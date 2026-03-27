@@ -1037,19 +1037,18 @@ void validate_batch_job(const batch_job &job)
             fail("batch job cannot set both prepared_key and prepared_ref: " + job.id);
         }
         if (!job.prepared_key.empty()) {
-            if (job.options.command != "run-kernel") {
-                fail("prepared_key is only supported for run-kernel jobs: " + job.id);
+            if (job.options.command != "run-kernel" &&
+                job.options.command != "run-kernel-attach") {
+                fail("prepared_key is only supported for prepared kernel jobs: " + job.id);
             }
             if (!job.options.compile_only) {
                 fail("prepared_key requires compile_only=true: " + job.id);
             }
         }
         if (!job.prepared_ref.empty()) {
-            if (job.options.command != "run-kernel") {
-                fail("prepared_ref is only supported for run-kernel jobs: " + job.id);
-            }
-            if (job.options.compile_only) {
-                fail("prepared_ref cannot be used with compile_only=true: " + job.id);
+            if (job.options.command != "run-kernel" &&
+                job.options.command != "run-kernel-attach") {
+                fail("prepared_ref is only supported for prepared kernel jobs: " + job.id);
             }
         }
         if (!job.prepared_group.empty() &&

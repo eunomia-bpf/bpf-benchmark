@@ -14,6 +14,7 @@ import tempfile
 import time
 import traceback
 from collections import Counter, defaultdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping
@@ -74,6 +75,62 @@ DEFAULT_VNG = str(Path(DEFAULT_VNG_MACHINE.executable))
 FALLBACK_REPEAT = 200
 DEFAULT_TIMEOUT_SECONDS = 240
 GUEST_BATCH_TARGETS_PER_CHUNK = 1
+
+
+@dataclass(frozen=True)
+class ResolvedProgram:
+    source: str
+    object_path: str
+    object_abs_path: str
+    repo: str
+    source_name: str
+    family: str
+    category: str
+    level: str
+    description: str | None
+    hypothesis: str | None
+    tags: tuple[str, ...]
+    object_relpath: str
+    canonical_object_name: str
+    object_basename: str
+    short_name: str
+    program_name: str
+    canonical_name: str
+    test_method: str
+    prog_type_name: str
+    section_name: str
+    io_mode: str
+    input_size: int
+    memory_path: str | None
+    trigger: str | None
+    trigger_timeout_seconds: int | None
+    compile_loader: str | None
+    attach_group: str | None
+    rejit_enabled: bool
+
+
+@dataclass(frozen=True)
+class ResolvedObject:
+    source: str
+    object_path: str
+    object_abs_path: str
+    repo: str
+    source_name: str
+    family: str
+    category: str
+    level: str
+    description: str | None
+    hypothesis: str | None
+    tags: tuple[str, ...]
+    object_relpath: str
+    canonical_name: str
+    object_basename: str
+    short_name: str
+    compile_loader: str | None
+    shared_state_policy: str
+    allow_object_only_result: bool
+    test_method: str
+    programs: tuple[ResolvedProgram, ...]
 
 
 def _mapping_dict(value: Any, *, field_name: str) -> dict[str, Any]:
@@ -371,6 +428,77 @@ def split_corpus_source(source: str, family: str | None = None) -> tuple[str, st
     return str(family or "").strip(), str(source_path.name or raw_source).strip()
 
 
+def _string_or_none(value: Any) -> str | None:
+    text = str(value or "").strip()
+    return text or None
+
+
+def _int_or_default(value: Any, default: int) -> int:
+    if value in (None, ""):
+        return default
+    return int(value)
+
+
+def _int_or_none(value: Any) -> int | None:
+    if value in (None, ""):
+        return None
+    return int(value)
+
+
+def _string_tuple(value: Any) -> tuple[str, ...]:
+    if not isinstance(value, list):
+        return ()
+    return tuple(str(item).strip() for item in value if str(item).strip())
+
+
+def _mapping(value: Any, *, field_name: str) -> dict[str, Any]:
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise SystemExit(f"invalid manifest field: {field_name} must be a mapping")
+    return dict(value)
+
+
+def _sequence(value: Any, *, field_name: str) -> list[Any]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        raise SystemExit(f"invalid manifest field: {field_name} must be a sequence")
+    return list(value)
+
+
+def object_matches_filter(obj: ResolvedObject, lowered_filters: list[str]) -> bool:
+    if not lowered_filters:
+        return True
+    haystacks = [
+        obj.canonical_name.lower(),
+        obj.object_path.lower(),
+        obj.object_relpath.lower(),
+        obj.repo.lower(),
+        obj.source_name.lower(),
+        obj.object_basename.lower(),
+    ]
+    return any(any(needle in haystack for haystack in haystacks) for needle in lowered_filters)
+
+
+def program_matches_filter(program: ResolvedProgram, lowered_filters: list[str]) -> bool:
+    if not lowered_filters:
+        return True
+    haystacks = [
+        program.canonical_name.lower(),
+        program.short_name.lower(),
+        program.canonical_object_name.lower(),
+        program.object_path.lower(),
+        program.object_relpath.lower(),
+        program.program_name.lower(),
+        program.source_name.lower(),
+        program.repo.lower(),
+        program.section_name.lower(),
+        program.prog_type_name.lower(),
+    ]
+    return any(any(needle in haystack for haystack in haystacks) for needle in lowered_filters)
+
+
 def build_target_name(
     *,
     source: str,
@@ -589,7 +717,7 @@ def build_test_run_batch_job(
     execution: str,
     runtime: str,
     object_path: Path,
-    program_name: str,
+    program_name: str | None,
     io_mode: str,
     memory_path: Path | None,
     input_size: int,
@@ -601,6 +729,7 @@ def build_test_run_batch_job(
     prepared_key: str | None = None,
     prepared_ref: str | None = None,
     prepared_group: str | None = None,
+    release_prepared: bool = True,
 ) -> dict[str, Any]:
     job: dict[str, Any] = {
         "id": job_id,
@@ -608,11 +737,12 @@ def build_test_run_batch_job(
         "execution": execution,
         "runtime": runtime,
         "program": str(object_path),
-        "program_name": program_name,
         "io_mode": io_mode,
         "repeat": max(1, repeat),
         "compile_only": compile_only,
     }
+    if program_name is not None:
+        job["program_name"] = program_name
     if memory_path is not None:
         job["memory"] = str(memory_path)
     if input_size > 0:
@@ -629,6 +759,8 @@ def build_test_run_batch_job(
         job["prepared_ref"] = prepared_ref
     if prepared_group is not None:
         job["prepared_group"] = prepared_group
+    if not release_prepared:
+        job["release_prepared"] = False
     return job
 
 
@@ -1018,19 +1150,19 @@ def run_guest_info_mode() -> int:
     return 0
 
 
-def load_guest_batch_targets(target_path: Path) -> list[dict[str, Any]]:
+def load_guest_batch_targets(target_path: Path) -> list[ResolvedObject]:
     payload = json.loads(target_path.read_text())
     if not isinstance(payload, dict):
         raise SystemExit("--guest-target-json payload must be a JSON object")
-    targets = payload.get("targets")
-    if not isinstance(targets, list):
-        raise SystemExit("--guest-target-json payload missing targets list")
-    normalized_targets: list[dict[str, Any]] = []
-    for index, target in enumerate(targets, start=1):
-        if not isinstance(target, dict):
-            raise SystemExit(f"--guest-target-json target #{index} must be a JSON object")
-        normalized_targets.append(dict(target))
-    return normalized_targets
+    objects = payload.get("objects")
+    if not isinstance(objects, list):
+        raise SystemExit("--guest-target-json payload missing objects list")
+    normalized_objects: list[ResolvedObject] = []
+    for index, obj in enumerate(objects, start=1):
+        if not isinstance(obj, dict):
+            raise SystemExit(f"--guest-target-json object #{index} must be a JSON object")
+        normalized_objects.append(deserialize_resolved_object(obj))
+    return normalized_objects
 
 
 def write_guest_batch_records(result_path: Path, records: list[dict[str, Any]]) -> None:
@@ -1067,7 +1199,7 @@ def sanitize_guest_batch_record(record: dict[str, Any]) -> dict[str, Any]:
 
 def run_guest_batch_mode(args: argparse.Namespace) -> int:
     target_path = Path(args.guest_target_json).resolve()
-    targets = load_guest_batch_targets(target_path)
+    objects = load_guest_batch_targets(target_path)
     runner = Path(args.runner).resolve()
     daemon = Path(args.daemon).resolve()
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
@@ -1076,51 +1208,67 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
         raise SystemExit("--btf-custom-path is required in guest batch mode")
 
     emit_guest_event("guest_info", payload=guest_info_payload())
-    skip_families = normalize_skip_families(args.skip_families)
     records: list[dict[str, Any]] = []
     if guest_result_path is not None:
         write_guest_batch_records(guest_result_path, records)
 
     active_daemon_socket: str | None = None
     daemon_proc: subprocess.Popen[str] | None = None
-    if targets:
+    if objects:
         active_daemon_socket = f"/tmp/bpfrejit-guest-{os.getpid()}.sock"
         daemon_proc = start_daemon_server(daemon, active_daemon_socket)
 
     try:
-        for chunk_start in range(0, len(targets), GUEST_BATCH_TARGETS_PER_CHUNK):
-            target_chunk = targets[chunk_start : chunk_start + GUEST_BATCH_TARGETS_PER_CHUNK]
+        for chunk_start in range(0, len(objects), GUEST_BATCH_TARGETS_PER_CHUNK):
+            object_chunk = objects[chunk_start : chunk_start + GUEST_BATCH_TARGETS_PER_CHUNK]
             try:
-                built_records, _batch_result = run_targets_locally_batch(
-                    targets=target_chunk,
+                object_records, program_records, _batch_result = run_objects_locally_batch(
+                    objects=object_chunk,
                     runner=runner,
                     daemon=daemon,
                     repeat=args.repeat,
                     timeout_seconds=args.timeout,
                     execution_mode="vm",
                     btf_custom_path=btf_custom_path,
-                    enable_recompile=True,
-                    enable_exec=True,
-                    skip_families=skip_families,
-                    blind_apply=args.blind_apply,
                     passes=list(args.selected_passes),
                     daemon_socket=active_daemon_socket,
                 )
+                built_records = []
+                for obj in object_chunk:
+                    object_record = next(
+                        item for item in object_records if item["canonical_object_name"] == obj.canonical_name
+                    )
+                    object_program_records = [
+                        item for item in program_records if item["canonical_object_name"] == obj.canonical_name
+                    ]
+                    built_records.append(
+                        {
+                            "object_record": object_record,
+                            "program_records": object_program_records,
+                        }
+                    )
             except Exception as exc:
                 print(traceback.format_exc(), file=sys.stderr, flush=True)
                 built_records = []
-                for target in target_chunk:
-                    record = build_empty_record(target, "vm")
-                    record["record_error"] = f"guest batch exception: {exc}"
-                    built_records.append(record)
+                for obj in object_chunk:
+                    built_records.append(
+                        {
+                            "object_record": build_empty_object_record(
+                                obj,
+                                "vm",
+                                error=f"guest batch exception: {exc}",
+                            ),
+                            "program_records": [],
+                        }
+                    )
 
             for index, record in enumerate(built_records, start=chunk_start + 1):
                 records.append(sanitize_guest_batch_record(record))
                 if guest_result_path is not None:
                     write_guest_batch_records(guest_result_path, records)
-                    emit_guest_event("program_progress", index=index, total=len(targets))
+                    emit_guest_event("program_progress", index=index, total=len(objects))
                 else:
-                    emit_guest_event("program_record", index=index, total=len(targets), record=record)
+                    emit_guest_event("program_record", index=index, total=len(objects), record=record)
     finally:
         stop_daemon_server(daemon_proc, active_daemon_socket if daemon_proc is not None else None)
     return 0
@@ -1180,73 +1328,774 @@ def load_corpus_build_report(path: Path) -> dict[str, Any]:
     }
 
 
+def serialize_resolved_object(obj: ResolvedObject) -> dict[str, Any]:
+    return asdict(obj)
+
+
+def deserialize_resolved_object(payload: Mapping[str, Any]) -> ResolvedObject:
+    programs_payload = payload.get("programs")
+    if not isinstance(programs_payload, list):
+        raise SystemExit("guest object payload missing programs list")
+    programs = tuple(ResolvedProgram(**dict(item)) for item in programs_payload if isinstance(item, Mapping))
+    base = dict(payload)
+    base["programs"] = programs
+    return ResolvedObject(**base)
+
+
+def clone_resolved_object(obj: ResolvedObject, programs: tuple[ResolvedProgram, ...]) -> ResolvedObject:
+    return ResolvedObject(
+        source=obj.source,
+        object_path=obj.object_path,
+        object_abs_path=obj.object_abs_path,
+        repo=obj.repo,
+        source_name=obj.source_name,
+        family=obj.family,
+        category=obj.category,
+        level=obj.level,
+        description=obj.description,
+        hypothesis=obj.hypothesis,
+        tags=obj.tags,
+        object_relpath=obj.object_relpath,
+        canonical_name=obj.canonical_name,
+        object_basename=obj.object_basename,
+        short_name=obj.short_name,
+        compile_loader=obj.compile_loader,
+        shared_state_policy=obj.shared_state_policy,
+        allow_object_only_result=obj.allow_object_only_result,
+        test_method=obj.test_method,
+        programs=programs,
+    )
+
+
+def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> ResolvedObject:
+    source = _string_or_none(entry.get("source"))
+    if source is None:
+        raise SystemExit(f"manifest object #{index} missing source")
+    object_candidate = Path(source)
+    object_path = object_candidate if object_candidate.is_absolute() else (ROOT_DIR / object_candidate)
+    repo_from_source, object_relpath = split_corpus_source(source, _string_or_none(entry.get("family")) or "")
+    repo = _string_or_none(entry.get("repo")) or repo_from_source or (_string_or_none(entry.get("family")) or object_candidate.name)
+    family = _string_or_none(entry.get("family")) or repo
+    category = _string_or_none(entry.get("category")) or ""
+    level = _string_or_none(entry.get("level")) or ""
+    description = _string_or_none(entry.get("description"))
+    hypothesis = _string_or_none(entry.get("hypothesis"))
+    tags = _string_tuple(entry.get("tags"))
+    object_basename = Path(source).name
+    canonical_object_name = f"{repo}:{object_relpath}" if repo else object_relpath
+    short_name = f"{repo}:{object_basename}" if repo else object_basename
+    compile_loader = _string_or_none(entry.get("compile_loader"))
+    shared_state_policy = _string_or_none(entry.get("shared_state_policy")) or "reset_maps"
+    allow_object_only_result = bool(entry.get("allow_object_only_result", False))
+    object_test_method = _string_or_none(entry.get("test_method")) or "compile_only"
+    object_prog_type = _string_or_none(entry.get("prog_type")) or ""
+    object_section = _string_or_none(entry.get("section")) or ""
+    object_io_mode = _string_or_none(entry.get("io_mode")) or "context"
+    object_test_input = _string_or_none(entry.get("test_input"))
+    object_input_size = _int_or_default(entry.get("input_size"), 0)
+    object_trigger = _string_or_none(entry.get("trigger"))
+    object_trigger_timeout = _int_or_none(entry.get("trigger_timeout_seconds"))
+    object_attach_group = _string_or_none(entry.get("attach_group"))
+    object_rejit_enabled = bool(entry.get("rejit_enabled", True))
+
+    raw_programs = _sequence(entry.get("programs"), field_name=f"objects[{index}].programs")
+    programs: list[ResolvedProgram] = []
+    for program_index, raw_program in enumerate(raw_programs, start=1):
+        if not isinstance(raw_program, Mapping):
+            raise SystemExit(f"manifest objects[{index}].programs[{program_index}] must be a mapping")
+        program_name = _string_or_none(raw_program.get("name"))
+        if program_name is None:
+            raise SystemExit(f"manifest objects[{index}].programs[{program_index}] missing name")
+        test_method = _string_or_none(raw_program.get("test_method")) or object_test_method
+        prog_type_name = _string_or_none(raw_program.get("prog_type")) or object_prog_type
+        section_name = _string_or_none(raw_program.get("section")) or object_section or ""
+        io_mode = _string_or_none(raw_program.get("io_mode")) or object_io_mode
+        memory_path = _string_or_none(raw_program.get("test_input")) or object_test_input
+        input_size = _int_or_default(raw_program.get("input_size"), object_input_size)
+        trigger = _string_or_none(raw_program.get("trigger")) or object_trigger
+        trigger_timeout_seconds = _int_or_none(raw_program.get("trigger_timeout_seconds"))
+        if trigger_timeout_seconds is None:
+            trigger_timeout_seconds = object_trigger_timeout
+        attach_group = _string_or_none(raw_program.get("attach_group")) or object_attach_group
+        if test_method == "attach_trigger" and attach_group is None:
+            attach_group = program_name
+        rejit_enabled = bool(raw_program.get("rejit_enabled", object_rejit_enabled))
+        program_family = _string_or_none(raw_program.get("family")) or family
+        program_category = _string_or_none(raw_program.get("category")) or category
+        program_level = _string_or_none(raw_program.get("level")) or level
+        program_description = _string_or_none(raw_program.get("description")) or description
+        program_hypothesis = _string_or_none(raw_program.get("hypothesis")) or hypothesis
+        program_tags = _string_tuple(raw_program.get("tags")) or tags
+        canonical_name = f"{canonical_object_name}:{program_name}"
+        short_program_name = f"{short_name}:{program_name}"
+        programs.append(
+            ResolvedProgram(
+                source=source,
+                object_path=source,
+                object_abs_path=str(object_path.resolve()),
+                repo=repo,
+                source_name=program_family or repo,
+                family=program_family or "",
+                category=program_category or "",
+                level=program_level or "",
+                description=program_description,
+                hypothesis=program_hypothesis,
+                tags=program_tags,
+                object_relpath=object_relpath,
+                canonical_object_name=canonical_object_name,
+                object_basename=object_basename,
+                short_name=short_program_name,
+                program_name=program_name,
+                canonical_name=canonical_name,
+                test_method=test_method,
+                prog_type_name=prog_type_name,
+                section_name=section_name,
+                io_mode=io_mode,
+                input_size=input_size,
+                memory_path=memory_path,
+                trigger=trigger,
+                trigger_timeout_seconds=trigger_timeout_seconds,
+                compile_loader=compile_loader,
+                attach_group=attach_group,
+                rejit_enabled=rejit_enabled,
+            )
+        )
+
+    if not programs and not allow_object_only_result:
+        raise SystemExit(f"manifest object #{index} has no programs and does not allow object-only results")
+
+    return ResolvedObject(
+        source=source,
+        object_path=source,
+        object_abs_path=str(object_path.resolve()),
+        repo=repo,
+        source_name=family or repo,
+        family=family or "",
+        category=category or "",
+        level=level or "",
+        description=description,
+        hypothesis=hypothesis,
+        tags=tags,
+        object_relpath=object_relpath,
+        canonical_name=canonical_object_name,
+        object_basename=object_basename,
+        short_name=short_name,
+        compile_loader=compile_loader,
+        shared_state_policy=shared_state_policy,
+        allow_object_only_result=allow_object_only_result,
+        test_method=object_test_method,
+        programs=tuple(programs),
+    )
+
+
+def runtime_for_program(program: ResolvedProgram, *, rejit: bool) -> str:
+    if program.test_method == "attach_trigger":
+        return "kernel-attach-rejit" if rejit else "kernel-attach"
+    return "kernel-rejit" if rejit else "kernel"
+
+
+def build_object_batch_plan_v2(
+    *,
+    objects: list[ResolvedObject],
+    repeat: int,
+    btf_custom_path: Path | None,
+    daemon_socket: str,
+    passes: list[str],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    jobs: list[dict[str, Any]] = []
+    object_refs: list[dict[str, Any]] = []
+
+    for index, obj in enumerate(objects, start=1):
+        object_path = ROOT_DIR / obj.object_path
+        baseline_group = f"object-{index:04d}:baseline"
+        rejit_group = f"object-{index:04d}:rejit"
+        baseline_prepared_key = f"{baseline_group}:prepared"
+        rejit_prepared_key = f"{rejit_group}:prepared"
+        refs: dict[str, Any] = {
+            "object": obj,
+            "baseline_object_compile": f"object-{index:04d}:baseline-object-compile",
+            "rejit_object_compile": f"object-{index:04d}:rejit-object-compile",
+            "programs": {},
+        }
+        object_refs.append(refs)
+
+        jobs.append(
+            build_test_run_batch_job(
+                job_id=refs["baseline_object_compile"],
+                execution="serial",
+                runtime="kernel",
+                object_path=object_path,
+                program_name=None,
+                io_mode="context",
+                memory_path=None,
+                input_size=0,
+                repeat=repeat,
+                btf_custom_path=btf_custom_path,
+                compile_only=True,
+                prepared_key=baseline_prepared_key,
+                prepared_group=baseline_group,
+            )
+        )
+
+        for program_index, program in enumerate(obj.programs, start=1):
+            program_refs = {
+                "baseline_compile": f"object-{index:04d}:program-{program_index:04d}:baseline-compile",
+                "baseline_run": f"object-{index:04d}:program-{program_index:04d}:baseline-run",
+                "rejit_compile": f"object-{index:04d}:program-{program_index:04d}:rejit-compile",
+                "rejit_run": f"object-{index:04d}:program-{program_index:04d}:rejit-run",
+            }
+            refs["programs"][program.canonical_name] = program_refs
+            memory_path = Path(program.memory_path) if program.memory_path else None
+            jobs.append(
+                build_test_run_batch_job(
+                    job_id=program_refs["baseline_compile"],
+                    execution="serial",
+                    runtime=runtime_for_program(program, rejit=False),
+                    object_path=object_path,
+                    program_name=program.program_name,
+                    io_mode=program.io_mode,
+                    memory_path=memory_path,
+                    input_size=program.input_size,
+                    repeat=repeat,
+                    btf_custom_path=btf_custom_path,
+                    compile_only=True,
+                    prepared_ref=baseline_prepared_key,
+                    prepared_group=baseline_group,
+                    release_prepared=False,
+                )
+            )
+            if program.test_method != "compile_only":
+                jobs.append(
+                    build_test_run_batch_job(
+                        job_id=program_refs["baseline_run"],
+                        execution="serial",
+                        runtime=runtime_for_program(program, rejit=False),
+                        object_path=object_path,
+                        program_name=program.program_name,
+                        io_mode=program.io_mode,
+                        memory_path=memory_path,
+                        input_size=program.input_size,
+                        repeat=repeat,
+                        btf_custom_path=btf_custom_path,
+                        compile_only=False,
+                        prepared_ref=baseline_prepared_key,
+                        prepared_group=baseline_group,
+                        release_prepared=False,
+                    )
+                )
+
+        jobs.append(
+            build_test_run_batch_job(
+                job_id=refs["rejit_object_compile"],
+                execution="serial",
+                runtime="kernel-rejit",
+                object_path=object_path,
+                program_name=None,
+                io_mode="context",
+                memory_path=None,
+                input_size=0,
+                repeat=repeat,
+                btf_custom_path=btf_custom_path,
+                compile_only=True,
+                daemon_socket=daemon_socket,
+                passes=passes,
+                prepared_key=rejit_prepared_key,
+                prepared_group=rejit_group,
+            )
+        )
+
+        for program_index, program in enumerate(obj.programs, start=1):
+            program_refs = refs["programs"][program.canonical_name]
+            memory_path = Path(program.memory_path) if program.memory_path else None
+            jobs.append(
+                build_test_run_batch_job(
+                    job_id=program_refs["rejit_compile"],
+                    execution="serial",
+                    runtime=runtime_for_program(program, rejit=True),
+                    object_path=object_path,
+                    program_name=program.program_name,
+                    io_mode=program.io_mode,
+                    memory_path=memory_path,
+                    input_size=program.input_size,
+                    repeat=repeat,
+                    btf_custom_path=btf_custom_path,
+                    compile_only=True,
+                    daemon_socket=daemon_socket,
+                    passes=passes,
+                    prepared_ref=rejit_prepared_key,
+                    prepared_group=rejit_group,
+                    release_prepared=False,
+                )
+            )
+            if program.test_method != "compile_only" and program.rejit_enabled:
+                jobs.append(
+                    build_test_run_batch_job(
+                        job_id=program_refs["rejit_run"],
+                        execution="serial",
+                        runtime=runtime_for_program(program, rejit=True),
+                        object_path=object_path,
+                        program_name=program.program_name,
+                        io_mode=program.io_mode,
+                        memory_path=memory_path,
+                        input_size=program.input_size,
+                        repeat=repeat,
+                        btf_custom_path=btf_custom_path,
+                        compile_only=False,
+                        daemon_socket=daemon_socket,
+                        passes=passes,
+                        prepared_ref=rejit_prepared_key,
+                        prepared_group=rejit_group,
+                        release_prepared=False,
+                    )
+                )
+
+    return {
+        "schema_version": 1,
+        "scheduler": {
+            "max_parallel_jobs": 1,
+        },
+        "jobs": jobs,
+    }, object_refs
+
+
+def build_empty_program_record(program: ResolvedProgram, execution_mode: str) -> dict[str, Any]:
+    return {
+        "canonical_name": program.canonical_name,
+        "short_name": program.short_name,
+        "canonical_object_name": program.canonical_object_name,
+        "repo": program.repo,
+        "source_name": program.source_name,
+        "family": program.family,
+        "category": program.category,
+        "level": program.level,
+        "description": program.description,
+        "hypothesis": program.hypothesis,
+        "tags": list(program.tags),
+        "object_path": program.object_path,
+        "object_relpath": program.object_relpath,
+        "object_basename": program.object_basename,
+        "program_name": program.program_name,
+        "section_name": program.section_name,
+        "prog_type_name": program.prog_type_name,
+        "test_method": program.test_method,
+        "compile_loader": program.compile_loader,
+        "attach_group": program.attach_group,
+        "io_mode": program.io_mode,
+        "input_size": program.input_size,
+        "memory_path": program.memory_path,
+        "execution_mode": execution_mode,
+        "baseline_compile": None,
+        "baseline_run": None,
+        "rejit_compile": None,
+        "rejit_run": None,
+        "compile_passes_applied": [],
+        "run_passes_applied": [],
+        "applied_passes": [],
+        "size_ratio": None,
+        "size_delta_pct": None,
+        "speedup_ratio": None,
+        "record_error": None,
+        "guest_invocation": None,
+    }
+
+
+def build_empty_object_record(obj: ResolvedObject, execution_mode: str, *, error: str | None = None) -> dict[str, Any]:
+    return {
+        "canonical_object_name": obj.canonical_name,
+        "repo": obj.repo,
+        "source_name": obj.source_name,
+        "object_path": obj.object_path,
+        "object_relpath": obj.object_relpath,
+        "object_basename": obj.object_basename,
+        "source": obj.source,
+        "compile_loader": obj.compile_loader,
+        "shared_state_policy": obj.shared_state_policy,
+        "program_count": len(obj.programs),
+        "measured_program_count": sum(1 for program in obj.programs if program.test_method != "compile_only"),
+        "execution_mode": execution_mode,
+        "stock_compile": None,
+        "rejit_compile": None,
+        "status": "error" if error else "ok",
+        "error": error,
+    }
+
+
+def build_program_record_v2(
+    *,
+    program: ResolvedProgram,
+    execution_mode: str,
+    job_refs: Mapping[str, str],
+    results_by_id: Mapping[str, dict[str, Any]],
+) -> dict[str, Any]:
+    record = build_empty_program_record(program, execution_mode)
+    record["baseline_compile"] = batch_job_invocation_summary(results_by_id.get(job_refs["baseline_compile"]))
+    record["rejit_compile"] = batch_job_invocation_summary(results_by_id.get(job_refs["rejit_compile"]))
+    if program.test_method != "compile_only":
+        record["baseline_run"] = batch_job_invocation_summary(results_by_id.get(job_refs["baseline_run"]))
+        record["rejit_run"] = batch_job_invocation_summary(results_by_id.get(job_refs["rejit_run"]))
+
+    record["compile_passes_applied"] = rejit_passes(record["rejit_compile"])
+    record["run_passes_applied"] = rejit_passes(record["rejit_run"])
+    record["applied_passes"] = merge_passes(record["compile_passes_applied"], record["run_passes_applied"])
+    record["size_ratio"] = size_ratio(record["baseline_compile"], record["rejit_compile"])
+    record["size_delta_pct"] = size_delta_pct(record["baseline_compile"], record["rejit_compile"])
+    record["speedup_ratio"] = speedup_ratio(record["baseline_run"], record["rejit_run"])
+    return record
+
+
+def build_object_record_v2(
+    *,
+    obj: ResolvedObject,
+    execution_mode: str,
+    refs: Mapping[str, Any],
+    results_by_id: Mapping[str, dict[str, Any]],
+) -> dict[str, Any]:
+    record = build_empty_object_record(obj, execution_mode)
+    record["stock_compile"] = batch_job_invocation_summary(results_by_id.get(refs["baseline_object_compile"]))
+    record["rejit_compile"] = batch_job_invocation_summary(results_by_id.get(refs["rejit_object_compile"]))
+    if record["stock_compile"] and not record["stock_compile"].get("ok"):
+        record["status"] = "error"
+        record["error"] = summarize_failure_reason(record["stock_compile"])
+    elif record["rejit_compile"] and not record["rejit_compile"].get("ok"):
+        record["status"] = "error"
+        record["error"] = summarize_failure_reason(record["rejit_compile"])
+    return record
+
+
+def run_objects_locally_batch(
+    *,
+    objects: list[ResolvedObject],
+    runner: Path,
+    daemon: Path,
+    repeat: int,
+    timeout_seconds: int,
+    execution_mode: str,
+    btf_custom_path: Path | None,
+    passes: list[str],
+    daemon_socket: str | None = None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    active_daemon_socket = daemon_socket
+    daemon_proc = None
+    if objects and active_daemon_socket is None:
+        active_daemon_socket = f"/tmp/bpfrejit-{os.getpid()}.sock"
+        daemon_proc = start_daemon_server(daemon, active_daemon_socket)
+
+    try:
+        if not objects:
+            batch_result = {
+                "ok": True,
+                "completed_with_job_errors": False,
+                "returncode": 0,
+                "timed_out": False,
+                "duration_seconds": 0.0,
+                "stdout": "",
+                "stderr": "",
+                "error": None,
+                "result": {"jobs": []},
+                "progress": None,
+            }
+            return [], [], batch_result
+
+        assert active_daemon_socket is not None
+        spec_payload, object_refs = build_object_batch_plan_v2(
+            objects=objects,
+            repeat=repeat,
+            btf_custom_path=btf_custom_path,
+            daemon_socket=active_daemon_socket,
+            passes=passes,
+        )
+        batch_result = run_batch_runner(
+            runner,
+            spec_payload=spec_payload,
+            timeout_seconds=packet_batch_timeout_seconds(max(1, len(objects)), timeout_seconds),
+            cwd=ROOT_DIR,
+        )
+    finally:
+        stop_daemon_server(daemon_proc, active_daemon_socket if daemon_proc is not None else None)
+
+    results_by_id = batch_job_result_map(batch_result.get("result"))
+    object_records: list[dict[str, Any]] = []
+    program_records: list[dict[str, Any]] = []
+    for refs in object_refs:
+        obj = refs["object"]
+        object_records.append(
+            build_object_record_v2(
+                obj=obj,
+                execution_mode=execution_mode,
+                refs=refs,
+                results_by_id=results_by_id,
+            )
+        )
+        for program in obj.programs:
+            program_records.append(
+                build_program_record_v2(
+                    program=program,
+                    execution_mode=execution_mode,
+                    job_refs=refs["programs"][program.canonical_name],
+                    results_by_id=results_by_id,
+                )
+            )
+    return object_records, program_records, batch_result
+
+
+def build_summary_v2(program_records: list[dict[str, Any]], object_records: list[dict[str, Any]]) -> dict[str, Any]:
+    compile_pairs = [
+        record
+        for record in program_records
+        if record.get("baseline_compile") and record["baseline_compile"].get("ok")
+        and record.get("rejit_compile") and record["rejit_compile"].get("ok")
+    ]
+    measured_pairs = [
+        record
+        for record in program_records
+        if record.get("baseline_run") and record["baseline_run"].get("ok")
+        and record.get("rejit_run") and record["rejit_run"].get("ok")
+    ]
+    applied_programs = [record for record in program_records if record.get("applied_passes")]
+    compile_pass_counts = Counter()
+    run_pass_counts = Counter()
+    for record in program_records:
+        compile_pass_counts.update(record.get("compile_passes_applied") or [])
+        run_pass_counts.update(record.get("run_passes_applied") or [])
+
+    failure_reasons = Counter()
+    rejit_failures = Counter()
+    for record in program_records:
+        if record.get("record_error"):
+            failure_reasons[str(record["record_error"])] += 1
+            continue
+        for key in ("baseline_compile", "rejit_compile", "baseline_run", "rejit_run"):
+            raw = record.get(key)
+            if raw and not raw.get("ok"):
+                failure_reasons[summarize_failure_reason(raw)] += 1
+        for key in ("rejit_compile", "rejit_run"):
+            raw = record.get(key)
+            if raw and raw.get("ok"):
+                rejit = ((raw.get("sample") or {}).get("rejit") or {})
+                if rejit.get("requested") and not rejit.get("applied") and rejit.get("error"):
+                    rejit_failures[str(rejit["error"])] += 1
+
+    size_ratios = [record["size_ratio"] for record in compile_pairs if record.get("size_ratio") is not None]
+    exec_ratios = [record["speedup_ratio"] for record in measured_pairs if record.get("speedup_ratio") is not None]
+
+    def aggregate_rows(grouped: Mapping[str, list[dict[str, Any]]], label_key: str) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for label, items in grouped.items():
+            grouped_compile = [item for item in items if item in compile_pairs]
+            grouped_measured = [item for item in items if item in measured_pairs]
+            rows.append(
+                {
+                    label_key: label,
+                    "programs": len(items),
+                    "compile_pairs": len(grouped_compile),
+                    "measured_pairs": len(grouped_measured),
+                    "applied_programs": sum(1 for item in items if item.get("applied_passes")),
+                    "code_size_ratio_geomean": geomean([item["size_ratio"] for item in grouped_compile if item.get("size_ratio") is not None]),
+                    "exec_ratio_geomean": geomean([item["speedup_ratio"] for item in grouped_measured if item.get("speedup_ratio") is not None]),
+                }
+            )
+        rows.sort(key=lambda item: (-item["programs"], item[label_key]))
+        return rows
+
+    grouped_by_repo: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    grouped_by_object: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for record in program_records:
+        grouped_by_repo[record["repo"]].append(record)
+        grouped_by_object[record["canonical_object_name"]].append(record)
+
+    return {
+        "effective_mode": "vm",
+        "objects_attempted": len(object_records),
+        "targets_attempted": len(program_records),
+        "compile_pairs": len(compile_pairs),
+        "measured_pairs": len(measured_pairs),
+        "applied_programs": len(applied_programs),
+        "code_size_ratio_geomean": geomean(size_ratios),
+        "code_size_delta_median_pct": statistics.median(
+            [record["size_delta_pct"] for record in compile_pairs if record.get("size_delta_pct") is not None]
+        ) if compile_pairs else None,
+        "exec_ratio_geomean": geomean(exec_ratios),
+        "exec_ratio_median": statistics.median(exec_ratios) if exec_ratios else None,
+        "exec_ratio_min": min(exec_ratios) if exec_ratios else None,
+        "exec_ratio_max": max(exec_ratios) if exec_ratios else None,
+        "pass_counts": dict(sorted((compile_pass_counts + run_pass_counts).items())),
+        "compile_pass_counts": dict(sorted(compile_pass_counts.items())),
+        "run_pass_counts": dict(sorted(run_pass_counts.items())),
+        "failure_reasons": dict(failure_reasons.most_common(16)),
+        "rejit_failure_reasons": dict(rejit_failures.most_common(16)),
+        "by_repo": aggregate_rows(grouped_by_repo, "repo"),
+        "by_object": aggregate_rows(grouped_by_object, "canonical_object_name"),
+    }
+
+
+def build_markdown_v2(data: dict[str, Any]) -> str:
+    summary = data["summary"]
+    records = sorted(data["program_records"], key=lambda item: item["canonical_name"])
+    object_records = sorted(data["object_records"], key=lambda item: item["canonical_object_name"])
+    corpus_build_summary = data.get("corpus_build_summary") or {}
+    guest_info = (data.get("guest_smoke") or {}).get("payload")
+    lines: list[str] = [
+        "# Corpus Batch REJIT Results",
+        "",
+        f"- Generated: {data['generated_at']}",
+        f"- Corpus manifest: `{data['macro_corpus_yaml']}`",
+        f"- Corpus build report: `{data['corpus_build_report']}`",
+        f"- Runner: `{data['runner_binary']}`",
+        f"- Daemon: `{data['daemon_binary']}`",
+        "- Requested mode: `strict-vm`",
+        f"- Effective mode: `{summary['effective_mode']}`",
+        f"- Benchmark profile: `{data.get('benchmark_profile') or 'default'}`",
+        f"- Benchmark config: `{data.get('benchmark_config') or 'fallback-defaults'}`",
+        f"- Objects: {summary['objects_attempted']}",
+        f"- Programs: {summary['targets_attempted']}",
+        f"- Compile pairs: {summary['compile_pairs']}",
+        f"- Measured pairs: {summary['measured_pairs']}",
+        f"- REJIT applied programs: {summary['applied_programs']}",
+        f"- Code-size ratio geomean (baseline/rejit): {format_ratio(summary['code_size_ratio_geomean'])}",
+        f"- Exec-time ratio geomean (baseline/rejit): {format_ratio(summary['exec_ratio_geomean'])}",
+    ]
+    if corpus_build_summary:
+        lines.append(
+            f"- Build availability: {corpus_build_summary.get('available_total', 0)} objects "
+            f"({corpus_build_summary.get('built_ok', 0)} built, {corpus_build_summary.get('staged_existing', 0)} staged)"
+        )
+    if guest_info:
+        lines.append(f"- Guest kernel: `{guest_info.get('kernel_release', 'unknown')}`")
+    lines.append("")
+
+    lines.extend(["## By Repo", ""])
+    lines.extend(
+        markdown_table(
+            ["Repo", "Programs", "Compile Pairs", "Measured Pairs", "Applied", "Code Ratio", "Exec Ratio"],
+            [
+                [
+                    row["repo"],
+                    row["programs"],
+                    row["compile_pairs"],
+                    row["measured_pairs"],
+                    row["applied_programs"],
+                    format_ratio(row["code_size_ratio_geomean"]),
+                    format_ratio(row["exec_ratio_geomean"]),
+                ]
+                for row in summary["by_repo"]
+            ],
+        )
+    )
+    lines.append("")
+
+    lines.extend(["## By Object", ""])
+    lines.extend(
+        markdown_table(
+            ["Object", "Programs", "Compile", "REJIT Compile", "Status", "Error"],
+            [
+                [
+                    row["canonical_object_name"],
+                    row["program_count"],
+                    format_ns(((row.get("stock_compile") or {}).get("sample") or {}).get("compile_ns")),
+                    format_ns(((row.get("rejit_compile") or {}).get("sample") or {}).get("compile_ns")),
+                    row["status"],
+                    row.get("error") or "",
+                ]
+                for row in object_records
+            ],
+        )
+    )
+    lines.append("")
+
+    lines.extend(["## Per-Program Results", ""])
+    lines.extend(
+        markdown_table(
+            [
+                "Program",
+                "Repo",
+                "Type",
+                "Compile Passes",
+                "Run Passes",
+                "Baseline JIT",
+                "REJIT JIT",
+                "Code Ratio",
+                "Baseline ns",
+                "REJIT ns",
+                "Exec Ratio",
+                "Note",
+            ],
+            [
+                [
+                    record["canonical_name"],
+                    record["repo"],
+                    record["prog_type_name"],
+                    ", ".join(record.get("compile_passes_applied") or []) or "-",
+                    ", ".join(record.get("run_passes_applied") or []) or "-",
+                    format_ns(((record.get("baseline_compile") or {}).get("sample") or {}).get("jited_prog_len")),
+                    format_ns(((record.get("rejit_compile") or {}).get("sample") or {}).get("jited_prog_len")),
+                    format_ratio(record.get("size_ratio")),
+                    format_ns(((record.get("baseline_run") or {}).get("sample") or {}).get("exec_ns")),
+                    format_ns(((record.get("rejit_run") or {}).get("sample") or {}).get("exec_ns")),
+                    format_ratio(record.get("speedup_ratio")),
+                    record.get("record_error")
+                    or (
+                        summarize_failure_reason(record.get("rejit_compile"))
+                        if record.get("rejit_compile") and not record["rejit_compile"].get("ok")
+                        else ""
+                    ),
+                ]
+                for record in records
+            ],
+        )
+    )
+
+    if summary["failure_reasons"]:
+        lines.extend(["", "## Top Failure Reasons", ""])
+        lines.extend(markdown_table(["Reason", "Count"], [[reason, count] for reason, count in summary["failure_reasons"].items()]))
+
+    return "\n".join(lines) + "\n"
+
+
 def load_targets_from_yaml(
     yaml_path: Path,
     corpus_build_report: dict[str, Any],
     filters: list[str] | None,
     max_programs: int | None,
-) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Load strict corpus targets from macro_corpus.yaml plus the build report."""
+) -> tuple[list[ResolvedObject], dict[str, Any]]:
     with open(yaml_path) as f:
         manifest = yaml.safe_load(f)
-    programs = manifest.get("programs") or []
-    candidates: list[dict[str, Any]] = []
-    for entry in programs:
-        test_method = entry.get("test_method", "")
-        can_test_run = test_method == "bpf_prog_test_run"
-        program_names = manifest_program_names(entry)
-        program_name = program_names[0] if program_names else ""
-        source = str(entry.get("source", ""))
-        object_candidate = Path(source)
-        object_path = object_candidate if object_candidate.is_absolute() else (ROOT_DIR / object_candidate)
-        source_name, object_name = split_corpus_source(source, str(entry.get("family", "")))
-        target_name = resolve_target_name(entry)
-        sections = entry.get("sections") or []
-        section_name = sections[0] if sections else entry.get("prog_type", "")
-        candidates.append(
-            {
-                "name": target_name,
-                "object_name": object_name,
-                "object_path": source,
-                "object_abs_path": str(object_path.resolve()),
-                "source_name": source_name or str(entry.get("family", "") or object_name or target_name),
-                "program_name": program_name,
-                "program_names": program_names,
-                "section_name": section_name,
-                "section_root": "",
-                "prog_type_name": str(entry.get("prog_type", "")),
-                "io_mode": str(entry.get("io_mode", "context")),
-                "input_size": int(entry.get("input_size", 0) or 0),
-                "memory_path": str(entry.get("test_input")) if entry.get("test_input") else None,
-                "can_test_run": can_test_run,
-            }
-        )
+    if not isinstance(manifest, dict):
+        raise SystemExit(f"macro corpus YAML root must be a mapping: {yaml_path}")
+    if int(manifest.get("schema_version", 0) or 0) != 2 or "objects" not in manifest:
+        raise SystemExit(f"macro corpus YAML must use schema_version: 2 objects format: {yaml_path}")
 
-    selected = candidates
-    if filters:
-        lowered = [item.lower() for item in filters]
-        selected = [
-            record
-            for record in selected
-            if any(
-                needle in record["name"].lower()
-                or needle in record["object_path"].lower()
-                or needle in record["program_name"].lower()
-                or needle in record["source_name"].lower()
-                or needle in record["section_name"].lower()
-                or needle in record["prog_type_name"].lower()
-                for needle in lowered
-            )
-        ]
-    selected.sort(key=lambda item: (item["name"], item["object_path"], item["program_name"]))
-    if max_programs is not None:
-        selected = selected[:max_programs]
+    raw_objects = _sequence(manifest.get("objects"), field_name="objects")
+    resolved_objects = [
+        resolve_manifest_object(entry, index=index)
+        for index, entry in enumerate(raw_objects, start=1)
+    ]
+    resolved_objects.sort(key=lambda item: item.canonical_name)
+
+    lowered_filters = [item.lower() for item in filters or []]
+    selected_objects: list[ResolvedObject] = []
+    remaining_programs = max_programs
+    for obj in resolved_objects:
+        object_selected = object_matches_filter(obj, lowered_filters)
+        if object_selected:
+            selected_programs = obj.programs
+        else:
+            selected_programs = tuple(program for program in obj.programs if program_matches_filter(program, lowered_filters))
+        if not selected_programs and (obj.programs or not object_selected):
+            continue
+        if remaining_programs is not None and selected_programs:
+            if remaining_programs <= 0:
+                break
+            selected_programs = selected_programs[:remaining_programs]
+            remaining_programs -= len(selected_programs)
+            if not selected_programs:
+                break
+        selected_objects.append(clone_resolved_object(obj, selected_programs))
 
     available_objects = corpus_build_report["available_objects"]
     missing_objects = [
-        record["object_path"]
-        for record in selected
-        if record["object_abs_path"] not in available_objects
+        obj.object_path
+        for obj in selected_objects
+        if obj.object_abs_path not in available_objects
     ]
     if missing_objects:
         raise SystemExit(
@@ -1255,25 +2104,25 @@ def load_targets_from_yaml(
             + (" ..." if len(missing_objects) > 12 else "")
         )
 
-    for record in selected:
-        record.pop("object_abs_path", None)
-
-    build_summary = corpus_build_report.get("summary") or {}
+    build_summary_payload = corpus_build_report.get("summary") or {}
     summary = {
         "manifest": str(yaml_path),
-        "total_entries": len(programs),
-        "selected_entries": len(selected),
+        "schema_version": 2,
+        "total_objects": len(resolved_objects),
+        "selected_objects": len(selected_objects),
+        "total_programs": sum(len(obj.programs) for obj in resolved_objects),
+        "selected_programs": sum(len(obj.programs) for obj in selected_objects),
         "build_report_path": str(corpus_build_report["path"]),
-        "available_objects": int(build_summary.get("available_total", len(available_objects)) or len(available_objects)),
-        "built_from_source": int(build_summary.get("built_ok", 0) or 0),
-        "staged_existing": int(build_summary.get("staged_existing", 0) or 0),
+        "available_objects": int(build_summary_payload.get("available_total", len(available_objects)) or len(available_objects)),
+        "built_from_source": int(build_summary_payload.get("built_ok", 0) or 0),
+        "staged_existing": int(build_summary_payload.get("staged_existing", 0) or 0),
     }
-    return selected, summary
+    return selected_objects, summary
 
 
 def run_targets_in_guest_batch(
     *,
-    targets: list[dict[str, Any]],
+    targets: list[ResolvedObject],
     runner: Path,
     daemon: Path,
     kernel_image: Path,
@@ -1305,14 +2154,7 @@ def run_targets_in_guest_batch(
     )
     try:
         guest_target_payload = {
-            "targets": [
-                {
-                    **target,
-                    "policy_mode": "blind-apply-rejit" if blind_apply else "daemon-auto",
-                    "policy_path": None,
-                }
-                for target in targets
-            ],
+            "objects": [serialize_resolved_object(obj) for obj in targets],
         }
         with handle:
             json.dump(guest_target_payload, handle)
@@ -1798,7 +2640,7 @@ def packet_main(argv: list[str] | None = None) -> int:
     started_at = datetime.now(timezone.utc).isoformat()
     corpus_build_report = load_corpus_build_report(corpus_build_report_path)
 
-    targets, yaml_summary = load_targets_from_yaml(
+    objects, yaml_summary = load_targets_from_yaml(
         yaml_path=macro_corpus_yaml,
         corpus_build_report=corpus_build_report,
         filters=args.filters,
@@ -1811,7 +2653,9 @@ def packet_main(argv: list[str] | None = None) -> int:
         raise SystemExit(f"btf path missing: {btf_custom_path}")
 
     guest_smoke: dict[str, Any] = {"invocation": None, "payload": None}
-    records: list[dict[str, Any]] = []
+    object_records: list[dict[str, Any]] = []
+    program_records: list[dict[str, Any]] = []
+    total_programs = sum(len(obj.programs) for obj in objects)
     result = {
         "generated_at": started_at,
         "repo_root": str(ROOT_DIR),
@@ -1833,8 +2677,9 @@ def packet_main(argv: list[str] | None = None) -> int:
         "guest_smoke": guest_smoke,
         "skip_families": skip_families,
         "blind_apply": args.blind_apply,
-        "summary": build_summary(records),
-        "programs": records,
+        "summary": build_summary_v2(program_records, object_records),
+        "object_records": object_records,
+        "program_records": program_records,
     }
     current_target: dict[str, Any] | None = None
     current_target_index: int | None = None
@@ -1845,11 +2690,13 @@ def packet_main(argv: list[str] | None = None) -> int:
         updated_at: str,
         error_message: str | None,
     ) -> dict[str, Any]:
-        result["summary"] = build_summary(records)
+        result["summary"] = build_summary_v2(program_records, object_records)
         progress = {
             "status": status,
-            "total_programs": len(targets),
-            "completed_programs": len(records),
+            "total_objects": len(objects),
+            "completed_objects": len(object_records),
+            "total_programs": total_programs,
+            "completed_programs": len(program_records),
             "current_target_index": current_target_index,
             "current_target": current_target,
         }
@@ -1901,17 +2748,19 @@ def packet_main(argv: list[str] | None = None) -> int:
     artifact_dir = session.run_dir
 
     def flush_artifact(status: str, *, error_message: str | None = None, include_markdown: bool = False) -> None:
-        result["summary"] = build_summary(records)
+        result["summary"] = build_summary_v2(program_records, object_records)
         progress = {
             "status": status,
-            "total_programs": len(targets),
-            "completed_programs": len(records),
+            "total_objects": len(objects),
+            "completed_objects": len(object_records),
+            "total_programs": total_programs,
+            "completed_programs": len(program_records),
             "current_target_index": current_target_index,
             "current_target": current_target,
         }
         if error_message:
             progress["error_message"] = error_message
-        detail_texts = {"result.md": build_markdown(result)} if include_markdown else None
+        detail_texts = {"result.md": build_markdown_v2(result)} if include_markdown else None
         session.write(
             status=status,
             progress_payload=progress,
@@ -1929,12 +2778,23 @@ def packet_main(argv: list[str] | None = None) -> int:
         def handle_guest_record(index: int, record: dict[str, Any]) -> None:
             nonlocal current_target_index, current_target
             current_target_index = index
-            current_target = targets[index - 1] if index - 1 < len(targets) else None
-            records.append(record)
+            current_target = (
+                {"canonical_object_name": objects[index - 1].canonical_name}
+                if index - 1 < len(objects)
+                else None
+            )
+            object_record = record.get("object_record")
+            program_bundle = record.get("program_records")
+            if isinstance(object_record, dict):
+                object_records.append(object_record)
+            if isinstance(program_bundle, list):
+                for item in program_bundle:
+                    if isinstance(item, dict):
+                        program_records.append(item)
             flush_artifact("running")
 
         batch_result = run_targets_in_guest_batch(
-            targets=targets,
+            targets=objects,
             runner=runner,
             daemon=daemon,
             kernel_image=kernel_image,
@@ -1951,7 +2811,9 @@ def packet_main(argv: list[str] | None = None) -> int:
         )
         guest_invocation = batch_text_invocation_summary(batch_result["invocation"])
         guest_smoke["invocation"] = guest_invocation
-        for record in records:
+        for record in object_records:
+            record["guest_invocation"] = dict(guest_invocation) if guest_invocation is not None else None
+        for record in program_records:
             record["guest_invocation"] = dict(guest_invocation) if guest_invocation is not None else None
 
         if not guest_smoke.get("payload"):
@@ -1971,6 +2833,7 @@ def packet_main(argv: list[str] | None = None) -> int:
     print(f"Wrote {artifact_dir / 'metadata.json'}")
     print(
         f"mode={summary['effective_mode']} "
+        f"objects={summary['objects_attempted']} "
         f"targets={summary['targets_attempted']} "
         f"compile_pairs={summary['compile_pairs']} "
         f"measured_pairs={summary['measured_pairs']} "

@@ -1805,6 +1805,17 @@ using bpf_link_ptr = std::unique_ptr<bpf_link, bpf_link_deleter>;
 
 } // namespace
 
+struct prepared_program_state {
+    bpf_program *prog = nullptr;
+    int program_fd = -1;
+    bpf_prog_info program_info = {};
+    rejit_summary prepared_rejit {};
+    std::vector<bpf_insn> rejit_insns;
+    uint64_t rejit_apply_ns = 0;
+    bool rejit_applied = false;
+    bool katran_fixture_initialized = false;
+};
+
 struct prepared_kernel_state {
     cli_options options;
     std::vector<uint8_t> input_bytes;
@@ -1822,6 +1833,8 @@ struct prepared_kernel_state {
     uint64_t rejit_apply_ns = 0;
     bool rejit_applied = false;
     bool katran_fixture_initialized = false;
+    std::unordered_map<std::string, prepared_program_state> programs;
+    std::vector<std::string> program_order;
 };
 
 namespace {
@@ -1845,77 +1858,313 @@ void populate_rejit_from_daemon_summary(
     summary.daemon_response = response.raw_json;
 }
 
-sample_result build_compile_only_sample(prepared_kernel_state &prepared)
+prepared_program_state &require_prepared_program(
+    prepared_kernel_state &prepared,
+    const std::optional<std::string> &program_name)
 {
-    const auto final_program_info = load_prog_info(prepared.program_fd);
-    prepared.program_info = final_program_info;
+    if (program_name.has_value()) {
+        const auto found = prepared.programs.find(*program_name);
+        if (found == prepared.programs.end()) {
+            fail("prepared kernel state is missing program: " + *program_name);
+        }
+        return found->second;
+    }
+    if (prepared.program_order.size() != 1) {
+        fail("multi-program prepared kernel state requires --program-name");
+    }
+    return prepared.programs.at(prepared.program_order.front());
+}
+
+prepared_program_state *summary_program_for_prepared(prepared_kernel_state &prepared)
+{
+    if (prepared.options.program_name.has_value()) {
+        return &require_prepared_program(prepared, prepared.options.program_name);
+    }
+    if (prepared.program_order.size() == 1) {
+        return &prepared.programs.at(prepared.program_order.front());
+    }
+    return nullptr;
+}
+
+void maybe_write_prepared_program_dumps(
+    const prepared_kernel_state &prepared,
+    const prepared_program_state &program)
+{
     if (prepared.options.dump_jit) {
         const auto jited_program =
-            load_jited_program(prepared.program_fd, final_program_info.jited_prog_len);
+            load_jited_program(program.program_fd, program.program_info.jited_prog_len);
         const auto dump_path = std::filesystem::path(
             benchmark_name_for_program(prepared.options.program) + ".kernel.bin");
         write_binary_file(dump_path, jited_program.data(), jited_program.size());
     }
     if (prepared.options.dump_xlated.has_value()) {
-        const auto xlated_program = load_xlated_program(
-            prepared.program_fd, final_program_info.xlated_prog_len);
+        const auto xlated_program =
+            load_xlated_program(program.program_fd, program.program_info.xlated_prog_len);
         write_binary_file(
             *prepared.options.dump_xlated,
             xlated_program.data(),
             xlated_program.size());
     }
+}
 
+void maybe_apply_prepared_daemon_rejit(
+    prepared_program_state &program,
+    const cli_options &options)
+{
+    if (!options.rejit ||
+        !options.daemon_socket.has_value() ||
+        !program.prepared_rejit.requested ||
+        program.rejit_applied) {
+        return;
+    }
+    const auto rejit_start = std::chrono::steady_clock::now();
+    const auto socket_response =
+        daemon_socket_optimize(*options.daemon_socket, program.program_info.id, options.passes);
+    const auto rejit_end = std::chrono::steady_clock::now();
+    program.rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
+    populate_rejit_from_daemon_summary(program.prepared_rejit, socket_response);
+    program.rejit_applied = true;
+    program.program_info = load_prog_info(program.program_fd);
+    if (!socket_response.ok) {
+        fprintf(stderr, "daemon socket optimize failed: %s\n", socket_response.error.c_str());
+    }
+}
+
+void maybe_apply_prepared_bytecode_rejit(
+    prepared_program_state &program,
+    const cli_options &options)
+{
+    if (!options.rejit ||
+        options.daemon_socket.has_value() ||
+        !program.prepared_rejit.requested ||
+        program.rejit_applied) {
+        return;
+    }
+    if (program.rejit_insns.empty()) {
+        fail("prepared kernel state is missing REJIT instructions");
+    }
+    auto rejit_start = std::chrono::steady_clock::now();
+    auto rejit_end = rejit_start;
+    apply_rejit(
+        program.program_fd,
+        program.rejit_insns.data(),
+        static_cast<uint32_t>(program.rejit_insns.size()),
+        program.prepared_rejit,
+        rejit_start,
+        rejit_end);
+    program.rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
+    program.rejit_applied = true;
+    program.program_info = load_prog_info(program.program_fd);
+}
+
+sample_result build_compile_only_sample(prepared_kernel_state &prepared)
+{
     sample_result sample;
     sample.compile_ns = prepared.memory_prepare_ns +
                         prepared.object_open_ns +
                         prepared.object_load_ns +
                         prepared.rejit_apply_ns;
-    sample.jited_prog_len = final_program_info.jited_prog_len;
-    sample.xlated_prog_len = final_program_info.xlated_prog_len;
-    sample.code_size = {
-        .bpf_bytecode_bytes = final_program_info.xlated_prog_len,
-        .native_code_bytes = final_program_info.jited_prog_len,
-    };
-    sample.rejit = prepared.prepared_rejit;
+    if (auto *program = summary_program_for_prepared(prepared); program != nullptr) {
+        sample.compile_ns = prepared.memory_prepare_ns +
+                            prepared.object_open_ns +
+                            prepared.object_load_ns +
+                            program->rejit_apply_ns;
+        program->program_info = load_prog_info(program->program_fd);
+        maybe_write_prepared_program_dumps(prepared, *program);
+        sample.jited_prog_len = program->program_info.jited_prog_len;
+        sample.xlated_prog_len = program->program_info.xlated_prog_len;
+        sample.code_size = {
+            .bpf_bytecode_bytes = program->program_info.xlated_prog_len,
+            .native_code_bytes = program->program_info.jited_prog_len,
+        };
+        sample.rejit = program->prepared_rejit;
+    } else {
+        sample.rejit.requested = prepared.options.rejit;
+        if (prepared.options.daemon_socket.has_value()) {
+            sample.rejit.mode = "daemon";
+        } else if (prepared.options.rejit_program.has_value()) {
+            sample.rejit.mode = "replacement";
+        } else if (prepared.options.rejit) {
+            sample.rejit.mode = "same-bytecode";
+        }
+    }
     sample.phases_ns = {
         {"memory_prepare_ns", prepared.memory_prepare_ns},
         {"object_open_ns", prepared.object_open_ns},
         {"object_load_ns", prepared.object_load_ns},
     };
+    if (auto *program = summary_program_for_prepared(prepared);
+        program != nullptr &&
+        (program->prepared_rejit.syscall_attempted || program->rejit_applied)) {
+        sample.phases_ns.push_back({"rejit_apply_ns", program->rejit_apply_ns});
+    }
     return sample;
+}
+
+sample_result build_prepared_program_compile_sample(
+    prepared_kernel_state &prepared,
+    const cli_options &options)
+{
+    auto &program = require_prepared_program(prepared, options.program_name);
+    if (options.daemon_socket.has_value()) {
+        maybe_apply_prepared_daemon_rejit(program, options);
+    } else {
+        maybe_apply_prepared_bytecode_rejit(program, options);
+    }
+
+    program.program_info = load_prog_info(program.program_fd);
+    maybe_write_prepared_program_dumps(prepared, program);
+
+    sample_result sample;
+    sample.compile_ns = prepared.memory_prepare_ns +
+                        prepared.object_open_ns +
+                        prepared.object_load_ns +
+                        program.rejit_apply_ns;
+    sample.jited_prog_len = program.program_info.jited_prog_len;
+    sample.xlated_prog_len = program.program_info.xlated_prog_len;
+    sample.code_size = {
+        .bpf_bytecode_bytes = program.program_info.xlated_prog_len,
+        .native_code_bytes = program.program_info.jited_prog_len,
+    };
+    sample.rejit = program.prepared_rejit;
+    sample.phases_ns = {
+        {"memory_prepare_ns", prepared.memory_prepare_ns},
+        {"object_open_ns", prepared.object_open_ns},
+        {"object_load_ns", prepared.object_load_ns},
+    };
+    if (program.prepared_rejit.syscall_attempted || program.rejit_applied) {
+        sample.phases_ns.push_back({"rejit_apply_ns", program.rejit_apply_ns});
+    }
+    return sample;
+}
+
+std::vector<sample_result> execute_prepared_kernel_attach(
+    prepared_kernel_state &prepared,
+    const cli_options &options)
+{
+    auto &program = require_prepared_program(prepared, options.program_name);
+    if (options.daemon_socket.has_value()) {
+        maybe_apply_prepared_daemon_rejit(program, options);
+    }
+
+    const uint64_t base_compile_ns =
+        prepared.object_open_ns +
+        prepared.object_load_ns;
+
+    const auto attach_start = std::chrono::steady_clock::now();
+    bpf_link *raw_link = bpf_program__attach(program.prog);
+    const int attach_error = libbpf_get_error(raw_link);
+    if (attach_error != 0) {
+        fail("bpf_program__attach failed: " + libbpf_error_string(attach_error));
+    }
+    bpf_link_ptr link(raw_link);
+    const auto attach_end = std::chrono::steady_clock::now();
+
+    const int stats_fd = bpf_enable_stats(BPF_STATS_RUN_TIME);
+    if (stats_fd < 0) {
+        fail("bpf_enable_stats(BPF_STATS_RUN_TIME) failed: " + std::string(strerror(errno)));
+    }
+    scoped_fd stats_fd_guard(stats_fd);
+
+    const uint32_t warmup_workload_amount = is_duration_based_workload(options.workload_type)
+        ? options.workload_iterations
+        : options.warmup_repeat * options.workload_iterations;
+    const uint32_t measured_workload_amount = is_duration_based_workload(options.workload_type)
+        ? options.workload_iterations
+        : options.repeat * options.workload_iterations;
+
+    if (options.warmup_repeat > 0) {
+        run_workload(options.workload_type, warmup_workload_amount);
+    }
+
+    const auto before_stats = read_bpf_stats(program.program_fd);
+
+    const auto exec_wall_start = std::chrono::steady_clock::now();
+    const uint64_t tsc_before = rdtsc_start();
+    run_workload(options.workload_type, measured_workload_amount);
+    const uint64_t tsc_after = rdtsc_end();
+    const auto exec_wall_end = std::chrono::steady_clock::now();
+
+    const auto after_stats = read_bpf_stats(program.program_fd);
+    stats_fd_guard.reset();
+    link.reset();
+
+    const uint64_t run_cnt_delta = after_stats.run_cnt - before_stats.run_cnt;
+    const uint64_t run_time_ns_delta = after_stats.run_time_ns - before_stats.run_time_ns;
+    const uint64_t exec_ns = run_cnt_delta > 0
+        ? run_time_ns_delta / run_cnt_delta
+        : 0;
+
+    const uint64_t tsc_freq_hz = kHasTscMeasurement ? detect_tsc_freq_hz() : 0;
+    std::optional<uint64_t> wall_exec_ns;
+    std::optional<uint64_t> exec_cycles;
+    if (kHasTscMeasurement && tsc_freq_hz > 0 && tsc_after > tsc_before && run_cnt_delta > 0) {
+        const uint64_t total_cycles = tsc_after - tsc_before;
+        exec_cycles = total_cycles / run_cnt_delta;
+        wall_exec_ns = static_cast<uint64_t>(std::llround(
+            (static_cast<long double>(total_cycles) * 1000000000.0L) /
+            (static_cast<long double>(tsc_freq_hz) *
+             static_cast<long double>(run_cnt_delta))));
+    }
+
+    program.program_info = load_prog_info(program.program_fd);
+    sample_result sample;
+    if (options.rejit && options.daemon_socket.has_value()) {
+        sample.phase = "recompile";
+    }
+    sample.compile_ns = base_compile_ns + program.rejit_apply_ns;
+    sample.exec_ns = exec_ns;
+    sample.timing_source = "bpf_stats";
+    sample.timing_source_wall =
+        wall_exec_ns.has_value() ? "rdtsc" : "unavailable";
+    sample.wall_exec_ns = wall_exec_ns;
+    sample.exec_cycles = exec_cycles;
+    sample.tsc_freq_hz = tsc_freq_hz > 0
+        ? std::optional<uint64_t>(tsc_freq_hz)
+        : std::nullopt;
+    sample.result = run_cnt_delta;
+    sample.retval = 0;
+    sample.jited_prog_len = program.program_info.jited_prog_len;
+    sample.xlated_prog_len = program.program_info.xlated_prog_len;
+    sample.code_size = {
+        .bpf_bytecode_bytes = program.program_info.xlated_prog_len,
+        .native_code_bytes = program.program_info.jited_prog_len,
+    };
+    sample.rejit = program.prepared_rejit;
+    sample.phases_ns = {
+        {"object_open_ns", prepared.object_open_ns},
+        {"object_load_ns", prepared.object_load_ns},
+        {"attach_ns", elapsed_ns(attach_start, attach_end)},
+        {"workload_wall_ns", elapsed_ns(exec_wall_start, exec_wall_end)},
+    };
+    if (program.prepared_rejit.syscall_attempted) {
+        sample.phases_ns.push_back({"rejit_apply_ns", program.rejit_apply_ns});
+    }
+    return {std::move(sample)};
 }
 
 std::vector<sample_result> execute_prepared_kernel_run(
     prepared_kernel_state &prepared,
     const cli_options &options)
 {
+    auto &program = require_prepared_program(prepared, options.program_name);
     if (katran_balancer_fixture_requested(options) &&
-        !prepared.katran_fixture_initialized) {
+        !program.katran_fixture_initialized) {
         initialize_katran_test_fixture(prepared.object.get());
-        prepared.katran_fixture_initialized = true;
+        program.katran_fixture_initialized = true;
     }
 
-    rejit_summary rejit = prepared.prepared_rejit;
-    uint64_t rejit_apply_ns = prepared.rejit_apply_ns;
-    const bool prepared_rejit_already_applied = prepared.rejit_applied;
-    const auto packet_kind = resolve_packet_context_kind(prepared.program_info.type);
+    rejit_summary rejit = program.prepared_rejit;
+    uint64_t rejit_apply_ns = program.rejit_apply_ns;
+    const bool prepared_rejit_already_applied = program.rejit_applied;
+    const auto packet_kind = resolve_packet_context_kind(program.program_info.type);
 
     if (options.daemon_socket.has_value() &&
         rejit.requested &&
         !prepared_rejit_already_applied) {
-        const auto rejit_start = std::chrono::steady_clock::now();
-        const auto socket_response =
-            daemon_socket_optimize(*options.daemon_socket, prepared.program_info.id, options.passes);
-        const auto rejit_end = std::chrono::steady_clock::now();
-        rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
-        populate_rejit_from_daemon_summary(rejit, socket_response);
-        prepared.prepared_rejit = rejit;
-        prepared.rejit_apply_ns = rejit_apply_ns;
-        prepared.rejit_applied = true;
-        prepared.program_info = load_prog_info(prepared.program_fd);
-        if (!socket_response.ok) {
-            fprintf(stderr, "daemon socket optimize failed: %s\n", socket_response.error.c_str());
-        }
+        maybe_apply_prepared_daemon_rejit(program, options);
+        rejit = program.prepared_rejit;
+        rejit_apply_ns = program.rejit_apply_ns;
     }
 
     std::chrono::steady_clock::time_point exec_input_prepare_start {};
@@ -1971,7 +2220,7 @@ std::vector<sample_result> execute_prepared_kernel_run(
             if (options.raw_packet) {
                 packet = input_bytes;
             } else {
-                packet = build_packet_input(input_bytes, prepared.program_info.type);
+                packet = build_packet_input(input_bytes, program.program_info.type);
             }
             packet_out.assign(packet_output_capacity(options, packet.size()), 0);
         }
@@ -1987,7 +2236,7 @@ std::vector<sample_result> execute_prepared_kernel_run(
         if (options.raw_packet) {
             packet = input_bytes;
         } else {
-            packet = build_packet_input(input_bytes, prepared.program_info.type);
+            packet = build_packet_input(input_bytes, program.program_info.type);
         }
         packet_out.assign(packet_output_capacity(options, packet.size()), 0);
         exec_input_prepare_end = std::chrono::steady_clock::now();
@@ -2003,7 +2252,7 @@ std::vector<sample_result> execute_prepared_kernel_run(
         if (options.raw_packet) {
             packet = input_bytes;
         } else {
-            packet = build_packet_input(input_bytes, prepared.program_info.type);
+            packet = build_packet_input(input_bytes, program.program_info.type);
         }
         packet_out.assign(packet_output_capacity(options, packet.size()), 0);
         exec_input_prepare_end = std::chrono::steady_clock::now();
@@ -2013,7 +2262,7 @@ std::vector<sample_result> execute_prepared_kernel_run(
     test_opts.sz = sizeof(test_opts);
     const bool kernel_repeat_supported =
         prepared.effective_io_mode != "context" ||
-        context_mode_supports_kernel_repeat(prepared.program_info.type);
+        context_mode_supports_kernel_repeat(program.program_info.type);
     const uint32_t requested_repeat = kernel_repeat_supported ? options.repeat : 1u;
     test_opts.repeat = kernel_repeat_supported ? requested_repeat : 0u;
     if (!packet.empty()) {
@@ -2033,7 +2282,7 @@ std::vector<sample_result> execute_prepared_kernel_run(
 
     const uint64_t tsc_freq_hz = kHasTscMeasurement ? detect_tsc_freq_hz() : 0;
     kernel_test_run_context run_context = {
-        .program_fd = prepared.program_fd,
+        .program_fd = program.program_fd,
         .test_opts = &test_opts,
         .effective_repeat = requested_repeat,
         .tsc_freq_hz = tsc_freq_hz,
@@ -2125,7 +2374,8 @@ std::vector<sample_result> execute_prepared_kernel_run(
             key,
             stock_pass.measurement.retval);
         const auto stock_result_read_end = std::chrono::steady_clock::now();
-        const auto stock_program_info = load_prog_info(prepared.program_fd);
+        const auto stock_program_info = load_prog_info(program.program_fd);
+        program.program_info = stock_program_info;
         stock_sample = build_measured_sample(
             std::string("stock"),
             base_compile_ns,
@@ -2141,17 +2391,17 @@ std::vector<sample_result> execute_prepared_kernel_run(
         auto rejit_start = std::chrono::steady_clock::now();
         auto rejit_end = rejit_start;
         apply_rejit(
-            prepared.program_fd,
-            prepared.rejit_insns.data(),
-            static_cast<uint32_t>(prepared.rejit_insns.size()),
+            program.program_fd,
+            program.rejit_insns.data(),
+            static_cast<uint32_t>(program.rejit_insns.size()),
             rejit,
             rejit_start,
             rejit_end);
         rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
-        prepared.prepared_rejit = rejit;
-        prepared.rejit_apply_ns = rejit_apply_ns;
-        prepared.rejit_applied = true;
-        prepared.program_info = load_prog_info(prepared.program_fd);
+        program.prepared_rejit = rejit;
+        program.rejit_apply_ns = rejit_apply_ns;
+        program.rejit_applied = true;
+        program.program_info = load_prog_info(program.program_fd);
     }
 
     auto run_pass = execute_kernel_measurement_pass(
@@ -2174,20 +2424,9 @@ std::vector<sample_result> execute_prepared_kernel_run(
     result_read_start = result_read_start_now;
     result_read_end = result_read_end_now;
 
-    const auto final_program_info = load_prog_info(prepared.program_fd);
-    prepared.program_info = final_program_info;
-    if (options.dump_jit) {
-        const auto jited_program =
-            load_jited_program(prepared.program_fd, final_program_info.jited_prog_len);
-        const auto dump_path = std::filesystem::path(
-            benchmark_name_for_program(options.program) + ".kernel.bin");
-        write_binary_file(dump_path, jited_program.data(), jited_program.size());
-    }
-    if (options.dump_xlated.has_value()) {
-        const auto xlated_program = load_xlated_program(
-            prepared.program_fd, final_program_info.xlated_prog_len);
-        write_binary_file(*options.dump_xlated, xlated_program.data(), xlated_program.size());
-    }
+    const auto final_program_info = load_prog_info(program.program_fd);
+    program.program_info = final_program_info;
+    maybe_write_prepared_program_dumps(prepared, program);
 
     auto sample = build_measured_sample(
         measure_same_image_pair ? std::optional<std::string>(std::string("rejit"))
@@ -2223,6 +2462,10 @@ prepared_kernel_handle prepare_kernel(const cli_options &options)
 {
     initialize_micro_exec_process();
 
+    if (options.manual_load && !options.program_name.has_value()) {
+        fail("prepare_kernel with --manual-load requires --program-name");
+    }
+
     auto prepared = std::make_shared<prepared_kernel_state>();
     prepared->options = options;
 
@@ -2254,88 +2497,126 @@ prepared_kernel_handle prepare_kernel(const cli_options &options)
     if (options.manual_load) {
         prepared->program_fd = manual_load_program(prepared->object.get(), options);
         prepared->manual_program_fd.reset(prepared->program_fd);
+        prepared_program_state state;
+        state.program_fd = prepared->program_fd;
+        state.program_info = load_prog_info(prepared->program_fd);
+        const std::string selected_name = *options.program_name;
+        prepared->program_order.push_back(selected_name);
+        prepared->programs.emplace(selected_name, std::move(state));
     } else {
         const int load_error = bpf_object__load(prepared->object.get());
         if (load_error != 0) {
             fail("bpf_object__load failed: " + libbpf_error_string(-load_error));
         }
 
-        prepared->prog = find_program(prepared->object.get(), options.program_name);
-        prepared->program_fd = bpf_program__fd(prepared->prog);
-        if (prepared->program_fd < 0) {
-            fail("unable to obtain program fd");
+        bpf_program *program = nullptr;
+        bpf_object__for_each_program(program, prepared->object.get()) {
+            const char *name = bpf_program__name(program);
+            if (name == nullptr || name[0] == '\0') {
+                continue;
+            }
+            const int program_fd = bpf_program__fd(program);
+            if (program_fd < 0) {
+                continue;
+            }
+            prepared_program_state state;
+            state.prog = program;
+            state.program_fd = program_fd;
+            state.program_info = load_prog_info(program_fd);
+            prepared->program_order.emplace_back(name);
+            prepared->programs.emplace(name, std::move(state));
+        }
+        if (prepared->programs.empty()) {
+            fail("prepared kernel state did not load any programs");
         }
     }
     const auto object_load_end = std::chrono::steady_clock::now();
     prepared->object_load_ns = elapsed_ns(object_load_start, object_load_end);
     prepared->effective_io_mode =
         resolve_effective_io_mode(options.io_mode, prepared->object.get());
-    if (!options.compile_only && katran_balancer_fixture_requested(options)) {
-        initialize_katran_test_fixture(prepared->object.get());
-        prepared->katran_fixture_initialized = true;
+
+    if (options.program_name.has_value()) {
+        auto &selected = require_prepared_program(*prepared, options.program_name);
+        prepared->prog = selected.prog;
+        prepared->program_fd = selected.program_fd;
+        prepared->program_info = selected.program_info;
+    } else if (prepared->program_order.size() == 1) {
+        auto &selected = prepared->programs.at(prepared->program_order.front());
+        prepared->prog = selected.prog;
+        prepared->program_fd = selected.program_fd;
+        prepared->program_info = selected.program_info;
     }
-    prepared->program_info = load_prog_info(prepared->program_fd);
 
     if (options.rejit) {
-        prepared->prepared_rejit.requested = true;
-        if (options.daemon_socket.has_value()) {
-            prepared->prepared_rejit.mode = "daemon";
-            fprintf(stderr, "rejit: mode=daemon-socket socket=%s prog_id=%u\n",
-                    options.daemon_socket->c_str(), prepared->program_info.id);
-        } else if (options.rejit_program.has_value()) {
-            prepared->prepared_rejit.mode = "replacement";
-            auto replacement_image = load_program_image(
-                *options.rejit_program, options.program_name);
-            if (replacement_image.code.size() % sizeof(bpf_insn) != 0) {
-                fail("replacement program image does not contain aligned BPF instructions");
-            }
-            const size_t cnt = replacement_image.code.size() / sizeof(bpf_insn);
-            prepared->rejit_insns.resize(cnt);
-            std::memcpy(
-                prepared->rejit_insns.data(),
-                replacement_image.code.data(),
-                replacement_image.code.size());
-        } else {
-            prepared->prepared_rejit.mode = "same-bytecode";
-            if (prepared->prog == nullptr) {
-                fail("same-bytecode REJIT requires a program loaded via bpf_object__load "
-                     "(not manual_load_program)");
-            }
-            const size_t cnt = bpf_program__insn_cnt(prepared->prog);
-            if (cnt == 0) {
-                fail("bpf_program__insn_cnt returned 0 for REJIT");
-            }
-            const bpf_insn *raw = bpf_program__insns(prepared->prog);
-            prepared->rejit_insns.assign(raw, raw + cnt);
+        if (options.rejit_program.has_value() && !options.program_name.has_value()) {
+            fail("replacement REJIT requires --program-name for prepared kernel state");
         }
-        if (prepared->prepared_rejit.mode != "daemon") {
-            fprintf(stderr, "rejit: mode=%s insn_cnt=%zu\n",
-                    prepared->prepared_rejit.mode.c_str(),
-                    prepared->rejit_insns.size());
+        if (!options.daemon_socket.has_value() &&
+            !options.program_name.has_value() &&
+            prepared->program_order.size() > 1) {
+            fail("multi-program prepared kernel state only supports daemon REJIT");
+        }
+
+        for (const auto &program_name : prepared->program_order) {
+            auto &program = prepared->programs.at(program_name);
+            program.prepared_rejit.requested = true;
+            if (options.daemon_socket.has_value()) {
+                program.prepared_rejit.mode = "daemon";
+            } else if (options.rejit_program.has_value()) {
+                program.prepared_rejit.mode = "replacement";
+                auto replacement_image = load_program_image(
+                    *options.rejit_program, std::optional<std::string>(program_name));
+                if (replacement_image.code.size() % sizeof(bpf_insn) != 0) {
+                    fail("replacement program image does not contain aligned BPF instructions");
+                }
+                const size_t cnt = replacement_image.code.size() / sizeof(bpf_insn);
+                program.rejit_insns.resize(cnt);
+                std::memcpy(
+                    program.rejit_insns.data(),
+                    replacement_image.code.data(),
+                    replacement_image.code.size());
+            } else {
+                program.prepared_rejit.mode = "same-bytecode";
+                if (program.prog == nullptr) {
+                    fail("same-bytecode REJIT requires a program loaded via bpf_object__load "
+                         "(not manual_load_program)");
+                }
+                const size_t cnt = bpf_program__insn_cnt(program.prog);
+                if (cnt == 0) {
+                    fail("bpf_program__insn_cnt returned 0 for REJIT");
+                }
+                const bpf_insn *raw = bpf_program__insns(program.prog);
+                program.rejit_insns.assign(raw, raw + cnt);
+            }
+        }
+
+        if (options.program_name.has_value()) {
+            auto &selected = require_prepared_program(*prepared, options.program_name);
+            prepared->prepared_rejit = selected.prepared_rejit;
+            prepared->rejit_insns = selected.rejit_insns;
+            if (options.daemon_socket.has_value()) {
+                fprintf(stderr, "rejit: mode=daemon-socket socket=%s prog_id=%u\n",
+                        options.daemon_socket->c_str(), selected.program_info.id);
+            } else {
+                fprintf(stderr, "rejit: mode=%s insn_cnt=%zu\n",
+                        selected.prepared_rejit.mode.c_str(),
+                        selected.rejit_insns.size());
+            }
         }
     }
 
-    if (options.compile_only && options.rejit) {
-        auto rejit_start = std::chrono::steady_clock::now();
+    if (options.compile_only && options.rejit && options.program_name.has_value()) {
+        auto &selected = require_prepared_program(*prepared, options.program_name);
         if (options.daemon_socket.has_value()) {
-            const auto socket_response =
-                daemon_socket_optimize(*options.daemon_socket, prepared->program_info.id, options.passes);
-            const auto rejit_end = std::chrono::steady_clock::now();
-            prepared->rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
-            populate_rejit_from_daemon_summary(prepared->prepared_rejit, socket_response);
+            maybe_apply_prepared_daemon_rejit(selected, options);
         } else {
-            auto rejit_end = rejit_start;
-            apply_rejit(
-                prepared->program_fd,
-                prepared->rejit_insns.data(),
-                static_cast<uint32_t>(prepared->rejit_insns.size()),
-                prepared->prepared_rejit,
-                rejit_start,
-                rejit_end);
-            prepared->rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
+            maybe_apply_prepared_bytecode_rejit(selected, options);
         }
-        prepared->rejit_applied = true;
-        prepared->program_info = load_prog_info(prepared->program_fd);
+        prepared->prepared_rejit = selected.prepared_rejit;
+        prepared->rejit_insns = selected.rejit_insns;
+        prepared->rejit_apply_ns = selected.rejit_apply_ns;
+        prepared->rejit_applied = selected.rejit_applied;
+        prepared->program_info = selected.program_info;
     }
 
     return prepared;
@@ -2355,6 +2636,15 @@ std::vector<sample_result> run_prepared_kernel(
 {
     if (!prepared) {
         fail("run_prepared_kernel requires a prepared kernel handle");
+    }
+    if (options.compile_only) {
+        if (options.program_name.has_value()) {
+            return {build_prepared_program_compile_sample(*prepared, options)};
+        }
+        return {build_compile_only_sample(*prepared)};
+    }
+    if (options.attach_mode) {
+        return execute_prepared_kernel_attach(*prepared, options);
     }
     return execute_prepared_kernel_run(*prepared, options);
 }
