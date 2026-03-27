@@ -981,53 +981,12 @@ mod tests {
 
 #[cfg(test)]
 mod real_bpfo_tests {
-    use super::map_inline::find_map_lookup_sites;
     use crate::pass::{BpfProgram, PipelineResult};
     use crate::test_utils::{
         assert_valid_bpf, hot_branch_profiling, load_fixture_program, pass_result,
         permissive_pass_ctx, run_named_pipeline, run_named_pipeline_with_profiling,
         LoadedFixtureProgram,
     };
-
-    #[test]
-    fn test_real_000_debug_katran_fixture_first_five_insns() {
-        let loaded = load_fixture_program("katran/xdp_pktcntr.bpf.o", "xdp").unwrap();
-        let sites = find_map_lookup_sites(&loaded.insns);
-        let helper_calls = loaded
-            .insns
-            .iter()
-            .enumerate()
-            .filter(|(_, insn)| insn.is_call())
-            .collect::<Vec<_>>();
-
-        eprintln!(
-            "fixture_debug path={} section={} insn_count={} used_maps={} helper_calls={} lookup_sites={}",
-            loaded.object_path.display(),
-            loaded.section_name,
-            loaded.insns.len(),
-            loaded.used_maps.len(),
-            helper_calls.len(),
-            sites.len()
-        );
-        for (pc, insn) in loaded.insns.iter().enumerate().take(5) {
-            eprintln!("  pc {pc}: {:?}", insn);
-        }
-        for (pc, insn) in helper_calls.iter().take(8) {
-            eprintln!(
-                "  helper pc {}: code={:#04x} dst={} src={} off={} imm={}",
-                pc,
-                insn.code,
-                insn.dst_reg(),
-                insn.src_reg(),
-                insn.off,
-                insn.imm
-            );
-        }
-        eprintln!("  lookup_sites={sites:?}");
-
-        assert!(!loaded.insns.is_empty());
-        assert!(!helper_calls.is_empty());
-    }
 
     fn run_real_case(
         pass_names: &[&str],
