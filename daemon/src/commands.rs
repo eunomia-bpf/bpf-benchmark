@@ -147,61 +147,11 @@ pub(crate) struct TimingsNs {
     pub total_ns: u64,
 }
 
-// ── PGO helpers ─────────────────────────────────────────────────────
-
-/// PGO configuration passed through CLI flags.
-pub(crate) struct PgoConfig {
-    /// Observation interval for profiling.
-    pub interval: Duration,
-}
-
-/// Collect profiling data for a program if PGO is enabled.
-///
-/// When PGO is enabled, polls the program's runtime stats for the configured
-/// interval and returns a `ProfilingData` with program-level hotness information.
-pub(crate) fn collect_pgo_data(
-    prog_id: u32,
-    pgo_config: &Option<PgoConfig>,
-) -> Option<pass::ProfilingData> {
-    let config = pgo_config.as_ref()?;
-    match profiler::collect_program_profiling(prog_id, config.interval) {
-        Ok((profiling, analysis)) => {
-            if analysis.is_hot() {
-                eprintln!(
-                    "  pgo: prog {} is hot (delta_run_cnt={}, avg_ns={})",
-                    prog_id,
-                    analysis.delta_run_cnt,
-                    analysis
-                        .delta_avg_ns
-                        .map_or("-".to_string(), |v| format!("{:.2}", v)),
-                );
-            } else {
-                eprintln!(
-                    "  pgo: prog {} is cold (no activity during observation)",
-                    prog_id
-                );
-            }
-            Some(profiling)
-        }
-        Err(e) => {
-            eprintln!("  pgo: failed to profile prog {}: {:#}", prog_id, e);
-            None
-        }
-    }
-}
-
 // ── Pipeline helpers ────────────────────────────────────────────────
 
-/// Build the appropriate pipeline based on the selected pass names.
-pub(crate) fn build_pipeline(pass_names: Option<&[String]>) -> Result<pass::PassManager> {
-    match pass_names {
-        Some(names) => passes::build_custom_pipeline(names),
-        None => Ok(passes::build_full_pipeline()),
-    }
-}
-
-pub(crate) fn pipeline_pass_names(pass_names: Option<&[String]>) -> Result<Vec<String>> {
-    passes::selected_pass_names(pass_names)
+/// Build the daemon's default optimization pipeline.
+pub(crate) fn build_pipeline() -> pass::PassManager {
+    passes::build_full_pipeline()
 }
 
 pub(crate) type SharedInvalidationTracker = Arc<Mutex<MapInvalidationTracker<BpfMapValueReader>>>;
@@ -486,10 +436,7 @@ pub(crate) fn rank_programs_by_hotness(prog_ids: &[u32], observation_window: Dur
 
 // ── Subcommand implementations ──────────────────────────────────────
 
-pub(crate) fn cmd_enumerate(
-    ctx: &pass::PassContext,
-    pass_names: &Option<Vec<String>>,
-) -> Result<()> {
+pub(crate) fn cmd_enumerate(ctx: &pass::PassContext) -> Result<()> {
     println!(
         "{:>6}  {:>6}  {:>5}  {:<16}  sites",
         "ID", "type", "insns", "name"
@@ -497,7 +444,7 @@ pub(crate) fn cmd_enumerate(
     println!("{}", "-".repeat(60));
 
     for prog_id in bpf::iter_prog_ids() {
-        match enumerate_one(prog_id, ctx, pass_names) {
+        match enumerate_one(prog_id, ctx) {
             Ok(()) => {}
             Err(e) => {
                 eprintln!("  prog {}: {:#}", prog_id, e);
@@ -507,11 +454,7 @@ pub(crate) fn cmd_enumerate(
     Ok(())
 }
 
-fn enumerate_one(
-    prog_id: u32,
-    ctx: &pass::PassContext,
-    pass_names: &Option<Vec<String>>,
-) -> Result<()> {
+fn enumerate_one(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
 
@@ -526,7 +469,7 @@ fn enumerate_one(
     let site_summary = if !orig_insns.is_empty() {
         let mut program = pass::BpfProgram::new(orig_insns);
         program.set_map_ids(bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default());
-        let pm = build_pipeline(pass_names.as_deref())?;
+        let pm = build_pipeline();
 
         match pm.run(&mut program, ctx) {
             Ok(result) if result.total_sites_applied > 0 => {
@@ -555,7 +498,6 @@ fn enumerate_one(
 pub(crate) fn cmd_rewrite(
     prog_id: u32,
     ctx: &pass::PassContext,
-    pass_names: &Option<Vec<String>>,
 ) -> Result<()> {
     let (info, orig_insns) = bpf::get_orig_insns_by_id(prog_id)?;
 
@@ -577,7 +519,7 @@ pub(crate) fn cmd_rewrite(
     let mut program = pass::BpfProgram::new(orig_insns.clone());
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     program.set_map_ids(bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default());
-    let pm = build_pipeline(pass_names.as_deref())?;
+    let pm = build_pipeline();
 
     let mut local_ctx = ctx.clone();
     local_ctx.prog_type = info.prog_type;
@@ -615,11 +557,9 @@ pub(crate) fn cmd_rewrite(
 pub(crate) fn cmd_apply(
     prog_id: u32,
     ctx: &pass::PassContext,
-    pass_names: &Option<Vec<String>>,
-    pgo_config: &Option<PgoConfig>,
     rollback_enabled: bool,
 ) -> Result<()> {
-    let result = try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled, None)?;
+    let result = try_apply_one(prog_id, ctx, rollback_enabled, None)?;
     emit_debug_result(&result);
 
     if result.program.orig_insn_count == 0 {
@@ -636,8 +576,6 @@ pub(crate) fn cmd_apply(
 
 pub(crate) fn cmd_apply_all(
     ctx: &pass::PassContext,
-    pass_names: &Option<Vec<String>>,
-    pgo_config: &Option<PgoConfig>,
     rollback_enabled: bool,
 ) -> Result<()> {
     let mut total = 0u32;
@@ -646,7 +584,7 @@ pub(crate) fn cmd_apply_all(
 
     for prog_id in bpf::iter_prog_ids() {
         total += 1;
-        match try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled, None) {
+        match try_apply_one(prog_id, ctx, rollback_enabled, None) {
             Ok(result) => {
                 emit_debug_result(&result);
                 if result.summary.applied {
@@ -722,8 +660,6 @@ pub(crate) fn cmd_profile(prog_id: u32, interval_ms: u64, samples: usize) -> Res
 pub(crate) fn try_apply_one(
     prog_id: u32,
     ctx: &pass::PassContext,
-    pass_names: &Option<Vec<String>>,
-    pgo_config: &Option<PgoConfig>,
     rollback_enabled: bool,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
 ) -> Result<OptimizeOneResult> {
@@ -810,9 +746,6 @@ pub(crate) fn try_apply_one(
     // Fetch map IDs for FD relocation before REJIT.
     let map_ids = bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default();
 
-    // Collect PGO data once (reused across rollback retries).
-    let profiling = collect_pgo_data(prog_id, pgo_config);
-
     let mut disabled_passes: HashSet<String> = HashSet::new();
     let max_retries = 10;
     let mut attempts: Vec<AttemptRecord> = Vec::new();
@@ -820,12 +753,10 @@ pub(crate) fn try_apply_one(
     let mut total_pipeline_ns: u64 = 0;
     let mut total_rejit_ns: u64 = 0;
     let had_tracked_inline_sites = tracker_tracks_prog(invalidation_tracker, prog_id)?;
-    let selected_pass_names = pipeline_pass_names(pass_names.as_deref())?;
-
     for attempt in 0..=max_retries {
         let mut program = pass::BpfProgram::new(orig_insns.clone());
         program.set_map_ids(map_ids.clone());
-        let pm = build_pipeline(Some(selected_pass_names.as_slice()))?;
+        let pm = build_pipeline();
         let mut local_ctx = ctx.clone();
         local_ctx.prog_type = info.prog_type;
         for disabled in sorted_strings(disabled_passes.iter().cloned()) {
@@ -833,8 +764,7 @@ pub(crate) fn try_apply_one(
         }
 
         let pipeline_start = Instant::now();
-        let pipeline_result =
-            pm.run_with_profiling(&mut program, &local_ctx, profiling.as_ref())?;
+        let pipeline_result = pm.run(&mut program, &local_ctx)?;
         let pipeline_elapsed = pipeline_start.elapsed().as_nanos() as u64;
         total_pipeline_ns += pipeline_elapsed;
         let attempt_map_inline_records = collect_map_inline_records(&pipeline_result.pass_results);
@@ -1753,13 +1683,9 @@ processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 p
         );
     }
 
-    /// Test build_pipeline: verify that pass selection works correctly.
     #[test]
-    fn test_build_pipeline_default_and_custom() {
-        // Default pipeline should include the standard passes.
-        let pm_default = build_pipeline(None).expect("default pipeline should build");
-        // Just verify it was built without panic.
-        // We can test it by running on a trivial program.
+    fn test_build_pipeline_default() {
+        let pm = build_pipeline();
         let exit_insn = crate::insn::BpfInsn {
             code: crate::insn::BPF_JMP | crate::insn::BPF_EXIT,
             regs: 0,
@@ -1768,24 +1694,8 @@ processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 p
         };
         let mut prog = pass::BpfProgram::new(vec![exit_insn]);
         let ctx = pass::PassContext::test_default();
-        let result = pm_default.run(&mut prog, &ctx).unwrap();
-        // A single EXIT instruction should not trigger any transforms.
+        let result = pm.run(&mut prog, &ctx).unwrap();
         assert!(!result.program_changed);
-
-        // Custom pipeline with specific passes.
-        let custom_passes = vec!["wide_mem".to_string()];
-        let pm_custom =
-            build_pipeline(Some(custom_passes.as_slice())).expect("custom pipeline should build");
-        let mut prog2 = pass::BpfProgram::new(vec![exit_insn]);
-        let result2 = pm_custom.run(&mut prog2, &ctx).unwrap();
-        assert!(!result2.program_changed);
-    }
-
-    /// Test collect_pgo_data returns None when PGO is disabled.
-    #[test]
-    fn test_collect_pgo_data_none_when_disabled() {
-        let result = collect_pgo_data(1, &None);
-        assert!(result.is_none());
     }
 
     /// HIGH #3 continued: Integration test for try_apply_one with a real BPF program.
@@ -1806,7 +1716,7 @@ processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 p
 
         // Find a program to try applying to.
         for prog_id in bpf::iter_prog_ids().take(50) {
-            let result = try_apply_one(prog_id, &ctx, &None, &None, true, None);
+            let result = try_apply_one(prog_id, &ctx, true, None);
             match result {
                 Ok(opt_result) => {
                     // Verify the result structure is well-formed.

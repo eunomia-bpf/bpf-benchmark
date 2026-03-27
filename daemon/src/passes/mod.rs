@@ -58,8 +58,9 @@ pub struct PassRegistryEntry {
 /// `build_custom_pipeline()` iterate this array in order, guaranteeing
 /// consistent pass sequencing regardless of which passes are selected.
 ///
-/// `speculation_barrier` is excluded from the default pipeline but is available
-/// when explicitly requested via `--passes`.
+/// `speculation_barrier`, `dangerous_helper_firewall`, and `live_patch` are
+/// excluded from the default pipeline but remain available to explicit custom
+/// pipelines and tests.
 pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     PassRegistryEntry {
         name: "map_inline",
@@ -159,12 +160,15 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
 ];
 
 /// Returns whether a pass is included in the default pipeline.
-/// `speculation_barrier` is opt-in only.
+/// Security hardening passes are opt-in only.
 fn is_default_pass(name: &str) -> bool {
-    name != "speculation_barrier"
+    !matches!(
+        name,
+        "speculation_barrier" | "dangerous_helper_firewall" | "live_patch"
+    )
 }
 
-/// Generate the `--passes` help string dynamically from the registry.
+/// Generate the pass-list help string dynamically from the registry.
 pub fn available_passes_help() -> String {
     PASS_REGISTRY
         .iter()
@@ -230,8 +234,8 @@ fn register_standard_analyses(pm: &mut PassManager) {
 
 /// Build the default optimization pipeline.
 ///
-/// Includes all passes from `PASS_REGISTRY` except opt-in passes
-/// (currently `speculation_barrier`), in canonical order.
+/// Includes all passes from `PASS_REGISTRY` except opt-in passes, in canonical
+/// order.
 pub fn build_full_pipeline() -> PassManager {
     let mut pm = PassManager::new();
     register_standard_analyses(&mut pm);
@@ -500,9 +504,18 @@ mod tests {
     }
 
     #[test]
-    fn test_default_pipeline_ends_with_live_patch() {
+    fn test_default_pipeline_ends_with_branch_flip() {
         let pm = build_full_pipeline();
-        assert_eq!(pm.pass_names().last().copied(), Some("live_patch"));
+        assert_eq!(pm.pass_names().last().copied(), Some("branch_flip"));
+    }
+
+    #[test]
+    fn test_default_pipeline_excludes_security_passes() {
+        let pm = build_full_pipeline();
+
+        assert!(!pm.pass_names().contains(&"speculation_barrier"));
+        assert!(!pm.pass_names().contains(&"dangerous_helper_firewall"));
+        assert!(!pm.pass_names().contains(&"live_patch"));
     }
 
     #[test]

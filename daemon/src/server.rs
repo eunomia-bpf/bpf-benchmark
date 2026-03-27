@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
 
-use crate::commands::{self, PgoConfig};
+use crate::commands;
 use crate::invalidation::{MapInvalidationTracker, MapValueReader};
 use crate::{bpf, pass};
 
@@ -57,13 +57,11 @@ where
 pub(crate) fn cmd_serve(
     socket_path: &str,
     ctx: &pass::PassContext,
-    pgo_config: &Option<PgoConfig>,
     rollback_enabled: bool,
 ) -> Result<()> {
     use std::os::unix::net::UnixListener;
 
     register_signal_handlers();
-    let serve_default_pass_names: Option<Vec<String>> = None;
     let tracker = commands::new_invalidation_tracker();
     let mut last_invalidation_check = Instant::now();
 
@@ -80,14 +78,7 @@ pub(crate) fn cmd_serve(
         if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
             let tracker_for_apply = tracker.clone();
             let _ = process_invalidation_tick(&tracker, |prog_id| {
-                commands::try_apply_one(
-                    prog_id,
-                    ctx,
-                    &serve_default_pass_names,
-                    pgo_config,
-                    rollback_enabled,
-                    Some(&tracker_for_apply),
-                )?;
+                commands::try_apply_one(prog_id, ctx, rollback_enabled, Some(&tracker_for_apply))?;
                 Ok(())
             });
             last_invalidation_check = Instant::now();
@@ -95,7 +86,7 @@ pub(crate) fn cmd_serve(
 
         match listener.accept() {
             Ok((stream, _addr)) => {
-                let _ = handle_client(stream, ctx, pgo_config, rollback_enabled, &tracker);
+                let _ = handle_client(stream, ctx, rollback_enabled, &tracker);
             }
             Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
                 std::thread::sleep(Duration::from_millis(100));
@@ -115,7 +106,6 @@ pub(crate) fn cmd_serve(
 fn handle_client(
     stream: std::os::unix::net::UnixStream,
     ctx: &pass::PassContext,
-    pgo_config: &Option<PgoConfig>,
     rollback_enabled: bool,
     tracker: &commands::SharedInvalidationTracker,
 ) -> Result<()> {
@@ -131,7 +121,12 @@ fn handle_client(
         }
 
         let response = match serde_json::from_str::<serde_json::Value>(&line) {
-            Ok(req) => process_request(&req, ctx, pgo_config, rollback_enabled, tracker),
+            Ok(req) => process_request(
+                &req,
+                ctx,
+                rollback_enabled,
+                tracker,
+            ),
             Err(e) => {
                 serde_json::json!({"status": "error", "message": format!("invalid JSON: {}", e)})
             }
@@ -149,7 +144,6 @@ fn handle_client(
 fn process_request(
     req: &serde_json::Value,
     ctx: &pass::PassContext,
-    pgo_config: &Option<PgoConfig>,
     rollback_enabled: bool,
     tracker: &commands::SharedInvalidationTracker,
 ) -> serde_json::Value {
@@ -160,18 +154,7 @@ fn process_request(
                 Some(id) => id as u32,
                 None => return serde_json::json!({"status": "error", "message": "missing prog_id"}),
             };
-            let request_pass_names = match resolve_request_pass_names(req) {
-                Ok(names) => Some(names),
-                Err(message) => return serde_json::json!({"status": "error", "message": message}),
-            };
-            match commands::try_apply_one(
-                prog_id,
-                ctx,
-                &request_pass_names,
-                pgo_config,
-                rollback_enabled,
-                Some(tracker),
-            ) {
+            match commands::try_apply_one(prog_id, ctx, rollback_enabled, Some(tracker)) {
                 Ok(result) => {
                     // The optimize response already embeds the full structured
                     // result, including any deduplicated `inlined_map_entries`,
@@ -188,23 +171,12 @@ fn process_request(
             }
         }
         "optimize-all" => {
-            let request_pass_names = match resolve_request_pass_names(req) {
-                Ok(names) => Some(names),
-                Err(message) => return serde_json::json!({"status": "error", "message": message}),
-            };
             let mut applied = 0u32;
             let mut errors = 0u32;
             let mut total = 0u32;
             for prog_id in bpf::iter_prog_ids() {
                 total += 1;
-                match commands::try_apply_one(
-                    prog_id,
-                    ctx,
-                    &request_pass_names,
-                    pgo_config,
-                    rollback_enabled,
-                    Some(tracker),
-                ) {
+                match commands::try_apply_one(prog_id, ctx, rollback_enabled, Some(tracker)) {
                     Ok(result) => {
                         if result.summary.applied {
                             applied += 1;
@@ -224,41 +196,12 @@ fn process_request(
     }
 }
 
-fn parse_request_pass_names(
-    req: &serde_json::Value,
-) -> std::result::Result<Option<Vec<String>>, String> {
-    let Some(raw_passes) = req.get("passes") else {
-        return Ok(None);
-    };
-
-    let passes = raw_passes
-        .as_array()
-        .ok_or_else(|| "passes must be an array of strings".to_string())?;
-    let mut parsed = Vec::with_capacity(passes.len());
-    for pass in passes {
-        let name = pass
-            .as_str()
-            .ok_or_else(|| "passes must be an array of strings".to_string())?;
-        parsed.push(name.to_string());
-    }
-
-    Ok(Some(parsed))
-}
-
-fn resolve_request_pass_names(req: &serde_json::Value) -> std::result::Result<Vec<String>, String> {
-    let request_pass_names = parse_request_pass_names(req)?;
-
-    commands::pipeline_pass_names(request_pass_names.as_deref()).map_err(|e| format!("{:#}", e))
-}
-
 // ── Watch (polling daemon) ──────────────────────────────────────────
 
 pub(crate) fn cmd_watch(
     interval_secs: u64,
     once: bool,
     ctx: &pass::PassContext,
-    pass_names: &Option<Vec<String>>,
-    pgo_config: &Option<PgoConfig>,
     rollback_enabled: bool,
 ) -> Result<()> {
     register_signal_handlers();
@@ -290,14 +233,7 @@ pub(crate) fn cmd_watch(
         if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
             let tracker_for_apply = tracker.clone();
             let _ = process_invalidation_tick(&tracker, |prog_id| {
-                commands::try_apply_one(
-                    prog_id,
-                    ctx,
-                    pass_names,
-                    pgo_config,
-                    rollback_enabled,
-                    Some(&tracker_for_apply),
-                )?;
+                commands::try_apply_one(prog_id, ctx, rollback_enabled, Some(&tracker_for_apply))?;
                 Ok(())
             });
             last_invalidation_check = Instant::now();
@@ -325,14 +261,7 @@ pub(crate) fn cmd_watch(
         let mut applied = 0u32;
         let mut errors = 0u32;
         for prog_id in &ranked_ids {
-            match commands::try_apply_one(
-                *prog_id,
-                ctx,
-                pass_names,
-                pgo_config,
-                rollback_enabled,
-                Some(&tracker),
-            ) {
+            match commands::try_apply_one(*prog_id, ctx, rollback_enabled, Some(&tracker)) {
                 Ok(result) => {
                     if result.summary.applied {
                         optimized.insert(*prog_id);
@@ -380,8 +309,6 @@ pub(crate) fn cmd_watch(
                     commands::try_apply_one(
                         prog_id,
                         ctx,
-                        pass_names,
-                        pgo_config,
                         rollback_enabled,
                         Some(&tracker_for_apply),
                     )?;
@@ -480,69 +407,4 @@ mod tests {
         );
     }
 
-    #[test]
-    fn parse_request_pass_names_accepts_string_lists() {
-        let req = serde_json::json!({
-            "cmd": "optimize",
-            "prog_id": 123,
-            "passes": ["wide_mem", "const_prop", "dce"],
-        });
-
-        assert_eq!(
-            parse_request_pass_names(&req).expect("passes should parse"),
-            Some(vec![
-                "wide_mem".to_string(),
-                "const_prop".to_string(),
-                "dce".to_string(),
-            ])
-        );
-    }
-
-    #[test]
-    fn resolve_request_pass_names_without_field_uses_full_pipeline() {
-        let req = serde_json::json!({
-            "cmd": "optimize",
-            "prog_id": 123,
-        });
-
-        let resolved =
-            resolve_request_pass_names(&req).expect("missing passes should use defaults");
-        let full_pipeline =
-            commands::pipeline_pass_names(None).expect("full pipeline names should resolve");
-
-        assert_eq!(resolved, full_pipeline);
-    }
-
-    #[test]
-    fn resolve_request_pass_names_prefers_request_override() {
-        let req = serde_json::json!({
-            "cmd": "optimize",
-            "prog_id": 123,
-            "passes": ["wide_mem", "const_prop", "map_inline"],
-        });
-
-        let resolved =
-            resolve_request_pass_names(&req).expect("request passes should resolve successfully");
-
-        assert_eq!(resolved, vec!["map_inline", "const_prop", "wide_mem"]);
-    }
-
-    #[test]
-    fn process_request_rejects_invalid_pass_name() {
-        let req = serde_json::json!({
-            "cmd": "optimize",
-            "prog_id": 123,
-            "passes": ["wide_mem", "nope"],
-        });
-        let ctx = pass::PassContext::test_default();
-        let tracker = commands::new_invalidation_tracker();
-
-        let response = process_request(&req, &ctx, &None, true, &tracker);
-
-        assert_eq!(response["status"], "error");
-        assert!(response["message"]
-            .as_str()
-            .unwrap_or_default()
-            .contains("unknown pass name(s): nope"));
-    }
 }

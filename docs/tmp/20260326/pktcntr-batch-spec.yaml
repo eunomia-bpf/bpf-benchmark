@@ -1,0 +1,20 @@
+schema_version: 1
+scheduler:
+  max_parallel_jobs: 1
+retain_daemon_debug: false
+jobs:
+- id: pktcntr-rejit-compile
+  type: test_run
+  execution: parallel
+  runtime: kernel-rejit
+  program: /home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/xdp_pktcntr.bpf.o
+  program_name: pktcntr
+  io_mode: context
+  repeat: 1
+  compile_only: true
+  btf_custom_path: /home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/vmlinux
+  daemon_socket: /tmp/map-inline.sock
+  passes:
+  - map_inline
+  prepared_key: pktcntr-prepared
+  prepared_group: pktcntr

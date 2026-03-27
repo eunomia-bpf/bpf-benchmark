@@ -19,22 +19,12 @@ mod server;
 mod test_utils;
 mod verifier_log;
 
-use std::time::Duration;
-
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-
-use commands::PgoConfig;
 
 #[derive(Parser)]
 #[command(name = "bpfrejit-daemon", version, about = "BpfReJIT userspace daemon")]
 struct Cli {
-    /// Comma-separated list of passes to run (default: all optimization passes).
-    /// Use --list-passes to see available passes.
-    /// Example: --passes speculation_barrier
-    #[arg(long, value_delimiter = ',')]
-    passes: Option<Vec<String>>,
-
     /// List all available passes and exit.
     #[arg(long)]
     list_passes: bool,
@@ -46,21 +36,6 @@ struct Cli {
     /// Use this flag to disable that behavior (fail immediately on rejection).
     #[arg(long)]
     no_rollback: bool,
-
-    /// Enable PGO (Profile-Guided Optimization).
-    ///
-    /// When set, the daemon polls program runtime stats before optimization
-    /// to collect profiling data. This enables PGO-guided passes like
-    /// branch_flip to make data-driven decisions.
-    #[arg(long)]
-    pgo: bool,
-
-    /// PGO profiling observation interval in milliseconds.
-    ///
-    /// How long to observe program runtime stats before making optimization
-    /// decisions. Only used when --pgo is enabled.
-    #[arg(long, default_value_t = 500)]
-    pgo_interval_ms: u64,
 
     #[command(subcommand)]
     command: Command,
@@ -156,61 +131,21 @@ fn main() -> Result<()> {
     // Keep descriptor BTF FDs alive for the daemon's lifetime.
     let _btf_fds = discovery.btf_fds;
 
-    // Determine which passes to use.
-    let pass_names = cli.passes;
-    let validate_pass_names = || -> Result<()> {
-        if let Some(pass_names) = pass_names.as_deref() {
-            passes::validate_pass_names(pass_names)?;
-        }
-        Ok(())
-    };
     let rollback_enabled = !cli.no_rollback;
-    let pgo_config = if cli.pgo {
-        Some(PgoConfig {
-            interval: Duration::from_millis(cli.pgo_interval_ms),
-        })
-    } else {
-        None
-    };
 
     match cli.command {
-        Command::Enumerate => {
-            validate_pass_names()?;
-            commands::cmd_enumerate(&ctx, &pass_names)
-        }
-        Command::Rewrite { prog_id } => {
-            validate_pass_names()?;
-            commands::cmd_rewrite(prog_id, &ctx, &pass_names)
-        }
-        Command::Apply { prog_id } => {
-            validate_pass_names()?;
-            commands::cmd_apply(prog_id, &ctx, &pass_names, &pgo_config, rollback_enabled)
-        }
-        Command::ApplyAll => {
-            validate_pass_names()?;
-            commands::cmd_apply_all(&ctx, &pass_names, &pgo_config, rollback_enabled)
-        }
-        Command::Serve { socket } => {
-            if pass_names.is_some() {
-                eprintln!("serve: ignoring --passes; use request \"passes\" instead");
-            }
-            server::cmd_serve(&socket, &ctx, &pgo_config, rollback_enabled)
-        }
+        Command::Enumerate => commands::cmd_enumerate(&ctx),
+        Command::Rewrite { prog_id } => commands::cmd_rewrite(prog_id, &ctx),
+        Command::Apply { prog_id } => commands::cmd_apply(prog_id, &ctx, rollback_enabled),
+        Command::ApplyAll => commands::cmd_apply_all(&ctx, rollback_enabled),
+        Command::Serve { socket } => server::cmd_serve(&socket, &ctx, rollback_enabled),
         Command::Profile {
             prog_id,
             interval_ms,
             samples,
         } => commands::cmd_profile(prog_id, interval_ms, samples),
         Command::Watch { interval, once } => {
-            validate_pass_names()?;
-            server::cmd_watch(
-                interval,
-                once,
-                &ctx,
-                &pass_names,
-                &pgo_config,
-                rollback_enabled,
-            )
+            server::cmd_watch(interval, once, &ctx, rollback_enabled)
         }
     }
 }

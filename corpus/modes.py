@@ -156,12 +156,6 @@ def _deep_merge(base: Mapping[str, Any], override: Mapping[str, Any]) -> dict[st
     return merged
 
 
-def parse_pass_csv(value: str | None) -> list[str] | None:
-    if value is None:
-        return None
-    return [item.strip() for item in value.split(",") if item.strip()]
-
-
 def _fallback_benchmark_config() -> dict[str, Any]:
     return {
         "defaults": {
@@ -216,25 +210,6 @@ def load_benchmark_config(profile: str | None = None) -> dict[str, Any]:
     return effective
 
 
-def resolve_requested_passes(
-    benchmark_config: Mapping[str, Any],
-    cli_passes: str | None,
-) -> list[str]:
-    cli_pass_list = parse_pass_csv(cli_passes)
-    if cli_pass_list is not None:
-        return cli_pass_list
-
-    passes_config = _mapping_dict(benchmark_config.get("passes"), field_name="passes")
-    active_list = normalize_passes(passes_config.get("active_list"))
-    if active_list:
-        return active_list
-
-    active_name = str(passes_config.get("active") or "").strip()
-    if not active_name:
-        return []
-    return normalize_passes(passes_config.get(active_name))
-
-
 def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     argv = list(sys.argv[1:] if argv is None else argv)
     pre_parser = argparse.ArgumentParser(add_help=False)
@@ -258,10 +233,6 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Macro corpus YAML manifest used to select the corpus targets.",
     )
     parser.add_argument("--profile", default=benchmark_config.get("profile"), help=profile_help)
-    parser.add_argument(
-        "--passes",
-        help="Comma-separated daemon pass list; overrides benchmark_config.yaml pass selection.",
-    )
     add_output_json_argument(parser, benchmark_config["output_json"])
     add_output_md_argument(parser, benchmark_config["output_md"])
     add_runner_argument(parser, DEFAULT_RUNNER, help_text="Path to micro_exec.")
@@ -327,7 +298,6 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     args = parser.parse_args(argv)
     args.benchmark_config = load_benchmark_config(args.profile)
-    args.selected_passes = resolve_requested_passes(args.benchmark_config, args.passes)
     args.default_output_json = str(args.benchmark_config["output_json"])
     args.default_output_md = str(args.benchmark_config["output_md"])
     return args
@@ -578,7 +548,7 @@ def start_daemon_server(daemon: Path, daemon_socket: str) -> subprocess.Popen[st
     socket_path = Path(daemon_socket)
     socket_path.unlink(missing_ok=True)
     daemon_proc: subprocess.Popen[str] = subprocess.Popen(
-        [str(daemon), "--pgo", "serve", "--socket", daemon_socket],
+        [str(daemon), "serve", "--socket", daemon_socket],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         text=True,
@@ -733,7 +703,6 @@ def build_test_run_batch_job(
     btf_custom_path: Path | None,
     compile_only: bool,
     daemon_socket: str | None = None,
-    passes: list[str] | None = None,
     prepared_key: str | None = None,
     prepared_ref: str | None = None,
     prepared_group: str | None = None,
@@ -762,8 +731,6 @@ def build_test_run_batch_job(
         job["btf_custom_path"] = str(btf_custom_path)
     if daemon_socket is not None:
         job["daemon_socket"] = daemon_socket
-    if passes is not None:
-        job["passes"] = list(passes)
     if prepared_key is not None:
         job["prepared_key"] = prepared_key
     if prepared_ref is not None:
@@ -822,7 +789,6 @@ def build_target_batch_plan(
     enable_recompile: bool,
     enable_exec: bool,
     daemon_socket: str | None,
-    passes: list[str],
 ) -> tuple[dict[str, Any], list[dict[str, str]]]:
     jobs: list[dict[str, Any]] = []
     job_refs: list[dict[str, str]] = []
@@ -964,7 +930,6 @@ def build_target_batch_plan(
                         btf_custom_path=btf_custom_path,
                         compile_only=True,
                         daemon_socket=daemon_socket,
-                        passes=passes,
                         prepared_key=(
                             entry["rejit_prepared_key"]
                             if enable_exec and target.get("can_test_run")
@@ -998,7 +963,6 @@ def build_target_batch_plan(
                             btf_custom_path=btf_custom_path,
                             compile_only=False,
                             daemon_socket=daemon_socket,
-                            passes=passes,
                             prepared_ref=entry["rejit_prepared_key"],
                             prepared_group=rejit_group,
                         )
@@ -1018,7 +982,6 @@ def build_target_batch_plan(
                             btf_custom_path=btf_custom_path,
                             compile_only=False,
                             daemon_socket=daemon_socket,
-                            passes=passes,
                         )
                     )
 
@@ -1094,7 +1057,6 @@ def run_targets_locally_batch(
     enable_exec: bool,
     skip_families: list[str],
     blind_apply: bool,
-    passes: list[str],
     daemon_socket: str | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     active_daemon_socket = daemon_socket
@@ -1111,7 +1073,6 @@ def run_targets_locally_batch(
             enable_recompile=enable_recompile,
             enable_exec=enable_exec,
             daemon_socket=active_daemon_socket,
-            passes=passes,
         )
         batch_result = run_batch_runner(
             runner,
@@ -1241,7 +1202,6 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
                     timeout_seconds=args.timeout,
                     execution_mode="vm",
                     btf_custom_path=btf_custom_path,
-                    passes=list(args.selected_passes),
                     daemon_socket=active_daemon_socket,
                 )
                 built_records = []
@@ -1522,7 +1482,6 @@ def build_object_batch_plan_v2(
     repeat: int,
     btf_custom_path: Path | None,
     daemon_socket: str,
-    passes: list[str],
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     jobs: list[dict[str, Any]] = []
     object_refs: list[dict[str, Any]] = []
@@ -1624,7 +1583,6 @@ def build_object_batch_plan_v2(
                 btf_custom_path=btf_custom_path,
                 compile_only=True,
                 daemon_socket=daemon_socket,
-                passes=passes,
                 prepared_key=rejit_prepared_key,
                 prepared_group=rejit_group,
                 fixture_path=fixture_path,
@@ -1648,7 +1606,6 @@ def build_object_batch_plan_v2(
                     btf_custom_path=btf_custom_path,
                     compile_only=True,
                     daemon_socket=daemon_socket,
-                    passes=passes,
                     prepared_ref=rejit_prepared_key,
                     prepared_group=rejit_group,
                     release_prepared=False,
@@ -1670,7 +1627,6 @@ def build_object_batch_plan_v2(
                         btf_custom_path=btf_custom_path,
                         compile_only=False,
                         daemon_socket=daemon_socket,
-                        passes=passes,
                         prepared_ref=rejit_prepared_key,
                         prepared_group=rejit_group,
                         release_prepared=False,
@@ -1800,7 +1756,6 @@ def run_objects_locally_batch(
     timeout_seconds: int,
     execution_mode: str,
     btf_custom_path: Path | None,
-    passes: list[str],
     daemon_socket: str | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
     active_daemon_socket = daemon_socket
@@ -1831,7 +1786,6 @@ def run_objects_locally_batch(
             repeat=repeat,
             btf_custom_path=btf_custom_path,
             daemon_socket=active_daemon_socket,
-            passes=passes,
         )
         batch_result = run_batch_runner(
             runner,
@@ -2183,8 +2137,6 @@ def run_targets_in_guest_batch(
     vng_binary: str,
     skip_families: list[str],
     blind_apply: bool,
-    passes: list[str],
-    passes_cli_value: str | None,
     on_guest_info: Callable[[dict[str, Any]], None] | None = None,
     on_record: Callable[[int, dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
@@ -2233,11 +2185,6 @@ def run_targets_in_guest_batch(
             "--timeout",
             str(timeout_seconds),
         ]
-        guest_passes_value = passes_cli_value
-        if guest_passes_value is None and passes:
-            guest_passes_value = ",".join(passes)
-        if guest_passes_value is not None:
-            guest_argv.extend(["--passes", guest_passes_value])
         if skip_families:
             guest_argv.extend(["--skip-families", ",".join(skip_families)])
         if blind_apply:
@@ -2518,7 +2465,6 @@ def build_markdown(data: dict[str, Any]) -> str:
         f"- Benchmark profile: `{data.get('benchmark_profile') or 'default'}`",
         f"- Benchmark config: `{data.get('benchmark_config') or 'fallback-defaults'}`",
         f"- Repeat: {data['repeat']}",
-        f"- Requested passes: `{', '.join(data.get('requested_passes') or []) or 'daemon default pipeline'}`",
         f"- Skip families: `{', '.join(data.get('skip_families') or []) or 'none'}`",
         f"- Target programs: {summary['targets_attempted']}",
         f"- Compile pairs: {summary['compile_pairs']}",
@@ -2655,7 +2601,6 @@ def packet_main(argv: list[str] | None = None) -> int:
     args = parse_packet_args(argv)
     require_minimum(args.repeat, 1, "--repeat")
     skip_families = normalize_skip_families(args.skip_families)
-    requested_passes = list(args.selected_passes)
     benchmark_config_path = args.benchmark_config.get("config_path")
     if skip_families and not args.blind_apply:
         raise SystemExit("--skip-families requires --blind-apply")
@@ -2710,7 +2655,6 @@ def packet_main(argv: list[str] | None = None) -> int:
     print(
         "vm-corpus selection "
         f"profile={args.profile or 'default'} "
-        f"passes={','.join(requested_passes) or 'daemon-default'} "
         f"manifest_objects={yaml_summary['total_objects']} "
         f"manifest_programs={yaml_summary['total_programs']} "
         f"selected_objects={yaml_summary['selected_objects']} "
@@ -2734,7 +2678,6 @@ def packet_main(argv: list[str] | None = None) -> int:
         "btf_custom_path": str(btf_custom_path) if btf_custom_path is not None else None,
         "vng_binary": args.vng,
         "repeat": args.repeat,
-        "requested_passes": requested_passes,
         "timeout_seconds": args.timeout,
         "guest_smoke": guest_smoke,
         "skip_families": skip_families,
@@ -2787,7 +2730,6 @@ def packet_main(argv: list[str] | None = None) -> int:
                 "btf_custom_path": repo_relative_path(btf_custom_path) if btf_custom_path is not None else None,
                 "vng_binary": args.vng,
                 "repeat": args.repeat,
-                "requested_passes": requested_passes,
                 "timeout_seconds": args.timeout,
                 "skip_families": skip_families,
                 "blind_apply": bool(args.blind_apply),
@@ -2866,8 +2808,6 @@ def packet_main(argv: list[str] | None = None) -> int:
             vng_binary=args.vng,
             skip_families=skip_families,
             blind_apply=args.blind_apply,
-            passes=requested_passes,
-            passes_cli_value=args.passes,
             on_guest_info=handle_guest_info,
             on_record=handle_guest_record,
         )

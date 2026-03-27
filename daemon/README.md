@@ -167,7 +167,8 @@ profiler data, the pass skips all sites. No heuristic fallback.
 Inserts real `bpf_speculation_barrier()` kfunc calls after conditional
 branches. The kernel JIT lowers the kfunc inline to the architecture
 barrier instruction (`LFENCE` on x86, `DSB SY` + `ISB` on arm64). This
-pass is NOT in the default pipeline and must be explicitly enabled.
+pass is NOT in the default pipeline and is only available in explicit
+custom pipelines.
 
 ## kfunc Discovery
 
@@ -200,7 +201,7 @@ injected programmatically (e.g., from instrumentation or sampling).
 ## CLI Reference
 
 ```
-bpfrejit-daemon [--passes <pass1,pass2,...>] <COMMAND>
+bpfrejit-daemon <COMMAND>
 
 Commands:
   enumerate                List all live BPF programs with optimization sites

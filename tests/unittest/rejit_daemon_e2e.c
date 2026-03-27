@@ -262,8 +262,6 @@ static int run_daemon_apply_all(char *reason, size_t reason_sz)
 	char status_buf[32];
 	char *const argv[] = {
 		g_daemon_path,
-		"--passes",
-		"map_inline",
 		"apply-all",
 		NULL,
 	};

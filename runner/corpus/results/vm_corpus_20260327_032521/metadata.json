@@ -692,14 +692,42 @@
   },
   "daemon_binary": "daemon/target/release/bpfrejit-daemon",
   "details_dir": "details",
+  "error_message": "vm guest batch failed: Script done on 2026-03-26 20:34:29-07:00 [COMMAND_EXIT_CODE=\"255\"] (exit=255)",
   "generated_at": "2026-03-27T03:25:21.351409+00:00",
   "guest_smoke": {
-    "invocation": null,
-    "payload": null
+    "invocation": {
+      "command": [
+        "/home/yunwei37/workspace/.venv/bin/python3",
+        "/home/yunwei37/workspace/bpf-benchmark/runner/scripts/run_vm_shell.py",
+        "--action",
+        "vm-corpus",
+        "--kernel-image",
+        "/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/arch/x86/boot/bzImage",
+        "--timeout",
+        "458040",
+        "--command",
+        "/home/yunwei37/workspace/bpf-benchmark/module/load_all.sh 2>/dev/null || true; python3 corpus/driver.py --guest-target-json /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260326/corpus-rejit-batch/corpus-rejit-vm-batch-7tlioqox.json --guest-result-json /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260326/corpus-rejit-batch/corpus-rejit-vm-batch-result-2btetodu.json --runner /home/yunwei37/workspace/bpf-benchmark/runner/build/micro_exec --daemon /home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon --btf-custom-path /home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/vmlinux --repeat 10 --timeout 240 --passes map_inline,const_prop,dce,wide_mem,rotate,cond_select,extract,endian_fusion,bulk_memory,bounds_check_merge,skb_load_bytes,branch_flip"
+      ],
+      "duration_seconds": 548.145594040001,
+      "error": "Script done on 2026-03-26 20:34:29-07:00 [COMMAND_EXIT_CODE=\"255\"] (exit=255)",
+      "ok": false,
+      "returncode": 255,
+      "stderr_tail": "",
+      "stdout_tail": "Loaded bpf_barrier\nLoaded bpf_bulk_memory\nLoaded bpf_endian\nLoaded bpf_extract\nLoaded bpf_rotate\nLoaded bpf_select\nkinsn modules: 6/6 loaded\nScript started on 2026-03-26 20:34:20-07:00 [COMMAND=\"/home/yunwei37/workspace/bpf-benchmark/runner/scripts/vng-wrapper.sh /tmp/vng-wrapper.ilYnuy\" TERM=\"xterm-256color\" TTY=\"/dev/pts/4\" COLUMNS=\"-1\" LINES=\"-1\"]\nLoaded bpf_barrier\nLoaded bpf_bulk_memory\nLoaded bpf_endian\nLoaded bpf_extract\nLoaded bpf_rotate\nLoaded bpf_select\nkinsn modules: 6/6 loaded\nScript done on 2026-03-26 20:34:29-07:00 [COMMAND_EXIT_CODE=\"255\"]",
+      "timed_out": false
+    },
+    "payload": {
+      "btf_exists": true,
+      "cwd": "/home/yunwei37/workspace/bpf-benchmark",
+      "kernel_release": "7.0.0-rc2+",
+      "kind": "guest_info",
+      "runner_exists": true,
+      "uid": 0
+    }
   },
   "kernel_image": "vendor/linux-framework/arch/x86/boot/bzImage",
   "kernel_tree": "vendor/linux-framework",
-  "last_updated_at": "2026-03-27T03:25:21.798148+00:00",
+  "last_updated_at": "2026-03-27T03:34:29.991315+00:00",
   "macro_corpus_yaml": "corpus/config/macro_corpus.yaml",
   "mode": "packet",
   "output_hint_json": "runner/corpus/results/vm_corpus.json",
@@ -709,7 +737,8 @@
     "completed_programs": 0,
     "current_target": null,
     "current_target_index": null,
-    "status": "running",
+    "error_message": "vm guest batch failed: Script done on 2026-03-26 20:34:29-07:00 [COMMAND_EXIT_CODE=\"255\"] (exit=255)",
+    "status": "error",
     "total_objects": 477,
     "total_programs": 2019
   },
@@ -732,7 +761,7 @@
   "runner_binary": "runner/build/micro_exec",
   "skip_families": [],
   "started_at": "2026-03-27T03:25:21.351409+00:00",
-  "status": "running",
+  "status": "error",
   "suite": "corpus",
   "summary": {
     "applied_programs": 0,

@@ -1358,7 +1358,8 @@ static_verify_program_record execute_static_verify_program(
     record.insn_count_before = static_cast<int64_t>(before_info.xlated_prog_len / sizeof(bpf_insn));
     record.code_size_before = static_cast<int64_t>(before_info.jited_prog_len);
 
-    const auto daemon_response = daemon_socket_optimize_batch(job.daemon_socket, before_info.id);
+    const auto daemon_response =
+        daemon_socket_optimize_batch(job.daemon_socket, before_info.id);
     record.daemon_status = daemon_response.status;
     record.daemon_message = daemon_response.message;
     record.daemon_error_message = daemon_response.error_message;

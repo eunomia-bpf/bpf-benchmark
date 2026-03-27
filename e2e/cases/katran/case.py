@@ -37,7 +37,7 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.corpus import materialize_katran_packet  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
-from runner.libs.rejit import apply_daemon_rejit, benchmark_performance_passes, scan_programs  # noqa: E402
+from runner.libs.rejit import apply_daemon_rejit, scan_programs  # noqa: E402
 
 from e2e.case_common import (  # noqa: E402
     capture_map_state,
@@ -2141,7 +2141,6 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     )
     runner_binary = Path(args.runner).resolve()
     daemon_binary = Path(args.daemon).resolve()
-    performance_passes = benchmark_performance_passes()
     katran_object = Path(args.katran_object).resolve()
     setup_script = Path(args.setup_script).resolve()
 
@@ -2239,16 +2238,8 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                             map_capture = {
                                 "cycle_index": cycle_index,
                             }
-                        scan_results = scan_programs(
-                            prog_ids,
-                            daemon_binary,
-                            pass_names=performance_passes,
-                        )
-                        rejit_result = apply_daemon_rejit(
-                            daemon_binary,
-                            prog_ids,
-                            pass_names=performance_passes,
-                        )
+                        scan_results = scan_programs(prog_ids, daemon_binary)
+                        rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
                         if args.capture_maps and map_capture is not None and "result" not in map_capture:
                             optimize_results = (
                                 rejit_result.get("per_program")
