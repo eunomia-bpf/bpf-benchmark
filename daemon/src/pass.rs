@@ -596,6 +596,8 @@ pub struct PassManager {
     analyses: AnalysisRegistry,
 }
 
+const CONST_PROP_DCE_FIXED_POINT_MAX_ITERS: usize = 5;
+
 impl PassManager {
     pub fn new() -> Self {
         Self {
@@ -652,72 +654,55 @@ impl PassManager {
         let mut total_sites = 0usize;
         let mut any_changed = false;
         let mut debug_traces = Vec::new();
+        let mut pass_idx = 0usize;
 
-        for pass in &self.passes {
-            // Check whether policy allows this pass.
-            if !ctx.policy.disabled_passes.is_empty()
-                && ctx
-                    .policy
-                    .disabled_passes
-                    .contains(&pass.name().to_string())
-            {
-                continue;
-            }
-            if !ctx.policy.enabled_passes.is_empty()
-                && !ctx.policy.enabled_passes.contains(&pass.name().to_string())
-            {
+        while pass_idx < self.passes.len() {
+            let pass = self.passes[pass_idx].as_ref();
+            if !pass_allowed(pass, ctx) {
+                pass_idx += 1;
                 continue;
             }
 
-            // Ensure required analyses are computed (skip if already cached).
-            for analysis_name in pass.required_analyses() {
-                if let Some(analysis) = self.analyses.registry.get(analysis_name) {
-                    // The analysis cache's get() method handles caching internally,
-                    // but run_and_cache is used for type-erased access. It's a no-op
-                    // if the result is already cached.
-                    analysis.run_and_cache(program, &mut cache);
+            let has_fixed_point_pair = pass.name() == "const_prop"
+                && pass_idx + 1 < self.passes.len()
+                && self.passes[pass_idx + 1].name() == "dce"
+                && pass_allowed(self.passes[pass_idx + 1].as_ref(), ctx);
+
+            if has_fixed_point_pair {
+                for _ in 0..CONST_PROP_DCE_FIXED_POINT_MAX_ITERS {
+                    let const_result =
+                        self.run_single_pass(pass, program, &mut cache, ctx, &mut debug_traces)?;
+                    total_sites += const_result.sites_applied;
+                    any_changed |= const_result.changed;
+
+                    let dce_result = self.run_single_pass(
+                        self.passes[pass_idx + 1].as_ref(),
+                        program,
+                        &mut cache,
+                        ctx,
+                        &mut debug_traces,
+                    )?;
+                    total_sites += dce_result.sites_applied;
+                    any_changed |= dce_result.changed;
+
+                    let pair_changed = const_result.changed || dce_result.changed;
+                    pass_results.push(const_result);
+                    pass_results.push(dce_result);
+
+                    if !pair_changed {
+                        break;
+                    }
                 }
+
+                pass_idx += 2;
+                continue;
             }
 
-            // Record insn count before this pass runs.
-            let insns_before = program.insns.len();
-            // Capture compact bytecode dump before the pass runs (always enabled
-            // for debug logging -- no flag needed).
-            let before_dump = dump_bytecode_compact(&program.insns);
-
-            // Run the pass.
-            let mut result = pass.run(program, &mut cache, ctx)?;
-
-            // Fill in insns_before/insns_after from the actual program state.
-            result.insns_before = insns_before;
-            result.insns_after = program.insns.len();
-
-            if result.changed {
-                debug_traces.push(PassDebugTrace {
-                    pass_name: result.pass_name.clone(),
-                    changed: true,
-                    bytecode_before: Some(before_dump),
-                    bytecode_after: Some(dump_bytecode_compact(&program.insns)),
-                });
-            } else {
-                debug_traces.push(PassDebugTrace {
-                    pass_name: result.pass_name.clone(),
-                    changed: false,
-                    bytecode_before: None,
-                    bytecode_after: None,
-                });
-            }
-
-            if result.changed {
-                // Transform modified the program — invalidate all cached analyses.
-                cache.invalidate_all();
-                // Synchronize annotations.
-                program.sync_annotations();
-                any_changed = true;
-            }
-
+            let result = self.run_single_pass(pass, program, &mut cache, ctx, &mut debug_traces)?;
             total_sites += result.sites_applied;
+            any_changed |= result.changed;
             pass_results.push(result);
+            pass_idx += 1;
         }
 
         // Build attribution from pass results. Each pass that applied any sites
@@ -761,6 +746,61 @@ impl PassManager {
         }
         self.run(program, ctx)
     }
+
+    fn run_single_pass(
+        &self,
+        pass: &dyn BpfPass,
+        program: &mut BpfProgram,
+        cache: &mut AnalysisCache,
+        ctx: &PassContext,
+        debug_traces: &mut Vec<PassDebugTrace>,
+    ) -> anyhow::Result<PassResult> {
+        for analysis_name in pass.required_analyses() {
+            if let Some(analysis) = self.analyses.registry.get(analysis_name) {
+                analysis.run_and_cache(program, cache);
+            }
+        }
+
+        let insns_before = program.insns.len();
+        let before_dump = dump_bytecode_compact(&program.insns);
+        let mut result = pass.run(program, cache, ctx)?;
+        result.insns_before = insns_before;
+        result.insns_after = program.insns.len();
+
+        if result.changed {
+            debug_traces.push(PassDebugTrace {
+                pass_name: result.pass_name.clone(),
+                changed: true,
+                bytecode_before: Some(before_dump),
+                bytecode_after: Some(dump_bytecode_compact(&program.insns)),
+            });
+            cache.invalidate_all();
+            program.sync_annotations();
+        } else {
+            debug_traces.push(PassDebugTrace {
+                pass_name: result.pass_name.clone(),
+                changed: false,
+                bytecode_before: None,
+                bytecode_after: None,
+            });
+        }
+
+        Ok(result)
+    }
+}
+
+fn pass_allowed(pass: &dyn BpfPass, ctx: &PassContext) -> bool {
+    if !ctx.policy.disabled_passes.is_empty()
+        && ctx
+            .policy
+            .disabled_passes
+            .contains(&pass.name().to_string())
+    {
+        return false;
+    }
+
+    ctx.policy.enabled_passes.is_empty()
+        || ctx.policy.enabled_passes.contains(&pass.name().to_string())
 }
 
 // ── Helper: default PassContext for testing ──────────────────────────
@@ -936,6 +976,65 @@ mod tests {
                 sites_applied: 0,
                 sites_skipped: vec![],
                 diagnostics: vec![format!("insn_count={}", count)],
+                ..Default::default()
+            })
+        }
+    }
+
+    struct TestConstPropFixedPointPass;
+
+    impl BpfPass for TestConstPropFixedPointPass {
+        fn name(&self) -> &str {
+            "const_prop"
+        }
+
+        fn run(
+            &self,
+            program: &mut BpfProgram,
+            _analyses: &mut AnalysisCache,
+            _ctx: &PassContext,
+        ) -> anyhow::Result<PassResult> {
+            let changed =
+                matches!(program.insns.first(), Some(insn) if *insn == BpfInsn::mov64_reg(0, 1));
+            if changed {
+                program.insns[0] = BpfInsn::mov64_imm(0, 7);
+            }
+
+            Ok(PassResult {
+                pass_name: self.name().into(),
+                changed,
+                sites_applied: usize::from(changed),
+                sites_skipped: vec![],
+                diagnostics: vec![],
+                ..Default::default()
+            })
+        }
+    }
+
+    struct TestDceFixedPointPass;
+
+    impl BpfPass for TestDceFixedPointPass {
+        fn name(&self) -> &str {
+            "dce"
+        }
+
+        fn run(
+            &self,
+            program: &mut BpfProgram,
+            _analyses: &mut AnalysisCache,
+            _ctx: &PassContext,
+        ) -> anyhow::Result<PassResult> {
+            let changed = matches!(program.insns.first(), Some(insn) if *insn == BpfInsn::nop());
+            if changed {
+                program.insns.remove(0);
+            }
+
+            Ok(PassResult {
+                pass_name: self.name().into(),
+                changed,
+                sites_applied: usize::from(changed),
+                sites_skipped: vec![],
+                diagnostics: vec![],
                 ..Default::default()
             })
         }
@@ -1184,6 +1283,39 @@ mod tests {
         assert!(result.pass_results[1].changed);
         // Second count_reporter should see 3 instructions (cache was invalidated).
         assert_eq!(result.pass_results[2].diagnostics, vec!["insn_count=3"]);
+    }
+
+    #[test]
+    fn test_pass_manager_retries_const_prop_and_dce_to_fixed_point() {
+        let mut pm = PassManager::new();
+        pm.add_pass(TestConstPropFixedPointPass);
+        pm.add_pass(TestDceFixedPointPass);
+
+        let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::mov64_reg(0, 1), exit_insn()]);
+        let ctx = PassContext::test_default();
+
+        let result = pm.run(&mut prog, &ctx).unwrap();
+
+        assert_eq!(
+            result
+                .pass_results
+                .iter()
+                .map(|pr| pr.pass_name.as_str())
+                .collect::<Vec<_>>(),
+            vec![
+                "const_prop",
+                "dce",
+                "const_prop",
+                "dce",
+                "const_prop",
+                "dce"
+            ]
+        );
+        assert_eq!(prog.insns, vec![BpfInsn::mov64_imm(0, 7), exit_insn()]);
+        assert!(result.pass_results[1].changed);
+        assert!(result.pass_results[2].changed);
+        assert!(!result.pass_results[4].changed);
+        assert!(!result.pass_results[5].changed);
     }
 
     #[test]

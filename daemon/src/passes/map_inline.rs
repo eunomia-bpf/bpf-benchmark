@@ -102,10 +102,8 @@ pub fn try_extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Result<Con
     let stack_off = resolve_stack_pointer_to_stack(insns, call_pc, 2, bounds)?;
     let (store_pc, source_imm_pc, width, value) =
         find_constant_stack_store(insns, call_pc, bounds, stack_off)?;
-    let removable_setup =
-        find_r2_stack_pointer_setup_simple(insns, call_pc, bounds).filter(|(_, _, off)| {
-            *off == stack_off
-        });
+    let removable_setup = find_r2_stack_pointer_setup_simple(insns, call_pc, bounds)
+        .filter(|(_, _, off)| *off == stack_off);
 
     Ok(ConstantKey {
         stack_off,
@@ -565,11 +563,16 @@ fn read_scalar_from_value(value: &[u8], offset: i16, size: u8) -> Option<u64> {
 }
 
 fn emit_constant_load(dst_reg: u8, value: u64, size: u8) -> Vec<BpfInsn> {
-    if size == BPF_DW || value > i32::MAX as u64 {
-        return emit_ldimm64(dst_reg, value);
+    let signed_value = value as i64;
+    if size == BPF_DW && signed_value >= i32::MIN as i64 && signed_value <= i32::MAX as i64 {
+        return vec![BpfInsn::mov64_imm(dst_reg, signed_value as i32)];
     }
 
-    vec![BpfInsn::mov64_imm(dst_reg, value as i32)]
+    if size != BPF_DW && value <= i32::MAX as u64 {
+        return vec![BpfInsn::mov64_imm(dst_reg, value as i32)];
+    }
+
+    emit_ldimm64(dst_reg, value)
 }
 
 fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
@@ -853,7 +856,9 @@ fn prev_real_pc_bounded(insns: &[BpfInsn], pc: usize, lower_bound: usize) -> Opt
         prev = Some(cursor);
         cursor += insn_width(&insns[cursor]);
     }
-    (cursor == pc).then_some(prev?).filter(|prev_pc| *prev_pc >= lower_bound)
+    (cursor == pc)
+        .then_some(prev?)
+        .filter(|prev_pc| *prev_pc >= lower_bound)
 }
 
 fn find_prev_reg_def(
@@ -1591,6 +1596,42 @@ mod tests {
         assert_eq!(program.insns[0].dst_reg(), 6);
         assert_eq!(program.insns[0].imm as u32 as u64, 0);
         assert_eq!(program.insns[1].imm as u32 as u64, 1);
+    }
+
+    #[test]
+    fn map_inline_pass_emits_mov64_imm_for_dw_constants_that_fit_i32() {
+        install_array_map(113, 42u64.to_le_bytes().to_vec());
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_DW, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![113]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(6, 42),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
+        assert!(!program.insns[0].is_ldimm64());
     }
 
     #[test]

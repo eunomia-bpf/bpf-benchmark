@@ -1040,13 +1040,8 @@ mod real_bpfo_tests {
         ($name:ident, $pass:literal, $fixture:literal, $program:literal, $with_maps:expr, $with_profile:expr, $expect_change:expr) => {
             #[test]
             fn $name() {
-                let (fixture, _program, result) = run_real_case(
-                    &[$pass],
-                    $fixture,
-                    $program,
-                    $with_maps,
-                    $with_profile,
-                );
+                let (fixture, _program, result) =
+                    run_real_case(&[$pass], $fixture, $program, $with_maps, $with_profile);
                 if $expect_change {
                     assert_pass_changed(&result, $pass, &fixture);
                 } else {
@@ -1107,63 +1102,63 @@ mod real_bpfo_tests {
     real_pipeline_test!(
         test_const_prop_real_katran_xdp,
         ["map_inline", "const_prop"],
-        assert_pass="const_prop",
-        fixture="katran/xdp_pktcntr.bpf.o",
-        program="xdp",
-        maps=true,
-        profile=false,
-        change=true
+        assert_pass = "const_prop",
+        fixture = "katran/xdp_pktcntr.bpf.o",
+        program = "xdp",
+        maps = true,
+        profile = false,
+        change = true
     );
     real_pipeline_test!(
         test_const_prop_real_bindsnoop,
         ["map_inline", "const_prop"],
-        assert_pass="const_prop",
-        fixture="bcc/libbpf-tools/bindsnoop.bpf.o",
-        program="kprobe/inet_bind",
-        maps=true,
-        profile=false,
-        change=false
+        assert_pass = "const_prop",
+        fixture = "bcc/libbpf-tools/bindsnoop.bpf.o",
+        program = "kprobe/inet_bind",
+        maps = true,
+        profile = false,
+        change = false
     );
     real_pipeline_test!(
         test_const_prop_real_cilium_xdp_entry,
         ["map_inline", "const_prop"],
-        assert_pass="const_prop",
-        fixture="cilium/bpf_xdp.bpf.o",
-        program="xdp/entry",
-        maps=true,
-        profile=false,
-        change=false
+        assert_pass = "const_prop",
+        fixture = "cilium/bpf_xdp.bpf.o",
+        program = "xdp/entry",
+        maps = true,
+        profile = false,
+        change = false
     );
 
     real_pipeline_test!(
         test_dce_real_katran_xdp,
         ["map_inline", "const_prop", "dce"],
-        assert_pass="dce",
-        fixture="katran/xdp_pktcntr.bpf.o",
-        program="xdp",
-        maps=true,
-        profile=false,
-        change=true
+        assert_pass = "dce",
+        fixture = "katran/xdp_pktcntr.bpf.o",
+        program = "xdp",
+        maps = true,
+        profile = false,
+        change = true
     );
     real_pipeline_test!(
         test_dce_real_bindsnoop,
         ["map_inline", "const_prop", "dce"],
-        assert_pass="dce",
-        fixture="bcc/libbpf-tools/bindsnoop.bpf.o",
-        program="kprobe/inet_bind",
-        maps=true,
-        profile=false,
-        change=false
+        assert_pass = "dce",
+        fixture = "bcc/libbpf-tools/bindsnoop.bpf.o",
+        program = "kprobe/inet_bind",
+        maps = true,
+        profile = false,
+        change = false
     );
     real_pipeline_test!(
         test_dce_real_cilium_xdp_entry,
         ["map_inline", "const_prop", "dce"],
-        assert_pass="dce",
-        fixture="cilium/bpf_xdp.bpf.o",
-        program="xdp/entry",
-        maps=true,
-        profile=false,
-        change=false
+        assert_pass = "dce",
+        fixture = "cilium/bpf_xdp.bpf.o",
+        program = "xdp/entry",
+        maps = true,
+        profile = false,
+        change = false
     );
 
     real_single_pass_test!(
