@@ -109,6 +109,19 @@ struct code_size_summary {
     uint64_t native_code_bytes = 0;
 };
 
+struct daemon_pass_detail {
+    std::string pass_name;
+    bool changed = false;
+    uint32_t sites_found = 0;
+    uint32_t sites_applied = 0;
+    uint32_t sites_skipped = 0;
+    int64_t insns_before = 0;
+    int64_t insns_after = 0;
+    int64_t insn_delta = 0;
+    std::string skip_reasons_json = "{}";
+    std::string diagnostics_json = "[]";
+};
+
 struct rejit_summary {
     bool requested = false;
     std::string mode = "none";            // "same-bytecode", "replacement", or "daemon"
@@ -122,6 +135,7 @@ struct rejit_summary {
     int64_t insn_delta = 0;
     uint32_t verifier_retries = 0;
     std::vector<std::string> final_disabled_passes;
+    std::vector<daemon_pass_detail> pass_details;
     std::string daemon_response;               // raw daemon JSON response
     bool daemon_debug_stripped = false;
 };

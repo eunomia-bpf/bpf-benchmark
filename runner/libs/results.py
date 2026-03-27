@@ -42,6 +42,7 @@ class RejitSummary(TypedDict, total=False):
     error: str
     total_sites_applied: int
     passes_applied: list[str]
+    pass_details: list[dict[str, Any]]
     insn_delta: int
     verifier_retries: int
     final_disabled_passes: list[str]

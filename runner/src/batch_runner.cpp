@@ -90,6 +90,7 @@ struct static_verify_program_record {
     bool applied = false;
     bool program_changed = false;
     std::vector<std::string> passes_applied;
+    std::vector<daemon_pass_detail> daemon_pass_details;
     std::string daemon_status;
     std::string daemon_message;
     std::string daemon_error_message;
@@ -386,6 +387,35 @@ void print_json_string_array_local(std::ostream &out, const std::vector<std::str
     out << "]";
 }
 
+void print_json_daemon_pass_details_local(
+    std::ostream &out,
+    const std::vector<daemon_pass_detail> &details)
+{
+    out << "[";
+    for (size_t index = 0; index < details.size(); ++index) {
+        if (index != 0) {
+            out << ",";
+        }
+        const auto &detail = details[index];
+        out
+            << "{"
+            << "\"pass_name\":\"" << json_escape(detail.pass_name) << "\","
+            << "\"changed\":" << (detail.changed ? "true" : "false") << ","
+            << "\"sites_found\":" << detail.sites_found << ","
+            << "\"sites_applied\":" << detail.sites_applied << ","
+            << "\"sites_skipped\":" << detail.sites_skipped << ","
+            << "\"insns_before\":" << detail.insns_before << ","
+            << "\"insns_after\":" << detail.insns_after << ","
+            << "\"insn_delta\":" << detail.insn_delta << ","
+            << "\"skip_reasons\":"
+            << (detail.skip_reasons_json.empty() ? "{}" : detail.skip_reasons_json) << ","
+            << "\"diagnostics\":"
+            << (detail.diagnostics_json.empty() ? "[]" : detail.diagnostics_json)
+            << "}";
+    }
+    out << "]";
+}
+
 template <typename T>
 void print_optional_json_field(std::ostream &out, const char *field_name, const std::optional<T> &value)
 {
@@ -413,6 +443,7 @@ struct daemon_socket_response_batch {
     std::string error_message;
     uint32_t total_sites_applied = 0;
     std::vector<std::string> passes_applied;
+    std::vector<daemon_pass_detail> pass_details;
     int64_t insn_delta = 0;
     uint32_t verifier_retries = 0;
     std::vector<std::string> final_disabled_passes;
@@ -489,6 +520,85 @@ bool extract_json_bool_batch(const std::string &json, const std::string &key)
     return json.find(pattern1) != std::string::npos || json.find(pattern2) != std::string::npos;
 }
 
+bool json_char_escaped_batch(const std::string &json, size_t pos)
+{
+    if (pos == 0 || pos > json.size()) {
+        return false;
+    }
+
+    size_t backslash_count = 0;
+    size_t cursor = pos;
+    while (cursor > 0 && json[--cursor] == '\\') {
+        ++backslash_count;
+    }
+    return (backslash_count % 2) != 0;
+}
+
+size_t find_matching_json_delim_batch(
+    const std::string &json,
+    size_t open_pos,
+    char open_ch,
+    char close_ch)
+{
+    if (open_pos >= json.size() || json[open_pos] != open_ch) {
+        return std::string::npos;
+    }
+
+    int depth = 0;
+    bool in_string = false;
+    for (size_t index = open_pos; index < json.size(); ++index) {
+        const char ch = json[index];
+        if (ch == '"' && !json_char_escaped_batch(json, index)) {
+            in_string = !in_string;
+            continue;
+        }
+        if (in_string) {
+            continue;
+        }
+        if (ch == open_ch) {
+            ++depth;
+        } else if (ch == close_ch) {
+            --depth;
+            if (depth == 0) {
+                return index;
+            }
+        }
+    }
+
+    return std::string::npos;
+}
+
+std::string extract_json_compound_batch(
+    const std::string &json,
+    const std::string &key,
+    char open_ch,
+    char close_ch)
+{
+    const std::string pattern = "\"" + key + "\"";
+    size_t key_pos = json.find(pattern);
+    while (key_pos != std::string::npos) {
+        const auto colon_pos = json.find(':', key_pos + pattern.size());
+        if (colon_pos == std::string::npos) {
+            return {};
+        }
+        size_t value_start = colon_pos + 1;
+        while (value_start < json.size() && json[value_start] == ' ') {
+            ++value_start;
+        }
+        if (value_start < json.size() && json[value_start] == open_ch) {
+            const auto value_end = find_matching_json_delim_batch(
+                json, value_start, open_ch, close_ch);
+            if (value_end == std::string::npos) {
+                return {};
+            }
+            return json.substr(value_start, value_end - value_start + 1);
+        }
+        key_pos = json.find(pattern, key_pos + pattern.size());
+    }
+
+    return {};
+}
+
 std::vector<std::string> extract_json_string_array_batch(const std::string &json, const std::string &key)
 {
     std::vector<std::string> values;
@@ -528,57 +638,64 @@ std::vector<std::string> extract_json_string_array_batch(const std::string &json
     return values;
 }
 
-std::vector<std::string> extract_changed_passes_batch(const std::string &json)
+std::vector<daemon_pass_detail> extract_pass_details_batch(const std::string &json)
+{
+    std::vector<daemon_pass_detail> details;
+    const std::string passes_json = extract_json_compound_batch(json, "passes", '[', ']');
+    if (passes_json.size() < 2) {
+        return details;
+    }
+
+    size_t cursor = 1;
+    while (cursor + 1 < passes_json.size()) {
+        const auto object_start = passes_json.find('{', cursor);
+        if (object_start == std::string::npos || object_start + 1 >= passes_json.size()) {
+            break;
+        }
+        const auto object_end = find_matching_json_delim_batch(
+            passes_json, object_start, '{', '}');
+        if (object_end == std::string::npos) {
+            break;
+        }
+
+        const std::string pass_object =
+            passes_json.substr(object_start, object_end - object_start + 1);
+        daemon_pass_detail detail;
+        detail.pass_name = extract_json_string_batch(pass_object, "pass_name");
+        detail.changed = extract_json_bool_batch(pass_object, "changed");
+        detail.sites_applied = static_cast<uint32_t>(
+            extract_json_int_batch(pass_object, "sites_applied"));
+        detail.sites_skipped = static_cast<uint32_t>(
+            extract_json_int_batch(pass_object, "sites_skipped"));
+        detail.sites_found = detail.sites_applied + detail.sites_skipped;
+        detail.insns_before = extract_json_int_batch(pass_object, "insns_before");
+        detail.insns_after = extract_json_int_batch(pass_object, "insns_after");
+        detail.insn_delta = extract_json_int_batch(pass_object, "insn_delta");
+        if (const auto skip_reasons =
+                extract_json_compound_batch(pass_object, "skip_reasons", '{', '}');
+            !skip_reasons.empty()) {
+            detail.skip_reasons_json = skip_reasons;
+        }
+        if (const auto diagnostics =
+                extract_json_compound_batch(pass_object, "diagnostics", '[', ']');
+            !diagnostics.empty()) {
+            detail.diagnostics_json = diagnostics;
+        }
+        details.push_back(std::move(detail));
+        cursor = object_end + 1;
+    }
+
+    return details;
+}
+
+std::vector<std::string> changed_pass_names_batch(const std::vector<daemon_pass_detail> &details)
 {
     std::vector<std::string> values;
-    auto passes_pos = json.find("\"passes\":[");
-    if (passes_pos == std::string::npos) {
-        passes_pos = json.find("\"passes\": [");
-    }
-    if (passes_pos == std::string::npos) {
-        return values;
-    }
-    const auto array_open = json.find('[', passes_pos);
-    if (array_open == std::string::npos) {
-        return values;
-    }
-    int depth = 1;
-    size_t array_close = array_open + 1;
-    while (array_close < json.size() && depth > 0) {
-        if (json[array_close] == '[') {
-            ++depth;
-        } else if (json[array_close] == ']') {
-            --depth;
+    values.reserve(details.size());
+    for (const auto &detail : details) {
+        if (detail.changed && !detail.pass_name.empty()) {
+            values.push_back(detail.pass_name);
         }
-        ++array_close;
-    }
-    size_t cursor = array_open;
-    while (true) {
-        const auto object_start = json.find('{', cursor + 1);
-        if (object_start == std::string::npos || object_start >= array_close) {
-            break;
-        }
-        int object_depth = 1;
-        size_t object_end = object_start + 1;
-        while (object_end < json.size() && object_depth > 0) {
-            if (json[object_end] == '{') {
-                ++object_depth;
-            } else if (json[object_end] == '}') {
-                --object_depth;
-            }
-            ++object_end;
-        }
-        if (object_depth != 0) {
-            break;
-        }
-        const std::string pass_object = json.substr(object_start, object_end - object_start);
-        if (extract_json_bool_batch(pass_object, "changed")) {
-            const auto pass_name = extract_json_string_batch(pass_object, "pass_name");
-            if (!pass_name.empty()) {
-                values.push_back(pass_name);
-            }
-        }
-        cursor = object_end;
     }
     return values;
 }
@@ -643,60 +760,33 @@ daemon_socket_response_batch daemon_socket_optimize_batch(
         return response;
     }
 
-    auto summary_pos = line.find("\"summary\":");
-    if (summary_pos != std::string::npos) {
-        const auto brace = line.find('{', summary_pos);
-        if (brace != std::string::npos) {
-            int depth = 1;
-            size_t end = brace + 1;
-            while (end < line.size() && depth > 0) {
-                if (line[end] == '{') {
-                    ++depth;
-                } else if (line[end] == '}') {
-                    --depth;
-                }
-                ++end;
-            }
-            const std::string summary = line.substr(brace, end - brace);
-            response.applied = extract_json_bool_batch(summary, "applied");
-            response.program_changed = extract_json_bool_batch(summary, "program_changed");
-            response.total_sites_applied = static_cast<uint32_t>(
-                extract_json_int_batch(summary, "total_sites_applied"));
-            response.verifier_retries = static_cast<uint32_t>(
-                extract_json_int_batch(summary, "verifier_retries"));
-            response.final_disabled_passes =
-                extract_json_string_array_batch(summary, "final_disabled_passes");
+    const std::string summary = extract_json_compound_batch(line, "summary", '{', '}');
+    if (!summary.empty()) {
+        response.applied = extract_json_bool_batch(summary, "applied");
+        response.program_changed = extract_json_bool_batch(summary, "program_changed");
+        response.total_sites_applied = static_cast<uint32_t>(
+            extract_json_int_batch(summary, "total_sites_applied"));
+        response.verifier_retries = static_cast<uint32_t>(
+            extract_json_int_batch(summary, "verifier_retries"));
+        response.final_disabled_passes =
+            extract_json_string_array_batch(summary, "final_disabled_passes");
+    }
+
+    const std::string program_json = extract_json_compound_batch(line, "program", '{', '}');
+    if (!program_json.empty()) {
+        response.insn_delta = extract_json_int_batch(program_json, "insn_delta");
+        const auto final_insn_count = extract_json_int_batch(program_json, "final_insn_count");
+        const auto final_jited_size = extract_json_int_batch(program_json, "final_jited_size");
+        if (final_insn_count > 0) {
+            response.final_insn_count = final_insn_count;
+        }
+        if (final_jited_size > 0) {
+            response.final_jited_size = final_jited_size;
         }
     }
 
-    auto program_pos = line.find("\"program\":");
-    if (program_pos != std::string::npos) {
-        const auto brace = line.find('{', program_pos);
-        if (brace != std::string::npos) {
-            int depth = 1;
-            size_t end = brace + 1;
-            while (end < line.size() && depth > 0) {
-                if (line[end] == '{') {
-                    ++depth;
-                } else if (line[end] == '}') {
-                    --depth;
-                }
-                ++end;
-            }
-            const std::string program_json = line.substr(brace, end - brace);
-            response.insn_delta = extract_json_int_batch(program_json, "insn_delta");
-            const auto final_insn_count = extract_json_int_batch(program_json, "final_insn_count");
-            const auto final_jited_size = extract_json_int_batch(program_json, "final_jited_size");
-            if (final_insn_count > 0) {
-                response.final_insn_count = final_insn_count;
-            }
-            if (final_jited_size > 0) {
-                response.final_jited_size = final_jited_size;
-            }
-        }
-    }
-
-    response.passes_applied = extract_changed_passes_batch(line);
+    response.pass_details = extract_pass_details_batch(line);
+    response.passes_applied = changed_pass_names_batch(response.pass_details);
     return response;
 }
 
@@ -938,6 +1028,8 @@ std::string serialize_static_verify_record_json(const static_verify_program_reco
         << ",\"program_changed\":" << (record.program_changed ? "true" : "false")
         << ",\"passes_applied\":";
     print_json_string_array_local(out, record.passes_applied);
+    out << ",\"daemon_pass_details\":";
+    print_json_daemon_pass_details_local(out, record.daemon_pass_details);
     out
         << ",\"daemon_status\":\"" << json_escape(record.daemon_status) << "\""
         << ",\"daemon_message\":\"" << json_escape(record.daemon_message) << "\""
@@ -1371,6 +1463,7 @@ static_verify_program_record execute_static_verify_program(
     record.daemon_verifier_retries = daemon_response.verifier_retries;
     record.daemon_final_disabled_passes = daemon_response.final_disabled_passes;
     record.passes_applied = daemon_response.passes_applied;
+    record.daemon_pass_details = daemon_response.pass_details;
     record.applied = daemon_response.applied;
     record.program_changed = daemon_response.program_changed;
 

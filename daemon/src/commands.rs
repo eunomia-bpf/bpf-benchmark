@@ -7,11 +7,13 @@ use std::os::unix::io::{AsRawFd, RawFd};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use serde::Serialize;
 
 use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
 use crate::{bpf, insn, pass, passes, profiler, verifier_log};
+
+const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
 
 // ── OptimizeOneResult — structured return from try_apply_one ────────
 
@@ -647,6 +649,45 @@ pub(crate) fn cmd_profile(prog_id: u32, interval_ms: u64, samples: usize) -> Res
     Ok(())
 }
 
+fn program_has_map_lookup_elem(insns: &[insn::BpfInsn]) -> bool {
+    insns
+        .iter()
+        .any(|insn| insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM)
+}
+
+fn maybe_attach_original_verifier_states(
+    prog_fd: RawFd,
+    orig_insns: &[insn::BpfInsn],
+    map_ids: &[u32],
+    program: &mut pass::BpfProgram,
+) {
+    if !program_has_map_lookup_elem(orig_insns) {
+        return;
+    }
+
+    let mut probe_insns = orig_insns.to_vec();
+    let map_fd_bindings = pass::build_map_fd_bindings(orig_insns, map_ids);
+    let capture = (|| -> Result<Vec<verifier_log::VerifierInsn>> {
+        let _map_fds_guard =
+            bpf::relocate_map_fds_with_bindings(&mut probe_insns, map_ids, &map_fd_bindings)
+                .context("relocate map FDs for verifier-log capture")?;
+        let result = bpf::bpf_prog_rejit_capture_verifier_log(prog_fd, &probe_insns, &[])
+            .context("capture original-program verifier log via BPF_PROG_REJIT(log_level=2)")?;
+        Ok(verifier_log::parse_verifier_log(&result.verifier_log))
+    })();
+
+    match capture {
+        Ok(states) if !states.is_empty() => program.set_verifier_states(states),
+        Ok(_) => {}
+        Err(err) => {
+            eprintln!(
+                "    warning: failed to capture original-program verifier log for prog fd {}: {:#}",
+                prog_fd, err
+            );
+        }
+    }
+}
+
 /// Try to apply rewrites to a single program via PassManager.
 ///
 /// Returns a structured `OptimizeOneResult` describing everything that happened:
@@ -739,6 +780,16 @@ pub(crate) fn try_apply_one(
 
     // Fetch map IDs for FD relocation before REJIT.
     let map_ids = bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default();
+    let original_verifier_states = {
+        let mut seed_program = pass::BpfProgram::new(orig_insns.clone());
+        maybe_attach_original_verifier_states(
+            fd.as_raw_fd(),
+            &orig_insns,
+            &map_ids,
+            &mut seed_program,
+        );
+        seed_program.verifier_states.clone()
+    };
 
     let mut disabled_passes: HashSet<String> = HashSet::new();
     let max_retries = 10;
@@ -750,6 +801,7 @@ pub(crate) fn try_apply_one(
     for attempt in 0..=max_retries {
         let mut program = pass::BpfProgram::new(orig_insns.clone());
         program.set_map_ids(map_ids.clone());
+        program.verifier_states = original_verifier_states.clone();
         let pm = build_pipeline();
         let mut local_ctx = ctx.clone();
         local_ctx.prog_type = info.prog_type;
@@ -862,13 +914,13 @@ pub(crate) fn try_apply_one(
             &program.map_fd_bindings,
         )
         .unwrap_or_else(|e| {
-                eprintln!("    warning: map FD relocation failed: {:#}", e);
-                push_debug_warning(
-                    &mut attempt_debug,
-                    format!("map FD relocation failed before REJIT: {e:#}"),
-                );
-                Vec::new()
-            });
+            eprintln!("    warning: map FD relocation failed: {:#}", e);
+            push_debug_warning(
+                &mut attempt_debug,
+                format!("map FD relocation failed before REJIT: {e:#}"),
+            );
+            Vec::new()
+        });
 
         if let Some(debug) = attempt_debug.as_mut() {
             debug.pre_rejit_bytecode = Some(insn::dump_bytecode_compact(&program.insns));
@@ -1687,6 +1739,7 @@ processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 p
 
     #[test]
     fn test_build_pipeline_default() {
+        let ctx = pass::PassContext::test_default();
         let pm = build_pipeline();
         let exit_insn = crate::insn::BpfInsn {
             code: crate::insn::BPF_JMP | crate::insn::BPF_EXIT,
@@ -1695,7 +1748,6 @@ processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 p
             imm: 0,
         };
         let mut prog = pass::BpfProgram::new(vec![exit_insn]);
-        let ctx = pass::PassContext::test_default();
         let result = pm.run(&mut prog, &ctx).unwrap();
         assert!(!result.program_changed);
     }

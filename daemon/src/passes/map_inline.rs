@@ -8,12 +8,14 @@ use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
 use crate::bpf;
 use crate::insn::*;
 use crate::pass::*;
+use crate::verifier_log::VerifierInsn;
 
 const BPF_ADD: u8 = 0x00;
 const BPF_SUB: u8 = 0x10;
 const BPF_MUL: u8 = 0x20;
 const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = 6;
 const BPF_PSEUDO_MAP_FD: u8 = 1;
+const BPF_PSEUDO_MAP_VALUE: u8 = 2;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
 const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
 const REG_RESOLUTION_LIMIT: usize = 64;
@@ -73,6 +75,16 @@ struct ConstantRegValue {
     source_pc: Option<usize>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum KeyPointerOrigin {
+    Stack(i16),
+    MapValue {
+        old_fd: i32,
+        value_off: i32,
+        ldimm_pc: usize,
+    },
+}
+
 /// Find all `bpf_map_lookup_elem()` call sites in the instruction stream.
 pub fn find_map_lookup_sites(insns: &[BpfInsn]) -> Vec<MapLookupSite> {
     let mut sites = Vec::new();
@@ -117,6 +129,294 @@ pub fn try_extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Result<Con
         r2_mov_pc: removable_setup.map(|(mov_pc, _, _)| mov_pc),
         r2_add_pc: removable_setup.map(|(_, add_pc, _)| add_pc),
     })
+}
+
+fn try_extract_constant_key_from_map_value(
+    program: &BpfProgram,
+    call_pc: usize,
+    info: &crate::analysis::MapInfo,
+) -> Result<ConstantKey, String> {
+    let key_width = u8::try_from(info.key_size)
+        .map_err(|_| format!("map key size {} does not fit in u8", info.key_size))?;
+    if key_width == 0 {
+        return Err("map key size is zero".to_string());
+    }
+    if key_width > 8 {
+        return Err(format!(
+            "map key size {} exceeds constant-key inline limit of 8 bytes",
+            info.key_size
+        ));
+    }
+
+    let bounds = subprog_bounds(&program.insns, call_pc);
+    let origin = resolve_key_pointer_origin(&program.insns, call_pc, 2, bounds)?;
+    let KeyPointerOrigin::MapValue {
+        old_fd,
+        value_off,
+        ldimm_pc,
+    } = origin
+    else {
+        return Err("key pointer does not resolve to a pseudo-map-value constant".to_string());
+    };
+
+    if value_off < 0 {
+        return Err(format!(
+            "pseudo-map-value key offset {} is negative",
+            value_off
+        ));
+    }
+
+    let source_map_id = program
+        .map_fd_bindings
+        .get(&old_fd)
+        .copied()
+        .ok_or_else(|| format!("no map_id binding for pseudo-map-value old_fd {}", old_fd))?;
+    let (source_info, source_frozen) =
+        bpf::bpf_map_get_info_by_id(source_map_id).map_err(|err| {
+            format!(
+                "failed to resolve pseudo-map-value source map {}: {err:#}",
+                source_map_id
+            )
+        })?;
+    if !source_frozen {
+        return Err(format!(
+            "pseudo-map-value source map {} is mutable",
+            source_map_id
+        ));
+    }
+
+    let source_key = vec![0u8; source_info.key_size as usize];
+    let source_value_size = bpf::bpf_map_lookup_value_size(&source_info);
+    let source_value =
+        bpf::bpf_map_lookup_elem_by_id(source_map_id, &source_key, source_value_size).map_err(
+            |err| {
+                format!(
+                    "failed to read pseudo-map-value source map {}: {err:#}",
+                    source_map_id
+                )
+            },
+        )?;
+    let value_off = value_off as usize;
+    let key_end = value_off
+        .checked_add(info.key_size as usize)
+        .ok_or_else(|| "pseudo-map-value key offset overflows".to_string())?;
+    if key_end > source_value.len() {
+        return Err(format!(
+            "pseudo-map-value key range [{}..{}) exceeds source map value length {}",
+            value_off,
+            key_end,
+            source_value.len()
+        ));
+    }
+
+    let mut raw = [0u8; 8];
+    raw[..info.key_size as usize].copy_from_slice(&source_value[value_off..key_end]);
+    Ok(ConstantKey {
+        stack_off: 0,
+        width: key_width,
+        value: u64::from_le_bytes(raw),
+        // Reuse the removable-pc slots so a contiguous `ldimm64 r2 =
+        // pseudo_map_value` setup can be dropped alongside the lookup.
+        store_pc: ldimm_pc,
+        source_imm_pc: Some(ldimm_pc + 1),
+        r2_mov_pc: None,
+        r2_add_pc: None,
+    })
+}
+
+fn try_extract_constant_key_verifier_guided(
+    insns: &[BpfInsn],
+    verifier_states: &[VerifierInsn],
+    call_pc: usize,
+    key_size: u32,
+) -> Result<ConstantKey, String> {
+    if verifier_states.is_empty() {
+        return Err("no verifier states available".to_string());
+    }
+    if key_size == 0 {
+        return Err("map key size is zero".to_string());
+    }
+    let key_width: u8 = key_size
+        .try_into()
+        .map_err(|_| format!("map key size {} does not fit in u8", key_size))?;
+
+    let occurrences = verifier_states
+        .iter()
+        .enumerate()
+        .filter(|(_, state)| state.pc == call_pc)
+        .collect::<Vec<_>>();
+    if occurrences.is_empty() {
+        return Err(format!(
+            "verifier log has no state snapshot at call pc {}",
+            call_pc
+        ));
+    }
+
+    let mut extracted = Vec::new();
+    for (occ_idx, state) in occurrences {
+        extracted.push(try_extract_constant_key_for_occurrence(
+            insns,
+            verifier_states,
+            call_pc,
+            key_width,
+            occ_idx,
+            state.frame,
+        )?);
+    }
+
+    let first = extracted
+        .first()
+        .cloned()
+        .ok_or_else(|| format!("no verifier-guided key candidates at pc {}", call_pc))?;
+    let all_same = extracted.iter().all(|key| {
+        key.stack_off == first.stack_off
+            && key.width == first.width
+            && key.value == first.value
+            && key.store_pc == first.store_pc
+    });
+    if !all_same {
+        return Err(format!(
+            "verifier-derived key candidates disagree across {} state(s)",
+            extracted.len()
+        ));
+    }
+
+    Ok(first)
+}
+
+fn try_extract_constant_key_for_occurrence(
+    insns: &[BpfInsn],
+    verifier_states: &[VerifierInsn],
+    call_pc: usize,
+    key_width: u8,
+    occurrence_idx: usize,
+    frame: usize,
+) -> Result<ConstantKey, String> {
+    let key_off =
+        find_latest_r2_stack_offset(verifier_states, occurrence_idx, frame).ok_or_else(|| {
+            format!(
+                "verifier log did not expose r2 stack pointer before pc {}",
+                call_pc
+            )
+        })?;
+
+    let (store_pc, source_imm_pc, value) =
+        find_verifier_guided_stack_store(insns, verifier_states, occurrence_idx, frame, key_off, key_width)
+            .ok_or_else(|| {
+                format!(
+                    "verifier log did not expose a constant stack store covering fp{} width {} before pc {}",
+                    key_off, key_width, call_pc
+                )
+            })?;
+
+    let bounds = subprog_bounds(insns, call_pc);
+    let removable_setup = find_r2_stack_pointer_setup_simple(insns, call_pc, bounds)
+        .filter(|(_, _, off)| *off == key_off);
+
+    Ok(ConstantKey {
+        stack_off: key_off,
+        width: key_width,
+        value,
+        store_pc,
+        source_imm_pc,
+        r2_mov_pc: removable_setup.map(|(mov_pc, _, _)| mov_pc),
+        r2_add_pc: removable_setup.map(|(_, add_pc, _)| add_pc),
+    })
+}
+
+fn find_latest_r2_stack_offset(
+    verifier_states: &[VerifierInsn],
+    before_idx: usize,
+    frame: usize,
+) -> Option<i16> {
+    for idx in (0..before_idx).rev() {
+        let state = &verifier_states[idx];
+        if state.frame != frame {
+            continue;
+        }
+        let Some(reg) = state.regs.get(&2) else {
+            continue;
+        };
+        if reg.reg_type != "fp" {
+            return None;
+        }
+        return reg.offset.map(|off| off as i16);
+    }
+    None
+}
+
+fn find_verifier_guided_stack_store(
+    insns: &[BpfInsn],
+    verifier_states: &[VerifierInsn],
+    before_idx: usize,
+    frame: usize,
+    key_off: i16,
+    key_width: u8,
+) -> Option<(usize, Option<usize>, u64)> {
+    for idx in (0..before_idx).rev() {
+        let state = &verifier_states[idx];
+        if state.frame != frame {
+            continue;
+        }
+        let pc = state.pc;
+        let Some(insn) = insns.get(pc) else {
+            continue;
+        };
+        let Some((store_pc, source_imm_pc, value)) =
+            verifier_guided_stack_store_value(insn, state, key_off, key_width)
+        else {
+            continue;
+        };
+        return Some((store_pc, source_imm_pc, value));
+    }
+    None
+}
+
+fn verifier_guided_stack_store_value(
+    insn: &BpfInsn,
+    state: &VerifierInsn,
+    key_off: i16,
+    key_width: u8,
+) -> Option<(usize, Option<usize>, u64)> {
+    if !matches!(bpf_class(insn.code), BPF_ST | BPF_STX)
+        || bpf_mode(insn.code) != BPF_MEM
+        || insn.dst_reg() != 10
+    {
+        return None;
+    }
+
+    let store_width = size_in_bytes(bpf_size(insn.code))?;
+    let store_start = i32::from(insn.off);
+    let store_end = store_start + i32::from(store_width);
+    let key_start = i32::from(key_off);
+    let key_end = key_start + i32::from(key_width);
+    if store_start > key_start || store_end < key_end {
+        return None;
+    }
+
+    let raw_value = match bpf_class(insn.code) {
+        BPF_ST => truncate_imm(insn.imm, store_width),
+        BPF_STX => truncate_value(
+            verifier_known_scalar_value(state.regs.get(&insn.src_reg())?)?,
+            store_width,
+        ),
+        _ => return None,
+    };
+
+    let full_bytes = raw_value.to_le_bytes();
+    let subrange_start = usize::try_from(key_start - store_start).ok()?;
+    let subrange_end = subrange_start + key_width as usize;
+    let mut key_bytes = [0u8; 8];
+    key_bytes[..key_width as usize].copy_from_slice(&full_bytes[subrange_start..subrange_end]);
+
+    Some((state.pc, None, u64::from_le_bytes(key_bytes)))
+}
+
+fn verifier_known_scalar_value(reg: &crate::verifier_log::RegState) -> Option<u64> {
+    if reg.reg_type != "scalar" {
+        return None;
+    }
+    reg.known_value.map(|value| value as u64)
 }
 
 /// Classify all uses of the lookup result until its value-pointer aliases die out.
@@ -211,10 +511,15 @@ impl BpfPass for MapInlinePass {
                 continue;
             }
 
-            let key = match try_extract_constant_key(&program.insns, site.call_pc) {
+            let key = match try_extract_constant_key_verifier_guided(
+                &program.insns,
+                program.verifier_states.as_ref(),
+                site.call_pc,
+                info.key_size,
+            ) {
                 Ok(key) => {
                     log_map_inline_debug(&format!(
-                        "site at PC={}: extracted key value={} width={} stack_off={} store_pc={} source_imm_pc={:?} r2_mov_pc={:?} r2_add_pc={:?}",
+                        "site at PC={}: verifier-guided key value={} width={} stack_off={} store_pc={} source_imm_pc={:?} r2_mov_pc={:?} r2_add_pc={:?}",
                         site.call_pc,
                         key.value,
                         key.width,
@@ -226,20 +531,63 @@ impl BpfPass for MapInlinePass {
                     ));
                     key
                 }
-                Err(err) => {
-                    log_map_inline_debug(&format!("site pc={} skip: {}", site.call_pc, err));
-                    record_skip(
-                        &mut skipped,
-                        &mut diagnostics,
-                        site.call_pc,
-                        "lookup key is not a constant stack materialization".into(),
-                        Some(format!(
-                            "site at PC={}: key extraction failed: {}",
-                            site.call_pc, err
-                        )),
-                    );
-                    continue;
-                }
+                Err(verifier_err) => match try_extract_constant_key(&program.insns, site.call_pc) {
+                    Ok(key) => {
+                        log_map_inline_debug(&format!(
+                            "site at PC={}: fallback backward-scan key after verifier-guided miss: {}",
+                            site.call_pc, verifier_err
+                        ));
+                        log_map_inline_debug(&format!(
+                            "site at PC={}: extracted key value={} width={} stack_off={} store_pc={} source_imm_pc={:?} r2_mov_pc={:?} r2_add_pc={:?}",
+                            site.call_pc,
+                            key.value,
+                            key.width,
+                            key.stack_off,
+                            key.store_pc,
+                            key.source_imm_pc,
+                            key.r2_mov_pc,
+                            key.r2_add_pc
+                        ));
+                        key
+                    }
+                    Err(scan_err) => {
+                        match try_extract_constant_key_from_map_value(program, site.call_pc, info) {
+                            Ok(key) => {
+                                log_map_inline_debug(&format!(
+                                "site at PC={}: pseudo-map-value key after verifier-guided miss={} and backward-scan miss={}",
+                                site.call_pc, verifier_err, scan_err
+                            ));
+                                log_map_inline_debug(&format!(
+                                "site at PC={}: extracted pseudo-map-value key value={} width={} store_pc={} source_imm_pc={:?}",
+                                site.call_pc,
+                                key.value,
+                                key.width,
+                                key.store_pc,
+                                key.source_imm_pc
+                            ));
+                                key
+                            }
+                            Err(map_value_err) => {
+                                log_map_inline_debug(&format!(
+                                "site pc={} skip: verifier-guided={} fallback={} pseudo-map-value={}",
+                                site.call_pc, verifier_err, scan_err, map_value_err
+                            ));
+                                record_skip(
+                                &mut skipped,
+                                &mut diagnostics,
+                                site.call_pc,
+                                "lookup key is not a constant stack or pseudo-map-value materialization"
+                                    .into(),
+                                Some(format!(
+                                    "site at PC={}: verifier-guided key extraction failed: {}; fallback scan failed: {}; pseudo-map-value fallback failed: {}",
+                                    site.call_pc, verifier_err, scan_err, map_value_err
+                                )),
+                            );
+                                continue;
+                            }
+                        }
+                    }
+                },
             };
             if (key.width as u32) < info.key_size {
                 let reason = format!(
@@ -511,26 +859,26 @@ fn build_site_rewrite(
         site.call_pc, info.map_id, encoded_key, lookup_value_size
     ));
     let value = match bpf::bpf_map_lookup_elem_by_id(info.map_id, &encoded_key, lookup_value_size) {
-            Ok(value) => {
-                log_map_inline_debug(&format!(
-                    "site pc={} INLINE value={:?}",
-                    site.call_pc, value
-                ));
-                value
-            }
-            Err(err) => {
-                log_map_inline_debug(&format!(
-                    "site at PC={}: bpf_map_lookup_elem_by_id(map_id={}, key={}) failed: {:#}",
-                    site.call_pc,
-                    info.map_id,
-                    format_bytes_preview(&encoded_key),
-                    err
-                ));
-                return Err(err);
-            }
-        };
-    let inline_value = prepare_inline_value(info, &value)
-        .map_err(|reason| site_level_inline_veto(reason))?;
+        Ok(value) => {
+            log_map_inline_debug(&format!(
+                "site pc={} INLINE value={:?}",
+                site.call_pc, value
+            ));
+            value
+        }
+        Err(err) => {
+            log_map_inline_debug(&format!(
+                "site at PC={}: bpf_map_lookup_elem_by_id(map_id={}, key={}) failed: {:#}",
+                site.call_pc,
+                info.map_id,
+                format_bytes_preview(&encoded_key),
+                err
+            ));
+            return Err(err);
+        }
+    };
+    let inline_value =
+        prepare_inline_value(info, &value).map_err(|reason| site_level_inline_veto(reason))?;
 
     let removable_null_check_pc =
         null_check_pc.filter(|&pc| null_check_is_fallthrough_non_null(&program.insns[pc]));
@@ -569,14 +917,15 @@ fn build_site_rewrite(
 
     let mut replacements = BTreeMap::new();
     for load in &uses.fixed_loads {
-        let scalar = read_scalar_from_value(&inline_value, load.offset, load.size).ok_or_else(|| {
-            anyhow::anyhow!(
-                "map value read out of bounds for load pc {} (offset {}, size {})",
-                load.pc,
-                load.offset,
-                load.size
-            )
-        })?;
+        let scalar =
+            read_scalar_from_value(&inline_value, load.offset, load.size).ok_or_else(|| {
+                anyhow::anyhow!(
+                    "map value read out of bounds for load pc {} (offset {}, size {})",
+                    load.pc,
+                    load.offset,
+                    load.size
+                )
+            })?;
         replacements.insert(load.pc, emit_constant_load(load.dst_reg, scalar, load.size));
     }
 
@@ -603,7 +952,10 @@ fn encode_key_bytes(value: u64, key_size: usize) -> Vec<u8> {
     value.to_le_bytes()[..key_size].to_vec()
 }
 
-fn prepare_inline_value(info: &crate::analysis::MapInfo, raw_value: &[u8]) -> Result<Vec<u8>, String> {
+fn prepare_inline_value(
+    info: &crate::analysis::MapInfo,
+    raw_value: &[u8],
+) -> Result<Vec<u8>, String> {
     if info.map_type != BPF_MAP_TYPE_PERCPU_ARRAY {
         return Ok(raw_value.to_vec());
     }
@@ -611,7 +963,10 @@ fn prepare_inline_value(info: &crate::analysis::MapInfo, raw_value: &[u8]) -> Re
     collapse_uniform_percpu_array_value(info.value_size as usize, raw_value)
 }
 
-fn collapse_uniform_percpu_array_value(value_size: usize, raw_value: &[u8]) -> Result<Vec<u8>, String> {
+fn collapse_uniform_percpu_array_value(
+    value_size: usize,
+    raw_value: &[u8],
+) -> Result<Vec<u8>, String> {
     if value_size == 0 {
         return Err("PERCPU_ARRAY has zero value_size".to_string());
     }
@@ -983,6 +1338,114 @@ fn resolve_stack_pointer_to_stack(
     bounds: (usize, usize),
 ) -> Result<i16, String> {
     resolve_stack_pointer_to_stack_inner(insns, before_pc, reg, bounds, REG_RESOLUTION_LIMIT)
+}
+
+fn resolve_key_pointer_origin(
+    insns: &[BpfInsn],
+    before_pc: usize,
+    reg: u8,
+    bounds: (usize, usize),
+) -> Result<KeyPointerOrigin, String> {
+    resolve_key_pointer_origin_inner(insns, before_pc, reg, bounds, REG_RESOLUTION_LIMIT)
+}
+
+fn resolve_key_pointer_origin_inner(
+    insns: &[BpfInsn],
+    before_pc: usize,
+    reg: u8,
+    bounds: (usize, usize),
+    budget: usize,
+) -> Result<KeyPointerOrigin, String> {
+    if budget == 0 {
+        return Err(format!(
+            "key pointer resolution for r{} exceeded {} steps",
+            reg, REG_RESOLUTION_LIMIT
+        ));
+    }
+    if reg == 10 {
+        return Ok(KeyPointerOrigin::Stack(0));
+    }
+
+    let Some(pc) = find_prev_reg_def(insns, before_pc, reg, bounds.0) else {
+        if reg <= 5 {
+            return Err(format!("key pointer flows from function argument r{}", reg));
+        }
+        return Err(format!("no definition for key pointer register r{}", reg));
+    };
+    let insn = &insns[pc];
+
+    if insn.is_ldimm64() && insn.dst_reg() == reg {
+        if insn.src_reg() == BPF_PSEUDO_MAP_VALUE {
+            let value_off = insns
+                .get(pc + 1)
+                .ok_or_else(|| format!("pseudo-map-value load at pc {} is truncated", pc))?
+                .imm;
+            return Ok(KeyPointerOrigin::MapValue {
+                old_fd: insn.imm,
+                value_off,
+                ldimm_pc: pc,
+            });
+        }
+        return Err(format!(
+            "register r{} definition at pc {} is not a pseudo-map-value pointer",
+            reg, pc
+        ));
+    }
+
+    if (insn.class() == BPF_ALU64 || insn.class() == BPF_ALU) && insn.dst_reg() == reg {
+        let op = bpf_op(insn.code);
+        let src_mode = bpf_src(insn.code);
+
+        if op == BPF_MOV && src_mode == BPF_X {
+            return resolve_key_pointer_origin_inner(insns, pc, insn.src_reg(), bounds, budget - 1);
+        }
+
+        if op == BPF_ADD || op == BPF_SUB {
+            let base = resolve_key_pointer_origin_inner(insns, pc, reg, bounds, budget - 1)?;
+            let delta = if src_mode == BPF_K {
+                insn.imm as i64
+            } else {
+                resolve_constant_reg_value_inner(insns, pc, insn.src_reg(), bounds, budget - 1)?
+                    .value as i64
+            };
+            let signed_delta = if op == BPF_SUB { -delta } else { delta };
+            return match base {
+                KeyPointerOrigin::Stack(stack_off) => {
+                    let stack_off = stack_off as i64 + signed_delta;
+                    let stack_off = i16::try_from(stack_off).map_err(|_| {
+                        format!(
+                            "resolved stack offset {} from r{} does not fit in i16",
+                            stack_off, reg
+                        )
+                    })?;
+                    Ok(KeyPointerOrigin::Stack(stack_off))
+                }
+                KeyPointerOrigin::MapValue {
+                    old_fd,
+                    value_off,
+                    ldimm_pc,
+                } => {
+                    let value_off = value_off as i64 + signed_delta;
+                    let value_off = i32::try_from(value_off).map_err(|_| {
+                        format!(
+                            "resolved pseudo-map-value offset {} from r{} does not fit in i32",
+                            value_off, reg
+                        )
+                    })?;
+                    Ok(KeyPointerOrigin::MapValue {
+                        old_fd,
+                        value_off,
+                        ldimm_pc,
+                    })
+                }
+            };
+        }
+    }
+
+    Err(format!(
+        "register r{} definition at pc {} does not resolve to constant stack or pseudo-map-value memory",
+        reg, pc
+    ))
 }
 
 fn resolve_stack_pointer_to_stack_inner(
@@ -1396,6 +1859,7 @@ mod tests {
     use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
     use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
     use crate::pass::{MapInlineRecord, PassContext, PassManager};
+    use crate::verifier_log::parse_verifier_log;
 
     fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
         [
@@ -1410,6 +1874,23 @@ mod tests {
                 regs: 0,
                 off: 0,
                 imm: 0,
+            },
+        ]
+    }
+
+    fn ld_imm64_parts(dst: u8, src: u8, imm_lo: i32, imm_hi: i32) -> [BpfInsn; 2] {
+        [
+            BpfInsn {
+                code: BPF_LD | BPF_DW | BPF_IMM,
+                regs: BpfInsn::make_regs(dst, src),
+                off: 0,
+                imm: imm_lo,
+            },
+            BpfInsn {
+                code: 0,
+                regs: 0,
+                off: 0,
+                imm: imm_hi,
             },
         ]
     }
@@ -1496,6 +1977,30 @@ mod tests {
         );
     }
 
+    fn install_empty_map(
+        map_id: u32,
+        map_type: u32,
+        value_size: u32,
+        max_entries: u32,
+        frozen: bool,
+    ) {
+        let mut info = BpfMapInfo::default();
+        info.map_type = map_type;
+        info.id = map_id;
+        info.key_size = 4;
+        info.value_size = value_size;
+        info.max_entries = max_entries;
+
+        install_mock_map(
+            map_id,
+            MockMapState {
+                info,
+                frozen,
+                values: HashMap::new(),
+            },
+        );
+    }
+
     fn install_percpu_array_map(
         map_id: u32,
         value_size: u32,
@@ -1534,6 +2039,51 @@ mod tests {
         let mut values = HashMap::new();
         values.insert(1u32.to_le_bytes().to_vec(), value);
         install_map(map_id, 2, 8, true, values);
+    }
+
+    fn install_array_map_entry(
+        map_id: u32,
+        max_entries: u32,
+        key: u32,
+        value: Vec<u8>,
+        frozen: bool,
+    ) {
+        let mut values = HashMap::new();
+        values.insert(key.to_le_bytes().to_vec(), value.clone());
+
+        let mut info = BpfMapInfo::default();
+        info.map_type = 2;
+        info.id = map_id;
+        info.key_size = 4;
+        info.value_size = value.len() as u32;
+        info.max_entries = max_entries;
+
+        install_mock_map(
+            map_id,
+            MockMapState {
+                info,
+                frozen,
+                values,
+            },
+        );
+    }
+
+    fn install_empty_array_map(map_id: u32, value_size: u32, max_entries: u32) {
+        let mut info = BpfMapInfo::default();
+        info.map_type = 2;
+        info.id = map_id;
+        info.key_size = 4;
+        info.value_size = value_size;
+        info.max_entries = max_entries;
+
+        install_mock_map(
+            map_id,
+            MockMapState {
+                info,
+                frozen: true,
+                values: HashMap::new(),
+            },
+        );
     }
 
     fn install_hash_map(map_id: u32, value: Vec<u8>) {
@@ -1647,6 +2197,42 @@ mod tests {
         assert_eq!(key.value, 7);
         assert_eq!(key.r2_mov_pc, None);
         assert_eq!(key.r2_add_pc, None);
+    }
+
+    #[test]
+    fn verifier_guided_key_extracts_wide_zero_store_subrange() {
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let insns = vec![
+            BpfInsn::mov64_imm(3, 0),
+            BpfInsn::stx_mem(BPF_DW, 10, 3, -8),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            map[0],
+            map[1],
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+        ];
+        assert!(
+            try_extract_constant_key(&insns, 6).is_err(),
+            "plain backward scan should miss fp-8 wide store for fp-4 key"
+        );
+
+        let states = parse_verifier_log(
+            r#"
+0: R1=ctx() R10=fp0
+0: (b7) r3 = 0                        ; R3=0
+1: (7b) *(u64 *)(r10 -8) = r3         ; R3=0 R10=fp0 fp-8=0
+2: (bf) r2 = r10                      ; R2=fp0 R10=fp0
+3: (07) r2 += -4                      ; R2=fp-4
+4: (18) r1 = 0xffff8f09c3e45000       ; R1=map_ptr(map=test_array,ks=4,vs=4)
+6: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=test_array,ks=4,vs=4)
+"#,
+        );
+
+        let key = try_extract_constant_key_verifier_guided(&insns, &states, 6, 4).unwrap();
+        assert_eq!(key.stack_off, -4);
+        assert_eq!(key.width, 4);
+        assert_eq!(key.value, 0);
+        assert_eq!(key.store_pc, 1);
     }
 
     #[test]
@@ -2144,6 +2730,92 @@ mod tests {
     }
 
     #[test]
+    fn map_inline_pass_rewrites_array_lookup_with_pseudo_map_value_zero_key() {
+        install_array_map_entry(120, 8, 0, vec![7, 0, 0, 0], true);
+        install_array_map_entry(121, 1, 0, vec![0, 0, 0, 0], true);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let key = ld_imm64_parts(2, BPF_PSEUDO_MAP_VALUE, 43, 0);
+        let mut program = BpfProgram::new(vec![
+            map[0],
+            map[1],
+            key[0],
+            key[1],
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![120, 121]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(6, 7),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
+    fn map_inline_pass_uses_verifier_guided_wide_zero_store_key() {
+        let mut values = HashMap::new();
+        values.insert(0u32.to_le_bytes().to_vec(), 42u32.to_le_bytes().to_vec());
+        install_map(7001, 2, 8, true, values);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 123);
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::mov64_imm(3, 0),
+            BpfInsn::stx_mem(BPF_DW, 10, 3, -8),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            map[0],
+            map[1],
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            jeq_imm(0, 0, 2),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+            exit_insn(),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![7001]);
+        program.set_verifier_log(
+            r#"
+0: R1=ctx() R10=fp0
+0: (b7) r3 = 0                        ; R3=0
+1: (7b) *(u64 *)(r10 -8) = r3         ; R3=0 R10=fp0 fp-8=0
+2: (bf) r2 = r10                      ; R2=fp0 R10=fp0
+3: (07) r2 += -4                      ; R2=fp-4
+4: (18) r1 = 0xffff8f09c3e45000       ; R1=map_ptr(map=test_array,ks=4,vs=4)
+6: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=test_array,ks=4,vs=4)
+7: (15) if r0 == 0x0 goto pc+2        ; R0=map_value(map=test_array,ks=4,vs=4)
+8: (61) r6 = *(u32 *)(r0 +0)          ; R0=map_value(map=test_array,ks=4,vs=4) R6=42
+"#,
+        );
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 1);
+        assert!(program.insns.contains(&BpfInsn::mov64_imm(6, 42)));
+        assert!(program
+            .insns
+            .iter()
+            .all(|insn| !(insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM)));
+    }
+
+    #[test]
     fn map_inline_pass_keeps_hash_lookup_and_null_check() {
         install_hash_map(105, vec![7, 0, 0, 0]);
 
@@ -2530,6 +3202,78 @@ mod tests {
     }
 
     #[test]
+    fn map_inline_pass_inlines_zero_filled_array_maps() {
+        install_empty_map(311, 2, 8, 8, true);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 2),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::ldx_mem(BPF_DW, 7, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![311]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(6, 0),
+                BpfInsn::mov64_imm(7, 0),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
+    fn map_inline_pass_inlines_zero_filled_percpu_array_maps() {
+        install_empty_map(312, BPF_MAP_TYPE_PERCPU_ARRAY, 4, 8, true);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 3),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![312]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(6, 0),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
     fn map_inline_pass_records_inlined_sites_for_tracker() {
         let value = vec![7, 0, 0, 0];
         install_array_map(115, value.clone());
@@ -2561,6 +3305,42 @@ mod tests {
     }
 
     #[test]
+    fn map_inline_pass_inlines_zero_filled_array_defaults() {
+        install_empty_array_map(915, 4, 8);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![915]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 1);
+        assert!(!program
+            .insns
+            .iter()
+            .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+        assert_eq!(
+            result.pass_results[0].map_inline_records[0].expected_value,
+            vec![0u8; 4]
+        );
+        assert!(program
+            .insns
+            .iter()
+            .any(|insn| insn == &BpfInsn::mov64_imm(6, 0)));
+    }
+
+    #[test]
     fn map_inline_pass_inlines_uniform_percpu_array_maps() {
         let blob = make_percpu_blob(&7u32.to_le_bytes(), 2);
         let mut values = HashMap::new();
@@ -2584,16 +3364,61 @@ mod tests {
         let result = run_map_inline_pass(&mut program);
 
         assert!(result.program_changed);
-        assert!(
-            !program
-                .insns
-                .iter()
-                .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM)
-        );
-        assert!(program.insns.iter().any(|insn| insn == &BpfInsn::mov64_imm(6, 7)));
+        assert!(!program
+            .insns
+            .iter()
+            .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+        assert!(program
+            .insns
+            .iter()
+            .any(|insn| insn == &BpfInsn::mov64_imm(6, 7)));
         assert!(
             result.pass_results[0].map_inline_records[0].expected_value == blob,
             "tracker should store the full per-cpu blob: {:?}",
+            result.pass_results[0].map_inline_records
+        );
+    }
+
+    #[test]
+    fn map_inline_pass_inlines_zero_filled_percpu_array_defaults() {
+        install_percpu_array_map(916, 4, 8, true, HashMap::new());
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![916]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 1);
+        assert!(!program
+            .insns
+            .iter()
+            .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+        assert!(
+            program
+                .insns
+                .iter()
+                .any(|insn| insn == &BpfInsn::mov64_imm(6, 0)),
+            "program should inline a zero constant: {:?}",
+            program.insns
+        );
+        assert!(
+            result.pass_results[0].map_inline_records[0]
+                .expected_value
+                .iter()
+                .all(|byte| *byte == 0),
+            "tracker should preserve the full zero-filled per-cpu blob: {:?}",
             result.pass_results[0].map_inline_records
         );
     }
@@ -2626,10 +3451,9 @@ mod tests {
         assert!(!result.program_changed);
         assert_eq!(program.insns, original);
         assert!(
-            result.pass_results[0]
-                .sites_skipped
-                .iter()
-                .any(|skip| skip.reason.contains("PERCPU_ARRAY value differs across CPUs")),
+            result.pass_results[0].sites_skipped.iter().any(|skip| skip
+                .reason
+                .contains("PERCPU_ARRAY value differs across CPUs")),
             "mixed PERCPU_ARRAY should be rejected with a precise reason: {:?}",
             result.pass_results[0].sites_skipped
         );

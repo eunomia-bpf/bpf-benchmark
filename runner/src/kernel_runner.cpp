@@ -757,10 +757,85 @@ bool fixture_value_uses_reference_fd(uint32_t map_type)
            map_type == BPF_MAP_TYPE_HASH_OF_MAPS;
 }
 
-void update_fixture_map_elem(
+const live_fixture_map *match_live_fixture_map(
+    const std::optional<std::string> &map_name,
+    const std::optional<uint32_t> &map_id,
+    const std::unordered_map<std::string, std::vector<live_fixture_map>> &maps_by_name,
+    const std::unordered_map<uint32_t, live_fixture_map> &maps_by_id,
+    std::unordered_map<std::string, size_t> &name_occurrence_counts)
+{
+    if (map_name.has_value()) {
+        const auto found = maps_by_name.find(*map_name);
+        if (found == maps_by_name.end()) {
+            std::fprintf(
+                stderr,
+                "fixture map '%s' not found in loaded object; skipping map\n",
+                map_name->c_str());
+            return nullptr;
+        }
+        const size_t occurrence_index = name_occurrence_counts[*map_name]++;
+        if (occurrence_index >= found->second.size()) {
+            std::fprintf(
+                stderr,
+                "fixture map '%s' occurrence exceeds matching loaded maps; skipping map\n",
+                map_name->c_str());
+            return nullptr;
+        }
+
+        const live_fixture_map *live_map = &found->second[occurrence_index];
+        if (map_id.has_value() && live_map->id != *map_id) {
+            std::fprintf(
+                stderr,
+                "fixture map '%s' id remapped: fixture=%u live=%u\n",
+                map_name->c_str(),
+                *map_id,
+                live_map->id);
+        }
+        return live_map;
+    }
+
+    const auto found = maps_by_id.find(*map_id);
+    if (found == maps_by_id.end()) {
+        std::fprintf(
+            stderr,
+            "fixture map id %u not found in loaded object; skipping map\n",
+            *map_id);
+        return nullptr;
+    }
+    return &found->second;
+}
+
+int resolve_fixture_reference_fd(
+    const live_fixture_map &map,
+    uint32_t referenced_id,
+    const std::unordered_map<uint32_t, live_fixture_map> &fixture_maps_by_id,
+    bool &needs_close)
+{
+    needs_close = false;
+    if (map.type != BPF_MAP_TYPE_PROG_ARRAY) {
+        const auto fixture_ref = fixture_maps_by_id.find(referenced_id);
+        if (fixture_ref != fixture_maps_by_id.end()) {
+            return fixture_ref->second.fd;
+        }
+    }
+
+    int referenced_fd = -1;
+    if (map.type == BPF_MAP_TYPE_PROG_ARRAY) {
+        referenced_fd = bpf_prog_get_fd_by_id(referenced_id);
+    } else {
+        referenced_fd = bpf_map_get_fd_by_id(referenced_id);
+    }
+    if (referenced_fd >= 0) {
+        needs_close = true;
+    }
+    return referenced_fd;
+}
+
+bool update_fixture_map_elem(
     const live_fixture_map &map,
     const std::vector<uint8_t> &key,
-    const std::vector<uint8_t> &value)
+    const std::vector<uint8_t> &value,
+    const std::unordered_map<uint32_t, live_fixture_map> &fixture_maps_by_id)
 {
     if (fixture_value_uses_reference_fd(map.type)) {
         if (value.size() != sizeof(uint32_t)) {
@@ -769,31 +844,39 @@ void update_fixture_map_elem(
 
         uint32_t referenced_id = 0;
         std::memcpy(&referenced_id, value.data(), sizeof(referenced_id));
-        int referenced_fd = -1;
-        if (map.type == BPF_MAP_TYPE_PROG_ARRAY) {
-            referenced_fd = bpf_prog_get_fd_by_id(referenced_id);
-        } else {
-            referenced_fd = bpf_map_get_fd_by_id(referenced_id);
-        }
+        bool referenced_fd_needs_close = false;
+        const int referenced_fd = resolve_fixture_reference_fd(
+            map,
+            referenced_id,
+            fixture_maps_by_id,
+            referenced_fd_needs_close);
         if (referenced_fd < 0) {
-            fail("unable to resolve referenced object id " +
-                 std::to_string(referenced_id) +
-                 " for fixture map '" + map.name + "': " +
-                 std::string(strerror(errno)));
+            const int resolve_errno = errno;
+            std::fprintf(
+                stderr,
+                "fixture map '%s' references %s id %u, but it is not present in "
+                "the fixture or current kernel (%s); skipping entry\n",
+                map.name.c_str(),
+                map.type == BPF_MAP_TYPE_PROG_ARRAY ? "program" : "map",
+                referenced_id,
+                std::string(strerror(resolve_errno)).c_str());
+            return false;
         }
 
-        scoped_fd referenced_fd_guard(referenced_fd);
+        scoped_fd referenced_fd_guard(
+            referenced_fd_needs_close ? referenced_fd : -1);
         if (bpf_map_update_elem(map.fd, key.data(), &referenced_fd, BPF_ANY) != 0) {
             fail("bpf_map_update_elem(" + map.name + ") failed: " +
                  std::string(strerror(errno)));
         }
-        return;
+        return true;
     }
 
     if (bpf_map_update_elem(map.fd, key.data(), value.data(), BPF_ANY) != 0) {
         fail("bpf_map_update_elem(" + map.name + ") failed: " +
              std::string(strerror(errno)));
     }
+    return true;
 }
 
 void load_map_fixtures(
@@ -837,8 +920,9 @@ void load_map_fixtures(
             });
     }
 
-    size_t loaded_entries = 0;
-    std::unordered_set<uint32_t> updated_map_ids;
+    std::vector<const live_fixture_map *> resolved_live_maps;
+    resolved_live_maps.reserve(maps.size());
+    std::unordered_map<uint32_t, live_fixture_map> fixture_maps_by_fixture_id;
     std::unordered_map<std::string, size_t> name_occurrence_counts;
     for (const auto &map_node : maps) {
         if (!map_node.IsMap()) {
@@ -857,43 +941,25 @@ void load_map_fixtures(
                  "' requires each map entry to specify map_name or map_id");
         }
 
-        const live_fixture_map *live_map = nullptr;
-        if (map_name.has_value()) {
-            const auto found = maps_by_name.find(*map_name);
-            if (found == maps_by_name.end()) {
-                std::fprintf(
-                    stderr,
-                    "fixture map '%s' not found in loaded object; skipping map\n",
-                    map_name->c_str());
-                continue;
-            }
-            const size_t occurrence_index = name_occurrence_counts[*map_name]++;
-            if (occurrence_index >= found->second.size()) {
-                std::fprintf(
-                    stderr,
-                    "fixture map '%s' occurrence exceeds matching loaded maps; skipping map\n",
-                    map_name->c_str());
-                continue;
-            }
-            live_map = &found->second[occurrence_index];
-            if (map_id.has_value() && live_map->id != *map_id) {
-                std::fprintf(
-                    stderr,
-                    "fixture map '%s' id remapped: fixture=%u live=%u\n",
-                    map_name->c_str(),
-                    *map_id,
-                    live_map->id);
-            }
-        } else {
-            const auto found = maps_by_id.find(*map_id);
-            if (found == maps_by_id.end()) {
-                std::fprintf(
-                    stderr,
-                    "fixture map id %u not found in loaded object; skipping map\n",
-                    *map_id);
-                continue;
-            }
-            live_map = &found->second;
+        const live_fixture_map *live_map = match_live_fixture_map(
+            map_name,
+            map_id,
+            maps_by_name,
+            maps_by_id,
+            name_occurrence_counts);
+        resolved_live_maps.push_back(live_map);
+        if (live_map != nullptr && map_id.has_value()) {
+            fixture_maps_by_fixture_id.insert_or_assign(*map_id, *live_map);
+        }
+    }
+
+    size_t loaded_entries = 0;
+    std::unordered_set<uint32_t> updated_map_ids;
+    size_t map_index = 0;
+    for (const auto &map_node : maps) {
+        const live_fixture_map *live_map = resolved_live_maps.at(map_index++);
+        if (live_map == nullptr) {
+            continue;
         }
 
         if (const auto declared_key_size =
@@ -969,9 +1035,14 @@ void load_map_fixtures(
                 break;
             }
 
-            update_fixture_map_elem(*live_map, key, value);
-            ++loaded_entries;
-            updated_map_ids.insert(live_map->id);
+            if (update_fixture_map_elem(
+                    *live_map,
+                    key,
+                    value,
+                    fixture_maps_by_fixture_id)) {
+                ++loaded_entries;
+                updated_map_ids.insert(live_map->id);
+            }
         }
         if (skip_map) {
             continue;
@@ -1095,6 +1166,7 @@ struct daemon_socket_response {
     /* Structured fields extracted from daemon's OptimizeOneResult */
     uint32_t total_sites_applied = 0;
     std::vector<std::string> passes_applied;    /* pass names that changed the program */
+    std::vector<daemon_pass_detail> pass_details;
     int64_t insn_delta = 0;
     uint32_t verifier_retries = 0;
     std::vector<std::string> final_disabled_passes;
@@ -1161,57 +1233,81 @@ static bool extract_json_bool(const std::string &json, const std::string &key)
            json.find(pat_true2) != std::string::npos;
 }
 
-/* Extract pass names that changed from the "passes" array in the JSON.
- * Looks for objects with "changed":true and extracts "pass_name". */
-static std::vector<std::string> extract_changed_passes(const std::string &json)
+static bool json_char_escaped(const std::string &json, size_t pos)
 {
-    std::vector<std::string> result;
-    /* Find "passes":[ section */
-    auto passes_pos = json.find("\"passes\":[");
-    if (passes_pos == std::string::npos) {
-        passes_pos = json.find("\"passes\": [");
+    if (pos == 0 || pos > json.size()) {
+        return false;
     }
-    if (passes_pos == std::string::npos) return result;
 
-    /* Find the opening '[' of the passes array */
-    auto array_open = json.find('[', passes_pos);
-    if (array_open == std::string::npos) return result;
-
-    /* Find the matching ']' for the passes array, respecting nesting */
-    int arr_depth = 1;
-    size_t array_close = array_open + 1;
-    while (array_close < json.size() && arr_depth > 0) {
-        if (json[array_close] == '[') ++arr_depth;
-        else if (json[array_close] == ']') --arr_depth;
-        ++array_close;
+    size_t backslash_count = 0;
+    size_t cursor = pos;
+    while (cursor > 0 && json[--cursor] == '\\') {
+        ++backslash_count;
     }
-    /* array_close now points one past the matching ']' */
+    return (backslash_count % 2) != 0;
+}
 
-    /* Walk through the passes array looking for changed:true entries */
-    size_t pos = array_open;
-    while (true) {
-        auto obj_start = json.find('{', pos + 1);
-        if (obj_start == std::string::npos || obj_start >= array_close) break;
-        /* Find matching } — handle nesting */
-        int depth = 1;
-        size_t obj_end = obj_start + 1;
-        while (obj_end < json.size() && depth > 0) {
-            if (json[obj_end] == '{') ++depth;
-            else if (json[obj_end] == '}') --depth;
-            ++obj_end;
+static size_t find_matching_json_delim(
+    const std::string &json,
+    size_t open_pos,
+    char open_ch,
+    char close_ch)
+{
+    if (open_pos >= json.size() || json[open_pos] != open_ch) {
+        return std::string::npos;
+    }
+
+    int depth = 0;
+    bool in_string = false;
+    for (size_t index = open_pos; index < json.size(); ++index) {
+        const char ch = json[index];
+        if (ch == '"' && !json_char_escaped(json, index)) {
+            in_string = !in_string;
+            continue;
         }
-        if (depth != 0) break;
-
-        std::string pass_obj = json.substr(obj_start, obj_end - obj_start);
-        if (extract_json_bool(pass_obj, "changed")) {
-            std::string name = extract_json_string(pass_obj, "pass_name");
-            if (!name.empty()) {
-                result.push_back(name);
+        if (in_string) {
+            continue;
+        }
+        if (ch == open_ch) {
+            ++depth;
+        } else if (ch == close_ch) {
+            --depth;
+            if (depth == 0) {
+                return index;
             }
         }
-        pos = obj_end;
     }
-    return result;
+    return std::string::npos;
+}
+
+static std::string extract_json_compound(
+    const std::string &json,
+    const std::string &key,
+    char open_ch,
+    char close_ch)
+{
+    const std::string pattern = "\"" + key + "\"";
+    size_t key_pos = json.find(pattern);
+    while (key_pos != std::string::npos) {
+        const auto colon_pos = json.find(':', key_pos + pattern.size());
+        if (colon_pos == std::string::npos) {
+            return {};
+        }
+        size_t value_start = colon_pos + 1;
+        while (value_start < json.size() && json[value_start] == ' ') {
+            ++value_start;
+        }
+        if (value_start < json.size() && json[value_start] == open_ch) {
+            const auto value_end =
+                find_matching_json_delim(json, value_start, open_ch, close_ch);
+            if (value_end == std::string::npos) {
+                return {};
+            }
+            return json.substr(value_start, value_end - value_start + 1);
+        }
+        key_pos = json.find(pattern, key_pos + pattern.size());
+    }
+    return {};
 }
 
 /* Extract a JSON array of strings for a given key.
@@ -1245,6 +1341,69 @@ static std::vector<std::string> extract_json_string_array(const std::string &jso
         if (q2 == std::string::npos) break;
         result.push_back(arr_content.substr(q1 + 1, q2 - q1 - 1));
         spos = q2 + 1;
+    }
+    return result;
+}
+
+static std::vector<daemon_pass_detail> extract_pass_details(const std::string &json)
+{
+    std::vector<daemon_pass_detail> details;
+    const std::string passes_json = extract_json_compound(json, "passes", '[', ']');
+    if (passes_json.size() < 2) {
+        return details;
+    }
+
+    size_t cursor = 1;
+    while (cursor + 1 < passes_json.size()) {
+        const auto object_start = passes_json.find('{', cursor);
+        if (object_start == std::string::npos || object_start + 1 >= passes_json.size()) {
+            break;
+        }
+        const auto object_end =
+            find_matching_json_delim(passes_json, object_start, '{', '}');
+        if (object_end == std::string::npos) {
+            break;
+        }
+
+        const std::string pass_object =
+            passes_json.substr(object_start, object_end - object_start + 1);
+        daemon_pass_detail detail;
+        detail.pass_name = extract_json_string(pass_object, "pass_name");
+        detail.changed = extract_json_bool(pass_object, "changed");
+        detail.sites_applied = static_cast<uint32_t>(
+            extract_json_int(pass_object, "sites_applied"));
+        detail.sites_skipped = static_cast<uint32_t>(
+            extract_json_int(pass_object, "sites_skipped"));
+        detail.sites_found = detail.sites_applied + detail.sites_skipped;
+        detail.insns_before = extract_json_int(pass_object, "insns_before");
+        detail.insns_after = extract_json_int(pass_object, "insns_after");
+        detail.insn_delta = extract_json_int(pass_object, "insn_delta");
+        if (const auto skip_reasons =
+                extract_json_compound(pass_object, "skip_reasons", '{', '}');
+            !skip_reasons.empty()) {
+            detail.skip_reasons_json = skip_reasons;
+        }
+        if (const auto diagnostics =
+                extract_json_compound(pass_object, "diagnostics", '[', ']');
+            !diagnostics.empty()) {
+            detail.diagnostics_json = diagnostics;
+        }
+        details.push_back(std::move(detail));
+        cursor = object_end + 1;
+    }
+
+    return details;
+}
+
+static std::vector<std::string> changed_pass_names(
+    const std::vector<daemon_pass_detail> &details)
+{
+    std::vector<std::string> result;
+    result.reserve(details.size());
+    for (const auto &detail : details) {
+        if (detail.changed && !detail.pass_name.empty()) {
+            result.push_back(detail.pass_name);
+        }
     }
     return result;
 }
@@ -1319,48 +1478,25 @@ daemon_socket_response daemon_socket_optimize(
 
     if (response.ok) {
         /* Extract summary.applied (nested in "summary" object) */
-        auto summary_pos = buf.find("\"summary\":");
-        if (summary_pos != std::string::npos) {
-            /* Extract the summary sub-object */
-            auto brace = buf.find('{', summary_pos);
-            if (brace != std::string::npos) {
-                int depth = 1;
-                size_t end = brace + 1;
-                while (end < buf.size() && depth > 0) {
-                    if (buf[end] == '{') ++depth;
-                    else if (buf[end] == '}') --depth;
-                    ++end;
-                }
-                std::string summary = buf.substr(brace, end - brace);
-                response.applied = extract_json_bool(summary, "applied");
-                response.total_sites_applied = static_cast<uint32_t>(
-                    extract_json_int(summary, "total_sites_applied"));
-                response.verifier_retries = static_cast<uint32_t>(
-                    extract_json_int(summary, "verifier_retries"));
-                response.final_disabled_passes =
-                    extract_json_string_array(summary, "final_disabled_passes");
-            }
+        const std::string summary = extract_json_compound(buf, "summary", '{', '}');
+        if (!summary.empty()) {
+            response.applied = extract_json_bool(summary, "applied");
+            response.total_sites_applied = static_cast<uint32_t>(
+                extract_json_int(summary, "total_sites_applied"));
+            response.verifier_retries = static_cast<uint32_t>(
+                extract_json_int(summary, "verifier_retries"));
+            response.final_disabled_passes =
+                extract_json_string_array(summary, "final_disabled_passes");
         }
 
         /* Extract program.insn_delta */
-        auto prog_pos = buf.find("\"program\":");
-        if (prog_pos != std::string::npos) {
-            auto brace = buf.find('{', prog_pos);
-            if (brace != std::string::npos) {
-                int depth = 1;
-                size_t end = brace + 1;
-                while (end < buf.size() && depth > 0) {
-                    if (buf[end] == '{') ++depth;
-                    else if (buf[end] == '}') --depth;
-                    ++end;
-                }
-                std::string prog_obj = buf.substr(brace, end - brace);
-                response.insn_delta = extract_json_int(prog_obj, "insn_delta");
-            }
+        const std::string prog_obj = extract_json_compound(buf, "program", '{', '}');
+        if (!prog_obj.empty()) {
+            response.insn_delta = extract_json_int(prog_obj, "insn_delta");
         }
 
-        /* Extract pass names that changed */
-        response.passes_applied = extract_changed_passes(buf);
+        response.pass_details = extract_pass_details(buf);
+        response.passes_applied = changed_pass_names(response.pass_details);
     } else {
         /* Extract error message */
         std::string msg = extract_json_string(buf, "message");
@@ -2219,6 +2355,7 @@ void populate_rejit_from_daemon_summary(
         summary.applied = response.applied;
         summary.total_sites_applied = response.total_sites_applied;
         summary.passes_applied = response.passes_applied;
+        summary.pass_details = response.pass_details;
         summary.insn_delta = response.insn_delta;
         summary.verifier_retries = response.verifier_retries;
         summary.final_disabled_passes = response.final_disabled_passes;
@@ -3151,6 +3288,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             r.applied = resp.applied;
             r.total_sites_applied = resp.total_sites_applied;
             r.passes_applied = resp.passes_applied;
+            r.pass_details = resp.pass_details;
             r.insn_delta = resp.insn_delta;
             r.verifier_retries = resp.verifier_retries;
             r.final_disabled_passes = resp.final_disabled_passes;
@@ -3576,6 +3714,7 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
             rejit.applied = sock_resp.applied;
             rejit.total_sites_applied = sock_resp.total_sites_applied;
             rejit.passes_applied = sock_resp.passes_applied;
+            rejit.pass_details = sock_resp.pass_details;
             rejit.insn_delta = sock_resp.insn_delta;
             rejit.verifier_retries = sock_resp.verifier_retries;
             rejit.final_disabled_passes = sock_resp.final_disabled_passes;

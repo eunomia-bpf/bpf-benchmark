@@ -68,7 +68,10 @@ impl MapInfo {
     /// Returns whether v1 can eliminate the lookup/null-check sequence.
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn can_remove_lookup_pattern_v1(&self) -> bool {
-        matches!(self.map_type, BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY)
+        matches!(
+            self.map_type,
+            BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY
+        )
     }
 
     /// Returns whether this inline is speculative and depends on runtime stability.

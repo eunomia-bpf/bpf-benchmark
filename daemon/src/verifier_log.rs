@@ -17,7 +17,10 @@ use std::collections::HashMap;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct VerifierInsn {
     pub pc: usize,
+    pub frame: usize,
+    pub from_pc: Option<usize>,
     pub regs: HashMap<u8, RegState>,
+    pub stack: HashMap<i16, StackState>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -39,6 +42,12 @@ impl RegState {
             offset: None,
         }
     }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct StackState {
+    pub slot_types: Option<String>,
+    pub value: Option<RegState>,
 }
 
 pub fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
@@ -108,26 +117,39 @@ fn parse_state_line(line: &str) -> Option<VerifierInsn> {
         return None;
     }
 
-    let (pc, state_text) =
+    let (pc, from_pc, state_text) =
         parse_from_state_line(trimmed).or_else(|| parse_pc_state_line(trimmed))?;
+    let (frame, state_text) = strip_frame_prefix(state_text);
 
     let mut regs = HashMap::new();
+    let mut stack = HashMap::new();
     for token in split_top_level_tokens(state_text) {
         if let Some((regno, state)) = parse_reg_token(token) {
             regs.insert(regno, state);
+            continue;
+        }
+        if let Some((off, state)) = parse_stack_token(token) {
+            stack.insert(off, state);
         }
     }
 
-    if regs.is_empty() {
+    if regs.is_empty() && stack.is_empty() {
         return None;
     }
 
-    Some(VerifierInsn { pc, regs })
+    Some(VerifierInsn {
+        pc,
+        frame,
+        from_pc,
+        regs,
+        stack,
+    })
 }
 
-fn parse_from_state_line(line: &str) -> Option<(usize, &str)> {
+fn parse_from_state_line(line: &str) -> Option<(usize, Option<usize>, &str)> {
     let rest = line.strip_prefix("from ")?;
-    let (_, rest) = rest.split_once(" to ")?;
+    let (from_text, rest) = rest.split_once(" to ")?;
+    let from_pc = from_text.trim().parse().ok()?;
 
     let digits_len = rest.chars().take_while(|ch| ch.is_ascii_digit()).count();
     if digits_len == 0 {
@@ -141,10 +163,10 @@ fn parse_from_state_line(line: &str) -> Option<(usize, &str)> {
     }
 
     let state_text = tail.strip_prefix(':')?.trim();
-    is_state_text(state_text).then_some((pc, state_text))
+    is_state_text(state_text).then_some((pc, Some(from_pc), state_text))
 }
 
-fn parse_pc_state_line(line: &str) -> Option<(usize, &str)> {
+fn parse_pc_state_line(line: &str) -> Option<(usize, Option<usize>, &str)> {
     let colon = line.find(':')?;
     let pc = line[..colon].trim().parse().ok()?;
     let tail = line[colon + 1..].trim();
@@ -153,16 +175,34 @@ fn parse_pc_state_line(line: &str) -> Option<(usize, &str)> {
     }
 
     if is_state_text(tail) {
-        return Some((pc, tail));
+        return Some((pc, None, tail));
     }
 
     let semicolon = find_top_level_char(tail, ';')?;
     let state_text = tail[semicolon + 1..].trim();
-    is_state_text(state_text).then_some((pc, state_text))
+    is_state_text(state_text).then_some((pc, None, state_text))
 }
 
 fn is_state_text(text: &str) -> bool {
     text.starts_with('R') || text.starts_with("frame")
+}
+
+fn strip_frame_prefix(text: &str) -> (usize, &str) {
+    let Some(rest) = text.strip_prefix("frame") else {
+        return (0, text);
+    };
+
+    let digits_len = rest.chars().take_while(|ch| ch.is_ascii_digit()).count();
+    if digits_len == 0 {
+        return (0, text);
+    }
+
+    let frame = rest[..digits_len].parse().ok();
+    let tail = rest[digits_len..].trim_start();
+    match (frame, tail.strip_prefix(':')) {
+        (Some(frame), Some(tail)) => (frame, tail.trim_start()),
+        _ => (0, text),
+    }
 }
 
 fn split_top_level_tokens(text: &str) -> Vec<&str> {
@@ -208,10 +248,22 @@ fn parse_reg_token(token: &str) -> Option<(u8, RegState)> {
     Some((regno, state))
 }
 
+fn parse_stack_token(token: &str) -> Option<(i16, StackState)> {
+    let (lhs, rhs) = token.split_once('=')?;
+    let off = parse_stack_name(lhs)?;
+    let state = parse_stack_state(rhs.trim());
+    Some((off, state))
+}
+
 fn parse_reg_name(name: &str) -> Option<u8> {
     let name = name.strip_prefix('R')?;
     let name = name.strip_suffix("_w").unwrap_or(name);
     name.parse().ok()
+}
+
+fn parse_stack_name(name: &str) -> Option<i16> {
+    let name = name.strip_prefix("fp")?;
+    parse_i32(name)?.try_into().ok()
 }
 
 fn parse_reg_state(raw: &str) -> RegState {
@@ -256,6 +308,70 @@ fn normalize_reg_type(reg_type: &str) -> String {
         "inv" => "scalar".to_string(),
         other => other.to_string(),
     }
+}
+
+fn parse_stack_state(raw: &str) -> StackState {
+    if raw.is_empty() {
+        return StackState {
+            slot_types: None,
+            value: None,
+        };
+    }
+
+    for split in raw.char_indices().skip(1).map(|(idx, _)| idx) {
+        let prefix = &raw[..split];
+        let rest = raw[split..].trim();
+        if prefix.chars().all(is_stack_slot_type_char) && looks_like_reg_state(rest) {
+            return StackState {
+                slot_types: Some(prefix.to_string()),
+                value: Some(parse_reg_state(rest)),
+            };
+        }
+    }
+
+    if raw.len() == 8 && raw.chars().all(is_stack_slot_type_char) {
+        return StackState {
+            slot_types: Some(raw.to_string()),
+            value: None,
+        };
+    }
+
+    if looks_like_reg_state(raw) {
+        return StackState {
+            slot_types: None,
+            value: Some(parse_reg_state(raw)),
+        };
+    }
+
+    if raw.chars().all(is_stack_slot_type_char) {
+        return StackState {
+            slot_types: Some(raw.to_string()),
+            value: None,
+        };
+    }
+
+    StackState {
+        slot_types: None,
+        value: Some(parse_reg_state(raw)),
+    }
+}
+
+fn looks_like_reg_state(raw: &str) -> bool {
+    if raw.is_empty() {
+        return false;
+    }
+    parse_signed_value(raw).is_some()
+        || raw.starts_with("fp")
+        || raw.contains('(')
+        || raw == "scalar"
+        || (!raw.chars().all(is_stack_slot_type_char)
+            && raw
+                .chars()
+                .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '_' | '+' | '-')))
+}
+
+fn is_stack_slot_type_char(ch: char) -> bool {
+    matches!(ch, '?' | 'r' | 'm' | '0' | 'd' | 'i' | 'f')
 }
 
 fn parse_reg_attributes(attrs: &str, state: &mut RegState) {
@@ -421,6 +537,8 @@ from 4 to 6: R0_w=pkt(off=8,r=8) R1=ctx() R2_w=pkt(r=8) R3_w=pkt_end() R10=fp0
         assert_eq!(insns.len(), 5);
 
         assert_eq!(insns[0].pc, 6);
+        assert_eq!(insns[0].from_pc, Some(4));
+        assert_eq!(insns[0].frame, 0);
         assert_eq!(insns[0].regs.get(&1).unwrap().reg_type, "ctx");
         assert_eq!(insns[0].regs.get(&0).unwrap().reg_type, "pkt");
         assert_eq!(insns[0].regs.get(&0).unwrap().offset, Some(8));
@@ -449,6 +567,10 @@ from 4 to 6: R0_w=pkt(off=8,r=8) R1=ctx() R2_w=pkt(r=8) R3_w=pkt_end() R10=fp0
         assert_eq!(r2.known_value, Some(1));
         assert_eq!(r2.min_value, Some(1));
         assert_eq!(r2.max_value, Some(1));
+
+        let fp8 = insns[4].stack.get(&-8).unwrap();
+        assert_eq!(fp8.slot_types.as_deref(), Some("0000????"));
+        assert!(fp8.value.is_none());
     }
 
     #[test]
@@ -520,6 +642,33 @@ processed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_stat
         assert_eq!(parsed[0].pc, 0);
         assert!(parsed[0].regs.contains_key(&1));
         assert_eq!(parsed[0].regs.get(&1).unwrap().reg_type, "ctx");
+    }
+
+    #[test]
+    fn parses_frame_and_stack_tokens() {
+        let log = r#"
+3: frame1: R1=ctx() R2=fp-24 R10=fp0 fp-24=scalar(id=1) fp-32=0000???? fp-40=fp-56
+"#;
+
+        let insns = parse_verifier_log(log);
+        assert_eq!(insns.len(), 1);
+        let insn = &insns[0];
+        assert_eq!(insn.pc, 3);
+        assert_eq!(insn.frame, 1);
+        assert_eq!(insn.regs.get(&2).unwrap().reg_type, "fp");
+        assert_eq!(insn.regs.get(&2).unwrap().offset, Some(-24));
+
+        let fp24 = insn.stack.get(&-24).unwrap();
+        assert_eq!(fp24.slot_types, None);
+        assert_eq!(fp24.value.as_ref().unwrap().reg_type, "scalar");
+
+        let fp32 = insn.stack.get(&-32).unwrap();
+        assert_eq!(fp32.slot_types.as_deref(), Some("0000????"));
+        assert!(fp32.value.is_none());
+
+        let fp40 = insn.stack.get(&-40).unwrap();
+        assert_eq!(fp40.value.as_ref().unwrap().reg_type, "fp");
+        assert_eq!(fp40.value.as_ref().unwrap().offset, Some(-56));
     }
 
     // ── extract_failure_pc tests ──────────────────────────────────

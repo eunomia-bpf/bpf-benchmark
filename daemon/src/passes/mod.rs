@@ -249,6 +249,16 @@ pub fn build_full_pipeline() -> PassManager {
     pm
 }
 
+pub fn build_pipeline_for_profile(profile: crate::pass::PipelineProfile) -> PassManager {
+    match profile {
+        crate::pass::PipelineProfile::Default => build_full_pipeline(),
+        crate::pass::PipelineProfile::MapInlineOnly => {
+            build_custom_pipeline(&["map_inline".to_string()])
+                .expect("map_inline-only pipeline should always be valid")
+        }
+    }
+}
+
 /// Build a pipeline containing only the named passes, in canonical order.
 ///
 /// Pass names are matched against `PASS_REGISTRY` entries by canonical name
@@ -516,6 +526,13 @@ mod tests {
         assert!(!pm.pass_names().contains(&"speculation_barrier"));
         assert!(!pm.pass_names().contains(&"dangerous_helper_firewall"));
         assert!(!pm.pass_names().contains(&"live_patch"));
+    }
+
+    #[test]
+    fn test_map_inline_only_pipeline_contains_only_map_inline() {
+        let pm = build_pipeline_for_profile(crate::pass::PipelineProfile::MapInlineOnly);
+
+        assert_eq!(pm.pass_names(), vec!["map_inline"]);
     }
 
     #[test]
@@ -1388,17 +1405,17 @@ mod real_bpfo_tests {
         let mut attempted_cases = 0usize;
 
         for case in all_captured_real_cases() {
-            let (loaded, _program, result) = match try_run_captured_real_case(&["map_inline"], *case)
-            {
-                Ok(result) => result,
-                Err(err) => {
-                    eprintln!(
-                        "captured fixture {}:{} skipped during smoke scan: {:#}",
-                        case.object_path, case.program_name, err
-                    );
-                    continue;
-                }
-            };
+            let (loaded, _program, result) =
+                match try_run_captured_real_case(&["map_inline"], *case) {
+                    Ok(result) => result,
+                    Err(err) => {
+                        eprintln!(
+                            "captured fixture {}:{} skipped during smoke scan: {:#}",
+                            case.object_path, case.program_name, err
+                        );
+                        continue;
+                    }
+                };
             attempted_cases += 1;
             let pass = pass_result(&result, "map_inline").unwrap();
             eprintln!(

@@ -65,6 +65,35 @@ void print_json_string_array(std::ostream &out,
     out << "]";
 }
 
+void print_json_daemon_pass_details(
+    std::ostream &out,
+    const std::vector<daemon_pass_detail> &details)
+{
+    out << "[";
+    for (size_t index = 0; index < details.size(); ++index) {
+        if (index != 0) {
+            out << ",";
+        }
+        const auto &detail = details[index];
+        out
+            << "{"
+            << "\"pass_name\":\"" << json_escape(detail.pass_name) << "\","
+            << "\"changed\":" << (detail.changed ? "true" : "false") << ","
+            << "\"sites_found\":" << detail.sites_found << ","
+            << "\"sites_applied\":" << detail.sites_applied << ","
+            << "\"sites_skipped\":" << detail.sites_skipped << ","
+            << "\"insns_before\":" << detail.insns_before << ","
+            << "\"insns_after\":" << detail.insns_after << ","
+            << "\"insn_delta\":" << detail.insn_delta << ","
+            << "\"skip_reasons\":"
+            << (detail.skip_reasons_json.empty() ? "{}" : detail.skip_reasons_json) << ","
+            << "\"diagnostics\":"
+            << (detail.diagnostics_json.empty() ? "[]" : detail.diagnostics_json)
+            << "}";
+    }
+    out << "]";
+}
+
 std::string usage_text()
 {
     return
@@ -925,6 +954,8 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
         << "\"verifier_retries\":" << sample.rejit.verifier_retries << ","
         << "\"final_disabled_passes\":";
     print_json_string_array(out, sample.rejit.final_disabled_passes);
+    out << ",\"pass_details\":";
+    print_json_daemon_pass_details(out, sample.rejit.pass_details);
     if (sample.rejit.daemon_debug_stripped) {
         out << ",\"daemon_debug_stripped\":true";
     }

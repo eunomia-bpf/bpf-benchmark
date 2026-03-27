@@ -599,7 +599,14 @@ pub fn bpf_map_lookup_elem_by_id(map_id: u32, key: &[u8], value_size: usize) -> 
     }
 
     let fd = bpf_map_get_fd_by_id(map_id)?;
-    bpf_map_lookup_elem(fd.as_raw_fd(), key, value_size)
+    match bpf_map_lookup_elem_optional(fd.as_raw_fd(), key, value_size)? {
+        Some(value) => Ok(value),
+        None => {
+            let info = bpf_map_get_info(fd.as_raw_fd())?;
+            zero_filled_lookup_value(&info, key, value_size)
+                .ok_or_else(|| anyhow::anyhow!("map {} missing key {:?}", map_id, key))
+        }
+    }
 }
 
 pub fn bpf_map_lookup_value_size(info: &BpfMapInfo) -> usize {
@@ -638,7 +645,8 @@ fn possible_cpu_count() -> usize {
 
 fn read_possible_cpu_count() -> Option<usize> {
     let text = std::fs::read_to_string("/sys/devices/system/cpu/possible").ok()?;
-    parse_possible_cpu_list(&text).or_else(|| std::thread::available_parallelism().ok().map(usize::from))
+    parse_possible_cpu_list(&text)
+        .or_else(|| std::thread::available_parallelism().ok().map(usize::from))
 }
 
 fn parse_possible_cpu_list(text: &str) -> Option<usize> {
@@ -663,23 +671,7 @@ fn mock_zero_filled_lookup_value(
     key: &[u8],
     value_size: usize,
 ) -> Option<Vec<u8>> {
-    if state.info.key_size as usize != key.len() || key.len() > 8 {
-        return None;
-    }
-
-    let expected_size = mock_lookup_value_size(state);
-    let always_present = matches!(
-        state.info.map_type,
-        BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY
-    );
-    if !always_present || value_size != expected_size {
-        return None;
-    }
-
-    let mut raw = [0u8; 8];
-    raw[..key.len()].copy_from_slice(key);
-    let index = u64::from_le_bytes(raw);
-    (index < state.info.max_entries as u64).then_some(vec![0u8; value_size])
+    zero_filled_lookup_value(&state.info, key, value_size)
 }
 
 #[cfg(test)]
@@ -690,6 +682,28 @@ fn mock_lookup_value_size(state: &MockMapState) -> usize {
         .next()
         .map(|value| value.len())
         .unwrap_or_else(|| bpf_map_lookup_value_size(&state.info))
+}
+
+fn zero_filled_lookup_value(info: &BpfMapInfo, key: &[u8], value_size: usize) -> Option<Vec<u8>> {
+    if !matches!(
+        info.map_type,
+        BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY
+    ) {
+        return None;
+    }
+    if info.key_size as usize != key.len() || key.len() > 8 {
+        return None;
+    }
+
+    let expected_size = bpf_map_lookup_value_size(info);
+    if value_size != expected_size {
+        return None;
+    }
+
+    let mut raw = [0u8; 8];
+    raw[..key.len()].copy_from_slice(key);
+    let index = u64::from_le_bytes(raw);
+    (index < info.max_entries as u64).then_some(vec![0u8; value_size])
 }
 
 /// Open a file descriptor for the BPF BTF object with the given ID.
@@ -933,7 +947,8 @@ pub fn relocate_map_fds_with_bindings(
         return Ok(Vec::new());
     }
 
-    let relocation_targets = resolve_map_ids_for_relocation(&unique_old_fds, map_ids, map_fd_bindings);
+    let relocation_targets =
+        resolve_map_ids_for_relocation(&unique_old_fds, map_ids, map_fd_bindings);
 
     // Step 2: Verify we have enough map IDs.
     if relocation_targets.len() < unique_old_fds.len() {
@@ -1080,9 +1095,8 @@ fn run_rejit_once(
 /// The kernel will run bpf_check() + JIT on the new instructions and
 /// atomically replace the program image in-place.
 ///
-/// When `capture_verifier_log` is false, first attempts with log_level=0
-/// (fast path) and only retries with log_level=2 on failure. When true,
-/// always uses log_level=2 so the success path also returns the verifier log.
+/// First attempts with `log_level=0` (fast path) and only retries with
+/// `log_level=2` on failure.
 pub fn bpf_prog_rejit(
     prog_fd: RawFd,
     insns: &[BpfInsn],
@@ -1113,6 +1127,19 @@ pub fn bpf_prog_rejit(
             }
         }
     }
+}
+
+/// Submit BPF bytecode to the kernel via `BPF_PROG_REJIT(log_level=2)` and
+/// return the verifier log even on success.
+pub fn bpf_prog_rejit_capture_verifier_log(
+    prog_fd: RawFd,
+    insns: &[BpfInsn],
+    fd_array: &[RawFd],
+) -> Result<RejitResult> {
+    const LOG_BUF_SIZE: usize = 16 * 1024 * 1024; // 16 MB
+
+    let mut log_buf = vec![0u8; LOG_BUF_SIZE];
+    run_rejit_once(prog_fd, insns, fd_array, 2, Some(&mut log_buf))
 }
 
 /// Iterate over all live BPF program IDs in the kernel.

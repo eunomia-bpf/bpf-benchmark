@@ -9,10 +9,13 @@
 
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
+use std::sync::Arc;
 
+use clap::ValueEnum;
 use serde::Serialize;
 
 use crate::insn::{dump_bytecode_compact, BpfBytecodeDump, BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
+use crate::verifier_log::{self, VerifierInsn};
 
 // ── Per-instruction annotation — populated by analysis passes, read by transform passes.
 #[derive(Clone, Debug, Default)]
@@ -79,6 +82,8 @@ pub struct BpfProgram {
     /// Set by `inject_profiling` when PMU data is available.
     /// Consumed by BranchFlipPass to gate optimization.
     pub branch_miss_rate: Option<f64>,
+    /// Parsed `log_level=2` verifier state snapshots for the original program.
+    pub verifier_states: Arc<[VerifierInsn]>,
 }
 
 /// Transform log entry — records sites applied by each pass.
@@ -99,6 +104,7 @@ impl BpfProgram {
             map_ids: Vec::new(),
             map_fd_bindings: HashMap::new(),
             branch_miss_rate: None,
+            verifier_states: Arc::from([]),
         }
     }
 
@@ -158,6 +164,16 @@ impl BpfProgram {
         if data.branch_miss_rate.is_some() {
             self.branch_miss_rate = data.branch_miss_rate;
         }
+    }
+
+    /// Attach parsed verifier states to this program.
+    pub fn set_verifier_states(&mut self, states: Vec<VerifierInsn>) {
+        self.verifier_states = Arc::from(states);
+    }
+
+    /// Parse and attach a raw verifier log to this program.
+    pub fn set_verifier_log(&mut self, log: &str) {
+        self.set_verifier_states(verifier_log::parse_verifier_log(log));
     }
 
     /// Record a transform operation.
@@ -543,6 +559,14 @@ pub enum Arch {
     Aarch64,
 }
 
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, ValueEnum)]
+#[value(rename_all = "snake_case")]
+pub enum PipelineProfile {
+    #[default]
+    Default,
+    MapInlineOnly,
+}
+
 /// Optimization policy configuration.
 #[derive(Clone, Debug, Default)]
 
@@ -551,6 +575,8 @@ pub struct PolicyConfig {
     pub enabled_passes: Vec<String>,
     /// Disabled pass name list.
     pub disabled_passes: Vec<String>,
+    /// Fixed pipeline selection for controlled benchmarking and debugging.
+    pub pipeline_profile: PipelineProfile,
 }
 
 // ── Type-erased analysis wrapper ────────────────────────────────────
