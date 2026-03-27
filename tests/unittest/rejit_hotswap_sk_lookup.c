@@ -25,6 +25,7 @@
 #define CLIENT_INTERVAL_US 10000
 #define ROUND_DWELL_US 200000
 #define ACCEPT_TIMEOUT_MS 1200
+#define MIN_EXCLUSIVE_ACCEPTS 24
 
 static const char *g_progs_dir = "tests/unittest/build/progs";
 static int g_pass;
@@ -102,27 +103,57 @@ static int open_reuseport_listener(int port)
 	return fd;
 }
 
-static int wait_for_accept(struct accept_ctx *accept_ctx, int expected_idx,
-			   char *reason, size_t reason_sz)
+static int wait_for_exclusive_accept(struct accept_ctx *accept_ctx,
+				     struct client_ctx *client_ctx,
+				     int expected_idx, char *reason,
+				     size_t reason_sz)
 {
-	unsigned long long start_err = read_counter(&accept_ctx->err);
-	unsigned long long start_accepts = read_counter(&accept_ctx->accepted[expected_idx]);
+	unsigned long long start_accept_err = read_counter(&accept_ctx->err);
+	unsigned long long start_client_err = read_counter(&client_ctx->err);
+	unsigned long long start_accepts[2] = {
+		read_counter(&accept_ctx->accepted[0]),
+		read_counter(&accept_ctx->accepted[1]),
+	};
+	int other_idx = expected_idx ^ 1;
 	int elapsed_ms = 0;
 
 	while (elapsed_ms < ACCEPT_TIMEOUT_MS) {
-		if (read_counter(&accept_ctx->err) > start_err) {
+		unsigned long long accept_err_now = read_counter(&accept_ctx->err);
+		unsigned long long client_err_now = read_counter(&client_ctx->err);
+		unsigned long long expected_delta;
+		unsigned long long other_delta;
+
+		if (accept_err_now > start_accept_err) {
 			snprintf(reason, reason_sz, "accept worker saw unexpected errors");
 			errno = EIO;
 			return -1;
 		}
-		if (read_counter(&accept_ctx->accepted[expected_idx]) > start_accepts)
-			return 0;
+		if (client_err_now > start_client_err) {
+			snprintf(reason, reason_sz, "client worker saw unexpected connect errors");
+			errno = EIO;
+			return -1;
+		}
+
+		expected_delta = read_counter(&accept_ctx->accepted[expected_idx]) -
+				 start_accepts[expected_idx];
+		other_delta = read_counter(&accept_ctx->accepted[other_idx]) -
+			      start_accepts[other_idx];
+		if (expected_delta + other_delta >= MIN_EXCLUSIVE_ACCEPTS) {
+			if (expected_delta > 0 && other_delta == 0)
+				return 0;
+
+			start_accepts[0] = read_counter(&accept_ctx->accepted[0]);
+			start_accepts[1] = read_counter(&accept_ctx->accepted[1]);
+			start_accept_err = accept_err_now;
+			start_client_err = client_err_now;
+		}
 
 		usleep(10000);
 		elapsed_ms += 10;
 	}
 
-	snprintf(reason, reason_sz, "timed out waiting for server %d accept",
+	snprintf(reason, reason_sz,
+		 "timed out waiting for exclusive accepts on server %d",
 		 expected_idx);
 	errno = ETIMEDOUT;
 	return -1;
@@ -330,7 +361,8 @@ static int test_rejit_hotswap_sk_lookup(void)
 	}
 	client_started = true;
 
-	if (wait_for_accept(&accept_ctx, 0, reason, sizeof(reason)) < 0) {
+	if (wait_for_exclusive_accept(&accept_ctx, &client_ctx, 0,
+				      reason, sizeof(reason)) < 0) {
 		TEST_FAIL(name, reason);
 		goto out;
 	}
@@ -355,8 +387,8 @@ static int test_rejit_hotswap_sk_lookup(void)
 			goto out;
 		}
 
-		if (wait_for_accept(&accept_ctx, expected_idx,
-				    reason, sizeof(reason)) < 0) {
+		if (wait_for_exclusive_accept(&accept_ctx, &client_ctx, expected_idx,
+					      reason, sizeof(reason)) < 0) {
 			TEST_FAIL(name, reason);
 			goto out;
 		}

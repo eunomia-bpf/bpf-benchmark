@@ -52,6 +52,14 @@ static void destroy_ext_instance(struct ext_instance *ext)
 	ext->fd = -1;
 }
 
+static struct bpf_program *find_ext_program(struct ext_instance *ext)
+{
+	if (!ext->obj)
+		return NULL;
+
+	return bpf_object__find_program_by_name(ext->obj, "rejit_hotswap_ext");
+}
+
 static int test_run_target(int target_fd, __u32 *retval)
 {
 	unsigned char data[256] = {};
@@ -102,53 +110,77 @@ static int wait_for_retval(int target_fd, __u32 expected,
 	return -1;
 }
 
-static int load_rejit_attach_ext(const char *ext_path, int target_fd,
-				 __u32 expected, struct ext_instance *ext,
-				 char *reason, size_t reason_sz)
+static int open_ext_instance(const char *ext_path, int target_fd,
+			     struct ext_instance *ext, char *reason,
+			     size_t reason_sz)
 {
-	char log_buf[65536] = {};
 	struct bpf_program *ext_prog;
-	struct bpf_insn *orig_insns = NULL;
-	struct bpf_insn *patched_insns = NULL;
-	int orig_cnt;
-	int ret = -1;
 
 	ext->fd = -1;
 	ext->obj = bpf_object__open_file(ext_path, NULL);
 	if (!ext->obj || libbpf_get_error(ext->obj)) {
 		snprintf(reason, reason_sz, "cannot open test_hotswap_ext.bpf.o");
 		ext->obj = NULL;
-		goto out;
+		return -1;
 	}
 
-	ext_prog = bpf_object__find_program_by_name(ext->obj, "rejit_hotswap_ext");
+	ext_prog = find_ext_program(ext);
 	if (!ext_prog) {
 		snprintf(reason, reason_sz, "EXT program not found");
-		goto out;
+		goto err;
 	}
 
 	if (bpf_program__set_attach_target(ext_prog, target_fd,
 					   "rejit_hotswap_ext_target_func") < 0) {
 		snprintf(reason, reason_sz, "bpf_program__set_attach_target failed");
-		goto out;
+		goto err;
 	}
 
 	if (bpf_object__load(ext->obj) < 0) {
 		snprintf(reason, reason_sz, "failed to load EXT object");
-		goto out;
+		goto err;
 	}
 
 	ext->fd = bpf_program__fd(ext_prog);
 	if (ext->fd < 0) {
 		snprintf(reason, reason_sz, "invalid EXT program fd");
-		goto out;
+		goto err;
 	}
 
-	orig_cnt = hotswap_get_original_insns(ext->fd, &orig_insns);
-	if (orig_cnt < 0) {
-		snprintf(reason, reason_sz, "get_original_insns failed");
-		goto out;
+	return 0;
+
+err:
+	destroy_ext_instance(ext);
+	return -1;
+}
+
+static int attach_ext_instance(struct ext_instance *ext, char *reason,
+			       size_t reason_sz)
+{
+	struct bpf_program *ext_prog = find_ext_program(ext);
+
+	if (!ext_prog) {
+		snprintf(reason, reason_sz, "EXT program not found");
+		return -1;
 	}
+
+	ext->link = bpf_program__attach_trace(ext_prog);
+	if (!ext->link || libbpf_get_error(ext->link)) {
+		snprintf(reason, reason_sz, "attach_trace failed for EXT program");
+		ext->link = NULL;
+		return -1;
+	}
+
+	return 0;
+}
+
+static int rejit_ext_return_value(int ext_fd, const struct bpf_insn *orig_insns,
+				  int orig_cnt, __u32 expected,
+				  char *log_buf, size_t log_buf_sz,
+				  char *reason, size_t reason_sz)
+{
+	struct bpf_insn *patched_insns = NULL;
+	int ret = -1;
 
 	patched_insns = calloc(orig_cnt, sizeof(*patched_insns));
 	if (!patched_insns) {
@@ -163,22 +195,12 @@ static int load_rejit_attach_ext(const char *ext_path, int target_fd,
 		goto out;
 	}
 
-	/*
-	 * Attached EXT programs clear aux->dst_prog in tracing link setup, so
-	 * REJIT them before attach while the verifier can still resolve the
-	 * freplace target.
-	 */
-	if (hotswap_rejit_prog(ext->fd, patched_insns, orig_cnt,
-			       log_buf, sizeof(log_buf)) < 0) {
+	memset(log_buf, 0, log_buf_sz);
+	if (hotswap_rejit_prog(ext_fd, patched_insns, orig_cnt,
+			       log_buf, log_buf_sz) < 0) {
 		fprintf(stderr, "    verifier log:\n%s\n", log_buf);
-		snprintf(reason, reason_sz, "BPF_PROG_REJIT failed");
-		goto out;
-	}
-
-	ext->link = bpf_program__attach_trace(ext_prog);
-	if (!ext->link || libbpf_get_error(ext->link)) {
-		snprintf(reason, reason_sz, "attach_trace failed for EXT program");
-		ext->link = NULL;
+		snprintf(reason, reason_sz,
+			 "kernel does not support live REJIT of attached EXT programs");
 		goto out;
 	}
 
@@ -186,9 +208,6 @@ static int load_rejit_attach_ext(const char *ext_path, int target_fd,
 
 out:
 	free(patched_insns);
-	free(orig_insns);
-	if (ret)
-		destroy_ext_instance(ext);
 	return ret;
 }
 
@@ -197,13 +216,16 @@ static int test_rejit_hotswap_ext(void)
 	const char *name = "rejit_hotswap_ext";
 	char target_path[512];
 	char ext_path[512];
+	char log_buf[65536];
 	char reason[256];
 	struct bpf_object *target_obj = NULL;
 	struct ext_instance ext = {
 		.fd = -1,
 	};
+	struct bpf_insn *orig_insns = NULL;
 	struct bpf_program *target_prog;
 	int target_fd;
+	int orig_cnt;
 	int i;
 	int ret = 1;
 
@@ -237,8 +259,19 @@ static int test_rejit_hotswap_ext(void)
 		goto out;
 	}
 
-	if (load_rejit_attach_ext(ext_path, target_fd, EXT_RETVAL_A, &ext,
-				  reason, sizeof(reason)) < 0) {
+	if (open_ext_instance(ext_path, target_fd, &ext,
+			      reason, sizeof(reason)) < 0) {
+		TEST_FAIL(name, reason);
+		goto out;
+	}
+
+	orig_cnt = hotswap_get_original_insns(ext.fd, &orig_insns);
+	if (orig_cnt < 0) {
+		TEST_FAIL(name, "get_original_insns failed");
+		goto out;
+	}
+
+	if (attach_ext_instance(&ext, reason, sizeof(reason)) < 0) {
 		TEST_FAIL(name, reason);
 		goto out;
 	}
@@ -251,9 +284,10 @@ static int test_rejit_hotswap_ext(void)
 	for (i = 0; i < HOTSWAP_ROUNDS; i++) {
 		__u32 expected = (i % 2) == 0 ? EXT_RETVAL_B : EXT_RETVAL_A;
 
-		destroy_ext_instance(&ext);
-		if (load_rejit_attach_ext(ext_path, target_fd, expected, &ext,
-					  reason, sizeof(reason)) < 0) {
+		if (rejit_ext_return_value(ext.fd, orig_insns, orig_cnt,
+					   expected, log_buf,
+					   sizeof(log_buf),
+					   reason, sizeof(reason)) < 0) {
 			TEST_FAIL(name, reason);
 			goto out;
 		}
@@ -271,6 +305,7 @@ static int test_rejit_hotswap_ext(void)
 
 out:
 	destroy_ext_instance(&ext);
+	free(orig_insns);
 	if (target_obj)
 		bpf_object__close(target_obj);
 	return ret;

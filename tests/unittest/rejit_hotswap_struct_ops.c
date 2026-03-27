@@ -28,6 +28,9 @@
 #define WORKER_INTERVAL_US 10000
 #define ROUND_DWELL_US 200000
 #define ACCEPT_POLL_TIMEOUT_MS 50
+#define MAP_SAMPLE_INTERVAL_US 25000
+#define MIN_MAP_OK_EVENTS 16
+#define MIN_STABLE_MAP_SAMPLES 8
 
 static const char *g_progs_dir = "tests/unittest/build/progs";
 static int g_pass;
@@ -80,8 +83,11 @@ static int wait_for_map_value(int map_fd, __u64 expected,
 			      struct accept_ctx *accept_ctx,
 			      char *reason, size_t reason_sz)
 {
+	unsigned long long start_ok = read_counter(&worker->ok);
 	unsigned long long start_err = read_counter(&worker->err);
 	unsigned long long start_accept_err = read_counter(&accept_ctx->err);
+	__u64 last_value = 0;
+	int stable_samples = 0;
 	int elapsed_ms = 0;
 
 	while (elapsed_ms < MAP_WAIT_TIMEOUT_MS) {
@@ -101,15 +107,30 @@ static int wait_for_map_value(int map_fd, __u64 expected,
 			return -1;
 		}
 
-		if (read_value_map(map_fd, &current) == 0 && current == expected)
+		if (read_value_map(map_fd, &current) < 0) {
+			snprintf(reason, reason_sz, "value_map lookup failed: %s",
+				 strerror(errno));
+			return -1;
+		}
+
+		last_value = current;
+		if (current == expected)
+			stable_samples++;
+		else
+			stable_samples = 0;
+
+		if (stable_samples >= MIN_STABLE_MAP_SAMPLES &&
+		    read_counter(&worker->ok) - start_ok >= MIN_MAP_OK_EVENTS)
 			return 0;
 
-		usleep(10000);
-		elapsed_ms += 10;
+		usleep(MAP_SAMPLE_INTERVAL_US);
+		elapsed_ms += MAP_SAMPLE_INTERVAL_US / 1000;
 	}
 
-	snprintf(reason, reason_sz, "timed out waiting for map value %llu",
-		 (unsigned long long)expected);
+	snprintf(reason, reason_sz,
+		 "timed out waiting for stable map value %llu (last=%llu)",
+		 (unsigned long long)expected,
+		 (unsigned long long)last_value);
 	errno = ETIMEDOUT;
 	return -1;
 }

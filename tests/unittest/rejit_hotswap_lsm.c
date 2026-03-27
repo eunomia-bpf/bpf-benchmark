@@ -29,7 +29,6 @@
 static const char *g_progs_dir = "tests/unittest/build/progs";
 static int g_pass;
 static int g_fail;
-static int g_skip;
 
 struct hotswap_stats {
 	__u64 total;
@@ -44,11 +43,6 @@ struct hotswap_stats {
 #define TEST_FAIL(name, reason) do { \
 	fprintf(stderr, "  FAIL  %s: %s\n", name, reason); \
 	g_fail++; \
-} while (0)
-
-#define TEST_SKIP(name, reason) do { \
-	printf("  SKIP  %s: %s\n", name, reason); \
-	g_skip++; \
 } while (0)
 
 static int read_stats(int map_fd, struct hotswap_stats *stats)
@@ -225,8 +219,8 @@ static int test_rejit_hotswap_lsm(void)
 	fd = -1;
 
 	if (!bpf_lsm_is_active(reason, sizeof(reason))) {
-		TEST_SKIP(name, reason);
-		return 0;
+		TEST_FAIL(name, reason);
+		goto out;
 	}
 
 	obj = bpf_object__open_file(obj_path, NULL);
@@ -335,6 +329,6 @@ int main(int argc, char **argv)
 	if (test_rejit_hotswap_lsm())
 		return 1;
 
-	printf("\nSummary: pass=%d fail=%d skip=%d\n", g_pass, g_fail, g_skip);
+	printf("\nSummary: pass=%d fail=%d\n", g_pass, g_fail);
 	return g_fail ? 1 : 0;
 }

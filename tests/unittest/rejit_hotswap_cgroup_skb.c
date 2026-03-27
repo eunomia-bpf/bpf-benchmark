@@ -25,6 +25,8 @@
 #define ROUND_DWELL_US 200000
 #define SEND_TIMEOUT_MS 1200
 #define HOTSWAP_CGROUP_PORT 41013
+#define MIN_SEND_MODE_EVENTS 32
+#define MIN_SEND_MODE_PERCENT 90
 
 static const char *g_progs_dir = "tests/unittest/build/progs";
 static int g_pass;
@@ -144,23 +146,32 @@ static int wait_for_send_mode(struct worker_ctx *worker, bool expect_allow,
 		unsigned long long ok_now = read_counter(&worker->ok);
 		unsigned long long eperm_now = read_counter(&worker->eperm);
 		unsigned long long other_now = read_counter(&worker->other_err);
+		unsigned long long ok_delta = ok_now - start_ok;
+		unsigned long long eperm_delta = eperm_now - start_eperm;
+		unsigned long long total = ok_delta + eperm_delta;
+		unsigned long long matching = expect_allow ? ok_delta : eperm_delta;
 
 		if (other_now > start_other) {
 			snprintf(reason, reason_sz, "worker saw unexpected send errors");
 			errno = EIO;
 			return -1;
 		}
-		if (expect_allow && ok_now > start_ok)
-			return 0;
-		if (!expect_allow && eperm_now > start_eperm)
-			return 0;
+		if (total >= MIN_SEND_MODE_EVENTS) {
+			if (matching * 100 >= total * MIN_SEND_MODE_PERCENT)
+				return 0;
+
+			start_ok = ok_now;
+			start_eperm = eperm_now;
+			start_other = other_now;
+		}
 
 		usleep(10000);
 		elapsed_ms += 10;
 	}
 
-	snprintf(reason, reason_sz, "timed out waiting for send %s",
-		 expect_allow ? "success" : "EPERM");
+	snprintf(reason, reason_sz,
+		 "timed out waiting for stable send mode %s",
+		 expect_allow ? "allow" : "EPERM");
 	errno = ETIMEDOUT;
 	return -1;
 }

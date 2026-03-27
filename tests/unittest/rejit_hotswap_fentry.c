@@ -28,7 +28,6 @@
 static const char *g_progs_dir = "tests/unittest/build/progs";
 static int g_pass;
 static int g_fail;
-static int g_skip;
 
 struct hotswap_stats {
 	__u64 total;
@@ -47,11 +46,6 @@ struct worker_ctx {
 #define TEST_FAIL(name, reason) do { \
 	fprintf(stderr, "  FAIL  %s: %s\n", name, reason); \
 	g_fail++; \
-} while (0)
-
-#define TEST_SKIP(name, reason) do { \
-	printf("  SKIP  %s: %s\n", name, reason); \
-	g_skip++; \
 } while (0)
 
 static int read_stats(int map_fd, struct hotswap_stats *stats)
@@ -153,7 +147,7 @@ static int preflight_fentry_rejit(int prog_fd, const struct bpf_insn *orig_insns
 		snprintf(reason, reason_sz,
 			 "loaded fentry program has no attach_btf_id, REJIT cannot reconstruct tracing target");
 		errno = EOPNOTSUPP;
-		return 1;
+		return -1;
 	}
 
 	memset(log_buf, 0, log_buf_sz);
@@ -166,7 +160,7 @@ static int preflight_fentry_rejit(int prog_fd, const struct bpf_insn *orig_insns
 			 "attached fentry REJIT lost tracing attach BTF context on this kernel (attach_btf_id=%u)",
 			 info.attach_btf_id);
 		errno = EOPNOTSUPP;
-		return 1;
+		return -1;
 	}
 
 	snprintf(reason, reason_sz, "identity BPF_PROG_REJIT failed: %s",
@@ -197,7 +191,7 @@ static int test_rejit_hotswap_fentry(void)
 {
 	const char *name = "rejit_hotswap_fentry";
 	char fentry_path[512];
-	char log_buf[65536];
+	char log_buf[65536] = {};
 	char reason[256];
 	struct bpf_object *fentry_obj = NULL;
 	struct bpf_program *fentry_prog;
@@ -266,16 +260,11 @@ static int test_rejit_hotswap_fentry(void)
 		goto out;
 	}
 
-	i = preflight_fentry_rejit(fentry_fd, orig_insns, orig_cnt,
+	if (preflight_fentry_rejit(fentry_fd, orig_insns, orig_cnt,
 				   log_buf, sizeof(log_buf),
-				   reason, sizeof(reason));
-	if (i > 0) {
-		TEST_SKIP(name, reason);
-		ret = 0;
-		goto out;
-	}
-	if (i < 0) {
-		fprintf(stderr, "    verifier log:\n%s\n", log_buf);
+				   reason, sizeof(reason)) < 0) {
+		if (log_buf[0])
+			fprintf(stderr, "    verifier log:\n%s\n", log_buf);
 		TEST_FAIL(name, reason);
 		goto out;
 	}
@@ -312,9 +301,8 @@ static int test_rejit_hotswap_fentry(void)
 		if (hotswap_rejit_prog(fentry_fd, patched_insns, orig_cnt,
 				       log_buf, sizeof(log_buf)) < 0) {
 			if (rejit_log_has_attach_btf_failure(log_buf)) {
-				TEST_SKIP(name,
+				TEST_FAIL(name,
 					  "attached fentry REJIT lost tracing attach BTF context on this kernel");
-				ret = 0;
 			} else {
 				fprintf(stderr, "    verifier log:\n%s\n", log_buf);
 				TEST_FAIL(name, "BPF_PROG_REJIT failed");
@@ -355,6 +343,6 @@ int main(int argc, char **argv)
 	if (test_rejit_hotswap_fentry())
 		return 1;
 
-	printf("\nSummary: pass=%d fail=%d skip=%d\n", g_pass, g_fail, g_skip);
+	printf("\nSummary: pass=%d fail=%d\n", g_pass, g_fail);
 	return g_fail ? 1 : 0;
 }

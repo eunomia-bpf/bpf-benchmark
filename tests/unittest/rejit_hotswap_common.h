@@ -159,6 +159,12 @@ static inline bool hotswap_is_mov_reg_insn(const struct bpf_insn *insn)
 	       insn->code == (BPF_ALU | BPF_MOV | BPF_X);
 }
 
+static inline bool hotswap_is_add_imm_insn(const struct bpf_insn *insn)
+{
+	return insn->code == (BPF_ALU64 | BPF_ADD | BPF_K) ||
+	       insn->code == (BPF_ALU | BPF_ADD | BPF_K);
+}
+
 static inline int hotswap_patch_scalar_imm(struct bpf_insn *insns, int insn_cnt,
 					   int def_idx, __u8 reg, __s32 imm)
 {
@@ -198,6 +204,39 @@ static inline int hotswap_patch_scalar_imm(struct bpf_insn *insns, int insn_cnt,
 	return -1;
 }
 
+static inline int hotswap_find_stack_slot_offset(const struct bpf_insn *insns,
+						 int def_idx, __u8 reg,
+						 __s16 *stack_off)
+{
+	__s32 offset = 0;
+	int j;
+
+	for (j = def_idx; j >= 0; j--) {
+		if (insns[j].dst_reg != reg)
+			continue;
+
+		if (hotswap_is_add_imm_insn(&insns[j])) {
+			offset += insns[j].imm;
+			continue;
+		}
+
+		if (hotswap_is_mov_reg_insn(&insns[j])) {
+			if (insns[j].src_reg == BPF_REG_10) {
+				*stack_off = (__s16)offset;
+				return 0;
+			}
+
+			reg = insns[j].src_reg;
+			continue;
+		}
+
+		break;
+	}
+
+	errno = ENOENT;
+	return -1;
+}
+
 static inline int hotswap_patch_atomic_add_imm(struct bpf_insn *insns,
 					       int insn_cnt, __s16 off,
 					       __s32 imm)
@@ -226,15 +265,22 @@ static inline int hotswap_patch_atomic_add_imm(struct bpf_insn *insns,
 static inline int hotswap_patch_stack_map_key(struct bpf_insn *insns,
 					      int insn_cnt, __s32 key)
 {
-	int i, j;
+	int i;
 
 	for (i = 0; i < insn_cnt; i++) {
+		__s16 stack_off;
+		int j;
+
 		if (insns[i].code != (BPF_JMP | BPF_CALL) ||
 		    insns[i].imm != BPF_FUNC_map_lookup_elem)
 			continue;
 
-		for (j = i - 1; j >= 0 && j >= i - 8; j--) {
-			if (insns[j].dst_reg != BPF_REG_10 || insns[j].off >= 0)
+		if (hotswap_find_stack_slot_offset(insns, i - 1, BPF_REG_2,
+						   &stack_off) < 0)
+			continue;
+
+		for (j = i - 1; j >= 0; j--) {
+			if (insns[j].dst_reg != BPF_REG_10 || insns[j].off != stack_off)
 				continue;
 
 			if (insns[j].code == (BPF_ST | BPF_MEM | BPF_W)) {

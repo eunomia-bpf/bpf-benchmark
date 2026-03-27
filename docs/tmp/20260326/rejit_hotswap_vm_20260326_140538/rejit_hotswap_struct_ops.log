@@ -1,0 +1,6 @@
+command: ./tests/unittest/build/rejit_hotswap_struct_ops ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:43-07:00
+  FAIL  rejit_hotswap_struct_ops: timed out waiting for map value 1111
+
+finished_at: 2026-03-26T14:18:45-07:00
+exit_code: 1

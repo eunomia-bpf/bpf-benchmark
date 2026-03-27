@@ -1,0 +1,7 @@
+command: ./tests/unittest/build/rejit_hotswap_sched_cls ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:41-07:00
+libbpf: Kernel error message: Specified qdisc kind is unknown
+  FAIL  rejit_hotswap_sched_cls: bpf_tc_hook_create failed
+
+finished_at: 2026-03-26T14:18:41-07:00
+exit_code: 1

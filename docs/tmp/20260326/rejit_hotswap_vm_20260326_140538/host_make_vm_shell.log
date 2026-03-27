@@ -1,0 +1,369 @@
+make -C "/home/yunwei37/workspace/bpf-benchmark/runner" vm-shell \
+	PYTHON="/home/yunwei37/workspace/.venv/bin/python3" VENV="/home/yunwei37/workspace/.venv" \
+	BZIMAGE="vendor/linux-framework/arch/x86/boot/bzImage" TARGET="" \
+	VM_COMMAND='bash docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/run_in_vm.sh'
+make[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/runner'
+make -C "/home/yunwei37/workspace/bpf-benchmark" kernel BZIMAGE="vendor/linux-framework/arch/x86/boot/bzImage"
+make[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark'
+  SKIP    kernel-build (bzImage already exists)
+make[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark'
+make -C "/home/yunwei37/workspace/bpf-benchmark" virtme-hostfs-modules BZIMAGE="vendor/linux-framework/arch/x86/boot/bzImage"
+make[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark'
+  SKIP    kernel-build (bzImage already exists)
+rm -rf "/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/.virtme_mods"
+make -C "/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework" -j"24" drivers/net/veth.ko net/ipv4/ip_tunnel.ko net/ipv4/tunnel4.ko net/ipv4/ipip.ko fs/netfs/netfs.ko net/9p/9pnet.ko net/9p/9pnet_virtio.ko fs/9p/9p.ko fs/fuse/virtiofs.ko fs/overlayfs/overlay.ko
+make[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework'
+  DESCEND objtool
+  DESCEND bpf/resolve_btfids
+  INSTALL libsubcmd_headers
+  CALL    scripts/checksyscalls.sh
+  INSTALL libsubcmd_headers
+make[7]: 'net/9p/9pnet.mod' is up to date.
+make[7]: 'net/9p/9pnet_virtio.mod' is up to date.
+make[7]: 'fs/overlayfs/overlay.mod' is up to date.
+make[7]: 'fs/9p/9p.mod' is up to date.
+make[7]: 'fs/fuse/virtiofs.mod' is up to date.
+make[7]: 'fs/netfs/netfs.mod' is up to date.
+  MODPOST Module.symvers
+make[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework'
+make[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark'
+make -C "/home/yunwei37/workspace/bpf-benchmark" kinsn-modules BZIMAGE="vendor/linux-framework/arch/x86/boot/bzImage"
+make[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark'
+  SKIP    kernel-build (bzImage already exists)
+make -C "/home/yunwei37/workspace/bpf-benchmark/module/x86" KDIR="/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework"
+make[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/module/x86'
+make -C /home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework M=/home/yunwei37/workspace/bpf-benchmark/module/x86 modules
+make[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework'
+make[5]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/module/x86'
+  MODPOST Module.symvers
+make[5]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/module/x86'
+make[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework'
+make[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/module/x86'
+make[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark'
+/home/yunwei37/workspace/.venv/bin/python3 "/home/yunwei37/workspace/bpf-benchmark/runner/scripts/run_vm_shell.py"  \
+	--action vm-test \
+	--kernel-image "/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/arch/x86/boot/bzImage" \
+	 \
+	 \
+	--timeout "3600" \
+	--command 'cd "/home/yunwei37/workspace/bpf-benchmark" && source "/home/yunwei37/workspace/.venv/bin/activate" && "/home/yunwei37/workspace/bpf-benchmark/module/load_all.sh" 2>/dev/null || true; bash docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/run_in_vm.sh'
+Loaded bpf_barrier
+Loaded bpf_bulk_memory
+Loaded bpf_endian
+Loaded bpf_extract
+Loaded bpf_rotate
+Loaded bpf_select
+kinsn modules: 6/6 loaded
+=== tracepoint ===
+command: ./tests/unittest/build/rejit_hotswap_tracepoint ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:04-07:00
+  PASS  rejit_hotswap_tracepoint
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:10-07:00
+exit_code: 0
+
+status: PASS
+
+=== kprobe ===
+command: ./tests/unittest/build/rejit_hotswap_kprobe ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:10-07:00
+  PASS  rejit_hotswap_kprobe
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:16-07:00
+exit_code: 0
+
+status: PASS
+
+=== perf_event ===
+command: ./tests/unittest/build/rejit_hotswap_perf_event ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:16-07:00
+  PASS  rejit_hotswap_perf_event
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:21-07:00
+exit_code: 0
+
+status: PASS
+
+=== fentry ===
+command: ./tests/unittest/build/rejit_hotswap_fentry ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:21-07:00
+  PASS  rejit_hotswap_fentry
+
+Summary: pass=1 fail=0 skip=0
+
+finished_at: 2026-03-26T14:18:27-07:00
+exit_code: 0
+
+status: PASS
+
+=== lsm ===
+command: ./tests/unittest/build/rejit_hotswap_lsm ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:27-07:00
+  PASS  rejit_hotswap_lsm
+
+Summary: pass=1 fail=0 skip=0
+
+finished_at: 2026-03-26T14:18:33-07:00
+exit_code: 0
+
+status: PASS
+
+=== xdp ===
+command: ./tests/unittest/build/rejit_hotswap_xdp ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:33-07:00
+  PASS  rejit_hotswap_xdp
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:39-07:00
+exit_code: 0
+
+status: PASS
+
+=== socket_filter ===
+command: ./tests/unittest/build/rejit_hotswap_socket_filter ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:39-07:00
+  PASS  rejit_hotswap_socket_filter
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:41-07:00
+exit_code: 0
+
+status: PASS
+
+=== sched_cls ===
+command: ./tests/unittest/build/rejit_hotswap_sched_cls ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:41-07:00
+libbpf: Kernel error message: Specified qdisc kind is unknown
+  FAIL  rejit_hotswap_sched_cls: bpf_tc_hook_create failed
+
+finished_at: 2026-03-26T14:18:41-07:00
+exit_code: 1
+
+status: FAIL
+
+=== cgroup_skb ===
+command: ./tests/unittest/build/rejit_hotswap_cgroup_skb ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:41-07:00
+  PASS  rejit_hotswap_cgroup_skb
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:43-07:00
+exit_code: 0
+
+status: PASS
+
+=== struct_ops ===
+command: ./tests/unittest/build/rejit_hotswap_struct_ops ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:43-07:00
+  FAIL  rejit_hotswap_struct_ops: timed out waiting for map value 1111
+
+finished_at: 2026-03-26T14:18:45-07:00
+exit_code: 1
+
+status: FAIL
+
+=== ext ===
+command: ./tests/unittest/build/rejit_hotswap_ext ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:45-07:00
+  FAIL  rejit_hotswap_ext: worker saw unexpected BPF_PROG_TEST_RUN results
+
+finished_at: 2026-03-26T14:18:45-07:00
+exit_code: 1
+
+status: FAIL
+
+=== sk_lookup ===
+command: ./tests/unittest/build/rejit_hotswap_sk_lookup ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:45-07:00
+  FAIL  rejit_hotswap_sk_lookup: failed to populate sock_map
+
+finished_at: 2026-03-26T14:18:45-07:00
+exit_code: 1
+
+status: FAIL
+
+=== summary ===
+test	status	rc	log
+tracepoint	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_tracepoint.log
+kprobe	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_kprobe.log
+perf_event	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_perf_event.log
+fentry	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_fentry.log
+lsm	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_lsm.log
+xdp	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_xdp.log
+socket_filter	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_socket_filter.log
+sched_cls	FAIL	1	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_sched_cls.log
+cgroup_skb	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_cgroup_skb.log
+struct_ops	FAIL	1	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_struct_ops.log
+ext	FAIL	1	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_ext.log
+sk_lookup	FAIL	1	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_sk_lookup.log
+Script started on 2026-03-26 14:18:01-07:00 [COMMAND="/home/yunwei37/workspace/bpf-benchmark/runner/scripts/vng-wrapper.sh /tmp/vng-wrapper.fNHbRU" <not executed on terminal>]
+Loaded bpf_barrier
+Loaded bpf_bulk_memory
+Loaded bpf_endian
+Loaded bpf_extract
+Loaded bpf_rotate
+Loaded bpf_select
+kinsn modules: 6/6 loaded
+=== tracepoint ===
+command: ./tests/unittest/build/rejit_hotswap_tracepoint ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:04-07:00
+  PASS  rejit_hotswap_tracepoint
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:10-07:00
+exit_code: 0
+
+status: PASS
+
+=== kprobe ===
+command: ./tests/unittest/build/rejit_hotswap_kprobe ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:10-07:00
+  PASS  rejit_hotswap_kprobe
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:16-07:00
+exit_code: 0
+
+status: PASS
+
+=== perf_event ===
+command: ./tests/unittest/build/rejit_hotswap_perf_event ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:16-07:00
+  PASS  rejit_hotswap_perf_event
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:21-07:00
+exit_code: 0
+
+status: PASS
+
+=== fentry ===
+command: ./tests/unittest/build/rejit_hotswap_fentry ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:21-07:00
+  PASS  rejit_hotswap_fentry
+
+Summary: pass=1 fail=0 skip=0
+
+finished_at: 2026-03-26T14:18:27-07:00
+exit_code: 0
+
+status: PASS
+
+=== lsm ===
+command: ./tests/unittest/build/rejit_hotswap_lsm ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:27-07:00
+  PASS  rejit_hotswap_lsm
+
+Summary: pass=1 fail=0 skip=0
+
+finished_at: 2026-03-26T14:18:33-07:00
+exit_code: 0
+
+status: PASS
+
+=== xdp ===
+command: ./tests/unittest/build/rejit_hotswap_xdp ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:33-07:00
+  PASS  rejit_hotswap_xdp
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:39-07:00
+exit_code: 0
+
+status: PASS
+
+=== socket_filter ===
+command: ./tests/unittest/build/rejit_hotswap_socket_filter ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:39-07:00
+  PASS  rejit_hotswap_socket_filter
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:41-07:00
+exit_code: 0
+
+status: PASS
+
+=== sched_cls ===
+command: ./tests/unittest/build/rejit_hotswap_sched_cls ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:41-07:00
+libbpf: Kernel error message: Specified qdisc kind is unknown
+  FAIL  rejit_hotswap_sched_cls: bpf_tc_hook_create failed
+
+finished_at: 2026-03-26T14:18:41-07:00
+exit_code: 1
+
+status: FAIL
+
+=== cgroup_skb ===
+command: ./tests/unittest/build/rejit_hotswap_cgroup_skb ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:41-07:00
+  PASS  rejit_hotswap_cgroup_skb
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:43-07:00
+exit_code: 0
+
+status: PASS
+
+=== struct_ops ===
+command: ./tests/unittest/build/rejit_hotswap_struct_ops ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:43-07:00
+  FAIL  rejit_hotswap_struct_ops: timed out waiting for map value 1111
+
+finished_at: 2026-03-26T14:18:45-07:00
+exit_code: 1
+
+status: FAIL
+
+=== ext ===
+command: ./tests/unittest/build/rejit_hotswap_ext ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:45-07:00
+  FAIL  rejit_hotswap_ext: worker saw unexpected BPF_PROG_TEST_RUN results
+
+finished_at: 2026-03-26T14:18:45-07:00
+exit_code: 1
+
+status: FAIL
+
+=== sk_lookup ===
+command: ./tests/unittest/build/rejit_hotswap_sk_lookup ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:45-07:00
+  FAIL  rejit_hotswap_sk_lookup: failed to populate sock_map
+
+finished_at: 2026-03-26T14:18:45-07:00
+exit_code: 1
+
+status: FAIL
+
+=== summary ===
+test	status	rc	log
+tracepoint	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_tracepoint.log
+kprobe	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_kprobe.log
+perf_event	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_perf_event.log
+fentry	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_fentry.log
+lsm	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_lsm.log
+xdp	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_xdp.log
+socket_filter	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_socket_filter.log
+sched_cls	FAIL	1	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_sched_cls.log
+cgroup_skb	PASS	0	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_cgroup_skb.log
+struct_ops	FAIL	1	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_struct_ops.log
+ext	FAIL	1	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_ext.log
+sk_lookup	FAIL	1	docs/tmp/20260326/rejit_hotswap_vm_20260326_140538/rejit_hotswap_sk_lookup.log
+
+Script done on 2026-03-26 14:18:45-07:00 [COMMAND_EXIT_CODE="0"]
+make[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/runner'

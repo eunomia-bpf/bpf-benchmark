@@ -1,0 +1,149 @@
+=== runtime_check ===
+timestamp: 2026-03-26T14:18:04-07:00
+pwd: /home/yunwei37/workspace/bpf-benchmark
+
+[uname]
+Linux virtme-ng 7.0.0-rc2+ #7 SMP PREEMPT_DYNAMIC Thu Mar 26 13:23:10 PDT 2026 x86_64 x86_64 x86_64 GNU/Linux
+
+[lsm]
+lockdown,capability,landlock,yama,apparmor,bpf,ima,evm
+[kernel_config]
+<unavailable>
+
+=== tracepoint ===
+command: ./tests/unittest/build/rejit_hotswap_tracepoint ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:04-07:00
+  PASS  rejit_hotswap_tracepoint
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:10-07:00
+exit_code: 0
+
+status: PASS
+
+=== kprobe ===
+command: ./tests/unittest/build/rejit_hotswap_kprobe ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:10-07:00
+  PASS  rejit_hotswap_kprobe
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:16-07:00
+exit_code: 0
+
+status: PASS
+
+=== perf_event ===
+command: ./tests/unittest/build/rejit_hotswap_perf_event ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:16-07:00
+  PASS  rejit_hotswap_perf_event
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:21-07:00
+exit_code: 0
+
+status: PASS
+
+=== fentry ===
+command: ./tests/unittest/build/rejit_hotswap_fentry ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:21-07:00
+  PASS  rejit_hotswap_fentry
+
+Summary: pass=1 fail=0 skip=0
+
+finished_at: 2026-03-26T14:18:27-07:00
+exit_code: 0
+
+status: PASS
+
+=== lsm ===
+command: ./tests/unittest/build/rejit_hotswap_lsm ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:27-07:00
+  PASS  rejit_hotswap_lsm
+
+Summary: pass=1 fail=0 skip=0
+
+finished_at: 2026-03-26T14:18:33-07:00
+exit_code: 0
+
+status: PASS
+
+=== xdp ===
+command: ./tests/unittest/build/rejit_hotswap_xdp ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:33-07:00
+  PASS  rejit_hotswap_xdp
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:39-07:00
+exit_code: 0
+
+status: PASS
+
+=== socket_filter ===
+command: ./tests/unittest/build/rejit_hotswap_socket_filter ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:39-07:00
+  PASS  rejit_hotswap_socket_filter
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:41-07:00
+exit_code: 0
+
+status: PASS
+
+=== sched_cls ===
+command: ./tests/unittest/build/rejit_hotswap_sched_cls ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:41-07:00
+libbpf: Kernel error message: Specified qdisc kind is unknown
+  FAIL  rejit_hotswap_sched_cls: bpf_tc_hook_create failed
+
+finished_at: 2026-03-26T14:18:41-07:00
+exit_code: 1
+
+status: FAIL
+
+=== cgroup_skb ===
+command: ./tests/unittest/build/rejit_hotswap_cgroup_skb ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:41-07:00
+  PASS  rejit_hotswap_cgroup_skb
+
+Summary: pass=1 fail=0
+
+finished_at: 2026-03-26T14:18:43-07:00
+exit_code: 0
+
+status: PASS
+
+=== struct_ops ===
+command: ./tests/unittest/build/rejit_hotswap_struct_ops ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:43-07:00
+  FAIL  rejit_hotswap_struct_ops: timed out waiting for map value 1111
+
+finished_at: 2026-03-26T14:18:45-07:00
+exit_code: 1
+
+status: FAIL
+
+=== ext ===
+command: ./tests/unittest/build/rejit_hotswap_ext ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:45-07:00
+  FAIL  rejit_hotswap_ext: worker saw unexpected BPF_PROG_TEST_RUN results
+
+finished_at: 2026-03-26T14:18:45-07:00
+exit_code: 1
+
+status: FAIL
+
+=== sk_lookup ===
+command: ./tests/unittest/build/rejit_hotswap_sk_lookup ./tests/unittest/build/progs
+started_at: 2026-03-26T14:18:45-07:00
+  FAIL  rejit_hotswap_sk_lookup: failed to populate sock_map
+
+finished_at: 2026-03-26T14:18:45-07:00
+exit_code: 1
+
+status: FAIL
+
