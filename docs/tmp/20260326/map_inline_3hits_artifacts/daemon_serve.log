@@ -1,0 +1,26 @@
+kinsn discovery:
+  vmlinux BTF str_len=2761768 type_cnt=148882 type_id_bias=148881
+  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=148904 fd=3
+  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=148906 fd=4
+  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=148903 fd=5
+  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=148910 fd=6
+  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=148911 fd=6
+  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=148906 fd=7
+  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=148907 fd=7
+  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=148908 fd=7
+  bpf_speculation_barrier: function 'bpf_speculation_barrier' found in 'bpf_barrier' btf_id=148905 fd=8
+platform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true
+serve: listening on /tmp/bpfrejit-map-inline-3hits-365.sock
+  prog 12 (pktcntr): 1 sites, 22 -> 22 insns
+    REJIT ok
+  prog 18 (pktcntr): 12 sites, 22 -> 12 insns
+    REJIT ok
+  prog 35 (cgroup_skb_ingr): 9 sites, 3602 -> 3544 insns
+    REJIT ok
+  prog 44 (cgroup_skb_ingr): 152 sites, 3602 -> 3203 insns
+    REJIT ok
+  prog 62 (cgroup_skb_egre): 9 sites, 3602 -> 3544 insns
+    REJIT ok
+  prog 71 (cgroup_skb_egre): 152 sites, 3602 -> 3203 insns
+    REJIT ok
+serve: shutting down

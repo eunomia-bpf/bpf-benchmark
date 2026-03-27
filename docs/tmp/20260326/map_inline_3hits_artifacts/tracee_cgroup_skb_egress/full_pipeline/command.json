@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "/home/yunwei37/workspace/bpf-benchmark/runner/build/micro_exec",
+    "run-kernel",
+    "--program",
+    "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tracee/tracee.bpf.o",
+    "--program-name",
+    "cgroup_skb_egress",
+    "--btf-custom-path",
+    "/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/vmlinux",
+    "--io-mode",
+    "packet",
+    "--input-size",
+    "64",
+    "--warmup",
+    "1",
+    "--repeat",
+    "1",
+    "--compile-only",
+    "--dump-xlated",
+    "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260326/map_inline_3hits_artifacts/tracee_cgroup_skb_egress/full_pipeline/xlated.bin",
+    "--rejit",
+    "--daemon-socket",
+    "/tmp/bpfrejit-map-inline-3hits-365.sock",
+    "--passes",
+    "map_inline,const_prop,dce,wide_mem,rotate,cond_select,extract,endian_fusion,bulk_memory,bounds_check_merge,skb_load_bytes,branch_flip"
+  ]
+}

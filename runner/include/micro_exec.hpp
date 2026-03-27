@@ -44,6 +44,7 @@ struct cli_options {
     std::string command;
     std::filesystem::path program;
     std::optional<std::filesystem::path> memory;
+    std::optional<std::filesystem::path> fixture_path;
     std::optional<std::filesystem::path> btf_custom_path;
     bool rejit = false;                                 // enable REJIT (same-bytecode by default)
     std::optional<std::filesystem::path> rejit_program; // replacement ELF for REJIT

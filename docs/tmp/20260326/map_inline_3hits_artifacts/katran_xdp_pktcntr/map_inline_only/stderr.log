@@ -1,0 +1,32 @@
+libbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'
+libbpf: loading object from /home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/xdp_pktcntr.bpf.o
+libbpf: elf: section(3) xdp, size 176, link 0, flags 6, type=1
+libbpf: sec 'xdp': found program 'pktcntr' at insn offset 0 (0 bytes), code size 22 insns (176 bytes)
+libbpf: elf: section(4) .relxdp, size 32, link 26, flags 40, type=9
+libbpf: elf: section(5) .maps, size 64, link 0, flags 3, type=1
+libbpf: elf: section(6) license, size 4, link 0, flags 3, type=1
+libbpf: license of /home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/xdp_pktcntr.bpf.o is GPL
+libbpf: elf: section(16) .BTF, size 1223, link 0, flags 0, type=1
+libbpf: elf: section(18) .BTF.ext, size 256, link 0, flags 0, type=1
+libbpf: elf: section(26) .symtab, size 384, link 1, flags 0, type=2
+libbpf: looking for externs among 16 symbols...
+libbpf: collected 0 externs total
+libbpf: map 'ctl_array': at sec_idx 5, offset 0.
+libbpf: map 'ctl_array': found type = 2.
+libbpf: map 'ctl_array': found key [6], sz = 4.
+libbpf: map 'ctl_array': found value [6], sz = 4.
+libbpf: map 'ctl_array': found max_entries = 2.
+libbpf: map 'cntrs_array': at sec_idx 5, offset 32.
+libbpf: map 'cntrs_array': found type = 6.
+libbpf: map 'cntrs_array': found key [6], sz = 4.
+libbpf: map 'cntrs_array': found value [13], sz = 8.
+libbpf: map 'cntrs_array': found max_entries = 512.
+libbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'
+libbpf: sec '.relxdp': relo #0: insn #5 against 'ctl_array'
+libbpf: prog 'pktcntr': found map 0 (ctl_array, sec 5, off 0) for insn #5
+libbpf: sec '.relxdp': relo #1: insn #13 against 'cntrs_array'
+libbpf: prog 'pktcntr': found map 1 (cntrs_array, sec 5, off 32) for insn #13
+libbpf: object 'xdp_pktcntr': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...
+libbpf: map 'ctl_array': created successfully, fd=4
+libbpf: map 'cntrs_array': created successfully, fd=5
+rejit: mode=daemon-socket socket=/tmp/bpfrejit-map-inline-3hits-365.sock prog_id=12

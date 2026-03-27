@@ -38,6 +38,10 @@ profiles:
   ablation_map_inline:
     passes:
       active_list: [map_inline, const_prop, dce]
+  ablation_map_inline_full:
+    passes:
+      active_list: [map_inline, const_prop, dce]
+    repeat: 500
   ablation_wide_mem:
     passes:
       active_list: [wide_mem]

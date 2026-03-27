@@ -6,11 +6,13 @@
 #include <bpf/btf.h>
 #include <bpf/libbpf.h>
 #include <linux/bpf.h>
+#include <yaml-cpp/yaml.h>
 
 #include <algorithm>
 #include <array>
 #include <atomic>
 #include <cerrno>
+#include <cctype>
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
@@ -31,6 +33,7 @@
 #include <system_error>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 #include <unistd.h>
 #include <utility>
 #include <vector>
@@ -612,6 +615,312 @@ class scoped_fd {
   private:
     int fd_ = -1;
 };
+
+struct live_fixture_map {
+    std::string name;
+    uint32_t id = 0;
+    uint32_t type = 0;
+    uint32_t key_size = 0;
+    uint32_t value_size = 0;
+    int fd = -1;
+};
+
+std::string require_scalar_string_field(
+    const YAML::Node &node,
+    std::string_view field_name)
+{
+    if (!node || !node.IsScalar()) {
+        fail("fixture field '" + std::string(field_name) + "' must be a scalar string");
+    }
+    try {
+        return node.as<std::string>();
+    } catch (const YAML::Exception &) {
+        fail("fixture field '" + std::string(field_name) + "' must be a scalar string");
+    }
+}
+
+std::optional<std::string> optional_scalar_string_field(
+    const YAML::Node &node,
+    std::string_view field_name)
+{
+    if (!node) {
+        return std::nullopt;
+    }
+    if (!node.IsScalar()) {
+        fail("fixture field '" + std::string(field_name) + "' must be a scalar string");
+    }
+    try {
+        return node.as<std::string>();
+    } catch (const YAML::Exception &) {
+        fail("fixture field '" + std::string(field_name) + "' must be a scalar string");
+    }
+}
+
+std::optional<uint32_t> optional_u32_field(
+    const YAML::Node &node,
+    std::string_view field_name)
+{
+    if (!node) {
+        return std::nullopt;
+    }
+    if (!node.IsScalar()) {
+        fail("fixture field '" + std::string(field_name) + "' must be an integer");
+    }
+    try {
+        return node.as<uint32_t>();
+    } catch (const YAML::Exception &) {
+        fail("fixture field '" + std::string(field_name) + "' must be an integer");
+    }
+}
+
+int hex_nibble_value(char ch)
+{
+    if (ch >= '0' && ch <= '9') {
+        return ch - '0';
+    }
+    if (ch >= 'a' && ch <= 'f') {
+        return 10 + (ch - 'a');
+    }
+    if (ch >= 'A' && ch <= 'F') {
+        return 10 + (ch - 'A');
+    }
+    return -1;
+}
+
+std::vector<uint8_t> decode_hex_bytes(
+    std::string_view text,
+    std::string_view field_name)
+{
+    size_t start = 0;
+    size_t end = text.size();
+    while (start < end &&
+           std::isspace(static_cast<unsigned char>(text[start])) != 0) {
+        ++start;
+    }
+    while (end > start &&
+           std::isspace(static_cast<unsigned char>(text[end - 1])) != 0) {
+        --end;
+    }
+
+    std::string_view trimmed = text.substr(start, end - start);
+    if (trimmed.starts_with("0x") || trimmed.starts_with("0X")) {
+        trimmed.remove_prefix(2);
+    }
+    if (trimmed.size() % 2 != 0) {
+        fail("fixture field '" + std::string(field_name) + "' must have even-length hex");
+    }
+
+    std::vector<uint8_t> bytes;
+    bytes.reserve(trimmed.size() / 2);
+    for (size_t index = 0; index < trimmed.size(); index += 2) {
+        const int high = hex_nibble_value(trimmed[index]);
+        const int low = hex_nibble_value(trimmed[index + 1]);
+        if (high < 0 || low < 0) {
+            fail("fixture field '" + std::string(field_name) + "' contains invalid hex");
+        }
+        bytes.push_back(static_cast<uint8_t>((high << 4) | low));
+    }
+    return bytes;
+}
+
+live_fixture_map describe_live_fixture_map(bpf_map *map)
+{
+    const int fd = bpf_map__fd(map);
+    if (fd < 0) {
+        fail("unable to obtain loaded map fd for fixture replay");
+    }
+
+    bpf_map_info info = {};
+    __u32 info_len = sizeof(info);
+    if (bpf_map_get_info_by_fd(fd, &info, &info_len) != 0) {
+        fail("bpf_map_get_info_by_fd failed during fixture replay: " +
+             std::string(strerror(errno)));
+    }
+
+    const char *map_name = bpf_map__name(map);
+    return {
+        .name = map_name != nullptr ? std::string(map_name) : std::string(),
+        .id = info.id,
+        .type = info.type,
+        .key_size = info.key_size,
+        .value_size = info.value_size,
+        .fd = fd,
+    };
+}
+
+bool fixture_value_uses_reference_fd(uint32_t map_type)
+{
+    return map_type == BPF_MAP_TYPE_PROG_ARRAY ||
+           map_type == BPF_MAP_TYPE_ARRAY_OF_MAPS ||
+           map_type == BPF_MAP_TYPE_HASH_OF_MAPS;
+}
+
+void update_fixture_map_elem(
+    const live_fixture_map &map,
+    const std::vector<uint8_t> &key,
+    const std::vector<uint8_t> &value)
+{
+    if (fixture_value_uses_reference_fd(map.type)) {
+        if (value.size() != sizeof(uint32_t)) {
+            fail("fixture value size mismatch for special map '" + map.name + "'");
+        }
+
+        uint32_t referenced_id = 0;
+        std::memcpy(&referenced_id, value.data(), sizeof(referenced_id));
+        int referenced_fd = -1;
+        if (map.type == BPF_MAP_TYPE_PROG_ARRAY) {
+            referenced_fd = bpf_prog_get_fd_by_id(referenced_id);
+        } else {
+            referenced_fd = bpf_map_get_fd_by_id(referenced_id);
+        }
+        if (referenced_fd < 0) {
+            fail("unable to resolve referenced object id " +
+                 std::to_string(referenced_id) +
+                 " for fixture map '" + map.name + "': " +
+                 std::string(strerror(errno)));
+        }
+
+        scoped_fd referenced_fd_guard(referenced_fd);
+        if (bpf_map_update_elem(map.fd, key.data(), &referenced_fd, BPF_ANY) != 0) {
+            fail("bpf_map_update_elem(" + map.name + ") failed: " +
+                 std::string(strerror(errno)));
+        }
+        return;
+    }
+
+    if (bpf_map_update_elem(map.fd, key.data(), value.data(), BPF_ANY) != 0) {
+        fail("bpf_map_update_elem(" + map.name + ") failed: " +
+             std::string(strerror(errno)));
+    }
+}
+
+void load_map_fixtures(
+    const std::filesystem::path &fixture_json_path,
+    bpf_object *object)
+{
+    YAML::Node root;
+    try {
+        root = YAML::LoadFile(fixture_json_path.string());
+    } catch (const YAML::Exception &error) {
+        fail("unable to parse fixture JSON '" + fixture_json_path.string() +
+             "': " + error.what());
+    }
+
+    const YAML::Node maps = root["maps"];
+    if (!maps || !maps.IsSequence()) {
+        fail("fixture JSON '" + fixture_json_path.string() +
+             "' must contain a 'maps' sequence");
+    }
+
+    std::unordered_map<std::string, live_fixture_map> maps_by_name;
+    std::unordered_map<uint32_t, live_fixture_map> maps_by_id;
+    bpf_map *map = nullptr;
+    while ((map = bpf_object__next_map(object, map)) != nullptr) {
+        const auto live_map = describe_live_fixture_map(map);
+        if (!live_map.name.empty()) {
+            maps_by_name.insert_or_assign(live_map.name, live_map);
+        }
+        maps_by_id.insert_or_assign(live_map.id, live_map);
+    }
+
+    size_t loaded_entries = 0;
+    std::unordered_set<uint32_t> updated_map_ids;
+    for (const auto &map_node : maps) {
+        if (!map_node.IsMap()) {
+            fail("fixture JSON '" + fixture_json_path.string() +
+                 "' contains a non-object map entry");
+        }
+
+        std::optional<std::string> map_name =
+            optional_scalar_string_field(map_node["map_name"], "map_name");
+        if (!map_name.has_value()) {
+            map_name = optional_scalar_string_field(map_node["name"], "name");
+        }
+        const auto map_id = optional_u32_field(map_node["map_id"], "map_id");
+        if (!map_name.has_value() && !map_id.has_value()) {
+            fail("fixture JSON '" + fixture_json_path.string() +
+                 "' requires each map entry to specify map_name or map_id");
+        }
+
+        const live_fixture_map *live_map = nullptr;
+        if (map_name.has_value()) {
+            const auto found = maps_by_name.find(*map_name);
+            if (found == maps_by_name.end()) {
+                fail("fixture map '" + *map_name + "' not found in loaded object");
+            }
+            live_map = &found->second;
+            if (map_id.has_value() && live_map->id != *map_id) {
+                fail("fixture map '" + *map_name + "' id mismatch: fixture=" +
+                     std::to_string(*map_id) + " live=" +
+                     std::to_string(live_map->id));
+            }
+        } else {
+            const auto found = maps_by_id.find(*map_id);
+            if (found == maps_by_id.end()) {
+                fail("fixture map id " + std::to_string(*map_id) +
+                     " not found in loaded object");
+            }
+            live_map = &found->second;
+        }
+
+        if (const auto declared_key_size =
+                optional_u32_field(map_node["key_size"], "key_size");
+            declared_key_size.has_value() &&
+            *declared_key_size != live_map->key_size) {
+            fail("fixture key_size mismatch for map '" + live_map->name + "'");
+        }
+        if (const auto declared_value_size =
+                optional_u32_field(map_node["value_size"], "value_size");
+            declared_value_size.has_value() &&
+            *declared_value_size != live_map->value_size) {
+            fail("fixture value_size mismatch for map '" + live_map->name + "'");
+        }
+
+        const YAML::Node entries = map_node["entries"];
+        if (!entries || !entries.IsSequence()) {
+            fail("fixture map '" + live_map->name + "' must contain an 'entries' sequence");
+        }
+
+        for (const auto &entry_node : entries) {
+            if (!entry_node.IsMap()) {
+                fail("fixture map '" + live_map->name +
+                     "' contains a non-object entry");
+            }
+
+            const auto key = decode_hex_bytes(
+                require_scalar_string_field(entry_node["key_hex"], "key_hex"),
+                "key_hex");
+            const auto value = decode_hex_bytes(
+                require_scalar_string_field(entry_node["value_hex"], "value_hex"),
+                "value_hex");
+            if (key.size() != live_map->key_size) {
+                fail("fixture key size mismatch for map '" + live_map->name + "'");
+            }
+            if (value.size() != live_map->value_size) {
+                fail("fixture value size mismatch for map '" + live_map->name + "'");
+            }
+
+            update_fixture_map_elem(*live_map, key, value);
+            ++loaded_entries;
+            updated_map_ids.insert(live_map->id);
+        }
+    }
+
+    std::fprintf(
+        stderr,
+        "loaded %zu entries into %zu maps from fixture %s\n",
+        loaded_entries,
+        updated_map_ids.size(),
+        fixture_json_path.c_str());
+}
+
+void maybe_load_map_fixtures(const cli_options &options, bpf_object *object)
+{
+    if (!options.fixture_path.has_value() || options.compile_only) {
+        return;
+    }
+    load_map_fixtures(*options.fixture_path, object);
+}
 
 struct prog_load_attr {
     __u32 prog_type;
@@ -2043,6 +2352,7 @@ std::vector<sample_result> execute_prepared_kernel_attach(
     const cli_options &options)
 {
     auto &program = require_prepared_program(prepared, options.program_name);
+    maybe_load_map_fixtures(options, prepared.object.get());
     if (options.daemon_socket.has_value()) {
         maybe_apply_prepared_daemon_rejit(program, options);
     }
@@ -2153,6 +2463,7 @@ std::vector<sample_result> execute_prepared_kernel_run(
         initialize_katran_test_fixture(prepared.object.get());
         program.katran_fixture_initialized = true;
     }
+    maybe_load_map_fixtures(options, prepared.object.get());
 
     rejit_summary rejit = program.prepared_rejit;
     uint64_t rejit_apply_ns = program.rejit_apply_ns;
@@ -2705,6 +3016,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     if (!options.compile_only && katran_balancer_fixture_requested(options)) {
         initialize_katran_test_fixture(object.get());
     }
+    maybe_load_map_fixtures(options, object.get());
     const auto program_info = load_prog_info(program_fd);
 
     /* v2 REJIT: prepare bytecode for BPF_PROG_REJIT if requested */
@@ -3163,6 +3475,7 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
         fail("bpf_object__load failed: " + libbpf_error_string(-load_error));
     }
     const auto object_load_end = std::chrono::steady_clock::now();
+    maybe_load_map_fixtures(options, object.get());
 
     /* Find the target program */
     bpf_program *prog = find_program(object.get(), options.program_name);

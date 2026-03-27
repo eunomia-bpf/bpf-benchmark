@@ -1,0 +1,348 @@
+{
+  "code_size": {
+    "bpf_bytecode_bytes": 144,
+    "inflation_ratio": 0.652778,
+    "native_code_bytes": 94
+  },
+  "compile_ns": 37271782,
+  "disabled_passes": [],
+  "exec_ns": 0,
+  "jited_prog_len": 94,
+  "no_cmov": false,
+  "perf_counters": {},
+  "perf_counters_meta": {
+    "collected": false,
+    "error": "",
+    "include_kernel": false,
+    "requested": false,
+    "scope": "full_repeat_raw"
+  },
+  "phases_ns": {
+    "memory_prepare_ns": 118549,
+    "object_load_ns": 1345793,
+    "object_open_ns": 3685943
+  },
+  "rejit": {
+    "applied": true,
+    "daemon_response": {
+      "attempts": [
+        {
+          "attempt": 0,
+          "debug": {
+            "final_jited_machine_code": {
+              "byte_len": 94,
+              "bytes_per_line": 16,
+              "lines": [
+                {
+                  "offset": 0,
+                  "raw_hex": "f3 0f 1e fa 0f 1f 44 00 00 0f 1f 00 55 48 89 e5"
+                },
+                {
+                  "offset": 16,
+                  "raw_hex": "f3 0f 1e fa 48 81 ec 08 00 00 00 31 ff 89 7d fc"
+                },
+                {
+                  "offset": 32,
+                  "raw_hex": "89 7d f8 48 89 ee 48 83 c6 fc 48 bf 00 22 97 ca"
+                },
+                {
+                  "offset": 48,
+                  "raw_hex": "fe 88 ff ff 48 81 c7 30 01 00 00 8b 46 00 48 83"
+                },
+                {
+                  "offset": 64,
+                  "raw_hex": "f8 02 73 09 48 c1 e0 03 48 01 f8 eb 02 31 c0 48"
+                },
+                {
+                  "offset": 80,
+                  "raw_hex": "85 c0 74 02 31 ff b8 02 00 00 00 c9 c3 cc"
+                }
+              ]
+            },
+            "final_xlated_bytecode": {
+              "insn_count": 18,
+              "raw_hex_blob": "b701000000000000631afcff00000000631af8ff00000000bfa200000000000007020000fcffffff1811000005000000000000000000000007010000300100006120000000000000350003000200000067000000030000000f100000000000000500010000000000b7000000000000001500010000000000b701000000000000b7000000020000009500000000000000"
+            },
+            "pass_traces": [
+              {
+                "bytecode_after": {
+                  "insn_count": 22,
+                  "raw_hex_blob": "b701000000000000631afcff00000000631af8ff00000000bfa200000000000007020000fcffffff18110000040000000000000000000000850000000100000015000b0000000000b7010000000000001501090000000000bfa200000000000007020000f8ffffff1811000005000000000000000000000085000000010000001500030000000000790100000000000007010000010000007b10000000000000b7000000020000009500000000000000"
+                },
+                "bytecode_before": {
+                  "insn_count": 22,
+                  "raw_hex_blob": "b701000000000000631afcff00000000631af8ff00000000bfa200000000000007020000fcffffff18110000040000000000000000000000850000000100000015000b000000000061010000000000001501090000000000bfa200000000000007020000f8ffffff1811000005000000000000000000000085000000010000001500030000000000790100000000000007010000010000007b10000000000000b7000000020000009500000000000000"
+                },
+                "changed": true,
+                "pass_name": "map_inline"
+              },
+              {
+                "bytecode_after": {
+                  "insn_count": 22,
+                  "raw_hex_blob": "b701000000000000631afcff00000000631af8ff00000000bfa200000000000007020000fcffffff18110000040000000000000000000000850000000100000015000b0000000000b7010000000000000500090000000000bfa200000000000007020000f8ffffff1811000005000000000000000000000085000000010000001500030000000000790100000000000007010000010000007b10000000000000b7000000020000009500000000000000"
+                },
+                "bytecode_before": {
+                  "insn_count": 22,
+                  "raw_hex_blob": "b701000000000000631afcff00000000631af8ff00000000bfa200000000000007020000fcffffff18110000040000000000000000000000850000000100000015000b0000000000b7010000000000001501090000000000bfa200000000000007020000f8ffffff1811000005000000000000000000000085000000010000001500030000000000790100000000000007010000010000007b10000000000000b7000000020000009500000000000000"
+                },
+                "changed": true,
+                "pass_name": "const_prop"
+              },
+              {
+                "bytecode_after": {
+                  "insn_count": 12,
+                  "raw_hex_blob": "b701000000000000631afcff00000000631af8ff00000000bfa200000000000007020000fcffffff1811000004000000000000000000000085000000010000001500010000000000b701000000000000b7000000020000009500000000000000"
+                },
+                "bytecode_before": {
+                  "insn_count": 22,
+                  "raw_hex_blob": "b701000000000000631afcff00000000631af8ff00000000bfa200000000000007020000fcffffff18110000040000000000000000000000850000000100000015000b0000000000b7010000000000000500090000000000bfa200000000000007020000f8ffffff1811000005000000000000000000000085000000010000001500030000000000790100000000000007010000010000007b10000000000000b7000000020000009500000000000000"
+                },
+                "changed": true,
+                "pass_name": "dce"
+              },
+              {
+                "changed": false,
+                "pass_name": "skb_load_bytes_spec"
+              },
+              {
+                "changed": false,
+                "pass_name": "bounds_check_merge"
+              },
+              {
+                "changed": false,
+                "pass_name": "wide_mem"
+              },
+              {
+                "changed": false,
+                "pass_name": "bulk_memory"
+              },
+              {
+                "changed": false,
+                "pass_name": "rotate"
+              },
+              {
+                "changed": false,
+                "pass_name": "cond_select"
+              },
+              {
+                "changed": false,
+                "pass_name": "extract"
+              },
+              {
+                "changed": false,
+                "pass_name": "endian_fusion"
+              },
+              {
+                "changed": false,
+                "pass_name": "branch_flip"
+              }
+            ],
+            "pre_rejit_bytecode": {
+              "insn_count": 12,
+              "raw_hex_blob": "b701000000000000631afcff00000000631af8ff00000000bfa200000000000007020000fcffffff181100000c000000000000000000000085000000010000001500010000000000b701000000000000b7000000020000009500000000000000"
+            },
+            "warnings": [
+              "REJIT succeeded but the verifier log buffer was empty"
+            ]
+          },
+          "disabled_passes": [],
+          "result": "applied"
+        }
+      ],
+      "changed": true,
+      "passes": [
+        {
+          "changed": true,
+          "diagnostics": [
+            "site at PC=15: map_type=6, skip reason: unsupported map type",
+            "site at PC=7: inlined successfully, value=0x0"
+          ],
+          "insn_delta": 0,
+          "insns_after": 22,
+          "insns_before": 22,
+          "pass_name": "map_inline",
+          "sites_applied": 1,
+          "sites_skipped": 1,
+          "skip_reasons": {
+            "map type 6 not inlineable in v1": 1
+          }
+        },
+        {
+          "changed": true,
+          "diagnostics": [],
+          "insn_delta": 0,
+          "insns_after": 22,
+          "insns_before": 22,
+          "pass_name": "const_prop",
+          "sites_applied": 1,
+          "sites_skipped": 0,
+          "skip_reasons": {}
+        },
+        {
+          "changed": true,
+          "diagnostics": [
+            "removed 9 unreachable insns",
+            "removed 1 nop insns"
+          ],
+          "insn_delta": -10,
+          "insns_after": 12,
+          "insns_before": 22,
+          "pass_name": "dce",
+          "sites_applied": 10,
+          "sites_skipped": 0,
+          "skip_reasons": {}
+        },
+        {
+          "changed": false,
+          "diagnostics": [],
+          "insn_delta": 0,
+          "insns_after": 12,
+          "insns_before": 12,
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {}
+        },
+        {
+          "changed": false,
+          "diagnostics": [],
+          "insn_delta": 0,
+          "insns_after": 12,
+          "insns_before": 12,
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {}
+        },
+        {
+          "changed": false,
+          "diagnostics": [],
+          "insn_delta": 0,
+          "insns_after": 12,
+          "insns_before": 12,
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {}
+        },
+        {
+          "changed": false,
+          "diagnostics": [],
+          "insn_delta": 0,
+          "insns_after": 12,
+          "insns_before": 12,
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {}
+        },
+        {
+          "changed": false,
+          "diagnostics": [],
+          "insn_delta": 0,
+          "insns_after": 12,
+          "insns_before": 12,
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {}
+        },
+        {
+          "changed": false,
+          "diagnostics": [],
+          "insn_delta": 0,
+          "insns_after": 12,
+          "insns_before": 12,
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {}
+        },
+        {
+          "changed": false,
+          "diagnostics": [],
+          "insn_delta": 0,
+          "insns_after": 12,
+          "insns_before": 12,
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {}
+        },
+        {
+          "changed": false,
+          "diagnostics": [],
+          "insn_delta": 0,
+          "insns_after": 12,
+          "insns_before": 12,
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {}
+        },
+        {
+          "changed": false,
+          "diagnostics": [
+            "no PMU data available, skipping branch_flip"
+          ],
+          "insn_delta": 0,
+          "insns_after": 12,
+          "insns_before": 12,
+          "pass_name": "branch_flip",
+          "sites_applied": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {}
+        }
+      ],
+      "passes_applied": [
+        "map_inline",
+        "const_prop",
+        "dce"
+      ],
+      "prog_id": 18,
+      "program": {
+        "final_insn_count": 12,
+        "insn_delta": -10,
+        "orig_insn_count": 22,
+        "prog_id": 18,
+        "prog_name": "pktcntr",
+        "prog_type": 6
+      },
+      "status": "ok",
+      "summary": {
+        "applied": true,
+        "final_disabled_passes": [],
+        "passes_changed": 3,
+        "passes_executed": 12,
+        "program_changed": true,
+        "total_sites_applied": 12,
+        "verifier_retries": 0
+      },
+      "timings_ns": {
+        "pipeline_run_ns": 2135607,
+        "rejit_syscall_ns": 386882,
+        "total_ns": 3105391
+      }
+    },
+    "error": "",
+    "final_disabled_passes": [],
+    "insn_cnt": 0,
+    "insn_delta": -10,
+    "mode": "daemon",
+    "passes_applied": [
+      "map_inline",
+      "const_prop",
+      "dce"
+    ],
+    "requested": true,
+    "syscall_attempted": true,
+    "total_sites_applied": 12,
+    "verifier_retries": 0
+  },
+  "result": 0,
+  "retval": 0,
+  "timing_source": "unknown",
+  "timing_source_wall": "unavailable",
+  "wall_exec_ns": null,
+  "xlated_prog_len": 144
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "btf_id": 24,
+    "bytes_key": 4,
+    "bytes_memlock": 82224,
+    "bytes_value": 8,
+    "flags": 0,
+    "frozen": 0,
+    "id": 2,
+    "max_entries": 512,
+    "name": "cntrs_array",
+    "pin_path": "/sys/fs/bpf/map_inline_3hits_map_inline_only_katran_xdp_pktcntr/maps/cntrs_array",
+    "type": "percpu_array"
+  },
+  {
+    "btf_id": 24,
+    "bytes_key": 4,
+    "bytes_memlock": 320,
+    "bytes_value": 4,
+    "flags": 0,
+    "frozen": 0,
+    "id": 1,
+    "max_entries": 2,
+    "name": "ctl_array",
+    "pin_path": "/sys/fs/bpf/map_inline_3hits_map_inline_only_katran_xdp_pktcntr/maps/ctl_array",
+    "type": "array"
+  }
+]

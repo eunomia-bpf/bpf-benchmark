@@ -112,7 +112,7 @@ std::string usage_text()
         "run-llvmbpf|"
 #endif
         "run-kernel|run-kernel-attach|list-programs> [--program <path>|<path>] [--program-name <name>] "
-        "[--memory <path>] [--btf-custom-path <path>] "
+        "[--memory <path>] [--fixture-path <path>] [--btf-custom-path <path>] "
         "[--rejit] [--rejit-program <path>] [--daemon-socket <path>] [--passes <csv>] "
         "[--manual-load] "
         "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size N] "
@@ -543,6 +543,10 @@ cli_options parse_args(int argc, char **argv)
             options.memory = std::filesystem::path(argv[++index]);
             continue;
         }
+        if (current == "--fixture-path" && index + 1 < argc) {
+            options.fixture_path = std::filesystem::path(argv[++index]);
+            continue;
+        }
         if (current == "--btf-custom-path" && index + 1 < argc) {
             options.btf_custom_path = std::filesystem::path(argv[++index]);
             continue;
@@ -712,6 +716,10 @@ keep_alive_request parse_keep_alive_request(std::string_view json_line)
     if (const auto memory = get_optional_string_field(fields, {"memory"});
         memory.has_value()) {
         options.memory = std::filesystem::path(*memory);
+    }
+    if (const auto fixture_path = get_optional_string_field(fields, {"fixture_path"});
+        fixture_path.has_value()) {
+        options.fixture_path = std::filesystem::path(*fixture_path);
     }
     if (const auto btf_path = get_optional_string_field(fields, {"btf_custom_path"});
         btf_path.has_value()) {

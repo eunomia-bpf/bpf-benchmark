@@ -126,6 +126,7 @@ class ResolvedObject:
     canonical_name: str
     object_basename: str
     short_name: str
+    fixture_path: str | None
     compile_loader: str | None
     shared_state_policy: str
     allow_object_only_result: bool
@@ -730,6 +731,7 @@ def build_test_run_batch_job(
     prepared_ref: str | None = None,
     prepared_group: str | None = None,
     release_prepared: bool = True,
+    fixture_path: Path | None = None,
 ) -> dict[str, Any]:
     job: dict[str, Any] = {
         "id": job_id,
@@ -745,6 +747,8 @@ def build_test_run_batch_job(
         job["program_name"] = program_name
     if memory_path is not None:
         job["memory"] = str(memory_path)
+    if fixture_path is not None:
+        job["fixture_path"] = str(fixture_path)
     if input_size > 0:
         job["input_size"] = int(input_size)
     if btf_custom_path is not None:
@@ -1339,6 +1343,7 @@ def deserialize_resolved_object(payload: Mapping[str, Any]) -> ResolvedObject:
     programs = tuple(ResolvedProgram(**dict(item)) for item in programs_payload if isinstance(item, Mapping))
     base = dict(payload)
     base["programs"] = programs
+    base.setdefault("fixture_path", None)
     return ResolvedObject(**base)
 
 
@@ -1359,6 +1364,7 @@ def clone_resolved_object(obj: ResolvedObject, programs: tuple[ResolvedProgram, 
         canonical_name=obj.canonical_name,
         object_basename=obj.object_basename,
         short_name=obj.short_name,
+        fixture_path=obj.fixture_path,
         compile_loader=obj.compile_loader,
         shared_state_policy=obj.shared_state_policy,
         allow_object_only_result=obj.allow_object_only_result,
@@ -1384,6 +1390,7 @@ def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> Resolved
     object_basename = Path(source).name
     canonical_object_name = f"{repo}:{object_relpath}" if repo else object_relpath
     short_name = f"{repo}:{object_basename}" if repo else object_basename
+    fixture_path = _string_or_none(entry.get("fixture_path"))
     compile_loader = _string_or_none(entry.get("compile_loader"))
     shared_state_policy = _string_or_none(entry.get("shared_state_policy")) or "reset_maps"
     allow_object_only_result = bool(entry.get("allow_object_only_result", False))
@@ -1480,6 +1487,7 @@ def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> Resolved
         canonical_name=canonical_object_name,
         object_basename=object_basename,
         short_name=short_name,
+        fixture_path=fixture_path,
         compile_loader=compile_loader,
         shared_state_policy=shared_state_policy,
         allow_object_only_result=allow_object_only_result,
@@ -1507,6 +1515,7 @@ def build_object_batch_plan_v2(
 
     for index, obj in enumerate(objects, start=1):
         object_path = ROOT_DIR / obj.object_path
+        fixture_path = Path(obj.fixture_path) if obj.fixture_path else None
         baseline_group = f"object-{index:04d}:baseline"
         rejit_group = f"object-{index:04d}:rejit"
         baseline_prepared_key = f"{baseline_group}:prepared"
@@ -1534,6 +1543,7 @@ def build_object_batch_plan_v2(
                 compile_only=True,
                 prepared_key=baseline_prepared_key,
                 prepared_group=baseline_group,
+                fixture_path=fixture_path,
             )
         )
 
@@ -1562,6 +1572,7 @@ def build_object_batch_plan_v2(
                     prepared_ref=baseline_prepared_key,
                     prepared_group=baseline_group,
                     release_prepared=False,
+                    fixture_path=fixture_path,
                 )
             )
             if program.test_method != "compile_only":
@@ -1581,6 +1592,7 @@ def build_object_batch_plan_v2(
                         prepared_ref=baseline_prepared_key,
                         prepared_group=baseline_group,
                         release_prepared=False,
+                        fixture_path=fixture_path,
                     )
                 )
 
@@ -1601,6 +1613,7 @@ def build_object_batch_plan_v2(
                 passes=passes,
                 prepared_key=rejit_prepared_key,
                 prepared_group=rejit_group,
+                fixture_path=fixture_path,
             )
         )
 
@@ -1625,6 +1638,7 @@ def build_object_batch_plan_v2(
                     prepared_ref=rejit_prepared_key,
                     prepared_group=rejit_group,
                     release_prepared=False,
+                    fixture_path=fixture_path,
                 )
             )
             if program.test_method != "compile_only" and program.rejit_enabled:
@@ -1646,6 +1660,7 @@ def build_object_batch_plan_v2(
                         prepared_ref=rejit_prepared_key,
                         prepared_group=rejit_group,
                         release_prepared=False,
+                        fixture_path=fixture_path,
                     )
                 )
 

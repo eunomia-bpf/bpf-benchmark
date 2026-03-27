@@ -1,0 +1,44 @@
+{
+  "code_size": {
+    "bpf_bytecode_bytes": 31080,
+    "inflation_ratio": 0.626737,
+    "native_code_bytes": 19479
+  },
+  "compile_ns": 331208771,
+  "disabled_passes": [],
+  "exec_ns": 0,
+  "jited_prog_len": 19479,
+  "no_cmov": false,
+  "perf_counters": {},
+  "perf_counters_meta": {
+    "collected": false,
+    "error": "",
+    "include_kernel": false,
+    "requested": false,
+    "scope": "full_repeat_raw"
+  },
+  "phases_ns": {
+    "memory_prepare_ns": 147035,
+    "object_load_ns": 162868922,
+    "object_open_ns": 168339849
+  },
+  "rejit": {
+    "applied": false,
+    "error": "",
+    "final_disabled_passes": [],
+    "insn_cnt": 0,
+    "insn_delta": 0,
+    "mode": "none",
+    "passes_applied": [],
+    "requested": false,
+    "syscall_attempted": false,
+    "total_sites_applied": 0,
+    "verifier_retries": 0
+  },
+  "result": 0,
+  "retval": 0,
+  "timing_source": "unknown",
+  "timing_source_wall": "unavailable",
+  "wall_exec_ns": null,
+  "xlated_prog_len": 31080
+}

@@ -1,0 +1,112 @@
+{
+  "attempts": [
+    {
+      "attempt": 0,
+      "debug": {
+        "final_jited_machine_code": {
+          "byte_len": 94,
+          "bytes_per_line": 16,
+          "lines": [
+            {
+              "offset": 0,
+              "raw_hex": "f3 0f 1e fa 0f 1f 44 00 00 0f 1f 00 55 48 89 e5"
+            },
+            {
+              "offset": 16,
+              "raw_hex": "f3 0f 1e fa 48 81 ec 08 00 00 00 31 ff 89 7d fc"
+            },
+            {
+              "offset": 32,
+              "raw_hex": "89 7d f8 48 89 ee 48 83 c6 fc 48 bf 00 66 e2 89"
+            },
+            {
+              "offset": 48,
+              "raw_hex": "de 8c ff ff 48 81 c7 30 01 00 00 8b 46 00 48 83"
+            },
+            {
+              "offset": 64,
+              "raw_hex": "f8 02 73 09 48 c1 e0 03 48 01 f8 eb 02 31 c0 48"
+            },
+            {
+              "offset": 80,
+              "raw_hex": "85 c0 74 02 31 ff b8 02 00 00 00 c9 c3 cc"
+            }
+          ]
+        },
+        "final_xlated_bytecode": {
+          "insn_count": 18,
+          "raw_hex_blob": "b701000000000000631afcff00000000631af8ff00000000bfa200000000000007020000fcffffff1811000001000000000000000000000007010000300100006120000000000000350003000200000067000000030000000f100000000000000500010000000000b7000000000000001500010000000000b701000000000000b7000000020000009500000000000000"
+        },
+        "pass_traces": [
+          {
+            "bytecode_after": {
+              "insn_count": 22,
+              "raw_hex_blob": "b701000000000000631afcff00000000631af8ff00000000bfa200000000000007020000fcffffff18110000040000000000000000000000850000000100000015000b0000000000b7010000000000001501090000000000bfa200000000000007020000f8ffffff1811000005000000000000000000000085000000010000001500030000000000790100000000000007010000010000007b10000000000000b7000000020000009500000000000000"
+            },
+            "bytecode_before": {
+              "insn_count": 22,
+              "raw_hex_blob": "b701000000000000631afcff00000000631af8ff00000000bfa200000000000007020000fcffffff18110000040000000000000000000000850000000100000015000b000000000061010000000000001501090000000000bfa200000000000007020000f8ffffff1811000005000000000000000000000085000000010000001500030000000000790100000000000007010000010000007b10000000000000b7000000020000009500000000000000"
+            },
+            "changed": true,
+            "pass_name": "map_inline"
+          }
+        ],
+        "pre_rejit_bytecode": {
+          "insn_count": 22,
+          "raw_hex_blob": "b701000000000000631afcff00000000631af8ff00000000bfa200000000000007020000fcffffff181100000c0000000000000000000000850000000100000015000b0000000000b7010000000000001501090000000000bfa200000000000007020000f8ffffff181100000d000000000000000000000085000000010000001500030000000000790100000000000007010000010000007b10000000000000b7000000020000009500000000000000"
+        },
+        "warnings": [
+          "REJIT succeeded but the verifier log buffer was empty"
+        ]
+      },
+      "disabled_passes": [],
+      "result": "applied"
+    }
+  ],
+  "changed": true,
+  "passes": [
+    {
+      "changed": true,
+      "diagnostics": [
+        "site at PC=15: map_type=6, skip reason: unsupported map type",
+        "site at PC=7: inlined successfully, value=0x0"
+      ],
+      "insn_delta": 0,
+      "insns_after": 22,
+      "insns_before": 22,
+      "pass_name": "map_inline",
+      "sites_applied": 1,
+      "sites_skipped": 1,
+      "skip_reasons": {
+        "map type 6 not inlineable in v1": 1
+      }
+    }
+  ],
+  "passes_applied": [
+    "map_inline"
+  ],
+  "prog_id": 7,
+  "program": {
+    "final_insn_count": 22,
+    "insn_delta": 0,
+    "orig_insn_count": 22,
+    "prog_id": 7,
+    "prog_name": "pktcntr",
+    "prog_type": 6
+  },
+  "status": "ok",
+  "summary": {
+    "applied": true,
+    "final_disabled_passes": [],
+    "passes_changed": 1,
+    "passes_executed": 1,
+    "program_changed": true,
+    "total_sites_applied": 1,
+    "verifier_retries": 0
+  },
+  "timings_ns": {
+    "pipeline_run_ns": 4233991,
+    "rejit_syscall_ns": 147567,
+    "total_ns": 8515339
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "group": "katran_xdp_pktcntr",
+  "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/xdp_pktcntr.bpf.o",
+  "prog_type": "xdp",
+  "programs": [
+    {
+      "passes_applied": [
+        "map_inline"
+      ],
+      "prog_id": 7,
+      "prog_name": "pktcntr",
+      "prog_pin": "/sys/fs/bpf/map_inline_3hits_map_inline_only_katran_xdp_pktcntr/progs/pktcntr",
+      "program": {
+        "final_insn_count": 22,
+        "insn_delta": 0,
+        "orig_insn_count": 22,
+        "prog_id": 7,
+        "prog_name": "pktcntr",
+        "prog_type": 6
+      },
+      "response_status": "ok",
+      "scenario": "map_inline_only",
+      "summary": {
+        "applied": true,
+        "final_disabled_passes": [],
+        "passes_changed": 1,
+        "passes_executed": 1,
+        "program_changed": true,
+        "total_sites_applied": 1,
+        "verifier_retries": 0
+      }
+    }
+  ],
+  "scenario": "map_inline_only"
+}

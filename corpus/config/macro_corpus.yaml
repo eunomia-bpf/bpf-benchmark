@@ -17,6 +17,8 @@ runtimes:
   label: kernel eBPF rejit v2
   mode: kernel-rejit
 objects:
+# Optional object fields include:
+# - fixture_path: corpus/fixtures/<repo>/<object>/<program>.json
 - source: corpus/build/KubeArmor/enforcer.bpf.o
   repo: KubeArmor
   test_method: attach_trigger

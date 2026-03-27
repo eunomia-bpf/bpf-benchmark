@@ -1126,6 +1126,7 @@ batch_job parse_job(const YAML::Node &node, size_t index)
     options.program = std::filesystem::path(require_scalar_string(node["program"], "program"));
     options.program_name = optional_string(node, "program_name");
     options.memory = optional_path(node, "memory");
+    options.fixture_path = optional_path(node, "fixture_path");
     options.btf_custom_path = optional_path(node, "btf_custom_path");
     options.daemon_socket = optional_string(node, "daemon_socket");
     options.rejit_program = optional_path(node, "rejit_program");
