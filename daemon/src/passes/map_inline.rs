@@ -12,6 +12,7 @@ use crate::pass::*;
 const BPF_ADD: u8 = 0x00;
 const BPF_PSEUDO_MAP_FD: u8 = 1;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
+const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
 
 /// Dynamic map inlining optimization pass.
 pub struct MapInlinePass;
@@ -420,21 +421,28 @@ fn build_site_rewrite(
     let value =
         bpf::bpf_map_lookup_elem_by_id(info.map_id, &encoded_key, info.value_size as usize)?;
 
-    let mut skipped_pcs = HashSet::new();
+    let mut lookup_pattern_pcs = HashSet::new();
     if remove_lookup_pattern {
-        skipped_pcs.insert(site.call_pc);
-        skipped_pcs.insert(site.map_load_pc);
-        skipped_pcs.insert(site.map_load_pc + 1);
-        skipped_pcs.insert(key.store_pc);
-        skipped_pcs.insert(key.r2_mov_pc);
-        skipped_pcs.insert(key.r2_add_pc);
+        lookup_pattern_pcs.insert(site.call_pc);
+        lookup_pattern_pcs.insert(site.map_load_pc);
+        lookup_pattern_pcs.insert(site.map_load_pc + 1);
+        lookup_pattern_pcs.insert(key.store_pc);
+        lookup_pattern_pcs.insert(key.r2_mov_pc);
+        lookup_pattern_pcs.insert(key.r2_add_pc);
         if let Some(source_imm_pc) = key.source_imm_pc {
-            skipped_pcs.insert(source_imm_pc);
+            lookup_pattern_pcs.insert(source_imm_pc);
         }
         if let Some(null_check_pc) = null_check_pc {
-            skipped_pcs.insert(null_check_pc);
+            lookup_pattern_pcs.insert(null_check_pc);
         }
     }
+    let can_remove_lookup_pattern = remove_lookup_pattern
+        && lookup_pattern_removal_is_safe(program, site, null_check_pc, &lookup_pattern_pcs);
+    let skipped_pcs = if can_remove_lookup_pattern {
+        lookup_pattern_pcs
+    } else {
+        HashSet::new()
+    };
 
     let mut replacements = BTreeMap::new();
     for load in &uses.fixed_loads {
@@ -453,30 +461,9 @@ fn build_site_rewrite(
         return Ok(None);
     }
 
-    if remove_lookup_pattern {
-        // The raw PCs we remove must be exactly the lookup pattern. If unrelated
-        // instructions are interleaved, skip the site rather than deleting them.
-        let min_removed_pc = skipped_pcs.iter().min().copied().unwrap_or(site.call_pc);
-        let max_removed_pc = skipped_pcs.iter().max().copied().unwrap_or(site.call_pc);
-        if skipped_pcs.len() != max_removed_pc - min_removed_pc + 1 {
-            return Ok(None);
-        }
-
-        // Only remove the lookup pattern itself: key materialization, map load,
-        // helper call, and an optional immediate null check.
-        if max_removed_pc != null_check_pc.unwrap_or(site.call_pc) {
-            return Ok(None);
-        }
-
-        // All removed PCs must be within bounds.
-        if skipped_pcs.iter().any(|&pc| pc >= program.insns.len()) {
-            return Ok(None);
-        }
-    }
-
     Ok(Some(SiteRewrite {
         call_pc: site.call_pc,
-        removed_null_check: remove_lookup_pattern && null_check_pc.is_some(),
+        removed_null_check: can_remove_lookup_pattern && null_check_pc.is_some(),
         speculative: info.is_speculative_v1(),
         map_inline_record: MapInlineRecord {
             map_id: info.map_id,
@@ -559,20 +546,64 @@ fn find_map_load_for_call(insns: &[BpfInsn], call_pc: usize) -> Option<usize> {
     None
 }
 
-fn find_r2_stack_pointer_setup(insns: &[BpfInsn], call_pc: usize) -> Option<(usize, usize, i16)> {
-    let r2_add_pc = prev_real_pc(insns, call_pc)?;
-    let r2_mov_pc = prev_real_pc(insns, r2_add_pc)?;
-    let add = &insns[r2_add_pc];
-    let mov = &insns[r2_mov_pc];
-
-    if mov.code != (BPF_ALU64 | BPF_MOV | BPF_X) || mov.dst_reg() != 2 || mov.src_reg() != 10 {
-        return None;
+fn lookup_pattern_removal_is_safe(
+    program: &BpfProgram,
+    site: &MapLookupSite,
+    null_check_pc: Option<usize>,
+    skipped_pcs: &HashSet<usize>,
+) -> bool {
+    if skipped_pcs.is_empty() || skipped_pcs.iter().any(|&pc| pc >= program.insns.len()) {
+        return false;
     }
+
+    let min_removed_pc = skipped_pcs.iter().min().copied().unwrap_or(site.call_pc);
+    let max_removed_pc = skipped_pcs.iter().max().copied().unwrap_or(site.call_pc);
+
+    // Only remove the lookup pattern itself when it is a tight contiguous block.
+    // If clang interleaves unrelated setup, keep the lookup instructions and only
+    // rewrite the fixed loads that consume the helper result.
+    skipped_pcs.len() == max_removed_pc - min_removed_pc + 1
+        && max_removed_pc == null_check_pc.unwrap_or(site.call_pc)
+}
+
+fn find_r2_stack_pointer_setup(insns: &[BpfInsn], call_pc: usize) -> Option<(usize, usize, i16)> {
+    let (r2_add_pc, scanned) =
+        find_prev_reg_def_within(insns, call_pc, 2, R2_SETUP_LOOKBACK_LIMIT)?;
+    let add = &insns[r2_add_pc];
+
     if add.code != (BPF_ALU64 | BPF_ADD | BPF_K) || add.dst_reg() != 2 || add.imm >= 0 {
         return None;
     }
 
+    let remaining = R2_SETUP_LOOKBACK_LIMIT.saturating_sub(scanned);
+    let (r2_mov_pc, _) = find_prev_reg_def_within(insns, r2_add_pc, 2, remaining)?;
+    let mov = &insns[r2_mov_pc];
+    if mov.code != (BPF_ALU64 | BPF_MOV | BPF_X) || mov.dst_reg() != 2 || mov.src_reg() != 10 {
+        return None;
+    }
+
     Some((r2_mov_pc, r2_add_pc, add.imm as i16))
+}
+
+fn find_prev_reg_def_within(
+    insns: &[BpfInsn],
+    start_pc: usize,
+    reg: u8,
+    limit: usize,
+) -> Option<(usize, usize)> {
+    let mut cursor = start_pc;
+    let mut scanned = 0usize;
+
+    while scanned < limit {
+        let pc = prev_real_pc(insns, cursor)?;
+        scanned += 1;
+        if insn_defines_reg(&insns[pc], reg) {
+            return Some((pc, scanned));
+        }
+        cursor = pc;
+    }
+
+    None
 }
 
 fn find_constant_stack_store(
@@ -1153,6 +1184,112 @@ mod tests {
         ];
         let mut program = BpfProgram::new(original.clone());
         program.set_map_ids(vec![104]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(result.pass_results[0]
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.reason.contains("constant stack materialization")));
+    }
+
+    #[test]
+    fn test_map_inline_real_clang_order() {
+        install_array_map(117, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            map[0],
+            map[1],
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![117]);
+
+        let key = extract_constant_key(&program.insns, 5).unwrap();
+        assert_eq!(key.value, 1);
+        assert_eq!(key.stack_off, -4);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(6, 7),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_map_inline_interleaved_arg_setup() {
+        install_array_map(118, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            BpfInsn::mov64_imm(3, 9),
+            map[0],
+            map[1],
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![118]);
+
+        let key = extract_constant_key(&program.insns, 6).unwrap();
+        assert_eq!(key.value, 1);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(program.insns[7], BpfInsn::mov64_imm(6, 7));
+        assert_eq!(program.insns.last().copied(), Some(exit_insn()));
+    }
+
+    #[test]
+    fn test_map_inline_r2_clobbered_between() {
+        install_array_map(119, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            BpfInsn::mov64_imm(2, 0),
+            map[0],
+            map[1],
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![119]);
+
+        assert!(extract_constant_key(&program.insns, 6).is_none());
 
         let result = run_map_inline_pass(&mut program);
 
