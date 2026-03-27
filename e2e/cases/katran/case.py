@@ -37,7 +37,7 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.corpus import materialize_katran_packet  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
-from runner.libs.rejit import apply_daemon_rejit, scan_programs  # noqa: E402
+from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes, scan_programs  # noqa: E402
 
 from e2e.case_common import (  # noqa: E402
     capture_map_state,
@@ -2239,7 +2239,11 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                                 "cycle_index": cycle_index,
                             }
                         scan_results = scan_programs(prog_ids, daemon_binary)
-                        rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
+                        rejit_result = apply_daemon_rejit(
+                            daemon_binary,
+                            prog_ids,
+                            enabled_passes=benchmark_rejit_enabled_passes(),
+                        )
                         if args.capture_maps and map_capture is not None and "result" not in map_capture:
                             optimize_results = (
                                 rejit_result.get("per_program")

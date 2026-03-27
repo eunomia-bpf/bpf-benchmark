@@ -797,6 +797,10 @@ keep_alive_request parse_keep_alive_request(std::string_view json_line)
         disabled_passes.has_value()) {
         options.disabled_passes = *disabled_passes;
     }
+    if (const auto enabled_passes = get_optional_string_array_field(fields, {"enabled_passes"});
+        enabled_passes.has_value()) {
+        options.enabled_passes = *enabled_passes;
+    }
     if (const auto log_passes = get_optional_bool_field(fields, {"log_passes"});
         log_passes.has_value()) {
         options.log_passes = *log_passes;

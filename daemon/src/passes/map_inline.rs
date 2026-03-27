@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Scan helpers for dynamic map inlining.
 
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::Write as _;
 
 use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
@@ -74,6 +74,12 @@ impl R0UseClassification {
 struct ConstantRegValue {
     value: u64,
     source_pc: Option<usize>,
+}
+
+#[derive(Clone, Debug)]
+struct FrozenMapValue {
+    map_id: u32,
+    value: Vec<u8>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -456,6 +462,9 @@ impl BpfPass for MapInlinePass {
         let mut skipped = Vec::new();
         let mut rewrites = Vec::new();
         let mut diagnostics = Vec::new();
+        let (direct_replacements, direct_sites_applied, direct_diagnostics) =
+            build_direct_map_value_load_rewrites(program);
+        diagnostics.extend(direct_diagnostics);
         let sites = find_map_lookup_sites(&program.insns);
 
         log_map_inline_debug(&format!("found {} lookup sites", sites.len()));
@@ -697,7 +706,7 @@ impl BpfPass for MapInlinePass {
             rewrites.push(rewrite);
         }
 
-        if rewrites.is_empty() {
+        if rewrites.is_empty() && direct_replacements.is_empty() {
             log_map_inline_debug("no map_inline rewrites prepared");
             return Ok(PassResult {
                 pass_name: self.name().into(),
@@ -710,9 +719,9 @@ impl BpfPass for MapInlinePass {
         }
 
         let mut skip_pcs = HashSet::new();
-        let mut replacements: BTreeMap<usize, Vec<BpfInsn>> = BTreeMap::new();
+        let mut replacements: BTreeMap<usize, Vec<BpfInsn>> = direct_replacements;
         let mut map_inline_records = Vec::new();
-        let mut applied = 0usize;
+        let mut applied = direct_sites_applied;
         let mut removed_any_null_check = false;
         let mut speculative_sites = 0usize;
 
@@ -884,6 +893,11 @@ fn build_site_rewrite(
 
     let removable_null_check_pc =
         null_check_pc.filter(|&pc| null_check_is_fallthrough_non_null(&program.insns[pc]));
+    let replacement_pcs = uses
+        .fixed_loads
+        .iter()
+        .map(|load| load.pc)
+        .collect::<HashSet<_>>();
     let mut lookup_pattern_pcs = HashSet::new();
     if remove_lookup_pattern {
         lookup_pattern_pcs.insert(site.call_pc);
@@ -906,8 +920,16 @@ fn build_site_rewrite(
     if remove_lookup_pattern {
         lookup_pattern_pcs.extend(uses.alias_copy_pcs.iter().copied());
     }
-    let null_check_blocks_lookup_removal =
-        null_check_pc.is_some() && removable_null_check_pc.is_none();
+    let null_check_blocks_lookup_removal = if let Some(null_check_pc) = removable_null_check_pc {
+        !null_check_removal_window_is_trivial(
+            program,
+            null_check_pc,
+            &lookup_pattern_pcs,
+            &replacement_pcs,
+        )
+    } else {
+        null_check_pc.is_some()
+    };
     let can_remove_lookup_pattern = remove_lookup_pattern
         && !null_check_blocks_lookup_removal
         && lookup_pattern_removal_is_safe(program, uses, &lookup_pattern_pcs);
@@ -948,6 +970,142 @@ fn build_site_rewrite(
         skipped_pcs,
         replacements,
     }))
+}
+
+fn build_direct_map_value_load_rewrites(
+    program: &BpfProgram,
+) -> (BTreeMap<usize, Vec<BpfInsn>>, usize, Vec<String>) {
+    let mut replacements = BTreeMap::new();
+    let mut sites_applied = 0usize;
+    let mut diagnostics = Vec::new();
+    let mut map_cache: HashMap<i32, Option<FrozenMapValue>> = HashMap::new();
+    let mut pc = 0usize;
+
+    while pc < program.insns.len() {
+        let insn = &program.insns[pc];
+        if !insn.is_ldx_mem() {
+            pc += insn_width(insn);
+            continue;
+        }
+
+        let bounds = subprog_bounds(&program.insns, pc);
+        let origin = match resolve_key_pointer_origin(&program.insns, pc, insn.src_reg(), bounds) {
+            Ok(KeyPointerOrigin::MapValue {
+                old_fd, value_off, ..
+            }) => Some((old_fd, value_off)),
+            _ => None,
+        };
+        let Some((old_fd, value_off)) = origin else {
+            pc += insn_width(insn);
+            continue;
+        };
+
+        let Some(total_off) = value_off.checked_add(insn.off as i32) else {
+            record_diagnostic(
+                &mut diagnostics,
+                format!(
+                    "site at PC={}: pseudo-map-value offset overflow (base {} + load off {})",
+                    pc, value_off, insn.off
+                ),
+            );
+            pc += insn_width(insn);
+            continue;
+        };
+        if total_off < 0 {
+            record_diagnostic(
+                &mut diagnostics,
+                format!(
+                    "site at PC={}: pseudo-map-value load offset {} is negative",
+                    pc, total_off
+                ),
+            );
+            pc += insn_width(insn);
+            continue;
+        }
+
+        let Some(map_value) =
+            resolve_frozen_map_value(program, old_fd, &mut map_cache, &mut diagnostics)
+        else {
+            pc += insn_width(insn);
+            continue;
+        };
+
+        let offset = total_off as usize;
+        let Some(scalar) = read_scalar_from_value_at(&map_value.value, offset, bpf_size(insn.code))
+        else {
+            record_diagnostic(
+                &mut diagnostics,
+                format!(
+                    "site at PC={}: pseudo-map-value load out of bounds (map_id={}, off={}, size={})",
+                    pc,
+                    map_value.map_id,
+                    offset,
+                    size_in_bytes(bpf_size(insn.code)).unwrap_or_default()
+                ),
+            );
+            pc += insn_width(insn);
+            continue;
+        };
+
+        replacements.insert(
+            pc,
+            emit_constant_load(insn.dst_reg(), scalar, bpf_size(insn.code)),
+        );
+        sites_applied += 1;
+        record_diagnostic(
+            &mut diagnostics,
+            format!(
+                "site at PC={}: constantized pseudo-map-value load from map_id={} off={} value=0x{:x}",
+                pc, map_value.map_id, offset, scalar
+            ),
+        );
+
+        pc += insn_width(insn);
+    }
+
+    (replacements, sites_applied, diagnostics)
+}
+
+fn resolve_frozen_map_value(
+    program: &BpfProgram,
+    old_fd: i32,
+    cache: &mut HashMap<i32, Option<FrozenMapValue>>,
+    diagnostics: &mut Vec<String>,
+) -> Option<FrozenMapValue> {
+    if let Some(cached) = cache.get(&old_fd) {
+        return cached.clone();
+    }
+
+    let resolved = (|| -> anyhow::Result<Option<FrozenMapValue>> {
+        let Some(&map_id) = program.map_fd_bindings.get(&old_fd) else {
+            return Ok(None);
+        };
+        let (info, frozen) = bpf::bpf_map_get_info_by_id(map_id)?;
+        if !frozen {
+            return Ok(None);
+        }
+
+        let key = vec![0u8; info.key_size as usize];
+        let value_size = bpf::bpf_map_lookup_value_size(&info);
+        let value = bpf::bpf_map_lookup_elem_by_id(map_id, &key, value_size)?;
+        Ok(Some(FrozenMapValue { map_id, value }))
+    })();
+
+    let cached = match resolved {
+        Ok(value) => value,
+        Err(err) => {
+            record_diagnostic(
+                diagnostics,
+                format!(
+                    "pseudo-map-value old_fd {} could not be resolved to a frozen value: {err:#}",
+                    old_fd
+                ),
+            );
+            None
+        }
+    };
+    cache.insert(old_fd, cached.clone());
+    cached
 }
 
 fn encode_key_bytes(value: u64, key_size: usize) -> Vec<u8> {
@@ -1001,8 +1159,11 @@ fn read_scalar_from_value(value: &[u8], offset: i16, size: u8) -> Option<u64> {
     if offset < 0 {
         return None;
     }
+    read_scalar_from_value_at(value, offset as usize, size)
+}
+
+fn read_scalar_from_value_at(value: &[u8], offset: usize, size: u8) -> Option<u64> {
     let width = size_in_bytes(size)? as usize;
-    let offset = offset as usize;
     if offset + width > value.len() {
         return None;
     }
@@ -1809,6 +1970,56 @@ fn null_check_is_fallthrough_non_null(insn: &BpfInsn) -> bool {
         && insn.off >= 0
 }
 
+fn null_check_removal_window_is_trivial(
+    program: &BpfProgram,
+    null_check_pc: usize,
+    skipped_pcs: &HashSet<usize>,
+    replacement_pcs: &HashSet<usize>,
+) -> bool {
+    let Some(null_target_pc) = jump_target_pc(
+        null_check_pc,
+        &program.insns[null_check_pc],
+        program.insns.len(),
+    ) else {
+        return false;
+    };
+    let Some(mut pc) =
+        advance_to_non_null_path(null_check_pc, &program.insns[null_check_pc], program.insns.len())
+    else {
+        return false;
+    };
+
+    while pc < null_target_pc {
+        if skipped_pcs.contains(&pc) || replacement_pcs.contains(&pc) {
+            pc += insn_width(&program.insns[pc]);
+            continue;
+        }
+
+        let insn = &program.insns[pc];
+        if !is_trivially_safe_null_check_guarded_insn(insn) {
+            return false;
+        }
+        pc += insn_width(insn);
+    }
+
+    true
+}
+
+fn is_trivially_safe_null_check_guarded_insn(insn: &BpfInsn) -> bool {
+    if insn.is_exit() || insn.is_ja() {
+        return true;
+    }
+
+    if insn.is_ldimm64() {
+        return insn.src_reg() == 0;
+    }
+
+    match insn.class() {
+        BPF_ALU64 | BPF_ALU => bpf_op(insn.code) == BPF_MOV && bpf_src(insn.code) == BPF_K,
+        _ => false,
+    }
+}
+
 fn insn_uses_any_alias(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> bool {
     alias_regs
         .iter()
@@ -1865,9 +2076,10 @@ mod tests {
     use super::*;
     use std::collections::HashMap;
 
-    use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
+    use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, MapInfoAnalysis};
     use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
     use crate::pass::{MapInlineRecord, PassContext, PassManager};
+    use crate::passes::{ConstPropPass, DcePass};
     use crate::verifier_log::parse_verifier_log;
 
     fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
@@ -2115,6 +2327,148 @@ mod tests {
         pm.run(program, &PassContext::test_default()).unwrap()
     }
 
+    fn run_map_inline_const_prop_dce(program: &mut BpfProgram) -> PipelineResult {
+        let mut pm = PassManager::new();
+        pm.register_analysis(BranchTargetAnalysis);
+        pm.register_analysis(CFGAnalysis);
+        pm.register_analysis(MapInfoAnalysis);
+        pm.add_pass(MapInlinePass);
+        pm.add_pass(ConstPropPass);
+        pm.add_pass(DcePass);
+        pm.run(program, &PassContext::test_default()).unwrap()
+    }
+
+    fn bcc_top20_objects() -> Vec<std::path::PathBuf> {
+        let dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("corpus/build/bcc/libbpf-tools");
+        let mut objects = std::fs::read_dir(dir)
+            .unwrap()
+            .filter_map(|entry| entry.ok().map(|entry| entry.path()))
+            .filter(|path| {
+                path.extension().and_then(|ext| ext.to_str()) == Some("o")
+                    && path.file_name()
+                        .and_then(|name| name.to_str())
+                        .map(|name| name.ends_with(".bpf.o") && !name.ends_with(".tmp.o"))
+                        .unwrap_or(false)
+            })
+            .collect::<Vec<_>>();
+        objects.sort();
+        objects.truncate(20);
+        objects
+    }
+
+    #[test]
+    #[ignore]
+    fn dump_bcc_top20_pattern_stats() {
+        use crate::elf_parser::parse_bpf_object;
+
+        let mut pseudo_map_value_loads = 0usize;
+        let mut rodata_loads = 0usize;
+        let mut data_loads = 0usize;
+        let mut bss_loads = 0usize;
+        let mut kconfig_loads = 0usize;
+        let mut lookup_calls = 0usize;
+        let mut array_calls = 0usize;
+        let mut hash_calls = 0usize;
+        let mut percpu_calls = 0usize;
+        let mut other_calls = 0usize;
+        let mut constant_key_calls = 0usize;
+        let mut dynamic_key_calls = 0usize;
+        let mut constant_array_fixed_load_only = 0usize;
+        let mut constant_array_other_uses = 0usize;
+
+        for object_path in bcc_top20_objects() {
+            let object = parse_bpf_object(&object_path).unwrap();
+            let mut object_pseudo_map_value_loads = 0usize;
+            let mut object_lookup_calls = 0usize;
+            let mut object_constant_key_calls = 0usize;
+            for program in &object.programs {
+                for relocation in &program.map_relocations {
+                    if relocation.pseudo_src != BPF_PSEUDO_MAP_VALUE {
+                        continue;
+                    }
+                    if !relocation.map_name.starts_with('.') {
+                        continue;
+                    }
+                    pseudo_map_value_loads += 1;
+                    object_pseudo_map_value_loads += 1;
+                    match relocation.map_name.as_str() {
+                        name if name.starts_with(".rodata") => rodata_loads += 1,
+                        name if name.starts_with(".data") => data_loads += 1,
+                        name if name.starts_with(".bss") => bss_loads += 1,
+                        name if name.starts_with(".kconfig") => kconfig_loads += 1,
+                        _ => {}
+                    }
+                }
+
+                for site in find_map_lookup_sites(&program.insns) {
+                    lookup_calls += 1;
+                    object_lookup_calls += 1;
+                    let relocation = program
+                        .map_relocations
+                        .iter()
+                        .find(|relocation| relocation.pc == site.map_load_pc)
+                        .unwrap();
+                    let map = &object.maps[relocation.map_index];
+                    match map.map_type.unwrap_or_default() {
+                        2 => array_calls += 1,
+                        1 | 9 => hash_calls += 1,
+                        5 | 6 | 10 => percpu_calls += 1,
+                        _ => other_calls += 1,
+                    }
+
+                    let is_constant_key = extract_constant_key(&program.insns, site.call_pc)
+                        .is_some()
+                        || object.maps[relocation.map_index].name.starts_with('.');
+                    if is_constant_key {
+                        constant_key_calls += 1;
+                        object_constant_key_calls += 1;
+                        if matches!(map.map_type, Some(2 | 6)) {
+                            let uses = classify_r0_uses_with_options(
+                                &program.insns,
+                                site.call_pc,
+                                false,
+                                false,
+                            );
+                            if !uses.fixed_loads.is_empty() && uses.all_fixed_loads() {
+                                constant_array_fixed_load_only += 1;
+                            } else {
+                                constant_array_other_uses += 1;
+                            }
+                        }
+                    } else {
+                        dynamic_key_calls += 1;
+                    }
+                }
+            }
+
+            println!(
+                "object={} pseudo_map_value_loads={} lookup_calls={} constant_key_calls={}",
+                object_path.file_name().and_then(|name| name.to_str()).unwrap_or("unknown"),
+                object_pseudo_map_value_loads,
+                object_lookup_calls,
+                object_constant_key_calls
+            );
+        }
+
+        println!("bcc_top20_objects={}", bcc_top20_objects().len());
+        println!("pseudo_map_value_loads={pseudo_map_value_loads}");
+        println!("rodata_loads={rodata_loads}");
+        println!("data_loads={data_loads}");
+        println!("bss_loads={bss_loads}");
+        println!("kconfig_loads={kconfig_loads}");
+        println!("lookup_calls={lookup_calls}");
+        println!("array_calls={array_calls}");
+        println!("hash_calls={hash_calls}");
+        println!("percpu_calls={percpu_calls}");
+        println!("other_calls={other_calls}");
+        println!("constant_key_calls={constant_key_calls}");
+        println!("dynamic_key_calls={dynamic_key_calls}");
+        println!("constant_array_fixed_load_only={constant_array_fixed_load_only}");
+        println!("constant_array_other_uses={constant_array_other_uses}");
+    }
+
     fn has_non_constant_key_skip(result: &PipelineResult) -> bool {
         result.pass_results[0].sites_skipped.iter().any(|skip| {
             skip.reason
@@ -2154,6 +2508,86 @@ mod tests {
         ];
 
         assert!(find_map_lookup_sites(&insns).is_empty());
+    }
+
+    #[test]
+    fn map_inline_constantizes_frozen_pseudo_map_value_loads() {
+        let mut values = HashMap::new();
+        values.insert(0u32.to_le_bytes().to_vec(), vec![0, 0, 0, 0, 42, 0, 0, 0]);
+        install_map(901, 2, 1, true, values);
+
+        let map_value = ld_imm64_parts(1, BPF_PSEUDO_MAP_VALUE, 77, 4);
+        let mut program = BpfProgram::new(vec![
+            map_value[0],
+            map_value[1],
+            BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![901]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(program.insns[2], BpfInsn::mov64_imm(2, 42));
+    }
+
+    #[test]
+    fn map_inline_skips_mutable_pseudo_map_value_loads() {
+        let mut values = HashMap::new();
+        values.insert(0u32.to_le_bytes().to_vec(), vec![7, 0, 0, 0]);
+        install_map(902, 2, 1, false, values);
+
+        let map_value = ld_imm64_parts(1, BPF_PSEUDO_MAP_VALUE, 78, 0);
+        let original = vec![
+            map_value[0],
+            map_value[1],
+            BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![902]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+    }
+
+    #[test]
+    fn map_inline_pseudo_map_value_feeds_const_prop_and_dce() {
+        let mut values = HashMap::new();
+        values.insert(0u32.to_le_bytes().to_vec(), vec![1, 0, 0, 0]);
+        install_map(903, 2, 1, true, values);
+
+        let map_value = ld_imm64_parts(1, BPF_PSEUDO_MAP_VALUE, 79, 0);
+        let mut program = BpfProgram::new(vec![
+            map_value[0],
+            map_value[1],
+            BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
+            jeq_imm(2, 1, 1),
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![903]);
+
+        let result = run_map_inline_const_prop_dce(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.pass_results[0].pass_name, "map_inline");
+        assert_eq!(result.pass_results[1].pass_name, "const_prop");
+        assert_eq!(result.pass_results[2].pass_name, "dce");
+        assert!(result.pass_results[0].changed);
+        assert!(result.pass_results[1].changed);
+        assert!(
+            !program.insns.iter().any(|insn| insn.is_cond_jmp()),
+            "expected const_prop+dce to remove the conditional branch after pseudo-map-value constantization"
+        );
+        assert!(
+            !program.insns.iter().any(|insn| *insn == BpfInsn::mov64_imm(0, 0)),
+            "expected dce to remove the dead false branch after pseudo-map-value constantization"
+        );
     }
 
     #[test]
@@ -2536,6 +2970,41 @@ mod tests {
                 exit_insn(),
             ]
         );
+    }
+
+    #[test]
+    fn map_inline_pass_keeps_null_check_when_non_null_window_has_side_effects() {
+        install_array_map(1602, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            jeq_imm(0, 0, 5),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::stx_mem(BPF_W, 10, 6, -8),
+            jeq_imm(6, 0, 1),
+            BpfInsn::mov64_imm(0, 0),
+            ja(1),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![1602]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 1);
+        assert!(program
+            .insns
+            .iter()
+            .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+        assert!(program.insns.contains(&jeq_imm(0, 0, 5)));
+        assert!(program.insns.contains(&BpfInsn::mov64_imm(6, 7)));
     }
 
     #[test]

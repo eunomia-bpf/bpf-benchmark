@@ -131,7 +131,7 @@ impl Analysis for MapInfoAnalysis {
 pub fn collect_map_references<F>(
     insns: &[BpfInsn],
     map_ids: &[u32],
-    mut resolver: F,
+    resolver: F,
 ) -> MapInfoResult
 where
     F: FnMut(u32) -> Option<MapInfo>,

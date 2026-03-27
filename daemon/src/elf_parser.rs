@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+#![cfg_attr(not(test), allow(dead_code))]
 //! ELF/BTF parsing helpers for real `.bpf.o` test fixtures.
 
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -16,6 +17,7 @@ use crate::insn::{BpfInsn, BPF_DW, BPF_IMM, BPF_LD};
 pub const BPF_PSEUDO_MAP_FD: u8 = 1;
 pub const BPF_PSEUDO_MAP_VALUE: u8 = 2;
 
+const BPF_MAP_TYPE_ARRAY: u32 = 2;
 const R_BPF_64_64: u32 = 1;
 const R_BPF_64_NODYLD32: u32 = 4;
 
@@ -101,6 +103,12 @@ struct ElfMapSymbol {
     name: String,
     section_offset: usize,
     symbol_size: usize,
+}
+
+#[derive(Clone, Debug)]
+struct RelocationTarget {
+    map_index: usize,
+    force_pseudo_src: Option<u8>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -314,27 +322,49 @@ pub fn parse_bpf_object<P: AsRef<Path>>(path: P) -> Result<ElfBpfObject> {
     let map_symbols = collect_map_symbols(&elf, maps_section_index);
     let raw_maps = collect_raw_map_metadata(&data, maps_section_index, &map_symbols);
     let btf_maps = collect_btf_map_metadata(&data, &elf).unwrap_or_default();
-    let maps = merge_map_metadata(&map_symbols, &raw_maps, &btf_maps);
-    let map_by_sym = map_symbols
+    let mut maps = merge_map_metadata(&map_symbols, &raw_maps, &btf_maps);
+    let mut relocation_targets = map_symbols
         .iter()
         .enumerate()
-        .map(|(map_index, symbol)| (symbol.sym_index, map_index))
+        .map(|(map_index, symbol)| {
+            (
+                symbol.sym_index,
+                RelocationTarget {
+                    map_index,
+                    force_pseudo_src: None,
+                },
+            )
+        })
         .collect::<HashMap<_, _>>();
+    let global_data_maps = collect_global_data_maps(&elf, maps.len());
+    for global_data_map in global_data_maps {
+        let map_index = maps.len();
+        maps.push(global_data_map.map);
+        for sym_index in global_data_map.symbol_indices {
+            relocation_targets.insert(
+                sym_index,
+                RelocationTarget {
+                    map_index,
+                    force_pseudo_src: Some(BPF_PSEUDO_MAP_VALUE),
+                },
+            );
+        }
+    }
 
-    let mut relocations_by_section: HashMap<usize, Vec<(usize, usize)>> = HashMap::new();
+    let mut relocations_by_section: HashMap<usize, Vec<(usize, RelocationTarget)>> = HashMap::new();
     for (reloc_section_index, relocations) in &elf.shdr_relocs {
         let target_section_index = elf.section_headers[*reloc_section_index].sh_info as usize;
         for relocation in relocations {
             if relocation.r_type != R_BPF_64_64 {
                 continue;
             }
-            let Some(&map_index) = map_by_sym.get(&relocation.r_sym) else {
+            let Some(target) = relocation_targets.get(&relocation.r_sym).cloned() else {
                 continue;
             };
             relocations_by_section
                 .entry(target_section_index)
                 .or_default()
-                .push((relocation.r_offset as usize, map_index));
+                .push((relocation.r_offset as usize, target));
         }
     }
 
@@ -364,16 +394,21 @@ pub fn parse_bpf_object<P: AsRef<Path>>(path: P) -> Result<ElfBpfObject> {
         let mut map_relocations = Vec::new();
         if let Some(relocations) = relocations_by_section.get_mut(&section_index) {
             relocations.sort_unstable_by_key(|(offset, _)| *offset);
-            for &(offset, map_index) in relocations.iter() {
-                let pc =
-                    apply_map_relocation(&mut insns, offset, map_index).with_context(|| {
+            for (offset, target) in relocations.iter() {
+                let pc = apply_map_relocation(
+                    &mut insns,
+                    *offset,
+                    target.map_index,
+                    target.force_pseudo_src,
+                )
+                .with_context(|| {
                         format!("failed to relocate {} at byte {}", section_name, offset)
                     })?;
                 let pseudo_src = insns[pc].src_reg();
                 map_relocations.push(ElfProgramMapRelocation {
                     pc,
-                    map_index,
-                    map_name: maps[map_index].name.clone(),
+                    map_index: target.map_index,
+                    map_name: maps[target.map_index].name.clone(),
                     pseudo_src,
                 });
             }
@@ -476,6 +511,71 @@ fn collect_map_symbols(elf: &Elf<'_>, maps_section_index: Option<usize>) -> Vec<
 
     map_symbols.sort_unstable_by_key(|symbol| symbol.section_offset);
     map_symbols
+}
+
+#[derive(Clone, Debug)]
+struct GlobalDataMap {
+    map: ElfMapMetadata,
+    symbol_indices: Vec<usize>,
+}
+
+fn collect_global_data_maps(elf: &Elf<'_>, base_index: usize) -> Vec<GlobalDataMap> {
+    let mut global_data_maps = Vec::new();
+
+    for (section_index, section) in elf.section_headers.iter().enumerate() {
+        let Some(section_name) = section_name(elf, section_index) else {
+            continue;
+        };
+        if !is_global_data_section_name(&section_name) {
+            continue;
+        }
+
+        let symbol_indices = elf
+            .syms
+            .iter()
+            .enumerate()
+            .filter_map(|(sym_index, symbol)| {
+                if symbol.st_shndx as usize != section_index {
+                    return None;
+                }
+                if symbol.st_type() != sym::STT_OBJECT || symbol.st_size == 0 {
+                    return None;
+                }
+                Some(sym_index)
+            })
+            .collect::<Vec<_>>();
+        if symbol_indices.is_empty() {
+            continue;
+        }
+
+        let value_size = u32::try_from(section.sh_size).ok().unwrap_or(u32::MAX);
+        global_data_maps.push(GlobalDataMap {
+            map: ElfMapMetadata {
+                index: base_index + global_data_maps.len(),
+                name: section_name,
+                map_type: Some(BPF_MAP_TYPE_ARRAY),
+                key_size: Some(4),
+                value_size: Some(value_size),
+                max_entries: Some(1),
+                map_flags: None,
+                numa_node: None,
+                pinning: None,
+                section_offset: 0,
+                symbol_size: value_size as usize,
+            },
+            symbol_indices,
+        });
+    }
+
+    global_data_maps
+}
+
+fn is_global_data_section_name(name: &str) -> bool {
+    matches!(name, ".rodata" | ".data" | ".bss" | ".kconfig")
+        || name.starts_with(".rodata.")
+        || name.starts_with(".data.")
+        || name.starts_with(".bss.")
+        || name.starts_with(".kconfig.")
 }
 
 fn collect_raw_map_metadata(
@@ -901,6 +1001,7 @@ fn apply_map_relocation(
     insns: &mut [BpfInsn],
     byte_offset: usize,
     map_index: usize,
+    force_pseudo_src: Option<u8>,
 ) -> Result<usize> {
     if byte_offset % std::mem::size_of::<BpfInsn>() != 0 {
         bail!("map relocation offset {} is not insn-aligned", byte_offset);
@@ -910,11 +1011,13 @@ fn apply_map_relocation(
         bail!("map relocation at pc {} falls off end of program", pc);
     }
 
-    let pseudo_src = if insns[pc + 1].imm != 0 {
-        BPF_PSEUDO_MAP_VALUE
-    } else {
-        BPF_PSEUDO_MAP_FD
-    };
+    let pseudo_src = force_pseudo_src.unwrap_or_else(|| {
+        if insns[pc + 1].imm != 0 {
+            BPF_PSEUDO_MAP_VALUE
+        } else {
+            BPF_PSEUDO_MAP_FD
+        }
+    });
 
     let insn = insns
         .get_mut(pc)
@@ -1059,5 +1162,31 @@ mod tests {
 
         assert!(!first.insns.is_empty());
         assert!(first.insns.last().unwrap().is_exit());
+    }
+
+    #[test]
+    fn parse_bindsnoop_global_rodata_relocations_as_pseudo_map_value() {
+        let object = parse_bpf_object(fixture("bcc/libbpf-tools/bindsnoop.bpf.o")).unwrap();
+        let program = object.program_named("kprobe/inet_bind").unwrap();
+
+        let rodata_map = object
+            .maps
+            .iter()
+            .find(|map| map.name == ".rodata")
+            .expect("expected synthetic .rodata map");
+        assert_eq!(rodata_map.map_type, Some(BPF_MAP_TYPE_ARRAY));
+        assert_eq!(rodata_map.key_size, Some(4));
+        assert_eq!(rodata_map.max_entries, Some(1));
+        assert_eq!(rodata_map.value_size, Some(10));
+
+        let rodata_relocs = program
+            .map_relocations
+            .iter()
+            .filter(|reloc| reloc.map_name == ".rodata")
+            .collect::<Vec<_>>();
+        assert_eq!(rodata_relocs.len(), 2);
+        assert!(rodata_relocs
+            .iter()
+            .all(|reloc| reloc.pseudo_src == BPF_PSEUDO_MAP_VALUE));
     }
 }

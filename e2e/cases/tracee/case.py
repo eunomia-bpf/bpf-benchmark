@@ -37,7 +37,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from runner.libs.rejit import apply_daemon_rejit, scan_programs  # noqa: E402
+from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes, scan_programs  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_exec_storm,
@@ -726,7 +726,11 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     daemon_binary,
                     prog_fds=session.program_fds,
                 )
-                rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
+                rejit_result = apply_daemon_rejit(
+                    daemon_binary,
+                    prog_ids,
+                    enabled_passes=benchmark_rejit_enabled_passes(),
+                )
                 if args.capture_maps and map_capture is not None:
                     optimize_results = (
                         rejit_result.get("per_program")

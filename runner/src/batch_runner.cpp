@@ -702,7 +702,8 @@ std::vector<std::string> changed_pass_names_batch(const std::vector<daemon_pass_
 
 daemon_socket_response_batch daemon_socket_optimize_batch(
     const std::string &socket_path,
-    uint32_t prog_id)
+    uint32_t prog_id,
+    const std::vector<std::string> &enabled_passes)
 {
     daemon_socket_response_batch response;
 
@@ -726,8 +727,20 @@ daemon_socket_response_batch daemon_socket_optimize_batch(
         return response;
     }
 
-    const std::string request =
-        "{\"cmd\":\"optimize\",\"prog_id\":" + std::to_string(prog_id) + "}\n";
+    std::ostringstream request_stream;
+    request_stream << "{\"cmd\":\"optimize\",\"prog_id\":" << prog_id;
+    if (!enabled_passes.empty()) {
+        request_stream << ",\"enabled_passes\":[";
+        for (size_t index = 0; index < enabled_passes.size(); ++index) {
+            if (index != 0) {
+                request_stream << ",";
+            }
+            request_stream << "\"" << json_escape(enabled_passes[index]) << "\"";
+        }
+        request_stream << "]";
+    }
+    request_stream << "}\n";
+    const std::string request = request_stream.str();
     if (write(fd, request.c_str(), request.size()) < 0) {
         close(fd);
         response.error = "write() failed: " + std::string(strerror(errno));
@@ -1240,6 +1253,7 @@ batch_job parse_job(const YAML::Node &node, size_t index)
     options.no_cmov = optional_bool(node, "no_cmov", false);
     options.llvm_target_cpu = optional_string(node, "llvm_target_cpu");
     options.llvm_target_features = optional_string(node, "llvm_target_features");
+    options.enabled_passes = optional_string_list(node, "enabled_passes");
     options.disabled_passes = optional_string_list(node, "disabled_passes");
     options.log_passes = optional_bool(node, "log_passes", false);
     options.perf_counters = optional_bool(node, "perf_counters", false);
@@ -1456,7 +1470,10 @@ static_verify_program_record execute_static_verify_program(
     record.code_size_before = static_cast<int64_t>(before_info.jited_prog_len);
 
     const auto daemon_response =
-        daemon_socket_optimize_batch(job.daemon_socket, before_info.id);
+        daemon_socket_optimize_batch(
+            job.daemon_socket,
+            before_info.id,
+            job.options.enabled_passes);
     record.daemon_status = daemon_response.status;
     record.daemon_message = daemon_response.message;
     record.daemon_error_message = daemon_response.error_message;

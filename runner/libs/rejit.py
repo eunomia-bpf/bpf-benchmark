@@ -2,9 +2,13 @@
 from __future__ import annotations
 
 import json
+import os
+import socket
 import subprocess
+import tempfile
+import time
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 
 _PASS_TO_SITE_FIELD = {
@@ -15,6 +19,7 @@ _PASS_TO_SITE_FIELD = {
     "rotate": "rotate_sites",
     "wide_mem": "wide_sites",
 }
+_DEFAULT_REJIT_ENABLED_PASSES = ("map_inline", "const_prop", "dce")
 
 def _zero_site_counts() -> dict[str, int]:
     return {
@@ -87,6 +92,10 @@ def _daemon_command(
     command.append(subcommand)
     command.extend(str(arg) for arg in subcommand_args)
     return command
+
+
+def benchmark_rejit_enabled_passes() -> list[str]:
+    return list(_DEFAULT_REJIT_ENABLED_PASSES)
 
 
 def _parse_enumerate_table(stdout: str) -> dict[int, dict[str, Any]]:
@@ -256,9 +265,120 @@ def _apply_one(
     }
 
 
+def _apply_result_from_response(
+    response: Mapping[str, Any],
+    *,
+    output: str,
+    exit_code: int,
+) -> dict[str, object]:
+    summary = response.get("summary") if isinstance(response, Mapping) else {}
+    program = response.get("program") if isinstance(response, Mapping) else {}
+    raw_inlined_entries = response.get("inlined_map_entries") if isinstance(response, Mapping) else []
+    if not isinstance(raw_inlined_entries, list):
+        raw_inlined_entries = []
+    inlined_map_entries = [
+        dict(entry) for entry in raw_inlined_entries if isinstance(entry, Mapping)
+    ]
+    applied_sites = int((summary or {}).get("total_sites_applied", 0) or 0)
+    error_message = str(response.get("error_message") or response.get("message") or "").strip()
+    return {
+        "applied": exit_code == 0 and bool((summary or {}).get("applied", True)),
+        "output": output,
+        "exit_code": exit_code,
+        "debug_result": dict(response),
+        "kernel_prog_name": str((program or {}).get("prog_name") or ""),
+        "inlined_map_entries": inlined_map_entries,
+        "summary": dict(summary) if isinstance(summary, Mapping) else {},
+        "counts": {
+            "total_sites": applied_sites,
+            "applied_sites": applied_sites,
+        },
+        "error": error_message,
+    }
+
+
+def _start_daemon_server(daemon_binary: Path | str) -> tuple[subprocess.Popen[str], Path, str]:
+    socket_dir = tempfile.mkdtemp(prefix="bpfrejit-daemon-")
+    socket_path = Path(socket_dir) / "daemon.sock"
+    proc = subprocess.Popen(
+        [str(daemon_binary), "serve", "--socket", str(socket_path)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    deadline = time.monotonic() + 5.0
+    while time.monotonic() < deadline:
+        if socket_path.exists():
+            return proc, socket_path, socket_dir
+        if proc.poll() is not None:
+            stdout, stderr = proc.communicate(timeout=1)
+            raise RuntimeError(
+                f"daemon serve exited early (rc={proc.returncode}): {(stderr or stdout).strip()}"
+            )
+        time.sleep(0.05)
+    proc.terminate()
+    try:
+        stdout, stderr = proc.communicate(timeout=1)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        stdout, stderr = proc.communicate(timeout=1)
+    raise RuntimeError(f"timed out waiting for daemon socket: {(stderr or stdout).strip()}")
+
+
+def _stop_daemon_server(proc: subprocess.Popen[str], socket_path: Path, socket_dir: str) -> None:
+    proc.terminate()
+    try:
+        proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait(timeout=5)
+    socket_path.unlink(missing_ok=True)
+    try:
+        os.rmdir(socket_dir)
+    except OSError:
+        pass
+
+
+def _apply_one_via_socket(
+    socket_path: Path,
+    prog_id: int,
+    enabled_passes: Sequence[str],
+) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "cmd": "optimize",
+        "prog_id": int(prog_id),
+    }
+    normalized_passes = [str(name).strip() for name in enabled_passes if str(name).strip()]
+    if normalized_passes:
+        payload["enabled_passes"] = normalized_passes
+    request = json.dumps(payload) + "\n"
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+        client.connect(str(socket_path))
+        client.sendall(request.encode())
+        chunks: list[bytes] = []
+        while True:
+            chunk = client.recv(4096)
+            if not chunk:
+                break
+            chunks.append(chunk)
+            if b"\n" in chunk:
+                break
+    line = b"".join(chunks).decode(errors="replace").strip()
+    if not line:
+        raise RuntimeError("empty response from daemon socket")
+    response = json.loads(line)
+    if not isinstance(response, Mapping):
+        raise RuntimeError("daemon socket returned non-object JSON")
+    if str(response.get("status") or "") != "ok":
+        return _apply_result_from_response(response, output=line, exit_code=1)
+    return _apply_result_from_response(response, output=line, exit_code=0)
+
+
 def apply_daemon_rejit(
     daemon_binary: Path | str,
     prog_ids: list[int] | None = None,
+    *,
+    enabled_passes: Sequence[str] | None = None,
 ) -> dict[str, object]:
     """Call daemon apply or apply-all and return a canonical ReJIT summary."""
     if prog_ids:
@@ -269,21 +389,35 @@ def apply_daemon_rejit(
         total_sites = 0
         applied_sites = 0
         errors: list[str] = []
+        daemon_proc = None
+        daemon_socket_path = None
+        daemon_socket_dir = None
 
-        for prog_id in [int(value) for value in prog_ids if int(value) > 0]:
-            result = _apply_one(daemon_binary, prog_id)
-            per_program[prog_id] = result
-            outputs.append(str(result.get("output") or ""))
-            exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
-            all_applied = all_applied and bool(result.get("applied", False))
+        if enabled_passes:
+            daemon_proc, daemon_socket_path, daemon_socket_dir = _start_daemon_server(daemon_binary)
 
-            counts = result.get("counts") if isinstance(result.get("counts"), Mapping) else {}
-            total_sites += int((counts or {}).get("total_sites", 0) or 0)
-            applied_sites += int((counts or {}).get("applied_sites", 0) or 0)
+        try:
+            for prog_id in [int(value) for value in prog_ids if int(value) > 0]:
+                if enabled_passes:
+                    assert daemon_socket_path is not None
+                    result = _apply_one_via_socket(daemon_socket_path, prog_id, enabled_passes)
+                else:
+                    result = _apply_one(daemon_binary, prog_id)
+                per_program[prog_id] = result
+                outputs.append(str(result.get("output") or ""))
+                exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
+                all_applied = all_applied and bool(result.get("applied", False))
 
-            error = str(result.get("error") or "").strip()
-            if error:
-                errors.append(f"prog {prog_id}: {error}")
+                counts = result.get("counts") if isinstance(result.get("counts"), Mapping) else {}
+                total_sites += int((counts or {}).get("total_sites", 0) or 0)
+                applied_sites += int((counts or {}).get("applied_sites", 0) or 0)
+
+                error = str(result.get("error") or "").strip()
+                if error:
+                    errors.append(f"prog {prog_id}: {error}")
+        finally:
+            if daemon_proc is not None and daemon_socket_path is not None and daemon_socket_dir is not None:
+                _stop_daemon_server(daemon_proc, daemon_socket_path, daemon_socket_dir)
 
         return {
             "applied": all_applied,
@@ -313,6 +447,7 @@ def apply_daemon_rejit(
 
 __all__ = [
     "apply_daemon_rejit",
+    "benchmark_rejit_enabled_passes",
     "enumerate_program_record",
     "scan_programs",
 ]

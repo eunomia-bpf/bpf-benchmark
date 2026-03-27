@@ -1408,14 +1408,59 @@ static std::vector<std::string> changed_pass_names(
     return result;
 }
 
-std::string build_daemon_optimize_request(uint32_t prog_id)
+std::string json_escape_request(std::string_view input)
 {
-    return "{\"cmd\":\"optimize\",\"prog_id\":" + std::to_string(prog_id) + "}\n";
+    std::string escaped;
+    escaped.reserve(input.size());
+    for (const char ch : input) {
+        switch (ch) {
+        case '\\':
+            escaped += "\\\\";
+            break;
+        case '"':
+            escaped += "\\\"";
+            break;
+        case '\n':
+            escaped += "\\n";
+            break;
+        case '\r':
+            escaped += "\\r";
+            break;
+        case '\t':
+            escaped += "\\t";
+            break;
+        default:
+            escaped.push_back(ch);
+            break;
+        }
+    }
+    return escaped;
+}
+
+std::string build_daemon_optimize_request(
+    uint32_t prog_id,
+    const std::vector<std::string> &enabled_passes)
+{
+    std::string request =
+        "{\"cmd\":\"optimize\",\"prog_id\":" + std::to_string(prog_id);
+    if (!enabled_passes.empty()) {
+        request += ",\"enabled_passes\":[";
+        for (size_t index = 0; index < enabled_passes.size(); ++index) {
+            if (index != 0) {
+                request += ",";
+            }
+            request += "\"" + json_escape_request(enabled_passes[index]) + "\"";
+        }
+        request += "]";
+    }
+    request += "}\n";
+    return request;
 }
 
 daemon_socket_response daemon_socket_optimize(
     const std::string &socket_path,
-    uint32_t prog_id)
+    uint32_t prog_id,
+    const std::vector<std::string> &enabled_passes)
 {
     daemon_socket_response response;
 
@@ -1441,7 +1486,7 @@ daemon_socket_response daemon_socket_optimize(
     }
 
     /* Send JSON request line */
-    const std::string request = build_daemon_optimize_request(prog_id);
+    const std::string request = build_daemon_optimize_request(prog_id, enabled_passes);
     const ssize_t written = write(fd, request.c_str(), request.size());
     if (written < 0 || static_cast<size_t>(written) != request.size()) {
         close(fd);
@@ -1535,6 +1580,20 @@ void configure_autoload(bpf_object *object, const std::optional<std::string> &pr
 {
     if (!program_name.has_value()) {
         return;
+    }
+
+    /*
+     * Tail-call objects need their callee programs loaded so libbpf can
+     * populate PROG_ARRAY initial slots. Disabling autoload for every
+     * non-selected program breaks selected-program benchmarking for real
+     * multi-program objects such as Tetragon execve and Tracee raw tracepoint
+     * pipelines.
+     */
+    bpf_map *map = nullptr;
+    while ((map = bpf_object__next_map(object, map)) != nullptr) {
+        if (bpf_map__type(map) == BPF_MAP_TYPE_PROG_ARRAY) {
+            return;
+        }
     }
 
     bpf_program *program = nullptr;
@@ -2438,7 +2497,10 @@ void maybe_apply_prepared_daemon_rejit(
     }
     const auto rejit_start = std::chrono::steady_clock::now();
     const auto socket_response =
-        daemon_socket_optimize(*options.daemon_socket, program.program_info.id);
+        daemon_socket_optimize(
+            *options.daemon_socket,
+            program.program_info.id,
+            options.enabled_passes);
     const auto rejit_end = std::chrono::steady_clock::now();
     program.rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
     populate_rejit_from_daemon_summary(program.prepared_rejit, socket_response);
@@ -2688,8 +2750,22 @@ std::vector<sample_result> execute_prepared_kernel_run(
     std::chrono::steady_clock::time_point exec_input_prepare_end {};
     std::chrono::steady_clock::time_point result_read_start {};
     std::chrono::steady_clock::time_point result_read_end {};
+    std::chrono::steady_clock::time_point memory_prepare_start {};
+    std::chrono::steady_clock::time_point memory_prepare_end {};
 
-    std::vector<uint8_t> input_bytes = prepared.input_bytes;
+    /*
+     * Prepared kernel state is shared across later batch jobs, so runtime
+     * execution must honor the current job's io-mode and input bytes instead
+     * of reusing the compile-only placeholder settings from prepare_kernel().
+     */
+    memory_prepare_start = std::chrono::steady_clock::now();
+    std::vector<uint8_t> input_bytes = materialize_memory(options.memory, options.input_size);
+    memory_prepare_end = std::chrono::steady_clock::now();
+    if (options.input_size != 0 && input_bytes.size() < options.input_size) {
+        input_bytes.resize(options.input_size, 0);
+    }
+    const std::string effective_io_mode =
+        resolve_effective_io_mode(options.io_mode, prepared.object.get());
     std::vector<uint8_t> packet;
     std::vector<uint8_t> packet_out;
     std::vector<uint8_t> context_in;
@@ -2698,9 +2774,9 @@ std::vector<sample_result> execute_prepared_kernel_run(
     uint32_t key = 0;
     const bool result_from_skb_context =
         packet_kind == packet_context_kind::skb &&
-        (prepared.effective_io_mode == "packet" || prepared.effective_io_mode == "staged");
+        (effective_io_mode == "packet" || effective_io_mode == "staged");
 
-    if (prepared.effective_io_mode == "map") {
+    if (effective_io_mode == "map") {
         bpf_map *input_map = bpf_object__find_map_by_name(prepared.object.get(), "input_map");
         bpf_map *result_map = bpf_object__find_map_by_name(prepared.object.get(), "result_map");
         if (result_map == nullptr) {
@@ -2745,7 +2821,7 @@ std::vector<sample_result> execute_prepared_kernel_run(
             fail("bpf_map_update_elem(result_map) failed: " + std::string(strerror(errno)));
         }
         exec_input_prepare_end = std::chrono::steady_clock::now();
-    } else if (prepared.effective_io_mode == "staged") {
+    } else if (effective_io_mode == "staged") {
         if (packet_kind == packet_context_kind::none) {
             fail("io-mode staged requires an XDP or skb packet context");
         }
@@ -2757,7 +2833,7 @@ std::vector<sample_result> execute_prepared_kernel_run(
         }
         packet_out.assign(packet_output_capacity(options, packet.size()), 0);
         exec_input_prepare_end = std::chrono::steady_clock::now();
-    } else if (prepared.effective_io_mode == "context") {
+    } else if (effective_io_mode == "context") {
         exec_input_prepare_start = std::chrono::steady_clock::now();
         context_in = input_bytes;
         exec_input_prepare_end = std::chrono::steady_clock::now();
@@ -2778,7 +2854,7 @@ std::vector<sample_result> execute_prepared_kernel_run(
     bpf_test_run_opts test_opts = {};
     test_opts.sz = sizeof(test_opts);
     const bool kernel_repeat_supported =
-        prepared.effective_io_mode != "context" ||
+        effective_io_mode != "context" ||
         context_mode_supports_kernel_repeat(program.program_info.type);
     const uint32_t requested_repeat = kernel_repeat_supported ? options.repeat : 1u;
     test_opts.repeat = kernel_repeat_supported ? requested_repeat : 0u;
@@ -2808,11 +2884,10 @@ std::vector<sample_result> execute_prepared_kernel_run(
         .context_out_size = static_cast<uint32_t>(sizeof(context_out)),
         .result_fd = result_fd,
         .result_key = key,
-        .reset_result_map = prepared.effective_io_mode == "map",
+        .reset_result_map = effective_io_mode == "map",
     };
 
     const uint64_t base_compile_ns =
-        prepared.memory_prepare_ns +
         prepared.object_open_ns +
         prepared.object_load_ns;
     auto build_measured_sample =
@@ -2848,7 +2923,8 @@ std::vector<sample_result> execute_prepared_kernel_run(
             };
             sample.rejit = measured_rejit;
             sample.phases_ns = {
-                {"memory_prepare_ns", prepared.memory_prepare_ns},
+                {"memory_prepare_ns",
+                 elapsed_ns(memory_prepare_start, memory_prepare_end)},
                 {"object_open_ns", prepared.object_open_ns},
                 {"object_load_ns", prepared.object_load_ns},
             };
@@ -2857,13 +2933,13 @@ std::vector<sample_result> execute_prepared_kernel_run(
                 sample.phases_ns.push_back({"rejit_apply_ns", rejit_apply_ns});
             }
             sample.phases_ns.push_back(
-                {prepare_phase_name(prepared.effective_io_mode),
+                {prepare_phase_name(effective_io_mode),
                  elapsed_ns(exec_input_prepare_start, exec_input_prepare_end)});
             sample.phases_ns.push_back(
                 {"prog_run_wall_ns",
                  elapsed_ns(measurement.wall_start, measurement.wall_end)});
             sample.phases_ns.push_back(
-                {result_phase_name(prepared.effective_io_mode),
+                {result_phase_name(effective_io_mode),
                  elapsed_ns(measured_result_read_start, measured_result_read_end)});
             sample.perf_counters = std::move(perf_counters);
             return sample;
@@ -2883,7 +2959,7 @@ std::vector<sample_result> execute_prepared_kernel_run(
             options.perf_counters);
         const auto stock_result_read_start = std::chrono::steady_clock::now();
         const uint64_t stock_result = read_kernel_test_run_result(
-            prepared.effective_io_mode,
+            effective_io_mode,
             result_from_skb_context,
             packet_out,
             context_out,
@@ -2930,7 +3006,7 @@ std::vector<sample_result> execute_prepared_kernel_run(
 
     const auto result_read_start_now = std::chrono::steady_clock::now();
     const uint64_t result = read_kernel_test_run_result(
-        prepared.effective_io_mode,
+        effective_io_mode,
         result_from_skb_context,
         packet_out,
         context_out,
@@ -3298,7 +3374,10 @@ std::vector<sample_result> run_kernel(const cli_options &options)
 
     if (options.daemon_socket.has_value() && rejit.requested && !options.compile_only) {
         rejit_start = std::chrono::steady_clock::now();
-        const auto sock_resp = daemon_socket_optimize(*options.daemon_socket, program_info.id);
+        const auto sock_resp = daemon_socket_optimize(
+            *options.daemon_socket,
+            program_info.id,
+            options.enabled_passes);
         rejit_end = std::chrono::steady_clock::now();
         populate_rejit_from_daemon(rejit, sock_resp);
         if (!sock_resp.ok) {
@@ -3313,7 +3392,10 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     if (options.compile_only && rejit.requested) {
         if (options.daemon_socket.has_value()) {
             rejit_start = std::chrono::steady_clock::now();
-            const auto sock_resp = daemon_socket_optimize(*options.daemon_socket, program_info.id);
+            const auto sock_resp = daemon_socket_optimize(
+                *options.daemon_socket,
+                program_info.id,
+                options.enabled_passes);
             rejit_end = std::chrono::steady_clock::now();
             populate_rejit_from_daemon(rejit, sock_resp);
         } else {
@@ -3703,7 +3785,10 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
         rejit.requested = true;
         rejit.mode = "daemon";
         rejit_start = std::chrono::steady_clock::now();
-        const auto sock_resp = daemon_socket_optimize(*options.daemon_socket, program_info_before.id);
+        const auto sock_resp = daemon_socket_optimize(
+            *options.daemon_socket,
+            program_info_before.id,
+            options.enabled_passes);
         rejit_end = std::chrono::steady_clock::now();
         rejit.syscall_attempted = true;
         if (!sock_resp.ok) {

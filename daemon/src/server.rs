@@ -142,14 +142,55 @@ fn process_request(
     rollback_enabled: bool,
     tracker: &commands::SharedInvalidationTracker,
 ) -> serde_json::Value {
+    fn parse_request_pass_list(
+        req: &serde_json::Value,
+        key: &str,
+    ) -> std::result::Result<Option<Vec<String>>, String> {
+        let Some(value) = req.get(key) else {
+            return Ok(None);
+        };
+        let array = value
+            .as_array()
+            .ok_or_else(|| format!("{key} must be a JSON string array"))?;
+        let mut passes = Vec::with_capacity(array.len());
+        for entry in array {
+            let name = entry
+                .as_str()
+                .ok_or_else(|| format!("{key} entries must be strings"))?
+                .trim();
+            if !name.is_empty() {
+                passes.push(name.to_string());
+            }
+        }
+        Ok(Some(passes))
+    }
+
+    fn request_context(
+        req: &serde_json::Value,
+        base_ctx: &pass::PassContext,
+    ) -> std::result::Result<pass::PassContext, String> {
+        let mut local_ctx = base_ctx.clone();
+        if let Some(enabled_passes) = parse_request_pass_list(req, "enabled_passes")? {
+            local_ctx.policy.enabled_passes = enabled_passes;
+        }
+        if let Some(disabled_passes) = parse_request_pass_list(req, "disabled_passes")? {
+            local_ctx.policy.disabled_passes = disabled_passes;
+        }
+        Ok(local_ctx)
+    }
+
     let cmd = req.get("cmd").and_then(|v| v.as_str()).unwrap_or("");
+    let local_ctx = match request_context(req, ctx) {
+        Ok(value) => value,
+        Err(message) => return serde_json::json!({"status": "error", "message": message}),
+    };
     match cmd {
         "optimize" => {
             let prog_id = match req.get("prog_id").and_then(|v| v.as_u64()) {
                 Some(id) => id as u32,
                 None => return serde_json::json!({"status": "error", "message": "missing prog_id"}),
             };
-            match commands::try_apply_one(prog_id, ctx, rollback_enabled, Some(tracker)) {
+            match commands::try_apply_one(prog_id, &local_ctx, rollback_enabled, Some(tracker)) {
                 Ok(result) => {
                     // The optimize response already embeds the full structured
                     // result, including any deduplicated `inlined_map_entries`,
@@ -171,7 +212,8 @@ fn process_request(
             let mut total = 0u32;
             for prog_id in bpf::iter_prog_ids() {
                 total += 1;
-                match commands::try_apply_one(prog_id, ctx, rollback_enabled, Some(tracker)) {
+                match commands::try_apply_one(prog_id, &local_ctx, rollback_enabled, Some(tracker))
+                {
                     Ok(result) => {
                         if result.summary.applied {
                             applied += 1;

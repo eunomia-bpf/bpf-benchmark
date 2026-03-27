@@ -10,15 +10,6 @@ passes:
     - map_inline
     - const_prop
     - dce
-    - wide_mem
-    - rotate
-    - cond_select
-    - extract
-    - endian_fusion
-    - bulk_memory
-    - bounds_check_merge
-    - skb_load_bytes
-    - branch_flip
   security:
     - dangerous_helper_firewall
     - live_patch

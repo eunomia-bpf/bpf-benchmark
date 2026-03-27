@@ -63,6 +63,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 DRIVER_RELATIVE = Path(__file__).with_name("driver.py").resolve().relative_to(ROOT_DIR)
 DEFAULT_MACRO_CORPUS_YAML = ROOT_DIR / "corpus" / "config" / "macro_corpus.yaml"
 DEFAULT_BENCHMARK_CONFIG_YAML = ROOT_DIR / "corpus" / "config" / "benchmark_config.yaml"
+DEFAULT_REJIT_ENABLED_PASSES = ["map_inline", "const_prop", "dce"]
 FALLBACK_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_vm_batch")
 FALLBACK_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-batch-rejit-results.md"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
@@ -209,6 +210,34 @@ def load_benchmark_config(profile: str | None = None) -> dict[str, Any]:
     effective["config_loaded"] = config_loaded
     effective["available_profiles"] = sorted(profiles)
     return effective
+
+
+def benchmark_enabled_passes(benchmark_config: Mapping[str, Any] | None) -> list[str]:
+    passes_config = _mapping_dict(
+        (benchmark_config or {}).get("passes"),
+        field_name="passes",
+    )
+
+    def normalize(values: Any) -> list[str]:
+        if not isinstance(values, list):
+            return []
+        return [str(value).strip() for value in values if str(value).strip()]
+
+    active_list = normalize(passes_config.get("active_list"))
+    if active_list:
+        return active_list
+
+    active_name = str(passes_config.get("active") or "").strip()
+    if active_name:
+        named_list = normalize(passes_config.get(active_name))
+        if named_list:
+            return named_list
+
+    performance_list = normalize(passes_config.get("performance"))
+    if performance_list:
+        return performance_list
+
+    return list(DEFAULT_REJIT_ENABLED_PASSES)
 
 
 def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -704,6 +733,7 @@ def build_test_run_batch_job(
     btf_custom_path: Path | None,
     compile_only: bool,
     daemon_socket: str | None = None,
+    enabled_passes: list[str] | None = None,
     prepared_key: str | None = None,
     prepared_ref: str | None = None,
     prepared_group: str | None = None,
@@ -738,6 +768,8 @@ def build_test_run_batch_job(
         job["btf_custom_path"] = str(btf_custom_path)
     if daemon_socket is not None:
         job["daemon_socket"] = daemon_socket
+    if enabled_passes:
+        job["enabled_passes"] = list(enabled_passes)
     if prepared_key is not None:
         job["prepared_key"] = prepared_key
     if prepared_ref is not None:
@@ -796,6 +828,7 @@ def build_target_batch_plan(
     enable_recompile: bool,
     enable_exec: bool,
     daemon_socket: str | None,
+    enabled_passes: list[str] | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, str]]]:
     jobs: list[dict[str, Any]] = []
     job_refs: list[dict[str, str]] = []
@@ -937,6 +970,7 @@ def build_target_batch_plan(
                         btf_custom_path=btf_custom_path,
                         compile_only=True,
                         daemon_socket=daemon_socket,
+                        enabled_passes=enabled_passes,
                         prepared_key=(
                             entry["rejit_prepared_key"]
                             if enable_exec and target.get("can_test_run")
@@ -970,6 +1004,7 @@ def build_target_batch_plan(
                             btf_custom_path=btf_custom_path,
                             compile_only=False,
                             daemon_socket=daemon_socket,
+                            enabled_passes=enabled_passes,
                             prepared_ref=entry["rejit_prepared_key"],
                             prepared_group=rejit_group,
                         )
@@ -989,6 +1024,7 @@ def build_target_batch_plan(
                             btf_custom_path=btf_custom_path,
                             compile_only=False,
                             daemon_socket=daemon_socket,
+                            enabled_passes=enabled_passes,
                         )
                     )
 
@@ -1065,6 +1101,7 @@ def run_targets_locally_batch(
     skip_families: list[str],
     blind_apply: bool,
     daemon_socket: str | None = None,
+    enabled_passes: list[str] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     active_daemon_socket = daemon_socket
     daemon_proc = None
@@ -1080,6 +1117,7 @@ def run_targets_locally_batch(
             enable_recompile=enable_recompile,
             enable_exec=enable_exec,
             daemon_socket=active_daemon_socket,
+            enabled_passes=enabled_passes,
         )
         batch_result = run_batch_runner(
             runner,
@@ -1183,6 +1221,7 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
     daemon = Path(args.daemon).resolve()
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
     guest_result_path = Path(args.guest_result_json).resolve() if args.guest_result_json else None
+    enabled_passes = benchmark_enabled_passes(args.benchmark_config)
     if btf_custom_path is None:
         raise SystemExit("--btf-custom-path is required in guest batch mode")
 
@@ -1210,6 +1249,7 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
                     execution_mode="vm",
                     btf_custom_path=btf_custom_path,
                     daemon_socket=active_daemon_socket,
+                    enabled_passes=enabled_passes,
                 )
                 built_records = []
                 for obj in object_chunk:
@@ -1507,6 +1547,7 @@ def build_object_batch_plan_v2(
     repeat: int,
     btf_custom_path: Path | None,
     daemon_socket: str,
+    enabled_passes: list[str] | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     jobs: list[dict[str, Any]] = []
     object_refs: list[dict[str, Any]] = []
@@ -1613,6 +1654,7 @@ def build_object_batch_plan_v2(
                 btf_custom_path=btf_custom_path,
                 compile_only=True,
                 daemon_socket=daemon_socket,
+                enabled_passes=enabled_passes,
                 prepared_key=rejit_prepared_key,
                 prepared_group=rejit_group,
                 fixture_path=fixture_path,
@@ -1637,6 +1679,7 @@ def build_object_batch_plan_v2(
                     btf_custom_path=btf_custom_path,
                     compile_only=True,
                     daemon_socket=daemon_socket,
+                    enabled_passes=enabled_passes,
                     prepared_ref=rejit_prepared_key,
                     prepared_group=rejit_group,
                     release_prepared=False,
@@ -1660,6 +1703,7 @@ def build_object_batch_plan_v2(
                         btf_custom_path=btf_custom_path,
                         compile_only=False,
                         daemon_socket=daemon_socket,
+                        enabled_passes=enabled_passes,
                         prepared_ref=rejit_prepared_key,
                         prepared_group=rejit_group,
                         release_prepared=False,
@@ -1792,6 +1836,7 @@ def run_objects_locally_batch(
     execution_mode: str,
     btf_custom_path: Path | None,
     daemon_socket: str | None = None,
+    enabled_passes: list[str] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
     active_daemon_socket = daemon_socket
     daemon_proc = None
@@ -1821,6 +1866,7 @@ def run_objects_locally_batch(
             repeat=repeat,
             btf_custom_path=btf_custom_path,
             daemon_socket=active_daemon_socket,
+            enabled_passes=enabled_passes,
         )
         batch_result = run_batch_runner(
             runner,

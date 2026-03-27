@@ -43,7 +43,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from runner.libs.rejit import apply_daemon_rejit, scan_programs  # noqa: E402
+from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes, scan_programs  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_dd_read_load,
@@ -358,7 +358,11 @@ def run_phase(
         baseline["measurement"] = measurement
         baseline["status"] = "ok"
 
-        rejit_apply = apply_daemon_rejit(daemon_binary, prog_ids)
+        rejit_apply = apply_daemon_rejit(
+            daemon_binary,
+            prog_ids,
+            enabled_passes=benchmark_rejit_enabled_passes(),
+        )
         if rejit_apply["applied"]:
             rejit = {
                 "phase": "post_rejit",

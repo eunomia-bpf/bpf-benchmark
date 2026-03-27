@@ -35,7 +35,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from runner.libs.rejit import apply_daemon_rejit, scan_programs  # noqa: E402
+from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes, scan_programs  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_connect_storm,
@@ -694,7 +694,11 @@ def daemon_payload(
                         }
                     }
                 scan_results = scan_programs(prog_ids, daemon_binary)
-                rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
+                rejit_result = apply_daemon_rejit(
+                    daemon_binary,
+                    prog_ids,
+                    enabled_passes=benchmark_rejit_enabled_passes(),
+                )
                 if capture_maps and map_capture is not None:
                     optimize_results = (
                         rejit_result.get("per_program")

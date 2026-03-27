@@ -1,0 +1,27 @@
+jobs:
+  - id: baseline-object-compile
+    type: test_run
+    execution: serial
+    runtime: kernel
+    program: /home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/balancer.bpf.o
+    program_name: balancer_ingress
+    io_mode: packet
+    memory: /home/yunwei37/workspace/bpf-benchmark/corpus/inputs/katran_vip_packet_64.bin
+    input_size: 64
+    repeat: 50
+    compile_only: true
+    prepared_key: katran-prepared
+    prepared_group: katran-group
+  - id: baseline-run
+    type: test_run
+    execution: serial
+    runtime: kernel
+    program: /home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/balancer.bpf.o
+    program_name: balancer_ingress
+    io_mode: packet
+    memory: /home/yunwei37/workspace/bpf-benchmark/corpus/inputs/katran_vip_packet_64.bin
+    input_size: 64
+    repeat: 50
+    prepared_ref: katran-prepared
+    prepared_group: katran-group
+    release_prepared: false

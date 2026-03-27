@@ -29,7 +29,7 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
 from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
-from runner.libs.rejit import apply_daemon_rejit, scan_programs  # noqa: E402
+from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes, scan_programs  # noqa: E402
 from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from e2e.case_common import (  # noqa: E402
@@ -690,7 +690,11 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
             prog_ids = [int(program["id"]) for program in scheduler_programs]
             baseline = run_phase(workloads, duration_s, agent_pid=session.pid)
             scan_results = scan_programs(prog_ids, daemon_binary)
-            rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
+            rejit_result = apply_daemon_rejit(
+                daemon_binary,
+                prog_ids,
+                enabled_passes=benchmark_rejit_enabled_passes(),
+            )
             if rejit_result["applied"]:
                 post_rejit = run_phase(workloads, duration_s, agent_pid=session.pid)
             else:
