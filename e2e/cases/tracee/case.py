@@ -46,6 +46,8 @@ from runner.libs.workload import (  # noqa: E402
     run_scheduler_load,
 )
 from e2e.case_common import (  # noqa: E402
+    build_map_capture_specs,
+    capture_map_state,
     git_sha,
     host_metadata,
     summarize_numbers,
@@ -650,6 +652,7 @@ def skip_payload(
         "post_rejit": None,
         "comparison": {"comparable": False, "reason": reason},
         "limitations": list(limitations),
+        "map_capture": None,
     }
 
 
@@ -692,6 +695,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     commands = build_tracee_commands(tracee_binary, events, args.tracee_extra_arg or [])
 
     try:
+        map_capture: dict[str, object] | None = None
         with enable_bpf_stats():
             with TraceeAgentSession(commands, load_timeout=int(args.load_timeout)) as session:
                 prog_ids = [int(program["id"]) for program in session.programs]
@@ -703,6 +707,24 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     agent_pid=session.pid,
                     collector=session.collector,
                 )
+                if args.capture_maps:
+                    capture_plan = build_map_capture_specs(
+                        session.programs,
+                        repo_name="tracee",
+                        object_paths=sorted((ROOT_DIR / "corpus" / "build" / "tracee").glob("*.bpf.o")),
+                        runner_binary=Path(args.runner).resolve(),
+                    )
+                    map_capture = {
+                        "discovery": {
+                            key: value
+                            for key, value in capture_plan.items()
+                            if key != "program_specs"
+                        }
+                    }
+                    map_capture["result"] = capture_map_state(
+                        captured_from="e2e/tracee",
+                        program_specs=capture_plan["program_specs"],
+                    )
                 scan_results = scan_programs(prog_ids, daemon_binary, prog_fds=session.program_fds)
                 rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
                 if rejit_result["applied"]:
@@ -745,6 +767,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "post_rejit": post_rejit,
         "comparison": compare_phases(baseline, post_rejit),
         "limitations": limitations,
+        "map_capture": map_capture,
     }
     return payload
 
@@ -757,10 +780,12 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--tracee-binary")
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
+    parser.add_argument("--runner", default=str(ROOT_DIR / "runner" / "build" / "micro_exec"))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--load-timeout", type=int, default=20)
     parser.add_argument("--tracee-extra-arg", action="append", default=[])
+    parser.add_argument("--capture-maps", action="store_true")
     parser.add_argument("--skip-setup", action="store_true")
     return parser
 

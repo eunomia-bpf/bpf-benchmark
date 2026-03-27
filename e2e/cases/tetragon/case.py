@@ -44,6 +44,8 @@ from runner.libs.workload import (  # noqa: E402
     run_open_storm,
 )
 from e2e.case_common import (  # noqa: E402
+    build_map_capture_specs,
+    capture_map_state,
     git_sha,
     host_metadata,
     relpath,
@@ -650,13 +652,16 @@ def skip_payload(
         "programs": [],
         "comparison": {"comparable": False, "reason": reason},
         "limitations": list(limitations),
+        "map_capture": None,
     }
 
 
 def daemon_payload(
     *,
     daemon_binary: Path,
+    runner_binary: Path,
     tetragon_binary: str,
+    capture_maps: bool,
     duration_s: int,
     smoke: bool,
     load_timeout: int,
@@ -670,9 +675,28 @@ def daemon_payload(
         with TetragonAgentSession(command, load_timeout) as session:
             prog_ids = [int(program["id"]) for program in session.programs]
             baseline = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=session.pid)
+            map_capture: dict[str, object] | None = None
             agent_logs = session.collector_snapshot()
             exit_reason = describe_agent_exit("Tetragon", session.process, agent_logs)
             if exit_reason is None:
+                if capture_maps:
+                    capture_plan = build_map_capture_specs(
+                        session.programs,
+                        repo_name="tetragon",
+                        object_paths=sorted((ROOT_DIR / "corpus" / "build" / "tetragon").glob("*.bpf.o")),
+                        runner_binary=runner_binary,
+                    )
+                    map_capture = {
+                        "discovery": {
+                            key: value
+                            for key, value in capture_plan.items()
+                            if key != "program_specs"
+                        }
+                    }
+                    map_capture["result"] = capture_map_state(
+                        captured_from="e2e/tetragon",
+                        program_specs=capture_plan["program_specs"],
+                    )
                 scan_results = scan_programs(prog_ids, daemon_binary)
                 rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
                 if rejit_result["applied"]:
@@ -716,6 +740,7 @@ def daemon_payload(
                 "programs": build_program_summary(scan_results, baseline, post_rejit),
                 "comparison": comparison,
                 "limitations": limitations,
+                "map_capture": map_capture,
             }
             return payload
 
@@ -728,6 +753,7 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
 
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
     daemon_binary = Path(args.daemon).resolve()
+    runner_binary = Path(args.runner).resolve()
     ensure_artifacts(daemon_binary)
 
     setup_result = {
@@ -759,7 +785,9 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
         try:
             return daemon_payload(
                 daemon_binary=daemon_binary,
+                runner_binary=runner_binary,
                 tetragon_binary=tetragon_binary,
+                capture_maps=bool(args.capture_maps),
                 duration_s=duration_s,
                 smoke=bool(args.smoke),
                 load_timeout=int(args.load_timeout),
@@ -784,11 +812,13 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--tetragon-binary")
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
+    parser.add_argument("--runner", default=str(ROOT_DIR / "runner" / "build" / "micro_exec"))
     parser.add_argument("--bpftool", default=DEFAULT_BPFTOOL)
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--load-timeout", type=int, default=DEFAULT_LOAD_TIMEOUT_S)
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_S)
+    parser.add_argument("--capture-maps", action="store_true")
     parser.add_argument("--skip-setup", action="store_true")
     return parser
 

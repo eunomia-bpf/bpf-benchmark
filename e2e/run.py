@@ -160,6 +160,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--katran-skip-attach", action="store_true")
     parser.add_argument("--kernel-config", default=str(ROOT_DIR / "vendor" / "linux-framework" / ".config"))
     parser.add_argument("--bpftool", default="/usr/local/sbin/bpftool", help="Explicit bpftool path for Tetragon runs.")
+    parser.add_argument(
+        "--capture-maps",
+        action="store_true",
+        help="Capture live BPF map state before REJIT and save per-program fixtures under corpus/fixtures/.",
+    )
     parser.add_argument("--scheduler-extra-arg", action="append", default=[])
     parser.add_argument("--skip-setup", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--tools-dir", default="", help="Directory with compiled libbpf-tools binaries (bcc case).")

@@ -240,7 +240,7 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-target timeout in seconds.")
     add_filter_argument(
         parser,
-        help_text="Only include targets whose object path, program name, or source contains this substring. Repeatable.",
+        help_text="Only include targets whose canonical name, object path, program name, or source contains this substring. Repeatable.",
     )
     add_max_programs_argument(parser, help_text="Optional cap for smoke testing.")
     parser.add_argument(
@@ -347,6 +347,69 @@ def normalize_passes(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []
     return [str(item) for item in value if str(item)]
+
+
+def manifest_program_names(entry: Mapping[str, Any]) -> list[str]:
+    program_name = str(entry.get("program_name") or "").strip()
+    if program_name:
+        return [program_name]
+    return normalize_passes(entry.get("program_names"))
+
+
+def split_corpus_source(source: str, family: str | None = None) -> tuple[str, str]:
+    raw_source = str(source or "")
+    source_path = Path(raw_source)
+    parts = source_path.parts
+    for index in range(len(parts) - 2):
+        if parts[index : index + 2] != ("corpus", "build"):
+            continue
+        repo_index = index + 2
+        repo_name = str(parts[repo_index]).strip()
+        object_rel = Path(*parts[repo_index + 1 :])
+        object_name = str(object_rel).strip() if str(object_rel) != "." else source_path.name
+        return repo_name, object_name
+    return str(family or "").strip(), str(source_path.name or raw_source).strip()
+
+
+def build_target_name(
+    *,
+    source: str,
+    family: str | None = None,
+    program_names: list[str] | None = None,
+) -> str:
+    repo_name, object_name = split_corpus_source(source, family)
+    prefix = ":".join(part for part in (repo_name, object_name) if part)
+    names = [name for name in (program_names or []) if name]
+    if not names:
+        return prefix
+    program_token = "+".join(names)
+    return f"{prefix}:{program_token}" if prefix else program_token
+
+
+def resolve_target_name(entry: Mapping[str, Any]) -> str:
+    raw_name = str(entry.get("name") or "").strip()
+    if raw_name:
+        return raw_name
+    return build_target_name(
+        source=str(entry.get("source", "")),
+        family=str(entry.get("family", "")),
+        program_names=manifest_program_names(entry),
+    )
+
+
+def record_target_name(record: Mapping[str, Any]) -> str:
+    raw_name = str(record.get("name") or "").strip()
+    if raw_name:
+        return raw_name
+    program_names = record.get("program_names")
+    if not isinstance(program_names, list):
+        program_names = []
+    return build_target_name(
+        source=str(record.get("object_path", "")),
+        family=str(record.get("source_name", "")),
+        program_names=[str(item) for item in program_names if str(item)]
+        or ([str(record.get("program_name")).strip()] if str(record.get("program_name") or "").strip() else []),
+    )
 
 
 def merge_passes(*pass_lists: list[str]) -> list[str]:
@@ -479,7 +542,7 @@ def summarize_failure_reason(record: dict[str, Any] | None) -> str:
 
 
 def program_label(record: dict[str, Any]) -> str:
-    return f"{record['object_path']}:{record['program_name']}"
+    return record_target_name(record)
 
 
 def rejit_metadata(record: dict[str, Any] | None) -> dict[str, Any]:
@@ -1131,33 +1194,31 @@ def load_targets_from_yaml(
     for entry in programs:
         test_method = entry.get("test_method", "")
         can_test_run = test_method == "bpf_prog_test_run"
-        program_name = entry.get("program_name") or ""
-        if not program_name:
-            names = entry.get("program_names") or []
-            program_name = names[0] if names else ""
+        program_names = manifest_program_names(entry)
+        program_name = program_names[0] if program_names else ""
         source = str(entry.get("source", ""))
         object_candidate = Path(source)
         object_path = object_candidate if object_candidate.is_absolute() else (ROOT_DIR / object_candidate)
-        source_parts = Path(source).parts
-        if len(source_parts) >= 3 and source_parts[0] == "corpus" and source_parts[1] == "build":
-            source_name = source_parts[2]
-        else:
-            source_name = entry.get("family", entry.get("name", ""))
+        source_name, object_name = split_corpus_source(source, str(entry.get("family", "")))
+        target_name = resolve_target_name(entry)
         sections = entry.get("sections") or []
         section_name = sections[0] if sections else entry.get("prog_type", "")
         candidates.append(
             {
-            "object_path": source,
-            "object_abs_path": str(object_path.resolve()),
-            "source_name": source_name,
-            "program_name": program_name,
-            "section_name": section_name,
-            "section_root": "",
-            "prog_type_name": str(entry.get("prog_type", "")),
-            "io_mode": str(entry.get("io_mode", "context")),
-            "input_size": int(entry.get("input_size", 0) or 0),
-            "memory_path": str(entry.get("test_input")) if entry.get("test_input") else None,
-            "can_test_run": can_test_run,
+                "name": target_name,
+                "object_name": object_name,
+                "object_path": source,
+                "object_abs_path": str(object_path.resolve()),
+                "source_name": source_name or str(entry.get("family", "") or object_name or target_name),
+                "program_name": program_name,
+                "program_names": program_names,
+                "section_name": section_name,
+                "section_root": "",
+                "prog_type_name": str(entry.get("prog_type", "")),
+                "io_mode": str(entry.get("io_mode", "context")),
+                "input_size": int(entry.get("input_size", 0) or 0),
+                "memory_path": str(entry.get("test_input")) if entry.get("test_input") else None,
+                "can_test_run": can_test_run,
             }
         )
 
@@ -1168,7 +1229,8 @@ def load_targets_from_yaml(
             record
             for record in selected
             if any(
-                needle in record["object_path"].lower()
+                needle in record["name"].lower()
+                or needle in record["object_path"].lower()
                 or needle in record["program_name"].lower()
                 or needle in record["source_name"].lower()
                 or needle in record["section_name"].lower()
@@ -1176,7 +1238,7 @@ def load_targets_from_yaml(
                 for needle in lowered
             )
         ]
-    selected.sort(key=lambda item: (item["source_name"], item["object_path"], item["program_name"]))
+    selected.sort(key=lambda item: (item["name"], item["object_path"], item["program_name"]))
     if max_programs is not None:
         selected = selected[:max_programs]
 
@@ -1547,7 +1609,7 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
 
 def build_markdown(data: dict[str, Any]) -> str:
     summary = data["summary"]
-    records = sorted(data["programs"], key=lambda item: (item["source_name"], item["object_path"], item["program_name"]))
+    records = sorted(data["programs"], key=lambda item: (record_target_name(item), item["object_path"], item["program_name"]))
     corpus_build_summary = data.get("corpus_build_summary") or {}
     guest_info = (data.get("guest_smoke") or {}).get("payload")
     lines: list[str] = [

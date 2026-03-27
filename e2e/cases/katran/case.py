@@ -40,6 +40,7 @@ from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stat
 from runner.libs.rejit import apply_daemon_rejit, scan_programs  # noqa: E402
 
 from e2e.case_common import (  # noqa: E402
+    capture_map_state,
     git_sha,
     host_metadata,
     relpath,
@@ -2196,6 +2197,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         server_metadata: dict[str, object] = {}
         map_config: dict[str, object] = {}
         test_run_validation: dict[str, object] = {}
+        map_capture: dict[str, object] | None = None
         for cycle_index in range(sample_count):
             with KatranDsrTopology(
                 args.katran_iface,
@@ -2232,6 +2234,22 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                             "samples": [baseline_sample],
                             "summary": build_phase_summary([baseline_sample]),
                         }
+                        if args.capture_maps and map_capture is None:
+                            map_capture = {
+                                "cycle_index": cycle_index,
+                                "result": capture_map_state(
+                                    captured_from="e2e/katran",
+                                    program_specs=[
+                                        {
+                                            "prog_id": int(session.prog_id),
+                                            "repo": "katran",
+                                            "object": katran_object.name,
+                                            "program": DEFAULT_PROGRAM_NAME,
+                                            "qualified_prog_name": f"katran/{katran_object.name}:{DEFAULT_PROGRAM_NAME}",
+                                        }
+                                    ],
+                                ),
+                            }
                         scan_results = scan_programs(prog_ids, daemon_binary)
                         rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
                         post_rejit_phase: dict[str, object] | None = None
@@ -2337,6 +2355,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "post_rejit": post_rejit,
         "comparison": compare_phases(baseline, post_rejit),
         "limitations": limitations,
+        "map_capture": map_capture,
     }
     return payload
 
@@ -2362,6 +2381,7 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument("--capture-maps", action="store_true")
     parser.add_argument("--skip-setup", action="store_true")
     return parser
 
