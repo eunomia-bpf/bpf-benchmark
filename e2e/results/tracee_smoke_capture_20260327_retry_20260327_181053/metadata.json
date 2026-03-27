@@ -1,0 +1,81 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "tracee",
+  "completed_at": "2026-03-27T18:11:01.340094+00:00",
+  "details_dir": "details",
+  "generated_at": "2026-03-27T18:11:01.340098+00:00",
+  "last_updated_at": "2026-03-27T18:11:01.340094+00:00",
+  "optimization_summary": {
+    "baseline": null,
+    "comparison": {
+      "comparable": false,
+      "reason": "Tracee binary could not run on this kernel: failed to launch Tracee: /home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee --events execve,security_file_open,security_socket_connect,sched_process_exec --output json --signatures-dir /home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/signatures: command exited with code 2: os/signal.signal_recv()\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/runtime/sigqueue.go:152 +0x29 fp=0xc00038b7c0 sp=0xc00038b7a0 pc=0xd1bd29\nos/signal.loop()\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/os/signal/signal_unix.go:23 +0x13 fp=0xc00038b7e0 sp=0xc00038b7c0 pc=0x11bf0f3\nruntime.goexit({})\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/runtime/asm_amd64.s:1700 +0x1 fp=0xc00038b7e8 sp=0xc00038b7e0 pc=0xd21c41\ncreated by os/signal.Notify.func1.1 in goroutine 1\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/os/signal/signal.go:152 +0x1f\ngoroutine 67 gp=0xc000386540 m=nil [select]:\nruntime.gopark(0xc002ba07b0?, 0x2?, 0x0?, 0x0?, 0xc002ba079c?)\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/runtime/proc.go:435 +0xce fp=0xc002ba0630 sp=0xc002ba0610 pc=0xd19bce\nruntime.selectgo(0xc002ba07b0, 0xc002ba0798, 0x0?, 0x0, 0x0?, 0x1)\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/runtime/select.go:351 +0x837 fp=0xc002ba0768 sp=0xc002ba0630 pc=0xcf5877\nos/signal.NotifyContext.func1()\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/os/signal/signal.go:289 +0x66 fp=0xc002ba07e0 sp=0xc002ba0768 pc=0x11bec86\nruntime.goexit({})\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/runtime/asm_amd64.s:1700 +0x1 fp=0xc002ba07e8 sp=0xc002ba07e0 pc=0xd21c41\ncreated by os/signal.NotifyContext in goroutine 1\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/os/signal/signal.go:288 +0x156\nrax    0xfd6e\nrbx    0xc000052fc8\nrcx    0x24592\nrdx    0x7fc02c64ae20\nrdi    0x7fc02c64ae20\nrsi    0xfd6e\nrbp    0x7fc036ffba30\nrsp    0x7fc036ffba10\nr8     0x1\nr9     0x7fc02c01c4f0\nr10    0x7fc02c020db0\nr11    0x40\nr12    0xffffffffffffffff\nr13    0x8e\nr14    0xc000002380\nr15    0xc0006391a0\nrip    0x1e0f33c\nrflags 0x10202\ncs     0x33\nfs     0x0\ngs     0x0"
+    },
+    "config": {
+      "events": [
+        "execve",
+        "security_file_open",
+        "security_socket_connect",
+        "sched_process_exec"
+      ],
+      "measurement_duration_s": 60,
+      "smoke_duration_s": 10,
+      "workloads": [
+        {
+          "command": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
+          "kind": "exec_storm",
+          "metric": "bogo-ops/s",
+          "name": "exec_storm",
+          "rate": 4
+        },
+        {
+          "command": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
+          "kind": "file_io",
+          "metric": "IOPS",
+          "name": "file_io"
+        },
+        {
+          "command": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
+          "kind": "network",
+          "metric": "req/s",
+          "name": "network"
+        }
+      ]
+    },
+    "duration_s": 10,
+    "generated_at": "2026-03-27T18:11:01.290455+00:00",
+    "host": {
+      "git_sha": "unknown",
+      "hostname": "virtme-ng",
+      "kernel": "7.0.0-rc2+",
+      "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+      "python": "3.12.3"
+    },
+    "limitations": [],
+    "map_capture": null,
+    "mode": "skipped",
+    "post_rejit": null,
+    "rejit_result": null,
+    "scan_results": {},
+    "setup": {
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "TRACEE_BINARY=/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee\nTracee version: v0.24.1-kernel7-patch1",
+      "tracee_binary": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee"
+    },
+    "skip_reason": "Tracee binary could not run on this kernel: failed to launch Tracee: /home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee --events execve,security_file_open,security_socket_connect,sched_process_exec --output json --signatures-dir /home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/signatures: command exited with code 2: os/signal.signal_recv()\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/runtime/sigqueue.go:152 +0x29 fp=0xc00038b7c0 sp=0xc00038b7a0 pc=0xd1bd29\nos/signal.loop()\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/os/signal/signal_unix.go:23 +0x13 fp=0xc00038b7e0 sp=0xc00038b7c0 pc=0x11bf0f3\nruntime.goexit({})\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/runtime/asm_amd64.s:1700 +0x1 fp=0xc00038b7e8 sp=0xc00038b7e0 pc=0xd21c41\ncreated by os/signal.Notify.func1.1 in goroutine 1\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/os/signal/signal.go:152 +0x1f\ngoroutine 67 gp=0xc000386540 m=nil [select]:\nruntime.gopark(0xc002ba07b0?, 0x2?, 0x0?, 0x0?, 0xc002ba079c?)\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/runtime/proc.go:435 +0xce fp=0xc002ba0630 sp=0xc002ba0610 pc=0xd19bce\nruntime.selectgo(0xc002ba07b0, 0xc002ba0798, 0x0?, 0x0, 0x0?, 0x1)\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/runtime/select.go:351 +0x837 fp=0xc002ba0768 sp=0xc002ba0630 pc=0xcf5877\nos/signal.NotifyContext.func1()\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/os/signal/signal.go:289 +0x66 fp=0xc002ba07e0 sp=0xc002ba0768 pc=0x11bec86\nruntime.goexit({})\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/runtime/asm_amd64.s:1700 +0x1 fp=0xc002ba07e8 sp=0xc002ba07e0 pc=0xd21c41\ncreated by os/signal.NotifyContext in goroutine 1\n\t/home/yunwei37/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.9.linux-amd64/src/os/signal/signal.go:288 +0x156\nrax    0xfd6e\nrbx    0xc000052fc8\nrcx    0x24592\nrdx    0x7fc02c64ae20\nrdi    0x7fc02c64ae20\nrsi    0xfd6e\nrbp    0x7fc036ffba30\nrsp    0x7fc036ffba10\nr8     0x1\nr9     0x7fc02c01c4f0\nr10    0x7fc02c020db0\nr11    0x40\nr12    0xffffffffffffffff\nr13    0x8e\nr14    0xc000002380\nr15    0xc0006391a0\nrip    0x1e0f33c\nrflags 0x10202\ncs     0x33\nfs     0x0\ngs     0x0",
+    "smoke": true,
+    "status": "skipped",
+    "tracee_binary": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee",
+    "tracee_programs": []
+  },
+  "output_hint_json": "e2e/results/tracee_smoke_capture_20260327_retry.json",
+  "output_hint_md": "e2e/results/tracee_smoke_capture_20260327_retry.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "run_type": "tracee_smoke_capture_20260327_retry",
+  "smoke": true,
+  "started_at": "2026-03-27T18:10:53.514822+00:00",
+  "status": "completed",
+  "suite": "e2e"
+}

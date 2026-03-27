@@ -153,10 +153,23 @@ def capture_map_state(
 
     inline_capture_programs: list[dict[str, object]] = []
     normalized_results: list[tuple[int, Mapping[str, object]]] = []
+    capture_prog_ids: set[int] = set()
     for raw_prog_id, raw_result in optimize_results.items():
         if not isinstance(raw_result, Mapping):
             continue
-        normalized_results.append((int(raw_prog_id), raw_result))
+        prog_id = int(raw_prog_id)
+        normalized_results.append((prog_id, raw_result))
+
+        summary = raw_result.get("summary") if isinstance(raw_result.get("summary"), Mapping) else {}
+        applied_sites = int((summary or {}).get("total_sites_applied", 0) or 0)
+        raw_entries = raw_result.get("inlined_map_entries")
+        inlined_entry_count = (
+            len([entry for entry in raw_entries if isinstance(entry, Mapping)])
+            if isinstance(raw_entries, list)
+            else 0
+        )
+        if applied_sites > 0 or inlined_entry_count > 0:
+            capture_prog_ids.add(prog_id)
 
     for prog_id, result in sorted(normalized_results, key=lambda item: item[0]):
         kernel_prog_name = str(result.get("kernel_prog_name") or f"prog_{prog_id}")
@@ -174,6 +187,25 @@ def capture_map_state(
             }
         )
 
+    filtered_program_specs = [
+        dict(spec)
+        for spec in program_specs
+        if int(spec.get("prog_id", 0) or 0) in capture_prog_ids
+    ]
+    if not filtered_program_specs:
+        return {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "captured_from": captured_from,
+            "status": "skipped",
+            "reason": "no optimized programs reported applied sites or inline capture entries",
+            "programs_seen": len(program_specs),
+            "programs_selected": 0,
+            "programs_written": 0,
+            "programs": [],
+            "skipped_programs": [],
+            "errors": [],
+        }
+
     fixture_dir = fixture_root or (ROOT_DIR / "corpus" / "fixtures")
     script_path = ROOT_DIR / "runner" / "scripts" / "capture_map_state.py"
     if not script_path.exists():
@@ -183,7 +215,7 @@ def capture_map_state(
         tempdir_path = Path(tempdir)
         spec_path = tempdir_path / "program_specs.json"
         inline_capture_path = tempdir_path / "inline_capture.json"
-        write_json(spec_path, list(program_specs))
+        write_json(spec_path, filtered_program_specs)
         write_json(inline_capture_path, inline_capture_programs)
         command = [
             sys.executable or "python3",

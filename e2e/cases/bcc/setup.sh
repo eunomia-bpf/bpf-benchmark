@@ -11,8 +11,13 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd -- "${SCRIPT_DIR}/../../.." && pwd)
 LIBBPF_TOOLS_SRC="${REPO_ROOT}/runner/repos/bcc/libbpf-tools"
 BUILD_OUTPUT="${LIBBPF_TOOLS_SRC}/.output"
+RUNNER_DIR="${REPO_ROOT}/runner"
+VENDOR_LIBBPF_SRC="${REPO_ROOT}/vendor/libbpf/src"
+VENDOR_LIBBPF_OBJ="${REPO_ROOT}/runner/build/vendor/libbpf/obj/libbpf.a"
+VENDOR_BPFTOOL="${REPO_ROOT}/runner/build/vendor/bpftool/bootstrap/bpftool"
+VENDOR_INCLUDES="-I${BUILD_OUTPUT} -I${REPO_ROOT}/vendor/libbpf/include -I${REPO_ROOT}/vendor/libbpf/include/uapi -I${REPO_ROOT}/vendor/libbpf/src"
 # Binaries we actually need — must match config.yaml tool names
-REQUIRED_TOOLS=(tcplife biosnoop runqlat execsnoop opensnoop capable vfsstat tcpconnect)
+REQUIRED_TOOLS=(tcplife biosnoop runqlat syscount execsnoop opensnoop capable vfsstat tcpconnect bindsnoop fsdist)
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -53,13 +58,13 @@ fi
 
 # ── Install missing runtime workload tools ─────────────────────────────────────
 missing_workload_tools=()
-for tool in stress-ng fio curl dd; do
+for tool in stress-ng fio curl dd setpriv; do
   if ! need_tool "${tool}"; then
     missing_workload_tools+=("${tool}")
   fi
 done
 if [[ "${#missing_workload_tools[@]}" -gt 0 ]]; then
-  apt_install stress-ng fio curl coreutils || true
+  apt_install stress-ng fio curl coreutils util-linux || true
 fi
 
 # ── Check if rebuild is needed ─────────────────────────────────────────────────
@@ -99,10 +104,32 @@ fi
 
 build_log="/tmp/bcc-libbpf-tools-build.log"
 echo "Building libbpf-tools in ${LIBBPF_TOOLS_SRC} (this may take a few minutes)..." >&2
+if ! make -C "${RUNNER_DIR}" \
+      -j"${NPROC}" \
+      JOBS="${NPROC}" \
+      vendor_libbpf vendor_bpftool \
+      >"${build_log}" 2>&1; then
+  echo "ERROR: vendor libbpf/bpftool build failed; last 60 lines of build log:" >&2
+  tail -n 60 "${build_log}" >&2
+  exit 1
+fi
+if [[ ! -f "${VENDOR_LIBBPF_OBJ}" ]]; then
+  echo "ERROR: expected vendor libbpf archive not found at ${VENDOR_LIBBPF_OBJ}" >&2
+  exit 1
+fi
+if [[ ! -x "${VENDOR_BPFTOOL}" ]]; then
+  echo "ERROR: expected vendor bpftool not found at ${VENDOR_BPFTOOL}" >&2
+  exit 1
+fi
 if ! make -C "${LIBBPF_TOOLS_SRC}" \
       -j"${NPROC}" \
       CLANG="${CLANG:-clang}" \
       LLVM_STRIP="${LLVM_STRIP:-llvm-strip}" \
+      USE_BLAZESYM=0 \
+      BPFTOOL="${VENDOR_BPFTOOL}" \
+      LIBBPF_SRC="${VENDOR_LIBBPF_SRC}" \
+      LIBBPF_OBJ="${VENDOR_LIBBPF_OBJ}" \
+      INCLUDES="${VENDOR_INCLUDES}" \
       "${REQUIRED_TOOLS[@]}" \
       >"${build_log}" 2>&1; then
   echo "ERROR: libbpf-tools build failed; last 60 lines of build log:" >&2

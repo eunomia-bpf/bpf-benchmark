@@ -693,23 +693,17 @@ def daemon_payload(
                             if key != "program_specs"
                         }
                     }
+                    map_capture["result"] = capture_map_state(
+                        captured_from="e2e/tetragon",
+                        program_specs=capture_plan["program_specs"],
+                        optimize_results={},
+                    )
                 scan_results = scan_programs(prog_ids, daemon_binary)
                 rejit_result = apply_daemon_rejit(
                     daemon_binary,
                     prog_ids,
                     enabled_passes=benchmark_rejit_enabled_passes(),
                 )
-                if capture_maps and map_capture is not None:
-                    optimize_results = (
-                        rejit_result.get("per_program")
-                        if isinstance(rejit_result.get("per_program"), Mapping)
-                        else {}
-                    )
-                    map_capture["result"] = capture_map_state(
-                        captured_from="e2e/tetragon",
-                        program_specs=capture_plan["program_specs"],
-                        optimize_results=optimize_results,
-                    )
                 if rejit_result["applied"]:
                     post_rejit = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=session.pid)
                 else:

@@ -1,0 +1,21 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "tracee",
+  "details_dir": "details",
+  "generated_at": "2026-03-27T18:26:46.499969+00:00",
+  "last_updated_at": "2026-03-27T18:26:46.499957+00:00",
+  "optimization_summary": {
+    "case": "tracee",
+    "smoke": true,
+    "status": "running"
+  },
+  "output_hint_json": "e2e/results/tracee_smoke_capture_20260327_fast.json",
+  "output_hint_md": "e2e/results/tracee_smoke_capture_20260327_fast.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "run_type": "tracee_smoke_capture_20260327_fast",
+  "smoke": true,
+  "started_at": "2026-03-27T18:26:43.591283+00:00",
+  "status": "running",
+  "suite": "e2e"
+}

@@ -131,6 +131,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 .PHONY: all runner micro daemon kernel kernel-build kernel-clean kernel-rebuild kernel-arm64 kernel-tests kinsn-modules virtme-hostfs-modules upstream-selftests-build \
 	corpus-fetch corpus-build-objects corpus-build corpus-build-native \
 	corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx \
+	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
 	daemon-tests python-tests check smoke validate \
 	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	arm64-worktree arm64-rootfs arm64-crossbuild-image cross-arm64 selftest-arm64 \
@@ -141,7 +142,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 # ── Help ───────────────────────────────────────────────────────────────────────
 help:
 	@echo "Build:  all runner micro daemon kernel kernel-clean kernel-rebuild kinsn-modules kernel-tests upstream-selftests-build kernel-arm64 cross-arm64"
-	@echo "Repos:  corpus-fetch corpus-build-objects corpus-build corpus-build-native corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx REPOS=\"tracee tetragon ...\""
+	@echo "Repos:  corpus-fetch corpus-build-objects corpus-build corpus-build-native corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace REPOS=\"katran tracee tetragon cilium bpftrace ...\""
 	@echo "Test:   smoke daemon-tests python-tests check"
 	@echo "VM x86: vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
@@ -183,6 +184,21 @@ corpus-build-xdp-tutorial:
 
 corpus-build-scx:
 	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-scx
+
+corpus-build-katran:
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-katran
+
+corpus-build-tracee:
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-tracee
+
+corpus-build-tetragon:
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-tetragon
+
+corpus-build-cilium:
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-cilium
+
+corpus-build-bpftrace:
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-bpftrace
 
 micro:
 	$(MAKE) -j"$(JOBS)" runner

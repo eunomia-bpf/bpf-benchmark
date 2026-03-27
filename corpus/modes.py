@@ -241,6 +241,14 @@ def benchmark_enabled_passes(benchmark_config: Mapping[str, Any] | None) -> list
     return list(DEFAULT_REJIT_ENABLED_PASSES)
 
 
+def benchmark_warmup_repeat(benchmark_config: Mapping[str, Any] | None) -> int:
+    value = (benchmark_config or {}).get("warmups")
+    try:
+        return max(0, int(value))
+    except (TypeError, ValueError):
+        return 0
+
+
 def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     argv = list(sys.argv[1:] if argv is None else argv)
     pre_parser = argparse.ArgumentParser(add_help=False)
@@ -746,6 +754,7 @@ def build_test_run_batch_job(
     memory_path: Path | None,
     input_size: int,
     repeat: int,
+    warmup_repeat: int | None = None,
     btf_custom_path: Path | None,
     compile_only: bool,
     daemon_socket: str | None = None,
@@ -768,6 +777,8 @@ def build_test_run_batch_job(
         "repeat": max(1, repeat),
         "compile_only": compile_only,
     }
+    if warmup_repeat is not None:
+        job["warmup_repeat"] = max(0, int(warmup_repeat))
     if program_name is not None:
         job["program_name"] = program_name
     if attach_program_name is not None:
@@ -844,6 +855,7 @@ def build_target_batch_plan(
     *,
     targets: list[dict[str, Any]],
     repeat: int,
+    warmup_repeat: int,
     btf_custom_path: Path | None,
     enable_recompile: bool,
     enable_exec: bool,
@@ -895,6 +907,7 @@ def build_target_batch_plan(
                     memory_path=entry["memory_path"],
                     input_size=int(target["input_size"]),
                     repeat=repeat,
+                    warmup_repeat=warmup_repeat,
                     btf_custom_path=btf_custom_path,
                     compile_only=True,
                     prepared_key=(
@@ -929,6 +942,7 @@ def build_target_batch_plan(
                             memory_path=entry["memory_path"],
                             input_size=int(target["input_size"]),
                             repeat=repeat,
+                            warmup_repeat=warmup_repeat,
                             btf_custom_path=btf_custom_path,
                             compile_only=False,
                             prepared_ref=entry["baseline_prepared_key"],
@@ -949,6 +963,7 @@ def build_target_batch_plan(
                             memory_path=None,
                             input_size=0,
                             repeat=repeat,
+                            warmup_repeat=warmup_repeat,
                             btf_custom_path=btf_custom_path,
                             compile_only=False,
                         )
@@ -974,6 +989,7 @@ def build_target_batch_plan(
                         memory_path=entry["memory_path"],
                         input_size=int(target["input_size"]),
                         repeat=10,
+                        warmup_repeat=warmup_repeat,
                         btf_custom_path=btf_custom_path,
                         compile_only=False,
                     )
@@ -997,6 +1013,7 @@ def build_target_batch_plan(
                         memory_path=entry["memory_path"],
                         input_size=int(target["input_size"]),
                         repeat=repeat,
+                        warmup_repeat=warmup_repeat,
                         btf_custom_path=btf_custom_path,
                         compile_only=True,
                         daemon_socket=daemon_socket,
@@ -1033,6 +1050,7 @@ def build_target_batch_plan(
                             memory_path=entry["memory_path"],
                             input_size=int(target["input_size"]),
                             repeat=repeat,
+                            warmup_repeat=warmup_repeat,
                             btf_custom_path=btf_custom_path,
                             compile_only=False,
                             daemon_socket=daemon_socket,
@@ -1055,6 +1073,7 @@ def build_target_batch_plan(
                             memory_path=None,
                             input_size=0,
                             repeat=repeat,
+                            warmup_repeat=warmup_repeat,
                             btf_custom_path=btf_custom_path,
                             compile_only=False,
                             daemon_socket=daemon_socket,
@@ -1127,6 +1146,7 @@ def run_targets_locally_batch(
     runner: Path,
     daemon: Path,
     repeat: int,
+    warmup_repeat: int,
     timeout_seconds: int,
     execution_mode: str,
     btf_custom_path: Path | None,
@@ -1147,6 +1167,7 @@ def run_targets_locally_batch(
         spec_payload, job_refs = build_target_batch_plan(
             targets=targets,
             repeat=repeat,
+            warmup_repeat=warmup_repeat,
             btf_custom_path=btf_custom_path,
             enable_recompile=enable_recompile,
             enable_exec=enable_exec,
@@ -1256,6 +1277,7 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
     guest_result_path = Path(args.guest_result_json).resolve() if args.guest_result_json else None
     enabled_passes = benchmark_enabled_passes(args.benchmark_config)
+    warmup_repeat = benchmark_warmup_repeat(args.benchmark_config)
     if btf_custom_path is None:
         raise SystemExit("--btf-custom-path is required in guest batch mode")
 
@@ -1279,6 +1301,7 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
                     runner=runner,
                     daemon=daemon,
                     repeat=args.repeat,
+                    warmup_repeat=warmup_repeat,
                     timeout_seconds=args.timeout,
                     execution_mode="vm",
                     btf_custom_path=btf_custom_path,
@@ -1582,6 +1605,7 @@ def build_object_batch_plan_v2(
     *,
     objects: list[ResolvedObject],
     repeat: int,
+    warmup_repeat: int,
     btf_custom_path: Path | None,
     daemon_socket: str,
     enabled_passes: list[str] | None = None,
@@ -1617,6 +1641,7 @@ def build_object_batch_plan_v2(
                 memory_path=None,
                 input_size=0,
                 repeat=repeat,
+                warmup_repeat=warmup_repeat,
                 btf_custom_path=btf_custom_path,
                 compile_only=True,
                 prepared_key=baseline_prepared_key,
@@ -1648,6 +1673,7 @@ def build_object_batch_plan_v2(
                     memory_path=memory_path,
                     input_size=program.input_size,
                     repeat=repeat,
+                    warmup_repeat=warmup_repeat,
                     btf_custom_path=btf_custom_path,
                     compile_only=True,
                     prepared_ref=baseline_prepared_key,
@@ -1672,6 +1698,7 @@ def build_object_batch_plan_v2(
                         memory_path=memory_path,
                         input_size=program.input_size,
                         repeat=repeat,
+                        warmup_repeat=warmup_repeat,
                         btf_custom_path=btf_custom_path,
                         compile_only=False,
                         prepared_ref=baseline_prepared_key,
@@ -1696,6 +1723,7 @@ def build_object_batch_plan_v2(
                 memory_path=None,
                 input_size=0,
                 repeat=repeat,
+                warmup_repeat=warmup_repeat,
                 btf_custom_path=btf_custom_path,
                 compile_only=True,
                 daemon_socket=daemon_socket,
@@ -1723,6 +1751,7 @@ def build_object_batch_plan_v2(
                     memory_path=memory_path,
                     input_size=program.input_size,
                     repeat=repeat,
+                    warmup_repeat=warmup_repeat,
                     btf_custom_path=btf_custom_path,
                     compile_only=True,
                     daemon_socket=daemon_socket,
@@ -1749,6 +1778,7 @@ def build_object_batch_plan_v2(
                         memory_path=memory_path,
                         input_size=program.input_size,
                         repeat=repeat,
+                        warmup_repeat=warmup_repeat,
                         btf_custom_path=btf_custom_path,
                         compile_only=False,
                         daemon_socket=daemon_socket,
@@ -1882,6 +1912,7 @@ def run_objects_locally_batch(
     runner: Path,
     daemon: Path,
     repeat: int,
+    warmup_repeat: int,
     timeout_seconds: int,
     execution_mode: str,
     btf_custom_path: Path | None,
@@ -1914,6 +1945,7 @@ def run_objects_locally_batch(
         spec_payload, object_refs = build_object_batch_plan_v2(
             objects=objects,
             repeat=repeat,
+            warmup_repeat=warmup_repeat,
             btf_custom_path=btf_custom_path,
             daemon_socket=active_daemon_socket,
             enabled_passes=enabled_passes,

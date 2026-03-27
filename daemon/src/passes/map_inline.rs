@@ -737,6 +737,8 @@ fn run_map_inline_round(
         build_direct_map_value_load_rewrites(program);
     diagnostics.extend(direct_diagnostics);
     let sites = find_map_lookup_sites(&program.insns);
+    let mutable_maps_with_lookup_value_writes =
+        collect_mutable_maps_with_lookup_value_writes(program, &sites, &map_info);
 
     log_map_inline_debug(&format!(
         "found {} lookup sites (verifier_guided_keys={})",
@@ -791,6 +793,20 @@ fn run_map_inline_round(
                 Some(format!(
                     "site at PC={}: map_type={}, skip reason: unsupported map type",
                     site.call_pc, info.map_type
+                )),
+            );
+            continue;
+        }
+        if !info.frozen && mutable_maps_with_lookup_value_writes.contains(&info.map_id) {
+            let reason = "mutable map value is written elsewhere in program".to_string();
+            record_skip(
+                &mut skipped,
+                &mut diagnostics,
+                site.call_pc,
+                reason,
+                Some(format!(
+                    "site at PC={}: map_id {} is mutated via lookup-result stores in this program",
+                    site.call_pc, info.map_id
                 )),
             );
             continue;
@@ -858,6 +874,20 @@ fn run_map_inline_round(
         if uses.fixed_loads.is_empty() {
             let reason = "lookup result is not consumed by fixed-offset scalar loads".to_string();
             record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+            continue;
+        }
+        if !info.frozen && !uses.other_uses.is_empty() {
+            let reason = "mutable lookup result has non-load uses".to_string();
+            record_skip(
+                &mut skipped,
+                &mut diagnostics,
+                site.call_pc,
+                reason,
+                Some(format!(
+                    "site at PC={}: mutable map lookup value escapes beyond fixed loads at pcs {:?}",
+                    site.call_pc, uses.other_uses
+                )),
+            );
             continue;
         }
         let rewrite = match build_site_rewrite(program, &site, &key, &uses, info, null_check_pc) {
@@ -2217,6 +2247,7 @@ fn classify_r0_uses_with_options(
         if let Some(stack_off) = resolve_stack_load_slot(insns, pc, insn, bounds) {
             if alias_stack_slots.contains(&stack_off) {
                 classification.alias_copy_pcs.push(pc);
+                alias_stack_slots.remove(&stack_off);
                 kill_defined_alias_regs(&mut alias_regs, insn);
                 alias_regs.insert(insn.dst_reg());
                 pc += insn_width(insn);
@@ -2266,6 +2297,89 @@ fn classify_r0_uses_with_options(
     }
 
     classification
+}
+
+fn collect_mutable_maps_with_lookup_value_writes(
+    program: &BpfProgram,
+    sites: &[MapLookupSite],
+    map_info: &crate::analysis::MapInfoResult,
+) -> HashSet<u32> {
+    let mut mutated_maps = HashSet::new();
+
+    for site in sites {
+        let Some(map_ref) = map_info.reference_at_pc(site.map_load_pc) else {
+            continue;
+        };
+        let Some(info) = map_ref.info.as_ref() else {
+            continue;
+        };
+        if info.frozen {
+            continue;
+        }
+        if lookup_result_may_write_value(&program.insns, site.call_pc) {
+            mutated_maps.insert(info.map_id);
+        }
+    }
+
+    mutated_maps
+}
+
+fn lookup_result_may_write_value(insns: &[BpfInsn], start_pc: usize) -> bool {
+    let mut alias_regs = HashSet::from([0u8]);
+    let mut alias_stack_slots = HashSet::new();
+    let bounds = subprog_bounds(insns, start_pc);
+    let mut pc = start_pc + 1;
+
+    while pc < insns.len() && (!alias_regs.is_empty() || !alias_stack_slots.is_empty()) {
+        let insn = &insns[pc];
+
+        if insn_writes_via_alias(insn, &alias_regs) {
+            return true;
+        }
+
+        if let Some(dst_reg) = alias_copy_dst(insn, &alias_regs) {
+            kill_defined_alias_regs(&mut alias_regs, insn);
+            alias_regs.insert(dst_reg);
+            pc += insn_width(insn);
+            continue;
+        }
+
+        if let Some((stack_off, width)) = resolve_stack_store_slot(insns, pc, insn, bounds) {
+            kill_overlapping_alias_stack_slots(&mut alias_stack_slots, stack_off, width);
+            if insn.class() == BPF_STX
+                && bpf_mode(insn.code) == BPF_MEM
+                && width == 8
+                && alias_regs.contains(&insn.src_reg())
+            {
+                alias_stack_slots.insert(stack_off);
+                pc += insn_width(insn);
+                continue;
+            }
+        }
+
+        if let Some(stack_off) = resolve_stack_load_slot(insns, pc, insn, bounds) {
+            if alias_stack_slots.contains(&stack_off) {
+                kill_defined_alias_regs(&mut alias_regs, insn);
+                alias_regs.insert(insn.dst_reg());
+                pc += insn_width(insn);
+                continue;
+            }
+        }
+
+        if insn.is_call() {
+            if insn_uses_any_alias(insn, &alias_regs) {
+                return true;
+            }
+            alias_regs = surviving_alias_regs_after_helper_call(&alias_regs);
+            pc += insn_width(insn);
+            continue;
+        }
+
+        kill_defined_alias_regs(&mut alias_regs, insn);
+        pc += insn_width(insn);
+    }
+
+    false
 }
 
 fn resolve_stack_store_slot(
@@ -2361,12 +2475,13 @@ fn alias_copy_dst(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> Option<u8> {
 }
 
 fn is_null_check_on_alias(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> bool {
+    let op = bpf_op(insn.code);
     insn.class() == BPF_JMP
-        && matches!(bpf_op(insn.code), BPF_JEQ | BPF_JNE)
+        && matches!(op, BPF_JEQ | BPF_JNE)
         && bpf_src(insn.code) == BPF_K
         && insn.src_reg() == 0
         && insn.imm == 0
-        && insn.off >= 0
+        && (op == BPF_JEQ || insn.off >= 0)
         && alias_regs.contains(&insn.dst_reg())
 }
 
@@ -2434,6 +2549,12 @@ fn insn_uses_any_alias(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> bool {
         .iter()
         .copied()
         .any(|reg| insn_uses_reg(insn, reg))
+}
+
+fn insn_writes_via_alias(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> bool {
+    matches!(insn.class(), BPF_ST | BPF_STX)
+        && alias_regs.contains(&insn.dst_reg())
+        && !insn.is_ldx_mem()
 }
 
 fn kill_defined_alias_regs(alias_regs: &mut HashSet<u8>, insn: &BpfInsn) {
@@ -3264,6 +3385,29 @@ mod tests {
     }
 
     #[test]
+    fn classify_r0_uses_marks_store_back_as_other_use() {
+        let insns = vec![
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 1, 0, 0),
+            add64_imm(1, 1),
+            BpfInsn::stx_mem(BPF_W, 0, 1, 0),
+        ];
+
+        let uses = classify_r0_uses(&insns, 0);
+        assert_eq!(
+            uses.fixed_loads,
+            vec![FixedLoadUse {
+                pc: 1,
+                dst_reg: 1,
+                size: BPF_W,
+                offset: 0,
+            }]
+        );
+        assert_eq!(uses.other_uses, vec![3]);
+        assert!(!uses.all_fixed_loads());
+    }
+
+    #[test]
     fn map_inline_pass_rewrites_lookup_and_scalar_loads() {
         install_array_map(101, vec![7, 0, 0, 0, 0xaa, 0, 0, 0]);
 
@@ -4032,6 +4176,37 @@ mod tests {
     }
 
     #[test]
+    fn classify_r0_uses_tracks_backward_jeq_null_check() {
+        let uses = classify_r0_uses(
+            &[
+                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                BpfInsn {
+                    code: BPF_JMP | BPF_JEQ | BPF_K,
+                    regs: BpfInsn::make_regs(0, 0),
+                    off: -1,
+                    imm: 0,
+                },
+                BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ],
+            0,
+        );
+
+        assert_eq!(uses.null_check_pc, Some(1));
+        assert_eq!(
+            uses.fixed_loads,
+            vec![FixedLoadUse {
+                pc: 2,
+                dst_reg: 6,
+                size: BPF_W,
+                offset: 0,
+            }]
+        );
+        assert!(uses.other_uses.is_empty());
+    }
+
+    #[test]
     fn map_inline_pass_keeps_hash_lookup_and_rewrites_jne_guarded_load() {
         install_hash_map(122, vec![7, 0, 0, 0]);
 
@@ -4400,6 +4575,125 @@ mod tests {
                 exit_insn(),
             ]
         );
+    }
+
+    #[test]
+    fn map_inline_pass_skips_mutable_array_lookup_with_store_back() {
+        install_mutable_array_map(415, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            add64_imm(6, 1),
+            BpfInsn::stx_mem(BPF_W, 0, 6, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![415]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(result.pass_results[0]
+            .sites_skipped
+            .iter()
+            .any(|skip| skip
+                .reason
+                .contains("mutable lookup result has non-load uses")
+                || skip
+                    .reason
+                    .contains("mutable map value is written elsewhere in program")));
+    }
+
+    #[test]
+    fn map_inline_pass_skips_non_frozen_array_after_same_map_is_written() {
+        install_mutable_array_map(416, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            add64_imm(6, 1),
+            BpfInsn::stx_mem(BPF_W, 0, 6, 0),
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -8, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -8),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 7, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![416]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(result.pass_results[0]
+            .sites_skipped
+            .iter()
+            .any(|skip| skip
+                .reason
+                .contains("mutable map value is written elsewhere in program")));
+    }
+
+    #[test]
+    fn map_inline_pass_keeps_other_mutable_read_only_maps_inlineable() {
+        install_mutable_array_map(417, vec![7, 0, 0, 0]);
+        install_mutable_array_map(418, vec![11, 0, 0, 0]);
+
+        let map1 = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let map2 = ld_imm64(1, BPF_PSEUDO_MAP_FD, 43);
+        let mut program = BpfProgram::new(vec![
+            map1[0],
+            map1[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            add64_imm(6, 1),
+            BpfInsn::stx_mem(BPF_W, 0, 6, 0),
+            map2[0],
+            map2[1],
+            st_mem(BPF_W, 10, -8, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -8),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 7, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![417, 418]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(
+            program.insns.iter().filter(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM).count(),
+            1
+        );
+        assert!(program
+            .insns
+            .iter()
+            .any(|insn| insn == &BpfInsn::mov64_imm(7, 11)));
     }
 
     #[test]

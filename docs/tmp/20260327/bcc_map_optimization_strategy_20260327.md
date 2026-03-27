@@ -284,6 +284,72 @@ daemon socket optimize 结果：
 - `execsnoop + stress-ng --exec` 是一个比 `bindsnoop` 更容易手工复现、也更容易稳定看到 `map_inline` 效果的 BCC 验证路径。
 - 对这个工具，收益的主来源确实是 `.rodata` / global-data constantization，再由 `const_prop + dce` 折叠过滤分支并删掉 dead code。
 
+## 9. 手工 VM 性能采样：`execsnoop` stock vs optimized
+
+为了回答“有没有 end-to-end 性能收益”，我又在同一条 VM 手工路径上做了一轮交错采样：
+
+- 入口：`make vm-shell`
+- 脚本：[execsnoop_perf_vm_20260327.sh](/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260327/execsnoop_perf_vm_20260327.sh)
+- 每轮顺序：
+  1. `no_trace`
+  2. `stock execsnoop`
+  3. `optimized execsnoop`
+- 每个 case 都跑：
+  - `setpriv --reuid 65534 --regid 65534 --clear-groups`
+  - `stress-ng --exec 2 --exec-method execve --timeout 10 --metrics-brief`
+- `optimized` case 仍只启用：
+  - `["map_inline", "const_prop", "dce"]`
+
+采样结果使用 `stress-ng` 的 `bogo ops/s (real time)` 作为吞吐指标。
+
+全 5 轮均值：
+
+| mode | mean bogo ops/s | stdev |
+| --- | ---: | ---: |
+| `no_trace` | `172.08` | `12.30` |
+| `stock` | `170.96` | `20.46` |
+| `optimized` | `181.38` | `4.34` |
+
+按这个全样本均值算：
+
+- `optimized vs stock`: `+6.10%`
+
+但这里要非常小心：`stock` 的第 1 轮是明显冷启动低点：
+
+- `stock round1`: `135.74`
+- `optimized round1`: `175.17`
+
+如果把第 1 轮当暖机剔除，只看第 2-5 轮稳态均值：
+
+| mode | steady-state mean bogo ops/s |
+| --- | ---: |
+| `no_trace` | `174.61` |
+| `stock` | `179.76` |
+| `optimized` | `182.93` |
+
+这时：
+
+- `optimized vs stock`: 约 `+1.76%`
+
+解读：
+
+1. `execsnoop` 的 live program 确实被大幅瘦身了：
+   - 主程序 `2236 -> 806` insns
+   - 次程序 `64 -> 56` insns
+2. 但在这个 `stress-ng --exec` 压测里，end-to-end 吞吐提升没有 code size 降幅那么夸张。
+3. 更保守、也更可信的说法是：
+   - `steady-state` 下看到的是“小幅提升”，量级大约 `1-2%`
+   - 不能把这轮数据解读成稳定的 `6%+` 提升
+4. 后两轮样本里：
+   - `stock`: `185.66`, `184.44`
+   - `optimized`: `185.55`, `185.46`
+   这也说明 steady-state 优势并不大，至少在当前 workload 上接近噪音边界。
+
+结论：
+
+- 对 `execsnoop`，`map_inline + const_prop + dce` 的收益在“代码体积 / dead branch 删除”上非常明显。
+- 但对 `stress-ng --exec` 这个 end-to-end 压测，当前只看到“小幅或接近噪音边界”的吞吐改善，还不能宣称有很强的性能提升。
+
 ## 最终建议
 
 1. 保留当前 Pattern A 实现，并把它视为 BCC 的主 map 优化入口。

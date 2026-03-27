@@ -1,0 +1,18 @@
+retain_daemon_debug: true
+jobs:
+  - id: katran-live-map-inline
+    type: test_run
+    execution: serial
+    runtime: kernel
+    program: /home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/balancer.bpf.o
+    program_name: balancer_ingress
+    io_mode: packet
+    raw_packet: true
+    memory: /home/yunwei37/workspace/bpf-benchmark/corpus/inputs/katran_vip_packet_64.bin
+    input_size: 64
+    repeat: 1
+    warmup_repeat: 1
+    daemon_socket: /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260327/katran-inline-debug.sock
+    enabled_passes:
+      - map_inline
+    log_passes: true

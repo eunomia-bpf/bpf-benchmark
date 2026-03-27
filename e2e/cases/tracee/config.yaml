@@ -3,6 +3,8 @@ events:
   - security_file_open
   - security_socket_connect
   - sched_process_exec
+target_programs:
+  - sys_enter_submit
 workloads:
   - name: exec_storm
     kind: exec_storm
@@ -19,4 +21,3 @@ workloads:
     metric: req/s
 measurement_duration_s: 60
 smoke_duration_s: 10
-

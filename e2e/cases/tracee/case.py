@@ -321,6 +321,31 @@ def _format_launch_failure(command: Sequence[str], proc: subprocess.Popen[str] |
     return f"{rendered}: {reason}"
 
 
+def select_tracee_programs(
+    live_programs: Sequence[Mapping[str, object]],
+    config: Mapping[str, object],
+) -> list[dict[str, object]]:
+    requested_names = [
+        str(name).strip()
+        for name in (config.get("target_programs") or [])
+        if str(name).strip()
+    ]
+    if not requested_names:
+        return [dict(program) for program in live_programs if isinstance(program, Mapping)]
+
+    selected: list[dict[str, object]] = []
+    for requested_name in requested_names:
+        for program in live_programs:
+            if not isinstance(program, Mapping):
+                continue
+            live_name = str(program.get("name") or "")
+            if live_name == requested_name and dict(program) not in selected:
+                selected.append(dict(program))
+    if selected:
+        return selected
+    return [dict(program) for program in live_programs if isinstance(program, Mapping)]
+
+
 def run_workload(spec: Mapping[str, object], duration_s: int) -> WorkloadResult:
     kind = str(spec.get("kind", spec.get("name", "")))
     if kind == "exec_storm":
@@ -671,14 +696,17 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "stdout_tail": "",
         "stderr_tail": "",
     }
-    if not args.skip_setup:
+    tracee_binary = resolve_tracee_binary(args.tracee_binary, setup_result)
+    if tracee_binary is None and not args.skip_setup:
         setup_result = run_setup_script(Path(args.setup_script).resolve())
+        tracee_binary = resolve_tracee_binary(args.tracee_binary, setup_result)
+    elif tracee_binary is not None:
+        setup_result["tracee_binary"] = tracee_binary
+        setup_result["stdout_tail"] = "Tracee setup skipped: using an already available binary."
 
     limitations: list[str] = []
     if setup_result["returncode"] != 0:
         limitations.append("Setup script returned non-zero; only the real Tracee binary path was attempted.")
-
-    tracee_binary = resolve_tracee_binary(args.tracee_binary, setup_result)
     if tracee_binary is None:
         return skip_payload(
             config=config,
@@ -698,7 +726,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         map_capture: dict[str, object] | None = None
         with enable_bpf_stats():
             with TraceeAgentSession(commands, load_timeout=int(args.load_timeout)) as session:
-                prog_ids = [int(program["id"]) for program in session.programs]
+                selected_programs = select_tracee_programs(session.programs, config)
+                prog_ids = [int(program["id"]) for program in selected_programs]
                 baseline = run_phase(
                     workloads,
                     duration_s,
@@ -709,7 +738,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 )
                 if args.capture_maps:
                     capture_plan = build_map_capture_specs(
-                        session.programs,
+                        selected_programs,
                         repo_name="tracee",
                         object_paths=sorted((ROOT_DIR / "corpus" / "build" / "tracee").glob("*.bpf.o")),
                         runner_binary=Path(args.runner).resolve(),
@@ -721,6 +750,11 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                             if key != "program_specs"
                         }
                     }
+                    map_capture["result"] = capture_map_state(
+                        captured_from="e2e/tracee",
+                        program_specs=capture_plan["program_specs"],
+                        optimize_results={},
+                    )
                 scan_results = scan_programs(
                     prog_ids,
                     daemon_binary,
@@ -731,17 +765,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     prog_ids,
                     enabled_passes=benchmark_rejit_enabled_passes(),
                 )
-                if args.capture_maps and map_capture is not None:
-                    optimize_results = (
-                        rejit_result.get("per_program")
-                        if isinstance(rejit_result.get("per_program"), Mapping)
-                        else {}
-                    )
-                    map_capture["result"] = capture_map_state(
-                        captured_from="e2e/tracee",
-                        program_specs=capture_plan["program_specs"],
-                        optimize_results=optimize_results,
-                    )
                 if rejit_result["applied"]:
                     post_rejit = run_phase(
                         workloads,
@@ -773,6 +796,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "tracee_binary": tracee_binary,
         "tracee_launch_command": commands,
         "tracee_programs": session.programs,
+        "selected_tracee_programs": selected_programs,
         "setup": setup_result,
         "host": host_metadata(),
         "config": dict(config),

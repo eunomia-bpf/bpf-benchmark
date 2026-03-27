@@ -1,15 +1,15 @@
 # Expanded Corpus Build Results
 
-- Generated: `2026-03-27T17:04:23.413984+00:00`
+- Generated: `2026-03-27T18:39:33.359040+00:00`
 - Manifest: `/home/yunwei37/workspace/bpf-benchmark/runner/repos.yaml`
 - Repo root: `/home/yunwei37/workspace/bpf-benchmark/runner/repos`
 - Macro corpus: `/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_corpus.yaml`
 - Build root: `/home/yunwei37/workspace/bpf-benchmark/corpus/build`
 - Sources considered: 1213
 - Built from source: 429
-- Staged existing objects: 134
-- Available objects: 563
-- Failures: 650
+- Staged existing objects: 128
+- Available objects: 557
+- Failures: 656
 
 ## Per-Repo Summary
 
@@ -17,7 +17,7 @@
 | --- | ---: | ---: | ---: | ---: |
 | KubeArmor | 0 | 3 | 0 | 0 |
 | bcc | 57 | 0 | 0 | 0 |
-| bpftrace | 0 | 5 | 0 | 0 |
+| bpftrace | 0 | 0 | 5 | 0 |
 | calico | 0 | 8 | 0 | 0 |
 | cilium | 0 | 3 | 9 | 0 |
 | coroot-node-agent | 0 | 1 | 0 | 0 |
@@ -34,7 +34,7 @@
 | suricata | 0 | 2 | 0 | 0 |
 | systemd | 0 | 8 | 6 | 0 |
 | tetragon | 0 | 23 | 28 | 0 |
-| tracee | 0 | 2 | 0 | 0 |
+| tracee | 0 | 1 | 1 | 0 |
 | tubular | 0 | 1 | 0 | 0 |
 | xdp-examples | 0 | 0 | 13 | 0 |
 | xdp-tools | 0 | 13 | 14 | 0 |
@@ -45,7 +45,7 @@
 | Stage | Count |
 | --- | ---: |
 | clang | 648 |
-| missing_object | 2 |
+| missing_object | 8 |
 
 ## Top Errors
 
@@ -76,6 +76,11 @@
 
 | Repo | Path | Stage | Error |
 | --- | --- | --- | --- |
+| bpftrace | exec_trace.bpf.o | missing_object | macro corpus references missing object: corpus/build/bpftrace/exec_trace.bpf.o |
+| bpftrace | open_latency.bpf.o | missing_object | macro corpus references missing object: corpus/build/bpftrace/open_latency.bpf.o |
+| bpftrace | scheduler_latency.bpf.o | missing_object | macro corpus references missing object: corpus/build/bpftrace/scheduler_latency.bpf.o |
+| bpftrace | tcp_connect.bpf.o | missing_object | macro corpus references missing object: corpus/build/bpftrace/tcp_connect.bpf.o |
+| bpftrace | vfs_read_count.bpf.o | missing_object | macro corpus references missing object: corpus/build/bpftrace/vfs_read_count.bpf.o |
 | cilium | bpf/bpf_alignchecker.c | clang | 13 | #incl... |
 | cilium | bpf/bpf_host.c | clang | PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues... |
 | cilium | bpf/bpf_lxc.c | clang | PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/... |
@@ -121,11 +126,6 @@
 | linux-selftests | tools/testing/selftests/bpf/progs/cg_storage_multi_isolated.c | clang | PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace, preprocessed s... |
 | linux-selftests | tools/testing/selftests/bpf/progs/cg_storage_multi_shared.c | clang | PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace, preprocessed sou... |
 | linux-selftests | tools/testing/selftests/bpf/progs/cgroup_getset_retval_getsockopt.c | clang | 1 error generated. |
-| linux-selftests | tools/testing/selftests/bpf/progs/cgroup_getset_retval_hooks.c | clang | 1 error generated. |
-| linux-selftests | tools/testing/selftests/bpf/progs/cgroup_getset_retval_setsockopt.c | clang | 1 error generated. |
-| linux-selftests | tools/testing/selftests/bpf/progs/cgroup_iter_memcg.c | clang | /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/... |
-| linux-selftests | tools/testing/selftests/bpf/progs/cgroup_read_xattr.c | clang | 159912 | extern int bpf_path_d_path(str... |
-| linux-selftests | tools/testing/selftests/bpf/progs/cgroup_skb_sk_lookup_kern.c | clang | PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace, preprocessed s... |
 
 ## Notes
 

@@ -116,13 +116,39 @@ Katran corpus 一度看起来像是：
   - `wall_exec_ns=326752`
   - `retval=2`
 
+### 2.5 Corpus `warmup_repeat` 接线修复
+
+这一轮又确认了一个会显著污染 corpus 结果的 runner 问题：
+
+- `corpus/config/benchmark_config.yaml` 里已经有 `warmups` 配置
+- 但 `corpus/modes.py` 之前没有把它传进 batch job
+- `runner/src/batch_runner.cpp` 因而会回落到默认 `warmup_repeat=5`
+
+这会直接导致：
+
+- 配置里本来想跑 `warmups=0` 或 `warmups=1` 的 profile
+- 实际都会先多跑 5 次 warmup
+- 对 Katran 这类 stateful `bpf_prog_test_run` 程序，会把 corpus 与 direct batch / e2e 的语义拉开
+
+已经完成的修复是：
+
+- `corpus/modes.py` 新增 `benchmark_warmup_repeat()`
+- `build_test_run_batch_job()` / `build_target_batch_plan()` / `build_object_batch_plan_v2()` / `run_guest_batch_mode()` 现在都会把 `warmup_repeat` 显式传到 batch runner
+
+已做的最小验证：
+
+- `python3 -m py_compile corpus/modes.py`：通过
+- 本地读取配置确认：
+  - `dev -> warmup_repeat = 0`
+  - `ablation_map_inline_only -> warmup_repeat = 1`
+
 ## 3. 构建与验证状态
 
 当前已经确认通过的验证包括：
 
 1. `make runner`：通过
 2. `make daemon-tests`：通过
-   - 当前结果：`540 passed / 0 failed / 13 ignored`
+   - 当前结果：`550 passed / 0 failed / 13 ignored`
 3. `pytest -q tests/python/test_rejit.py`：通过
 4. `python3 -m py_compile runner/libs/rejit.py tests/python/test_rejit.py`：通过
 5. `python3 -m py_compile corpus/modes.py runner/libs/rejit.py e2e/cases/{tracee,tetragon,katran,scx,bpftrace,bcc}/case.py`：通过
@@ -511,3 +537,369 @@ benchmark 完成后，需要立即检查：
 1. 继续沿着 Katran 剩余 skip 类别往下打，把 `non-load uses` 和 map-in-map 形态继续吃掉
 2. 并行修 Tetragon `execve_rate` 的 attach + REJIT blocker
 3. 修 Tracee versioned map-of-maps / inner-map fixture replay
+
+## 11. Katran correctness 复核后的最新真值
+
+这一轮最大的变化不是“又多拿了多少 site”，而是把一个之前看起来很漂亮、但实际上不可信的 Katran runtime 结果彻底证伪了。
+
+### 11.1 先证伪：之前的 1.714x 不是可信收益
+
+之前有一轮 Katran `balancer_ingress` 的结果一度显示：
+
+- baseline `exec_ns = 12`
+- rejit `exec_ns = 7`
+- `speedup_ratio = 1.714x`
+
+但后续把 `run` 路径和输出包一起对上以后，确认那不是“正确程序更快”，而是 **语义已经变了**。
+
+真正的证据来自后面的 corpus 复跑：
+
+- artifact:
+  - `corpus/results/vm_corpus_20260327_171855/details/result.json`
+- 结果：
+  - baseline `retval = 3`
+  - rejit `retval = 1`
+  - baseline `result = 02000000000b0200`
+  - rejit `result = 02000000000a0200`
+
+也就是说，这一轮 REJIT 已经把包改写行为打坏了，不能再把之前那组“更快”的数字当成有效性能收益。
+
+### 11.2 第一个真根因：mutable stats/vip_miss_stats 被错误 inline
+
+这轮复核里最先确认的问题是：
+
+- `map_inline` 以前会把 `stats` / `vip_miss_stats` 一类 mutable map 的 lookup 也 inline 掉
+- 即便后面还有 store-back / counter update，它也会先把 `*(u64 *)(r0 + off)` 这种 load 直接替成常量
+- 这样就会把“读旧值 -> +1 -> 写回”的逻辑改成“写死某个常量派生值”
+
+Katran 里这类 site 非常多，典型就是：
+
+- `PC=13`
+- `PC=366`
+- `PC=469`
+- `PC=543`
+- `PC=572`
+- `PC=594`
+- `PC=618`
+- `PC=657`
+- `PC=796`
+- `PC=826`
+- `PC=848`
+- `PC=899`
+- `PC=1089`
+- `PC=1552`
+- `PC=1793`
+- `PC=2010`
+- `PC=2031`
+- `PC=2066`
+- `PC=2206`
+- `PC=2227`
+
+现在已经加了新的保守规则：
+
+- `mutable lookup result has non-load uses`
+
+只要 lookup 结果后面除了 fixed-offset scalar load 之外还有别的指针用途，就不再 inline 该 site。
+
+对应新回归测试：
+
+- `classify_r0_uses_marks_store_back_as_other_use`
+- `map_inline_pass_skips_mutable_array_lookup_with_store_back`
+
+### 11.3 第二个真根因：spill-slot alias 活得太久
+
+把上面的 mutable-site 清掉之后，Katran 一度恢复了语义正确，但 runtime 没有提升，甚至更慢：
+
+- artifact:
+  - `corpus/results/vm_corpus_20260327_171557/details/result.json`
+- 结果：
+  - baseline `retval = 3`
+  - rejit `retval = 3`
+  - baseline `exec_ns = 1928`
+  - rejit `exec_ns = 3142`
+  - `speedup_ratio = 0.614x`
+
+这时我又尝试把 `ctl_array` 第二个热 site 重新放进来，也就是允许 backward `JEQ r0, 0` 也被识别成 null-check。结果是：
+
+- `PC=1811` 又重新被 inline
+- 语义再次坏掉
+
+对应 artifact：
+
+- `corpus/results/vm_corpus_20260327_171855/details/result.json`
+
+对应结果：
+
+- baseline `retval = 3`
+- rejit `retval = 1`
+- baseline `result = 02000000000b0200`
+- rejit `result = 02000000000a0200`
+
+这说明 `PC=1811` 不是“单纯 null-check 识别不够”的问题，而是这个 site 的 spill/reload use 区间本身更复杂。
+
+进一步看 bytecode 后确认：
+
+- `PC=1811` 会把 `ctl_array` lookup 结果 spill 到 `fp-0x98`
+- 后面还有一次 `stats` helper
+- 再后面既有最近的一簇字节 load，也有更远处跨多个 block 的 flag/config load
+
+之前的 stack-slot alias 跟踪会把 `fp-0x98` 一直当成 alias 根，导致一次 spill 后，后面很远的 use cluster 也被一起归到这次 lookup 上。
+
+现在已经改成：
+
+- **stack-slot alias 在第一次 reload 后就消费掉**
+
+这样只保留最近的一簇 reload/load，不再把远距离 use cluster 全部吃进去。
+
+对应已有回归：
+
+- `classify_r0_uses_tracks_stack_spill_and_reload_across_helper`
+
+### 11.4 当前 Katran 的稳定真值
+
+做完上面两层回退后，Katran 当前最可信的一轮是：
+
+- artifact:
+  - `corpus/results/vm_corpus_20260327_172402/details/result.json`
+
+结果如下：
+
+- baseline `retval = 3`
+- rejit `retval = 3`
+- baseline `result = 02000000000b0200`
+- rejit `result = 02000000000b0200`
+- baseline `exec_ns = 1474`
+- rejit `exec_ns = 3096`
+- `speedup_ratio = 0.476x`
+
+代码尺寸：
+
+- baseline JIT `13656`
+- rejit JIT `13634`
+- `code_ratio = 1.0016x`
+
+pass 统计：
+
+- `sites_applied = 2`
+- `sites_found = 66`
+- `sites_skipped = 64`
+
+这轮真正被吃到的 site 只剩两条 `ctl_array`：
+
+- `site at PC=1105: inlined successfully, value=0x02000000000b0000`
+- `site at PC=1807: inlined successfully, value=0x02000000000b0000`
+
+注意这里的 PC 比前面的 object-level call-site 低 3，是因为这轮 rewrite 后最终记录点落在 map-setup 边界上；但本质上对应的仍然是之前那两条 `ctl_array` 热路径。
+
+### 11.5 当前判断
+
+Katran 这条线现在的真状态应该更新为：
+
+- **correctness 已经重新拉回来了**
+- **之前的 1.714x 不能再当成有效成果**
+- **当前安全版本的 map_inline 还没有拿到正 runtime 收益**
+
+更具体地说：
+
+- 只吃安全的 `ctl_array` 近距离 load cluster，收益太小，JIT 尺寸几乎没变
+- 一旦把更远的 spill/reload use cluster 也吃进去，`PC=1811` 这条路径又会把语义打坏
+- 所以下一步不能继续靠“再放宽一点 use-classifier”赌收益，必须换成更可证明的方法：
+  - 要么做 dominated-use / CFG-aware 的更精细判定
+  - 要么直接转去 live e2e，找能让 `ctl_array` / 其它 config map 触发明显 `const_prop + dce` 折叠的真实配置
+
+### 11.6 当前代码与测试状态
+
+这一轮之后，daemon 当前验证状态是：
+
+- `make daemon-tests`
+  - **550 passed / 0 failed / 13 ignored**
+
+所以现在可以确定：
+
+- 新加的保守规则没有把基础 `map_inline` 功能打坏
+- Katran 的问题已经从“明显 correctness bug”收敛成“safe 版本 coverage 太保守，导致没有性能收益”
+
+### 11.7 corpus warmup 配置失真已修复
+
+这一轮又确认了一个会直接污染 Katran corpus 结果解释的 runner 问题：
+
+- `corpus/config/benchmark_config.yaml` 里虽然早就有 `warmups` 字段
+- 但 `corpus/modes.py` 之前没有把它传进 batch job
+- `runner/src/batch_runner.cpp` 会把未显式传入的 `warmup_repeat` 默认成 `5`
+
+这意味着在修复前：
+
+- `dev` profile 即使设计上想要 `warmups=0`
+- 实际跑进 guest/batch 时仍会变成 `warmup_repeat=5`
+
+对 Katran 这种 stateful 的 `bpf_prog_test_run` 程序，这会带来两个直接问题：
+
+1. corpus 的 baseline/rejit run 不再是“fresh single-shot”语义
+2. direct batch repro 和 corpus 结果会被额外的 warmup 次数污染，导致 `retval` / `exec_ns` 很难直接对齐解释
+
+现在已经修复：
+
+- `corpus/modes.py` 新增 `benchmark_warmup_repeat()`
+- `build_test_run_batch_job()` 开始显式写入 `warmup_repeat`
+- target/object/batch guest 几条路径都已把 profile 的 warmups 透传到最终 job
+
+已做静态验证：
+
+- `python3 -m py_compile corpus/modes.py`
+- 本地读取配置结果：
+  - `dev -> warmup_repeat=0`
+  - `ablation_map_inline_only -> warmup_repeat=1`
+
+这条修复不会直接带来性能提升，但它是现在解释 Katran corpus runtime 的必要前提；没有它，后面的性能数字不可信。
+
+### 11.8 Tracee 的当前 blocker 是 versioned inner maps fixture 不完整
+
+这部分现在已经可以下定论：
+
+- Tracee `sys_enter_submit` 的热路径不是 attach 控制面本身没打通
+- 真正的 blocker 是 fixture capture/replay 还原不出 versioned map-of-maps 指向的 inner maps
+
+具体来说：
+
+1. `sys_enter_submit` 热路径会读：
+   - `events_map_version -> events_map`
+   - `pid/uid/mnt/pidns/uts/comm/cgroup/process_tree/binary` 这些 `*_version -> inner map`
+2. Tracee userspace 会在运行时动态创建这些 inner maps，再插进 outer version map
+3. 当前 `corpus/fixtures/tracee/tracee.bpf.o/sys_enter_submit.json` 只保存了 outer maps
+4. outer map 的 `value_hex` 里引用的 inner map id `242..251` 并没有对应的 fixture map 节点
+
+所以 replay 时会出现：
+
+- `unable to resolve referenced object id 242 for fixture map 'events_map_version'`
+
+runner 当前的 replay 逻辑只会：
+
+- 匹配 object 内已经存在的 live map
+- 或尝试按内核当前 object id 直接取 fd
+
+但 Tracee 这些 inner maps：
+
+- 不在 BPF object 静态 maps 里
+- fresh replay 时也没有现成 live id
+
+所以 outer map-of-maps 的 entry 无法真正回放，程序虽然能加载，但走不到真实热路径。
+
+当前最小修复方向已经明确：
+
+1. `runner/scripts/capture_map_state.py`
+   - 不能再只靠 daemon 返回的 `inlined_map_entries`
+   - 需要按 `prog_id` 枚举 live program maps，并递归抓取 `HASH_OF_MAPS` / `ARRAY_OF_MAPS` 的 inner maps
+2. `runner/src/kernel_runner.cpp`
+   - replay 时需要支持“fixture 里有、object 里没有”的 inner map
+   - 也就是先创建 fixture-only live inner maps，先填充 inner，再回填 outer map-of-maps entry
+
+这件事没做完之前：
+
+- Tracee `sys_enter_submit` 的 `map_inline + const_prop`
+- 还不是在真实热路径状态上工作
+
+### 11.9 Tetragon `execve_rate` 还存在 post-verify `EINVAL`
+
+Tetragon 这条线也有了新结论：
+
+- `execve_rate` / `event_execve` 这组程序仍然是更值得打的目标
+- 但 `execve_rate` 当前存在一种不是普通 verifier reject 的 `BPF_PROG_REJIT -> -EINVAL`
+
+现在更像是：
+
+1. verifier 已经完整看完了新程序
+2. 但 REJIT 在 verifier 之后返回 `Invalid argument`
+3. 这和 direct tail-call `poke_tab` 的 insn index 不匹配高度一致
+
+当前已知现象是：
+
+- `map_inline` 吃掉前几个 lookup 之后
+- `const_prop + dce` 继续把 `cgroup_rate()` 周围逻辑大幅折叠
+- 最终 tail-call 所在 pc 发生了显著前移
+
+这类失败当前最合理的短期处理不是让整条 benchmark 硬失败，而是：
+
+- 把“complete verifier log + `EINVAL`”归入现有 post-verify REJIT failure
+- 走 daemon 已有的“禁掉最近改动 pass 再重试”回退路径
+
+这样可以先把：
+
+- `dce`
+- 必要时再到 `const_prop`
+
+从导致 tail-call poke mismatch 的组合里剥掉，先保住 `map_inline` 的其它收益，再继续定位真正该保留/该禁用的边界。
+
+### 11.10 Tracee versioned inner maps 的 capture/replay 修复已落代码
+
+上一节里写的最小修复现在已经不是“计划”，而是已经落到代码里了：
+
+1. `runner/scripts/capture_map_state.py`
+   - 已恢复 raw `bpf()` live dump 路径
+   - 不再只抄 daemon 返回的 `inlined_map_entries`
+   - 现在会按 `prog_id` 枚举 live program maps，并递归抓取 `HASH_OF_MAPS` / `ARRAY_OF_MAPS` 引用到的 inner maps
+2. `runner/src/kernel_runner.cpp`
+   - replay 端已支持“fixture 里有、object 里没有”的 inner map
+   - 会先创建 fixture-only live inner maps
+   - 先填充 inner，再回填 outer map-of-maps entry
+   - 同时补上 fixture `map_type` 字符串到 `enum bpf_map_type` 的解析
+
+当前已做的最小验证：
+
+- `python3 -m py_compile runner/scripts/capture_map_state.py`：通过
+- `make runner`：通过
+
+这说明：
+
+- Tracee `sys_enter_submit` 之前那条“outer version map 能 replay、但 inner map 根本不存在”的结构性缺口，现在在代码层已经补上
+- 剩下要验证的是 VM 上重新跑一轮 Tracee e2e / corpus，确认新的 fixture capture 确实把 inner maps 抓出来并能在 replay 时被消费
+
+### 11.11 Katran warmup 修复后的新权威真值
+
+warmup 接线修复后，我重新跑了一轮：
+
+- artifact:
+  - `runner/corpus/results/katran_ablation_map_inline_full_20260327_1_20260327_175405/details/result.json`
+
+这轮的重要意义是：
+
+- 它已经不再受“profile 写的是 `warmups=0/1`，实际 batch 默认跑 5 次 warmup”这个污染项影响
+- 因此比前面那些 corpus 数字更适合作为当前 Katran 的权威真值
+
+结果如下：
+
+- baseline `retval = 3`
+- rejit `retval = 3`
+- baseline `result = 575044581326850`
+- rejit `result = 575044581326850`
+- baseline `exec_ns = 1643`
+- rejit `exec_ns = 2448`
+- `speedup_ratio = 0.671x`
+
+代码尺寸：
+
+- baseline JIT `13656`
+- rejit JIT `13634`
+- `size_ratio = 1.0016x`
+
+pass 结果：
+
+- `compile_passes_applied = [map_inline]`
+- `run_passes_applied = [map_inline]`
+- `total_sites_applied = 2`
+- `verifier_retries = 0`
+
+也就是说，这轮并没有出现：
+
+- `const_prop`
+- `dce`
+
+的实质生效；当前 Katran `balancer_ingress` 上真正起作用的仍然只有 2 个安全 `ctl_array` site 的 `map_inline`。
+
+所以 Katran 当前的最新判断应更新为：
+
+1. warmup 污染已经去掉
+2. correctness 仍然正确
+3. 当前安全 coverage 下 runtime 仍然是明显退化
+4. 真正的下一步不是再重复同一轮 corpus，而是：
+   - 要么扩大可证明安全的 inline coverage
+   - 要么换一个能让 `const_prop + dce` 真正折叠掉长路径的 Katran 配置 / live workload

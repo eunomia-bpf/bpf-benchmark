@@ -623,8 +623,77 @@ struct live_fixture_map {
     uint32_t key_size = 0;
     uint32_t value_size = 0;
     uint32_t max_entries = 0;
+    uint32_t map_flags = 0;
     int fd = -1;
 };
+
+std::string libbpf_error_string(int error_code);
+
+std::optional<uint32_t> optional_fixture_map_type_field(
+    const YAML::Node &node,
+    std::string_view field_name)
+{
+    if (!node) {
+        return std::nullopt;
+    }
+    if (!node.IsScalar()) {
+        fail("fixture field '" + std::string(field_name) + "' must be a scalar");
+    }
+
+    try {
+        return node.as<uint32_t>();
+    } catch (const YAML::Exception &) {
+    }
+
+    std::string text;
+    try {
+        text = node.as<std::string>();
+    } catch (const YAML::Exception &) {
+        fail("fixture field '" + std::string(field_name) + "' must be a scalar");
+    }
+
+    static const std::unordered_map<std::string, uint32_t> kMapTypes = {
+        {"BPF_MAP_TYPE_HASH", BPF_MAP_TYPE_HASH},
+        {"BPF_MAP_TYPE_ARRAY", BPF_MAP_TYPE_ARRAY},
+        {"BPF_MAP_TYPE_PROG_ARRAY", BPF_MAP_TYPE_PROG_ARRAY},
+        {"BPF_MAP_TYPE_PERCPU_HASH", BPF_MAP_TYPE_PERCPU_HASH},
+        {"BPF_MAP_TYPE_PERCPU_ARRAY", BPF_MAP_TYPE_PERCPU_ARRAY},
+        {"BPF_MAP_TYPE_LRU_HASH", BPF_MAP_TYPE_LRU_HASH},
+        {"BPF_MAP_TYPE_LRU_PERCPU_HASH", BPF_MAP_TYPE_LRU_PERCPU_HASH},
+        {"BPF_MAP_TYPE_LPM_TRIE", BPF_MAP_TYPE_LPM_TRIE},
+        {"BPF_MAP_TYPE_ARRAY_OF_MAPS", BPF_MAP_TYPE_ARRAY_OF_MAPS},
+        {"BPF_MAP_TYPE_HASH_OF_MAPS", BPF_MAP_TYPE_HASH_OF_MAPS},
+    };
+    if (const auto found = kMapTypes.find(text); found != kMapTypes.end()) {
+        return found->second;
+    }
+    if (text.rfind("BPF_MAP_TYPE_", 0) == 0) {
+        const std::string suffix = text.substr(std::strlen("BPF_MAP_TYPE_"));
+        if (!suffix.empty() &&
+            std::all_of(suffix.begin(), suffix.end(), [](unsigned char ch) {
+                return std::isdigit(ch) != 0;
+            })) {
+            return static_cast<uint32_t>(std::stoul(suffix));
+        }
+    }
+    fail("fixture field '" + std::string(field_name) + "' uses unknown map type '" +
+         text + "'");
+}
+
+bool fixture_map_type_supported_for_creation(uint32_t map_type)
+{
+    switch (map_type) {
+    case BPF_MAP_TYPE_HASH:
+    case BPF_MAP_TYPE_ARRAY:
+    case BPF_MAP_TYPE_PERCPU_HASH:
+    case BPF_MAP_TYPE_PERCPU_ARRAY:
+    case BPF_MAP_TYPE_LRU_HASH:
+    case BPF_MAP_TYPE_LRU_PERCPU_HASH:
+        return true;
+    default:
+        return false;
+    }
+}
 
 std::string require_scalar_string_field(
     const YAML::Node &node,
@@ -746,6 +815,7 @@ live_fixture_map describe_live_fixture_map(bpf_map *map)
         .key_size = info.key_size,
         .value_size = info.value_size,
         .max_entries = info.max_entries,
+        .map_flags = info.map_flags,
         .fd = fd,
     };
 }
@@ -755,6 +825,117 @@ bool fixture_value_uses_reference_fd(uint32_t map_type)
     return map_type == BPF_MAP_TYPE_PROG_ARRAY ||
            map_type == BPF_MAP_TYPE_ARRAY_OF_MAPS ||
            map_type == BPF_MAP_TYPE_HASH_OF_MAPS;
+}
+
+std::unordered_set<uint32_t> collect_fixture_referenced_ids(const YAML::Node &maps)
+{
+    std::unordered_set<uint32_t> referenced_ids;
+    for (const auto &map_node : maps) {
+        if (!map_node.IsMap()) {
+            fail("fixture contains a non-object map entry while collecting references");
+        }
+
+        const auto map_type =
+            optional_fixture_map_type_field(map_node["map_type"], "map_type");
+        if (!map_type.has_value() || !fixture_value_uses_reference_fd(*map_type) ||
+            *map_type == BPF_MAP_TYPE_PROG_ARRAY) {
+            continue;
+        }
+
+        const YAML::Node entries = map_node["entries"];
+        if (!entries || !entries.IsSequence()) {
+            continue;
+        }
+        for (const auto &entry_node : entries) {
+            if (!entry_node.IsMap()) {
+                fail("fixture map contains a non-object entry while collecting references");
+            }
+            const auto value = decode_hex_bytes(
+                require_scalar_string_field(entry_node["value_hex"], "value_hex"),
+                "value_hex");
+            if (value.size() < sizeof(uint32_t)) {
+                continue;
+            }
+            uint32_t referenced_id = 0;
+            std::memcpy(&referenced_id, value.data(), sizeof(referenced_id));
+            if (referenced_id != 0) {
+                referenced_ids.insert(referenced_id);
+            }
+        }
+    }
+    return referenced_ids;
+}
+
+std::string fixture_created_map_name(
+    const std::optional<std::string> &map_name,
+    uint32_t fixture_map_id)
+{
+    std::string base = map_name.value_or("fixture_map_" + std::to_string(fixture_map_id));
+    constexpr size_t kMaxLen = BPF_OBJ_NAME_LEN - 1;
+    if (base.size() > kMaxLen) {
+        base.resize(kMaxLen);
+    }
+    return base;
+}
+
+std::optional<live_fixture_map> create_fixture_only_map(
+    const YAML::Node &map_node,
+    const std::optional<std::string> &map_name,
+    uint32_t fixture_map_id,
+    std::vector<scoped_fd> &owned_fixture_fds)
+{
+    const auto map_type =
+        optional_fixture_map_type_field(map_node["map_type"], "map_type");
+    const auto key_size = optional_u32_field(map_node["key_size"], "key_size");
+    const auto value_size = optional_u32_field(map_node["value_size"], "value_size");
+    const auto max_entries = optional_u32_field(map_node["max_entries"], "max_entries");
+    if (!map_type.has_value() || !key_size.has_value() || !value_size.has_value() ||
+        !max_entries.has_value()) {
+        fail("fixture-only map creation requires map_type/key_size/value_size/max_entries");
+    }
+    if (!fixture_map_type_supported_for_creation(*map_type)) {
+        std::fprintf(
+            stderr,
+            "fixture map id %u uses unsupported fixture-only map type %u; skipping map\n",
+            fixture_map_id,
+            *map_type);
+        return std::nullopt;
+    }
+
+    bpf_map_create_opts create_opts = {};
+    create_opts.sz = sizeof(create_opts);
+    const std::string created_name =
+        fixture_created_map_name(map_name, fixture_map_id);
+    scoped_fd created_fd(bpf_map_create(
+        static_cast<enum bpf_map_type>(*map_type),
+        created_name.c_str(),
+        *key_size,
+        *value_size,
+        *max_entries,
+        &create_opts));
+    if (created_fd.get() < 0) {
+        fail("bpf_map_create(" + created_name + ") failed during fixture replay: " +
+             libbpf_error_string(-created_fd.get()));
+    }
+
+    bpf_map_info info = {};
+    __u32 info_len = sizeof(info);
+    if (bpf_map_get_info_by_fd(created_fd.get(), &info, &info_len) != 0) {
+        fail("bpf_map_get_info_by_fd failed for fixture-only map: " +
+             std::string(strerror(errno)));
+    }
+
+    live_fixture_map created_map = {
+        .name = map_name.value_or(created_name),
+        .id = info.id,
+        .type = info.type,
+        .key_size = info.key_size,
+        .value_size = info.value_size,
+        .max_entries = info.max_entries,
+        .fd = created_fd.get(),
+    };
+    owned_fixture_fds.push_back(std::move(created_fd));
+    return created_map;
 }
 
 const live_fixture_map *match_live_fixture_map(
@@ -897,6 +1078,8 @@ void load_map_fixtures(
              "' must contain a 'maps' sequence");
     }
 
+    const std::unordered_set<uint32_t> referenced_fixture_ids =
+        collect_fixture_referenced_ids(maps);
     std::unordered_map<std::string, std::vector<live_fixture_map>> maps_by_name;
     std::unordered_map<uint32_t, live_fixture_map> maps_by_id;
     bpf_map *map = nullptr;
@@ -920,10 +1103,11 @@ void load_map_fixtures(
             });
     }
 
-    std::vector<const live_fixture_map *> resolved_live_maps;
+    std::vector<std::optional<live_fixture_map>> resolved_live_maps;
     resolved_live_maps.reserve(maps.size());
     std::unordered_map<uint32_t, live_fixture_map> fixture_maps_by_fixture_id;
     std::unordered_map<std::string, size_t> name_occurrence_counts;
+    std::vector<scoped_fd> owned_fixture_fds;
     for (const auto &map_node : maps) {
         if (!map_node.IsMap()) {
             fail("fixture JSON '" + fixture_json_path.string() +
@@ -947,107 +1131,131 @@ void load_map_fixtures(
             maps_by_name,
             maps_by_id,
             name_occurrence_counts);
-        resolved_live_maps.push_back(live_map);
-        if (live_map != nullptr && map_id.has_value()) {
-            fixture_maps_by_fixture_id.insert_or_assign(*map_id, *live_map);
+        std::optional<live_fixture_map> resolved_map;
+        if (live_map != nullptr) {
+            resolved_map = *live_map;
+        } else if (map_id.has_value() &&
+                   referenced_fixture_ids.contains(*map_id)) {
+            resolved_map = create_fixture_only_map(
+                map_node,
+                map_name,
+                *map_id,
+                owned_fixture_fds);
+        }
+        resolved_live_maps.push_back(resolved_map);
+        if (resolved_map.has_value() && map_id.has_value()) {
+            fixture_maps_by_fixture_id.insert_or_assign(*map_id, *resolved_map);
         }
     }
 
     size_t loaded_entries = 0;
     std::unordered_set<uint32_t> updated_map_ids;
-    size_t map_index = 0;
-    for (const auto &map_node : maps) {
-        const live_fixture_map *live_map = resolved_live_maps.at(map_index++);
-        if (live_map == nullptr) {
-            continue;
-        }
-
-        if (const auto declared_key_size =
-                optional_u32_field(map_node["key_size"], "key_size");
-            declared_key_size.has_value() &&
-            *declared_key_size != live_map->key_size) {
-            std::fprintf(
-                stderr,
-                "fixture map '%s' key_size mismatch: fixture=%u live=%u; skipping map\n",
-                live_map->name.c_str(),
-                *declared_key_size,
-                live_map->key_size);
-            continue;
-        }
-        if (const auto declared_value_size =
-                optional_u32_field(map_node["value_size"], "value_size");
-            declared_value_size.has_value() &&
-            *declared_value_size != live_map->value_size) {
-            std::fprintf(
-                stderr,
-                "fixture map '%s' value_size mismatch: fixture=%u live=%u; skipping map\n",
-                live_map->name.c_str(),
-                *declared_value_size,
-                live_map->value_size);
-            continue;
-        }
-
-        const YAML::Node entries = map_node["entries"];
-        if (!entries || !entries.IsSequence()) {
-            fail("fixture map '" + live_map->name + "' must contain an 'entries' sequence");
-        }
-        if (entries.size() > live_map->max_entries) {
-            std::fprintf(
-                stderr,
-                "fixture map '%s' has %zu entries but live max_entries=%u; skipping map\n",
-                live_map->name.c_str(),
-                entries.size(),
-                live_map->max_entries);
-            continue;
-        }
-
-        bool skip_map = false;
-        for (const auto &entry_node : entries) {
-            if (!entry_node.IsMap()) {
-                fail("fixture map '" + live_map->name +
-                     "' contains a non-object entry");
+    auto load_fixture_maps = [&](bool load_reference_maps) {
+        size_t map_index = 0;
+        for (const auto &map_node : maps) {
+            const auto &live_map = resolved_live_maps.at(map_index++);
+            if (!live_map.has_value() ||
+                fixture_value_uses_reference_fd(live_map->type) != load_reference_maps) {
+                continue;
             }
 
-            const auto key = decode_hex_bytes(
-                require_scalar_string_field(entry_node["key_hex"], "key_hex"),
-                "key_hex");
-            const auto value = decode_hex_bytes(
-                require_scalar_string_field(entry_node["value_hex"], "value_hex"),
-                "value_hex");
-            if (key.size() != live_map->key_size) {
+            if (const auto declared_key_size =
+                    optional_u32_field(map_node["key_size"], "key_size");
+                declared_key_size.has_value() &&
+                *declared_key_size != live_map->key_size) {
                 std::fprintf(
                     stderr,
-                    "fixture map '%s' entry key size mismatch: fixture=%zu live=%u; skipping map\n",
+                    "fixture map '%s' key_size mismatch: fixture=%u live=%u; skipping map\n",
                     live_map->name.c_str(),
-                    key.size(),
+                    *declared_key_size,
                     live_map->key_size);
-                skip_map = true;
-                break;
+                continue;
             }
-            if (value.size() != live_map->value_size) {
+            if (const auto declared_value_size =
+                    optional_u32_field(map_node["value_size"], "value_size");
+                declared_value_size.has_value() &&
+                *declared_value_size != live_map->value_size) {
                 std::fprintf(
                     stderr,
-                    "fixture map '%s' entry value size mismatch: fixture=%zu live=%u; skipping map\n",
+                    "fixture map '%s' value_size mismatch: fixture=%u live=%u; skipping map\n",
                     live_map->name.c_str(),
-                    value.size(),
+                    *declared_value_size,
                     live_map->value_size);
-                skip_map = true;
-                break;
+                continue;
             }
 
-            if (update_fixture_map_elem(
-                    *live_map,
-                    key,
-                    value,
-                    fixture_maps_by_fixture_id)) {
-                ++loaded_entries;
-                updated_map_ids.insert(live_map->id);
+            if ((live_map->map_flags & BPF_F_RDONLY) != 0) {
+                std::fprintf(
+                    stderr,
+                    "fixture map '%s' is read-only to userspace; skipping replay\n",
+                    live_map->name.c_str());
+                continue;
+            }
+
+            const YAML::Node entries = map_node["entries"];
+            if (!entries || !entries.IsSequence()) {
+                fail("fixture map '" + live_map->name + "' must contain an 'entries' sequence");
+            }
+            if (entries.size() > live_map->max_entries) {
+                std::fprintf(
+                    stderr,
+                    "fixture map '%s' has %zu entries but live max_entries=%u; skipping map\n",
+                    live_map->name.c_str(),
+                    entries.size(),
+                    live_map->max_entries);
+                continue;
+            }
+
+            bool skip_map = false;
+            for (const auto &entry_node : entries) {
+                if (!entry_node.IsMap()) {
+                    fail("fixture map '" + live_map->name +
+                         "' contains a non-object entry");
+                }
+
+                const auto key = decode_hex_bytes(
+                    require_scalar_string_field(entry_node["key_hex"], "key_hex"),
+                    "key_hex");
+                const auto value = decode_hex_bytes(
+                    require_scalar_string_field(entry_node["value_hex"], "value_hex"),
+                    "value_hex");
+                if (key.size() != live_map->key_size) {
+                    std::fprintf(
+                        stderr,
+                        "fixture map '%s' entry key size mismatch: fixture=%zu live=%u; skipping map\n",
+                        live_map->name.c_str(),
+                        key.size(),
+                        live_map->key_size);
+                    skip_map = true;
+                    break;
+                }
+                if (value.size() != live_map->value_size) {
+                    std::fprintf(
+                        stderr,
+                        "fixture map '%s' entry value size mismatch: fixture=%zu live=%u; skipping map\n",
+                        live_map->name.c_str(),
+                        value.size(),
+                        live_map->value_size);
+                    skip_map = true;
+                    break;
+                }
+
+                if (update_fixture_map_elem(
+                        *live_map,
+                        key,
+                        value,
+                        fixture_maps_by_fixture_id)) {
+                    ++loaded_entries;
+                    updated_map_ids.insert(live_map->id);
+                }
+            }
+            if (skip_map) {
+                continue;
             }
         }
-        if (skip_map) {
-            continue;
-        }
-    }
+    };
+    load_fixture_maps(false);
+    load_fixture_maps(true);
 
     std::fprintf(
         stderr,

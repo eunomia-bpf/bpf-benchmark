@@ -12,6 +12,7 @@ import os
 import statistics
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 from dataclasses import dataclass
@@ -35,7 +36,7 @@ from runner.libs import (  # noqa: E402
     write_json,
     write_text,
 )
-from runner.libs.agent import find_bpf_programs, start_agent, stop_agent  # noqa: E402
+from runner.libs.agent import find_bpf_programs, stop_agent  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
     enable_bpf_stats,
@@ -46,11 +47,13 @@ from runner.libs.metrics import (  # noqa: E402
 from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes, scan_programs  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
+    run_bind_storm,
     run_dd_read_load,
     run_exec_storm,
     run_file_open_load,
     run_scheduler_load,
     run_tcp_connect_load,
+    run_user_exec_loop,
 )
 from e2e.case_common import (  # noqa: E402
     git_sha,
@@ -80,6 +83,17 @@ class ToolSpec:
     expected_programs: int
     workload_kind: str
     spawn_timeout_s: int
+    tool_args: tuple[str, ...]
+
+
+@dataclass(slots=True)
+class ToolProcessSession:
+    process: subprocess.Popen[str]
+    tempdir: Any
+    stdout_path: Path
+    stderr_path: Path
+    stdout_handle: Any
+    stderr_handle: Any
 
 
 @dataclass(frozen=True, slots=True)
@@ -99,6 +113,7 @@ def load_config(path: Path) -> SuiteConfig:
             expected_programs=int(entry.get("expected_programs", 1)),
             workload_kind=entry["workload_kind"],
             spawn_timeout_s=int(entry.get("spawn_timeout_s", 20)),
+            tool_args=tuple(str(arg) for arg in entry.get("tool_args", [])),
         )
         for entry in raw.get("tools", [])
     )
@@ -114,7 +129,22 @@ def load_config(path: Path) -> SuiteConfig:
 # Tool binary resolution
 # ---------------------------------------------------------------------------
 
-def resolve_tools_dir(explicit: str | None) -> Path:
+def run_setup_script(setup_script: Path) -> dict[str, object]:
+    completed = run_command(["bash", str(setup_script)], check=False, timeout=1800)
+    result = {
+        "returncode": completed.returncode,
+        "tools_dir": None,
+        "stdout_tail": tail_text(completed.stdout or "", max_lines=60, max_chars=12000),
+        "stderr_tail": tail_text(completed.stderr or "", max_lines=60, max_chars=12000),
+    }
+    for line in (completed.stdout or "").splitlines():
+        if line.startswith("BCC_TOOLS_DIR="):
+            value = line.split("=", 1)[1].strip()
+            result["tools_dir"] = value or None
+    return result
+
+
+def resolve_tools_dir(explicit: str | None, *, setup_result: Mapping[str, object] | None = None) -> Path:
     """Return the directory containing compiled libbpf-tools binaries."""
     # Priority: explicit CLI arg > BCC_TOOLS_DIR env var > setup.sh output > default src dir
     if explicit:
@@ -124,6 +154,11 @@ def resolve_tools_dir(explicit: str | None) -> Path:
     env_dir = os.environ.get("BCC_TOOLS_DIR", "").strip()
     if env_dir:
         candidate = Path(env_dir)
+        if candidate.is_dir():
+            return candidate
+    setup_dir = str((setup_result or {}).get("tools_dir") or "").strip()
+    if setup_dir:
+        candidate = Path(setup_dir)
         if candidate.is_dir():
             return candidate
     # Check .output subdirectory (standard libbpf-tools build output)
@@ -158,8 +193,12 @@ def run_named_workload(kind: str, duration_s: int) -> WorkloadResult:
         return run_scheduler_load(duration_s)
     if kind == "exec_storm":
         return run_exec_storm(duration_s, rate=2)
+    if kind == "exec_loop":
+        return run_user_exec_loop(duration_s)
     if kind == "file_open":
         return run_file_open_load(duration_s)
+    if kind == "bind_storm":
+        return run_bind_storm(duration_s)
     raise RuntimeError(f"unsupported workload kind: {kind!r}")
 
 
@@ -199,19 +238,52 @@ def wait_for_attached_programs(
 # Site aggregation
 # ---------------------------------------------------------------------------
 
-def aggregate_site_totals(records: Mapping[int, Mapping[str, object]]) -> dict[str, int]:
-    totals: dict[str, int] = {
+def zero_site_totals() -> dict[str, int]:
+    return {
         "total_sites": 0,
+        "map_inline_sites": 0,
+        "const_prop_sites": 0,
+        "dce_sites": 0,
         "cmov_sites": 0,
         "wide_sites": 0,
         "rotate_sites": 0,
         "lea_sites": 0,
     }
+
+
+def aggregate_site_totals(records: Mapping[int, Mapping[str, object]]) -> dict[str, int]:
+    totals = zero_site_totals()
     for record in records.values():
         counts = record.get("sites") or record.get("counts") or {}
         for field in totals:
             totals[field] += int(counts.get(field, 0) or 0)
     return totals
+
+
+def start_tool_session(tool_binary: Path, tool_args: Sequence[str]) -> ToolProcessSession:
+    tempdir = tempfile.TemporaryDirectory(prefix=f"bcc-{tool_binary.name}-")
+    stdout_path = Path(tempdir.name) / "stdout.log"
+    stderr_path = Path(tempdir.name) / "stderr.log"
+    stdout_handle = stdout_path.open("w", encoding="utf-8")
+    stderr_handle = stderr_path.open("w", encoding="utf-8")
+    process = subprocess.Popen(
+        [str(tool_binary), *tool_args],
+        cwd=ROOT_DIR,
+        env=os.environ.copy(),
+        stdin=subprocess.DEVNULL,
+        stdout=stdout_handle,
+        stderr=stderr_handle,
+        text=True,
+        bufsize=1,
+    )
+    return ToolProcessSession(
+        process=process,
+        tempdir=tempdir,
+        stdout_path=stdout_path,
+        stderr_path=stderr_path,
+        stdout_handle=stdout_handle,
+        stderr_handle=stderr_handle,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -273,24 +345,26 @@ def measure_workload(
 # Per-tool phase runner
 # ---------------------------------------------------------------------------
 
-def finalize_process_output(process: Any) -> dict[str, object]:
-    stdout = ""
-    stderr = ""
+def finalize_process_output(session: ToolProcessSession) -> dict[str, object]:
+    for handle in (session.stdout_handle, session.stderr_handle):
+        try:
+            handle.flush()
+        except Exception:
+            pass
+        try:
+            handle.close()
+        except Exception:
+            pass
     try:
-        stdout, stderr = process.communicate(timeout=1)
-    except Exception:
-        if process.stdout is not None:
-            try:
-                stdout = process.stdout.read()
-            except Exception:
-                pass
-        if process.stderr is not None:
-            try:
-                stderr = process.stderr.read()
-            except Exception:
-                pass
+        stdout = session.stdout_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        stdout = ""
+    try:
+        stderr = session.stderr_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        stderr = ""
     return {
-        "returncode": process.returncode,
+        "returncode": session.process.returncode,
         "stdout_tail": tail_text(stdout, max_lines=40, max_chars=8000),
         "stderr_tail": tail_text(stderr, max_lines=40, max_chars=8000),
     }
@@ -308,9 +382,8 @@ def run_phase(
 
     Returns (baseline, rejit) where rejit is None if apply failed or was skipped.
     """
-    # Most libbpf-tools write to stdout; -T adds timestamps for biosnoop etc.
-    # Run without extra flags to keep the tool's default output mode.
-    process = start_agent(str(tool_binary), [])
+    session = start_tool_session(tool_binary, spec.tool_args)
+    process = session.process
 
     baseline: dict[str, object] = {
         "phase": "baseline",
@@ -319,13 +392,7 @@ def run_phase(
         "programs": [],
         "prog_ids": [],
         "scan_results": {},
-        "site_totals": {
-            "total_sites": 0,
-            "cmov_sites": 0,
-            "wide_sites": 0,
-            "rotate_sites": 0,
-            "lea_sites": 0,
-        },
+        "site_totals": zero_site_totals(),
         "measurement": None,
         "process": {},
     }
@@ -390,7 +457,7 @@ def run_phase(
         return baseline, rejit
     finally:
         stop_agent(process, timeout=8)
-        process_output = finalize_process_output(process)
+        process_output = finalize_process_output(session)
         baseline["process"] = process_output
         if rejit is not None:
             rejit["process"] = process_output
@@ -398,6 +465,7 @@ def run_phase(
             stderr_tail = str(process_output.get("stderr_tail") or "")
             stdout_tail = str(process_output.get("stdout_tail") or "")
             baseline["reason"] = stderr_tail or stdout_tail or "unknown failure"
+        session.tempdir.cleanup()
 
 
 # ---------------------------------------------------------------------------
@@ -484,6 +552,7 @@ def _markdown_table(headers: Sequence[str], rows: Sequence[Sequence[object]]) ->
 
 
 def build_markdown(payload: Mapping[str, object]) -> str:
+    site_totals = payload["summary"]["site_totals"]
     lines = [
         "# BCC libbpf-tools Real End-to-End Benchmark",
         "",
@@ -492,6 +561,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Duration per phase: `{payload['duration_s']}s`",
         f"- Host kernel: `{payload['host']['kernel']}`",
         f"- Tools dir: `{payload['tools_dir']}`",
+        f"- Setup rc: `{payload['setup']['returncode']}`",
         f"- Daemon: `{payload['daemon']}`",
         "",
         "## Summary",
@@ -500,11 +570,14 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Baseline successes: `{payload['summary']['baseline_successes']}`",
         f"- ReJIT successes: `{payload['summary']['rejit_successes']}`",
         f"- Tools with eligible sites: `{payload['summary']['tools_with_sites']}`",
-        f"- Aggregate sites: `{payload['summary']['site_totals']['total_sites']}` "
-        f"(cmov={payload['summary']['site_totals']['cmov_sites']}, "
-        f"wide={payload['summary']['site_totals']['wide_sites']}, "
-        f"rotate={payload['summary']['site_totals']['rotate_sites']}, "
-        f"lea={payload['summary']['site_totals']['lea_sites']})",
+        f"- Aggregate sites: `{site_totals['total_sites']}` "
+        f"(map_inline={site_totals['map_inline_sites']}, "
+        f"const_prop={site_totals['const_prop_sites']}, "
+        f"dce={site_totals['dce_sites']}, "
+        f"cmov={site_totals['cmov_sites']}, "
+        f"wide={site_totals['wide_sites']}, "
+        f"rotate={site_totals['rotate_sites']}, "
+        f"lea={site_totals['lea_sites']})",
         f"- Geomean speedup: `{_fmt_ratio(payload['summary']['speedup_geomean'])}`",
         "",
         "## Per-Tool",
@@ -553,6 +626,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
 
 
 def build_report(payload: Mapping[str, object]) -> str:
+    site_totals = payload["summary"]["site_totals"]
     improved = [
         record["summary"]["name"]
         for record in payload["records"]
@@ -577,7 +651,8 @@ def build_report(payload: Mapping[str, object]) -> str:
         "## Outcome",
         "",
         f"- Tools with detected sites: `{payload['summary']['tools_with_sites']}`; "
-        f"aggregate site count: `{payload['summary']['site_totals']['total_sites']}`.",
+        f"aggregate site count: `{site_totals['total_sites']}` "
+        f"(map_inline=`{site_totals['map_inline_sites']}`, const_prop=`{site_totals['const_prop_sites']}`, dce=`{site_totals['dce_sites']}`).",
         f"- Geomean BPF speedup across tools with both baseline and ReJIT data: "
         f"`{_fmt_ratio(payload['summary']['speedup_geomean'])}`.",
         "",
@@ -619,6 +694,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--report-md", default=str(DEFAULT_REPORT_MD))
+    parser.add_argument("--setup-script", default=str(DEFAULT_SETUP_SCRIPT))
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--tools-dir", default="", help="Directory with compiled libbpf-tools binaries.")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
@@ -626,6 +702,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--smoke-duration", type=int, default=0)
     parser.add_argument("--attach-timeout", type=int, default=0)
     parser.add_argument("--tool", action="append", dest="tools")
+    parser.add_argument("--skip-setup", action="store_true")
     parser.add_argument("--smoke", action="store_true")
     return parser.parse_args()
 
@@ -635,8 +712,17 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
     if not daemon_binary.exists():
         raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
 
+    setup_result = {
+        "returncode": 0,
+        "tools_dir": None,
+        "stdout_tail": "",
+        "stderr_tail": "",
+    }
+    if not getattr(args, "skip_setup", False):
+        setup_result = run_setup_script(Path(args.setup_script).resolve())
+
     suite = load_config(Path(args.config).resolve())
-    tools_dir = resolve_tools_dir(getattr(args, "tools_dir", None) or "")
+    tools_dir = resolve_tools_dir(getattr(args, "tools_dir", None) or "", setup_result=setup_result)
 
     # Duration resolution: CLI > smoke flag > config
     smoke = bool(args.smoke)
@@ -674,6 +760,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
                 record: dict[str, object] = {
                     "name": spec.name,
                     "description": spec.description,
+                    "tool_args": list(spec.tool_args),
                     "tool_binary": None,
                     "baseline": {
                         "phase": "baseline",
@@ -682,10 +769,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
                         "programs": [],
                         "prog_ids": [],
                         "scan_results": {},
-                        "site_totals": {
-                            "total_sites": 0, "cmov_sites": 0,
-                            "wide_sites": 0, "rotate_sites": 0, "lea_sites": 0,
-                        },
+                        "site_totals": zero_site_totals(),
                         "measurement": None,
                         "process": {},
                     },
@@ -724,6 +808,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             records.append({
                 "name": spec.name,
                 "description": spec.description,
+                "tool_args": list(spec.tool_args),
                 "tool_binary": str(tool_binary),
                 "baseline": baseline,
                 "rejit": rejit,
@@ -731,10 +816,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             })
 
     # Aggregate
-    site_totals: dict[str, int] = {
-        "total_sites": 0, "cmov_sites": 0,
-        "wide_sites": 0, "rotate_sites": 0, "lea_sites": 0,
-    }
+    site_totals = zero_site_totals()
     speedups: list[float] = []
     baseline_successes = 0
     rejit_successes = 0
@@ -763,6 +845,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
         "selected_tools": [spec.name for spec in selected],
         "tools_dir": str(tools_dir),
         "daemon": str(daemon_binary),
+        "setup": dict(setup_result),
         "host": host_metadata(),
         "records": records,
         "summary": {

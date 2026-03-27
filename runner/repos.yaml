@@ -219,6 +219,13 @@ repos:
     compile_include_dirs:
       - .
 
+  - name: bpftrace
+    url: https://github.com/bpftrace/bpftrace.git
+    branch: master
+    harvest_globs: []
+    compile_include_dirs:
+      - .
+
   - name: tubular
     url: https://github.com/cloudflare/tubular.git
     branch: main

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import socket
 import subprocess
 import tempfile
@@ -10,8 +11,13 @@ import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from . import tail_text
+
 
 _PASS_TO_SITE_FIELD = {
+    "map_inline": "map_inline_sites",
+    "const_prop": "const_prop_sites",
+    "dce": "dce_sites",
     "branch_flip": "branch_flip_sites",
     "cond_select": "cmov_sites",
     "endian_fusion": "endian_sites",
@@ -20,10 +26,14 @@ _PASS_TO_SITE_FIELD = {
     "wide_mem": "wide_sites",
 }
 _DEFAULT_REJIT_ENABLED_PASSES = ("map_inline", "const_prop", "dce")
+_DEFAULT_APPLY_TIMEOUT_SECONDS = 120.0
 
 def _zero_site_counts() -> dict[str, int]:
     return {
         "total_sites": 0,
+        "map_inline_sites": 0,
+        "const_prop_sites": 0,
+        "dce_sites": 0,
         "cmov_sites": 0,
         "wide_sites": 0,
         "rotate_sites": 0,
@@ -71,6 +81,9 @@ def _parse_site_summary(site_summary: str) -> dict[str, int]:
     counts["total_sites"] = sum(
         counts[field_name]
         for field_name in (
+            "map_inline_sites",
+            "const_prop_sites",
+            "dce_sites",
             "cmov_sites",
             "wide_sites",
             "rotate_sites",
@@ -224,12 +237,32 @@ def scan_programs(
 def _apply_one(
     daemon_binary: Path | str,
     prog_id: int,
+    *,
+    timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
 ) -> dict[str, object]:
-    result = subprocess.run(
-        _daemon_command(daemon_binary, "apply", prog_id),
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            _daemon_command(daemon_binary, "apply", prog_id),
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+        )
+    except subprocess.TimeoutExpired as exc:
+        detail = f"apply timed out after {timeout_seconds:.0f}s for prog {prog_id}"
+        return {
+            "applied": False,
+            "output": (exc.stdout or "") + (exc.stderr or ""),
+            "exit_code": 124,
+            "debug_result": {},
+            "kernel_prog_name": "",
+            "inlined_map_entries": [],
+            "summary": {},
+            "counts": {
+                "total_sites": 0,
+                "applied_sites": 0,
+            },
+            "error": detail,
+        }
     combined_output = result.stdout + result.stderr
     debug_result = _parse_last_json_object(f"{result.stderr}\n{result.stdout}")
     summary = debug_result.get("summary") if isinstance(debug_result, Mapping) else {}
@@ -300,29 +333,48 @@ def _apply_result_from_response(
 def _start_daemon_server(daemon_binary: Path | str) -> tuple[subprocess.Popen[str], Path, str]:
     socket_dir = tempfile.mkdtemp(prefix="bpfrejit-daemon-")
     socket_path = Path(socket_dir) / "daemon.sock"
-    proc = subprocess.Popen(
-        [str(daemon_binary), "serve", "--socket", str(socket_path)],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
+    stdout_path = Path(socket_dir) / "daemon.stdout.log"
+    stderr_path = Path(socket_dir) / "daemon.stderr.log"
+    stdout_handle = stdout_path.open("w", encoding="utf-8")
+    stderr_handle = stderr_path.open("w", encoding="utf-8")
+    try:
+        proc = subprocess.Popen(
+            [str(daemon_binary), "serve", "--socket", str(socket_path)],
+            stdout=stdout_handle,
+            stderr=stderr_handle,
+            text=True,
+        )
+    finally:
+        stdout_handle.close()
+        stderr_handle.close()
+
+    def log_tail() -> str:
+        fragments: list[str] = []
+        for path in (stderr_path, stdout_path):
+            try:
+                text = path.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            if text.strip():
+                fragments.append(text)
+        return tail_text("\n".join(fragments), max_lines=80, max_chars=8000)
+
     deadline = time.monotonic() + 5.0
     while time.monotonic() < deadline:
         if socket_path.exists():
             return proc, socket_path, socket_dir
         if proc.poll() is not None:
-            stdout, stderr = proc.communicate(timeout=1)
             raise RuntimeError(
-                f"daemon serve exited early (rc={proc.returncode}): {(stderr or stdout).strip()}"
+                f"daemon serve exited early (rc={proc.returncode}): {log_tail()}"
             )
         time.sleep(0.05)
     proc.terminate()
     try:
-        stdout, stderr = proc.communicate(timeout=1)
+        proc.wait(timeout=1)
     except subprocess.TimeoutExpired:
         proc.kill()
-        stdout, stderr = proc.communicate(timeout=1)
-    raise RuntimeError(f"timed out waiting for daemon socket: {(stderr or stdout).strip()}")
+        proc.wait(timeout=1)
+    raise RuntimeError(f"timed out waiting for daemon socket: {log_tail()}")
 
 
 def _stop_daemon_server(proc: subprocess.Popen[str], socket_path: Path, socket_dir: str) -> None:
@@ -333,16 +385,15 @@ def _stop_daemon_server(proc: subprocess.Popen[str], socket_path: Path, socket_d
         proc.kill()
         proc.wait(timeout=5)
     socket_path.unlink(missing_ok=True)
-    try:
-        os.rmdir(socket_dir)
-    except OSError:
-        pass
+    shutil.rmtree(socket_dir, ignore_errors=True)
 
 
 def _apply_one_via_socket(
     socket_path: Path,
     prog_id: int,
     enabled_passes: Sequence[str],
+    *,
+    timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
 ) -> dict[str, object]:
     payload: dict[str, object] = {
         "cmd": "optimize",
@@ -353,16 +404,33 @@ def _apply_one_via_socket(
         payload["enabled_passes"] = normalized_passes
     request = json.dumps(payload) + "\n"
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+        client.settimeout(timeout_seconds)
         client.connect(str(socket_path))
         client.sendall(request.encode())
         chunks: list[bytes] = []
-        while True:
-            chunk = client.recv(4096)
-            if not chunk:
-                break
-            chunks.append(chunk)
-            if b"\n" in chunk:
-                break
+        try:
+            while True:
+                chunk = client.recv(4096)
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                if b"\n" in chunk:
+                    break
+        except socket.timeout:
+            return {
+                "applied": False,
+                "output": "",
+                "exit_code": 124,
+                "debug_result": {},
+                "kernel_prog_name": "",
+                "inlined_map_entries": [],
+                "summary": {},
+                "counts": {
+                    "total_sites": 0,
+                    "applied_sites": 0,
+                },
+                "error": f"socket optimize timed out after {timeout_seconds:.0f}s for prog {prog_id}",
+            }
     line = b"".join(chunks).decode(errors="replace").strip()
     if not line:
         raise RuntimeError("empty response from daemon socket")
@@ -400,7 +468,11 @@ def apply_daemon_rejit(
             for prog_id in [int(value) for value in prog_ids if int(value) > 0]:
                 if enabled_passes:
                     assert daemon_socket_path is not None
-                    result = _apply_one_via_socket(daemon_socket_path, prog_id, enabled_passes)
+                    result = _apply_one_via_socket(
+                        daemon_socket_path,
+                        prog_id,
+                        enabled_passes,
+                    )
                 else:
                     result = _apply_one(daemon_binary, prog_id)
                 per_program[prog_id] = result
