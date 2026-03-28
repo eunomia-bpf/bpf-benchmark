@@ -147,6 +147,24 @@ class prepared_kernel_store {
         prepared_.insert_or_assign(key, stored_prepared {
                 .handle = std::move(handle),
                 .group = group,
+                .prepare_error = std::string(),
+            });
+        if (!group.empty()) {
+            groups_[group].push_back(key);
+        }
+    }
+
+    void put_failure(
+        const std::string &key,
+        const std::string &error,
+        const std::string &group = std::string())
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        erase_unlocked(key);
+        prepared_.insert_or_assign(key, stored_prepared {
+                .handle = {},
+                .group = group,
+                .prepare_error = error,
             });
         if (!group.empty()) {
             groups_[group].push_back(key);
@@ -161,6 +179,16 @@ class prepared_kernel_store {
             return {};
         }
         return found->second.handle;
+    }
+
+    std::optional<std::string> get_prepare_error(const std::string &key) const
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        const auto found = prepared_.find(key);
+        if (found == prepared_.end() || found->second.prepare_error.empty()) {
+            return std::nullopt;
+        }
+        return found->second.prepare_error;
     }
 
     void erase(const std::string &key)
@@ -197,6 +225,7 @@ class prepared_kernel_store {
     struct stored_prepared {
         prepared_kernel_handle handle;
         std::string group;
+        std::string prepare_error;
     };
 
     void erase_unlocked(const std::string &key)
@@ -225,6 +254,19 @@ class prepared_kernel_store {
     std::unordered_map<std::string, stored_prepared> prepared_;
     std::unordered_map<std::string, std::vector<std::string>> groups_;
 };
+
+[[noreturn]] void fail_missing_prepared_state(
+    const prepared_kernel_store &prepared_store,
+    const std::string &prepared_ref)
+{
+    if (const auto prepare_error = prepared_store.get_prepare_error(prepared_ref);
+        prepare_error.has_value()) {
+        fail(
+            "prepared kernel state for ref " + prepared_ref +
+            " is unavailable because prepare failed: " + *prepare_error);
+    }
+    fail("missing prepared kernel state for ref: " + prepared_ref);
+}
 
 std::string json_escape(std::string_view input)
 {
@@ -1616,7 +1658,7 @@ batch_job_result execute_job(
             if (!job.prepared_ref.empty()) {
                 auto prepared = prepared_store.get(job.prepared_ref);
                 if (!prepared) {
-                    fail("missing prepared kernel state for ref: " + job.prepared_ref);
+                    fail_missing_prepared_state(prepared_store, job.prepared_ref);
                 }
                 result.samples = run_prepared_kernel(prepared, job.options);
                 if (job.release_prepared && job.prepared_group.empty()) {
@@ -1633,7 +1675,7 @@ batch_job_result execute_job(
             if (!job.prepared_ref.empty()) {
                 auto prepared = prepared_store.get(job.prepared_ref);
                 if (!prepared) {
-                    fail("missing prepared kernel state for ref: " + job.prepared_ref);
+                    fail_missing_prepared_state(prepared_store, job.prepared_ref);
                 }
                 result.samples = run_prepared_kernel(prepared, job.options);
                 if (job.release_prepared && job.prepared_group.empty()) {
@@ -1653,6 +1695,9 @@ batch_job_result execute_job(
     } catch (const std::exception &error) {
         result.ok = false;
         result.error = error.what();
+        if (!job.prepared_key.empty()) {
+            prepared_store.put_failure(job.prepared_key, result.error, job.prepared_group);
+        }
         if (job.type == "static_verify_object" && result.payload_json == "null") {
             std::vector<static_verify_program_record> records = {
                 make_error_record(result.error),

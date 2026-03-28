@@ -34,17 +34,8 @@ DEFAULT_OUTPUT_JSON = latest_output_path(CORPUS_DIR / "results", "expanded_corpu
 DEFAULT_OUTPUT_MD = CORPUS_DIR / "results" / "expanded_corpus_build.md"
 DEFAULT_TIMEOUT_SECONDS = 90
 DEFAULT_MAX_WORKERS = min(8, (os.cpu_count() or 4))
-GLOBAL_INCLUDE_DIRS = (
-    REPO_ROOT / "vendor" / "linux-framework" / "tools" / "lib",
-    REPO_ROOT / "vendor" / "linux-framework" / "tools" / "lib" / "bpf",
-    REPO_ROOT / "vendor" / "linux-framework" / "tools" / "include",
-    REPO_ROOT / "vendor" / "linux-framework" / "tools" / "include" / "uapi",
-    REPO_ROOT / "vendor" / "linux-framework" / "include",
-    REPO_ROOT / "vendor" / "linux-framework" / "include" / "uapi",
-    REPO_ROOT / "vendor" / "libbpf" / "include" / "uapi",
-    REPO_ROOT / "vendor" / "libbpf" / "include",
-    REPO_ROOT / "vendor" / "libbpf" / "src",
-)
+LINUX_FRAMEWORK_ROOT = REPO_ROOT / "vendor" / "linux-framework"
+LIBBPF_ROOT = REPO_ROOT / "vendor" / "libbpf"
 
 
 @dataclass(frozen=True)
@@ -306,6 +297,36 @@ def target_arch_macro() -> str:
     return machine
 
 
+def global_include_dirs() -> tuple[Path, ...]:
+    arch = target_arch_macro()
+    candidates = (
+        LINUX_FRAMEWORK_ROOT / "tools" / "lib",
+        LINUX_FRAMEWORK_ROOT / "tools" / "lib" / "bpf",
+        LINUX_FRAMEWORK_ROOT / "tools" / "include",
+        LINUX_FRAMEWORK_ROOT / "tools" / "arch" / arch / "include",
+        LINUX_FRAMEWORK_ROOT / "tools" / "include" / "uapi",
+        LINUX_FRAMEWORK_ROOT / "tools" / "arch" / arch / "include" / "uapi",
+        LINUX_FRAMEWORK_ROOT / "include",
+        LINUX_FRAMEWORK_ROOT / "arch" / arch / "include" / "uapi",
+        LINUX_FRAMEWORK_ROOT / "arch" / arch / "include" / "generated" / "uapi",
+        LINUX_FRAMEWORK_ROOT / f"build-{arch}" / "arch" / arch / "include" / "generated" / "uapi",
+        LINUX_FRAMEWORK_ROOT / "include" / "uapi",
+        LINUX_FRAMEWORK_ROOT / "include" / "generated" / "uapi",
+        LIBBPF_ROOT / "include" / "uapi",
+        LIBBPF_ROOT / "include",
+        LIBBPF_ROOT / "src",
+    )
+    unique_dirs: list[Path] = []
+    seen: set[Path] = set()
+    for path in candidates:
+        resolved = path.resolve()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        unique_dirs.append(resolved)
+    return tuple(unique_dirs)
+
+
 def ensure_vmlinux_header(bpftool: str, output_path: Path) -> None:
     if output_path.exists():
         return
@@ -396,13 +417,14 @@ def compile_source(
     item: WorkItem,
     clang: str,
     bpftool: str,
+    global_include_dirs: tuple[Path, ...],
     timeout_seconds: int,
 ) -> dict[str, Any]:
     ensure_parent(item.output_path)
     ensure_parent(item.temp_output_path)
     include_flags = [
         flag
-        for include_dir in (item.vmlinux_header.parent, *GLOBAL_INCLUDE_DIRS, *item.include_dirs)
+        for include_dir in (item.vmlinux_header.parent, *global_include_dirs, *item.include_dirs)
         if include_dir.exists()
         for flag in ("-I", str(include_dir))
     ]
@@ -678,6 +700,7 @@ def main() -> int:
     bpftool_binary = shutil.which(args.bpftool)
     if bpftool_binary is None:
         raise SystemExit(f"bpftool not found: {args.bpftool}")
+    global_dirs = tuple(path for path in global_include_dirs() if path.exists())
 
     work_items, repo_states = build_work_items(
         manifest=manifest,
@@ -698,6 +721,7 @@ def main() -> int:
                     item,
                     clang_binary,
                     bpftool_binary,
+                    global_dirs,
                     args.timeout_seconds,
                 ): item
                 for item in work_items
@@ -738,7 +762,7 @@ def main() -> int:
         "toolchain": {
             "clang": clang_binary,
             "bpftool": bpftool_binary,
-            "global_include_dirs": [str(path) for path in GLOBAL_INCLUDE_DIRS if path.exists()],
+            "global_include_dirs": [str(path) for path in global_dirs],
         },
         "repo_states": repo_states,
         "summary": summary,

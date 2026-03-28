@@ -1066,10 +1066,10 @@ fn run_rejit_once(
         )
     };
 
-    let verifier_log = log_buf
-        .as_ref()
-        .map(|buf| extract_log_string(buf))
-        .unwrap_or_default();
+    let verifier_log = match log_buf.as_ref() {
+        Some(buf) => extract_log_string(buf),
+        None => String::new(),
+    };
 
     if ret < 0 {
         let os_err = std::io::Error::last_os_error();

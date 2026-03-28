@@ -321,7 +321,8 @@ pub fn parse_bpf_object<P: AsRef<Path>>(path: P) -> Result<ElfBpfObject> {
     let maps_section_index = find_section_index(&elf, ".maps");
     let map_symbols = collect_map_symbols(&elf, maps_section_index);
     let raw_maps = collect_raw_map_metadata(&data, maps_section_index, &map_symbols);
-    let btf_maps = collect_btf_map_metadata(&data, &elf).unwrap_or_default();
+    let btf_maps = collect_btf_map_metadata(&data, &elf)
+        .with_context(|| format!("failed to collect BTF map metadata for {}", path.display()))?;
     let mut maps = merge_map_metadata(&map_symbols, &raw_maps, &btf_maps);
     let mut relocation_targets = map_symbols
         .iter()
@@ -380,7 +381,9 @@ pub fn parse_bpf_object<P: AsRef<Path>>(path: P) -> Result<ElfBpfObject> {
             continue;
         }
 
-        let section_name = section_name(&elf, section_index).unwrap_or_default();
+        let Some(section_name) = section_name(&elf, section_index) else {
+            continue;
+        };
         if section_name.is_empty() || section_name.starts_with('.') {
             continue;
         }
@@ -805,9 +808,8 @@ fn parse_btf(bytes: &[u8]) -> Result<ParsedBtf> {
         let size_or_type = read_u32(type_bytes, &mut offset)?;
         let kind = (info >> 24) & 0x1f;
         let vlen = (info & 0xffff) as usize;
-        let name = btf_string(strings, name_off)
-            .unwrap_or_default()
-            .to_string();
+        // BTF permits anonymous types, and names are only used for optional metadata lookups.
+        let name = btf_name_or_anonymous(strings, name_off);
 
         let ty = match kind {
             1 => {
@@ -829,9 +831,9 @@ fn parse_btf(bytes: &[u8]) -> Result<ParsedBtf> {
             4 => {
                 let mut members = Vec::with_capacity(vlen);
                 for _ in 0..vlen {
-                    let member_name = btf_string(strings, read_u32(type_bytes, &mut offset)?)
-                        .unwrap_or_default()
-                        .to_string();
+                    // Anonymous members are valid, so keep parsing even when the name is absent.
+                    let member_name =
+                        btf_name_or_anonymous(strings, read_u32(type_bytes, &mut offset)?);
                     let type_id = read_u32(type_bytes, &mut offset)?;
                     let _bit_offset = read_u32(type_bytes, &mut offset)?;
                     members.push(BtfMember {
@@ -941,6 +943,13 @@ fn btf_string(strings: &[u8], name_off: u32) -> Option<&str> {
     std::str::from_utf8(&tail[..end]).ok()
 }
 
+fn btf_name_or_anonymous(strings: &[u8], name_off: u32) -> String {
+    match btf_string(strings, name_off) {
+        Some(name) => name.to_string(),
+        None => String::new(),
+    }
+}
+
 fn find_btf_string_offset(strings: &[u8], needle: &str) -> Option<u32> {
     let mut offset = 0usize;
     while offset < strings.len() {
@@ -974,11 +983,19 @@ fn merge_map_metadata(
         .iter()
         .enumerate()
         .map(|(index, symbol)| {
-            let raw = raw_maps.get(index).cloned().unwrap_or_default();
-            let btf = btf_by_name
+            // Some objects provide only BTF-backed map metadata, so a missing raw entry is valid.
+            let raw = match raw_maps.get(index).cloned() {
+                Some(raw) => raw,
+                None => RawMapMetadata::default(),
+            };
+            // Likewise, not every symbol has a matching named BTF record.
+            let btf = match btf_by_name
                 .remove(&symbol.name)
                 .or_else(|| unnamed_btf.pop_front())
-                .unwrap_or_default();
+            {
+                Some(btf) => btf,
+                None => BtfMapMetadata::default(),
+            };
 
             ElfMapMetadata {
                 index,

@@ -4694,17 +4694,20 @@ objects:
     - xdp
 - source: corpus/build/cilium/bpf_lxc.bpf.o
   repo: cilium
-  test_method: compile_only
+  # Object-only corpus entry: no enumerated programs yet, so only object compile
+  # is recorded until this object is expanded into per-program targets.
   allow_object_only_result: true
   programs: []
 - source: corpus/build/cilium/bpf_overlay.bpf.o
   repo: cilium
-  test_method: compile_only
+  # Object-only corpus entry: no enumerated programs yet, so only object compile
+  # is recorded until this object is expanded into per-program targets.
   allow_object_only_result: true
   programs: []
 - source: corpus/build/cilium/bpf_xdp.bpf.o
   repo: cilium
-  test_method: compile_only
+  # Object-only corpus entry: no enumerated programs yet, so only object compile
+  # is recorded until this object is expanded into per-program targets.
   allow_object_only_result: true
   programs: []
 - source: corpus/build/coroot-node-agent/ebpf.bpf.o
@@ -5451,7 +5454,7 @@ objects:
     section: tcx
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/arena_htab.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -5466,7 +5469,7 @@ objects:
   - name: arena_htab_llvm
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/arena_htab_asm.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -5481,7 +5484,7 @@ objects:
   - name: arena_htab_asm
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/arena_list.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -5636,7 +5639,7 @@ objects:
   - name: flow_dissector_5
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_gotox.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -6601,7 +6604,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_ls_attach_cgroup.bpf.o
@@ -7299,7 +7302,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
   - name: kfunc_syscall_test_null_fail
@@ -7308,7 +7311,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
   - name: kfunc_call_test_get_mem_fail_rdonly
@@ -7466,7 +7469,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
   - name: kfunc_syscall_test_null
@@ -7475,7 +7478,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_call_test_subprog.bpf.o
@@ -7496,7 +7499,7 @@ objects:
   - name: kfunc_call_test1
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_implicit_args.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -7920,7 +7923,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
   - name: test_ls_map_kptr_ref1
@@ -7929,7 +7932,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
   - name: test_ls_map_kptr_ref2
@@ -7938,7 +7941,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
   - name: test_ls_map_kptr_ref_del
@@ -7947,7 +7950,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/map_kptr_fail.bpf.o
@@ -8134,7 +8137,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/map_kptr_race.bpf.o
@@ -8214,7 +8217,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/map_percpu_stats.bpf.o
@@ -8626,7 +8629,7 @@ objects:
     section: tp_btf/sched_pi_setprio
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/rcu_tasks_trace_gp.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -8757,7 +8760,7 @@ objects:
   - name: main_prog
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/sock_addr_kern.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -10763,7 +10766,7 @@ objects:
   - name: main_prog
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_task_local_data.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -11187,7 +11190,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/token_lsm.bpf.o
@@ -11494,7 +11497,7 @@ objects:
     section: usdt
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uptr_update_failure.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -11539,7 +11542,7 @@ objects:
     section: usdt//proc/self/exe:uretprobe_stack:target
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_arena.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -11713,7 +11716,7 @@ objects:
     trigger_timeout_seconds: 30
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_arena_globals1.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -11729,7 +11732,7 @@ objects:
   - name: check_relocation
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_arena_globals2.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -11744,7 +11747,7 @@ objects:
   - name: check_reserve2
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_arena_large.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -11762,7 +11765,7 @@ objects:
   - name: free_reserved
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_bits_iter.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -12288,7 +12291,7 @@ objects:
     trigger_timeout_seconds: 30
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_default_trusted_ptr.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: selftests
   family: linux-selftests
   level: support
@@ -12362,7 +12365,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
   - name: cgrp_kfunc_syscall
@@ -12371,7 +12374,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
   - name: cpumask_kfunc_syscall
@@ -12380,7 +12383,7 @@ objects:
     - linux_selftests
     - syscall
     - compile-only
-    test_method: compile_only
+    test_method: bpf_prog_test_run
     prog_type: syscall
     section: syscall
   - name: task_kfunc_tracepoint
@@ -12927,24 +12930,28 @@ objects:
     section: fexit/do_unlinkat
 - source: corpus/build/netbird/prog.bpf.o
   repo: netbird
-  test_method: compile_only
+  # Object-only corpus entry: no enumerated programs yet, so only object compile
+  # is recorded until this object is expanded into per-program targets.
   allow_object_only_result: true
   programs: []
 - source: corpus/build/opentelemetry-ebpf-profiler/generic_probe.bpf.o
   repo: opentelemetry-ebpf-profiler
-  test_method: compile_only
+  # Object-only corpus entry: no enumerated programs yet, so only object compile
+  # is recorded until this object is expanded into per-program targets.
   allow_object_only_result: true
   programs: []
   compile_loader: bpftool_loadall
 - source: corpus/build/opentelemetry-ebpf-profiler/native_stack_trace.bpf.o
   repo: opentelemetry-ebpf-profiler
-  test_method: compile_only
+  # Object-only corpus entry: no enumerated programs yet, so only object compile
+  # is recorded until this object is expanded into per-program targets.
   allow_object_only_result: true
   programs: []
   compile_loader: bpftool_loadall
 - source: corpus/build/opentelemetry-ebpf-profiler/sched_monitor.bpf.o
   repo: opentelemetry-ebpf-profiler
-  test_method: compile_only
+  # Object-only corpus entry: no enumerated programs yet, so only object compile
+  # is recorded until this object is expanded into per-program targets.
   allow_object_only_result: true
   programs: []
   compile_loader: bpftool_loadall
