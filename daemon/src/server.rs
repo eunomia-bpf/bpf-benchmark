@@ -86,7 +86,9 @@ pub(crate) fn cmd_serve(
 
         match listener.accept() {
             Ok((stream, _addr)) => {
-                let _ = handle_client(stream, ctx, rollback_enabled, &tracker);
+                if let Err(err) = handle_client(stream, ctx, rollback_enabled, &tracker) {
+                    eprintln!("serve: client error: {:#}", err);
+                }
             }
             Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
                 std::thread::sleep(Duration::from_millis(100));
@@ -101,6 +103,25 @@ pub(crate) fn cmd_serve(
     println!("serve: shutting down");
     let _ = std::fs::remove_file(socket_path);
     Ok(())
+}
+
+fn panic_payload_message(payload: &(dyn std::any::Any + Send)) -> String {
+    if let Some(message) = payload.downcast_ref::<String>() {
+        return message.clone();
+    }
+    if let Some(message) = payload.downcast_ref::<&'static str>() {
+        return (*message).to_string();
+    }
+    "non-string panic payload".to_string()
+}
+
+fn panic_response(payload: Box<dyn std::any::Any + Send>) -> serde_json::Value {
+    let message = panic_payload_message(payload.as_ref());
+    eprintln!("serve: request panicked: {}", message);
+    serde_json::json!({
+        "status": "error",
+        "message": format!("request handler panicked: {}", message),
+    })
 }
 
 fn handle_client(
@@ -121,7 +142,12 @@ fn handle_client(
         }
 
         let response = match serde_json::from_str::<serde_json::Value>(&line) {
-            Ok(req) => process_request(&req, ctx, rollback_enabled, tracker),
+            Ok(req) => match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                process_request(&req, ctx, rollback_enabled, tracker)
+            })) {
+                Ok(response) => response,
+                Err(payload) => panic_response(payload),
+            },
             Err(e) => {
                 serde_json::json!({"status": "error", "message": format!("invalid JSON: {}", e)})
             }
@@ -442,5 +468,23 @@ mod tests {
             *seen.lock().expect("seen lock should not be poisoned"),
             vec![101]
         );
+    }
+
+    #[test]
+    fn panic_payload_message_formats_strings() {
+        let payload: Box<dyn std::any::Any + Send> = Box::new(String::from("boom"));
+        assert_eq!(panic_payload_message(payload.as_ref()), "boom");
+    }
+
+    #[test]
+    fn panic_payload_message_formats_static_str() {
+        let payload: Box<dyn std::any::Any + Send> = Box::new("boom");
+        assert_eq!(panic_payload_message(payload.as_ref()), "boom");
+    }
+
+    #[test]
+    fn panic_payload_message_handles_unknown_payloads() {
+        let payload: Box<dyn std::any::Any + Send> = Box::new(42usize);
+        assert_eq!(panic_payload_message(payload.as_ref()), "non-string panic payload");
     }
 }

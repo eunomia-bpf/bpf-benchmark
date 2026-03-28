@@ -9,7 +9,7 @@
 1. `map_inline` 的主线正确性问题已经修到“能在真实程序上稳定 fire”，不再停留在只对 toy case 生效。
 2. `corpus` / `e2e` 的 pass 控制已经按设计改成 **request-level**，`daemon serve` 启动参数保持不变；现在可以确保性能实验只跑 `map_inline + const_prop + dce`，不会再混入 `wide_mem` / `endian_fusion` / `branch_flip` 等无关 pass。
 3. Katran 的 corpus runtime 路径此前不是“程序本身不能测”，而是 `runner` prepared-state 复用错误导致 `io_mode=packet` 被错误降成 `context`，这个 `EINVAL` 根因已经修复。
-4. 但是，**目标还没有达成**：当前还没有拿到用户要求的 `50%+` 级别真实 runtime 提升；Tetragon 现有 runtime 仍接近持平或略慢，Tracee 还存在 attach / fixture 双重阻塞。
+4. 但是，**目标还没有达成**：当前还没有拿到用户要求的 `50%+` 级别真实 runtime 提升；Tetragon 当前主要卡在 `execve_rate` 的 post-verify `EINVAL` 回退边界，Tracee 当前 `read_hotpath` 已被新 guard 证伪为无效 benchmark，仍缺少有效 live case。
 
 换句话说，当前状态是：
 
@@ -417,11 +417,11 @@ benchmark 完成后，需要立即检查：
 
 按优先级排序，下一步应该是：
 
-1. **收 Katran live e2e 新结果**
-2. **重跑 Katran 定向 corpus runtime**
-3. **把 Tetragon 转到 `execve_rate` / `event_execve`**
-4. **修 Tracee 的 versioned inner-map state replay + attach**
-5. **继续扩 `map_inline` coverage**
+1. **把 Tetragon `execve_rate` / `event_execve` 的 post-verify `EINVAL` 路径打通**
+2. **为 Katran 选择能让 `const_prop + dce` 真正折叠长路径的 workload / 配置，或继续扩大安全 coverage**
+3. **为 Tracee 换一条 apply-program 真会执行的 live benchmark**
+4. **把 e2e / summary 继续做成单-case、pass-aware 的 targeted triage**
+5. **只对被修到的 case 做短 rerun，不再重刷整套已知无效矩阵**
 
 ## 9. 当前判断
 
@@ -432,9 +432,9 @@ benchmark 完成后，需要立即检查：
 
 更具体地说：
 
-- **Katran**：最接近突破口，基础设施已基本打通，下一步重点是拿干净 runtime 并扩大命中
-- **Tetragon**：pass 已 work，但目标程序要换
-- **Tracee**：最大 blocker 在 runtime fixture/attach，不在 pass 本身
+- **Katran**：基础设施已基本打通，但当前安全 coverage 太保守；下一步要么扩 coverage，要么换一个能让 `const_prop + dce` 真正折叠长路径的配置
+- **Tetragon**：pass 已 work，当前主 blocker 是 `execve_rate` 的 post-verify `EINVAL`，不是 attach 起不来
+- **Tracee**：versioned inner-map capture/replay 代码已补上，但当前缺的是一个 measurement/apply 两边都真在跑的有效 live benchmark
 
 现在还不能说：
 
@@ -529,14 +529,14 @@ benchmark 完成后，需要立即检查：
 这次更新后的判断更清晰了：
 
 - **Katran**：已经连续多轮拿到真实正收益，且 coverage 还在继续上升
-- **Tetragon**：仍然主要卡在 attach orchestration + `BPF_PROG_REJIT: Invalid argument`
-- **Tracee**：仍然主要卡在 attach / fixture replay 完整性，不是 `map_inline` 本体
+- **Tetragon**：仍然主要卡在 `execve_rate` 的 post-verify `BPF_PROG_REJIT: Invalid argument`
+- **Tracee**：fixture replay 代码路径虽已补齐，但当前 `read_hotpath` 已被判成无效 benchmark，真正缺的是新的有效 live case
 
 所以当前最合理的下一步仍然是：
 
-1. 继续沿着 Katran 剩余 skip 类别往下打，把 `non-load uses` 和 map-in-map 形态继续吃掉
-2. 并行修 Tetragon `execve_rate` 的 attach + REJIT blocker
-3. 修 Tracee versioned map-of-maps / inner-map fixture replay
+1. 继续沿着 Katran 剩余 skip 类别往下打，或直接换一个更容易让 `const_prop + dce` 生效的 live workload
+2. 并行修 Tetragon `execve_rate` 的 post-verify `EINVAL` 回退边界
+3. 为 Tracee 重新选一条 apply-program 有真实 activity 的 live benchmark
 
 ## 11. Katran correctness 复核后的最新真值
 
@@ -1026,3 +1026,133 @@ VM 空闲后，我已经按同一套配置补跑了完整 30s 版本：
 - 代码和语法检查已经完成
 - 但我准备补的验证 run 被另一条外部 `vm-e2e` 占住了
 - 所以这一节先记录机制更新；等 VM 空闲后，只需要补一条短 run，就能确认当前 `read_hotpath` 会不会被新 guard 直接判成无效
+
+### 11.15 Tracee read-hotpath 已被新 guard 正式判定为无效 benchmark
+
+VM 空闲后，我已经用新的单-case `make` 入口补跑了最短验证：
+
+- `make vm-e2e E2E_CASE=tracee E2E_ARGS='--config /home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/config_read_hotpath.yaml --duration 5 --rejit-passes map_inline,const_prop'`
+
+本轮产物：
+
+- `e2e/results/tracee_20260327_233434/details/result.json`
+- `e2e/results/tracee_20260327_233434/details/result.md`
+- `e2e/results/tracee_authoritative_20260327.json`
+- `e2e/results/tracee-e2e-real.md`
+
+关键 preflight 结果：
+
+- measurement targets 仍然在稳定执行
+  - `target_runs = 3236228`
+- 但真正被 ReJIT 的 apply targets 仍然完全没有执行
+  - prog `20` `sys_enter_submit`: `run_cnt_delta = 0`
+  - prog `23` `sys_exit_submit`: `run_cnt_delta = 0`
+- 因此 case 被直接判成：
+  - `preflight observed zero apply-program executions; skipping invalid optimization benchmark`
+
+这条验证把 Tracee 当前结论进一步收紧成了：
+
+1. 11.13 那轮 30s `read_hotpath` 数字，在旧 guard 下虽然跑完了，但按现在更严格也更正确的 benchmark 有效性标准，应该视为**过时结果**
+2. 当前 `read` workload 确实持续打热了外层 `sys_enter` / `sys_exit`
+3. 但它没有实际打到当前配置里的 `apply_programs`，所以这条 case 不能再用于评估 `sys_enter_submit + sys_exit_submit` 的优化收益
+4. Tracee 下一步不应该继续在这条 `read_hotpath` 配置上调 pass，而应该先换：
+   - 能真正执行 `sys_enter_submit` / `sys_exit_submit` 的事件/工作负载组合
+   - 或者改成与 `read` workload 实际热执行程序一致的 apply targets
+
+到这里，Tracee 这条线的当前最准确状态应更新为：
+
+- `read_hotpath` 这条 live 配置已经被验证为**无效 benchmark**
+- 当前还没有一个同时满足：
+  - measurement targets 在跑
+  - apply targets 也在跑
+  - 且能稳定观察 runtime 收益
+  的 Tracee live case
+
+### 11.16 `free_tmp` BTF 泄漏已补、最小 REJIT correctness 已通过，Tetragon 单-pass 新 blocker 已拿全
+
+这一轮我先把最新的 REJIT 元数据修正补完整：
+
+- 在 `vendor/linux-framework/kernel/bpf/syscall.c` 的 `free_tmp:` 路径补上了 `tmp->aux->btf` 的 `btf_put()`
+- 这样当前放宽后的 “任何带 `btf + func_info` 的程序都预填充 func metadata” 不再在失败路径上遗留额外 BTF 引用
+
+然后跑了一个最小 correctness case，确认新 hunk 至少不会把“带 subprog 的 tracing 程序”直接打坏：
+
+- 命令：
+  - `make vm-shell VM_COMMAND='"/home/yunwei37/workspace/bpf-benchmark/tests/unittest/build/rejit_pass_correctness" "/home/yunwei37/workspace/bpf-benchmark/tests/unittest/build/progs" "T17_tracepoint_subprog"'`
+- 结果：
+  - `T17_tracepoint_subprog: PASS`
+  - 没再出现 `missing btf func_info`
+  - 没有 guest oops / panic
+
+这说明：
+
+1. 之前 Tetragon 上那个 `missing btf func_info` 级别的 metadata blocker 已经被当前内核修正打掉
+2. 最新内核 hunk 至少在最小 tracepoint-subprog correctness 上没有引入新的明显内核级问题
+
+随后我把 Tetragon `execve_rate` / `event_execve` 按用户要求拆成单-pass 独立跑完：
+
+- `map_inline`
+  - artifact: `e2e/results/tetragon_20260328_033535/metadata.json`
+  - preflight:
+    - `event_execve run_cnt_delta = 6957`
+    - `execve_rate run_cnt_delta = 0`
+  - 结论：
+    - `missing btf func_info` 已消失
+    - 但整轮仍然 `rejit did not apply successfully`
+    - 当前 active apply path 仍是 `event_execve`，不是 `execve_rate`
+
+- `const_prop`
+  - artifact: `e2e/results/tetragon_20260328_033915/metadata.json`
+  - preflight:
+    - `event_execve run_cnt_delta = 7005`
+    - `execve_rate run_cnt_delta = 0`
+  - verifier 新 blocker：
+    - `unreachable insn 230`
+  - 结论：
+    - `execve_rate` 单独看是 `no_change`
+    - 真正失败的是 active 的 `event_execve`
+
+- `dce`
+  - artifact: `e2e/results/tetragon_20260328_034137/details/result.json`
+  - preflight:
+    - `event_execve run_cnt_delta = 7218`
+    - `execve_rate run_cnt_delta = 0`
+  - verifier 新 blocker：
+    - `call unknown#195896080`
+    - 之后落到 `R4 !read_ok`
+  - 结论：
+    - `execve_rate` 仍然只是 `no_change`
+    - 当前 `dce` 失败面已经是更具体的 verifier state 问题，不再是 metadata 缺失
+
+因此，Tetragon 这条线的当前最准确判断应更新为：
+
+1. 旧的 `missing btf func_info` 已经解决
+2. 现在剩下的是三个**独立**的 pass-specific blocker，不应再混成一个“通用 post-verify `EINVAL`”
+3. `execve_rate` 直到现在仍然在 preflight 里是冷的；下一轮分析应该把 `event_execve` 当成真正活跃的 apply target
+
+### 11.17 `vm-static-test` 现在也能做 single-pass correctness，但它不是 e2e 的替代品
+
+为了让后续单-pass correctness 不必每次都重跑 `vm-e2e`，我还补了 harness 侧的一层基础设施：
+
+- `daemon/tests/static_verify.py` 现在支持：
+  - `--enabled-passes map_inline,const_prop,...`
+- `runner/src/batch_runner.cpp` 的 `static_verify_object` job 现在会把这组 `enabled_passes` 真正透传给 daemon socket optimize
+
+我已经用它做了第一条 focused 验证：
+
+- 命令：
+  - `make vm-static-test STATIC_VERIFY_ARGS='--filter bpf_execve_event --max-objects 1 --enabled-passes map_inline'`
+- 结果：
+  - `objects=1`
+  - `programs=3`
+  - `verifier_accepted=3`
+  - `applied=0`
+
+这条结果的意义要限定清楚：
+
+1. single-pass static-verify pass-through 现在是通的
+2. 但 `static_verify` 走的是 live object 加载，不带 e2e 那种“运行后 map 已经热起来/有稳定常量值”的上下文
+3. 所以它可以作为：
+   - pass-isolated correctness smoke
+   - harness plumbing regression test
+4. 但它**不能替代**当前 Tetragon e2e 单-pass rerun，因为后者真正暴露问题的前提就是 live map state 让 rewrite 实际发生

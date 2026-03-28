@@ -347,6 +347,7 @@ def _socket_error_result(
     prog_id: int,
     detail: str,
     *,
+    exit_code: int = 1,
     daemon_proc: subprocess.Popen[str] | None = None,
     stdout_path: Path | None = None,
     stderr_path: Path | None = None,
@@ -366,7 +367,7 @@ def _socket_error_result(
     return {
         "applied": False,
         "output": log_tail,
-        "exit_code": 1,
+        "exit_code": exit_code,
         "debug_result": {},
         "kernel_prog_name": "",
         "inlined_map_entries": [],
@@ -480,6 +481,7 @@ def _apply_one_via_socket(
             return _socket_error_result(
                 prog_id,
                 f"socket optimize timed out after {timeout_seconds:.0f}s for prog {prog_id}",
+                exit_code=124,
                 daemon_proc=daemon_proc,
                 stdout_path=stdout_path,
                 stderr_path=stderr_path,

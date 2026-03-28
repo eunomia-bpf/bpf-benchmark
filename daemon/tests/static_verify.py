@@ -90,6 +90,15 @@ def format_average(value: float | None) -> str:
     return f"{value:.2f}"
 
 
+def parse_enabled_passes(raw: str) -> list[str]:
+    passes: list[str] = []
+    for item in raw.split(","):
+        name = item.strip()
+        if name and name not in passes:
+            passes.append(name)
+    return passes
+
+
 @dataclass
 class ObjectEntry:
     object_path: Path
@@ -236,8 +245,9 @@ def build_static_batch_job(
     entry: ObjectEntry,
     object_index: int,
     daemon_socket: Path,
+    enabled_passes: Sequence[str],
 ) -> dict[str, object]:
-    return {
+    job = {
         "id": f"object-{object_index:04d}",
         "type": "static_verify_object",
         "execution": "parallel",
@@ -250,6 +260,9 @@ def build_static_batch_job(
         "sections_from_manifest": list(entry.sections),
         "prog_types": list(entry.prog_types),
     }
+    if enabled_passes:
+        job["enabled_passes"] = list(enabled_passes)
+    return job
 
 
 def batch_result_map(batch_payload: Mapping[str, object] | None) -> dict[str, dict[str, object]]:
@@ -445,6 +458,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Do not fail the run when any micro object is skipped or errors.",
     )
+    parser.add_argument(
+        "--enabled-passes",
+        default="",
+        help="Optional comma-separated pass list to send to the daemon for each static-verify job.",
+    )
     return parser.parse_args(argv)
 
 
@@ -479,6 +497,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         objects = [entry for entry in objects if "macro" in entry.manifest_kinds]
     if args.max_objects > 0:
         objects = objects[: args.max_objects]
+    enabled_passes = parse_enabled_passes(args.enabled_passes)
 
     daemon = DaemonServer(
         binary=daemon_binary,
@@ -507,6 +526,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     entry=entry,
                     object_index=index,
                     daemon_socket=socket_path,
+                    enabled_passes=enabled_passes,
                 )
                 for index, entry in enumerate(objects, start=1)
             ],

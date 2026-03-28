@@ -1218,6 +1218,7 @@ batch_job parse_job(const YAML::Node &node, size_t index)
         job.program_names_from_manifest = optional_string_list(node, "program_names_from_manifest");
         job.sections_from_manifest = optional_string_list(node, "sections_from_manifest");
         job.prog_types = optional_string_list(node, "prog_types");
+        job.options.enabled_passes = optional_string_list(node, "enabled_passes");
         validate_batch_job(job);
         return job;
     }

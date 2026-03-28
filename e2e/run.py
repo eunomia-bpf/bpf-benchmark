@@ -15,6 +15,9 @@ if __package__ in {None, ""}:
 from runner.libs import (  # noqa: E402
     ROOT_DIR,
     prepare_bpftool_environment,
+    smoke_output_path,
+    write_json,
+    write_text,
 )
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.run_artifacts import (  # noqa: E402
@@ -46,6 +49,7 @@ from e2e.cases.scx.case import (  # noqa: E402
     run_scx_case,
 )
 from e2e.cases.tetragon.case import (  # noqa: E402
+    DEFAULT_CONFIG as DEFAULT_TETRAGON_CONFIG,
     DEFAULT_OUTPUT_JSON as DEFAULT_TETRAGON_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_TETRAGON_OUTPUT_MD,
     DEFAULT_SETUP_SCRIPT as DEFAULT_TETRAGON_SETUP_SCRIPT,
@@ -194,6 +198,17 @@ def apply_case_defaults(args: argparse.Namespace) -> None:
             args.report_md = str(DEFAULT_BCC_REPORT_MD)
         if args.config == str(ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"):
             args.config = str(ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml")
+    if args.case == "tetragon":
+        if args.config == str(ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"):
+            args.config = str(DEFAULT_TETRAGON_CONFIG)
+
+
+def resolve_primary_output_json(args: argparse.Namespace, spec: CaseSpec) -> Path:
+    output_json = Path(args.output_json).resolve()
+    default_output_json = spec.default_output_json.resolve()
+    if bool(args.smoke) and output_json == default_output_json:
+        return smoke_output_path(default_output_json.parent, args.case).resolve()
+    return output_json
 
 
 ALL_CASES = ("tracee", "tetragon", "bpftrace", "scx", "katran", "bcc")
@@ -242,10 +257,12 @@ def build_run_metadata(
 
 def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) -> dict[str, object]:
     """Run a single e2e case and persist its outputs progressively."""
-    output_json = Path(args.output_json).resolve()
+    spec = CASE_SPECS[args.case]
+    output_json = resolve_primary_output_json(args, spec)
+    output_md = Path(args.output_md).resolve()
+    report_md = Path(args.report_md).resolve()
     run_type = derive_run_type(output_json, args.case)
     started_at = datetime.now(timezone.utc).isoformat()
-    spec = CASE_SPECS[args.case]
 
     progress_payload: dict[str, object] = {
         "case": args.case,
@@ -299,6 +316,10 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
             result_payload=payload,
             detail_texts=detail_texts,
         )
+        write_json(output_json, payload)
+        write_text(output_md, detail_texts["result.md"])
+        if "report.md" in detail_texts:
+            write_text(report_md, detail_texts["report.md"])
     except Exception as exc:
         failed_at = datetime.now(timezone.utc).isoformat()
         error_payload = {

@@ -1,0 +1,224 @@
+{
+  "baseline": null,
+  "comparison": {
+    "comparable": false,
+    "reason": "preflight observed zero apply-program executions; skipping invalid optimization benchmark"
+  },
+  "config": {
+    "apply_programs": [
+      "sys_enter_submit",
+      "sys_exit_submit"
+    ],
+    "events": [
+      "read"
+    ],
+    "measurement_duration_s": 30,
+    "preflight_duration_s": 5,
+    "require_program_activity": true,
+    "smoke_duration_s": 5,
+    "target_programs": [
+      "tracepoint__raw_syscalls__sys_enter",
+      "tracepoint__raw_syscalls__sys_exit"
+    ],
+    "workloads": [
+      {
+        "kind": "read",
+        "metric": "reads/s",
+        "name": "read_hotpath"
+      }
+    ]
+  },
+  "duration_s": 5,
+  "generated_at": "2026-03-27T23:34:46.296431+00:00",
+  "host": {
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2+",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "limitations": [
+    "Configured Tracee events/workload did not execute the configured apply programs during preflight."
+  ],
+  "map_capture": null,
+  "mode": "skipped",
+  "post_rejit": null,
+  "preflight": {
+    "program_activity": {
+      "apply_programs": {
+        "avg_ns_per_run": null,
+        "programs": [
+          {
+            "avg_ns_per_run": null,
+            "id": 20,
+            "name": "sys_enter_submi",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0
+          },
+          {
+            "avg_ns_per_run": null,
+            "id": 23,
+            "name": "sys_exit_submit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0
+          }
+        ],
+        "total_run_cnt": 0,
+        "total_run_time_ns": 0
+      },
+      "target_programs": {
+        "avg_ns_per_run": 165.61018074128276,
+        "programs": [
+          {
+            "avg_ns_per_run": 57.89771126064214,
+            "id": 17,
+            "name": "tracepoint__raw",
+            "run_cnt_delta": 1618096,
+            "run_time_ns_delta": 93684055
+          },
+          {
+            "avg_ns_per_run": 273.32025384826454,
+            "id": 21,
+            "name": "tracepoint__raw",
+            "run_cnt_delta": 1618132,
+            "run_time_ns_delta": 442268249
+          }
+        ],
+        "total_run_cnt": 3236228,
+        "total_run_time_ns": 535952304
+      }
+    },
+    "summary": {
+      "agent_cpu_total_pct": {
+        "count": 1,
+        "max": 71.79873911362291,
+        "mean": 71.79873911362291,
+        "median": 71.79873911362291,
+        "min": 71.79873911362291
+      },
+      "app_throughput": {
+        "count": 1,
+        "max": 13884.017249085742,
+        "mean": 13884.017249085742,
+        "median": 13884.017249085742,
+        "min": 13884.017249085742
+      },
+      "bpf_avg_ns_per_run": {
+        "count": 1,
+        "max": 165.61018074128276,
+        "mean": 165.61018074128276,
+        "median": 165.61018074128276,
+        "min": 165.61018074128276
+      },
+      "events_per_sec": {
+        "count": 1,
+        "max": 56826.13091617272,
+        "mean": 56826.13091617272,
+        "median": 56826.13091617272,
+        "min": 56826.13091617272
+      },
+      "system_cpu_busy_pct": {
+        "count": 1,
+        "max": 5.724622260055334,
+        "mean": 5.724622260055334,
+        "median": 5.724622260055334,
+        "min": 5.724622260055334
+      }
+    },
+    "workloads": [
+      {
+        "agent_cpu": {
+          "sys_pct": 22.79959960711145,
+          "total_pct": 71.79873911362291,
+          "user_pct": 48.99913950651146
+        },
+        "app_throughput": 13884.017249085742,
+        "bpf": {
+          "programs": {
+            "17": {
+              "avg_ns_per_run": 57.89771126064214,
+              "bytes_jited": 243,
+              "bytes_xlated": 264,
+              "id": 17,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 1618096,
+              "run_time_ns_delta": 93684055,
+              "type": "raw_tracepoint"
+            },
+            "20": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 17850,
+              "bytes_xlated": 30384,
+              "id": 20,
+              "name": "sys_enter_submi",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "21": {
+              "avg_ns_per_run": 273.32025384826454,
+              "bytes_jited": 272,
+              "bytes_xlated": 320,
+              "id": 21,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 1618132,
+              "run_time_ns_delta": 442268249,
+              "type": "raw_tracepoint"
+            },
+            "23": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 11851,
+              "bytes_xlated": 19984,
+              "id": 23,
+              "name": "sys_exit_submit",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            }
+          },
+          "summary": {
+            "active_programs": 2,
+            "avg_ns_per_run": 165.61018074128276,
+            "total_events": 3236228,
+            "total_run_time_ns": 535952304
+          }
+        },
+        "command_template": "",
+        "drop_counters": {
+          "event_count": 0,
+          "lost_event_count": 0,
+          "lost_write_count": 0
+        },
+        "duration_s": 5.015263144,
+        "event_counts": {
+          "read": 284998
+        },
+        "events_per_sec": 56826.13091617272,
+        "events_total": 284998,
+        "kind": "read",
+        "metric": "reads/s",
+        "name": "read_hotpath",
+        "ops_per_sec": 13884.017249085742,
+        "ops_total": 69632.0,
+        "stderr_tail": "",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 5.724622260055334
+        }
+      }
+    ]
+  },
+  "rejit_result": null,
+  "scan_results": {},
+  "setup": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "Tracee setup skipped: using an already available binary.",
+    "tracee_binary": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee"
+  },
+  "skip_reason": "preflight observed zero apply-program executions; skipping invalid optimization benchmark",
+  "smoke": false,
+  "status": "skipped",
+  "tracee_binary": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee",
+  "tracee_programs": []
+}

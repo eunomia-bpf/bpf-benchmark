@@ -327,26 +327,35 @@ def select_tracee_programs(
     config: Mapping[str, object],
     *,
     config_key: str = "target_programs",
+    allow_all_when_unset: bool = True,
 ) -> list[dict[str, object]]:
+    available_programs = [dict(program) for program in live_programs if isinstance(program, Mapping)]
     requested_names = [
         str(name).strip()
         for name in (config.get(config_key) or [])
         if str(name).strip()
     ]
     if not requested_names:
-        return [dict(program) for program in live_programs if isinstance(program, Mapping)]
+        return available_programs if allow_all_when_unset else []
 
     selected: list[dict[str, object]] = []
+    missing: list[str] = []
     for requested_name in requested_names:
+        matched = False
         for program in live_programs:
             if not isinstance(program, Mapping):
                 continue
             live_name = str(program.get("name") or "")
             if live_name == requested_name and dict(program) not in selected:
                 selected.append(dict(program))
-    if selected:
-        return selected
-    return [dict(program) for program in live_programs if isinstance(program, Mapping)]
+                matched = True
+        if not matched:
+            missing.append(requested_name)
+    if missing:
+        raise RuntimeError(
+            f"configured {config_key} not found in live Tracee programs: {', '.join(missing)}"
+        )
+    return selected
 
 
 def run_workload(spec: Mapping[str, object], duration_s: int) -> WorkloadResult:
@@ -583,6 +592,24 @@ def compare_phases(baseline: Mapping[str, object], post: Mapping[str, object] | 
     }
 
 
+def append_preflight_markdown(lines: list[str], preflight: Mapping[str, object]) -> None:
+    lines.extend(["## Preflight", ""])
+    activity = preflight.get("program_activity") if isinstance(preflight.get("program_activity"), Mapping) else {}
+    for workload in preflight.get("workloads") or []:
+        details = [
+            f"events/s={workload.get('events_per_sec')}",
+            f"bpf_avg_ns={((workload.get('bpf') or {}).get('summary', {}).get('avg_ns_per_run'))}",
+        ]
+        target_activity = activity.get("target_programs") if isinstance(activity, Mapping) else None
+        if isinstance(target_activity, Mapping):
+            details.append(f"target_runs={target_activity.get('total_run_cnt')}")
+        apply_activity = activity.get("apply_programs") if isinstance(activity, Mapping) else None
+        if isinstance(apply_activity, Mapping) and target_activity != apply_activity:
+            details.append(f"apply_runs={apply_activity.get('total_run_cnt')}")
+        lines.append(f"- {workload['name']}: " + ", ".join(details))
+    lines.append("")
+
+
 def build_markdown(payload: Mapping[str, object]) -> str:
     preflight = payload.get("preflight")
     lines = [
@@ -609,6 +636,9 @@ def build_markdown(payload: Mapping[str, object]) -> str:
                 f"- Reason: `{payload.get('skip_reason', 'unknown')}`",
             ]
         )
+        if isinstance(preflight, Mapping):
+            lines.append("")
+            append_preflight_markdown(lines, preflight)
         limitations = payload.get("limitations") or []
         if limitations:
             lines.extend(["", "## Limitations", ""])
@@ -618,21 +648,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         return "\n".join(lines)
 
     if isinstance(preflight, Mapping):
-        lines.extend(["## Preflight", ""])
-        activity = preflight.get("program_activity") if isinstance(preflight.get("program_activity"), Mapping) else {}
-        for workload in preflight.get("workloads") or []:
-            details = [
-                f"events/s={workload.get('events_per_sec')}",
-                f"bpf_avg_ns={((workload.get('bpf') or {}).get('summary', {}).get('avg_ns_per_run'))}",
-            ]
-            target_activity = activity.get("target_programs") if isinstance(activity, Mapping) else None
-            if isinstance(target_activity, Mapping):
-                details.append(f"target_runs={target_activity.get('total_run_cnt')}")
-            apply_activity = activity.get("apply_programs") if isinstance(activity, Mapping) else None
-            if isinstance(apply_activity, Mapping) and target_activity != apply_activity:
-                details.append(f"apply_runs={apply_activity.get('total_run_cnt')}")
-            lines.append(f"- {workload['name']}: " + ", ".join(details))
-        lines.append("")
+        append_preflight_markdown(lines, preflight)
 
     lines.extend(["## Baseline", ""])
     baseline = payload["baseline"]
@@ -775,6 +791,17 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             reason="Tracee binary is unavailable in this environment; manual .bpf.o fallback is forbidden.",
             limitations=limitations,
         )
+    if require_program_activity and preflight_duration_s <= 0:
+        limitations.append("require_program_activity requires preflight_duration_s > 0.")
+        return skip_payload(
+            config=config,
+            duration_s=duration_s,
+            tracee_binary=tracee_binary,
+            setup_result=setup_result,
+            smoke=bool(args.smoke),
+            reason="require_program_activity requires preflight_duration_s > 0",
+            limitations=limitations,
+        )
 
     workloads = list(config.get("workloads") or [])
     events = list(config.get("events") or [])
@@ -787,16 +814,22 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             with TraceeAgentSession(commands, load_timeout=int(args.load_timeout)) as session:
                 selected_programs = select_tracee_programs(session.programs, config)
                 prog_ids = [int(program["id"]) for program in selected_programs]
-                apply_programs = select_tracee_programs(session.programs, config, config_key="apply_programs")
                 if config.get("apply_programs"):
+                    apply_programs = select_tracee_programs(
+                        session.programs,
+                        config,
+                        config_key="apply_programs",
+                        allow_all_when_unset=False,
+                    )
                     apply_prog_ids = [int(program["id"]) for program in apply_programs]
                 else:
                     apply_programs = [dict(program) for program in selected_programs]
                     apply_prog_ids = list(prog_ids)
                 if preflight_duration_s > 0 and workloads:
+                    preflight_workloads = list(workloads)
                     preflight_prog_ids = sorted(set(prog_ids) | set(apply_prog_ids))
                     preflight = run_phase(
-                        workloads[:1],
+                        preflight_workloads,
                         preflight_duration_s,
                         preflight_prog_ids,
                         prog_fds=session.program_fds,
@@ -897,7 +930,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             tracee_binary=tracee_binary,
             setup_result=setup_result,
             smoke=bool(args.smoke),
-            reason=f"Tracee binary could not run on this kernel: {exc}",
+            reason=f"Tracee case could not run: {exc}",
             limitations=limitations,
         )
 

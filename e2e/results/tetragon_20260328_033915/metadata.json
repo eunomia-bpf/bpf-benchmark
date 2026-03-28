@@ -1,0 +1,1330 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "tetragon",
+  "completed_at": "2026-03-28T03:40:53.483784+00:00",
+  "details_dir": "details",
+  "generated_at": "2026-03-28T03:40:53.483787+00:00",
+  "last_updated_at": "2026-03-28T03:40:53.483784+00:00",
+  "optimization_summary": {
+    "agent_logs": {
+      "stderr_tail": [
+        "level=info msg=\"Starting tetragon\" version=v1.6.0",
+        "level=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/usr/local/lib/tetragon/bpf/ btf: cgroup-rate:1000,1s cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-compatibility-syscall64-size-type:false enable-cri:false enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:true export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename:/var/log/tetragon/tetragon.log export-rate-limit:-1 expose-stack-addresses:false field-filters: force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address::6789 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true server-address:unix:///var/run/tetragon/tetragon.sock tracing-policy: tracing-policy-dir:/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260327/vm-tmp/tetragon-policy-yjxjikli use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"",
+        "level=info msg=\"Tetragon pid file creation succeeded\" pid=387 pidfile=/var/run/tetragon/tetragon.pid",
+        "level=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/sys/fs/bpf/tetragon",
+        "level=info msg=\"BPF detected features: override_return: true, buildid: true, kprobe_multi: true, uprobe_multi true, fmodret: true, fmodret_syscall: true, signal: true, large: true, link_pin: true, lsm: true, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: true probe_write_user: true uprobe_regs_change: true\"",
+        "level=warn msg=\"Deployment mode is unknown, advanced Cgroups tracking will be disabled\" confmap-update=tg_conf_map",
+        "level=info msg=\"Updated TetragonConf map successfully\" confmap-update=tg_conf_map deployment.mode=unknown log.level=0 cgroup.fs.magic=Cgroupv2 cgroup.hierarchyID=0 NSPID=387",
+        "level=info msg=\"Disabling Kubernetes API\"",
+        "level=info msg=\"Configured redaction filters\" redactionFilters=\"\"",
+        "level=info msg=\"Configured field filters\" fieldFilters=[]",
+        "level=info msg=\"Starting JSON exporter\" logger=\"&{Filename:/var/log/tetragon/tetragon.log MaxSize:10 MaxAge:0 MaxBackups:5 LocalTime:false Compress:true FileMode:-rw------- size:0 file:<nil> mu:{_:{} mu:{state:0 sema:0}} millCh:<nil> startMill:{_:{} done:{_:{} v:0} m:{_:{} mu:{state:0 sema:0}}}}\" request=\"\"",
+        "level=info msg=\"Exporter configuration\" enabled=true fileName=/var/log/tetragon/tetragon.log",
+        "level=info msg=\"Starting gRPC server\" protocol=unix address=/var/run/tetragon/tetragon.sock",
+        "level=info msg=\"Starting gRPC health server\" address=:6789 interval=10"
+      ],
+      "stdout_tail": [
+        "level=info msg=\"Tetragon current security context\" SELinux=unconfined AppArmor=unconfined Smack=\"\" Lockdown=none",
+        "level=warn msg=\"Unable to mount BPF filesystem\" error=\"multiple mount points detected at /sys/fs/bpf\"",
+        "level=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux",
+        "level=error msg=\"Detecting kernel config failed\" error=\"open /boot/config-7.0.0-rc2+: no such file or directory\"",
+        "level=error msg=\"Detecting kernel config failed\" error=\"open /boot/config-7.0.0-rc2+: no such file or directory\"",
+        "level=info msg=\"Cgroup mode detection succeeded\" cgroup.fs=/sys/fs/cgroup cgroup.mode=\"Unified mode (Cgroupv2)\"",
+        "level=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/proc/1/root/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids rdma misc dmem]\" cgroup.hierarchyID=0",
+        "level=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids rdma misc dmem]\" cgroup.hierarchyID=0",
+        "level=warn msg=\"Failed to detect deployment mode from Cgroupv2 path\" cgroup.fs=/sys/fs/cgroup error=\"cgroup path is empty\"",
+        "level=warn msg=\"Unable to find Cgroup migration path for pid=387\" cgroup.fs=/sys/fs/cgroup error=\"could not validate Cgroupv2 hierarchy\"",
+        "level=warn msg=\"Detection of deployment mode failed\" cgroup.fs=/sys/fs/cgroup error=\"could not detect Cgroup migration path for pid=387\"",
+        "level=warn msg=\"Deployment mode detection failed\" cgroup.fs=/sys/fs/cgroup deployment.mode=unknown",
+        "level=info msg=\"Exit probe on acct_process\"",
+        "level=info msg=\"Set execve_map entries 32768\" size=28M",
+        "level=info msg=\"BPF ring buffer size (bytes)\" total=2M",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=__base__",
+        "level=info msg=\"Loading kernel version 7.0.0\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=__base__",
+        "level=info msg=\"Available sensors\" sensors=__base__",
+        "level=info msg=\"Registered sensors (policy-handlers)\" policy-handlers=\"loader sensor, tracing, enforcer\"",
+        "level=info msg=\"Registered probe types\" types=\"enforcer, generic_kprobe, generic_lsm, generic_tracepoint, generic_uprobe, generic_usdt, loader, execve\"",
+        "level=info msg=\"Creating new EventCache\" retries=15 delay=2s",
+        "level=info msg=\"Starting process manager\" enableK8s=false enableProcessCred=false enableProcessNs=false",
+        "level=info msg=\"Successfully detected bpftool path\" bpftool=/usr/local/sbin/bpftool",
+        "level=warn msg=\"failed to locate gops binary, on bugtool debugging ensure you have gops installed\"",
+        "level=info msg=\"BPF: found active BPF resources\" bpf-dir=/sys/fs/bpf/tetragon pinned-bpf=\"[__base__ cgroup_rate_map cgroup_rate_options_map execve_map execve_map_stats execve_map_update_data tcpmon_map tg_conf_map tg_errmetrics_map tg_execve_joined_info_map tg_execve_joined_info_map_stats tg_mbset_gen tg_mbset_map tg_rb_events tg_stats_map]\"",
+        "level=info msg=\"Read ProcFS /proc/ appended 211/272 entries\"",
+        "level=info msg=\"Cgroup rate started (1000/1s)\"",
+        "level=info msg=\"Added kprobe\" return=false function=security_bprm_check override=false",
+        "level=info msg=\"Added kprobe\" return=false function=security_file_open override=false",
+        "level=info msg=\"Added kprobe\" return=false function=tcp_connect override=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 7.0.0\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /usr/local/lib/tetragon/bpf/bpf_multi_kprobe_v612.o -> kprobe_multi (3 functions)\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260327/vm-tmp/tetragon-policy-yjxjikli/tetragon-e2e-kprobes.yaml metadata.namespace=\"\" metadata.name=bpf-benchmark-tetragon-e2e-kprobes",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_tracepoint",
+        "level=info msg=\"Loading kernel version 7.0.0\"",
+        "level=info msg=\"Loaded generic tracepoint program: /usr/local/lib/tetragon/bpf/bpf_generic_tracepoint_v612.o -> syscalls/sys_enter_execve\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_tracepoint",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260327/vm-tmp/tetragon-policy-yjxjikli/tetragon-e2e-tracepoint.yaml metadata.namespace=\"\" metadata.name=bpf-benchmark-tetragon-e2e-tracepoint",
+        "level=info msg=\"Perf ring buffer size (bytes)\" percpu=68K total=1M",
+        "level=info msg=\"Events queue size (events)\" size=63K",
+        "level=info msg=\"Listening for events...\""
+      ]
+    },
+    "apply_tetragon_programs": [
+      {
+        "btf_id": 181,
+        "bytes_jited": 1390,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 2352,
+        "gpl_compatible": true,
+        "id": 26,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          148,
+          24,
+          23,
+          143,
+          10,
+          17,
+          18,
+          22,
+          15
+        ],
+        "name": "execve_rate",
+        "orphaned": false,
+        "tag": "ced0e930cd488737",
+        "type": "tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 182,
+        "bytes_jited": 11250,
+        "bytes_memlock": 20480,
+        "bytes_xlated": 20216,
+        "gpl_compatible": true,
+        "id": 27,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          148,
+          11,
+          20,
+          19,
+          12,
+          14,
+          21,
+          147,
+          149,
+          10,
+          132,
+          15,
+          139,
+          18,
+          17,
+          22
+        ],
+        "name": "event_execve",
+        "orphaned": false,
+        "pids": [
+          {
+            "comm": "tetragon",
+            "pid": 387
+          }
+        ],
+        "run_cnt": 2,
+        "run_time_ns": 11370,
+        "tag": "9610091f8acc08f2",
+        "type": "tracepoint",
+        "uid": 0
+      }
+    ],
+    "baseline": {
+      "summary": {
+        "agent_cpu_total_pct": {
+          "count": 1,
+          "max": 51.38334980099046,
+          "mean": 51.38334980099046,
+          "median": 51.38334980099046,
+          "min": 51.38334980099046
+        },
+        "app_throughput": {
+          "count": 1,
+          "max": 242.39695005860213,
+          "mean": 242.39695005860213,
+          "median": 242.39695005860213,
+          "min": 242.39695005860213
+        },
+        "bpf_avg_ns_per_run": {
+          "count": 1,
+          "max": 5358.705028086039,
+          "mean": 5358.705028086039,
+          "median": 5358.705028086039,
+          "min": 5358.705028086039
+        },
+        "events_per_sec": {
+          "count": 1,
+          "max": 155.86779477382933,
+          "mean": 155.86779477382933,
+          "median": 155.86779477382933,
+          "min": 155.86779477382933
+        },
+        "system_cpu_busy_pct": {
+          "count": 1,
+          "max": 75.567636712504,
+          "mean": 75.567636712504,
+          "median": 75.567636712504,
+          "min": 75.567636712504
+        }
+      },
+      "workloads": [
+        {
+          "agent_cpu": {
+            "sys_pct": 5.598185970535926,
+            "total_pct": 51.38334980099046,
+            "user_pct": 45.785163830454536
+          },
+          "app_throughput": 242.39695005860213,
+          "bpf": {
+            "programs": {
+              "26": {
+                "avg_ns_per_run": null,
+                "bytes_jited": 1390,
+                "bytes_xlated": 2352,
+                "id": 26,
+                "name": "execve_rate",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "tracepoint"
+              },
+              "27": {
+                "avg_ns_per_run": 5358.705028086039,
+                "bytes_jited": 11250,
+                "bytes_xlated": 20216,
+                "id": 27,
+                "name": "event_execve",
+                "run_cnt_delta": 7299,
+                "run_time_ns_delta": 39113188,
+                "type": "tracepoint"
+              }
+            },
+            "summary": {
+              "active_programs": 1,
+              "avg_ns_per_run": 5358.705028086039,
+              "total_events": 7299,
+              "total_run_time_ns": 39113188
+            }
+          },
+          "description": "stress-ng execve workload",
+          "duration_s": 46.82814696,
+          "events_per_sec": 155.86779477382933,
+          "events_total": 7299,
+          "kind": "exec_storm",
+          "metric": "bogo-ops/s",
+          "name": "stress_exec",
+          "ops_per_sec": 242.39695005860213,
+          "ops_total": 11351.0,
+          "stderr_tail": "",
+          "stdout_tail": "stress-ng: info:  [11351] setting to a 5 secs run per stressor\nstress-ng: info:  [11351] dispatching hogs: 2 exec\nstress-ng: info:  [11351] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [11351] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11351]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11351] exec               7532     46.77     21.13    727.73       161.06          10.06\nstress-ng: info:  [11351] skipped: 0\nstress-ng: info:  [11351] passed: 2: exec (2)\nstress-ng: info:  [11351] failed: 0\nstress-ng: info:  [11351] metrics untrustworthy: 0\nstress-ng: info:  [11351] successful run completed in 46.77 secs",
+          "system_cpu": {
+            "busy_pct": 75.567636712504
+          }
+        }
+      ]
+    },
+    "comparison": {
+      "comparable": false,
+      "reason": "rejit did not apply successfully"
+    },
+    "config": {
+      "apply_programs": [
+        "execve_rate",
+        "event_execve"
+      ],
+      "measurement_duration_s": 30,
+      "preflight_duration_s": 5,
+      "require_program_activity": true,
+      "smoke_duration_s": 8,
+      "target_programs": [
+        "execve_rate",
+        "event_execve"
+      ],
+      "tetragon_extra_args": [
+        "--cgroup-rate",
+        "1000,1s"
+      ],
+      "workloads": [
+        {
+          "description": "stress-ng execve workload",
+          "kind": "exec_storm",
+          "metric": "bogo-ops/s",
+          "name": "stress_exec",
+          "value": 2
+        }
+      ]
+    },
+    "duration_s": 5,
+    "generated_at": "2026-03-28T03:40:53.122926+00:00",
+    "host": {
+      "git_sha": "unknown",
+      "hostname": "virtme-ng",
+      "kernel": "7.0.0-rc2+",
+      "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+      "python": "3.12.3"
+    },
+    "limitations": [
+      "events_total and events_per_sec are derived from aggregate BPF run_cnt deltas, so a single application operation can increment multiple program counters."
+    ],
+    "map_capture": null,
+    "mode": "tetragon_daemon",
+    "policy_dir": "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260327/vm-tmp/tetragon-policy-yjxjikli",
+    "policy_paths": [
+      "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260327/vm-tmp/tetragon-policy-yjxjikli/tetragon-e2e-tracepoint.yaml",
+      "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260327/vm-tmp/tetragon-policy-yjxjikli/tetragon-e2e-kprobes.yaml"
+    ],
+    "post_rejit": null,
+    "preflight": {
+      "program_activity": {
+        "apply_programs": {
+          "avg_ns_per_run": 3922.2301213418987,
+          "programs": [
+            {
+              "avg_ns_per_run": null,
+              "id": 26,
+              "name": "execve_rate",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0
+            },
+            {
+              "avg_ns_per_run": 3922.2301213418987,
+              "id": 27,
+              "name": "event_execve",
+              "run_cnt_delta": 7005,
+              "run_time_ns_delta": 27475222
+            }
+          ],
+          "total_run_cnt": 7005,
+          "total_run_time_ns": 27475222
+        },
+        "target_programs": {
+          "avg_ns_per_run": 3922.2301213418987,
+          "programs": [
+            {
+              "avg_ns_per_run": null,
+              "id": 26,
+              "name": "execve_rate",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0
+            },
+            {
+              "avg_ns_per_run": 3922.2301213418987,
+              "id": 27,
+              "name": "event_execve",
+              "run_cnt_delta": 7005,
+              "run_time_ns_delta": 27475222
+            }
+          ],
+          "total_run_cnt": 7005,
+          "total_run_time_ns": 27475222
+        }
+      },
+      "summary": {
+        "agent_cpu_total_pct": {
+          "count": 1,
+          "max": 10.396821589751163,
+          "mean": 10.396821589751163,
+          "median": 10.396821589751163,
+          "min": 10.396821589751163
+        },
+        "app_throughput": {
+          "count": 1,
+          "max": 9.462745721026971,
+          "mean": 9.462745721026971,
+          "median": 9.462745721026971,
+          "min": 9.462745721026971
+        },
+        "bpf_avg_ns_per_run": {
+          "count": 1,
+          "max": 3922.2301213418987,
+          "mean": 3922.2301213418987,
+          "median": 3922.2301213418987,
+          "min": 3922.2301213418987
+        },
+        "events_per_sec": {
+          "count": 1,
+          "max": 160.11240042462305,
+          "mean": 160.11240042462305,
+          "median": 160.11240042462305,
+          "min": 160.11240042462305
+        },
+        "system_cpu_busy_pct": {
+          "count": 1,
+          "max": 74.18741081338196,
+          "mean": 74.18741081338196,
+          "median": 74.18741081338196,
+          "min": 74.18741081338196
+        }
+      },
+      "workloads": [
+        {
+          "agent_cpu": {
+            "sys_pct": 3.398960904341726,
+            "total_pct": 10.396821589751163,
+            "user_pct": 6.997860685409436
+          },
+          "app_throughput": 9.462745721026971,
+          "bpf": {
+            "programs": {
+              "26": {
+                "avg_ns_per_run": null,
+                "bytes_jited": 1390,
+                "bytes_xlated": 2352,
+                "id": 26,
+                "name": "execve_rate",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "tracepoint"
+              },
+              "27": {
+                "avg_ns_per_run": 3922.2301213418987,
+                "bytes_jited": 11250,
+                "bytes_xlated": 20216,
+                "id": 27,
+                "name": "event_execve",
+                "run_cnt_delta": 7005,
+                "run_time_ns_delta": 27475222,
+                "type": "tracepoint"
+              }
+            },
+            "summary": {
+              "active_programs": 1,
+              "avg_ns_per_run": 3922.2301213418987,
+              "total_events": 7005,
+              "total_run_time_ns": 27475222
+            }
+          },
+          "description": "stress-ng execve workload",
+          "duration_s": 43.750515147,
+          "events_per_sec": 160.11240042462305,
+          "events_total": 7005,
+          "kind": "exec_storm",
+          "metric": "bogo-ops/s",
+          "name": "stress_exec",
+          "ops_per_sec": 9.462745721026971,
+          "ops_total": 414.0,
+          "stderr_tail": "",
+          "stdout_tail": "stress-ng: info:  [414] setting to a 5 secs run per stressor\nstress-ng: info:  [414] dispatching hogs: 2 exec\nstress-ng: info:  [414] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [414] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [414]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [414] exec               7205     43.63     19.87    683.77       165.16          10.24\nstress-ng: info:  [414] skipped: 0\nstress-ng: info:  [414] passed: 2: exec (2)\nstress-ng: info:  [414] failed: 0\nstress-ng: info:  [414] metrics untrustworthy: 0\nstress-ng: info:  [414] successful run completed in 43.63 secs",
+          "system_cpu": {
+            "busy_pct": 74.18741081338196
+          }
+        }
+      ]
+    },
+    "programs": [
+      {
+        "id": 26,
+        "name": "execve_rate",
+        "rejit_avg_ns": null,
+        "rejit_events": null,
+        "sites": 54,
+        "speedup": null,
+        "stock_avg_ns": null,
+        "stock_events": 0,
+        "type": "tracepoint"
+      },
+      {
+        "id": 27,
+        "name": "event_execve",
+        "rejit_avg_ns": null,
+        "rejit_events": null,
+        "sites": 293,
+        "speedup": null,
+        "stock_avg_ns": 5358.705028086039,
+        "stock_events": 7299,
+        "type": "tracepoint"
+      }
+    ],
+    "rejit_result": {
+      "applied": false,
+      "counts": {
+        "applied_sites": 0,
+        "total_sites": 0
+      },
+      "error": "",
+      "exit_code": 0,
+      "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"const_prop\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":241,\"insns_before\":241,\"pass_name\":\"const_prop\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":26,\"program\":{\"final_insn_count\":241,\"insn_delta\":0,\"orig_insn_count\":241,\"prog_id\":26,\"prog_name\":\"execve_rate\",\"prog_type\":5},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":1185358,\"rejit_syscall_ns\":0,\"total_ns\":22030463}}\n{\"attempts\":[{\"attempt\":0,\"attributed_pass\":\"const_prop\",\"debug\":{\"pass_traces\":[{\"bytecode_after\":{\"insn_count\":2461,\"raw_hex_blob\":\"bf160000000000008500000023000000bf090000000000007b6a80ff000000006166080000000000b701000000000000631a88ff00000000bfa20000000000000702000088ffffff181100004900000000000000000000008500000001000000bf0700000000000015078406000000007b6a70ff00000000850000000e000000bf0600000000000085000000230000007b0aa0ff00000000b7080000000b00000f80000000000000bfa100000000000007010000a0ffffffb702000008000000bf0300000000000085000000710000007b6a60ff000000007b6a68ff0000000079a3a0ff000000007b9a78ff0000000015039c0000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf060000000000001506020000000000796108000000000055014e0000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff000000001503820000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf06000000000000150602000000000079610800000000005501340000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff000000001503680000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf060000000000001506020000000000796108000000000055011a0000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff0000000015034e0000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf0600000000000015063f0000000000796108000000000015013d000000000079610800000000007b17a8000000000079610000000000007b17a00000000000b701000000000000631af8ff00000000bfa200000000000007020000f8ffffff1811000032000000000000000000000085000000010000001500460000000000796178030000000079020000000000001d124300000000007b0a58ff00000000bfa800000000000007080000a0ffffffb709000000000000bf81000000000000b702000000000000b7030000a0860100852000007f3c0100bf8100000000000085200000803c01001500070000000000bf6100000000000005000c0000000000bfa100000000000007010000a0ffffff85200000803c0100bf910000000000005500070000000000bfa100000000000007010000a0ffffff852000007d3c010079a158ff0000000079110000000000007b1678030000000005002a0000000000bf980000000000006111100000000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf090000000000001509efff000000001d89eeff00000000bf920000000000000702000070000000181100002f000000000000000000000085000000010000001500e3ff0000000079010000000000001501e1ff00000000db167003400000000500dfff000000000f89000000000000bfa100000000000007010000a0ffffffb702000008000000bf930000000000008500000071000000b70600000000000079a3a0ff00000000b7010000000000001503070000000000b7010000f40a00000f13000000000000bfa100000000000007010000a0ff\n...[truncated]",
+      "per_program": {
+        "26": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "const_prop"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass_name": "const_prop",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 26,
+            "program": {
+              "final_insn_count": 241,
+              "insn_delta": 0,
+              "orig_insn_count": 241,
+              "prog_id": 26,
+              "prog_name": "execve_rate",
+              "prog_type": 5
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 1185358,
+              "rejit_syscall_ns": 0,
+              "total_ns": 22030463
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "execve_rate",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"const_prop\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":241,\"insns_before\":241,\"pass_name\":\"const_prop\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":26,\"program\":{\"final_insn_count\":241,\"insn_delta\":0,\"orig_insn_count\":241,\"prog_id\":26,\"prog_name\":\"execve_rate\",\"prog_type\":5},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":1185358,\"rejit_syscall_ns\":0,\"total_ns\":22030463}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "27": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "attributed_pass": "const_prop",
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "bytecode_after": {
+                        "insn_count": 2461,
+                        "raw_hex_blob": "bf160000000000008500000023000000bf090000000000007b6a80ff000000006166080000000000b701000000000000631a88ff00000000bfa20000000000000702000088ffffff181100004900000000000000000000008500000001000000bf0700000000000015078406000000007b6a70ff00000000850000000e000000bf0600000000000085000000230000007b0aa0ff00000000b7080000000b00000f80000000000000bfa100000000000007010000a0ffffffb702000008000000bf0300000000000085000000710000007b6a60ff000000007b6a68ff0000000079a3a0ff000000007b9a78ff0000000015039c0000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf060000000000001506020000000000796108000000000055014e0000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff000000001503820000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf06000000000000150602000000000079610800000000005501340000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff000000001503680000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf060000000000001506020000000000796108000000000055011a0000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff0000000015034e0000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf0600000000000015063f0000000000796108000000000015013d000000000079610800000000007b17a8000000000079610000000000007b17a00000000000b701000000000000631af8ff00000000bfa200000000000007020000f8ffffff1811000032000000000000000000000085000000010000001500460000000000796178030000000079020000000000001d124300000000007b0a58ff00000000bfa800000000000007080000a0ffffffb709000000000000bf81000000000000b702000000000000b7030000a0860100852000007f3c0100bf8100000000000085200000803c01001500070000000000bf6100000000000005000c0000000000bfa100000000000007010000a0ffffff85200000803c0100bf910000000000005500070000000000bfa100000000000007010000a0ffffff852000007d3c010079a158ff0000000079110000000000007b1678030000000005002a0000000000bf980000000000006111100000000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf090000000000001509efff000000001d89eeff00000000bf920000000000000702000070000000181100002f000000000000000000000085000000010000001500e3ff0000000079010000000000001501e1ff00000000db167003400000000500dfff000000000f89000000000000bfa100000000000007010000a0ffffffb702000008000000bf930000000000008500000071000000b70600000000000079a3a0ff00000000b7010000000000001503070000000000b7010000f40a00000f13000000000000bfa100000000000007010000a0ffffffb702000004000000850000007100000061a1a0ff00000000b7020000400000007b27b000000000007b67a800000000006317a0000000000079a870ff0000000079a968ff00000000b70100000100000063175c0100000000639748010000000079a160ff00000000770100002000000063174401000000008500000023000000b7010000010000000500000000000000b7010000580b00000f10000000000000bfa10000000000000701000090ffffffb702000008000000bf030000000000008500000071000000b70200000000000079a390ff0000000015031f00000000000500090000000000850000001023ad0b0f10000000000000bfa100000000000007010000a0ffffffb702000018000000bf03000000000000850000007100000079a3b0ff000000007b3a90ff00000000b7010000040000000f13000000000000bfa100000000000007010000f8ffffffb7020000040000008500000071000000b70200000000000061a1f8ff0000000015010c0000000000b702000010000000b70400008000000079a390ff000000000f430000000000002f21000000000000670100002000000077010000200000000f13000000000000\n...[truncated]"
+                      },
+                      "bytecode_before": {
+                        "insn_count": 2461,
+                        "raw_hex_blob": "bf160000000000008500000023000000bf090000000000007b6a80ff000000006166080000000000b701000000000000631a88ff00000000bfa20000000000000702000088ffffff181100004900000000000000000000008500000001000000bf0700000000000015078406000000007b6a70ff00000000850000000e000000bf0600000000000085000000230000007b0aa0ff00000000b7080000000b00000f80000000000000bfa100000000000007010000a0ffffffb702000008000000bf0300000000000085000000710000007b6a60ff000000007b6a68ff0000000079a3a0ff000000007b9a78ff0000000015039c0000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf060000000000001506020000000000796108000000000055014e0000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff000000001503820000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf06000000000000150602000000000079610800000000005501340000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff000000001503680000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf060000000000001506020000000000796108000000000055011a0000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff0000000015034e0000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf0600000000000015063f0000000000796108000000000015013d000000000079610800000000007b17a8000000000079610000000000007b17a00000000000b701000000000000631af8ff00000000bfa200000000000007020000f8ffffff1811000032000000000000000000000085000000010000001500460000000000796178030000000079020000000000001d124300000000007b0a58ff00000000bfa800000000000007080000a0ffffffb709000000000000bf81000000000000b702000000000000b7030000a0860100852000007f3c0100bf8100000000000085200000803c01001500070000000000bf6100000000000005000c0000000000bfa100000000000007010000a0ffffff85200000803c0100bf910000000000005500070000000000bfa100000000000007010000a0ffffff852000007d3c010079a158ff0000000079110000000000007b1678030000000005002a0000000000bf980000000000006111100000000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf090000000000001509efff000000001d89eeff00000000bf920000000000000702000070000000181100002f000000000000000000000085000000010000001500e3ff0000000079010000000000001501e1ff00000000db167003400000000500dfff000000000f89000000000000bfa100000000000007010000a0ffffffb702000008000000bf930000000000008500000071000000b70600000000000079a3a0ff00000000b7010000000000001503070000000000b7010000f40a00000f13000000000000bfa100000000000007010000a0ffffffb702000004000000850000007100000061a1a0ff00000000b7020000400000007b27b000000000007b67a800000000006317a0000000000079a870ff0000000079a968ff00000000b70100000100000063175c0100000000639748010000000079a160ff00000000770100002000000063174401000000008500000023000000b70100000100000015010b0000000000b7010000580b00000f10000000000000bfa10000000000000701000090ffffffb702000008000000bf030000000000008500000071000000b70200000000000079a390ff0000000015031f00000000000500090000000000850000001023ad0b0f10000000000000bfa100000000000007010000a0ffffffb702000018000000bf03000000000000850000007100000079a3b0ff000000007b3a90ff00000000b7010000040000000f13000000000000bfa100000000000007010000f8ffffffb7020000040000008500000071000000b70200000000000061a1f8ff0000000015010c0000000000b702000010000000b70400008000000079a390ff000000000f430000000000002f21000000000000670100002000000077010000200000000f13000000000000\n...[truncated]"
+                      },
+                      "changed": true,
+                      "pass_name": "const_prop"
+                    }
+                  ],
+                  "pre_rejit_bytecode": {
+                    "insn_count": 2461,
+                    "raw_hex_blob": "bf160000000000008500000023000000bf090000000000007b6a80ff000000006166080000000000b701000000000000631a88ff00000000bfa20000000000000702000088ffffff181100001300000000000000000000008500000001000000bf0700000000000015078406000000007b6a70ff00000000850000000e000000bf0600000000000085000000230000007b0aa0ff00000000b7080000000b00000f80000000000000bfa100000000000007010000a0ffffffb702000008000000bf0300000000000085000000710000007b6a60ff000000007b6a68ff0000000079a3a0ff000000007b9a78ff0000000015039c0000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100001100000000000000000000008500000001000000bf060000000000001506020000000000796108000000000055014e0000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff000000001503820000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100001100000000000000000000008500000001000000bf06000000000000150602000000000079610800000000005501340000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff000000001503680000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100001100000000000000000000008500000001000000bf060000000000001506020000000000796108000000000055011a0000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff0000000015034e0000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100001100000000000000000000008500000001000000bf0600000000000015063f0000000000796108000000000015013d000000000079610800000000007b17a8000000000079610000000000007b17a00000000000b701000000000000631af8ff00000000bfa200000000000007020000f8ffffff181100000c000000000000000000000085000000010000001500460000000000796178030000000079020000000000001d124300000000007b0a58ff00000000bfa800000000000007080000a0ffffffb709000000000000bf81000000000000b702000000000000b7030000a0860100852000007f3c0100bf8100000000000085200000803c01001500070000000000bf6100000000000005000c0000000000bfa100000000000007010000a0ffffff85200000803c0100bf910000000000005500070000000000bfa100000000000007010000a0ffffff852000007d3c010079a158ff0000000079110000000000007b1678030000000005002a0000000000bf980000000000006111100000000000631a90ff00000000bfa20000000000000702000090ffffff181100001100000000000000000000008500000001000000bf090000000000001509efff000000001d89eeff00000000bf9200000000000007020000700000001811000016000000000000000000000085000000010000001500e3ff0000000079010000000000001501e1ff00000000db167003400000000500dfff000000000f89000000000000bfa100000000000007010000a0ffffffb702000008000000bf930000000000008500000071000000b70600000000000079a3a0ff00000000b7010000000000001503070000000000b7010000f40a00000f13000000000000bfa100000000000007010000a0ffffffb702000004000000850000007100000061a1a0ff00000000b7020000400000007b27b000000000007b67a800000000006317a0000000000079a870ff0000000079a968ff00000000b70100000100000063175c0100000000639748010000000079a160ff00000000770100002000000063174401000000008500000023000000b7010000010000000500000000000000b7010000580b00000f10000000000000bfa10000000000000701000090ffffffb702000008000000bf030000000000008500000071000000b70200000000000079a390ff0000000015031f00000000000500090000000000850000001023ad0b0f10000000000000bfa100000000000007010000a0ffffffb702000018000000bf03000000000000850000007100000079a3b0ff000000007b3a90ff00000000b7010000040000000f13000000000000bfa100000000000007010000f8ffffffb7020000040000008500000071000000b70200000000000061a1f8ff0000000015010c0000000000b702000010000000b70400008000000079a390ff000000000f430000000000002f21000000000000670100002000000077010000200000000f13000000000000\n...[truncated]"
+                  },
+                  "verifier_log": {
+                    "log": "func#0 @0\nfunc#1 @1689\nfunc#2 @1805\nfunc#3 @1996\nfunc#4 @2169\nfunc#5 @2238\nfunc#6 @2261\nfunc#7 @2329\nunreachable insn 230\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+                    "log_level": 2,
+                    "source": "BPF_PROG_REJIT"
+                  },
+                  "warnings": [
+                    "verifier log captured from BPF_PROG_REJIT(log_level=2) failure path"
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "rejit_failed"
+              },
+              {
+                "attempt": 1,
+                "debug": {
+                  "pass_traces": []
+                },
+                "disabled_passes": [
+                  "const_prop"
+                ],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [],
+            "passes_applied": [],
+            "prog_id": 27,
+            "program": {
+              "final_insn_count": 2461,
+              "insn_delta": 0,
+              "orig_insn_count": 2461,
+              "prog_id": 27,
+              "prog_name": "event_execve",
+              "prog_type": 5
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [
+                "const_prop"
+              ],
+              "passes_changed": 0,
+              "passes_executed": 0,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 2387431,
+              "rejit_syscall_ns": 982735,
+              "total_ns": 142039024
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "event_execve",
+          "output": "{\"attempts\":[{\"attempt\":0,\"attributed_pass\":\"const_prop\",\"debug\":{\"pass_traces\":[{\"bytecode_after\":{\"insn_count\":2461,\"raw_hex_blob\":\"bf160000000000008500000023000000bf090000000000007b6a80ff000000006166080000000000b701000000000000631a88ff00000000bfa20000000000000702000088ffffff181100004900000000000000000000008500000001000000bf0700000000000015078406000000007b6a70ff00000000850000000e000000bf0600000000000085000000230000007b0aa0ff00000000b7080000000b00000f80000000000000bfa100000000000007010000a0ffffffb702000008000000bf0300000000000085000000710000007b6a60ff000000007b6a68ff0000000079a3a0ff000000007b9a78ff0000000015039c0000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf060000000000001506020000000000796108000000000055014e0000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff000000001503820000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf06000000000000150602000000000079610800000000005501340000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff000000001503680000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf060000000000001506020000000000796108000000000055011a0000000000b7010000000b000079a3a0ff000000000f13000000000000bfa100000000000007010000a0ffffffb702000008000000850000007100000079a3a0ff0000000015034e0000000000b7010000f40a00000f13000000000000bfa100000000000007010000f8ffffffb702000004000000850000007100000061a1f8ff00000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf0600000000000015063f0000000000796108000000000015013d000000000079610800000000007b17a8000000000079610000000000007b17a00000000000b701000000000000631af8ff00000000bfa200000000000007020000f8ffffff1811000032000000000000000000000085000000010000001500460000000000796178030000000079020000000000001d124300000000007b0a58ff00000000bfa800000000000007080000a0ffffffb709000000000000bf81000000000000b702000000000000b7030000a0860100852000007f3c0100bf8100000000000085200000803c01001500070000000000bf6100000000000005000c0000000000bfa100000000000007010000a0ffffff85200000803c0100bf910000000000005500070000000000bfa100000000000007010000a0ffffff852000007d3c010079a158ff0000000079110000000000007b1678030000000005002a0000000000bf980000000000006111100000000000631a90ff00000000bfa20000000000000702000090ffffff181100004c00000000000000000000008500000001000000bf090000000000001509efff000000001d89eeff00000000bf920000000000000702000070000000181100002f000000000000000000000085000000010000001500e3ff0000000079010000000000001501e1ff00000000db167003400000000500dfff000000000f89000000000000bfa100000000000007010000a0ffffffb702000008000000bf930000000000008500000071000000b70600000000000079a3a0ff00000000b7010000000000001503070000000000b7010000f40a00000f13000000000000bfa100000000000007010000a0ffffffb702000004000000850000007100000061a1a0ff00000000b7020000400000007b27b000000000007b67a800000000006317a0000000000079a870ff0000000079a968ff00000000b70100000100000063175c0100000000639748010000000079a160ff00000000770100002000000063174401000000008500000023000000b7010000010000000500000000000000b7010000580b00000f10000000000000bfa10000000000000701000090ffffffb702000008000000bf030000000000008500000071000000b70200000000000079a390ff0000000015031f00000000000500090000000000850000001023ad0b0f10000000000000bfa100000000000007010000a0ffffffb702000018000000bf03000000000000850000007100000079a3b0ff000000007b3a90ff00000000b7010000040000000f13000000000000bfa100000000000007010000f8ffffffb7020000040000008500000071000000b70200000000000061a1f8ff0000000015010c0000\n...[truncated]",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [
+              "const_prop"
+            ],
+            "passes_changed": 0,
+            "passes_executed": 0,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        }
+      }
+    },
+    "scan_results": {
+      "26": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 5,
+          "dce_sites": 47,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 2,
+          "rotate_sites": 0,
+          "total_sites": 54,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 5,
+            "dce_sites": 47,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 2,
+            "rotate_sites": 0,
+            "total_sites": 54,
+            "wide_sites": 0
+          },
+          "insn_count": 241,
+          "name": "execve_rate",
+          "prog_id": 26,
+          "prog_type": 5,
+          "site_summary": "map_inline=2 const_prop=5 dce=47",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 5,
+            "dce_sites": 47,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 2,
+            "rotate_sites": 0,
+            "total_sites": 54,
+            "wide_sites": 0
+          },
+          "total_sites": 54,
+          "type": 5
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 5,
+          "dce_sites": 47,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 2,
+          "rotate_sites": 0,
+          "total_sites": 54,
+          "wide_sites": 0
+        }
+      },
+      "27": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 23,
+          "dce_sites": 265,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 5,
+          "rotate_sites": 0,
+          "total_sites": 293,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 23,
+            "dce_sites": 265,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 5,
+            "rotate_sites": 0,
+            "total_sites": 293,
+            "wide_sites": 0
+          },
+          "insn_count": 2461,
+          "name": "event_execve",
+          "prog_id": 27,
+          "prog_type": 5,
+          "site_summary": "map_inline=5 const_prop=22 dce=265 const_prop=1",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 23,
+            "dce_sites": 265,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 5,
+            "rotate_sites": 0,
+            "total_sites": 293,
+            "wide_sites": 0
+          },
+          "total_sites": 293,
+          "type": 5
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 23,
+          "dce_sites": 265,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 5,
+          "rotate_sites": 0,
+          "total_sites": 293,
+          "wide_sites": 0
+        }
+      }
+    },
+    "selected_tetragon_programs": [
+      {
+        "btf_id": 181,
+        "bytes_jited": 1390,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 2352,
+        "gpl_compatible": true,
+        "id": 26,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          148,
+          24,
+          23,
+          143,
+          10,
+          17,
+          18,
+          22,
+          15
+        ],
+        "name": "execve_rate",
+        "orphaned": false,
+        "tag": "ced0e930cd488737",
+        "type": "tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 182,
+        "bytes_jited": 11250,
+        "bytes_memlock": 20480,
+        "bytes_xlated": 20216,
+        "gpl_compatible": true,
+        "id": 27,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          148,
+          11,
+          20,
+          19,
+          12,
+          14,
+          21,
+          147,
+          149,
+          10,
+          132,
+          15,
+          139,
+          18,
+          17,
+          22
+        ],
+        "name": "event_execve",
+        "orphaned": false,
+        "pids": [
+          {
+            "comm": "tetragon",
+            "pid": 387
+          }
+        ],
+        "run_cnt": 2,
+        "run_time_ns": 11370,
+        "tag": "9610091f8acc08f2",
+        "type": "tracepoint",
+        "uid": 0
+      }
+    ],
+    "setup": {
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "TETRAGON_BINARY=/usr/local/bin/tetragon\nTETRA_BINARY=/usr/local/bin/tetra\nSTRESS_NG_BINARY=/bin/stress-ng",
+      "tetra_binary": "/usr/local/bin/tetra",
+      "tetragon_binary": "/usr/local/bin/tetragon"
+    },
+    "smoke": false,
+    "status": "ok",
+    "tetragon_binary": "/usr/local/bin/tetragon",
+    "tetragon_launch_command": [
+      "/usr/local/bin/tetragon",
+      "--cgroup-rate",
+      "1000,1s",
+      "--tracing-policy-dir",
+      "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260327/vm-tmp/tetragon-policy-yjxjikli"
+    ],
+    "tetragon_programs": [
+      {
+        "btf_id": 90,
+        "bytes_jited": 1021,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 1792,
+        "gpl_compatible": true,
+        "id": 23,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          11,
+          26,
+          10,
+          17,
+          18,
+          22,
+          13
+        ],
+        "name": "event_exit_acct_process",
+        "orphaned": false,
+        "pids": [
+          {
+            "comm": "tetragon",
+            "pid": 387
+          }
+        ],
+        "run_cnt": 1,
+        "run_time_ns": 3275,
+        "tag": "d95674f514bfba88",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 134,
+        "bytes_jited": 7344,
+        "bytes_memlock": 12288,
+        "bytes_xlated": 11312,
+        "gpl_compatible": true,
+        "id": 25,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          11,
+          108,
+          13,
+          10,
+          87,
+          24,
+          23,
+          78,
+          17,
+          18,
+          22
+        ],
+        "name": "event_wake_up_new_task",
+        "orphaned": false,
+        "pids": [
+          {
+            "comm": "tetragon",
+            "pid": 387
+          }
+        ],
+        "run_cnt": 3,
+        "run_time_ns": 17345,
+        "tag": "1987825527c81407",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 181,
+        "bytes_jited": 1390,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 2352,
+        "gpl_compatible": true,
+        "id": 26,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          148,
+          24,
+          23,
+          143,
+          10,
+          17,
+          18,
+          22,
+          15
+        ],
+        "name": "execve_rate",
+        "orphaned": false,
+        "tag": "ced0e930cd488737",
+        "type": "tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 182,
+        "bytes_jited": 11250,
+        "bytes_memlock": 20480,
+        "bytes_xlated": 20216,
+        "gpl_compatible": true,
+        "id": 27,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          148,
+          11,
+          20,
+          19,
+          12,
+          14,
+          21,
+          147,
+          149,
+          10,
+          132,
+          15,
+          139,
+          18,
+          17,
+          22
+        ],
+        "name": "event_execve",
+        "orphaned": false,
+        "pids": [
+          {
+            "comm": "tetragon",
+            "pid": 387
+          }
+        ],
+        "run_cnt": 2,
+        "run_time_ns": 11370,
+        "tag": "9610091f8acc08f2",
+        "type": "tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 183,
+        "bytes_jited": 5010,
+        "bytes_memlock": 8192,
+        "bytes_xlated": 8064,
+        "gpl_compatible": true,
+        "id": 28,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          148,
+          149,
+          21,
+          11,
+          19,
+          10,
+          17,
+          18,
+          22
+        ],
+        "name": "execve_send",
+        "orphaned": false,
+        "tag": "89cafbb83eb4b0c1",
+        "type": "tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 217,
+        "bytes_jited": 1542,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 2560,
+        "gpl_compatible": true,
+        "id": 29,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          11,
+          178,
+          12,
+          14
+        ],
+        "name": "tg_kp_bprm_committing_creds",
+        "orphaned": false,
+        "pids": [
+          {
+            "comm": "tetragon",
+            "pid": 387
+          }
+        ],
+        "run_cnt": 2,
+        "run_time_ns": 1761,
+        "tag": "baccda55c3fe363a",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 259,
+        "bytes_jited": 312,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 504,
+        "gpl_compatible": true,
+        "id": 30,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          16,
+          11
+        ],
+        "name": "execve_map_update",
+        "orphaned": false,
+        "pids": [
+          {
+            "comm": "tetragon",
+            "pid": 387
+          }
+        ],
+        "tag": "91e944ea4862cb03",
+        "type": "socket_filter",
+        "uid": 0
+      },
+      {
+        "btf_id": 301,
+        "bytes_jited": 146,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 240,
+        "gpl_compatible": true,
+        "id": 31,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          23
+        ],
+        "name": "tg_cgroup_rmdir",
+        "orphaned": false,
+        "pids": [
+          {
+            "comm": "tetragon",
+            "pid": 387
+          }
+        ],
+        "tag": "7d1e2d547c21c413",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 375,
+        "bytes_jited": 4911,
+        "bytes_memlock": 12288,
+        "bytes_xlated": 8752,
+        "gpl_compatible": true,
+        "id": 34,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          311,
+          277,
+          319,
+          276,
+          274,
+          338,
+          316,
+          318,
+          337,
+          334,
+          325,
+          346,
+          11,
+          21,
+          320,
+          317,
+          315
+        ],
+        "name": "generic_kprobe_actions",
+        "orphaned": false,
+        "tag": "6a72b3624a8f304e",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 376,
+        "bytes_jited": 11098,
+        "bytes_memlock": 20480,
+        "bytes_xlated": 17992,
+        "gpl_compatible": true,
+        "id": 38,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          311,
+          11,
+          336,
+          21,
+          277,
+          276,
+          312,
+          309,
+          323,
+          307,
+          20,
+          19,
+          314
+        ],
+        "name": "generic_kprobe_process_filter",
+        "orphaned": false,
+        "tag": "1338940e92ea133e",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 377,
+        "bytes_jited": 1886,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 3160,
+        "gpl_compatible": true,
+        "id": 39,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          311,
+          11,
+          10,
+          17,
+          18,
+          22,
+          320
+        ],
+        "name": "generic_kprobe_output",
+        "orphaned": false,
+        "tag": "d34f9653f96eb28f",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 378,
+        "bytes_jited": 17203,
+        "bytes_memlock": 32768,
+        "bytes_xlated": 29456,
+        "gpl_compatible": true,
+        "id": 40,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          311,
+          275,
+          310,
+          21,
+          336,
+          276,
+          274,
+          327,
+          316,
+          335,
+          18,
+          10,
+          17,
+          22
+        ],
+        "name": "generic_kprobe_process_event",
+        "orphaned": false,
+        "tag": "a9375855c326e9b1",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 379,
+        "bytes_jited": 11199,
+        "bytes_memlock": 20480,
+        "bytes_xlated": 18192,
+        "gpl_compatible": true,
+        "id": 47,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          311,
+          277,
+          276,
+          310,
+          281,
+          283,
+          279,
+          321,
+          346,
+          285,
+          287,
+          299,
+          293,
+          291,
+          297,
+          303,
+          289,
+          305,
+          295,
+          301,
+          309,
+          323,
+          307,
+          322
+        ],
+        "name": "generic_kprobe_filter_arg",
+        "orphaned": false,
+        "tag": "f6f8c6b6759d5ea1",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 391,
+        "bytes_jited": 1322,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 2240,
+        "gpl_compatible": true,
+        "id": 48,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          311,
+          275,
+          310,
+          21,
+          276
+        ],
+        "name": "generic_kprobe_setup_event",
+        "orphaned": false,
+        "tag": "d6e32e6fbdb9daee",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 392,
+        "bytes_jited": 1750,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 3080,
+        "gpl_compatible": true,
+        "id": 52,
+        "jited": true,
+        "loaded_at": 1774669160,
+        "map_ids": [
+          311,
+          275,
+          330,
+          10,
+          343,
+          276
+        ],
+        "name": "generic_kprobe_event",
+        "orphaned": false,
+        "pids": [
+          {
+            "comm": "tetragon",
+            "pid": 387
+          }
+        ],
+        "run_cnt": 24,
+        "run_time_ns": 16611,
+        "tag": "ac2440d87f6f0ea6",
+        "type": "kprobe",
+        "uid": 0
+      }
+    ]
+  },
+  "output_hint_json": "e2e/results/tetragon_authoritative_20260328.json",
+  "output_hint_md": "e2e/results/tetragon-real-e2e.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "run_type": "tetragon",
+  "selected_rejit_passes": [
+    "const_prop"
+  ],
+  "smoke": false,
+  "started_at": "2026-03-28T03:39:15.519902+00:00",
+  "status": "completed",
+  "suite": "e2e"
+}

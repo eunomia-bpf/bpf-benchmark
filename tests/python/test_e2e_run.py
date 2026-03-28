@@ -1,0 +1,71 @@
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from e2e import run as e2e_run
+from runner.libs import smoke_output_path
+
+
+def test_resolve_primary_output_json_uses_smoke_path_for_default_output() -> None:
+    spec = e2e_run.CASE_SPECS["tracee"]
+    args = argparse.Namespace(
+        case="tracee",
+        output_json=str(spec.default_output_json),
+        smoke=True,
+    )
+
+    resolved = e2e_run.resolve_primary_output_json(args, spec)
+
+    assert resolved == smoke_output_path(spec.default_output_json.parent, "tracee").resolve()
+
+
+def test_run_single_case_writes_primary_outputs(tmp_path: Path, monkeypatch) -> None:
+    payload = {"status": "ok", "value": 7}
+
+    def fake_run_case(args: argparse.Namespace) -> dict[str, object]:
+        del args
+        return dict(payload)
+
+    spec = e2e_run.CaseSpec(
+        run_case=fake_run_case,
+        build_markdown=lambda result: f"value={result['value']}",
+        build_report=lambda result: f"report={result['value']}",
+        default_output_json=tmp_path / "dummy_authoritative_20260327.json",
+        default_output_md=tmp_path / "dummy.md",
+    )
+    monkeypatch.setitem(e2e_run.CASE_SPECS, "dummy", spec)
+
+    args = argparse.Namespace(
+        case="dummy",
+        output_json=str(tmp_path / "dummy.json"),
+        output_md=str(tmp_path / "dummy.md"),
+        report_md=str(tmp_path / "dummy-report.md"),
+        smoke=False,
+    )
+
+    result = e2e_run._run_single_case(args, clear_existing=True)
+
+    assert result == payload
+    assert json.loads((tmp_path / "dummy.json").read_text()) == payload
+    assert (tmp_path / "dummy.md").read_text() == "value=7\n"
+    assert (tmp_path / "dummy-report.md").read_text() == "report=7\n"
+
+
+def test_apply_case_defaults_switches_tetragon_config_from_tracee_default() -> None:
+    args = argparse.Namespace(
+        case="tetragon",
+        output_json=str(e2e_run.DEFAULT_OUTPUT_JSON),
+        output_md=str(e2e_run.DEFAULT_OUTPUT_MD),
+        report_md=str(e2e_run.DEFAULT_BPFTRACE_REPORT_MD),
+        setup_script=str(e2e_run.DEFAULT_TRACEE_SETUP_SCRIPT),
+        config=str(e2e_run.ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"),
+    )
+
+    e2e_run.apply_case_defaults(args)
+
+    assert args.config == str(e2e_run.DEFAULT_TETRAGON_CONFIG)

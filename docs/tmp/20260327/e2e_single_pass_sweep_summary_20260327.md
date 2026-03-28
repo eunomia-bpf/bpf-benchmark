@@ -43,12 +43,28 @@ Artifacts:
 
 | Case | map_inline | const_prop | dce |
 | --- | --- | --- | --- |
-| tracee | skip: `setpriv ... /bin/true` timeout | same skip | attach ok, but `rejit did not apply successfully` |
+| tracee | historical skip: `setpriv ... /bin/true` timeout | same historical skip | historical attach ok, but `rejit did not apply successfully` |
 | tetragon | attach ok, not comparable | same | same |
 | bpftrace | baseline ok, `rejit_successes=0` | same | same |
 | scx | attach ok, `post-ReJIT measurements are unavailable` | same | same |
 | katran | comparable, BPF speedup ratio `0.981x`, app throughput `+2.78%` | attach ok, no successful rejit | attach ok, no successful rejit |
 | bcc | strongest signal: `9/10` rejit successes, geomean `1.016x` | `0/10` rejit successes | `0/10` rejit successes |
+
+## Post-Sweep Updates
+
+1. `make vm-e2e` now supports `E2E_CASE=...`, so follow-up validation no longer needs to rerun the full matrix.
+2. Later Tracee validation on `config_read_hotpath.yaml` showed:
+   - `target_runs > 0`
+   - `apply_runs = 0`
+   - final status: `preflight observed zero apply-program executions; skipping invalid optimization benchmark`
+3. That means the current Tracee `read_hotpath` line is not just “noisy” or “flaky”; it is an invalid benchmark under the stricter guard, and the sweep-era Tracee results above should be treated as historical rather than actionable.
+4. Unified `e2e/run.py` now writes canonical `output_json` / `output_md` files in addition to run-dir artifacts, so metadata output hints now resolve to real files.
+5. After the kernel-side `func_info` preload fix and `free_tmp` `btf_put()` cleanup, a minimal VM correctness case (`T17_tracepoint_subprog`) passed, so the old Tetragon blocker `missing btf func_info` is no longer the current root cause.
+6. Targeted single-case Tetragon reruns now exist for each isolated pass:
+   - `map_inline`: `tetragon_20260328_033535`
+   - `const_prop`: `tetragon_20260328_033915`
+   - `dce`: `tetragon_20260328_034137`
+7. `vm-static-test` now supports `--enabled-passes ...`, so pass-isolated VM correctness checks no longer need to rely on `vm-e2e`. A focused run on `bpf_execve_event` with `map_inline` showed `3/3 verifier_accepted`, but `applied=0`, which confirms that live-object static verify is a correctness control and not a substitute for map-stateful e2e data.
 
 ## High-Signal Findings
 
@@ -70,9 +86,11 @@ Artifacts:
    - All three runs attached and loaded
    - All three runs remained non-comparable because `post-ReJIT measurements are unavailable`
 
-5. `tetragon` is stable at attach/load but unstable at actual apply/compare.
-   - All three runs launched and measured baseline
-   - All three runs ended with `rejit did not apply successfully`
+5. `tetragon` is no longer blocked by `missing btf func_info`; it is now split into three pass-specific verifier problems.
+   - `map_inline`: current Tetragon line still does not compare successfully, but the old metadata blocker is gone and the remaining failure is downstream of actual rewrite/apply.
+   - `const_prop`: isolated rerun on `event_execve` now fails with `unreachable insn 230`.
+   - `dce`: isolated rerun now fails with `call unknown#195896080` followed by `R4 !read_ok`.
+   - Across all three reruns, `execve_rate` stayed cold in preflight (`run_cnt_delta = 0`) while `event_execve` was the actually active apply target.
 
 6. `tracee` has an intermittent workload/harness failure.
    - `map_inline` and `const_prop` both skipped with `setpriv --reuid 65534 ... /bin/true` timing out
@@ -85,40 +103,42 @@ Artifacts:
 
 ## Improvement Priorities
 
-1. Fix Tracee error attribution and workload robustness.
-   - The current top-level skip reason says “could not run on this kernel”, but the observed failure is a workload-side timeout.
-   - Split agent-launch failures from workload execution failures.
-   - Add explicit logging for whether `stress-ng --exec` ran or the case fell back to the rapid exec loop.
+1. Replace Tracee `read_hotpath` with a valid apply-program-active benchmark.
+   - The latest guard validation proved that the current `read` workload heats `sys_enter` / `sys_exit` but not the configured `sys_enter_submit` / `sys_exit_submit`.
+   - Do not spend more sweep time on this config until the measurement/apply pair is valid.
 
-2. Make e2e summaries pass-aware.
+2. Triage Tetragon as three separate verifier surfaces, not one generic post-verify `EINVAL`.
+   - `map_inline`: keep digging on the current rewrite/apply boundary, especially callback/static-subprog interactions.
+   - `const_prop`: debug why the isolated rewrite leaves `event_execve` with `unreachable insn 230`.
+   - `dce`: debug the active-program verifier state corruption around `call unknown#195896080` and `R4 !read_ok`.
+   - Future Tetragon analysis should treat `event_execve` as the real hot/apply program until `execve_rate` is proven active.
+
+3. Make e2e summaries pass-aware.
    - Current summaries still report aggregate site totals for all passes.
    - For single-pass sweeps, the report should surface selected-pass site totals first.
    - This would make `bpftrace` immediately show “no relevant sites for this pass” instead of looking like a generic ReJIT failure.
 
-3. Treat `const_prop` / `dce` isolated sweeps as diagnostic-only.
+4. Treat `const_prop` / `dce` isolated sweeps as diagnostic-only.
    - Current data strongly suggests these passes are not useful standalone end-to-end benchmarks.
    - For performance-facing runs, prefer `map_inline` alone or the cascade `map_inline,const_prop,dce`.
 
-4. Improve `bcc` setup amortization.
+5. Improve `bcc` setup amortization.
    - Full-suite wall time is dominated by the last `bcc` phase on every sweep.
    - Reuse already-built tool artifacts more aggressively and skip setup when binaries are already present and validated.
 
-5. Clarify non-comparable case states in `scx`, `tetragon`, and `katran`.
-   - `scx`: measurement path unavailable
-   - `tetragon`: apply failed
-   - `katran`: apply failed for `const_prop` / `dce`
-   - Those should be surfaced as first-class statuses in the summary layer, not buried in per-case markdown.
-
 ## Practical Next Step
 
-If the goal is an actionable benchmark profile rather than pure diagnostics, the best next run is:
+If the goal is targeted harness cleanup rather than another historical full-matrix snapshot, the next runs should be:
 
 ```bash
-make vm-e2e E2E_ARGS='--rejit-passes map_inline,const_prop,dce --duration 5'
+make vm-static-test STATIC_VERIFY_ARGS='--filter bpf_execve_event --max-objects 1 --enabled-passes map_inline'
+make vm-e2e E2E_CASE=tetragon E2E_ARGS='--config e2e/cases/tetragon/config_execve_rate.yaml --rejit-passes map_inline --duration 5'
+make vm-e2e E2E_CASE=tetragon E2E_ARGS='--config e2e/cases/tetragon/config_execve_rate.yaml --rejit-passes const_prop --duration 5'
+make vm-e2e E2E_CASE=tetragon E2E_ARGS='--config e2e/cases/tetragon/config_execve_rate.yaml --rejit-passes dce --duration 5'
 ```
 
-If the goal is harness cleanup first, start with:
+and, only after choosing a new valid Tracee config:
 
-1. Tracee workload failure attribution
-2. Pass-aware site reporting
-3. `bcc` setup caching
+```bash
+make vm-e2e E2E_CASE=tracee E2E_ARGS='--config <new-tracee-config> --rejit-passes map_inline,const_prop --duration 5'
+```

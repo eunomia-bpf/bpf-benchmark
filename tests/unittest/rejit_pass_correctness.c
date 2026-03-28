@@ -41,6 +41,7 @@
 
 /* Default progs directory (relative to binary location or CWD) */
 static const char *g_progs_dir = "progs";
+static const char *g_test_filter;
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
@@ -225,7 +226,7 @@ struct test_prog_desc {
 	enum prog_category cat;
 	/*
 	 * For fentry programs, the kernel function to attach to.
-	 * NULL for non-fentry types.
+	 * NULL for generic tracing programs and non-fentry types.
 	 */
 	const char *fentry_target;
 };
@@ -327,6 +328,12 @@ static const struct test_prog_desc test_progs[] = {
 		.obj_file = "test_zero_applied_noop_select.bpf.o",
 		.prog_name = "test_zero_applied_noop_select",
 		.cat = CAT_XDP,
+	},
+	{
+		.test_name = "T17_tracepoint_subprog",
+		.obj_file = "test_tracepoint_subprog.bpf.o",
+		.prog_name = "test_tracepoint_subprog",
+		.cat = CAT_FENTRY,
 	},
 };
 
@@ -595,6 +602,9 @@ static int test_fentry_prog(const struct test_prog_desc *desc)
 
 static int run_test(const struct test_prog_desc *desc)
 {
+	if (g_test_filter && strcmp(desc->test_name, g_test_filter) != 0)
+		return 0;
+
 	switch (desc->cat) {
 	case CAT_XDP:
 		return test_xdp_prog(desc);
@@ -627,11 +637,15 @@ int main(int argc, char *argv[])
 	/* Optional arg: path to directory containing .bpf.o progs */
 	if (argc > 1)
 		g_progs_dir = argv[1];
+	if (argc > 2)
+		g_test_filter = argv[2];
 
 	libbpf_set_print(libbpf_print_fn);
 
 	printf("=== REJIT pass correctness test suite ===\n");
 	printf("  progs_dir = %s\n\n", g_progs_dir);
+	if (g_test_filter)
+		printf("  test_filter = %s\n\n", g_test_filter);
 
 	printf("--- XDP programs (full TEST_RUN verification) ---\n");
 	for (i = 0; i < ARRAY_SIZE(test_progs); i++) {

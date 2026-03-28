@@ -33,3 +33,15 @@ def test_apply_one_treats_missing_inlined_map_entries_as_empty(monkeypatch) -> N
     assert result["applied"] is True
     assert result["inlined_map_entries"] == []
     assert result["kernel_prog_name"] == "balancer_ingress"
+
+
+def test_socket_error_result_preserves_supplied_exit_code() -> None:
+    result = rejit._socket_error_result(
+        123,
+        "socket optimize timed out after 120s for prog 123",
+        exit_code=124,
+    )
+
+    assert result["applied"] is False
+    assert result["exit_code"] == 124
+    assert "timed out" in str(result["error"])
