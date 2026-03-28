@@ -69,6 +69,7 @@ pub struct R0UseClassification {
 
 impl R0UseClassification {
     /// Returns whether every `r0` use is a fixed-offset scalar load.
+    #[cfg(test)]
     pub fn all_fixed_loads(&self) -> bool {
         self.other_uses.is_empty()
     }
@@ -119,10 +120,12 @@ pub fn find_map_lookup_sites(insns: &[BpfInsn]) -> Vec<MapLookupSite> {
 }
 
 /// Recover a stack-materialized constant key for a lookup helper call.
+#[cfg(test)]
 pub fn extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Option<ConstantKey> {
     try_extract_constant_key(insns, call_pc).ok()
 }
 
+#[cfg(test)]
 pub fn try_extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Result<ConstantKey, String> {
     let bounds = subprog_bounds(insns, call_pc);
     let stack_off = resolve_stack_pointer_to_stack(insns, call_pc, 2, bounds)?;
@@ -633,6 +636,7 @@ fn verifier_known_scalar_value(reg: &crate::verifier_log::RegState) -> Option<u6
 }
 
 /// Classify all uses of the lookup result until its value-pointer aliases die out.
+#[cfg(test)]
 pub fn classify_r0_uses(insns: &[BpfInsn], call_pc: usize) -> R0UseClassification {
     classify_r0_uses_with_options(insns, call_pc, false, false)
 }

@@ -10,7 +10,6 @@ use crate::pass::{Analysis, BpfProgram};
 #[derive(Clone, Debug)]
 
 pub struct LivenessResult {
-    pub live_in: Vec<HashSet<u8>>,
     pub live_out: Vec<HashSet<u8>>,
 }
 
@@ -54,7 +53,7 @@ impl Analysis for LivenessAnalysis {
             }
         }
 
-        LivenessResult { live_in, live_out }
+        LivenessResult { live_out }
     }
 }
 
@@ -165,7 +164,7 @@ mod tests {
         let prog = make_program(insns);
         let liveness = LivenessAnalysis.run(&prog);
         assert!(liveness.live_out[0].contains(&0));
-        assert!(liveness.live_in[1].contains(&0));
+        assert!(!liveness.live_out[1].contains(&0));
     }
 
     #[test]
@@ -197,7 +196,7 @@ mod tests {
         ];
         let prog = make_program(insns);
         let liveness = LivenessAnalysis.run(&prog);
-        assert!(liveness.live_in[2].contains(&2));
+        assert!(liveness.live_out[1].contains(&2));
     }
 
     #[test]

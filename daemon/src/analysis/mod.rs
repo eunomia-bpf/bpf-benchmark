@@ -19,4 +19,4 @@ pub use cfg::CFGResult;
 #[allow(unused_imports)]
 pub use liveness::LivenessResult;
 #[allow(unused_imports)]
-pub use map_info::{collect_map_references, MapInfo, MapInfoResult, MapReference};
+pub use map_info::{MapInfo, MapInfoResult, MapReference};

@@ -40,12 +40,10 @@ from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_dd_read_load,
     run_exec_storm,
-    run_file_open_load,
     run_scheduler_load,
     run_tcp_connect_load,
 )
 from e2e.case_common import (  # noqa: E402
-    git_sha,
     host_metadata,
     percent_delta,
 )

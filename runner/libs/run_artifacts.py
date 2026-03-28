@@ -337,44 +337,6 @@ def externalize_sample_daemon_debug(
     return relative_path, detail_payload, index_entry
 
 
-def extract_daemon_debug_details(payload: Mapping[str, Any]) -> tuple[dict[str, Any], int]:
-    detail_payloads: dict[str, Any] = {}
-    index_entries: list[dict[str, Any]] = []
-
-    for benchmark in payload.get("benchmarks", []):
-        if not isinstance(benchmark, Mapping):
-            continue
-        benchmark_name = str(benchmark.get("name", "unknown"))
-
-        for run in benchmark.get("runs", []):
-            if not isinstance(run, Mapping):
-                continue
-            runtime_name = str(run.get("runtime", "unknown"))
-            samples = run.get("samples", [])
-            if not isinstance(samples, list):
-                continue
-
-            for sample_index, sample in enumerate(samples):
-                if not isinstance(sample, Mapping):
-                    continue
-                detail = _daemon_debug_detail_for_sample(
-                    benchmark_name=benchmark_name,
-                    runtime_name=runtime_name,
-                    sample_index=sample_index,
-                    sample=sample,
-                )
-                if detail is None:
-                    continue
-                relative_path, detail_payload, index_entry = detail
-                detail_payloads[relative_path] = detail_payload
-                index_entries.append(index_entry)
-
-    if index_entries:
-        detail_payloads["daemon_debug/index.json"] = index_entries
-
-    return detail_payloads, len(index_entries)
-
-
 def write_run_artifact(
     *,
     results_dir: Path,

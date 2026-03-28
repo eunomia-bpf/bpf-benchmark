@@ -4351,111 +4351,6 @@ objects:
     section: tp_btf/sched_switch
   - name: sched_wakeup
     section: tp_btf/sched_wakeup
-- source: corpus/build/bpftrace/exec_trace.bpf.o
-  repo: bpftrace
-  test_method: attach_trigger
-  description: bpftrace sched_process_exec tracepoint script object.
-  category: observability
-  family: bpftrace
-  level: support
-  tags:
-  - observability
-  - bpftrace
-  - tracepoint
-  - support
-  - attach
-  prog_type: tracepoint
-  section: s_tracepoint:sched:sched_process_exec_1
-  trigger: for i in $(seq 200); do /bin/true; done
-  trigger_timeout_seconds: 30
-  compile_loader: bpftool_loadall
-  programs:
-  - name: tracepoint:sched:sched_process_exec
-- source: corpus/build/bpftrace/open_latency.bpf.o
-  repo: bpftrace
-  test_method: attach_trigger
-  description: bpftrace open-latency kprobe/kretprobe script object.
-  category: observability
-  family: bpftrace
-  level: support
-  tags:
-  - observability
-  - bpftrace
-  - kprobe
-  - support
-  - attach
-  prog_type: kprobe
-  trigger: for i in $(seq 200); do ls /tmp >/dev/null 2>&1; done
-  trigger_timeout_seconds: 30
-  compile_loader: bpftool_loadall
-  programs:
-  - name: kprobe:do_sys_openat2
-    section: s_kprobe:do_sys_openat2_1
-  - name: kretprobe:do_sys_openat2
-    section: s_kretprobe:do_sys_openat2_2
-- source: corpus/build/bpftrace/scheduler_latency.bpf.o
-  repo: bpftrace
-  test_method: attach_trigger
-  description: bpftrace scheduler-latency tracepoint script object.
-  category: observability
-  family: bpftrace
-  level: support
-  tags:
-  - observability
-  - bpftrace
-  - tracepoint
-  - support
-  - attach
-  prog_type: tracepoint
-  trigger: for i in $(seq 200); do /bin/true; done
-  trigger_timeout_seconds: 30
-  compile_loader: bpftool_loadall
-  programs:
-  - name: tracepoint:sched:sched_wakeup
-    section: s_tracepoint:sched:sched_wakeup_1
-  - name: tracepoint:sched:sched_switch
-    section: s_tracepoint:sched:sched_switch_2
-- source: corpus/build/bpftrace/tcp_connect.bpf.o
-  repo: bpftrace
-  test_method: attach_trigger
-  description: bpftrace TCP connect kprobe script object.
-  category: networking
-  family: bpftrace
-  level: support
-  tags:
-  - networking
-  - bpftrace
-  - kprobe
-  - support
-  - attach
-  prog_type: kprobe
-  section: s_kprobe:tcp_v4_connect_1
-  trigger: for i in $(seq 50); do curl -s --connect-timeout 1 http://127.0.0.1/ >/dev/null
-    2>&1 || true; done
-  trigger_timeout_seconds: 30
-  compile_loader: bpftool_loadall
-  programs:
-  - name: kprobe:tcp_v4_connect
-- source: corpus/build/bpftrace/vfs_read_count.bpf.o
-  repo: bpftrace
-  test_method: attach_trigger
-  description: bpftrace VFS read counter kprobe script object.
-  category: observability
-  family: bpftrace
-  level: support
-  tags:
-  - observability
-  - bpftrace
-  - kprobe
-  - support
-  - attach
-  prog_type: kprobe
-  section: s_kprobe:vfs_read_1
-  trigger: for i in $(seq 200); do head -c 4096 /etc/hosts >/dev/null; done
-  trigger_timeout_seconds: 30
-  compile_loader: bpftool_loadall
-  programs:
-  - name: kprobe:vfs_read
 - source: corpus/build/calico/from_hep_debug.bpf.o
   repo: calico
   test_method: bpf_prog_test_run
@@ -5537,6 +5432,8 @@ objects:
     section: tp_btf/sched_process_fork
   - name: socket_post_create
     section: lsm.s/socket_post_create
+# Remains compile_only: these tcp_congestion_ops callback suites still need a
+# stable attach anchor and traffic workload instead of per-callback auto-attach.
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_cc_cubic.bpf.o
   repo: linux-selftests
   test_method: compile_only
@@ -6871,6 +6768,8 @@ objects:
   input_size: 64
   programs:
   - name: decap_sanity
+# Remains compile_only: the dummy struct_ops selftests do not expose a stable
+# generic attach anchor for the corpus runner yet.
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/dummy_st_ops_fail.bpf.o
   repo: linux-selftests
   test_method: compile_only
@@ -7081,6 +6980,8 @@ objects:
   input_size: 64
   programs:
   - name: test_pkt_access
+# Remains compile_only: freplace programs need an external replacement target,
+# which the generic corpus runner does not provision yet.
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/freplace_unreliable_prog.bpf.o
   repo: linux-selftests
   test_method: compile_only
@@ -9219,6 +9120,8 @@ objects:
   compile_loader: bpftool_loadall
   programs:
   - name: socket_post_create
+# Remains compile_only: these tcp_congestion_ops variants also need a dedicated
+# attach anchor plus a reproducible TCP workload before they can measure runtime.
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tcp_ca_incompl_cong_ops.bpf.o
   repo: linux-selftests
   test_method: compile_only
@@ -9769,10 +9672,12 @@ objects:
     section: tp_btf/bpf_testmod_test_read
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_custom_sec_handlers.bpf.o
   repo: linux-selftests
-  test_method: compile_only
+  test_method: attach_trigger
   category: selftests
   family: linux-selftests
   level: support
+  trigger: for i in $(seq 200); do /bin/true; done
+  trigger_timeout_seconds: 30
   programs:
   - name: abc1
     tags:
@@ -10012,9 +9917,11 @@ objects:
     - linux_selftests
     - struct-ops
     - compile-only
-    test_method: compile_only
+    test_method: attach_trigger
     prog_type: struct_ops
     section: struct_ops/test_1
+    trigger: for i in $(seq 200); do /bin/true; done
+    trigger_timeout_seconds: 30
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_kernel_flag.bpf.o
   repo: linux-selftests
   test_method: attach_trigger
@@ -12618,6 +12525,8 @@ objects:
   programs:
   - name: rx
   - name: redirect
+# Remains compile_only: this freplace program requires an external XDP target
+# program, so the current corpus runner can only report compile-time results.
 - source: corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_metadata2.bpf.o
   repo: linux-selftests
   test_method: compile_only
@@ -12707,10 +12616,13 @@ objects:
     section: tc
 - source: corpus/build/loxilb/llb_ebpf_emain.bpf.o
   repo: loxilb
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: networking
   family: loxilb
   level: production
+  io_mode: packet
+  test_input: corpus/inputs/macro_dummy_packet_64.bin
+  input_size: 64
   programs:
   - name: tc_packet_func_fast
     description: Loxilb fast-path TC datapath from the extended main object.
@@ -12784,10 +12696,13 @@ objects:
     section: tc_packet_hook7
 - source: corpus/build/loxilb/llb_ebpf_main.bpf.o
   repo: loxilb
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: networking
   family: loxilb
   level: production
+  io_mode: packet
+  test_input: corpus/inputs/macro_dummy_packet_64.bin
+  input_size: 64
   programs:
   - name: tc_packet_func_fast
     tags:
@@ -12885,8 +12800,8 @@ objects:
     - loxilb
     - unspec
     - compile-only
-    test_method: compile_only
-    prog_type: unspec
+    test_method: bpf_prog_test_run
+    prog_type: xdp
     section: xdp_pass
 - source: corpus/build/manual-test/fentry.gen.bpf.o
   repo: manual-test
@@ -13241,10 +13156,13 @@ objects:
     section: usdt
 - source: corpus/build/scx/scx_bpfland_main.bpf.o
   repo: scx
-  test_method: compile_only
+  test_method: attach_trigger
   category: resource-control
   family: scx
   prog_type: struct_ops
+  attach_group: bpfland_init
+  trigger: for i in $(seq 200); do /bin/true; done
+  trigger_timeout_seconds: 30
   programs:
   - name: bpfland_select_cpu
     level: production
@@ -13354,10 +13272,13 @@ objects:
     trigger_timeout_seconds: 30
 - source: corpus/build/scx/scx_flash_main.bpf.o
   repo: scx
-  test_method: compile_only
+  test_method: attach_trigger
   category: resource-control
   family: scx
   prog_type: struct_ops
+  attach_group: flash_init
+  trigger: for i in $(seq 200); do /bin/true; done
+  trigger_timeout_seconds: 30
   programs:
   - name: flash_select_cpu
     level: production
@@ -13483,9 +13404,12 @@ objects:
     trigger_timeout_seconds: 30
 - source: corpus/build/scx/scx_lavd_main.bpf.o
   repo: scx
-  test_method: compile_only
+  test_method: attach_trigger
   category: resource-control
   family: scx
+  attach_group: lavd_init
+  trigger: for i in $(seq 200); do /bin/true; done
+  trigger_timeout_seconds: 30
   programs:
   - name: arena_init
     level: production
@@ -13955,10 +13879,13 @@ objects:
     trigger_timeout_seconds: 30
 - source: corpus/build/scx/scx_rusty_main.bpf.o
   repo: scx
-  test_method: compile_only
+  test_method: attach_trigger
   category: resource-control
   family: scx
   prog_type: struct_ops
+  attach_group: rusty_init
+  trigger: for i in $(seq 200); do /bin/true; done
+  trigger_timeout_seconds: 30
   programs:
   - name: rusty_select_cpu
     level: production
@@ -14432,6 +14359,8 @@ objects:
     attach_group: event_execve
   - name: event_execve
     section: tracepoint/sys_execve
+# Remains compile_only: this seccomp program has no generic libbpf attach or
+# BPF_PROG_TEST_RUN path in the current corpus runner.
 - source: corpus/build/tetragon/bpf_execve_map_update.bpf.o
   repo: tetragon
   test_method: compile_only
@@ -14827,27 +14756,6 @@ objects:
   compile_loader: bpftool_loadall
   programs:
   - name: iter
-- source: corpus/build/tracee/lsm_check.bpf.o
-  repo: tracee
-  test_method: attach_trigger
-  description: Tracee LSM probe for BPF capability checks.
-  category: security
-  family: tracee
-  level: production
-  hypothesis: Attached LSM probes exercise a realistic live-attach and trigger path
-    absent from test_run-only suites.
-  tags:
-  - security
-  - observability
-  - tracee
-  - production
-  - attach
-  prog_type: lsm
-  section: lsm/bpf
-  trigger: bpftool prog show >/dev/null
-  trigger_timeout_seconds: 20
-  programs:
-  - name: lsm_bpf_check
 - source: corpus/build/tracee/tracee.bpf.o
   repo: tracee
   test_method: attach_trigger
@@ -17933,31 +17841,15 @@ objects:
   input_size: 64
   programs:
   - name: _xdp_fail2
-- source: corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail3.bpf.o
+- source: corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern.bpf.o
   repo: xdp-tutorial
   test_method: bpf_prog_test_run
-  description: Tailgrow experiment failing sample 3.
   category: networking
   family: xdp-tutorial
   level: support
-  tags:
-  - networking
-  - xdp-tutorial
-  - xdp
-  - support
-  prog_type: xdp
-  section: xdp_fail3
   io_mode: packet
   test_input: corpus/inputs/macro_dummy_packet_64.bin
   input_size: 64
-  programs:
-  - name: _xdp_fail3
-- source: corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern.bpf.o
-  repo: xdp-tutorial
-  test_method: compile_only
-  category: networking
-  family: xdp-tutorial
-  level: support
   programs:
   - name: grow_parse
     tags:
@@ -18023,25 +17915,6 @@ objects:
   input_size: 64
   programs:
   - name: _xdp_end_loop
-- source: corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern3.bpf.o
-  repo: xdp-tutorial
-  test_method: bpf_prog_test_run
-  description: Tailgrow experiment working sample.
-  category: networking
-  family: xdp-tutorial
-  level: support
-  tags:
-  - networking
-  - xdp-tutorial
-  - xdp
-  - support
-  prog_type: xdp
-  section: xdp_works1
-  io_mode: packet
-  test_input: corpus/inputs/macro_dummy_packet_64.bin
-  input_size: 64
-  programs:
-  - name: _xdp_works1
 - source: corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern4.bpf.o
   repo: xdp-tutorial
   test_method: bpf_prog_test_run
@@ -18082,10 +17955,13 @@ objects:
   - name: _fix_port_egress
 - source: corpus/build/xdp-tutorial/packet-solutions/xdp_prog_kern_02.bpf.o
   repo: xdp-tutorial
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: networking
   family: xdp-tutorial
   level: support
+  io_mode: packet
+  test_input: corpus/inputs/macro_dummy_packet_64.bin
+  input_size: 64
   programs:
   - name: xdp_patch_ports_func
     tags:
@@ -18118,10 +17994,13 @@ objects:
     section: xdp_pass
 - source: corpus/build/xdp-tutorial/packet-solutions/xdp_prog_kern_03.bpf.o
   repo: xdp-tutorial
-  test_method: compile_only
+  test_method: bpf_prog_test_run
   category: networking
   family: xdp-tutorial
   level: support
+  io_mode: packet
+  test_input: corpus/inputs/macro_dummy_packet_64.bin
+  input_size: 64
   programs:
   - name: xdp_icmp_echo_func
     tags:

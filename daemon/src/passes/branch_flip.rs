@@ -807,17 +807,6 @@ mod tests {
         );
         let profiling = crate::pass::ProfilingData {
             branch_profiles,
-            program_hotness: Some(crate::profiler::PgoAnalysis {
-                prog_id: 42,
-                total: crate::profiler::ProgStats {
-                    run_cnt: 10000,
-                    run_time_ns: 50_000_000,
-                    avg_ns: Some(5000.0),
-                },
-                delta_run_cnt: 1000,
-                delta_run_time_ns: 5_000_000,
-                delta_avg_ns: Some(5000.0),
-            }),
             branch_miss_rate: Some(0.10), // 10% miss rate => high, should trigger
         };
 
@@ -855,7 +844,6 @@ mod tests {
                 );
                 m
             },
-            program_hotness: None,
             branch_miss_rate: Some(0.01), // 1% miss rate => low, should trigger
         };
 

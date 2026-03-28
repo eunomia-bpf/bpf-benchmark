@@ -148,8 +148,8 @@ fn test_cfg_analysis_with_subprogs() {
     let cfg = CFGAnalysis;
     let result = cfg.run(&prog);
 
-    assert!(result.branch_targets[3]);
     assert!(result.subprogs.len() >= 2);
+    assert_eq!(result.subprogs[1].start, 3);
 }
 
 #[test]
@@ -169,8 +169,8 @@ fn test_liveness_across_branch() {
     let result = liveness.run(&prog);
 
     assert!(result.live_out[0].contains(&1));
-    assert!(result.live_in[1].contains(&1));
-    assert!(result.live_in[4].contains(&0));
+    assert!(!result.live_out[1].contains(&0));
+    assert!(result.live_out[3].contains(&0));
 }
 
 #[test]

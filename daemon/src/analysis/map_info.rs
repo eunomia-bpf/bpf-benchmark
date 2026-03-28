@@ -130,6 +130,7 @@ impl Analysis for MapInfoAnalysis {
 }
 
 /// Scan the instruction stream and resolve each unique map reference.
+#[cfg(test)]
 pub fn collect_map_references<F>(
     insns: &[BpfInsn],
     map_ids: &[u32],

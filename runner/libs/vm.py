@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 from typing import Sequence
 
-from . import DEFAULT_VENV_ACTIVATE, ROOT_DIR, docs_tmp_dir, scratch_date_stamp, which
+from . import DEFAULT_VENV_ACTIVATE, ROOT_DIR, docs_tmp_dir, scratch_date_stamp
 from .machines import resolve_machine, resolve_machine_executable
 
 

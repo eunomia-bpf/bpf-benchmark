@@ -1,6 +1,6 @@
 # Tetragon Real End-to-End Benchmark
 
-- Generated: 2026-03-28T14:33:36.995618+00:00
+- Generated: 2026-03-28T18:45:54.064487+00:00
 - Mode: `tetragon_daemon`
 - Smoke: `False`
 - Duration per workload: `30s`
@@ -13,17 +13,17 @@
 
 ## Baseline
 
-- Application throughput mean: `250.91068352620184` ops/s
-- Events/s mean: `151.18081443256062`
-- Agent CPU mean: `13.29786900097839`%
-- BPF avg ns mean: `4620.2683901586115`
+- Application throughput mean: `64.21846551004046` ops/s
+- Events/s mean: `142.56076157294817`
+- Agent CPU mean: `10.033189764073278`%
+- BPF avg ns mean: `5142.128756957329`
 
-- stress_exec: ops/s=250.91068352620184, events/s=151.18081443256062, agent_cpu=13.29786900097839, bpf_avg_ns=4620.2683901586115
+- stress_exec: ops/s=64.21846551004046, events/s=142.56076157294817, agent_cpu=10.033189764073278, bpf_avg_ns=5142.128756957329
 
 ## Per-Program
 
-- execve_rate (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
-- event_execve (tracepoint): sites=224, stock_avg_ns=4620.2683901586115, rejit_avg_ns=None, speedup=None
+- execve_rate (tracepoint): sites=54, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- event_execve (tracepoint): sites=293, stock_avg_ns=5142.128756957329, rejit_avg_ns=None, speedup=None
 
 ## Comparison
 

@@ -914,26 +914,6 @@ std::vector<uint8_t> load_xlated_program_batch(int program_fd, uint32_t length)
     return bytes;
 }
 
-std::string sanitize_component_batch(std::string_view text)
-{
-    std::string output;
-    output.reserve(text.size());
-    for (const char ch : text) {
-        if (std::isalnum(static_cast<unsigned char>(ch)) || ch == '_' || ch == '-') {
-            output.push_back(ch);
-        } else {
-            output.push_back('-');
-        }
-    }
-    while (!output.empty() && (output.back() == '-' || output.back() == '.')) {
-        output.pop_back();
-    }
-    while (!output.empty() && (output.front() == '-' || output.front() == '.')) {
-        output.erase(output.begin());
-    }
-    return output.empty() ? "object" : output;
-}
-
 std::string format_byte_dump_batch(const std::vector<uint8_t> &bytes, size_t width, bool annotate_pc)
 {
     if (bytes.empty()) {

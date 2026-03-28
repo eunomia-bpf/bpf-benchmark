@@ -8,7 +8,7 @@ import sys
 import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import yaml
 

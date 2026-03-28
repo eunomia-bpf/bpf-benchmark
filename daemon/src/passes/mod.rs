@@ -178,6 +178,7 @@ pub fn build_full_pipeline() -> PassManager {
 ///
 /// Pass names are matched against `PASS_REGISTRY` entries by canonical name.
 /// Unknown names are rejected.
+#[cfg(test)]
 pub fn build_custom_pipeline(names: &[String]) -> Result<PassManager> {
     let mut pm = PassManager::new();
     register_standard_analyses(&mut pm);

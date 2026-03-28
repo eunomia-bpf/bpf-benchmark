@@ -18,7 +18,6 @@ pub struct BasicBlock {
 
 pub struct SubprogRange {
     pub start: usize,
-    pub end: usize,
 }
 
 /// Result of CFG analysis.
@@ -27,7 +26,6 @@ pub struct SubprogRange {
 pub struct CFGResult {
     pub blocks: Vec<BasicBlock>,
     pub insn_to_block: Vec<usize>,
-    pub branch_targets: Vec<bool>,
     pub subprogs: Vec<SubprogRange>,
 }
 
@@ -174,20 +172,16 @@ impl Analysis for CFGAnalysis {
         // Subprog boundaries
         subprog_entries.sort();
         subprog_entries.dedup();
-        let mut subprogs = vec![SubprogRange { start: 0, end: n }];
+        let mut subprogs = vec![SubprogRange { start: 0 }];
         for &entry in &subprog_entries {
             if entry > 0 {
-                subprogs.push(SubprogRange {
-                    start: entry,
-                    end: n,
-                });
+                subprogs.push(SubprogRange { start: entry });
             }
         }
 
         CFGResult {
             blocks,
             insn_to_block,
-            branch_targets,
             subprogs,
         }
     }

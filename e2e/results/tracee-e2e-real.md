@@ -1,6 +1,6 @@
 # Tracee Real End-to-End Benchmark
 
-- Generated: 2026-03-28T14:31:49.331201+00:00
+- Generated: 2026-03-28T18:44:02.536762+00:00
 - Mode: `tracee_daemon`
 - Duration per workload: `60s`
 - Smoke: `False`
@@ -13,19 +13,19 @@
 
 ## Baseline
 
-- exec_storm: app=2.541761316729036 bogo-ops/s, events/s=6480.799325951943, drops={'event_count': 0, 'lost_event_count': 0, 'lost_write_count': 0}, agent_cpu=9.94870586753221, bpf_avg_ns=None
-- file_io: app=5109.362720668877 IOPS, events/s=7.763585965384045, drops={'event_count': 0, 'lost_event_count': 0, 'lost_write_count': 0}, agent_cpu=0.19999905755777436, bpf_avg_ns=None
-- network: app=6179.781049213797 req/s, events/s=6182.026071378609, drops={'event_count': 0, 'lost_event_count': 0, 'lost_write_count': 0}, agent_cpu=19.349940399926073, bpf_avg_ns=None
+- exec_storm: app=2.445495564328929 bogo-ops/s, events/s=6703.908029312058, drops={'event_count': 0, 'lost_event_count': 0, 'lost_write_count': 0}, agent_cpu=9.64998771958646, bpf_avg_ns=None
+- file_io: app=5352.025521669283 IOPS, events/s=7.718442959356406, drops={'event_count': 0, 'lost_event_count': 0, 'lost_write_count': 0}, agent_cpu=0.14999851241475293, bpf_avg_ns=None
+- network: app=6215.461979869563 req/s, events/s=6217.70580495843, drops={'event_count': 0, 'lost_event_count': 0, 'lost_write_count': 0}, agent_cpu=20.28328796705536, bpf_avg_ns=None
 
 ## Post-ReJIT
 
-- exec_storm: app=47.673964150923425 bogo-ops/s, events/s=6514.598052807035, drops={'event_count': 0, 'lost_event_count': 0, 'lost_write_count': 0}, agent_cpu=9.531160002964167, bpf_avg_ns=None
-- file_io: app=5541.476231717004 IOPS, events/s=7.72459448743151, drops={'event_count': 0, 'lost_event_count': 0, 'lost_write_count': 0}, agent_cpu=0.13333309146266104, bpf_avg_ns=None
-- network: app=6492.228526743261 req/s, events/s=6494.29464555979, drops={'event_count': 0, 'lost_event_count': 0, 'lost_write_count': 0}, agent_cpu=19.9666160985492, bpf_avg_ns=None
+- exec_storm: app=71.59703134276546 bogo-ops/s, events/s=7586.173028647651, drops={'event_count': 0, 'lost_event_count': 0, 'lost_write_count': 0}, agent_cpu=10.683257642987096, bpf_avg_ns=None
+- file_io: app=6129.987782098649 IOPS, events/s=7.693212500207147, drops={'event_count': 0, 'lost_event_count': 0, 'lost_write_count': 0}, agent_cpu=0.18333224827836642, bpf_avg_ns=None
+- network: app=6309.372323718108 req/s, events/s=6311.438468281649, drops={'event_count': 0, 'lost_event_count': 0, 'lost_write_count': 0}, agent_cpu=20.14997822559767, bpf_avg_ns=None
 
 ## Comparison
 
-- exec_storm: app_delta=1775.627103030843%, events_delta=0.5215209599184399%, cpu_delta=-4.196986724984115%, bpf_ns_delta=None%
-- file_io: app_delta=8.45728781987039%, events_delta=-0.5022354119138791%, cpu_delta=-33.33314012035047%, bpf_ns_delta=None%
-- network: app_delta=5.055963553420942%, events_delta=5.05123353696152%, cpu_delta=3.186964331039915%, bpf_ns_delta=None%
+- exec_storm: app_delta=2827.7105379830236%, events_delta=13.160457981792002%, cpu_delta=10.707473972256167%, bpf_ns_delta=None%
+- file_io: app_delta=14.535847358715918%, events_delta=-0.3268853482770753%, cpu_delta=22.222710963588856%, bpf_ns_delta=None%
+- network: app_delta=1.5109149432930191%, events_delta=1.5075120352022735%, cpu_delta=-0.6572393079180042%, bpf_ns_delta=None%
 

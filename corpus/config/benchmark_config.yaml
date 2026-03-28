@@ -22,9 +22,6 @@ profiles:
     iterations: 10
     warmups: 2
     repeat: 500
-  ablation_map_inline:
-    passes:
-      active_list: [map_inline, const_prop, dce]
   ablation_map_inline_only:
     passes:
       active_list: [map_inline]

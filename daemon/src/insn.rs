@@ -55,6 +55,7 @@ pub const BPF_EXIT: u8 = 0x90;
 
 // ── Pseudo source-register tags ────────────────────────────────────
 pub const BPF_PSEUDO_CALL: u8 = 1;
+#[cfg(test)]
 pub const BPF_PSEUDO_KFUNC_CALL: u8 = 2;
 pub const BPF_PSEUDO_KINSN_SIDECAR: u8 = 3;
 pub const BPF_PSEUDO_KINSN_CALL: u8 = 4;
@@ -212,6 +213,7 @@ impl BpfInsn {
     ///
     /// `off = 0` means vmlinux BTF. For module kfuncs, `off` is the 1-based
     /// slot in the load/REJIT `fd_array`.
+    #[cfg(test)]
     pub const fn call_kfunc_with_off(btf_id: i32, off: i16) -> Self {
         Self {
             code: BPF_JMP | BPF_CALL,
@@ -222,6 +224,7 @@ impl BpfInsn {
     }
 
     /// `call kfunc` against vmlinux BTF.
+    #[cfg(test)]
     pub const fn call_kfunc(btf_id: i32) -> Self {
         Self::call_kfunc_with_off(btf_id, 0)
     }
@@ -315,6 +318,7 @@ impl BpfInsn {
     }
 
     #[inline]
+    #[cfg(test)]
     pub const fn is_kinsn_sidecar(&self) -> bool {
         self.code == (BPF_ALU64 | BPF_MOV | BPF_K) && self.src_reg() == BPF_PSEUDO_KINSN_SIDECAR
     }

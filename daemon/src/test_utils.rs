@@ -24,7 +24,6 @@ static NEXT_TEST_MAP_ID: AtomicU32 = AtomicU32::new(10_000);
 pub struct LoadedFixtureProgram {
     pub object_path: PathBuf,
     pub section_name: String,
-    pub symbol_name: Option<String>,
     pub prog_type: u32,
     pub insns: Vec<BpfInsn>,
     pub used_maps: Vec<ElfMapMetadata>,
@@ -151,7 +150,6 @@ fn materialize_program_fixture(
     LoadedFixtureProgram {
         object_path: object.path.clone(),
         section_name: program.section_name.clone(),
-        symbol_name: program.symbol_name.clone(),
         prog_type: program.prog_type,
         insns: program.insns.clone(),
         used_maps,

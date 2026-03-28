@@ -14,7 +14,7 @@ use std::sync::Arc;
 use serde::Serialize;
 
 use crate::insn::{dump_bytecode_compact, BpfBytecodeDump, BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
-use crate::verifier_log::{self, VerifierInsn};
+use crate::verifier_log::VerifierInsn;
 
 // ── Per-instruction annotation — populated by analysis passes, read by transform passes.
 #[derive(Clone, Debug, Default)]
@@ -31,25 +31,10 @@ pub struct BranchProfile {
     pub not_taken_count: u64,
 }
 
-/// Profiling data that can be injected into the pass pipeline.
-///
-/// Maps instruction PCs to branch profiles. Consumed by PGO-guided passes
-/// like BranchFlipPass. When provided to `PassManager::run_with_profiling`,
-/// the data is injected into the program's annotations before pass execution.
-///
-/// `program_hotness` provides program-level activity metrics from the profiler.
-/// `branch_profiles` provides per-PC branch taken/not-taken counts (when available).
+#[cfg(test)]
 #[derive(Clone, Debug, Default)]
 pub struct ProfilingData {
-    /// Per-PC branch profiles.
     pub branch_profiles: HashMap<usize, BranchProfile>,
-    /// Program-level hotness from the profiler (run_cnt/run_time_ns deltas).
-    /// Future passes can use this to gate optimization on hot programs.
-    #[cfg_attr(not(test), allow(dead_code))]
-    pub program_hotness: Option<crate::profiler::PgoAnalysis>,
-    /// Program-level branch miss rate from PMU hardware counters.
-    /// Computed as branch_misses / branch_instructions during the observation window.
-    /// None if PMU counters are unavailable (e.g., no hardware PMU in VM).
     pub branch_miss_rate: Option<f64>,
 }
 
@@ -158,6 +143,7 @@ impl BpfProgram {
     ///
     /// For each PC in the profiling data that is within bounds, sets the
     /// corresponding annotation's branch_profile.
+    #[cfg(test)]
     pub fn inject_profiling(&mut self, data: &ProfilingData) {
         for (&pc, profile) in &data.branch_profiles {
             if pc < self.annotations.len() {
@@ -176,8 +162,9 @@ impl BpfProgram {
     }
 
     /// Parse and attach a raw verifier log to this program.
+    #[cfg(test)]
     pub fn set_verifier_log(&mut self, log: &str) {
-        self.set_verifier_states(verifier_log::parse_verifier_log(log));
+        self.set_verifier_states(crate::verifier_log::parse_verifier_log(log));
     }
 
     /// Record a transform operation.
@@ -347,6 +334,7 @@ pub struct MapInlineRecord {
 }
 
 /// High-level pass classification used by diagnostics and tests.
+#[cfg(test)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PassCategory {
     Optimization,
@@ -362,6 +350,7 @@ pub trait BpfPass: Send + Sync {
     fn name(&self) -> &str;
 
     /// High-level classification for this pass.
+    #[cfg(test)]
     fn category(&self) -> PassCategory {
         PassCategory::Optimization
     }
@@ -564,6 +553,7 @@ impl PlatformCapabilities {
 pub enum Arch {
     #[default]
     X86_64,
+    #[cfg_attr(not(target_arch = "aarch64"), allow(dead_code))]
     Aarch64,
 }
 
@@ -806,6 +796,7 @@ impl PassManager {
     /// If `profiling` is provided, injects branch profiles into the program's
     /// annotations before running the pipeline. This enables PGO-guided passes
     /// like BranchFlipPass to make data-driven decisions.
+    #[cfg(test)]
     pub fn run_with_profiling(
         &self,
         program: &mut BpfProgram,

@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from . import ensure_parent
-from .commands import build_runner_command
 from .results import parse_runner_sample
 
 

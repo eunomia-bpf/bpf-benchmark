@@ -160,41 +160,6 @@ def collect_perf_stat_for_program(
     return result
 
 
-def _run_perf_collection(
-    prog_ids: Sequence[int],
-    duration_s: int | float,
-    *,
-    events: Sequence[str],
-    max_workers: int,
-) -> dict[int, dict[str, Any]]:
-    if not prog_ids:
-        return {}
-    results: dict[int, dict[str, Any]] = {}
-    worker_count = max(1, min(max_workers, len(prog_ids)))
-    with ThreadPoolExecutor(max_workers=worker_count) as executor:
-        futures: dict[Future[dict[str, Any]], int] = {
-            executor.submit(
-                collect_perf_stat_for_program,
-                int(prog_id),
-                duration_s,
-                events=events,
-            ): int(prog_id)
-            for prog_id in prog_ids
-        }
-        for future in as_completed(futures):
-            prog_id = futures[future]
-            try:
-                results[prog_id] = future.result()
-            except Exception as exc:
-                results[prog_id] = {
-                    "prog_id": int(prog_id),
-                    "events": {},
-                    "errors": [str(exc)],
-                    "branch_miss_rate": None,
-                }
-    return results
-
-
 def _hotness_labels(records: list[dict[str, Any]]) -> dict[int, str]:
     active = [
         record

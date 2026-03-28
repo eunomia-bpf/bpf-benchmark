@@ -32,7 +32,6 @@ from runner.libs import (  # noqa: E402
     run_command,
     smoke_output_path,
     tail_text,
-    which,
     write_json,
     write_text,
 )
@@ -56,7 +55,6 @@ from runner.libs.workload import (  # noqa: E402
     run_user_exec_loop,
 )
 from e2e.case_common import (  # noqa: E402
-    git_sha,
     host_metadata,
     percent_delta,
 )

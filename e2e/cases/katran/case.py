@@ -41,12 +41,10 @@ from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes
 
 from e2e.case_common import (  # noqa: E402
     capture_map_state,
-    git_sha,
     host_metadata,
     relpath,
     summarize_numbers,
     percent_delta,
-    percentile,
     speedup_ratio,
     persist_results,
 )
@@ -89,7 +87,6 @@ DEFAULT_SMOKE_WARMUP_PACKET_COUNT = 100
 DEFAULT_MIN_MEASUREMENT_REQUESTS = 1000
 DEFAULT_SMOKE_MIN_MEASUREMENT_REQUESTS = 100
 REQUEST_FAILURE_PREVIEW_LIMIT = 5
-WARMUP_MAX_ATTEMPT_FACTOR = 3
 WRK_OUTPUT_PREVIEW_LINES = 40
 WRK_SOCKET_ERRORS_RE = re.compile(
     r"Socket errors:\s*connect\s+(\d+),\s*read\s+(\d+),\s*write\s+(\d+),\s*timeout\s+(\d+)",
@@ -200,58 +197,6 @@ class PhaseSample:
     system_cpu: dict[str, object]
     bpf: dict[str, object]
     state_reset: dict[str, object]
-
-
-
-def extract_request_latencies(sample: Mapping[str, object]) -> list[float]:
-    latencies = sample.get("request_latencies_ms")
-    if isinstance(latencies, list):
-        return [float(value) for value in latencies if value is not None]
-    extracted: list[float] = []
-    for request in sample.get("requests") or []:
-        if not isinstance(request, Mapping):
-            continue
-        latency = request.get("latency_ms")
-        if latency is not None:
-            extracted.append(float(latency))
-    return extracted
-
-
-def summarize_request_records(records: Sequence[Mapping[str, object]]) -> dict[str, object]:
-    latencies: list[float] = []
-    failures: list[dict[str, object]] = []
-    success_count = 0
-    for record in records:
-        if bool(record.get("ok")):
-            success_count += 1
-        latency = record.get("latency_ms")
-        if latency is not None:
-            latencies.append(float(latency))
-        if len(failures) >= REQUEST_FAILURE_PREVIEW_LIMIT:
-            continue
-        if bool(record.get("ok")) and not record.get("error"):
-            continue
-        failures.append(
-            {
-                "index": int(record.get("index", -1) or -1),
-                "error": str(record.get("error") or ""),
-                "snippet": str(record.get("snippet") or "")[:200],
-            }
-        )
-    return {
-        "request_count": len(records),
-        "success_count": success_count,
-        "ops_per_sec": None,
-        "latency_ms": {
-            **summarize_numbers(latencies),
-            "p50": percentile(latencies, 50.0),
-            "p90": percentile(latencies, 90.0),
-            "p99": percentile(latencies, 99.0),
-        },
-        "latencies_ms": latencies,
-        "failure_preview": failures,
-    }
-
 
 def wrk_binary() -> str | None:
     return which("wrk")
@@ -1634,45 +1579,6 @@ def configure_katran_maps(session: KatranDirectSession) -> dict[str, object]:
         "default_gateway_mac": ROUTER_LB_MAC,
         "ch_ring_size": CH_RING_SIZE,
     }
-
-
-CLIENT_REQUEST_SCRIPT = """
-import json
-import socket
-import sys
-import time
-
-host = sys.argv[1]
-port = int(sys.argv[2])
-count = int(sys.argv[3])
-timeout = float(sys.argv[4])
-payload = b"GET / HTTP/1.0\\r\\nHost: katran\\r\\nConnection: close\\r\\n\\r\\n"
-results = []
-for index in range(count):
-    entry = {"index": index, "ok": False, "error": "", "bytes": 0, "latency_ms": None, "snippet": ""}
-    started = time.monotonic()
-    try:
-        with socket.create_connection((host, port), timeout=timeout) as sock:
-            sock.settimeout(timeout)
-            sock.sendall(payload)
-            chunks = []
-            while True:
-                chunk = sock.recv(4096)
-                if not chunk:
-                    break
-                chunks.append(chunk)
-        data = b"".join(chunks)
-        text = data.decode("latin1", "replace")
-        entry["latency_ms"] = (time.monotonic() - started) * 1000.0
-        entry["bytes"] = len(data)
-        entry["snippet"] = text[:200]
-        entry["ok"] = text.startswith("HTTP/1.0 200 OK") or text.startswith("HTTP/1.1 200 OK")
-    except Exception as exc:
-        entry["error"] = str(exc)
-    results.append(entry)
-print(json.dumps(results))
-"""
-
 PARALLEL_CLIENT_REQUEST_SCRIPT = """
 import json
 import socket
@@ -1797,32 +1703,6 @@ print(
 """
 
 
-def perform_http_requests(iterations: int) -> list[dict[str, object]]:
-    payload = run_json_command(
-        [
-            "ip",
-            "netns",
-            "exec",
-            CLIENT_NS,
-            "python3",
-            "-c",
-            CLIENT_REQUEST_SCRIPT,
-            VIP_IP,
-            str(VIP_PORT),
-            str(max(1, int(iterations))),
-            str(HTTP_TIMEOUT_S),
-        ],
-        timeout=max(30, int(iterations) * 5),
-    )
-    if not isinstance(payload, list):
-        raise RuntimeError("client request payload is not a JSON list")
-    requests: list[dict[str, object]] = []
-    for item in payload:
-        if isinstance(item, dict):
-            requests.append(dict(item))
-    return requests
-
-
 def run_parallel_http_load(
     *,
     duration_s: int | float,
@@ -1849,37 +1729,6 @@ def run_parallel_http_load(
     if not isinstance(payload, Mapping):
         raise RuntimeError("parallel client payload is not a JSON object")
     return dict(payload)
-
-
-def run_warmup_requests(iterations: int, *, batch_size: int) -> dict[str, object]:
-    if iterations <= 0:
-        return {
-            "request_count": 0,
-            "success_count": 0,
-            "latency_ms": summarize_numbers([]),
-            "failure_preview": [],
-        }
-    records: list[dict[str, object]] = []
-    requested = max(0, int(iterations))
-    success_count = 0
-    attempted = 0
-    attempt_budget = max(requested, requested * WARMUP_MAX_ATTEMPT_FACTOR)
-    while success_count < requested and attempted < attempt_budget:
-        current_batch = min(max(1, int(batch_size)), requested - success_count)
-        batch_records = perform_http_requests(current_batch)
-        records.extend(batch_records)
-        attempted += len(batch_records)
-        success_count += sum(1 for record in batch_records if bool(record.get("ok")))
-        if success_count < requested and any(not bool(record.get("ok")) for record in batch_records):
-            time.sleep(0.2)
-    summary = summarize_request_records(records)
-    summary["requested_request_count"] = requested
-    summary["attempted_request_count"] = attempted
-    summary["completed_warmup_requests"] = min(requested, int(summary["success_count"] or 0))
-    if int(summary["success_count"] or 0) < requested:
-        raise RuntimeError(f"Katran warmup validation failed: {summary['failure_preview']}")
-    summary.pop("latencies_ms", None)
-    return summary
 
 
 def run_warmup_wrk(
@@ -1911,25 +1760,6 @@ def run_warmup_wrk(
     if int(summary.get("success_count", 0) or 0) != int(summary.get("request_count", 0) or 0):
         raise RuntimeError(f"Katran wrk warmup failed: {summary.get('failure_preview')}")
     return summary
-
-
-def execute_http_measurement_loop(
-    *,
-    batch_size: int,
-    duration_s: int | float,
-    minimum_requests: int,
-) -> tuple[list[dict[str, object]], int, float]:
-    records: list[dict[str, object]] = []
-    batches = 0
-    started = time.monotonic()
-    requested_duration = max(0.0, float(duration_s))
-    request_target = max(1, int(minimum_requests), int(batch_size))
-    while True:
-        records.extend(perform_http_requests(batch_size))
-        batches += 1
-        elapsed = time.monotonic() - started
-        if elapsed >= requested_duration and len(records) >= request_target:
-            return records, batches, elapsed
 
 
 WARMUP_RETRY_COUNT = 3

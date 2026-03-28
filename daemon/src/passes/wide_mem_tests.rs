@@ -66,7 +66,6 @@ fn test_scan_wide_mem_4byte() {
     let s = &sites[0];
     assert_eq!(s.start_pc, 0);
     assert_eq!(s.old_len, 10);
-    assert_eq!(s.family, Family::WideMem);
     assert_eq!(s.get_binding("dst_reg"), Some(0));
     assert_eq!(s.get_binding("base_reg"), Some(6));
     assert_eq!(s.get_binding("base_off"), Some(10));
@@ -176,7 +175,6 @@ fn test_scan_high_first_2byte() {
     let s = &sites[0];
     assert_eq!(s.start_pc, 0);
     assert_eq!(s.old_len, 4);
-    assert_eq!(s.family, Family::WideMem);
     assert_eq!(s.get_binding("dst_reg"), Some(1));
     assert_eq!(s.get_binding("base_reg"), Some(6));
     assert_eq!(s.get_binding("base_off"), Some(10));
@@ -191,7 +189,6 @@ fn test_scan_high_first_4byte() {
     let s = &sites[0];
     assert_eq!(s.start_pc, 0);
     assert_eq!(s.old_len, 10);
-    assert_eq!(s.family, Family::WideMem);
     assert_eq!(s.get_binding("dst_reg"), Some(2));
     assert_eq!(s.get_binding("base_reg"), Some(1));
     assert_eq!(s.get_binding("base_off"), Some(8));
@@ -272,7 +269,6 @@ fn test_emit_wide_mem_4() {
     let site = RewriteSite {
         start_pc: 5,
         old_len: 10,
-        family: Family::WideMem,
         bindings: vec![
             Binding {
                 name: "dst_reg",
@@ -305,7 +301,6 @@ fn test_emit_wide_mem_2() {
     let site = RewriteSite {
         start_pc: 0,
         old_len: 4,
-        family: Family::WideMem,
         bindings: vec![
             Binding {
                 name: "dst_reg",
@@ -338,7 +333,6 @@ fn test_emit_wide_mem_8() {
     let site = RewriteSite {
         start_pc: 0,
         old_len: 22,
-        family: Family::WideMem,
         bindings: vec![
             Binding {
                 name: "dst_reg",
@@ -371,7 +365,6 @@ fn test_emit_wide_mem_unsupported_width() {
     let site = RewriteSite {
         start_pc: 0,
         old_len: 7,
-        family: Family::WideMem,
         bindings: vec![
             Binding {
                 name: "dst_reg",

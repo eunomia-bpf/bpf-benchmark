@@ -21,10 +21,12 @@ const BPF_MAP_TYPE_PERCPU_HASH: u32 = 5;
 const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = 6;
 const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = 10;
 const BPF_PROG_GET_NEXT_ID: u32 = 11;
+#[cfg(test)]
 const BPF_MAP_GET_NEXT_ID: u32 = 12;
 const BPF_PROG_GET_FD_BY_ID: u32 = 13;
 const BPF_MAP_GET_FD_BY_ID: u32 = 14;
 const BPF_OBJ_GET_INFO_BY_FD: u32 = 15;
+#[cfg(test)]
 const BPF_BTF_LOAD: u32 = 18;
 const BPF_BTF_GET_FD_BY_ID: u32 = 19;
 // BPF_TASK_FD_QUERY=20, BPF_MAP_LOOKUP_AND_DELETE_ELEM=21, BPF_MAP_FREEZE=22
@@ -526,30 +528,6 @@ pub fn bpf_map_get_info_by_id(id: u32) -> Result<(BpfMapInfo, bool)> {
     Ok((info, frozen))
 }
 
-/// Lookup a map element by fd and return the raw value bytes.
-pub fn bpf_map_lookup_elem(fd: RawFd, key: &[u8], value_size: usize) -> Result<Vec<u8>> {
-    let mut attr: AttrMapElem = zeroed_attr();
-    let mut value = vec![0u8; value_size];
-
-    attr.map_fd = fd as u32;
-    attr.key = key.as_ptr() as u64;
-    attr.value = value.as_mut_ptr() as u64;
-    attr.flags = 0;
-
-    let ret = unsafe {
-        sys_bpf(
-            BPF_MAP_LOOKUP_ELEM,
-            &mut attr as *mut _ as *mut u8,
-            std::mem::size_of::<AttrMapElem>() as u32,
-        )
-    };
-    if ret < 0 {
-        bail!(bpf_err("BPF_MAP_LOOKUP_ELEM"));
-    }
-
-    Ok(value)
-}
-
 /// Lookup a map element by fd and return `None` when the key is absent.
 pub fn bpf_map_lookup_elem_optional(
     fd: RawFd,
@@ -911,6 +889,7 @@ const BPF_PSEUDO_MAP_VALUE: u8 = 2;
 /// 5. Patches the bytecode to use the new FDs
 ///
 /// Returns the list of opened map `OwnedFd`s (caller must keep them alive until REJIT completes).
+#[cfg(test)]
 pub fn relocate_map_fds(insns: &mut [BpfInsn], map_ids: &[u32]) -> Result<Vec<OwnedFd>> {
     relocate_map_fds_with_bindings(insns, map_ids, &HashMap::new())
 }

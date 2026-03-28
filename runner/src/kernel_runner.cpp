@@ -2040,26 +2040,6 @@ uint64_t read_skb_result(const __sk_buff &ctx)
            (static_cast<uint64_t>(ctx.cb[1]) << 32);
 }
 
-int sys_memfd_create(const char *name, unsigned int flags)
-{
-    return static_cast<int>(syscall(__NR_memfd_create, name, flags));
-}
-
-void write_full_or_fail(int fd, const uint8_t *data, size_t size)
-{
-    size_t written = 0;
-    while (written < size) {
-        const ssize_t rc = write(fd, data + written, size - written);
-        if (rc < 0) {
-            if (errno == EINTR) {
-                continue;
-            }
-            fail("unable to write memfd: " + std::string(strerror(errno)));
-        }
-        written += static_cast<size_t>(rc);
-    }
-}
-
 std::string trim_log_buffer(const std::vector<char> &buffer)
 {
     size_t length = 0;
@@ -2070,29 +2050,6 @@ std::string trim_log_buffer(const std::vector<char> &buffer)
         --length;
     }
     return std::string(buffer.data(), length);
-}
-
-scoped_fd build_sealed_memfd_from_blob(const char *name,
-                                       const std::vector<uint8_t> &blob,
-                                       std::string_view description)
-{
-    scoped_fd memfd(sys_memfd_create(name, MFD_CLOEXEC | MFD_ALLOW_SEALING));
-    if (memfd.get() < 0) {
-        fail("memfd_create failed for " + std::string(description) + ": " +
-             std::string(strerror(errno)));
-    }
-
-    if (!blob.empty()) {
-        write_full_or_fail(memfd.get(), blob.data(), blob.size());
-    }
-
-    const int seals = F_SEAL_WRITE | F_SEAL_GROW | F_SEAL_SHRINK;
-    if (fcntl(memfd.get(), F_ADD_SEALS, seals) != 0) {
-        fail("unable to seal " + std::string(description) +
-             " memfd: " + std::string(strerror(errno)));
-    }
-
-    return memfd;
 }
 
 uint64_t read_kernel_test_run_result(std::string_view effective_io_mode,

@@ -16,20 +16,6 @@ use super::utils::fixup_all_branches;
 // Pattern matching (absorbed from matcher.rs)
 // ═══════════════════════════════════════════════════════════════════
 
-/// Identifies which transform family a matched site belongs to.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Family {
-    WideMem,
-}
-
-impl std::fmt::Display for Family {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Family::WideMem => write!(f, "wide_mem"),
-        }
-    }
-}
-
 /// A named binding captured from a matched pattern.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Binding {
@@ -45,8 +31,6 @@ pub struct RewriteSite {
     pub start_pc: usize,
     /// Number of original instructions consumed by this pattern.
     pub old_len: usize,
-    /// Which transform family.
-    pub family: Family,
     /// Captured bindings (register numbers, offsets, widths, etc.).
     pub bindings: Vec<Binding>,
 }
@@ -110,7 +94,6 @@ fn try_match_wide_mem_at(insns: &[BpfInsn], pc: usize) -> Option<RewriteSite> {
             return Some(RewriteSite {
                 start_pc: pc,
                 old_len: len_a,
-                family: Family::WideMem,
                 bindings: vec![
                     Binding {
                         name: "dst_reg",
@@ -141,7 +124,6 @@ fn try_match_wide_mem_at(insns: &[BpfInsn], pc: usize) -> Option<RewriteSite> {
                 return Some(RewriteSite {
                     start_pc: pc,
                     old_len: len_b,
-                    family: Family::WideMem,
                     bindings: vec![
                         Binding {
                             name: "dst_reg",

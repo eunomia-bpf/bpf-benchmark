@@ -1,6 +1,6 @@
 # scx_rusty End-to-End Benchmark
 
-- Generated: 2026-03-28T14:39:19.670199+00:00
+- Generated: 2026-03-28T18:55:04.482633+00:00
 - Mode: `scx_rusty_loader`
 - Duration per workload: `30s`
 - Smoke: `False`
@@ -21,9 +21,9 @@
 
 ## Baseline
 
-- hackbench: throughput=5.964505575792195 runs/s, lat_p50_ms=155.0, ctx/s=959809.5034643677, agent_cpu=0.13333301862740987
-- stress-ng-cpu: throughput=11621.65 bogo-ops/s, lat_p50_ms=None, ctx/s=134.75881338371113, agent_cpu=0.2999988601843304
-- sysbench-cpu: throughput=17651.11 events/s, lat_p50_ms=0.23, ctx/s=124.601219244538, agent_cpu=0.3666639835051909
+- hackbench: throughput=5.7184761406482565 runs/s, lat_p50_ms=161.0, ctx/s=930073.0406754334, agent_cpu=0.16666625156214532
+- stress-ng-cpu: throughput=11570.64 bogo-ops/s, lat_p50_ms=None, ctx/s=132.7675225698794, agent_cpu=0.39999737743052954
+- sysbench-cpu: throughput=17641.13 events/s, lat_p50_ms=0.23, ctx/s=117.97755843060109, agent_cpu=0.3666637804482731
 
 ## Comparison
 

@@ -48,10 +48,6 @@ pub struct ElfMapMetadata {
     pub value_size: Option<u32>,
     pub max_entries: Option<u32>,
     pub map_flags: Option<u32>,
-    pub numa_node: Option<u32>,
-    pub pinning: Option<u32>,
-    pub section_offset: usize,
-    pub symbol_size: usize,
 }
 
 #[derive(Clone, Debug)]
@@ -64,7 +60,6 @@ pub struct ElfProgramMapRelocation {
 
 #[derive(Clone, Debug)]
 pub struct ElfProgramInfo {
-    pub section_index: usize,
     pub section_name: String,
     pub symbol_name: Option<String>,
     pub prog_type: u32,
@@ -118,8 +113,6 @@ struct RawMapMetadata {
     value_size: Option<u32>,
     max_entries: Option<u32>,
     map_flags: Option<u32>,
-    numa_node: Option<u32>,
-    pinning: Option<u32>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -130,8 +123,6 @@ struct BtfMapMetadata {
     value_size: Option<u32>,
     max_entries: Option<u32>,
     map_flags: Option<u32>,
-    numa_node: Option<u32>,
-    pinning: Option<u32>,
 }
 
 #[derive(Clone, Debug)]
@@ -160,7 +151,6 @@ enum BtfType {
         nelems: u32,
     },
     Struct {
-        name: String,
         size: u32,
         members: Vec<BtfMember>,
     },
@@ -427,7 +417,6 @@ pub fn parse_bpf_object<P: AsRef<Path>>(path: P) -> Result<ElfBpfObject> {
         }
 
         programs.push(ElfProgramInfo {
-            section_index,
             section_name: section_name.clone(),
             symbol_name: primary_program_symbol_name(&elf, section_index),
             prog_type: infer_prog_type_from_section(&section_name),
@@ -561,10 +550,6 @@ fn collect_global_data_maps(elf: &Elf<'_>, base_index: usize) -> Vec<GlobalDataM
                 value_size: Some(value_size),
                 max_entries: Some(1),
                 map_flags: None,
-                numa_node: None,
-                pinning: None,
-                section_offset: 0,
-                symbol_size: value_size as usize,
             },
             symbol_indices,
         });
@@ -623,8 +608,6 @@ fn parse_raw_map_definition(bytes: &[u8]) -> RawMapMetadata {
     let value_size = read_u32(8).filter(|value| *value != 0);
     let max_entries = read_u32(12).filter(|value| *value != 0);
     let map_flags = read_u32(16).filter(|value| *value != 0);
-    let pinning = read_u32(20).filter(|value| *value != 0);
-    let numa_node = read_u32(24).filter(|value| *value != 0);
 
     RawMapMetadata {
         map_type,
@@ -632,8 +615,6 @@ fn parse_raw_map_definition(bytes: &[u8]) -> RawMapMetadata {
         value_size,
         max_entries,
         map_flags,
-        numa_node,
-        pinning,
     }
 }
 
@@ -685,8 +666,6 @@ fn collect_btf_map_metadata(data: &[u8], elf: &Elf<'_>) -> Result<Vec<BtfMapMeta
                     metadata.max_entries = parsed_btf.decode_uint_member(member.type_id)
                 }
                 "map_flags" => metadata.map_flags = parsed_btf.decode_uint_member(member.type_id),
-                "numa_node" => metadata.numa_node = parsed_btf.decode_uint_member(member.type_id),
-                "pinning" => metadata.pinning = parsed_btf.decode_uint_member(member.type_id),
                 _ => {}
             }
         }
@@ -841,11 +820,7 @@ fn parse_btf(bytes: &[u8]) -> Result<ParsedBtf> {
                         type_id,
                     });
                 }
-                BtfType::Struct {
-                    name,
-                    size: size_or_type,
-                    members,
-                }
+                BtfType::Struct { size: size_or_type, members }
             }
             5 => {
                 for _ in 0..vlen {
@@ -1005,10 +980,6 @@ fn merge_map_metadata(
                 value_size: btf.value_size.or(raw.value_size),
                 max_entries: btf.max_entries.or(raw.max_entries),
                 map_flags: btf.map_flags.or(raw.map_flags),
-                numa_node: btf.numa_node.or(raw.numa_node),
-                pinning: btf.pinning.or(raw.pinning),
-                section_offset: symbol.section_offset,
-                symbol_size: symbol.symbol_size,
             }
         })
         .collect()
