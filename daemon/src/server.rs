@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: MIT
 //! Unix socket server implementation.
 
+use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
+use serde::Serialize;
 
 use crate::commands::{self, OptimizeMode};
 use crate::invalidation::{MapInvalidationTracker, MapValueReader};
-use crate::{bpf, pass, profiler};
+use crate::{bpf, insn, pass, profiler};
+
+const DEFAULT_HOTNESS_WINDOW_MS: u64 = 250;
 
 /// Global shutdown flag set by signal handler.
 static SHUTDOWN_FLAG: AtomicBool = AtomicBool::new(false);
@@ -80,6 +84,109 @@ impl ProfilingState {
     fn profiling_data_for(&self, prog_id: u32) -> Result<Option<pass::ProfilingData>> {
         Ok(self.snapshot()?.profiling_data_for(prog_id))
     }
+}
+
+#[derive(Clone, Debug)]
+struct LiveProgramCandidate {
+    prog_id: u32,
+    prog_name: String,
+    orig_insn_count: usize,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct OptimizeAllOrderEntry {
+    prog_id: u32,
+    prog_name: String,
+    orig_insn_count: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    hotness_score: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    run_cnt_delta: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    run_time_ns_delta: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    avg_ns: Option<f64>,
+}
+
+fn collect_live_program_candidates() -> Result<Vec<LiveProgramCandidate>> {
+    let mut candidates = Vec::new();
+    for prog_id in bpf::iter_prog_ids() {
+        let prog_id = prog_id.context("enumerate program IDs for optimize-all")?;
+        let (info, orig_insns) = bpf::get_orig_insns_by_id(prog_id)
+            .with_context(|| format!("collect optimize-all metadata for prog {}", prog_id))?;
+        let orig_insn_count = if !orig_insns.is_empty() {
+            orig_insns.len()
+        } else {
+            info.orig_prog_len as usize / std::mem::size_of::<insn::BpfInsn>()
+        };
+        candidates.push(LiveProgramCandidate {
+            prog_id,
+            prog_name: info.name_str().to_string(),
+            orig_insn_count,
+        });
+    }
+    Ok(candidates)
+}
+
+fn default_optimize_all_order(candidates: &[LiveProgramCandidate]) -> Vec<OptimizeAllOrderEntry> {
+    candidates
+        .iter()
+        .map(|candidate| OptimizeAllOrderEntry {
+            prog_id: candidate.prog_id,
+            prog_name: candidate.prog_name.clone(),
+            orig_insn_count: candidate.orig_insn_count,
+            hotness_score: None,
+            run_cnt_delta: None,
+            run_time_ns_delta: None,
+            avg_ns: None,
+        })
+        .collect()
+}
+
+fn optimize_all_order_from_ranking(
+    candidates: &[LiveProgramCandidate],
+    ranking: &profiler::HotnessRanking,
+    observation_window: Duration,
+) -> Vec<OptimizeAllOrderEntry> {
+    let candidates_by_id: HashMap<u32, &LiveProgramCandidate> = candidates
+        .iter()
+        .map(|candidate| (candidate.prog_id, candidate))
+        .collect();
+    let mut ranked_ids = HashSet::new();
+    let mut ordered = Vec::with_capacity(candidates.len());
+
+    for analysis in &ranking.ranked {
+        let Some(candidate) = candidates_by_id.get(&analysis.prog_id) else {
+            continue;
+        };
+        ranked_ids.insert(analysis.prog_id);
+        ordered.push(OptimizeAllOrderEntry {
+            prog_id: candidate.prog_id,
+            prog_name: candidate.prog_name.clone(),
+            orig_insn_count: candidate.orig_insn_count,
+            hotness_score: Some(analysis.hotness_score(observation_window)),
+            run_cnt_delta: Some(analysis.delta_run_cnt),
+            run_time_ns_delta: Some(analysis.delta_run_time_ns),
+            avg_ns: analysis.delta_avg_ns,
+        });
+    }
+
+    for candidate in candidates {
+        if ranked_ids.contains(&candidate.prog_id) {
+            continue;
+        }
+        ordered.push(OptimizeAllOrderEntry {
+            prog_id: candidate.prog_id,
+            prog_name: candidate.prog_name.clone(),
+            orig_insn_count: candidate.orig_insn_count,
+            hotness_score: None,
+            run_cnt_delta: None,
+            run_time_ns_delta: None,
+            avg_ns: None,
+        });
+    }
+
+    ordered
 }
 
 // ── Serve (Unix socket server) ──────────────────────────────────────
@@ -294,6 +401,23 @@ fn process_request(
         Ok(Duration::from_millis(interval_ms))
     }
 
+    fn request_optional_interval(
+        req: &serde_json::Value,
+        key: &str,
+        default_ms: u64,
+    ) -> std::result::Result<Duration, String> {
+        let Some(value) = req.get(key) else {
+            return Ok(Duration::from_millis(default_ms));
+        };
+        let interval_ms = value
+            .as_u64()
+            .ok_or_else(|| format!("{key} must be a JSON integer"))?;
+        if interval_ms == 0 {
+            return Err(format!("{key} must be greater than zero"));
+        }
+        Ok(Duration::from_millis(interval_ms))
+    }
+
     fn request_path<'a>(
         req: &'a serde_json::Value,
         key: &str,
@@ -362,33 +486,131 @@ fn process_request(
             }
         }
         "optimize-all" => {
+            let hotness_window = match request_optional_interval(
+                req,
+                "hotness_window_ms",
+                DEFAULT_HOTNESS_WINDOW_MS,
+            ) {
+                Ok(interval) => interval,
+                Err(message) => {
+                    return serde_json::json!({"status": "error", "message": message});
+                }
+            };
             let profile_snapshot = match request_profile_snapshot(profiling_state) {
                 Ok(snapshot) => snapshot,
                 Err(message) => {
                     return serde_json::json!({"status": "error", "message": message});
                 }
             };
-            let mut applied = 0u32;
-            let mut errors = 0u32;
-            let mut total = 0u32;
-            for prog_id in bpf::iter_prog_ids() {
-                let prog_id = match prog_id {
-                    Ok(prog_id) => prog_id,
+            let candidates = match collect_live_program_candidates() {
+                Ok(candidates) => candidates,
+                Err(err) => {
+                    return serde_json::json!({
+                        "status": "error",
+                        "message": format!("failed to collect optimize-all candidates: {err:#}"),
+                    });
+                }
+            };
+            let mut program_order = default_optimize_all_order(&candidates);
+            let mut profiling_source = "none";
+            let mut observation_window_ms: Option<u64> = None;
+            let mut on_demand_profiles: HashMap<u32, pass::ProfilingData> = HashMap::new();
+
+            if let Some(snapshot) = profile_snapshot.as_ref() {
+                let observation_window = Duration::from_millis(snapshot.duration_ms.max(1));
+                let ranking = match snapshot.hotness_ranking() {
+                    Ok(ranking) => ranking,
                     Err(err) => {
                         return serde_json::json!({
                             "status": "error",
-                            "message": format!("failed to enumerate program IDs: {:#}", err),
+                            "message": format!(
+                                "failed to rank loaded profile snapshot by hotness: {err:#}"
+                            ),
                         });
                     }
                 };
-                total += 1;
-                let profiling = profile_snapshot
+                program_order =
+                    optimize_all_order_from_ranking(&candidates, &ranking, observation_window);
+                profiling_source = "snapshot";
+                observation_window_ms = Some(observation_window.as_millis() as u64);
+            } else if candidates.len() > 1 {
+                let prog_ids = candidates
+                    .iter()
+                    .map(|candidate| candidate.prog_id)
+                    .collect::<Vec<_>>();
+                match profiler::collect_hotness_ranking(&prog_ids, hotness_window) {
+                    Ok((ranking, observation_window)) => {
+                        program_order = optimize_all_order_from_ranking(
+                            &candidates,
+                            &ranking,
+                            observation_window,
+                        );
+                        profiling_source = "stats_window";
+                        observation_window_ms = Some(observation_window.as_millis() as u64);
+                    }
+                    Err(err) => {
+                        return serde_json::json!({
+                            "status": "error",
+                            "message": format!(
+                                "failed to rank optimize-all programs by hotness: {err:#}"
+                            ),
+                        });
+                    }
+                }
+            } else if let Some(candidate) = candidates.first() {
+                match profiler::bpf_stats_enabled() {
+                    Ok(true) => {
+                        match profiler::collect_program_profiling(candidate.prog_id, hotness_window)
+                        {
+                            Ok((profiling, analysis)) => {
+                                on_demand_profiles.insert(candidate.prog_id, profiling);
+                                let ranking = profiler::HotnessRanking::from_analyses(
+                                    vec![analysis],
+                                    hotness_window,
+                                );
+                                program_order = optimize_all_order_from_ranking(
+                                    &candidates,
+                                    &ranking,
+                                    hotness_window,
+                                );
+                                profiling_source = "stats_window_single";
+                                observation_window_ms = Some(hotness_window.as_millis() as u64);
+                            }
+                            Err(err) => {
+                                return serde_json::json!({
+                                    "status": "error",
+                                    "message": format!(
+                                        "failed to collect one-shot profiling for prog {}: {err:#}",
+                                        candidate.prog_id
+                                    ),
+                                });
+                            }
+                        }
+                    }
+                    Ok(false) => {}
+                    Err(err) => {
+                        return serde_json::json!({
+                            "status": "error",
+                            "message": format!("failed to query bpf stats state: {err:#}"),
+                        });
+                    }
+                }
+            }
+            let mut applied = 0u32;
+            let mut errors = 0u32;
+            let total = program_order.len() as u32;
+            for entry in &program_order {
+                let prog_id = entry.prog_id;
+                let snapshot_profiling = profile_snapshot
                     .as_ref()
                     .and_then(|snapshot| snapshot.profiling_data_for(prog_id));
+                let profiling = on_demand_profiles
+                    .get(&prog_id)
+                    .or(snapshot_profiling.as_ref());
                 match commands::try_apply_one(
                     prog_id,
                     &local_ctx,
-                    profiling.as_ref(),
+                    profiling,
                     Some(tracker),
                     OptimizeMode::Apply,
                 ) {
@@ -400,7 +622,15 @@ fn process_request(
                     Err(_) => errors += 1,
                 }
             }
-            serde_json::json!({"status": "ok", "total": total, "applied": applied, "errors": errors})
+            serde_json::json!({
+                "status": "ok",
+                "total": total,
+                "applied": applied,
+                "errors": errors,
+                "profiling_source": profiling_source,
+                "hotness_window_ms": observation_window_ms,
+                "program_order": program_order,
+            })
         }
         "profile-start" => {
             let interval = match request_interval(req) {
@@ -527,6 +757,7 @@ fn process_request(
                 "status": "ok",
                 "version": env!("CARGO_PKG_VERSION"),
                 "profiling": profiling,
+                "available_passes_help": crate::passes::available_passes_help(),
             })
         }
         _ => {

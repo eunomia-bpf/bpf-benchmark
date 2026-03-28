@@ -30,6 +30,10 @@ Repository-level constraints for coding agents working in this tree.
 - Do not use `git switch` or `git checkout` to move to another branch, even for inspection.
 - If a branch ref must be updated, move the ref without switching branches.
 
+## Codex Launch Safety
+
+- **Never use shell `&` or `2>&1 &` to background `codex exec`.**  The outer shell exits immediately, causing false "completed" notifications while the codex child process is still running. Use the Bash tool's `run_in_background: true` parameter instead.
+
 ## Code Change Scope
 
 - Delete v1 and dead code when v2 replaces it.

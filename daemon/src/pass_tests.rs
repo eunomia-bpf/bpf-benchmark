@@ -136,6 +136,34 @@ impl BpfPass for RewriteMovImmPass {
     }
 }
 
+#[test]
+fn test_prepend_nop_pass_shifts_annotations_forward() {
+    let mut pm = PassManager::new();
+    pm.add_pass(PrependNopPass);
+
+    let mut program = make_program(vec![BpfInsn::mov64_imm(0, 1), exit_insn()]);
+    program.annotations[1].branch_profile = Some(BranchProfile {
+        taken_count: 7,
+        not_taken_count: 3,
+    });
+
+    let ctx = ctx_for_pass_manager(&pm);
+    let result = pm.run(&mut program, &ctx).unwrap();
+
+    assert!(result.program_changed);
+    assert_eq!(program.insns.len(), 3);
+    assert!(program.annotations[0].branch_profile.is_none());
+    assert!(program.annotations[1].branch_profile.is_none());
+    assert_eq!(
+        program.annotations[2]
+            .branch_profile
+            .as_ref()
+            .expect("prepended program should remap existing annotation")
+            .taken_count,
+        7
+    );
+}
+
 /// A trivial analysis that counts the number of instructions.
 struct InsnCountAnalysis;
 

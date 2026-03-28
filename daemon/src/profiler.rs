@@ -135,6 +135,13 @@ impl HotnessRanking {
             b.hotness_score(observation_window)
                 .partial_cmp(&a.hotness_score(observation_window))
                 .unwrap_or(std::cmp::Ordering::Equal)
+                .then_with(|| b.delta_run_time_ns.cmp(&a.delta_run_time_ns))
+                .then_with(|| {
+                    b.delta_avg_ns
+                        .partial_cmp(&a.delta_avg_ns)
+                        .unwrap_or(std::cmp::Ordering::Equal)
+                })
+                .then_with(|| a.prog_id.cmp(&b.prog_id))
         });
         Self { ranked }
     }
@@ -198,6 +205,28 @@ impl ProfileSnapshot {
     pub fn profiling_data_for(&self, prog_id: u32) -> Option<ProfilingData> {
         self.program_profile(prog_id)
             .map(ProgramProfile::to_profiling_data)
+    }
+
+    pub fn hotness_ranking(&self) -> Result<HotnessRanking> {
+        let observation_window = Duration::from_millis(self.duration_ms.max(1));
+        let mut analyses = Vec::with_capacity(self.programs.len());
+        for (prog_id, profile) in &self.programs {
+            let prog_id = prog_id
+                .parse::<u32>()
+                .with_context(|| format!("parse profiled program ID '{}'", prog_id))?;
+            analyses.push(PgoAnalysis {
+                prog_id,
+                total: ProgStats {
+                    run_cnt: profile.run_cnt,
+                    run_time_ns: profile.run_time_ns,
+                    avg_ns: profile.avg_ns,
+                },
+                delta_run_cnt: profile.run_cnt,
+                delta_run_time_ns: profile.run_time_ns,
+                delta_avg_ns: profile.avg_ns,
+            });
+        }
+        Ok(HotnessRanking::from_analyses(analyses, observation_window))
     }
 
     pub fn save_to_path(&self, path: &std::path::Path) -> Result<()> {
@@ -476,25 +505,31 @@ pub fn collect_program_profiling(
     prog_id: u32,
     interval: Duration,
 ) -> Result<(ProfilingData, PgoAnalysis)> {
+    if interval.is_zero() {
+        anyhow::bail!("profile interval must be greater than zero");
+    }
+    if !bpf_stats_enabled()? {
+        anyhow::bail!(
+            "runtime profiling requires kernel.bpf_stats_enabled=1; enable it before collecting profiling data"
+        );
+    }
+
     let mut poller = ProgStatsPoller::open(prog_id)?;
     let pmu = pmu::PmuCounters::open();
-
-    poller.poll_delta()?;
 
     if let Some(ref pmu) = pmu {
         pmu.reset_and_enable();
     }
 
-    thread::sleep(interval);
-
+    let deltas = poller.collect_deltas(interval, 1);
     let branch_miss_rate = pmu.as_ref().and_then(|pmu| {
         let rate = pmu.read_branch_miss_rate();
         pmu.disable();
         rate
     });
-
-    let delta = poller
-        .poll_delta()?
+    let delta = deltas?
+        .into_iter()
+        .next()
         .context("failed to compute stats delta")?;
     let analysis = PgoAnalysis::from_delta(&delta);
     let profiling = ProfilingData {
@@ -505,10 +540,66 @@ pub fn collect_program_profiling(
     Ok((profiling, analysis))
 }
 
+pub fn collect_hotness_ranking(
+    prog_ids: &[u32],
+    interval: Duration,
+) -> Result<(HotnessRanking, Duration)> {
+    if interval.is_zero() {
+        anyhow::bail!("hotness ranking interval must be greater than zero");
+    }
+    if prog_ids.is_empty() {
+        return Ok((HotnessRanking { ranked: Vec::new() }, interval));
+    }
+    if !bpf_stats_enabled()? {
+        anyhow::bail!(
+            "hotness ranking requires kernel.bpf_stats_enabled=1 or a loaded profile snapshot"
+        );
+    }
+
+    let before = read_selected_prog_stats(prog_ids)?;
+    thread::sleep(interval);
+    let after = read_selected_prog_stats(prog_ids)?;
+
+    let mut analyses = Vec::with_capacity(prog_ids.len());
+    let mut observation_window = Duration::ZERO;
+
+    for &prog_id in prog_ids {
+        let before_snapshot = before
+            .get(&prog_id)
+            .with_context(|| format!("missing baseline stats snapshot for prog {}", prog_id))?;
+        let after_snapshot = after
+            .get(&prog_id)
+            .with_context(|| format!("missing final stats snapshot for prog {}", prog_id))?;
+        let delta = ProgStatsDelta::from_snapshots(before_snapshot, after_snapshot);
+        if observation_window.is_zero() {
+            observation_window = delta.elapsed;
+        }
+        analyses.push(PgoAnalysis::from_delta(&delta));
+    }
+
+    if observation_window.is_zero() {
+        observation_window = interval;
+    }
+
+    Ok((
+        HotnessRanking::from_analyses(analyses, observation_window),
+        observation_window,
+    ))
+}
+
 pub struct ProgStatsPoller {
     prog_id: u32,
     prog_fd: OwnedFd,
     previous: Option<ProgStatsSnapshot>,
+}
+
+fn read_selected_prog_stats(prog_ids: &[u32]) -> Result<HashMap<u32, ProgStatsSnapshot>> {
+    let mut snapshots = HashMap::with_capacity(prog_ids.len());
+    for &prog_id in prog_ids {
+        let poller = ProgStatsPoller::open(prog_id)?;
+        snapshots.insert(prog_id, poller.snapshot()?);
+    }
+    Ok(snapshots)
 }
 
 impl ProgStatsPoller {

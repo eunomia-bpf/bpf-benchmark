@@ -67,6 +67,13 @@ pub(crate) struct OptimizeSummary {
 }
 
 /// Per-pass detail record.
+#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
+pub(crate) struct SkippedSiteDetail {
+    pub pc: usize,
+    pub reason: String,
+}
+
+/// Per-pass detail record.
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct PassDetail {
     pub pass_name: String,
@@ -75,6 +82,8 @@ pub(crate) struct PassDetail {
     pub sites_applied: usize,
     pub sites_skipped: usize,
     pub skip_reasons: HashMap<String, usize>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub skipped_sites: Vec<SkippedSiteDetail>,
     pub insns_before: usize,
     pub insns_after: usize,
     pub insn_delta: i64,
@@ -90,6 +99,14 @@ impl From<&pass::PassResult> for PassDetail {
             sites_applied: pr.sites_applied,
             sites_skipped: pr.sites_skipped.len(),
             skip_reasons: pr.skip_reason_counts(),
+            skipped_sites: pr
+                .sites_skipped
+                .iter()
+                .map(|skip| SkippedSiteDetail {
+                    pc: skip.pc,
+                    reason: skip.reason.clone(),
+                })
+                .collect(),
             insns_before: pr.insns_before,
             insns_after: pr.insns_after,
             insn_delta: pr.insns_after as i64 - pr.insns_before as i64,
@@ -519,9 +536,22 @@ pub(crate) fn try_apply_one(
                 Ok(verify_result)
             };
 
-        pm.run_with_profiling_and_verifier(&mut program, &local_ctx, profiling, &mut verifier)?
+        if let Some(profiling) = profiling {
+            pm.run_with_profiling_and_verifier(
+                &mut program,
+                &local_ctx,
+                Some(profiling),
+                &mut verifier,
+            )?
+        } else {
+            pm.run_with_verifier(&mut program, &local_ctx, &mut verifier)?
+        }
     } else {
-        pm.run_with_profiling(&mut program, &local_ctx, profiling)?
+        if let Some(profiling) = profiling {
+            pm.run_with_profiling(&mut program, &local_ctx, Some(profiling))?
+        } else {
+            pm.run(&mut program, &local_ctx)?
+        }
     };
     let total_pipeline_ns = pipeline_start.elapsed().as_nanos() as u64;
 

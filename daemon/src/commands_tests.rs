@@ -68,6 +68,7 @@ fn test_optimize_one_result_serialization() {
                 sites_applied: 3,
                 sites_skipped: 1,
                 skip_reasons: HashMap::from([("subprog_unsupported".to_string(), 1)]),
+                skipped_sites: vec![],
                 insns_before: 100,
                 insns_after: 90,
                 insn_delta: -10,
@@ -80,6 +81,7 @@ fn test_optimize_one_result_serialization() {
                 sites_applied: 0,
                 sites_skipped: 0,
                 skip_reasons: HashMap::new(),
+                skipped_sites: vec![],
                 insns_before: 90,
                 insns_after: 90,
                 insn_delta: 0,
@@ -177,6 +179,7 @@ fn test_optimize_one_result_records_rejected_pass_verify_status() {
                 sites_applied: 4,
                 sites_skipped: 0,
                 skip_reasons: HashMap::new(),
+                skipped_sites: vec![],
                 insns_before: 110,
                 insns_after: 110,
                 insn_delta: 0,
@@ -189,6 +192,7 @@ fn test_optimize_one_result_records_rejected_pass_verify_status() {
                 sites_applied: 2,
                 sites_skipped: 0,
                 skip_reasons: HashMap::new(),
+                skipped_sites: vec![],
                 insns_before: 110,
                 insns_after: 100,
                 insn_delta: -10,
@@ -265,6 +269,10 @@ fn test_pass_detail_from_pass_result() {
     assert_eq!(detail.sites_skipped, 3);
     assert_eq!(detail.skip_reasons["subprog_unsupported"], 2);
     assert_eq!(detail.skip_reasons["kfunc_unavailable"], 1);
+    assert_eq!(detail.skipped_sites.len(), 3);
+    assert_eq!(detail.skipped_sites[0].pc, 10);
+    assert_eq!(detail.skipped_sites[1].pc, 20);
+    assert_eq!(detail.skipped_sites[2].pc, 30);
     assert_eq!(detail.insns_before, 100);
     assert_eq!(detail.insns_after, 95);
     assert_eq!(detail.insn_delta, -5);
@@ -414,6 +422,7 @@ fn test_verifier_rejection_count_counts_rejected_passes() {
             sites_applied: 0,
             sites_skipped: 0,
             skip_reasons: HashMap::new(),
+            skipped_sites: vec![],
             insns_before: 100,
             insns_after: 100,
             insn_delta: 0,
@@ -426,6 +435,7 @@ fn test_verifier_rejection_count_counts_rejected_passes() {
             sites_applied: 2,
             sites_skipped: 0,
             skip_reasons: HashMap::new(),
+            skipped_sites: vec![],
             insns_before: 100,
             insns_after: 104,
             insn_delta: 4,

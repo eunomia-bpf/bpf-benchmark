@@ -8,7 +8,7 @@
 > - 任何 TODO/实验/文档引用条目被取代时，必须至少保留一行并标注状态，不得直接删除。
 > - 每个任务做完 → 立即更新本文档（任务条目状态 + 关键数据 + 文档路径）。
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
-> - 用 agent background 跑任务，不阻塞主对话。
+> - 用 Bash tool 的 `run_in_background: true` 跑 codex，不阻塞主对话。**禁止用 shell `&` 或 `2>&1 &` 后台启动 codex**（外层 shell 退出导致假完成通知，codex 子进程仍在跑）。
 > - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
 > - **⚠️ 同一时间只能有一个 agent 修改内核代码（vendor/linux-framework），也只能有一个 agent 跑测试（VM benchmark / selftest）。** 多个 agent 同时改内核代码会产生 git 冲突；多个 agent 同时跑 VM 测试会竞争资源、结果不可靠。调度时必须串行化内核改动和测试任务。
 > - **⚠️ codex 默认不要 commit/push，除非 prompt 明确要求。** 改完代码就停，由 Claude 统一 commit。
@@ -943,7 +943,12 @@ make clean
 | **580** | KVM PMU 调查 | ✅ | **根因**：Arrow Lake 是 Hybrid CPU（P+E core），KVM 硬编码禁用 vPMU（`X86_FEATURE_HYBRID_CPU` → `enable_pmu=false`），modprobe 无法覆盖。替代：`perf kvm stat --guest` 或重编译宿主机内核。 |
 | **581** | SOSP paper review (Opus + Codex) | ✅ | **两个 reviewer 一致 Strong Reject / Reject**。致命：eval placeholder、formally verified 无支撑、Section 5 空。核心故事在 framework/kinsn/map-inline 间不收敛。报告：`sosp_paper_review_20260328.md`。 |
 | **582** | 回归根因分析 | ✅ | Calico：非代码膨胀，是 layout/branch perturbation。BCC：emit_constant_load 把 32-bit 0xffffffff 用 LD_IMM64。报告：`regression_root_cause_analysis_20260328.md`。 |
-| **583** | E2E 最终重跑（最新 binary） | 🔄 | codex 在跑。用最新 daemon binary（含 per-pass verify + mutable guard + const_prop fix）。 |
-| **584** | emit_constant_load fix + Tetragon R4 调查 | 🔄 | codex 在跑。 |
-| **585** | perf kvm stat --guest 调研 | 🔄 | codex 在跑。 |
-| **586** | 7 个重构 post-review | 🔄 | codex 在跑。检查 corpus/modes refactor、CLI simplify、C++ dedup、per-pass verify、PGO socket、E2E scaffold、mutable guard。 |
+| **583** | E2E 最终重跑（最新 binary） | ✅ | **5/6 PASS**：tracee ✅、tetragon ✅（顶层 OK，event_execve 内部 const_prop `unreachable insn 230` + dce `Permission denied` 仍在）、bpftrace ✅、scx ✅、bcc ✅。**Katran ❌**：veth module 加载失败（`modprobe: unknown symbol`），kernel 7.0-rc2 模块符号不兼容，未到 scan/apply。11 passes 均确认。daemon binary mtime 14:37 > E2E start 14:38。 |
+| **584** | emit_constant_load fix + Tetragon R4 调查 | ✅ | **Bug 1 已修**：map_inline 替换 LDX_MEM_W/H/B 时用 `MOV32_IMM` 而非 `MOV64_IMM`，避免 0xffffffff zero-extension 语义错误（u32 max → LD_IMM64 2-slot 变成 MOV32_IMM 1-slot）。const_prop ALU32 折叠同理。回归测试覆盖。`make daemon-tests` 通过。**Bug 2 调查**：R4 !read_ok 是 BPF-to-BPF 子程序参数初始化问题（非 map_inline），最新重跑 Tetragon 已 OK。 |
+| **585** | perf kvm stat --guest 调研 | ✅ | **结论**：`perf kvm stat` 只看 KVM exits（tracepoint），拿不到 branch_misses/instructions/cycles。**可用方案**：`perf stat -e cycles:Gk,instructions:Gk,branches:Gk,branch-misses:Gk -p <qemu-pid>` 从 host 侧采 guest-kernel PMU 汇总，已实测可用。进一步细到 BPF 程序需 `perf record -e ...:Gk` + guest kallsyms/BPF JIT symbols。报告：`perf_kvm_guest_profiling_20260328.md`。 |
+| **586** | 7 个重构 post-review | ✅ | 7 个重构全部正确，无功能缺失。**12 cargo warnings** 全在 profiler.rs（dead code：`ProgStatsPoller`/`HotnessRanking`/`collect_program_profiling` 等未使用）+ bpf.rs `get_orig_insns_by_id` + pass.rs `pc`/`run` + passes/mod.rs `description`/`available_passes_help`。`make daemon-tests` 510 pass。`pytest tests/python/` 38 pass。报告：`post_refactor_review_20260328.md`。 |
+| **587** | **Corpus 数据统计审计（2026-03-28）** | ✅ | **关键发现**：(1) `0.980x` 是 crash-truncated partial run（288/469 objects，exit 139），不是完整结果。(2) headline geomean 包含 85 个 `applied=false` 程序（geomean 0.951x），严重稀释 applied-only 的 0.995x。(3) 483 measured 但只有 255 个有 `speedup_ratio!=null`（228 个 exec_ns=0）。(4) applied=364 但只有 170 进入 geomean（74 无 measured pair + 120 exec_ns=0）。**修复建议**：主指标改为 `applied-only comparable geomean`（本次 0.995x / 170 samples）；必须同时报 sample count；crash run 不能当 authoritative。**真实漏斗**：2009 programs → crash 截断 1149 → prepared ok 648 compile → 483 measured → 255 comparable → 170 applied comparable。报告：`corpus_data_statistics_review_20260328.md`。 |
+| **588** | Profiler 接线 + cargo warnings 消除 | ✅ | optimize-all 接入 hotness ranking（有 snapshot 按 hotness 排序，没有先做 stats observation window）。branch_flip 数据链路通了（profile snapshot → ProfilingData → branch_miss_rate）。**12 cargo warnings 全部通过实际使用消除**（不是删除）。`make daemon` 0 warnings，`make daemon-tests` 509 pass。**未做 VM live profiling 验证**。 |
+| **589** | Corpus 覆盖率修复 + 完整重跑 | 🔄 | codex 在跑。修复 3 大出血点（crash/-860, prepared fail/-501, exec_ns=0/-228）+ results.py applied-only geomean + 完整 corpus run。 |
+| **590** | kinsn vs kfunc novelty 文档 | 🔄 | codex 在跑。5 个技术差异维度（验证模型、指令级抽象、优化器组合性、降级、信任面），附代码引用。 |
+| **591** | Katran veth module 修复 | 🔄 | codex 在跑。veth.ko `Unknown symbol in module`，可能需要 CONFIG_VETH=y 或依赖模块。 |
