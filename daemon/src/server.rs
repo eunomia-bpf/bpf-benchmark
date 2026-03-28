@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
-//! Server and watch daemon implementations.
+//! Unix socket server implementation.
 
-use std::collections::HashSet;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
 
-use crate::commands;
+use crate::commands::{self, OptimizeMode, PgoConfig};
 use crate::invalidation::{MapInvalidationTracker, MapValueReader};
-use crate::{bpf, pass};
+use crate::{bpf, pass, profiler};
 
 /// Global shutdown flag set by signal handler.
 static SHUTDOWN_FLAG: AtomicBool = AtomicBool::new(false);
@@ -70,11 +69,17 @@ fn run_invalidation_tick_logged<A, F>(
 pub(crate) fn cmd_serve(
     socket_path: &str,
     ctx: &pass::PassContext,
+    pgo_config: Option<&PgoConfig>,
     rollback_enabled: bool,
 ) -> Result<()> {
     use std::os::unix::net::UnixListener;
 
     register_signal_handlers();
+    if pgo_config.is_some() && !profiler::bpf_stats_enabled()? {
+        anyhow::bail!(
+            "serve --pgo requires kernel.bpf_stats_enabled=1; enable it before starting the daemon"
+        );
+    }
     let tracker = commands::new_invalidation_tracker();
     let mut last_invalidation_check = Instant::now();
 
@@ -91,7 +96,14 @@ pub(crate) fn cmd_serve(
         if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
             let tracker_for_apply = tracker.clone();
             run_invalidation_tick_logged("serve", &tracker, |prog_id| {
-                commands::try_apply_one(prog_id, ctx, rollback_enabled, Some(&tracker_for_apply))?;
+                commands::try_apply_one(
+                    prog_id,
+                    ctx,
+                    pgo_config,
+                    rollback_enabled,
+                    Some(&tracker_for_apply),
+                    OptimizeMode::Apply,
+                )?;
                 Ok(())
             });
             last_invalidation_check = Instant::now();
@@ -99,7 +111,8 @@ pub(crate) fn cmd_serve(
 
         match listener.accept() {
             Ok((stream, _addr)) => {
-                if let Err(err) = handle_client(stream, ctx, rollback_enabled, &tracker) {
+                if let Err(err) = handle_client(stream, ctx, pgo_config, rollback_enabled, &tracker)
+                {
                     eprintln!("serve: client error: {:#}", err);
                 }
             }
@@ -140,6 +153,7 @@ fn panic_response(payload: Box<dyn std::any::Any + Send>) -> serde_json::Value {
 fn handle_client(
     stream: std::os::unix::net::UnixStream,
     ctx: &pass::PassContext,
+    pgo_config: Option<&PgoConfig>,
     rollback_enabled: bool,
     tracker: &commands::SharedInvalidationTracker,
 ) -> Result<()> {
@@ -156,7 +170,7 @@ fn handle_client(
 
         let response = match serde_json::from_str::<serde_json::Value>(&line) {
             Ok(req) => match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                process_request(&req, ctx, rollback_enabled, tracker)
+                process_request(&req, ctx, pgo_config, rollback_enabled, tracker)
             })) {
                 Ok(response) => response,
                 Err(payload) => panic_response(payload),
@@ -178,6 +192,7 @@ fn handle_client(
 fn process_request(
     req: &serde_json::Value,
     ctx: &pass::PassContext,
+    pgo_config: Option<&PgoConfig>,
     rollback_enabled: bool,
     tracker: &commands::SharedInvalidationTracker,
 ) -> serde_json::Value {
@@ -223,6 +238,32 @@ fn process_request(
         Ok(local_ctx)
     }
 
+    fn request_mode(req: &serde_json::Value) -> std::result::Result<OptimizeMode, String> {
+        if let Some(value) = req.get("dry_run") {
+            let dry_run = value
+                .as_bool()
+                .ok_or_else(|| "dry_run must be a JSON boolean".to_string())?;
+            return Ok(if dry_run {
+                OptimizeMode::DryRun
+            } else {
+                OptimizeMode::Apply
+            });
+        }
+
+        if let Some(value) = req.get("apply") {
+            let apply = value
+                .as_bool()
+                .ok_or_else(|| "apply must be a JSON boolean".to_string())?;
+            return Ok(if apply {
+                OptimizeMode::Apply
+            } else {
+                OptimizeMode::DryRun
+            });
+        }
+
+        Ok(OptimizeMode::Apply)
+    }
+
     let cmd = req.get("cmd").and_then(|v| v.as_str()).unwrap_or("");
     let local_ctx = match request_context(req, ctx) {
         Ok(value) => value,
@@ -234,7 +275,20 @@ fn process_request(
                 Some(id) => id as u32,
                 None => return serde_json::json!({"status": "error", "message": "missing prog_id"}),
             };
-            match commands::try_apply_one(prog_id, &local_ctx, rollback_enabled, Some(tracker)) {
+            let mode = match request_mode(req) {
+                Ok(mode) => mode,
+                Err(message) => {
+                    return serde_json::json!({"status": "error", "message": message});
+                }
+            };
+            match commands::try_apply_one(
+                prog_id,
+                &local_ctx,
+                pgo_config,
+                rollback_enabled,
+                Some(tracker),
+                mode,
+            ) {
                 Ok(result) => {
                     // The optimize response already embeds the full structured
                     // result, including any deduplicated `inlined_map_entries`,
@@ -265,8 +319,14 @@ fn process_request(
                     }
                 };
                 total += 1;
-                match commands::try_apply_one(prog_id, &local_ctx, rollback_enabled, Some(tracker))
-                {
+                match commands::try_apply_one(
+                    prog_id,
+                    &local_ctx,
+                    pgo_config,
+                    rollback_enabled,
+                    Some(tracker),
+                    OptimizeMode::Apply,
+                ) {
                     Ok(result) => {
                         if result.summary.applied {
                             applied += 1;
@@ -284,138 +344,6 @@ fn process_request(
             serde_json::json!({"status": "error", "message": format!("unknown command: {}", cmd)})
         }
     }
-}
-
-// ── Watch (polling daemon) ──────────────────────────────────────────
-
-pub(crate) fn cmd_watch(
-    interval_secs: u64,
-    once: bool,
-    ctx: &pass::PassContext,
-    rollback_enabled: bool,
-) -> Result<()> {
-    register_signal_handlers();
-    let tracker = commands::new_invalidation_tracker();
-    let mut last_invalidation_check = Instant::now();
-
-    // Programs that were successfully optimized — never revisited.
-    let mut optimized: HashSet<u32> = HashSet::new();
-    // Programs that returned Ok(false) (no transforms) — no point retrying.
-    let mut no_op: HashSet<u32> = HashSet::new();
-    // Programs that failed — retry up to MAX_RETRIES times.
-    let mut fail_count: std::collections::HashMap<u32, u32> = std::collections::HashMap::new();
-    const MAX_RETRIES: u32 = 3;
-
-    let mut round: u32 = 0;
-    let observation_window = Duration::from_millis(200);
-
-    println!(
-        "watch: starting (interval={}s, once={})",
-        interval_secs, once
-    );
-
-    loop {
-        if SHUTDOWN_FLAG.load(Ordering::Relaxed) {
-            println!("watch: received shutdown signal, exiting");
-            break;
-        }
-
-        if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
-            let tracker_for_apply = tracker.clone();
-            run_invalidation_tick_logged("watch", &tracker, |prog_id| {
-                commands::try_apply_one(prog_id, ctx, rollback_enabled, Some(&tracker_for_apply))?;
-                Ok(())
-            });
-            last_invalidation_check = Instant::now();
-        }
-
-        round += 1;
-        let ids: Vec<u32> = bpf::iter_prog_ids().collect::<Result<Vec<_>>>()?;
-        let total = ids.len();
-
-        // Candidates: not yet optimized, not permanently no-op, and not exhausted retries.
-        let candidate_ids: Vec<u32> = ids
-            .iter()
-            .copied()
-            .filter(|id| {
-                !optimized.contains(id)
-                    && !no_op.contains(id)
-                    && fail_count.get(id).copied().unwrap_or(0) < MAX_RETRIES
-            })
-            .collect();
-        let candidate_count = candidate_ids.len();
-
-        // Collect stats for candidate programs and rank by hotness.
-        let ranked_ids = commands::rank_programs_by_hotness(&candidate_ids, observation_window);
-
-        let mut applied = 0u32;
-        let mut errors = 0u32;
-        for prog_id in &ranked_ids {
-            match commands::try_apply_one(*prog_id, ctx, rollback_enabled, Some(&tracker)) {
-                Ok(result) => {
-                    if result.summary.applied {
-                        optimized.insert(*prog_id);
-                        applied += 1;
-                    } else {
-                        no_op.insert(*prog_id);
-                    }
-                }
-                Err(e) => {
-                    let count = fail_count.entry(*prog_id).or_insert(0);
-                    *count += 1;
-                    if *count >= MAX_RETRIES {
-                        eprintln!(
-                            "  watch: prog {}: giving up after {} attempts: {:#}",
-                            prog_id, count, e
-                        );
-                    } else {
-                        eprintln!(
-                            "  watch: prog {}: attempt {}/{} failed: {:#}",
-                            prog_id, count, MAX_RETRIES, e
-                        );
-                    }
-                    errors += 1;
-                }
-            }
-        }
-
-        println!(
-            "watch round {}: scanned {} progs, {} candidates, {} optimized, {} errors",
-            round, total, candidate_count, applied, errors
-        );
-
-        if once {
-            break;
-        }
-
-        let steps = interval_secs.max(1) * 10;
-        for _ in 0..steps {
-            if SHUTDOWN_FLAG.load(Ordering::Relaxed) {
-                break;
-            }
-            if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
-                let tracker_for_apply = tracker.clone();
-                run_invalidation_tick_logged("watch", &tracker, |prog_id| {
-                    commands::try_apply_one(
-                        prog_id,
-                        ctx,
-                        rollback_enabled,
-                        Some(&tracker_for_apply),
-                    )?;
-                    Ok(())
-                });
-                last_invalidation_check = Instant::now();
-            }
-            std::thread::sleep(Duration::from_millis(100));
-        }
-
-        if SHUTDOWN_FLAG.load(Ordering::Relaxed) {
-            println!("watch: received shutdown signal, exiting");
-            break;
-        }
-    }
-
-    Ok(())
 }
 
 #[cfg(test)]
@@ -525,7 +453,13 @@ mod tests {
             "disabled_passes": ["map_inline"],
         });
         let tracker = commands::new_invalidation_tracker();
-        let response = process_request(&req, &pass::PassContext::test_default(), true, &tracker);
+        let response = process_request(
+            &req,
+            &pass::PassContext::test_default(),
+            None,
+            true,
+            &tracker,
+        );
 
         assert_eq!(response["status"], "ok");
     }
@@ -537,7 +471,13 @@ mod tests {
             "enabled_passes": ["skb_load_bytes"],
         });
         let tracker = commands::new_invalidation_tracker();
-        let response = process_request(&req, &pass::PassContext::test_default(), true, &tracker);
+        let response = process_request(
+            &req,
+            &pass::PassContext::test_default(),
+            None,
+            true,
+            &tracker,
+        );
 
         assert_eq!(response["status"], "error");
         assert_eq!(
@@ -553,7 +493,13 @@ mod tests {
             "disabled_passes": ["bulk_mem"],
         });
         let tracker = commands::new_invalidation_tracker();
-        let response = process_request(&req, &pass::PassContext::test_default(), true, &tracker);
+        let response = process_request(
+            &req,
+            &pass::PassContext::test_default(),
+            None,
+            true,
+            &tracker,
+        );
 
         assert_eq!(response["status"], "error");
         assert_eq!(
@@ -569,7 +515,13 @@ mod tests {
             "enabled_passes": ["   "],
         });
         let tracker = commands::new_invalidation_tracker();
-        let response = process_request(&req, &pass::PassContext::test_default(), true, &tracker);
+        let response = process_request(
+            &req,
+            &pass::PassContext::test_default(),
+            None,
+            true,
+            &tracker,
+        );
 
         assert_eq!(response["status"], "error");
         assert_eq!(response["message"], "enabled_passes entries must not be blank");
@@ -582,9 +534,35 @@ mod tests {
             "disabled_passes": ["   "],
         });
         let tracker = commands::new_invalidation_tracker();
-        let response = process_request(&req, &pass::PassContext::test_default(), true, &tracker);
+        let response = process_request(
+            &req,
+            &pass::PassContext::test_default(),
+            None,
+            true,
+            &tracker,
+        );
 
         assert_eq!(response["status"], "error");
         assert_eq!(response["message"], "disabled_passes entries must not be blank");
+    }
+
+    #[test]
+    fn process_request_rejects_non_boolean_dry_run() {
+        let req = serde_json::json!({
+            "cmd": "optimize",
+            "prog_id": 1,
+            "dry_run": "yes",
+        });
+        let tracker = commands::new_invalidation_tracker();
+        let response = process_request(
+            &req,
+            &pass::PassContext::test_default(),
+            None,
+            true,
+            &tracker,
+        );
+
+        assert_eq!(response["status"], "error");
+        assert_eq!(response["message"], "dry_run must be a JSON boolean");
     }
 }

@@ -1,4 +1,5 @@
 #include "micro_exec.hpp"
+#include "bpf_helpers.hpp"
 
 #include <bpf/libbpf.h>
 #include <elf.h>
@@ -73,13 +74,6 @@ unique_fd open_readonly(const std::filesystem::path &path)
         fail("unable to open ELF file: " + path.string());
     }
     return unique_fd(new int(fd));
-}
-
-std::string libbpf_error_string(int error_code)
-{
-    char buffer[256];
-    libbpf_strerror(error_code, buffer, sizeof(buffer));
-    return std::string(buffer);
 }
 
 GElf_Shdr get_section_header_or_fail(Elf_Scn *section, const char *context)

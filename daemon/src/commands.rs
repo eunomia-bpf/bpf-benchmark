@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-//! Subcommand implementations: enumerate, rewrite, apply, apply-all, profile.
+//! Shared optimize/apply helpers used by `serve`.
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::Write as _;
@@ -147,6 +147,59 @@ pub(crate) struct TimingsNs {
     pub pipeline_run_ns: u64,
     pub rejit_syscall_ns: u64,
     pub total_ns: u64,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct PgoConfig {
+    pub interval: Duration,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum OptimizeMode {
+    Apply,
+    DryRun,
+}
+
+impl OptimizeMode {
+    fn should_apply(self) -> bool {
+        matches!(self, Self::Apply)
+    }
+}
+
+pub(crate) fn collect_pgo_data(
+    prog_id: u32,
+    pgo_config: Option<&PgoConfig>,
+) -> Option<pass::ProfilingData> {
+    let config = pgo_config?;
+    match profiler::collect_program_profiling(prog_id, config.interval) {
+        Ok((profiling, analysis)) => {
+            if analysis.is_hot() {
+                eprintln!(
+                    "  pgo: prog {} is hot (delta_run_cnt={}, avg_ns={})",
+                    prog_id,
+                    analysis.delta_run_cnt,
+                    analysis
+                        .delta_avg_ns
+                        .map_or("-".to_string(), |value| format!("{value:.2}")),
+                );
+            } else {
+                eprintln!("  pgo: prog {} is cold (no activity during observation)");
+            }
+
+            if profiling.branch_miss_rate.is_none() {
+                eprintln!(
+                    "  pgo: prog {} has no PMU branch_miss_rate data; branch_flip will remain gated",
+                    prog_id
+                );
+            }
+
+            Some(profiling)
+        }
+        Err(err) => {
+            eprintln!("  pgo: failed to profile prog {}: {:#}", prog_id, err);
+            None
+        }
+    }
 }
 
 // ── Pipeline helpers ────────────────────────────────────────────────
@@ -386,278 +439,6 @@ fn attribute_post_verify_rejit_failure(passes: &[PassDetail]) -> Option<String> 
         .map(|pass| pass.pass_name.clone())
 }
 
-/// Rank program IDs by hotness using `HotnessRanking`.
-///
-/// Collects a quick stats snapshot for each program, builds a `HotnessRanking`,
-/// and returns IDs sorted hottest-first. Programs whose stats cannot be read
-/// are appended at the end (they'll still be processed).
-pub(crate) fn rank_programs_by_hotness(prog_ids: &[u32], observation_window: Duration) -> Vec<u32> {
-    use profiler::{HotnessRanking, PgoAnalysis, ProgStatsDelta, ProgStatsSnapshot};
-
-    if prog_ids.is_empty() {
-        return Vec::new();
-    }
-
-    // Collect before-snapshots for all programs.
-    let mut snapshots_before: Vec<(u32, ProgStatsSnapshot)> = Vec::new();
-    let mut unreadable: Vec<u32> = Vec::new();
-
-    for &pid in prog_ids {
-        match profiler::ProgStatsPoller::open(pid) {
-            Ok(poller) => match poller.snapshot() {
-                Ok(snap) => snapshots_before.push((pid, snap)),
-                Err(_) => unreadable.push(pid),
-            },
-            Err(_) => unreadable.push(pid),
-        }
-    }
-
-    // Brief sleep to observe activity.
-    std::thread::sleep(observation_window);
-
-    // Collect after-snapshots and compute analyses.
-    let mut analyses: Vec<PgoAnalysis> = Vec::new();
-    for (pid, before) in &snapshots_before {
-        match profiler::ProgStatsPoller::open(*pid) {
-            Ok(poller) => match poller.snapshot() {
-                Ok(after) => {
-                    let delta = ProgStatsDelta::from_snapshots(before, &after);
-                    analyses.push(PgoAnalysis::from_delta(&delta));
-                }
-                Err(_) => unreadable.push(*pid),
-            },
-            Err(_) => unreadable.push(*pid),
-        }
-    }
-
-    let ranking = HotnessRanking::from_analyses(analyses, observation_window);
-
-    // Return IDs in hotness order, then append unreadable ones.
-    let mut result: Vec<u32> = ranking.ranked.iter().map(|a| a.prog_id).collect();
-    result.extend(unreadable);
-    result
-}
-
-// ── Subcommand implementations ──────────────────────────────────────
-
-pub(crate) fn cmd_enumerate(ctx: &pass::PassContext) -> Result<()> {
-    println!(
-        "{:>6}  {:>6}  {:>5}  {:<16}  sites",
-        "ID", "type", "insns", "name"
-    );
-    println!("{}", "-".repeat(60));
-
-    for prog_id in bpf::iter_prog_ids() {
-        let prog_id = prog_id?;
-        match enumerate_one(prog_id, ctx) {
-            Ok(()) => {}
-            Err(e) => {
-                eprintln!("  prog {}: {:#}", prog_id, e);
-            }
-        }
-    }
-    Ok(())
-}
-
-fn enumerate_one(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
-    let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
-    let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
-
-    let name = info.name_str();
-    let insn_count = if !orig_insns.is_empty() {
-        orig_insns.len()
-    } else {
-        info.orig_prog_len as usize / 8
-    };
-
-    // Run the pipeline in dry-run mode to count sites.
-    let site_summary = if !orig_insns.is_empty() {
-        let mut program = pass::BpfProgram::new(orig_insns);
-        program.set_map_ids(
-            bpf::bpf_prog_get_map_ids(fd.as_raw_fd())
-                .context("fetch program map IDs for enumerate")?,
-        );
-        let pm = build_pipeline();
-
-        match pm.run(&mut program, ctx) {
-            Ok(result) if result.total_sites_applied > 0 => {
-                let parts: Vec<String> = result
-                    .pass_results
-                    .iter()
-                    .filter(|pr| pr.sites_applied > 0)
-                    .map(|pr| format!("{}={}", pr.pass_name, pr.sites_applied))
-                    .collect();
-                parts.join(" ")
-            }
-            _ => "-".to_string(),
-        }
-    } else {
-        "-".to_string()
-    };
-
-    println!(
-        "{:>6}  {:>6}  {:>5}  {:<16}  {}",
-        prog_id, info.prog_type, insn_count, name, site_summary,
-    );
-
-    Ok(())
-}
-
-pub(crate) fn cmd_rewrite(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
-    let (info, orig_insns) = bpf::get_orig_insns_by_id(prog_id)?;
-
-    if orig_insns.is_empty() {
-        println!(
-            "prog {}: no original instructions available (orig_prog_len={})",
-            prog_id, info.orig_prog_len
-        );
-        return Ok(());
-    }
-
-    println!(
-        "prog {} ({:?}): {} original instructions",
-        prog_id,
-        info.name_str(),
-        orig_insns.len()
-    );
-
-    let mut program = pass::BpfProgram::new(orig_insns.clone());
-    let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
-    program.set_map_ids(
-        bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).context("fetch program map IDs for rewrite")?,
-    );
-    let pm = build_pipeline();
-
-    let mut local_ctx = ctx.clone();
-    local_ctx.prog_type = info.prog_type;
-    let pipeline_result = pm.run(&mut program, &local_ctx)?;
-
-    for pr in &pipeline_result.pass_results {
-        if pr.sites_applied > 0 {
-            println!("  {}: {} sites applied", pr.pass_name, pr.sites_applied);
-        }
-        for skip in &pr.sites_skipped {
-            println!("    skip pc={}: {}", skip.pc, skip.reason);
-        }
-    }
-
-    if !pipeline_result.program_changed {
-        println!("  nothing to rewrite");
-        return Ok(());
-    }
-
-    println!(
-        "  rewrite: {} insns -> {} insns ({} sites applied)",
-        orig_insns.len(),
-        program.insns.len(),
-        pipeline_result.total_sites_applied
-    );
-
-    // Print new instructions for inspection.
-    for (i, insn) in program.insns.iter().enumerate() {
-        println!("    [{:>4}] {}", i, insn);
-    }
-
-    Ok(())
-}
-
-pub(crate) fn cmd_apply(
-    prog_id: u32,
-    ctx: &pass::PassContext,
-    rollback_enabled: bool,
-) -> Result<()> {
-    let result = try_apply_one(prog_id, ctx, rollback_enabled, None)?;
-    emit_debug_result(&result);
-
-    if result.program.orig_insn_count == 0 {
-        println!("prog {}: no original instructions available", prog_id);
-    } else if !result.summary.applied {
-        println!(
-            "prog {} ({}): no transforms applied",
-            result.program.prog_id, result.program.prog_name
-        );
-    }
-
-    Ok(())
-}
-
-pub(crate) fn cmd_apply_all(ctx: &pass::PassContext, rollback_enabled: bool) -> Result<()> {
-    let mut total = 0u32;
-    let mut applied = 0u32;
-    let mut errors = 0u32;
-
-    for prog_id in bpf::iter_prog_ids() {
-        let prog_id = prog_id?;
-        total += 1;
-        match try_apply_one(prog_id, ctx, rollback_enabled, None) {
-            Ok(result) => {
-                emit_debug_result(&result);
-                if result.summary.applied {
-                    applied += 1;
-                }
-            }
-            Err(e) => {
-                eprintln!("  prog {}: {:#}", prog_id, e);
-                errors += 1;
-            }
-        }
-    }
-
-    println!(
-        "\napply-all: scanned {} programs, applied {}, errors {}",
-        total, applied, errors
-    );
-    Ok(())
-}
-
-pub(crate) fn cmd_profile(prog_id: u32, interval_ms: u64, samples: usize) -> Result<()> {
-    if !profiler::bpf_stats_enabled()? {
-        anyhow::bail!(
-            "kernel.bpf_stats_enabled=0; enable it first, e.g. `sudo sysctl kernel.bpf_stats_enabled=1`"
-        );
-    }
-
-    let interval = Duration::from_millis(interval_ms);
-    let mut poller = profiler::ProgStatsPoller::open(prog_id)?;
-    let baseline = poller.snapshot()?;
-
-    println!(
-        "prog {} baseline: run_cnt={} run_time_ns={} avg_ns={}",
-        prog_id,
-        baseline.stats.run_cnt,
-        baseline.stats.run_time_ns,
-        fmt_avg(baseline.stats.avg_ns),
-    );
-    println!(
-        "{:>6}  {:>10}  {:>14}  {:>14}  {:>12}",
-        "sample", "elapsed_ms", "delta_run_cnt", "delta_time_ns", "delta_avg_ns"
-    );
-    println!("{}", "-".repeat(68));
-
-    poller.poll_delta()?;
-    for (index, delta) in poller.collect_deltas(interval, samples)?.iter().enumerate() {
-        let pgo = profiler::PgoAnalysis::from_delta(delta);
-        println!(
-            "{:>6}  {:>10.3}  {:>14}  {:>14}  {:>12}",
-            index + 1,
-            delta.elapsed.as_secs_f64() * 1000.0,
-            pgo.delta_run_cnt,
-            pgo.delta_run_time_ns,
-            fmt_avg(pgo.delta_avg_ns),
-        );
-    }
-
-    let final_stats = poller.poll_stats()?;
-    println!(
-        "final totals: run_cnt={} run_time_ns={} avg_ns={}",
-        final_stats.run_cnt,
-        final_stats.run_time_ns,
-        fmt_avg(final_stats.avg_ns),
-    );
-
-    Ok(())
-}
-
 fn program_has_map_lookup_elem(insns: &[insn::BpfInsn]) -> bool {
     insns
         .iter()
@@ -704,8 +485,10 @@ fn maybe_attach_original_verifier_states(
 pub(crate) fn try_apply_one(
     prog_id: u32,
     ctx: &pass::PassContext,
+    pgo_config: Option<&PgoConfig>,
     rollback_enabled: bool,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
+    mode: OptimizeMode,
 ) -> Result<OptimizeOneResult> {
     let total_start = Instant::now();
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
@@ -800,6 +583,7 @@ pub(crate) fn try_apply_one(
         );
         seed_program.verifier_states.clone()
     };
+    let profiling = collect_pgo_data(prog_id, pgo_config);
 
     let mut disabled_passes: HashSet<String> = HashSet::new();
     let max_retries = 10;
@@ -820,7 +604,7 @@ pub(crate) fn try_apply_one(
         }
 
         let pipeline_start = Instant::now();
-        let pipeline_result = pm.run(&mut program, &local_ctx)?;
+        let pipeline_result = pm.run_with_profiling(&mut program, &local_ctx, profiling.as_ref())?;
         let pipeline_elapsed = pipeline_start.elapsed().as_nanos() as u64;
         total_pipeline_ns += pipeline_elapsed;
         let attempt_map_inline_records = collect_map_inline_records(&pipeline_result.pass_results);
@@ -836,6 +620,32 @@ pub(crate) fn try_apply_one(
         let disabled_passes_sorted = sorted_strings(disabled_passes.iter().cloned());
 
         if !pipeline_result.program_changed {
+            if !mode.should_apply() {
+                attempts.push(AttemptRecord {
+                    attempt,
+                    disabled_passes: disabled_passes_sorted.clone(),
+                    result: "dry_run".to_string(),
+                    failure_pc: None,
+                    attributed_pass: None,
+                    debug: attempt_debug,
+                });
+
+                return Ok(make_result(
+                    "ok",
+                    false,
+                    false,
+                    0,
+                    orig_insn_count,
+                    last_pass_details,
+                    attempts,
+                    total_pipeline_ns,
+                    total_rejit_ns,
+                    disabled_passes_sorted,
+                    vec![],
+                    None,
+                ));
+            }
+
             let mut restore_insns = orig_insns.clone();
             let _map_fds_guard = bpf::relocate_map_fds_with_bindings(
                 &mut restore_insns,
@@ -892,6 +702,32 @@ pub(crate) fn try_apply_one(
         }
 
         let final_insn_count = program.insns.len();
+
+        if !mode.should_apply() {
+            attempts.push(AttemptRecord {
+                attempt,
+                disabled_passes: disabled_passes_sorted.clone(),
+                result: "dry_run".to_string(),
+                failure_pc: None,
+                attributed_pass: None,
+                debug: attempt_debug,
+            });
+
+            return Ok(make_result(
+                "ok",
+                false,
+                true,
+                pipeline_result.total_sites_applied,
+                final_insn_count,
+                last_pass_details,
+                attempts,
+                total_pipeline_ns,
+                total_rejit_ns,
+                disabled_passes_sorted,
+                attempt_inlined_map_entries,
+                None,
+            ));
+        }
 
         if disabled_passes.is_empty() {
             println!(
@@ -1190,13 +1026,6 @@ pub(crate) fn try_apply_one(
     }
 
     anyhow::bail!(exhausted_msg)
-}
-
-fn fmt_avg(value: Option<f64>) -> String {
-    match value {
-        Some(avg) => format!("{avg:.2}"),
-        None => "-".to_string(),
-    }
 }
 
 // ── Tests ───────────────────────────────────────────────────────────

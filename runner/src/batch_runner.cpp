@@ -1,4 +1,6 @@
 #include "micro_exec.hpp"
+#include "bpf_helpers.hpp"
+#include "daemon_client.hpp"
 
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>

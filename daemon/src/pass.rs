@@ -31,7 +31,6 @@ pub struct BranchProfile {
     pub not_taken_count: u64,
 }
 
-#[cfg(test)]
 #[derive(Clone, Debug, Default)]
 pub struct ProfilingData {
     pub branch_profiles: HashMap<usize, BranchProfile>,
@@ -143,7 +142,6 @@ impl BpfProgram {
     ///
     /// For each PC in the profiling data that is within bounds, sets the
     /// corresponding annotation's branch_profile.
-    #[cfg(test)]
     pub fn inject_profiling(&mut self, data: &ProfilingData) {
         for (&pc, profile) in &data.branch_profiles {
             if pc < self.annotations.len() {
@@ -796,7 +794,6 @@ impl PassManager {
     /// If `profiling` is provided, injects branch profiles into the program's
     /// annotations before running the pipeline. This enables PGO-guided passes
     /// like BranchFlipPass to make data-driven decisions.
-    #[cfg(test)]
     pub fn run_with_profiling(
         &self,
         program: &mut BpfProgram,

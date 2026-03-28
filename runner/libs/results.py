@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from collections import Counter, defaultdict
 import json
+import statistics
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Sequence, TypedDict
@@ -203,6 +205,129 @@ def parse_runner_sample(stdout: str) -> RunnerSample:
     return samples[-1]
 
 
+def _invocation_failure_reason(record: Mapping[str, object] | None) -> str:
+    if not record:
+        return "n/a"
+    error = record.get("error")
+    if error:
+        return str(error)
+    sample = record.get("sample")
+    if not isinstance(sample, Mapping):
+        return "unknown"
+    rejit = sample.get("rejit")
+    if isinstance(rejit, Mapping) and rejit.get("error"):
+        return str(rejit["error"])
+    return "unknown"
+
+
+def summarize_corpus_batch_results(
+    program_records: Sequence[Mapping[str, Any]],
+    object_records: Sequence[Mapping[str, Any]],
+    *,
+    effective_mode: str = "vm",
+) -> dict[str, Any]:
+    compile_pairs = [
+        record
+        for record in program_records
+        if record.get("baseline_compile")
+        and record["baseline_compile"].get("ok")
+        and record.get("rejit_compile")
+        and record["rejit_compile"].get("ok")
+    ]
+    measured_pairs = [
+        record
+        for record in program_records
+        if record.get("baseline_run")
+        and record["baseline_run"].get("ok")
+        and record.get("rejit_run")
+        and record["rejit_run"].get("ok")
+    ]
+    applied_programs = [record for record in program_records if record.get("applied_passes")]
+    compile_pass_counts: Counter[str] = Counter()
+    run_pass_counts: Counter[str] = Counter()
+    for record in program_records:
+        compile_pass_counts.update(record.get("compile_passes_applied") or [])
+        run_pass_counts.update(record.get("run_passes_applied") or [])
+
+    failure_reasons: Counter[str] = Counter()
+    rejit_failures: Counter[str] = Counter()
+    for record in program_records:
+        if record.get("record_error"):
+            failure_reasons[str(record["record_error"])] += 1
+            continue
+        for key in ("baseline_compile", "rejit_compile", "baseline_run", "rejit_run"):
+            raw = record.get(key)
+            if raw and not raw.get("ok"):
+                failure_reasons[_invocation_failure_reason(raw)] += 1
+        for key in ("rejit_compile", "rejit_run"):
+            raw = record.get(key)
+            if raw and raw.get("ok"):
+                sample = raw.get("sample") or {}
+                rejit = sample.get("rejit") or {}
+                if rejit.get("requested") and not rejit.get("applied") and rejit.get("error"):
+                    rejit_failures[str(rejit["error"])] += 1
+
+    size_ratios = [record["size_ratio"] for record in compile_pairs if record.get("size_ratio") is not None]
+    exec_ratios = [record["speedup_ratio"] for record in measured_pairs if record.get("speedup_ratio") is not None]
+
+    def aggregate_rows(grouped: Mapping[str, list[Mapping[str, Any]]], label_key: str) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for label, items in grouped.items():
+            grouped_compile = [item for item in items if item in compile_pairs]
+            grouped_measured = [item for item in items if item in measured_pairs]
+            rows.append(
+                {
+                    label_key: label,
+                    "programs": len(items),
+                    "compile_pairs": len(grouped_compile),
+                    "measured_pairs": len(grouped_measured),
+                    "applied_programs": sum(1 for item in items if item.get("applied_passes")),
+                    "code_size_ratio_geomean": geometric_mean(
+                        [item["size_ratio"] for item in grouped_compile if item.get("size_ratio") is not None]
+                    ),
+                    "exec_ratio_geomean": geometric_mean(
+                        [item["speedup_ratio"] for item in grouped_measured if item.get("speedup_ratio") is not None]
+                    ),
+                }
+            )
+        rows.sort(key=lambda item: (-item["programs"], item[label_key]))
+        return rows
+
+    grouped_by_repo: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
+    grouped_by_object: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
+    for record in program_records:
+        grouped_by_repo[str(record["repo"])].append(record)
+        grouped_by_object[str(record["canonical_object_name"])].append(record)
+
+    return {
+        "effective_mode": effective_mode,
+        "objects_attempted": len(object_records),
+        "targets_attempted": len(program_records),
+        "compile_pairs": len(compile_pairs),
+        "measured_pairs": len(measured_pairs),
+        "applied_programs": len(applied_programs),
+        "code_size_ratio_geomean": geometric_mean(size_ratios),
+        "code_size_delta_median_pct": (
+            statistics.median(
+                [record["size_delta_pct"] for record in compile_pairs if record.get("size_delta_pct") is not None]
+            )
+            if compile_pairs
+            else None
+        ),
+        "exec_ratio_geomean": geometric_mean(exec_ratios),
+        "exec_ratio_median": statistics.median(exec_ratios) if exec_ratios else None,
+        "exec_ratio_min": min(exec_ratios) if exec_ratios else None,
+        "exec_ratio_max": max(exec_ratios) if exec_ratios else None,
+        "pass_counts": dict(sorted((compile_pass_counts + run_pass_counts).items())),
+        "compile_pass_counts": dict(sorted(compile_pass_counts.items())),
+        "run_pass_counts": dict(sorted(run_pass_counts.items())),
+        "failure_reasons": dict(failure_reasons.most_common(16)),
+        "rejit_failure_reasons": dict(rejit_failures.most_common(16)),
+        "by_repo": aggregate_rows(grouped_by_repo, "repo"),
+        "by_object": aggregate_rows(grouped_by_object, "canonical_object_name"),
+    }
+
+
 __all__ = [
     "CodeSizeSummary",
     "PerfCounterMeta",
@@ -222,6 +347,7 @@ __all__ = [
     "parse_command_samples",
     "parse_runner_sample",
     "parse_runner_samples",
+    "summarize_corpus_batch_results",
     "summarize_named_counters",
     "summarize_optional_ns",
     "summarize_perf_counter_meta",
