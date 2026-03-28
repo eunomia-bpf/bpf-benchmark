@@ -226,6 +226,12 @@ virtme-hostfs-modules: $(BZIMAGE_PATH)
 	rm -rf "$(KERNEL_DIR)/.virtme_mods"
 	# Parallel sub-makes here occasionally race on generated kernel headers.
 	$(MAKE) -j1 -C "$(KERNEL_DIR)" $(VIRTME_HOSTFS_MODULES)
+	@for module in $(VIRTME_HOSTFS_MODULES); do \
+		test -f "$(KERNEL_DIR)/$$module" || { \
+			echo "missing built hostfs module: $(KERNEL_DIR)/$$module" >&2; \
+			exit 1; \
+		}; \
+	done
 	@printf '%s\n' $(VIRTME_HOSTFS_MODULE_ORDER) > "$(KERNEL_DIR)/modules.order"
 
 kernel-tests:
@@ -260,16 +266,15 @@ $(KERNEL_CONFIG_STAMP): $(DEFCONFIG_SRC) $(KERNEL_CONFIG_PATH)
 	touch "$@"
 
 kernel-build: $(KERNEL_CONFIG_STAMP)
-	@if [ ! -f "$(BZIMAGE_PATH)" ]; then \
-		$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" bzImage modules_prepare; \
-		if [ -f "$(KERNEL_DIR)/vmlinux.symvers" ]; then \
-			cp "$(KERNEL_DIR)/vmlinux.symvers" "$(KERNEL_SYMVERS_PATH)"; \
-		fi; \
-		test -f "$(KERNEL_SYMVERS_PATH)"; \
-		touch "$(KERNEL_SYMVERS_PATH)"; \
-	else \
-		echo "  SKIP    kernel-build (bzImage already exists)"; \
+	# Let kbuild decide what is stale. Skipping here can leave the guest
+	# booting an older bzImage while hostfs modules are rebuilt for the
+	# current tree, which breaks Katran's veth/ipip module loading path.
+	$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" bzImage modules_prepare
+	@if [ -f "$(KERNEL_DIR)/vmlinux.symvers" ]; then \
+		cp "$(KERNEL_DIR)/vmlinux.symvers" "$(KERNEL_SYMVERS_PATH)"; \
 	fi
+	@test -f "$(KERNEL_SYMVERS_PATH)"
+	@touch "$(KERNEL_SYMVERS_PATH)"
 
 $(BZIMAGE_PATH): kernel-build
 	@test -f "$@"

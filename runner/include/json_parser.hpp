@@ -32,6 +32,9 @@ std::string extract_json_compound(
 std::vector<std::string> extract_json_string_array(
     const std::string &json,
     const std::string &key);
+std::optional<std::vector<std::string>> extract_json_string_array_optional(
+    const std::string &json,
+    const std::string &key);
 std::vector<daemon_pass_detail> extract_pass_details(const std::string &json);
 std::vector<std::string> changed_pass_names(
     const std::vector<daemon_pass_detail> &details);

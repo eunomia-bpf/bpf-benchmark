@@ -58,6 +58,8 @@ pub const BPF_PSEUDO_CALL: u8 = 1;
 #[cfg(test)]
 pub const BPF_PSEUDO_KFUNC_CALL: u8 = 2;
 pub const BPF_PSEUDO_KINSN_SIDECAR: u8 = 3;
+/// LD_IMM64 local-function reference used for helper callbacks.
+pub const BPF_PSEUDO_FUNC: u8 = 4;
 pub const BPF_PSEUDO_KINSN_CALL: u8 = 4;
 
 // ── kinsn encoding constants (synced with include/linux/bpf.h) ────
@@ -178,6 +180,12 @@ impl BpfInsn {
     #[inline]
     pub fn is_ldimm64(&self) -> bool {
         self.code == (BPF_LD | BPF_DW | BPF_IMM)
+    }
+
+    /// True for `LD_IMM64 dst, pseudo_func` callback references.
+    #[inline]
+    pub fn is_ldimm64_pseudo_func(&self) -> bool {
+        self.is_ldimm64() && self.src_reg() == BPF_PSEUDO_FUNC
     }
 
     /// True for LDX_MEM of any size.

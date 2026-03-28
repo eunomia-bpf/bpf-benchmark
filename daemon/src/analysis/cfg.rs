@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // CFG (Control Flow Graph) analysis.
 
+use crate::insn::BPF_PSEUDO_FUNC;
 use crate::pass::{Analysis, BpfProgram};
 
 /// A single basic block in the CFG.
@@ -47,7 +48,13 @@ impl Analysis for CFGAnalysis {
         let mut pc = 0;
         while pc < n {
             let insn = &program.insns[pc];
-            if insn.is_jmp_class() && !insn.is_exit() {
+            if insn.is_ldimm64() && insn.src_reg() == BPF_PSEUDO_FUNC {
+                let target = (pc as i64 + 1 + insn.imm as i64) as usize;
+                if target < n {
+                    branch_targets[target] = true;
+                    subprog_entries.push(target);
+                }
+            } else if insn.is_jmp_class() && !insn.is_exit() {
                 if insn.is_call() {
                     if insn.src_reg() == 1 {
                         let target = (pc as i64 + 1 + insn.imm as i64) as usize;

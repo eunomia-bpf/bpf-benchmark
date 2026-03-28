@@ -23,7 +23,6 @@ from runner.libs.machines import resolve_machine
 from runner.libs.rejit import (
     _start_daemon_server,
     _stop_daemon_server,
-    benchmark_config_enabled_passes,
     benchmark_config_repeat,
     benchmark_config_warmups,
     load_benchmark_config,
@@ -255,7 +254,6 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
     daemon = Path(args.daemon).resolve()
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
     guest_result_path = Path(args.guest_result_json).resolve() if args.guest_result_json else None
-    enabled_passes = benchmark_config_enabled_passes(args.benchmark_config)
     warmup_repeat = benchmark_config_warmups(args.benchmark_config)
     if btf_custom_path is None:
         raise SystemExit("--btf-custom-path is required in guest batch mode")
@@ -285,7 +283,7 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
                     execution_mode="vm",
                     btf_custom_path=btf_custom_path,
                     daemon_socket=active_daemon_socket,
-                    enabled_passes=enabled_passes,
+                    benchmark_config=args.benchmark_config,
                 )
                 built_records = []
                 for obj in object_chunk:
@@ -334,6 +332,18 @@ def build_markdown_v2(data: dict[str, Any]) -> str:
     object_records = sorted(data["object_records"], key=lambda item: item["canonical_object_name"])
     corpus_build_summary = data.get("corpus_build_summary") or {}
     guest_info = (data.get("guest_smoke") or {}).get("payload")
+
+    def note_for_record(record: dict[str, Any]) -> str:
+        if record.get("record_error"):
+            return str(record["record_error"])
+        for key in ("baseline_compile", "rejit_compile", "baseline_run", "rejit_run"):
+            invocation = record.get(key)
+            if invocation and not invocation.get("ok"):
+                return summarize_failure_reason(invocation)
+        if record.get("comparison_exclusion_reason"):
+            return str(record["comparison_exclusion_reason"])
+        return ""
+
     lines: list[str] = [
         "# Corpus Batch REJIT Results",
         "",
@@ -350,9 +360,18 @@ def build_markdown_v2(data: dict[str, Any]) -> str:
         f"- Programs: {summary['targets_attempted']}",
         f"- Compile pairs: {summary['compile_pairs']}",
         f"- Measured pairs: {summary['measured_pairs']}",
+        f"- Comparable exec pairs (all): {summary['comparable_pairs']}",
+        f"- Comparable exec pairs (applied-only): {summary['applied_comparable_pairs']}",
         f"- REJIT applied programs: {summary['applied_programs']}",
         f"- Code-size ratio geomean (baseline/rejit): {format_ratio(summary['code_size_ratio_geomean'])}",
-        f"- Exec-time ratio geomean (baseline/rejit): {format_ratio(summary['exec_ratio_geomean'])}",
+        (
+            "- Exec-time ratio geomean (baseline/rejit, applied comparable): "
+            f"{format_ratio(summary['exec_ratio_geomean'])}"
+        ),
+        (
+            "- Exec-time ratio geomean (baseline/rejit, all comparable): "
+            f"{format_ratio(summary['all_exec_ratio_geomean'])}"
+        ),
     ]
     if corpus_build_summary:
         lines.append(
@@ -366,16 +385,30 @@ def build_markdown_v2(data: dict[str, Any]) -> str:
     lines.extend(["## By Repo", ""])
     lines.extend(
         markdown_table(
-            ["Repo", "Programs", "Compile Pairs", "Measured Pairs", "Applied", "Code Ratio", "Exec Ratio"],
+            [
+                "Repo",
+                "Programs",
+                "Compile Pairs",
+                "Measured Pairs",
+                "Comparable",
+                "Applied Comparable",
+                "Applied",
+                "Code Ratio",
+                "Exec Ratio (Applied)",
+                "Exec Ratio (All)",
+            ],
             [
                 [
                     row["repo"],
                     row["programs"],
                     row["compile_pairs"],
                     row["measured_pairs"],
+                    row["comparable_pairs"],
+                    row["applied_comparable_pairs"],
                     row["applied_programs"],
                     format_ratio(row["code_size_ratio_geomean"]),
                     format_ratio(row["exec_ratio_geomean"]),
+                    format_ratio(row["all_exec_ratio_geomean"]),
                 ]
                 for row in summary["by_repo"]
             ],
@@ -432,12 +465,7 @@ def build_markdown_v2(data: dict[str, Any]) -> str:
                     format_ns(((record.get("baseline_run") or {}).get("sample") or {}).get("exec_ns")),
                     format_ns(((record.get("rejit_run") or {}).get("sample") or {}).get("exec_ns")),
                     format_ratio(record.get("speedup_ratio")),
-                    record.get("record_error")
-                    or (
-                        summarize_failure_reason(record.get("rejit_compile"))
-                        if record.get("rejit_compile") and not record["rejit_compile"].get("ok")
-                        else ""
-                    ),
+                    note_for_record(record),
                 ]
                 for record in records
             ],
@@ -447,6 +475,15 @@ def build_markdown_v2(data: dict[str, Any]) -> str:
     if summary["failure_reasons"]:
         lines.extend(["", "## Top Failure Reasons", ""])
         lines.extend(markdown_table(["Reason", "Count"], [[reason, count] for reason, count in summary["failure_reasons"].items()]))
+
+    if summary["comparison_exclusion_reasons"]:
+        lines.extend(["", "## Top Comparison Exclusions", ""])
+        lines.extend(
+            markdown_table(
+                ["Reason", "Count"],
+                [[reason, count] for reason, count in summary["comparison_exclusion_reasons"].items()],
+            )
+        )
 
     return "\n".join(lines) + "\n"
 
@@ -685,6 +722,8 @@ def packet_main(argv: list[str] | None = None) -> int:
         f"targets={summary['targets_attempted']} "
         f"compile_pairs={summary['compile_pairs']} "
         f"measured_pairs={summary['measured_pairs']} "
+        f"comparable={summary['comparable_pairs']} "
+        f"applied_comparable={summary['applied_comparable_pairs']} "
         f"applied={summary['applied_programs']}"
     )
     return 0

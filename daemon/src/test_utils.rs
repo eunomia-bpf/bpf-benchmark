@@ -10,7 +10,7 @@ use serde::Deserialize;
 
 use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
 use crate::elf_parser::{parse_bpf_object, ElfBpfObject, ElfMapMetadata, ElfProgramInfo};
-use crate::insn::{BpfInsn, BPF_PSEUDO_CALL};
+use crate::insn::{BpfInsn, BPF_PSEUDO_CALL, BPF_PSEUDO_FUNC};
 use crate::pass::{BpfProgram, BranchProfile, PassContext, PipelineResult, ProfilingData};
 use crate::passes::build_custom_pipeline;
 
@@ -286,6 +286,22 @@ pub fn assert_valid_bpf(program: &BpfProgram) {
             assert!(
                 !ldimm64_continuations.contains_key(&(target as usize)),
                 "pseudo call at pc {} targets LD_IMM64 continuation pc {}",
+                pc,
+                target
+            );
+        }
+
+        if insn.is_ldimm64() && insn.src_reg() == BPF_PSEUDO_FUNC {
+            let target = pc as i64 + 1 + insn.imm as i64;
+            assert!(
+                (0..program.insns.len() as i64).contains(&target),
+                "pseudo func at pc {} targets out of bounds pc {}",
+                pc,
+                target
+            );
+            assert!(
+                !ldimm64_continuations.contains_key(&(target as usize)),
+                "pseudo func at pc {} targets LD_IMM64 continuation pc {}",
                 pc,
                 target
             );

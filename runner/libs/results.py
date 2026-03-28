@@ -251,6 +251,12 @@ def summarize_corpus_batch_results(
         and record.get("rejit_run")
         and record["rejit_run"].get("ok")
     ]
+    comparable_pairs = [
+        record for record in measured_pairs if record.get("speedup_ratio") is not None
+    ]
+    applied_comparable_pairs = [
+        record for record in comparable_pairs if record.get("applied_passes")
+    ]
     applied_programs = [record for record in program_records if record.get("applied_passes")]
     compile_pass_counts: Counter[str] = Counter()
     run_pass_counts: Counter[str] = Counter()
@@ -260,6 +266,7 @@ def summarize_corpus_batch_results(
 
     failure_reasons: Counter[str] = Counter()
     rejit_failures: Counter[str] = Counter()
+    comparison_exclusions: Counter[str] = Counter()
     for record in program_records:
         if record.get("record_error"):
             failure_reasons[str(record["record_error"])] += 1
@@ -275,27 +282,48 @@ def summarize_corpus_batch_results(
                 rejit = sample.get("rejit") or {}
                 if rejit.get("requested") and not rejit.get("applied") and rejit.get("error"):
                     rejit_failures[str(rejit["error"])] += 1
+        exclusion_reason = record.get("comparison_exclusion_reason")
+        if exclusion_reason:
+            comparison_exclusions[str(exclusion_reason)] += 1
 
     size_ratios = [record["size_ratio"] for record in compile_pairs if record.get("size_ratio") is not None]
-    exec_ratios = [record["speedup_ratio"] for record in measured_pairs if record.get("speedup_ratio") is not None]
+    exec_ratios = [record["speedup_ratio"] for record in applied_comparable_pairs]
+    all_exec_ratios = [record["speedup_ratio"] for record in comparable_pairs]
 
     def aggregate_rows(grouped: Mapping[str, list[Mapping[str, Any]]], label_key: str) -> list[dict[str, Any]]:
         rows: list[dict[str, Any]] = []
         for label, items in grouped.items():
             grouped_compile = [item for item in items if item in compile_pairs]
             grouped_measured = [item for item in items if item in measured_pairs]
+            grouped_comparable = [item for item in items if item in comparable_pairs]
+            grouped_applied_comparable = [
+                item for item in items if item in applied_comparable_pairs
+            ]
             rows.append(
                 {
                     label_key: label,
                     "programs": len(items),
                     "compile_pairs": len(grouped_compile),
                     "measured_pairs": len(grouped_measured),
+                    "comparable_pairs": len(grouped_comparable),
+                    "applied_comparable_pairs": len(grouped_applied_comparable),
                     "applied_programs": sum(1 for item in items if item.get("applied_passes")),
                     "code_size_ratio_geomean": geometric_mean(
                         [item["size_ratio"] for item in grouped_compile if item.get("size_ratio") is not None]
                     ),
                     "exec_ratio_geomean": geometric_mean(
-                        [item["speedup_ratio"] for item in grouped_measured if item.get("speedup_ratio") is not None]
+                        [
+                            item["speedup_ratio"]
+                            for item in grouped_applied_comparable
+                            if item.get("speedup_ratio") is not None
+                        ]
+                    ),
+                    "all_exec_ratio_geomean": geometric_mean(
+                        [
+                            item["speedup_ratio"]
+                            for item in grouped_comparable
+                            if item.get("speedup_ratio") is not None
+                        ]
                     ),
                 }
             )
@@ -314,6 +342,8 @@ def summarize_corpus_batch_results(
         "targets_attempted": len(program_records),
         "compile_pairs": len(compile_pairs),
         "measured_pairs": len(measured_pairs),
+        "comparable_pairs": len(comparable_pairs),
+        "applied_comparable_pairs": len(applied_comparable_pairs),
         "applied_programs": len(applied_programs),
         "code_size_ratio_geomean": geometric_mean(size_ratios),
         "code_size_delta_median_pct": (
@@ -324,13 +354,18 @@ def summarize_corpus_batch_results(
             else None
         ),
         "exec_ratio_geomean": geometric_mean(exec_ratios),
+        "all_exec_ratio_geomean": geometric_mean(all_exec_ratios),
         "exec_ratio_median": statistics.median(exec_ratios) if exec_ratios else None,
         "exec_ratio_min": min(exec_ratios) if exec_ratios else None,
         "exec_ratio_max": max(exec_ratios) if exec_ratios else None,
+        "all_exec_ratio_median": statistics.median(all_exec_ratios) if all_exec_ratios else None,
+        "all_exec_ratio_min": min(all_exec_ratios) if all_exec_ratios else None,
+        "all_exec_ratio_max": max(all_exec_ratios) if all_exec_ratios else None,
         "pass_counts": dict(sorted((compile_pass_counts + run_pass_counts).items())),
         "compile_pass_counts": dict(sorted(compile_pass_counts.items())),
         "run_pass_counts": dict(sorted(run_pass_counts.items())),
         "failure_reasons": dict(failure_reasons.most_common(16)),
+        "comparison_exclusion_reasons": dict(comparison_exclusions.most_common(16)),
         "rejit_failure_reasons": dict(rejit_failures.most_common(16)),
         "by_repo": aggregate_rows(grouped_by_repo, "repo"),
         "by_object": aggregate_rows(grouped_by_object, "canonical_object_name"),

@@ -20,6 +20,22 @@ passes:
     - bulk_memory
   active: performance
 
+policy:
+  default:
+    passes:
+      - wide_mem
+      - rotate
+      - cond_select
+      - extract
+      - endian_fusion
+      - map_inline
+      - const_prop
+      - dce
+      - bounds_check_merge
+      - skb_load_bytes_spec
+      - bulk_memory
+  rules: []
+
 profiles:
   dev:
     iterations: 1

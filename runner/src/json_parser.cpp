@@ -350,6 +350,21 @@ std::vector<std::string> extract_json_string_array(
     fail_invalid_json_value("string array", key);
 }
 
+std::optional<std::vector<std::string>> extract_json_string_array_optional(
+    const std::string &json,
+    const std::string &key)
+{
+    const size_t value_start = find_json_key_value_start(json, key);
+    if (value_start == std::string::npos) {
+        return std::nullopt;
+    }
+    if (json.compare(value_start, 4, "null") == 0 &&
+        is_json_value_terminated(json, value_start + 4)) {
+        return std::nullopt;
+    }
+    return extract_json_string_array(json, key);
+}
+
 std::vector<daemon_pass_detail> extract_pass_details(const std::string &json)
 {
     std::vector<daemon_pass_detail> details;

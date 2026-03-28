@@ -53,6 +53,82 @@ def test_benchmark_rejit_enabled_passes_uses_default_when_env_missing(monkeypatc
     ]
 
 
+def test_benchmark_config_enabled_passes_prefers_policy_default() -> None:
+    config = {
+        "passes": {
+            "active_list": ["const_prop"],
+        },
+        "policy": {
+            "default": {
+                "passes": ["const_prop", "dce", "wide_mem"],
+            },
+        },
+    }
+
+    assert rejit.benchmark_config_enabled_passes(config) == ["const_prop", "dce", "wide_mem"]
+
+
+def test_benchmark_policy_required_site_passes_collects_unique_values() -> None:
+    config = {
+        "policy": {
+            "rules": [
+                {"match": {"has_sites": ["map_inline", "const_prop"]}},
+                {"match": {"prog_type": "xdp"}},
+                {"match": {"has_sites": ["map_inline", "wide_mem"]}},
+            ],
+        },
+    }
+
+    assert rejit.benchmark_policy_required_site_passes(config) == [
+        "map_inline",
+        "const_prop",
+        "wide_mem",
+    ]
+
+
+def test_resolve_program_enabled_passes_applies_ordered_rules() -> None:
+    config = {
+        "policy": {
+            "default": {
+                "passes": ["const_prop", "dce"],
+            },
+            "rules": [
+                {
+                    "match": {"prog_type": "xdp"},
+                    "enable": ["wide_mem"],
+                },
+                {
+                    "match": {"repo": "katran"},
+                    "enable": ["endian_fusion"],
+                },
+                {
+                    "match": {"has_sites": ["map_inline"]},
+                    "enable": ["map_inline"],
+                },
+                {
+                    "match": {"prog_type": "kprobe"},
+                    "passes": ["const_prop"],
+                    "disable": ["dce"],
+                },
+            ],
+        },
+    }
+
+    xdp_passes = rejit.resolve_program_enabled_passes(
+        config,
+        context={"repo": "katran", "prog_type": "xdp"},
+        site_counts={"map_inline": 3},
+    )
+    kprobe_passes = rejit.resolve_program_enabled_passes(
+        config,
+        context={"repo": "katran", "prog_type": "kprobe"},
+        site_counts={"map_inline": 3},
+    )
+
+    assert xdp_passes == ["const_prop", "dce", "wide_mem", "endian_fusion", "map_inline"]
+    assert kprobe_passes == ["const_prop"]
+
+
 def test_apply_daemon_rejit_empty_pass_list_uses_socket(monkeypatch) -> None:
     calls: list[tuple[str, object]] = []
 

@@ -116,7 +116,7 @@ static int decode_memset_payload(u64 payload, u8 *dst_base_reg, u8 *val_reg,
 		return -EINVAL;
 	if (*dst_base_reg > BPF_REG_10 || *val_reg > BPF_REG_10)
 		return -EINVAL;
-	if (!*width)
+	if (!bulk_width_bytes(*width))
 		return -EINVAL;
 	if (!decoded_len || decoded_len < bulk_width_bytes(*width) ||
 	    decoded_len > 128)

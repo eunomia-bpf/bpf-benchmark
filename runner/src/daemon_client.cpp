@@ -215,8 +215,13 @@ daemon_socket_response daemon_socket_optimize(
         } else {
             response.verifier_retries = 0;
         }
-        response.final_disabled_passes =
-            extract_json_string_array(summary, "final_disabled_passes");
+        if (const auto final_disabled_passes =
+                extract_json_string_array_optional(summary, "final_disabled_passes");
+            final_disabled_passes.has_value()) {
+            response.final_disabled_passes = *final_disabled_passes;
+        } else {
+            response.final_disabled_passes.clear();
+        }
 
         const std::string program_json = extract_json_compound(line, "program", '{', '}');
         response.insn_delta = extract_json_int(program_json, "insn_delta");

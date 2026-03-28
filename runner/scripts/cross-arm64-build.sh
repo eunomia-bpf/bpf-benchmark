@@ -10,7 +10,7 @@ set -euo pipefail
 JOBS="${ARM64_CROSSBUILD_JOBS:-4}"
 build_root=/tmp/bpf-benchmark-arm64
 runner_build="$build_root/runner"
-daemon_build="$build_root/daemon"
+daemon_target="$build_root/daemon-target"
 
 rm -rf "$build_root"
 mkdir -p /out/runner/build /out/daemon/build /out/lib
@@ -23,15 +23,12 @@ make -C /workspace/runner \
     micro_exec >/dev/null
 
 # Build daemon
-cmake -S /workspace/daemon -B "$daemon_build" \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DBPF_REJIT_DAEMON_BUILD_CLI=ON \
-    -DBPF_REJIT_DAEMON_BUILD_TESTS=OFF >/dev/null
-cmake --build "$daemon_build" --target bpfrejit-daemon -j"$JOBS" >/dev/null
+CARGO_TARGET_DIR="$daemon_target" \
+    cargo build --release --manifest-path /workspace/daemon/Cargo.toml >/dev/null
 
 # Copy binaries
 cp "$runner_build/micro_exec" /out/runner/build/micro_exec.real
-cp "$daemon_build/bpfrejit-daemon" /out/daemon/build/bpfrejit-daemon.real
+cp "$daemon_target/release/bpfrejit-daemon" /out/daemon/build/bpfrejit-daemon.real
 
 # Copy runtime libraries
 copy_runtime_libs() {
@@ -39,7 +36,7 @@ copy_runtime_libs() {
     local lib
     while read -r lib; do
         case "$(basename "$lib")" in
-            libyaml-cpp.so*|libelf.so*|libz.so*|libzstd.so*|libstdc++.so*|libgcc_s.so*|libbpf.so*)
+            libyaml-cpp.so*|libelf.so*|libz.so*|libzstd.so*|libstdc++.so*|libgcc_s.so*|libbpf.so*|libtinfo.so*|libncurses.so*|libncursesw.so*)
                 cp -L "$lib" /out/lib/ ;;
         esac
     done < <(ldd "$binary" | awk '/=> \// {print $3} /^\// {print $1}' | sort -u)

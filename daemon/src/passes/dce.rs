@@ -122,6 +122,23 @@ mod tests {
         }
     }
 
+    fn pseudo_func_ref(dst: u8, imm: i32) -> [BpfInsn; 2] {
+        [
+            BpfInsn {
+                code: BPF_LD | BPF_DW | BPF_IMM,
+                regs: BpfInsn::make_regs(dst, BPF_PSEUDO_FUNC),
+                off: 0,
+                imm,
+            },
+            BpfInsn {
+                code: 0,
+                regs: 0,
+                off: 0,
+                imm: 0,
+            },
+        ]
+    }
+
     fn run_dce_pass(program: &mut BpfProgram) -> PipelineResult {
         let mut pm = PassManager::new();
         pm.register_analysis(CFGAnalysis);
@@ -151,7 +168,7 @@ mod tests {
 
         assert!(result.program_changed);
         assert_eq!(result.pass_results[1].pass_name, "dce");
-        assert_eq!(result.pass_results[1].sites_applied, 2);
+        assert_eq!(result.pass_results[1].sites_applied, 1);
         assert_eq!(
             program.insns,
             vec![
@@ -204,6 +221,45 @@ mod tests {
                 exit_insn(),
             ]
         );
+    }
+
+    #[test]
+    fn dce_preserves_callback_only_subprog_and_rewrites_func_ref() {
+        let callback = pseudo_func_ref(2, 4);
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::ja(1),           // 0
+            BpfInsn::mov64_imm(0, 9), // 1: dead
+            callback[0],              // 2
+            callback[1],              // 3
+            BpfInsn::mov64_imm(0, 0), // 4
+            exit_insn(),              // 5
+            BpfInsn::mov64_imm(0, 8), // 6: dead
+            BpfInsn::mov64_reg(0, 1), // 7: callback subprog entry
+            exit_insn(),              // 8
+        ]);
+
+        let result = run_dce_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn {
+                    code: BPF_LD | BPF_DW | BPF_IMM,
+                    regs: BpfInsn::make_regs(2, BPF_PSEUDO_FUNC),
+                    off: 0,
+                    imm: 3,
+                },
+                callback[1],
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+                BpfInsn::mov64_reg(0, 1),
+                exit_insn(),
+            ]
+        );
+        assert!(program.insns[0].is_ldimm64_pseudo_func());
+        assert_eq!(program.insns[0].imm, 3);
+        assert_eq!(0usize + 1 + program.insns[0].imm as usize, 4);
     }
 
     /// After const_prop folds a conditional branch, the dead block that

@@ -152,6 +152,28 @@ fn test_cfg_analysis_with_subprogs() {
 }
 
 #[test]
+fn test_cfg_analysis_with_callback_subprog_refs() {
+    use crate::analysis::CFGAnalysis;
+    use crate::pass::Analysis;
+
+    let callback = ld_imm64(2, BPF_PSEUDO_FUNC, 4);
+    let prog = make_program(vec![
+        callback[0],
+        callback[1],
+        BpfInsn::mov64_imm(0, 0),
+        exit_insn(),
+        BpfInsn::mov64_reg(0, 1),
+        exit_insn(),
+    ]);
+
+    let cfg = CFGAnalysis;
+    let result = cfg.run(&prog);
+
+    assert!(result.subprogs.len() >= 2);
+    assert_eq!(result.subprogs[1].start, 5);
+}
+
+#[test]
 fn test_liveness_across_branch() {
     use crate::analysis::LivenessAnalysis;
     use crate::pass::Analysis;

@@ -116,8 +116,18 @@ impl BpfPass for ConstPropPass {
             }
         }
 
-        program.insns = new_insns;
-        program.remap_annotations(&addr_map);
+        let mut final_insns = new_insns;
+        let mut final_addr_map = addr_map;
+        let cleanup_cfg = CFGAnalysis.run(&BpfProgram::new(final_insns.clone()));
+        if let Some((cleaned_insns, cleanup_map)) =
+            super::utils::eliminate_unreachable_blocks_with_cfg(&final_insns, &cleanup_cfg)
+        {
+            final_addr_map = super::utils::compose_addr_maps(&final_addr_map, &cleanup_map);
+            final_insns = cleaned_insns;
+        }
+
+        program.insns = final_insns;
+        program.remap_annotations(&final_addr_map);
         program.log_transform(TransformEntry {
             sites_applied: replacements.len(),
         });
@@ -790,8 +800,17 @@ mod tests {
 
         assert!(result.program_changed);
         assert_eq!(result.total_sites_applied, 2);
-        assert_eq!(program.insns[1], BpfInsn::ja(1));
-        assert_eq!(program.insns[4], BpfInsn::nop());
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(1, 7),
+                BpfInsn::ja(0),
+                BpfInsn::mov64_imm(3, 9),
+                BpfInsn::nop(),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
     }
 
     #[test]
@@ -831,9 +850,34 @@ mod tests {
             program.insns,
             vec![
                 BpfInsn::mov32_imm(6, 7),
-                BpfInsn::ja(1),
-                BpfInsn::mov64_imm(0, 0),
+                BpfInsn::ja(0),
                 BpfInsn::mov64_imm(0, 1),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
+    fn const_prop_removes_dead_target_after_false_branch_fold() {
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::mov64_imm(1, 1),
+            jeq_imm(1, 0, 2),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+
+        let result = run_const_prop_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(1, 1),
+                BpfInsn::nop(),
+                BpfInsn::mov64_imm(0, 0),
                 exit_insn(),
             ]
         );
@@ -853,10 +897,10 @@ mod tests {
 
         assert!(result.program_changed);
         assert_eq!(result.total_sites_applied, 2);
-        assert_eq!(program.insns[1], BpfInsn::ja(3));
-        assert!(program.insns[3].is_ldimm64());
-        assert_eq!(1usize + 1 + program.insns[1].off as usize, 5);
-        assert_eq!(program.insns[5], exit_insn());
+        assert_eq!(
+            program.insns,
+            vec![BpfInsn::mov64_imm(2, 7), BpfInsn::ja(0), exit_insn(),]
+        );
     }
 
     #[test]
@@ -887,9 +931,10 @@ mod tests {
 
         assert!(result.program_changed);
         assert_eq!(result.total_sites_applied, 2);
-        assert_eq!(program.insns[1], BpfInsn::ja(3));
-        assert_eq!(1usize + 1 + program.insns[1].off as usize, 5);
-        assert_eq!(program.insns[5], exit_insn());
+        assert_eq!(
+            program.insns,
+            vec![BpfInsn::mov64_imm(1, -1), BpfInsn::ja(0), exit_insn(),]
+        );
     }
 
     #[test]

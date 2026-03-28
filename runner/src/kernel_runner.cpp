@@ -1391,12 +1391,23 @@ bpf_program *find_program(bpf_object *object, const std::optional<std::string> &
 std::vector<std::string> configured_program_names_for_load(const cli_options &options)
 {
     std::vector<std::string> names;
-    if (options.program_name.has_value() && !options.program_name->empty()) {
-        names.push_back(*options.program_name);
-    }
-    if (options.attach_program_name.has_value() && !options.attach_program_name->empty()) {
-        if (std::find(names.begin(), names.end(), *options.attach_program_name) == names.end()) {
-            names.push_back(*options.attach_program_name);
+    const auto append_unique_name = [&](const std::optional<std::string> &name) {
+        if (!name.has_value() || name->empty()) {
+            return;
+        }
+        if (std::find(names.begin(), names.end(), *name) == names.end()) {
+            names.push_back(*name);
+        }
+    };
+
+    append_unique_name(options.program_name);
+    append_unique_name(options.attach_program_name);
+    for (const auto &name : options.load_program_names) {
+        if (name.empty()) {
+            continue;
+        }
+        if (std::find(names.begin(), names.end(), name) == names.end()) {
+            names.push_back(name);
         }
     }
     return names;

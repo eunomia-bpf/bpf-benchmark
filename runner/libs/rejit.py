@@ -65,6 +65,9 @@ def _fallback_benchmark_config() -> dict[str, Any]:
             "repeat": _DEFAULT_BENCHMARK_REPEAT,
         },
         "passes": {},
+        "policy": {
+            "rules": [],
+        },
         "profiles": {},
     }
 
@@ -93,6 +96,7 @@ def load_benchmark_config(profile: str | None = None) -> dict[str, Any]:
 
     defaults = _mapping_dict(root_config.get("defaults"), field_name="defaults")
     passes = _mapping_dict(root_config.get("passes"), field_name="passes")
+    policy = _mapping_dict(root_config.get("policy"), field_name="policy")
     profiles = _mapping_dict(root_config.get("profiles"), field_name="profiles")
 
     profile_overrides: dict[str, Any] = {}
@@ -106,8 +110,9 @@ def load_benchmark_config(profile: str | None = None) -> dict[str, Any]:
             raise SystemExit(message)
         profile_overrides = _mapping_dict(raw_profile, field_name=f"profiles.{profile}")
 
-    effective = _deep_merge({**defaults, "passes": passes}, profile_overrides)
+    effective = _deep_merge({**defaults, "passes": passes, "policy": policy}, profile_overrides)
     effective["passes"] = _mapping_dict(effective.get("passes"), field_name="passes")
+    effective["policy"] = _mapping_dict(effective.get("policy"), field_name="policy")
     effective["profile"] = profile
     effective["config_path"] = _BENCHMARK_CONFIG_PATH if config_loaded else None
     effective["config_loaded"] = config_loaded
@@ -121,7 +126,100 @@ def _normalize_pass_list(raw: Any) -> list[str]:
     return [str(value).strip() for value in raw if str(value).strip()]
 
 
+def _policy_pass_list(raw: Any, *, field_name: str) -> list[str] | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, list):
+        raise SystemExit(f"invalid benchmark config field: {field_name} must be a sequence")
+    return [str(value).strip() for value in raw if str(value).strip()]
+
+
+def _policy_match_values(raw: Any, *, field_name: str) -> list[str]:
+    if raw is None:
+        return []
+    if isinstance(raw, list):
+        return [str(value).strip() for value in raw if str(value).strip()]
+    if isinstance(raw, Mapping):
+        raise SystemExit(f"invalid benchmark config field: {field_name} must be a scalar or sequence")
+    text = str(raw).strip()
+    return [text] if text else []
+
+
+def _policy_context_text(context: Mapping[str, Any] | None, *field_names: str) -> str:
+    payload = context or {}
+    for field_name in field_names:
+        text = str(payload.get(field_name) or "").strip()
+        if text:
+            return text
+    return ""
+
+
+def _site_count_for_pass(site_counts: Mapping[str, Any] | None, pass_name: str) -> int:
+    if not site_counts:
+        return 0
+    candidates = [pass_name]
+    field_name = _PASS_TO_SITE_FIELD.get(pass_name)
+    if field_name:
+        candidates.append(field_name)
+    for key in candidates:
+        try:
+            return max(0, int(site_counts.get(key, 0) or 0))
+        except (TypeError, ValueError):
+            continue
+    return 0
+
+
+def _policy_rule_matches(
+    match_config: Mapping[str, Any],
+    *,
+    context: Mapping[str, Any] | None,
+    site_counts: Mapping[str, Any] | None,
+    field_name: str,
+) -> bool:
+    text_fields = {
+        "repo": ("repo",),
+        "object": ("object", "object_basename"),
+        "object_relpath": ("object_relpath",),
+        "object_path": ("object_path",),
+        "program": ("program", "program_name"),
+        "section": ("section", "section_name"),
+        "prog_type": ("prog_type", "prog_type_name"),
+        "test_method": ("test_method",),
+        "attach_group": ("attach_group",),
+        "family": ("family",),
+        "category": ("category",),
+        "level": ("level",),
+    }
+
+    for key, raw_value in match_config.items():
+        current_field = f"{field_name}.{key}"
+        if key == "has_sites":
+            required_sites = _policy_pass_list(raw_value, field_name=current_field) or []
+            if any(_site_count_for_pass(site_counts, pass_name) <= 0 for pass_name in required_sites):
+                return False
+            continue
+        aliases = text_fields.get(key)
+        if aliases is None:
+            raise SystemExit(f"invalid benchmark config field: {current_field} is unsupported")
+        expected_values = {value.lower() for value in _policy_match_values(raw_value, field_name=current_field)}
+        if not expected_values:
+            return False
+        actual_value = _policy_context_text(context, *aliases).lower()
+        if not actual_value or actual_value not in expected_values:
+            return False
+    return True
+
+
 def benchmark_config_enabled_passes(benchmark_config: Mapping[str, Any] | None) -> list[str]:
+    policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
+    policy_default = _mapping_dict(policy_config.get("default"), field_name="policy.default")
+    policy_default_passes = _policy_pass_list(
+        policy_default.get("passes"),
+        field_name="policy.default.passes",
+    )
+    if policy_default_passes is not None:
+        return policy_default_passes
+
     passes_config = _mapping_dict((benchmark_config or {}).get("passes"), field_name="passes")
 
     active_list = _normalize_pass_list(passes_config.get("active_list"))
@@ -139,6 +237,97 @@ def benchmark_config_enabled_passes(benchmark_config: Mapping[str, Any] | None) 
         return performance_list
 
     return list(_DEFAULT_REJIT_ENABLED_PASSES)
+
+
+def benchmark_policy_required_site_passes(
+    benchmark_config: Mapping[str, Any] | None,
+) -> list[str]:
+    policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
+    raw_rules = policy_config.get("rules")
+    if raw_rules is None:
+        return []
+    if not isinstance(raw_rules, list):
+        raise SystemExit("invalid benchmark config field: policy.rules must be a sequence")
+
+    required: list[str] = []
+    seen: set[str] = set()
+    for index, raw_rule in enumerate(raw_rules, start=1):
+        if not isinstance(raw_rule, Mapping):
+            raise SystemExit(f"invalid benchmark config field: policy.rules[{index}] must be a mapping")
+        match_config = _mapping_dict(raw_rule.get("match"), field_name=f"policy.rules[{index}].match")
+        for pass_name in _policy_pass_list(
+            match_config.get("has_sites"),
+            field_name=f"policy.rules[{index}].match.has_sites",
+        ) or []:
+            if pass_name in seen:
+                continue
+            seen.add(pass_name)
+            required.append(pass_name)
+    return required
+
+
+def resolve_program_enabled_passes(
+    benchmark_config: Mapping[str, Any] | None,
+    *,
+    context: Mapping[str, Any] | None = None,
+    site_counts: Mapping[str, Any] | None = None,
+    fallback_passes: Sequence[str] | None = None,
+) -> list[str]:
+    policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
+    default_config = _mapping_dict(policy_config.get("default"), field_name="policy.default")
+    raw_rules = policy_config.get("rules")
+    if raw_rules is None:
+        raw_rules = []
+    if not isinstance(raw_rules, list):
+        raise SystemExit("invalid benchmark config field: policy.rules must be a sequence")
+
+    default_passes = _policy_pass_list(
+        default_config.get("passes"),
+        field_name="policy.default.passes",
+    )
+    active_passes = list(
+        default_passes
+        if default_passes is not None
+        else (list(fallback_passes) if fallback_passes is not None else benchmark_config_enabled_passes(benchmark_config))
+    )
+
+    for index, raw_rule in enumerate(raw_rules, start=1):
+        if not isinstance(raw_rule, Mapping):
+            raise SystemExit(f"invalid benchmark config field: policy.rules[{index}] must be a mapping")
+        rule = dict(raw_rule)
+        match_config = _mapping_dict(rule.get("match"), field_name=f"policy.rules[{index}].match")
+        if not _policy_rule_matches(
+            match_config,
+            context=context,
+            site_counts=site_counts,
+            field_name=f"policy.rules[{index}].match",
+        ):
+            continue
+
+        replacement_passes = _policy_pass_list(
+            rule.get("passes"),
+            field_name=f"policy.rules[{index}].passes",
+        )
+        if replacement_passes is not None:
+            active_passes = list(replacement_passes)
+
+        for pass_name in _policy_pass_list(
+            rule.get("enable"),
+            field_name=f"policy.rules[{index}].enable",
+        ) or []:
+            if pass_name not in active_passes:
+                active_passes.append(pass_name)
+
+        disabled = set(
+            _policy_pass_list(
+                rule.get("disable"),
+                field_name=f"policy.rules[{index}].disable",
+            ) or []
+        )
+        if disabled:
+            active_passes = [pass_name for pass_name in active_passes if pass_name not in disabled]
+
+    return active_passes
 
 
 def _benchmark_int(
@@ -285,7 +474,7 @@ def _site_counts_from_optimize_response(response: Mapping[str, Any]) -> dict[str
             if field_name is None:
                 continue
             try:
-                counts[field_name] += int(item.get("sites_applied") or 0)
+                counts[field_name] += int(item.get("sites_found") or item.get("sites_applied") or 0)
             except (TypeError, ValueError):
                 continue
     counts["bitfield_sites"] = counts["extract_sites"]
@@ -868,9 +1057,11 @@ __all__ = [
     "apply_daemon_rejit",
     "benchmark_config_enabled_passes",
     "benchmark_config_iterations",
+    "benchmark_policy_required_site_passes",
     "benchmark_config_repeat",
     "benchmark_config_warmups",
     "benchmark_rejit_enabled_passes",
     "load_benchmark_config",
+    "resolve_program_enabled_passes",
     "scan_programs",
 ]

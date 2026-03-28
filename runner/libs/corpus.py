@@ -16,7 +16,13 @@ import yaml
 from . import ROOT_DIR, ensure_parent
 from .batch_runner import run_batch_runner
 from .object_discovery import supplement_with_existing_corpus_build_objects
-from .rejit import _start_daemon_server, _stop_daemon_server
+from .rejit import (
+    _start_daemon_server,
+    _stop_daemon_server,
+    benchmark_config_enabled_passes,
+    benchmark_policy_required_site_passes,
+    resolve_program_enabled_passes,
+)
 from .results import parse_runner_sample
 
 
@@ -91,6 +97,165 @@ def normalize_passes(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []
     return [str(item) for item in value if str(item)]
+
+
+def program_policy_context(program: ResolvedProgram) -> dict[str, Any]:
+    return {
+        "repo": program.repo,
+        "object": program.object_basename,
+        "object_relpath": program.object_relpath,
+        "object_path": program.object_path,
+        "program": program.program_name,
+        "section": program.section_name,
+        "prog_type": program.prog_type_name,
+        "test_method": program.test_method,
+        "attach_group": program.attach_group,
+        "family": program.family,
+        "category": program.category,
+        "level": program.level,
+    }
+
+
+def _site_counts_from_static_verify_record(record: Mapping[str, Any]) -> dict[str, int]:
+    raw_details = record.get("daemon_pass_details")
+    if not isinstance(raw_details, list):
+        return {}
+    counts: dict[str, int] = {}
+    for item in raw_details:
+        if not isinstance(item, Mapping):
+            continue
+        pass_name = str(item.get("pass_name") or "").strip()
+        if not pass_name:
+            continue
+        try:
+            count = int(item.get("sites_found") or item.get("sites_applied") or 0)
+        except (TypeError, ValueError):
+            continue
+        counts[pass_name] = counts.get(pass_name, 0) + max(0, count)
+    return counts
+
+
+def _build_program_site_scan_jobs(
+    *,
+    objects: list[ResolvedObject],
+    daemon_socket: str,
+    enabled_passes: list[str],
+) -> tuple[list[dict[str, Any]], dict[str, ResolvedObject]]:
+    jobs: list[dict[str, Any]] = []
+    objects_by_job_id: dict[str, ResolvedObject] = {}
+    for index, obj in enumerate(objects, start=1):
+        job_id = f"site-scan-{index:04d}"
+        jobs.append(
+            {
+                "id": job_id,
+                "type": "static_verify_object",
+                "execution": "serial",
+                "object": str(ROOT_DIR / obj.object_path),
+                "object_index": index,
+                "daemon_socket": daemon_socket,
+                "enabled_passes": list(enabled_passes),
+            }
+        )
+        objects_by_job_id[job_id] = obj
+    return jobs, objects_by_job_id
+
+
+def scan_program_site_counts(
+    *,
+    objects: list[ResolvedObject],
+    runner: Path,
+    daemon_socket: str,
+    enabled_passes: list[str],
+    timeout_seconds: int,
+) -> dict[str, dict[str, int]]:
+    if not objects or not enabled_passes:
+        return {}
+
+    jobs, objects_by_job_id = _build_program_site_scan_jobs(
+        objects=objects,
+        daemon_socket=daemon_socket,
+        enabled_passes=enabled_passes,
+    )
+    batch_result = run_batch_runner(
+        runner,
+        spec_payload={
+            "schema_version": 1,
+            "scheduler": {
+                "max_parallel_jobs": 1,
+            },
+            "jobs": jobs,
+        },
+        timeout_seconds=packet_batch_timeout_seconds(max(1, len(objects)), timeout_seconds),
+        cwd=ROOT_DIR,
+    )
+    result_payload = batch_result.get("result")
+    if not isinstance(result_payload, Mapping):
+        return {}
+
+    raw_jobs = result_payload.get("jobs")
+    if not isinstance(raw_jobs, list):
+        return {}
+
+    counts_by_program: dict[str, dict[str, int]] = {}
+    for raw_job in raw_jobs:
+        if not isinstance(raw_job, Mapping):
+            continue
+        job_id = str(raw_job.get("id") or "").strip()
+        obj = objects_by_job_id.get(job_id)
+        if obj is None:
+            continue
+        payload = raw_job.get("payload")
+        records = payload.get("records") if isinstance(payload, Mapping) else None
+        if not isinstance(records, list):
+            continue
+        programs_by_name = {program.program_name: program for program in obj.programs}
+        for raw_record in records:
+            if not isinstance(raw_record, Mapping):
+                continue
+            program_name = str(raw_record.get("prog_name") or "").strip()
+            program = programs_by_name.get(program_name)
+            if program is None:
+                continue
+            counts_by_program[program.canonical_name] = _site_counts_from_static_verify_record(raw_record)
+    return counts_by_program
+
+
+def resolve_program_enabled_passes_map(
+    *,
+    objects: list[ResolvedObject],
+    benchmark_config: Mapping[str, Any] | None,
+    runner: Path,
+    daemon_socket: str,
+    timeout_seconds: int,
+    enabled_passes: list[str] | None = None,
+) -> dict[str, list[str]]:
+    if enabled_passes is not None:
+        return {
+            program.canonical_name: list(enabled_passes)
+            for obj in objects
+            for program in obj.programs
+        }
+
+    fallback_passes = benchmark_config_enabled_passes(benchmark_config)
+    site_passes = benchmark_policy_required_site_passes(benchmark_config)
+    site_counts_by_program = scan_program_site_counts(
+        objects=objects,
+        runner=runner,
+        daemon_socket=daemon_socket,
+        enabled_passes=site_passes,
+        timeout_seconds=timeout_seconds,
+    ) if site_passes else {}
+
+    return {
+        program.canonical_name: resolve_program_enabled_passes(
+            benchmark_config,
+            context=program_policy_context(program),
+            site_counts=site_counts_by_program.get(program.canonical_name),
+            fallback_passes=fallback_passes,
+        )
+        for obj in objects
+        for program in obj.programs
+    }
 
 
 def _string_or_none(value: Any) -> str | None:
@@ -1134,6 +1299,65 @@ def speedup_ratio(
     return float(baseline_ns) / float(rejit_ns)
 
 
+def sample_field(
+    record: Mapping[str, Any] | None,
+    field_name: str,
+) -> Any:
+    if not isinstance(record, Mapping):
+        return None
+    sample = record.get("sample")
+    if not isinstance(sample, Mapping):
+        return None
+    return sample.get(field_name)
+
+
+def comparison_exclusion_reason(
+    *,
+    obj: ResolvedObject,
+    program: ResolvedProgram,
+    baseline_record: dict[str, Any] | None,
+    rejit_record: dict[str, Any] | None,
+) -> str | None:
+    if program.test_method == "compile_only":
+        return None
+    if not baseline_record or not rejit_record:
+        return None
+    if not baseline_record.get("ok") or not rejit_record.get("ok"):
+        return None
+    if speedup_ratio(baseline_record, rejit_record) is not None:
+        return None
+
+    baseline_exec_ns = sample_field(baseline_record, "exec_ns")
+    rejit_exec_ns = sample_field(rejit_record, "exec_ns")
+    baseline_run_cnt = sample_field(baseline_record, "result")
+    rejit_run_cnt = sample_field(rejit_record, "result")
+
+    if program.test_method == "attach_trigger":
+        unsupported_reason = attach_trigger_unsupported_reason(obj, program)
+        if unsupported_reason is not None:
+            return f"attach_trigger measurement unsupported: {unsupported_reason}"
+        if baseline_run_cnt == 0 and rejit_run_cnt == 0:
+            return "attach_trigger did not fire the target program in baseline or REJIT (run_cnt_delta=0)"
+        if baseline_run_cnt == 0:
+            return "attach_trigger did not fire the target program in baseline (run_cnt_delta=0)"
+        if rejit_run_cnt == 0:
+            return "attach_trigger did not fire the target program in REJIT (run_cnt_delta=0)"
+        if baseline_exec_ns == 0 and rejit_exec_ns == 0:
+            return "attach_trigger produced exec_ns=0 in baseline and REJIT"
+        if baseline_exec_ns == 0:
+            return "attach_trigger produced exec_ns=0 in baseline"
+        if rejit_exec_ns == 0:
+            return "attach_trigger produced exec_ns=0 in REJIT"
+
+    if baseline_exec_ns == 0 and rejit_exec_ns == 0:
+        return f"{program.test_method} reported exec_ns=0 in baseline and REJIT"
+    if baseline_exec_ns == 0:
+        return f"{program.test_method} reported exec_ns=0 in baseline"
+    if rejit_exec_ns == 0:
+        return f"{program.test_method} reported exec_ns=0 in REJIT"
+    return f"{program.test_method} runtime comparison is unavailable"
+
+
 def rejit_metadata(record: dict[str, Any] | None) -> dict[str, Any]:
     if not record or not record.get("ok"):
         return {}
@@ -1142,6 +1366,24 @@ def rejit_metadata(record: dict[str, Any] | None) -> dict[str, Any]:
 
 def rejit_passes(record: dict[str, Any] | None) -> list[str]:
     return normalize_passes(rejit_metadata(record).get("passes_applied"))
+
+
+def merge_unique_names(names: list[str]) -> list[str]:
+    merged: list[str] = []
+    seen: set[str] = set()
+    for name in names:
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        merged.append(name)
+    return merged
+
+
+def program_load_names(program: ResolvedProgram) -> list[str]:
+    names = [program.program_name]
+    if program.attach_group:
+        names.append(program.attach_group)
+    return merge_unique_names(names)
 
 
 def build_test_run_batch_job(
@@ -1162,6 +1404,7 @@ def build_test_run_batch_job(
     compile_only: bool,
     daemon_socket: str | None = None,
     enabled_passes: list[str] | None = None,
+    load_program_names: list[str] | None = None,
     prepared_key: str | None = None,
     prepared_ref: str | None = None,
     prepared_group: str | None = None,
@@ -1186,6 +1429,8 @@ def build_test_run_batch_job(
         job["program_name"] = program_name
     if attach_program_name is not None:
         job["attach_program_name"] = attach_program_name
+    if load_program_names is not None:
+        job["load_program_names"] = list(load_program_names)
     if raw_packet:
         job["raw_packet"] = True
     if memory_path is not None:
@@ -1260,6 +1505,30 @@ def runtime_for_program(program: ResolvedProgram, *, rejit: bool) -> str:
     return "kernel-rejit" if rejit else "kernel"
 
 
+def build_prepared_groups(obj: ResolvedObject) -> list[dict[str, Any]]:
+    groups_by_key: dict[str, dict[str, Any]] = {}
+    ordered_groups: list[dict[str, Any]] = []
+    for program in obj.programs:
+        if program.test_method == "attach_trigger":
+            group_key = f"attach:{program.attach_group or program.program_name}"
+        else:
+            group_key = f"program:{program.program_name}"
+        group = groups_by_key.get(group_key)
+        if group is None:
+            group = {
+                "group_key": group_key,
+                "programs": [],
+                "load_program_names": [],
+            }
+            groups_by_key[group_key] = group
+            ordered_groups.append(group)
+        group["programs"].append(program)
+        group["load_program_names"] = merge_unique_names(
+            list(group["load_program_names"]) + program_load_names(program)
+        )
+    return ordered_groups
+
+
 def build_object_batch_plan_v2(
     *,
     objects: list[ResolvedObject],
@@ -1268,6 +1537,7 @@ def build_object_batch_plan_v2(
     btf_custom_path: Path | None,
     daemon_socket: str,
     enabled_passes: list[str] | None = None,
+    program_enabled_passes: Mapping[str, list[str]] | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     jobs: list[dict[str, Any]] = []
     object_refs: list[dict[str, Any]] = []
@@ -1275,78 +1545,68 @@ def build_object_batch_plan_v2(
     for index, obj in enumerate(objects, start=1):
         object_path = ROOT_DIR / obj.object_path
         fixture_path = Path(obj.fixture_path) if obj.fixture_path else None
-        baseline_group = f"object-{index:04d}:baseline"
-        rejit_group = f"object-{index:04d}:rejit"
-        baseline_prepared_key = f"{baseline_group}:prepared"
-        rejit_prepared_key = f"{rejit_group}:prepared"
         refs: dict[str, Any] = {
             "object": obj,
-            "baseline_object_compile": f"object-{index:04d}:baseline-object-compile",
-            "rejit_object_compile": f"object-{index:04d}:rejit-object-compile",
+            "baseline_group_compiles": [],
+            "rejit_group_compiles": [],
             "programs": {},
         }
         object_refs.append(refs)
 
-        jobs.append(
-            build_test_run_batch_job(
-                job_id=refs["baseline_object_compile"],
-                execution="serial",
-                runtime="kernel",
-                object_path=object_path,
-                program_name=None,
-                attach_program_name=None,
-                io_mode="context",
-                raw_packet=False,
-                memory_path=None,
-                input_size=0,
-                repeat=repeat,
-                warmup_repeat=warmup_repeat,
-                btf_custom_path=btf_custom_path,
-                compile_only=True,
-                prepared_key=baseline_prepared_key,
-                prepared_group=baseline_group,
-                fixture_path=fixture_path,
-            )
-        )
+        def enabled_passes_for_program(program: ResolvedProgram) -> list[str] | None:
+            if program_enabled_passes is not None and program.canonical_name in program_enabled_passes:
+                return list(program_enabled_passes[program.canonical_name])
+            if enabled_passes is not None:
+                return list(enabled_passes)
+            return None
 
         for program_index, program in enumerate(obj.programs, start=1):
-            program_refs = {
+            refs["programs"][program.canonical_name] = {
                 "baseline_compile": f"object-{index:04d}:program-{program_index:04d}:baseline-compile",
                 "baseline_run": f"object-{index:04d}:program-{program_index:04d}:baseline-run",
                 "rejit_compile": f"object-{index:04d}:program-{program_index:04d}:rejit-compile",
                 "rejit_run": f"object-{index:04d}:program-{program_index:04d}:rejit-run",
             }
-            refs["programs"][program.canonical_name] = program_refs
-            memory_path = Path(program.memory_path) if program.memory_path else None
-            program_fixture_path = Path(program.fixture_path) if program.fixture_path else fixture_path
+        prepared_groups = build_prepared_groups(obj)
+
+        for group_index, group in enumerate(prepared_groups, start=1):
+            baseline_group = f"object-{index:04d}:baseline-group-{group_index:04d}"
+            baseline_prepared_key = f"{baseline_group}:prepared"
+            baseline_prepare_job_id = f"{baseline_group}:prepare"
+            load_program_names = list(group["load_program_names"])
+
+            refs["baseline_group_compiles"].append(baseline_prepare_job_id)
+
             jobs.append(
                 build_test_run_batch_job(
-                    job_id=program_refs["baseline_compile"],
+                    job_id=baseline_prepare_job_id,
                     execution="serial",
-                    runtime=runtime_for_program(program, rejit=False),
+                    runtime="kernel",
                     object_path=object_path,
-                    program_name=program.program_name,
-                    attach_program_name=program.attach_group,
-                    io_mode=program.io_mode,
-                    raw_packet=program.raw_packet,
-                    memory_path=memory_path,
-                    input_size=program.input_size,
+                    program_name=None,
+                    attach_program_name=None,
+                    io_mode="context",
+                    raw_packet=False,
+                    memory_path=None,
+                    input_size=0,
                     repeat=repeat,
                     warmup_repeat=warmup_repeat,
                     btf_custom_path=btf_custom_path,
                     compile_only=True,
-                    prepared_ref=baseline_prepared_key,
+                    load_program_names=load_program_names,
+                    prepared_key=baseline_prepared_key,
                     prepared_group=baseline_group,
-                    release_prepared=False,
-                    fixture_path=program_fixture_path,
-                    trigger_command=program.trigger,
-                    trigger_timeout_seconds=program.trigger_timeout_seconds,
+                    fixture_path=fixture_path,
                 )
             )
-            if program.test_method != "compile_only":
+
+            for program in group["programs"]:
+                program_refs = refs["programs"][program.canonical_name]
+                memory_path = Path(program.memory_path) if program.memory_path else None
+                program_fixture_path = Path(program.fixture_path) if program.fixture_path else fixture_path
                 jobs.append(
                     build_test_run_batch_job(
-                        job_id=program_refs["baseline_run"],
+                        job_id=program_refs["baseline_compile"],
                         execution="serial",
                         runtime=runtime_for_program(program, rejit=False),
                         object_path=object_path,
@@ -1359,7 +1619,7 @@ def build_object_batch_plan_v2(
                         repeat=repeat,
                         warmup_repeat=warmup_repeat,
                         btf_custom_path=btf_custom_path,
-                        compile_only=False,
+                        compile_only=True,
                         prepared_ref=baseline_prepared_key,
                         prepared_group=baseline_group,
                         release_prepared=False,
@@ -1368,65 +1628,45 @@ def build_object_batch_plan_v2(
                         trigger_timeout_seconds=program.trigger_timeout_seconds,
                     )
                 )
+                if program.test_method != "compile_only":
+                    jobs.append(
+                        build_test_run_batch_job(
+                            job_id=program_refs["baseline_run"],
+                            execution="serial",
+                            runtime=runtime_for_program(program, rejit=False),
+                            object_path=object_path,
+                            program_name=program.program_name,
+                            attach_program_name=program.attach_group,
+                            io_mode=program.io_mode,
+                            raw_packet=program.raw_packet,
+                            memory_path=memory_path,
+                            input_size=program.input_size,
+                            repeat=repeat,
+                            warmup_repeat=warmup_repeat,
+                            btf_custom_path=btf_custom_path,
+                            compile_only=False,
+                            prepared_ref=baseline_prepared_key,
+                            prepared_group=baseline_group,
+                            release_prepared=False,
+                            fixture_path=program_fixture_path,
+                            trigger_command=program.trigger,
+                            trigger_timeout_seconds=program.trigger_timeout_seconds,
+                        )
+                    )
 
-        jobs.append(
-            build_test_run_batch_job(
-                job_id=refs["rejit_object_compile"],
-                execution="serial",
-                runtime="kernel-rejit",
-                object_path=object_path,
-                program_name=None,
-                attach_program_name=None,
-                io_mode="context",
-                raw_packet=False,
-                memory_path=None,
-                input_size=0,
-                repeat=repeat,
-                warmup_repeat=warmup_repeat,
-                btf_custom_path=btf_custom_path,
-                compile_only=True,
-                daemon_socket=daemon_socket,
-                enabled_passes=enabled_passes,
-                prepared_key=rejit_prepared_key,
-                prepared_group=rejit_group,
-                fixture_path=fixture_path,
-            )
-        )
+            for program in group["programs"]:
+                program_refs = refs["programs"][program.canonical_name]
+                memory_path = Path(program.memory_path) if program.memory_path else None
+                program_fixture_path = Path(program.fixture_path) if program.fixture_path else fixture_path
+                rejit_group = f"{program_refs['rejit_compile']}:group"
+                rejit_prepared_key = f"{program_refs['rejit_compile']}:prepared"
+                program_passes = enabled_passes_for_program(program)
 
-        for program_index, program in enumerate(obj.programs, start=1):
-            program_refs = refs["programs"][program.canonical_name]
-            memory_path = Path(program.memory_path) if program.memory_path else None
-            program_fixture_path = Path(program.fixture_path) if program.fixture_path else fixture_path
-            jobs.append(
-                build_test_run_batch_job(
-                    job_id=program_refs["rejit_compile"],
-                    execution="serial",
-                    runtime=runtime_for_program(program, rejit=True),
-                    object_path=object_path,
-                    program_name=program.program_name,
-                    attach_program_name=program.attach_group,
-                    io_mode=program.io_mode,
-                    raw_packet=program.raw_packet,
-                    memory_path=memory_path,
-                    input_size=program.input_size,
-                    repeat=repeat,
-                    warmup_repeat=warmup_repeat,
-                    btf_custom_path=btf_custom_path,
-                    compile_only=True,
-                    daemon_socket=daemon_socket,
-                    enabled_passes=enabled_passes,
-                    prepared_ref=rejit_prepared_key,
-                    prepared_group=rejit_group,
-                    release_prepared=False,
-                    fixture_path=program_fixture_path,
-                    trigger_command=program.trigger,
-                    trigger_timeout_seconds=program.trigger_timeout_seconds,
-                )
-            )
-            if program.test_method != "compile_only" and program.rejit_enabled:
+                refs["rejit_group_compiles"].append(program_refs["rejit_compile"])
+
                 jobs.append(
                     build_test_run_batch_job(
-                        job_id=program_refs["rejit_run"],
+                        job_id=program_refs["rejit_compile"],
                         execution="serial",
                         runtime=runtime_for_program(program, rejit=True),
                         object_path=object_path,
@@ -1439,17 +1679,44 @@ def build_object_batch_plan_v2(
                         repeat=repeat,
                         warmup_repeat=warmup_repeat,
                         btf_custom_path=btf_custom_path,
-                        compile_only=False,
+                        compile_only=True,
                         daemon_socket=daemon_socket,
-                        enabled_passes=enabled_passes,
-                        prepared_ref=rejit_prepared_key,
+                        enabled_passes=program_passes,
+                        load_program_names=program_load_names(program),
+                        prepared_key=rejit_prepared_key,
                         prepared_group=rejit_group,
-                        release_prepared=False,
                         fixture_path=program_fixture_path,
                         trigger_command=program.trigger,
                         trigger_timeout_seconds=program.trigger_timeout_seconds,
                     )
                 )
+                if program.test_method != "compile_only" and program.rejit_enabled:
+                    jobs.append(
+                        build_test_run_batch_job(
+                            job_id=program_refs["rejit_run"],
+                            execution="serial",
+                            runtime=runtime_for_program(program, rejit=True),
+                            object_path=object_path,
+                            program_name=program.program_name,
+                            attach_program_name=program.attach_group,
+                            io_mode=program.io_mode,
+                            raw_packet=program.raw_packet,
+                            memory_path=memory_path,
+                            input_size=program.input_size,
+                            repeat=repeat,
+                            warmup_repeat=warmup_repeat,
+                            btf_custom_path=btf_custom_path,
+                            compile_only=False,
+                            daemon_socket=daemon_socket,
+                            enabled_passes=program_passes,
+                            prepared_ref=rejit_prepared_key,
+                            prepared_group=rejit_group,
+                            release_prepared=False,
+                            fixture_path=program_fixture_path,
+                            trigger_command=program.trigger,
+                            trigger_timeout_seconds=program.trigger_timeout_seconds,
+                        )
+                    )
 
     return {
         "schema_version": 1,
@@ -1497,6 +1764,7 @@ def build_empty_program_record(program: ResolvedProgram, execution_mode: str) ->
         "size_ratio": None,
         "size_delta_pct": None,
         "speedup_ratio": None,
+        "comparison_exclusion_reason": None,
         "record_error": None,
         "guest_invocation": None,
     }
@@ -1523,8 +1791,47 @@ def build_empty_object_record(obj: ResolvedObject, execution_mode: str, *, error
     }
 
 
+def object_compile_summaries(
+    job_ids: list[str],
+    results_by_id: Mapping[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    summaries: list[dict[str, Any]] = []
+    for job_id in job_ids:
+        summary = batch_job_invocation_summary(results_by_id.get(job_id))
+        if summary is not None:
+            summaries.append(summary)
+    return summaries
+
+
+def representative_object_compile_summary(
+    summaries: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    for summary in summaries:
+        if summary.get("ok"):
+            return summary
+    if summaries:
+        return summaries[0]
+    return None
+
+
+def object_compile_error_summary(
+    label: str,
+    summaries: list[dict[str, Any]],
+) -> str | None:
+    if not summaries:
+        return None
+    failures = [summary for summary in summaries if not summary.get("ok")]
+    if not failures:
+        return None
+    first_reason = summarize_failure_reason(failures[0])
+    if len(failures) == len(summaries):
+        return f"all {len(summaries)} {label} prepared groups failed; first: {first_reason}"
+    return f"{len(failures)}/{len(summaries)} {label} prepared groups failed; first: {first_reason}"
+
+
 def build_program_record_v2(
     *,
+    obj: ResolvedObject,
     program: ResolvedProgram,
     execution_mode: str,
     job_refs: Mapping[str, str],
@@ -1543,6 +1850,12 @@ def build_program_record_v2(
     record["size_ratio"] = size_ratio(record["baseline_compile"], record["rejit_compile"])
     record["size_delta_pct"] = size_delta_pct(record["baseline_compile"], record["rejit_compile"])
     record["speedup_ratio"] = speedup_ratio(record["baseline_run"], record["rejit_run"])
+    record["comparison_exclusion_reason"] = comparison_exclusion_reason(
+        obj=obj,
+        program=program,
+        baseline_record=record["baseline_run"],
+        rejit_record=record["rejit_run"],
+    )
     return record
 
 
@@ -1554,14 +1867,27 @@ def build_object_record_v2(
     results_by_id: Mapping[str, dict[str, Any]],
 ) -> dict[str, Any]:
     record = build_empty_object_record(obj, execution_mode)
-    record["stock_compile"] = batch_job_invocation_summary(results_by_id.get(refs["baseline_object_compile"]))
-    record["rejit_compile"] = batch_job_invocation_summary(results_by_id.get(refs["rejit_object_compile"]))
-    if record["stock_compile"] and not record["stock_compile"].get("ok"):
+    baseline_summaries = object_compile_summaries(list(refs.get("baseline_group_compiles") or []), results_by_id)
+    rejit_summaries = object_compile_summaries(list(refs.get("rejit_group_compiles") or []), results_by_id)
+    record["stock_compile"] = representative_object_compile_summary(baseline_summaries)
+    record["rejit_compile"] = representative_object_compile_summary(rejit_summaries)
+
+    baseline_error = object_compile_error_summary("baseline", baseline_summaries)
+    rejit_error = object_compile_error_summary("REJIT", rejit_summaries)
+    baseline_ok = any(summary.get("ok") for summary in baseline_summaries)
+    rejit_ok = any(summary.get("ok") for summary in rejit_summaries)
+
+    if baseline_error and not baseline_ok:
         record["status"] = "error"
-        record["error"] = summarize_failure_reason(record["stock_compile"])
-    elif record["rejit_compile"] and not record["rejit_compile"].get("ok"):
+        record["error"] = baseline_error
+    elif rejit_error and not rejit_ok:
         record["status"] = "error"
-        record["error"] = summarize_failure_reason(record["rejit_compile"])
+        record["error"] = rejit_error
+    elif baseline_error or rejit_error:
+        record["status"] = "partial"
+        record["error"] = "; ".join(
+            error for error in (baseline_error, rejit_error) if error
+        )
     return record
 
 
@@ -1577,6 +1903,7 @@ def run_objects_locally_batch(
     btf_custom_path: Path | None,
     daemon_socket: str | None = None,
     enabled_passes: list[str] | None = None,
+    benchmark_config: Mapping[str, Any] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
     active_daemon_socket = daemon_socket
     daemon_server: tuple[subprocess.Popen[str], Path, str, Path, Path] | None = None
@@ -1601,6 +1928,14 @@ def run_objects_locally_batch(
             return [], [], batch_result
 
         assert active_daemon_socket is not None
+        program_enabled_passes = resolve_program_enabled_passes_map(
+            objects=objects,
+            benchmark_config=benchmark_config,
+            runner=runner,
+            daemon_socket=active_daemon_socket,
+            timeout_seconds=timeout_seconds,
+            enabled_passes=enabled_passes,
+        )
         spec_payload, object_refs = build_object_batch_plan_v2(
             objects=objects,
             repeat=repeat,
@@ -1608,6 +1943,7 @@ def run_objects_locally_batch(
             btf_custom_path=btf_custom_path,
             daemon_socket=active_daemon_socket,
             enabled_passes=enabled_passes,
+            program_enabled_passes=program_enabled_passes,
         )
         batch_result = run_batch_runner(
             runner,
@@ -1635,6 +1971,7 @@ def run_objects_locally_batch(
         for program in obj.programs:
             program_records.append(
                 build_program_record_v2(
+                    obj=obj,
                     program=program,
                     execution_mode=execution_mode,
                     job_refs=refs["programs"][program.canonical_name],
