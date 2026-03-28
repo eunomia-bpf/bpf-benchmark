@@ -908,8 +908,17 @@ make clean
 | **545** | **map_inline 零命中调查（2026-03-28）** | ✅ | 全量 run 的 0 hit 是 stale artifact。离线扫描：764 程序中 148 个有 map_lookup，2432 sites，保守 preflight 212 个候选。**安全 coverage 从 41 掉到 2 的元凶**：mutable writeback guard 是程序级 map veto——同一 map 上某 site 有写回，所有 site 一起禁。verifier-guided key extraction 代码有了但实际 `no verifier states available`。报告：`map_inline_corpus_zero_hit_investigation_20260328.md`。 |
 | **546** | **仓库一致性审查（2026-03-28）** | ✅ | 3 HIGH：benchmark_config.yaml 引用不存在的 security pass（已修 #539）、`enabled_passes=[]` 语义不一致、macro_corpus.yaml 引用 8 个不存在的 .bpf.o。5 MEDIUM：E2E JSON 无统一 schema、术语漂移、pass 解析重复、根 Makefile 不 thin、profiler 旧路径。报告：`repo_consistency_review_20260328.md`。 |
 | **547** | **Daemon 代码质量审查（2026-03-28）** | ✅ | 3 HIGH：rollback 归因退化（已修 #542）、branch_flip 默认启用但永远 skip、`--list-passes` 不可用（已修 #542）。5 MEDIUM：pass 别名不生效（已修 #542）、REJIT 错误字符串协议、静默吞错（已修 #542）、enumerate 缺 prog_type、serve 测试极少。God files：map_inline.rs 5134 行。报告：`daemon_code_quality_review_20260328.md`。 |
-| **548** | E2E post-fix 重跑 | 🔄 | 用修复后代码（#540/#541/#542）重跑 `make vm-e2e`。重点验证 Tetragon 不再 Permission denied、所有 case 只用 performance passes。 |
-| **549** | Corpus 覆盖率瓶颈分析 | 🔄 | 调查 2019→557→764→442→315→130 每一级漏斗损失的原因和修复方案。 |
-| **550** | Daemon 架构文档 | 🔄 | 中文完整架构和算法文档 `docs/daemon-architecture.md`，覆盖 CLI/数据结构/15 个 pass 算法/syscall 层/rewrite 基础设施。 |
-| **551** | Daemon post-fix review | 🔄 | review 修复质量，找残留问题。 |
-| **552** | E2E + corpus 代码 review | 🔄 | 数据流一致性、错误处理、死代码、God Files。 |
+| **548** | E2E post-fix 重跑 | ✅ | **全部 6 case ok**（tracee/tetragon/katran/bcc/bpftrace/scx）。Tetragon 不再 Permission denied。E2E 结果目录：`e2e/results/*_20260328_18*/`。 |
+| **549** | Corpus 覆盖率瓶颈分析 | ✅ | **关键发现**：(1) build 失败 76% 是 asm/types.h 缺失。(2) 当前 v2 partial run 已有 334 applied（不是旧的 130）。(3) prepared-state 失败 308 个是 object-level load 先失败。(4) compile_only 226 个天生不可测。(5) attach 失败 91 个需要专用 handler。报告：`corpus_coverage_bottleneck_analysis_20260328.md`。 |
+| **550** | Daemon 架构文档 | ✅ | 1476 行中文完整架构文档 `docs/daemon-architecture.md`。 |
+| **551** | Daemon post-fix review | ✅ | HIGH: rollback attribution 跨 pass 坐标不稳定。MEDIUM: 空白字符串绕过校验、invalidation polling 错误丢弃。const_prop jump fix 缺 backward/JMP32 测试。报告：`daemon_post_fix_review_20260328.md`。 |
+| **552** | E2E + corpus 代码 review | ✅ | CRITICAL: E2E 把失败伪装成 skipped。HIGH: enabled_passes=[] 语义不一致、corpus daemon 启动脆弱、blind_apply 未接线。报告：`e2e_corpus_code_review_20260328.md`。 |
+| **553** | 测试重组 + unwrap_or_default 修复 | ✅ | 4 个空测试文件已填充（bulk_memory/cond_select/wide_mem/real_bpfo）。unwrap_or_default 收紧（bpf.rs/commands.rs/elf_parser.rs）。daemon-tests **510 pass / 0 fail / 13 ignored**。 |
+| **554** | compile_only 清理 + prepared-state 调查 | ✅ | compile_only 从 66 降到 17（剩余有原因注释）。prepared-state 根因是 object-level load 先失败，不是 ref 映射错。batch_runner 已改进错误透传。报告：`compile_only_and_prepared_state_fix_20260328.md`。 |
+| **555** | asm/types.h build 修复 + attach 调查 | ✅ | 构建脚本注入 vendor/linux-framework arch-specific UAPI include。验证通过。attach 根因是 generic `bpf_program__attach()` 缺专用 handler。报告：`build_and_attach_fix_20260328.md`。 |
+| **556** | K2 + fixed-baseline 对比方案 | ✅ | K2 开源可用，需 pre-load .bpf.o 输入。fixed-baseline 分支 `jit-fixed-baselines` 可用。报告：`k2_and_baseline_comparison_plan_20260328.md`。 |
+| **557** | Ablation 设计 + bpftrace 调查 | ✅ | ablation matrix 设计完成（7 个 profile）。bpftrace 0 ReJIT 根因已识别。报告：`ablation_and_bpftrace_investigation_20260328.md`。 |
+| **558** | Static verify post-build | ✅ | **531 objects / 1241 programs / 345 applied / 345 verifier accepted**。报告：`post_build_fix_static_verify_20260328.md`。 |
+| **559** | Corpus dev run（performance-only pipeline） | 🔄 | 45/469 objects 完成。**172 compile / 139 measured / 165 applied**。exec geomean **0.999x**。map_inline=295, const_prop=306, dce=303。正在跑。 |
+| **560** | 死代码 + 垃圾测试清理 | 🔄 | codex 已派，等结果。 |
+| **561** | 全仓库静默失败 + 安全 pass 清理 | 🔄 | codex 已派，output 丢失，需确认结果。安全 pass 已从 registry 删除（#539 确认）。 |
