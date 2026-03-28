@@ -571,12 +571,16 @@ pub enum PipelineProfile {
 #[derive(Clone, Debug, Default)]
 
 pub struct PolicyConfig {
-    /// Enabled pass name list (empty = all enabled).
+    /// Enabled pass name list.
     pub enabled_passes: Vec<String>,
     /// Disabled pass name list.
     pub disabled_passes: Vec<String>,
     /// Fixed pipeline selection for controlled benchmarking and debugging.
     pub pipeline_profile: PipelineProfile,
+}
+
+pub fn default_enabled_passes() -> Vec<String> {
+    crate::passes::selected_pass_names(None).expect("default pass list should always resolve")
 }
 
 // ── Type-erased analysis wrapper ────────────────────────────────────
@@ -861,8 +865,10 @@ fn pass_allowed(pass: &dyn BpfPass, ctx: &PassContext) -> bool {
         return false;
     }
 
-    ctx.policy.enabled_passes.is_empty()
-        || ctx.policy.enabled_passes.contains(&pass.name().to_string())
+    ctx.policy
+        .enabled_passes
+        .iter()
+        .any(|name| name == pass.name())
 }
 
 // ── Helper: default PassContext for testing ──────────────────────────
@@ -871,7 +877,7 @@ impl PassContext {
     /// Create a minimal PassContext suitable for testing.
     /// All kinsn targets unavailable (btf_id = -1), no special CPU features.
     #[cfg(test)]
-    pub fn test_default() -> Self {
+        pub fn test_default() -> Self {
         Self {
             kinsn_registry: KinsnRegistry {
                 rotate64_btf_id: -1,
@@ -887,7 +893,10 @@ impl PassContext {
                 target_supported_encodings: HashMap::new(),
             },
             platform: PlatformCapabilities::default(),
-            policy: PolicyConfig::default(),
+            policy: PolicyConfig {
+                enabled_passes: default_enabled_passes(),
+                ..PolicyConfig::default()
+            },
             prog_type: 0,
         }
     }
@@ -905,6 +914,16 @@ mod tests {
     /// Construct a minimal BPF program from instructions.
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
         BpfProgram::new(insns)
+    }
+
+    fn ctx_for_pass_manager(pm: &PassManager) -> PassContext {
+        let mut ctx = PassContext::test_default();
+        ctx.policy.enabled_passes = pm
+            .pass_names()
+            .into_iter()
+            .map(str::to_string)
+            .collect();
+        ctx
     }
 
     /// A no-op pass that does not change the program.
@@ -1259,7 +1278,7 @@ mod tests {
         let mut pm = PassManager::new();
         pm.add_pass(NoOpPass);
         let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-        let ctx = PassContext::test_default();
+        let ctx = ctx_for_pass_manager(&pm);
 
         let result = pm.run(&mut prog, &ctx).unwrap();
 
@@ -1276,7 +1295,7 @@ mod tests {
         let mut pm = PassManager::new();
         pm.add_pass(AppendNopPass);
         let mut prog = make_program(vec![exit_insn()]);
-        let ctx = PassContext::test_default();
+        let ctx = ctx_for_pass_manager(&pm);
 
         let result = pm.run(&mut prog, &ctx).unwrap();
 
@@ -1297,7 +1316,7 @@ mod tests {
         pm.add_pass(AppendNopPass);
 
         let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-        let ctx = PassContext::test_default();
+        let ctx = ctx_for_pass_manager(&pm);
 
         let result = pm.run(&mut prog, &ctx).unwrap();
 
@@ -1334,7 +1353,7 @@ mod tests {
         pm.add_pass(CountReportingPass);
 
         let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-        let ctx = PassContext::test_default();
+        let ctx = ctx_for_pass_manager(&pm);
 
         let result = pm.run(&mut prog, &ctx).unwrap();
 
@@ -1415,7 +1434,7 @@ mod tests {
         pm.add_pass(AppendNopPass);
 
         let mut prog = make_program(vec![exit_insn()]);
-        let mut ctx = PassContext::test_default();
+        let mut ctx = ctx_for_pass_manager(&pm);
         ctx.policy.disabled_passes = vec!["append_nop".into()];
 
         let result = pm.run(&mut prog, &ctx).unwrap();
@@ -1492,7 +1511,7 @@ mod tests {
         let mut pm = PassManager::new();
         pm.add_pass(AppendNopPass);
 
-        let ctx = PassContext::test_default();
+        let ctx = ctx_for_pass_manager(&pm);
 
         let mut prog = make_program(vec![exit_insn()]);
         let result = pm
@@ -1528,7 +1547,7 @@ mod tests {
         assert_eq!(ctx.kinsn_registry.memcpy_bulk_btf_id, -1);
         assert_eq!(ctx.kinsn_registry.memset_bulk_btf_id, -1);
         assert!(!ctx.platform.has_bmi1);
-        assert!(ctx.policy.enabled_passes.is_empty());
+        assert_eq!(ctx.policy.enabled_passes, default_enabled_passes());
         assert!(ctx.policy.disabled_passes.is_empty());
     }
 
@@ -1873,7 +1892,7 @@ mod tests {
         pm.add_pass(AppendNopPass);
 
         let mut prog = make_program(vec![exit_insn()]);
-        let ctx = PassContext::test_default();
+        let ctx = ctx_for_pass_manager(&pm);
 
         let result = pm.run(&mut prog, &ctx).unwrap();
 
@@ -1891,7 +1910,7 @@ mod tests {
         pm.add_pass(NoOpPass);
 
         let mut prog = make_program(vec![exit_insn()]);
-        let ctx = PassContext::test_default();
+        let ctx = ctx_for_pass_manager(&pm);
 
         let result = pm.run(&mut prog, &ctx).unwrap();
 
@@ -1909,7 +1928,7 @@ mod tests {
         pm.add_pass(AppendNopPass);
 
         let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-        let ctx = PassContext::test_default();
+        let ctx = ctx_for_pass_manager(&pm);
 
         let result = pm.run(&mut prog, &ctx).unwrap();
 
@@ -1931,7 +1950,7 @@ mod tests {
         pm.add_pass(AppendNopPass);
 
         let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-        let mut ctx = PassContext::test_default();
+        let mut ctx = ctx_for_pass_manager(&pm);
         ctx.policy.disabled_passes = vec!["rewrite_mov_imm".into()];
 
         let result = pm.run(&mut prog, &ctx).unwrap();
@@ -1961,7 +1980,7 @@ mod tests {
         pm.add_pass(AppendNopPass);
 
         let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-        let ctx = PassContext::test_default();
+        let ctx = ctx_for_pass_manager(&pm);
 
         // First run: both passes fire.
         let result1 = pm.run(&mut prog, &ctx).unwrap();
@@ -1971,7 +1990,7 @@ mod tests {
 
         // Second run: disable rewrite_mov_imm (simulating rollback).
         let mut prog2 = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-        let mut ctx2 = PassContext::test_default();
+        let mut ctx2 = ctx_for_pass_manager(&pm);
         ctx2.policy.disabled_passes = vec!["rewrite_mov_imm".into()];
 
         let result2 = pm.run(&mut prog2, &ctx2).unwrap();
@@ -2028,7 +2047,7 @@ mod tests {
         pm.add_pass(AppendNopPass);
 
         let mut prog = make_program(vec![exit_insn()]);
-        let ctx = PassContext::test_default();
+        let ctx = ctx_for_pass_manager(&pm);
         let result = pm.run(&mut prog, &ctx).unwrap();
 
         assert_eq!(result.pass_results.len(), 1);

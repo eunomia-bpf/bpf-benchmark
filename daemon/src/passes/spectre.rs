@@ -201,6 +201,7 @@ mod tests {
 
     fn ctx_with_barrier(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
+        ctx.policy.enabled_passes = vec!["speculation_barrier".to_string()];
         ctx.kinsn_registry.speculation_barrier_btf_id = btf_id;
         ctx
     }

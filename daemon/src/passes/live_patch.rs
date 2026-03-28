@@ -911,6 +911,7 @@ mod tests {
         pm.add_pass(LivePatchPass);
 
         let mut ctx = PassContext::test_default();
+        ctx.policy.enabled_passes = vec!["live_patch".to_string()];
         ctx.prog_type = prog_type;
         pm.run(program, &ctx).unwrap()
     }

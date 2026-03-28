@@ -385,7 +385,9 @@ mod tests {
             .map(|name| (*name).to_string())
             .collect::<Vec<_>>();
         let pm = build_custom_pipeline(&pass_names).unwrap();
-        pm.run(program, &PassContext::test_default()).unwrap()
+        let mut ctx = PassContext::test_default();
+        ctx.policy.enabled_passes = pass_names;
+        pm.run(program, &ctx).unwrap()
     }
 
     fn make_wide_mem_4byte_program() -> Vec<BpfInsn> {
@@ -426,6 +428,8 @@ mod tests {
         let mut prog = make_program(insns);
         // Provide a barrier btf_id so the spectre pass can fire.
         let mut ctx = PassContext::test_default();
+        ctx.policy.enabled_passes =
+            vec!["wide_mem".to_string(), "speculation_barrier".to_string()];
         ctx.kinsn_registry.speculation_barrier_btf_id = 777;
 
         let result = pm.run(&mut prog, &ctx).unwrap();

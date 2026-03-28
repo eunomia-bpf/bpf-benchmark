@@ -827,36 +827,34 @@ pub(crate) fn try_apply_one(
         let disabled_passes_sorted = sorted_strings(disabled_passes.iter().cloned());
 
         if !pipeline_result.program_changed {
-            let mut restored_original = false;
+            let mut restore_insns = orig_insns.clone();
+            let _map_fds_guard = bpf::relocate_map_fds_with_bindings(
+                &mut restore_insns,
+                &map_ids,
+                &program.map_fd_bindings,
+            )
+            .unwrap_or_else(|e| {
+                eprintln!("    warning: map FD relocation failed: {:#}", e);
+                push_debug_warning(
+                    &mut attempt_debug,
+                    format!("map FD relocation failed before identity REJIT: {e:#}"),
+                );
+                Vec::new()
+            });
+
+            if let Some(debug) = attempt_debug.as_mut() {
+                debug.pre_rejit_bytecode = Some(insn::dump_bytecode_compact(&restore_insns));
+                debug.warnings.push(
+                    "program was unchanged; issuing identity REJIT with original bytecode"
+                        .to_string(),
+                );
+            }
+
+            let rejit_start = Instant::now();
+            bpf::bpf_prog_rejit(fd.as_raw_fd(), &restore_insns, &[])?;
+            total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
+
             if had_tracked_inline_sites {
-                let mut restore_insns = orig_insns.clone();
-                let _map_fds_guard = bpf::relocate_map_fds_with_bindings(
-                    &mut restore_insns,
-                    &map_ids,
-                    &program.map_fd_bindings,
-                )
-                .unwrap_or_else(|e| {
-                    eprintln!("    warning: map FD relocation failed: {:#}", e);
-                    push_debug_warning(
-                        &mut attempt_debug,
-                        format!("map FD relocation failed before restore REJIT: {e:#}"),
-                    );
-                    Vec::new()
-                });
-
-                if let Some(debug) = attempt_debug.as_mut() {
-                    debug.pre_rejit_bytecode = Some(insn::dump_bytecode_compact(&restore_insns));
-                    debug.warnings.push(
-                        "restoring original bytecode after invalidated map inline produced no rewrite"
-                            .to_string(),
-                    );
-                }
-
-                let rejit_start = Instant::now();
-                bpf::bpf_prog_rejit(fd.as_raw_fd(), &restore_insns, &[])?;
-                total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
-                restored_original = true;
-
                 if let Err(err) = refresh_invalidation_tracking(invalidation_tracker, prog_id, &[])
                 {
                     eprintln!(
@@ -869,11 +867,7 @@ pub(crate) fn try_apply_one(
             attempts.push(AttemptRecord {
                 attempt,
                 disabled_passes: disabled_passes_sorted.clone(),
-                result: if restored_original {
-                    "restored_original".to_string()
-                } else {
-                    "no_change".to_string()
-                },
+                result: "identity_rejit".to_string(),
                 failure_pc: None,
                 attributed_pass: None,
                 debug: attempt_debug,
@@ -881,8 +875,8 @@ pub(crate) fn try_apply_one(
 
             return Ok(make_result(
                 "ok",
+                true,
                 false,
-                restored_original,
                 0,
                 orig_insn_count,
                 last_pass_details,
@@ -1782,7 +1776,10 @@ processed 26 insns (limit 1000000) max_states_per_insn 1 total_states 3 peak_sta
         let ctx = pass::PassContext {
             kinsn_registry: discovery.registry,
             platform: pass::PlatformCapabilities::default(),
-            policy: pass::PolicyConfig::default(),
+            policy: pass::PolicyConfig {
+                enabled_passes: pass::default_enabled_passes(),
+                ..pass::PolicyConfig::default()
+            },
             prog_type: 0,
         };
 

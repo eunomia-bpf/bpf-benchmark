@@ -118,10 +118,9 @@ def _daemon_command(
 
 
 def benchmark_rejit_enabled_passes() -> list[str]:
-    configured = _parse_enabled_passes(os.environ.get(_BENCH_PASSES_ENV))
-    if configured:
-        return configured
-    return list(_DEFAULT_REJIT_ENABLED_PASSES)
+    if _BENCH_PASSES_ENV not in os.environ:
+        return list(_DEFAULT_REJIT_ENABLED_PASSES)
+    return _parse_enabled_passes(os.environ.get(_BENCH_PASSES_ENV))
 
 
 def _parse_enumerate_table(stdout: str) -> dict[int, dict[str, Any]]:
@@ -461,8 +460,7 @@ def _apply_one_via_socket(
         "prog_id": int(prog_id),
     }
     normalized_passes = [str(name).strip() for name in enabled_passes if str(name).strip()]
-    if normalized_passes:
-        payload["enabled_passes"] = normalized_passes
+    payload["enabled_passes"] = normalized_passes
     request = json.dumps(payload) + "\n"
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
         client.settimeout(timeout_seconds)
@@ -547,7 +545,7 @@ def apply_daemon_rejit(
         daemon_stdout_path = None
         daemon_stderr_path = None
 
-        if enabled_passes:
+        if enabled_passes is not None:
             (
                 daemon_proc,
                 daemon_socket_path,
@@ -558,7 +556,7 @@ def apply_daemon_rejit(
 
         try:
             for prog_id in [int(value) for value in prog_ids if int(value) > 0]:
-                if enabled_passes:
+                if enabled_passes is not None:
                     assert daemon_socket_path is not None
                     result = _apply_one_via_socket(
                         daemon_socket_path,

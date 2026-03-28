@@ -526,6 +526,7 @@ mod tests {
         pm.add_pass(DangerousHelperFirewallPass);
 
         let mut ctx = PassContext::test_default();
+        ctx.policy.enabled_passes = vec!["dangerous_helper_firewall".to_string()];
         ctx.prog_type = prog_type;
         pm.run(program, &ctx).unwrap()
     }

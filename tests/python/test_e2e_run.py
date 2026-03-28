@@ -69,3 +69,9 @@ def test_apply_case_defaults_switches_tetragon_config_from_tracee_default() -> N
     e2e_run.apply_case_defaults(args)
 
     assert args.config == str(e2e_run.DEFAULT_TETRAGON_CONFIG)
+
+
+def test_build_parser_leaves_rejit_passes_unset_by_default() -> None:
+    args = e2e_run.build_parser().parse_args(["tracee"])
+
+    assert args.rejit_passes is None

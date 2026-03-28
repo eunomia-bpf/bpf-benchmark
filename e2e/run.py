@@ -176,8 +176,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--tool", action="append", dest="tools", help="Select specific libbpf-tools by name (bcc case).")
     parser.add_argument(
         "--rejit-passes",
-        default="",
-        help="Comma-separated ReJIT passes to enable for e2e apply, for example 'map_inline' or 'map_inline,const_prop'.",
+        default=None,
+        help="Comma-separated ReJIT passes to enable for e2e apply. Pass an empty string to run zero passes.",
     )
     return parser
 
@@ -347,7 +347,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     prepare_bpftool_environment()
-    if str(args.rejit_passes or "").strip():
+    if args.rejit_passes is not None:
         os.environ["BPFREJIT_BENCH_PASSES"] = str(args.rejit_passes).strip()
 
     if args.case == "all":

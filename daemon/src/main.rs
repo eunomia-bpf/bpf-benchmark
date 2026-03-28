@@ -125,7 +125,10 @@ fn main() -> Result<()> {
     let ctx = pass::PassContext {
         kinsn_registry: discovery.registry,
         platform,
-        policy: pass::PolicyConfig::default(),
+        policy: pass::PolicyConfig {
+            enabled_passes: pass::default_enabled_passes(),
+            ..pass::PolicyConfig::default()
+        },
         prog_type: 0,
     };
     // Keep descriptor BTF FDs alive for the daemon's lifetime.

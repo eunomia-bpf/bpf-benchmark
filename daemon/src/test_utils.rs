@@ -188,7 +188,9 @@ pub fn run_named_pipeline(
         .map(|name| (*name).to_string())
         .collect::<Vec<_>>();
     let pipeline = build_custom_pipeline(&pass_names)?;
-    pipeline.run(program, ctx)
+    let mut local_ctx = ctx.clone();
+    local_ctx.policy.enabled_passes = pass_names;
+    pipeline.run(program, &local_ctx)
 }
 
 pub fn run_named_pipeline_with_profiling(
@@ -202,7 +204,9 @@ pub fn run_named_pipeline_with_profiling(
         .map(|name| (*name).to_string())
         .collect::<Vec<_>>();
     let pipeline = build_custom_pipeline(&pass_names)?;
-    pipeline.run_with_profiling(program, ctx, profiling)
+    let mut local_ctx = ctx.clone();
+    local_ctx.policy.enabled_passes = pass_names;
+    pipeline.run_with_profiling(program, &local_ctx, profiling)
 }
 
 pub fn hot_branch_profiling(insns: &[BpfInsn]) -> ProfilingData {
