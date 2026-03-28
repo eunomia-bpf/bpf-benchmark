@@ -199,8 +199,8 @@ fn process_request(
         if let Some(enabled_passes) = parse_request_pass_list(req, "enabled_passes")? {
             local_ctx.policy.enabled_passes = enabled_passes;
         }
-        if let Some(disabled_passes) = parse_request_pass_list(req, "disabled_passes")? {
-            local_ctx.policy.disabled_passes = disabled_passes;
+        if req.get("disabled_passes").is_some() {
+            return Err("disabled_passes is not supported; use enabled_passes".to_string());
         }
         Ok(local_ctx)
     }
@@ -486,5 +486,21 @@ mod tests {
     fn panic_payload_message_handles_unknown_payloads() {
         let payload: Box<dyn std::any::Any + Send> = Box::new(42usize);
         assert_eq!(panic_payload_message(payload.as_ref()), "non-string panic payload");
+    }
+
+    #[test]
+    fn process_request_rejects_external_disabled_passes() {
+        let req = serde_json::json!({
+            "cmd": "status",
+            "disabled_passes": ["map_inline"],
+        });
+        let tracker = commands::new_invalidation_tracker();
+        let response = process_request(&req, &pass::PassContext::test_default(), true, &tracker);
+
+        assert_eq!(response["status"], "error");
+        assert_eq!(
+            response["message"],
+            "disabled_passes is not supported; use enabled_passes"
+        );
     }
 }

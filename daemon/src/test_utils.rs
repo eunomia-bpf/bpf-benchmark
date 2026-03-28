@@ -169,7 +169,6 @@ pub fn permissive_pass_ctx(prog_type: u32) -> PassContext {
     ctx.kinsn_registry.endian_load16_btf_id = 1006;
     ctx.kinsn_registry.endian_load32_btf_id = 1007;
     ctx.kinsn_registry.endian_load64_btf_id = 1008;
-    ctx.kinsn_registry.speculation_barrier_btf_id = 1009;
     ctx.platform.has_bmi1 = true;
     ctx.platform.has_bmi2 = true;
     ctx.platform.has_cmov = true;

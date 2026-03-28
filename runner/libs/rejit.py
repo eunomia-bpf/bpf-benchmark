@@ -8,10 +8,13 @@ import socket
 import subprocess
 import tempfile
 import time
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from . import tail_text
+import yaml
+
+from . import ROOT_DIR, tail_text
 
 
 _PASS_TO_SITE_FIELD = {
@@ -27,6 +30,7 @@ _PASS_TO_SITE_FIELD = {
 }
 _DEFAULT_REJIT_ENABLED_PASSES = ("map_inline", "const_prop", "dce")
 _BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
+_BENCHMARK_CONFIG_PATH = ROOT_DIR / "corpus" / "config" / "benchmark_config.yaml"
 _DEFAULT_APPLY_TIMEOUT_SECONDS = 120.0
 
 
@@ -37,6 +41,43 @@ def _parse_enabled_passes(raw: str | None) -> list[str]:
     if text.lower() in {"default", "benchmark-default"}:
         return list(_DEFAULT_REJIT_ENABLED_PASSES)
     return [token.strip() for token in text.split(",") if token.strip()]
+
+
+def _normalize_pass_list(raw: Any) -> list[str]:
+    if not isinstance(raw, list):
+        return []
+    return [str(value).strip() for value in raw if str(value).strip()]
+
+
+@lru_cache(maxsize=1)
+def _benchmark_config_enabled_passes() -> list[str]:
+    try:
+        payload = yaml.safe_load(_BENCHMARK_CONFIG_PATH.read_text(encoding="utf-8"))
+    except OSError:
+        return list(_DEFAULT_REJIT_ENABLED_PASSES)
+    if not isinstance(payload, Mapping):
+        return list(_DEFAULT_REJIT_ENABLED_PASSES)
+
+    passes_config = payload.get("passes")
+    if not isinstance(passes_config, Mapping):
+        return list(_DEFAULT_REJIT_ENABLED_PASSES)
+
+    active_list = _normalize_pass_list(passes_config.get("active_list"))
+    if active_list:
+        return active_list
+
+    active_name = str(passes_config.get("active") or "").strip()
+    if active_name:
+        named_list = _normalize_pass_list(passes_config.get(active_name))
+        if named_list:
+            return named_list
+
+    performance_list = _normalize_pass_list(passes_config.get("performance"))
+    if performance_list:
+        return performance_list
+
+    return list(_DEFAULT_REJIT_ENABLED_PASSES)
+
 
 def _zero_site_counts() -> dict[str, int]:
     return {
@@ -118,9 +159,13 @@ def _daemon_command(
 
 
 def benchmark_rejit_enabled_passes() -> list[str]:
-    if _BENCH_PASSES_ENV not in os.environ:
-        return list(_DEFAULT_REJIT_ENABLED_PASSES)
-    return _parse_enabled_passes(os.environ.get(_BENCH_PASSES_ENV))
+    if _BENCH_PASSES_ENV in os.environ:
+        raw = os.environ.get(_BENCH_PASSES_ENV)
+        text = str(raw or "").strip().lower()
+        if text in {"default", "benchmark-default"}:
+            return list(_benchmark_config_enabled_passes())
+        return _parse_enabled_passes(raw)
+    return list(_benchmark_config_enabled_passes())
 
 
 def _parse_enumerate_table(stdout: str) -> dict[int, dict[str, Any]]:

@@ -28,11 +28,6 @@ const KNOWN_KINSNS: &[(&str, &str, &str)] = &[
     ("bpf_endian_load16", "bpf_endian_load16", "bpf_endian"),
     ("bpf_endian_load32", "bpf_endian_load32", "bpf_endian"),
     ("bpf_endian_load64", "bpf_endian_load64", "bpf_endian"),
-    (
-        "bpf_speculation_barrier",
-        "bpf_speculation_barrier",
-        "bpf_barrier",
-    ),
 ];
 
 // ── BTF constants (synced from vendor/linux-framework/include/uapi/linux/btf.h) ──
@@ -324,7 +319,6 @@ pub fn discover_kinsns() -> DiscoveryResult {
         endian_load16_btf_id: -1,
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,
-        speculation_barrier_btf_id: -1,
         target_btf_fds: HashMap::new(),
         target_supported_encodings: HashMap::new(),
     };
@@ -427,7 +421,6 @@ pub fn discover_kinsns() -> DiscoveryResult {
             "bpf_endian_load16" => registry.endian_load16_btf_id = btf_id,
             "bpf_endian_load32" => registry.endian_load32_btf_id = btf_id,
             "bpf_endian_load64" => registry.endian_load64_btf_id = btf_id,
-            "bpf_speculation_barrier" => registry.speculation_barrier_btf_id = btf_id,
             _ => {}
         }
 
@@ -975,7 +968,6 @@ mod tests {
                 "bpf_endian_load16" => result.registry.endian_load16_btf_id,
                 "bpf_endian_load32" => result.registry.endian_load32_btf_id,
                 "bpf_endian_load64" => result.registry.endian_load64_btf_id,
-                "bpf_speculation_barrier" => result.registry.speculation_barrier_btf_id,
                 _ => continue,
             };
             assert!(

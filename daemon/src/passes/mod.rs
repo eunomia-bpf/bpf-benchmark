@@ -8,15 +8,12 @@ mod branch_flip;
 mod bulk_memory;
 mod cond_select;
 mod const_prop;
-mod dangerous_helper_firewall;
 mod dce;
 mod endian;
 mod extract;
-mod live_patch;
 mod map_inline;
 mod rotate;
 mod skb_load_bytes;
-mod spectre;
 pub mod utils;
 mod wide_mem;
 
@@ -25,15 +22,12 @@ pub use branch_flip::BranchFlipPass;
 pub use bulk_memory::BulkMemoryPass;
 pub use cond_select::CondSelectPass;
 pub use const_prop::ConstPropPass;
-pub use dangerous_helper_firewall::DangerousHelperFirewallPass;
 pub use dce::DcePass;
 pub use endian::EndianFusionPass;
 pub use extract::ExtractPass;
-pub use live_patch::LivePatchPass;
 pub use map_inline::MapInlinePass;
 pub use rotate::RotatePass;
 pub use skb_load_bytes::SkbLoadBytesSpecPass;
-pub use spectre::SpectreMitigationPass;
 pub use wide_mem::WideMemPass;
 
 use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis, MapInfoAnalysis};
@@ -42,14 +36,12 @@ use crate::pass::{BpfPass, PassManager};
 // ── Pass registry ───────────────────────────────────────────────────
 
 /// Entry in the pass registry. Defines the canonical name, description,
-/// legacy aliases, and a constructor for each pass.
+/// and constructor for each pass.
 pub struct PassRegistryEntry {
     /// Canonical pass name (matches `BpfPass::name()`).
     pub name: &'static str,
     /// Short description for help text.
     pub description: &'static str,
-    /// Additional CLI names accepted for this pass.
-    pub aliases: &'static [&'static str],
     /// Constructor: returns a boxed pass instance.
     pub make: fn() -> Box<dyn BpfPass>,
 }
@@ -57,81 +49,65 @@ pub struct PassRegistryEntry {
 /// Canonical pass ordering and metadata. Both `build_full_pipeline()` and
 /// `build_custom_pipeline()` iterate this array in order, guaranteeing
 /// consistent pass sequencing regardless of which passes are selected.
-///
-/// `speculation_barrier`, `dangerous_helper_firewall`, and `live_patch` are
-/// excluded from the default pipeline but remain available to explicit custom
-/// pipelines and tests.
 pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     PassRegistryEntry {
         name: "map_inline",
         description: "Inline stable map lookups and frozen pseudo-map-value loads",
-        aliases: &[],
         make: || Box::new(MapInlinePass),
     },
     PassRegistryEntry {
         name: "const_prop",
         description: "Fold register constants into MOV/LD_IMM64/JA rewrites",
-        aliases: &[],
         make: || Box::new(ConstPropPass),
     },
     PassRegistryEntry {
         name: "dce",
         description: "Remove CFG-unreachable blocks and NOPs after simplification",
-        aliases: &[],
         make: || Box::new(DcePass),
     },
     PassRegistryEntry {
         name: "skb_load_bytes_spec",
         description: "Specialize eligible skb_load_bytes helper sites into direct packet access",
-        aliases: &["skb_load_bytes"],
         make: || Box::new(SkbLoadBytesSpecPass),
     },
     PassRegistryEntry {
         name: "bounds_check_merge",
         description: "Merge direct packet bounds-check ladders into a dominant guard",
-        aliases: &[],
         make: || Box::new(BoundsCheckMergePass),
     },
     PassRegistryEntry {
         name: "wide_mem",
         description: "Fuse byte-by-byte loads into wider memory accesses",
-        aliases: &[],
         make: || Box::new(WideMemPass),
     },
     PassRegistryEntry {
         name: "bulk_memory",
         description: "Lower large scalarized memcpy/memset runs into bulk-memory kinsn calls",
-        aliases: &["bulk_mem"],
         make: || Box::new(BulkMemoryPass),
     },
     PassRegistryEntry {
         name: "rotate",
         description: "Replace shift+or patterns with rotate kfunc (ROL/ROR)",
-        aliases: &[],
         make: || Box::new(RotatePass),
     },
     PassRegistryEntry {
         name: "cond_select",
         description: "Replace branch-over-mov with conditional select kfunc (CMOV/CSEL)",
-        aliases: &[],
         make: || Box::new(CondSelectPass),
     },
     PassRegistryEntry {
         name: "extract",
         description: "Replace shift+mask with bit field extract kfunc (BEXTR)",
-        aliases: &[],
         make: || Box::new(ExtractPass),
     },
     PassRegistryEntry {
         name: "endian_fusion",
         description: "Fuse endian swap patterns into endian load kfunc (MOVBE)",
-        aliases: &[],
         make: || Box::new(EndianFusionPass),
     },
     PassRegistryEntry {
         name: "branch_flip",
         description: "Flip branch polarity using PGO data to improve branch prediction",
-        aliases: &[],
         make: || {
             Box::new(BranchFlipPass {
                 min_bias: 0.7,
@@ -139,34 +115,7 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
             })
         },
     },
-    PassRegistryEntry {
-        name: "speculation_barrier",
-        description: "Insert speculation barrier kfunc after conditional branches",
-        aliases: &[],
-        make: || Box::new(SpectreMitigationPass),
-    },
-    PassRegistryEntry {
-        name: "dangerous_helper_firewall",
-        description: "Rewrite or audit dangerous helper calls according to security policy",
-        aliases: &["dangerous_helper"],
-        make: || Box::new(DangerousHelperFirewallPass),
-    },
-    PassRegistryEntry {
-        name: "live_patch",
-        description: "Insert runtime hardening guards for known verifier CVE signatures",
-        aliases: &[],
-        make: || Box::new(LivePatchPass),
-    },
 ];
-
-/// Returns whether a pass is included in the default pipeline.
-/// Security hardening passes are opt-in only.
-fn is_default_pass(name: &str) -> bool {
-    !matches!(
-        name,
-        "speculation_barrier" | "dangerous_helper_firewall" | "live_patch"
-    )
-}
 
 /// Generate the pass-list help string dynamically from the registry.
 pub fn available_passes_help() -> String {
@@ -184,9 +133,7 @@ fn resolve_requested_passes(names: &[String]) -> Result<Vec<&'static PassRegistr
     let mut unknown = Vec::new();
 
     for name in &requested {
-        let known = PASS_REGISTRY
-            .iter()
-            .any(|entry| entry.name == *name || entry.aliases.iter().any(|alias| alias == name));
+        let known = PASS_REGISTRY.iter().any(|entry| entry.name == *name);
         if !known {
             unknown.push((*name).to_string());
         }
@@ -199,10 +146,7 @@ fn resolve_requested_passes(names: &[String]) -> Result<Vec<&'static PassRegistr
 
     Ok(PASS_REGISTRY
         .iter()
-        .filter(|entry| {
-            requested.contains(entry.name)
-                || entry.aliases.iter().any(|alias| requested.contains(alias))
-        })
+        .filter(|entry| requested.contains(entry.name))
         .collect())
 }
 
@@ -218,7 +162,6 @@ pub fn selected_pass_names(names: Option<&[String]>) -> Result<Vec<String>> {
             .collect()),
         None => Ok(PASS_REGISTRY
             .iter()
-            .filter(|entry| is_default_pass(entry.name))
             .map(|entry| entry.name.to_string())
             .collect()),
     }
@@ -232,18 +175,13 @@ fn register_standard_analyses(pm: &mut PassManager) {
     pm.register_analysis(MapInfoAnalysis);
 }
 
-/// Build the default optimization pipeline.
-///
-/// Includes all passes from `PASS_REGISTRY` except opt-in passes, in canonical
-/// order.
+/// Build the default optimization pipeline from `PASS_REGISTRY` in canonical order.
 pub fn build_full_pipeline() -> PassManager {
     let mut pm = PassManager::new();
     register_standard_analyses(&mut pm);
 
     for entry in PASS_REGISTRY {
-        if is_default_pass(entry.name) {
-            pm.add_pass_boxed((entry.make)());
-        }
+        pm.add_pass_boxed((entry.make)());
     }
 
     pm
@@ -407,38 +345,6 @@ mod tests {
     }
 
     #[test]
-    fn test_pipeline_wide_mem_then_spectre() {
-        let mut pm = PassManager::new();
-        pm.register_analysis(BranchTargetAnalysis);
-        pm.register_analysis(LivenessAnalysis);
-        pm.add_pass(WideMemPass);
-        pm.add_pass(SpectreMitigationPass);
-
-        let insns = vec![
-            BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
-            BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
-            BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-            BpfInsn::alu64_reg(BPF_OR, 0, 1),
-            jeq_imm(0, 42, 1),
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
-        ];
-
-        let mut prog = make_program(insns);
-        // Provide a barrier btf_id so the spectre pass can fire.
-        let mut ctx = PassContext::test_default();
-        ctx.policy.enabled_passes =
-            vec!["wide_mem".to_string(), "speculation_barrier".to_string()];
-        ctx.kinsn_registry.speculation_barrier_btf_id = 777;
-
-        let result = pm.run(&mut prog, &ctx).unwrap();
-
-        assert!(result.program_changed);
-        assert!(result.total_sites_applied >= 2);
-    }
-
-    #[test]
     fn test_cfg_analysis_with_subprogs() {
         use crate::analysis::CFGAnalysis;
         use crate::pass::Analysis;
@@ -524,15 +430,6 @@ mod tests {
     }
 
     #[test]
-    fn test_default_pipeline_excludes_security_passes() {
-        let pm = build_full_pipeline();
-
-        assert!(!pm.pass_names().contains(&"speculation_barrier"));
-        assert!(!pm.pass_names().contains(&"dangerous_helper_firewall"));
-        assert!(!pm.pass_names().contains(&"live_patch"));
-    }
-
-    #[test]
     fn test_map_inline_only_pipeline_contains_only_map_inline() {
         let pm = build_pipeline_for_profile(crate::pass::PipelineProfile::MapInlineOnly);
 
@@ -565,11 +462,11 @@ mod tests {
     }
 
     #[test]
-    fn test_selected_pass_names_accept_aliases() {
-        let names = selected_pass_names(Some(&["skb_load_bytes".to_string()]))
-            .expect("alias should resolve to canonical pass name");
+    fn test_selected_pass_names_reject_aliases() {
+        let err = selected_pass_names(Some(&["skb_load_bytes".to_string()]))
+            .expect_err("legacy alias should be rejected");
 
-        assert_eq!(names, vec!["skb_load_bytes_spec"]);
+        assert!(err.to_string().contains("unknown pass name(s): skb_load_bytes"));
     }
 
     #[test]
@@ -1802,87 +1699,4 @@ mod real_bpfo_tests {
         false
     );
 
-    real_single_pass_test!(
-        test_speculation_barrier_real_cilium_xdp_entry,
-        "speculation_barrier",
-        "cilium/bpf_xdp.bpf.o",
-        "xdp/entry",
-        false,
-        false,
-        true
-    );
-    real_single_pass_test!(
-        test_speculation_barrier_real_cilium_lxc_entry,
-        "speculation_barrier",
-        "cilium/bpf_lxc.bpf.o",
-        "tc/entry",
-        false,
-        false,
-        true
-    );
-    real_single_pass_test!(
-        test_speculation_barrier_real_tracee_sys_enter,
-        "speculation_barrier",
-        "tracee/tracee.bpf.o",
-        "tracepoint__raw_syscalls__sys_enter",
-        false,
-        false,
-        true
-    );
-
-    real_single_pass_test!(
-        test_dangerous_helper_firewall_real_tracee_check_helper_call,
-        "dangerous_helper_firewall",
-        "tracee/tracee.bpf.o",
-        "kprobe/check_helper_call",
-        false,
-        false,
-        true
-    );
-    real_single_pass_test!(
-        test_dangerous_helper_firewall_real_tcplife,
-        "dangerous_helper_firewall",
-        "bcc/libbpf-tools/tcplife.bpf.o",
-        "tracepoint/sock/inet_sock_set_state",
-        false,
-        false,
-        true
-    );
-    real_single_pass_test!(
-        test_dangerous_helper_firewall_real_calico_from_hep,
-        "dangerous_helper_firewall",
-        "calico/from_hep_debug.bpf.o",
-        "tc",
-        false,
-        false,
-        true
-    );
-
-    real_single_pass_test!(
-        test_live_patch_real_cilium_lxc_entry,
-        "live_patch",
-        "cilium/bpf_lxc.bpf.o",
-        "tc/entry",
-        false,
-        false,
-        true
-    );
-    real_single_pass_test!(
-        test_live_patch_real_calico_from_hep,
-        "live_patch",
-        "calico/from_hep_debug.bpf.o",
-        "tc",
-        false,
-        false,
-        true
-    );
-    real_single_pass_test!(
-        test_live_patch_real_tracee_sys_enter,
-        "live_patch",
-        "tracee/tracee.bpf.o",
-        "tracepoint__raw_syscalls__sys_enter",
-        false,
-        false,
-        true
-    );
 }

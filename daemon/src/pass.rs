@@ -338,7 +338,6 @@ pub struct MapInlineRecord {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PassCategory {
     Optimization,
-    Security,
     Observability,
 }
 
@@ -404,7 +403,6 @@ pub struct KinsnRegistry {
     pub endian_load16_btf_id: i32,
     pub endian_load32_btf_id: i32,
     pub endian_load64_btf_id: i32,
-    pub speculation_barrier_btf_id: i32,
     /// Per-target BTF FDs: maps target name (e.g., "bpf_rotate64") to the
     /// owning BTF FD that must be present in the REJIT fd_array.
     pub target_btf_fds: HashMap<String, i32>,
@@ -420,7 +418,6 @@ impl KinsnRegistry {
             "cond_select" => Some("bpf_select64"),
             "extract" => Some("bpf_extract64"),
             "endian_fusion" => Some("bpf_endian_load32"),
-            "speculation_barrier" => Some("bpf_speculation_barrier"),
             _ => None,
         }
     }
@@ -435,7 +432,6 @@ impl KinsnRegistry {
             "bpf_endian_load16" => self.endian_load16_btf_id,
             "bpf_endian_load32" => self.endian_load32_btf_id,
             "bpf_endian_load64" => self.endian_load64_btf_id,
-            "bpf_speculation_barrier" => self.speculation_barrier_btf_id,
             _ => -1,
         }
     }
@@ -888,7 +884,6 @@ impl PassContext {
                 endian_load16_btf_id: -1,
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,
-                speculation_barrier_btf_id: -1,
                 target_btf_fds: HashMap::new(),
                 target_supported_encodings: HashMap::new(),
             },
@@ -1563,7 +1558,6 @@ mod tests {
                 endian_load16_btf_id: -1,
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,
-                speculation_barrier_btf_id: -1,
                 target_btf_fds: HashMap::from([("bpf_rotate64".to_string(), 42)]),
                 target_supported_encodings: HashMap::new(),
             },
@@ -1599,7 +1593,6 @@ mod tests {
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
-            speculation_barrier_btf_id: -1,
             target_btf_fds: HashMap::new(),
             target_supported_encodings: HashMap::new(),
         };
@@ -1623,7 +1616,6 @@ mod tests {
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
-            speculation_barrier_btf_id: -1,
             target_btf_fds: HashMap::new(),
             target_supported_encodings: HashMap::new(),
         };
@@ -1647,7 +1639,6 @@ mod tests {
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
-            speculation_barrier_btf_id: -1,
             target_btf_fds: HashMap::new(),
             target_supported_encodings: HashMap::new(),
         };
