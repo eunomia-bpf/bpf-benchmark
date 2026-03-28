@@ -27,7 +27,6 @@ from runner.libs.rejit import (
     benchmark_config_repeat,
     benchmark_config_warmups,
     load_benchmark_config,
-    serve_requires_pgo,
 )
 from runner.libs.results import summarize_corpus_batch_results
 from runner.libs.vm import (
@@ -269,7 +268,7 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
     active_daemon_socket: str | None = None
     daemon_server: tuple[subprocess.Popen[str], Path, str, Path, Path] | None = None
     if objects:
-        daemon_server = _start_daemon_server(daemon, pgo=serve_requires_pgo(enabled_passes))
+        daemon_server = _start_daemon_server(daemon)
         active_daemon_socket = str(daemon_server[1])
 
     try:

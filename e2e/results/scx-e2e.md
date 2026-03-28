@@ -1,6 +1,6 @@
 # scx_rusty End-to-End Benchmark
 
-- Generated: 2026-03-28T18:55:04.482633+00:00
+- Generated: 2026-03-28T21:04:14.448338+00:00
 - Mode: `scx_rusty_loader`
 - Duration per workload: `30s`
 - Smoke: `False`
@@ -16,14 +16,14 @@
 
 ## Loaded Programs
 
-- Programs: `13`; sites total=`3345`, cmov=`0`, lea=`0`
+- Programs: `13`; sites total=`3421`, cmov=`0`, lea=`0`
 - Active ops: `['rusty_1.1.0_x86_64_unknown_linux_gnu']`
 
 ## Baseline
 
-- hackbench: throughput=5.7184761406482565 runs/s, lat_p50_ms=161.0, ctx/s=930073.0406754334, agent_cpu=0.16666625156214532
-- stress-ng-cpu: throughput=11570.64 bogo-ops/s, lat_p50_ms=None, ctx/s=132.7675225698794, agent_cpu=0.39999737743052954
-- sysbench-cpu: throughput=17641.13 events/s, lat_p50_ms=0.23, ctx/s=117.97755843060109, agent_cpu=0.3666637804482731
+- hackbench: throughput=5.77984013205148 runs/s, lat_p50_ms=156.0, ctx/s=953041.5265133631, agent_cpu=0.1999995172544985
+- stress-ng-cpu: throughput=11616.64 bogo-ops/s, lat_p50_ms=None, ctx/s=135.37420698005386, agent_cpu=0.29999890490399617
+- sysbench-cpu: throughput=17648.2 events/s, lat_p50_ms=0.23, ctx/s=118.10959697133089, agent_cpu=0.36666534477698626
 
 ## Comparison
 

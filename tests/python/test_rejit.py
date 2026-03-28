@@ -52,8 +52,8 @@ def test_benchmark_rejit_enabled_passes_uses_default_when_env_missing(monkeypatc
 def test_apply_daemon_rejit_empty_pass_list_uses_socket(monkeypatch) -> None:
     calls: list[tuple[str, object]] = []
 
-    def fake_start_daemon_server(_daemon_binary, *, pgo=False):
-        calls.append(("start", pgo))
+    def fake_start_daemon_server(_daemon_binary):
+        calls.append(("start", None))
         return object(), Path("/tmp/daemon.sock"), "/tmp/daemon-dir", None, None
 
     def fake_apply_one_via_socket(socket_path, prog_id, enabled_passes, **kwargs):
@@ -77,17 +77,22 @@ def test_apply_daemon_rejit_empty_pass_list_uses_socket(monkeypatch) -> None:
     result = rejit.apply_daemon_rejit(Path("/tmp/fake-daemon"), [123], enabled_passes=[])
 
     assert result["applied"] is True
-    assert ("start", False) in calls
+    assert ("start", None) in calls
     assert ("socket", (Path("/tmp/daemon.sock"), 123, [])) in calls
     assert ("stop", None) in calls
 
 
-def test_apply_daemon_rejit_branch_flip_starts_daemon_with_pgo(monkeypatch) -> None:
+def test_apply_daemon_rejit_branch_flip_profiles_before_optimize(monkeypatch) -> None:
     calls: list[tuple[str, object]] = []
 
-    def fake_start_daemon_server(_daemon_binary, *, pgo=False):
-        calls.append(("start", pgo))
+    def fake_start_daemon_server(_daemon_binary):
+        calls.append(("start", None))
         return object(), Path("/tmp/daemon.sock"), "/tmp/daemon-dir", None, None
+
+    def fake_prepare_branch_flip_profile(socket_path, **kwargs):
+        del kwargs
+        calls.append(("profile", socket_path))
+        return None
 
     def fake_apply_one_via_socket(socket_path, prog_id, enabled_passes, **kwargs):
         del kwargs
@@ -101,6 +106,7 @@ def test_apply_daemon_rejit_branch_flip_starts_daemon_with_pgo(monkeypatch) -> N
         }
 
     monkeypatch.setattr(rejit, "_start_daemon_server", fake_start_daemon_server)
+    monkeypatch.setattr(rejit, "_prepare_branch_flip_profile", fake_prepare_branch_flip_profile)
     monkeypatch.setattr(rejit, "_apply_one_via_socket", fake_apply_one_via_socket)
     monkeypatch.setattr(rejit, "_stop_daemon_server", lambda *_args: calls.append(("stop", None)))
 
@@ -111,7 +117,31 @@ def test_apply_daemon_rejit_branch_flip_starts_daemon_with_pgo(monkeypatch) -> N
     )
 
     assert result["applied"] is True
-    assert ("start", True) in calls
+    assert ("start", None) in calls
+    assert ("profile", Path("/tmp/daemon.sock")) in calls
+    assert ("socket", (Path("/tmp/daemon.sock"), 123, ["branch_flip"])) in calls
+
+
+def test_prepare_branch_flip_profile_sends_start_stop(monkeypatch) -> None:
+    requests: list[dict[str, object]] = []
+    sleeps: list[float] = []
+
+    def fake_profile_request(_socket_path, payload, **kwargs):
+        del kwargs
+        requests.append(dict(payload))
+        return {"status": "ok"}
+
+    monkeypatch.setattr(rejit, "_profile_request", fake_profile_request)
+    monkeypatch.setattr(rejit.time, "sleep", lambda seconds: sleeps.append(seconds))
+
+    result = rejit._prepare_branch_flip_profile(Path("/tmp/daemon.sock"))
+
+    assert result is None
+    assert requests == [
+        {"cmd": "profile-start", "interval_ms": 1000},
+        {"cmd": "profile-stop"},
+    ]
+    assert sleeps == [1.0]
 
 
 def test_apply_daemon_rejit_requires_prog_ids() -> None:

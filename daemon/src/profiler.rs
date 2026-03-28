@@ -7,11 +7,15 @@
 //! - **Program-level PMU**: use `perf_event_open` to collect branch miss and
 //!   branch instruction counters during the same observation window.
 
+use std::collections::{BTreeMap, HashMap};
+use std::ffi::CStr;
 use std::os::fd::{AsRawFd, OwnedFd};
+use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result};
+use serde::{Deserialize, Serialize};
 
 use crate::bpf;
 use crate::pass::ProfilingData;
@@ -142,6 +146,324 @@ impl HotnessRanking {
     }
 }
 
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct ProgramProfile {
+    pub run_cnt: u64,
+    pub run_time_ns: u64,
+    pub avg_ns: Option<f64>,
+    pub branch_miss_rate: Option<f64>,
+}
+
+impl ProgramProfile {
+    fn add_delta(&mut self, delta: &ProgStatsDelta) {
+        self.run_cnt = self.run_cnt.saturating_add(delta.run_cnt_delta);
+        self.run_time_ns = self.run_time_ns.saturating_add(delta.run_time_ns_delta);
+        self.avg_ns = avg_ns(self.run_time_ns, self.run_cnt);
+    }
+
+    fn to_profiling_data(&self) -> ProfilingData {
+        ProfilingData {
+            branch_profiles: HashMap::new(),
+            branch_miss_rate: self.branch_miss_rate,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ProfileSnapshot {
+    pub version: u32,
+    pub collected_at: String,
+    pub duration_ms: u64,
+    pub programs: BTreeMap<String, ProgramProfile>,
+}
+
+impl ProfileSnapshot {
+    pub const VERSION: u32 = 1;
+
+    pub fn programs_profiled(&self) -> usize {
+        self.programs.len()
+    }
+
+    pub fn summary(&self) -> ProfileSummary {
+        ProfileSummary {
+            programs_profiled: self.programs_profiled(),
+            duration_ms: self.duration_ms,
+        }
+    }
+
+    pub fn program_profile(&self, prog_id: u32) -> Option<&ProgramProfile> {
+        self.programs.get(&prog_id.to_string())
+    }
+
+    pub fn profiling_data_for(&self, prog_id: u32) -> Option<ProfilingData> {
+        self.program_profile(prog_id)
+            .map(ProgramProfile::to_profiling_data)
+    }
+
+    pub fn save_to_path(&self, path: &std::path::Path) -> Result<()> {
+        let json = serde_json::to_vec_pretty(self).context("serialize profile snapshot")?;
+        std::fs::write(path, json)
+            .with_context(|| format!("write profile snapshot to {}", path.display()))
+    }
+
+    pub fn load_from_path(path: &std::path::Path) -> Result<Self> {
+        let raw = std::fs::read(path)
+            .with_context(|| format!("read profile snapshot from {}", path.display()))?;
+        let snapshot: Self = serde_json::from_slice(&raw).context("parse profile snapshot JSON")?;
+        if snapshot.version != Self::VERSION {
+            anyhow::bail!(
+                "unsupported profile snapshot version {}; expected {}",
+                snapshot.version,
+                Self::VERSION
+            );
+        }
+        Ok(snapshot)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ProfileSummary {
+    pub programs_profiled: usize,
+    pub duration_ms: u64,
+}
+
+#[derive(Debug)]
+pub struct ProfilerSession {
+    shared: Arc<Mutex<SessionState>>,
+    stop_tx: Option<mpsc::Sender<()>>,
+    handle: Option<thread::JoinHandle<Result<ProfileSnapshot>>>,
+}
+
+#[derive(Debug)]
+struct SessionState {
+    started_at: Instant,
+    collected_at: SystemTime,
+    programs: HashMap<u32, ProgramProfile>,
+    last_snapshots: HashMap<u32, ProgStatsSnapshot>,
+    current_branch_miss_rate: Option<f64>,
+    fatal_error: Option<String>,
+}
+
+impl SessionState {
+    fn new() -> Self {
+        Self {
+            started_at: Instant::now(),
+            collected_at: SystemTime::now(),
+            programs: HashMap::new(),
+            last_snapshots: HashMap::new(),
+            current_branch_miss_rate: None,
+            fatal_error: None,
+        }
+    }
+
+    fn snapshot(&self) -> Result<ProfileSnapshot> {
+        if let Some(message) = &self.fatal_error {
+            anyhow::bail!("{message}");
+        }
+
+        let mut programs = BTreeMap::new();
+        for (prog_id, profile) in &self.programs {
+            let mut program = profile.clone();
+            if program.branch_miss_rate.is_none() {
+                program.branch_miss_rate = self.current_branch_miss_rate;
+            }
+            programs.insert(prog_id.to_string(), program);
+        }
+
+        Ok(ProfileSnapshot {
+            version: ProfileSnapshot::VERSION,
+            collected_at: format_system_time_rfc3339(self.collected_at)?,
+            duration_ms: self.started_at.elapsed().as_millis() as u64,
+            programs,
+        })
+    }
+}
+
+impl ProfilerSession {
+    pub fn start(interval: Duration) -> Result<Self> {
+        if interval.is_zero() {
+            anyhow::bail!("profile interval must be greater than zero");
+        }
+        if !bpf_stats_enabled()? {
+            anyhow::bail!(
+                "profile-start requires kernel.bpf_stats_enabled=1; enable it before starting profiling"
+            );
+        }
+
+        let mut initial_state = SessionState::new();
+        initial_state.last_snapshots = read_all_prog_stats()?;
+
+        let shared = Arc::new(Mutex::new(initial_state));
+        let (stop_tx, stop_rx) = mpsc::channel();
+        let shared_for_thread = Arc::clone(&shared);
+        let handle = thread::Builder::new()
+            .name("bpfrejit-profiler".to_string())
+            .spawn(move || run_profiler_thread(shared_for_thread, stop_rx, interval))
+            .context("spawn profiling thread")?;
+
+        Ok(Self {
+            shared,
+            stop_tx: Some(stop_tx),
+            handle: Some(handle),
+        })
+    }
+
+    pub fn snapshot(&self) -> Result<ProfileSnapshot> {
+        let state = self
+            .shared
+            .lock()
+            .map_err(|_| anyhow::anyhow!("profiling state lock poisoned"))?;
+        state.snapshot()
+    }
+
+    pub fn stop(mut self) -> Result<ProfileSnapshot> {
+        if let Some(stop_tx) = self.stop_tx.take() {
+            stop_tx
+                .send(())
+                .context("signal profiling thread to stop")?;
+        }
+
+        let handle = self
+            .handle
+            .take()
+            .ok_or_else(|| anyhow::anyhow!("profiling thread handle missing"))?;
+
+        match handle.join() {
+            Ok(result) => result,
+            Err(payload) => anyhow::bail!(
+                "profiling thread panicked: {}",
+                panic_payload_message(payload.as_ref())
+            ),
+        }
+    }
+}
+
+impl Drop for ProfilerSession {
+    fn drop(&mut self) {
+        if let Some(stop_tx) = self.stop_tx.take() {
+            let _ = stop_tx.send(());
+        }
+        if let Some(handle) = self.handle.take() {
+            let _ = handle.join();
+        }
+    }
+}
+
+fn run_profiler_thread(
+    shared: Arc<Mutex<SessionState>>,
+    stop_rx: mpsc::Receiver<()>,
+    interval: Duration,
+) -> Result<ProfileSnapshot> {
+    let pmu = pmu::PmuCounters::open();
+    if let Some(ref pmu) = pmu {
+        pmu.reset_and_enable();
+    }
+
+    loop {
+        match stop_rx.recv_timeout(interval) {
+            Ok(()) | Err(mpsc::RecvTimeoutError::Disconnected) => {
+                let poll_result = poll_all_programs(&shared, pmu.as_ref());
+                if let Some(ref pmu) = pmu {
+                    pmu.disable();
+                }
+                if let Err(err) = &poll_result {
+                    record_fatal_error(&shared, err);
+                }
+                poll_result?;
+                return snapshot_from_shared(&shared);
+            }
+            Err(mpsc::RecvTimeoutError::Timeout) => {
+                if let Err(err) = poll_all_programs(&shared, pmu.as_ref()) {
+                    record_fatal_error(&shared, &err);
+                    if let Some(ref pmu) = pmu {
+                        pmu.disable();
+                    }
+                    return Err(err);
+                }
+            }
+        }
+    }
+}
+
+fn record_fatal_error(shared: &Arc<Mutex<SessionState>>, err: &anyhow::Error) {
+    if let Ok(mut state) = shared.lock() {
+        state.fatal_error = Some(format!("profiling session failed: {err:#}"));
+    }
+}
+
+fn snapshot_from_shared(shared: &Arc<Mutex<SessionState>>) -> Result<ProfileSnapshot> {
+    let state = shared
+        .lock()
+        .map_err(|_| anyhow::anyhow!("profiling state lock poisoned"))?;
+    state.snapshot()
+}
+
+fn poll_all_programs(
+    shared: &Arc<Mutex<SessionState>>,
+    pmu: Option<&pmu::PmuCounters>,
+) -> Result<()> {
+    let branch_miss_rate = pmu.and_then(|counter| counter.read_branch_miss_rate());
+    let current = read_all_prog_stats()?;
+    let mut state = shared
+        .lock()
+        .map_err(|_| anyhow::anyhow!("profiling state lock poisoned"))?;
+
+    state.current_branch_miss_rate = branch_miss_rate;
+
+    let current_ids: std::collections::HashSet<u32> = current.keys().copied().collect();
+    state
+        .last_snapshots
+        .retain(|prog_id, _| current_ids.contains(prog_id));
+
+    for (prog_id, snapshot) in current {
+        if let Some(before) = state.last_snapshots.get(&prog_id) {
+            let delta = ProgStatsDelta::from_snapshots(before, &snapshot);
+            let entry = state.programs.entry(prog_id).or_default();
+            entry.add_delta(&delta);
+            entry.branch_miss_rate = branch_miss_rate;
+        } else if let Some(entry) = state.programs.get_mut(&prog_id) {
+            entry.branch_miss_rate = branch_miss_rate;
+        }
+
+        state.last_snapshots.insert(prog_id, snapshot);
+    }
+
+    Ok(())
+}
+
+fn read_all_prog_stats() -> Result<HashMap<u32, ProgStatsSnapshot>> {
+    let captured_at = Instant::now();
+    let mut snapshots = HashMap::new();
+
+    for prog_id in bpf::iter_prog_ids() {
+        let prog_id = prog_id.context("enumerate program IDs for profiling")?;
+        let prog_fd = bpf::bpf_prog_get_fd_by_id(prog_id)
+            .with_context(|| format!("open prog {} for profiling snapshot", prog_id))?;
+        let (info, _) = bpf::bpf_prog_get_info(prog_fd.as_raw_fd(), false)
+            .with_context(|| format!("read stats for prog {}", prog_id))?;
+        snapshots.insert(
+            prog_id,
+            ProgStatsSnapshot {
+                prog_id,
+                captured_at,
+                stats: ProgStats::from_totals(info.run_cnt, info.run_time_ns),
+            },
+        );
+    }
+
+    Ok(snapshots)
+}
+
+fn panic_payload_message(payload: &(dyn std::any::Any + Send)) -> String {
+    if let Some(message) = payload.downcast_ref::<String>() {
+        return message.clone();
+    }
+    if let Some(message) = payload.downcast_ref::<&'static str>() {
+        return (*message).to_string();
+    }
+    "non-string panic payload".to_string()
+}
+
 /// Collect runtime profiling data for one program during an observation window.
 ///
 /// This currently provides:
@@ -248,6 +570,39 @@ pub fn bpf_stats_enabled() -> Result<bool> {
     let raw = std::fs::read_to_string("/proc/sys/kernel/bpf_stats_enabled")
         .context("read /proc/sys/kernel/bpf_stats_enabled")?;
     Ok(raw.trim() == "1")
+}
+
+fn format_system_time_rfc3339(timestamp: SystemTime) -> Result<String> {
+    let unix = timestamp
+        .duration_since(UNIX_EPOCH)
+        .context("convert timestamp to unix epoch")?;
+    let seconds = unix.as_secs() as libc::time_t;
+    let mut tm: libc::tm = unsafe { std::mem::zeroed() };
+    if unsafe { libc::gmtime_r(&seconds, &mut tm) }.is_null() {
+        anyhow::bail!("format collected_at timestamp with gmtime_r");
+    }
+
+    let mut buffer = [0 as libc::c_char; 32];
+    let format = b"%Y-%m-%dT%H:%M:%SZ\0";
+    let written = unsafe {
+        libc::strftime(
+            buffer.as_mut_ptr(),
+            buffer.len(),
+            format.as_ptr() as *const libc::c_char,
+            &tm,
+        )
+    };
+    if written == 0 {
+        anyhow::bail!("format collected_at timestamp with strftime");
+    }
+
+    Ok(CStr::from_bytes_until_nul(unsafe {
+        std::slice::from_raw_parts(buffer.as_ptr() as *const u8, buffer.len())
+    })
+    .context("convert collected_at buffer to C string")?
+    .to_str()
+    .context("convert collected_at buffer to UTF-8")?
+    .to_string())
 }
 
 fn avg_ns(run_time_ns: u64, run_cnt: u64) -> Option<f64> {

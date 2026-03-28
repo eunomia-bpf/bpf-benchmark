@@ -19,28 +19,12 @@ mod server;
 mod test_utils;
 mod verifier_log;
 
-use std::time::Duration;
-
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-
-use commands::PgoConfig;
 
 #[derive(Parser)]
 #[command(name = "bpfrejit-daemon", version, about = "BpfReJIT userspace daemon")]
 struct Cli {
-    /// Enable runtime profiling before each optimize request.
-    #[arg(long)]
-    pgo: bool,
-
-    /// PGO observation interval in milliseconds.
-    #[arg(long, default_value_t = 500)]
-    pgo_interval_ms: u64,
-
-    /// Disable automatic verifier-guided transform rollback.
-    #[arg(long)]
-    no_rollback: bool,
-
     #[command(subcommand)]
     command: Command,
 }
@@ -85,17 +69,7 @@ fn main() -> Result<()> {
     };
     // Keep descriptor BTF FDs alive for the daemon's lifetime.
     let _btf_fds = discovery.btf_fds;
-    let pgo_config = if cli.pgo {
-        Some(PgoConfig {
-            interval: Duration::from_millis(cli.pgo_interval_ms),
-        })
-    } else {
-        None
-    };
-
     match cli.command {
-        Command::Serve { socket } => {
-            server::cmd_serve(&socket, &ctx, pgo_config.as_ref(), !cli.no_rollback)
-        }
+        Command::Serve { socket } => server::cmd_serve(&socket, &ctx),
     }
 }

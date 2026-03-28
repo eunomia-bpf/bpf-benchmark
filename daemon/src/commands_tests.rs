@@ -58,13 +58,13 @@ fn test_optimize_one_result_serialization() {
             total_sites_applied: 3,
             passes_executed: 2,
             passes_changed: 1,
-            verifier_retries: 0,
-            final_disabled_passes: vec![],
+            verifier_rejections: 0,
         },
         passes: vec![
             PassDetail {
                 pass_name: "wide_mem".to_string(),
                 changed: true,
+                verify: pass::PassVerifyResult::accepted(),
                 sites_applied: 3,
                 sites_skipped: 1,
                 skip_reasons: HashMap::from([("subprog_unsupported".to_string(), 1)]),
@@ -76,6 +76,7 @@ fn test_optimize_one_result_serialization() {
             PassDetail {
                 pass_name: "rotate".to_string(),
                 changed: false,
+                verify: pass::PassVerifyResult::not_needed(),
                 sites_applied: 0,
                 sites_skipped: 0,
                 skip_reasons: HashMap::new(),
@@ -117,15 +118,17 @@ fn test_optimize_one_result_serialization() {
     assert_eq!(parsed["program"]["insn_delta"], -10);
     assert_eq!(parsed["summary"]["applied"], true);
     assert_eq!(parsed["summary"]["total_sites_applied"], 3);
-    assert_eq!(parsed["summary"]["verifier_retries"], 0);
+    assert_eq!(parsed["summary"]["verifier_rejections"], 0);
     assert_eq!(parsed["passes"].as_array().unwrap().len(), 2);
     assert_eq!(parsed["passes"][0]["pass_name"], "wide_mem");
     assert_eq!(parsed["passes"][0]["changed"], true);
+    assert_eq!(parsed["passes"][0]["verify"]["status"], "accepted");
     assert_eq!(
         parsed["passes"][0]["skip_reasons"]["subprog_unsupported"],
         1
     );
     assert_eq!(parsed["passes"][1]["changed"], false);
+    assert_eq!(parsed["passes"][1]["verify"]["status"], "not_needed");
     assert_eq!(parsed["attempts"].as_array().unwrap().len(), 1);
     assert_eq!(parsed["attempts"][0]["result"], "applied");
     // failure_pc and attributed_pass should be absent when None
@@ -142,7 +145,7 @@ fn test_optimize_one_result_serialization() {
 }
 
 #[test]
-fn test_optimize_one_result_with_rollback() {
+fn test_optimize_one_result_records_rejected_pass_verify_status() {
     let result = OptimizeOneResult {
         status: "ok".to_string(),
         prog_id: 99,
@@ -162,28 +165,44 @@ fn test_optimize_one_result_with_rollback() {
             total_sites_applied: 2,
             passes_executed: 3,
             passes_changed: 1,
-            verifier_retries: 1,
-            final_disabled_passes: vec!["branch_flip".to_string()],
+            verifier_rejections: 1,
         },
-        passes: vec![],
-        attempts: vec![
-            AttemptRecord {
-                attempt: 0,
-                disabled_passes: vec![],
-                result: "verifier_rejected".to_string(),
-                failure_pc: Some(76),
-                attributed_pass: Some("branch_flip".to_string()),
-                debug: None,
+        passes: vec![
+            PassDetail {
+                pass_name: "branch_flip".to_string(),
+                changed: false,
+                verify: pass::PassVerifyResult::rejected(
+                    "BPF_PROG_REJIT: Permission denied (os error 13)",
+                ),
+                sites_applied: 4,
+                sites_skipped: 0,
+                skip_reasons: HashMap::new(),
+                insns_before: 110,
+                insns_after: 110,
+                insn_delta: 0,
+                diagnostics: vec![],
             },
-            AttemptRecord {
-                attempt: 1,
-                disabled_passes: vec!["branch_flip".to_string()],
-                result: "applied".to_string(),
-                failure_pc: None,
-                attributed_pass: None,
-                debug: None,
+            PassDetail {
+                pass_name: "extract".to_string(),
+                changed: true,
+                verify: pass::PassVerifyResult::accepted(),
+                sites_applied: 2,
+                sites_skipped: 0,
+                skip_reasons: HashMap::new(),
+                insns_before: 110,
+                insns_after: 100,
+                insn_delta: -10,
+                diagnostics: vec![],
             },
         ],
+        attempts: vec![AttemptRecord {
+            attempt: 0,
+            disabled_passes: vec![],
+            result: "applied".to_string(),
+            failure_pc: None,
+            attributed_pass: None,
+            debug: None,
+        }],
         timings_ns: TimingsNs {
             pipeline_run_ns: 200_000,
             rejit_syscall_ns: 100_000,
@@ -196,13 +215,17 @@ fn test_optimize_one_result_with_rollback() {
     let json = serde_json::to_string(&result).expect("serialization should succeed");
     let parsed: serde_json::Value = serde_json::from_str(&json).expect("JSON should parse back");
 
-    assert_eq!(parsed["summary"]["verifier_retries"], 1);
+    assert_eq!(parsed["summary"]["verifier_rejections"], 1);
     assert_eq!(parsed["passes_applied"][0], "extract");
-    assert_eq!(parsed["summary"]["final_disabled_passes"][0], "branch_flip");
-    assert_eq!(parsed["attempts"].as_array().unwrap().len(), 2);
-    assert_eq!(parsed["attempts"][0]["failure_pc"], 76);
-    assert_eq!(parsed["attempts"][0]["attributed_pass"], "branch_flip");
-    assert_eq!(parsed["attempts"][1]["result"], "applied");
+    assert_eq!(parsed["passes"].as_array().unwrap().len(), 2);
+    assert_eq!(parsed["passes"][0]["verify"]["status"], "rejected");
+    assert_eq!(
+        parsed["passes"][0]["verify"]["error_message"],
+        "BPF_PROG_REJIT: Permission denied (os error 13)"
+    );
+    assert_eq!(parsed["passes"][1]["verify"]["status"], "accepted");
+    assert_eq!(parsed["attempts"].as_array().unwrap().len(), 1);
+    assert_eq!(parsed["attempts"][0]["result"], "applied");
     assert!(parsed.get("inlined_map_entries").is_none());
 }
 
@@ -211,6 +234,7 @@ fn test_pass_detail_from_pass_result() {
     let pr = pass::PassResult {
         pass_name: "wide_mem".to_string(),
         changed: true,
+        verify: pass::PassVerifyResult::accepted(),
         sites_applied: 5,
         sites_skipped: vec![
             pass::SkipReason {
@@ -236,6 +260,7 @@ fn test_pass_detail_from_pass_result() {
 
     assert_eq!(detail.pass_name, "wide_mem");
     assert_eq!(detail.changed, true);
+    assert_eq!(detail.verify.status, pass::PassVerifyStatus::Accepted);
     assert_eq!(detail.sites_applied, 5);
     assert_eq!(detail.sites_skipped, 3);
     assert_eq!(detail.skip_reasons["subprog_unsupported"], 2);
@@ -280,6 +305,36 @@ fn test_collect_inlined_map_entries_deduplicates_map_key_pairs() {
             },
         ]
     );
+}
+
+#[test]
+fn test_collect_map_inline_records_ignores_rejected_passes() {
+    let rejected = pass::PassResult {
+        pass_name: "map_inline".to_string(),
+        changed: false,
+        verify: pass::PassVerifyResult::rejected("synthetic verifier rejection"),
+        map_inline_records: vec![pass::MapInlineRecord {
+            map_id: 17,
+            key: 0u32.to_le_bytes().to_vec(),
+            expected_value: 11u32.to_le_bytes().to_vec(),
+        }],
+        ..Default::default()
+    };
+    let accepted = pass::PassResult {
+        pass_name: "map_inline".to_string(),
+        changed: true,
+        verify: pass::PassVerifyResult::accepted(),
+        map_inline_records: vec![pass::MapInlineRecord {
+            map_id: 18,
+            key: 1u32.to_le_bytes().to_vec(),
+            expected_value: 22u32.to_le_bytes().to_vec(),
+        }],
+        ..Default::default()
+    };
+
+    let records = collect_map_inline_records(&[rejected, accepted]);
+    assert_eq!(records.len(), 1);
+    assert_eq!(records[0].map_id, 18);
 }
 
 #[test]
@@ -347,157 +402,15 @@ fn test_record_map_inline_records_preserves_existing_entries_on_open_failure() {
     assert!(tracker.tracks_prog(101));
 }
 
-// ── HIGH #3: Orchestration unit tests ───────────────────────────
-
-/// Test attribute_verifier_failure — the core attribution logic used by
-/// the rollback loop in the serve optimize path / try_apply_one.
-///
-/// The verifier log format requires state lines (e.g., "15: R0=scalar R1=ctx()")
-/// followed by error lines. extract_failure_pc extracts the PC from the last
-/// state line before an error keyword.
-#[test]
-fn test_attribute_verifier_failure_basic() {
-    let attribution = vec![
-        pass::TransformAttribution {
-            pass_name: "wide_mem".to_string(),
-            pc_ranges: vec![10..20],
-        },
-        pass::TransformAttribution {
-            pass_name: "rotate".to_string(),
-            pc_ranges: vec![30..40],
-        },
-    ];
-
-    // Failure at PC 15 -> attributed to wide_mem
-    // Use realistic verifier log format: state line, then error line
-    let log_wide_mem = "\
-0: R1=ctx() R10=fp0
-15: R0=scalar R2=pkt(r=8)
-R2 type=scalar expected=pkt_ptr
-";
-    let result = attribute_verifier_failure(log_wide_mem, &attribution);
-    assert_eq!(result, Some("wide_mem".to_string()));
-
-    // Failure at PC 35 -> attributed to rotate
-    let log_rotate = "\
-0: R1=ctx() R10=fp0
-35: R0=scalar R1=ctx()
-invalid func bpf_rotate64#12345
-";
-    let result = attribute_verifier_failure(log_rotate, &attribution);
-    assert_eq!(result, Some("rotate".to_string()));
-
-    // Failure at PC 5 (before any pass range) -> None
-    let log_before = "\
-0: R1=ctx() R10=fp0
-5: R0=scalar R2=pkt(r=8)
-R2 invalid mem access
-";
-    let result = attribute_verifier_failure(log_before, &attribution);
-    assert_eq!(result, None);
-
-    // Failure at PC 25 (between pass ranges) -> None
-    let log_gap = "\
-0: R1=ctx() R10=fp0
-25: R0=scalar R1=ctx()
-R1 type=scalar expected=fp
-";
-    let result = attribute_verifier_failure(log_gap, &attribution);
-    assert_eq!(result, None);
-}
-
-/// Test attribute_verifier_failure with overlapping ranges —
-/// should pick the last (most recently applied) pass.
-#[test]
-fn test_attribute_verifier_failure_overlapping_ranges() {
-    let attribution = vec![
-        pass::TransformAttribution {
-            pass_name: "wide_mem".to_string(),
-            pc_ranges: vec![10..30],
-        },
-        pass::TransformAttribution {
-            pass_name: "rotate".to_string(),
-            pc_ranges: vec![20..40],
-        },
-    ];
-
-    // PC 25 is in both ranges — should pick "rotate" (last)
-    let log = "\
-0: R1=ctx() R10=fp0
-25: R0=scalar R2=pkt(r=8)
-R2 invalid mem access 'scalar'
-";
-    let result = attribute_verifier_failure(log, &attribution);
-    assert_eq!(result, Some("rotate".to_string()));
-}
+// ── Per-pass verification unit tests ─────────────────────────
 
 #[test]
-fn test_verifier_log_completion_marker_detection() {
-    let log = "\
-10: R0=scalar
-55: safe
-processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 peak_states 232 mark_read 0
-";
-    assert!(verifier_log_looks_complete(log));
-    assert!(!should_treat_as_verifier_rejection(
-        "BPF_PROG_REJIT: No space left on device (os error 28)",
-        log,
-    ));
-}
-
-#[test]
-fn test_incomplete_verifier_log_still_treated_as_rejection() {
-    let log = "\
-35: R0=scalar R1=ctx()
-invalid func bpf_rotate64#12345
-";
-    assert!(!verifier_log_looks_complete(log));
-    assert!(should_treat_as_verifier_rejection(
-        "BPF_PROG_REJIT: Permission denied (os error 13)",
-        log,
-    ));
-}
-
-#[test]
-fn test_complete_verifier_log_e2big_is_retryable_post_verify_failure() {
-    let log = "\
-10: R0=scalar
-55: safe
-processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 peak_states 232 mark_read 0
-";
-    assert!(!should_treat_as_verifier_rejection(
-        "BPF_PROG_REJIT: Argument list too long (os error 7)",
-        log,
-    ));
-    assert!(should_retry_post_verify_rejit_failure(
-        "BPF_PROG_REJIT: Argument list too long (os error 7)",
-        log,
-    ));
-}
-
-#[test]
-fn test_complete_verifier_log_einval_is_retryable_post_verify_failure() {
-    let log = "\
-10: R0=scalar
-55: safe
-processed 26 insns (limit 1000000) max_states_per_insn 1 total_states 3 peak_states 3 mark_read 0
-";
-    assert!(!should_treat_as_verifier_rejection(
-        "BPF_PROG_REJIT: Invalid argument (os error 22)",
-        log,
-    ));
-    assert!(should_retry_post_verify_rejit_failure(
-        "BPF_PROG_REJIT: Invalid argument (os error 22)",
-        log,
-    ));
-}
-
-#[test]
-fn test_attribute_post_verify_rejit_failure_uses_last_changed_pass() {
+fn test_verifier_rejection_count_counts_rejected_passes() {
     let passes = vec![
         PassDetail {
             pass_name: "wide_mem".to_string(),
             changed: false,
+            verify: pass::PassVerifyResult::rejected("synthetic verifier rejection"),
             sites_applied: 0,
             sites_skipped: 0,
             skip_reasons: HashMap::new(),
@@ -509,6 +422,7 @@ fn test_attribute_post_verify_rejit_failure_uses_last_changed_pass() {
         PassDetail {
             pass_name: "extract".to_string(),
             changed: true,
+            verify: pass::PassVerifyResult::accepted(),
             sites_applied: 2,
             sites_skipped: 0,
             skip_reasons: HashMap::new(),
@@ -517,23 +431,9 @@ fn test_attribute_post_verify_rejit_failure_uses_last_changed_pass() {
             insn_delta: 4,
             diagnostics: vec![],
         },
-        PassDetail {
-            pass_name: "endian_fusion".to_string(),
-            changed: true,
-            sites_applied: 3,
-            sites_skipped: 0,
-            skip_reasons: HashMap::new(),
-            insns_before: 104,
-            insns_after: 110,
-            insn_delta: 6,
-            diagnostics: vec![],
-        },
     ];
 
-    assert_eq!(
-        attribute_post_verify_rejit_failure(&passes),
-        Some("endian_fusion".to_string())
-    );
+    assert_eq!(verifier_rejection_count(&passes), 1);
 }
 
 #[test]

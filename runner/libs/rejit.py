@@ -33,6 +33,7 @@ _BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
 _BENCHMARK_CONFIG_PATH = ROOT_DIR / "corpus" / "config" / "benchmark_config.yaml"
 _DEFAULT_APPLY_TIMEOUT_SECONDS = 120.0
 _DEFAULT_BENCHMARK_REPEAT = 200
+_DEFAULT_PROFILE_INTERVAL_MS = 1000
 
 
 def _mapping_dict(value: Any, *, field_name: str) -> dict[str, Any]:
@@ -508,8 +509,6 @@ def _daemon_error_response(
 
 def _start_daemon_server(
     daemon_binary: Path | str,
-    *,
-    pgo: bool = False,
 ) -> tuple[subprocess.Popen[str], Path, str, Path, Path]:
     socket_dir = tempfile.mkdtemp(prefix="bpfrejit-daemon-")
     socket_path = Path(socket_dir) / "daemon.sock"
@@ -518,10 +517,7 @@ def _start_daemon_server(
     stdout_handle = stdout_path.open("w", encoding="utf-8")
     stderr_handle = stderr_path.open("w", encoding="utf-8")
     try:
-        command = [str(daemon_binary)]
-        if pgo:
-            command.append("--pgo")
-        command.extend(["serve", "--socket", str(socket_path)])
+        command = [str(daemon_binary), "serve", "--socket", str(socket_path)]
         proc = subprocess.Popen(
             command,
             stdout=stdout_handle,
@@ -674,8 +670,80 @@ def _branch_flip_requested(enabled_passes: Sequence[str] | None) -> bool:
     return any(str(name).strip() == "branch_flip" for name in enabled_passes)
 
 
-def serve_requires_pgo(enabled_passes: Sequence[str] | None) -> bool:
-    return _branch_flip_requested(enabled_passes)
+def _profile_request(
+    socket_path: Path,
+    payload: Mapping[str, object],
+    *,
+    daemon_proc: subprocess.Popen[str] | None = None,
+    stdout_path: Path | None = None,
+    stderr_path: Path | None = None,
+    timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
+) -> dict[str, Any]:
+    return _daemon_request(
+        socket_path,
+        payload,
+        timeout_seconds=timeout_seconds,
+        daemon_proc=daemon_proc,
+        stdout_path=stdout_path,
+        stderr_path=stderr_path,
+    )
+
+
+def _prepare_branch_flip_profile(
+    socket_path: Path,
+    *,
+    daemon_proc: subprocess.Popen[str] | None = None,
+    stdout_path: Path | None = None,
+    stderr_path: Path | None = None,
+    interval_ms: int = _DEFAULT_PROFILE_INTERVAL_MS,
+    timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
+) -> dict[str, object] | None:
+    start_response = _profile_request(
+        socket_path,
+        {
+            "cmd": "profile-start",
+            "interval_ms": int(interval_ms),
+        },
+        daemon_proc=daemon_proc,
+        stdout_path=stdout_path,
+        stderr_path=stderr_path,
+        timeout_seconds=timeout_seconds,
+    )
+    if str(start_response.get("status") or "") != "ok":
+        message = str(
+            start_response.get("message")
+            or start_response.get("error")
+            or "profile-start failed"
+        )
+        return {
+            "exit_code": 124 if "timed out" in message.lower() else 1,
+            "output": json.dumps(start_response, sort_keys=True),
+            "error": message,
+        }
+
+    time.sleep(interval_ms / 1000.0)
+
+    stop_response = _profile_request(
+        socket_path,
+        {"cmd": "profile-stop"},
+        daemon_proc=daemon_proc,
+        stdout_path=stdout_path,
+        stderr_path=stderr_path,
+        timeout_seconds=timeout_seconds,
+    )
+    if str(stop_response.get("status") or "") != "ok":
+        message = str(
+            stop_response.get("message")
+            or stop_response.get("error")
+            or "profile-stop failed"
+        )
+        return {
+            "exit_code": 124 if "timed out" in message.lower() else 1,
+            "output": json.dumps(stop_response, sort_keys=True),
+            "error": message,
+        }
+
+    return None
 
 
 def _apply_one_via_socket(
@@ -736,10 +804,27 @@ def apply_daemon_rejit(
             daemon_socket_dir,
             daemon_stdout_path,
             daemon_stderr_path,
-        ) = _start_daemon_server(
-            daemon_binary,
-            pgo=_branch_flip_requested(enabled_passes),
-        )
+        ) = _start_daemon_server(daemon_binary)
+        if _branch_flip_requested(enabled_passes):
+            assert daemon_socket_path is not None
+            profile_error = _prepare_branch_flip_profile(
+                daemon_socket_path,
+                daemon_proc=daemon_proc,
+                stdout_path=daemon_stdout_path,
+                stderr_path=daemon_stderr_path,
+            )
+            if profile_error is not None:
+                return {
+                    "applied": False,
+                    "output": str(profile_error.get("output") or ""),
+                    "exit_code": int(profile_error.get("exit_code", 1) or 1),
+                    "per_program": {},
+                    "counts": {
+                        "total_sites": 0,
+                        "applied_sites": 0,
+                    },
+                    "error": str(profile_error.get("error") or "profile collection failed"),
+                }
         for prog_id in requested_prog_ids:
             assert daemon_socket_path is not None
             result = _apply_one_via_socket(
@@ -788,5 +873,4 @@ __all__ = [
     "benchmark_rejit_enabled_passes",
     "load_benchmark_config",
     "scan_programs",
-    "serve_requires_pgo",
 ]

@@ -37,7 +37,7 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.corpus import materialize_katran_packet  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
-from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes, scan_programs  # noqa: E402
+from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 
 from e2e.case_common import (  # noqa: E402
     CaseLifecycleState,

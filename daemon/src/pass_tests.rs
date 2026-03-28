@@ -616,7 +616,6 @@ fn test_pipeline_result_aggregate() {
         ],
         total_sites_applied: 2,
         program_changed: true,
-        attribution: vec![],
         debug_traces: vec![],
     };
 
@@ -640,6 +639,10 @@ fn test_pass_manager_collects_debug_traces() {
     assert_eq!(result.debug_traces.len(), 1);
     assert_eq!(result.debug_traces[0].pass_name, "append_nop");
     assert!(result.debug_traces[0].changed);
+    assert_eq!(
+        result.debug_traces[0].verify.status,
+        PassVerifyStatus::Skipped
+    );
     assert_eq!(
         result.debug_traces[0]
             .bytecode_before
@@ -999,89 +1002,103 @@ fn test_pass_skips_without_platform_capability() {
         .any(|s| s.reason.contains("CMOV")));
 }
 
-// ── TransformAttribution tests ──────────────────────────────
+// ── Per-pass verification tests ─────────────────────────────
 
 #[test]
-fn test_attribution_populated_after_transform() {
-    let mut pm = PassManager::new();
-    pm.add_pass(AppendNopPass);
-
-    let mut prog = make_program(vec![exit_insn()]);
-    let ctx = ctx_for_pass_manager(&pm);
-
-    let result = pm.run(&mut prog, &ctx).unwrap();
-
-    assert!(result.program_changed);
-    assert!(
-        !result.attribution.is_empty(),
-        "attribution should be populated after transform"
-    );
-    assert_eq!(result.attribution[0].pass_name, "append_nop");
-    assert_eq!(result.attribution[0].pc_ranges, vec![1..2]);
-}
-
-#[test]
-fn test_attribution_empty_when_no_change() {
+fn test_verify_callback_not_run_for_unchanged_pass() {
     let mut pm = PassManager::new();
     pm.add_pass(NoOpPass);
 
     let mut prog = make_program(vec![exit_insn()]);
     let ctx = ctx_for_pass_manager(&pm);
+    let mut verifier_called = false;
+    let result = pm
+        .run_with_verifier(&mut prog, &ctx, &mut |_, _| {
+            verifier_called = true;
+            Ok(PassVerifyResult::accepted())
+        })
+        .unwrap();
 
-    let result = pm.run(&mut prog, &ctx).unwrap();
-
+    assert!(!verifier_called);
     assert!(!result.program_changed);
-    assert!(
-        result.attribution.is_empty(),
-        "attribution should be empty when no changes"
+    assert_eq!(
+        result.pass_results[0].verify.status,
+        PassVerifyStatus::NotNeeded
     );
 }
 
 #[test]
-fn test_attribution_multiple_passes() {
+fn test_verify_callback_accepts_changed_pass() {
+    let mut pm = PassManager::new();
+    pm.add_pass(AppendNopPass);
+
+    let mut prog = make_program(vec![exit_insn()]);
+    let ctx = ctx_for_pass_manager(&pm);
+    let mut verified_passes = Vec::new();
+    let result = pm
+        .run_with_verifier(&mut prog, &ctx, &mut |pass_name, _| {
+            verified_passes.push(pass_name.to_string());
+            Ok(PassVerifyResult::accepted())
+        })
+        .unwrap();
+
+    assert_eq!(verified_passes, vec!["append_nop"]);
+    assert!(result.program_changed);
+    assert_eq!(result.total_sites_applied, 1);
+    assert_eq!(prog.insns.len(), 2);
+    assert_eq!(
+        result.pass_results[0].verify.status,
+        PassVerifyStatus::Accepted
+    );
+}
+
+#[test]
+fn test_verify_rejection_rolls_back_and_continues_pipeline() {
     let mut pm = PassManager::new();
     pm.add_pass(RewriteMovImmPass { new_imm: 99 });
     pm.add_pass(AppendNopPass);
 
     let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
     let ctx = ctx_for_pass_manager(&pm);
+    let mut verified_passes = Vec::new();
+    let result = pm
+        .run_with_verifier(&mut prog, &ctx, &mut |pass_name, _| {
+            verified_passes.push(pass_name.to_string());
+            if pass_name == "rewrite_mov_imm" {
+                return Ok(PassVerifyResult::rejected("synthetic verifier rejection"));
+            }
+            Ok(PassVerifyResult::accepted())
+        })
+        .unwrap();
 
-    let result = pm.run(&mut prog, &ctx).unwrap();
-
+    assert_eq!(verified_passes, vec!["rewrite_mov_imm", "append_nop"]);
     assert!(result.program_changed);
-    assert_eq!(result.attribution.len(), 2);
-    let names: Vec<&str> = result
-        .attribution
-        .iter()
-        .map(|a| a.pass_name.as_str())
-        .collect();
-    assert!(names.contains(&"rewrite_mov_imm"));
-    assert!(names.contains(&"append_nop"));
-    assert_eq!(result.attribution[0].pc_ranges, vec![0..1]);
-    assert_eq!(result.attribution[1].pc_ranges, vec![2..3]);
+    assert_eq!(result.total_sites_applied, 1);
+    assert_eq!(prog.insns[0].imm, 42);
+    assert_eq!(prog.insns.len(), 3);
+
+    assert!(!result.pass_results[0].changed);
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert_eq!(result.pass_results[0].insns_before, 2);
+    assert_eq!(result.pass_results[0].insns_after, 2);
+    assert_eq!(
+        result.pass_results[0].verify.status,
+        PassVerifyStatus::Rejected
+    );
+    assert_eq!(
+        result.pass_results[0].verify.error_message.as_deref(),
+        Some("synthetic verifier rejection")
+    );
+
+    assert!(result.pass_results[1].changed);
+    assert_eq!(
+        result.pass_results[1].verify.status,
+        PassVerifyStatus::Accepted
+    );
 }
 
 #[test]
-fn test_attribution_remaps_prior_ranges_after_later_layout_change() {
-    let mut pm = PassManager::new();
-    pm.add_pass(RewriteMovImmPass { new_imm: 99 });
-    pm.add_pass(PrependNopPass);
-
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-    let ctx = ctx_for_pass_manager(&pm);
-
-    let result = pm.run(&mut prog, &ctx).unwrap();
-
-    assert!(result.program_changed);
-    assert_eq!(result.attribution.len(), 2);
-    assert_eq!(result.attribution[0].pass_name, "rewrite_mov_imm");
-    assert_eq!(result.attribution[0].pc_ranges, vec![1..2]);
-    assert_eq!(result.attribution[1].pass_name, "prepend_nop");
-    assert_eq!(result.attribution[1].pc_ranges, vec![0..1]);
-}
-
-#[test]
-fn test_disabled_pass_not_in_attribution() {
+fn test_disabled_pass_not_verified() {
     let mut pm = PassManager::new();
     pm.add_pass(RewriteMovImmPass { new_imm: 99 });
     pm.add_pass(AppendNopPass);
@@ -1089,14 +1106,20 @@ fn test_disabled_pass_not_in_attribution() {
     let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
     let mut ctx = ctx_for_pass_manager(&pm);
     ctx.policy.disabled_passes = vec!["rewrite_mov_imm".into()];
+    let mut verified_passes = Vec::new();
+    let result = pm
+        .run_with_verifier(&mut prog, &ctx, &mut |pass_name, _| {
+            verified_passes.push(pass_name.to_string());
+            Ok(PassVerifyResult::accepted())
+        })
+        .unwrap();
 
-    let result = pm.run(&mut prog, &ctx).unwrap();
-
+    assert_eq!(verified_passes, vec!["append_nop"]);
     assert!(result.program_changed);
-    // Only append_nop should appear in attribution.
-    assert_eq!(result.attribution.len(), 1);
-    assert_eq!(result.attribution[0].pass_name, "append_nop");
-    assert_eq!(result.attribution[0].pc_ranges, vec![2..3]);
+    assert_eq!(prog.insns[0].imm, 42);
+    assert_eq!(prog.insns.len(), 3);
+    assert_eq!(result.pass_results.len(), 1);
+    assert_eq!(result.pass_results[0].pass_name, "append_nop");
 }
 
 #[test]
@@ -1107,38 +1130,6 @@ fn test_pass_names_method() {
 
     let names = pm.pass_names();
     assert_eq!(names, vec!["noop", "append_nop"]);
-}
-
-#[test]
-fn test_rollback_via_disabled_passes_policy() {
-    // Simulate the rollback mechanism: run with all passes, then disable one
-    // and verify the disabled pass is skipped on the second run.
-    let mut pm = PassManager::new();
-    pm.add_pass(RewriteMovImmPass { new_imm: 99 });
-    pm.add_pass(AppendNopPass);
-
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-    let ctx = ctx_for_pass_manager(&pm);
-
-    // First run: both passes fire.
-    let result1 = pm.run(&mut prog, &ctx).unwrap();
-    assert_eq!(result1.attribution.len(), 2);
-    assert_eq!(prog.insns[0].imm, 99);
-    assert_eq!(prog.insns.len(), 3); // 2 original + 1 NOP
-
-    // Second run: disable rewrite_mov_imm (simulating rollback).
-    let mut prog2 = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-    let mut ctx2 = ctx_for_pass_manager(&pm);
-    ctx2.policy.disabled_passes = vec!["rewrite_mov_imm".into()];
-
-    let result2 = pm.run(&mut prog2, &ctx2).unwrap();
-    assert_eq!(result2.attribution.len(), 1);
-    assert_eq!(result2.attribution[0].pass_name, "append_nop");
-    assert_eq!(result2.attribution[0].pc_ranges, vec![2..3]);
-    // The MOV immediate should NOT be rewritten.
-    assert_eq!(prog2.insns[0].imm, 42);
-    // But NOP should still be appended.
-    assert_eq!(prog2.insns.len(), 3);
 }
 
 #[test]

@@ -35,7 +35,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes, scan_programs  # noqa: E402
+from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_dd_read_load,
@@ -44,8 +44,10 @@ from runner.libs.workload import (  # noqa: E402
     run_tcp_connect_load,
 )
 from e2e.case_common import (  # noqa: E402
+    CaseLifecycleState,
     host_metadata,
     percent_delta,
+    run_case_lifecycle,
 )
 
 
@@ -338,55 +340,116 @@ def run_phase(
 
     Returns (baseline, rejit) where rejit is None only when ReJIT was not applicable.
     """
-    process = start_agent("bpftrace", ["-q", str(spec.script_path)])
-    baseline: dict[str, object] = {
-        "phase": "baseline",
-        "status": "error",
-        "reason": "",
-        "programs": [],
-        "prog_ids": [],
-        "scan_results": {},
-        "site_totals": {
-            "total_sites": 0,
-            "cmov_sites": 0,
-            "wide_sites": 0,
-            "rotate_sites": 0,
-            "lea_sites": 0,
-        },
-        "measurement": None,
-        "process": {},
-    }
-    rejit: dict[str, object] | None = None
+    programs: list[dict[str, object]] = []
+    prog_ids: list[int] = []
+    process_output: dict[str, object] = {}
+
+    def setup() -> dict[str, object]:
+        return {}
+
+    def start(_: object) -> CaseLifecycleState:
+        process = start_agent("bpftrace", ["-q", str(spec.script_path)])
+        return CaseLifecycleState(runtime=process)
+
+    def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
+        process = lifecycle.runtime
+        nonlocal programs
+        nonlocal prog_ids
+        if phase_name == "baseline" and not lifecycle.target_prog_ids:
+            programs = wait_for_attached_programs(
+                process,
+                expected_count=spec.expected_programs,
+                timeout_s=attach_timeout,
+            )
+            if not programs:
+                return {
+                    "status": "error",
+                    "reason": "bpftrace did not attach any programs",
+                    "measurement": None,
+                }
+            prog_ids = [int(program["id"]) for program in programs]
+            lifecycle.target_prog_ids = list(prog_ids)
+            lifecycle.apply_prog_ids = list(prog_ids)
+        if not lifecycle.target_prog_ids:
+            return {"status": "error", "reason": "no BPF programs are attached", "measurement": None}
+        return {
+            "status": "ok",
+            "reason": "",
+            "measurement": measure_workload(
+                spec.workload_kind,
+                duration_s,
+                lifecycle.target_prog_ids,
+                agent_pid=int(process.pid or 0),
+                initial_stats=sample_bpf_stats(lifecycle.target_prog_ids),
+            ),
+        }
+
+    def stop(_: object, lifecycle: CaseLifecycleState) -> None:
+        nonlocal process_output
+        process = lifecycle.runtime
+        stop_agent(process, timeout=8)
+        process_output = finalize_process_output(process)
+
+    def cleanup(_: object) -> None:
+        return None
+
+    baseline_measurement: dict[str, object] | None = None
+    scan_results: dict[int, dict[str, object]] = {}
+    rejit_apply: dict[str, object] | None = None
+    post_measurement: dict[str, object] | None = None
+    baseline_status = "error"
+    baseline_reason = ""
     try:
-        programs = wait_for_attached_programs(process, expected_count=spec.expected_programs, timeout_s=attach_timeout)
-        if not programs:
-            baseline["status"] = "error"
-            baseline["reason"] = "bpftrace did not attach any programs"
-            return baseline, None
-
-        prog_ids = [int(program["id"]) for program in programs]
-        baseline["programs"] = programs
-        baseline["prog_ids"] = prog_ids
-        scan_results = scan_programs(prog_ids, daemon_binary)
-        baseline["scan_results"] = {str(key): value for key, value in scan_results.items()}
-        baseline["site_totals"] = aggregate_site_totals(scan_results)
-
-        measurement = measure_workload(
-            spec.workload_kind,
-            duration_s,
-            prog_ids,
-            agent_pid=int(process.pid or 0),
-            initial_stats=sample_bpf_stats(prog_ids),
-        )
-        baseline["measurement"] = measurement
-        baseline["status"] = "ok"
-
-        rejit_apply = apply_daemon_rejit(
-            daemon_binary,
-            prog_ids,
+        lifecycle_result = run_case_lifecycle(
+            daemon_binary=daemon_binary,
+            setup=setup,
+            start=start,
+            workload=workload,
+            stop=stop,
+            cleanup=cleanup,
             enabled_passes=benchmark_rejit_enabled_passes(),
         )
-        if rejit_apply["applied"]:
+        if lifecycle_result.baseline is not None:
+            baseline_status = str(lifecycle_result.baseline.get("status") or "error")
+            baseline_reason = str(lifecycle_result.baseline.get("reason") or "")
+            measurement = lifecycle_result.baseline.get("measurement")
+            if isinstance(measurement, Mapping):
+                baseline_measurement = dict(measurement)
+        scan_results = lifecycle_result.scan_results
+        rejit_apply = lifecycle_result.rejit_result
+        if isinstance(lifecycle_result.post_rejit, Mapping):
+            measurement = lifecycle_result.post_rejit.get("measurement")
+            if isinstance(measurement, Mapping):
+                post_measurement = dict(measurement)
+    except Exception as exc:
+        baseline_reason = str(exc)
+
+    site_totals = aggregate_site_totals(scan_results) if scan_results else {
+        "total_sites": 0,
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+    }
+    baseline: dict[str, object] = {
+        "phase": "baseline",
+        "status": baseline_status,
+        "reason": baseline_reason,
+        "programs": programs,
+        "prog_ids": prog_ids,
+        "scan_results": {str(key): value for key, value in scan_results.items()},
+        "site_totals": site_totals,
+        "measurement": baseline_measurement,
+        "process": process_output,
+    }
+    if baseline["status"] != "ok" and not baseline["reason"]:
+        stderr_tail = str(process_output.get("stderr_tail") or "")
+        stdout_tail = str(process_output.get("stdout_tail") or "")
+        baseline["reason"] = stderr_tail or stdout_tail or "unknown failure"
+
+    rejit: dict[str, object] | None = None
+    if baseline["status"] == "ok" and rejit_apply is not None:
+        if rejit_apply.get("applied"):
             rejit = {
                 "phase": "post_rejit",
                 "status": "ok",
@@ -396,14 +459,8 @@ def run_phase(
                 "scan_results": baseline["scan_results"],
                 "site_totals": baseline["site_totals"],
                 "rejit_result": rejit_apply,
-                "measurement": measure_workload(
-                    spec.workload_kind,
-                    duration_s,
-                    prog_ids,
-                    agent_pid=int(process.pid or 0),
-                    initial_stats=sample_bpf_stats(prog_ids),
-                ),
-                "process": {},
+                "measurement": post_measurement,
+                "process": process_output,
             }
         else:
             rejit_error = str(rejit_apply.get("error") or "").strip()
@@ -418,24 +475,9 @@ def run_phase(
                     "site_totals": baseline["site_totals"],
                     "rejit_result": rejit_apply,
                     "measurement": None,
-                    "process": {},
+                    "process": process_output,
                 }
-
-        return baseline, rejit
-    except Exception as exc:
-        baseline["status"] = "error"
-        baseline["reason"] = str(exc)
-        return baseline, rejit
-    finally:
-        stop_agent(process, timeout=8)
-        process_output = finalize_process_output(process)
-        baseline["process"] = process_output
-        if rejit is not None:
-            rejit["process"] = process_output
-        if baseline["status"] != "ok" and not baseline["reason"]:
-            stderr_tail = str(process_output.get("stderr_tail") or "")
-            stdout_tail = str(process_output.get("stdout_tail") or "")
-            baseline["reason"] = stderr_tail or stdout_tail or "unknown failure"
+    return baseline, rejit
 
 
 def summarize_script(spec: ScriptSpec, baseline: Mapping[str, object], rejit: Mapping[str, object] | None) -> dict[str, object]:

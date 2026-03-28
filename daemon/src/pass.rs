@@ -67,8 +67,6 @@ pub struct BpfProgram {
     pub branch_miss_rate: Option<f64>,
     /// Parsed `log_level=2` verifier state snapshots for the original program.
     pub verifier_states: Arc<[VerifierInsn]>,
-    /// Address map emitted by the most recent structural rewrite.
-    last_addr_map: Option<Vec<usize>>,
 }
 
 /// Transform log entry — records sites applied by each pass.
@@ -90,7 +88,6 @@ impl BpfProgram {
             map_fd_bindings: HashMap::new(),
             branch_miss_rate: None,
             verifier_states: Arc::from([]),
-            last_addr_map: None,
         }
     }
 
@@ -105,7 +102,6 @@ impl BpfProgram {
     pub fn sync_annotations(&mut self) {
         self.annotations
             .resize_with(self.insns.len(), InsnAnnotation::default);
-        self.last_addr_map = None;
     }
 
     /// Remap annotations using an address map (old_pc -> new_pc).
@@ -135,7 +131,6 @@ impl BpfProgram {
         }
 
         self.annotations = new_annotations;
-        self.last_addr_map = Some(addr_map.to_vec());
     }
 
     /// Inject profiling data into annotations.
@@ -168,14 +163,6 @@ impl BpfProgram {
     /// Record a transform operation.
     pub fn log_transform(&mut self, entry: TransformEntry) {
         self.transform_log.push(entry);
-    }
-
-    fn clear_last_addr_map(&mut self) {
-        self.last_addr_map = None;
-    }
-
-    fn take_last_addr_map(&mut self) -> Option<Vec<usize>> {
-        self.last_addr_map.take()
     }
 
     /// Whether any transforms have been applied (used by tests and diagnostic tools).
@@ -304,6 +291,8 @@ pub struct PassResult {
     pub insns_before: usize,
     /// Instruction count after this pass ran.
     pub insns_after: usize,
+    /// Per-pass verifier outcome.
+    pub verify: PassVerifyResult,
 }
 
 impl PassResult {
@@ -314,6 +303,62 @@ impl PassResult {
             *counts.entry(skip.reason.clone()).or_insert(0) += 1;
         }
         counts
+    }
+}
+
+#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum PassVerifyStatus {
+    NotNeeded,
+    Skipped,
+    Accepted,
+    Rejected,
+}
+
+#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
+pub struct PassVerifyResult {
+    pub status: PassVerifyStatus,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error_message: Option<String>,
+}
+
+impl Default for PassVerifyResult {
+    fn default() -> Self {
+        Self::not_needed()
+    }
+}
+
+impl PassVerifyResult {
+    pub fn not_needed() -> Self {
+        Self {
+            status: PassVerifyStatus::NotNeeded,
+            error_message: None,
+        }
+    }
+
+    pub fn skipped() -> Self {
+        Self {
+            status: PassVerifyStatus::Skipped,
+            error_message: None,
+        }
+    }
+
+    pub fn accepted() -> Self {
+        Self {
+            status: PassVerifyStatus::Accepted,
+            error_message: None,
+        }
+    }
+
+    pub fn rejected(error_message: impl Into<String>) -> Self {
+        Self {
+            status: PassVerifyStatus::Rejected,
+            error_message: Some(error_message.into()),
+        }
+    }
+
+    fn rejected_change(&self) -> bool {
+        matches!(self.status, PassVerifyStatus::Rejected)
     }
 }
 
@@ -605,23 +650,11 @@ impl AnalysisRegistry {
 
 // ── PassManager ─────────────────────────────────────────────────────
 
-/// Records which pass is responsible for modifications at a given PC range.
-///
-/// After the pipeline runs, `transform_attribution` maps each modified PC range
-/// back to the pass that created it. Used by the rollback mechanism to attribute
-/// verifier failures to specific passes.
-#[derive(Clone, Debug)]
-pub struct TransformAttribution {
-    /// PC ranges (in the *new* instruction stream) actually changed by a pass.
-    pub pc_ranges: Vec<std::ops::Range<usize>>,
-    /// Name of the pass that produced this range.
-    pub pass_name: String,
-}
-
 #[derive(Clone, Debug, Serialize)]
 pub struct PassDebugTrace {
     pub pass_name: String,
     pub changed: bool,
+    pub verify: PassVerifyResult,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bytecode_before: Option<BpfBytecodeDump>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -634,8 +667,6 @@ pub struct PipelineResult {
     pub pass_results: Vec<PassResult>,
     pub total_sites_applied: usize,
     pub program_changed: bool,
-    /// Attribution of PC ranges to passes (populated for rollback support).
-    pub attribution: Vec<TransformAttribution>,
     /// Full bytecode dumps around each executed pass, only populated when
     /// debug logging is enabled.
     pub debug_traces: Vec<PassDebugTrace>,
@@ -703,6 +734,18 @@ impl PassManager {
         program: &mut BpfProgram,
         ctx: &PassContext,
     ) -> anyhow::Result<PipelineResult> {
+        self.run_with_verifier(program, ctx, &mut |_, _| Ok(PassVerifyResult::skipped()))
+    }
+
+    pub fn run_with_verifier<V>(
+        &self,
+        program: &mut BpfProgram,
+        ctx: &PassContext,
+        verifier: &mut V,
+    ) -> anyhow::Result<PipelineResult>
+    where
+        V: FnMut(&str, &BpfProgram) -> anyhow::Result<PassVerifyResult>,
+    {
         let available_passes = self
             .passes
             .iter()
@@ -714,7 +757,6 @@ impl PassManager {
         let mut total_sites = 0usize;
         let mut any_changed = false;
         let mut debug_traces = Vec::new();
-        let mut attribution = Vec::new();
         let mut pass_idx = 0usize;
 
         while pass_idx < self.passes.len() {
@@ -736,10 +778,12 @@ impl PassManager {
                         program,
                         &mut cache,
                         ctx,
+                        verifier,
                         &mut debug_traces,
-                        &mut attribution,
                     )?;
-                    total_sites += const_result.sites_applied;
+                    if const_result.changed {
+                        total_sites += const_result.sites_applied;
+                    }
                     any_changed |= const_result.changed;
 
                     let dce_result = self.run_single_pass(
@@ -747,10 +791,12 @@ impl PassManager {
                         program,
                         &mut cache,
                         ctx,
+                        verifier,
                         &mut debug_traces,
-                        &mut attribution,
                     )?;
-                    total_sites += dce_result.sites_applied;
+                    if dce_result.changed {
+                        total_sites += dce_result.sites_applied;
+                    }
                     any_changed |= dce_result.changed;
 
                     let pair_changed = const_result.changed || dce_result.changed;
@@ -766,15 +812,11 @@ impl PassManager {
                 continue;
             }
 
-            let result = self.run_single_pass(
-                pass,
-                program,
-                &mut cache,
-                ctx,
-                &mut debug_traces,
-                &mut attribution,
-            )?;
-            total_sites += result.sites_applied;
+            let result =
+                self.run_single_pass(pass, program, &mut cache, ctx, verifier, &mut debug_traces)?;
+            if result.changed {
+                total_sites += result.sites_applied;
+            }
             any_changed |= result.changed;
             pass_results.push(result);
             pass_idx += 1;
@@ -784,7 +826,6 @@ impl PassManager {
             pass_results,
             total_sites_applied: total_sites,
             program_changed: any_changed,
-            attribution,
             debug_traces,
         })
     }
@@ -800,57 +841,77 @@ impl PassManager {
         ctx: &PassContext,
         profiling: Option<&ProfilingData>,
     ) -> anyhow::Result<PipelineResult> {
+        self.run_with_profiling_and_verifier(program, ctx, profiling, &mut |_, _| {
+            Ok(PassVerifyResult::skipped())
+        })
+    }
+
+    pub fn run_with_profiling_and_verifier<V>(
+        &self,
+        program: &mut BpfProgram,
+        ctx: &PassContext,
+        profiling: Option<&ProfilingData>,
+        verifier: &mut V,
+    ) -> anyhow::Result<PipelineResult>
+    where
+        V: FnMut(&str, &BpfProgram) -> anyhow::Result<PassVerifyResult>,
+    {
         if let Some(data) = profiling {
             program.inject_profiling(data);
         }
-        self.run(program, ctx)
+        self.run_with_verifier(program, ctx, verifier)
     }
 
-    fn run_single_pass(
+    fn run_single_pass<V>(
         &self,
         pass: &dyn BpfPass,
         program: &mut BpfProgram,
         cache: &mut AnalysisCache,
         ctx: &PassContext,
+        verifier: &mut V,
         debug_traces: &mut Vec<PassDebugTrace>,
-        attribution: &mut Vec<TransformAttribution>,
-    ) -> anyhow::Result<PassResult> {
+    ) -> anyhow::Result<PassResult>
+    where
+        V: FnMut(&str, &BpfProgram) -> anyhow::Result<PassVerifyResult>,
+    {
         for analysis_name in pass.required_analyses() {
             if let Some(analysis) = self.analyses.registry.get(analysis_name) {
                 analysis.run_and_cache(program, cache);
             }
         }
 
-        program.clear_last_addr_map();
-        let before_insns = program.insns.clone();
-        let insns_before = program.insns.len();
+        let before_program = program.clone();
+        let before_insns = before_program.insns.clone();
+        let insns_before = before_insns.len();
         let mut result = pass.run(program, cache, ctx)?;
         result.insns_before = insns_before;
         result.insns_after = program.insns.len();
 
         if result.changed {
-            if let Some(addr_map) = program.take_last_addr_map() {
-                remap_transform_attribution(attribution, &addr_map);
-            }
-            let changed_ranges = changed_pc_ranges(&before_insns, &program.insns);
-            if !changed_ranges.is_empty() {
-                attribution.push(TransformAttribution {
-                    pass_name: result.pass_name.clone(),
-                    pc_ranges: changed_ranges,
-                });
-            }
+            let tentative_after = dump_bytecode_compact(&program.insns);
+            let verify = verifier(result.pass_name.as_str(), program)?;
+            let keep_change = !verify.rejected_change();
+            result.verify = verify.clone();
             debug_traces.push(PassDebugTrace {
                 pass_name: result.pass_name.clone(),
-                changed: true,
+                changed: keep_change,
+                verify,
                 bytecode_before: Some(dump_bytecode_compact(&before_insns)),
-                bytecode_after: Some(dump_bytecode_compact(&program.insns)),
+                bytecode_after: Some(tentative_after),
             });
-            cache.invalidate_all();
-            program.sync_annotations();
+            if keep_change {
+                cache.invalidate_all();
+                program.sync_annotations();
+            } else {
+                *program = before_program;
+                result.changed = false;
+                result.insns_after = program.insns.len();
+            }
         } else {
             debug_traces.push(PassDebugTrace {
                 pass_name: result.pass_name.clone(),
                 changed: false,
+                verify: PassVerifyResult::not_needed(),
                 bytecode_before: None,
                 bytecode_after: None,
             });
@@ -911,159 +972,6 @@ fn validate_policy_pass_names(
         "invalid {field}: unknown pass name(s): {}",
         unknown.join(", ")
     );
-}
-
-fn changed_pc_ranges(before: &[BpfInsn], after: &[BpfInsn]) -> Vec<std::ops::Range<usize>> {
-    let unchanged = unchanged_after_pcs(before, after);
-    let mut ranges = Vec::new();
-    let mut start = None;
-
-    for (pc, is_unchanged) in unchanged.into_iter().enumerate() {
-        match (start, is_unchanged) {
-            (None, false) => start = Some(pc),
-            (Some(from), true) => {
-                ranges.push(from..pc);
-                start = None;
-            }
-            _ => {}
-        }
-    }
-
-    if let Some(from) = start {
-        ranges.push(from..after.len());
-    }
-
-    ranges
-}
-
-fn remap_transform_attribution(attribution: &mut [TransformAttribution], addr_map: &[usize]) {
-    for attr in attribution {
-        attr.pc_ranges = remap_pc_ranges(&attr.pc_ranges, addr_map);
-    }
-}
-
-fn remap_pc_ranges(
-    ranges: &[std::ops::Range<usize>],
-    addr_map: &[usize],
-) -> Vec<std::ops::Range<usize>> {
-    let mut remapped = Vec::with_capacity(ranges.len());
-
-    for range in ranges {
-        if range.start >= addr_map.len() || range.end >= addr_map.len() {
-            continue;
-        }
-
-        let start = addr_map[range.start];
-        let end = addr_map[range.end];
-        if start < end {
-            remapped.push(start..end);
-        }
-    }
-
-    merge_pc_ranges(remapped)
-}
-
-fn merge_pc_ranges(mut ranges: Vec<std::ops::Range<usize>>) -> Vec<std::ops::Range<usize>> {
-    if ranges.len() <= 1 {
-        return ranges;
-    }
-
-    ranges.sort_by(|lhs, rhs| {
-        lhs.start
-            .cmp(&rhs.start)
-            .then_with(|| lhs.end.cmp(&rhs.end))
-    });
-
-    let mut merged: Vec<std::ops::Range<usize>> = Vec::with_capacity(ranges.len());
-    for range in ranges {
-        if let Some(last) = merged.last_mut() {
-            if range.start <= last.end {
-                last.end = last.end.max(range.end);
-                continue;
-            }
-        }
-        merged.push(range);
-    }
-
-    merged
-}
-
-fn unchanged_after_pcs(before: &[BpfInsn], after: &[BpfInsn]) -> Vec<bool> {
-    let before_tokens = occurrence_tokens(before);
-    let after_tokens = occurrence_tokens(after);
-    let before_positions = before_tokens
-        .into_iter()
-        .enumerate()
-        .map(|(pc, token)| (token, pc))
-        .collect::<HashMap<_, _>>();
-    let matches = after_tokens
-        .into_iter()
-        .enumerate()
-        .filter_map(|(after_pc, token)| {
-            before_positions
-                .get(&token)
-                .copied()
-                .map(|before_pc| (after_pc, before_pc))
-        })
-        .collect::<Vec<_>>();
-    let mut unchanged = vec![false; after.len()];
-
-    for match_idx in longest_increasing_subsequence_positions(
-        &matches
-            .iter()
-            .map(|(_, before_pc)| *before_pc)
-            .collect::<Vec<_>>(),
-    ) {
-        unchanged[matches[match_idx].0] = true;
-    }
-
-    unchanged
-}
-
-fn occurrence_tokens(insns: &[BpfInsn]) -> Vec<(BpfInsn, usize)> {
-    let mut seen = HashMap::new();
-
-    insns
-        .iter()
-        .copied()
-        .map(|insn| {
-            let ordinal = seen.entry(insn).or_insert(0usize);
-            *ordinal += 1;
-            (insn, *ordinal)
-        })
-        .collect()
-}
-
-fn longest_increasing_subsequence_positions(values: &[usize]) -> Vec<usize> {
-    if values.is_empty() {
-        return Vec::new();
-    }
-
-    let mut tails: Vec<usize> = Vec::new();
-    let mut prev = vec![None; values.len()];
-
-    for (idx, value) in values.iter().copied().enumerate() {
-        let pos = match tails.binary_search_by(|tail_idx| values[*tail_idx].cmp(&value)) {
-            Ok(pos) | Err(pos) => pos,
-        };
-        if pos > 0 {
-            prev[idx] = Some(tails[pos - 1]);
-        }
-        if pos == tails.len() {
-            tails.push(idx);
-        } else {
-            tails[pos] = idx;
-        }
-    }
-
-    let mut lis = Vec::with_capacity(tails.len());
-    let mut current = tails.last().copied();
-    while let Some(idx) = current {
-        lis.push(idx);
-        current = prev[idx];
-    }
-    lis.reverse();
-    lis
 }
 
 // ── Helper: default PassContext for testing ──────────────────────────

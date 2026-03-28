@@ -16,7 +16,7 @@ import yaml
 from . import ROOT_DIR, ensure_parent
 from .batch_runner import run_batch_runner
 from .object_discovery import supplement_with_existing_corpus_build_objects
-from .rejit import _start_daemon_server, _stop_daemon_server, serve_requires_pgo
+from .rejit import _start_daemon_server, _stop_daemon_server
 from .results import parse_runner_sample
 
 
@@ -1581,7 +1581,7 @@ def run_objects_locally_batch(
     active_daemon_socket = daemon_socket
     daemon_server: tuple[subprocess.Popen[str], Path, str, Path, Path] | None = None
     if objects and active_daemon_socket is None:
-        daemon_server = _start_daemon_server(daemon, pgo=serve_requires_pgo(enabled_passes))
+        daemon_server = _start_daemon_server(daemon)
         active_daemon_socket = str(daemon_server[1])
 
     try:

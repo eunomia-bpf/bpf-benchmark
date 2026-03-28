@@ -29,7 +29,7 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
 from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
-from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes, scan_programs  # noqa: E402
+from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from e2e.case_common import (  # noqa: E402
