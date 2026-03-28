@@ -110,14 +110,16 @@ impl MapInfoResult {
 /// Analysis that resolves `BPF_PSEUDO_MAP_FD` references back to live maps.
 pub struct MapInfoAnalysis;
 
+type MapInfoAnalysisResult<T> = std::result::Result<T, String>;
+
 impl Analysis for MapInfoAnalysis {
-    type Result = MapInfoResult;
+    type Result = MapInfoAnalysisResult<MapInfoResult>;
 
     fn name(&self) -> &str {
         "map_info"
     }
 
-    fn run(&self, program: &BpfProgram) -> MapInfoResult {
+    fn run(&self, program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
         collect_map_references_with_bindings(
             &program.insns,
             &program.map_ids,
@@ -132,9 +134,9 @@ pub fn collect_map_references<F>(
     insns: &[BpfInsn],
     map_ids: &[u32],
     resolver: F,
-) -> MapInfoResult
+) -> MapInfoAnalysisResult<MapInfoResult>
 where
-    F: FnMut(u32) -> Option<MapInfo>,
+    F: FnMut(u32) -> MapInfoAnalysisResult<Option<MapInfo>>,
 {
     collect_map_references_with_bindings(insns, map_ids, &HashMap::new(), resolver)
 }
@@ -146,9 +148,9 @@ pub fn collect_map_references_with_bindings<F>(
     map_ids: &[u32],
     map_fd_bindings: &HashMap<i32, u32>,
     mut resolver: F,
-) -> MapInfoResult
+) -> MapInfoAnalysisResult<MapInfoResult>
 where
-    F: FnMut(u32) -> Option<MapInfo>,
+    F: FnMut(u32) -> MapInfoAnalysisResult<Option<MapInfo>>,
 {
     let mut references = Vec::new();
     let mut old_fd_to_index: HashMap<i32, usize> = HashMap::new();
@@ -176,7 +178,10 @@ where
             let info = match resolved_by_index.get(&map_index) {
                 Some(info) => info.clone(),
                 None => {
-                    let resolved = map_id.and_then(&mut resolver);
+                    let resolved = match map_id {
+                        Some(map_id) => resolver(map_id)?,
+                        None => None,
+                    };
                     resolved_by_index.insert(map_index, resolved.clone());
                     resolved
                 }
@@ -202,22 +207,23 @@ where
         .filter_map(|index| resolved_by_index.get(&index).cloned().flatten())
         .collect();
 
-    MapInfoResult {
+    Ok(MapInfoResult {
         references,
         unique_maps,
-    }
+    })
 }
 
-fn resolve_live_map_info(map_id: u32) -> Option<MapInfo> {
-    let (info, frozen) = bpf::bpf_map_get_info_by_id(map_id).ok()?;
-    Some(MapInfo {
+fn resolve_live_map_info(map_id: u32) -> MapInfoAnalysisResult<Option<MapInfo>> {
+    let (info, frozen) = bpf::bpf_map_get_info_by_id(map_id)
+        .map_err(|err| format!("resolve live map info for map {map_id}: {err:#}"))?;
+    Ok(Some(MapInfo {
         map_type: info.map_type,
         key_size: info.key_size,
         value_size: info.value_size,
         max_entries: info.max_entries,
         frozen,
         map_id: info.id,
-    })
+    }))
 }
 
 #[cfg(test)]
@@ -299,11 +305,14 @@ mod tests {
         let ld2 = make_ld_imm64(3, BPF_PSEUDO_MAP_FD, 10);
         let insns = vec![ld0[0], ld0[1], ld1[0], ld1[1], ld2[0], ld2[1]];
 
-        let result = collect_map_references(&insns, &[101, 202], |map_id| match map_id {
-            101 => Some(array_map(101, 4)),
-            202 => Some(hash_map(202)),
-            _ => None,
-        });
+        let result = collect_map_references(&insns, &[101, 202], |map_id| {
+            Ok(match map_id {
+                101 => Some(array_map(101, 4)),
+                202 => Some(hash_map(202)),
+                _ => None,
+            })
+        })
+        .expect("map reference collection should succeed");
 
         assert_eq!(result.references.len(), 3);
         assert_eq!(result.references[0].map_index, 0);
@@ -322,10 +331,13 @@ mod tests {
         let ld = make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 10);
         let insns = vec![ld[0], ld[1]];
 
-        let result = collect_map_references(&insns, &[303], |map_id| match map_id {
-            303 => Some(lru_hash_map(303)),
-            _ => None,
-        });
+        let result = collect_map_references(&insns, &[303], |map_id| {
+            Ok(match map_id {
+                303 => Some(lru_hash_map(303)),
+                _ => None,
+            })
+        })
+        .expect("map reference collection should succeed");
 
         assert_eq!(result.unique_maps.len(), 1);
         assert!(result.unique_maps[0].is_inlineable_v1());
@@ -336,7 +348,8 @@ mod tests {
     #[test]
     fn collect_map_references_ignores_non_map_ldimm64() {
         let plain = make_ld_imm64(1, 0, 77);
-        let result = collect_map_references(&plain, &[101], |_| Some(array_map(101, 4)));
+        let result = collect_map_references(&plain, &[101], |_| Ok(Some(array_map(101, 4))))
+            .expect("map reference collection should succeed");
         assert!(result.references.is_empty());
         assert!(result.unique_maps.is_empty());
     }
@@ -347,7 +360,9 @@ mod tests {
         let ld1 = make_ld_imm64(2, BPF_PSEUDO_MAP_FD, 11);
         let insns = vec![ld0[0], ld0[1], ld1[0], ld1[1]];
 
-        let result = collect_map_references(&insns, &[101], |map_id| Some(array_map(map_id, 4)));
+        let result =
+            collect_map_references(&insns, &[101], |map_id| Ok(Some(array_map(map_id, 4))))
+                .expect("map reference collection should succeed");
 
         assert_eq!(result.references.len(), 2);
         assert_eq!(result.references[0].map_id, Some(101));
@@ -360,11 +375,26 @@ mod tests {
     fn map_info_analysis_runs_without_live_map_metadata() {
         let ld = make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 10);
         let program = BpfProgram::new(vec![ld[0], ld[1]]);
-        let result = MapInfoAnalysis.run(&program);
+        let result = MapInfoAnalysis
+            .run(&program)
+            .expect("map info analysis should succeed");
 
         assert_eq!(result.references.len(), 1);
         assert_eq!(result.references[0].map_id, None);
         assert_eq!(result.references[0].info, None);
+    }
+
+    #[test]
+    fn map_info_analysis_propagates_live_map_lookup_errors() {
+        let ld = make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 10);
+        let mut program = BpfProgram::new(vec![ld[0], ld[1]]);
+        program.set_map_ids(vec![999_999]);
+
+        let err = MapInfoAnalysis
+            .run(&program)
+            .expect_err("missing live map metadata should propagate");
+
+        assert!(err.contains("resolve live map info for map 999999"));
     }
 
     #[test]
@@ -380,8 +410,9 @@ mod tests {
             &program.insns,
             &program.map_ids,
             &program.map_fd_bindings,
-            |map_id| Some(array_map(map_id, 4)),
-        );
+            |map_id| Ok(Some(array_map(map_id, 4))),
+        )
+        .expect("map reference collection should succeed");
 
         assert_eq!(result.references.len(), 1);
         assert_eq!(result.references[0].old_fd, 11);

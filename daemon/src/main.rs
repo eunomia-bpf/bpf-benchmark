@@ -25,24 +25,15 @@ use clap::{Parser, Subcommand};
 #[derive(Parser)]
 #[command(name = "bpfrejit-daemon", version, about = "BpfReJIT userspace daemon")]
 struct Cli {
-    /// List all available passes and exit.
-    #[arg(long)]
-    list_passes: bool,
-
-    /// Disable automatic verifier-guided transform rollback.
-    ///
-    /// By default, when REJIT fails due to verifier rejection, the daemon
-    /// attempts to identify the responsible pass, disables it, and retries.
-    /// Use this flag to disable that behavior (fail immediately on rejection).
-    #[arg(long)]
-    no_rollback: bool,
-
     #[command(subcommand)]
     command: Command,
 }
 
 #[derive(Subcommand)]
 enum Command {
+    /// List all available passes and exit.
+    ListPasses,
+
     /// List all live BPF programs and scan for optimization sites.
     Enumerate,
 
@@ -58,10 +49,18 @@ enum Command {
         /// BPF program ID.
         #[arg(value_name = "PROG_ID")]
         prog_id: u32,
+
+        /// Disable automatic verifier-guided transform rollback.
+        #[arg(long)]
+        no_rollback: bool,
     },
 
     /// Apply rewrites to all live BPF programs that have optimization sites.
-    ApplyAll,
+    ApplyAll {
+        /// Disable automatic verifier-guided transform rollback.
+        #[arg(long)]
+        no_rollback: bool,
+    },
 
     /// Continuously watch for new BPF programs and apply rewrites (daemon mode).
     Watch {
@@ -72,6 +71,10 @@ enum Command {
         /// Run only one scan round then exit (useful for testing).
         #[arg(long)]
         once: bool,
+
+        /// Disable automatic verifier-guided transform rollback.
+        #[arg(long)]
+        no_rollback: bool,
     },
 
     /// Run as a Unix socket server (persistent daemon mode).
@@ -79,6 +82,10 @@ enum Command {
         /// Unix socket path.
         #[arg(long, default_value = "/var/run/bpfrejit.sock")]
         socket: String,
+
+        /// Disable automatic verifier-guided transform rollback.
+        #[arg(long)]
+        no_rollback: bool,
     },
 
     /// Poll runtime BPF stats for one live program.
@@ -99,12 +106,6 @@ enum Command {
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
-
-    if cli.list_passes {
-        println!("Available passes (in canonical pipeline order):\n");
-        println!("{}", passes::available_passes_help());
-        return Ok(());
-    }
 
     // Discover available kinsn targets from exported BTF kinsn stubs.
     let discovery = kfunc_discovery::discover_kinsns();
@@ -134,21 +135,32 @@ fn main() -> Result<()> {
     // Keep descriptor BTF FDs alive for the daemon's lifetime.
     let _btf_fds = discovery.btf_fds;
 
-    let rollback_enabled = !cli.no_rollback;
-
     match cli.command {
+        Command::ListPasses => {
+            println!("Available passes (in canonical pipeline order):\n");
+            println!("{}", passes::available_passes_help());
+            Ok(())
+        }
         Command::Enumerate => commands::cmd_enumerate(&ctx),
         Command::Rewrite { prog_id } => commands::cmd_rewrite(prog_id, &ctx),
-        Command::Apply { prog_id } => commands::cmd_apply(prog_id, &ctx, rollback_enabled),
-        Command::ApplyAll => commands::cmd_apply_all(&ctx, rollback_enabled),
-        Command::Serve { socket } => server::cmd_serve(&socket, &ctx, rollback_enabled),
+        Command::Apply {
+            prog_id,
+            no_rollback,
+        } => commands::cmd_apply(prog_id, &ctx, !no_rollback),
+        Command::ApplyAll { no_rollback } => commands::cmd_apply_all(&ctx, !no_rollback),
+        Command::Serve {
+            socket,
+            no_rollback,
+        } => server::cmd_serve(&socket, &ctx, !no_rollback),
         Command::Profile {
             prog_id,
             interval_ms,
             samples,
         } => commands::cmd_profile(prog_id, interval_ms, samples),
-        Command::Watch { interval, once } => {
-            server::cmd_watch(interval, once, &ctx, rollback_enabled)
-        }
+        Command::Watch {
+            interval,
+            once,
+            no_rollback,
+        } => server::cmd_watch(interval, once, &ctx, !no_rollback),
     }
 }

@@ -8,10 +8,9 @@
 //! - `PassManager`: orchestrates pass execution and analysis cache invalidation
 
 use std::any::{Any, TypeId};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
-use clap::ValueEnum;
 use serde::Serialize;
 
 use crate::insn::{dump_bytecode_compact, BpfBytecodeDump, BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
@@ -555,28 +554,20 @@ pub enum Arch {
     Aarch64,
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, ValueEnum)]
-#[value(rename_all = "snake_case")]
-pub enum PipelineProfile {
-    #[default]
-    Default,
-    MapInlineOnly,
-}
-
 /// Optimization policy configuration.
 #[derive(Clone, Debug, Default)]
-
 pub struct PolicyConfig {
     /// Enabled pass name list.
     pub enabled_passes: Vec<String>,
     /// Disabled pass name list.
     pub disabled_passes: Vec<String>,
-    /// Fixed pipeline selection for controlled benchmarking and debugging.
-    pub pipeline_profile: PipelineProfile,
 }
 
 pub fn default_enabled_passes() -> Vec<String> {
-    crate::passes::selected_pass_names(None).expect("default pass list should always resolve")
+    crate::passes::PASS_REGISTRY
+        .iter()
+        .map(|entry| entry.name.to_string())
+        .collect()
 }
 
 // ── Type-erased analysis wrapper ────────────────────────────────────
@@ -620,8 +611,8 @@ impl AnalysisRegistry {
 /// verifier failures to specific passes.
 #[derive(Clone, Debug)]
 pub struct TransformAttribution {
-    /// PC range (in the *new* instruction stream) that was produced by a pass.
-    pub pc_range: std::ops::Range<usize>,
+    /// PC ranges (in the *new* instruction stream) actually changed by a pass.
+    pub pc_ranges: Vec<std::ops::Range<usize>>,
     /// Name of the pass that produced this range.
     pub pass_name: String,
 }
@@ -711,16 +702,23 @@ impl PassManager {
         program: &mut BpfProgram,
         ctx: &PassContext,
     ) -> anyhow::Result<PipelineResult> {
+        let available_passes = self
+            .passes
+            .iter()
+            .map(|pass| pass.name())
+            .chain(crate::passes::PASS_REGISTRY.iter().map(|entry| entry.name))
+            .collect::<HashSet<_>>();
         let mut cache = AnalysisCache::new();
         let mut pass_results = Vec::new();
         let mut total_sites = 0usize;
         let mut any_changed = false;
         let mut debug_traces = Vec::new();
+        let mut attribution = Vec::new();
         let mut pass_idx = 0usize;
 
         while pass_idx < self.passes.len() {
             let pass = self.passes[pass_idx].as_ref();
-            if !pass_allowed(pass, ctx) {
+            if !pass_allowed(pass, ctx, &available_passes)? {
                 pass_idx += 1;
                 continue;
             }
@@ -728,12 +726,18 @@ impl PassManager {
             let has_fixed_point_pair = pass.name() == "const_prop"
                 && pass_idx + 1 < self.passes.len()
                 && self.passes[pass_idx + 1].name() == "dce"
-                && pass_allowed(self.passes[pass_idx + 1].as_ref(), ctx);
+                && pass_allowed(self.passes[pass_idx + 1].as_ref(), ctx, &available_passes)?;
 
             if has_fixed_point_pair {
                 for _ in 0..CONST_PROP_DCE_FIXED_POINT_MAX_ITERS {
-                    let const_result =
-                        self.run_single_pass(pass, program, &mut cache, ctx, &mut debug_traces)?;
+                    let const_result = self.run_single_pass(
+                        pass,
+                        program,
+                        &mut cache,
+                        ctx,
+                        &mut debug_traces,
+                        &mut attribution,
+                    )?;
                     total_sites += const_result.sites_applied;
                     any_changed |= const_result.changed;
 
@@ -743,6 +747,7 @@ impl PassManager {
                         &mut cache,
                         ctx,
                         &mut debug_traces,
+                        &mut attribution,
                     )?;
                     total_sites += dce_result.sites_applied;
                     any_changed |= dce_result.changed;
@@ -760,27 +765,18 @@ impl PassManager {
                 continue;
             }
 
-            let result = self.run_single_pass(pass, program, &mut cache, ctx, &mut debug_traces)?;
+            let result = self.run_single_pass(
+                pass,
+                program,
+                &mut cache,
+                ctx,
+                &mut debug_traces,
+                &mut attribution,
+            )?;
             total_sites += result.sites_applied;
             any_changed |= result.changed;
             pass_results.push(result);
             pass_idx += 1;
-        }
-
-        // Build attribution from pass results. Each pass that applied any sites
-        // gets a conservative attribution covering the entire final program range.
-        // This is sufficient for rollback: when the verifier rejects at some PC,
-        // all passes that made changes are candidates for disabling. The last
-        // matching pass (most recently applied) is preferred by the attribution
-        // lookup in attribute_verifier_failure().
-        let mut attribution = Vec::new();
-        for pr in &pass_results {
-            if pr.sites_applied > 0 {
-                attribution.push(TransformAttribution {
-                    pc_range: 0..program.insns.len(),
-                    pass_name: pr.pass_name.clone(),
-                });
-            }
         }
 
         Ok(PipelineResult {
@@ -816,6 +812,7 @@ impl PassManager {
         cache: &mut AnalysisCache,
         ctx: &PassContext,
         debug_traces: &mut Vec<PassDebugTrace>,
+        attribution: &mut Vec<TransformAttribution>,
     ) -> anyhow::Result<PassResult> {
         for analysis_name in pass.required_analyses() {
             if let Some(analysis) = self.analyses.registry.get(analysis_name) {
@@ -823,17 +820,24 @@ impl PassManager {
             }
         }
 
+        let before_insns = program.insns.clone();
         let insns_before = program.insns.len();
-        let before_dump = dump_bytecode_compact(&program.insns);
         let mut result = pass.run(program, cache, ctx)?;
         result.insns_before = insns_before;
         result.insns_after = program.insns.len();
 
         if result.changed {
+            let changed_ranges = changed_pc_ranges(&before_insns, &program.insns);
+            if !changed_ranges.is_empty() {
+                attribution.push(TransformAttribution {
+                    pass_name: result.pass_name.clone(),
+                    pc_ranges: changed_ranges,
+                });
+            }
             debug_traces.push(PassDebugTrace {
                 pass_name: result.pass_name.clone(),
                 changed: true,
-                bytecode_before: Some(before_dump),
+                bytecode_before: Some(dump_bytecode_compact(&before_insns)),
                 bytecode_after: Some(dump_bytecode_compact(&program.insns)),
             });
             cache.invalidate_all();
@@ -851,20 +855,151 @@ impl PassManager {
     }
 }
 
-fn pass_allowed(pass: &dyn BpfPass, ctx: &PassContext) -> bool {
+fn pass_allowed(
+    pass: &dyn BpfPass,
+    ctx: &PassContext,
+    available_passes: &HashSet<&str>,
+) -> anyhow::Result<bool> {
+    validate_policy_pass_names("enabled_passes", &ctx.policy.enabled_passes, available_passes)?;
+    validate_policy_pass_names(
+        "disabled_passes",
+        &ctx.policy.disabled_passes,
+        available_passes,
+    )?;
+
     if !ctx.policy.disabled_passes.is_empty()
         && ctx
             .policy
             .disabled_passes
             .contains(&pass.name().to_string())
     {
-        return false;
+        return Ok(false);
     }
 
-    ctx.policy
+    Ok(ctx
+        .policy
         .enabled_passes
         .iter()
-        .any(|name| name == pass.name())
+        .any(|name| name == pass.name()))
+}
+
+fn validate_policy_pass_names(
+    field: &str,
+    configured: &[String],
+    available_passes: &HashSet<&str>,
+) -> anyhow::Result<()> {
+    let mut unknown = configured
+        .iter()
+        .filter(|name| !available_passes.contains(name.as_str()))
+        .cloned()
+        .collect::<Vec<_>>();
+    unknown.sort();
+    unknown.dedup();
+    if unknown.is_empty() {
+        return Ok(());
+    }
+    anyhow::bail!("invalid {field}: unknown pass name(s): {}", unknown.join(", "));
+}
+
+fn changed_pc_ranges(before: &[BpfInsn], after: &[BpfInsn]) -> Vec<std::ops::Range<usize>> {
+    let unchanged = unchanged_after_pcs(before, after);
+    let mut ranges = Vec::new();
+    let mut start = None;
+
+    for (pc, is_unchanged) in unchanged.into_iter().enumerate() {
+        match (start, is_unchanged) {
+            (None, false) => start = Some(pc),
+            (Some(from), true) => {
+                ranges.push(from..pc);
+                start = None;
+            }
+            _ => {}
+        }
+    }
+
+    if let Some(from) = start {
+        ranges.push(from..after.len());
+    }
+
+    ranges
+}
+
+fn unchanged_after_pcs(before: &[BpfInsn], after: &[BpfInsn]) -> Vec<bool> {
+    let before_tokens = occurrence_tokens(before);
+    let after_tokens = occurrence_tokens(after);
+    let before_positions = before_tokens
+        .into_iter()
+        .enumerate()
+        .map(|(pc, token)| (token, pc))
+        .collect::<HashMap<_, _>>();
+    let matches = after_tokens
+        .into_iter()
+        .enumerate()
+        .filter_map(|(after_pc, token)| {
+            before_positions
+                .get(&token)
+                .copied()
+                .map(|before_pc| (after_pc, before_pc))
+        })
+        .collect::<Vec<_>>();
+    let mut unchanged = vec![false; after.len()];
+
+    for match_idx in longest_increasing_subsequence_positions(
+        &matches
+            .iter()
+            .map(|(_, before_pc)| *before_pc)
+            .collect::<Vec<_>>(),
+    ) {
+        unchanged[matches[match_idx].0] = true;
+    }
+
+    unchanged
+}
+
+fn occurrence_tokens(insns: &[BpfInsn]) -> Vec<(BpfInsn, usize)> {
+    let mut seen = HashMap::new();
+
+    insns
+        .iter()
+        .copied()
+        .map(|insn| {
+            let ordinal = seen.entry(insn).or_insert(0usize);
+            *ordinal += 1;
+            (insn, *ordinal)
+        })
+        .collect()
+}
+
+fn longest_increasing_subsequence_positions(values: &[usize]) -> Vec<usize> {
+    if values.is_empty() {
+        return Vec::new();
+    }
+
+    let mut tails: Vec<usize> = Vec::new();
+    let mut prev = vec![None; values.len()];
+
+    for (idx, value) in values.iter().copied().enumerate() {
+        let pos = match tails.binary_search_by(|tail_idx| values[*tail_idx].cmp(&value)) {
+            Ok(pos) | Err(pos) => pos,
+        };
+        if pos > 0 {
+            prev[idx] = Some(tails[pos - 1]);
+        }
+        if pos == tails.len() {
+            tails.push(idx);
+        } else {
+            tails[pos] = idx;
+        }
+    }
+
+    let mut lis = Vec::with_capacity(tails.len());
+    let mut current = tails.last().copied();
+    while let Some(idx) = current {
+        lis.push(idx);
+        current = prev[idx];
+    }
+    lis.reverse();
+    lis
 }
 
 // ── Helper: default PassContext for testing ──────────────────────────
@@ -873,7 +1008,7 @@ impl PassContext {
     /// Create a minimal PassContext suitable for testing.
     /// All kinsn targets unavailable (btf_id = -1), no special CPU features.
     #[cfg(test)]
-        pub fn test_default() -> Self {
+    pub fn test_default() -> Self {
         Self {
             kinsn_registry: KinsnRegistry {
                 rotate64_btf_id: -1,
@@ -913,11 +1048,7 @@ mod tests {
 
     fn ctx_for_pass_manager(pm: &PassManager) -> PassContext {
         let mut ctx = PassContext::test_default();
-        ctx.policy.enabled_passes = pm
-            .pass_names()
-            .into_iter()
-            .map(str::to_string)
-            .collect();
+        ctx.policy.enabled_passes = pm.pass_names().into_iter().map(str::to_string).collect();
         ctx
     }
 
@@ -1893,6 +2024,7 @@ mod tests {
             "attribution should be populated after transform"
         );
         assert_eq!(result.attribution[0].pass_name, "append_nop");
+        assert_eq!(result.attribution[0].pc_ranges, vec![1..2]);
     }
 
     #[test]
@@ -1932,6 +2064,8 @@ mod tests {
             .collect();
         assert!(names.contains(&"rewrite_mov_imm"));
         assert!(names.contains(&"append_nop"));
+        assert_eq!(result.attribution[0].pc_ranges, vec![0..1]);
+        assert_eq!(result.attribution[1].pc_ranges, vec![2..3]);
     }
 
     #[test]
@@ -1950,6 +2084,7 @@ mod tests {
         // Only append_nop should appear in attribution.
         assert_eq!(result.attribution.len(), 1);
         assert_eq!(result.attribution[0].pass_name, "append_nop");
+        assert_eq!(result.attribution[0].pc_ranges, vec![2..3]);
     }
 
     #[test]
@@ -1987,10 +2122,28 @@ mod tests {
         let result2 = pm.run(&mut prog2, &ctx2).unwrap();
         assert_eq!(result2.attribution.len(), 1);
         assert_eq!(result2.attribution[0].pass_name, "append_nop");
+        assert_eq!(result2.attribution[0].pc_ranges, vec![2..3]);
         // The MOV immediate should NOT be rewritten.
         assert_eq!(prog2.insns[0].imm, 42);
         // But NOP should still be appended.
         assert_eq!(prog2.insns.len(), 3);
+    }
+
+    #[test]
+    fn test_invalid_policy_pass_name_is_rejected() {
+        let mut pm = PassManager::new();
+        pm.add_pass(AppendNopPass);
+
+        let mut prog = make_program(vec![exit_insn()]);
+        let mut ctx = ctx_for_pass_manager(&pm);
+        ctx.policy.disabled_passes = vec!["bulk_mem".into()];
+
+        let err = pm
+            .run(&mut prog, &ctx)
+            .expect_err("legacy aliases should be rejected");
+
+        assert!(err.to_string().contains("invalid disabled_passes"));
+        assert!(err.to_string().contains("unknown pass name(s): bulk_mem"));
     }
 
     #[test]

@@ -131,12 +131,12 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 同一框架支持四种用途：
 
-| 用途 | 说明 |
-|------|------|
-| **性能优化** | wide load 合并、rotate、cmov、硬件特化 lowering、PGO、const propagation |
-| **安全加固** | 插入 bounds check、speculation barrier、收紧权限、Spectre 缓解注入 |
-| **恶意程序阻断** | 检测恶意 BPF prog → 替换为 no-op/安全版本 → 在线热修复，危险 helper 防火墙 |
-| **运行时可观测** | 给 hot path 插入 tracing，不改应用代码 |
+| 用途 | 说明 | OSDI 评估 |
+|------|------|:---:|
+| **性能优化** | wide load 合并、rotate、cmov、硬件特化 lowering、PGO、const propagation、map inlining | ✅ 主线 |
+| **安全加固** | 插入 bounds check、speculation barrier、收紧权限、Spectre 缓解注入 | ⏸ future work |
+| **恶意程序阻断** | 检测恶意 BPF prog → 替换为 no-op/安全版本 → 在线热修复，危险 helper 防火墙 | ⏸ future work |
+| **运行时可观测** | 给 hot path 插入 tracing，不改应用代码 | ⏸ future work |
 
 ### 1.10 Why Userspace and kernel module (详细理由)
 
@@ -217,15 +217,17 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **Tail-call specialization** | 否 | ✅ 调研完成 | **Phase 1**：dynamic-key monomorphic PIC（guarded constant-key fast path），复用 kernel `map_poke_run()`。**Kernel blocker**：`poke_tab` shape check 需放宽 | **537 sites / 31 对象(5.46%)；Cilium 216、Tetragon 118、Tracee 49；upstream 已有 constant-key direct jump → 论文新意在 dynamic-key PIC；break-even 命中率 ~8%**。调研：`tail_call_specialization_research_20260326.md` |
 | **Spill/fill 消除** | 否 | ❌ 不做 | 冗余 spill/fill 消除 | **内核已有 KF_FASTCALL，增量收益低** |
 
-### 3.2 安全加固变换
+### 3.2 安全加固变换（暂不在 OSDI 评估范围）
 
-| 变换 | 状态 | 说明 | Corpus 证据（2026-03-24） |
-|------|:---:|------|------|
-| **Spectre 缓解注入** | ✅ 已实现 | 在缺少 speculation barrier 的位置插入 lfence kinsn | SpeculationBarrierPass + bpf_barrier kinsn |
-| **LFENCE/BPF_NOSPEC 消除** | ⏸ 降优先级 | daemon 重构 bytecode 使 speculative path 安全 → verifier 不再插 barrier | **corpus 861 程序实测 BPF_ST_NOSPEC = 0**。设计保留：`lfence_nospec_elimination_design_20260324.md` |
-| **危险 helper 防火墙** | ✅ 已实现 | 分级策略：P0 `send_signal`/`send_signal_thread`/`override_return` fail-closed（`r0=-EPERM`）；P1 `ktime_get_ns` coarseify；`probe_read_kernel` audit-only | **91034 helper 调用 / 568 对象；严格危险集 26925 调用(29.6%) / 155 对象(27.3%)；权限提升类仅 10 次调用(send_signal 7 + override_return 3)；Tracee+KubeArmor 占 91.6%**。实现：`dangerous_helper_firewall_design_20260326.md` / `dangerous_helper_firewall_impl_report_20260326.md` |
-| **BPF 程序漏洞热修复** | ✅ 已实现 | 不修 verifier，对已加载字节码做 null-guard / helper 参数净化 / packet pointer refresh / tail-call isolation，并要求补丁后重新过 verifier | **45+ verifier CVE 中 31 个(G1)适合热补丁，13 个高可行性（nullability/helper contract/packet pointer 刷新）；信任模型：补丁绕开缺陷 verifier 规则 + re-verify**。设计/实现/评审：`live_patch_pass_design_20260326.md` / `live_patch_impl_report_20260326.md` / `live_patch_review_report_20260326.md` |
-| **权限收紧** | ✅ 调研完成 | D(部署声明)⊇S(静态包络)⊇N(可安全收紧)⊇O(观测 live)。BpfReJIT 补上 BPF token 只收紧"未来加载"的缺口 | **157 源文件中 0 个使用高风险 helper，但 systemd/Tracee/bcc 容器以 privileged/CAP_SYS_ADMIN 部署；过权在部署层面非字节码层面；不能仅凭 live 观测删除 helper**。调研：`privilege_narrowing_research_20260326.md` |
+> **2026-03-28 决定**：安全相关 pass（speculation_barrier、dangerous_helper_firewall、live_patch、权限收紧）暂不纳入当前评估和 benchmark pipeline。代码保留在 daemon 中供 future work 引用，但不在默认 pipeline 中启用，也不在 benchmark_config.yaml 中配置。
+
+| 变换 | 状态 | 说明 |
+|------|:---:|------|
+| **Spectre 缓解注入** | ⏸ 暂不评估 | SpeculationBarrierPass + bpf_barrier kinsn。代码保留 |
+| **LFENCE/BPF_NOSPEC 消除** | ⏸ 暂不评估 | corpus 861 程序实测 BPF_ST_NOSPEC = 0 |
+| **危险 helper 防火墙** | ⏸ 暂不评估 | DangerousHelperFirewallPass。代码保留 |
+| **BPF 程序漏洞热修复** | ⏸ 暂不评估 | LivePatchPass。代码保留 |
+| **权限收紧** | ⏸ 暂不评估 | 调研完成，过权在部署层面非字节码层面 |
 
 ### 3.3 不在范围内
 

@@ -154,19 +154,6 @@ pub fn validate_pass_names(names: &[String]) -> Result<()> {
     resolve_requested_passes(names).map(|_| ())
 }
 
-pub fn selected_pass_names(names: Option<&[String]>) -> Result<Vec<String>> {
-    match names {
-        Some(names) => Ok(resolve_requested_passes(names)?
-            .into_iter()
-            .map(|entry| entry.name.to_string())
-            .collect()),
-        None => Ok(PASS_REGISTRY
-            .iter()
-            .map(|entry| entry.name.to_string())
-            .collect()),
-    }
-}
-
 /// Register standard analyses into a PassManager.
 fn register_standard_analyses(pm: &mut PassManager) {
     pm.register_analysis(BranchTargetAnalysis);
@@ -187,20 +174,10 @@ pub fn build_full_pipeline() -> PassManager {
     pm
 }
 
-pub fn build_pipeline_for_profile(profile: crate::pass::PipelineProfile) -> PassManager {
-    match profile {
-        crate::pass::PipelineProfile::Default => build_full_pipeline(),
-        crate::pass::PipelineProfile::MapInlineOnly => {
-            build_custom_pipeline(&["map_inline".to_string()])
-                .expect("map_inline-only pipeline should always be valid")
-        }
-    }
-}
-
 /// Build a pipeline containing only the named passes, in canonical order.
 ///
-/// Pass names are matched against `PASS_REGISTRY` entries by canonical name
-/// and legacy aliases. Unknown names are rejected.
+/// Pass names are matched against `PASS_REGISTRY` entries by canonical name.
+/// Unknown names are rejected.
 pub fn build_custom_pipeline(names: &[String]) -> Result<PassManager> {
     let mut pm = PassManager::new();
     register_standard_analyses(&mut pm);
@@ -431,7 +408,8 @@ mod tests {
 
     #[test]
     fn test_map_inline_only_pipeline_contains_only_map_inline() {
-        let pm = build_pipeline_for_profile(crate::pass::PipelineProfile::MapInlineOnly);
+        let pm = build_custom_pipeline(&["map_inline".to_string()])
+            .expect("custom pipeline should build");
 
         assert_eq!(pm.pass_names(), vec!["map_inline"]);
     }
@@ -462,11 +440,13 @@ mod tests {
     }
 
     #[test]
-    fn test_selected_pass_names_reject_aliases() {
-        let err = selected_pass_names(Some(&["skb_load_bytes".to_string()]))
+    fn test_validate_pass_names_reject_aliases() {
+        let err = validate_pass_names(&["skb_load_bytes".to_string()])
             .expect_err("legacy alias should be rejected");
 
-        assert!(err.to_string().contains("unknown pass name(s): skb_load_bytes"));
+        assert!(err
+            .to_string()
+            .contains("unknown pass name(s): skb_load_bytes"));
     }
 
     #[test]
@@ -1257,12 +1237,10 @@ mod real_bpfo_tests {
             pass.sites_skipped
         );
         assert!(
-            pass.sites_skipped
-                .iter()
-                .any(|skip| {
-                    skip.reason
-                        == "lookup key is not a constant stack or pseudo-map-value materialization"
-                }),
+            pass.sites_skipped.iter().any(|skip| {
+                skip.reason
+                    == "lookup key is not a constant stack or pseudo-map-value materialization"
+            }),
             "expected dynamic-key skip on {}:{}; skipped={:?}",
             loaded.object_path.display(),
             loaded.section_name,
@@ -1698,5 +1676,4 @@ mod real_bpfo_tests {
         true,
         false
     );
-
 }

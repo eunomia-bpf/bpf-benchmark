@@ -108,6 +108,7 @@ impl BpfPass for ConstPropPass {
         addr_map[orig_len] = new_insns.len();
 
         super::utils::fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
+        fixup_folded_jumps(&mut new_insns, &program.insns, &addr_map, &replacements);
         for old_pc in nop_pcs {
             let new_pc = addr_map[old_pc];
             if new_pc < new_insns.len() {
@@ -516,6 +517,43 @@ fn replacement_if_changed(
     (original != candidate).then(|| candidate.to_vec())
 }
 
+fn fixup_folded_jumps(
+    new_insns: &mut [BpfInsn],
+    old_insns: &[BpfInsn],
+    addr_map: &[usize],
+    replacements: &BTreeMap<usize, Vec<BpfInsn>>,
+) {
+    for (&old_pc, replacement) in replacements {
+        let old_insn = &old_insns[old_pc];
+        if !old_insn.is_cond_jmp() {
+            continue;
+        }
+
+        let Some(new_branch) = replacement.first() else {
+            continue;
+        };
+        if !new_branch.is_ja() || new_branch.off == 0 {
+            continue;
+        }
+
+        let old_target = old_pc as i64 + 1 + old_insn.off as i64;
+        if !(0..=old_insns.len() as i64).contains(&old_target) {
+            continue;
+        }
+
+        let new_pc = addr_map[old_pc];
+        if new_pc >= new_insns.len() || !new_insns[new_pc].is_ja() {
+            continue;
+        }
+
+        let new_target = addr_map[old_target as usize];
+        let new_off = new_target as i64 - (new_pc as i64 + 1);
+        if let Ok(new_off) = i16::try_from(new_off) {
+            new_insns[new_pc].off = new_off;
+        }
+    }
+}
+
 fn insn_width(insn: &BpfInsn) -> usize {
     if insn.is_ldimm64() {
         2
@@ -742,6 +780,26 @@ mod tests {
                 exit_insn(),
             ]
         );
+    }
+
+    #[test]
+    fn const_prop_fixups_folded_jump_after_ldimm64_growth() {
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::mov64_imm(2, 7),
+            jeq_imm(2, 7, 2),
+            BpfInsn::mov64_imm(1, 1),
+            BpfInsn::alu64_imm(BPF_LSH, 1, 40),
+            exit_insn(),
+        ]);
+
+        let result = run_const_prop_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 2);
+        assert_eq!(program.insns[1], BpfInsn::ja(3));
+        assert!(program.insns[3].is_ldimm64());
+        assert_eq!(1usize + 1 + program.insns[1].off as usize, 5);
+        assert_eq!(program.insns[5], exit_insn());
     }
 
     #[test]

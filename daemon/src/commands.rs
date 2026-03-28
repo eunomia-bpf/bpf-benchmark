@@ -322,12 +322,15 @@ fn attribute_verifier_failure(
 ) -> Option<String> {
     let failed_pc = verifier_log::extract_failure_pc(verifier_log_text)?;
 
-    // Find the pass whose PC range contains the failure PC.
-    // If multiple passes cover the same PC (conservative attribution), pick the
-    // last one (most recently applied — most likely the cause).
+    // If multiple passes touch the same PC, pick the last one (most recently
+    // applied).
     let mut candidate: Option<&str> = None;
     for attr in attribution {
-        if attr.pc_range.contains(&failed_pc) {
+        if attr
+            .pc_ranges
+            .iter()
+            .any(|range| range.contains(&failed_pc))
+        {
             candidate = Some(&attr.pass_name);
         }
     }
@@ -447,6 +450,7 @@ pub(crate) fn cmd_enumerate(ctx: &pass::PassContext) -> Result<()> {
     println!("{}", "-".repeat(60));
 
     for prog_id in bpf::iter_prog_ids() {
+        let prog_id = prog_id?;
         match enumerate_one(prog_id, ctx) {
             Ok(()) => {}
             Err(e) => {
@@ -471,7 +475,10 @@ fn enumerate_one(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
     // Run the pipeline in dry-run mode to count sites.
     let site_summary = if !orig_insns.is_empty() {
         let mut program = pass::BpfProgram::new(orig_insns);
-        program.set_map_ids(bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default());
+        program.set_map_ids(
+            bpf::bpf_prog_get_map_ids(fd.as_raw_fd())
+                .context("fetch program map IDs for enumerate")?,
+        );
         let pm = build_pipeline();
 
         match pm.run(&mut program, ctx) {
@@ -518,7 +525,9 @@ pub(crate) fn cmd_rewrite(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
 
     let mut program = pass::BpfProgram::new(orig_insns.clone());
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
-    program.set_map_ids(bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default());
+    program.set_map_ids(
+        bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).context("fetch program map IDs for rewrite")?,
+    );
     let pm = build_pipeline();
 
     let mut local_ctx = ctx.clone();
@@ -580,6 +589,7 @@ pub(crate) fn cmd_apply_all(ctx: &pass::PassContext, rollback_enabled: bool) -> 
     let mut errors = 0u32;
 
     for prog_id in bpf::iter_prog_ids() {
+        let prog_id = prog_id?;
         total += 1;
         match try_apply_one(prog_id, ctx, rollback_enabled, None) {
             Ok(result) => {
@@ -780,7 +790,8 @@ pub(crate) fn try_apply_one(
     }
 
     // Fetch map IDs for FD relocation before REJIT.
-    let map_ids = bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default();
+    let map_ids =
+        bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).context("fetch program map IDs for apply")?;
     let original_verifier_states = {
         let mut seed_program = pass::BpfProgram::new(orig_insns.clone());
         maybe_attach_original_verifier_states(
@@ -833,14 +844,7 @@ pub(crate) fn try_apply_one(
                 &map_ids,
                 &program.map_fd_bindings,
             )
-            .unwrap_or_else(|e| {
-                eprintln!("    warning: map FD relocation failed: {:#}", e);
-                push_debug_warning(
-                    &mut attempt_debug,
-                    format!("map FD relocation failed before identity REJIT: {e:#}"),
-                );
-                Vec::new()
-            });
+            .context("relocate map FDs before identity REJIT")?;
 
             if let Some(debug) = attempt_debug.as_mut() {
                 debug.pre_rejit_bytecode = Some(insn::dump_bytecode_compact(&restore_insns));
@@ -908,14 +912,7 @@ pub(crate) fn try_apply_one(
             &map_ids,
             &program.map_fd_bindings,
         )
-        .unwrap_or_else(|e| {
-            eprintln!("    warning: map FD relocation failed: {:#}", e);
-            push_debug_warning(
-                &mut attempt_debug,
-                format!("map FD relocation failed before REJIT: {e:#}"),
-            );
-            Vec::new()
-        });
+        .context("relocate map FDs before REJIT")?;
 
         if let Some(debug) = attempt_debug.as_mut() {
             debug.pre_rejit_bytecode = Some(insn::dump_bytecode_compact(&program.insns));
@@ -1573,11 +1570,11 @@ mod tests {
         let attribution = vec![
             pass::TransformAttribution {
                 pass_name: "wide_mem".to_string(),
-                pc_range: 10..20,
+                pc_ranges: vec![10..20],
             },
             pass::TransformAttribution {
                 pass_name: "rotate".to_string(),
-                pc_range: 30..40,
+                pc_ranges: vec![30..40],
             },
         ];
 
@@ -1626,11 +1623,11 @@ R1 type=scalar expected=fp
         let attribution = vec![
             pass::TransformAttribution {
                 pass_name: "wide_mem".to_string(),
-                pc_range: 10..30,
+                pc_ranges: vec![10..30],
             },
             pass::TransformAttribution {
                 pass_name: "rotate".to_string(),
-                pc_range: 20..40,
+                pc_ranges: vec![20..40],
             },
         ];
 
@@ -1785,6 +1782,7 @@ processed 26 insns (limit 1000000) max_states_per_insn 1 total_states 3 peak_sta
 
         // Find a program to try applying to.
         for prog_id in bpf::iter_prog_ids().take(50) {
+            let prog_id = prog_id.expect("program enumeration should succeed");
             let result = try_apply_one(prog_id, &ctx, true, None);
             match result {
                 Ok(opt_result) => {

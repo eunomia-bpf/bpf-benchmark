@@ -197,10 +197,14 @@ fn process_request(
     ) -> std::result::Result<pass::PassContext, String> {
         let mut local_ctx = base_ctx.clone();
         if let Some(enabled_passes) = parse_request_pass_list(req, "enabled_passes")? {
+            crate::passes::validate_pass_names(&enabled_passes)
+                .map_err(|err| format!("invalid enabled_passes: {err}"))?;
             local_ctx.policy.enabled_passes = enabled_passes;
         }
-        if req.get("disabled_passes").is_some() {
-            return Err("disabled_passes is not supported; use enabled_passes".to_string());
+        if let Some(disabled_passes) = parse_request_pass_list(req, "disabled_passes")? {
+            crate::passes::validate_pass_names(&disabled_passes)
+                .map_err(|err| format!("invalid disabled_passes: {err}"))?;
+            local_ctx.policy.disabled_passes = disabled_passes;
         }
         Ok(local_ctx)
     }
@@ -237,6 +241,15 @@ fn process_request(
             let mut errors = 0u32;
             let mut total = 0u32;
             for prog_id in bpf::iter_prog_ids() {
+                let prog_id = match prog_id {
+                    Ok(prog_id) => prog_id,
+                    Err(err) => {
+                        return serde_json::json!({
+                            "status": "error",
+                            "message": format!("failed to enumerate program IDs: {:#}", err),
+                        });
+                    }
+                };
                 total += 1;
                 match commands::try_apply_one(prog_id, &local_ctx, rollback_enabled, Some(tracker))
                 {
@@ -303,7 +316,7 @@ pub(crate) fn cmd_watch(
         }
 
         round += 1;
-        let ids: Vec<u32> = bpf::iter_prog_ids().collect();
+        let ids: Vec<u32> = bpf::iter_prog_ids().collect::<Result<Vec<_>>>()?;
         let total = ids.len();
 
         // Candidates: not yet optimized, not permanently no-op, and not exhausted retries.
@@ -485,11 +498,14 @@ mod tests {
     #[test]
     fn panic_payload_message_handles_unknown_payloads() {
         let payload: Box<dyn std::any::Any + Send> = Box::new(42usize);
-        assert_eq!(panic_payload_message(payload.as_ref()), "non-string panic payload");
+        assert_eq!(
+            panic_payload_message(payload.as_ref()),
+            "non-string panic payload"
+        );
     }
 
     #[test]
-    fn process_request_rejects_external_disabled_passes() {
+    fn process_request_accepts_valid_disabled_passes() {
         let req = serde_json::json!({
             "cmd": "status",
             "disabled_passes": ["map_inline"],
@@ -497,10 +513,38 @@ mod tests {
         let tracker = commands::new_invalidation_tracker();
         let response = process_request(&req, &pass::PassContext::test_default(), true, &tracker);
 
+        assert_eq!(response["status"], "ok");
+    }
+
+    #[test]
+    fn process_request_rejects_unknown_enabled_passes() {
+        let req = serde_json::json!({
+            "cmd": "status",
+            "enabled_passes": ["skb_load_bytes"],
+        });
+        let tracker = commands::new_invalidation_tracker();
+        let response = process_request(&req, &pass::PassContext::test_default(), true, &tracker);
+
         assert_eq!(response["status"], "error");
         assert_eq!(
             response["message"],
-            "disabled_passes is not supported; use enabled_passes"
+            "invalid enabled_passes: unknown pass name(s): skb_load_bytes"
+        );
+    }
+
+    #[test]
+    fn process_request_rejects_unknown_disabled_passes() {
+        let req = serde_json::json!({
+            "cmd": "status",
+            "disabled_passes": ["bulk_mem"],
+        });
+        let tracker = commands::new_invalidation_tracker();
+        let response = process_request(&req, &pass::PassContext::test_default(), true, &tracker);
+
+        assert_eq!(response["status"], "error");
+        assert_eq!(
+            response["message"],
+            "invalid disabled_passes: unknown pass name(s): bulk_mem"
         );
     }
 }

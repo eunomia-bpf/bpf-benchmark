@@ -301,8 +301,7 @@ pub fn assert_valid_bpf(program: &BpfProgram) {
                 pc
             );
             assert_eq!(
-                insn.off,
-                0,
+                insn.off, 0,
                 "helper call at pc {} uses non-zero off reserved field",
                 pc
             );

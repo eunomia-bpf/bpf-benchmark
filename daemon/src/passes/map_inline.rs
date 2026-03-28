@@ -500,11 +500,7 @@ fn find_constant_stack_bytes_with_limit(
                 .into_iter()
                 .map(|byte| byte.unwrap_or(0))
                 .collect::<Vec<_>>();
-            return Ok((
-                latest_store_pc.unwrap_or(pc),
-                latest_source_imm_pc,
-                bytes,
-            ));
+            return Ok((latest_store_pc.unwrap_or(pc), latest_source_imm_pc, bytes));
         }
 
         cursor = pc;
@@ -535,7 +531,10 @@ fn constant_stack_store_bytes(
         let resolved = resolve_constant_reg_value(insns, store_pc, insn.src_reg(), bounds)?;
         truncate_value(resolved.value, width)
     } else {
-        return Err(format!("instruction at pc {} is not a stack store", store_pc));
+        return Err(format!(
+            "instruction at pc {} is not a stack store",
+            store_pc
+        ));
     };
 
     Ok(value.to_le_bytes()[..usize::from(width)].to_vec())
@@ -551,7 +550,10 @@ fn constant_stack_store_source_pc(
         return Ok(None);
     }
     if bpf_class(insn.code) != BPF_STX {
-        return Err(format!("instruction at pc {} is not a stack store", store_pc));
+        return Err(format!(
+            "instruction at pc {} is not a stack store",
+            store_pc
+        ));
     }
     Ok(resolve_constant_reg_value(insns, store_pc, insn.src_reg(), bounds)?.source_pc)
 }
@@ -729,7 +731,9 @@ fn run_map_inline_round(
     use_verifier_guided_keys: bool,
 ) -> anyhow::Result<PassResult> {
     let bt = analyses.get(&BranchTargetAnalysis, program);
-    let map_info = analyses.get(&MapInfoAnalysis, program);
+    let map_info = analyses
+        .get(&MapInfoAnalysis, program)
+        .map_err(anyhow::Error::msg)?;
     let mut skipped = Vec::new();
     let mut rewrites = Vec::new();
     let mut diagnostics = Vec::new();
@@ -824,8 +828,7 @@ fn run_map_inline_round(
                     &mut skipped,
                     &mut diagnostics,
                     site.call_pc,
-                    "lookup key is not a constant stack or pseudo-map-value materialization"
-                        .into(),
+                    "lookup key is not a constant stack or pseudo-map-value materialization".into(),
                     Some(format!("site at PC={}: {}", site.call_pc, detail)),
                 );
                 continue;
@@ -1138,14 +1141,14 @@ fn extract_site_constant_key(
                         ));
                         return Ok(key);
                     }
-                    Err(scan_err) => match try_extract_constant_key_from_map_value(program, call_pc, info)
-                    {
-                        Ok(key) => {
-                            log_map_inline_debug(&format!(
+                    Err(scan_err) => {
+                        match try_extract_constant_key_from_map_value(program, call_pc, info) {
+                            Ok(key) => {
+                                log_map_inline_debug(&format!(
                                 "site at PC={}: pseudo-map-value key after verifier-guided miss={} and backward-scan miss={}",
                                 call_pc, verifier_err, scan_err
                             ));
-                            log_map_inline_debug(&format!(
+                                log_map_inline_debug(&format!(
                                 "site at PC={}: extracted pseudo-map-value key={} width={} store_pc={} source_imm_pc={:?}",
                                 call_pc,
                                 format_constant_key(&key),
@@ -1153,19 +1156,20 @@ fn extract_site_constant_key(
                                 key.store_pc,
                                 key.source_imm_pc
                             ));
-                            return Ok(key);
-                        }
-                        Err(map_value_err) => {
-                            log_map_inline_debug(&format!(
+                                return Ok(key);
+                            }
+                            Err(map_value_err) => {
+                                log_map_inline_debug(&format!(
                                 "site pc={} skip: verifier-guided={} fallback={} pseudo-map-value={}",
                                 call_pc, verifier_err, scan_err, map_value_err
                             ));
-                            return Err(format!(
+                                return Err(format!(
                                 "verifier-guided key extraction failed: {}; fallback scan failed: {}; pseudo-map-value fallback failed: {}",
                                 verifier_err, scan_err, map_value_err
                             ));
+                            }
                         }
-                    },
+                    }
                 }
             }
         }
@@ -2395,9 +2399,14 @@ fn resolve_stack_store_slot(
     if !(insn.class() == BPF_ST || insn.class() == BPF_STX) {
         return None;
     }
-    let base_stack_off =
-        resolve_stack_pointer_to_stack_inner(insns, pc, insn.dst_reg(), bounds, REG_RESOLUTION_LIMIT)
-            .ok()?;
+    let base_stack_off = resolve_stack_pointer_to_stack_inner(
+        insns,
+        pc,
+        insn.dst_reg(),
+        bounds,
+        REG_RESOLUTION_LIMIT,
+    )
+    .ok()?;
     let stack_off = i32::from(base_stack_off) + i32::from(insn.off);
     let stack_off = i16::try_from(stack_off).ok()?;
     Some((stack_off, width))
@@ -2412,14 +2421,23 @@ fn resolve_stack_load_slot(
     if insn.class() != BPF_LDX || bpf_mode(insn.code) != BPF_MEM || bpf_size(insn.code) != BPF_DW {
         return None;
     }
-    let base_stack_off =
-        resolve_stack_pointer_to_stack_inner(insns, pc, insn.src_reg(), bounds, REG_RESOLUTION_LIMIT)
-            .ok()?;
+    let base_stack_off = resolve_stack_pointer_to_stack_inner(
+        insns,
+        pc,
+        insn.src_reg(),
+        bounds,
+        REG_RESOLUTION_LIMIT,
+    )
+    .ok()?;
     let stack_off = i32::from(base_stack_off) + i32::from(insn.off);
     i16::try_from(stack_off).ok()
 }
 
-fn kill_overlapping_alias_stack_slots(alias_stack_slots: &mut HashSet<i16>, stack_off: i16, width: u8) {
+fn kill_overlapping_alias_stack_slots(
+    alias_stack_slots: &mut HashSet<i16>,
+    stack_off: i16,
+    width: u8,
+) {
     let store_start = i32::from(stack_off);
     let store_end = store_start + i32::from(width);
     alias_stack_slots.retain(|slot| {
@@ -2507,9 +2525,11 @@ fn null_check_removal_window_is_trivial(
     ) else {
         return false;
     };
-    let Some(mut pc) =
-        advance_to_non_null_path(null_check_pc, &program.insns[null_check_pc], program.insns.len())
-    else {
+    let Some(mut pc) = advance_to_non_null_path(
+        null_check_pc,
+        &program.insns[null_check_pc],
+        program.insns.len(),
+    ) else {
         return false;
     };
 
@@ -2888,7 +2908,8 @@ mod tests {
             .filter_map(|entry| entry.ok().map(|entry| entry.path()))
             .filter(|path| {
                 path.extension().and_then(|ext| ext.to_str()) == Some("o")
-                    && path.file_name()
+                    && path
+                        .file_name()
                         .and_then(|name| name.to_str())
                         .map(|name| name.ends_with(".bpf.o") && !name.ends_with(".tmp.o"))
                         .unwrap_or(false)
@@ -2986,7 +3007,10 @@ mod tests {
 
             println!(
                 "object={} pseudo_map_value_loads={} lookup_calls={} constant_key_calls={}",
-                object_path.file_name().and_then(|name| name.to_str()).unwrap_or("unknown"),
+                object_path
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .unwrap_or("unknown"),
                 object_pseudo_map_value_loads,
                 object_lookup_calls,
                 object_constant_key_calls
@@ -3126,7 +3150,10 @@ mod tests {
             "expected const_prop+dce to remove the conditional branch after pseudo-map-value constantization"
         );
         assert!(
-            !program.insns.iter().any(|insn| *insn == BpfInsn::mov64_imm(0, 0)),
+            !program
+                .insns
+                .iter()
+                .any(|insn| *insn == BpfInsn::mov64_imm(0, 0)),
             "expected dce to remove the dead false branch after pseudo-map-value constantization"
         );
     }
@@ -4602,15 +4629,12 @@ mod tests {
 
         assert!(!result.program_changed);
         assert_eq!(program.insns, original);
-        assert!(result.pass_results[0]
-            .sites_skipped
-            .iter()
-            .any(|skip| skip
+        assert!(result.pass_results[0].sites_skipped.iter().any(|skip| skip
+            .reason
+            .contains("mutable lookup result has non-load uses")
+            || skip
                 .reason
-                .contains("mutable lookup result has non-load uses")
-                || skip
-                    .reason
-                    .contains("mutable map value is written elsewhere in program")));
+                .contains("mutable map value is written elsewhere in program")));
     }
 
     #[test]
@@ -4645,12 +4669,9 @@ mod tests {
 
         assert!(!result.program_changed);
         assert_eq!(program.insns, original);
-        assert!(result.pass_results[0]
-            .sites_skipped
-            .iter()
-            .any(|skip| skip
-                .reason
-                .contains("mutable map value is written elsewhere in program")));
+        assert!(result.pass_results[0].sites_skipped.iter().any(|skip| skip
+            .reason
+            .contains("mutable map value is written elsewhere in program")));
     }
 
     #[test]
@@ -4687,7 +4708,11 @@ mod tests {
         assert!(result.program_changed);
         assert_eq!(result.total_sites_applied, 1);
         assert_eq!(
-            program.insns.iter().filter(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM).count(),
+            program
+                .insns
+                .iter()
+                .filter(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM)
+                .count(),
             1
         );
         assert!(program
@@ -4760,9 +4785,7 @@ mod tests {
         assert!(result.pass_results[0]
             .sites_skipped
             .iter()
-            .any(|skip| skip
-                .reason
-                .contains("fixed-offset scalar loads")));
+            .any(|skip| skip.reason.contains("fixed-offset scalar loads")));
     }
 
     #[test]
@@ -4793,9 +4816,7 @@ mod tests {
         assert!(result.pass_results[0]
             .sites_skipped
             .iter()
-            .any(|skip| skip
-                .reason
-                .contains("fixed-offset scalar loads")));
+            .any(|skip| skip.reason.contains("fixed-offset scalar loads")));
     }
 
     #[test]

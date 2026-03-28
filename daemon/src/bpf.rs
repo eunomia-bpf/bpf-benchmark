@@ -450,8 +450,8 @@ fn bpf_prog_get_images(fd: RawFd, request: ProgImageRequest) -> Result<BpfProgIm
 // ── Public API ──────────────────────────────────────────────────────
 
 /// Enumerate BPF program IDs starting from `start_id`.
-/// Returns `Ok(next_id)` or `Err` when no more programs remain (ENOENT).
-pub fn bpf_prog_get_next_id(start_id: u32) -> Result<u32> {
+/// Returns `Ok(None)` when no more programs remain (ENOENT).
+pub fn bpf_prog_get_next_id(start_id: u32) -> Result<Option<u32>> {
     let mut attr: AttrGetNextId = zeroed_attr();
     attr.start_id = start_id;
     let ret = unsafe {
@@ -462,9 +462,13 @@ pub fn bpf_prog_get_next_id(start_id: u32) -> Result<u32> {
         )
     };
     if ret < 0 {
-        bail!(bpf_err("BPF_PROG_GET_NEXT_ID"));
+        let err = std::io::Error::last_os_error();
+        if err.raw_os_error() == Some(libc::ENOENT) {
+            return Ok(None);
+        }
+        bail!("BPF_PROG_GET_NEXT_ID: {}", err);
     }
-    Ok(attr.next_id)
+    Ok(Some(attr.next_id))
 }
 
 /// Open a file descriptor for the BPF program with the given ID.
@@ -950,14 +954,12 @@ pub fn relocate_map_fds_with_bindings(
     let relocation_targets =
         resolve_map_ids_for_relocation(&unique_old_fds, map_ids, map_fd_bindings);
 
-    // Step 2: Verify we have enough map IDs.
-    if relocation_targets.len() < unique_old_fds.len() {
-        eprintln!(
-            "  relocate_map_fds: found {} unique FDs in bytecode but only {} map IDs in prog info",
+    if relocation_targets.len() != unique_old_fds.len() {
+        bail!(
+            "relocate_map_fds: found {} unique FDs in bytecode but only resolved {} map IDs",
             unique_old_fds.len(),
             relocation_targets.len()
         );
-        // Proceed with what we have, remaining will fail but this is better than failing all.
     }
 
     // Step 3: Open new FDs for each map ID and build old_fd -> new_fd mapping.
@@ -965,20 +967,15 @@ pub fn relocate_map_fds_with_bindings(
     let mut fd_map: HashMap<i32, i32> = HashMap::new();
 
     for (&old_fd, &map_id) in &relocation_targets {
-        match bpf_map_get_fd_by_id(map_id) {
-            Ok(new_fd) => {
-                let raw = new_fd.as_raw_fd();
-                fd_map.insert(old_fd, raw);
-                owned_fds.push(new_fd);
-            }
-            Err(e) => {
-                eprintln!(
-                    "  relocate_map_fds: failed to open map ID {} (old fd {}): {:#}",
-                    map_id, old_fd, e
-                );
-                // Skip this mapping; the REJIT will likely fail but we continue.
-            }
-        }
+        let new_fd = bpf_map_get_fd_by_id(map_id).with_context(|| {
+            format!(
+                "relocate_map_fds: open map ID {} for old fd {}",
+                map_id, old_fd
+            )
+        })?;
+        let raw = new_fd.as_raw_fd();
+        fd_map.insert(old_fd, raw);
+        owned_fds.push(new_fd);
     }
 
     // Step 4: Patch the bytecode.
@@ -1142,16 +1139,42 @@ pub fn bpf_prog_rejit_capture_verifier_log(
     run_rejit_once(prog_fd, insns, fd_array, 2, Some(&mut log_buf))
 }
 
-/// Iterate over all live BPF program IDs in the kernel.
-pub fn iter_prog_ids() -> impl Iterator<Item = u32> {
-    let mut id = 0u32;
-    std::iter::from_fn(move || match bpf_prog_get_next_id(id) {
-        Ok(next) => {
-            id = next;
-            Some(next)
+pub struct ProgIdIter {
+    next_id: u32,
+    done: bool,
+}
+
+impl Iterator for ProgIdIter {
+    type Item = Result<u32>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.done {
+            return None;
         }
-        Err(_) => None,
-    })
+
+        match bpf_prog_get_next_id(self.next_id) {
+            Ok(Some(next_id)) => {
+                self.next_id = next_id;
+                Some(Ok(next_id))
+            }
+            Ok(None) => {
+                self.done = true;
+                None
+            }
+            Err(err) => {
+                self.done = true;
+                Some(Err(err))
+            }
+        }
+    }
+}
+
+/// Iterate over all live BPF program IDs in the kernel.
+pub fn iter_prog_ids() -> ProgIdIter {
+    ProgIdIter {
+        next_id: 0,
+        done: false,
+    }
 }
 
 /// Convenience: get the original BPF instructions for a program by ID.
@@ -1187,18 +1210,16 @@ mod tests {
     }
 
     /// Verify relocate_map_fds correctly identifies map references via src_reg,
-    /// not dst_reg. With no map_ids to resolve, the function should detect the
-    /// map references but return empty (no FDs to open).
+    /// not dst_reg. Missing map IDs is now a hard error.
     #[test]
     fn test_relocate_map_fds_src_reg_extraction() {
         // Instruction with dst_reg=0, src_reg=BPF_PSEUDO_MAP_FD(1), imm=42 (old fd).
         let ld_pair = make_ld_imm64(0, BPF_PSEUDO_MAP_FD, 42, 0);
         let mut insns = vec![ld_pair[0], ld_pair[1]];
 
-        // No map_ids provided -> relocate_map_fds finds 1 unique FD but can't remap it.
-        // It should print a warning but not panic.
+        // No map_ids provided -> relocation must fail instead of silently continuing.
         let result = relocate_map_fds(&mut insns, &[]);
-        assert!(result.is_ok());
+        assert!(result.is_err());
         // Old FD remains unpatched since there are no map_ids.
         assert_eq!(insns[0].imm, 42);
     }
@@ -1241,9 +1262,7 @@ mod tests {
         let mut insns2 = vec![ld_pair[0], ld_pair[1]];
 
         let result2 = relocate_map_fds(&mut insns2, &[]);
-        assert!(result2.is_ok());
-        // Found 1 unique FD but no map_ids to remap -> warning printed, 0 FDs returned.
-        // The key thing is it DID detect the reference (unique_old_fds would have 1 entry).
+        assert!(result2.is_err());
     }
 
     #[test]
@@ -1270,7 +1289,7 @@ mod tests {
 
         // Should detect 1 map reference (src_reg=2 = BPF_PSEUDO_MAP_VALUE).
         let result = relocate_map_fds(&mut insns, &[]);
-        assert!(result.is_ok());
+        assert!(result.is_err());
         // imm unchanged since no map_ids to remap.
         assert_eq!(insns[0].imm, 55);
     }
@@ -1283,9 +1302,9 @@ mod tests {
         let ld3 = make_ld_imm64(3, BPF_PSEUDO_MAP_FD, 10, 0); // duplicate of first
         let mut insns = vec![ld1[0], ld1[1], ld2[0], ld2[1], ld3[0], ld3[1]];
 
-        // 2 unique old FDs (10 and 11), but no map_ids -> warning, no remapping.
+        // 2 unique old FDs (10 and 11), but no map_ids -> hard failure.
         let result = relocate_map_fds(&mut insns, &[]);
-        assert!(result.is_ok());
+        assert!(result.is_err());
     }
 
     #[test]
@@ -1971,6 +1990,7 @@ mod tests {
         // Load the first BPF program that has maps.
         let mut found_prog_with_maps = false;
         for prog_id in iter_prog_ids().take(200) {
+            let prog_id = prog_id.expect("program enumeration should succeed");
             let fd = match bpf_prog_get_fd_by_id(prog_id) {
                 Ok(f) => f,
                 Err(_) => continue,
@@ -2048,7 +2068,9 @@ mod tests {
             "bpf_prog_get_next_id(0) failed: {}",
             result.unwrap_err()
         );
-        let first_id = result.unwrap();
+        let first_id = result
+            .unwrap()
+            .expect("expected at least one loaded program");
         assert!(
             first_id > 0,
             "first prog ID should be > 0, got {}",
@@ -2059,7 +2081,10 @@ mod tests {
     #[test]
     #[ignore]
     fn test_iter_prog_ids_returns_some() {
-        let ids: Vec<u32> = iter_prog_ids().take(100).collect();
+        let ids: Vec<u32> = iter_prog_ids()
+            .take(100)
+            .collect::<Result<Vec<_>>>()
+            .expect("program enumeration should succeed");
         assert!(
             !ids.is_empty(),
             "iter_prog_ids() returned no programs (expected at least one)"
@@ -2079,7 +2104,9 @@ mod tests {
     #[ignore]
     fn test_bpf_prog_get_fd_and_info_smoke() {
         // Get the first program ID and open its fd, then get info.
-        let first_id = bpf_prog_get_next_id(0).expect("bpf_prog_get_next_id(0) failed");
+        let first_id = bpf_prog_get_next_id(0)
+            .expect("bpf_prog_get_next_id(0) failed")
+            .expect("expected at least one loaded program");
         let fd = bpf_prog_get_fd_by_id(first_id).expect("bpf_prog_get_fd_by_id failed");
         use std::os::unix::io::AsRawFd;
         let (info, _) = bpf_prog_get_info(fd.as_raw_fd(), false).expect("bpf_prog_get_info failed");

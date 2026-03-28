@@ -10,10 +10,6 @@ passes:
     - map_inline
     - const_prop
     - dce
-  security:
-    - dangerous_helper_firewall
-    - live_patch
-    - speculation_barrier
   active: performance
 
 profiles:

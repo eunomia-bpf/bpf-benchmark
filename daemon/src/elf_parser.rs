@@ -402,8 +402,8 @@ pub fn parse_bpf_object<P: AsRef<Path>>(path: P) -> Result<ElfBpfObject> {
                     target.force_pseudo_src,
                 )
                 .with_context(|| {
-                        format!("failed to relocate {} at byte {}", section_name, offset)
-                    })?;
+                    format!("failed to relocate {} at byte {}", section_name, offset)
+                })?;
                 let pseudo_src = insns[pc].src_reg();
                 map_relocations.push(ElfProgramMapRelocation {
                     pc,

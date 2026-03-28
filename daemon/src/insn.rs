@@ -92,7 +92,7 @@ pub const fn bpf_src(code: u8) -> u8 {
 
 /// A single BPF instruction, ABI-compatible with `struct bpf_insn` in the kernel.
 #[repr(C)]
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct BpfInsn {
     pub code: u8,
     pub regs: u8, // dst_reg:4 | src_reg:4

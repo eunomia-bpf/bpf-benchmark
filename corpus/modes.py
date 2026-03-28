@@ -593,6 +593,13 @@ def batch_text_invocation_summary(result: dict[str, Any] | None) -> dict[str, An
         summary["command"] = command
     elif isinstance(command, list):
         summary["command"] = [str(part) for part in command]
+    debug_artifacts = result.get("debug_artifacts")
+    if isinstance(debug_artifacts, dict) and debug_artifacts:
+        summary["debug_artifacts"] = {
+            str(key): str(value)
+            for key, value in debug_artifacts.items()
+            if str(value)
+        }
     return summary
 
 
@@ -2427,6 +2434,7 @@ def run_targets_in_guest_batch(
         emitted_records = 0
         timed_out = False
         guest_result_mtime_ns: int | None = None
+        preserve_debug_artifacts = False
 
         def sync_guest_records() -> None:
             nonlocal emitted_records, guest_result_mtime_ns
@@ -2530,6 +2538,7 @@ def run_targets_in_guest_batch(
 
         stdout = "".join(stdout_chunks)
         stderr = "".join(stderr_chunks)
+        diagnostic_stdout = "".join(diagnostic_stdout_chunks)
         ok = process.returncode == 0 and not timed_out and guest_info is not None and emitted_records == len(targets)
         error = None
         if timed_out:
@@ -2541,6 +2550,27 @@ def run_targets_in_guest_batch(
         elif emitted_records != len(targets):
             error = f"guest batch emitted {emitted_records}/{len(targets)} records"
 
+        debug_artifacts: dict[str, str] | None = None
+        if error is not None:
+            preserve_debug_artifacts = True
+            debug_artifacts = {}
+            if target_path.exists():
+                debug_artifacts["target_json"] = str(target_path)
+            if result_path.exists():
+                debug_artifacts["result_json"] = str(result_path)
+            for suffix, text in (
+                ("stdout_log", stdout),
+                ("stderr_log", stderr),
+                ("diagnostic_stdout_log", diagnostic_stdout),
+            ):
+                if not text:
+                    continue
+                log_path = result_path.with_name(f"{result_path.name}.{suffix}.txt")
+                log_path.write_text(text)
+                debug_artifacts[suffix] = str(log_path)
+            if not debug_artifacts:
+                debug_artifacts = None
+
         return {
             "invocation": {
                 "ok": ok,
@@ -2550,16 +2580,18 @@ def run_targets_in_guest_batch(
                 "duration_seconds": time.monotonic() - start,
                 "stdout": stdout,
                 "stderr": stderr,
-                "diagnostic_stdout": "".join(diagnostic_stdout_chunks),
+                "diagnostic_stdout": diagnostic_stdout,
                 "sample": None,
                 "error": error,
+                "debug_artifacts": debug_artifacts,
             },
             "guest_info": guest_info,
             "records_emitted": emitted_records,
         }
     finally:
-        Path(handle.name).unlink(missing_ok=True)
-        Path(result_handle.name).unlink(missing_ok=True)
+        if not locals().get("preserve_debug_artifacts", False):
+            Path(handle.name).unlink(missing_ok=True)
+            Path(result_handle.name).unlink(missing_ok=True)
 
 
 def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
