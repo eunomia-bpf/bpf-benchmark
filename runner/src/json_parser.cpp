@@ -1,74 +1,254 @@
 #include "json_parser.hpp"
 
+#include <cctype>
+#include <exception>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
-std::string extract_json_string(const std::string &json, const std::string &key)
+namespace {
+
+size_t skip_json_whitespace(const std::string &json, size_t pos)
 {
-    const std::string pattern1 = "\"" + key + "\":\"";
-    const std::string pattern2 = "\"" + key + "\": \"";
-    auto pos = json.find(pattern1);
-    size_t value_start = std::string::npos;
-    if (pos != std::string::npos) {
-        value_start = pos + pattern1.size();
-    } else {
-        pos = json.find(pattern2);
-        if (pos != std::string::npos) {
-            value_start = pos + pattern2.size();
+    while (pos < json.size() &&
+           std::isspace(static_cast<unsigned char>(json[pos])) != 0) {
+        ++pos;
+    }
+    return pos;
+}
+
+[[noreturn]] void fail_missing_json_key(const std::string &key)
+{
+    fail("missing JSON key: " + key);
+}
+
+[[noreturn]] void fail_invalid_json_value(
+    std::string_view value_kind,
+    const std::string &key)
+{
+    fail("invalid JSON " + std::string(value_kind) + " for key: " + key);
+}
+
+size_t find_json_string_end(const std::string &json, size_t quote_pos)
+{
+    if (quote_pos >= json.size() || json[quote_pos] != '"') {
+        return std::string::npos;
+    }
+    for (size_t index = quote_pos + 1; index < json.size(); ++index) {
+        if (json[index] == '"' && !json_char_escaped(json, index)) {
+            return index;
         }
     }
+    return std::string::npos;
+}
+
+bool is_json_value_terminated(const std::string &json, size_t pos)
+{
+    if (pos >= json.size()) {
+        return true;
+    }
+    switch (json[pos]) {
+    case ',':
+    case '}':
+    case ']':
+        return true;
+    default:
+        return std::isspace(static_cast<unsigned char>(json[pos])) != 0;
+    }
+}
+
+size_t find_json_key_value_start(const std::string &json, const std::string &key)
+{
+    int object_depth = 0;
+    int array_depth = 0;
+    for (size_t index = 0; index < json.size(); ++index) {
+        const char ch = json[index];
+        if (ch == '"') {
+            const size_t string_end = find_json_string_end(json, index);
+            if (string_end == std::string::npos) {
+                fail("unterminated JSON string while scanning for key: " + key);
+            }
+            if (object_depth == 1 && array_depth == 0) {
+                const std::string_view token(
+                    json.data() + index + 1,
+                    string_end - index - 1);
+                const size_t after_string = skip_json_whitespace(json, string_end + 1);
+                if (token == key &&
+                    after_string < json.size() &&
+                    json[after_string] == ':') {
+                    return skip_json_whitespace(json, after_string + 1);
+                }
+            }
+            index = string_end;
+            continue;
+        }
+
+        switch (ch) {
+        case '{':
+            ++object_depth;
+            break;
+        case '}':
+            --object_depth;
+            break;
+        case '[':
+            ++array_depth;
+            break;
+        case ']':
+            --array_depth;
+            break;
+        default:
+            break;
+        }
+    }
+    return std::string::npos;
+}
+
+size_t require_json_key_value_start(const std::string &json, const std::string &key)
+{
+    const size_t value_start = find_json_key_value_start(json, key);
     if (value_start == std::string::npos) {
-        return {};
+        fail_missing_json_key(key);
     }
-    const auto value_end = json.find('"', value_start);
+    return value_start;
+}
+
+std::string parse_json_string_at(
+    const std::string &json,
+    size_t value_start,
+    const std::string &key)
+{
+    if (value_start >= json.size() || json[value_start] != '"') {
+        fail_invalid_json_value("string value", key);
+    }
+    const size_t value_end = find_json_string_end(json, value_start);
     if (value_end == std::string::npos) {
-        return {};
+        fail_invalid_json_value("string value", key);
     }
-    return json.substr(value_start, value_end - value_start);
+    return json.substr(value_start + 1, value_end - value_start - 1);
+}
+
+std::optional<std::string> maybe_extract_json_string(
+    const std::string &json,
+    const std::string &key)
+{
+    const size_t value_start = find_json_key_value_start(json, key);
+    if (value_start == std::string::npos) {
+        return std::nullopt;
+    }
+    if (json.compare(value_start, 4, "null") == 0 &&
+        is_json_value_terminated(json, value_start + 4)) {
+        return std::nullopt;
+    }
+    return parse_json_string_at(json, value_start, key);
+}
+
+std::optional<int64_t> maybe_extract_json_int(
+    const std::string &json,
+    const std::string &key)
+{
+    const size_t value_start = find_json_key_value_start(json, key);
+    if (value_start == std::string::npos) {
+        return std::nullopt;
+    }
+    if (json.compare(value_start, 4, "null") == 0 &&
+        is_json_value_terminated(json, value_start + 4)) {
+        return std::nullopt;
+    }
+
+    size_t value_end = value_start;
+    if (value_end < json.size() && json[value_end] == '-') {
+        ++value_end;
+    }
+    if (value_end >= json.size() ||
+        std::isdigit(static_cast<unsigned char>(json[value_end])) == 0) {
+        fail_invalid_json_value("integer value", key);
+    }
+    while (value_end < json.size() &&
+           std::isdigit(static_cast<unsigned char>(json[value_end])) != 0) {
+        ++value_end;
+    }
+    if (!is_json_value_terminated(json, value_end)) {
+        fail_invalid_json_value("integer value", key);
+    }
+
+    try {
+        return std::stoll(json.substr(value_start, value_end - value_start));
+    } catch (const std::exception &) {
+        fail_invalid_json_value("integer value", key);
+    }
+}
+
+}  // namespace
+
+std::string extract_json_string(const std::string &json, const std::string &key)
+{
+    const size_t value_start = require_json_key_value_start(json, key);
+    return parse_json_string_at(json, value_start, key);
+}
+
+std::optional<std::string> extract_json_string_optional(
+    const std::string &json,
+    const std::string &key)
+{
+    return maybe_extract_json_string(json, key);
 }
 
 int64_t extract_json_int(const std::string &json, const std::string &key)
 {
-    const std::string pattern1 = "\"" + key + "\":";
-    const std::string pattern2 = "\"" + key + "\": ";
-    size_t value_start = std::string::npos;
-    auto pos = json.find(pattern1);
-    if (pos != std::string::npos) {
-        value_start = pos + pattern1.size();
-    } else {
-        pos = json.find(pattern2);
-        if (pos != std::string::npos) {
-            value_start = pos + pattern2.size();
-        }
+    const size_t value_start = require_json_key_value_start(json, key);
+    if (json.compare(value_start, 4, "null") == 0 &&
+        is_json_value_terminated(json, value_start + 4)) {
+        fail_invalid_json_value("integer value", key);
     }
-    if (value_start == std::string::npos) {
-        return 0;
+
+    size_t value_end = value_start;
+    if (value_end < json.size() && json[value_end] == '-') {
+        ++value_end;
     }
-    while (value_start < json.size() && json[value_start] == ' ') {
-        ++value_start;
+    if (value_end >= json.size() ||
+        std::isdigit(static_cast<unsigned char>(json[value_end])) == 0) {
+        fail_invalid_json_value("integer value", key);
     }
-    if (value_start >= json.size()) {
-        return 0;
+    while (value_end < json.size() &&
+           std::isdigit(static_cast<unsigned char>(json[value_end])) != 0) {
+        ++value_end;
     }
+    if (!is_json_value_terminated(json, value_end)) {
+        fail_invalid_json_value("integer value", key);
+    }
+
     try {
-        return std::stoll(json.substr(value_start));
-    } catch (...) {
-        return 0;
+        return std::stoll(json.substr(value_start, value_end - value_start));
+    } catch (const std::exception &) {
+        fail_invalid_json_value("integer value", key);
     }
+}
+
+std::optional<int64_t> extract_json_int_optional(
+    const std::string &json,
+    const std::string &key)
+{
+    return maybe_extract_json_int(json, key);
 }
 
 bool extract_json_bool(const std::string &json, const std::string &key)
 {
-    const std::string pattern1 = "\"" + key + "\":true";
-    const std::string pattern2 = "\"" + key + "\": true";
-    return json.find(pattern1) != std::string::npos ||
-           json.find(pattern2) != std::string::npos;
+    const size_t value_start = require_json_key_value_start(json, key);
+    if (json.compare(value_start, 4, "true") == 0 &&
+        is_json_value_terminated(json, value_start + 4)) {
+        return true;
+    }
+    if (json.compare(value_start, 5, "false") == 0 &&
+        is_json_value_terminated(json, value_start + 5)) {
+        return false;
+    }
+    fail_invalid_json_value("boolean value", key);
 }
 
 bool json_char_escaped(const std::string &json, size_t pos)
 {
-    if (pos == 0 || pos > json.size()) {
+    if (pos == 0 || pos >= json.size()) {
         return false;
     }
 
@@ -120,29 +300,16 @@ std::string extract_json_compound(
     char open_ch,
     char close_ch)
 {
-    const std::string pattern = "\"" + key + "\"";
-    size_t key_pos = json.find(pattern);
-    while (key_pos != std::string::npos) {
-        const auto colon_pos = json.find(':', key_pos + pattern.size());
-        if (colon_pos == std::string::npos) {
-            return {};
-        }
-        size_t value_start = colon_pos + 1;
-        while (value_start < json.size() && json[value_start] == ' ') {
-            ++value_start;
-        }
-        if (value_start < json.size() && json[value_start] == open_ch) {
-            const auto value_end =
-                find_matching_json_delim(json, value_start, open_ch, close_ch);
-            if (value_end == std::string::npos) {
-                return {};
-            }
-            return json.substr(value_start, value_end - value_start + 1);
-        }
-        key_pos = json.find(pattern, key_pos + pattern.size());
+    const size_t value_start = require_json_key_value_start(json, key);
+    if (value_start >= json.size() || json[value_start] != open_ch) {
+        fail_invalid_json_value("compound value", key);
     }
-
-    return {};
+    const auto value_end =
+        find_matching_json_delim(json, value_start, open_ch, close_ch);
+    if (value_end == std::string::npos) {
+        fail_invalid_json_value("compound value", key);
+    }
+    return json.substr(value_start, value_end - value_start + 1);
 }
 
 std::vector<std::string> extract_json_string_array(
@@ -150,40 +317,37 @@ std::vector<std::string> extract_json_string_array(
     const std::string &key)
 {
     std::vector<std::string> values;
-    const std::string pattern1 = "\"" + key + "\":[";
-    const std::string pattern2 = "\"" + key + "\": [";
-    size_t array_start = std::string::npos;
-    auto pos = json.find(pattern1);
-    if (pos != std::string::npos) {
-        array_start = pos + pattern1.size();
-    } else {
-        pos = json.find(pattern2);
-        if (pos != std::string::npos) {
-            array_start = pos + pattern2.size();
-        }
+    size_t cursor = require_json_key_value_start(json, key);
+    if (cursor >= json.size() || json[cursor] != '[') {
+        fail_invalid_json_value("string array", key);
     }
-    if (array_start == std::string::npos) {
+    ++cursor;
+    cursor = skip_json_whitespace(json, cursor);
+    if (cursor < json.size() && json[cursor] == ']') {
         return values;
     }
-    const auto array_end = json.find(']', array_start);
-    if (array_end == std::string::npos) {
-        return values;
-    }
-    const std::string content = json.substr(array_start, array_end - array_start);
-    size_t cursor = 0;
-    while (true) {
-        const auto q1 = content.find('"', cursor);
-        if (q1 == std::string::npos) {
-            break;
+
+    while (cursor < json.size()) {
+        cursor = skip_json_whitespace(json, cursor);
+        values.push_back(parse_json_string_at(json, cursor, key));
+        const size_t value_end = find_json_string_end(json, cursor);
+        if (value_end == std::string::npos) {
+            fail_invalid_json_value("string array", key);
         }
-        const auto q2 = content.find('"', q1 + 1);
-        if (q2 == std::string::npos) {
-            break;
+        cursor = skip_json_whitespace(json, value_end + 1);
+        if (cursor >= json.size()) {
+            fail_invalid_json_value("string array", key);
         }
-        values.push_back(content.substr(q1 + 1, q2 - q1 - 1));
-        cursor = q2 + 1;
+        if (json[cursor] == ']') {
+            return values;
+        }
+        if (json[cursor] != ',') {
+            fail_invalid_json_value("string array", key);
+        }
+        ++cursor;
     }
-    return values;
+
+    fail_invalid_json_value("string array", key);
 }
 
 std::vector<daemon_pass_detail> extract_pass_details(const std::string &json)

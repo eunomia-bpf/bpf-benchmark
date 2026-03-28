@@ -1,4 +1,4 @@
-"""BpfReJIT v2 helpers for live enumeration and apply flows."""
+"""BpfReJIT v2 helpers for daemon-backed scan and optimize flows."""
 from __future__ import annotations
 
 import json

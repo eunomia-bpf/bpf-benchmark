@@ -10,7 +10,7 @@
 
 ## Directory Layout
 
-- `driver.py`: consolidated micro suite driver; `python3 micro/driver.py suite ...` is the canonical entrypoint
+- `driver.py`: consolidated micro suite driver; `python3 micro/driver.py ...` is the canonical entrypoint
 - `../runner/libs/catalog.py`: shared suite YAML parser for micro and corpus manifests
 - `input_generators.py`: deterministic input generation for active benchmarks
 - `summarize_rq.py`, `generate_figures.py`: active reporting utilities
@@ -31,7 +31,7 @@ make micro
 List the active suite:
 
 ```bash
-python3 micro/driver.py suite -- --list
+python3 micro/driver.py --list
 ```
 
 Run the suite on the host:
@@ -61,7 +61,7 @@ make vm-micro PROFILE=ablation_wide_mem
 Run a targeted smoke test directly:
 
 ```bash
-python3 micro/driver.py suite -- \
+python3 micro/driver.py \
   --bench simple \
   --runtime llvmbpf \
   --iterations 1 \

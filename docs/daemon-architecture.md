@@ -75,9 +75,6 @@ daemon 自己不实现 kinsn，只做三件事：
 
 1. `serve [--socket PATH]`
 
-`enumerate`、`rewrite`、`apply`、`apply-all`、`watch`、`profile` 这些旧 CLI
-在当前代码里都不存在；相关能力统一收口到 `serve` 的 Unix socket JSON 协议。
-
 ### 2.2 `serve`
 
 输入：

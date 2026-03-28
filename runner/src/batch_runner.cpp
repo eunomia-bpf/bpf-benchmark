@@ -270,35 +270,6 @@ class prepared_kernel_store {
     fail("missing prepared kernel state for ref: " + prepared_ref);
 }
 
-std::string json_escape(std::string_view input)
-{
-    std::string output;
-    output.reserve(input.size());
-    for (const char ch : input) {
-        switch (ch) {
-        case '\\':
-            output += "\\\\";
-            break;
-        case '"':
-            output += "\\\"";
-            break;
-        case '\n':
-            output += "\\n";
-            break;
-        case '\r':
-            output += "\\r";
-            break;
-        case '\t':
-            output += "\\t";
-            break;
-        default:
-            output += ch;
-            break;
-        }
-    }
-    return output;
-}
-
 std::string batch_usage_text()
 {
     return
@@ -419,47 +390,6 @@ std::vector<std::string> optional_string_list(const YAML::Node &node, const char
     return values;
 }
 
-void print_json_string_array_local(std::ostream &out, const std::vector<std::string> &values)
-{
-    out << "[";
-    for (size_t index = 0; index < values.size(); ++index) {
-        if (index != 0) {
-            out << ",";
-        }
-        out << "\"" << json_escape(values[index]) << "\"";
-    }
-    out << "]";
-}
-
-void print_json_daemon_pass_details_local(
-    std::ostream &out,
-    const std::vector<daemon_pass_detail> &details)
-{
-    out << "[";
-    for (size_t index = 0; index < details.size(); ++index) {
-        if (index != 0) {
-            out << ",";
-        }
-        const auto &detail = details[index];
-        out
-            << "{"
-            << "\"pass_name\":\"" << json_escape(detail.pass_name) << "\","
-            << "\"changed\":" << (detail.changed ? "true" : "false") << ","
-            << "\"sites_found\":" << detail.sites_found << ","
-            << "\"sites_applied\":" << detail.sites_applied << ","
-            << "\"sites_skipped\":" << detail.sites_skipped << ","
-            << "\"insns_before\":" << detail.insns_before << ","
-            << "\"insns_after\":" << detail.insns_after << ","
-            << "\"insn_delta\":" << detail.insn_delta << ","
-            << "\"skip_reasons\":"
-            << (detail.skip_reasons_json.empty() ? "{}" : detail.skip_reasons_json) << ","
-            << "\"diagnostics\":"
-            << (detail.diagnostics_json.empty() ? "[]" : detail.diagnostics_json)
-            << "}";
-    }
-    out << "]";
-}
-
 template <typename T>
 void print_optional_json_field(std::ostream &out, const char *field_name, const std::optional<T> &value)
 {
@@ -471,7 +401,7 @@ void print_optional_json_field(std::ostream &out, const char *field_name, const 
     }
 }
 
-struct bpf_object_deleter_batch {
+struct bpf_object_deleter {
     void operator()(bpf_object *object) const
     {
         if (object != nullptr) {
@@ -480,7 +410,7 @@ struct bpf_object_deleter_batch {
     }
 };
 
-using bpf_object_ptr_batch = std::unique_ptr<bpf_object, bpf_object_deleter_batch>;
+using bpf_object_ptr = std::unique_ptr<bpf_object, bpf_object_deleter>;
 
 std::string serialize_load_attempts_json(const std::vector<static_verify_attempt> &attempts)
 {
@@ -528,16 +458,16 @@ std::string serialize_static_verify_record_json(const static_verify_program_reco
         << ",\"applied\":" << (record.applied ? "true" : "false")
         << ",\"program_changed\":" << (record.program_changed ? "true" : "false")
         << ",\"passes_applied\":";
-    print_json_string_array_local(out, record.passes_applied);
+    print_json_string_array(out, record.passes_applied);
     out << ",\"daemon_pass_details\":";
-    print_json_daemon_pass_details_local(out, record.daemon_pass_details);
+    print_json_daemon_pass_details(out, record.daemon_pass_details);
     out
         << ",\"daemon_status\":\"" << json_escape(record.daemon_status) << "\""
         << ",\"daemon_message\":\"" << json_escape(record.daemon_message) << "\""
         << ",\"daemon_error_message\":\"" << json_escape(record.daemon_error_message) << "\"";
     print_optional_json_field(out, "daemon_verifier_retries", record.daemon_verifier_retries);
     out << ",\"daemon_final_disabled_passes\":";
-    print_json_string_array_local(out, record.daemon_final_disabled_passes);
+    print_json_string_array(out, record.daemon_final_disabled_passes);
     print_optional_json_field(out, "insn_count_before", record.insn_count_before);
     print_optional_json_field(out, "insn_count_after", record.insn_count_after);
     print_optional_json_field(out, "code_size_before", record.code_size_before);
@@ -810,21 +740,21 @@ std::optional<enum bpf_prog_type> unique_prog_type_hint(const std::vector<std::s
     return prog_type_from_string(*unique_name);
 }
 
-std::pair<bpf_object_ptr_batch, std::string> try_open_static_verify_object(
+std::pair<bpf_object_ptr, std::string> try_open_static_verify_object(
     const std::filesystem::path &object_path)
 {
     bpf_object *raw_object = bpf_object__open_file(object_path.c_str(), nullptr);
     const int open_error = libbpf_get_error(raw_object);
     if (open_error != 0) {
         return {
-            bpf_object_ptr_batch(),
+            bpf_object_ptr(),
             "bpf_object__open_file failed: " + libbpf_error_string(open_error),
         };
     }
-    return {bpf_object_ptr_batch(raw_object), std::string()};
+    return {bpf_object_ptr(raw_object), std::string()};
 }
 
-std::pair<bpf_object_ptr_batch, std::vector<static_verify_attempt>> load_static_verify_object(
+std::pair<bpf_object_ptr, std::vector<static_verify_attempt>> load_static_verify_object(
     const batch_job &job)
 {
     std::vector<static_verify_attempt> attempts;
@@ -837,7 +767,7 @@ std::pair<bpf_object_ptr_batch, std::vector<static_verify_attempt>> load_static_
                 .ok = false,
                 .error = std::move(open_error),
             });
-            return {bpf_object_ptr_batch(), attempts};
+            return {bpf_object_ptr(), attempts};
         }
         const int load_error = bpf_object__load(object.get());
         attempts.push_back({
@@ -859,7 +789,7 @@ std::pair<bpf_object_ptr_batch, std::vector<static_verify_attempt>> load_static_
                 .ok = false,
                 .error = std::move(open_error),
             });
-            return {bpf_object_ptr_batch(), attempts};
+            return {bpf_object_ptr(), attempts};
         }
         bpf_program *program = nullptr;
         while ((program = bpf_object__next_program(object.get(), program)) != nullptr) {
@@ -880,7 +810,7 @@ std::pair<bpf_object_ptr_batch, std::vector<static_verify_attempt>> load_static_
         }
     }
 
-    return {bpf_object_ptr_batch(), attempts};
+    return {bpf_object_ptr(), attempts};
 }
 
 static_verify_program_record make_skip_load_record(

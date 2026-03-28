@@ -4,9 +4,7 @@
 It discovers live kernel BPF programs, runs the rewrite pipeline, and applies
 rewritten bytecode via `BPF_PROG_REJIT`.
 
-All active CLI usage goes through `serve`. There are no one-shot `enumerate`,
-`rewrite`, `apply`, `apply-all`, `watch`, or `profile` subcommands in the
-current tree.
+All active CLI usage goes through `serve`.
 
 ## Build
 

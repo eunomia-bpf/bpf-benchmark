@@ -5,11 +5,18 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
 std::string extract_json_string(const std::string &json, const std::string &key);
+std::optional<std::string> extract_json_string_optional(
+    const std::string &json,
+    const std::string &key);
 int64_t extract_json_int(const std::string &json, const std::string &key);
+std::optional<int64_t> extract_json_int_optional(
+    const std::string &json,
+    const std::string &key);
 bool extract_json_bool(const std::string &json, const std::string &key);
 bool json_char_escaped(const std::string &json, size_t pos);
 size_t find_matching_json_delim(

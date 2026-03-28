@@ -14,35 +14,6 @@
 
 namespace {
 
-std::string json_escape(std::string_view input)
-{
-    std::string output;
-    output.reserve(input.size());
-    for (const char ch : input) {
-        switch (ch) {
-        case '\\':
-            output += "\\\\";
-            break;
-        case '"':
-            output += "\\\"";
-            break;
-        case '\n':
-            output += "\\n";
-            break;
-        case '\r':
-            output += "\\r";
-            break;
-        case '\t':
-            output += "\\t";
-            break;
-        default:
-            output += ch;
-            break;
-        }
-    }
-    return output;
-}
-
 std::string lower_ascii(std::string_view input)
 {
     std::string output(input);
@@ -50,48 +21,6 @@ std::string lower_ascii(std::string_view input)
         ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
     }
     return output;
-}
-
-void print_json_string_array(std::ostream &out,
-                             const std::vector<std::string> &values)
-{
-    out << "[";
-    for (size_t index = 0; index < values.size(); ++index) {
-        if (index != 0) {
-            out << ",";
-        }
-        out << "\"" << json_escape(values[index]) << "\"";
-    }
-    out << "]";
-}
-
-void print_json_daemon_pass_details(
-    std::ostream &out,
-    const std::vector<daemon_pass_detail> &details)
-{
-    out << "[";
-    for (size_t index = 0; index < details.size(); ++index) {
-        if (index != 0) {
-            out << ",";
-        }
-        const auto &detail = details[index];
-        out
-            << "{"
-            << "\"pass_name\":\"" << json_escape(detail.pass_name) << "\","
-            << "\"changed\":" << (detail.changed ? "true" : "false") << ","
-            << "\"sites_found\":" << detail.sites_found << ","
-            << "\"sites_applied\":" << detail.sites_applied << ","
-            << "\"sites_skipped\":" << detail.sites_skipped << ","
-            << "\"insns_before\":" << detail.insns_before << ","
-            << "\"insns_after\":" << detail.insns_after << ","
-            << "\"insn_delta\":" << detail.insn_delta << ","
-            << "\"skip_reasons\":"
-            << (detail.skip_reasons_json.empty() ? "{}" : detail.skip_reasons_json) << ","
-            << "\"diagnostics\":"
-            << (detail.diagnostics_json.empty() ? "[]" : detail.diagnostics_json)
-            << "}";
-    }
-    out << "]";
 }
 
 std::string usage_text()
@@ -439,6 +368,76 @@ void validate_cli_options(const cli_options &options)
 }
 
 } // namespace
+
+std::string json_escape(std::string_view input)
+{
+    std::string output;
+    output.reserve(input.size());
+    for (const char ch : input) {
+        switch (ch) {
+        case '\\':
+            output += "\\\\";
+            break;
+        case '"':
+            output += "\\\"";
+            break;
+        case '\n':
+            output += "\\n";
+            break;
+        case '\r':
+            output += "\\r";
+            break;
+        case '\t':
+            output += "\\t";
+            break;
+        default:
+            output += ch;
+            break;
+        }
+    }
+    return output;
+}
+
+void print_json_string_array(std::ostream &out, const std::vector<std::string> &values)
+{
+    out << "[";
+    for (size_t index = 0; index < values.size(); ++index) {
+        if (index != 0) {
+            out << ",";
+        }
+        out << "\"" << json_escape(values[index]) << "\"";
+    }
+    out << "]";
+}
+
+void print_json_daemon_pass_details(
+    std::ostream &out,
+    const std::vector<daemon_pass_detail> &details)
+{
+    out << "[";
+    for (size_t index = 0; index < details.size(); ++index) {
+        if (index != 0) {
+            out << ",";
+        }
+        const auto &detail = details[index];
+        out
+            << "{"
+            << "\"pass_name\":\"" << json_escape(detail.pass_name) << "\","
+            << "\"changed\":" << (detail.changed ? "true" : "false") << ","
+            << "\"sites_found\":" << detail.sites_found << ","
+            << "\"sites_applied\":" << detail.sites_applied << ","
+            << "\"sites_skipped\":" << detail.sites_skipped << ","
+            << "\"insns_before\":" << detail.insns_before << ","
+            << "\"insns_after\":" << detail.insns_after << ","
+            << "\"insn_delta\":" << detail.insn_delta << ","
+            << "\"skip_reasons\":"
+            << (detail.skip_reasons_json.empty() ? "{}" : detail.skip_reasons_json) << ","
+            << "\"diagnostics\":"
+            << (detail.diagnostics_json.empty() ? "[]" : detail.diagnostics_json)
+            << "}";
+    }
+    out << "]";
+}
 
 [[noreturn]] void fail(const std::string &message)
 {
