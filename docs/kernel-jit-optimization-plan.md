@@ -919,6 +919,16 @@ make clean
 | **556** | K2 + fixed-baseline 对比方案 | ✅ | K2 开源可用，需 pre-load .bpf.o 输入。fixed-baseline 分支 `jit-fixed-baselines` 可用。报告：`k2_and_baseline_comparison_plan_20260328.md`。 |
 | **557** | Ablation 设计 + bpftrace 调查 | ✅ | ablation matrix 设计完成（7 个 profile）。bpftrace 0 ReJIT 根因已识别。报告：`ablation_and_bpftrace_investigation_20260328.md`。 |
 | **558** | Static verify post-build | ✅ | **531 objects / 1241 programs / 345 applied / 345 verifier accepted**。报告：`post_build_fix_static_verify_20260328.md`。 |
-| **559** | Corpus dev run（performance-only pipeline） | 🔄 | 45/469 objects 完成。**172 compile / 139 measured / 165 applied**。exec geomean **0.999x**。map_inline=295, const_prop=306, dce=303。正在跑。 |
-| **560** | 死代码 + 垃圾测试清理 | 🔄 | codex 已派，等结果。 |
-| **561** | 全仓库静默失败 + 安全 pass 清理 | 🔄 | codex 已派，output 丢失，需确认结果。安全 pass 已从 registry 删除（#539 确认）。 |
+| **559** | Corpus dev run（performance-only pipeline） | ✅ partial | **288/469 objects**（在 test_map_init.bpf.o segfault exit 139）。**648 compile / 483 measured / 364 applied**。exec geomean **0.980x**。map_inline=465, const_prop=635, dce=458。linux-selftests **0.874x**（快 14%），Katran **0.919x**（快 8%），calico **1.125x**（慢 12.5% 回归）。报告：`corpus_dev_full_results_20260328.md`。 |
+| **560** | 死代码 + 垃圾测试清理 | ✅ | cargo build 0 warnings, 507 tests pass / 0 ignored。Python pyflakes 干净。corpus/modes.py 旧 v1 helper 删除。 |
+| **561** | 全仓库静默失败 + 安全 pass 清理 | ✅ | 安全 pass .rs 文件已删。enabled_passes=[] 语义统一（C++ `enabled_passes_specified` flag）。E2E skip→error。json_parser fail-close + socket 30s 超时。 |
+| **562** | Daemon CLI serve-only + PGO 接线 | ✅ | 删除 watch/apply/apply-all/enumerate/rewrite 五个子命令。保留 serve 作为唯一入口。PGO 接到 serve --pgo，branch_flip 不再 always-skip。Python 统一走 serve socket。**净删 -1418 行**。 |
+| **563** | corpus/modes.py 重构 | ✅ | **3085 → 689 行**（-78%）。逻辑下沉到 runner/libs/（rejit.py + corpus.py + results.py + vm.py）。pytest 34 pass。 |
+| **564** | Runner C++ 去重 | ✅ | 新建 json_parser.cpp + daemon_client.cpp + bpf_helpers.cpp 三个共享模块。kernel_runner -491 行，batch_runner -547 行，**合计 -1038 行**。make runner + smoke 通过。 |
+| **565** | json_parser fail-close + socket timeout | ✅ | 缺 key → fail()。转义引号处理。socket 30s SO_RCVTIMEO/SO_SNDTIMEO。error_message 透传到 response.error。_batch 残留命名清除。 |
+| **566** | 5 个 SOSP red flags 修复 | ✅ | (1) micro enabled_passes 传递。(2) daemon docs/tests 更新到 serve-only。(3) module/load_all.sh 失败即退出 + bpf_barrier 移除默认路径。(4) README 删除不存在 target。(5) profiler 路径统一。 |
+| **567** | SOSP 架构 readiness review | ✅ | 302 files / 120644 LOC。5 大 red flags（已修 #566）。God files 列表。重复实现分析。artifact 闭环缺失。报告：`architecture_sosp_readiness_20260328.md`。 |
+| **568** | Mutable writeback guard site-local | ✅ | 删除程序级 `collect_mutable_maps_with_lookup_value_writes()` veto。改为 per-site r0 use classification 直接判断。同一 mutable map 上只读 site 仍可 inline。507 tests pass。 |
+| **569** | bpftrace 0 applied 修复 | ✅ | 根因：bpftrace sites 全是 wide_mem，但 active passes 只有 map_inline/const_prop/dce。修复：benchmark_config.yaml performance 列表加回所有 11 个 performance passes（wide_mem/rotate/cond_select/extract/endian_fusion/map_inline/const_prop/dce/bounds_check_merge/skb_load_bytes_spec/bulk_memory）。 |
+| **570** | Corpus 深入分析 + crash 调查 | 🔄 | codex 在跑。分析 Top 10 / 回归 / 按 repo / map_inline 效果 + test_map_init.bpf.o segfault 根因。 |
+| **571** | E2E + Katran VM 验证（全修复后） | 🔄 | codex 在跑。验证 Tetragon 不再 Permission denied、Katran map_inline coverage 从 2 回升。 |

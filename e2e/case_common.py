@@ -10,9 +10,10 @@ import platform
 import statistics
 import sys
 import tempfile
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import Callable, Mapping, Sequence
 
 from runner.libs import (
     ROOT_DIR,
@@ -235,6 +236,155 @@ def capture_map_state(
     if not isinstance(payload, dict):
         raise RuntimeError("map capture script returned a non-object JSON payload")
     return payload
+
+
+# ---------------------------------------------------------------------------
+# Lifecycle helpers
+# ---------------------------------------------------------------------------
+
+@dataclass(slots=True)
+class CaseLifecycleState:
+    runtime: object
+    target_prog_ids: list[int] = field(default_factory=list)
+    apply_prog_ids: list[int] = field(default_factory=list)
+    scan_kwargs: dict[str, object] = field(default_factory=dict)
+    artifacts: dict[str, object] = field(default_factory=dict)
+
+    def requested_prog_ids(self) -> list[int]:
+        raw_prog_ids = self.apply_prog_ids or self.target_prog_ids
+        return [int(value) for value in raw_prog_ids if int(value) > 0]
+
+
+@dataclass(frozen=True, slots=True)
+class LifecycleAbort:
+    status: str
+    reason: str
+    artifacts: Mapping[str, object] | None = None
+
+
+@dataclass(slots=True)
+class LifecycleRunResult:
+    setup_state: object
+    state: CaseLifecycleState | None
+    baseline: Mapping[str, object] | None
+    scan_results: dict[int, dict[str, object]]
+    rejit_result: dict[str, object] | None
+    post_rejit: Mapping[str, object] | None
+    artifacts: dict[str, object] = field(default_factory=dict)
+    abort: LifecycleAbort | None = None
+
+
+def _artifact_dict(value: Mapping[str, object] | None) -> dict[str, object]:
+    if value is None:
+        return {}
+    return dict(value)
+
+
+def run_case_lifecycle(
+    *,
+    daemon_binary: Path,
+    setup: Callable[[], object],
+    start: Callable[[object], CaseLifecycleState],
+    workload: Callable[[object, CaseLifecycleState, str], Mapping[str, object] | None],
+    stop: Callable[[object, CaseLifecycleState], None],
+    cleanup: Callable[[object], None],
+    enabled_passes: Sequence[str] | None = None,
+    before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
+    after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
+    before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], str | None] | None = None,
+) -> LifecycleRunResult:
+    """Run the shared E2E lifecycle for a live program session.
+
+    The case-specific hooks remain responsible for setup/start/workload/stop/
+    cleanup. This helper centralizes the repeated phase ordering:
+
+    1. setup
+    2. start
+    3. optional pre-baseline checks
+    4. baseline workload
+    5. optional after-baseline work
+    6. scan + daemon apply
+    7. post-ReJIT workload
+    8. stop + cleanup
+    """
+    from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes, scan_programs
+
+    setup_state = setup()
+    lifecycle_state: CaseLifecycleState | None = None
+    baseline: Mapping[str, object] | None = None
+    scan_results: dict[int, dict[str, object]] = {}
+    rejit_result: dict[str, object] | None = None
+    post_rejit: Mapping[str, object] | None = None
+    artifacts: dict[str, object] = {}
+    abort: LifecycleAbort | None = None
+
+    try:
+        lifecycle_state = start(setup_state)
+        artifacts.update(_artifact_dict(lifecycle_state.artifacts))
+
+        if before_baseline is not None:
+            abort = before_baseline(setup_state, lifecycle_state)
+            if abort is not None:
+                artifacts.update(_artifact_dict(abort.artifacts))
+                return LifecycleRunResult(
+                    setup_state=setup_state,
+                    state=lifecycle_state,
+                    baseline=None,
+                    scan_results={},
+                    rejit_result=None,
+                    post_rejit=None,
+                    artifacts=artifacts,
+                    abort=abort,
+                )
+
+        baseline = workload(setup_state, lifecycle_state, "baseline")
+        if baseline is None:
+            raise RuntimeError("baseline workload returned no result")
+        artifacts.update(_artifact_dict(lifecycle_state.artifacts))
+
+        if after_baseline is not None:
+            artifacts.update(_artifact_dict(after_baseline(setup_state, lifecycle_state, baseline)))
+
+        skip_rejit_reason = None
+        if before_rejit is not None:
+            skip_rejit_reason = before_rejit(setup_state, lifecycle_state, baseline)
+
+        requested_prog_ids = lifecycle_state.requested_prog_ids()
+        if skip_rejit_reason is not None:
+            rejit_result = {
+                "applied": False,
+                "reason": skip_rejit_reason,
+                "error": skip_rejit_reason,
+            }
+        elif requested_prog_ids:
+            scan_results = scan_programs(
+                requested_prog_ids,
+                daemon_binary,
+                **lifecycle_state.scan_kwargs,
+            )
+            rejit_result = apply_daemon_rejit(
+                daemon_binary,
+                requested_prog_ids,
+                enabled_passes=enabled_passes or benchmark_rejit_enabled_passes(),
+            )
+            if rejit_result.get("applied"):
+                post_rejit = workload(setup_state, lifecycle_state, "post_rejit")
+        return LifecycleRunResult(
+            setup_state=setup_state,
+            state=lifecycle_state,
+            baseline=baseline,
+            scan_results=scan_results,
+            rejit_result=rejit_result,
+            post_rejit=post_rejit,
+            artifacts=artifacts,
+            abort=abort,
+        )
+    finally:
+        try:
+            if lifecycle_state is not None:
+                stop(setup_state, lifecycle_state)
+        finally:
+            cleanup(setup_state)
 
 
 # ---------------------------------------------------------------------------

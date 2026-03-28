@@ -2565,7 +2565,7 @@ std::vector<sample_result> execute_prepared_kernel_attach(
         object_scope_daemon_rejit ? prepared.prepared_rejit : program.prepared_rejit;
     sample_result sample;
     if (options.rejit && options.daemon_socket.has_value()) {
-        sample.phase = "recompile";
+        sample.phase = "rejit";
     }
     sample.compile_ns = base_compile_ns + rejit_apply_ns;
     sample.exec_ns = exec_ns;
@@ -2918,14 +2918,14 @@ std::vector<sample_result> execute_prepared_kernel_run(
         measure_same_image_pair);
     if (stock_sample.has_value()) {
         const uint32_t stock_retval = stock_sample->retval;
-        const uint32_t recompile_retval = sample.retval;
-        const bool mismatch = (stock_retval != recompile_retval);
+        const uint32_t rejit_retval = sample.retval;
+        const bool mismatch = (stock_retval != rejit_retval);
         stock_sample->correctness_mismatch = false;
         sample.correctness_mismatch = mismatch;
         if (mismatch) {
             fprintf(stderr,
-                    "CORRECTNESS MISMATCH: stock retval=%u, recompile retval=%u\n",
-                    stock_retval, recompile_retval);
+                    "CORRECTNESS MISMATCH: stock retval=%u, rejit retval=%u\n",
+                    stock_retval, rejit_retval);
         }
         return {std::move(*stock_sample), std::move(sample)};
     }
@@ -3602,14 +3602,14 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         measure_same_image_pair);
     if (stock_sample.has_value()) {
         const uint32_t stock_retval = stock_sample->retval;
-        const uint32_t recompile_retval = sample.retval;
-        const bool mismatch = (stock_retval != recompile_retval);
+        const uint32_t rejit_retval = sample.retval;
+        const bool mismatch = (stock_retval != rejit_retval);
         stock_sample->correctness_mismatch = false;
         sample.correctness_mismatch = mismatch;
         if (mismatch) {
             fprintf(stderr,
-                    "CORRECTNESS MISMATCH: stock retval=%u, recompile retval=%u\n",
-                    stock_retval, recompile_retval);
+                    "CORRECTNESS MISMATCH: stock retval=%u, rejit retval=%u\n",
+                    stock_retval, rejit_retval);
         }
         return {std::move(*stock_sample), std::move(sample)};
     }
@@ -3777,7 +3777,7 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
     /* Build sample result */
     sample_result sample;
     if (options.rejit && options.daemon_socket.has_value()) {
-        sample.phase = "recompile";
+        sample.phase = "rejit";
     }
     sample.compile_ns = base_compile_ns + elapsed_ns(rejit_start, rejit_end);
     sample.exec_ns = exec_ns;

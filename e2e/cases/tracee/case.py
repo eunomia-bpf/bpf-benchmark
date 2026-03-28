@@ -47,12 +47,15 @@ from runner.libs.workload import (  # noqa: E402
     run_scheduler_load,
 )
 from e2e.case_common import (  # noqa: E402
+    CaseLifecycleState,
+    LifecycleAbort,
     build_map_capture_specs,
     capture_map_state,
     host_metadata,
     summarize_numbers,
     percent_delta,
     persist_results,
+    run_case_lifecycle,
 )
 
 
@@ -843,122 +846,151 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     events = list(config.get("events") or [])
     commands = build_tracee_commands(tracee_binary, events, args.tracee_extra_arg or [])
     preflight: dict[str, object] | None = None
+    runner_binary = Path(args.runner).resolve()
 
     try:
         map_capture: dict[str, object] | None = None
+
+        def setup() -> dict[str, object]:
+            return {}
+
+        def start(_: object) -> CaseLifecycleState:
+            session = TraceeAgentSession(commands, load_timeout=int(args.load_timeout))
+            session.__enter__()
+            selected_programs = select_tracee_programs(session.programs, config)
+            prog_ids = [int(program["id"]) for program in selected_programs]
+            if config.get("apply_programs"):
+                apply_programs = select_tracee_programs(
+                    session.programs,
+                    config,
+                    config_key="apply_programs",
+                    allow_all_when_unset=False,
+                )
+                apply_prog_ids = [int(program["id"]) for program in apply_programs]
+            else:
+                apply_programs = [dict(program) for program in selected_programs]
+                apply_prog_ids = list(prog_ids)
+            return CaseLifecycleState(
+                runtime=session,
+                target_prog_ids=prog_ids,
+                apply_prog_ids=apply_prog_ids,
+                scan_kwargs={"prog_fds": session.program_fds},
+                artifacts={
+                    "tracee_programs": session.programs,
+                    "selected_tracee_programs": selected_programs,
+                    "apply_tracee_programs": apply_programs,
+                },
+            )
+
+        def before_baseline(_: object, lifecycle: CaseLifecycleState) -> LifecycleAbort | None:
+            nonlocal preflight
+            if preflight_duration_s <= 0 or not workloads:
+                return None
+            session = lifecycle.runtime
+            assert isinstance(session, TraceeAgentSession)
+            preflight_prog_ids = sorted(set(lifecycle.target_prog_ids) | set(lifecycle.apply_prog_ids))
+            preflight = run_phase(
+                list(workloads),
+                preflight_duration_s,
+                preflight_prog_ids,
+                prog_fds=session.program_fds,
+                agent_pid=session.pid,
+                collector=session.collector,
+            )
+            preflight["program_activity"] = {
+                "target_programs": summarize_program_activity(preflight, lifecycle.target_prog_ids),
+                "apply_programs": summarize_program_activity(preflight, lifecycle.apply_prog_ids),
+            }
+            lifecycle.artifacts["preflight"] = preflight
+            if not require_program_activity:
+                return None
+
+            target_run_cnt = int(
+                ((preflight.get("program_activity") or {}).get("target_programs") or {}).get("total_run_cnt", 0) or 0
+            )
+            apply_run_cnt = int(
+                ((preflight.get("program_activity") or {}).get("apply_programs") or {}).get("total_run_cnt", 0) or 0
+            )
+            if target_run_cnt <= 0:
+                limitations.append(
+                    "Configured Tracee events/workload did not execute the selected target programs during preflight."
+                )
+                return LifecycleAbort(
+                    status="skipped",
+                    reason="preflight observed zero target-program executions; skipping invalid runtime measurement",
+                    artifacts={"preflight": preflight},
+                )
+            if config.get("apply_programs") and apply_run_cnt <= 0:
+                limitations.append(
+                    "Configured Tracee events/workload did not execute the configured apply programs during preflight."
+                )
+                return LifecycleAbort(
+                    status="skipped",
+                    reason="preflight observed zero apply-program executions; skipping invalid optimization benchmark",
+                    artifacts={"preflight": preflight},
+                )
+            return None
+
+        def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
+            del phase_name
+            session = lifecycle.runtime
+            assert isinstance(session, TraceeAgentSession)
+            return run_phase(
+                workloads,
+                duration_s,
+                lifecycle.target_prog_ids,
+                prog_fds=session.program_fds,
+                agent_pid=session.pid,
+                collector=session.collector,
+            )
+
+        def after_baseline(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> dict[str, object] | None:
+            del baseline
+            nonlocal map_capture
+            if not args.capture_maps:
+                return None
+            apply_programs = lifecycle.artifacts["apply_tracee_programs"]
+            assert isinstance(apply_programs, list)
+            capture_plan = build_map_capture_specs(
+                apply_programs,
+                repo_name="tracee",
+                object_paths=sorted((ROOT_DIR / "corpus" / "build" / "tracee").glob("*.bpf.o")),
+                runner_binary=runner_binary,
+            )
+            map_capture = {
+                "discovery": {
+                    key: value
+                    for key, value in capture_plan.items()
+                    if key != "program_specs"
+                }
+            }
+            map_capture["result"] = capture_map_state(
+                captured_from="e2e/tracee",
+                program_specs=capture_plan["program_specs"],
+                optimize_results={},
+            )
+            return {"map_capture": map_capture}
+
+        def stop(_: object, lifecycle: CaseLifecycleState) -> None:
+            session = lifecycle.runtime
+            assert isinstance(session, TraceeAgentSession)
+            session.close()
+
+        def cleanup(_: object) -> None:
+            return None
+
         with enable_bpf_stats():
-            with TraceeAgentSession(commands, load_timeout=int(args.load_timeout)) as session:
-                selected_programs = select_tracee_programs(session.programs, config)
-                prog_ids = [int(program["id"]) for program in selected_programs]
-                if config.get("apply_programs"):
-                    apply_programs = select_tracee_programs(
-                        session.programs,
-                        config,
-                        config_key="apply_programs",
-                        allow_all_when_unset=False,
-                    )
-                    apply_prog_ids = [int(program["id"]) for program in apply_programs]
-                else:
-                    apply_programs = [dict(program) for program in selected_programs]
-                    apply_prog_ids = list(prog_ids)
-                if preflight_duration_s > 0 and workloads:
-                    preflight_workloads = list(workloads)
-                    preflight_prog_ids = sorted(set(prog_ids) | set(apply_prog_ids))
-                    preflight = run_phase(
-                        preflight_workloads,
-                        preflight_duration_s,
-                        preflight_prog_ids,
-                        prog_fds=session.program_fds,
-                        agent_pid=session.pid,
-                        collector=session.collector,
-                    )
-                    preflight["program_activity"] = {
-                        "target_programs": summarize_program_activity(preflight, prog_ids),
-                        "apply_programs": summarize_program_activity(preflight, apply_prog_ids),
-                    }
-                    if require_program_activity:
-                        target_run_cnt = int(
-                            ((preflight.get("program_activity") or {}).get("target_programs") or {}).get("total_run_cnt", 0) or 0
-                        )
-                        apply_run_cnt = int(
-                            ((preflight.get("program_activity") or {}).get("apply_programs") or {}).get("total_run_cnt", 0) or 0
-                        )
-                        if target_run_cnt <= 0:
-                            limitations.append(
-                                "Configured Tracee events/workload did not execute the selected target programs during preflight."
-                            )
-                            return skip_payload(
-                                config=config,
-                                duration_s=duration_s,
-                                tracee_binary=tracee_binary,
-                                setup_result=setup_result,
-                                smoke=bool(args.smoke),
-                                reason="preflight observed zero target-program executions; skipping invalid runtime measurement",
-                                limitations=limitations,
-                                preflight=preflight,
-                            )
-                        if config.get("apply_programs") and apply_run_cnt <= 0:
-                            limitations.append(
-                                "Configured Tracee events/workload did not execute the configured apply programs during preflight."
-                            )
-                            return skip_payload(
-                                config=config,
-                                duration_s=duration_s,
-                                tracee_binary=tracee_binary,
-                                setup_result=setup_result,
-                                smoke=bool(args.smoke),
-                                reason="preflight observed zero apply-program executions; skipping invalid optimization benchmark",
-                                limitations=limitations,
-                                preflight=preflight,
-                            )
-                baseline = run_phase(
-                    workloads,
-                    duration_s,
-                    prog_ids,
-                    prog_fds=session.program_fds,
-                    agent_pid=session.pid,
-                    collector=session.collector,
-                )
-                if args.capture_maps:
-                    capture_plan = build_map_capture_specs(
-                        apply_programs,
-                        repo_name="tracee",
-                        object_paths=sorted((ROOT_DIR / "corpus" / "build" / "tracee").glob("*.bpf.o")),
-                        runner_binary=Path(args.runner).resolve(),
-                    )
-                    map_capture = {
-                        "discovery": {
-                            key: value
-                            for key, value in capture_plan.items()
-                            if key != "program_specs"
-                        }
-                    }
-                    map_capture["result"] = capture_map_state(
-                        captured_from="e2e/tracee",
-                        program_specs=capture_plan["program_specs"],
-                        optimize_results={},
-                    )
-                scan_results = scan_programs(
-                    apply_prog_ids,
-                    daemon_binary,
-                    prog_fds=session.program_fds,
-                )
-                rejit_result = apply_daemon_rejit(
-                    daemon_binary,
-                    apply_prog_ids,
-                    enabled_passes=benchmark_rejit_enabled_passes(),
-                )
-                if rejit_result["applied"]:
-                    post_rejit = run_phase(
-                        workloads,
-                        duration_s,
-                        prog_ids,
-                        prog_fds=session.program_fds,
-                        agent_pid=session.pid,
-                        collector=session.collector,
-                    )
-                else:
-                    post_rejit = None
+            lifecycle_result = run_case_lifecycle(
+                daemon_binary=daemon_binary,
+                setup=setup,
+                start=start,
+                workload=workload,
+                stop=stop,
+                cleanup=cleanup,
+                before_baseline=before_baseline,
+                after_baseline=after_baseline,
+                enabled_passes=benchmark_rejit_enabled_passes(),
+            )
     except Exception as exc:
         return error_payload(
             config=config,
@@ -971,6 +1003,40 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             preflight=preflight,
         )
 
+    if lifecycle_result.abort is not None:
+        return skip_payload(
+            config=config,
+            duration_s=duration_s,
+            tracee_binary=tracee_binary,
+            setup_result=setup_result,
+            smoke=bool(args.smoke),
+            reason=lifecycle_result.abort.reason,
+            limitations=limitations,
+            preflight=preflight,
+        )
+
+    if lifecycle_result.state is None or lifecycle_result.baseline is None:
+        return error_payload(
+            config=config,
+            duration_s=duration_s,
+            tracee_binary=tracee_binary,
+            setup_result=setup_result,
+            smoke=bool(args.smoke),
+            error_message="Tracee lifecycle completed without a baseline phase",
+            limitations=limitations,
+            preflight=preflight,
+        )
+
+    session = lifecycle_result.state.runtime
+    assert isinstance(session, TraceeAgentSession)
+    tracee_programs = lifecycle_result.artifacts.get("tracee_programs") or []
+    selected_programs = lifecycle_result.artifacts.get("selected_tracee_programs") or []
+    apply_programs = lifecycle_result.artifacts.get("apply_tracee_programs") or []
+    baseline = lifecycle_result.baseline
+    scan_results = lifecycle_result.scan_results
+    rejit_result = lifecycle_result.rejit_result
+    post_rejit = lifecycle_result.post_rejit
+
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": "ok",
@@ -979,7 +1045,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "duration_s": duration_s,
         "tracee_binary": tracee_binary,
         "tracee_launch_command": commands,
-        "tracee_programs": session.programs,
+        "tracee_programs": tracee_programs,
         "selected_tracee_programs": selected_programs,
         "apply_tracee_programs": apply_programs,
         "setup": setup_result,

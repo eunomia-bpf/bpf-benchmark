@@ -46,6 +46,8 @@ from runner.libs.workload import (  # noqa: E402
     run_open_storm,
 )
 from e2e.case_common import (  # noqa: E402
+    CaseLifecycleState,
+    LifecycleAbort,
     build_map_capture_specs,
     capture_map_state,
     host_metadata,
@@ -53,6 +55,7 @@ from e2e.case_common import (  # noqa: E402
     percent_delta,
     speedup_ratio,
     persist_results,
+    run_case_lifecycle,
 )
 
 
@@ -804,146 +807,225 @@ def daemon_payload(
     setup_result: Mapping[str, object],
     limitations: list[str],
 ) -> dict[str, object]:
-    with tempfile.TemporaryDirectory(prefix="tetragon-policy-") as tempdir:
-        policy_dir = Path(tempdir)
+    preflight: dict[str, object] | None = None
+
+    def setup() -> dict[str, object]:
+        tempdir = tempfile.TemporaryDirectory(prefix="tetragon-policy-")
+        policy_dir = Path(tempdir.name)
         policy_paths = write_tetragon_policies(policy_dir)
+        return {
+            "tempdir": tempdir,
+            "policy_dir": policy_dir,
+            "policy_paths": policy_paths,
+        }
+
+    def start(state: object) -> CaseLifecycleState:
+        assert isinstance(state, dict)
+        policy_dir = state["policy_dir"]
+        assert isinstance(policy_dir, Path)
         command = [tetragon_binary, *tetragon_extra_args, "--tracing-policy-dir", str(policy_dir)]
-        with TetragonAgentSession(command, load_timeout) as session:
-            selected_programs = select_tetragon_programs(session.programs, config)
-            prog_ids = [int(program["id"]) for program in selected_programs]
-            if config.get("apply_programs"):
-                apply_programs = select_tetragon_programs(
-                    session.programs,
-                    config,
-                    config_key="apply_programs",
-                    allow_all_when_unset=False,
-                )
-                apply_prog_ids = [int(program["id"]) for program in apply_programs]
-            else:
-                apply_programs = [dict(program) for program in selected_programs]
-                apply_prog_ids = list(prog_ids)
-            preflight: dict[str, object] | None = None
-            map_capture: dict[str, object] | None = None
-            agent_logs = session.collector_snapshot()
-            exit_reason = describe_agent_exit("Tetragon", session.process, agent_logs)
-            if exit_reason is None:
-                if preflight_duration_s > 0 and workloads:
-                    preflight_workloads = list(workloads)
-                    preflight_prog_ids = sorted(set(prog_ids) | set(apply_prog_ids))
-                    preflight = run_phase(preflight_workloads, preflight_duration_s, preflight_prog_ids, agent_pid=session.pid)
-                    preflight["program_activity"] = {
-                        "target_programs": summarize_program_activity(preflight, prog_ids),
-                        "apply_programs": summarize_program_activity(preflight, apply_prog_ids),
-                    }
-                    if require_program_activity:
-                        target_run_cnt = int(
-                            ((preflight.get("program_activity") or {}).get("target_programs") or {}).get("total_run_cnt", 0) or 0
-                        )
-                        apply_run_cnt = int(
-                            ((preflight.get("program_activity") or {}).get("apply_programs") or {}).get("total_run_cnt", 0) or 0
-                        )
-                        if target_run_cnt <= 0:
-                            limitations.append(
-                                "Configured Tetragon workload did not execute the selected target programs during preflight."
-                            )
-                            return error_payload(
-                                config=config,
-                                tetragon_binary=tetragon_binary,
-                                duration_s=duration_s,
-                                smoke=smoke,
-                                setup_result=setup_result,
-                                error_message="preflight observed zero target-program executions; invalid runtime measurement",
-                                limitations=limitations,
-                                preflight=preflight,
-                            )
-                        if config.get("apply_programs") and apply_run_cnt <= 0:
-                            limitations.append(
-                                "Configured Tetragon workload did not execute the configured apply programs during preflight."
-                            )
-                            return error_payload(
-                                config=config,
-                                tetragon_binary=tetragon_binary,
-                                duration_s=duration_s,
-                                smoke=smoke,
-                                setup_result=setup_result,
-                                error_message="preflight observed zero apply-program executions; invalid optimization benchmark",
-                                limitations=limitations,
-                                preflight=preflight,
-                            )
-                baseline = run_phase(workloads, duration_s, prog_ids, agent_pid=session.pid)
-                if capture_maps:
-                    capture_plan = build_map_capture_specs(
-                        apply_programs,
-                        repo_name="tetragon",
-                        object_paths=sorted((ROOT_DIR / "corpus" / "build" / "tetragon").glob("*.bpf.o")),
-                        runner_binary=runner_binary,
-                    )
-                    map_capture = {
-                        "discovery": {
-                            key: value
-                            for key, value in capture_plan.items()
-                            if key != "program_specs"
-                        }
-                    }
-                    map_capture["result"] = capture_map_state(
-                        captured_from="e2e/tetragon",
-                        program_specs=capture_plan["program_specs"],
-                        optimize_results={},
-                    )
-                scan_results = scan_programs(apply_prog_ids, daemon_binary)
-                rejit_result = apply_daemon_rejit(
-                    daemon_binary,
-                    apply_prog_ids,
-                    enabled_passes=benchmark_rejit_enabled_passes(),
-                )
-                if rejit_result["applied"]:
-                    post_rejit = run_phase(workloads, duration_s, prog_ids, agent_pid=session.pid)
-                else:
-                    post_rejit = None
-                comparison = compare_phases(baseline, post_rejit)
-            else:
-                limitations.append(f"{exit_reason}; skipping scan and ReJIT after the baseline phase.")
-                scan_results = {}
-                rejit_result = {
-                    "applied": False,
-                    "reason": exit_reason,
-                }
-                post_rejit = None
-                comparison = {
-                    "comparable": False,
-                    "reason": exit_reason,
-                }
-            limitations.append(
-                "events_total and events_per_sec are derived from aggregate BPF run_cnt deltas, so a single application operation can increment multiple program counters."
+        session = TetragonAgentSession(command, load_timeout)
+        session.__enter__()
+        selected_programs = select_tetragon_programs(session.programs, config)
+        prog_ids = [int(program["id"]) for program in selected_programs]
+        if config.get("apply_programs"):
+            apply_programs = select_tetragon_programs(
+                session.programs,
+                config,
+                config_key="apply_programs",
+                allow_all_when_unset=False,
             )
-            payload = {
-                "generated_at": datetime.now(timezone.utc).isoformat(),
-                "status": "ok",
-                "mode": "tetragon_daemon",
-                "smoke": smoke,
-                "duration_s": duration_s,
-                "tetragon_binary": tetragon_binary,
-                "setup": dict(setup_result),
-                "host": host_metadata(),
+            apply_prog_ids = [int(program["id"]) for program in apply_programs]
+        else:
+            apply_programs = [dict(program) for program in selected_programs]
+            apply_prog_ids = list(prog_ids)
+        return CaseLifecycleState(
+            runtime=session,
+            target_prog_ids=prog_ids,
+            apply_prog_ids=apply_prog_ids,
+            artifacts={
                 "tetragon_launch_command": command,
-                "policy_dir": str(policy_dir),
-                "policy_paths": [str(path) for path in policy_paths],
-                "config": dict(config),
                 "tetragon_programs": session.programs,
                 "selected_tetragon_programs": selected_programs,
                 "apply_tetragon_programs": apply_programs,
-                "agent_logs": session.collector_snapshot(),
-                "preflight": preflight,
-                "baseline": baseline,
-                "scan_results": {str(key): value for key, value in scan_results.items()},
-                "rejit_result": rejit_result,
-                "post_rejit": post_rejit,
-                "programs": build_program_summary(scan_results, baseline, post_rejit),
-                "comparison": comparison,
-                "limitations": limitations,
-                "map_capture": map_capture,
+            },
+        )
+
+    def before_baseline(_: object, lifecycle: CaseLifecycleState) -> LifecycleAbort | None:
+        nonlocal preflight
+        if preflight_duration_s <= 0 or not workloads:
+            return None
+        session = lifecycle.runtime
+        assert isinstance(session, TetragonAgentSession)
+        preflight_prog_ids = sorted(set(lifecycle.target_prog_ids) | set(lifecycle.apply_prog_ids))
+        preflight = run_phase(list(workloads), preflight_duration_s, preflight_prog_ids, agent_pid=session.pid)
+        preflight["program_activity"] = {
+            "target_programs": summarize_program_activity(preflight, lifecycle.target_prog_ids),
+            "apply_programs": summarize_program_activity(preflight, lifecycle.apply_prog_ids),
+        }
+        lifecycle.artifacts["preflight"] = preflight
+        if not require_program_activity:
+            return None
+
+        target_run_cnt = int(
+            ((preflight.get("program_activity") or {}).get("target_programs") or {}).get("total_run_cnt", 0) or 0
+        )
+        apply_run_cnt = int(
+            ((preflight.get("program_activity") or {}).get("apply_programs") or {}).get("total_run_cnt", 0) or 0
+        )
+        if target_run_cnt <= 0:
+            limitations.append(
+                "Configured Tetragon workload did not execute the selected target programs during preflight."
+            )
+            return LifecycleAbort(
+                status="error",
+                reason="preflight observed zero target-program executions; invalid runtime measurement",
+                artifacts={"preflight": preflight},
+            )
+        if config.get("apply_programs") and apply_run_cnt <= 0:
+            limitations.append(
+                "Configured Tetragon workload did not execute the configured apply programs during preflight."
+            )
+            return LifecycleAbort(
+                status="error",
+                reason="preflight observed zero apply-program executions; invalid optimization benchmark",
+                artifacts={"preflight": preflight},
+            )
+        return None
+
+    def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
+        del phase_name
+        session = lifecycle.runtime
+        assert isinstance(session, TetragonAgentSession)
+        return run_phase(workloads, duration_s, lifecycle.target_prog_ids, agent_pid=session.pid)
+
+    def after_baseline(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> dict[str, object] | None:
+        del baseline
+        if not capture_maps:
+            return None
+        apply_programs = lifecycle.artifacts["apply_tetragon_programs"]
+        assert isinstance(apply_programs, list)
+        capture_plan = build_map_capture_specs(
+            apply_programs,
+            repo_name="tetragon",
+            object_paths=sorted((ROOT_DIR / "corpus" / "build" / "tetragon").glob("*.bpf.o")),
+            runner_binary=runner_binary,
+        )
+        map_capture = {
+            "discovery": {
+                key: value
+                for key, value in capture_plan.items()
+                if key != "program_specs"
             }
-            return payload
+        }
+        map_capture["result"] = capture_map_state(
+            captured_from="e2e/tetragon",
+            program_specs=capture_plan["program_specs"],
+            optimize_results={},
+        )
+        return {"map_capture": map_capture}
+
+    def before_rejit(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> str | None:
+        del baseline
+        session = lifecycle.runtime
+        assert isinstance(session, TetragonAgentSession)
+        exit_reason = describe_agent_exit("Tetragon", session.process, session.collector_snapshot())
+        if exit_reason is not None:
+            limitations.append(f"{exit_reason}; skipping scan and ReJIT after the baseline phase.")
+        return exit_reason
+
+    def stop(_: object, lifecycle: CaseLifecycleState) -> None:
+        session = lifecycle.runtime
+        assert isinstance(session, TetragonAgentSession)
+        session.close()
+
+    def cleanup(state: object) -> None:
+        assert isinstance(state, dict)
+        tempdir = state["tempdir"]
+        assert isinstance(tempdir, tempfile.TemporaryDirectory)
+        tempdir.cleanup()
+
+    lifecycle_result = run_case_lifecycle(
+        daemon_binary=daemon_binary,
+        setup=setup,
+        start=start,
+        workload=workload,
+        stop=stop,
+        cleanup=cleanup,
+        before_baseline=before_baseline,
+        after_baseline=after_baseline,
+        before_rejit=before_rejit,
+        enabled_passes=benchmark_rejit_enabled_passes(),
+    )
+    if lifecycle_result.abort is not None:
+        return error_payload(
+            config=config,
+            tetragon_binary=tetragon_binary,
+            duration_s=duration_s,
+            smoke=smoke,
+            setup_result=setup_result,
+            error_message=lifecycle_result.abort.reason,
+            limitations=limitations,
+            preflight=preflight,
+        )
+    if lifecycle_result.state is None or lifecycle_result.baseline is None:
+        return error_payload(
+            config=config,
+            tetragon_binary=tetragon_binary,
+            duration_s=duration_s,
+            smoke=smoke,
+            setup_result=setup_result,
+            error_message="Tetragon lifecycle completed without a baseline phase",
+            limitations=limitations,
+            preflight=preflight,
+        )
+
+    session = lifecycle_result.state.runtime
+    assert isinstance(session, TetragonAgentSession)
+    setup_state = lifecycle_result.setup_state
+    assert isinstance(setup_state, dict)
+    policy_dir = setup_state["policy_dir"]
+    policy_paths = setup_state["policy_paths"]
+    assert isinstance(policy_dir, Path)
+    assert isinstance(policy_paths, list)
+
+    baseline = lifecycle_result.baseline
+    scan_results = lifecycle_result.scan_results
+    rejit_result = lifecycle_result.rejit_result or {"applied": False, "reason": "reJIT did not run"}
+    post_rejit = lifecycle_result.post_rejit
+    comparison = compare_phases(baseline, post_rejit)
+
+    limitations.append(
+        "events_total and events_per_sec are derived from aggregate BPF run_cnt deltas, so a single application operation can increment multiple program counters."
+    )
+    payload = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": "ok",
+        "mode": "tetragon_daemon",
+        "smoke": smoke,
+        "duration_s": duration_s,
+        "tetragon_binary": tetragon_binary,
+        "setup": dict(setup_result),
+        "host": host_metadata(),
+        "tetragon_launch_command": lifecycle_result.artifacts.get("tetragon_launch_command") or [],
+        "policy_dir": str(policy_dir),
+        "policy_paths": [str(path) for path in policy_paths],
+        "config": dict(config),
+        "tetragon_programs": lifecycle_result.artifacts.get("tetragon_programs") or [],
+        "selected_tetragon_programs": lifecycle_result.artifacts.get("selected_tetragon_programs") or [],
+        "apply_tetragon_programs": lifecycle_result.artifacts.get("apply_tetragon_programs") or [],
+        "agent_logs": session.collector_snapshot(),
+        "preflight": preflight,
+        "baseline": baseline,
+        "scan_results": {str(key): value for key, value in scan_results.items()},
+        "rejit_result": rejit_result,
+        "post_rejit": post_rejit,
+        "programs": build_program_summary(scan_results, baseline, post_rejit),
+        "comparison": comparison,
+        "limitations": limitations,
+        "map_capture": lifecycle_result.artifacts.get("map_capture"),
+    }
+    return payload
 
 
 def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:

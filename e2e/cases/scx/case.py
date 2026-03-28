@@ -33,11 +33,13 @@ from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes
 from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from e2e.case_common import (  # noqa: E402
+    CaseLifecycleState,
     host_metadata,
     summarize_numbers,
     percent_delta,
     percentile,
     persist_results,
+    run_case_lifecycle,
 )
 
 
@@ -681,35 +683,66 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     loader_error: str | None = None
 
     try:
-        with ScxSchedulerSession(
-            scheduler_binary,
-            args.scheduler_extra_arg or [],
-            load_timeout=int(args.load_timeout),
-        ) as session:
-            scheduler_programs = session.programs
-            scheduler_ops = read_scx_ops()
-            scheduler_snapshot = session.collector_snapshot()
-            runtime_counters_available = any(
-                ("run_cnt" in program) or ("run_time_ns" in program)
-                for program in scheduler_programs
+        def setup() -> dict[str, object]:
+            return {}
+
+        def start(_: object) -> CaseLifecycleState:
+            session = ScxSchedulerSession(
+                scheduler_binary,
+                args.scheduler_extra_arg or [],
+                load_timeout=int(args.load_timeout),
             )
-            if not runtime_counters_available:
-                limitations.append(
-                    "bpftool does not expose per-program run_cnt/run_time_ns for these struct_ops programs on this kernel, so BPF runtime deltas are unavailable."
-                )
-            prog_ids = [int(program["id"]) for program in scheduler_programs]
-            baseline = run_phase(workloads, duration_s, agent_pid=session.pid)
-            scan_results = scan_programs(prog_ids, daemon_binary)
-            rejit_result = apply_daemon_rejit(
-                daemon_binary,
-                prog_ids,
-                enabled_passes=benchmark_rejit_enabled_passes(),
+            session.__enter__()
+            return CaseLifecycleState(
+                runtime=session,
+                target_prog_ids=[int(program["id"]) for program in session.programs],
+                artifacts={
+                    "scheduler_programs": session.programs,
+                },
             )
-            if rejit_result["applied"]:
-                post_rejit = run_phase(workloads, duration_s, agent_pid=session.pid)
-            else:
-                post_rejit = None
-            scheduler_snapshot = session.collector_snapshot()
+
+        def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
+            del phase_name
+            session = lifecycle.runtime
+            assert isinstance(session, ScxSchedulerSession)
+            return run_phase(workloads, duration_s, agent_pid=session.pid)
+
+        def stop(_: object, lifecycle: CaseLifecycleState) -> None:
+            session = lifecycle.runtime
+            assert isinstance(session, ScxSchedulerSession)
+            session.close()
+
+        def cleanup(_: object) -> None:
+            return None
+
+        lifecycle_result = run_case_lifecycle(
+            daemon_binary=daemon_binary,
+            setup=setup,
+            start=start,
+            workload=workload,
+            stop=stop,
+            cleanup=cleanup,
+            enabled_passes=benchmark_rejit_enabled_passes(),
+        )
+        if lifecycle_result.state is None:
+            raise RuntimeError("scx lifecycle completed without a live session")
+        session = lifecycle_result.state.runtime
+        assert isinstance(session, ScxSchedulerSession)
+        scheduler_programs = list(lifecycle_result.artifacts.get("scheduler_programs") or [])
+        scheduler_ops = read_scx_ops()
+        scheduler_snapshot = session.collector_snapshot()
+        runtime_counters_available = any(
+            ("run_cnt" in program) or ("run_time_ns" in program)
+            for program in scheduler_programs
+        )
+        if not runtime_counters_available:
+            limitations.append(
+                "bpftool does not expose per-program run_cnt/run_time_ns for these struct_ops programs on this kernel, so BPF runtime deltas are unavailable."
+            )
+        baseline = lifecycle_result.baseline
+        scan_results = lifecycle_result.scan_results
+        rejit_result = lifecycle_result.rejit_result
+        post_rejit = lifecycle_result.post_rejit
     except Exception as exc:
         loader_error = str(exc)
         limitations.append(f"scx_rusty userspace loader failed: {loader_error}")

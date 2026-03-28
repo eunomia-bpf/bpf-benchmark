@@ -71,28 +71,33 @@ daemon 自己不实现 kinsn，只做三件事：
 
 ### 2.1 实际存在的子命令
 
-当前 `main.rs` 只暴露一个运行模式：
+当前 CLI 只保留一个子命令：
 
-1. `serve [--socket PATH]`
+1. `bpfrejit-daemon [--pgo] [--pgo-interval-ms N] [--no-rollback] serve [--socket PATH]`
+
+这里需要注意两点：
+
+1. `serve` 是唯一的命令入口；历史上的 `watch`、`apply`、`apply-all`、`enumerate`、`rewrite` 已全部删除。
+2. `--pgo`、`--pgo-interval-ms`、`--no-rollback` 是顶层 CLI flag，但它们实际只对 `serve` 路径生效。
 
 ### 2.2 `serve`
 
 输入：
 
 1. `--socket`，默认 `/var/run/bpfrejit.sock`
-2. `--no-rollback`
-3. `--pgo`
-4. `--pgo-interval-ms`
+2. 顶层 `--no-rollback`
+3. 顶层 `--pgo`
+4. 顶层 `--pgo-interval-ms`
 
 行为：
 
 1. 绑定 Unix socket。
 2. 使用非阻塞 `accept()` 循环接收客户端。
-3. 每 1 秒跑一次 invalidation tick。
+3. 每 1 秒跑一次 invalidation tick；`MapInvalidationTracker` 仍然由 `serve` 持有并在这里驱动。
 4. 对每一行请求做一次 JSON 解析和处理。
-5. 若开启 `--pgo`，则在每次 `optimize` 请求前收集短窗口运行统计。
+5. 若以 `--pgo` 启动，则在每次 `optimize` / `optimize-all` / invalidation reoptimize 进入 pipeline 前，通过 `profiler` 收集一个短窗口运行统计。
 
-`serve` 是唯一长期运行模式；它不会自己主动扫描或排序 live program，而是被动响应客户端请求。
+`serve` 是唯一长期运行模式；不再存在独立的 watch / enumerate / rewrite / apply 子命令。live program 的枚举只发生在 `optimize-all` 请求或 invalidation 驱动的重优化路径里。
 
 ### 2.3 serve 模式的 Unix socket 协议
 
@@ -219,7 +224,7 @@ daemon 自己不实现 kinsn，只做三件事：
 6. `map_fd_bindings`
    稳定的 `old_fd -> map_id` 映射，用于在删除/重排 pseudo-map load 后仍能正确重定位 map FD。
 7. `branch_miss_rate`
-   注入的 PMU 分支失效率，供 `branch_flip` 使用。
+   由 `serve --pgo` 路径中的 `profiler` 注入的 PMU 分支失效率，供 `branch_flip` 使用。
 8. `verifier_states`
    原始程序 `log_level=2` verifier 状态快照，用于 `map_inline` 的 verifier-guided key 提取。
 
@@ -243,6 +248,7 @@ daemon 自己不实现 kinsn，只做三件事：
 1. `branch_profile: Option<BranchProfile>`
 
 它主要服务 `BranchFlipPass`。也就是说，当前 annotation 机制是通用的，但真正写入的动态注解只有分支 profile。
+这些 per-site profile 也是由 `serve --pgo` 路径中的 `profiler` 采集并注入。
 
 ### 3.4 `PassContext`
 
@@ -310,12 +316,12 @@ daemon 自己不实现 kinsn，只做三件事：
 11. `endian_fusion`
 12. `branch_flip`
 
-构建方式有两种：
+运行时构建方式只有一种：
 
 1. `build_full_pipeline()`
    全量按注册表顺序加入。
-2. `build_custom_pipeline(names)`
-   从注册表中过滤，但仍保持 canonical order，不按用户输入顺序重排。
+
+另有一个 `build_custom_pipeline(names)`，但它当前只在测试代码中存在，不是 CLI/daemon 的运行时入口。
 
 执行流程：
 
@@ -545,18 +551,17 @@ rollback 不在 `PassManager` 内部做，而是在 `commands::try_apply_one()` 
    直接跳过。当前只允许 `HASH/ARRAY/PERCPU_ARRAY/LRU_HASH`。
 2. map 元数据不可用
    跳过。
-3. mutable map 且该 map 的 lookup value 在程序其他位置可能被写
-   跳过。`collect_mutable_maps_with_lookup_value_writes()` 会沿 alias 跟踪，发现经由 lookup result 写内存的场景。
-4. key 不是常量
+3. key 不是常量
    跳过。
-5. 对 `ARRAY/PERCPU_ARRAY`，若常量 key 超出 `max_entries`
+4. 对 `ARRAY/PERCPU_ARRAY`，若常量 key 超出 `max_entries`
    直接跳过。
 
 这里的核心策略是：
 
 1. “map 可读”是必要条件。
 2. “map frozen”不是必要条件。
-3. 对 mutable map，只允许只读、可重新失效追踪的投机性内联。
+3. 对 mutable map，不再做“程序级/整张 map 只要出现写就全部禁用”的 writeback guard；当前 guard 是 site-local 的。
+4. 也就是说，daemon 只检查“当前 lookup site 返回的 `r0` use region 是否逃逸出固定偏移只读 load”。同一张 mutable map 上，某些 site 可以被内联，另一些 site 可以因为逃逸写而被跳过。
 
 #### 6.1.5 constant key 提取：三条路径
 
@@ -639,10 +644,12 @@ rollback 不在 `PassManager` 内部做，而是在 `commands::try_apply_one()` 
 若结果满足：
 
 1. 至少有一个 `fixed_load`
-2. mutable map 没有 `other_uses`
+2. 当前 site 的 mutable lookup result 没有 `other_uses`
 3. speculative map 具备立即 null-check
 
 才可能继续 inline。
+
+换句话说，mutable writeback guard 现在是“按当前 site 的 alias/use region 判定”，而不是“先做整程序扫描，再把整张 map 一刀切禁用”。
 
 #### 6.1.7 null-check 识别与消除
 
@@ -723,7 +730,7 @@ rollback 不在 `PassManager` 内部做，而是在 `commands::try_apply_one()` 
 
 #### 6.1.11 invalidation tracking
 
-`map_inline` 本身只产出 `MapInlineRecord`，真正的 tracking 在 `commands.rs` 和 `server.rs`：
+CLI 虽然已经只剩 `serve`，但 invalidation tracking 并没有被移走；`map_inline` 本身只产出 `MapInlineRecord`，真正的 tracking 仍然在 `commands.rs` 和 `server.rs`：
 
 1. 每个成功应用的 inline site 会记录：
    `map_id/key/expected_value`。
@@ -939,7 +946,7 @@ rewrite：
 
 目标：
 
-1. 根据 PGO，把热点 taken-path 的 if/else diamond 翻面，使热点 path 变成 fallthrough。
+1. 根据 `serve --pgo` 注入的 profile，把热点 taken-path 的 if/else diamond 翻面，使热点 path 变成 fallthrough。
 
 匹配算法：
 
@@ -952,8 +959,10 @@ rewrite：
 触发条件：
 
 1. `program.branch_miss_rate` 必须存在，且不超过阈值。
-2. site 上必须有 `BranchProfile`。
-3. `taken_count / total >= min_bias`。
+2. 若 site 上有 `BranchProfile`，则要求 `taken_count / total >= min_bias`。
+3. 若 site 上没有 `BranchProfile`，但程序级 PMU miss-rate gate 已通过，则允许退化到一个保守的 size-asymmetry fallback：
+   `else_len > 0 && then_len > 2 * else_len`
+4. 若完全没有 PMU 数据，则整个 pass 仍然跳过；也就是说 `branch_flip` 要真正生效，入口仍然是以 `--pgo` 启动 `serve`。
 
 rewrite：
 
@@ -966,7 +975,7 @@ rewrite：
 
 1. 不接受 `JSET`，因为没有简单反操作。
 2. site 内不能有来自外部的 interior target，JCC 自己的 target 除外。
-3. 没有 PGO 数据时完全不做 heuristic fallback。
+3. 没有 PMU 数据时完全不做 fallback；只有 `serve --pgo` 成功收集到程序级 profile 后，才会考虑 per-site profile 或 size-asymmetry fallback。
 
 ### 6.10 `BoundsCheckMergePass`
 
@@ -1103,24 +1112,6 @@ rewrite：
    `dst_base/src_base/dst_off/src_off/len/temp_reg`
 3. memset payload 编码：
    `base/dst_off/len/width_class/zero_fill/fill_byte`
-
-### 6.13 `SpeculationBarrierPass`
-
-当前 `daemon/src/` 中未实现此 pass，也未出现在 `PASS_REGISTRY`。
-
-因此当前 daemon：
-
-1. 不存在该 pass 的代码。
-2. 不存在其 pipeline 排位。
-3. 不存在其算法、guard 或 rewrite 逻辑。
-
-### 6.14 `DangerousHelperFirewallPass`
-
-同上，当前代码库未实现。
-
-### 6.15 `LivePatchPass`
-
-同上，当前代码库未实现。
 
 ## 7. BPF Syscall 层
 
@@ -1298,7 +1289,7 @@ rewrite：
 
 ## 9. Pipeline 配置
 
-### 9.1 默认 pipeline 组成
+### 9.1 daemon 默认 pipeline 组成
 
 默认 pipeline 就是 `PASS_REGISTRY` 全量顺序：
 
@@ -1315,7 +1306,31 @@ rewrite：
 11. `endian_fusion`
 12. `branch_flip`
 
-### 9.2 排序原因与依赖关系
+这 12 个 pass 就是当前 daemon 注册表中的全部优化 pass；安全 pass `speculation_barrier`、`dangerous_helper_firewall`、`live_patch` 已不在 registry 中，也不在默认 pipeline 中。
+
+### 9.2 `benchmark_config.yaml` 的 performance pass 集
+
+`corpus/config/benchmark_config.yaml` 的 `passes.performance` 当前列出了 11 个 performance pass：
+
+1. `wide_mem`
+2. `rotate`
+3. `cond_select`
+4. `extract`
+5. `endian_fusion`
+6. `map_inline`
+7. `const_prop`
+8. `dce`
+9. `bounds_check_merge`
+10. `skb_load_bytes_spec`
+11. `bulk_memory`
+
+这里与 daemon 默认 pipeline 有一个刻意差异：
+
+1. 这 11 个 pass 覆盖了当前 benchmark 配置里默认启用的非 PGO pass。
+2. `branch_flip` 仍然在 daemon `PASS_REGISTRY` 里，但不在这个 `performance` 列表中；它只有在请求显式启用、并且 `serve` 以 `--pgo` 启动时才真正有意义。
+3. 三个安全 pass 既不在 registry 中，也不在 `benchmark_config.yaml` 中。
+
+### 9.3 排序原因与依赖关系
 
 当前顺序体现了三层意图：
 
@@ -1332,7 +1347,7 @@ rewrite：
 2. `dce` 需要跟在 `const_prop` 后反复收尾。
 3. `branch_flip` 放最后，避免后续 pass 再打乱其已重排的分支布局。
 
-### 9.3 按请求覆盖 pass 选择
+### 9.4 按请求覆盖 pass 选择
 
 当前代码支持两种覆盖方式：
 
@@ -1343,14 +1358,14 @@ rewrite：
 
 1. 名字必须是 canonical pass name。
 2. unknown name 会在请求入口直接报错。
-3. `build_custom_pipeline()` 虽然支持构建子集 pipeline，但当前 CLI 没有直接暴露该入口；实际用户可控覆盖主要在 `serve`。
+3. 运行时不会重建“子集 pipeline”；daemon 始终从 `build_full_pipeline()` 出发，再由 policy 决定哪些 pass 被启用或禁用。
 
-### 9.4 当前未进入 pipeline 的 pass
+### 9.5 不在当前范围内的 pass
 
-以下 pass 名称出现在需求说明中，但当前代码库并不存在，也不在默认 pipeline 中：
+以下安全 pass 不在当前 OSDI 评测范围内，且已经从当前 registry / 默认 pipeline / benchmark config 中移除：
 
-1. `SpeculationBarrierPass`
-2. `DangerousHelperFirewallPass`
-3. `LivePatchPass`
+1. `speculation_barrier`
+2. `dangerous_helper_firewall`
+3. `live_patch`
 
-因此，“默认 pipeline 组成”只以上文 12 个已实现 pass 为准。
+因此，本文件里与 pipeline 相关的描述都只以上文 daemon 默认 12-pass pipeline 和 benchmark 默认 11-pass performance 集为准。

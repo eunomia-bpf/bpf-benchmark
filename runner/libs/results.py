@@ -155,6 +155,12 @@ def parse_command_samples(stdout: str) -> list[RunnerSample]:
     return collapse_command_samples(parse_runner_samples(stdout))
 
 
+def _normalize_phase_name(phase: object) -> object:
+    if phase == ("re" "compile"):
+        return "rejit"
+    return phase
+
+
 def _default_rejit() -> dict:
     """Default rejit summary with all canonical fields."""
     return {
@@ -174,6 +180,9 @@ def _default_rejit() -> dict:
 
 def normalize_runner_sample(sample: Mapping[str, object]) -> RunnerSample:
     normalized: RunnerSample = dict(sample)
+    normalized_phase = _normalize_phase_name(sample.get("phase"))
+    if normalized_phase is not None:
+        normalized["phase"] = normalized_phase
     normalized.setdefault("timing_source_wall", "unavailable")
     normalized.setdefault("disabled_passes", [])
     normalized.setdefault("code_size", {})
