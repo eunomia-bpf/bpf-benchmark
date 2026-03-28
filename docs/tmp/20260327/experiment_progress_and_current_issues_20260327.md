@@ -273,6 +273,37 @@ fixture smoke 中已确认能命中的更有潜力的程序包括：
 - 之前选中的 `wake_up_new_task` 不是最值得打的热路径
 - 下一步应转向 `execve_rate` / `event_execve` 这种更可能因为 map 常量而触发更深折叠的程序
 
+这条判断在后续的权威单-case rerun 上又被进一步收紧了：
+
+- `map_inline` e2e 权威 rerun：
+  - artifact: `e2e/results/tetragon_20260328_041603/details/result.json`
+  - preflight:
+    - `event_execve run_cnt_delta = 7501`
+    - `execve_rate run_cnt_delta = 0`
+  - 新结论：
+    - 这轮不再是“rewrite 后 apply 失败再回退”
+    - 而是两个 apply program 都被新的 tail-call guard 明确判成 `no_change`
+    - `event_execve` 因为包含 `bpf_tail_call` helper，`map_inline` 当前被保守禁用，`sites_applied = 0`
+    - `execve_rate` 同样是 `no_change`
+
+- `map_inline` corpus 权威 rerun：
+  - artifact: `runner/corpus/results/vm_corpus_20260328_041923/details/result.json`
+  - profile: `ablation_map_inline_only`
+  - filter: `bpf_execve_event`
+  - 结果：
+    - `selected_objects = 1`
+    - `selected_programs = 3`
+    - `compile_pairs = 3`
+    - `measured_pairs = 0`
+    - failure reason 全部是 `bpf_program__attach failed: Invalid argument`
+  - 这说明当前 Tetragon corpus 的主 blocker 已经不是 REJIT，也不是 pass 本身，而是 `event_execve` 这条 attach-group 在线下 generic `bpf_program__attach()` 路径上无法成功 attach
+
+因此，当前 Tetragon 最准确的状态应该更新为：
+
+1. `map_inline` 在 Tetragon e2e 上已经从“导致 kernel-side `poke_tab update failed: -22`”收敛到“保守 `no_change`”
+2. `execve_rate` 依旧不是活跃 apply target，真正热的是 `event_execve`
+3. corpus 这边的当前缺口不是“还没跑”，而是 generic attach 先把 `event_execve` 家族挡在测量之前；后续 `const_prop` / `dce` 独立 rerun 主要是在补齐 artifact，而不是预期它们会在当前 attach 面下突然给出 runtime 数据
+
 ### 4.4 Tracee 当前真值
 
 Tracee 当前状态最复杂，因为它同时有：
@@ -1156,3 +1187,81 @@ VM 空闲后，我已经用新的单-case `make` 入口补跑了最短验证：
    - pass-isolated correctness smoke
    - harness plumbing regression test
 4. 但它**不能替代**当前 Tetragon e2e 单-pass rerun，因为后者真正暴露问题的前提就是 live map state 让 rewrite 实际发生
+
+### 11.18 Tetragon `map_inline` 已从 rollback fail 收敛成 `no_change`，但 corpus 仍卡在 attach
+
+在完成 `map_inline` 的 tail-call guard 之后，我补跑了两条最新真值：
+
+1. `make vm-e2e E2E_CASE=tetragon E2E_ARGS='--config /home/yunwei37/workspace/bpf-benchmark/e2e/cases/tetragon/config_execve_rate.yaml --rejit-passes map_inline --duration 5'`
+2. `make vm-corpus TARGET=x86 PROFILE=ablation_map_inline_only FILTERS='bpf_execve_event' SKIP_CORPUS_FETCH=1`
+
+结果分别是：
+
+- e2e artifact：`e2e/results/tetragon_20260328_041603/details/result.json`
+  - `status = ok`
+  - `comparison.comparable = false`
+  - reason: `rejit did not apply successfully`
+  - 但这次 `rejit_result` 的内部细节已经不是 verifier / apply 失败，而是：
+    - `event_execve`: `no_change`
+    - `execve_rate`: `no_change`
+    - 共同 skip reason:
+      - `program contains bpf_tail_call helper; map_inline is disabled until poke_tab-preserving rewrites land`
+
+- corpus artifact：`runner/corpus/results/vm_corpus_20260328_041923/details/result.json`
+  - `compile_pairs = 3`
+  - `measured_pairs = 0`
+  - 所有 baseline/rejit run 都失败在：
+    - `bpf_program__attach failed: Invalid argument`
+  - 三个 program（`execve_rate` / `execve_send` / `event_execve`）都是这个同一类 attach 失败
+
+这条更新很关键，因为它把当前 Tetragon `map_inline` 的两个 failure surface 彻底拆开了：
+
+1. **e2e apply path**：当前已经被保守 guard 收成干净 `no_change`，不再制造误导性的 rollback failure
+2. **corpus attach path**：当前仍然被 generic attach 机制挡住，导致单-pass corpus artifact 只能给出“独立失败数据”，还给不出 runtime 对比
+
+所以后续继续补 `const_prop` / `dce` 的 corpus 单-pass 数据是有意义的，但需要明确预期：
+
+- 这些 rerun 现在的主要目标是把 artifact 补齐
+- 不是在当前 attach blocker 未修复前，指望它们直接产出可比较 runtime
+
+### 11.19 Tetragon corpus 三个单-pass artifact 已全部补齐，但都停在同一个 attach blocker
+
+为了把用户要求的“每个 pass 独立运行并拿到数据”闭环，我又顺序补跑了：
+
+1. `make vm-corpus TARGET=x86 PROFILE=ablation_const_prop_only FILTERS='bpf_execve_event' SKIP_CORPUS_FETCH=1`
+2. `make vm-corpus TARGET=x86 PROFILE=ablation_dce_only FILTERS='bpf_execve_event' SKIP_CORPUS_FETCH=1`
+
+新 artifact 分别是：
+
+- `const_prop`: `runner/corpus/results/vm_corpus_20260328_042542/details/result.json`
+- `dce`: `runner/corpus/results/vm_corpus_20260328_042647/details/result.json`
+
+这两轮和前面的 `map_inline` corpus artifact：
+
+- `map_inline`: `runner/corpus/results/vm_corpus_20260328_041923/details/result.json`
+
+一起，已经把 Tetragon `bpf_execve_event` 这条线的三条独立 corpus 结果补全了。
+
+三轮的共同结果完全一致：
+
+- `selected_objects = 1`
+- `selected_programs = 3`
+- `compile_pairs = 3`
+- `measured_pairs = 0`
+- `applied_programs = 0`
+- failure reason 全部是：
+  - `bpf_program__attach failed: Invalid argument`
+
+program 级别也一致：
+
+- `execve_rate`
+- `execve_send`
+- `event_execve`
+
+baseline / rejit 两边都在 attach 前失败，因此：
+
+1. 当前 corpus 线已经不是“还有哪一轮没跑到”的问题
+2. 而是 **三条单-pass 结果都一致地证明**：
+   - `event_execve` family 在线下 generic attach path 上过不去
+   - 所以这条 corpus 线暂时只能给出“独立失败 artifact”，还给不出 runtime 对比
+3. 这也反过来说明，后续若想继续从 Tetragon corpus 拿 runtime 数据，优先级已经不是再调 `map_inline` / `const_prop` / `dce` 本身，而是先修这条 attach 路径

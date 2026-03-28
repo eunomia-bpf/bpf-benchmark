@@ -1601,6 +1601,48 @@ def runtime_for_program(program: ResolvedProgram, *, rejit: bool) -> str:
     return "kernel-rejit" if rejit else "kernel"
 
 
+def find_program_in_object(
+    obj: ResolvedObject,
+    program_name: str,
+) -> ResolvedProgram | None:
+    for program in obj.programs:
+        if program.program_name == program_name:
+            return program
+    return None
+
+
+def generic_attach_section_unsupported_reason(
+    prog_type_name: str,
+    section_name: str,
+) -> str | None:
+    prog_type = prog_type_name.strip()
+    section = section_name.strip()
+    if prog_type == "tracepoint":
+        parts = section.split("/") if section else []
+        if len(parts) != 3 or parts[0] != "tracepoint" or not parts[1] or not parts[2]:
+            return (
+                "libbpf generic tracepoint attach requires section "
+                f"'tracepoint/<category>/<name>', got '{section or '<empty>'}'"
+            )
+    return None
+
+
+def attach_trigger_unsupported_reason(
+    obj: ResolvedObject,
+    program: ResolvedProgram,
+) -> str | None:
+    if program.test_method != "attach_trigger":
+        return None
+    attach_name = program.attach_group or program.program_name
+    attach_program = find_program_in_object(obj, attach_name)
+    if attach_program is None:
+        return f"attach program '{attach_name}' not found in object"
+    return generic_attach_section_unsupported_reason(
+        attach_program.prog_type_name,
+        attach_program.section_name,
+    )
+
+
 def build_object_batch_plan_v2(
     *,
     objects: list[ResolvedObject],
