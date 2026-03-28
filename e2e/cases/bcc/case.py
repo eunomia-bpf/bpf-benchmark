@@ -840,6 +840,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
 
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": "ok",
         "smoke": smoke,
         "duration_s": duration_s,
         "selected_tools": [spec.name for spec in selected],

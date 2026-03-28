@@ -35,3 +35,16 @@ Repository-level constraints for coding agents working in this tree.
 - Delete v1 and dead code when v2 replaces it.
 - Avoid unrelated kernel churn when fixing test failures.
 - Keep kernel diffs minimal and directly tied to REJIT/kinsn/v2 behavior.
+
+## Error Handling (Zero Silent Failure Policy)
+
+- **Every error must be visible.** No `unwrap_or_default()`, `.ok()`, `except: pass`, `let _ = result`, or any pattern that silently swallows errors.
+- **No `compile_only` or skip-by-default.** Every corpus program must either run and produce a measurement, or fail with a clear error message explaining why. Do not annotate programs as "compile only" to hide runtime failures.
+- **Errors must propagate, not degrade.** If a map FD lookup fails, the apply must abort — not continue with a broken program. If an E2E case fails, the suite must report failure — not mask it as "skipped".
+- **No fallback behavior.** If a configuration or dependency is missing, fail loudly. Do not silently fall back to defaults that change the meaning of the benchmark.
+
+## Security Passes (Out of Scope)
+
+- Security-related passes (`speculation_barrier`, `dangerous_helper_firewall`, `live_patch`) are **not in the current OSDI evaluation scope**.
+- Do not include them in `benchmark_config.yaml`, default pipeline, or any benchmark run.
+- Code for these passes should be removed from the daemon default pipeline. Standalone pass implementations may be retained for future work but must not be registered or enabled by default.

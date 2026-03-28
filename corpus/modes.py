@@ -30,6 +30,7 @@ from runner.libs import authoritative_output_path, docs_tmp_dir, latest_output_p
 from runner.libs.batch_runner import run_batch_runner
 from runner.libs.object_discovery import supplement_with_existing_corpus_build_objects
 from runner.libs.machines import resolve_machine
+from runner.libs.rejit import _start_daemon_server, _stop_daemon_server
 from runner.libs.vm import DEFAULT_VM_TARGET
 
 from runner.libs.run_artifacts import (
@@ -219,23 +220,23 @@ def benchmark_enabled_passes(benchmark_config: Mapping[str, Any] | None) -> list
         field_name="passes",
     )
 
-    def normalize(values: Any) -> list[str]:
+    def normalize(values: Any) -> list[str] | None:
         if not isinstance(values, list):
-            return []
+            return None
         return [str(value).strip() for value in values if str(value).strip()]
 
     active_list = normalize(passes_config.get("active_list"))
-    if active_list:
+    if active_list is not None:
         return active_list
 
     active_name = str(passes_config.get("active") or "").strip()
     if active_name:
         named_list = normalize(passes_config.get(active_name))
-        if named_list:
+        if named_list is not None:
             return named_list
 
     performance_list = normalize(passes_config.get("performance"))
-    if performance_list:
+    if performance_list is not None:
         return performance_list
 
     return list(DEFAULT_REJIT_ENABLED_PASSES)
@@ -313,16 +314,6 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     add_max_programs_argument(parser, help_text="Optional cap for smoke testing.")
     parser.add_argument(
-        "--skip-families",
-        action="append",
-        help="Comma-separated REJIT families to exclude from daemon apply. Supported: cmov, wide, rotate, lea, extract, endian, branch-flip.",
-    )
-    parser.add_argument(
-        "--blind-apply",
-        action="store_true",
-        help="Ignore per-program policies and force blind all-apply auto-scan REJIT for debugging.",
-    )
-    parser.add_argument(
         "--guest-info",
         action="store_true",
         help=argparse.SUPPRESS,
@@ -365,50 +356,6 @@ def build_corpus_artifact_metadata(
     }
     metadata.update(extra_fields)
     return metadata
-
-
-def canonical_family_name(value: str) -> str:
-    normalized = value.strip().lower().replace("_", "-")
-    mapping = {
-        "cmov": "cmov",
-        "cond-select": "cmov",
-        "wide": "wide",
-        "wide-mem": "wide",
-        "wide-load": "wide",
-        "rotate": "rotate",
-        "lea": "lea",
-        "addr-calc": "lea",
-        "addrcalc": "lea",
-        "extract": "extract",
-        "bitfield": "extract",
-        "bitfield-extract": "extract",
-        "bit-extract": "extract",
-        "endian": "endian",
-        "endian-fusion": "endian",
-        "branch-flip": "branch-flip",
-        "branchflip": "branch-flip",
-        "bflip": "branch-flip",
-    }
-    if normalized not in mapping:
-        raise SystemExit(
-            f"unsupported family in --skip-families: {value} "
-            "(expected cmov, wide, rotate, lea, extract, endian, or branch-flip)"
-        )
-    return mapping[normalized]
-
-
-def normalize_skip_families(values: list[str] | None) -> list[str]:
-    normalized: list[str] = []
-    seen: set[str] = set()
-    for raw in values or []:
-        for item in raw.split(","):
-            if not item.strip():
-                continue
-            family = canonical_family_name(item)
-            if family not in seen:
-                seen.add(family)
-                normalized.append(family)
-    return normalized
 
 
 def normalize_passes(value: Any) -> list[str]:
@@ -538,17 +485,6 @@ def build_target_name(
     return f"{prefix}:{program_token}" if prefix else program_token
 
 
-def resolve_target_name(entry: Mapping[str, Any]) -> str:
-    raw_name = str(entry.get("name") or "").strip()
-    if raw_name:
-        return raw_name
-    return build_target_name(
-        source=str(entry.get("source", "")),
-        family=str(entry.get("family", "")),
-        program_names=manifest_program_names(entry),
-    )
-
-
 def record_target_name(record: Mapping[str, Any]) -> str:
     raw_name = str(record.get("name") or "").strip()
     if raw_name:
@@ -601,31 +537,6 @@ def batch_text_invocation_summary(result: dict[str, Any] | None) -> dict[str, An
             if str(value)
         }
     return summary
-
-
-def start_daemon_server(daemon: Path, daemon_socket: str) -> subprocess.Popen[str]:
-    socket_path = Path(daemon_socket)
-    socket_path.unlink(missing_ok=True)
-    daemon_proc: subprocess.Popen[str] = subprocess.Popen(
-        [str(daemon), "serve", "--socket", daemon_socket],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        text=True,
-    )
-    time.sleep(0.5)
-    return daemon_proc
-
-
-def stop_daemon_server(daemon_proc: subprocess.Popen[str] | None, daemon_socket: str | None) -> None:
-    if daemon_proc is not None:
-        daemon_proc.terminate()
-        try:
-            daemon_proc.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            daemon_proc.kill()
-            daemon_proc.wait()
-    if daemon_socket:
-        Path(daemon_socket).unlink(missing_ok=True)
 
 
 def emit_guest_event(kind: str, **payload: Any) -> None:
@@ -806,7 +717,7 @@ def build_test_run_batch_job(
         job["btf_custom_path"] = str(btf_custom_path)
     if daemon_socket is not None:
         job["daemon_socket"] = daemon_socket
-    if enabled_passes:
+    if enabled_passes is not None:
         job["enabled_passes"] = list(enabled_passes)
     if prepared_key is not None:
         job["prepared_key"] = prepared_key
@@ -1294,10 +1205,10 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
         write_guest_batch_records(guest_result_path, records)
 
     active_daemon_socket: str | None = None
-    daemon_proc: subprocess.Popen[str] | None = None
+    daemon_server: tuple[subprocess.Popen[str], Path, str, Path, Path] | None = None
     if objects:
-        active_daemon_socket = f"/tmp/bpfrejit-guest-{os.getpid()}.sock"
-        daemon_proc = start_daemon_server(daemon, active_daemon_socket)
+        daemon_server = _start_daemon_server(daemon)
+        active_daemon_socket = str(daemon_server[1])
 
     try:
         for chunk_start in range(0, len(objects), GUEST_BATCH_TARGETS_PER_CHUNK):
@@ -1352,7 +1263,8 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
                 else:
                     emit_guest_event("program_record", index=index, total=len(objects), record=record)
     finally:
-        stop_daemon_server(daemon_proc, active_daemon_socket if daemon_proc is not None else None)
+        if daemon_server is not None:
+            _stop_daemon_server(daemon_server[0], daemon_server[1], daemon_server[2])
     return 0
 
 
@@ -1632,22 +1544,6 @@ def generic_attach_section_unsupported_reason(
                 f"'tracepoint/<category>/<name>', got '{section or '<empty>'}'"
             )
     return None
-
-
-def attach_trigger_unsupported_reason(
-    obj: ResolvedObject,
-    program: ResolvedProgram,
-) -> str | None:
-    if program.test_method != "attach_trigger":
-        return None
-    attach_name = program.attach_group or program.program_name
-    attach_program = find_program_in_object(obj, attach_name)
-    if attach_program is None:
-        return f"attach program '{attach_name}' not found in object"
-    return generic_attach_section_unsupported_reason(
-        attach_program.prog_type_name,
-        attach_program.section_name,
-    )
 
 
 def build_object_batch_plan_v2(
@@ -1969,10 +1865,10 @@ def run_objects_locally_batch(
     enabled_passes: list[str] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
     active_daemon_socket = daemon_socket
-    daemon_proc = None
+    daemon_server: tuple[subprocess.Popen[str], Path, str, Path, Path] | None = None
     if objects and active_daemon_socket is None:
-        active_daemon_socket = f"/tmp/bpfrejit-{os.getpid()}.sock"
-        daemon_proc = start_daemon_server(daemon, active_daemon_socket)
+        daemon_server = _start_daemon_server(daemon)
+        active_daemon_socket = str(daemon_server[1])
 
     try:
         if not objects:
@@ -2006,7 +1902,8 @@ def run_objects_locally_batch(
             cwd=ROOT_DIR,
         )
     finally:
-        stop_daemon_server(daemon_proc, active_daemon_socket if daemon_proc is not None else None)
+        if daemon_server is not None:
+            _stop_daemon_server(daemon_server[0], daemon_server[1], daemon_server[2])
 
     results_by_id = batch_job_result_map(batch_result.get("result"))
     object_records: list[dict[str, Any]] = []
@@ -2348,8 +2245,6 @@ def run_targets_in_guest_batch(
     repeat: int,
     timeout_seconds: int,
     vng_binary: str,
-    skip_families: list[str],
-    blind_apply: bool,
     on_guest_info: Callable[[dict[str, Any]], None] | None = None,
     on_record: Callable[[int, dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
@@ -2400,10 +2295,6 @@ def run_targets_in_guest_batch(
         ]
         if profile:
             guest_argv.extend(["--profile", profile])
-        if skip_families:
-            guest_argv.extend(["--skip-families", ",".join(skip_families)])
-        if blind_apply:
-            guest_argv.append("--blind-apply")
         guest_exec = build_guest_exec(guest_argv)
         timeout_limit = packet_batch_timeout_seconds(len(targets), timeout_seconds)
         command = build_vm_shell_command(
@@ -2840,10 +2731,7 @@ def build_markdown(data: dict[str, Any]) -> str:
 def packet_main(argv: list[str] | None = None) -> int:
     args = parse_packet_args(argv)
     require_minimum(args.repeat, 1, "--repeat")
-    skip_families = normalize_skip_families(args.skip_families)
     benchmark_config_path = args.benchmark_config.get("config_path")
-    if skip_families and not args.blind_apply:
-        raise SystemExit("--skip-families requires --blind-apply")
 
     if args.guest_info:
         return run_guest_info_mode()
@@ -2920,8 +2808,6 @@ def packet_main(argv: list[str] | None = None) -> int:
         "repeat": args.repeat,
         "timeout_seconds": args.timeout,
         "guest_smoke": guest_smoke,
-        "skip_families": skip_families,
-        "blind_apply": args.blind_apply,
         "summary": build_summary_v2(program_records, object_records),
         "object_records": object_records,
         "program_records": program_records,
@@ -2971,8 +2857,6 @@ def packet_main(argv: list[str] | None = None) -> int:
                 "vng_binary": args.vng,
                 "repeat": args.repeat,
                 "timeout_seconds": args.timeout,
-                "skip_families": skip_families,
-                "blind_apply": bool(args.blind_apply),
                 "guest_smoke": guest_smoke,
                 "started_at": session_started_at,
                 "last_updated_at": updated_at,
@@ -3047,8 +2931,6 @@ def packet_main(argv: list[str] | None = None) -> int:
             repeat=args.repeat,
             timeout_seconds=args.timeout,
             vng_binary=args.vng,
-            skip_families=skip_families,
-            blind_apply=args.blind_apply,
             on_guest_info=handle_guest_info,
             on_record=handle_guest_record,
         )

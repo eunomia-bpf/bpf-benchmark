@@ -49,7 +49,6 @@ from runner.libs.workload import (  # noqa: E402
 from e2e.case_common import (  # noqa: E402
     build_map_capture_specs,
     capture_map_state,
-    git_sha,
     host_metadata,
     summarize_numbers,
     percent_delta,
@@ -627,13 +626,16 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Setup tracee binary: `{payload['setup'].get('tracee_binary') or 'missing'}`",
         "",
     ]
-    if payload.get("status") == "skipped":
+    status = str(payload.get("status") or "")
+    if status != "ok":
+        result_label = "SKIP" if status == "skipped" else "ERROR"
+        result_reason = payload.get("skip_reason") or payload.get("error_message") or "unknown"
         lines.extend(
             [
                 "## Result",
                 "",
-                "- Status: `SKIP`",
-                f"- Reason: `{payload.get('skip_reason', 'unknown')}`",
+                f"- Status: `{result_label}`",
+                f"- Reason: `{result_reason}`",
             ]
         )
         if isinstance(preflight, Mapping):
@@ -753,6 +755,40 @@ def skip_payload(
     }
 
 
+def error_payload(
+    *,
+    config: Mapping[str, object],
+    duration_s: int,
+    tracee_binary: str | None,
+    setup_result: Mapping[str, object],
+    smoke: bool,
+    error_message: str,
+    limitations: Sequence[str],
+    preflight: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": "error",
+        "mode": "error",
+        "error_message": error_message,
+        "smoke": smoke,
+        "duration_s": duration_s,
+        "tracee_binary": tracee_binary,
+        "tracee_programs": [],
+        "setup": dict(setup_result),
+        "host": host_metadata(),
+        "config": dict(config),
+        "preflight": None if preflight is None else dict(preflight),
+        "baseline": None,
+        "scan_results": {},
+        "rejit_result": None,
+        "post_rejit": None,
+        "comparison": {"comparable": False, "reason": error_message},
+        "limitations": list(limitations),
+        "map_capture": None,
+    }
+
+
 def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     config = load_config(Path(args.config).resolve())
     duration_s = int(args.duration or config.get("measurement_duration_s") or 60)
@@ -793,13 +829,13 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         )
     if require_program_activity and preflight_duration_s <= 0:
         limitations.append("require_program_activity requires preflight_duration_s > 0.")
-        return skip_payload(
+        return error_payload(
             config=config,
             duration_s=duration_s,
             tracee_binary=tracee_binary,
             setup_result=setup_result,
             smoke=bool(args.smoke),
-            reason="require_program_activity requires preflight_duration_s > 0",
+            error_message="require_program_activity requires preflight_duration_s > 0",
             limitations=limitations,
         )
 
@@ -924,14 +960,15 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 else:
                     post_rejit = None
     except Exception as exc:
-        return skip_payload(
+        return error_payload(
             config=config,
             duration_s=duration_s,
             tracee_binary=tracee_binary,
             setup_result=setup_result,
             smoke=bool(args.smoke),
-            reason=f"Tracee case could not run: {exc}",
+            error_message=f"Tracee case could not run: {exc}",
             limitations=limitations,
+            preflight=preflight,
         )
 
     payload = {

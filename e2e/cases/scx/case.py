@@ -33,7 +33,6 @@ from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes
 from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from e2e.case_common import (  # noqa: E402
-    git_sha,
     host_metadata,
     summarize_numbers,
     percent_delta,
@@ -565,6 +564,7 @@ def probe_bpftool_register(object_path: Path, bpftool_binary: Path) -> dict[str,
 
 
 def build_markdown(payload: Mapping[str, object]) -> str:
+    status = str(payload.get("status") or "")
     lines = [
         "# scx_rusty End-to-End Benchmark",
         "",
@@ -587,6 +587,16 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     lines.append(
         f"- runtime counters exposed via bpftool: `{preflight.get('runtime_counters_available')}`"
     )
+    if status != "ok":
+        lines.extend(
+            [
+                "",
+                "## Result",
+                "",
+                "- Status: `ERROR`",
+                f"- Reason: `{payload.get('error_message') or 'unknown'}`",
+            ]
+        )
     lines.extend(["", "## Loaded Programs", ""])
     site_totals = ((payload.get("scan_summary") or {}).get("site_totals") or {})
     lines.append(
@@ -717,6 +727,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": "ok" if baseline is not None else "error",
         "mode": mode,
         "smoke": bool(args.smoke),
         "duration_s": duration_s,
@@ -740,6 +751,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         "post_rejit": post_rejit,
         "comparison": compare_phases(baseline, post_rejit),
         "limitations": limitations,
+        "error_message": loader_error,
     }
     return payload
 

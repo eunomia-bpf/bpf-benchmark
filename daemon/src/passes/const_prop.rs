@@ -569,7 +569,7 @@ mod tests {
 
     use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
     use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
-    use crate::passes::MapInlinePass;
+    use crate::passes::{DcePass, MapInlinePass};
 
     const BPF_PSEUDO_MAP_FD: u8 = 1;
 
@@ -585,6 +585,24 @@ mod tests {
     fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
         BpfInsn {
             code: BPF_JMP | BPF_JEQ | BPF_K,
+            regs: BpfInsn::make_regs(dst, 0),
+            off,
+            imm,
+        }
+    }
+
+    fn jeq32_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
+        BpfInsn {
+            code: BPF_JMP32 | BPF_JEQ | BPF_K,
+            regs: BpfInsn::make_regs(dst, 0),
+            off,
+            imm,
+        }
+    }
+
+    fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
+        BpfInsn {
+            code: BPF_JMP | BPF_JNE | BPF_K,
             regs: BpfInsn::make_regs(dst, 0),
             off,
             imm,
@@ -660,6 +678,14 @@ mod tests {
         let mut pm = PassManager::new();
         pm.register_analysis(CFGAnalysis);
         pm.add_pass(ConstPropPass);
+        pm.run(program, &PassContext::test_default()).unwrap()
+    }
+
+    fn run_const_prop_then_dce(program: &mut BpfProgram) -> PipelineResult {
+        let mut pm = PassManager::new();
+        pm.register_analysis(CFGAnalysis);
+        pm.add_pass(ConstPropPass);
+        pm.add_pass(DcePass);
         pm.run(program, &PassContext::test_default()).unwrap()
     }
 
@@ -800,6 +826,89 @@ mod tests {
         assert!(program.insns[3].is_ldimm64());
         assert_eq!(1usize + 1 + program.insns[1].off as usize, 5);
         assert_eq!(program.insns[5], exit_insn());
+    }
+
+    #[test]
+    fn fixup_folded_jumps_remaps_backward_jump_after_growth() {
+        let old_insns = vec![
+            BpfInsn::mov64_imm(2, 1),
+            jne_imm(1, 0, -2),
+            exit_insn(),
+        ];
+        let wide = ld_imm64(2, 0, 1, 1);
+        let mut new_insns = vec![wide[0], wide[1], BpfInsn::ja(-2), exit_insn()];
+        let addr_map = vec![0, 2, 3, 4];
+        let replacements = BTreeMap::from([(1usize, vec![BpfInsn::ja(-2)])]);
+
+        fixup_folded_jumps(&mut new_insns, &old_insns, &addr_map, &replacements);
+
+        assert_eq!(new_insns[2], BpfInsn::ja(-3));
+        assert_eq!(2isize + 1 + new_insns[2].off as isize, 0);
+    }
+
+    #[test]
+    fn const_prop_folds_jmp32_branch_and_fixups_target_after_growth() {
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::mov64_imm(1, -1),
+            jeq32_imm(1, -1, 2),
+            BpfInsn::mov64_imm(2, 1),
+            BpfInsn::alu64_imm(BPF_LSH, 2, 40),
+            exit_insn(),
+        ]);
+
+        let result = run_const_prop_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 2);
+        assert_eq!(program.insns[1], BpfInsn::ja(3));
+        assert_eq!(1usize + 1 + program.insns[1].off as usize, 5);
+        assert_eq!(program.insns[5], exit_insn());
+    }
+
+    #[test]
+    fn fixup_folded_jumps_remaps_jump_to_end_sentinel() {
+        let old_insns = vec![
+            jeq_imm(1, 7, 2),
+            BpfInsn::mov64_imm(2, 1),
+            exit_insn(),
+        ];
+        let wide = ld_imm64(2, 0, 1, 1);
+        let mut new_insns = vec![BpfInsn::ja(2), wide[0], wide[1], exit_insn()];
+        let addr_map = vec![0, 1, 3, 4];
+        let replacements = BTreeMap::from([(0usize, vec![BpfInsn::ja(2)])]);
+
+        fixup_folded_jumps(&mut new_insns, &old_insns, &addr_map, &replacements);
+
+        assert_eq!(new_insns[0], BpfInsn::ja(3));
+        assert_eq!(0usize + 1 + new_insns[0].off as usize, 4);
+    }
+
+    #[test]
+    fn const_prop_then_dce_handles_folded_jump_after_dead_block_growth() {
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::mov64_imm(1, 7),
+            jeq_imm(1, 7, 2),
+            BpfInsn::mov64_imm(2, 1),
+            BpfInsn::alu64_imm(BPF_LSH, 2, 40),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+
+        let result = run_const_prop_then_dce(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.pass_results[0].pass_name, "const_prop");
+        assert_eq!(result.pass_results[1].pass_name, "dce");
+        assert!(result.pass_results[0].changed);
+        assert!(result.pass_results[1].changed);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(1, 7),
+                BpfInsn::mov64_imm(0, 1),
+                exit_insn(),
+            ]
+        );
     }
 
     #[test]

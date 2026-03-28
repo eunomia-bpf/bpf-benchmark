@@ -712,6 +712,7 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
 
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": "ok",
         "smoke": bool(args.smoke),
         "duration_s": duration_s,
         "selected_scripts": [spec.name for spec in scripts],

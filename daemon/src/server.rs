@@ -52,6 +52,19 @@ where
     Ok(invalidated)
 }
 
+fn run_invalidation_tick_logged<A, F>(
+    context: &str,
+    tracker: &std::sync::Arc<std::sync::Mutex<MapInvalidationTracker<A>>>,
+    reoptimize: F,
+) where
+    A: MapValueReader,
+    F: FnMut(u32) -> Result<()>,
+{
+    if let Err(err) = process_invalidation_tick(tracker, reoptimize) {
+        eprintln!("{context}: invalidation tick failed: {:#}", err);
+    }
+}
+
 // ── Serve (Unix socket server) ──────────────────────────────────────
 
 pub(crate) fn cmd_serve(
@@ -77,7 +90,7 @@ pub(crate) fn cmd_serve(
     while !SHUTDOWN_FLAG.load(Ordering::Relaxed) {
         if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
             let tracker_for_apply = tracker.clone();
-            let _ = process_invalidation_tick(&tracker, |prog_id| {
+            run_invalidation_tick_logged("serve", &tracker, |prog_id| {
                 commands::try_apply_one(prog_id, ctx, rollback_enabled, Some(&tracker_for_apply))?;
                 Ok(())
             });
@@ -180,13 +193,14 @@ fn process_request(
             .ok_or_else(|| format!("{key} must be a JSON string array"))?;
         let mut passes = Vec::with_capacity(array.len());
         for entry in array {
-            let name = entry
+            let raw_name = entry
                 .as_str()
-                .ok_or_else(|| format!("{key} entries must be strings"))?
-                .trim();
-            if !name.is_empty() {
-                passes.push(name.to_string());
+                .ok_or_else(|| format!("{key} entries must be strings"))?;
+            let name = raw_name.trim();
+            if name.is_empty() {
+                return Err(format!("{key} entries must not be blank"));
             }
+            passes.push(name.to_string());
         }
         Ok(Some(passes))
     }
@@ -308,7 +322,7 @@ pub(crate) fn cmd_watch(
 
         if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
             let tracker_for_apply = tracker.clone();
-            let _ = process_invalidation_tick(&tracker, |prog_id| {
+            run_invalidation_tick_logged("watch", &tracker, |prog_id| {
                 commands::try_apply_one(prog_id, ctx, rollback_enabled, Some(&tracker_for_apply))?;
                 Ok(())
             });
@@ -381,7 +395,7 @@ pub(crate) fn cmd_watch(
             }
             if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
                 let tracker_for_apply = tracker.clone();
-                let _ = process_invalidation_tick(&tracker, |prog_id| {
+                run_invalidation_tick_logged("watch", &tracker, |prog_id| {
                     commands::try_apply_one(
                         prog_id,
                         ctx,
@@ -546,5 +560,31 @@ mod tests {
             response["message"],
             "invalid disabled_passes: unknown pass name(s): bulk_mem"
         );
+    }
+
+    #[test]
+    fn process_request_rejects_blank_enabled_pass_name() {
+        let req = serde_json::json!({
+            "cmd": "status",
+            "enabled_passes": ["   "],
+        });
+        let tracker = commands::new_invalidation_tracker();
+        let response = process_request(&req, &pass::PassContext::test_default(), true, &tracker);
+
+        assert_eq!(response["status"], "error");
+        assert_eq!(response["message"], "enabled_passes entries must not be blank");
+    }
+
+    #[test]
+    fn process_request_rejects_blank_disabled_pass_name() {
+        let req = serde_json::json!({
+            "cmd": "status",
+            "disabled_passes": ["   "],
+        });
+        let tracker = commands::new_invalidation_tracker();
+        let response = process_request(&req, &pass::PassContext::test_default(), true, &tracker);
+
+        assert_eq!(response["status"], "error");
+        assert_eq!(response["message"], "disabled_passes entries must not be blank");
     }
 }

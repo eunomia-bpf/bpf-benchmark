@@ -48,9 +48,7 @@ from runner.libs.workload import (  # noqa: E402
 from e2e.case_common import (  # noqa: E402
     build_map_capture_specs,
     capture_map_state,
-    git_sha,
     host_metadata,
-    relpath,
     summarize_numbers,
     percent_delta,
     speedup_ratio,
@@ -650,14 +648,17 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Setup return code: `{payload['setup']['returncode']}`",
         f"- Setup tetragon binary: `{payload['setup'].get('tetragon_binary') or 'missing'}`",
     ]
-    if payload.get("status") == "skipped":
+    status = str(payload.get("status") or "")
+    if status != "ok":
+        result_label = "SKIP" if status == "skipped" else "ERROR"
+        result_reason = payload.get("skip_reason") or payload.get("error_message") or "unknown"
         lines.extend(
             [
                 "",
                 "## Result",
                 "",
-                "- Status: `SKIP`",
-                f"- Reason: `{payload.get('skip_reason', 'unknown')}`",
+                f"- Status: `{result_label}`",
+                f"- Reason: `{result_reason}`",
             ]
         )
         append_preflight_markdown(lines, payload)
@@ -780,6 +781,41 @@ def skip_payload(
         "post_rejit": None,
         "programs": [],
         "comparison": {"comparable": False, "reason": reason},
+        "limitations": list(limitations),
+        "map_capture": None,
+        "preflight": dict(preflight or {}) if preflight else None,
+    }
+
+
+def error_payload(
+    *,
+    config: Mapping[str, object] | None,
+    tetragon_binary: str | None,
+    duration_s: int,
+    smoke: bool,
+    setup_result: Mapping[str, object],
+    error_message: str,
+    limitations: Sequence[str],
+    preflight: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": "error",
+        "mode": "error",
+        "error_message": error_message,
+        "config": dict(config or {}),
+        "smoke": smoke,
+        "duration_s": duration_s,
+        "tetragon_binary": tetragon_binary,
+        "setup": dict(setup_result),
+        "host": host_metadata(),
+        "tetragon_programs": [],
+        "baseline": None,
+        "scan_results": {},
+        "rejit_result": None,
+        "post_rejit": None,
+        "programs": [],
+        "comparison": {"comparable": False, "reason": error_message},
         "limitations": list(limitations),
         "map_capture": None,
         "preflight": dict(preflight or {}) if preflight else None,
@@ -1000,13 +1036,13 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
 
     if require_program_activity and preflight_duration_s <= 0:
         limitations.append("require_program_activity requires preflight_duration_s > 0.")
-        return skip_payload(
+        return error_payload(
             config=config,
             tetragon_binary=tetragon_binary,
             duration_s=duration_s,
             smoke=bool(args.smoke),
             setup_result=setup_result,
-            reason="require_program_activity requires preflight_duration_s > 0",
+            error_message="require_program_activity requires preflight_duration_s > 0",
             limitations=limitations,
         )
 
@@ -1029,13 +1065,13 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
                 limitations=limitations,
             )
         except Exception as exc:
-            return skip_payload(
+            return error_payload(
                 config=config,
                 tetragon_binary=tetragon_binary,
                 duration_s=duration_s,
                 smoke=bool(args.smoke),
                 setup_result=setup_result,
-                reason=f"Tetragon case could not run: {exc}",
+                error_message=f"Tetragon case could not run: {exc}",
                 limitations=limitations,
             )
 

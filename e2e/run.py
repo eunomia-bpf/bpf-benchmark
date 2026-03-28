@@ -225,6 +225,12 @@ def _is_skipped_payload(payload: object) -> bool:
     return isinstance(payload, dict) and str(payload.get("status", "")).lower() == "skipped"
 
 
+def _payload_status(payload: object) -> str:
+    if not isinstance(payload, dict):
+        return ""
+    return str(payload.get("status", "")).lower()
+
+
 def _trim_e2e_value(value: object) -> object:
     if isinstance(value, dict):
         return {key: _trim_e2e_value(inner) for key, inner in value.items()}
@@ -301,25 +307,60 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
         detail_texts = {"result.md": spec.build_markdown(payload) + "\n"}
         if spec.build_report is not None:
             detail_texts["report.md"] = spec.build_report(payload) + "\n"
+        payload_status = _payload_status(payload)
+        if payload_status not in {"ok", "skipped", "error"}:
+            payload_status = "error"
+            if isinstance(payload, dict):
+                payload.setdefault("status", "error")
+                payload.setdefault(
+                    "error_message",
+                    f"{args.case} returned an invalid status: {payload.get('status')!r}",
+                )
 
         completed_at = datetime.now(timezone.utc).isoformat()
-        progress_payload = {
-            "case": args.case,
-            "status": "completed",
-            "smoke": bool(args.smoke),
-            "completed_at": completed_at,
-        }
         metadata_payload = payload
-        session.write(
-            status="completed",
-            progress_payload=progress_payload,
-            result_payload=payload,
-            detail_texts=detail_texts,
-        )
         write_json(output_json, payload)
         write_text(output_md, detail_texts["result.md"])
         if "report.md" in detail_texts:
             write_text(report_md, detail_texts["report.md"])
+        if payload_status in {"ok", "skipped"}:
+            progress_payload = {
+                "case": args.case,
+                "status": "completed",
+                "case_status": payload_status,
+                "smoke": bool(args.smoke),
+                "completed_at": completed_at,
+            }
+            session.write(
+                status="completed",
+                progress_payload=progress_payload,
+                result_payload=payload,
+                detail_texts=detail_texts,
+            )
+            return payload
+
+        error_message = (
+            str(payload.get("error_message") or "").strip()
+            if isinstance(payload, dict)
+            else ""
+        ) or f"{args.case} returned status={payload_status or 'missing'}"
+        error_payload = {
+            "case": args.case,
+            "status": "error",
+            "case_status": payload_status or "missing",
+            "smoke": bool(args.smoke),
+            "error_message": error_message,
+            "failed_at": completed_at,
+        }
+        metadata_payload = payload if isinstance(payload, dict) else error_payload
+        session.write(
+            status="error",
+            progress_payload=error_payload,
+            result_payload=payload if isinstance(payload, dict) else None,
+            detail_texts=detail_texts,
+            error_message=error_message,
+        )
+        raise RuntimeError(error_message)
     except Exception as exc:
         failed_at = datetime.now(timezone.utc).isoformat()
         error_payload = {

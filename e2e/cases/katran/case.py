@@ -2327,6 +2327,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": "ok",
         "mode": "katran_dsr_direct_map_connection_churn_same_image_paired",
         "control_plane_mode": "bpftool_direct_map",
         "traffic_driver": "wrk" if use_wrk_driver else "python_parallel",
