@@ -20,7 +20,7 @@ const REG_COUNT: usize = 11;
 
 type RegConstState = [Option<u64>; REG_COUNT];
 
-/// Fold exact register constants into MOV/LD_IMM64/JA/NOP.
+/// Fold exact register constants into MOV32/MOV64/LD_IMM64/JA/NOP.
 pub struct ConstPropPass;
 
 impl BpfPass for ConstPropPass {
@@ -253,7 +253,7 @@ fn fold_alu_instruction(
     let op = bpf_op(insn.code);
     let candidate = match op {
         BPF_MOV if bpf_src(insn.code) == BPF_K => return None,
-        _ => emit_constant_load(insn.dst_reg(), result),
+        _ => emit_constant_load(insn.dst_reg(), result, insn.class() == BPF_ALU),
     };
 
     replacement_if_changed(insns, pc, &candidate)
@@ -468,7 +468,11 @@ fn unknown_state() -> RegConstState {
     [None; REG_COUNT]
 }
 
-fn emit_constant_load(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
+fn emit_constant_load(dst_reg: u8, value: u64, is_32: bool) -> Vec<BpfInsn> {
+    if is_32 {
+        return vec![BpfInsn::mov32_imm(dst_reg, value as u32 as i32)];
+    }
+
     if let Some(imm) = as_mov64_imm(value) {
         vec![BpfInsn::mov64_imm(dst_reg, imm)]
     } else {
@@ -714,6 +718,33 @@ mod tests {
     }
 
     #[test]
+    fn const_prop_folds_alu32_chain_to_mov32_imm() {
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::mov64_imm(1, -1),
+            BpfInsn {
+                code: BPF_ALU | BPF_ADD | BPF_K,
+                regs: BpfInsn::make_regs(1, 0),
+                off: 0,
+                imm: 1,
+            },
+            exit_insn(),
+        ]);
+
+        let result = run_const_prop_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(1, -1),
+                BpfInsn::mov32_imm(1, 0),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
     fn const_prop_tracks_ldimm64_constants() {
         let wide = ld_imm64(1, 0, 0, 1);
         let mut program = BpfProgram::new(vec![wide[0], wide[1], add64_imm(1, 1), exit_insn()]);
@@ -799,7 +830,7 @@ mod tests {
         assert_eq!(
             program.insns,
             vec![
-                BpfInsn::mov64_imm(6, 7),
+                BpfInsn::mov32_imm(6, 7),
                 BpfInsn::ja(1),
                 BpfInsn::mov64_imm(0, 0),
                 BpfInsn::mov64_imm(0, 1),

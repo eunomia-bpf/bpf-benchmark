@@ -208,8 +208,13 @@ daemon_socket_response daemon_socket_optimize(
         response.program_changed = extract_json_bool(summary, "program_changed");
         response.total_sites_applied = static_cast<uint32_t>(
             extract_json_int(summary, "total_sites_applied"));
-        response.verifier_retries = static_cast<uint32_t>(
-            extract_json_int(summary, "verifier_retries"));
+        if (const auto verifier_retries =
+                extract_json_int_optional(summary, "verifier_retries");
+            verifier_retries.has_value()) {
+            response.verifier_retries = static_cast<uint32_t>(*verifier_retries);
+        } else {
+            response.verifier_retries = 0;
+        }
         response.final_disabled_passes =
             extract_json_string_array(summary, "final_disabled_passes");
 

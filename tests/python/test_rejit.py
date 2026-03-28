@@ -46,7 +46,11 @@ def test_benchmark_rejit_enabled_passes_respects_explicit_empty_env(monkeypatch)
 def test_benchmark_rejit_enabled_passes_uses_default_when_env_missing(monkeypatch) -> None:
     monkeypatch.delenv("BPFREJIT_BENCH_PASSES", raising=False)
 
-    assert rejit.benchmark_rejit_enabled_passes() == ["map_inline", "const_prop", "dce"]
+    assert rejit.benchmark_rejit_enabled_passes() == [
+        "wide_mem", "rotate", "cond_select", "extract", "endian_fusion",
+        "map_inline", "const_prop", "dce",
+        "bounds_check_merge", "skb_load_bytes_spec", "bulk_memory",
+    ]
 
 
 def test_apply_daemon_rejit_empty_pass_list_uses_socket(monkeypatch) -> None:

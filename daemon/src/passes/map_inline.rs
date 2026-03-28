@@ -1533,16 +1533,17 @@ fn round_up_8(value: usize) -> usize {
 }
 
 fn emit_constant_load(dst_reg: u8, value: u64, size: u8) -> Vec<BpfInsn> {
-    let signed_value = value as i64;
-    if size == BPF_DW && signed_value >= i32::MIN as i64 && signed_value <= i32::MAX as i64 {
-        return vec![BpfInsn::mov64_imm(dst_reg, signed_value as i32)];
+    if size == BPF_DW {
+        let signed_value = value as i64;
+        if signed_value >= i32::MIN as i64 && signed_value <= i32::MAX as i64 {
+            return vec![BpfInsn::mov64_imm(dst_reg, signed_value as i32)];
+        }
+
+        return emit_ldimm64(dst_reg, value);
     }
 
-    if size != BPF_DW && value <= i32::MAX as u64 {
-        return vec![BpfInsn::mov64_imm(dst_reg, value as i32)];
-    }
-
-    emit_ldimm64(dst_reg, value)
+    debug_assert!(value <= u32::MAX as u64);
+    vec![BpfInsn::mov32_imm(dst_reg, value as u32 as i32)]
 }
 
 fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {

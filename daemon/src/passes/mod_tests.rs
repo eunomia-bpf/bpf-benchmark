@@ -280,7 +280,7 @@ fn cascade_map_inline_emits_non_zero_mov_constant() {
     );
     assert_eq!(result.pass_results[0].pass_name, "map_inline");
     assert_eq!(result.pass_results[0].sites_applied, 1);
-    assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+    assert_eq!(program.insns, vec![BpfInsn::mov32_imm(0, 42), exit_insn()]);
 }
 
 #[test]
@@ -311,7 +311,7 @@ fn cascade_const_prop_folds_non_zero_map_inline_output() {
     assert_eq!(
         program.insns,
         vec![
-            BpfInsn::mov64_imm(0, 42),
+            BpfInsn::mov32_imm(0, 42),
             BpfInsn::mov64_imm(1, 10),
             BpfInsn::mov64_imm(1, 52),
             exit_insn(),
@@ -350,7 +350,7 @@ fn cascade_dce_eliminates_dead_branch_after_const_prop() {
     assert_eq!(
         program.insns,
         vec![
-            BpfInsn::mov64_imm(6, 42),
+            BpfInsn::mov32_imm(6, 42),
             BpfInsn::mov64_imm(0, 1),
             exit_insn(),
         ]
@@ -411,7 +411,7 @@ fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
     assert_eq!(
         program.insns,
         vec![
-            BpfInsn::mov64_imm(6, 42),
+            BpfInsn::mov32_imm(6, 42),
             BpfInsn::mov64_imm(1, 10),
             BpfInsn::mov64_imm(1, 52),
             BpfInsn::mov64_imm(0, 1),
@@ -461,7 +461,7 @@ fn cascade_hash_map_keeps_null_path_but_folds_non_null_path() {
             BpfInsn::alu64_imm(BPF_ADD, 2, -4),
             call_helper(HELPER_MAP_LOOKUP_ELEM),
             jeq_imm(0, 0, 5),
-            BpfInsn::mov64_imm(6, 42),
+            BpfInsn::mov32_imm(6, 42),
             BpfInsn::mov64_imm(1, 10),
             BpfInsn::mov64_imm(1, 52),
             BpfInsn::mov64_imm(0, 1),

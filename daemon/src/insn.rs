@@ -209,6 +209,17 @@ impl BpfInsn {
         }
     }
 
+    /// `mov32 dst, imm`
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub const fn mov32_imm(dst: u8, imm: i32) -> Self {
+        Self {
+            code: BPF_ALU | BPF_MOV | BPF_K,
+            regs: Self::make_regs(dst, 0),
+            off: 0,
+            imm,
+        }
+    }
+
     /// `call kfunc` (src_reg = BPF_PSEUDO_KFUNC_CALL = 2)
     ///
     /// `off = 0` means vmlinux BTF. For module kfuncs, `off` is the 1-based
@@ -471,6 +482,13 @@ mod tests {
         assert_eq!(insn.dst_reg(), 3);
         assert_eq!(insn.src_reg(), 0);
         assert_eq!(insn.imm, 42);
+
+        // mov32_imm r4, -1
+        let insn = BpfInsn::mov32_imm(4, -1);
+        assert_eq!(insn.code, BPF_ALU | BPF_MOV | BPF_K);
+        assert_eq!(insn.dst_reg(), 4);
+        assert_eq!(insn.src_reg(), 0);
+        assert_eq!(insn.imm, -1);
 
         // ldx_mem(W, r0, r6, 4)
         let insn = BpfInsn::ldx_mem(BPF_W, 0, 6, 4);

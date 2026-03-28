@@ -930,5 +930,20 @@ make clean
 | **567** | SOSP 架构 readiness review | ✅ | 302 files / 120644 LOC。5 大 red flags（已修 #566）。God files 列表。重复实现分析。artifact 闭环缺失。报告：`architecture_sosp_readiness_20260328.md`。 |
 | **568** | Mutable writeback guard site-local | ✅ | 删除程序级 `collect_mutable_maps_with_lookup_value_writes()` veto。改为 per-site r0 use classification 直接判断。同一 mutable map 上只读 site 仍可 inline。507 tests pass。 |
 | **569** | bpftrace 0 applied 修复 | ✅ | 根因：bpftrace sites 全是 wide_mem，但 active passes 只有 map_inline/const_prop/dce。修复：benchmark_config.yaml performance 列表加回所有 11 个 performance passes（wide_mem/rotate/cond_select/extract/endian_fusion/map_inline/const_prop/dce/bounds_check_merge/skb_load_bytes_spec/bulk_memory）。 |
-| **570** | Corpus 深入分析 + crash 调查 | 🔄 | codex 在跑。分析 Top 10 / 回归 / 按 repo / map_inline 效果 + test_map_init.bpf.o segfault 根因。 |
-| **571** | E2E + Katran VM 验证（全修复后） | 🔄 | codex 在跑。验证 Tetragon 不再 Permission denied、Katran map_inline coverage 从 2 回升。 |
+| **570** | Corpus 深入分析 + crash 调查 | ✅ | **Top 10 speedup**: security_bpf_map 4.19x（map_inline+const_prop+dce）。**88/255 加速 >1.05x**（但 36 个是 no-change 噪声）。**103/255 回归 <0.95x**（~50 噪声 + ~37 pass-induced）。**Calico 不是代码膨胀**：xlated 不变，native 只 +2-4B，但慢 3-4x（layout perturbation）。**BCC emit bug**: 32-bit 0xffffffff 用 2-slot LD_IMM64。**Crash 根因**：REJIT retry 中 guest segfault（已修 #per-pass verify）。报告：`corpus_deep_analysis_and_crash_20260328.md`。 |
+| **571** | E2E + Katran VM 验证（第一轮） | ✅ | **用旧 binary**（mtime 比 E2E 晚）。Tetragon 仍 Permission denied（R4 !read_ok，可能第二个 bug）。Katran map_inline=**6**（site-local veto 生效，但其他原因 skip 了 60+ sites）。BCC geomean **1.023x**。报告：`e2e_and_katran_post_all_fixes_20260328.md`。 |
+| **572** | Per-pass verify 重构 | ✅ | 删除 retry loop / attribution / --no-rollback。每个 changed pass 后调 verify callback，失败回退+标记 rejected+继续后续 pass。最终 REJIT 只做一次。**506 tests pass / 0 failed / 0 ignored**。 |
+| **573** | PGO socket protocol | ✅ | 删除 --pgo CLI flag。新增 socket 命令：profile-start/stop/save/load。optimize 自动用已有 profile。branch_flip 启用时 Python 自动 start→sleep→stop→optimize。**513 daemon tests pass**。 |
+| **574** | E2E case scaffold 去重 | ✅ | run_case_lifecycle() 在 case_common.py。6 个 case 统一生命周期。 |
+| **575** | 术语统一 recompile→rejit | ✅ | C++ phase 输出、Python 解析兼容层全改。`make runner` + `make smoke` 通过。 |
+| **576** | daemon-architecture.md 更新 | ✅ | 反映 serve-only + PGO socket + per-pass verify + 删安全 pass。1371 行。 |
+| **577** | Calico 回归分析 | ✅ | **不是真实回归**：51 applied 中 25 慢 26 快，中位数 1.005。3 次同配置 run geomean 从 0.84→0.80→1.13，连正负号都翻。repeat=50 对 138-150ns 程序不够。 |
+| **578** | verifier_retries JSON 兼容修复 | ✅ | daemon_client.cpp optional 解析，缺失时置 0。`make runner` 通过。 |
+| **579** | Python test 修复 | ✅ | test_benchmark_rejit_enabled_passes 断言更新到 11 pass 列表。38 python tests pass。 |
+| **580** | KVM PMU 调查 | ✅ | **根因**：Arrow Lake 是 Hybrid CPU（P+E core），KVM 硬编码禁用 vPMU（`X86_FEATURE_HYBRID_CPU` → `enable_pmu=false`），modprobe 无法覆盖。替代：`perf kvm stat --guest` 或重编译宿主机内核。 |
+| **581** | SOSP paper review (Opus + Codex) | ✅ | **两个 reviewer 一致 Strong Reject / Reject**。致命：eval placeholder、formally verified 无支撑、Section 5 空。核心故事在 framework/kinsn/map-inline 间不收敛。报告：`sosp_paper_review_20260328.md`。 |
+| **582** | 回归根因分析 | ✅ | Calico：非代码膨胀，是 layout/branch perturbation。BCC：emit_constant_load 把 32-bit 0xffffffff 用 LD_IMM64。报告：`regression_root_cause_analysis_20260328.md`。 |
+| **583** | E2E 最终重跑（最新 binary） | 🔄 | codex 在跑。用最新 daemon binary（含 per-pass verify + mutable guard + const_prop fix）。 |
+| **584** | emit_constant_load fix + Tetragon R4 调查 | 🔄 | codex 在跑。 |
+| **585** | perf kvm stat --guest 调研 | 🔄 | codex 在跑。 |
+| **586** | 7 个重构 post-review | 🔄 | codex 在跑。检查 corpus/modes refactor、CLI simplify、C++ dedup、per-pass verify、PGO socket、E2E scaffold、mutable guard。 |
