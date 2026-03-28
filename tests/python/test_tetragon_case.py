@@ -46,12 +46,12 @@ def test_workload_specs_from_config_parses_exec_storm() -> None:
     assert workloads[0].value == 3
 
 
-def test_build_markdown_keeps_preflight_for_skipped_payload() -> None:
+def test_build_markdown_keeps_preflight_for_error_payload() -> None:
     payload = {
         "generated_at": "2026-03-27T23:34:34.000000+00:00",
-        "status": "skipped",
-        "mode": "skipped",
-        "skip_reason": "preflight observed zero apply-program executions; skipping invalid optimization benchmark",
+        "status": "error",
+        "mode": "error",
+        "error_message": "preflight observed zero apply-program executions; invalid optimization benchmark",
         "smoke": False,
         "duration_s": 30,
         "tetragon_binary": "/tmp/tetragon",

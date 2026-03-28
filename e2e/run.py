@@ -323,7 +323,23 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
         write_text(output_md, detail_texts["result.md"])
         if "report.md" in detail_texts:
             write_text(report_md, detail_texts["report.md"])
-        if payload_status in {"ok", "skipped"}:
+        if payload_status == "ok":
+            progress_payload = {
+                "case": args.case,
+                "status": "completed",
+                "case_status": payload_status,
+                "smoke": bool(args.smoke),
+                "completed_at": completed_at,
+            }
+            session.write(
+                status="completed",
+                progress_payload=progress_payload,
+                result_payload=payload,
+                detail_texts=detail_texts,
+            )
+            return payload
+
+        if payload_status == "skipped":
             progress_payload = {
                 "case": args.case,
                 "status": "completed",

@@ -57,3 +57,27 @@ def test_attach_trigger_accepts_standard_tracepoint_section() -> None:
     reason = modes.attach_trigger_unsupported_reason(obj, program)
 
     assert reason is None
+
+
+def test_build_test_run_batch_job_preserves_explicit_empty_enabled_passes() -> None:
+    job = modes.build_test_run_batch_job(
+        job_id="empty-passes",
+        execution="serial",
+        runtime="kernel-rejit",
+        object_path=Path("/tmp/demo.bpf.o"),
+        program_name=None,
+        attach_program_name=None,
+        io_mode="context",
+        raw_packet=False,
+        memory_path=None,
+        input_size=0,
+        repeat=1,
+        warmup_repeat=0,
+        btf_custom_path=None,
+        compile_only=True,
+        daemon_socket="/tmp/rejit.sock",
+        enabled_passes=[],
+    )
+
+    assert "enabled_passes" in job
+    assert job["enabled_passes"] == []

@@ -56,6 +56,42 @@ def test_run_single_case_writes_primary_outputs(tmp_path: Path, monkeypatch) -> 
     assert (tmp_path / "dummy-report.md").read_text() == "report=7\n"
 
 
+def test_run_single_case_raises_for_error_payload(tmp_path: Path, monkeypatch) -> None:
+    payload = {"status": "error", "error_message": "boom", "value": 7}
+
+    def fake_run_case(args: argparse.Namespace) -> dict[str, object]:
+        del args
+        return dict(payload)
+
+    spec = e2e_run.CaseSpec(
+        run_case=fake_run_case,
+        build_markdown=lambda result: f"status={result['status']}",
+        build_report=lambda result: f"report={result['status']}",
+        default_output_json=tmp_path / "dummy_authoritative_20260327.json",
+        default_output_md=tmp_path / "dummy.md",
+    )
+    monkeypatch.setitem(e2e_run.CASE_SPECS, "dummy-error", spec)
+
+    args = argparse.Namespace(
+        case="dummy-error",
+        output_json=str(tmp_path / "dummy.json"),
+        output_md=str(tmp_path / "dummy.md"),
+        report_md=str(tmp_path / "dummy-report.md"),
+        smoke=False,
+    )
+
+    try:
+        e2e_run._run_single_case(args, clear_existing=True)
+    except RuntimeError as exc:
+        assert str(exc) == "boom"
+    else:
+        raise AssertionError("error payload should fail the case")
+
+    assert json.loads((tmp_path / "dummy.json").read_text()) == payload
+    assert (tmp_path / "dummy.md").read_text() == "status=error\n"
+    assert (tmp_path / "dummy-report.md").read_text() == "report=error\n"
+
+
 def test_apply_case_defaults_switches_tetragon_config_from_tracee_default() -> None:
     args = argparse.Namespace(
         case="tetragon",

@@ -745,7 +745,8 @@ std::vector<std::string> changed_pass_names_batch(const std::vector<daemon_pass_
 daemon_socket_response_batch daemon_socket_optimize_batch(
     const std::string &socket_path,
     uint32_t prog_id,
-    const std::vector<std::string> &enabled_passes)
+    const std::vector<std::string> &enabled_passes,
+    bool enabled_passes_specified)
 {
     daemon_socket_response_batch response;
 
@@ -771,7 +772,7 @@ daemon_socket_response_batch daemon_socket_optimize_batch(
 
     std::ostringstream request_stream;
     request_stream << "{\"cmd\":\"optimize\",\"prog_id\":" << prog_id;
-    if (!enabled_passes.empty()) {
+    if (enabled_passes_specified) {
         request_stream << ",\"enabled_passes\":[";
         for (size_t index = 0; index < enabled_passes.size(); ++index) {
             if (index != 0) {
@@ -1240,6 +1241,7 @@ batch_job parse_job(const YAML::Node &node, size_t index)
         job.program_names_from_manifest = optional_string_list(node, "program_names_from_manifest");
         job.sections_from_manifest = optional_string_list(node, "sections_from_manifest");
         job.prog_types = optional_string_list(node, "prog_types");
+        job.options.enabled_passes_specified = static_cast<bool>(node["enabled_passes"]);
         job.options.enabled_passes = optional_string_list(node, "enabled_passes");
         validate_batch_job(job);
         return job;
@@ -1293,6 +1295,7 @@ batch_job parse_job(const YAML::Node &node, size_t index)
     options.no_cmov = optional_bool(node, "no_cmov", false);
     options.llvm_target_cpu = optional_string(node, "llvm_target_cpu");
     options.llvm_target_features = optional_string(node, "llvm_target_features");
+    options.enabled_passes_specified = static_cast<bool>(node["enabled_passes"]);
     options.enabled_passes = optional_string_list(node, "enabled_passes");
     options.disabled_passes = optional_string_list(node, "disabled_passes");
     options.log_passes = optional_bool(node, "log_passes", false);
@@ -1513,7 +1516,8 @@ static_verify_program_record execute_static_verify_program(
         daemon_socket_optimize_batch(
             job.daemon_socket,
             before_info.id,
-            job.options.enabled_passes);
+            job.options.enabled_passes,
+            job.options.enabled_passes_specified);
     record.daemon_status = daemon_response.status;
     record.daemon_message = daemon_response.message;
     record.daemon_error_message = daemon_response.error_message;

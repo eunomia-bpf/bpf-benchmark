@@ -752,41 +752,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     return "\n".join(lines)
 
 
-def skip_payload(
-    *,
-    config: Mapping[str, object] | None,
-    tetragon_binary: str | None,
-    duration_s: int,
-    smoke: bool,
-    setup_result: Mapping[str, object],
-    reason: str,
-    limitations: Sequence[str],
-    preflight: Mapping[str, object] | None = None,
-) -> dict[str, object]:
-    return {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "skipped",
-        "mode": "skipped",
-        "skip_reason": reason,
-        "config": dict(config or {}),
-        "smoke": smoke,
-        "duration_s": duration_s,
-        "tetragon_binary": tetragon_binary,
-        "setup": dict(setup_result),
-        "host": host_metadata(),
-        "tetragon_programs": [],
-        "baseline": None,
-        "scan_results": {},
-        "rejit_result": None,
-        "post_rejit": None,
-        "programs": [],
-        "comparison": {"comparable": False, "reason": reason},
-        "limitations": list(limitations),
-        "map_capture": None,
-        "preflight": dict(preflight or {}) if preflight else None,
-    }
-
-
 def error_payload(
     *,
     config: Mapping[str, object] | None,
@@ -881,13 +846,13 @@ def daemon_payload(
                             limitations.append(
                                 "Configured Tetragon workload did not execute the selected target programs during preflight."
                             )
-                            return skip_payload(
+                            return error_payload(
                                 config=config,
                                 tetragon_binary=tetragon_binary,
                                 duration_s=duration_s,
                                 smoke=smoke,
                                 setup_result=setup_result,
-                                reason="preflight observed zero target-program executions; skipping invalid runtime measurement",
+                                error_message="preflight observed zero target-program executions; invalid runtime measurement",
                                 limitations=limitations,
                                 preflight=preflight,
                             )
@@ -895,13 +860,13 @@ def daemon_payload(
                             limitations.append(
                                 "Configured Tetragon workload did not execute the configured apply programs during preflight."
                             )
-                            return skip_payload(
+                            return error_payload(
                                 config=config,
                                 tetragon_binary=tetragon_binary,
                                 duration_s=duration_s,
                                 smoke=smoke,
                                 setup_result=setup_result,
-                                reason="preflight observed zero apply-program executions; skipping invalid optimization benchmark",
+                                error_message="preflight observed zero apply-program executions; invalid optimization benchmark",
                                 limitations=limitations,
                                 preflight=preflight,
                             )
@@ -1024,13 +989,13 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
 
     tetragon_binary = resolve_tetragon_binary(args.tetragon_binary, setup_result)
     if tetragon_binary is None:
-        return skip_payload(
+        return error_payload(
             config=config,
             tetragon_binary=None,
             duration_s=duration_s,
             smoke=bool(args.smoke),
             setup_result=setup_result,
-            reason="Tetragon binary is unavailable in this environment; manual .bpf.o fallback is forbidden.",
+            error_message="Tetragon binary is unavailable in this environment; manual .bpf.o fallback is forbidden.",
             limitations=limitations,
         )
 

@@ -1657,11 +1657,12 @@ std::string json_escape_request(std::string_view input)
 
 std::string build_daemon_optimize_request(
     uint32_t prog_id,
-    const std::vector<std::string> &enabled_passes)
+    const std::vector<std::string> &enabled_passes,
+    bool enabled_passes_specified)
 {
     std::string request =
         "{\"cmd\":\"optimize\",\"prog_id\":" + std::to_string(prog_id);
-    if (!enabled_passes.empty()) {
+    if (enabled_passes_specified) {
         request += ",\"enabled_passes\":[";
         for (size_t index = 0; index < enabled_passes.size(); ++index) {
             if (index != 0) {
@@ -1678,7 +1679,8 @@ std::string build_daemon_optimize_request(
 daemon_socket_response daemon_socket_optimize(
     const std::string &socket_path,
     uint32_t prog_id,
-    const std::vector<std::string> &enabled_passes)
+    const std::vector<std::string> &enabled_passes,
+    bool enabled_passes_specified)
 {
     daemon_socket_response response;
 
@@ -1704,7 +1706,8 @@ daemon_socket_response daemon_socket_optimize(
     }
 
     /* Send JSON request line */
-    const std::string request = build_daemon_optimize_request(prog_id, enabled_passes);
+    const std::string request =
+        build_daemon_optimize_request(prog_id, enabled_passes, enabled_passes_specified);
     const ssize_t written = write(fd, request.c_str(), request.size());
     if (written < 0 || static_cast<size_t>(written) != request.size()) {
         close(fd);
@@ -2836,7 +2839,8 @@ void maybe_apply_prepared_daemon_rejit(
         daemon_socket_optimize(
             *options.daemon_socket,
             program.program_info.id,
-            options.enabled_passes);
+            options.enabled_passes,
+            options.enabled_passes_specified);
     const auto rejit_end = std::chrono::steady_clock::now();
     program.rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
     populate_rejit_from_daemon_summary(program.prepared_rejit, socket_response);
@@ -3747,7 +3751,8 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         const auto sock_resp = daemon_socket_optimize(
             *options.daemon_socket,
             program_info.id,
-            options.enabled_passes);
+            options.enabled_passes,
+            options.enabled_passes_specified);
         rejit_end = std::chrono::steady_clock::now();
         populate_rejit_from_daemon(rejit, sock_resp);
         if (!sock_resp.ok) {
@@ -3765,7 +3770,8 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             const auto sock_resp = daemon_socket_optimize(
                 *options.daemon_socket,
                 program_info.id,
-                options.enabled_passes);
+                options.enabled_passes,
+                options.enabled_passes_specified);
             rejit_end = std::chrono::steady_clock::now();
             populate_rejit_from_daemon(rejit, sock_resp);
         } else {
@@ -4159,7 +4165,8 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
         const auto sock_resp = daemon_socket_optimize(
             *options.daemon_socket,
             program_info_before.id,
-            options.enabled_passes);
+            options.enabled_passes,
+            options.enabled_passes_specified);
         rejit_end = std::chrono::steady_clock::now();
         rejit.syscall_attempted = true;
         if (!sock_resp.ok) {

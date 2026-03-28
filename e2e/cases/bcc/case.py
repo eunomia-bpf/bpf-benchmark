@@ -378,7 +378,7 @@ def run_phase(
 ) -> tuple[dict[str, object], dict[str, object] | None]:
     """Run baseline then daemon-apply then post-rejit measurement for one tool.
 
-    Returns (baseline, rejit) where rejit is None if apply failed or was skipped.
+    Returns (baseline, rejit) where rejit is None only when ReJIT was not applicable.
     """
     session = start_tool_session(tool_binary, spec.tool_args)
     process = session.process
@@ -402,7 +402,7 @@ def run_phase(
             timeout_s=attach_timeout,
         )
         if not programs:
-            baseline["status"] = "skipped"
+            baseline["status"] = "error"
             baseline["reason"] = f"{spec.name} did not attach any BPF programs within {attach_timeout}s"
             return baseline, None
 
@@ -447,6 +447,21 @@ def run_phase(
                 ),
                 "process": {},
             }
+        else:
+            rejit_error = str(rejit_apply.get("error") or "").strip()
+            if rejit_error:
+                rejit = {
+                    "phase": "post_rejit",
+                    "status": "error",
+                    "reason": rejit_error,
+                    "programs": programs,
+                    "prog_ids": prog_ids,
+                    "scan_results": baseline["scan_results"],
+                    "site_totals": baseline["site_totals"],
+                    "rejit_result": rejit_apply,
+                    "measurement": None,
+                    "process": {},
+                }
 
         return baseline, rejit
     except Exception as exc:
@@ -459,7 +474,7 @@ def run_phase(
         baseline["process"] = process_output
         if rejit is not None:
             rejit["process"] = process_output
-        if baseline["status"] not in ("ok", "skipped") and not baseline["reason"]:
+        if baseline["status"] != "ok" and not baseline["reason"]:
             stderr_tail = str(process_output.get("stderr_tail") or "")
             stdout_tail = str(process_output.get("stdout_tail") or "")
             baseline["reason"] = stderr_tail or stdout_tail or "unknown failure"
@@ -521,6 +536,21 @@ def geomean(values: Sequence[object]) -> float | None:
     if not positive:
         return None
     return statistics.geometric_mean(positive)
+
+
+def collect_record_errors(records: Sequence[Mapping[str, object]]) -> list[str]:
+    errors: list[str] = []
+    for record in records:
+        name = str(record.get("name") or "unknown")
+        baseline = record.get("baseline") or {}
+        if isinstance(baseline, Mapping) and str(baseline.get("status") or "") == "error":
+            reason = str(baseline.get("reason") or "unknown failure")
+            errors.append(f"{name} baseline failed: {reason}")
+        rejit = record.get("rejit") or {}
+        if isinstance(rejit, Mapping) and str(rejit.get("status") or "") == "error":
+            reason = str(rejit.get("reason") or "unknown failure")
+            errors.append(f"{name} rejit failed: {reason}")
+    return errors
 
 
 # ---------------------------------------------------------------------------
@@ -762,7 +792,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
                     "tool_binary": None,
                     "baseline": {
                         "phase": "baseline",
-                        "status": "skipped",
+                        "status": "error",
                         "reason": f"binary '{spec.name}' not found in {tools_dir}",
                         "programs": [],
                         "prog_ids": [],
@@ -787,7 +817,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
                         "avg_ns_delta_pct": None,
                         "workload_ops_delta_pct": None,
                         "cpu_delta_pct": None,
-                        "baseline_status": "skipped",
+                        "baseline_status": "error",
                         "rejit_status": None,
                         "note": f"binary not found in {tools_dir}",
                     },
@@ -836,9 +866,11 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
         if isinstance(speedup, (int, float)) and float(speedup) > 0:
             speedups.append(float(speedup))
 
-    return {
+    errors = collect_record_errors(records)
+
+    payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "ok",
+        "status": "error" if errors else "ok",
         "smoke": smoke,
         "duration_s": duration_s,
         "selected_tools": [spec.name for spec in selected],
@@ -855,6 +887,9 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             "speedup_geomean": geomean(speedups),
         },
     }
+    if errors:
+        payload["error_message"] = "; ".join(errors)
+    return payload
 
 
 def main() -> None:

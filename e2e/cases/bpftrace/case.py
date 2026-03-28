@@ -336,7 +336,7 @@ def run_phase(
 ) -> tuple[dict[str, object], dict[str, object] | None]:
     """Run baseline then daemon-apply then rejit measurement for one bpftrace script.
 
-    Returns (baseline, rejit) where rejit is None if apply failed or was skipped.
+    Returns (baseline, rejit) where rejit is None only when ReJIT was not applicable.
     """
     process = start_agent("bpftrace", ["-q", str(spec.script_path)])
     baseline: dict[str, object] = {
@@ -360,7 +360,7 @@ def run_phase(
     try:
         programs = wait_for_attached_programs(process, expected_count=spec.expected_programs, timeout_s=attach_timeout)
         if not programs:
-            baseline["status"] = "skipped"
+            baseline["status"] = "error"
             baseline["reason"] = "bpftrace did not attach any programs"
             return baseline, None
 
@@ -405,6 +405,21 @@ def run_phase(
                 ),
                 "process": {},
             }
+        else:
+            rejit_error = str(rejit_apply.get("error") or "").strip()
+            if rejit_error:
+                rejit = {
+                    "phase": "post_rejit",
+                    "status": "error",
+                    "reason": rejit_error,
+                    "programs": programs,
+                    "prog_ids": prog_ids,
+                    "scan_results": baseline["scan_results"],
+                    "site_totals": baseline["site_totals"],
+                    "rejit_result": rejit_apply,
+                    "measurement": None,
+                    "process": {},
+                }
 
         return baseline, rejit
     except Exception as exc:
@@ -489,6 +504,21 @@ def geomean(values: Sequence[object]) -> float | None:
     if not positive:
         return None
     return statistics.geometric_mean(positive)
+
+
+def collect_record_errors(records: Sequence[Mapping[str, object]]) -> list[str]:
+    errors: list[str] = []
+    for record in records:
+        name = str(record.get("name") or "unknown")
+        baseline = record.get("baseline") or {}
+        if isinstance(baseline, Mapping) and str(baseline.get("status") or "") == "error":
+            reason = str(baseline.get("reason") or "unknown failure")
+            errors.append(f"{name} baseline failed: {reason}")
+        rejit = record.get("rejit") or {}
+        if isinstance(rejit, Mapping) and str(rejit.get("status") or "") == "error":
+            reason = str(rejit.get("reason") or "unknown failure")
+            errors.append(f"{name} rejit failed: {reason}")
+    return errors
 
 
 def build_markdown(payload: Mapping[str, object]) -> str:
@@ -708,9 +738,11 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
         if isinstance(speedup, (int, float)) and float(speedup) > 0:
             speedups.append(float(speedup))
 
-    return {
+    errors = collect_record_errors(records)
+
+    payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "ok",
+        "status": "error" if errors else "ok",
         "smoke": bool(args.smoke),
         "duration_s": duration_s,
         "selected_scripts": [spec.name for spec in scripts],
@@ -727,6 +759,9 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
             "speedup_geomean": geomean(speedups),
         },
     }
+    if errors:
+        payload["error_message"] = "; ".join(errors)
+    return payload
 
 
 def main() -> None:

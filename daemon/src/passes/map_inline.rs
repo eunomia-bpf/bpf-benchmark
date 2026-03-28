@@ -745,8 +745,6 @@ fn run_map_inline_round(
         build_direct_map_value_load_rewrites(program);
     diagnostics.extend(direct_diagnostics);
     let sites = find_map_lookup_sites(&program.insns);
-    let mutable_maps_with_lookup_value_writes =
-        collect_mutable_maps_with_lookup_value_writes(program, &sites, &map_info);
 
     log_map_inline_debug(&format!(
         "found {} lookup sites (verifier_guided_keys={})",
@@ -801,20 +799,6 @@ fn run_map_inline_round(
                 Some(format!(
                     "site at PC={}: map_type={}, skip reason: unsupported map type",
                     site.call_pc, info.map_type
-                )),
-            );
-            continue;
-        }
-        if !info.frozen && mutable_maps_with_lookup_value_writes.contains(&info.map_id) {
-            let reason = "mutable map value is written elsewhere in program".to_string();
-            record_skip(
-                &mut skipped,
-                &mut diagnostics,
-                site.call_pc,
-                reason,
-                Some(format!(
-                    "site at PC={}: map_id {} is mutated via lookup-result stores in this program",
-                    site.call_pc, info.map_id
                 )),
             );
             continue;
@@ -2307,89 +2291,6 @@ fn classify_r0_uses_with_options(
     classification
 }
 
-fn collect_mutable_maps_with_lookup_value_writes(
-    program: &BpfProgram,
-    sites: &[MapLookupSite],
-    map_info: &crate::analysis::MapInfoResult,
-) -> HashSet<u32> {
-    let mut mutated_maps = HashSet::new();
-
-    for site in sites {
-        let Some(map_ref) = map_info.reference_at_pc(site.map_load_pc) else {
-            continue;
-        };
-        let Some(info) = map_ref.info.as_ref() else {
-            continue;
-        };
-        if info.frozen {
-            continue;
-        }
-        if lookup_result_may_write_value(&program.insns, site.call_pc) {
-            mutated_maps.insert(info.map_id);
-        }
-    }
-
-    mutated_maps
-}
-
-fn lookup_result_may_write_value(insns: &[BpfInsn], start_pc: usize) -> bool {
-    let mut alias_regs = HashSet::from([0u8]);
-    let mut alias_stack_slots = HashSet::new();
-    let bounds = subprog_bounds(insns, start_pc);
-    let mut pc = start_pc + 1;
-
-    while pc < insns.len() && (!alias_regs.is_empty() || !alias_stack_slots.is_empty()) {
-        let insn = &insns[pc];
-
-        if insn_writes_via_alias(insn, &alias_regs) {
-            return true;
-        }
-
-        if let Some(dst_reg) = alias_copy_dst(insn, &alias_regs) {
-            kill_defined_alias_regs(&mut alias_regs, insn);
-            alias_regs.insert(dst_reg);
-            pc += insn_width(insn);
-            continue;
-        }
-
-        if let Some((stack_off, width)) = resolve_stack_store_slot(insns, pc, insn, bounds) {
-            kill_overlapping_alias_stack_slots(&mut alias_stack_slots, stack_off, width);
-            if insn.class() == BPF_STX
-                && bpf_mode(insn.code) == BPF_MEM
-                && width == 8
-                && alias_regs.contains(&insn.src_reg())
-            {
-                alias_stack_slots.insert(stack_off);
-                pc += insn_width(insn);
-                continue;
-            }
-        }
-
-        if let Some(stack_off) = resolve_stack_load_slot(insns, pc, insn, bounds) {
-            if alias_stack_slots.contains(&stack_off) {
-                kill_defined_alias_regs(&mut alias_regs, insn);
-                alias_regs.insert(insn.dst_reg());
-                pc += insn_width(insn);
-                continue;
-            }
-        }
-
-        if insn.is_call() {
-            if insn_uses_any_alias(insn, &alias_regs) {
-                return true;
-            }
-            alias_regs = surviving_alias_regs_after_helper_call(&alias_regs);
-            pc += insn_width(insn);
-            continue;
-        }
-
-        kill_defined_alias_regs(&mut alias_regs, insn);
-        pc += insn_width(insn);
-    }
-
-    false
-}
-
 fn resolve_stack_store_slot(
     insns: &[BpfInsn],
     pc: usize,
@@ -2573,12 +2474,6 @@ fn insn_uses_any_alias(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> bool {
         .iter()
         .copied()
         .any(|reg| insn_uses_reg(insn, reg))
-}
-
-fn insn_writes_via_alias(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> bool {
-    matches!(insn.class(), BPF_ST | BPF_STX)
-        && alias_regs.contains(&insn.dst_reg())
-        && !insn.is_ldx_mem()
 }
 
 fn kill_defined_alias_regs(alias_regs: &mut HashSet<u8>, insn: &BpfInsn) {

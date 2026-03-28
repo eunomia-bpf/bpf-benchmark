@@ -1870,18 +1870,15 @@ fn map_inline_pass_skips_mutable_array_lookup_with_store_back() {
     assert_eq!(program.insns, original);
     assert!(result.pass_results[0].sites_skipped.iter().any(|skip| skip
         .reason
-        .contains("mutable lookup result has non-load uses")
-        || skip
-            .reason
-            .contains("mutable map value is written elsewhere in program")));
+        .contains("mutable lookup result has non-load uses")));
 }
 
 #[test]
-fn map_inline_pass_skips_non_frozen_array_after_same_map_is_written() {
+fn map_inline_pass_inlines_read_only_site_after_same_map_writeback_elsewhere() {
     install_mutable_array_map(416, vec![7, 0, 0, 0]);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let original = vec![
+    let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         st_mem(BPF_W, 10, -4, 1),
@@ -1900,15 +1897,34 @@ fn map_inline_pass_skips_non_frozen_array_after_same_map_is_written() {
         BpfInsn::ldx_mem(BPF_W, 7, 0, 0),
         BpfInsn::mov64_imm(0, 0),
         exit_insn(),
-    ];
-    let mut program = BpfProgram::new(original.clone());
+    ]);
     program.set_map_ids(vec![416]);
 
     let result = run_map_inline_pass(&mut program);
 
-    assert!(!result.program_changed);
-    assert_eq!(program.insns, original);
+    assert!(result.program_changed);
+    assert_eq!(result.total_sites_applied, 1);
+    assert_eq!(
+        program.insns,
+        vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            add64_imm(6, 1),
+            BpfInsn::stx_mem(BPF_W, 0, 6, 0),
+            BpfInsn::mov64_imm(7, 7),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]
+    );
     assert!(result.pass_results[0].sites_skipped.iter().any(|skip| skip
+        .reason
+        .contains("mutable lookup result has non-load uses")));
+    assert!(!result.pass_results[0].sites_skipped.iter().any(|skip| skip
         .reason
         .contains("mutable map value is written elsewhere in program")));
 }
