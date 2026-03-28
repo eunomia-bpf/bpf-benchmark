@@ -820,7 +820,10 @@ fn parse_btf(bytes: &[u8]) -> Result<ParsedBtf> {
                         type_id,
                     });
                 }
-                BtfType::Struct { size: size_or_type, members }
+                BtfType::Struct {
+                    size: size_or_type,
+                    members,
+                }
             }
             5 => {
                 for _ in 0..vlen {

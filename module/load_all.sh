@@ -13,10 +13,17 @@ loaded=0
 total=0
 for ko in "$MODULE_DIR"/*.ko; do
     [ -f "$ko" ] || continue
-    total=$((total + 1))
     mod=$(basename "$ko" .ko)
+    if [ "$mod" = "bpf_barrier" ]; then
+        continue
+    fi
+    total=$((total + 1))
     if ! lsmod | grep -q "^${mod} "; then
-        insmod "$ko" && echo "Loaded $mod" || echo "WARN: Failed to load $mod"
+        if ! insmod "$ko"; then
+            echo "ERROR: Failed to load $mod" >&2
+            exit 1
+        fi
+        echo "Loaded $mod"
     fi
     # Count as loaded if BTF entry exists (module registered successfully).
     if [ -e "/sys/kernel/btf/${mod}" ]; then

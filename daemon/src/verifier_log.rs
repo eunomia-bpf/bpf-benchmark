@@ -10,7 +10,7 @@
 //! optimization analyses (constant propagation, range checks, liveness, etc.).
 //!
 //! Used by `bpf_prog_rejit()` to parse verifier diagnostics on REJIT failure,
-//! providing structured error output in `cmd_apply` and `try_apply_one`.
+//! providing structured error output in the serve optimize flow.
 
 use std::collections::HashMap;
 

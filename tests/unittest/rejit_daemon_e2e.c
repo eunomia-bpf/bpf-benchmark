@@ -9,12 +9,14 @@
 #include <netpacket/packet.h>
 #include <poll.h>
 #include <pthread.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -255,57 +257,113 @@ static int get_prog_info_snapshot(int prog_fd, struct bpf_prog_info *info)
 	return hotswap_get_prog_info(prog_fd, info, &info_len);
 }
 
-static int run_daemon_apply_all(char *reason, size_t reason_sz)
+static int run_daemon_optimize_all_request(char *reason, size_t reason_sz)
 {
+	char socket_dir_template[] = "/tmp/rejit-daemon-e2e.XXXXXX";
+	char socket_path[PATH_MAX];
+	char response[256];
+	struct sockaddr_un addr = {};
 	pid_t pid;
+	int fd = -1;
+	ssize_t nread;
 	int status;
-	char status_buf[32];
-	char *const argv[] = {
-		g_daemon_path,
-		"apply-all",
-		NULL,
-	};
+
+	if (!mkdtemp(socket_dir_template)) {
+		snprintf(reason, reason_sz, "mkdtemp failed: %s", strerror(errno));
+		return -1;
+	}
+	if (join_path(socket_path, sizeof(socket_path), socket_dir_template,
+		      "/daemon.sock") < 0) {
+		snprintf(reason, reason_sz, "socket path is too long");
+		rmdir(socket_dir_template);
+		return -1;
+	}
 
 	pid = fork();
 	if (pid < 0) {
 		snprintf(reason, reason_sz, "fork failed: %s", strerror(errno));
+		rmdir(socket_dir_template);
 		return -1;
 	}
 
 	if (pid == 0) {
+		char *const argv[] = {
+			g_daemon_path,
+			"serve",
+			"--socket",
+			socket_path,
+			NULL,
+		};
 		execv(g_daemon_path, argv);
 		fprintf(stderr, "execv(%s) failed: %s\n", g_daemon_path,
 			strerror(errno));
 		_exit(127);
 	}
 
-	if (waitpid(pid, &status, 0) < 0) {
-		snprintf(reason, reason_sz, "waitpid failed: %s", strerror(errno));
-		return -1;
+	for (int attempt = 0; attempt < 50; attempt++) {
+		if (access(socket_path, F_OK) == 0)
+			break;
+		if (waitpid(pid, &status, WNOHANG) == pid) {
+			snprintf(reason, reason_sz,
+				 "daemon serve exited early: status=0x%x", status);
+			rmdir(socket_dir_template);
+			return -1;
+		}
+		usleep(100000);
 	}
 
-	if (WIFEXITED(status)) {
-		snprintf(status_buf, sizeof(status_buf), "exit %d",
-			 WEXITSTATUS(status));
-	} else if (WIFSIGNALED(status)) {
-		snprintf(status_buf, sizeof(status_buf), "signal %d",
-			 WTERMSIG(status));
-	} else {
-		snprintf(status_buf, sizeof(status_buf), "status 0x%x", status);
+	fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+	if (fd < 0) {
+		snprintf(reason, reason_sz, "socket failed: %s", strerror(errno));
+		goto fail;
 	}
 
-	if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-		snprintf(reason, reason_sz, "daemon apply-all failed (%s)",
-			 status_buf);
-		return -1;
+	addr.sun_family = AF_UNIX;
+	snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", socket_path);
+	if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+		snprintf(reason, reason_sz, "connect failed: %s", strerror(errno));
+		goto fail;
 	}
 
+	if (write(fd, "{\"cmd\":\"optimize-all\"}\n",
+		  strlen("{\"cmd\":\"optimize-all\"}\n")) < 0) {
+		snprintf(reason, reason_sz, "write failed: %s", strerror(errno));
+		goto fail;
+	}
+
+	memset(response, 0, sizeof(response));
+	nread = read(fd, response, sizeof(response) - 1);
+	if (nread <= 0) {
+		snprintf(reason, reason_sz, "read failed: %s",
+			 nread < 0 ? strerror(errno) : "empty response");
+		goto fail;
+	}
+	if (!strstr(response, "\"status\":\"ok\"")) {
+		snprintf(reason, reason_sz,
+			 "daemon optimize-all request failed (%s)", response);
+		goto fail;
+	}
+
+	close(fd);
+	kill(pid, SIGTERM);
+	waitpid(pid, &status, 0);
+	unlink(socket_path);
+	rmdir(socket_dir_template);
 	return 0;
+
+fail:
+	if (fd >= 0)
+		close(fd);
+	kill(pid, SIGTERM);
+	waitpid(pid, &status, 0);
+	unlink(socket_path);
+	rmdir(socket_dir_template);
+	return -1;
 }
 
-static int test_rejit_daemon_apply_all(void)
+static int test_rejit_daemon_optimize_all_request(void)
 {
-	const char *name = "rejit_daemon_apply_all";
+	const char *name = "rejit_daemon_optimize_all_request";
 	char obj_path[PATH_MAX];
 	char reason[256];
 	struct bpf_object *obj = NULL;
@@ -407,7 +465,7 @@ static int test_rejit_daemon_apply_all(void)
 		goto out;
 	}
 
-	if (run_daemon_apply_all(reason, sizeof(reason)) < 0) {
+	if (run_daemon_optimize_all_request(reason, sizeof(reason)) < 0) {
 		TEST_FAIL(name, reason);
 		goto out;
 	}
@@ -419,7 +477,7 @@ static int test_rejit_daemon_apply_all(void)
 
 	if (post_info.orig_prog_len == 0) {
 		snprintf(reason, sizeof(reason),
-			 "orig_prog_len is still 0 after daemon apply-all (pre_xlated=%u post_xlated=%u)",
+			 "orig_prog_len is still 0 after daemon optimize-all request (pre_xlated=%u post_xlated=%u)",
 			 pre_info.xlated_prog_len, post_info.xlated_prog_len);
 		TEST_FAIL(name, reason);
 		goto out;
@@ -427,7 +485,7 @@ static int test_rejit_daemon_apply_all(void)
 
 	if (post_info.xlated_prog_len >= pre_info.xlated_prog_len) {
 		snprintf(reason, sizeof(reason),
-			 "xlated_prog_len did not shrink after daemon apply-all (pre=%u post=%u)",
+			 "xlated_prog_len did not shrink after daemon optimize-all request (pre=%u post=%u)",
 			 pre_info.xlated_prog_len, post_info.xlated_prog_len);
 		TEST_FAIL(name, reason);
 		goto out;
@@ -464,7 +522,7 @@ int main(int argc, char **argv)
 	if (argc > 1)
 		snprintf(g_progs_dir, sizeof(g_progs_dir), "%s", argv[1]);
 
-	if (test_rejit_daemon_apply_all())
+	if (test_rejit_daemon_optimize_all_request())
 		return 1;
 
 	printf("\nSummary: pass=%d fail=%d skip=%d\n", g_pass, g_fail, g_skip);

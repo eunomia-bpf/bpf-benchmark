@@ -144,9 +144,9 @@ def add_common_profile_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--daemon",
         default=str(DEFAULT_DAEMON),
-        help="Path to bpfrejit-daemon used for live enumerate.",
+        help="Path to the bpfrejit-daemon serve binary.",
     )
-    parser.add_argument("--no-sites", action="store_true", help="Skip live enumerate site census collection.")
+    parser.add_argument("--no-sites", action="store_true", help="Skip daemon serve site census collection.")
     parser.add_argument("--no-perf", action="store_true", help="Skip perf stat collection.")
     parser.add_argument("--perf-events", default="cycles,instructions,branches,branch-misses")
     parser.add_argument("--perf-max-workers", type=int, default=8)

@@ -13,7 +13,7 @@ from . import resolve_bpftool_binary, resolve_perf_binary, run_json_command, tai
 from .metrics import compute_delta, sample_bpf_stats
 from .rejit import scan_programs
 
-DEFAULT_DAEMON = Path(__file__).resolve().parents[2] / "daemon" / "build" / "bpfrejit-daemon"
+DEFAULT_DAEMON = Path(__file__).resolve().parents[2] / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_PERF_EVENTS = ("cycles", "instructions", "branches", "branch-misses")
 
 

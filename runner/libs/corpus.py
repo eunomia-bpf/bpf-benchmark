@@ -16,7 +16,7 @@ import yaml
 from . import ROOT_DIR, ensure_parent
 from .batch_runner import run_batch_runner
 from .object_discovery import supplement_with_existing_corpus_build_objects
-from .rejit import _start_daemon_server, _stop_daemon_server
+from .rejit import _start_daemon_server, _stop_daemon_server, serve_requires_pgo
 from .results import parse_runner_sample
 
 
@@ -393,6 +393,30 @@ def find_program_in_object(
         if program.program_name == program_name:
             return program
     return None
+
+
+def attach_trigger_unsupported_reason(
+    obj: ResolvedObject,
+    program: ResolvedProgram,
+) -> str | None:
+    candidate = program
+    if program.attach_group:
+        grouped = find_program_in_object(obj, program.attach_group)
+        if grouped is not None:
+            candidate = grouped
+
+    section_name = str(candidate.section_name or "").strip()
+    if not section_name:
+        return "attach_trigger requires tracepoint/<category>/<name> sections; got empty section"
+
+    parts = section_name.split("/")
+    if len(parts) == 3 and parts[0] == "tracepoint" and all(parts[1:]):
+        return None
+
+    return (
+        "attach_trigger requires tracepoint/<category>/<name> sections; "
+        f"got {section_name}"
+    )
 
 
 def object_matches_filter(obj: ResolvedObject, lowered_filters: list[str]) -> bool:
@@ -1557,7 +1581,7 @@ def run_objects_locally_batch(
     active_daemon_socket = daemon_socket
     daemon_server: tuple[subprocess.Popen[str], Path, str, Path, Path] | None = None
     if objects and active_daemon_socket is None:
-        daemon_server = _start_daemon_server(daemon)
+        daemon_server = _start_daemon_server(daemon, pgo=serve_requires_pgo(enabled_passes))
         active_daemon_socket = str(daemon_server[1])
 
     try:
@@ -1629,6 +1653,7 @@ __all__ = [
     "add_runner_argument",
     "add_daemon_argument",
     "add_timeout_argument",
+    "attach_trigger_unsupported_reason",
     "batch_job_invocation_summary",
     "batch_job_result_map",
     "build_empty_object_record",

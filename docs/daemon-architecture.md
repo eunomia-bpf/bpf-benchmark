@@ -71,121 +71,21 @@ daemon 自己不实现 kinsn，只做三件事：
 
 ### 2.1 实际存在的子命令
 
-当前 `main.rs` 实现的子命令共有八个：
+当前 `main.rs` 只暴露一个运行模式：
 
-1. `list-passes`
-2. `enumerate`
-3. `rewrite <PROG_ID>`
-4. `apply <PROG_ID> [--no-rollback]`
-5. `apply-all [--no-rollback]`
-6. `watch [--interval N] [--once] [--no-rollback]`
-7. `serve [--socket PATH] [--no-rollback]`
-8. `profile <PROG_ID> [--interval-ms N] [--samples N]`
+1. `serve [--socket PATH]`
 
-你的需求里列出的 `enumerate/rewrite/apply/apply-all/serve/watch` 都存在；此外代码里还额外实现了 `list-passes` 和 `profile`。
+`enumerate`、`rewrite`、`apply`、`apply-all`、`watch`、`profile` 这些旧 CLI
+在当前代码里都不存在；相关能力统一收口到 `serve` 的 Unix socket JSON 协议。
 
-### 2.2 `enumerate`
-
-输入：
-
-1. 无位置参数。
-2. 使用启动时发现的 `KinsnRegistry`、平台能力和默认 pipeline。
-
-行为：
-
-1. 遍历所有 live program ID。
-2. 通过 `bpf_prog_get_info(..., fetch_orig=true)` 读取原始指令。
-3. 若能取到原始字节码，则构造 `BpfProgram` 并跑一次 dry-run pipeline。
-4. 汇总每个 pass 的 `sites_applied`，打印每个 program 的可优化位点摘要。
-
-输出：
-
-1. 文本表格：`ID / type / insns / name / sites`。
-2. `sites` 形如 `map_inline=2 wide_mem=1`；若无可应用位点则为 `-`。
-
-### 2.3 `rewrite`
-
-输入：
-
-1. `prog_id`。
-
-行为：
-
-1. 拉取原始字节码。
-2. 绑定 map IDs，构造 pipeline，执行重写但不调用 `BPF_PROG_REJIT`。
-3. 打印每个 pass 的应用位点和 skip reason。
-4. 若程序被改写，逐条打印新的 BPF 指令。
-
-输出：
-
-1. 文本说明原始条数、重写后条数、应用位点。
-2. 重写后的指令流。
-
-### 2.4 `apply`
-
-输入：
-
-1. `prog_id`
-2. `--no-rollback`
-
-行为：
-
-1. 调用 `try_apply_one()`。
-2. 构建 pipeline 并执行。
-3. 把重写后指令做 map fd relocation。
-4. 调用 `BPF_PROG_REJIT`。
-5. 若 verifier 拒绝或 REJIT 后处理失败，在未关闭 rollback 时进入“按 pass 禁用重试”循环。
-
-输出：
-
-1. stdout 输出简短文本状态。
-2. stderr 额外输出完整 JSON 调试记录，即 `OptimizeOneResult` 的序列化结果。
-
-### 2.5 `apply-all`
-
-输入：
-
-1. `--no-rollback`
-
-行为：
-
-1. 枚举全部 live program。
-2. 对每个 program 复用 `try_apply_one()`。
-3. 统计总数、应用成功数、错误数。
-
-输出：
-
-1. 每个程序的调试 JSON。
-2. 最后输出 `apply-all: scanned X programs, applied Y, errors Z`。
-
-### 2.6 `watch`
-
-输入：
-
-1. `--interval`，默认 5 秒。
-2. `--once`
-3. `--no-rollback`
-
-行为：
-
-1. 周期性枚举 live programs。
-2. 过滤掉已优化成功、明确 no-op、或已超过失败重试上限的 program。
-3. 通过 `rank_programs_by_hotness()` 基于 `run_cnt/run_time_ns` 的短窗口 delta 做热度排序。
-4. 依次执行 `try_apply_one()`。
-5. 独立于主轮询，每 1 秒检查一次 invalidation tracker；若 map-inline 依赖失效，立即重新优化对应 program。
-
-状态集合：
-
-1. `optimized`：成功应用过，不再重复处理。
-2. `no_op`：pipeline 没有改动，不再重试。
-3. `fail_count`：失败次数，最多 3 次。
-
-### 2.7 `serve`
+### 2.2 `serve`
 
 输入：
 
 1. `--socket`，默认 `/var/run/bpfrejit.sock`
 2. `--no-rollback`
+3. `--pgo`
+4. `--pgo-interval-ms`
 
 行为：
 
@@ -193,28 +93,11 @@ daemon 自己不实现 kinsn，只做三件事：
 2. 使用非阻塞 `accept()` 循环接收客户端。
 3. 每 1 秒跑一次 invalidation tick。
 4. 对每一行请求做一次 JSON 解析和处理。
+5. 若开启 `--pgo`，则在每次 `optimize` 请求前收集短窗口运行统计。
 
-serve 是持久 daemon 模式；它不会自己扫描热度排序，而是被动等待客户端发请求。
+`serve` 是唯一长期运行模式；它不会自己主动扫描或排序 live program，而是被动响应客户端请求。
 
-### 2.8 `profile`
-
-这是代码里存在但不在你给定列表中的辅助命令。
-
-输入：
-
-1. `prog_id`
-2. `--interval-ms`
-3. `--samples`
-
-行为：
-
-1. 读取 `/proc/sys/kernel/bpf_stats_enabled`。
-2. 轮询 `bpf_prog_info.run_cnt/run_time_ns`。
-3. 打印基线与 delta 样本。
-
-它不参与 rewrite，但与 `watch` 的热度排序逻辑共用 `profiler.rs`。
-
-### 2.9 serve 模式的 Unix socket 协议
+### 2.3 serve 模式的 Unix socket 协议
 
 协议是“逐行 JSON request / 逐行 JSON response”：
 
@@ -848,7 +731,7 @@ rollback 不在 `PassManager` 内部做，而是在 `commands::try_apply_one()` 
 1. 每个成功应用的 inline site 会记录：
    `map_id/key/expected_value`。
 2. `record_map_inline_records()` 会打开 map fd，并把 `(prog_id, map_fd, key, expected_value)` 存进 `MapInvalidationTracker`。
-3. `serve/watch` 每秒调用 `check_for_invalidations()`。
+3. `serve` 每秒调用 `check_for_invalidations()`。
 4. tracker 以 map 为单位 batch lookup 所有被追踪 key。
 5. 只要当前 value 与 `expected_value` 不同，就把对应 `prog_id` 标为 invalidated。
 6. invalidated program 会立刻重新走 `try_apply_one()`。

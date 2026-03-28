@@ -65,8 +65,6 @@ make vm-micro ITERATIONS=10 WARMUPS=2 REPEAT=500
 make vm-corpus                       # corpus benchmark in VM
 make vm-e2e                          # E2E benchmarks in VM
 make vm-all                          # all VM benchmarks
-make verify-build                    # check artifacts are up to date
-make compare OLD=a.json NEW=b.json   # diff two result JSON files
 ```
 
 Results are written to:

@@ -1,4 +1,3 @@
-
 #![allow(dead_code)]
 
 use super::*;
@@ -214,8 +213,8 @@ fn test_default_pipeline_ends_with_branch_flip() {
 
 #[test]
 fn test_map_inline_only_pipeline_contains_only_map_inline() {
-    let pm = build_custom_pipeline(&["map_inline".to_string()])
-        .expect("custom pipeline should build");
+    let pm =
+        build_custom_pipeline(&["map_inline".to_string()]).expect("custom pipeline should build");
 
     assert_eq!(pm.pass_names(), vec!["map_inline"]);
 }

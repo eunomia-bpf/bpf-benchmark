@@ -7,6 +7,9 @@ cd "$ROOT_DIR"
 PASS=0
 FAIL=0
 TOTAL=0
+DAEMON_PID=""
+DAEMON_SOCKET=""
+SOCKET_DIR=""
 
 report() {
     local name="$1" status="$2" detail="$3"
@@ -20,23 +23,72 @@ report() {
     fi
 }
 
+cleanup() {
+    if [ -n "$DAEMON_PID" ] && kill -0 "$DAEMON_PID" 2>/dev/null; then
+        kill "$DAEMON_PID"
+        wait "$DAEMON_PID" || true
+    fi
+    if [ -n "$SOCKET_DIR" ] && [ -d "$SOCKET_DIR" ]; then
+        rm -rf "$SOCKET_DIR"
+    fi
+}
+trap cleanup EXIT
+
+start_daemon() {
+    SOCKET_DIR="$(mktemp -d)"
+    DAEMON_SOCKET="$SOCKET_DIR/bpfrejit.sock"
+    ./daemon/target/release/bpfrejit-daemon serve --socket "$DAEMON_SOCKET" &
+    DAEMON_PID=$!
+    sleep 1
+    [ -S "$DAEMON_SOCKET" ]
+}
+
+daemon_request() {
+    local payload="$1"
+    python3 - "$DAEMON_SOCKET" "$payload" <<'PY'
+import socket
+import sys
+
+socket_path = sys.argv[1]
+payload = sys.argv[2]
+client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+client.connect(socket_path)
+client.sendall((payload + "\n").encode())
+chunks = []
+while True:
+    chunk = client.recv(4096)
+    if not chunk:
+        break
+    chunks.append(chunk)
+    if b"\n" in chunk:
+        break
+client.close()
+sys.stdout.write(b"".join(chunks).decode().strip())
+PY
+}
+
 echo "================================================================"
 echo "=== BpfReJIT v2 End-to-End Integration Tests ==="
 echo "================================================================"
 
-# ── TEST 1: daemon enumerate ──────────────────────────────────────
+# ── TEST 1: daemon serve ──────────────────────────────────────────
 echo ""
-echo "=== TEST 1: daemon enumerate ==="
+echo "=== TEST 1: daemon serve ==="
 
-# 1a: daemon runs without error
-OUTPUT=$(./daemon/target/release/bpfrejit-daemon enumerate 2>&1)
-if [ $? -eq 0 ]; then
-    report "1a: daemon enumerate runs cleanly" "PASS"
+if start_daemon; then
+    report "1a: daemon serve starts cleanly" "PASS"
 else
-    report "1a: daemon enumerate runs cleanly" "FAIL" "non-zero exit"
+    report "1a: daemon serve starts cleanly" "FAIL" "socket not created"
 fi
 
-# 1b: Load a program with compile-only and check daemon during execution
+STATUS_OUTPUT=$(daemon_request '{"cmd":"status"}')
+if printf '%s\n' "$STATUS_OUTPUT" | python3 -c 'import json,sys; payload=json.load(sys.stdin); raise SystemExit(0 if payload.get("status")=="ok" else 1)'; then
+    report "1b: daemon status request succeeds" "PASS"
+else
+    report "1b: daemon status request succeeds" "FAIL" "$STATUS_OUTPUT"
+fi
+
+# 1c: Load a program with compile-only and check kernel path during execution
 # We use a fifo trick to hold the program loaded: micro_exec compile-only
 # loads/unloads immediately, but during run-kernel --repeat the prog is loaded.
 #
@@ -50,9 +102,9 @@ CO_OUTPUT=$(./runner/build/micro_exec run-kernel \
   --compile-only 2>&1)
 echo "$CO_OUTPUT" | head -5
 if echo "$CO_OUTPUT" | grep -q '"xlated_prog_len":664'; then
-    report "1b: kernel loads load_byte_recompose (83 insns, 664 bytes)" "PASS"
+    report "1c: kernel loads load_byte_recompose (83 insns, 664 bytes)" "PASS"
 else
-    report "1b: kernel loads load_byte_recompose" "FAIL" "unexpected output"
+    report "1c: kernel loads load_byte_recompose" "FAIL" "unexpected output"
 fi
 
 # ── TEST 2: BPF_PROG_REJIT syscall ───────────────────────────────
@@ -134,16 +186,16 @@ else
     report "2c: BPF_PROG_REJIT for simple.bpf.o" "FAIL" "$SIMPLE_RESULT"
 fi
 
-# ── TEST 3: daemon apply-all ─────────────────────────────────────
+# ── TEST 3: daemon optimize-all via serve ────────────────────────
 echo ""
-echo "=== TEST 3: daemon apply-all ==="
+echo "=== TEST 3: daemon optimize-all via serve ==="
 
-APPLYALL=$(./daemon/target/release/bpfrejit-daemon apply-all 2>&1)
+APPLYALL=$(daemon_request '{"cmd":"optimize-all"}')
 echo "$APPLYALL"
-if echo "$APPLYALL" | grep -q "apply-all: scanned"; then
-    report "3: daemon apply-all completes" "PASS"
+if printf '%s\n' "$APPLYALL" | python3 -c 'import json,sys; payload=json.load(sys.stdin); ok=payload.get("status")=="ok" and "total" in payload and "applied" in payload and "errors" in payload; raise SystemExit(0 if ok else 1)'; then
+    report "3: daemon optimize-all request completes" "PASS"
 else
-    report "3: daemon apply-all" "FAIL" "$APPLYALL"
+    report "3: daemon optimize-all request" "FAIL" "$APPLYALL"
 fi
 
 # ── TEST 4: kinsn module load/unload ─────────────────────────────

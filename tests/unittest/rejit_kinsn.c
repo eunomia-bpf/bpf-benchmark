@@ -4,7 +4,7 @@
  *
  * Covers:
  *   - kinsn function discovery via BTF transport
- *   - REJIT correctness for rotate/select/endian/barrier/bulk-memory/LDP
+ *   - REJIT correctness for rotate/select/endian/bulk-memory/LDP
  *   - packed sidecar semantics on arbitrary architectural registers
  *   - x86 native emit byte-pattern coverage for rotate and bulk memory
  *   - x86 rotate clobber behavior (r5 preserved, r4 rejected)
@@ -43,7 +43,6 @@ enum kinsn_module_id {
 	MOD_SELECT,
 	MOD_EXTRACT,
 	MOD_ENDIAN,
-	MOD_BARRIER,
 	MOD_BULK_MEMORY,
 	MOD_LDP,
 	MOD_CNT,
@@ -56,7 +55,6 @@ enum kinsn_func_id {
 	FUNC_ENDIAN16,
 	FUNC_ENDIAN32,
 	FUNC_ENDIAN64,
-	FUNC_BARRIER,
 	FUNC_MEMCPY_BULK,
 	FUNC_MEMSET_BULK,
 	FUNC_LDP128,
@@ -130,11 +128,6 @@ static struct kinsn_module_ref g_modules[MOD_CNT] = {
 		.btf_fd = -1,
 		.required = true,
 	},
-	[MOD_BARRIER] = {
-		.module_name = "bpf_barrier",
-		.btf_fd = -1,
-		.required = true,
-	},
 	[MOD_BULK_MEMORY] = {
 		.module_name = "bpf_bulk_memory",
 		.btf_fd = -1,
@@ -171,10 +164,6 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 	[FUNC_ENDIAN64] = {
 		.func_name = "bpf_endian_load64",
 		.module_id = MOD_ENDIAN,
-	},
-	[FUNC_BARRIER] = {
-		.func_name = "bpf_speculation_barrier",
-		.module_id = MOD_BARRIER,
 	},
 	[FUNC_MEMCPY_BULK] = {
 		.func_name = "bpf_memcpy_bulk",
@@ -1234,23 +1223,6 @@ static int test_kinsn_discovery(void)
 	return 0;
 }
 
-static int test_rejit_barrier_preserves_r5(void)
-{
-	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_BARRIER].btf_fd);
-	struct bpf_insn prog[] = {
-		BPF_MOV64_IMM(BPF_REG_5, 7),
-		BPF_KINSN_SIDECAR(0),
-		BPF_CALL_KINSN(0, 0),
-		BPF_MOV64_REG(BPF_REG_0, BPF_REG_5),
-		BPF_EXIT_INSN(),
-	};
-
-	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_BARRIER].btf_id);
-	return run_rejit_expect_success("barrier_preserves_r5",
-					prog, ARRAY_SIZE(prog),
-					fd_array, ARRAY_SIZE(fd_array), 7);
-}
-
 static int test_rejit_rotate_apply(void)
 {
 	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
@@ -1876,8 +1848,6 @@ int main(int argc, char **argv)
 		ret |= test_kinsn_discovery();
 	else if (should_run_test(filter, "kinsn_discovery"))
 		ret |= test_kinsn_discovery();
-	if (should_run_test(filter, "barrier_preserves_r5"))
-		ret |= test_rejit_barrier_preserves_r5();
 	if (should_run_test(filter, "rotate_apply"))
 		ret |= test_rejit_rotate_apply();
 	if (should_run_test(filter, "rotate_jit_emits_rol"))

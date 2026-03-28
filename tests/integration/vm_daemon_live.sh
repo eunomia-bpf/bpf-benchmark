@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test: daemon enumerate/rewrite/apply with a live BPF program
+# Test: daemon serve mode with a live BPF program.
 set -e
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
@@ -7,9 +7,13 @@ cd "$ROOT_DIR"
 PASS=0
 FAIL=0
 TOTAL=0
+DAEMON_PID=""
+HOLD_PID=""
+SOCKET_DIR=""
+DAEMON_SOCKET=""
 
 report() {
-    local name="$1" status="$2" detail="$3"
+    local name="$1" status="$2" detail="${3:-}"
     TOTAL=$((TOTAL + 1))
     if [ "$status" = "PASS" ]; then
         PASS=$((PASS + 1))
@@ -20,111 +24,116 @@ report() {
     fi
 }
 
+cleanup() {
+    if [ -n "$DAEMON_PID" ] && kill -0 "$DAEMON_PID" 2>/dev/null; then
+        kill "$DAEMON_PID"
+        wait "$DAEMON_PID" || true
+    fi
+    if [ -n "$HOLD_PID" ] && kill -0 "$HOLD_PID" 2>/dev/null; then
+        kill "$HOLD_PID"
+        wait "$HOLD_PID" || true
+    fi
+    if [ -n "$SOCKET_DIR" ] && [ -d "$SOCKET_DIR" ]; then
+        rm -rf "$SOCKET_DIR"
+    fi
+}
+trap cleanup EXIT
+
+daemon_request() {
+    local payload="$1"
+    python3 - "$DAEMON_SOCKET" "$payload" <<'PY'
+import socket
+import sys
+
+socket_path = sys.argv[1]
+payload = sys.argv[2]
+client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+client.connect(socket_path)
+client.sendall((payload + "\n").encode())
+chunks = []
+while True:
+    chunk = client.recv(4096)
+    if not chunk:
+        break
+    chunks.append(chunk)
+    if b"\n" in chunk:
+        break
+client.close()
+sys.stdout.write(b"".join(chunks).decode().strip())
+PY
+}
+
 echo "================================================================"
-echo "=== BpfReJIT v2 Live Daemon Integration Tests ==="
+echo "=== BpfReJIT v2 Serve Integration Tests ==="
 echo "================================================================"
 
-# Hold a BPF program loaded in background
 echo "--- Loading load_byte_recompose.bpf.o and holding it ---"
 HOLD_PROG="${ROOT_DIR}/tests/helpers/build/hold_bpf_prog"
 "$HOLD_PROG" "${ROOT_DIR}/micro/programs/load_byte_recompose.bpf.o" 120 &
-BGPID=$!
+HOLD_PID=$!
 sleep 2
 
-if kill -0 $BGPID 2>/dev/null; then
-    echo "hold_bpf_prog running (pid=$BGPID)"
+if kill -0 "$HOLD_PID" 2>/dev/null; then
+    report "0: BPF program stays loaded" "PASS"
 else
-    echo "hold_bpf_prog already exited"
     report "0: BPF program stays loaded" "FAIL" "process exited"
     exit 1
 fi
 
-# Test 1: daemon enumerate sees the live program
-echo ""
-echo "--- daemon enumerate ---"
-ENUM_OUTPUT=$(./daemon/target/release/bpfrejit-daemon enumerate 2>&1)
-echo "$ENUM_OUTPUT"
+SOCKET_DIR="$(mktemp -d)"
+DAEMON_SOCKET="$SOCKET_DIR/bpfrejit.sock"
 
-PROG_LINES=$(echo "$ENUM_OUTPUT" | grep -E "^\s+[0-9]+" || true)
-PROG_COUNT=$(echo "$PROG_LINES" | grep -c -E "[0-9]" || true)
-echo "Found $PROG_COUNT programs"
+echo "--- Starting daemon serve ---"
+./daemon/target/release/bpfrejit-daemon serve --socket "$DAEMON_SOCKET" &
+DAEMON_PID=$!
+sleep 1
 
-if [ "$PROG_COUNT" -gt 0 ]; then
-    report "1: daemon enumerate finds live programs ($PROG_COUNT)" "PASS"
+if [ ! -S "$DAEMON_SOCKET" ]; then
+    report "1: daemon serve starts" "FAIL" "socket not created"
+    exit 1
+fi
+report "1: daemon serve starts" "PASS"
 
-    PROG_ID=$(echo "$PROG_LINES" | head -1 | awk '{print $1}')
-    echo "Using prog_id=$PROG_ID"
-
-    # Check if it has wide_mem sites
-    HAS_WIDE=$(echo "$PROG_LINES" | head -1 | grep -o "wide_mem=[0-9]*" || echo "none")
-    echo "Sites: $HAS_WIDE"
-
-    # Test 2: daemon rewrite
-    echo ""
-    echo "--- daemon rewrite $PROG_ID ---"
-    REWRITE_OUTPUT=$(./daemon/target/release/bpfrejit-daemon rewrite "$PROG_ID" 2>&1)
-    echo "$REWRITE_OUTPUT"
-
-    if echo "$REWRITE_OUTPUT" | grep -qE "found [0-9]+ rewrite sites"; then
-        SITES=$(echo "$REWRITE_OUTPUT" | grep -o "found [0-9]* rewrite" | grep -o "[0-9]*")
-        report "2: daemon rewrite finds $SITES optimization sites" "PASS"
-    elif echo "$REWRITE_OUTPUT" | grep -q "nothing to rewrite\|no original"; then
-        report "2: daemon rewrite (no wide_mem sites)" "PASS" "(program may not have wide_mem patterns)"
-    elif echo "$REWRITE_OUTPUT" | grep -q "original instructions"; then
-        report "2: daemon rewrite (read program)" "PASS"
-    else
-        report "2: daemon rewrite" "FAIL" "unexpected output"
-    fi
-
-    # Test 3: daemon apply
-    echo ""
-    echo "--- daemon apply $PROG_ID ---"
-    APPLY_OUTPUT=$(./daemon/target/release/bpfrejit-daemon apply "$PROG_ID" 2>&1)
-    APPLY_EXIT=$?
-    echo "$APPLY_OUTPUT"
-
-    if echo "$APPLY_OUTPUT" | grep -q "REJIT successful"; then
-        report "3: daemon apply REJIT successful" "PASS"
-    elif echo "$APPLY_OUTPUT" | grep -q "no optimization sites\|no transforms"; then
-        report "3: daemon apply (no sites)" "PASS" "(no wide_mem patterns found)"
-    elif [ $APPLY_EXIT -eq 0 ]; then
-        report "3: daemon apply completed" "PASS"
-    else
-        report "3: daemon apply" "FAIL" "$APPLY_OUTPUT"
-    fi
-
-    # Test 4: daemon apply-all
-    echo ""
-    echo "--- daemon apply-all ---"
-    APPLYALL_OUTPUT=$(./daemon/target/release/bpfrejit-daemon apply-all 2>&1)
-    echo "$APPLYALL_OUTPUT"
-
-    if echo "$APPLYALL_OUTPUT" | grep -q "apply-all:"; then
-        APPLIED=$(echo "$APPLYALL_OUTPUT" | grep -o "applied [0-9]*" | grep -o "[0-9]*" || echo "0")
-        report "4: daemon apply-all (applied=$APPLIED)" "PASS"
-    else
-        report "4: daemon apply-all" "FAIL" "$APPLYALL_OUTPUT"
-    fi
+echo "--- daemon status ---"
+STATUS_OUTPUT="$(daemon_request '{"cmd":"status"}')"
+echo "$STATUS_OUTPUT"
+if printf '%s\n' "$STATUS_OUTPUT" | python3 -c 'import json,sys; payload=json.load(sys.stdin); raise SystemExit(0 if payload.get("status")=="ok" else 1)'; then
+    report "2: daemon status request" "PASS"
 else
-    report "1: daemon enumerate" "FAIL" "no programs found"
-    report "2: daemon rewrite" "FAIL" "skipped"
-    report "3: daemon apply" "FAIL" "skipped"
-    report "4: daemon apply-all" "FAIL" "skipped"
+    report "2: daemon status request" "FAIL" "$STATUS_OUTPUT"
 fi
 
-# Clean up
-echo ""
-echo "--- Cleaning up ---"
-kill $BGPID 2>/dev/null || true
-wait $BGPID 2>/dev/null || true
+PROG_ID="$(bpftool -j -p prog show | python3 -c 'import json,sys; payload=json.load(sys.stdin); ids=[int(entry.get("id", 0)) for entry in payload if isinstance(entry, dict) and int(entry.get("id", 0)) > 0]; print(max(ids) if ids else "")')"
+if [ -z "$PROG_ID" ]; then
+    report "3: locate live prog_id" "FAIL" "bpftool returned no live program ids"
+    exit 1
+fi
+report "3: locate live prog_id=$PROG_ID" "PASS"
 
-# Check dmesg
+echo "--- daemon optimize dry-run ---"
+DRY_RUN_OUTPUT="$(daemon_request "{\"cmd\":\"optimize\",\"prog_id\":${PROG_ID},\"dry_run\":true}")"
+echo "$DRY_RUN_OUTPUT"
+if printf '%s\n' "$DRY_RUN_OUTPUT" | python3 -c 'import json,sys; payload=json.load(sys.stdin); summary=payload.get("summary") or {}; ok=payload.get("status")=="ok" and "total_sites_applied" in summary; raise SystemExit(0 if ok else 1)'; then
+    report "4: daemon dry-run optimize request" "PASS"
+else
+    report "4: daemon dry-run optimize request" "FAIL" "$DRY_RUN_OUTPUT"
+fi
+
+echo "--- daemon optimize dry-run with explicit enabled_passes ---"
+PASS_OUTPUT="$(daemon_request "{\"cmd\":\"optimize\",\"prog_id\":${PROG_ID},\"dry_run\":true,\"enabled_passes\":[\"wide_mem\"]}")"
+echo "$PASS_OUTPUT"
+if printf '%s\n' "$PASS_OUTPUT" | python3 -c 'import json,sys; payload=json.load(sys.stdin); raise SystemExit(0 if payload.get("status")=="ok" else 1)'; then
+    report "5: daemon request accepts enabled_passes override" "PASS"
+else
+    report "5: daemon request accepts enabled_passes override" "FAIL" "$PASS_OUTPUT"
+fi
+
 WARNINGS=$(dmesg | grep -c -E "WARNING|BUG|Oops" || true)
 if [ "$WARNINGS" -eq 0 ] 2>/dev/null; then
-    report "5: no kernel warnings" "PASS"
+    report "6: no kernel warnings" "PASS"
 else
     WARN_DETAIL=$(dmesg | grep -E "WARNING|BUG|Oops" | head -3)
-    report "5: no kernel warnings" "FAIL" "$WARN_DETAIL"
+    report "6: no kernel warnings" "FAIL" "$WARN_DETAIL"
 fi
 
 echo ""

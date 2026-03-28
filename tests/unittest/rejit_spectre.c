@@ -12,10 +12,9 @@
  *   5. Verify program info (jited_prog_len) is updated after REJIT
  *
  * NOTE: This test uses a local NOP-insertion helper (insert JA+0 after each
- * conditional branch) to construct modified programs for REJIT. This is NOT
- * related to the daemon's SpectreMitigationPass, which inserts real
- * bpf_speculation_barrier() kfunc calls (#382) rather than JA+0 NOPs.
- * The purpose of these tests is to verify the REJIT syscall handles
+ * conditional branch) to construct modified programs for REJIT. It does not
+ * exercise any active security pass or `bpf_barrier` kfunc path. The purpose
+ * of these tests is only to verify that the REJIT syscall handles
  * instruction-count changes and branch-offset fixups correctly.
  *
  * The tests cover:
@@ -187,9 +186,8 @@ static int is_nop(const struct bpf_insn *insn)
  * offsets as needed. This produces a semantically equivalent but longer
  * program suitable for REJIT testing.
  *
- * NOTE: The daemon's SpectreMitigationPass uses bpf_speculation_barrier()
- * kfunc calls (not JA+0 NOPs). This local helper is only used to construct
- * test inputs for verifying REJIT correctness with changed insn counts.
+ * NOTE: This local helper is only used to construct test inputs for verifying
+ * REJIT correctness with changed insn counts.
  *
  * Returns the new instruction count. Output buffer must be large enough.
  */

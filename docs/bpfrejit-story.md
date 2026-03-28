@@ -144,7 +144,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 6. **BPF_PROG_REJIT 接受完整的新 BPF bytecode**，不是 patch format — daemon 提交整段新程序，kernel 走标准 verify 路径
 7. **Mandatory Falsification**：如果 fixed kernel heuristics 在所有测试硬件和 workload 上恢复相同收益，正确结论是"用 kernel peepholes"，不是发布 userspace-guided interface
 8. **Daemon 零 libbpf 依赖**：daemon 只通过 raw BPF syscall 与内核交互，不需要 libbpf。Rust 实现。
-9. **Daemon 两种运行模式**：(1) 一次性模式（apply-all）；(2) 常驻模式（watch，待实现）。
+9. **Daemon 统一入口**：当前只保留 `serve` 常驻模式；优化、dry-run、批量操作都通过 Unix socket JSON 请求触发。
 
 ---
 

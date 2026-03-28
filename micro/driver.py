@@ -41,6 +41,10 @@ from runner.libs.results import (
     summarize_perf_counter_meta,
     summarize_phase_timings,
 )
+from runner.libs.rejit import (
+    benchmark_config_enabled_passes,
+    load_benchmark_config,
+)
 
 from runner.libs.run_artifacts import (
     ArtifactSession,
@@ -58,6 +62,11 @@ DEFAULT_RUNTIME_ORDER_SEED = 0
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run declarative micro benchmark suites.")
     parser.add_argument("--suite", default=str(CONFIG_PATH), help="Path to suite YAML.")
+    parser.add_argument(
+        "--profile",
+        default=None,
+        help="Optional benchmark pass profile from corpus/config/benchmark_config.yaml.",
+    )
     parser.add_argument("--bench", action="append", dest="benches", help="Benchmark name.")
     parser.add_argument("--runtime", action="append", dest="runtimes", help="Runtime name.")
     parser.add_argument("--iterations", type=int, help="Measured runs per pair.")
@@ -150,6 +159,7 @@ def build_micro_batch_job(
     perf_counters: bool = False,
     perf_scope: str = "full_repeat_raw",
     daemon_socket: str | None = None,
+    enabled_passes: list[str] | None = None,
     compile_only: bool = False,
     prepared_key: str | None = None,
     prepared_ref: str | None = None,
@@ -174,6 +184,8 @@ def build_micro_batch_job(
         job["perf_scope"] = perf_scope
     if daemon_socket is not None:
         job["daemon_socket"] = daemon_socket
+    if enabled_passes is not None:
+        job["enabled_passes"] = list(enabled_passes)
     if prepared_key is not None:
         job["prepared_key"] = prepared_key
     if prepared_ref is not None:
@@ -418,6 +430,7 @@ def build_micro_batch_plan(
     memory_files: dict[str, Path | None] = {}
     parallel_jobs = micro_batch_parallel_jobs()
     measurement_entries: list[dict[str, Any]] = []
+    enabled_passes = benchmark_config_enabled_passes(getattr(args, "benchmark_config", None))
 
     for benchmark in benchmarks:
         memory_file = resolve_memory_file(benchmark, args.regenerate_inputs)
@@ -446,6 +459,9 @@ def build_micro_batch_plan(
                         perf_counters=args.perf_counters,
                         perf_scope=args.perf_scope,
                         daemon_socket=daemon_socket if is_rejit_runtime else None,
+                        enabled_passes=(
+                            enabled_passes if is_rejit_runtime and daemon_socket is not None else None
+                        ),
                     )
                 )
 
@@ -474,6 +490,9 @@ def build_micro_batch_plan(
                         "memory": memory_file,
                         "input_size": benchmark.kernel_input_size,
                         "daemon_socket": daemon_socket if is_rejit_runtime else None,
+                        "enabled_passes": (
+                            enabled_passes if is_rejit_runtime and daemon_socket is not None else None
+                        ),
                         "perf_counters": args.perf_counters,
                         "perf_scope": args.perf_scope,
                         "pgo_job": (
@@ -523,6 +542,7 @@ def build_micro_batch_plan(
                     memory=entry["memory"],
                     input_size=entry["input_size"],
                     daemon_socket=entry["daemon_socket"],
+                    enabled_passes=entry["enabled_passes"],
                     compile_only=True,
                     prepared_key=f"{entry['job_id']}::prepared",
                     prepared_group=window_group,
@@ -542,6 +562,7 @@ def build_micro_batch_plan(
                     perf_counters=entry["perf_counters"],
                     perf_scope=entry["perf_scope"],
                     daemon_socket=entry["daemon_socket"],
+                    enabled_passes=entry["enabled_passes"],
                     prepared_ref=f"{entry['job_id']}::prepared",
                     prepared_group=window_group,
                 )
@@ -560,6 +581,7 @@ def build_micro_batch_plan(
                     perf_counters=entry["perf_counters"],
                     perf_scope=entry["perf_scope"],
                     daemon_socket=entry["daemon_socket"],
+                    enabled_passes=entry["enabled_passes"],
                 )
             )
 
@@ -589,6 +611,8 @@ def batch_result_map(batch_payload: dict[str, Any] | None) -> dict[str, dict[str
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    args.benchmark_config = load_benchmark_config(args.profile)
+    enabled_passes = benchmark_config_enabled_passes(args.benchmark_config)
     suite_path = Path(args.suite)
     try:
         suite = load_suite(suite_path)
@@ -655,6 +679,13 @@ def main(argv: list[str] | None = None) -> int:
             "shuffle_seed": args.shuffle_seed,
             "runtime_order_seed": runtime_order_seed,
         },
+        "benchmark_profile": args.profile,
+        "benchmark_config": (
+            str(args.benchmark_config["config_path"])
+            if args.benchmark_config.get("config_path") is not None
+            else None
+        ),
+        "enabled_passes": enabled_passes,
         "iteration_runtime_orders": {},
         "benchmarks": [],
     }

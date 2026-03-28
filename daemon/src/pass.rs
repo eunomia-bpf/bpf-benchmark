@@ -52,7 +52,7 @@ pub struct BpfProgram {
     /// Transform log: records what each pass did.
     pub transform_log: Vec<TransformEntry>,
     /// BTF FDs required by kinsn function calls introduced during rewrite.
-    /// Used by cmd_apply to construct the REJIT transport fd_array.
+    /// Used by the serve optimize path to construct the REJIT transport fd_array.
     pub required_btf_fds: Vec<i32>,
     /// Map IDs referenced by this program, in the kernel's `used_maps` order.
     /// This metadata lets analyses resolve `BPF_PSEUDO_MAP_FD` references
@@ -474,7 +474,7 @@ impl KinsnRegistry {
     }
 
     /// Return all unique BTF FDs in the registry.
-    /// Used by cmd_apply to validate that required_btf_fds are a subset.
+    /// Used by the serve optimize path to validate that required_btf_fds are a subset.
     pub fn all_btf_fds(&self) -> Vec<i32> {
         let mut fds: Vec<i32> = self.target_btf_fds.values().copied().collect();
         fds.sort();
@@ -865,7 +865,11 @@ fn pass_allowed(
     ctx: &PassContext,
     available_passes: &HashSet<&str>,
 ) -> anyhow::Result<bool> {
-    validate_policy_pass_names("enabled_passes", &ctx.policy.enabled_passes, available_passes)?;
+    validate_policy_pass_names(
+        "enabled_passes",
+        &ctx.policy.enabled_passes,
+        available_passes,
+    )?;
     validate_policy_pass_names(
         "disabled_passes",
         &ctx.policy.disabled_passes,
@@ -903,7 +907,10 @@ fn validate_policy_pass_names(
     if unknown.is_empty() {
         return Ok(());
     }
-    anyhow::bail!("invalid {field}: unknown pass name(s): {}", unknown.join(", "));
+    anyhow::bail!(
+        "invalid {field}: unknown pass name(s): {}",
+        unknown.join(", ")
+    );
 }
 
 fn changed_pc_ranges(before: &[BpfInsn], after: &[BpfInsn]) -> Vec<std::ops::Range<usize>> {
@@ -929,10 +936,7 @@ fn changed_pc_ranges(before: &[BpfInsn], after: &[BpfInsn]) -> Vec<std::ops::Ran
     ranges
 }
 
-fn remap_transform_attribution(
-    attribution: &mut [TransformAttribution],
-    addr_map: &[usize],
-) {
+fn remap_transform_attribution(attribution: &mut [TransformAttribution], addr_map: &[usize]) {
     for attr in attribution {
         attr.pc_ranges = remap_pc_ranges(&attr.pc_ranges, addr_map);
     }
@@ -959,9 +963,7 @@ fn remap_pc_ranges(
     merge_pc_ranges(remapped)
 }
 
-fn merge_pc_ranges(
-    mut ranges: Vec<std::ops::Range<usize>>,
-) -> Vec<std::ops::Range<usize>> {
+fn merge_pc_ranges(mut ranges: Vec<std::ops::Range<usize>>) -> Vec<std::ops::Range<usize>> {
     if ranges.len() <= 1 {
         return ranges;
     }

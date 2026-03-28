@@ -169,37 +169,38 @@ impl OptimizeMode {
 pub(crate) fn collect_pgo_data(
     prog_id: u32,
     pgo_config: Option<&PgoConfig>,
-) -> Option<pass::ProfilingData> {
-    let config = pgo_config?;
-    match profiler::collect_program_profiling(prog_id, config.interval) {
-        Ok((profiling, analysis)) => {
-            if analysis.is_hot() {
-                eprintln!(
-                    "  pgo: prog {} is hot (delta_run_cnt={}, avg_ns={})",
-                    prog_id,
-                    analysis.delta_run_cnt,
-                    analysis
-                        .delta_avg_ns
-                        .map_or("-".to_string(), |value| format!("{value:.2}")),
-                );
-            } else {
-                eprintln!("  pgo: prog {} is cold (no activity during observation)");
-            }
+) -> Result<Option<pass::ProfilingData>> {
+    let Some(config) = pgo_config else {
+        return Ok(None);
+    };
 
-            if profiling.branch_miss_rate.is_none() {
-                eprintln!(
-                    "  pgo: prog {} has no PMU branch_miss_rate data; branch_flip will remain gated",
-                    prog_id
-                );
-            }
+    let (profiling, analysis) = profiler::collect_program_profiling(prog_id, config.interval)
+        .with_context(|| format!("collect PGO data for prog {}", prog_id))?;
 
-            Some(profiling)
-        }
-        Err(err) => {
-            eprintln!("  pgo: failed to profile prog {}: {:#}", prog_id, err);
-            None
-        }
+    if analysis.is_hot() {
+        eprintln!(
+            "  pgo: prog {} is hot (delta_run_cnt={}, avg_ns={})",
+            prog_id,
+            analysis.delta_run_cnt,
+            analysis
+                .delta_avg_ns
+                .map_or("-".to_string(), |value| format!("{value:.2}")),
+        );
+    } else {
+        eprintln!(
+            "  pgo: prog {} is cold (no activity during observation)",
+            prog_id
+        );
     }
+
+    if profiling.branch_miss_rate.is_none() {
+        eprintln!(
+            "  pgo: prog {} has no PMU branch_miss_rate data; branch_flip will remain gated",
+            prog_id
+        );
+    }
+
+    Ok(Some(profiling))
 }
 
 // ── Pipeline helpers ────────────────────────────────────────────────
@@ -583,7 +584,7 @@ pub(crate) fn try_apply_one(
         );
         seed_program.verifier_states.clone()
     };
-    let profiling = collect_pgo_data(prog_id, pgo_config);
+    let profiling = collect_pgo_data(prog_id, pgo_config)?;
 
     let mut disabled_passes: HashSet<String> = HashSet::new();
     let max_retries = 10;
@@ -604,7 +605,8 @@ pub(crate) fn try_apply_one(
         }
 
         let pipeline_start = Instant::now();
-        let pipeline_result = pm.run_with_profiling(&mut program, &local_ctx, profiling.as_ref())?;
+        let pipeline_result =
+            pm.run_with_profiling(&mut program, &local_ctx, profiling.as_ref())?;
         let pipeline_elapsed = pipeline_start.elapsed().as_nanos() as u64;
         total_pipeline_ns += pipeline_elapsed;
         let attempt_map_inline_records = collect_map_inline_records(&pipeline_result.pass_results);

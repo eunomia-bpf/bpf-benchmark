@@ -104,7 +104,7 @@ impl PgoAnalysis {
     }
 
     /// Hotness score: invocations per second during the observation window.
-    /// Returns 0.0 if no time elapsed. Used by HotnessRanking and watch mode.
+    /// Returns 0.0 if no time elapsed. Used by HotnessRanking.
     pub fn hotness_score(&self, elapsed: Duration) -> f64 {
         let secs = elapsed.as_secs_f64();
         if secs <= 0.0 {
@@ -115,7 +115,7 @@ impl PgoAnalysis {
 }
 
 /// Program hotness ranking — sorts programs by activity level.
-/// Used by the watch command and future multi-program PGO flows.
+/// Kept for future multi-program PGO flows.
 #[derive(Clone, Debug)]
 
 pub struct HotnessRanking {

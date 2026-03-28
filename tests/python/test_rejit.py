@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import subprocess
 import sys
 from pathlib import Path
 
@@ -10,25 +9,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from runner.libs import rejit
 
 
-def test_apply_one_treats_missing_inlined_map_entries_as_empty(monkeypatch) -> None:
-    payload = {
-        "summary": {"applied": True, "total_sites_applied": 0},
-        "program": {"prog_name": "balancer_ingress"},
-        "inlined_map_entries": None,
-    }
-
-    def fake_run(*args, **kwargs):
-        del args, kwargs
-        return subprocess.CompletedProcess(
-            args=["daemon", "apply", "123"],
-            returncode=0,
-            stdout=json.dumps(payload),
-            stderr="",
-        )
-
-    monkeypatch.setattr(rejit.subprocess, "run", fake_run)
-
-    result = rejit._apply_one(Path("/tmp/fake-daemon"), 123)
+def test_apply_result_treats_missing_inlined_map_entries_as_empty() -> None:
+    result = rejit._apply_result_from_response(
+        {
+            "status": "ok",
+            "summary": {"applied": True, "total_sites_applied": 0},
+            "program": {"prog_name": "balancer_ingress"},
+        },
+        output="{}",
+        exit_code=0,
+    )
 
     assert result["applied"] is True
     assert result["inlined_map_entries"] == []
@@ -62,8 +52,8 @@ def test_benchmark_rejit_enabled_passes_uses_default_when_env_missing(monkeypatc
 def test_apply_daemon_rejit_empty_pass_list_uses_socket(monkeypatch) -> None:
     calls: list[tuple[str, object]] = []
 
-    def fake_start_daemon_server(_daemon_binary):
-        calls.append(("start", None))
+    def fake_start_daemon_server(_daemon_binary, *, pgo=False):
+        calls.append(("start", pgo))
         return object(), Path("/tmp/daemon.sock"), "/tmp/daemon-dir", None, None
 
     def fake_apply_one_via_socket(socket_path, prog_id, enabled_passes, **kwargs):
@@ -77,23 +67,60 @@ def test_apply_daemon_rejit_empty_pass_list_uses_socket(monkeypatch) -> None:
             "error": "",
         }
 
-    def fake_apply_one(_daemon_binary, _prog_id):
-        raise AssertionError("CLI apply path should not be used for explicit empty pass lists")
-
     def fake_stop_daemon_server(_proc, _socket_path, _socket_dir):
         calls.append(("stop", None))
 
     monkeypatch.setattr(rejit, "_start_daemon_server", fake_start_daemon_server)
     monkeypatch.setattr(rejit, "_apply_one_via_socket", fake_apply_one_via_socket)
-    monkeypatch.setattr(rejit, "_apply_one", fake_apply_one)
     monkeypatch.setattr(rejit, "_stop_daemon_server", fake_stop_daemon_server)
 
     result = rejit.apply_daemon_rejit(Path("/tmp/fake-daemon"), [123], enabled_passes=[])
 
     assert result["applied"] is True
-    assert ("start", None) in calls
+    assert ("start", False) in calls
     assert ("socket", (Path("/tmp/daemon.sock"), 123, [])) in calls
     assert ("stop", None) in calls
+
+
+def test_apply_daemon_rejit_branch_flip_starts_daemon_with_pgo(monkeypatch) -> None:
+    calls: list[tuple[str, object]] = []
+
+    def fake_start_daemon_server(_daemon_binary, *, pgo=False):
+        calls.append(("start", pgo))
+        return object(), Path("/tmp/daemon.sock"), "/tmp/daemon-dir", None, None
+
+    def fake_apply_one_via_socket(socket_path, prog_id, enabled_passes, **kwargs):
+        del kwargs
+        calls.append(("socket", (socket_path, prog_id, list(enabled_passes))))
+        return {
+            "applied": True,
+            "output": "",
+            "exit_code": 0,
+            "counts": {"total_sites": 1, "applied_sites": 1},
+            "error": "",
+        }
+
+    monkeypatch.setattr(rejit, "_start_daemon_server", fake_start_daemon_server)
+    monkeypatch.setattr(rejit, "_apply_one_via_socket", fake_apply_one_via_socket)
+    monkeypatch.setattr(rejit, "_stop_daemon_server", lambda *_args: calls.append(("stop", None)))
+
+    result = rejit.apply_daemon_rejit(
+        Path("/tmp/fake-daemon"),
+        [123],
+        enabled_passes=["branch_flip"],
+    )
+
+    assert result["applied"] is True
+    assert ("start", True) in calls
+
+
+def test_apply_daemon_rejit_requires_prog_ids() -> None:
+    try:
+        rejit.apply_daemon_rejit(Path("/tmp/fake-daemon"), [])
+    except ValueError as exc:
+        assert "at least one prog_id" in str(exc)
+    else:
+        raise AssertionError("expected ValueError for empty prog_ids")
 
 
 def test_apply_one_via_socket_sends_explicit_empty_pass_list(monkeypatch) -> None:

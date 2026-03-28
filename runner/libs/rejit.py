@@ -253,17 +253,6 @@ def _parse_site_summary(site_summary: str) -> dict[str, int]:
     return counts
 
 
-def _daemon_command(
-    daemon: Path | str,
-    subcommand: str,
-    *subcommand_args: object,
-) -> list[str]:
-    command = [str(daemon)]
-    command.append(subcommand)
-    command.extend(str(arg) for arg in subcommand_args)
-    return command
-
-
 def benchmark_rejit_enabled_passes() -> list[str]:
     if _BENCH_PASSES_ENV in os.environ:
         raw = os.environ.get(_BENCH_PASSES_ENV)
@@ -344,26 +333,6 @@ def _scan_record_from_optimize_response(prog_id: int, response: Mapping[str, Any
     }
 
 
-def enumerate_program_record(
-    daemon: Path | str,
-    prog_id: int,
-    *,
-    timeout_seconds: int = 60,
-) -> dict[str, Any]:
-    """Return the parsed daemon dry-run optimize record for a specific live prog_id."""
-    records = scan_programs([prog_id], daemon, timeout_seconds=timeout_seconds)
-    record = records.get(int(prog_id))
-    if not isinstance(record, Mapping):
-        raise RuntimeError(f"prog {prog_id} not found in daemon scan output")
-    error = str(record.get("error") or "").strip()
-    if error:
-        raise RuntimeError(error)
-    enumerate_record = record.get("enumerate_record")
-    if not isinstance(enumerate_record, Mapping):
-        raise RuntimeError(f"prog {prog_id} scan output was missing enumerate_record")
-    return dict(enumerate_record)
-
-
 def scan_programs(
     prog_ids: list[int],
     daemon: Path | str,
@@ -428,39 +397,6 @@ def scan_programs(
             _stop_daemon_server(daemon_proc, daemon_socket_path, daemon_socket_dir)
 
     return results
-
-
-def _apply_one(
-    daemon_binary: Path | str,
-    prog_id: int,
-    *,
-    timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
-) -> dict[str, object]:
-    daemon_proc = None
-    daemon_socket_path = None
-    daemon_socket_dir = None
-    daemon_stdout_path = None
-    daemon_stderr_path = None
-    try:
-        (
-            daemon_proc,
-            daemon_socket_path,
-            daemon_socket_dir,
-            daemon_stdout_path,
-            daemon_stderr_path,
-        ) = _start_daemon_server(daemon_binary)
-        return _apply_one_via_socket(
-            daemon_socket_path,
-            prog_id,
-            None,
-            daemon_proc=daemon_proc,
-            stdout_path=daemon_stdout_path,
-            stderr_path=daemon_stderr_path,
-            timeout_seconds=timeout_seconds,
-        )
-    finally:
-        if daemon_proc is not None and daemon_socket_path is not None and daemon_socket_dir is not None:
-            _stop_daemon_server(daemon_proc, daemon_socket_path, daemon_socket_dir)
 
 
 def _apply_result_from_response(
@@ -546,6 +482,30 @@ def _daemon_log_tail(stdout_path: Path | None, stderr_path: Path | None) -> str:
     return tail_text("\n".join(fragments), max_lines=80, max_chars=8000)
 
 
+def _daemon_error_response(
+    detail: str,
+    *,
+    daemon_proc: subprocess.Popen[str] | None = None,
+    stdout_path: Path | None = None,
+    stderr_path: Path | None = None,
+) -> dict[str, Any]:
+    notes: list[str] = [detail]
+    if daemon_proc is not None:
+        returncode = daemon_proc.poll()
+        notes.append(
+            f"daemon serve rc={returncode}" if returncode is not None else "daemon serve still running"
+        )
+
+    log_tail = _daemon_log_tail(stdout_path, stderr_path)
+    if log_tail:
+        notes.append(f"daemon log tail:\n{log_tail}")
+
+    return {
+        "status": "error",
+        "message": "\n".join(notes),
+    }
+
+
 def _start_daemon_server(
     daemon_binary: Path | str,
     *,
@@ -604,6 +564,71 @@ def _stop_daemon_server(proc: subprocess.Popen[str], socket_path: Path, socket_d
     shutil.rmtree(socket_dir, ignore_errors=True)
 
 
+def _daemon_request(
+    socket_path: Path,
+    payload: Mapping[str, object],
+    *,
+    timeout_seconds: float,
+    daemon_proc: subprocess.Popen[str] | None = None,
+    stdout_path: Path | None = None,
+    stderr_path: Path | None = None,
+) -> dict[str, Any]:
+    request = json.dumps(dict(payload)) + "\n"
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+        client.settimeout(timeout_seconds)
+        try:
+            client.connect(str(socket_path))
+            client.sendall(request.encode())
+            chunks: list[bytes] = []
+            while True:
+                chunk = client.recv(4096)
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                if b"\n" in chunk:
+                    break
+        except socket.timeout:
+            return _daemon_error_response(
+                f"daemon socket request timed out after {timeout_seconds:.0f}s",
+                daemon_proc=daemon_proc,
+                stdout_path=stdout_path,
+                stderr_path=stderr_path,
+            )
+        except OSError as exc:
+            return _daemon_error_response(
+                f"daemon socket request failed: {exc}",
+                daemon_proc=daemon_proc,
+                stdout_path=stdout_path,
+                stderr_path=stderr_path,
+            )
+
+    line = b"".join(chunks).decode(errors="replace").strip()
+    if not line:
+        return _daemon_error_response(
+            "daemon socket returned an empty response",
+            daemon_proc=daemon_proc,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+        )
+    try:
+        response = json.loads(line)
+    except json.JSONDecodeError as exc:
+        return _daemon_error_response(
+            f"daemon socket returned invalid JSON: {exc}: {line[:400]}",
+            daemon_proc=daemon_proc,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+        )
+    if not isinstance(response, Mapping):
+        return _daemon_error_response(
+            f"daemon socket returned non-object JSON: {line[:400]}",
+            daemon_proc=daemon_proc,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+        )
+    return dict(response)
+
+
 def _optimize_request(
     socket_path: Path,
     prog_id: int,
@@ -623,72 +648,34 @@ def _optimize_request(
         payload["dry_run"] = True
     if enabled_passes is not None:
         payload["enabled_passes"] = [str(name).strip() for name in enabled_passes if str(name).strip()]
-    request = json.dumps(payload) + "\n"
-    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
-        client.settimeout(timeout_seconds)
-        try:
-            client.connect(str(socket_path))
-            client.sendall(request.encode())
-            chunks: list[bytes] = []
-            while True:
-                chunk = client.recv(4096)
-                if not chunk:
-                    break
-                chunks.append(chunk)
-                if b"\n" in chunk:
-                    break
-        except socket.timeout:
-            return _socket_error_result(
-                prog_id,
-                f"socket optimize timed out after {timeout_seconds:.0f}s for prog {prog_id}",
-                exit_code=124,
-                daemon_proc=daemon_proc,
-                stdout_path=stdout_path,
-                stderr_path=stderr_path,
-            )
-        except OSError as exc:
-            return _socket_error_result(
-                prog_id,
-                f"socket optimize failed for prog {prog_id}: {exc}",
-                daemon_proc=daemon_proc,
-                stdout_path=stdout_path,
-                stderr_path=stderr_path,
-            )
-
-    line = b"".join(chunks).decode(errors="replace").strip()
-    if not line:
+    response = _daemon_request(
+        socket_path,
+        payload,
+        timeout_seconds=timeout_seconds,
+        daemon_proc=daemon_proc,
+        stdout_path=stdout_path,
+        stderr_path=stderr_path,
+    )
+    if str(response.get("status") or "") == "error":
         return _socket_error_result(
             prog_id,
-            f"daemon socket returned an empty response for prog {prog_id}",
+            str(response.get("message") or response.get("error") or f"socket optimize failed for prog {prog_id}"),
+            exit_code=124 if "timed out" in str(response.get("message") or "").lower() else 1,
             daemon_proc=daemon_proc,
             stdout_path=stdout_path,
             stderr_path=stderr_path,
         )
-    try:
-        response = json.loads(line)
-    except json.JSONDecodeError as exc:
-        return _socket_error_result(
-            prog_id,
-            f"daemon socket returned invalid JSON for prog {prog_id}: {exc}: {line[:400]}",
-            daemon_proc=daemon_proc,
-            stdout_path=stdout_path,
-            stderr_path=stderr_path,
-        )
-    if not isinstance(response, Mapping):
-        return _socket_error_result(
-            prog_id,
-            f"daemon socket returned non-object JSON for prog {prog_id}: {line[:400]}",
-            daemon_proc=daemon_proc,
-            stdout_path=stdout_path,
-            stderr_path=stderr_path,
-        )
-    return dict(response)
+    return response
 
 
 def _branch_flip_requested(enabled_passes: Sequence[str] | None) -> bool:
     if enabled_passes is None:
         return False
     return any(str(name).strip() == "branch_flip" for name in enabled_passes)
+
+
+def serve_requires_pgo(enabled_passes: Sequence[str] | None) -> bool:
+    return _branch_flip_requested(enabled_passes)
 
 
 def _apply_one_via_socket(
@@ -724,75 +711,24 @@ def apply_daemon_rejit(
     *,
     enabled_passes: Sequence[str] | None = None,
 ) -> dict[str, object]:
-    """Call daemon optimize or optimize-all via serve and return a canonical ReJIT summary."""
-    if prog_ids:
-        per_program: dict[int, dict[str, object]] = {}
-        outputs: list[str] = []
-        exit_code = 0
-        all_applied = True
-        total_sites = 0
-        applied_sites = 0
-        errors: list[str] = []
-        daemon_proc = None
-        daemon_socket_path = None
-        daemon_socket_dir = None
-        daemon_stdout_path = None
-        daemon_stderr_path = None
+    """Apply serve-mode optimize requests and return a canonical ReJIT summary."""
+    requested_prog_ids = [int(value) for value in (prog_ids or []) if int(value) > 0]
+    if not requested_prog_ids:
+        raise ValueError("apply_daemon_rejit requires at least one prog_id")
 
-        try:
-            (
-                daemon_proc,
-                daemon_socket_path,
-                daemon_socket_dir,
-                daemon_stdout_path,
-                daemon_stderr_path,
-            ) = _start_daemon_server(
-                daemon_binary,
-                pgo=_branch_flip_requested(enabled_passes),
-            )
-            for prog_id in [int(value) for value in prog_ids if int(value) > 0]:
-                assert daemon_socket_path is not None
-                result = _apply_one_via_socket(
-                    daemon_socket_path,
-                    prog_id,
-                    enabled_passes,
-                    daemon_proc=daemon_proc,
-                    stdout_path=daemon_stdout_path,
-                    stderr_path=daemon_stderr_path,
-                )
-                per_program[prog_id] = result
-                outputs.append(str(result.get("output") or ""))
-                exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
-                all_applied = all_applied and bool(result.get("applied", False))
-
-                counts = result.get("counts") if isinstance(result.get("counts"), Mapping) else {}
-                total_sites += int((counts or {}).get("total_sites", 0) or 0)
-                applied_sites += int((counts or {}).get("applied_sites", 0) or 0)
-
-                error = str(result.get("error") or "").strip()
-                if error:
-                    errors.append(f"prog {prog_id}: {error}")
-        finally:
-            if daemon_proc is not None and daemon_socket_path is not None and daemon_socket_dir is not None:
-                _stop_daemon_server(daemon_proc, daemon_socket_path, daemon_socket_dir)
-
-        return {
-            "applied": all_applied,
-            "output": "\n".join(output for output in outputs if output),
-            "exit_code": exit_code,
-            "per_program": per_program,
-            "counts": {
-                "total_sites": total_sites,
-                "applied_sites": applied_sites,
-            },
-            "error": "; ".join(errors),
-        }
-
+    per_program: dict[int, dict[str, object]] = {}
+    outputs: list[str] = []
+    exit_code = 0
+    all_applied = True
+    total_sites = 0
+    applied_sites = 0
+    errors: list[str] = []
     daemon_proc = None
     daemon_socket_path = None
     daemon_socket_dir = None
     daemon_stdout_path = None
     daemon_stderr_path = None
+
     try:
         (
             daemon_proc,
@@ -804,28 +740,43 @@ def apply_daemon_rejit(
             daemon_binary,
             pgo=_branch_flip_requested(enabled_passes),
         )
-        request_payload: dict[str, object] = {"cmd": "optimize-all"}
-        if enabled_passes is not None:
-            request_payload["enabled_passes"] = [str(name).strip() for name in enabled_passes if str(name).strip()]
-        response = _daemon_request(
-            daemon_socket_path,
-            request_payload,
-            timeout_seconds=_DEFAULT_APPLY_TIMEOUT_SECONDS,
-            daemon_proc=daemon_proc,
-            stdout_path=daemon_stdout_path,
-            stderr_path=daemon_stderr_path,
-        )
-        output = json.dumps(response, sort_keys=True)
-        error_message = str(response.get("message") or response.get("error") or "").strip()
-        return {
-            "applied": str(response.get("status") or "") == "ok",
-            "output": output,
-            "exit_code": 0 if str(response.get("status") or "") == "ok" else 1,
-            "error": error_message,
-        }
+        for prog_id in requested_prog_ids:
+            assert daemon_socket_path is not None
+            result = _apply_one_via_socket(
+                daemon_socket_path,
+                prog_id,
+                enabled_passes,
+                daemon_proc=daemon_proc,
+                stdout_path=daemon_stdout_path,
+                stderr_path=daemon_stderr_path,
+            )
+            per_program[prog_id] = result
+            outputs.append(str(result.get("output") or ""))
+            exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
+            all_applied = all_applied and bool(result.get("applied", False))
+
+            counts = result.get("counts") if isinstance(result.get("counts"), Mapping) else {}
+            total_sites += int((counts or {}).get("total_sites", 0) or 0)
+            applied_sites += int((counts or {}).get("applied_sites", 0) or 0)
+
+            error = str(result.get("error") or "").strip()
+            if error:
+                errors.append(f"prog {prog_id}: {error}")
     finally:
         if daemon_proc is not None and daemon_socket_path is not None and daemon_socket_dir is not None:
             _stop_daemon_server(daemon_proc, daemon_socket_path, daemon_socket_dir)
+
+    return {
+        "applied": all_applied,
+        "output": "\n".join(output for output in outputs if output),
+        "exit_code": exit_code,
+        "per_program": per_program,
+        "counts": {
+            "total_sites": total_sites,
+            "applied_sites": applied_sites,
+        },
+        "error": "; ".join(errors),
+    }
 
 
 __all__ = [
@@ -835,7 +786,7 @@ __all__ = [
     "benchmark_config_repeat",
     "benchmark_config_warmups",
     "benchmark_rejit_enabled_passes",
-    "enumerate_program_record",
     "load_benchmark_config",
     "scan_programs",
+    "serve_requires_pgo",
 ]

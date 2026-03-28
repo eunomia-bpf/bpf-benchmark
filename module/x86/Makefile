@@ -9,7 +9,6 @@ obj-m += bpf_rotate.o
 obj-m += bpf_select.o
 obj-m += bpf_extract.o
 obj-m += bpf_endian.o
-obj-m += bpf_barrier.o
 obj-m += bpf_bulk_memory.o
 
 all:

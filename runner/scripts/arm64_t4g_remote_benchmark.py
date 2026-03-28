@@ -159,10 +159,10 @@ def scan_program(daemon_binary: Path, prog_id: int) -> dict[str, Any]:
     results = scan_programs([prog_id], daemon_binary)
     record = results.get(int(prog_id))
     if not isinstance(record, dict):
-        raise RuntimeError(f"daemon enumerate did not return a record for prog_id={prog_id}")
+        raise RuntimeError(f"daemon scan did not return a record for prog_id={prog_id}")
     error = str(record.get("error") or "").strip()
     if error:
-        raise RuntimeError(f"daemon enumerate failed for prog_id={prog_id}: {error}")
+        raise RuntimeError(f"daemon scan failed for prog_id={prog_id}: {error}")
     return record
 
 
@@ -376,7 +376,7 @@ def run_daemon_stock_vs_rejit(
 
     return {
         "suite": suite.suite_name,
-        "method": "bpftool prog loadall/run pinned + daemon enumerate/apply (live auto policy)",
+        "method": "bpftool prog loadall/run pinned + daemon serve optimize (live auto policy)",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "host": {
             "hostname": platform.node(),

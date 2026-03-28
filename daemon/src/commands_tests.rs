@@ -1,4 +1,3 @@
-
 use super::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -24,11 +23,7 @@ impl MockTrackerReader {
 }
 
 impl MapValueReader for MockTrackerReader {
-    fn lookup_values_batch(
-        &self,
-        map_fd: u32,
-        keys: &[Vec<u8>],
-    ) -> Result<Vec<BatchLookupValue>> {
+    fn lookup_values_batch(&self, map_fd: u32, keys: &[Vec<u8>]) -> Result<Vec<BatchLookupValue>> {
         let values = self.values.borrow();
         let map_values = values.get(&map_fd).cloned().unwrap_or_default();
         Ok(keys
@@ -112,8 +107,7 @@ fn test_optimize_one_result_serialization() {
     };
 
     let json = serde_json::to_string(&result).expect("serialization should succeed");
-    let parsed: serde_json::Value =
-        serde_json::from_str(&json).expect("JSON should parse back");
+    let parsed: serde_json::Value = serde_json::from_str(&json).expect("JSON should parse back");
 
     assert_eq!(parsed["status"], "ok");
     assert_eq!(parsed["prog_id"], 42);
@@ -200,8 +194,7 @@ fn test_optimize_one_result_with_rollback() {
     };
 
     let json = serde_json::to_string(&result).expect("serialization should succeed");
-    let parsed: serde_json::Value =
-        serde_json::from_str(&json).expect("JSON should parse back");
+    let parsed: serde_json::Value = serde_json::from_str(&json).expect("JSON should parse back");
 
     assert_eq!(parsed["summary"]["verifier_retries"], 1);
     assert_eq!(parsed["passes_applied"][0], "extract");
@@ -357,7 +350,7 @@ fn test_record_map_inline_records_preserves_existing_entries_on_open_failure() {
 // ── HIGH #3: Orchestration unit tests ───────────────────────────
 
 /// Test attribute_verifier_failure — the core attribution logic used by
-/// the rollback loop in cmd_apply / try_apply_one.
+/// the rollback loop in the serve optimize path / try_apply_one.
 ///
 /// The verifier log format requires state lines (e.g., "15: R0=scalar R1=ctx()")
 /// followed by error lines. extract_failure_pc extracts the PC from the last

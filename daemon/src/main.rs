@@ -94,6 +94,8 @@ fn main() -> Result<()> {
     };
 
     match cli.command {
-        Command::Serve { socket } => server::cmd_serve(&socket, &ctx, pgo_config.as_ref(), !cli.no_rollback),
+        Command::Serve { socket } => {
+            server::cmd_serve(&socket, &ctx, pgo_config.as_ref(), !cli.no_rollback)
+        }
     }
 }

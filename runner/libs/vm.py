@@ -185,7 +185,7 @@ def build_guest_exec(argv: list[str]) -> str:
     # Load kinsn kernel modules before running the guest command so the daemon
     # can apply platform-specific rewrites (rotate, cond_select, extract).
     load_script = ROOT_DIR / "module" / "load_all.sh"
-    kinsn_load = f"{shlex.quote(str(load_script))} 2>/dev/null || true; "
+    kinsn_load = f"{shlex.quote(str(load_script))} && "
     main_cmd = " ".join(shlex.quote(part) for part in argv)
     return kinsn_load + main_cmd
 

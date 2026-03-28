@@ -830,11 +830,7 @@ mod tests {
 
     #[test]
     fn fixup_folded_jumps_remaps_backward_jump_after_growth() {
-        let old_insns = vec![
-            BpfInsn::mov64_imm(2, 1),
-            jne_imm(1, 0, -2),
-            exit_insn(),
-        ];
+        let old_insns = vec![BpfInsn::mov64_imm(2, 1), jne_imm(1, 0, -2), exit_insn()];
         let wide = ld_imm64(2, 0, 1, 1);
         let mut new_insns = vec![wide[0], wide[1], BpfInsn::ja(-2), exit_insn()];
         let addr_map = vec![0, 2, 3, 4];
@@ -867,11 +863,7 @@ mod tests {
 
     #[test]
     fn fixup_folded_jumps_remaps_jump_to_end_sentinel() {
-        let old_insns = vec![
-            jeq_imm(1, 7, 2),
-            BpfInsn::mov64_imm(2, 1),
-            exit_insn(),
-        ];
+        let old_insns = vec![jeq_imm(1, 7, 2), BpfInsn::mov64_imm(2, 1), exit_insn()];
         let wide = ld_imm64(2, 0, 1, 1);
         let mut new_insns = vec![BpfInsn::ja(2), wide[0], wide[1], exit_insn()];
         let addr_map = vec![0, 1, 3, 4];

@@ -35,7 +35,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--daemon",
         default=str(DEFAULT_DAEMON),
-        help="Path to bpfrejit-daemon used for live enumerate.",
+        help="Path to the bpfrejit-daemon serve binary.",
     )
     parser.add_argument(
         "--output",
@@ -55,7 +55,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--no-sites",
         action="store_true",
-        help="Skip daemon enumerate site census collection.",
+        help="Skip daemon serve site census collection.",
     )
     parser.add_argument(
         "--no-perf",

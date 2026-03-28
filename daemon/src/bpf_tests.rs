@@ -1,4 +1,3 @@
-
 use super::*;
 
 /// Helper: build a BPF_LD_IMM64 instruction pair with given dst_reg, src_reg, and imm.
@@ -142,8 +141,7 @@ fn parse_bpf_cmd_enum() -> std::collections::HashMap<String, u32> {
         env!("CARGO_MANIFEST_DIR"),
         "/../vendor/linux-framework/include/uapi/linux/bpf.h"
     );
-    let content =
-        std::fs::read_to_string(header_path).expect("failed to read kernel bpf.h header");
+    let content = std::fs::read_to_string(header_path).expect("failed to read kernel bpf.h header");
 
     let mut result = std::collections::HashMap::new();
     let mut in_enum = false;
@@ -486,8 +484,7 @@ fn test_bpf_prog_info_layout_matches_kernel_header() {
         env!("CARGO_MANIFEST_DIR"),
         "/../vendor/linux-framework/include/uapi/linux/bpf.h"
     );
-    let content =
-        std::fs::read_to_string(header_path).expect("failed to read kernel bpf.h header");
+    let content = std::fs::read_to_string(header_path).expect("failed to read kernel bpf.h header");
 
     // Find the struct bpf_prog_info definition and extract field names+types.
     let mut in_struct = false;
@@ -640,8 +637,7 @@ fn test_bpf_prog_info_layout_matches_kernel_header() {
     for (rust_name, rust_offset) in &rust_offsets {
         // The kernel header uses "type" for prog_type; map it
         let kernel_name = *rust_name;
-        if let Some((_, kernel_offset)) = kernel_offsets.iter().find(|(n, _)| n == kernel_name)
-        {
+        if let Some((_, kernel_offset)) = kernel_offsets.iter().find(|(n, _)| n == kernel_name) {
             assert_eq!(
                 *rust_offset, *kernel_offset,
                 "BpfProgInfo field '{}' offset mismatch: Rust={} kernel={}",
@@ -735,8 +731,7 @@ fn test_btf_info_layout_matches_kernel_header() {
         env!("CARGO_MANIFEST_DIR"),
         "/../vendor/linux-framework/include/uapi/linux/bpf.h"
     );
-    let content =
-        std::fs::read_to_string(header_path).expect("failed to read kernel bpf.h header");
+    let content = std::fs::read_to_string(header_path).expect("failed to read kernel bpf.h header");
 
     // Find struct bpf_btf_info
     let mut in_struct = false;
@@ -876,10 +871,7 @@ fn test_mock_percpu_array_lookup_uses_full_blob_size() {
         MockMapState {
             info,
             frozen: true,
-            values: std::collections::HashMap::from([(
-                1u32.to_le_bytes().to_vec(),
-                value.clone(),
-            )]),
+            values: std::collections::HashMap::from([(1u32.to_le_bytes().to_vec(), value.clone())]),
         },
     );
 
@@ -908,7 +900,6 @@ fn test_mock_percpu_array_lookup_returns_zero_for_in_range_missing_key() {
     );
 
     let lookup_size = bpf_map_lookup_value_size_by_id(9004).expect("lookup size");
-    let value =
-        bpf_map_lookup_elem_by_id(9004, &2u32.to_le_bytes(), lookup_size).expect("lookup");
+    let value = bpf_map_lookup_elem_by_id(9004, &2u32.to_le_bytes(), lookup_size).expect("lookup");
     assert_eq!(value, vec![0u8; lookup_size]);
 }

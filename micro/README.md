@@ -37,19 +37,25 @@ python3 micro/driver.py suite -- --list
 Run the suite on the host:
 
 ```bash
-./docs/paper/scripts/run_micro.sh
+python3 micro/driver.py --runtime llvmbpf --runtime kernel --runtime kernel-rejit
 ```
 
 Run llvmbpf only:
 
 ```bash
-./docs/paper/scripts/run_micro.sh --llvmbpf-only
+python3 micro/driver.py --runtime llvmbpf
 ```
 
 Run inside the framework-kernel VM:
 
 ```bash
-./docs/paper/scripts/run_micro.sh --vm
+make vm-micro
+```
+
+Run a specific pass profile through the daemon-backed VM path:
+
+```bash
+make vm-micro PROFILE=ablation_wide_mem
 ```
 
 Run a targeted smoke test directly:

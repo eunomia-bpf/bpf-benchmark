@@ -524,7 +524,10 @@ mod tests {
         );
 
         assert_eq!(response["status"], "error");
-        assert_eq!(response["message"], "enabled_passes entries must not be blank");
+        assert_eq!(
+            response["message"],
+            "enabled_passes entries must not be blank"
+        );
     }
 
     #[test]
@@ -543,7 +546,10 @@ mod tests {
         );
 
         assert_eq!(response["status"], "error");
-        assert_eq!(response["message"], "disabled_passes entries must not be blank");
+        assert_eq!(
+            response["message"],
+            "disabled_passes entries must not be blank"
+        );
     }
 
     #[test]

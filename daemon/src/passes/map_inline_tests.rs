@@ -134,13 +134,7 @@ fn install_map_with_key_size(
     );
 }
 
-fn install_empty_map(
-    map_id: u32,
-    map_type: u32,
-    value_size: u32,
-    max_entries: u32,
-    frozen: bool,
-) {
+fn install_empty_map(map_id: u32, map_type: u32, value_size: u32, max_entries: u32, frozen: bool) {
     let mut info = BpfMapInfo::default();
     info.map_type = map_type;
     info.id = map_id;
@@ -198,13 +192,7 @@ fn install_array_map(map_id: u32, value: Vec<u8>) {
     install_map(map_id, 2, 8, true, values);
 }
 
-fn install_array_map_entry(
-    map_id: u32,
-    max_entries: u32,
-    key: u32,
-    value: Vec<u8>,
-    frozen: bool,
-) {
+fn install_array_map_entry(map_id: u32, max_entries: u32, key: u32, value: Vec<u8>, frozen: bool) {
     let mut values = HashMap::new();
     values.insert(key.to_le_bytes().to_vec(), value.clone());
 

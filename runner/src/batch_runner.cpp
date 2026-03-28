@@ -471,30 +471,6 @@ void print_optional_json_field(std::ostream &out, const char *field_name, const 
     }
 }
 
-template <typename T>
-__u64 ptr_to_u64_batch(T *ptr)
-{
-    return static_cast<__u64>(reinterpret_cast<uintptr_t>(ptr));
-}
-
-struct daemon_socket_response_batch {
-    bool ok = false;
-    bool applied = false;
-    bool program_changed = false;
-    std::string error;
-    std::string status = "error";
-    std::string message;
-    std::string error_message;
-    uint32_t total_sites_applied = 0;
-    std::vector<std::string> passes_applied;
-    std::vector<daemon_pass_detail> pass_details;
-    int64_t insn_delta = 0;
-    uint32_t verifier_retries = 0;
-    std::vector<std::string> final_disabled_passes;
-    std::optional<int64_t> final_insn_count;
-    std::optional<int64_t> final_jited_size;
-};
-
 struct bpf_object_deleter_batch {
     void operator()(bpf_object *object) const
     {
@@ -505,535 +481,6 @@ struct bpf_object_deleter_batch {
 };
 
 using bpf_object_ptr_batch = std::unique_ptr<bpf_object, bpf_object_deleter_batch>;
-
-std::string extract_json_string_batch(const std::string &json, const std::string &key)
-{
-    const std::string pattern1 = "\"" + key + "\":\"";
-    const std::string pattern2 = "\"" + key + "\": \"";
-    auto pos = json.find(pattern1);
-    size_t value_start = std::string::npos;
-    if (pos != std::string::npos) {
-        value_start = pos + pattern1.size();
-    } else {
-        pos = json.find(pattern2);
-        if (pos != std::string::npos) {
-            value_start = pos + pattern2.size();
-        }
-    }
-    if (value_start == std::string::npos) {
-        return {};
-    }
-    const auto value_end = json.find('"', value_start);
-    if (value_end == std::string::npos) {
-        return {};
-    }
-    return json.substr(value_start, value_end - value_start);
-}
-
-int64_t extract_json_int_batch(const std::string &json, const std::string &key)
-{
-    const std::string pattern1 = "\"" + key + "\":";
-    const std::string pattern2 = "\"" + key + "\": ";
-    size_t value_start = std::string::npos;
-    auto pos = json.find(pattern1);
-    if (pos != std::string::npos) {
-        value_start = pos + pattern1.size();
-    } else {
-        pos = json.find(pattern2);
-        if (pos != std::string::npos) {
-            value_start = pos + pattern2.size();
-        }
-    }
-    if (value_start == std::string::npos) {
-        return 0;
-    }
-    while (value_start < json.size() && json[value_start] == ' ') {
-        ++value_start;
-    }
-    try {
-        return std::stoll(json.substr(value_start));
-    } catch (...) {
-        return 0;
-    }
-}
-
-bool extract_json_bool_batch(const std::string &json, const std::string &key)
-{
-    const std::string pattern1 = "\"" + key + "\":true";
-    const std::string pattern2 = "\"" + key + "\": true";
-    return json.find(pattern1) != std::string::npos || json.find(pattern2) != std::string::npos;
-}
-
-bool json_char_escaped_batch(const std::string &json, size_t pos)
-{
-    if (pos == 0 || pos > json.size()) {
-        return false;
-    }
-
-    size_t backslash_count = 0;
-    size_t cursor = pos;
-    while (cursor > 0 && json[--cursor] == '\\') {
-        ++backslash_count;
-    }
-    return (backslash_count % 2) != 0;
-}
-
-size_t find_matching_json_delim_batch(
-    const std::string &json,
-    size_t open_pos,
-    char open_ch,
-    char close_ch)
-{
-    if (open_pos >= json.size() || json[open_pos] != open_ch) {
-        return std::string::npos;
-    }
-
-    int depth = 0;
-    bool in_string = false;
-    for (size_t index = open_pos; index < json.size(); ++index) {
-        const char ch = json[index];
-        if (ch == '"' && !json_char_escaped_batch(json, index)) {
-            in_string = !in_string;
-            continue;
-        }
-        if (in_string) {
-            continue;
-        }
-        if (ch == open_ch) {
-            ++depth;
-        } else if (ch == close_ch) {
-            --depth;
-            if (depth == 0) {
-                return index;
-            }
-        }
-    }
-
-    return std::string::npos;
-}
-
-std::string extract_json_compound_batch(
-    const std::string &json,
-    const std::string &key,
-    char open_ch,
-    char close_ch)
-{
-    const std::string pattern = "\"" + key + "\"";
-    size_t key_pos = json.find(pattern);
-    while (key_pos != std::string::npos) {
-        const auto colon_pos = json.find(':', key_pos + pattern.size());
-        if (colon_pos == std::string::npos) {
-            return {};
-        }
-        size_t value_start = colon_pos + 1;
-        while (value_start < json.size() && json[value_start] == ' ') {
-            ++value_start;
-        }
-        if (value_start < json.size() && json[value_start] == open_ch) {
-            const auto value_end = find_matching_json_delim_batch(
-                json, value_start, open_ch, close_ch);
-            if (value_end == std::string::npos) {
-                return {};
-            }
-            return json.substr(value_start, value_end - value_start + 1);
-        }
-        key_pos = json.find(pattern, key_pos + pattern.size());
-    }
-
-    return {};
-}
-
-std::vector<std::string> extract_json_string_array_batch(const std::string &json, const std::string &key)
-{
-    std::vector<std::string> values;
-    const std::string pattern1 = "\"" + key + "\":[";
-    const std::string pattern2 = "\"" + key + "\": [";
-    size_t array_start = std::string::npos;
-    auto pos = json.find(pattern1);
-    if (pos != std::string::npos) {
-        array_start = pos + pattern1.size();
-    } else {
-        pos = json.find(pattern2);
-        if (pos != std::string::npos) {
-            array_start = pos + pattern2.size();
-        }
-    }
-    if (array_start == std::string::npos) {
-        return values;
-    }
-    const auto array_end = json.find(']', array_start);
-    if (array_end == std::string::npos) {
-        return values;
-    }
-    const std::string content = json.substr(array_start, array_end - array_start);
-    size_t cursor = 0;
-    while (true) {
-        const auto q1 = content.find('"', cursor);
-        if (q1 == std::string::npos) {
-            break;
-        }
-        const auto q2 = content.find('"', q1 + 1);
-        if (q2 == std::string::npos) {
-            break;
-        }
-        values.push_back(content.substr(q1 + 1, q2 - q1 - 1));
-        cursor = q2 + 1;
-    }
-    return values;
-}
-
-std::vector<daemon_pass_detail> extract_pass_details_batch(const std::string &json)
-{
-    std::vector<daemon_pass_detail> details;
-    const std::string passes_json = extract_json_compound_batch(json, "passes", '[', ']');
-    if (passes_json.size() < 2) {
-        return details;
-    }
-
-    size_t cursor = 1;
-    while (cursor + 1 < passes_json.size()) {
-        const auto object_start = passes_json.find('{', cursor);
-        if (object_start == std::string::npos || object_start + 1 >= passes_json.size()) {
-            break;
-        }
-        const auto object_end = find_matching_json_delim_batch(
-            passes_json, object_start, '{', '}');
-        if (object_end == std::string::npos) {
-            break;
-        }
-
-        const std::string pass_object =
-            passes_json.substr(object_start, object_end - object_start + 1);
-        daemon_pass_detail detail;
-        detail.pass_name = extract_json_string_batch(pass_object, "pass_name");
-        detail.changed = extract_json_bool_batch(pass_object, "changed");
-        detail.sites_applied = static_cast<uint32_t>(
-            extract_json_int_batch(pass_object, "sites_applied"));
-        detail.sites_skipped = static_cast<uint32_t>(
-            extract_json_int_batch(pass_object, "sites_skipped"));
-        detail.sites_found = detail.sites_applied + detail.sites_skipped;
-        detail.insns_before = extract_json_int_batch(pass_object, "insns_before");
-        detail.insns_after = extract_json_int_batch(pass_object, "insns_after");
-        detail.insn_delta = extract_json_int_batch(pass_object, "insn_delta");
-        if (const auto skip_reasons =
-                extract_json_compound_batch(pass_object, "skip_reasons", '{', '}');
-            !skip_reasons.empty()) {
-            detail.skip_reasons_json = skip_reasons;
-        }
-        if (const auto diagnostics =
-                extract_json_compound_batch(pass_object, "diagnostics", '[', ']');
-            !diagnostics.empty()) {
-            detail.diagnostics_json = diagnostics;
-        }
-        details.push_back(std::move(detail));
-        cursor = object_end + 1;
-    }
-
-    return details;
-}
-
-std::vector<std::string> changed_pass_names_batch(const std::vector<daemon_pass_detail> &details)
-{
-    std::vector<std::string> values;
-    values.reserve(details.size());
-    for (const auto &detail : details) {
-        if (detail.changed && !detail.pass_name.empty()) {
-            values.push_back(detail.pass_name);
-        }
-    }
-    return values;
-}
-
-daemon_socket_response_batch daemon_socket_optimize_batch(
-    const std::string &socket_path,
-    uint32_t prog_id,
-    const std::vector<std::string> &enabled_passes,
-    bool enabled_passes_specified)
-{
-    daemon_socket_response_batch response;
-
-    const int fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (fd < 0) {
-        response.error = "socket() failed: " + std::string(strerror(errno));
-        return response;
-    }
-
-    sockaddr_un address = {};
-    address.sun_family = AF_UNIX;
-    if (socket_path.size() >= sizeof(address.sun_path)) {
-        close(fd);
-        response.error = "socket path too long";
-        return response;
-    }
-    std::strncpy(address.sun_path, socket_path.c_str(), sizeof(address.sun_path) - 1);
-    if (connect(fd, reinterpret_cast<sockaddr *>(&address), sizeof(address)) != 0) {
-        close(fd);
-        response.error = "connect() failed: " + std::string(strerror(errno));
-        return response;
-    }
-
-    std::ostringstream request_stream;
-    request_stream << "{\"cmd\":\"optimize\",\"prog_id\":" << prog_id;
-    if (enabled_passes_specified) {
-        request_stream << ",\"enabled_passes\":[";
-        for (size_t index = 0; index < enabled_passes.size(); ++index) {
-            if (index != 0) {
-                request_stream << ",";
-            }
-            request_stream << "\"" << json_escape(enabled_passes[index]) << "\"";
-        }
-        request_stream << "]";
-    }
-    request_stream << "}\n";
-    const std::string request = request_stream.str();
-    if (write(fd, request.c_str(), request.size()) < 0) {
-        close(fd);
-        response.error = "write() failed: " + std::string(strerror(errno));
-        return response;
-    }
-
-    std::string line;
-    char byte = 0;
-    bool peer_closed = false;
-    int read_error = 0;
-    while (true) {
-        const ssize_t read_result = read(fd, &byte, 1);
-        if (read_result < 0) {
-            read_error = errno;
-            break;
-        }
-        if (read_result == 0) {
-            peer_closed = true;
-            break;
-        }
-        if (byte == '\n') {
-            break;
-        }
-        line.push_back(byte);
-    }
-    close(fd);
-    if (line.empty()) {
-        if (read_error != 0) {
-            response.error = "read() failed: " + std::string(strerror(read_error));
-        } else if (peer_closed) {
-            response.error = "daemon closed connection before responding";
-        } else {
-            response.error = "empty response from daemon";
-        }
-        return response;
-    }
-
-    response.status = extract_json_string_batch(line, "status");
-    response.ok = response.status == "ok";
-    response.message = extract_json_string_batch(line, "message");
-    response.error_message = extract_json_string_batch(line, "error_message");
-    if (!response.ok) {
-        response.error = !response.error_message.empty()
-            ? response.error_message
-            : (!response.message.empty() ? response.message : line);
-        return response;
-    }
-
-    const std::string summary = extract_json_compound_batch(line, "summary", '{', '}');
-    if (!summary.empty()) {
-        response.applied = extract_json_bool_batch(summary, "applied");
-        response.program_changed = extract_json_bool_batch(summary, "program_changed");
-        response.total_sites_applied = static_cast<uint32_t>(
-            extract_json_int_batch(summary, "total_sites_applied"));
-        response.verifier_retries = static_cast<uint32_t>(
-            extract_json_int_batch(summary, "verifier_retries"));
-        response.final_disabled_passes =
-            extract_json_string_array_batch(summary, "final_disabled_passes");
-    }
-
-    const std::string program_json = extract_json_compound_batch(line, "program", '{', '}');
-    if (!program_json.empty()) {
-        response.insn_delta = extract_json_int_batch(program_json, "insn_delta");
-        const auto final_insn_count = extract_json_int_batch(program_json, "final_insn_count");
-        const auto final_jited_size = extract_json_int_batch(program_json, "final_jited_size");
-        if (final_insn_count > 0) {
-            response.final_insn_count = final_insn_count;
-        }
-        if (final_jited_size > 0) {
-            response.final_jited_size = final_jited_size;
-        }
-    }
-
-    response.pass_details = extract_pass_details_batch(line);
-    response.passes_applied = changed_pass_names_batch(response.pass_details);
-    return response;
-}
-
-bpf_prog_info load_prog_info_batch(int program_fd)
-{
-    bpf_prog_info info = {};
-    union bpf_attr attr = {};
-    attr.info.bpf_fd = program_fd;
-    attr.info.info_len = sizeof(info);
-    attr.info.info = ptr_to_u64_batch(&info);
-    if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
-        fail("BPF_OBJ_GET_INFO_BY_FD failed: " + std::string(strerror(errno)));
-    }
-    return info;
-}
-
-std::vector<uint8_t> load_jited_program_batch(int program_fd, uint32_t length)
-{
-    if (length == 0) {
-        return {};
-    }
-    std::vector<uint8_t> bytes(length);
-    bpf_prog_info info = {};
-    info.jited_prog_len = length;
-    info.jited_prog_insns = ptr_to_u64_batch(bytes.data());
-    union bpf_attr attr = {};
-    attr.info.bpf_fd = program_fd;
-    attr.info.info_len = sizeof(info);
-    attr.info.info = ptr_to_u64_batch(&info);
-    if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
-        fail("BPF_OBJ_GET_INFO_BY_FD (JIT dump) failed: " + std::string(strerror(errno)));
-    }
-    bytes.resize(info.jited_prog_len);
-    return bytes;
-}
-
-std::vector<uint8_t> load_xlated_program_batch(int program_fd, uint32_t length)
-{
-    if (length == 0) {
-        return {};
-    }
-    std::vector<uint8_t> bytes(length);
-    bpf_prog_info info = {};
-    info.xlated_prog_len = length;
-    info.xlated_prog_insns = ptr_to_u64_batch(bytes.data());
-    union bpf_attr attr = {};
-    attr.info.bpf_fd = program_fd;
-    attr.info.info_len = sizeof(info);
-    attr.info.info = ptr_to_u64_batch(&info);
-    if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
-        fail("BPF_OBJ_GET_INFO_BY_FD (xlated dump) failed: " + std::string(strerror(errno)));
-    }
-    bytes.resize(info.xlated_prog_len);
-    return bytes;
-}
-
-std::string format_byte_dump_batch(const std::vector<uint8_t> &bytes, size_t width, bool annotate_pc)
-{
-    if (bytes.empty()) {
-        return {};
-    }
-    std::ostringstream out;
-    for (size_t offset = 0; offset < bytes.size(); offset += width) {
-        if (offset != 0) {
-            out << "\n";
-        }
-        if (annotate_pc) {
-            out << std::setw(4) << (offset / width) << ": ";
-        }
-        const size_t line_width = std::min(width, bytes.size() - offset);
-        for (size_t index = 0; index < line_width; ++index) {
-            if (index != 0) {
-                out << " ";
-            }
-            out << std::hex << std::setw(2) << std::setfill('0')
-                << static_cast<unsigned int>(bytes[offset + index])
-                << std::dec << std::setfill(' ');
-        }
-    }
-    return out.str();
-}
-
-std::string program_name_from_info_batch(const bpf_prog_info &info)
-{
-    const char *name = reinterpret_cast<const char *>(info.name);
-    if (name == nullptr || name[0] == '\0') {
-        return {};
-    }
-    return std::string(name);
-}
-
-std::optional<enum bpf_prog_type> prog_type_from_string_batch(const std::string &value)
-{
-    static const std::pair<std::string_view, enum bpf_prog_type> mapping[] = {
-        {"xdp", BPF_PROG_TYPE_XDP},
-        {"sched_cls", BPF_PROG_TYPE_SCHED_CLS},
-        {"sched_act", BPF_PROG_TYPE_SCHED_ACT},
-        {"kprobe", BPF_PROG_TYPE_KPROBE},
-        {"tracepoint", BPF_PROG_TYPE_TRACEPOINT},
-        {"raw_tracepoint", BPF_PROG_TYPE_RAW_TRACEPOINT},
-        {"raw_tp", BPF_PROG_TYPE_RAW_TRACEPOINT},
-        {"tracing", BPF_PROG_TYPE_TRACING},
-        {"perf_event", BPF_PROG_TYPE_PERF_EVENT},
-        {"socket_filter", BPF_PROG_TYPE_SOCKET_FILTER},
-        {"cgroup_skb", BPF_PROG_TYPE_CGROUP_SKB},
-        {"cgroup_sock", BPF_PROG_TYPE_CGROUP_SOCK},
-        {"cgroup_device", BPF_PROG_TYPE_CGROUP_DEVICE},
-        {"cgroup_sock_addr", BPF_PROG_TYPE_CGROUP_SOCK_ADDR},
-        {"cgroup_sysctl", BPF_PROG_TYPE_CGROUP_SYSCTL},
-        {"cgroup_sockopt", BPF_PROG_TYPE_CGROUP_SOCKOPT},
-        {"sk_msg", BPF_PROG_TYPE_SK_MSG},
-        {"sk_skb", BPF_PROG_TYPE_SK_SKB},
-        {"flow_dissector", BPF_PROG_TYPE_FLOW_DISSECTOR},
-        {"lwt_in", BPF_PROG_TYPE_LWT_IN},
-        {"lwt_out", BPF_PROG_TYPE_LWT_OUT},
-        {"lwt_xmit", BPF_PROG_TYPE_LWT_XMIT},
-        {"lwt_seg6local", BPF_PROG_TYPE_LWT_SEG6LOCAL},
-        {"sockops", BPF_PROG_TYPE_SOCK_OPS},
-        {"struct_ops", BPF_PROG_TYPE_STRUCT_OPS},
-        {"lsm", BPF_PROG_TYPE_LSM},
-        {"syscall", BPF_PROG_TYPE_SYSCALL},
-    };
-    for (const auto &[name, prog_type] : mapping) {
-        if (name == value) {
-            return prog_type;
-        }
-    }
-    return std::nullopt;
-}
-
-std::string prog_type_name_from_enum_batch(enum bpf_prog_type prog_type)
-{
-    static const std::pair<enum bpf_prog_type, std::string_view> mapping[] = {
-        {BPF_PROG_TYPE_SOCKET_FILTER, "socket_filter"},
-        {BPF_PROG_TYPE_KPROBE, "kprobe"},
-        {BPF_PROG_TYPE_SCHED_CLS, "sched_cls"},
-        {BPF_PROG_TYPE_SCHED_ACT, "sched_act"},
-        {BPF_PROG_TYPE_TRACEPOINT, "tracepoint"},
-        {BPF_PROG_TYPE_XDP, "xdp"},
-        {BPF_PROG_TYPE_PERF_EVENT, "perf_event"},
-        {BPF_PROG_TYPE_CGROUP_SKB, "cgroup_skb"},
-        {BPF_PROG_TYPE_CGROUP_SOCK, "cgroup_sock"},
-        {BPF_PROG_TYPE_LWT_IN, "lwt_in"},
-        {BPF_PROG_TYPE_LWT_OUT, "lwt_out"},
-        {BPF_PROG_TYPE_LWT_XMIT, "lwt_xmit"},
-        {BPF_PROG_TYPE_SOCK_OPS, "sock_ops"},
-        {BPF_PROG_TYPE_SK_SKB, "sk_skb"},
-        {BPF_PROG_TYPE_CGROUP_DEVICE, "cgroup_device"},
-        {BPF_PROG_TYPE_SK_MSG, "sk_msg"},
-        {BPF_PROG_TYPE_RAW_TRACEPOINT, "raw_tracepoint"},
-        {BPF_PROG_TYPE_CGROUP_SOCK_ADDR, "cgroup_sock_addr"},
-        {BPF_PROG_TYPE_LWT_SEG6LOCAL, "lwt_seg6local"},
-        {BPF_PROG_TYPE_LIRC_MODE2, "lirc_mode2"},
-        {BPF_PROG_TYPE_SK_REUSEPORT, "sk_reuseport"},
-        {BPF_PROG_TYPE_FLOW_DISSECTOR, "flow_dissector"},
-        {BPF_PROG_TYPE_CGROUP_SYSCTL, "cgroup_sysctl"},
-        {BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE, "raw_tracepoint_writable"},
-        {BPF_PROG_TYPE_CGROUP_SOCKOPT, "cgroup_sockopt"},
-        {BPF_PROG_TYPE_TRACING, "tracing"},
-        {BPF_PROG_TYPE_STRUCT_OPS, "struct_ops"},
-        {BPF_PROG_TYPE_EXT, "ext"},
-        {BPF_PROG_TYPE_LSM, "lsm"},
-        {BPF_PROG_TYPE_SK_LOOKUP, "sk_lookup"},
-        {BPF_PROG_TYPE_SYSCALL, "syscall"},
-        {BPF_PROG_TYPE_NETFILTER, "netfilter"},
-    };
-    for (const auto &[value, name] : mapping) {
-        if (value == prog_type) {
-            return std::string(name);
-        }
-    }
-    return {};
-}
 
 std::string serialize_load_attempts_json(const std::vector<static_verify_attempt> &attempts)
 {
@@ -1342,14 +789,7 @@ batch_spec load_batch_spec(const std::filesystem::path &spec_path)
     return spec;
 }
 
-std::string libbpf_error_string_batch(int error_code)
-{
-    char buffer[256] = {};
-    libbpf_strerror(error_code, buffer, sizeof(buffer));
-    return std::string(buffer);
-}
-
-std::optional<enum bpf_prog_type> unique_prog_type_hint_batch(const std::vector<std::string> &prog_types)
+std::optional<enum bpf_prog_type> unique_prog_type_hint(const std::vector<std::string> &prog_types)
 {
     std::optional<std::string> unique_name;
     for (const auto &prog_type : prog_types) {
@@ -1367,7 +807,7 @@ std::optional<enum bpf_prog_type> unique_prog_type_hint_batch(const std::vector<
     if (!unique_name.has_value()) {
         return std::nullopt;
     }
-    return prog_type_from_string_batch(*unique_name);
+    return prog_type_from_string(*unique_name);
 }
 
 std::pair<bpf_object_ptr_batch, std::string> try_open_static_verify_object(
@@ -1378,7 +818,7 @@ std::pair<bpf_object_ptr_batch, std::string> try_open_static_verify_object(
     if (open_error != 0) {
         return {
             bpf_object_ptr_batch(),
-            "bpf_object__open_file failed: " + libbpf_error_string_batch(open_error),
+            "bpf_object__open_file failed: " + libbpf_error_string(open_error),
         };
     }
     return {bpf_object_ptr_batch(raw_object), std::string()};
@@ -1403,14 +843,14 @@ std::pair<bpf_object_ptr_batch, std::vector<static_verify_attempt>> load_static_
         attempts.push_back({
             .command = "libbpf_object__load",
             .ok = load_error == 0,
-            .error = load_error == 0 ? std::string() : libbpf_error_string_batch(-load_error),
+            .error = load_error == 0 ? std::string() : libbpf_error_string(-load_error),
         });
         if (load_error == 0) {
             return {std::move(object), attempts};
         }
     }
 
-    const auto prog_type_hint = unique_prog_type_hint_batch(job.prog_types);
+    const auto prog_type_hint = unique_prog_type_hint(job.prog_types);
     if (prog_type_hint.has_value()) {
         auto [object, open_error] = try_open_static_verify_object(job.object_path);
         if (!object) {
@@ -1425,7 +865,7 @@ std::pair<bpf_object_ptr_batch, std::vector<static_verify_attempt>> load_static_
         while ((program = bpf_object__next_program(object.get(), program)) != nullptr) {
             const int type_error = bpf_program__set_type(program, *prog_type_hint);
             if (type_error != 0) {
-                fail("bpf_program__set_type failed: " + libbpf_error_string_batch(-type_error));
+                fail("bpf_program__set_type failed: " + libbpf_error_string(-type_error));
             }
         }
         const int load_error = bpf_object__load(object.get());
@@ -1433,7 +873,7 @@ std::pair<bpf_object_ptr_batch, std::vector<static_verify_attempt>> load_static_
         attempts.push_back({
             .command = std::move(command),
             .ok = load_error == 0,
-            .error = load_error == 0 ? std::string() : libbpf_error_string_batch(-load_error),
+            .error = load_error == 0 ? std::string() : libbpf_error_string(-load_error),
         });
         if (load_error == 0) {
             return {std::move(object), attempts};
@@ -1489,14 +929,15 @@ static_verify_program_record execute_static_verify_program(
         return record;
     }
 
-    const auto before_info = load_prog_info_batch(program_fd);
+    const auto before_info = load_prog_info(program_fd);
     record.prog_id = before_info.id;
     record.prog_type = before_info.type;
-    const std::string prog_type_name = prog_type_name_from_enum_batch(static_cast<enum bpf_prog_type>(before_info.type));
+    const std::string prog_type_name =
+        prog_type_name_from_enum(static_cast<enum bpf_prog_type>(before_info.type));
     if (!prog_type_name.empty()) {
         record.prog_type_name = prog_type_name;
     }
-    std::string program_name = program_name_from_info_batch(before_info);
+    std::string program_name = program_name_from_info(before_info);
     if (program_name.empty()) {
         const char *fallback_name = bpf_program__name(program);
         if (fallback_name != nullptr) {
@@ -1507,15 +948,17 @@ static_verify_program_record execute_static_verify_program(
         record.prog_name = program_name;
     }
 
-    const auto before_xlated_bytes = load_xlated_program_batch(program_fd, before_info.xlated_prog_len);
-    const auto before_jited_bytes = load_jited_program_batch(program_fd, before_info.jited_prog_len);
-    record.before_xlated = format_byte_dump_batch(before_xlated_bytes, sizeof(bpf_insn), true);
-    record.before_jited = format_byte_dump_batch(before_jited_bytes, 16, false);
+    const auto before_xlated_bytes =
+        load_xlated_program(program_fd, before_info.xlated_prog_len, false);
+    const auto before_jited_bytes =
+        load_jited_program(program_fd, before_info.jited_prog_len, false);
+    record.before_xlated = format_byte_dump(before_xlated_bytes, sizeof(bpf_insn), true);
+    record.before_jited = format_byte_dump(before_jited_bytes, 16, false);
     record.insn_count_before = static_cast<int64_t>(before_info.xlated_prog_len / sizeof(bpf_insn));
     record.code_size_before = static_cast<int64_t>(before_info.jited_prog_len);
 
     const auto daemon_response =
-        daemon_socket_optimize_batch(
+        daemon_socket_optimize(
             job.daemon_socket,
             before_info.id,
             job.options.enabled_passes,
@@ -1532,15 +975,23 @@ static_verify_program_record execute_static_verify_program(
 
     if (!daemon_response.ok) {
         record.status = "error";
-        record.error = daemon_response.error;
+        record.error = !daemon_response.error_message.empty()
+            ? daemon_response.error_message
+            : (!daemon_response.message.empty()
+                ? daemon_response.message
+                : (!daemon_response.raw_json.empty()
+                    ? daemon_response.raw_json
+                    : daemon_response.error));
         return record;
     }
 
-    const auto after_info = load_prog_info_batch(program_fd);
-    const auto after_xlated_bytes = load_xlated_program_batch(program_fd, after_info.xlated_prog_len);
-    const auto after_jited_bytes = load_jited_program_batch(program_fd, after_info.jited_prog_len);
-    record.after_xlated = format_byte_dump_batch(after_xlated_bytes, sizeof(bpf_insn), true);
-    record.after_jited = format_byte_dump_batch(after_jited_bytes, 16, false);
+    const auto after_info = load_prog_info(program_fd);
+    const auto after_xlated_bytes =
+        load_xlated_program(program_fd, after_info.xlated_prog_len, false);
+    const auto after_jited_bytes =
+        load_jited_program(program_fd, after_info.jited_prog_len, false);
+    record.after_xlated = format_byte_dump(after_xlated_bytes, sizeof(bpf_insn), true);
+    record.after_jited = format_byte_dump(after_jited_bytes, 16, false);
     record.insn_count_after = static_cast<int64_t>(after_info.xlated_prog_len / sizeof(bpf_insn));
     record.code_size_after = static_cast<int64_t>(after_info.jited_prog_len);
     record.verifier_accepted = true;

@@ -69,8 +69,11 @@ set_target_properties(vendor_libbpf PROPERTIES
 
 set(MICRO_EXEC_SOURCES
     src/batch_runner.cpp
+    src/bpf_helpers.cpp
     src/common.cpp
+    src/daemon_client.cpp
     src/elf_program_loader.cpp
+    src/json_parser.cpp
     src/kernel_runner.cpp
     src/main.cpp
     src/perf_counters.cpp
