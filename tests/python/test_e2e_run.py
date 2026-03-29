@@ -7,6 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from e2e import case_common
 from e2e import run as e2e_run
 from runner.libs import smoke_output_path
 
@@ -26,9 +27,20 @@ def test_resolve_primary_output_json_uses_smoke_path_for_default_output() -> Non
 
 def test_run_single_case_writes_primary_outputs(tmp_path: Path, monkeypatch) -> None:
     payload = {"status": "ok", "value": 7}
+    case_common.reset_pending_result_metadata()
 
     def fake_run_case(args: argparse.Namespace) -> dict[str, object]:
         del args
+        case_common._append_pending_kinsn_metadata(
+            {
+                "status": "completed",
+                "requested_prog_ids": [7],
+                "module_load": {
+                    "loaded_modules": ["bpf_endian"],
+                    "failed_modules": [],
+                },
+            }
+        )
         return dict(payload)
 
     spec = e2e_run.CaseSpec(
@@ -50,8 +62,11 @@ def test_run_single_case_writes_primary_outputs(tmp_path: Path, monkeypatch) -> 
 
     result = e2e_run._run_single_case(args, clear_existing=True)
 
-    assert result == payload
-    assert json.loads((tmp_path / "dummy.json").read_text()) == payload
+    assert result["status"] == "ok"
+    assert result["value"] == 7
+    assert result["metadata"]["kinsn_modules"]["count"] == 1
+    written = json.loads((tmp_path / "dummy.json").read_text())
+    assert written["metadata"]["kinsn_modules"]["lifecycle_runs"][0]["requested_prog_ids"] == [7]
     assert (tmp_path / "dummy.md").read_text() == "value=7\n"
     assert (tmp_path / "dummy-report.md").read_text() == "report=7\n"
 

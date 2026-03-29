@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import nullcontext
 from pathlib import Path
 import sys
 
@@ -475,6 +476,246 @@ def test_build_object_batch_plan_v2_uses_program_scoped_rejit_passes() -> None:
     assert "prepared_ref" not in kprobe_compile
     assert kprobe_run["enabled_passes"] == ["const_prop"]
     assert kprobe_run["prepared_ref"] == kprobe_compile["prepared_key"]
+
+
+def test_load_targets_from_yaml_applies_repo_loader_config(tmp_path: Path) -> None:
+    object_path = tmp_path / "tracee.bpf.o"
+    object_path.write_text("placeholder")
+    manifest_path = tmp_path / "macro.yaml"
+    manifest_path.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": 2,
+                "repos": {
+                    "tracee": {
+                        "loader": "app-native",
+                        "loader_binary": "e2e/cases/tracee/bin/tracee",
+                        "loader_args": ["--install-path", "/tmp/tracee"],
+                    }
+                },
+                "objects": [
+                    {
+                        "source": str(object_path),
+                        "repo": "tracee",
+                        "test_method": "attach_trigger",
+                        "programs": [
+                            {
+                                "name": "tracepoint__raw_syscalls__sys_enter",
+                                "prog_type": "raw_tracepoint",
+                                "section": "raw_tracepoint/sys_enter",
+                                "trigger": "true",
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+    )
+
+    objects, summary = corpus_lib.load_targets_from_yaml(
+        manifest_path,
+        corpus_build_report={
+            "path": tmp_path / "build-report.json",
+            "summary": {},
+            "available_objects": {str(object_path.resolve())},
+            "supplemented_existing": 0,
+        },
+    )
+
+    assert summary["selected_objects"] == 1
+    assert objects[0].loader == "app-native"
+    assert objects[0].loader_binary == "e2e/cases/tracee/bin/tracee"
+    assert objects[0].loader_args == ("--install-path", "/tmp/tracee")
+    assert objects[0].programs[0].loader == "app-native"
+    assert objects[0].programs[0].loader_args == ("--install-path", "/tmp/tracee")
+
+
+def test_run_tracee_app_native_object_builds_live_program_records(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    program = modes.ResolvedProgram(
+        source="corpus/build/tracee/tracee.bpf.o",
+        object_path="corpus/build/tracee/tracee.bpf.o",
+        object_abs_path="/tmp/tracee.bpf.o",
+        repo="tracee",
+        source_name="tracee",
+        family="tracee",
+        category="security",
+        level="unit",
+        description=None,
+        hypothesis=None,
+        tags=(),
+        object_relpath="tracee.bpf.o",
+        canonical_object_name="tracee:tracee.bpf.o",
+        object_basename="tracee.bpf.o",
+        short_name="tracee:tracee.bpf.o:tracepoint__raw_syscalls__sys_enter",
+        program_name="tracepoint__raw_syscalls__sys_enter",
+        canonical_name="tracee:tracee.bpf.o:tracepoint__raw_syscalls__sys_enter",
+        fixture_path=None,
+        test_method="attach_trigger",
+        prog_type_name="raw_tracepoint",
+        section_name="raw_tracepoint/sys_enter",
+        io_mode="context",
+        raw_packet=False,
+        input_size=0,
+        memory_path=None,
+        trigger="true",
+        trigger_timeout_seconds=30,
+        compile_loader=None,
+        attach_group=None,
+        rejit_enabled=True,
+        loader="app-native",
+        loader_binary="e2e/cases/tracee/bin/tracee",
+        loader_args=("--install-path", "/tmp/tracee"),
+        loader_setup_script="e2e/cases/tracee/setup.sh",
+        loader_timeout_seconds=30,
+    )
+    obj = modes.ResolvedObject(
+        source="corpus/build/tracee/tracee.bpf.o",
+        object_path="corpus/build/tracee/tracee.bpf.o",
+        object_abs_path="/tmp/tracee.bpf.o",
+        repo="tracee",
+        source_name="tracee",
+        family="tracee",
+        category="security",
+        level="unit",
+        description=None,
+        hypothesis=None,
+        tags=(),
+        object_relpath="tracee.bpf.o",
+        canonical_name="tracee:tracee.bpf.o",
+        object_basename="tracee.bpf.o",
+        short_name="tracee:tracee.bpf.o",
+        fixture_path=None,
+        compile_loader=None,
+        shared_state_policy="reset_maps",
+        allow_object_only_result=False,
+        test_method="attach_trigger",
+        programs=(program,),
+        loader="app-native",
+        loader_binary="e2e/cases/tracee/bin/tracee",
+        loader_args=("--install-path", "/tmp/tracee"),
+        loader_setup_script="e2e/cases/tracee/setup.sh",
+        loader_timeout_seconds=30,
+    )
+
+    monkeypatch.setattr(
+        corpus_lib,
+        "_start_tracee_app_native_session",
+        lambda _obj: {
+            "command": ["tracee", "--install-path", "/tmp/tracee", "--output", "none"],
+            "live_programs": [{"id": 101, "name": "tracepoint__raw_syscalls__sys_enter"}],
+        },
+    )
+    monkeypatch.setattr(corpus_lib, "_stop_app_native_session", lambda _session: None)
+    monkeypatch.setattr(corpus_lib, "enable_bpf_stats", lambda: nullcontext())
+    sample_stats = [
+        {
+            101: {
+                "id": 101,
+                "name": "tracepoint__raw_syscalls__sys_enter",
+                "bytes_jited": 64,
+                "bytes_xlated": 32,
+                "run_cnt": 10,
+                "run_time_ns": 1000,
+            }
+        },
+        {
+            101: {
+                "id": 101,
+                "name": "tracepoint__raw_syscalls__sys_enter",
+                "bytes_jited": 48,
+                "bytes_xlated": 24,
+                "run_cnt": 20,
+                "run_time_ns": 1600,
+            }
+        },
+    ]
+    monkeypatch.setattr(corpus_lib, "sample_bpf_stats", lambda _ids: sample_stats.pop(0))
+    trigger_results = iter(
+        [
+            (
+                {
+                    "compile_ns": 0,
+                    "exec_ns": 10,
+                    "result": 5,
+                    "jited_prog_len": 64,
+                    "xlated_prog_len": 32,
+                    "rejit": corpus_lib._sample_rejit_metadata(requested=False),
+                },
+                0.1,
+            ),
+            (
+                {
+                    "compile_ns": 0,
+                    "exec_ns": 8,
+                    "result": 5,
+                    "jited_prog_len": 48,
+                    "xlated_prog_len": 24,
+                    "rejit": corpus_lib._sample_rejit_metadata(
+                        requested=True,
+                        result={
+                            "applied": True,
+                            "summary": {
+                                "total_sites_applied": 2,
+                                "verifier_retries": 1,
+                                "final_disabled_passes": [],
+                            },
+                            "debug_result": {"passes_applied": ["map_inline"]},
+                        },
+                    ),
+                },
+                0.1,
+            ),
+        ]
+    )
+    monkeypatch.setattr(
+        corpus_lib,
+        "_run_app_native_attach_trigger",
+        lambda *_args, **_kwargs: next(trigger_results),
+    )
+    monkeypatch.setattr(
+        corpus_lib,
+        "apply_daemon_rejit",
+        lambda *_args, **_kwargs: {
+            "applied": True,
+            "per_program": {
+                101: {
+                    "exit_code": 0,
+                    "applied": True,
+                    "summary": {
+                        "total_sites_applied": 2,
+                        "verifier_retries": 1,
+                        "final_disabled_passes": [],
+                    },
+                    "debug_result": {"passes_applied": ["map_inline"]},
+                }
+            },
+        },
+    )
+
+    object_record, program_records, batch_result = corpus_lib._run_tracee_app_native_object(
+        obj=obj,
+        daemon_binary=tmp_path / "daemon",
+        daemon_socket="/tmp/daemon.sock",
+        execution_mode="vm",
+        warmup_repeat=1,
+        enabled_passes_map={program.canonical_name: ["map_inline"]},
+    )
+
+    assert object_record["status"] == "ok"
+    assert batch_result["completed_with_job_errors"] is False
+    assert len(program_records) == 1
+    record = program_records[0]
+    assert record["baseline_compile"]["ok"] is True
+    assert record["baseline_compile"]["sample"]["jited_prog_len"] == 64
+    assert record["baseline_run"]["sample"]["exec_ns"] == 10
+    assert record["rejit_compile"]["ok"] is True
+    assert record["rejit_compile"]["sample"]["rejit"]["passes_applied"] == ["map_inline"]
+    assert record["rejit_run"]["sample"]["exec_ns"] == 8
+    assert record["speedup_ratio"] == pytest.approx(1.25)
+    assert record["compile_passes_applied"] == ["map_inline"]
 
 
 def test_run_objects_locally_batch_splits_resource_exhausted_batches(

@@ -15,7 +15,7 @@ from typing import Any, Mapping, Sequence
 
 import yaml
 
-from . import ROOT_DIR, ensure_parent, run_command, run_json_command, tail_text, which
+from . import ROOT_DIR, ensure_parent, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
 from .agent import find_bpf_programs, stop_agent, wait_healthy
 from .batch_runner import run_batch_runner
 from .metrics import enable_bpf_stats, sample_bpf_stats
@@ -1657,6 +1657,617 @@ def build_prepared_groups(obj: ResolvedObject) -> list[dict[str, Any]]:
     return ordered_groups
 
 
+def _current_live_prog_ids() -> list[int]:
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
+    if not isinstance(payload, list):
+        return []
+    return [
+        int(record["id"])
+        for record in payload
+        if isinstance(record, Mapping) and int(record.get("id", 0) or 0) > 0
+    ]
+
+
+def _program_names_match(live_name: str, object_program_name: str) -> bool:
+    if not live_name or not object_program_name:
+        return False
+    return (
+        live_name == object_program_name
+        or object_program_name.startswith(live_name)
+        or live_name.startswith(object_program_name)
+    )
+
+
+def _match_live_program(
+    program: ResolvedProgram,
+    live_programs: Sequence[Mapping[str, Any]],
+) -> Mapping[str, Any] | None:
+    exact_matches = [
+        candidate
+        for candidate in live_programs
+        if str(candidate.get("name") or "") == program.program_name
+    ]
+    if len(exact_matches) == 1:
+        return exact_matches[0]
+    if len(exact_matches) > 1:
+        raise RuntimeError(
+            f"multiple live programs matched {program.program_name}: "
+            + ", ".join(str(item.get("id") or "?") for item in exact_matches)
+        )
+
+    fuzzy_matches = [
+        candidate
+        for candidate in live_programs
+        if _program_names_match(str(candidate.get("name") or ""), program.program_name)
+    ]
+    if len(fuzzy_matches) == 1:
+        return fuzzy_matches[0]
+    if len(fuzzy_matches) > 1:
+        raise RuntimeError(
+            f"multiple fuzzy live programs matched {program.program_name}: "
+            + ", ".join(str(item.get("name") or "?") for item in fuzzy_matches)
+        )
+    return None
+
+
+def _resolve_executable_candidate(candidate: str | None) -> str | None:
+    text = str(candidate or "").strip()
+    if not text:
+        return None
+    resolved = which(text)
+    if resolved is not None:
+        return resolved
+    path = Path(text).expanduser()
+    if not path.is_absolute():
+        path = ROOT_DIR / path
+    if path.is_file() and os.access(path, os.X_OK):
+        return str(path.resolve())
+    return None
+
+
+def _make_invocation_error(error: str, *, duration_seconds: float = 0.0) -> dict[str, Any]:
+    return {
+        "ok": False,
+        "returncode": 2,
+        "timed_out": False,
+        "duration_seconds": float(duration_seconds),
+        "error": error,
+        "stderr_tail": summarize_text(error),
+        "stdout_tail": "",
+    }
+
+
+def _make_invocation_summary(
+    sample: Mapping[str, Any],
+    *,
+    ok: bool = True,
+    error: str | None = None,
+    duration_seconds: float = 0.0,
+) -> dict[str, Any]:
+    invocation = {
+        "ok": ok,
+        "returncode": 0 if ok else 2,
+        "timed_out": False,
+        "duration_seconds": float(duration_seconds),
+        "error": error,
+        "stderr_tail": summarize_text(error or ""),
+        "stdout_tail": "",
+        "sample": dict(sample),
+    }
+    if not ok and error:
+        invocation["stderr_tail"] = summarize_text(error)
+    return invocation
+
+
+def _sample_rejit_metadata(
+    *,
+    requested: bool,
+    result: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    if not requested:
+        return {
+            "requested": False,
+            "mode": "none",
+            "syscall_attempted": False,
+            "applied": False,
+            "error": "",
+            "total_sites_applied": 0,
+            "passes_applied": [],
+            "verifier_retries": 0,
+            "final_disabled_passes": [],
+        }
+
+    summary = result.get("summary") if isinstance(result, Mapping) else {}
+    if not isinstance(summary, Mapping):
+        summary = {}
+    debug_result = result.get("debug_result") if isinstance(result, Mapping) else {}
+    if not isinstance(debug_result, Mapping):
+        debug_result = {}
+    return {
+        "requested": True,
+        "mode": "daemon",
+        "syscall_attempted": True,
+        "applied": bool(result.get("applied", False)) if isinstance(result, Mapping) else False,
+        "error": str(result.get("error") or "") if isinstance(result, Mapping) else "",
+        "total_sites_applied": int((summary or {}).get("total_sites_applied", 0) or 0),
+        "passes_applied": list(debug_result.get("passes_applied") or []),
+        "verifier_retries": int((summary or {}).get("verifier_retries", 0) or 0),
+        "final_disabled_passes": list((summary or {}).get("final_disabled_passes") or []),
+    }
+
+
+def _compile_sample_from_bpf_stats(
+    stats: Mapping[str, Any],
+    *,
+    rejit: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    return {
+        "compile_ns": 0,
+        "exec_ns": 0,
+        "timing_source": "live_bpf_stats",
+        "timing_source_wall": "unavailable",
+        "result": 0,
+        "retval": 0,
+        "jited_prog_len": int(stats.get("bytes_jited", 0) or 0),
+        "xlated_prog_len": int(stats.get("bytes_xlated", 0) or 0),
+        "rejit": dict(rejit or _sample_rejit_metadata(requested=False)),
+    }
+
+
+def _read_process_log_tail(path: Path) -> str:
+    try:
+        return tail_text(path.read_text(encoding="utf-8", errors="replace"), max_lines=40, max_chars=8000)
+    except OSError:
+        return ""
+
+
+def _resolve_tracee_loader_binary(obj: ResolvedObject) -> str:
+    resolved = _resolve_executable_candidate(obj.loader_binary)
+    if resolved is not None:
+        return resolved
+
+    setup_script = _resolve_executable_candidate(obj.loader_setup_script)
+    if setup_script is None:
+        candidate = Path(obj.loader_setup_script or "e2e/cases/tracee/setup.sh")
+        if not candidate.is_absolute():
+            candidate = ROOT_DIR / candidate
+        setup_script = str(candidate.resolve()) if candidate.exists() else None
+    if setup_script is None:
+        raise RuntimeError(
+            "tracee loader binary is unavailable and no setup script was configured"
+        )
+
+    completed = run_command(["bash", setup_script], cwd=ROOT_DIR, check=False, timeout=1800)
+    scripted_binary = ""
+    for line in (completed.stdout or "").splitlines():
+        if line.startswith("TRACEE_BINARY="):
+            scripted_binary = line.split("=", 1)[1].strip()
+            break
+
+    resolved = _resolve_executable_candidate(scripted_binary)
+    if resolved is not None:
+        return resolved
+
+    details = tail_text("\n".join(filter(None, [completed.stderr, completed.stdout])), max_lines=40, max_chars=8000)
+    raise RuntimeError(
+        "tracee setup did not yield an executable loader binary"
+        + (f": {details}" if details else "")
+    )
+
+
+def _ensure_empty_tracee_signatures_dir() -> Path:
+    signatures_dir = ROOT_DIR / "e2e" / "cases" / "tracee" / "bin" / "signatures"
+    signatures_dir.mkdir(parents=True, exist_ok=True)
+    return signatures_dir
+
+
+def _args_have_flag(args: Sequence[str], flag: str) -> bool:
+    return any(arg == flag or arg.startswith(f"{flag}=") for arg in args)
+
+
+def _build_tracee_loader_command(obj: ResolvedObject) -> list[str]:
+    binary = _resolve_tracee_loader_binary(obj)
+    args = ["--install-path" if arg == "--install-dir" else arg for arg in obj.loader_args]
+    if not _args_have_flag(args, "--install-path"):
+        args.extend(["--install-path", "/tmp/tracee"])
+    if not _args_have_flag(args, "--output"):
+        args.extend(["--output", "none"])
+    if not _args_have_flag(args, "--signatures-dir"):
+        args.extend(["--signatures-dir", str(_ensure_empty_tracee_signatures_dir())])
+    return [binary, *args]
+
+
+def _start_tracee_app_native_session(obj: ResolvedObject) -> dict[str, Any]:
+    command = _build_tracee_loader_command(obj)
+    process_dir = Path(tempfile.mkdtemp(prefix="tracee-app-native-"))
+    stdout_path = process_dir / "stdout.log"
+    stderr_path = process_dir / "stderr.log"
+    stdout_handle = stdout_path.open("w", encoding="utf-8")
+    stderr_handle = stderr_path.open("w", encoding="utf-8")
+    preexisting_ids = set(_current_live_prog_ids())
+    proc = None
+    try:
+        proc = subprocess.Popen(
+            command,
+            cwd=ROOT_DIR,
+            env={
+                **os.environ,
+                "HOME": os.environ.get("HOME", str(ROOT_DIR)),
+            },
+            stdout=stdout_handle,
+            stderr=stderr_handle,
+            text=True,
+        )
+    finally:
+        stdout_handle.close()
+        stderr_handle.close()
+
+    load_timeout = int(obj.loader_timeout_seconds or _DEFAULT_APP_NATIVE_LOAD_TIMEOUT_SECONDS)
+
+    def _health_check() -> bool:
+        return bool(
+            [
+                item
+                for item in find_bpf_programs(proc.pid or 0)
+                if int(item.get("id", -1)) not in preexisting_ids
+            ]
+        )
+
+    healthy = wait_healthy(proc, load_timeout, _health_check)
+    if not healthy:
+        stderr_tail = _read_process_log_tail(stderr_path)
+        stdout_tail = _read_process_log_tail(stdout_path)
+        if proc.poll() is None:
+            stop_agent(proc, timeout=8)
+        details = tail_text("\n".join(filter(None, [stderr_tail, stdout_tail])), max_lines=40, max_chars=8000)
+        rendered = " ".join(command)
+        raise RuntimeError(
+            f"tracee app-native loader failed to become healthy: {rendered}"
+            + (f": {details}" if details else "")
+        )
+
+    live_programs = [
+        dict(item)
+        for item in find_bpf_programs(proc.pid or 0)
+        if int(item.get("id", -1)) not in preexisting_ids
+    ]
+    if not live_programs:
+        stop_agent(proc, timeout=8)
+        raise RuntimeError("tracee app-native loader started but did not own any new BPF programs")
+
+    return {
+        "process": proc,
+        "command": command,
+        "process_dir": process_dir,
+        "stdout_path": stdout_path,
+        "stderr_path": stderr_path,
+        "live_programs": live_programs,
+    }
+
+
+def _stop_app_native_session(session: Mapping[str, Any]) -> None:
+    process = session.get("process")
+    if isinstance(process, subprocess.Popen):
+        stop_agent(process, timeout=8)
+    process_dir = session.get("process_dir")
+    if isinstance(process_dir, Path):
+        shutil.rmtree(process_dir, ignore_errors=True)
+
+
+def _run_trigger_command(
+    command: str,
+    *,
+    timeout_seconds: int | None,
+) -> float:
+    started = time.monotonic()
+    run_command(
+        ["bash", "-lc", command],
+        cwd=ROOT_DIR,
+        timeout=timeout_seconds or 30,
+    )
+    return max(0.0, time.monotonic() - started)
+
+
+def _run_app_native_attach_trigger(
+    program: ResolvedProgram,
+    *,
+    prog_id: int,
+    warmup_repeat: int,
+) -> tuple[dict[str, Any], float]:
+    trigger_command = str(program.trigger or "").strip()
+    if not trigger_command:
+        raise RuntimeError(
+            f"app-native attach_trigger requires an explicit trigger command for {program.canonical_name}"
+        )
+
+    if warmup_repeat > 0:
+        _run_trigger_command(
+            trigger_command,
+            timeout_seconds=program.trigger_timeout_seconds,
+        )
+
+    before = sample_bpf_stats([prog_id]).get(prog_id) or {}
+    duration_seconds = _run_trigger_command(
+        trigger_command,
+        timeout_seconds=program.trigger_timeout_seconds,
+    )
+    after = sample_bpf_stats([prog_id]).get(prog_id) or {}
+    run_cnt_delta = max(
+        0,
+        int(after.get("run_cnt", 0) or 0) - int(before.get("run_cnt", 0) or 0),
+    )
+    run_time_ns_delta = max(
+        0,
+        int(after.get("run_time_ns", 0) or 0) - int(before.get("run_time_ns", 0) or 0),
+    )
+    sample = {
+        "compile_ns": 0,
+        "exec_ns": (run_time_ns_delta // run_cnt_delta) if run_cnt_delta > 0 else 0,
+        "timing_source": "bpf_stats",
+        "timing_source_wall": "unavailable",
+        "result": run_cnt_delta,
+        "retval": 0,
+        "jited_prog_len": int(after.get("bytes_jited", 0) or before.get("bytes_jited", 0) or 0),
+        "xlated_prog_len": int(after.get("bytes_xlated", 0) or before.get("bytes_xlated", 0) or 0),
+        "rejit": _sample_rejit_metadata(requested=False),
+    }
+    return sample, duration_seconds
+
+
+def _build_app_native_program_record(
+    *,
+    obj: ResolvedObject,
+    program: ResolvedProgram,
+    live_program: Mapping[str, Any] | None,
+    daemon_binary: Path,
+    daemon_socket: str,
+    enabled_passes: list[str],
+    warmup_repeat: int,
+    execution_mode: str,
+) -> dict[str, Any]:
+    record = build_empty_program_record(program, execution_mode)
+    record["guest_invocation"] = {
+        "loader": program.loader,
+        "loader_binary": program.loader_binary,
+    }
+    if live_program is None:
+        error = f"app-native loader did not load manifest program {program.program_name}"
+        record["baseline_compile"] = _make_invocation_error(error)
+        record["rejit_compile"] = _make_invocation_error(error)
+        if program.test_method != "compile_only":
+            record["baseline_run"] = _make_invocation_error(error)
+            record["rejit_run"] = _make_invocation_error(error)
+        record["record_error"] = error
+        return record
+
+    prog_id = int(live_program.get("id", 0) or 0)
+    if prog_id <= 0:
+        error = f"live program {program.program_name} is missing a valid prog_id"
+        record["baseline_compile"] = _make_invocation_error(error)
+        record["rejit_compile"] = _make_invocation_error(error)
+        if program.test_method != "compile_only":
+            record["baseline_run"] = _make_invocation_error(error)
+            record["rejit_run"] = _make_invocation_error(error)
+        record["record_error"] = error
+        return record
+
+    baseline_stats = sample_bpf_stats([prog_id]).get(prog_id)
+    if not isinstance(baseline_stats, Mapping):
+        error = f"failed to sample live BPF stats for prog_id {prog_id}"
+        record["baseline_compile"] = _make_invocation_error(error)
+        record["rejit_compile"] = _make_invocation_error(error)
+        if program.test_method != "compile_only":
+            record["baseline_run"] = _make_invocation_error(error)
+            record["rejit_run"] = _make_invocation_error(error)
+        record["record_error"] = error
+        return record
+
+    record["baseline_compile"] = _make_invocation_summary(
+        _compile_sample_from_bpf_stats(baseline_stats),
+    )
+
+    if program.test_method != "compile_only":
+        try:
+            baseline_sample, baseline_duration = _run_app_native_attach_trigger(
+                program,
+                prog_id=prog_id,
+                warmup_repeat=warmup_repeat,
+            )
+            record["baseline_run"] = _make_invocation_summary(
+                baseline_sample,
+                duration_seconds=baseline_duration,
+            )
+        except Exception as exc:
+            record["baseline_run"] = _make_invocation_error(str(exc))
+
+    rejit_error: str | None = None
+    try:
+        rejit_result = apply_daemon_rejit(
+            daemon_binary,
+            [prog_id],
+            enabled_passes=enabled_passes,
+            daemon_socket_path=Path(daemon_socket),
+        )
+        per_program = (
+            rejit_result.get("per_program", {}).get(prog_id, {})
+            if isinstance(rejit_result.get("per_program"), Mapping)
+            else {}
+        )
+        compile_ok = int(per_program.get("exit_code", 0) or 0) == 0
+        rejit_stats = sample_bpf_stats([prog_id]).get(prog_id) or baseline_stats
+        rejit_sample = _compile_sample_from_bpf_stats(
+            rejit_stats,
+            rejit=_sample_rejit_metadata(requested=True, result=per_program),
+        )
+        if compile_ok:
+            record["rejit_compile"] = _make_invocation_summary(rejit_sample)
+        else:
+            rejit_error = str(per_program.get("error") or rejit_result.get("error") or "daemon optimize failed")
+            record["rejit_compile"] = _make_invocation_summary(
+                rejit_sample,
+                ok=False,
+                error=rejit_error,
+            )
+        if program.test_method != "compile_only":
+            if compile_ok:
+                try:
+                    rejit_run_sample, rejit_duration = _run_app_native_attach_trigger(
+                        program,
+                        prog_id=prog_id,
+                        warmup_repeat=warmup_repeat,
+                    )
+                    rejit_run_sample["rejit"] = _sample_rejit_metadata(requested=True, result=per_program)
+                    record["rejit_run"] = _make_invocation_summary(
+                        rejit_run_sample,
+                        duration_seconds=rejit_duration,
+                    )
+                except Exception as exc:
+                    record["rejit_run"] = _make_invocation_error(str(exc))
+            else:
+                record["rejit_run"] = _make_invocation_error(rejit_error or "daemon optimize failed")
+    except Exception as exc:
+        error = str(exc)
+        record["rejit_compile"] = _make_invocation_error(error)
+        if program.test_method != "compile_only":
+            record["rejit_run"] = _make_invocation_error(error)
+
+    record["compile_passes_applied"] = rejit_passes(record["rejit_compile"])
+    record["run_passes_applied"] = rejit_passes(record["rejit_run"])
+    record["applied_passes"] = merge_passes(record["compile_passes_applied"], record["run_passes_applied"])
+    record["size_ratio"] = size_ratio(record["baseline_compile"], record["rejit_compile"])
+    record["size_delta_pct"] = size_delta_pct(record["baseline_compile"], record["rejit_compile"])
+    record["speedup_ratio"] = speedup_ratio(record["baseline_run"], record["rejit_run"])
+    record["comparison_exclusion_reason"] = comparison_exclusion_reason(
+        obj=obj,
+        program=program,
+        baseline_record=record["baseline_run"],
+        rejit_record=record["rejit_run"],
+    )
+    if (
+        record.get("baseline_compile")
+        and not record["baseline_compile"].get("ok")
+        and record.get("record_error") is None
+    ):
+        record["record_error"] = summarize_failure_reason(record["baseline_compile"])
+    return record
+
+
+def _build_app_native_object_record(
+    *,
+    obj: ResolvedObject,
+    program_records: Sequence[Mapping[str, Any]],
+    execution_mode: str,
+) -> dict[str, Any]:
+    record = build_empty_object_record(obj, execution_mode)
+    baseline_summaries = [
+        program_record.get("baseline_compile")
+        for program_record in program_records
+        if isinstance(program_record.get("baseline_compile"), Mapping)
+    ]
+    rejit_summaries = [
+        program_record.get("rejit_compile")
+        for program_record in program_records
+        if isinstance(program_record.get("rejit_compile"), Mapping)
+    ]
+    record["stock_compile"] = representative_object_compile_summary(baseline_summaries)
+    record["rejit_compile"] = representative_object_compile_summary(rejit_summaries)
+
+    baseline_error = object_compile_error_summary("baseline", baseline_summaries)
+    rejit_error = object_compile_error_summary("REJIT", rejit_summaries)
+    baseline_ok = any(summary.get("ok") for summary in baseline_summaries)
+    rejit_ok = any(summary.get("ok") for summary in rejit_summaries)
+
+    if baseline_error and not baseline_ok:
+        record["status"] = "error"
+        record["error"] = baseline_error
+    elif rejit_error and not rejit_ok:
+        record["status"] = "error"
+        record["error"] = rejit_error
+    elif baseline_error or rejit_error:
+        record["status"] = "partial"
+        record["error"] = "; ".join(error for error in (baseline_error, rejit_error) if error)
+    return record
+
+
+def _run_tracee_app_native_object(
+    *,
+    obj: ResolvedObject,
+    daemon_binary: Path,
+    daemon_socket: str,
+    execution_mode: str,
+    warmup_repeat: int,
+    enabled_passes_map: Mapping[str, list[str]],
+) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
+    started = time.monotonic()
+    session: dict[str, Any] | None = None
+    try:
+        session = _start_tracee_app_native_session(obj)
+        live_programs = list(session.get("live_programs") or [])
+        live_programs_by_name = {
+            str(program.get("name") or ""): dict(program)
+            for program in live_programs
+            if str(program.get("name") or "")
+        }
+        program_records: list[dict[str, Any]] = []
+        with enable_bpf_stats():
+            for program in obj.programs:
+                live_program = live_programs_by_name.get(program.program_name)
+                if live_program is None:
+                    live_program = _match_live_program(program, live_programs)
+                program_records.append(
+                    _build_app_native_program_record(
+                        obj=obj,
+                        program=program,
+                        live_program=live_program,
+                        daemon_binary=daemon_binary,
+                        daemon_socket=daemon_socket,
+                        enabled_passes=list(enabled_passes_map.get(program.canonical_name, [])),
+                        warmup_repeat=warmup_repeat,
+                        execution_mode=execution_mode,
+                    )
+                )
+        object_record = _build_app_native_object_record(
+            obj=obj,
+            program_records=program_records,
+            execution_mode=execution_mode,
+        )
+        job_errors = any(
+            isinstance(invocation, Mapping) and not invocation.get("ok", False)
+            for program_record in program_records
+            for invocation in (
+                program_record.get("baseline_compile"),
+                program_record.get("baseline_run"),
+                program_record.get("rejit_compile"),
+                program_record.get("rejit_run"),
+            )
+            if invocation is not None
+        )
+        result = {
+            "ok": True,
+            "completed_with_job_errors": job_errors,
+            "returncode": 2 if job_errors else 0,
+            "timed_out": False,
+            "duration_seconds": max(0.0, time.monotonic() - started),
+            "stdout": "",
+            "stderr": "",
+            "error": None,
+            "result": {
+                "jobs": [],
+                "app_native": {
+                    "repo": obj.repo,
+                    "loader": obj.loader,
+                    "command": list(session.get("command") or []),
+                    "loaded_program_count": len(live_programs),
+                },
+            },
+            "progress": None,
+        }
+        return object_record, program_records, result
+    finally:
+        if session is not None:
+            _stop_app_native_session(session)
+
+
 def build_object_batch_plan_v2(
     *,
     objects: list[ResolvedObject],
@@ -1889,6 +2500,8 @@ def build_empty_program_record(program: ResolvedProgram, execution_mode: str) ->
         "prog_type_name": program.prog_type_name,
         "test_method": program.test_method,
         "compile_loader": program.compile_loader,
+        "loader": program.loader,
+        "loader_binary": program.loader_binary,
         "attach_group": program.attach_group,
         "io_mode": program.io_mode,
         "raw_packet": program.raw_packet,
@@ -1921,6 +2534,8 @@ def build_empty_object_record(obj: ResolvedObject, execution_mode: str, *, error
         "object_basename": obj.object_basename,
         "source": obj.source,
         "compile_loader": obj.compile_loader,
+        "loader": obj.loader,
+        "loader_binary": obj.loader_binary,
         "shared_state_policy": obj.shared_state_policy,
         "program_count": len(obj.programs),
         "measured_program_count": sum(1 for program in obj.programs if program.test_method != "compile_only"),
@@ -2098,121 +2713,102 @@ def _prepare_resource_error(
     return None
 
 
-def run_objects_locally_batch(
+def _empty_corpus_batch_result(*, batch_size: int) -> dict[str, Any]:
+    return {
+        "ok": True,
+        "completed_with_job_errors": False,
+        "returncode": 0,
+        "timed_out": False,
+        "duration_seconds": 0.0,
+        "stdout": "",
+        "stderr": "",
+        "error": None,
+        "result": {
+            "jobs": [],
+            "batch_summary": {
+                "requested_batch_size": batch_size,
+                "attempted_batch_sizes": [],
+                "effective_batch_sizes": [],
+                "retry_splits": [],
+            },
+        },
+        "progress": None,
+    }
+
+
+def _execute_generic_object_batches(
     *,
     objects: list[ResolvedObject],
     runner: Path,
-    daemon: Path,
     repeat: int,
     warmup_repeat: int,
     timeout_seconds: int,
     execution_mode: str,
     btf_custom_path: Path | None,
-    daemon_socket: str | None = None,
+    daemon_socket: str,
     enabled_passes: list[str] | None = None,
-    benchmark_config: Mapping[str, Any] | None = None,
+    program_enabled_passes: Mapping[str, list[str]] | None = None,
     batch_size: int = _DEFAULT_CORPUS_BATCH_SIZE,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
-    if batch_size < 1:
-        raise ValueError(f"batch_size must be >= 1, got {batch_size}")
+    if not objects:
+        return [], [], _empty_corpus_batch_result(batch_size=batch_size)
 
-    active_daemon_socket = daemon_socket
-    daemon_server: tuple[subprocess.Popen[str], Path, str, Path, Path] | None = None
-    if objects and active_daemon_socket is None:
-        daemon_server = _start_daemon_server(daemon)
-        active_daemon_socket = str(daemon_server[1])
+    completed_batches: list[tuple[list[dict[str, Any]], dict[str, Any]]] = []
+    attempted_batch_sizes: list[int] = []
+    effective_batch_sizes: list[int] = []
+    retry_splits: list[dict[str, Any]] = []
+    total_duration_seconds = 0.0
+    stdout_chunks: list[str] = []
+    stderr_chunks: list[str] = []
 
-    try:
-        if not objects:
-            batch_result = {
-                "ok": True,
-                "completed_with_job_errors": False,
-                "returncode": 0,
-                "timed_out": False,
-                "duration_seconds": 0.0,
-                "stdout": "",
-                "stderr": "",
-                "error": None,
-                "result": {
-                    "jobs": [],
-                    "batch_summary": {
-                        "requested_batch_size": batch_size,
-                        "effective_batch_sizes": [],
-                        "retry_splits": [],
-                    },
-                },
-                "progress": None,
-            }
-            return [], [], batch_result
+    def execute_batch(batch_objects: list[ResolvedObject], batch_label: str) -> None:
+        nonlocal total_duration_seconds
 
-        assert active_daemon_socket is not None
-        program_enabled_passes = resolve_program_enabled_passes_map(
-            objects=objects,
-            benchmark_config=benchmark_config,
-            runner=runner,
-            daemon_socket=active_daemon_socket,
-            timeout_seconds=timeout_seconds,
+        attempted_batch_sizes.append(len(batch_objects))
+        spec_payload, object_refs = build_object_batch_plan_v2(
+            objects=batch_objects,
+            repeat=repeat,
+            warmup_repeat=warmup_repeat,
+            btf_custom_path=btf_custom_path,
+            daemon_socket=daemon_socket,
             enabled_passes=enabled_passes,
+            program_enabled_passes=program_enabled_passes,
+            batch_label=batch_label,
         )
-        completed_batches: list[tuple[list[dict[str, Any]], dict[str, Any]]] = []
-        attempted_batch_sizes: list[int] = []
-        effective_batch_sizes: list[int] = []
-        retry_splits: list[dict[str, Any]] = []
-        total_duration_seconds = 0.0
-        stdout_chunks: list[str] = []
-        stderr_chunks: list[str] = []
+        batch_result = run_batch_runner(
+            runner,
+            spec_payload=spec_payload,
+            timeout_seconds=packet_batch_timeout_seconds(max(1, len(batch_objects)), timeout_seconds),
+            cwd=ROOT_DIR,
+        )
+        total_duration_seconds += float(batch_result.get("duration_seconds", 0.0) or 0.0)
+        stdout = str(batch_result.get("stdout") or "").strip()
+        stderr = str(batch_result.get("stderr") or "").strip()
+        if stdout:
+            stdout_chunks.append(stdout)
+        if stderr:
+            stderr_chunks.append(stderr)
 
-        def execute_batch(batch_objects: list[ResolvedObject], batch_label: str) -> None:
-            nonlocal total_duration_seconds
-
-            attempted_batch_sizes.append(len(batch_objects))
-            spec_payload, object_refs = build_object_batch_plan_v2(
-                objects=batch_objects,
-                repeat=repeat,
-                warmup_repeat=warmup_repeat,
-                btf_custom_path=btf_custom_path,
-                daemon_socket=active_daemon_socket,
-                enabled_passes=enabled_passes,
-                program_enabled_passes=program_enabled_passes,
-                batch_label=batch_label,
+        resource_error = _prepare_resource_error(spec_payload, batch_result)
+        if resource_error is not None and len(batch_objects) > 1:
+            midpoint = max(1, len(batch_objects) // 2)
+            retry_splits.append(
+                {
+                    "batch_label": batch_label,
+                    "object_count": len(batch_objects),
+                    "retry_batch_size": midpoint,
+                    "error": resource_error,
+                }
             )
-            batch_result = run_batch_runner(
-                runner,
-                spec_payload=spec_payload,
-                timeout_seconds=packet_batch_timeout_seconds(max(1, len(batch_objects)), timeout_seconds),
-                cwd=ROOT_DIR,
-            )
-            total_duration_seconds += float(batch_result.get("duration_seconds", 0.0) or 0.0)
-            stdout = str(batch_result.get("stdout") or "").strip()
-            stderr = str(batch_result.get("stderr") or "").strip()
-            if stdout:
-                stdout_chunks.append(stdout)
-            if stderr:
-                stderr_chunks.append(stderr)
+            execute_batch(batch_objects[:midpoint], f"{batch_label}-a")
+            execute_batch(batch_objects[midpoint:], f"{batch_label}-b")
+            return
 
-            resource_error = _prepare_resource_error(spec_payload, batch_result)
-            if resource_error is not None and len(batch_objects) > 1:
-                midpoint = max(1, len(batch_objects) // 2)
-                retry_splits.append(
-                    {
-                        "batch_label": batch_label,
-                        "object_count": len(batch_objects),
-                        "retry_batch_size": midpoint,
-                        "error": resource_error,
-                    }
-                )
-                execute_batch(batch_objects[:midpoint], f"{batch_label}-a")
-                execute_batch(batch_objects[midpoint:], f"{batch_label}-b")
-                return
+        effective_batch_sizes.append(len(batch_objects))
+        completed_batches.append((object_refs, batch_result))
 
-            effective_batch_sizes.append(len(batch_objects))
-            completed_batches.append((object_refs, batch_result))
-
-        for batch_index, batch_objects in enumerate(_split_object_batches(objects, batch_size), start=1):
-            execute_batch(batch_objects, f"batch-{batch_index:04d}")
-    finally:
-        if daemon_server is not None:
-            _stop_daemon_server(daemon_server[0], daemon_server[1], daemon_server[2])
+    for batch_index, batch_objects in enumerate(_split_object_batches(objects, batch_size), start=1):
+        execute_batch(batch_objects, f"batch-{batch_index:04d}")
 
     object_records: list[dict[str, Any]] = []
     program_records: list[dict[str, Any]] = []
@@ -2278,6 +2874,260 @@ def run_objects_locally_batch(
         "progress": None,
     }
     return object_records, program_records, batch_result
+
+
+def _run_app_native_object(
+    *,
+    obj: ResolvedObject,
+    daemon_binary: Path,
+    daemon_socket: str,
+    execution_mode: str,
+    warmup_repeat: int,
+    enabled_passes_map: Mapping[str, list[str]],
+) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
+    if obj.repo.lower() == "tracee":
+        return _run_tracee_app_native_object(
+            obj=obj,
+            daemon_binary=daemon_binary,
+            daemon_socket=daemon_socket,
+            execution_mode=execution_mode,
+            warmup_repeat=warmup_repeat,
+            enabled_passes_map=enabled_passes_map,
+        )
+    raise RuntimeError(f"app-native loader is not implemented for repo {obj.repo}")
+
+
+def run_objects_locally_batch(
+    *,
+    objects: list[ResolvedObject],
+    runner: Path,
+    daemon: Path,
+    repeat: int,
+    warmup_repeat: int,
+    timeout_seconds: int,
+    execution_mode: str,
+    btf_custom_path: Path | None,
+    daemon_socket: str | None = None,
+    enabled_passes: list[str] | None = None,
+    benchmark_config: Mapping[str, Any] | None = None,
+    batch_size: int = _DEFAULT_CORPUS_BATCH_SIZE,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    if batch_size < 1:
+        raise ValueError(f"batch_size must be >= 1, got {batch_size}")
+    if not objects:
+        return [], [], _empty_corpus_batch_result(batch_size=batch_size)
+
+    active_daemon_socket = daemon_socket
+    daemon_server: tuple[subprocess.Popen[str], Path, str, Path, Path] | None = None
+    if active_daemon_socket is None:
+        daemon_server = _start_daemon_server(daemon)
+        active_daemon_socket = str(daemon_server[1])
+
+    generic_objects = [obj for obj in objects if obj.loader == "generic"]
+    app_native_objects = [obj for obj in objects if obj.loader == "app-native"]
+    fallback_enabled_passes = list(enabled_passes) if enabled_passes is not None else benchmark_config_enabled_passes(benchmark_config)
+    combined_object_records: dict[str, dict[str, Any]] = {}
+    combined_program_records: dict[str, dict[str, Any]] = {}
+    combined_jobs: list[dict[str, Any]] = []
+    completed_with_job_errors = False
+    combined_ok = True
+    combined_timed_out = False
+    combined_returncode: int | None = 0
+    combined_error: str | None = None
+    total_duration_seconds = 0.0
+    stdout_chunks: list[str] = []
+    stderr_chunks: list[str] = []
+    attempted_batch_sizes: list[int] = []
+    effective_batch_sizes: list[int] = []
+    retry_splits: list[dict[str, Any]] = []
+    app_native_summary: list[dict[str, Any]] = []
+
+    try:
+        assert active_daemon_socket is not None
+        generic_program_enabled_passes: dict[str, list[str]] = {}
+        if generic_objects:
+            generic_program_enabled_passes = resolve_program_enabled_passes_map(
+                objects=generic_objects,
+                benchmark_config=benchmark_config,
+                runner=runner,
+                daemon_socket=active_daemon_socket,
+                timeout_seconds=timeout_seconds,
+                enabled_passes=enabled_passes,
+            )
+        program_enabled_passes = {
+            program.canonical_name: list(generic_program_enabled_passes.get(program.canonical_name, fallback_enabled_passes))
+            for obj in objects
+            for program in obj.programs
+        }
+
+        if generic_objects:
+            generic_object_records, generic_program_records, generic_batch_result = _execute_generic_object_batches(
+                objects=generic_objects,
+                runner=runner,
+                repeat=repeat,
+                warmup_repeat=warmup_repeat,
+                timeout_seconds=timeout_seconds,
+                execution_mode=execution_mode,
+                btf_custom_path=btf_custom_path,
+                daemon_socket=active_daemon_socket,
+                enabled_passes=enabled_passes,
+                program_enabled_passes=generic_program_enabled_passes,
+                batch_size=batch_size,
+            )
+            for record in generic_object_records:
+                combined_object_records[str(record["canonical_object_name"])] = record
+            for record in generic_program_records:
+                combined_program_records[str(record["canonical_name"])] = record
+            payload = generic_batch_result.get("result")
+            if isinstance(payload, Mapping):
+                raw_jobs = payload.get("jobs")
+                if isinstance(raw_jobs, list):
+                    combined_jobs.extend(item for item in raw_jobs if isinstance(item, dict))
+                batch_summary = payload.get("batch_summary")
+                if isinstance(batch_summary, Mapping):
+                    attempted_batch_sizes.extend(
+                        int(value) for value in batch_summary.get("attempted_batch_sizes", []) or []
+                    )
+                    effective_batch_sizes.extend(
+                        int(value) for value in batch_summary.get("effective_batch_sizes", []) or []
+                    )
+                    retry_splits.extend(
+                        dict(item) for item in batch_summary.get("retry_splits", []) or []
+                        if isinstance(item, Mapping)
+                    )
+            total_duration_seconds += float(generic_batch_result.get("duration_seconds", 0.0) or 0.0)
+            stdout = str(generic_batch_result.get("stdout") or "").strip()
+            stderr = str(generic_batch_result.get("stderr") or "").strip()
+            if stdout:
+                stdout_chunks.append(stdout)
+            if stderr:
+                stderr_chunks.append(stderr)
+            combined_ok = combined_ok and bool(generic_batch_result.get("ok"))
+            completed_with_job_errors = (
+                completed_with_job_errors or bool(generic_batch_result.get("completed_with_job_errors"))
+            )
+            combined_timed_out = combined_timed_out or bool(generic_batch_result.get("timed_out"))
+            if combined_error is None and generic_batch_result.get("error"):
+                combined_error = str(generic_batch_result["error"])
+            result_returncode = generic_batch_result.get("returncode")
+            if isinstance(result_returncode, int) and result_returncode not in (0, 2):
+                combined_returncode = result_returncode
+            elif combined_returncode == 0 and result_returncode == 2:
+                combined_returncode = 2
+
+        for obj in app_native_objects:
+            try:
+                object_record, program_records, app_batch_result = _run_app_native_object(
+                    obj=obj,
+                    daemon_binary=daemon,
+                    daemon_socket=active_daemon_socket,
+                    execution_mode=execution_mode,
+                    warmup_repeat=warmup_repeat,
+                    enabled_passes_map=program_enabled_passes,
+                )
+            except Exception as exc:
+                error_text = str(exc)
+                object_record = build_empty_object_record(obj, execution_mode, error=error_text)
+                program_records = []
+                for program in obj.programs:
+                    program_record = build_empty_program_record(program, execution_mode)
+                    program_record["guest_invocation"] = {
+                        "loader": program.loader,
+                        "loader_binary": program.loader_binary,
+                    }
+                    invocation_error = _make_invocation_error(error_text)
+                    program_record["baseline_compile"] = invocation_error
+                    program_record["rejit_compile"] = invocation_error
+                    if program.test_method != "compile_only":
+                        program_record["baseline_run"] = invocation_error
+                        program_record["rejit_run"] = invocation_error
+                    program_record["record_error"] = error_text
+                    program_records.append(program_record)
+                app_batch_result = {
+                    "ok": True,
+                    "completed_with_job_errors": True,
+                    "returncode": 2,
+                    "timed_out": False,
+                    "duration_seconds": 0.0,
+                    "stdout": "",
+                    "stderr": error_text,
+                    "error": None,
+                    "result": {"jobs": []},
+                    "progress": None,
+                }
+
+            combined_object_records[obj.canonical_name] = object_record
+            for record in program_records:
+                combined_program_records[str(record["canonical_name"])] = record
+            total_duration_seconds += float(app_batch_result.get("duration_seconds", 0.0) or 0.0)
+            stdout = str(app_batch_result.get("stdout") or "").strip()
+            stderr = str(app_batch_result.get("stderr") or "").strip()
+            if stdout:
+                stdout_chunks.append(stdout)
+            if stderr:
+                stderr_chunks.append(stderr)
+            combined_ok = combined_ok and bool(app_batch_result.get("ok"))
+            completed_with_job_errors = (
+                completed_with_job_errors or bool(app_batch_result.get("completed_with_job_errors"))
+            )
+            combined_timed_out = combined_timed_out or bool(app_batch_result.get("timed_out"))
+            if combined_error is None and app_batch_result.get("error"):
+                combined_error = str(app_batch_result["error"])
+            result_returncode = app_batch_result.get("returncode")
+            if isinstance(result_returncode, int) and result_returncode not in (0, 2):
+                combined_returncode = result_returncode
+            elif combined_returncode == 0 and result_returncode == 2:
+                combined_returncode = 2
+            app_native_summary.append(
+                {
+                    "repo": obj.repo,
+                    "object": obj.canonical_name,
+                    "status": object_record.get("status"),
+                }
+            )
+    finally:
+        if daemon_server is not None:
+            _stop_daemon_server(daemon_server[0], daemon_server[1], daemon_server[2])
+
+    ordered_object_records = [
+        combined_object_records[obj.canonical_name]
+        for obj in objects
+        if obj.canonical_name in combined_object_records
+    ]
+    ordered_program_records = [
+        combined_program_records[program.canonical_name]
+        for obj in objects
+        for program in obj.programs
+        if program.canonical_name in combined_program_records
+    ]
+
+    if combined_timed_out:
+        combined_returncode = None
+    elif combined_returncode == 0 and completed_with_job_errors:
+        combined_returncode = 2
+
+    batch_result = {
+        "ok": combined_ok,
+        "completed_with_job_errors": completed_with_job_errors,
+        "returncode": combined_returncode,
+        "timed_out": combined_timed_out,
+        "duration_seconds": total_duration_seconds,
+        "stdout": "\n".join(stdout_chunks),
+        "stderr": "\n".join(stderr_chunks),
+        "error": combined_error,
+        "result": {
+            "jobs": combined_jobs,
+            "batch_summary": {
+                "requested_batch_size": batch_size,
+                "attempted_batch_sizes": attempted_batch_sizes,
+                "effective_batch_sizes": effective_batch_sizes,
+                "retry_splits": retry_splits,
+                "app_native_objects": app_native_summary,
+            },
+        },
+        "progress": None,
+    }
+    return ordered_object_records, ordered_program_records, batch_result
 
 
 __all__ = [

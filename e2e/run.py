@@ -72,6 +72,10 @@ from e2e.cases.tracee.case import (  # noqa: E402
     build_markdown as build_tracee_markdown,
     run_tracee_case,
 )
+from e2e.case_common import (  # noqa: E402
+    attach_pending_result_metadata,
+    reset_pending_result_metadata,
+)
 
 @dataclass(frozen=True)
 class CaseSpec:
@@ -301,9 +305,11 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
     artifact_dir = session.run_dir
     session.write(status="running", progress_payload=progress_payload)
     saved_env = os.environ.copy()
+    reset_pending_result_metadata()
 
     try:
         payload = spec.run_case(args)
+        attach_pending_result_metadata(payload)
         detail_texts = {"result.md": spec.build_markdown(payload) + "\n"}
         if spec.build_report is not None:
             detail_texts["report.md"] = spec.build_report(payload) + "\n"
@@ -368,6 +374,7 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
             "error_message": error_message,
             "failed_at": completed_at,
         }
+        attach_pending_result_metadata(error_payload)
         metadata_payload = payload if isinstance(payload, dict) else error_payload
         session.write(
             status="error",
@@ -386,6 +393,7 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
             "error_message": str(exc),
             "failed_at": failed_at,
         }
+        attach_pending_result_metadata(error_payload)
         metadata_payload = error_payload
         session.write(
             status="error",

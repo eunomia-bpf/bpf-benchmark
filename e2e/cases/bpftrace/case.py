@@ -45,6 +45,7 @@ from runner.libs.workload import (  # noqa: E402
 )
 from e2e.case_common import (  # noqa: E402
     CaseLifecycleState,
+    attach_pending_result_metadata,
     host_metadata,
     percent_delta,
     run_case_lifecycle,
@@ -809,6 +810,7 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
 def main() -> None:
     args = parse_args()
     payload = run_case(args)
+    attach_pending_result_metadata(payload)
 
     if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
         output_json = smoke_output_path(RESULTS_DIR, "bpftrace")

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -10,13 +11,44 @@ from e2e import case_common
 from runner.libs import rejit
 
 
-def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch) -> None:
+def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: Path) -> None:
+    case_common.reset_pending_result_metadata()
     daemon_proc = object()
     daemon_socket = Path("/tmp/rejit.sock")
-    daemon_stdout = Path("/tmp/rejit.stdout.log")
-    daemon_stderr = Path("/tmp/rejit.stderr.log")
+    daemon_stdout = tmp_path / "daemon.stdout.log"
+    daemon_stderr = tmp_path / "daemon.stderr.log"
+    daemon_stdout.write_text("serve: listening on /tmp/rejit.sock\n", encoding="utf-8")
+    daemon_stderr.write_text(
+        "kinsn discovery:\n"
+        "  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate'\n"
+        "platform: arch=X86_64 bmi1=true\n",
+        encoding="utf-8",
+    )
     calls: list[tuple[str, object]] = []
     phases: list[str] = []
+    lsmod_outputs = [
+        subprocess.CompletedProcess(["lsmod"], 0, "Module                  Size  Used by\n", ""),
+        subprocess.CompletedProcess(
+            ["lsmod"],
+            0,
+            "Module                  Size  Used by\n"
+            "bpf_endian             16384  0\n"
+            "bpf_rotate             16384  0\n",
+            "",
+        ),
+    ]
+
+    def fake_run_command(command, **_kwargs):
+        if list(command) == ["lsmod"]:
+            return lsmod_outputs.pop(0)
+        if str(command[0]).endswith("/module/load_all.sh"):
+            return subprocess.CompletedProcess(
+                list(command),
+                0,
+                "Loaded bpf_endian\nLoaded bpf_rotate\nkinsn modules: 2/2 loaded\n",
+                "",
+            )
+        raise AssertionError(f"unexpected command: {command}")
 
     def fake_start_daemon_server(daemon_binary):
         calls.append(("start", daemon_binary))
@@ -80,6 +112,8 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch) -> None:
     monkeypatch.setattr(rejit, "_stop_daemon_server", fake_stop_daemon_server)
     monkeypatch.setattr(rejit, "scan_programs", fake_scan_programs)
     monkeypatch.setattr(rejit, "apply_daemon_rejit", fake_apply_daemon_rejit)
+    monkeypatch.setattr(case_common, "_expected_kinsn_modules", lambda: ["bpf_endian", "bpf_rotate"])
+    monkeypatch.setattr(case_common, "run_command", fake_run_command)
 
     def setup():
         phases.append("setup")
@@ -122,6 +156,11 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch) -> None:
     assert calls[2][1]["daemon_proc"] is daemon_proc
     assert calls[1][1]["timeout_seconds"] == 33
     assert calls[2][1]["enabled_passes"] == ["map_inline"]
+    kinsn_metadata = result.metadata["kinsn_modules"]
+    assert kinsn_metadata["module_snapshot_before_daemon"]["resident_expected_modules"] == []
+    assert kinsn_metadata["module_load"]["loaded_modules"] == ["bpf_endian", "bpf_rotate"]
+    assert kinsn_metadata["module_load"]["failed_modules"] == []
+    assert "kinsn discovery:" in kinsn_metadata["daemon_kinsn_discovery"]["discovery_log"]
     assert phases == [
         "setup",
         "start",
@@ -132,11 +171,33 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch) -> None:
     ]
 
 
-def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypatch) -> None:
+def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypatch, tmp_path: Path) -> None:
+    case_common.reset_pending_result_metadata()
+    daemon_stdout = tmp_path / "daemon.stdout.log"
+    daemon_stderr = tmp_path / "daemon.stderr.log"
+    daemon_stdout.write_text("serve: listening on /tmp/rejit.sock\n", encoding="utf-8")
+    daemon_stderr.write_text("kinsn discovery:\n  module loaded\n", encoding="utf-8")
+    lsmod_outputs = [
+        subprocess.CompletedProcess(["lsmod"], 0, "Module                  Size  Used by\n", ""),
+        subprocess.CompletedProcess(
+            ["lsmod"],
+            0,
+            "Module                  Size  Used by\nbpf_endian             16384  0\n",
+            "",
+        ),
+    ]
+
+    def fake_run_command(command, **_kwargs):
+        if list(command) == ["lsmod"]:
+            return lsmod_outputs.pop(0)
+        if str(command[0]).endswith("/module/load_all.sh"):
+            return subprocess.CompletedProcess(list(command), 0, "Loaded bpf_endian\n", "")
+        raise AssertionError(f"unexpected command: {command}")
+
     monkeypatch.setattr(
         rejit,
         "_start_daemon_server",
-        lambda _daemon_binary: (object(), Path("/tmp/rejit.sock"), "/tmp/rejit-dir", None, None),
+        lambda _daemon_binary: (object(), Path("/tmp/rejit.sock"), "/tmp/rejit-dir", daemon_stdout, daemon_stderr),
     )
     monkeypatch.setattr(rejit, "_stop_daemon_server", lambda *_args: None)
     monkeypatch.setattr(
@@ -159,6 +220,8 @@ def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypat
             "error": "prog 101: id changed after struct_ops refresh",
         },
     )
+    monkeypatch.setattr(case_common, "_expected_kinsn_modules", lambda: ["bpf_endian"])
+    monkeypatch.setattr(case_common, "run_command", fake_run_command)
 
     phases: list[str] = []
 
@@ -184,9 +247,11 @@ def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypat
         "stop",
         "cleanup",
     ]
+    assert result.metadata["kinsn_modules"]["module_load"]["loaded_modules"] == ["bpf_endian"]
 
 
 def test_persist_results_truncates_large_nested_strings(tmp_path) -> None:
+    case_common.reset_pending_result_metadata()
     large_output = ("abcdef0123456789" * 2000) + "tail-marker"
     payload = {
         "status": "ok",
@@ -211,3 +276,31 @@ def test_persist_results_truncates_large_nested_strings(tmp_path) -> None:
     assert "...[truncated " in compact_output
     assert len(compact_output) < len(large_output)
     assert output_md.read_text() == "status=ok"
+
+
+def test_persist_results_attaches_pending_kinsn_metadata(tmp_path: Path) -> None:
+    case_common.reset_pending_result_metadata()
+    case_common._append_pending_kinsn_metadata(
+        {
+            "status": "completed",
+            "requested_prog_ids": [101],
+            "module_load": {
+                "loaded_modules": ["bpf_endian"],
+                "failed_modules": [],
+            },
+        }
+    )
+
+    output_json = tmp_path / "result.json"
+    output_md = tmp_path / "result.md"
+    case_common.persist_results(
+        {"status": "ok"},
+        output_json,
+        output_md,
+        lambda payload: payload["metadata"]["kinsn_modules"]["lifecycle_runs"][0]["status"],
+    )
+
+    persisted = json.loads(output_json.read_text())
+    assert persisted["metadata"]["kinsn_modules"]["count"] == 1
+    assert persisted["metadata"]["kinsn_modules"]["lifecycle_runs"][0]["requested_prog_ids"] == [101]
+    assert output_md.read_text() == "completed"

@@ -234,8 +234,9 @@ fn test_bpf_cmd_constants_match_kernel_header() {
 
 // ── Struct size and layout tests ─────────────────────────────────
 //
-// The bpf_attr union must be exactly 128 bytes (kernel enforced).
-// Each attr variant must be <= 128 bytes.
+// Legacy attr variants in this daemon still fit in 128 bytes, but the current
+// kernel `prog_load` variant is larger because it includes fd_array/signature
+// transport fields.
 
 #[test]
 fn test_attr_struct_sizes_fit_bpf_attr() {
@@ -262,8 +263,8 @@ fn test_attr_struct_sizes_fit_bpf_attr() {
     );
     assert_eq!(
         std::mem::size_of::<AttrProgLoad>(),
-        128,
-        "AttrProgLoad must be 128 bytes"
+        168,
+        "AttrProgLoad must match the current kernel prog_load attr size"
     );
 }
 

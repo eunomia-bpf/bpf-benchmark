@@ -5,6 +5,7 @@ tracee, tetragon, bpftrace, katran, and scx case files.
 """
 from __future__ import annotations
 
+import copy
 import json
 import platform
 import statistics
@@ -23,6 +24,197 @@ from runner.libs import (
 )
 
 MAX_PERSISTED_STRING_CHARS = 16_384
+_PENDING_KINSN_METADATA: list[dict[str, object]] = []
+_KINSN_MODULE_ARCH_DIRS = {
+    "x86_64": "x86",
+    "aarch64": "arm64",
+}
+
+
+def reset_pending_result_metadata() -> None:
+    _PENDING_KINSN_METADATA.clear()
+
+
+def attach_pending_result_metadata(payload: dict[str, object]) -> dict[str, object]:
+    if not _PENDING_KINSN_METADATA:
+        return payload
+
+    metadata = payload.get("metadata")
+    metadata_payload = dict(metadata) if isinstance(metadata, Mapping) else {}
+
+    existing_kinsn = metadata_payload.get("kinsn_modules")
+    kinsn_payload = dict(existing_kinsn) if isinstance(existing_kinsn, Mapping) else {}
+
+    lifecycle_runs: list[object] = []
+    existing_runs = kinsn_payload.get("lifecycle_runs")
+    if isinstance(existing_runs, list):
+        lifecycle_runs.extend(copy.deepcopy(existing_runs))
+    lifecycle_runs.extend(copy.deepcopy(_PENDING_KINSN_METADATA))
+
+    kinsn_payload["count"] = len(lifecycle_runs)
+    kinsn_payload["lifecycle_runs"] = lifecycle_runs
+    metadata_payload["kinsn_modules"] = kinsn_payload
+    payload["metadata"] = metadata_payload
+
+    _PENDING_KINSN_METADATA.clear()
+    return payload
+
+
+def _append_pending_kinsn_metadata(record: Mapping[str, object]) -> None:
+    payload = copy.deepcopy(dict(record))
+    payload["lifecycle_index"] = len(_PENDING_KINSN_METADATA) + 1
+    _PENDING_KINSN_METADATA.append(payload)
+
+
+def _expected_kinsn_modules() -> list[str]:
+    arch_dir = _KINSN_MODULE_ARCH_DIRS.get(platform.machine())
+    if arch_dir is None:
+        return []
+    module_dir = ROOT_DIR / "module" / arch_dir
+    if not module_dir.exists():
+        return []
+    return sorted(
+        path.stem
+        for path in module_dir.glob("bpf_*.ko")
+        if path.is_file() and path.stem != "bpf_barrier"
+    )
+
+
+def _loaded_bpf_modules_from_lsmod() -> tuple[list[str], str] | None:
+    completed = run_command(["lsmod"], timeout=10, check=False)
+    if completed.returncode != 0:
+        return None
+    filtered_lines = [
+        line.rstrip()
+        for line in completed.stdout.splitlines()[1:]
+        if line.startswith("bpf_")
+    ]
+    modules = sorted({line.split()[0] for line in filtered_lines if line.split()})
+    return modules, "\n".join(filtered_lines)
+
+
+def _loaded_bpf_modules_from_sysfs() -> tuple[list[str], str]:
+    entries = sorted(path.name for path in Path("/sys/module").glob("bpf_*") if path.is_dir())
+    return entries, "\n".join(entries)
+
+
+def _capture_kinsn_module_snapshot(expected_modules: Sequence[str]) -> dict[str, object]:
+    snapshot = _loaded_bpf_modules_from_lsmod()
+    source = "lsmod"
+    if snapshot is None:
+        snapshot = _loaded_bpf_modules_from_sysfs()
+        source = "sysfs"
+
+    loaded_modules, raw_output = snapshot
+    expected = sorted({str(name) for name in expected_modules if str(name).strip()})
+    resident_expected = [name for name in expected if name in loaded_modules]
+    missing_expected = [name for name in expected if name not in resident_expected]
+    return {
+        "captured_at": datetime.now(timezone.utc).isoformat(),
+        "source": source,
+        "raw_output": raw_output,
+        "loaded_bpf_modules": loaded_modules,
+        "expected_modules": expected,
+        "resident_expected_modules": resident_expected,
+        "missing_expected_modules": missing_expected,
+    }
+
+
+def _run_kinsn_module_loader(
+    expected_modules: Sequence[str],
+    *,
+    before_snapshot: Mapping[str, object],
+) -> dict[str, object]:
+    script_path = ROOT_DIR / "module" / "load_all.sh"
+    if not script_path.exists():
+        return {
+            "invoked_at": datetime.now(timezone.utc).isoformat(),
+            "script_path": relpath(script_path),
+            "status": "missing_script",
+            "exit_code": None,
+            "stdout": "",
+            "stderr": "",
+            "expected_modules": sorted({str(name) for name in expected_modules if str(name).strip()}),
+            "loaded_modules": list(before_snapshot.get("resident_expected_modules") or []),
+            "newly_loaded_modules": [],
+            "failed_modules": list(before_snapshot.get("missing_expected_modules") or []),
+            "snapshot_after": dict(before_snapshot),
+        }
+
+    completed = run_command([str(script_path)], timeout=120, check=False)
+    after_snapshot = _capture_kinsn_module_snapshot(expected_modules)
+
+    expected = list(after_snapshot.get("expected_modules") or [])
+    before_loaded = {
+        str(name)
+        for name in before_snapshot.get("resident_expected_modules") or []
+        if str(name).strip()
+    }
+    after_loaded = {
+        str(name)
+        for name in after_snapshot.get("resident_expected_modules") or []
+        if str(name).strip()
+    }
+
+    loaded_modules = [name for name in expected if name in after_loaded]
+    newly_loaded_modules = [name for name in expected if name in after_loaded and name not in before_loaded]
+    failed_modules = [name for name in expected if name not in after_loaded]
+
+    status = "ok"
+    if completed.returncode != 0:
+        status = "error"
+    elif failed_modules:
+        status = "partial"
+
+    return {
+        "invoked_at": datetime.now(timezone.utc).isoformat(),
+        "script_path": relpath(script_path),
+        "status": status,
+        "exit_code": completed.returncode,
+        "stdout": (completed.stdout or "").strip(),
+        "stderr": (completed.stderr or "").strip(),
+        "expected_modules": expected,
+        "loaded_modules": loaded_modules,
+        "newly_loaded_modules": newly_loaded_modules,
+        "failed_modules": failed_modules,
+        "snapshot_after": after_snapshot,
+    }
+
+
+def _read_text_file(path: Path | None) -> str:
+    if path is None or not path.exists():
+        return ""
+    return path.read_text(encoding="utf-8", errors="replace")
+
+
+def _capture_daemon_kinsn_discovery(stdout_path: Path | None, stderr_path: Path | None) -> dict[str, object]:
+    stdout_text = _read_text_file(stdout_path).strip()
+    stderr_text = _read_text_file(stderr_path).strip()
+    status = "ok" if "kinsn discovery:" in stderr_text else "missing"
+    return {
+        "captured_at": datetime.now(timezone.utc).isoformat(),
+        "status": status,
+        "stdout_path": relpath(stdout_path) if stdout_path is not None else None,
+        "stderr_path": relpath(stderr_path) if stderr_path is not None else None,
+        "stdout": stdout_text,
+        "stderr": stderr_text,
+        "discovery_log": stderr_text,
+    }
+
+
+def _initial_kinsn_metadata(requested_prog_ids: Sequence[int]) -> dict[str, object]:
+    return {
+        "captured_at": datetime.now(timezone.utc).isoformat(),
+        "requested_prog_ids": [int(value) for value in requested_prog_ids if int(value) > 0],
+        "expected_modules": _expected_kinsn_modules(),
+        "status": "pending",
+    }
+
+
+def _lifecycle_metadata_payload(kinsn_metadata: Mapping[str, object] | None) -> dict[str, object]:
+    if kinsn_metadata is None:
+        return {}
+    return {"kinsn_modules": copy.deepcopy(dict(kinsn_metadata))}
 
 
 # ---------------------------------------------------------------------------
@@ -273,6 +465,7 @@ class LifecycleRunResult:
     rejit_result: dict[str, object] | None
     post_rejit: Mapping[str, object] | None
     artifacts: dict[str, object] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
     abort: LifecycleAbort | None = None
 
 
@@ -326,14 +519,20 @@ def run_case_lifecycle(
     post_rejit: Mapping[str, object] | None = None
     artifacts: dict[str, object] = {}
     abort: LifecycleAbort | None = None
+    kinsn_metadata: dict[str, object] | None = None
 
     try:
         lifecycle_state = start(setup_state)
         artifacts.update(_artifact_dict(lifecycle_state.artifacts))
+        kinsn_metadata = _initial_kinsn_metadata(lifecycle_state.requested_prog_ids())
 
         if before_baseline is not None:
             abort = before_baseline(setup_state, lifecycle_state)
             if abort is not None:
+                assert kinsn_metadata is not None
+                kinsn_metadata["status"] = "skipped"
+                kinsn_metadata["reason"] = abort.reason
+                kinsn_metadata["skipped_phase"] = "before_baseline"
                 artifacts.update(_artifact_dict(abort.artifacts))
                 return LifecycleRunResult(
                     setup_state=setup_state,
@@ -343,6 +542,7 @@ def run_case_lifecycle(
                     rejit_result=None,
                     post_rejit=None,
                     artifacts=artifacts,
+                    metadata=_lifecycle_metadata_payload(kinsn_metadata),
                     abort=abort,
                 )
 
@@ -359,14 +559,36 @@ def run_case_lifecycle(
             skip_rejit_reason = before_rejit(setup_state, lifecycle_state, baseline)
 
         requested_prog_ids = lifecycle_state.requested_prog_ids()
+        assert kinsn_metadata is not None
+        kinsn_metadata["requested_prog_ids"] = requested_prog_ids
         if skip_rejit_reason is not None:
+            kinsn_metadata["status"] = "skipped"
+            kinsn_metadata["reason"] = skip_rejit_reason
+            kinsn_metadata["skipped_phase"] = "before_rejit"
             rejit_result = {
                 "applied": False,
                 "reason": skip_rejit_reason,
                 "error": skip_rejit_reason,
             }
         elif requested_prog_ids:
-            daemon_server = _start_daemon_server(daemon_binary)
+            before_snapshot = _capture_kinsn_module_snapshot(kinsn_metadata.get("expected_modules") or [])
+            kinsn_metadata["module_snapshot_before_daemon"] = before_snapshot
+            kinsn_metadata["module_load"] = _run_kinsn_module_loader(
+                kinsn_metadata.get("expected_modules") or [],
+                before_snapshot=before_snapshot,
+            )
+            kinsn_metadata["status"] = "daemon_starting"
+            try:
+                daemon_server = _start_daemon_server(daemon_binary)
+            except Exception as exc:
+                kinsn_metadata["status"] = "daemon_start_failed"
+                kinsn_metadata["error"] = str(exc)
+                raise
+            kinsn_metadata["daemon_kinsn_discovery"] = _capture_daemon_kinsn_discovery(
+                daemon_server[3],
+                daemon_server[4],
+            )
+            kinsn_metadata["status"] = "daemon_started"
             try:
                 scan_results = scan_programs(
                     requested_prog_ids,
@@ -388,11 +610,15 @@ def run_case_lifecycle(
                 )
             finally:
                 _stop_daemon_server(daemon_server[0], daemon_server[1], daemon_server[2])
+            kinsn_metadata["status"] = "completed"
             run_post_rejit = bool(rejit_result.get("applied"))
             if should_run_post_rejit is not None:
                 run_post_rejit = bool(should_run_post_rejit(rejit_result))
             if run_post_rejit:
                 post_rejit = workload(setup_state, lifecycle_state, "post_rejit")
+        else:
+            kinsn_metadata["status"] = "skipped"
+            kinsn_metadata["reason"] = "no requested program ids"
         return LifecycleRunResult(
             setup_state=setup_state,
             state=lifecycle_state,
@@ -401,9 +627,20 @@ def run_case_lifecycle(
             rejit_result=rejit_result,
             post_rejit=post_rejit,
             artifacts=artifacts,
+            metadata=_lifecycle_metadata_payload(kinsn_metadata),
             abort=abort,
         )
+    except Exception as exc:
+        if kinsn_metadata is not None:
+            status = str(kinsn_metadata.get("status") or "")
+            if status in {"", "pending"}:
+                kinsn_metadata["status"] = "error"
+            kinsn_metadata.setdefault("error", str(exc))
+        raise
     finally:
+        if kinsn_metadata is not None:
+            artifacts["kinsn_modules"] = copy.deepcopy(kinsn_metadata)
+            _append_pending_kinsn_metadata(kinsn_metadata)
         try:
             if lifecycle_state is not None:
                 stop(setup_state, lifecycle_state)
@@ -501,8 +738,10 @@ def persist_results(
     *build_markdown* must be a callable ``(payload) -> str`` supplied by
     the individual case, since each case has its own markdown format.
     """
-    write_json(output_json, _compact_persisted_value(payload))
-    write_text(output_md, build_markdown(payload))  # type: ignore[operator]
+    payload_dict = dict(payload)
+    attach_pending_result_metadata(payload_dict)
+    write_json(output_json, _compact_persisted_value(payload_dict))
+    write_text(output_md, build_markdown(payload_dict))  # type: ignore[operator]
 
 
 def _compact_persisted_value(value: object) -> object:

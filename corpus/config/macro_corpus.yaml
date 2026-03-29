@@ -20,6 +20,14 @@ optional_manifests:
 - path: corpus/config/macro_corpus_linux_selftests.yaml
   description: Opt-in linux-selftests corpus entries kept out of the default
     production macro corpus.
+repos:
+  tracee:
+    loader: app-native
+    loader_binary: e2e/cases/tracee/bin/tracee
+    loader_setup_script: e2e/cases/tracee/setup.sh
+    loader_args:
+    - --install-path
+    - /tmp/tracee
 objects:
 # Optional object fields include:
 # - fixture_path: corpus/fixtures/<repo>/<object>/<program>.json
