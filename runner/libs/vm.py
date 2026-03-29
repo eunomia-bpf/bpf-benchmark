@@ -17,9 +17,14 @@ from .machines import resolve_machine, resolve_machine_executable
 
 
 DEFAULT_VM_TARGET = os.environ.get("TARGET", "").strip() or "local-x86-vng"
+DEFAULT_GUEST_NOFILE = 65536
 
 
-def write_guest_script(commands: Sequence[str | Sequence[str]]) -> Path:
+def write_guest_script(
+    commands: Sequence[str | Sequence[str]],
+    *,
+    nofile: int | None = None,
+) -> Path:
     scratch_stamp = scratch_date_stamp()
     script_dir = docs_tmp_dir("guest-scripts", stamp=scratch_stamp)
     handle = tempfile.NamedTemporaryFile(
@@ -41,6 +46,8 @@ def write_guest_script(commands: Sequence[str | Sequence[str]]) -> Path:
         handle.write(f"export TMPDIR={shlex.quote(str(vm_tmp_dir))}\n")
         if DEFAULT_VENV_ACTIVATE.exists():
             handle.write(f". {shlex.quote(str(DEFAULT_VENV_ACTIVATE))}\n")
+        if nofile is not None:
+            handle.write(f"ulimit -HSn {int(nofile)}\n")
         for command in commands:
             if isinstance(command, str):
                 handle.write(command.rstrip() + "\n")
@@ -163,6 +170,7 @@ def build_vm_shell_command(
     guest_exec: str,
     timeout_seconds: int,
     vng_binary: str,
+    nofile: int | None = None,
 ) -> list[str]:
     command = [
         sys.executable,
@@ -176,6 +184,8 @@ def build_vm_shell_command(
         "--command",
         guest_exec,
     ]
+    if nofile is not None:
+        command.extend(["--nofile", str(int(nofile))])
     if vng_binary != str(resolve_machine_executable(target=DEFAULT_VM_TARGET, action="vm-corpus")):
         command.extend(["--vm-executable", vng_binary])
     return command
@@ -217,6 +227,7 @@ def run_corpus_targets_in_guest_batch(
     btf_custom_path: Path,
     profile: str | None,
     repeat: int,
+    batch_size: int,
     timeout_seconds: int,
     vng_binary: str,
     kinsn_load_script: Path | None = None,
@@ -265,6 +276,8 @@ def run_corpus_targets_in_guest_batch(
             str(btf_custom_path),
             "--repeat",
             str(repeat),
+            "--batch-size",
+            str(batch_size),
             "--timeout",
             str(timeout_seconds),
         ]
@@ -277,6 +290,7 @@ def run_corpus_targets_in_guest_batch(
             guest_exec=guest_exec,
             timeout_seconds=timeout_limit,
             vng_binary=vng_binary,
+            nofile=DEFAULT_GUEST_NOFILE,
         )
         start = time.monotonic()
         process = subprocess.Popen(

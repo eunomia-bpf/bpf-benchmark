@@ -477,6 +477,169 @@ def test_build_object_batch_plan_v2_uses_program_scoped_rejit_passes() -> None:
     assert kprobe_run["prepared_ref"] == kprobe_compile["prepared_key"]
 
 
+def test_run_objects_locally_batch_splits_resource_exhausted_batches(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    objects = [
+        _synthetic_guest_batch_object("alpha"),
+        _synthetic_guest_batch_object("beta"),
+        _synthetic_guest_batch_object("gamma"),
+    ]
+    batch_object_counts: list[int] = []
+    daemon_events: list[tuple[str, object]] = []
+
+    def fake_start_daemon_server(_daemon: Path):
+        daemon_events.append(("start", "daemon"))
+        return ("proc", tmp_path / "daemon.sock", "sock-dir", tmp_path / "daemon.out", tmp_path / "daemon.err")
+
+    def fake_stop_daemon_server(proc, socket_path, socket_dir):
+        daemon_events.append(("stop", (proc, socket_path, socket_dir)))
+
+    def fake_resolve_program_enabled_passes_map(**_kwargs):
+        return {
+            obj.programs[0].canonical_name: ["map_inline"]
+            for obj in objects
+        }
+
+    def _successful_batch_result(spec_payload: dict[str, object]) -> dict[str, object]:
+        jobs: list[dict[str, object]] = []
+        for raw_job in spec_payload["jobs"]:
+            assert isinstance(raw_job, dict)
+            runtime = str(raw_job.get("runtime") or "")
+            compile_only = bool(raw_job.get("compile_only"))
+            is_rejit = runtime.endswith("rejit")
+            jobs.append(
+                {
+                    "id": raw_job["id"],
+                    "type": "test_run",
+                    "execution": raw_job["execution"],
+                    "runtime": runtime,
+                    "ok": True,
+                    "error": "",
+                    "wall_time_ns": 1,
+                    "samples": [
+                        {
+                            "compile_ns": 10,
+                            "exec_ns": 0 if compile_only else (8 if is_rejit else 10),
+                            "jited_prog_len": 48 if is_rejit else 64,
+                            "xlated_prog_len": 24 if is_rejit else 32,
+                            "rejit": {
+                                "requested": is_rejit,
+                                "applied": is_rejit,
+                                "passes_applied": ["map_inline"] if is_rejit else [],
+                            },
+                        }
+                    ],
+                }
+            )
+        return {
+            "ok": True,
+            "completed_with_job_errors": False,
+            "returncode": 0,
+            "timed_out": False,
+            "duration_seconds": 1.0,
+            "stdout": "",
+            "stderr": "",
+            "error": None,
+            "result": {"jobs": jobs},
+            "progress": None,
+        }
+
+    def fake_run_batch_runner(_runner, *, spec_payload, **_kwargs):
+        assert isinstance(spec_payload, dict)
+        jobs = spec_payload["jobs"]
+        assert isinstance(jobs, list)
+        object_count = len({str(job.get("program")) for job in jobs if isinstance(job, dict)})
+        batch_object_counts.append(object_count)
+        if object_count == 3:
+            first_prepare = next(
+                str(job["id"])
+                for job in jobs
+                if isinstance(job, dict) and job.get("prepared_key")
+            )
+            return {
+                "ok": True,
+                "completed_with_job_errors": True,
+                "returncode": 2,
+                "timed_out": False,
+                "duration_seconds": 1.0,
+                "stdout": "",
+                "stderr": "",
+                "error": None,
+                "result": {
+                    "jobs": [
+                        {
+                            "id": first_prepare,
+                            "type": "test_run",
+                            "execution": "serial",
+                            "runtime": "kernel",
+                            "ok": False,
+                            "error": "bpf_object__load failed: Cannot allocate memory",
+                            "wall_time_ns": 1,
+                            "samples": [],
+                        }
+                    ]
+                },
+                "progress": None,
+            }
+        return _successful_batch_result(spec_payload)
+
+    monkeypatch.setattr(corpus_lib, "_start_daemon_server", fake_start_daemon_server)
+    monkeypatch.setattr(corpus_lib, "_stop_daemon_server", fake_stop_daemon_server)
+    monkeypatch.setattr(
+        corpus_lib,
+        "resolve_program_enabled_passes_map",
+        fake_resolve_program_enabled_passes_map,
+    )
+    monkeypatch.setattr(corpus_lib, "run_batch_runner", fake_run_batch_runner)
+
+    object_records, program_records, batch_result = corpus_lib.run_objects_locally_batch(
+        objects=objects,
+        runner=tmp_path / "micro_exec",
+        daemon=tmp_path / "bpfrejit-daemon",
+        repeat=3,
+        warmup_repeat=1,
+        timeout_seconds=30,
+        execution_mode="vm",
+        btf_custom_path=tmp_path / "vmlinux",
+        benchmark_config={},
+        batch_size=3,
+    )
+
+    assert batch_object_counts == [3, 1, 2]
+    assert [event[0] for event in daemon_events] == ["start", "stop"]
+    assert [record["canonical_object_name"] for record in object_records] == [
+        obj.canonical_name for obj in objects
+    ]
+    assert [record["canonical_name"] for record in program_records] == [
+        obj.programs[0].canonical_name for obj in objects
+    ]
+    assert batch_result["ok"] is True
+    assert batch_result["completed_with_job_errors"] is False
+    batch_summary = batch_result["result"]["batch_summary"]
+    assert batch_summary["requested_batch_size"] == 3
+    assert batch_summary["attempted_batch_sizes"] == [3, 1, 2]
+    assert batch_summary["effective_batch_sizes"] == [1, 2]
+    assert len(batch_summary["retry_splits"]) == 1
+
+
+def test_guest_batch_failure_headline_prefers_batch_stderr_over_generic_exit_code() -> None:
+    headline = modes._guest_batch_failure_headline(
+        batch_result={
+            "error": "batch runner exited with code 1",
+            "stderr": (
+                "libbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\n"
+                "RLIMIT_NOFILE hard limit 4096 is below required corpus batch minimum 65536"
+            ),
+            "returncode": 1,
+        },
+        built_records=[],
+    )
+
+    assert headline == "RLIMIT_NOFILE hard limit 4096 is below required corpus batch minimum 65536"
+
+
 def test_run_guest_batch_mode_reuses_single_daemon_session_for_all_objects(
     monkeypatch,
     tmp_path: Path,
@@ -549,6 +712,7 @@ def test_run_guest_batch_mode_reuses_single_daemon_session_for_all_objects(
         btf_custom_path=str(tmp_path / "btf"),
         guest_result_json=str(tmp_path / "guest-result.json"),
         repeat=3,
+        batch_size=7,
         timeout=45,
         benchmark_config={},
     )
@@ -556,6 +720,7 @@ def test_run_guest_batch_mode_reuses_single_daemon_session_for_all_objects(
     assert modes.run_guest_batch_mode(args) == 0
     assert len(batch_calls) == 1
     assert batch_calls[0]["objects"] == [obj_alpha, obj_beta]
+    assert batch_calls[0]["batch_size"] == 7
     assert persisted_records == [
         [],
         [obj_alpha.canonical_name],

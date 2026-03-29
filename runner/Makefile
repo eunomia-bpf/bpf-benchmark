@@ -28,6 +28,7 @@ FILTERS ?=
 ITERATIONS ?= 3
 WARMUPS ?= 1
 REPEAT ?= 100
+BATCH_SIZE ?= 100
 BENCH ?=
 STATIC_VERIFY_ARGS ?=
 FUZZ_ROUNDS ?= 1000
@@ -325,6 +326,7 @@ vm-corpus: corpus-build micro_exec daemon-binary kernel-image kinsn-modules-buil
 		--daemon "$(DAEMON_PATH)" \
 		--btf-custom-path "$(VMLINUX_PATH)" \
 		--corpus-build-report "$(CORPUS_BUILD_REPORT)" \
+		--batch-size "$(BATCH_SIZE)" \
 		$(VM_CORPUS_REPEAT_FLAG) \
 		$(VM_CORPUS_OUTPUT_JSON_FLAG) \
 		$(VM_CORPUS_OUTPUT_MD_FLAG)

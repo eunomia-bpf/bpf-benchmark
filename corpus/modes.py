@@ -80,6 +80,7 @@ DEFAULT_CORPUS_BUILD_REPORT = latest_output_path(ROOT_DIR / "corpus" / "results"
 DEFAULT_VNG_MACHINE = resolve_machine(target=DEFAULT_VM_TARGET, action="vm-corpus")
 DEFAULT_VNG = str(Path(DEFAULT_VNG_MACHINE.executable))
 DEFAULT_TIMEOUT_SECONDS = 240
+DEFAULT_BATCH_SIZE = 100
 
 
 def snapshot_guest_input(source: Path, snapshot_dir: Path) -> Path:
@@ -153,6 +154,12 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
         parser,
         benchmark_config_repeat(benchmark_config),
         help_text="Repeat count passed to each micro_exec invocation.",
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=int(benchmark_config.get("corpus_batch_size") or DEFAULT_BATCH_SIZE),
+        help="Maximum objects to keep loaded per corpus batch before cleanup.",
     )
     add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-target timeout in seconds.")
     add_filter_argument(
@@ -263,6 +270,13 @@ def _guest_batch_failure_headline(
     built_records: list[dict[str, Any]],
 ) -> str:
     batch_error = str(batch_result.get("error") or "").strip()
+    batch_stderr = str(batch_result.get("stderr") or "").strip()
+    if batch_stderr and (
+        not batch_error or batch_error.startswith("batch runner exited with code")
+    ):
+        stderr_lines = [line.strip() for line in batch_stderr.splitlines() if line.strip()]
+        if stderr_lines:
+            return stderr_lines[-1]
     if batch_error:
         return batch_error
 
@@ -299,6 +313,7 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
     guest_result_path = Path(args.guest_result_json).resolve() if args.guest_result_json else None
     warmup_repeat = benchmark_config_warmups(args.benchmark_config)
+    batch_size = int(getattr(args, "batch_size", DEFAULT_BATCH_SIZE) or DEFAULT_BATCH_SIZE)
     if btf_custom_path is None:
         raise SystemExit("--btf-custom-path is required in guest batch mode")
 
@@ -317,6 +332,7 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
         execution_mode="vm",
         btf_custom_path=btf_custom_path,
         benchmark_config=args.benchmark_config,
+        batch_size=batch_size,
     )
     built_records = []
     for obj in objects:
@@ -359,6 +375,7 @@ def build_markdown_v2(data: dict[str, Any]) -> str:
     object_records = sorted(data["object_records"], key=lambda item: item["canonical_object_name"])
     corpus_build_summary = data.get("corpus_build_summary") or {}
     guest_info = (data.get("guest_smoke") or {}).get("payload")
+    requested_batch_size = int(data.get("batch_size") or DEFAULT_BATCH_SIZE)
 
     def note_for_record(record: dict[str, Any]) -> str:
         if record.get("record_error"):
@@ -383,6 +400,7 @@ def build_markdown_v2(data: dict[str, Any]) -> str:
         f"- Effective mode: `{summary['effective_mode']}`",
         f"- Benchmark profile: `{data.get('benchmark_profile') or 'default'}`",
         f"- Benchmark config: `{data.get('benchmark_config') or 'fallback-defaults'}`",
+        f"- Batch size: {requested_batch_size}",
         f"- Objects: {summary['objects_attempted']}",
         f"- Programs: {summary['targets_attempted']}",
         f"- Compile pairs: {summary['compile_pairs']}",
@@ -517,6 +535,7 @@ def build_markdown_v2(data: dict[str, Any]) -> str:
 def packet_main(argv: list[str] | None = None) -> int:
     args = parse_packet_args(argv)
     require_minimum(args.repeat, 1, "--repeat")
+    require_minimum(args.batch_size, 1, "--batch-size")
     benchmark_config_path = args.benchmark_config.get("config_path")
 
     if args.guest_info:
@@ -569,6 +588,7 @@ def packet_main(argv: list[str] | None = None) -> int:
     print(
         "vm-corpus selection "
         f"profile={args.profile or 'default'} "
+        f"batch_size={args.batch_size} "
         f"manifest_objects={yaml_summary['total_objects']} "
         f"manifest_programs={yaml_summary['total_programs']} "
         f"selected_objects={yaml_summary['selected_objects']} "
@@ -592,6 +612,7 @@ def packet_main(argv: list[str] | None = None) -> int:
         "btf_custom_path": str(btf_custom_path) if btf_custom_path is not None else None,
         "vng_binary": args.vng,
         "repeat": args.repeat,
+        "batch_size": args.batch_size,
         "timeout_seconds": args.timeout,
         "guest_smoke": guest_smoke,
         "summary": summarize_corpus_batch_results(program_records, object_records),
@@ -648,6 +669,7 @@ def packet_main(argv: list[str] | None = None) -> int:
                 },
                 "vng_binary": args.vng,
                 "repeat": args.repeat,
+                "batch_size": args.batch_size,
                 "timeout_seconds": args.timeout,
                 "guest_smoke": guest_smoke,
                 "started_at": session_started_at,
@@ -748,6 +770,7 @@ def packet_main(argv: list[str] | None = None) -> int:
             btf_custom_path=btf_snapshot,
             profile=args.profile,
             repeat=args.repeat,
+            batch_size=args.batch_size,
             timeout_seconds=args.timeout,
             vng_binary=args.vng,
             kinsn_load_script=kinsn_module_snapshot / "load_all.sh",

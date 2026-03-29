@@ -18,6 +18,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--kernel-image", required=True, help="Kernel image passed to the VM backend.")
     parser.add_argument("--cpus", type=int, help="Optional guest CPU count override.")
     parser.add_argument("--mem", help="Optional guest memory override.")
+    parser.add_argument("--nofile", type=int, help="Optional guest RLIMIT_NOFILE soft/hard value.")
     parser.add_argument(
         "--vm-executable",
         help="Optional backend executable override (for example a custom vng binary).",
@@ -30,7 +31,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    guest_script = write_guest_script([args.command])
+    guest_script = write_guest_script([args.command], nofile=args.nofile)
     completed = run_in_vm(
         args.kernel_image,
         guest_script,

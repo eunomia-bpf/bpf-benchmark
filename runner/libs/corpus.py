@@ -4,21 +4,26 @@ import argparse
 from dataclasses import asdict, dataclass
 import json
 import math
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 import yaml
 
-from . import ROOT_DIR, ensure_parent
+from . import ROOT_DIR, ensure_parent, run_command, run_json_command, tail_text, which
+from .agent import find_bpf_programs, stop_agent, wait_healthy
 from .batch_runner import run_batch_runner
+from .metrics import enable_bpf_stats, sample_bpf_stats
 from .object_discovery import supplement_with_existing_corpus_build_objects
 from .rejit import (
     _start_daemon_server,
     _stop_daemon_server,
+    apply_daemon_rejit,
     benchmark_config_enabled_passes,
     benchmark_policy_required_site_passes,
     resolve_program_enabled_passes,
@@ -32,6 +37,17 @@ def relpath(path: Path | str, root_dir: Path) -> str:
         return candidate.relative_to(root_dir).as_posix()
     except ValueError:
         return str(candidate)
+
+
+_DEFAULT_CORPUS_BATCH_SIZE = 100
+_DEFAULT_APP_NATIVE_LOAD_TIMEOUT_SECONDS = 60
+_BATCH_RESOURCE_ERROR_SUBSTRINGS = (
+    "cannot allocate memory",
+    "enomem",
+    "too many open files",
+    "emfile",
+    "enfile",
+)
 
 
 @dataclass(frozen=True)
@@ -66,6 +82,11 @@ class ResolvedProgram:
     compile_loader: str | None
     attach_group: str | None
     rejit_enabled: bool
+    loader: str = "generic"
+    loader_binary: str | None = None
+    loader_args: tuple[str, ...] = ()
+    loader_setup_script: str | None = None
+    loader_timeout_seconds: int | None = None
 
 
 @dataclass(frozen=True)
@@ -91,6 +112,11 @@ class ResolvedObject:
     allow_object_only_result: bool
     test_method: str
     programs: tuple[ResolvedProgram, ...]
+    loader: str = "generic"
+    loader_binary: str | None = None
+    loader_args: tuple[str, ...] = ()
+    loader_setup_script: str | None = None
+    loader_timeout_seconds: int | None = None
 
 
 def normalize_passes(value: Any) -> list[str]:
@@ -302,6 +328,51 @@ def _sequence(value: Any, *, field_name: str) -> list[Any]:
     return list(value)
 
 
+def _loader_kind(value: Any) -> str:
+    text = _string_or_none(value) or "generic"
+    normalized = text.strip().lower()
+    if normalized not in {"generic", "app-native"}:
+        raise SystemExit(f"invalid loader kind: {value!r}")
+    return normalized
+
+
+def _resolve_repo_loader_configs(manifest: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+    raw_repos = manifest.get("repos")
+    if raw_repos is None:
+        return {}
+    if not isinstance(raw_repos, Mapping):
+        raise SystemExit("macro corpus YAML field 'repos' must be a mapping")
+
+    configs: dict[str, dict[str, Any]] = {}
+    for raw_repo_name, raw_config in raw_repos.items():
+        repo_name = str(raw_repo_name).strip()
+        if not repo_name:
+            raise SystemExit("macro corpus YAML field 'repos' contains an empty repo name")
+        if not isinstance(raw_config, Mapping):
+            raise SystemExit(f"macro corpus YAML repos[{repo_name!r}] must be a mapping")
+        loader_args = _sequence(raw_config.get("loader_args"), field_name=f"repos[{repo_name!r}].loader_args")
+        configs[repo_name.lower()] = {
+            "loader": _loader_kind(raw_config.get("loader")),
+            "loader_binary": _string_or_none(raw_config.get("loader_binary")),
+            "loader_args": tuple(str(item) for item in loader_args if str(item).strip()),
+            "loader_setup_script": _string_or_none(raw_config.get("loader_setup_script")),
+            "loader_timeout_seconds": _int_or_default(
+                raw_config.get("loader_timeout_seconds"),
+                _DEFAULT_APP_NATIVE_LOAD_TIMEOUT_SECONDS,
+            ),
+        }
+    return configs
+
+
+def _repo_loader_config_for(
+    repo: str,
+    repo_loader_configs: Mapping[str, Mapping[str, Any]] | None,
+) -> Mapping[str, Any]:
+    if repo_loader_configs is None:
+        return {}
+    return repo_loader_configs.get(repo.lower(), {})
+
+
 def split_corpus_source(source: str, family: str | None = None) -> tuple[str, str]:
     raw_source = str(source or "")
     source_path = Path(raw_source)
@@ -408,10 +479,20 @@ def clone_resolved_object(obj: ResolvedObject, programs: tuple[ResolvedProgram, 
         allow_object_only_result=obj.allow_object_only_result,
         test_method=obj.test_method,
         programs=programs,
+        loader=obj.loader,
+        loader_binary=obj.loader_binary,
+        loader_args=obj.loader_args,
+        loader_setup_script=obj.loader_setup_script,
+        loader_timeout_seconds=obj.loader_timeout_seconds,
     )
 
 
-def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> ResolvedObject:
+def resolve_manifest_object(
+    entry: Mapping[str, Any],
+    *,
+    index: int,
+    repo_loader_configs: Mapping[str, Mapping[str, Any]] | None = None,
+) -> ResolvedObject:
     source = _string_or_none(entry.get("source"))
     if source is None:
         raise SystemExit(f"manifest object #{index} missing source")
@@ -421,6 +502,7 @@ def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> Resolved
     repo = _string_or_none(entry.get("repo")) or repo_from_source or (
         _string_or_none(entry.get("family")) or object_candidate.name
     )
+    repo_loader_config = _repo_loader_config_for(repo, repo_loader_configs)
     family = _string_or_none(entry.get("family")) or repo
     category = _string_or_none(entry.get("category")) or ""
     level = _string_or_none(entry.get("level")) or ""
@@ -432,6 +514,27 @@ def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> Resolved
     short_name = f"{repo}:{object_basename}" if repo else object_basename
     fixture_path = _string_or_none(entry.get("fixture_path"))
     compile_loader = _string_or_none(entry.get("compile_loader"))
+    loader = _loader_kind(entry.get("loader") if "loader" in entry else repo_loader_config.get("loader"))
+    loader_binary = _string_or_none(entry.get("loader_binary")) or _string_or_none(repo_loader_config.get("loader_binary"))
+    loader_args = tuple(
+        str(item).strip()
+        for item in (
+            _sequence(entry.get("loader_args"), field_name=f"objects[{index}].loader_args")
+            if entry.get("loader_args") is not None
+            else list(repo_loader_config.get("loader_args") or [])
+        )
+        if str(item).strip()
+    )
+    loader_setup_script = (
+        _string_or_none(entry.get("loader_setup_script"))
+        or _string_or_none(repo_loader_config.get("loader_setup_script"))
+    )
+    loader_timeout_seconds = _int_or_default(
+        entry.get("loader_timeout_seconds")
+        if entry.get("loader_timeout_seconds") is not None
+        else repo_loader_config.get("loader_timeout_seconds"),
+        _DEFAULT_APP_NATIVE_LOAD_TIMEOUT_SECONDS,
+    )
     shared_state_policy = _string_or_none(entry.get("shared_state_policy")) or "reset_maps"
     allow_object_only_result = bool(entry.get("allow_object_only_result", False))
     object_test_method = _string_or_none(entry.get("test_method")) or "compile_only"
@@ -519,6 +622,11 @@ def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> Resolved
                 compile_loader=compile_loader,
                 attach_group=attach_group,
                 rejit_enabled=rejit_enabled,
+                loader=loader,
+                loader_binary=loader_binary,
+                loader_args=loader_args,
+                loader_setup_script=loader_setup_script,
+                loader_timeout_seconds=loader_timeout_seconds,
             )
         )
 
@@ -547,6 +655,11 @@ def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> Resolved
         allow_object_only_result=allow_object_only_result,
         test_method=object_test_method,
         programs=tuple(programs),
+        loader=loader,
+        loader_binary=loader_binary,
+        loader_args=loader_args,
+        loader_setup_script=loader_setup_script,
+        loader_timeout_seconds=loader_timeout_seconds,
     )
 
 
@@ -670,9 +783,10 @@ def load_targets_from_yaml(
     if int(manifest.get("schema_version", 0) or 0) != 2 or "objects" not in manifest:
         raise SystemExit(f"macro corpus YAML must use schema_version: 2 objects format: {yaml_path}")
 
+    repo_loader_configs = _resolve_repo_loader_configs(manifest)
     raw_objects = _sequence(manifest.get("objects"), field_name="objects")
     resolved_objects = [
-        resolve_manifest_object(entry, index=index)
+        resolve_manifest_object(entry, index=index, repo_loader_configs=repo_loader_configs)
         for index, entry in enumerate(raw_objects, start=1)
     ]
     resolved_objects.sort(key=lambda item: item.canonical_name)
@@ -1905,70 +2019,12 @@ def build_object_record_v2(
     return record
 
 
-def run_objects_locally_batch(
+def _build_records_from_batch_result(
     *,
-    objects: list[ResolvedObject],
-    runner: Path,
-    daemon: Path,
-    repeat: int,
-    warmup_repeat: int,
-    timeout_seconds: int,
+    object_refs: Sequence[Mapping[str, Any]],
+    batch_result: Mapping[str, Any],
     execution_mode: str,
-    btf_custom_path: Path | None,
-    daemon_socket: str | None = None,
-    enabled_passes: list[str] | None = None,
-    benchmark_config: Mapping[str, Any] | None = None,
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
-    active_daemon_socket = daemon_socket
-    daemon_server: tuple[subprocess.Popen[str], Path, str, Path, Path] | None = None
-    if objects and active_daemon_socket is None:
-        daemon_server = _start_daemon_server(daemon)
-        active_daemon_socket = str(daemon_server[1])
-
-    try:
-        if not objects:
-            batch_result = {
-                "ok": True,
-                "completed_with_job_errors": False,
-                "returncode": 0,
-                "timed_out": False,
-                "duration_seconds": 0.0,
-                "stdout": "",
-                "stderr": "",
-                "error": None,
-                "result": {"jobs": []},
-                "progress": None,
-            }
-            return [], [], batch_result
-
-        assert active_daemon_socket is not None
-        program_enabled_passes = resolve_program_enabled_passes_map(
-            objects=objects,
-            benchmark_config=benchmark_config,
-            runner=runner,
-            daemon_socket=active_daemon_socket,
-            timeout_seconds=timeout_seconds,
-            enabled_passes=enabled_passes,
-        )
-        spec_payload, object_refs = build_object_batch_plan_v2(
-            objects=objects,
-            repeat=repeat,
-            warmup_repeat=warmup_repeat,
-            btf_custom_path=btf_custom_path,
-            daemon_socket=active_daemon_socket,
-            enabled_passes=enabled_passes,
-            program_enabled_passes=program_enabled_passes,
-        )
-        batch_result = run_batch_runner(
-            runner,
-            spec_payload=spec_payload,
-            timeout_seconds=packet_batch_timeout_seconds(max(1, len(objects)), timeout_seconds),
-            cwd=ROOT_DIR,
-        )
-    finally:
-        if daemon_server is not None:
-            _stop_daemon_server(daemon_server[0], daemon_server[1], daemon_server[2])
-
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     results_by_id = batch_job_result_map(batch_result.get("result"))
     object_records: list[dict[str, Any]] = []
     program_records: list[dict[str, Any]] = []
@@ -1992,6 +2048,222 @@ def run_objects_locally_batch(
                     results_by_id=results_by_id,
                 )
             )
+    return object_records, program_records
+
+
+def _split_object_batches(
+    objects: Sequence[ResolvedObject],
+    batch_size: int,
+) -> list[list[ResolvedObject]]:
+    return [
+        list(objects[index:index + batch_size])
+        for index in range(0, len(objects), batch_size)
+    ]
+
+
+def _prepare_resource_error(
+    spec_payload: Mapping[str, Any],
+    batch_result: Mapping[str, Any],
+) -> str | None:
+    results_by_id = batch_job_result_map(batch_result.get("result"))
+    jobs = spec_payload.get("jobs")
+    if not isinstance(jobs, list):
+        return None
+    for raw_job in jobs:
+        if not isinstance(raw_job, Mapping) or not raw_job.get("prepared_key"):
+            continue
+        job_id = str(raw_job.get("id") or "").strip()
+        if not job_id:
+            continue
+        result = results_by_id.get(job_id)
+        if not result or result.get("ok"):
+            continue
+        error_text = summarize_failure_reason(result)
+        lowered = error_text.lower()
+        if any(token in lowered for token in _BATCH_RESOURCE_ERROR_SUBSTRINGS):
+            return error_text
+    return None
+
+
+def run_objects_locally_batch(
+    *,
+    objects: list[ResolvedObject],
+    runner: Path,
+    daemon: Path,
+    repeat: int,
+    warmup_repeat: int,
+    timeout_seconds: int,
+    execution_mode: str,
+    btf_custom_path: Path | None,
+    daemon_socket: str | None = None,
+    enabled_passes: list[str] | None = None,
+    benchmark_config: Mapping[str, Any] | None = None,
+    batch_size: int = _DEFAULT_CORPUS_BATCH_SIZE,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    if batch_size < 1:
+        raise ValueError(f"batch_size must be >= 1, got {batch_size}")
+
+    active_daemon_socket = daemon_socket
+    daemon_server: tuple[subprocess.Popen[str], Path, str, Path, Path] | None = None
+    if objects and active_daemon_socket is None:
+        daemon_server = _start_daemon_server(daemon)
+        active_daemon_socket = str(daemon_server[1])
+
+    try:
+        if not objects:
+            batch_result = {
+                "ok": True,
+                "completed_with_job_errors": False,
+                "returncode": 0,
+                "timed_out": False,
+                "duration_seconds": 0.0,
+                "stdout": "",
+                "stderr": "",
+                "error": None,
+                "result": {
+                    "jobs": [],
+                    "batch_summary": {
+                        "requested_batch_size": batch_size,
+                        "effective_batch_sizes": [],
+                        "retry_splits": [],
+                    },
+                },
+                "progress": None,
+            }
+            return [], [], batch_result
+
+        assert active_daemon_socket is not None
+        program_enabled_passes = resolve_program_enabled_passes_map(
+            objects=objects,
+            benchmark_config=benchmark_config,
+            runner=runner,
+            daemon_socket=active_daemon_socket,
+            timeout_seconds=timeout_seconds,
+            enabled_passes=enabled_passes,
+        )
+        completed_batches: list[tuple[list[dict[str, Any]], dict[str, Any]]] = []
+        attempted_batch_sizes: list[int] = []
+        effective_batch_sizes: list[int] = []
+        retry_splits: list[dict[str, Any]] = []
+        total_duration_seconds = 0.0
+        stdout_chunks: list[str] = []
+        stderr_chunks: list[str] = []
+
+        def execute_batch(batch_objects: list[ResolvedObject], batch_label: str) -> None:
+            nonlocal total_duration_seconds
+
+            attempted_batch_sizes.append(len(batch_objects))
+            spec_payload, object_refs = build_object_batch_plan_v2(
+                objects=batch_objects,
+                repeat=repeat,
+                warmup_repeat=warmup_repeat,
+                btf_custom_path=btf_custom_path,
+                daemon_socket=active_daemon_socket,
+                enabled_passes=enabled_passes,
+                program_enabled_passes=program_enabled_passes,
+                batch_label=batch_label,
+            )
+            batch_result = run_batch_runner(
+                runner,
+                spec_payload=spec_payload,
+                timeout_seconds=packet_batch_timeout_seconds(max(1, len(batch_objects)), timeout_seconds),
+                cwd=ROOT_DIR,
+            )
+            total_duration_seconds += float(batch_result.get("duration_seconds", 0.0) or 0.0)
+            stdout = str(batch_result.get("stdout") or "").strip()
+            stderr = str(batch_result.get("stderr") or "").strip()
+            if stdout:
+                stdout_chunks.append(stdout)
+            if stderr:
+                stderr_chunks.append(stderr)
+
+            resource_error = _prepare_resource_error(spec_payload, batch_result)
+            if resource_error is not None and len(batch_objects) > 1:
+                midpoint = max(1, len(batch_objects) // 2)
+                retry_splits.append(
+                    {
+                        "batch_label": batch_label,
+                        "object_count": len(batch_objects),
+                        "retry_batch_size": midpoint,
+                        "error": resource_error,
+                    }
+                )
+                execute_batch(batch_objects[:midpoint], f"{batch_label}-a")
+                execute_batch(batch_objects[midpoint:], f"{batch_label}-b")
+                return
+
+            effective_batch_sizes.append(len(batch_objects))
+            completed_batches.append((object_refs, batch_result))
+
+        for batch_index, batch_objects in enumerate(_split_object_batches(objects, batch_size), start=1):
+            execute_batch(batch_objects, f"batch-{batch_index:04d}")
+    finally:
+        if daemon_server is not None:
+            _stop_daemon_server(daemon_server[0], daemon_server[1], daemon_server[2])
+
+    object_records: list[dict[str, Any]] = []
+    program_records: list[dict[str, Any]] = []
+    combined_jobs: list[dict[str, Any]] = []
+    completed_with_job_errors = False
+    combined_ok = True
+    combined_timed_out = False
+    combined_returncode: int | None = 0
+    combined_error: str | None = None
+
+    for object_refs, batch_result in completed_batches:
+        batch_object_records, batch_program_records = _build_records_from_batch_result(
+            object_refs=object_refs,
+            batch_result=batch_result,
+            execution_mode=execution_mode,
+        )
+        object_records.extend(batch_object_records)
+        program_records.extend(batch_program_records)
+
+        payload = batch_result.get("result")
+        if isinstance(payload, Mapping):
+            raw_jobs = payload.get("jobs")
+            if isinstance(raw_jobs, list):
+                combined_jobs.extend(item for item in raw_jobs if isinstance(item, dict))
+
+        combined_ok = combined_ok and bool(batch_result.get("ok"))
+        completed_with_job_errors = (
+            completed_with_job_errors or bool(batch_result.get("completed_with_job_errors"))
+        )
+        combined_timed_out = combined_timed_out or bool(batch_result.get("timed_out"))
+        if combined_error is None and batch_result.get("error"):
+            combined_error = str(batch_result["error"])
+
+        result_returncode = batch_result.get("returncode")
+        if isinstance(result_returncode, int) and result_returncode not in (0, 2):
+            combined_returncode = result_returncode
+        elif combined_returncode == 0 and result_returncode == 2:
+            combined_returncode = 2
+
+    if combined_timed_out:
+        combined_returncode = None
+    elif combined_returncode == 0 and completed_with_job_errors:
+        combined_returncode = 2
+
+    batch_result = {
+        "ok": combined_ok,
+        "completed_with_job_errors": completed_with_job_errors,
+        "returncode": combined_returncode,
+        "timed_out": combined_timed_out,
+        "duration_seconds": total_duration_seconds,
+        "stdout": "\n".join(stdout_chunks),
+        "stderr": "\n".join(stderr_chunks),
+        "error": combined_error,
+        "result": {
+            "jobs": combined_jobs,
+            "batch_summary": {
+                "requested_batch_size": batch_size,
+                "attempted_batch_sizes": attempted_batch_sizes,
+                "effective_batch_sizes": effective_batch_sizes,
+                "retry_splits": retry_splits,
+            },
+        },
+        "progress": None,
+    }
     return object_records, program_records, batch_result
 
 

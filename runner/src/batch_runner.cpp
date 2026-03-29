@@ -29,12 +29,15 @@
 #include <sys/socket.h>
 #include <sys/syscall.h>
 #include <sys/un.h>
+#include <sys/resource.h>
 #include <unordered_map>
 #include <unistd.h>
 #include <thread>
 #include <vector>
 
 namespace {
+
+constexpr rlim_t kRequiredBatchRunnerNofile = 65536;
 
 using clock_type = std::chrono::steady_clock;
 
@@ -268,6 +271,37 @@ class prepared_kernel_store {
             " is unavailable because prepare failed: " + *prepare_error);
     }
     fail("missing prepared kernel state for ref: " + prepared_ref);
+}
+
+std::string format_rlimit_value(rlim_t value)
+{
+    if (value == RLIM_INFINITY) {
+        return "infinity";
+    }
+    return std::to_string(static_cast<unsigned long long>(value));
+}
+
+void ensure_batch_runner_nofile_limit()
+{
+    rlimit limit {};
+    if (getrlimit(RLIMIT_NOFILE, &limit) != 0) {
+        fail("getrlimit(RLIMIT_NOFILE) failed: " + std::string(strerror(errno)));
+    }
+    if (limit.rlim_cur >= kRequiredBatchRunnerNofile) {
+        return;
+    }
+    if (limit.rlim_max != RLIM_INFINITY && limit.rlim_max < kRequiredBatchRunnerNofile) {
+        fail(
+            "RLIMIT_NOFILE hard limit " + format_rlimit_value(limit.rlim_max) +
+            " is below required corpus batch minimum " +
+            std::to_string(static_cast<unsigned long long>(kRequiredBatchRunnerNofile)));
+    }
+
+    rlimit updated = limit;
+    updated.rlim_cur = kRequiredBatchRunnerNofile;
+    if (setrlimit(RLIMIT_NOFILE, &updated) != 0) {
+        fail("setrlimit(RLIMIT_NOFILE) failed: " + std::string(strerror(errno)));
+    }
 }
 
 std::string batch_usage_text()
@@ -1269,6 +1303,7 @@ batch_cli_options parse_batch_cli_args(int argc, char **argv)
 int run_batch_cli(int argc, char **argv)
 {
     initialize_micro_exec_process();
+    ensure_batch_runner_nofile_limit();
 
     const batch_cli_options cli = parse_batch_cli_args(argc, argv);
     const batch_spec spec = load_batch_spec(cli.spec_path);
