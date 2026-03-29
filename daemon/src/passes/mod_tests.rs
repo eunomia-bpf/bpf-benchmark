@@ -443,7 +443,7 @@ fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
 }
 
 #[test]
-fn cascade_hash_map_keeps_null_path_but_folds_non_null_path() {
+fn cascade_hash_map_removes_lookup_and_null_path_then_folds_non_null_path() {
     install_hash_map(305, 42u32.to_le_bytes().to_vec());
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
@@ -476,19 +476,10 @@ fn cascade_hash_map_keeps_null_path_but_folds_non_null_path() {
     assert_eq!(
         program.insns,
         vec![
-            map[0],
-            map[1],
-            st_mem(BPF_W, 10, -4, 1),
-            BpfInsn::mov64_reg(2, 10),
-            BpfInsn::alu64_imm(BPF_ADD, 2, -4),
-            call_helper(HELPER_MAP_LOOKUP_ELEM),
-            jeq_imm(0, 0, 5),
             BpfInsn::mov32_imm(6, 42),
             BpfInsn::mov64_imm(1, 10),
             BpfInsn::mov64_imm(1, 52),
             BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
-            BpfInsn::mov64_imm(0, 0),
             exit_insn(),
         ]
     );

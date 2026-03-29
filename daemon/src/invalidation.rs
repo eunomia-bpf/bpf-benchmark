@@ -326,6 +326,19 @@ mod tests {
     }
 
     #[test]
+    fn test_check_missing_entry_invalidates_program() {
+        let accessor = FakeMapAccessor::default();
+        let mut tracker = MapInvalidationTracker::new(accessor);
+        tracker.record_inline_site(101, 7, key(1), value(11));
+
+        let invalidated = tracker
+            .check_for_invalidations()
+            .expect("check_for_invalidations should not error");
+
+        assert_eq!(invalidated_set(invalidated), HashSet::from([101]));
+    }
+
+    #[test]
     fn test_remove_prog_clears_entries() {
         let mut tracker = MapInvalidationTracker::new(FakeMapAccessor::default());
         tracker.record_inline_site(101, 7, key(1), value(11));

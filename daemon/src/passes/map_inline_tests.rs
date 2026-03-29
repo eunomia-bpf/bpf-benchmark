@@ -623,6 +623,29 @@ fn classify_r0_uses_tracks_stack_spill_and_reload_across_helper() {
 }
 
 #[test]
+fn classify_r0_uses_allows_helper_argument_loaded_from_lookup_value() {
+    let insns = vec![
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 4),
+        BpfInsn::mov64_reg(1, 6),
+        call_helper(2),
+    ];
+
+    let uses = classify_r0_uses(&insns, 0);
+    assert_eq!(
+        uses.fixed_loads,
+        vec![FixedLoadUse {
+            pc: 1,
+            dst_reg: 6,
+            size: BPF_W,
+            offset: 4,
+        }]
+    );
+    assert!(uses.other_uses.is_empty());
+    assert!(uses.all_fixed_loads());
+}
+
+#[test]
 fn classify_r0_uses_marks_pointer_escape_after_null_check_as_other() {
     let insns = vec![
         call_helper(HELPER_MAP_LOOKUP_ELEM),
@@ -1030,7 +1053,7 @@ fn test_map_inline_real_clang_order() {
 }
 
 #[test]
-fn test_map_inline_interleaved_arg_setup() {
+fn map_inline_pass_removes_interleaved_side_effect_free_setup_gap() {
     install_array_map(118, vec![7, 0, 0, 0]);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
@@ -1059,8 +1082,15 @@ fn test_map_inline_interleaved_arg_setup() {
         result.pass_results[0].sites_skipped
     );
     assert_eq!(result.total_sites_applied, 1);
-    assert_eq!(program.insns[7], BpfInsn::mov32_imm(6, 7));
-    assert_eq!(program.insns.last().copied(), Some(exit_insn()));
+    assert_eq!(
+        program.insns,
+        vec![
+            BpfInsn::mov64_imm(3, 9),
+            BpfInsn::mov32_imm(6, 7),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]
+    );
 }
 
 #[test]
@@ -1201,18 +1231,65 @@ fn map_inline_pass_rewrites_lookup_with_split_halfword_key_materialization() {
     assert_eq!(
         program.insns,
         vec![
-            map[0],
-            map[1],
-            st_mem(BPF_H, 10, -4, 7),
-            st_mem(BPF_H, 10, -2, 0),
-            BpfInsn::mov64_reg(2, 10),
-            add64_imm(2, -4),
-            call_helper(HELPER_MAP_LOOKUP_ELEM),
             BpfInsn::mov32_imm(6, 42),
             BpfInsn::mov64_imm(0, 0),
             exit_insn(),
         ]
     );
+}
+
+#[test]
+fn map_inline_pass_removes_hash_lookup_with_16_byte_split_dw_key() {
+    let lo = 0x0706_0504_0302_0100u64;
+    let hi = 0x0f0e_0d0c_0b0a_0908u64;
+    let mut key_bytes = lo.to_le_bytes().to_vec();
+    key_bytes.extend_from_slice(&hi.to_le_bytes());
+
+    let mut values = HashMap::new();
+    values.insert(key_bytes.clone(), 42u32.to_le_bytes().to_vec());
+    install_map_with_key_size(9302, 1, 16, 8, true, values);
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let key_lo = emit_ldimm64(3, lo);
+    let key_hi = emit_ldimm64(4, hi);
+    let mut program = BpfProgram::new(vec![
+        map[0],
+        map[1],
+        key_lo[0],
+        key_lo[1],
+        BpfInsn::stx_mem(BPF_DW, 10, 3, -16),
+        key_hi[0],
+        key_hi[1],
+        BpfInsn::stx_mem(BPF_DW, 10, 4, -8),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -16),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        jeq_imm(0, 0, 3),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        BpfInsn::mov64_imm(0, 0),
+        ja(1),
+        BpfInsn::mov64_imm(0, 1),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![9302]);
+
+    let result = run_map_inline_pass(&mut program);
+
+    assert!(
+        result.program_changed,
+        "skip reasons: {:?}",
+        result.pass_results[0].sites_skipped
+    );
+    assert_eq!(result.total_sites_applied, 1);
+    assert_eq!(
+        program.insns,
+        vec![
+            BpfInsn::mov32_imm(6, 42),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]
+    );
+    assert_eq!(result.pass_results[0].map_inline_records[0].key, key_bytes);
 }
 
 #[test]
@@ -1265,7 +1342,7 @@ fn map_inline_pass_uses_verifier_guided_wide_zero_store_key() {
 }
 
 #[test]
-fn map_inline_pass_keeps_hash_lookup_and_null_check() {
+fn map_inline_pass_removes_hash_lookup_and_null_path_when_entry_present() {
     install_hash_map(105, vec![7, 0, 0, 0]);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
@@ -1296,17 +1373,8 @@ fn map_inline_pass_keeps_hash_lookup_and_null_check() {
     assert_eq!(
         program.insns,
         vec![
-            map[0],
-            map[1],
-            st_mem(BPF_W, 10, -4, 1),
-            BpfInsn::mov64_reg(2, 10),
-            add64_imm(2, -4),
-            call_helper(HELPER_MAP_LOOKUP_ELEM),
-            jeq_imm(0, 0, 3),
             BpfInsn::mov32_imm(6, 7),
             BpfInsn::mov64_imm(0, 0),
-            ja(1),
-            BpfInsn::mov64_imm(0, 1),
             exit_insn(),
         ]
     );
@@ -1372,20 +1440,8 @@ fn map_inline_pass_rewrites_hash_lookup_with_20_byte_constant_key() {
     assert_eq!(
         program.insns,
         vec![
-            map[0],
-            map[1],
-            BpfInsn::mov64_imm(3, 0),
-            BpfInsn::stx_mem(BPF_DW, 10, 3, -20),
-            BpfInsn::stx_mem(BPF_DW, 10, 3, -12),
-            st_mem(BPF_W, 10, -4, 1),
-            BpfInsn::mov64_reg(2, 10),
-            add64_imm(2, -20),
-            call_helper(HELPER_MAP_LOOKUP_ELEM),
-            jeq_imm(0, 0, 3),
             BpfInsn::mov32_imm(6, 7),
             BpfInsn::mov64_imm(0, 0),
-            ja(1),
-            BpfInsn::mov64_imm(0, 1),
             exit_insn(),
         ]
     );
@@ -1393,7 +1449,7 @@ fn map_inline_pass_rewrites_hash_lookup_with_20_byte_constant_key() {
 }
 
 #[test]
-fn map_inline_pass_keeps_hash_lookup_and_rewrites_alias_load() {
+fn map_inline_pass_removes_hash_lookup_via_alias_guarded_load() {
     install_hash_map(121, vec![7, 0, 0, 0]);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
@@ -1425,18 +1481,8 @@ fn map_inline_pass_keeps_hash_lookup_and_rewrites_alias_load() {
     assert_eq!(
         program.insns,
         vec![
-            map[0],
-            map[1],
-            st_mem(BPF_W, 10, -4, 1),
-            BpfInsn::mov64_reg(2, 10),
-            add64_imm(2, -4),
-            call_helper(HELPER_MAP_LOOKUP_ELEM),
-            BpfInsn::mov64_reg(6, 0),
-            jeq_imm(6, 0, 3),
             BpfInsn::mov32_imm(7, 7),
             BpfInsn::mov64_imm(0, 0),
-            ja(1),
-            BpfInsn::mov64_imm(0, 1),
             exit_insn(),
         ]
     );
@@ -1585,6 +1631,49 @@ fn map_inline_pass_rewrites_load_before_pointer_escape_to_helper() {
             call_helper(HELPER_MAP_LOOKUP_ELEM),
             BpfInsn::mov32_imm(6, 7),
             BpfInsn::mov64_reg(1, 0),
+            call_helper(2),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]
+    );
+}
+
+#[test]
+fn map_inline_pass_removes_hash_lookup_before_helper_using_loaded_scalar() {
+    install_hash_map(1061, vec![0, 0, 0, 0, 7, 0, 0, 0]);
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let mut program = BpfProgram::new(vec![
+        map[0],
+        map[1],
+        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        jeq_imm(0, 0, 5),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 4),
+        BpfInsn::mov64_reg(1, 6),
+        call_helper(2),
+        BpfInsn::mov64_imm(0, 0),
+        ja(1),
+        BpfInsn::mov64_imm(0, 1),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![1061]);
+
+    let result = run_map_inline_pass(&mut program);
+
+    assert!(
+        result.program_changed,
+        "skip reasons: {:?}",
+        result.pass_results[0].sites_skipped
+    );
+    assert_eq!(result.total_sites_applied, 1);
+    assert_eq!(
+        program.insns,
+        vec![
+            BpfInsn::mov32_imm(6, 7),
+            BpfInsn::mov64_reg(1, 6),
             call_helper(2),
             BpfInsn::mov64_imm(0, 0),
             exit_insn(),

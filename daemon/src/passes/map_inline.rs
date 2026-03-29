@@ -45,6 +45,7 @@ pub struct ConstantKey {
     pub bytes: Vec<u8>,
     pub store_pc: usize,
     pub source_imm_pc: Option<usize>,
+    pub materialization_pcs: Vec<usize>,
     pub r2_mov_pc: Option<usize>,
     pub r2_add_pc: Option<usize>,
 }
@@ -79,6 +80,14 @@ impl R0UseClassification {
 struct ConstantRegValue {
     value: u64,
     source_pc: Option<usize>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ConstantStackBytes {
+    bytes: Vec<u8>,
+    latest_store_pc: usize,
+    latest_source_imm_pc: Option<usize>,
+    materialization_pcs: Vec<usize>,
 }
 
 #[derive(Clone, Debug)]
@@ -133,14 +142,14 @@ pub fn try_extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Result<Con
     let mut extracted = None;
     for width in [8u8, 4, 2, 1] {
         match find_constant_stack_bytes(insns, call_pc, bounds, stack_off, width) {
-            Ok((store_pc, source_imm_pc, bytes)) => {
-                extracted = Some((store_pc, source_imm_pc, width, bytes));
+            Ok(stack_bytes) => {
+                extracted = Some((width, stack_bytes));
                 break;
             }
             Err(err) => last_err = Some(err),
         }
     }
-    let (store_pc, source_imm_pc, width, bytes) = extracted.ok_or_else(|| {
+    let (width, stack_bytes) = extracted.ok_or_else(|| {
         last_err.unwrap_or_else(|| format!("no stack store found for fp{}", stack_off))
     })?;
     let removable_setup = find_r2_stack_pointer_setup_simple(insns, call_pc, bounds)
@@ -149,10 +158,11 @@ pub fn try_extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Result<Con
     Ok(ConstantKey {
         stack_off,
         width,
-        value: constant_key_value(&bytes),
-        bytes,
-        store_pc,
-        source_imm_pc,
+        value: constant_key_value(&stack_bytes.bytes),
+        bytes: stack_bytes.bytes,
+        store_pc: stack_bytes.latest_store_pc,
+        source_imm_pc: stack_bytes.latest_source_imm_pc,
+        materialization_pcs: stack_bytes.materialization_pcs,
         r2_mov_pc: removable_setup.map(|(mov_pc, _, _)| mov_pc),
         r2_add_pc: removable_setup.map(|(_, add_pc, _)| add_pc),
     })
@@ -171,8 +181,7 @@ fn try_extract_constant_key_sized(
     let stack_off = resolve_stack_pointer_to_stack(insns, call_pc, 2, bounds)?;
     let key_width = u8::try_from(key_size)
         .map_err(|_| format!("map key size {} does not fit in u8", key_size))?;
-    let (store_pc, source_imm_pc, bytes) =
-        find_constant_stack_bytes(insns, call_pc, bounds, stack_off, key_width)?;
+    let stack_bytes = find_constant_stack_bytes(insns, call_pc, bounds, stack_off, key_width)?;
 
     let removable_setup = find_r2_stack_pointer_setup_simple(insns, call_pc, bounds)
         .filter(|(_, _, off)| *off == stack_off);
@@ -180,10 +189,11 @@ fn try_extract_constant_key_sized(
     Ok(ConstantKey {
         stack_off,
         width: key_width,
-        value: constant_key_value(&bytes),
-        bytes,
-        store_pc,
-        source_imm_pc,
+        value: constant_key_value(&stack_bytes.bytes),
+        bytes: stack_bytes.bytes,
+        store_pc: stack_bytes.latest_store_pc,
+        source_imm_pc: stack_bytes.latest_source_imm_pc,
+        materialization_pcs: stack_bytes.materialization_pcs,
         r2_mov_pc: removable_setup.map(|(mov_pc, _, _)| mov_pc),
         r2_add_pc: removable_setup.map(|(_, add_pc, _)| add_pc),
     })
@@ -271,6 +281,7 @@ fn try_extract_constant_key_from_map_value(
         // pseudo_map_value` setup can be dropped alongside the lookup.
         store_pc: ldimm_pc,
         source_imm_pc: Some(ldimm_pc + 1),
+        materialization_pcs: vec![ldimm_pc, ldimm_pc + 1],
         r2_mov_pc: None,
         r2_add_pc: None,
     })
@@ -331,6 +342,7 @@ fn try_extract_constant_key_verifier_guided(
             && key.width == first.width
             && key.bytes == first.bytes
             && key.store_pc == first.store_pc
+            && key.materialization_pcs == first.materialization_pcs
     });
     if !all_same {
         return Err(format!(
@@ -378,6 +390,7 @@ fn try_extract_constant_key_for_occurrence(
         bytes: value.to_le_bytes()[..key_width as usize].to_vec(),
         store_pc,
         source_imm_pc,
+        materialization_pcs: materialization_pcs_for_store(insns, store_pc, source_imm_pc),
         r2_mov_pc: removable_setup.map(|(mov_pc, _, _)| mov_pc),
         r2_add_pc: removable_setup.map(|(_, add_pc, _)| add_pc),
     })
@@ -425,7 +438,7 @@ fn find_constant_stack_bytes(
     bounds: (usize, usize),
     stack_off: i16,
     key_width: u8,
-) -> Result<(usize, Option<usize>, Vec<u8>), String> {
+) -> Result<ConstantStackBytes, String> {
     find_constant_stack_bytes_with_limit(insns, before_pc, bounds, stack_off, key_width, None)
 }
 
@@ -436,13 +449,14 @@ fn find_constant_stack_bytes_with_limit(
     stack_off: i16,
     key_width: u8,
     mut lookback_limit: Option<usize>,
-) -> Result<(usize, Option<usize>, Vec<u8>), String> {
+) -> Result<ConstantStackBytes, String> {
     let key_width_usize = usize::from(key_width);
     let target_start = i32::from(stack_off);
     let target_end = target_start + i32::from(key_width);
     let mut raw = vec![None; key_width_usize];
     let mut latest_store_pc = None;
     let mut latest_source_imm_pc = None;
+    let mut materialization_pcs = HashSet::new();
     let mut cursor = before_pc;
 
     while let Some(pc) = prev_real_pc_bounded(insns, cursor, bounds.0) {
@@ -479,6 +493,7 @@ fn find_constant_stack_bytes_with_limit(
 
         let bytes = constant_stack_store_bytes(insns, pc, bounds)?;
         let source_imm_pc = constant_stack_store_source_pc(insns, pc, bounds)?;
+        let mut covered_new_byte = false;
         for absolute_off in overlap_start..overlap_end {
             let key_idx = usize::try_from(absolute_off - target_start).unwrap_or(usize::MAX);
             if key_idx >= key_width_usize || raw[key_idx].is_some() {
@@ -492,9 +507,17 @@ fn find_constant_stack_bytes_with_limit(
                 ));
             }
             raw[key_idx] = Some(bytes[store_idx]);
+            covered_new_byte = true;
+        }
+
+        if covered_new_byte {
             latest_store_pc.get_or_insert(pc);
             if latest_source_imm_pc.is_none() {
                 latest_source_imm_pc = source_imm_pc;
+            }
+            insert_materialization_pc(&mut materialization_pcs, insns, pc);
+            if let Some(source_imm_pc) = source_imm_pc {
+                insert_materialization_pc(&mut materialization_pcs, insns, source_imm_pc);
             }
         }
 
@@ -503,7 +526,14 @@ fn find_constant_stack_bytes_with_limit(
                 .into_iter()
                 .map(|byte| byte.unwrap_or(0))
                 .collect::<Vec<_>>();
-            return Ok((latest_store_pc.unwrap_or(pc), latest_source_imm_pc, bytes));
+            let mut materialization_pcs = materialization_pcs.into_iter().collect::<Vec<_>>();
+            materialization_pcs.sort_unstable();
+            return Ok(ConstantStackBytes {
+                bytes,
+                latest_store_pc: latest_store_pc.unwrap_or(pc),
+                latest_source_imm_pc,
+                materialization_pcs,
+            });
         }
 
         cursor = pc;
@@ -1216,7 +1246,8 @@ fn build_site_rewrite(
     info: &crate::analysis::MapInfo,
     null_check_pc: Option<usize>,
 ) -> anyhow::Result<Option<SiteRewrite>> {
-    let remove_lookup_pattern = info.can_remove_lookup_pattern_v1();
+    let remove_lookup_pattern =
+        site_can_attempt_lookup_pattern_removal(program, uses, info, null_check_pc);
     let encoded_key = encode_key_bytes(&key.bytes, info.key_size as usize);
     let lookup_value_size = bpf::bpf_map_lookup_value_size_by_id(info.map_id)?;
     log_map_inline_debug(&format!(
@@ -1257,15 +1288,12 @@ fn build_site_rewrite(
         lookup_pattern_pcs.insert(site.call_pc);
         lookup_pattern_pcs.insert(site.map_load_pc);
         lookup_pattern_pcs.insert(site.map_load_pc + 1);
-        lookup_pattern_pcs.insert(key.store_pc);
+        lookup_pattern_pcs.extend(key.materialization_pcs.iter().copied());
         if let Some(r2_mov_pc) = key.r2_mov_pc {
             lookup_pattern_pcs.insert(r2_mov_pc);
         }
         if let Some(r2_add_pc) = key.r2_add_pc {
             lookup_pattern_pcs.insert(r2_add_pc);
-        }
-        if let Some(source_imm_pc) = key.source_imm_pc {
-            lookup_pattern_pcs.insert(source_imm_pc);
         }
         if let Some(null_check_pc) = removable_null_check_pc {
             lookup_pattern_pcs.insert(null_check_pc);
@@ -1277,6 +1305,7 @@ fn build_site_rewrite(
     let null_check_blocks_lookup_removal = if let Some(null_check_pc) = removable_null_check_pc {
         !null_check_removal_window_is_trivial(
             program,
+            uses,
             null_check_pc,
             &lookup_pattern_pcs,
             &replacement_pcs,
@@ -1287,7 +1316,7 @@ fn build_site_rewrite(
     let can_remove_lookup_pattern = remove_lookup_pattern
         && uses.other_uses.is_empty()
         && !null_check_blocks_lookup_removal
-        && lookup_pattern_removal_is_safe(program, uses, &lookup_pattern_pcs);
+        && lookup_pattern_removal_is_safe(program, site.call_pc, &lookup_pattern_pcs);
     let skipped_pcs = if can_remove_lookup_pattern {
         lookup_pattern_pcs
     } else {
@@ -1325,6 +1354,21 @@ fn build_site_rewrite(
         skipped_pcs,
         replacements,
     }))
+}
+
+fn site_can_attempt_lookup_pattern_removal(
+    program: &BpfProgram,
+    uses: &R0UseClassification,
+    info: &crate::analysis::MapInfo,
+    null_check_pc: Option<usize>,
+) -> bool {
+    if info.can_remove_lookup_pattern_v1() {
+        return true;
+    }
+
+    info.is_speculative_v1()
+        && uses.other_uses.is_empty()
+        && null_check_pc.is_some_and(|pc| null_check_is_fallthrough_non_null(&program.insns[pc]))
 }
 
 fn build_direct_map_value_load_rewrites(
@@ -1591,7 +1635,7 @@ fn site_level_inline_veto_reason(err: &anyhow::Error) -> Option<String> {
 
 fn lookup_pattern_removal_is_safe(
     program: &BpfProgram,
-    uses: &R0UseClassification,
+    lookup_call_pc: usize,
     skipped_pcs: &HashSet<usize>,
 ) -> bool {
     if skipped_pcs.is_empty() || skipped_pcs.iter().any(|&pc| pc >= program.insns.len()) {
@@ -1599,18 +1643,65 @@ fn lookup_pattern_removal_is_safe(
     }
 
     let min_removed_pc = skipped_pcs.iter().min().copied().unwrap_or(0);
-    let max_removed_pc = skipped_pcs.iter().max().copied().unwrap_or(0);
-    let first_load_pc = uses
-        .fixed_loads
-        .iter()
-        .map(|load| load.pc)
-        .min()
-        .unwrap_or(program.insns.len());
+    let end_pc = lookup_call_pc + insn_width(&program.insns[lookup_call_pc]);
+    let mut pc = min_removed_pc;
+    while pc < end_pc {
+        let insn = &program.insns[pc];
+        let width = insn_width(insn);
+        let insn_pcs = pc..pc + width;
 
-    // Only remove the lookup pattern itself when it is a tight contiguous block.
-    // If clang interleaves unrelated setup, keep the lookup instructions and only
-    // rewrite the fixed loads that consume the helper result.
-    skipped_pcs.len() == max_removed_pc - min_removed_pc + 1 && max_removed_pc < first_load_pc
+        let fully_skipped = insn_pcs.clone().all(|slot| skipped_pcs.contains(&slot));
+        if fully_skipped {
+            pc += width;
+            continue;
+        }
+        if insn_pcs.clone().any(|slot| skipped_pcs.contains(&slot)) {
+            return false;
+        }
+        if !lookup_pattern_gap_insn_is_safe(insn) {
+            return false;
+        }
+        if [1u8, 2]
+            .into_iter()
+            .any(|reg| insn_uses_reg(insn, reg) || insn_defines_reg(insn, reg))
+        {
+            return false;
+        }
+
+        pc += width;
+    }
+
+    true
+}
+
+fn materialization_pcs_for_store(
+    insns: &[BpfInsn],
+    store_pc: usize,
+    source_imm_pc: Option<usize>,
+) -> Vec<usize> {
+    let mut pcs = HashSet::new();
+    insert_materialization_pc(&mut pcs, insns, store_pc);
+    if let Some(source_imm_pc) = source_imm_pc {
+        insert_materialization_pc(&mut pcs, insns, source_imm_pc);
+    }
+    let mut pcs = pcs.into_iter().collect::<Vec<_>>();
+    pcs.sort_unstable();
+    pcs
+}
+
+fn insert_materialization_pc(
+    materialization_pcs: &mut HashSet<usize>,
+    insns: &[BpfInsn],
+    pc: usize,
+) {
+    materialization_pcs.insert(pc);
+    if insns.get(pc).is_some_and(BpfInsn::is_ldimm64) && pc + 1 < insns.len() {
+        materialization_pcs.insert(pc + 1);
+    }
+}
+
+fn lookup_pattern_gap_insn_is_safe(insn: &BpfInsn) -> bool {
+    !insn.is_jmp_class() && !matches!(insn.class(), BPF_ST | BPF_STX)
 }
 
 fn find_r2_stack_pointer_setup_simple(
@@ -1720,7 +1811,7 @@ fn resolve_constant_reg_value_inner(
                         stack_off, reg
                     )
                 })?;
-                let (_, _, bytes) = find_constant_stack_bytes_with_limit(
+                let stack_bytes = find_constant_stack_bytes_with_limit(
                     insns,
                     pc,
                     bounds,
@@ -1729,7 +1820,7 @@ fn resolve_constant_reg_value_inner(
                     Some(CONST_STACK_VALUE_LOOKBACK_LIMIT),
                 )?;
                 return Ok(ConstantRegValue {
-                    value: constant_key_value(&bytes),
+                    value: constant_key_value(&stack_bytes.bytes),
                     source_pc: None,
                 });
             }
@@ -2249,26 +2340,30 @@ fn classify_r0_uses_with_options(
         }
 
         if insn.is_call() {
-            if allow_unrelated_helper_calls
-                || (allow_readonly_helper_calls && helper_call_is_readonly_for_lookup_value(insn))
-            {
-                let surviving_aliases = surviving_alias_regs_after_helper_call(&alias_regs);
-                if !surviving_aliases.is_empty() || !alias_stack_slots.is_empty() {
-                    alias_regs = surviving_aliases;
-                    pc += insn_width(insn);
-                    continue;
-                }
-            }
-            if insn_uses_any_alias(insn, &alias_regs)
-                || (alias_stack_slots.is_empty() && !alias_regs.is_empty())
-            {
+            if insn_uses_any_alias(insn, &alias_regs) {
                 classification.other_uses.push(pc);
                 break;
             }
+
+            let surviving_aliases = surviving_alias_regs_after_helper_call(&alias_regs);
+            let can_follow_helper = allow_unrelated_helper_calls
+                || (allow_readonly_helper_calls && helper_call_is_readonly_for_lookup_value(insn));
+            if can_follow_helper && (!surviving_aliases.is_empty() || !alias_stack_slots.is_empty())
+            {
+                alias_regs = surviving_aliases;
+                pc += insn_width(insn);
+                continue;
+            }
+
+            let has_unfollowed_aliases = !surviving_aliases.is_empty();
             alias_regs.clear();
             if !alias_stack_slots.is_empty() {
                 pc += insn_width(insn);
                 continue;
+            }
+            if has_unfollowed_aliases {
+                classification.other_uses.push(pc);
+                break;
             }
             break;
         }
@@ -2420,6 +2515,7 @@ fn null_check_is_fallthrough_non_null(insn: &BpfInsn) -> bool {
 
 fn null_check_removal_window_is_trivial(
     program: &BpfProgram,
+    uses: &R0UseClassification,
     null_check_pc: usize,
     skipped_pcs: &HashSet<usize>,
     replacement_pcs: &HashSet<usize>,
@@ -2438,36 +2534,117 @@ fn null_check_removal_window_is_trivial(
     ) else {
         return false;
     };
+    let load_dst_regs = uses
+        .fixed_loads
+        .iter()
+        .map(|load| (load.pc, load.dst_reg))
+        .collect::<HashMap<_, _>>();
+    let mut safe_scalar_regs = HashSet::new();
+    let mut killed_arg_regs = HashSet::new();
 
     while pc < null_target_pc {
-        if skipped_pcs.contains(&pc) || replacement_pcs.contains(&pc) {
-            pc += insn_width(&program.insns[pc]);
+        let insn = &program.insns[pc];
+        let width = insn_width(insn);
+        let insn_pcs = pc..pc + width;
+
+        if insn_pcs.clone().all(|slot| skipped_pcs.contains(&slot)) {
+            for reg in 1..=5 {
+                if insn_defines_reg(insn, reg) {
+                    killed_arg_regs.insert(reg);
+                    safe_scalar_regs.remove(&reg);
+                }
+            }
+            pc += width;
+            continue;
+        }
+        if insn_pcs.clone().any(|slot| skipped_pcs.contains(&slot)) {
+            return false;
+        }
+        if replacement_pcs.contains(&pc) {
+            let Some(&dst_reg) = load_dst_regs.get(&pc) else {
+                return false;
+            };
+            mark_safe_scalar_reg(&mut safe_scalar_regs, &mut killed_arg_regs, dst_reg);
+            pc += width;
             continue;
         }
 
-        let insn = &program.insns[pc];
-        if !is_trivially_safe_null_check_guarded_insn(insn) {
+        if !is_trivially_safe_null_check_guarded_insn(
+            insn,
+            &mut safe_scalar_regs,
+            &mut killed_arg_regs,
+        ) {
             return false;
         }
-        pc += insn_width(insn);
+        pc += width;
     }
 
     true
 }
 
-fn is_trivially_safe_null_check_guarded_insn(insn: &BpfInsn) -> bool {
+fn is_trivially_safe_null_check_guarded_insn(
+    insn: &BpfInsn,
+    safe_scalar_regs: &mut HashSet<u8>,
+    killed_arg_regs: &mut HashSet<u8>,
+) -> bool {
     if insn.is_exit() || insn.is_ja() {
         return true;
     }
 
     if insn.is_ldimm64() {
-        return insn.src_reg() == 0;
+        if insn.src_reg() != 0 {
+            return false;
+        }
+        mark_safe_scalar_reg(safe_scalar_regs, killed_arg_regs, insn.dst_reg());
+        return true;
     }
 
     match insn.class() {
-        BPF_ALU64 | BPF_ALU => bpf_op(insn.code) == BPF_MOV && bpf_src(insn.code) == BPF_K,
+        BPF_ALU64 | BPF_ALU => match (bpf_op(insn.code), bpf_src(insn.code)) {
+            (BPF_MOV, BPF_K) => {
+                mark_safe_scalar_reg(safe_scalar_regs, killed_arg_regs, insn.dst_reg());
+                true
+            }
+            (BPF_MOV, BPF_X) if safe_scalar_regs.contains(&insn.src_reg()) => {
+                mark_safe_scalar_reg(safe_scalar_regs, killed_arg_regs, insn.dst_reg());
+                true
+            }
+            (BPF_ADD | BPF_SUB | BPF_MUL | BPF_AND | BPF_OR | BPF_LSH | BPF_RSH, BPF_K)
+                if safe_scalar_regs.contains(&insn.dst_reg()) =>
+            {
+                mark_safe_scalar_reg(safe_scalar_regs, killed_arg_regs, insn.dst_reg());
+                true
+            }
+            (BPF_ADD | BPF_SUB | BPF_MUL | BPF_AND | BPF_OR | BPF_LSH | BPF_RSH, BPF_X)
+                if safe_scalar_regs.contains(&insn.dst_reg())
+                    && safe_scalar_regs.contains(&insn.src_reg()) =>
+            {
+                mark_safe_scalar_reg(safe_scalar_regs, killed_arg_regs, insn.dst_reg());
+                true
+            }
+            _ => false,
+        },
+        BPF_JMP | BPF_JMP32 if insn.is_call() => {
+            if (1..=5).any(|reg| killed_arg_regs.contains(&reg)) {
+                return false;
+            }
+            for reg in 0..=5 {
+                safe_scalar_regs.remove(&reg);
+            }
+            killed_arg_regs.extend(1..=5);
+            true
+        }
         _ => false,
     }
+}
+
+fn mark_safe_scalar_reg(
+    safe_scalar_regs: &mut HashSet<u8>,
+    killed_arg_regs: &mut HashSet<u8>,
+    reg: u8,
+) {
+    safe_scalar_regs.insert(reg);
+    killed_arg_regs.remove(&reg);
 }
 
 fn insn_uses_any_alias(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> bool {
