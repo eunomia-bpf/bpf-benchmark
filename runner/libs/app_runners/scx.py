@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR
 from ..workload import WorkloadResult
+from .scx_support import ScxSchedulerSession, preferred_path, read_scx_ops, read_scx_state, run_workload
 
 
 DEFAULT_SCX_REPO = ROOT_DIR / "runner" / "repos" / "scx"
@@ -38,6 +39,8 @@ class ScxRunner:
         self.session: Any | None = None
         self.programs: list[dict[str, object]] = []
         self.process_output: dict[str, object] = {}
+        self.workload_spec: Mapping[str, object] = {"name": "hackbench", "kind": "hackbench", "metric": "runs/s"}
+        self.last_workload_extra: dict[str, object] = {}
 
     @property
     def pid(self) -> int | None:
@@ -62,9 +65,8 @@ class ScxRunner:
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None:
             raise RuntimeError("ScxRunner is not running")
-        from e2e.cases.scx import case as scx_case
-
-        result, _ = scx_case.run_hackbench(max(1, int(round(seconds))))
+        result, extra = run_workload(self.workload_spec, max(1, int(round(seconds))))
+        self.last_workload_extra = dict(extra)
         return result
 
     def stop(self) -> None:
@@ -76,4 +78,4 @@ class ScxRunner:
         session.close()
 
 
-__all__ = ["ScxRunner"]
+__all__ = ["ScxRunner", "ScxSchedulerSession", "preferred_path", "read_scx_ops", "read_scx_state", "run_workload"]

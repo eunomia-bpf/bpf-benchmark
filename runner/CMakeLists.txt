@@ -45,6 +45,7 @@ set(MICRO_EXEC_SOURCES
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)
     set(MICRO_LLVMBPF_LIBRARY "${MICRO_REPO_ROOT}/vendor/llvmbpf/libllvmbpf_vm.a")
+    set(MICRO_LLVMBPF_BUILD_CACHE "${MICRO_REPO_ROOT}/vendor/llvmbpf/build/CMakeCache.txt")
     if(NOT EXISTS "${MICRO_LLVMBPF_LIBRARY}")
         message(FATAL_ERROR "MICRO_EXEC_ENABLE_LLVMBPF=ON requires ${MICRO_LLVMBPF_LIBRARY}")
     endif()
@@ -52,48 +53,56 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
     add_library(vendor_llvmbpf STATIC IMPORTED GLOBAL)
     set_target_properties(vendor_llvmbpf PROPERTIES
         IMPORTED_LOCATION "${MICRO_LLVMBPF_LIBRARY}"
-        INTERFACE_INCLUDE_DIRECTORIES "${MICRO_REPO_ROOT}/vendor/llvmbpf/include"
+        INTERFACE_INCLUDE_DIRECTORIES "${MICRO_REPO_ROOT}/vendor/llvmbpf/include;${MICRO_REPO_ROOT}/vendor/llvmbpf/src"
     )
+
+    if((NOT DEFINED LLVM_DIR OR "${LLVM_DIR}" STREQUAL "") AND EXISTS "${MICRO_LLVMBPF_BUILD_CACHE}")
+        file(STRINGS "${MICRO_LLVMBPF_BUILD_CACHE}" MICRO_LLVMBPF_LLVM_DIR_LINE REGEX "^LLVM_DIR:PATH=")
+        if(MICRO_LLVMBPF_LLVM_DIR_LINE)
+            string(REPLACE "LLVM_DIR:PATH=" "" LLVM_DIR "${MICRO_LLVMBPF_LLVM_DIR_LINE}")
+        endif()
+    endif()
 
     if(DEFINED LLVM_DIR)
         find_package(LLVM REQUIRED CONFIG PATHS "${LLVM_DIR}" NO_DEFAULT_PATH)
     else()
         find_package(LLVM REQUIRED CONFIG)
     endif()
-    pkg_check_modules(SPDLOG REQUIRED IMPORTED_TARGET spdlog)
 
-    set(LLVM_COMPONENTS
-        ${LLVM_TARGETS_TO_BUILD}
-        Core
-        Support
-        Target
-        Analysis
-        ipo
-        TransformUtils
-        BitReader
-        AsmParser
-        Linker
-        MC
-        MCParser
-        MCDisassembler
-        Object
-        ExecutionEngine
-        RuntimeDyld
-        OrcJIT
-        MCJIT
-        X86CodeGen
-        X86Desc
-        X86Info
-        X86AsmParser
-        NVPTXCodeGen
-        NVPTXDesc
-        NVPTXInfo
-        AArch64CodeGen
-        AArch64Desc
-        AArch64Info
-        AArch64AsmParser
+    if(LLVM_TOOLS_BINARY_DIR AND EXISTS "${LLVM_TOOLS_BINARY_DIR}/llvm-config")
+        set(LLVM_CONFIG_BIN "${LLVM_TOOLS_BINARY_DIR}/llvm-config")
+    else()
+        find_program(LLVM_CONFIG_BIN NAMES llvm-config REQUIRED)
+    endif()
+    execute_process(
+        COMMAND "${LLVM_CONFIG_BIN}" --ldflags --libs --system-libs
+        OUTPUT_VARIABLE LLVM_LINK_FLAGS_RAW
+        OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    llvm_map_components_to_libnames(LLVM_LIBS ${LLVM_COMPONENTS})
+    if("${LLVM_LINK_FLAGS_RAW}" STREQUAL "")
+        message(FATAL_ERROR "failed to resolve LLVM link flags from ${LLVM_CONFIG_BIN}")
+    endif()
+    separate_arguments(LLVM_LINK_FLAGS NATIVE_COMMAND "${LLVM_LINK_FLAGS_RAW}")
+
+    set(MICRO_LLVMBPF_SPDLOG_LIBRARY "")
+    foreach(
+        SPDLOG_CANDIDATE
+        "${MICRO_REPO_ROOT}/vendor/llvmbpf/build/_deps/spdlog-build/libspdlogd.a"
+        "${MICRO_REPO_ROOT}/vendor/llvmbpf/build/_deps/spdlog-build/libspdlog.a"
+    )
+        if(EXISTS "${SPDLOG_CANDIDATE}")
+            set(MICRO_LLVMBPF_SPDLOG_LIBRARY "${SPDLOG_CANDIDATE}")
+            break()
+        endif()
+    endforeach()
+    if(MICRO_LLVMBPF_SPDLOG_LIBRARY)
+        add_library(vendor_llvmbpf_spdlog STATIC IMPORTED GLOBAL)
+        set_target_properties(vendor_llvmbpf_spdlog PROPERTIES
+            IMPORTED_LOCATION "${MICRO_LLVMBPF_SPDLOG_LIBRARY}"
+        )
+    else()
+        pkg_check_modules(SPDLOG REQUIRED IMPORTED_TARGET spdlog)
+    endif()
 
     list(APPEND MICRO_EXEC_SOURCES src/llvmbpf_runner.cpp)
 endif()
@@ -110,7 +119,12 @@ target_include_directories(micro_exec
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)
     target_compile_definitions(micro_exec PRIVATE MICRO_EXEC_ENABLE_LLVMBPF=1)
-    target_include_directories(micro_exec PRIVATE "${MICRO_REPO_ROOT}/vendor/llvmbpf/include")
+    target_include_directories(
+        micro_exec
+        PRIVATE
+            "${MICRO_REPO_ROOT}/vendor/llvmbpf/include"
+            "${MICRO_REPO_ROOT}/vendor/llvmbpf/src"
+    )
 endif()
 
 target_link_libraries(micro_exec
@@ -125,7 +139,11 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
     target_link_libraries(micro_exec
         PRIVATE
             vendor_llvmbpf
-            PkgConfig::SPDLOG
-            ${LLVM_LIBS}
+            ${LLVM_LINK_FLAGS}
     )
+    if(TARGET vendor_llvmbpf_spdlog)
+        target_link_libraries(micro_exec PRIVATE vendor_llvmbpf_spdlog)
+    else()
+        target_link_libraries(micro_exec PRIVATE PkgConfig::SPDLOG)
+    endif()
 endif()

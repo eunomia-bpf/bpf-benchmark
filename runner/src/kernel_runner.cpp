@@ -553,10 +553,7 @@ std::string resolve_effective_io_mode(std::string_view requested_io_mode, bpf_ob
     const bool has_input_map = bpf_object__find_map_by_name(object, "input_map") != nullptr;
     const bool has_result_map = bpf_object__find_map_by_name(object, "result_map") != nullptr;
     if (has_input_map && !has_result_map) {
-        std::fprintf(
-            stderr,
-            "io-mode: requested map but result_map is absent; falling back to staged\n");
-        return "staged";
+        fail("io-mode map requires result_map when input_map is present");
     }
     return std::string(requested_io_mode);
 }

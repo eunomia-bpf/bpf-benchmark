@@ -21,6 +21,9 @@ def test_macro_corpus_manifest_uses_only_new_measurements() -> None:
     assert "attach_trigger" not in manifest_text
     assert "compile-only" not in manifest_text
     assert "attach_group:" not in manifest_text
+    assert manifest.get("build", {}).get("runner_binary") is None
+    runtimes = manifest.get("runtimes")
+    assert runtimes == [{"name": "kernel", "label": "kernel eBPF", "mode": "kernel"}]
 
     for entry in objects:
         assert isinstance(entry, dict)
@@ -142,6 +145,48 @@ def test_load_targets_from_yaml_rejects_object_only_entries(tmp_path: Path) -> N
                 "path": tmp_path / "build-report.json",
                 "summary": {},
                 "available_objects": {str(object_path.resolve())},
+                "supplemented_existing": 0,
+            },
+        )
+
+
+def test_load_targets_from_yaml_fails_when_selected_object_is_missing_from_build_report(
+    tmp_path: Path,
+) -> None:
+    object_path = tmp_path / "demo.bpf.o"
+    object_path.write_text("placeholder", encoding="utf-8")
+    manifest_path = tmp_path / "macro.yaml"
+    manifest_path.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": 2,
+                "objects": [
+                    {
+                        "source": str(object_path),
+                        "repo": "demo",
+                        "measurement": "test_run",
+                        "programs": [
+                            {
+                                "name": "demo_prog",
+                                "prog_type": "xdp",
+                                "section": "xdp",
+                            }
+                        ],
+                    }
+                ],
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(SystemExit, match="missing from the build report"):
+        corpus_lib.load_targets_from_yaml(
+            manifest_path,
+            corpus_build_report={
+                "path": tmp_path / "build-report.json",
+                "summary": {},
+                "available_objects": set(),
                 "supplemented_existing": 0,
             },
         )

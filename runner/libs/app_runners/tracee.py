@@ -1,12 +1,20 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, NoReturn, Sequence
+from typing import Any, Mapping, NoReturn, Sequence
 
 import yaml
 
 from .. import ROOT_DIR
-from ..workload import WorkloadResult, run_user_exec_loop
+from ..workload import WorkloadResult
+from .tracee_support import (
+    TraceeAgentSession,
+    TraceeOutputCollector,
+    build_tracee_commands,
+    resolve_tracee_binary,
+    run_setup_script,
+    run_tracee_workload,
+)
 
 
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"
@@ -46,6 +54,8 @@ class TraceeRunner:
         self.programs: list[dict[str, object]] = []
         self.process_output: dict[str, object] = {}
         self.setup_result: dict[str, object] = {"returncode": 0, "tracee_binary": None, "stdout_tail": "", "stderr_tail": ""}
+        self.workload_spec: Mapping[str, object] = {"kind": "exec_storm"}
+        self.command_used: list[str] = []
 
     def _fail_start(self, message: str) -> NoReturn:
         try:
@@ -66,21 +76,21 @@ class TraceeRunner:
         return None if self.session is None else self.session.pid
 
     @property
-    def collector(self) -> Any | None:
+    def collector(self) -> TraceeOutputCollector | None:
         return None if self.session is None else self.session.collector
 
     @property
     def program_fds(self) -> dict[int, int]:
         return {} if self.session is None else dict(self.session.program_fds)
 
-    def _resolve_binary(self, tracee_case: Any) -> str:
-        resolved = tracee_case.resolve_tracee_binary(None if self.tracee_binary is None else str(self.tracee_binary), self.setup_result)
+    def _resolve_binary(self) -> str:
+        resolved = resolve_tracee_binary(None if self.tracee_binary is None else str(self.tracee_binary), self.setup_result)
         if resolved is None and not self.skip_setup:
-            self.setup_result = tracee_case.run_setup_script(self.setup_script)
+            self.setup_result = run_setup_script(self.setup_script)
             if int(self.setup_result.get("returncode", 0) or 0) != 0:
                 details = str(self.setup_result.get("stderr_tail") or self.setup_result.get("stdout_tail") or self.setup_result)
                 raise RuntimeError(f"Tracee setup failed: {details}")
-            resolved = tracee_case.resolve_tracee_binary(
+            resolved = resolve_tracee_binary(
                 None if self.tracee_binary is None else str(self.tracee_binary),
                 self.setup_result,
             )
@@ -93,13 +103,13 @@ class TraceeRunner:
             raise RuntimeError("TraceeRunner is already running")
         if not self.events:
             raise RuntimeError("TraceeRunner requires at least one Tracee event")
-        from e2e.cases.tracee import case as tracee_case
 
-        tracee_binary = self._resolve_binary(tracee_case)
-        commands = tracee_case.build_tracee_commands(tracee_binary, self.events, self.extra_args)
-        session = tracee_case.TraceeAgentSession(commands, self.load_timeout_s)
+        tracee_binary = self._resolve_binary()
+        commands = build_tracee_commands(tracee_binary, self.events, self.extra_args)
+        session = TraceeAgentSession(commands, self.load_timeout_s)
         session.__enter__()
         self.session = session
+        self.command_used = list(session.command_used or [])
         programs = [dict(program) for program in session.programs]
         if not programs:
             self._fail_start("Tracee did not attach any BPF programs")
@@ -119,7 +129,7 @@ class TraceeRunner:
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None:
             raise RuntimeError("TraceeRunner is not running")
-        return run_user_exec_loop(max(1, int(round(seconds))), mark_fallback=False)
+        return run_tracee_workload(self.workload_spec, max(1, int(round(seconds))))
 
     def stop(self) -> None:
         if self.session is None:
@@ -137,4 +147,12 @@ class TraceeRunner:
         }
 
 
-__all__ = ["TraceeRunner"]
+__all__ = [
+    "TraceeAgentSession",
+    "TraceeOutputCollector",
+    "TraceeRunner",
+    "build_tracee_commands",
+    "resolve_tracee_binary",
+    "run_setup_script",
+    "run_tracee_workload",
+]

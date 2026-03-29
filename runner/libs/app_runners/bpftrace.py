@@ -6,6 +6,7 @@ from typing import Any, NoReturn, Sequence
 from .. import which
 from ..agent import start_agent, stop_agent
 from ..workload import WorkloadResult
+from .bpftrace_support import SCRIPTS, ScriptSpec, finalize_process_output, run_named_workload, wait_for_attached_programs
 
 
 DEFAULT_ATTACH_TIMEOUT_S = 20
@@ -52,8 +53,8 @@ class BpftraceRunner:
     def pid(self) -> int | None:
         return None if self.process is None else int(self.process.pid or 0)
 
-    def _resolve_script(self, bpftrace_case: Any) -> tuple[Path, str, int]:
-        specs = {spec.name: spec for spec in bpftrace_case.SCRIPTS}
+    def _resolve_script(self) -> tuple[Path, str, int]:
+        specs = {spec.name: spec for spec in SCRIPTS}
         if self.script_name:
             spec = specs.get(self.script_name)
             if spec is None:
@@ -67,22 +68,21 @@ class BpftraceRunner:
             return self.script_path, self.workload_kind or (spec.workload_kind if spec else ""), int(self.expected_programs or (spec.expected_programs if spec else 1))
         if self.object_path is not None and self.object_path.suffix == ".bt":
             self.script_path = self.object_path
-            return self._resolve_script(bpftrace_case)
+            return self._resolve_script()
         raise RuntimeError("BpftraceRunner requires script_name or script_path")
 
     def start(self) -> list[int]:
         if self.process is not None:
             raise RuntimeError("BpftraceRunner is already running")
-        from e2e.cases.bpftrace import case as bpftrace_case
 
         bpftrace_binary = which("bpftrace")
         if bpftrace_binary is None:
             raise RuntimeError("bpftrace is required but not present in PATH")
-        script_path, workload_kind, expected_programs = self._resolve_script(bpftrace_case)
+        script_path, workload_kind, expected_programs = self._resolve_script()
         self.workload_kind = self.workload_kind or workload_kind
         self.expected_programs = int(self.expected_programs or expected_programs or 1)
         self.process = start_agent(bpftrace_binary, ["-q", str(script_path)])
-        programs = bpftrace_case.wait_for_attached_programs(
+        programs = wait_for_attached_programs(
             self.process,
             expected_count=self.expected_programs,
             timeout_s=self.attach_timeout_s,
@@ -112,19 +112,15 @@ class BpftraceRunner:
             raise RuntimeError("BpftraceRunner is not running")
         if not self.workload_kind:
             raise RuntimeError("bpftrace workload kind is not resolved")
-        from e2e.cases.bpftrace import case as bpftrace_case
-
-        return bpftrace_case.run_named_workload(self.workload_kind, max(1, int(round(seconds))))
+        return run_named_workload(self.workload_kind, max(1, int(round(seconds))))
 
     def stop(self) -> None:
         if self.process is None:
             return
-        from e2e.cases.bpftrace import case as bpftrace_case
-
         process = self.process
         self.process = None
         stop_agent(process, timeout=8)
-        self.process_output = bpftrace_case.finalize_process_output(process)
+        self.process_output = finalize_process_output(process)
 
 
-__all__ = ["BpftraceRunner"]
+__all__ = ["BpftraceRunner", "SCRIPTS", "ScriptSpec", "finalize_process_output", "run_named_workload", "wait_for_attached_programs"]

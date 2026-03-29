@@ -6,16 +6,12 @@ defaults:
   repeat: 1
   output: corpus/results/dev/macro_corpus.json
 build:
-  runner_binary: runner/build/micro_exec
   daemon_binary: daemon/target/release/bpfrejit-daemon
   bpftool_binary: bpftool
 runtimes:
 - name: kernel
   label: kernel eBPF
   mode: kernel
-- name: kernel-rejit
-  label: kernel eBPF rejit v2
-  mode: kernel-rejit
 optional_manifests:
 - path: corpus/config/macro_corpus_linux_selftests.yaml
   description: Opt-in linux-selftests corpus entries kept out of the default production

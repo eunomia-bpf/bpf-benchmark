@@ -2,12 +2,10 @@ from __future__ import annotations
 
 """Corpus manifest parsing and shared result helpers."""
 
-import argparse
 from collections import Counter
 from dataclasses import asdict, dataclass, replace
 import json
 import math
-import sys
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -517,36 +515,21 @@ def load_targets_from_yaml(
         selected_objects.append(clone_resolved_object(obj, selected_programs))
 
     available_objects = corpus_build_report["available_objects"]
-    kept_selected_objects: list[ResolvedObject] = []
-    kept_on_disk_only: list[str] = []
-    dropped_missing_objects: list[str] = []
+    missing_from_build_report: list[str] = []
     for obj in selected_objects:
         if obj.object_abs_path in available_objects:
-            kept_selected_objects.append(obj)
             continue
-        if Path(obj.object_abs_path).exists():
-            kept_selected_objects.append(obj)
-            kept_on_disk_only.append(obj.object_path)
-            continue
-        dropped_missing_objects.append(obj.object_path)
+        location_detail = "present on disk but absent from report"
+        if not Path(obj.object_abs_path).exists():
+            location_detail = "absent from report and missing on disk"
+        missing_from_build_report.append(f"{obj.object_path} ({location_detail})")
 
-    if kept_on_disk_only:
-        print(
-            "warning: selected corpus objects missing from build report but present on disk; keeping them: "
-            + ", ".join(kept_on_disk_only[:12])
-            + (" ..." if len(kept_on_disk_only) > 12 else ""),
-            file=sys.stderr,
-            flush=True,
+    if missing_from_build_report:
+        raise SystemExit(
+            "selected corpus objects are missing from the build report: "
+            + ", ".join(missing_from_build_report[:12])
+            + (" ..." if len(missing_from_build_report) > 12 else "")
         )
-    if dropped_missing_objects:
-        print(
-            "warning: selected corpus objects missing from build report and disk; dropping them: "
-            + ", ".join(dropped_missing_objects[:12])
-            + (" ..." if len(dropped_missing_objects) > 12 else ""),
-            file=sys.stderr,
-            flush=True,
-        )
-    selected_objects = kept_selected_objects
 
     build_summary_payload = corpus_build_report.get("summary") or {}
     report_available_total = int(
@@ -571,83 +554,6 @@ def load_targets_from_yaml(
         "supplemented_existing": supplemented_existing,
     }
     return selected_objects, summary
-
-
-def add_output_json_argument(
-    parser: argparse.ArgumentParser,
-    default: Path | str,
-    *,
-    help_text: str = "Path for structured JSON output.",
-) -> None:
-    parser.add_argument("--output-json", default=str(default), help=help_text)
-
-
-def add_output_md_argument(
-    parser: argparse.ArgumentParser,
-    default: Path | str,
-    *,
-    help_text: str = "Path for markdown output.",
-) -> None:
-    parser.add_argument("--output-md", default=str(default), help=help_text)
-
-
-def add_runner_argument(
-    parser: argparse.ArgumentParser,
-    default: Path | str | None = None,
-    *,
-    help_text: str,
-) -> None:
-    kwargs: dict[str, Any] = {"help": help_text}
-    if default is not None:
-        kwargs["default"] = str(default)
-    parser.add_argument("--runner", **kwargs)
-
-
-def add_daemon_argument(
-    parser: argparse.ArgumentParser,
-    default: Path | str,
-    *,
-    help_text: str,
-) -> None:
-    parser.add_argument("--daemon", default=str(default), help=help_text)
-
-
-def add_repeat_argument(
-    parser: argparse.ArgumentParser,
-    default: int | None = None,
-    *,
-    help_text: str,
-) -> None:
-    kwargs: dict[str, Any] = {"type": int, "help": help_text}
-    if default is not None:
-        kwargs["default"] = default
-    parser.add_argument("--repeat", **kwargs)
-
-
-def add_timeout_argument(
-    parser: argparse.ArgumentParser,
-    default: int,
-    *,
-    help_text: str,
-) -> None:
-    parser.add_argument("--timeout", type=int, default=default, help=help_text)
-
-
-def add_filter_argument(
-    parser: argparse.ArgumentParser,
-    *,
-    help_text: str,
-) -> None:
-    parser.add_argument("--filter", action="append", dest="filters", help=help_text)
-
-
-def add_max_programs_argument(
-    parser: argparse.ArgumentParser,
-    *,
-    help_text: str,
-) -> None:
-    parser.add_argument("--max-programs", type=int, help=help_text)
-
 
 def require_minimum(value: int, minimum: int, flag: str) -> None:
     if value < minimum:

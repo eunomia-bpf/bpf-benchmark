@@ -8,7 +8,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from e2e import case_common
-from runner.libs import rejit
 
 
 def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: Path) -> None:
@@ -50,67 +49,74 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: 
             )
         raise AssertionError(f"unexpected command: {command}")
 
-    def fake_start_daemon_server(daemon_binary):
-        calls.append(("start", daemon_binary))
-        return daemon_proc, daemon_socket, "/tmp/rejit-dir", daemon_stdout, daemon_stderr
+    class FakeDaemonSession:
+        def __init__(self, daemon_binary: Path) -> None:
+            self.daemon_binary = daemon_binary
+            self.proc = daemon_proc
+            self.socket_path = daemon_socket
+            self.socket_dir = "/tmp/rejit-dir"
+            self.stdout_path = daemon_stdout
+            self.stderr_path = daemon_stderr
+            calls.append(("start", daemon_binary))
 
-    def fake_stop_daemon_server(proc, socket_path, socket_dir):
-        calls.append(("stop", (proc, socket_path, socket_dir)))
+        @classmethod
+        def start(cls, daemon_binary: Path) -> "FakeDaemonSession":
+            return cls(daemon_binary)
 
-    def fake_scan_programs(prog_ids, daemon_binary, **kwargs):
-        calls.append(
-            (
-                "scan",
-                {
-                    "prog_ids": list(prog_ids),
-                    "daemon_binary": daemon_binary,
-                    "daemon_socket_path": kwargs["daemon_socket_path"],
-                    "daemon_proc": kwargs["daemon_proc"],
-                    "daemon_stdout_path": kwargs["daemon_stdout_path"],
-                    "daemon_stderr_path": kwargs["daemon_stderr_path"],
-                    "timeout_seconds": kwargs["timeout_seconds"],
-                },
+        def scan_programs(self, prog_ids, *, timeout_seconds=60):
+            calls.append(
+                (
+                    "scan",
+                    {
+                        "prog_ids": list(prog_ids),
+                        "daemon_binary": self.daemon_binary,
+                        "daemon_socket_path": self.socket_path,
+                        "daemon_proc": self.proc,
+                        "daemon_stdout_path": self.stdout_path,
+                        "daemon_stderr_path": self.stderr_path,
+                        "timeout_seconds": timeout_seconds,
+                    },
+                )
             )
-        )
-        return {
-            101: {
-                "prog_id": 101,
-                "sites": {},
-                "counts": {},
+            return {
+                101: {
+                    "prog_id": 101,
+                    "sites": {},
+                    "counts": {},
+                    "error": "",
+                }
+            }
+
+        def apply_rejit(self, prog_ids, *, enabled_passes=None):
+            calls.append(
+                (
+                    "apply",
+                    {
+                        "prog_ids": list(prog_ids),
+                        "enabled_passes": list(enabled_passes or []),
+                        "daemon_socket_path": self.socket_path,
+                        "daemon_proc": self.proc,
+                        "daemon_stdout_path": self.stdout_path,
+                        "daemon_stderr_path": self.stderr_path,
+                    },
+                )
+            )
+            return {
+                "applied": True,
+                "output": "",
+                "exit_code": 0,
+                "per_program": {},
+                "counts": {
+                    "total_sites": 0,
+                    "applied_sites": 0,
+                },
                 "error": "",
             }
-        }
 
-    def fake_apply_daemon_rejit(prog_ids, *, enabled_passes=None, **kwargs):
-        calls.append(
-            (
-                "apply",
-                {
-                    "prog_ids": list(prog_ids),
-                    "enabled_passes": list(enabled_passes or []),
-                    "daemon_socket_path": kwargs["daemon_socket_path"],
-                    "daemon_proc": kwargs["daemon_proc"],
-                    "daemon_stdout_path": kwargs["daemon_stdout_path"],
-                    "daemon_stderr_path": kwargs["daemon_stderr_path"],
-                },
-            )
-        )
-        return {
-            "applied": True,
-            "output": "",
-            "exit_code": 0,
-            "per_program": {},
-            "counts": {
-                "total_sites": 0,
-                "applied_sites": 0,
-            },
-            "error": "",
-        }
+        def close(self) -> None:
+            calls.append(("stop", (self.proc, self.socket_path, self.socket_dir)))
 
-    monkeypatch.setattr(rejit, "_start_daemon_server", fake_start_daemon_server)
-    monkeypatch.setattr(rejit, "_stop_daemon_server", fake_stop_daemon_server)
-    monkeypatch.setattr(rejit, "scan_programs", fake_scan_programs)
-    monkeypatch.setattr(rejit, "apply_daemon_rejit", fake_apply_daemon_rejit)
+    monkeypatch.setattr(case_common, "DaemonSession", FakeDaemonSession)
     monkeypatch.setattr(case_common, "_expected_kinsn_modules", lambda: ["bpf_endian", "bpf_rotate"])
     monkeypatch.setattr(case_common, "run_command", fake_run_command)
 
@@ -193,32 +199,40 @@ def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypat
             return subprocess.CompletedProcess(list(command), 0, "Loaded bpf_endian\n", "")
         raise AssertionError(f"unexpected command: {command}")
 
-    monkeypatch.setattr(
-        rejit,
-        "_start_daemon_server",
-        lambda _daemon_binary: (object(), Path("/tmp/rejit.sock"), "/tmp/rejit-dir", daemon_stdout, daemon_stderr),
-    )
-    monkeypatch.setattr(rejit, "_stop_daemon_server", lambda *_args: None)
-    monkeypatch.setattr(
-        rejit,
-        "scan_programs",
-        lambda *_args, **_kwargs: {101: {"prog_id": 101, "sites": {}, "counts": {}, "error": ""}},
-    )
-    monkeypatch.setattr(
-        rejit,
-        "apply_daemon_rejit",
-        lambda *_args, **_kwargs: {
-            "applied": False,
-            "output": "",
-            "exit_code": 1,
-            "per_program": {},
-            "counts": {
-                "total_sites": 7,
-                "applied_sites": 7,
-            },
-            "error": "prog 101: id changed after struct_ops refresh",
-        },
-    )
+    class FakeDaemonSession:
+        def __init__(self) -> None:
+            self.proc = object()
+            self.socket_path = Path("/tmp/rejit.sock")
+            self.socket_dir = "/tmp/rejit-dir"
+            self.stdout_path = daemon_stdout
+            self.stderr_path = daemon_stderr
+
+        @classmethod
+        def start(cls, _daemon_binary: Path) -> "FakeDaemonSession":
+            return cls()
+
+        def scan_programs(self, _prog_ids, *, timeout_seconds=60):
+            del timeout_seconds
+            return {101: {"prog_id": 101, "sites": {}, "counts": {}, "error": ""}}
+
+        def apply_rejit(self, _prog_ids, *, enabled_passes=None):
+            del enabled_passes
+            return {
+                "applied": False,
+                "output": "",
+                "exit_code": 1,
+                "per_program": {},
+                "counts": {
+                    "total_sites": 7,
+                    "applied_sites": 7,
+                },
+                "error": "prog 101: id changed after struct_ops refresh",
+            }
+
+        def close(self) -> None:
+            return None
+
+    monkeypatch.setattr(case_common, "DaemonSession", FakeDaemonSession)
     monkeypatch.setattr(case_common, "_expected_kinsn_modules", lambda: ["bpf_endian"])
     monkeypatch.setattr(case_common, "run_command", fake_run_command)
 

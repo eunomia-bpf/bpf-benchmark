@@ -330,10 +330,15 @@ def _benchmark_int(
     minimum: int,
 ) -> int:
     value = (benchmark_config or {}).get(key)
-    try:
-        return max(minimum, int(value))
-    except (TypeError, ValueError):
+    if value is None:
         return default
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError) as exc:
+        raise SystemExit(f"invalid benchmark config field: {key} must be an integer") from exc
+    if parsed < minimum:
+        raise SystemExit(f"invalid benchmark config field: {key} must be >= {minimum}")
+    return parsed
 
 
 def benchmark_config_iterations(benchmark_config: Mapping[str, Any] | None) -> int:

@@ -22,6 +22,7 @@ from runner.libs import (
     write_json,
     write_text,
 )
+from runner.libs.daemon_session import DaemonSession
 
 MAX_PERSISTED_STRING_CHARS = 16_384
 _PENDING_KINSN_METADATA: list[dict[str, object]] = []
@@ -504,13 +505,7 @@ def run_case_lifecycle(
     7. post-ReJIT workload
     8. stop + cleanup
     """
-    from runner.libs.rejit import (
-        _start_daemon_server,
-        _stop_daemon_server,
-        apply_daemon_rejit,
-        benchmark_rejit_enabled_passes,
-        scan_programs,
-    )
+    from runner.libs.rejit import benchmark_rejit_enabled_passes
 
     setup_state = setup()
     lifecycle_state: CaseLifecycleState | None = None
@@ -580,36 +575,27 @@ def run_case_lifecycle(
             )
             kinsn_metadata["status"] = "daemon_starting"
             try:
-                daemon_server = _start_daemon_server(daemon_binary)
+                daemon_session = DaemonSession.start(daemon_binary)
             except Exception as exc:
                 kinsn_metadata["status"] = "daemon_start_failed"
                 kinsn_metadata["error"] = str(exc)
                 raise
             kinsn_metadata["daemon_kinsn_discovery"] = _capture_daemon_kinsn_discovery(
-                daemon_server[3],
-                daemon_server[4],
+                daemon_session.stdout_path,
+                daemon_session.stderr_path,
             )
             kinsn_metadata["status"] = "daemon_started"
             try:
-                scan_results = scan_programs(
+                scan_results = daemon_session.scan_programs(
                     requested_prog_ids,
-                    daemon_binary,
-                    daemon_socket_path=daemon_server[1],
-                    daemon_proc=daemon_server[0],
-                    daemon_stdout_path=daemon_server[3],
-                    daemon_stderr_path=daemon_server[4],
                     **lifecycle_state.scan_kwargs,
                 )
-                rejit_result = apply_daemon_rejit(
+                rejit_result = daemon_session.apply_rejit(
                     requested_prog_ids,
                     enabled_passes=enabled_passes or benchmark_rejit_enabled_passes(),
-                    daemon_socket_path=daemon_server[1],
-                    daemon_proc=daemon_server[0],
-                    daemon_stdout_path=daemon_server[3],
-                    daemon_stderr_path=daemon_server[4],
                 )
             finally:
-                _stop_daemon_server(daemon_server[0], daemon_server[1], daemon_server[2])
+                daemon_session.close()
             kinsn_metadata["status"] = "completed"
             run_post_rejit = bool(rejit_result.get("applied"))
             if should_run_post_rejit is not None:

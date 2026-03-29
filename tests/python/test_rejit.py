@@ -159,6 +159,14 @@ def test_load_benchmark_config_fails_when_config_is_missing(monkeypatch, tmp_pat
         rejit._load_benchmark_root_config.cache_clear()
 
 
+def test_benchmark_config_repeat_rejects_invalid_values() -> None:
+    with pytest.raises(SystemExit, match="repeat must be an integer"):
+        rejit.benchmark_config_repeat({"repeat": "abc"})
+
+    with pytest.raises(SystemExit, match="repeat must be >= 1"):
+        rejit.benchmark_config_repeat({"repeat": 0})
+
+
 def test_resolve_program_enabled_passes_applies_ordered_rules() -> None:
     config = {
         "policy": {

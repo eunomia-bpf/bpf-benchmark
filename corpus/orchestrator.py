@@ -6,7 +6,7 @@ import json
 import os
 import subprocess
 import sys
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
@@ -21,12 +21,8 @@ from runner.libs import ROOT_DIR, ensure_parent, resolve_bpftool_binary, run_com
 from runner.libs.app_runners import get_app_runner
 from runner.libs.bpf_stats import enable_bpf_stats, read_program_stats
 from runner.libs.corpus import load_targets_from_yaml, materialize_dummy_packet
-from runner.libs.rejit import (
-    _start_daemon_server,
-    _stop_daemon_server,
-    apply_daemon_rejit,
-    benchmark_rejit_enabled_passes,
-)
+from runner.libs.daemon_session import DaemonSession
+from runner.libs.rejit import benchmark_rejit_enabled_passes
 
 
 DEFAULT_MACRO_CORPUS_YAML = ROOT_DIR / "corpus" / "config" / "macro_corpus.yaml"
@@ -60,7 +56,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--filter", action="append", dest="filters")
     parser.add_argument("--max-programs", type=int)
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.repeat is not None and int(args.repeat) < 0:
+        raise SystemExit("--repeat must be >= 0")
+    if float(args.workload_seconds) <= 0:
+        raise SystemExit("--workload-seconds must be > 0")
+    return args
 
 
 def ensure_bpffs_mounted() -> None:
@@ -128,6 +129,17 @@ def _program_stats_by_name(
     return records
 
 
+def _program_stats_by_prog_id(
+    phase_stats: Mapping[int, Mapping[str, object]],
+    prog_ids: list[int],
+) -> dict[str, dict[str, object]]:
+    return {
+        str(prog_id): dict(phase_stats[prog_id])
+        for prog_id in prog_ids
+        if int(prog_id) in phase_stats
+    }
+
+
 def _mean_exec_ns(records: Mapping[str, Mapping[str, object]]) -> float | None:
     values = [
         float(record["exec_ns"])
@@ -179,77 +191,315 @@ def _build_prog_run_command(
     return command
 
 
-def _run_app_native_entry(
-    obj: Any,
-    *,
-    daemon_socket_path: Path,
-    workload_seconds: float,
+def _runner_kwargs_for_repo(
+    repo: str,
+    primary_obj: Any,
+    expected_program_names: list[str],
 ) -> dict[str, object]:
-    runner = get_app_runner(
-        obj.repo,
-        object_path=obj.object_abs_path,
-        expected_program_names=[program.program_name for program in obj.programs],
-    )
-    result: dict[str, object]
-    try:
-        prog_ids = list(runner.start())
-        actual_programs = {
-            str(program.get("name") or ""): int(program.get("id", 0) or 0)
-            for program in getattr(runner, "programs", [])
-            if str(program.get("name") or "").strip() and int(program.get("id", 0) or 0) > 0
+    loader_binary = str(getattr(primary_obj, "loader_binary", "") or "").strip()
+    loader_args = tuple(str(arg) for arg in (getattr(primary_obj, "loader_args", ()) or ()) if str(arg).strip())
+    setup_script = str(getattr(primary_obj, "loader_setup_script", "") or "").strip()
+    timeout_seconds = getattr(primary_obj, "loader_timeout_seconds", None)
+    normalized = str(repo or "").strip().lower()
+
+    if normalized == "bcc":
+        kwargs: dict[str, object] = {
+            "object_path": primary_obj.object_abs_path,
+            "expected_program_names": expected_program_names,
         }
+        if loader_binary:
+            kwargs["tool_binary"] = loader_binary
+        if loader_args:
+            kwargs["tool_args"] = loader_args
+        if timeout_seconds is not None:
+            kwargs["attach_timeout_s"] = int(timeout_seconds)
+        if setup_script:
+            kwargs["setup_script"] = setup_script
+        return kwargs
+
+    if normalized == "tracee":
+        kwargs = {
+            "object_path": primary_obj.object_abs_path,
+            "expected_program_names": expected_program_names,
+        }
+        if loader_binary:
+            kwargs["tracee_binary"] = loader_binary
+        if loader_args:
+            kwargs["extra_args"] = loader_args
+        if timeout_seconds is not None:
+            kwargs["load_timeout_s"] = int(timeout_seconds)
+        if setup_script:
+            kwargs["setup_script"] = setup_script
+        return kwargs
+
+    if normalized == "tetragon":
+        kwargs = {
+            "object_path": primary_obj.object_abs_path,
+            "expected_program_names": expected_program_names,
+        }
+        if loader_binary:
+            kwargs["tetragon_binary"] = loader_binary
+        if loader_args:
+            kwargs["tetragon_extra_args"] = loader_args
+        if timeout_seconds is not None:
+            kwargs["load_timeout_s"] = int(timeout_seconds)
+        if setup_script:
+            kwargs["setup_script"] = setup_script
+        return kwargs
+
+    if normalized == "bpftrace":
+        kwargs = {
+            "object_path": primary_obj.object_abs_path,
+            "expected_program_names": expected_program_names,
+        }
+        if str(primary_obj.object_abs_path).endswith(".bt"):
+            kwargs["script_path"] = primary_obj.object_abs_path
+            kwargs.pop("object_path", None)
+        if timeout_seconds is not None:
+            kwargs["attach_timeout_s"] = int(timeout_seconds)
+        return kwargs
+
+    if normalized == "scx":
+        kwargs = {
+            "object_path": primary_obj.object_abs_path,
+        }
+        if loader_binary:
+            kwargs["scheduler_binary"] = loader_binary
+        if loader_args:
+            kwargs["scheduler_extra_args"] = loader_args
+        if timeout_seconds is not None:
+            kwargs["load_timeout_s"] = int(timeout_seconds)
+        return kwargs
+
+    if normalized == "katran":
+        kwargs = {
+            "object_path": primary_obj.object_abs_path,
+        }
+        if loader_args:
+            raise RuntimeError(f"katran app runner does not support loader_args in corpus manifest: {loader_args}")
+        return kwargs
+
+    return {
+        "object_path": primary_obj.object_abs_path,
+        "expected_program_names": expected_program_names,
+    }
+
+
+def _assign_live_program_ids(
+    indexed_objects: list[tuple[int, Any]],
+    live_programs: list[dict[str, object]],
+) -> tuple[dict[int, dict[str, int]], list[dict[str, object]]]:
+    live_ids_by_name: dict[str, list[int]] = defaultdict(list)
+    live_programs_by_id: dict[int, dict[str, object]] = {}
+    for live_program in live_programs:
+        prog_name = str(live_program.get("name") or "").strip()
+        prog_id = int(live_program.get("id", 0) or 0)
+        if not prog_name or prog_id <= 0:
+            continue
+        live_ids_by_name[prog_name].append(prog_id)
+        live_programs_by_id[prog_id] = dict(live_program)
+
+    assignments: dict[int, dict[str, int]] = {}
+    errors: list[str] = []
+    for index, obj in indexed_objects:
+        seen_program_names: set[str] = set()
+        object_assignments: dict[str, int] = {}
+        for program in obj.programs:
+            program_name = str(program.program_name)
+            if program_name in seen_program_names:
+                errors.append(f"{obj.object_path}: duplicate manifest program name {program_name!r} inside one object")
+                continue
+            seen_program_names.add(program_name)
+            available_ids = live_ids_by_name.get(program_name)
+            if not available_ids:
+                errors.append(f"{obj.object_path}: live app runner did not load expected program {program_name!r}")
+                continue
+            object_assignments[program_name] = int(available_ids.pop(0))
+        assignments[index] = object_assignments
+
+    if errors:
+        raise RuntimeError("; ".join(errors))
+
+    leftover_ids = [prog_id for prog_ids in live_ids_by_name.values() for prog_id in prog_ids]
+    leftover_programs = [live_programs_by_id[prog_id] for prog_id in leftover_ids if prog_id in live_programs_by_id]
+    return assignments, leftover_programs
+
+
+def _runner_programs_by_id(programs: list[dict[str, object]]) -> dict[int, dict[str, object]]:
+    return {
+        int(program.get("id", 0) or 0): dict(program)
+        for program in programs
+        if int(program.get("id", 0) or 0) > 0
+    }
+
+
+def _subset_runner_programs(
+    programs_by_id: Mapping[int, Mapping[str, object]],
+    prog_ids: list[int],
+) -> list[dict[str, object]]:
+    return [dict(programs_by_id[prog_id]) for prog_id in prog_ids if prog_id in programs_by_id]
+
+
+def _subset_apply_result(
+    apply_result: Mapping[str, object],
+    prog_ids: list[int],
+) -> dict[str, object]:
+    raw_per_program = apply_result.get("per_program")
+    per_program = dict(raw_per_program) if isinstance(raw_per_program, Mapping) else {}
+    selected: dict[str, dict[str, object]] = {}
+    total_sites = 0
+    applied_sites = 0
+    all_applied = True
+    errors: list[str] = []
+
+    for prog_id in prog_ids:
+        raw_entry = per_program.get(prog_id)
+        if raw_entry is None:
+            raw_entry = per_program.get(str(prog_id))
+        if not isinstance(raw_entry, Mapping):
+            all_applied = False
+            errors.append(f"missing daemon apply result for prog_id {prog_id}")
+            continue
+        entry = dict(raw_entry)
+        selected[str(prog_id)] = entry
+        all_applied = all_applied and bool(entry.get("applied"))
+        counts = entry.get("counts") if isinstance(entry.get("counts"), Mapping) else {}
+        total_sites += int((counts or {}).get("total_sites", 0) or 0)
+        applied_sites += int((counts or {}).get("applied_sites", 0) or 0)
+        error = str(entry.get("error") or "").strip()
+        if error:
+            errors.append(f"prog {prog_id}: {error}")
+
+    if not selected and isinstance(apply_result.get("error"), str) and str(apply_result.get("error")).strip():
+        errors.append(str(apply_result.get("error")).strip())
+
+    return {
+        "applied": all_applied and bool(selected),
+        "exit_code": int(apply_result.get("exit_code", 0) or 0),
+        "counts": {
+            "total_sites": total_sites,
+            "applied_sites": applied_sites,
+        },
+        "per_program": selected,
+        "error": "; ".join(errors),
+    }
+
+
+def _run_app_native_repo_group(
+    indexed_objects: list[tuple[int, Any]],
+    *,
+    daemon_session: DaemonSession,
+    workload_seconds: float,
+) -> tuple[list[tuple[int, dict[str, object]]], dict[str, object]]:
+    if not indexed_objects:
+        raise RuntimeError("app-native repo group is empty")
+
+    repo = str(indexed_objects[0][1].repo)
+    primary_obj = indexed_objects[0][1]
+    expected_program_names = [str(program.program_name) for _, obj in indexed_objects for program in obj.programs]
+    runner = get_app_runner(repo, **_runner_kwargs_for_repo(repo, primary_obj, expected_program_names))
+    batch_results: list[tuple[int, dict[str, object]]] = []
+    batch_summary: dict[str, object]
+
+    try:
+        prog_ids = [int(value) for value in runner.start() if int(value) > 0]
+        if not prog_ids:
+            raise RuntimeError(f"{repo}: app runner did not return any live prog_ids")
+        live_programs = [dict(program) for program in getattr(runner, "programs", [])]
+        assignments_by_index, unassigned_live_programs = _assign_live_program_ids(indexed_objects, live_programs)
+        programs_by_id = _runner_programs_by_id(live_programs)
+
         with enable_bpf_stats():
             runner.run_workload(workload_seconds)
             baseline_snapshot = read_program_stats(prog_ids)
-            apply_result = apply_daemon_rejit(
+            batch_apply_result = daemon_session.apply_rejit(
                 prog_ids,
                 enabled_passes=benchmark_rejit_enabled_passes(),
-                daemon_socket_path=daemon_socket_path,
             )
             rejit_snapshot: Mapping[int, Mapping[str, object]] = {}
-            if bool(apply_result.get("applied")):
+            if bool(batch_apply_result.get("applied")):
                 runner.run_workload(workload_seconds)
                 rejit_snapshot = read_program_stats(prog_ids)
+
         baseline_phase = _program_phase_stats(baseline_snapshot)
         rejit_phase = _program_phase_stats(rejit_snapshot, baseline_snapshot) if rejit_snapshot else {}
-        baseline_by_name = _program_stats_by_name(baseline_phase, actual_programs)
-        rejit_by_name = _program_stats_by_name(rejit_phase, actual_programs)
-        status = "ok" if apply_result.get("applied") else "error"
-        error = str(apply_result.get("error") or "").strip()
-        result = {
-            "object": obj.object_path,
-            "repo": obj.repo,
-            "measurement": "app_native",
-            "status": status,
-            "error": error,
-            "runner": {
-                "type": type(runner).__name__,
-                "tool_name": getattr(runner, "tool_name", ""),
-                "tool_binary": str(getattr(runner, "tool_binary", "") or ""),
-            },
-            "prog_ids": prog_ids,
-            "programs": [dict(program) for program in getattr(runner, "programs", [])],
-            "baseline": {
-                "programs": baseline_by_name,
-                "exec_ns_mean": _mean_exec_ns(baseline_by_name),
-            },
-            "rejit_apply": dict(apply_result),
-            "rejit": {
-                "programs": rejit_by_name,
-                "exec_ns_mean": _mean_exec_ns(rejit_by_name),
-            } if rejit_by_name else None,
-        }
     finally:
         runner.stop()
-    result["process"] = dict(getattr(runner, "process_output", {}))
-    return result
+
+    runner_info = {
+        "type": type(runner).__name__,
+        "tool_name": getattr(runner, "tool_name", ""),
+        "tool_binary": str(getattr(runner, "tool_binary", "") or ""),
+    }
+    process_output = dict(getattr(runner, "process_output", {}))
+
+    batch_summary = {
+        "repo": repo,
+        "measurement": "app_native",
+        "status": "ok" if bool(batch_apply_result.get("applied")) else "error",
+        "error": str(batch_apply_result.get("error") or "").strip(),
+        "objects": [obj.object_path for _, obj in indexed_objects],
+        "prog_ids": prog_ids,
+        "runner": runner_info,
+        "programs": live_programs,
+        "unassigned_live_programs": unassigned_live_programs,
+        "baseline": {
+            "programs": _program_stats_by_prog_id(baseline_phase, prog_ids),
+            "exec_ns_mean": _mean_exec_ns(_program_stats_by_prog_id(baseline_phase, prog_ids)),
+        },
+        "rejit_apply": dict(batch_apply_result),
+        "rejit": {
+            "programs": _program_stats_by_prog_id(rejit_phase, prog_ids),
+            "exec_ns_mean": _mean_exec_ns(_program_stats_by_prog_id(rejit_phase, prog_ids)),
+        } if rejit_phase else None,
+        "process": process_output,
+    }
+
+    for index, obj in indexed_objects:
+        assigned_programs = assignments_by_index.get(index, {})
+        object_prog_ids = list(assigned_programs.values())
+        object_apply = _subset_apply_result(batch_apply_result, object_prog_ids)
+        baseline_by_name = _program_stats_by_name(baseline_phase, assigned_programs)
+        rejit_by_name = _program_stats_by_name(rejit_phase, assigned_programs)
+        object_error = str(object_apply.get("error") or "").strip()
+        if not bool(batch_apply_result.get("applied")) and not object_error:
+            object_error = str(batch_apply_result.get("error") or "").strip()
+
+        batch_results.append(
+            (
+                index,
+                {
+                    "object": obj.object_path,
+                    "repo": obj.repo,
+                    "measurement": "app_native",
+                    "batch_repo": repo,
+                    "status": "ok" if bool(batch_apply_result.get("applied")) else "error",
+                    "error": object_error,
+                    "runner": runner_info,
+                    "prog_ids": object_prog_ids,
+                    "programs": _subset_runner_programs(programs_by_id, object_prog_ids),
+                    "baseline": {
+                        "programs": baseline_by_name,
+                        "exec_ns_mean": _mean_exec_ns(baseline_by_name),
+                    },
+                    "rejit_apply": object_apply,
+                    "rejit": {
+                        "programs": rejit_by_name,
+                        "exec_ns_mean": _mean_exec_ns(rejit_by_name),
+                    } if rejit_by_name else None,
+                    "process": process_output,
+                },
+            )
+        )
+
+    return batch_results, batch_summary
 
 
 def _run_test_run_entry(
     obj: Any,
     *,
     bpftool_binary: str,
-    daemon_socket_path: Path,
+    daemon_session: DaemonSession,
     repeat: int,
     btf_path: Path | None,
 ) -> dict[str, object]:
@@ -285,10 +535,9 @@ def _run_test_run_entry(
                 )
                 if not isinstance(baseline_run, Mapping):
                     raise RuntimeError(f"{program.program_name}: unexpected bpftool baseline payload")
-                apply_result = apply_daemon_rejit(
+                apply_result = daemon_session.apply_rejit(
                     [prog_id],
                     enabled_passes=benchmark_rejit_enabled_passes(),
-                    daemon_socket_path=daemon_socket_path,
                 )
                 rejit_run: Mapping[str, object] | None = None
                 if bool(apply_result.get("applied")):
@@ -367,6 +616,21 @@ def _run_test_run_entry(
         run_command(["rm", "-rf", str(pin_root)], check=False)
 
 
+def _daemon_exit_error(daemon_session: DaemonSession) -> str | None:
+    returncode = daemon_session.proc.poll()
+    if returncode is None:
+        return None
+    return f"daemon session exited early (rc={returncode})"
+
+
+def _app_native_group_map(indexed_objects: list[tuple[int, Any]]) -> dict[str, list[tuple[int, Any]]]:
+    grouped: dict[str, list[tuple[int, Any]]] = {}
+    for indexed_object in indexed_objects:
+        repo = str(indexed_object[1].repo)
+        grouped.setdefault(repo, []).append(indexed_object)
+    return grouped
+
+
 def run_suite(args: argparse.Namespace) -> dict[str, object]:
     manifest_path = Path(args.suite).resolve()
     build_report = _manifest_build_report(manifest_path)
@@ -386,63 +650,121 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
     if not daemon_binary.exists():
         raise RuntimeError(f"daemon binary not found: {daemon_binary}")
 
-    daemon_proc, daemon_socket_path, daemon_socket_dir, daemon_stdout_path, daemon_stderr_path = _start_daemon_server(
-        daemon_binary
+    indexed_objects = list(enumerate(objects))
+    app_native_groups = _app_native_group_map(
+        [(index, obj) for index, obj in indexed_objects if obj.measurement == "app_native"]
     )
-    try:
-        results: list[dict[str, object]] = []
-        for obj in objects:
-            try:
-                if obj.measurement == "app_native":
-                    result = _run_app_native_entry(
-                        obj,
-                        daemon_socket_path=daemon_socket_path,
+    indexed_results: dict[int, dict[str, object]] = {}
+    repo_batches: list[dict[str, object]] = []
+    fatal_error = ""
+
+    if indexed_objects:
+        with DaemonSession.start(daemon_binary) as daemon_session:
+            for repo, indexed_group in app_native_groups.items():
+                try:
+                    group_results, batch_summary = _run_app_native_repo_group(
+                        indexed_group,
+                        daemon_session=daemon_session,
                         workload_seconds=max(1.0, float(args.workload_seconds)),
                     )
-                elif obj.measurement == "test_run":
-                    result = _run_test_run_entry(
-                        obj,
-                        bpftool_binary=bpftool_binary,
-                        daemon_socket_path=daemon_socket_path,
-                        repeat=max(1, repeat),
-                        btf_path=btf_path,
-                    )
-                else:
-                    raise RuntimeError(f"unsupported measurement: {obj.measurement}")
-            except Exception as exc:
-                result = {
-                    "object": obj.object_path,
-                    "repo": obj.repo,
-                    "measurement": obj.measurement,
-                    "status": "error",
-                    "error": str(exc),
-                }
-            results.append(result)
+                except Exception as exc:
+                    batch_summary = {
+                        "repo": repo,
+                        "measurement": "app_native",
+                        "status": "error",
+                        "error": str(exc),
+                        "objects": [obj.object_path for _, obj in indexed_group],
+                    }
+                    group_results = [
+                        (
+                            index,
+                            {
+                                "object": obj.object_path,
+                                "repo": obj.repo,
+                                "measurement": "app_native",
+                                "batch_repo": repo,
+                                "status": "error",
+                                "error": str(exc),
+                            },
+                        )
+                        for index, obj in indexed_group
+                    ]
+                repo_batches.append(batch_summary)
+                for index, result in group_results:
+                    indexed_results[index] = result
+                daemon_error = _daemon_exit_error(daemon_session)
+                if daemon_error is not None:
+                    fatal_error = daemon_error
+                    break
 
-        status_counts = Counter(str(result.get("status") or "error") for result in results)
-        measurement_counts = Counter(str(result.get("measurement") or "") for result in results)
-        return {
-            "generated_at": datetime.now(timezone.utc).isoformat(),
-            "manifest": str(manifest_path),
-            "daemon": str(daemon_binary),
-            "daemon_socket": str(daemon_socket_path),
-            "bpftool": bpftool_binary,
-            "btf_custom_path": str(btf_path) if btf_path is not None else None,
-            "filters": list(args.filters or []),
-            "repeat": max(1, repeat),
-            "workload_seconds": max(1.0, float(args.workload_seconds)),
-            "manifest_summary": manifest_summary,
-            "results": results,
-            "summary": {
-                "selected_objects": len(objects),
-                "selected_programs": sum(len(obj.programs) for obj in objects),
-                "measurements": dict(sorted(measurement_counts.items())),
-                "statuses": dict(sorted(status_counts.items())),
-            },
-            "status": "ok" if status_counts.get("error", 0) == 0 else "error",
-        }
-    finally:
-        _stop_daemon_server(daemon_proc, daemon_socket_path, daemon_socket_dir)
+            if not fatal_error:
+                for index, obj in indexed_objects:
+                    if obj.measurement != "test_run":
+                        continue
+                    try:
+                        indexed_results[index] = _run_test_run_entry(
+                            obj,
+                            bpftool_binary=bpftool_binary,
+                            daemon_session=daemon_session,
+                            repeat=max(1, repeat),
+                            btf_path=btf_path,
+                        )
+                    except Exception as exc:
+                        indexed_results[index] = {
+                            "object": obj.object_path,
+                            "repo": obj.repo,
+                            "measurement": obj.measurement,
+                            "status": "error",
+                            "error": str(exc),
+                        }
+                    daemon_error = _daemon_exit_error(daemon_session)
+                    if daemon_error is not None:
+                        fatal_error = daemon_error
+                        break
+
+            if fatal_error:
+                for index, obj in indexed_objects:
+                    if index in indexed_results:
+                        continue
+                    indexed_results[index] = {
+                        "object": obj.object_path,
+                        "repo": obj.repo,
+                        "measurement": obj.measurement,
+                        "status": "error",
+                        "error": fatal_error,
+                    }
+
+            daemon_socket = str(daemon_session.socket_path)
+    else:
+        daemon_socket = None
+
+    results = [indexed_results[index] for index, _obj in indexed_objects if index in indexed_results]
+    status_counts = Counter(str(result.get("status") or "error") for result in results)
+    measurement_counts = Counter(obj.measurement for obj in objects)
+    payload = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "manifest": str(manifest_path),
+        "daemon": str(daemon_binary),
+        "daemon_socket": daemon_socket,
+        "bpftool": bpftool_binary,
+        "btf_custom_path": str(btf_path) if btf_path is not None else None,
+        "filters": list(args.filters or []),
+        "repeat": max(1, repeat),
+        "workload_seconds": max(1.0, float(args.workload_seconds)),
+        "manifest_summary": manifest_summary,
+        "app_native_batches": repo_batches,
+        "results": results,
+        "summary": {
+            "selected_objects": len(objects),
+            "selected_programs": sum(len(obj.programs) for obj in objects),
+            "measurements": dict(sorted(measurement_counts.items())),
+            "statuses": dict(sorted(status_counts.items())),
+        },
+        "status": "ok" if status_counts.get("error", 0) == 0 else "error",
+    }
+    if fatal_error:
+        payload["fatal_error"] = fatal_error
+    return payload
 
 
 def main(argv: list[str] | None = None) -> int:
