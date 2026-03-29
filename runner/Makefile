@@ -11,6 +11,7 @@ LIBBPF_PREFIX := $(LIBBPF_BUILD_DIR)/prefix
 LIBBPF_A := $(LIBBPF_OBJDIR)/libbpf.a
 LIBBPF_HEADER := $(LIBBPF_PREFIX)/include/bpf/bpf.h
 BPFTOOL_BUILD_DIR := $(BUILD_DIR)/vendor/bpftool
+BPFTOOL_BOOTSTRAP := $(BPFTOOL_BUILD_DIR)/bootstrap/bpftool
 TOOLS_BUILD_DIR := $(BUILD_DIR)/tools
 MICRO_EXEC_ENABLE_LLVMBPF ?= ON
 PYTHON ?= python3
@@ -55,6 +56,7 @@ VM_MICRO_SMOKE_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro_smoke.json
 VM_MICRO_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro.json
 VM_CORPUS_OUTPUT_JSON ?= $(CORPUS_RESULTS_DIR)/vm_corpus.json
 VM_CORPUS_OUTPUT_MD ?= $(CORPUS_RESULTS_DIR)/vm_corpus.md
+VM_CORPUS_NEW_OUTPUT_JSON ?= $(CORPUS_RESULTS_DIR)/vm_corpus_new.json
 CORPUS_BUILD_REPORT ?= $(CORPUS_RESULTS_DIR)/expanded_corpus_build.latest.json
 VM_STATIC_OUTPUT ?= $(REPO_ROOT)/daemon/tests/results/static_verify.json
 
@@ -65,6 +67,7 @@ VM_SELFTEST_TIMEOUT ?= 3600
 VM_STATIC_TIMEOUT ?= 7200
 VM_NEGATIVE_TIMEOUT ?= 3600
 VM_MICRO_TIMEOUT ?= 7200
+VM_CORPUS_TIMEOUT ?= 7200
 VM_E2E_TIMEOUT ?= 7200
 SCX_PROG_SHOW_RACE_MODE ?= bpftool-loop
 SCX_PROG_SHOW_RACE_ITERATIONS ?= 20
@@ -86,6 +89,7 @@ MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT)
 VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 PROFILE_FLAG := $(if $(strip $(PROFILE)),--profile "$(PROFILE)",)
 FILTER_FLAGS := $(foreach filter,$(FILTERS),--filter "$(filter)")
+VM_CORPUS_NEW_FILTER_FLAGS := $(if $(strip $(FILTERS)),$(FILTER_FLAGS),--filter "execsnoop" --filter "xdp_pass_kern")
 REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
 WARMUPS_IS_EXPLICIT := $(or $(findstring command line,$(origin WARMUPS)),$(findstring environment,$(origin WARMUPS)),$(findstring override,$(origin WARMUPS)))
 VM_CORPUS_OUTPUT_JSON_IS_EXPLICIT := $(or $(findstring command line,$(origin VM_CORPUS_OUTPUT_JSON)),$(findstring environment,$(origin VM_CORPUS_OUTPUT_JSON)),$(findstring override,$(origin VM_CORPUS_OUTPUT_JSON)))
@@ -101,7 +105,7 @@ VM_CORPUS_OUTPUT_MD_FLAG := $(if $(strip $(VM_CORPUS_OUTPUT_MD_IS_EXPLICIT)),--o
 	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
 	scx-artifacts e2e-prep e2e-tracee-setup e2e-tetragon-setup \
 	kernel-image unittest-build negative-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary \
-	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-corpus-new vm-e2e vm-all \
 	clean
 
 all: micro_exec
@@ -333,6 +337,16 @@ vm-corpus: corpus-build micro_exec daemon-binary kernel-image kinsn-modules-buil
 		$(VM_CORPUS_WARMUPS_FLAG) \
 		$(VM_CORPUS_OUTPUT_JSON_FLAG) \
 		$(VM_CORPUS_OUTPUT_MD_FLAG)
+
+vm-corpus-new: corpus-build-bcc corpus-build-xdp-tutorial vendor_bpftool micro_exec daemon-binary kernel-image kinsn-modules-build
+	mkdir -p "$(CORPUS_RESULTS_DIR)"
+	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
+		--action vm-corpus-new \
+		--kernel-image "$(BZIMAGE_PATH)" \
+		$(VM_CPU_FLAG) \
+		$(VM_MEM_FLAG) \
+		--timeout "$(VM_CORPUS_TIMEOUT)" \
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/orchestrator.py" --daemon "$(DAEMON_PATH)" --runner "$(MICRO_RUNNER)" --bpftool "$(BPFTOOL_BOOTSTRAP)" --btf-custom-path /sys/kernel/btf/vmlinux --repeat "$(REPEAT)" --output-json "$(VM_CORPUS_NEW_OUTPUT_JSON)" $(VM_CORPUS_NEW_FILTER_FLAGS)'
 
 vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"
