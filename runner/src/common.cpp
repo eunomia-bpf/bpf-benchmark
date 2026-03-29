@@ -424,6 +424,24 @@ void print_json_daemon_pass_details(
             << "{"
             << "\"pass_name\":\"" << json_escape(detail.pass_name) << "\","
             << "\"changed\":" << (detail.changed ? "true" : "false") << ","
+            << "\"verify\":{"
+            << "\"status\":\"" << json_escape(detail.verify_status) << "\"";
+        if (!detail.verify_error_message.empty()) {
+            out << ",\"error_message\":\"" << json_escape(detail.verify_error_message) << "\"";
+        }
+        out << "},"
+            << "\"rollback\":";
+        if (!detail.rollback_applied) {
+            out << "null";
+        } else {
+            out
+                << "{"
+                << "\"action\":\"" << json_escape(detail.rollback_action) << "\","
+                << "\"restored_insn_count\":" << detail.rollback_restored_insn_count
+                << "}";
+        }
+        out
+            << ","
             << "\"sites_found\":" << detail.sites_found << ","
             << "\"sites_applied\":" << detail.sites_applied << ","
             << "\"sites_skipped\":" << detail.sites_skipped << ","

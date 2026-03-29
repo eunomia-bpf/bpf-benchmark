@@ -911,8 +911,8 @@ fn run_map_inline_round(
             );
             continue;
         }
-        let mut rewrite =
-            match build_site_rewrite(program, &site, &key, &uses, info, null_check_pc) {
+        let mut rewrite = match build_site_rewrite(program, &site, &key, &uses, info, null_check_pc)
+        {
             Ok(Some(rewrite)) => rewrite,
             Ok(None) => {
                 let reason = "failed to materialize replacement constants".to_string();

@@ -54,6 +54,49 @@ def test_socket_error_result_preserves_supplied_exit_code() -> None:
     assert "timed out" in str(result["error"])
 
 
+def test_optimize_request_preserves_structured_error_response(monkeypatch) -> None:
+    monkeypatch.setattr(
+        rejit,
+        "_daemon_request",
+        lambda *args, **kwargs: {
+            "status": "error",
+            "message": "final REJIT failed",
+            "summary": {"applied": False, "total_sites_applied": 1},
+            "passes": [
+                {
+                    "pass_name": "const_prop",
+                    "changed": False,
+                    "verify": {
+                        "status": "rejected",
+                        "error_message": "synthetic verifier rejection",
+                    },
+                    "rollback": {
+                        "action": "restored_pre_pass_snapshot",
+                        "restored_insn_count": 17,
+                    },
+                    "sites_applied": 1,
+                    "sites_skipped": 0,
+                    "insns_before": 17,
+                    "insns_after": 17,
+                    "insn_delta": 0,
+                    "diagnostics": [],
+                }
+            ],
+        },
+    )
+
+    response = rejit._optimize_request(
+        Path("/tmp/daemon.sock"),
+        123,
+        enabled_passes=["const_prop"],
+        dry_run=False,
+    )
+
+    assert response["status"] == "error"
+    assert response["passes"][0]["verify"]["status"] == "rejected"
+    assert response["passes"][0]["rollback"]["action"] == "restored_pre_pass_snapshot"
+
+
 def test_benchmark_rejit_enabled_passes_respects_explicit_empty_env(monkeypatch) -> None:
     monkeypatch.setenv("BPFREJIT_BENCH_PASSES", "")
 

@@ -100,6 +100,36 @@ impl BpfPass for PrependNopPass {
     }
 }
 
+/// A pass that appends a NOP with a caller-provided logical name.
+struct NamedAppendNopPass {
+    name: &'static str,
+}
+
+impl BpfPass for NamedAppendNopPass {
+    fn name(&self) -> &str {
+        self.name
+    }
+    fn category(&self) -> PassCategory {
+        PassCategory::Optimization
+    }
+    fn run(
+        &self,
+        program: &mut BpfProgram,
+        _analyses: &mut AnalysisCache,
+        _ctx: &PassContext,
+    ) -> anyhow::Result<PassResult> {
+        program.insns.push(BpfInsn::nop());
+        Ok(PassResult {
+            pass_name: self.name().into(),
+            changed: true,
+            sites_applied: 1,
+            sites_skipped: vec![],
+            diagnostics: vec![],
+            ..Default::default()
+        })
+    }
+}
+
 /// A pass that replaces all MOV64_IMM with a different immediate value.
 struct RewriteMovImmPass {
     new_imm: i32,
@@ -1117,12 +1147,75 @@ fn test_verify_rejection_rolls_back_and_continues_pipeline() {
         result.pass_results[0].verify.error_message.as_deref(),
         Some("synthetic verifier rejection")
     );
+    assert_eq!(
+        result.pass_results[0].rollback,
+        Some(PassRollbackResult::restored_pre_pass_snapshot(2))
+    );
 
     assert!(result.pass_results[1].changed);
     assert_eq!(
         result.pass_results[1].verify.status,
         PassVerifyStatus::Accepted
     );
+    assert_eq!(result.pass_results[1].rollback, None);
+}
+
+#[test]
+fn test_verify_rejection_restores_last_accepted_snapshot_before_next_pass() {
+    let mut pm = PassManager::new();
+    pm.add_pass(NamedAppendNopPass { name: "pass_a" });
+    pm.add_pass(RewriteMovImmPass { new_imm: 99 });
+    pm.add_pass(PrependNopPass);
+    pm.add_pass(NamedAppendNopPass { name: "pass_d" });
+
+    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+    let ctx = ctx_for_pass_manager(&pm);
+    let mut verifier_observations = Vec::new();
+    let result = pm
+        .run_with_verifier(&mut prog, &ctx, &mut |pass_name, program| {
+            verifier_observations.push((
+                pass_name.to_string(),
+                program.insns.len(),
+                program.insns[0].code,
+                program.insns[0].imm,
+            ));
+            if pass_name == "prepend_nop" {
+                return Ok(PassVerifyResult::rejected("synthetic verifier rejection"));
+            }
+            Ok(PassVerifyResult::accepted())
+        })
+        .unwrap();
+
+    assert_eq!(
+        verifier_observations
+            .iter()
+            .map(|(name, ..)| name.as_str())
+            .collect::<Vec<_>>(),
+        vec!["pass_a", "rewrite_mov_imm", "prepend_nop", "pass_d"]
+    );
+    assert_eq!(result.total_sites_applied, 3);
+    assert!(result.program_changed);
+
+    assert!(result.pass_results[0].changed);
+    assert_eq!(result.pass_results[0].rollback, None);
+    assert!(result.pass_results[1].changed);
+    assert_eq!(result.pass_results[1].rollback, None);
+    assert!(!result.pass_results[2].changed);
+    assert_eq!(
+        result.pass_results[2].rollback,
+        Some(PassRollbackResult::restored_pre_pass_snapshot(3))
+    );
+    assert!(result.pass_results[3].changed);
+    assert_eq!(result.pass_results[3].rollback, None);
+
+    assert_eq!(prog.insns[0].imm, 99);
+    assert_eq!(prog.insns.len(), 4);
+    assert_ne!(prog.insns[0].code, BpfInsn::nop().code);
+    assert_eq!(verifier_observations[2].1, 4);
+    assert_eq!(verifier_observations[2].2, BpfInsn::nop().code);
+    assert_eq!(verifier_observations[3].1, 4);
+    assert_eq!(verifier_observations[3].2, BpfInsn::mov64_imm(0, 0).code);
+    assert_eq!(verifier_observations[3].3, 99);
 }
 
 #[test]

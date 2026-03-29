@@ -2589,6 +2589,23 @@ struct prepared_kernel_state {
 
 namespace {
 
+std::string daemon_socket_failure_message(const daemon_socket_response &response)
+{
+    if (!response.error.empty()) {
+        return "daemon socket optimize failed: " + response.error;
+    }
+    if (!response.error_message.empty()) {
+        return "daemon socket optimize failed: " + response.error_message;
+    }
+    if (!response.message.empty()) {
+        return "daemon socket optimize failed: " + response.message;
+    }
+    if (!response.raw_json.empty()) {
+        return "daemon socket optimize failed: " + response.raw_json;
+    }
+    return "daemon socket optimize failed: unknown error";
+}
+
 void maybe_apply_prepared_daemon_rejit(
     prepared_program_state &program,
     const cli_options &options);
@@ -2600,7 +2617,7 @@ void populate_rejit_from_daemon_summary(
     summary.syscall_attempted = true;
     if (!response.ok) {
         summary.applied = false;
-        summary.error = "daemon socket optimize failed: " + response.error;
+        summary.error = daemon_socket_failure_message(response);
     } else {
         summary.applied = response.applied;
         summary.total_sites_applied = response.total_sites_applied;
@@ -2814,11 +2831,11 @@ void maybe_apply_prepared_daemon_rejit(
     const auto rejit_end = std::chrono::steady_clock::now();
     program.rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
     populate_rejit_from_daemon_summary(program.prepared_rejit, socket_response);
+    if (!socket_response.ok) {
+        fail(daemon_socket_failure_message(socket_response));
+    }
     program.rejit_applied = true;
     program.program_info = load_prog_info(program.program_fd);
-    if (!socket_response.ok) {
-        fprintf(stderr, "daemon socket optimize failed: %s\n", socket_response.error.c_str());
-    }
 }
 
 void maybe_apply_prepared_bytecode_rejit(
@@ -3721,7 +3738,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         r.syscall_attempted = true;
         if (!resp.ok) {
             r.applied = false;
-            r.error = "daemon socket optimize failed: " + resp.error;
+            r.error = daemon_socket_failure_message(resp);
         } else {
             r.applied = resp.applied;
             r.total_sites_applied = resp.total_sites_applied;
@@ -3744,7 +3761,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         rejit_end = std::chrono::steady_clock::now();
         populate_rejit_from_daemon(rejit, sock_resp);
         if (!sock_resp.ok) {
-            fprintf(stderr, "daemon socket optimize failed: %s\n", sock_resp.error.c_str());
+            fail(daemon_socket_failure_message(sock_resp));
         }
     }
     /* Only do in-process stock+rejit paired measurement for non-daemon
@@ -3762,6 +3779,9 @@ std::vector<sample_result> run_kernel(const cli_options &options)
                 options.enabled_passes_specified);
             rejit_end = std::chrono::steady_clock::now();
             populate_rejit_from_daemon(rejit, sock_resp);
+            if (!sock_resp.ok) {
+                fail(daemon_socket_failure_message(sock_resp));
+            }
         } else {
             apply_rejit(program_fd, rejit_insns.data(),
                         static_cast<uint32_t>(rejit_insns.size()),
@@ -4159,8 +4179,8 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
         rejit.syscall_attempted = true;
         if (!sock_resp.ok) {
             rejit.applied = false;
-            rejit.error = "daemon socket optimize failed: " + sock_resp.error;
-            fprintf(stderr, "daemon socket optimize failed: %s\n", sock_resp.error.c_str());
+            rejit.error = daemon_socket_failure_message(sock_resp);
+            fail(rejit.error);
         } else {
             rejit.applied = sock_resp.applied;
             rejit.total_sites_applied = sock_resp.total_sites_applied;

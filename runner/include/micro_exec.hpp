@@ -116,6 +116,11 @@ struct code_size_summary {
 struct daemon_pass_detail {
     std::string pass_name;
     bool changed = false;
+    std::string verify_status = "not_needed";
+    std::string verify_error_message;
+    bool rollback_applied = false;
+    std::string rollback_action;
+    int64_t rollback_restored_insn_count = 0;
     uint32_t sites_found = 0;
     uint32_t sites_applied = 0;
     uint32_t sites_skipped = 0;

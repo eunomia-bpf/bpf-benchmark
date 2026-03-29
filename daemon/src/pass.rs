@@ -293,6 +293,8 @@ pub struct PassResult {
     pub insns_after: usize,
     /// Per-pass verifier outcome.
     pub verify: PassVerifyResult,
+    /// Rollback outcome when a rejected pass is reverted to its pre-pass snapshot.
+    pub rollback: Option<PassRollbackResult>,
 }
 
 impl PassResult {
@@ -320,6 +322,12 @@ pub struct PassVerifyResult {
     pub status: PassVerifyStatus,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
+pub struct PassRollbackResult {
+    pub action: String,
+    pub restored_insn_count: usize,
 }
 
 impl Default for PassVerifyResult {
@@ -359,6 +367,15 @@ impl PassVerifyResult {
 
     fn rejected_change(&self) -> bool {
         matches!(self.status, PassVerifyStatus::Rejected)
+    }
+}
+
+impl PassRollbackResult {
+    pub fn restored_pre_pass_snapshot(restored_insn_count: usize) -> Self {
+        Self {
+            action: "restored_pre_pass_snapshot".to_string(),
+            restored_insn_count,
+        }
     }
 }
 
@@ -906,6 +923,9 @@ impl PassManager {
                 *program = before_program;
                 result.changed = false;
                 result.insns_after = program.insns.len();
+                result.rollback = Some(PassRollbackResult::restored_pre_pass_snapshot(
+                    result.insns_after,
+                ));
             }
         } else {
             debug_traces.push(PassDebugTrace {

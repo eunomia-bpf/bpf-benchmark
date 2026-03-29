@@ -52,6 +52,7 @@ impl BpfPass for ConstPropPass {
 
         let block_in = solve_block_entry_states(program, &cfg);
         let mut replacements = BTreeMap::new();
+        let protected_prefix_end = super::utils::tail_call_protected_prefix_end(&program.insns);
         let mut nop_pcs = HashSet::new();
 
         for (block_idx, block) in cfg.blocks.iter().enumerate() {
@@ -62,6 +63,12 @@ impl BpfPass for ConstPropPass {
                 block_in[block_idx],
                 Some(&mut replacements),
             );
+        }
+
+        if let Some(prefix_end) = protected_prefix_end {
+            replacements.retain(|&pc, replacement| {
+                tail_safe_const_prop_replacement(&program.insns, pc, replacement, prefix_end)
+            });
         }
 
         for (&pc, replacement) in &replacements {
@@ -531,6 +538,24 @@ fn replacement_if_changed(
     (original != candidate).then(|| candidate.to_vec())
 }
 
+fn tail_safe_const_prop_replacement(
+    insns: &[BpfInsn],
+    pc: usize,
+    replacement: &[BpfInsn],
+    protected_prefix_end: usize,
+) -> bool {
+    let old_insn = &insns[pc];
+    if old_insn.is_cond_jmp() {
+        return false;
+    }
+    if pc >= protected_prefix_end {
+        return true;
+    }
+
+    replacement.len() == insn_width(old_insn)
+        && !replacement.iter().any(|insn| insn.is_ja() && insn.off == 0)
+}
+
 fn fixup_folded_jumps(
     new_insns: &mut [BpfInsn],
     old_insns: &[BpfInsn],
@@ -884,6 +909,36 @@ mod tests {
     }
 
     #[test]
+    fn const_prop_skips_tail_sensitive_branch_folding_but_keeps_safe_alu_fold() {
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::mov64_imm(1, 7),
+            jeq_imm(1, 7, 1),
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::mov64_imm(2, 5),
+            add64_imm(2, 2),
+            call_helper(12),
+            exit_insn(),
+        ]);
+
+        let result = run_const_prop_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(1, 7),
+                jeq_imm(1, 7, 1),
+                BpfInsn::mov64_imm(0, 0),
+                BpfInsn::mov64_imm(2, 5),
+                BpfInsn::mov64_imm(2, 7),
+                call_helper(12),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
     fn const_prop_fixups_folded_jump_after_ldimm64_growth() {
         let mut program = BpfProgram::new(vec![
             BpfInsn::mov64_imm(2, 7),
@@ -969,10 +1024,7 @@ mod tests {
         assert_eq!(result.pass_results[1].pass_name, "dce");
         assert!(result.pass_results[0].changed);
         assert!(result.pass_results[1].changed);
-        assert_eq!(
-            program.insns,
-            vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]
-        );
+        assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
     }
 
     #[test]

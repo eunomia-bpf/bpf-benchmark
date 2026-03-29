@@ -194,6 +194,39 @@ daemon_socket_response daemon_socket_optimize(
             error_message.has_value()) {
             response.error_message = *error_message;
         }
+        if (const auto summary = extract_json_compound_optional(line, "summary", '{', '}');
+            summary.has_value()) {
+            response.applied = extract_json_bool(*summary, "applied");
+            response.program_changed = extract_json_bool(*summary, "program_changed");
+            response.total_sites_applied = static_cast<uint32_t>(
+                extract_json_int(*summary, "total_sites_applied"));
+            if (const auto verifier_retries =
+                    extract_json_int_optional(*summary, "verifier_retries");
+                verifier_retries.has_value()) {
+                response.verifier_retries = static_cast<uint32_t>(*verifier_retries);
+            } else {
+                response.verifier_retries = 0;
+            }
+            if (const auto final_disabled_passes =
+                    extract_json_string_array_optional(*summary, "final_disabled_passes");
+                final_disabled_passes.has_value()) {
+                response.final_disabled_passes = *final_disabled_passes;
+            } else {
+                response.final_disabled_passes.clear();
+            }
+        }
+        if (const auto program_json = extract_json_compound_optional(line, "program", '{', '}');
+            program_json.has_value()) {
+            response.insn_delta = extract_json_int(*program_json, "insn_delta");
+            response.final_insn_count = extract_json_int(*program_json, "final_insn_count");
+            if (const auto final_jited_size =
+                    extract_json_int_optional(*program_json, "final_jited_size");
+                final_jited_size.has_value()) {
+                response.final_jited_size = *final_jited_size;
+            }
+        }
+        response.pass_details = extract_pass_details(line);
+        response.passes_applied = changed_pass_names(response.pass_details);
         if (!response.ok) {
             response.error = !response.error_message.empty()
                 ? response.error_message
@@ -203,37 +236,6 @@ daemon_socket_response daemon_socket_optimize(
             return response;
         }
 
-        const std::string summary = extract_json_compound(line, "summary", '{', '}');
-        response.applied = extract_json_bool(summary, "applied");
-        response.program_changed = extract_json_bool(summary, "program_changed");
-        response.total_sites_applied = static_cast<uint32_t>(
-            extract_json_int(summary, "total_sites_applied"));
-        if (const auto verifier_retries =
-                extract_json_int_optional(summary, "verifier_retries");
-            verifier_retries.has_value()) {
-            response.verifier_retries = static_cast<uint32_t>(*verifier_retries);
-        } else {
-            response.verifier_retries = 0;
-        }
-        if (const auto final_disabled_passes =
-                extract_json_string_array_optional(summary, "final_disabled_passes");
-            final_disabled_passes.has_value()) {
-            response.final_disabled_passes = *final_disabled_passes;
-        } else {
-            response.final_disabled_passes.clear();
-        }
-
-        const std::string program_json = extract_json_compound(line, "program", '{', '}');
-        response.insn_delta = extract_json_int(program_json, "insn_delta");
-        response.final_insn_count = extract_json_int(program_json, "final_insn_count");
-        if (const auto final_jited_size =
-                extract_json_int_optional(program_json, "final_jited_size");
-            final_jited_size.has_value()) {
-            response.final_jited_size = *final_jited_size;
-        }
-
-        response.pass_details = extract_pass_details(line);
-        response.passes_applied = changed_pass_names(response.pass_details);
     } catch (const std::exception &error) {
         response.error = "invalid daemon JSON: " + std::string(error.what());
         response.ok = false;

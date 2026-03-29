@@ -62,9 +62,14 @@ fn test_optimize_one_result_serialization() {
         },
         passes: vec![
             PassDetail {
+                pass: "wide_mem".to_string(),
                 pass_name: "wide_mem".to_string(),
                 changed: true,
+                verify_result: pass::PassVerifyStatus::Accepted,
+                verify_error: None,
+                action: "kept".to_string(),
                 verify: pass::PassVerifyResult::accepted(),
+                rollback: None,
                 sites_applied: 3,
                 sites_skipped: 1,
                 skip_reasons: HashMap::from([("subprog_unsupported".to_string(), 1)]),
@@ -75,9 +80,14 @@ fn test_optimize_one_result_serialization() {
                 diagnostics: vec![],
             },
             PassDetail {
+                pass: "rotate".to_string(),
                 pass_name: "rotate".to_string(),
                 changed: false,
+                verify_result: pass::PassVerifyStatus::NotNeeded,
+                verify_error: None,
+                action: "kept".to_string(),
                 verify: pass::PassVerifyResult::not_needed(),
+                rollback: None,
                 sites_applied: 0,
                 sites_skipped: 0,
                 skip_reasons: HashMap::new(),
@@ -122,14 +132,19 @@ fn test_optimize_one_result_serialization() {
     assert_eq!(parsed["summary"]["total_sites_applied"], 3);
     assert_eq!(parsed["summary"]["verifier_rejections"], 0);
     assert_eq!(parsed["passes"].as_array().unwrap().len(), 2);
+    assert_eq!(parsed["passes"][0]["pass"], "wide_mem");
     assert_eq!(parsed["passes"][0]["pass_name"], "wide_mem");
     assert_eq!(parsed["passes"][0]["changed"], true);
+    assert_eq!(parsed["passes"][0]["verify_result"], "accepted");
+    assert!(parsed["passes"][0]["verify_error"].is_null());
+    assert_eq!(parsed["passes"][0]["action"], "kept");
     assert_eq!(parsed["passes"][0]["verify"]["status"], "accepted");
     assert_eq!(
         parsed["passes"][0]["skip_reasons"]["subprog_unsupported"],
         1
     );
     assert_eq!(parsed["passes"][1]["changed"], false);
+    assert_eq!(parsed["passes"][1]["verify_result"], "not_needed");
     assert_eq!(parsed["passes"][1]["verify"]["status"], "not_needed");
     assert_eq!(parsed["attempts"].as_array().unwrap().len(), 1);
     assert_eq!(parsed["attempts"][0]["result"], "applied");
@@ -171,11 +186,16 @@ fn test_optimize_one_result_records_rejected_pass_verify_status() {
         },
         passes: vec![
             PassDetail {
+                pass: "branch_flip".to_string(),
                 pass_name: "branch_flip".to_string(),
                 changed: false,
+                verify_result: pass::PassVerifyStatus::Rejected,
+                verify_error: Some("BPF_PROG_LOAD: Permission denied (os error 13)".to_string()),
+                action: "rolled_back".to_string(),
                 verify: pass::PassVerifyResult::rejected(
-                    "BPF_PROG_REJIT: Permission denied (os error 13)",
+                    "BPF_PROG_LOAD: Permission denied (os error 13)",
                 ),
+                rollback: Some(pass::PassRollbackResult::restored_pre_pass_snapshot(110)),
                 sites_applied: 4,
                 sites_skipped: 0,
                 skip_reasons: HashMap::new(),
@@ -186,9 +206,14 @@ fn test_optimize_one_result_records_rejected_pass_verify_status() {
                 diagnostics: vec![],
             },
             PassDetail {
+                pass: "extract".to_string(),
                 pass_name: "extract".to_string(),
                 changed: true,
+                verify_result: pass::PassVerifyStatus::Accepted,
+                verify_error: None,
+                action: "kept".to_string(),
                 verify: pass::PassVerifyResult::accepted(),
+                rollback: None,
                 sites_applied: 2,
                 sites_skipped: 0,
                 skip_reasons: HashMap::new(),
@@ -222,11 +247,18 @@ fn test_optimize_one_result_records_rejected_pass_verify_status() {
     assert_eq!(parsed["summary"]["verifier_rejections"], 1);
     assert_eq!(parsed["passes_applied"][0], "extract");
     assert_eq!(parsed["passes"].as_array().unwrap().len(), 2);
+    assert_eq!(parsed["passes"][0]["verify_result"], "rejected");
     assert_eq!(parsed["passes"][0]["verify"]["status"], "rejected");
     assert_eq!(
-        parsed["passes"][0]["verify"]["error_message"],
-        "BPF_PROG_REJIT: Permission denied (os error 13)"
+        parsed["passes"][0]["verify_error"],
+        "BPF_PROG_LOAD: Permission denied (os error 13)"
     );
+    assert_eq!(parsed["passes"][0]["action"], "rolled_back");
+    assert_eq!(
+        parsed["passes"][0]["rollback"]["action"],
+        "restored_pre_pass_snapshot"
+    );
+    assert_eq!(parsed["passes"][0]["rollback"]["restored_insn_count"], 110);
     assert_eq!(parsed["passes"][1]["verify"]["status"], "accepted");
     assert_eq!(parsed["attempts"].as_array().unwrap().len(), 1);
     assert_eq!(parsed["attempts"][0]["result"], "applied");
@@ -239,6 +271,7 @@ fn test_pass_detail_from_pass_result() {
         pass_name: "wide_mem".to_string(),
         changed: true,
         verify: pass::PassVerifyResult::accepted(),
+        rollback: None,
         sites_applied: 5,
         sites_skipped: vec![
             pass::SkipReason {
@@ -262,8 +295,12 @@ fn test_pass_detail_from_pass_result() {
 
     let detail = PassDetail::from(&pr);
 
+    assert_eq!(detail.pass, "wide_mem");
     assert_eq!(detail.pass_name, "wide_mem");
     assert_eq!(detail.changed, true);
+    assert_eq!(detail.verify_result, pass::PassVerifyStatus::Accepted);
+    assert_eq!(detail.verify_error, None);
+    assert_eq!(detail.action, "kept");
     assert_eq!(detail.verify.status, pass::PassVerifyStatus::Accepted);
     assert_eq!(detail.sites_applied, 5);
     assert_eq!(detail.sites_skipped, 3);
@@ -276,6 +313,7 @@ fn test_pass_detail_from_pass_result() {
     assert_eq!(detail.insns_before, 100);
     assert_eq!(detail.insns_after, 95);
     assert_eq!(detail.insn_delta, -5);
+    assert_eq!(detail.rollback, None);
 }
 
 #[test]
@@ -321,6 +359,7 @@ fn test_collect_map_inline_records_ignores_rejected_passes() {
         pass_name: "map_inline".to_string(),
         changed: false,
         verify: pass::PassVerifyResult::rejected("synthetic verifier rejection"),
+        rollback: Some(pass::PassRollbackResult::restored_pre_pass_snapshot(100)),
         map_inline_records: vec![pass::MapInlineRecord {
             map_id: 17,
             key: 0u32.to_le_bytes().to_vec(),
@@ -332,6 +371,7 @@ fn test_collect_map_inline_records_ignores_rejected_passes() {
         pass_name: "map_inline".to_string(),
         changed: true,
         verify: pass::PassVerifyResult::accepted(),
+        rollback: None,
         map_inline_records: vec![pass::MapInlineRecord {
             map_id: 18,
             key: 1u32.to_le_bytes().to_vec(),
@@ -416,9 +456,14 @@ fn test_record_map_inline_records_preserves_existing_entries_on_open_failure() {
 fn test_verifier_rejection_count_counts_rejected_passes() {
     let passes = vec![
         PassDetail {
+            pass: "wide_mem".to_string(),
             pass_name: "wide_mem".to_string(),
             changed: false,
+            verify_result: pass::PassVerifyStatus::Rejected,
+            verify_error: Some("synthetic verifier rejection".to_string()),
+            action: "rolled_back".to_string(),
             verify: pass::PassVerifyResult::rejected("synthetic verifier rejection"),
+            rollback: Some(pass::PassRollbackResult::restored_pre_pass_snapshot(100)),
             sites_applied: 0,
             sites_skipped: 0,
             skip_reasons: HashMap::new(),
@@ -429,9 +474,14 @@ fn test_verifier_rejection_count_counts_rejected_passes() {
             diagnostics: vec![],
         },
         PassDetail {
+            pass: "extract".to_string(),
             pass_name: "extract".to_string(),
             changed: true,
+            verify_result: pass::PassVerifyStatus::Accepted,
+            verify_error: None,
+            action: "kept".to_string(),
             verify: pass::PassVerifyResult::accepted(),
+            rollback: None,
             sites_applied: 2,
             sites_skipped: 0,
             skip_reasons: HashMap::new(),

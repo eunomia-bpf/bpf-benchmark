@@ -29,6 +29,11 @@ std::string extract_json_compound(
     const std::string &key,
     char open_ch,
     char close_ch);
+std::optional<std::string> extract_json_compound_optional(
+    const std::string &json,
+    const std::string &key,
+    char open_ch,
+    char close_ch);
 std::vector<std::string> extract_json_string_array(
     const std::string &json,
     const std::string &key);

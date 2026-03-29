@@ -369,10 +369,7 @@ fn cascade_dce_eliminates_dead_branch_after_const_prop() {
     assert_eq!(result.pass_results[1].sites_applied, 1);
     assert_eq!(result.pass_results[2].pass_name, "dce");
     assert!(result.pass_results[2].changed);
-    assert_eq!(
-        program.insns,
-        vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]
-    );
+    assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
 }
 
 #[test]
@@ -426,10 +423,7 @@ fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
         .find(|pr| pr.pass_name == "dce")
         .map(|pr| pr.changed)
         .unwrap_or(false));
-    assert_eq!(
-        program.insns,
-        vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]
-    );
+    assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
 }
 
 #[test]
@@ -463,10 +457,7 @@ fn cascade_hash_map_removes_lookup_and_null_path_then_folds_non_null_path() {
     assert_eq!(result.pass_results[1].sites_applied, 1);
     assert_eq!(result.pass_results[2].pass_name, "dce");
     assert!(result.pass_results[2].changed);
-    assert_eq!(
-        program.insns,
-        vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]
-    );
+    assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
 }
 
 // ── HIGH #6: Real BPF bytecode pipeline tests ────────────────────

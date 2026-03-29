@@ -312,6 +312,31 @@ std::string extract_json_compound(
     return json.substr(value_start, value_end - value_start + 1);
 }
 
+std::optional<std::string> extract_json_compound_optional(
+    const std::string &json,
+    const std::string &key,
+    char open_ch,
+    char close_ch)
+{
+    const size_t value_start = find_json_key_value_start(json, key);
+    if (value_start == std::string::npos) {
+        return std::nullopt;
+    }
+    if (json.compare(value_start, 4, "null") == 0 &&
+        is_json_value_terminated(json, value_start + 4)) {
+        return std::nullopt;
+    }
+    if (value_start >= json.size() || json[value_start] != open_ch) {
+        fail_invalid_json_value("compound value", key);
+    }
+    const auto value_end =
+        find_matching_json_delim(json, value_start, open_ch, close_ch);
+    if (value_end == std::string::npos) {
+        fail_invalid_json_value("compound value", key);
+    }
+    return json.substr(value_start, value_end - value_start + 1);
+}
+
 std::vector<std::string> extract_json_string_array(
     const std::string &json,
     const std::string &key)
@@ -368,28 +393,45 @@ std::optional<std::vector<std::string>> extract_json_string_array_optional(
 std::vector<daemon_pass_detail> extract_pass_details(const std::string &json)
 {
     std::vector<daemon_pass_detail> details;
-    const std::string passes_json = extract_json_compound(json, "passes", '[', ']');
-    if (passes_json.size() < 2) {
+    const auto passes_json = extract_json_compound_optional(json, "passes", '[', ']');
+    if (!passes_json.has_value() || passes_json->size() < 2) {
         return details;
     }
 
     size_t cursor = 1;
-    while (cursor + 1 < passes_json.size()) {
-        const auto object_start = passes_json.find('{', cursor);
-        if (object_start == std::string::npos || object_start + 1 >= passes_json.size()) {
+    while (cursor + 1 < passes_json->size()) {
+        const auto object_start = passes_json->find('{', cursor);
+        if (object_start == std::string::npos || object_start + 1 >= passes_json->size()) {
             break;
         }
         const auto object_end =
-            find_matching_json_delim(passes_json, object_start, '{', '}');
+            find_matching_json_delim(*passes_json, object_start, '{', '}');
         if (object_end == std::string::npos) {
             break;
         }
 
         const std::string pass_object =
-            passes_json.substr(object_start, object_end - object_start + 1);
+            passes_json->substr(object_start, object_end - object_start + 1);
         daemon_pass_detail detail;
         detail.pass_name = extract_json_string(pass_object, "pass_name");
         detail.changed = extract_json_bool(pass_object, "changed");
+        if (const auto verify = extract_json_compound_optional(pass_object, "verify", '{', '}');
+            verify.has_value()) {
+            detail.verify_status = extract_json_string(*verify, "status");
+            if (const auto verify_error =
+                    extract_json_string_optional(*verify, "error_message");
+                verify_error.has_value()) {
+                detail.verify_error_message = *verify_error;
+            }
+        }
+        if (const auto rollback =
+                extract_json_compound_optional(pass_object, "rollback", '{', '}');
+            rollback.has_value()) {
+            detail.rollback_applied = true;
+            detail.rollback_action = extract_json_string(*rollback, "action");
+            detail.rollback_restored_insn_count =
+                extract_json_int(*rollback, "restored_insn_count");
+        }
         detail.sites_applied = static_cast<uint32_t>(
             extract_json_int(pass_object, "sites_applied"));
         detail.sites_skipped = static_cast<uint32_t>(

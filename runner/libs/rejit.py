@@ -883,15 +883,6 @@ def _optimize_request(
         stdout_path=stdout_path,
         stderr_path=stderr_path,
     )
-    if str(response.get("status") or "") == "error":
-        return _socket_error_result(
-            prog_id,
-            str(response.get("message") or response.get("error") or f"socket optimize failed for prog {prog_id}"),
-            exit_code=124 if "timed out" in str(response.get("message") or "").lower() else 1,
-            daemon_proc=daemon_proc,
-            stdout_path=stdout_path,
-            stderr_path=stderr_path,
-        )
     return response
 
 

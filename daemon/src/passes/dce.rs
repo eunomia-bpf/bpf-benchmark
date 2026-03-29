@@ -5,8 +5,8 @@ use crate::analysis::CFGAnalysis;
 use crate::pass::*;
 
 use super::utils::{
-    compose_addr_maps, eliminate_dead_register_defs, eliminate_nops,
-    eliminate_unreachable_blocks_with_cfg,
+    compose_addr_maps, eliminate_dead_register_defs, eliminate_dead_register_defs_tail_safe,
+    eliminate_nops, eliminate_unreachable_blocks_with_cfg, tail_call_protected_prefix_end,
 };
 
 /// Dead code elimination pass.
@@ -35,20 +35,38 @@ impl BpfPass for DcePass {
     ) -> anyhow::Result<PassResult> {
         let cfg = analyses.get(&CFGAnalysis, program);
         let mut final_insns = program.insns.clone();
+        let protected_prefix_end = tail_call_protected_prefix_end(&final_insns);
         let mut final_addr_map: Option<Vec<usize>> = None;
         let mut unreachable_removed = 0usize;
         let mut dead_defs_removed = 0usize;
+        let mut dead_defs_neutralized = 0usize;
         let mut nop_removed = 0usize;
 
-        if let Some((cleaned_insns, cleanup_map)) =
-            eliminate_unreachable_blocks_with_cfg(&final_insns, &cfg)
-        {
-            unreachable_removed = final_insns.len() - cleaned_insns.len();
-            final_addr_map = Some(cleanup_map);
-            final_insns = cleaned_insns;
+        if protected_prefix_end.is_none() {
+            if let Some((cleaned_insns, cleanup_map)) =
+                eliminate_unreachable_blocks_with_cfg(&final_insns, &cfg)
+            {
+                unreachable_removed = final_insns.len() - cleaned_insns.len();
+                final_addr_map = Some(cleanup_map);
+                final_insns = cleaned_insns;
+            }
         }
 
-        if let Some((cleaned_insns, cleanup_map)) = eliminate_dead_register_defs(&final_insns) {
+        if let Some(prefix_end) = protected_prefix_end {
+            if let Some((cleaned_insns, cleanup_map, neutralized, deleted)) =
+                eliminate_dead_register_defs_tail_safe(&final_insns, prefix_end)
+            {
+                dead_defs_neutralized = neutralized;
+                dead_defs_removed = deleted;
+                final_addr_map = Some(match final_addr_map.take() {
+                    Some(existing) => compose_addr_maps(&existing, &cleanup_map),
+                    None => cleanup_map,
+                });
+                final_insns = cleaned_insns;
+            }
+        } else if let Some((cleaned_insns, cleanup_map)) =
+            eliminate_dead_register_defs(&final_insns)
+        {
             dead_defs_removed = final_insns.len() - cleaned_insns.len();
             final_addr_map = Some(match final_addr_map.take() {
                 Some(existing) => compose_addr_maps(&existing, &cleanup_map),
@@ -57,13 +75,15 @@ impl BpfPass for DcePass {
             final_insns = cleaned_insns;
         }
 
-        while let Some((cleaned_insns, cleanup_map)) = eliminate_nops(&final_insns) {
-            nop_removed += final_insns.len() - cleaned_insns.len();
-            final_addr_map = Some(match final_addr_map.take() {
-                Some(existing) => compose_addr_maps(&existing, &cleanup_map),
-                None => cleanup_map,
-            });
-            final_insns = cleaned_insns;
+        if protected_prefix_end.is_none() {
+            while let Some((cleaned_insns, cleanup_map)) = eliminate_nops(&final_insns) {
+                nop_removed += final_insns.len() - cleaned_insns.len();
+                final_addr_map = Some(match final_addr_map.take() {
+                    Some(existing) => compose_addr_maps(&existing, &cleanup_map),
+                    None => cleanup_map,
+                });
+                final_insns = cleaned_insns;
+            }
         }
 
         let Some(final_addr_map) = final_addr_map else {
@@ -77,10 +97,17 @@ impl BpfPass for DcePass {
             });
         };
 
-        let sites_applied = unreachable_removed + dead_defs_removed + nop_removed;
+        let sites_applied =
+            unreachable_removed + dead_defs_neutralized + dead_defs_removed + nop_removed;
         let mut diagnostics = Vec::new();
         if unreachable_removed > 0 {
             diagnostics.push(format!("removed {} unreachable insns", unreachable_removed));
+        }
+        if dead_defs_neutralized > 0 {
+            diagnostics.push(format!(
+                "neutralized {} dead-def insns to preserve tail-call poke indices",
+                dead_defs_neutralized
+            ));
         }
         if dead_defs_removed > 0 {
             diagnostics.push(format!("removed {} dead-def insns", dead_defs_removed));
@@ -138,6 +165,15 @@ mod tests {
         }
     }
 
+    fn call_helper(imm: i32) -> BpfInsn {
+        BpfInsn {
+            code: BPF_JMP | BPF_CALL,
+            regs: BpfInsn::make_regs(0, 0),
+            off: 0,
+            imm,
+        }
+    }
+
     fn pseudo_func_ref(dst: u8, imm: i32) -> [BpfInsn; 2] {
         [
             BpfInsn {
@@ -185,10 +221,7 @@ mod tests {
         assert!(result.program_changed);
         assert_eq!(result.pass_results[1].pass_name, "dce");
         assert_eq!(result.pass_results[1].sites_applied, 2);
-        assert_eq!(
-            program.insns,
-            vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]
-        );
+        assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
     }
 
     #[test]
@@ -229,6 +262,30 @@ mod tests {
             .iter()
             .any(|diag| diag.contains("dead-def")));
         assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
+    }
+
+    #[test]
+    fn dce_neutralizes_dead_defs_before_tail_call() {
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::mov64_imm(8, 1),
+            BpfInsn::mov64_imm(8, 2),
+            call_helper(12),
+            exit_insn(),
+        ]);
+
+        let result = run_dce_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.pass_results[0].sites_applied, 2);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_reg(8, 8),
+                BpfInsn::mov64_reg(8, 8),
+                call_helper(12),
+                exit_insn(),
+            ]
+        );
     }
 
     #[test]

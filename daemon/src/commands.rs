@@ -76,9 +76,15 @@ pub(crate) struct SkippedSiteDetail {
 /// Per-pass detail record.
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct PassDetail {
+    pub pass: String,
     pub pass_name: String,
     pub changed: bool,
+    pub verify_result: pass::PassVerifyStatus,
+    pub verify_error: Option<String>,
+    pub action: String,
     pub verify: pass::PassVerifyResult,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rollback: Option<pass::PassRollbackResult>,
     pub sites_applied: usize,
     pub sites_skipped: usize,
     pub skip_reasons: HashMap<String, usize>,
@@ -93,9 +99,18 @@ pub(crate) struct PassDetail {
 impl From<&pass::PassResult> for PassDetail {
     fn from(pr: &pass::PassResult) -> Self {
         Self {
+            pass: pr.pass_name.clone(),
             pass_name: pr.pass_name.clone(),
             changed: pr.changed,
+            verify_result: pr.verify.status.clone(),
+            verify_error: pr.verify.error_message.clone(),
+            action: if pr.rollback.is_some() {
+                "rolled_back".to_string()
+            } else {
+                "kept".to_string()
+            },
             verify: pr.verify.clone(),
+            rollback: pr.rollback.clone(),
             sites_applied: pr.sites_applied,
             sites_skipped: pr.sites_skipped.len(),
             skip_reasons: pr.skip_reason_counts(),
@@ -308,6 +323,10 @@ fn build_rejit_fd_array(required_btf_fds: &[RawFd]) -> Vec<RawFd> {
     fd_array
 }
 
+fn build_prog_load_fd_array(required_btf_fds: &[RawFd]) -> Vec<RawFd> {
+    required_btf_fds.to_vec()
+}
+
 fn new_attempt_debug(pass_traces: Vec<pass::PassDebugTrace>) -> Option<AttemptDebug> {
     Some(AttemptDebug {
         pass_traces,
@@ -495,32 +514,54 @@ pub(crate) fn try_apply_one(
 
     let pipeline_start = Instant::now();
     let pipeline_result = if mode.should_apply() {
-        let prog_fd = fd.as_raw_fd();
-        let mut verifier =
-            |pass_name: &str, program: &pass::BpfProgram| -> Result<pass::PassVerifyResult> {
-                let mut verify_insns = program.insns.clone();
-                let _map_fds_guard = bpf::relocate_map_fds_with_bindings(
-                    &mut verify_insns,
-                    &map_ids,
-                    &program.map_fd_bindings,
+        let prog_load_meta = bpf::bpf_prog_load_meta_from_prog_info(prog_id, fd.as_raw_fd(), &info)
+            .context("prepare live-program metadata for per-pass BPF_PROG_LOAD verify");
+        let mut verifier = |pass_name: &str,
+                            program: &pass::BpfProgram|
+         -> Result<pass::PassVerifyResult> {
+            let prog_load_meta = match prog_load_meta.as_ref() {
+                Ok(meta) => meta,
+                Err(err) => {
+                    let err_msg = format!("{err:#}");
+                    let headline = err_msg.lines().next().unwrap_or("<empty error message>");
+                    eprintln!(
+                        "    WARN: skipping pass '{}' for prog {} ({}): {}",
+                        pass_name,
+                        prog_id,
+                        info.name_str(),
+                        headline,
+                    );
+                    return Ok(pass::PassVerifyResult::rejected(err_msg));
+                }
+            };
+
+            let mut verify_insns = program.insns.clone();
+            let _map_fds_guard = bpf::relocate_map_fds_with_bindings(
+                &mut verify_insns,
+                &map_ids,
+                &program.map_fd_bindings,
+            )
+            .with_context(|| {
+                format!(
+                    "relocate map FDs before per-pass verify for pass '{}'",
+                    pass_name
                 )
-                .with_context(|| {
-                    format!(
-                        "relocate map FDs before per-pass verify for pass '{}'",
-                        pass_name
-                    )
-                })?;
+            })?;
 
-                validate_required_btf_fds(
-                    &program.required_btf_fds,
-                    &local_ctx,
-                    &format!("per-pass verify for '{}'", pass_name),
-                )?;
-                let fd_array = build_rejit_fd_array(&program.required_btf_fds);
+            validate_required_btf_fds(
+                &program.required_btf_fds,
+                &local_ctx,
+                &format!("per-pass verify for '{}'", pass_name),
+            )?;
+            let fd_array = build_prog_load_fd_array(&program.required_btf_fds);
 
-                let rejit_start = Instant::now();
-                let verify_result = match bpf::bpf_prog_rejit(prog_fd, &verify_insns, &fd_array) {
-                    Ok(_) => pass::PassVerifyResult::accepted(),
+            let rejit_start = Instant::now();
+            let verify_result =
+                match bpf::bpf_prog_load_verify(prog_load_meta, &verify_insns, &fd_array) {
+                    Ok(result) => {
+                        let _verifier_log = result.verifier_log;
+                        pass::PassVerifyResult::accepted()
+                    }
                     Err(err) => {
                         let err_msg = format!("{:#}", err);
                         let headline = err_msg.lines().next().unwrap_or("<empty error message>");
@@ -534,9 +575,9 @@ pub(crate) fn try_apply_one(
                         pass::PassVerifyResult::rejected(err_msg)
                     }
                 };
-                total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
-                Ok(verify_result)
-            };
+            total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
+            Ok(verify_result)
+        };
 
         if let Some(profiling) = profiling {
             pm.run_with_profiling_and_verifier(
