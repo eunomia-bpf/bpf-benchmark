@@ -225,10 +225,6 @@ def _restore_environment(saved_env: dict[str, str]) -> None:
     os.environ.update(saved_env)
 
 
-def _is_skipped_payload(payload: object) -> bool:
-    return isinstance(payload, dict) and str(payload.get("status", "")).lower() == "skipped"
-
-
 def _payload_status(payload: object) -> str:
     if not isinstance(payload, dict):
         return ""
@@ -314,7 +310,7 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
         if spec.build_report is not None:
             detail_texts["report.md"] = spec.build_report(payload) + "\n"
         payload_status = _payload_status(payload)
-        if payload_status not in {"ok", "skipped", "error"}:
+        if payload_status not in {"ok", "error"}:
             payload_status = "error"
             if isinstance(payload, dict):
                 payload.setdefault("status", "error")
@@ -330,22 +326,6 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
         if "report.md" in detail_texts:
             write_text(report_md, detail_texts["report.md"])
         if payload_status == "ok":
-            progress_payload = {
-                "case": args.case,
-                "status": "completed",
-                "case_status": payload_status,
-                "smoke": bool(args.smoke),
-                "completed_at": completed_at,
-            }
-            session.write(
-                status="completed",
-                progress_payload=progress_payload,
-                result_payload=payload,
-                detail_texts=detail_texts,
-            )
-            return payload
-
-        if payload_status == "skipped":
             progress_payload = {
                 "case": args.case,
                 "status": "completed",
@@ -429,11 +409,8 @@ def main(argv: list[str] | None = None) -> int:
             case_args = parser.parse_args(case_argv)
             apply_case_defaults(case_args)
             try:
-                payload = _run_single_case(case_args)
-                if _is_skipped_payload(payload):
-                    print(f"  e2e: {case_name} SKIP")
-                else:
-                    print(f"  e2e: {case_name} OK")
+                _run_single_case(case_args)
+                print(f"  e2e: {case_name} OK")
             except Exception as exc:
                 print(f"  e2e: {case_name} FAILED: {exc}")
                 failed.append(case_name)

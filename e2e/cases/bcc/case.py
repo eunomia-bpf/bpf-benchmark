@@ -349,28 +349,34 @@ def measure_workload(
 # ---------------------------------------------------------------------------
 
 def finalize_process_output(session: ToolProcessSession) -> dict[str, object]:
+    io_errors: list[str] = []
     for handle in (session.stdout_handle, session.stderr_handle):
         try:
             handle.flush()
-        except Exception:
-            pass
+        except Exception as exc:
+            io_errors.append(f"failed to flush {handle.name}: {exc}")
         try:
             handle.close()
-        except Exception:
-            pass
+        except Exception as exc:
+            io_errors.append(f"failed to close {handle.name}: {exc}")
     try:
         stdout = session.stdout_path.read_text(encoding="utf-8", errors="replace")
-    except OSError:
+    except OSError as exc:
+        io_errors.append(f"failed to read {session.stdout_path}: {exc}")
         stdout = ""
     try:
         stderr = session.stderr_path.read_text(encoding="utf-8", errors="replace")
-    except OSError:
+    except OSError as exc:
+        io_errors.append(f"failed to read {session.stderr_path}: {exc}")
         stderr = ""
-    return {
+    payload = {
         "returncode": session.process.returncode,
         "stdout_tail": tail_text(stdout, max_lines=40, max_chars=8000),
         "stderr_tail": tail_text(stderr, max_lines=40, max_chars=8000),
     }
+    if io_errors:
+        raise RuntimeError("; ".join(io_errors))
+    return payload
 
 
 def run_phase(
@@ -434,9 +440,25 @@ def run_phase(
         nonlocal process_output
         session = lifecycle.runtime
         assert isinstance(session, ToolProcessSession)
-        stop_agent(session.process, timeout=8)
-        process_output = finalize_process_output(session)
-        session.tempdir.cleanup()
+        stop_error: Exception | None = None
+        finalize_error: Exception | None = None
+        try:
+            stop_agent(session.process, timeout=8)
+        except Exception as exc:
+            stop_error = exc
+        try:
+            process_output = finalize_process_output(session)
+        except Exception as exc:
+            finalize_error = exc
+        finally:
+            session.tempdir.cleanup()
+        if stop_error is not None or finalize_error is not None:
+            failures: list[str] = []
+            if stop_error is not None:
+                failures.append(f"failed to stop {spec.name}: {stop_error}")
+            if finalize_error is not None:
+                failures.append(f"failed to capture {spec.name} output: {finalize_error}")
+            raise RuntimeError("; ".join(failures))
 
     def cleanup(_: object) -> None:
         return None

@@ -2827,7 +2827,8 @@ void maybe_apply_prepared_daemon_rejit(
             *options.daemon_socket,
             program.program_info.id,
             options.enabled_passes,
-            options.enabled_passes_specified);
+            options.enabled_passes_specified,
+            false);
     const auto rejit_end = std::chrono::steady_clock::now();
     program.rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
     populate_rejit_from_daemon_summary(program.prepared_rejit, socket_response);
@@ -3757,7 +3758,8 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             *options.daemon_socket,
             program_info.id,
             options.enabled_passes,
-            options.enabled_passes_specified);
+            options.enabled_passes_specified,
+            false);
         rejit_end = std::chrono::steady_clock::now();
         populate_rejit_from_daemon(rejit, sock_resp);
         if (!sock_resp.ok) {
@@ -3776,7 +3778,8 @@ std::vector<sample_result> run_kernel(const cli_options &options)
                 *options.daemon_socket,
                 program_info.id,
                 options.enabled_passes,
-                options.enabled_passes_specified);
+                options.enabled_passes_specified,
+                false);
             rejit_end = std::chrono::steady_clock::now();
             populate_rejit_from_daemon(rejit, sock_resp);
             if (!sock_resp.ok) {
@@ -4174,7 +4177,8 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
             *options.daemon_socket,
             program_info_before.id,
             options.enabled_passes,
-            options.enabled_passes_specified);
+            options.enabled_passes_specified,
+            false);
         rejit_end = std::chrono::steady_clock::now();
         rejit.syscall_attempted = true;
         if (!sock_resp.ok) {

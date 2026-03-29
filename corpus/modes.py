@@ -156,6 +156,12 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
         help_text="Repeat count passed to each micro_exec invocation.",
     )
     parser.add_argument(
+        "--warmups",
+        type=int,
+        default=benchmark_config_warmups(benchmark_config),
+        help="Warmup repeat count passed to each micro_exec invocation.",
+    )
+    parser.add_argument(
         "--batch-size",
         type=int,
         default=int(benchmark_config.get("corpus_batch_size") or DEFAULT_BATCH_SIZE),
@@ -269,38 +275,64 @@ def _guest_batch_failure_headline(
     batch_result: dict[str, Any],
     built_records: list[dict[str, Any]],
 ) -> str:
+    def failure_messages() -> list[str]:
+        messages: list[str] = []
+        seen: set[str] = set()
+
+        def add(message: str) -> None:
+            text = message.strip()
+            if not text or text in seen:
+                return
+            seen.add(text)
+            messages.append(text)
+
+        for bundle in built_records:
+            object_record = bundle.get("object_record")
+            if isinstance(object_record, dict):
+                object_name = str(object_record.get("canonical_object_name") or "unknown-object")
+                object_error = str(object_record.get("error") or "").strip()
+                object_status = str(object_record.get("status") or "").strip()
+                if object_error:
+                    add(f"{object_name}: {object_error}")
+                elif object_status == "error":
+                    add(f"{object_name}: object status error")
+
+            program_records = bundle.get("program_records")
+            if not isinstance(program_records, list):
+                continue
+            for program_record in program_records:
+                if not isinstance(program_record, dict):
+                    continue
+                program_name = str(program_record.get("canonical_name") or "unknown-program")
+                for field_name in ("baseline_compile", "rejit_compile", "baseline_run", "rejit_run"):
+                    invocation = program_record.get(field_name)
+                    if isinstance(invocation, dict) and not invocation.get("ok", False):
+                        add(f"{program_name} {field_name}: {summarize_failure_reason(invocation)}")
+                        break
+
+        return messages
+
     batch_error = str(batch_result.get("error") or "").strip()
     batch_stderr = str(batch_result.get("stderr") or "").strip()
+    record_failures = failure_messages()
     if batch_stderr and (
         not batch_error or batch_error.startswith("batch runner exited with code")
     ):
+        if record_failures:
+            return record_failures[0]
         stderr_lines = [line.strip() for line in batch_stderr.splitlines() if line.strip()]
         if stderr_lines:
             return stderr_lines[-1]
+    if record_failures and (
+        not batch_error
+        or batch_error.startswith("batch runner exited with code")
+        or batch_error.startswith("libbpf:")
+    ):
+        return record_failures[0]
     if batch_error:
         return batch_error
-
-    for bundle in built_records:
-        object_record = bundle.get("object_record")
-        if isinstance(object_record, dict):
-            object_name = str(object_record.get("canonical_object_name") or "unknown-object")
-            object_error = str(object_record.get("error") or "").strip()
-            if object_error:
-                return f"{object_name}: {object_error}"
-            if str(object_record.get("status") or "").strip() == "error":
-                return f"{object_name}: object status error"
-
-        program_records = bundle.get("program_records")
-        if not isinstance(program_records, list):
-            continue
-        for program_record in program_records:
-            if not isinstance(program_record, dict):
-                continue
-            program_name = str(program_record.get("canonical_name") or "unknown-program")
-            for field_name in ("baseline_compile", "rejit_compile", "baseline_run", "rejit_run"):
-                invocation = program_record.get(field_name)
-                if isinstance(invocation, dict) and not invocation.get("ok", False):
-                    return f"{program_name} {field_name}: {summarize_failure_reason(invocation)}"
+    if record_failures:
+        return record_failures[0]
 
     return f"batch runner exited with code {batch_result.get('returncode')}"
 
@@ -312,7 +344,7 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
     daemon = Path(args.daemon).resolve()
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
     guest_result_path = Path(args.guest_result_json).resolve() if args.guest_result_json else None
-    warmup_repeat = benchmark_config_warmups(args.benchmark_config)
+    warmup_repeat = int(getattr(args, "warmups", 1) or 1)
     batch_size = int(getattr(args, "batch_size", DEFAULT_BATCH_SIZE) or DEFAULT_BATCH_SIZE)
     if btf_custom_path is None:
         raise SystemExit("--btf-custom-path is required in guest batch mode")
@@ -400,6 +432,7 @@ def build_markdown_v2(data: dict[str, Any]) -> str:
         f"- Effective mode: `{summary['effective_mode']}`",
         f"- Benchmark profile: `{data.get('benchmark_profile') or 'default'}`",
         f"- Benchmark config: `{data.get('benchmark_config') or 'fallback-defaults'}`",
+        f"- Warmups: {data.get('warmups', 0)}",
         f"- Batch size: {requested_batch_size}",
         f"- Objects: {summary['objects_attempted']}",
         f"- Programs: {summary['targets_attempted']}",
@@ -535,6 +568,7 @@ def build_markdown_v2(data: dict[str, Any]) -> str:
 def packet_main(argv: list[str] | None = None) -> int:
     args = parse_packet_args(argv)
     require_minimum(args.repeat, 1, "--repeat")
+    require_minimum(args.warmups, 0, "--warmups")
     require_minimum(args.batch_size, 1, "--batch-size")
     benchmark_config_path = args.benchmark_config.get("config_path")
 
@@ -612,6 +646,7 @@ def packet_main(argv: list[str] | None = None) -> int:
         "btf_custom_path": str(btf_custom_path) if btf_custom_path is not None else None,
         "vng_binary": args.vng,
         "repeat": args.repeat,
+        "warmups": args.warmups,
         "batch_size": args.batch_size,
         "timeout_seconds": args.timeout,
         "guest_smoke": guest_smoke,
@@ -669,6 +704,7 @@ def packet_main(argv: list[str] | None = None) -> int:
                 },
                 "vng_binary": args.vng,
                 "repeat": args.repeat,
+                "warmups": args.warmups,
                 "batch_size": args.batch_size,
                 "timeout_seconds": args.timeout,
                 "guest_smoke": guest_smoke,
@@ -784,16 +820,27 @@ def packet_main(argv: list[str] | None = None) -> int:
         for record in program_records:
             record["guest_invocation"] = dict(guest_invocation) if guest_invocation is not None else None
 
+        guest_batch_warning: str | None = None
         if not guest_smoke.get("payload"):
             smoke_error = (guest_smoke.get("invocation") or {}).get("error") or "guest smoke failed"
             raise RuntimeError(f"vm guest smoke failed: {smoke_error}")
         if not batch_result["invocation"]["ok"]:
             batch_error = batch_result["invocation"]["error"] or "guest batch failed"
-            raise RuntimeError(f"vm guest batch failed: {batch_error}")
+            if batch_result.get("records_emitted") == len(objects):
+                guest_batch_warning = (
+                    "vm guest batch completed with non-zero exit after emitting all records: "
+                    f"{batch_error}"
+                )
+            else:
+                raise RuntimeError(f"vm guest batch failed: {batch_error}")
 
         current_target = None
         current_target_index = None
-        flush_artifact("completed", include_markdown=True)
+        flush_artifact(
+            "completed_with_errors" if guest_batch_warning else "completed",
+            error_message=guest_batch_warning,
+            include_markdown=True,
+        )
     except Exception as exc:
         flush_artifact("error", error_message=str(exc))
         raise

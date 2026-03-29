@@ -87,9 +87,11 @@ VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 PROFILE_FLAG := $(if $(strip $(PROFILE)),--profile "$(PROFILE)",)
 FILTER_FLAGS := $(foreach filter,$(FILTERS),--filter "$(filter)")
 REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
+WARMUPS_IS_EXPLICIT := $(or $(findstring command line,$(origin WARMUPS)),$(findstring environment,$(origin WARMUPS)),$(findstring override,$(origin WARMUPS)))
 VM_CORPUS_OUTPUT_JSON_IS_EXPLICIT := $(or $(findstring command line,$(origin VM_CORPUS_OUTPUT_JSON)),$(findstring environment,$(origin VM_CORPUS_OUTPUT_JSON)),$(findstring override,$(origin VM_CORPUS_OUTPUT_JSON)))
 VM_CORPUS_OUTPUT_MD_IS_EXPLICIT := $(or $(findstring command line,$(origin VM_CORPUS_OUTPUT_MD)),$(findstring environment,$(origin VM_CORPUS_OUTPUT_MD)),$(findstring override,$(origin VM_CORPUS_OUTPUT_MD)))
 VM_CORPUS_REPEAT_FLAG := $(if $(strip $(REPEAT_IS_EXPLICIT)),--repeat "$(REPEAT)",)
+VM_CORPUS_WARMUPS_FLAG := $(if $(strip $(WARMUPS_IS_EXPLICIT)),--warmups "$(WARMUPS)",)
 VM_CORPUS_OUTPUT_JSON_FLAG := $(if $(strip $(VM_CORPUS_OUTPUT_JSON_IS_EXPLICIT)),--output-json "$(VM_CORPUS_OUTPUT_JSON)",)
 VM_CORPUS_OUTPUT_MD_FLAG := $(if $(strip $(VM_CORPUS_OUTPUT_MD_IS_EXPLICIT)),--output-md "$(VM_CORPUS_OUTPUT_MD)",)
 
@@ -328,6 +330,7 @@ vm-corpus: corpus-build micro_exec daemon-binary kernel-image kinsn-modules-buil
 		--corpus-build-report "$(CORPUS_BUILD_REPORT)" \
 		--batch-size "$(BATCH_SIZE)" \
 		$(VM_CORPUS_REPEAT_FLAG) \
+		$(VM_CORPUS_WARMUPS_FLAG) \
 		$(VM_CORPUS_OUTPUT_JSON_FLAG) \
 		$(VM_CORPUS_OUTPUT_MD_FLAG)
 

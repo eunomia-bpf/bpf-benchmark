@@ -33,7 +33,6 @@ set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL TRUE)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBELF REQUIRED IMPORTED_TARGET libelf)
 pkg_check_modules(ZLIB REQUIRED IMPORTED_TARGET zlib)
-pkg_check_modules(LIBZSTD REQUIRED IMPORTED_TARGET libzstd)
 pkg_check_modules(YAMLCPP REQUIRED IMPORTED_TARGET yaml-cpp)
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)
@@ -106,7 +105,6 @@ target_link_libraries(micro_exec
         PkgConfig::LIBELF
         PkgConfig::YAMLCPP
         PkgConfig::ZLIB
-        PkgConfig::LIBZSTD
 )
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)

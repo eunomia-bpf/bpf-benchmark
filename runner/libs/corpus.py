@@ -50,6 +50,10 @@ _BATCH_RESOURCE_ERROR_SUBSTRINGS = (
 )
 
 
+def _corpus_batch_parallel_jobs() -> int:
+    return max(1, os.cpu_count() or 1)
+
+
 @dataclass(frozen=True)
 class ResolvedProgram:
     source: str
@@ -214,35 +218,58 @@ def scan_program_site_counts(
         timeout_seconds=packet_batch_timeout_seconds(max(1, len(objects)), timeout_seconds),
         cwd=ROOT_DIR,
     )
+    if not bool(batch_result.get("ok")):
+        error_text = str(batch_result.get("error") or "").strip()
+        stderr_text = tail_text(str(batch_result.get("stderr") or ""), max_lines=20, max_chars=4000)
+        details = error_text or stderr_text or f"returncode={batch_result.get('returncode')}"
+        raise RuntimeError(f"program site scan failed: {details}")
+    if bool(batch_result.get("timed_out")):
+        raise RuntimeError("program site scan timed out")
+    if bool(batch_result.get("completed_with_job_errors")):
+        raise RuntimeError("program site scan completed with job errors")
     result_payload = batch_result.get("result")
     if not isinstance(result_payload, Mapping):
-        return {}
+        raise RuntimeError("program site scan returned no structured result payload")
 
     raw_jobs = result_payload.get("jobs")
     if not isinstance(raw_jobs, list):
-        return {}
+        raise RuntimeError("program site scan result is missing jobs")
 
     counts_by_program: dict[str, dict[str, int]] = {}
     for raw_job in raw_jobs:
         if not isinstance(raw_job, Mapping):
-            continue
+            raise RuntimeError("program site scan returned a non-mapping job record")
         job_id = str(raw_job.get("id") or "").strip()
         obj = objects_by_job_id.get(job_id)
         if obj is None:
-            continue
+            raise RuntimeError(f"program site scan returned an unknown job id: {job_id or '<missing>'}")
+        if not bool(raw_job.get("ok")):
+            job_error = str(raw_job.get("error") or "").strip() or "unknown static verify failure"
+            raise RuntimeError(f"program site scan job {job_id} failed: {job_error}")
         payload = raw_job.get("payload")
         records = payload.get("records") if isinstance(payload, Mapping) else None
         if not isinstance(records, list):
-            continue
+            raise RuntimeError(f"program site scan job {job_id} returned no records payload")
         programs_by_name = {program.program_name: program for program in obj.programs}
+        seen_programs: set[str] = set()
         for raw_record in records:
             if not isinstance(raw_record, Mapping):
-                continue
+                raise RuntimeError(f"program site scan job {job_id} returned a non-mapping program record")
             program_name = str(raw_record.get("prog_name") or "").strip()
             program = programs_by_name.get(program_name)
             if program is None:
                 continue
+            seen_programs.add(program.canonical_name)
             counts_by_program[program.canonical_name] = _site_counts_from_static_verify_record(raw_record)
+        missing_programs = [
+            program.canonical_name
+            for program in obj.programs
+            if program.canonical_name not in seen_programs
+        ]
+        if missing_programs:
+            raise RuntimeError(
+                f"program site scan job {job_id} did not return records for: {', '.join(missing_programs)}"
+            )
     return counts_by_program
 
 
@@ -537,7 +564,14 @@ def resolve_manifest_object(
     )
     shared_state_policy = _string_or_none(entry.get("shared_state_policy")) or "reset_maps"
     allow_object_only_result = bool(entry.get("allow_object_only_result", False))
-    object_test_method = _string_or_none(entry.get("test_method")) or "compile_only"
+    raw_programs = _sequence(entry.get("programs"), field_name=f"objects[{index}].programs")
+    object_test_method = _string_or_none(entry.get("test_method"))
+    if object_test_method is None:
+        if raw_programs:
+            raise SystemExit(f"manifest object #{index} is missing test_method")
+        if not allow_object_only_result:
+            raise SystemExit(f"manifest object #{index} is missing test_method")
+        object_test_method = "object_only"
     object_prog_type = _string_or_none(entry.get("prog_type")) or ""
     object_section = _string_or_none(entry.get("section")) or ""
     object_io_mode = _string_or_none(entry.get("io_mode")) or "context"
@@ -554,7 +588,6 @@ def resolve_manifest_object(
         absolute = ROOT_DIR / relative
         return relative.as_posix() if absolute.exists() else None
 
-    raw_programs = _sequence(entry.get("programs"), field_name=f"objects[{index}].programs")
     programs: list[ResolvedProgram] = []
     for program_index, raw_program in enumerate(raw_programs, start=1):
         if not isinstance(raw_program, Mapping):
@@ -1837,9 +1870,16 @@ def _resolve_tracee_loader_binary(obj: ResolvedObject) -> str:
             "tracee loader binary is unavailable and no setup script was configured"
         )
 
-    completed = run_command(["bash", setup_script], cwd=ROOT_DIR, check=False, timeout=1800)
+    completed = run_command(
+        ["bash", setup_script],
+        1800,
+        cwd=ROOT_DIR,
+        expect_json=False,
+    )
     scripted_binary = ""
-    for line in (completed.stdout or "").splitlines():
+    stdout_text = str(completed.get("stdout") or "")
+    stderr_text = str(completed.get("stderr") or "")
+    for line in stdout_text.splitlines():
         if line.startswith("TRACEE_BINARY="):
             scripted_binary = line.split("=", 1)[1].strip()
             break
@@ -1848,7 +1888,11 @@ def _resolve_tracee_loader_binary(obj: ResolvedObject) -> str:
     if resolved is not None:
         return resolved
 
-    details = tail_text("\n".join(filter(None, [completed.stderr, completed.stdout])), max_lines=40, max_chars=8000)
+    details = tail_text(
+        "\n".join(filter(None, [stderr_text, stdout_text])),
+        max_lines=40,
+        max_chars=8000,
+    )
     raise RuntimeError(
         "tracee setup did not yield an executable loader binary"
         + (f": {details}" if details else "")
@@ -1962,8 +2006,9 @@ def _run_trigger_command(
     started = time.monotonic()
     run_command(
         ["bash", "-lc", command],
+        timeout_seconds or 30,
         cwd=ROOT_DIR,
-        timeout=timeout_seconds or 30,
+        expect_json=False,
     )
     return max(0.0, time.monotonic() - started)
 
@@ -2280,7 +2325,10 @@ def build_object_batch_plan_v2(
     batch_label: str | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     baseline_prepare_jobs: list[dict[str, Any]] = []
-    baseline_measure_jobs: list[dict[str, Any]] = []
+    baseline_compile_parallel_jobs: list[dict[str, Any]] = []
+    baseline_compile_serial_jobs: list[dict[str, Any]] = []
+    baseline_run_parallel_jobs: list[dict[str, Any]] = []
+    baseline_run_serial_jobs: list[dict[str, Any]] = []
     rejit_prepare_jobs: list[dict[str, Any]] = []
     rejit_measure_jobs: list[dict[str, Any]] = []
     object_refs: list[dict[str, Any]] = []
@@ -2321,13 +2369,14 @@ def build_object_batch_plan_v2(
             baseline_prepared_key = f"{baseline_group}:prepared"
             baseline_prepare_job_id = f"{baseline_group}:prepare"
             load_program_names = list(group["load_program_names"])
+            group_is_parallel_safe = len(group["programs"]) == 1
 
             refs["baseline_group_compiles"].append(baseline_prepare_job_id)
 
             baseline_prepare_jobs.append(
                 build_test_run_batch_job(
                     job_id=baseline_prepare_job_id,
-                    execution="serial",
+                    execution="parallel",
                     runtime="kernel",
                     object_path=object_path,
                     program_name=None,
@@ -2351,10 +2400,15 @@ def build_object_batch_plan_v2(
                 program_refs = refs["programs"][program.canonical_name]
                 memory_path = Path(program.memory_path) if program.memory_path else None
                 program_fixture_path = Path(program.fixture_path) if program.fixture_path else fixture_path
-                baseline_measure_jobs.append(
+                baseline_compile_jobs = (
+                    baseline_compile_parallel_jobs
+                    if group_is_parallel_safe
+                    else baseline_compile_serial_jobs
+                )
+                baseline_compile_jobs.append(
                     build_test_run_batch_job(
                         job_id=program_refs["baseline_compile"],
-                        execution="serial",
+                        execution="parallel" if group_is_parallel_safe else "serial",
                         runtime=runtime_for_program(program, rejit=False),
                         object_path=object_path,
                         program_name=program.program_name,
@@ -2376,10 +2430,15 @@ def build_object_batch_plan_v2(
                     )
                 )
                 if program.test_method != "compile_only":
-                    baseline_measure_jobs.append(
+                    baseline_run_jobs = (
+                        baseline_run_parallel_jobs
+                        if group_is_parallel_safe
+                        else baseline_run_serial_jobs
+                    )
+                    baseline_run_jobs.append(
                         build_test_run_batch_job(
                             job_id=program_refs["baseline_run"],
-                            execution="serial",
+                            execution="parallel" if group_is_parallel_safe else "serial",
                             runtime=runtime_for_program(program, rejit=False),
                             object_path=object_path,
                             program_name=program.program_name,
@@ -2414,7 +2473,7 @@ def build_object_batch_plan_v2(
                 rejit_prepare_jobs.append(
                     build_test_run_batch_job(
                         job_id=program_refs["rejit_compile"],
-                        execution="serial",
+                        execution="parallel",
                         runtime=runtime_for_program(program, rejit=True),
                         object_path=object_path,
                         program_name=program.program_name,
@@ -2441,7 +2500,7 @@ def build_object_batch_plan_v2(
                     rejit_measure_jobs.append(
                         build_test_run_batch_job(
                             job_id=program_refs["rejit_run"],
-                            execution="serial",
+                            execution="parallel",
                             runtime=runtime_for_program(program, rejit=True),
                             object_path=object_path,
                             program_name=program.program_name,
@@ -2465,14 +2524,30 @@ def build_object_batch_plan_v2(
                         )
                     )
 
+    def insert_stage_barrier(jobs: list[dict[str, Any]]) -> None:
+        if not jobs:
+            return
+        jobs[0] = {**jobs[0], "execution": "serial"}
+
+    # The batch runner coalesces adjacent parallel jobs into a single chunk.
+    # Keep each prepare/compile/run phase separate so prepared-state
+    # dependencies and group transitions remain ordered.
+    insert_stage_barrier(baseline_compile_parallel_jobs)
+    insert_stage_barrier(baseline_run_parallel_jobs)
+    insert_stage_barrier(rejit_prepare_jobs)
+    insert_stage_barrier(rejit_measure_jobs)
+
     return {
         "schema_version": 1,
         "scheduler": {
-            "max_parallel_jobs": 1,
+            "max_parallel_jobs": _corpus_batch_parallel_jobs(),
         },
         "jobs": (
             baseline_prepare_jobs
-            + baseline_measure_jobs
+            + baseline_compile_parallel_jobs
+            + baseline_compile_serial_jobs
+            + baseline_run_parallel_jobs
+            + baseline_run_serial_jobs
             + rejit_prepare_jobs
             + rejit_measure_jobs
         ),
@@ -2942,6 +3017,36 @@ def run_objects_locally_batch(
     retry_splits: list[dict[str, Any]] = []
     app_native_summary: list[dict[str, Any]] = []
 
+    def ensure_local_daemon_running(context: str) -> None:
+        if daemon_server is None:
+            return
+        daemon_proc = daemon_server[0]
+        poll = getattr(daemon_proc, "poll", None)
+        if not callable(poll):
+            return
+        returncode = poll()
+        if returncode is None:
+            return
+        stdout_tail = ""
+        stderr_tail = ""
+        for path, label in ((daemon_server[3], "stdout"), (daemon_server[4], "stderr")):
+            try:
+                text = Path(path).read_text(encoding="utf-8", errors="replace").strip()
+            except OSError as exc:
+                text = f"<unavailable: {exc}>"
+            if not text:
+                continue
+            preview = tail_text(text, max_lines=20, max_chars=4000)
+            if label == "stdout":
+                stdout_tail = preview
+            else:
+                stderr_tail = preview
+        details = stderr_tail or stdout_tail
+        message = f"bpfrejit-daemon exited with code {returncode} during {context}"
+        if details:
+            message = f"{message}: {details}"
+        raise RuntimeError(message)
+
     try:
         assert active_daemon_socket is not None
         generic_program_enabled_passes: dict[str, list[str]] = {}
@@ -2954,6 +3059,7 @@ def run_objects_locally_batch(
                 timeout_seconds=timeout_seconds,
                 enabled_passes=enabled_passes,
             )
+            ensure_local_daemon_running("policy site scan")
         program_enabled_passes = {
             program.canonical_name: list(generic_program_enabled_passes.get(program.canonical_name, fallback_enabled_passes))
             for obj in objects
@@ -2974,6 +3080,7 @@ def run_objects_locally_batch(
                 program_enabled_passes=generic_program_enabled_passes,
                 batch_size=batch_size,
             )
+            ensure_local_daemon_running("generic corpus batch execution")
             for record in generic_object_records:
                 combined_object_records[str(record["canonical_object_name"])] = record
             for record in generic_program_records:
@@ -3016,6 +3123,7 @@ def run_objects_locally_batch(
                 combined_returncode = 2
 
         for obj in app_native_objects:
+            ensure_local_daemon_running(f"app-native corpus object setup for {obj.canonical_name}")
             try:
                 object_record, program_records, app_batch_result = _run_app_native_object(
                     obj=obj,
@@ -3078,6 +3186,7 @@ def run_objects_locally_batch(
                 combined_returncode = result_returncode
             elif combined_returncode == 0 and result_returncode == 2:
                 combined_returncode = 2
+            ensure_local_daemon_running(f"app-native corpus object execution for {obj.canonical_name}")
             app_native_summary.append(
                 {
                     "repo": obj.repo,

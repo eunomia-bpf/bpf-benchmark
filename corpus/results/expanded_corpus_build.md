@@ -1,14 +1,14 @@
 # Expanded Corpus Build Results
 
-- Generated: `2026-03-29T16:52:01.295100+00:00`
+- Generated: `2026-03-29T20:30:42.830516+00:00`
 - Manifest: `/home/yunwei37/workspace/bpf-benchmark/runner/repos.yaml`
 - Repo root: `/home/yunwei37/workspace/bpf-benchmark/runner/repos`
 - Macro corpus: `/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_corpus.yaml`
 - Build root: `/home/yunwei37/workspace/bpf-benchmark/corpus/build`
-- Sources considered: 1192
+- Sources considered: 1183
 - Built from source: 740
-- Staged existing objects: 115
-- Available objects: 855
+- Staged existing objects: 106
+- Available objects: 846
 - Failures: 337
 
 ## Per-Repo Summary
@@ -23,16 +23,15 @@
 | datadog-agent | 0 | 1 | 0 | 0 |
 | katran | 0 | 5 | 2 | 0 |
 | libbpf-bootstrap | 13 | 0 | 2 | 0 |
-| linux-selftests | 649 | 6 | 267 | 0 |
+| linux-selftests | 649 | 0 | 267 | 0 |
 | loxilb | 0 | 3 | 0 | 0 |
-| manual-test | 0 | 2 | 0 | 0 |
 | netbird | 0 | 1 | 1 | 0 |
 | opentelemetry-ebpf-profiler | 0 | 3 | 0 | 0 |
 | real_world_code_size | 0 | 15 | 0 | 0 |
 | scx | 0 | 4 | 0 | 0 |
 | suricata | 0 | 2 | 0 | 0 |
 | systemd | 4 | 6 | 2 | 0 |
-| tetragon | 0 | 23 | 28 | 0 |
+| tetragon | 0 | 22 | 28 | 0 |
 | tracee | 0 | 1 | 0 | 0 |
 | tubular | 0 | 1 | 0 | 0 |
 | xdp-examples | 5 | 0 | 8 | 0 |

@@ -1344,13 +1344,12 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     ]
     status = str(payload.get("status") or "")
     if status != "ok":
-        result_label = "SKIP" if status == "skipped" else "ERROR"
-        result_reason = payload.get("skip_reason") or payload.get("error_message") or "unknown"
+        result_reason = payload.get("error_message") or payload.get("skip_reason") or "unknown"
         lines.extend(
             [
                 "## Result",
                 "",
-                f"- Status: `{result_label}`",
+                "- Status: `ERROR`",
                 f"- Reason: `{result_reason}`",
             ]
         )
@@ -1481,42 +1480,6 @@ def run_phase(
     }
 
 
-def skip_payload(
-    *,
-    config: Mapping[str, object],
-    duration_s: int,
-    tracee_binary: str | None,
-    setup_result: Mapping[str, object],
-    smoke: bool,
-    reason: str,
-    limitations: Sequence[str],
-    preflight: Mapping[str, object] | None = None,
-) -> dict[str, object]:
-    return {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "skipped",
-        "mode": "skipped",
-        "skip_reason": reason,
-        "smoke": smoke,
-        "duration_s": duration_s,
-        "tracee_binary": tracee_binary,
-        "tracee_programs": [],
-        "setup": dict(setup_result),
-        "host": host_metadata(),
-        "config": dict(config),
-        "preflight": None if preflight is None else dict(preflight),
-        "control": None,
-        "baseline": None,
-        "paired_cycles": [],
-        "scan_results": {},
-        "rejit_result": None,
-        "post_rejit": None,
-        "comparison": {"comparable": False, "reason": reason},
-        "limitations": list(limitations),
-        "map_capture": None,
-    }
-
-
 def error_payload(
     *,
     config: Mapping[str, object],
@@ -1594,13 +1557,13 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     if setup_result["returncode"] != 0:
         limitations.append("Setup script returned non-zero; only the real Tracee binary path was attempted.")
     if tracee_binary is None:
-        return skip_payload(
+        return error_payload(
             config=config,
             duration_s=duration_s,
             tracee_binary=None,
             setup_result=setup_result,
             smoke=bool(args.smoke),
-            reason="Tracee binary is unavailable in this environment; manual .bpf.o fallback is forbidden.",
+            error_message="Tracee binary is unavailable in this environment; manual .bpf.o fallback is forbidden.",
             limitations=limitations,
         )
     if require_program_activity and preflight_duration_s <= 0:
@@ -1733,8 +1696,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                             "Configured Tracee events/workload did not execute the selected target programs during preflight."
                         )
                         return LifecycleAbort(
-                            status="skipped",
-                            reason="preflight observed zero target-program executions; skipping invalid runtime measurement",
+                            status="error",
+                            reason="preflight observed zero target-program executions; target workload did not exercise the selected programs",
                             artifacts={"preflight": preflight},
                         )
                     if config.get("apply_programs") and apply_run_cnt <= 0:
@@ -1742,8 +1705,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                             "Configured Tracee events/workload did not execute the configured apply programs during preflight."
                         )
                         return LifecycleAbort(
-                            status="skipped",
-                            reason="preflight observed zero apply-program executions; skipping invalid optimization benchmark",
+                            status="error",
+                            reason="preflight observed zero apply-program executions; configured apply programs were not exercised",
                             artifacts={"preflight": preflight},
                         )
                     return None
@@ -1824,13 +1787,13 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 )
 
                 if lifecycle_result.abort is not None:
-                    return skip_payload(
+                    return error_payload(
                         config=config,
                         duration_s=duration_s,
                         tracee_binary=tracee_binary,
                         setup_result=setup_result,
                         smoke=bool(args.smoke),
-                        reason=lifecycle_result.abort.reason,
+                        error_message=lifecycle_result.abort.reason,
                         limitations=limitations,
                         preflight=preflight,
                     )

@@ -31,6 +31,7 @@ daemon_socket_response daemon_socket_optimize(
     const std::string &socket_path,
     uint32_t prog_id,
     const std::vector<std::string> &enabled_passes,
-    bool enabled_passes_specified);
+    bool enabled_passes_specified,
+    bool dry_run);
 
 #endif

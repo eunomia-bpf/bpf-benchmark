@@ -57,7 +57,7 @@ class ArtifactSession:
         metadata.setdefault("status", status)
         metadata.setdefault("started_at", self.started_at)
         metadata["last_updated_at"] = updated_at
-        if status == "completed":
+        if str(status).startswith("completed"):
             metadata.setdefault("completed_at", updated_at)
         if error_message:
             metadata["error_message"] = error_message

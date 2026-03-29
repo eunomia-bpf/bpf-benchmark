@@ -24,6 +24,10 @@ AWS_ARM64_BENCH_WARMUPS="${AWS_ARM64_BENCH_WARMUPS:-0}"
 AWS_ARM64_BENCH_REPEAT="${AWS_ARM64_BENCH_REPEAT:-10}"
 AWS_ARM64_BENCH_CPU="${AWS_ARM64_BENCH_CPU:-0}"
 AWS_ARM64_REMOTE_RESULT_JSON="${AWS_ARM64_REMOTE_RESULT_JSON:-arm64_t4g_micro.json}"
+AWS_ARM64_CORPUS_ATTEMPT="${AWS_ARM64_CORPUS_ATTEMPT:-1}"
+AWS_ARM64_CORPUS_FILTERS="${AWS_ARM64_CORPUS_FILTERS:-katran}"
+AWS_ARM64_CORPUS_MAX_PROGRAMS="${AWS_ARM64_CORPUS_MAX_PROGRAMS:-3}"
+AWS_ARM64_CORPUS_REPEAT="${AWS_ARM64_CORPUS_REPEAT:-1}"
 AWS_REGION_VALUE="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
 
 ARM64_BUILD_DIR="${ARM64_BUILD_DIR:-$ROOT_DIR/vendor/linux-framework/build-arm64}"
@@ -65,7 +69,7 @@ usage: aws_arm64.sh <launch|setup|benchmark|terminate|full> [arg]
 Commands:
   launch               Launch or reuse a tagged EC2 ARM64 instance.
   setup <instance_ip>  Upload/install the ARM64 kernel + modules, reboot, verify.
-  benchmark <ip>       Upload local cross-built ARM64 binaries and run smoke benchmarks.
+  benchmark <ip>       Upload local cross-built ARM64 binaries and run ARM64 micro + corpus attempt.
   terminate <id>       Terminate the EC2 instance and clear cached state.
   full                 Local cross-build -> launch -> setup -> benchmark -> terminate.
 
@@ -85,6 +89,10 @@ Optional env:
   AWS_ARM64_BENCH_ITERATIONS   default: 1
   AWS_ARM64_BENCH_WARMUPS      default: 0
   AWS_ARM64_BENCH_REPEAT       default: 10
+  AWS_ARM64_CORPUS_ATTEMPT     default: 1
+  AWS_ARM64_CORPUS_FILTERS     default: katran
+  AWS_ARM64_CORPUS_MAX_PROGRAMS default: 3
+  AWS_ARM64_CORPUS_REPEAT      default: 1
 EOF
 }
 
@@ -443,29 +451,51 @@ ensure_remote_runtime_prereqs() {
 set -euo pipefail
 sudo dnf -y install \
     bpftool \
+    cargo \
+    cmake \
     dracut \
     elfutils-libelf \
+    elfutils-libelf-devel \
+    gcc-c++ \
     grubby \
     gzip \
+    make \
     ncurses-libs \
+    pkgconf-pkg-config \
     python3 \
     python3.11 \
     python3.11-pip \
     tar \
     util-linux \
+    rust \
+    yaml-cpp-devel \
     zlib \
+    zlib-devel \
     zstd >/dev/null
 if ! rpm -q python3.11-pyyaml >/dev/null 2>&1; then
     if ! sudo dnf -y install python3.11-pyyaml >/dev/null 2>&1; then
         sudo python3.11 -m pip install --quiet PyYAML >/dev/null
     fi
 fi
+if ! python3.11 -c 'import elftools' >/dev/null 2>&1; then
+    if ! sudo dnf -y install python3-pyelftools >/dev/null 2>&1; then
+        if ! sudo dnf -y install python3.11-pyelftools >/dev/null 2>&1; then
+            sudo python3.11 -m pip install --quiet pyelftools >/dev/null
+        fi
+    fi
+fi
 command -v bpftool >/dev/null
+command -v cargo >/dev/null
+command -v cmake >/dev/null
+command -v c++ >/dev/null
 command -v dracut >/dev/null
 command -v grubby >/dev/null
+command -v make >/dev/null
 command -v python3 >/dev/null
 command -v python3.11 >/dev/null
+command -v rustc >/dev/null
 python3.11 -c 'import yaml' >/dev/null
+python3.11 -c 'import elftools' >/dev/null
 command -v taskset >/dev/null
 EOF
 }
@@ -548,7 +578,7 @@ ensure_cross_arm64_artifacts() {
           ! -x "$ARM64_CROSS_DAEMON" || ! -x "$ARM64_CROSS_DAEMON_REAL" || \
           ! -d "$ARM64_CROSS_LIB_DIR" ]]; then
         log "Building local AL2023-compatible ARM64 userspace artifacts"
-        make -C "$ROOT_DIR" cross-arm64 >/dev/null
+        make -C "$ROOT_DIR" cross-arm64 ARM64_CROSSBUILD_ENABLE_LLVMBPF="${ARM64_CROSSBUILD_ENABLE_LLVMBPF:-OFF}" >/dev/null
     fi
 
     file "$ARM64_CROSS_RUNNER_REAL" | grep -F "ARM aarch64" >/dev/null \
@@ -568,20 +598,29 @@ ensure_benchmark_bundle() {
     require_local_path "$ROOT_DIR/micro/programs/simple.bpf.o" "simple micro object"
     require_local_path "$ROOT_DIR/runner/libs/__init__.py" "runner python helpers"
     require_local_path "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" "ARM64 remote benchmark runner"
+    require_local_path "$ROOT_DIR/corpus/config/macro_corpus.yaml" "macro corpus manifest"
+    require_local_path "$ROOT_DIR/corpus/config/benchmark_config.yaml" "benchmark config"
+    require_local_path "$ROOT_DIR/corpus/results/expanded_corpus_build.latest.json" "corpus build report"
     require_local_path "$SMOKE_CORPUS_OBJECT" "daemon smoke object"
 
     rm -rf "$BENCHMARK_BUNDLE_DIR"
     mkdir -p \
         "$BENCHMARK_BUNDLE_DIR/runner/libs" \
         "$BENCHMARK_BUNDLE_DIR/runner/scripts" \
+        "$BENCHMARK_BUNDLE_DIR/runner/include" \
+        "$BENCHMARK_BUNDLE_DIR/runner/src" \
         "$BENCHMARK_BUNDLE_DIR/runner/build" \
         "$BENCHMARK_BUNDLE_DIR/daemon/build" \
+        "$BENCHMARK_BUNDLE_DIR/daemon/src" \
         "$BENCHMARK_BUNDLE_DIR/daemon/target/release" \
+        "$BENCHMARK_BUNDLE_DIR/vendor" \
         "$BENCHMARK_BUNDLE_DIR/lib" \
         "$BENCHMARK_BUNDLE_DIR/micro/programs" \
         "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs" \
         "$BENCHMARK_BUNDLE_DIR/micro/config" \
-        "$BENCHMARK_BUNDLE_DIR/corpus/build/katran"
+        "$BENCHMARK_BUNDLE_DIR/corpus/build/katran" \
+        "$BENCHMARK_BUNDLE_DIR/corpus/config" \
+        "$BENCHMARK_BUNDLE_DIR/corpus/results"
 
     cp "$ARM64_CROSS_RUNNER" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec"
     cp "$ARM64_CROSS_RUNNER_REAL" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec.real"
@@ -596,10 +635,24 @@ ensure_benchmark_bundle() {
     cp -a "$ROOT_DIR/micro/generated-inputs/." "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs/"
 
     cp -a "$ROOT_DIR/runner/libs/." "$BENCHMARK_BUNDLE_DIR/runner/libs/"
+    cp "$ROOT_DIR/runner/CMakeLists.txt" "$BENCHMARK_BUNDLE_DIR/runner/"
+    cp "$ROOT_DIR/runner/Makefile" "$BENCHMARK_BUNDLE_DIR/runner/"
+    cp -a "$ROOT_DIR/runner/include/." "$BENCHMARK_BUNDLE_DIR/runner/include/"
+    cp -a "$ROOT_DIR/runner/src/." "$BENCHMARK_BUNDLE_DIR/runner/src/"
     cp "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" \
         "$BENCHMARK_BUNDLE_DIR/runner/scripts/"
 
+    cp "$ROOT_DIR/daemon/Cargo.toml" "$BENCHMARK_BUNDLE_DIR/daemon/"
+    cp "$ROOT_DIR/daemon/Cargo.lock" "$BENCHMARK_BUNDLE_DIR/daemon/"
+    cp -a "$ROOT_DIR/daemon/src/." "$BENCHMARK_BUNDLE_DIR/daemon/src/"
+
+    cp -a "$ROOT_DIR/vendor/libbpf" "$BENCHMARK_BUNDLE_DIR/vendor/"
+
     cp "$SMOKE_CORPUS_OBJECT" "$BENCHMARK_BUNDLE_DIR/corpus/build/katran/balancer.bpf.o"
+    cp -a "$ROOT_DIR/corpus/build/katran/." "$BENCHMARK_BUNDLE_DIR/corpus/build/katran/"
+    cp "$ROOT_DIR/corpus/config/macro_corpus.yaml" "$BENCHMARK_BUNDLE_DIR/corpus/config/"
+    cp "$ROOT_DIR/corpus/config/benchmark_config.yaml" "$BENCHMARK_BUNDLE_DIR/corpus/config/"
+    cp "$ROOT_DIR/corpus/results/expanded_corpus_build.latest.json" "$BENCHMARK_BUNDLE_DIR/corpus/results/"
 
     tar -C "$BENCHMARK_BUNDLE_DIR" -czf "$BENCHMARK_BUNDLE_TAR" .
 }
@@ -630,7 +683,9 @@ EOF
     ssh_bash "$ip" "$AWS_ARM64_REMOTE_STAGE_DIR" \
         "$AWS_ARM64_BENCH_ITERATIONS" "$AWS_ARM64_BENCH_WARMUPS" "$AWS_ARM64_BENCH_REPEAT" \
         "$AWS_ARM64_BENCH_CPU" "$AWS_ARM64_REMOTE_RESULT_JSON" "$STATE_INSTANCE_ID" \
-        "$AWS_ARM64_INSTANCE_TYPE" "$AWS_ARM64_PROFILE" "$(resolve_region)" <<'EOF'
+        "$AWS_ARM64_INSTANCE_TYPE" "$AWS_ARM64_PROFILE" "$(resolve_region)" \
+        "$AWS_ARM64_CORPUS_ATTEMPT" "$AWS_ARM64_CORPUS_FILTERS" \
+        "$AWS_ARM64_CORPUS_MAX_PROGRAMS" "$AWS_ARM64_CORPUS_REPEAT" <<'EOF'
 set -euo pipefail
 root="$1"
 iterations="$2"
@@ -642,15 +697,29 @@ instance_id="$7"
 instance_type="$8"
 aws_profile="$9"
 aws_region="${10}"
+corpus_attempt="${11}"
+corpus_filters="${12}"
+corpus_max_programs="${13}"
+corpus_repeat="${14}"
 results_dir="$root/results"
 
 cd "$root"
 tar -xzf benchmark-bundle.tar.gz
 mkdir -p "$results_dir"
+rm -rf "$root/runner/build" "$root/daemon/target"
+if ! sudo swapon --show | awk '{print $1}' | grep -Fx /swapfile >/dev/null 2>&1; then
+    if [[ ! -f /swapfile ]]; then
+        sudo fallocate -l 2G /swapfile 2>/dev/null || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048 status=none
+    fi
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile >/dev/null
+    sudo swapon /swapfile
+fi
+make -C "$root/runner" micro_exec MICRO_EXEC_ENABLE_LLVMBPF=OFF JOBS=1
+cargo build --release -j1 --manifest-path "$root/daemon/Cargo.toml"
 
 sudo -n env \
     PATH="/usr/sbin:/usr/bin:/sbin:/bin:${PATH}" \
-    LD_LIBRARY_PATH="$root/lib" \
     PYTHONPATH="$root" \
     python3.11 "$root/runner/scripts/arm64_t4g_remote_benchmark.py" \
         --output "$results_dir/$result_json" \
@@ -661,7 +730,11 @@ sudo -n env \
         --instance-id "$instance_id" \
         --instance-type "$instance_type" \
         --aws-profile "$aws_profile" \
-        --aws-region "$aws_region"
+        --aws-region "$aws_region" \
+        --corpus-attempt "$corpus_attempt" \
+        --corpus-filters "$corpus_filters" \
+        --corpus-max-programs "$corpus_max_programs" \
+        --corpus-repeat "$corpus_repeat"
 
 sudo -n chown -R "$(id -un):$(id -gn)" "$results_dir"
 

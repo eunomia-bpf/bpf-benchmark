@@ -13,8 +13,6 @@ use serde::Serialize;
 use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
 use crate::{bpf, insn, pass, passes, verifier_log};
 
-const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
-
 // ── OptimizeOneResult — structured return from try_apply_one ────────
 
 /// Structured result from a single optimize operation.
@@ -34,6 +32,43 @@ pub(crate) struct OptimizeOneResult {
     pub inlined_map_entries: Vec<InlinedMapEntry>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
+}
+
+/// Compact optimize response exposed by `serve`.
+///
+/// The daemon keeps richer attempt/debug state internally, but the socket
+/// protocol only needs stable structured fields that the runner consumes.
+#[derive(Clone, Debug, Serialize)]
+pub(crate) struct ServeOptimizeResponse {
+    pub status: String,
+    pub prog_id: u32,
+    pub changed: bool,
+    pub passes_applied: Vec<String>,
+    pub program: ProgramInfo,
+    pub summary: OptimizeSummary,
+    pub passes: Vec<PassDetail>,
+    pub timings_ns: TimingsNs,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub inlined_map_entries: Vec<InlinedMapEntry>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error_message: Option<String>,
+}
+
+impl From<OptimizeOneResult> for ServeOptimizeResponse {
+    fn from(value: OptimizeOneResult) -> Self {
+        Self {
+            status: value.status,
+            prog_id: value.prog_id,
+            changed: value.changed,
+            passes_applied: value.passes_applied,
+            program: value.program,
+            summary: value.summary,
+            passes: value.passes,
+            timings_ns: value.timings_ns,
+            inlined_map_entries: value.inlined_map_entries,
+            error_message: value.error_message,
+        }
+    }
 }
 
 /// One deduplicated map entry that `map_inline` specialized for this program.
@@ -338,18 +373,30 @@ fn new_attempt_debug(pass_traces: Vec<pass::PassDebugTrace>) -> Option<AttemptDe
     })
 }
 
-fn program_has_map_lookup_elem(insns: &[insn::BpfInsn]) -> bool {
-    insns
-        .iter()
-        .any(|insn| insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM)
-}
-
 fn error_headline(err: &anyhow::Error) -> String {
     format!("{err:#}")
         .lines()
         .next()
         .unwrap_or("<empty error message>")
         .to_string()
+}
+
+pub(crate) fn summarize_error(err: &anyhow::Error) -> String {
+    error_headline(err)
+}
+
+fn parse_verifier_states_from_log(
+    log: &str,
+    source: &str,
+) -> Result<Vec<verifier_log::VerifierInsn>> {
+    let states = verifier_log::parse_verifier_log(log);
+    if !log.trim().is_empty() && states.is_empty() {
+        anyhow::bail!(
+            "{} returned a non-empty verifier log, but parser found no state snapshots",
+            source
+        );
+    }
+    Ok(states)
 }
 
 fn validate_required_btf_fds(
@@ -377,7 +424,7 @@ fn maybe_attach_original_verifier_states(
     map_ids: &[u32],
     program: &mut pass::BpfProgram,
 ) {
-    if !program_has_map_lookup_elem(orig_insns) {
+    if orig_insns.is_empty() {
         return;
     }
 
@@ -389,7 +436,15 @@ fn maybe_attach_original_verifier_states(
                 .context("relocate map FDs for verifier-log capture")?;
         let result = bpf::bpf_prog_rejit_capture_verifier_log(prog_fd, &probe_insns, &[])
             .context("capture original-program verifier log via BPF_PROG_REJIT(log_level=2)")?;
-        Ok(verifier_log::parse_verifier_log(&result.verifier_log))
+        if result.verifier_log.trim().is_empty() {
+            anyhow::bail!(
+                "BPF_PROG_REJIT(log_level=2) original-program capture returned an empty verifier log"
+            );
+        }
+        parse_verifier_states_from_log(
+            &result.verifier_log,
+            "BPF_PROG_REJIT(log_level=2) original-program capture",
+        )
     })();
 
     match capture {
@@ -522,8 +577,7 @@ pub(crate) fn try_apply_one(
             let prog_load_meta = match prog_load_meta.as_ref() {
                 Ok(meta) => meta,
                 Err(err) => {
-                    let err_msg = format!("{err:#}");
-                    let headline = err_msg.lines().next().unwrap_or("<empty error message>");
+                    let headline = error_headline(err);
                     eprintln!(
                         "    WARN: skipping pass '{}' for prog {} ({}): {}",
                         pass_name,
@@ -531,7 +585,7 @@ pub(crate) fn try_apply_one(
                         info.name_str(),
                         headline,
                     );
-                    return Ok(pass::PassVerifyResult::rejected(err_msg));
+                    return Ok(pass::PassVerifyResult::rejected(headline));
                 }
             };
 
@@ -559,13 +613,39 @@ pub(crate) fn try_apply_one(
             let verify_result =
                 match bpf::bpf_prog_load_verify(prog_load_meta, &verify_insns, &fd_array) {
                     Ok(result) => {
-                        let _log_true_size = result.log_true_size;
-                        let states = verifier_log::parse_verifier_log(&result.verifier_log);
+                        let states = if result.verifier_log.is_empty() {
+                            if result.log_true_size > 0 {
+                                eprintln!(
+                                    "    WARN: accepted pass '{}' for prog {} ({}) exceeded the verifier log buffer (true size {} bytes); verifier-guided states are unavailable for subsequent passes",
+                                    pass_name,
+                                    prog_id,
+                                    info.name_str(),
+                                    result.log_true_size
+                                );
+                            }
+                            Vec::new()
+                        } else {
+                            match parse_verifier_states_from_log(
+                                &result.verifier_log,
+                                "BPF_PROG_LOAD(log_level=2) per-pass verify",
+                            ) {
+                                Ok(states) => states,
+                                Err(err) => {
+                                    eprintln!(
+                                        "    WARN: accepted pass '{}' for prog {} ({}) produced an unusable verifier log: {:#}; verifier-guided states are unavailable for subsequent passes",
+                                        pass_name,
+                                        prog_id,
+                                        info.name_str(),
+                                        err
+                                    );
+                                    Vec::new()
+                                }
+                            }
+                        };
                         pass::PassVerifyResult::accepted_with_verifier_states(states)
                     }
                     Err(err) => {
-                        let err_msg = format!("{:#}", err);
-                        let headline = err_msg.lines().next().unwrap_or("<empty error message>");
+                        let headline = error_headline(&err);
                         eprintln!(
                             "    WARN: skipping pass '{}' for prog {} ({}): {}",
                             pass_name,
@@ -573,7 +653,7 @@ pub(crate) fn try_apply_one(
                             info.name_str(),
                             headline,
                         );
-                        pass::PassVerifyResult::rejected(err_msg)
+                        pass::PassVerifyResult::rejected(headline)
                     }
                 };
             total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
@@ -735,6 +815,7 @@ pub(crate) fn try_apply_one(
             total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
 
             let err_msg = format!("{:#}", e);
+            let err_headline = error_headline(&e);
             let log_text = err_msg
                 .find("verifier log:\n")
                 .map(|pos| &err_msg[pos + "verifier log:\n".len()..])
@@ -776,7 +857,7 @@ pub(crate) fn try_apply_one(
                 total_pipeline_ns,
                 total_rejit_ns,
                 vec![],
-                Some(err_msg),
+                Some(err_headline.clone()),
             );
             let headline = failure_result
                 .error_message
@@ -789,7 +870,7 @@ pub(crate) fn try_apply_one(
                 info.name_str(),
                 headline
             );
-            Err(e)
+            Ok(failure_result)
         }
     }
 }

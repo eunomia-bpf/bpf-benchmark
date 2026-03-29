@@ -794,14 +794,13 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     ]
     status = str(payload.get("status") or "")
     if status != "ok":
-        result_label = "SKIP" if status == "skipped" else "ERROR"
-        result_reason = payload.get("skip_reason") or payload.get("error_message") or "unknown"
+        result_reason = payload.get("error_message") or payload.get("skip_reason") or "unknown"
         lines.extend(
             [
                 "",
                 "## Result",
                 "",
-                f"- Status: `{result_label}`",
+                "- Status: `ERROR`",
                 f"- Reason: `{result_reason}`",
             ]
         )
@@ -1085,7 +1084,7 @@ def daemon_payload(
         assert isinstance(session, TetragonAgentSession)
         exit_reason = describe_agent_exit("Tetragon", session.process, session.collector_snapshot())
         if exit_reason is not None:
-            limitations.append(f"{exit_reason}; skipping scan and ReJIT after the baseline phase.")
+            limitations.append(f"{exit_reason}; aborting scan and ReJIT after the baseline phase.")
         return exit_reason
 
     def stop(_: object, lifecycle: CaseLifecycleState) -> None:
@@ -1148,13 +1147,20 @@ def daemon_payload(
     rejit_result = lifecycle_result.rejit_result or {"applied": False, "reason": "reJIT did not run"}
     post_rejit = lifecycle_result.post_rejit
     comparison = compare_phases(baseline, post_rejit)
+    error_message = ""
+    if not rejit_result.get("applied"):
+        error_message = str(rejit_result.get("error") or rejit_result.get("reason") or "").strip()
+        if not error_message:
+            error_message = "Tetragon reJIT did not apply"
+    elif post_rejit is None:
+        error_message = "Tetragon post-ReJIT phase is missing"
 
     limitations.append(
         "events_total and events_per_sec are derived from aggregate BPF run_cnt deltas, so a single application operation can increment multiple program counters."
     )
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "ok",
+        "status": "error" if error_message else "ok",
         "mode": "tetragon_daemon",
         "smoke": smoke,
         "duration_s": duration_s,
@@ -1179,6 +1185,8 @@ def daemon_payload(
         "limitations": limitations,
         "map_capture": lifecycle_result.artifacts.get("map_capture"),
     }
+    if error_message:
+        payload["error_message"] = error_message
     return payload
 
 

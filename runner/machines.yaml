@@ -7,7 +7,7 @@ defaults:
 
 aliases:
   x86: local-x86-vng
-  arm64: local-arm64-qemu
+  arm64: aws-arm64
   aws: aws-arm64
 
 default_targets:

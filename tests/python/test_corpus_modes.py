@@ -718,6 +718,29 @@ def test_run_tracee_app_native_object_builds_live_program_records(
     assert record["compile_passes_applied"] == ["map_inline"]
 
 
+def test_manifest_removes_compile_only_and_manual_test_defaults() -> None:
+    manifest = yaml.safe_load(modes.DEFAULT_MACRO_CORPUS_YAML.read_text())
+    objects = manifest.get("objects")
+    assert isinstance(objects, list)
+    sources = {
+        entry.get("source")
+        for entry in objects
+        if isinstance(entry, dict)
+    }
+
+    assert "corpus/build/manual-test/fentry.gen.bpf.o" not in sources
+    assert "corpus/build/manual-test/fentry.tmp.bpf.o" not in sources
+    assert "corpus/build/tetragon/bpf_execve_map_update.bpf.o" not in sources
+
+
+def test_object_only_entries_do_not_default_to_compile_only() -> None:
+    obj = _resolve_object("corpus/build/netbird/prog.bpf.o")
+
+    assert obj.allow_object_only_result is True
+    assert obj.programs == ()
+    assert obj.test_method == "object_only"
+
+
 def test_run_objects_locally_batch_splits_resource_exhausted_batches(
     monkeypatch,
     tmp_path: Path,
@@ -865,6 +888,96 @@ def test_run_objects_locally_batch_splits_resource_exhausted_batches(
     assert len(batch_summary["retry_splits"]) == 1
 
 
+def test_scan_program_site_counts_raises_on_missing_program_records(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    obj = _synthetic_guest_batch_object("alpha")
+
+    monkeypatch.setattr(
+        corpus_lib,
+        "run_batch_runner",
+        lambda *_args, **_kwargs: {
+            "ok": True,
+            "completed_with_job_errors": False,
+            "timed_out": False,
+            "returncode": 0,
+            "error": None,
+            "stderr": "",
+            "result": {
+                "jobs": [
+                    {
+                        "id": "site-scan-0001",
+                        "ok": True,
+                        "payload": {"records": []},
+                    }
+                ]
+            },
+        },
+    )
+
+    with pytest.raises(RuntimeError, match="did not return records"):
+        corpus_lib.scan_program_site_counts(
+            objects=[obj],
+            runner=tmp_path / "micro_exec",
+            daemon_socket="/tmp/daemon.sock",
+            enabled_passes=["map_inline"],
+            timeout_seconds=30,
+        )
+
+
+def test_run_objects_locally_batch_fails_when_local_daemon_exits(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    obj = _synthetic_guest_batch_object("alpha")
+    daemon_events: list[str] = []
+
+    class FakeDaemonProc:
+        def __init__(self) -> None:
+            self.returncode: int | None = None
+
+        def poll(self) -> int | None:
+            return self.returncode
+
+    daemon_proc = FakeDaemonProc()
+    daemon_stdout = tmp_path / "daemon.stdout"
+    daemon_stderr = tmp_path / "daemon.stderr"
+    daemon_stdout.write_text("", encoding="utf-8")
+    daemon_stderr.write_text("daemon crashed after site scan", encoding="utf-8")
+
+    def fake_start_daemon_server(_daemon: Path):
+        daemon_events.append("start")
+        return (daemon_proc, tmp_path / "daemon.sock", str(tmp_path / "sockdir"), daemon_stdout, daemon_stderr)
+
+    def fake_stop_daemon_server(_proc, _socket_path, _socket_dir):
+        daemon_events.append("stop")
+
+    def fake_resolve_program_enabled_passes_map(**_kwargs):
+        daemon_proc.returncode = 42
+        return {obj.programs[0].canonical_name: ["map_inline"]}
+
+    monkeypatch.setattr(corpus_lib, "_start_daemon_server", fake_start_daemon_server)
+    monkeypatch.setattr(corpus_lib, "_stop_daemon_server", fake_stop_daemon_server)
+    monkeypatch.setattr(corpus_lib, "resolve_program_enabled_passes_map", fake_resolve_program_enabled_passes_map)
+
+    with pytest.raises(RuntimeError, match="bpfrejit-daemon exited with code 42 during policy site scan"):
+        corpus_lib.run_objects_locally_batch(
+            objects=[obj],
+            runner=tmp_path / "micro_exec",
+            daemon=tmp_path / "bpfrejit-daemon",
+            repeat=3,
+            warmup_repeat=1,
+            timeout_seconds=30,
+            execution_mode="vm",
+            btf_custom_path=tmp_path / "vmlinux",
+            benchmark_config={},
+            batch_size=1,
+        )
+
+    assert daemon_events == ["start", "stop"]
+
+
 def test_guest_batch_failure_headline_prefers_batch_stderr_over_generic_exit_code() -> None:
     headline = modes._guest_batch_failure_headline(
         batch_result={
@@ -879,6 +992,28 @@ def test_guest_batch_failure_headline_prefers_batch_stderr_over_generic_exit_cod
     )
 
     assert headline == "RLIMIT_NOFILE hard limit 4096 is below required corpus batch minimum 65536"
+
+
+def test_guest_batch_failure_headline_prefers_record_failure_over_generic_libbpf_line() -> None:
+    headline = modes._guest_batch_failure_headline(
+        batch_result={
+            "error": "libbpf: map 'cali_perf_evnt': created successfully, fd=2188",
+            "stderr": "",
+            "returncode": 1,
+        },
+        built_records=[
+            {
+                "object_record": {
+                    "canonical_object_name": "demo:alpha.bpf.o",
+                    "status": "error",
+                    "error": "bpf_object__load failed: Invalid argument",
+                },
+                "program_records": [],
+            }
+        ],
+    )
+
+    assert headline == "demo:alpha.bpf.o: bpf_object__load failed: Invalid argument"
 
 
 def test_run_guest_batch_mode_reuses_single_daemon_session_for_all_objects(
@@ -953,6 +1088,7 @@ def test_run_guest_batch_mode_reuses_single_daemon_session_for_all_objects(
         btf_custom_path=str(tmp_path / "btf"),
         guest_result_json=str(tmp_path / "guest-result.json"),
         repeat=3,
+        warmups=0,
         batch_size=7,
         timeout=45,
         benchmark_config={},
@@ -974,7 +1110,10 @@ def test_run_guest_batch_mode_reuses_single_daemon_session_for_all_objects(
     ]
 
 
-def test_run_guest_batch_mode_exits_on_batch_job_errors(monkeypatch, tmp_path: Path) -> None:
+def test_run_guest_batch_mode_keeps_records_on_batch_job_errors(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
     obj_alpha = _synthetic_guest_batch_object("alpha")
     persisted_records: list[list[str]] = []
 
@@ -1023,6 +1162,7 @@ def test_run_guest_batch_mode_exits_on_batch_job_errors(monkeypatch, tmp_path: P
         btf_custom_path=str(tmp_path / "btf"),
         guest_result_json=str(tmp_path / "guest-result.json"),
         repeat=3,
+        warmups=0,
         timeout=45,
         benchmark_config={},
     )

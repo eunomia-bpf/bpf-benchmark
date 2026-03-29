@@ -162,6 +162,86 @@ fn test_optimize_one_result_serialization() {
 }
 
 #[test]
+fn test_serve_optimize_response_omits_attempt_debug_payloads() {
+    let result = OptimizeOneResult {
+        status: "error".to_string(),
+        prog_id: 7,
+        changed: false,
+        passes_applied: vec![],
+        program: ProgramInfo {
+            prog_id: 7,
+            prog_name: "demo_prog".to_string(),
+            prog_type: 6,
+            orig_insn_count: 10,
+            final_insn_count: 10,
+            insn_delta: 0,
+        },
+        summary: OptimizeSummary {
+            applied: false,
+            program_changed: false,
+            total_sites_applied: 0,
+            passes_executed: 1,
+            passes_changed: 0,
+            verifier_rejections: 1,
+        },
+        passes: vec![PassDetail {
+            pass: "map_inline".to_string(),
+            pass_name: "map_inline".to_string(),
+            changed: false,
+            verify_result: pass::PassVerifyStatus::Rejected,
+            verify_error: Some("BPF_PROG_REJIT: Operation not permitted".to_string()),
+            action: "rolled_back".to_string(),
+            verify: pass::PassVerifyResult::rejected("BPF_PROG_REJIT: Operation not permitted"),
+            rollback: None,
+            sites_applied: 0,
+            sites_skipped: 1,
+            skip_reasons: HashMap::from([("verifier_rejected".to_string(), 1)]),
+            skipped_sites: vec![],
+            insns_before: 10,
+            insns_after: 10,
+            insn_delta: 0,
+            diagnostics: vec![],
+        }],
+        attempts: vec![AttemptRecord {
+            attempt: 0,
+            disabled_passes: vec![],
+            result: "rejit_failed".to_string(),
+            failure_pc: Some(42),
+            attributed_pass: Some("map_inline".to_string()),
+            debug: Some(AttemptDebug {
+                pass_traces: vec![],
+                pre_rejit_bytecode: None,
+                verifier_log: Some(VerifierLogRecord {
+                    source: "BPF_PROG_REJIT".to_string(),
+                    log_level: 2,
+                    log: "very large verifier log".to_string(),
+                }),
+                final_xlated_bytecode: None,
+                final_jited_machine_code: None,
+                warnings: vec!["warn".to_string()],
+            }),
+        }],
+        timings_ns: TimingsNs {
+            pipeline_run_ns: 10,
+            rejit_syscall_ns: 20,
+            total_ns: 30,
+        },
+        inlined_map_entries: vec![],
+        error_message: Some("BPF_PROG_REJIT: Operation not permitted".to_string()),
+    };
+
+    let json = serde_json::to_string(&ServeOptimizeResponse::from(result))
+        .expect("serve response serialization should succeed");
+    let parsed: serde_json::Value = serde_json::from_str(&json).expect("JSON should parse back");
+
+    assert_eq!(parsed["status"], "error");
+    assert_eq!(parsed["program"]["prog_name"], "demo_prog");
+    assert_eq!(parsed["passes"][0]["verify_error"], "BPF_PROG_REJIT: Operation not permitted");
+    assert_eq!(parsed["error_message"], "BPF_PROG_REJIT: Operation not permitted");
+    assert!(parsed.get("attempts").is_none());
+}
+
+#[test]
 fn test_optimize_one_result_records_rejected_pass_verify_status() {
     let result = OptimizeOneResult {
         status: "ok".to_string(),
@@ -509,4 +589,33 @@ fn test_build_pipeline_default() {
     let mut prog = pass::BpfProgram::new(vec![exit_insn]);
     let result = pm.run(&mut prog, &ctx).unwrap();
     assert!(!result.program_changed);
+}
+
+#[test]
+fn test_parse_verifier_states_from_log_accepts_parseable_states() {
+    let states = parse_verifier_states_from_log(
+        r#"
+0: R1=ctx() R10=fp0
+0: (85) call bpf_get_prandom_u32#7   ; R0=1
+"#,
+        "test verifier log",
+    )
+    .expect("state snapshots should parse");
+
+    assert_eq!(states.len(), 2);
+    assert_eq!(states[1].pc, 0);
+    assert_eq!(states[1].regs.get(&0).unwrap().exact_u64(), Some(1));
+}
+
+#[test]
+fn test_parse_verifier_states_from_log_rejects_nonempty_log_without_states() {
+    let err = parse_verifier_states_from_log(
+        "processed 4 insns (limit 1000000)\nsafe\n",
+        "test verifier log",
+    )
+    .expect_err("non-empty logs without parseable states should be rejected");
+
+    assert!(err
+        .to_string()
+        .contains("parser found no state snapshots"));
 }

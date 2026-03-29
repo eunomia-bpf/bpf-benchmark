@@ -216,13 +216,23 @@ pub(crate) fn cmd_serve(socket_path: &str, ctx: &pass::PassContext) -> Result<()
                     Some(state) => state.profiling_data_for(prog_id)?,
                     None => None,
                 };
-                commands::try_apply_one(
+                let result = commands::try_apply_one(
                     prog_id,
                     ctx,
                     profiling.as_ref(),
                     Some(&tracker_for_apply),
                     OptimizeMode::Apply,
                 )?;
+                if result.status != "ok" {
+                    anyhow::bail!(
+                        "{}",
+                        result
+                            .error_message
+                            .unwrap_or_else(|| {
+                                format!("optimize prog {} returned status {}", prog_id, result.status)
+                            })
+                    );
+                }
                 Ok(())
             });
             last_invalidation_check = Instant::now();
@@ -471,10 +481,7 @@ fn process_request(
                 mode,
             ) {
                 Ok(result) => {
-                    // The optimize response already embeds the full structured
-                    // result, including any deduplicated `inlined_map_entries`,
-                    // so serve mode does not need a second debug channel.
-                    match serde_json::to_value(&result) {
+                    match serde_json::to_value(commands::ServeOptimizeResponse::from(result)) {
                         Ok(v) => v,
                         Err(e) => serde_json::json!({
                             "status": "error",
@@ -482,7 +489,10 @@ fn process_request(
                         }),
                     }
                 }
-                Err(e) => serde_json::json!({"status": "error", "message": format!("{:#}", e)}),
+                Err(e) => serde_json::json!({
+                    "status": "error",
+                    "message": commands::summarize_error(&e),
+                }),
             }
         }
         "optimize-all" => {
@@ -615,8 +625,10 @@ fn process_request(
                     OptimizeMode::Apply,
                 ) {
                     Ok(result) => {
-                        if result.summary.applied {
+                        if result.status == "ok" && result.summary.applied {
                             applied += 1;
+                        } else if result.status != "ok" {
+                            errors += 1;
                         }
                     }
                     Err(_) => errors += 1,

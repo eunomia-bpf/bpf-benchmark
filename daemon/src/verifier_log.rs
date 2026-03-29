@@ -837,6 +837,44 @@ from 12 to 18 (speculative execution): frame1: R2_w=42 R10=fp0 fp-24=0000???? sc
     }
 
     #[test]
+    fn distinguishes_exact_64bit_and_32bit_scalars() {
+        let log = r#"
+0: (b7) r3 = 42                       ; R3=42
+1: (b4) w4 = 42                       ; R4_w=42
+"#;
+
+        let insns = parse_verifier_log(log);
+        assert_eq!(insns.len(), 2);
+
+        let r3 = insns[0].regs.get(&3).unwrap();
+        assert_eq!(r3.value_width, VerifierValueWidth::Bits64);
+        assert_eq!(r3.exact_u64(), Some(42));
+        assert_eq!(r3.exact_u32(), Some(42));
+
+        let r4 = insns[1].regs.get(&4).unwrap();
+        assert_eq!(r4.value_width, VerifierValueWidth::Bits32);
+        assert_eq!(r4.exact_u64(), None);
+        assert_eq!(r4.exact_u32(), Some(42));
+    }
+
+    #[test]
+    fn truncated_log_tail_does_not_drop_complete_states() {
+        let log = "\
+0: R1=ctx() R10=fp0
+1: (b7) r0 = 0                        ; R0=0
+2: (07) r0 += 1                       ; R0=scalar(var_off=(0x1;
+";
+
+        let insns = parse_verifier_log(log);
+        assert_eq!(insns.len(), 3);
+        assert_eq!(insns[0].pc, 0);
+        assert_eq!(insns[1].regs.get(&0).unwrap().exact_u64(), Some(0));
+        assert_eq!(insns[2].pc, 2);
+        assert_eq!(insns[2].regs.get(&0).unwrap().reg_type, "scalar");
+        assert_eq!(insns[2].regs.get(&0).unwrap().exact_u64(), None);
+    }
+
+    #[test]
     fn ignores_non_state_lines() {
         let log = r#"
 0: (b7) r0 = 0

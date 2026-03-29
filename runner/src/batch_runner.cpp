@@ -927,7 +927,8 @@ static_verify_program_record execute_static_verify_program(
             job.daemon_socket,
             before_info.id,
             job.options.enabled_passes,
-            job.options.enabled_passes_specified);
+            job.options.enabled_passes_specified,
+            true);
     record.daemon_status = daemon_response.status;
     record.daemon_message = daemon_response.message;
     record.daemon_error_message = daemon_response.error_message;
@@ -1055,7 +1056,11 @@ batch_job_result execute_job(
             return result;
         }
         if (job.options.command == "run-llvmbpf") {
+#if MICRO_EXEC_ENABLE_LLVMBPF
             result.samples = {run_llvmbpf(job.options)};
+#else
+            fail("run-llvmbpf is unavailable in this micro_exec build");
+#endif
         } else if (job.options.command == "run-kernel-attach") {
             if (!job.prepared_ref.empty()) {
                 auto prepared = prepared_store.get(job.prepared_ref);

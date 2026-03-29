@@ -2083,27 +2083,19 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                 session = runtime["session"]
                 assert isinstance(session, KatranDirectSession)
                 sample_phase_name = "stock" if phase_name == "baseline" else "post_rejit"
-                try:
-                    sample = measure_phase(
-                        index=cycle_index,
-                        phase_name=sample_phase_name,
-                        session=session,
-                        traffic_iterations=traffic_iterations,
-                        duration_s=duration_s,
-                        minimum_requests=minimum_requests,
-                        warmup_request_count=warmup_request_count,
-                        warmup_duration_s=warmup_duration_s,
-                        use_wrk_driver=use_wrk_driver,
-                        wrk_connections=wrk_connections,
-                        wrk_threads=wrk_threads,
-                    )
-                except RuntimeError as rejit_exc:
-                    if phase_name != "post_rejit":
-                        raise
-                    limitations.append(
-                        f"Post-REJIT measurement failed (cycle {cycle_index}): {rejit_exc}"
-                    )
-                    return None
+                sample = measure_phase(
+                    index=cycle_index,
+                    phase_name=sample_phase_name,
+                    session=session,
+                    traffic_iterations=traffic_iterations,
+                    duration_s=duration_s,
+                    minimum_requests=minimum_requests,
+                    warmup_request_count=warmup_request_count,
+                    warmup_duration_s=warmup_duration_s,
+                    use_wrk_driver=use_wrk_driver,
+                    wrk_connections=wrk_connections,
+                    wrk_threads=wrk_threads,
+                )
                 return {
                     "samples": [sample],
                     "summary": build_phase_summary([sample]),
@@ -2169,6 +2161,11 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
             cycle_rejit_result = lifecycle_result.rejit_result or {"applied": False, "reason": "reJIT did not run"}
             cycle_post_rejit = lifecycle_result.post_rejit
             cycle_baseline = lifecycle_result.baseline
+            if not cycle_rejit_result.get("applied"):
+                reason = str(cycle_rejit_result.get("error") or cycle_rejit_result.get("reason") or "").strip()
+                raise RuntimeError(f"katran cycle {cycle_index} reJIT did not apply: {reason or cycle_rejit_result}")
+            if cycle_post_rejit is None:
+                raise RuntimeError(f"katran cycle {cycle_index} did not produce a post-ReJIT phase")
             cycle_results.append(
                 {
                     "cycle_index": cycle_index,

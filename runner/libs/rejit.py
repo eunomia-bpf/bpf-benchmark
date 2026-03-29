@@ -57,7 +57,7 @@ def _deep_merge(base: Mapping[str, Any], override: Mapping[str, Any]) -> dict[st
     return merged
 
 
-def _fallback_benchmark_config() -> dict[str, Any]:
+def _benchmark_config_skeleton() -> dict[str, Any]:
     return {
         "defaults": {
             "iterations": 3,
@@ -74,12 +74,11 @@ def _fallback_benchmark_config() -> dict[str, Any]:
 
 @lru_cache(maxsize=1)
 def _load_benchmark_root_config() -> tuple[dict[str, Any], bool]:
-    root_config = _fallback_benchmark_config()
-    config_loaded = False
+    root_config = _benchmark_config_skeleton()
     try:
         payload = yaml.safe_load(_BENCHMARK_CONFIG_PATH.read_text(encoding="utf-8"))
-    except OSError:
-        return root_config, config_loaded
+    except OSError as exc:
+        raise SystemExit(f"benchmark config file not found: {_BENCHMARK_CONFIG_PATH}") from exc
     if payload is None:
         return root_config, True
     if not isinstance(payload, Mapping):
@@ -89,11 +88,6 @@ def _load_benchmark_root_config() -> tuple[dict[str, Any], bool]:
 
 def load_benchmark_config(profile: str | None = None) -> dict[str, Any]:
     root_config, config_loaded = _load_benchmark_root_config()
-    if profile and not config_loaded:
-        raise SystemExit(
-            f"benchmark profile requested but config file not found: {_BENCHMARK_CONFIG_PATH}"
-        )
-
     defaults = _mapping_dict(root_config.get("defaults"), field_name="defaults")
     passes = _mapping_dict(root_config.get("passes"), field_name="passes")
     policy = _mapping_dict(root_config.get("policy"), field_name="policy")

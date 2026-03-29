@@ -32,7 +32,7 @@ ARM64_CROSSBUILD_STAMP      := $(ROOT_DIR)/.cache/arm64-crossbuild-image.stamp
 ARM64_DOCKER_PLATFORM       ?= linux/arm64
 ARM64_REPO_GUEST_MOUNT      ?= /mnt
 ARM64_SELFTEST_GUEST_ROOT   ?= $(ARM64_REPO_GUEST_MOUNT)/tests/kernel
-ARM64_CROSSBUILD_ENABLE_LLVMBPF ?= ON
+ARM64_CROSSBUILD_ENABLE_LLVMBPF ?= OFF
 ARM64_CROSSBUILD_JOBS       ?= 4
 ARM64_KERNEL_MAKEFLAGS      := $(filter-out B,$(MAKEFLAGS))
 AWS_ARM64_SCRIPT         := $(ROOT_DIR)/runner/scripts/aws_arm64.sh
@@ -121,7 +121,9 @@ VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 # Benchmark args
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
 ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
+ROOT_VM_CORPUS_WARMUPS_IS_EXPLICIT := $(or $(findstring command line,$(origin WARMUPS)),$(findstring environment,$(origin WARMUPS)),$(findstring override,$(origin WARMUPS)))
 ROOT_VM_CORPUS_REPEAT_ARG := $(if $(strip $(ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT)),REPEAT="$(REPEAT)",)
+ROOT_VM_CORPUS_WARMUPS_ARG := $(if $(strip $(ROOT_VM_CORPUS_WARMUPS_IS_EXPLICIT)),WARMUPS="$(WARMUPS)",)
 ROOT_VM_CORPUS_PROFILE_ARG := $(if $(strip $(PROFILE)),PROFILE="$(PROFILE)",)
 ROOT_VM_CORPUS_FILTERS_ARG := $(if $(strip $(FILTERS)),FILTERS="$(FILTERS)",)
 
@@ -387,7 +389,7 @@ vm-corpus:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-corpus \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
 		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" BATCH_SIZE="$(BATCH_SIZE)" \
-		$(ROOT_VM_CORPUS_PROFILE_ARG) $(ROOT_VM_CORPUS_REPEAT_ARG) $(ROOT_VM_CORPUS_FILTERS_ARG)
+		$(ROOT_VM_CORPUS_PROFILE_ARG) $(ROOT_VM_CORPUS_REPEAT_ARG) $(ROOT_VM_CORPUS_WARMUPS_ARG) $(ROOT_VM_CORPUS_FILTERS_ARG)
 
 vm-e2e:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-e2e \
@@ -441,13 +443,13 @@ $(ARM64_CROSSBUILD_STAMP): $(ARM64_CROSSBUILD_DOCKERFILE)
 
 arm64-crossbuild-image: $(ARM64_CROSSBUILD_STAMP)
 
-cross-arm64: arm64-crossbuild-image
+cross-arm64:
 	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)" && mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR)"
-	"$(DOCKER)" run --rm --platform "$(ARM64_DOCKER_PLATFORM)" --user "$$(id -u):$$(id -g)" \
-		-v "$(ROOT_DIR)":/workspace -v "$(ARM64_CROSSBUILD_OUTPUT_DIR)":/out -w /workspace \
-		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
-		-e MICRO_EXEC_ENABLE_LLVMBPF="$(ARM64_CROSSBUILD_ENABLE_LLVMBPF)" \
-		"$(ARM64_CROSSBUILD_IMAGE)" /workspace/runner/scripts/cross-arm64-build.sh
+	ARM64_CROSSBUILD_OUTPUT_DIR="$(ARM64_CROSSBUILD_OUTPUT_DIR)" \
+	ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
+	CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
+	MICRO_EXEC_ENABLE_LLVMBPF="$(ARM64_CROSSBUILD_ENABLE_LLVMBPF)" \
+	"$(ROOT_DIR)/runner/scripts/cross-arm64-build.sh"
 	file "$(ARM64_CROSS_RUNNER_REAL)" | grep -F "ARM aarch64"
 	file "$(ARM64_CROSS_DAEMON_REAL)" | grep -F "ARM aarch64"
 

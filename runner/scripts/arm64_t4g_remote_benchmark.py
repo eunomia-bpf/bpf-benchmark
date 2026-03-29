@@ -7,8 +7,8 @@ import math
 import os
 import platform
 import shutil
-import statistics
 import subprocess
+import statistics
 import sys
 from collections import Counter
 from datetime import datetime, timezone
@@ -21,7 +21,16 @@ if str(REPO_ROOT) not in sys.path:
 
 from runner.libs.catalog import DEFAULT_MICRO_MANIFEST, load_manifest as load_micro_suite
 from runner.libs.benchmarks import resolve_memory_file
-from runner.libs.rejit import apply_daemon_rejit, scan_programs
+from runner.libs.corpus import load_corpus_build_report, load_targets_from_yaml, run_objects_locally_batch
+from runner.libs.rejit import (
+    _start_daemon_server,
+    _stop_daemon_server,
+    apply_daemon_rejit,
+    benchmark_config_warmups,
+    load_benchmark_config,
+    scan_programs,
+)
+from runner.libs.results import summarize_corpus_batch_results
 from runner.libs.run_artifacts import load_latest_result_for_output
 
 
@@ -39,6 +48,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--instance-type", required=True)
     parser.add_argument("--aws-profile", default="codex-ec2")
     parser.add_argument("--aws-region", default="us-east-1")
+    parser.add_argument("--corpus-attempt", type=int, choices=(0, 1), default=1)
+    parser.add_argument("--corpus-filters", default="katran")
+    parser.add_argument("--corpus-max-programs", type=int, default=3)
+    parser.add_argument("--corpus-repeat", type=int, default=1)
     return parser.parse_args()
 
 
@@ -156,8 +169,29 @@ def bpftool_prog_show_id(bpftool_binary: str, prog_id: int) -> dict[str, Any]:
     return payload
 
 
-def scan_program(daemon_binary: Path, prog_id: int) -> dict[str, Any]:
-    results = scan_programs([prog_id], daemon_binary)
+def runner_supports_llvmbpf(runner_binary: Path) -> bool:
+    help_output = run_command([str(runner_binary), "--help"], check=False, timeout=30)
+    text = "\n".join([help_output.stdout, help_output.stderr])
+    return "run-llvmbpf" in text
+
+
+def scan_program(
+    daemon_binary: Path,
+    prog_id: int,
+    *,
+    daemon_socket_path: Path,
+    daemon_proc: subprocess.Popen[str],
+    daemon_stdout_path: Path,
+    daemon_stderr_path: Path,
+) -> dict[str, Any]:
+    results = scan_programs(
+        [prog_id],
+        daemon_binary,
+        daemon_socket_path=daemon_socket_path,
+        daemon_proc=daemon_proc,
+        daemon_stdout_path=daemon_stdout_path,
+        daemon_stderr_path=daemon_stderr_path,
+    )
     record = results.get(int(prog_id))
     if not isinstance(record, dict):
         raise RuntimeError(f"daemon scan did not return a record for prog_id={prog_id}")
@@ -272,6 +306,10 @@ def run_daemon_stock_vs_rejit(
     *,
     runner_binary: Path,
     daemon_binary: Path,
+    daemon_socket_path: Path,
+    daemon_proc: subprocess.Popen[str],
+    daemon_stdout_path: Path,
+    daemon_stderr_path: Path,
     bpftool_binary: str,
     iterations: int,
     warmups: int,
@@ -322,7 +360,14 @@ def run_daemon_stock_vs_rejit(
             if prog_id <= 0:
                 raise RuntimeError(f"{benchmark.name}: invalid prog id from pinned program")
 
-            scan_before = scan_program(daemon_binary, prog_id)
+            scan_before = scan_program(
+                daemon_binary,
+                prog_id,
+                daemon_socket_path=daemon_socket_path,
+                daemon_proc=daemon_proc,
+                daemon_stdout_path=daemon_stdout_path,
+                daemon_stderr_path=daemon_stderr_path,
+            )
             stock = run_bpftool_samples(
                 bpftool_binary,
                 pin_path,
@@ -334,7 +379,14 @@ def run_daemon_stock_vs_rejit(
 
             total_sites = int(((scan_before.get("counts") or {}).get("total_sites", 0)) or 0)
             if total_sites > 0:
-                rejit_apply = apply_daemon_rejit(str(daemon_binary), [prog_id])
+                rejit_apply = apply_daemon_rejit(
+                    str(daemon_binary),
+                    [prog_id],
+                    daemon_socket_path=daemon_socket_path,
+                    daemon_proc=daemon_proc,
+                    daemon_stdout_path=daemon_stdout_path,
+                    daemon_stderr_path=daemon_stderr_path,
+                )
             else:
                 rejit_apply = skipped_rejit_result(reason="no_sites")
 
@@ -400,6 +452,10 @@ def run_daemon_stock_vs_rejit(
 def run_katran_smoke(
     *,
     daemon_binary: Path,
+    daemon_socket_path: Path,
+    daemon_proc: subprocess.Popen[str],
+    daemon_stdout_path: Path,
+    daemon_stderr_path: Path,
     bpftool_binary: str,
 ) -> dict[str, Any]:
     ensure_bpffs_mounted()
@@ -464,9 +520,23 @@ def run_katran_smoke(
         prog_id = int(pinned_program.get("id", 0) or 0)
         if prog_id <= 0:
             raise RuntimeError("katran smoke did not produce a live program id")
-        scan_before = scan_program(daemon_binary, prog_id)
+        scan_before = scan_program(
+            daemon_binary,
+            prog_id,
+            daemon_socket_path=daemon_socket_path,
+            daemon_proc=daemon_proc,
+            daemon_stdout_path=daemon_stdout_path,
+            daemon_stderr_path=daemon_stderr_path,
+        )
         if int(((scan_before.get("counts") or {}).get("total_sites", 0)) or 0) > 0:
-            rejit_apply = apply_daemon_rejit(str(daemon_binary), [prog_id])
+            rejit_apply = apply_daemon_rejit(
+                str(daemon_binary),
+                [prog_id],
+                daemon_socket_path=daemon_socket_path,
+                daemon_proc=daemon_proc,
+                daemon_stdout_path=daemon_stdout_path,
+                daemon_stderr_path=daemon_stderr_path,
+            )
         else:
             rejit_apply = skipped_rejit_result(reason="no_sites")
 
@@ -484,6 +554,19 @@ def run_katran_smoke(
 
 
 def summarize_llvmbpf_vs_kernel(raw: dict[str, Any]) -> dict[str, Any]:
+    if str(raw.get("status") or "").strip() == "skipped":
+        return {
+            "status": "skipped",
+            "reason": raw.get("reason"),
+            "error": raw.get("error"),
+            "benchmarks": 0,
+            "llvmbpf_faster": 0,
+            "kernel_faster": 0,
+            "median_ratio": None,
+            "geometric_mean_ratio": None,
+            "largest_kernel_wins": [],
+            "largest_llvmbpf_wins": [],
+        }
     ratios: list[tuple[str, float, float, float]] = []
     llvmbpf_faster = 0
     kernel_faster = 0
@@ -598,6 +681,113 @@ def summarize_katran(raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def summarize_corpus_attempt(raw: dict[str, Any]) -> dict[str, Any]:
+    if str(raw.get("status") or "").strip() != "ok":
+        return {
+            "status": str(raw.get("status") or "error"),
+            "filters": raw.get("filters"),
+            "max_programs": raw.get("max_programs"),
+            "repeat": raw.get("repeat"),
+            "error": raw.get("error"),
+        }
+    summary = raw.get("summary") if isinstance(raw.get("summary"), dict) else {}
+    return {
+        "status": "ok",
+        "filters": raw.get("filters"),
+        "max_programs": raw.get("max_programs"),
+        "repeat": raw.get("repeat"),
+        "selected_objects": raw.get("selected_objects"),
+        "selected_programs": raw.get("selected_programs"),
+        "objects_attempted": summary.get("objects_attempted"),
+        "targets_attempted": summary.get("targets_attempted"),
+        "measured_pairs": summary.get("measured_pairs"),
+        "comparable_pairs": summary.get("comparable_pairs"),
+        "applied_programs": summary.get("applied_programs"),
+        "exec_ratio_geomean": summary.get("exec_ratio_geomean"),
+        "failure_reasons": summary.get("failure_reasons"),
+    }
+
+
+def build_corpus_report_from_disk(report_path: Path, build_root: Path) -> dict[str, Any]:
+    available_objects = {str(path.resolve()) for path in build_root.rglob("*.bpf.o")}
+    if not available_objects:
+        raise RuntimeError(f"no corpus objects found under {build_root}")
+    return {
+        "path": report_path,
+        "payload": {},
+        "summary": {
+            "available_total": len(available_objects),
+        },
+        "available_objects": available_objects,
+        "build_root": build_root,
+        "supplemented_existing": 0,
+    }
+
+
+def run_corpus_attempt(
+    *,
+    runner_binary: Path,
+    daemon_binary: Path,
+    daemon_socket_path: Path,
+    benchmark_config: dict[str, Any],
+    filters_csv: str,
+    max_programs: int,
+    repeat: int,
+) -> dict[str, Any]:
+    if max_programs < 1:
+        raise RuntimeError(f"corpus max_programs must be >= 1, got {max_programs}")
+    filters = [token.strip() for token in str(filters_csv).split(",") if token.strip()]
+    if not filters:
+        raise RuntimeError("corpus attempt requires at least one non-empty filter")
+
+    build_report_path = REPO_ROOT / "corpus" / "results" / "expanded_corpus_build.latest.json"
+    build_root = REPO_ROOT / "corpus" / "build"
+    build_report_note: str | None = None
+    try:
+        corpus_build_report = load_corpus_build_report(build_report_path)
+    except SystemExit as exc:
+        build_report_note = str(exc)
+        corpus_build_report = build_corpus_report_from_disk(build_report_path, build_root)
+    objects, yaml_summary = load_targets_from_yaml(
+        yaml_path=REPO_ROOT / "corpus" / "config" / "macro_corpus.yaml",
+        corpus_build_report=corpus_build_report,
+        filters=filters,
+        max_programs=max_programs,
+    )
+    if not objects:
+        raise RuntimeError(f"no corpus objects matched filters={filters}")
+
+    object_records, program_records, batch_result = run_objects_locally_batch(
+        objects=objects,
+        runner=runner_binary,
+        daemon=daemon_binary,
+        repeat=max(1, repeat),
+        warmup_repeat=benchmark_config_warmups(benchmark_config),
+        timeout_seconds=240,
+        execution_mode="vm",
+        btf_custom_path=Path("/sys/kernel/btf/vmlinux"),
+        daemon_socket=str(daemon_socket_path),
+        benchmark_config=benchmark_config,
+        batch_size=max_programs,
+    )
+    if not batch_result.get("ok"):
+        raise RuntimeError(str(batch_result.get("error") or "corpus batch failed"))
+    if batch_result.get("completed_with_job_errors"):
+        raise RuntimeError("corpus batch completed with job errors")
+    return {
+        "status": "ok",
+        "filters": filters,
+        "max_programs": int(max_programs),
+        "repeat": int(max(1, repeat)),
+        "build_report_note": build_report_note,
+        "selected_objects": int(yaml_summary.get("selected_objects", 0) or 0),
+        "selected_programs": int(yaml_summary.get("selected_programs", 0) or 0),
+        "summary": summarize_corpus_batch_results(program_records, object_records),
+        "object_records": object_records,
+        "program_records": program_records,
+    }
+
+
 def main() -> int:
     args = parse_args()
     output_path = Path(args.output).resolve()
@@ -607,33 +797,81 @@ def main() -> int:
     runner_binary = (REPO_ROOT / "runner" / "build" / "micro_exec").resolve()
     daemon_binary = (REPO_ROOT / "daemon" / "target" / "release" / "bpfrejit-daemon").resolve()
     bpftool_binary = shutil.which("bpftool") or "bpftool"
+    benchmark_config = load_benchmark_config(None)
 
     if not runner_binary.exists():
         raise SystemExit(f"missing runner binary: {runner_binary}")
     if not daemon_binary.exists():
         raise SystemExit(f"missing daemon binary: {daemon_binary}")
 
-    raw_llvmbpf_vs_kernel = run_llvmbpf_vs_kernel(
-        iterations=args.iterations,
-        warmups=args.warmups,
-        repeat=args.repeat,
-        cpu=args.cpu,
-        results_dir=results_dir,
-    )
-    raw_rejit = run_daemon_stock_vs_rejit(
-        runner_binary=runner_binary,
-        daemon_binary=daemon_binary,
-        bpftool_binary=bpftool_binary,
-        iterations=args.iterations,
-        warmups=args.warmups,
-        repeat=args.repeat,
-        cpu=args.cpu,
-        results_dir=results_dir,
-    )
-    raw_katran = run_katran_smoke(
-        daemon_binary=daemon_binary,
-        bpftool_binary=bpftool_binary,
-    )
+    if runner_supports_llvmbpf(runner_binary):
+        raw_llvmbpf_vs_kernel = run_llvmbpf_vs_kernel(
+            iterations=args.iterations,
+            warmups=args.warmups,
+            repeat=args.repeat,
+            cpu=args.cpu,
+            results_dir=results_dir,
+        )
+    else:
+        raw_llvmbpf_vs_kernel = {
+            "status": "skipped",
+            "reason": "runner was cross-built without llvmbpf support",
+            "error": "",
+        }
+
+    daemon_proc, daemon_socket_path, daemon_socket_dir, daemon_stdout_path, daemon_stderr_path = _start_daemon_server(daemon_binary)
+    try:
+        raw_rejit = run_daemon_stock_vs_rejit(
+            runner_binary=runner_binary,
+            daemon_binary=daemon_binary,
+            daemon_socket_path=daemon_socket_path,
+            daemon_proc=daemon_proc,
+            daemon_stdout_path=daemon_stdout_path,
+            daemon_stderr_path=daemon_stderr_path,
+            bpftool_binary=bpftool_binary,
+            iterations=args.iterations,
+            warmups=args.warmups,
+            repeat=args.repeat,
+            cpu=args.cpu,
+            results_dir=results_dir,
+        )
+        raw_katran = run_katran_smoke(
+            daemon_binary=daemon_binary,
+            daemon_socket_path=daemon_socket_path,
+            daemon_proc=daemon_proc,
+            daemon_stdout_path=daemon_stdout_path,
+            daemon_stderr_path=daemon_stderr_path,
+            bpftool_binary=bpftool_binary,
+        )
+        if bool(args.corpus_attempt):
+            try:
+                raw_corpus = run_corpus_attempt(
+                    runner_binary=runner_binary,
+                    daemon_binary=daemon_binary,
+                    daemon_socket_path=daemon_socket_path,
+                    benchmark_config=benchmark_config,
+                    filters_csv=args.corpus_filters,
+                    max_programs=args.corpus_max_programs,
+                    repeat=args.corpus_repeat,
+                )
+            except Exception as exc:
+                raw_corpus = {
+                    "status": "error",
+                    "filters": [token.strip() for token in str(args.corpus_filters).split(",") if token.strip()],
+                    "max_programs": int(args.corpus_max_programs),
+                    "repeat": int(args.corpus_repeat),
+                    "error": str(exc),
+                }
+        else:
+            raw_corpus = {
+                "status": "skipped",
+                "filters": [],
+                "max_programs": int(args.corpus_max_programs),
+                "repeat": int(args.corpus_repeat),
+                "error": "corpus attempt disabled",
+            }
+    finally:
+        _stop_daemon_server(daemon_proc, daemon_socket_path, daemon_socket_dir)
 
     payload = {
         "run_date": datetime.now(timezone.utc).isoformat(),
@@ -663,11 +901,13 @@ def main() -> int:
             "llvmbpf_vs_kernel": summarize_llvmbpf_vs_kernel(raw_llvmbpf_vs_kernel),
             "daemon_stock_vs_rejit": summarize_rejit(raw_rejit),
             "katran_smoke": summarize_katran(raw_katran),
+            "corpus_attempt": summarize_corpus_attempt(raw_corpus),
         },
         "raw": {
             "llvmbpf_vs_kernel": raw_llvmbpf_vs_kernel,
             "daemon_stock_vs_rejit": raw_rejit,
             "katran_smoke": raw_katran,
+            "corpus_attempt": raw_corpus,
         },
     }
 

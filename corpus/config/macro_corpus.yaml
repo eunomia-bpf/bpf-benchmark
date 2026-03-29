@@ -5519,46 +5519,6 @@ objects:
     test_method: bpf_prog_test_run
     prog_type: xdp
     section: xdp_pass
-- source: corpus/build/manual-test/fentry.gen.bpf.o
-  repo: manual-test
-  test_method: attach_trigger
-  category: selftests
-  family: manual-test
-  level: support
-  tags:
-  - selftests
-  - manual_test
-  - tracing
-  - attach
-  prog_type: tracing
-  trigger: for i in $(seq 200); do /bin/true; done
-  trigger_timeout_seconds: 30
-  compile_loader: bpftool_loadall
-  programs:
-  - name: do_unlinkat
-    section: fentry/do_unlinkat
-  - name: do_unlinkat_exit
-    section: fexit/do_unlinkat
-- source: corpus/build/manual-test/fentry.tmp.bpf.o
-  repo: manual-test
-  test_method: attach_trigger
-  category: selftests
-  family: manual-test
-  level: support
-  tags:
-  - selftests
-  - manual_test
-  - tracing
-  - attach
-  prog_type: tracing
-  trigger: for i in $(seq 200); do /bin/true; done
-  trigger_timeout_seconds: 30
-  compile_loader: bpftool_loadall
-  programs:
-  - name: do_unlinkat
-    section: fentry/do_unlinkat
-  - name: do_unlinkat_exit
-    section: fexit/do_unlinkat
 - source: corpus/build/netbird/prog.bpf.o
   repo: netbird
   # Object-only corpus entry: no enumerated programs yet, so only object compile
@@ -7075,23 +7035,6 @@ objects:
     attach_group: event_execve
   - name: event_execve
     section: tracepoint/sys_execve
-# Remains compile_only: this seccomp program has no generic libbpf attach or
-# BPF_PROG_TEST_RUN path in the current corpus runner.
-- source: corpus/build/tetragon/bpf_execve_map_update.bpf.o
-  repo: tetragon
-  test_method: compile_only
-  category: security
-  family: tetragon
-  level: production
-  tags:
-  - security
-  - tetragon
-  - unspec
-  - compile-only
-  prog_type: unspec
-  section: seccomp
-  programs:
-  - name: execve_map_update
 - source: corpus/build/tetragon/bpf_exit.bpf.o
   repo: tetragon
   test_method: attach_trigger

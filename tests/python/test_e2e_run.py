@@ -5,6 +5,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from e2e import case_common
@@ -105,6 +107,36 @@ def test_run_single_case_raises_for_error_payload(tmp_path: Path, monkeypatch) -
     assert json.loads((tmp_path / "dummy.json").read_text()) == payload
     assert (tmp_path / "dummy.md").read_text() == "status=error\n"
     assert (tmp_path / "dummy-report.md").read_text() == "report=error\n"
+
+
+def test_run_single_case_rejects_skipped_payload(tmp_path: Path, monkeypatch) -> None:
+    payload = {"status": "skipped", "skip_reason": "not allowed"}
+
+    def fake_run_case(args: argparse.Namespace) -> dict[str, object]:
+        del args
+        return dict(payload)
+
+    spec = e2e_run.CaseSpec(
+        run_case=fake_run_case,
+        build_markdown=lambda result: f"status={result['status']}",
+        default_output_json=tmp_path / "dummy_authoritative_20260327.json",
+        default_output_md=tmp_path / "dummy.md",
+    )
+    monkeypatch.setitem(e2e_run.CASE_SPECS, "dummy-skipped", spec)
+
+    args = argparse.Namespace(
+        case="dummy-skipped",
+        output_json=str(tmp_path / "dummy.json"),
+        output_md=str(tmp_path / "dummy.md"),
+        report_md=str(tmp_path / "dummy-report.md"),
+        smoke=False,
+    )
+
+    with pytest.raises(RuntimeError, match="returned an invalid status: 'skipped'"):
+        e2e_run._run_single_case(args, clear_existing=True)
+
+    written = json.loads((tmp_path / "dummy.json").read_text())
+    assert written["status"] == "skipped"
 
 
 def test_apply_case_defaults_switches_tetragon_config_from_tracee_default() -> None:

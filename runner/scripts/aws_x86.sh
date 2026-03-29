@@ -849,8 +849,21 @@ ensure_local_e2e_assets() {
 stage_runtime_libs() {
     local binary="$1"
     local dest_dir="$2"
+    local ldd_output ldd_status dep
     mkdir -p "$dest_dir"
-    local dep
+
+    set +e
+    ldd_output="$(ldd "$binary" 2>&1)"
+    ldd_status=$?
+    set -e
+    if [[ "$ldd_status" -ne 0 ]]; then
+        if grep -Eq 'not a dynamic executable|statically linked' <<<"$ldd_output"; then
+            return 0
+        fi
+        printf '%s\n' "$ldd_output" >&2
+        die "failed to inspect runtime libraries for ${binary}"
+    fi
+
     while IFS= read -r dep; do
         [[ -n "$dep" ]] || continue
         case "$dep" in
@@ -860,11 +873,16 @@ stage_runtime_libs() {
         esac
         [[ -f "$dep" ]] || continue
         cp -L "$dep" "$dest_dir/"
-    done < <(ldd "$binary" | awk '
+    done < <(printf '%s\n' "$ldd_output" | awk '
         /=> not found/ { print "not found:" $1; next }
         /=>/ { print $3; next }
         /^[[:space:]]*\// { print $1 }
     ')
+}
+
+binary_requires_runtime_loader() {
+    local binary="$1"
+    readelf -l "$binary" 2>/dev/null | grep -F "Requesting program interpreter" >/dev/null
 }
 
 install_portable_runtime_wrapper() {
@@ -905,6 +923,38 @@ EOF
     chmod +x "$wrapper_path"
 }
 
+install_passthrough_wrapper() {
+    local wrapper_path="$1"
+    local real_binary="${wrapper_path}.bin"
+    [[ -x "$real_binary" ]] || die "wrapped binary is missing: ${real_binary}"
+    cat >"$wrapper_path" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_path="$(readlink -f "$0")"
+exec "${script_path}.bin" "$@"
+EOF
+    chmod +x "$wrapper_path"
+}
+
+resolve_local_binary_candidate() {
+    local binary_name="$1"
+    shift || true
+    local candidate
+    for candidate in "$@"; do
+        [[ -n "$candidate" ]] || continue
+        if [[ -x "$candidate" ]]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+    if command -v "$binary_name" >/dev/null 2>&1; then
+        command -v "$binary_name"
+        return 0
+    fi
+    return 1
+}
+
 wrap_bundled_x86_binary_if_present() {
     local source_path="$1"
     local bundled_path="$2"
@@ -917,8 +967,12 @@ wrap_bundled_x86_binary_if_present() {
 
     mkdir -p "$(dirname "$bundled_path")"
     cp "$source_path" "${bundled_path}.bin"
-    stage_runtime_libs "$source_path" "$BENCHMARK_BUNDLE_DIR/lib"
-    install_portable_runtime_wrapper "$bundled_path"
+    if binary_requires_runtime_loader "$source_path"; then
+        stage_runtime_libs "$source_path" "$BENCHMARK_BUNDLE_DIR/lib"
+        install_portable_runtime_wrapper "$bundled_path"
+    else
+        install_passthrough_wrapper "$bundled_path"
+    fi
 }
 
 ensure_benchmark_bundle() {
@@ -962,6 +1016,7 @@ ensure_benchmark_bundle() {
     if [[ "$bench_mode" == "e2e" ]]; then
         mkdir -p \
             "$BENCHMARK_BUNDLE_DIR/e2e" \
+            "$BENCHMARK_BUNDLE_DIR/e2e/bin" \
             "$BENCHMARK_BUNDLE_DIR/corpus/build" \
             "$BENCHMARK_BUNDLE_DIR/corpus/config" \
             "$BENCHMARK_BUNDLE_DIR/corpus/inputs" \
@@ -989,6 +1044,22 @@ ensure_benchmark_bundle() {
     cp "$X86_KINSN_MODULE_DIR"/*.ko "$BENCHMARK_BUNDLE_DIR/module/x86/"
 
     if [[ "$bench_mode" == "e2e" ]]; then
+        local tracee_binary=""
+        local tetragon_binary=""
+        local tetra_binary=""
+        local katran_server_binary=""
+        local wrk_binary=""
+
+        tracee_binary="$(resolve_local_binary_candidate tracee \
+            "$ROOT_DIR/e2e/cases/tracee/bin/tracee" || true)"
+        tetragon_binary="$(resolve_local_binary_candidate tetragon \
+            "$ROOT_DIR/e2e/cases/tetragon/bin/tetragon" || true)"
+        tetra_binary="$(resolve_local_binary_candidate tetra \
+            "$ROOT_DIR/e2e/cases/tetragon/bin/tetra" || true)"
+        katran_server_binary="$(resolve_local_binary_candidate katran_server_grpc \
+            "$ROOT_DIR/e2e/cases/katran/bin/katran_server_grpc" || true)"
+        wrk_binary="$(resolve_local_binary_candidate wrk || true)"
+
         cp -a "$ROOT_DIR/e2e/." "$BENCHMARK_BUNDLE_DIR/e2e/"
         rm -rf "$BENCHMARK_BUNDLE_DIR/e2e/results"
 
@@ -1013,21 +1084,30 @@ ensure_benchmark_bundle() {
                 "scx scheduler binary"
         fi
         wrap_bundled_x86_binary_if_present \
-            "$ROOT_DIR/e2e/cases/tracee/bin/tracee" \
+            "$tracee_binary" \
             "$BENCHMARK_BUNDLE_DIR/e2e/cases/tracee/bin/tracee" \
             "Tracee binary"
         wrap_bundled_x86_binary_if_present \
-            "$ROOT_DIR/e2e/cases/tetragon/bin/tetragon" \
+            "$tetragon_binary" \
             "$BENCHMARK_BUNDLE_DIR/e2e/cases/tetragon/bin/tetragon" \
             "Tetragon binary"
         wrap_bundled_x86_binary_if_present \
-            "$ROOT_DIR/e2e/cases/tetragon/bin/tetra" \
+            "$tetra_binary" \
             "$BENCHMARK_BUNDLE_DIR/e2e/cases/tetragon/bin/tetra" \
             "tetra CLI"
         wrap_bundled_x86_binary_if_present \
-            "$ROOT_DIR/e2e/cases/katran/bin/katran_server_grpc" \
+            "$katran_server_binary" \
             "$BENCHMARK_BUNDLE_DIR/e2e/cases/katran/bin/katran_server_grpc" \
             "Katran gRPC server"
+        wrap_bundled_x86_binary_if_present \
+            "$wrk_binary" \
+            "$BENCHMARK_BUNDLE_DIR/e2e/bin/wrk" \
+            "wrk HTTP load generator"
+        if [[ -d /usr/local/lib/tetragon/bpf ]]; then
+            mkdir -p "$BENCHMARK_BUNDLE_DIR/e2e/cases/tetragon/lib"
+            cp -a /usr/local/lib/tetragon/bpf \
+                "$BENCHMARK_BUNDLE_DIR/e2e/cases/tetragon/lib/"
+        fi
     fi
 
     tar -C "$BENCHMARK_BUNDLE_DIR" -czf "$BENCHMARK_BUNDLE_TAR" .

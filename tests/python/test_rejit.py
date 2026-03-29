@@ -4,6 +4,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from runner.libs import rejit
@@ -144,6 +146,17 @@ def test_benchmark_policy_required_site_passes_collects_unique_values() -> None:
         "const_prop",
         "wide_mem",
     ]
+
+
+def test_load_benchmark_config_fails_when_config_is_missing(monkeypatch, tmp_path: Path) -> None:
+    missing = tmp_path / "missing-benchmark-config.yaml"
+    monkeypatch.setattr(rejit, "_BENCHMARK_CONFIG_PATH", missing)
+    rejit._load_benchmark_root_config.cache_clear()
+    try:
+        with pytest.raises(SystemExit, match="benchmark config file not found"):
+            rejit.load_benchmark_config()
+    finally:
+        rejit._load_benchmark_root_config.cache_clear()
 
 
 def test_resolve_program_enabled_passes_applies_ordered_rules() -> None:

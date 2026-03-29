@@ -25,12 +25,12 @@ def test_select_tracee_programs_raises_on_missing_requested_name() -> None:
         )
 
 
-def test_build_markdown_keeps_preflight_for_skipped_payload() -> None:
+def test_build_markdown_keeps_preflight_for_error_payload() -> None:
     payload = {
         "generated_at": "2026-03-27T19:52:35.704448+00:00",
-        "status": "skipped",
-        "mode": "skipped",
-        "skip_reason": "preflight observed zero apply-program executions; skipping invalid optimization benchmark",
+        "status": "error",
+        "mode": "error",
+        "error_message": "preflight observed zero apply-program executions; configured apply programs were not exercised",
         "smoke": False,
         "duration_s": 30,
         "tracee_binary": "/tmp/tracee",

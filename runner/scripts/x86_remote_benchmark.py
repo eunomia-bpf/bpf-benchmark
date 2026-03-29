@@ -15,6 +15,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -682,6 +684,23 @@ def run_e2e_case(
         "--bpftool",
         bpftool_binary,
     ]
+    if case_name == "tetragon":
+        tetragon_bpf_lib = (REPO_ROOT / "e2e" / "cases" / "tetragon" / "lib" / "bpf").resolve()
+        if tetragon_bpf_lib.exists():
+            config_path = case_results_dir / "tetragon-aws.yaml"
+            config_payload = yaml.safe_load((REPO_ROOT / "e2e" / "cases" / "tetragon" / "config_execve_rate.yaml").read_text())
+            if not isinstance(config_payload, dict):
+                raise RuntimeError("tetragon config payload is not a mapping")
+            tetragon_extra_args = [
+                str(value).strip()
+                for value in (config_payload.get("tetragon_extra_args") or [])
+                if str(value).strip()
+            ]
+            if not any(arg == "--bpf-lib" or str(arg).startswith("--bpf-lib=") for arg in tetragon_extra_args):
+                tetragon_extra_args.extend(["--bpf-lib", str(tetragon_bpf_lib)])
+            config_payload["tetragon_extra_args"] = tetragon_extra_args
+            config_path.write_text(yaml.safe_dump(config_payload, sort_keys=False))
+            command.extend(["--config", str(config_path)])
     if smoke:
         command.append("--smoke")
 
@@ -689,10 +708,17 @@ def run_e2e_case(
     env["BPFTOOL_BIN"] = bpftool_binary
     env["PYTHONPATH"] = str(REPO_ROOT)
     current_path = env.get("PATH", "")
-    bpftool_dir = str(Path(bpftool_binary).resolve().parent)
     path_entries = [entry for entry in current_path.split(os.pathsep) if entry]
-    if bpftool_dir not in path_entries:
-        env["PATH"] = bpftool_dir if not current_path else f"{bpftool_dir}{os.pathsep}{current_path}"
+    extra_path_entries = [
+        str(Path(bpftool_binary).resolve().parent),
+        str((REPO_ROOT / "e2e" / "cases" / case_name / "bin").resolve()),
+        str((REPO_ROOT / "e2e" / "bin").resolve()),
+    ]
+    updated_path_entries = list(path_entries)
+    for entry in reversed(extra_path_entries):
+        if entry not in updated_path_entries:
+            updated_path_entries.insert(0, entry)
+    env["PATH"] = os.pathsep.join(updated_path_entries)
 
     timed_out = False
     try:

@@ -48,7 +48,8 @@ std::string json_escape_request(std::string_view input)
 std::string build_daemon_optimize_request(
     uint32_t prog_id,
     const std::vector<std::string> &enabled_passes,
-    bool enabled_passes_specified)
+    bool enabled_passes_specified,
+    bool dry_run)
 {
     std::string request =
         "{\"cmd\":\"optimize\",\"prog_id\":" + std::to_string(prog_id);
@@ -61,6 +62,9 @@ std::string build_daemon_optimize_request(
             request += "\"" + json_escape_request(enabled_passes[index]) + "\"";
         }
         request += "]";
+    }
+    if (dry_run) {
+        request += ",\"dry_run\":true";
     }
     request += "}\n";
     return request;
@@ -102,7 +106,8 @@ daemon_socket_response daemon_socket_optimize(
     const std::string &socket_path,
     uint32_t prog_id,
     const std::vector<std::string> &enabled_passes,
-    bool enabled_passes_specified)
+    bool enabled_passes_specified,
+    bool dry_run)
 {
     daemon_socket_response response;
 
@@ -133,7 +138,7 @@ daemon_socket_response daemon_socket_optimize(
     }
 
     const std::string request =
-        build_daemon_optimize_request(prog_id, enabled_passes, enabled_passes_specified);
+        build_daemon_optimize_request(prog_id, enabled_passes, enabled_passes_specified, dry_run);
     size_t total_written = 0;
     while (total_written < request.size()) {
         const ssize_t written =
