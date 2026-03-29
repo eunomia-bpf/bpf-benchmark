@@ -1,14 +1,14 @@
 # Expanded Corpus Build Results
 
-- Generated: `2026-03-29T20:30:42.830516+00:00`
+- Generated: `2026-03-29T23:00:20.522690+00:00`
 - Manifest: `/home/yunwei37/workspace/bpf-benchmark/runner/repos.yaml`
 - Repo root: `/home/yunwei37/workspace/bpf-benchmark/runner/repos`
 - Macro corpus: `/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_corpus.yaml`
 - Build root: `/home/yunwei37/workspace/bpf-benchmark/corpus/build`
-- Sources considered: 1183
+- Sources considered: 1176
 - Built from source: 740
-- Staged existing objects: 106
-- Available objects: 846
+- Staged existing objects: 99
+- Available objects: 839
 - Failures: 337
 
 ## Per-Repo Summary
@@ -18,15 +18,14 @@
 | KubeArmor | 0 | 3 | 0 | 0 |
 | bcc | 57 | 0 | 0 | 0 |
 | calico | 0 | 8 | 0 | 0 |
-| cilium | 0 | 3 | 9 | 0 |
+| cilium | 0 | 0 | 9 | 0 |
 | coroot-node-agent | 0 | 1 | 0 | 0 |
 | datadog-agent | 0 | 1 | 0 | 0 |
 | katran | 0 | 5 | 2 | 0 |
 | libbpf-bootstrap | 13 | 0 | 2 | 0 |
 | linux-selftests | 649 | 0 | 267 | 0 |
 | loxilb | 0 | 3 | 0 | 0 |
-| netbird | 0 | 1 | 1 | 0 |
-| opentelemetry-ebpf-profiler | 0 | 3 | 0 | 0 |
+| netbird | 0 | 0 | 1 | 0 |
 | real_world_code_size | 0 | 15 | 0 | 0 |
 | scx | 0 | 4 | 0 | 0 |
 | suricata | 0 | 2 | 0 | 0 |

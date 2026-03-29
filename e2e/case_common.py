@@ -491,10 +491,9 @@ def run_case_lifecycle(
 ) -> LifecycleRunResult:
     """Run the shared E2E lifecycle for a live program session.
 
-    TODO: the case-specific ``start`` / ``workload`` / ``stop`` hooks should
-    move into ``runner/libs/app_runners/`` so corpus and E2E share one
-    lifecycle surface per repo. This helper centralizes the repeated phase
-    ordering until that extraction lands:
+    E2E cases already share repo-specific runner implementations in
+    ``runner/libs/app_runners/``. This helper centralizes the repeated
+    daemon-scan/apply ordering around those case-specific hooks:
 
     1. setup
     2. start

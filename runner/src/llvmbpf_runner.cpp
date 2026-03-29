@@ -572,10 +572,7 @@ std::string resolve_effective_io_mode(const cli_options &options,
         has_result_map = has_result_map || spec.name == "result_map";
     }
     if (has_input_map && !has_result_map) {
-        std::fprintf(stderr,
-                     "io-mode: requested map but result_map is absent; "
-                     "falling back to staged\n");
-        return "staged";
+        fail("io-mode map requires result_map when input_map is present");
     }
     return options.io_mode;
 }
@@ -625,6 +622,8 @@ uint64_t read_result_value(const userspace_map_state &state)
 
 sample_result run_llvmbpf(const cli_options &options)
 {
+    constexpr int kLlvmBpfOptimizationLevel = 3;
+
     const auto program_image_start = clock_type::now();
     const auto image = load_program_image(options.program, options.program_name);
     const auto program_image_end = clock_type::now();
@@ -658,29 +657,11 @@ sample_result run_llvmbpf(const cli_options &options)
     const auto exec_input_prepare_end = clock_type::now();
 
     bpftime::llvmbpf_vm vm;
-    if (vm.set_optimization_level(options.opt_level) < 0) {
+    if (vm.set_optimization_level(kLlvmBpfOptimizationLevel) < 0) {
         fail("llvmbpf set_optimization_level failed: " + vm.get_error_message());
     }
-    if (configure_no_cmov(vm, options.no_cmov) < 0) {
-        if (options.no_cmov) {
-            fail("llvmbpf build does not support --no-cmov");
-        }
+    if (configure_no_cmov(vm, false) < 0) {
         fail("llvmbpf set_no_cmov failed: " + vm.get_error_message());
-    }
-    if (options.llvm_target_cpu.has_value() &&
-        vm.set_target_cpu(*options.llvm_target_cpu) < 0) {
-        fail("llvmbpf set_target_cpu failed: " + vm.get_error_message());
-    }
-    if (options.llvm_target_features.has_value() &&
-        vm.set_target_features(*options.llvm_target_features) < 0) {
-        fail("llvmbpf set_target_features failed: " + vm.get_error_message());
-    }
-    if (!options.disabled_passes.empty() &&
-        vm.set_disabled_passes(options.disabled_passes) < 0) {
-        fail("llvmbpf set_disabled_passes failed: " + vm.get_error_message());
-    }
-    if (options.log_passes && vm.set_log_passes(true) < 0) {
-        fail("llvmbpf set_log_passes failed: " + vm.get_error_message());
     }
     const auto load_code_start = clock_type::now();
     if (vm.load_code(image.code.data(), image.code.size()) < 0) {
@@ -716,26 +697,10 @@ sample_result run_llvmbpf(const cli_options &options)
 
     sample_result sample;
     sample.compile_ns = elapsed_ns(compile_start, compile_end);
-    sample.opt_level = options.opt_level;
-    sample.no_cmov = options.no_cmov;
-    sample.native_code_size = compiled_code->size;
-    sample.bpf_insn_count = image.code.size() / sizeof(ebpf_inst);
-    sample.disabled_passes = options.disabled_passes;
     sample.code_size = {
         .bpf_bytecode_bytes = image.code.size(),
         .native_code_bytes = compiled_code->size,
     };
-    if (options.compile_only) {
-        sample.phases_ns = {
-            {"program_image_ns", elapsed_ns(program_image_start, program_image_end)},
-            {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
-            {prepare_phase_name(effective_io_mode),
-             elapsed_ns(exec_input_prepare_start, exec_input_prepare_end)},
-            {"vm_load_code_ns", elapsed_ns(load_code_start, load_code_end)},
-            {"jit_compile_ns", sample.compile_ns},
-        };
-        return sample;
-    }
 
     uint64_t retval = 0;
     uint64_t result = 0;

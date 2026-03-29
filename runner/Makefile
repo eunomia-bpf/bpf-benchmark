@@ -15,6 +15,7 @@ BPFTOOL_BOOTSTRAP := $(BPFTOOL_BUILD_DIR)/bootstrap/bpftool
 BPFTOOL_RUNTIME ?= /usr/local/sbin/bpftool
 TOOLS_BUILD_DIR := $(BUILD_DIR)/tools
 MICRO_EXEC_ENABLE_LLVMBPF ?= ON
+LLVM_CONFIG ?= $(shell command -v llvm-config || true)
 PYTHON ?= python3
 REPOS ?=
 SKIP_CORPUS_FETCH ?= 0
@@ -208,11 +209,16 @@ $(BPFTOOL_BUILD_DIR):
 	mkdir -p $@
 
 micro_exec: $(LIBBPF_A) $(LIBBPF_HEADER) | $(BUILD_DIR)
+	@if [ "$(MICRO_EXEC_ENABLE_LLVMBPF)" = "ON" ] && [ -z "$(LLVM_CONFIG)" ]; then \
+		echo "MICRO_EXEC_ENABLE_LLVMBPF=ON requires llvm-config on PATH" >&2; \
+		exit 1; \
+	fi
 	cmake -S $(ROOT_DIR) -B $(BUILD_DIR) \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DMICRO_REPO_ROOT=$(REPO_ROOT) \
 		-DMICRO_LIBBPF_PREFIX=$(LIBBPF_PREFIX) \
 		-DMICRO_LIBBPF_LIBRARY=$(LIBBPF_A) \
+		$(if $(filter ON,$(MICRO_EXEC_ENABLE_LLVMBPF)),-DLLVM_DIR=$$($(LLVM_CONFIG) --cmakedir),) \
 		-DMICRO_EXEC_ENABLE_LLVMBPF=$(MICRO_EXEC_ENABLE_LLVMBPF)
 	cmake --build $(BUILD_DIR) --target micro_exec -j "$(JOBS)"
 
@@ -296,7 +302,7 @@ vm-negative-test: scx-artifacts kernel-image kinsn-modules-build
 		--timeout "$(VM_NEGATIVE_TIMEOUT)" \
 		--command '$(VM_INIT) echo "=== adversarial_rejit ===" && "$(NEGATIVE_TEST_DIR)/build/adversarial_rejit" && echo "=== fuzz_rejit ($(FUZZ_ROUNDS) rounds) ===" && "$(NEGATIVE_TEST_DIR)/build/fuzz_rejit" $(FUZZ_ROUNDS) && echo "=== scx_prog_show_race ($(SCX_PROG_SHOW_RACE_MODE)) ===" && "$(NEGATIVE_TEST_DIR)/build/scx_prog_show_race" "$(REPO_ROOT)" --mode "$(SCX_PROG_SHOW_RACE_MODE)" --iterations "$(SCX_PROG_SHOW_RACE_ITERATIONS)" --load-timeout "$(SCX_PROG_SHOW_RACE_LOAD_TIMEOUT)" $(if $(filter 1,$(SCX_PROG_SHOW_RACE_SKIP_PROBE)),--skip-probe,)'
 
-vm-micro-smoke: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-build
+vm-micro-smoke: micro_exec micro-programs kernel-image kinsn-modules-build
 	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-micro-smoke \
@@ -304,9 +310,9 @@ vm-micro-smoke: micro_exec micro-programs daemon-binary kernel-image kinsn-modul
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_MICRO_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) "$(DAEMON_PATH)" $(DAEMON_ARGS) serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; python3 "$(REPO_ROOT)/micro/driver.py" --runtime kernel --runtime kernel-rejit --daemon-socket "$(DAEMON_SOCKET)" $(VM_SMOKE_ARGS) --output "$(VM_MICRO_SMOKE_OUTPUT)"'
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/micro/driver.py" --runtime llvmbpf --runtime kernel $(VM_SMOKE_ARGS) --output "$(VM_MICRO_SMOKE_OUTPUT)"'
 
-vm-micro: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-build
+vm-micro: micro_exec micro-programs kernel-image kinsn-modules-build
 	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-micro \
@@ -314,7 +320,7 @@ vm-micro: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-bui
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_MICRO_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) "$(DAEMON_PATH)" $(DAEMON_ARGS) serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; python3 "$(REPO_ROOT)/micro/driver.py" --runtime llvmbpf --runtime kernel --runtime kernel-rejit --daemon-socket "$(DAEMON_SOCKET)" $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/micro/driver.py" --runtime llvmbpf --runtime kernel $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'
 
 vm-corpus: corpus-build corpus-build-native vendor_bpftool daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(CORPUS_RESULTS_DIR)"

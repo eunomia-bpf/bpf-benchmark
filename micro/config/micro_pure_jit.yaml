@@ -46,12 +46,6 @@ runtimes:
     repeat: 200
     sudo: true
 
-  - name: kernel-rejit
-    label: kernel eBPF + REJIT
-    mode: kernel-rejit
-    repeat: 200
-    sudo: true
-
 benchmarks:
   - name: simple
     description: Return-only baseline

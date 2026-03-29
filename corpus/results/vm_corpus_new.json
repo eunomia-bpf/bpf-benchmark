@@ -2,12 +2,12 @@
   "bpftool": "/usr/local/sbin/bpftool",
   "btf_custom_path": "/sys/kernel/btf/vmlinux",
   "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
-  "daemon_socket": "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260329/vm-tmp/bpfrejit-daemon-jjsbv53w/daemon.sock",
+  "daemon_socket": "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260329/vm-tmp/bpfrejit-daemon-_etcl6iy/daemon.sock",
   "filters": [
     "execsnoop",
     "xdp_pass_kern"
   ],
-  "generated_at": "2026-03-29T22:26:54.608208+00:00",
+  "generated_at": "2026-03-29T22:59:07.754503+00:00",
   "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_corpus.yaml",
   "manifest_summary": {
     "available_objects": 179,
@@ -30,26 +30,26 @@
   "results": [
     {
       "baseline": {
-        "exec_ns_mean": 3347.024864864865,
+        "exec_ns_mean": 2753.252391073326,
         "programs": {
           "tracepoint__syscalls__sys_enter_execve": {
-            "bytes_jited": 3604,
-            "bytes_xlated": 6352,
-            "exec_ns": 3478.2367567567567,
+            "bytes_jited": 3632,
+            "bytes_xlated": 6400,
+            "exec_ns": 2751.107332624867,
             "id": 7,
             "name": "tracepoint__sys",
-            "run_cnt": 925,
-            "run_time_ns": 3217369,
+            "run_cnt": 941,
+            "run_time_ns": 2588792,
             "type": "tracepoint"
           },
           "tracepoint__syscalls__sys_exit_execve": {
-            "bytes_jited": 265,
-            "bytes_xlated": 440,
-            "exec_ns": 3215.812972972973,
+            "bytes_jited": 290,
+            "bytes_xlated": 480,
+            "exec_ns": 2755.3974495217853,
             "id": 9,
             "name": "tracepoint__sys",
-            "run_cnt": 925,
-            "run_time_ns": 2974627,
+            "run_cnt": 941,
+            "run_time_ns": 2592829,
             "type": "tracepoint"
           }
         }
@@ -60,7 +60,7 @@
       "process": {
         "returncode": 0,
         "stderr_tail": "",
-        "stdout_tail": "true             1281   372      0 /bin/true\nsetpriv          1282   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1282   372      0 /bin/true\nsetpriv          1283   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1283   372      0 /bin/true\nsetpriv          1284   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1284   372      0 /bin/true\nsetpriv          1285   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1285   372      0 /bin/true\nsetpriv          1286   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1286   372      0 /bin/true\nsetpriv          1287   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1287   372      0 /bin/true\nsetpriv          1288   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1288   372      0 /bin/true\nsetpriv          1289   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1289   372      0 /bin/true\nsetpriv          1290   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1290   372      0 /bin/true\nsetpriv          1291   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1291   372      0 /bin/true\nsetpriv          1292   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1292   372      0 /bin/true\nsetpriv          1293   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1293   372      0 /bin/true\nsetpriv          1294   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1294   372      0 /bin/true\nsetpriv          1295   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1295   372      0 /bin/true\nsetpriv          1296   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1296   372      0 /bin/true\nsetpriv          1297   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1297   372      0 /bin/true\nsetpriv          1298   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1298   372      0 /bin/true\nsetpriv          1299   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1299   372      0 /bin/true\nsetpriv          1300   372      0 /bin/setpriv --reuid 65534 --regid 65534 --clear-groups /bin/true\ntrue             1300   372      0 /bin/true\nbpftool          1301   372      0 /home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/tools/bpf/bpftool/bpftool -j -p prog show"
+        "stdout_tail": "15:59:06 65534 true             1264   370      0 /bin/true\n15:59:06 65534 true             1265   370      0 /bin/true\n15:59:06 65534 true             1266   370      0 /bin/true\n15:59:06 65534 true             1267   370      0 /bin/true\n15:59:06 65534 true             1268   370      0 /bin/true\n15:59:06 65534 true             1269   370      0 /bin/true\n15:59:06 65534 true             1270   370      0 /bin/true\n15:59:06 65534 true             1271   370      0 /bin/true\n15:59:06 65534 true             1272   370      0 /bin/true\n15:59:06 65534 true             1273   370      0 /bin/true\n15:59:06 65534 true             1274   370      0 /bin/true\n15:59:06 65534 true             1275   370      0 /bin/true\n15:59:06 65534 true             1276   370      0 /bin/true\n15:59:06 65534 true             1277   370      0 /bin/true\n15:59:06 65534 true             1278   370      0 /bin/true\n15:59:06 65534 true             1279   370      0 /bin/true\n15:59:06 65534 true             1280   370      0 /bin/true\n15:59:06 65534 true             1281   370      0 /bin/true\n15:59:06 65534 true             1282   370      0 /bin/true\n15:59:06 65534 true             1283   370      0 /bin/true\n15:59:06 65534 true             1284   370      0 /bin/true\n15:59:06 65534 true             1285   370      0 /bin/true\n15:59:06 65534 true             1286   370      0 /bin/true\n15:59:06 65534 true             1287   370      0 /bin/true\n15:59:06 65534 true             1288   370      0 /bin/true\n15:59:06 65534 true             1289   370      0 /bin/true\n15:59:06 65534 true             1290   370      0 /bin/true\n15:59:06 65534 true             1291   370      0 /bin/true\n15:59:06 65534 true             1292   370      0 /bin/true\n15:59:06 65534 true             1293   370      0 /bin/true\n15:59:06 65534 true             1294   370      0 /bin/true\n15:59:06 65534 true             1295   370      0 /bin/true\n15:59:06 65534 true             1296   370      0 /bin/true\n15:59:06 65534 true             1297   370      0 /bin/true\n15:59:06 65534 true             1298   370      0 /bin/true\n15:59:06 65534 true             1299   370      0 /bin/true\n15:59:06 65534 true             1300   370      0 /bin/true\n15:59:06 65534 true             1301   370      0 /bin/true\n15:59:06 65534 true             1302   370      0 /bin/true\n15:59:06 65534 true             1303   370      0 /bin/true"
       },
       "prog_ids": [
         7,
@@ -69,13 +69,13 @@
       "programs": [
         {
           "btf_id": 23,
-          "bytes_jited": 3604,
+          "bytes_jited": 3632,
           "bytes_memlock": 20480,
-          "bytes_xlated": 6352,
+          "bytes_xlated": 6400,
           "gpl_compatible": true,
           "id": 7,
           "jited": true,
-          "loaded_at": 1774823191,
+          "loaded_at": 1774825124,
           "map_ids": [
             6,
             2,
@@ -86,20 +86,20 @@
           "owner_fds": [
             {
               "fd": 8,
-              "pid": 379
+              "pid": 377
             },
             {
               "fd": 11,
-              "pid": 379
+              "pid": 377
             }
           ],
           "owner_pids": [
-            379
+            377
           ],
           "pids": [
             {
               "comm": "execsnoop",
-              "pid": 379
+              "pid": 377
             }
           ],
           "tag": "3e7aee7cb016a79f",
@@ -108,13 +108,13 @@
         },
         {
           "btf_id": 23,
-          "bytes_jited": 265,
+          "bytes_jited": 290,
           "bytes_memlock": 4096,
-          "bytes_xlated": 440,
+          "bytes_xlated": 480,
           "gpl_compatible": true,
           "id": 9,
           "jited": true,
-          "loaded_at": 1774823191,
+          "loaded_at": 1774825124,
           "map_ids": [
             6,
             2,
@@ -126,20 +126,20 @@
           "owner_fds": [
             {
               "fd": 9,
-              "pid": 379
+              "pid": 377
             },
             {
               "fd": 13,
-              "pid": 379
+              "pid": 377
             }
           ],
           "owner_pids": [
-            379
+            377
           ],
           "pids": [
             {
               "comm": "execsnoop",
-              "pid": 379
+              "pid": 377
             }
           ],
           "tag": "5da4993d8f94bf47",
@@ -148,26 +148,26 @@
         }
       ],
       "rejit": {
-        "exec_ns_mean": 3564.8635359116024,
+        "exec_ns_mean": 3295.9235880398674,
         "programs": {
           "tracepoint__syscalls__sys_enter_execve": {
-            "bytes_jited": 2893,
-            "bytes_xlated": 5208,
-            "exec_ns": 3684.6596685082873,
+            "bytes_jited": 2903,
+            "bytes_xlated": 5224,
+            "exec_ns": 3288.8826135105205,
             "id": 7,
             "name": "tracepoint__sys",
-            "run_cnt": 905,
-            "run_time_ns": 3334617,
+            "run_cnt": 903,
+            "run_time_ns": 2969861,
             "type": "tracepoint"
           },
           "tracepoint__syscalls__sys_exit_execve": {
-            "bytes_jited": 230,
-            "bytes_xlated": 392,
-            "exec_ns": 3445.067403314917,
+            "bytes_jited": 242,
+            "bytes_xlated": 408,
+            "exec_ns": 3302.9645625692137,
             "id": 9,
             "name": "tracepoint__sys",
-            "run_cnt": 905,
-            "run_time_ns": 3117786,
+            "run_cnt": 903,
+            "run_time_ns": 2982577,
             "type": "tracepoint"
           }
         }
@@ -175,18 +175,18 @@
       "rejit_apply": {
         "applied": true,
         "counts": {
-          "applied_sites": 427,
-          "total_sites": 427
+          "applied_sites": 432,
+          "total_sites": 432
         },
         "error": "",
         "exit_code": 0,
-        "output": "{\"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"site at PC=5: constantized pseudo-map-value load from map_id=6 off=0 value=0x0\", \"site at PC=16: constantized pseudo-map-value load from map_id=6 off=4 value=0xffffffff\", \"site at PC=20: constantized pseudo-map-value load from map_id=6 off=4 value=0xffffffff\", \"site at PC=96: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=132: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=168: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=204: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=240: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=276: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=312: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=347: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=383: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=419: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=455: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=491: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=527: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=563: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=599: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=635: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=671: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=707: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=743: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=779: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=815: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=851: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=887: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=923: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=959: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=995: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1031: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1067: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1103: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1139: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1175: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1211: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1247: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1283: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1319: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1355: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1391: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1427: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1463: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1499: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1535: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1571: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1607: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1643: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1679: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1715: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1751: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1787: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1823: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1859: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1895: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1931: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1967: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2003: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2039: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2075: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2111: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2147: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2183: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2217: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=41: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=41: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-4 width 4 before pc 41; fallback scan failed: register r0 definition at pc 25 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"round 2: site at PC=41: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"round 2: site at PC=41: fallback scan failed: register r0 definition at pc 25 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\"], \"insn_delta\": 0, \"insns_after\": 2236, \"insns_before\": 2236, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 63, \"sites_skipped\": 1, \"skip_reasons\": {\"lookup key is not a constant stack or pseudo-map-value materialization\": 1}, \"skipped_sites\": [{\"pc\": 41, \"reason\": \"lookup key is not a constant stack or pseudo-map-value materialization\"}], \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": -1422, \"insns_after\": 814, \"insns_before\": 2236, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 182, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"removed 145 dead-def insns\", \"removed 22 nop insns\"], \"insn_delta\": -167, \"insns_after\": 647, \"insns_before\": 814, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 167, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"map_inline\", \"const_prop\", \"dce\"], \"prog_id\": 7, \"program\": {\"final_insn_count\": 647, \"insn_delta\": -1589, \"orig_insn_count\": 2236, \"prog_id\": 7, \"prog_name\": \"tracepoint__sys\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 13, \"program_changed\": true, \"total_sites_applied\": 412, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 455861508, \"rejit_syscall_ns\": 20973123, \"total_ns\": 467502838}}\n{\"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"site at PC=3: constantized pseudo-map-value load from map_id=6 off=0 value=0x0\", \"site at PC=13: constantized pseudo-map-value load from map_id=6 off=4 value=0xffffffff\", \"site at PC=17: constantized pseudo-map-value load from map_id=6 off=4 value=0xffffffff\", \"site at PC=32: constantized pseudo-map-value load from map_id=6 off=1 value=0x1\", \"site at PC=27: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=27: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-4 width 4 before pc 27; fallback scan failed: register r0 definition at pc 21 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"round 2: site at PC=27: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"round 2: site at PC=27: fallback scan failed: register r0 definition at pc 21 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\"], \"insn_delta\": 0, \"insns_after\": 64, \"insns_before\": 64, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 4, \"sites_skipped\": 1, \"skip_reasons\": {\"lookup key is not a constant stack or pseudo-map-value materialization\": 1}, \"skipped_sites\": [{\"pc\": 27, \"reason\": \"lookup key is not a constant stack or pseudo-map-value materialization\"}], \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": -9, \"insns_after\": 55, \"insns_before\": 64, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 3, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"removed 5 dead-def insns\", \"removed 3 nop insns\"], \"insn_delta\": -8, \"insns_after\": 47, \"insns_before\": 55, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 8, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"map_inline\", \"const_prop\", \"dce\"], \"prog_id\": 9, \"program\": {\"final_insn_count\": 47, \"insn_delta\": -17, \"orig_insn_count\": 64, \"prog_id\": 9, \"prog_name\": \"tracepoint__sys\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 13, \"program_changed\": true, \"total_sites_applied\": 15, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 3422556, \"rejit_syscall_ns\": 2813268, \"total_ns\": 8000360}}",
+        "output": "{\"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"site at PC=5: constantized pseudo-map-value load from map_id=6 off=0 value=0x0\", \"site at PC=16: constantized pseudo-map-value load from map_id=6 off=4 value=0xfffe\", \"site at PC=20: constantized pseudo-map-value load from map_id=6 off=4 value=0xfffe\", \"site at PC=96: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=132: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=168: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=204: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=240: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=276: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=312: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=347: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=383: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=419: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=455: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=491: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=527: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=563: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=599: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=635: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=671: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=707: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=743: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=779: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=815: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=851: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=887: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=923: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=959: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=995: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1031: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1067: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1103: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1139: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1175: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1211: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1247: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1283: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1319: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1355: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1391: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1427: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1463: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1499: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1535: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1571: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1607: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1643: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1679: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1715: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1751: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1787: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1823: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1859: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1895: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1931: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1967: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2003: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2039: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2075: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2111: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2147: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2183: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2217: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=41: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=41: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-4 width 4 before pc 41; fallback scan failed: register r0 definition at pc 25 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"round 2: site at PC=41: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"round 2: site at PC=41: fallback scan failed: register r0 definition at pc 25 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\"], \"insn_delta\": 0, \"insns_after\": 2236, \"insns_before\": 2236, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 63, \"sites_skipped\": 1, \"skip_reasons\": {\"lookup key is not a constant stack or pseudo-map-value materialization\": 1}, \"skipped_sites\": [{\"pc\": 41, \"reason\": \"lookup key is not a constant stack or pseudo-map-value materialization\"}], \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": -1417, \"insns_after\": 819, \"insns_before\": 2236, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 182, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"removed 148 dead-def insns\", \"removed 22 nop insns\"], \"insn_delta\": -170, \"insns_after\": 649, \"insns_before\": 819, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 170, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"map_inline\", \"const_prop\", \"dce\"], \"prog_id\": 7, \"program\": {\"final_insn_count\": 649, \"insn_delta\": -1587, \"orig_insn_count\": 2236, \"prog_id\": 7, \"prog_name\": \"tracepoint__sys\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 13, \"program_changed\": true, \"total_sites_applied\": 415, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 452514752, \"rejit_syscall_ns\": 20716696, \"total_ns\": 461057783}}\n{\"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"site at PC=3: constantized pseudo-map-value load from map_id=6 off=0 value=0x0\", \"site at PC=13: constantized pseudo-map-value load from map_id=6 off=4 value=0xfffe\", \"site at PC=17: constantized pseudo-map-value load from map_id=6 off=4 value=0xfffe\", \"site at PC=32: constantized pseudo-map-value load from map_id=6 off=1 value=0x1\", \"site at PC=27: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=27: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-4 width 4 before pc 27; fallback scan failed: register r0 definition at pc 21 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"round 2: site at PC=27: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"round 2: site at PC=27: fallback scan failed: register r0 definition at pc 21 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\"], \"insn_delta\": 0, \"insns_after\": 64, \"insns_before\": 64, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 4, \"sites_skipped\": 1, \"skip_reasons\": {\"lookup key is not a constant stack or pseudo-map-value materialization\": 1}, \"skipped_sites\": [{\"pc\": 27, \"reason\": \"lookup key is not a constant stack or pseudo-map-value materialization\"}], \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": -5, \"insns_after\": 59, \"insns_before\": 64, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 3, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"removed 7 dead-def insns\", \"removed 3 nop insns\"], \"insn_delta\": -10, \"insns_after\": 49, \"insns_before\": 59, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 10, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"map_inline\", \"const_prop\", \"dce\"], \"prog_id\": 9, \"program\": {\"final_insn_count\": 49, \"insn_delta\": -15, \"orig_insn_count\": 64, \"prog_id\": 9, \"prog_name\": \"tracepoint__sys\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 13, \"program_changed\": true, \"total_sites_applied\": 17, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 3065676, \"rejit_syscall_ns\": 2672618, \"total_ns\": 6591544}}",
         "per_program": {
           "7": {
             "applied": true,
             "counts": {
-              "applied_sites": 412,
-              "total_sites": 412
+              "applied_sites": 415,
+              "total_sites": 415
             },
             "debug_result": {
               "changed": true,
@@ -196,8 +196,8 @@
                   "changed": true,
                   "diagnostics": [
                     "site at PC=5: constantized pseudo-map-value load from map_id=6 off=0 value=0x0",
-                    "site at PC=16: constantized pseudo-map-value load from map_id=6 off=4 value=0xffffffff",
-                    "site at PC=20: constantized pseudo-map-value load from map_id=6 off=4 value=0xffffffff",
+                    "site at PC=16: constantized pseudo-map-value load from map_id=6 off=4 value=0xfffe",
+                    "site at PC=20: constantized pseudo-map-value load from map_id=6 off=4 value=0xfffe",
                     "site at PC=96: constantized pseudo-map-value load from map_id=6 off=8 value=0x14",
                     "site at PC=132: constantized pseudo-map-value load from map_id=6 off=8 value=0x14",
                     "site at PC=168: constantized pseudo-map-value load from map_id=6 off=8 value=0x14",
@@ -289,8 +289,8 @@
                   "action": "kept",
                   "changed": true,
                   "diagnostics": [],
-                  "insn_delta": -1422,
-                  "insns_after": 814,
+                  "insn_delta": -1417,
+                  "insns_after": 819,
                   "insns_before": 2236,
                   "pass": "const_prop",
                   "pass_name": "const_prop",
@@ -307,15 +307,15 @@
                   "action": "kept",
                   "changed": true,
                   "diagnostics": [
-                    "removed 145 dead-def insns",
+                    "removed 148 dead-def insns",
                     "removed 22 nop insns"
                   ],
-                  "insn_delta": -167,
-                  "insns_after": 647,
-                  "insns_before": 814,
+                  "insn_delta": -170,
+                  "insns_after": 649,
+                  "insns_before": 819,
                   "pass": "dce",
                   "pass_name": "dce",
-                  "sites_applied": 167,
+                  "sites_applied": 170,
                   "sites_skipped": 0,
                   "skip_reasons": {},
                   "verify": {
@@ -329,8 +329,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 647,
-                  "insns_before": 647,
+                  "insns_after": 649,
+                  "insns_before": 649,
                   "pass": "const_prop",
                   "pass_name": "const_prop",
                   "sites_applied": 0,
@@ -347,8 +347,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 647,
-                  "insns_before": 647,
+                  "insns_after": 649,
+                  "insns_before": 649,
                   "pass": "dce",
                   "pass_name": "dce",
                   "sites_applied": 0,
@@ -365,8 +365,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 647,
-                  "insns_before": 647,
+                  "insns_after": 649,
+                  "insns_before": 649,
                   "pass": "skb_load_bytes_spec",
                   "pass_name": "skb_load_bytes_spec",
                   "sites_applied": 0,
@@ -383,8 +383,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 647,
-                  "insns_before": 647,
+                  "insns_after": 649,
+                  "insns_before": 649,
                   "pass": "bounds_check_merge",
                   "pass_name": "bounds_check_merge",
                   "sites_applied": 0,
@@ -401,8 +401,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 647,
-                  "insns_before": 647,
+                  "insns_after": 649,
+                  "insns_before": 649,
                   "pass": "wide_mem",
                   "pass_name": "wide_mem",
                   "sites_applied": 0,
@@ -419,8 +419,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 647,
-                  "insns_before": 647,
+                  "insns_after": 649,
+                  "insns_before": 649,
                   "pass": "bulk_memory",
                   "pass_name": "bulk_memory",
                   "sites_applied": 0,
@@ -437,8 +437,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 647,
-                  "insns_before": 647,
+                  "insns_after": 649,
+                  "insns_before": 649,
                   "pass": "rotate",
                   "pass_name": "rotate",
                   "sites_applied": 0,
@@ -455,8 +455,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 647,
-                  "insns_before": 647,
+                  "insns_after": 649,
+                  "insns_before": 649,
                   "pass": "cond_select",
                   "pass_name": "cond_select",
                   "sites_applied": 0,
@@ -473,8 +473,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 647,
-                  "insns_before": 647,
+                  "insns_after": 649,
+                  "insns_before": 649,
                   "pass": "extract",
                   "pass_name": "extract",
                   "sites_applied": 0,
@@ -491,8 +491,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 647,
-                  "insns_before": 647,
+                  "insns_after": 649,
+                  "insns_before": 649,
                   "pass": "endian_fusion",
                   "pass_name": "endian_fusion",
                   "sites_applied": 0,
@@ -512,8 +512,8 @@
               ],
               "prog_id": 7,
               "program": {
-                "final_insn_count": 647,
-                "insn_delta": -1589,
+                "final_insn_count": 649,
+                "insn_delta": -1587,
                 "orig_insn_count": 2236,
                 "prog_id": 7,
                 "prog_name": "tracepoint__sys",
@@ -525,34 +525,34 @@
                 "passes_changed": 3,
                 "passes_executed": 13,
                 "program_changed": true,
-                "total_sites_applied": 412,
+                "total_sites_applied": 415,
                 "verifier_rejections": 0
               },
               "timings_ns": {
-                "pipeline_run_ns": 455861508,
-                "rejit_syscall_ns": 20973123,
-                "total_ns": 467502838
+                "pipeline_run_ns": 452514752,
+                "rejit_syscall_ns": 20716696,
+                "total_ns": 461057783
               }
             },
             "error": "",
             "exit_code": 0,
             "inlined_map_entries": [],
             "kernel_prog_name": "tracepoint__sys",
-            "output": "{\"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"site at PC=5: constantized pseudo-map-value load from map_id=6 off=0 value=0x0\", \"site at PC=16: constantized pseudo-map-value load from map_id=6 off=4 value=0xffffffff\", \"site at PC=20: constantized pseudo-map-value load from map_id=6 off=4 value=0xffffffff\", \"site at PC=96: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=132: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=168: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=204: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=240: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=276: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=312: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=347: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=383: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=419: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=455: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=491: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=527: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=563: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=599: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=635: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=671: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=707: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=743: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=779: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=815: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=851: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=887: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=923: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=959: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=995: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1031: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1067: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1103: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1139: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1175: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1211: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1247: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1283: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1319: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1355: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1391: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1427: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1463: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1499: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1535: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1571: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1607: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1643: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1679: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1715: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1751: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1787: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1823: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1859: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1895: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1931: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1967: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2003: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2039: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2075: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2111: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2147: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2183: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2217: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=41: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=41: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-4 width 4 before pc 41; fallback scan failed: register r0 definition at pc 25 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"round 2: site at PC=41: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"round 2: site at PC=41: fallback scan failed: register r0 definition at pc 25 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\"], \"insn_delta\": 0, \"insns_after\": 2236, \"insns_before\": 2236, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 63, \"sites_skipped\": 1, \"skip_reasons\": {\"lookup key is not a constant stack or pseudo-map-value materialization\": 1}, \"skipped_sites\": [{\"pc\": 41, \"reason\": \"lookup key is not a constant stack or pseudo-map-value materialization\"}], \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": -1422, \"insns_after\": 814, \"insns_before\": 2236, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 182, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"removed 145 dead-def insns\", \"removed 22 nop insns\"], \"insn_delta\": -167, \"insns_after\": 647, \"insns_before\": 814, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 167, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 647, \"insns_before\": 647, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"map_inline\", \"const_prop\", \"dce\"], \"prog_id\": 7, \"program\": {\"final_insn_count\": 647, \"insn_delta\": -1589, \"orig_insn_count\": 2236, \"prog_id\": 7, \"prog_name\": \"tracepoint__sys\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 13, \"program_changed\": true, \"total_sites_applied\": 412, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 455861508, \"rejit_syscall_ns\": 20973123, \"total_ns\": 467502838}}",
+            "output": "{\"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"site at PC=5: constantized pseudo-map-value load from map_id=6 off=0 value=0x0\", \"site at PC=16: constantized pseudo-map-value load from map_id=6 off=4 value=0xfffe\", \"site at PC=20: constantized pseudo-map-value load from map_id=6 off=4 value=0xfffe\", \"site at PC=96: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=132: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=168: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=204: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=240: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=276: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=312: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=347: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=383: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=419: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=455: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=491: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=527: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=563: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=599: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=635: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=671: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=707: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=743: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=779: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=815: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=851: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=887: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=923: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=959: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=995: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1031: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1067: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1103: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1139: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1175: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1211: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1247: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1283: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1319: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1355: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1391: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1427: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1463: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1499: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1535: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1571: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1607: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1643: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1679: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1715: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1751: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1787: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1823: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1859: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1895: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1931: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=1967: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2003: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2039: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2075: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2111: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2147: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2183: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=2217: constantized pseudo-map-value load from map_id=6 off=8 value=0x14\", \"site at PC=41: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=41: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-4 width 4 before pc 41; fallback scan failed: register r0 definition at pc 25 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"round 2: site at PC=41: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"round 2: site at PC=41: fallback scan failed: register r0 definition at pc 25 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\"], \"insn_delta\": 0, \"insns_after\": 2236, \"insns_before\": 2236, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 63, \"sites_skipped\": 1, \"skip_reasons\": {\"lookup key is not a constant stack or pseudo-map-value materialization\": 1}, \"skipped_sites\": [{\"pc\": 41, \"reason\": \"lookup key is not a constant stack or pseudo-map-value materialization\"}], \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": -1417, \"insns_after\": 819, \"insns_before\": 2236, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 182, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"removed 148 dead-def insns\", \"removed 22 nop insns\"], \"insn_delta\": -170, \"insns_after\": 649, \"insns_before\": 819, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 170, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 649, \"insns_before\": 649, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"map_inline\", \"const_prop\", \"dce\"], \"prog_id\": 7, \"program\": {\"final_insn_count\": 649, \"insn_delta\": -1587, \"orig_insn_count\": 2236, \"prog_id\": 7, \"prog_name\": \"tracepoint__sys\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 13, \"program_changed\": true, \"total_sites_applied\": 415, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 452514752, \"rejit_syscall_ns\": 20716696, \"total_ns\": 461057783}}",
             "summary": {
               "applied": true,
               "passes_changed": 3,
               "passes_executed": 13,
               "program_changed": true,
-              "total_sites_applied": 412,
+              "total_sites_applied": 415,
               "verifier_rejections": 0
             }
           },
           "9": {
             "applied": true,
             "counts": {
-              "applied_sites": 15,
-              "total_sites": 15
+              "applied_sites": 17,
+              "total_sites": 17
             },
             "debug_result": {
               "changed": true,
@@ -562,8 +562,8 @@
                   "changed": true,
                   "diagnostics": [
                     "site at PC=3: constantized pseudo-map-value load from map_id=6 off=0 value=0x0",
-                    "site at PC=13: constantized pseudo-map-value load from map_id=6 off=4 value=0xffffffff",
-                    "site at PC=17: constantized pseudo-map-value load from map_id=6 off=4 value=0xffffffff",
+                    "site at PC=13: constantized pseudo-map-value load from map_id=6 off=4 value=0xfffe",
+                    "site at PC=17: constantized pseudo-map-value load from map_id=6 off=4 value=0xfffe",
                     "site at PC=32: constantized pseudo-map-value load from map_id=6 off=1 value=0x1",
                     "site at PC=27: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
                     "site at PC=27: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-4 width 4 before pc 27; fallback scan failed: register r0 definition at pc 21 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
@@ -596,8 +596,8 @@
                   "action": "kept",
                   "changed": true,
                   "diagnostics": [],
-                  "insn_delta": -9,
-                  "insns_after": 55,
+                  "insn_delta": -5,
+                  "insns_after": 59,
                   "insns_before": 64,
                   "pass": "const_prop",
                   "pass_name": "const_prop",
@@ -614,15 +614,15 @@
                   "action": "kept",
                   "changed": true,
                   "diagnostics": [
-                    "removed 5 dead-def insns",
+                    "removed 7 dead-def insns",
                     "removed 3 nop insns"
                   ],
-                  "insn_delta": -8,
-                  "insns_after": 47,
-                  "insns_before": 55,
+                  "insn_delta": -10,
+                  "insns_after": 49,
+                  "insns_before": 59,
                   "pass": "dce",
                   "pass_name": "dce",
-                  "sites_applied": 8,
+                  "sites_applied": 10,
                   "sites_skipped": 0,
                   "skip_reasons": {},
                   "verify": {
@@ -636,8 +636,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 47,
-                  "insns_before": 47,
+                  "insns_after": 49,
+                  "insns_before": 49,
                   "pass": "const_prop",
                   "pass_name": "const_prop",
                   "sites_applied": 0,
@@ -654,8 +654,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 47,
-                  "insns_before": 47,
+                  "insns_after": 49,
+                  "insns_before": 49,
                   "pass": "dce",
                   "pass_name": "dce",
                   "sites_applied": 0,
@@ -672,8 +672,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 47,
-                  "insns_before": 47,
+                  "insns_after": 49,
+                  "insns_before": 49,
                   "pass": "skb_load_bytes_spec",
                   "pass_name": "skb_load_bytes_spec",
                   "sites_applied": 0,
@@ -690,8 +690,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 47,
-                  "insns_before": 47,
+                  "insns_after": 49,
+                  "insns_before": 49,
                   "pass": "bounds_check_merge",
                   "pass_name": "bounds_check_merge",
                   "sites_applied": 0,
@@ -708,8 +708,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 47,
-                  "insns_before": 47,
+                  "insns_after": 49,
+                  "insns_before": 49,
                   "pass": "wide_mem",
                   "pass_name": "wide_mem",
                   "sites_applied": 0,
@@ -726,8 +726,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 47,
-                  "insns_before": 47,
+                  "insns_after": 49,
+                  "insns_before": 49,
                   "pass": "bulk_memory",
                   "pass_name": "bulk_memory",
                   "sites_applied": 0,
@@ -744,8 +744,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 47,
-                  "insns_before": 47,
+                  "insns_after": 49,
+                  "insns_before": 49,
                   "pass": "rotate",
                   "pass_name": "rotate",
                   "sites_applied": 0,
@@ -762,8 +762,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 47,
-                  "insns_before": 47,
+                  "insns_after": 49,
+                  "insns_before": 49,
                   "pass": "cond_select",
                   "pass_name": "cond_select",
                   "sites_applied": 0,
@@ -780,8 +780,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 47,
-                  "insns_before": 47,
+                  "insns_after": 49,
+                  "insns_before": 49,
                   "pass": "extract",
                   "pass_name": "extract",
                   "sites_applied": 0,
@@ -798,8 +798,8 @@
                   "changed": false,
                   "diagnostics": [],
                   "insn_delta": 0,
-                  "insns_after": 47,
-                  "insns_before": 47,
+                  "insns_after": 49,
+                  "insns_before": 49,
                   "pass": "endian_fusion",
                   "pass_name": "endian_fusion",
                   "sites_applied": 0,
@@ -819,8 +819,8 @@
               ],
               "prog_id": 9,
               "program": {
-                "final_insn_count": 47,
-                "insn_delta": -17,
+                "final_insn_count": 49,
+                "insn_delta": -15,
                 "orig_insn_count": 64,
                 "prog_id": 9,
                 "prog_name": "tracepoint__sys",
@@ -832,26 +832,26 @@
                 "passes_changed": 3,
                 "passes_executed": 13,
                 "program_changed": true,
-                "total_sites_applied": 15,
+                "total_sites_applied": 17,
                 "verifier_rejections": 0
               },
               "timings_ns": {
-                "pipeline_run_ns": 3422556,
-                "rejit_syscall_ns": 2813268,
-                "total_ns": 8000360
+                "pipeline_run_ns": 3065676,
+                "rejit_syscall_ns": 2672618,
+                "total_ns": 6591544
               }
             },
             "error": "",
             "exit_code": 0,
             "inlined_map_entries": [],
             "kernel_prog_name": "tracepoint__sys",
-            "output": "{\"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"site at PC=3: constantized pseudo-map-value load from map_id=6 off=0 value=0x0\", \"site at PC=13: constantized pseudo-map-value load from map_id=6 off=4 value=0xffffffff\", \"site at PC=17: constantized pseudo-map-value load from map_id=6 off=4 value=0xffffffff\", \"site at PC=32: constantized pseudo-map-value load from map_id=6 off=1 value=0x1\", \"site at PC=27: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=27: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-4 width 4 before pc 27; fallback scan failed: register r0 definition at pc 21 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"round 2: site at PC=27: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"round 2: site at PC=27: fallback scan failed: register r0 definition at pc 21 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\"], \"insn_delta\": 0, \"insns_after\": 64, \"insns_before\": 64, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 4, \"sites_skipped\": 1, \"skip_reasons\": {\"lookup key is not a constant stack or pseudo-map-value materialization\": 1}, \"skipped_sites\": [{\"pc\": 27, \"reason\": \"lookup key is not a constant stack or pseudo-map-value materialization\"}], \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": -9, \"insns_after\": 55, \"insns_before\": 64, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 3, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"removed 5 dead-def insns\", \"removed 3 nop insns\"], \"insn_delta\": -8, \"insns_after\": 47, \"insns_before\": 55, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 8, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 47, \"insns_before\": 47, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"map_inline\", \"const_prop\", \"dce\"], \"prog_id\": 9, \"program\": {\"final_insn_count\": 47, \"insn_delta\": -17, \"orig_insn_count\": 64, \"prog_id\": 9, \"prog_name\": \"tracepoint__sys\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 13, \"program_changed\": true, \"total_sites_applied\": 15, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 3422556, \"rejit_syscall_ns\": 2813268, \"total_ns\": 8000360}}",
+            "output": "{\"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"site at PC=3: constantized pseudo-map-value load from map_id=6 off=0 value=0x0\", \"site at PC=13: constantized pseudo-map-value load from map_id=6 off=4 value=0xfffe\", \"site at PC=17: constantized pseudo-map-value load from map_id=6 off=4 value=0xfffe\", \"site at PC=32: constantized pseudo-map-value load from map_id=6 off=1 value=0x1\", \"site at PC=27: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=27: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-4 width 4 before pc 27; fallback scan failed: register r0 definition at pc 21 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"round 2: site at PC=27: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"round 2: site at PC=27: fallback scan failed: register r0 definition at pc 21 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\"], \"insn_delta\": 0, \"insns_after\": 64, \"insns_before\": 64, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 4, \"sites_skipped\": 1, \"skip_reasons\": {\"lookup key is not a constant stack or pseudo-map-value materialization\": 1}, \"skipped_sites\": [{\"pc\": 27, \"reason\": \"lookup key is not a constant stack or pseudo-map-value materialization\"}], \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": -5, \"insns_after\": 59, \"insns_before\": 64, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 3, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"removed 7 dead-def insns\", \"removed 3 nop insns\"], \"insn_delta\": -10, \"insns_after\": 49, \"insns_before\": 59, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 10, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 49, \"insns_before\": 49, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"map_inline\", \"const_prop\", \"dce\"], \"prog_id\": 9, \"program\": {\"final_insn_count\": 49, \"insn_delta\": -15, \"orig_insn_count\": 64, \"prog_id\": 9, \"prog_name\": \"tracepoint__sys\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 13, \"program_changed\": true, \"total_sites_applied\": 17, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 3065676, \"rejit_syscall_ns\": 2672618, \"total_ns\": 6591544}}",
             "summary": {
               "applied": true,
               "passes_changed": 3,
               "passes_executed": 13,
               "program_changed": true,
-              "total_sites_applied": 15,
+              "total_sites_applied": 17,
               "verifier_rejections": 0
             }
           }
@@ -873,11 +873,11 @@
         {
           "baseline": {
             "bytes_xlated": 16,
-            "exec_ns": 81,
+            "exec_ns": 39,
             "jited_bytes": 28,
             "prog_id": 59,
             "raw": {
-              "duration": 81,
+              "duration": 39,
               "retval": 2
             },
             "retval": 2,
@@ -885,17 +885,16 @@
             "xlated_insns": 2
           },
           "error": "",
-          "fallback": null,
-          "pin_path": "/sys/fs/bpf/corpus-orch-xdp_pass_kern_bpf-372/progs/xdp_prog_simple",
+          "pin_path": "/sys/fs/bpf/corpus-orch-xdp_pass_kern_bpf-370/progs/xdp_prog_simple",
           "prog_id": 59,
           "program_name": "xdp_prog_simple",
           "rejit": {
             "bytes_xlated": 16,
-            "exec_ns": 57,
+            "exec_ns": 39,
             "jited_bytes": 28,
             "prog_id": 59,
             "raw": {
-              "duration": 57,
+              "duration": 39,
               "retval": 2
             },
             "retval": 2,
@@ -910,7 +909,7 @@
             },
             "error": "",
             "exit_code": 0,
-            "output": "{\"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 59, \"program\": {\"final_insn_count\": 2, \"insn_delta\": 0, \"orig_insn_count\": 2, \"prog_id\": 59, \"prog_name\": \"xdp_prog_simple\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 11, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 818375, \"rejit_syscall_ns\": 688833, \"total_ns\": 5473418}}",
+            "output": "{\"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 59, \"program\": {\"final_insn_count\": 2, \"insn_delta\": 0, \"orig_insn_count\": 2, \"prog_id\": 59, \"prog_name\": \"xdp_prog_simple\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 11, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 500175, \"rejit_syscall_ns\": 56226, \"total_ns\": 4241630}}",
             "per_program": {
               "59": {
                 "applied": true,
@@ -1140,16 +1139,16 @@
                     "verifier_rejections": 0
                   },
                   "timings_ns": {
-                    "pipeline_run_ns": 818375,
-                    "rejit_syscall_ns": 688833,
-                    "total_ns": 5473418
+                    "pipeline_run_ns": 500175,
+                    "rejit_syscall_ns": 56226,
+                    "total_ns": 4241630
                   }
                 },
                 "error": "",
                 "exit_code": 0,
                 "inlined_map_entries": [],
                 "kernel_prog_name": "xdp_prog_simple",
-                "output": "{\"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 59, \"program\": {\"final_insn_count\": 2, \"insn_delta\": 0, \"orig_insn_count\": 2, \"prog_id\": 59, \"prog_name\": \"xdp_prog_simple\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 11, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 818375, \"rejit_syscall_ns\": 688833, \"total_ns\": 5473418}}",
+                "output": "{\"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 2, \"insns_before\": 2, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 59, \"program\": {\"final_insn_count\": 2, \"insn_delta\": 0, \"orig_insn_count\": 2, \"prog_id\": 59, \"prog_name\": \"xdp_prog_simple\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 11, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 500175, \"rejit_syscall_ns\": 56226, \"total_ns\": 4241630}}",
                 "summary": {
                   "applied": true,
                   "passes_changed": 0,
@@ -1160,11 +1159,18 @@
                 }
               }
             }
-          }
+          },
+          "status": "ok"
         }
       ],
       "repo": "xdp-tutorial",
-      "status": "ok"
+      "status": "ok",
+      "summary": {
+        "records": 1,
+        "statuses": {
+          "ok": 1
+        }
+      }
     }
   ],
   "runner": "/home/yunwei37/workspace/bpf-benchmark/runner/build/micro_exec",

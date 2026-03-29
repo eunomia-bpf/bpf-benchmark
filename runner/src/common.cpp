@@ -17,12 +17,25 @@ std::string usage_text()
         "[--warmup N] [--input-size N] [--perf-counters] "
         "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] "
         "[--dump-xlated <path>]\n"
+#ifdef MICRO_EXEC_ENABLE_LLVMBPF
+        "  micro_exec run-llvmbpf [--program <path>|<path>] [--program-name <name>] "
+        "[--memory <path>] [--io-mode map|staged|packet] [--raw-packet] "
+        "[--repeat N] [--input-size N] [--perf-counters] "
+        "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit]\n"
+#endif
         "  micro_exec list-programs [--program <path>|<path>]";
 }
 
 void validate_cli_options(const cli_options &options)
 {
-    if (options.command != "test-run" && options.command != "list-programs") {
+    const bool supported_command =
+        options.command == "test-run" ||
+        options.command == "list-programs"
+#ifdef MICRO_EXEC_ENABLE_LLVMBPF
+        || options.command == "run-llvmbpf"
+#endif
+        ;
+    if (!supported_command) {
         fail("unsupported command: " + options.command);
     }
     if (options.program.empty()) {
@@ -32,7 +45,12 @@ void validate_cli_options(const cli_options &options)
         options.perf_scope != "full_repeat_avg") {
         fail("--perf-scope must be one of full_repeat_raw or full_repeat_avg");
     }
-    if (options.command == "test-run" && options.repeat == 0) {
+    if ((options.command == "test-run"
+#ifdef MICRO_EXEC_ENABLE_LLVMBPF
+         || options.command == "run-llvmbpf"
+#endif
+        ) &&
+        options.repeat == 0) {
         fail("--repeat must be >= 1");
     }
 }

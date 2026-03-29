@@ -31,7 +31,6 @@ from runner.libs.rejit import (
 
 DEFAULT_MACRO_CORPUS_YAML = ROOT_DIR / "corpus" / "config" / "macro_corpus.yaml"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
-DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_OUTPUT_JSON = ROOT_DIR / "corpus" / "results" / "vm_corpus_new.json"
 DEFAULT_BTF_PATH = Path("/sys/kernel/btf/vmlinux")
 NETWORK_TEST_RUN_TYPES = {"xdp", "sched_cls", "sched_act", "cgroup_skb", "socket_filter"}
@@ -54,7 +53,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the new Python-only corpus orchestrator.")
     parser.add_argument("--suite", default=str(DEFAULT_MACRO_CORPUS_YAML))
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--runner", default=str(DEFAULT_RUNNER))
     parser.add_argument("--bpftool", default="", help="Explicit bpftool binary.")
     parser.add_argument("--btf-custom-path", default=str(DEFAULT_BTF_PATH))
     parser.add_argument("--repeat", type=int, default=0)
@@ -382,7 +380,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
         ((yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}).get("defaults") or {}).get("repeat", 1)
     )
     daemon_binary = Path(args.daemon).resolve()
-    runner_binary = Path(args.runner).resolve() if str(args.runner).strip() else None
     btf_path = Path(args.btf_custom_path).resolve() if str(args.btf_custom_path).strip() else None
     bpftool_binary = str(Path(args.bpftool).resolve()) if str(args.bpftool).strip() else resolve_bpftool_binary()
 
@@ -412,14 +409,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                     )
                 else:
                     raise RuntimeError(f"unsupported measurement: {obj.measurement}")
-            except NotImplementedError as exc:
-                result = {
-                    "object": obj.object_path,
-                    "repo": obj.repo,
-                    "measurement": obj.measurement,
-                    "status": "unsupported",
-                    "error": str(exc),
-                }
             except Exception as exc:
                 result = {
                     "object": obj.object_path,
@@ -438,7 +427,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
             "daemon": str(daemon_binary),
             "daemon_socket": str(daemon_socket_path),
             "bpftool": bpftool_binary,
-            "runner": str(runner_binary) if runner_binary is not None else None,
             "btf_custom_path": str(btf_path) if btf_path is not None else None,
             "filters": list(args.filters or []),
             "repeat": max(1, repeat),

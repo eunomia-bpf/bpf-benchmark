@@ -15,6 +15,12 @@ int main(int argc, char **argv)
             print_json(run_kernel(options));
             return 0;
         }
+#ifdef MICRO_EXEC_ENABLE_LLVMBPF
+        if (options.command == "run-llvmbpf") {
+            print_json(run_llvmbpf(options));
+            return 0;
+        }
+#endif
         fail("unknown command: " + options.command);
     } catch (const std::exception &error) {
         std::cerr << error.what() << "\n";

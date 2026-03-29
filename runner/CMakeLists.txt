@@ -43,6 +43,61 @@ set(MICRO_EXEC_SOURCES
     src/perf_counters.cpp
 )
 
+if(MICRO_EXEC_ENABLE_LLVMBPF)
+    set(MICRO_LLVMBPF_LIBRARY "${MICRO_REPO_ROOT}/vendor/llvmbpf/libllvmbpf_vm.a")
+    if(NOT EXISTS "${MICRO_LLVMBPF_LIBRARY}")
+        message(FATAL_ERROR "MICRO_EXEC_ENABLE_LLVMBPF=ON requires ${MICRO_LLVMBPF_LIBRARY}")
+    endif()
+
+    add_library(vendor_llvmbpf STATIC IMPORTED GLOBAL)
+    set_target_properties(vendor_llvmbpf PROPERTIES
+        IMPORTED_LOCATION "${MICRO_LLVMBPF_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${MICRO_REPO_ROOT}/vendor/llvmbpf/include"
+    )
+
+    if(DEFINED LLVM_DIR)
+        find_package(LLVM REQUIRED CONFIG PATHS "${LLVM_DIR}" NO_DEFAULT_PATH)
+    else()
+        find_package(LLVM REQUIRED CONFIG)
+    endif()
+    pkg_check_modules(SPDLOG REQUIRED IMPORTED_TARGET spdlog)
+
+    set(LLVM_COMPONENTS
+        ${LLVM_TARGETS_TO_BUILD}
+        Core
+        Support
+        Target
+        Analysis
+        ipo
+        TransformUtils
+        BitReader
+        AsmParser
+        Linker
+        MC
+        MCParser
+        MCDisassembler
+        Object
+        ExecutionEngine
+        RuntimeDyld
+        OrcJIT
+        MCJIT
+        X86CodeGen
+        X86Desc
+        X86Info
+        X86AsmParser
+        NVPTXCodeGen
+        NVPTXDesc
+        NVPTXInfo
+        AArch64CodeGen
+        AArch64Desc
+        AArch64Info
+        AArch64AsmParser
+    )
+    llvm_map_components_to_libnames(LLVM_LIBS ${LLVM_COMPONENTS})
+
+    list(APPEND MICRO_EXEC_SOURCES src/llvmbpf_runner.cpp)
+endif()
+
 add_executable(micro_exec ${MICRO_EXEC_SOURCES})
 
 target_include_directories(micro_exec
@@ -53,6 +108,11 @@ target_include_directories(micro_exec
         "${MICRO_REPO_ROOT}/vendor/libbpf/include/uapi"
 )
 
+if(MICRO_EXEC_ENABLE_LLVMBPF)
+    target_compile_definitions(micro_exec PRIVATE MICRO_EXEC_ENABLE_LLVMBPF=1)
+    target_include_directories(micro_exec PRIVATE "${MICRO_REPO_ROOT}/vendor/llvmbpf/include")
+endif()
+
 target_link_libraries(micro_exec
     PRIVATE
         vendor_libbpf
@@ -60,3 +120,12 @@ target_link_libraries(micro_exec
         PkgConfig::ZLIB
         PkgConfig::YAMLCPP
 )
+
+if(MICRO_EXEC_ENABLE_LLVMBPF)
+    target_link_libraries(micro_exec
+        PRIVATE
+            vendor_llvmbpf
+            PkgConfig::SPDLOG
+            ${LLVM_LIBS}
+    )
+endif()

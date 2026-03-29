@@ -199,4 +199,12 @@ docs/tmp/*/llvmbpf_roundtrip_poc/*.bin
 docs/tmp/*/llvmbpf_roundtrip_poc/*.ll
 docs/tmp/*/llvmbpf_roundtrip_poc/*.bc
 docs/tmp/*/llvmbpf_roundtrip_poc/*.o
+docs/tmp/*/llvmbpf_roundtrip_poc/*.a
+docs/tmp/*/llvmbpf_roundtrip_poc/*.rc
 docs/tmp/*/llvmbpf_roundtrip_poc/roundtrip_*/
+
+# llvmbpf bulk roundtrip artifacts
+docs/tmp/*/llvmbpf_bulk_roundtrip/artifacts/
+docs/tmp/*/llvmbpf_bulk_roundtrip/build_logs/
+docs/tmp/*/llvmbpf_bulk_roundtrip/guest_logs/
+docs/tmp/*/llvmbpf_bulk_roundtrip/guest_verify_helper/
