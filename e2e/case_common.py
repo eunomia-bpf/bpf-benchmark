@@ -307,7 +307,13 @@ def run_case_lifecycle(
     7. post-ReJIT workload
     8. stop + cleanup
     """
-    from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes, scan_programs
+    from runner.libs.rejit import (
+        _start_daemon_server,
+        _stop_daemon_server,
+        apply_daemon_rejit,
+        benchmark_rejit_enabled_passes,
+        scan_programs,
+    )
 
     setup_state = setup()
     lifecycle_state: CaseLifecycleState | None = None
@@ -357,16 +363,28 @@ def run_case_lifecycle(
                 "error": skip_rejit_reason,
             }
         elif requested_prog_ids:
-            scan_results = scan_programs(
-                requested_prog_ids,
-                daemon_binary,
-                **lifecycle_state.scan_kwargs,
-            )
-            rejit_result = apply_daemon_rejit(
-                daemon_binary,
-                requested_prog_ids,
-                enabled_passes=enabled_passes or benchmark_rejit_enabled_passes(),
-            )
+            daemon_server = _start_daemon_server(daemon_binary)
+            try:
+                scan_results = scan_programs(
+                    requested_prog_ids,
+                    daemon_binary,
+                    daemon_socket_path=daemon_server[1],
+                    daemon_proc=daemon_server[0],
+                    daemon_stdout_path=daemon_server[3],
+                    daemon_stderr_path=daemon_server[4],
+                    **lifecycle_state.scan_kwargs,
+                )
+                rejit_result = apply_daemon_rejit(
+                    daemon_binary,
+                    requested_prog_ids,
+                    enabled_passes=enabled_passes or benchmark_rejit_enabled_passes(),
+                    daemon_socket_path=daemon_server[1],
+                    daemon_proc=daemon_server[0],
+                    daemon_stdout_path=daemon_server[3],
+                    daemon_stderr_path=daemon_server[4],
+                )
+            finally:
+                _stop_daemon_server(daemon_server[0], daemon_server[1], daemon_server[2])
             if rejit_result.get("applied"):
                 post_rejit = workload(setup_state, lifecycle_state, "post_rejit")
         return LifecycleRunResult(

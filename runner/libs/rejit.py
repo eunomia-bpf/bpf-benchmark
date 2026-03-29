@@ -529,6 +529,10 @@ def scan_programs(
     *,
     prog_fds: dict[int, int] | None = None,
     timeout_seconds: int = 60,
+    daemon_socket_path: Path | None = None,
+    daemon_proc: subprocess.Popen[str] | None = None,
+    daemon_stdout_path: Path | None = None,
+    daemon_stderr_path: Path | None = None,
 ) -> dict[int, dict[str, Any]]:
     """Collect dry-run optimize summaries for the requested live prog_ids."""
     del prog_fds
@@ -537,31 +541,67 @@ def scan_programs(
     if not requested_ids:
         return {}
 
-    zero = _zero_site_counts()
-    results: dict[int, dict[str, Any]] = {}
-    daemon_proc = None
-    daemon_socket_path = None
-    daemon_socket_dir = None
-    daemon_stdout_path = None
-    daemon_stderr_path = None
+    if daemon_socket_path is not None:
+        return _scan_programs_via_socket(
+            requested_ids,
+            daemon_socket_path,
+            daemon_proc=daemon_proc,
+            stdout_path=daemon_stdout_path,
+            stderr_path=daemon_stderr_path,
+            timeout_seconds=timeout_seconds,
+        )
 
+    daemon_proc_local = None
+    daemon_socket_path_local = None
+    daemon_socket_dir = None
+    daemon_stdout_path_local = None
+    daemon_stderr_path_local = None
     try:
         (
-            daemon_proc,
-            daemon_socket_path,
+            daemon_proc_local,
+            daemon_socket_path_local,
             daemon_socket_dir,
-            daemon_stdout_path,
-            daemon_stderr_path,
+            daemon_stdout_path_local,
+            daemon_stderr_path_local,
         ) = _start_daemon_server(daemon)
+        return _scan_programs_via_socket(
+            requested_ids,
+            daemon_socket_path_local,
+            daemon_proc=daemon_proc_local,
+            stdout_path=daemon_stdout_path_local,
+            stderr_path=daemon_stderr_path_local,
+            timeout_seconds=timeout_seconds,
+        )
+    finally:
+        if (
+            daemon_proc_local is not None
+            and daemon_socket_path_local is not None
+            and daemon_socket_dir is not None
+        ):
+            _stop_daemon_server(daemon_proc_local, daemon_socket_path_local, daemon_socket_dir)
+
+
+def _scan_programs_via_socket(
+    requested_ids: list[int],
+    socket_path: Path,
+    *,
+    daemon_proc: subprocess.Popen[str] | None = None,
+    stdout_path: Path | None = None,
+    stderr_path: Path | None = None,
+    timeout_seconds: int = 60,
+) -> dict[int, dict[str, Any]]:
+    zero = _zero_site_counts()
+    results: dict[int, dict[str, Any]] = {}
+    try:
         for prog_id in requested_ids:
             response = _optimize_request(
-                daemon_socket_path,
+                socket_path,
                 prog_id,
                 enabled_passes=None,
                 dry_run=True,
                 daemon_proc=daemon_proc,
-                stdout_path=daemon_stdout_path,
-                stderr_path=daemon_stderr_path,
+                stdout_path=stdout_path,
+                stderr_path=stderr_path,
                 timeout_seconds=float(timeout_seconds),
             )
             if str(response.get("status") or "") != "ok":
@@ -582,9 +622,6 @@ def scan_programs(
                 "counts": dict(zero),
                 "error": error,
             }
-    finally:
-        if daemon_proc is not None and daemon_socket_path is not None and daemon_socket_dir is not None:
-            _stop_daemon_server(daemon_proc, daemon_socket_path, daemon_socket_dir)
 
     return results
 
@@ -967,12 +1004,65 @@ def apply_daemon_rejit(
     prog_ids: list[int] | None = None,
     *,
     enabled_passes: Sequence[str] | None = None,
+    daemon_socket_path: Path | None = None,
+    daemon_proc: subprocess.Popen[str] | None = None,
+    daemon_stdout_path: Path | None = None,
+    daemon_stderr_path: Path | None = None,
 ) -> dict[str, object]:
     """Apply serve-mode optimize requests and return a canonical ReJIT summary."""
     requested_prog_ids = [int(value) for value in (prog_ids or []) if int(value) > 0]
     if not requested_prog_ids:
         raise ValueError("apply_daemon_rejit requires at least one prog_id")
 
+    if daemon_socket_path is not None:
+        return _apply_daemon_rejit_via_socket(
+            requested_prog_ids,
+            daemon_socket_path,
+            enabled_passes=enabled_passes,
+            daemon_proc=daemon_proc,
+            stdout_path=daemon_stdout_path,
+            stderr_path=daemon_stderr_path,
+        )
+
+    daemon_proc_local = None
+    daemon_socket_path_local = None
+    daemon_socket_dir = None
+    daemon_stdout_path_local = None
+    daemon_stderr_path_local = None
+    try:
+        (
+            daemon_proc_local,
+            daemon_socket_path_local,
+            daemon_socket_dir,
+            daemon_stdout_path_local,
+            daemon_stderr_path_local,
+        ) = _start_daemon_server(daemon_binary)
+        return _apply_daemon_rejit_via_socket(
+            requested_prog_ids,
+            daemon_socket_path_local,
+            enabled_passes=enabled_passes,
+            daemon_proc=daemon_proc_local,
+            stdout_path=daemon_stdout_path_local,
+            stderr_path=daemon_stderr_path_local,
+        )
+    finally:
+        if (
+            daemon_proc_local is not None
+            and daemon_socket_path_local is not None
+            and daemon_socket_dir is not None
+        ):
+            _stop_daemon_server(daemon_proc_local, daemon_socket_path_local, daemon_socket_dir)
+
+
+def _apply_daemon_rejit_via_socket(
+    requested_prog_ids: list[int],
+    socket_path: Path,
+    *,
+    enabled_passes: Sequence[str] | None = None,
+    daemon_proc: subprocess.Popen[str] | None = None,
+    stdout_path: Path | None = None,
+    stderr_path: Path | None = None,
+) -> dict[str, object]:
     per_program: dict[int, dict[str, object]] = {}
     outputs: list[str] = []
     exit_code = 0
@@ -980,65 +1070,47 @@ def apply_daemon_rejit(
     total_sites = 0
     applied_sites = 0
     errors: list[str] = []
-    daemon_proc = None
-    daemon_socket_path = None
-    daemon_socket_dir = None
-    daemon_stdout_path = None
-    daemon_stderr_path = None
 
-    try:
-        (
-            daemon_proc,
-            daemon_socket_path,
-            daemon_socket_dir,
-            daemon_stdout_path,
-            daemon_stderr_path,
-        ) = _start_daemon_server(daemon_binary)
-        if _branch_flip_requested(enabled_passes):
-            assert daemon_socket_path is not None
-            profile_error = _prepare_branch_flip_profile(
-                daemon_socket_path,
-                daemon_proc=daemon_proc,
-                stdout_path=daemon_stdout_path,
-                stderr_path=daemon_stderr_path,
-            )
-            if profile_error is not None:
-                return {
-                    "applied": False,
-                    "output": str(profile_error.get("output") or ""),
-                    "exit_code": int(profile_error.get("exit_code", 1) or 1),
-                    "per_program": {},
-                    "counts": {
-                        "total_sites": 0,
-                        "applied_sites": 0,
-                    },
-                    "error": str(profile_error.get("error") or "profile collection failed"),
-                }
-        for prog_id in requested_prog_ids:
-            assert daemon_socket_path is not None
-            result = _apply_one_via_socket(
-                daemon_socket_path,
-                prog_id,
-                enabled_passes,
-                daemon_proc=daemon_proc,
-                stdout_path=daemon_stdout_path,
-                stderr_path=daemon_stderr_path,
-            )
-            per_program[prog_id] = result
-            outputs.append(str(result.get("output") or ""))
-            exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
-            all_applied = all_applied and bool(result.get("applied", False))
+    if _branch_flip_requested(enabled_passes):
+        profile_error = _prepare_branch_flip_profile(
+            socket_path,
+            daemon_proc=daemon_proc,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+        )
+        if profile_error is not None:
+            return {
+                "applied": False,
+                "output": str(profile_error.get("output") or ""),
+                "exit_code": int(profile_error.get("exit_code", 1) or 1),
+                "per_program": {},
+                "counts": {
+                    "total_sites": 0,
+                    "applied_sites": 0,
+                },
+                "error": str(profile_error.get("error") or "profile collection failed"),
+            }
+    for prog_id in requested_prog_ids:
+        result = _apply_one_via_socket(
+            socket_path,
+            prog_id,
+            enabled_passes,
+            daemon_proc=daemon_proc,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+        )
+        per_program[prog_id] = result
+        outputs.append(str(result.get("output") or ""))
+        exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
+        all_applied = all_applied and bool(result.get("applied", False))
 
-            counts = result.get("counts") if isinstance(result.get("counts"), Mapping) else {}
-            total_sites += int((counts or {}).get("total_sites", 0) or 0)
-            applied_sites += int((counts or {}).get("applied_sites", 0) or 0)
+        counts = result.get("counts") if isinstance(result.get("counts"), Mapping) else {}
+        total_sites += int((counts or {}).get("total_sites", 0) or 0)
+        applied_sites += int((counts or {}).get("applied_sites", 0) or 0)
 
-            error = str(result.get("error") or "").strip()
-            if error:
-                errors.append(f"prog {prog_id}: {error}")
-    finally:
-        if daemon_proc is not None and daemon_socket_path is not None and daemon_socket_dir is not None:
-            _stop_daemon_server(daemon_proc, daemon_socket_path, daemon_socket_dir)
+        error = str(result.get("error") or "").strip()
+        if error:
+            errors.append(f"prog {prog_id}: {error}")
 
     return {
         "applied": all_applied,

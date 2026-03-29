@@ -202,6 +202,110 @@ def test_apply_daemon_rejit_branch_flip_profiles_before_optimize(monkeypatch) ->
     assert ("socket", (Path("/tmp/daemon.sock"), 123, ["branch_flip"])) in calls
 
 
+def test_scan_programs_uses_supplied_daemon_socket_without_restart(monkeypatch) -> None:
+    calls: list[tuple[str, object]] = []
+    daemon_proc = object()
+
+    def fake_optimize_request(socket_path, prog_id, enabled_passes, dry_run, **kwargs):
+        calls.append(("optimize", (socket_path, prog_id, enabled_passes, dry_run, kwargs)))
+        return {
+            "status": "ok",
+            "passes": [{"pass_name": "map_inline", "sites_found": 2}],
+            "program": {
+                "prog_name": f"prog_{prog_id}",
+                "prog_type": 6,
+                "orig_insn_count": 42,
+            },
+        }
+
+    monkeypatch.setattr(
+        rejit,
+        "_start_daemon_server",
+        lambda _daemon_binary: (_ for _ in ()).throw(AssertionError("unexpected daemon restart")),
+    )
+    monkeypatch.setattr(rejit, "_optimize_request", fake_optimize_request)
+
+    result = rejit.scan_programs(
+        [123],
+        Path("/tmp/fake-daemon"),
+        daemon_socket_path=Path("/tmp/existing.sock"),
+        daemon_proc=daemon_proc,
+        daemon_stdout_path=Path("/tmp/daemon.stdout.log"),
+        daemon_stderr_path=Path("/tmp/daemon.stderr.log"),
+        timeout_seconds=33,
+    )
+
+    assert result[123]["error"] == ""
+    assert result[123]["counts"]["map_inline_sites"] == 2
+    assert calls == [
+        (
+            "optimize",
+            (
+                Path("/tmp/existing.sock"),
+                123,
+                None,
+                True,
+                {
+                    "daemon_proc": daemon_proc,
+                    "stdout_path": Path("/tmp/daemon.stdout.log"),
+                    "stderr_path": Path("/tmp/daemon.stderr.log"),
+                    "timeout_seconds": 33.0,
+                },
+            ),
+        )
+    ]
+
+
+def test_apply_daemon_rejit_uses_supplied_daemon_socket_without_restart(monkeypatch) -> None:
+    calls: list[tuple[str, object]] = []
+    daemon_proc = object()
+
+    def fake_apply_one_via_socket(socket_path, prog_id, enabled_passes, **kwargs):
+        calls.append(("socket", (socket_path, prog_id, list(enabled_passes), kwargs)))
+        return {
+            "applied": True,
+            "output": "",
+            "exit_code": 0,
+            "counts": {"total_sites": 1, "applied_sites": 1},
+            "error": "",
+        }
+
+    monkeypatch.setattr(
+        rejit,
+        "_start_daemon_server",
+        lambda _daemon_binary: (_ for _ in ()).throw(AssertionError("unexpected daemon restart")),
+    )
+    monkeypatch.setattr(rejit, "_apply_one_via_socket", fake_apply_one_via_socket)
+
+    result = rejit.apply_daemon_rejit(
+        Path("/tmp/fake-daemon"),
+        [123],
+        enabled_passes=["map_inline"],
+        daemon_socket_path=Path("/tmp/existing.sock"),
+        daemon_proc=daemon_proc,
+        daemon_stdout_path=Path("/tmp/daemon.stdout.log"),
+        daemon_stderr_path=Path("/tmp/daemon.stderr.log"),
+    )
+
+    assert result["applied"] is True
+    assert result["counts"] == {"total_sites": 1, "applied_sites": 1}
+    assert calls == [
+        (
+            "socket",
+            (
+                Path("/tmp/existing.sock"),
+                123,
+                ["map_inline"],
+                {
+                    "daemon_proc": daemon_proc,
+                    "stdout_path": Path("/tmp/daemon.stdout.log"),
+                    "stderr_path": Path("/tmp/daemon.stderr.log"),
+                },
+            ),
+        )
+    ]
+
+
 def test_prepare_branch_flip_profile_sends_start_stop(monkeypatch) -> None:
     requests: list[dict[str, object]] = []
     sleeps: list[float] = []
