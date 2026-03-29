@@ -205,10 +205,6 @@ def test_resolve_program_enabled_passes_applies_ordered_rules() -> None:
 def test_apply_daemon_rejit_empty_pass_list_uses_socket(monkeypatch) -> None:
     calls: list[tuple[str, object]] = []
 
-    def fake_start_daemon_server(_daemon_binary):
-        calls.append(("start", None))
-        return object(), Path("/tmp/daemon.sock"), "/tmp/daemon-dir", None, None
-
     def fake_apply_one_via_socket(socket_path, prog_id, enabled_passes, **kwargs):
         del kwargs
         calls.append(("socket", (socket_path, prog_id, list(enabled_passes))))
@@ -220,27 +216,25 @@ def test_apply_daemon_rejit_empty_pass_list_uses_socket(monkeypatch) -> None:
             "error": "",
         }
 
-    def fake_stop_daemon_server(_proc, _socket_path, _socket_dir):
-        calls.append(("stop", None))
-
-    monkeypatch.setattr(rejit, "_start_daemon_server", fake_start_daemon_server)
+    monkeypatch.setattr(
+        rejit,
+        "_start_daemon_server",
+        lambda _daemon_binary: (_ for _ in ()).throw(AssertionError("unexpected daemon restart")),
+    )
     monkeypatch.setattr(rejit, "_apply_one_via_socket", fake_apply_one_via_socket)
-    monkeypatch.setattr(rejit, "_stop_daemon_server", fake_stop_daemon_server)
 
-    result = rejit.apply_daemon_rejit(Path("/tmp/fake-daemon"), [123], enabled_passes=[])
+    result = rejit.apply_daemon_rejit(
+        [123],
+        enabled_passes=[],
+        daemon_socket_path=Path("/tmp/daemon.sock"),
+    )
 
     assert result["applied"] is True
-    assert ("start", None) in calls
     assert ("socket", (Path("/tmp/daemon.sock"), 123, [])) in calls
-    assert ("stop", None) in calls
 
 
 def test_apply_daemon_rejit_branch_flip_profiles_before_optimize(monkeypatch) -> None:
     calls: list[tuple[str, object]] = []
-
-    def fake_start_daemon_server(_daemon_binary):
-        calls.append(("start", None))
-        return object(), Path("/tmp/daemon.sock"), "/tmp/daemon-dir", None, None
 
     def fake_prepare_branch_flip_profile(socket_path, **kwargs):
         del kwargs
@@ -258,19 +252,21 @@ def test_apply_daemon_rejit_branch_flip_profiles_before_optimize(monkeypatch) ->
             "error": "",
         }
 
-    monkeypatch.setattr(rejit, "_start_daemon_server", fake_start_daemon_server)
+    monkeypatch.setattr(
+        rejit,
+        "_start_daemon_server",
+        lambda _daemon_binary: (_ for _ in ()).throw(AssertionError("unexpected daemon restart")),
+    )
     monkeypatch.setattr(rejit, "_prepare_branch_flip_profile", fake_prepare_branch_flip_profile)
     monkeypatch.setattr(rejit, "_apply_one_via_socket", fake_apply_one_via_socket)
-    monkeypatch.setattr(rejit, "_stop_daemon_server", lambda *_args: calls.append(("stop", None)))
 
     result = rejit.apply_daemon_rejit(
-        Path("/tmp/fake-daemon"),
         [123],
         enabled_passes=["branch_flip"],
+        daemon_socket_path=Path("/tmp/daemon.sock"),
     )
 
     assert result["applied"] is True
-    assert ("start", None) in calls
     assert ("profile", Path("/tmp/daemon.sock")) in calls
     assert ("socket", (Path("/tmp/daemon.sock"), 123, ["branch_flip"])) in calls
 
@@ -351,7 +347,6 @@ def test_apply_daemon_rejit_uses_supplied_daemon_socket_without_restart(monkeypa
     monkeypatch.setattr(rejit, "_apply_one_via_socket", fake_apply_one_via_socket)
 
     result = rejit.apply_daemon_rejit(
-        Path("/tmp/fake-daemon"),
         [123],
         enabled_passes=["map_inline"],
         daemon_socket_path=Path("/tmp/existing.sock"),
@@ -403,11 +398,16 @@ def test_prepare_branch_flip_profile_sends_start_stop(monkeypatch) -> None:
 
 def test_apply_daemon_rejit_requires_prog_ids() -> None:
     try:
-        rejit.apply_daemon_rejit(Path("/tmp/fake-daemon"), [])
+        rejit.apply_daemon_rejit([])
     except ValueError as exc:
         assert "at least one prog_id" in str(exc)
     else:
         raise AssertionError("expected ValueError for empty prog_ids")
+
+
+def test_apply_daemon_rejit_requires_daemon_socket_path() -> None:
+    with pytest.raises(ValueError, match="daemon_socket_path"):
+        rejit.apply_daemon_rejit([123])
 
 
 def test_apply_one_via_socket_sends_explicit_empty_pass_list(monkeypatch) -> None:

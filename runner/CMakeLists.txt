@@ -22,43 +22,10 @@ endif()
 set(MICRO_REPO_ROOT "${MICRO_REPO_ROOT}" CACHE PATH "Repository root")
 set(MICRO_LIBBPF_PREFIX "${MICRO_LIBBPF_PREFIX}" CACHE PATH "libbpf prefix")
 set(MICRO_LIBBPF_LIBRARY "${MICRO_LIBBPF_LIBRARY}" CACHE FILEPATH "libbpf static library")
-set(MICRO_LLVMBPF_ROOT "${MICRO_REPO_ROOT}/vendor/llvmbpf")
-option(MICRO_EXEC_ENABLE_LLVMBPF "Build llvmbpf support into micro_exec" ON)
-
-# llvmbpf is built as a static library, so the LLVM package's imported targets
-# must remain visible when the top-level micro_exec target resolves its full
-# link closure.
-set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL TRUE)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBELF REQUIRED IMPORTED_TARGET libelf)
-pkg_check_modules(ZLIB REQUIRED IMPORTED_TARGET zlib)
 pkg_check_modules(YAMLCPP REQUIRED IMPORTED_TARGET yaml-cpp)
-
-if(MICRO_EXEC_ENABLE_LLVMBPF)
-    find_package(LLVM REQUIRED CONFIG)
-
-    if(NOT TARGET ZLIB::ZLIB)
-        add_library(ZLIB::ZLIB INTERFACE IMPORTED GLOBAL)
-        target_link_libraries(ZLIB::ZLIB INTERFACE PkgConfig::ZLIB)
-    endif()
-
-    find_library(MICRO_TERMINFO_LIBRARY
-        NAMES tinfo terminfo ncurses ncursesw curses
-        PATH_SUFFIXES lib64 lib
-        REQUIRED
-    )
-    mark_as_advanced(MICRO_TERMINFO_LIBRARY)
-
-    if(NOT TARGET Terminfo::terminfo)
-        add_library(Terminfo::terminfo UNKNOWN IMPORTED GLOBAL)
-        set_target_properties(Terminfo::terminfo PROPERTIES
-            IMPORTED_LOCATION "${MICRO_TERMINFO_LIBRARY}"
-        )
-    endif()
-
-    add_subdirectory("${MICRO_LLVMBPF_ROOT}" "${CMAKE_BINARY_DIR}/llvmbpf")
-endif()
 
 add_library(vendor_libbpf STATIC IMPORTED GLOBAL)
 set_target_properties(vendor_libbpf PROPERTIES
@@ -67,20 +34,13 @@ set_target_properties(vendor_libbpf PROPERTIES
 )
 
 set(MICRO_EXEC_SOURCES
-    src/batch_runner.cpp
     src/bpf_helpers.cpp
     src/common.cpp
-    src/daemon_client.cpp
     src/elf_program_loader.cpp
-    src/json_parser.cpp
     src/kernel_runner.cpp
     src/main.cpp
     src/perf_counters.cpp
 )
-
-if(MICRO_EXEC_ENABLE_LLVMBPF)
-    list(APPEND MICRO_EXEC_SOURCES src/llvmbpf_runner.cpp)
-endif()
 
 add_executable(micro_exec ${MICRO_EXEC_SOURCES})
 
@@ -92,26 +52,9 @@ target_include_directories(micro_exec
         "${MICRO_REPO_ROOT}/vendor/libbpf/include/uapi"
 )
 
-if(MICRO_EXEC_ENABLE_LLVMBPF)
-    target_include_directories(micro_exec
-        PRIVATE
-            "${MICRO_REPO_ROOT}/vendor/llvmbpf/include"
-    )
-endif()
-
 target_link_libraries(micro_exec
     PRIVATE
         vendor_libbpf
         PkgConfig::LIBELF
         PkgConfig::YAMLCPP
-        PkgConfig::ZLIB
-)
-
-if(MICRO_EXEC_ENABLE_LLVMBPF)
-    target_link_libraries(micro_exec PRIVATE llvmbpf_vm spdlog::spdlog)
-endif()
-
-target_compile_definitions(micro_exec
-    PRIVATE
-        MICRO_EXEC_ENABLE_LLVMBPF=$<BOOL:${MICRO_EXEC_ENABLE_LLVMBPF}>
 )

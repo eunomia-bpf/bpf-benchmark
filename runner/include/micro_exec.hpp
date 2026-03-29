@@ -46,41 +46,16 @@ struct cli_options {
     std::optional<std::filesystem::path> memory;
     std::optional<std::filesystem::path> fixture_path;
     std::optional<std::filesystem::path> btf_custom_path;
-    bool rejit = false;                                 // enable REJIT (same-bytecode by default)
-    std::optional<std::filesystem::path> rejit_program; // replacement ELF for REJIT
-    std::optional<std::string> daemon_socket;             // --daemon-socket <path> for Unix socket daemon
     std::optional<std::string> program_name;
-    std::optional<std::string> attach_program_name;
-    std::vector<std::string> load_program_names;
-    std::optional<std::string> trigger_command;
-    std::optional<uint32_t> trigger_timeout_seconds;
     std::string io_mode = "map";
-    bool manual_load = false;
     bool raw_packet = false;
     uint32_t repeat = 1;
     uint32_t warmup_repeat = 5;
     uint32_t input_size = 0;
-    int opt_level = 3;
-    bool no_cmov = false;
-    std::optional<std::string> llvm_target_cpu;
-    std::optional<std::string> llvm_target_features;
-    bool enabled_passes_specified = false;
-    std::vector<std::string> enabled_passes;
-    std::vector<std::string> disabled_passes;
-    bool log_passes = false;
     bool perf_counters = false;
     std::string perf_scope = "full_repeat_raw";
     bool dump_jit = false;
     std::optional<std::filesystem::path> dump_xlated;
-    bool compile_only = false;
-    bool attach_mode = false;                            // attach + bpf_stats measurement path
-    uint32_t workload_iterations = 2;                    // syscall iterations, or duration seconds for mixed/stress-ng/fio/wrk
-    std::string workload_type = "mixed";                 // workload: "mixed", "stress-ng", "fio", "wrk", or legacy syscall loops
-};
-
-struct keep_alive_request {
-    std::string cmd;
-    cli_options options;
 };
 
 struct timing_phase {
@@ -184,13 +159,8 @@ struct paired_test_run_result {
     std::optional<sample_result> rejit_run;
 };
 
-struct prepared_kernel_state;
-using prepared_kernel_handle = std::shared_ptr<prepared_kernel_state>;
-
 [[noreturn]] void fail(const std::string &message);
 cli_options parse_args(int argc, char **argv);
-keep_alive_request parse_keep_alive_request(std::string_view json_line);
-int run_batch_cli(int argc, char **argv);
 std::vector<uint8_t> read_binary_file(const std::filesystem::path &path);
 void write_binary_file(const std::filesystem::path &path, const uint8_t *data, size_t size);
 std::string benchmark_name_for_program(const std::filesystem::path &program);
@@ -200,17 +170,7 @@ program_image load_program_image(
     const std::filesystem::path &path,
     const std::optional<std::string> &program_name = std::nullopt);
 void initialize_micro_exec_process();
-sample_result run_llvmbpf(const cli_options &options);
 std::vector<sample_result> run_kernel(const cli_options &options);
-std::vector<sample_result> run_kernel_attach(const cli_options &options);
-prepared_kernel_handle prepare_kernel(const cli_options &options);
-sample_result summarize_prepared_kernel_compile(const prepared_kernel_handle &prepared);
-std::vector<sample_result> run_prepared_kernel(
-    const prepared_kernel_handle &prepared,
-    const cli_options &options);
-paired_test_run_result run_kernel_paired(
-    const cli_options &options,
-    uint32_t pgo_warmup_repeat);
 void print_json(std::ostream &out, const sample_result &sample);
 void print_json(std::ostream &out, const std::vector<sample_result> &samples);
 void print_json(const sample_result &sample);

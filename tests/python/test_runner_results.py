@@ -64,7 +64,7 @@ def test_summarize_corpus_batch_results_headline_exec_geomean_is_applied_only() 
             "size_delta_pct": 0.0,
             "speedup_ratio": None,
             "record_error": None,
-            "comparison_exclusion_reason": "attach_trigger did not fire the target program in baseline or REJIT (run_cnt_delta=0)",
+            "comparison_exclusion_reason": "app_native reported exec_ns=0 in baseline and REJIT",
         },
     ]
 
@@ -76,7 +76,7 @@ def test_summarize_corpus_batch_results_headline_exec_geomean_is_applied_only() 
     assert math.isclose(summary["exec_ratio_geomean"], 2.0)
     assert math.isclose(summary["all_exec_ratio_geomean"], math.sqrt(8.0))
     assert summary["comparison_exclusion_reasons"] == {
-        "attach_trigger did not fire the target program in baseline or REJIT (run_cnt_delta=0)": 1
+        "app_native reported exec_ns=0 in baseline and REJIT": 1
     }
 
     repo_row = summary["by_repo"][0]

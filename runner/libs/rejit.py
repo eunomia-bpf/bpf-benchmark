@@ -990,7 +990,6 @@ def _apply_one_via_socket(
 
 
 def apply_daemon_rejit(
-    daemon_binary: Path | str,
     prog_ids: list[int] | None = None,
     *,
     enabled_passes: Sequence[str] | None = None,
@@ -999,49 +998,20 @@ def apply_daemon_rejit(
     daemon_stdout_path: Path | None = None,
     daemon_stderr_path: Path | None = None,
 ) -> dict[str, object]:
-    """Apply serve-mode optimize requests and return a canonical ReJIT summary."""
+    """Apply serve-mode optimize requests over an existing daemon socket."""
     requested_prog_ids = [int(value) for value in (prog_ids or []) if int(value) > 0]
     if not requested_prog_ids:
         raise ValueError("apply_daemon_rejit requires at least one prog_id")
-
-    if daemon_socket_path is not None:
-        return _apply_daemon_rejit_via_socket(
-            requested_prog_ids,
-            daemon_socket_path,
-            enabled_passes=enabled_passes,
-            daemon_proc=daemon_proc,
-            stdout_path=daemon_stdout_path,
-            stderr_path=daemon_stderr_path,
-        )
-
-    daemon_proc_local = None
-    daemon_socket_path_local = None
-    daemon_socket_dir = None
-    daemon_stdout_path_local = None
-    daemon_stderr_path_local = None
-    try:
-        (
-            daemon_proc_local,
-            daemon_socket_path_local,
-            daemon_socket_dir,
-            daemon_stdout_path_local,
-            daemon_stderr_path_local,
-        ) = _start_daemon_server(daemon_binary)
-        return _apply_daemon_rejit_via_socket(
-            requested_prog_ids,
-            daemon_socket_path_local,
-            enabled_passes=enabled_passes,
-            daemon_proc=daemon_proc_local,
-            stdout_path=daemon_stdout_path_local,
-            stderr_path=daemon_stderr_path_local,
-        )
-    finally:
-        if (
-            daemon_proc_local is not None
-            and daemon_socket_path_local is not None
-            and daemon_socket_dir is not None
-        ):
-            _stop_daemon_server(daemon_proc_local, daemon_socket_path_local, daemon_socket_dir)
+    if daemon_socket_path is None:
+        raise ValueError("apply_daemon_rejit requires daemon_socket_path")
+    return _apply_daemon_rejit_via_socket(
+        requested_prog_ids,
+        daemon_socket_path,
+        enabled_passes=enabled_passes,
+        daemon_proc=daemon_proc,
+        stdout_path=daemon_stdout_path,
+        stderr_path=daemon_stderr_path,
+    )
 
 
 def _apply_daemon_rejit_via_socket(

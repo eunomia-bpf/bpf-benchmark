@@ -384,17 +384,6 @@ fn process_request(
             });
         }
 
-        if let Some(value) = req.get("apply") {
-            let apply = value
-                .as_bool()
-                .ok_or_else(|| "apply must be a JSON boolean".to_string())?;
-            return Ok(if apply {
-                OptimizeMode::Apply
-            } else {
-                OptimizeMode::DryRun
-            });
-        }
-
         Ok(OptimizeMode::Apply)
     }
 

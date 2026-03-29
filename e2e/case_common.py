@@ -491,8 +491,10 @@ def run_case_lifecycle(
 ) -> LifecycleRunResult:
     """Run the shared E2E lifecycle for a live program session.
 
-    The case-specific hooks remain responsible for setup/start/workload/stop/
-    cleanup. This helper centralizes the repeated phase ordering:
+    TODO: the case-specific ``start`` / ``workload`` / ``stop`` hooks should
+    move into ``runner/libs/app_runners/`` so corpus and E2E share one
+    lifecycle surface per repo. This helper centralizes the repeated phase
+    ordering until that extraction lands:
 
     1. setup
     2. start
@@ -600,7 +602,6 @@ def run_case_lifecycle(
                     **lifecycle_state.scan_kwargs,
                 )
                 rejit_result = apply_daemon_rejit(
-                    daemon_binary,
                     requested_prog_ids,
                     enabled_passes=enabled_passes or benchmark_rejit_enabled_passes(),
                     daemon_socket_path=daemon_server[1],

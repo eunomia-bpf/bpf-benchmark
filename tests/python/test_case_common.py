@@ -81,13 +81,12 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: 
             }
         }
 
-    def fake_apply_daemon_rejit(daemon_binary, prog_ids, *, enabled_passes=None, **kwargs):
+    def fake_apply_daemon_rejit(prog_ids, *, enabled_passes=None, **kwargs):
         calls.append(
             (
                 "apply",
                 {
                     "prog_ids": list(prog_ids),
-                    "daemon_binary": daemon_binary,
                     "enabled_passes": list(enabled_passes or []),
                     "daemon_socket_path": kwargs["daemon_socket_path"],
                     "daemon_proc": kwargs["daemon_proc"],

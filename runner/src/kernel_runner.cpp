@@ -1,7 +1,5 @@
 #include "micro_exec.hpp"
 #include "bpf_helpers.hpp"
-#include "daemon_client.hpp"
-#include "json_parser.hpp"
 
 #include <arpa/inet.h>
 
@@ -74,11 +72,6 @@
 
 #ifndef F_SEAL_WRITE
 #define F_SEAL_WRITE 0x0008
-#endif
-
-/* v2 REJIT syscall subcommand */
-#ifndef BPF_PROG_REJIT
-#define BPF_PROG_REJIT 39
 #endif
 
 namespace {
@@ -1391,43 +1384,9 @@ bpf_program *find_program(bpf_object *object, const std::optional<std::string> &
     fail("unable to find program named '" + *program_name + "'");
 }
 
-std::vector<std::string> configured_program_names_for_load(const cli_options &options)
-{
-    std::vector<std::string> names;
-    const auto append_unique_name = [&](const std::optional<std::string> &name) {
-        if (!name.has_value() || name->empty()) {
-            return;
-        }
-        if (std::find(names.begin(), names.end(), *name) == names.end()) {
-            names.push_back(*name);
-        }
-    };
-
-    append_unique_name(options.program_name);
-    append_unique_name(options.attach_program_name);
-    for (const auto &name : options.load_program_names) {
-        if (name.empty()) {
-            continue;
-        }
-        if (std::find(names.begin(), names.end(), name) == names.end()) {
-            names.push_back(name);
-        }
-    }
-    return names;
-}
-
-std::optional<std::string> attach_program_name_for_options(const cli_options &options)
-{
-    if (options.attach_program_name.has_value() && !options.attach_program_name->empty()) {
-        return options.attach_program_name;
-    }
-    return options.program_name;
-}
-
 void configure_autoload(bpf_object *object, const cli_options &options)
 {
-    const auto configured_names = configured_program_names_for_load(options);
-    if (configured_names.empty()) {
+    if (!options.program_name.has_value() || options.program_name->empty()) {
         return;
     }
 
@@ -1445,85 +1404,15 @@ void configure_autoload(bpf_object *object, const cli_options &options)
         }
     }
 
-    const std::unordered_set<std::string> selected_names(
-        configured_names.begin(), configured_names.end());
     bpf_program *program = nullptr;
     while ((program = bpf_object__next_program(object, program)) != nullptr) {
         const char *current_name = bpf_program__name(program);
         const bool autoload =
-            current_name != nullptr && selected_names.contains(current_name);
+            current_name != nullptr && *options.program_name == current_name;
         if (bpf_program__set_autoload(program, autoload) != 0) {
             fail("unable to configure program autoload");
         }
     }
-}
-
-/* ================================================================
- * v2 REJIT: apply BPF_PROG_REJIT with provided bytecode
- * ================================================================ */
-
-void apply_rejit(
-    int program_fd,
-    const bpf_insn *insns,
-    uint32_t insn_cnt,
-    rejit_summary &rejit,
-    std::chrono::steady_clock::time_point &rejit_start,
-    std::chrono::steady_clock::time_point &rejit_end)
-{
-    rejit.insn_cnt = insn_cnt;
-    rejit.syscall_attempted = true;
-
-    /*
-     * Build the bpf_attr for BPF_PROG_REJIT.
-     * Layout matches kernel's bpf_attr.rejit:
-     *   __u32 prog_fd;
-     *   __u32 insn_cnt;
-     *   __aligned_u64 insns;
-     *   __u32 log_level;
-     *   __u32 log_size;
-     *   __aligned_u64 log_buf;
-     *   __aligned_u64 fd_array;
-     *   __u32 fd_array_cnt;
-     */
-    struct {
-        __u32 prog_fd;
-        __u32 insn_cnt;
-        __aligned_u64 insns;
-        __u32 log_level;
-        __u32 log_size;
-        __aligned_u64 log_buf;
-        __aligned_u64 fd_array;
-        __u32 fd_array_cnt;
-    } __attribute__((aligned(8))) rejit_attr = {};
-
-    rejit_attr.prog_fd = static_cast<__u32>(program_fd);
-    rejit_attr.insn_cnt = insn_cnt;
-    rejit_attr.insns = ptr_to_u64(insns);
-    rejit_attr.log_level = 0;
-    rejit_attr.log_size = 0;
-    rejit_attr.log_buf = 0;
-    rejit_attr.fd_array = 0;
-    rejit_attr.fd_array_cnt = 0;
-
-    alignas(8) char attr_buf[256] = {};
-    static_assert(sizeof(rejit_attr) <= sizeof(attr_buf));
-    std::memcpy(attr_buf, &rejit_attr, sizeof(rejit_attr));
-
-    rejit_start = std::chrono::steady_clock::now();
-    const int rc = static_cast<int>(
-        syscall(__NR_bpf, BPF_PROG_REJIT, attr_buf, sizeof(attr_buf)));
-    rejit_end = std::chrono::steady_clock::now();
-
-    if (rc != 0) {
-        rejit.error = "BPF_PROG_REJIT failed: " +
-                      std::string(strerror(errno)) +
-                      " (errno=" + std::to_string(errno) + ")";
-        fprintf(stderr, "BPF_PROG_REJIT failed: %s (errno=%d)\n",
-                strerror(errno), errno);
-        return;
-    }
-
-    rejit.applied = true;
 }
 
 bool skb_payload_starts_after_l2(uint32_t prog_type)
