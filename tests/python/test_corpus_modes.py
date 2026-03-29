@@ -1113,6 +1113,7 @@ def test_run_guest_batch_mode_reuses_single_daemon_session_for_all_objects(
 def test_run_guest_batch_mode_keeps_records_on_batch_job_errors(
     monkeypatch,
     tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     obj_alpha = _synthetic_guest_batch_object("alpha")
     persisted_records: list[list[str]] = []
@@ -1123,7 +1124,7 @@ def test_run_guest_batch_mode_keeps_records_on_batch_job_errors(
         modes,
         "run_objects_locally_batch",
         lambda **_kwargs: (
-            [{"canonical_object_name": obj_alpha.canonical_name, "status": "error", "error": "daemon serve rc=42"}],
+            [{"canonical_object_name": obj_alpha.canonical_name, "status": "ok"}],
             [
                 {
                     "canonical_object_name": obj_alpha.canonical_name,
@@ -1167,9 +1168,83 @@ def test_run_guest_batch_mode_keeps_records_on_batch_job_errors(
         benchmark_config={},
     )
 
-    with pytest.raises(SystemExit, match="guest batch completed with job errors: demo:alpha.bpf.o: daemon serve rc=42"):
-        modes.run_guest_batch_mode(args)
+    assert modes.run_guest_batch_mode(args) == 0
     assert persisted_records == [
         [],
         [obj_alpha.canonical_name],
     ]
+    assert (
+        capsys.readouterr().err.strip()
+        == "guest batch completed with job errors: demo:alpha.bpf.o:alpha_prog rejit_compile: daemon serve rc=42"
+    )
+
+
+def test_run_guest_batch_mode_keeps_records_on_non_ok_batch_result(
+    monkeypatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    obj_alpha = _synthetic_guest_batch_object("alpha")
+    persisted_records: list[list[str]] = []
+
+    monkeypatch.setattr(modes, "guest_info_payload", lambda: {"kernel_release": "test-kernel"})
+    monkeypatch.setattr(modes, "load_guest_batch_targets", lambda _path: [obj_alpha])
+    monkeypatch.setattr(
+        modes,
+        "run_objects_locally_batch",
+        lambda **_kwargs: (
+            [{"canonical_object_name": obj_alpha.canonical_name, "status": "ok"}],
+            [
+                {
+                    "canonical_object_name": obj_alpha.canonical_name,
+                    "canonical_name": obj_alpha.programs[0].canonical_name,
+                    "baseline_compile": {"ok": True},
+                    "rejit_compile": {"ok": True},
+                    "baseline_run": {"ok": False, "error": "bpf_program__attach failed: No such file or directory"},
+                    "rejit_run": {"ok": True},
+                }
+            ],
+            {
+                "ok": False,
+                "completed_with_job_errors": False,
+                "returncode": 1,
+                "timed_out": False,
+                "duration_seconds": 1.0,
+                "stdout": "",
+                "stderr": "libbpf: failed to attach",
+                "error": "batch runner exited with code 1",
+                "result": {"jobs": []},
+                "progress": None,
+            },
+        ),
+    )
+    monkeypatch.setattr(
+        modes,
+        "write_guest_batch_records",
+        lambda _path, records: persisted_records.append(
+            [item["object_record"]["canonical_object_name"] for item in records]
+        ),
+    )
+    monkeypatch.setattr(modes, "emit_guest_event", lambda *_args, **_kwargs: None)
+
+    args = argparse.Namespace(
+        guest_target_json=str(tmp_path / "targets.json"),
+        runner=str(tmp_path / "runner"),
+        daemon=str(tmp_path / "daemon"),
+        btf_custom_path=str(tmp_path / "btf"),
+        guest_result_json=str(tmp_path / "guest-result.json"),
+        repeat=3,
+        warmups=0,
+        timeout=45,
+        benchmark_config={},
+    )
+
+    assert modes.run_guest_batch_mode(args) == 0
+    assert persisted_records == [
+        [],
+        [obj_alpha.canonical_name],
+    ]
+    assert (
+        capsys.readouterr().err.strip()
+        == "guest batch failed: demo:alpha.bpf.o:alpha_prog baseline_run: bpf_program__attach failed: No such file or directory"
+    )

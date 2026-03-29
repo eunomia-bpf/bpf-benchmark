@@ -390,15 +390,19 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
             emit_guest_event("program_record", index=index, total=len(objects), record=record)
 
     if not batch_result["ok"]:
-        raise SystemExit(
+        print(
             "guest batch failed: "
-            + _guest_batch_failure_headline(batch_result=batch_result, built_records=built_records)
+            + _guest_batch_failure_headline(batch_result=batch_result, built_records=built_records),
+            file=sys.stderr,
         )
+        return 0
     if batch_result["completed_with_job_errors"]:
-        raise SystemExit(
+        print(
             "guest batch completed with job errors: "
-            + _guest_batch_failure_headline(batch_result=batch_result, built_records=built_records)
+            + _guest_batch_failure_headline(batch_result=batch_result, built_records=built_records),
+            file=sys.stderr,
         )
+        return 0
     return 0
 
 def build_markdown_v2(data: dict[str, Any]) -> str:
