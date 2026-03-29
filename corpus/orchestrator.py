@@ -136,7 +136,12 @@ def _infer_prog_type_name(program: Any) -> str:
         return prog_type
     section_name = str(getattr(program, "section_name", "") or "").strip().lower()
     section_root = section_name.split("/", 1)[0]
-    return SECTION_TYPE_PREFIXES.get(section_root, prog_type or "unspec")
+    if section_root in SECTION_TYPE_PREFIXES:
+        return SECTION_TYPE_PREFIXES[section_root]
+    for prefix, inferred_type in SECTION_TYPE_PREFIXES.items():
+        if section_name.startswith(prefix):
+            return inferred_type
+    return prog_type or "unspec"
 
 
 def _bpftool_prog_show_pinned(bpftool_binary: str, pin_path: Path) -> dict[str, Any]:

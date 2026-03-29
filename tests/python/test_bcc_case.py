@@ -99,7 +99,7 @@ def test_run_phase_uses_shared_bcc_runner(monkeypatch, tmp_path: Path) -> None:
         return SimpleNamespace(
             baseline=baseline,
             scan_results={},
-            rejit_result={"applied": False, "error": "synthetic"},
+            rejit_result=None,
             post_rejit=None,
         )
 
