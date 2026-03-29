@@ -4,7 +4,10 @@
 use crate::analysis::CFGAnalysis;
 use crate::pass::*;
 
-use super::utils::{compose_addr_maps, eliminate_nops, eliminate_unreachable_blocks_with_cfg};
+use super::utils::{
+    compose_addr_maps, eliminate_dead_register_defs, eliminate_nops,
+    eliminate_unreachable_blocks_with_cfg,
+};
 
 /// Dead code elimination pass.
 ///
@@ -34,6 +37,7 @@ impl BpfPass for DcePass {
         let mut final_insns = program.insns.clone();
         let mut final_addr_map: Option<Vec<usize>> = None;
         let mut unreachable_removed = 0usize;
+        let mut dead_defs_removed = 0usize;
         let mut nop_removed = 0usize;
 
         if let Some((cleaned_insns, cleanup_map)) =
@@ -41,6 +45,15 @@ impl BpfPass for DcePass {
         {
             unreachable_removed = final_insns.len() - cleaned_insns.len();
             final_addr_map = Some(cleanup_map);
+            final_insns = cleaned_insns;
+        }
+
+        if let Some((cleaned_insns, cleanup_map)) = eliminate_dead_register_defs(&final_insns) {
+            dead_defs_removed = final_insns.len() - cleaned_insns.len();
+            final_addr_map = Some(match final_addr_map.take() {
+                Some(existing) => compose_addr_maps(&existing, &cleanup_map),
+                None => cleanup_map,
+            });
             final_insns = cleaned_insns;
         }
 
@@ -64,10 +77,13 @@ impl BpfPass for DcePass {
             });
         };
 
-        let sites_applied = unreachable_removed + nop_removed;
+        let sites_applied = unreachable_removed + dead_defs_removed + nop_removed;
         let mut diagnostics = Vec::new();
         if unreachable_removed > 0 {
             diagnostics.push(format!("removed {} unreachable insns", unreachable_removed));
+        }
+        if dead_defs_removed > 0 {
+            diagnostics.push(format!("removed {} dead-def insns", dead_defs_removed));
         }
         if nop_removed > 0 {
             diagnostics.push(format!("removed {} nop insns", nop_removed));
@@ -168,14 +184,10 @@ mod tests {
 
         assert!(result.program_changed);
         assert_eq!(result.pass_results[1].pass_name, "dce");
-        assert_eq!(result.pass_results[1].sites_applied, 1);
+        assert_eq!(result.pass_results[1].sites_applied, 2);
         assert_eq!(
             program.insns,
-            vec![
-                BpfInsn::mov64_imm(1, 7),
-                BpfInsn::mov64_imm(0, 1),
-                exit_insn(),
-            ]
+            vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]
         );
     }
 
@@ -193,6 +205,29 @@ mod tests {
 
         assert!(result.program_changed);
         assert_eq!(result.pass_results[0].sites_applied, 3);
+        assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
+    }
+
+    #[test]
+    fn dce_removes_dead_defs_exposed_by_const_prop() {
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::mov32_imm(1, 20),
+            BpfInsn::alu64_imm(BPF_LSH, 1, 32),
+            BpfInsn::alu64_imm(BPF_RSH, 1, 32),
+            jeq_imm(1, 20, 1),
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+
+        let result = run_const_prop_then_dce(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.pass_results[1].pass_name, "dce");
+        assert!(result.pass_results[1]
+            .diagnostics
+            .iter()
+            .any(|diag| diag.contains("dead-def")));
         assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
     }
 
@@ -296,11 +331,7 @@ mod tests {
         // unreachable, subprog has no remaining callers.
         assert_eq!(
             program.insns,
-            vec![
-                BpfInsn::mov64_imm(1, 7),
-                BpfInsn::mov64_imm(0, 0),
-                exit_insn(),
-            ],
+            vec![BpfInsn::mov64_imm(0, 0), exit_insn(),],
             "orphaned subprog should be removed; got {:?}",
             program.insns
         );

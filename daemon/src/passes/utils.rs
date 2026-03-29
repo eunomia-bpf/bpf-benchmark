@@ -6,7 +6,7 @@
 
 use std::collections::HashSet;
 
-use crate::analysis::{CFGAnalysis, CFGResult};
+use crate::analysis::{CFGAnalysis, CFGResult, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::{Analysis, BpfProgram};
 
@@ -204,6 +204,64 @@ pub fn eliminate_nops(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
     }
 
     eliminate_marked_insns(insns, &deleted)
+}
+
+/// Remove side-effect-free register definitions whose result is dead.
+///
+/// This runs to a fixed point because deleting one dead definition can expose
+/// earlier definitions that were only live through the removed instruction.
+pub fn eliminate_dead_register_defs(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+    if insns.is_empty() {
+        return None;
+    }
+
+    let mut final_insns = insns.to_vec();
+    let mut final_addr_map: Option<Vec<usize>> = None;
+
+    while let Some((cleaned_insns, cleanup_map)) = eliminate_dead_register_defs_once(&final_insns) {
+        final_addr_map = Some(match final_addr_map.take() {
+            Some(existing) => compose_addr_maps(&existing, &cleanup_map),
+            None => cleanup_map,
+        });
+        final_insns = cleaned_insns;
+    }
+
+    final_addr_map.map(|addr_map| (final_insns, addr_map))
+}
+
+fn eliminate_dead_register_defs_once(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+    let liveness = LivenessAnalysis.run(&BpfProgram::new(insns.to_vec()));
+    let mut deleted = vec![false; insns.len()];
+    let mut pc = 0usize;
+
+    while pc < insns.len() {
+        let insn = &insns[pc];
+        let width = insn_width(insn);
+
+        if is_removable_dead_def(insn, liveness.live_out.get(pc)) {
+            for slot in &mut deleted[pc..pc + width] {
+                *slot = true;
+            }
+        }
+
+        pc += width;
+    }
+
+    eliminate_marked_insns(insns, &deleted)
+}
+
+fn is_removable_dead_def(insn: &BpfInsn, live_out: Option<&HashSet<u8>>) -> bool {
+    let Some(live_out) = live_out else {
+        return false;
+    };
+
+    match insn.class() {
+        BPF_ALU | BPF_ALU64 | BPF_LDX => !live_out.contains(&insn.dst_reg()),
+        BPF_LD if insn.is_ldimm64() && !insn.is_ldimm64_pseudo_func() => {
+            !live_out.contains(&insn.dst_reg())
+        }
+        _ => false,
+    }
 }
 
 fn eliminate_marked_insns(
@@ -492,6 +550,21 @@ mod tests {
         assert_eq!(new_insns[0].dst_reg(), 0);
         assert_eq!(new_insns[0].off, 0);
         assert_eq!(new_insns[0].imm, 5);
+    }
+
+    #[test]
+    fn test_eliminate_dead_register_defs_cascades_across_overwrites() {
+        let insns = vec![
+            BpfInsn::mov64_imm(1, 1),
+            BpfInsn::mov64_imm(1, 2),
+            BpfInsn::mov64_imm(0, 7),
+            exit_insn(),
+        ];
+
+        let (new_insns, _addr_map) =
+            eliminate_dead_register_defs(&insns).expect("dead defs should be removed");
+
+        assert_eq!(new_insns, vec![BpfInsn::mov64_imm(0, 7), exit_insn(),]);
     }
 
     #[test]

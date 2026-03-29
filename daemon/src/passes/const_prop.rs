@@ -971,11 +971,7 @@ mod tests {
         assert!(result.pass_results[1].changed);
         assert_eq!(
             program.insns,
-            vec![
-                BpfInsn::mov64_imm(1, 7),
-                BpfInsn::mov64_imm(0, 1),
-                exit_insn(),
-            ]
+            vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]
         );
     }
 

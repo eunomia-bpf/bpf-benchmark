@@ -371,11 +371,7 @@ fn cascade_dce_eliminates_dead_branch_after_const_prop() {
     assert!(result.pass_results[2].changed);
     assert_eq!(
         program.insns,
-        vec![
-            BpfInsn::mov32_imm(6, 42),
-            BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
-        ]
+        vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]
     );
 }
 
@@ -432,13 +428,7 @@ fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
         .unwrap_or(false));
     assert_eq!(
         program.insns,
-        vec![
-            BpfInsn::mov32_imm(6, 42),
-            BpfInsn::mov64_imm(1, 10),
-            BpfInsn::mov64_imm(1, 52),
-            BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
-        ]
+        vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]
     );
 }
 
@@ -472,16 +462,10 @@ fn cascade_hash_map_removes_lookup_and_null_path_then_folds_non_null_path() {
     assert_eq!(result.pass_results[1].pass_name, "const_prop");
     assert_eq!(result.pass_results[1].sites_applied, 1);
     assert_eq!(result.pass_results[2].pass_name, "dce");
-    assert!(!result.pass_results[2].changed);
+    assert!(result.pass_results[2].changed);
     assert_eq!(
         program.insns,
-        vec![
-            BpfInsn::mov32_imm(6, 42),
-            BpfInsn::mov64_imm(1, 10),
-            BpfInsn::mov64_imm(1, 52),
-            BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
-        ]
+        vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]
     );
 }
 
