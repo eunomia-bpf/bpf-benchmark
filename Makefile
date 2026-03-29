@@ -10,6 +10,7 @@ DAEMON_DIR := $(ROOT_DIR)/daemon
 KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
 KERNEL_TEST_DIR := $(ROOT_DIR)/tests/kernel
 KINSN_MODULE_DIR := $(ROOT_DIR)/module/x86
+CACHE_DIR := $(ROOT_DIR)/.cache
 
 # ARM64 / AWS (see runner/scripts/aws_arm64.sh for full docs)
 ARM64_WORKTREE_DIR  ?= $(ROOT_DIR)/.worktrees/linux-framework-arm64-src
@@ -98,6 +99,8 @@ MICRO_RUNNER := $(RUNNER_DIR)/build/micro_exec
 KERNEL_SYMVERS_PATH := $(KERNEL_DIR)/Module.symvers
 KERNEL_CONFIG_PATH := $(KERNEL_DIR)/.config
 KERNEL_CONFIG_STAMP := $(KERNEL_DIR)/.bpfrejit_config.stamp
+KERNEL_BUILD_STAMP := $(KERNEL_DIR)/.bpfrejit_kernel_build.stamp
+KERNEL_BUILD_LOCK := $(CACHE_DIR)/kernel-build.lock
 NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
 JOBS         ?= $(NPROC)
 DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_defconfig
@@ -158,6 +161,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 	vm-arm64-smoke vm-arm64-selftest \
 	aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
 	aws-x86-launch aws-x86-setup aws-x86-benchmark aws-x86-terminate aws-x86-full aws-x86 \
+	__kernel-config-locked __kernel-build-locked \
 	help clean
 
 # ── Help ───────────────────────────────────────────────────────────────────────
@@ -229,30 +233,22 @@ micro:
 daemon:
 	cargo build --release --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
-kernel: $(BZIMAGE_PATH)
+kernel: kernel-build
+	@test -f "$(BZIMAGE_PATH)"
 
 kernel-clean:
 	$(MAKE) -C "$(KERNEL_DIR)" clean
 	rm -f "$(KERNEL_CONFIG_STAMP)"
+	rm -f "$(KERNEL_BUILD_STAMP)"
 
 kernel-rebuild: kernel-clean
 	$(MAKE) kernel BZIMAGE="$(BZIMAGE)"
 
-kinsn-modules: $(BZIMAGE_PATH)
-kinsn-modules: $(KERNEL_SYMVERS_PATH)
+kinsn-modules: kernel-build
 	$(MAKE) -C "$(KINSN_MODULE_DIR)" KDIR="$(KERNEL_DIR)"
 
-virtme-hostfs-modules: $(BZIMAGE_PATH)
-	rm -rf "$(KERNEL_DIR)/.virtme_mods"
-	# Parallel sub-makes here occasionally race on generated kernel headers.
-	$(MAKE) -j1 -C "$(KERNEL_DIR)" $(VIRTME_HOSTFS_MODULES)
-	@for module in $(VIRTME_HOSTFS_MODULES); do \
-		test -f "$(KERNEL_DIR)/$$module" || { \
-			echo "missing built hostfs module: $(KERNEL_DIR)/$$module" >&2; \
-			exit 1; \
-		}; \
-	done
-	@printf '%s\n' $(VIRTME_HOSTFS_MODULE_ORDER) > "$(KERNEL_DIR)/modules.order"
+virtme-hostfs-modules: kernel-build
+	@:
 
 kernel-tests:
 	$(MAKE) -j"$(JOBS)" -C "$(KERNEL_TEST_DIR)" JOBS="$(JOBS)"
@@ -273,7 +269,7 @@ $(DAEMON_PATH): $(DAEMON_SOURCES)
 $(KERNEL_CONFIG_PATH):
 	cp "$(DEFCONFIG_SRC)" "$@"
 
-$(KERNEL_CONFIG_STAMP): $(DEFCONFIG_SRC) $(KERNEL_CONFIG_PATH)
+__kernel-config-locked:
 	@if ! diff -q "$(DEFCONFIG_SRC)" "$(KERNEL_CONFIG_PATH)" >/dev/null 2>&1; then \
 		cp "$(DEFCONFIG_SRC)" "$(KERNEL_CONFIG_PATH)"; \
 	fi
@@ -283,24 +279,34 @@ $(KERNEL_CONFIG_STAMP): $(DEFCONFIG_SRC) $(KERNEL_CONFIG_PATH)
 		--set-str SYSTEM_TRUSTED_KEYS "" \
 		--set-str SYSTEM_REVOCATION_KEYS ""
 	$(MAKE) -C "$(KERNEL_DIR)" olddefconfig
-	touch "$@"
+	touch "$(KERNEL_CONFIG_STAMP)"
 
-kernel-build: $(KERNEL_CONFIG_STAMP)
+kernel-build:
+	@mkdir -p "$(dir $(KERNEL_BUILD_LOCK))"
+	flock "$(KERNEL_BUILD_LOCK)" $(MAKE) __kernel-build-locked
+
+__kernel-build-locked:
+	$(MAKE) __kernel-config-locked
 	# Let kbuild decide what is stale. Skipping here can leave the guest
 	# booting an older bzImage while hostfs modules are rebuilt for the
 	# current tree, which breaks Katran's veth/ipip module loading path.
 	$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" bzImage modules_prepare
 	@if [ -f "$(KERNEL_DIR)/vmlinux.symvers" ]; then \
 		cp "$(KERNEL_DIR)/vmlinux.symvers" "$(KERNEL_SYMVERS_PATH)"; \
-	fi
+		fi
 	@test -f "$(KERNEL_SYMVERS_PATH)"
 	@touch "$(KERNEL_SYMVERS_PATH)"
-
-$(BZIMAGE_PATH): kernel-build
-	@test -f "$@"
-
-$(KERNEL_SYMVERS_PATH): $(BZIMAGE_PATH)
-	@test -f "$@"
+	rm -rf "$(KERNEL_DIR)/.virtme_mods"
+	# Parallel sub-makes here occasionally race on generated kernel headers.
+	$(MAKE) -j1 -C "$(KERNEL_DIR)" $(VIRTME_HOSTFS_MODULES)
+	@for module in $(VIRTME_HOSTFS_MODULES); do \
+		test -f "$(KERNEL_DIR)/$$module" || { \
+			echo "missing built hostfs module: $(KERNEL_DIR)/$$module" >&2; \
+			exit 1; \
+		}; \
+	done
+	@printf '%s\n' $(VIRTME_HOSTFS_MODULE_ORDER) > "$(KERNEL_DIR)/modules.order"
+	@touch "$(KERNEL_BUILD_STAMP)"
 
 # ── Local tests ────────────────────────────────────────────────────────────────
 smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)

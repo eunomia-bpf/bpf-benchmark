@@ -46,6 +46,9 @@ AWS_X86_REMOTE_RESULT_JSON="${AWS_X86_REMOTE_RESULT_JSON:-x86_t3_micro.json}"
 AWS_REGION_VALUE="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
 
 KERNEL_DIR="${KERNEL_DIR:-$ROOT_DIR/vendor/linux-framework}"
+KERNEL_BUILD_LOCK_FILE="${KERNEL_BUILD_LOCK_FILE:-$ROOT_DIR/.cache/kernel-build.lock}"
+KERNEL_CONFIG_STAMP_FILE="$KERNEL_DIR/.bpfrejit_config.stamp"
+KERNEL_DEFCONFIG_SRC="$ROOT_DIR/vendor/bpfrejit_defconfig"
 X86_BZIMAGE="${X86_BZIMAGE:-$KERNEL_DIR/arch/x86/boot/bzImage}"
 X86_VMLINUX="${X86_VMLINUX:-$KERNEL_DIR/vmlinux}"
 X86_RUNNER="${X86_RUNNER:-$ROOT_DIR/runner/build/micro_exec}"
@@ -63,6 +66,9 @@ STATE_KERNEL_RELEASE=""
 FULL_LIFECYCLE_INSTANCE_ID=""
 FULL_LIFECYCLE_LAUNCH_OUTPUT=""
 FULL_LIFECYCLE_CLEANUP_RUNNING=0
+FULL_LIFECYCLE_CLEANUP_TOKEN=""
+FULL_LIFECYCLE_WATCHER_PID=""
+AWS_X86_KERNEL_CACHE_VERSION=2
 
 log() {
     printf '[aws-x86] %s\n' "$*" >&2
@@ -110,6 +116,13 @@ EOF
 ensure_dirs() {
     mkdir -p "$CACHE_DIR" "$STATE_DIR" "$RESULTS_DIR"
 }
+
+with_kernel_lock() (
+    mkdir -p "$(dirname "$KERNEL_BUILD_LOCK_FILE")"
+    exec 9>"$KERNEL_BUILD_LOCK_FILE"
+    flock 9
+    "$@"
+)
 
 load_state() {
     if [[ -f "$STATE_FILE" ]]; then
@@ -373,33 +386,134 @@ launch_instance() {
     printf 'AWS_REGION=%s\n' "$region"
 }
 
-build_kernel_artifacts() {
-    ensure_dirs
+require_kernel_config_value() {
+    local config_file="$1"
+    local key="$2"
+    local expected="$3"
+    rg -qx "${key}=${expected}" "$config_file" >/dev/null \
+        || die "kernel config ${key} must be ${expected} in ${config_file}"
+}
+
+require_kernel_builtin_module() {
+    local modules_builtin="$1"
+    local module_path="$2"
+    rg -qx "$module_path" "$modules_builtin" >/dev/null \
+        || die "kernel builtin module missing from ${modules_builtin}: ${module_path}"
+}
+
+x86_kernel_manifest_path() {
+    local kernel_release="$1"
+    printf '%s\n' "$ARTIFACT_DIR/manifest-${kernel_release}.env"
+}
+
+cached_x86_kernel_artifacts_ready() {
+    local kernel_release="$1"
+    local manifest
+    manifest="$(x86_kernel_manifest_path "$kernel_release")"
+    [[ -f "$manifest" ]] || return 1
+    rg -qx "AWS_X86_KERNEL_CACHE_VERSION=${AWS_X86_KERNEL_CACHE_VERSION}" "$manifest" >/dev/null || return 1
+}
+
+write_x86_kernel_manifest() {
+    local kernel_release="$1"
+    local manifest
+    manifest="$(x86_kernel_manifest_path "$kernel_release")"
+    cat >"$manifest" <<EOF
+AWS_X86_KERNEL_CACHE_VERSION=${AWS_X86_KERNEL_CACHE_VERSION}
+AWS_X86_CONFIG_NET_VENDOR_AMAZON=y
+AWS_X86_CONFIG_ENA_ETHERNET=y
+AWS_X86_CONFIG_BLK_DEV_NVME=y
+AWS_X86_CONFIG_XFS_FS=y
+AWS_X86_CONFIG_EXT4_FS=y
+EOF
+}
+
+_prepare_x86_aws_config_locked() {
+    local config_file="$KERNEL_DIR/.config"
+    local config_script="$KERNEL_DIR/scripts/config"
+
+    [[ -f "$KERNEL_DEFCONFIG_SRC" ]] || die "x86 defconfig missing: ${KERNEL_DEFCONFIG_SRC}"
+    [[ -x "$config_script" ]] || die "kernel config helper missing: ${config_script}"
+
+    if [[ ! -f "$config_file" ]]; then
+        cp "$KERNEL_DEFCONFIG_SRC" "$config_file"
+    elif ! diff -q "$KERNEL_DEFCONFIG_SRC" "$config_file" >/dev/null 2>&1; then
+        cp "$KERNEL_DEFCONFIG_SRC" "$config_file"
+    fi
+
+    "$config_script" --file "$config_file" \
+        --enable UNWINDER_ORC \
+        --disable UNWINDER_FRAME_POINTER \
+        --disable DEBUG_INFO_BTF_MODULES \
+        --set-str SYSTEM_TRUSTED_KEYS "" \
+        --set-str SYSTEM_REVOCATION_KEYS "" \
+        --enable NET_VENDOR_AMAZON \
+        --set-val ENA_ETHERNET y \
+        --set-val BLK_DEV_NVME y \
+        --set-val XFS_FS y \
+        --enable EXT4_FS
+    rm -f "$KERNEL_CONFIG_STAMP_FILE"
+    make -C "$KERNEL_DIR" olddefconfig >/dev/null
+
+    require_kernel_config_value "$config_file" "CONFIG_NET_VENDOR_AMAZON" "y"
+    require_kernel_config_value "$config_file" "CONFIG_ENA_ETHERNET" "y"
+    require_kernel_config_value "$config_file" "CONFIG_BLK_DEV_NVME" "y"
+    require_kernel_config_value "$config_file" "CONFIG_XFS_FS" "y"
+    require_kernel_config_value "$config_file" "CONFIG_EXT4_FS" "y"
+}
+
+prepare_x86_aws_config() {
+    with_kernel_lock _prepare_x86_aws_config_locked
+}
+
+_build_local_x86_kernel_after_config_locked() {
+    log "Building local x86 kernel image"
+    make -C "$KERNEL_DIR" -j"$(nproc)" bzImage modules_prepare >/dev/null
+    if [[ -f "$KERNEL_DIR/vmlinux.symvers" ]]; then
+        cp "$KERNEL_DIR/vmlinux.symvers" "$KERNEL_DIR/Module.symvers"
+    fi
+}
+
+_build_local_x86_kernel_locked() {
+    _prepare_x86_aws_config_locked
+    _build_local_x86_kernel_after_config_locked
+}
+
+build_local_x86_kernel() {
+    with_kernel_lock _build_local_x86_kernel_locked
+}
+
+_build_kernel_artifacts_locked() {
+    _prepare_x86_aws_config_locked
     if [[ -f "$KERNEL_RELEASE_FILE" ]]; then
         local cached_release cached_vmlinux cached_image cached_modules
         cached_release="$(<"$KERNEL_RELEASE_FILE")"
         cached_vmlinux="$ARTIFACT_DIR/vmlinux-$cached_release"
         cached_image="$ARTIFACT_DIR/bzImage-$cached_release"
         cached_modules="$ARTIFACT_DIR/modules-$cached_release.tar.gz"
-        if [[ -f "$cached_vmlinux" && -f "$cached_image" && -f "$cached_modules" ]]; then
+        if [[ -f "$cached_vmlinux" && -f "$cached_image" && -f "$cached_modules" ]] && \
+            cached_x86_kernel_artifacts_ready "$cached_release"; then
             log "Reusing cached x86 kernel artifacts for ${cached_release}"
             printf '%s\n' "$cached_release"
             return
         fi
     fi
 
-    if [[ ! -f "$X86_BZIMAGE" || ! -f "$X86_VMLINUX" || ! -f "$KERNEL_DIR/include/config/kernel.release" ]]; then
-        log "Building local x86 kernel image"
-        make -C "$ROOT_DIR" kernel >/dev/null
-    fi
+    _build_local_x86_kernel_after_config_locked
 
     log "Building local x86 kernel modules"
+    rm -f "$KERNEL_DIR/modules.order"
     make -C "$KERNEL_DIR" -j"$(nproc)" modules >/dev/null
 
     local version_file="$KERNEL_DIR/include/config/kernel.release"
     [[ -f "$version_file" ]] || die "kernel release file missing: $version_file"
     local kernel_release
     kernel_release="$(<"$version_file")"
+    local modules_builtin="$KERNEL_DIR/modules.builtin"
+    [[ -f "$modules_builtin" ]] || die "kernel modules.builtin missing: ${modules_builtin}"
+    require_kernel_builtin_module "$modules_builtin" "kernel/drivers/net/ethernet/amazon/ena/ena.ko"
+    require_kernel_builtin_module "$modules_builtin" "kernel/drivers/nvme/host/nvme.ko"
+    require_kernel_builtin_module "$modules_builtin" "kernel/fs/xfs/xfs.ko"
 
     mkdir -p "$ARTIFACT_DIR"
     rm -rf "$MODULES_STAGE_DIR"
@@ -412,6 +526,7 @@ build_kernel_artifacts() {
     cp "$X86_BZIMAGE" "$ARTIFACT_DIR/bzImage-$kernel_release"
     tar -C "$MODULES_STAGE_DIR" -czf "$ARTIFACT_DIR/modules-$kernel_release.tar.gz" lib/modules
     printf '%s\n' "$kernel_release" > "$KERNEL_RELEASE_FILE"
+    write_x86_kernel_manifest "$kernel_release"
 
     load_state
     if [[ -n "${STATE_INSTANCE_ID:-}" ]]; then
@@ -421,6 +536,11 @@ build_kernel_artifacts() {
     fi
 
     printf '%s\n' "$kernel_release"
+}
+
+build_kernel_artifacts() {
+    ensure_dirs
+    with_kernel_lock _build_kernel_artifacts_locked
 }
 
 ensure_remote_runtime_prereqs() {
@@ -467,8 +587,11 @@ setup_instance() {
     wait_for_ssh "$ip"
     ensure_remote_runtime_prereqs "$ip"
 
-    local kernel_release kernel_image modules_tar verify_log
-    kernel_release="$(build_kernel_artifacts)"
+    local kernel_release kernel_image modules_tar verify_log kernel_release_output
+    kernel_release_output="$(mktemp "${TMPDIR:-/tmp}/aws-x86-kernel-release.XXXXXX")"
+    build_kernel_artifacts >"$kernel_release_output"
+    kernel_release="$(<"$kernel_release_output")"
+    rm -f "$kernel_release_output"
     kernel_image="$ARTIFACT_DIR/bzImage-$kernel_release"
     modules_tar="$ARTIFACT_DIR/modules-$kernel_release.tar.gz"
     verify_log="$RESULTS_DIR/setup_verify_${kernel_release}_$(date -u +%Y%m%d_%H%M%S).log"
@@ -550,7 +673,9 @@ ensure_local_daemon() {
 
 ensure_local_kinsn_modules() {
     log "Ensuring local x86 kinsn modules are built"
-    make -C "$ROOT_DIR" kinsn-modules >/dev/null
+    build_local_x86_kernel
+    [[ -f "$KERNEL_DIR/Module.symvers" ]] || die "kernel Module.symvers missing: ${KERNEL_DIR}/Module.symvers"
+    make -C "$ROOT_DIR/module/x86" KDIR="$KERNEL_DIR" >/dev/null
     local ko_count
     ko_count="$(find "$X86_KINSN_MODULE_DIR" -maxdepth 1 -name '*.ko' | wc -l | tr -d ' ')"
     [[ "$ko_count" -gt 0 ]] || die "no x86 kinsn modules found under ${X86_KINSN_MODULE_DIR}"
@@ -738,6 +863,48 @@ full_lifecycle_cleanup_instance_id() {
     fi
 }
 
+start_full_lifecycle_watcher() {
+    local instance_id="$1"
+    local region="$2"
+    local watcher_script
+
+    command -v setsid >/dev/null || die "setsid is required for x86 AWS cleanup watcher"
+    FULL_LIFECYCLE_CLEANUP_TOKEN="$(mktemp "${STATE_DIR}/aws-x86-cleanup.XXXXXX")"
+    watcher_script="$(cat <<'EOF'
+set -euo pipefail
+trap "" INT TERM HUP
+parent_pid="$1"
+instance_id="$2"
+profile="$3"
+region="$4"
+token="$5"
+state_file="$6"
+
+while kill -0 "$parent_pid" 2>/dev/null; do
+    [[ -f "$token" ]] || exit 0
+    sleep 1
+done
+
+[[ -f "$token" ]] || exit 0
+AWS_PAGER="" aws --profile "$profile" --region "$region" ec2 terminate-instances --instance-ids "$instance_id" >/dev/null
+AWS_PAGER="" aws --profile "$profile" --region "$region" ec2 wait instance-terminated --instance-ids "$instance_id" >/dev/null
+rm -f "$token" "$state_file"
+EOF
+)"
+    setsid bash -c "$watcher_script" bash \
+        "$$" "$instance_id" "$AWS_X86_PROFILE" "$region" \
+        "$FULL_LIFECYCLE_CLEANUP_TOKEN" "$STATE_FILE" >/dev/null 2>&1 &
+    FULL_LIFECYCLE_WATCHER_PID="$!"
+}
+
+stop_full_lifecycle_watcher() {
+    if [[ -n "${FULL_LIFECYCLE_CLEANUP_TOKEN:-}" ]]; then
+        rm -f "$FULL_LIFECYCLE_CLEANUP_TOKEN"
+        FULL_LIFECYCLE_CLEANUP_TOKEN=""
+    fi
+    FULL_LIFECYCLE_WATCHER_PID=""
+}
+
 full_lifecycle_cleanup() {
     local status="$1"
     local reason="$2"
@@ -747,7 +914,9 @@ full_lifecycle_cleanup() {
         return
     fi
     FULL_LIFECYCLE_CLEANUP_RUNNING=1
-    trap - EXIT INT TERM
+    trap - EXIT
+    trap '' INT TERM
+    stop_full_lifecycle_watcher
 
     if [[ -n "${FULL_LIFECYCLE_LAUNCH_OUTPUT:-}" ]]; then
         rm -f "$FULL_LIFECYCLE_LAUNCH_OUTPUT"
@@ -812,6 +981,7 @@ full_lifecycle() {
     FULL_LIFECYCLE_LAUNCH_OUTPUT=""
     [[ -n "$instance_id" && -n "$instance_ip" ]] || die "failed to capture launched instance state"
     FULL_LIFECYCLE_INSTANCE_ID="$instance_id"
+    start_full_lifecycle_watcher "$instance_id" "$(resolve_region)"
 
     wait_for_ssh "$instance_ip"
     setup_instance "$instance_ip"

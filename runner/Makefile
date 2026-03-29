@@ -224,7 +224,6 @@ vendor_bpftool: | $(BPFTOOL_BUILD_DIR)
 
 kernel-image:
 	$(MAKE) -C "$(REPO_ROOT)" kernel BZIMAGE="$(BZIMAGE)"
-	$(MAKE) -C "$(REPO_ROOT)" virtme-hostfs-modules BZIMAGE="$(BZIMAGE)"
 
 negative-build:
 	$(MAKE) -C "$(NEGATIVE_TEST_DIR)" all
