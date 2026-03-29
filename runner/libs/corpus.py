@@ -1666,11 +1666,19 @@ def build_object_batch_plan_v2(
     daemon_socket: str,
     enabled_passes: list[str] | None = None,
     program_enabled_passes: Mapping[str, list[str]] | None = None,
+    batch_label: str | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    jobs: list[dict[str, Any]] = []
+    baseline_prepare_jobs: list[dict[str, Any]] = []
+    baseline_measure_jobs: list[dict[str, Any]] = []
+    rejit_prepare_jobs: list[dict[str, Any]] = []
+    rejit_measure_jobs: list[dict[str, Any]] = []
     object_refs: list[dict[str, Any]] = []
+    batch_prefix = f"{batch_label}:" if batch_label else ""
+    baseline_batch_group = f"{batch_prefix}baseline"
+    rejit_batch_group = f"{batch_prefix}rejit"
 
     for index, obj in enumerate(objects, start=1):
+        object_job_prefix = f"{batch_prefix}object-{index:04d}"
         object_path = ROOT_DIR / obj.object_path
         fixture_path = Path(obj.fixture_path) if obj.fixture_path else None
         refs: dict[str, Any] = {
@@ -1690,22 +1698,22 @@ def build_object_batch_plan_v2(
 
         for program_index, program in enumerate(obj.programs, start=1):
             refs["programs"][program.canonical_name] = {
-                "baseline_compile": f"object-{index:04d}:program-{program_index:04d}:baseline-compile",
-                "baseline_run": f"object-{index:04d}:program-{program_index:04d}:baseline-run",
-                "rejit_compile": f"object-{index:04d}:program-{program_index:04d}:rejit-compile",
-                "rejit_run": f"object-{index:04d}:program-{program_index:04d}:rejit-run",
+                "baseline_compile": f"{object_job_prefix}:program-{program_index:04d}:baseline-compile",
+                "baseline_run": f"{object_job_prefix}:program-{program_index:04d}:baseline-run",
+                "rejit_compile": f"{object_job_prefix}:program-{program_index:04d}:rejit-compile",
+                "rejit_run": f"{object_job_prefix}:program-{program_index:04d}:rejit-run",
             }
         prepared_groups = build_prepared_groups(obj)
 
         for group_index, group in enumerate(prepared_groups, start=1):
-            baseline_group = f"object-{index:04d}:baseline-group-{group_index:04d}"
+            baseline_group = f"{object_job_prefix}:baseline-group-{group_index:04d}"
             baseline_prepared_key = f"{baseline_group}:prepared"
             baseline_prepare_job_id = f"{baseline_group}:prepare"
             load_program_names = list(group["load_program_names"])
 
             refs["baseline_group_compiles"].append(baseline_prepare_job_id)
 
-            jobs.append(
+            baseline_prepare_jobs.append(
                 build_test_run_batch_job(
                     job_id=baseline_prepare_job_id,
                     execution="serial",
@@ -1723,7 +1731,7 @@ def build_object_batch_plan_v2(
                     compile_only=True,
                     load_program_names=load_program_names,
                     prepared_key=baseline_prepared_key,
-                    prepared_group=baseline_group,
+                    prepared_group=baseline_batch_group,
                     fixture_path=fixture_path,
                 )
             )
@@ -1732,7 +1740,7 @@ def build_object_batch_plan_v2(
                 program_refs = refs["programs"][program.canonical_name]
                 memory_path = Path(program.memory_path) if program.memory_path else None
                 program_fixture_path = Path(program.fixture_path) if program.fixture_path else fixture_path
-                jobs.append(
+                baseline_measure_jobs.append(
                     build_test_run_batch_job(
                         job_id=program_refs["baseline_compile"],
                         execution="serial",
@@ -1749,7 +1757,7 @@ def build_object_batch_plan_v2(
                         btf_custom_path=btf_custom_path,
                         compile_only=True,
                         prepared_ref=baseline_prepared_key,
-                        prepared_group=baseline_group,
+                        prepared_group=baseline_batch_group,
                         release_prepared=False,
                         fixture_path=program_fixture_path,
                         trigger_command=program.trigger,
@@ -1757,7 +1765,7 @@ def build_object_batch_plan_v2(
                     )
                 )
                 if program.test_method != "compile_only":
-                    jobs.append(
+                    baseline_measure_jobs.append(
                         build_test_run_batch_job(
                             job_id=program_refs["baseline_run"],
                             execution="serial",
@@ -1774,7 +1782,7 @@ def build_object_batch_plan_v2(
                             btf_custom_path=btf_custom_path,
                             compile_only=False,
                             prepared_ref=baseline_prepared_key,
-                            prepared_group=baseline_group,
+                            prepared_group=baseline_batch_group,
                             release_prepared=False,
                             fixture_path=program_fixture_path,
                             trigger_command=program.trigger,
@@ -1792,7 +1800,7 @@ def build_object_batch_plan_v2(
 
                 refs["rejit_group_compiles"].append(program_refs["rejit_compile"])
 
-                jobs.append(
+                rejit_prepare_jobs.append(
                     build_test_run_batch_job(
                         job_id=program_refs["rejit_compile"],
                         execution="serial",
@@ -1812,14 +1820,14 @@ def build_object_batch_plan_v2(
                         enabled_passes=program_passes,
                         load_program_names=program_load_names(program),
                         prepared_key=rejit_prepared_key,
-                        prepared_group=rejit_group,
+                        prepared_group=rejit_batch_group,
                         fixture_path=program_fixture_path,
                         trigger_command=program.trigger,
                         trigger_timeout_seconds=program.trigger_timeout_seconds,
                     )
                 )
                 if program.test_method != "compile_only" and program.rejit_enabled:
-                    jobs.append(
+                    rejit_measure_jobs.append(
                         build_test_run_batch_job(
                             job_id=program_refs["rejit_run"],
                             execution="serial",
@@ -1838,7 +1846,7 @@ def build_object_batch_plan_v2(
                             daemon_socket=daemon_socket,
                             enabled_passes=program_passes,
                             prepared_ref=rejit_prepared_key,
-                            prepared_group=rejit_group,
+                            prepared_group=rejit_batch_group,
                             release_prepared=False,
                             fixture_path=program_fixture_path,
                             trigger_command=program.trigger,
@@ -1851,7 +1859,12 @@ def build_object_batch_plan_v2(
         "scheduler": {
             "max_parallel_jobs": 1,
         },
-        "jobs": jobs,
+        "jobs": (
+            baseline_prepare_jobs
+            + baseline_measure_jobs
+            + rejit_prepare_jobs
+            + rejit_measure_jobs
+        ),
     }, object_refs
 
 
