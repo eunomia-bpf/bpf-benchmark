@@ -14,11 +14,45 @@
 
 use std::collections::HashMap;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum VerifierInsnKind {
+    EdgeFullState,
+    PcFullState,
+    InsnDeltaState,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum VerifierValueWidth {
+    Unknown,
+    Bits32,
+    Bits64,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct Tnum {
+    pub value: u64,
+    pub mask: u64,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct ScalarRange {
+    pub smin: Option<i64>,
+    pub smax: Option<i64>,
+    pub umin: Option<u64>,
+    pub umax: Option<u64>,
+    pub smin32: Option<i32>,
+    pub smax32: Option<i32>,
+    pub umin32: Option<u32>,
+    pub umax32: Option<u32>,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct VerifierInsn {
     pub pc: usize,
     pub frame: usize,
     pub from_pc: Option<usize>,
+    pub kind: VerifierInsnKind,
+    pub speculative: bool,
     pub regs: HashMap<u8, RegState>,
     pub stack: HashMap<i16, StackState>,
 }
@@ -26,21 +60,46 @@ pub struct VerifierInsn {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RegState {
     pub reg_type: String,
-    pub min_value: Option<i64>,
-    pub max_value: Option<i64>,
-    pub known_value: Option<i64>,
+    pub value_width: VerifierValueWidth,
+    pub precise: bool,
+    pub exact_value: Option<u64>,
+    pub tnum: Option<Tnum>,
+    pub range: ScalarRange,
     pub offset: Option<i32>,
+    pub id: Option<u32>,
 }
 
 impl RegState {
-    fn new(reg_type: impl Into<String>) -> Self {
+    fn new(reg_type: impl Into<String>, value_width: VerifierValueWidth) -> Self {
         Self {
             reg_type: reg_type.into(),
-            min_value: None,
-            max_value: None,
-            known_value: None,
+            value_width,
+            precise: false,
+            exact_value: None,
+            tnum: None,
+            range: ScalarRange::default(),
             offset: None,
+            id: None,
         }
+    }
+
+    pub fn exact_u64(&self) -> Option<u64> {
+        if self.reg_type != "scalar" {
+            return None;
+        }
+
+        match self.value_width {
+            VerifierValueWidth::Bits32 => None,
+            VerifierValueWidth::Bits64 | VerifierValueWidth::Unknown => self.exact_value,
+        }
+    }
+
+    pub fn exact_u32(&self) -> Option<u32> {
+        if self.reg_type != "scalar" {
+            return None;
+        }
+
+        self.exact_value.map(|value| value as u32)
     }
 }
 
@@ -117,20 +176,41 @@ fn parse_state_line(line: &str) -> Option<VerifierInsn> {
         return None;
     }
 
-    let (pc, from_pc, state_text) =
+    let (pc, from_pc, kind, speculative, state_text) =
         parse_from_state_line(trimmed).or_else(|| parse_pc_state_line(trimmed))?;
     let (frame, state_text) = strip_frame_prefix(state_text);
 
     let mut regs = HashMap::new();
     let mut stack = HashMap::new();
-    for token in split_top_level_tokens(state_text) {
+    let tokens = split_top_level_tokens(state_text);
+    let mut idx = 0usize;
+    while idx < tokens.len() {
+        let token = tokens[idx];
         if let Some((regno, state)) = parse_reg_token(token) {
             regs.insert(regno, state);
+            idx += 1;
             continue;
         }
-        if let Some((off, state)) = parse_stack_token(token) {
+
+        if let Some((off, mut state)) = parse_stack_token(token) {
+            if state.value.is_none()
+                && idx + 1 < tokens.len()
+                && parse_reg_token(tokens[idx + 1]).is_none()
+                && parse_stack_token(tokens[idx + 1]).is_none()
+                && looks_like_reg_state(tokens[idx + 1])
+            {
+                state.value = Some(parse_reg_state(
+                    tokens[idx + 1],
+                    VerifierValueWidth::Unknown,
+                ));
+                idx += 1;
+            }
             stack.insert(off, state);
+            idx += 1;
+            continue;
         }
+
+        idx += 1;
     }
 
     if regs.is_empty() && stack.is_empty() {
@@ -141,12 +221,16 @@ fn parse_state_line(line: &str) -> Option<VerifierInsn> {
         pc,
         frame,
         from_pc,
+        kind,
+        speculative,
         regs,
         stack,
     })
 }
 
-fn parse_from_state_line(line: &str) -> Option<(usize, Option<usize>, &str)> {
+fn parse_from_state_line(
+    line: &str,
+) -> Option<(usize, Option<usize>, VerifierInsnKind, bool, &str)> {
     let rest = line.strip_prefix("from ")?;
     let (from_text, rest) = rest.split_once(" to ")?;
     let from_pc = from_text.trim().parse().ok()?;
@@ -158,15 +242,24 @@ fn parse_from_state_line(line: &str) -> Option<(usize, Option<usize>, &str)> {
 
     let pc = rest[..digits_len].parse().ok()?;
     let mut tail = &rest[digits_len..];
-    if let Some(stripped) = tail.strip_prefix(" (speculative execution)") {
+    let speculative = if let Some(stripped) = tail.strip_prefix(" (speculative execution)") {
         tail = stripped;
-    }
+        true
+    } else {
+        false
+    };
 
     let state_text = tail.strip_prefix(':')?.trim();
-    is_state_text(state_text).then_some((pc, Some(from_pc), state_text))
+    is_state_text(state_text).then_some((
+        pc,
+        Some(from_pc),
+        VerifierInsnKind::EdgeFullState,
+        speculative,
+        state_text,
+    ))
 }
 
-fn parse_pc_state_line(line: &str) -> Option<(usize, Option<usize>, &str)> {
+fn parse_pc_state_line(line: &str) -> Option<(usize, Option<usize>, VerifierInsnKind, bool, &str)> {
     let colon = line.find(':')?;
     let pc = line[..colon].trim().parse().ok()?;
     let tail = line[colon + 1..].trim();
@@ -175,12 +268,18 @@ fn parse_pc_state_line(line: &str) -> Option<(usize, Option<usize>, &str)> {
     }
 
     if is_state_text(tail) {
-        return Some((pc, None, tail));
+        return Some((pc, None, VerifierInsnKind::PcFullState, false, tail));
     }
 
     let semicolon = find_top_level_char(tail, ';')?;
     let state_text = tail[semicolon + 1..].trim();
-    is_state_text(state_text).then_some((pc, None, state_text))
+    is_state_text(state_text).then_some((
+        pc,
+        None,
+        VerifierInsnKind::InsnDeltaState,
+        false,
+        state_text,
+    ))
 }
 
 fn is_state_text(text: &str) -> bool {
@@ -243,8 +342,8 @@ fn split_top_level_tokens(text: &str) -> Vec<&str> {
 
 fn parse_reg_token(token: &str) -> Option<(u8, RegState)> {
     let (lhs, rhs) = token.split_once('=')?;
-    let regno = parse_reg_name(lhs)?;
-    let state = parse_reg_state(rhs.trim());
+    let (regno, value_width) = parse_reg_name(lhs)?;
+    let state = parse_reg_state(rhs.trim(), value_width);
     Some((regno, state))
 }
 
@@ -255,10 +354,14 @@ fn parse_stack_token(token: &str) -> Option<(i16, StackState)> {
     Some((off, state))
 }
 
-fn parse_reg_name(name: &str) -> Option<u8> {
+fn parse_reg_name(name: &str) -> Option<(u8, VerifierValueWidth)> {
     let name = name.strip_prefix('R')?;
-    let name = name.strip_suffix("_w").unwrap_or(name);
-    name.parse().ok()
+    let (name, value_width) = if let Some(name) = name.strip_suffix("_w") {
+        (name, VerifierValueWidth::Bits32)
+    } else {
+        (name, VerifierValueWidth::Bits64)
+    };
+    Some((name.parse().ok()?, value_width))
 }
 
 fn parse_stack_name(name: &str) -> Option<i16> {
@@ -266,19 +369,23 @@ fn parse_stack_name(name: &str) -> Option<i16> {
     parse_i32(name)?.try_into().ok()
 }
 
-fn parse_reg_state(raw: &str) -> RegState {
-    let value = raw.strip_prefix('P').unwrap_or(raw);
+fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> RegState {
+    let (precise, value) = match raw.strip_prefix('P') {
+        Some(rest) => (true, rest),
+        None => (false, raw),
+    };
 
-    if let Some(known) = parse_signed_value(value) {
-        let mut state = RegState::new("scalar");
-        state.known_value = Some(known);
-        state.min_value = Some(known);
-        state.max_value = Some(known);
+    if let Some(exact) = parse_scalar_exact_value(value) {
+        let mut state = RegState::new("scalar", value_width);
+        state.precise = precise;
+        state.exact_value = Some(exact);
+        apply_exact_value_to_range(&mut state.range, exact, value_width);
         return state;
     }
 
     if let Some(rest) = value.strip_prefix("fp") {
-        let mut state = RegState::new("fp");
+        let mut state = RegState::new("fp", value_width);
+        state.precise = precise;
         if !rest.is_empty() {
             state.offset = parse_i32(rest);
         }
@@ -288,19 +395,16 @@ fn parse_reg_state(raw: &str) -> RegState {
     if let Some(open) = value.find('(') {
         let close = value.rfind(')').unwrap_or(value.len());
         let reg_type = normalize_reg_type(&value[..open]);
-        let mut state = RegState::new(reg_type);
+        let mut state = RegState::new(reg_type, value_width);
+        state.precise = precise;
         parse_reg_attributes(&value[open + 1..close], &mut state);
-        if state.known_value.is_none() && state.reg_type == "scalar" {
-            if let (Some(min), Some(max)) = (state.min_value, state.max_value) {
-                if min == max {
-                    state.known_value = Some(min);
-                }
-            }
-        }
+        infer_exact_value(&mut state);
         return state;
     }
 
-    RegState::new(normalize_reg_type(value))
+    let mut state = RegState::new(normalize_reg_type(value), value_width);
+    state.precise = precise;
+    state
 }
 
 fn normalize_reg_type(reg_type: &str) -> String {
@@ -327,7 +431,7 @@ fn parse_stack_state(raw: &str) -> StackState {
         {
             return StackState {
                 slot_types: Some(prefix.to_string()),
-                value: Some(parse_reg_state(rest)),
+                value: Some(parse_reg_state(rest, VerifierValueWidth::Unknown)),
             };
         }
     }
@@ -342,7 +446,7 @@ fn parse_stack_state(raw: &str) -> StackState {
     if looks_like_reg_state(raw) {
         return StackState {
             slot_types: None,
-            value: Some(parse_reg_state(raw)),
+            value: Some(parse_reg_state(raw, VerifierValueWidth::Unknown)),
         };
     }
 
@@ -355,7 +459,7 @@ fn parse_stack_state(raw: &str) -> StackState {
 
     StackState {
         slot_types: None,
-        value: Some(parse_reg_state(raw)),
+        value: Some(parse_reg_state(raw, VerifierValueWidth::Unknown)),
     }
 }
 
@@ -378,15 +482,6 @@ fn is_stack_slot_type_char(ch: char) -> bool {
 }
 
 fn parse_reg_attributes(attrs: &str, state: &mut RegState) {
-    let mut smin = None;
-    let mut smax = None;
-    let mut umin = None;
-    let mut umax = None;
-    let mut smin32 = None;
-    let mut smax32 = None;
-    let mut umin32 = None;
-    let mut umax32 = None;
-
     for segment in split_top_level_segments(attrs, ',') {
         let parts: Vec<_> = segment
             .split('=')
@@ -401,22 +496,70 @@ fn parse_reg_attributes(attrs: &str, state: &mut RegState) {
         let value = parts[parts.len() - 1];
         for key in &parts[..parts.len() - 1] {
             match *key {
-                "smin" | "smin_value" => smin = parse_signed_value(value),
-                "smax" | "smax_value" => smax = parse_signed_value(value),
-                "umin" | "umin_value" => umin = parse_unsigned_value(value),
-                "umax" | "umax_value" => umax = parse_unsigned_value(value),
-                "smin32" | "smin32_value" => smin32 = parse_signed_value(value),
-                "smax32" | "smax32_value" => smax32 = parse_signed_value(value),
-                "umin32" | "umin32_value" => umin32 = parse_unsigned_value(value),
-                "umax32" | "umax32_value" => umax32 = parse_unsigned_value(value),
+                "smin" | "smin_value" => state.range.smin = parse_signed_value(value),
+                "smax" | "smax_value" => state.range.smax = parse_signed_value(value),
+                "umin" | "umin_value" => state.range.umin = parse_unsigned_value(value),
+                "umax" | "umax_value" => state.range.umax = parse_unsigned_value(value),
+                "smin32" | "smin32_value" => state.range.smin32 = parse_signed_i32(value),
+                "smax32" | "smax32_value" => state.range.smax32 = parse_signed_i32(value),
+                "umin32" | "umin32_value" => state.range.umin32 = parse_unsigned_u32(value),
+                "umax32" | "umax32_value" => state.range.umax32 = parse_unsigned_u32(value),
                 "off" => state.offset = parse_i32(value),
+                "id" => state.id = parse_u32(value),
+                "var_off" => state.tnum = parse_tnum(value),
                 _ => {}
             }
         }
     }
+}
 
-    state.min_value = smin.or(umin).or(smin32).or(umin32);
-    state.max_value = smax.or(umax).or(smax32).or(umax32);
+fn apply_exact_value_to_range(
+    range: &mut ScalarRange,
+    exact: u64,
+    value_width: VerifierValueWidth,
+) {
+    let exact32 = exact as u32;
+
+    range.umin32 = Some(exact32);
+    range.umax32 = Some(exact32);
+    range.smin32 = Some(exact32 as i32);
+    range.smax32 = Some(exact32 as i32);
+
+    if value_width != VerifierValueWidth::Bits32 {
+        range.umin = Some(exact);
+        range.umax = Some(exact);
+        range.smin = Some(exact as i64);
+        range.smax = Some(exact as i64);
+    }
+}
+
+fn infer_exact_value(state: &mut RegState) {
+    if state.reg_type != "scalar" || state.exact_value.is_some() {
+        return;
+    }
+
+    if let Some(tnum) = state.tnum {
+        if tnum.mask == 0 {
+            state.exact_value = Some(tnum.value);
+            return;
+        }
+    }
+
+    if let (Some(umin), Some(umax)) = (state.range.umin, state.range.umax) {
+        if umin == umax {
+            state.exact_value = Some(umin);
+            return;
+        }
+    }
+
+    if let (Some(umin32), Some(umax32)) = (state.range.umin32, state.range.umax32) {
+        if umin32 == umax32 {
+            state.exact_value = Some(u64::from(umin32));
+            if state.value_width == VerifierValueWidth::Bits64 {
+                state.value_width = VerifierValueWidth::Bits32;
+            }
+        }
+    }
 }
 
 fn split_top_level_segments(text: &str, separator: char) -> Vec<&str> {
@@ -466,6 +609,18 @@ fn parse_i32(text: &str) -> Option<i32> {
     parse_signed_value(text)?.try_into().ok()
 }
 
+fn parse_u32(text: &str) -> Option<u32> {
+    parse_unsigned_u64(text)?.try_into().ok()
+}
+
+fn parse_signed_i32(text: &str) -> Option<i32> {
+    parse_signed_value(text)?.try_into().ok()
+}
+
+fn parse_unsigned_u32(text: &str) -> Option<u32> {
+    parse_unsigned_u64(text)?.try_into().ok()
+}
+
 fn parse_signed_value(text: &str) -> Option<i64> {
     let value = text.trim();
     if value.is_empty() {
@@ -499,19 +654,17 @@ fn parse_signed_value(text: &str) -> Option<i64> {
     value.parse().ok()
 }
 
-fn parse_unsigned_value(text: &str) -> Option<i64> {
+fn parse_unsigned_value(text: &str) -> Option<u64> {
     let value = text.trim();
     if value.is_empty() || value.starts_with('-') {
         return None;
     }
 
-    let unsigned = if let Some(rest) = value.strip_prefix('+') {
-        parse_unsigned_u64(rest)?
+    if let Some(rest) = value.strip_prefix('+') {
+        parse_unsigned_u64(rest)
     } else {
-        parse_unsigned_u64(value)?
-    };
-
-    i64::try_from(unsigned).ok()
+        parse_unsigned_u64(value)
+    }
 }
 
 fn parse_unsigned_u64(text: &str) -> Option<u64> {
@@ -520,6 +673,42 @@ fn parse_unsigned_u64(text: &str) -> Option<u64> {
     }
 
     text.parse().ok()
+}
+
+fn parse_scalar_exact_value(text: &str) -> Option<u64> {
+    let value = text.trim();
+    if value.is_empty() || value.contains('(') {
+        return None;
+    }
+
+    if let Some(rest) = value
+        .strip_prefix("-0x")
+        .or_else(|| value.strip_prefix("-0X"))
+    {
+        let magnitude = u64::from_str_radix(rest, 16).ok()?;
+        return Some(0u64.wrapping_sub(magnitude));
+    }
+
+    if let Some(rest) = value.strip_prefix('-') {
+        let magnitude: u64 = rest.parse().ok()?;
+        return Some(0u64.wrapping_sub(magnitude));
+    }
+
+    if let Some(rest) = value.strip_prefix('+') {
+        return parse_unsigned_u64(rest);
+    }
+
+    parse_unsigned_u64(value)
+}
+
+fn parse_tnum(text: &str) -> Option<Tnum> {
+    let value = text.trim();
+    let inner = value.strip_prefix('(')?.strip_suffix(')')?;
+    let (value, mask) = inner.split_once(';')?;
+    Some(Tnum {
+        value: parse_unsigned_u64(value.trim())?,
+        mask: parse_unsigned_u64(mask.trim())?,
+    })
 }
 
 #[cfg(test)]
@@ -541,6 +730,7 @@ from 4 to 6: R0_w=pkt(off=8,r=8) R1=ctx() R2_w=pkt(r=8) R3_w=pkt_end() R10=fp0
 
         assert_eq!(insns[0].pc, 6);
         assert_eq!(insns[0].from_pc, Some(4));
+        assert_eq!(insns[0].kind, VerifierInsnKind::EdgeFullState);
         assert_eq!(insns[0].frame, 0);
         assert_eq!(insns[0].regs.get(&1).unwrap().reg_type, "ctx");
         assert_eq!(insns[0].regs.get(&0).unwrap().reg_type, "pkt");
@@ -551,14 +741,22 @@ from 4 to 6: R0_w=pkt(off=8,r=8) R1=ctx() R2_w=pkt(r=8) R3_w=pkt_end() R10=fp0
         assert_eq!(insns[2].pc, 6);
         let r3_after_load = insns[2].regs.get(&3).unwrap();
         assert_eq!(r3_after_load.reg_type, "scalar");
-        assert_eq!(r3_after_load.min_value, None);
-        assert_eq!(r3_after_load.max_value, Some(255));
-        assert_eq!(r3_after_load.known_value, None);
+        assert_eq!(insns[2].kind, VerifierInsnKind::InsnDeltaState);
+        assert_eq!(r3_after_load.value_width, VerifierValueWidth::Bits32);
+        assert_eq!(r3_after_load.range.umax, Some(255));
+        assert_eq!(
+            r3_after_load.tnum,
+            Some(Tnum {
+                value: 0,
+                mask: 0xff
+            })
+        );
+        assert_eq!(r3_after_load.exact_value, None);
 
         assert_eq!(insns[3].pc, 7);
         let r3_before_branch = insns[3].regs.get(&3).unwrap();
-        assert_eq!(r3_before_branch.min_value, Some(0));
-        assert_eq!(r3_before_branch.max_value, Some(255));
+        assert_eq!(r3_before_branch.range.umin, Some(0));
+        assert_eq!(r3_before_branch.range.umax, Some(255));
 
         assert_eq!(insns[4].pc, 10);
         let r1 = insns[4].regs.get(&1).unwrap();
@@ -567,9 +765,9 @@ from 4 to 6: R0_w=pkt(off=8,r=8) R1=ctx() R2_w=pkt(r=8) R3_w=pkt_end() R10=fp0
 
         let r2 = insns[4].regs.get(&2).unwrap();
         assert_eq!(r2.reg_type, "scalar");
-        assert_eq!(r2.known_value, Some(1));
-        assert_eq!(r2.min_value, Some(1));
-        assert_eq!(r2.max_value, Some(1));
+        assert_eq!(r2.exact_u64(), Some(1));
+        assert_eq!(r2.range.umin, Some(1));
+        assert_eq!(r2.range.umax, Some(1));
 
         let fp8 = insns[4].stack.get(&-8).unwrap();
         assert_eq!(fp8.slot_types.as_deref(), Some("0000????"));
@@ -593,15 +791,49 @@ from 4 to 6: R0_w=pkt(off=8,r=8) R1=ctx() R2_w=pkt(r=8) R3_w=pkt_end() R10=fp0
 
         let range = insns[1].regs.get(&0).unwrap();
         assert_eq!(range.reg_type, "scalar");
-        assert_eq!(range.min_value, Some(0));
-        assert_eq!(range.max_value, Some(1));
-        assert_eq!(range.known_value, None);
+        assert_eq!(range.range.smin, Some(0));
+        assert_eq!(range.range.umax, Some(1));
+        assert_eq!(range.exact_value, None);
 
         let zero = insns[2].regs.get(&0).unwrap();
-        assert_eq!(zero.known_value, Some(0));
+        assert_eq!(zero.exact_u64(), Some(0));
 
         let one = insns[3].regs.get(&0).unwrap();
-        assert_eq!(one.known_value, Some(1));
+        assert_eq!(one.exact_u64(), Some(1));
+    }
+
+    #[test]
+    fn parses_speculative_full_state_and_stack_spill() {
+        let log = r#"
+from 12 to 18 (speculative execution): frame1: R2_w=42 R10=fp0 fp-24=0000???? scalar(id=7,var_off=(0x2a; 0x0))
+"#;
+
+        let insns = parse_verifier_log(log);
+        assert_eq!(insns.len(), 1);
+
+        let insn = &insns[0];
+        assert_eq!(insn.kind, VerifierInsnKind::EdgeFullState);
+        assert!(insn.speculative);
+        assert_eq!(insn.frame, 1);
+
+        let reg = insn.regs.get(&2).unwrap();
+        assert_eq!(reg.value_width, VerifierValueWidth::Bits32);
+        assert_eq!(reg.exact_u32(), Some(42));
+        assert_eq!(reg.exact_u64(), None);
+
+        let spill = insn.stack.get(&-24).unwrap();
+        assert_eq!(spill.slot_types.as_deref(), Some("0000????"));
+        let spilled_value = spill.value.as_ref().unwrap();
+        assert_eq!(spilled_value.reg_type, "scalar");
+        assert_eq!(spilled_value.id, Some(7));
+        assert_eq!(
+            spilled_value.tnum,
+            Some(Tnum {
+                value: 0x2a,
+                mask: 0
+            })
+        );
+        assert_eq!(spilled_value.exact_u64(), Some(42));
     }
 
     #[test]

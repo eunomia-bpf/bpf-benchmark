@@ -26,11 +26,13 @@ from runner.libs.run_artifacts import load_latest_result_for_output
 
 
 ETHERNET_HEADER_SIZE = 14
+SUPPORTED_E2E_CASES = ("tracee", "tetragon", "scx", "katran")
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the x86 AWS micro benchmark bundle on the remote host.")
+    parser = argparse.ArgumentParser(description="Run the x86 AWS benchmark bundle on the remote host.")
     parser.add_argument("--output", required=True, help="Final JSON output path.")
+    parser.add_argument("--mode", choices=("micro", "e2e"), default="micro")
     parser.add_argument("--iterations", type=int, default=10)
     parser.add_argument("--warmups", type=int, default=2)
     parser.add_argument("--repeat", type=int, default=200)
@@ -39,6 +41,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--instance-type", required=True)
     parser.add_argument("--aws-profile", default="codex-ec2")
     parser.add_argument("--aws-region", default="us-east-1")
+    parser.add_argument("--e2e-cases", default="tracee,tetragon,scx,katran")
+    parser.add_argument("--e2e-smoke", type=int, choices=(0, 1), default=1)
     return parser.parse_args()
 
 
@@ -89,6 +93,35 @@ def maybe_read_text(path: str | Path) -> str | None:
         return Path(path).read_text().strip()
     except OSError:
         return None
+
+
+def tail_text(text: str, *, max_lines: int = 40, max_chars: int = 8000) -> str:
+    lines = [line.rstrip() for line in text.splitlines() if line.strip()]
+    if len(lines) > max_lines:
+        lines = lines[-max_lines:]
+    summary = "\n".join(lines)
+    if len(summary) > max_chars:
+        summary = summary[-max_chars:]
+    return summary
+
+
+def parse_e2e_cases(cases_csv: str) -> list[str]:
+    requested = [token.strip().lower() for token in str(cases_csv).split(",") if token.strip()]
+    if not requested:
+        raise RuntimeError("no E2E cases were selected")
+    resolved: list[str] = []
+    for token in requested:
+        if token == "all":
+            for case_name in SUPPORTED_E2E_CASES:
+                if case_name not in resolved:
+                    resolved.append(case_name)
+            continue
+        if token not in SUPPORTED_E2E_CASES:
+            supported = ", ".join(SUPPORTED_E2E_CASES)
+            raise RuntimeError(f"unsupported E2E case {token!r}; supported cases: {supported}")
+        if token not in resolved:
+            resolved.append(token)
+    return resolved
 
 
 def sanitize_name(text: str) -> str:
@@ -598,6 +631,196 @@ def summarize_katran(raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def read_json_if_exists(path: Path) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def summarize_e2e_payload(payload: dict[str, Any] | None) -> dict[str, Any] | None:
+    if payload is None:
+        return None
+    limitations = payload.get("limitations")
+    limitations_count = len(limitations) if isinstance(limitations, list) else 0
+    return {
+        "status": str(payload.get("status") or ""),
+        "duration_s": payload.get("duration_s"),
+        "sample_count": payload.get("sample_count"),
+        "measurement_driver": payload.get("traffic_driver") or payload.get("mode"),
+        "error_message": payload.get("error_message"),
+        "limitations_count": limitations_count,
+    }
+
+
+def run_e2e_case(
+    case_name: str,
+    *,
+    smoke: bool,
+    bpftool_binary: str,
+    results_dir: Path,
+) -> dict[str, Any]:
+    case_results_dir = results_dir / "e2e" / case_name
+    case_results_dir.mkdir(parents=True, exist_ok=True)
+    output_json = case_results_dir / f"{case_name}.json"
+    output_md = case_results_dir / f"{case_name}.md"
+    report_md = case_results_dir / f"{case_name}-report.md"
+
+    command = [
+        sys.executable,
+        str(REPO_ROOT / "e2e" / "run.py"),
+        case_name,
+        "--output-json",
+        str(output_json),
+        "--output-md",
+        str(output_md),
+        "--report-md",
+        str(report_md),
+        "--bpftool",
+        bpftool_binary,
+    ]
+    if smoke:
+        command.append("--smoke")
+
+    env = os.environ.copy()
+    env["BPFTOOL_BIN"] = bpftool_binary
+    env["PYTHONPATH"] = str(REPO_ROOT)
+    current_path = env.get("PATH", "")
+    bpftool_dir = str(Path(bpftool_binary).resolve().parent)
+    path_entries = [entry for entry in current_path.split(os.pathsep) if entry]
+    if bpftool_dir not in path_entries:
+        env["PATH"] = bpftool_dir if not current_path else f"{bpftool_dir}{os.pathsep}{current_path}"
+
+    timed_out = False
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=REPO_ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=7200,
+        )
+    except subprocess.TimeoutExpired as exc:
+        timed_out = True
+        completed = subprocess.CompletedProcess(
+            command,
+            124,
+            exc.stdout or "",
+            exc.stderr or "",
+        )
+
+    payload = read_json_if_exists(output_json)
+    payload_status = str((payload or {}).get("status") or "").strip().lower()
+    if timed_out:
+        status = "error"
+    elif payload_status in {"ok", "skipped", "error"}:
+        status = payload_status
+    elif completed.returncode == 0:
+        status = "ok"
+    else:
+        status = "error"
+
+    error_message = ""
+    if isinstance(payload, dict):
+        error_message = str(payload.get("error_message") or "").strip()
+    if not error_message and status == "error":
+        error_message = tail_text(completed.stderr or completed.stdout or "remote e2e case failed")
+
+    return {
+        "case": case_name,
+        "status": status,
+        "smoke": smoke,
+        "timed_out": timed_out,
+        "returncode": int(completed.returncode),
+        "command": command,
+        "output_json": str(output_json),
+        "output_md": str(output_md) if output_md.exists() else None,
+        "report_md": str(report_md) if report_md.exists() else None,
+        "stdout_tail": tail_text(completed.stdout or ""),
+        "stderr_tail": tail_text(completed.stderr or ""),
+        "error_message": error_message,
+        "result": summarize_e2e_payload(payload),
+    }
+
+
+def run_e2e_suite(
+    *,
+    cases_csv: str,
+    smoke: bool,
+    bpftool_binary: str,
+    results_dir: Path,
+) -> dict[str, Any]:
+    cases = parse_e2e_cases(cases_csv)
+    ensure_bpffs_mounted()
+    module_load = run_command(
+        ["bash", str(REPO_ROOT / "module" / "load_all.sh")],
+        check=False,
+        timeout=120,
+    )
+    case_results = [
+        run_e2e_case(
+            case_name,
+            smoke=smoke,
+            bpftool_binary=bpftool_binary,
+            results_dir=results_dir,
+        )
+        for case_name in cases
+    ]
+    return {
+        "suite": "e2e",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "supported_cases": list(SUPPORTED_E2E_CASES),
+        "selected_cases": cases,
+        "smoke": smoke,
+        "bpftool": bpftool_binary,
+        "module_load": {
+            "returncode": int(module_load.returncode),
+            "stdout_tail": tail_text(module_load.stdout or ""),
+            "stderr_tail": tail_text(module_load.stderr or ""),
+        },
+        "cases": case_results,
+    }
+
+
+def summarize_e2e(raw: dict[str, Any]) -> dict[str, Any]:
+    cases = raw.get("cases") if isinstance(raw.get("cases"), list) else []
+    ok_cases: list[str] = []
+    skipped_cases: list[str] = []
+    failed_cases: list[dict[str, Any]] = []
+    for record in cases:
+        if not isinstance(record, dict):
+            continue
+        case_name = str(record.get("case") or "unknown")
+        status = str(record.get("status") or "").lower()
+        if status == "ok":
+            ok_cases.append(case_name)
+        elif status == "skipped":
+            skipped_cases.append(case_name)
+        else:
+            failed_cases.append(
+                {
+                    "case": case_name,
+                    "error_message": record.get("error_message"),
+                    "returncode": record.get("returncode"),
+                    "timed_out": bool(record.get("timed_out")),
+                }
+            )
+    return {
+        "selected_cases": raw.get("selected_cases"),
+        "smoke": bool(raw.get("smoke")),
+        "total_cases": len(cases),
+        "ok_cases": ok_cases,
+        "skipped_cases": skipped_cases,
+        "failed_cases": failed_cases,
+        "module_load_returncode": int(((raw.get("module_load") or {}).get("returncode", 0)) or 0),
+    }
+
+
 def main() -> int:
     args = parse_args()
     output_path = Path(args.output).resolve()
@@ -613,28 +836,6 @@ def main() -> int:
     if not daemon_binary.exists():
         raise SystemExit(f"missing daemon binary: {daemon_binary}")
 
-    raw_llvmbpf_vs_kernel = run_llvmbpf_vs_kernel(
-        iterations=args.iterations,
-        warmups=args.warmups,
-        repeat=args.repeat,
-        cpu=args.cpu,
-        results_dir=results_dir,
-    )
-    raw_rejit = run_daemon_stock_vs_rejit(
-        runner_binary=runner_binary,
-        daemon_binary=daemon_binary,
-        bpftool_binary=bpftool_binary,
-        iterations=args.iterations,
-        warmups=args.warmups,
-        repeat=args.repeat,
-        cpu=args.cpu,
-        results_dir=results_dir,
-    )
-    raw_katran = run_katran_smoke(
-        daemon_binary=daemon_binary,
-        bpftool_binary=bpftool_binary,
-    )
-
     payload = {
         "run_date": datetime.now(timezone.utc).isoformat(),
         "aws": {
@@ -649,6 +850,7 @@ def main() -> int:
             "cached_artifacts": ".cache/aws-x86/",
         },
         "parameters": {
+            "mode": args.mode,
             "iterations": args.iterations,
             "warmups": args.warmups,
             "repeat": args.repeat,
@@ -659,17 +861,79 @@ def main() -> int:
             "turbo_state": maybe_read_text("/sys/devices/system/cpu/intel_pstate/no_turbo") or "unknown",
             "perf_event_paranoid": maybe_read_text("/proc/sys/kernel/perf_event_paranoid") or "unknown",
         },
-        "summary": {
+    }
+
+    if args.mode == "e2e":
+        try:
+            raw_e2e = run_e2e_suite(
+                cases_csv=args.e2e_cases,
+                smoke=bool(args.e2e_smoke),
+                bpftool_binary=bpftool_binary,
+                results_dir=results_dir,
+            )
+            payload["parameters"].update(
+                {
+                    "e2e_cases": raw_e2e.get("selected_cases"),
+                    "e2e_smoke": bool(args.e2e_smoke),
+                }
+            )
+            payload["summary"] = {"e2e": summarize_e2e(raw_e2e)}
+            payload["raw"] = {"e2e": raw_e2e}
+        except Exception as exc:
+            try:
+                selected_cases = parse_e2e_cases(args.e2e_cases) if args.e2e_cases else []
+            except Exception:
+                selected_cases = []
+            payload["parameters"].update(
+                {
+                    "e2e_cases": selected_cases,
+                    "e2e_smoke": bool(args.e2e_smoke),
+                }
+            )
+            payload["summary"] = {
+                "e2e": {
+                    "selected_cases": payload["parameters"]["e2e_cases"],
+                    "smoke": bool(args.e2e_smoke),
+                    "total_cases": 0,
+                    "ok_cases": [],
+                    "skipped_cases": [],
+                    "failed_cases": [{"case": "suite", "error_message": str(exc), "returncode": None, "timed_out": False}],
+                    "module_load_returncode": None,
+                }
+            }
+            payload["raw"] = {"e2e_error": str(exc)}
+    else:
+        raw_llvmbpf_vs_kernel = run_llvmbpf_vs_kernel(
+            iterations=args.iterations,
+            warmups=args.warmups,
+            repeat=args.repeat,
+            cpu=args.cpu,
+            results_dir=results_dir,
+        )
+        raw_rejit = run_daemon_stock_vs_rejit(
+            runner_binary=runner_binary,
+            daemon_binary=daemon_binary,
+            bpftool_binary=bpftool_binary,
+            iterations=args.iterations,
+            warmups=args.warmups,
+            repeat=args.repeat,
+            cpu=args.cpu,
+            results_dir=results_dir,
+        )
+        raw_katran = run_katran_smoke(
+            daemon_binary=daemon_binary,
+            bpftool_binary=bpftool_binary,
+        )
+        payload["summary"] = {
             "llvmbpf_vs_kernel": summarize_llvmbpf_vs_kernel(raw_llvmbpf_vs_kernel),
             "daemon_stock_vs_rejit": summarize_rejit(raw_rejit),
             "katran_smoke": summarize_katran(raw_katran),
-        },
-        "raw": {
+        }
+        payload["raw"] = {
             "llvmbpf_vs_kernel": raw_llvmbpf_vs_kernel,
             "daemon_stock_vs_rejit": raw_rejit,
             "katran_smoke": raw_katran,
-        },
-    }
+        }
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")

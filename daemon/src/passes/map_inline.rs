@@ -662,7 +662,8 @@ fn verifier_known_scalar_value(reg: &crate::verifier_log::RegState) -> Option<u6
     if reg.reg_type != "scalar" {
         return None;
     }
-    reg.known_value.map(|value| value as u64)
+
+    reg.exact_u64().or_else(|| reg.exact_u32().map(u64::from))
 }
 
 /// Classify all uses of the lookup result until its value-pointer aliases die out.

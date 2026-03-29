@@ -8,7 +8,7 @@
 # Commands:
 #   launch     Launch or reuse a tagged x86 EC2 instance.
 #   setup      Upload the local x86 bzImage + kernel modules, install, reboot, verify.
-#   benchmark  Upload the local runner/daemon/corpus bundle, load module/x86 kinsn modules, run benchmarks.
+#   benchmark  Upload the local benchmark bundle and run the selected benchmark mode.
 #   terminate  Terminate the EC2 instance and clear cached state.
 #   full       launch -> setup -> benchmark -> terminate, with EXIT cleanup if setup/benchmark fails.
 #
@@ -17,7 +17,8 @@
 #   - runner binary: runner/build/micro_exec
 #   - daemon binary: daemon/target/release/bpfrejit-daemon
 #   - kinsn modules: module/x86/*.ko
-#   - smoke corpus: corpus/build/katran/balancer.bpf.o
+#   - micro smoke object: corpus/build/katran/balancer.bpf.o
+#   - e2e assets: e2e/, runner/libs/, corpus/config/benchmark_config.yaml, module/x86/*.ko
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -43,7 +44,10 @@ AWS_X86_BENCH_ITERATIONS="${AWS_X86_BENCH_ITERATIONS:-1}"
 AWS_X86_BENCH_WARMUPS="${AWS_X86_BENCH_WARMUPS:-0}"
 AWS_X86_BENCH_REPEAT="${AWS_X86_BENCH_REPEAT:-10}"
 AWS_X86_BENCH_CPU="${AWS_X86_BENCH_CPU:-0}"
-AWS_X86_REMOTE_RESULT_JSON="${AWS_X86_REMOTE_RESULT_JSON:-x86_t3_micro.json}"
+AWS_X86_BENCH_MODE="${AWS_X86_BENCH_MODE:-micro}"
+AWS_X86_E2E_CASES="${AWS_X86_E2E_CASES:-tracee,tetragon,scx,katran}"
+AWS_X86_E2E_SMOKE="${AWS_X86_E2E_SMOKE:-1}"
+AWS_X86_REMOTE_RESULT_JSON="${AWS_X86_REMOTE_RESULT_JSON:-x86_benchmark.json}"
 AWS_REGION_VALUE="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
 
 KERNEL_DIR="${KERNEL_DIR:-$ROOT_DIR/vendor/linux-framework}"
@@ -109,10 +113,66 @@ Optional env:
   AWS_X86_ROOT_VOLUME_SIZE_GB  default: 32
   AWS_X86_NAME_TAG             default: bpf-benchmark-x86
   AWS_X86_AMI_ID               override the AL2023 x86_64 AMI
+  AWS_X86_BENCH_MODE           default: micro
+                               values: micro | e2e
   AWS_X86_BENCH_ITERATIONS     default: 1
   AWS_X86_BENCH_WARMUPS        default: 0
   AWS_X86_BENCH_REPEAT         default: 10
+  AWS_X86_E2E_CASES            default: tracee,tetragon,scx,katran
+                               values: all or a comma-separated subset of tracee,tetragon,scx,katran
+  AWS_X86_E2E_SMOKE            default: 1
 EOF
+}
+
+normalize_benchmark_mode() {
+    printf '%s\n' "$(printf '%s' "$AWS_X86_BENCH_MODE" | tr '[:upper:]' '[:lower:]')"
+}
+
+normalize_e2e_cases_csv() {
+    printf '%s\n' "${AWS_X86_E2E_CASES//[[:space:]]/}"
+}
+
+validate_benchmark_mode() {
+    case "$(normalize_benchmark_mode)" in
+        micro|e2e)
+            ;;
+        *)
+            die "AWS_X86_BENCH_MODE must be one of: micro, e2e"
+            ;;
+    esac
+    [[ "$AWS_X86_E2E_SMOKE" =~ ^[01]$ ]] || die "AWS_X86_E2E_SMOKE must be 0 or 1"
+}
+
+validate_e2e_cases() {
+    local csv token
+    csv="$(normalize_e2e_cases_csv)"
+    [[ -n "$csv" ]] || die "AWS_X86_E2E_CASES must not be empty"
+    IFS=',' read -r -a _aws_x86_e2e_case_tokens <<<"$csv"
+    for token in "${_aws_x86_e2e_case_tokens[@]}"; do
+        [[ -n "$token" ]] || continue
+        case "$token" in
+            all|tracee|tetragon|scx|katran)
+                ;;
+            *)
+                die "unsupported AWS x86 E2E case: ${token}"
+                ;;
+        esac
+    done
+}
+
+e2e_case_selected() {
+    local wanted="$1"
+    local csv token
+    csv="$(normalize_e2e_cases_csv)"
+    [[ -n "$csv" ]] || return 1
+    IFS=',' read -r -a _aws_x86_e2e_case_tokens <<<"$csv"
+    for token in "${_aws_x86_e2e_case_tokens[@]}"; do
+        [[ -n "$token" ]] || continue
+        if [[ "$token" == "all" || "$token" == "$wanted" ]]; then
+            return 0
+        fi
+    done
+    return 1
 }
 
 ensure_dirs() {
@@ -593,29 +653,42 @@ sudo dnf -y install \
     bpftool \
     dracut \
     elfutils-libelf \
+    fio \
     grubby \
     gzip \
+    iproute \
     kmod \
     ncurses-libs \
+    procps-ng \
     python3 \
     python3.11 \
     python3.11-pip \
+    stress-ng \
     tar \
     util-linux \
     zlib \
     zstd >/dev/null
+for optional_pkg in sysbench wrk; do
+    sudo dnf -y install "${optional_pkg}" >/dev/null 2>&1 || true
+done
 if ! rpm -q python3.11-pyyaml >/dev/null 2>&1; then
     if ! sudo dnf -y install python3.11-pyyaml >/dev/null 2>&1; then
         sudo python3.11 -m pip install --quiet PyYAML >/dev/null
     fi
 fi
+python3.11 -c 'import elftools' >/dev/null 2>&1 \
+    || sudo python3.11 -m pip install --quiet pyelftools >/dev/null
 command -v bpftool >/dev/null
+command -v curl >/dev/null
+command -v fio >/dev/null
+command -v ip >/dev/null
 command -v dracut >/dev/null
 command -v grubby >/dev/null
 command -v python3 >/dev/null
 command -v python3.11 >/dev/null
 command -v insmod >/dev/null
-python3.11 -c 'import yaml' >/dev/null
+command -v stress-ng >/dev/null
+python3.11 -c 'import yaml, elftools' >/dev/null
 command -v taskset >/dev/null
 EOF
 }
@@ -746,6 +819,33 @@ ensure_local_kinsn_modules() {
     [[ "$ko_count" -gt 0 ]] || die "no x86 kinsn modules found under ${X86_KINSN_MODULE_DIR}"
 }
 
+ensure_local_e2e_assets() {
+    require_local_path "$ROOT_DIR/e2e/run.py" "e2e runner"
+    require_local_path "$ROOT_DIR/e2e/case_common.py" "e2e shared helpers"
+    require_local_path "$ROOT_DIR/corpus/config/benchmark_config.yaml" "benchmark config"
+    require_local_path "$ROOT_DIR/corpus/inputs/katran_vip_packet_64.bin" "katran test packet"
+
+    if e2e_case_selected katran; then
+        if [[ ! -f "$ROOT_DIR/corpus/build/katran/balancer.bpf.o" ]]; then
+            log "Building local Katran corpus objects"
+            make -C "$ROOT_DIR" corpus-build-katran >/dev/null
+        fi
+        require_local_path "$ROOT_DIR/corpus/build/katran/balancer.bpf.o" "katran object"
+    fi
+
+    if e2e_case_selected scx; then
+        if [[ ! -x "$ROOT_DIR/runner/repos/scx/target/release/scx_rusty" || \
+              ! -f "$ROOT_DIR/corpus/build/scx/scx_rusty_main.bpf.o" ]]; then
+            log "Building local scx artifacts"
+            make -C "$ROOT_DIR" corpus-build-scx >/dev/null
+        fi
+        require_local_path "$ROOT_DIR/runner/repos/scx/target/release/scx_rusty" "scx scheduler binary"
+        require_local_path "$ROOT_DIR/corpus/build/scx/scx_rusty_main.bpf.o" "scx scheduler object"
+        file "$ROOT_DIR/runner/repos/scx/target/release/scx_rusty" | grep -F "x86-64" >/dev/null \
+            || die "local scx_rusty is not an x86_64 binary: $ROOT_DIR/runner/repos/scx/target/release/scx_rusty"
+    fi
+}
+
 stage_runtime_libs() {
     local binary="$1"
     local dest_dir="$2"
@@ -791,15 +891,45 @@ done
     exit 1
 }
 
+script_dir="$(cd "$(dirname "$script_path")" && pwd)"
+bundle_lib_path="$bundle_root/lib"
+case_lib_dir="$script_dir/../lib"
+if [[ -d "$case_lib_dir" ]]; then
+    bundle_lib_path="$case_lib_dir:$bundle_lib_path"
+fi
+
 exec "$bundle_root/lib/ld-linux-x86-64.so.2" \
-    --library-path "$bundle_root/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+    --library-path "$bundle_lib_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
     "${script_path}.bin" "$@"
 EOF
     chmod +x "$wrapper_path"
 }
 
+wrap_bundled_x86_binary_if_present() {
+    local source_path="$1"
+    local bundled_path="$2"
+    local description="$3"
+
+    [[ -e "$source_path" ]] || return 0
+    [[ -x "$source_path" ]] || die "${description} exists but is not executable: ${source_path}"
+    file "$source_path" | grep -F "x86-64" >/dev/null \
+        || die "${description} is not an x86_64 binary: ${source_path}"
+
+    mkdir -p "$(dirname "$bundled_path")"
+    cp "$source_path" "${bundled_path}.bin"
+    stage_runtime_libs "$source_path" "$BENCHMARK_BUNDLE_DIR/lib"
+    install_portable_runtime_wrapper "$bundled_path"
+}
+
 ensure_benchmark_bundle() {
+    local bench_mode
+    bench_mode="$(normalize_benchmark_mode)"
+
     log "Preparing local x86 benchmark bundle"
+    validate_benchmark_mode
+    if [[ "$bench_mode" == "e2e" ]]; then
+        validate_e2e_cases
+    fi
     ensure_local_runner
     ensure_local_daemon
     ensure_local_kinsn_modules
@@ -813,6 +943,9 @@ ensure_benchmark_bundle() {
     require_local_path "$ROOT_DIR/runner/scripts/x86_remote_benchmark.py" "x86 remote benchmark runner"
     require_local_path "$SMOKE_CORPUS_OBJECT" "daemon smoke object"
     require_local_path "$X86_KINSN_LOAD_SCRIPT" "kinsn module loader"
+    if [[ "$bench_mode" == "e2e" ]]; then
+        ensure_local_e2e_assets
+    fi
 
     rm -rf "$BENCHMARK_BUNDLE_DIR"
     mkdir -p \
@@ -826,6 +959,14 @@ ensure_benchmark_bundle() {
         "$BENCHMARK_BUNDLE_DIR/micro/config" \
         "$BENCHMARK_BUNDLE_DIR/corpus/build/katran" \
         "$BENCHMARK_BUNDLE_DIR/module/x86"
+    if [[ "$bench_mode" == "e2e" ]]; then
+        mkdir -p \
+            "$BENCHMARK_BUNDLE_DIR/e2e" \
+            "$BENCHMARK_BUNDLE_DIR/corpus/build" \
+            "$BENCHMARK_BUNDLE_DIR/corpus/config" \
+            "$BENCHMARK_BUNDLE_DIR/corpus/inputs" \
+            "$BENCHMARK_BUNDLE_DIR/runner/repos/scx/target/release"
+    fi
 
     cp "$X86_RUNNER" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec.bin"
     cp "$X86_DAEMON" "$BENCHMARK_BUNDLE_DIR/daemon/target/release/bpfrejit-daemon.bin"
@@ -847,6 +988,48 @@ ensure_benchmark_bundle() {
     cp "$X86_KINSN_LOAD_SCRIPT" "$BENCHMARK_BUNDLE_DIR/module/load_all.sh"
     cp "$X86_KINSN_MODULE_DIR"/*.ko "$BENCHMARK_BUNDLE_DIR/module/x86/"
 
+    if [[ "$bench_mode" == "e2e" ]]; then
+        cp -a "$ROOT_DIR/e2e/." "$BENCHMARK_BUNDLE_DIR/e2e/"
+        rm -rf "$BENCHMARK_BUNDLE_DIR/e2e/results"
+
+        cp "$ROOT_DIR/corpus/config/benchmark_config.yaml" \
+            "$BENCHMARK_BUNDLE_DIR/corpus/config/"
+        cp "$ROOT_DIR/corpus/inputs/katran_vip_packet_64.bin" \
+            "$BENCHMARK_BUNDLE_DIR/corpus/inputs/"
+
+        for corpus_family in katran scx tracee tetragon; do
+            if [[ -d "$ROOT_DIR/corpus/build/$corpus_family" ]]; then
+                mkdir -p "$BENCHMARK_BUNDLE_DIR/corpus/build/$corpus_family"
+                cp -a "$ROOT_DIR/corpus/build/$corpus_family/." \
+                    "$BENCHMARK_BUNDLE_DIR/corpus/build/$corpus_family/"
+            fi
+        done
+
+        mkdir -p "$BENCHMARK_BUNDLE_DIR/runner/repos/scx"
+        if e2e_case_selected scx; then
+            wrap_bundled_x86_binary_if_present \
+                "$ROOT_DIR/runner/repos/scx/target/release/scx_rusty" \
+                "$BENCHMARK_BUNDLE_DIR/runner/repos/scx/target/release/scx_rusty" \
+                "scx scheduler binary"
+        fi
+        wrap_bundled_x86_binary_if_present \
+            "$ROOT_DIR/e2e/cases/tracee/bin/tracee" \
+            "$BENCHMARK_BUNDLE_DIR/e2e/cases/tracee/bin/tracee" \
+            "Tracee binary"
+        wrap_bundled_x86_binary_if_present \
+            "$ROOT_DIR/e2e/cases/tetragon/bin/tetragon" \
+            "$BENCHMARK_BUNDLE_DIR/e2e/cases/tetragon/bin/tetragon" \
+            "Tetragon binary"
+        wrap_bundled_x86_binary_if_present \
+            "$ROOT_DIR/e2e/cases/tetragon/bin/tetra" \
+            "$BENCHMARK_BUNDLE_DIR/e2e/cases/tetragon/bin/tetra" \
+            "tetra CLI"
+        wrap_bundled_x86_binary_if_present \
+            "$ROOT_DIR/e2e/cases/katran/bin/katran_server_grpc" \
+            "$BENCHMARK_BUNDLE_DIR/e2e/cases/katran/bin/katran_server_grpc" \
+            "Katran gRPC server"
+    fi
+
     tar -C "$BENCHMARK_BUNDLE_DIR" -czf "$BENCHMARK_BUNDLE_TAR" .
 }
 
@@ -854,11 +1037,17 @@ benchmark_instance() {
     local ip="${1:-${STATE_INSTANCE_IP:-}}"
     [[ -n "$ip" ]] || die "benchmark requires an instance IP"
 
+    validate_benchmark_mode
+    if [[ "$(normalize_benchmark_mode)" == "e2e" ]]; then
+        validate_e2e_cases
+    fi
     load_state
     ensure_benchmark_bundle
     wait_for_ssh "$ip"
+    ensure_remote_runtime_prereqs "$ip"
 
-    local stamp local_bundle_dir local_archive
+    local stamp local_bundle_dir local_archive bench_mode
+    bench_mode="$(normalize_benchmark_mode)"
     stamp="$(date -u +%Y%m%d_%H%M%S)"
     local_bundle_dir="$RESULTS_DIR/benchmark_${stamp}"
     local_archive="$RESULTS_DIR/benchmark_${stamp}.tar.gz"
@@ -872,11 +1061,12 @@ mkdir -p "$root/results"
 EOF
     scp_to "$ip" "$BENCHMARK_BUNDLE_TAR" "$AWS_X86_REMOTE_STAGE_DIR/"
 
-    log "Running full x86 benchmark suite on ${ip}"
+    log "Running ${bench_mode} x86 benchmark suite on ${ip}"
     ssh_bash "$ip" "$AWS_X86_REMOTE_STAGE_DIR" \
         "$AWS_X86_BENCH_ITERATIONS" "$AWS_X86_BENCH_WARMUPS" "$AWS_X86_BENCH_REPEAT" \
         "$AWS_X86_BENCH_CPU" "$AWS_X86_REMOTE_RESULT_JSON" "$STATE_INSTANCE_ID" \
-        "$AWS_X86_INSTANCE_TYPE" "$AWS_X86_PROFILE" "$(resolve_region)" <<'EOF'
+        "$AWS_X86_INSTANCE_TYPE" "$AWS_X86_PROFILE" "$(resolve_region)" \
+        "$bench_mode" "$AWS_X86_E2E_CASES" "$AWS_X86_E2E_SMOKE" <<'EOF'
 set -euo pipefail
 root="$1"
 iterations="$2"
@@ -888,6 +1078,9 @@ instance_id="$7"
 instance_type="$8"
 aws_profile="$9"
 aws_region="${10}"
+bench_mode="${11}"
+e2e_cases="${12}"
+e2e_smoke="${13}"
 results_dir="$root/results"
 
 cd "$root"
@@ -902,6 +1095,7 @@ sudo -n env \
     PYTHONPATH="$root" \
     python3.11 "$root/runner/scripts/x86_remote_benchmark.py" \
         --output "$results_dir/$result_json" \
+        --mode "$bench_mode" \
         --iterations "$iterations" \
         --warmups "$warmups" \
         --repeat "$repeat" \
@@ -909,7 +1103,9 @@ sudo -n env \
         --instance-id "$instance_id" \
         --instance-type "$instance_type" \
         --aws-profile "$aws_profile" \
-        --aws-region "$aws_region"
+        --aws-region "$aws_region" \
+        --e2e-cases "$e2e_cases" \
+        --e2e-smoke "$e2e_smoke"
 
 sudo -n chown -R "$(id -un):$(id -gn)" "$results_dir"
 

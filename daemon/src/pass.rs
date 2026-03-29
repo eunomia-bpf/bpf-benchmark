@@ -322,6 +322,8 @@ pub struct PassVerifyResult {
     pub status: PassVerifyStatus,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
+    #[serde(skip)]
+    pub verifier_states: Arc<[VerifierInsn]>,
 }
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
@@ -341,6 +343,7 @@ impl PassVerifyResult {
         Self {
             status: PassVerifyStatus::NotNeeded,
             error_message: None,
+            verifier_states: Arc::from([]),
         }
     }
 
@@ -348,13 +351,24 @@ impl PassVerifyResult {
         Self {
             status: PassVerifyStatus::Skipped,
             error_message: None,
+            verifier_states: Arc::from([]),
         }
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
     pub fn accepted() -> Self {
         Self {
             status: PassVerifyStatus::Accepted,
             error_message: None,
+            verifier_states: Arc::from([]),
+        }
+    }
+
+    pub fn accepted_with_verifier_states(states: Vec<VerifierInsn>) -> Self {
+        Self {
+            status: PassVerifyStatus::Accepted,
+            error_message: None,
+            verifier_states: Arc::from(states),
         }
     }
 
@@ -362,6 +376,7 @@ impl PassVerifyResult {
         Self {
             status: PassVerifyStatus::Rejected,
             error_message: Some(error_message.into()),
+            verifier_states: Arc::from([]),
         }
     }
 
@@ -912,11 +927,12 @@ impl PassManager {
             debug_traces.push(PassDebugTrace {
                 pass_name: result.pass_name.clone(),
                 changed: keep_change,
-                verify,
+                verify: verify.clone(),
                 bytecode_before: Some(dump_bytecode_compact(&before_insns)),
                 bytecode_after: Some(tentative_after),
             });
             if keep_change {
+                program.verifier_states = verify.verifier_states.clone();
                 cache.invalidate_all();
                 program.sync_annotations();
             } else {

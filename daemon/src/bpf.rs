@@ -1392,6 +1392,32 @@ pub struct RejitResult {
 #[derive(Debug)]
 pub struct ProgLoadVerifyResult {
     pub verifier_log: String,
+    pub log_true_size: u32,
+}
+
+#[derive(Debug)]
+struct ProgLoadVerifyFailure {
+    os_err: std::io::Error,
+    verifier_log: String,
+    log_true_size: u32,
+}
+
+impl ProgLoadVerifyFailure {
+    fn is_enospc(&self) -> bool {
+        self.os_err.raw_os_error() == Some(libc::ENOSPC)
+    }
+
+    fn into_anyhow(self) -> anyhow::Error {
+        if self.verifier_log.is_empty() {
+            anyhow::anyhow!("BPF_PROG_LOAD: {}", self.os_err)
+        } else {
+            anyhow::anyhow!(
+                "BPF_PROG_LOAD: {}\nverifier log:\n{}",
+                self.os_err,
+                self.verifier_log
+            )
+        }
+    }
 }
 
 fn extract_log_string(log_buf: &[u8]) -> String {
@@ -1408,7 +1434,7 @@ fn run_prog_load_once(
     fd_array: &[RawFd],
     log_level: u32,
     log_buf: Option<&mut [u8]>,
-) -> Result<ProgLoadVerifyResult> {
+) -> std::result::Result<ProgLoadVerifyResult, ProgLoadVerifyFailure> {
     let mut attr: AttrProgLoad = zeroed_attr();
     let mut log_buf = log_buf;
     let license = CString::new(meta.license()).expect("static license strings never contain NUL");
@@ -1437,16 +1463,18 @@ fn run_prog_load_once(
     };
 
     if ret < 0 {
-        let os_err = std::io::Error::last_os_error();
-        if verifier_log.is_empty() {
-            bail!("BPF_PROG_LOAD: {}", os_err);
-        } else {
-            bail!("BPF_PROG_LOAD: {}\nverifier log:\n{}", os_err, verifier_log);
-        }
+        return Err(ProgLoadVerifyFailure {
+            os_err: std::io::Error::last_os_error(),
+            verifier_log,
+            log_true_size: attr.log_true_size,
+        });
     }
 
     let _loaded_prog = unsafe { OwnedFd::from_raw_fd(ret as RawFd) };
-    Ok(ProgLoadVerifyResult { verifier_log })
+    Ok(ProgLoadVerifyResult {
+        verifier_log,
+        log_true_size: attr.log_true_size,
+    })
 }
 
 fn populate_prog_load_attr(
@@ -1500,31 +1528,49 @@ pub fn bpf_prog_load_verify(
     insns: &[BpfInsn],
     fd_array: &[RawFd],
 ) -> Result<ProgLoadVerifyResult> {
-    const LOG_BUF_SIZE: usize = 16 * 1024 * 1024; // 16 MB
+    const INITIAL_LOG_BUF_SIZE: usize = 16 * 1024 * 1024; // 16 MB
+    const MAX_LOG_BUF_SIZE: usize = 64 * 1024 * 1024; // 64 MB
 
-    match run_prog_load_once(meta, insns, fd_array, 0, None) {
-        Ok(_) => Ok(ProgLoadVerifyResult {
-            verifier_log: String::new(),
-        }),
-        Err(first_err) => {
-            let mut log_buf = vec![0u8; LOG_BUF_SIZE];
-            match run_prog_load_once(meta, insns, fd_array, 2, Some(&mut log_buf)) {
-                Ok(result) => Ok(result),
-                Err(second_err) => {
-                    let first_msg = format!("{first_err:#}");
-                    let second_msg = format!("{second_err:#}");
-
-                    if second_msg.contains("No space left on device") {
-                        bail!(
-                            "{second_msg}\ninitial BPF_PROG_LOAD failure without verifier log:\n{first_msg}"
-                        );
+    let mut log_buf_size = INITIAL_LOG_BUF_SIZE;
+    loop {
+        let mut log_buf = vec![0u8; log_buf_size];
+        match run_prog_load_once(meta, insns, fd_array, 2, Some(&mut log_buf)) {
+            Ok(result) => return Ok(result),
+            Err(err) => {
+                if err.is_enospc() {
+                    if let Some(next_size) =
+                        next_log_buf_size(log_buf_size, err.log_true_size, MAX_LOG_BUF_SIZE)
+                    {
+                        log_buf_size = next_size;
+                        continue;
                     }
 
-                    Err(second_err)
+                    if run_prog_load_once(meta, insns, fd_array, 0, None).is_ok() {
+                        return Ok(ProgLoadVerifyResult {
+                            verifier_log: String::new(),
+                            log_true_size: err.log_true_size,
+                        });
+                    }
                 }
+
+                return Err(err.into_anyhow());
             }
         }
     }
+}
+
+fn next_log_buf_size(current: usize, log_true_size: u32, max: usize) -> Option<usize> {
+    if current >= max {
+        return None;
+    }
+
+    let hinted = usize::try_from(log_true_size)
+        .ok()
+        .and_then(|size| size.checked_add(1))
+        .unwrap_or(current);
+    let doubled = current.saturating_mul(2);
+    let next = hinted.max(doubled).min(max);
+    (next > current).then_some(next)
 }
 
 fn run_rejit_once(

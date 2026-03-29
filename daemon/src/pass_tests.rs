@@ -1111,6 +1111,40 @@ fn test_verify_callback_accepts_changed_pass() {
 }
 
 #[test]
+fn test_verify_callback_refreshes_program_verifier_states_on_accept() {
+    let mut pm = PassManager::new();
+    pm.add_pass(AppendNopPass);
+
+    let mut prog = make_program(vec![exit_insn()]);
+    prog.set_verifier_log(
+        r#"
+0: R0=0 R10=fp0
+"#,
+    );
+    let ctx = ctx_for_pass_manager(&pm);
+    let result = pm
+        .run_with_verifier(&mut prog, &ctx, &mut |_, _| {
+            Ok(PassVerifyResult::accepted_with_verifier_states(
+                crate::verifier_log::parse_verifier_log(
+                    r#"
+0: R0=0 R10=fp0
+1: (95) exit ; R0=1
+"#,
+                ),
+            ))
+        })
+        .unwrap();
+
+    assert!(result.program_changed);
+    assert_eq!(prog.verifier_states.len(), 2);
+    assert_eq!(prog.verifier_states[1].pc, 1);
+    assert_eq!(
+        prog.verifier_states[1].regs.get(&0).unwrap().exact_u64(),
+        Some(1)
+    );
+}
+
+#[test]
 fn test_verify_rejection_rolls_back_and_continues_pipeline() {
     let mut pm = PassManager::new();
     pm.add_pass(RewriteMovImmPass { new_imm: 99 });

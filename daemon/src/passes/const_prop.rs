@@ -6,6 +6,7 @@ use std::collections::{BTreeMap, HashSet};
 use crate::analysis::CFGAnalysis;
 use crate::insn::*;
 use crate::pass::*;
+use crate::verifier_log::{VerifierInsn, VerifierInsnKind};
 
 const BPF_ADD: u8 = 0x00;
 const BPF_SUB: u8 = 0x10;
@@ -18,7 +19,158 @@ const BPF_NEG: u8 = 0x80;
 
 const REG_COUNT: usize = 11;
 
-type RegConstState = [Option<u64>; REG_COUNT];
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+struct RegConstFact {
+    exact64: Option<u64>,
+    exact32: Option<u32>,
+}
+
+impl RegConstFact {
+    const fn unknown() -> Self {
+        Self {
+            exact64: None,
+            exact32: None,
+        }
+    }
+}
+
+type RegConstState = [RegConstFact; REG_COUNT];
+
+#[derive(Default)]
+struct VerifierExactConstOracle {
+    facts: BTreeMap<(usize, u8), RegConstFact>,
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+struct OracleExactAccumulator {
+    saw_observation: bool,
+    exact64: Consensus<u64>,
+    exact32: Consensus<u32>,
+}
+
+#[derive(Clone, Copy, Debug)]
+enum Consensus<T> {
+    Unseen,
+    Exact(T),
+    Conflict,
+}
+
+impl<T> Default for Consensus<T> {
+    fn default() -> Self {
+        Self::Unseen
+    }
+}
+
+impl<T: Copy + Eq> Consensus<T> {
+    fn observe(&mut self, value: T) {
+        *self = match *self {
+            Self::Unseen => Self::Exact(value),
+            Self::Exact(current) if current == value => Self::Exact(current),
+            Self::Exact(_) | Self::Conflict => Self::Conflict,
+        };
+    }
+
+    fn invalidate(&mut self) {
+        *self = Self::Conflict;
+    }
+
+    fn into_option(self) -> Option<T> {
+        match self {
+            Self::Exact(value) => Some(value),
+            Self::Unseen | Self::Conflict => None,
+        }
+    }
+}
+
+impl OracleExactAccumulator {
+    fn observe(&mut self, reg: &crate::verifier_log::RegState) {
+        self.saw_observation = true;
+
+        if reg.reg_type != "scalar" {
+            self.exact64.invalidate();
+            self.exact32.invalidate();
+            return;
+        }
+
+        match (reg.exact_u64(), reg.exact_u32()) {
+            (Some(exact64), Some(exact32)) => {
+                self.exact64.observe(exact64);
+                self.exact32.observe(exact32);
+            }
+            (Some(_), None) => {
+                self.exact64.invalidate();
+                self.exact32.invalidate();
+            }
+            (None, Some(exact32)) => {
+                self.exact64.invalidate();
+                self.exact32.observe(exact32);
+            }
+            (None, None) => {
+                self.exact64.invalidate();
+                self.exact32.invalidate();
+            }
+        }
+    }
+
+    fn into_fact(self) -> Option<RegConstFact> {
+        if !self.saw_observation {
+            return None;
+        }
+
+        let fact = RegConstFact {
+            exact64: self.exact64.into_option(),
+            exact32: self.exact32.into_option(),
+        };
+        (fact.exact64.is_some() || fact.exact32.is_some()).then_some(fact)
+    }
+}
+
+impl VerifierExactConstOracle {
+    fn from_states(states: &[VerifierInsn]) -> Self {
+        let mut accumulators: BTreeMap<(usize, u8), OracleExactAccumulator> = BTreeMap::new();
+
+        for state in states {
+            if state.kind != VerifierInsnKind::InsnDeltaState {
+                continue;
+            }
+
+            for (&regno, reg_state) in &state.regs {
+                accumulators
+                    .entry((state.pc, regno))
+                    .or_default()
+                    .observe(reg_state);
+            }
+        }
+
+        let facts = accumulators
+            .into_iter()
+            .filter_map(|(key, acc)| acc.into_fact().map(|fact| (key, fact)))
+            .collect();
+
+        Self { facts }
+    }
+
+    fn fact(&self, pc: usize, reg: u8) -> Option<RegConstFact> {
+        self.facts.get(&(pc, reg)).copied()
+    }
+
+    fn exact_for_instruction(&self, pc: usize, reg: u8, is_32: bool) -> Option<u64> {
+        let fact = self.fact(pc, reg)?;
+        if is_32 {
+            fact.exact32.map(u64::from)
+        } else {
+            fact.exact64
+        }
+    }
+
+    fn apply_post_state(&self, pc: usize, state: &mut RegConstState) {
+        for reg in 0..REG_COUNT {
+            if let Some(fact) = self.fact(pc, reg as u8) {
+                set_reg_fact(state, reg as u8, fact);
+            }
+        }
+    }
+}
 
 /// Fold exact register constants into MOV32/MOV64/LD_IMM64/JA/NOP.
 pub struct ConstPropPass;
@@ -50,7 +202,8 @@ impl BpfPass for ConstPropPass {
             });
         }
 
-        let block_in = solve_block_entry_states(program, &cfg);
+        let oracle = VerifierExactConstOracle::from_states(program.verifier_states.as_ref());
+        let block_in = solve_block_entry_states(program, &cfg, &oracle);
         let mut replacements = BTreeMap::new();
         let protected_prefix_end = super::utils::tail_call_protected_prefix_end(&program.insns);
         let mut nop_pcs = HashSet::new();
@@ -61,6 +214,7 @@ impl BpfPass for ConstPropPass {
                 block.start,
                 block.end,
                 block_in[block_idx],
+                &oracle,
                 Some(&mut replacements),
             );
         }
@@ -153,6 +307,7 @@ impl BpfPass for ConstPropPass {
 fn solve_block_entry_states(
     program: &BpfProgram,
     cfg: &crate::analysis::CFGResult,
+    oracle: &VerifierExactConstOracle,
 ) -> Vec<RegConstState> {
     let mut block_in = vec![unknown_state(); cfg.blocks.len()];
     let mut block_out = vec![unknown_state(); cfg.blocks.len()];
@@ -163,7 +318,14 @@ fn solve_block_entry_states(
 
         for (block_idx, block) in cfg.blocks.iter().enumerate() {
             let in_state = merge_predecessor_states(&block.preds, &block_out);
-            let out_state = simulate_block(&program.insns, block.start, block.end, in_state, None);
+            let out_state = simulate_block(
+                &program.insns,
+                block.start,
+                block.end,
+                in_state,
+                oracle,
+                None,
+            );
 
             if block_in[block_idx] != in_state || block_out[block_idx] != out_state {
                 block_in[block_idx] = in_state;
@@ -193,11 +355,12 @@ fn simulate_block(
     start: usize,
     end: usize,
     mut state: RegConstState,
+    oracle: &VerifierExactConstOracle,
     mut replacements: Option<&mut BTreeMap<usize, Vec<BpfInsn>>>,
 ) -> RegConstState {
     let mut pc = start;
     while pc < end {
-        let (next_state, replacement) = analyze_instruction(insns, pc, &state);
+        let (next_state, replacement) = analyze_instruction(insns, pc, &state, oracle);
         if let (Some(map), Some(replacement)) = (replacements.as_deref_mut(), replacement) {
             map.insert(pc, replacement);
         }
@@ -211,61 +374,70 @@ fn analyze_instruction(
     insns: &[BpfInsn],
     pc: usize,
     state: &RegConstState,
+    oracle: &VerifierExactConstOracle,
 ) -> (RegConstState, Option<Vec<BpfInsn>>) {
     let insn = &insns[pc];
     let mut next = *state;
-
-    match insn.class() {
+    let replacement = match insn.class() {
         BPF_LD => {
             if insn.is_ldimm64() {
                 if insn.src_reg() == 0 {
                     let value = decode_ldimm64(insns, pc);
-                    set_reg_const(&mut next, insn.dst_reg(), Some(value));
+                    set_reg_exact64(&mut next, insn.dst_reg(), value);
                 } else {
                     /* Pseudo-imm forms like MAP_FD/MAP_VALUE carry verifier-visible
                      * type via src_reg. Treat them as non-foldable so const_prop
                      * never re-emits them as plain scalar LD_IMM64.
                      */
-                    set_reg_const(&mut next, insn.dst_reg(), None);
+                    set_reg_unknown(&mut next, insn.dst_reg());
                 }
             } else {
-                set_reg_const(&mut next, insn.dst_reg(), None);
+                set_reg_unknown(&mut next, insn.dst_reg());
             }
-            (next, None)
+            None
         }
         BPF_LDX => {
-            set_reg_const(&mut next, insn.dst_reg(), None);
-            (next, None)
+            set_reg_unknown(&mut next, insn.dst_reg());
+            None
         }
         BPF_ALU | BPF_ALU64 => {
-            let replacement = fold_alu_instruction(insns, pc, state);
+            let replacement = fold_alu_instruction(insns, pc, state, oracle);
             let result = evaluate_alu_result(insn, state);
-            set_reg_const(&mut next, insn.dst_reg(), result);
-            (next, replacement)
+            match result {
+                Some(value) => set_reg_exact64(&mut next, insn.dst_reg(), value),
+                None => set_reg_unknown(&mut next, insn.dst_reg()),
+            }
+            replacement
         }
         BPF_JMP | BPF_JMP32 => {
             if insn.is_call() {
                 for reg in 0..=5 {
-                    next[reg] = None;
+                    set_reg_unknown(&mut next, reg as u8);
                 }
-                (next, None)
+                None
             } else if insn.is_cond_jmp() {
-                (next, fold_jump_instruction(insns, pc, state))
+                fold_jump_instruction(insns, pc, state)
             } else {
-                (next, None)
+                None
             }
         }
-        _ => (next, None),
-    }
+        _ => None,
+    };
+
+    oracle.apply_post_state(pc, &mut next);
+    (next, replacement)
 }
 
 fn fold_alu_instruction(
     insns: &[BpfInsn],
     pc: usize,
     state: &RegConstState,
+    oracle: &VerifierExactConstOracle,
 ) -> Option<Vec<BpfInsn>> {
     let insn = &insns[pc];
-    let result = evaluate_alu_result(insn, state)?;
+    let result = oracle
+        .exact_for_instruction(pc, insn.dst_reg(), insn.class() == BPF_ALU)
+        .or_else(|| evaluate_alu_result(insn, state))?;
 
     let op = bpf_op(insn.code);
     let candidate = match op {
@@ -297,20 +469,20 @@ fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {
 
     if op == BPF_MOV {
         return if bpf_src(insn.code) == BPF_X {
-            reg_const(state, insn.src_reg()).map(|value| normalize_alu_result(is_32, value))
+            reg_const(state, insn.src_reg(), is_32).map(|value| normalize_alu_result(is_32, value))
         } else {
             Some(alu_imm_operand(insn))
         };
     }
 
-    let dst = reg_const(state, insn.dst_reg())?;
+    let dst = reg_const(state, insn.dst_reg(), is_32)?;
 
     if op == BPF_NEG {
         return Some(eval_unary_alu(op, dst, is_32)?);
     }
 
     let rhs = if bpf_src(insn.code) == BPF_X {
-        reg_const(state, insn.src_reg())?
+        reg_const(state, insn.src_reg(), is_32)?
     } else {
         alu_imm_operand(insn)
     };
@@ -320,9 +492,9 @@ fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {
 
 fn evaluate_jump_condition(insn: &BpfInsn, state: &RegConstState) -> Option<bool> {
     let is_32 = insn.class() == BPF_JMP32;
-    let lhs = reg_const(state, insn.dst_reg())?;
+    let lhs = reg_const(state, insn.dst_reg(), is_32)?;
     let rhs = if bpf_src(insn.code) == BPF_X {
-        reg_const(state, insn.src_reg())?
+        reg_const(state, insn.src_reg(), is_32)?
     } else {
         jump_imm_operand(insn)
     };
@@ -460,29 +632,59 @@ fn jump_imm_operand(insn: &BpfInsn) -> u64 {
     }
 }
 
-fn reg_const(state: &RegConstState, reg: u8) -> Option<u64> {
-    state.get(reg as usize).copied().flatten()
+fn reg_const(state: &RegConstState, reg: u8, is_32: bool) -> Option<u64> {
+    let fact = *state.get(reg as usize)?;
+    if is_32 {
+        fact.exact32.map(u64::from)
+    } else {
+        fact.exact64
+    }
 }
 
-fn set_reg_const(state: &mut RegConstState, reg: u8, value: Option<u64>) {
+fn set_reg_fact(state: &mut RegConstState, reg: u8, fact: RegConstFact) {
     if let Some(slot) = state.get_mut(reg as usize) {
-        *slot = value;
+        *slot = fact;
+    }
+}
+
+fn set_reg_exact64(state: &mut RegConstState, reg: u8, value: u64) {
+    set_reg_fact(
+        state,
+        reg,
+        RegConstFact {
+            exact64: Some(value),
+            exact32: Some(value as u32),
+        },
+    );
+}
+
+fn set_reg_unknown(state: &mut RegConstState, reg: u8) {
+    set_reg_fact(state, reg, RegConstFact::unknown());
+}
+
+fn merge_reg_fact(lhs: RegConstFact, rhs: RegConstFact) -> RegConstFact {
+    RegConstFact {
+        exact64: match (lhs.exact64, rhs.exact64) {
+            (Some(left), Some(right)) if left == right => Some(left),
+            _ => None,
+        },
+        exact32: match (lhs.exact32, rhs.exact32) {
+            (Some(left), Some(right)) if left == right => Some(left),
+            _ => None,
+        },
     }
 }
 
 fn meet_states(lhs: &RegConstState, rhs: &RegConstState) -> RegConstState {
     let mut merged = unknown_state();
     for reg in 0..REG_COUNT {
-        merged[reg] = match (lhs[reg], rhs[reg]) {
-            (Some(left), Some(right)) if left == right => Some(left),
-            _ => None,
-        };
+        merged[reg] = merge_reg_fact(lhs[reg], rhs[reg]);
     }
     merged
 }
 
 fn unknown_state() -> RegConstState {
-    [None; REG_COUNT]
+    [RegConstFact::unknown(); REG_COUNT]
 }
 
 fn emit_constant_load(dst_reg: u8, value: u64, is_32: bool) -> Vec<BpfInsn> {
@@ -833,6 +1035,40 @@ mod tests {
                 BpfInsn::mov64_imm(3, 9),
                 BpfInsn::nop(),
                 BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
+    fn const_prop_uses_verifier_exact_constants_after_helper_calls() {
+        let mut program = BpfProgram::new(vec![
+            call_helper(7),
+            jeq_imm(0, 1, 1),
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+        program.set_verifier_log(
+            r#"
+0: R1=ctx() R10=fp0
+0: (85) call bpf_get_prandom_u32#7   ; R0=1
+1: (15) if r0 == 0x1 goto pc+1       ; R0=1
+2: (b7) r0 = 0                       ; R0=0
+3: (b7) r0 = 1                       ; R0=1
+"#,
+        );
+
+        let result = run_const_prop_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![
+                call_helper(7),
+                BpfInsn::ja(0),
+                BpfInsn::mov64_imm(0, 1),
                 exit_insn(),
             ]
         );

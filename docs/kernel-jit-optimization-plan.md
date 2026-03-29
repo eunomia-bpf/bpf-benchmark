@@ -612,223 +612,170 @@ make clean
 | # | 任务 | 状态 | 关键数据 / 文档 |
 |---|------|:---:|------|
 | ~~1-303~~ | v1 历史任务 | 见旧档 | `docs/kernel-jit-optimization-plan-record-old.md` |
-| 304 | **⚠️ 重大架构探索：BpfReJIT v2 — Verifier-guarded post-load transformation framework（2026-03-21）** | 🔄 | **架构方向讨论**，考虑从当前 native-level rewrite (~6400 LOC kernel) 转向通用 post-load program transformation 框架。核心思路：不在 native code 层做优化，改为在 BPF bytecode 层做重写 + 让 kernel verifier 验证；新优化通过 kernel module 部署；privileged daemon 自动发现/分析/重写 live BPF 程序，对应用完全透明。**最终收敛方案**见 #304a-#304d。**10 份 codex 调研报告**：(A) `kinsn_feasibility_research_20260320.md`、(B) `bpf_program_replacement_research_20260320.md`、(C) `verifier_acceptance_research_20260320.md`、(D) `architecture_comparison_osdi_20260320.md`、(E) `kinsn_minimal_implementation_20260321.md`、(F) `userspace_framework_design_research_20260321.md`、(G) `bpf_prog_rewrite_kernel_research_20260321.md`、(H) `transparent_replacement_feasibility_20260321.md`、(I) `inline_kfunc_feasibility_20260321.md`。 |
-| 304a | **收敛方案：两套正交接口（2026-03-21）** | 📝 | **(接口 A) 程序变换 — GET + REJIT**：`BPF_PROG_GET_ORIGINAL` 拿原始 bytecode + `BPF_PROG_REJIT` 对同一 `struct bpf_prog` 做 bytecode patch → re-verify → re-JIT → image swap（复用现有 `jit_directives.c` staged commit/rollback/trampoline regen）。零 attach 变化、零运行时开销。**(接口 B) ISA 扩展 — Inline Kfunc**：新"指令"注册为 kfunc（复用 `register_btf_kfunc_id_set()` + 新 `KF_INLINE_EMIT` flag）；verifier 零改动（走已有 `check_kfunc_call()`）；interpreter 零改动（调真实内核函数）；JIT CALL case 检测 `KF_INLINE_EMIT` → 调 module 的 emit 回调内联展开为自定义 native 序列。优雅降级：module 未加载时 emit 普通 CALL。已有先例：`fixup_kfunc_call()` 中 `bpf_cast_to_kern_ctx`/`bpf_rdonly_cast` 等已被完全替换为 plain BPF 指令。**kernel 总改动估计 ~500-800 LOC**（GET_ORIGINAL ~70 + REJIT ~580 + Inline Kfunc ~150-200）。 |
-| 304b | **关键发现汇总（2026-03-21）** | 📝 | **(1)** `struct bpf_prog` 不保留原始 bytecode — `insnsi` 被 verifier/fixup 原地改写，需在 load 时新增保存 pre-fixup baseline 到 `bpf_prog_aux`。**(2)** BPF opcode `BPF_ALU64` 的 `0xe0`/`0xf0` 是仅有干净空位，但 Inline Kfunc 不需要新 opcode。**(3)** xlated bytecode 不可逆（`convert_ctx_accesses()` + `do_misc_fixups()`），不能直接重新 PROG_LOAD。**(4)** 现有 `jit_directives.c` image swap 机制可复用。**(5)** re-verify 开销 ~ms 级（vs re-JIT ~30μs），但只发生一次。**(6)** Inline Kfunc 优于 kinsn — 零 verifier/interpreter 改动，复用 kfunc 注册/生命周期/BTF。**(7)** "interpreter 优雅降级"不成立 — kfunc 强制 JIT，降级是 "inline emit 失败 → fallback 普通 kfunc CALL"。**(8)** 常量参数编码（`RORX imm8`）需 v2 增强，v1 先做纯寄存器版。 |
-| 304c | **论文定位（2026-03-21）** | 📝 | 与 K2/Merlin/EPSO **不同赛道**（runtime post-load vs compile-time pre-load）。类比：K2 = GCC -O3，我们 = JVM HotSpot。两者正交可叠加。**新定位**："Verifier-guarded, modular, post-load program transformation infrastructure for eBPF — 给 eBPF 加上类似 JVM 分层编译的能力，在 OS 内核级别，且安全模型更强（kernel verifier vs JVM bytecode verifier）"。同一框架支持四种用途：**(1)** 性能优化；**(2)** 安全加固；**(3)** 恶意程序在线热修复；**(4)** 运行时可观测。 |
-| 304d | **Daemon 完整工作流（2026-03-21）** | 📝 | `BPF_PROG_GET_NEXT_ID` → `BPF_PROG_GET_ORIGINAL` → 用户态分析+重写（kinsn/kfunc 替换 or 安全加固 or PGO 决策）→ `BPF_PROG_REJIT`（kernel: patch orig bytecode → re-verify → re-JIT → image swap via RCU）。**完全透明**：不需要 .bpf.o，不需要改应用/loader，不需要 detach/reattach，零运行时开销。`freplace` 和 `bpf_link_update` 也可作为备选替换路径（freplace 有 ~3-5ns trampoline 开销，link_update 零开销但覆盖面有限）。 |
-| 304e | **POC 实现（2026-03-21）** | ✅ | **三个 Phase 全部完成。** Phase 1 Inline Kfunc ✅（kernel `a3173b119`）：KF_INLINE_EMIT + x86 JIT dispatch + test module。Phase 2 GET_ORIGINAL ✅（kernel `36e41e7a0`）：保存+导出原始 insns。Phase 3 REJIT ✅：VM 验证 "same prog_fd re-jitted from XDP_PASS to XDP_DROP"。**+200 行 kernel 核心改动**（+297 行 selftest）。Git：`rejit-v2` 分支，v1 保存在 `v1-native-rewrite` 分支。主仓库 commits: `e50365a`（v1 snapshot）、`ba3c76e`（switch to rejit-v2）、`f5eb9f1`（plan doc rewrite）。 |
-| 304f | **⚠️ REJIT 接口设计决策（2026-03-21）** | 📝 | **BPF_PROG_REJIT 接受完整的新 BPF bytecode，不是 patch。** daemon 提交整段新程序 `(prog_fd, new_insns, new_insn_cnt)` → kernel 对新 bytecode 做完整 `bpf_check()` + JIT → 原子替换同一 `struct bpf_prog` 的 image。理由：(1) daemon 有完全灵活性做任意变换；(2) kernel 走标准 verify 路径，零特殊 patch 逻辑；(3) map 引用在新 bytecode 中用 fd/BTF ID，kernel 正常 resolve。**不是 patch format** — 避免 kernel 内部 patch 应用+offset 调整的复杂度。 |
-| 304g | **调研全部完成（2026-03-21）** | ✅ | **(1)** Verifier-fixup 耦合度 → **结论 4C**：xlated 不能直接喂 verifier，需保存原始 bytecode。`vendor/linux-framework/docs/tmp/20260321/verifier_fixup_coupling_analysis_20260321.md`。**(2)** 安全 use case → 推荐"危险 helper 防火墙 + exfil sinkholing"。`docs/tmp/20260321/security_usecase_research_20260321.md`。**(3)** 用户态适配 → scanner matcher 可复用，输出改为 full-program rewrite；新增 `run-rejit` 子命令。`docs/tmp/20260321/userspace_v2_adaptation_research_20260321.md`。**(4)** 综合 related work → `docs/tmp/20260321/comprehensive_related_work_20260321.md`。**(5)** 设计 gap → identity-preserving swap 是核心难点。`docs/tmp/20260321/bpfrejit_v2_design_gaps_20260321.md`。 |
-| **305** | **内核 POC 修复（2026-03-21）** | ✅ | **内核代码 444 行**（vs stock 7.0-rc2），含 selftest 共 974 行。修复内容：(1) 去掉 14 项不必要防御检查；(2) UAPI 增加 `fd_array`/`fd_array_cnt` 支持 maps 和 module kfunc；(3) 去掉等长约束（只 swap JIT image，不拷贝 xlated insns）；(4) per-prog `rejit_mutex` 并发保护；(5) `attach_btf` 透传到 tmp；(6) swap 增加 `used_maps`/`kfunc_tab` 等字段；(7) sleepable 程序支持（`synchronize_rcu_tasks_trace`）。VM 测试通过：same-length PASS + different-length PASS（2→4 insns）+ inline_kfunc PASS。 |
-| **306** | **Runner v1→v2 替换（2026-03-21）** | ✅ | **净删除 1,121 行**（-1320/+199）。8 文件改动，0 errors 0 warnings。删除全部 v1 scanner/policy/directive 代码。新增 `--rejit`/`--rejit-program`，runtime `kernel-rejit`。`recompile.py` 601→20 行。⚠️ 已知问题：same-bytecode 模式读 xlated insns 而非 orig_prog_insns，需后续修正（4C 结论）。 |
-| **307** | **module/x86/ 真实 kinsn 模块（2026-03-21）** | ✅ | 创建 `module/x86/`：3 个模块编译通过零警告。`bpf_rotate.c`→ROL(9B)、`bpf_select.c`→CMOV(10B)、`bpf_extract.c`→BEXTR(12B)。每个含 kfunc fallback + KF_INLINE_EMIT + x86 emit 回调。 |
-| **308** | **Bytecode rewriter 架构设计（2026-03-21）** | ✅ | 6 阶段 pipeline（Parse→Match→Decide→Emit→BranchFixup→Validate）。C++ 实现在 daemon/ 中，复用 70-80% 现有 matcher。变换：WIDE_MEM(N→1)、ROTATE(4→4 kfunc)、SELECT(3→7 kfunc)、EXTRACT(2→5 kfunc)。总估计 2.1-3.2k LoC。报告：`docs/tmp/20260321/rewriter_architecture_design_20260321.md`。 |
-| **309** | **scanner→daemon 重命名 + 死代码清单（2026-03-21）** | ✅ | `git mv scanner daemon`，全部引用更新，编译通过。产出死代码清单：daemon/ C++ 中 v1 policy blob/JIT_RECOMPILE 路径、runner/ 中 directive_blob 路径、corpus/ 中 v1 enumerate 路径。daemon/ C++ 将被 Rust 重写取代。 |
-| **310** | **Runner v1 死代码清理（2026-03-21）** | ✅ | 删除 32 行 v1 残留：`BPF_F_JIT_DIRECTIVES_FD`、`--directive-blob`、`build_sealed_directive_memfd()`、`jit_directives_fd/flags` 结构体字段。5 文件，0 errors 0 warnings。 |
-| **311** | **Daemon Rust POC 实现（2026-03-21）** | ✅ | **1,834 行 Rust，21 tests all pass。** 删除全部 C++ 代码，Rust 重写。6 个模块：bpf.rs（raw syscall wrapper，零 libbpf）、insn.rs（BpfInsn repr(C)）、matcher.rs（WIDE_MEM 2-8 byte LE 检测）、emit.rs（byte-ladder→wide load）、rewriter.rs（site 应用 + addr_map + branch fixup）、main.rs（CLI: enumerate/rewrite/apply/apply-all）。依赖：libc + clap + anyhow。 |
-| **312** | **VM 冒烟测试 + bug 修复（2026-03-21）** | ✅ | **20/20 PASS。** 修复 3 个 bug：(1) BPF_PROG_REJIT cmd 号统一为 39；(2) ksym list_del_rcu 后加 INIT_LIST_HEAD_RCU；(3) daemon orig_prog_len bytes÷8=insns。kinsn 模块加载/卸载成功。 |
-| **313** | **Matcher Variant B 修复（2026-03-21）** | ✅ | 旧 C++ scanner 有 low-first + high-first 两种 variant，Rust daemon 只有 low-first。添加 `match_wide_mem_high_first()`，**27 tests all pass**。 |
-| **314** | **daemon-apply 集成 + --daemon-path（2026-03-21）** | ✅ | micro_exec 新增 `--daemon-path`，fork/exec daemon apply <prog_id>。~50 行改动。driver.py + Makefile 适配。 |
-| **315** | **⚠️ v2 WIDE_MEM 性能结果（2026-03-21）** | ✅ | **14 个 micro benchmark，10 个有 WIDE_MEM site（71%）。** 显著加速：bounds_ladder **2.78x**、load_byte **2.59x**、stride_load_16 **2.46x**、bitfield_extract **1.33x**、load_byte_recompose **1.17x**。Katran e2e：daemon 找到 4 site 但 REJIT 返回 EOPNOTSUPP（func_cnt>0 限制）。Commit `27cbc1b`。 |
-| **316** | **Paper tex v2 更新（2026-03-21）** | ✅ | Abstract 一字不差替换，Title 更新，Introduction/Background 全部重写（v2 三 insights + 三组件），Design/Eval 用 v2 占位符。+463/-866 行。删除全部 v1 内容。新增 7 bib 条目。 |
-| **317** | **corpus/ 死代码清理（2026-03-21）** | ✅ | 净删 ~329 行。删除 `apply_recompile_v5()`、`_apply_one_v5_enumerate()`、`build_kernel_command()` 等 v1 路径。所有 import 验证通过。 |
-| **318** | **driver.py --daemon-path 适配（2026-03-21）** | ✅ | micro/driver.py 新增 `--daemon-path` 参数，Makefile `vm-micro` 自动传 DAEMON_PATH。+10 行。 |
-| **319** | **Makefile cmake→cargo（2026-03-21）** | ✅ | daemon target 从 cmake 改为 cargo build。CLAUDE.md 同步更新。 |
-| **320** | **Commit push（2026-03-21）** | ✅ | 3 commits：`698334f`（主 #305-#311）、`56d6d19`（清理）、`c48cb43`（补全）。kernel submodule `4bcbc8e21`。 |
-| **321** | **Daemon pass 框架设计（2026-03-21）** | ✅ | BpfPass/Analysis/AnalysisCache/PassManager 框架。线性 insn+annotation IR。6 分析 + 6 pass。渐进迁移路径。报告：`docs/tmp/20260321/daemon_pass_framework_design_20260321.md`。 |
-| **322** | **Kernel code review by codex（2026-03-21）** | ✅ | 发现 3 Critical（旧 image UAF、attachment 缓存不同步、KERNEL_BPFPTR 伪装）+ 4 Major。报告：`docs/tmp/20260321/kernel_v2_review_20260321.md`。 |
-| **323** | **ARM64 inline kfunc + kinsn 模块（2026-03-21）** | ✅ | 内核 `bpf.h` +emit_arm64（+12）、`arm64/bpf_jit_comp.c` +dispatch（+44）。`module/arm64/` 3 模块（ROR 4B、CSEL 8B、LSR+AND 20B）。交叉编译通过。+613 行。 |
-| **324** | **e2e v2 daemon 集成（2026-03-21）** | ✅ | 5 case 全部接入 baseline→daemon apply-all→post_rejit 流程。净减 314 行。 |
-| **325** | **Attachment sync 调研（2026-03-21）** | ✅ | TC/cgroup/kprobe 只缓存 `prog*`，WRITE_ONCE 够用。XDP dispatcher 不会 UAF（indirect fallback）。**Trampoline/freplace 是真 UAF**（硬编码地址）。报告：`docs/tmp/20260321/rejit_attachment_sync_research_20260321.md`。 |
-| **325a** | **REJIT 安全性 VM 验证（2026-03-22）** | ✅ | **12/12 PASS，dmesg 干净。** XDP/TC/cgroup_skb REJIT + 正确性 + 运行中 REJIT + 并发 REJIT 全部通过。 |
-| **325b** | **XDP/trampoline 修复设计（2026-03-22）** | ✅ | Phase 0: KERNEL_BPFPTR fix + 拒绝 live trampoline（~10 行）。Phase 1: XDP dispatcher refresh（~31 行）。Phase 2: trampoline refresh（~75 行）。报告：`docs/tmp/20260321/rejit_xdp_trampoline_fix_design_20260321.md`。 |
-| **325c** | **内核 Phase 0-2 修复实现（2026-03-22）** | ✅ | +260 行 kernel（+459 行 selftest）。fd_array fix + XDP refresh + trampoline refresh + ARM64。**VM 6/6 PASS**（same-len + diff-len + fd_array + correctness + info + concurrent）。 |
-| **326** | **Verifier log parser（2026-03-21）** | ✅ | `verifier_log.rs` 433 行，33 tests。 |
-| **327** | **Daemon profiling（2026-03-21）** | ✅ | `profiler.rs` 249 行。bpf_stats polling。 |
-| **328** | **Daemon pass 框架实现（2026-03-22）** | ✅ | pass.rs + analysis.rs + passes.rs。WideMemPass + RotatePass + SpectreMitigationPass。**104 tests all pass。** |
-| **329** | kinsn pass（ROTATE/SELECT/EXTRACT） | 🔄 | RotatePass 在 #328 已实现。SELECT/EXTRACT 待做。 |
-| **330** | 内核 Critical issue 修复 | ✅ 归入 #325c | Phase 0-2 全部完成。 |
-| **331** | VM 全量 micro suite rejit | ✅ 归入 #338 | 见 #338。 |
-| **332** | 全量评估：stock vs rejit vs llvmbpf | 待定 | 依赖 #331。 |
-| **333** | **安全测试套件设计（2026-03-22）** | ✅ | 553 行设计文档。5 类测试：negative(20 case)/fuzz(100K+)/concurrent/privilege/differential。参考 Jitterbug/K2/BCF 方法论。报告：`docs/tmp/20260321/safety_eval_design_20260321.md`。 |
-| **334** | func_cnt 限制 + e2e 兼容性 | ✅ 调研完成 | **结论**：swap 路径不完整（缺 `aux->func[]`/`func_cnt`/`real_func_cnt`/kallsyms）。**E2E 兼容**：Tracee 12/13、Tetragon 7/7、Katran **0/1**（blocker）、bpftrace 7/7。**最小修复方案 A'**：layout match + swap multi-subprog JIT package，~50-90 行。报告：`docs/tmp/20260322/func_cnt_and_e2e_compat_20260322.md`。 |
-| **335** | perf/LBR 调研（2026-03-22） | ✅ | VM 无硬件 PMU（Arrow Lake 太新）。LBR 不可用。perf 软件采样可关联 BPF JIT 代码。bpf_stats 够用。 |
-| **336** | func_cnt 修复实现（方案 A'） | ✅ VM 验证 | **+55/-3 行 syscall.c**。(1) 移除 func_cnt/real_func_cnt gate；(2) 新增 `bpf_prog_rejit_subprog_layout_match()` 校验 real_func_cnt + per-subprog len；(3) swap func/func_cnt/real_func_cnt/bpf_exception_cb/exception_boundary；(4) `bpf_prog_kallsyms_del_all()` + subprog re-publish。**VM rejit_poc 6/6 PASS + dmesg 干净。** Kernel `21c1b1f89`，主仓库 `31c1433`。 |
-| **337** | 安全 negative test suite 实现 | ✅ VM 验证 | **919 行 `tests/rejit_safety_tests.c`，20 个测试**（15 negative + 5 correctness）。**VM 20/20 PASS + dmesg 干净。** 覆盖：非法 bytecode/OOB/infinite loop/illegal helper/oversized/invalid fd/non-privileged/失败后原程序不变/identity transform/NOP insertion/多次 REJIT/roundtrip。主仓库 `31c1433`。 |
-| **338** | VM micro 冒烟（2026-03-22） | ✅ | 62 bench × 3 runtime。**正确性 62/62 全部通过**。性能数据非权威（低迭代+VM 噪声）。WIDE_MEM 改进可见（load_byte_recompose 0.68x, stride_load_4 0.60x）。 |
-| **339** | **Kernel cleanup + gate 放宽 + st_ops（2026-03-22）** | ✅ bzImage #104 | **(1)** Code review 净减 101 行（死代码/过度注释/防御性编程）。**(2)** 删除 layout match check，允许 REJIT 改变 subprog 长度。**(3)** 放宽 dst_trampoline/dst_prog gate（零额外代码）。**(4)** 实现 st_ops text_poke refresh（+85 行，3 文件）。**当前 ~608 LOC 纯代码，tail_call 已在 #343 解决。** 报告：`docs/tmp/20260322/kernel_cleanup_arch_review_20260322.md`、`docs/tmp/20260322/st_ops_rejit_research_20260322.md`。 |
-| **340** | **Daemon 升级（2026-03-22）** | ✅ 已被 #344 取代 | CondSelectPass + BranchFlipPass + rewriter fixes + watch mode。后续在 #344 做了完整重构。 |
-| **341** | **Benchmark 框架升级（2026-03-22）** | ✅ | **(1)** driver.py 自动正确性验证（kernel vs kernel-rejit result 比较）。**(2)** corpus v2 对齐（`--daemon-path` + `kernel-rejit` + YAML）。**(3)** Makefile 修复（dispatcher.c 加入 KERNEL_JIT_SOURCES）。 |
-| **342** | **prog_type 覆盖测试（2026-03-22）** | ✅ VM 21/21 | `tests/unittest/rejit_prog_types.c`。.bpf.c + libbpf，覆盖 XDP/TC/socket/cgroup/kprobe/tracepoint/raw_tp/perf/fentry/fexit/freplace/LSM/struct_ops。含 kernel EXT REJIT fix。 |
-| **343** | **tail_call REJIT（2026-03-22）** | ✅ VM 2/2 | `tests/unittest/rejit_tail_call.c`。caller poke 更新 + target 两阶段 NOP/JMP。deadlock fix `f4be5f31b`。**BpfReJIT 零 prog_type 限制。** |
-| **344** | **Daemon 完整重构（2026-03-22）** | ✅ 111 tests | 删 matcher/emit/rewriter（-1622 行）→ passes/wide_mem。main.rs 走 PassManager。passes/ + analysis/ 拆模块。verifier_log 恢复。6,425 行 / 17 文件。 |
-| **345** | **kfunc 发现 + VM module loading（2026-03-22）** | ✅ 119 tests | `kfunc_discovery.rs`（~130 行）：BTF parser + 扫描 `/sys/kernel/btf/` + KfuncRegistry 填充。Makefile 自动 insmod kinsn modules。Commits: `1c281ea` + `7f5d70a`。 |
-| **346** | **全量测试 + kernel bug fixes（2026-03-22）** | ✅ | **micro 62/62 完成，0 correctness mismatch，47 applied，geomean 0.887x（11.3% 加速）。** 发现并修复 4 个 kernel bug：**(1)** text_mutex 竞争（删 bpf_arch_text_invalidate）**(2)** kallsyms latch_tree 双重注册 **(3)** synchronize_rcu→expedited **(4)** XDP test_run 慢 sync。Kernel `b4bd737`，主仓库 `92d717c`。 |
-| **347** | **upstream BPF selftest（2026-03-22）** | ✅ | test_verifier **526 PASS / 1 FAIL**（CONFIG_IPV6 相关，非 REJIT 回归）。test_progs verifier+jit: 109 PASS。新增 `make vm-upstream-test-verifier` target。 |
-| **348** | **kernel bug fix 审查 + 回归测试（2026-03-22）** | ✅ | 4 个 fix 全部正确。5 个回归测试 PASS（并发 REJIT 40/40 + latency 27μs + rapid kallsyms 20/20 + XDP test_run + 压力测试 78779 REJITs）。`tests/unittest/rejit_regression.c`。 |
-| **349** | **kernel 全面审计 + 修复（2026-03-22）** | ✅ | 发现 3 HIGH + 6 MED。修复：**(H1)** kfd_array 内存泄漏 **(H2)** EXT func_info 泄漏 **(H3)** struct_ops multi-slot **(M1)** expedited 范围限制 **(M4)** insns/len swap **(M6)** UAPI flags 字段。Kernel `8a6923893`。报告：`docs/tmp/20260322/kernel_full_audit_20260322.md`。 |
-| **350** | **kinsn module 重编（2026-03-22）** | ✅ | vermagic 不匹配修复。3/3 modules 加载成功。`/sys/kernel/btf/bpf_rotate` 等 BTF 确认。 |
-| **351** | **micro v2 with kinsn（2026-03-22）** | ✅ | 62/62 完成。**RotatePass 生效**（412 sites / 5 benchmarks）。但只 7/62 applied — **PassManager 路径和旧 matcher 覆盖率差异调查中**。Bias-adjusted applied geomean 0.967x。rotate64_hash **20.4% 真实加速**。报告：`docs/tmp/20260322/micro_analysis_v2_20260322.md`。 |
-| **352** | **corpus compile_only→attach_trigger（2026-03-22）** | ✅ 代码完成 | 4 个目标改为 attach_trigger + bpf_stats timing。新增 `runner/libs/attach.py`。**VM 验证中。** |
-| **353** | **applied 数下降调查（2026-03-22）** | ✅ | **Root cause**: WideMemPass emitter 只支持 width 2/4/8，width=3/5/6/7 导致 cmd_apply crash。修复：skip 不支持的 width。49/62 有 wide_mem sites，预期恢复 ~47 applied。121 tests。 |
-| **354** | **e2e 准备（2026-03-22）** | ✅ | 5/5 case 可跑。Katran 不用 tail_call（是 func_cnt 问题，已修）。dev 数据：Katran 1.108x、Tracee +8.1%、Tetragon BPF -10.5%。**v2 e2e 尚未跑**（等全部 pass 修复后统一跑）。 |
-| **355** | **全部 5 pass 真正 apply（2026-03-22）** | ✅ | CondSelectPass emit 实现（commit `25c73f4`）、BranchFlipPass heuristic（`ed36a35`）、SpectreMitigation 测试（`1eb150d`）。后续在 #362 做了算法正确性修复。 |
-| **356** | **SpectreMitigation 专门测试（2026-03-22）** | ✅ | 18 daemon unit tests + 7 VM integration tests（`tests/unittest/rejit_spectre.c`）+ `--passes` CLI flag。Commit `1eb150d`。⚠️ JA+0 是 placeholder 不是真 barrier，真 barrier 需要 kinsn（future）。 |
-| **357** | **bpftrace 复杂 tools（2026-03-22）** | ✅ | 6 个 upstream tools（tcplife/biosnoop/runqlat/tcpretrans/capable/vfsstat）替换 5 个简单脚本。Commit `6933ee3`。 |
-| **358** | **v2 全量评估（2026-03-22）** | 🔄 | micro ✅（62/62, 49 applied, geomean **1.153x**, applied-only **1.096x**, 0 mismatch）。corpus 🔄（94/148 measured, applied=0 — 旧 binary 问题，rebuild 后待重跑）。e2e 🔄 正在跑。 |
-| **359** | Recompile overhead 测量 | 待做 | REJIT verify+JIT+swap 各多久？reviewer 必问。 |
-| **360** | Policy sensitivity 输入变体 | 待做 | 启用 predictable/random 变体到 YAML，支撑 Insight 2。 |
-| **361** | VM bias 调查 | 待做 | control 有 7.8% phantom speedup，需要理解和消除。 |
-| **362** | **Daemon P0 算法修复（2026-03-22）** | ✅ | **(1)** branch_flip: 修正 CFG diamond 识别（then_len=off-1），删 heuristic 改为 PGO-only，修正 flip offset。**(2)** cond_select: 删 Pattern B（两路径都得到 true_val 的误编译），实现 swap-safe emit_safe_params()，删 predictability_threshold。**(3)** rotate: 加 find_provenance_mov()（回扫 8 条找 MOV tmp,dst），加 live-out 检查。**(4)** liveness: call defs 改为 {r0-r5}。**147 tests pass。** Commit `ae76f1b`。 |
-| **363** | **Daemon P1 集成修复（2026-03-22）** | ✅ | **(1)** BTF kind: 19 个常量对齐 kernel header + sync test + mixed-kind test。**(2)** fd_array: BpfProgram.required_module_fds + rotate/cond_select 记录 module FD + cmd_apply 传给 bpf_prog_rejit。**(3)** PGO: 删 analysis/pgo.rs 死代码。**(4)** Dead code: build_full_pipeline 删除，cargo check zero warnings。Commit `0c650f0`。 |
-| **364** | **Daemon serve 子命令（2026-03-22）** | ✅ | Unix socket server mode。JSON newline-delimited 协议（optimize/optimize-all/status）。SIGTERM/SIGINT graceful shutdown。serde + serde_json 依赖。Commit `4df4922`。 |
-| **365** | **Tests 目录重组（2026-03-22）** | ✅ | 删 40+ debug scripts。4 层结构：kernel/ + unittest/ + integration/ + python/ + helpers/。unittest/Makefile 统一构建 6 个 rejit_*.c。根 Makefile 加 unittest-tests + python-tests targets。Commit `a68a79a`。 |
-| **366** | **Kernel bug 回归测试（2026-03-22）** | ✅ VM 9/9 | `tests/unittest/rejit_audit_tests.c`：T1-T6 kfd_array leak stress、T2-T3-T8 insns/len swap（含 2→4→6→4→2 cycle）、T4-T5 UAPI flags、T7 func_info stress、**T9 struct_ops multi-slot**（tcp_congestion_ops 4-slot trampoline patch）。Commit `ca5aa66`。 |
-| **367** | **docs/tmp 按日期归档（2026-03-22）** | ✅ | 创建 6 个日期子目录（20260313-20260322），~250 个文件归档。plan doc + old record 82 个路径引用更新。Commits `94c3ce2` + `3373251`。 |
-| **368** | **Corpus measured_pairs 修复（2026-03-22）** | ✅ | vng --cwd→--rwdir、kinsn auto-load、v1→v2 runner command 迁移。measured_pairs 0→94。Commit `7a5009e`。 |
-| **369** | **Daemon code review by codex（2026-03-22）** | ✅ | 发现 3 CRITICAL + 8 HIGH。branch_flip CFG 错误、cond_select Pattern B 误编译、spectre JA+0 假 barrier、寄存器别名、rotate provenance、BTF kind 错误、fd_array 未打通、PGO 两套死代码。全部在 #362-#363 修复。报告：`docs/tmp/20260322/daemon_code_review_20260322.md`。 |
-| **370** | **vm-micro-smoke 全覆盖（2026-03-22）** | ✅ | smoke 从 3 个 benchmark 改为全部 62 个（ITER=1, WARM=0, REP=50）。加 daemon-path 依赖。 |
-| **371** | Corpus 54 unmeasured 程序 | 🔄 | 152 targets 中 54 个无 exec 数据（stock phase missing）。opus 正在诊断+配 attach_trigger。 |
-| **372** | Makefile vm-selftest 接入 unittest | 🔄 | unittest/ 6 个测试文件需接入 vm-selftest。opus 正在做。 |
-| **373** | kinsn module 重编（2026-03-22） | ✅ | 3/3 x86 modules against kernel 7.0-rc2+rejit-v2。Commit `9e6eb3d`。 |
-| **374** | **Daemon post-fix review（2026-03-22）** | ✅ | Codex review 发现 5/11 修复完整、3/11 部分修复、3/11 未修复 + 1 新问题。报告：`docs/tmp/20260322/daemon_postfix_review_20260322.md`。 |
-| **375** | **Daemon 7 issues 全修复（2026-03-22）** | ✅ | **(1)** cond_select parallel-copy 算法（27 组合穷举测试）。**(2)** rotate dst 改写检查。**(3)** fd_array per-kfunc module_fd（HashMap）。**(4)** spectre→barrier_placeholder + Placeholder category。**(5)** InsnAnnotation remap（addr_map 重映射）。**(6)** PGO 闭环（ProfilingData→annotations→branch_flip）。**(7)** ExtractPass 已存在确认。**187 tests pass**（+17 new）。 |
-| **376** | 缺失 pass 站点覆盖分析（2026-03-22） | ✅ | ENDIAN_FUSION 1386 sites（最高）、BITFIELD_EXTRACT 542 sites、ADDR_CALC 较少。ENDIAN 需新 kinsn module + daemon pass。 |
-| **377** | **ExtractPass 验证+增强（2026-03-22）** | ✅ | pattern 正确（RSH+AND→bpf_extract64 kfunc）。+9 new edge case tests（width=1/32, shift=0, consecutive, non-matching masks）。**196 tests pass**，zero warnings。 |
-| **378** | E2E katran veth 修复 + 全量跑 | ✅ 归入 #404 | VM 缺 veth 模块导致 katran 失败。opus 修复中（modprobe veth）。 |
-| **379** | **全项目架构审查 + 论文差距分析（2026-03-22）** | ✅ | Codex 全面 review：死代码、设计缺陷、组织问题、论文差距。报告→`docs/tmp/20260322/full_project_review_20260322.md`。 |
-| **380** | **ENDIAN_FUSION 实现（2026-03-22）** | ✅ | x86 bpf_endian.c（MOVBE 3 variants）+ arm64 bpf_endian.c（LDR+REV）+ daemon EndianFusionPass（LDX_MEM+ENDIAN_TO_BE→kfunc）。+22 tests。**218 tests pass**。 |
-| **381** | **Module UB + cross-arch 修复（2026-03-22）** | ✅ | **(1)** extract len=64 UB fix。**(2)** rotate shift=0 UB fix。**(3)** ARM64 ROL/ROR 统一（NEG+AND+RORV 实现左旋）。**(4)** 全部 module 改 BPF_PROG_TYPE_UNSPEC（不限 XDP）。**(5)** build artifact gitignore。 |
-| **382** | **真实 Spectre barrier（2026-03-22）** | ✅ | x86 bpf_barrier.c（LFENCE 3B）+ arm64 bpf_barrier.c（DSB SY+ISB 8B）。daemon SpeculationBarrierPass 替换 JA+0 placeholder。kfunc 不可用时 pass 不做任何事。**224 tests pass**。 |
-| **383** | **kinsn common header + module 简化（2026-03-22）** | ✅ | `module/include/kinsn_common.h`：DEFINE_KINSN_MODULE/DEFINE_KINSN_MODULE_MULTI 宏。10 个 module 文件全部简化（~300 行减少）。BPF_PROG_TYPE_UNSPEC 默认全 prog type。module/.gitignore 清理 artifact。 |
-| **406** | Transform trace 可观测性设计 | 🔄 | daemon optimize 返回 per-site transform log（PC、原始指令、替换指令、insn delta）。runner 写入 JSON。codex 调研中。 |
-| **405** | Micro 回归分析（bounds_check_heavy/rotate64_hash） | 待做 | 两个 applied benchmark 0.87-0.88x 回归。需要 per-pass ablation 定位。依赖 #406 可观测性。 |
-| **404** | E2E 3 bug 修复 + 重跑 | ✅ | persist_results 签名 + scx bpftool + katran CONFIG_NET_IPIP。vm-e2e 重跑中。 |
-| **403** | Corpus applied=2 调查+修复 | 🔄 | 152 measured 但只 2 applied。opus 调查中。 |
-| **402** | CPU freq scaling bias 修复（2026-03-22） | ✅ | daemon socket idle gap 导致 CPU 降频。修复：daemon 调用移到测量前。geomean 0.654→1.059x。 |
-| **401** | Split BTF name_off 修复（2026-03-22） | ✅ | module BTF 用 split BTF，name_off 需减 vmlinux str_len。修复后 7/7 kfuncs 发现成功。241 tests。 |
-| **400** | Verifier log buffer ENOSPC 修复（2026-03-22） | ✅ | log_level=2 + 64KB buffer 对大程序溢出→ENOSPC→误判 verifier 拒绝。改为快速路径 log_level=0，失败时 16MB。 |
-| **399** | v1 policy 文件系统清理（2026-03-22） | ✅ | 删 runner/libs/policy.py (553行) + corpus/policies/ (582文件) + micro/policies/ (~40文件) + CLI 参数 + generate_default_policies.py + auto_tune.py。corpus rejit 改为 daemon_socket 触发。 |
-| **398** | **Verifier differential correctness verification 调研（2026-03-22）** | 📝 | 结论：**可行，但只能做 heuristic differential checking，不是 sound correctness proof。** 三方案里 **B（每 pass 前后 temp `BPF_PROG_LOAD` + `log_level=2` 对比）最佳**；A 太晚，C 工程量过大。对 `wide_mem` 信号最强；`rotate/cond_select` 很弱；`branch_flip` false positive 最高。**最可信路线 = verifier-diff guardrail + 本地 peephole translation validation（SMT/bitvector）**。完整报告：`docs/tmp/20260322/verifier_differential_verification_research_20260322.md`。 |
-| **397** | **Verifier-guided transform rollback（2026-03-22）** | ✅ | TransformAttribution + extract_failure_pc + rollback loop + --no-rollback flag。**240 tests pass**。 |
-| **396** | **Fuzz + adversarial negative tests（2026-03-22）** | ✅ | tests/negative/: fuzz_rejit.c (10000轮) + adversarial_rejit.c (23 tests + 3 differential)。vm-negative-test target。 |
-| **395** | **Corpus 54 unmeasured 完整实现（2026-03-22）** | ✅ | 8 新 attach 类型 + 22 新程序。measured_pairs 91→152。 | 需要：新 attach 类型实现（kprobe/tracepoint/cgroup_sock_addr 等）+ 触发机制 + bpf_stats 测量 + YAML 配置。不只是改 config。 |
-| **394** | deprecated CLI 清理（2026-03-22） | ✅ | 删 --daemon-path（3处）、recompile_v5→blind_apply、recompile_v4 死分支、重复 --bpftool 合并。 |
-| **393** | **sudo 全量清理（2026-03-22）** | ✅ | 29 文件，删除所有 sudo（除 AWS 脚本）。VM 内已是 root。 |
-| **392** | **kernel 修改总结（2026-03-22）** | ✅ | 22 文件，净增 ~1300 行。5 组件：GET_ORIGINAL + REJIT + kinsn + 传播 + bug fix。 |
-| **391** | **5 dead code 接线（2026-03-22）** | ✅ | **(1)** verifier_log→bpf_prog_rejit（64KB log buffer + 结构化解析）。**(2)** HotnessRanking→watch（热度排序优先优化）。**(3)** PlatformCapabilities→PassContext（/proc/cpuinfo 检测 BMI1/CMOV/MOVBE/RORX，pass 开头检查）。**(4)** all_module_fds→cmd_apply（required⊆all 验证）。**(5)** AnalysisCache invalidate→PassManager（pass 修改后精确失效）。**229 tests pass**。 |
-| **390** | **Makefile 大重构（2026-03-22）** | ✅ | 759→335 行（56% 减少）。vm-test 合并 4 个 target。vm-e2e 收敛为 `e2e/run.py all`。inline shell 抽到 4 个脚本。删 verify-build/compare/kernel-perf 死 target。 |
-| **389** | **Makefile 全自动 pipeline（2026-03-22）** | ✅ | kernel 自动 defconfig + modules_prepare。kinsn-modules 加入所有 vm-* 依赖链。corpus load_all.sh（5/5 modules）。删 e2e/run.py --vm 死代码（~160 行）。删 KINSN_MODULES 死变量。 |
-| **388** | **Daemon serve 接入 benchmark pipeline（2026-03-22）** | ✅ | kernel_runner.cpp: Unix socket client（daemon_socket_optimize）。micro/driver.py + corpus/driver.py: --daemon-socket 参数。Makefile vm-micro: 自动启动 daemon serve → socket 通信 → trap kill。fork/exec fallback 保留。 |
-| **387** | **5 infra 架构修复（2026-03-22）** | ✅ | **(1)** module/load_all.sh 统一 kinsn 加载。**(2)** kernel target 改 file-based 避免重编。**(3)** VM_INIT 宏统一 venv+module 加载，所有 vm-* target 使用。**(4)** daemon path 统一到 daemon/target/release/。**(5)** PYTHON 变量统一 venv python3。make smoke 验证通过。 |
-| **386** | **scanner→daemon 全量清理 + 死代码删除（2026-03-22）** | ✅ | 25 文件 scanner→daemon 命名统一。删除 build_scanner_command/parse_scanner_v5_output/REMOVED_SUBCOMMAND_HINTS/input_generators.py shim。全部 import 验证通过。 |
-| **385** | **e2e case_common 提取 + gitignore（2026-03-22）** | ✅ | 新建 `e2e/case_common.py`：git_sha/host_metadata/summarize_numbers/percent_delta/percentile/speedup_ratio/ensure_*/persist_results。5 个 case 文件去重。4 个新 .gitignore（module/x86, module/arm64, tests/kernel, tests/unittest）。 |
-| **384** | **PGO 闭环实现（2026-03-22）** | ✅ | **(1)** profiler.rs: PgoAnalysis.is_hot()/hotness_score() + HotnessRanking + collect_program_profiling()。**(2)** pass.rs: ProfilingData.program_hotness + 删 #[allow(dead_code)]。**(3)** main.rs: --pgo/--pgo-interval-ms CLI + PgoConfig + collect_pgo_data() 接线到 apply/apply-all/watch/serve。**(4)** 完整数据流：profiler→ProfilingData→inject_profiling→BranchFlipPass。**224 tests pass**。 |
-| **407** | **Transform trace observability P0+P1（2026-03-23）** | ✅ | daemon `try_apply_one()` → 结构化 `OptimizeOneResult`（per-pass detail + rollback attempts + timings）。runner 结构化 JSON 解析 + `daemon_response` 嵌入。Python `rejit` 为 canonical，`recompile` 兼容。**246 tests + smoke pass**。 |
-| **408** | **kinsn BTF 常量修复（2026-03-23）** | ✅ | **Root cause**: `BPF_BTF_GET_NEXT_ID` 常量 22→23（应为 23，22 是 BPF_MAP_FREEZE）。修复后 7/7 kfuncs 发现成功。同时显式添加 `CONFIG_DEBUG_INFO_BTF_MODULES=y` 到 defconfig。 |
-| **409** | **Map fd bit extraction 修复（2026-03-23）** | ✅ | **Root cause**: `relocate_map_fds()` 中 `regs & 0x0f`（提取 dst_reg）应为 `(regs >> 4) & 0x0f`（提取 src_reg）。导致 corpus 60/152 程序 REJIT 失败（EINVAL/EBADF）。**256 tests + smoke pass**。 |
-| **410** | **PMU counters 接入 profiler（2026-03-23）** | ✅ | profiler.rs 用 `perf_event_open` 采集 `BRANCH_MISSES`/`BRANCH_INSTRUCTIONS`。ProfilingData + BpfProgram 增加 `branch_miss_rate: Option<f64>`。Graceful fallback（PMU 不可用时 None）。**251 tests**。 |
-| **411** | **BranchFlip fallback + PGO warmup（2026-03-23）** | ✅ | **(1)** BranchFlipPass: `branch_miss_rate=None` → skip（"no PMU data"）。**(2)** micro/driver.py: `--pgo-warmup-repeat`（默认 10），optimize 前先跑 warmup。**(3)** corpus/modes.py: daemon serve 加 `--pgo`。**(4)** Makefile vm-micro: daemon serve 加 `--pgo`。**265 tests + smoke pass**。 |
-| **412** | **死代码/过时测试/脚本清理（2026-03-23）** | ✅ | 删 test_policy_utils.py + test_profile_guided_policy.py + profile_guided_policy.py。修 ARM64/AWS 脚本（daemon/build→target/release，删 policy 引用）。更新 corpus/e2e 旧路径。**256 tests**。 |
-| **413** | **Daemon 测试缺口补充（2026-03-23）** | ✅ | +19 tests（含 `test_bpf_cmd_constants_match_kernel_header` — 解析 kernel header 验证 BPF cmd 常量，能直接抓住 22→23 bug）。`AttrRejit._pad` 修复（128-44→128-48）。struct layout + BTF 真实环境集成测试（`#[ignore]`）。**265 tests, 10 ignored**。 |
-| **414** | **Mock test 审计报告（2026-03-23）** | ✅ | 6 HIGH + 8 MEDIUM。核心发现：BpfProgInfo/BtfInfo layout 未验证、BTF_KIND 常量硬编码、cmd_apply 零测试、所有 pass 从未用真实 bytecode。报告：`docs/tmp/20260323/daemon_mock_test_audit_20260323.md`。 |
-| **415** | **修复全部 14 个测试问题（2026-03-23）** | ✅ | 6 HIGH + 8 MEDIUM 全修。BpfProgInfo/BtfInfo field-by-field layout 验证、BTF_KIND 从 header 解析、真实 .bpf.o bytecode 测试 5 个 pass。**关键发现**：rotate scanner 不匹配 clang 反向 OR、cond_select 不匹配 Jcc+1 短 pattern、extract 全部 caller-saved conflict。 |
-| **416** | **Pass pattern matcher 修复 + caller-saved save/restore（2026-03-23）** | ✅ | **(1)** RotatePass: 支持反向 OR 操作数（256/256 匹配，17 applied）。**(2)** CondSelectPass: 支持 Jcc+1 短 pattern（104 detected）。**(3)** caller-saved save/restore in passes/utils.rs（endian 256 applied, extract 1 applied）。**(4)** BranchFlipPass 真实 bytecode 测试（256 flips verified）。**303 tests**。 |
+| 304 | **v2 架构探索+收敛（2026-03-21）** | ✅ | v1 native-level rewrite → v2 bytecode-layer transformation + kernel verifier 验证。**收敛方案**：(A) GET_ORIGINAL+REJIT 程序变换；(B) Inline Kfunc ISA 扩展（KF_INLINE_EMIT）。REJIT 接受完整新 bytecode（非 patch）。**+200 行 kernel**。10 份调研报告在 `docs/tmp/20260320-21/`。POC 三 Phase 完成（`rejit-v2` 分支）。主仓库 commits: `e50365a`/`ba3c76e`/`f5eb9f1`。关键发现：xlated 不可逆需保存原始 bytecode；Inline Kfunc 优于独立 kinsn；re-verify ~ms 级。 |
+| 305 | 内核 POC 修复（2026-03-21） | ✅ | **444 行 kernel**（含 selftest 974 行）。fd_array/等长约束/rejit_mutex/sleepable 等 7 项修复。VM 通过。 |
+| 306 | Runner v1→v2 替换 | ✅ | 净删 1121 行，删全部 v1 scanner/policy/directive 代码。 |
+| 307 | module/x86/ 真实 kinsn 模块 | ✅ | `bpf_rotate.c`(ROL)、`bpf_select.c`(CMOV)、`bpf_extract.c`(BEXTR)。 |
+| 308 | Bytecode rewriter 架构设计 | ✅ | 6 阶段 pipeline。报告：`docs/tmp/20260321/rewriter_architecture_design_20260321.md`。 |
+| 309 | scanner→daemon 重命名 | ✅ | `git mv scanner daemon`，编译通过。 |
+| 310 | Runner v1 死代码清理 | ✅ | 删 32 行 v1 残留。 |
+| 311 | Daemon Rust POC 实现 | ✅ | **1834 行 Rust，21 tests**。C++→Rust 重写。6 模块，零 libbpf 依赖。 |
+| 312 | VM 冒烟 + 3 bug fix | ✅ | **20/20 PASS**。REJIT cmd=39、ksym INIT_LIST_HEAD_RCU、len bytes÷8。 |
+| 313 | Matcher Variant B 修复 | ✅ | 添加 high-first variant。27 tests。 |
+| 314 | daemon-apply 集成 | ✅ | micro_exec `--daemon-path`。 |
+| 315 | v2 WIDE_MEM 性能结果 | ✅ | 10/14 有 site。bounds_ladder **2.78x**、load_byte **2.59x**。Commit `27cbc1b`。 |
+| 316 | Paper tex v2 更新 | ✅ | Abstract/Intro/Background 全部重写。+463/-866 行。 |
+| 317 | corpus/ 死代码清理 | ✅ | 净删 ~329 行 v1 路径。 |
+| 318 | driver.py --daemon-path 适配 | ✅ | Makefile `vm-micro` 自动传 DAEMON_PATH。 |
+| 319 | Makefile cmake→cargo | ✅ | daemon target 改 cargo build。 |
+| 320 | Commit push（2026-03-21） | ✅ | `698334f`/`56d6d19`/`c48cb43`。kernel submodule `4bcbc8e21`。 |
+| 321 | Daemon pass 框架设计 | ✅ | PassManager 框架。报告：`docs/tmp/20260321/daemon_pass_framework_design_20260321.md`。 |
+| 322 | Kernel code review | ✅ | 3 Critical + 4 Major。报告：`docs/tmp/20260321/kernel_v2_review_20260321.md`。 |
+| 323 | ARM64 inline kfunc + kinsn 模块 | ✅ | `module/arm64/` 3 模块。+613 行。交叉编译通过。 |
+| 324 | e2e v2 daemon 集成 | ✅ | 5 case 接入 baseline→apply-all→post_rejit。 |
+| 325 | Attachment sync 调研+修复（2026-03-22） | ✅ | Trampoline/freplace UAF 是真问题。Phase 0-2 修复实现：+260 行 kernel。**VM 12/12 PASS**。报告：`docs/tmp/20260321/rejit_attachment_sync_research_20260321.md`。 |
+| 326 | Verifier log parser | ✅ | `verifier_log.rs` 433 行，33 tests。 |
+| 327 | Daemon profiling | ✅ | `profiler.rs` 249 行。bpf_stats polling。 |
+| 328 | Daemon pass 框架实现 | ✅ | WideMemPass + RotatePass + SpectreMitigation。**104 tests**。 |
+| 333 | 安全测试套件设计 | ✅ | 5 类测试。报告：`docs/tmp/20260321/safety_eval_design_20260321.md`。 |
+| 334 | func_cnt 限制调研 | ✅ | swap 路径不完整。报告：`docs/tmp/20260322/func_cnt_and_e2e_compat_20260322.md`。 |
+| 335 | perf/LBR 调研 | ✅ | VM 无硬件 PMU（Arrow Lake）。bpf_stats 够用。 |
+| 336 | func_cnt 修复实现 | ✅ | **+55 行 syscall.c**。multi-subprog layout match + swap。**VM 6/6 PASS**。Kernel `21c1b1f89`。 |
+| 337 | 安全 negative test suite | ✅ | **919 行，20 tests，VM 20/20 PASS**。主仓库 `31c1433`。 |
+| 338 | VM micro 冒烟（2026-03-22） | ✅ | **62/62, 47 applied, 0 mismatch**。geomean 0.887x。 |
+| 339 | Kernel cleanup + gate 放宽 + st_ops | ✅ | 净减 101 行，st_ops text_poke +85 行。**~608 LOC kernel**。报告：`docs/tmp/20260322/kernel_cleanup_arch_review_20260322.md`。 |
+| 340 | Daemon 升级 | ✅ | 被 #344 取代。 |
+| 341 | Benchmark 框架升级 | ✅ | driver.py 正确性验证，corpus v2 对齐。 |
+| 342 | prog_type 覆盖测试 | ✅ | **VM 21/21**。覆盖 13 种 prog_type。 |
+| 343 | tail_call REJIT | ✅ | **VM 2/2**。deadlock fix `f4be5f31b`。**BpfReJIT 零 prog_type 限制。** |
+| 344 | Daemon 完整重构 | ✅ | 删旧代码 -1622 行，PassManager 架构。**6425 行 / 111 tests**。 |
+| 345 | kfunc 发现 + VM module loading | ✅ | `kfunc_discovery.rs`。Commits: `1c281ea`/`7f5d70a`。 |
+| 346 | 全量测试 + 4 kernel bug fixes | ✅ | **62/62, 47 applied, 0 mismatch**。修 4 个 kernel bug。Kernel `b4bd737`。 |
+| 347 | upstream BPF selftest | ✅ | test_verifier **526/527**（1 FAIL 非 REJIT）。test_progs 109 PASS。 |
+| 348 | kernel bug fix 回归测试 | ✅ | 5 回归 PASS。并发 40/40，latency 27μs，78779 REJITs 压力。 |
+| 349 | kernel 全面审计+修复 | ✅ | 3 HIGH + 6 MED 全修。Kernel `8a6923893`。报告：`docs/tmp/20260322/kernel_full_audit_20260322.md`。 |
+| 350 | kinsn module 重编 | ✅ | 3/3 modules 加载成功。 |
+| 351 | micro v2 with kinsn | ✅ | RotatePass **412 sites**。rotate64_hash **20.4% 加速**。报告：`docs/tmp/20260322/micro_analysis_v2_20260322.md`。 |
+| 352 | corpus attach_trigger | ✅ | 新增 `runner/libs/attach.py`。 |
+| 353 | applied 数下降修复 | ✅ | WideMemPass width=3/5/6/7 skip。121 tests。 |
+| 354 | e2e 准备 | ✅ | 5/5 case 可跑。dev: Katran 1.108x, Tracee +8.1%。 |
+| 355 | 全部 5 pass apply | ✅ | CondSelectPass/BranchFlipPass/SpectreMitigation。后续 #362 修正算法。 |
+| 356 | SpectreMitigation 测试 | ✅ | 18+7 tests。JA+0 是 placeholder（真 barrier 在 #382）。 |
+| 357 | bpftrace 复杂 tools | ✅ | 6 个 upstream tools 替换简单脚本。Commit `6933ee3`。 |
+| 358 | v2 全量评估 | 🔄 | micro **1.153x**（62/62, 49 applied）。corpus/e2e 待重跑。 |
+| 359 | Recompile overhead | ✅ 见 #491 | daemon ~2ms + REJIT ~13ms。 |
+| 360 | Policy sensitivity 输入变体 | 待做 | predictable/random 变体，支撑 Insight 2。 |
+| 361 | VM bias 调查 | 待做 | control 有 7.8% phantom speedup。 |
+| 362 | Daemon P0 算法修复 | ✅ | branch_flip/cond_select/rotate/liveness 4 项修复。**147 tests**。Commit `ae76f1b`。 |
+| 363 | Daemon P1 集成修复 | ✅ | BTF kind/fd_array/PGO/dead code。Commit `0c650f0`。 |
+| 364 | Daemon serve 子命令 | ✅ | Unix socket server，JSON 协议。Commit `4df4922`。 |
+| 365 | Tests 目录重组 | ✅ | 删 40+ debug scripts。4 层结构。Commit `a68a79a`。 |
+| 366 | Kernel bug 回归测试 | ✅ | **VM 9/9**。含 struct_ops multi-slot。Commit `ca5aa66`。 |
+| 367 | docs/tmp 按日期归档 | ✅ | ~250 文件归到 6 个日期目录。Commits `94c3ce2`/`3373251`。 |
+| 368 | Corpus measured_pairs 修复 | ✅ | vng --rwdir + kinsn auto-load。0→94 measured。Commit `7a5009e`。 |
+| 369 | Daemon code review | ✅ | 3 CRITICAL + 8 HIGH，全在 #362-363 修复。报告：`docs/tmp/20260322/daemon_code_review_20260322.md`。 |
+| 370 | vm-micro-smoke 全覆盖 | ✅ | 62 bench smoke（ITER=1, WARM=0, REP=50）。 |
+| 371 | Corpus 54 unmeasured | ✅ | 8 新 attach 类型。measured 91→152。 |
+| 372 | Makefile vm-selftest 接入 unittest | ✅ | unittest/ 6 个测试文件接入。 |
+| 373 | kinsn module 重编 | ✅ | 3/3 x86 modules。Commit `9e6eb3d`。 |
+| 374 | Daemon post-fix review | ✅ | 5/11 完整、3/11 部分、3/11 未修。报告：`docs/tmp/20260322/daemon_postfix_review_20260322.md`。 |
+| 375 | Daemon 7 issues 全修复 | ✅ | cond_select/rotate/fd_array/PGO/annotation remap 等。**187 tests**。 |
+| 376 | 缺失 pass 覆盖分析 | ✅ | ENDIAN_FUSION **1386 sites**（最高）、EXTRACT 542。 |
+| 377 | ExtractPass 增强 | ✅ | +9 edge case tests。**196 tests**。 |
+| 379 | 全项目架构审查 | ✅ | 报告：`docs/tmp/20260322/full_project_review_20260322.md`。 |
+| 380 | ENDIAN_FUSION 实现 | ✅ | x86 MOVBE + arm64 LDR+REV + daemon EndianFusionPass。+22 tests。 |
+| 381 | Module UB + cross-arch 修复 | ✅ | extract/rotate UB fix。ARM64 ROL 统一。全部 UNSPEC。 |
+| 382 | 真实 Spectre barrier | ✅ | x86 LFENCE + arm64 DSB+ISB kinsn。**224 tests**。 |
+| 383 | kinsn common header | ✅ | `DEFINE_KINSN_MODULE` 宏，10 modules 简化 ~300 行。 |
+| 384 | PGO 闭环实现 | ✅ | profiler→ProfilingData→BranchFlipPass 完整数据流。**224 tests**。 |
+| 385 | e2e case_common 提取 | ✅ | `e2e/case_common.py`，5 case 去重。 |
+| 386 | scanner→daemon 全量清理 | ✅ | 25 文件命名统一。 |
+| 387 | 5 infra 架构修复 | ✅ | module/load_all.sh、VM_INIT 宏、daemon path 统一。 |
+| 388 | Daemon serve 接入 pipeline | ✅ | kernel_runner.cpp Unix socket client。 |
+| 389 | Makefile 全自动 pipeline | ✅ | kernel defconfig + kinsn-modules 依赖链。 |
+| 390 | Makefile 大重构 | ✅ | 759→335 行（-56%）。 |
+| 391 | 5 dead code 接线 | ✅ | verifier_log/HotnessRanking/PlatformCapabilities/module_fds/AnalysisCache。**229 tests**。 |
+| 392 | kernel 改动总结 | ✅ | 22 文件，净增 ~1300 行。5 组件。 |
+| 393 | sudo 全量清理 | ✅ | 29 文件删 sudo。VM 内已是 root。 |
+| 394 | deprecated CLI 清理 | ✅ | 删 --daemon-path、recompile_v5→blind_apply 等。 |
+| 395 | Corpus 54 unmeasured 实现 | ✅ | 8 新 attach 类型。measured 91→152。 |
+| 396 | Fuzz + adversarial tests | ✅ | fuzz 10000 轮 + adversarial 23 tests。 |
+| 397 | Verifier-guided rollback | ✅ | TransformAttribution + failure PC 提取。**240 tests**。 |
+| 398 | Verifier differential verification 调研 | 📝 | **方案 B（per-pass LOAD+log_level=2 对比）最佳**。报告：`docs/tmp/20260322/verifier_differential_verification_research_20260322.md`。 |
+| 399 | v1 policy 文件系统清理 | ✅ | 删 policy.py(553行) + corpus/policies/(582文件)。 |
+| 400 | Verifier log ENOSPC 修复 | ✅ | 快速路径 log_level=0，失败时 16MB。 |
+| 401 | Split BTF name_off 修复 | ✅ | 7/7 kfuncs 发现成功。 |
+| 402 | CPU freq scaling bias 修复 | ✅ | daemon idle 降频。修复后 geomean 0.654→1.059x。 |
+| 403 | Corpus applied=2 调查 | 🔄 | 152 measured 只 2 applied。 |
+| 404 | E2E 3 bug 修复 | ✅ | persist_results + scx bpftool + katran CONFIG_NET_IPIP。 |
+| 407 | Transform trace observability | ✅ | 结构化 `OptimizeOneResult`。runner JSON 嵌入。**246 tests**。 |
+| 408 | kinsn BTF 常量修复 | ✅ | `BPF_BTF_GET_NEXT_ID` 22→23。`CONFIG_DEBUG_INFO_BTF_MODULES=y`。 |
+| 409 | Map fd bit extraction 修复 | ✅ | `regs & 0x0f` → `(regs >> 4) & 0x0f`。修复 60/152 REJIT 失败。**256 tests**。 |
+| 410 | PMU counters 接入 profiler | ✅ | `perf_event_open` 采集 branch_misses。**251 tests**。 |
+| 411 | BranchFlip fallback + PGO warmup | ✅ | no PMU data → skip。`--pgo-warmup-repeat`。**265 tests**。 |
+| 412 | 死代码/过时脚本清理 | ✅ | 删 v1 policy tests。**256 tests**。 |
+| 413 | Daemon 测试缺口补充 | ✅ | +19 tests。含 kernel header BPF cmd 常量验证。**265 tests**。 |
+| 414 | Mock test 审计 | ✅ | 6 HIGH + 8 MEDIUM。报告：`docs/tmp/20260323/daemon_mock_test_audit_20260323.md`。 |
+| 415 | 修复全部 14 个测试问题 | ✅ | 发现 rotate/cond_select/extract 真实 bytecode 不匹配。 |
+| 416 | Pass pattern matcher 修复 | ✅ | RotatePass 反向 OR、CondSelectPass Jcc+1、caller-saved save/restore。**303 tests**。 |
 | **417** | **⚠️ kinsn operand-encoded ALU 设计（2026-03-23）** | ✅ 设计完成 | **核心 novelty**：kinsn 不是函数调用，是自定义 ALU 指令。dst_reg 编码操作数，off 编码常量，verifier 只 mark dst_reg modified + narrow_result 回调恢复精度。每个 kinsn 替换都是 N→1 指令，零开销。**关键**: 这是论文 kinsn 机制的核心贡献 — 如何让 verifier 正确建模平台特定内联指令。设计报告：`docs/tmp/20260323/kinsn_register_design_20260323.md`。 |
-| **418** | kfunc verifier 机制调研（2026-03-23） | ✅ | verifier 无现成机制让 kfunc 控制 clobber。KF_FASTCALL 只做 spill/fill NOP 消除。do_refine_retval_range() 和 bpf_res_spin_lock 是 range narrowing 先例。报告：`docs/tmp/20260323/kfunc_verifier_mechanisms_20260323.md`。 |
+| 418 | kfunc verifier 机制调研 | ✅ | 无现成 clobber 控制。报告：`docs/tmp/20260323/kfunc_verifier_mechanisms_20260323.md`。 |
 | **419** | **⚠️ bpf_kinsn_ops 完整设计（2026-03-23）** | ✅ | codex 调研。独立 sidecar `struct bpf_kinsn_ops`（不扩展 btf_kfunc_id_set）。`model_call()` 返回声明式 `bpf_kinsn_effect`（input_mask + clobber_mask + result range/tnum + mem_accesses），不暴露 bpf_reg_state。packed ABI 用 sidecar pseudo-insn（不复用 off 字段）。endian_load 改 const void*。KF_KINSN 替代 KF_INLINE_EMIT。设计报告：`docs/tmp/20260323/kinsn_ops_design_20260323.md`。 |
-| **420** | **⚠️ kinsn_ops 完整实现（2026-03-23）** | ✅ | codex 实现两步。**第一步**：bpf_kinsn_ops + model_call + verifier 通用逻辑 + 5 module 迁移。**第二步**：packed ABI + sidecar pseudo-insn + daemon 适配。**结果**：53/62 applied, 1612 sites（rotate 701, extract 524, endian 256）。vm-selftest **70/70 PASS**（含 rejit_kinsn 9/9 + rejit_kinsn_packed 6/6）。Commit `8c1dd22`。Review：`docs/tmp/20260323/kinsn_implementation_review_20260323.md`。 |
-| **421** | SIMD kinsn module | 🔄 调研中 | 新 kinsn module：bpf_memcpy_simd → AVX2/NEON，bpf_crc32 → SSE4.2。不需改框架，只需新 module + daemon pass。机会分析：`simd_constprop_opportunity_analysis_20260323.md`。**设计报告见 #472g**。 |
-| **422** | Frozen map constant inlining | ❌ 不做 | **调研结论（`map_inlining_opportunity_analysis_20260323.md`）：真实 workload 几乎无显式 BPF_MAP_FREEZE，hot-path frozen map lookup 接近零。价值在于引出 #423。** |
-| **423** | **Dynamic map inlining + invalidation** | ✅ v1 + invalidation loop 已落地 | `daemon/src/passes/map_inline.rs` 已实现 **ARRAY 全 lookup 消除**，并扩展到 **struct value 多字段 fixed-offset load**；同时支持 **HASH/LRU_HASH speculative inline**（保留 runtime lookup + null check，只替换 non-null path 字段 load）。最新实现移除 frozen requirement：只要 map type 支持 direct value access，就允许 mutable map speculative inline，并把 invalidation tracker 接到 `commands.rs` + `server.rs`，在 `serve` / `watch` 模式下轮询失效并自动 re-REJIT / restore-original。**设计报告见 #472a**。 |
-| **424** | Verifier-assisted constant propagation | 🔄 v1 已落地，verifier log 版待做 | `daemon/src/passes/const_prop.rs` 已实现 pass 级常量传播：消费 `map_inline` 产出的 `MOV/LD_IMM64`，把常量 ALU 折叠成 `MOV/LD_IMM64`，把常量分支折叠成 `JA/NOP`。基于 `log_level=2` verifier state 的 exact-scalar + DCE 扩展仍待做。**设计报告见 #472b**。 |
-| **425** | **vm-micro 正确性验证（2026-03-23）** | ✅ | 53/62 applied, 0 mismatch。rotate 15, extract 4, endian 1, wide_mem 49。kinsn pass 生效。 |
-| **426** | **vm-corpus 正确性验证（2026-03-23）** | ✅ | 152 measured, **56 applied**（从 4 提升 14x）。0 error, 0 mismatch。wide_mem 35, endian 17, cond_select 12, extract 4。 |
-| **427** | vm-e2e 正确性验证（2026-03-23） | ✅ | 4/5 PASS（katran timeout 未修复）。tracee/tetragon/bpftrace/scx OK。 |
-| **428** | **Kernel code review（2026-03-23）** | ✅ | 2 CRITICAL（tools/uapi 头不同步、无 fd_array_cnt 上限）+ 3 HIGH（find_call_site x86 硬编码、text_invalidate 被删、无 try_module_get）。正确性全 PASS。报告：`docs/tmp/20260323/kernel_code_review_20260323.md`。 |
-| **429** | **Packed ABI 验证（2026-03-23）** | ✅ | rotate ✅ packed（-2/site），extract ✅ packed（0/site）。**endian ❌ offset!=0 走 legacy（+4.99/site 膨胀）**。unit tests 不覆盖 packed。 |
-| **430** | **修复 endian packed offset + 删 legacy ABI（2026-03-23）** | ✅ | endian packed 支持 offset ✅、unit tests 走 packed ✅、删除 daemon 全部 legacy emit 路径 ✅。`emit_kfunc_call_legacy()`/`save_caller_saved_regs()`/`restore_caller_saved_regs()` 全部删除。296 cargo tests pass。vm-micro/corpus/e2e 正确性验证 0 mismatch。Commit `5e10be2`。 |
-| **431** | Kernel CRITICAL/HIGH 修复（2026-03-23） | ✅ | tools/uapi 头同步（`BPF_PSEUDO_KINSN_SIDECAR`、REJIT `flags`、`orig_prog_*`）、`fd_array_cnt` 上限=64、`find_call_site()` 改为 x86/ARM64 架构相关扫描、恢复 `bpf_arch_text_invalidate()`、`kinsn_ops` 在 verifier/JIT 期间显式持有 module 引用。验证：`make kernel`、`make vm-selftest`、`make vm-micro-smoke` 全通过。 |
-| **432** | E2E 真实应用模式 + katran 修复 | ✅ 归入 #435 | katran HTTP server 修复（自定义 HTTP/1.0 handler）。5/5 PASS。Commit `a57e41f`。 |
-| **433** | LFENCE/BPF_NOSPEC 消除 | 🔄 设计中 | 安全屏障消除。内核代码分析：`comprehensive_optimization_survey_20260323.md` §A。**设计报告见 #472c**。 |
-| **434** | 全面优化调研（2026-03-23） | ✅ | codex 调研。报告：`docs/tmp/20260323/comprehensive_optimization_survey_20260323.md`、`map_inlining_opportunity_analysis_20260323.md`、`simd_constprop_opportunity_analysis_20260323.md`。 |
-| **435** | E2E 真实应用模式 + katran 修复（2026-03-23） | ✅ | tracee/tetragon 已有真实 binary 流程。katran 改 xdpgeneric + 降并发 + retry。**5/5 PASS**。但 tracee 走 manual fallback（需修为 SKIP）、katran post-REJIT 破坏程序（correctness bug）。 |
-| **436** | **删除 E2E manual fallback 路径（2026-03-23）** | ✅ | 删除 `e2e/cases/tracee/manual.py`（-244 行）。tracee/tetragon 二进制不可用时标 SKIP（"manual .bpf.o fallback is forbidden"）。e2e ALL PASSED。Commit `174bfe5`。 |
-| **437** | **Katran post-REJIT correctness bug（2026-03-23）** | ✅ | Root cause 不是 REJIT bug，是 HTTP server 行为问题（`python3 -m http.server` 的 Connection handling 不可靠）。修复为自定义 HTTP/1.0 handler。Commit `a57e41f`。 |
-| **438** | Endian packed ABI offset 支持 | ✅ 归入 #430 | 在 #430 中一起修复。 |
-| **439** | 删除 daemon legacy ABI 代码 | ✅ 归入 #430 | 在 #430 中一起完成。`emit_kfunc_call_legacy()` 全部删除。 |
-| **440** | Unit tests 覆盖 packed ABI | ✅ 归入 #430 | 在 #430 中一起完成。296 tests pass，全走 packed。 |
-| **441** | Kernel CRITICAL/HIGH 修复（2026-03-23） | ✅ | 同 #431：修复 tools/uapi 头不同步、REJIT `fd_array_cnt` 无上限、`find_call_site()` x86 硬编码、`text_invalidate` 删除、`kinsn_ops` owner 引用问题。验证：`make kernel`、`make vm-selftest`、`make vm-micro-smoke` 全通过。见 #428。 |
-| **442** | 冗余 bounds check 消除 | 🔄 调研中 | BPF packet access 中冗余的 bounds check 消除。从零调研。**调研报告见 #472d**。 |
-| **443** | **Dead code elimination pass（2026-03-24）** | ✅ v1 已实现 | 新增 `daemon/src/passes/dce.rs`：做 **unreachable block elimination**（从每个 subprog entry 做 reachability）+ **`JA +0` NOP cleanup fixed-point**，并复用通用 branch-fixup/address-map helper。默认 pass 顺序改为 `map_inline -> const_prop -> dce -> wide_mem -> ...`。验证：`make daemon-tests` **333 pass**，`make daemon` 通过。设计报告：`docs/tmp/20260324/verifier_constprop_dce_design_20260324.md`。 |
-| **444** | Helper call 内联/优化 | ✅ v1 已实现 | `skb_load_bytes -> direct packet access` 已落地为 `SkbLoadBytesSpecPass`，限定 TC (`SCHED_CLS`/`SCHED_ACT`) + `len<=8` + bytewise fast path；验证：`cargo test ... skb_load` **14/14**，`cargo test ...` **379 pass / 12 ignored**；实现 commit：`bf0742d9540f`。调研报告：`docs/tmp/20260324/helper_call_inlining_research_20260324.md`。 |
-| **445** | Spill/fill 消除 | ❌ 低优先级 | BPF 程序冗余 spill/fill 消除。**调研结论（`comprehensive_optimization_survey_20260323.md`）：内核已有 KF_FASTCALL，增量收益低**。 |
-| **446** | **kinsn 设计文档（2026-03-23）** | ✅ | `docs/kinsn-design.md`（1097 行）。覆盖 packed ABI 编码、daemon→verifier→JIT 数据流、bpf_kinsn_ops API、安全模型、5 个 kinsn 规格、添加新 kinsn 指南。Commit `5e10be2`。 |
-| **447** | **Daemon debug logging（2026-03-23）** | ✅ | `--debug` CLI flag。per-pass 完整 bytecode dump、verifier log（via REJIT log_level=2）、JIT machine code dump。299 tests pass。 |
-| **448** | **Corpus 测量 bug 修复（2026-03-23）** | ✅ | **Root cause**：daemon-socket 模式下 C++ runner 不输出 stock sample，Python fallback 把 recompile sample 当 baseline → ratio=1.0。修复：driver 在 v5_run 前单独跑 stock baseline + 防护 fallback。 |
-| **449** | **bpftrace 脚本修复（2026-03-23）** | ✅ | 5 个脚本语法适配 bpftrace v0.20.2：`->` 替代 `.`、`delete(@map[key])`、`if ($cond)`、`interval:s:1`。6/6 scripts 成功。 |
-| **450** | **Tetragon e2e 修复（2026-03-23）** | ✅ | kprobe `security_socket_connect` → `tcp_connect`（内核缺 `CONFIG_SECURITY_NETWORK`）。增加 agent 退出检测。 |
-| **451** | **Tracee e2e 修复（2026-03-23）** | ✅ | setup.sh 重写适配当前 kernel。tracee/tetragon 都 status: ok。 |
-| **452** | **Kernel 完整审计 v2（2026-03-23）** | ✅ | #428 五个问题全修 ✅。新发现 2 HIGH（refresh 吞错误 err=0、bpf_func publish 缺 barrier）+ 5 MEDIUM + 5 dead code。精确 LOC：1437 代码行 + 162 注释行。报告：`docs/tmp/20260323/kernel_full_review_20260323.md`。 |
-| **453** | Kernel HIGH 修复（refresh err=0 + dead code） | 待做 | H2: trampoline/struct_ops/XDP refresh 失败时静默吞错误，可能 UAF。5 个 dead code 清理。 |
-| **454** | 干净环境性能重跑 | 待做 | 串行跑 vm-micro/vm-corpus/vm-e2e strict params。不并行任何任务。 |
-| **455** | Recompile overhead 测量 | ✅ 数据已有 | daemon pipeline ~2-5ms + kernel REJIT syscall ~3-7ms，从 static_verify.json 和 micro results 可提取。不需额外基础设施，只需汇总分析。 |
-| **456** | ARM64 QEMU 测试 | 待做 | vm-arm64-selftest + vm-arm64-micro-smoke。基础设施已有。 |
-| **457** | **WideMemPass packet pointer verifier 拒绝 bug（2026-03-25）** | ✅ | **Root cause**：XDP/TC 程序中非 R10 寄存器可能是 packet pointer，wide load 被 verifier 拒绝（range tracking 不够/对齐问题）。**修复**：`PassContext` 新增 `prog_type`，WideMemPass 在 XDP/TC/LWT/SK_SKB 程序中 skip 非 R10 base 的 site。`pass.rs` + `wide_mem.rs` + `main.rs`/`commands.rs`。+7 tests，350 daemon tests pass。 |
-| **458** | **Corpus single-VM batch mode（2026-03-23）** | ✅ | `corpus/modes.py` 默认改为单 VM batch：一次 `vng --exec` 跑全部 target，guest 内 `daemon serve` 全程常驻，删除旧的 per-target VM 路径；`vm-corpus` 外部入口不变，JSON + markdown 输出格式保持兼容。 |
-| **459** | **micro_exec keep-alive 模式（2026-03-23）** | ✅ 代码完成 | `runner/src/main.cpp` 无参启动进入 stdin JSON-line keep-alive 模式，BTF 只加载一次。`micro/driver.py` 新增 `MicroExecSession` 复用单个长驻进程。预期 micro 时间 13.5min→3-4min。`make smoke` + llvmbpf 验证通过。 |
-| **460** | **Daemon 静态验证 pipeline（2026-03-23）** | ✅ VM 跑通 | `daemon/tests/static_verify.py` + `make vm-static-test`。130 个 .bpf.o → 342 个程序 → 48 applied → 340 verifier accepted → 2 error（xdp_synproxy）。micro 62/62 全部通过。结果：`daemon/tests/results/static_verify.json`。 |
-| **461** | **BCC libbpf-tools corpus 扩展（2026-03-23）** | ✅ | macro_corpus.yaml +34 条目（16→50），覆盖全部可行 BCC libbpf-tools .bpf.o。7 个合理跳过（uprobe/USDT/dummy section）。 |
-| **462** | **BCC e2e case（2026-03-23）** | ✅ 代码完成 | `e2e/cases/bcc/`：8 个代表性 tool（tcplife/biosnoop/runqlat/execsnoop/opensnoop/capable/vfsstat/tcpconnect），真实 binary 加载，已注册到 `e2e/run.py`。 |
-| **463** | **kinsn v2 instantiate 设计（2026-03-23）** | ✅ 设计完成 | `instantiate_insn()` 方案：kinsn 展开为等价 BPF 指令序列 → verifier 直接 walk → 极简。建议论文前做 compat-v2（保留 sidecar/fd_slot，只切 verifier 从 effect DSL 到 instruction instantiation）。报告：`docs/tmp/20260323/kinsn_v2_instantiate_design_20260323.md`。 |
-| **464** | **Paper submodule + 死代码清理（2026-03-23）** | ✅ pushed | `docs/paper` 替换为 `yunwei37/bpfrejit-paper` submodule。删除 `daemon/tests/policy_v3_golden/`（10 个孤立 v1 YAML）+ 9 个垃圾文件（temp corpus JSON + 空 debug artifacts）。Commits: `91a2be3` + `329ef17`。 |
-| **465** | **VM 管理设计文档（2026-03-23）** | ✅ | 分析现有 VM/ARM64/CI 管理现状 + 统一方案设计（config/machines.yaml、TARGET= 选择、vm_global lock）。报告：`docs/tmp/20260323/vm_management_design_20260323.md`。 |
-| **466** | **Benchmark 框架 review（2026-03-23）** | ✅ | 五大瓶颈识别：corpus per-VM 72%、micro subprocess 83%、PGO sleep 15%、corpus socket wait、correctness/perf 不分离。#458/#459 解决前两个。 |
-| **467** | **Runner 统一第三方 repo 控制面** | 🔄 | **父任务**：`runner/` 成为唯一第三方 BPF 项目注册中心和 fetch/build 入口。**第一批实现已落地**：`runner/repos.yaml`、`runner/scripts/fetch_corpus_repos.py`、`runner/scripts/build_corpus_objects.py`、`runner/libs/repo_registry.py`、`runner/Makefile` repo targets、根 `Makefile` 薄透传。验证：`make corpus-fetch REPOS='bcc'` ✅，`python3 runner/scripts/build_corpus_objects.py --repo bcc --max-sources 2` ✅。剩余消费层和旧路径清理见 #467d/#467f。 |
-| **467a** | `runner/repos.yaml` schema 收口 | ✅ | `corpus/repos.yaml` 已迁到 `runner/repos.yaml`。`corpus/config/macro_corpus.yaml` 已改为读取 `runner/repos.yaml` / `runner/repos` / `runner/inventory.json`。schema 已扩到支持 `cargo_packages` / `promoted_objects` / `forced_includes` 等 repo-specific 字段，并可同时容纳 source-backed 与 prebuilt registry-only 项目；本轮新增 runner 注册项：`scx`、`netbird`、`systemd`，以及 `tracee` / `suricata` / `calico` / `KubeArmor` / `datadog-agent` / `coroot-node-agent` / `loxilb` / `opentelemetry-ebpf-profiler` / `tubular` 等 prebuilt upstream。 |
-| **467b** | `runner/repos/` fetch 后端统一 | ✅ | fetch 入口已迁到 `runner/scripts/fetch_corpus_repos.py`，工作区目标改为 `runner/repos/`。`make corpus-fetch REPOS='bcc'` 实测通过，输出 `runner/inventory.json`。 |
-| **467c** | repo build/harvest 编排收口到 `runner/` | ✅ | build 入口已迁到 `runner/scripts/build_corpus_objects.py`，`runner/Makefile` 新增 `corpus-fetch` / `corpus-build-objects` / `corpus-build`。对象产物仍写入 `corpus/build/`，但 orchestration 已收口到 `runner/`。builder 本轮新增 manifest-driven `forced_includes` 能力，已用于 `netbird` legacy map-def 源和 `systemd` 源的兼容编译；同时支持 prebuilt/registry-only repo 在 `corpus-build` 中走 zero-work no-op，而不是误报失败。 |
-| **467d** | `corpus/` 和 `e2e/` 消费层迁移 | 🔄 | active 路径已继续迁移：`bcc` / `scx` e2e 默认 repo 路径改到 `runner/repos/`，`e2e/run.py` 的 `scx` 默认参数已切到 `runner/repos/scx`，`runner/Makefile` 新增 `e2e-prep` / `scx-artifacts`，`make vm-e2e` 会在进 VM 前自动准备 `runner/repos/scx` 和 `scx_rusty` binary。`corpus` README / `e2e` README 已同步更新；其余 case/配置和遗留硬编码路径继续清理。 |
-| **467e** | Make 入口统一 | ✅ | 根 `Makefile` 新增薄封装 `corpus-fetch` / `corpus-build-objects` / `corpus-build`，全部透传到 `runner/Makefile`。 |
-| **467f** | repo 控制面验证与旧路径清理 | 🔄 | 当前验证：repo manifest 解析 ✅、`make corpus-fetch REPOS='bcc'` ✅、`python3 runner/scripts/build_corpus_objects.py --repo bcc --max-sources 2` ✅、相关 Python 文件 `py_compile` ✅、`make -C runner e2e-prep` ✅、`make corpus-fetch REPOS='netbird systemd'` ✅、`python3 runner/scripts/build_corpus_objects.py --repo netbird --repo systemd --max-sources 3` ✅、`make corpus-fetch REPOS='tracee'` ✅、`python3 runner/scripts/build_corpus_objects.py --repo tracee --max-sources 1` ✅（prebuilt repo 正确走 zero-work no-op）。fetch 路径已支持把 legacy `corpus/repos/<name>` checkout 自动迁移到 `runner/repos/<name>`（已实测迁移 `scx`、`netbird`、`systemd`）。遗留旧路径清理仍未完成。 |
-| **468** | Corpus 补全缺失项目（macro_corpus.yaml） | ✅ | +61 条目：cilium/KubeArmor/loxilb/scx/bpftrace/xdp-tools/xdp-tutorial/netbird/opentelemetry-ebpf-profiler/tubular。加上 #461 BCC +34 条目，macro_corpus.yaml 从原始 ~60 扩展到 ~155 条目。YAML 验证通过。 |
-| **469** | **Runner infra 收口后的构建修复、全量验证与跑速分析** | 🔄 | **支撑任务**：在 #467 / #470 改动落地后统一修复构建与接线问题，并做完整验证，不接受只跑 smoke 收尾。最终验证至少覆盖 `make all`、`make check`、`make vm-static-test`、全量 `vm-micro`、全量 `vm-corpus`、全量 `vm-e2e`；同时分析 benchmark framework 自身运行这些任务时的性能瓶颈，必要时继续优化以缩短总评测时间。**当前状态**：`make all` ✅、`make check` ✅；VM 全量验证与跑速分析继续见 #469b/#469c。 |
-| **469a** | Runner infra 收口后的本地构建验证 | ✅ | `make all` 与 `make check` 已通过，包含 runner `micro_exec`、daemon release build、kernel-tests、daemon-tests、Python tests、local smoke。当前未发现新的构建/链接阻塞；daemon 仍有若干非阻塞 warning。 |
-| **469b** | Runner infra 收口后的全量 VM 验证 | ✅ | 串行全量验证已完成：`make vm-static-test STATIC_VERIFY_ARGS='--mode micro' TARGET=x86` ✅（62 objects / 62 programs / 39 applied / 62 verifier accepted）、`make vm-static-test TARGET=x86` ✅（191 objects / 420 programs / 63 applied / 418 verifier accepted；191 objects 中 58 个因 loader/libbpf 限制 `skip_load`，1 个 object partial，剩余 runtime errors 仍集中在 `xdp_synproxy`）、`make vm-micro TARGET=x86` ✅（`468.87s`）、`make vm-corpus TARGET=x86` ✅（`908.68s`，152 compile/measured pairs，44 applied）、`make vm-e2e TARGET=x86` ✅（`1186.39s`；tracee/tetragon/bpftrace/scx/katran/bcc 全部 OK）。 |
-| **469c** | Benchmark 执行性能瓶颈分析与提速 | 🔄 数据已采集 | 本轮数据表明：1) `vm-micro` 的主成本仍是 guest 内 `kernel-rejit compile`，但 batch 重构最初引入了一次明显回归，根因不是 benchmark 本体，而是 correctness-only 路径错误默认写出了超重 debug artifacts：`vm_micro_20260324_123603` 结果目录达到 `421M`，其中 `details/daemon_debug/` 共 `63` 个 JSON、总计 `417.56 MB`。修复为“默认不写 live_samples/daemon_debug 细节，只在显式 `--write-details` 时开启”后，同参数 `make vm-micro TARGET=x86 ITERATIONS=1 WARMUPS=0 REPEAT=1` 从 `154.23s`（`vm_micro_20260324_122147`）降到 `119.39s`（`vm_micro_20260324_124131`），也快过之前旧路径的 `132.85s`（`vm_micro_20260324_020125`）。2) `vm-corpus` 在 single-VM batch + C++ runner 后已消掉 per-target VM 启动，`REPEAT=1` 的可比成功运行从 `703.35s`（`vm_corpus_20260324_022707`）降到 `514.45s`（`vm_corpus_20260324_121217`）；剩余大头仍是 guest 内 compile/verify，而不是 Python/VM 外壳。3) `vm-static-test` 已迁到 C++ batch path，旧的 Python `bpftool/loadall/process_*` 调度栈已删除；`static_verify_object` 改为 object-level batch jobs，直接用 `libbpf` 打开/加载 object、遍历已加载 prog 并抓 xlated/JIT dump。`cilium/bpf_lxc.bpf.o` 这类在 `bpf_object__open_file()` 阶段即 `Operation not supported` 的对象现在会被稳定归类为 `skip_load`，不再中断整轮验证。4) `vm-e2e` 的长尾主要来自 case/workload 本身，不是 VM 包装层；`scx` 的 host-side repo/binary 前置已收口到 `runner`，重复运行时可直接 skip。5) 已修基础设施固定成本/噪音：`runner.libs.workload` 和 `katran` 的轻量 HTTP helper 对客户端提早断开不再打印 `BrokenPipeError` traceback；`runner/Makefile` 新增按需 `e2e-tracee-setup` / `e2e-tetragon-setup`，warm cache 实测直接 skip（`elapsed_s=0.00`）。下一步提速重点：#457、进一步压缩 guest 内 compile/verify 总量、剩余 e2e setup/download 缓存细化。 |
-| **470** | **Runner 统一 VM/机器调度控制面** | 🔄 | **父任务**：所有 VM/远端机器的注册、选择、排队、串行执行、guest 初始化和 VM 相关构建编排全部收口到 `runner/`。**前两批实现已落地**：`runner/machines.yaml`、`runner/libs/machines.py`、`runner/scripts/with_vm_lock.py`、`runner/libs/vm.py` 的机器解析 + 串行锁/队列状态；新增 `runner/scripts/run_vm_shell.py` 和 `runner/Makefile` 内的 `vm-*` 目标，根 `Makefile` 的 VM 入口已降为薄透传。验证：`py_compile` ✅、`resolve_machine()` / `build_vng_command()` ✅、两个并发 `with_vm_lock.py` 任务自动排队串行完成（总耗时 `2.59s`，第二个任务 `wait_seconds=1.82s`）✅、`make -n vm-test TARGET=x86` 显示根入口已透传到 `runner/Makefile` ✅。剩余 backend/consumer 收口见 #470c/#470e/#470f。 |
-| **470a** | `runner/machines.yaml` 机器注册中心 | ✅ MVP | `runner/machines.yaml` 已落地，注册本地 x86 vng、本地 ARM64 QEMU、AWS ARM64，并提供 alias、`default_targets`、`backend`、`arch`、`executable`、`cpus`、`memory`、`lock_scope`。后续可继续扩展 kernel/rootfs/build profile 字段，但中心注册入口已建立。 |
-| **470b** | 自动排队 + 串行执行层 | ✅ MVP | `runner/scripts/with_vm_lock.py` + `runner/libs/machines.py` 已提供 file-backed queue state 和 `vm_global` lock；VM 相关命令现在可自动排队并串行执行，而不是只靠人工约束。并发验证：两个任务总耗时 `2.59s`，第二个任务记录 `wait_seconds=1.82s`。 |
-| **470c** | VM backend adapter 收口 | 🔄 | `runner/libs/vm.py` 已接管 `vng` backend 的命令拼装、锁包装和机器解析；`runner/scripts/run_vm_shell.py` 进一步把“guest 内运行 shell 命令”的 x86 VM 路径收口到 runner。`qemu-system-aarch64`、AWS SSH、CI runner adapter 仍待继续收口。 |
-| **470d** | 根 `Makefile` 薄封装化 | ✅ | 根 `Makefile` 的 `vm-test` / `vm-selftest` / `vm-static-test` / `vm-negative-test` / `vm-micro-smoke` / `vm-micro` / `vm-corpus` / `vm-e2e` 已改成薄透传到 `runner/Makefile`，不再内联 `vng` 命令、guest init、queue/lock 或 e2e 预下载逻辑。 |
-| **470e** | `micro/` / `corpus/` / `e2e/` VM 路径迁移 | 🔄 | `micro/driver.py`、`corpus/modes.py`、`daemon/tests/static_verify.py` 的执行热路径都已继续收口：Python 仍负责 YAML/control-plane 选择，但实际 job 执行改为一次调用 `runner/build/micro_exec run-batch` 的 C++ batch runner；`static_verify` 的旧 `bpftool/loadall/process_*` Python 调度代码已删除。`corpus/modes.py` 仍通过 `runner.libs.vm.build_vng_command()` 生成 VM 命令；`e2e/cases/scx/case.py` 已通过 `run_in_vm(..., action=\"vm-e2e\")` 接入 runner 调度语义。剩余待迁移的是 `e2e/run.py` 和其他 case 的具体执行循环。 |
-| **470f** | 调度控制面验证 | ✅ 主线已通 | 已完成基础验证：`py_compile` ✅、机器解析 ✅、命令生成 ✅、并发队列/锁串行化 ✅。端到端验证也已在 #469b 跑完：`make vm-static-test` / `make vm-micro` / `make vm-corpus` / `make vm-e2e` 全部通过；剩余工作已转为性能优化与个别 backend/case 的继续收口。 |
-| **471** | **用户态 benchmark 框架死代码清理（2026-03-24）** | ✅ | corpus/modes.py 删 3 函数 + 1 import（invocation_summary/paired_stock_invocation_summary/text_invocation_summary/parse_runner_samples import）、MODE_NAMES 常量。micro/benchmark_catalog.py 删 3 无用全局变量（DEFAULT_SUITE/AVAILABLE_BENCHMARKS/AVAILABLE_RUNTIMES）。micro/driver.py 删 read_git_sha()（和 _git_rev_parse 重复）。Commits `d3879ba`+`3b98b53`+`eeef9f4`。 |
-| **472** | **⚠️ 未实现优化深度调研（2026-03-24）** | 🔄 | **父任务**：8 份独立调研/设计报告，覆盖 plan §3 中所有已列出但未设计的优化。全部 codex 并行执行中。 |
-| **472a** | #423 Dynamic map inlining + invalidation 设计报告 | 🔄 codex 执行中 | 已有机会分析（`map_inlining_opportunity_analysis_20260323.md`），本轮做具体设计：稳定性检测、invalidation 机制、bytecode rewrite 算法、verifier 交互、daemon pass 设计、case study、break-even 模型。→ `docs/tmp/20260324/dynamic_map_inlining_design_20260324.md` |
-| **472b** | #424 Verifier const prop + #443 DCE 深度调研+设计 | 🔄 codex 执行中 | 已有统计（`simd_constprop_opportunity_analysis_20260323.md` Part 2），本轮做：log_level=2 格式精确解析、可利用常量状态分类、verifier 接受性验证、DCE 算法、pass 交互顺序、case study。→ `docs/tmp/20260324/verifier_constprop_dce_design_20260324.md` |
-| **472c** | #433 LFENCE/BPF_NOSPEC 消除设计报告 | ✅ | 已有内核代码分析（`comprehensive_optimization_survey_20260323.md` §A），本轮做：corpus NOSPEC 统计、安全判断算法、verifier 交互（pre-fixup bytecode → verifier 重新决定插不插）、safe-load 替代方案、case study。→ `docs/tmp/20260324/lfence_nospec_elimination_design_20260324.md` |
-| **472d** | #442 冗余 bounds check 消除从零调研 | ✅ | 从零开始：bounds check bytecode pattern、冗余定义（dominator 关系）、corpus XDP/TC 统计、消除算法（interval analysis）、verifier 接受性（合并 vs 删除）、case study。→ `docs/tmp/20260324/bounds_check_elimination_research_20260324.md` |
-| **472e** | 128-bit wide load-store 全新调研 | ✅ | 新课题：ARM64 LDP/STP、x86 MOVDQU/REP MOVSB、corpus 连续相邻 load/store 频率、和 wide_mem 关系、kinsn 设计、verifier 挑战。→ `docs/tmp/20260324/128bit_wide_loadstore_research_20260324.md` |
-| **472f** | ADDR_CALC (LEA) 从零调研 | ✅ | 报告：`docs/tmp/20260324/addr_calc_lea_research_20260324.md`。**主结论**：strict `mov+shift+add` LEA pattern 在当前 `corpus/build` 里仅 **14 sites / 7 objects**，**100% 来自 tetragon**，且全是 `scale=4, disp=0`；x86 strict LEA **ROI 低，不建议第一波实现**。补充观察：ARM64 broader shifted-add（特别是 `shift=4`）覆盖远大于 x86 LEA，应视为 separate family。 |
-| **472g** | #421 SIMD kinsn 设计报告 | ✅ | 已有机会分析（`simd_constprop_opportunity_analysis_20260323.md` Part 1），本轮做：技术路线决策（rep movsb vs SSE2 vs AVX2）、kinsn module 设计、daemon pass、ARM64 设计、corpus case。→ `docs/tmp/20260324/simd_kinsn_design_20260324.md` |
-| **472h** | #444 Helper call 内联/特化调研 | ✅ | 报告：`docs/tmp/20260324/helper_call_inlining_research_20260324.md`。主结论：`skb_load_bytes` 是最适合先做的纯 bytecode helper specialization；`skb_store_bytes` 只适合 `flags=0` 窄子集；`probe_read_kernel` 必须保留 nofault/fault-handling 语义；`ktime_get_ns` 只能走新 intrinsic/helper-inline contract。 |
-| **473** | **Related Work 系统性文献整理 + 对比分析（2026-03-24）** | ✅ | codex 完成基于 primary sources 的全面 related-work survey，覆盖 K2/Merlin/EPSO/ePass/BCF、Jitterbug/Jitk/PREVAIL/Agni/VEP/BeeBox/VeriFence、bpftime/llvmbpf/uXDP/hXDP/eHDL/femto-containers，以及 HotSpot/V8/LLVM ORC/livepatch 等类比系统；输出逐篇分析、大对比表、按维度差异化分析与 BpfReJIT novelty 总结。报告：`docs/tmp/20260324/related_work_comprehensive_analysis_20260324.md`。 |
-| **474** | **⚠️ Map Inlining + Const Prop + DCE 实现（论文核心 story）** | 🔄 | **父任务**：分阶段实现 dynamic map inlining 及其级联优化链。当前进度：**474a/474b/474c/474d/474e/474f 已完成**，默认 pipeline 已接入 `map_inline -> const_prop -> dce -> wide_mem -> ...`，`serve` / `watch` invalidation loop 也已落地；后续主线剩 **474g verifier-assisted classification**。Corpus 数据支撑：11556 个 map_lookup_elem site；Katran 22→2 条（-91%）；Tetragon 447→2（-99.6%）。设计文档：`dynamic_map_inlining_design_20260324.md` + `verifier_constprop_dce_design_20260324.md`。 |
-| **474a** | MapInlinePass v0：ARRAY + const key + scalar loads | ✅ | v0 已完成：`MapInfoAnalysis` + `find_map_lookup_sites` + `extract_constant_key` + rewrite + ARRAY null check 消除 + branch fixup。daemon tests 已通过。 |
-| **474b** | MapInlinePass v1：struct value 多字段 + HASH map 稳定 entry | ✅ | 已完成：支持 **多个 fixed-offset `LDX_MEM` 字段读取**（struct value 多字段分别替换为 `MOV/LD_IMM64`）；支持 **HASH/LRU_HASH speculative inline**，daemon 成功读值时只 inline **non-null path**，保留 runtime lookup + null check，并在 pass diagnostics 里标记 speculative site。 |
-| **474c** | ConstPropPass：利用 map inline 产出的常量做传播 | ✅ | 已完成：新增 `daemon/src/passes/const_prop.rs`，跟踪 `MOV_IMM/LD_IMM64` 常量状态，折叠常量 ALU，并把常量条件分支改写为 `JA/NOP`。默认 pass 顺序已改为 `map_inline -> const_prop -> wide_mem -> rotate -> ...`。 |
-| **474d** | **DCEPass：dead branch + unreachable block elimination（2026-03-24）** | ✅ v1 | 已完成 v1：`daemon/src/passes/dce.rs` 在 `const_prop` 后执行，消费折叠后的 `JA/NOP`，删除不可达 basic block，并循环删除 `JA +0` NOP 直到 fixed point；dead register def elimination 暂缓。已补单测覆盖 dead branch、NOP cleanup 和 subprog 保留，`make daemon-tests` 通过。 |
-| **474e** | 全量测试 + 性能验证（2026-03-25） | ✅ | **vm-static-test**: 62/62 verifier accepted, 53 applied, avg -36 insns, avg -161 bytes。**vm-micro**: 62/62 correct, 4800 sites applied, geomean 1.00x（micro 无 map lookup，中性）。**vm-corpus**: 152 measured, 72 applied, **exec geomean 0.854x（rejit 快 ~17%，从 9% 提升到 17%）**。**vm-e2e**: Katran BPF **+8.8%**（speedup 0.919, app +1.4%, P99 -1.2%）；Tracee/Tetragon REJIT 失败（"no direct value access support for this map type" + "unreachable insn" — map_inline 对不支持直接值访问的 map 类型触发 verifier 拒绝）；BCC/bpftrace/scx completed 但无有效对比。结果：`vm_micro_20260325_053433` + `vm_corpus_20260325_053936` + `e2e/results/*_20260325_06*`。 |
-| **474f** | Dynamic invalidation（watch/serve 模式） | ✅ | `MapInvalidationTracker` 已接入 daemon pipeline：`MapInlinePass` 输出 `(map_id, key, expected_value)` 记录，`commands::try_apply_one()` 成功应用后刷新 tracker；`serve` / `watch` 每秒轮询 invalidation，命中后自动重新 REJIT，若新值导致 map_inline 不再可改写则回退到原始 bytecode 并清理 tracking。测试：`cargo test --manifest-path daemon/Cargo.toml invalidation` **12/12**，以及 `cargo test --manifest-path daemon/Cargo.toml` **436 pass / 12 ignored**。tracker primitive 实现 commit：`eb9b5fe`。 |
-| **474g** | Verifier-assisted map classification | 待做 | 利用 REJIT log_level=2 的 verifier state 自动识别：哪些 map_lookup 的 key 是常量、哪些 map 是 ARRAY/HASH、value 的字段 layout。避免手动数据流分析，让 verifier 做大部分工作。 |
-| **474h** | Frozen map 特殊路径 | ⏸ 降优先级 | 移除 frozen requirement + 接通 invalidation loop 后，frozen map 不再是 correctness gate。后续如果需要，可把 frozen map 作为“无需 tracking 的 permanent inline”小优化；不影响主线。 |
-| **475** | **⚠️ kinsn 统一到 kfunc 路径（消除平行子系统）（2026-03-25）** | 📝 设计完成 | **目标**：消除 kinsn 在 kfunc 旁边建的平行基础设施（独立 UAPI pseudo、独立注册表、独立 desc/BTF 查找、独立 JIT dispatch），统一到标准 kfunc 路径。**核心方案**：module 导出真实 kfunc（`struct bpf_kinsn *bpf_rotate64(void) { return &rotate; }`），用标准 `register_btf_kfunc_id_set()` + `KF_KINSN` flag 注册；daemon emit 的 CALL 改为 `BPF_PSEUDO_KFUNC_CALL` 编码（imm=func btf_id）；verifier 早期 normalize shim 把旧 `PSEUDO_KINSN_CALL` 归一化为 `PSEUDO_KFUNC_CALL`；`check_kfunc_call()` 看到 `KF_KINSN` → proof lowering 旁路（instantiate_insn → verifier walk）；`fixup_kfunc_call()` 对 `KF_KINSN` 跳过 imm rewrite；JIT 在 kfunc CALL 路径内按 `KF_KINSN` 分派到 `emit_x86/emit_arm64`。**保留不变**：sidecar packed ABI、verifier proof lowering/restore 语义、native emit 回调。**可删除**：`kinsn_tab`（prog_aux + btf）、`register_bpf_kinsn_set()`/`unregister`/`btf_try_get_kinsn_desc()`、`add_kinsn_call()`、`fetch_kinsn_desc_meta()`、`bpf_jit_find_kinsn_desc()`/`bpf_jit_get_kinsn_payload()` 独立入口、`BPF_PSEUDO_KINSN_CALL` UAPI（降为 compat shim）、独立 JIT dispatch 分支、BTF_KIND_VAR descriptor 构建链。**预估**：内核 diff 净减 ~150-260 行，消除"平行子系统"审查阻力。调研报告：`docs/tmp/20260325/kinsn_kfunc_unification_research_20260325.md`（opus）+ `docs/tmp/20260325/kinsn_kfunc_unification_codex_research_20260325.md`（codex）。 |
-| **475a** | Module 补真实 kfunc stub + daemon 切 FUNC discovery | 待做 | 10 个 module 文件（x86×5 + arm64×5）各补一个 `noinline struct bpf_kinsn *bpf_xxx(void) { return &desc; }` + `BTF_ID_FLAGS(func, ..., KF_KINSN)` + `register_btf_kfunc_id_set()`。daemon `kfunc_discovery.rs` 从 `find_var_btf_id()` 切到 `find_func_btf_id()`。 |
-| **475b** | Verifier/JIT 旁路 + 早期 normalize shim | 待做 | 引入 `KF_KINSN` internal flag。`add_subprog_and_kfunc()` 早期把 `PSEUDO_KINSN_CALL` normalize 为 `PSEUDO_KFUNC_CALL`。`check_kfunc_call()` 对 `KF_KINSN` 转 proof lowering。`fixup_kfunc_call()` 对 `KF_KINSN` 跳过。JIT kfunc CALL 路径内加 `KF_KINSN` 分支。 |
-| **475c** | 删除旧平行基础设施 | 待做 | 删除 `kinsn_tab`、`register_bpf_kinsn_set()`、`btf_try_get_kinsn_desc()`、`add_kinsn_call()`、独立 JIT dispatch、`BPF_PSEUDO_KINSN_CALL`（或降为 normalize shim）。更新全部 daemon tests 和 vm-selftest。 |
-| **476** | **⚠️ 测试基础设施完善 + bug 修复（2026-03-25/26）** | ✅ | **测试基础设施**：(1) `rejit_swap_tests.c` 5 tests（metadata/concurrent/tail_call/orig_insns）。(2) `rejit_verifier_negative_tests.c` 4 tests（daemon bug verifier 回归：scalar→map_value/unreachable insn/invalid call/unsupported map type）。(3) `rejit_pass_correctness.c` 16 tests（每个 BPF prog identity REJIT 正确性验证）。(4) C++ runner retval correctness check（paired measurement stock vs recompile retval 对比）。(5) `tests/negative/` adversarial(23)+fuzz(1000) 接入 vm-selftest。(6) vm-selftest.sh 自动发现 `rejit_*` binary + host 预编译。(7) ARM64 QEMU 验证 53 pass。(8) `tests/kernel/` v1 遗留删除，16 个 BPF progs 迁移到 `tests/unittest/progs/`。**Bug 修复**：(1) daemon const_prop 丢弃 map_value 指针类型（`const_prop.rs:202`）。(2) daemon map_inline 对不支持直接值访问的 map 类型没有过滤（`map_info.rs:supports_direct_value_access()`）。(3) daemon DCE orphaned subprog（`utils.rs:eliminate_unreachable_blocks_with_cfg()`）。(4) 内核 `bpf_prog_get_info_by_fd()` metadata 竞态（`syscall.c:5772 guard(mutex)`）。(5) 内核 `bpf_prog_get_stats()` null deref（`syscall.c:2466`）。(6) 内核 swap 遗漏 `tail_call_reachable`/`arena`/`ctx_arg_info`。(7) 内核 `smp_wmb()` → `smp_store_release()`。(8) host `panic_on_oops=1` 移除。**验证结果**：vm-selftest x86 13 suites ALL PASSED；ARM64 53 pass；vm-micro 62/62 **0 correctness mismatch** 1591 sites；vm-corpus 131 targets 76 compile 55 measured 20 applied。**注意**：corpus `packet` mode 不做 retval 对比（无 TEST_RUN），retval check 只对 micro 和 corpus `compile` mode 有效。**残留 P1**：(1) `bpf_prog_rejit_swap()` one-way copy 导致 rollback 不可逆（需 kernel fault injection）。(2) `find_call_site()` 只返回第一个匹配（libbpf 限制无法测试）。**调查报告**：`docs/tmp/20260325/kernel_remaining_bugs_20260325.md`、`crash_path_trace_opus/codex_20260325.md`、`kernel_bug_root_cause_opus/codex_20260325.md`、`kernel_patch_strict_final_review_20260325.md`、`arm64_test_results_20260325.md`。 |
+| **420** | **kinsn_ops 完整实现** | ✅ | **53/62 applied, 1612 sites**（rotate 701, extract 524, endian 256）。vm-selftest **70/70 PASS**。Commit `8c1dd22`。Review：`docs/tmp/20260323/kinsn_implementation_review_20260323.md`。 |
+| 421 | SIMD kinsn module | 🔄 | **设计报告见 #472g**。x86 SIMD 不做（FPU 开销），ARM64 NEON 条件性 Phase 2。 |
+| 422 | Frozen map inlining | ❌ 不做 | 真实 workload 无显式 freeze。报告：`map_inlining_opportunity_analysis_20260323.md`。 |
+| 423 | **Dynamic map inlining + invalidation** | ✅ | ARRAY 全消除 + HASH speculative inline + invalidation tracker。**设计报告见 #472a**。 |
+| 424 | Verifier-assisted const prop | 🔄 | v1 已落地（`const_prop.rs`），verifier log 版待做。**设计报告见 #472b**。 |
+| 425 | vm-micro 正确性验证 | ✅ | **53/62 applied, 0 mismatch**。kinsn pass 生效。 |
+| 426 | vm-corpus 正确性验证 | ✅ | 152 measured, **56 applied**（14x 提升）。0 mismatch。 |
+| 427 | vm-e2e 正确性验证 | ✅ | 4/5 PASS（katran timeout）。 |
+| 428 | Kernel code review | ✅ | 2 CRITICAL + 3 HIGH。报告：`docs/tmp/20260323/kernel_code_review_20260323.md`。 |
+| 429 | Packed ABI 验证 | ✅ | rotate/extract ✅。endian offset 需修（#430）。 |
+| 430 | endian packed + 删 legacy ABI | ✅ | 全部走 packed。删 legacy emit。**296 tests**。Commit `5e10be2`。 |
+| 431 | Kernel CRITICAL/HIGH 修复 | ✅ | uapi 头同步、fd_array_cnt 上限、module 引用。 |
+| 432 | katran HTTP server 修复 | ✅ | 归入 #435。Commit `a57e41f`。 |
+| 433 | LFENCE/BPF_NOSPEC 消除 | 🔄 | **设计报告见 #472c**。 |
+| 434 | 全面优化调研 | ✅ | 3 份报告：`docs/tmp/20260323/comprehensive_optimization_survey_20260323.md` 等。 |
+| 435 | E2E 真实应用模式 | ✅ | katran xdpgeneric + retry。**5/5 PASS**。 |
+| 436 | 删除 E2E manual fallback | ✅ | 删 `manual.py`（-244 行）。Commit `174bfe5`。 |
+| 437 | Katran post-REJIT correctness bug | ✅ | HTTP server 行为问题（非 REJIT bug）。Commit `a57e41f`。 |
+| 438-440 | endian packed / legacy ABI / packed tests | ✅ | 归入 #430。 |
+| 441 | Kernel CRITICAL/HIGH 修复 | ✅ | 同 #431（重复条目）。 |
+| 442 | 冗余 bounds check 消除 | 🔄 | **调研报告见 #472d**。 |
+| 443 | DCE pass | ✅ | `dce.rs`：unreachable block + NOP cleanup。设计：`docs/tmp/20260324/verifier_constprop_dce_design_20260324.md`。 |
+| 444 | skb_load_bytes 特化 | ✅ | `SkbLoadBytesSpecPass`。TC only, len≤8。Commit `bf0742d9540f`。报告：`docs/tmp/20260324/helper_call_inlining_research_20260324.md`。 |
+| 445 | Spill/fill 消除 | ❌ | 内核已有 KF_FASTCALL。 |
+| 446 | kinsn 设计文档 | ✅ | `docs/kinsn-design.md`（1097 行）。Commit `5e10be2`。 |
+| 447 | Daemon debug logging | ✅ | `--debug` per-pass dump。299 tests。 |
+| 448 | Corpus 测量 bug 修复 | ✅ | daemon-socket 模式下 stock sample 缺失。 |
+| 449 | bpftrace 脚本修复 | ✅ | 语法适配 v0.20.2。 |
+| 450 | Tetragon e2e 修复 | ✅ | kprobe→tcp_connect。 |
+| 451 | Tracee e2e 修复 | ✅ | setup.sh 重写。 |
+| 452 | Kernel 完整审计 v2 | ✅ | **1437 LOC**。2 HIGH + 5 MED 新发现。报告：`docs/tmp/20260323/kernel_full_review_20260323.md`。 |
+| 453 | Kernel HIGH 修复 | 待做 | refresh 吞错误 + dead code。 |
+| 454 | 干净环境性能重跑 | 待做 | 串行 strict params。 |
+| 455 | Recompile overhead | ✅ | daemon ~2-5ms + REJIT ~3-7ms。见 #491 详细。 |
+| 456 | ARM64 QEMU 测试 | 待做 | vm-arm64-selftest + smoke。 |
+| 457 | WideMemPass packet pointer fix | ✅ | XDP/TC skip 非 R10 base。+7 tests，**350 tests**。 |
+| 458 | Corpus single-VM batch | ✅ | 单 VM + daemon serve 全程常驻。删 per-target VM 路径。 |
+| 459 | micro_exec keep-alive | ✅ | stdin JSON-line 模式。BTF 只加载一次。micro 13.5min→3-4min。 |
+| 460 | Daemon 静态验证 pipeline | ✅ | 342 程序→48 applied→340 accepted。`make vm-static-test`。 |
+| 461 | BCC corpus 扩展 | ✅ | +34 条目（16→50）。 |
+| 462 | BCC e2e case | ✅ | 8 个 tool，真实 binary。 |
+| 463 | kinsn v2 instantiate 设计 | ✅ | 报告：`docs/tmp/20260323/kinsn_v2_instantiate_design_20260323.md`。 |
+| 464 | Paper submodule + 清理 | ✅ | Commits `91a2be3`/`329ef17`。 |
+| 465 | VM 管理设计 | ✅ | 报告：`docs/tmp/20260323/vm_management_design_20260323.md`。 |
+| 466 | Benchmark 框架 review | ✅ | 五大瓶颈。#458/#459 解决前两个。 |
+| 467 | **Runner 统一第三方 repo 控制面** | 🔄 | `runner/repos.yaml` + fetch(`fetch_corpus_repos.py`) + build(`build_corpus_objects.py`) + Make 薄封装均已落地。bcc/scx 消费层已迁。**剩余**：其余消费层硬编码路径 + 遗留旧路径清理。 |
+| 468 | Corpus 补全 | ✅ | +61 条目。~60→~155。 |
+| 469 | Runner infra 全量验证+提速 | 🔄 | `make all`/`check` ✅。VM 全量通过（static-test/micro/corpus/e2e）。debug artifact 默认关闭后 micro 154→119s，corpus 703→514s。 |
+| 470 | Runner VM/机器调度控制面 | 🔄 | `machines.yaml` + `with_vm_lock.py` 自动排队串行 + Makefile 薄封装。端到端验证通过。**剩余**：QEMU/AWS SSH backend adapter + e2e/run.py VM 路径迁移。 |
+| 471 | benchmark 死代码清理 | ✅ | 删 v1 helpers。Commits `d3879ba`/`3b98b53`/`eeef9f4`。 |
+| 472 | **未实现优化深度调研** | ✅ | 8 份设计/调研报告全部完成，均在 `docs/tmp/20260324/`：(a) `dynamic_map_inlining_design`、(b) `verifier_constprop_dce_design`、(c) `lfence_nospec_elimination_design`、(d) `bounds_check_elimination_research`、(e) `128bit_wide_loadstore_research`、(f) `addr_calc_lea_research`（**14 sites，ROI 低**）、(g) `simd_kinsn_design`、(h) `helper_call_inlining_research`（`skb_load_bytes` 最可行）。 |
+| 473 | Related Work survey | ✅ | → `docs/tmp/20260324/related_work_comprehensive_analysis_20260324.md` |
+| 474 | **Map Inlining + Const Prop + DCE（论文核心）** | 🔄 | MapInlinePass v0(ARRAY)+v1(struct/HASH speculative) + ConstPropPass(ALU/分支折叠) + DCEPass(unreachable+NOP) + `MapInvalidationTracker`(serve/watch 1s 轮询，commit `eb9b5fe`) 全部落地。Pipeline: `map_inline → const_prop → dce`。**11556 lookup sites；Katran -91%；Tetragon -99.6%**。corpus 72 applied, **exec geomean 0.854x**（+17%）。Katran BPF **+8.8%**。设计：`docs/tmp/20260324/dynamic_map_inlining_design_20260324.md` + `docs/tmp/20260324/verifier_constprop_dce_design_20260324.md`。**剩余**：474g verifier-assisted map classification（log_level=2 自动识别常量 key/map type/value layout）。474h frozen map ⏸。 |
+| **475** | **kinsn 统一到 kfunc 路径** | 📝 设计完成 | 消除平行子系统，统一到 `KF_KINSN` + `PSEUDO_KFUNC_CALL`。净减 ~150-260 行 kernel。报告：`docs/tmp/20260325/kinsn_kfunc_unification_research_20260325.md`、`docs/tmp/20260325/kinsn_kfunc_unification_codex_research_20260325.md`。**待做**：(1) 10 module 补 kfunc stub + daemon 切 FUNC discovery；(2) verifier/JIT `KF_KINSN` 旁路 + normalize shim；(3) 删旧 `kinsn_tab`/`register_bpf_kinsn_set()`/独立 JIT dispatch。 |
+| **476** | **测试基础设施 + bug 修复（2026-03-25/26）** | ✅ | **测试**：rejit_swap(5) + rejit_verifier_negative(4) + rejit_pass_correctness(16) + retval check + fuzz(1000) + ARM64 53 pass。**Bug 修复**：daemon const_prop/map_inline/DCE 3 个 + 内核 metadata 竞态/null deref/swap 遗漏/smp_wmb 4 个。**验证**：vm-selftest x86 **13 suites ALL PASSED**；vm-micro **62/62 0 mismatch 1591 sites**。**残留 P1**：swap one-way copy + find_call_site 单匹配。报告：`docs/tmp/20260325/kernel_remaining_bugs_20260325.md`、`kernel_patch_strict_final_review_20260325.md`、`arm64_test_results_20260325.md`。 |
 | **477** | **框架死代码清理（2026-03-26）** | ✅ | 删除 ~1314 行死代码：(1) corpus 删除所有 mode 概念（tracing/perf/code-size/packet），`driver.py` 直接调用 `packet_main()`，不再需要 mode 参数。(2) 删除 `runner/libs/attach.py`（860 行，全仓库无引用）。(3) 删除 `micro/driver.py --rejit` 无效 flag。(4) 清理 unused imports。**验证**：vm-micro 62/62 0 mismatch ✅；corpus 764 targets 471 compile 292 measured 113 applied ✅。**审查报告**：`docs/tmp/20260326/corpus_modes_audit_20260326.md`、`docs/tmp/20260326/benchmark_framework_dead_code_audit_20260326.md`。**注意**：`make vm-corpus` 通过 Makefile/runner 包装层有 output 截断问题，但 `python3 corpus/driver.py` 直接跑正常。 |
 | **477** | **⚠️ CRITICAL: REJIT subprog kallsyms 双重删除 kernel panic（2026-03-25）** | ✅ | **Root cause**：`bpf_prog_rejit_swap()` 先 `kallsyms_del_all(prog)` poison 旧 subprogs lnode，再 swap func[] 到 tmp，cleanup 时 `__bpf_prog_put_noref(tmp)` 对 poisoned lnode 再次 `list_del_rcu` → GPF。**修复**：swap 后对 tmp 旧 subprogs 的 ksym.lnode 做 `INIT_LIST_HEAD_RCU()`（+10 行 syscall.c）。**验证**：新增 Test 6 `parallel_subprog_rejit`（8 prog × 20 REJIT = 160 次，含 bpf2bpf call），修复前 panic 修复后 6/6 PASS。`make vm-static-test`：191 objects / 616 programs / **217 applied** / 576 verifier accepted / 0 crash。报告：`docs/tmp/20260325/rejit_kallsyms_crash_report_20260325.md`。 |
 | **480** | **Corpus 全 prog type 覆盖（2026-03-25）** | ✅ | **(1)** C++ runner `run-kernel-attach`（libbpf attach + bpf_enable_stats）。**(2)** batch plan `kernel-attach` 分支。**(3)** 删除 65K 行 inventory.json，改为 `macro_corpus.yaml` 驱动。**(4)** YAML 131→764 条目（322 test_run + 390 attach + 52 compile_only），覆盖 2019/2019 程序 100%。**(5)** **结果**：`make vm-corpus` 从 152 targets/69 applied → **764 targets / 471 compile / 292 measured / 113 applied**（2026-03-26 最新）。 |

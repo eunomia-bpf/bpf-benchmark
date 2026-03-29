@@ -559,8 +559,9 @@ pub(crate) fn try_apply_one(
             let verify_result =
                 match bpf::bpf_prog_load_verify(prog_load_meta, &verify_insns, &fd_array) {
                     Ok(result) => {
-                        let _verifier_log = result.verifier_log;
-                        pass::PassVerifyResult::accepted()
+                        let _log_true_size = result.log_true_size;
+                        let states = verifier_log::parse_verifier_log(&result.verifier_log);
+                        pass::PassVerifyResult::accepted_with_verifier_states(states)
                     }
                     Err(err) => {
                         let err_msg = format!("{:#}", err);
