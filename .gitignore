@@ -141,6 +141,9 @@ docs/tmp/*.sh
 !docs/tmp/
 !e2e/results/
 
+# Corpus run guest-inputs snapshots (build artifacts copied into VM, ~600MB+)
+runner/corpus/results/*/guest-inputs/
+
 # Cached E2E tool binaries (downloaded by setup scripts)
 e2e/cases/tracee/bin/
 e2e/cases/tetragon/bin/
