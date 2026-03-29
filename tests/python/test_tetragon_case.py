@@ -10,6 +10,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from e2e.cases.tetragon import case
+from runner.libs.app_runners import tetragon_support
 from runner.libs.workload import WorkloadResult
 
 
@@ -120,14 +121,14 @@ class _FakeProcess:
 
 
 def test_tetragon_session_preserves_startup_failure_when_cleanup_times_out(monkeypatch) -> None:
-    session = case.TetragonAgentSession(["/usr/local/bin/tetragon"], 20)
+    session = tetragon_support.TetragonAgentSession(["/usr/local/bin/tetragon"], 20)
     session.collector.snapshot = lambda: {"stderr_tail": ["startup log"], "stdout_tail": []}  # type: ignore[method-assign]
 
-    monkeypatch.setattr(case, "current_prog_ids", lambda: [])
-    monkeypatch.setattr(case, "start_agent", lambda *_args, **_kwargs: _FakeProcess())
-    monkeypatch.setattr(case, "wait_healthy", lambda *_args, **_kwargs: False)
+    monkeypatch.setattr(tetragon_support, "current_prog_ids", lambda: [])
+    monkeypatch.setattr(tetragon_support, "start_agent", lambda *_args, **_kwargs: _FakeProcess())
+    monkeypatch.setattr(tetragon_support, "wait_healthy", lambda *_args, **_kwargs: False)
     monkeypatch.setattr(
-        case,
+        tetragon_support,
         "stop_agent",
         lambda *_args, **_kwargs: (_ for _ in ()).throw(
             subprocess.TimeoutExpired(["/usr/local/bin/tetragon"], 3)
@@ -144,19 +145,19 @@ def test_tetragon_session_preserves_startup_failure_when_cleanup_times_out(monke
 
 
 def test_tetragon_session_preserves_empty_program_failure_when_cleanup_times_out(monkeypatch) -> None:
-    monkeypatch.setattr(case, "current_prog_ids", lambda: [])
-    monkeypatch.setattr(case, "start_agent", lambda *_args, **_kwargs: _FakeProcess())
-    monkeypatch.setattr(case, "wait_healthy", lambda *_args, **_kwargs: True)
-    monkeypatch.setattr(case, "current_programs", lambda: [])
+    monkeypatch.setattr(tetragon_support, "current_prog_ids", lambda: [])
+    monkeypatch.setattr(tetragon_support, "start_agent", lambda *_args, **_kwargs: _FakeProcess())
+    monkeypatch.setattr(tetragon_support, "wait_healthy", lambda *_args, **_kwargs: True)
+    monkeypatch.setattr(tetragon_support, "current_programs", lambda: [])
     monkeypatch.setattr(
-        case,
+        tetragon_support,
         "stop_agent",
         lambda *_args, **_kwargs: (_ for _ in ()).throw(
             subprocess.TimeoutExpired(["/usr/local/bin/tetragon"], 3)
         ),
     )
 
-    session = case.TetragonAgentSession(["/usr/local/bin/tetragon"], 20)
+    session = tetragon_support.TetragonAgentSession(["/usr/local/bin/tetragon"], 20)
 
     with pytest.raises(RuntimeError) as excinfo:
         session.__enter__()

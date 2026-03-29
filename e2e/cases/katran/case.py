@@ -1780,6 +1780,7 @@ def measure_phase(
     *,
     index: int,
     phase_name: str,
+    runner: KatranRunner,
     session: KatranDirectSession,
     traffic_iterations: int,
     duration_s: int,
@@ -1807,22 +1808,10 @@ def measure_phase(
     )
     cpu_thread.start()
     request_latencies: list[float] = []
-    if use_wrk_driver:
-        request_summary = run_wrk(
-            namespace=CLIENT_NS,
-            duration_s=duration_s,
-            connections=wrk_connections,
-            threads=wrk_threads,
-        )
-        measurement_batches = 1
-        measurement_duration_s = float(request_summary.get("duration_s") or 0.0)
-    else:
-        request_summary = run_parallel_http_load(
-            duration_s=duration_s,
-            concurrency=traffic_iterations,
-        )
-        measurement_batches = 1
-        measurement_duration_s = float(request_summary.get("duration_s") or 0.0)
+    workload_result = runner.run_workload(duration_s)
+    request_summary = dict(runner.last_request_summary)
+    measurement_batches = 1
+    measurement_duration_s = float(request_summary.get("duration_s") or workload_result.duration_s or 0.0)
     cpu_thread.join()
     after = sample_bpf_stats([session.prog_id])
     ipip_after = link_stats(REAL_NS, "ipip0")
@@ -2000,6 +1989,10 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                     iface=args.katran_iface,
                     router_peer_iface=args.katran_router_peer_iface,
                     bpftool=resolved_bpftool,
+                    concurrency=traffic_iterations,
+                    use_wrk_driver=use_wrk_driver,
+                    wrk_connections=wrk_connections,
+                    wrk_threads=wrk_threads,
                 )
                 runner.start()
                 return CaseLifecycleState(
@@ -2016,6 +2009,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                 sample = measure_phase(
                     index=cycle_index,
                     phase_name=sample_phase_name,
+                    runner=runner,
                     session=runner.session,
                     traffic_iterations=traffic_iterations,
                     duration_s=duration_s,

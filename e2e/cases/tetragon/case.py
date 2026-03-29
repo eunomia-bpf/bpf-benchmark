@@ -2,14 +2,9 @@
 from __future__ import annotations
 
 import argparse
-import json
 import os
-import shlex
 import sys
-import tempfile
 import threading
-import time
-from collections import deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -31,8 +26,15 @@ from runner.libs import (  # noqa: E402
     tail_text,
     which,
 )
-from runner.libs.app_runners.tetragon import TetragonRunner  # noqa: E402
-from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
+from runner.libs.app_runners.tetragon import (  # noqa: E402
+    TetragonAgentSession,
+    TetragonRunner,
+    describe_agent_exit,
+    resolve_tetragon_binary,
+    run_exec_storm_in_cgroup as runner_run_exec_storm_in_cgroup,
+    run_setup_script,
+    run_tetragon_workload,
+)
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
     enable_bpf_stats,
@@ -41,13 +43,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_total_cpu_usage,
 )
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
-from runner.libs.workload import (  # noqa: E402
-    WorkloadResult,
-    run_connect_storm,
-    run_exec_storm,
-    run_file_io,
-    run_open_storm,
-)
+from runner.libs.workload import WorkloadResult  # noqa: E402
 from e2e.case_common import (  # noqa: E402
     CaseLifecycleState,
     LifecycleAbort,
@@ -123,182 +119,6 @@ def bpftool_binary() -> str:
         return "bpftool"
 
 
-class ProcessOutputCollector:
-    def __init__(self) -> None:
-        self._lock = threading.Lock()
-        self.stdout_tail: deque[str] = deque(maxlen=200)
-        self.stderr_tail: deque[str] = deque(maxlen=200)
-
-    def consume_stdout(self, pipe: Any) -> None:
-        for raw_line in iter(pipe.readline, ""):
-            with self._lock:
-                self.stdout_tail.append(raw_line.rstrip())
-        pipe.close()
-
-    def consume_stderr(self, pipe: Any) -> None:
-        for raw_line in iter(pipe.readline, ""):
-            with self._lock:
-                self.stderr_tail.append(raw_line.rstrip())
-        pipe.close()
-
-    def snapshot(self) -> dict[str, object]:
-        with self._lock:
-            return {
-                "stdout_tail": list(self.stdout_tail),
-                "stderr_tail": list(self.stderr_tail),
-            }
-
-
-class TetragonAgentSession:
-    def __init__(self, command: Sequence[str], load_timeout: int) -> None:
-        self.command = list(command)
-        self.load_timeout = load_timeout
-        self.process: Any | None = None
-        self.collector = ProcessOutputCollector()
-        self.stdout_thread: threading.Thread | None = None
-        self.stderr_thread: threading.Thread | None = None
-        self.programs: list[dict[str, object]] = []
-
-    def __enter__(self) -> "TetragonAgentSession":
-        before_ids = set(current_prog_ids())
-        self.process = start_agent(self.command[0], self.command[1:], env={"HOME": os.environ.get("HOME", str(ROOT_DIR))})
-        assert self.process.stdout is not None
-        assert self.process.stderr is not None
-        self.stdout_thread = threading.Thread(target=self.collector.consume_stdout, args=(self.process.stdout,), daemon=True)
-        self.stderr_thread = threading.Thread(target=self.collector.consume_stderr, args=(self.process.stderr,), daemon=True)
-        self.stdout_thread.start()
-        self.stderr_thread.start()
-
-        healthy = wait_healthy(
-            self.process,
-            self.load_timeout,
-            lambda: bool([item for item in find_bpf_programs(self.process.pid or 0) if int(item.get("id", -1)) not in before_ids]),
-        )
-        if not healthy:
-            snapshot = self.collector.snapshot()
-            details = tail_text(
-                "\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or [])),
-                max_lines=40,
-                max_chars=8000,
-            )
-            cleanup_error: Exception | None = None
-            try:
-                self.close()
-            except Exception as exc:
-                cleanup_error = exc
-            message = f"Tetragon failed to become healthy within {self.load_timeout}s: {details}"
-            if cleanup_error is not None:
-                message = f"{message}\nCleanup error while stopping Tetragon: {cleanup_error}"
-            raise RuntimeError(message)
-
-        self.programs = [
-            item
-            for item in current_programs()
-            if int(item.get("id", -1)) not in before_ids
-        ]
-        if not self.programs:
-            cleanup_error: Exception | None = None
-            try:
-                self.close()
-            except Exception as exc:
-                cleanup_error = exc
-            message = "Tetragon became healthy but no new BPF programs were found"
-            if cleanup_error is not None:
-                message = f"{message}\nCleanup error while stopping Tetragon: {cleanup_error}"
-            raise RuntimeError(message)
-        return self
-
-    @property
-    def pid(self) -> int | None:
-        return None if self.process is None else self.process.pid
-
-    def collector_snapshot(self) -> dict[str, object]:
-        return self.collector.snapshot()
-
-    def close(self) -> None:
-        stop_error: Exception | None = None
-        if self.process is not None:
-            try:
-                stop_agent(self.process, timeout=8)
-            except Exception as exc:
-                stop_error = exc
-            finally:
-                self.process = None
-        if self.stdout_thread is not None:
-            self.stdout_thread.join(timeout=2.0)
-            self.stdout_thread = None
-        if self.stderr_thread is not None:
-            self.stderr_thread.join(timeout=2.0)
-            self.stderr_thread = None
-        if stop_error is not None:
-            raise RuntimeError(f"failed to stop Tetragon process cleanly: {stop_error}") from stop_error
-
-    def __exit__(self, exc_type, exc, tb) -> None:
-        self.close()
-
-
-def describe_agent_exit(agent_name: str, process: Any | None, snapshot: Mapping[str, object]) -> str | None:
-    if process is None:
-        return f"{agent_name} process handle is unavailable"
-    returncode = process.poll()
-    if returncode is None:
-        return None
-    combined = "\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or []))
-    details = tail_text(combined, max_lines=40, max_chars=8000)
-    if details:
-        return f"{agent_name} exited with code {returncode}: {details}"
-    return f"{agent_name} exited with code {returncode}"
-
-
-def write_tetragon_policies(directory: Path) -> list[Path]:
-    directory.mkdir(parents=True, exist_ok=True)
-    tracepoint_path = directory / "tetragon-e2e-tracepoint.yaml"
-    tracepoint_path.write_text(
-        """
-apiVersion: cilium.io/v1alpha1
-kind: TracingPolicy
-metadata:
-  name: bpf-benchmark-tetragon-e2e-tracepoint
-spec:
-  tracepoints:
-    - subsystem: syscalls
-      event: sys_enter_execve
-""".strip()
-        + "\n"
-    )
-
-    kprobe_path = directory / "tetragon-e2e-kprobes.yaml"
-    kprobe_path.write_text(
-        """
-apiVersion: cilium.io/v1alpha1
-kind: TracingPolicy
-metadata:
-  name: bpf-benchmark-tetragon-e2e-kprobes
-spec:
-  kprobes:
-    - call: security_bprm_check
-      syscall: false
-    - call: security_file_open
-      syscall: false
-    - call: tcp_connect
-      syscall: false
-""".strip()
-        + "\n"
-    )
-    return [tracepoint_path, kprobe_path]
-
-
-def current_programs() -> list[dict[str, object]]:
-    payload = run_json_command([bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
-    if not isinstance(payload, list):
-        return []
-    return [dict(record) for record in payload if isinstance(record, dict) and "id" in record]
-
-
-def current_prog_ids() -> list[int]:
-    return [int(record["id"]) for record in current_programs()]
-
-
 def ensure_artifacts(daemon_binary: Path) -> None:
     if not daemon_binary.exists():
         raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
@@ -309,39 +129,6 @@ def load_config(path: Path) -> dict[str, object]:
     if not isinstance(payload, dict):
         raise RuntimeError(f"invalid config payload in {path}")
     return payload
-
-
-def run_setup_script(setup_script: Path) -> dict[str, object]:
-    completed = run_command(["bash", str(setup_script)], check=False, timeout=1800)
-    result = {
-        "returncode": completed.returncode,
-        "tetragon_binary": None,
-        "tetra_binary": None,
-        "stdout_tail": tail_text(completed.stdout or "", max_lines=60, max_chars=12000),
-        "stderr_tail": tail_text(completed.stderr or "", max_lines=60, max_chars=12000),
-    }
-    for line in (completed.stdout or "").splitlines():
-        if line.startswith("TETRAGON_BINARY="):
-            value = line.split("=", 1)[1].strip()
-            result["tetragon_binary"] = value or None
-        if line.startswith("TETRA_BINARY="):
-            value = line.split("=", 1)[1].strip()
-            result["tetra_binary"] = value or None
-    return result
-
-
-def resolve_tetragon_binary(explicit: str | None, setup_result: Mapping[str, object]) -> str | None:
-    if explicit:
-        candidate = Path(explicit).resolve()
-        if candidate.exists():
-            return str(candidate)
-    scripted = str(setup_result.get("tetragon_binary") or "").strip()
-    if scripted and Path(scripted).exists():
-        return scripted
-    resolved = which("tetragon")
-    if resolved:
-        return resolved
-    return None
 
 
 def workload_specs_from_config(config: Mapping[str, object]) -> tuple[WorkloadSpec, ...]:
@@ -411,95 +198,7 @@ def run_workload(spec: WorkloadSpec, duration_s: int) -> WorkloadResult:
 
 
 def run_exec_storm_in_cgroup(duration_s: int | float, rate: int) -> WorkloadResult:
-    stress_ng = which("stress-ng")
-    if stress_ng is None:
-        raise RuntimeError("stress-ng is required for the tetragon cgroup-rate exec workload")
-
-    cgroup_root = Path("/sys/fs/cgroup")
-    if not cgroup_root.is_dir():
-        raise RuntimeError(f"cgroup v2 root is unavailable: {cgroup_root}")
-    if not (cgroup_root / "cgroup.procs").exists():
-        raise RuntimeError(f"cgroup root is missing cgroup.procs: {cgroup_root / 'cgroup.procs'}")
-    if os.geteuid() != 0:
-        raise RuntimeError("tetragon cgroup-rate exec workload requires root to create and join a cgroup")
-
-    command: list[str] = [
-        stress_ng,
-        "--exec",
-        str(max(1, int(rate))),
-        "--exec-method",
-        "execve",
-        "--temp-path",
-        "/tmp",
-        "--timeout",
-        f"{max(1, int(duration_s))}s",
-        "--metrics-brief",
-    ]
-    run_cwd = Path("/tmp")
-    setpriv = which("setpriv")
-    if setpriv is None:
-        raise RuntimeError("setpriv is required for the tetragon cgroup-rate exec workload")
-    command = [
-        setpriv,
-        "--reuid",
-        "65534",
-        "--regid",
-        "65534",
-        "--clear-groups",
-        *command,
-    ]
-
-    cgroup_path = cgroup_root / f"bpf-benchmark-tetragon-exec-{os.getpid()}-{time.monotonic_ns()}"
-    script = """
-set -euo pipefail
-ROOT_CGROUP="/sys/fs/cgroup"
-CGROUP_PATH="$1"
-shift
-mkdir -p "$CGROUP_PATH"
-echo $$ > "$CGROUP_PATH/cgroup.procs"
-set +e
-"$@"
-status=$?
-set -e
-echo $$ > "$ROOT_CGROUP/cgroup.procs"
-for _ in $(seq 1 20); do
-  if [[ ! -s "$CGROUP_PATH/cgroup.procs" ]]; then
-    break
-  fi
-  sleep 0.1
-done
-rmdir "$CGROUP_PATH"
-exit "$status"
-""".strip()
-
-    start = time.monotonic()
-    completed = run_command(
-        ["bash", "-lc", script, "bash", str(cgroup_path), *command],
-        check=False,
-        cwd=run_cwd,
-        timeout=max(float(duration_s) + 30, float(duration_s) * 12),
-    )
-    elapsed = time.monotonic() - start
-    if completed.returncode != 0:
-        details = tail_text(completed.stderr or completed.stdout or "", max_lines=60, max_chars=12000)
-        rendered = shlex.join(command)
-        raise RuntimeError(
-            f"tetragon cgroup-rate exec workload failed ({completed.returncode}) for {rendered}: {details}"
-        )
-
-    combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
-    from runner.libs.workload import _parse_stress_ng_bogo_ops  # noqa: PLC0415
-
-    ops_total_value = _parse_stress_ng_bogo_ops(combined, stressor="exec")
-    if ops_total_value is None:
-        ops_total_value = max(1.0, elapsed * max(1, int(rate)))
-    return WorkloadResult(
-        ops_total=float(ops_total_value),
-        ops_per_sec=(float(ops_total_value) / elapsed) if elapsed > 0 else None,
-        duration_s=elapsed,
-        stdout=tail_text(completed.stdout or "", max_lines=40, max_chars=8000),
-        stderr=tail_text(completed.stderr or "", max_lines=40, max_chars=8000),
-    )
+    return runner_run_exec_storm_in_cgroup(duration_s, rate)
 
 
 def run_workload_with_options(
@@ -508,20 +207,17 @@ def run_workload_with_options(
     *,
     exec_workload_cgroup: bool,
 ) -> WorkloadResult:
-    if spec.kind == "exec_storm":
-        if exec_workload_cgroup:
-            return run_exec_storm_in_cgroup(duration_s, spec.value or 2)
-        return run_exec_storm(duration_s, spec.value or 2)
-    if spec.kind == "file_io":
-        return run_file_io(duration_s)
-    if spec.kind == "open_storm":
-        return run_open_storm(duration_s)
-    if spec.kind == "connect_storm":
-        return run_connect_storm(duration_s)
-    raise RuntimeError(f"unsupported workload kind: {spec.kind}")
+    if spec.kind == "exec_storm" and exec_workload_cgroup:
+        return run_exec_storm_in_cgroup(duration_s, spec.value or 2)
+    return run_tetragon_workload(
+        {"kind": spec.kind, "value": spec.value},
+        duration_s,
+        exec_workload_cgroup=False,
+    )
 
 
 def measure_workload(
+    runner: TetragonRunner,
     workload_spec: WorkloadSpec,
     duration_s: int,
     prog_ids: list[int],
@@ -549,11 +245,9 @@ def measure_workload(
     system_thread.start()
     threads.append(system_thread)
 
-    workload_result = run_workload_with_options(
-        workload_spec,
-        duration_s,
-        exec_workload_cgroup=exec_workload_cgroup,
-    )
+    runner.workload_spec = {"kind": workload_spec.kind, "value": workload_spec.value}
+    runner.exec_workload_cgroup = exec_workload_cgroup
+    workload_result = runner.run_workload(duration_s)
 
     for thread in threads:
         thread.join()
@@ -615,6 +309,7 @@ def summarize_phase(workloads: Sequence[Mapping[str, object]]) -> dict[str, obje
 
 
 def run_phase(
+    runner: TetragonRunner,
     workloads: Sequence[WorkloadSpec],
     duration_s: int,
     prog_ids: list[int],
@@ -624,6 +319,7 @@ def run_phase(
 ) -> dict[str, object]:
     records = [
         measure_workload(
+            runner,
             spec,
             duration_s,
             prog_ids,
@@ -997,6 +693,7 @@ def daemon_payload(
         assert isinstance(runner, TetragonRunner)
         preflight_prog_ids = sorted(set(lifecycle.target_prog_ids) | set(lifecycle.apply_prog_ids))
         preflight = run_phase(
+            runner,
             list(workloads),
             preflight_duration_s,
             preflight_prog_ids,
@@ -1042,6 +739,7 @@ def daemon_payload(
         runner = lifecycle.runtime
         assert isinstance(runner, TetragonRunner)
         return run_phase(
+            runner,
             workloads,
             duration_s,
             lifecycle.target_prog_ids,

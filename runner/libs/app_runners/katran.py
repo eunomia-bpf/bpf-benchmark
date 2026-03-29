@@ -5,6 +5,20 @@ from typing import Any
 
 from .. import ROOT_DIR, resolve_bpftool_binary, tail_text
 from ..workload import WorkloadResult
+from .katran_support import (
+    KatranDirectSession,
+    KatranDsrTopology,
+    NamespaceHttpServer,
+    CLIENT_NS,
+    REAL_NS,
+    TOPOLOGY_SETTLE_S,
+    VIP_IP,
+    VIP_PORT,
+    configure_katran_maps,
+    run_katran_prog_test_run,
+    run_parallel_http_load,
+    run_wrk,
+)
 
 
 DEFAULT_KATRAN_OBJECT = ROOT_DIR / "corpus" / "build" / "katran" / "balancer.bpf.o"
@@ -23,6 +37,9 @@ class KatranRunner:
         router_peer_iface: str | None = None,
         bpftool: str = "",
         concurrency: int = DEFAULT_CONCURRENCY,
+        use_wrk_driver: bool = False,
+        wrk_connections: int = 32,
+        wrk_threads: int = 1,
     ) -> None:
         self.object_path = Path(object_path).resolve() if object_path is not None else DEFAULT_KATRAN_OBJECT.resolve()
         self.program_name = str(program_name)
@@ -30,11 +47,15 @@ class KatranRunner:
         self.router_peer_iface = None if router_peer_iface is None else str(router_peer_iface)
         self.bpftool = str(bpftool or resolve_bpftool_binary())
         self.concurrency = max(1, int(concurrency))
+        self.use_wrk_driver = bool(use_wrk_driver)
+        self.wrk_connections = max(1, int(wrk_connections))
+        self.wrk_threads = max(1, int(wrk_threads))
         self.topology: Any | None = None
         self.http_server: Any | None = None
         self.session: Any | None = None
         self.programs: list[dict[str, object]] = []
         self.artifacts: dict[str, object] = {}
+        self.last_request_summary: dict[str, object] = {}
 
     @property
     def prog_id(self) -> int | None:
@@ -45,11 +66,10 @@ class KatranRunner:
             raise RuntimeError("KatranRunner is already running")
         if not self.object_path.exists():
             raise RuntimeError(f"Katran object not found: {self.object_path}")
-        from e2e.cases.katran import case as katran_case
 
-        topology = katran_case.KatranDsrTopology(self.iface, router_peer_iface=self.router_peer_iface)
-        http_server = katran_case.NamespaceHttpServer(katran_case.REAL_NS, katran_case.VIP_IP, katran_case.VIP_PORT)
-        session = katran_case.KatranDirectSession(
+        topology = KatranDsrTopology(self.iface, router_peer_iface=self.router_peer_iface)
+        http_server = NamespaceHttpServer(REAL_NS, VIP_IP, VIP_PORT)
+        session = KatranDirectSession(
             object_path=self.object_path,
             program_name=self.program_name,
             iface=self.iface,
@@ -66,10 +86,12 @@ class KatranRunner:
                 "topology": topology.metadata(),
                 "http_server": http_server.metadata(),
                 "live_program": session.metadata(),
-                "map_configuration": katran_case.configure_katran_maps(session),
-                "test_run_validation": katran_case.run_katran_prog_test_run(session),
+                "map_configuration": configure_katran_maps(session),
+                "test_run_validation": run_katran_prog_test_run(session),
             }
-            katran_case.time.sleep(katran_case.TOPOLOGY_SETTLE_S)
+            import time  # noqa: PLC0415
+
+            time.sleep(TOPOLOGY_SETTLE_S)
         except Exception:
             session.close()
             http_server.close()
@@ -84,9 +106,16 @@ class KatranRunner:
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None:
             raise RuntimeError("KatranRunner is not running")
-        from e2e.cases.katran import case as katran_case
-
-        summary = katran_case.run_parallel_http_load(duration_s=max(1.0, float(seconds)), concurrency=self.concurrency)
+        if self.use_wrk_driver:
+            summary = run_wrk(
+                namespace=CLIENT_NS,
+                duration_s=max(1.0, float(seconds)),
+                connections=self.wrk_connections,
+                threads=self.wrk_threads,
+            )
+        else:
+            summary = run_parallel_http_load(duration_s=max(1.0, float(seconds)), concurrency=self.concurrency)
+        self.last_request_summary = dict(summary)
         request_count = int(summary.get("request_count", 0) or 0)
         success_count = int(summary.get("success_count", 0) or 0)
         if request_count <= 0:
@@ -125,4 +154,12 @@ class KatranRunner:
             raise RuntimeError("; ".join(errors))
 
 
-__all__ = ["KatranRunner"]
+__all__ = [
+    "KatranDirectSession",
+    "KatranDsrTopology",
+    "KatranRunner",
+    "NamespaceHttpServer",
+    "configure_katran_maps",
+    "run_katran_prog_test_run",
+    "run_parallel_http_load",
+]

@@ -2,12 +2,21 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
-from typing import Any, NoReturn, Sequence
+from typing import Any, Mapping, NoReturn, Sequence
 
 import yaml
 
 from .. import ROOT_DIR
-from ..workload import WorkloadResult, run_exec_storm
+from ..workload import WorkloadResult
+from .tetragon_support import (
+    TetragonAgentSession,
+    describe_agent_exit,
+    resolve_tetragon_binary,
+    run_exec_storm_in_cgroup,
+    run_setup_script,
+    run_tetragon_workload,
+    write_tetragon_policies,
+)
 
 
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "tetragon" / "config_execve_rate.yaml"
@@ -48,6 +57,8 @@ class TetragonRunner:
         self.session: Any | None = None
         self.programs: list[dict[str, object]] = []
         self.process_output: dict[str, object] = {}
+        self.workload_spec: Mapping[str, object] = {"kind": "exec_storm", "value": 2}
+        self.exec_workload_cgroup = any(arg == "--cgroup-rate" for arg in self.tetragon_extra_args)
 
     def _fail_start(self, message: str) -> NoReturn:
         try:
@@ -67,14 +78,14 @@ class TetragonRunner:
     def pid(self) -> int | None:
         return None if self.session is None else self.session.pid
 
-    def _resolve_binary(self, tetragon_case: Any) -> str:
-        resolved = tetragon_case.resolve_tetragon_binary(None if self.tetragon_binary is None else str(self.tetragon_binary), self.setup_result)
+    def _resolve_binary(self) -> str:
+        resolved = resolve_tetragon_binary(None if self.tetragon_binary is None else str(self.tetragon_binary), self.setup_result)
         if resolved is None and not self.skip_setup:
-            self.setup_result = tetragon_case.run_setup_script(self.setup_script)
+            self.setup_result = run_setup_script(self.setup_script)
             if int(self.setup_result.get("returncode", 0) or 0) != 0:
                 details = str(self.setup_result.get("stderr_tail") or self.setup_result.get("stdout_tail") or self.setup_result)
                 raise RuntimeError(f"Tetragon setup failed: {details}")
-            resolved = tetragon_case.resolve_tetragon_binary(
+            resolved = resolve_tetragon_binary(
                 None if self.tetragon_binary is None else str(self.tetragon_binary),
                 self.setup_result,
             )
@@ -85,14 +96,13 @@ class TetragonRunner:
     def start(self) -> list[int]:
         if self.session is not None:
             raise RuntimeError("TetragonRunner is already running")
-        from e2e.cases.tetragon import case as tetragon_case
 
-        tetragon_binary = self._resolve_binary(tetragon_case)
+        tetragon_binary = self._resolve_binary()
         self.tempdir = tempfile.TemporaryDirectory(prefix="tetragon-policy-")
         policy_dir = Path(self.tempdir.name)
-        self.policy_paths = tetragon_case.write_tetragon_policies(policy_dir)
+        self.policy_paths = write_tetragon_policies(policy_dir)
         self.command = [tetragon_binary, *self.tetragon_extra_args, "--tracing-policy-dir", str(policy_dir)]
-        session = tetragon_case.TetragonAgentSession(self.command, self.load_timeout_s)
+        session = TetragonAgentSession(self.command, self.load_timeout_s)
         try:
             session.__enter__()
         except Exception:
@@ -119,7 +129,11 @@ class TetragonRunner:
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None:
             raise RuntimeError("TetragonRunner is not running")
-        return run_exec_storm(max(1, int(round(seconds))), rate=2)
+        return run_tetragon_workload(
+            self.workload_spec,
+            max(1, int(round(seconds))),
+            exec_workload_cgroup=self.exec_workload_cgroup,
+        )
 
     def stop(self) -> None:
         if self.session is None and self.tempdir is None:
@@ -143,4 +157,13 @@ class TetragonRunner:
             raise RuntimeError("; ".join(errors))
 
 
-__all__ = ["TetragonRunner"]
+__all__ = [
+    "TetragonAgentSession",
+    "TetragonRunner",
+    "describe_agent_exit",
+    "resolve_tetragon_binary",
+    "run_exec_storm_in_cgroup",
+    "run_setup_script",
+    "run_tetragon_workload",
+    "write_tetragon_policies",
+]

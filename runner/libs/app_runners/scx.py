@@ -54,9 +54,7 @@ class ScxRunner:
             raise RuntimeError("ScxRunner is already running")
         if not self.scheduler_binary.exists():
             raise RuntimeError(f"scx scheduler binary not found: {self.scheduler_binary}")
-        from e2e.cases.scx import case as scx_case
-
-        session = scx_case.ScxSchedulerSession(self.scheduler_binary, self.scheduler_extra_args, self.load_timeout_s)
+        session = ScxSchedulerSession(self.scheduler_binary, self.scheduler_extra_args, self.load_timeout_s)
         session.__enter__()
         self.session = session
         self.programs = [dict(program) for program in session.programs]
