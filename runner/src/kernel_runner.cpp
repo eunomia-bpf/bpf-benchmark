@@ -24,12 +24,15 @@
 #include <cstring>
 #include <fcntl.h>
 #include <fstream>
+#include <sched.h>
 #include <time.h>
 #include <memory>
 #include <netinet/in.h>
 #include <string>
 #include <string_view>
+#include <sys/mman.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/syscall.h>
 #include <sys/wait.h>
 #include <sys/un.h>
@@ -1800,6 +1803,453 @@ bool run_trigger_workload_command(
     return run_shell_workload_command(shell_command);
 }
 
+std::string lower_ascii_copy(std::string_view input)
+{
+    std::string output(input);
+    for (char &ch : output) {
+        ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+    }
+    return output;
+}
+
+bool string_contains_any(
+    std::string_view haystack,
+    std::initializer_list<std::string_view> needles)
+{
+    for (const auto needle : needles) {
+        if (haystack.find(needle) != std::string_view::npos) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::string attach_section_root(std::string_view section_name)
+{
+    const size_t slash = section_name.find('/');
+    if (slash == std::string_view::npos) {
+        return lower_ascii_copy(section_name);
+    }
+    return lower_ascii_copy(section_name.substr(0, slash));
+}
+
+bool section_supports_auto_attach_trigger(std::string_view section_name)
+{
+    const std::string root = attach_section_root(section_name);
+    if (root.empty()) {
+        return false;
+    }
+    if (root == "tracepoint" || root == "tp" ||
+        root == "raw_tp" || root == "raw_tracepoint" ||
+        root == "tp_btf" ||
+        root == "ksyscall" || root == "kretsyscall") {
+        return true;
+    }
+    return std::string_view(root).starts_with("kprobe") ||
+           std::string_view(root).starts_with("kretprobe") ||
+           std::string_view(root).starts_with("fentry") ||
+           std::string_view(root).starts_with("fexit") ||
+           std::string_view(root).starts_with("fmod_ret") ||
+           std::string_view(root).starts_with("lsm");
+}
+
+struct auto_attach_trigger_plan {
+    bool exec_ops = false;
+    bool process_ops = false;
+    bool scheduler_ops = false;
+    bool file_ops = false;
+    bool memory_ops = false;
+    bool network_ops = false;
+
+    bool any() const
+    {
+        return exec_ops || process_ops || scheduler_ops ||
+               file_ops || memory_ops || network_ops;
+    }
+};
+
+auto_attach_trigger_plan build_auto_attach_trigger_plan(std::string_view section_name)
+{
+    auto_attach_trigger_plan plan {};
+    const std::string lower = lower_ascii_copy(section_name);
+    const std::string root = attach_section_root(lower);
+
+    const auto enable_default_sweep = [&]() {
+        plan.exec_ops = true;
+        plan.process_ops = true;
+        plan.scheduler_ops = true;
+        plan.file_ops = true;
+        plan.memory_ops = true;
+        plan.network_ops = true;
+    };
+
+    if (lower.empty()) {
+        enable_default_sweep();
+        return plan;
+    }
+
+    if (string_contains_any(lower, {"exec", "bprm"})) {
+        plan.exec_ops = true;
+        plan.process_ops = true;
+        plan.scheduler_ops = true;
+    }
+    if (string_contains_any(
+            lower,
+            {"sched", "task", "fork", "clone", "exit", "wait", "sleep", "yield", "wakeup"})) {
+        plan.process_ops = true;
+        plan.scheduler_ops = true;
+    }
+    if (string_contains_any(
+            lower,
+            {"file", "inode", "dentry", "vfs", "open", "close", "read", "write",
+             "unlink", "rename", "mkdir", "rmdir", "stat", "fsync",
+             "blk", "block", "writeback"})) {
+        plan.file_ops = true;
+    }
+    if (string_contains_any(
+            lower,
+            {"mmap", "munmap", "mprotect", "brk", "vma", "vm_", "vmscan",
+             "page", "folio", "reclaim", "mm_"})) {
+        plan.memory_ops = true;
+    }
+    if (string_contains_any(
+            lower,
+            {"sock", "socket", "tcp", "udp", "bind", "connect", "accept", "listen",
+             "send", "recv", "net", "skb", "xdp", "devmap", "cpumap", "icmp", "ip_"})) {
+        plan.network_ops = true;
+    }
+
+    if (root == "tracepoint" || root == "tp") {
+        if (lower.find("/syscalls/") != std::string::npos) {
+            plan.exec_ops = true;
+            plan.process_ops = true;
+            plan.scheduler_ops = true;
+            plan.file_ops = true;
+            plan.network_ops = true;
+        }
+        if (lower.find("/sched/") != std::string::npos) {
+            plan.exec_ops = true;
+            plan.process_ops = true;
+            plan.scheduler_ops = true;
+        }
+        if (lower.find("/block/") != std::string::npos ||
+            lower.find("/writeback/") != std::string::npos) {
+            plan.file_ops = true;
+        }
+        if (lower.find("/xdp/") != std::string::npos ||
+            lower.find("/net/") != std::string::npos ||
+            lower.find("/sock/") != std::string::npos) {
+            plan.network_ops = true;
+        }
+    }
+
+    if (root == "raw_tp" || root == "raw_tracepoint" || root == "tp_btf") {
+        if (string_contains_any(lower, {"sched_", "irq_", "wakeup"})) {
+            plan.process_ops = true;
+            plan.scheduler_ops = true;
+        }
+        if (string_contains_any(lower, {"block_", "writeback"})) {
+            plan.file_ops = true;
+        }
+        if (string_contains_any(lower, {"mm_vmscan", "reclaim"})) {
+            plan.memory_ops = true;
+            plan.file_ops = true;
+        }
+        if (string_contains_any(lower, {"xdp", "net", "sock"})) {
+            plan.network_ops = true;
+        }
+    }
+
+    if (plan.exec_ops) {
+        plan.process_ops = true;
+        plan.scheduler_ops = true;
+    }
+    if (!plan.any()) {
+        enable_default_sweep();
+    }
+    return plan;
+}
+
+uint32_t normalized_auto_attach_iterations(uint32_t iterations_or_duration)
+{
+    return std::max(1u, std::min(iterations_or_duration, 4u));
+}
+
+void run_auto_exec_trigger_suite(uint32_t iterations)
+{
+    for (uint32_t i = 0; i < iterations; ++i) {
+        if (!run_shell_workload_command("/bin/true >/dev/null 2>&1")) {
+            fail("auto attach trigger exec workload failed");
+        }
+    }
+}
+
+void run_auto_process_trigger_suite(uint32_t iterations)
+{
+    for (uint32_t i = 0; i < iterations; ++i) {
+        int pipe_fds[2] = {-1, -1};
+        if (pipe2(pipe_fds, O_CLOEXEC) != 0) {
+            fail("pipe2 failed for auto attach trigger process workload: " +
+                 std::string(strerror(errno)));
+        }
+        scoped_fd read_end(pipe_fds[0]);
+        scoped_fd write_end(pipe_fds[1]);
+
+        const pid_t child = fork();
+        if (child < 0) {
+            fail("fork failed for auto attach trigger process workload: " +
+                 std::string(strerror(errno)));
+        }
+        if (child == 0) {
+            read_end.reset();
+            const char byte = 'x';
+            const ssize_t write_ret = write(write_end.get(), &byte, 1);
+            if (write_ret != 1) {
+                _exit(1);
+            }
+            _exit(0);
+        }
+
+        write_end.reset();
+        char byte = '\0';
+        const ssize_t read_ret = read(read_end.get(), &byte, 1);
+        if (read_ret != 1) {
+            fail("read failed for auto attach trigger process workload");
+        }
+        int status = 0;
+        (void)waitpid(child, &status, 0);
+    }
+}
+
+void run_auto_scheduler_trigger_suite(uint32_t iterations)
+{
+    const struct timespec ts = {0, 1000}; /* 1 microsecond */
+    const uint32_t loops = std::max(1u, iterations * 8u);
+    for (uint32_t i = 0; i < loops; ++i) {
+        (void)sched_yield();
+        (void)nanosleep(&ts, nullptr);
+    }
+}
+
+void run_auto_file_trigger_suite(uint32_t iterations)
+{
+    std::string template_path = std::filesystem::temp_directory_path().string();
+    if (!template_path.empty() && template_path.back() != '/') {
+        template_path += '/';
+    }
+    template_path += "kernel-attach-auto-file-XXXXXX";
+    std::vector<char> directory_template(template_path.begin(), template_path.end());
+    directory_template.push_back('\0');
+    char *created = ::mkdtemp(directory_template.data());
+    if (created == nullptr) {
+        fail("mkdtemp failed for auto attach trigger file workload: " +
+             std::string(strerror(errno)));
+    }
+
+    const std::filesystem::path temp_dir(created);
+    const std::filesystem::path file_path = temp_dir / "probe.bin";
+    const std::filesystem::path rename_path = temp_dir / "probe-renamed.bin";
+    std::array<char, 4096> buffer {};
+    std::fill(buffer.begin(), buffer.end(), 'a');
+
+    for (uint32_t i = 0; i < iterations; ++i) {
+        const int fd = open(file_path.c_str(), O_CREAT | O_TRUNC | O_RDWR | O_CLOEXEC, 0600);
+        if (fd < 0) {
+            fail("open failed for auto attach trigger file workload: " +
+                 std::string(strerror(errno)));
+        }
+        scoped_fd fd_guard(fd);
+
+        const ssize_t write_ret = write(fd_guard.get(), buffer.data(), buffer.size());
+        if (write_ret != static_cast<ssize_t>(buffer.size())) {
+            fail("write failed for auto attach trigger file workload");
+        }
+        (void)lseek(fd_guard.get(), 0, SEEK_SET);
+        char byte = '\0';
+        const ssize_t read_ret = read(fd_guard.get(), &byte, 1);
+        if (read_ret != 1) {
+            fail("read failed for auto attach trigger file workload");
+        }
+        (void)fsync(fd_guard.get());
+        struct stat st = {};
+        (void)fstat(fd_guard.get(), &st);
+        fd_guard.reset();
+
+        if (rename(file_path.c_str(), rename_path.c_str()) != 0) {
+            fail("rename failed for auto attach trigger file workload: " +
+                 std::string(strerror(errno)));
+        }
+        (void)stat(rename_path.c_str(), &st);
+        if (rename(rename_path.c_str(), file_path.c_str()) != 0) {
+            fail("rename restore failed for auto attach trigger file workload: " +
+                 std::string(strerror(errno)));
+        }
+        (void)unlink(file_path.c_str());
+    }
+
+    std::error_code error;
+    std::filesystem::remove_all(temp_dir, error);
+}
+
+void run_auto_memory_trigger_suite(uint32_t iterations)
+{
+    constexpr size_t region_size = 4096;
+    for (uint32_t i = 0; i < iterations; ++i) {
+        void *region =
+            mmap(nullptr,
+                 region_size,
+                 PROT_READ | PROT_WRITE,
+                 MAP_PRIVATE | MAP_ANONYMOUS,
+                 -1,
+                 0);
+        if (region == MAP_FAILED) {
+            fail("mmap failed for auto attach trigger memory workload: " +
+                 std::string(strerror(errno)));
+        }
+        std::memset(region, 0xAB, region_size);
+        if (mprotect(region, region_size, PROT_READ) != 0) {
+            const std::string error = std::string(strerror(errno));
+            (void)munmap(region, region_size);
+            fail("mprotect failed for auto attach trigger memory workload: " + error);
+        }
+        if (munmap(region, region_size) != 0) {
+            fail("munmap failed for auto attach trigger memory workload: " +
+                 std::string(strerror(errno)));
+        }
+    }
+}
+
+void run_auto_network_trigger_suite(uint32_t iterations)
+{
+    for (uint32_t i = 0; i < iterations; ++i) {
+        scoped_fd server_fd(socket(AF_INET, SOCK_STREAM, 0));
+        if (server_fd.get() < 0) {
+            fail("socket failed for auto attach trigger network workload: " +
+                 std::string(strerror(errno)));
+        }
+
+        const int reuse = 1;
+        (void)setsockopt(server_fd.get(), SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+
+        sockaddr_in addr = {};
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        addr.sin_port = 0;
+        if (bind(server_fd.get(), reinterpret_cast<const sockaddr *>(&addr), sizeof(addr)) != 0) {
+            fail("bind failed for auto attach trigger network workload: " +
+                 std::string(strerror(errno)));
+        }
+        if (listen(server_fd.get(), 1) != 0) {
+            fail("listen failed for auto attach trigger network workload: " +
+                 std::string(strerror(errno)));
+        }
+
+        socklen_t addr_len = sizeof(addr);
+        if (getsockname(server_fd.get(), reinterpret_cast<sockaddr *>(&addr), &addr_len) != 0) {
+            fail("getsockname failed for auto attach trigger network workload: " +
+                 std::string(strerror(errno)));
+        }
+
+        scoped_fd client_fd(socket(AF_INET, SOCK_STREAM, 0));
+        if (client_fd.get() < 0) {
+            fail("client socket failed for auto attach trigger network workload: " +
+                 std::string(strerror(errno)));
+        }
+        if (connect(client_fd.get(), reinterpret_cast<const sockaddr *>(&addr), sizeof(addr)) != 0) {
+            fail("connect failed for auto attach trigger network workload: " +
+                 std::string(strerror(errno)));
+        }
+
+        scoped_fd accepted_fd(accept(server_fd.get(), nullptr, nullptr));
+        if (accepted_fd.get() < 0) {
+            fail("accept failed for auto attach trigger network workload: " +
+                 std::string(strerror(errno)));
+        }
+
+        const char client_byte = 'c';
+        const char server_byte = 's';
+        char sink = '\0';
+        (void)send(client_fd.get(), &client_byte, 1, MSG_NOSIGNAL);
+        (void)recv(accepted_fd.get(), &sink, 1, 0);
+        (void)send(accepted_fd.get(), &server_byte, 1, MSG_NOSIGNAL);
+        (void)recv(client_fd.get(), &sink, 1, 0);
+    }
+}
+
+std::string describe_auto_attach_trigger_plan(const auto_attach_trigger_plan &plan)
+{
+    std::vector<std::string> names;
+    if (plan.exec_ops) {
+        names.emplace_back("exec");
+    }
+    if (plan.process_ops) {
+        names.emplace_back("process");
+    }
+    if (plan.scheduler_ops) {
+        names.emplace_back("sched");
+    }
+    if (plan.file_ops) {
+        names.emplace_back("file");
+    }
+    if (plan.memory_ops) {
+        names.emplace_back("memory");
+    }
+    if (plan.network_ops) {
+        names.emplace_back("network");
+    }
+
+    std::string description;
+    for (size_t index = 0; index < names.size(); ++index) {
+        if (index > 0) {
+            description += ",";
+        }
+        description += names[index];
+    }
+    return description;
+}
+
+bool run_auto_attach_trigger_workload(
+    std::string_view section_name,
+    uint32_t iterations_or_duration)
+{
+    if (!section_supports_auto_attach_trigger(section_name)) {
+        return false;
+    }
+
+    const auto plan = build_auto_attach_trigger_plan(section_name);
+    if (!plan.any()) {
+        return false;
+    }
+
+    const uint32_t iterations = normalized_auto_attach_iterations(iterations_or_duration);
+    std::fprintf(stderr,
+                 "attach: auto-trigger fallback for section '%.*s' using %s (iterations=%u)\n",
+                 static_cast<int>(section_name.size()),
+                 section_name.data(),
+                 describe_auto_attach_trigger_plan(plan).c_str(),
+                 iterations);
+
+    if (plan.exec_ops) {
+        run_auto_exec_trigger_suite(std::min(iterations, 2u));
+    }
+    if (plan.process_ops) {
+        run_auto_process_trigger_suite(iterations);
+    }
+    if (plan.scheduler_ops) {
+        run_auto_scheduler_trigger_suite(iterations);
+    }
+    if (plan.file_ops) {
+        run_auto_file_trigger_suite(iterations);
+    }
+    if (plan.memory_ops) {
+        run_auto_memory_trigger_suite(iterations);
+    }
+    if (plan.network_ops) {
+        run_auto_network_trigger_suite(iterations);
+    }
+    return true;
+}
+
 void run_mixed_syscall_fallback(uint32_t duration_seconds)
 {
     const uint32_t seconds = workload_duration_seconds(duration_seconds);
@@ -2534,6 +2984,10 @@ std::vector<sample_result> execute_prepared_kernel_attach(
     const uint32_t measured_workload_amount = is_duration_based_workload(options.workload_type)
         ? options.workload_iterations
         : options.repeat * options.workload_iterations;
+    const char *attach_section_name_raw = bpf_program__section_name(attach_program.prog);
+    const std::string_view attach_section_name =
+        attach_section_name_raw != nullptr ? std::string_view(attach_section_name_raw)
+                                           : std::string_view();
 
     if (options.warmup_repeat > 0) {
         run_attach_workload(options, warmup_workload_amount);
@@ -2544,10 +2998,21 @@ std::vector<sample_result> execute_prepared_kernel_attach(
     const auto exec_wall_start = std::chrono::steady_clock::now();
     const uint64_t tsc_before = rdtsc_start();
     run_attach_workload(options, measured_workload_amount);
+    auto after_stats = read_bpf_stats(program.program_fd);
+    std::optional<uint64_t> auto_trigger_wall_ns;
+    const bool needs_auto_trigger = after_stats.run_cnt == before_stats.run_cnt;
+    if (needs_auto_trigger) {
+        const auto auto_trigger_start = std::chrono::steady_clock::now();
+        const bool ran_auto_trigger =
+            run_auto_attach_trigger_workload(attach_section_name, measured_workload_amount);
+        const auto auto_trigger_end = std::chrono::steady_clock::now();
+        if (ran_auto_trigger) {
+            auto_trigger_wall_ns = elapsed_ns(auto_trigger_start, auto_trigger_end);
+            after_stats = read_bpf_stats(program.program_fd);
+        }
+    }
     const uint64_t tsc_after = rdtsc_end();
     const auto exec_wall_end = std::chrono::steady_clock::now();
-
-    const auto after_stats = read_bpf_stats(program.program_fd);
     stats_fd_guard.reset();
     link.reset();
 
@@ -2603,6 +3068,9 @@ std::vector<sample_result> execute_prepared_kernel_attach(
         {"attach_ns", elapsed_ns(attach_start, attach_end)},
         {"workload_wall_ns", elapsed_ns(exec_wall_start, exec_wall_end)},
     };
+    if (auto_trigger_wall_ns.has_value()) {
+        sample.phases_ns.push_back({"auto_trigger_wall_ns", *auto_trigger_wall_ns});
+    }
     if (rejit.syscall_attempted) {
         sample.phases_ns.push_back({"rejit_apply_ns", rejit_apply_ns});
     }
@@ -3730,6 +4198,10 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
     const uint32_t measured_workload_amount = is_duration_based_workload(options.workload_type)
         ? options.workload_iterations
         : options.repeat * options.workload_iterations;
+    const char *attach_section_name_raw = bpf_program__section_name(attach_prog);
+    const std::string_view attach_section_name =
+        attach_section_name_raw != nullptr ? std::string_view(attach_section_name_raw)
+                                           : std::string_view();
 
     /* Warmup: duration-based workloads treat workload_iterations as total seconds. */
     if (options.warmup_repeat > 0) {
@@ -3743,11 +4215,21 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
     const auto exec_wall_start = std::chrono::steady_clock::now();
     const uint64_t tsc_before = rdtsc_start();
     run_attach_workload(options, measured_workload_amount);
+    auto after_stats = read_bpf_stats(program_fd);
+    std::optional<uint64_t> auto_trigger_wall_ns;
+    const bool needs_auto_trigger = after_stats.run_cnt == before_stats.run_cnt;
+    if (needs_auto_trigger) {
+        const auto auto_trigger_start = std::chrono::steady_clock::now();
+        const bool ran_auto_trigger =
+            run_auto_attach_trigger_workload(attach_section_name, measured_workload_amount);
+        const auto auto_trigger_end = std::chrono::steady_clock::now();
+        if (ran_auto_trigger) {
+            auto_trigger_wall_ns = elapsed_ns(auto_trigger_start, auto_trigger_end);
+            after_stats = read_bpf_stats(program_fd);
+        }
+    }
     const uint64_t tsc_after = rdtsc_end();
     const auto exec_wall_end = std::chrono::steady_clock::now();
-
-    /* Read stats after the measured workload */
-    const auto after_stats = read_bpf_stats(program_fd);
 
     /* Close stats fd to stop accounting */
     stats_fd_guard.reset();
@@ -3815,6 +4297,9 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
         {"attach_ns", elapsed_ns(attach_start, attach_end)},
         {"workload_wall_ns", elapsed_ns(exec_wall_start, exec_wall_end)},
     };
+    if (auto_trigger_wall_ns.has_value()) {
+        sample.phases_ns.push_back({"auto_trigger_wall_ns", *auto_trigger_wall_ns});
+    }
     if (rejit.syscall_attempted) {
         sample.phases_ns.push_back(
             {"rejit_apply_ns", elapsed_ns(rejit_start, rejit_end)});

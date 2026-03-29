@@ -572,14 +572,28 @@ def attach_trigger_unsupported_reason(
 
     section_name = str(candidate.section_name or "").strip()
     if not section_name:
-        return "attach_trigger requires tracepoint/<category>/<name> sections; got empty section"
+        return "attach_trigger requires a non-empty auto-attach section; got empty section"
 
     parts = section_name.split("/")
-    if len(parts) == 3 and parts[0] == "tracepoint" and all(parts[1:]):
+    root = parts[0]
+    root_prefixes = ("kprobe", "kretprobe", "fentry", "fexit", "fmod_ret", "lsm")
+
+    if len(parts) == 3 and root in {"tracepoint", "tp"} and all(parts[1:]):
         return None
+    if len(parts) >= 2 and root in {"raw_tracepoint", "raw_tp", "tp_btf"} and all(parts[1:]):
+        return None
+    if root in {"ksyscall", "kretsyscall"} and len(parts) == 2 and all(parts[1:]):
+        return None
+    if root.startswith(root_prefixes):
+        if len(parts) == 1:
+            if "." in root:
+                return None
+        elif all(parts[1:]):
+            return None
 
     return (
-        "attach_trigger requires tracepoint/<category>/<name> sections; "
+        "attach_trigger does not currently recognize the section as an auto-triggerable "
+        "kernel event hook; "
         f"got {section_name}"
     )
 

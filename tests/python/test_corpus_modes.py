@@ -26,6 +26,70 @@ def _resolve_object(source: str) -> modes.ResolvedObject:
     return modes.resolve_manifest_object(entry, index=1)
 
 
+def _synthetic_attach_program(
+    section_name: str,
+    *,
+    program_name: str = "attach_prog",
+    prog_type_name: str = "kprobe",
+) -> tuple[modes.ResolvedObject, modes.ResolvedProgram]:
+    program = modes.ResolvedProgram(
+        source="corpus/build/demo/demo.bpf.o",
+        object_path="corpus/build/demo/demo.bpf.o",
+        object_abs_path="/tmp/demo.bpf.o",
+        repo="demo",
+        source_name="demo",
+        family="demo",
+        category="test",
+        level="unit",
+        description=None,
+        hypothesis=None,
+        tags=(),
+        object_relpath="demo.bpf.o",
+        canonical_object_name="demo:demo.bpf.o",
+        object_basename="demo.bpf.o",
+        short_name=f"demo:demo.bpf.o:{program_name}",
+        program_name=program_name,
+        canonical_name=f"demo:demo.bpf.o:{program_name}",
+        fixture_path=None,
+        test_method="attach_trigger",
+        prog_type_name=prog_type_name,
+        section_name=section_name,
+        io_mode="context",
+        raw_packet=False,
+        input_size=0,
+        memory_path=None,
+        trigger=None,
+        trigger_timeout_seconds=None,
+        compile_loader=None,
+        attach_group=program_name,
+        rejit_enabled=True,
+    )
+    obj = modes.ResolvedObject(
+        source="corpus/build/demo/demo.bpf.o",
+        object_path="corpus/build/demo/demo.bpf.o",
+        object_abs_path="/tmp/demo.bpf.o",
+        repo="demo",
+        source_name="demo",
+        family="demo",
+        category="test",
+        level="unit",
+        description=None,
+        hypothesis=None,
+        tags=(),
+        object_relpath="demo.bpf.o",
+        canonical_name="demo:demo.bpf.o",
+        object_basename="demo.bpf.o",
+        short_name="demo:demo.bpf.o",
+        fixture_path=None,
+        compile_loader=None,
+        shared_state_policy="reset_maps",
+        allow_object_only_result=False,
+        test_method="attach_trigger",
+        programs=(program,),
+    )
+    return obj, program
+
+
 def test_attach_trigger_rejects_tetragon_custom_tracepoint_section() -> None:
     obj = _resolve_object("corpus/build/tetragon/bpf_execve_event.bpf.o")
     program = modes.find_program_in_object(obj, "event_execve")
@@ -34,7 +98,7 @@ def test_attach_trigger_rejects_tetragon_custom_tracepoint_section() -> None:
     reason = modes.attach_trigger_unsupported_reason(obj, program)
 
     assert reason is not None
-    assert "tracepoint/<category>/<name>" in reason
+    assert "auto-triggerable kernel event hook" in reason
     assert "tracepoint/sys_execve" in reason
 
 
@@ -54,6 +118,39 @@ def test_attach_trigger_accepts_standard_tracepoint_section() -> None:
     obj = _resolve_object("corpus/build/bcc/libbpf-tools/execsnoop.bpf.o")
     program = modes.find_program_in_object(obj, "tracepoint__syscalls__sys_enter_execve")
     assert program is not None
+
+    reason = modes.attach_trigger_unsupported_reason(obj, program)
+
+    assert reason is None
+
+
+def test_attach_trigger_accepts_kprobe_section() -> None:
+    obj, program = _synthetic_attach_program(
+        "kprobe/do_sys_openat2",
+        prog_type_name="kprobe",
+    )
+
+    reason = modes.attach_trigger_unsupported_reason(obj, program)
+
+    assert reason is None
+
+
+def test_attach_trigger_accepts_raw_tracepoint_section() -> None:
+    obj, program = _synthetic_attach_program(
+        "raw_tp/sched_switch",
+        prog_type_name="raw_tracepoint",
+    )
+
+    reason = modes.attach_trigger_unsupported_reason(obj, program)
+
+    assert reason is None
+
+
+def test_attach_trigger_accepts_fentry_section() -> None:
+    obj, program = _synthetic_attach_program(
+        "fentry/tcp_v4_connect",
+        prog_type_name="tracing",
+    )
 
     reason = modes.attach_trigger_unsupported_reason(obj, program)
 
@@ -101,6 +198,25 @@ def test_comparison_exclusion_reason_labels_unsupported_attach_trigger() -> None
 
     assert reason is not None
     assert reason.startswith("attach_trigger measurement unsupported:")
+
+
+def test_comparison_exclusion_reason_for_supported_attach_trigger_reports_zero_run_cnt() -> None:
+    obj, program = _synthetic_attach_program(
+        "kprobe/do_sys_openat2",
+        prog_type_name="kprobe",
+    )
+
+    baseline_record = {"ok": True, "sample": {"exec_ns": 0, "result": 0}}
+    rejit_record = {"ok": True, "sample": {"exec_ns": 0, "result": 0}}
+
+    reason = corpus_lib.comparison_exclusion_reason(
+        obj=obj,
+        program=program,
+        baseline_record=baseline_record,
+        rejit_record=rejit_record,
+    )
+
+    assert reason == "attach_trigger did not fire the target program in baseline or REJIT (run_cnt_delta=0)"
 
 
 def test_build_object_batch_plan_v2_uses_group_scoped_load_program_names() -> None:
