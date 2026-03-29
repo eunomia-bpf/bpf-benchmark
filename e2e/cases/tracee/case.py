@@ -37,6 +37,7 @@ from runner.libs import (  # noqa: E402
     tail_text,
     which,
 )
+from runner.libs.app_runners.tracee import TraceeRunner  # noqa: E402
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
@@ -1622,19 +1623,22 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 if not control_records:
                     raise RuntimeError("control phase produced no workload measurements")
 
-                # TODO: Move the Tracee launch/workload/stop hooks into
-                # runner/libs/app_runners/tracee.py so corpus and E2E share one lifecycle.
                 def setup() -> dict[str, object]:
                     return {}
 
                 def start(_: object) -> CaseLifecycleState:
-                    session = TraceeAgentSession(commands, load_timeout=int(args.load_timeout))
-                    session.__enter__()
-                    cycle_selected_programs = select_tracee_programs(session.programs, config)
+                    runner = TraceeRunner(
+                        tracee_binary=tracee_binary,
+                        events=events,
+                        extra_args=args.tracee_extra_arg or [],
+                        load_timeout_s=int(args.load_timeout),
+                    )
+                    runner.start()
+                    cycle_selected_programs = select_tracee_programs(runner.programs, config)
                     prog_ids = [int(program["id"]) for program in cycle_selected_programs]
                     if config.get("apply_programs"):
                         cycle_apply_programs = select_tracee_programs(
-                            session.programs,
+                            runner.programs,
                             config,
                             config_key="apply_programs",
                             allow_all_when_unset=False,
@@ -1644,12 +1648,12 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                         cycle_apply_programs = [dict(program) for program in cycle_selected_programs]
                         apply_prog_ids = list(prog_ids)
                     return CaseLifecycleState(
-                        runtime=session,
+                        runtime=runner,
                         target_prog_ids=prog_ids,
                         apply_prog_ids=apply_prog_ids,
-                        scan_kwargs={"prog_fds": session.program_fds},
+                        scan_kwargs={"prog_fds": runner.program_fds},
                         artifacts={
-                            "tracee_programs": session.programs,
+                            "tracee_programs": runner.programs,
                             "selected_tracee_programs": cycle_selected_programs,
                             "apply_tracee_programs": cycle_apply_programs,
                         },
@@ -1659,8 +1663,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     nonlocal preflight
                     if preflight is not None or preflight_duration_s <= 0:
                         return None
-                    session = lifecycle.runtime
-                    assert isinstance(session, TraceeAgentSession)
+                    runner = lifecycle.runtime
+                    assert isinstance(runner, TraceeRunner)
                     preflight_prog_ids = sorted(set(lifecycle.target_prog_ids) | set(lifecycle.apply_prog_ids))
                     preflight = run_phase(
                         list(workloads),
@@ -1673,9 +1677,9 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                         latency_probe_timeout_s=latency_probe_timeout_s,
                         ci_iterations=ci_iterations,
                         ci_seed=cycle_seed + 250,
-                        prog_fds=session.program_fds,
-                        agent_pid=session.pid,
-                        collector=session.collector,
+                        prog_fds=runner.program_fds,
+                        agent_pid=runner.pid,
+                        collector=runner.collector,
                     )
                     preflight["program_activity"] = {
                         "target_programs": summarize_program_activity(preflight, lifecycle.target_prog_ids),
@@ -1714,8 +1718,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     return None
 
                 def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
-                    session = lifecycle.runtime
-                    assert isinstance(session, TraceeAgentSession)
+                    runner = lifecycle.runtime
+                    assert isinstance(runner, TraceeRunner)
                     phase_result = run_phase(
                         workloads,
                         duration_s,
@@ -1727,9 +1731,9 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                         latency_probe_timeout_s=latency_probe_timeout_s,
                         ci_iterations=ci_iterations,
                         ci_seed=cycle_seed + (500 if phase_name == "post_rejit" else 0),
-                        prog_fds=session.program_fds,
-                        agent_pid=session.pid,
-                        collector=session.collector,
+                        prog_fds=runner.program_fds,
+                        agent_pid=runner.pid,
+                        collector=runner.collector,
                         control_records=control_records,
                         require_tracee_activity=True,
                     )
@@ -1769,9 +1773,9 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     return {"map_capture": map_capture}
 
                 def stop(_: object, lifecycle: CaseLifecycleState) -> None:
-                    session = lifecycle.runtime
-                    assert isinstance(session, TraceeAgentSession)
-                    session.close()
+                    runner = lifecycle.runtime
+                    assert isinstance(runner, TraceeRunner)
+                    runner.stop()
 
                 def cleanup(_: object) -> None:
                     return None

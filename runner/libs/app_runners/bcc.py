@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Mapping, NoReturn, Sequence
 
 import yaml
 
@@ -37,6 +37,7 @@ class BCCWorkloadSpec:
     workload_kind: str
     expected_programs: int
     spawn_timeout_s: int
+    tool_args: tuple[str, ...]
 
 
 @dataclass(slots=True)
@@ -52,21 +53,24 @@ class ToolProcessSession:
 @lru_cache(maxsize=1)
 def _bcc_tool_specs() -> dict[str, BCCWorkloadSpec]:
     payload = yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))
+    if not isinstance(payload, Mapping):
+        raise RuntimeError(f"BCC config must be a mapping: {DEFAULT_CONFIG}")
     tools = payload.get("tools")
     if not isinstance(tools, list):
-        return {}
+        raise RuntimeError(f"BCC config field 'tools' must be a sequence: {DEFAULT_CONFIG}")
     specs: dict[str, BCCWorkloadSpec] = {}
     for entry in tools:
         if not isinstance(entry, Mapping):
-            continue
+            raise RuntimeError(f"BCC config field 'tools' contains a non-mapping entry: {DEFAULT_CONFIG}")
         name = str(entry.get("name") or "").strip()
         if not name:
-            continue
+            raise RuntimeError(f"BCC config field 'tools' contains an entry without a name: {DEFAULT_CONFIG}")
         specs[name] = BCCWorkloadSpec(
             name=name,
             workload_kind=str(entry.get("workload_kind") or "mixed"),
             expected_programs=int(entry.get("expected_programs", 1) or 1),
             spawn_timeout_s=int(entry.get("spawn_timeout_s", DEFAULT_ATTACH_TIMEOUT_SECONDS) or DEFAULT_ATTACH_TIMEOUT_SECONDS),
+            tool_args=tuple(str(arg) for arg in entry.get("tool_args", []) if str(arg).strip()),
         )
     return specs
 
@@ -213,7 +217,7 @@ class BCCRunner:
         tool_binary: Path | str | None = None,
         object_path: Path | str | None = None,
         tool_name: str | None = None,
-        tool_args: Sequence[str] = (),
+        tool_args: Sequence[str] | None = None,
         workload_kind: str | None = None,
         expected_programs: int | None = None,
         expected_program_names: Sequence[str] = (),
@@ -229,7 +233,11 @@ class BCCRunner:
 
         spec = _bcc_tool_specs().get(resolved_tool_name)
         self.tool_name = resolved_tool_name or Path(str(tool_binary)).name
-        self.tool_args = tuple(str(arg) for arg in tool_args)
+        self.tool_args = (
+            tuple(str(arg) for arg in tool_args if str(arg).strip())
+            if tool_args is not None
+            else (spec.tool_args if spec else ())
+        )
         self.workload_kind = workload_kind or (spec.workload_kind if spec else "mixed")
         self.expected_programs = int(expected_programs or (spec.expected_programs if spec else max(1, len(tuple(expected_program_names)) or 1)))
         self.attach_timeout_s = int(attach_timeout_s or (spec.spawn_timeout_s if spec else DEFAULT_ATTACH_TIMEOUT_SECONDS))
@@ -253,6 +261,8 @@ class BCCRunner:
         if self.tool_binary is not None:
             if not self.tool_binary.exists():
                 raise RuntimeError(f"BCC tool binary not found: {self.tool_binary}")
+            if not os.access(self.tool_binary, os.X_OK):
+                raise RuntimeError(f"BCC tool binary is not executable: {self.tool_binary}")
             return self.tool_binary
 
         if not self.skip_setup:
@@ -267,6 +277,23 @@ class BCCRunner:
             raise RuntimeError(f"BCC tool '{self.tool_name}' not found in {self.tools_dir}")
         self.tool_binary = tool_binary
         return tool_binary
+
+    def _fail_start(self, message: str) -> NoReturn:
+        stop_error = ""
+        try:
+            self.stop()
+        except Exception as exc:
+            stop_error = str(exc)
+        details: list[str] = [message]
+        stderr_tail = str(self.process_output.get("stderr_tail") or "").strip()
+        stdout_tail = str(self.process_output.get("stdout_tail") or "").strip()
+        if stderr_tail:
+            details.append(f"stderr tail:\n{stderr_tail}")
+        elif stdout_tail:
+            details.append(f"stdout tail:\n{stdout_tail}")
+        if stop_error:
+            details.append(f"stop error: {stop_error}")
+        raise RuntimeError("\n".join(details))
 
     def start(self) -> list[int]:
         if self.session is not None:
@@ -302,16 +329,26 @@ class BCCRunner:
             timeout_s=self.attach_timeout_s,
         )
         if not programs:
-            self.stop()
-            raise RuntimeError(
+            return self._fail_start(
                 f"BCC tool {self.tool_name} did not attach any BPF programs within {self.attach_timeout_s}s"
+            )
+        if len(programs) < self.expected_programs:
+            attached_names = sorted(str(program.get("name") or "") for program in programs if str(program.get("name") or "").strip())
+            return self._fail_start(
+                f"BCC tool {self.tool_name} attached {len(programs)} programs, expected at least {self.expected_programs}: {attached_names}"
             )
 
         if self.expected_program_names:
             expected = set(self.expected_program_names)
             matched = [program for program in programs if str(program.get("name") or "") in expected]
-            if matched:
-                programs = matched
+            found = {str(program.get("name") or "") for program in matched}
+            missing = [name for name in self.expected_program_names if name not in found]
+            if missing:
+                attached_names = sorted(str(program.get("name") or "") for program in programs if str(program.get("name") or "").strip())
+                return self._fail_start(
+                    f"BCC tool {self.tool_name} did not attach expected programs {missing}; attached {attached_names}"
+                )
+            programs = matched
 
         self.programs = [dict(program) for program in programs]
         return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]

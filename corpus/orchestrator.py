@@ -5,12 +5,17 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
 
 import yaml
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from runner.libs import ROOT_DIR, ensure_parent, resolve_bpftool_binary, run_command, run_json_command, write_json
 from runner.libs.app_runners import get_app_runner
@@ -37,6 +42,12 @@ SECTION_TYPE_PREFIXES = {
     "cgroup_skb": "cgroup_skb",
     "socket": "socket_filter",
 }
+
+
+def _sanitize_pin_component(value: str) -> str:
+    sanitized = "".join(char if (char.isalnum() or char in {"_", "-"}) else "_" for char in str(value))
+    sanitized = sanitized.strip("_-")
+    return sanitized or "prog"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -170,36 +181,6 @@ def _build_prog_run_command(
     return command
 
 
-def _run_micro_exec_fallback(
-    runner_binary: Path,
-    object_path: Path,
-    program_name: str,
-    *,
-    repeat: int,
-    btf_path: Path | None,
-) -> dict[str, object]:
-    command = [
-        str(runner_binary),
-        "test-run",
-        "--program",
-        str(object_path),
-        "--program-name",
-        program_name,
-        "--repeat",
-        str(max(1, repeat)),
-    ]
-    if btf_path is not None and btf_path.exists():
-        command.extend(["--btf-custom-path", str(btf_path)])
-    payload = run_json_command(command, timeout=180)
-    if isinstance(payload, list):
-        if len(payload) != 1:
-            raise RuntimeError(f"micro_exec fallback returned {len(payload)} records for {program_name}")
-        payload = payload[0]
-    if not isinstance(payload, Mapping):
-        raise RuntimeError(f"micro_exec fallback returned unexpected payload for {program_name}")
-    return dict(payload)
-
-
 def _run_app_native_entry(
     obj: Any,
     *,
@@ -272,11 +253,11 @@ def _run_test_run_entry(
     bpftool_binary: str,
     daemon_socket_path: Path,
     repeat: int,
-    runner_binary: Path,
     btf_path: Path | None,
 ) -> dict[str, object]:
     ensure_bpffs_mounted()
-    pin_root = Path("/sys/fs/bpf") / f"corpus-orch-{Path(obj.object_abs_path).stem}-{os.getpid()}"
+    object_component = _sanitize_pin_component(Path(obj.object_abs_path).stem)
+    pin_root = Path("/sys/fs/bpf") / f"corpus-orch-{object_component}-{os.getpid()}"
     pin_dir = pin_root / "progs"
     map_dir = pin_root / "maps"
     load_command = [bpftool_binary, "prog", "loadall", obj.object_abs_path, str(pin_dir)]
@@ -292,18 +273,14 @@ def _run_test_run_entry(
     try:
         run_command(load_command, timeout=180)
         records: list[dict[str, object]] = []
-        status = "ok"
+        record_errors: list[str] = []
         for program in obj.programs:
-            pin_path = pin_dir / program.program_name
-            prog_show = _bpftool_prog_show_pinned(bpftool_binary, pin_path)
-            prog_id = int(prog_show.get("id", 0) or 0)
-            if prog_id <= 0:
-                raise RuntimeError(f"{program.program_name}: failed to resolve pinned prog id")
-            bpftool_error = ""
-            fallback: dict[str, object] | None = None
-            baseline: dict[str, object]
-            rejit: dict[str, object] | None
             try:
+                pin_path = pin_dir / program.program_name
+                prog_show = _bpftool_prog_show_pinned(bpftool_binary, pin_path)
+                prog_id = int(prog_show.get("id", 0) or 0)
+                if prog_id <= 0:
+                    raise RuntimeError(f"{program.program_name}: failed to resolve pinned prog id")
                 baseline_run = run_json_command(
                     _build_prog_run_command(bpftool_binary, pin_path, program, repeat=repeat),
                     timeout=120,
@@ -323,7 +300,7 @@ def _run_test_run_entry(
                     )
                     if not isinstance(rejit_run, Mapping):
                         raise RuntimeError(f"{program.program_name}: unexpected bpftool rejit payload")
-                baseline = {
+                baseline: dict[str, object] = {
                     "source": "bpftool",
                     "exec_ns": int(baseline_run.get("duration", 0) or 0),
                     "retval": int(baseline_run.get("retval", 0) or 0),
@@ -333,7 +310,7 @@ def _run_test_run_entry(
                     "xlated_insns": int(int(prog_show.get("bytes_xlated", 0) or 0) / 8),
                     "raw": dict(baseline_run),
                 }
-                rejit = None
+                rejit: dict[str, object] | None = None
                 if rejit_run is not None:
                     post_show = _bpftool_prog_show_pinned(bpftool_binary, pin_path)
                     rejit = {
@@ -346,55 +323,47 @@ def _run_test_run_entry(
                         "xlated_insns": int(int(post_show.get("bytes_xlated", 0) or 0) / 8),
                         "raw": dict(rejit_run),
                     }
+                record_status = "ok"
+                record_error = ""
+                if not bool(apply_result.get("applied")):
+                    record_status = "error"
+                    record_error = str(apply_result.get("error") or "").strip() or (
+                        f"{program.program_name}: daemon REJIT apply returned applied=false"
+                    )
             except Exception as exc:
-                status = "fallback"
-                bpftool_error = str(exc)
-                fallback = {
-                    "reason": bpftool_error,
-                    "note": "micro_exec fallback reloads the object and cannot measure the live REJIT-mutated kernel program",
-                    "baseline": _run_micro_exec_fallback(
-                        runner_binary,
-                        Path(obj.object_abs_path),
-                        program.program_name,
-                        repeat=repeat,
-                        btf_path=btf_path,
-                    ),
-                }
-                apply_result = apply_daemon_rejit(
-                    [prog_id],
-                    enabled_passes=benchmark_rejit_enabled_passes(),
-                    daemon_socket_path=daemon_socket_path,
-                )
-                baseline = {
-                    "source": "micro_exec",
-                    "exec_ns": int(fallback["baseline"].get("exec_ns", 0) or 0),
-                    "retval": int(fallback["baseline"].get("retval", 0) or 0),
-                    "prog_id": prog_id,
-                    "jited_bytes": int(fallback["baseline"].get("jited_prog_len", 0) or 0),
-                    "bytes_xlated": int(fallback["baseline"].get("xlated_prog_len", 0) or 0),
-                    "xlated_insns": int(int(fallback["baseline"].get("xlated_prog_len", 0) or 0) / 8),
-                    "raw": dict(fallback["baseline"]),
-                }
+                pin_path = pin_dir / program.program_name
+                prog_id = 0
+                baseline = {}
                 rejit = None
+                apply_result = {}
+                record_status = "error"
+                record_error = str(exc)
+            if record_error:
+                record_errors.append(record_error)
             records.append(
                 {
                     "program_name": program.program_name,
+                    "status": record_status,
                     "pin_path": str(pin_path),
                     "prog_id": prog_id,
                     "baseline": baseline,
                     "rejit_apply": dict(apply_result),
                     "rejit": rejit,
-                    "fallback": fallback,
-                    "error": bpftool_error or str(apply_result.get("error") or ""),
+                    "error": record_error,
                 }
             )
+        statuses = Counter(str(record.get("status") or "error") for record in records)
         return {
             "object": obj.object_path,
             "repo": obj.repo,
             "measurement": "test_run",
-            "status": status,
-            "error": "",
+            "status": "ok" if statuses.get("error", 0) == 0 else "error",
+            "error": "; ".join(record_errors),
             "records": records,
+            "summary": {
+                "records": len(records),
+                "statuses": dict(sorted(statuses.items())),
+            },
         }
     finally:
         run_command(["rm", "-rf", str(pin_root)], check=False)
@@ -413,14 +382,12 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
         ((yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}).get("defaults") or {}).get("repeat", 1)
     )
     daemon_binary = Path(args.daemon).resolve()
-    runner_binary = Path(args.runner).resolve()
+    runner_binary = Path(args.runner).resolve() if str(args.runner).strip() else None
     btf_path = Path(args.btf_custom_path).resolve() if str(args.btf_custom_path).strip() else None
     bpftool_binary = str(Path(args.bpftool).resolve()) if str(args.bpftool).strip() else resolve_bpftool_binary()
 
     if not daemon_binary.exists():
         raise RuntimeError(f"daemon binary not found: {daemon_binary}")
-    if not runner_binary.exists():
-        raise RuntimeError(f"micro_exec binary not found: {runner_binary}")
 
     daemon_proc, daemon_socket_path, daemon_socket_dir, daemon_stdout_path, daemon_stderr_path = _start_daemon_server(
         daemon_binary
@@ -441,7 +408,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         bpftool_binary=bpftool_binary,
                         daemon_socket_path=daemon_socket_path,
                         repeat=max(1, repeat),
-                        runner_binary=runner_binary,
                         btf_path=btf_path,
                     )
                 else:
@@ -472,7 +438,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
             "daemon": str(daemon_binary),
             "daemon_socket": str(daemon_socket_path),
             "bpftool": bpftool_binary,
-            "runner": str(runner_binary),
+            "runner": str(runner_binary) if runner_binary is not None else None,
             "btf_custom_path": str(btf_path) if btf_path is not None else None,
             "filters": list(args.filters or []),
             "repeat": max(1, repeat),

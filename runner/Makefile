@@ -10,8 +10,9 @@ LIBBPF_OBJDIR := $(LIBBPF_BUILD_DIR)/obj
 LIBBPF_PREFIX := $(LIBBPF_BUILD_DIR)/prefix
 LIBBPF_A := $(LIBBPF_OBJDIR)/libbpf.a
 LIBBPF_HEADER := $(LIBBPF_PREFIX)/include/bpf/bpf.h
-BPFTOOL_BUILD_DIR := $(BUILD_DIR)/vendor/bpftool
+BPFTOOL_BUILD_DIR := $(BUILD_DIR)/vendor/bpftool/
 BPFTOOL_BOOTSTRAP := $(BPFTOOL_BUILD_DIR)/bootstrap/bpftool
+BPFTOOL_RUNTIME ?= /usr/local/sbin/bpftool
 TOOLS_BUILD_DIR := $(BUILD_DIR)/tools
 MICRO_EXEC_ENABLE_LLVMBPF ?= ON
 PYTHON ?= python3
@@ -29,7 +30,6 @@ FILTERS ?=
 ITERATIONS ?= 3
 WARMUPS ?= 1
 REPEAT ?= 100
-BATCH_SIZE ?= 100
 BENCH ?=
 STATIC_VERIFY_ARGS ?=
 FUZZ_ROUNDS ?= 1000
@@ -57,7 +57,6 @@ VM_MICRO_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro.json
 VM_CORPUS_OUTPUT_JSON ?= $(CORPUS_RESULTS_DIR)/vm_corpus.json
 VM_CORPUS_OUTPUT_MD ?= $(CORPUS_RESULTS_DIR)/vm_corpus.md
 VM_CORPUS_NEW_OUTPUT_JSON ?= $(CORPUS_RESULTS_DIR)/vm_corpus_new.json
-CORPUS_BUILD_REPORT ?= $(CORPUS_RESULTS_DIR)/expanded_corpus_build.latest.json
 VM_STATIC_OUTPUT ?= $(REPO_ROOT)/daemon/tests/results/static_verify.json
 
 VM_CPUS ?=
@@ -88,17 +87,10 @@ BPFTOOL_JOBS ?= 1
 BENCH_FLAGS := $(foreach b,$(BENCH),--bench $(b))
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
-PROFILE_FLAG := $(if $(strip $(PROFILE)),--profile "$(PROFILE)",)
 FILTER_FLAGS := $(foreach filter,$(FILTERS),--filter "$(filter)")
 VM_CORPUS_NEW_FILTER_FLAGS := $(if $(strip $(FILTERS)),$(FILTER_FLAGS),--filter "execsnoop" --filter "xdp_pass_kern")
 REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
-WARMUPS_IS_EXPLICIT := $(or $(findstring command line,$(origin WARMUPS)),$(findstring environment,$(origin WARMUPS)),$(findstring override,$(origin WARMUPS)))
-VM_CORPUS_OUTPUT_JSON_IS_EXPLICIT := $(or $(findstring command line,$(origin VM_CORPUS_OUTPUT_JSON)),$(findstring environment,$(origin VM_CORPUS_OUTPUT_JSON)),$(findstring override,$(origin VM_CORPUS_OUTPUT_JSON)))
-VM_CORPUS_OUTPUT_MD_IS_EXPLICIT := $(or $(findstring command line,$(origin VM_CORPUS_OUTPUT_MD)),$(findstring environment,$(origin VM_CORPUS_OUTPUT_MD)),$(findstring override,$(origin VM_CORPUS_OUTPUT_MD)))
 VM_CORPUS_REPEAT_FLAG := $(if $(strip $(REPEAT_IS_EXPLICIT)),--repeat "$(REPEAT)",)
-VM_CORPUS_WARMUPS_FLAG := $(if $(strip $(WARMUPS_IS_EXPLICIT)),--warmups "$(WARMUPS)",)
-VM_CORPUS_OUTPUT_JSON_FLAG := $(if $(strip $(VM_CORPUS_OUTPUT_JSON_IS_EXPLICIT)),--output-json "$(VM_CORPUS_OUTPUT_JSON)",)
-VM_CORPUS_OUTPUT_MD_FLAG := $(if $(strip $(VM_CORPUS_OUTPUT_MD_IS_EXPLICIT)),--output-md "$(VM_CORPUS_OUTPUT_MD)",)
 
 .PHONY: all micro_exec vendor_libbpf vendor_bpftool \
 	corpus-fetch corpus-build-objects corpus-build corpus-build-native \
@@ -324,23 +316,17 @@ vm-micro: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-bui
 		--timeout "$(VM_MICRO_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) "$(DAEMON_PATH)" $(DAEMON_ARGS) serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; python3 "$(REPO_ROOT)/micro/driver.py" --runtime llvmbpf --runtime kernel --runtime kernel-rejit --daemon-socket "$(DAEMON_SOCKET)" $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'
 
-vm-corpus: corpus-build micro_exec daemon-binary kernel-image kinsn-modules-build
+vm-corpus: corpus-build corpus-build-native vendor_bpftool daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(CORPUS_RESULTS_DIR)"
-	TARGET="$(TARGET)" $(VENV_ACTIVATE) $(PYTHON) "$(REPO_ROOT)/corpus/driver.py" \
-		$(PROFILE_FLAG) \
-		$(FILTER_FLAGS) \
+	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
+		--action vm-corpus \
 		--kernel-image "$(BZIMAGE_PATH)" \
-		--runner "$(MICRO_RUNNER)" \
-		--daemon "$(DAEMON_PATH)" \
-		--btf-custom-path "$(VMLINUX_PATH)" \
-		--corpus-build-report "$(CORPUS_BUILD_REPORT)" \
-		--batch-size "$(BATCH_SIZE)" \
-		$(VM_CORPUS_REPEAT_FLAG) \
-		$(VM_CORPUS_WARMUPS_FLAG) \
-		$(VM_CORPUS_OUTPUT_JSON_FLAG) \
-		$(VM_CORPUS_OUTPUT_MD_FLAG)
+		$(VM_CPU_FLAG) \
+		$(VM_MEM_FLAG) \
+		--timeout "$(VM_CORPUS_TIMEOUT)" \
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/orchestrator.py" --daemon "$(DAEMON_PATH)" --bpftool "$(BPFTOOL_RUNTIME)" --btf-custom-path /sys/kernel/btf/vmlinux --output-json "$(VM_CORPUS_OUTPUT_JSON)" $(VM_CORPUS_REPEAT_FLAG) $(FILTER_FLAGS)'
 
-vm-corpus-new: corpus-build-bcc corpus-build-xdp-tutorial vendor_bpftool micro_exec daemon-binary kernel-image kinsn-modules-build
+vm-corpus-new: corpus-build-bcc corpus-build-xdp-tutorial vendor_bpftool daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(CORPUS_RESULTS_DIR)"
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-corpus-new \
@@ -348,7 +334,7 @@ vm-corpus-new: corpus-build-bcc corpus-build-xdp-tutorial vendor_bpftool micro_e
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_CORPUS_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/orchestrator.py" --daemon "$(DAEMON_PATH)" --runner "$(MICRO_RUNNER)" --bpftool "$(BPFTOOL_BOOTSTRAP)" --btf-custom-path /sys/kernel/btf/vmlinux --repeat "$(REPEAT)" --output-json "$(VM_CORPUS_NEW_OUTPUT_JSON)" $(VM_CORPUS_NEW_FILTER_FLAGS)'
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/orchestrator.py" --daemon "$(DAEMON_PATH)" --bpftool "$(BPFTOOL_RUNTIME)" --btf-custom-path /sys/kernel/btf/vmlinux --repeat "$(REPEAT)" --output-json "$(VM_CORPUS_NEW_OUTPUT_JSON)" $(VM_CORPUS_NEW_FILTER_FLAGS)'
 
 vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"

@@ -31,6 +31,7 @@ from runner.libs import (  # noqa: E402
     tail_text,
     which,
 )
+from runner.libs.app_runners.tetragon import TetragonRunner  # noqa: E402
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
@@ -950,30 +951,22 @@ def daemon_payload(
     preflight: dict[str, object] | None = None
     exec_workload_cgroup = any(arg == "--cgroup-rate" for arg in tetragon_extra_args)
 
-    # TODO: Move the Tetragon policy/setup/start/workload/stop hooks into
-    # runner/libs/app_runners/tetragon.py so corpus and E2E share one lifecycle.
     def setup() -> dict[str, object]:
-        tempdir = tempfile.TemporaryDirectory(prefix="tetragon-policy-")
-        policy_dir = Path(tempdir.name)
-        policy_paths = write_tetragon_policies(policy_dir)
-        return {
-            "tempdir": tempdir,
-            "policy_dir": policy_dir,
-            "policy_paths": policy_paths,
-        }
+        return {}
 
     def start(state: object) -> CaseLifecycleState:
-        assert isinstance(state, dict)
-        policy_dir = state["policy_dir"]
-        assert isinstance(policy_dir, Path)
-        command = [tetragon_binary, *tetragon_extra_args, "--tracing-policy-dir", str(policy_dir)]
-        session = TetragonAgentSession(command, load_timeout)
-        session.__enter__()
-        selected_programs = select_tetragon_programs(session.programs, config)
+        del state
+        runner = TetragonRunner(
+            tetragon_binary=tetragon_binary,
+            tetragon_extra_args=tetragon_extra_args,
+            load_timeout_s=load_timeout,
+        )
+        runner.start()
+        selected_programs = select_tetragon_programs(runner.programs, config)
         prog_ids = [int(program["id"]) for program in selected_programs]
         if config.get("apply_programs"):
             apply_programs = select_tetragon_programs(
-                session.programs,
+                runner.programs,
                 config,
                 config_key="apply_programs",
                 allow_all_when_unset=False,
@@ -983,12 +976,14 @@ def daemon_payload(
             apply_programs = [dict(program) for program in selected_programs]
             apply_prog_ids = list(prog_ids)
         return CaseLifecycleState(
-            runtime=session,
+            runtime=runner,
             target_prog_ids=prog_ids,
             apply_prog_ids=apply_prog_ids,
             artifacts={
-                "tetragon_launch_command": command,
-                "tetragon_programs": session.programs,
+                "tetragon_launch_command": list(runner.command),
+                "policy_dir": None if runner.tempdir is None else runner.tempdir.name,
+                "policy_paths": [str(path) for path in runner.policy_paths],
+                "tetragon_programs": runner.programs,
                 "selected_tetragon_programs": selected_programs,
                 "apply_tetragon_programs": apply_programs,
             },
@@ -998,14 +993,14 @@ def daemon_payload(
         nonlocal preflight
         if preflight_duration_s <= 0 or not workloads:
             return None
-        session = lifecycle.runtime
-        assert isinstance(session, TetragonAgentSession)
+        runner = lifecycle.runtime
+        assert isinstance(runner, TetragonRunner)
         preflight_prog_ids = sorted(set(lifecycle.target_prog_ids) | set(lifecycle.apply_prog_ids))
         preflight = run_phase(
             list(workloads),
             preflight_duration_s,
             preflight_prog_ids,
-            agent_pid=session.pid,
+            agent_pid=runner.pid,
             exec_workload_cgroup=exec_workload_cgroup,
         )
         preflight["program_activity"] = {
@@ -1044,13 +1039,13 @@ def daemon_payload(
 
     def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
         del phase_name
-        session = lifecycle.runtime
-        assert isinstance(session, TetragonAgentSession)
+        runner = lifecycle.runtime
+        assert isinstance(runner, TetragonRunner)
         return run_phase(
             workloads,
             duration_s,
             lifecycle.target_prog_ids,
-            agent_pid=session.pid,
+            agent_pid=runner.pid,
             exec_workload_cgroup=exec_workload_cgroup,
         )
 
@@ -1082,23 +1077,23 @@ def daemon_payload(
 
     def before_rejit(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> str | None:
         del baseline
-        session = lifecycle.runtime
-        assert isinstance(session, TetragonAgentSession)
-        exit_reason = describe_agent_exit("Tetragon", session.process, session.collector_snapshot())
+        runner = lifecycle.runtime
+        assert isinstance(runner, TetragonRunner)
+        session = runner.session
+        snapshot = {} if session is None else session.collector_snapshot()
+        process = None if session is None else session.process
+        exit_reason = describe_agent_exit("Tetragon", process, snapshot)
         if exit_reason is not None:
             limitations.append(f"{exit_reason}; aborting scan and ReJIT after the baseline phase.")
         return exit_reason
 
     def stop(_: object, lifecycle: CaseLifecycleState) -> None:
-        session = lifecycle.runtime
-        assert isinstance(session, TetragonAgentSession)
-        session.close()
+        runner = lifecycle.runtime
+        assert isinstance(runner, TetragonRunner)
+        runner.stop()
 
     def cleanup(state: object) -> None:
-        assert isinstance(state, dict)
-        tempdir = state["tempdir"]
-        assert isinstance(tempdir, tempfile.TemporaryDirectory)
-        tempdir.cleanup()
+        del state
 
     lifecycle_result = run_case_lifecycle(
         daemon_binary=daemon_binary,
@@ -1135,14 +1130,10 @@ def daemon_payload(
             preflight=preflight,
         )
 
-    session = lifecycle_result.state.runtime
-    assert isinstance(session, TetragonAgentSession)
-    setup_state = lifecycle_result.setup_state
-    assert isinstance(setup_state, dict)
-    policy_dir = setup_state["policy_dir"]
-    policy_paths = setup_state["policy_paths"]
-    assert isinstance(policy_dir, Path)
-    assert isinstance(policy_paths, list)
+    runner = lifecycle_result.state.runtime
+    assert isinstance(runner, TetragonRunner)
+    policy_dir = lifecycle_result.artifacts.get("policy_dir")
+    policy_paths = lifecycle_result.artifacts.get("policy_paths") or []
 
     baseline = lifecycle_result.baseline
     scan_results = lifecycle_result.scan_results
@@ -1170,13 +1161,13 @@ def daemon_payload(
         "setup": dict(setup_result),
         "host": host_metadata(),
         "tetragon_launch_command": lifecycle_result.artifacts.get("tetragon_launch_command") or [],
-        "policy_dir": str(policy_dir),
+        "policy_dir": policy_dir,
         "policy_paths": [str(path) for path in policy_paths],
         "config": dict(config),
         "tetragon_programs": lifecycle_result.artifacts.get("tetragon_programs") or [],
         "selected_tetragon_programs": lifecycle_result.artifacts.get("selected_tetragon_programs") or [],
         "apply_tetragon_programs": lifecycle_result.artifacts.get("apply_tetragon_programs") or [],
-        "agent_logs": session.collector_snapshot(),
+        "agent_logs": runner.process_output,
         "preflight": preflight,
         "baseline": baseline,
         "scan_results": {str(key): value for key, value in scan_results.items()},

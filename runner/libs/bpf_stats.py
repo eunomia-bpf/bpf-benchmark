@@ -143,13 +143,18 @@ def read_program_stats(prog_ids: list[int] | tuple[int, ...]) -> dict[int, dict[
             "bytes_xlated": int(record.get("bytes_xlated", 0) or 0),
         }
 
+    unresolved: dict[int, str] = {}
     for prog_id in sorted(wanted):
         fd = _prog_fd_by_id(prog_id)
         if fd is None:
+            if prog_id not in stats:
+                unresolved[prog_id] = "libbpf could not resolve a program FD by id"
             continue
         try:
             info = _prog_info_from_fd(fd)
             if info is None:
+                if prog_id not in stats:
+                    unresolved[prog_id] = "libbpf could not read program info from the resolved FD"
                 continue
             run_cnt = int(info.run_cnt)
             run_time_ns = int(info.run_time_ns)
@@ -175,6 +180,14 @@ def read_program_stats(prog_ids: list[int] | tuple[int, ...]) -> dict[int, dict[
             entry["bytes_xlated"] = int(info.xlated_prog_len)
         finally:
             os.close(fd)
+
+    missing = sorted(prog_id for prog_id in wanted if prog_id not in stats)
+    if missing:
+        details = [
+            f"{prog_id}: {unresolved.get(prog_id, 'program stats were missing from both bpftool and libbpf')}"
+            for prog_id in missing
+        ]
+        raise RuntimeError(f"failed to read BPF stats for requested program ids: {'; '.join(details)}")
 
     return stats
 

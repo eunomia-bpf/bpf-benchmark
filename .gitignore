@@ -140,10 +140,6 @@ docs/tmp/**/*.diff
 docs/tmp/**/*.txt
 docs/tmp/**/*.exit
 docs/tmp/20260329/corpus-rejit-batch/*.json
-docs/tmp/20260329/guest-scripts/
-docs/tmp/20260329/guest-scripts/**
-docs/tmp/20260329/vm-tmp/
-docs/tmp/20260329/vm-tmp/**
 docs/tmp/20260329/llvmbpf_build/
 docs/tmp/20260329/llvmbpf_build/**
 docs/tmp/20260329/llvmbpf_roundtrip_poc/llvmbpf_build/
@@ -156,8 +152,10 @@ docs/tmp/20260329/llvmbpf_roundtrip_poc/*.o
 docs/tmp/20260329/llvmbpf_roundtrip_poc/*.rc
 docs/tmp/20260329/llvmbpf_roundtrip_poc/tracee_emitllvm.*/
 docs/tmp/20260329/llvmbpf_roundtrip_poc/tracee_emitllvm.*/**
-docs/tmp/**/guest-scripts/
-docs/tmp/**/guest-scripts/**
+docs/tmp/*/guest-scripts/
+docs/tmp/*/guest-scripts/**
+docs/tmp/*/vm-tmp/
+docs/tmp/*/vm-tmp/**
 docs/tmp/**/raw/
 docs/tmp/**/raw/**
 docs/tmp/**/target/
@@ -172,6 +170,7 @@ docs/tmp/*.sh
 !e2e/results/
 
 # Corpus run guest-inputs snapshots (build artifacts copied into VM, ~600MB+)
+corpus/results/*/guest-inputs/
 runner/corpus/results/*/guest-inputs/
 
 # Corpus smoke runs are scratch outputs; authoritative corpus metadata is tracked separately.
@@ -193,3 +192,11 @@ docs/paper/*.out
 docs/paper/*.pdf
 docs/paper/*.synctex.gz
 *.dat
+
+# llvmbpf POC build artifacts
+docs/tmp/*/llvmbpf_roundtrip_poc/llvmbpf_build/
+docs/tmp/*/llvmbpf_roundtrip_poc/*.bin
+docs/tmp/*/llvmbpf_roundtrip_poc/*.ll
+docs/tmp/*/llvmbpf_roundtrip_poc/*.bc
+docs/tmp/*/llvmbpf_roundtrip_poc/*.o
+docs/tmp/*/llvmbpf_roundtrip_poc/roundtrip_*/

@@ -90,7 +90,6 @@ FILTERS ?=
 ITERATIONS ?= 3
 WARMUPS    ?= 1
 REPEAT     ?= 100
-BATCH_SIZE ?= 100
 BENCH      ?=
 KALLSYMS_EXTRA_PASS ?= 1
 
@@ -121,10 +120,7 @@ VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 # Benchmark args
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
 ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
-ROOT_VM_CORPUS_WARMUPS_IS_EXPLICIT := $(or $(findstring command line,$(origin WARMUPS)),$(findstring environment,$(origin WARMUPS)),$(findstring override,$(origin WARMUPS)))
 ROOT_VM_CORPUS_REPEAT_ARG := $(if $(strip $(ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT)),REPEAT="$(REPEAT)",)
-ROOT_VM_CORPUS_WARMUPS_ARG := $(if $(strip $(ROOT_VM_CORPUS_WARMUPS_IS_EXPLICIT)),WARMUPS="$(WARMUPS)",)
-ROOT_VM_CORPUS_PROFILE_ARG := $(if $(strip $(PROFILE)),PROFILE="$(PROFILE)",)
 ROOT_VM_CORPUS_FILTERS_ARG := $(if $(strip $(FILTERS)),FILTERS="$(FILTERS)",)
 
 # Incremental rebuild sources
@@ -173,7 +169,8 @@ help:
 	@echo "Build:  all runner micro daemon kernel kernel-clean kernel-rebuild kinsn-modules kernel-tests upstream-selftests-build kernel-arm64 cross-arm64"
 	@echo "Repos:  corpus-fetch corpus-build-objects corpus-build corpus-build-native corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace REPOS=\"katran tracee tetragon cilium bpftrace ...\""
 	@echo "Test:   smoke daemon-tests python-tests check"
-	@echo "VM x86: vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
+	@echo "VM x86: vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-corpus-new vm-e2e vm-all validate"
+	@echo "        vm-corpus (new orchestrator full corpus)"
 	@echo "        vm-corpus-new (new orchestrator subset: default execsnoop + xdp_pass_kern)"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
@@ -389,8 +386,8 @@ vm-micro:
 vm-corpus:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-corpus \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" BATCH_SIZE="$(BATCH_SIZE)" \
-		$(ROOT_VM_CORPUS_PROFILE_ARG) $(ROOT_VM_CORPUS_REPEAT_ARG) $(ROOT_VM_CORPUS_WARMUPS_ARG) $(ROOT_VM_CORPUS_FILTERS_ARG)
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" \
+		$(ROOT_VM_CORPUS_REPEAT_ARG) $(ROOT_VM_CORPUS_FILTERS_ARG)
 
 vm-corpus-new:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-corpus-new \

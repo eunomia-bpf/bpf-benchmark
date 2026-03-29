@@ -27,6 +27,7 @@ from runner.libs import (  # noqa: E402
     write_json,
     write_text,
 )
+from runner.libs.app_runners.bpftrace import BpftraceRunner  # noqa: E402
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
@@ -341,8 +342,13 @@ def run_phase(
 
     Returns (baseline, rejit) where rejit is None only when ReJIT was not applicable.
     """
-    # TODO: Move the bpftrace session setup/start/workload/stop hooks into
-    # runner/libs/app_runners/bpftrace.py so corpus and E2E share one lifecycle.
+    bpftrace_runner = BpftraceRunner(
+        script_path=spec.script_path,
+        script_name=spec.name,
+        workload_kind=spec.workload_kind,
+        expected_programs=spec.expected_programs,
+        attach_timeout_s=attach_timeout,
+    )
     programs: list[dict[str, object]] = []
     prog_ids: list[int] = []
     process_output: dict[str, object] = {}
@@ -351,28 +357,19 @@ def run_phase(
         return {}
 
     def start(_: object) -> CaseLifecycleState:
-        process = start_agent("bpftrace", ["-q", str(spec.script_path)])
-        return CaseLifecycleState(runtime=process)
-
-    def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
-        process = lifecycle.runtime
         nonlocal programs
         nonlocal prog_ids
-        if phase_name == "baseline" and not lifecycle.target_prog_ids:
-            programs = wait_for_attached_programs(
-                process,
-                expected_count=spec.expected_programs,
-                timeout_s=attach_timeout,
-            )
-            if not programs:
-                return {
-                    "status": "error",
-                    "reason": "bpftrace did not attach any programs",
-                    "measurement": None,
-                }
-            prog_ids = [int(program["id"]) for program in programs]
-            lifecycle.target_prog_ids = list(prog_ids)
-            lifecycle.apply_prog_ids = list(prog_ids)
+        prog_ids = list(bpftrace_runner.start())
+        programs = [dict(program) for program in bpftrace_runner.programs]
+        return CaseLifecycleState(
+            runtime=bpftrace_runner,
+            target_prog_ids=list(prog_ids),
+            apply_prog_ids=list(prog_ids),
+        )
+
+    def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
+        runner = lifecycle.runtime
+        assert isinstance(runner, BpftraceRunner)
         if not lifecycle.target_prog_ids:
             return {"status": "error", "reason": "no BPF programs are attached", "measurement": None}
         return {
@@ -382,16 +379,17 @@ def run_phase(
                 spec.workload_kind,
                 duration_s,
                 lifecycle.target_prog_ids,
-                agent_pid=int(process.pid or 0),
+                agent_pid=int(runner.pid or 0),
                 initial_stats=sample_bpf_stats(lifecycle.target_prog_ids),
             ),
         }
 
     def stop(_: object, lifecycle: CaseLifecycleState) -> None:
         nonlocal process_output
-        process = lifecycle.runtime
-        stop_agent(process, timeout=8)
-        process_output = finalize_process_output(process)
+        runner = lifecycle.runtime
+        assert isinstance(runner, BpftraceRunner)
+        runner.stop()
+        process_output = dict(runner.process_output)
 
     def cleanup(_: object) -> None:
         return None

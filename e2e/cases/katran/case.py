@@ -35,6 +35,7 @@ from runner.libs import (  # noqa: E402
     tail_text,
     which,
 )
+from runner.libs.app_runners.katran import KatranRunner  # noqa: E402
 from runner.libs.corpus import materialize_katran_packet  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
@@ -1989,64 +1990,33 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         test_run_validation: dict[str, object] = {}
         map_capture: dict[str, object] | None = None
         for cycle_index in range(sample_count):
-            # TODO: Move the Katran topology/session/workload/stop hooks into
-            # runner/libs/app_runners/katran.py so corpus and E2E share one lifecycle.
             def setup() -> dict[str, object]:
                 return {}
 
             def start(_: object) -> CaseLifecycleState:
-                topology = KatranDsrTopology(
-                    args.katran_iface,
-                    router_peer_iface=args.katran_router_peer_iface,
-                )
-                http_server = NamespaceHttpServer(REAL_NS, VIP_IP, VIP_PORT)
-                session = KatranDirectSession(
+                runner = KatranRunner(
                     object_path=katran_object,
                     program_name=DEFAULT_PROGRAM_NAME,
                     iface=args.katran_iface,
-                    attach=True,
+                    router_peer_iface=args.katran_router_peer_iface,
                     bpftool=resolved_bpftool,
                 )
-                try:
-                    topology.__enter__()
-                    http_server.__enter__()
-                    session.__enter__()
-                    if session.attach_error:
-                        raise RuntimeError(f"failed to attach Katran XDP program: {session.attach_error}")
-                    cycle_map_config = configure_katran_maps(session)
-                    cycle_test_run = run_katran_prog_test_run(session)
-                    time.sleep(TOPOLOGY_SETTLE_S)
-                except Exception:
-                    session.close()
-                    http_server.close()
-                    topology.close()
-                    raise
+                runner.start()
                 return CaseLifecycleState(
-                    runtime={
-                        "topology": topology,
-                        "http_server": http_server,
-                        "session": session,
-                    },
-                    target_prog_ids=[int(session.prog_id)],
-                    artifacts={
-                        "topology": topology.metadata(),
-                        "http_server": http_server.metadata(),
-                        "live_program": session.metadata(),
-                        "test_run_validation": cycle_test_run,
-                        "map_configuration": cycle_map_config,
-                    },
+                    runtime=runner,
+                    target_prog_ids=[int(runner.prog_id or 0)],
+                    artifacts=dict(runner.artifacts),
                 )
 
             def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object] | None:
-                runtime = lifecycle.runtime
-                assert isinstance(runtime, dict)
-                session = runtime["session"]
-                assert isinstance(session, KatranDirectSession)
+                runner = lifecycle.runtime
+                assert isinstance(runner, KatranRunner)
+                assert isinstance(runner.session, KatranDirectSession)
                 sample_phase_name = "stock" if phase_name == "baseline" else "post_rejit"
                 sample = measure_phase(
                     index=cycle_index,
                     phase_name=sample_phase_name,
-                    session=session,
+                    session=runner.session,
                     traffic_iterations=traffic_iterations,
                     duration_s=duration_s,
                     minimum_requests=minimum_requests,
@@ -2066,10 +2036,11 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                 nonlocal map_capture
                 if not args.capture_maps or map_capture is not None:
                     return None
-                runtime = lifecycle.runtime
-                assert isinstance(runtime, dict)
-                session = runtime["session"]
-                assert isinstance(session, KatranDirectSession)
+                runner = lifecycle.runtime
+                assert isinstance(runner, KatranRunner)
+                prog_id = runner.prog_id
+                if prog_id is None:
+                    raise RuntimeError("Katran live program ID is unavailable")
                 map_capture = {
                     "cycle_index": cycle_index,
                 }
@@ -2077,7 +2048,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                     captured_from="e2e/katran",
                     program_specs=[
                         {
-                            "prog_id": int(session.prog_id),
+                            "prog_id": int(prog_id),
                             "repo": "katran",
                             "object": katran_object.name,
                             "program": DEFAULT_PROGRAM_NAME,
@@ -2089,17 +2060,9 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                 return {"map_capture": map_capture}
 
             def stop(_: object, lifecycle: CaseLifecycleState) -> None:
-                runtime = lifecycle.runtime
-                assert isinstance(runtime, dict)
-                session = runtime["session"]
-                http_server = runtime["http_server"]
-                topology = runtime["topology"]
-                assert isinstance(session, KatranDirectSession)
-                assert isinstance(http_server, NamespaceHttpServer)
-                assert isinstance(topology, KatranDsrTopology)
-                session.close()
-                http_server.close()
-                topology.close()
+                runner = lifecycle.runtime
+                assert isinstance(runner, KatranRunner)
+                runner.stop()
 
             def cleanup(_: object) -> None:
                 return None

@@ -27,6 +27,7 @@ from runner.libs import (  # noqa: E402
     tail_text,
     which,
 )
+from runner.libs.app_runners.scx import ScxRunner  # noqa: E402
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
 from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
@@ -683,36 +684,35 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     loader_error: str | None = None
 
     try:
-        # TODO: Move the scx_rusty loader/session hooks into
-        # runner/libs/app_runners/scx.py so corpus and E2E share one lifecycle.
         def setup() -> dict[str, object]:
             return {}
 
         def start(_: object) -> CaseLifecycleState:
-            session = ScxSchedulerSession(
-                scheduler_binary,
-                args.scheduler_extra_arg or [],
-                load_timeout=int(args.load_timeout),
+            runner = ScxRunner(
+                object_path=object_path,
+                scheduler_binary=scheduler_binary,
+                scheduler_extra_args=args.scheduler_extra_arg or [],
+                load_timeout_s=int(args.load_timeout),
             )
-            session.__enter__()
+            runner.start()
             return CaseLifecycleState(
-                runtime=session,
-                target_prog_ids=[int(program["id"]) for program in session.programs],
+                runtime=runner,
+                target_prog_ids=[int(program["id"]) for program in runner.programs],
                 artifacts={
-                    "scheduler_programs": session.programs,
+                    "scheduler_programs": runner.programs,
                 },
             )
 
         def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
             del phase_name
-            session = lifecycle.runtime
-            assert isinstance(session, ScxSchedulerSession)
-            return run_phase(workloads, duration_s, agent_pid=session.pid)
+            runner = lifecycle.runtime
+            assert isinstance(runner, ScxRunner)
+            return run_phase(workloads, duration_s, agent_pid=runner.pid)
 
         def stop(_: object, lifecycle: CaseLifecycleState) -> None:
-            session = lifecycle.runtime
-            assert isinstance(session, ScxSchedulerSession)
-            session.close()
+            runner = lifecycle.runtime
+            assert isinstance(runner, ScxRunner)
+            runner.stop()
 
         def cleanup(_: object) -> None:
             return None
@@ -731,11 +731,11 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         )
         if lifecycle_result.state is None:
             raise RuntimeError("scx lifecycle completed without a live session")
-        session = lifecycle_result.state.runtime
-        assert isinstance(session, ScxSchedulerSession)
+        runner = lifecycle_result.state.runtime
+        assert isinstance(runner, ScxRunner)
         scheduler_programs = list(lifecycle_result.artifacts.get("scheduler_programs") or [])
         scheduler_ops = read_scx_ops()
-        scheduler_snapshot = session.collector_snapshot()
+        scheduler_snapshot = dict(runner.process_output)
         runtime_counters_available = any(
             ("run_cnt" in program) or ("run_time_ns" in program)
             for program in scheduler_programs
