@@ -178,8 +178,15 @@ class TetragonAgentSession:
                 max_lines=40,
                 max_chars=8000,
             )
-            self.close()
-            raise RuntimeError(f"Tetragon failed to become healthy: {details}")
+            cleanup_error: Exception | None = None
+            try:
+                self.close()
+            except Exception as exc:
+                cleanup_error = exc
+            message = f"Tetragon failed to become healthy within {self.load_timeout}s: {details}"
+            if cleanup_error is not None:
+                message = f"{message}\nCleanup error while stopping Tetragon: {cleanup_error}"
+            raise RuntimeError(message)
 
         self.programs = [
             item
@@ -187,8 +194,15 @@ class TetragonAgentSession:
             if int(item.get("id", -1)) not in before_ids
         ]
         if not self.programs:
-            self.close()
-            raise RuntimeError("Tetragon became healthy but no new BPF programs were found")
+            cleanup_error: Exception | None = None
+            try:
+                self.close()
+            except Exception as exc:
+                cleanup_error = exc
+            message = "Tetragon became healthy but no new BPF programs were found"
+            if cleanup_error is not None:
+                message = f"{message}\nCleanup error while stopping Tetragon: {cleanup_error}"
+            raise RuntimeError(message)
         return self
 
     @property
@@ -199,15 +213,22 @@ class TetragonAgentSession:
         return self.collector.snapshot()
 
     def close(self) -> None:
+        stop_error: Exception | None = None
         if self.process is not None:
-            stop_agent(self.process, timeout=8)
-            self.process = None
+            try:
+                stop_agent(self.process, timeout=8)
+            except Exception as exc:
+                stop_error = exc
+            finally:
+                self.process = None
         if self.stdout_thread is not None:
             self.stdout_thread.join(timeout=2.0)
             self.stdout_thread = None
         if self.stderr_thread is not None:
             self.stderr_thread.join(timeout=2.0)
             self.stderr_thread = None
+        if stop_error is not None:
+            raise RuntimeError(f"failed to stop Tetragon process cleanly: {stop_error}") from stop_error
 
     def __exit__(self, exc_type, exc, tb) -> None:
         self.close()

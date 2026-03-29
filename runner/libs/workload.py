@@ -99,6 +99,7 @@ def run_rapid_exec_storm(
     iterations: int | None = None,
     command: Sequence[str] | None = None,
     command_path: str = "/bin/true",
+    mark_fallback: bool = True,
 ) -> WorkloadResult:
     duration_limit, iteration_limit = _normalize_workload_limits(duration_s, iterations)
     start = time.monotonic()
@@ -111,7 +112,8 @@ def run_rapid_exec_storm(
             raise RuntimeError(f"rapid exec fallback failed: {details}")
         ops_total += 1
     elapsed = time.monotonic() - start
-    return _finish_result(float(ops_total), elapsed, "", "fallback=rapid_exec_loop")
+    stderr = "fallback=rapid_exec_loop" if mark_fallback else ""
+    return _finish_result(float(ops_total), elapsed, "", stderr)
 
 
 def run_user_exec_loop(
@@ -121,6 +123,7 @@ def run_user_exec_loop(
     uid: int = 65534,
     gid: int = 65534,
     command_path: str = "/bin/true",
+    mark_fallback: bool = True,
 ) -> WorkloadResult:
     command: list[str] = [command_path]
     if os.geteuid() == 0:
@@ -135,7 +138,13 @@ def run_user_exec_loop(
                 "--clear-groups",
                 command_path,
             ]
-    return run_rapid_exec_storm(duration_s, iterations=iterations, command=command, command_path=command_path)
+    return run_rapid_exec_storm(
+        duration_s,
+        iterations=iterations,
+        command=command,
+        command_path=command_path,
+        mark_fallback=mark_fallback,
+    )
 
 
 def run_exec_storm(duration_s: int | float, rate: int) -> WorkloadResult:

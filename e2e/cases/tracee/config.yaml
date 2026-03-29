@@ -1,23 +1,43 @@
 events:
   - execve
+  - sched_process_exec
   - security_file_open
   - security_socket_connect
-  - sched_process_exec
-target_programs:
-  - sys_enter_submit
+require_program_activity: true
+preflight_duration_s: 5
+measurement_duration_s: 20
+smoke_duration_s: 6
+sample_count: 5
+smoke_sample_count: 2
+warmup_duration_s: 4
+smoke_warmup_duration_s: 2
+latency_probe_count: 8
+smoke_latency_probe_count: 3
+latency_probe_timeout_s: 5
+statistics:
+  bootstrap_iterations: 2000
+  bootstrap_seed: 20260328
 workloads:
   - name: exec_storm
     kind: exec_storm
     rate: 4
     command: stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief
-    metric: bogo-ops/s
+    metric: execs/s
+    primary_events:
+      - execve
+      - sched_process_exec
+    latency_probe_kind: exec
   - name: file_io
-    kind: file_io
-    command: fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based
-    metric: IOPS
+    kind: file_open
+    command: stress-ng --open 4 --timeout {duration}s --metrics-brief
+    metric: opens/s
+    primary_events:
+      - security_file_open
+    latency_probe_kind: file_open
   - name: network
     kind: network
     command: wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/
-    metric: req/s
-measurement_duration_s: 60
-smoke_duration_s: 10
+    metric: connects/s
+    primary_events:
+      - security_socket_connect
+    latency_probe_kind: tcp_connect

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import io
+import subprocess
 import sys
 from pathlib import Path
 
@@ -77,3 +79,62 @@ def test_build_markdown_keeps_preflight_for_error_payload() -> None:
     assert "## Preflight" in markdown
     assert "target_runs=3295552" in markdown
     assert "apply_runs=0" in markdown
+
+
+class _FakeProcess:
+    def __init__(self) -> None:
+        self.pid = 4242
+        self.returncode = None
+        self.stdout = io.StringIO("")
+        self.stderr = io.StringIO("")
+
+    def poll(self) -> int | None:
+        return self.returncode
+
+
+def test_tetragon_session_preserves_startup_failure_when_cleanup_times_out(monkeypatch) -> None:
+    session = case.TetragonAgentSession(["/usr/local/bin/tetragon"], 20)
+    session.collector.snapshot = lambda: {"stderr_tail": ["startup log"], "stdout_tail": []}  # type: ignore[method-assign]
+
+    monkeypatch.setattr(case, "current_prog_ids", lambda: [])
+    monkeypatch.setattr(case, "start_agent", lambda *_args, **_kwargs: _FakeProcess())
+    monkeypatch.setattr(case, "wait_healthy", lambda *_args, **_kwargs: False)
+    monkeypatch.setattr(
+        case,
+        "stop_agent",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            subprocess.TimeoutExpired(["/usr/local/bin/tetragon"], 3)
+        ),
+    )
+
+    with pytest.raises(RuntimeError) as excinfo:
+        session.__enter__()
+
+    message = str(excinfo.value)
+    assert "Tetragon failed to become healthy within 20s: startup log" in message
+    assert "Cleanup error while stopping Tetragon: failed to stop Tetragon process cleanly" in message
+    assert "timed out after 3 seconds" in message
+
+
+def test_tetragon_session_preserves_empty_program_failure_when_cleanup_times_out(monkeypatch) -> None:
+    monkeypatch.setattr(case, "current_prog_ids", lambda: [])
+    monkeypatch.setattr(case, "start_agent", lambda *_args, **_kwargs: _FakeProcess())
+    monkeypatch.setattr(case, "wait_healthy", lambda *_args, **_kwargs: True)
+    monkeypatch.setattr(case, "current_programs", lambda: [])
+    monkeypatch.setattr(
+        case,
+        "stop_agent",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            subprocess.TimeoutExpired(["/usr/local/bin/tetragon"], 3)
+        ),
+    )
+
+    session = case.TetragonAgentSession(["/usr/local/bin/tetragon"], 20)
+
+    with pytest.raises(RuntimeError) as excinfo:
+        session.__enter__()
+
+    message = str(excinfo.value)
+    assert "Tetragon became healthy but no new BPF programs were found" in message
+    assert "Cleanup error while stopping Tetragon: failed to stop Tetragon process cleanly" in message
+    assert "timed out after 3 seconds" in message
