@@ -181,11 +181,15 @@ def build_vm_shell_command(
     return command
 
 
-def build_guest_exec(argv: list[str]) -> str:
+def build_guest_exec(
+    argv: list[str],
+    *,
+    load_script: str | Path | None = None,
+) -> str:
     # Load kinsn kernel modules before running the guest command so the daemon
     # can apply platform-specific rewrites (rotate, cond_select, extract).
-    load_script = ROOT_DIR / "module" / "load_all.sh"
-    kinsn_load = f"{shlex.quote(str(load_script))} && "
+    resolved_load_script = Path(load_script).resolve() if load_script is not None else ROOT_DIR / "module" / "load_all.sh"
+    kinsn_load = f"{shlex.quote(str(resolved_load_script))} && "
     main_cmd = " ".join(shlex.quote(part) for part in argv)
     return kinsn_load + main_cmd
 
@@ -215,6 +219,7 @@ def run_corpus_targets_in_guest_batch(
     repeat: int,
     timeout_seconds: int,
     vng_binary: str,
+    kinsn_load_script: Path | None = None,
     on_guest_info: Callable[[dict[str, Any]], None] | None = None,
     on_record: Callable[[int, dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
@@ -265,7 +270,7 @@ def run_corpus_targets_in_guest_batch(
         ]
         if profile:
             guest_argv.extend(["--profile", profile])
-        guest_exec = build_guest_exec(guest_argv)
+        guest_exec = build_guest_exec(guest_argv, load_script=kinsn_load_script)
         timeout_limit = packet_batch_timeout_seconds(len(targets), timeout_seconds)
         command = build_vm_shell_command(
             kernel_image=kernel_image,
@@ -296,6 +301,7 @@ def run_corpus_targets_in_guest_batch(
         timed_out = False
         guest_result_mtime_ns: int | None = None
         preserve_debug_artifacts = False
+        last_heartbeat = start
 
         def sync_guest_records() -> None:
             nonlocal emitted_records, guest_result_mtime_ns
@@ -326,6 +332,15 @@ def run_corpus_targets_in_guest_batch(
                 break
             ready = selector.select(timeout=min(1.0, remaining))
             sync_guest_records()
+            now = time.monotonic()
+            if now - last_heartbeat >= 60:
+                print(
+                    "vm-corpus heartbeat "
+                    f"elapsed={int(now - start)}s "
+                    f"records={emitted_records}/{len(targets)}",
+                    flush=True,
+                )
+                last_heartbeat = now
             if not ready:
                 continue
             for key, _ in ready:

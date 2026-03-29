@@ -11,6 +11,7 @@ from runner.libs.run_artifacts import (
     create_run_artifact_dir,
     derive_run_type,
     externalize_sample_daemon_debug,
+    load_latest_result_for_output,
     repo_relative_path,
     result_root_for_output,
     update_run_artifact,
@@ -146,6 +147,49 @@ def test_repo_relative_path_returns_string() -> None:
 
 def test_artifact_timestamp_parses_generated_at() -> None:
     assert artifact_timestamp("2026-03-23T10:11:12+00:00") == "20260323_101112"
+
+
+def test_load_latest_result_for_output_reads_completed_artifact_payload(tmp_path: Path) -> None:
+    output_path = tmp_path / "results" / "llvmbpf_vs_kernel.json"
+    run_dir = write_run_artifact(
+        results_dir=output_path.parent,
+        run_type=derive_run_type(output_path, "pure_jit"),
+        metadata={
+            "generated_at": "2026-03-29T06:46:43+00:00",
+            "status": "completed",
+            "started_at": "2026-03-29T06:46:43+00:00",
+            "last_updated_at": "2026-03-29T06:47:01+00:00",
+        },
+        detail_payloads={"result.json": {"benchmarks": [], "suite": "micro"}},
+    )
+
+    payload = load_latest_result_for_output(output_path, fallback_run_type="pure_jit")
+
+    assert payload == {"benchmarks": [], "suite": "micro"}
+    assert run_dir.name == "llvmbpf_vs_kernel_20260329_064643"
+
+
+def test_load_latest_result_for_output_rejects_incomplete_artifact(tmp_path: Path) -> None:
+    output_path = tmp_path / "results" / "llvmbpf_vs_kernel.json"
+    write_run_artifact(
+        results_dir=output_path.parent,
+        run_type=derive_run_type(output_path, "pure_jit"),
+        metadata={
+            "generated_at": "2026-03-29T06:46:43+00:00",
+            "status": "error",
+            "started_at": "2026-03-29T06:46:43+00:00",
+            "last_updated_at": "2026-03-29T06:47:01+00:00",
+            "error_message": "micro batch runner failed",
+        },
+    )
+
+    try:
+        load_latest_result_for_output(output_path, fallback_run_type="pure_jit")
+    except RuntimeError as exc:
+        assert "did not complete" in str(exc)
+        assert "micro batch runner failed" in str(exc)
+    else:
+        raise AssertionError("expected RuntimeError for incomplete artifact")
 
 
 def test_artifact_entrypoints_compile() -> None:

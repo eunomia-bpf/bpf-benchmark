@@ -1,6 +1,6 @@
 # scx_rusty End-to-End Benchmark
 
-- Generated: 2026-03-29T01:55:23.639334+00:00
+- Generated: 2026-03-29T08:50:02.109678+00:00
 - Mode: `scx_rusty_loader`
 - Duration per workload: `30s`
 - Smoke: `False`
@@ -16,19 +16,26 @@
 
 ## Loaded Programs
 
-- Programs: `13`; sites total=`411`, cmov=`0`, lea=`0`
+- Programs: `13`; sites total=`732`, cmov=`0`, lea=`0`
 - Active ops: `[]`
 
 ## Baseline
 
-- hackbench: throughput=5.643627797967676 runs/s, lat_p50_ms=164.0, ctx/s=871206.4911941644, agent_cpu=0.19999949709459883
-- stress-ng-cpu: throughput=10309.47 bogo-ops/s, lat_p50_ms=None, ctx/s=138.40713920004754, agent_cpu=0.39999619416954496
-- sysbench-cpu: throughput=17477.97 events/s, lat_p50_ms=0.23, ctx/s=124.14086227847042, agent_cpu=0.39999584920307174
+- hackbench: throughput=5.760678813755709 runs/s, lat_p50_ms=158.0, ctx/s=959337.9635893521, agent_cpu=0.16666186575496367
+- stress-ng-cpu: throughput=11617.69 bogo-ops/s, lat_p50_ms=None, ctx/s=127.47279709247879, agent_cpu=0.3333283578853763
+- sysbench-cpu: throughput=17674.09 events/s, lat_p50_ms=0.23, ctx/s=120.06176179235939, agent_cpu=0.43332892442819115
+
+## Post-ReJIT
+
+- hackbench: throughput=8.90541268629789 runs/s, lat_p50_ms=101.0, ctx/s=1219302.7875196699, agent_cpu=0.0
+- stress-ng-cpu: throughput=11635.67 bogo-ops/s, lat_p50_ms=None, ctx/s=59.42049178922513, agent_cpu=0.0
+- sysbench-cpu: throughput=17640.2 events/s, lat_p50_ms=0.23, ctx/s=55.808178501301846, agent_cpu=0.0
 
 ## Comparison
 
-- Comparable: `False`
-- Reason: `post-ReJIT measurements are unavailable`
+- hackbench: throughput_delta=54.58964080818026%, ctx_delta=27.098356762372077%, lat_p50_delta=-36.075949367088604%, agent_cpu_delta=-100.0%
+- stress-ng-cpu: throughput_delta=0.15476398492298868%, ctx_delta=-53.38574727742357%, lat_p50_delta=None%, agent_cpu_delta=-100.0%
+- sysbench-cpu: throughput_delta=-0.19174961766065138%, ctx_delta=-53.517108471372254%, lat_p50_delta=0.0%, agent_cpu_delta=-100.0%
 
 ## Limitations
 

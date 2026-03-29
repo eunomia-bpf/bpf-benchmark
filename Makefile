@@ -91,6 +91,7 @@ ITERATIONS ?= 3
 WARMUPS    ?= 1
 REPEAT     ?= 100
 BENCH      ?=
+KALLSYMS_EXTRA_PASS ?= 1
 
 # Derived
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))

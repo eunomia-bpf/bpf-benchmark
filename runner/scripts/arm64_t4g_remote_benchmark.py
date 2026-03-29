@@ -22,6 +22,7 @@ if str(REPO_ROOT) not in sys.path:
 from runner.libs.catalog import DEFAULT_MICRO_MANIFEST, load_manifest as load_micro_suite
 from runner.libs.benchmarks import resolve_memory_file
 from runner.libs.rejit import apply_daemon_rejit, scan_programs
+from runner.libs.run_artifacts import load_latest_result_for_output
 
 
 ETHERNET_HEADER_SIZE = 14
@@ -264,7 +265,7 @@ def run_llvmbpf_vs_kernel(
         cwd=REPO_ROOT,
         timeout=7200,
     )
-    return json.loads(output_path.read_text())
+    return load_latest_result_for_output(output_path, fallback_run_type="pure_jit")
 
 
 def run_daemon_stock_vs_rejit(

@@ -1,6 +1,6 @@
 # BCC libbpf-tools Real End-to-End Benchmark
 
-- Generated: `2026-03-29T02:09:35.482743+00:00`
+- Generated: `2026-03-29T09:03:47.908621+00:00`
 - Mode: `full`
 - Duration per phase: `30s`
 - Host kernel: `7.0.0-rc2+`
@@ -14,36 +14,36 @@
 - Baseline successes: `10`
 - ReJIT successes: `10`
 - Tools with eligible sites: `9`
-- Aggregate sites: `624` (map_inline=184, const_prop=301, dce=131, cmov=0, wide=0, rotate=0, lea=0)
-- Geomean speedup: `1.077x`
+- Aggregate sites: `1016` (map_inline=184, const_prop=301, dce=523, cmov=0, wide=0, rotate=0, lea=0)
+- Geomean speedup: `1.015x`
 
 ## Per-Tool
 
 | Tool | Sites | Stock ns | ReJIT ns | Speedup | Ops/s Stock | Ops/s ReJIT | CPU% Stock | CPU% ReJIT | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| tcplife | 24 | 1253.23 | 1270.62 | 0.986x | 26.70 | 26.54 | 0.03 | 0.13 | ok |
-| biosnoop | 29 | 5310.20 | 6805.31 | 0.780x | 15212.24 | 15115.33 | 0.03 | 0.00 | ok |
-| runqlat | 38 | 226.16 | 224.77 | 1.006x | 63.56 | 62.47 | 0.00 | 0.00 | ok |
-| syscount | 36 | 72.63 | 71.19 | 1.020x | 7713.11 | 7758.20 | 0.00 | 0.00 | ok |
-| execsnoop | 277 | 2826.90 | 2940.43 | 0.961x | 54.22 | 52.79 | 0.27 | 0.30 | ok |
-| opensnoop | 72 | 650.05 | 592.45 | 1.097x | 7587.97 | 7702.64 | 0.03 | 0.10 | ok |
-| capable | 30 | 294.61 | 255.78 | 1.152x | 443.20 | 89.66 | 0.30 | 0.17 | ok |
-| vfsstat | 0 | 22.40 | 23.21 | 0.965x | 14033.83 | 13869.08 | 0.03 | 0.00 | ok |
-| tcpconnect | 50 | 18440.18 | 8419.95 | 2.190x | 7.13 | 10.16 | 0.10 | 0.07 | ok |
-| bindsnoop | 68 | 250.60 | 241.14 | 1.039x | 240604.10 | 370069.83 | 8.87 | 7.93 | ok |
+| tcplife | 39 | 1036.89 | 1024.20 | 1.012x | 28.10 | 27.76 | 0.10 | 0.07 | ok |
+| biosnoop | 50 | 7087.69 | 5491.82 | 1.291x | 15328.01 | 15162.61 | 0.00 | 0.00 | ok |
+| runqlat | 62 | 216.86 | 213.41 | 1.016x | 66.42 | 66.68 | 0.00 | 0.00 | ok |
+| syscount | 65 | 68.12 | 68.39 | 0.996x | 7636.94 | 7693.66 | 0.00 | 0.03 | ok |
+| execsnoop | 432 | 1733.25 | 1739.47 | 0.996x | 57.23 | 56.46 | 0.17 | 0.17 | ok |
+| opensnoop | 129 | 619.05 | 711.88 | 0.870x | 7514.38 | 7619.87 | 0.03 | 0.03 | ok |
+| capable | 57 | 252.87 | 249.65 | 1.013x | 569.25 | 137.89 | 0.20 | 0.30 | ok |
+| vfsstat | 0 | 22.95 | 22.78 | 1.008x | 11978.08 | 12567.92 | 0.03 | 0.00 | ok |
+| tcpconnect | 76 | 3873.62 | 4072.91 | 0.951x | 22.88 | 21.79 | 0.07 | 0.07 | ok |
+| bindsnoop | 106 | 222.34 | 212.30 | 1.047x | 394154.99 | 400315.67 | 6.40 | 6.07 | ok |
 
 ## Comparison
 
-- tcplife: avg_ns_delta=1.39%, ops_delta=-0.62%, cpu_delta=300.00%
-- biosnoop: avg_ns_delta=28.16%, ops_delta=-0.64%, cpu_delta=-100.00%
-- runqlat: avg_ns_delta=-0.61%, ops_delta=-1.70%, cpu_delta=n/a%
-- syscount: avg_ns_delta=-1.99%, ops_delta=0.58%, cpu_delta=n/a%
-- execsnoop: avg_ns_delta=4.02%, ops_delta=-2.64%, cpu_delta=12.50%
-- opensnoop: avg_ns_delta=-8.86%, ops_delta=1.51%, cpu_delta=200.00%
-- capable: avg_ns_delta=-13.18%, ops_delta=-79.77%, cpu_delta=-44.44%
-- vfsstat: avg_ns_delta=3.59%, ops_delta=-1.17%, cpu_delta=-100.00%
-- tcpconnect: avg_ns_delta=-54.34%, ops_delta=42.39%, cpu_delta=-33.33%
-- bindsnoop: avg_ns_delta=-3.77%, ops_delta=53.81%, cpu_delta=-10.53%
+- tcplife: avg_ns_delta=-1.22%, ops_delta=-1.21%, cpu_delta=-33.33%
+- biosnoop: avg_ns_delta=-22.52%, ops_delta=-1.08%, cpu_delta=n/a%
+- runqlat: avg_ns_delta=-1.59%, ops_delta=0.40%, cpu_delta=n/a%
+- syscount: avg_ns_delta=0.39%, ops_delta=0.74%, cpu_delta=n/a%
+- execsnoop: avg_ns_delta=0.36%, ops_delta=-1.35%, cpu_delta=0.00%
+- opensnoop: avg_ns_delta=15.00%, ops_delta=1.40%, cpu_delta=0.00%
+- capable: avg_ns_delta=-1.27%, ops_delta=-75.78%, cpu_delta=49.97%
+- vfsstat: avg_ns_delta=-0.76%, ops_delta=4.92%, cpu_delta=-100.00%
+- tcpconnect: avg_ns_delta=5.14%, ops_delta=-4.75%, cpu_delta=0.00%
+- bindsnoop: avg_ns_delta=-4.52%, ops_delta=1.56%, cpu_delta=-5.21%
 
 ## Notes
 

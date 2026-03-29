@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import traceback
@@ -21,8 +22,6 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
 from runner.libs import authoritative_output_path, latest_output_path, smoke_output_path
 from runner.libs.machines import resolve_machine
 from runner.libs.rejit import (
-    _start_daemon_server,
-    _stop_daemon_server,
     benchmark_config_repeat,
     benchmark_config_warmups,
     load_benchmark_config,
@@ -84,6 +83,20 @@ DEFAULT_VNG_MACHINE = resolve_machine(target=DEFAULT_VM_TARGET, action="vm-corpu
 DEFAULT_VNG = str(Path(DEFAULT_VNG_MACHINE.executable))
 DEFAULT_TIMEOUT_SECONDS = 240
 GUEST_BATCH_TARGETS_PER_CHUNK = 1
+
+
+def snapshot_guest_input(source: Path, snapshot_dir: Path) -> Path:
+    snapshot_dir.mkdir(parents=True, exist_ok=True)
+    destination = snapshot_dir / source.name
+    shutil.copy2(source, destination)
+    return destination
+
+
+def snapshot_guest_tree(source: Path, destination: Path) -> Path:
+    if destination.exists():
+        shutil.rmtree(destination)
+    shutil.copytree(source, destination)
+    return destination
 
 def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     argv = list(sys.argv[1:] if argv is None else argv)
@@ -263,67 +276,60 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
     if guest_result_path is not None:
         write_guest_batch_records(guest_result_path, records)
 
-    active_daemon_socket: str | None = None
-    daemon_server: tuple[subprocess.Popen[str], Path, str, Path, Path] | None = None
-    if objects:
-        daemon_server = _start_daemon_server(daemon)
-        active_daemon_socket = str(daemon_server[1])
-
-    try:
-        for chunk_start in range(0, len(objects), GUEST_BATCH_TARGETS_PER_CHUNK):
-            object_chunk = objects[chunk_start : chunk_start + GUEST_BATCH_TARGETS_PER_CHUNK]
-            try:
-                object_records, program_records, _batch_result = run_objects_locally_batch(
-                    objects=object_chunk,
-                    runner=runner,
-                    daemon=daemon,
-                    repeat=args.repeat,
-                    warmup_repeat=warmup_repeat,
-                    timeout_seconds=args.timeout,
-                    execution_mode="vm",
-                    btf_custom_path=btf_custom_path,
-                    daemon_socket=active_daemon_socket,
-                    benchmark_config=args.benchmark_config,
+    for chunk_start in range(0, len(objects), GUEST_BATCH_TARGETS_PER_CHUNK):
+        object_chunk = objects[chunk_start : chunk_start + GUEST_BATCH_TARGETS_PER_CHUNK]
+        try:
+            # Keep the guest daemon lifecycle scoped to the current chunk.
+            # Reusing one daemon across hundreds of corpus objects makes the
+            # batch sensitive to cross-object state accumulation and leaves the
+            # mounted workspace binaries hot-swappable under concurrent builds.
+            object_records, program_records, _batch_result = run_objects_locally_batch(
+                objects=object_chunk,
+                runner=runner,
+                daemon=daemon,
+                repeat=args.repeat,
+                warmup_repeat=warmup_repeat,
+                timeout_seconds=args.timeout,
+                execution_mode="vm",
+                btf_custom_path=btf_custom_path,
+                benchmark_config=args.benchmark_config,
+            )
+            built_records = []
+            for obj in object_chunk:
+                object_record = next(
+                    item for item in object_records if item["canonical_object_name"] == obj.canonical_name
                 )
-                built_records = []
-                for obj in object_chunk:
-                    object_record = next(
-                        item for item in object_records if item["canonical_object_name"] == obj.canonical_name
-                    )
-                    object_program_records = [
-                        item for item in program_records if item["canonical_object_name"] == obj.canonical_name
-                    ]
-                    built_records.append(
-                        {
-                            "object_record": object_record,
-                            "program_records": object_program_records,
-                        }
-                    )
-            except Exception as exc:
-                print(traceback.format_exc(), file=sys.stderr, flush=True)
-                built_records = []
-                for obj in object_chunk:
-                    built_records.append(
-                        {
-                            "object_record": build_empty_object_record(
-                                obj,
-                                "vm",
-                                error=f"guest batch exception: {exc}",
-                            ),
-                            "program_records": [],
-                        }
-                    )
+                object_program_records = [
+                    item for item in program_records if item["canonical_object_name"] == obj.canonical_name
+                ]
+                built_records.append(
+                    {
+                        "object_record": object_record,
+                        "program_records": object_program_records,
+                    }
+                )
+        except Exception as exc:
+            print(traceback.format_exc(), file=sys.stderr, flush=True)
+            built_records = []
+            for obj in object_chunk:
+                built_records.append(
+                    {
+                        "object_record": build_empty_object_record(
+                            obj,
+                            "vm",
+                            error=f"guest batch exception: {exc}",
+                        ),
+                        "program_records": [],
+                    }
+                )
 
-            for index, record in enumerate(built_records, start=chunk_start + 1):
-                records.append(sanitize_guest_batch_record(record))
-                if guest_result_path is not None:
-                    write_guest_batch_records(guest_result_path, records)
-                    emit_guest_event("program_progress", index=index, total=len(objects))
-                else:
-                    emit_guest_event("program_record", index=index, total=len(objects), record=record)
-    finally:
-        if daemon_server is not None:
-            _stop_daemon_server(daemon_server[0], daemon_server[1], daemon_server[2])
+        for index, record in enumerate(built_records, start=chunk_start + 1):
+            records.append(sanitize_guest_batch_record(record))
+            if guest_result_path is not None:
+                write_guest_batch_records(guest_result_path, records)
+                emit_guest_event("program_progress", index=index, total=len(objects))
+            else:
+                emit_guest_event("program_record", index=index, total=len(objects), record=record)
     return 0
 
 def build_markdown_v2(data: dict[str, Any]) -> str:
@@ -613,6 +619,12 @@ def packet_main(argv: list[str] | None = None) -> int:
                 "kernel_tree": repo_relative_path(kernel_tree),
                 "kernel_image": repo_relative_path(kernel_image),
                 "btf_custom_path": repo_relative_path(btf_custom_path) if btf_custom_path is not None else None,
+                "guest_input_snapshots": {
+                    "runner": repo_relative_path(runner_snapshot),
+                    "daemon": repo_relative_path(daemon_snapshot),
+                    "btf_custom_path": repo_relative_path(btf_snapshot) if btf_snapshot is not None else None,
+                    "kinsn_module_dir": repo_relative_path(kinsn_module_snapshot),
+                },
                 "vng_binary": args.vng,
                 "repeat": args.repeat,
                 "timeout_seconds": args.timeout,
@@ -633,6 +645,11 @@ def packet_main(argv: list[str] | None = None) -> int:
         metadata_builder=build_artifact_metadata,
     )
     artifact_dir = session.run_dir
+    snapshot_dir = artifact_dir / "guest-inputs"
+    runner_snapshot = snapshot_guest_input(runner, snapshot_dir)
+    daemon_snapshot = snapshot_guest_input(daemon, snapshot_dir)
+    btf_snapshot = snapshot_guest_input(btf_custom_path, snapshot_dir) if btf_custom_path is not None else None
+    kinsn_module_snapshot = snapshot_guest_tree(ROOT_DIR / "module", snapshot_dir / "module")
 
     def flush_artifact(status: str, *, error_message: str | None = None, include_markdown: bool = False) -> None:
         result["summary"] = summarize_corpus_batch_results(program_records, object_records)
@@ -661,6 +678,12 @@ def packet_main(argv: list[str] | None = None) -> int:
         def handle_guest_info(payload: dict[str, Any]) -> None:
             guest_smoke["payload"] = payload
             flush_artifact("running")
+            print(
+                "vm-corpus guest "
+                f"kernel={payload.get('kernel_release', 'unknown')} "
+                f"cwd={payload.get('cwd', 'unknown')}",
+                flush=True,
+            )
 
         def handle_guest_record(index: int, record: dict[str, Any]) -> None:
             nonlocal current_target_index, current_target
@@ -679,18 +702,34 @@ def packet_main(argv: list[str] | None = None) -> int:
                     if isinstance(item, dict):
                         program_records.append(item)
             flush_artifact("running")
+            summary = result["summary"]
+            object_name = None
+            if isinstance(object_record, dict):
+                object_name = object_record.get("canonical_object_name")
+            print(
+                "vm-corpus progress "
+                f"objects={len(object_records)}/{len(objects)} "
+                f"programs={len(program_records)}/{total_programs} "
+                f"measured={summary['measured_pairs']} "
+                f"comparable={summary['comparable_pairs']} "
+                f"applied_comparable={summary['applied_comparable_pairs']} "
+                f"applied_geomean={format_ratio(summary['exec_ratio_geomean'])} "
+                f"object={object_name or 'unknown'}",
+                flush=True,
+            )
 
         batch_result = run_corpus_targets_in_guest_batch(
             targets=objects,
             guest_driver=str(DRIVER_RELATIVE),
-            runner=runner,
-            daemon=daemon,
+            runner=runner_snapshot,
+            daemon=daemon_snapshot,
             kernel_image=kernel_image,
-            btf_custom_path=btf_custom_path,
+            btf_custom_path=btf_snapshot,
             profile=args.profile,
             repeat=args.repeat,
             timeout_seconds=args.timeout,
             vng_binary=args.vng,
+            kinsn_load_script=kinsn_module_snapshot / "load_all.sh",
             on_guest_info=handle_guest_info,
             on_record=handle_guest_record,
         )

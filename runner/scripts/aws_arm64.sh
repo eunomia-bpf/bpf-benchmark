@@ -576,6 +576,7 @@ ensure_benchmark_bundle() {
         "$BENCHMARK_BUNDLE_DIR/runner/scripts" \
         "$BENCHMARK_BUNDLE_DIR/runner/build" \
         "$BENCHMARK_BUNDLE_DIR/daemon/build" \
+        "$BENCHMARK_BUNDLE_DIR/daemon/target/release" \
         "$BENCHMARK_BUNDLE_DIR/lib" \
         "$BENCHMARK_BUNDLE_DIR/micro/programs" \
         "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs" \
@@ -586,6 +587,7 @@ ensure_benchmark_bundle() {
     cp "$ARM64_CROSS_RUNNER_REAL" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec.real"
     cp "$ARM64_CROSS_DAEMON" "$BENCHMARK_BUNDLE_DIR/daemon/build/bpfrejit-daemon"
     cp "$ARM64_CROSS_DAEMON_REAL" "$BENCHMARK_BUNDLE_DIR/daemon/build/bpfrejit-daemon.real"
+    cp "$ARM64_CROSS_DAEMON_REAL" "$BENCHMARK_BUNDLE_DIR/daemon/target/release/bpfrejit-daemon"
     cp -a "$ARM64_CROSS_LIB_DIR/." "$BENCHMARK_BUNDLE_DIR/lib/"
 
     cp "$ROOT_DIR"/micro/*.py "$BENCHMARK_BUNDLE_DIR/micro/"

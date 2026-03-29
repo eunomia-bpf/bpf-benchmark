@@ -418,3 +418,57 @@ def update_run_artifact(
             detail_path.write_text(text)
 
     return run_dir
+
+
+def load_latest_result_for_output(output_path: Path, *, fallback_run_type: str) -> dict[str, Any]:
+    results_dir = result_root_for_output(output_path)
+    run_type = sanitize_artifact_token(derive_run_type(output_path, fallback_run_type))
+    if not results_dir.is_dir():
+        raise RuntimeError(f"run artifact directory does not exist: {results_dir}")
+
+    latest_dir: Path | None = None
+    latest_metadata: dict[str, Any] | None = None
+    latest_key: tuple[str, str, str] | None = None
+    for child in sorted(results_dir.iterdir()):
+        if not child.is_dir():
+            continue
+        metadata = _managed_run_artifact_metadata(child)
+        if metadata is None:
+            continue
+        if sanitize_artifact_token(str(metadata.get("run_type", ""))) != run_type:
+            continue
+        started_at = str(metadata.get("started_at", ""))
+        last_updated_at = str(metadata.get("last_updated_at", ""))
+        candidate_key = (
+            last_updated_at,
+            started_at,
+            child.name,
+        )
+        if latest_key is None or candidate_key > latest_key:
+            latest_dir = child
+            latest_metadata = metadata
+            latest_key = candidate_key
+
+    if latest_dir is None or latest_metadata is None:
+        raise RuntimeError(
+            f"no run artifact found for output {output_path} under {results_dir} (run_type={run_type})"
+        )
+
+    status = str(latest_metadata.get("status", "")).strip()
+    if status != "completed":
+        error_message = str(latest_metadata.get("error_message", "")).strip()
+        detail = f" status={status!r}"
+        if error_message:
+            detail += f" error={error_message!r}"
+        raise RuntimeError(f"latest run artifact did not complete:{detail} path={latest_dir}")
+
+    result_path = latest_dir / "details" / "result.json"
+    if not result_path.is_file():
+        raise RuntimeError(f"completed run artifact is missing result payload: {result_path}")
+    try:
+        payload = json.loads(result_path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"failed to read result payload from {result_path}: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"result payload is not a JSON object: {result_path}")
+    return payload
