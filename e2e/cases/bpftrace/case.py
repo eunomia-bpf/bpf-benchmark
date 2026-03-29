@@ -341,6 +341,8 @@ def run_phase(
 
     Returns (baseline, rejit) where rejit is None only when ReJIT was not applicable.
     """
+    # TODO: Move the bpftrace session setup/start/workload/stop hooks into
+    # runner/libs/app_runners/bpftrace.py so corpus and E2E share one lifecycle.
     programs: list[dict[str, object]] = []
     prog_ids: list[int] = []
     process_output: dict[str, object] = {}

@@ -12,16 +12,22 @@ from runner.libs import corpus as corpus_lib
 
 
 def test_macro_corpus_manifest_uses_only_new_measurements() -> None:
-    manifest = yaml.safe_load((Path(__file__).resolve().parents[2] / "corpus" / "config" / "macro_corpus.yaml").read_text())
+    manifest_path = Path(__file__).resolve().parents[2] / "corpus" / "config" / "macro_corpus.yaml"
+    manifest_text = manifest_path.read_text(encoding="utf-8")
+    manifest = yaml.safe_load(manifest_text)
     objects = manifest.get("objects")
     assert isinstance(objects, list)
     assert objects
+    assert "attach_trigger" not in manifest_text
+    assert "compile-only" not in manifest_text
+    assert "attach_group:" not in manifest_text
 
     for entry in objects:
         assert isinstance(entry, dict)
         assert entry.get("measurement") in {"app_native", "test_run"}
         assert "test_method" not in entry
         assert "trigger" not in entry
+        assert "attach_group" not in entry
         assert "io_mode" not in entry
         assert "raw_packet" not in entry
         assert "input_size" not in entry
@@ -35,6 +41,7 @@ def test_macro_corpus_manifest_uses_only_new_measurements() -> None:
                 assert program["measurement"] in {"app_native", "test_run"}
             assert "test_method" not in program
             assert "trigger" not in program
+            assert "attach_group" not in program
             assert "io_mode" not in program
             assert "raw_packet" not in program
             assert "input_size" not in program

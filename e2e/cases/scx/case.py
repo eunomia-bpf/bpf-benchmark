@@ -683,6 +683,8 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     loader_error: str | None = None
 
     try:
+        # TODO: Move the scx_rusty loader/session hooks into
+        # runner/libs/app_runners/scx.py so corpus and E2E share one lifecycle.
         def setup() -> dict[str, object]:
             return {}
 

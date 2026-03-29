@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import math
 import subprocess
 import time
@@ -296,13 +295,6 @@ def profile_programs(
         run_time_ns = max(0, int(program_delta.get("run_time_ns_delta", 0) or 0))
         total_run_cnt += run_cnt
         total_run_time_ns += run_time_ns
-        live_sites = []
-        if include_sites:
-            enumerate_record = scan_record.get("enumerate_record")
-            if isinstance(enumerate_record, Mapping):
-                raw_sites = enumerate_record.get("sites")
-                if isinstance(raw_sites, list):
-                    live_sites = [dict(entry) for entry in raw_sites if isinstance(entry, Mapping)]
         base_records.append(
             {
                 "prog_id": int(prog_id),
@@ -318,7 +310,7 @@ def profile_programs(
                 "bytes_jited": int(program_after.get("bytes_jited", 0) or program_before.get("bytes_jited", 0) or 0),
                 "bytes_xlated": int(program_after.get("bytes_xlated", 0) or program_before.get("bytes_xlated", 0) or 0),
                 "site_summary": dict(scan_record.get("sites") or {}),
-                "sites": live_sites,
+                "sites": [],
                 "enumerate_error": str(scan_record.get("error") or ""),
                 "perf": {
                     "events": dict(perf_record.get("events") or {}),
@@ -462,10 +454,6 @@ def profile_current_programs(
     return payload
 
 
-def render_profile_json(payload: Mapping[str, Any]) -> str:
-    return json.dumps(payload, indent=2, sort_keys=True) + "\n"
-
-
 __all__ = [
     "DEFAULT_PERF_EVENTS",
     "DEFAULT_DAEMON",
@@ -473,6 +461,5 @@ __all__ = [
     "list_live_programs",
     "profile_current_programs",
     "profile_programs",
-    "render_profile_json",
     "resolve_target_programs",
 ]

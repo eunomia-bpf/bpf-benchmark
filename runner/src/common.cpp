@@ -48,25 +48,9 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
         << "{"
         << "\"compile_ns\":" << sample.compile_ns << ","
         << "\"exec_ns\":" << sample.exec_ns;
-    if (sample.phase.has_value()) {
-        out << ",\"phase\":\"" << json_escape(*sample.phase) << "\"";
-    }
     out
         << ",\"timing_source\":\"" << json_escape(sample.timing_source) << "\""
-        << ",\"timing_source_wall\":\"" << json_escape(sample.timing_source_wall) << "\""
-        << ",\"no_cmov\":" << (sample.no_cmov ? "true" : "false");
-
-    if (sample.opt_level.has_value()) {
-        out << ",\"opt_level\":" << *sample.opt_level;
-    }
-    out << ",\"disabled_passes\":[";
-    for (size_t index = 0; index < sample.disabled_passes.size(); ++index) {
-        if (index != 0) {
-            out << ",";
-        }
-        out << "\"" << json_escape(sample.disabled_passes[index]) << "\"";
-    }
-    out << "]";
+        << ",\"timing_source_wall\":\"" << json_escape(sample.timing_source_wall) << "\"";
 
     out << ",\"wall_exec_ns\":";
     if (sample.wall_exec_ns.has_value()) {
@@ -90,12 +74,6 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
     }
     if (sample.xlated_prog_len.has_value()) {
         out << ",\"xlated_prog_len\":" << *sample.xlated_prog_len;
-    }
-    if (sample.native_code_size.has_value()) {
-        out << ",\"native_code_size\":" << *sample.native_code_size;
-    }
-    if (sample.bpf_insn_count.has_value()) {
-        out << ",\"bpf_insn_count\":" << *sample.bpf_insn_count;
     }
 
     out
@@ -134,36 +112,8 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
         << "\"include_kernel\":" << (sample.perf_counters.include_kernel ? "true" : "false") << ","
         << "\"scope\":\"" << json_escape(sample.perf_counters.scope) << "\","
         << "\"error\":\"" << json_escape(sample.perf_counters.error) << "\""
-        << "},"
-        << "\"rejit\":{"
-        << "\"requested\":" << (sample.rejit.requested ? "true" : "false") << ","
-        << "\"mode\":\"" << json_escape(sample.rejit.mode) << "\","
-        << "\"syscall_attempted\":" << (sample.rejit.syscall_attempted ? "true" : "false") << ","
-        << "\"applied\":" << (sample.rejit.applied ? "true" : "false") << ","
-        << "\"insn_cnt\":" << sample.rejit.insn_cnt << ","
-        << "\"error\":\"" << json_escape(sample.rejit.error) << "\","
-        << "\"total_sites_applied\":" << sample.rejit.total_sites_applied << ","
-        << "\"passes_applied\":";
-    print_json_string_array(out, sample.rejit.passes_applied);
-    out << ","
-        << "\"insn_delta\":" << sample.rejit.insn_delta << ","
-        << "\"verifier_retries\":" << sample.rejit.verifier_retries << ","
-        << "\"final_disabled_passes\":";
-    print_json_string_array(out, sample.rejit.final_disabled_passes);
-    out << ",\"pass_details\":";
-    print_json_daemon_pass_details(out, sample.rejit.pass_details);
-    if (sample.rejit.daemon_debug_stripped) {
-        out << ",\"daemon_debug_stripped\":true";
-    }
-    if (!sample.rejit.daemon_response.empty()) {
-        out << ",\"daemon_response\":" << sample.rejit.daemon_response;
-    }
-    out << "}";
-    if (sample.correctness_mismatch.has_value()) {
-        out << ",\"correctness_mismatch\":"
-            << (*sample.correctness_mismatch ? "true" : "false");
-    }
-    out << "}";
+        << "}"
+        << "}";
 }
 
 } // namespace
@@ -195,65 +145,6 @@ std::string json_escape(std::string_view input)
         }
     }
     return output;
-}
-
-void print_json_string_array(std::ostream &out, const std::vector<std::string> &values)
-{
-    out << "[";
-    for (size_t index = 0; index < values.size(); ++index) {
-        if (index != 0) {
-            out << ",";
-        }
-        out << "\"" << json_escape(values[index]) << "\"";
-    }
-    out << "]";
-}
-
-void print_json_daemon_pass_details(
-    std::ostream &out,
-    const std::vector<daemon_pass_detail> &details)
-{
-    out << "[";
-    for (size_t index = 0; index < details.size(); ++index) {
-        if (index != 0) {
-            out << ",";
-        }
-        const auto &detail = details[index];
-        out
-            << "{"
-            << "\"pass_name\":\"" << json_escape(detail.pass_name) << "\","
-            << "\"changed\":" << (detail.changed ? "true" : "false") << ","
-            << "\"verify\":{"
-            << "\"status\":\"" << json_escape(detail.verify_status) << "\"";
-        if (!detail.verify_error_message.empty()) {
-            out << ",\"error_message\":\"" << json_escape(detail.verify_error_message) << "\"";
-        }
-        out << "},"
-            << "\"rollback\":";
-        if (!detail.rollback_applied) {
-            out << "null";
-        } else {
-            out
-                << "{"
-                << "\"action\":\"" << json_escape(detail.rollback_action) << "\","
-                << "\"restored_insn_count\":" << detail.rollback_restored_insn_count
-                << "}";
-        }
-        out
-            << ","
-            << "\"sites_found\":" << detail.sites_found << ","
-            << "\"sites_applied\":" << detail.sites_applied << ","
-            << "\"sites_skipped\":" << detail.sites_skipped << ","
-            << "\"insns_before\":" << detail.insns_before << ","
-            << "\"insns_after\":" << detail.insns_after << ","
-            << "\"insn_delta\":" << detail.insn_delta << ","
-            << "\"skip_reasons\":"
-            << (detail.skip_reasons_json.empty() ? "{}" : detail.skip_reasons_json) << ","
-            << "\"diagnostics\":"
-            << (detail.diagnostics_json.empty() ? "[]" : detail.diagnostics_json)
-            << "}";
-    }
-    out << "]";
 }
 
 [[noreturn]] void fail(const std::string &message)

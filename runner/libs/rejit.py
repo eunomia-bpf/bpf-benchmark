@@ -178,8 +178,6 @@ def _policy_rule_matches(
         "program": ("program", "program_name"),
         "section": ("section", "section_name"),
         "prog_type": ("prog_type", "prog_type_name"),
-        "test_method": ("test_method",),
-        "attach_group": ("attach_group",),
         "family": ("family",),
         "category": ("category",),
         "level": ("level",),
@@ -386,57 +384,6 @@ def _zero_site_counts() -> dict[str, int]:
     }
 
 
-def _parse_last_json_object(text: str) -> dict[str, Any] | None:
-    for line in reversed(text.splitlines()):
-        payload = line.strip()
-        if not payload or not payload.startswith("{"):
-            continue
-        try:
-            parsed = json.loads(payload)
-        except json.JSONDecodeError:
-            continue
-        if isinstance(parsed, dict):
-            return parsed
-    return None
-
-
-def _parse_site_summary(site_summary: str) -> dict[str, int]:
-    counts = _zero_site_counts()
-    text = site_summary.strip()
-    if not text or text == "-":
-        return counts
-
-    for token in text.split():
-        pass_name, separator, raw_value = token.partition("=")
-        if separator != "=":
-            continue
-        field_name = _PASS_TO_SITE_FIELD.get(pass_name)
-        if field_name is None:
-            continue
-        try:
-            counts[field_name] += int(raw_value)
-        except ValueError:
-            continue
-
-    counts["bitfield_sites"] = counts["extract_sites"]
-    counts["total_sites"] = sum(
-        counts[field_name]
-        for field_name in (
-            "map_inline_sites",
-            "const_prop_sites",
-            "dce_sites",
-            "cmov_sites",
-            "wide_sites",
-            "rotate_sites",
-            "lea_sites",
-            "extract_sites",
-            "endian_sites",
-            "branch_flip_sites",
-        )
-    )
-    return counts
-
-
 def benchmark_rejit_enabled_passes() -> list[str]:
     if _BENCH_PASSES_ENV in os.environ:
         raw = os.environ.get(_BENCH_PASSES_ENV)
@@ -492,25 +439,8 @@ def _site_counts_from_optimize_response(response: Mapping[str, Any]) -> dict[str
 
 def _scan_record_from_optimize_response(prog_id: int, response: Mapping[str, Any]) -> dict[str, Any]:
     counts = _site_counts_from_optimize_response(response)
-    program = response.get("program") if isinstance(response, Mapping) else {}
-    if not isinstance(program, Mapping):
-        program = {}
-    prog_type = int(program.get("prog_type") or 0)
-    prog_name = str(program.get("prog_name") or "")
-    insn_count = int(program.get("orig_insn_count") or 0)
-    enumerate_record = {
-        "prog_id": int(prog_id),
-        "prog_type": prog_type,
-        "type": prog_type,
-        "name": prog_name,
-        "insn_count": insn_count,
-        "site_summary": _site_summary_from_counts(counts),
-        "sites": dict(counts),
-        "counts": dict(counts),
-        "total_sites": int(counts["total_sites"]),
-    }
     return {
-        "enumerate_record": enumerate_record,
+        "prog_id": int(prog_id),
         "sites": dict(counts),
         "counts": dict(counts),
         "error": "",
@@ -600,7 +530,7 @@ def _scan_programs_via_socket(
             )
             if str(response.get("status") or "") != "ok":
                 results[prog_id] = {
-                    "enumerate_record": None,
+                    "prog_id": int(prog_id),
                     "sites": dict(zero),
                     "counts": dict(zero),
                     "error": str(response.get("message") or response.get("error") or "scan failed"),
@@ -611,7 +541,7 @@ def _scan_programs_via_socket(
         error = str(exc)
         for prog_id in requested_ids:
             results[prog_id] = {
-                "enumerate_record": None,
+                "prog_id": int(prog_id),
                 "sites": dict(zero),
                 "counts": dict(zero),
                 "error": error,

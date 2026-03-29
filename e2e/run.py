@@ -41,7 +41,6 @@ from e2e.cases.katran.case import (  # noqa: E402
     build_markdown as build_katran_markdown,
     run_katran_case,
 )
-DEFAULT_KATRAN_POLICY_FILE = ROOT_DIR / "e2e" / "cases" / "katran" / "balancer_ingress.e2e.policy.yaml"
 from e2e.cases.scx.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_SCX_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_SCX_OUTPUT_MD,
@@ -156,8 +155,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--scheduler-object", default=str(ROOT_DIR / "corpus" / "build" / "scx" / "scx_rusty_main.bpf.o"))
     parser.add_argument("--scx-repo", default=str(ROOT_DIR / "runner" / "repos" / "scx"))
     parser.add_argument("--katran-object", default=str(DEFAULT_KATRAN_CASE_OBJECT))
-    parser.add_argument("--katran-policy", default=str(DEFAULT_KATRAN_POLICY_FILE))
-    parser.add_argument("--katran-server-binary", help="Explicit Katran server binary path.")
     parser.add_argument("--katran-iface", default="katran0")
     parser.add_argument("--katran-router-peer-iface")
     parser.add_argument("--katran-packet-repeat", type=int)

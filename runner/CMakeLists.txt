@@ -25,6 +25,7 @@ set(MICRO_LIBBPF_LIBRARY "${MICRO_LIBBPF_LIBRARY}" CACHE FILEPATH "libbpf static
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBELF REQUIRED IMPORTED_TARGET libelf)
+pkg_check_modules(ZLIB REQUIRED IMPORTED_TARGET zlib)
 pkg_check_modules(YAMLCPP REQUIRED IMPORTED_TARGET yaml-cpp)
 
 add_library(vendor_libbpf STATIC IMPORTED GLOBAL)
@@ -56,5 +57,6 @@ target_link_libraries(micro_exec
     PRIVATE
         vendor_libbpf
         PkgConfig::LIBELF
+        PkgConfig::ZLIB
         PkgConfig::YAMLCPP
 )

@@ -794,7 +794,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     ]
     status = str(payload.get("status") or "")
     if status != "ok":
-        result_reason = payload.get("error_message") or payload.get("skip_reason") or "unknown"
+        result_reason = payload.get("error_message") or "unknown"
         lines.extend(
             [
                 "",
@@ -950,6 +950,8 @@ def daemon_payload(
     preflight: dict[str, object] | None = None
     exec_workload_cgroup = any(arg == "--cgroup-rate" for arg in tetragon_extra_args)
 
+    # TODO: Move the Tetragon policy/setup/start/workload/stop hooks into
+    # runner/libs/app_runners/tetragon.py so corpus and E2E share one lifecycle.
     def setup() -> dict[str, object]:
         tempdir = tempfile.TemporaryDirectory(prefix="tetragon-policy-")
         policy_dir = Path(tempdir.name)

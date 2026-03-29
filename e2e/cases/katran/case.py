@@ -452,7 +452,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- wrk threads: `{payload.get('wrk_threads')}`",
         f"- wrk connections: `{payload.get('wrk_connections')}`",
         f"- Warmup duration per phase: `{payload.get('warmup_duration_s')}`",
-        f"- Control plane: `{payload.get('control_plane_mode')}`",
         f"- Interface: `{((payload.get('live_program') or {}).get('iface'))}`",
         f"- Attach mode: `{((payload.get('live_program') or {}).get('attach_mode'))}`",
         "",
@@ -518,46 +517,11 @@ def ensure_artifacts(runner_binary: Path, daemon_binary: Path) -> None:
 
 def run_setup_script(setup_script: Path) -> dict[str, object]:
     completed = run_command(["bash", str(setup_script)], check=False, timeout=300)
-    server_binary = ""
-    for line in (completed.stdout or "").splitlines():
-        if line.startswith("KATRAN_SERVER_BINARY="):
-            server_binary = line.split("=", 1)[1].strip()
-            break
     return {
         "returncode": completed.returncode,
-        "katran_server_binary": server_binary or None,
         "stdout_tail": tail_text(completed.stdout or "", max_lines=40, max_chars=8000),
         "stderr_tail": tail_text(completed.stderr or "", max_lines=40, max_chars=8000),
     }
-
-
-def katran_server_candidates() -> tuple[Path, ...]:
-    return (
-        ROOT_DIR / "e2e" / "cases" / "katran" / "bin" / "katran_server_grpc",
-        Path("/usr/local/bin/katran_server_grpc"),
-        Path("/usr/local/sbin/katran_server_grpc"),
-        Path("/opt/katran/bin/katran_server_grpc"),
-        ROOT_DIR / "third_party" / "katran-src" / "build" / "example_grpc" / "katran_server_grpc",
-        ROOT_DIR / "tmp" / "katran-src" / "build" / "example_grpc" / "katran_server_grpc",
-    )
-
-
-def resolve_katran_server_binary(explicit: str | None, setup_result: Mapping[str, object]) -> str | None:
-    if explicit:
-        candidate = Path(explicit).expanduser().resolve()
-        if candidate.exists():
-            return str(candidate)
-    scripted = str(setup_result.get("katran_server_binary") or "").strip()
-    if scripted and Path(scripted).exists():
-        return scripted
-    for candidate in katran_server_candidates():
-        if candidate.is_file() and os.access(candidate, os.X_OK):
-            return str(candidate.resolve())
-    for candidate in ("katran_server_grpc", "katran_server"):
-        resolved = which(candidate)
-        if resolved:
-            return resolved
-    return None
 
 
 def read_kernel_config(path: Path) -> dict[str, object]:
@@ -1982,14 +1946,12 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
 
     setup_result = {
         "returncode": 0,
-        "katran_server_binary": None,
         "stdout_tail": "",
         "stderr_tail": "",
     }
     if not args.skip_setup:
         setup_result = run_setup_script(setup_script)
 
-    server_binary = resolve_katran_server_binary(args.katran_server_binary, setup_result)
     kernel_config = read_kernel_config(Path(args.kernel_config).resolve())
     object_program_listing = inspect_object_program(runner_binary, katran_object, DEFAULT_PROGRAM_NAME)
 
@@ -2004,10 +1966,6 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         limitations.append("CONFIG_DUMMY is not enabled in vendor/linux-framework/.config.")
     if not kernel_config.get("veth_enabled"):
         limitations.append("CONFIG_VETH is not enabled in vendor/linux-framework/.config.")
-    if server_binary is None:
-        limitations.append(
-            "Katran userspace server binary is not present; this case is running in standalone_direct_map_emulation via bpftool and pinned maps, not the official Katran userspace server path."
-        )
     if bool(args.katran_use_wrk) and not use_wrk_driver:
         limitations.append("wrk was requested but is unavailable; falling back to the built-in parallel Python HTTP client.")
     if not use_wrk_driver:
@@ -2031,6 +1989,8 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         test_run_validation: dict[str, object] = {}
         map_capture: dict[str, object] | None = None
         for cycle_index in range(sample_count):
+            # TODO: Move the Katran topology/session/workload/stop hooks into
+            # runner/libs/app_runners/katran.py so corpus and E2E share one lifecycle.
             def setup() -> dict[str, object]:
                 return {}
 
@@ -2216,7 +2176,6 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": "ok",
         "mode": "katran_dsr_direct_map_connection_churn_same_image_paired",
-        "control_plane_mode": "bpftool_direct_map",
         "traffic_driver": "wrk" if use_wrk_driver else "python_parallel",
         "workload_model": "http_short_flow_connection_churn",
         "smoke": bool(args.smoke),
@@ -2229,10 +2188,8 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "warmup_packet_count": warmup_request_count,
         "warmup_duration_s": warmup_duration_s,
         "min_measurement_requests": minimum_requests,
-        "same_image_measurement": True,
         "state_reset_strategy": "reset mutable stats/fallback maps before each phase warmup",
         "katran_object": relpath(katran_object),
-        "katran_server_binary": server_binary,
         "setup": setup_result,
         "host": host_metadata(),
         "kernel_config": kernel_config,
@@ -2259,7 +2216,6 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--katran-object", default=str(DEFAULT_KATRAN_OBJECT))
-    parser.add_argument("--katran-server-binary")
     parser.add_argument("--katran-iface", default=DEFAULT_INTERFACE)
     parser.add_argument("--katran-router-peer-iface")
     parser.add_argument("--katran-packet-repeat", type=int)

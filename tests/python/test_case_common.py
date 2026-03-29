@@ -74,7 +74,7 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: 
         )
         return {
             101: {
-                "enumerate_record": None,
+                "prog_id": 101,
                 "sites": {},
                 "counts": {},
                 "error": "",
@@ -202,7 +202,7 @@ def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypat
     monkeypatch.setattr(
         rejit,
         "scan_programs",
-        lambda *_args, **_kwargs: {101: {"enumerate_record": None, "sites": {}, "counts": {}, "error": ""}},
+        lambda *_args, **_kwargs: {101: {"prog_id": 101, "sites": {}, "counts": {}, "error": ""}},
     )
     monkeypatch.setattr(
         rejit,

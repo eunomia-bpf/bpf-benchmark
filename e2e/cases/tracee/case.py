@@ -1344,7 +1344,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     ]
     status = str(payload.get("status") or "")
     if status != "ok":
-        result_reason = payload.get("error_message") or payload.get("skip_reason") or "unknown"
+        result_reason = payload.get("error_message") or "unknown"
         lines.extend(
             [
                 "## Result",
@@ -1622,6 +1622,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 if not control_records:
                     raise RuntimeError("control phase produced no workload measurements")
 
+                # TODO: Move the Tracee launch/workload/stop hooks into
+                # runner/libs/app_runners/tracee.py so corpus and E2E share one lifecycle.
                 def setup() -> dict[str, object]:
                     return {}
 
@@ -1881,7 +1883,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "warmup_duration_s": warmup_duration_s,
         "latency_probe_count": latency_probe_count,
         "latency_probe_timeout_s": latency_probe_timeout_s,
-        "same_image_measurement": True,
         "tracee_binary": tracee_binary,
         "tracee_launch_command": commands,
         "tracee_programs": tracee_programs,

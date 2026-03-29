@@ -1,12 +1,6 @@
 from __future__ import annotations
 
-"""Corpus manifest parsing and result helpers.
-
-TODO: corpus execution moved to ``corpus/orchestrator.py`` and per-repo
-``runner/libs/app_runners/`` modules. The legacy batch planner, host/guest
-execution paths, attach-trigger handling, and prepared-state machinery were
-removed from this module on purpose.
-"""
+"""Corpus manifest parsing and shared result helpers."""
 
 import argparse
 from collections import Counter
@@ -230,22 +224,6 @@ def deserialize_resolved_object(payload: Mapping[str, Any]) -> ResolvedObject:
             continue
         programs.append(ResolvedProgram(**dict(item)))
     return ResolvedObject(**{**dict(payload), "programs": tuple(programs)})
-
-
-def load_guest_batch_targets(target_path: Path) -> list[ResolvedObject]:
-    payload = json.loads(target_path.read_text())
-    if not isinstance(payload, dict):
-        raise SystemExit("--guest-target-json payload must be a JSON object")
-    objects = payload.get("objects")
-    if not isinstance(objects, list):
-        raise SystemExit("--guest-target-json payload missing objects list")
-    return [deserialize_resolved_object(obj) for obj in objects if isinstance(obj, dict)]
-
-
-def write_guest_batch_records(result_path: Path, records: list[dict[str, Any]]) -> None:
-    ensure_parent(result_path)
-    payload = {"records": records}
-    result_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def _strip_daemon_response(value: Any) -> Any:
@@ -1001,7 +979,6 @@ __all__ = [
     "format_ratio",
     "geomean",
     "load_corpus_build_report",
-    "load_guest_batch_targets",
     "load_targets_from_yaml",
     "markdown_table",
     "materialize_dummy_context",
@@ -1025,5 +1002,4 @@ __all__ = [
     "split_corpus_source",
     "summarize_failure_reason",
     "summarize_text",
-    "write_guest_batch_records",
 ]
