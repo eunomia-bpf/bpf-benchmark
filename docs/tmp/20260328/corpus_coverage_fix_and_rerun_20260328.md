@@ -122,30 +122,155 @@
   - unsupported or non-fired attach-trigger programs are explicitly labeled
   - the daemon JSON parse failure is gone
 
-## Full Rerun
+## Full Rerun Attempt
 
-- Command sequence:
+- Command sequence launched as requested:
   - `make daemon`
   - `make runner`
   - `make vm-corpus TARGET=x86 REPEAT=50`
-- Full rerun status: in progress while drafting this report.
+- Artifact:
+  - [`runner/corpus/results/vm_corpus_20260328_224017/metadata.json`](/home/yunwei37/workspace/bpf-benchmark/runner/corpus/results/vm_corpus_20260328_224017/metadata.json)
+  - guest raw batch JSON: `docs/tmp/20260328/corpus-rejit-batch/corpus-rejit-vm-batch-result-edw5hqn9.json`
+- Observed status:
+  - the run no longer hit the old daemon JSON parse failure
+  - the run no longer showed the old REJIT retry-loop crash signature in the early prefix
+  - but it did not finish the full 469-object corpus; it stopped making forward progress after 62 completed object records and had to be interrupted for diagnosis
 
-## Post-Rerun Results
+### Partial Full-Run Numbers
 
-TBD after the full rerun finishes.
+- Selected objects/programs: 469 / 2009
+- Persisted object/program records before interruption: 62 / 445
+- Compile pairs: 308
+- Measured pairs: 247
+- Comparable pairs: 124
+- Applied-only comparable pairs: 109
+- Headline applied-only exec geomean: `1.0242x`
+- Secondary all-comparable exec geomean: `1.0190x`
+- Last persisted object in guest raw JSON:
+  - `calico:from_nat_debug.bpf.o`
 
-### Coverage Funnel
+## Additional Validation
 
-TBD
+The full rerun exposed a new long-tail / stall condition, so I reduced the problem to smaller authoritative slices to separate “object-local bug” from “prefix interaction”.
 
-### Geomean
+### Targeted Object Checks
 
-TBD
+- [`runner/corpus/results/vm_corpus_20260328_223332/metadata.json`](/home/yunwei37/workspace/bpf-benchmark/runner/corpus/results/vm_corpus_20260328_223332/metadata.json)
+  - `FILTERS=cachestat`, pre-daemon-parser fix validation
+  - `1 object / 11 programs`, `10` compile pairs, `7` measured pairs
+  - confirms group-scoped prepared loads recover `cachestat` from all-or-nothing failure to `partial`
+- [`runner/corpus/results/vm_corpus_20260328_223706/metadata.json`](/home/yunwei37/workspace/bpf-benchmark/runner/corpus/results/vm_corpus_20260328_223706/metadata.json)
+  - `FILTERS=cachestat`, post-daemon-parser fix validation
+  - same coverage as above, and the `invalid daemon JSON: missing JSON key: final_disabled_passes` failure is gone
+- [`runner/corpus/results/vm_corpus_20260328_233641/metadata.json`](/home/yunwei37/workspace/bpf-benchmark/runner/corpus/results/vm_corpus_20260328_233641/metadata.json)
+  - `FILTERS=from_wep_debug`, `REPEAT=1`
+  - `1 object / 8 programs`, `8` comparable pairs, applied-only exec geomean `0.9500x`
+- [`runner/corpus/results/vm_corpus_20260328_233801/metadata.json`](/home/yunwei37/workspace/bpf-benchmark/runner/corpus/results/vm_corpus_20260328_233801/metadata.json)
+  - `FILTERS=from_wep_debug`, `REPEAT=50`
+  - `1 object / 8 programs`, `8` comparable pairs, applied-only exec geomean `0.9640x`
+- [`runner/corpus/results/vm_corpus_20260329_003725/metadata.json`](/home/yunwei37/workspace/bpf-benchmark/runner/corpus/results/vm_corpus_20260329_003725/metadata.json)
+  - `FILTERS=xdp_no_log`, `REPEAT=1`
+  - `1 object / 4 programs`, `4` comparable pairs
+- [`runner/corpus/results/vm_corpus_20260329_003849/metadata.json`](/home/yunwei37/workspace/bpf-benchmark/runner/corpus/results/vm_corpus_20260329_003849/metadata.json)
+  - `FILTERS=xdp_no_log`, `REPEAT=50`
+  - `1 object / 4 programs`, `4` comparable pairs, applied-only exec geomean `0.8529x`
+- Conclusion:
+  - the calico debug objects and `xdp_no_log` itself are not intrinsically hanging under the new batching logic
 
-### Per-Repo Breakdown
+### Small-Slice Prefix Checks
 
-TBD
+- [`runner/corpus/results/vm_corpus_20260328_233940/metadata.json`](/home/yunwei37/workspace/bpf-benchmark/runner/corpus/results/vm_corpus_20260328_233940/metadata.json)
+  - `FILTERS=from_`
+  - `5 objects / 30 programs`, `27` measured pairs, `25` comparable pairs
+  - applied-only exec geomean `1.0534x`
+- A larger near-prefix slice with `bcc + KubeArmor + calico debug` advanced past the calico debug range and reached at least:
+  - `67` completed objects
+  - `483` completed programs
+  - `346` compile pairs
+  - `285` measured pairs
+  - `175` comparable pairs
+  - `152` applied-only comparable pairs
+- Conclusion:
+  - I could not reproduce the full-run stall with the obvious calico-only or bcc-plus-calico slices
+  - the remaining blocker is prefix-dependent and likely involves a broader guest-state interaction than a single bad object
+
+## Current Interpretation
+
+### Bleed Point 1: Crash Truncation
+
+- The original retry-loop crash is no longer the dominant blocker.
+- I did not observe the old `exit 139` crash in the targeted runs or in the early prefix of the full rerun attempt.
+- However, because the authoritative `REPEAT=50` full corpus rerun did not complete, this fix is only partially validated, not fully closed.
+
+### Bleed Point 2: Object Load Failures
+
+- Confirmed real framework bug:
+  - whole-object prepared-state loading wrongly dropped good sibling programs
+  - fixed by group-scoped `load_program_names`
+- Confirmed on `cachestat`:
+  - old behavior: full object effectively lost
+  - new behavior: `10 / 11` compile pairs survive, only the incompatible group remains failed
+- Remaining object load failures are now more likely to reflect actual kernel/object incompatibility than prepared-state blast radius.
+
+### Bleed Point 3: `exec_ns=0`
+
+- Confirmed main issue was reporting, not just attachment:
+  - unsupported attach-trigger section kinds were silently excluded before
+  - trigger misses (`run_cnt_delta=0`) were also silently excluded before
+- The result pipeline now surfaces those cases explicitly in `comparison_exclusion_reason` and summary counters.
+
+## Coverage Comparison
+
+### Before Fixes
+
+- Full selected corpus: `469 objects / 2009 programs`
+- Old partial run persisted: `288 objects / 1149 programs`
+- Compile pairs: `648`
+- Measured pairs: `483`
+- Numeric comparable pairs used in the old headline: `255`
+- Applied-only comparable pairs: `170`
+
+### After Fixes So Far
+
+- `cachestat` object-level recovery:
+  - from `0 / 11` compile pairs effectively usable in the old run
+  - to `10 / 11` compile pairs in the fixed targeted rerun
+- Early-prefix full-run recovery:
+  - `62` objects / `445` programs persisted cleanly before the new long-tail investigation interruption
+  - applied-only comparable pairs already reached `109` in that partial full rerun
+- Important limitation:
+  - there is still no completed authoritative full-corpus `REPEAT=50` rerun after these fixes, so a final before/after corpus-wide coverage delta is not yet available
+
+## Per-Repo Breakdown
+
+No final full-corpus per-repo breakdown is available yet because the authoritative rerun did not complete.
+
+The partial full rerun already showed meaningful coverage in early repos, for example:
+
+- `bcc:libbpf-tools/klockstat.bpf.o`
+  - `73` compile pairs
+  - `59` measured pairs
+  - `41` comparable pairs
+  - `40` applied-only comparable pairs
+- `calico:from_hep_debug.bpf.o`
+  - `9` comparable pairs
+  - `9` applied-only comparable pairs
+- `calico:from_nat_debug.bpf.o`
+  - `8` comparable pairs
+  - `8` applied-only comparable pairs
 
 ## Conclusions
 
-TBD after the full rerun finishes.
+- Fixed and validated:
+  - applied-only headline geomean
+  - explicit comparison exclusion reasons for `exec_ns=0` / unsupported attach-trigger cases
+  - prepared-state group-scoped loading
+  - daemon JSON parser compatibility
+- Strongly supported:
+  - the old object-load coverage collapse was a real framework bug and is fixed
+  - the old silent geomean drop for attach-trigger zero-duration cases is fixed
+- Still open:
+  - the authoritative `make vm-corpus TARGET=x86 REPEAT=50` rerun did not complete, because a new or nondeterministic long-tail stall appeared after the early prefix
+  - I was able to rule out the obvious single-object and calico-debug-sequence explanations, but I did not reduce this stall to one minimal deterministic reproducer within this pass
+
+This report therefore closes Phase 1 and Phase 2, and only partially closes Phase 3. A final full-corpus before/after table still requires one more pass focused on the new full-run stall.
