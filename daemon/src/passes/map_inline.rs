@@ -911,7 +911,8 @@ fn run_map_inline_round(
             );
             continue;
         }
-        let rewrite = match build_site_rewrite(program, &site, &key, &uses, info, null_check_pc) {
+        let mut rewrite =
+            match build_site_rewrite(program, &site, &key, &uses, info, null_check_pc) {
             Ok(Some(rewrite)) => rewrite,
             Ok(None) => {
                 let reason = "failed to materialize replacement constants".to_string();
@@ -943,9 +944,15 @@ fn run_map_inline_round(
             .iter()
             .any(|&pc| pc < bt.is_target.len() && bt.is_target[pc])
         {
-            let reason = "lookup pattern contains a branch target".to_string();
-            record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
-            continue;
+            record_diagnostic(
+                &mut diagnostics,
+                format!(
+                    "site at PC={}: keeping lookup pattern because removal would cross a branch target",
+                    site.call_pc
+                ),
+            );
+            rewrite.skipped_pcs.clear();
+            rewrite.removed_null_check = false;
         }
 
         if rewrite

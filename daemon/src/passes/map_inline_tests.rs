@@ -1593,6 +1593,66 @@ fn map_inline_pass_keeps_hash_lookup_and_rewrites_jne_guarded_load() {
 }
 
 #[test]
+fn map_inline_pass_falls_back_to_load_only_when_speculative_lookup_setup_has_branch_target() {
+    install_hash_map(123, vec![7, 0, 0, 0]);
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let mut program = BpfProgram::new(vec![
+        BpfInsn::mov64_imm(3, 1),
+        jne_imm(3, 0, 2),
+        BpfInsn::mov64_imm(4, 0),
+        BpfInsn::mov64_imm(4, 0),
+        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        map[0],
+        map[1],
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        jeq_imm(0, 0, 1),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        BpfInsn::mov64_imm(0, 0),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![123]);
+
+    let result = run_map_inline_pass(&mut program);
+
+    assert!(
+        result.program_changed,
+        "skip reasons: {:?}",
+        result.pass_results[0].sites_skipped
+    );
+    assert_eq!(result.total_sites_applied, 1);
+    assert_eq!(
+        program.insns,
+        vec![
+            BpfInsn::mov64_imm(3, 1),
+            jne_imm(3, 0, 2),
+            BpfInsn::mov64_imm(4, 0),
+            BpfInsn::mov64_imm(4, 0),
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            map[0],
+            map[1],
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            jeq_imm(0, 0, 1),
+            BpfInsn::mov32_imm(6, 7),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]
+    );
+    assert!(
+        !result.pass_results[0]
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.reason == "lookup pattern contains a branch target"),
+        "site should fall back to load-only rewrite: {:?}",
+        result.pass_results[0].sites_skipped
+    );
+}
+
+#[test]
 fn map_inline_pass_rewrites_load_before_pointer_escape_to_helper() {
     install_array_map(106, vec![7, 0, 0, 0]);
 

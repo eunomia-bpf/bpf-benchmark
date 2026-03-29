@@ -319,17 +319,18 @@ fn new_attempt_debug(pass_traces: Vec<pass::PassDebugTrace>) -> Option<AttemptDe
     })
 }
 
-pub(crate) fn emit_debug_result(result: &OptimizeOneResult) {
-    match serde_json::to_string(result) {
-        Ok(json) => eprintln!("{}", json),
-        Err(err) => eprintln!("debug-log: failed to serialize optimize result: {err}"),
-    }
-}
-
 fn program_has_map_lookup_elem(insns: &[insn::BpfInsn]) -> bool {
     insns
         .iter()
         .any(|insn| insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM)
+}
+
+fn error_headline(err: &anyhow::Error) -> String {
+    format!("{err:#}")
+        .lines()
+        .next()
+        .unwrap_or("<empty error message>")
+        .to_string()
 }
 
 fn validate_required_btf_fds(
@@ -376,9 +377,10 @@ fn maybe_attach_original_verifier_states(
         Ok(states) if !states.is_empty() => program.set_verifier_states(states),
         Ok(_) => {}
         Err(err) => {
+            let headline = error_headline(&err);
             eprintln!(
-                "    warning: failed to capture original-program verifier log for prog fd {}: {:#}",
-                prog_fd, err
+                "    warning: failed to capture original-program verifier log for prog fd {}: {}",
+                prog_fd, headline
             );
         }
     }
@@ -734,7 +736,17 @@ pub(crate) fn try_apply_one(
                 vec![],
                 Some(err_msg),
             );
-            emit_debug_result(&failure_result);
+            let headline = failure_result
+                .error_message
+                .as_deref()
+                .and_then(|message| message.lines().next())
+                .unwrap_or("<missing error>");
+            eprintln!(
+                "  prog {} ({}): final REJIT failed: {}",
+                prog_id,
+                info.name_str(),
+                headline
+            );
             Err(e)
         }
     }
