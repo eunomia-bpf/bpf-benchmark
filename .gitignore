@@ -27,6 +27,8 @@ Thumbs.db
 
 # C/C++ and build outputs
 *.o
+*.d
+*.ko
 *.a
 *.so
 build/
@@ -116,9 +118,20 @@ tmp/
 /corpus-v5-vm-batch-*.json
 /corpus-v5-vm-batch-result-*.json
 /corpus-v5-vm-batch-result-*.json.*
+*.log
+*.pid
 *.tmp
 *.tmp.md
 .tmp-*
+perf.data
+perf.data.*
+*.packet
+*.tar.gz
+
+# VM runtime artifacts
+.virtme_mods/
+**/guest-inputs/
+**/guest-inputs/**
 
 # Log files and generated diffs in docs/tmp
 docs/tmp/**/*.log
@@ -143,6 +156,9 @@ docs/tmp/*.sh
 
 # Corpus run guest-inputs snapshots (build artifacts copied into VM, ~600MB+)
 runner/corpus/results/*/guest-inputs/
+
+# Corpus smoke runs are scratch outputs; authoritative corpus metadata is tracked separately.
+corpus/results/vm_corpus_*_smoke_*/
 
 # Cached E2E tool binaries (downloaded by setup scripts)
 e2e/cases/tracee/bin/
