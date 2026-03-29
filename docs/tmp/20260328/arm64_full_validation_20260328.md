@@ -161,12 +161,49 @@
 
 ### 2.3 最终结果
 
-待本次重跑完成后补充：
+- `make cross-arm64` 最终成功完成
+- 成功生成：
+  - `.cache/aws-arm64/binaries/runner/build/micro_exec.real`
+  - `.cache/aws-arm64/binaries/daemon/build/bpfrejit-daemon.real`
+- 同时生成了带 `LD_LIBRARY_PATH` 的 wrapper：
+  - `.cache/aws-arm64/binaries/runner/build/micro_exec`
+  - `.cache/aws-arm64/binaries/daemon/build/bpfrejit-daemon`
+- 打包出的运行库位于 `.cache/aws-arm64/binaries/lib`，包含：
+  - `libelf.so.1`
+  - `libgcc_s.so.1`
+  - `libstdc++.so.6`
+  - `libtinfo.so.6`
+  - `libyaml-cpp.so.0.6`
+  - `libz.so.1`
+  - `libzstd.so.1`
+- `file` 结果确认二者均为 `ARM aarch64`：
+  - `micro_exec.real`: `ELF 64-bit LSB executable, ARM aarch64`
+  - `bpfrejit-daemon.real`: `ELF 64-bit LSB pie executable, ARM aarch64`
 
-- `micro_exec.real` 是否生成
-- `bpfrejit-daemon.real` 是否生成
-- `file` 是否确认二者均为 `ARM aarch64`
-- 输出目录内容与运行库打包情况
+### 2.4 运行时兼容性问题
+
+虽然 cross-build 已成功产出 ARM64 ELF，但在默认 `runner/scripts/arm64_qemu_smoke.py` 的 `-cpu cortex-a72` 模型下，两个二进制仍然会在打印完 `--help` 后触发 `Illegal instruction`。
+
+本次做了两轮修复与定位：
+
+- 在 `runner/scripts/cross-arm64-build.sh` 中显式设置：
+  - `CFLAGS=-mcpu=cortex-a72`
+  - `CXXFLAGS=-mcpu=cortex-a72`
+  - `RUSTFLAGS=-C target-cpu=cortex-a72`
+- 重新跑 `make cross-arm64`
+- 用 `qemu-aarch64-static -cpu cortex-a72` 与整机 QEMU 双重复现
+
+结果：
+
+- 自己编译的对象已明确按 `cortex-a72` 目标重编
+- 但最终运行时仍在 `cortex-a72` 下触发 `SIGILL`
+- 同一批二进制在 `qemu-aarch64(-static) -cpu max` 和整机 QEMU `-cpu max` 下均可正常执行
+
+结论：
+
+- ARM64 cross-build“生成产物”这一目标已达成
+- 但“默认 `cortex-a72` QEMU guest 直接运行 cross-built runner/daemon”这一目标**仍未完全解决**
+- 为了继续完成 micro benchmark，本次额外给 `runner/scripts/arm64_qemu_smoke.py` 增加了可选参数 `--cpu-model`，默认值仍保持 `cortex-a72`，benchmark 阶段临时改用 `--cpu-model max`
 
 ## 3. ARM64 Micro Benchmark
 
@@ -190,20 +227,60 @@
 - ARM64 QEMU guest 没有 `python3`
 - 因此不能直接在 guest 里运行现有 `micro/driver.py` / `corpus/driver.py`
 - micro benchmark 需要走手工 `micro_exec run-kernel` 路径
+- guest rootfs 是只读的
+- 因此 benchmark 前需要先在 guest 里挂 `tmpfs /tmp`
 
 ### 3.3 结果
 
-待 `make cross-arm64` 成功后补充。
+由于 cross-built runner/daemon 在 `cortex-a72` 下仍会触发 `SIGILL`，本次 micro benchmark 使用：
+
+- 整机 ARM64 QEMU
+- `--cpu-model max`
+- `repeat=200`
+- 每个 benchmark / mode 采样 `3` 次
+- 报告中的 `exec_ns` 取三次 sample 的 median
+
+结果如下：
+
+| benchmark | stock exec_ns median | rejit exec_ns median | rejit / stock | 说明 |
+| --- | ---: | ---: | ---: | --- |
+| `simple` | `2513` | `2575` | `1.0247x` | REJIT 成功但为 identity REJIT，无 pass 命中 |
+| `load_byte_recompose` | `3371` | `3423` | `1.0154x` | `wide_mem` 命中 `1` 个 site，`insn_delta=-9` |
+| `cmov_dense` | `4138` | `3817` | `0.9224x` | 实际命中 `rotate` `26` 个 site，`insn_delta=-52` |
+
+原始三次采样：
+
+- `simple`
+  - stock: `[2677, 2463, 2513]`
+  - rejit: `[2207, 3148, 2575]`
+- `load_byte_recompose`
+  - stock: `[3215, 3371, 4162]`
+  - rejit: `[3199, 3423, 3569]`
+- `cmov_dense`
+  - stock: `[3902, 6689, 4138]`
+  - rejit: `[3689, 3861, 3817]`
+
+额外观察：
+
+- `simple`：daemon 返回 `identity_rejit`，没有实际 pass 改写
+- `load_byte_recompose`：`wide_mem` 稳定命中，符合预期
+- `cmov_dense`：本次没有命中 `cond_select`
+  - daemon 诊断中 `cond_select` 共跳过 `32` 个 site
+  - skip reason 为 `JCC condition not a simple zero test`
+  - 实际生效的是 `rotate`
+
+因此，本次确实拿到了三个指定 benchmark 的 `stock vs rejit exec_ns`，但其中 `cmov_dense` 的 ARM64 行为和“cond_select benchmark”这一预期并不完全一致。
 
 ## 4. ARM64 Corpus Smoke
 
-待定。
+本次未完成 corpus smoke。
 
 当前已知限制：
 
 - guest rootfs 没有 `python3`
 - 因此无法直接运行现有 corpus Python pipeline
 - 如果补做 corpus smoke，只能走手工对象级验证，而不是完整 `corpus/driver.py` 路径
+- 由于本次时间主要花在 cross-build / CPU baseline / micro benchmark 上，未再额外实现 guest 内的手工 corpus harness
 
 ## 5. Logs
 
@@ -215,3 +292,10 @@
 - `docs/tmp/20260328/logs/vm-arm64-selftest_retry3.log`
 - `docs/tmp/20260328/logs/13_make_cross-arm64_final.log`
 - `docs/tmp/20260328/logs/14_make_cross-arm64_retry2.log`
+- `docs/tmp/20260328/logs/15_arm64_micro_binary_smoke.log`
+- `docs/tmp/20260328/logs/15_arm64_micro_binary_smoke_retry1.log`
+- `docs/tmp/20260328/logs/16_make_cross-arm64_cortex_a72.log`
+- `docs/tmp/20260328/logs/17_arm64_micro_binary_smoke_cpu_max.log`
+- `docs/tmp/20260328/logs/18_arm64_micro_simple_stock_probe.log`
+- `docs/tmp/20260328/logs/19_arm64_micro_simple_rejit_probe.log`
+- `docs/tmp/20260328/logs/20_arm64_micro_qemu_cpu_max.log`

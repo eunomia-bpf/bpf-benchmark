@@ -1,0 +1,37 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "bcc",
+  "details_dir": "details",
+  "error_message": "tcplife baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-tcplife-ut571_od'; biosnoop baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-biosnoop-avo1kz_l'; runqlat baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-runqlat-gqan87wz'; syscount baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-syscount-xsmoc_33'; execsnoop baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-execsnoop-a4eb0w_z'; opensnoop baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-opensnoop-dlt5hznx'; capable baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-capable-zo9msvsn'; vfsstat baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-vfsstat-bt6op93y'; tcpconnect baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-tcpconnect-pldjgdqi'; bindsnoop baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-bindsnoop-6v3k9lvm'",
+  "generated_at": "2026-03-29T01:32:14.477222+00:00",
+  "last_updated_at": "2026-03-29T01:32:14.477220+00:00",
+  "optimization_summary": {
+    "case": "bcc",
+    "error_message": "tcplife baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-tcplife-ut571_od'; biosnoop baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-biosnoop-avo1kz_l'; runqlat baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-runqlat-gqan87wz'; syscount baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-syscount-xsmoc_33'; execsnoop baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-execsnoop-a4eb0w_z'; opensnoop baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-opensnoop-dlt5hznx'; capable baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-capable-zo9msvsn'; vfsstat baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-vfsstat-bt6op93y'; tcpconnect baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-tcpconnect-pldjgdqi'; bindsnoop baseline failed: [Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/bcc-bindsnoop-6v3k9lvm'",
+    "failed_at": "2026-03-29T01:32:14.477209+00:00",
+    "smoke": false,
+    "status": "error"
+  },
+  "output_hint_json": "e2e/results/bcc_authoritative_20260329.json",
+  "output_hint_md": "e2e/results/bcc-e2e.md",
+  "output_hint_report_md": "docs/tmp/bcc-e2e-report.md",
+  "run_type": "bcc",
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "smoke": false,
+  "started_at": "2026-03-29T01:32:11.370019+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

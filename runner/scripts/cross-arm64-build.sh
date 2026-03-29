@@ -13,6 +13,7 @@ runner_build="$build_root/runner"
 daemon_target="$build_root/daemon-target"
 cargo_home="$build_root/cargo-home"
 home_dir="$build_root/home"
+target_cpu="${ARM64_CROSSBUILD_TARGET_CPU:-cortex-a72}"
 
 rm -rf "$build_root"
 mkdir -p /out/runner/build /out/daemon/build /out/lib "$cargo_home" "$home_dir"
@@ -21,6 +22,9 @@ mkdir -p /out/runner/build /out/daemon/build /out/lib "$cargo_home" "$home_dir"
 export CMAKE_BUILD_PARALLEL_LEVEL="$JOBS"
 export HOME="$home_dir"
 export CARGO_HOME="$cargo_home"
+export CFLAGS="${CFLAGS:+$CFLAGS }-mcpu=$target_cpu"
+export CXXFLAGS="${CXXFLAGS:+$CXXFLAGS }-mcpu=$target_cpu"
+export RUSTFLAGS="${RUSTFLAGS:+$RUSTFLAGS }-C target-cpu=$target_cpu"
 make -C /workspace/runner \
     BUILD_DIR="$runner_build" \
     JOBS="$JOBS" \

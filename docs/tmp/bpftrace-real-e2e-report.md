@@ -1,6 +1,6 @@
 # bpftrace Real E2E Report
 
-- Generated: `2026-03-28T21:58:07.837079+00:00`
+- Generated: `2026-03-29T01:53:15.402563+00:00`
 - Run mode: `full`
 - Duration per phase: `30s`
 - Guest kernel: `7.0.0-rc2+`
@@ -9,30 +9,30 @@
 ## Outcome
 
 - This benchmark treats `bpftrace` itself as the tracing agent and measures application throughput plus bpftrace CPU while tracing is active.
-- Scripts with detected sites: `4`; aggregate site count: `21`.
-- Geomean BPF speedup across scripts with both baseline and ReJIT data: `1.035x`.
+- Scripts with detected sites: `4`; aggregate site count: `22`.
+- Geomean BPF speedup across scripts with both baseline and ReJIT data: `1.037x`.
 
 ## Per-Script
 
-- `tcplife`: sites=8, stock_ns=1087.03, rejit_ns=921.53, speedup=1.180x, ops_stock=21.81, ops_rejit=22.00, cpu_stock=0.07, cpu_rejit=0.00
-- `biosnoop`: sites=4, stock_ns=4116.73, rejit_ns=4207.60, speedup=0.978x, ops_stock=13515.18, ops_rejit=13668.94, cpu_stock=0.03, cpu_rejit=0.00
-- `runqlat`: sites=0, stock_ns=187.90, rejit_ns=187.99, speedup=1.000x, ops_stock=61.12, ops_rejit=61.49, cpu_stock=0.07, cpu_rejit=0.00
-- `tcpretrans`: sites=3, stock_ns=n/a, rejit_ns=n/a, speedup=n/a, ops_stock=21.48, ops_rejit=21.86, cpu_stock=0.03, cpu_rejit=0.00
-- `capable`: sites=6, stock_ns=253.78, rejit_ns=246.98, speedup=1.028x, ops_stock=121.77, ops_rejit=377.18, cpu_stock=0.00, cpu_rejit=0.00
-- `vfsstat`: sites=0, stock_ns=37.03, rejit_ns=36.87, speedup=1.004x, ops_stock=13079.11, ops_rejit=12696.76, cpu_stock=0.03, cpu_rejit=0.00
+- `tcplife`: sites=8, stock_ns=1392.03, rejit_ns=1462.92, speedup=0.952x, ops_stock=21.07, ops_rejit=12.62, cpu_stock=0.13, cpu_rejit=0.00
+- `biosnoop`: sites=5, stock_ns=8226.75, rejit_ns=6990.53, speedup=1.177x, ops_stock=9330.44, ops_rejit=10427.45, cpu_stock=0.07, cpu_rejit=0.03
+- `runqlat`: sites=0, stock_ns=197.75, rejit_ns=186.32, speedup=1.061x, ops_stock=55.46, ops_rejit=58.14, cpu_stock=0.07, cpu_rejit=0.00
+- `tcpretrans`: sites=3, stock_ns=n/a, rejit_ns=n/a, speedup=n/a, ops_stock=21.52, ops_rejit=24.41, cpu_stock=0.03, cpu_rejit=0.03
+- `capable`: sites=6, stock_ns=311.84, rejit_ns=300.57, speedup=1.038x, ops_stock=32.87, ops_rejit=230.01, cpu_stock=0.00, cpu_rejit=0.00
+- `vfsstat`: sites=0, stock_ns=37.09, rejit_ns=38.18, speedup=0.972x, ops_stock=14816.57, ops_rejit=14101.33, cpu_stock=0.03, cpu_rejit=0.07
 
 ## Comparison
 
-- `tcplife` delta: avg_ns=-15.23%, ops=0.85%, cpu=-100.00%
-- `biosnoop` delta: avg_ns=2.21%, ops=1.14%, cpu=-100.00%
-- `runqlat` delta: avg_ns=0.05%, ops=0.60%, cpu=-100.00%
-- `tcpretrans` delta: avg_ns=n/a%, ops=1.77%, cpu=-100.00%
-- `capable` delta: avg_ns=-2.68%, ops=209.74%, cpu=n/a%
-- `vfsstat` delta: avg_ns=-0.43%, ops=-2.92%, cpu=-100.00%
+- `tcplife` delta: avg_ns=5.09%, ops=-40.12%, cpu=-100.00%
+- `biosnoop` delta: avg_ns=-15.03%, ops=11.76%, cpu=-50.00%
+- `runqlat` delta: avg_ns=-5.78%, ops=4.85%, cpu=-100.00%
+- `tcpretrans` delta: avg_ns=n/a%, ops=13.44%, cpu=0.00%
+- `capable` delta: avg_ns=-3.61%, ops=599.83%, cpu=n/a%
+- `vfsstat` delta: avg_ns=2.93%, ops=-4.83%, cpu=100.00%
 
 ## Interpretation
 
 - The prior VM-only bpftrace measurements were pure BPF run-time deltas. This case adds application throughput and bpftrace CPU overhead, which makes the policy-sensitive regressions visible as honest end-to-end cost.
-- Eligible CMOV-bearing scripts split by workload: improved=['tcplife', 'capable', 'vfsstat'], regressed=['biosnoop', 'runqlat']. The overall geomean across scripts with stock+ReJIT data is `1.035x`.
+- Eligible CMOV-bearing scripts split by workload: improved=['biosnoop', 'runqlat', 'capable'], regressed=['tcplife', 'vfsstat']. The overall geomean across scripts with stock+ReJIT data is `1.037x`.
 - Scripts with zero eligible sites were still measured for the baseline end-to-end overhead, but their ReJIT columns remain `n/a` to avoid implying a meaningless comparison.
 

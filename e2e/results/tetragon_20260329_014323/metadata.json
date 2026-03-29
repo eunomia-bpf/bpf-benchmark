@@ -1,0 +1,37 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "tetragon",
+  "details_dir": "details",
+  "error_message": "Tetragon case could not run: Command '['/usr/local/bin/tetragon', '--cgroup-rate', '1000,1s', '--tracing-policy-dir', '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/tetragon-policy-m_myr_ai']' timed out after 3 seconds",
+  "generated_at": "2026-03-29T01:45:09.349422+00:00",
+  "last_updated_at": "2026-03-29T01:45:09.349419+00:00",
+  "optimization_summary": {
+    "case": "tetragon",
+    "error_message": "Tetragon case could not run: Command '['/usr/local/bin/tetragon', '--cgroup-rate', '1000,1s', '--tracing-policy-dir', '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/tetragon-policy-m_myr_ai']' timed out after 3 seconds",
+    "failed_at": "2026-03-29T01:45:09.349398+00:00",
+    "smoke": false,
+    "status": "error"
+  },
+  "output_hint_json": "e2e/results/tetragon_authoritative_20260329.json",
+  "output_hint_md": "e2e/results/tetragon-real-e2e.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "run_type": "tetragon",
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "smoke": false,
+  "started_at": "2026-03-29T01:43:23.239989+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

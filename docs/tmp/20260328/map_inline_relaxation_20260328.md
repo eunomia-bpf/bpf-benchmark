@@ -71,28 +71,69 @@ Completed:
 
 ## Phase 2: vm-e2e TARGET=x86
 
-Status at report creation time: running.
+### Queue / retry note
 
-Observed state:
+- The first `make vm-e2e TARGET=x86` spent a long time queued behind another workspace-level `vm_global` holder.
+- After the lock was released, I mistakenly killed the original wrapper while checking whether the queued job had actually started.
+- That first partial run produced false host-side `vm-tmp/...` missing-directory errors for later cases and is not used for final judgement.
+- I then reran `make vm-e2e TARGET=x86` cleanly and use only that second run below.
 
-- The initial `make vm-e2e TARGET=x86` spent a long time queued behind a shared `vm_global` lock held by another in-progress `vm-corpus` job in this workspace.
-- After the lock was released, this run started and created:
-  - `e2e/results/tracee_20260329_011116/metadata.json`
-- At the time of this draft, the run has not yet produced final authoritative outputs for `tracee`, `katran`, or `tetragon`, so site-count comparison and 6-case pass/fail summary are still pending.
+### Final second-run result
 
-Pending fill-in after completion:
+Command:
 
-- Katran `map_inline_sites`
-- Tracee `map_inline_sites`
-- Tetragon health / pass status
-- 6-case pass/fail summary
+- `make vm-e2e TARGET=x86`
+
+Result:
+
+- Overall: failed
+- Pass cases: `tracee`, `bpftrace`, `scx`, `katran`, `bcc`
+- Fail cases: `tetragon`
+
+Per-case status:
+
+- `tracee`: `ok`
+- `tetragon`: `error`
+- `bpftrace`: `ok`
+- `scx`: `ok`
+- `katran`: `ok`
+- `bcc`: `ok`
+
+### Requested observations
+
+Katran map-inline site count:
+
+- Baseline (`20260328`): `6 / 6 / 6`
+- New run (`20260329`): `6 / 6 / 6`
+- Net change: no change
+
+Tracee map-inline site count:
+
+- Baseline (`20260328`): program `20` had `map_inline_sites = 1`
+- New run (`20260329`): program `20` has `map_inline_sites = 0`
+- Net change: `-1`
+
+Additional tracee scan delta:
+
+- `total_sites`: `131 -> 68`
+- `dce_sites`: `98 -> 36`
+
+Tetragon health:
+
+- Not normal in the clean rerun.
+- Error:
+  - `Tetragon case could not run: Command '['/usr/local/bin/tetragon', '--cgroup-rate', '1000,1s', '--tracing-policy-dir', '/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260328/vm-tmp/tetragon-policy-m_myr_ai']' timed out after 3 seconds`
+
+6-case pass/fail summary:
+
+- `5 / 6` passed
+- Failed case: `tetragon`
 
 ## Phase 3: vm-corpus REPEAT=50
 
-Pending until Phase 2 completes successfully.
+Not run.
 
-Pending fill-in after completion:
+Reason:
 
-- applied-only geomean comparison
-- any regressions or notable skips
-
+- The Phase 2 gate did not pass because `tetragon` failed in the clean rerun.
+- There is also an unexpected `tracee` regression in `map_inline_sites` (`1 -> 0`), so a corpus smoke run would not have been a sound final validation point.

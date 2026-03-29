@@ -111,6 +111,7 @@ def main() -> int:
     parser.add_argument("--host-share")
     parser.add_argument("--guest-mount", default="/mnt")
     parser.add_argument("--command", action="append", default=[])
+    parser.add_argument("--cpu-model", default="cortex-a72")
     parser.add_argument("--memory-mb", type=int, default=2048)
     parser.add_argument("--cpus", type=int, default=2)
     parser.add_argument("--timeout", type=int, default=180)
@@ -131,7 +132,7 @@ def main() -> int:
         "-M",
         "virt",
         "-cpu",
-        "cortex-a72",
+        args.cpu_model,
         "-smp",
         str(args.cpus),
         "-m",
