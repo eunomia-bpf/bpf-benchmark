@@ -1,0 +1,239 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "benchmark_config": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/benchmark_config.yaml",
+  "benchmark_profile": null,
+  "benchmarks": [
+    {
+      "category": "baseline",
+      "correctness_mismatch": false,
+      "description": "Return-only baseline",
+      "expected_result": 12345678,
+      "family": "baseline",
+      "hypothesis": "Captures the staged harness floor for baseline subtraction",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/simple.mem",
+      "io_mode": "staged",
+      "level": "tiny",
+      "name": "simple",
+      "runs": [
+        {
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/simple.bpf.o"
+          },
+          "baseline_adjustment": {
+            "applied": true,
+            "baseline_benchmark": "simple",
+            "baseline_exec_ns": 85.0,
+            "baseline_io_mode": "staged",
+            "median_minus_baseline_ns": 0.0,
+            "median_over_baseline_ratio": 1.0
+          },
+          "compile_ns": {
+            "count": 1,
+            "max": 4259348,
+            "mean": 4259348,
+            "median": 4259348,
+            "min": 4259348,
+            "p95": 4259348,
+            "stdev": 0
+          },
+          "derived_metrics": {},
+          "exec_ns": {
+            "count": 1,
+            "max": 85,
+            "mean": 85,
+            "median": 85,
+            "min": 85,
+            "p95": 85,
+            "stdev": 0
+          },
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "optimization_summary": {
+            "daemon_debug_entries": 0,
+            "final_disabled_passes": {},
+            "passes_applied": {},
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected_samples": 0,
+            "errors": {},
+            "hardware_counters_observed": false,
+            "include_kernel": null,
+            "requested": false,
+            "scope": "full_repeat_raw",
+            "software_counters_observed": false
+          },
+          "phases_ns": {
+            "input_stage_ns": {
+              "count": 1,
+              "max": 466,
+              "mean": 466,
+              "median": 466,
+              "min": 466,
+              "p95": 466,
+              "stdev": 0
+            },
+            "jit_compile_ns": {
+              "count": 1,
+              "max": 4259348,
+              "mean": 4259348,
+              "median": 4259348,
+              "min": 4259348,
+              "p95": 4259348,
+              "stdev": 0
+            },
+            "memory_prepare_ns": {
+              "count": 1,
+              "max": 270944,
+              "mean": 270944,
+              "median": 270944,
+              "min": 270944,
+              "p95": 270944,
+              "stdev": 0
+            },
+            "program_image_ns": {
+              "count": 1,
+              "max": 5177978,
+              "mean": 5177978,
+              "median": 5177978,
+              "min": 5177978,
+              "p95": 5177978,
+              "stdev": 0
+            },
+            "vm_load_code_ns": {
+              "count": 1,
+              "max": 302,
+              "mean": 302,
+              "median": 302,
+              "min": 302,
+              "p95": 302,
+              "stdev": 0
+            }
+          },
+          "repeat": 10,
+          "result_distribution": {
+            "12345678": 1
+          },
+          "runtime": "llvmbpf",
+          "sample_count": 1,
+          "timing_source": "rdtsc",
+          "wall_exec_ns": {
+            "count": 1,
+            "max": 4488,
+            "mean": 4488,
+            "median": 4488,
+            "min": 4488,
+            "p95": 4488,
+            "stdev": 0
+          }
+        }
+      ],
+      "tags": [
+        "baseline",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "bpftool_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build/vendor/bpftool/bpftool",
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build/micro_exec"
+  },
+  "completed_at": "2026-03-29T16:41:30.662698+00:00",
+  "defaults": {
+    "iterations": 1,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "repeat": 10,
+    "runtime_order_seed": 0,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "generated_at": "2026-03-29T16:41:30.237754+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "powersave",
+    "git_sha": "ce3ba5cc04ba71542f3910bc0b36e20151c60d8c",
+    "hostname": "lab",
+    "kernel_cmdline": "BOOT_IMAGE=/boot/vmlinuz-6.15.11-061511-generic root=UUID=85355174-a2ad-4e84-bf78-53fac30b89fb ro panic=10 splash quiet iommu=pt vt.handoff=7",
+    "kernel_version": "6.15.11-061511-generic",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "0"
+  },
+  "iteration_runtime_orders": {
+    "simple": [
+      [
+        "llvmbpf"
+      ]
+    ]
+  },
+  "last_updated_at": "2026-03-29T16:41:30.662698+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "optimization_summary": {
+    "benchmark_count": 1,
+    "correctness_mismatch_count": 0,
+    "correctness_mismatches": [],
+    "daemon_debug_entries": 0,
+    "final_disabled_passes": {},
+    "passes_applied": {},
+    "runtime_names": [
+      "llvmbpf"
+    ],
+    "total_sites_applied": 0,
+    "total_verifier_retries": 0
+  },
+  "output_hint": "micro/results/smoke.json",
+  "progress": {
+    "completed_benchmarks": 1,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 1
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "daemon_commit": "ce3ba5cc04ba71542f3910bc0b36e20151c60d8c",
+    "environment": "bare-metal",
+    "kernel_commit": "b07468207ab0d5f5f41f19d44289e2c5eeadde13",
+    "params": {
+      "iterations": 1,
+      "repeat": 10,
+      "warmups": 0
+    },
+    "repo_dirty": true,
+    "repo_git_sha": "ce3ba5cc04ba71542f3910bc0b36e20151c60d8c",
+    "timestamp": "2026-03-29T16:41:30.540159+00:00"
+  },
+  "run_type": "smoke",
+  "started_at": "2026-03-29T16:41:30.237754+00:00",
+  "status": "completed",
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "bpftool": {
+      "root": "vendor/bpftool"
+    },
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}

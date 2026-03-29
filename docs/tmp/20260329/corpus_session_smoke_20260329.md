@@ -1,0 +1,29 @@
+# Corpus Session Smoke 2026-03-29
+
+- Commands:
+  - `make daemon && make runner`
+  - `/usr/bin/time -p make vm-corpus TARGET=x86 REPEAT=10 ITERATIONS=1`
+- Result artifact: `runner/corpus/results/vm_corpus_20260329_163852`
+- Status: `error` (not `completed`)
+  - `error_message`: `vm guest batch failed: guest batch failed: batch runner exited with code 1 (exit=1)`
+- `completed_objects`: `469/469`
+- Daemon/session behavior:
+  - This exercised the session-level corpus batch path: one guest batch invocation advanced monotonically to `469/469`.
+  - No `daemon crash`, `reconnect`, `connection refused`, `broken pipe`, or `reset by peer` strings were found in:
+    - `docs/tmp/20260329/corpus_session_smoke_20260329.log`
+    - `docs/tmp/20260329/corpus-rejit-batch/corpus-rejit-vm-batch-result-cpesnrxi.json.stdout_log.txt`
+    - `runner/corpus/results/vm_corpus_20260329_163852/details/result.json`
+  - `daemon_status=error` count in `program_records`: `0`
+- Coverage:
+  - Object coverage: `469/469`
+  - Program targets attempted: `2009`
+  - Performance coverage: `measured_pairs=0`, `applied_comparable_pairs=0`
+- Applied-only geomean: `n/a`
+  - `summary.applied_programs=0`
+  - geomean fields are `null`
+- Wall-clock:
+  - End-to-end `make vm-corpus`: `112.29s`
+  - Guest batch itself: `43.21s`
+- Takeaway:
+  - The daemon session-level path appears to have held up for the full 469-object sweep and did not show crash/reconnect symptoms.
+  - This was not a clean successful corpus run because final status was `error`, so it did not produce usable applied-only performance numbers.
