@@ -83,6 +83,7 @@ TARGET_FLAG := $(if $(strip $(TARGET)),--target "$(TARGET)",)
 VM_CPU_FLAG := $(if $(strip $(VM_CPUS)),--cpus "$(VM_CPUS)",)
 VM_MEM_FLAG := $(if $(strip $(VM_MEM)),--mem "$(VM_MEM)",)
 JOBS ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
+BPFTOOL_JOBS ?= 1
 
 BENCH_FLAGS := $(foreach b,$(BENCH),--bench $(b))
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
@@ -225,9 +226,10 @@ micro_exec: $(LIBBPF_A) $(LIBBPF_HEADER) | $(BUILD_DIR)
 
 vendor_bpftool: | $(BPFTOOL_BUILD_DIR)
 	$(MAKE) -C $(REPO_ROOT)/vendor/bpftool/src \
-		-j"$(JOBS)" \
+		-j"$(BPFTOOL_JOBS)" \
 		OUTPUT=$(BPFTOOL_BUILD_DIR) \
-		BPF_DIR=$(REPO_ROOT)/vendor/libbpf/src
+		BPF_DIR=$(REPO_ROOT)/vendor/libbpf/src \
+		bootstrap
 
 kernel-image:
 	$(MAKE) -C "$(REPO_ROOT)" kernel BZIMAGE="$(BZIMAGE)"
