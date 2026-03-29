@@ -1,6 +1,18 @@
-"""Shared corpus/E2E app runners.
+"""Shared corpus/E2E app runners."""
 
-TODO: move per-repo ``start`` / ``workload`` / ``stop`` implementations here.
-The new corpus orchestrator and E2E cases should share these runners instead of
-embedding lifecycle logic in corpus batch code or individual case files.
-"""
+from __future__ import annotations
+
+from .bcc import BCCRunner
+
+
+def get_app_runner(repo: str, **kwargs: object) -> object:
+    normalized = str(repo or "").strip().lower()
+    if normalized == "bcc":
+        return BCCRunner(**kwargs)
+    raise NotImplementedError(f"no shared app runner is implemented for repo {repo!r}")
+
+
+__all__ = [
+    "BCCRunner",
+    "get_app_runner",
+]

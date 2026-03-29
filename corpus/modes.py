@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-"""Legacy shim for the corpus orchestrator.
-
-TODO: ``corpus/modes.py`` previously owned VM launch, guest batch scripts, and
-batch-plan orchestration. That code was removed in favor of the new
-``corpus/orchestrator.py`` entrypoint and shared app runners.
-"""
+"""Compatibility shim forwarding to ``corpus.orchestrator``."""
 
 import sys
 from pathlib import Path

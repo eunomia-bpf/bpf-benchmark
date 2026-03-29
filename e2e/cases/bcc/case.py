@@ -8,17 +8,13 @@ baseline → daemon-apply → post-rejit pattern used by the bpftrace case.
 from __future__ import annotations
 
 import argparse
-import os
 import statistics
-import subprocess
 import sys
-import tempfile
 import threading
-import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Mapping, Sequence
 
 import yaml
 
@@ -29,13 +25,11 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    run_command,
     smoke_output_path,
-    tail_text,
     write_json,
     write_text,
 )
-from runner.libs.agent import find_bpf_programs, stop_agent  # noqa: E402
+from runner.libs.app_runners.bcc import BCCRunner, find_tool_binary, resolve_tools_dir, run_setup_script  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
     enable_bpf_stats,
@@ -44,16 +38,6 @@ from runner.libs.metrics import (  # noqa: E402
     sample_total_cpu_usage,
 )
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
-from runner.libs.workload import (  # noqa: E402
-    WorkloadResult,
-    run_bind_storm,
-    run_dd_read_load,
-    run_exec_storm,
-    run_file_open_load,
-    run_scheduler_load,
-    run_tcp_connect_load,
-    run_user_exec_loop,
-)
 from e2e.case_common import (  # noqa: E402
     CaseLifecycleState,
     attach_pending_result_metadata,
@@ -69,8 +53,6 @@ DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "bcc")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bcc-e2e-report.md"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
-# libbpf-tools src dir; setup.sh may override this via BCC_TOOLS_DIR env var
-DEFAULT_TOOLS_DIR = ROOT_DIR / "runner" / "repos" / "bcc" / "libbpf-tools"
 
 
 # ---------------------------------------------------------------------------
@@ -86,16 +68,6 @@ class ToolSpec:
     spawn_timeout_s: int
     tool_args: tuple[str, ...]
     rejit_passes: tuple[str, ...]
-
-
-@dataclass(slots=True)
-class ToolProcessSession:
-    process: subprocess.Popen[str]
-    tempdir: Any
-    stdout_path: Path
-    stderr_path: Path
-    stdout_handle: Any
-    stderr_handle: Any
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,115 +101,6 @@ def load_config(path: Path) -> SuiteConfig:
 
 
 # ---------------------------------------------------------------------------
-# Tool binary resolution
-# ---------------------------------------------------------------------------
-
-def run_setup_script(setup_script: Path) -> dict[str, object]:
-    completed = run_command(["bash", str(setup_script)], check=False, timeout=1800)
-    result = {
-        "returncode": completed.returncode,
-        "tools_dir": None,
-        "stdout_tail": tail_text(completed.stdout or "", max_lines=60, max_chars=12000),
-        "stderr_tail": tail_text(completed.stderr or "", max_lines=60, max_chars=12000),
-    }
-    for line in (completed.stdout or "").splitlines():
-        if line.startswith("BCC_TOOLS_DIR="):
-            value = line.split("=", 1)[1].strip()
-            result["tools_dir"] = value or None
-    return result
-
-
-def resolve_tools_dir(explicit: str | None, *, setup_result: Mapping[str, object] | None = None) -> Path:
-    """Return the directory containing compiled libbpf-tools binaries."""
-    # Priority: explicit CLI arg > BCC_TOOLS_DIR env var > setup.sh output > default src dir
-    if explicit:
-        candidate = Path(explicit)
-        if candidate.is_dir():
-            return candidate
-    env_dir = os.environ.get("BCC_TOOLS_DIR", "").strip()
-    if env_dir:
-        candidate = Path(env_dir)
-        if candidate.is_dir():
-            return candidate
-    setup_dir = str((setup_result or {}).get("tools_dir") or "").strip()
-    if setup_dir:
-        candidate = Path(setup_dir)
-        if candidate.is_dir():
-            return candidate
-    # Check .output subdirectory (standard libbpf-tools build output)
-    output_subdir = DEFAULT_TOOLS_DIR / ".output"
-    if output_subdir.is_dir() and (output_subdir / "tcplife").exists():
-        return output_subdir
-    return DEFAULT_TOOLS_DIR
-
-
-def find_tool_binary(tools_dir: Path, name: str) -> Path | None:
-    """Return the path to a compiled libbpf-tools binary, or None."""
-    candidate = tools_dir / name
-    if candidate.is_file() and os.access(candidate, os.X_OK):
-        return candidate
-    # Some builds place binaries in parent directory
-    candidate2 = tools_dir.parent / name
-    if candidate2.is_file() and os.access(candidate2, os.X_OK):
-        return candidate2
-    return None
-
-
-# ---------------------------------------------------------------------------
-# Workload dispatch
-# ---------------------------------------------------------------------------
-
-def run_named_workload(kind: str, duration_s: int) -> WorkloadResult:
-    if kind == "tcp_connect":
-        return run_tcp_connect_load(duration_s)
-    if kind == "dd_read":
-        return run_dd_read_load(duration_s)
-    if kind == "scheduler":
-        return run_scheduler_load(duration_s)
-    if kind == "exec_storm":
-        return run_exec_storm(duration_s, rate=2)
-    if kind == "exec_loop":
-        return run_user_exec_loop(duration_s)
-    if kind == "file_open":
-        return run_file_open_load(duration_s)
-    if kind == "bind_storm":
-        return run_bind_storm(duration_s)
-    raise RuntimeError(f"unsupported workload kind: {kind!r}")
-
-
-# ---------------------------------------------------------------------------
-# BPF program discovery
-# ---------------------------------------------------------------------------
-
-def wait_for_attached_programs(
-    process: Any,
-    *,
-    expected_count: int,
-    timeout_s: int,
-) -> list[dict[str, object]]:
-    deadline = time.monotonic() + timeout_s
-    last_nonempty: list[dict[str, object]] = []
-    stable_ids: tuple[int, ...] | None = None
-    stable_rounds = 0
-    while time.monotonic() < deadline:
-        matches = find_bpf_programs(int(process.pid or 0))
-        if matches:
-            last_nonempty = matches
-            ids = tuple(int(item.get("id", 0)) for item in matches)
-            if ids == stable_ids:
-                stable_rounds += 1
-            else:
-                stable_ids = ids
-                stable_rounds = 1
-            if len(matches) >= expected_count and stable_rounds >= 2:
-                return matches
-        elif process.poll() is not None and not last_nonempty:
-            break
-        time.sleep(0.5)
-    return last_nonempty
-
-
-# ---------------------------------------------------------------------------
 # Site aggregation
 # ---------------------------------------------------------------------------
 
@@ -263,38 +126,8 @@ def aggregate_site_totals(records: Mapping[int, Mapping[str, object]]) -> dict[s
     return totals
 
 
-def start_tool_session(tool_binary: Path, tool_args: Sequence[str]) -> ToolProcessSession:
-    tempdir = tempfile.TemporaryDirectory(prefix=f"bcc-{tool_binary.name}-")
-    stdout_path = Path(tempdir.name) / "stdout.log"
-    stderr_path = Path(tempdir.name) / "stderr.log"
-    stdout_handle = stdout_path.open("w", encoding="utf-8")
-    stderr_handle = stderr_path.open("w", encoding="utf-8")
-    process = subprocess.Popen(
-        [str(tool_binary), *tool_args],
-        cwd=ROOT_DIR,
-        env=os.environ.copy(),
-        stdin=subprocess.DEVNULL,
-        stdout=stdout_handle,
-        stderr=stderr_handle,
-        text=True,
-        bufsize=1,
-    )
-    return ToolProcessSession(
-        process=process,
-        tempdir=tempdir,
-        stdout_path=stdout_path,
-        stderr_path=stderr_path,
-        stdout_handle=stdout_handle,
-        stderr_handle=stderr_handle,
-    )
-
-
-# ---------------------------------------------------------------------------
-# Measurement
-# ---------------------------------------------------------------------------
-
 def measure_workload(
-    workload_kind: str,
+    runner: BCCRunner,
     duration_s: int,
     prog_ids: Sequence[int],
     *,
@@ -318,7 +151,7 @@ def measure_workload(
     system_thread.start()
 
     try:
-        workload_result = run_named_workload(workload_kind, duration_s)
+        workload_result = runner.run_workload(duration_s)
     finally:
         cpu_thread.join()
         system_thread.join()
@@ -344,41 +177,6 @@ def measure_workload(
     }
 
 
-# ---------------------------------------------------------------------------
-# Per-tool phase runner
-# ---------------------------------------------------------------------------
-
-def finalize_process_output(session: ToolProcessSession) -> dict[str, object]:
-    io_errors: list[str] = []
-    for handle in (session.stdout_handle, session.stderr_handle):
-        try:
-            handle.flush()
-        except Exception as exc:
-            io_errors.append(f"failed to flush {handle.name}: {exc}")
-        try:
-            handle.close()
-        except Exception as exc:
-            io_errors.append(f"failed to close {handle.name}: {exc}")
-    try:
-        stdout = session.stdout_path.read_text(encoding="utf-8", errors="replace")
-    except OSError as exc:
-        io_errors.append(f"failed to read {session.stdout_path}: {exc}")
-        stdout = ""
-    try:
-        stderr = session.stderr_path.read_text(encoding="utf-8", errors="replace")
-    except OSError as exc:
-        io_errors.append(f"failed to read {session.stderr_path}: {exc}")
-        stderr = ""
-    payload = {
-        "returncode": session.process.returncode,
-        "stdout_tail": tail_text(stdout, max_lines=40, max_chars=8000),
-        "stderr_tail": tail_text(stderr, max_lines=40, max_chars=8000),
-    }
-    if io_errors:
-        raise RuntimeError("; ".join(io_errors))
-    return payload
-
-
 def run_phase(
     spec: ToolSpec,
     tool_binary: Path,
@@ -391,6 +189,14 @@ def run_phase(
 
     Returns (baseline, rejit) where rejit is None only when ReJIT was not applicable.
     """
+    bcc_runner = BCCRunner(
+        tool_binary=tool_binary,
+        tool_name=spec.name,
+        tool_args=spec.tool_args,
+        workload_kind=spec.workload_kind,
+        expected_programs=spec.expected_programs,
+        attach_timeout_s=attach_timeout,
+    )
     programs: list[dict[str, object]] = []
     prog_ids: list[int] = []
     process_output: dict[str, object] = {}
@@ -399,36 +205,29 @@ def run_phase(
         return {}
 
     def start(_: object) -> CaseLifecycleState:
-        return CaseLifecycleState(runtime=start_tool_session(tool_binary, spec.tool_args))
-
-    def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
-        session = lifecycle.runtime
-        assert isinstance(session, ToolProcessSession)
-        process = session.process
         nonlocal programs
         nonlocal prog_ids
-        if phase_name == "baseline" and not lifecycle.target_prog_ids:
-            programs = wait_for_attached_programs(
-                process,
-                expected_count=spec.expected_programs,
-                timeout_s=attach_timeout,
-            )
-            if not programs:
-                return {
-                    "status": "error",
-                    "reason": f"{spec.name} did not attach any BPF programs within {attach_timeout}s",
-                    "measurement": None,
-                }
-            prog_ids = [int(program["id"]) for program in programs]
-            lifecycle.target_prog_ids = list(prog_ids)
-            lifecycle.apply_prog_ids = list(prog_ids)
+        prog_ids = list(bcc_runner.start())
+        programs = [dict(program) for program in bcc_runner.programs]
+        return CaseLifecycleState(
+            runtime=bcc_runner,
+            target_prog_ids=list(prog_ids),
+            apply_prog_ids=list(prog_ids),
+        )
+
+    def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
+        runner = lifecycle.runtime
+        assert isinstance(runner, BCCRunner)
         if not lifecycle.target_prog_ids:
             return {"status": "error", "reason": "no BPF programs are attached", "measurement": None}
+        process = runner.session.process if runner.session is not None else None
+        if process is None:
+            return {"status": "error", "reason": "bcc runner process is not available", "measurement": None}
         return {
             "status": "ok",
             "reason": "",
             "measurement": measure_workload(
-                spec.workload_kind,
+                runner,
                 duration_s,
                 lifecycle.target_prog_ids,
                 agent_pid=int(process.pid or 0),
@@ -438,27 +237,10 @@ def run_phase(
 
     def stop(_: object, lifecycle: CaseLifecycleState) -> None:
         nonlocal process_output
-        session = lifecycle.runtime
-        assert isinstance(session, ToolProcessSession)
-        stop_error: Exception | None = None
-        finalize_error: Exception | None = None
-        try:
-            stop_agent(session.process, timeout=8)
-        except Exception as exc:
-            stop_error = exc
-        try:
-            process_output = finalize_process_output(session)
-        except Exception as exc:
-            finalize_error = exc
-        finally:
-            session.tempdir.cleanup()
-        if stop_error is not None or finalize_error is not None:
-            failures: list[str] = []
-            if stop_error is not None:
-                failures.append(f"failed to stop {spec.name}: {stop_error}")
-            if finalize_error is not None:
-                failures.append(f"failed to capture {spec.name} output: {finalize_error}")
-            raise RuntimeError("; ".join(failures))
+        runner = lifecycle.runtime
+        assert isinstance(runner, BCCRunner)
+        runner.stop()
+        process_output = dict(runner.process_output)
 
     def cleanup(_: object) -> None:
         return None
