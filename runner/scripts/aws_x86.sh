@@ -69,7 +69,7 @@ FULL_LIFECYCLE_LAUNCH_OUTPUT=""
 FULL_LIFECYCLE_CLEANUP_RUNNING=0
 FULL_LIFECYCLE_CLEANUP_TOKEN=""
 FULL_LIFECYCLE_WATCHER_PID=""
-AWS_X86_KERNEL_CACHE_VERSION=3
+AWS_X86_KERNEL_CACHE_VERSION=5
 
 log() {
     printf '[aws-x86] %s\n' "$*" >&2
@@ -449,13 +449,16 @@ write_x86_kernel_manifest() {
     cat >"$manifest" <<EOF
 AWS_X86_KERNEL_CACHE_VERSION=${AWS_X86_KERNEL_CACHE_VERSION}
 AWS_X86_CONFIG_NET_VENDOR_AMAZON=y
-AWS_X86_CONFIG_ENA_ETHERNET=m
+AWS_X86_CONFIG_ENA_ETHERNET=y
 AWS_X86_CONFIG_NVME_CORE=m
 AWS_X86_CONFIG_BLK_DEV_NVME=m
 AWS_X86_CONFIG_XFS_FS=m
 AWS_X86_CONFIG_EXT4_FS=m
-AWS_X86_CONFIG_VIRTIO_NET=m
+AWS_X86_CONFIG_VIRTIO_NET=y
 AWS_X86_CONFIG_VIRTIO_BLK=m
+AWS_X86_CONFIG_VIRTIO_PCI=y
+AWS_X86_CONFIG_DEFAULT_SECURITY=selinux
+AWS_X86_CONFIG_LSM=landlock,lockdown,yama,integrity,selinux,bpf
 EOF
 }
 
@@ -479,24 +482,26 @@ _prepare_x86_aws_config_locked() {
         --set-str SYSTEM_TRUSTED_KEYS "" \
         --set-str SYSTEM_REVOCATION_KEYS "" \
         --enable NET_VENDOR_AMAZON \
-        --module ENA_ETHERNET \
+        --enable ENA_ETHERNET \
         --module NVME_CORE \
         --module BLK_DEV_NVME \
         --module XFS_FS \
         --module EXT4_FS \
-        --module VIRTIO_NET \
+        --enable VIRTIO_NET \
+        --enable VIRTIO_PCI \
         --module VIRTIO_BLK
     rm -f "$KERNEL_CONFIG_STAMP_FILE"
     make -C "$KERNEL_DIR" olddefconfig >/dev/null
 
     require_kernel_config_value "$config_file" "CONFIG_NET_VENDOR_AMAZON" "y"
-    require_kernel_config_value "$config_file" "CONFIG_ENA_ETHERNET" "m"
+    require_kernel_config_value "$config_file" "CONFIG_ENA_ETHERNET" "y"
     require_kernel_config_value "$config_file" "CONFIG_NVME_CORE" "m"
     require_kernel_config_value "$config_file" "CONFIG_BLK_DEV_NVME" "m"
     require_kernel_config_value "$config_file" "CONFIG_XFS_FS" "m"
     require_kernel_config_value "$config_file" "CONFIG_EXT4_FS" "m"
-    require_kernel_config_value "$config_file" "CONFIG_VIRTIO_NET" "m"
+    require_kernel_config_value "$config_file" "CONFIG_VIRTIO_NET" "y"
     require_kernel_config_value "$config_file" "CONFIG_VIRTIO_BLK" "m"
+    require_kernel_config_value "$config_file" "CONFIG_VIRTIO_PCI" "y"
 }
 
 prepare_x86_aws_config() {
@@ -553,12 +558,10 @@ _build_kernel_artifacts_locked() {
     rm -f "$MODULES_STAGE_DIR/lib/modules/$kernel_release/build" \
           "$MODULES_STAGE_DIR/lib/modules/$kernel_release/source"
     local modules_root="$MODULES_STAGE_DIR/lib/modules/$kernel_release"
-    require_kernel_module_artifact "$modules_root" "kernel/drivers/net/ethernet/amazon/ena/ena.ko"
     require_kernel_module_artifact "$modules_root" "kernel/drivers/nvme/host/nvme-core.ko"
     require_kernel_module_artifact "$modules_root" "kernel/drivers/nvme/host/nvme.ko"
     require_kernel_module_artifact "$modules_root" "kernel/fs/ext4/ext4.ko"
     require_kernel_module_artifact "$modules_root" "kernel/fs/xfs/xfs.ko"
-    require_kernel_module_artifact "$modules_root" "kernel/drivers/net/virtio_net.ko"
     require_kernel_module_artifact "$modules_root" "kernel/drivers/block/virtio_blk.ko"
 
     cp "$X86_VMLINUX" "$ARTIFACT_DIR/vmlinux-$kernel_release"
@@ -651,13 +654,36 @@ ver="$1"
 stage_dir="$2"
 stock="/boot/vmlinuz-$(uname -r)"
 title="Codex x86 ($ver)"
+primary_netdev="$(ip -brief link | awk '$1 != "lo" { print $1; exit }')"
+[[ -n "$primary_netdev" ]] || exit 1
+primary_mac="$(cat "/sys/class/net/$primary_netdev/address")"
+[[ -n "$primary_mac" ]] || exit 1
 
 sudo tar -xzf "$stage_dir/modules-$ver.tar.gz" -C /
 sudo install -o root -g root -m 0755 \
     "$stage_dir/boot/bzImage-$ver" \
     "/boot/vmlinuz-$ver"
 sudo depmod -a "$ver"
-sudo dracut --force "/boot/initramfs-$ver.img" "$ver"
+dracut_drivers="nvme nvme-core xfs ext4 virtio_blk"
+sudo dracut --force --no-hostonly --add-drivers "$dracut_drivers" "/boot/initramfs-$ver.img" "$ver"
+sudo lsinitrd "/boot/initramfs-$ver.img" | \
+    grep -E '/(nvme(|-core)|xfs|ext4|virtio_blk)\.ko(\.(xz|zst|gz))?$' >/dev/null
+cat <<EOF_LINK | sudo tee /etc/systemd/network/10-codex-ena.link >/dev/null
+[Match]
+MACAddress=${primary_mac}
+
+[Link]
+Name=ens5
+EOF_LINK
+cat <<EOF_NET | sudo tee /etc/systemd/network/10-codex-ena.network >/dev/null
+[Match]
+MACAddress=${primary_mac}
+
+[Network]
+DHCP=yes
+LinkLocalAddressing=yes
+IPv6AcceptRA=yes
+EOF_NET
 sudo grubby --add-kernel "/boot/vmlinuz-$ver" \
     --initrd "/boot/initramfs-$ver.img" \
     --title "$title" \
@@ -731,17 +757,45 @@ stage_runtime_libs() {
             not\ found:*)
                 die "missing runtime library for ${binary}: ${dep#not found:}"
                 ;;
-            */ld-linux-*.so*|*/libc.so.*|*/libm.so.*)
-                continue
-                ;;
         esac
         [[ -f "$dep" ]] || continue
         cp -L "$dep" "$dest_dir/"
     done < <(ldd "$binary" | awk '
         /=> not found/ { print "not found:" $1; next }
         /=>/ { print $3; next }
-        /^\// { print $1 }
+        /^[[:space:]]*\// { print $1 }
     ')
+}
+
+install_portable_runtime_wrapper() {
+    local wrapper_path="$1"
+    local real_binary="${wrapper_path}.bin"
+    [[ -x "$real_binary" ]] || die "wrapped binary is missing: ${real_binary}"
+    cat >"$wrapper_path" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_path="$(readlink -f "$0")"
+search_dir="$(cd "$(dirname "$script_path")" && pwd)"
+bundle_root=""
+while [[ "$search_dir" != "/" ]]; do
+    if [[ -x "$search_dir/lib/ld-linux-x86-64.so.2" ]]; then
+        bundle_root="$search_dir"
+        break
+    fi
+    search_dir="$(dirname "$search_dir")"
+done
+
+[[ -n "$bundle_root" ]] || {
+    echo "portable runtime loader not found for $script_path" >&2
+    exit 1
+}
+
+exec "$bundle_root/lib/ld-linux-x86-64.so.2" \
+    --library-path "$bundle_root/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+    "${script_path}.bin" "$@"
+EOF
+    chmod +x "$wrapper_path"
 }
 
 ensure_benchmark_bundle() {
@@ -773,10 +827,12 @@ ensure_benchmark_bundle() {
         "$BENCHMARK_BUNDLE_DIR/corpus/build/katran" \
         "$BENCHMARK_BUNDLE_DIR/module/x86"
 
-    cp "$X86_RUNNER" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec"
-    cp "$X86_DAEMON" "$BENCHMARK_BUNDLE_DIR/daemon/target/release/bpfrejit-daemon"
+    cp "$X86_RUNNER" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec.bin"
+    cp "$X86_DAEMON" "$BENCHMARK_BUNDLE_DIR/daemon/target/release/bpfrejit-daemon.bin"
     stage_runtime_libs "$X86_RUNNER" "$BENCHMARK_BUNDLE_DIR/lib"
     stage_runtime_libs "$X86_DAEMON" "$BENCHMARK_BUNDLE_DIR/lib"
+    install_portable_runtime_wrapper "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec"
+    install_portable_runtime_wrapper "$BENCHMARK_BUNDLE_DIR/daemon/target/release/bpfrejit-daemon"
 
     cp "$ROOT_DIR"/micro/*.py "$BENCHMARK_BUNDLE_DIR/micro/"
     cp -a "$ROOT_DIR/micro/config/." "$BENCHMARK_BUNDLE_DIR/micro/config/"
@@ -811,7 +867,7 @@ benchmark_instance() {
     ssh_bash "$ip" "$AWS_X86_REMOTE_STAGE_DIR" <<'EOF'
 set -euo pipefail
 root="$1"
-rm -rf "$root"
+sudo -n rm -rf "$root"
 mkdir -p "$root/results"
 EOF
     scp_to "$ip" "$BENCHMARK_BUNDLE_TAR" "$AWS_X86_REMOTE_STAGE_DIR/"
@@ -843,7 +899,6 @@ sudo -n env PATH="/usr/sbin:/usr/bin:/sbin:/bin:${PATH}" \
 
 sudo -n env \
     PATH="/usr/sbin:/usr/bin:/sbin:/bin:${PATH}" \
-    LD_LIBRARY_PATH="$root/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
     PYTHONPATH="$root" \
     python3.11 "$root/runner/scripts/x86_remote_benchmark.py" \
         --output "$results_dir/$result_json" \

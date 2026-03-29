@@ -25,8 +25,9 @@ for ko in "$MODULE_DIR"/*.ko; do
         fi
         echo "Loaded $mod"
     fi
-    # Count as loaded if BTF entry exists (module registered successfully).
-    if [ -e "/sys/kernel/btf/${mod}" ]; then
+    # Some environments do not expose module BTF ids in /sys/kernel/btf even
+    # when the module is resident. Count real module residency instead.
+    if lsmod | grep -q "^${mod} " || [ -d "/sys/module/${mod}" ]; then
         loaded=$((loaded + 1))
     fi
 done
