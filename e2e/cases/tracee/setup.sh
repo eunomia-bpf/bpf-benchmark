@@ -6,6 +6,7 @@ REPO_ROOT=$(cd -- "${SCRIPT_DIR}/../../.." && pwd)
 CACHED_BINARY="${REPO_ROOT}/e2e/cases/tracee/bin/tracee"
 PATCHED_SOURCE_TAG="v0.24.1"
 PATCHED_VERSION="v0.24.1-kernel7-patch1"
+ALLOW_PATCHED_BUILD="${TRACEE_ALLOW_PATCHED_BUILD:-0}"
 
 tracee_version() {
   local bin="$1"
@@ -24,13 +25,16 @@ tracee_version() {
 
 cache_tracee_binary() {
   local source_bin="$1"
+  local tmp_binary="/tmp/tracee-bin/tracee"
   mkdir -p "$(dirname "${CACHED_BINARY}")"
   mkdir -p /tmp/tracee-bin
-  if [[ "${source_bin}" != "${CACHED_BINARY}" ]]; then
+  if [[ "$(readlink -f "${source_bin}")" != "$(readlink -f "${CACHED_BINARY}")" ]]; then
     cp "${source_bin}" "${CACHED_BINARY}"
   fi
-  cp "${source_bin}" /tmp/tracee-bin/tracee
-  chmod +x "${CACHED_BINARY}" /tmp/tracee-bin/tracee
+  if [[ "$(readlink -f "${source_bin}")" != "$(readlink -f "${tmp_binary}")" ]]; then
+    cp "${source_bin}" "${tmp_binary}"
+  fi
+  chmod +x "${CACHED_BINARY}" "${tmp_binary}"
 }
 
 build_patched_tracee_binary() {
@@ -70,6 +74,10 @@ build_patched_tracee_binary() {
   printf '%s\n' "${CACHED_BINARY}"
 }
 
+allow_patched_build() {
+  [[ "${ALLOW_PATCHED_BUILD}" == "1" ]]
+}
+
 select_tracee_binary() {
   local candidate="${1:-}"
   local version=""
@@ -82,14 +90,14 @@ select_tracee_binary() {
 
   if [[ -n "${candidate}" ]]; then
     version="$(tracee_version "${candidate}")"
-    if [[ "${version}" == "${PATCHED_VERSION}" ]]; then
+    if [[ "${version}" != "${PATCHED_VERSION}" ]]; then
       printf '%s\n' "${candidate}"
       return 0
     fi
-    if [[ "${version}" != "${PATCHED_SOURCE_TAG}" ]]; then
-      printf '%s\n' "${candidate}"
-      return 0
-    fi
+  fi
+
+  if ! allow_patched_build; then
+    return 0
   fi
 
   if [[ -x "${CACHED_BINARY}" ]]; then
@@ -148,10 +156,7 @@ if [[ "${#missing_pkgs[@]}" -gt 0 ]]; then
   done
 fi
 
-resolved_tracee_bin="$(select_tracee_binary "${tracee_bin}" || true)"
-if [[ -n "${resolved_tracee_bin}" ]]; then
-  tracee_bin="${resolved_tracee_bin}"
-fi
+tracee_bin="$(select_tracee_binary "${tracee_bin}" || true)"
 
 if [[ -z "${tracee_bin}" ]]; then
   apt_candidate=""
@@ -166,10 +171,7 @@ if [[ -z "${tracee_bin}" ]]; then
   fi
 fi
 
-resolved_tracee_bin="$(select_tracee_binary "${tracee_bin}" || true)"
-if [[ -n "${resolved_tracee_bin}" ]]; then
-  tracee_bin="${resolved_tracee_bin}"
-fi
+tracee_bin="$(select_tracee_binary "${tracee_bin}" || true)"
 
 if [[ -z "${tracee_bin}" ]]; then
   release_url="$(
@@ -219,10 +221,7 @@ PY
   fi
 fi
 
-resolved_tracee_bin="$(select_tracee_binary "${tracee_bin}" || true)"
-if [[ -n "${resolved_tracee_bin}" ]]; then
-  tracee_bin="${resolved_tracee_bin}"
-fi
+tracee_bin="$(select_tracee_binary "${tracee_bin}" || true)"
 
 if [[ -n "${tracee_bin}" ]]; then
   if ! "${tracee_bin}" --version >/dev/null 2>&1; then

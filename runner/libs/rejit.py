@@ -641,7 +641,12 @@ def _apply_result_from_response(
         dict(entry) for entry in raw_inlined_entries if isinstance(entry, Mapping)
     ]
     applied_sites = int((summary or {}).get("total_sites_applied", 0) or 0)
-    error_message = str(response.get("error_message") or response.get("message") or "").strip()
+    error_message = str(
+        response.get("error_message")
+        or response.get("message")
+        or response.get("error")
+        or ""
+    ).strip()
     return {
         "applied": exit_code == 0 and bool((summary or {}).get("applied", True)),
         "output": output,

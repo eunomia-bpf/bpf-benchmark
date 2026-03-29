@@ -4,9 +4,11 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
 import sys
 import tempfile
 import threading
+import time
 from collections import deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -404,7 +406,110 @@ def select_tetragon_programs(
 
 
 def run_workload(spec: WorkloadSpec, duration_s: int) -> WorkloadResult:
+    return run_workload_with_options(spec, duration_s, exec_workload_cgroup=False)
+
+
+def run_exec_storm_in_cgroup(duration_s: int | float, rate: int) -> WorkloadResult:
+    stress_ng = which("stress-ng")
+    if stress_ng is None:
+        raise RuntimeError("stress-ng is required for the tetragon cgroup-rate exec workload")
+
+    cgroup_root = Path("/sys/fs/cgroup")
+    if not cgroup_root.is_dir():
+        raise RuntimeError(f"cgroup v2 root is unavailable: {cgroup_root}")
+    if not (cgroup_root / "cgroup.procs").exists():
+        raise RuntimeError(f"cgroup root is missing cgroup.procs: {cgroup_root / 'cgroup.procs'}")
+    if os.geteuid() != 0:
+        raise RuntimeError("tetragon cgroup-rate exec workload requires root to create and join a cgroup")
+
+    command: list[str] = [
+        stress_ng,
+        "--exec",
+        str(max(1, int(rate))),
+        "--exec-method",
+        "execve",
+        "--temp-path",
+        "/tmp",
+        "--timeout",
+        f"{max(1, int(duration_s))}s",
+        "--metrics-brief",
+    ]
+    run_cwd = Path("/tmp")
+    setpriv = which("setpriv")
+    if setpriv is None:
+        raise RuntimeError("setpriv is required for the tetragon cgroup-rate exec workload")
+    command = [
+        setpriv,
+        "--reuid",
+        "65534",
+        "--regid",
+        "65534",
+        "--clear-groups",
+        *command,
+    ]
+
+    cgroup_path = cgroup_root / f"bpf-benchmark-tetragon-exec-{os.getpid()}-{time.monotonic_ns()}"
+    script = """
+set -euo pipefail
+ROOT_CGROUP="/sys/fs/cgroup"
+CGROUP_PATH="$1"
+shift
+mkdir -p "$CGROUP_PATH"
+echo $$ > "$CGROUP_PATH/cgroup.procs"
+set +e
+"$@"
+status=$?
+set -e
+echo $$ > "$ROOT_CGROUP/cgroup.procs"
+for _ in $(seq 1 20); do
+  if [[ ! -s "$CGROUP_PATH/cgroup.procs" ]]; then
+    break
+  fi
+  sleep 0.1
+done
+rmdir "$CGROUP_PATH"
+exit "$status"
+""".strip()
+
+    start = time.monotonic()
+    completed = run_command(
+        ["bash", "-lc", script, "bash", str(cgroup_path), *command],
+        check=False,
+        cwd=run_cwd,
+        timeout=max(float(duration_s) + 30, float(duration_s) * 12),
+    )
+    elapsed = time.monotonic() - start
+    if completed.returncode != 0:
+        details = tail_text(completed.stderr or completed.stdout or "", max_lines=60, max_chars=12000)
+        rendered = shlex.join(command)
+        raise RuntimeError(
+            f"tetragon cgroup-rate exec workload failed ({completed.returncode}) for {rendered}: {details}"
+        )
+
+    combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
+    from runner.libs.workload import _parse_stress_ng_bogo_ops  # noqa: PLC0415
+
+    ops_total_value = _parse_stress_ng_bogo_ops(combined, stressor="exec")
+    if ops_total_value is None:
+        ops_total_value = max(1.0, elapsed * max(1, int(rate)))
+    return WorkloadResult(
+        ops_total=float(ops_total_value),
+        ops_per_sec=(float(ops_total_value) / elapsed) if elapsed > 0 else None,
+        duration_s=elapsed,
+        stdout=tail_text(completed.stdout or "", max_lines=40, max_chars=8000),
+        stderr=tail_text(completed.stderr or "", max_lines=40, max_chars=8000),
+    )
+
+
+def run_workload_with_options(
+    spec: WorkloadSpec,
+    duration_s: int,
+    *,
+    exec_workload_cgroup: bool,
+) -> WorkloadResult:
     if spec.kind == "exec_storm":
+        if exec_workload_cgroup:
+            return run_exec_storm_in_cgroup(duration_s, spec.value or 2)
         return run_exec_storm(duration_s, spec.value or 2)
     if spec.kind == "file_io":
         return run_file_io(duration_s)
@@ -421,6 +526,7 @@ def measure_workload(
     prog_ids: list[int],
     *,
     agent_pid: int | None,
+    exec_workload_cgroup: bool,
 ) -> dict[str, object]:
     before_bpf = sample_bpf_stats(prog_ids)
     cpu_holder: dict[int, dict[str, float]] = {}
@@ -442,7 +548,11 @@ def measure_workload(
     system_thread.start()
     threads.append(system_thread)
 
-    workload_result = run_workload(workload_spec, duration_s)
+    workload_result = run_workload_with_options(
+        workload_spec,
+        duration_s,
+        exec_workload_cgroup=exec_workload_cgroup,
+    )
 
     for thread in threads:
         thread.join()
@@ -509,8 +619,18 @@ def run_phase(
     prog_ids: list[int],
     *,
     agent_pid: int | None,
+    exec_workload_cgroup: bool,
 ) -> dict[str, object]:
-    records = [measure_workload(spec, duration_s, prog_ids, agent_pid=agent_pid) for spec in workloads]
+    records = [
+        measure_workload(
+            spec,
+            duration_s,
+            prog_ids,
+            agent_pid=agent_pid,
+            exec_workload_cgroup=exec_workload_cgroup,
+        )
+        for spec in workloads
+    ]
     return {"workloads": records, "summary": summarize_phase(records)}
 
 
@@ -829,6 +949,7 @@ def daemon_payload(
     limitations: list[str],
 ) -> dict[str, object]:
     preflight: dict[str, object] | None = None
+    exec_workload_cgroup = any(arg == "--cgroup-rate" for arg in tetragon_extra_args)
 
     def setup() -> dict[str, object]:
         tempdir = tempfile.TemporaryDirectory(prefix="tetragon-policy-")
@@ -879,7 +1000,13 @@ def daemon_payload(
         session = lifecycle.runtime
         assert isinstance(session, TetragonAgentSession)
         preflight_prog_ids = sorted(set(lifecycle.target_prog_ids) | set(lifecycle.apply_prog_ids))
-        preflight = run_phase(list(workloads), preflight_duration_s, preflight_prog_ids, agent_pid=session.pid)
+        preflight = run_phase(
+            list(workloads),
+            preflight_duration_s,
+            preflight_prog_ids,
+            agent_pid=session.pid,
+            exec_workload_cgroup=exec_workload_cgroup,
+        )
         preflight["program_activity"] = {
             "target_programs": summarize_program_activity(preflight, lifecycle.target_prog_ids),
             "apply_programs": summarize_program_activity(preflight, lifecycle.apply_prog_ids),
@@ -918,7 +1045,13 @@ def daemon_payload(
         del phase_name
         session = lifecycle.runtime
         assert isinstance(session, TetragonAgentSession)
-        return run_phase(workloads, duration_s, lifecycle.target_prog_ids, agent_pid=session.pid)
+        return run_phase(
+            workloads,
+            duration_s,
+            lifecycle.target_prog_ids,
+            agent_pid=session.pid,
+            exec_workload_cgroup=exec_workload_cgroup,
+        )
 
     def after_baseline(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> dict[str, object] | None:
         del baseline

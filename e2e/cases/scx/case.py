@@ -723,6 +723,9 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
             stop=stop,
             cleanup=cleanup,
             enabled_passes=benchmark_rejit_enabled_passes(),
+            should_run_post_rejit=lambda result: int(
+                (((result.get("counts") or {}).get("applied_sites", 0)) or 0)
+            ) > 0,
         )
         if lifecycle_result.state is None:
             raise RuntimeError("scx lifecycle completed without a live session")

@@ -1,6 +1,8 @@
-# Focused Tetragon exec benchmark for the current e2e follow-up line.
-# This enables the cgroup rate sensor path so execve_rate is expected to
-# participate, and narrows both measurement and apply to the exec programs.
+# Tetragon exec benchmark.
+# `execve_rate` remains a useful scan/apply target when the cgroup-rate
+# sensor is enabled, but the workload's measurable hot path is still
+# `event_execve`, so keep both programs in scope for activity gating and
+# end-to-end comparison.
 
 tetragon_extra_args:
   - --cgroup-rate

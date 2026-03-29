@@ -10,6 +10,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from e2e.cases.tetragon import case
+from runner.libs.workload import WorkloadResult
 
 
 def test_select_tetragon_programs_raises_on_missing_requested_name() -> None:
@@ -46,6 +47,32 @@ def test_workload_specs_from_config_parses_exec_storm() -> None:
     assert workloads[0].name == "stress_exec"
     assert workloads[0].kind == "exec_storm"
     assert workloads[0].value == 3
+
+
+def test_run_workload_with_options_routes_exec_storm_into_cgroup_helper(monkeypatch) -> None:
+    expected = WorkloadResult(
+        ops_total=12.0,
+        ops_per_sec=3.0,
+        duration_s=4.0,
+        stdout="stdout",
+        stderr="stderr",
+    )
+
+    monkeypatch.setattr(case, "run_exec_storm_in_cgroup", lambda duration_s, rate: expected)
+
+    result = case.run_workload_with_options(
+        case.WorkloadSpec(
+            name="stress_exec",
+            kind="exec_storm",
+            metric="bogo-ops/s",
+            description="stress-ng execve workload",
+            value=3,
+        ),
+        5,
+        exec_workload_cgroup=True,
+    )
+
+    assert result == expected
 
 
 def test_build_markdown_keeps_preflight_for_error_payload() -> None:

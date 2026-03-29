@@ -25,6 +25,23 @@ def test_apply_result_treats_missing_inlined_map_entries_as_empty() -> None:
     assert result["kernel_prog_name"] == "balancer_ingress"
 
 
+def test_apply_result_preserves_error_field_when_message_is_missing() -> None:
+    result = rejit._apply_result_from_response(
+        {
+            "status": "error",
+            "error": "BPF_PROG_REJIT: Invalid argument (os error 22)",
+            "summary": {"applied": False, "total_sites_applied": 0},
+            "program": {"prog_name": "event_execve"},
+        },
+        output="{}",
+        exit_code=1,
+    )
+
+    assert result["applied"] is False
+    assert result["error"] == "BPF_PROG_REJIT: Invalid argument (os error 22)"
+    assert result["kernel_prog_name"] == "event_execve"
+
+
 def test_socket_error_result_preserves_supplied_exit_code() -> None:
     result = rejit._socket_error_result(
         123,

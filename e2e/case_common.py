@@ -22,6 +22,8 @@ from runner.libs import (
     write_text,
 )
 
+MAX_PERSISTED_STRING_CHARS = 16_384
+
 
 # ---------------------------------------------------------------------------
 # Path helpers
@@ -292,6 +294,7 @@ def run_case_lifecycle(
     before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
     after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
     before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], str | None] | None = None,
+    should_run_post_rejit: Callable[[Mapping[str, object]], bool] | None = None,
 ) -> LifecycleRunResult:
     """Run the shared E2E lifecycle for a live program session.
 
@@ -385,7 +388,10 @@ def run_case_lifecycle(
                 )
             finally:
                 _stop_daemon_server(daemon_server[0], daemon_server[1], daemon_server[2])
-            if rejit_result.get("applied"):
+            run_post_rejit = bool(rejit_result.get("applied"))
+            if should_run_post_rejit is not None:
+                run_post_rejit = bool(should_run_post_rejit(rejit_result))
+            if run_post_rejit:
                 post_rejit = workload(setup_state, lifecycle_state, "post_rejit")
         return LifecycleRunResult(
             setup_state=setup_state,
@@ -495,5 +501,23 @@ def persist_results(
     *build_markdown* must be a callable ``(payload) -> str`` supplied by
     the individual case, since each case has its own markdown format.
     """
-    write_json(output_json, payload)
+    write_json(output_json, _compact_persisted_value(payload))
     write_text(output_md, build_markdown(payload))  # type: ignore[operator]
+
+
+def _compact_persisted_value(value: object) -> object:
+    if isinstance(value, dict):
+        return {key: _compact_persisted_value(inner) for key, inner in value.items()}
+    if isinstance(value, list):
+        return [_compact_persisted_value(item) for item in value]
+    if isinstance(value, tuple):
+        return [_compact_persisted_value(item) for item in value]
+    if isinstance(value, str) and len(value) > MAX_PERSISTED_STRING_CHARS:
+        edge = max(1, MAX_PERSISTED_STRING_CHARS // 2)
+        omitted = len(value) - (edge * 2)
+        return (
+            value[:edge]
+            + f"\n...[truncated {omitted} chars]...\n"
+            + value[-edge:]
+        )
+    return value

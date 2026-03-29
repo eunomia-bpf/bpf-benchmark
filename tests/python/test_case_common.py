@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -129,3 +130,84 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch) -> None:
         "stop",
         "cleanup",
     ]
+
+
+def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypatch) -> None:
+    monkeypatch.setattr(
+        rejit,
+        "_start_daemon_server",
+        lambda _daemon_binary: (object(), Path("/tmp/rejit.sock"), "/tmp/rejit-dir", None, None),
+    )
+    monkeypatch.setattr(rejit, "_stop_daemon_server", lambda *_args: None)
+    monkeypatch.setattr(
+        rejit,
+        "scan_programs",
+        lambda *_args, **_kwargs: {101: {"enumerate_record": None, "sites": {}, "counts": {}, "error": ""}},
+    )
+    monkeypatch.setattr(
+        rejit,
+        "apply_daemon_rejit",
+        lambda *_args, **_kwargs: {
+            "applied": False,
+            "output": "",
+            "exit_code": 1,
+            "per_program": {},
+            "counts": {
+                "total_sites": 7,
+                "applied_sites": 7,
+            },
+            "error": "prog 101: id changed after struct_ops refresh",
+        },
+    )
+
+    phases: list[str] = []
+
+    result = case_common.run_case_lifecycle(
+        daemon_binary=Path("/tmp/fake-daemon"),
+        setup=lambda: {"runtime": "demo"},
+        start=lambda _setup_state: case_common.CaseLifecycleState(
+            runtime=object(),
+            apply_prog_ids=[101],
+        ),
+        workload=lambda _setup_state, _lifecycle_state, phase: phases.append(f"workload:{phase}") or {"phase": phase},
+        stop=lambda _setup_state, _lifecycle_state: phases.append("stop"),
+        cleanup=lambda _setup_state: phases.append("cleanup"),
+        should_run_post_rejit=lambda rejit_result: int(
+            (((rejit_result.get("counts") or {}).get("applied_sites", 0)) or 0)
+        ) > 0,
+    )
+
+    assert result.post_rejit == {"phase": "post_rejit"}
+    assert phases == [
+        "workload:baseline",
+        "workload:post_rejit",
+        "stop",
+        "cleanup",
+    ]
+
+
+def test_persist_results_truncates_large_nested_strings(tmp_path) -> None:
+    large_output = ("abcdef0123456789" * 2000) + "tail-marker"
+    payload = {
+        "status": "ok",
+        "rejit_result": {
+            "output": large_output,
+        },
+    }
+    output_json = tmp_path / "result.json"
+    output_md = tmp_path / "result.md"
+
+    case_common.persist_results(
+        payload,
+        output_json,
+        output_md,
+        lambda persisted_payload: f"status={persisted_payload['status']}",
+    )
+
+    persisted = json.loads(output_json.read_text())
+    compact_output = persisted["rejit_result"]["output"]
+    assert compact_output.startswith(large_output[:64])
+    assert compact_output.endswith(large_output[-64:])
+    assert "...[truncated " in compact_output
+    assert len(compact_output) < len(large_output)
+    assert output_md.read_text() == "status=ok"

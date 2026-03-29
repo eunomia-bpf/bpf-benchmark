@@ -84,6 +84,7 @@ class ToolSpec:
     workload_kind: str
     spawn_timeout_s: int
     tool_args: tuple[str, ...]
+    rejit_passes: tuple[str, ...]
 
 
 @dataclass(slots=True)
@@ -114,6 +115,7 @@ def load_config(path: Path) -> SuiteConfig:
             workload_kind=entry["workload_kind"],
             spawn_timeout_s=int(entry.get("spawn_timeout_s", 20)),
             tool_args=tuple(str(arg) for arg in entry.get("tool_args", [])),
+            rejit_passes=tuple(str(name) for name in entry.get("rejit_passes", [])),
         )
         for entry in raw.get("tools", [])
     )
@@ -445,6 +447,7 @@ def run_phase(
     baseline_status = "error"
     baseline_reason = ""
     try:
+        enabled_passes = list(spec.rejit_passes) if spec.rejit_passes else benchmark_rejit_enabled_passes()
         lifecycle_result = run_case_lifecycle(
             daemon_binary=daemon_binary,
             setup=setup,
@@ -452,7 +455,7 @@ def run_phase(
             workload=workload,
             stop=stop,
             cleanup=cleanup,
-            enabled_passes=benchmark_rejit_enabled_passes(),
+            enabled_passes=enabled_passes,
         )
         if lifecycle_result.baseline is not None:
             baseline_status = str(lifecycle_result.baseline.get("status") or "error")
