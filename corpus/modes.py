@@ -7,7 +7,6 @@ import os
 import shutil
 import subprocess
 import sys
-import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -48,7 +47,6 @@ from runner.libs.corpus import (
     add_daemon_argument,
     add_timeout_argument,
     attach_trigger_unsupported_reason,
-    build_empty_object_record,
     build_test_run_batch_job,
     find_program_in_object,
     format_ns,
@@ -82,7 +80,6 @@ DEFAULT_CORPUS_BUILD_REPORT = latest_output_path(ROOT_DIR / "corpus" / "results"
 DEFAULT_VNG_MACHINE = resolve_machine(target=DEFAULT_VM_TARGET, action="vm-corpus")
 DEFAULT_VNG = str(Path(DEFAULT_VNG_MACHINE.executable))
 DEFAULT_TIMEOUT_SECONDS = 240
-GUEST_BATCH_TARGETS_PER_CHUNK = 1
 
 
 def snapshot_guest_input(source: Path, snapshot_dir: Path) -> Path:
@@ -260,6 +257,40 @@ def run_guest_info_mode() -> int:
     return 0
 
 
+def _guest_batch_failure_headline(
+    *,
+    batch_result: dict[str, Any],
+    built_records: list[dict[str, Any]],
+) -> str:
+    batch_error = str(batch_result.get("error") or "").strip()
+    if batch_error:
+        return batch_error
+
+    for bundle in built_records:
+        object_record = bundle.get("object_record")
+        if isinstance(object_record, dict):
+            object_name = str(object_record.get("canonical_object_name") or "unknown-object")
+            object_error = str(object_record.get("error") or "").strip()
+            if object_error:
+                return f"{object_name}: {object_error}"
+            if str(object_record.get("status") or "").strip() == "error":
+                return f"{object_name}: object status error"
+
+        program_records = bundle.get("program_records")
+        if not isinstance(program_records, list):
+            continue
+        for program_record in program_records:
+            if not isinstance(program_record, dict):
+                continue
+            program_name = str(program_record.get("canonical_name") or "unknown-program")
+            for field_name in ("baseline_compile", "rejit_compile", "baseline_run", "rejit_run"):
+                invocation = program_record.get(field_name)
+                if isinstance(invocation, dict) and not invocation.get("ok", False):
+                    return f"{program_name} {field_name}: {summarize_failure_reason(invocation)}"
+
+    return f"batch runner exited with code {batch_result.get('returncode')}"
+
+
 def run_guest_batch_mode(args: argparse.Namespace) -> int:
     target_path = Path(args.guest_target_json).resolve()
     objects = load_guest_batch_targets(target_path)
@@ -276,60 +307,50 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
     if guest_result_path is not None:
         write_guest_batch_records(guest_result_path, records)
 
-    for chunk_start in range(0, len(objects), GUEST_BATCH_TARGETS_PER_CHUNK):
-        object_chunk = objects[chunk_start : chunk_start + GUEST_BATCH_TARGETS_PER_CHUNK]
-        try:
-            # Keep the guest daemon lifecycle scoped to the current chunk.
-            # Reusing one daemon across hundreds of corpus objects makes the
-            # batch sensitive to cross-object state accumulation and leaves the
-            # mounted workspace binaries hot-swappable under concurrent builds.
-            object_records, program_records, _batch_result = run_objects_locally_batch(
-                objects=object_chunk,
-                runner=runner,
-                daemon=daemon,
-                repeat=args.repeat,
-                warmup_repeat=warmup_repeat,
-                timeout_seconds=args.timeout,
-                execution_mode="vm",
-                btf_custom_path=btf_custom_path,
-                benchmark_config=args.benchmark_config,
-            )
-            built_records = []
-            for obj in object_chunk:
-                object_record = next(
-                    item for item in object_records if item["canonical_object_name"] == obj.canonical_name
-                )
-                object_program_records = [
-                    item for item in program_records if item["canonical_object_name"] == obj.canonical_name
-                ]
-                built_records.append(
-                    {
-                        "object_record": object_record,
-                        "program_records": object_program_records,
-                    }
-                )
-        except Exception as exc:
-            print(traceback.format_exc(), file=sys.stderr, flush=True)
-            built_records = []
-            for obj in object_chunk:
-                built_records.append(
-                    {
-                        "object_record": build_empty_object_record(
-                            obj,
-                            "vm",
-                            error=f"guest batch exception: {exc}",
-                        ),
-                        "program_records": [],
-                    }
-                )
+    object_records, program_records, batch_result = run_objects_locally_batch(
+        objects=objects,
+        runner=runner,
+        daemon=daemon,
+        repeat=args.repeat,
+        warmup_repeat=warmup_repeat,
+        timeout_seconds=args.timeout,
+        execution_mode="vm",
+        btf_custom_path=btf_custom_path,
+        benchmark_config=args.benchmark_config,
+    )
+    built_records = []
+    for obj in objects:
+        object_record = next(
+            item for item in object_records if item["canonical_object_name"] == obj.canonical_name
+        )
+        object_program_records = [
+            item for item in program_records if item["canonical_object_name"] == obj.canonical_name
+        ]
+        built_records.append(
+            {
+                "object_record": object_record,
+                "program_records": object_program_records,
+            }
+        )
 
-        for index, record in enumerate(built_records, start=chunk_start + 1):
-            records.append(sanitize_guest_batch_record(record))
-            if guest_result_path is not None:
-                write_guest_batch_records(guest_result_path, records)
-                emit_guest_event("program_progress", index=index, total=len(objects))
-            else:
-                emit_guest_event("program_record", index=index, total=len(objects), record=record)
+    for index, record in enumerate(built_records, start=1):
+        records.append(sanitize_guest_batch_record(record))
+        if guest_result_path is not None:
+            write_guest_batch_records(guest_result_path, records)
+            emit_guest_event("program_progress", index=index, total=len(objects))
+        else:
+            emit_guest_event("program_record", index=index, total=len(objects), record=record)
+
+    if not batch_result["ok"]:
+        raise SystemExit(
+            "guest batch failed: "
+            + _guest_batch_failure_headline(batch_result=batch_result, built_records=built_records)
+        )
+    if batch_result["completed_with_job_errors"]:
+        raise SystemExit(
+            "guest batch completed with job errors: "
+            + _guest_batch_failure_headline(batch_result=batch_result, built_records=built_records)
+        )
     return 0
 
 def build_markdown_v2(data: dict[str, Any]) -> str:

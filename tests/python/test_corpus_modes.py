@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 import sys
 
+import pytest
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -24,6 +26,64 @@ def _manifest_entry_by_source(source: str) -> dict:
 def _resolve_object(source: str) -> modes.ResolvedObject:
     entry = _manifest_entry_by_source(source)
     return modes.resolve_manifest_object(entry, index=1)
+
+
+def _synthetic_guest_batch_object(name: str) -> modes.ResolvedObject:
+    program = modes.ResolvedProgram(
+        source=f"corpus/build/demo/{name}.bpf.o",
+        object_path=f"corpus/build/demo/{name}.bpf.o",
+        object_abs_path=f"/tmp/{name}.bpf.o",
+        repo="demo",
+        source_name="demo",
+        family="demo",
+        category="test",
+        level="unit",
+        description=None,
+        hypothesis=None,
+        tags=(),
+        object_relpath=f"{name}.bpf.o",
+        canonical_object_name=f"demo:{name}.bpf.o",
+        object_basename=f"{name}.bpf.o",
+        short_name=f"demo:{name}.bpf.o:{name}_prog",
+        program_name=f"{name}_prog",
+        canonical_name=f"demo:{name}.bpf.o:{name}_prog",
+        fixture_path=None,
+        test_method="test_run",
+        prog_type_name="xdp",
+        section_name="xdp",
+        io_mode="context",
+        raw_packet=False,
+        input_size=0,
+        memory_path=None,
+        trigger=None,
+        trigger_timeout_seconds=None,
+        compile_loader=None,
+        attach_group=None,
+        rejit_enabled=True,
+    )
+    return modes.ResolvedObject(
+        source=f"corpus/build/demo/{name}.bpf.o",
+        object_path=f"corpus/build/demo/{name}.bpf.o",
+        object_abs_path=f"/tmp/{name}.bpf.o",
+        repo="demo",
+        source_name="demo",
+        family="demo",
+        category="test",
+        level="unit",
+        description=None,
+        hypothesis=None,
+        tags=(),
+        object_relpath=f"{name}.bpf.o",
+        canonical_name=f"demo:{name}.bpf.o",
+        object_basename=f"{name}.bpf.o",
+        short_name=f"demo:{name}.bpf.o",
+        fixture_path=None,
+        compile_loader=None,
+        shared_state_policy="reset_maps",
+        allow_object_only_result=False,
+        test_method="test_run",
+        programs=(program,),
+    )
 
 
 def _synthetic_attach_program(
@@ -415,3 +475,155 @@ def test_build_object_batch_plan_v2_uses_program_scoped_rejit_passes() -> None:
     assert "prepared_ref" not in kprobe_compile
     assert kprobe_run["enabled_passes"] == ["const_prop"]
     assert kprobe_run["prepared_ref"] == kprobe_compile["prepared_key"]
+
+
+def test_run_guest_batch_mode_reuses_single_daemon_session_for_all_objects(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    obj_alpha = _synthetic_guest_batch_object("alpha")
+    obj_beta = _synthetic_guest_batch_object("beta")
+    batch_calls: list[dict[str, object]] = []
+    persisted_records: list[list[str]] = []
+    emitted_events: list[tuple[str, dict[str, object]]] = []
+
+    def fake_run_objects_locally_batch(**kwargs):
+        batch_calls.append(kwargs)
+        return (
+            [
+                {"canonical_object_name": obj_alpha.canonical_name, "status": "ok", "error": None},
+                {"canonical_object_name": obj_beta.canonical_name, "status": "ok", "error": None},
+            ],
+            [
+                {
+                    "canonical_object_name": obj_alpha.canonical_name,
+                    "canonical_name": obj_alpha.programs[0].canonical_name,
+                    "baseline_compile": {"ok": True},
+                    "rejit_compile": {"ok": True},
+                    "baseline_run": {"ok": True},
+                    "rejit_run": {"ok": True},
+                },
+                {
+                    "canonical_object_name": obj_beta.canonical_name,
+                    "canonical_name": obj_beta.programs[0].canonical_name,
+                    "baseline_compile": {"ok": True},
+                    "rejit_compile": {"ok": True},
+                    "baseline_run": {"ok": True},
+                    "rejit_run": {"ok": True},
+                },
+            ],
+            {
+                "ok": True,
+                "completed_with_job_errors": False,
+                "returncode": 0,
+                "timed_out": False,
+                "duration_seconds": 1.0,
+                "stdout": "",
+                "stderr": "",
+                "error": None,
+                "result": {"jobs": []},
+                "progress": None,
+            },
+        )
+
+    monkeypatch.setattr(modes, "guest_info_payload", lambda: {"kernel_release": "test-kernel"})
+    monkeypatch.setattr(modes, "load_guest_batch_targets", lambda _path: [obj_alpha, obj_beta])
+    monkeypatch.setattr(modes, "run_objects_locally_batch", fake_run_objects_locally_batch)
+    monkeypatch.setattr(
+        modes,
+        "write_guest_batch_records",
+        lambda _path, records: persisted_records.append(
+            [item["object_record"]["canonical_object_name"] for item in records]
+        ),
+    )
+    monkeypatch.setattr(
+        modes,
+        "emit_guest_event",
+        lambda kind, **payload: emitted_events.append((kind, payload)),
+    )
+
+    args = argparse.Namespace(
+        guest_target_json=str(tmp_path / "targets.json"),
+        runner=str(tmp_path / "runner"),
+        daemon=str(tmp_path / "daemon"),
+        btf_custom_path=str(tmp_path / "btf"),
+        guest_result_json=str(tmp_path / "guest-result.json"),
+        repeat=3,
+        timeout=45,
+        benchmark_config={},
+    )
+
+    assert modes.run_guest_batch_mode(args) == 0
+    assert len(batch_calls) == 1
+    assert batch_calls[0]["objects"] == [obj_alpha, obj_beta]
+    assert persisted_records == [
+        [],
+        [obj_alpha.canonical_name],
+        [obj_alpha.canonical_name, obj_beta.canonical_name],
+    ]
+    assert [kind for kind, _payload in emitted_events] == [
+        "guest_info",
+        "program_progress",
+        "program_progress",
+    ]
+
+
+def test_run_guest_batch_mode_exits_on_batch_job_errors(monkeypatch, tmp_path: Path) -> None:
+    obj_alpha = _synthetic_guest_batch_object("alpha")
+    persisted_records: list[list[str]] = []
+
+    monkeypatch.setattr(modes, "guest_info_payload", lambda: {"kernel_release": "test-kernel"})
+    monkeypatch.setattr(modes, "load_guest_batch_targets", lambda _path: [obj_alpha])
+    monkeypatch.setattr(
+        modes,
+        "run_objects_locally_batch",
+        lambda **_kwargs: (
+            [{"canonical_object_name": obj_alpha.canonical_name, "status": "error", "error": "daemon serve rc=42"}],
+            [
+                {
+                    "canonical_object_name": obj_alpha.canonical_name,
+                    "canonical_name": obj_alpha.programs[0].canonical_name,
+                    "baseline_compile": {"ok": True},
+                    "rejit_compile": {"ok": False, "error": "daemon serve rc=42"},
+                }
+            ],
+            {
+                "ok": True,
+                "completed_with_job_errors": True,
+                "returncode": 2,
+                "timed_out": False,
+                "duration_seconds": 1.0,
+                "stdout": "",
+                "stderr": "",
+                "error": None,
+                "result": {"jobs": []},
+                "progress": None,
+            },
+        ),
+    )
+    monkeypatch.setattr(
+        modes,
+        "write_guest_batch_records",
+        lambda _path, records: persisted_records.append(
+            [item["object_record"]["canonical_object_name"] for item in records]
+        ),
+    )
+    monkeypatch.setattr(modes, "emit_guest_event", lambda *_args, **_kwargs: None)
+
+    args = argparse.Namespace(
+        guest_target_json=str(tmp_path / "targets.json"),
+        runner=str(tmp_path / "runner"),
+        daemon=str(tmp_path / "daemon"),
+        btf_custom_path=str(tmp_path / "btf"),
+        guest_result_json=str(tmp_path / "guest-result.json"),
+        repeat=3,
+        timeout=45,
+        benchmark_config={},
+    )
+
+    with pytest.raises(SystemExit, match="guest batch completed with job errors: demo:alpha.bpf.o: daemon serve rc=42"):
+        modes.run_guest_batch_mode(args)
+    assert persisted_records == [
+        [],
+        [obj_alpha.canonical_name],
+    ]

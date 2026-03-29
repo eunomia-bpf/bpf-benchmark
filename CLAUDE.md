@@ -10,6 +10,8 @@ Repository-level constraints for coding agents working in this tree.
 - Do not run kernel-related tests, load modules, load BPF programs, or use `bpftool` against the host kernel.
 - Debugging, static verification, and correctness-focused VM test runs may use multiple agents and multiple VMs in parallel when they do not share mutable build state.
 - Performance benchmarks (`vm-micro`, `vm-corpus`, `vm-e2e`, or any timing/perf-counter run) must not run in parallel with other performance benchmarks.
+- **Daemon lifecycle**: The daemon (`bpfrejit-daemon serve`) must be started once per benchmark session, not per-object or per-program. If the daemon crashes, fail the entire run — do not silently restart.
+- **Corpus bulk prepare**: Corpus benchmarks should load all objects into the kernel at once (or in large batches), then optimize all, then measure all — not per-object prepare/cleanup cycles.
 
 ## Test Ownership
 

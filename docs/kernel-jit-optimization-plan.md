@@ -21,6 +21,8 @@
 > - **⚠️ 禁止 sudo**：VM 内已是 root（vng），主机不跑 BPF。不需要 sudo。
 > - **⚠️ E2E 禁止 manual fallback**：E2E 测试必须用真实应用 binary 加载 BPF 程序，禁止手动加载 .bpf.o。如果应用不兼容当前 kernel，标记 SKIP 而不是 fallback。论文的 transparency 声明依赖此约束。
 > - **⚠️ VM 测试每个 target 一个 agent**：vm-test、vm-micro、vm-corpus、vm-e2e 分别用不同 agent 串行跑。不要一个 agent 跑所有。
+> - **⚠️ Daemon 必须 session 级启动一次**：corpus/micro/e2e 的 daemon（serve 模式）在 benchmark session 开始时启动一次，整个 run 结束后关闭。禁止 per-object 或 per-program 重启 daemon。如果 daemon crash，报错退出，不自动重启掩盖问题。
+> - **⚠️ Corpus prepared_kernel_state 应一次性全部加载**：corpus benchmark 应该一次性 load 所有 objects 到内核（~2000 programs / ~50MB 内存），然后统一 daemon optimize，最后逐 program 测量。禁止 per-object prepare/cleanup 循环（浪费大量 wall-clock）。如果内存不够可以分批（batch of 50-100），但不能逐个。
 > **v1 权威数据**（#256 rerun，native-level rewrite 架构）：micro **1.057x** / applied-only **1.193x**；corpus **0.983x**；Tracee **+8.1%**；Tetragon **+20.3%/+32.2%**；Katran BPF **1.108-1.168x**；gap **0.581x**。vm-selftest **35/35**。v1 代码保存在 `v1-native-rewrite` 分支。
 
 ---
