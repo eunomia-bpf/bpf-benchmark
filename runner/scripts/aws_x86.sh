@@ -33,6 +33,7 @@ KERNEL_RELEASE_FILE="$CACHE_DIR/kernel-release"
 
 AWS_X86_NAME_TAG="${AWS_X86_NAME_TAG:-bpf-benchmark-x86}"
 AWS_X86_INSTANCE_TYPE="${AWS_X86_INSTANCE_TYPE:-t3.micro}"
+AWS_X86_ROOT_VOLUME_SIZE_GB="${AWS_X86_ROOT_VOLUME_SIZE_GB:-32}"
 AWS_X86_PROFILE="${AWS_X86_PROFILE:-codex-ec2}"
 AWS_X86_REMOTE_USER="${AWS_X86_REMOTE_USER:-ec2-user}"
 AWS_X86_REMOTE_STAGE_DIR="${AWS_X86_REMOTE_STAGE_DIR:-/home/${AWS_X86_REMOTE_USER}/bpf-benchmark-x86}"
@@ -68,7 +69,7 @@ FULL_LIFECYCLE_LAUNCH_OUTPUT=""
 FULL_LIFECYCLE_CLEANUP_RUNNING=0
 FULL_LIFECYCLE_CLEANUP_TOKEN=""
 FULL_LIFECYCLE_WATCHER_PID=""
-AWS_X86_KERNEL_CACHE_VERSION=2
+AWS_X86_KERNEL_CACHE_VERSION=3
 
 log() {
     printf '[aws-x86] %s\n' "$*" >&2
@@ -105,6 +106,7 @@ Optional env:
   AWS_REGION / AWS_DEFAULT_REGION
                                override region instead of profile config
   AWS_X86_INSTANCE_TYPE        default: t3.micro
+  AWS_X86_ROOT_VOLUME_SIZE_GB  default: 32
   AWS_X86_NAME_TAG             default: bpf-benchmark-x86
   AWS_X86_AMI_ID               override the AL2023 x86_64 AMI
   AWS_X86_BENCH_ITERATIONS     default: 1
@@ -323,6 +325,19 @@ describe_instance() {
         --output text 2>/dev/null || true
 }
 
+resolve_root_device_name() {
+    local region="$1"
+    local ami_id="$2"
+    local root_device_name
+    root_device_name="$(aws_cmd "$region" ec2 describe-images \
+        --image-ids "$ami_id" \
+        --query 'Images[0].RootDeviceName' \
+        --output text)"
+    [[ -n "$root_device_name" && "$root_device_name" != "None" ]] \
+        || die "AMI ${ami_id} has no root device name"
+    printf '%s\n' "$root_device_name"
+}
+
 launch_instance() {
     ensure_dirs
     load_state
@@ -333,11 +348,13 @@ launch_instance() {
     require_env_var AWS_X86_SECURITY_GROUP_ID
     require_env_var AWS_X86_SUBNET_ID
 
-    local region key_path key_name instance_id="" instance_state="" instance_ip="" ami_id
+    local region key_path key_name instance_id="" instance_state="" instance_ip="" ami_id root_device_name
     region="$(resolve_region)"
     key_path="${AWS_X86_KEY_PATH}"
     key_name="${AWS_X86_KEY_NAME}"
     [[ -f "$key_path" ]] || die "SSH key does not exist: $key_path"
+    [[ "$AWS_X86_ROOT_VOLUME_SIZE_GB" =~ ^[1-9][0-9]*$ ]] \
+        || die "AWS_X86_ROOT_VOLUME_SIZE_GB must be a positive integer"
 
     if [[ -n "${STATE_INSTANCE_ID:-}" ]]; then
         read -r instance_id instance_state instance_ip <<<"$(describe_instance "$region" "$STATE_INSTANCE_ID")"
@@ -358,12 +375,14 @@ launch_instance() {
                 --query 'Parameter.Value' \
                 --output text)"
         fi
+        root_device_name="$(resolve_root_device_name "$region" "$ami_id")"
 
-        log "Launching ${AWS_X86_INSTANCE_TYPE} in ${region} using AMI ${ami_id}"
+        log "Launching ${AWS_X86_INSTANCE_TYPE} in ${region} using AMI ${ami_id} with ${AWS_X86_ROOT_VOLUME_SIZE_GB}GB root volume"
         instance_id="$(aws_cmd "$region" ec2 run-instances \
             --image-id "$ami_id" \
             --instance-type "$AWS_X86_INSTANCE_TYPE" \
             --key-name "$key_name" \
+            --block-device-mappings "DeviceName=${root_device_name},Ebs={DeleteOnTermination=true,VolumeSize=${AWS_X86_ROOT_VOLUME_SIZE_GB},VolumeType=gp3}" \
             --security-group-ids "$AWS_X86_SECURITY_GROUP_ID" \
             --subnet-id "$AWS_X86_SUBNET_ID" \
             --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=${AWS_X86_NAME_TAG}},{Key=Project,Value=bpf-benchmark},{Key=Role,Value=x86-baremetal}]" \
@@ -394,11 +413,20 @@ require_kernel_config_value() {
         || die "kernel config ${key} must be ${expected} in ${config_file}"
 }
 
-require_kernel_builtin_module() {
-    local modules_builtin="$1"
+require_kernel_module_artifact() {
+    local modules_root="$1"
     local module_path="$2"
-    rg -qx "$module_path" "$modules_builtin" >/dev/null \
-        || die "kernel builtin module missing from ${modules_builtin}: ${module_path}"
+    local candidate
+    for candidate in \
+        "$modules_root/$module_path" \
+        "$modules_root/$module_path.zst" \
+        "$modules_root/$module_path.xz" \
+        "$modules_root/$module_path.gz"; do
+        if [[ -f "$candidate" ]]; then
+            return
+        fi
+    done
+    die "kernel module artifact missing from ${modules_root}: ${module_path}{,.zst,.xz,.gz}"
 }
 
 x86_kernel_manifest_path() {
@@ -421,10 +449,13 @@ write_x86_kernel_manifest() {
     cat >"$manifest" <<EOF
 AWS_X86_KERNEL_CACHE_VERSION=${AWS_X86_KERNEL_CACHE_VERSION}
 AWS_X86_CONFIG_NET_VENDOR_AMAZON=y
-AWS_X86_CONFIG_ENA_ETHERNET=y
-AWS_X86_CONFIG_BLK_DEV_NVME=y
-AWS_X86_CONFIG_XFS_FS=y
-AWS_X86_CONFIG_EXT4_FS=y
+AWS_X86_CONFIG_ENA_ETHERNET=m
+AWS_X86_CONFIG_NVME_CORE=m
+AWS_X86_CONFIG_BLK_DEV_NVME=m
+AWS_X86_CONFIG_XFS_FS=m
+AWS_X86_CONFIG_EXT4_FS=m
+AWS_X86_CONFIG_VIRTIO_NET=m
+AWS_X86_CONFIG_VIRTIO_BLK=m
 EOF
 }
 
@@ -448,18 +479,24 @@ _prepare_x86_aws_config_locked() {
         --set-str SYSTEM_TRUSTED_KEYS "" \
         --set-str SYSTEM_REVOCATION_KEYS "" \
         --enable NET_VENDOR_AMAZON \
-        --set-val ENA_ETHERNET y \
-        --set-val BLK_DEV_NVME y \
-        --set-val XFS_FS y \
-        --enable EXT4_FS
+        --module ENA_ETHERNET \
+        --module NVME_CORE \
+        --module BLK_DEV_NVME \
+        --module XFS_FS \
+        --module EXT4_FS \
+        --module VIRTIO_NET \
+        --module VIRTIO_BLK
     rm -f "$KERNEL_CONFIG_STAMP_FILE"
     make -C "$KERNEL_DIR" olddefconfig >/dev/null
 
     require_kernel_config_value "$config_file" "CONFIG_NET_VENDOR_AMAZON" "y"
-    require_kernel_config_value "$config_file" "CONFIG_ENA_ETHERNET" "y"
-    require_kernel_config_value "$config_file" "CONFIG_BLK_DEV_NVME" "y"
-    require_kernel_config_value "$config_file" "CONFIG_XFS_FS" "y"
-    require_kernel_config_value "$config_file" "CONFIG_EXT4_FS" "y"
+    require_kernel_config_value "$config_file" "CONFIG_ENA_ETHERNET" "m"
+    require_kernel_config_value "$config_file" "CONFIG_NVME_CORE" "m"
+    require_kernel_config_value "$config_file" "CONFIG_BLK_DEV_NVME" "m"
+    require_kernel_config_value "$config_file" "CONFIG_XFS_FS" "m"
+    require_kernel_config_value "$config_file" "CONFIG_EXT4_FS" "m"
+    require_kernel_config_value "$config_file" "CONFIG_VIRTIO_NET" "m"
+    require_kernel_config_value "$config_file" "CONFIG_VIRTIO_BLK" "m"
 }
 
 prepare_x86_aws_config() {
@@ -509,18 +546,20 @@ _build_kernel_artifacts_locked() {
     [[ -f "$version_file" ]] || die "kernel release file missing: $version_file"
     local kernel_release
     kernel_release="$(<"$version_file")"
-    local modules_builtin="$KERNEL_DIR/modules.builtin"
-    [[ -f "$modules_builtin" ]] || die "kernel modules.builtin missing: ${modules_builtin}"
-    require_kernel_builtin_module "$modules_builtin" "kernel/drivers/net/ethernet/amazon/ena/ena.ko"
-    require_kernel_builtin_module "$modules_builtin" "kernel/drivers/nvme/host/nvme.ko"
-    require_kernel_builtin_module "$modules_builtin" "kernel/fs/xfs/xfs.ko"
-
     mkdir -p "$ARTIFACT_DIR"
     rm -rf "$MODULES_STAGE_DIR"
     mkdir -p "$MODULES_STAGE_DIR"
     make -C "$KERNEL_DIR" INSTALL_MOD_PATH="$MODULES_STAGE_DIR" modules_install >/dev/null
     rm -f "$MODULES_STAGE_DIR/lib/modules/$kernel_release/build" \
           "$MODULES_STAGE_DIR/lib/modules/$kernel_release/source"
+    local modules_root="$MODULES_STAGE_DIR/lib/modules/$kernel_release"
+    require_kernel_module_artifact "$modules_root" "kernel/drivers/net/ethernet/amazon/ena/ena.ko"
+    require_kernel_module_artifact "$modules_root" "kernel/drivers/nvme/host/nvme-core.ko"
+    require_kernel_module_artifact "$modules_root" "kernel/drivers/nvme/host/nvme.ko"
+    require_kernel_module_artifact "$modules_root" "kernel/fs/ext4/ext4.ko"
+    require_kernel_module_artifact "$modules_root" "kernel/fs/xfs/xfs.ko"
+    require_kernel_module_artifact "$modules_root" "kernel/drivers/net/virtio_net.ko"
+    require_kernel_module_artifact "$modules_root" "kernel/drivers/block/virtio_blk.ko"
 
     cp "$X86_VMLINUX" "$ARTIFACT_DIR/vmlinux-$kernel_release"
     cp "$X86_BZIMAGE" "$ARTIFACT_DIR/bzImage-$kernel_release"
