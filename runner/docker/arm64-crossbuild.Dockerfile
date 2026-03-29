@@ -2,6 +2,7 @@ FROM amazonlinux:2023
 
 RUN dnf install -y --setopt=install_weak_deps=False \
         cargo \
+        clang \
         cmake \
         elfutils-libelf-devel \
         file \

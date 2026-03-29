@@ -58,6 +58,24 @@ export AWS_ARM64_BENCH_ITERATIONS AWS_ARM64_BENCH_WARMUPS AWS_ARM64_BENCH_REPEAT
 export CROSS_COMPILE_ARM64 ARM64_BUILD_DIR ARM64_WORKTREE_DIR
 export ARM64_DOCKER_PLATFORM ARM64_CROSSBUILD_OUTPUT_DIR ARM64_CROSSBUILD_JOBS
 
+AWS_X86_SCRIPT            := $(ROOT_DIR)/runner/scripts/aws_x86.sh
+AWS_X86_CACHE_DIR         ?= $(ROOT_DIR)/.cache/aws-x86
+AWS_X86_NAME_TAG          ?= bpf-benchmark-x86
+AWS_X86_INSTANCE_TYPE     ?= t3.micro
+AWS_X86_REMOTE_USER       ?= ec2-user
+AWS_X86_REMOTE_STAGE_DIR  ?= /home/$(AWS_X86_REMOTE_USER)/bpf-benchmark-x86
+AWS_X86_REMOTE_KERNEL_STAGE_DIR ?= /home/$(AWS_X86_REMOTE_USER)/codex-kernel-stage-x86
+AWS_X86_AMI_PARAM         ?= /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+AWS_X86_BENCH_ITERATIONS  ?= 1
+AWS_X86_BENCH_WARMUPS     ?= 0
+AWS_X86_BENCH_REPEAT      ?= 10
+
+export AWS_X86_CACHE_DIR AWS_X86_NAME_TAG AWS_X86_INSTANCE_TYPE
+export AWS_X86_REMOTE_USER AWS_X86_REMOTE_STAGE_DIR AWS_X86_REMOTE_KERNEL_STAGE_DIR
+export AWS_X86_KEY_NAME AWS_X86_KEY_PATH AWS_X86_SECURITY_GROUP_ID AWS_X86_SUBNET_ID
+export AWS_X86_AMI_PARAM AWS_X86_AMI_ID
+export AWS_X86_BENCH_ITERATIONS AWS_X86_BENCH_WARMUPS AWS_X86_BENCH_REPEAT
+
 # Tunables
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
 DAEMON  ?= daemon/target/release/bpfrejit-daemon
@@ -139,6 +157,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 	arm64-worktree arm64-rootfs arm64-crossbuild-image cross-arm64 selftest-arm64 \
 	vm-arm64-smoke vm-arm64-selftest \
 	aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
+	aws-x86-launch aws-x86-setup aws-x86-benchmark aws-x86-terminate aws-x86-full aws-x86 \
 	help clean
 
 # ── Help ───────────────────────────────────────────────────────────────────────
@@ -149,6 +168,7 @@ help:
 	@echo "VM x86: vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
+	@echo "        aws-x86-launch aws-x86-setup aws-x86-benchmark aws-x86-terminate aws-x86-full aws-x86"
 	@echo "Params: ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) PROFILE=$(PROFILE) BENCH=\"...\" TARGET=\"x86|arm64|aws|...\" E2E_CASE=\"all|tracee|...\""
 
 # ── Build ──────────────────────────────────────────────────────────────────────
@@ -424,12 +444,12 @@ cross-arm64: arm64-crossbuild-image
 	file "$(ARM64_CROSS_DAEMON_REAL)" | grep -F "ARM aarch64"
 
 selftest-arm64: arm64-crossbuild-image
-	mkdir -p "$(KERNEL_TEST_DIR)/build-arm64/lib"
 	"$(DOCKER)" run --rm --platform "$(ARM64_DOCKER_PLATFORM)" --user "$$(id -u):$$(id -g)" \
 		-v "$(ROOT_DIR)":/workspace -w /workspace \
-		-e ARM64_SELFTEST_GUEST_ROOT="$(ARM64_SELFTEST_GUEST_ROOT)" \
+		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
 		"$(ARM64_CROSSBUILD_IMAGE)" /workspace/runner/scripts/cross-arm64-selftest.sh
-	file "$(KERNEL_TEST_DIR)/build-arm64/test_recompile" | grep -F "ELF 64-bit LSB executable, ARM aarch64"
+	file "$(ROOT_DIR)/tests/unittest/build-arm64/rejit_kinsn" | grep -F "ELF 64-bit LSB executable, ARM aarch64"
+	file "$(ROOT_DIR)/tests/negative/build-arm64/adversarial_rejit" | grep -F "ELF 64-bit LSB executable, ARM aarch64"
 
 vm-arm64-smoke: $(ARM64_IMAGE) $(ARM64_ROOTFS_DIR)/bin/sh
 	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/runner/scripts/arm64_qemu_smoke.py" \
@@ -439,12 +459,7 @@ vm-arm64-selftest: $(ARM64_IMAGE) $(ARM64_ROOTFS_DIR)/bin/sh selftest-arm64
 	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/runner/scripts/arm64_qemu_smoke.py" \
 		--qemu "$(ARM64_QEMU)" --kernel "$(ARM64_IMAGE)" --rootfs "$(ARM64_ROOTFS_DIR)" \
 		--host-share "$(ROOT_DIR)" --guest-mount "$(ARM64_REPO_GUEST_MOUNT)" \
-		--command 'mount -t tmpfs tmpfs /tmp' \
-		--command 'mkdir -p /tmp/selftest /tmp/selftest/lib' \
-		--command 'cp "$(ARM64_REPO_GUEST_MOUNT)/tests/kernel/build-arm64/test_recompile" /tmp/selftest/' \
-		--command 'cp -a "$(ARM64_REPO_GUEST_MOUNT)/tests/kernel/build-arm64/lib/." /tmp/selftest/lib/' \
-		--command 'chmod +x /tmp/selftest/test_recompile' \
-		--command 'LD_LIBRARY_PATH=/tmp/selftest/lib /tmp/selftest/test_recompile'
+		--command 'LD_LIBRARY_PATH="$(ARM64_REPO_GUEST_MOUNT)/tests/unittest/build-arm64/lib" "$(ARM64_REPO_GUEST_MOUNT)/runner/scripts/vm-selftest.sh" "$(ARM64_REPO_GUEST_MOUNT)" "$(ARM64_REPO_GUEST_MOUNT)/tests/unittest" "$(ARM64_REPO_GUEST_MOUNT)/module/arm64" "$(ARM64_REPO_GUEST_MOUNT)/tests/negative" "$(FUZZ_ROUNDS)" "$(ARM64_REPO_GUEST_MOUNT)/tests/unittest/build-arm64" "$(ARM64_REPO_GUEST_MOUNT)/tests/negative/build-arm64"'
 
 # ── AWS ARM64 ─────────────────────────────────────────────────────────────────
 aws-arm64-launch:
@@ -460,6 +475,22 @@ aws-arm64-terminate:
 	"$(AWS_ARM64_SCRIPT)" terminate "$(INSTANCE_ID)"
 aws-arm64: cross-arm64
 	"$(AWS_ARM64_SCRIPT)" full
+
+# ── AWS x86 ───────────────────────────────────────────────────────────────────
+aws-x86-launch:
+	"$(AWS_X86_SCRIPT)" launch
+aws-x86-setup:
+	@test -n "$(INSTANCE_IP)" || (echo "ERROR: INSTANCE_IP= required" && exit 1)
+	"$(AWS_X86_SCRIPT)" setup "$(INSTANCE_IP)"
+aws-x86-benchmark:
+	@test -n "$(INSTANCE_IP)" || (echo "ERROR: INSTANCE_IP= required" && exit 1)
+	"$(AWS_X86_SCRIPT)" benchmark "$(INSTANCE_IP)"
+aws-x86-terminate:
+	@test -n "$(INSTANCE_ID)" || (echo "ERROR: INSTANCE_ID= required" && exit 1)
+	"$(AWS_X86_SCRIPT)" terminate "$(INSTANCE_ID)"
+aws-x86-full:
+	"$(AWS_X86_SCRIPT)" full
+aws-x86: aws-x86-full
 
 # ── Clean ──────────────────────────────────────────────────────────────────────
 clean:

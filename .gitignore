@@ -75,9 +75,11 @@ tests/unittest/rejit_spectre
 tests/unittest/hold_bpf_prog
 tests/unittest/progs/*.bpf.o
 tests/unittest/build/
+tests/unittest/build-arm64/
 tests/helpers/build/
 tests/kernel/build/
 tests/kernel/build-arm64/
+tests/negative/build-arm64/
 tests/integration/
 
 # BPF build artifacts

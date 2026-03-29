@@ -4,7 +4,9 @@
 # Binaries are built on the host by `make unittest-build` and `make negative-build`
 # (runner/Makefile).
 #
-# Usage: vm-selftest.sh <ROOT_DIR> <UNITTEST_DIR> <KINSN_MODULE_DIR> <NEGATIVE_DIR> [FUZZ_ROUNDS]
+# Usage:
+#   vm-selftest.sh <ROOT_DIR> <UNITTEST_DIR> <KINSN_MODULE_DIR> <NEGATIVE_DIR>
+#                 [FUZZ_ROUNDS] [UNITTEST_BUILD_DIR] [NEGATIVE_BUILD_DIR]
 set -eu
 
 ROOT_DIR="$1"
@@ -12,8 +14,8 @@ UNITTEST_DIR="$2"
 KINSN_MODULE_DIR="$3"
 NEGATIVE_DIR="$4"
 FUZZ_ROUNDS="${5:-1000}"
-BUILD_DIR="${UNITTEST_DIR}/build"
-NEGATIVE_BUILD_DIR="${NEGATIVE_DIR}/build"
+BUILD_DIR="${6:-${UNITTEST_DIR}/build}"
+NEGATIVE_BUILD_DIR="${7:-${NEGATIVE_DIR}/build}"
 
 cd "$ROOT_DIR"
 

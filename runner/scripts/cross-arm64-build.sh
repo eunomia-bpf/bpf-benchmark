@@ -11,20 +11,25 @@ JOBS="${ARM64_CROSSBUILD_JOBS:-4}"
 build_root=/tmp/bpf-benchmark-arm64
 runner_build="$build_root/runner"
 daemon_target="$build_root/daemon-target"
+cargo_home="$build_root/cargo-home"
+home_dir="$build_root/home"
 
 rm -rf "$build_root"
-mkdir -p /out/runner/build /out/daemon/build /out/lib
+mkdir -p /out/runner/build /out/daemon/build /out/lib "$cargo_home" "$home_dir"
 
 # Build runner
 export CMAKE_BUILD_PARALLEL_LEVEL="$JOBS"
+export HOME="$home_dir"
+export CARGO_HOME="$cargo_home"
 make -C /workspace/runner \
     BUILD_DIR="$runner_build" \
+    JOBS="$JOBS" \
     MICRO_EXEC_ENABLE_LLVMBPF="${MICRO_EXEC_ENABLE_LLVMBPF:-ON}" \
     micro_exec >/dev/null
 
 # Build daemon
 CARGO_TARGET_DIR="$daemon_target" \
-    cargo build --release --manifest-path /workspace/daemon/Cargo.toml >/dev/null
+    cargo build --release -j "$JOBS" --manifest-path /workspace/daemon/Cargo.toml >/dev/null
 
 # Copy binaries
 cp "$runner_build/micro_exec" /out/runner/build/micro_exec.real
