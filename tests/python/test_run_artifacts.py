@@ -196,7 +196,6 @@ def test_artifact_entrypoints_compile() -> None:
     repo_root = Path(__file__).resolve().parents[2]
     for relative_path in (
         "micro/driver.py",
-        "corpus/driver.py",
         "corpus/orchestrator.py",
         "e2e/run.py",
         "e2e/cases/bpftrace/case.py",

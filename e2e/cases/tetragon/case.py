@@ -47,9 +47,8 @@ from runner.libs.workload import WorkloadResult  # noqa: E402
 from e2e.case_common import (  # noqa: E402
     CaseLifecycleState,
     LifecycleAbort,
-    build_map_capture_specs,
-    capture_map_state,
     host_metadata,
+    open_prepared_daemon_session,
     summarize_numbers,
     percent_delta,
     speedup_ratio,
@@ -622,7 +621,6 @@ def error_payload(
         "programs": [],
         "comparison": {"comparable": False, "reason": error_message},
         "limitations": list(limitations),
-        "map_capture": None,
         "preflight": dict(preflight or {}) if preflight else None,
     }
 
@@ -631,11 +629,9 @@ def daemon_payload(
     *,
     config: Mapping[str, object],
     daemon_binary: Path,
-    runner_binary: Path,
     tetragon_binary: str,
     tetragon_extra_args: Sequence[str],
     workloads: Sequence[WorkloadSpec],
-    capture_maps: bool,
     duration_s: int,
     preflight_duration_s: int,
     require_program_activity: bool,
@@ -747,33 +743,7 @@ def daemon_payload(
             exec_workload_cgroup=exec_workload_cgroup,
         )
 
-    def after_baseline(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> dict[str, object] | None:
-        del baseline
-        if not capture_maps:
-            return None
-        apply_programs = lifecycle.artifacts["apply_tetragon_programs"]
-        assert isinstance(apply_programs, list)
-        capture_plan = build_map_capture_specs(
-            apply_programs,
-            repo_name="tetragon",
-            object_paths=sorted((ROOT_DIR / "corpus" / "build" / "tetragon").glob("*.bpf.o")),
-            runner_binary=runner_binary,
-        )
-        map_capture = {
-            "discovery": {
-                key: value
-                for key, value in capture_plan.items()
-                if key != "program_specs"
-            }
-        }
-        map_capture["result"] = capture_map_state(
-            captured_from="e2e/tetragon",
-            program_specs=capture_plan["program_specs"],
-            optimize_results={},
-        )
-        return {"map_capture": map_capture}
-
-    def before_rejit(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> str | None:
+    def before_rejit(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> LifecycleAbort | None:
         del baseline
         runner = lifecycle.runtime
         assert isinstance(runner, TetragonRunner)
@@ -783,7 +753,11 @@ def daemon_payload(
         exit_reason = describe_agent_exit("Tetragon", process, snapshot)
         if exit_reason is not None:
             limitations.append(f"{exit_reason}; aborting scan and ReJIT after the baseline phase.")
-        return exit_reason
+            return LifecycleAbort(
+                status="error",
+                reason=exit_reason,
+            )
+        return None
 
     def stop(_: object, lifecycle: CaseLifecycleState) -> None:
         runner = lifecycle.runtime
@@ -793,18 +767,18 @@ def daemon_payload(
     def cleanup(state: object) -> None:
         del state
 
-    lifecycle_result = run_case_lifecycle(
-        daemon_binary=daemon_binary,
-        setup=setup,
-        start=start,
-        workload=workload,
-        stop=stop,
-        cleanup=cleanup,
-        before_baseline=before_baseline,
-        after_baseline=after_baseline,
-        before_rejit=before_rejit,
-        enabled_passes=benchmark_rejit_enabled_passes(),
-    )
+    with open_prepared_daemon_session(daemon_binary) as daemon_session:
+        lifecycle_result = run_case_lifecycle(
+            daemon_session=daemon_session,
+            setup=setup,
+            start=start,
+            workload=workload,
+            stop=stop,
+            cleanup=cleanup,
+            before_baseline=before_baseline,
+            before_rejit=before_rejit,
+            enabled_passes=benchmark_rejit_enabled_passes(),
+        )
     if lifecycle_result.abort is not None:
         return error_payload(
             config=config,
@@ -874,7 +848,6 @@ def daemon_payload(
         "programs": build_program_summary(scan_results, baseline, post_rejit),
         "comparison": comparison,
         "limitations": limitations,
-        "map_capture": lifecycle_result.artifacts.get("map_capture"),
     }
     if error_message:
         payload["error_message"] = error_message
@@ -905,7 +878,6 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
     ]
     workloads = workload_specs_from_config(config)
     daemon_binary = Path(args.daemon).resolve()
-    runner_binary = Path(args.runner).resolve()
     ensure_artifacts(daemon_binary)
 
     setup_result = {
@@ -951,11 +923,9 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
             return daemon_payload(
                 config=config,
                 daemon_binary=daemon_binary,
-                runner_binary=runner_binary,
                 tetragon_binary=tetragon_binary,
                 tetragon_extra_args=tetragon_extra_args,
                 workloads=workloads,
-                capture_maps=bool(args.capture_maps),
                 duration_s=duration_s,
                 preflight_duration_s=preflight_duration_s,
                 require_program_activity=require_program_activity,
@@ -990,7 +960,6 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--load-timeout", type=int, default=DEFAULT_LOAD_TIMEOUT_S)
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_S)
-    parser.add_argument("--capture-maps", action="store_true")
     parser.add_argument("--skip-setup", action="store_true")
     return parser
 

@@ -6,15 +6,14 @@ tracee, tetragon, bpftrace, katran, and scx case files.
 from __future__ import annotations
 
 import copy
-import json
 import platform
 import statistics
 import sys
-import tempfile
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Mapping, Sequence
+from typing import Callable, Iterator, Mapping, Sequence
 
 from runner.libs import (
     ROOT_DIR,
@@ -203,15 +202,6 @@ def _capture_daemon_kinsn_discovery(stdout_path: Path | None, stderr_path: Path 
     }
 
 
-def _initial_kinsn_metadata(requested_prog_ids: Sequence[int]) -> dict[str, object]:
-    return {
-        "captured_at": datetime.now(timezone.utc).isoformat(),
-        "requested_prog_ids": [int(value) for value in requested_prog_ids if int(value) > 0],
-        "expected_modules": _expected_kinsn_modules(),
-        "status": "pending",
-    }
-
-
 def _lifecycle_metadata_payload(kinsn_metadata: Mapping[str, object] | None) -> dict[str, object]:
     if kinsn_metadata is None:
         return {}
@@ -229,210 +219,6 @@ def relpath(path: Path) -> str:
         return str(path.resolve())
 
 
-def _program_names_match(live_name: str, object_program_name: str) -> bool:
-    if not live_name or not object_program_name:
-        return False
-    return (
-        live_name == object_program_name
-        or object_program_name.startswith(live_name)
-        or live_name.startswith(object_program_name)
-    )
-
-
-def build_map_capture_specs(
-    live_programs: Sequence[Mapping[str, object]],
-    *,
-    repo_name: str,
-    object_paths: Sequence[Path],
-    runner_binary: Path | None = None,
-) -> dict[str, object]:
-    from runner.libs.object_discovery import discover_object_programs
-
-    discovered_candidates: list[dict[str, str]] = []
-    discovery_errors: list[str] = []
-    if runner_binary is None or not runner_binary.exists():
-        missing_runner = "not provided" if runner_binary is None else relpath(runner_binary)
-        discovery_errors.append(f"runner binary unavailable for object discovery: {missing_runner}")
-    else:
-        for object_path in object_paths:
-            try:
-                listing = discover_object_programs(runner_binary, object_path)
-            except Exception as exc:
-                discovery_errors.append(f"{relpath(object_path)}: {exc}")
-                continue
-            for entry in listing:
-                discovered_candidates.append(
-                    {
-                        "object_name": object_path.name,
-                        "program_name": entry.name,
-                    }
-                )
-
-    program_specs: list[dict[str, object]] = []
-    unmatched_programs: list[str] = []
-    ambiguous_programs: list[dict[str, object]] = []
-    seen_targets: set[tuple[str, str, str]] = set()
-
-    for program in live_programs:
-        prog_id = int(program.get("id", 0) or 0)
-        if prog_id <= 0:
-            continue
-        live_name = str(program.get("name") or f"prog_{prog_id}")
-
-        matches = [item for item in discovered_candidates if _program_names_match(live_name, item["program_name"])]
-        exact_matches = [item for item in matches if item["program_name"] == live_name]
-        selected: dict[str, str] | None = None
-
-        if len(exact_matches) == 1:
-            selected = exact_matches[0]
-        elif len(matches) == 1:
-            selected = matches[0]
-        elif len(matches) > 1:
-            ambiguous_programs.append(
-                {
-                    "prog_id": prog_id,
-                    "live_name": live_name,
-                    "matches": [f"{item['object_name']}:{item['program_name']}" for item in matches],
-                }
-            )
-        else:
-            unmatched_programs.append(live_name)
-
-        object_name = "unknown"
-        program_name = live_name
-        if selected is not None:
-            object_name = selected["object_name"]
-            program_name = selected["program_name"]
-
-        if (repo_name, object_name, program_name) in seen_targets:
-            program_name = f"{program_name}_prog{prog_id}"
-        seen_targets.add((repo_name, object_name, program_name))
-        program_specs.append(
-            {
-                "prog_id": prog_id,
-                "repo": repo_name,
-                "object": object_name,
-                "program": program_name,
-                "qualified_prog_name": f"{repo_name}/{object_name}:{program_name}",
-            }
-        )
-
-    return {
-        "program_specs": program_specs,
-        "discovered_object_paths": [relpath(path) for path in object_paths],
-        "discovery_errors": discovery_errors,
-        "unmatched_programs": unmatched_programs,
-        "ambiguous_programs": ambiguous_programs,
-    }
-
-
-def capture_map_state(
-    *,
-    captured_from: str,
-    program_specs: Sequence[Mapping[str, object]],
-    optimize_results: Mapping[int, Mapping[str, object]],
-    fixture_root: Path | None = None,
-) -> dict[str, object]:
-    if not program_specs:
-        return {
-            "generated_at": datetime.now(timezone.utc).isoformat(),
-            "captured_from": captured_from,
-            "status": "skipped",
-            "reason": "no program specs were provided for map capture",
-            "programs_seen": 0,
-            "programs_selected": 0,
-            "programs_written": 0,
-            "programs": [],
-            "skipped_programs": [],
-            "errors": [],
-        }
-
-    inline_capture_programs: list[dict[str, object]] = []
-    normalized_results: list[tuple[int, Mapping[str, object]]] = []
-    capture_prog_ids: set[int] = set()
-    for raw_prog_id, raw_result in optimize_results.items():
-        if not isinstance(raw_result, Mapping):
-            continue
-        prog_id = int(raw_prog_id)
-        normalized_results.append((prog_id, raw_result))
-
-        summary = raw_result.get("summary") if isinstance(raw_result.get("summary"), Mapping) else {}
-        applied_sites = int((summary or {}).get("total_sites_applied", 0) or 0)
-        raw_entries = raw_result.get("inlined_map_entries")
-        inlined_entry_count = (
-            len([entry for entry in raw_entries if isinstance(entry, Mapping)])
-            if isinstance(raw_entries, list)
-            else 0
-        )
-        if applied_sites > 0 or inlined_entry_count > 0:
-            capture_prog_ids.add(prog_id)
-
-    for prog_id, result in sorted(normalized_results, key=lambda item: item[0]):
-        kernel_prog_name = str(result.get("kernel_prog_name") or f"prog_{prog_id}")
-        raw_entries = result.get("inlined_map_entries")
-        inlined_map_entries = (
-            [dict(entry) for entry in raw_entries if isinstance(entry, Mapping)]
-            if isinstance(raw_entries, list)
-            else []
-        )
-        inline_capture_programs.append(
-            {
-                "prog_id": prog_id,
-                "kernel_prog_name": kernel_prog_name,
-                "inlined_map_entries": inlined_map_entries,
-            }
-        )
-
-    filtered_program_specs = [
-        dict(spec)
-        for spec in program_specs
-        if int(spec.get("prog_id", 0) or 0) in capture_prog_ids
-    ]
-    if not filtered_program_specs:
-        return {
-            "generated_at": datetime.now(timezone.utc).isoformat(),
-            "captured_from": captured_from,
-            "status": "skipped",
-            "reason": "no optimized programs reported applied sites or inline capture entries",
-            "programs_seen": len(program_specs),
-            "programs_selected": 0,
-            "programs_written": 0,
-            "programs": [],
-            "skipped_programs": [],
-            "errors": [],
-        }
-
-    fixture_dir = fixture_root or (ROOT_DIR / "corpus" / "fixtures")
-    script_path = ROOT_DIR / "runner" / "scripts" / "capture_map_state.py"
-    if not script_path.exists():
-        raise RuntimeError(f"map capture script is missing: {script_path}")
-
-    with tempfile.TemporaryDirectory(prefix="map-capture-") as tempdir:
-        tempdir_path = Path(tempdir)
-        spec_path = tempdir_path / "program_specs.json"
-        inline_capture_path = tempdir_path / "inline_capture.json"
-        write_json(spec_path, filtered_program_specs)
-        write_json(inline_capture_path, inline_capture_programs)
-        command = [
-            sys.executable or "python3",
-            str(script_path),
-            "--captured-from",
-            captured_from,
-            "--fixture-root",
-            str(fixture_dir),
-            "--program-specs",
-            str(spec_path),
-            "--inline-capture-json",
-            str(inline_capture_path),
-        ]
-        completed = run_command(command, timeout=600)
-
-    payload = json.loads(completed.stdout)
-    if not isinstance(payload, dict):
-        raise RuntimeError("map capture script returned a non-object JSON payload")
-    return payload
-
-
 # ---------------------------------------------------------------------------
 # Lifecycle helpers
 # ---------------------------------------------------------------------------
@@ -448,6 +234,12 @@ class CaseLifecycleState:
     def requested_prog_ids(self) -> list[int]:
         raw_prog_ids = self.apply_prog_ids or self.target_prog_ids
         return [int(value) for value in raw_prog_ids if int(value) > 0]
+
+
+@dataclass(slots=True)
+class PreparedDaemonSession:
+    session: DaemonSession
+    metadata: dict[str, object]
 
 
 @dataclass(frozen=True, slots=True)
@@ -476,9 +268,55 @@ def _artifact_dict(value: Mapping[str, object] | None) -> dict[str, object]:
     return dict(value)
 
 
+@contextmanager
+def open_prepared_daemon_session(daemon_binary: Path) -> Iterator[PreparedDaemonSession]:
+    binary = daemon_binary.resolve()
+    expected_modules = _expected_kinsn_modules()
+    before_snapshot = _capture_kinsn_module_snapshot(expected_modules)
+    module_load = _run_kinsn_module_loader(
+        expected_modules,
+        before_snapshot=before_snapshot,
+    )
+    with DaemonSession.start(binary) as daemon_session:
+        metadata = {
+            "captured_at": datetime.now(timezone.utc).isoformat(),
+            "daemon_binary": relpath(binary),
+            "expected_modules": expected_modules,
+            "module_snapshot_before_daemon": before_snapshot,
+            "module_load": module_load,
+            "daemon_kinsn_discovery": _capture_daemon_kinsn_discovery(
+                daemon_session.stdout_path,
+                daemon_session.stderr_path,
+            ),
+            "status": "ready",
+        }
+        yield PreparedDaemonSession(
+            session=daemon_session,
+            metadata=metadata,
+        )
+
+
+def _clone_daemon_metadata(
+    daemon_session: PreparedDaemonSession,
+    requested_prog_ids: Sequence[int],
+) -> dict[str, object]:
+    metadata = copy.deepcopy(daemon_session.metadata)
+    metadata["captured_at"] = datetime.now(timezone.utc).isoformat()
+    metadata["requested_prog_ids"] = [int(value) for value in requested_prog_ids if int(value) > 0]
+    metadata["status"] = "pending"
+    return metadata
+
+
+def _daemon_exit_error(daemon_session: DaemonSession) -> str | None:
+    returncode = daemon_session.proc.poll()
+    if returncode is None:
+        return None
+    return f"daemon session exited early (rc={returncode})"
+
+
 def run_case_lifecycle(
     *,
-    daemon_binary: Path,
+    daemon_session: PreparedDaemonSession,
     setup: Callable[[], object],
     start: Callable[[object], CaseLifecycleState],
     workload: Callable[[object, CaseLifecycleState, str], Mapping[str, object] | None],
@@ -487,7 +325,7 @@ def run_case_lifecycle(
     enabled_passes: Sequence[str] | None = None,
     before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
     after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
-    before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], str | None] | None = None,
+    before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
     should_run_post_rejit: Callable[[Mapping[str, object]], bool] | None = None,
 ) -> LifecycleRunResult:
     """Run the shared E2E lifecycle for a live program session.
@@ -516,19 +354,23 @@ def run_case_lifecycle(
     artifacts: dict[str, object] = {}
     abort: LifecycleAbort | None = None
     kinsn_metadata: dict[str, object] | None = None
+    active_daemon_session = daemon_session.session
 
     try:
         lifecycle_state = start(setup_state)
         artifacts.update(_artifact_dict(lifecycle_state.artifacts))
-        kinsn_metadata = _initial_kinsn_metadata(lifecycle_state.requested_prog_ids())
+        requested_prog_ids = lifecycle_state.requested_prog_ids()
+        if not requested_prog_ids:
+            raise RuntimeError("lifecycle did not provide any requested program ids")
+        kinsn_metadata = _clone_daemon_metadata(daemon_session, requested_prog_ids)
 
         if before_baseline is not None:
             abort = before_baseline(setup_state, lifecycle_state)
             if abort is not None:
                 assert kinsn_metadata is not None
-                kinsn_metadata["status"] = "skipped"
+                kinsn_metadata["status"] = "aborted"
                 kinsn_metadata["reason"] = abort.reason
-                kinsn_metadata["skipped_phase"] = "before_baseline"
+                kinsn_metadata["abort_phase"] = "before_baseline"
                 artifacts.update(_artifact_dict(abort.artifacts))
                 return LifecycleRunResult(
                     setup_state=setup_state,
@@ -550,61 +392,46 @@ def run_case_lifecycle(
         if after_baseline is not None:
             artifacts.update(_artifact_dict(after_baseline(setup_state, lifecycle_state, baseline)))
 
-        skip_rejit_reason = None
         if before_rejit is not None:
-            skip_rejit_reason = before_rejit(setup_state, lifecycle_state, baseline)
+            abort = before_rejit(setup_state, lifecycle_state, baseline)
+            if abort is not None:
+                assert kinsn_metadata is not None
+                kinsn_metadata["status"] = "aborted"
+                kinsn_metadata["reason"] = abort.reason
+                kinsn_metadata["abort_phase"] = "before_rejit"
+                artifacts.update(_artifact_dict(abort.artifacts))
+                return LifecycleRunResult(
+                    setup_state=setup_state,
+                    state=lifecycle_state,
+                    baseline=baseline,
+                    scan_results={},
+                    rejit_result=None,
+                    post_rejit=None,
+                    artifacts=artifacts,
+                    metadata=_lifecycle_metadata_payload(kinsn_metadata),
+                    abort=abort,
+                )
 
-        requested_prog_ids = lifecycle_state.requested_prog_ids()
-        assert kinsn_metadata is not None
-        kinsn_metadata["requested_prog_ids"] = requested_prog_ids
-        if skip_rejit_reason is not None:
-            kinsn_metadata["status"] = "skipped"
-            kinsn_metadata["reason"] = skip_rejit_reason
-            kinsn_metadata["skipped_phase"] = "before_rejit"
-            rejit_result = {
-                "applied": False,
-                "reason": skip_rejit_reason,
-                "error": skip_rejit_reason,
-            }
-        elif requested_prog_ids:
-            before_snapshot = _capture_kinsn_module_snapshot(kinsn_metadata.get("expected_modules") or [])
-            kinsn_metadata["module_snapshot_before_daemon"] = before_snapshot
-            kinsn_metadata["module_load"] = _run_kinsn_module_loader(
-                kinsn_metadata.get("expected_modules") or [],
-                before_snapshot=before_snapshot,
-            )
-            kinsn_metadata["status"] = "daemon_starting"
-            try:
-                daemon_session = DaemonSession.start(daemon_binary)
-            except Exception as exc:
-                kinsn_metadata["status"] = "daemon_start_failed"
-                kinsn_metadata["error"] = str(exc)
-                raise
-            kinsn_metadata["daemon_kinsn_discovery"] = _capture_daemon_kinsn_discovery(
-                daemon_session.stdout_path,
-                daemon_session.stderr_path,
-            )
-            kinsn_metadata["status"] = "daemon_started"
-            try:
-                scan_results = daemon_session.scan_programs(
-                    requested_prog_ids,
-                    **lifecycle_state.scan_kwargs,
-                )
-                rejit_result = daemon_session.apply_rejit(
-                    requested_prog_ids,
-                    enabled_passes=enabled_passes or benchmark_rejit_enabled_passes(),
-                )
-            finally:
-                daemon_session.close()
-            kinsn_metadata["status"] = "completed"
-            run_post_rejit = bool(rejit_result.get("applied"))
-            if should_run_post_rejit is not None:
-                run_post_rejit = bool(should_run_post_rejit(rejit_result))
-            if run_post_rejit:
-                post_rejit = workload(setup_state, lifecycle_state, "post_rejit")
-        else:
-            kinsn_metadata["status"] = "skipped"
-            kinsn_metadata["reason"] = "no requested program ids"
+        daemon_error = _daemon_exit_error(active_daemon_session)
+        if daemon_error is not None:
+            raise RuntimeError(daemon_error)
+        scan_results = active_daemon_session.scan_programs(
+            requested_prog_ids,
+            **lifecycle_state.scan_kwargs,
+        )
+        daemon_error = _daemon_exit_error(active_daemon_session)
+        if daemon_error is not None:
+            raise RuntimeError(daemon_error)
+        rejit_result = active_daemon_session.apply_rejit(
+            requested_prog_ids,
+            enabled_passes=enabled_passes or benchmark_rejit_enabled_passes(),
+        )
+        kinsn_metadata["status"] = "completed"
+        run_post_rejit = bool(rejit_result.get("applied"))
+        if should_run_post_rejit is not None:
+            run_post_rejit = bool(should_run_post_rejit(rejit_result))
+        if run_post_rejit:
+            post_rejit = workload(setup_state, lifecycle_state, "post_rejit")
         return LifecycleRunResult(
             setup_state=setup_state,
             state=lifecycle_state,

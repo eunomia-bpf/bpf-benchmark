@@ -36,14 +36,15 @@ from runner.libs import (  # noqa: E402
     which,
 )
 from runner.libs.app_runners.katran import KatranRunner  # noqa: E402
+from runner.libs.app_runners.katran_support import KatranDirectSession as SharedKatranDirectSession  # noqa: E402
 from runner.libs.corpus import materialize_katran_packet  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 
 from e2e.case_common import (  # noqa: E402
     CaseLifecycleState,
-    capture_map_state,
     host_metadata,
+    open_prepared_daemon_session,
     relpath,
     summarize_numbers,
     percent_delta,
@@ -1373,141 +1374,7 @@ class NamespaceHttpServer:
         self.close()
 
 
-class KatranDirectSession:
-    def __init__(
-        self,
-        *,
-        object_path: Path,
-        program_name: str,
-        iface: str,
-        attach: bool,
-        bpftool: str,
-    ) -> None:
-        self.object_path = object_path
-        self.program_name = program_name
-        self.iface = iface
-        self.attach = attach
-        self.bpftool = bpftool
-        self.bpffs_dir: Path | None = None
-        self.prog_dir: Path | None = None
-        self.map_dir: Path | None = None
-        self.pinned_prog: Path | None = None
-        self.program: dict[str, object] = {}
-        self.attach_info: dict[str, object] = {}
-        self.attach_error: str = ""
-        self.attach_mode: str | None = None
-        self.ifindex: int = 0
-
-    def __enter__(self) -> "KatranDirectSession":
-        if not link_exists(self.iface):
-            raise RuntimeError(f"network interface does not exist: {self.iface}")
-        self.ifindex = int(Path("/sys/class/net").joinpath(self.iface, "ifindex").read_text().strip())
-        self.bpffs_dir = Path(tempfile.mkdtemp(prefix="katrane2e-", dir="/sys/fs/bpf"))
-        self.prog_dir = self.bpffs_dir / "progs"
-        self.map_dir = self.bpffs_dir / "maps"
-        self.prog_dir.mkdir(parents=True, exist_ok=True)
-        self.map_dir.mkdir(parents=True, exist_ok=True)
-        run_command(
-            [
-                self.bpftool,
-                "prog",
-                "loadall",
-                str(self.object_path),
-                str(self.prog_dir),
-                "type",
-                "xdp",
-                "pinmaps",
-                str(self.map_dir),
-            ],
-            timeout=90,
-        )
-        self.pinned_prog = self.prog_dir / self.program_name
-        if not self.pinned_prog.exists():
-            raise RuntimeError(f"pinned program not found after load: {self.pinned_prog}")
-        self.program = self._show_program()
-        if self.attach:
-            self._attempt_attach()
-        return self
-
-    @property
-    def prog_id(self) -> int:
-        return int(self.program.get("id", 0) or 0)
-
-    def map_path(self, name: str) -> Path:
-        if self.map_dir is None:
-            raise RuntimeError("map directory is not initialized")
-        return self.map_dir / name
-
-    def _show_program(self) -> dict[str, object]:
-        assert self.pinned_prog is not None
-        payload = run_json_command([self.bpftool, "-j", "prog", "show", "pinned", str(self.pinned_prog)], timeout=30)
-        if not isinstance(payload, dict):
-            raise RuntimeError("bpftool prog show pinned returned unexpected payload")
-        return dict(payload)
-
-    def _attempt_attach(self) -> None:
-        assert self.pinned_prog is not None
-        errors: list[str] = []
-        # Prefer xdpgeneric for veth interfaces: native XDP_TX on veth is
-        # broken in some kernels (including 7.0-rc2) where XDP_TX'd packets
-        # do not reach the peer namespace.  xdpgeneric handles this correctly.
-        for mode in ("xdpgeneric", "xdp"):
-            try:
-                run_command(
-                    [
-                        self.bpftool,
-                        "net",
-                        "attach",
-                        mode,
-                        "pinned",
-                        str(self.pinned_prog),
-                        "dev",
-                        self.iface,
-                        "overwrite",
-                    ],
-                    timeout=30,
-                )
-                self.attach_mode = mode
-                payload = run_json_command([self.bpftool, "-j", "net", "show", "dev", self.iface], timeout=30)
-                if isinstance(payload, list):
-                    for record in payload:
-                        if not isinstance(record, dict):
-                            continue
-                        if record.get("xdp") or record.get("xdp_attached"):
-                            self.attach_info = dict(record)
-                            break
-                return
-            except Exception as exc:
-                errors.append(f"{mode}: {exc}")
-        self.attach_error = "; ".join(errors)
-
-    def metadata(self) -> dict[str, object]:
-        return {
-            "program": dict(self.program),
-            "iface": self.iface,
-            "ifindex": self.ifindex,
-            "attached": bool(self.attach and not self.attach_error),
-            "attach_mode": self.attach_mode,
-            "attach_error": self.attach_error,
-            "attach_info": self.attach_info,
-            "bpffs_dir": None if self.bpffs_dir is None else str(self.bpffs_dir),
-            "pinned_prog": None if self.pinned_prog is None else str(self.pinned_prog),
-            "pinned_maps": [] if self.map_dir is None else sorted(path.name for path in self.map_dir.iterdir()),
-        }
-
-    def close(self) -> None:
-        if self.attach and self.attach_mode:
-            run_command([self.bpftool, "net", "detach", self.attach_mode, "dev", self.iface], check=False, timeout=15)
-            self.attach_mode = None
-        if self.bpffs_dir is not None:
-            shutil.rmtree(self.bpffs_dir, ignore_errors=True)
-            self.bpffs_dir = None
-            self.prog_dir = None
-            self.map_dir = None
-            self.pinned_prog = None
-
-    def __exit__(self, exc_type, exc, tb) -> None:
-        self.close()
+KatranDirectSession = SharedKatranDirectSession
 
 
 def configure_katran_maps(session: KatranDirectSession) -> dict[str, object]:
@@ -1977,136 +1844,107 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         server_metadata: dict[str, object] = {}
         map_config: dict[str, object] = {}
         test_run_validation: dict[str, object] = {}
-        map_capture: dict[str, object] | None = None
-        for cycle_index in range(sample_count):
-            def setup() -> dict[str, object]:
-                return {}
+        with open_prepared_daemon_session(daemon_binary) as daemon_session:
+            for cycle_index in range(sample_count):
+                def setup() -> dict[str, object]:
+                    return {}
 
-            def start(_: object) -> CaseLifecycleState:
-                runner = KatranRunner(
-                    object_path=katran_object,
-                    program_name=DEFAULT_PROGRAM_NAME,
-                    iface=args.katran_iface,
-                    router_peer_iface=args.katran_router_peer_iface,
-                    bpftool=resolved_bpftool,
-                    concurrency=traffic_iterations,
-                    use_wrk_driver=use_wrk_driver,
-                    wrk_connections=wrk_connections,
-                    wrk_threads=wrk_threads,
-                )
-                runner.start()
-                return CaseLifecycleState(
-                    runtime=runner,
-                    target_prog_ids=[int(runner.prog_id or 0)],
-                    artifacts=dict(runner.artifacts),
-                )
+                def start(_: object) -> CaseLifecycleState:
+                    runner = KatranRunner(
+                        object_path=katran_object,
+                        program_name=DEFAULT_PROGRAM_NAME,
+                        iface=args.katran_iface,
+                        router_peer_iface=args.katran_router_peer_iface,
+                        bpftool=resolved_bpftool,
+                        concurrency=traffic_iterations,
+                        use_wrk_driver=use_wrk_driver,
+                        wrk_connections=wrk_connections,
+                        wrk_threads=wrk_threads,
+                    )
+                    runner.start()
+                    return CaseLifecycleState(
+                        runtime=runner,
+                        target_prog_ids=[int(runner.prog_id or 0)],
+                        artifacts=dict(runner.artifacts),
+                    )
 
-            def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object] | None:
-                runner = lifecycle.runtime
-                assert isinstance(runner, KatranRunner)
-                assert isinstance(runner.session, KatranDirectSession)
-                sample_phase_name = "stock" if phase_name == "baseline" else "post_rejit"
-                sample = measure_phase(
-                    index=cycle_index,
-                    phase_name=sample_phase_name,
-                    runner=runner,
-                    session=runner.session,
-                    traffic_iterations=traffic_iterations,
-                    duration_s=duration_s,
-                    minimum_requests=minimum_requests,
-                    warmup_request_count=warmup_request_count,
-                    warmup_duration_s=warmup_duration_s,
-                    use_wrk_driver=use_wrk_driver,
-                    wrk_connections=wrk_connections,
-                    wrk_threads=wrk_threads,
-                )
-                return {
-                    "samples": [sample],
-                    "summary": build_phase_summary([sample]),
-                }
+                def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object] | None:
+                    runner = lifecycle.runtime
+                    assert isinstance(runner, KatranRunner)
+                    assert isinstance(runner.session, KatranDirectSession)
+                    sample_phase_name = "stock" if phase_name == "baseline" else "post_rejit"
+                    sample = measure_phase(
+                        index=cycle_index,
+                        phase_name=sample_phase_name,
+                        runner=runner,
+                        session=runner.session,
+                        traffic_iterations=traffic_iterations,
+                        duration_s=duration_s,
+                        minimum_requests=minimum_requests,
+                        warmup_request_count=warmup_request_count,
+                        warmup_duration_s=warmup_duration_s,
+                        use_wrk_driver=use_wrk_driver,
+                        wrk_connections=wrk_connections,
+                        wrk_threads=wrk_threads,
+                    )
+                    return {
+                        "samples": [sample],
+                        "summary": build_phase_summary([sample]),
+                    }
 
-            def after_baseline(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> dict[str, object] | None:
-                del baseline
-                nonlocal map_capture
-                if not args.capture_maps or map_capture is not None:
+                def stop(_: object, lifecycle: CaseLifecycleState) -> None:
+                    runner = lifecycle.runtime
+                    assert isinstance(runner, KatranRunner)
+                    runner.stop()
+
+                def cleanup(_: object) -> None:
                     return None
-                runner = lifecycle.runtime
-                assert isinstance(runner, KatranRunner)
-                prog_id = runner.prog_id
-                if prog_id is None:
-                    raise RuntimeError("Katran live program ID is unavailable")
-                map_capture = {
-                    "cycle_index": cycle_index,
-                }
-                map_capture["result"] = capture_map_state(
-                    captured_from="e2e/katran",
-                    program_specs=[
-                        {
-                            "prog_id": int(prog_id),
-                            "repo": "katran",
-                            "object": katran_object.name,
-                            "program": DEFAULT_PROGRAM_NAME,
-                            "qualified_prog_name": f"katran/{katran_object.name}:{DEFAULT_PROGRAM_NAME}",
-                        }
-                    ],
-                    optimize_results={},
+
+                lifecycle_result = run_case_lifecycle(
+                    daemon_session=daemon_session,
+                    setup=setup,
+                    start=start,
+                    workload=workload,
+                    stop=stop,
+                    cleanup=cleanup,
+                    enabled_passes=benchmark_rejit_enabled_passes(),
                 )
-                return {"map_capture": map_capture}
+                if lifecycle_result.state is None or lifecycle_result.baseline is None:
+                    raise RuntimeError(f"katran cycle {cycle_index} did not produce a baseline phase")
 
-            def stop(_: object, lifecycle: CaseLifecycleState) -> None:
-                runner = lifecycle.runtime
-                assert isinstance(runner, KatranRunner)
-                runner.stop()
-
-            def cleanup(_: object) -> None:
-                return None
-
-            lifecycle_result = run_case_lifecycle(
-                daemon_binary=daemon_binary,
-                setup=setup,
-                start=start,
-                workload=workload,
-                stop=stop,
-                cleanup=cleanup,
-                after_baseline=after_baseline,
-                enabled_passes=benchmark_rejit_enabled_passes(),
-            )
-            if lifecycle_result.state is None or lifecycle_result.baseline is None:
-                raise RuntimeError(f"katran cycle {cycle_index} did not produce a baseline phase")
-
-            cycle_scan_results = lifecycle_result.scan_results
-            cycle_rejit_result = lifecycle_result.rejit_result or {"applied": False, "reason": "reJIT did not run"}
-            cycle_post_rejit = lifecycle_result.post_rejit
-            cycle_baseline = lifecycle_result.baseline
-            if not cycle_rejit_result.get("applied"):
-                reason = str(cycle_rejit_result.get("error") or cycle_rejit_result.get("reason") or "").strip()
-                raise RuntimeError(f"katran cycle {cycle_index} reJIT did not apply: {reason or cycle_rejit_result}")
-            if cycle_post_rejit is None:
-                raise RuntimeError(f"katran cycle {cycle_index} did not produce a post-ReJIT phase")
-            cycle_results.append(
-                {
-                    "cycle_index": cycle_index,
-                    "topology": lifecycle_result.artifacts.get("topology") or {},
-                    "http_server": lifecycle_result.artifacts.get("http_server") or {},
-                    "live_program": lifecycle_result.artifacts.get("live_program") or {},
-                    "scan_results": {str(key): value for key, value in cycle_scan_results.items()},
-                    "test_run_validation": lifecycle_result.artifacts.get("test_run_validation") or {},
-                    "baseline": cycle_baseline,
-                    "rejit_result": cycle_rejit_result,
-                    "post_rejit": cycle_post_rejit,
-                    "comparison": compare_phases(cycle_baseline, cycle_post_rejit),
-                }
-            )
-            if not map_config:
-                map_config = lifecycle_result.artifacts.get("map_configuration") or {}
-            if not session_metadata:
-                session_metadata = lifecycle_result.artifacts.get("live_program") or {}
-            if not topology_metadata:
-                topology_metadata = lifecycle_result.artifacts.get("topology") or {}
-            if not server_metadata:
-                server_metadata = lifecycle_result.artifacts.get("http_server") or {}
-            if not test_run_validation:
-                test_run_validation = lifecycle_result.artifacts.get("test_run_validation") or {}
+                cycle_scan_results = lifecycle_result.scan_results
+                cycle_rejit_result = lifecycle_result.rejit_result or {"applied": False, "reason": "reJIT did not run"}
+                cycle_post_rejit = lifecycle_result.post_rejit
+                cycle_baseline = lifecycle_result.baseline
+                if not cycle_rejit_result.get("applied"):
+                    reason = str(cycle_rejit_result.get("error") or cycle_rejit_result.get("reason") or "").strip()
+                    raise RuntimeError(f"katran cycle {cycle_index} reJIT did not apply: {reason or cycle_rejit_result}")
+                if cycle_post_rejit is None:
+                    raise RuntimeError(f"katran cycle {cycle_index} did not produce a post-ReJIT phase")
+                cycle_results.append(
+                    {
+                        "cycle_index": cycle_index,
+                        "topology": lifecycle_result.artifacts.get("topology") or {},
+                        "http_server": lifecycle_result.artifacts.get("http_server") or {},
+                        "live_program": lifecycle_result.artifacts.get("live_program") or {},
+                        "scan_results": {str(key): value for key, value in cycle_scan_results.items()},
+                        "test_run_validation": lifecycle_result.artifacts.get("test_run_validation") or {},
+                        "baseline": cycle_baseline,
+                        "rejit_result": cycle_rejit_result,
+                        "post_rejit": cycle_post_rejit,
+                        "comparison": compare_phases(cycle_baseline, cycle_post_rejit),
+                    }
+                )
+                if not map_config:
+                    map_config = lifecycle_result.artifacts.get("map_configuration") or {}
+                if not session_metadata:
+                    session_metadata = lifecycle_result.artifacts.get("live_program") or {}
+                if not topology_metadata:
+                    topology_metadata = lifecycle_result.artifacts.get("topology") or {}
+                if not server_metadata:
+                    server_metadata = lifecycle_result.artifacts.get("http_server") or {}
+                if not test_run_validation:
+                    test_run_validation = lifecycle_result.artifacts.get("test_run_validation") or {}
 
     baseline_samples = [
         sample
@@ -2162,7 +2000,6 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "post_rejit": post_rejit,
         "comparison": compare_phases(baseline, post_rejit),
         "limitations": limitations,
-        "map_capture": map_capture,
     }
     return payload
 
@@ -2187,7 +2024,6 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
-    parser.add_argument("--capture-maps", action="store_true")
     parser.add_argument("--skip-setup", action="store_true")
     return parser
 

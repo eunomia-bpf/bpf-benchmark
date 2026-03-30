@@ -60,7 +60,6 @@ VM_MICRO_SMOKE_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro_smoke.json
 VM_MICRO_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro.json
 VM_CORPUS_OUTPUT_JSON ?= $(CORPUS_RESULTS_DIR)/vm_corpus.json
 VM_CORPUS_OUTPUT_MD ?= $(CORPUS_RESULTS_DIR)/vm_corpus.md
-VM_CORPUS_NEW_OUTPUT_JSON ?= $(CORPUS_RESULTS_DIR)/vm_corpus_new.json
 VM_STATIC_OUTPUT ?= $(REPO_ROOT)/daemon/tests/results/static_verify.json
 
 VM_CPUS ?=
@@ -81,7 +80,7 @@ _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv $(REPO_ROOT)/.venv $(R
 _VENV_FOUND := $(firstword $(foreach v,$(_VENV_CANDIDATES),$(if $(wildcard $(v)/bin/activate),$(v),)))
 VENV ?= $(_VENV_FOUND)
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
-VM_INIT := $(VENV_ACTIVATE) "$(REPO_ROOT)/module/load_all.sh" &&
+VM_INIT := $(VENV_ACTIVATE)
 TARGET_FLAG := $(if $(strip $(TARGET)),--target "$(TARGET)",)
 VM_CPU_FLAG := $(if $(strip $(VM_CPUS)),--cpus "$(VM_CPUS)",)
 VM_MEM_FLAG := $(if $(strip $(VM_MEM)),--mem "$(VM_MEM)",)
@@ -92,17 +91,16 @@ BENCH_FLAGS := $(foreach b,$(BENCH),--bench $(b))
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 FILTER_FLAGS := $(foreach filter,$(FILTERS),--filter "$(filter)")
-VM_CORPUS_NEW_FILTER_FLAGS := $(if $(strip $(FILTERS)),$(FILTER_FLAGS),--filter "execsnoop" --filter "xdp_pass_kern")
 REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
 VM_CORPUS_REPEAT_FLAG := $(if $(strip $(REPEAT_IS_EXPLICIT)),--repeat "$(REPEAT)",)
 
 .PHONY: all micro_exec vendor_libbpf vendor_bpftool \
-	corpus-fetch corpus-build-objects corpus-build corpus-build-native \
+	corpus-fetch corpus-build corpus-build-native \
 	corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx \
 	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
 	scx-artifacts e2e-prep e2e-tracee-setup e2e-tetragon-setup \
 	kernel-image unittest-build negative-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary \
-	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-corpus-new vm-e2e vm-all \
+	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	clean
 
 all: micro_exec
@@ -114,10 +112,7 @@ else
 	$(PYTHON) $(ROOT_DIR)/scripts/fetch_corpus_repos.py $(REPO_FLAGS)
 endif
 
-corpus-build-objects:
-	$(PYTHON) $(ROOT_DIR)/scripts/build_corpus_objects.py $(REPO_FLAGS)
-
-corpus-build: corpus-fetch corpus-build-objects
+corpus-build: corpus-fetch corpus-build-native
 
 corpus-build-native: corpus-fetch vendor_bpftool
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" $(REPO_FLAGS)
@@ -178,14 +173,14 @@ e2e-tracee-setup:
 	@if [ -x "$(TRACEE_CACHED_BINARY)" ]; then \
 		echo "tracee setup: using cached $(TRACEE_CACHED_BINARY)"; \
 	else \
-		bash "$(TRACEE_SETUP_SCRIPT)" || true; \
+		bash "$(TRACEE_SETUP_SCRIPT)"; \
 	fi
 
 e2e-tetragon-setup:
 	@if command -v tetragon >/dev/null 2>&1 && command -v tetra >/dev/null 2>&1 && command -v stress-ng >/dev/null 2>&1; then \
 		echo "tetragon setup: using cached system binaries"; \
 	else \
-		bash "$(TETRAGON_SETUP_SCRIPT)" || true; \
+		bash "$(TETRAGON_SETUP_SCRIPT)"; \
 	fi
 
 vendor_libbpf: $(LIBBPF_A) $(LIBBPF_HEADER)
@@ -334,16 +329,6 @@ vm-corpus: corpus-build corpus-build-native vendor_bpftool daemon-binary kernel-
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_CORPUS_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/orchestrator.py" --daemon "$(DAEMON_PATH)" --bpftool "$(BPFTOOL_RUNTIME)" --btf-custom-path /sys/kernel/btf/vmlinux --output-json "$(VM_CORPUS_OUTPUT_JSON)" $(VM_CORPUS_REPEAT_FLAG) $(FILTER_FLAGS)'
-
-vm-corpus-new: corpus-build-bcc corpus-build-xdp-tutorial vendor_bpftool daemon-binary kernel-image kinsn-modules-build
-	mkdir -p "$(CORPUS_RESULTS_DIR)"
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
-		--action vm-corpus-new \
-		--kernel-image "$(BZIMAGE_PATH)" \
-		$(VM_CPU_FLAG) \
-		$(VM_MEM_FLAG) \
-		--timeout "$(VM_CORPUS_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/orchestrator.py" --daemon "$(DAEMON_PATH)" --bpftool "$(BPFTOOL_RUNTIME)" --btf-custom-path /sys/kernel/btf/vmlinux --repeat "$(REPEAT)" --output-json "$(VM_CORPUS_NEW_OUTPUT_JSON)" $(VM_CORPUS_NEW_FILTER_FLAGS)'
 
 vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"
