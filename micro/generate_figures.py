@@ -26,7 +26,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from runner.libs.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
+from micro.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
 from runner.libs import latest_output_path
 
 

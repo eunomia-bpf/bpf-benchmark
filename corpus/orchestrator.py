@@ -7,23 +7,26 @@ import sys
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from runner.libs import ROOT_DIR, ensure_parent, write_json
+from runner.libs import ROOT_DIR, ensure_parent, write_json, write_text
 from runner.libs.app_runners import get_app_runner
-from runner.libs.app_suite_schema import AppSpec, load_app_suite_from_yaml
+from runner.libs.app_suite_schema import AppSpec, AppWorkload, load_app_suite_from_yaml
 from runner.libs.bpf_stats import enable_bpf_stats, read_program_stats
+from runner.libs.case_common import rejit_program_result, rejit_result_has_any_apply
 from runner.libs.daemon_session import DaemonSession
 from runner.libs.rejit import benchmark_rejit_enabled_passes
+from runner.libs.statistics import geometric_mean
 
 
 DEFAULT_MACRO_APPS_YAML = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_OUTPUT_JSON = ROOT_DIR / "corpus" / "results" / "vm_corpus.json"
+DEFAULT_OUTPUT_MD = ROOT_DIR / "corpus" / "results" / "vm_corpus.md"
 SECTION_TYPE_PREFIXES = {
     "xdp": "xdp",
     "tc": "sched_cls",
@@ -40,6 +43,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--repeat", type=int, default=0)
     parser.add_argument("--workload-seconds", type=float, default=0.0)
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
+    parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--filter", action="append", dest="filters")
     args = parser.parse_args(argv)
     if args.repeat is not None and int(args.repeat) < 0:
@@ -47,6 +51,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     if float(args.workload_seconds) < 0:
         raise SystemExit("--workload-seconds must be >= 0")
     return args
+
+
+def _workload_payload(workload: AppWorkload) -> dict[str, str]:
+    return {
+        "corpus": workload.corpus,
+        "e2e": workload.e2e,
+    }
+
+
+def _print_progress(event: str, **fields: object) -> None:
+    payload = {"event": event}
+    payload.update(fields)
+    print(json.dumps(payload, sort_keys=True), flush=True)
 
 
 def _program_phase_stats(
@@ -74,7 +91,7 @@ def _program_phase_stats(
 
 def _program_stats_by_prog_id(
     phase_stats: Mapping[int, Mapping[str, object]],
-    prog_ids: list[int],
+    prog_ids: Sequence[int],
 ) -> dict[str, dict[str, object]]:
     return {
         str(prog_id): dict(phase_stats[prog_id])
@@ -111,7 +128,7 @@ def _infer_prog_type_name(program: Any) -> str:
 def _validate_phase_measurement(
     phase_name: str,
     records: Mapping[int, Mapping[str, object]],
-    live_programs: list[dict[str, object]],
+    live_programs: Sequence[Mapping[str, object]],
 ) -> None:
     errors: list[str] = []
     for program in live_programs:
@@ -155,16 +172,294 @@ def _repeat_count(args: argparse.Namespace, suite_defaults: Mapping[str, object]
     return max(1, int(suite_defaults.get("repeat", 1) or 1))
 
 
+def _program_label(app_name: str, program_name: str, prog_id: int) -> str:
+    return f"{app_name}:{program_name or f'prog_{prog_id}'}#{prog_id}"
+
+
+def _phase_exec_ns(record: Mapping[str, object] | None) -> float | None:
+    if not isinstance(record, Mapping):
+        return None
+    value = record.get("exec_ns")
+    if not isinstance(value, (int, float)):
+        return None
+    return float(value)
+
+
+def _comparison_exclusion_reason(
+    baseline_exec_ns: float | None,
+    rejit_exec_ns: float | None,
+    *,
+    had_post_rejit: bool,
+    any_applied: bool,
+    apply_record: Mapping[str, object],
+) -> str:
+    apply_error = str(apply_record.get("error") or "").strip()
+    if baseline_exec_ns is None:
+        return "missing_baseline_exec_ns"
+    if baseline_exec_ns <= 0.0:
+        return "non_positive_baseline_exec_ns"
+    if not had_post_rejit:
+        if apply_error:
+            return f"apply_error: {apply_error}"
+        if not any_applied:
+            return "no_programs_applied_in_loader"
+        return "missing_post_rejit_measurement"
+    if rejit_exec_ns is None:
+        if apply_error:
+            return f"apply_error: {apply_error}"
+        return "missing_rejit_exec_ns"
+    if rejit_exec_ns <= 0.0:
+        return "non_positive_rejit_exec_ns"
+    return ""
+
+
+def _build_program_measurements(
+    app_name: str,
+    live_programs: Sequence[Mapping[str, object]],
+    baseline_programs: Mapping[str, Mapping[str, object]],
+    rejit_programs: Mapping[str, Mapping[str, object]],
+    apply_result: Mapping[str, object],
+    *,
+    had_post_rejit: bool,
+) -> dict[str, dict[str, object]]:
+    rows: dict[str, dict[str, object]] = {}
+    any_applied = rejit_result_has_any_apply(apply_result)
+    for live_program in live_programs:
+        prog_id = int(live_program.get("id", 0) or 0)
+        if prog_id <= 0:
+            continue
+        program_name = str(live_program.get("name") or f"prog_{prog_id}")
+        baseline_record = dict(baseline_programs.get(str(prog_id), {}))
+        rejit_record = dict(rejit_programs.get(str(prog_id), {}))
+        apply_record = rejit_program_result(apply_result, prog_id)
+        if not apply_record and isinstance(apply_result, Mapping):
+            apply_record = {
+                "applied": bool(apply_result.get("applied")),
+                "error": str(apply_result.get("error") or ""),
+                "counts": dict(apply_result.get("counts") or {}) if isinstance(apply_result.get("counts"), Mapping) else {},
+            }
+        baseline_exec_ns = _phase_exec_ns(baseline_record)
+        rejit_exec_ns = _phase_exec_ns(rejit_record)
+        comparable = (
+            baseline_exec_ns is not None
+            and baseline_exec_ns > 0.0
+            and rejit_exec_ns is not None
+            and rejit_exec_ns > 0.0
+        )
+        speedup = (baseline_exec_ns / rejit_exec_ns) if comparable else None
+        exclusion_reason = ""
+        if not comparable:
+            exclusion_reason = _comparison_exclusion_reason(
+                baseline_exec_ns,
+                rejit_exec_ns,
+                had_post_rejit=had_post_rejit,
+                any_applied=any_applied,
+                apply_record=apply_record,
+            )
+        rows[str(prog_id)] = {
+            "id": prog_id,
+            "label": _program_label(app_name, program_name, prog_id),
+            "name": program_name,
+            "type": str(live_program.get("type") or _infer_prog_type_name(live_program)),
+            "applied": bool(apply_record.get("applied")),
+            "comparable": comparable,
+            "speedup": speedup,
+            "comparison_exclusion_reason": exclusion_reason,
+            "baseline": baseline_record,
+            "rejit": rejit_record if had_post_rejit else {},
+            "apply": apply_record,
+        }
+    return rows
+
+
+def _comparison_rows(
+    results: Sequence[Mapping[str, object]],
+) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]]]:
+    comparable_rows: list[dict[str, object]] = []
+    applied_rows: list[dict[str, object]] = []
+    excluded_rows: list[dict[str, object]] = []
+    for result in results:
+        app_name = str(result.get("app") or "")
+        for row in (result.get("program_measurements") or {}).values():
+            if not isinstance(row, Mapping):
+                continue
+            row_payload = dict(row)
+            row_payload["app"] = app_name
+            if bool(row.get("comparable")):
+                comparable_rows.append(row_payload)
+                if bool(row.get("applied")):
+                    applied_rows.append(row_payload)
+                continue
+            excluded_rows.append(
+                {
+                    "app": app_name,
+                    "program_id": int(row.get("id", 0) or 0),
+                    "program": str(row.get("name") or ""),
+                    "label": str(row.get("label") or ""),
+                    "applied": bool(row.get("applied")),
+                    "reason": str(row.get("comparison_exclusion_reason") or "unknown"),
+                    "apply_error": str(((row.get("apply") or {}).get("error")) or ""),
+                }
+            )
+    return comparable_rows, applied_rows, excluded_rows
+
+
+def _per_app_breakdown(results: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
+    breakdown: list[dict[str, object]] = []
+    for result in results:
+        program_rows = [
+            dict(row)
+            for row in (result.get("program_measurements") or {}).values()
+            if isinstance(row, Mapping)
+        ]
+        comparable_speedups = [
+            float(row["speedup"])
+            for row in program_rows
+            if bool(row.get("comparable")) and isinstance(row.get("speedup"), (int, float))
+        ]
+        applied_speedups = [
+            float(row["speedup"])
+            for row in program_rows
+            if bool(row.get("applied")) and bool(row.get("comparable")) and isinstance(row.get("speedup"), (int, float))
+        ]
+        exclusions = [
+            {
+                "program_id": int(row.get("id", 0) or 0),
+                "program": str(row.get("name") or ""),
+                "label": str(row.get("label") or ""),
+                "reason": str(row.get("comparison_exclusion_reason") or "unknown"),
+            }
+            for row in program_rows
+            if not bool(row.get("comparable"))
+        ]
+        breakdown.append(
+            {
+                "app": str(result.get("app") or ""),
+                "runner": str(result.get("runner") or ""),
+                "workload": str(result.get("selected_workload") or ""),
+                "status": str(result.get("status") or ""),
+                "program_count": len(program_rows),
+                "applied_program_count": sum(1 for row in program_rows if bool(row.get("applied"))),
+                "comparable_program_count": len(comparable_speedups),
+                "sample_count": len(comparable_speedups),
+                "applied_only_geomean": geometric_mean(applied_speedups),
+                "all_comparable_geomean": geometric_mean(comparable_speedups),
+                "comparison_exclusions": exclusions,
+            }
+        )
+    return breakdown
+
+
+def _build_summary(
+    results: Sequence[Mapping[str, object]],
+    *,
+    selected_apps: int,
+    status_counts: Mapping[str, int],
+) -> dict[str, object]:
+    comparable_rows, applied_rows, excluded_rows = _comparison_rows(results)
+    comparable_speedups = [
+        float(row["speedup"])
+        for row in comparable_rows
+        if isinstance(row.get("speedup"), (int, float))
+    ]
+    applied_speedups = [
+        float(row["speedup"])
+        for row in applied_rows
+        if isinstance(row.get("speedup"), (int, float))
+    ]
+    exclusion_reason_counts = Counter(str(row.get("reason") or "unknown") for row in excluded_rows)
+    discovered_programs = sum(
+        len(result.get("program_measurements") or {})
+        for result in results
+        if isinstance(result, Mapping)
+    )
+    return {
+        "selected_apps": selected_apps,
+        "discovered_programs": discovered_programs,
+        "statuses": dict(sorted(status_counts.items())),
+        "sample_count": len(comparable_speedups),
+        "applied_sample_count": len(applied_speedups),
+        "applied_only_geomean": geometric_mean(applied_speedups),
+        "all_comparable_geomean": geometric_mean(comparable_speedups),
+        "comparison_exclusion_reasons": excluded_rows,
+        "comparison_exclusion_reason_counts": dict(sorted(exclusion_reason_counts.items())),
+        "per_app": _per_app_breakdown(results),
+    }
+
+
+def _format_ratio(value: object) -> str:
+    if not isinstance(value, (int, float)) or float(value) <= 0.0:
+        return "n/a"
+    return f"{float(value):.3f}x"
+
+
+def build_markdown(payload: Mapping[str, object]) -> str:
+    summary = payload.get("summary") if isinstance(payload.get("summary"), Mapping) else {}
+    lines = [
+        "# Corpus Authoritative Summary",
+        "",
+        f"- Generated: {payload.get('generated_at')}",
+        f"- Manifest: `{payload.get('manifest')}`",
+        f"- Daemon: `{payload.get('daemon')}`",
+        f"- Repeat: `{payload.get('repeat')}`",
+        f"- Workload seconds: `{payload.get('workload_seconds')}`",
+        f"- Status: `{payload.get('status')}`",
+        f"- Applied-only geomean (baseline/rejit): `{_format_ratio(summary.get('applied_only_geomean'))}`",
+        f"- All-comparable geomean (baseline/rejit): `{_format_ratio(summary.get('all_comparable_geomean'))}`",
+        f"- Sample count: `{summary.get('sample_count')}`",
+        "",
+        "## Per-App Breakdown",
+        "",
+        "| App | Runner | Workload | Programs | Applied | Comparable | Applied-only | All-comparable |",
+        "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for row in summary.get("per_app") or []:
+        if not isinstance(row, Mapping):
+            continue
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    str(row.get("app") or ""),
+                    str(row.get("runner") or ""),
+                    str(row.get("workload") or ""),
+                    str(int(row.get("program_count", 0) or 0)),
+                    str(int(row.get("applied_program_count", 0) or 0)),
+                    str(int(row.get("comparable_program_count", 0) or 0)),
+                    _format_ratio(row.get("applied_only_geomean")),
+                    _format_ratio(row.get("all_comparable_geomean")),
+                ]
+            )
+            + " |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Comparison Exclusion Reasons",
+            "",
+        ]
+    )
+    exclusion_counts = summary.get("comparison_exclusion_reason_counts") or {}
+    if not exclusion_counts:
+        lines.append("- none")
+    else:
+        for reason, count in sorted(exclusion_counts.items()):
+            lines.append(f"- `{reason}`: `{count}`")
+    return "\n".join(lines)
+
+
 def _run_app(
     app: AppSpec,
     *,
     daemon_session: DaemonSession,
     workload_seconds: float,
+    repeat: int,
 ) -> dict[str, object]:
+    selected_workload = app.workload_for("corpus")
     runner = get_app_runner(
         app.runner,
         app_name=app.name,
-        workload=app.workload,
+        workload=selected_workload,
         **app.args,
     )
     prog_ids: list[int] = []
@@ -172,8 +467,11 @@ def _run_app(
     baseline_phase: dict[int, dict[str, object]] = {}
     rejit_phase: dict[int, dict[str, object]] = {}
     baseline_workload: dict[str, object] | None = None
+    baseline_workloads: list[dict[str, object]] = []
     rejit_workload: dict[str, object] | None = None
+    rejit_workloads: list[dict[str, object]] = []
     apply_result: dict[str, object] = {}
+    had_post_rejit = False
 
     try:
         prog_ids = [int(value) for value in runner.start() if int(value) > 0]
@@ -184,20 +482,25 @@ def _run_app(
             raise RuntimeError(f"{app.name}: app runner did not expose any live programs")
 
         with enable_bpf_stats():
-            baseline_workload = runner.run_workload(workload_seconds).to_dict()
+            for _ in range(repeat):
+                baseline_workload = runner.run_workload(workload_seconds).to_dict()
+                baseline_workloads.append(dict(baseline_workload))
             baseline_snapshot = read_program_stats(prog_ids)
             apply_result = daemon_session.apply_rejit(
                 prog_ids,
                 enabled_passes=benchmark_rejit_enabled_passes(),
             )
             rejit_snapshot: Mapping[int, Mapping[str, object]] = {}
-            if bool(apply_result.get("applied")):
-                rejit_workload = runner.run_workload(workload_seconds).to_dict()
+            had_post_rejit = rejit_result_has_any_apply(apply_result)
+            if had_post_rejit:
+                for _ in range(repeat):
+                    rejit_workload = runner.run_workload(workload_seconds).to_dict()
+                    rejit_workloads.append(dict(rejit_workload))
                 rejit_snapshot = read_program_stats(prog_ids)
 
         baseline_phase = _program_phase_stats(baseline_snapshot)
         _validate_phase_measurement("baseline", baseline_phase, live_programs)
-        if bool(apply_result.get("applied")):
+        if had_post_rejit:
             rejit_phase = _program_phase_stats(rejit_snapshot, baseline_snapshot)
             _validate_phase_measurement("rejit", rejit_phase, live_programs)
     finally:
@@ -205,31 +508,42 @@ def _run_app(
 
     programs_by_id = _program_stats_by_prog_id(baseline_phase, prog_ids)
     rejit_programs_by_id = _program_stats_by_prog_id(rejit_phase, prog_ids)
-    status = "ok" if bool(apply_result.get("applied")) else "error"
     error = str(apply_result.get("error") or "").strip()
-    if status == "error" and not error:
-        error = "daemon apply did not report success"
+    status = "error" if error else "ok"
+    program_measurements = _build_program_measurements(
+        app.name,
+        live_programs,
+        programs_by_id,
+        rejit_programs_by_id,
+        apply_result,
+        had_post_rejit=had_post_rejit,
+    )
 
     return {
         "app": app.name,
         "runner": app.runner,
-        "workload": app.workload,
+        "workload": _workload_payload(app.workload),
+        "selected_workload": selected_workload,
         "args": dict(app.args),
         "status": status,
         "error": error,
         "prog_ids": prog_ids,
         "programs": live_programs,
+        "program_measurements": program_measurements,
         "baseline": {
             "programs": programs_by_id,
             "exec_ns_mean": _mean_exec_ns(programs_by_id),
         },
         "baseline_workload": baseline_workload,
+        "baseline_workloads": baseline_workloads,
         "rejit_apply": dict(apply_result),
         "rejit": {
             "programs": rejit_programs_by_id,
             "exec_ns_mean": _mean_exec_ns(rejit_programs_by_id),
-        } if rejit_phase else None,
+        } if had_post_rejit else None,
+        "had_post_rejit_measurement": had_post_rejit,
         "rejit_workload": rejit_workload,
+        "rejit_workloads": rejit_workloads,
         "process": dict(getattr(runner, "process_output", {})),
         "command_used": [str(item) for item in (getattr(runner, "command_used", []) or [])],
     }
@@ -250,24 +564,40 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
     results: list[dict[str, object]] = []
     fatal_error = ""
 
-    with DaemonSession.start(daemon_binary) as daemon_session:
+    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
         for app in suite.apps:
+            _print_progress(
+                "app_start",
+                app=app.name,
+                runner=app.runner,
+                workload=app.workload_for("corpus"),
+            )
             try:
                 result = _run_app(
                     app,
                     daemon_session=daemon_session,
                     workload_seconds=workload_seconds,
+                    repeat=repeat,
                 )
             except Exception as exc:
                 result = {
                     "app": app.name,
                     "runner": app.runner,
-                    "workload": app.workload,
+                    "workload": _workload_payload(app.workload),
+                    "selected_workload": app.workload_for("corpus"),
                     "args": dict(app.args),
                     "status": "error",
                     "error": str(exc),
+                    "program_measurements": {},
                 }
             results.append(result)
+            _print_progress(
+                "app_done",
+                app=app.name,
+                status=result.get("status"),
+                error=result.get("error"),
+                program_count=len(result.get("program_measurements") or {}),
+            )
             daemon_error = _daemon_exit_error(daemon_session)
             if daemon_error is not None:
                 fatal_error = daemon_error
@@ -282,16 +612,18 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                     {
                         "app": app.name,
                         "runner": app.runner,
-                        "workload": app.workload,
+                        "workload": _workload_payload(app.workload),
+                        "selected_workload": app.workload_for("corpus"),
                         "args": dict(app.args),
                         "status": "error",
                         "error": fatal_error,
+                        "program_measurements": {},
                     }
                 )
         daemon_socket = str(daemon_session.socket_path)
+        kinsn_metadata = dict(getattr(daemon_session, "kinsn_metadata", {}) or {})
 
     status_counts = Counter(str(result.get("status") or "error") for result in results)
-    live_program_count = sum(len(result.get("programs") or []) for result in results if isinstance(result, Mapping))
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "manifest": str(suite_path),
@@ -303,11 +635,12 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
         "workload_seconds": workload_seconds,
         "suite_summary": suite_summary,
         "results": results,
-        "summary": {
-            "selected_apps": len(suite.apps),
-            "discovered_programs": live_program_count,
-            "statuses": dict(sorted(status_counts.items())),
-        },
+        "kinsn_modules": kinsn_metadata,
+        "summary": _build_summary(
+            results,
+            selected_apps=len(suite.apps),
+            status_counts=status_counts,
+        ),
         "status": "ok" if status_counts.get("error", 0) == 0 else "error",
     }
     if fatal_error:
@@ -318,10 +651,22 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     payload = run_suite(args)
-    output_path = Path(args.output_json).resolve()
-    ensure_parent(output_path)
-    write_json(output_path, payload)
-    print(json.dumps({"status": payload["status"], "output_json": str(output_path)}, indent=2))
+    output_json = Path(args.output_json).resolve()
+    output_md = Path(args.output_md).resolve()
+    ensure_parent(output_json)
+    ensure_parent(output_md)
+    write_json(output_json, payload)
+    write_text(output_md, build_markdown(payload) + "\n")
+    print(
+        json.dumps(
+            {
+                "status": payload["status"],
+                "output_json": str(output_json),
+                "output_md": str(output_md),
+            },
+            indent=2,
+        )
+    )
     return 0 if payload["status"] == "ok" else 1
 
 

@@ -6,11 +6,13 @@ import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from runner.libs import case_common
 from e2e import run as e2e_run
+from runner.libs.app_suite_schema import AppSpec, AppWorkload
 from runner.libs import smoke_output_path
 
 
@@ -158,3 +160,52 @@ def test_build_parser_leaves_rejit_passes_unset_by_default() -> None:
     args = e2e_run.build_parser().parse_args(["tracee"])
 
     assert args.rejit_passes is None
+
+
+def test_apply_suite_case_config_rewrites_bcc_config_from_shared_suite(tmp_path: Path) -> None:
+    config_path = tmp_path / "bcc.yaml"
+    config_path.write_text(
+        yaml.safe_dump(
+            {
+                "tools": [
+                    {
+                        "name": "execsnoop",
+                        "workload_kind": "exec_loop",
+                        "expected_programs": 2,
+                        "spawn_timeout_s": 15,
+                    },
+                    {
+                        "name": "opensnoop",
+                        "workload_kind": "file_open",
+                        "expected_programs": 2,
+                        "spawn_timeout_s": 15,
+                    },
+                ]
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    args = argparse.Namespace(
+        case="bcc",
+        config=str(config_path),
+        tools=None,
+    )
+    suite_case_apps = {
+        "bcc": [
+            AppSpec(
+                name="bcc/execsnoop",
+                runner="bcc",
+                workload=AppWorkload(corpus="exec_storm", e2e="exec_storm"),
+                args={"tool": "execsnoop"},
+            )
+        ]
+    }
+
+    e2e_run.apply_suite_case_config(args, suite_case_apps)
+
+    rewritten = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
+    assert args.tools == ["execsnoop"]
+    assert [entry["name"] for entry in rewritten["tools"]] == ["execsnoop"]
+    assert rewritten["tools"][0]["workload_kind"] == "exec_storm"
+    e2e_run._cleanup_suite_temp_paths(args)

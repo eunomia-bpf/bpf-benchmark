@@ -442,12 +442,29 @@ def build_xdp_tutorial(stage_root: Path, jobs: int) -> RepoBuildResult:
     repo_dir = repo_checkout("xdp-tutorial")
     xdp_tools_dir = repo_checkout("xdp-tools")
     loader_dir = xdp_tools_dir / "xdp-loader"
+    extra_cflags = "-Wno-error=macro-redefined -Wno-macro-redefined"
 
     clean_stage_dir(stage_root)
     run(["make", f"-j{jobs}"], cwd=xdp_tools_dir)
-    run(["make", f"-j{jobs}", f"LOADER_DIR={loader_dir}"], cwd=repo_dir)
+    run(
+        [
+            "make",
+            f"-j{jobs}",
+            f"LOADER_DIR={loader_dir}",
+            f"EXTRA_CFLAGS={extra_cflags}",
+        ],
+        cwd=repo_dir,
+    )
     for extra_dir in ("advanced03-AF_XDP", "experiment01-tailgrow"):
-        run(["make", f"-j{jobs}", f"LOADER_DIR={loader_dir}"], cwd=repo_dir / extra_dir)
+        run(
+            [
+                "make",
+                f"-j{jobs}",
+                f"LOADER_DIR={loader_dir}",
+                f"EXTRA_CFLAGS={extra_cflags}",
+            ],
+            cwd=repo_dir / extra_dir,
+        )
 
     object_paths = [path for path in sorted(repo_dir.rglob("*.o")) if is_bpf_object(path)]
     object_count = stage_many(

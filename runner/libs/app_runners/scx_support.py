@@ -63,24 +63,31 @@ def preferred_path() -> str:
 
 def read_scx_state() -> str:
     path = Path("/sys/kernel/sched_ext/state")
+    if not path.is_file():
+        raise RuntimeError(f"sched_ext state file is missing: {path}")
     try:
         return path.read_text().strip()
-    except OSError:
-        return "missing"
+    except OSError as exc:
+        raise RuntimeError(f"failed to read sched_ext state from {path}: {exc}") from exc
 
 
 def read_scx_ops() -> list[str]:
     root = Path("/sys/kernel/sched_ext")
     if not root.exists():
-        return []
+        raise RuntimeError(f"sched_ext root is missing: {root}")
     values: list[str] = []
-    for candidate in sorted(root.glob("*/ops")):
+    candidates = sorted(root.glob("*/ops"))
+    if not candidates:
+        raise RuntimeError(f"sched_ext ops entries are missing under {root}")
+    for candidate in candidates:
         try:
             text = candidate.read_text().strip()
-        except OSError:
-            continue
+        except OSError as exc:
+            raise RuntimeError(f"failed to read sched_ext ops entry {candidate}: {exc}") from exc
         if text:
             values.append(text)
+    if not values:
+        raise RuntimeError(f"sched_ext ops entries under {root} were empty")
     return values
 
 
@@ -99,7 +106,8 @@ class ScxSchedulerSession:
     def __enter__(self) -> "ScxSchedulerSession":
         command_text = " ".join(
             [
-                "ulimit -l unlimited >/dev/null 2>&1 || true;",
+                "set -euo pipefail;",
+                "ulimit -l unlimited;",
                 "exec",
                 shlex.quote(str(self.binary)),
                 "--stats",
@@ -116,11 +124,15 @@ class ScxSchedulerSession:
         self.stdout_thread.start()
         self.stderr_thread.start()
 
-        healthy = wait_healthy(
-            self.process,
-            self.load_timeout,
-            lambda: read_scx_state() == "enabled" and bool(self._discover_programs()),
-        )
+        try:
+            healthy = wait_healthy(
+                self.process,
+                self.load_timeout,
+                lambda: read_scx_state() == "enabled" and bool(self._discover_programs()),
+            )
+        except Exception:
+            self.close()
+            raise
         if not healthy:
             snapshot = self.collector.snapshot()
             details = tail_text(

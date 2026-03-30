@@ -8,6 +8,7 @@ import statistics
 import sys
 import threading
 import time
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Mapping, Sequence
@@ -42,6 +43,7 @@ from runner.libs.case_common import (  # noqa: E402
     host_metadata,
     percent_delta,
     prepare_daemon_session,
+    rejit_result_has_any_apply,
     run_case_lifecycle,
 )
 
@@ -50,7 +52,6 @@ DEFAULT_SCRIPT_DIR = Path(__file__).with_name("scripts")
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "bpftrace")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bpftrace-real-e2e-report.md"
-DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_DURATION_S = 30
 MIN_BPFTRACE_VERSION = (0, 16, 0)
@@ -61,7 +62,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--report-md", default=str(DEFAULT_REPORT_MD))
-    parser.add_argument("--runner", default=str(DEFAULT_RUNNER))
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--duration", type=int, default=30)
     parser.add_argument("--smoke-duration", type=int, default=5)
@@ -91,9 +91,7 @@ def version_at_least(version: tuple[int, int, int] | None, minimum: tuple[int, i
     return version is not None and version >= minimum
 
 
-def ensure_artifacts(runner_binary: Path, daemon_binary: Path) -> None:
-    if not runner_binary.exists():
-        raise RuntimeError(f"micro_exec not found: {runner_binary}")
+def ensure_artifacts(daemon_binary: Path) -> None:
     if not daemon_binary.exists():
         raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
 
@@ -129,12 +127,18 @@ def ensure_required_tools() -> dict[str, object]:
 
 
 def selected_scripts(args: argparse.Namespace) -> list[ScriptSpec]:
+    workload_overrides = getattr(args, "_suite_workload_overrides", {}) or {}
     if args.smoke:
-        return [next(spec for spec in SCRIPTS if spec.name == "capable")]
-    if not args.scripts:
-        return list(SCRIPTS)
-    wanted = {name.strip() for name in args.scripts if name and name.strip()}
-    return [spec for spec in SCRIPTS if spec.name in wanted]
+        selected = [next(spec for spec in SCRIPTS if spec.name == "capable")]
+    elif not args.scripts:
+        selected = list(SCRIPTS)
+    else:
+        wanted = {name.strip() for name in args.scripts if name and name.strip()}
+        selected = [spec for spec in SCRIPTS if spec.name in wanted]
+    return [
+        replace(spec, workload_kind=str(workload_overrides.get(spec.name) or spec.workload_kind))
+        for spec in selected
+    ]
 
 
 def aggregate_site_totals(records: Mapping[int, Mapping[str, object]]) -> dict[str, int]:
@@ -327,11 +331,14 @@ def run_phase(
 
     rejit: dict[str, object] | None = None
     if baseline["status"] == "ok" and rejit_apply is not None:
-        if rejit_apply.get("applied"):
+        if rejit_result_has_any_apply(rejit_apply):
+            rejit_reason = ""
+            if post_measurement is None:
+                rejit_reason = "post-ReJIT measurement is missing"
             rejit = {
                 "phase": "post_rejit",
-                "status": "ok",
-                "reason": "",
+                "status": "ok" if not rejit_reason else "error",
+                "reason": rejit_reason,
                 "programs": programs,
                 "prog_ids": prog_ids,
                 "scan_results": baseline["scan_results"],
@@ -601,9 +608,8 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")
 
-    runner_binary = Path(args.runner).resolve()
     daemon_binary = Path(args.daemon).resolve()
-    ensure_artifacts(runner_binary, daemon_binary)
+    ensure_artifacts(daemon_binary)
     tool_versions = ensure_required_tools()
 
     scripts = selected_scripts(args)
@@ -669,7 +675,6 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
         "smoke": bool(args.smoke),
         "duration_s": duration_s,
         "selected_scripts": [spec.name for spec in scripts],
-        "runner": str(runner_binary),
         "daemon": str(daemon_binary),
         "host": host_metadata(),
         "tool_versions": tool_versions,
@@ -690,7 +695,7 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
 def main() -> None:
     args = parse_args()
     daemon_binary = Path(args.daemon).resolve()
-    with DaemonSession.start(daemon_binary) as daemon_session:
+    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
         args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
         payload = run_case(args)
     attach_pending_result_metadata(payload)

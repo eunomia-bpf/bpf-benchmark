@@ -4,6 +4,7 @@ from collections import Counter
 import json
 import re
 import shutil
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping
@@ -119,12 +120,14 @@ def repo_relative_path(path: Path) -> str:
 
 def _managed_run_artifact_metadata(path: Path) -> dict[str, Any] | None:
     metadata_path = path / "metadata.json"
-    try:
-        if not metadata_path.is_file():
-            return None
-        payload = json.loads(metadata_path.read_text())
-    except (OSError, json.JSONDecodeError):
+    if not metadata_path.is_file():
         return None
+    try:
+        payload = json.loads(metadata_path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"failed to read artifact metadata from {metadata_path}: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"artifact metadata is not a JSON object: {metadata_path}")
     if (
         payload.get("artifact_kind") == ARTIFACT_KIND
         and payload.get("artifact_version") == ARTIFACT_VERSION
@@ -137,11 +140,26 @@ def _is_managed_run_artifact(path: Path) -> bool:
     return _managed_run_artifact_metadata(path) is not None
 
 
+def _drop_corrupt_run_artifact(path: Path, exc: RuntimeError) -> None:
+    print(
+        f"warning: removing corrupt run artifact {path}: {exc}",
+        file=sys.stderr,
+    )
+    shutil.rmtree(path)
+
+
 def clear_previous_run_artifacts(results_dir: Path) -> None:
     if not results_dir.is_dir():
         return
     for child in results_dir.iterdir():
-        if child.is_dir() and _is_managed_run_artifact(child):
+        if not child.is_dir():
+            continue
+        try:
+            managed = _is_managed_run_artifact(child)
+        except RuntimeError as exc:
+            _drop_corrupt_run_artifact(child, exc)
+            continue
+        if managed:
             shutil.rmtree(child)
 
 
@@ -157,7 +175,11 @@ def clear_previous_run_details(results_dir: Path, *, run_type: str, keep_run_dir
         if child.resolve() == keep_resolved:
             continue
 
-        metadata = _managed_run_artifact_metadata(child)
+        try:
+            metadata = _managed_run_artifact_metadata(child)
+        except RuntimeError as exc:
+            _drop_corrupt_run_artifact(child, exc)
+            continue
         if metadata is None:
             continue
         if sanitize_artifact_token(str(metadata.get("run_type", ""))) != normalized_run_type:

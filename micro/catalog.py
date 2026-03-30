@@ -7,7 +7,7 @@ from typing import Any, Mapping, Sequence
 import yaml
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MICRO_MANIFEST = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
 
 
@@ -92,8 +92,6 @@ class CatalogTarget:
     input_generator: str | None = None
     expected_result: int | None = None
     test_method: str | None = None
-    trigger: str | None = None
-    trigger_timeout_seconds: int | None = None
     category: str | None = None
     family: str | None = None
     level: str | None = None
@@ -103,10 +101,6 @@ class CatalogTarget:
     policy_modes: tuple[str, ...] = ()
     transports: tuple[str, ...] = ()
     metadata: Mapping[str, object] = field(default_factory=dict)
-
-    @property
-    def program_object(self) -> Path:
-        return self.object_path
 
     @property
     def kernel_input_size(self) -> int:

@@ -18,7 +18,9 @@ from ..workload import (
     run_bind_storm,
     run_dd_read_load,
     run_exec_storm,
+    run_file_io,
     run_file_open_load,
+    run_named_workload as run_shared_workload,
     run_scheduler_load,
     run_tcp_connect_load,
     run_user_exec_loop,
@@ -153,6 +155,9 @@ def wait_for_attached_programs(
 
 def _run_named_workload(kind: str, duration_s: float) -> WorkloadResult:
     whole_seconds = max(1, int(round(duration_s)))
+    normalized = str(kind or "").strip()
+    if normalized == "mixed":
+        return _run_mixed_workload(duration_s)
     if kind == "tcp_connect":
         return run_tcp_connect_load(whole_seconds)
     if kind == "dd_read":
@@ -167,7 +172,22 @@ def _run_named_workload(kind: str, duration_s: float) -> WorkloadResult:
         return run_file_open_load(whole_seconds)
     if kind == "bind_storm":
         return run_bind_storm(whole_seconds)
-    raise RuntimeError(f"unsupported BCC workload kind: {kind!r}")
+    if normalized == "fio":
+        return run_file_io(whole_seconds)
+    if normalized == "file_open_storm":
+        return run_file_open_load(whole_seconds)
+    if normalized == "hackbench":
+        return run_scheduler_load(whole_seconds)
+    if normalized == "network":
+        # BCC's network tools are mostly connect-oriented; a TCP connect loop is
+        # the lightest workload that still fires these probes reliably in VM.
+        return run_tcp_connect_load(whole_seconds)
+    if normalized == "mixed_system":
+        return _run_mixed_workload(duration_s)
+    try:
+        return run_shared_workload(normalized, whole_seconds)
+    except RuntimeError as exc:
+        raise RuntimeError(f"unsupported BCC workload kind: {kind!r}") from exc
 
 
 def _run_mixed_workload(duration_s: float) -> WorkloadResult:
@@ -341,8 +361,6 @@ class BCCRunner:
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None:
             raise RuntimeError(f"BCC tool {self.tool_name} is not running")
-        if self.workload_kind == "mixed":
-            return _run_mixed_workload(seconds)
         return _run_named_workload(self.workload_kind, seconds)
 
     def stop(self) -> None:

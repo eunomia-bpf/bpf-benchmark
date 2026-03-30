@@ -463,11 +463,20 @@ def scan_programs(
     daemon_stderr_path: Path | None = None,
 ) -> dict[int, dict[str, Any]]:
     """Collect dry-run optimize summaries for the requested live prog_ids."""
-    del prog_fds
-
     requested_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
     if not requested_ids:
         return {}
+    if prog_fds is not None:
+        missing_prog_fds = [
+            prog_id
+            for prog_id in requested_ids
+            if int(prog_fds.get(prog_id, 0) or 0) <= 0
+        ]
+        if missing_prog_fds:
+            raise RuntimeError(
+                "scan_programs requires loader-owned prog_fds for all requested programs: "
+                + ", ".join(str(prog_id) for prog_id in missing_prog_fds)
+            )
     if daemon_socket_path is None:
         raise ValueError("scan_programs requires daemon_socket_path")
     return _scan_programs_via_socket(
@@ -895,6 +904,7 @@ def _apply_daemon_rejit_via_socket(
     per_program: dict[int, dict[str, object]] = {}
     outputs: list[str] = []
     exit_code = 0
+    applied_any = False
     all_applied = True
     total_sites = 0
     applied_sites = 0
@@ -910,12 +920,19 @@ def _apply_daemon_rejit_via_socket(
         if profile_error is not None:
             return {
                 "applied": False,
+                "applied_any": False,
+                "all_applied": False,
                 "output": str(profile_error.get("output") or ""),
                 "exit_code": int(profile_error.get("exit_code", 1) or 1),
                 "per_program": {},
                 "counts": {
                     "total_sites": 0,
                     "applied_sites": 0,
+                },
+                "program_counts": {
+                    "requested": len(requested_prog_ids),
+                    "applied": 0,
+                    "not_applied": len(requested_prog_ids),
                 },
                 "error": str(profile_error.get("error") or "profile collection failed"),
             }
@@ -931,6 +948,7 @@ def _apply_daemon_rejit_via_socket(
         per_program[prog_id] = result
         outputs.append(str(result.get("output") or ""))
         exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
+        applied_any = applied_any or bool(result.get("applied", False))
         all_applied = all_applied and bool(result.get("applied", False))
 
         counts = result.get("counts") if isinstance(result.get("counts"), Mapping) else {}
@@ -942,13 +960,20 @@ def _apply_daemon_rejit_via_socket(
             errors.append(f"prog {prog_id}: {error}")
 
     return {
-        "applied": all_applied,
+        "applied": applied_any,
+        "applied_any": applied_any,
+        "all_applied": all_applied,
         "output": "\n".join(output for output in outputs if output),
         "exit_code": exit_code,
         "per_program": per_program,
         "counts": {
             "total_sites": total_sites,
             "applied_sites": applied_sites,
+        },
+        "program_counts": {
+            "requested": len(requested_prog_ids),
+            "applied": sum(1 for record in per_program.values() if bool(record.get("applied", False))),
+            "not_applied": sum(1 for record in per_program.values() if not bool(record.get("applied", False))),
         },
         "error": "; ".join(errors),
     }

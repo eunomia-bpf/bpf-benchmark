@@ -130,6 +130,7 @@ def sample_bpf_stats(
     if not isinstance(payload, list):
         raise RuntimeError("bpftool prog show returned unexpected payload")
     stats: dict[int, dict[str, object]] = {}
+    errors: list[str] = []
     for record in payload:
         if not isinstance(record, dict):
             continue
@@ -152,10 +153,12 @@ def sample_bpf_stats(
         else:
             fd = _prog_fd_by_id(int(prog_id))
         if fd is None:
+            errors.append(f"prog_id={prog_id}: failed to resolve program FD")
             continue
         try:
             info = _prog_info_from_fd(fd)
             if info is None:
+                errors.append(f"prog_id={prog_id}: failed to read program info by FD")
                 continue
             entry = stats.setdefault(
                 int(prog_id),
@@ -177,6 +180,13 @@ def sample_bpf_stats(
             entry["bytes_xlated"] = int(info.xlated_prog_len)
         finally:
             os.close(fd)
+    missing = sorted(int(prog_id) for prog_id in wanted if int(prog_id) not in stats)
+    if missing:
+        errors.append(
+            "missing stats for requested prog_ids: " + ", ".join(str(prog_id) for prog_id in missing)
+        )
+    if errors:
+        raise RuntimeError("failed to sample BPF stats: " + "; ".join(errors))
     return stats
 
 

@@ -116,8 +116,10 @@ _tmpargs=$(mktemp /tmp/vng-wrapper.XXXXXX)
 _tmplog=$(mktemp /tmp/vng-wrapper-log.XXXXXX)
 printf '%s\0' "$@" > "$_tmpargs"
 export __VNG_WRAP=1
+set +e
 script -qfec "$_self $_tmpargs" "$_tmplog"
 _rc=$?
+set -e
 cat "$_tmplog"
 rm -f "$_tmplog"
 exit "$_rc"

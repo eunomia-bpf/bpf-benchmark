@@ -19,7 +19,6 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    resolve_bpftool_binary,
     run_command,
     run_json_command,
     smoke_output_path,
@@ -52,6 +51,7 @@ from runner.libs.case_common import (  # noqa: E402
     summarize_numbers,
     percent_delta,
     prepare_daemon_session,
+    rejit_result_has_any_apply,
     speedup_ratio,
     persist_results,
     run_case_lifecycle,
@@ -107,17 +107,6 @@ DEFAULT_WORKLOADS = (
         description="rapid loopback TCP connect storm",
     ),
 )
-
-
-
-def bpftool_binary() -> str:
-    try:
-        return resolve_bpftool_binary()
-    except RuntimeError:
-        if Path(DEFAULT_BPFTOOL).exists():
-            return DEFAULT_BPFTOOL
-        return "bpftool"
-
 
 def ensure_artifacts(daemon_binary: Path) -> None:
     if not daemon_binary.exists():
@@ -631,6 +620,7 @@ def error_payload(
 def daemon_payload(
     *,
     config: Mapping[str, object],
+    prepared_daemon_session: object,
     daemon_binary: Path,
     tetragon_binary: str,
     tetragon_extra_args: Sequence[str],
@@ -770,7 +760,6 @@ def daemon_payload(
     def cleanup(state: object) -> None:
         del state
 
-    prepared_daemon_session = getattr(args, "_prepared_daemon_session", None)
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")
     lifecycle_result = run_case_lifecycle(
@@ -818,7 +807,7 @@ def daemon_payload(
     post_rejit = lifecycle_result.post_rejit
     comparison = compare_phases(baseline, post_rejit)
     error_message = ""
-    if not rejit_result.get("applied"):
+    if not rejit_result_has_any_apply(rejit_result):
         error_message = str(rejit_result.get("error") or rejit_result.get("reason") or "").strip()
         if not error_message:
             error_message = "Tetragon reJIT did not apply"
@@ -928,6 +917,7 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
         try:
             return daemon_payload(
                 config=config,
+                prepared_daemon_session=getattr(args, "_prepared_daemon_session", None),
                 daemon_binary=daemon_binary,
                 tetragon_binary=tetragon_binary,
                 tetragon_extra_args=tetragon_extra_args,
@@ -960,7 +950,6 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--tetragon-binary")
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--runner", default=str(ROOT_DIR / "runner" / "build" / "micro_exec"))
     parser.add_argument("--bpftool", default=DEFAULT_BPFTOOL)
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
@@ -973,7 +962,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_case_parser()
     args = parser.parse_args(argv)
     daemon_binary = Path(args.daemon).resolve()
-    with DaemonSession.start(daemon_binary) as daemon_session:
+    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
         args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
         payload = run_tetragon_case(args)
     if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:

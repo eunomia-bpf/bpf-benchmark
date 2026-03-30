@@ -17,8 +17,8 @@ default_targets:
   vm-negative-test: local-x86-vng
   vm-micro-smoke: local-x86-vng
   vm-micro: local-x86-vng
-  vm-corpus: local-x86-vng
-  vm-e2e: local-x86-vng
+  vm-corpus: local-x86-vng-tcg-stable
+  vm-e2e: local-x86-vng-tcg-stable
 
 targets:
   local-x86-vng:
@@ -34,6 +34,16 @@ targets:
     executable: runner/scripts/vng-wrapper.sh
     args:
     - --disable-kvm
+    memory: 16G
+    lock_scope: vm_global
+
+  local-x86-vng-tcg-stable:
+    backend: vng
+    arch: x86_64
+    executable: runner/scripts/vng-wrapper.sh
+    args:
+    - --disable-kvm
+    cpus: 1
     memory: 16G
     lock_scope: vm_global
 

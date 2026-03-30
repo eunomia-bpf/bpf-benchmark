@@ -238,7 +238,11 @@ fn test_serve_optimize_response_omits_attempt_debug_payloads() {
     assert_eq!(parsed["program"]["prog_name"], "demo_prog");
     assert_eq!(parsed["passes"][0]["verify_error"], "BPF_PROG_REJIT: Operation not permitted");
     assert_eq!(parsed["error_message"], "BPF_PROG_REJIT: Operation not permitted");
-    assert!(parsed.get("attempts").is_none());
+    assert_eq!(parsed["attempts"].as_array().unwrap().len(), 1);
+    assert_eq!(parsed["attempts"][0]["result"], "rejit_failed");
+    assert_eq!(parsed["attempts"][0]["failure_pc"], 42);
+    assert_eq!(parsed["attempts"][0]["attributed_pass"], "map_inline");
+    assert!(parsed["attempts"][0].get("debug").is_none());
 }
 
 #[test]

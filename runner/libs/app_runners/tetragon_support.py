@@ -74,11 +74,23 @@ class TetragonAgentSession:
         self.stdout_thread.start()
         self.stderr_thread.start()
 
-        healthy = wait_healthy(
-            self.process,
-            self.load_timeout,
-            lambda: bool([item for item in find_bpf_programs(self.process.pid or 0) if int(item.get("id", -1)) not in before_ids]),
-        )
+        try:
+            healthy = wait_healthy(
+                self.process,
+                self.load_timeout,
+                lambda: bool([item for item in find_bpf_programs(self.process.pid or 0) if int(item.get("id", -1)) not in before_ids]),
+            )
+        except Exception:
+            cleanup_error: Exception | None = None
+            try:
+                self.close()
+            except Exception as exc:
+                cleanup_error = exc
+            if cleanup_error is not None:
+                raise RuntimeError(
+                    f"Tetragon health check failed and cleanup also failed: {cleanup_error}"
+                ) from cleanup_error
+            raise
         if not healthy:
             snapshot = self.collector.snapshot()
             details = tail_text("\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or [])), max_lines=40, max_chars=8000)
@@ -206,12 +218,16 @@ def run_setup_script(setup_script: Path) -> dict[str, object]:
 def resolve_tetragon_binary(explicit: str | None, setup_result: Mapping[str, object]) -> str | None:
     if explicit:
         candidate = Path(explicit).resolve()
-        if candidate.exists():
-            return str(candidate)
+        if not candidate.exists():
+            raise RuntimeError(f"Tetragon binary not found: {candidate}")
+        return str(candidate)
     scripted = str(setup_result.get("tetragon_binary") or "").strip()
-    if scripted and Path(scripted).exists():
-        return scripted
-    return which("tetragon")
+    if scripted:
+        candidate = Path(scripted).resolve()
+        if not candidate.exists():
+            raise RuntimeError(f"Tetragon setup reported a missing binary: {candidate}")
+        return str(candidate)
+    return None
 
 
 def run_exec_storm_in_cgroup(duration_s: int | float, rate: int) -> WorkloadResult:

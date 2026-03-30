@@ -7,9 +7,6 @@ from contextlib import contextmanager
 from functools import lru_cache
 from typing import Any
 
-from . import resolve_bpftool_binary, run_json_command
-
-
 BPF_STATS_RUN_TIME = 0
 BPF_TAG_SIZE = 8
 BPF_OBJ_NAME_LEN = 16
@@ -61,21 +58,24 @@ class BpfProgInfo(ctypes.Structure):
 
 @lru_cache(maxsize=1)
 def _libbpf() -> ctypes.CDLL:
-    path = ctypes.util.find_library("bpf") or "libbpf.so.1"
+    path = ctypes.util.find_library("bpf")
+    if path is None:
+        raise RuntimeError("libbpf could not be found in the current environment")
     lib = ctypes.CDLL(path, use_errno=True)
     lib.bpf_enable_stats.argtypes = [ctypes.c_int]
     lib.bpf_enable_stats.restype = ctypes.c_int
-    try:
-        lib.bpf_prog_get_fd_by_id.argtypes = [ctypes.c_uint32]
-        lib.bpf_prog_get_fd_by_id.restype = ctypes.c_int
-        lib.bpf_prog_get_info_by_fd.argtypes = [
-            ctypes.c_int,
-            ctypes.POINTER(BpfProgInfo),
-            ctypes.POINTER(ctypes.c_uint32),
-        ]
-        lib.bpf_prog_get_info_by_fd.restype = ctypes.c_int
-    except AttributeError:
-        pass
+    if not hasattr(lib, "bpf_prog_get_fd_by_id"):
+        raise RuntimeError(f"libbpf is missing bpf_prog_get_fd_by_id: {path}")
+    if not hasattr(lib, "bpf_prog_get_info_by_fd"):
+        raise RuntimeError(f"libbpf is missing bpf_prog_get_info_by_fd: {path}")
+    lib.bpf_prog_get_fd_by_id.argtypes = [ctypes.c_uint32]
+    lib.bpf_prog_get_fd_by_id.restype = ctypes.c_int
+    lib.bpf_prog_get_info_by_fd.argtypes = [
+        ctypes.c_int,
+        ctypes.POINTER(BpfProgInfo),
+        ctypes.POINTER(ctypes.c_uint32),
+    ]
+    lib.bpf_prog_get_info_by_fd.restype = ctypes.c_int
     return lib
 
 
@@ -92,20 +92,14 @@ def enable_bpf_stats() -> Any:
 
 
 def _prog_fd_by_id(prog_id: int) -> int | None:
-    try:
-        fd = int(_libbpf().bpf_prog_get_fd_by_id(int(prog_id)))
-    except AttributeError:
-        return None
+    fd = int(_libbpf().bpf_prog_get_fd_by_id(int(prog_id)))
     if fd < 0:
         return None
     return fd
 
 
 def _prog_info_from_fd(fd: int) -> BpfProgInfo | None:
-    try:
-        prog_get_info_by_fd = _libbpf().bpf_prog_get_info_by_fd
-    except AttributeError:
-        return None
+    prog_get_info_by_fd = _libbpf().bpf_prog_get_info_by_fd
     info = BpfProgInfo()
     info_len = ctypes.c_uint32(ctypes.sizeof(info))
     rc = prog_get_info_by_fd(fd, ctypes.byref(info), ctypes.byref(info_len))
@@ -119,75 +113,36 @@ def read_program_stats(prog_ids: list[int] | tuple[int, ...]) -> dict[int, dict[
     if not wanted:
         return {}
 
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
-    if not isinstance(payload, list):
-        raise RuntimeError("bpftool prog show returned unexpected payload")
-
     stats: dict[int, dict[str, object]] = {}
-    for record in payload:
-        if not isinstance(record, dict):
-            continue
-        prog_id = int(record.get("id", -1))
-        if prog_id not in wanted:
-            continue
-        run_cnt = int(record.get("run_cnt", 0) or 0)
-        run_time_ns = int(record.get("run_time_ns", 0) or 0)
-        stats[prog_id] = {
-            "id": prog_id,
-            "name": str(record.get("name", "")),
-            "type": str(record.get("type", "")),
-            "run_cnt": run_cnt,
-            "run_time_ns": run_time_ns,
-            "exec_ns": (run_time_ns / run_cnt) if run_cnt > 0 else None,
-            "bytes_jited": int(record.get("bytes_jited", 0) or 0),
-            "bytes_xlated": int(record.get("bytes_xlated", 0) or 0),
-        }
-
-    unresolved: dict[int, str] = {}
     for prog_id in sorted(wanted):
         fd = _prog_fd_by_id(prog_id)
         if fd is None:
-            if prog_id not in stats:
-                unresolved[prog_id] = "libbpf could not resolve a program FD by id"
             continue
         try:
             info = _prog_info_from_fd(fd)
             if info is None:
-                if prog_id not in stats:
-                    unresolved[prog_id] = "libbpf could not read program info from the resolved FD"
                 continue
             run_cnt = int(info.run_cnt)
             run_time_ns = int(info.run_time_ns)
-            entry = stats.setdefault(
-                prog_id,
-                {
-                    "id": prog_id,
-                    "name": "",
-                    "type": "",
-                    "run_cnt": 0,
-                    "run_time_ns": 0,
-                    "exec_ns": None,
-                    "bytes_jited": 0,
-                    "bytes_xlated": 0,
-                },
-            )
-            entry["id"] = int(info.id)
-            entry["name"] = bytes(info.name).split(b"\0", 1)[0].decode("utf-8", "replace")
-            entry["run_cnt"] = run_cnt
-            entry["run_time_ns"] = run_time_ns
-            entry["exec_ns"] = (run_time_ns / run_cnt) if run_cnt > 0 else None
-            entry["bytes_jited"] = int(info.jited_prog_len)
-            entry["bytes_xlated"] = int(info.xlated_prog_len)
+            stats[prog_id] = {
+                "id": int(info.id),
+                "name": bytes(info.name).split(b"\0", 1)[0].decode("utf-8", "replace"),
+                "type": int(info.type),
+                "run_cnt": run_cnt,
+                "run_time_ns": run_time_ns,
+                "exec_ns": (run_time_ns / run_cnt) if run_cnt > 0 else None,
+                "bytes_jited": int(info.jited_prog_len),
+                "bytes_xlated": int(info.xlated_prog_len),
+            }
         finally:
             os.close(fd)
 
     missing = sorted(prog_id for prog_id in wanted if prog_id not in stats)
     if missing:
-        details = [
-            f"{prog_id}: {unresolved.get(prog_id, 'program stats were missing from both bpftool and libbpf')}"
-            for prog_id in missing
-        ]
-        raise RuntimeError(f"failed to read BPF stats for requested program ids: {'; '.join(details)}")
+        raise RuntimeError(
+            "failed to read BPF stats for requested program ids: "
+            + ", ".join(str(prog_id) for prog_id in missing)
+        )
 
     return stats
 

@@ -8,11 +8,28 @@ import yaml
 
 
 @dataclass(frozen=True, slots=True)
+class AppWorkload:
+    corpus: str
+    e2e: str
+
+    def for_mode(self, mode: str) -> str:
+        normalized = str(mode or "").strip().lower()
+        if normalized == "corpus":
+            return self.corpus
+        if normalized == "e2e":
+            return self.e2e
+        raise ValueError(f"unsupported app workload mode: {mode!r}")
+
+
+@dataclass(frozen=True, slots=True)
 class AppSpec:
     name: str
     runner: str
-    workload: str
+    workload: AppWorkload
     args: dict[str, object] = field(default_factory=dict)
+
+    def workload_for(self, mode: str) -> str:
+        return self.workload.for_mode(mode)
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,13 +56,39 @@ def _mapping(value: Any, *, field_name: str) -> dict[str, object]:
     return {str(key): item for key, item in value.items()}
 
 
+def _workload_required(value: Any, *, field_name: str) -> AppWorkload:
+    if not isinstance(value, Mapping):
+        raise SystemExit(
+            f"invalid app suite field: {field_name} must be a mapping with corpus/e2e keys"
+        )
+    return AppWorkload(
+        corpus=_string_required(value.get("corpus"), field_name=f"{field_name}.corpus"),
+        e2e=_string_required(value.get("e2e"), field_name=f"{field_name}.e2e"),
+    )
+
+
+def _app_args(value: Any, *, field_name: str, raw_app: Mapping[str, object]) -> dict[str, object]:
+    args = _mapping(value, field_name=field_name)
+    for key, item in raw_app.items():
+        normalized_key = str(key)
+        if normalized_key in {"name", "runner", "workload", "args"}:
+            continue
+        if normalized_key in args:
+            raise SystemExit(
+                f"invalid app suite field: duplicate app arg {normalized_key!r} in {field_name}"
+            )
+        args[normalized_key] = item
+    return args
+
+
 def _matches_filter(app: AppSpec, lowered_filters: list[str]) -> bool:
     if not lowered_filters:
         return True
     haystacks = [
         app.name.lower(),
         app.runner.lower(),
-        app.workload.lower(),
+        app.workload.corpus.lower(),
+        app.workload.e2e.lower(),
         " ".join(f"{key}={value}" for key, value in sorted(app.args.items())).lower(),
     ]
     return any(any(needle in haystack for haystack in haystacks) for needle in lowered_filters)
@@ -80,8 +123,12 @@ def load_app_suite_from_yaml(
         app = AppSpec(
             name=_string_required(raw_app.get("name"), field_name=f"apps[{index}].name"),
             runner=_string_required(raw_app.get("runner"), field_name=f"apps[{index}].runner"),
-            workload=_string_required(raw_app.get("workload"), field_name=f"apps[{index}].workload"),
-            args=_mapping(raw_app.get("args"), field_name=f"apps[{index}].args"),
+            workload=_workload_required(raw_app.get("workload"), field_name=f"apps[{index}].workload"),
+            args=_app_args(
+                raw_app.get("args"),
+                field_name=f"apps[{index}].args",
+                raw_app={str(key): item for key, item in raw_app.items()},
+            ),
         )
         if app.name in seen_names:
             raise SystemExit(f"invalid app suite field: duplicate app name {app.name!r}")
@@ -113,5 +160,6 @@ def load_app_suite_from_yaml(
 __all__ = [
     "AppSpec",
     "AppSuite",
+    "AppWorkload",
     "load_app_suite_from_yaml",
 ]

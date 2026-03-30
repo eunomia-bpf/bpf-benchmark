@@ -76,11 +76,15 @@ class ManagedProcessSession:
         self.stderr_thread = threading.Thread(target=self.collector.consume_stderr, args=(self.process.stderr,), daemon=True)
         self.stdout_thread.start()
         self.stderr_thread.start()
-        healthy = wait_healthy(
-            self.process,
-            self.load_timeout_s,
-            lambda: bool(self._discover_programs()),
-        )
+        try:
+            healthy = wait_healthy(
+                self.process,
+                self.load_timeout_s,
+                lambda: bool(self._discover_programs()),
+            )
+        except Exception:
+            self.close()
+            raise
         if not healthy:
             details = tail_text(
                 "\n".join(

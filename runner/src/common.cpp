@@ -215,7 +215,7 @@ std::string benchmark_name_for_program(const std::filesystem::path &program)
         name.resize(name.size() - std::string(".o").size());
         return name;
     }
-    return program.stem().string();
+    return program.filename().string();
 }
 
 std::vector<uint8_t> materialize_memory(

@@ -38,11 +38,8 @@ def wait_healthy(
     while time.monotonic() < deadline:
         if proc.poll() is not None:
             return False
-        try:
-            if health_check_fn():
-                return True
-        except Exception:
-            pass
+        if health_check_fn():
+            return True
         time.sleep(0.5)
     return proc.poll() is None and health_check_fn()
 

@@ -360,8 +360,7 @@ void initialize_katran_test_fixture(bpf_object *object)
     bpf_map *ctl_array_map = bpf_object__find_map_by_name(object, "ctl_array");
     if (vip_map == nullptr || reals_map == nullptr || rings_map == nullptr ||
         ctl_array_map == nullptr) {
-        std::fprintf(stderr, "katran fixture: maps not found, skipping\n");
-        return;
+        fail("katran fixture missing required maps");
     }
 
     const int vip_fd = bpf_map__fd(vip_map);
@@ -807,17 +806,12 @@ struct process_runtime_state {
 
         struct btf *loaded_vmlinux_btf = btf__load_vmlinux_btf();
         if (loaded_vmlinux_btf == nullptr) {
-            std::fprintf(stderr, "vmlinux btf preload returned null\n");
-            return;
+            fail("vmlinux btf preload returned null");
         }
 
         const int load_error = libbpf_get_error(loaded_vmlinux_btf);
         if (load_error != 0) {
-            std::fprintf(
-                stderr,
-                "vmlinux btf preload failed: %s\n",
-                libbpf_error_string(load_error).c_str());
-            return;
+            fail("vmlinux btf preload failed: " + libbpf_error_string(load_error));
         }
 
         vmlinux_btf = loaded_vmlinux_btf;

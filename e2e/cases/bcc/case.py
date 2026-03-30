@@ -45,6 +45,7 @@ from runner.libs.case_common import (  # noqa: E402
     host_metadata,
     percent_delta,
     prepare_daemon_session,
+    rejit_result_has_any_apply,
     run_case_lifecycle,
 )
 
@@ -300,11 +301,14 @@ def run_phase(
 
     rejit: dict[str, object] | None = None
     if baseline["status"] == "ok" and rejit_apply is not None:
-        if rejit_apply.get("applied"):
+        if rejit_result_has_any_apply(rejit_apply):
+            rejit_reason = ""
+            if post_measurement is None:
+                rejit_reason = "post-ReJIT measurement is missing"
             rejit = {
                 "phase": "post_rejit",
-                "status": "ok",
-                "reason": "",
+                "status": "ok" if not rejit_reason else "error",
+                "reason": rejit_reason,
                 "programs": programs,
                 "prog_ids": prog_ids,
                 "scan_results": baseline["scan_results"],
@@ -746,7 +750,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
 def main() -> None:
     args = parse_args()
     daemon_binary = Path(args.daemon).resolve()
-    with DaemonSession.start(daemon_binary) as daemon_session:
+    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
         args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
         payload = run_bcc_case(args)
     attach_pending_result_metadata(payload)

@@ -21,13 +21,16 @@ from runner.libs import (
     write_text,
 )
 from runner.libs.daemon_session import DaemonSession
+from runner.libs.kinsn import (
+    capture_daemon_kinsn_discovery as _capture_daemon_kinsn_discovery,
+    capture_kinsn_module_snapshot as _capture_kinsn_module_snapshot,
+    expected_kinsn_modules as _expected_kinsn_modules,
+    relpath,
+    run_kinsn_module_loader as _run_kinsn_module_loader,
+)
 
 MAX_PERSISTED_STRING_CHARS = 16_384
 _PENDING_KINSN_METADATA: list[dict[str, object]] = []
-_KINSN_MODULE_ARCH_DIRS = {
-    "x86_64": "x86",
-    "aarch64": "arm64",
-}
 
 
 def reset_pending_result_metadata() -> None:
@@ -65,157 +68,53 @@ def _append_pending_kinsn_metadata(record: Mapping[str, object]) -> None:
     _PENDING_KINSN_METADATA.append(payload)
 
 
-def _expected_kinsn_modules() -> list[str]:
-    arch_dir = _KINSN_MODULE_ARCH_DIRS.get(platform.machine())
-    if arch_dir is None:
-        return []
-    module_dir = ROOT_DIR / "module" / arch_dir
-    if not module_dir.exists():
-        return []
-    return sorted(
-        path.stem
-        for path in module_dir.glob("bpf_*.ko")
-        if path.is_file() and path.stem != "bpf_barrier"
-    )
+def rejit_result_has_any_apply(rejit_result: Mapping[str, object] | None) -> bool:
+    if not isinstance(rejit_result, Mapping):
+        return False
+    per_program = rejit_result.get("per_program")
+    if isinstance(per_program, Mapping) and per_program:
+        return any(
+            bool(record.get("applied"))
+            for record in per_program.values()
+            if isinstance(record, Mapping)
+        )
+    counts = rejit_result.get("counts")
+    applied_sites = int(((counts or {}).get("applied_sites", 0)) or 0) if isinstance(counts, Mapping) else 0
+    return bool(rejit_result.get("applied")) or applied_sites > 0
 
 
-def _loaded_bpf_modules_from_lsmod() -> tuple[list[str], str] | None:
-    completed = run_command(["lsmod"], timeout=10, check=False)
-    if completed.returncode != 0:
-        return None
-    filtered_lines = [
-        line.rstrip()
-        for line in completed.stdout.splitlines()[1:]
-        if line.startswith("bpf_")
-    ]
-    modules = sorted({line.split()[0] for line in filtered_lines if line.split()})
-    return modules, "\n".join(filtered_lines)
+def rejit_result_all_applied(rejit_result: Mapping[str, object] | None) -> bool:
+    if not isinstance(rejit_result, Mapping):
+        return False
+    per_program = rejit_result.get("per_program")
+    if isinstance(per_program, Mapping) and per_program:
+        return all(
+            bool(record.get("applied"))
+            for record in per_program.values()
+            if isinstance(record, Mapping)
+        )
+    return bool(rejit_result.get("applied"))
 
 
-def _loaded_bpf_modules_from_sysfs() -> tuple[list[str], str]:
-    entries = sorted(path.name for path in Path("/sys/module").glob("bpf_*") if path.is_dir())
-    return entries, "\n".join(entries)
-
-
-def _capture_kinsn_module_snapshot(expected_modules: Sequence[str]) -> dict[str, object]:
-    snapshot = _loaded_bpf_modules_from_lsmod()
-    source = "lsmod"
-    if snapshot is None:
-        snapshot = _loaded_bpf_modules_from_sysfs()
-        source = "sysfs"
-
-    loaded_modules, raw_output = snapshot
-    expected = sorted({str(name) for name in expected_modules if str(name).strip()})
-    resident_expected = [name for name in expected if name in loaded_modules]
-    missing_expected = [name for name in expected if name not in resident_expected]
-    return {
-        "captured_at": datetime.now(timezone.utc).isoformat(),
-        "source": source,
-        "raw_output": raw_output,
-        "loaded_bpf_modules": loaded_modules,
-        "expected_modules": expected,
-        "resident_expected_modules": resident_expected,
-        "missing_expected_modules": missing_expected,
-    }
-
-
-def _run_kinsn_module_loader(
-    expected_modules: Sequence[str],
-    *,
-    before_snapshot: Mapping[str, object],
+def rejit_program_result(
+    rejit_result: Mapping[str, object] | None,
+    prog_id: int,
 ) -> dict[str, object]:
-    script_path = ROOT_DIR / "module" / "load_all.sh"
-    if not script_path.exists():
-        return {
-            "invoked_at": datetime.now(timezone.utc).isoformat(),
-            "script_path": relpath(script_path),
-            "status": "missing_script",
-            "exit_code": None,
-            "stdout": "",
-            "stderr": "",
-            "expected_modules": sorted({str(name) for name in expected_modules if str(name).strip()}),
-            "loaded_modules": list(before_snapshot.get("resident_expected_modules") or []),
-            "newly_loaded_modules": [],
-            "failed_modules": list(before_snapshot.get("missing_expected_modules") or []),
-            "snapshot_after": dict(before_snapshot),
-        }
-
-    completed = run_command([str(script_path)], timeout=120, check=False)
-    after_snapshot = _capture_kinsn_module_snapshot(expected_modules)
-
-    expected = list(after_snapshot.get("expected_modules") or [])
-    before_loaded = {
-        str(name)
-        for name in before_snapshot.get("resident_expected_modules") or []
-        if str(name).strip()
-    }
-    after_loaded = {
-        str(name)
-        for name in after_snapshot.get("resident_expected_modules") or []
-        if str(name).strip()
-    }
-
-    loaded_modules = [name for name in expected if name in after_loaded]
-    newly_loaded_modules = [name for name in expected if name in after_loaded and name not in before_loaded]
-    failed_modules = [name for name in expected if name not in after_loaded]
-
-    status = "ok"
-    if completed.returncode != 0:
-        status = "error"
-    elif failed_modules:
-        status = "partial"
-
-    return {
-        "invoked_at": datetime.now(timezone.utc).isoformat(),
-        "script_path": relpath(script_path),
-        "status": status,
-        "exit_code": completed.returncode,
-        "stdout": (completed.stdout or "").strip(),
-        "stderr": (completed.stderr or "").strip(),
-        "expected_modules": expected,
-        "loaded_modules": loaded_modules,
-        "newly_loaded_modules": newly_loaded_modules,
-        "failed_modules": failed_modules,
-        "snapshot_after": after_snapshot,
-    }
-
-
-def _read_text_file(path: Path | None) -> str:
-    if path is None or not path.exists():
-        return ""
-    return path.read_text(encoding="utf-8", errors="replace")
-
-
-def _capture_daemon_kinsn_discovery(stdout_path: Path | None, stderr_path: Path | None) -> dict[str, object]:
-    stdout_text = _read_text_file(stdout_path).strip()
-    stderr_text = _read_text_file(stderr_path).strip()
-    status = "ok" if "kinsn discovery:" in stderr_text else "missing"
-    return {
-        "captured_at": datetime.now(timezone.utc).isoformat(),
-        "status": status,
-        "stdout_path": relpath(stdout_path) if stdout_path is not None else None,
-        "stderr_path": relpath(stderr_path) if stderr_path is not None else None,
-        "stdout": stdout_text,
-        "stderr": stderr_text,
-        "discovery_log": stderr_text,
-    }
+    if not isinstance(rejit_result, Mapping):
+        return {}
+    per_program = rejit_result.get("per_program")
+    if not isinstance(per_program, Mapping):
+        return {}
+    record = per_program.get(int(prog_id))
+    if record is None:
+        record = per_program.get(str(int(prog_id)))
+    return dict(record) if isinstance(record, Mapping) else {}
 
 
 def _lifecycle_metadata_payload(kinsn_metadata: Mapping[str, object] | None) -> dict[str, object]:
     if kinsn_metadata is None:
         return {}
     return {"kinsn_modules": copy.deepcopy(dict(kinsn_metadata))}
-
-
-# ---------------------------------------------------------------------------
-# Path helpers
-# ---------------------------------------------------------------------------
-
-def relpath(path: Path) -> str:
-    try:
-        return path.resolve().relative_to(ROOT_DIR).as_posix()
-    except ValueError:
-        return str(path.resolve())
 
 
 # ---------------------------------------------------------------------------
@@ -273,24 +172,27 @@ def prepare_daemon_session(
     daemon_binary: Path | None = None,
 ) -> PreparedDaemonSession:
     binary = (daemon_binary or daemon_session.daemon_binary).resolve()
-    expected_modules = _expected_kinsn_modules()
-    before_snapshot = _capture_kinsn_module_snapshot(expected_modules)
-    module_load = _run_kinsn_module_loader(
-        expected_modules,
-        before_snapshot=before_snapshot,
+    metadata = copy.deepcopy(getattr(daemon_session, "kinsn_metadata", {}) or {})
+    if not metadata:
+        expected_modules = _expected_kinsn_modules()
+        before_snapshot = _capture_kinsn_module_snapshot(expected_modules)
+        module_load = _run_kinsn_module_loader(
+            expected_modules,
+            before_snapshot=before_snapshot,
+        )
+        metadata = {
+            "captured_at": datetime.now(timezone.utc).isoformat(),
+            "expected_modules": expected_modules,
+            "module_snapshot_before_daemon": before_snapshot,
+            "module_load": module_load,
+        }
+    metadata["captured_at"] = datetime.now(timezone.utc).isoformat()
+    metadata["daemon_binary"] = relpath(binary)
+    metadata["daemon_kinsn_discovery"] = _capture_daemon_kinsn_discovery(
+        daemon_session.stdout_path,
+        daemon_session.stderr_path,
     )
-    metadata = {
-        "captured_at": datetime.now(timezone.utc).isoformat(),
-        "daemon_binary": relpath(binary),
-        "expected_modules": expected_modules,
-        "module_snapshot_before_daemon": before_snapshot,
-        "module_load": module_load,
-        "daemon_kinsn_discovery": _capture_daemon_kinsn_discovery(
-            daemon_session.stdout_path,
-            daemon_session.stderr_path,
-        ),
-        "status": "ready",
-    }
+    metadata["status"] = "ready"
     return PreparedDaemonSession(
         session=daemon_session,
         metadata=metadata,
@@ -428,7 +330,7 @@ def run_case_lifecycle(
             enabled_passes=enabled_passes or benchmark_rejit_enabled_passes(),
         )
         kinsn_metadata["status"] = "completed"
-        run_post_rejit = bool(rejit_result.get("applied"))
+        run_post_rejit = rejit_result_has_any_apply(rejit_result)
         if should_run_post_rejit is not None:
             run_post_rejit = bool(should_run_post_rejit(rejit_result))
         if run_post_rejit:
@@ -446,8 +348,8 @@ def run_case_lifecycle(
         )
     except Exception as exc:
         if kinsn_metadata is not None:
-            status = str(kinsn_metadata.get("status") or "")
-            if status in {"", "pending"}:
+            status = str(kinsn_metadata.get("status") or "").strip().lower()
+            if status != "aborted":
                 kinsn_metadata["status"] = "error"
             kinsn_metadata.setdefault("error", str(exc))
         raise
@@ -467,22 +369,27 @@ def run_case_lifecycle(
 # ---------------------------------------------------------------------------
 
 def git_sha() -> str:
-    """Return the current HEAD commit hash, or 'unknown' on failure."""
-    try:
-        return run_command(["git", "rev-parse", "HEAD"], timeout=15).stdout.strip()
-    except Exception:
-        return "unknown"
+    """Return the current HEAD commit hash."""
+    value = run_command(["git", "rev-parse", "HEAD"], timeout=15).stdout.strip()
+    if not value:
+        raise RuntimeError("git rev-parse returned an empty HEAD revision")
+    return value
 
 
 def host_metadata() -> dict[str, object]:
     """Collect basic host information for result provenance."""
-    return {
+    metadata = {
         "hostname": platform.node(),
         "platform": platform.platform(),
         "kernel": platform.release(),
         "python": sys.version.split()[0],
-        "git_sha": git_sha(),
     }
+    try:
+        metadata["git_sha"] = git_sha()
+    except Exception as exc:
+        metadata["git_sha"] = None
+        metadata["git_sha_error"] = str(exc)
+    return metadata
 
 
 # ---------------------------------------------------------------------------

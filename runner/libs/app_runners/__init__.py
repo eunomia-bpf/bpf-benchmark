@@ -123,6 +123,14 @@ def _adapt_native_process(workload: str | None, app_name: str | None, kwargs: di
     return mapped
 
 
+def _adapt_katran(workload: str | None, app_name: str | None, kwargs: dict[str, object]) -> dict[str, object]:
+    del app_name
+    mapped = dict(kwargs)
+    if workload:
+        mapped.setdefault("workload_kind", str(workload).strip())
+    return mapped
+
+
 _RUNNERS: dict[str, tuple[str, str, RunnerAdapter]] = {
     "bcc": ("runner.libs.app_runners.bcc", "BCCRunner", _adapt_bcc),
     "bpftrace": ("runner.libs.app_runners.bpftrace", "BpftraceRunner", _adapt_bpftrace),
@@ -130,6 +138,7 @@ _RUNNERS: dict[str, tuple[str, str, RunnerAdapter]] = {
     "coroot-node-agent": ("runner.libs.app_runners.coroot_node_agent", "CorootNodeAgentRunner", _adapt_native_process),
     "datadog-agent": ("runner.libs.app_runners.datadog_agent", "DatadogAgentRunner", _adapt_native_process),
     "kubearmor": ("runner.libs.app_runners.kubearmor", "KubeArmorRunner", _adapt_native_process),
+    "katran": ("runner.libs.app_runners.katran", "KatranRunner", _adapt_katran),
     "libbpf-bootstrap": ("runner.libs.app_runners.libbpf_bootstrap", "LibbpfBootstrapRunner", _adapt_libbpf_bootstrap),
     "loxilb": ("runner.libs.app_runners.loxilb", "LoxilbRunner", _adapt_native_process),
     "scx": ("runner.libs.app_runners.scx", "ScxRunner", _adapt_scx),

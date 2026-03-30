@@ -11,6 +11,8 @@ from ..workload import (
     WorkloadResult,
     run_dd_read_load,
     run_exec_storm,
+    run_file_io,
+    run_named_workload as run_shared_workload,
     run_scheduler_load,
     run_tcp_connect_load,
 )
@@ -68,8 +70,8 @@ SCRIPTS: tuple[ScriptSpec, ...] = (
         name="vfsstat",
         script_path=DEFAULT_SCRIPT_DIR / "vfsstat.bt",
         description="kprobe vfs_read*/write*/fsync/open/create: per-function counters with interval printing",
-        expected_programs=6,
-        workload_kind="dd_read",
+        expected_programs=4,
+        workload_kind="vfs_create_write_fsync",
     ),
 )
 
@@ -103,15 +105,23 @@ def wait_for_attached_programs(
 
 
 def run_named_workload(kind: str, duration_s: int) -> WorkloadResult:
-    if kind == "tcp_connect":
+    normalized = str(kind or "").strip()
+    if normalized == "tcp_connect":
         return run_tcp_connect_load(duration_s)
-    if kind == "dd_read":
+    if normalized == "dd_read":
         return run_dd_read_load(duration_s)
-    if kind == "scheduler":
+    if normalized == "scheduler":
         return run_scheduler_load(duration_s)
-    if kind == "exec_storm":
+    if normalized == "exec_storm":
         return run_exec_storm(duration_s, rate=2)
-    raise RuntimeError(f"unsupported workload kind: {kind}")
+    if normalized == "fio":
+        return run_file_io(duration_s)
+    if normalized == "network":
+        return run_tcp_connect_load(duration_s)
+    try:
+        return run_shared_workload(normalized, duration_s)
+    except RuntimeError as exc:
+        raise RuntimeError(f"unsupported workload kind: {kind}") from exc
 
 
 def finalize_process_output(process: Any) -> dict[str, object]:

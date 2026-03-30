@@ -90,6 +90,8 @@ FILTERS ?=
 ITERATIONS ?= 3
 WARMUPS    ?= 1
 REPEAT     ?= 100
+VM_CORPUS_REPEAT ?= 200
+VM_CORPUS_WORKLOAD_SECONDS ?=
 BENCH      ?=
 KALLSYMS_EXTRA_PASS ?= 1
 
@@ -120,8 +122,10 @@ VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 # Benchmark args
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
 ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
-ROOT_VM_CORPUS_REPEAT_ARG := $(if $(strip $(ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT)),REPEAT="$(REPEAT)",)
+ROOT_VM_CORPUS_REPEAT_VALUE := $(if $(strip $(ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT)),$(REPEAT),$(VM_CORPUS_REPEAT))
+ROOT_VM_CORPUS_REPEAT_ARG := REPEAT="$(ROOT_VM_CORPUS_REPEAT_VALUE)"
 ROOT_VM_CORPUS_FILTERS_ARG := $(if $(strip $(FILTERS)),FILTERS="$(FILTERS)",)
+ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG := $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),VM_CORPUS_WORKLOAD_SECONDS="$(VM_CORPUS_WORKLOAD_SECONDS)",)
 
 # Incremental rebuild sources
 MICRO_RUNNER_SOURCES := $(wildcard $(RUNNER_DIR)/src/*.cpp $(RUNNER_DIR)/include/*.hpp $(RUNNER_DIR)/CMakeLists.txt)
@@ -174,7 +178,9 @@ help:
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
 	@echo "        aws-x86-launch aws-x86-setup aws-x86-benchmark aws-x86-terminate aws-x86-full aws-x86"
-	@echo "Params: ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) PROFILE=$(PROFILE) BENCH=\"...\" TARGET=\"x86|arm64|aws|...\" E2E_CASE=\"all|tracee|...\""
+	@echo "Params: vm-micro ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) BENCH=\"...\""
+	@echo "        vm-corpus REPEAT=$(VM_CORPUS_REPEAT) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) FILTERS=\"...\" TARGET=\"x86|arm64|aws|...\""
+	@echo "        vm-e2e E2E_CASE=\"all|tracee|...\" PROFILE=$(PROFILE)"
 
 # ── Build ──────────────────────────────────────────────────────────────────────
 all:
@@ -377,7 +383,7 @@ vm-corpus:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-corpus \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
 		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" \
-		$(ROOT_VM_CORPUS_REPEAT_ARG) $(ROOT_VM_CORPUS_FILTERS_ARG)
+		$(ROOT_VM_CORPUS_REPEAT_ARG) $(ROOT_VM_CORPUS_FILTERS_ARG) $(ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG)
 
 vm-e2e:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-e2e \

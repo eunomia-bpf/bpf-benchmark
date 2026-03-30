@@ -1,606 +1,143 @@
 schema_version: 1
 suite_name: macro_apps
 defaults:
-  duration_s: 10
+  duration_s: 1
+  repeat: 200
 
 apps:
-  - name: KubeArmor/default
-    runner: kubearmor
-    workload: security_policy_mix
-
   - name: bcc/capable
     runner: bcc
-    workload: exec_storm
-    args:
-      tool: capable
+    workload:
+      corpus: exec_storm
+      e2e: exec_storm
+    tool: capable
+
   - name: bcc/execsnoop
     runner: bcc
-    workload: exec_storm
-    args:
-      tool: execsnoop
+    workload:
+      corpus: exec_storm
+      e2e: exec_storm
+    tool: execsnoop
+
   - name: bcc/bindsnoop
     runner: bcc
-    workload: bind_storm
-    args:
-      tool: bindsnoop
-  - name: bcc/biolatency
-    runner: bcc
-    workload: fio
-    args:
-      tool: biolatency
-  - name: bcc/biopattern
-    runner: bcc
-    workload: fio
-    args:
-      tool: biopattern
+    workload:
+      corpus: bind_storm
+      e2e: bind_storm
+    tool: bindsnoop
+
   - name: bcc/biosnoop
     runner: bcc
-    workload: fio
-    args:
-      tool: biosnoop
-  - name: bcc/biostacks
-    runner: bcc
-    workload: fio
-    args:
-      tool: biostacks
-  - name: bcc/biotop
-    runner: bcc
-    workload: fio
-    args:
-      tool: biotop
-  - name: bcc/readahead
-    runner: bcc
-    workload: fio
-    args:
-      tool: readahead
+    workload:
+      corpus: fio
+      e2e: fio
+    tool: biosnoop
+
   - name: bcc/vfsstat
     runner: bcc
-    workload: fio
-    args:
-      tool: vfsstat
-  - name: bcc/drsnoop
-    runner: bcc
-    workload: file_open_storm
-    args:
-      tool: drsnoop
-  - name: bcc/filelife
-    runner: bcc
-    workload: file_open_storm
-    args:
-      tool: filelife
-  - name: bcc/filetop
-    runner: bcc
-    workload: file_open_storm
-    args:
-      tool: filetop
-  - name: bcc/fsdist
-    runner: bcc
-    workload: file_open_storm
-    args:
-      tool: fsdist
-  - name: bcc/fsslower
-    runner: bcc
-    workload: file_open_storm
-    args:
-      tool: fsslower
-  - name: bcc/mountsnoop
-    runner: bcc
-    workload: file_open_storm
-    args:
-      tool: mountsnoop
+    workload:
+      corpus: vfs_create_write_fsync
+      e2e: vfs_create_write_fsync
+    tool: vfsstat
+
   - name: bcc/opensnoop
     runner: bcc
-    workload: file_open_storm
-    args:
-      tool: opensnoop
-  - name: bcc/statsnoop
-    runner: bcc
-    workload: file_open_storm
-    args:
-      tool: statsnoop
+    workload:
+      corpus: file_open_storm
+      e2e: file_open_storm
+    tool: opensnoop
+
   - name: bcc/syscount
     runner: bcc
-    workload: file_open_storm
-    args:
-      tool: syscount
-  - name: bcc/solisten
-    runner: bcc
-    workload: network
-    args:
-      tool: solisten
+    workload:
+      corpus: file_open_storm
+      e2e: file_open_storm
+    tool: syscount
+
   - name: bcc/tcpconnect
     runner: bcc
-    workload: network
-    args:
-      tool: tcpconnect
-  - name: bcc/tcpconnlat
-    runner: bcc
-    workload: network
-    args:
-      tool: tcpconnlat
+    workload:
+      corpus: network
+      e2e: network
+    tool: tcpconnect
+
   - name: bcc/tcplife
     runner: bcc
-    workload: network
-    args:
-      tool: tcplife
-  - name: bcc/tcppktlat
-    runner: bcc
-    workload: network
-    args:
-      tool: tcppktlat
-  - name: bcc/tcprtt
-    runner: bcc
-    workload: network
-    args:
-      tool: tcprtt
-  - name: bcc/tcpstates
-    runner: bcc
-    workload: network
-    args:
-      tool: tcpstates
-  - name: bcc/tcpsynbl
-    runner: bcc
-    workload: network
-    args:
-      tool: tcpsynbl
-  - name: bcc/tcptop
-    runner: bcc
-    workload: network
-    args:
-      tool: tcptop
-  - name: bcc/tcptracer
-    runner: bcc
-    workload: network
-    args:
-      tool: tcptracer
-  - name: bcc/cpudist
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: cpudist
-  - name: bcc/cpufreq
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: cpufreq
-  - name: bcc/futexctn
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: futexctn
-  - name: bcc/hardirqs
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: hardirqs
-  - name: bcc/klockstat
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: klockstat
-  - name: bcc/llcstat
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: llcstat
-  - name: bcc/mdflush
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: mdflush
-  - name: bcc/memleak
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: memleak
-  - name: bcc/numamove
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: numamove
-  - name: bcc/offcputime
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: offcputime
-  - name: bcc/profile
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: profile
+    workload:
+      corpus: network
+      e2e: network
+    tool: tcplife
+
   - name: bcc/runqlat
     runner: bcc
-    workload: hackbench
-    args:
-      tool: runqlat
-  - name: bcc/runqlen
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: runqlen
-  - name: bcc/runqslower
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: runqslower
-  - name: bcc/slabratetop
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: slabratetop
-  - name: bcc/softirqs
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: softirqs
-  - name: bcc/wakeuptime
-    runner: bcc
-    workload: hackbench
-    args:
-      tool: wakeuptime
-  - name: bcc/bashreadline
-    runner: bcc
-    workload: mixed_system
-    args:
-      tool: bashreadline
-  - name: bcc/bitesize
-    runner: bcc
-    workload: mixed_system
-    args:
-      tool: bitesize
-  - name: bcc/cachestat
-    runner: bcc
-    workload: mixed_system
-    args:
-      tool: cachestat
-  - name: bcc/exitsnoop
-    runner: bcc
-    workload: mixed_system
-    args:
-      tool: exitsnoop
-  - name: bcc/funclatency
-    runner: bcc
-    workload: mixed_system
-    args:
-      tool: funclatency
-  - name: bcc/gethostlatency
-    runner: bcc
-    workload: mixed_system
-    args:
-      tool: gethostlatency
-  - name: bcc/javagc
-    runner: bcc
-    workload: mixed_system
-    args:
-      tool: javagc
-  - name: bcc/ksnoop
-    runner: bcc
-    workload: mixed_system
-    args:
-      tool: ksnoop
-  - name: bcc/oomkill
-    runner: bcc
-    workload: mixed_system
-    args:
-      tool: oomkill
-  - name: bcc/sigsnoop
-    runner: bcc
-    workload: mixed_system
-    args:
-      tool: sigsnoop
-  - name: bcc/syncsnoop
-    runner: bcc
-    workload: mixed_system
-    args:
-      tool: syncsnoop
+    workload:
+      corpus: hackbench
+      e2e: hackbench
+    tool: runqlat
 
-  - name: calico/felix
-    runner: calico
-    workload: network
-
-  - name: coroot-node-agent/default
-    runner: coroot-node-agent
-    workload: system_telemetry_mix
-
-  - name: datadog-agent/system-probe-oomkill
-    runner: datadog-agent
-    workload: oom_stress
-
-  - name: libbpf-bootstrap/bootstrap
-    runner: libbpf-bootstrap
-    workload: exec_storm
-    args:
-      app: bootstrap
-  - name: libbpf-bootstrap/fentry
-    runner: libbpf-bootstrap
-    workload: exec_storm
-    args:
-      app: fentry
-  - name: libbpf-bootstrap/kprobe
-    runner: libbpf-bootstrap
-    workload: exec_storm
-    args:
-      app: kprobe
-  - name: libbpf-bootstrap/ksyscall
-    runner: libbpf-bootstrap
-    workload: exec_storm
-    args:
-      app: ksyscall
-  - name: libbpf-bootstrap/uprobe
-    runner: libbpf-bootstrap
-    workload: exec_storm
-    args:
-      app: uprobe
-  - name: libbpf-bootstrap/usdt
-    runner: libbpf-bootstrap
-    workload: exec_storm
-    args:
-      app: usdt
-  - name: libbpf-bootstrap/lsm
-    runner: libbpf-bootstrap
-    workload: file_open_storm
-    args:
-      app: lsm
-  - name: libbpf-bootstrap/profile
-    runner: libbpf-bootstrap
-    workload: hackbench
-    args:
-      app: profile
-  - name: libbpf-bootstrap/tc
-    runner: libbpf-bootstrap
-    workload: network
-    args:
-      app: tc
-  - name: libbpf-bootstrap/task_iter
-    runner: libbpf-bootstrap
-    workload: iterator_poll
-    args:
-      app: task_iter
-  - name: libbpf-bootstrap/minimal
-    runner: libbpf-bootstrap
-    workload: minimal_syscall
-    args:
-      app: minimal
-
-  - name: loxilb/default
-    runner: loxilb
-    workload: network
-
-  - name: scx/bpfland
-    runner: scx
-    workload: hackbench
-    args:
-      scheduler: bpfland
-  - name: scx/flash
-    runner: scx
-    workload: hackbench
-    args:
-      scheduler: flash
-  - name: scx/lavd
-    runner: scx
-    workload: hackbench
-    args:
-      scheduler: lavd
   - name: scx/rusty
     runner: scx
-    workload: hackbench
-    args:
-      scheduler: rusty
-
-  - name: suricata/xdp-filter
-    runner: suricata
-    workload: network
-  - name: suricata/xdp-lb
-    runner: suricata
-    workload: network
-
-  - name: systemd/bind-iface
-    runner: systemd
-    workload: network
-    args:
-      app: bind-iface
-  - name: systemd/restrict-ifaces
-    runner: systemd
-    workload: network
-    args:
-      app: restrict-ifaces
-  - name: systemd/socket-bind
-    runner: systemd
-    workload: network
-    args:
-      app: socket-bind
-  - name: systemd/restrict-fs
-    runner: systemd
-    workload: file_open_storm
-    args:
-      app: restrict-fs
-  - name: systemd/sysctl-monitor
-    runner: systemd
-    workload: sysctl_write
-    args:
-      app: sysctl-monitor
-  - name: systemd/userns-restrict
-    runner: systemd
-    workload: userns_unshare
-    args:
-      app: userns-restrict
+    workload:
+      corpus: hackbench
+      e2e: hackbench
+    scheduler: rusty
 
   - name: tetragon/default
     runner: tetragon
-    workload: exec_storm
+    workload:
+      corpus: exec_storm
+      e2e: exec_storm
+
+  - name: katran
+    runner: katran
+    workload:
+      corpus: test_run
+      e2e: network
 
   - name: tracee/default
     runner: tracee
-    workload: tracee_default
-
-  - name: tubular/default
-    runner: tubular
-    workload: network
-
-  - name: xdp-tools/xdp_basic
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdp_basic
-  - name: xdp-tools/xdp_flowtable
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdp_flowtable
-  - name: xdp-tools/xdp_flowtable_sample
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdp_flowtable_sample
-  - name: xdp-tools/xdp_forward
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdp_forward
-  - name: xdp-tools/xdp_load_bytes
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdp_load_bytes
-  - name: xdp-tools/xdp_monitor
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdp_monitor
-  - name: xdp-tools/xdp_redirect_basic
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdp_redirect_basic
-  - name: xdp-tools/xdp_redirect_cpumap
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdp_redirect_cpumap
-  - name: xdp-tools/xdp_redirect_devmap
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdp_redirect_devmap
-  - name: xdp-tools/xdp_redirect_devmap_multi
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdp_redirect_devmap_multi
-  - name: xdp-tools/xdp_sample
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdp_sample
-  - name: xdp-tools/xdp_trafficgen
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdp_trafficgen
-  - name: xdp-tools/xdpsock
-    runner: xdp-tools
-    workload: network
-    args:
-      tool: xdpsock
-
-  - name: xdp-tutorial/advanced03-AF_XDP
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: advanced03-AF_XDP
-  - name: xdp-tutorial/basic01-xdp-pass
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: basic01-xdp-pass
-  - name: xdp-tutorial/basic02-prog-by-name
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: basic02-prog-by-name
-  - name: xdp-tutorial/basic03-map-counter
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: basic03-map-counter
-  - name: xdp-tutorial/basic04-pinning-maps
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: basic04-pinning-maps
-  - name: xdp-tutorial/experiment01-tailgrow
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: experiment01-tailgrow
-  - name: xdp-tutorial/packet-solutions
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: packet-solutions
-  - name: xdp-tutorial/packet01-parsing
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: packet01-parsing
-  - name: xdp-tutorial/packet02-rewriting
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: packet02-rewriting
-  - name: xdp-tutorial/packet03-redirecting
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: packet03-redirecting
-  - name: xdp-tutorial/tracing01-xdp-simple
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: tracing01-xdp-simple
-  - name: xdp-tutorial/tracing02-xdp-monitor
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: tracing02-xdp-monitor
-  - name: xdp-tutorial/tracing03-xdp-debug-print
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: tracing03-xdp-debug-print
-  - name: xdp-tutorial/tracing04-xdp-tcpdump
-    runner: xdp-tutorial
-    workload: network
-    args:
-      app: tracing04-xdp-tcpdump
+    workload:
+      corpus: tracee_default
+      e2e: tracee_default
 
   - name: bpftrace/capable
     runner: bpftrace
-    workload: exec_storm
-    args:
-      script: capable
+    workload:
+      corpus: exec_storm
+      e2e: exec_storm
+    script: capable
+
   - name: bpftrace/biosnoop
     runner: bpftrace
-    workload: fio
-    args:
-      script: biosnoop
+    workload:
+      corpus: fio
+      e2e: fio
+    script: biosnoop
+
   - name: bpftrace/vfsstat
     runner: bpftrace
-    workload: fio
-    args:
-      script: vfsstat
+    workload:
+      corpus: vfs_create_write_fsync
+      e2e: vfs_create_write_fsync
+    script: vfsstat
+
   - name: bpftrace/runqlat
     runner: bpftrace
-    workload: hackbench
-    args:
-      script: runqlat
+    workload:
+      corpus: hackbench
+      e2e: hackbench
+    script: runqlat
+
   - name: bpftrace/tcplife
     runner: bpftrace
-    workload: network
-    args:
-      script: tcplife
+    workload:
+      corpus: network
+      e2e: network
+    script: tcplife
+
   - name: bpftrace/tcpretrans
     runner: bpftrace
-    workload: network
-    args:
-      script: tcpretrans
+    workload:
+      corpus: network
+      e2e: network
+    script: tcpretrans

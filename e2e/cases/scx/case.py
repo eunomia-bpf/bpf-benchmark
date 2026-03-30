@@ -33,6 +33,7 @@ from runner.libs.case_common import (  # noqa: E402
     percentile,
     persist_results,
     prepare_daemon_session,
+    rejit_result_has_any_apply,
     run_case_lifecycle,
 )
 
@@ -102,6 +103,31 @@ def workload_specs() -> list[dict[str, str]]:
             "scx benchmark requires fixed workload generators in PATH: " + ", ".join(missing)
         )
     return [dict(spec) for _binary, spec in required]
+
+
+def select_workloads(
+    workloads: Sequence[Mapping[str, object]],
+    requested: Sequence[str] | None,
+) -> list[dict[str, object]]:
+    wanted = {str(value).strip() for value in (requested or []) if str(value).strip()}
+    if not wanted:
+        return [dict(spec) for spec in workloads]
+    selected = [
+        dict(spec)
+        for spec in workloads
+        if str(spec.get("name") or "").strip() in wanted or str(spec.get("kind") or "").strip() in wanted
+    ]
+    found = {
+        str(spec.get("name") or "").strip()
+        for spec in selected
+    } | {
+        str(spec.get("kind") or "").strip()
+        for spec in selected
+    }
+    missing = sorted(wanted - found)
+    if missing:
+        raise RuntimeError("unknown scx workloads selected: " + ", ".join(missing))
+    return selected
 
 
 def measure_workload(
@@ -325,92 +351,81 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary, scheduler_binary, scx_repo)
 
-    workloads = workload_specs()
+    workloads = select_workloads(workload_specs(), getattr(args, "workloads", None))
 
-    limitations: list[str] = []
     state_before = read_scx_state()
 
-    baseline: dict[str, object] | None = None
-    post_rejit: dict[str, object] | None = None
-    rejit_result: dict[str, object] | None = None
-    scan_results: dict[int, dict[str, object]] = {}
-    scheduler_programs: list[dict[str, object]] = []
-    scheduler_snapshot: dict[str, object] = {}
-    scheduler_ops: list[str] = []
-    runtime_counters_available = False
-    loader_error: str | None = None
     prepared_daemon_session = getattr(args, "_prepared_daemon_session", None)
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")
 
-    try:
-        def setup() -> dict[str, object]:
-            return {}
+    def setup() -> dict[str, object]:
+        return {}
 
-        def start(_: object) -> CaseLifecycleState:
-            runner = ScxRunner(
-                scheduler_binary=scheduler_binary,
-                scheduler_extra_args=args.scheduler_extra_arg or [],
-                load_timeout_s=int(args.load_timeout),
-                workload_spec={"name": "hackbench", "kind": "hackbench", "metric": "runs/s"},
-            )
-            runner.start()
-            return CaseLifecycleState(
-                runtime=runner,
-                target_prog_ids=[int(program["id"]) for program in runner.programs],
-                artifacts={
-                    "scheduler_programs": runner.programs,
-                },
-            )
-
-        def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
-            del phase_name
-            runner = lifecycle.runtime
-            assert isinstance(runner, ScxRunner)
-            return run_phase(runner, workloads, duration_s, agent_pid=runner.pid)
-
-        def stop(_: object, lifecycle: CaseLifecycleState) -> None:
-            runner = lifecycle.runtime
-            assert isinstance(runner, ScxRunner)
-            runner.stop()
-
-        def cleanup(_: object) -> None:
-            return None
-
-        lifecycle_result = run_case_lifecycle(
-            daemon_session=prepared_daemon_session,
-            setup=setup,
-            start=start,
-            workload=workload,
-            stop=stop,
-            cleanup=cleanup,
-            enabled_passes=benchmark_rejit_enabled_passes(),
-            should_run_post_rejit=lambda result: int(
-                (((result.get("counts") or {}).get("applied_sites", 0)) or 0)
-            ) > 0,
+    def start(_: object) -> CaseLifecycleState:
+        runner = ScxRunner(
+            scheduler_binary=scheduler_binary,
+            scheduler_extra_args=args.scheduler_extra_arg or [],
+            load_timeout_s=int(args.load_timeout),
+            workload_spec={"name": "hackbench", "kind": "hackbench", "metric": "runs/s"},
         )
-        if lifecycle_result.state is None:
-            raise RuntimeError("scx lifecycle completed without a live session")
-        runner = lifecycle_result.state.runtime
+        runner.start()
+        return CaseLifecycleState(
+            runtime=runner,
+            target_prog_ids=[int(program["id"]) for program in runner.programs],
+            artifacts={
+                "scheduler_programs": runner.programs,
+            },
+        )
+
+    def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
+        del phase_name
+        runner = lifecycle.runtime
         assert isinstance(runner, ScxRunner)
-        scheduler_programs = list(lifecycle_result.artifacts.get("scheduler_programs") or [])
-        scheduler_ops = read_scx_ops()
-        scheduler_snapshot = dict(runner.process_output)
-        runtime_counters_available = any(
-            ("run_cnt" in program) or ("run_time_ns" in program)
-            for program in scheduler_programs
-        )
-        if not runtime_counters_available:
-            limitations.append(
-                "bpftool does not expose per-program run_cnt/run_time_ns for these struct_ops programs on this kernel, so BPF runtime deltas are unavailable."
-            )
-        baseline = lifecycle_result.baseline
-        scan_results = lifecycle_result.scan_results
-        rejit_result = lifecycle_result.rejit_result
-        post_rejit = lifecycle_result.post_rejit
-    except Exception as exc:
-        loader_error = str(exc)
-        limitations.append(f"scx_rusty userspace loader failed: {loader_error}")
+        return run_phase(runner, workloads, duration_s, agent_pid=runner.pid)
+
+    def stop(_: object, lifecycle: CaseLifecycleState) -> None:
+        runner = lifecycle.runtime
+        assert isinstance(runner, ScxRunner)
+        runner.stop()
+
+    def cleanup(_: object) -> None:
+        return None
+
+    lifecycle_result = run_case_lifecycle(
+        daemon_session=prepared_daemon_session,
+        setup=setup,
+        start=start,
+        workload=workload,
+        stop=stop,
+        cleanup=cleanup,
+        enabled_passes=benchmark_rejit_enabled_passes(),
+        should_run_post_rejit=lambda result: int(
+            (((result.get("counts") or {}).get("applied_sites", 0)) or 0)
+        ) > 0,
+    )
+    if lifecycle_result.state is None:
+        raise RuntimeError("scx lifecycle completed without a live session")
+    runner = lifecycle_result.state.runtime
+    assert isinstance(runner, ScxRunner)
+    scheduler_programs = list(lifecycle_result.artifacts.get("scheduler_programs") or [])
+    scheduler_ops = read_scx_ops()
+    scheduler_snapshot = dict(runner.process_output)
+    runtime_counters_available = any(
+        ("run_cnt" in program) or ("run_time_ns" in program)
+        for program in scheduler_programs
+    )
+    if not runtime_counters_available:
+        raise RuntimeError("scx loader did not expose per-program run_cnt/run_time_ns counters")
+    baseline = lifecycle_result.baseline
+    scan_results = lifecycle_result.scan_results
+    rejit_result = lifecycle_result.rejit_result
+    post_rejit = lifecycle_result.post_rejit
+    error_message = ""
+    if isinstance(rejit_result, Mapping):
+        error_message = str(rejit_result.get("error") or "").strip()
+    if not error_message and rejit_result_has_any_apply(rejit_result) and post_rejit is None:
+        error_message = "scx post-ReJIT phase is missing"
 
     mode = "scx_rusty_loader"
     scan_summary = {
@@ -425,7 +440,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "ok" if baseline is not None else "error",
+        "status": "error" if error_message else "ok",
         "mode": mode,
         "smoke": bool(args.smoke),
         "duration_s": duration_s,
@@ -438,17 +453,16 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
             "state_before": state_before,
             "runtime_counters_available": runtime_counters_available,
             "available_workloads": [spec["name"] for spec in workloads],
-            "loader_error": loader_error,
         },
         "baseline": baseline,
         "scan_results": {str(key): value for key, value in scan_results.items()},
         "scan_summary": scan_summary,
-        "rejit_result": rejit_result if baseline is not None else None,
+        "rejit_result": rejit_result,
         "post_rejit": post_rejit,
         "comparison": compare_phases(baseline, post_rejit),
-        "limitations": limitations,
-        "error_message": loader_error,
     }
+    if error_message:
+        payload["error_message"] = error_message
     return payload
 
 
@@ -469,7 +483,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_case_parser()
     args = parser.parse_args(argv)
     daemon_binary = Path(args.daemon).resolve()
-    with DaemonSession.start(daemon_binary) as daemon_session:
+    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
         args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
         payload = run_scx_case(args)
     if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:

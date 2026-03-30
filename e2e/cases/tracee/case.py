@@ -68,6 +68,7 @@ from runner.libs.case_common import (  # noqa: E402
     percent_delta,
     prepare_daemon_session,
     persist_results,
+    rejit_result_has_any_apply,
     run_case_lifecycle,
 )
 
@@ -1457,7 +1458,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
 
                 if lifecycle_result.state is None or lifecycle_result.baseline is None:
                     raise RuntimeError(f"Tracee lifecycle cycle {cycle_index} completed without a baseline phase")
-                if not lifecycle_result.rejit_result or not lifecycle_result.rejit_result.get("applied"):
+                if not rejit_result_has_any_apply(lifecycle_result.rejit_result):
                     raise RuntimeError(f"Tracee reJIT did not apply in cycle {cycle_index}: {lifecycle_result.rejit_result}")
                 if lifecycle_result.post_rejit is None:
                     raise RuntimeError(f"Tracee post-ReJIT phase is missing in cycle {cycle_index}")
@@ -1572,7 +1573,6 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--tracee-binary")
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--runner", default=str(ROOT_DIR / "runner" / "build" / "micro_exec"))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--load-timeout", type=int, default=20)
@@ -1584,7 +1584,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_case_parser()
     args = parser.parse_args(argv)
     daemon_binary = Path(args.daemon).resolve()
-    with DaemonSession.start(daemon_binary) as daemon_session:
+    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
         args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
         payload = run_tracee_case(args)
     if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:

@@ -48,13 +48,28 @@ class _SilentHandler(BaseHTTPRequestHandler):
         del format, args
 
 
+class _ThreadingHTTPServerV6(ThreadingHTTPServer):
+    address_family = socket.AF_INET6
+
+
 class LocalHttpServer:
-    def __init__(self) -> None:
-        self.server = ThreadingHTTPServer(("127.0.0.1", 0), _SilentHandler)
+    def __init__(self, host: str = "127.0.0.1") -> None:
+        self.host = str(host)
+        self.family = socket.AF_INET6 if ":" in self.host else socket.AF_INET
+        server_class = _ThreadingHTTPServerV6 if self.family == socket.AF_INET6 else ThreadingHTTPServer
+        bind_address: tuple[object, ...]
+        if self.family == socket.AF_INET6:
+            bind_address = (self.host, 0, 0, 0)
+        else:
+            bind_address = (self.host, 0)
+        self.server = server_class(bind_address, _SilentHandler)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
 
     @property
     def url(self) -> str:
+        if self.family == socket.AF_INET6:
+            host, port, _flowinfo, _scopeid = self.server.server_address
+            return f"http://[{host}]:{port}/"
         host, port = self.server.server_address
         return f"http://{host}:{port}/"
 
@@ -199,19 +214,24 @@ def run_file_io(duration_s: int | float) -> WorkloadResult:
     fio_binary = which("fio")
     if fio_binary is None:
         raise RuntimeError("fio is required for the file_io workload")
-    with tempfile.TemporaryDirectory(prefix="tracee-fio-") as tempdir:
+    with tempfile.TemporaryDirectory(prefix="tracee-fio-", dir=str(_disk_backed_tmp_root())) as tempdir:
         data_path = Path(tempdir) / "fio.bin"
         command = [
             fio_binary,
             "--name=tracee-e2e",
             f"--filename={data_path}",
-            "--rw=randread",
+            "--rw=randrw",
+            "--rwmixread=70",
             "--bs=4k",
-            "--size=100M",
+            "--size=64M",
             f"--runtime={max(1, int(duration_s))}",
             "--time_based=1",
             "--ioengine=sync",
-            "--direct=0",
+            "--direct=1",
+            "--create_on_open=1",
+            "--fsync=1",
+            "--end_fsync=1",
+            "--invalidate=1",
             "--output-format=json",
         ]
         start = time.monotonic()
@@ -251,6 +271,17 @@ def _prepare_read_file(path: Path, size_mb: int = 64) -> None:
     with path.open("wb") as handle:
         for _ in range(max(1, int(size_mb))):
             handle.write(chunk)
+
+
+def _disk_backed_tmp_root() -> Path:
+    for candidate in (Path("/var/tmp"), Path("/tmp")):
+        try:
+            candidate.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            continue
+        if os.access(candidate, os.W_OK | os.X_OK):
+            return candidate
+    raise RuntimeError("no writable disk-backed temporary directory is available")
 
 
 def _normalize_workload_limits(
@@ -365,15 +396,15 @@ def run_rapid_connect_storm(
     port = port_holder[0]
     start = time.monotonic()
     ops_total = 0
-    transient_failures = 0
+    transient_failures: list[str] = []
     try:
         while _work_remaining(start, duration_limit, ops_total, iteration_limit):
             try:
                 with socket.create_connection(("127.0.0.1", port), timeout=1.0):
                     pass
                 ops_total += 1
-            except (TimeoutError, OSError):
-                transient_failures += 1
+            except (TimeoutError, OSError) as exc:
+                transient_failures.append(str(exc))
                 time.sleep(0.001)
     finally:
         stop.set()
@@ -381,11 +412,14 @@ def run_rapid_connect_storm(
 
     if errors:
         raise RuntimeError(f"loopback listener failed: {errors[-1]}")
-    if ops_total <= 0 and transient_failures > 0:
-        raise RuntimeError(f"loopback connects failed repeatedly ({transient_failures} transient failures)")
+    if transient_failures:
+        raise RuntimeError(
+            f"loopback connects failed {len(transient_failures)} time(s): {transient_failures[-1]}"
+        )
+    if ops_total <= 0:
+        raise RuntimeError("loopback connect workload completed without any successful operations")
     elapsed = time.monotonic() - start
-    stderr = "" if transient_failures <= 0 else f"transient_connect_failures={transient_failures}"
-    return _finish_result(float(ops_total), elapsed, "", stderr)
+    return _finish_result(float(ops_total), elapsed, "", "")
 
 
 def run_connect_storm(
@@ -405,9 +439,13 @@ def run_rapid_bind_storm(
     start = time.monotonic()
     ops_total = 0
     while _work_remaining(start, duration_limit, ops_total, iteration_limit):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client:
+        family = socket.AF_INET if (ops_total % 2) == 0 else socket.AF_INET6
+        with socket.socket(family, socket.SOCK_STREAM) as client:
             client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            client.bind(("127.0.0.1", 0))
+            if family == socket.AF_INET6:
+                client.bind(("::1", 0, 0, 0))
+            else:
+                client.bind(("127.0.0.1", 0))
         ops_total += 1
     elapsed = time.monotonic() - start
     return _finish_result(float(ops_total), elapsed, "", "")
@@ -448,7 +486,7 @@ def run_file_open_load(duration_s: int | float) -> WorkloadResult:
 
 def run_dd_read_load(duration_s: int | float) -> WorkloadResult:
     dd_binary = which("dd") or "dd"
-    with tempfile.TemporaryDirectory(prefix="tracee-dd-read-") as tempdir:
+    with tempfile.TemporaryDirectory(prefix="tracee-dd-read-", dir=str(_disk_backed_tmp_root())) as tempdir:
         data_path = Path(tempdir) / "read-target.bin"
         _prepare_read_file(data_path, size_mb=64)
         block_size = "4k"
@@ -465,7 +503,7 @@ def run_dd_read_load(duration_s: int | float) -> WorkloadResult:
                     "of=/dev/null",
                     f"bs={block_size}",
                     f"count={block_count}",
-                    "iflag=fullblock",
+                    "iflag=fullblock,direct",
                     "status=none",
                 ],
                 check=False,
@@ -478,6 +516,28 @@ def run_dd_read_load(duration_s: int | float) -> WorkloadResult:
             ops_total += float(block_count)
         elapsed = time.monotonic() - start
         return _finish_result(ops_total, elapsed, "", "\n".join(stderr_lines))
+
+
+def run_vfs_create_write_fsync_load(duration_s: int | float) -> WorkloadResult:
+    with tempfile.TemporaryDirectory(prefix="tracee-vfs-", dir=str(_disk_backed_tmp_root())) as tempdir:
+        root = Path(tempdir)
+        payload = b"x" * (64 * 1024)
+        start = time.monotonic()
+        deadline = start + float(duration_s)
+        ops_total = 0.0
+        while time.monotonic() < deadline:
+            path = root / f"vfs-op-{int(ops_total)}.dat"
+            with path.open("wb") as handle:
+                handle.write(payload)
+                handle.flush()
+                os.fsync(handle.fileno())
+            with path.open("rb") as handle:
+                while handle.read(len(payload)):
+                    pass
+            path.unlink()
+            ops_total += 1.0
+        elapsed = time.monotonic() - start
+        return _finish_result(ops_total, elapsed, "", "")
 
 
 def run_network_load(duration_s: int | float) -> WorkloadResult:
@@ -517,14 +577,16 @@ def run_tcp_connect_load(duration_s: int | float) -> WorkloadResult:
     curl_binary = which("curl")
     if curl_binary is None:
         raise RuntimeError("curl is required for TCP connect load")
-    with LocalHttpServer() as server:
+    with LocalHttpServer("127.0.0.1") as server_v4, LocalHttpServer("::1") as server_v6:
+        urls = (server_v4.url, server_v6.url)
         start = time.monotonic()
         deadline = start + float(duration_s)
         ops_total = 0.0
         stderr_lines: list[str] = []
         while time.monotonic() < deadline:
+            url = urls[int(ops_total) % len(urls)]
             completed = run_command(
-                [curl_binary, "-fsS", "-o", "/dev/null", "--http1.1", "--max-time", "2", server.url],
+                [curl_binary, "-fsS", "-g", "-o", "/dev/null", "--http1.1", "--max-time", "2", url],
                 check=False,
                 timeout=5,
             )
@@ -579,6 +641,8 @@ def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadR
         return run_bind_storm(seconds)
     if kind == "minimal_syscall":
         return run_user_exec_loop(seconds)
+    if kind == "vfs_create_write_fsync":
+        return run_vfs_create_write_fsync_load(seconds)
     if kind == "iterator_poll":
         start = time.monotonic()
         deadline = start + float(seconds)
@@ -674,5 +738,6 @@ __all__ = [
     "run_named_workload",
     "run_scheduler_load",
     "run_tcp_connect_load",
+    "run_vfs_create_write_fsync_load",
     "run_user_exec_loop",
 ]

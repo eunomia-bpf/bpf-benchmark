@@ -8,6 +8,7 @@ from runner.libs.run_artifacts import (
     ARTIFACT_KIND,
     ARTIFACT_VERSION,
     artifact_timestamp,
+    clear_previous_run_artifacts,
     create_run_artifact_dir,
     derive_run_type,
     externalize_sample_daemon_debug,
@@ -113,6 +114,51 @@ def test_create_run_artifact_dir_can_skip_clear_existing(tmp_path: Path) -> None
     assert second_dir.exists()
 
 
+def test_create_run_artifact_dir_removes_corrupt_artifact_with_warning(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    results_dir = tmp_path / "results"
+    results_dir.mkdir()
+
+    corrupt_dir = results_dir / "tracee_20260329_165448"
+    corrupt_dir.mkdir()
+    (corrupt_dir / "details").mkdir()
+    (corrupt_dir / "metadata.json").write_text("", encoding="utf-8")
+
+    run_dir = create_run_artifact_dir(
+        results_dir=results_dir,
+        run_type="tracee",
+        generated_at="2026-03-29T16:54:49+00:00",
+    )
+
+    captured = capsys.readouterr()
+    assert run_dir.exists()
+    assert not corrupt_dir.exists()
+    assert "warning: removing corrupt run artifact" in captured.err
+    assert "metadata.json" in captured.err
+
+
+def test_clear_previous_run_artifacts_removes_corrupt_artifact_with_warning(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    results_dir = tmp_path / "results"
+    results_dir.mkdir()
+
+    corrupt_dir = results_dir / "vm_micro_20260329_165448"
+    corrupt_dir.mkdir()
+    (corrupt_dir / "details").mkdir()
+    (corrupt_dir / "metadata.json").write_text("{not-json", encoding="utf-8")
+
+    clear_previous_run_artifacts(results_dir)
+
+    captured = capsys.readouterr()
+    assert not corrupt_dir.exists()
+    assert "warning: removing corrupt run artifact" in captured.err
+    assert "metadata.json" in captured.err
+
+
 def test_externalize_sample_daemon_debug_moves_large_payload_to_detail() -> None:
     sample = {
         "iteration_index": 2,
@@ -190,6 +236,21 @@ def test_load_latest_result_for_output_rejects_incomplete_artifact(tmp_path: Pat
         assert "micro batch runner failed" in str(exc)
     else:
         raise AssertionError("expected RuntimeError for incomplete artifact")
+
+
+def test_load_latest_result_for_output_rejects_corrupt_artifact_metadata(tmp_path: Path) -> None:
+    output_path = tmp_path / "results" / "llvmbpf_vs_kernel.json"
+    corrupt_dir = output_path.parent / "llvmbpf_vs_kernel_20260329_064643"
+    corrupt_dir.mkdir(parents=True)
+    (corrupt_dir / "metadata.json").write_text("{not-json", encoding="utf-8")
+
+    try:
+        load_latest_result_for_output(output_path, default_run_type="pure_jit")
+    except RuntimeError as exc:
+        assert "failed to read artifact metadata" in str(exc)
+        assert "metadata.json" in str(exc)
+    else:
+        raise AssertionError("expected RuntimeError for corrupt artifact metadata")
 
 
 def test_artifact_entrypoints_compile() -> None:

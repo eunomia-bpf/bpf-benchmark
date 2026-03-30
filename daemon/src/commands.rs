@@ -47,6 +47,8 @@ pub(crate) struct ServeOptimizeResponse {
     pub program: ProgramInfo,
     pub summary: OptimizeSummary,
     pub passes: Vec<PassDetail>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub attempts: Vec<AttemptRecord>,
     pub timings_ns: TimingsNs,
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub inlined_map_entries: Vec<InlinedMapEntry>,
@@ -56,6 +58,14 @@ pub(crate) struct ServeOptimizeResponse {
 
 impl From<OptimizeOneResult> for ServeOptimizeResponse {
     fn from(value: OptimizeOneResult) -> Self {
+        let attempts = value
+            .attempts
+            .into_iter()
+            .map(|attempt| AttemptRecord {
+                debug: None,
+                ..attempt
+            })
+            .collect();
         Self {
             status: value.status,
             prog_id: value.prog_id,
@@ -64,6 +74,7 @@ impl From<OptimizeOneResult> for ServeOptimizeResponse {
             program: value.program,
             summary: value.summary,
             passes: value.passes,
+            attempts,
             timings_ns: value.timings_ns,
             inlined_map_entries: value.inlined_map_entries,
             error_message: value.error_message,
@@ -723,6 +734,39 @@ pub(crate) fn try_apply_one(
         );
     }
 
+    if !pipeline_result.program_changed {
+        let attempt_result = if pass_details.iter().any(|pass| pass.changed) {
+            "restored_original"
+        } else {
+            "no_change"
+        };
+        if let Some(debug) = attempt_debug.as_mut() {
+            debug.warnings.push(
+                "final optimized program was unchanged; skipping final REJIT".to_string(),
+            );
+        }
+        return Ok(make_result(
+            "ok",
+            true,
+            false,
+            pipeline_result.total_sites_applied,
+            final_insn_count,
+            pass_details,
+            vec![AttemptRecord {
+                attempt: 0,
+                disabled_passes: vec![],
+                result: attempt_result.to_string(),
+                failure_pc: None,
+                attributed_pass: None,
+                debug: attempt_debug,
+            }],
+            total_pipeline_ns,
+            total_rejit_ns,
+            vec![],
+            None,
+        ));
+    }
+
     let mut final_rejit_insns = program.insns.clone();
     let _map_fds_guard = bpf::relocate_map_fds_with_bindings(
         &mut final_rejit_insns,
@@ -733,11 +777,6 @@ pub(crate) fn try_apply_one(
 
     if let Some(debug) = attempt_debug.as_mut() {
         debug.pre_rejit_bytecode = Some(insn::dump_bytecode_compact(&final_rejit_insns));
-        if !pipeline_result.program_changed {
-            debug
-                .warnings
-                .push("final optimized program was unchanged; issuing identity REJIT".to_string());
-        }
     }
 
     validate_required_btf_fds(&program.required_btf_fds, &local_ctx, "final REJIT")?;

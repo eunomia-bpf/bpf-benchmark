@@ -9,7 +9,6 @@ from runner.libs import bpf_stats
 
 
 def test_read_program_stats_raises_when_requested_program_is_unresolved(monkeypatch) -> None:
-    monkeypatch.setattr(bpf_stats, "run_json_command", lambda *_args, **_kwargs: [])
     monkeypatch.setattr(bpf_stats, "_prog_fd_by_id", lambda _prog_id: None)
 
     try:
@@ -31,7 +30,6 @@ def test_read_program_stats_closes_program_fd_after_info_read(monkeypatch) -> No
     info.jited_prog_len = 64
     info.xlated_prog_len = 32
 
-    monkeypatch.setattr(bpf_stats, "run_json_command", lambda *_args, **_kwargs: [])
     monkeypatch.setattr(bpf_stats, "_prog_fd_by_id", lambda _prog_id: 7)
     monkeypatch.setattr(bpf_stats, "_prog_info_from_fd", lambda _fd: info)
     monkeypatch.setattr(bpf_stats.os, "close", lambda fd: closed.append(fd))

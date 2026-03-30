@@ -15,7 +15,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from runner.libs.catalog import (
+from micro.catalog import (
     DEFAULT_MICRO_MANIFEST as CONFIG_PATH,
     REPO_ROOT as ROOT_DIR,
     CatalogManifest as SuiteSpec,
@@ -228,7 +228,7 @@ def select_runtimes(names: list[str] | None, suite: SuiteSpec) -> list[RuntimeSp
 
 def require_suite_artifacts(suite: SuiteSpec) -> None:
     required_paths = [suite.build.runner_binary]
-    required_paths.extend(benchmark.program_object for benchmark in suite.benchmarks.values())
+    required_paths.extend(benchmark.object_path for benchmark in suite.benchmarks.values())
     require_existing_paths(required_paths)
 
 
@@ -353,7 +353,7 @@ def build_runner_command(
     else:
         raise RuntimeError(f"unsupported micro runtime mode: {runtime.mode}")
 
-    command.extend(["--program", str(benchmark.program_object)])
+    command.extend(["--program", str(benchmark.object_path)])
     if benchmark.program_names:
         command.extend(["--program-name", benchmark.program_names[0]])
     if memory_file is not None:
@@ -649,9 +649,6 @@ def main(argv: list[str] | None = None) -> int:
                     "label": runtime.label,
                     "mode": runtime.mode,
                     "repeat": repeat,
-                    "artifacts": {
-                        "program_object": str(benchmark.program_object),
-                    },
                     "samples": samples,
                     "compile_ns": ns_summary(compile_values),
                     "exec_ns": ns_summary(exec_values),

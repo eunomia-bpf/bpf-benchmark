@@ -978,11 +978,10 @@ ensure_benchmark_bundle() {
     make -C "$ROOT_DIR/micro" programs >/dev/null
 
     require_local_path "$ROOT_DIR/micro/driver.py" "micro driver"
-    require_local_path "$ROOT_DIR/runner/libs/catalog.py" "shared benchmark catalog"
+    require_local_path "$ROOT_DIR/micro/catalog.py" "micro benchmark catalog"
     require_local_path "$ROOT_DIR/micro/config/micro_pure_jit.yaml" "micro suite manifest"
     require_local_path "$ROOT_DIR/micro/programs/simple.bpf.o" "simple micro object"
     require_local_path "$ROOT_DIR/runner/libs/__init__.py" "runner python helpers"
-    require_local_path "$ROOT_DIR/runner/scripts/x86_remote_benchmark.py" "x86 remote benchmark runner"
     require_local_path "$X86_KINSN_LOAD_SCRIPT" "kinsn module loader"
     if [[ "$bench_mode" == "e2e" ]]; then
         ensure_local_e2e_assets
@@ -1022,9 +1021,6 @@ ensure_benchmark_bundle() {
     cp -a "$ROOT_DIR/micro/generated-inputs/." "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs/"
 
     cp -a "$ROOT_DIR/runner/libs/." "$BENCHMARK_BUNDLE_DIR/runner/libs/"
-    cp "$ROOT_DIR/runner/scripts/x86_remote_benchmark.py" \
-        "$BENCHMARK_BUNDLE_DIR/runner/scripts/"
-
     cp "$X86_KINSN_LOAD_SCRIPT" "$BENCHMARK_BUNDLE_DIR/module/load_all.sh"
     cp "$X86_KINSN_MODULE_DIR"/*.ko "$BENCHMARK_BUNDLE_DIR/module/x86/"
 
@@ -1090,87 +1086,7 @@ ensure_benchmark_bundle() {
 }
 
 benchmark_instance() {
-    local ip="${1:-${STATE_INSTANCE_IP:-}}"
-    [[ -n "$ip" ]] || die "benchmark requires an instance IP"
-
-    validate_benchmark_mode
-    if [[ "$(normalize_benchmark_mode)" == "e2e" ]]; then
-        validate_e2e_cases
-    fi
-    load_state
-    ensure_benchmark_bundle
-    wait_for_ssh "$ip"
-    ensure_remote_runtime_prereqs "$ip"
-
-    local stamp local_bundle_dir local_archive bench_mode
-    bench_mode="$(normalize_benchmark_mode)"
-    stamp="$(date -u +%Y%m%d_%H%M%S)"
-    local_bundle_dir="$RESULTS_DIR/benchmark_${stamp}"
-    local_archive="$RESULTS_DIR/benchmark_${stamp}.tar.gz"
-    mkdir -p "$local_bundle_dir"
-
-    ssh_bash "$ip" "$AWS_X86_REMOTE_STAGE_DIR" <<'EOF'
-set -euo pipefail
-root="$1"
-sudo -n rm -rf "$root"
-mkdir -p "$root/results"
-EOF
-    scp_to "$ip" "$BENCHMARK_BUNDLE_TAR" "$AWS_X86_REMOTE_STAGE_DIR/"
-
-    log "Running ${bench_mode} x86 benchmark suite on ${ip}"
-    ssh_bash "$ip" "$AWS_X86_REMOTE_STAGE_DIR" \
-        "$AWS_X86_BENCH_ITERATIONS" "$AWS_X86_BENCH_WARMUPS" "$AWS_X86_BENCH_REPEAT" \
-        "$AWS_X86_BENCH_CPU" "$AWS_X86_REMOTE_RESULT_JSON" "$STATE_INSTANCE_ID" \
-        "$AWS_X86_INSTANCE_TYPE" "$AWS_X86_PROFILE" "$(resolve_region)" \
-        "$bench_mode" "$AWS_X86_E2E_CASES" "$AWS_X86_E2E_SMOKE" <<'EOF'
-set -euo pipefail
-root="$1"
-iterations="$2"
-warmups="$3"
-repeat="$4"
-cpu="$5"
-result_json="$6"
-instance_id="$7"
-instance_type="$8"
-aws_profile="$9"
-aws_region="${10}"
-bench_mode="${11}"
-e2e_cases="${12}"
-e2e_smoke="${13}"
-results_dir="$root/results"
-
-cd "$root"
-tar -xzf benchmark-bundle.tar.gz
-mkdir -p "$results_dir"
-
-sudo -n env PATH="/usr/sbin:/usr/bin:/sbin:/bin:${PATH}" \
-    bash "$root/module/load_all.sh"
-
-sudo -n env \
-    PATH="/usr/sbin:/usr/bin:/sbin:/bin:${PATH}" \
-    PYTHONPATH="$root" \
-    python3.11 "$root/runner/scripts/x86_remote_benchmark.py" \
-        --output "$results_dir/$result_json" \
-        --mode "$bench_mode" \
-        --iterations "$iterations" \
-        --warmups "$warmups" \
-        --repeat "$repeat" \
-        --cpu "$cpu" \
-        --instance-id "$instance_id" \
-        --instance-type "$instance_type" \
-        --aws-profile "$aws_profile" \
-        --aws-region "$aws_region" \
-        --e2e-cases "$e2e_cases" \
-        --e2e-smoke "$e2e_smoke"
-
-sudo -n chown -R "$(id -un):$(id -gn)" "$results_dir"
-
-tar -C "$root" -czf "$root/results.tar.gz" results
-EOF
-
-    scp_from "$ip" "$AWS_X86_REMOTE_STAGE_DIR/results.tar.gz" "$local_archive"
-    tar -xzf "$local_archive" -C "$local_bundle_dir"
-    log "Benchmark results: ${local_bundle_dir}/results/"
+    die "AWS x86 remote benchmark flow was retired with strict review cleanup; use make vm-corpus or make vm-e2e instead"
 }
 
 terminate_instance() {

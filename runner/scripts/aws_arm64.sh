@@ -583,12 +583,10 @@ ensure_benchmark_bundle() {
     make -C "$ROOT_DIR/micro" programs >/dev/null
 
     require_local_path "$ROOT_DIR/micro/driver.py" "micro driver"
-    require_local_path "$ROOT_DIR/runner/libs/catalog.py" "shared benchmark catalog"
+    require_local_path "$ROOT_DIR/micro/catalog.py" "micro benchmark catalog"
     require_local_path "$ROOT_DIR/micro/config/micro_pure_jit.yaml" "micro suite manifest"
     require_local_path "$ROOT_DIR/micro/programs/simple.bpf.o" "simple micro object"
     require_local_path "$ROOT_DIR/runner/libs/__init__.py" "runner python helpers"
-    require_local_path "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" "ARM64 remote benchmark runner"
-
     rm -rf "$BENCHMARK_BUNDLE_DIR"
     mkdir -p \
         "$BENCHMARK_BUNDLE_DIR/runner/libs" \
@@ -622,9 +620,6 @@ ensure_benchmark_bundle() {
     cp "$ROOT_DIR/runner/Makefile" "$BENCHMARK_BUNDLE_DIR/runner/"
     cp -a "$ROOT_DIR/runner/include/." "$BENCHMARK_BUNDLE_DIR/runner/include/"
     cp -a "$ROOT_DIR/runner/src/." "$BENCHMARK_BUNDLE_DIR/runner/src/"
-    cp "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" \
-        "$BENCHMARK_BUNDLE_DIR/runner/scripts/"
-
     cp "$ROOT_DIR/daemon/Cargo.toml" "$BENCHMARK_BUNDLE_DIR/daemon/"
     cp "$ROOT_DIR/daemon/Cargo.lock" "$BENCHMARK_BUNDLE_DIR/daemon/"
     cp -a "$ROOT_DIR/daemon/src/." "$BENCHMARK_BUNDLE_DIR/daemon/src/"
@@ -635,82 +630,7 @@ ensure_benchmark_bundle() {
 }
 
 benchmark_instance() {
-    local ip="${1:-${STATE_INSTANCE_IP:-}}"
-    [[ -n "$ip" ]] || die "benchmark requires an instance IP"
-
-    load_state
-    ensure_benchmark_bundle
-    wait_for_ssh "$ip"
-
-    local stamp local_bundle_dir local_archive
-    stamp="$(date -u +%Y%m%d_%H%M%S)"
-    local_bundle_dir="$RESULTS_DIR/benchmark_${stamp}"
-    local_archive="$RESULTS_DIR/benchmark_${stamp}.tar.gz"
-    mkdir -p "$local_bundle_dir"
-
-    ssh_bash "$ip" "$AWS_ARM64_REMOTE_STAGE_DIR" <<'EOF'
-set -euo pipefail
-root="$1"
-rm -rf "$root"
-mkdir -p "$root/results"
-EOF
-    scp_to "$ip" "$BENCHMARK_BUNDLE_TAR" "$AWS_ARM64_REMOTE_STAGE_DIR/"
-
-    log "Running full ARM64 t4g benchmark suite on ${ip}"
-    ssh_bash "$ip" "$AWS_ARM64_REMOTE_STAGE_DIR" \
-        "$AWS_ARM64_BENCH_ITERATIONS" "$AWS_ARM64_BENCH_WARMUPS" "$AWS_ARM64_BENCH_REPEAT" \
-        "$AWS_ARM64_BENCH_CPU" "$AWS_ARM64_REMOTE_RESULT_JSON" "$STATE_INSTANCE_ID" \
-        "$AWS_ARM64_INSTANCE_TYPE" "$AWS_ARM64_PROFILE" "$(resolve_region)" <<'EOF'
-set -euo pipefail
-root="$1"
-iterations="$2"
-warmups="$3"
-repeat="$4"
-cpu="$5"
-result_json="$6"
-instance_id="$7"
-instance_type="$8"
-aws_profile="$9"
-aws_region="${10}"
-results_dir="$root/results"
-
-cd "$root"
-tar -xzf benchmark-bundle.tar.gz
-mkdir -p "$results_dir"
-rm -rf "$root/runner/build" "$root/daemon/target"
-if ! sudo swapon --show | awk '{print $1}' | grep -Fx /swapfile >/dev/null 2>&1; then
-    if [[ ! -f /swapfile ]]; then
-        sudo fallocate -l 2G /swapfile 2>/dev/null || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048 status=none
-    fi
-    sudo chmod 600 /swapfile
-    sudo mkswap /swapfile >/dev/null
-    sudo swapon /swapfile
-fi
-make -C "$root/runner" micro_exec MICRO_EXEC_ENABLE_LLVMBPF=OFF JOBS=1
-cargo build --release -j1 --manifest-path "$root/daemon/Cargo.toml"
-
-sudo -n env \
-    PATH="/usr/sbin:/usr/bin:/sbin:/bin:${PATH}" \
-    PYTHONPATH="$root" \
-    python3.11 "$root/runner/scripts/arm64_t4g_remote_benchmark.py" \
-        --output "$results_dir/$result_json" \
-        --iterations "$iterations" \
-        --warmups "$warmups" \
-        --repeat "$repeat" \
-        --cpu "$cpu" \
-        --instance-id "$instance_id" \
-        --instance-type "$instance_type" \
-        --aws-profile "$aws_profile" \
-        --aws-region "$aws_region"
-
-sudo -n chown -R "$(id -un):$(id -gn)" "$results_dir"
-
-tar -C "$root" -czf "$root/results.tar.gz" results
-EOF
-
-    scp_from "$ip" "$AWS_ARM64_REMOTE_STAGE_DIR/results.tar.gz" "$local_archive"
-    tar -xzf "$local_archive" -C "$local_bundle_dir"
-    log "Benchmark results: ${local_bundle_dir}/results/"
+    die "AWS ARM64 remote benchmark flow was retired with strict review cleanup; use the supported VM/native benchmark entrypoints instead"
 }
 
 terminate_instance() {

@@ -28,32 +28,30 @@ from ..workload import (
 )
 
 
-CACHED_TRACEE_BINARY = ROOT_DIR / "e2e" / "cases" / "tracee" / "bin" / "tracee"
 TRACEE_STATS_PATTERN = re.compile(
     r"EventCount[:=]\s*(?P<events>\d+).*?LostEvCount[:=]\s*(?P<lost>\d+)(?:.*?LostWrCount[:=]\s*(?P<lost_writes>\d+))?",
     re.IGNORECASE,
 )
 SYS_PIDFD_GETFD = 438
+DEFAULT_CORPUS_TRACEE_BINARY = ROOT_DIR / "corpus" / "build" / "tracee" / "bin" / "tracee"
 
 
-def _dup_fd_from_process(pid: int, target_fd: int) -> int | None:
+def _dup_fd_from_process(pid: int, target_fd: int) -> int:
+    if not hasattr(os, "pidfd_open"):
+        raise RuntimeError("Tracee FD duplication requires os.pidfd_open support")
+    pidfd = os.pidfd_open(int(pid), 0)
     try:
-        pidfd = os.pidfd_open(int(pid), 0)
-    except (AttributeError, OSError):
-        pidfd = None
-    if pidfd is not None:
-        try:
-            libc = ctypes.CDLL(None, use_errno=True)
-            libc.syscall.restype = ctypes.c_long
-            result = int(libc.syscall(SYS_PIDFD_GETFD, int(pidfd), int(target_fd), 0))
-            if result >= 0:
-                return result
-        finally:
-            os.close(pidfd)
-    try:
-        return os.open(f"/proc/{pid}/fd/{target_fd}", os.O_RDONLY | os.O_CLOEXEC)
-    except OSError:
-        return None
+        libc = ctypes.CDLL(None, use_errno=True)
+        libc.syscall.restype = ctypes.c_long
+        result = int(libc.syscall(SYS_PIDFD_GETFD, int(pidfd), int(target_fd), 0))
+        if result < 0:
+            err = ctypes.get_errno()
+            raise RuntimeError(
+                f"pidfd_getfd failed for pid={pid} fd={target_fd}: {os.strerror(err)} (errno={err})"
+            )
+        return result
+    finally:
+        os.close(pidfd)
 
 
 class TraceeOutputCollector:
@@ -183,9 +181,20 @@ class TraceeAgentSession:
     def __enter__(self) -> "TraceeAgentSession":
         preexisting_ids = set(sample_bpf_stats(_current_prog_ids()))
         failures: list[str] = []
+        tracee_tmpdir = Path("/var/tmp/tracee")
+        tracee_tmpdir.mkdir(parents=True, exist_ok=True)
         for command in self.commands:
             self.collector = TraceeOutputCollector()
-            proc = start_agent(command[0], command[1:], env={"HOME": os.environ.get("HOME", str(ROOT_DIR))})
+            proc = start_agent(
+                command[0],
+                command[1:],
+                env={
+                    "HOME": os.environ.get("HOME", str(ROOT_DIR)),
+                    "TMPDIR": str(tracee_tmpdir),
+                    "TMP": str(tracee_tmpdir),
+                    "TEMP": str(tracee_tmpdir),
+                },
+            )
             self.process = proc
             self.command_used = command
             assert proc.stdout is not None
@@ -195,26 +204,40 @@ class TraceeAgentSession:
             self.stdout_thread.start()
             self.stderr_thread.start()
 
-            healthy = wait_healthy(
-                proc,
-                self.load_timeout,
-                lambda: bool([item for item in find_bpf_programs(proc.pid or 0) if int(item.get("id", -1)) not in preexisting_ids]),
-            )
+            try:
+                healthy = wait_healthy(
+                    proc,
+                    self.load_timeout,
+                    lambda: bool([item for item in find_bpf_programs(proc.pid or 0) if int(item.get("id", -1)) not in preexisting_ids]),
+                )
+            except Exception:
+                self.close()
+                raise
             if healthy:
                 programs = [item for item in find_bpf_programs(proc.pid or 0) if int(item.get("id", -1)) not in preexisting_ids]
                 if programs:
-                    self.programs = programs
-                    self.program_fds = {}
-                    for program in programs:
-                        prog_id = int(program.get("id", -1))
-                        for ref in program.get("owner_fds") or []:
-                            if int(ref.get("pid", -1)) != (proc.pid or -1):
-                                continue
-                            dup_fd = _dup_fd_from_process(int(proc.pid or -1), int(ref["fd"]))
-                            if dup_fd is None:
-                                continue
-                            self.program_fds[prog_id] = dup_fd
-                            break
+                    try:
+                        self.programs = programs
+                        self.program_fds = {}
+                        for program in programs:
+                            prog_id = int(program.get("id", -1))
+                            program_name = str(program.get("name") or prog_id)
+                            owner_refs = [
+                                ref
+                                for ref in (program.get("owner_fds") or [])
+                                if int(ref.get("pid", -1)) == (proc.pid or -1)
+                            ]
+                            if not owner_refs:
+                                raise RuntimeError(
+                                    f"Tracee program {program_name!r} (id={prog_id}) did not expose a loader-owned FD"
+                                )
+                            self.program_fds[prog_id] = _dup_fd_from_process(
+                                int(proc.pid or -1),
+                                int(owner_refs[0]["fd"]),
+                            )
+                    except Exception:
+                        self.close()
+                        raise
                     return self
             snapshot = self.collector.snapshot()
             failures.append(_format_launch_failure(command, proc, snapshot))
@@ -231,11 +254,12 @@ class TraceeAgentSession:
         return self.collector.snapshot()
 
     def close(self) -> None:
+        close_errors: list[str] = []
         for fd in self.program_fds.values():
             try:
                 os.close(fd)
-            except OSError:
-                pass
+            except OSError as exc:
+                close_errors.append(f"failed to close Tracee program fd {fd}: {exc}")
         self.program_fds.clear()
         if self.process is not None:
             stop_agent(self.process, timeout=8)
@@ -246,6 +270,8 @@ class TraceeAgentSession:
         if self.stderr_thread is not None:
             self.stderr_thread.join(timeout=2.0)
             self.stderr_thread = None
+        if close_errors:
+            raise RuntimeError("; ".join(close_errors))
 
     def __exit__(self, exc_type, exc, tb) -> None:
         self.close()
@@ -277,19 +303,17 @@ def run_setup_script(setup_script: Path) -> dict[str, object]:
 def resolve_tracee_binary(explicit: str | None, setup_result: Mapping[str, object]) -> str | None:
     if explicit:
         candidate = Path(explicit).resolve()
-        if candidate.exists():
-            return str(candidate)
+        if not candidate.exists():
+            raise RuntimeError(f"Tracee binary not found: {candidate}")
+        return str(candidate)
+    if DEFAULT_CORPUS_TRACEE_BINARY.exists():
+        return str(DEFAULT_CORPUS_TRACEE_BINARY.resolve())
     scripted = str(setup_result.get("tracee_binary") or "").strip()
-    if scripted and Path(scripted).exists():
-        return scripted
-    for candidate in ("tracee", "tracee-ebpf"):
-        resolved = which(candidate)
-        if resolved:
-            return resolved
-    if CACHED_TRACEE_BINARY.exists():
-        return str(CACHED_TRACEE_BINARY)
-    if Path("/tmp/tracee-bin/tracee").exists():
-        return "/tmp/tracee-bin/tracee"
+    if scripted:
+        candidate = Path(scripted).resolve()
+        if not candidate.exists():
+            raise RuntimeError(f"Tracee setup reported a missing binary: {candidate}")
+        return str(candidate)
     return None
 
 

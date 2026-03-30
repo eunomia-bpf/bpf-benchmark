@@ -60,13 +60,19 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
                     {
                         "name": "alpha",
                         "runner": "bcc",
-                        "workload": "exec_loop",
+                        "workload": {
+                            "corpus": "exec_loop",
+                            "e2e": "exec_loop",
+                        },
                         "args": {"tool": "execsnoop"},
                     },
                     {
                         "name": "beta",
                         "runner": "tracee",
-                        "workload": "file_open",
+                        "workload": {
+                            "corpus": "file_open",
+                            "e2e": "file_open",
+                        },
                     },
                 ],
             },
@@ -88,10 +94,16 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
         def __init__(self) -> None:
             self.proc = FakeProc()
             self.socket_path = Path("/tmp/rejit.sock")
+            self.kinsn_metadata = {
+                "expected_modules": ["bpf_rotate"],
+                "module_load": {"loaded_modules": ["bpf_rotate"], "failed_modules": []},
+                "daemon_kinsn_discovery": {"status": "ok", "discovery_log": "kinsn discovery:\n"},
+                "status": "ready",
+            }
 
         @classmethod
-        def start(cls, daemon_binary: Path) -> "FakeDaemonSession":
-            daemon_events.append(("start", daemon_binary))
+        def start(cls, daemon_binary: Path, *, load_kinsn: bool = False) -> "FakeDaemonSession":
+            daemon_events.append(("start", daemon_binary, load_kinsn))
             return cls()
 
         def __enter__(self) -> "FakeDaemonSession":
@@ -206,29 +218,49 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
     assert payload["summary"]["selected_apps"] == 2
     assert payload["summary"]["discovered_programs"] == 2
     assert payload["summary"]["statuses"] == {"error": 1, "ok": 1}
+    assert payload["summary"]["sample_count"] == 1
+    assert payload["summary"]["applied_only_geomean"] == pytest.approx(7.0 / 9.0)
+    assert payload["summary"]["all_comparable_geomean"] == pytest.approx(7.0 / 9.0)
+    assert payload["summary"]["comparison_exclusion_reasons"] == [
+        {
+            "app": "beta",
+            "apply_error": "demo apply failure",
+            "applied": False,
+            "label": "beta:beta_prog#202",
+            "program": "beta_prog",
+            "program_id": 202,
+            "reason": "apply_error: demo apply failure",
+        }
+    ]
     assert payload["status"] == "error"
+    assert payload["kinsn_modules"]["module_load"]["loaded_modules"] == ["bpf_rotate"]
     assert [result["app"] for result in payload["results"]] == ["alpha", "beta"]
     assert payload["results"][0]["status"] == "ok"
     assert payload["results"][0]["baseline"]["programs"]["101"]["run_cnt"] == 5
     assert payload["results"][0]["rejit"]["programs"]["101"]["run_cnt"] == 7
+    assert payload["results"][0]["program_measurements"]["101"]["applied"] is True
+    assert payload["results"][0]["program_measurements"]["101"]["comparable"] is True
+    assert payload["results"][0]["program_measurements"]["101"]["speedup"] == pytest.approx(7.0 / 9.0)
     assert payload["results"][0]["baseline_workload"]["duration_s"] == 4.0
+    assert len(payload["results"][0]["baseline_workloads"]) == 7
+    assert len(payload["results"][0]["rejit_workloads"]) == 7
     assert payload["results"][1]["status"] == "error"
     assert payload["results"][1]["error"] == "demo apply failure"
+    assert payload["results"][1]["program_measurements"]["202"]["comparison_exclusion_reason"] == "apply_error: demo apply failure"
+    assert len(payload["results"][1]["baseline_workloads"]) == 7
+    assert payload["results"][1]["rejit_workloads"] == []
     assert daemon_events == [
-        ("start", daemon_binary.resolve()),
+        ("start", daemon_binary.resolve(), True),
         ("apply", [101], ["map_inline"]),
         ("apply", [202], ["map_inline"]),
         "stop",
     ]
-    assert runner_events == [
-        ("start", "alpha", "exec_loop", {"tool": "execsnoop"}),
-        ("workload", "alpha", 4.0),
-        ("workload", "alpha", 4.0),
-        ("stop", "alpha"),
-        ("start", "beta", "file_open", {}),
-        ("workload", "beta", 4.0),
-        ("stop", "beta"),
-    ]
+    assert runner_events[0] == ("start", "alpha", "exec_loop", {"tool": "execsnoop"})
+    assert runner_events.count(("workload", "alpha", 4.0)) == 14
+    assert ("stop", "alpha") in runner_events
+    assert ("start", "beta", "file_open", {}) in runner_events
+    assert runner_events.count(("workload", "beta", 4.0)) == 7
+    assert ("stop", "beta") in runner_events
 
 
 def test_run_suite_marks_remaining_apps_after_daemon_exit(monkeypatch, tmp_path: Path) -> None:
@@ -238,9 +270,9 @@ def test_run_suite_marks_remaining_apps_after_daemon_exit(monkeypatch, tmp_path:
             {
                 "schema_version": 1,
                 "apps": [
-                    {"name": "alpha", "runner": "bcc", "workload": "exec_loop"},
-                    {"name": "beta", "runner": "tracee", "workload": "file_open"},
-                    {"name": "gamma", "runner": "bpftrace", "workload": "exec_loop"},
+                    {"name": "alpha", "runner": "bcc", "workload": {"corpus": "exec_loop", "e2e": "exec_loop"}},
+                    {"name": "beta", "runner": "tracee", "workload": {"corpus": "file_open", "e2e": "file_open"}},
+                    {"name": "gamma", "runner": "bpftrace", "workload": {"corpus": "exec_loop", "e2e": "exec_loop"}},
                 ],
             },
             sort_keys=False,
@@ -263,9 +295,11 @@ def test_run_suite_marks_remaining_apps_after_daemon_exit(monkeypatch, tmp_path:
         def __init__(self) -> None:
             self.proc = FakeProc()
             self.socket_path = Path("/tmp/rejit.sock")
+            self.kinsn_metadata = {}
 
         @classmethod
-        def start(cls, _daemon_binary: Path) -> "FakeDaemonSession":
+        def start(cls, _daemon_binary: Path, *, load_kinsn: bool = False) -> "FakeDaemonSession":
+            assert load_kinsn is True
             return cls()
 
         def __enter__(self) -> "FakeDaemonSession":
@@ -276,8 +310,8 @@ def test_run_suite_marks_remaining_apps_after_daemon_exit(monkeypatch, tmp_path:
 
     run_calls: list[str] = []
 
-    def fake_run_app(app, *, daemon_session, workload_seconds):
-        del daemon_session, workload_seconds
+    def fake_run_app(app, *, daemon_session, workload_seconds, repeat):
+        del daemon_session, workload_seconds, repeat
         run_calls.append(app.name)
         return {
             "app": app.name,

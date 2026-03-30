@@ -34,6 +34,8 @@ FILTERS ?=
 ITERATIONS ?= 3
 WARMUPS ?= 1
 REPEAT ?= 100
+VM_CORPUS_REPEAT ?= 200
+VM_CORPUS_WORKLOAD_SECONDS ?=
 BENCH ?=
 FUZZ_ROUNDS ?= 1000
 VM_COMMAND ?= /bin/bash
@@ -52,7 +54,6 @@ NEGATIVE_TEST_DIR := $(REPO_ROOT)/tests/negative
 MICRO_RESULTS_DIR := $(REPO_ROOT)/micro/results
 CORPUS_RESULTS_DIR := $(REPO_ROOT)/corpus/results
 E2E_RESULTS_DIR := $(REPO_ROOT)/e2e/results
-TRACEE_CACHED_BINARY := $(REPO_ROOT)/e2e/cases/tracee/bin/tracee
 TRACEE_SETUP_SCRIPT := $(REPO_ROOT)/e2e/cases/tracee/setup.sh
 TETRAGON_SETUP_SCRIPT := $(REPO_ROOT)/e2e/cases/tetragon/setup.sh
 VM_MICRO_SMOKE_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro_smoke.json
@@ -88,7 +89,9 @@ MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT)
 VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 FILTER_FLAGS := $(foreach filter,$(FILTERS),--filter "$(filter)")
 REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
-VM_CORPUS_REPEAT_FLAG := $(if $(strip $(REPEAT_IS_EXPLICIT)),--repeat "$(REPEAT)",)
+VM_CORPUS_REPEAT_VALUE := $(if $(strip $(REPEAT_IS_EXPLICIT)),$(REPEAT),$(VM_CORPUS_REPEAT))
+VM_CORPUS_REPEAT_FLAG := --repeat "$(VM_CORPUS_REPEAT_VALUE)"
+VM_CORPUS_WORKLOAD_SECONDS_FLAG := $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),--workload-seconds "$(VM_CORPUS_WORKLOAD_SECONDS)",)
 
 .PHONY: all micro_exec vendor_libbpf vendor_bpftool \
 	corpus-fetch corpus-build corpus-build-native \
@@ -166,18 +169,10 @@ e2e-prep:
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_scx_artifacts.py"
 
 e2e-tracee-setup:
-	@if [ -x "$(TRACEE_CACHED_BINARY)" ]; then \
-		echo "tracee setup: using cached $(TRACEE_CACHED_BINARY)"; \
-	else \
-		bash "$(TRACEE_SETUP_SCRIPT)"; \
-	fi
+	bash "$(TRACEE_SETUP_SCRIPT)"
 
 e2e-tetragon-setup:
-	@if command -v tetragon >/dev/null 2>&1 && command -v tetra >/dev/null 2>&1 && command -v stress-ng >/dev/null 2>&1; then \
-		echo "tetragon setup: using cached system binaries"; \
-	else \
-		bash "$(TETRAGON_SETUP_SCRIPT)"; \
-	fi
+	bash "$(TETRAGON_SETUP_SCRIPT)"
 
 vendor_libbpf: $(LIBBPF_A) $(LIBBPF_HEADER)
 
@@ -314,7 +309,7 @@ vm-corpus: corpus-build corpus-build-native vendor_bpftool daemon-binary kernel-
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_CORPUS_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/orchestrator.py" --daemon "$(DAEMON_PATH)" --output-json "$(VM_CORPUS_OUTPUT_JSON)" $(VM_CORPUS_REPEAT_FLAG) $(FILTER_FLAGS)'
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/orchestrator.py" --daemon "$(DAEMON_PATH)" --output-json "$(VM_CORPUS_OUTPUT_JSON)" --output-md "$(VM_CORPUS_OUTPUT_MD)" $(VM_CORPUS_REPEAT_FLAG) $(VM_CORPUS_WORKLOAD_SECONDS_FLAG) $(FILTER_FLAGS)'
 
 vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"
