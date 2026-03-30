@@ -3,7 +3,7 @@
 > 本文档是 micro benchmark 层的统一参考，合并了原来分散在多个文件中的实验计划、进度追踪、RQ 定义和结果分析。
 > 详细的阶段性报告（含机器码分析细节）见 `docs/stage-log-2026-03-07.md`。
 
-> 更新说明（2026-03-07）：`micro/config/micro_pure_jit.yaml` 当前包含 `30` 个 pure-jit / staged-codegen case，另有 `2` 个 packet-backed 对照 benchmark，其中新增 `bpf_call_chain` 作为首个 local-call benchmark；`micro/config/micro_runtime.yaml` 当前包含 `9` 个 runtime case。第 4 节覆盖表与第 7 节进度已按此状态同步，并新增了可复现的 representativeness 分析结果（保留报告：`micro/results/archive/representativeness_report.md`）与真实程序 code-size / exec-time 外部验证脚本 `corpus/run_real_world_code_size.py`、`corpus/run_real_world_exec_time.py`。第 `6.1`、`6.1b`、`6.1e` 节现已切换为 authoritative pure-JIT run（`30` iterations × `1000` repeats，iteration 级 runtime 随机交错 / counterbalanced），覆盖 `31` 个 benchmark；执行时间 geomean 为 `0.849x`，BH-corrected paired Wilcoxon 显著 `25/31`，编译时间 geomean 为 `3.394x`。第 `6.2`、`6.4`、`6.5` 节已按同一 `31`-case authoritative 数据同步；第 `6.6` 节已切换为 authoritative runtime run（`9` case，执行时间 geomean `0.829x`，BH-corrected paired Wilcoxon 显著 `7/9`）。真实程序外部验证现已更新到 code-size `162` paired instances（`36` unique，geomean `0.618x`）与 exec-time `98` paired instances（`14` unique；valid packet rerun，instance geomean `0.514x` / unique geomean `0.484x`，`97/98` kernel exec ≥ `20ns`）。**2026-03-19 注**：这两条 corpus 外部验证脚本现已切换为 `kernel` vs `kernel-recompile`；本节保留的是早期 `llvmbpf` 对照结果，作为历史记录。
+> 更新说明（2026-03-07）：`micro/config/micro_pure_jit.yaml` 当前包含 `30` 个 pure-jit / staged-codegen case，另有 `2` 个 packet-backed 对照 benchmark，其中新增 `bpf_call_chain` 作为首个 local-call benchmark；`micro/config/micro_runtime.yaml` 当前包含 `9` 个 runtime case。第 4 节覆盖表与第 7 节进度已按此状态同步，并新增了可复现的 representativeness 分析结果（保留报告：`micro/results/archive/representativeness_report.md`）与真实程序 code-size / exec-time 外部验证流程。第 `6.1`、`6.1b`、`6.1e` 节现已切换为 authoritative pure-JIT run（`30` iterations × `1000` repeats，iteration 级 runtime 随机交错 / counterbalanced），覆盖 `31` 个 benchmark；执行时间 geomean 为 `0.849x`，BH-corrected paired Wilcoxon 显著 `25/31`，编译时间 geomean 为 `3.394x`。第 `6.2`、`6.4`、`6.5` 节已按同一 `31`-case authoritative 数据同步；第 `6.6` 节已切换为 authoritative runtime run（`9` case，执行时间 geomean `0.829x`，BH-corrected paired Wilcoxon 显著 `7/9`）。真实程序外部验证现已更新到 code-size `162` paired instances（`36` unique，geomean `0.618x`）与 exec-time `98` paired instances（`14` unique；valid packet rerun，instance geomean `0.514x` / unique geomean `0.484x`，`97/98` kernel exec ≥ `20ns`）。**2026-03-19 注**：该外部验证流程现已切换为 `kernel` vs `kernel-recompile`；本节保留的是早期 `llvmbpf` 对照结果，作为历史记录。
 > Note: benchmarks use staged input via `bpf_map_lookup_elem`; this measures JIT codegen quality under realistic input staging, not helper-free isolation.
 
 ---
@@ -139,8 +139,7 @@ corpus/config/macro_corpus.yaml  ──→  真实程序语料库入口 + 外部
 
 ### 真实程序 code-size 外部验证（多源）
 
-- 脚本（历史 `llvmbpf` 结果对应路径；2026-03-19 起脚本语义已切到 `kernel` vs `kernel-recompile`）：`corpus/run_real_world_code_size.py`
-- 报告：`corpus/results/real_world_code_size.md`
+- 历史 code-size 外部验证入口已移除；相关历史材料只保留在 `docs/tmp/`。
 - 当前覆盖：`libbpf-bootstrap`、`bcf/cilium`、`bcf/inspektor-gadget`、`bcf/collected`
 - 当前结果：纳入 `77` 个 input artifacts，枚举出 `949` 个真实 program，其中 `162` 个在 `llvmbpf` 和 `kernel` 上都完成了 compile-only inspect
 - 代码尺寸结论：`llvmbpf/kernel` native code-size geomean 为 `0.618x`

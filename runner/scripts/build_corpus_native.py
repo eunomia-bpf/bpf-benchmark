@@ -219,7 +219,6 @@ def clang_bpf_sys_includes(clang: str = "clang") -> list[str]:
 
 def locate_cached_vmlinux_header() -> Path | None:
     prioritized = [
-        REPO_ROOT / "corpus" / "build" / "real_world_code_size" / "libbpf-bootstrap" / "vmlinux.h",
         REPO_ROOT / "corpus" / "build" / "bcc" / "vmlinux.h",
         REPO_ROOT / "corpus" / "build" / "katran" / "vmlinux.h",
         REPO_ROOT / "corpus" / "build" / "cilium" / "vmlinux.h",

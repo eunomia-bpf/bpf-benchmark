@@ -26,7 +26,6 @@
 | linux-selftests | 649 | 0 | 267 | 0 |
 | loxilb | 0 | 3 | 0 | 0 |
 | netbird | 0 | 0 | 1 | 0 |
-| real_world_code_size | 0 | 15 | 0 | 0 |
 | scx | 0 | 4 | 0 | 0 |
 | suricata | 0 | 2 | 0 | 0 |
 | systemd | 4 | 6 | 2 | 0 |
