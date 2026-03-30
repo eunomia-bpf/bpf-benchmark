@@ -1,0 +1,164 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "daemon_socket": "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260330/vm-tmp/bpfrejit-daemon-ej8fy8k5/daemon.sock",
+  "filters": [
+    "bpftrace/biosnoop"
+  ],
+  "generated_at": "2026-03-30T13:23:52.194988+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-03-30T13:23:41.621363+00:00",
+    "daemon_binary": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+    "daemon_kinsn_discovery": {
+      "captured_at": "2026-03-30T13:23:41.748471+00:00",
+      "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699092 type_cnt=145729 type_id_bias=145728\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=147700 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=147702 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=147677 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=147695 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=147696 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=147679 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=147680 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=147681 fd=7\nplatform: arch=X86_64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+      "status": "ok",
+      "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699092 type_cnt=145729 type_id_bias=145728\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=147700 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=147702 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=147677 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=147695 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=147696 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=147679 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=147680 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=147681 fd=7\nplatform: arch=X86_64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+      "stderr_path": "docs/tmp/20260330/vm-tmp/bpfrejit-daemon-ej8fy8k5/daemon.stderr.log",
+      "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260330/vm-tmp/bpfrejit-daemon-ej8fy8k5/daemon.sock",
+      "stdout_path": "docs/tmp/20260330/vm-tmp/bpfrejit-daemon-ej8fy8k5/daemon.stdout.log"
+    },
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "exit_code": 0,
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-03-30T13:23:41.617046+00:00",
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "newly_loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "script_path": "module/load_all.sh",
+      "snapshot_after": {
+        "captured_at": "2026-03-30T13:23:41.616850+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "stderr": "",
+      "stdout": "Loaded bpf_bulk_memory\nLoaded bpf_endian\nLoaded bpf_extract\nLoaded bpf_rotate\nLoaded bpf_select\nkinsn modules: 5/5 loaded"
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-03-30T13:23:40.876415+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [],
+      "missing_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "raw_output": "",
+      "resident_expected_modules": [],
+      "source": "lsmod"
+    },
+    "status": "ready"
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "repeat": 1,
+  "results": [
+    {
+      "app": "bpftrace/biosnoop",
+      "args": {
+        "script": "biosnoop"
+      },
+      "error": "fio file_io workload failed:         \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+      "program_measurements": {},
+      "runner": "bpftrace",
+      "selected_workload": "fio",
+      "status": "error",
+      "workload": {
+        "corpus": "fio",
+        "e2e": "fio"
+      }
+    }
+  ],
+  "status": "error",
+  "suite_name": "macro_apps",
+  "suite_summary": {
+    "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+    "schema_version": 1,
+    "selected_apps": 1,
+    "suite_name": "macro_apps",
+    "total_apps": 20
+  },
+  "summary": {
+    "all_comparable_geomean": null,
+    "applied_only_geomean": null,
+    "applied_sample_count": 0,
+    "comparison_exclusion_reason_counts": {},
+    "comparison_exclusion_reasons": [],
+    "discovered_programs": 0,
+    "per_app": [
+      {
+        "all_comparable_geomean": null,
+        "app": "bpftrace/biosnoop",
+        "applied_only_geomean": null,
+        "applied_program_count": 0,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [],
+        "program_count": 0,
+        "runner": "bpftrace",
+        "sample_count": 0,
+        "status": "error",
+        "workload": "fio"
+      }
+    ],
+    "sample_count": 0,
+    "selected_apps": 1,
+    "statuses": {
+      "error": 1
+    }
+  },
+  "workload_seconds": 1.0
+}

@@ -28,9 +28,13 @@ if str(REPO_ROOT) not in sys.path:
 
 from runner.libs.app_runners.bcc import BCCRunner  # noqa: E402
 from runner.libs.app_runners.tracee import TraceeRunner  # noqa: E402
+from runner.libs.agent import find_bpf_programs  # noqa: E402
 
 
 HELPER_BINARY = WORKDIR / "guest_helper" / "target" / "release" / "llvmbpf-rejit-guest"
+TRACEE_PROGRAM_STABILIZE_TIMEOUT_S = 20.0
+TRACEE_PROGRAM_STABLE_WINDOW_S = 3.0
+TRACEE_PROGRAM_POLL_INTERVAL_S = 0.5
 
 
 def safe_slug(text: str) -> str:
@@ -59,6 +63,37 @@ def run_helper(argv: list[str]) -> dict[str, Any]:
     return json.loads(completed.stdout)
 
 
+def wait_for_tracee_programs(runner: TraceeRunner) -> list[dict[str, Any]]:
+    if runner.pid is None:
+        raise RuntimeError("TraceeRunner has no pid after start()")
+
+    deadline = time.monotonic() + TRACEE_PROGRAM_STABILIZE_TIMEOUT_S
+    stable_deadline: float | None = None
+    best_programs = [dict(program) for program in runner.programs]
+    best_count = len(best_programs)
+
+    while time.monotonic() < deadline:
+        current = [dict(program) for program in find_bpf_programs(runner.pid)]
+        current_count = len(current)
+        if current_count > best_count:
+            best_programs = current
+            best_count = current_count
+            stable_deadline = time.monotonic() + TRACEE_PROGRAM_STABLE_WINDOW_S
+        elif current_count == best_count and current_count > 0:
+            if stable_deadline is None:
+                stable_deadline = time.monotonic() + TRACEE_PROGRAM_STABLE_WINDOW_S
+            if time.monotonic() >= stable_deadline:
+                break
+        else:
+            stable_deadline = None
+        time.sleep(TRACEE_PROGRAM_POLL_INTERVAL_S)
+
+    if not best_programs:
+        raise RuntimeError("Tracee attached no BPF programs after stabilization wait")
+    runner.programs = best_programs
+    return best_programs
+
+
 def open_runner(scenario: str, bcc_tool: str | None) -> tuple[Any, list[dict[str, Any]]]:
     if scenario == "execsnoop":
         runner = BCCRunner(tool_name="execsnoop")
@@ -72,7 +107,10 @@ def open_runner(scenario: str, bcc_tool: str | None) -> tuple[Any, list[dict[str
         raise RuntimeError(f"unsupported scenario: {scenario}")
 
     runner.start()
-    programs = [dict(program) for program in runner.programs]
+    if scenario == "tracee":
+        programs = wait_for_tracee_programs(runner)
+    else:
+        programs = [dict(program) for program in runner.programs]
     if not programs:
         raise RuntimeError(f"{scenario} attached no programs")
     return runner, programs

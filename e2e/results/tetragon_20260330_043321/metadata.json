@@ -1,0 +1,37 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "tetragon",
+  "details_dir": "details",
+  "error_message": "prog 28: BPF_PROG_REJIT: Invalid argument (os error 22)",
+  "generated_at": "2026-03-30T04:34:54.929653+00:00",
+  "last_updated_at": "2026-03-30T04:34:54.929650+00:00",
+  "optimization_summary": {
+    "case": "tetragon",
+    "error_message": "prog 28: BPF_PROG_REJIT: Invalid argument (os error 22)",
+    "failed_at": "2026-03-30T04:34:54.929635+00:00",
+    "smoke": true,
+    "status": "error"
+  },
+  "output_hint_json": "e2e/results/tetragon_smoke_20260330.json",
+  "output_hint_md": "e2e/results/tetragon-real-e2e.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "run_type": "tetragon",
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "smoke": true,
+  "started_at": "2026-03-30T04:33:21.535836+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

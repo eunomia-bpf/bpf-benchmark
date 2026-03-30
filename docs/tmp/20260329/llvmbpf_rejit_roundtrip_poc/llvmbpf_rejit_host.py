@@ -7,6 +7,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,17 @@ from llvmbpf_postprocess import postprocess_roundtrip_object  # noqa: E402
 
 
 HOST_LIFTER = WORKDIR / "build" / "llvmbpf-raw-lift"
+
+
+@dataclass(frozen=True)
+class PrepareConfig:
+    default_opt_level: str
+    opt_passes: str | None
+    disable_loop_unrolling: bool
+    bpf_stack_size: int
+    llc_extra_args: tuple[str, ...]
+    large_program_threshold: int | None
+    large_program_opt_level: str | None
 
 
 def require_tool(name: str) -> str:
@@ -80,7 +92,42 @@ def build_tools() -> None:
         )
 
 
-def prepare_program(program: dict[str, Any], opt_level: str, bpf_stack_size: int) -> dict[str, Any]:
+def pick_opt_level(program: dict[str, Any], config: PrepareConfig) -> str:
+    if (
+        config.large_program_threshold is not None
+        and config.large_program_opt_level is not None
+        and int(program["dump"]["original_insn_count"]) > config.large_program_threshold
+    ):
+        return config.large_program_opt_level
+    return config.default_opt_level
+
+
+def build_opt_command(raw_ll: Path, opt_bc: Path, opt_level: str, config: PrepareConfig) -> list[str]:
+    argv = [require_tool("opt")]
+    if config.opt_passes:
+        argv.extend([f"-passes={config.opt_passes}", str(raw_ll), "-o", str(opt_bc)])
+    else:
+        argv.extend([f"-{opt_level}", str(raw_ll), "-o", str(opt_bc)])
+    if config.disable_loop_unrolling:
+        argv.append("-disable-loop-unrolling")
+    return argv
+
+
+def build_llc_command(opt_bc: Path, raw_obj: Path, config: PrepareConfig) -> list[str]:
+    return [
+        require_tool("llc"),
+        "-march=bpf",
+        "-mcpu=v3",
+        f"--bpf-stack-size={config.bpf_stack_size}",
+        *config.llc_extra_args,
+        "-filetype=obj",
+        str(opt_bc),
+        "-o",
+        str(raw_obj),
+    ]
+
+
+def prepare_program(program: dict[str, Any], config: PrepareConfig) -> dict[str, Any]:
     program_dir = Path(program["program_dir"]).resolve()
     original_bin = Path(program["original_bin_path"]).resolve()
     raw_ll = program_dir / "lifted.ll"
@@ -88,6 +135,7 @@ def prepare_program(program: dict[str, Any], opt_level: str, bpf_stack_size: int
     raw_obj = program_dir / "roundtrip_raw.bpf.o"
     obj_path = program_dir / "roundtrip.bpf.o"
     bin_path = program_dir / "roundtrip.bin"
+    opt_level = pick_opt_level(program, config)
 
     lift = run_command(
         [str(HOST_LIFTER), "emit-llvm", str(original_bin)],
@@ -103,7 +151,7 @@ def prepare_program(program: dict[str, Any], opt_level: str, bpf_stack_size: int
         }
 
     opt = run_command(
-        [require_tool("opt"), f"-{opt_level}", str(raw_ll), "-o", str(opt_bc)],
+        build_opt_command(raw_ll, opt_bc, opt_level, config),
         stdout_path=program_dir / "opt.stdout.log",
         stderr_path=program_dir / "opt.stderr.log",
     )
@@ -116,16 +164,7 @@ def prepare_program(program: dict[str, Any], opt_level: str, bpf_stack_size: int
         }
 
     llc = run_command(
-        [
-            require_tool("llc"),
-            "-march=bpf",
-            "-mcpu=v3",
-            f"--bpf-stack-size={bpf_stack_size}",
-            "-filetype=obj",
-            str(opt_bc),
-            "-o",
-            str(raw_obj),
-        ],
+        build_llc_command(opt_bc, raw_obj, config),
         stdout_path=program_dir / "llc.stdout.log",
         stderr_path=program_dir / "llc.stderr.log",
     )
@@ -158,13 +197,14 @@ def prepare_program(program: dict[str, Any], opt_level: str, bpf_stack_size: int
         "program_id": program["program_id"],
         "program_name": program["program_name"],
         "status": "ok",
+        "effective_opt_level": opt_level,
         "roundtrip_bin_path": str(bin_path),
         "roundtrip_obj_path": str(obj_path),
         "postprocess": postprocess_summary,
     }
 
 
-def run_prepare(session_dir: Path, opt_level: str) -> None:
+def run_prepare(session_dir: Path, config: PrepareConfig) -> None:
     manifest_path = session_dir / "manifest.json"
     if not manifest_path.exists():
         raise RuntimeError(f"missing manifest: {manifest_path}")
@@ -172,10 +212,19 @@ def run_prepare(session_dir: Path, opt_level: str) -> None:
     results = {
         "session_dir": str(session_dir),
         "scenario": manifest["scenario"],
+        "prepare_config": {
+            "default_opt_level": config.default_opt_level,
+            "opt_passes": config.opt_passes,
+            "disable_loop_unrolling": config.disable_loop_unrolling,
+            "bpf_stack_size": config.bpf_stack_size,
+            "llc_extra_args": list(config.llc_extra_args),
+            "large_program_threshold": config.large_program_threshold,
+            "large_program_opt_level": config.large_program_opt_level,
+        },
         "programs": [],
     }
     for program in manifest["programs"]:
-        results["programs"].append(prepare_program(program, opt_level, manifest["bpf_stack_size"]))
+        results["programs"].append(prepare_program(program, config))
     summary_path = session_dir / "host_prepare_summary.json"
     write_json(summary_path, results)
     print(json.dumps(results, indent=2))
@@ -190,7 +239,12 @@ def build_parser() -> argparse.ArgumentParser:
     prepare = sub.add_parser("prepare")
     prepare.add_argument("--session-dir", type=Path, required=True)
     prepare.add_argument("--opt-level", default="O2")
+    prepare.add_argument("--opt-passes", default=None)
+    prepare.add_argument("--disable-loop-unrolling", action="store_true")
     prepare.add_argument("--bpf-stack-size", type=int, default=512)
+    prepare.add_argument("--llc-extra-arg", action="append", default=[])
+    prepare.add_argument("--large-program-threshold", type=int, default=None)
+    prepare.add_argument("--large-program-opt-level", default=None)
     return parser
 
 
@@ -207,7 +261,16 @@ def main() -> int:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         manifest["bpf_stack_size"] = args.bpf_stack_size
         write_json(manifest_path, manifest)
-        run_prepare(session_dir, args.opt_level)
+        config = PrepareConfig(
+            default_opt_level=args.opt_level,
+            opt_passes=args.opt_passes,
+            disable_loop_unrolling=args.disable_loop_unrolling,
+            bpf_stack_size=args.bpf_stack_size,
+            llc_extra_args=tuple(args.llc_extra_arg),
+            large_program_threshold=args.large_program_threshold,
+            large_program_opt_level=args.large_program_opt_level,
+        )
+        run_prepare(session_dir, config)
         return 0
     raise AssertionError(f"unhandled command: {args.command}")
 

@@ -565,7 +565,7 @@ fn run_rejit(prog_id: u32, roundtrip_bin: &Path) -> Result<()> {
         }
     };
 
-    match bpf::bpf_prog_rejit_capture_verifier_log(prog_fd.as_raw_fd(), &rejit_insns, &[]) {
+    match bpf::bpf_prog_rejit(prog_fd.as_raw_fd(), &rejit_insns, &[]) {
         Ok(result) => print_json(&RejitOutput {
             program_name: info.name_str().to_string(),
             program_id: info.id,

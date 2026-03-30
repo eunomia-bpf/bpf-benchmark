@@ -220,14 +220,19 @@ def run_file_io(duration_s: int | float) -> WorkloadResult:
             fio_binary,
             "--name=tracee-e2e",
             f"--filename={data_path}",
-            "--rw=randrw",
-            "--rwmixread=70",
+            # Mixed randrw on a freshly created file can issue an initial read
+            # against yet-unwritten offsets and fail under virtme's rw overlay.
+            # Random writes still exercise the block layer and biosnoop probes
+            # without tripping that guest-specific EIO path.
+            "--rw=randwrite",
             "--bs=4k",
             "--size=64M",
             f"--runtime={max(1, int(duration_s))}",
             "--time_based=1",
             "--ioengine=sync",
-            "--direct=1",
+            # virtme rw overlays commonly reject O_DIRECT with EIO. Keep the
+            # workload buffered, invalidate cache, and fsync each iteration so
+            # biosnoop-style block I/O still happens in the guest.
             "--create_on_open=1",
             "--fsync=1",
             "--end_fsync=1",
