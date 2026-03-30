@@ -4,8 +4,8 @@
 
 ## Directory Layout
 
-- `driver.py`: declarative macro corpus entrypoint plus corpus mode dispatch
-- `modes.py`: consolidated packet, tracing, perf, and code-size corpus modes
+- `driver.py`: thin corpus entrypoint that forwards to `orchestrator.py`
+- `orchestrator.py`: shared corpus benchmark orchestrator for native app loader instances
 - `corpus/config/macro_corpus.yaml`: declarative macro/corpus suite consumed by `python3 corpus/driver.py --suite corpus/config/macro_corpus.yaml`
 - `build/`: compiled `.bpf.o` outputs under `corpus/build/<repo>/`
 - `results/`: committed JSON/Markdown outputs from corpus and supporting analyses
@@ -20,19 +20,12 @@ Shared runner-owned inputs:
 
 ## Canonical Entry Points
 
-Use `corpus/driver.py <mode> ...` for the active corpus measurement modes:
-
-- `python3 corpus/driver.py packet`
-- `python3 corpus/driver.py perf`
-- `python3 corpus/driver.py tracing`
-- `python3 corpus/driver.py code-size`
-
 Use `python3 corpus/driver.py --suite corpus/config/macro_corpus.yaml` for the declarative macro suite.
 
 Top-level support scripts retained in `corpus/`:
 
 - `driver.py`: corpus measurement entrypoint
-- `modes.py`: corpus mode implementations
+- `orchestrator.py`: native-loader corpus orchestration
 
 Runner-owned repo control-plane scripts:
 
@@ -66,8 +59,8 @@ Inspect the declarative macro suite:
 python3 corpus/driver.py --suite corpus/config/macro_corpus.yaml --list
 ```
 
-Inspect the corpus perf harness:
+Inspect the corpus orchestrator:
 
 ```bash
-python3 corpus/driver.py perf --help
+python3 corpus/driver.py --help
 ```

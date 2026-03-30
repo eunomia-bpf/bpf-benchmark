@@ -44,7 +44,7 @@ def test_infer_prog_type_name_uses_section_prefix_when_prog_type_is_unspec() -> 
     assert orchestrator._infer_prog_type_name(program) == "xdp"
 
 
-def test_run_suite_routes_app_native_and_test_run(monkeypatch, tmp_path: Path) -> None:
+def test_run_suite_splits_program_measurements_and_routes_loader_instances(monkeypatch, tmp_path: Path) -> None:
     manifest_path = tmp_path / "macro.yaml"
     manifest_path.write_text(
         yaml.safe_dump({"schema_version": 2, "defaults": {"repeat": 7}, "objects": []}, sort_keys=False),
@@ -56,25 +56,44 @@ def test_run_suite_routes_app_native_and_test_run(monkeypatch, tmp_path: Path) -
 
     objects = [
         SimpleNamespace(
+            object_path="corpus/build/tracee/tracee.bpf.o",
+            object_abs_path=str(tmp_path / "tracee.bpf.o"),
+            repo="tracee",
+            measurement="app_native",
+            programs=(
+                SimpleNamespace(
+                    program_name="sys_enter_submit",
+                    measurement="app_native",
+                ),
+                SimpleNamespace(
+                    program_name="cgroup_skb_egress",
+                    measurement="test_run",
+                ),
+            ),
+        ),
+        SimpleNamespace(
             object_path="corpus/build/bcc/execsnoop.bpf.o",
             object_abs_path=str(tmp_path / "execsnoop.bpf.o"),
             repo="bcc",
             measurement="app_native",
-            programs=(SimpleNamespace(program_name="tracepoint__syscalls__sys_enter_execve"),),
+            programs=(
+                SimpleNamespace(
+                    program_name="tracepoint__syscalls__sys_enter_execve",
+                    measurement="app_native",
+                ),
+            ),
         ),
         SimpleNamespace(
             object_path="corpus/build/bcc/opensnoop.bpf.o",
             object_abs_path=str(tmp_path / "opensnoop.bpf.o"),
             repo="bcc",
             measurement="app_native",
-            programs=(SimpleNamespace(program_name="tracepoint__syscalls__sys_enter_openat"),),
-        ),
-        SimpleNamespace(
-            object_path="corpus/build/xdp-tutorial/xdp_pass_kern.bpf.o",
-            object_abs_path=str(tmp_path / "xdp_pass_kern.bpf.o"),
-            repo="xdp-tutorial",
-            measurement="test_run",
-            programs=(SimpleNamespace(program_name="xdp_prog_simple", prog_type_name="xdp", section_name="xdp"),),
+            programs=(
+                SimpleNamespace(
+                    program_name="tracepoint__syscalls__sys_enter_openat",
+                    measurement="app_native",
+                ),
+            ),
         ),
     ]
 
@@ -105,32 +124,40 @@ def test_run_suite_routes_app_native_and_test_run(monkeypatch, tmp_path: Path) -
 
     monkeypatch.setattr(orchestrator, "DaemonSession", FakeDaemonSession)
 
-    batch_calls: list[tuple[str, tuple[str, ...]]] = []
+    batch_calls: list[tuple[str, tuple[str, ...], tuple[tuple[str, ...], ...]]] = []
 
-    def fake_run_app_native_repo_group(indexed_group, **_kwargs):
-        batch_calls.append((indexed_group[0][1].repo, tuple(obj.object_path for _, obj in indexed_group)))
+    def fake_run_app_native_loader_instance(indexed_group, *, loader_label, **_kwargs):
+        batch_calls.append(
+            (
+                loader_label,
+                tuple(obj.object_path for _, obj in indexed_group),
+                tuple(tuple(program.program_name for program in obj.programs) for _, obj in indexed_group),
+            )
+        )
         return (
             [
                 (
                     index,
-                    {"object": obj.object_path, "measurement": obj.measurement, "status": "ok", "repo": obj.repo},
+                    {
+                        "object": obj.object_path,
+                        "measurement": obj.measurement,
+                        "status": "ok",
+                        "repo": obj.repo,
+                        "loader_instance": loader_label,
+                    },
                 )
                 for index, obj in indexed_group
             ],
             {
                 "repo": indexed_group[0][1].repo,
+                "loader_instance": loader_label,
                 "measurement": "app_native",
                 "status": "ok",
                 "objects": [obj.object_path for _, obj in indexed_group],
             },
         )
 
-    monkeypatch.setattr(orchestrator, "_run_app_native_repo_group", fake_run_app_native_repo_group)
-    monkeypatch.setattr(
-        orchestrator,
-        "_run_test_run_entry",
-        lambda obj, **_kwargs: {"object": obj.object_path, "measurement": obj.measurement, "status": "fallback"},
-    )
+    monkeypatch.setattr(orchestrator, "_run_app_native_loader_instance", fake_run_app_native_loader_instance)
 
     args = orchestrator.parse_args(
         [
@@ -143,29 +170,68 @@ def test_run_suite_routes_app_native_and_test_run(monkeypatch, tmp_path: Path) -
     payload = orchestrator.run_suite(args)
 
     assert payload["repeat"] == 7
-    assert payload["summary"]["selected_objects"] == 3
-    assert payload["summary"]["statuses"] == {"fallback": 1, "ok": 2}
-    assert payload["summary"]["measurements"] == {"app_native": 2, "test_run": 1}
+    assert payload["summary"]["selected_manifest_objects"] == 3
+    assert payload["summary"]["selected_execution_units"] == 4
+    assert payload["summary"]["selected_programs"] == 4
+    assert payload["summary"]["statuses"] == {"error": 1, "ok": 3}
+    assert payload["summary"]["measurements"] == {"app_native": 3, "test_run": 1}
+    assert payload["status"] == "error"
     assert batch_calls == [
         (
-            "bcc",
+            "tracee",
+            (
+                "corpus/build/tracee/tracee.bpf.o",
+            ),
+            (("sys_enter_submit",),),
+        ),
+        (
+            "bcc:execsnoop",
             (
                 "corpus/build/bcc/execsnoop.bpf.o",
+            ),
+            (("tracepoint__syscalls__sys_enter_execve",),),
+        ),
+        (
+            "bcc:opensnoop",
+            (
                 "corpus/build/bcc/opensnoop.bpf.o",
             ),
+            (("tracepoint__syscalls__sys_enter_openat",),),
         )
     ]
     assert payload["app_native_batches"] == [
         {
+            "repo": "tracee",
+            "loader_instance": "tracee",
+            "measurement": "app_native",
+            "status": "ok",
+            "objects": [
+                "corpus/build/tracee/tracee.bpf.o",
+            ],
+        },
+        {
             "repo": "bcc",
+            "loader_instance": "bcc:execsnoop",
             "measurement": "app_native",
             "status": "ok",
             "objects": [
                 "corpus/build/bcc/execsnoop.bpf.o",
+            ],
+        },
+        {
+            "repo": "bcc",
+            "loader_instance": "bcc:opensnoop",
+            "measurement": "app_native",
+            "status": "ok",
+            "objects": [
                 "corpus/build/bcc/opensnoop.bpf.o",
             ],
         }
     ]
+    assert any(
+        result["measurement"] == "test_run" and "unsupported corpus measurement" in result["error"]
+        for result in payload["results"]
+    )
 
 
 def test_parse_args_rejects_invalid_repeat_and_workload_seconds() -> None:

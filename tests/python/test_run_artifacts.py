@@ -197,7 +197,7 @@ def test_artifact_entrypoints_compile() -> None:
     for relative_path in (
         "micro/driver.py",
         "corpus/driver.py",
-        "corpus/modes.py",
+        "corpus/orchestrator.py",
         "e2e/run.py",
         "e2e/cases/bpftrace/case.py",
         "e2e/cases/tetragon/case.py",

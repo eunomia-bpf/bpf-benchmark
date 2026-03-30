@@ -2,9 +2,8 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import is_dataclass, replace
 import json
-import os
-import subprocess
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
@@ -17,10 +16,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from runner.libs import ROOT_DIR, ensure_parent, resolve_bpftool_binary, run_command, run_json_command, write_json
+from runner.libs import ROOT_DIR, ensure_parent, write_json
 from runner.libs.app_runners import get_app_runner
+from runner.libs.app_runners.systemd import systemd_binary_for_object
 from runner.libs.bpf_stats import enable_bpf_stats, read_program_stats
-from runner.libs.corpus import load_targets_from_yaml, materialize_dummy_packet
+from runner.libs.corpus import load_targets_from_yaml
 from runner.libs.daemon_session import DaemonSession
 from runner.libs.rejit import benchmark_rejit_enabled_passes
 
@@ -29,7 +29,6 @@ DEFAULT_MACRO_CORPUS_YAML = ROOT_DIR / "corpus" / "config" / "macro_corpus.yaml"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_OUTPUT_JSON = ROOT_DIR / "corpus" / "results" / "vm_corpus_new.json"
 DEFAULT_BTF_PATH = Path("/sys/kernel/btf/vmlinux")
-NETWORK_TEST_RUN_TYPES = {"xdp", "sched_cls", "sched_act", "cgroup_skb", "socket_filter"}
 SECTION_TYPE_PREFIXES = {
     "xdp": "xdp",
     "tc": "sched_cls",
@@ -37,12 +36,15 @@ SECTION_TYPE_PREFIXES = {
     "cgroup_skb": "cgroup_skb",
     "socket": "socket_filter",
 }
-
-
-def _sanitize_pin_component(value: str) -> str:
-    sanitized = "".join(char if (char.isalnum() or char in {"_", "-"}) else "_" for char in str(value))
-    sanitized = sanitized.strip("_-")
-    return sanitized or "prog"
+SHARED_LOADER_REPOS = {
+    "coroot-node-agent",
+    "datadog-agent",
+    "katran",
+    "kubearmor",
+    "tetragon",
+    "tracee",
+    "tubular",
+}
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -62,12 +64,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     if float(args.workload_seconds) <= 0:
         raise SystemExit("--workload-seconds must be > 0")
     return args
-
-
-def ensure_bpffs_mounted() -> None:
-    if subprocess.run(["mountpoint", "-q", "/sys/fs/bpf"], check=False).returncode == 0:
-        return
-    run_command(["mount", "-t", "bpf", "bpf", "/sys/fs/bpf"])
 
 
 def _manifest_build_report(manifest_path: Path) -> dict[str, Any]:
@@ -151,6 +147,94 @@ def _mean_exec_ns(records: Mapping[str, Mapping[str, object]]) -> float | None:
     return sum(values) / len(values)
 
 
+def _split_objects_by_program_measurement(objects: list[Any]) -> list[Any]:
+    split_objects: list[Any] = []
+    for obj in objects:
+        programs_by_measurement: dict[str, list[Any]] = {}
+        for program in obj.programs:
+            programs_by_measurement.setdefault(str(program.measurement), []).append(program)
+        for measurement, programs in programs_by_measurement.items():
+            if is_dataclass(obj):
+                split_objects.append(replace(obj, measurement=measurement, programs=tuple(programs)))
+                continue
+            payload = dict(vars(obj))
+            payload["measurement"] = measurement
+            payload["programs"] = tuple(programs)
+            split_objects.append(type(obj)(**payload))
+    return split_objects
+
+
+def _loader_instance_identity(obj: Any) -> tuple[tuple[object, ...], str]:
+    repo = str(obj.repo or "").strip().lower()
+    loader_binary = str(getattr(obj, "loader_binary", "") or "").strip()
+    loader_args = tuple(str(arg) for arg in (getattr(obj, "loader_args", ()) or ()))
+    if repo in SHARED_LOADER_REPOS:
+        key = (repo, loader_binary, loader_args)
+        return key, repo
+    if repo == "bcc":
+        label = Path(obj.object_abs_path).name.removesuffix(".bpf.o")
+        return (repo, label), f"{repo}:{label}"
+    if repo == "systemd":
+        binary = str(systemd_binary_for_object(obj.object_abs_path))
+        label = Path(binary).name
+        return (repo, binary), f"{repo}:{label}"
+    label = Path(obj.object_abs_path).name
+    key = (
+        repo,
+        str(obj.object_abs_path),
+        loader_binary,
+        loader_args,
+    )
+    return key, f"{repo}:{label}"
+
+
+def _group_app_native_loader_instances(indexed_objects: list[tuple[int, Any]]) -> list[tuple[str, list[tuple[int, Any]]]]:
+    groups: dict[tuple[object, ...], tuple[str, list[tuple[int, Any]]]] = {}
+    for indexed_object in indexed_objects:
+        index, obj = indexed_object
+        if str(obj.measurement) != "app_native":
+            continue
+        key, label = _loader_instance_identity(obj)
+        if key not in groups:
+            groups[key] = (label, [])
+        groups[key][1].append((index, obj))
+    return list(groups.values())
+
+
+def _unsupported_measurement_result(obj: Any) -> dict[str, object]:
+    return {
+        "object": obj.object_path,
+        "repo": obj.repo,
+        "measurement": obj.measurement,
+        "status": "error",
+        "error": (
+            f"unsupported corpus measurement {obj.measurement!r}: loader instances must come from native app runners; "
+            "migrate this object to an app runner or remove it from the corpus suite"
+        ),
+    }
+
+
+def _validate_phase_measurement(
+    phase_name: str,
+    records: Mapping[str, Mapping[str, object]],
+    expected_program_names: list[str],
+) -> None:
+    errors: list[str] = []
+    for program_name in expected_program_names:
+        record = records.get(program_name)
+        if record is None:
+            errors.append(f"{phase_name}: missing stats for program {program_name!r}")
+            continue
+        run_cnt = int(record.get("run_cnt", 0) or 0)
+        exec_ns = record.get("exec_ns")
+        if run_cnt <= 0:
+            errors.append(f"{phase_name}: program {program_name!r} observed zero runs")
+        if not isinstance(exec_ns, (int, float)):
+            errors.append(f"{phase_name}: program {program_name!r} is missing exec_ns")
+    if errors:
+        raise RuntimeError("; ".join(errors))
+
+
 def _infer_prog_type_name(program: Any) -> str:
     prog_type = str(getattr(program, "prog_type_name", "") or "").strip().lower()
     if prog_type and prog_type != "unspec":
@@ -163,32 +247,6 @@ def _infer_prog_type_name(program: Any) -> str:
         if section_name.startswith(prefix):
             return inferred_type
     return prog_type or "unspec"
-
-
-def _bpftool_prog_show_pinned(bpftool_binary: str, pin_path: Path) -> dict[str, Any]:
-    payload = run_json_command([bpftool_binary, "-j", "-p", "prog", "show", "pinned", str(pin_path)], timeout=30)
-    if isinstance(payload, list):
-        if len(payload) != 1:
-            raise RuntimeError(f"unexpected pinned prog payload for {pin_path}")
-        payload = payload[0]
-    if not isinstance(payload, Mapping):
-        raise RuntimeError(f"unexpected pinned prog payload for {pin_path}")
-    return dict(payload)
-
-
-def _build_prog_run_command(
-    bpftool_binary: str,
-    pin_path: Path,
-    program: Any,
-    *,
-    repeat: int,
-) -> list[str]:
-    command = [bpftool_binary, "-j", "-p", "prog", "run", "pinned", str(pin_path)]
-    if _infer_prog_type_name(program) in NETWORK_TEST_RUN_TYPES:
-        packet_path = materialize_dummy_packet(ROOT_DIR / "corpus" / "inputs" / "macro_dummy_packet_64.bin")
-        command.extend(["data_in", str(packet_path)])
-    command.extend(["repeat", str(max(1, repeat))])
-    return command
 
 
 def _runner_kwargs_for_repo(
@@ -275,14 +333,23 @@ def _runner_kwargs_for_repo(
         kwargs = {
             "object_path": primary_obj.object_abs_path,
         }
+        if loader_binary:
+            raise RuntimeError(f"katran app runner does not support loader_binary in corpus manifest: {loader_binary}")
         if loader_args:
             raise RuntimeError(f"katran app runner does not support loader_args in corpus manifest: {loader_args}")
         return kwargs
 
-    return {
+    kwargs = {
         "object_path": primary_obj.object_abs_path,
         "expected_program_names": expected_program_names,
     }
+    if loader_binary:
+        kwargs["loader_binary"] = loader_binary
+    if loader_args:
+        kwargs["loader_args"] = loader_args
+    if timeout_seconds is not None:
+        kwargs["load_timeout_s"] = int(timeout_seconds)
+    return kwargs
 
 
 def _assign_live_program_ids(
@@ -385,14 +452,15 @@ def _subset_apply_result(
     }
 
 
-def _run_app_native_repo_group(
+def _run_app_native_loader_instance(
     indexed_objects: list[tuple[int, Any]],
     *,
+    loader_label: str,
     daemon_session: DaemonSession,
     workload_seconds: float,
 ) -> tuple[list[tuple[int, dict[str, object]]], dict[str, object]]:
     if not indexed_objects:
-        raise RuntimeError("app-native repo group is empty")
+        raise RuntimeError("app-native loader instance is empty")
 
     repo = str(indexed_objects[0][1].repo)
     primary_obj = indexed_objects[0][1]
@@ -400,17 +468,26 @@ def _run_app_native_repo_group(
     runner = get_app_runner(repo, **_runner_kwargs_for_repo(repo, primary_obj, expected_program_names))
     batch_results: list[tuple[int, dict[str, object]]] = []
     batch_summary: dict[str, object]
+    prog_ids: list[int] = []
+    live_programs: list[dict[str, object]] = []
+    unassigned_live_programs: list[dict[str, object]] = []
+    programs_by_id: dict[int, dict[str, object]] = {}
+    batch_apply_result: dict[str, object] = {}
+    baseline_phase: dict[int, dict[str, object]] = {}
+    rejit_phase: dict[int, dict[str, object]] = {}
+    baseline_workload = None
+    rejit_workload = None
 
     try:
         prog_ids = [int(value) for value in runner.start() if int(value) > 0]
         if not prog_ids:
-            raise RuntimeError(f"{repo}: app runner did not return any live prog_ids")
+            raise RuntimeError(f"{loader_label}: app runner did not return any live prog_ids")
         live_programs = [dict(program) for program in getattr(runner, "programs", [])]
         assignments_by_index, unassigned_live_programs = _assign_live_program_ids(indexed_objects, live_programs)
         programs_by_id = _runner_programs_by_id(live_programs)
 
         with enable_bpf_stats():
-            runner.run_workload(workload_seconds)
+            baseline_workload = runner.run_workload(workload_seconds).to_dict()
             baseline_snapshot = read_program_stats(prog_ids)
             batch_apply_result = daemon_session.apply_rejit(
                 prog_ids,
@@ -418,11 +495,18 @@ def _run_app_native_repo_group(
             )
             rejit_snapshot: Mapping[int, Mapping[str, object]] = {}
             if bool(batch_apply_result.get("applied")):
-                runner.run_workload(workload_seconds)
+                rejit_workload = runner.run_workload(workload_seconds).to_dict()
                 rejit_snapshot = read_program_stats(prog_ids)
 
         baseline_phase = _program_phase_stats(baseline_snapshot)
         rejit_phase = _program_phase_stats(rejit_snapshot, baseline_snapshot) if rejit_snapshot else {}
+        for index, _obj in indexed_objects:
+            assigned_programs = assignments_by_index.get(index, {})
+            baseline_by_name = _program_stats_by_name(baseline_phase, assigned_programs)
+            _validate_phase_measurement("baseline", baseline_by_name, list(assigned_programs))
+            if bool(batch_apply_result.get("applied")):
+                rejit_by_name = _program_stats_by_name(rejit_phase, assigned_programs)
+                _validate_phase_measurement("rejit", rejit_by_name, list(assigned_programs))
     finally:
         runner.stop()
 
@@ -430,11 +514,14 @@ def _run_app_native_repo_group(
         "type": type(runner).__name__,
         "tool_name": getattr(runner, "tool_name", ""),
         "tool_binary": str(getattr(runner, "tool_binary", "") or ""),
+        "loader_binary": str(getattr(runner, "loader_binary", "") or ""),
+        "command_used": [str(item) for item in (getattr(runner, "command_used", []) or [])],
     }
     process_output = dict(getattr(runner, "process_output", {}))
 
     batch_summary = {
         "repo": repo,
+        "loader_instance": loader_label,
         "measurement": "app_native",
         "status": "ok" if bool(batch_apply_result.get("applied")) else "error",
         "error": str(batch_apply_result.get("error") or "").strip(),
@@ -447,11 +534,13 @@ def _run_app_native_repo_group(
             "programs": _program_stats_by_prog_id(baseline_phase, prog_ids),
             "exec_ns_mean": _mean_exec_ns(_program_stats_by_prog_id(baseline_phase, prog_ids)),
         },
+        "baseline_workload": baseline_workload,
         "rejit_apply": dict(batch_apply_result),
         "rejit": {
             "programs": _program_stats_by_prog_id(rejit_phase, prog_ids),
             "exec_ns_mean": _mean_exec_ns(_program_stats_by_prog_id(rejit_phase, prog_ids)),
         } if rejit_phase else None,
+        "rejit_workload": rejit_workload,
         "process": process_output,
     }
 
@@ -471,8 +560,8 @@ def _run_app_native_repo_group(
                 {
                     "object": obj.object_path,
                     "repo": obj.repo,
+                    "loader_instance": loader_label,
                     "measurement": "app_native",
-                    "batch_repo": repo,
                     "status": "ok" if bool(batch_apply_result.get("applied")) else "error",
                     "error": object_error,
                     "runner": runner_info,
@@ -495,140 +584,11 @@ def _run_app_native_repo_group(
     return batch_results, batch_summary
 
 
-def _run_test_run_entry(
-    obj: Any,
-    *,
-    bpftool_binary: str,
-    daemon_session: DaemonSession,
-    repeat: int,
-    btf_path: Path | None,
-) -> dict[str, object]:
-    ensure_bpffs_mounted()
-    object_component = _sanitize_pin_component(Path(obj.object_abs_path).stem)
-    pin_root = Path("/sys/fs/bpf") / f"corpus-orch-{object_component}-{os.getpid()}"
-    pin_dir = pin_root / "progs"
-    map_dir = pin_root / "maps"
-    load_command = [bpftool_binary, "prog", "loadall", obj.object_abs_path, str(pin_dir)]
-    inferred_type = _infer_prog_type_name(obj.programs[0]) if obj.programs else "unspec"
-    if btf_path is not None and btf_path.exists():
-        load_command.extend(["kernel_btf", str(btf_path)])
-    if inferred_type and inferred_type != "unspec":
-        load_command.extend(["type", inferred_type])
-    load_command.extend(["pinmaps", str(map_dir)])
-    run_command(["rm", "-rf", str(pin_root)], check=False)
-    run_command(["mkdir", "-p", str(pin_dir), str(map_dir)])
-
-    try:
-        run_command(load_command, timeout=180)
-        records: list[dict[str, object]] = []
-        record_errors: list[str] = []
-        for program in obj.programs:
-            try:
-                pin_path = pin_dir / program.program_name
-                prog_show = _bpftool_prog_show_pinned(bpftool_binary, pin_path)
-                prog_id = int(prog_show.get("id", 0) or 0)
-                if prog_id <= 0:
-                    raise RuntimeError(f"{program.program_name}: failed to resolve pinned prog id")
-                baseline_run = run_json_command(
-                    _build_prog_run_command(bpftool_binary, pin_path, program, repeat=repeat),
-                    timeout=120,
-                )
-                if not isinstance(baseline_run, Mapping):
-                    raise RuntimeError(f"{program.program_name}: unexpected bpftool baseline payload")
-                apply_result = daemon_session.apply_rejit(
-                    [prog_id],
-                    enabled_passes=benchmark_rejit_enabled_passes(),
-                )
-                rejit_run: Mapping[str, object] | None = None
-                if bool(apply_result.get("applied")):
-                    rejit_run = run_json_command(
-                        _build_prog_run_command(bpftool_binary, pin_path, program, repeat=repeat),
-                        timeout=120,
-                    )
-                    if not isinstance(rejit_run, Mapping):
-                        raise RuntimeError(f"{program.program_name}: unexpected bpftool rejit payload")
-                baseline: dict[str, object] = {
-                    "source": "bpftool",
-                    "exec_ns": int(baseline_run.get("duration", 0) or 0),
-                    "retval": int(baseline_run.get("retval", 0) or 0),
-                    "prog_id": prog_id,
-                    "jited_bytes": int(prog_show.get("bytes_jited", 0) or 0),
-                    "bytes_xlated": int(prog_show.get("bytes_xlated", 0) or 0),
-                    "xlated_insns": int(int(prog_show.get("bytes_xlated", 0) or 0) / 8),
-                    "raw": dict(baseline_run),
-                }
-                rejit: dict[str, object] | None = None
-                if rejit_run is not None:
-                    post_show = _bpftool_prog_show_pinned(bpftool_binary, pin_path)
-                    rejit = {
-                        "source": "bpftool",
-                        "exec_ns": int(rejit_run.get("duration", 0) or 0),
-                        "retval": int(rejit_run.get("retval", 0) or 0),
-                        "prog_id": prog_id,
-                        "jited_bytes": int(post_show.get("bytes_jited", 0) or 0),
-                        "bytes_xlated": int(post_show.get("bytes_xlated", 0) or 0),
-                        "xlated_insns": int(int(post_show.get("bytes_xlated", 0) or 0) / 8),
-                        "raw": dict(rejit_run),
-                    }
-                record_status = "ok"
-                record_error = ""
-                if not bool(apply_result.get("applied")):
-                    record_status = "error"
-                    record_error = str(apply_result.get("error") or "").strip() or (
-                        f"{program.program_name}: daemon REJIT apply returned applied=false"
-                    )
-            except Exception as exc:
-                pin_path = pin_dir / program.program_name
-                prog_id = 0
-                baseline = {}
-                rejit = None
-                apply_result = {}
-                record_status = "error"
-                record_error = str(exc)
-            if record_error:
-                record_errors.append(record_error)
-            records.append(
-                {
-                    "program_name": program.program_name,
-                    "status": record_status,
-                    "pin_path": str(pin_path),
-                    "prog_id": prog_id,
-                    "baseline": baseline,
-                    "rejit_apply": dict(apply_result),
-                    "rejit": rejit,
-                    "error": record_error,
-                }
-            )
-        statuses = Counter(str(record.get("status") or "error") for record in records)
-        return {
-            "object": obj.object_path,
-            "repo": obj.repo,
-            "measurement": "test_run",
-            "status": "ok" if statuses.get("error", 0) == 0 else "error",
-            "error": "; ".join(record_errors),
-            "records": records,
-            "summary": {
-                "records": len(records),
-                "statuses": dict(sorted(statuses.items())),
-            },
-        }
-    finally:
-        run_command(["rm", "-rf", str(pin_root)], check=False)
-
-
 def _daemon_exit_error(daemon_session: DaemonSession) -> str | None:
     returncode = daemon_session.proc.poll()
     if returncode is None:
         return None
     return f"daemon session exited early (rc={returncode})"
-
-
-def _app_native_group_map(indexed_objects: list[tuple[int, Any]]) -> dict[str, list[tuple[int, Any]]]:
-    grouped: dict[str, list[tuple[int, Any]]] = {}
-    for indexed_object in indexed_objects:
-        repo = str(indexed_object[1].repo)
-        grouped.setdefault(repo, []).append(indexed_object)
-    return grouped
 
 
 def run_suite(args: argparse.Namespace) -> dict[str, object]:
@@ -644,32 +604,36 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
         ((yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}).get("defaults") or {}).get("repeat", 1)
     )
     daemon_binary = Path(args.daemon).resolve()
-    btf_path = Path(args.btf_custom_path).resolve() if str(args.btf_custom_path).strip() else None
-    bpftool_binary = str(Path(args.bpftool).resolve()) if str(args.bpftool).strip() else resolve_bpftool_binary()
+    execution_units = _split_objects_by_program_measurement(objects)
 
     if not daemon_binary.exists():
         raise RuntimeError(f"daemon binary not found: {daemon_binary}")
 
-    indexed_objects = list(enumerate(objects))
-    app_native_groups = _app_native_group_map(
-        [(index, obj) for index, obj in indexed_objects if obj.measurement == "app_native"]
-    )
+    indexed_objects = list(enumerate(execution_units))
+    app_native_groups = _group_app_native_loader_instances(indexed_objects)
     indexed_results: dict[int, dict[str, object]] = {}
-    repo_batches: list[dict[str, object]] = []
+    loader_batches: list[dict[str, object]] = []
     fatal_error = ""
 
-    if indexed_objects:
+    unsupported_units = [(index, obj) for index, obj in indexed_objects if str(obj.measurement) != "app_native"]
+    for index, obj in unsupported_units:
+        indexed_results[index] = _unsupported_measurement_result(obj)
+
+    app_native_units = [(index, obj) for index, obj in indexed_objects if str(obj.measurement) == "app_native"]
+    if app_native_units:
         with DaemonSession.start(daemon_binary) as daemon_session:
-            for repo, indexed_group in app_native_groups.items():
+            for loader_label, indexed_group in app_native_groups:
                 try:
-                    group_results, batch_summary = _run_app_native_repo_group(
+                    group_results, batch_summary = _run_app_native_loader_instance(
                         indexed_group,
+                        loader_label=loader_label,
                         daemon_session=daemon_session,
                         workload_seconds=max(1.0, float(args.workload_seconds)),
                     )
                 except Exception as exc:
                     batch_summary = {
-                        "repo": repo,
+                        "repo": indexed_group[0][1].repo,
+                        "loader_instance": loader_label,
                         "measurement": "app_native",
                         "status": "error",
                         "error": str(exc),
@@ -681,46 +645,21 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                             {
                                 "object": obj.object_path,
                                 "repo": obj.repo,
+                                "loader_instance": loader_label,
                                 "measurement": "app_native",
-                                "batch_repo": repo,
                                 "status": "error",
                                 "error": str(exc),
                             },
                         )
                         for index, obj in indexed_group
                     ]
-                repo_batches.append(batch_summary)
+                loader_batches.append(batch_summary)
                 for index, result in group_results:
                     indexed_results[index] = result
                 daemon_error = _daemon_exit_error(daemon_session)
                 if daemon_error is not None:
                     fatal_error = daemon_error
                     break
-
-            if not fatal_error:
-                for index, obj in indexed_objects:
-                    if obj.measurement != "test_run":
-                        continue
-                    try:
-                        indexed_results[index] = _run_test_run_entry(
-                            obj,
-                            bpftool_binary=bpftool_binary,
-                            daemon_session=daemon_session,
-                            repeat=max(1, repeat),
-                            btf_path=btf_path,
-                        )
-                    except Exception as exc:
-                        indexed_results[index] = {
-                            "object": obj.object_path,
-                            "repo": obj.repo,
-                            "measurement": obj.measurement,
-                            "status": "error",
-                            "error": str(exc),
-                        }
-                    daemon_error = _daemon_exit_error(daemon_session)
-                    if daemon_error is not None:
-                        fatal_error = daemon_error
-                        break
 
             if fatal_error:
                 for index, obj in indexed_objects:
@@ -740,23 +679,22 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
 
     results = [indexed_results[index] for index, _obj in indexed_objects if index in indexed_results]
     status_counts = Counter(str(result.get("status") or "error") for result in results)
-    measurement_counts = Counter(obj.measurement for obj in objects)
+    measurement_counts = Counter(program.measurement for obj in execution_units for program in obj.programs)
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "manifest": str(manifest_path),
         "daemon": str(daemon_binary),
         "daemon_socket": daemon_socket,
-        "bpftool": bpftool_binary,
-        "btf_custom_path": str(btf_path) if btf_path is not None else None,
         "filters": list(args.filters or []),
         "repeat": max(1, repeat),
         "workload_seconds": max(1.0, float(args.workload_seconds)),
         "manifest_summary": manifest_summary,
-        "app_native_batches": repo_batches,
+        "app_native_batches": loader_batches,
         "results": results,
         "summary": {
-            "selected_objects": len(objects),
-            "selected_programs": sum(len(obj.programs) for obj in objects),
+            "selected_manifest_objects": len(objects),
+            "selected_execution_units": len(execution_units),
+            "selected_programs": sum(len(obj.programs) for obj in execution_units),
             "measurements": dict(sorted(measurement_counts.items())),
             "statuses": dict(sorted(status_counts.items())),
         },
