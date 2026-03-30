@@ -202,6 +202,13 @@ docs/tmp/*/llvmbpf_roundtrip_poc/*.o
 docs/tmp/*/llvmbpf_roundtrip_poc/*.a
 docs/tmp/*/llvmbpf_roundtrip_poc/*.rc
 docs/tmp/*/llvmbpf_roundtrip_poc/roundtrip_*/
+docs/tmp/*/llvmbpf_rejit_roundtrip_poc/sessions/
+docs/tmp/*/llvmbpf_rejit_roundtrip_poc/*.bin
+docs/tmp/*/llvmbpf_rejit_roundtrip_poc/*.bc
+docs/tmp/*/llvmbpf_rejit_roundtrip_poc/*.ll
+docs/tmp/*/llvmbpf_rejit_roundtrip_poc/*.o
+docs/tmp/*/llvmbpf_rejit_roundtrip_poc/guest_helper/target/
+docs/tmp/*/llvmbpf_rejit_roundtrip_poc/raw_lifter
 
 # llvmbpf bulk roundtrip artifacts
 docs/tmp/*/llvmbpf_bulk_roundtrip/artifacts/
