@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ctypes
 import ctypes.util
+import errno
 import os
 from contextlib import contextmanager
 from functools import lru_cache
@@ -64,10 +65,14 @@ def _libbpf() -> ctypes.CDLL:
     lib = ctypes.CDLL(path, use_errno=True)
     lib.bpf_enable_stats.argtypes = [ctypes.c_int]
     lib.bpf_enable_stats.restype = ctypes.c_int
+    if not hasattr(lib, "bpf_prog_get_next_id"):
+        raise RuntimeError(f"libbpf is missing bpf_prog_get_next_id: {path}")
     if not hasattr(lib, "bpf_prog_get_fd_by_id"):
         raise RuntimeError(f"libbpf is missing bpf_prog_get_fd_by_id: {path}")
     if not hasattr(lib, "bpf_prog_get_info_by_fd"):
         raise RuntimeError(f"libbpf is missing bpf_prog_get_info_by_fd: {path}")
+    lib.bpf_prog_get_next_id.argtypes = [ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32)]
+    lib.bpf_prog_get_next_id.restype = ctypes.c_int
     lib.bpf_prog_get_fd_by_id.argtypes = [ctypes.c_uint32]
     lib.bpf_prog_get_fd_by_id.restype = ctypes.c_int
     lib.bpf_prog_get_info_by_fd.argtypes = [
@@ -106,6 +111,25 @@ def _prog_info_from_fd(fd: int) -> BpfProgInfo | None:
     if rc != 0:
         return None
     return info
+
+
+def list_program_ids() -> list[int]:
+    prog_get_next_id = _libbpf().bpf_prog_get_next_id
+    program_ids: list[int] = []
+    current_id = 0
+    while True:
+        next_id = ctypes.c_uint32(0)
+        rc = int(prog_get_next_id(int(current_id), ctypes.byref(next_id)))
+        if rc == 0:
+            current_id = int(next_id.value)
+            program_ids.append(current_id)
+            continue
+        err = ctypes.get_errno()
+        if err == errno.ENOENT:
+            return program_ids
+        raise RuntimeError(
+            f"bpf_prog_get_next_id failed after prog_id={current_id}: {os.strerror(err)} (errno={err})"
+        )
 
 
 def read_program_stats(prog_ids: list[int] | tuple[int, ...]) -> dict[int, dict[str, object]]:
@@ -149,5 +173,6 @@ def read_program_stats(prog_ids: list[int] | tuple[int, ...]) -> dict[int, dict[
 
 __all__ = [
     "enable_bpf_stats",
+    "list_program_ids",
     "read_program_stats",
 ]

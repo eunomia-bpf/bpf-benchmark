@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
-from typing import Any, Mapping, NoReturn, Sequence
+from typing import Any, Mapping, Sequence
 
 import yaml
 
 from .. import ROOT_DIR
 from ..workload import WorkloadResult
+from .base import AppRunner
 from .tetragon_support import (
     TetragonAgentSession,
     describe_agent_exit,
@@ -31,7 +32,7 @@ def _default_extra_args() -> tuple[str, ...]:
     return tuple(str(arg) for arg in (payload.get("tetragon_extra_args") or []) if str(arg).strip())
 
 
-class TetragonRunner:
+class TetragonRunner(AppRunner):
     def __init__(
         self,
         *,
@@ -42,6 +43,7 @@ class TetragonRunner:
         setup_script: Path | str = DEFAULT_SETUP_SCRIPT,
         workload_spec: Mapping[str, object] | None = None,
     ) -> None:
+        super().__init__()
         self.tetragon_binary = None if tetragon_binary is None else Path(tetragon_binary).resolve()
         self.tetragon_extra_args = tuple(str(arg) for arg in (tetragon_extra_args or _default_extra_args()) if str(arg).strip())
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
@@ -52,24 +54,8 @@ class TetragonRunner:
         self.policy_paths: list[Path] = []
         self.command: list[str] = []
         self.session: Any | None = None
-        self.programs: list[dict[str, object]] = []
-        self.process_output: dict[str, object] = {}
         self.workload_spec: Mapping[str, object] = dict(workload_spec or {"kind": "exec_storm", "value": 2})
         self.exec_workload_cgroup = any(arg == "--cgroup-rate" for arg in self.tetragon_extra_args)
-
-    def _fail_start(self, message: str) -> NoReturn:
-        try:
-            self.stop()
-        except Exception as exc:
-            raise RuntimeError(f"{message}; stop failed: {exc}") from exc
-        stderr_tail = str(self.process_output.get("stderr_tail") or "").strip()
-        stdout_tail = str(self.process_output.get("stdout_tail") or "").strip()
-        details = [message]
-        if stderr_tail:
-            details.append(f"stderr tail:\n{stderr_tail}")
-        elif stdout_tail:
-            details.append(f"stdout tail:\n{stdout_tail}")
-        raise RuntimeError("\n".join(details))
 
     @property
     def pid(self) -> int | None:
@@ -99,6 +85,7 @@ class TetragonRunner:
         policy_dir = Path(self.tempdir.name)
         self.policy_paths = write_tetragon_policies(policy_dir)
         self.command = [tetragon_binary, *self.tetragon_extra_args, "--tracing-policy-dir", str(policy_dir)]
+        self.command_used = list(self.command)
         session = TetragonAgentSession(self.command, self.load_timeout_s)
         try:
             session.__enter__()
@@ -112,14 +99,11 @@ class TetragonRunner:
         if not programs:
             self._fail_start("Tetragon did not attach any BPF programs")
         if self.expected_program_names:
-            expected = set(self.expected_program_names)
-            matched = [program for program in programs if str(program.get("name") or "") in expected]
-            found = {str(program.get("name") or "") for program in matched}
-            missing = [name for name in self.expected_program_names if name not in found]
-            if missing:
-                attached_names = sorted(str(program.get("name") or "") for program in programs if str(program.get("name") or "").strip())
-                self._fail_start(f"Tetragon did not attach expected programs {missing}; attached {attached_names}")
-            programs = matched
+            programs = self._filter_expected_programs(
+                programs,
+                self.expected_program_names,
+                owner_label="Tetragon",
+            )
         self.programs = programs
         return [int(program["id"]) for program in programs if int(program.get("id", 0) or 0) > 0]
 

@@ -9,6 +9,7 @@ import copy
 import platform
 import statistics
 import sys
+import threading
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,6 +21,7 @@ from runner.libs import (
     write_json,
     write_text,
 )
+from runner.libs.app_runners.base import AppRunner
 from runner.libs.daemon_session import DaemonSession
 from runner.libs.kinsn import (
     capture_daemon_kinsn_discovery as _capture_daemon_kinsn_discovery,
@@ -27,6 +29,12 @@ from runner.libs.kinsn import (
     expected_kinsn_modules as _expected_kinsn_modules,
     relpath,
     run_kinsn_module_loader as _run_kinsn_module_loader,
+)
+from runner.libs.metrics import (
+    compute_delta,
+    sample_bpf_stats,
+    sample_cpu_usage,
+    sample_total_cpu_usage,
 )
 
 MAX_PERSISTED_STRING_CHARS = 16_384
@@ -362,6 +370,263 @@ def run_case_lifecycle(
                 stop(setup_state, lifecycle_state)
         finally:
             cleanup(setup_state)
+
+
+def _default_runner_lifecycle_state(
+    runner: AppRunner,
+    started_prog_ids: Sequence[int],
+) -> CaseLifecycleState:
+    prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
+    if not prog_ids:
+        raise RuntimeError("app runner did not return any live prog_ids")
+    programs = [dict(program) for program in getattr(runner, "programs", [])]
+    if not programs:
+        raise RuntimeError("app runner did not expose any live programs")
+    return CaseLifecycleState(
+        runtime=runner,
+        target_prog_ids=list(prog_ids),
+        apply_prog_ids=list(prog_ids),
+        artifacts={
+            "runner_artifacts": dict(getattr(runner, "artifacts", {}) or {}),
+            "programs": programs,
+            "command_used": [str(item) for item in (getattr(runner, "command_used", []) or [])],
+        },
+    )
+
+
+def run_app_runner_lifecycle(
+    *,
+    daemon_session: PreparedDaemonSession,
+    runner: AppRunner,
+    measure: Callable[[CaseLifecycleState, str], Mapping[str, object] | None],
+    enabled_passes: Sequence[str] | None = None,
+    build_state: Callable[[AppRunner, list[int]], CaseLifecycleState] | None = None,
+    before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
+    after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
+    before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
+    should_run_post_rejit: Callable[[Mapping[str, object]], bool] | None = None,
+) -> LifecycleRunResult:
+    """Run the shared daemon scan/apply lifecycle around a repo AppRunner."""
+
+    def setup() -> None:
+        return None
+
+    def start(_: object) -> CaseLifecycleState:
+        started_prog_ids = [int(value) for value in runner.start() if int(value) > 0]
+        if build_state is not None:
+            return build_state(runner, started_prog_ids)
+        return _default_runner_lifecycle_state(runner, started_prog_ids)
+
+    def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> Mapping[str, object] | None:
+        return measure(lifecycle, phase_name)
+
+    def stop(_: object, lifecycle: CaseLifecycleState) -> None:
+        runtime = lifecycle.runtime
+        if not isinstance(runtime, AppRunner):
+            raise RuntimeError(f"runner lifecycle expected AppRunner runtime, got {type(runtime)!r}")
+        runtime.stop()
+
+    def cleanup(_: object) -> None:
+        return None
+
+    return run_case_lifecycle(
+        daemon_session=daemon_session,
+        setup=setup,
+        start=start,
+        workload=workload,
+        stop=stop,
+        cleanup=cleanup,
+        enabled_passes=enabled_passes,
+        before_baseline=before_baseline,
+        after_baseline=after_baseline,
+        before_rejit=before_rejit,
+        should_run_post_rejit=should_run_post_rejit,
+    )
+
+
+def measure_app_runner_workload(
+    runner: AppRunner,
+    duration_s: int | float,
+    prog_ids: Sequence[int],
+    *,
+    agent_pid: int | None = None,
+    initial_stats: Mapping[int, Mapping[str, object]] | None = None,
+) -> dict[str, object]:
+    before_bpf = {
+        int(key): dict(value)
+        for key, value in (initial_stats or sample_bpf_stats(list(prog_ids))).items()
+    }
+    cpu_holder: dict[int, dict[str, float]] = {}
+    system_cpu_holder: dict[str, float] = {}
+    threads: list[threading.Thread] = []
+
+    if agent_pid is not None and int(agent_pid) > 0:
+        cpu_thread = threading.Thread(
+            target=lambda: cpu_holder.update(sample_cpu_usage([int(agent_pid)], duration_s)),
+            daemon=True,
+        )
+        cpu_thread.start()
+        threads.append(cpu_thread)
+
+    system_thread = threading.Thread(
+        target=lambda: system_cpu_holder.update(sample_total_cpu_usage(duration_s)),
+        daemon=True,
+    )
+    system_thread.start()
+    threads.append(system_thread)
+
+    try:
+        workload_result = runner.run_workload(float(duration_s))
+    finally:
+        for thread in threads:
+            thread.join()
+
+    after_bpf = sample_bpf_stats(list(prog_ids))
+    measurement = {
+        "workload": workload_result.to_dict(),
+        "initial_stats": {str(key): value for key, value in before_bpf.items()},
+        "final_stats": {str(key): value for key, value in after_bpf.items()},
+        "bpf": compute_delta(before_bpf, after_bpf),
+        "system_cpu": system_cpu_holder,
+    }
+    if agent_pid is not None and int(agent_pid) > 0:
+        agent_cpu = cpu_holder.get(int(agent_pid), {})
+        total_pct: float | None = None
+        if agent_cpu:
+            total_pct = float(agent_cpu.get("user_pct", 0.0)) + float(agent_cpu.get("sys_pct", 0.0))
+        measurement["agent_cpu"] = {
+            "user_pct": agent_cpu.get("user_pct"),
+            "sys_pct": agent_cpu.get("sys_pct"),
+            "total_pct": total_pct,
+        }
+    return measurement
+
+
+def zero_site_totals(fields: Sequence[str]) -> dict[str, int]:
+    return {str(field): 0 for field in fields if str(field).strip()}
+
+
+def aggregate_scan_site_totals(
+    records: Mapping[int, Mapping[str, object]],
+    *,
+    fields: Sequence[str],
+) -> dict[str, int]:
+    totals = zero_site_totals(fields)
+    for record in records.values():
+        counts = record.get("sites") or record.get("counts") or {}
+        for field in totals:
+            totals[field] += int(counts.get(field, 0) or 0)
+    return totals
+
+
+def run_app_runner_phase_records(
+    *,
+    runner: AppRunner,
+    prepared_daemon_session: PreparedDaemonSession,
+    measure: Callable[[CaseLifecycleState, str], Mapping[str, object] | None],
+    site_totals_fields: Sequence[str],
+    enabled_passes: Sequence[str] | None = None,
+    build_state: Callable[[AppRunner, list[int]], CaseLifecycleState] | None = None,
+    before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
+    after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
+    before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
+    should_run_post_rejit: Callable[[Mapping[str, object]], bool] | None = None,
+) -> tuple[dict[str, object], dict[str, object] | None]:
+    baseline_measurement: dict[str, object] | None = None
+    scan_results: dict[int, dict[str, object]] = {}
+    rejit_apply: dict[str, object] | None = None
+    post_measurement: dict[str, object] | None = None
+    baseline_status = "error"
+    baseline_reason = ""
+    programs: list[dict[str, object]] = []
+    prog_ids: list[int] = []
+
+    try:
+        lifecycle_result = run_app_runner_lifecycle(
+            daemon_session=prepared_daemon_session,
+            runner=runner,
+            measure=measure,
+            enabled_passes=enabled_passes,
+            build_state=build_state,
+            before_baseline=before_baseline,
+            after_baseline=after_baseline,
+            before_rejit=before_rejit,
+            should_run_post_rejit=should_run_post_rejit,
+        )
+        programs = [dict(program) for program in (lifecycle_result.artifacts.get("programs") or [])]
+        if lifecycle_result.state is not None:
+            prog_ids = [int(value) for value in lifecycle_result.state.target_prog_ids if int(value) > 0]
+        if lifecycle_result.baseline is not None:
+            baseline_status = str(lifecycle_result.baseline.get("status") or "error")
+            baseline_reason = str(lifecycle_result.baseline.get("reason") or "")
+            measurement_payload = lifecycle_result.baseline.get("measurement")
+            if isinstance(measurement_payload, Mapping):
+                baseline_measurement = dict(measurement_payload)
+        scan_results = lifecycle_result.scan_results
+        rejit_apply = lifecycle_result.rejit_result
+        if isinstance(lifecycle_result.post_rejit, Mapping):
+            measurement_payload = lifecycle_result.post_rejit.get("measurement")
+            if isinstance(measurement_payload, Mapping):
+                post_measurement = dict(measurement_payload)
+    except Exception as exc:
+        baseline_reason = str(exc)
+
+    process_output = dict(getattr(runner, "process_output", {}))
+    site_totals = (
+        aggregate_scan_site_totals(scan_results, fields=site_totals_fields)
+        if scan_results
+        else zero_site_totals(site_totals_fields)
+    )
+    baseline = {
+        "phase": "baseline",
+        "status": baseline_status,
+        "reason": baseline_reason,
+        "programs": programs,
+        "prog_ids": prog_ids,
+        "scan_results": {str(key): value for key, value in scan_results.items()},
+        "site_totals": site_totals,
+        "measurement": baseline_measurement,
+        "process": process_output,
+    }
+    if baseline["status"] != "ok" and not baseline["reason"]:
+        stderr_tail = str(process_output.get("stderr_tail") or "")
+        stdout_tail = str(process_output.get("stdout_tail") or "")
+        baseline["reason"] = stderr_tail or stdout_tail or "unknown failure"
+
+    rejit: dict[str, object] | None = None
+    if baseline["status"] == "ok" and rejit_apply is not None:
+        if rejit_result_has_any_apply(rejit_apply):
+            rejit_reason = ""
+            if post_measurement is None:
+                rejit_reason = "post-ReJIT measurement is missing"
+            rejit = {
+                "phase": "post_rejit",
+                "status": "ok" if not rejit_reason else "error",
+                "reason": rejit_reason,
+                "programs": programs,
+                "prog_ids": prog_ids,
+                "scan_results": baseline["scan_results"],
+                "site_totals": baseline["site_totals"],
+                "rejit_result": rejit_apply,
+                "measurement": post_measurement,
+                "process": process_output,
+            }
+        else:
+            rejit_error = str(rejit_apply.get("error") or "").strip()
+            if rejit_error:
+                rejit = {
+                    "phase": "post_rejit",
+                    "status": "error",
+                    "reason": rejit_error,
+                    "programs": programs,
+                    "prog_ids": prog_ids,
+                    "scan_results": baseline["scan_results"],
+                    "site_totals": baseline["site_totals"],
+                    "rejit_result": rejit_apply,
+                    "measurement": None,
+                    "process": process_output,
+                }
+    return baseline, rejit
 
 
 # ---------------------------------------------------------------------------

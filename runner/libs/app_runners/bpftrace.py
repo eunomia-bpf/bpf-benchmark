@@ -1,18 +1,19 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, NoReturn, Sequence
+from typing import Any, Sequence
 
 from .. import which
 from ..agent import start_agent, stop_agent
 from ..workload import WorkloadResult
+from .base import AppRunner
 from .bpftrace_support import SCRIPTS, ScriptSpec, finalize_process_output, run_named_workload, wait_for_attached_programs
 
 
 DEFAULT_ATTACH_TIMEOUT_S = 20
 
 
-class BpftraceRunner:
+class BpftraceRunner(AppRunner):
     def __init__(
         self,
         *,
@@ -23,6 +24,7 @@ class BpftraceRunner:
         expected_program_names: Sequence[str] = (),
         attach_timeout_s: int = DEFAULT_ATTACH_TIMEOUT_S,
     ) -> None:
+        super().__init__()
         self.script_path = None if script_path is None else Path(script_path).resolve()
         self.script_name = str(script_name or "").strip()
         self.workload_kind = workload_kind
@@ -30,22 +32,6 @@ class BpftraceRunner:
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.attach_timeout_s = int(attach_timeout_s)
         self.process: Any | None = None
-        self.programs: list[dict[str, object]] = []
-        self.process_output: dict[str, object] = {}
-
-    def _fail_start(self, message: str) -> NoReturn:
-        try:
-            self.stop()
-        except Exception as exc:
-            raise RuntimeError(f"{message}; stop failed: {exc}") from exc
-        stderr_tail = str(self.process_output.get("stderr_tail") or "").strip()
-        stdout_tail = str(self.process_output.get("stdout_tail") or "").strip()
-        details = [message]
-        if stderr_tail:
-            details.append(f"stderr tail:\n{stderr_tail}")
-        elif stdout_tail:
-            details.append(f"stdout tail:\n{stdout_tail}")
-        raise RuntimeError("\n".join(details))
 
     @property
     def pid(self) -> int | None:
@@ -77,6 +63,7 @@ class BpftraceRunner:
         self.workload_kind = self.workload_kind or workload_kind
         self.expected_programs = int(self.expected_programs or expected_programs or 1)
         self.process = start_agent(bpftrace_binary, ["-q", str(script_path)])
+        self.command_used = [bpftrace_binary, "-q", str(script_path)]
         programs = wait_for_attached_programs(
             self.process,
             expected_count=self.expected_programs,
@@ -90,14 +77,11 @@ class BpftraceRunner:
                 f"bpftrace attached {len(programs)} programs, expected at least {self.expected_programs}: {attached_names}"
             )
         if self.expected_program_names:
-            expected = set(self.expected_program_names)
-            matched = [program for program in programs if str(program.get("name") or "") in expected]
-            found = {str(program.get("name") or "") for program in matched}
-            missing = [name for name in self.expected_program_names if name not in found]
-            if missing:
-                attached_names = sorted(str(program.get("name") or "") for program in programs if str(program.get("name") or "").strip())
-                self._fail_start(f"bpftrace did not attach expected programs {missing}; attached {attached_names}")
-            programs = matched
+            programs = self._filter_expected_programs(
+                programs,
+                self.expected_program_names,
+                owner_label="bpftrace",
+            )
         self.script_path = script_path
         self.programs = [dict(program) for program in programs]
         return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]

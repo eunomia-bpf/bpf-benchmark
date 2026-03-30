@@ -5,6 +5,7 @@ from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR
 from ..workload import WorkloadResult
+from .base import AppRunner
 from .scx_support import ScxSchedulerSession, preferred_path, read_scx_ops, read_scx_state, run_workload
 
 
@@ -20,7 +21,7 @@ def _scheduler_binary_for_name(scheduler: str | None) -> Path:
     return DEFAULT_SCX_REPO / "target" / "release" / f"scx_{normalized}"
 
 
-class ScxRunner:
+class ScxRunner(AppRunner):
     def __init__(
         self,
         *,
@@ -30,6 +31,7 @@ class ScxRunner:
         load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
         workload_spec: Mapping[str, object] | None = None,
     ) -> None:
+        super().__init__()
         self.scheduler = str(scheduler).strip()
         if not self.scheduler:
             raise RuntimeError("ScxRunner requires a scheduler name")
@@ -38,8 +40,6 @@ class ScxRunner:
         self.scheduler_extra_args = tuple(str(arg) for arg in scheduler_extra_args)
         self.load_timeout_s = int(load_timeout_s)
         self.session: Any | None = None
-        self.programs: list[dict[str, object]] = []
-        self.process_output: dict[str, object] = {}
         self.workload_spec: Mapping[str, object] = dict(
             workload_spec
             or {"name": "hackbench", "kind": "hackbench", "metric": "runs/s"}
@@ -61,6 +61,7 @@ class ScxRunner:
         session = ScxSchedulerSession(self.scheduler_binary, self.scheduler_extra_args, self.load_timeout_s)
         session.__enter__()
         self.session = session
+        self.command_used = list(session.command_used or [])
         self.programs = [dict(program) for program in session.programs]
         return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
 

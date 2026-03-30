@@ -17,7 +17,14 @@ from runner.libs import ROOT_DIR, ensure_parent, write_json, write_text
 from runner.libs.app_runners import get_app_runner
 from runner.libs.app_suite_schema import AppSpec, AppWorkload, load_app_suite_from_yaml
 from runner.libs.bpf_stats import enable_bpf_stats, read_program_stats
-from runner.libs.case_common import rejit_program_result, rejit_result_has_any_apply
+from runner.libs.case_common import (
+    attach_pending_result_metadata,
+    prepare_daemon_session,
+    rejit_program_result,
+    rejit_result_has_any_apply,
+    reset_pending_result_metadata,
+    run_app_runner_lifecycle,
+)
 from runner.libs.daemon_session import DaemonSession
 from runner.libs.rejit import benchmark_rejit_enabled_passes
 from runner.libs.statistics import geometric_mean
@@ -170,6 +177,26 @@ def _repeat_count(args: argparse.Namespace, suite_defaults: Mapping[str, object]
     if explicit > 0:
         return explicit
     return max(1, int(suite_defaults.get("repeat", 1) or 1))
+
+
+def _measure_runner_phase(
+    runner: object,
+    prog_ids: Sequence[int],
+    *,
+    workload_seconds: float,
+    repeat: int,
+) -> dict[str, object]:
+    workloads: list[dict[str, object]] = []
+    last_workload: dict[str, object] | None = None
+    for _ in range(repeat):
+        workload = runner.run_workload(workload_seconds).to_dict()
+        last_workload = dict(workload)
+        workloads.append(dict(workload))
+    return {
+        "workload": last_workload,
+        "workloads": workloads,
+        "program_stats": read_program_stats(list(prog_ids)),
+    }
 
 
 def _program_label(app_name: str, program_name: str, prog_id: int) -> str:
@@ -451,7 +478,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
 def _run_app(
     app: AppSpec,
     *,
-    daemon_session: DaemonSession,
+    daemon_session: object,
     workload_seconds: float,
     repeat: int,
 ) -> dict[str, object]:
@@ -473,38 +500,44 @@ def _run_app(
     apply_result: dict[str, object] = {}
     had_post_rejit = False
 
-    try:
-        prog_ids = [int(value) for value in runner.start() if int(value) > 0]
-        if not prog_ids:
-            raise RuntimeError(f"{app.name}: app runner did not return any live prog_ids")
-        live_programs = [dict(program) for program in getattr(runner, "programs", [])]
-        if not live_programs:
-            raise RuntimeError(f"{app.name}: app runner did not expose any live programs")
+    with enable_bpf_stats():
+        lifecycle_result = run_app_runner_lifecycle(
+            daemon_session=daemon_session,
+            runner=runner,
+            enabled_passes=benchmark_rejit_enabled_passes(),
+            measure=lambda lifecycle, _phase_name: {
+                "measurement": _measure_runner_phase(
+                    lifecycle.runtime,
+                    lifecycle.target_prog_ids,
+                    workload_seconds=workload_seconds,
+                    repeat=repeat,
+                )
+            },
+        )
 
-        with enable_bpf_stats():
-            for _ in range(repeat):
-                baseline_workload = runner.run_workload(workload_seconds).to_dict()
-                baseline_workloads.append(dict(baseline_workload))
-            baseline_snapshot = read_program_stats(prog_ids)
-            apply_result = daemon_session.apply_rejit(
-                prog_ids,
-                enabled_passes=benchmark_rejit_enabled_passes(),
-            )
-            rejit_snapshot: Mapping[int, Mapping[str, object]] = {}
-            had_post_rejit = rejit_result_has_any_apply(apply_result)
-            if had_post_rejit:
-                for _ in range(repeat):
-                    rejit_workload = runner.run_workload(workload_seconds).to_dict()
-                    rejit_workloads.append(dict(rejit_workload))
-                rejit_snapshot = read_program_stats(prog_ids)
+    if lifecycle_result.state is None or lifecycle_result.baseline is None:
+        raise RuntimeError(f"{app.name}: runner lifecycle did not produce a baseline measurement")
 
-        baseline_phase = _program_phase_stats(baseline_snapshot)
-        _validate_phase_measurement("baseline", baseline_phase, live_programs)
-        if had_post_rejit:
-            rejit_phase = _program_phase_stats(rejit_snapshot, baseline_snapshot)
-            _validate_phase_measurement("rejit", rejit_phase, live_programs)
-    finally:
-        runner.stop()
+    prog_ids = [int(value) for value in lifecycle_result.state.target_prog_ids if int(value) > 0]
+    live_programs = [dict(program) for program in (lifecycle_result.artifacts.get("programs") or [])]
+    baseline_measurement = dict((lifecycle_result.baseline.get("measurement") or {}))
+    baseline_snapshot = dict(baseline_measurement.get("program_stats") or {})
+    baseline_workload = dict(baseline_measurement.get("workload") or {}) if baseline_measurement.get("workload") else None
+    baseline_workloads = [dict(workload) for workload in (baseline_measurement.get("workloads") or [])]
+    apply_result = dict(lifecycle_result.rejit_result or {})
+    had_post_rejit = lifecycle_result.post_rejit is not None
+    if not live_programs:
+        raise RuntimeError(f"{app.name}: runner lifecycle did not expose any live programs")
+
+    baseline_phase = _program_phase_stats(baseline_snapshot)
+    _validate_phase_measurement("baseline", baseline_phase, live_programs)
+    if had_post_rejit:
+        rejit_measurement = dict((lifecycle_result.post_rejit or {}).get("measurement") or {})
+        rejit_snapshot = dict(rejit_measurement.get("program_stats") or {})
+        rejit_workload = dict(rejit_measurement.get("workload") or {}) if rejit_measurement.get("workload") else None
+        rejit_workloads = [dict(workload) for workload in (rejit_measurement.get("workloads") or [])]
+        rejit_phase = _program_phase_stats(rejit_snapshot, baseline_snapshot)
+        _validate_phase_measurement("rejit", rejit_phase, live_programs)
 
     programs_by_id = _program_stats_by_prog_id(baseline_phase, prog_ids)
     rejit_programs_by_id = _program_stats_by_prog_id(rejit_phase, prog_ids)
@@ -545,7 +578,7 @@ def _run_app(
         "rejit_workload": rejit_workload,
         "rejit_workloads": rejit_workloads,
         "process": dict(getattr(runner, "process_output", {})),
-        "command_used": [str(item) for item in (getattr(runner, "command_used", []) or [])],
+        "command_used": [str(item) for item in (lifecycle_result.artifacts.get("command_used") or getattr(runner, "command_used", []) or [])],
     }
 
 
@@ -563,8 +596,13 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
     repeat = _repeat_count(args, suite.defaults)
     results: list[dict[str, object]] = []
     fatal_error = ""
+    reset_pending_result_metadata()
 
     with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
+        prepared_daemon_session = prepare_daemon_session(
+            daemon_session,
+            daemon_binary=daemon_binary,
+        )
         for app in suite.apps:
             _print_progress(
                 "app_start",
@@ -575,7 +613,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
             try:
                 result = _run_app(
                     app,
-                    daemon_session=daemon_session,
+                    daemon_session=prepared_daemon_session,
                     workload_seconds=workload_seconds,
                     repeat=repeat,
                 )
@@ -620,8 +658,8 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         "program_measurements": {},
                     }
                 )
-        daemon_socket = str(daemon_session.socket_path)
-        kinsn_metadata = dict(getattr(daemon_session, "kinsn_metadata", {}) or {})
+        daemon_socket = str(prepared_daemon_session.session.socket_path)
+        kinsn_metadata = dict(prepared_daemon_session.metadata)
 
     status_counts = Counter(str(result.get("status") or "error") for result in results)
     payload = {
@@ -645,7 +683,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
     }
     if fatal_error:
         payload["fatal_error"] = fatal_error
-    return payload
+    return attach_pending_result_metadata(payload)
 
 
 def main(argv: list[str] | None = None) -> int:

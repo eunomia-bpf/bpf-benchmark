@@ -5,6 +5,8 @@ from __future__ import annotations
 import importlib
 from typing import Any, Callable
 
+from .base import AppRunner
+
 RunnerAdapter = Callable[[str | None, str | None, dict[str, object]], dict[str, object]]
 
 
@@ -152,7 +154,7 @@ _RUNNERS: dict[str, tuple[str, str, RunnerAdapter]] = {
 }
 
 
-def _load_runner_class(runner: str) -> type[object]:
+def _load_runner_class(runner: str) -> type[AppRunner]:
     module_name, class_name, _adapter = _RUNNERS[runner]
     module = importlib.import_module(module_name)
     return getattr(module, class_name)
@@ -164,7 +166,7 @@ def get_app_runner(
     workload: str | None = None,
     app_name: str | None = None,
     **kwargs: object,
-) -> object:
+) -> AppRunner:
     normalized = str(runner or "").strip().lower()
     spec = _RUNNERS.get(normalized)
     if spec is None:
@@ -173,9 +175,13 @@ def get_app_runner(
     del module_name, class_name
     constructor_kwargs = adapter(workload, app_name, dict(kwargs))
     runner_class = _load_runner_class(normalized)
-    return runner_class(**constructor_kwargs)
+    runner_instance = runner_class(**constructor_kwargs)
+    if not isinstance(runner_instance, AppRunner):
+        raise TypeError(f"{runner_class.__module__}.{runner_class.__name__} must inherit AppRunner")
+    return runner_instance
 
 
 __all__ = [
+    "AppRunner",
     "get_app_runner",
 ]

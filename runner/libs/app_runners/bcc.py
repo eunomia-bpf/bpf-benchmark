@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Mapping, NoReturn, Sequence
+from typing import Any, Mapping, Sequence
 
 import yaml
 
@@ -25,6 +25,7 @@ from ..workload import (
     run_tcp_connect_load,
     run_user_exec_loop,
 )
+from .base import AppRunner
 
 
 DEFAULT_SETUP_SCRIPT = ROOT_DIR / "e2e" / "cases" / "bcc" / "setup.sh"
@@ -221,7 +222,7 @@ def _run_mixed_workload(duration_s: float) -> WorkloadResult:
     )
 
 
-class BCCRunner:
+class BCCRunner(AppRunner):
     def __init__(
         self,
         *,
@@ -235,6 +236,7 @@ class BCCRunner:
         tools_dir: Path | str | None = None,
         setup_script: Path | str = DEFAULT_SETUP_SCRIPT,
     ) -> None:
+        super().__init__()
         resolved_tool_name = str(tool_name or "").strip()
         if not resolved_tool_name and tool_binary is None:
             raise RuntimeError("BCCRunner requires tool_binary or tool_name")
@@ -260,8 +262,6 @@ class BCCRunner:
         self.tools_dir = resolve_tools_dir(tools_dir)
         self.tool_binary = Path(tool_binary).resolve() if tool_binary is not None else None
         self.session: ToolProcessSession | None = None
-        self.programs: list[dict[str, object]] = []
-        self.process_output: dict[str, object] = {}
 
     def _resolve_tool_binary(self) -> Path:
         if self.tool_binary is not None:
@@ -283,23 +283,6 @@ class BCCRunner:
         self.tool_binary = tool_binary
         return tool_binary
 
-    def _fail_start(self, message: str) -> NoReturn:
-        stop_error = ""
-        try:
-            self.stop()
-        except Exception as exc:
-            stop_error = str(exc)
-        details: list[str] = [message]
-        stderr_tail = str(self.process_output.get("stderr_tail") or "").strip()
-        stdout_tail = str(self.process_output.get("stdout_tail") or "").strip()
-        if stderr_tail:
-            details.append(f"stderr tail:\n{stderr_tail}")
-        elif stdout_tail:
-            details.append(f"stdout tail:\n{stdout_tail}")
-        if stop_error:
-            details.append(f"stop error: {stop_error}")
-        raise RuntimeError("\n".join(details))
-
     def start(self) -> list[int]:
         if self.session is not None:
             raise RuntimeError(f"BCC tool {self.tool_name} is already running")
@@ -310,8 +293,10 @@ class BCCRunner:
         stderr_path = Path(tempdir.name) / "stderr.log"
         stdout_handle = stdout_path.open("w", encoding="utf-8")
         stderr_handle = stderr_path.open("w", encoding="utf-8")
+        command = [str(tool_binary), *self.tool_args]
+        self.command_used = list(command)
         process = subprocess.Popen(
-            [str(tool_binary), *self.tool_args],
+            command,
             cwd=ROOT_DIR,
             env=os.environ.copy(),
             stdin=subprocess.DEVNULL,
@@ -344,16 +329,11 @@ class BCCRunner:
             )
 
         if self.expected_program_names:
-            expected = set(self.expected_program_names)
-            matched = [program for program in programs if str(program.get("name") or "") in expected]
-            found = {str(program.get("name") or "") for program in matched}
-            missing = [name for name in self.expected_program_names if name not in found]
-            if missing:
-                attached_names = sorted(str(program.get("name") or "") for program in programs if str(program.get("name") or "").strip())
-                return self._fail_start(
-                    f"BCC tool {self.tool_name} did not attach expected programs {missing}; attached {attached_names}"
-                )
-            programs = matched
+            programs = self._filter_expected_programs(
+                programs,
+                self.expected_program_names,
+                owner_label=f"BCC tool {self.tool_name}",
+            )
 
         self.programs = [dict(program) for program in programs]
         return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]

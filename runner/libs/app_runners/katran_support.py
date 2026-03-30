@@ -2,20 +2,32 @@ from __future__ import annotations
 
 import ctypes
 import ctypes.util
+import errno
 import os
-import shutil
 import socket
 import struct
 import subprocess
-import tempfile
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
-from .. import ROOT_DIR, run_command, run_json_command, tail_text, which
+from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
+from .process_support import ManagedProcessSession
 
 
+DEFAULT_KATRAN_OBJECT = ROOT_DIR / "corpus" / "build" / "katran" / "balancer.bpf.o"
+DEFAULT_KATRAN_PROGRAM_NAME = "balancer_ingress"
 DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
+DEFAULT_KATRAN_SERVER_BINARY_CANDIDATES = (
+    ROOT_DIR / "e2e" / "cases" / "katran" / "bin" / "katran_server_grpc",
+    Path("/usr/local/bin/katran_server_grpc"),
+    Path("/usr/local/sbin/katran_server_grpc"),
+    Path("/opt/katran/bin/katran_server_grpc"),
+)
+DEFAULT_KATRAN_SERVER_LIB_DIR = ROOT_DIR / "e2e" / "cases" / "katran" / "lib"
+DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 30
+KATRAN_REQUIRED_MAP_NAMES = ("vip_map", "reals", "ch_rings", "ctl_array")
+BPF_OBJECT_NAME_LIMIT = 15
 DEFAULT_IP_CANDIDATES = (
     "/usr/local/sbin/ip",
     "/usr/local/bin/ip",
@@ -69,6 +81,79 @@ MODULE_FALLBACK_CANDIDATES: dict[str, tuple[Path, ...]] = {
     "ip_tunnel": (ROOT_DIR / "vendor" / "linux-framework" / "net" / "ipv4" / "ip_tunnel.ko",),
     "ipip": (ROOT_DIR / "vendor" / "linux-framework" / "net" / "ipv4" / "ipip.ko",),
 }
+
+
+def _bpftool_binary() -> str:
+    return resolve_bpftool_binary()
+
+
+def _map_show_records() -> list[dict[str, object]]:
+    payload = run_json_command([_bpftool_binary(), "-j", "-p", "map", "show"], timeout=30)
+    if not isinstance(payload, list):
+        raise RuntimeError("bpftool map show returned unexpected payload")
+    return [dict(record) for record in payload if isinstance(record, dict)]
+
+
+def _net_show_records(iface: str) -> list[dict[str, object]]:
+    payload = run_json_command([_bpftool_binary(), "-j", "net", "show", "dev", str(iface)], timeout=30)
+    if not isinstance(payload, list):
+        raise RuntimeError(f"bpftool net show returned unexpected payload for {iface}")
+    return [dict(record) for record in payload if isinstance(record, dict)]
+
+
+def _program_name_variants(name: str) -> set[str]:
+    normalized = str(name or "").strip()
+    if not normalized:
+        return set()
+    return {normalized, normalized[:BPF_OBJECT_NAME_LIMIT]}
+
+
+def _attached_xdp_info(iface: str) -> dict[str, object]:
+    for record in _net_show_records(iface):
+        if record.get("xdp") or record.get("xdp_attached"):
+            return dict(record)
+    return {}
+
+
+def katran_server_binary_candidates() -> tuple[Path, ...]:
+    return DEFAULT_KATRAN_SERVER_BINARY_CANDIDATES
+
+
+def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
+    candidates: list[Path] = []
+    if explicit is not None and str(explicit).strip():
+        candidates.append(Path(explicit).expanduser().resolve())
+    candidates.extend(candidate.resolve() for candidate in katran_server_binary_candidates())
+    for candidate in candidates:
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return candidate
+    for binary_name in ("katran_server_grpc", "katran_server"):
+        resolved = which(binary_name)
+        if resolved:
+            return Path(resolved).resolve()
+    rendered = ", ".join(str(candidate) for candidate in candidates) or "<none>"
+    raise RuntimeError(f"Katran server binary not found or not executable; tried: {rendered}")
+
+
+def katran_server_env(server_binary: Path) -> dict[str, str]:
+    library_dirs: list[str] = []
+    for candidate in (
+        server_binary.resolve().parent.parent / "lib",
+        DEFAULT_KATRAN_SERVER_LIB_DIR,
+    ):
+        if candidate.is_dir():
+            rendered = str(candidate.resolve())
+            if rendered not in library_dirs:
+                library_dirs.append(rendered)
+    current = os.environ.get("LD_LIBRARY_PATH", "")
+    current_entries = [entry for entry in current.split(os.pathsep) if entry]
+    merged: list[str] = []
+    for entry in [*library_dirs, *current_entries]:
+        if entry not in merged:
+            merged.append(entry)
+    if not merged:
+        return {}
+    return {"LD_LIBRARY_PATH": os.pathsep.join(merged)}
 
 def ip_binary() -> str:
     for candidate in DEFAULT_IP_CANDIDATES:
@@ -180,6 +265,12 @@ class LibbpfMapApi:
         self.lib = ctypes.CDLL(path, use_errno=True)
         self.lib.bpf_obj_get.argtypes = [ctypes.c_char_p]
         self.lib.bpf_obj_get.restype = ctypes.c_int
+        self.lib.bpf_map_get_fd_by_id.argtypes = [ctypes.c_uint32]
+        self.lib.bpf_map_get_fd_by_id.restype = ctypes.c_int
+        self.lib.bpf_map_get_next_id.argtypes = [ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32)]
+        self.lib.bpf_map_get_next_id.restype = ctypes.c_int
+        self.lib.bpf_prog_get_fd_by_id.argtypes = [ctypes.c_uint32]
+        self.lib.bpf_prog_get_fd_by_id.restype = ctypes.c_int
         self.lib.bpf_map_update_elem.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint64]
         self.lib.bpf_map_update_elem.restype = ctypes.c_int
         self.lib.bpf_prog_test_run_opts.argtypes = [ctypes.c_int, ctypes.POINTER(BpfTestRunOpts)]
@@ -191,6 +282,37 @@ class LibbpfMapApi:
             return fd
         err = ctypes.get_errno()
         raise RuntimeError(f"bpf_obj_get failed for {path}: {os.strerror(err)} (errno={err})")
+
+    def map_get_fd_by_id(self, map_id: int) -> int:
+        fd = int(self.lib.bpf_map_get_fd_by_id(int(map_id)))
+        if fd >= 0:
+            return fd
+        err = ctypes.get_errno()
+        raise RuntimeError(f"bpf_map_get_fd_by_id failed for map_id={map_id}: {os.strerror(err)} (errno={err})")
+
+    def prog_get_fd_by_id(self, prog_id: int) -> int:
+        fd = int(self.lib.bpf_prog_get_fd_by_id(int(prog_id)))
+        if fd >= 0:
+            return fd
+        err = ctypes.get_errno()
+        raise RuntimeError(f"bpf_prog_get_fd_by_id failed for prog_id={prog_id}: {os.strerror(err)} (errno={err})")
+
+    def list_map_ids(self) -> list[int]:
+        current_id = 0
+        map_ids: list[int] = []
+        while True:
+            next_id = ctypes.c_uint32(0)
+            rc = int(self.lib.bpf_map_get_next_id(int(current_id), ctypes.byref(next_id)))
+            if rc == 0:
+                current_id = int(next_id.value)
+                map_ids.append(current_id)
+                continue
+            err = ctypes.get_errno()
+            if err == errno.ENOENT:
+                return map_ids
+            raise RuntimeError(
+                f"bpf_map_get_next_id failed after map_id={current_id}: {os.strerror(err)} (errno={err})"
+            )
 
     def update(self, fd: int, key: bytes, value: bytes, flags: int = 0) -> None:
         key_buf = (ctypes.c_ubyte * len(key)).from_buffer_copy(key)
@@ -454,110 +576,160 @@ class NamespaceHttpServer:
         self.close()
 
 
-class KatranDirectSession:
-    def __init__(self, *, object_path: Path, program_name: str, iface: str, attach: bool, bpftool: str) -> None:
-        self.object_path = object_path
-        self.program_name = program_name
+class KatranServerSession:
+    def __init__(
+        self,
+        *,
+        server_binary: Path,
+        object_path: Path,
+        iface: str,
+        default_router_mac: str,
+        load_timeout_s: int = DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S,
+    ) -> None:
+        self.server_binary = server_binary.resolve()
+        self.object_path = object_path.resolve()
         self.iface = iface
-        self.attach = attach
-        self.bpftool = bpftool
-        self.bpffs_dir: Path | None = None
-        self.prog_dir: Path | None = None
-        self.map_dir: Path | None = None
-        self.pinned_prog: Path | None = None
+        self.default_router_mac = default_router_mac
+        self.load_timeout_s = int(load_timeout_s)
+        self.session: ManagedProcessSession | None = None
+        self.command_used: list[str] = []
+        self.programs: list[dict[str, object]] = []
         self.program: dict[str, object] = {}
+        self.maps_by_name: dict[str, dict[str, object]] = {}
         self.attach_info: dict[str, object] = {}
-        self.attach_error = ""
-        self.attach_mode: str | None = None
         self.ifindex = 0
 
-    def __enter__(self) -> "KatranDirectSession":
+    def __enter__(self) -> "KatranServerSession":
         if not link_exists(self.iface):
             raise RuntimeError(f"network interface does not exist: {self.iface}")
+        if not self.object_path.exists():
+            raise RuntimeError(f"Katran object not found: {self.object_path}")
         self.ifindex = int(Path("/sys/class/net").joinpath(self.iface, "ifindex").read_text().strip())
-        self.bpffs_dir = Path(tempfile.mkdtemp(prefix="katrane2e-", dir="/sys/fs/bpf"))
-        self.prog_dir = self.bpffs_dir / "progs"
-        self.map_dir = self.bpffs_dir / "maps"
-        self.prog_dir.mkdir(parents=True, exist_ok=True)
-        self.map_dir.mkdir(parents=True, exist_ok=True)
-        run_command([self.bpftool, "prog", "loadall", str(self.object_path), str(self.prog_dir), "type", "xdp", "pinmaps", str(self.map_dir)], timeout=90)
-        self.pinned_prog = self.prog_dir / self.program_name
-        if not self.pinned_prog.exists():
-            raise RuntimeError(f"pinned program not found after load: {self.pinned_prog}")
-        self.program = self._show_program()
-        if self.attach:
-            self._attempt_attach()
+        command = [
+            str(self.server_binary),
+            f"-balancer_prog={self.object_path}",
+            f"-default_mac={self.default_router_mac}",
+            f"-intf={self.iface}",
+            "-hc_forwarding=false",
+            "-logtostderr",
+            "-alsologtostderr",
+        ]
+        before_map_ids = set(LibbpfMapApi().list_map_ids())
+        session = ManagedProcessSession(
+            command,
+            load_timeout_s=self.load_timeout_s,
+            cwd=ROOT_DIR,
+            env=katran_server_env(self.server_binary),
+        )
+        try:
+            session.__enter__()
+            self.session = session
+            self.command_used = list(command)
+            self.programs = [dict(program) for program in session.programs]
+            self.program = self._select_program(self.programs)
+            self.maps_by_name = self._discover_maps(before_map_ids)
+            self.attach_info = _attached_xdp_info(self.iface)
+        except Exception:
+            session.close()
+            self.session = None
+            raise
+        if not self.attach_info:
+            self.close()
+            raise RuntimeError(f"Katran server did not expose an attached XDP program on {self.iface}")
         return self
 
     @property
     def prog_id(self) -> int:
         return int(self.program.get("id", 0) or 0)
 
-    def map_path(self, name: str) -> Path:
-        if self.map_dir is None:
-            raise RuntimeError("map directory is not initialized")
-        return self.map_dir / name
+    @property
+    def pid(self) -> int | None:
+        return None if self.session is None else self.session.pid
 
-    def _show_program(self) -> dict[str, object]:
-        assert self.pinned_prog is not None
-        payload = run_json_command([self.bpftool, "-j", "prog", "show", "pinned", str(self.pinned_prog)], timeout=30)
-        if not isinstance(payload, dict):
-            raise RuntimeError("bpftool prog show pinned returned unexpected payload")
-        return dict(payload)
+    def map_id(self, name: str) -> int:
+        record = self.maps_by_name.get(name)
+        if record is None:
+            raise RuntimeError(f"Katran server map is unavailable: {name}")
+        return int(record.get("id", 0) or 0)
 
-    def _attempt_attach(self) -> None:
-        assert self.pinned_prog is not None
-        errors: list[str] = []
-        for mode in ("xdpgeneric", "xdp"):
-            try:
-                run_command([self.bpftool, "net", "attach", mode, "pinned", str(self.pinned_prog), "dev", self.iface, "overwrite"], timeout=30)
-                self.attach_mode = mode
-                payload = run_json_command([self.bpftool, "-j", "net", "show", "dev", self.iface], timeout=30)
-                if isinstance(payload, list):
-                    for record in payload:
-                        if isinstance(record, dict) and (record.get("xdp") or record.get("xdp_attached")):
-                            self.attach_info = dict(record)
-                            break
-                return
-            except Exception as exc:
-                errors.append(f"{mode}: {exc}")
-        self.attach_error = "; ".join(errors)
+    def collector_snapshot(self) -> dict[str, object]:
+        return {} if self.session is None else self.session.collector_snapshot()
+
+    def _select_program(self, programs: list[dict[str, object]]) -> dict[str, object]:
+        if not programs:
+            raise RuntimeError("Katran server did not expose any BPF programs")
+        expected_names = _program_name_variants(DEFAULT_KATRAN_PROGRAM_NAME)
+        matching = [dict(program) for program in programs if str(program.get("name") or "") in expected_names]
+        if len(matching) == 1:
+            return matching[0]
+        xdp_programs = [dict(program) for program in programs if str(program.get("type") or "") == "xdp"]
+        if len(xdp_programs) == 1:
+            return xdp_programs[0]
+        attached = sorted(
+            f"{program.get('name') or '<unnamed>'}:{program.get('type') or '<unknown>'}"
+            for program in programs
+        )
+        raise RuntimeError(f"could not determine Katran balancer program from attached set: {attached}")
+
+    def _discover_maps(self, before_map_ids: set[int]) -> dict[str, dict[str, object]]:
+        deadline = time.monotonic() + float(self.load_timeout_s)
+        last_names: list[str] = []
+        api = LibbpfMapApi()
+        while time.monotonic() < deadline:
+            current_ids = set(api.list_map_ids())
+            new_ids = current_ids - before_map_ids
+            new_records = [
+                record
+                for record in _map_show_records()
+                if int(record.get("id", -1)) in new_ids
+            ]
+            maps_by_name = {
+                str(record.get("name") or ""): dict(record)
+                for record in new_records
+                if str(record.get("name") or "").strip()
+            }
+            missing = [name for name in KATRAN_REQUIRED_MAP_NAMES if name not in maps_by_name]
+            if not missing:
+                return {name: dict(maps_by_name[name]) for name in KATRAN_REQUIRED_MAP_NAMES}
+            last_names = sorted(maps_by_name)
+            if self.session is not None and self.session.process is not None and self.session.process.poll() is not None:
+                break
+            time.sleep(0.2)
+        missing = [name for name in KATRAN_REQUIRED_MAP_NAMES if name not in last_names]
+        raise RuntimeError(f"Katran server did not expose expected maps {missing}; discovered {last_names}")
 
     def metadata(self) -> dict[str, object]:
         return {
+            "server_binary": str(self.server_binary),
+            "object_path": str(self.object_path),
             "program": dict(self.program),
+            "programs": [dict(program) for program in self.programs],
+            "maps": {name: dict(record) for name, record in self.maps_by_name.items()},
             "iface": self.iface,
             "ifindex": self.ifindex,
-            "attached": bool(self.attach and not self.attach_error),
-            "attach_mode": self.attach_mode,
-            "attach_error": self.attach_error,
+            "attached": bool(self.attach_info),
             "attach_info": self.attach_info,
-            "bpffs_dir": None if self.bpffs_dir is None else str(self.bpffs_dir),
-            "pinned_prog": None if self.pinned_prog is None else str(self.pinned_prog),
-            "pinned_maps": [] if self.map_dir is None else sorted(path.name for path in self.map_dir.iterdir()),
+            "pid": self.pid,
+            "command_used": list(self.command_used),
         }
 
     def close(self) -> None:
-        if self.attach and self.attach_mode:
-            run_command([self.bpftool, "net", "detach", self.attach_mode, "dev", self.iface], check=False, timeout=15)
-            self.attach_mode = None
-        if self.bpffs_dir is not None:
-            shutil.rmtree(self.bpffs_dir, ignore_errors=True)
-            self.bpffs_dir = None
-            self.prog_dir = None
-            self.map_dir = None
-            self.pinned_prog = None
+        if self.session is None:
+            return
+        session = self.session
+        self.session = None
+        session.close()
 
     def __exit__(self, exc_type, exc, tb) -> None:
         self.close()
 
 
-def configure_katran_maps(session: KatranDirectSession) -> dict[str, object]:
+def configure_katran_maps(session: KatranServerSession) -> dict[str, object]:
     api = LibbpfMapApi()
-    vip_fd = api.obj_get(session.map_path("vip_map"))
-    reals_fd = api.obj_get(session.map_path("reals"))
-    rings_fd = api.obj_get(session.map_path("ch_rings"))
-    ctl_fd = api.obj_get(session.map_path("ctl_array"))
+    vip_fd = api.map_get_fd_by_id(session.map_id("vip_map"))
+    reals_fd = api.map_get_fd_by_id(session.map_id("reals"))
+    rings_fd = api.map_get_fd_by_id(session.map_id("ch_rings"))
+    ctl_fd = api.map_get_fd_by_id(session.map_id("ctl_array"))
     try:
         api.update(ctl_fd, pack_u32(0), pack_ctl_mac(ROUTER_LB_MAC))
         api.update(vip_fd, pack_vip_definition(VIP_IP, VIP_PORT, TCP_PROTO), pack_vip_meta(F_LRU_BYPASS, VIP_NUM))
@@ -570,6 +742,7 @@ def configure_katran_maps(session: KatranDirectSession) -> dict[str, object]:
         os.close(rings_fd)
         os.close(ctl_fd)
     return {
+        "map_ids": {name: session.map_id(name) for name in KATRAN_REQUIRED_MAP_NAMES},
         "vip": {"address": VIP_IP, "port": VIP_PORT, "proto": TCP_PROTO, "vip_num": VIP_NUM, "flags": F_LRU_BYPASS},
         "real": {"address": REAL_IP, "real_num": REAL_NUM},
         "default_gateway_mac": ROUTER_LB_MAC,
@@ -578,18 +751,16 @@ def configure_katran_maps(session: KatranDirectSession) -> dict[str, object]:
 
 
 def run_katran_prog_test_run(
-    session: KatranDirectSession,
+    session: KatranServerSession,
     *,
     repeat: int = 1,
     require_xdp_tx: bool = True,
 ) -> dict[str, object]:
-    if session.pinned_prog is None:
-        raise RuntimeError("Katran pinned program path is unavailable")
     if not DEFAULT_KATRAN_TEST_PACKET.exists():
         raise RuntimeError(f"Katran test packet is missing: {DEFAULT_KATRAN_TEST_PACKET}")
     api = LibbpfMapApi()
     packet = DEFAULT_KATRAN_TEST_PACKET.read_bytes()
-    prog_fd = api.obj_get(session.pinned_prog)
+    prog_fd = api.prog_get_fd_by_id(session.prog_id)
     try:
         result = api.prog_test_run(prog_fd, packet, repeat=max(1, int(repeat)), data_out_size=max(256, len(packet) + 64))
     finally:
@@ -732,15 +903,18 @@ def run_parallel_http_load(*, duration_s: int | float, concurrency: int) -> dict
 
 __all__ = [
     "CLIENT_NS",
-    "KatranDirectSession",
     "KatranDsrTopology",
+    "KatranServerSession",
     "NamespaceHttpServer",
     "REAL_NS",
     "TOPOLOGY_SETTLE_S",
     "VIP_IP",
     "VIP_PORT",
     "XDP_TX",
+    "DEFAULT_KATRAN_OBJECT",
+    "DEFAULT_KATRAN_PROGRAM_NAME",
     "configure_katran_maps",
+    "resolve_katran_server_binary",
     "run_katran_prog_test_run",
     "run_parallel_http_load",
 ]

@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Mapping, NoReturn, Sequence
+from typing import Any, Mapping, Sequence
 
 import yaml
 
 from .. import ROOT_DIR
 from ..workload import WorkloadResult
+from .base import AppRunner
 from .tracee_support import (
     TraceeAgentSession,
     TraceeOutputCollector,
@@ -29,7 +30,7 @@ def _default_events() -> tuple[str, ...]:
     return tuple(str(event) for event in (payload.get("events") or []) if str(event).strip())
 
 
-class TraceeRunner:
+class TraceeRunner(AppRunner):
     def __init__(
         self,
         *,
@@ -41,6 +42,7 @@ class TraceeRunner:
         setup_script: Path | str = DEFAULT_SETUP_SCRIPT,
         workload_spec: Mapping[str, object] | None = None,
     ) -> None:
+        super().__init__()
         self.tracee_binary = None if tracee_binary is None else Path(tracee_binary).resolve()
         self.events = tuple(str(event) for event in (events or _default_events()) if str(event).strip())
         self.extra_args = tuple(str(arg) for arg in extra_args)
@@ -48,25 +50,8 @@ class TraceeRunner:
         self.load_timeout_s = int(load_timeout_s)
         self.setup_script = Path(setup_script).resolve()
         self.session: Any | None = None
-        self.programs: list[dict[str, object]] = []
-        self.process_output: dict[str, object] = {}
         self.setup_result: dict[str, object] = {"returncode": 0, "tracee_binary": None, "stdout_tail": "", "stderr_tail": ""}
         self.workload_spec: Mapping[str, object] = dict(workload_spec or {"kind": "exec_storm"})
-        self.command_used: list[str] = []
-
-    def _fail_start(self, message: str) -> NoReturn:
-        try:
-            self.stop()
-        except Exception as exc:
-            raise RuntimeError(f"{message}; stop failed: {exc}") from exc
-        stderr_tail = str(self.process_output.get("stderr_tail") or "").strip()
-        stdout_tail = str(self.process_output.get("stdout_tail") or "").strip()
-        details = [message]
-        if stderr_tail:
-            details.append(f"stderr tail:\n{stderr_tail}")
-        elif stdout_tail:
-            details.append(f"stdout tail:\n{stdout_tail}")
-        raise RuntimeError("\n".join(details))
 
     @property
     def pid(self) -> int | None:
@@ -111,14 +96,11 @@ class TraceeRunner:
         if not programs:
             self._fail_start("Tracee did not attach any BPF programs")
         if self.expected_program_names:
-            expected = set(self.expected_program_names)
-            matched = [program for program in programs if str(program.get("name") or "") in expected]
-            found = {str(program.get("name") or "") for program in matched}
-            missing = [name for name in self.expected_program_names if name not in found]
-            if missing:
-                attached_names = sorted(str(program.get("name") or "") for program in programs if str(program.get("name") or "").strip())
-                self._fail_start(f"Tracee did not attach expected programs {missing}; attached {attached_names}")
-            programs = matched
+            programs = self._filter_expected_programs(
+                programs,
+                self.expected_program_names,
+                owner_label="Tracee",
+            )
         self.tracee_binary = Path(tracee_binary).resolve()
         self.programs = programs
         return [int(program["id"]) for program in programs if int(program.get("id", 0) or 0) > 0]

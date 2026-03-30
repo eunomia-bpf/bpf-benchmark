@@ -11,6 +11,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from corpus import orchestrator
+from runner.libs.app_runners.base import AppRunner
 
 
 def test_program_phase_stats_computes_deltas() -> None:
@@ -94,6 +95,11 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
         def __init__(self) -> None:
             self.proc = FakeProc()
             self.socket_path = Path("/tmp/rejit.sock")
+            self.socket_dir = "/tmp/rejit-dir"
+            self.stdout_path = tmp_path / "daemon.stdout.log"
+            self.stderr_path = tmp_path / "daemon.stderr.log"
+            self.stdout_path.write_text("serve: listening on /tmp/rejit.sock\n", encoding="utf-8")
+            self.stderr_path.write_text("kinsn discovery:\n  module loaded\n", encoding="utf-8")
             self.kinsn_metadata = {
                 "expected_modules": ["bpf_rotate"],
                 "module_load": {"loaded_modules": ["bpf_rotate"], "failed_modules": []},
@@ -113,6 +119,18 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
             del exc_type, exc, tb
             daemon_events.append("stop")
 
+        def scan_programs(self, prog_ids, *, timeout_seconds=60):
+            daemon_events.append(("scan", list(prog_ids), timeout_seconds))
+            prog_id = int(prog_ids[0])
+            return {
+                prog_id: {
+                    "prog_id": prog_id,
+                    "sites": {},
+                    "counts": {},
+                    "error": "",
+                }
+            }
+
         def apply_rejit(self, prog_ids, *, enabled_passes=None):
             daemon_events.append(("apply", list(prog_ids), list(enabled_passes or [])))
             prog_id = int(prog_ids[0])
@@ -122,8 +140,9 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
 
     runner_events: list[object] = []
 
-    class FakeRunner:
+    class FakeRunner(AppRunner):
         def __init__(self, *, app_name: str, workload: str, **kwargs) -> None:
+            super().__init__()
             self.app_name = app_name
             self.workload = workload
             self.kwargs = kwargs
@@ -234,6 +253,7 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
     ]
     assert payload["status"] == "error"
     assert payload["kinsn_modules"]["module_load"]["loaded_modules"] == ["bpf_rotate"]
+    assert payload["metadata"]["kinsn_modules"]["count"] == 2
     assert [result["app"] for result in payload["results"]] == ["alpha", "beta"]
     assert payload["results"][0]["status"] == "ok"
     assert payload["results"][0]["baseline"]["programs"]["101"]["run_cnt"] == 5
@@ -251,7 +271,9 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
     assert payload["results"][1]["rejit_workloads"] == []
     assert daemon_events == [
         ("start", daemon_binary.resolve(), True),
+        ("scan", [101], 60),
         ("apply", [101], ["map_inline"]),
+        ("scan", [202], 60),
         ("apply", [202], ["map_inline"]),
         "stop",
     ]
@@ -295,7 +317,16 @@ def test_run_suite_marks_remaining_apps_after_daemon_exit(monkeypatch, tmp_path:
         def __init__(self) -> None:
             self.proc = FakeProc()
             self.socket_path = Path("/tmp/rejit.sock")
-            self.kinsn_metadata = {}
+            self.socket_dir = "/tmp/rejit-dir"
+            self.stdout_path = tmp_path / "daemon.stdout.log"
+            self.stderr_path = tmp_path / "daemon.stderr.log"
+            self.stdout_path.write_text("serve: listening on /tmp/rejit.sock\n", encoding="utf-8")
+            self.stderr_path.write_text("kinsn discovery:\n  module loaded\n", encoding="utf-8")
+            self.kinsn_metadata = {
+                "expected_modules": ["bpf_rotate"],
+                "module_load": {"loaded_modules": ["bpf_rotate"], "failed_modules": []},
+                "status": "ready",
+            }
 
         @classmethod
         def start(cls, _daemon_binary: Path, *, load_kinsn: bool = False) -> "FakeDaemonSession":

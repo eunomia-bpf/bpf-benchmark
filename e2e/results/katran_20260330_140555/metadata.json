@@ -1,0 +1,148 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "katran",
+  "details_dir": "details",
+  "error_message": "Katran workload observed failures: [{'worker': 3, 'error': 'timed out', 'snippet': ''}, {'worker': 6, 'error': 'timed out', 'snippet': ''}, {'worker': 8, 'error': 'timed out', 'snippet': ''}, {'worker': 9, 'error': 'timed out', 'snippet': ''}, {'worker': 11, 'error': 'timed out', 'snippet': ''}]",
+  "generated_at": "2026-03-30T14:06:25.936625+00:00",
+  "last_updated_at": "2026-03-30T14:06:25.936532+00:00",
+  "optimization_summary": {
+    "case": "katran",
+    "error_message": "Katran workload observed failures: [{'worker': 3, 'error': 'timed out', 'snippet': ''}, {'worker': 6, 'error': 'timed out', 'snippet': ''}, {'worker': 8, 'error': 'timed out', 'snippet': ''}, {'worker': 9, 'error': 'timed out', 'snippet': ''}, {'worker': 11, 'error': 'timed out', 'snippet': ''}]",
+    "failed_at": "2026-03-30T14:06:25.935969+00:00",
+    "metadata": {
+      "kinsn_modules": {
+        "count": 1,
+        "lifecycle_runs": [
+          {
+            "captured_at": "2026-03-30T14:06:09.415979+00:00",
+            "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+            "daemon_kinsn_discovery": {
+              "captured_at": "2026-03-30T14:05:55.016635+00:00",
+              "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699092 type_cnt=145729 type_id_bias=145728\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=147700 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=147702 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=147677 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=147695 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=147696 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=147679 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=147680 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=147681 fd=7\nplatform: arch=X86_64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+              "status": "ok",
+              "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699092 type_cnt=145729 type_id_bias=145728\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=147700 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=147702 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=147677 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=147695 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=147696 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=147679 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=147680 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=147681 fd=7\nplatform: arch=X86_64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+              "stderr_path": "docs/tmp/20260330/vm-tmp/bpfrejit-daemon-ostia1jb/daemon.stderr.log",
+              "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260330/vm-tmp/bpfrejit-daemon-ostia1jb/daemon.sock",
+              "stdout_path": "docs/tmp/20260330/vm-tmp/bpfrejit-daemon-ostia1jb/daemon.stdout.log"
+            },
+            "error": "Katran workload observed failures: [{'worker': 3, 'error': 'timed out', 'snippet': ''}, {'worker': 6, 'error': 'timed out', 'snippet': ''}, {'worker': 8, 'error': 'timed out', 'snippet': ''}, {'worker': 9, 'error': 'timed out', 'snippet': ''}, {'worker': 11, 'error': 'timed out', 'snippet': ''}]",
+            "expected_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "lifecycle_index": 1,
+            "module_load": {
+              "exit_code": 0,
+              "expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "failed_modules": [],
+              "invoked_at": "2026-03-30T14:05:54.879407+00:00",
+              "loaded_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "newly_loaded_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "script_path": "module/load_all.sh",
+              "snapshot_after": {
+                "captured_at": "2026-03-30T14:05:54.879271+00:00",
+                "expected_modules": [
+                  "bpf_bulk_memory",
+                  "bpf_endian",
+                  "bpf_extract",
+                  "bpf_rotate",
+                  "bpf_select"
+                ],
+                "loaded_bpf_modules": [
+                  "bpf_bulk_memory",
+                  "bpf_endian",
+                  "bpf_extract",
+                  "bpf_rotate",
+                  "bpf_select"
+                ],
+                "missing_expected_modules": [],
+                "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+                "resident_expected_modules": [
+                  "bpf_bulk_memory",
+                  "bpf_endian",
+                  "bpf_extract",
+                  "bpf_rotate",
+                  "bpf_select"
+                ],
+                "source": "lsmod"
+              },
+              "status": "ok",
+              "stderr": "",
+              "stdout": "Loaded bpf_bulk_memory\nLoaded bpf_endian\nLoaded bpf_extract\nLoaded bpf_rotate\nLoaded bpf_select\nkinsn modules: 5/5 loaded"
+            },
+            "module_snapshot_before_daemon": {
+              "captured_at": "2026-03-30T14:05:54.152341+00:00",
+              "expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "loaded_bpf_modules": [],
+              "missing_expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "raw_output": "",
+              "resident_expected_modules": [],
+              "source": "lsmod"
+            },
+            "requested_prog_ids": [
+              6
+            ],
+            "status": "error"
+          }
+        ]
+      }
+    },
+    "smoke": true,
+    "status": "error"
+  },
+  "output_hint_json": "e2e/results/katran_smoke_20260330.json",
+  "output_hint_md": "e2e/results/katran-e2e.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "run_type": "katran",
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "smoke": true,
+  "started_at": "2026-03-30T14:05:55.035110+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

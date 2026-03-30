@@ -20,18 +20,15 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.app_runners.katran import (  # noqa: E402
     DEFAULT_INTERFACE,
-    DEFAULT_KATRAN_OBJECT,
-    DEFAULT_PROGRAM_NAME,
     KatranRunner,
 )
 from runner.libs.case_common import (  # noqa: E402
-    CaseLifecycleState,
     attach_pending_result_metadata,
     host_metadata,
     percent_delta,
     prepare_daemon_session,
     rejit_result_has_any_apply,
-    run_case_lifecycle,
+    run_app_runner_lifecycle,
     speedup_ratio,
 )
 from runner.libs.daemon_session import DaemonSession  # noqa: E402
@@ -112,50 +109,24 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     duration_s = int(args.duration or (args.smoke_duration if args.smoke else DEFAULT_DURATION_S))
     workload_kind = str(getattr(args, "workload", "") or "network")
     runner = KatranRunner(
-        object_path=Path(getattr(args, "object_path", DEFAULT_KATRAN_OBJECT)).resolve(),
-        program_name=str(getattr(args, "program_name", DEFAULT_PROGRAM_NAME)),
         iface=str(getattr(args, "iface", DEFAULT_INTERFACE)),
         router_peer_iface=getattr(args, "router_peer_iface", None),
-        bpftool=str(getattr(args, "bpftool", "")),
         concurrency=int(getattr(args, "concurrency", 16)),
         workload_kind=workload_kind,
     )
 
-    def setup() -> dict[str, object]:
-        return {}
-
-    def start(_: object) -> CaseLifecycleState:
-        prog_ids = list(runner.start())
-        return CaseLifecycleState(
-            runtime=runner,
-            target_prog_ids=list(prog_ids),
-            apply_prog_ids=list(prog_ids),
-            artifacts={
-                "runner_artifacts": dict(runner.artifacts),
-                "programs": [dict(program) for program in runner.programs],
-            },
-        )
-
-    def workload(_: object, lifecycle: CaseLifecycleState, _phase_name: str) -> dict[str, object]:
+    def workload(lifecycle: object, _phase_name: str) -> dict[str, object]:
+        prog_ids = list(getattr(lifecycle, "target_prog_ids", []) or [])
         return {
             "status": "ok",
-            "measurement": measure_workload(lifecycle.runtime, duration_s, list(lifecycle.target_prog_ids)),
+            "measurement": measure_workload(runner, duration_s, prog_ids),
         }
 
-    def stop(_: object, _lifecycle: CaseLifecycleState) -> None:
-        runner.stop()
-
-    def cleanup(_: object) -> None:
-        return None
-
     with enable_bpf_stats():
-        lifecycle_result = run_case_lifecycle(
+        lifecycle_result = run_app_runner_lifecycle(
             daemon_session=prepared_daemon_session,
-            setup=setup,
-            start=start,
-            workload=workload,
-            stop=stop,
-            cleanup=cleanup,
+            runner=runner,
+            measure=workload,
         )
 
     baseline = dict(lifecycle_result.baseline or {})
@@ -220,11 +191,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--duration", type=int, default=0)
     parser.add_argument("--smoke-duration", type=int, default=DEFAULT_SMOKE_DURATION_S)
     parser.add_argument("--smoke", action="store_true")
-    parser.add_argument("--object-path", default=str(DEFAULT_KATRAN_OBJECT))
-    parser.add_argument("--program-name", default=DEFAULT_PROGRAM_NAME)
     parser.add_argument("--iface", default=DEFAULT_INTERFACE)
     parser.add_argument("--router-peer-iface", default=None)
-    parser.add_argument("--bpftool", default="")
     parser.add_argument("--concurrency", type=int, default=16)
     parser.add_argument("--workload", default="network")
     return parser

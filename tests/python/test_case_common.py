@@ -9,6 +9,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from runner.libs import case_common
+from runner.libs.app_runners.base import AppRunner
+from runner.libs.workload import WorkloadResult
 
 
 def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: Path) -> None:
@@ -275,6 +277,148 @@ def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypat
         "cleanup",
     ]
     assert result.metadata["kinsn_modules"]["module_load"]["loaded_modules"] == ["bpf_endian", "bpf_rotate"]
+
+
+def test_run_app_runner_lifecycle_wraps_app_runner_defaults(tmp_path: Path) -> None:
+    case_common.reset_pending_result_metadata()
+
+    class FakeProc:
+        def poll(self) -> None:
+            return None
+
+    daemon_stdout = tmp_path / "daemon.stdout.log"
+    daemon_stderr = tmp_path / "daemon.stderr.log"
+    daemon_stdout.write_text("serve: listening on /tmp/rejit.sock\n", encoding="utf-8")
+    daemon_stderr.write_text("kinsn discovery:\n  module loaded\n", encoding="utf-8")
+
+    class FakeDaemonSession:
+        def __init__(self) -> None:
+            self.proc = FakeProc()
+            self.socket_path = Path("/tmp/rejit.sock")
+            self.socket_dir = "/tmp/rejit-dir"
+            self.stdout_path = daemon_stdout
+            self.stderr_path = daemon_stderr
+            self.kinsn_metadata = {
+                "expected_modules": ["bpf_rotate"],
+                "module_load": {
+                    "loaded_modules": ["bpf_rotate"],
+                    "failed_modules": [],
+                },
+                "status": "ready",
+            }
+
+        def scan_programs(self, prog_ids, *, timeout_seconds=60):
+            del timeout_seconds
+            return {int(prog_ids[0]): {"sites": {}, "counts": {}, "error": ""}}
+
+        def apply_rejit(self, _prog_ids, *, enabled_passes=None):
+            del enabled_passes
+            return {
+                "applied": True,
+                "error": "",
+                "counts": {"applied_sites": 1},
+                "per_program": {101: {"applied": True}},
+            }
+
+    class FakeRunner(AppRunner):
+        def __init__(self) -> None:
+            super().__init__()
+            self.artifacts = {"source": "runner"}
+            self.command_used = ["demo-runner", "alpha"]
+
+        def start(self) -> list[int]:
+            self.programs = [{"id": 101, "name": "alpha_prog", "type": "xdp"}]
+            return [101]
+
+        def run_workload(self, seconds: float) -> WorkloadResult:
+            return WorkloadResult(
+                ops_total=seconds,
+                ops_per_sec=seconds,
+                duration_s=seconds,
+                stdout="",
+                stderr="",
+            )
+
+        def stop(self) -> None:
+            self.process_output = {"returncode": 0}
+
+    prepared_daemon_session = case_common.prepare_daemon_session(
+        FakeDaemonSession(),
+        daemon_binary=Path("/tmp/fake-daemon"),
+    )
+    runner = FakeRunner()
+    result = case_common.run_app_runner_lifecycle(
+        daemon_session=prepared_daemon_session,
+        runner=runner,
+        measure=lambda lifecycle, phase: {
+            "phase": phase,
+            "prog_ids": list(lifecycle.target_prog_ids),
+        },
+    )
+
+    assert result.baseline == {"phase": "baseline", "prog_ids": [101]}
+    assert result.post_rejit == {"phase": "post_rejit", "prog_ids": [101]}
+    assert result.artifacts["runner_artifacts"] == {"source": "runner"}
+    assert result.artifacts["command_used"] == ["demo-runner", "alpha"]
+    assert result.artifacts["programs"] == [{"id": 101, "name": "alpha_prog", "type": "xdp"}]
+
+
+def test_measure_app_runner_workload_collects_bpf_and_cpu(monkeypatch) -> None:
+    samples = iter(
+        [
+            {
+                101: {
+                    "id": 101,
+                    "name": "alpha_prog",
+                    "run_cnt": 2,
+                    "run_time_ns": 20,
+                }
+            },
+            {
+                101: {
+                    "id": 101,
+                    "name": "alpha_prog",
+                    "run_cnt": 5,
+                    "run_time_ns": 35,
+                }
+            },
+        ]
+    )
+
+    class FakeRunner(AppRunner):
+        def start(self) -> list[int]:
+            return [101]
+
+        def run_workload(self, seconds: float) -> WorkloadResult:
+            return WorkloadResult(
+                ops_total=12.0,
+                ops_per_sec=6.0,
+                duration_s=seconds,
+                stdout="ok",
+                stderr="",
+            )
+
+        def stop(self) -> None:
+            return None
+
+    monkeypatch.setattr(case_common, "sample_bpf_stats", lambda prog_ids: next(samples))
+    monkeypatch.setattr(case_common, "sample_cpu_usage", lambda pids, duration_s: {321: {"user_pct": 1.5, "sys_pct": 2.5}})
+    monkeypatch.setattr(case_common, "sample_total_cpu_usage", lambda duration_s: {"busy_pct": 70.0})
+    monkeypatch.setattr(case_common, "compute_delta", lambda before, after: {"summary": {"avg_ns_per_run": 3.0}})
+
+    measurement = case_common.measure_app_runner_workload(
+        FakeRunner(),
+        2,
+        [101],
+        agent_pid=321,
+    )
+
+    assert measurement["workload"]["ops_total"] == 12.0
+    assert measurement["initial_stats"]["101"]["run_cnt"] == 2
+    assert measurement["final_stats"]["101"]["run_cnt"] == 5
+    assert measurement["bpf"]["summary"]["avg_ns_per_run"] == 3.0
+    assert measurement["agent_cpu"]["total_pct"] == 4.0
+    assert measurement["system_cpu"]["busy_pct"] == 70.0
 
 
 def test_prepare_daemon_session_rejects_partial_kinsn_module_load(monkeypatch, tmp_path: Path) -> None:

@@ -10,7 +10,6 @@ from __future__ import annotations
 import argparse
 import statistics
 import sys
-import threading
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -32,21 +31,18 @@ from runner.libs import (  # noqa: E402
 from runner.libs.app_runners.bcc import BCCRunner, find_tool_binary, resolve_tools_dir, run_setup_script  # noqa: E402
 from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
-    compute_delta,
     enable_bpf_stats,
-    sample_bpf_stats,
-    sample_cpu_usage,
-    sample_total_cpu_usage,
 )
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
-    CaseLifecycleState,
     attach_pending_result_metadata,
     host_metadata,
+    measure_app_runner_workload,
     percent_delta,
     prepare_daemon_session,
     rejit_result_has_any_apply,
-    run_case_lifecycle,
+    run_app_runner_phase_records,
+    zero_site_totals,
 )
 
 
@@ -103,81 +99,16 @@ def load_config(path: Path) -> SuiteConfig:
     )
 
 
-# ---------------------------------------------------------------------------
-# Site aggregation
-# ---------------------------------------------------------------------------
-
-def zero_site_totals() -> dict[str, int]:
-    return {
-        "total_sites": 0,
-        "map_inline_sites": 0,
-        "const_prop_sites": 0,
-        "dce_sites": 0,
-        "cmov_sites": 0,
-        "wide_sites": 0,
-        "rotate_sites": 0,
-        "lea_sites": 0,
-    }
-
-
-def aggregate_site_totals(records: Mapping[int, Mapping[str, object]]) -> dict[str, int]:
-    totals = zero_site_totals()
-    for record in records.values():
-        counts = record.get("sites") or record.get("counts") or {}
-        for field in totals:
-            totals[field] += int(counts.get(field, 0) or 0)
-    return totals
-
-
-def measure_workload(
-    runner: BCCRunner,
-    duration_s: int,
-    prog_ids: Sequence[int],
-    *,
-    agent_pid: int,
-    initial_stats: Mapping[int, Mapping[str, object]] | None = None,
-) -> dict[str, object]:
-    before_bpf = {int(k): dict(v) for k, v in (initial_stats or sample_bpf_stats(list(prog_ids))).items()}
-    cpu_holder: dict[int, dict[str, float]] = {}
-    system_cpu_holder: dict[str, float] = {}
-
-    cpu_thread = threading.Thread(
-        target=lambda: cpu_holder.update(sample_cpu_usage([agent_pid], duration_s)),
-        daemon=True,
-    )
-    cpu_thread.start()
-
-    system_thread = threading.Thread(
-        target=lambda: system_cpu_holder.update(sample_total_cpu_usage(duration_s)),
-        daemon=True,
-    )
-    system_thread.start()
-
-    try:
-        workload_result = runner.run_workload(duration_s)
-    finally:
-        cpu_thread.join()
-        system_thread.join()
-
-    after_bpf = sample_bpf_stats(list(prog_ids))
-    bpf_delta = compute_delta(before_bpf, after_bpf)
-    agent_cpu = cpu_holder.get(agent_pid, {})
-    total_pct: float | None = None
-    if agent_cpu:
-        total_pct = float(agent_cpu.get("user_pct", 0.0)) + float(agent_cpu.get("sys_pct", 0.0))
-
-    return {
-        "workload": workload_result.to_dict(),
-        "initial_stats": {str(k): v for k, v in before_bpf.items()},
-        "final_stats": {str(k): v for k, v in after_bpf.items()},
-        "bpf": bpf_delta,
-        "agent_cpu": {
-            "user_pct": agent_cpu.get("user_pct"),
-            "sys_pct": agent_cpu.get("sys_pct"),
-            "total_pct": total_pct,
-        },
-        "system_cpu": system_cpu_holder,
-    }
+BCC_SITE_TOTAL_FIELDS = (
+    "total_sites",
+    "map_inline_sites",
+    "const_prop_sites",
+    "dce_sites",
+    "cmov_sites",
+    "wide_sites",
+    "rotate_sites",
+    "lea_sites",
+)
 
 
 def run_phase(
@@ -200,139 +131,34 @@ def run_phase(
         expected_programs=spec.expected_programs,
         attach_timeout_s=attach_timeout,
     )
-    programs: list[dict[str, object]] = []
-    prog_ids: list[int] = []
-    process_output: dict[str, object] = {}
-
-    def setup() -> dict[str, object]:
-        return {}
-
-    def start(_: object) -> CaseLifecycleState:
-        nonlocal programs
-        nonlocal prog_ids
-        prog_ids = list(bcc_runner.start())
-        programs = [dict(program) for program in bcc_runner.programs]
-        return CaseLifecycleState(
-            runtime=bcc_runner,
-            target_prog_ids=list(prog_ids),
-            apply_prog_ids=list(prog_ids),
-        )
-
-    def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
-        runner = lifecycle.runtime
-        assert isinstance(runner, BCCRunner)
-        if not lifecycle.target_prog_ids:
+    def workload(lifecycle: object, _phase_name: str) -> dict[str, object]:
+        prog_ids = [int(value) for value in (getattr(lifecycle, "target_prog_ids", []) or []) if int(value) > 0]
+        if not prog_ids:
             return {"status": "error", "reason": "no BPF programs are attached", "measurement": None}
-        process = runner.session.process if runner.session is not None else None
+        process = bcc_runner.session.process if bcc_runner.session is not None else None
         if process is None:
             return {"status": "error", "reason": "bcc runner process is not available", "measurement": None}
         return {
             "status": "ok",
             "reason": "",
-            "measurement": measure_workload(
-                runner,
+            "measurement": measure_app_runner_workload(
+                bcc_runner,
                 duration_s,
-                lifecycle.target_prog_ids,
+                prog_ids,
                 agent_pid=int(process.pid or 0),
-                initial_stats=sample_bpf_stats(lifecycle.target_prog_ids),
             ),
         }
 
-    def stop(_: object, lifecycle: CaseLifecycleState) -> None:
-        nonlocal process_output
-        runner = lifecycle.runtime
-        assert isinstance(runner, BCCRunner)
-        runner.stop()
-        process_output = dict(runner.process_output)
-
-    def cleanup(_: object) -> None:
-        return None
-
-    baseline_measurement: dict[str, object] | None = None
-    scan_results: dict[int, dict[str, object]] = {}
-    rejit_apply: dict[str, object] | None = None
-    post_measurement: dict[str, object] | None = None
-    baseline_status = "error"
-    baseline_reason = ""
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")
-    try:
-        enabled_passes = list(spec.rejit_passes) if spec.rejit_passes else benchmark_rejit_enabled_passes()
-        lifecycle_result = run_case_lifecycle(
-            daemon_session=prepared_daemon_session,
-            setup=setup,
-            start=start,
-            workload=workload,
-            stop=stop,
-            cleanup=cleanup,
-            enabled_passes=enabled_passes,
-        )
-        if lifecycle_result.baseline is not None:
-            baseline_status = str(lifecycle_result.baseline.get("status") or "error")
-            baseline_reason = str(lifecycle_result.baseline.get("reason") or "")
-            measurement = lifecycle_result.baseline.get("measurement")
-            if isinstance(measurement, Mapping):
-                baseline_measurement = dict(measurement)
-        scan_results = lifecycle_result.scan_results
-        rejit_apply = lifecycle_result.rejit_result
-        if isinstance(lifecycle_result.post_rejit, Mapping):
-            measurement = lifecycle_result.post_rejit.get("measurement")
-            if isinstance(measurement, Mapping):
-                post_measurement = dict(measurement)
-    except Exception as exc:
-        baseline_reason = str(exc)
-
-    site_totals = aggregate_site_totals(scan_results) if scan_results else zero_site_totals()
-    baseline: dict[str, object] = {
-        "phase": "baseline",
-        "status": baseline_status,
-        "reason": baseline_reason,
-        "programs": programs,
-        "prog_ids": prog_ids,
-        "scan_results": {str(k): v for k, v in scan_results.items()},
-        "site_totals": site_totals,
-        "measurement": baseline_measurement,
-        "process": process_output,
-    }
-    if baseline["status"] != "ok" and not baseline["reason"]:
-        stderr_tail = str(process_output.get("stderr_tail") or "")
-        stdout_tail = str(process_output.get("stdout_tail") or "")
-        baseline["reason"] = stderr_tail or stdout_tail or "unknown failure"
-
-    rejit: dict[str, object] | None = None
-    if baseline["status"] == "ok" and rejit_apply is not None:
-        if rejit_result_has_any_apply(rejit_apply):
-            rejit_reason = ""
-            if post_measurement is None:
-                rejit_reason = "post-ReJIT measurement is missing"
-            rejit = {
-                "phase": "post_rejit",
-                "status": "ok" if not rejit_reason else "error",
-                "reason": rejit_reason,
-                "programs": programs,
-                "prog_ids": prog_ids,
-                "scan_results": baseline["scan_results"],
-                "site_totals": baseline["site_totals"],
-                "rejit_result": rejit_apply,
-                "measurement": post_measurement,
-                "process": process_output,
-            }
-        else:
-            rejit_error = str(rejit_apply.get("error") or "").strip()
-            if rejit_error:
-                rejit = {
-                    "phase": "post_rejit",
-                    "status": "error",
-                    "reason": rejit_error,
-                    "programs": programs,
-                    "prog_ids": prog_ids,
-                    "scan_results": baseline["scan_results"],
-                    "site_totals": baseline["site_totals"],
-                    "rejit_result": rejit_apply,
-                    "measurement": None,
-                    "process": process_output,
-                }
-    return baseline, rejit
+    enabled_passes = list(spec.rejit_passes) if spec.rejit_passes else benchmark_rejit_enabled_passes()
+    return run_app_runner_phase_records(
+        runner=bcc_runner,
+        prepared_daemon_session=prepared_daemon_session,
+        measure=workload,
+        site_totals_fields=BCC_SITE_TOTAL_FIELDS,
+        enabled_passes=enabled_passes,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -652,7 +478,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
                         "programs": [],
                         "prog_ids": [],
                         "scan_results": {},
-                        "site_totals": zero_site_totals(),
+                        "site_totals": zero_site_totals(BCC_SITE_TOTAL_FIELDS),
                         "measurement": None,
                         "process": {},
                     },
@@ -699,7 +525,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             })
 
     # Aggregate
-    site_totals = zero_site_totals()
+    site_totals = zero_site_totals(BCC_SITE_TOTAL_FIELDS)
     speedups: list[float] = []
     baseline_successes = 0
     rejit_successes = 0

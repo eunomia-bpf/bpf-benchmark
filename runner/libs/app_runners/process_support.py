@@ -10,6 +10,7 @@ from typing import Any, Callable, Mapping, Sequence
 from .. import ROOT_DIR, tail_text
 from ..agent import find_bpf_programs, stop_agent, wait_healthy
 from ..workload import WorkloadResult, run_named_workload
+from .base import AppRunner
 
 
 class ProcessOutputCollector:
@@ -132,7 +133,7 @@ class ManagedProcessSession:
         self.close()
 
 
-class NativeProcessRunner:
+class NativeProcessRunner(AppRunner):
     def __init__(
         self,
         *,
@@ -142,15 +143,13 @@ class NativeProcessRunner:
         load_timeout_s: int = 20,
         workload_kind: str | None = None,
     ) -> None:
+        super().__init__()
         self.loader_binary = None if loader_binary is None else Path(loader_binary).resolve()
         self.loader_args = tuple(str(arg) for arg in loader_args if str(arg).strip())
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.load_timeout_s = int(load_timeout_s)
         self.workload_kind = str(workload_kind or "").strip()
         self.session: ManagedProcessSession | None = None
-        self.programs: list[dict[str, object]] = []
-        self.process_output: dict[str, object] = {}
-        self.command_used: list[str] = []
 
     def _default_binary_candidates(self) -> tuple[Path, ...]:
         return ()
@@ -180,20 +179,6 @@ class NativeProcessRunner:
             raise RuntimeError(f"{type(self).__name__} requires an explicit workload_kind")
         return run_named_workload(self.workload_kind, seconds)
 
-    def _fail_start(self, message: str) -> None:
-        try:
-            self.stop()
-        except Exception as exc:
-            raise RuntimeError(f"{message}; stop failed: {exc}") from exc
-        stderr_tail = str(self.process_output.get("stderr_tail") or "").strip()
-        stdout_tail = str(self.process_output.get("stdout_tail") or "").strip()
-        details = [message]
-        if stderr_tail:
-            details.append(f"stderr tail:\n{stderr_tail}")
-        elif stdout_tail:
-            details.append(f"stdout tail:\n{stdout_tail}")
-        raise RuntimeError("\n".join(details))
-
     def start(self) -> list[int]:
         if self.session is not None:
             raise RuntimeError(f"{type(self).__name__} is already running")
@@ -212,14 +197,11 @@ class NativeProcessRunner:
         if not programs:
             self._fail_start("native app did not attach any BPF programs")
         if self.expected_program_names:
-            expected = set(self.expected_program_names)
-            matched = [program for program in programs if str(program.get("name") or "") in expected]
-            found = {str(program.get("name") or "") for program in matched}
-            missing = [name for name in self.expected_program_names if name not in found]
-            if missing:
-                attached = sorted(str(program.get("name") or "") for program in programs if str(program.get("name") or "").strip())
-                self._fail_start(f"native app did not attach expected programs {missing}; attached {attached}")
-            programs = matched
+            programs = self._filter_expected_programs(
+                programs,
+                self.expected_program_names,
+                owner_label="native app",
+            )
         self.loader_binary = binary
         self.programs = programs
         return [int(program["id"]) for program in programs if int(program.get("id", 0) or 0) > 0]
