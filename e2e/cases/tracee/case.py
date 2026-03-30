@@ -1242,7 +1242,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             tracee_binary=None,
             setup_result=setup_result,
             smoke=bool(args.smoke),
-            error_message="Tracee binary is unavailable in this environment; manual .bpf.o fallback is forbidden.",
+            error_message="Tracee binary is unavailable in this environment; manual .bpf.o path is forbidden.",
             limitations=limitations,
         )
     if require_program_activity and preflight_duration_s <= 0:

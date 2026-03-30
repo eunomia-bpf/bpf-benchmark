@@ -20,8 +20,8 @@ from runner.libs.run_artifacts import (
 
 
 def test_derive_run_type_strips_timestamp_suffixes() -> None:
-    assert derive_run_type(Path("/tmp/vm_micro_authoritative_20260323.json"), "fallback") == "vm_micro"
-    assert derive_run_type(Path("/tmp/tracee_20260323_101112.json"), "fallback") == "tracee"
+    assert derive_run_type(Path("/tmp/vm_micro_authoritative_20260323.json"), "default") == "vm_micro"
+    assert derive_run_type(Path("/tmp/tracee_20260323_101112.json"), "default") == "tracee"
 
 
 def test_result_root_for_output_uses_parent_of_dev_dir(tmp_path: Path) -> None:
@@ -163,7 +163,7 @@ def test_load_latest_result_for_output_reads_completed_artifact_payload(tmp_path
         detail_payloads={"result.json": {"benchmarks": [], "suite": "micro"}},
     )
 
-    payload = load_latest_result_for_output(output_path, fallback_run_type="pure_jit")
+    payload = load_latest_result_for_output(output_path, default_run_type="pure_jit")
 
     assert payload == {"benchmarks": [], "suite": "micro"}
     assert run_dir.name == "llvmbpf_vs_kernel_20260329_064643"
@@ -184,7 +184,7 @@ def test_load_latest_result_for_output_rejects_incomplete_artifact(tmp_path: Pat
     )
 
     try:
-        load_latest_result_for_output(output_path, fallback_run_type="pure_jit")
+        load_latest_result_for_output(output_path, default_run_type="pure_jit")
     except RuntimeError as exc:
         assert "did not complete" in str(exc)
         assert "micro batch runner failed" in str(exc)

@@ -315,11 +315,6 @@ apps:
     workload: exec_storm
     args:
       app: bootstrap
-  - name: libbpf-bootstrap/bootstrap_legacy
-    runner: libbpf-bootstrap
-    workload: exec_storm
-    args:
-      app: bootstrap_legacy
   - name: libbpf-bootstrap/fentry
     runner: libbpf-bootstrap
     workload: exec_storm

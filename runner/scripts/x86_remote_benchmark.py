@@ -202,20 +202,6 @@ def scan_program(daemon_binary: Path, prog_id: int) -> dict[str, Any]:
     return record
 
 
-def skipped_rejit_result(*, reason: str, error: str = "") -> dict[str, Any]:
-    return {
-        "applied": False,
-        "output": "",
-        "exit_code": 0,
-        "counts": {
-            "total_sites": 0,
-            "applied_sites": 0,
-        },
-        "error": error,
-        "reason": reason,
-    }
-
-
 def command_record(mode: str, completed: subprocess.CompletedProcess[str]) -> dict[str, Any]:
     return {
         "mode": mode,
@@ -300,7 +286,7 @@ def run_llvmbpf_vs_kernel(
         cwd=REPO_ROOT,
         timeout=7200,
     )
-    return load_latest_result_for_output(output_path, fallback_run_type="pure_jit")
+    return load_latest_result_for_output(output_path, default_run_type="pure_jit")
 
 
 def run_daemon_stock_vs_rejit(
@@ -371,7 +357,7 @@ def run_daemon_stock_vs_rejit(
             if total_sites > 0:
                 rejit_apply = apply_daemon_rejit(str(daemon_binary), [prog_id])
             else:
-                rejit_apply = skipped_rejit_result(reason="no_sites")
+                raise RuntimeError(f"{benchmark.name}: daemon scan found zero optimization sites")
 
             load_info_after = None
             rejit = None
@@ -503,7 +489,7 @@ def run_katran_smoke(
         if int(((scan_before.get("counts") or {}).get("total_sites", 0)) or 0) > 0:
             rejit_apply = apply_daemon_rejit(str(daemon_binary), [prog_id])
         else:
-            rejit_apply = skipped_rejit_result(reason="no_sites")
+            raise RuntimeError("katran smoke found zero optimization sites")
 
         return {
             "object": str(object_path),
@@ -744,8 +730,10 @@ def run_e2e_case(
     payload_status = str((payload or {}).get("status") or "").strip().lower()
     if timed_out:
         status = "error"
-    elif payload_status in {"ok", "skipped", "error"}:
+    elif payload_status in {"ok", "error"}:
         status = payload_status
+    elif payload_status:
+        status = "error"
     elif completed.returncode == 0:
         status = "ok"
     else:
@@ -754,6 +742,8 @@ def run_e2e_case(
     error_message = ""
     if isinstance(payload, dict):
         error_message = str(payload.get("error_message") or "").strip()
+    if not error_message and payload_status and payload_status not in {"ok", "error"}:
+        error_message = f"remote e2e case returned an invalid status: {payload_status!r}"
     if not error_message and status == "error":
         error_message = tail_text(completed.stderr or completed.stdout or "remote e2e case failed")
 
@@ -785,7 +775,6 @@ def run_e2e_suite(
     ensure_bpffs_mounted()
     module_load = run_command(
         ["bash", str(REPO_ROOT / "module" / "load_all.sh")],
-        check=False,
         timeout=120,
     )
     case_results = [
@@ -816,7 +805,6 @@ def run_e2e_suite(
 def summarize_e2e(raw: dict[str, Any]) -> dict[str, Any]:
     cases = raw.get("cases") if isinstance(raw.get("cases"), list) else []
     ok_cases: list[str] = []
-    skipped_cases: list[str] = []
     failed_cases: list[dict[str, Any]] = []
     for record in cases:
         if not isinstance(record, dict):
@@ -825,8 +813,6 @@ def summarize_e2e(raw: dict[str, Any]) -> dict[str, Any]:
         status = str(record.get("status") or "").lower()
         if status == "ok":
             ok_cases.append(case_name)
-        elif status == "skipped":
-            skipped_cases.append(case_name)
         else:
             failed_cases.append(
                 {
@@ -841,7 +827,6 @@ def summarize_e2e(raw: dict[str, Any]) -> dict[str, Any]:
         "smoke": bool(raw.get("smoke")),
         "total_cases": len(cases),
         "ok_cases": ok_cases,
-        "skipped_cases": skipped_cases,
         "failed_cases": failed_cases,
         "module_load_returncode": int(((raw.get("module_load") or {}).get("returncode", 0)) or 0),
     }
@@ -922,7 +907,6 @@ def main() -> int:
                     "smoke": bool(args.e2e_smoke),
                     "total_cases": 0,
                     "ok_cases": [],
-                    "skipped_cases": [],
                     "failed_cases": [{"case": "suite", "error_message": str(exc), "returncode": None, "timed_out": False}],
                     "module_load_returncode": None,
                 }

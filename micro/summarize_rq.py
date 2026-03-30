@@ -11,7 +11,6 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from runner.libs.catalog import (
-    DEFAULT_MACRO_MANIFEST,
     DEFAULT_MICRO_MANIFEST,
     load_manifest,
     load_manifest_from_results,
@@ -43,7 +42,6 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--corpus-manifest",
-        default=str(DEFAULT_MACRO_MANIFEST),
         help="Macro/corpus manifest used to annotate the corpus snapshot.",
     )
     parser.add_argument("--output", help="Optional markdown output path.")

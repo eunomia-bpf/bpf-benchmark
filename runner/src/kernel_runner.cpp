@@ -75,7 +75,7 @@ static inline uint64_t rdtsc_end()
 }
 #endif
 
-struct kernel_test_run_context {
+struct kernel_probe_context {
     int program_fd = -1;
     bpf_test_run_opts *test_opts = nullptr;
     uint32_t effective_repeat = 1;
@@ -88,7 +88,7 @@ struct kernel_test_run_context {
     bool reset_result_map = false;
 };
 
-struct kernel_test_run_measurement {
+struct kernel_run_measurement {
     uint64_t exec_ns = 0;
     std::optional<uint64_t> wall_exec_ns;
     std::optional<uint64_t> exec_cycles;
@@ -98,7 +98,7 @@ struct kernel_test_run_measurement {
 };
 
 struct kernel_run_pass_result {
-    kernel_test_run_measurement measurement {};
+    kernel_run_measurement measurement {};
     perf_counter_capture perf_counters {};
 };
 
@@ -396,7 +396,7 @@ size_t packet_output_capacity(const cli_options &options, size_t packet_size)
     return packet_size;
 }
 
-void reset_kernel_test_run_state(kernel_test_run_context &context)
+void reset_kernel_probe_state(kernel_probe_context &context)
 {
     if (context.test_opts == nullptr) {
         fail("internal error: missing test run options");
@@ -427,11 +427,11 @@ void reset_kernel_test_run_state(kernel_test_run_context &context)
     }
 }
 
-kernel_test_run_measurement execute_kernel_test_run(kernel_test_run_context &context)
+kernel_run_measurement execute_kernel_probe(kernel_probe_context &context)
 {
-    reset_kernel_test_run_state(context);
+    reset_kernel_probe_state(context);
 
-    kernel_test_run_measurement measurement {};
+    kernel_run_measurement measurement {};
     const auto wall_start = std::chrono::steady_clock::now();
     const uint64_t tsc_before = rdtsc_start();
     const int run_error = bpf_prog_test_run_opts(context.program_fd, context.test_opts);
@@ -462,16 +462,16 @@ kernel_test_run_measurement execute_kernel_test_run(kernel_test_run_context &con
 }
 
 kernel_run_pass_result execute_kernel_measurement_pass(
-    kernel_test_run_context &context,
+    kernel_probe_context &context,
     const cli_options &options)
 {
     for (uint32_t warmup_index = 0; warmup_index < options.warmup_repeat; ++warmup_index) {
-        static_cast<void>(execute_kernel_test_run(context));
+        static_cast<void>(execute_kernel_probe(context));
     }
 
     kernel_run_pass_result result {};
     if (!options.perf_counters) {
-        result.measurement = execute_kernel_test_run(context);
+        result.measurement = execute_kernel_probe(context);
         return result;
     }
 
@@ -483,7 +483,7 @@ kernel_run_pass_result execute_kernel_measurement_pass(
     result.perf_counters = measure_perf_counters(
         perf_options,
         [&]() {
-            result.measurement = execute_kernel_test_run(context);
+            result.measurement = execute_kernel_probe(context);
         });
 
     if (options.perf_scope == "full_repeat_avg") {
@@ -1122,7 +1122,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     }
 
     const uint64_t tsc_freq_hz = kHasTscMeasurement ? detect_tsc_freq_hz() : 0;
-    kernel_test_run_context run_context = {
+    kernel_probe_context run_context = {
         .program_fd = program_fd,
         .test_opts = &test_opts,
         .effective_repeat = effective_repeat,

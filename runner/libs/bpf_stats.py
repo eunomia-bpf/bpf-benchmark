@@ -30,7 +30,7 @@ class BpfProgInfo(ctypes.Structure):
         ("map_ids", ctypes.c_uint64),
         ("name", ctypes.c_char * BPF_OBJ_NAME_LEN),
         ("ifindex", ctypes.c_uint32),
-        ("gpl_compatible", ctypes.c_uint32, 1),
+        ("gpl_flag", ctypes.c_uint32, 1),
         ("_bitfield_pad", ctypes.c_uint32, 31),
         ("netns_dev", ctypes.c_uint64),
         ("netns_ino", ctypes.c_uint64),

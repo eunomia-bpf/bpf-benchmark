@@ -903,7 +903,7 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
             duration_s=duration_s,
             smoke=bool(args.smoke),
             setup_result=setup_result,
-            error_message="Tetragon binary is unavailable in this environment; manual .bpf.o fallback is forbidden.",
+            error_message="Tetragon binary is unavailable in this environment; manual .bpf.o path is forbidden.",
             limitations=limitations,
         )
 

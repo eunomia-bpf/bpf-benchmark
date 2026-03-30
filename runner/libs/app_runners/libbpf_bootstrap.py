@@ -25,7 +25,7 @@ class LibbpfBootstrapRunner(NativeProcessRunner):
         if self.object_path is None:
             return run_sleep_workload(seconds)
         stem = _binary_name_for_object(self.object_path)
-        if stem in {"bootstrap", "bootstrap_legacy"}:
+        if stem == "bootstrap":
             return run_exec_storm(max(1, int(round(seconds))), 2)
         return run_sleep_workload(seconds)
 

@@ -101,12 +101,12 @@ def result_root_for_output(output_path: Path) -> Path:
     return parent
 
 
-def derive_run_type(output_path: Path, fallback: str) -> str:
+def derive_run_type(output_path: Path, default_token: str) -> str:
     stem = output_path.stem
     if stem.endswith(".latest"):
         stem = stem[: -len(".latest")]
     stem = _STAMP_SUFFIX_RE.sub("", stem)
-    return sanitize_artifact_token(stem or fallback)
+    return sanitize_artifact_token(stem or default_token)
 
 
 def repo_relative_path(path: Path) -> str:
@@ -420,9 +420,9 @@ def update_run_artifact(
     return run_dir
 
 
-def load_latest_result_for_output(output_path: Path, *, fallback_run_type: str) -> dict[str, Any]:
+def load_latest_result_for_output(output_path: Path, *, default_run_type: str) -> dict[str, Any]:
     results_dir = result_root_for_output(output_path)
-    run_type = sanitize_artifact_token(derive_run_type(output_path, fallback_run_type))
+    run_type = sanitize_artifact_token(derive_run_type(output_path, default_run_type))
     if not results_dir.is_dir():
         raise RuntimeError(f"run artifact directory does not exist: {results_dir}")
 

@@ -96,13 +96,6 @@ def capture(command: list[str], *, cwd: Path | None = None, env: dict[str, str] 
     return subprocess.run(command, cwd=cwd, env=env, text=True, capture_output=True, check=False)
 
 
-def try_run(command: list[str], *, cwd: Path | None = None, env: dict[str, str] | None = None) -> bool:
-    where = f" (cwd={cwd})" if cwd else ""
-    print(f"[run] {printable_command(command)}{where}")
-    completed = subprocess.run(command, cwd=cwd, env=env, text=True, check=False)
-    return completed.returncode == 0
-
-
 def summarize_process_output(completed: subprocess.CompletedProcess[str]) -> str:
     lines = [
         line.strip()
@@ -454,9 +447,7 @@ def build_xdp_tutorial(stage_root: Path, jobs: int) -> RepoBuildResult:
     run(["make", f"-j{jobs}"], cwd=xdp_tools_dir)
     run(["make", f"-j{jobs}", f"LOADER_DIR={loader_dir}"], cwd=repo_dir)
     for extra_dir in ("advanced03-AF_XDP", "experiment01-tailgrow"):
-        ok = try_run(["make", f"-j{jobs}", f"LOADER_DIR={loader_dir}"], cwd=repo_dir / extra_dir)
-        if not ok:
-            print(f"[warn] xdp-tutorial extra lesson failed and was skipped: {extra_dir}")
+        run(["make", f"-j{jobs}", f"LOADER_DIR={loader_dir}"], cwd=repo_dir / extra_dir)
 
     object_paths = [path for path in sorted(repo_dir.rglob("*.o")) if is_bpf_object(path)]
     object_count = stage_many(
@@ -601,23 +592,22 @@ def build_tetragon(stage_root: Path, jobs: int) -> RepoBuildResult:
 
     binary_paths: list[Path] = []
     if (repo_dir / "cmd" / "tetragon").exists() and (repo_dir / "cmd" / "tetra").exists():
-        ok = try_run(
+        run(
             ["make", f"-j{jobs}", "tetragon", "tetra", "EXTRA_GO_BUILD_FLAGS=-mod=mod"],
             cwd=repo_dir,
         )
-        if ok:
-            binary_paths = [path for path in (repo_dir / "tetragon", repo_dir / "tetra") if is_executable_file(path)]
+        binary_paths = [path for path in (repo_dir / "tetragon", repo_dir / "tetra") if is_executable_file(path)]
     binary_count = stage_many(binary_paths, lambda src: stage_root / "bin" / src.name)
     remove_staged_temp_objects(stage_root)
 
-    verify_cmd = (str(stage_root / "bin" / "tetragon"), "--help") if binary_paths else ()
+    verify_cmd = (str(stage_root / "bin" / "tetragon"), "--help")
     return RepoBuildResult(
         name="tetragon",
         stage_dir=stage_root,
         object_count=object_count,
         binary_count=binary_count,
         verify_command=verify_cmd,
-        verify_ok=verify_binary(list(verify_cmd)) if verify_cmd else True,
+        verify_ok=verify_binary(list(verify_cmd)),
         status="ok",
     )
 

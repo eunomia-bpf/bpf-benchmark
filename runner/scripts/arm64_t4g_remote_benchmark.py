@@ -193,20 +193,6 @@ def scan_program(
     return record
 
 
-def skipped_rejit_result(*, reason: str, error: str = "") -> dict[str, Any]:
-    return {
-        "applied": False,
-        "output": "",
-        "exit_code": 0,
-        "counts": {
-            "total_sites": 0,
-            "applied_sites": 0,
-        },
-        "error": error,
-        "reason": reason,
-    }
-
-
 def command_record(mode: str, completed: subprocess.CompletedProcess[str]) -> dict[str, Any]:
     return {
         "mode": mode,
@@ -291,7 +277,7 @@ def run_llvmbpf_vs_kernel(
         cwd=REPO_ROOT,
         timeout=7200,
     )
-    return load_latest_result_for_output(output_path, fallback_run_type="pure_jit")
+    return load_latest_result_for_output(output_path, default_run_type="pure_jit")
 
 
 def run_daemon_stock_vs_rejit(
@@ -380,7 +366,7 @@ def run_daemon_stock_vs_rejit(
                     daemon_stderr_path=daemon_stderr_path,
                 )
             else:
-                rejit_apply = skipped_rejit_result(reason="no_sites")
+                raise RuntimeError(f"{benchmark.name}: daemon scan found zero optimization sites")
 
             load_info_after = None
             rejit = None
@@ -530,7 +516,7 @@ def run_katran_smoke(
                 daemon_stderr_path=daemon_stderr_path,
             )
         else:
-            rejit_apply = skipped_rejit_result(reason="no_sites")
+            raise RuntimeError("katran smoke found zero optimization sites")
 
         return {
             "object": str(object_path),
@@ -546,19 +532,6 @@ def run_katran_smoke(
 
 
 def summarize_llvmbpf_vs_kernel(raw: dict[str, Any]) -> dict[str, Any]:
-    if str(raw.get("status") or "").strip() == "skipped":
-        return {
-            "status": "skipped",
-            "reason": raw.get("reason"),
-            "error": raw.get("error"),
-            "benchmarks": 0,
-            "llvmbpf_faster": 0,
-            "kernel_faster": 0,
-            "median_ratio": None,
-            "geometric_mean_ratio": None,
-            "largest_kernel_wins": [],
-            "largest_llvmbpf_wins": [],
-        }
     ratios: list[tuple[str, float, float, float]] = []
     llvmbpf_faster = 0
     kernel_faster = 0
@@ -697,11 +670,7 @@ def main() -> int:
             results_dir=results_dir,
         )
     else:
-        raw_llvmbpf_vs_kernel = {
-            "status": "skipped",
-            "reason": "runner was cross-built without llvmbpf support",
-            "error": "",
-        }
+        raise SystemExit("runner was cross-built without llvmbpf support")
 
     daemon_proc, daemon_socket_path, daemon_socket_dir, daemon_stdout_path, daemon_stderr_path = _start_daemon_server(daemon_binary)
     try:
