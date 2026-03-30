@@ -9,7 +9,7 @@ from .. import ROOT_DIR, tail_text
 from ..agent import find_bpf_programs
 from ..workload import (
     WorkloadResult,
-    run_dd_read_load,
+    run_block_io_load,
     run_exec_storm,
     run_file_io,
     run_named_workload as run_shared_workload,
@@ -43,7 +43,7 @@ SCRIPTS: tuple[ScriptSpec, ...] = (
         script_path=DEFAULT_SCRIPT_DIR / "biosnoop.bt",
         description="tracepoint block_io_start/done: per-I/O latency with tuple-keyed maps and bitwise ops (dev >> 20)",
         expected_programs=2,
-        workload_kind="dd_read",
+        workload_kind="block_io",
     ),
     ScriptSpec(
         name="runqlat",
@@ -57,7 +57,7 @@ SCRIPTS: tuple[ScriptSpec, ...] = (
         script_path=DEFAULT_SCRIPT_DIR / "tcpretrans.bt",
         description="kprobe tcp_retransmit_skb: TCP retransmit tracing with 12-entry state string map, ntop/bswap",
         expected_programs=1,
-        workload_kind="tcp_connect",
+        workload_kind="tcp_retransmit",
     ),
     ScriptSpec(
         name="capable",
@@ -108,8 +108,8 @@ def run_named_workload(kind: str, duration_s: int) -> WorkloadResult:
     normalized = str(kind or "").strip()
     if normalized == "tcp_connect":
         return run_tcp_connect_load(duration_s)
-    if normalized == "dd_read":
-        return run_dd_read_load(duration_s)
+    if normalized == "block_io":
+        return run_block_io_load(duration_s)
     if normalized == "scheduler":
         return run_scheduler_load(duration_s)
     if normalized == "exec_storm":
@@ -118,10 +118,7 @@ def run_named_workload(kind: str, duration_s: int) -> WorkloadResult:
         return run_file_io(duration_s)
     if normalized == "network":
         return run_tcp_connect_load(duration_s)
-    try:
-        return run_shared_workload(normalized, duration_s)
-    except RuntimeError as exc:
-        raise RuntimeError(f"unsupported workload kind: {kind}") from exc
+    return run_shared_workload(normalized, duration_s)
 
 
 def finalize_process_output(process: Any) -> dict[str, object]:

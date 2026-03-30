@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -182,7 +183,7 @@ def remove_staged_temp_objects(path: Path) -> None:
                 candidate.unlink()
 
 
-def clang_bpf_sys_includes(clang: str = "clang") -> list[str]:
+def clang_system_include_paths(clang: str = "clang") -> list[str]:
     completed = subprocess.run(
         [clang, "-v", "-E", "-"],
         input="",
@@ -206,7 +207,14 @@ def clang_bpf_sys_includes(clang: str = "clang") -> list[str]:
             break
         candidate = line.strip()
         if candidate.startswith("/"):
-            includes.extend(["-idirafter", candidate])
+            includes.append(candidate)
+    return includes
+
+
+def clang_bpf_sys_includes(clang: str = "clang") -> list[str]:
+    includes: list[str] = []
+    for path in clang_system_include_paths(clang):
+        includes.extend(["-idirafter", path])
     return includes
 
 
@@ -237,6 +245,110 @@ def find_cached_vmlinux_header() -> Path:
         "missing cached vmlinux.h for native corpus builds; "
         "run the generic corpus object builder first or provide a staged vmlinux.h under corpus/build/"
     )
+
+
+def replace_once(text: str, old: str, new: str, *, context: str) -> str:
+    if old not in text:
+        raise CommandError(f"failed to rewrite {context}: expected source pattern missing")
+    return text.replace(old, new, 1)
+
+
+def bpftrace_target_arch_define() -> str:
+    machine = platform.machine().lower()
+    arch_map = {
+        "x86_64": "x86",
+        "amd64": "x86",
+        "aarch64": "arm64",
+        "arm64": "arm64",
+        "armv7l": "arm",
+        "armv6l": "arm",
+        "riscv64": "riscv",
+        "s390x": "s390",
+        "ppc64le": "powerpc",
+        "ppc64": "powerpc",
+        "loongarch64": "loongarch",
+    }
+    target = arch_map.get(machine)
+    if target is None:
+        raise CommandError(f"unsupported host architecture for bpftrace stdlib build: {machine}")
+    return f"__TARGET_ARCH_{target}"
+
+
+def resolve_bpftrace_llvm_cmake_dirs() -> tuple[Path, Path]:
+    supported_majors = ("18", "19", "20", "21", "22")
+    llvm_prefixes = (Path("/usr/lib"), Path("/lib"))
+    clang_prefixes = (Path("/usr/lib/cmake"), Path("/lib/cmake"))
+    for major in supported_majors:
+        llvm_dir = next((prefix / f"llvm-{major}" / "cmake" for prefix in llvm_prefixes if (prefix / f"llvm-{major}" / "cmake").is_dir()), None)
+        clang_dir = next((prefix / f"clang-{major}" for prefix in clang_prefixes if (prefix / f"clang-{major}").is_dir()), None)
+        if llvm_dir is not None and clang_dir is not None:
+            return llvm_dir, clang_dir
+    raise CommandError("missing supported LLVM/Clang CMake packages for bpftrace userspace build (need 18-22)")
+
+
+def prepare_bpftrace_stdlib_source(
+    source: Path,
+    *,
+    stdlib_dir: Path,
+    temp_root: Path,
+    cached_vmlinux_text: str | None,
+) -> tuple[Path, list[str]]:
+    relative = source.relative_to(stdlib_dir)
+    relative_posix = relative.as_posix()
+    source_text = source.read_text()
+    rewritten_text = source_text
+    extra_flags: list[str] = []
+
+    if (
+        relative_posix == "task/vma.bpf.c"
+        and cached_vmlinux_text is not None
+        and "extern int bpf_iter_task_vma_new(struct bpf_iter_task_vma *it" in cached_vmlinux_text
+    ):
+        compat_block = """// We can guarantee that struct task_struct is defined in vmlinux.h, but
+// cannot guarantee that bpf_iter_task_vma is declared. The symbols will
+// be resolved as a weak references, and nulled if they are present, but
+// we need to add a manually forward declaration here.
+struct __compat_bpf_iter_task_vma {
+  __u64 __opaque[1];
+} __attribute__((aligned(8)));
+
+extern int bpf_iter_task_vma_new(struct __compat_bpf_iter_task_vma *it,
+                                 struct task_struct *task,
+                                 u64 addr) __ksym __weak;
+extern struct vm_area_struct *bpf_iter_task_vma_next(
+    struct __compat_bpf_iter_task_vma *it) __ksym __weak;
+extern void bpf_iter_task_vma_destroy(
+    struct __compat_bpf_iter_task_vma *it) __ksym __weak;
+"""
+        rewritten_text = replace_once(
+            rewritten_text,
+            compat_block,
+            "/* cached vmlinux.h already declares bpf_iter_task_vma helpers. */\n",
+            context="bpftrace task/vma stdlib shim block",
+        )
+        rewritten_text = replace_once(
+            rewritten_text,
+            "struct __compat_bpf_iter_task_vma vma_it;",
+            "struct bpf_iter_task_vma vma_it;",
+            context="bpftrace task/vma iterator type",
+        )
+
+    if relative_posix == "usdt/usdt.bpf.c":
+        rewritten_text = replace_once(
+            rewritten_text,
+            "#define __VMLINUX_H__\n",
+            "",
+            context="bpftrace usdt vmlinux guard",
+        )
+        extra_flags.append(f"-D{bpftrace_target_arch_define()}")
+
+    if rewritten_text == source_text:
+        return source, extra_flags
+
+    patched = temp_root / "patched-src" / relative
+    patched.parent.mkdir(parents=True, exist_ok=True)
+    patched.write_text(rewritten_text)
+    return patched, extra_flags
 
 
 def bpf_stage_relative(path: Path) -> Path:
@@ -654,9 +766,16 @@ def build_cilium(stage_root: Path, jobs: int) -> RepoBuildResult:
 def build_bpftrace(stage_root: Path, jobs: int) -> RepoBuildResult:
     repo_dir = repo_checkout("bpftrace")
     clean_stage_dir(stage_root)
+    llvm_dir, clang_dir = resolve_bpftrace_llvm_cmake_dirs()
+    llvm_major = llvm_dir.parent.name.removeprefix("llvm-")
+    clang_binary = f"clang-{llvm_major}"
+    if shutil.which(clang_binary) is None:
+        clang_binary = "clang"
+    system_include_paths = f'\\\"{":".join(clang_system_include_paths(clang_binary))}\\\"'
+    run(["git", "submodule", "update", "--init", "--depth", "1", "libbpf"], cwd=repo_dir)
 
     messages: list[str] = []
-    binary_paths: list[Path] = []
+    binary_count = 0
     with tempfile.TemporaryDirectory(prefix="bpftrace-build-") as build_dir:
         configure = capture(
             [
@@ -668,7 +787,9 @@ def build_bpftrace(stage_root: Path, jobs: int) -> RepoBuildResult:
                 "-DBUILD_TESTING=OFF",
                 "-DENABLE_MAN=OFF",
                 "-DENABLE_SKB_OUTPUT=OFF",
-                "-DUSE_SYSTEM_LIBBPF=ON",
+                f"-DLLVM_DIR={llvm_dir}",
+                f"-DClang_DIR={clang_dir}",
+                f"-DSYSTEM_INCLUDE_PATHS={system_include_paths}",
             ]
         )
         if configure.returncode == 0:
@@ -676,7 +797,7 @@ def build_bpftrace(stage_root: Path, jobs: int) -> RepoBuildResult:
             if build.returncode == 0:
                 candidate = Path(build_dir) / "src" / "bpftrace"
                 if is_executable_file(candidate):
-                    binary_paths.append(candidate)
+                    binary_count = stage_many([candidate], lambda src: stage_root / "bin" / src.name)
             else:
                 messages.append(f"userspace build failed: {summarize_process_output(build)}")
         else:
@@ -684,6 +805,7 @@ def build_bpftrace(stage_root: Path, jobs: int) -> RepoBuildResult:
 
     stdlib_dir = repo_dir / "src" / "stdlib"
     cached_vmlinux = locate_cached_vmlinux_header()
+    cached_vmlinux_text = cached_vmlinux.read_text() if cached_vmlinux is not None else None
     stdlib_failures: list[str] = []
     stdlib_objects: list[Path] = []
     common_clang_flags = ["clang", "-target", "bpf", "-g", "-O2", "-I", str(stdlib_dir / "include"), *clang_bpf_sys_includes()]
@@ -700,9 +822,16 @@ def build_bpftrace(stage_root: Path, jobs: int) -> RepoBuildResult:
                 continue
 
             command = list(common_clang_flags)
+            compile_source, extra_flags = prepare_bpftrace_stdlib_source(
+                source,
+                stdlib_dir=stdlib_dir,
+                temp_root=temp_root,
+                cached_vmlinux_text=cached_vmlinux_text,
+            )
+            command.extend(extra_flags)
             if needs_vmlinux and cached_vmlinux is not None:
                 command.extend(["-I", str(cached_vmlinux.parent)])
-            command.extend(["-c", str(source), "-o", str(output)])
+            command.extend(["-c", str(compile_source), "-o", str(output)])
             completed = capture(command)
             if completed.returncode == 0 and is_bpf_object(output):
                 stdlib_objects.append(output)
@@ -711,7 +840,6 @@ def build_bpftrace(stage_root: Path, jobs: int) -> RepoBuildResult:
 
         object_count = stage_many(stdlib_objects, lambda src: stage_root / "stdlib" / src.relative_to(temp_root))
 
-    binary_count = stage_many(binary_paths, lambda src: stage_root / "bin" / src.name)
     remove_staged_temp_objects(stage_root)
 
     message_parts = []

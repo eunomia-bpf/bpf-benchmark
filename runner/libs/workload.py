@@ -4,6 +4,7 @@ import json
 import os
 import re
 import socket
+import stat
 import subprocess
 import tempfile
 import threading
@@ -90,6 +91,20 @@ def _finish_result(ops_total: float, duration_s: float, stdout: str, stderr: str
         duration_s=duration_s,
         stdout=tail_text(stdout, max_lines=40, max_chars=8000),
         stderr=tail_text(stderr, max_lines=40, max_chars=8000),
+    )
+
+
+def _merge_workload_results(results: Sequence[WorkloadResult]) -> WorkloadResult:
+    total_duration = sum(result.duration_s for result in results)
+    total_ops = sum(result.ops_total for result in results)
+    stdout = "\n".join(result.stdout for result in results if result.stdout)
+    stderr = "\n".join(result.stderr for result in results if result.stderr)
+    return WorkloadResult(
+        ops_total=total_ops,
+        ops_per_sec=(total_ops / total_duration) if total_duration > 0 else None,
+        duration_s=total_duration,
+        stdout=tail_text(stdout, max_lines=80, max_chars=12000),
+        stderr=tail_text(stderr, max_lines=80, max_chars=12000),
     )
 
 
@@ -287,6 +302,34 @@ def _disk_backed_tmp_root() -> Path:
         if os.access(candidate, os.W_OK | os.X_OK):
             return candidate
     raise RuntimeError("no writable disk-backed temporary directory is available")
+
+
+def _load_kernel_module(module_name: str, *module_args: str) -> None:
+    modprobe_binary = which("modprobe")
+    if modprobe_binary is None:
+        raise RuntimeError(f"modprobe is required to load kernel module {module_name!r}")
+    completed = run_command(
+        [modprobe_binary, module_name, *module_args],
+        check=False,
+        timeout=10,
+    )
+    if completed.returncode != 0:
+        details = tail_text(completed.stderr or completed.stdout)
+        raise RuntimeError(f"modprobe {module_name} failed: {details}")
+
+
+def _wait_for_block_device(path: Path, *, timeout_s: float = 2.0) -> Path:
+    deadline = time.monotonic() + timeout_s
+    while time.monotonic() < deadline:
+        try:
+            mode = path.stat().st_mode
+        except FileNotFoundError:
+            time.sleep(0.1)
+            continue
+        if stat.S_ISBLK(mode):
+            return path
+        time.sleep(0.1)
+    raise RuntimeError(f"block device did not appear: {path}")
 
 
 def _normalize_workload_limits(
@@ -489,38 +532,185 @@ def run_file_open_load(duration_s: int | float) -> WorkloadResult:
     return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
 
 
-def run_dd_read_load(duration_s: int | float) -> WorkloadResult:
+def run_block_io_load(duration_s: int | float) -> WorkloadResult:
     dd_binary = which("dd") or "dd"
-    with tempfile.TemporaryDirectory(prefix="tracee-dd-read-", dir=str(_disk_backed_tmp_root())) as tempdir:
-        data_path = Path(tempdir) / "read-target.bin"
-        _prepare_read_file(data_path, size_mb=64)
-        block_size = "4k"
-        block_count = 4096
-        start = time.monotonic()
-        deadline = start + float(duration_s)
-        stderr_lines: list[str] = []
-        ops_total = 0.0
+    block_size = "4k"
+    block_count = 4096
+    _load_kernel_module("null_blk", "nr_devices=1", "queue_mode=2")
+    device_path = _wait_for_block_device(Path("/dev/nullb0"))
+
+    start = time.monotonic()
+    deadline = start + float(duration_s)
+    stderr_lines: list[str] = []
+    ops_total = 0.0
+    while time.monotonic() < deadline:
+        write_completed = run_command(
+            [
+                dd_binary,
+                "if=/dev/zero",
+                f"of={device_path}",
+                f"bs={block_size}",
+                f"count={block_count}",
+                "oflag=direct",
+                "conv=fsync",
+                "status=none",
+            ],
+            check=False,
+            timeout=30,
+        )
+        if write_completed.returncode != 0:
+            details = tail_text(write_completed.stderr or write_completed.stdout)
+            raise RuntimeError(f"block_io write failed: {details}")
+        read_completed = run_command(
+            [
+                dd_binary,
+                f"if={device_path}",
+                "of=/dev/null",
+                f"bs={block_size}",
+                f"count={block_count}",
+                "iflag=fullblock,direct",
+                "status=none",
+            ],
+            check=False,
+            timeout=30,
+        )
+        if read_completed.returncode != 0:
+            details = tail_text(read_completed.stderr or read_completed.stdout)
+            raise RuntimeError(f"block_io read failed: {details}")
+        stderr_lines.append(write_completed.stderr or "")
+        stderr_lines.append(read_completed.stderr or "")
+        ops_total += float(block_count * 2)
+    elapsed = time.monotonic() - start
+    return _finish_result(ops_total, elapsed, "", "\n".join(stderr_lines))
+
+
+def run_tracee_default_load(duration_s: int | float) -> WorkloadResult:
+    total_duration = max(0.3, float(duration_s))
+    exec_seconds = max(0.1, total_duration * 0.4)
+    open_seconds = max(0.1, total_duration * 0.3)
+    connect_seconds = max(0.1, total_duration - exec_seconds - open_seconds)
+    return _merge_workload_results(
+        [
+            run_user_exec_loop(exec_seconds),
+            run_open_storm(open_seconds),
+            run_connect_storm(connect_seconds),
+        ]
+    )
+
+
+def _run_tc_qdisc(command: Sequence[str], *, action: str) -> subprocess.CompletedProcess[str]:
+    completed = run_command(list(command), check=False, timeout=10)
+    if completed.returncode != 0:
+        details = tail_text(completed.stderr or completed.stdout)
+        raise RuntimeError(f"tc {action} failed: {details}")
+    return completed
+
+
+def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
+    tc_binary = which("tc")
+    if tc_binary is None:
+        raise RuntimeError("tc is required for the tcp_retransmit workload")
+    _load_kernel_module("sch_netem")
+
+    ready = threading.Event()
+    stop = threading.Event()
+    errors: list[str] = []
+    port_holder: list[int] = []
+
+    def server() -> None:
+        payload = b"x" * 65536
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
+                listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                listener.bind(("127.0.0.1", 0))
+                listener.listen()
+                listener.settimeout(0.25)
+                port_holder.append(int(listener.getsockname()[1]))
+                ready.set()
+                while not stop.is_set():
+                    try:
+                        conn, _ = listener.accept()
+                    except (socket.timeout, TimeoutError):
+                        continue
+                    with conn:
+                        conn.settimeout(0.5)
+                        try:
+                            for _ in range(16):
+                                if stop.is_set():
+                                    break
+                                conn.sendall(payload)
+                        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, socket.timeout, OSError):
+                            continue
+        except Exception as exc:
+            errors.append(str(exc))
+            ready.set()
+
+    thread = threading.Thread(target=server, daemon=True)
+    thread.start()
+    if not ready.wait(timeout=2.0):
+        stop.set()
+        thread.join(timeout=1.0)
+        raise RuntimeError("tcp retransmit server did not become ready")
+    if errors:
+        stop.set()
+        thread.join(timeout=1.0)
+        raise RuntimeError(f"tcp retransmit server failed: {errors[-1]}")
+    if not port_holder:
+        stop.set()
+        thread.join(timeout=1.0)
+        raise RuntimeError("tcp retransmit server failed to publish a port")
+
+    _run_tc_qdisc(
+        [tc_binary, "qdisc", "replace", "dev", "lo", "root", "netem", "delay", "20ms", "loss", "3%"],
+        action="qdisc replace dev lo root netem",
+    )
+
+    port = port_holder[0]
+    start = time.monotonic()
+    deadline = start + max(0.3, float(duration_s))
+    attempts = 0
+    successes = 0
+    failures = 0
+    try:
         while time.monotonic() < deadline:
-            completed = run_command(
-                [
-                    dd_binary,
-                    f"if={data_path}",
-                    "of=/dev/null",
-                    f"bs={block_size}",
-                    f"count={block_count}",
-                    "iflag=fullblock,direct",
-                    "status=none",
-                ],
-                check=False,
-                timeout=30,
-            )
-            if completed.returncode != 0:
-                details = tail_text(completed.stderr or completed.stdout)
-                raise RuntimeError(f"dd read load failed: {details}")
-            stderr_lines.append(completed.stderr or "")
-            ops_total += float(block_count)
-        elapsed = time.monotonic() - start
-        return _finish_result(ops_total, elapsed, "", "\n".join(stderr_lines))
+            attempts += 1
+            received = 0
+            try:
+                with socket.create_connection(("127.0.0.1", port), timeout=1.0) as client:
+                    client.settimeout(0.5)
+                    while received < (256 * 1024) and time.monotonic() < deadline:
+                        chunk = client.recv(65536)
+                        if not chunk:
+                            break
+                        received += len(chunk)
+                if received > 0:
+                    successes += 1
+                else:
+                    failures += 1
+            except (TimeoutError, OSError):
+                failures += 1
+    finally:
+        cleanup_error: RuntimeError | None = None
+        try:
+            _run_tc_qdisc([tc_binary, "qdisc", "del", "dev", "lo", "root"], action="qdisc del dev lo root")
+        except RuntimeError as exc:
+            cleanup_error = exc
+        stop.set()
+        thread.join(timeout=1.0)
+        if cleanup_error is not None:
+            raise cleanup_error
+
+    if errors:
+        raise RuntimeError(f"tcp retransmit server failed: {errors[-1]}")
+    if successes <= 0:
+        raise RuntimeError(f"tcp retransmit workload produced no successful transfers; attempts={attempts}, failures={failures}")
+    elapsed = time.monotonic() - start
+    return _finish_result(
+        float(attempts),
+        elapsed,
+        f"successful_transfers={successes}",
+        f"failed_transfers={failures}",
+    )
 
 
 def run_vfs_create_write_fsync_load(duration_s: int | float) -> WorkloadResult:
@@ -637,7 +827,13 @@ def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadR
     if kind == "file_open_storm":
         return run_file_open_load(seconds)
     if kind in {"network", "tracee_default"}:
+        if kind == "tracee_default":
+            return run_tracee_default_load(float(duration_s))
         return run_network_load(seconds)
+    if kind == "block_io":
+        return run_block_io_load(float(duration_s))
+    if kind == "tcp_retransmit":
+        return run_tcp_retransmit_load(float(duration_s))
     if kind == "fio":
         return run_file_io(seconds)
     if kind == "hackbench":
@@ -729,8 +925,8 @@ def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadR
 
 __all__ = [
     "WorkloadResult",
+    "run_block_io_load",
     "run_connect_storm",
-    "run_dd_read_load",
     "run_exec_storm",
     "run_bind_storm",
     "run_file_open_load",
@@ -742,7 +938,9 @@ __all__ = [
     "run_rapid_open_storm",
     "run_named_workload",
     "run_scheduler_load",
+    "run_tcp_retransmit_load",
     "run_tcp_connect_load",
+    "run_tracee_default_load",
     "run_vfs_create_write_fsync_load",
     "run_user_exec_loop",
 ]

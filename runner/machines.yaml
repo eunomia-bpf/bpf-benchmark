@@ -1,34 +1,37 @@
 defaults:
-  target: local-x86-vng
+  target: x86-dev
   lock_scope: vm_global
   cpus_auto_ratio: 0.8
   memory_auto_ratio: 0.8
   memory_min_gib: 4
 
 aliases:
-  x86: local-x86-vng
+  x86: x86-benchmark
+  x86-dev: x86-dev
+  x86-benchmark: x86-benchmark
   arm64: aws-arm64
   aws: aws-arm64
 
 default_targets:
-  vm-test: local-x86-vng
-  vm-selftest: local-x86-vng
-  vm-static-test: local-x86-vng
-  vm-negative-test: local-x86-vng
-  vm-micro-smoke: local-x86-vng
-  vm-micro: local-x86-vng
-  vm-corpus: local-x86-vng-tcg-stable
-  vm-e2e: local-x86-vng-tcg-stable
+  vm-shell: x86-dev
+  vm-test: x86-dev
+  vm-selftest: x86-dev
+  vm-static-test: x86-dev
+  vm-negative-test: x86-dev
+  vm-micro-smoke: x86-benchmark
+  vm-micro: x86-benchmark
+  vm-corpus: x86-benchmark
+  vm-e2e: x86-benchmark
 
 targets:
-  local-x86-vng:
+  x86-dev:
     backend: vng
     arch: x86_64
     executable: runner/scripts/vng-wrapper.sh
     memory: 16G
     lock_scope: vm_global
 
-  local-x86-vng-tcg:
+  x86-debug-tcg:
     backend: vng
     arch: x86_64
     executable: runner/scripts/vng-wrapper.sh
@@ -37,7 +40,7 @@ targets:
     memory: 16G
     lock_scope: vm_global
 
-  local-x86-vng-tcg-stable:
+  x86-benchmark:
     backend: vng
     arch: x86_64
     executable: runner/scripts/vng-wrapper.sh

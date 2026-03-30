@@ -16,7 +16,7 @@ from ..agent import find_bpf_programs, stop_agent
 from ..workload import (
     WorkloadResult,
     run_bind_storm,
-    run_dd_read_load,
+    run_block_io_load,
     run_exec_storm,
     run_file_io,
     run_file_open_load,
@@ -126,6 +126,17 @@ def find_tool_binary(tools_dir: Path, tool_name: str) -> Path | None:
     return None
 
 
+def _local_capture_root() -> Path:
+    for candidate in (Path("/dev/shm"), Path("/run"), Path("/tmp")):
+        try:
+            candidate.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            continue
+        if os.access(candidate, os.W_OK | os.X_OK):
+            return candidate
+    raise RuntimeError("no writable guest-local temporary directory is available for BCC output capture")
+
+
 def wait_for_attached_programs(
     process: subprocess.Popen[str],
     *,
@@ -161,8 +172,8 @@ def _run_named_workload(kind: str, duration_s: float) -> WorkloadResult:
         return _run_mixed_workload(duration_s)
     if kind == "tcp_connect":
         return run_tcp_connect_load(whole_seconds)
-    if kind == "dd_read":
-        return run_dd_read_load(whole_seconds)
+    if kind == "block_io":
+        return run_block_io_load(whole_seconds)
     if kind == "scheduler":
         return run_scheduler_load(whole_seconds)
     if kind == "exec_storm":
@@ -185,17 +196,14 @@ def _run_named_workload(kind: str, duration_s: float) -> WorkloadResult:
         return run_tcp_connect_load(whole_seconds)
     if normalized == "mixed_system":
         return _run_mixed_workload(duration_s)
-    try:
-        return run_shared_workload(normalized, whole_seconds)
-    except RuntimeError as exc:
-        raise RuntimeError(f"unsupported BCC workload kind: {kind!r}") from exc
+    return run_shared_workload(normalized, whole_seconds)
 
 
 def _run_mixed_workload(duration_s: float) -> WorkloadResult:
     segments = (
         ("exec_loop", 0.25),
         ("file_open", 0.20),
-        ("dd_read", 0.20),
+        ("block_io", 0.20),
         ("tcp_connect", 0.20),
         ("bind_storm", 0.10),
         ("scheduler", 0.05),
@@ -288,7 +296,10 @@ class BCCRunner(AppRunner):
             raise RuntimeError(f"BCC tool {self.tool_name} is already running")
 
         tool_binary = self._resolve_tool_binary()
-        tempdir = tempfile.TemporaryDirectory(prefix=f"bcc-{tool_binary.name}-")
+        tempdir = tempfile.TemporaryDirectory(
+            prefix=f"bcc-{tool_binary.name}-",
+            dir=str(_local_capture_root()),
+        )
         stdout_path = Path(tempdir.name) / "stdout.log"
         stderr_path = Path(tempdir.name) / "stderr.log"
         stdout_handle = stdout_path.open("w", encoding="utf-8")

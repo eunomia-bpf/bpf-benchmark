@@ -75,7 +75,7 @@ class WorkloadSpec:
 
 DEFAULT_WORKLOADS = (
     WorkloadSpec(
-        name="stress_exec",
+        name="exec_storm",
         kind="exec_storm",
         metric="bogo-ops/s",
         description="stress-ng execve workload",

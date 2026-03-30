@@ -39,9 +39,9 @@ AWS_X86_REMOTE_USER="${AWS_X86_REMOTE_USER:-ec2-user}"
 AWS_X86_REMOTE_STAGE_DIR="${AWS_X86_REMOTE_STAGE_DIR:-/home/${AWS_X86_REMOTE_USER}/bpf-benchmark-x86}"
 AWS_X86_REMOTE_KERNEL_STAGE_DIR="${AWS_X86_REMOTE_KERNEL_STAGE_DIR:-/home/${AWS_X86_REMOTE_USER}/codex-kernel-stage-x86}"
 AWS_X86_AMI_PARAM="${AWS_X86_AMI_PARAM:-/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64}"
-AWS_X86_BENCH_ITERATIONS="${AWS_X86_BENCH_ITERATIONS:-1}"
+AWS_X86_BENCH_SAMPLES="${AWS_X86_BENCH_SAMPLES:-1}"
 AWS_X86_BENCH_WARMUPS="${AWS_X86_BENCH_WARMUPS:-0}"
-AWS_X86_BENCH_REPEAT="${AWS_X86_BENCH_REPEAT:-10}"
+AWS_X86_BENCH_INNER_REPEAT="${AWS_X86_BENCH_INNER_REPEAT:-10}"
 AWS_X86_BENCH_CPU="${AWS_X86_BENCH_CPU:-0}"
 AWS_X86_BENCH_MODE="${AWS_X86_BENCH_MODE:-micro}"
 AWS_X86_E2E_CASES="${AWS_X86_E2E_CASES:-tracee,tetragon,scx}"
@@ -112,9 +112,9 @@ Optional env:
   AWS_X86_AMI_ID               override the AL2023 x86_64 AMI
   AWS_X86_BENCH_MODE           default: micro
                                values: micro | e2e
-  AWS_X86_BENCH_ITERATIONS     default: 1
+  AWS_X86_BENCH_SAMPLES        default: 1
   AWS_X86_BENCH_WARMUPS        default: 0
-  AWS_X86_BENCH_REPEAT         default: 10
+  AWS_X86_BENCH_INNER_REPEAT   default: 10
   AWS_X86_E2E_CASES            default: tracee,tetragon,scx
                                values: all or a comma-separated subset of tracee,tetragon,scx
   AWS_X86_E2E_SMOKE            default: 1

@@ -161,7 +161,7 @@ def test_clear_previous_run_artifacts_removes_corrupt_artifact_with_warning(
 
 def test_externalize_sample_daemon_debug_moves_large_payload_to_detail() -> None:
     sample = {
-        "iteration_index": 2,
+        "sample_index": 2,
         "result": 7,
         "rejit": {
             "applied": True,
@@ -179,11 +179,11 @@ def test_externalize_sample_daemon_debug_moves_large_payload_to_detail() -> None
 
     assert detail is not None
     relative_path, detail_payload, index_entry = detail
-    assert relative_path == "daemon_debug/branch_dense__kernel_rejit__iter02.json"
-    assert sample["rejit"]["daemon_debug_ref"] == "details/daemon_debug/branch_dense__kernel_rejit__iter02.json"
+    assert relative_path == "daemon_debug/branch_dense__kernel_rejit__sample02.json"
+    assert sample["rejit"]["daemon_debug_ref"] == "details/daemon_debug/branch_dense__kernel_rejit__sample02.json"
     assert "daemon_response" not in sample["rejit"]
     assert detail_payload["daemon_response"] == {"debug": {"verifier_log": {"log": "ok"}}}
-    assert index_entry["path"] == "details/daemon_debug/branch_dense__kernel_rejit__iter02.json"
+    assert index_entry["path"] == "details/daemon_debug/branch_dense__kernel_rejit__sample02.json"
 
 
 def test_repo_relative_path_returns_string() -> None:

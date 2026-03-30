@@ -26,6 +26,8 @@ DEFAULT_KATRAN_SERVER_BINARY_CANDIDATES = (
 )
 DEFAULT_KATRAN_SERVER_LIB_DIR = ROOT_DIR / "e2e" / "cases" / "katran" / "lib"
 DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 30
+DEFAULT_KATRAN_STOP_TIMEOUT_S = 10.0
+DEFAULT_KATRAN_STOP_SETTLE_S = 2.0
 KATRAN_REQUIRED_MAP_NAMES = ("vip_map", "reals", "ch_rings", "ctl_array")
 BPF_OBJECT_NAME_LIMIT = 15
 DEFAULT_IP_CANDIDATES = (
@@ -113,6 +115,58 @@ def _attached_xdp_info(iface: str) -> dict[str, object]:
         if record.get("xdp") or record.get("xdp_attached"):
             return dict(record)
     return {}
+
+
+def _current_prog_ids() -> set[int]:
+    payload = run_json_command([_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
+    if not isinstance(payload, list):
+        raise RuntimeError("bpftool prog show returned unexpected payload")
+    return {
+        int(record["id"])
+        for record in payload
+        if isinstance(record, dict) and "id" in record
+    }
+
+
+def _namespace_exists(namespace: str) -> bool:
+    for root in (Path("/run/netns"), Path("/var/run/netns")):
+        if root.joinpath(namespace).exists():
+            return True
+    return False
+
+
+def wait_for_katran_teardown(
+    prog_id: int | None,
+    *,
+    timeout_s: float = DEFAULT_KATRAN_STOP_TIMEOUT_S,
+    settle_s: float = DEFAULT_KATRAN_STOP_SETTLE_S,
+) -> None:
+    timeout = max(0.1, float(timeout_s))
+    settle = max(0.0, float(settle_s))
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        prog_gone = prog_id in (None, 0) or int(prog_id) not in _current_prog_ids()
+        namespaces_gone = all(
+            not _namespace_exists(namespace)
+            for namespace in (ROUTER_NS, CLIENT_NS, REAL_NS)
+        )
+        if prog_gone and namespaces_gone:
+            if settle > 0.0:
+                time.sleep(settle)
+            return
+        time.sleep(0.1)
+    remaining = []
+    if prog_id not in (None, 0) and int(prog_id) in _current_prog_ids():
+        remaining.append(f"prog_id={int(prog_id)}")
+    remaining.extend(
+        namespace
+        for namespace in (ROUTER_NS, CLIENT_NS, REAL_NS)
+        if _namespace_exists(namespace)
+    )
+    raise RuntimeError(
+        "Katran teardown did not quiesce before the next app start: "
+        + (", ".join(remaining) if remaining else "transient kernel/procfs state remained")
+    )
 
 
 def katran_server_binary_candidates() -> tuple[Path, ...]:

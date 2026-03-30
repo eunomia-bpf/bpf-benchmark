@@ -64,9 +64,9 @@ Run a targeted smoke test directly:
 python3 micro/driver.py \
   --bench simple \
   --runtime llvmbpf \
-  --iterations 1 \
+  --samples 1 \
   --warmups 0 \
-  --repeat 10
+  --inner-repeat 10
 ```
 
 ## Outputs

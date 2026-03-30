@@ -1,6 +1,6 @@
 # Tetragon Real End-to-End Benchmark
 
-- Generated: 2026-03-30T04:44:39.551975+00:00
+- Generated: 2026-03-30T21:39:14.810371+00:00
 - Mode: `tetragon_daemon`
 - Smoke: `True`
 - Duration per workload: `8s`
@@ -13,30 +13,30 @@
 
 ## Baseline
 
-- Application throughput mean: `228.91162211026983` ops/s
-- Events/s mean: `156.80524940869637`
-- Agent CPU mean: `37.48101673645662`%
-- BPF avg ns mean: `5565.828201583511`
+- Application throughput mean: `119.64095970058044` ops/s
+- Events/s mean: `28.696171145895676`
+- Agent CPU mean: `6.239726870781842`%
+- BPF avg ns mean: `39895.838461538464`
 
-- stress_exec: ops/s=228.91162211026983, events/s=156.80524940869637, agent_cpu=37.48101673645662, bpf_avg_ns=5565.828201583511
+- exec_storm: ops/s=119.64095970058044, events/s=28.696171145895676, agent_cpu=6.239726870781842, bpf_avg_ns=39895.838461538464
 
 ## Per-Program
 
-- execve_rate (tracepoint): sites=6, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
-- event_execve (tracepoint): sites=13, stock_avg_ns=5565.828201583511, rejit_avg_ns=5927.0968510851835, speedup=0.9390479591310326
+- execve_rate (tracepoint): sites=19, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- event_execve (tracepoint): sites=13, stock_avg_ns=39895.838461538464, rejit_avg_ns=44816.64940239044, speedup=0.8902012754976389
 
 ## Post-ReJIT
 
-- Application throughput mean: `474.5344106469795` ops/s
-- Events/s mean: `158.44980677224672`
-- Agent CPU mean: `47.07701725036083`%
-- BPF avg ns mean: `5927.0968510851835`
+- Application throughput mean: `170.29559359272127` ops/s
+- Events/s mean: `26.95094198724656`
+- Agent CPU mean: `6.617541246009917`%
+- BPF avg ns mean: `44816.64940239044`
 
-- stress_exec: ops/s=474.5344106469795, events/s=158.44980677224672, agent_cpu=47.07701725036083, bpf_avg_ns=5927.0968510851835
+- exec_storm: ops/s=170.29559359272127, events/s=26.95094198724656, agent_cpu=6.617541246009917, bpf_avg_ns=44816.64940239044
 
 ## Comparison
 
-- stress_exec: baseline_ops/s=228.91162211026983, post_ops/s=474.5344106469795, app_delta=107.30026997859892%, baseline_cpu=37.48101673645662, post_cpu=47.07701725036083, cpu_delta=25.602295106819994%
+- exec_storm: baseline_ops/s=119.64095970058044, post_ops/s=170.29559359272127, app_delta=42.33887292354701%, baseline_cpu=6.239726870781842, post_cpu=6.617541246009917, cpu_delta=6.0549825826067725%
 
 ## Limitations
 

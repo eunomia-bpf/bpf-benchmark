@@ -297,20 +297,19 @@ def _daemon_debug_detail_for_sample(
     if not isinstance(daemon_response, Mapping):
         return None
 
-    iteration_index = sample.get("iteration_index")
-    iter_suffix = (
-        f"iter{int(iteration_index):02d}"
-        if isinstance(iteration_index, int)
-        else f"sample{sample_index:02d}"
+    sample_slot = sample.get("sample_index")
+    effective_sample_index = int(sample_slot) if isinstance(sample_slot, int) else sample_index
+    sample_suffix = (
+        f"sample{effective_sample_index:02d}"
     )
     basename = (
         f"{sanitize_artifact_token(benchmark_name)}__"
-        f"{sanitize_artifact_token(runtime_name)}__{iter_suffix}.json"
+        f"{sanitize_artifact_token(runtime_name)}__{sample_suffix}.json"
     )
     relative_path = f"daemon_debug/{basename}"
     detail_payload = {
         "benchmark": benchmark_name,
-        "iteration_index": iteration_index,
+        "sample_index": effective_sample_index,
         "rejit_summary": {
             key: value
             for key, value in rejit.items()
@@ -318,15 +317,13 @@ def _daemon_debug_detail_for_sample(
         },
         "result": sample.get("result"),
         "runtime": runtime_name,
-        "sample_index": sample_index,
         "daemon_response": daemon_response,
     }
     index_entry = {
         "benchmark": benchmark_name,
-        "iteration_index": iteration_index,
+        "sample_index": effective_sample_index,
         "path": f"details/{relative_path}",
         "runtime": runtime_name,
-        "sample_index": sample_index,
         "verifier_retries": int(rejit.get("verifier_retries", 0) or 0),
     }
     return relative_path, detail_payload, index_entry

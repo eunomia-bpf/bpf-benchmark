@@ -11,6 +11,7 @@ from .katran_support import (
     CLIENT_NS,
     DEFAULT_KATRAN_OBJECT,
     DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S,
+    DEFAULT_KATRAN_STOP_SETTLE_S,
     KatranDsrTopology,
     KatranServerSession,
     NamespaceHttpServer,
@@ -23,6 +24,7 @@ from .katran_support import (
     resolve_katran_server_binary,
     run_katran_prog_test_run,
     run_parallel_http_load,
+    wait_for_katran_teardown,
 )
 
 
@@ -168,6 +170,7 @@ class KatranRunner(AppRunner):
 
     def stop(self) -> None:
         errors: list[str] = []
+        prog_id = self.prog_id
         if self.session is not None:
             session = self.session
             process = None if session.session is None else session.session.process
@@ -194,6 +197,11 @@ class KatranRunner(AppRunner):
             except Exception as exc:
                 errors.append(str(exc))
             self.topology = None
+        if not errors:
+            try:
+                wait_for_katran_teardown(prog_id, settle_s=DEFAULT_KATRAN_STOP_SETTLE_S)
+            except Exception as exc:
+                errors.append(str(exc))
         if errors:
             raise RuntimeError("; ".join(errors))
 

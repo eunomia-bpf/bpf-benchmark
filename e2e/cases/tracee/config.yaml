@@ -18,26 +18,16 @@ statistics:
   bootstrap_iterations: 2000
   bootstrap_seed: 20260328
 workloads:
-  - name: exec_storm
-    kind: exec_storm
-    rate: 4
-    command: stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief
-    metric: execs/s
+  - name: tracee_default
+    kind: tracee_default
+    command: mixed exec/open/connect workload over {duration}s
+    metric: ops/s
     primary_events:
       - execve
       - sched_process_exec
-    latency_probe_kind: exec
-  - name: file_io
-    kind: file_open
-    command: stress-ng --open 4 --timeout {duration}s --metrics-brief
-    metric: opens/s
-    primary_events:
       - security_file_open
-    latency_probe_kind: file_open
-  - name: network
-    kind: network
-    command: wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/
-    metric: connects/s
-    primary_events:
       - security_socket_connect
-    latency_probe_kind: tcp_connect
+    latency_probe_kind: exec
+    latency_probe_events:
+      - sched_process_exec
+      - execve

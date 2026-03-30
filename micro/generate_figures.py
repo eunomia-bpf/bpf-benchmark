@@ -182,18 +182,18 @@ def get_run(benchmark: dict[str, object], runtime: str) -> dict[str, object]:
     raise KeyError(f"benchmark {benchmark.get('name', '<unknown>')} missing runtime {runtime}")
 
 
-def extract_metric_samples_with_iteration(run: dict[str, object], metric: str) -> list[tuple[int, float]]:
+def extract_metric_samples_with_sample_index(run: dict[str, object], metric: str) -> list[tuple[int, float]]:
     values: list[tuple[int, float]] = []
     for fallback_index, sample in enumerate(run.get("samples", [])):
         metric_value = sample.get(metric)
         if metric_value is None:
             continue
-        raw_index = sample.get("iteration_index", fallback_index)
+        raw_index = sample.get("sample_index", fallback_index)
         try:
-            iteration_index = int(raw_index)
+            sample_index = int(raw_index)
         except (TypeError, ValueError):
-            iteration_index = fallback_index
-        values.append((iteration_index, float(metric_value)))
+            sample_index = fallback_index
+        values.append((sample_index, float(metric_value)))
     if not values:
         raise ValueError(f"run {run.get('runtime', '<unknown>')} has no {metric} samples")
     values.sort(key=lambda item: item[0])
@@ -202,7 +202,7 @@ def extract_metric_samples_with_iteration(run: dict[str, object], metric: str) -
 
 def extract_metric_samples(run: dict[str, object], metric: str) -> np.ndarray:
     return np.asarray(
-        [value for _, value in extract_metric_samples_with_iteration(run, metric)],
+        [value for _, value in extract_metric_samples_with_sample_index(run, metric)],
         dtype=np.float64,
     )
 
@@ -239,32 +239,32 @@ def extract_native_code_bytes(run: dict[str, object]) -> float:
 
 
 def paired_wilcoxon_pvalue(lhs_run: dict[str, object], rhs_run: dict[str, object], metric: str) -> float:
-    lhs_samples = extract_metric_samples_with_iteration(lhs_run, metric)
-    rhs_samples = extract_metric_samples_with_iteration(rhs_run, metric)
+    lhs_samples = extract_metric_samples_with_sample_index(lhs_run, metric)
+    rhs_samples = extract_metric_samples_with_sample_index(rhs_run, metric)
 
-    lhs_by_iteration: dict[int, float] = {}
-    rhs_by_iteration: dict[int, float] = {}
+    lhs_by_sample: dict[int, float] = {}
+    rhs_by_sample: dict[int, float] = {}
     lhs_duplicates = False
     rhs_duplicates = False
 
-    for iteration_index, value in lhs_samples:
-        if iteration_index in lhs_by_iteration:
+    for sample_index, value in lhs_samples:
+        if sample_index in lhs_by_sample:
             lhs_duplicates = True
-        lhs_by_iteration[iteration_index] = value
-    for iteration_index, value in rhs_samples:
-        if iteration_index in rhs_by_iteration:
+        lhs_by_sample[sample_index] = value
+    for sample_index, value in rhs_samples:
+        if sample_index in rhs_by_sample:
             rhs_duplicates = True
-        rhs_by_iteration[iteration_index] = value
+        rhs_by_sample[sample_index] = value
 
     if lhs_duplicates or rhs_duplicates:
         return math.nan
 
-    paired_indexes = sorted(set(lhs_by_iteration) & set(rhs_by_iteration))
-    if not paired_indexes or set(lhs_by_iteration) != set(rhs_by_iteration):
+    paired_indexes = sorted(set(lhs_by_sample) & set(rhs_by_sample))
+    if not paired_indexes or set(lhs_by_sample) != set(rhs_by_sample):
         return math.nan
 
-    lhs_values = np.asarray([lhs_by_iteration[index] for index in paired_indexes], dtype=np.float64)
-    rhs_values = np.asarray([rhs_by_iteration[index] for index in paired_indexes], dtype=np.float64)
+    lhs_values = np.asarray([lhs_by_sample[index] for index in paired_indexes], dtype=np.float64)
+    rhs_values = np.asarray([rhs_by_sample[index] for index in paired_indexes], dtype=np.float64)
 
     try:
         return float(wilcoxon(lhs_values, rhs_values, alternative="two-sided").pvalue)

@@ -46,16 +46,16 @@ AWS_ARM64_REMOTE_USER    ?= ec2-user
 AWS_ARM64_REMOTE_STAGE_DIR        ?= /home/$(AWS_ARM64_REMOTE_USER)/bpf-benchmark-arm64
 AWS_ARM64_REMOTE_KERNEL_STAGE_DIR ?= /home/$(AWS_ARM64_REMOTE_USER)/codex-kernel-stage
 AWS_ARM64_AMI_PARAM      ?= /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64
-AWS_ARM64_BENCH_ITERATIONS ?= 1
+AWS_ARM64_BENCH_SAMPLES ?= 1
 AWS_ARM64_BENCH_WARMUPS    ?= 0
-AWS_ARM64_BENCH_REPEAT     ?= 10
+AWS_ARM64_BENCH_INNER_REPEAT ?= 10
 
 export AWS_REGION AWS_DEFAULT_REGION AWS_PROFILE
 export AWS_ARM64_CACHE_DIR AWS_ARM64_NAME_TAG AWS_ARM64_INSTANCE_TYPE
 export AWS_ARM64_REMOTE_USER AWS_ARM64_REMOTE_STAGE_DIR AWS_ARM64_REMOTE_KERNEL_STAGE_DIR
 export AWS_ARM64_KEY_NAME AWS_ARM64_KEY_PATH AWS_ARM64_SECURITY_GROUP_ID AWS_ARM64_SUBNET_ID
 export AWS_ARM64_AMI_PARAM AWS_ARM64_AMI_ID
-export AWS_ARM64_BENCH_ITERATIONS AWS_ARM64_BENCH_WARMUPS AWS_ARM64_BENCH_REPEAT
+export AWS_ARM64_BENCH_SAMPLES AWS_ARM64_BENCH_WARMUPS AWS_ARM64_BENCH_INNER_REPEAT
 export CROSS_COMPILE_ARM64 ARM64_BUILD_DIR ARM64_WORKTREE_DIR
 export ARM64_DOCKER_PLATFORM ARM64_CROSSBUILD_OUTPUT_DIR ARM64_CROSSBUILD_JOBS
 
@@ -67,15 +67,15 @@ AWS_X86_REMOTE_USER       ?= ec2-user
 AWS_X86_REMOTE_STAGE_DIR  ?= /home/$(AWS_X86_REMOTE_USER)/bpf-benchmark-x86
 AWS_X86_REMOTE_KERNEL_STAGE_DIR ?= /home/$(AWS_X86_REMOTE_USER)/codex-kernel-stage-x86
 AWS_X86_AMI_PARAM         ?= /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
-AWS_X86_BENCH_ITERATIONS  ?= 1
+AWS_X86_BENCH_SAMPLES     ?= 1
 AWS_X86_BENCH_WARMUPS     ?= 0
-AWS_X86_BENCH_REPEAT      ?= 10
+AWS_X86_BENCH_INNER_REPEAT ?= 10
 
 export AWS_X86_CACHE_DIR AWS_X86_NAME_TAG AWS_X86_INSTANCE_TYPE
 export AWS_X86_REMOTE_USER AWS_X86_REMOTE_STAGE_DIR AWS_X86_REMOTE_KERNEL_STAGE_DIR
 export AWS_X86_KEY_NAME AWS_X86_KEY_PATH AWS_X86_SECURITY_GROUP_ID AWS_X86_SUBNET_ID
 export AWS_X86_AMI_PARAM AWS_X86_AMI_ID
-export AWS_X86_BENCH_ITERATIONS AWS_X86_BENCH_WARMUPS AWS_X86_BENCH_REPEAT
+export AWS_X86_BENCH_SAMPLES AWS_X86_BENCH_WARMUPS AWS_X86_BENCH_INNER_REPEAT
 
 # Tunables
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
@@ -87,10 +87,10 @@ E2E_CASE ?= all
 REPOS ?=
 PROFILE ?=
 FILTERS ?=
-ITERATIONS ?= 3
+SAMPLES    ?= 3
 WARMUPS    ?= 1
-REPEAT     ?= 100
-VM_CORPUS_REPEAT ?= 200
+INNER_REPEAT ?= 100
+VM_CORPUS_SAMPLES ?= 200
 VM_CORPUS_WORKLOAD_SECONDS ?=
 BENCH      ?=
 KALLSYMS_EXTRA_PASS ?= 1
@@ -120,10 +120,10 @@ PYTHON := $(if $(VENV),$(VENV)/bin/python3,python3)
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 
 # Benchmark args
-LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
-ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
-ROOT_VM_CORPUS_REPEAT_VALUE := $(if $(strip $(ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT)),$(REPEAT),$(VM_CORPUS_REPEAT))
-ROOT_VM_CORPUS_REPEAT_ARG := REPEAT="$(ROOT_VM_CORPUS_REPEAT_VALUE)"
+LOCAL_SMOKE_ARGS := --bench simple --samples 1 --warmups 0 --inner-repeat 10
+ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT := $(or $(findstring command line,$(origin SAMPLES)),$(findstring environment,$(origin SAMPLES)),$(findstring override,$(origin SAMPLES)))
+ROOT_VM_CORPUS_SAMPLES_VALUE := $(if $(strip $(ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT)),$(SAMPLES),$(VM_CORPUS_SAMPLES))
+ROOT_VM_CORPUS_SAMPLES_ARG := SAMPLES="$(ROOT_VM_CORPUS_SAMPLES_VALUE)"
 ROOT_VM_CORPUS_FILTERS_ARG := $(if $(strip $(FILTERS)),FILTERS="$(FILTERS)",)
 ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG := $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),VM_CORPUS_WORKLOAD_SECONDS="$(VM_CORPUS_WORKLOAD_SECONDS)",)
 
@@ -132,10 +132,12 @@ MICRO_RUNNER_SOURCES := $(wildcard $(RUNNER_DIR)/src/*.cpp $(RUNNER_DIR)/include
 MICRO_BPF_SOURCES    := $(wildcard $(MICRO_DIR)/programs/*.bpf.c $(MICRO_DIR)/programs/common.h)
 DAEMON_SOURCES       := $(wildcard $(DAEMON_DIR)/src/*.rs $(DAEMON_DIR)/Cargo.toml $(DAEMON_DIR)/Cargo.lock)
 VIRTME_HOSTFS_MODULES := \
+	drivers/block/null_blk/null_blk.ko \
 	drivers/net/veth.ko \
 	net/ipv4/ip_tunnel.ko \
 	net/ipv4/tunnel4.ko \
 	net/ipv4/ipip.ko \
+	net/sched/sch_netem.ko \
 	fs/netfs/netfs.ko \
 	net/9p/9pnet.ko \
 	net/9p/9pnet_virtio.ko \
@@ -143,10 +145,12 @@ VIRTME_HOSTFS_MODULES := \
 	fs/fuse/virtiofs.ko \
 	fs/overlayfs/overlay.ko
 VIRTME_HOSTFS_MODULE_ORDER := \
+	drivers/block/null_blk/null_blk.o \
 	drivers/net/veth.o \
 	net/ipv4/ip_tunnel.o \
 	net/ipv4/tunnel4.o \
 	net/ipv4/ipip.o \
+	net/sched/sch_netem.o \
 	fs/netfs/netfs.o \
 	net/9p/9pnet.o \
 	net/9p/9pnet_virtio.o \
@@ -178,8 +182,8 @@ help:
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
 	@echo "        aws-x86-launch aws-x86-setup aws-x86-benchmark aws-x86-terminate aws-x86-full aws-x86"
-	@echo "Params: vm-micro ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) BENCH=\"...\""
-	@echo "        vm-corpus REPEAT=$(VM_CORPUS_REPEAT) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) FILTERS=\"...\" TARGET=\"x86|arm64|aws|...\""
+	@echo "Params: vm-micro SAMPLES=$(SAMPLES) WARMUPS=$(WARMUPS) INNER_REPEAT=$(INNER_REPEAT) BENCH=\"...\""
+	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) FILTERS=\"...\" TARGET=\"x86-benchmark|x86-dev|arm64|aws|...\""
 	@echo "        vm-e2e E2E_CASE=\"all|tracee|...\" PROFILE=$(PROFILE)"
 
 # ── Build ──────────────────────────────────────────────────────────────────────
@@ -377,13 +381,13 @@ vm-micro:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-micro \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
 		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)" \
-		ITERATIONS="$(ITERATIONS)" WARMUPS="$(WARMUPS)" REPEAT="$(REPEAT)" BENCH="$(BENCH)"
+		SAMPLES="$(SAMPLES)" WARMUPS="$(WARMUPS)" INNER_REPEAT="$(INNER_REPEAT)" BENCH="$(BENCH)"
 
 vm-corpus:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-corpus \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
 		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" \
-		$(ROOT_VM_CORPUS_REPEAT_ARG) $(ROOT_VM_CORPUS_FILTERS_ARG) $(ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG)
+		$(ROOT_VM_CORPUS_SAMPLES_ARG) $(ROOT_VM_CORPUS_FILTERS_ARG) $(ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG)
 
 vm-e2e:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-e2e \

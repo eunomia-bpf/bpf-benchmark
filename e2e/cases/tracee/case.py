@@ -50,7 +50,6 @@ from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_connect_storm,
-    run_dd_read_load,
     run_file_open_load,
     run_network_load,
     run_open_storm,
@@ -277,6 +276,8 @@ def latency_probe_kind(spec: Mapping[str, object]) -> str:
     if configured:
         return configured
     kind = str(spec.get("kind", spec.get("name", "")))
+    if kind == "tracee_default":
+        return "exec"
     if kind in {"file_io", "file_open", "open_storm"}:
         return "file_open"
     if kind in {"network", "connect_storm"}:
@@ -289,6 +290,9 @@ def latency_probe_events(spec: Mapping[str, object]) -> list[str]:
     if configured:
         return configured
     primary = primary_events_for_workload(spec)
+    kind = str(spec.get("kind", spec.get("name", "")))
+    if kind == "tracee_default":
+        return ["sched_process_exec", "execve"]
     if primary:
         return primary
     probe_kind = latency_probe_kind(spec)
@@ -849,6 +853,33 @@ def summarize_program_activity(
     }
 
 
+def select_active_program_ids(
+    phase: Mapping[str, object],
+    prog_ids: Sequence[int],
+) -> list[int]:
+    aggregated = aggregate_programs(phase)
+    selected: list[int] = []
+    for prog_id in [int(value) for value in prog_ids if int(value) > 0]:
+        record = aggregated.get(str(prog_id), {})
+        run_cnt = int(record.get("run_cnt_delta", 0) or 0)
+        run_time_ns = int(record.get("run_time_ns_delta", 0) or 0)
+        if run_cnt > 0 or run_time_ns > 0:
+            selected.append(prog_id)
+    return selected
+
+
+def filter_tracee_programs_by_id(
+    programs: Sequence[Mapping[str, object]],
+    prog_ids: Sequence[int],
+) -> list[dict[str, object]]:
+    wanted = {int(value) for value in prog_ids if int(value) > 0}
+    return [
+        dict(program)
+        for program in programs
+        if isinstance(program, Mapping) and int(program.get("id", 0) or 0) in wanted
+    ]
+
+
 def _phase_samples_by_workload_and_cycle(phase: Mapping[str, object]) -> dict[str, dict[int, Mapping[str, object]]]:
     grouped: dict[str, dict[int, Mapping[str, object]]] = {}
     for sample in phase_records(phase):
@@ -1391,6 +1422,28 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                             status="error",
                             reason="preflight observed zero apply-program executions; configured apply programs were not exercised",
                             artifacts={"preflight": preflight},
+                        )
+                    if not config.get("target_programs"):
+                        active_target_ids = select_active_program_ids(preflight, lifecycle.target_prog_ids)
+                        if not active_target_ids:
+                            return LifecycleAbort(
+                                status="error",
+                                reason="preflight did not identify any active Tracee target programs",
+                                artifacts={"preflight": preflight},
+                            )
+                        lifecycle.target_prog_ids = active_target_ids
+                        lifecycle.artifacts["selected_tracee_programs"] = filter_tracee_programs_by_id(
+                            runner.programs,
+                            lifecycle.target_prog_ids,
+                        )
+                    if not config.get("apply_programs"):
+                        active_apply_ids = select_active_program_ids(preflight, lifecycle.apply_prog_ids)
+                        if not active_apply_ids:
+                            active_apply_ids = list(lifecycle.target_prog_ids)
+                        lifecycle.apply_prog_ids = active_apply_ids
+                        lifecycle.artifacts["apply_tracee_programs"] = filter_tracee_programs_by_id(
+                            runner.programs,
+                            lifecycle.apply_prog_ids,
                         )
                     return None
 

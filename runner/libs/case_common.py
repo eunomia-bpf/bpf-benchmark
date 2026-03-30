@@ -10,6 +10,7 @@ import platform
 import statistics
 import sys
 import threading
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,7 +18,9 @@ from typing import Callable, Mapping, Sequence
 
 from runner.libs import (
     ROOT_DIR,
+    resolve_bpftool_binary,
     run_command,
+    run_json_command,
     write_json,
     write_text,
 )
@@ -39,6 +42,9 @@ from runner.libs.metrics import (
 
 MAX_PERSISTED_STRING_CHARS = 16_384
 _PENDING_KINSN_METADATA: list[dict[str, object]] = []
+DEFAULT_SUITE_QUIESCE_TIMEOUT_S = 20.0
+DEFAULT_SUITE_QUIESCE_STABLE_S = 2.0
+DEFAULT_SUITE_QUIESCE_POLL_S = 0.2
 
 
 def reset_pending_result_metadata() -> None:
@@ -68,6 +74,50 @@ def attach_pending_result_metadata(payload: dict[str, object]) -> dict[str, obje
 
     _PENDING_KINSN_METADATA.clear()
     return payload
+
+
+def _current_program_ids() -> tuple[int, ...]:
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
+    if not isinstance(payload, list):
+        raise RuntimeError("bpftool prog show returned unexpected payload while waiting for suite quiescence")
+    prog_ids = sorted(
+        int(record.get("id", -1))
+        for record in payload
+        if isinstance(record, Mapping) and int(record.get("id", -1)) > 0
+    )
+    return tuple(prog_ids)
+
+
+def wait_for_suite_quiescence(
+    *,
+    stable_s: float = DEFAULT_SUITE_QUIESCE_STABLE_S,
+    timeout_s: float = DEFAULT_SUITE_QUIESCE_TIMEOUT_S,
+    poll_s: float = DEFAULT_SUITE_QUIESCE_POLL_S,
+) -> None:
+    deadline = time.monotonic() + max(0.0, float(timeout_s))
+    stable_window = max(0.0, float(stable_s))
+    poll_interval = max(0.05, float(poll_s))
+    previous_ids: tuple[int, ...] | None = None
+    stable_since: float | None = None
+    while True:
+        now = time.monotonic()
+        current_ids = _current_program_ids()
+        if current_ids == previous_ids:
+            if stable_since is None:
+                stable_since = now
+            if now - stable_since >= stable_window:
+                return
+        else:
+            previous_ids = current_ids
+            stable_since = now
+        if now >= deadline:
+            break
+        time.sleep(min(poll_interval, max(0.0, deadline - now)))
+    rendered = ", ".join(str(prog_id) for prog_id in (previous_ids or ()))
+    raise RuntimeError(
+        "kernel program table did not quiesce between suite entries within "
+        f"{float(timeout_s):.1f}s; last visible prog_ids=[{rendered}]"
+    )
 
 
 def _append_pending_kinsn_metadata(record: Mapping[str, object]) -> None:
@@ -322,6 +372,11 @@ def run_case_lifecycle(
                     metadata=_lifecycle_metadata_payload(kinsn_metadata),
                     abort=abort,
                 )
+
+        requested_prog_ids = lifecycle_state.requested_prog_ids()
+        if not requested_prog_ids:
+            raise RuntimeError("lifecycle did not provide any requested program ids after baseline")
+        kinsn_metadata["requested_prog_ids"] = list(requested_prog_ids)
 
         daemon_error = _daemon_exit_error(active_daemon_session)
         if daemon_error is not None:

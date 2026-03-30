@@ -58,9 +58,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--suite", default=str(CONFIG_PATH), help="Path to suite YAML.")
     parser.add_argument("--bench", action="append", dest="benches", help="Benchmark name.")
     parser.add_argument("--runtime", action="append", dest="runtimes", help="Runtime name.")
-    parser.add_argument("--iterations", type=int, help="Measured runs per pair.")
+    parser.add_argument("--samples", type=int, help="Measured samples per runtime pair.")
     parser.add_argument("--warmups", type=int, help="Warmup runs per pair.")
-    parser.add_argument("--repeat", type=int, help="Repeat count inside each helper sample.")
+    parser.add_argument("--inner-repeat", type=int, dest="inner_repeat", help="Repeat count inside each helper sample.")
     parser.add_argument("--output", help="Override JSON output path.")
     parser.add_argument("--cpu", help="Pin child processes to a specific CPU via taskset.")
     parser.add_argument(
@@ -82,7 +82,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--perf-scope",
         default="full_repeat_raw",
         choices=["full_repeat_raw", "full_repeat_avg"],
-        help="PMU scope: full_repeat_raw (default, raw totals) or full_repeat_avg (cumulative counters divided by repeat).",
+        help="PMU scope: full_repeat_raw (default, raw totals) or full_repeat_avg (cumulative counters divided by inner repeat).",
     )
     parser.add_argument(
         "--regenerate-inputs",
@@ -169,8 +169,9 @@ def _detect_environment() -> str:
 
 def collect_provenance(
     args: argparse.Namespace,
-    iterations: int,
+    samples: int,
     warmups: int,
+    inner_repeat: int | None,
 ) -> dict[str, object]:
     linux_dir = ROOT_DIR / "vendor" / "linux-framework"
     kernel_commit = _git_rev_parse(linux_dir) if linux_dir.is_dir() else "unknown"
@@ -182,9 +183,9 @@ def collect_provenance(
         "repo_git_sha": repo_git_sha,
         "repo_dirty": repo_dirty,
         "params": {
-            "iterations": iterations,
+            "samples": samples,
             "warmups": warmups,
-            "repeat": args.repeat,
+            "inner_repeat": inner_repeat,
         },
         "cpu_model": _read_cpu_model(),
         "environment": _detect_environment(),
@@ -326,11 +327,11 @@ def _live_sample_relative_path(
     benchmark_name: str,
     runtime_name: str,
     *,
-    iteration_index: int,
+    sample_index: int,
 ) -> str:
     basename = (
         f"{sanitize_artifact_token(benchmark_name)}__"
-        f"{sanitize_artifact_token(runtime_name)}__iter{iteration_index:02d}.json"
+        f"{sanitize_artifact_token(runtime_name)}__sample{sample_index:02d}.json"
     )
     return f"live_samples/{basename}"
 
@@ -340,7 +341,7 @@ def build_runner_command(
     runner_binary: Path,
     benchmark: CatalogTarget,
     runtime: RuntimeSpec,
-    repeat: int,
+    inner_repeat: int,
     memory_file: Path | None,
     perf_counters: bool,
     perf_scope: str,
@@ -362,7 +363,7 @@ def build_runner_command(
         command.extend(["--io-mode", benchmark.io_mode])
     if benchmark.kernel_input_size > 0:
         command.extend(["--input-size", str(benchmark.kernel_input_size)])
-    command.extend(["--repeat", str(max(1, repeat))])
+    command.extend(["--inner-repeat", str(max(1, inner_repeat))])
 
     if perf_counters:
         command.append("--perf-counters")
@@ -413,8 +414,9 @@ def main(argv: list[str] | None = None) -> int:
         random.Random(args.shuffle_seed).shuffle(benchmarks)
     runtime_order_seed = args.shuffle_seed if args.shuffle_seed is not None else DEFAULT_RUNTIME_ORDER_SEED
 
-    iterations = args.iterations if args.iterations is not None else suite.defaults.iterations
+    samples = args.samples if args.samples is not None else suite.defaults.samples
     warmups = args.warmups if args.warmups is not None else suite.defaults.warmups
+    default_inner_repeat = args.inner_repeat if args.inner_repeat is not None else suite.defaults.inner_repeat
     if args.output:
         output_path = Path(args.output).resolve()
     else:
@@ -437,7 +439,7 @@ def main(argv: list[str] | None = None) -> int:
         "suite": suite.suite_name,
         "manifest": str(suite.manifest_path),
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "provenance": collect_provenance(args, iterations, warmups),
+        "provenance": collect_provenance(args, samples, warmups, default_inner_repeat),
         "host": {
             "hostname": platform.node(),
             "platform": platform.platform(),
@@ -459,15 +461,15 @@ def main(argv: list[str] | None = None) -> int:
             "runner_binary": str(runner_binary),
         },
         "defaults": {
-            "iterations": iterations,
+            "samples": samples,
             "warmups": warmups,
-            "repeat": args.repeat if args.repeat is not None else suite.defaults.repeat,
+            "inner_repeat": default_inner_repeat,
             "perf_counters": args.perf_counters,
             "perf_scope": args.perf_scope,
             "shuffle_seed": args.shuffle_seed,
             "runtime_order_seed": runtime_order_seed,
         },
-        "iteration_runtime_orders": {},
+        "sample_runtime_orders": {},
         "benchmarks": [],
     }
 
@@ -566,16 +568,16 @@ def main(argv: list[str] | None = None) -> int:
 
             runtime_samples: dict[str, dict[str, object]] = {}
             for runtime in runtimes:
-                repeat = args.repeat if args.repeat is not None else runtime.default_repeat
+                inner_repeat = args.inner_repeat if args.inner_repeat is not None else runtime.default_inner_repeat
                 runtime_samples[runtime.name] = {
-                    "repeat": repeat,
+                    "inner_repeat": inner_repeat,
                     "samples": [],
                 }
                 warmup_command = build_runner_command(
                     runner_binary=runner_binary,
                     benchmark=benchmark,
                     runtime=runtime,
-                    repeat=repeat,
+                    inner_repeat=inner_repeat,
                     memory_file=memory_file,
                     perf_counters=args.perf_counters,
                     perf_scope=args.perf_scope,
@@ -589,30 +591,30 @@ def main(argv: list[str] | None = None) -> int:
                             f"{sample.get('result')} != {benchmark.expected_result}"
                         )
 
-            iteration_runtime_orders: list[list[str]] = []
-            for iteration_idx in range(iterations):
+            sample_runtime_orders: list[list[str]] = []
+            for sample_idx in range(samples):
                 if len(runtimes) == 2:
-                    ordered = list(runtimes) if iteration_idx % 2 == 0 else list(reversed(runtimes))
+                    ordered = list(runtimes) if sample_idx % 2 == 0 else list(reversed(runtimes))
                 else:
-                    rng = random.Random(runtime_order_seed + iteration_idx)
+                    rng = random.Random(runtime_order_seed + sample_idx)
                     ordered = list(runtimes)
                     rng.shuffle(ordered)
-                iteration_runtime_orders.append([runtime.name for runtime in ordered])
+                sample_runtime_orders.append([runtime.name for runtime in ordered])
 
                 for runtime in ordered:
-                    repeat = int(runtime_samples[runtime.name]["repeat"])
+                    inner_repeat = int(runtime_samples[runtime.name]["inner_repeat"])
                     command = build_runner_command(
                         runner_binary=runner_binary,
                         benchmark=benchmark,
                         runtime=runtime,
-                        repeat=repeat,
+                        inner_repeat=inner_repeat,
                         memory_file=memory_file,
                         perf_counters=args.perf_counters,
                         perf_scope=args.perf_scope,
                         cpu=args.cpu,
                     )
                     sample = run_single_sample(command, cwd=ROOT_DIR)
-                    sample["iteration_index"] = iteration_idx
+                    sample["sample_index"] = sample_idx
 
                     if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:
                         raise RuntimeError(
@@ -625,37 +627,37 @@ def main(argv: list[str] | None = None) -> int:
                         live_sample_path = _live_sample_relative_path(
                             benchmark.name,
                             runtime.name,
-                            iteration_index=iteration_idx,
+                            sample_index=sample_idx,
                         )
                         detail_payloads[live_sample_path] = sample
 
                     runtime_samples[runtime.name]["samples"].append(sample)
                     flush_sample_details(detail_payloads=detail_payloads)
 
-            results["iteration_runtime_orders"][benchmark.name] = iteration_runtime_orders
+            results["sample_runtime_orders"][benchmark.name] = sample_runtime_orders
             for runtime in runtimes:
                 sample_entry = runtime_samples[runtime.name]
-                samples = list(sample_entry["samples"])
-                repeat = int(sample_entry["repeat"])
-                compile_values = [sample["compile_ns"] for sample in samples]
-                exec_values = [sample["exec_ns"] for sample in samples]
-                result_values = [sample["result"] for sample in samples]
-                perf_counter_summary = summarize_named_counters(samples, "perf_counters")
-                wall_exec_summary = summarize_optional_ns(samples, "wall_exec_ns")
-                timing_source = str(samples[0].get("timing_source", "unknown")) if samples else "unknown"
+                run_samples = list(sample_entry["samples"])
+                inner_repeat = int(sample_entry["inner_repeat"])
+                compile_values = [sample["compile_ns"] for sample in run_samples]
+                exec_values = [sample["exec_ns"] for sample in run_samples]
+                result_values = [sample["result"] for sample in run_samples]
+                perf_counter_summary = summarize_named_counters(run_samples, "perf_counters")
+                wall_exec_summary = summarize_optional_ns(run_samples, "wall_exec_ns")
+                timing_source = str(run_samples[0].get("timing_source", "unknown")) if run_samples else "unknown"
 
                 run_record: dict[str, Any] = {
                     "runtime": runtime.name,
                     "label": runtime.label,
                     "mode": runtime.mode,
-                    "repeat": repeat,
-                    "samples": samples,
+                    "inner_repeat": inner_repeat,
+                    "samples": run_samples,
                     "compile_ns": ns_summary(compile_values),
                     "exec_ns": ns_summary(exec_values),
                     "timing_source": timing_source,
-                    "phases_ns": summarize_phase_timings(samples),
+                    "phases_ns": summarize_phase_timings(run_samples),
                     "perf_counters": perf_counter_summary,
-                    "perf_counters_meta": summarize_perf_counter_meta(samples),
+                    "perf_counters_meta": summarize_perf_counter_meta(run_samples),
                     "derived_metrics": derive_perf_metrics(perf_counter_summary),
                     "result_distribution": dict(Counter(str(value) for value in result_values)),
                 }

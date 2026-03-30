@@ -16,7 +16,7 @@ if str(REPO_ROOT) not in sys.path:
 from runner.libs import ROOT_DIR, ensure_parent, write_json, write_text
 from runner.libs.app_runners import get_app_runner
 from runner.libs.app_suite_schema import AppSpec, AppWorkload, load_app_suite_from_yaml
-from runner.libs.bpf_stats import enable_bpf_stats, read_program_stats
+from runner.libs.bpf_stats import enable_bpf_stats
 from runner.libs.case_common import (
     attach_pending_result_metadata,
     prepare_daemon_session,
@@ -24,8 +24,10 @@ from runner.libs.case_common import (
     rejit_result_has_any_apply,
     reset_pending_result_metadata,
     run_app_runner_lifecycle,
+    wait_for_suite_quiescence,
 )
 from runner.libs.daemon_session import DaemonSession
+from runner.libs.metrics import sample_bpf_stats
 from runner.libs.rejit import benchmark_rejit_enabled_passes
 from runner.libs.statistics import geometric_mean
 
@@ -47,14 +49,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the app-native corpus suite driver.")
     parser.add_argument("--suite", default=str(DEFAULT_MACRO_APPS_YAML))
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--repeat", type=int, default=0)
+    parser.add_argument("--samples", type=int, default=0)
     parser.add_argument("--workload-seconds", type=float, default=0.0)
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--filter", action="append", dest="filters")
     args = parser.parse_args(argv)
-    if args.repeat is not None and int(args.repeat) < 0:
-        raise SystemExit("--repeat must be >= 0")
+    if args.samples is not None and int(args.samples) < 0:
+        raise SystemExit("--samples must be >= 0")
     if float(args.workload_seconds) < 0:
         raise SystemExit("--workload-seconds must be >= 0")
     return args
@@ -132,27 +134,19 @@ def _infer_prog_type_name(program: Any) -> str:
     return prog_type or "unspec"
 
 
-def _validate_phase_measurement(
-    phase_name: str,
-    records: Mapping[int, Mapping[str, object]],
-    live_programs: Sequence[Mapping[str, object]],
-) -> None:
-    errors: list[str] = []
-    for program in live_programs:
-        prog_id = int(program.get("id", 0) or 0)
-        program_name = str(program.get("name") or f"prog_{prog_id}")
-        record = records.get(prog_id)
-        if record is None:
-            errors.append(f"{phase_name}: missing stats for live program {program_name!r} (id={prog_id})")
-            continue
-        run_cnt = int(record.get("run_cnt", 0) or 0)
+def _has_phase_measurement(records: Mapping[str, Mapping[str, object]]) -> bool:
+    for record in records.values():
         exec_ns = record.get("exec_ns")
-        if run_cnt <= 0:
-            errors.append(f"{phase_name}: live program {program_name!r} observed zero runs")
-        if not isinstance(exec_ns, (int, float)):
-            errors.append(f"{phase_name}: live program {program_name!r} is missing exec_ns")
-    if errors:
-        raise RuntimeError("; ".join(errors))
+        if isinstance(exec_ns, (int, float)) and float(exec_ns) > 0.0:
+            return True
+    return False
+
+
+def _has_comparable_measurement(program_measurements: Mapping[str, Mapping[str, object]]) -> bool:
+    for record in program_measurements.values():
+        if bool(record.get("comparable")):
+            return True
+    return False
 
 
 def _daemon_exit_error(daemon_session: DaemonSession) -> str | None:
@@ -172,11 +166,24 @@ def _workload_seconds(args: argparse.Namespace, suite_defaults: Mapping[str, obj
     return default_value
 
 
-def _repeat_count(args: argparse.Namespace, suite_defaults: Mapping[str, object]) -> int:
-    explicit = int(args.repeat or 0)
+def _app_workload_seconds(
+    args: argparse.Namespace,
+    suite_defaults: Mapping[str, object],
+    app: AppSpec,
+) -> float:
+    explicit = float(args.workload_seconds or 0.0)
     if explicit > 0:
         return explicit
-    return max(1, int(suite_defaults.get("repeat", 1) or 1))
+    if app.duration_s is not None:
+        return float(app.duration_s)
+    return _workload_seconds(args, suite_defaults)
+
+
+def _sample_count(args: argparse.Namespace, suite_defaults: Mapping[str, object]) -> int:
+    explicit = int(args.samples or 0)
+    if explicit > 0:
+        return explicit
+    return max(1, int(suite_defaults.get("samples", 1) or 1))
 
 
 def _measure_runner_phase(
@@ -184,19 +191,35 @@ def _measure_runner_phase(
     prog_ids: Sequence[int],
     *,
     workload_seconds: float,
-    repeat: int,
+    samples: int,
 ) -> dict[str, object]:
     workloads: list[dict[str, object]] = []
     last_workload: dict[str, object] | None = None
-    for _ in range(repeat):
+    prog_fds = getattr(runner, "program_fds", None)
+    initial_stats = sample_bpf_stats(list(prog_ids), prog_fds=prog_fds)
+    for _ in range(samples):
         workload = runner.run_workload(workload_seconds).to_dict()
         last_workload = dict(workload)
         workloads.append(dict(workload))
+    final_stats = sample_bpf_stats(list(prog_ids), prog_fds=prog_fds)
     return {
         "workload": last_workload,
         "workloads": workloads,
-        "program_stats": read_program_stats(list(prog_ids)),
+        "initial_stats": initial_stats,
+        "final_stats": final_stats,
     }
+
+
+def _selected_live_programs(
+    live_programs: Sequence[Mapping[str, object]],
+    prog_ids: Sequence[int],
+) -> list[dict[str, object]]:
+    wanted = {int(prog_id) for prog_id in prog_ids if int(prog_id) > 0}
+    return [
+        dict(program)
+        for program in live_programs
+        if int(program.get("id", 0) or 0) in wanted
+    ]
 
 
 def _program_label(app_name: str, program_name: str, prog_id: int) -> str:
@@ -428,7 +451,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Generated: {payload.get('generated_at')}",
         f"- Manifest: `{payload.get('manifest')}`",
         f"- Daemon: `{payload.get('daemon')}`",
-        f"- Repeat: `{payload.get('repeat')}`",
+        f"- Samples: `{payload.get('samples')}`",
         f"- Workload seconds: `{payload.get('workload_seconds')}`",
         f"- Status: `{payload.get('status')}`",
         f"- Applied-only geomean (baseline/rejit): `{_format_ratio(summary.get('applied_only_geomean'))}`",
@@ -480,7 +503,7 @@ def _run_app(
     *,
     daemon_session: object,
     workload_seconds: float,
-    repeat: int,
+    samples: int,
 ) -> dict[str, object]:
     selected_workload = app.workload_for("corpus")
     runner = get_app_runner(
@@ -500,6 +523,35 @@ def _run_app(
     apply_result: dict[str, object] = {}
     had_post_rejit = False
 
+    def before_rejit(_setup_state: object, lifecycle: object, baseline: Mapping[str, object]) -> object | None:
+        measurement = dict((baseline.get("measurement") or {}))
+        initial_stats = measurement.get("initial_stats") or {}
+        final_stats = measurement.get("final_stats") or {}
+        selector = getattr(runner, "select_corpus_program_ids", None)
+        if not callable(selector):
+            return None
+        selected = selector(initial_stats, final_stats)
+        if selected is None:
+            return None
+        selected_prog_ids = [
+            int(prog_id)
+            for prog_id in selected
+            if int(prog_id) > 0
+        ]
+        if not selected_prog_ids:
+            raise RuntimeError(
+                f"{app.name}: workload {selected_workload!r} did not execute any runner-selected programs during baseline"
+            )
+        lifecycle.target_prog_ids = list(selected_prog_ids)
+        lifecycle.apply_prog_ids = list(selected_prog_ids)
+        selected_programs = _selected_live_programs(
+            lifecycle.artifacts.get("programs") or [],
+            selected_prog_ids,
+        )
+        if selected_programs:
+            lifecycle.artifacts["programs"] = selected_programs
+        return None
+
     with enable_bpf_stats():
         lifecycle_result = run_app_runner_lifecycle(
             daemon_session=daemon_session,
@@ -510,9 +562,10 @@ def _run_app(
                     lifecycle.runtime,
                     lifecycle.target_prog_ids,
                     workload_seconds=workload_seconds,
-                    repeat=repeat,
+                    samples=samples,
                 )
             },
+            before_rejit=before_rejit,
         )
 
     if lifecycle_result.state is None or lifecycle_result.baseline is None:
@@ -521,7 +574,8 @@ def _run_app(
     prog_ids = [int(value) for value in lifecycle_result.state.target_prog_ids if int(value) > 0]
     live_programs = [dict(program) for program in (lifecycle_result.artifacts.get("programs") or [])]
     baseline_measurement = dict((lifecycle_result.baseline.get("measurement") or {}))
-    baseline_snapshot = dict(baseline_measurement.get("program_stats") or {})
+    baseline_initial_snapshot = dict(baseline_measurement.get("initial_stats") or {})
+    baseline_final_snapshot = dict(baseline_measurement.get("final_stats") or {})
     baseline_workload = dict(baseline_measurement.get("workload") or {}) if baseline_measurement.get("workload") else None
     baseline_workloads = [dict(workload) for workload in (baseline_measurement.get("workloads") or [])]
     apply_result = dict(lifecycle_result.rejit_result or {})
@@ -529,19 +583,26 @@ def _run_app(
     if not live_programs:
         raise RuntimeError(f"{app.name}: runner lifecycle did not expose any live programs")
 
-    baseline_phase = _program_phase_stats(baseline_snapshot)
-    _validate_phase_measurement("baseline", baseline_phase, live_programs)
+    baseline_phase = _program_phase_stats(baseline_final_snapshot, baseline_initial_snapshot)
     if had_post_rejit:
         rejit_measurement = dict((lifecycle_result.post_rejit or {}).get("measurement") or {})
-        rejit_snapshot = dict(rejit_measurement.get("program_stats") or {})
+        rejit_initial_snapshot = dict(rejit_measurement.get("initial_stats") or {})
+        rejit_final_snapshot = dict(rejit_measurement.get("final_stats") or {})
         rejit_workload = dict(rejit_measurement.get("workload") or {}) if rejit_measurement.get("workload") else None
         rejit_workloads = [dict(workload) for workload in (rejit_measurement.get("workloads") or [])]
-        rejit_phase = _program_phase_stats(rejit_snapshot, baseline_snapshot)
-        _validate_phase_measurement("rejit", rejit_phase, live_programs)
+        rejit_phase = _program_phase_stats(rejit_final_snapshot, rejit_initial_snapshot)
 
     programs_by_id = _program_stats_by_prog_id(baseline_phase, prog_ids)
     rejit_programs_by_id = _program_stats_by_prog_id(rejit_phase, prog_ids)
     error = str(apply_result.get("error") or "").strip()
+    if not _has_phase_measurement(programs_by_id):
+        raise RuntimeError(
+            f"{app.name}: workload {selected_workload!r} did not execute any target programs during baseline"
+        )
+    if had_post_rejit and not error and not _has_phase_measurement(rejit_programs_by_id):
+        raise RuntimeError(
+            f"{app.name}: workload {selected_workload!r} did not execute any target programs after rejit"
+        )
     status = "error" if error else "ok"
     program_measurements = _build_program_measurements(
         app.name,
@@ -551,12 +612,17 @@ def _run_app(
         apply_result,
         had_post_rejit=had_post_rejit,
     )
+    if not error and not _has_comparable_measurement(program_measurements):
+        raise RuntimeError(
+            f"{app.name}: workload {selected_workload!r} produced no comparable target program measurements"
+        )
 
     return {
         "app": app.name,
         "runner": app.runner,
         "workload": _workload_payload(app.workload),
         "selected_workload": selected_workload,
+        "configured_workload_seconds": float(workload_seconds),
         "args": dict(app.args),
         "status": status,
         "error": error,
@@ -593,7 +659,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
         raise RuntimeError(f"daemon binary not found: {daemon_binary}")
 
     workload_seconds = _workload_seconds(args, suite.defaults)
-    repeat = _repeat_count(args, suite.defaults)
+    samples = _sample_count(args, suite.defaults)
     results: list[dict[str, object]] = []
     fatal_error = ""
     reset_pending_result_metadata()
@@ -603,7 +669,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
             daemon_session,
             daemon_binary=daemon_binary,
         )
-        for app in suite.apps:
+        for index, app in enumerate(suite.apps):
             _print_progress(
                 "app_start",
                 app=app.name,
@@ -611,11 +677,12 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                 workload=app.workload_for("corpus"),
             )
             try:
+                app_workload_seconds = _app_workload_seconds(args, suite.defaults, app)
                 result = _run_app(
                     app,
                     daemon_session=prepared_daemon_session,
-                    workload_seconds=workload_seconds,
-                    repeat=repeat,
+                    workload_seconds=app_workload_seconds,
+                    samples=samples,
                 )
             except Exception as exc:
                 result = {
@@ -623,6 +690,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                     "runner": app.runner,
                     "workload": _workload_payload(app.workload),
                     "selected_workload": app.workload_for("corpus"),
+                    "configured_workload_seconds": _app_workload_seconds(args, suite.defaults, app),
                     "args": dict(app.args),
                     "status": "error",
                     "error": str(exc),
@@ -640,6 +708,8 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
             if daemon_error is not None:
                 fatal_error = daemon_error
                 break
+            if index + 1 < len(suite.apps):
+                wait_for_suite_quiescence()
 
         if fatal_error:
             selected_names = {str(result.get("app") or "") for result in results}
@@ -652,6 +722,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         "runner": app.runner,
                         "workload": _workload_payload(app.workload),
                         "selected_workload": app.workload_for("corpus"),
+                        "configured_workload_seconds": _app_workload_seconds(args, suite.defaults, app),
                         "args": dict(app.args),
                         "status": "error",
                         "error": fatal_error,
@@ -669,7 +740,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
         "daemon": str(daemon_binary),
         "daemon_socket": daemon_socket,
         "filters": list(args.filters or []),
-        "repeat": repeat,
+        "samples": samples,
         "workload_seconds": workload_seconds,
         "suite_summary": suite_summary,
         "results": results,

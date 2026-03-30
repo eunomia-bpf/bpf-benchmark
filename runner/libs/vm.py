@@ -12,7 +12,7 @@ from . import DEFAULT_VENV_ACTIVATE, ROOT_DIR, docs_tmp_dir, scratch_date_stamp
 from .machines import resolve_machine, resolve_machine_executable
 
 
-DEFAULT_VM_TARGET = os.environ.get("TARGET", "").strip() or "local-x86-vng"
+DEFAULT_VM_TARGET = os.environ.get("TARGET", "").strip() or "x86-dev"
 DEFAULT_GUEST_NOFILE = 65536
 
 

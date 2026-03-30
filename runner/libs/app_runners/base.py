@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import NoReturn, Sequence
+from typing import Mapping, NoReturn, Sequence
 
 from ..workload import WorkloadResult
 
@@ -23,6 +23,14 @@ class AppRunner(ABC):
     @abstractmethod
     def stop(self) -> None:
         raise NotImplementedError
+
+    def select_corpus_program_ids(
+        self,
+        initial_stats: Mapping[int, Mapping[str, object]],
+        final_stats: Mapping[int, Mapping[str, object]],
+    ) -> list[int] | None:
+        del initial_stats, final_stats
+        return None
 
     def _fail_start(self, message: str) -> NoReturn:
         try:

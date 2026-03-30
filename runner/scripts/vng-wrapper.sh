@@ -34,10 +34,12 @@ ensure_repo_modules_fresh() {
     fi
 
     local hostfs_modules=(
+        "$_repo_kernel_dir/drivers/block/null_blk/null_blk.ko"
         "$_repo_kernel_dir/drivers/net/veth.ko"
         "$_repo_kernel_dir/net/ipv4/ip_tunnel.ko"
         "$_repo_kernel_dir/net/ipv4/tunnel4.ko"
         "$_repo_kernel_dir/net/ipv4/ipip.ko"
+        "$_repo_kernel_dir/net/sched/sch_netem.ko"
         "$_repo_kernel_dir/fs/netfs/netfs.ko"
         "$_repo_kernel_dir/net/9p/9pnet.ko"
         "$_repo_kernel_dir/net/9p/9pnet_virtio.ko"

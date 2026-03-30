@@ -13,14 +13,14 @@ std::string usage_text()
         "usage:\n"
         "  micro_exec test-run [--program <path>|<path>] [--program-name <name>] "
         "[--memory <path>] [--fixture-path <path>] [--btf-custom-path <path>] "
-        "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] "
+        "[--io-mode map|staged|packet|context] [--raw-packet] [--inner-repeat N] "
         "[--warmup N] [--input-size N] [--perf-counters] "
         "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] "
         "[--dump-xlated <path>]\n"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
         "  micro_exec run-llvmbpf [--program <path>|<path>] [--program-name <name>] "
         "[--memory <path>] [--io-mode map|staged|packet] [--raw-packet] "
-        "[--repeat N] [--input-size N] [--perf-counters] "
+        "[--inner-repeat N] [--input-size N] [--perf-counters] "
         "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit]\n"
 #endif
         "  micro_exec list-programs [--program <path>|<path>]";
@@ -51,7 +51,7 @@ void validate_cli_options(const cli_options &options)
 #endif
         ) &&
         options.repeat == 0) {
-        fail("--repeat must be >= 1");
+        fail("--inner-repeat must be >= 1");
     }
 }
 
@@ -286,7 +286,7 @@ cli_options parse_args(int argc, char **argv)
             options.raw_packet = true;
             continue;
         }
-        if (current == "--repeat" && index + 1 < argc) {
+        if (current == "--inner-repeat" && index + 1 < argc) {
             options.repeat = static_cast<uint32_t>(std::stoul(argv[++index]));
             continue;
         }

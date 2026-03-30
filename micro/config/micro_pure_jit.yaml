@@ -21,9 +21,9 @@ build:
   bpftool_binary: runner/build/vendor/bpftool/bpftool
 
 defaults:
-  iterations: 10
+  samples: 10
   warmups: 2
-  repeat: 200
+  inner_repeat: 200
   runtimes: [llvmbpf, kernel]
   output: micro/results/dev/pure_jit.json
 
@@ -37,13 +37,13 @@ runtimes:
   - name: llvmbpf
     label: llvmbpf LLVM JIT
     mode: llvmbpf
-    repeat: 200
+    inner_repeat: 200
     aliases: [llvm]
 
   - name: kernel
     label: kernel eBPF
     mode: kernel
-    repeat: 200
+    inner_repeat: 200
     sudo: true
 
 benchmarks:

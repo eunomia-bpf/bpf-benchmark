@@ -2,7 +2,7 @@ schema_version: 1
 suite_name: macro_apps
 defaults:
   duration_s: 1
-  repeat: 200
+  samples: 200
 
 apps:
   - name: bcc/capable
@@ -29,9 +29,10 @@ apps:
   - name: bcc/biosnoop
     runner: bcc
     workload:
-      corpus: fio
-      e2e: fio
+      corpus: block_io
+      e2e: block_io
     tool: biosnoop
+    duration_s: 5
 
   - name: bcc/vfsstat
     runner: bcc
@@ -99,6 +100,7 @@ apps:
     workload:
       corpus: tracee_default
       e2e: tracee_default
+    duration_s: 5
 
   - name: bpftrace/capable
     runner: bpftrace
@@ -110,9 +112,10 @@ apps:
   - name: bpftrace/biosnoop
     runner: bpftrace
     workload:
-      corpus: fio
-      e2e: fio
+      corpus: block_io
+      e2e: block_io
     script: biosnoop
+    duration_s: 5
 
   - name: bpftrace/vfsstat
     runner: bpftrace
@@ -138,6 +141,7 @@ apps:
   - name: bpftrace/tcpretrans
     runner: bpftrace
     workload:
-      corpus: network
-      e2e: network
+      corpus: tcp_retransmit
+      e2e: tcp_retransmit
     script: tcpretrans
+    duration_s: 5

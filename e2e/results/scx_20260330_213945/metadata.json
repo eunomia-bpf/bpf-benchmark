@@ -1,0 +1,33 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "scx",
+  "details_dir": "details",
+  "generated_at": "2026-03-30T21:39:47.740539+00:00",
+  "last_updated_at": "2026-03-30T21:39:47.740415+00:00",
+  "optimization_summary": {
+    "case": "scx",
+    "smoke": true,
+    "status": "running"
+  },
+  "output_hint_json": "e2e/results/scx_smoke_20260330.json",
+  "output_hint_md": "e2e/results/scx-e2e.md",
+  "run_type": "scx",
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "smoke": true,
+  "started_at": "2026-03-30T21:39:45.216877+00:00",
+  "status": "running",
+  "suite": "e2e"
+}

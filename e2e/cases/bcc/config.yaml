@@ -4,7 +4,7 @@
 #
 # workload_kind must be one of:
 #   tcp_connect  -- curl-based HTTP loopback connects
-#   dd_read      -- dd sequential reads from a temp file
+#   block_io     -- explicit block read/write loop on a guest RAM disk
 #   scheduler    -- scheduler-stress context-switch storm
 #   exec_storm   -- stress-ng --exec execve storm
 #   exec_loop    -- deterministic execve loop, optionally dropped to uid 65534
@@ -26,7 +26,7 @@ tools:
   - name: biosnoop
     description: "Block I/O per-request latency tracing with disk/sector maps"
     expected_programs: 2
-    workload_kind: dd_read
+    workload_kind: block_io
     spawn_timeout_s: 15
 
   - name: runqlat

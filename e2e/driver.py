@@ -80,6 +80,7 @@ from runner.libs.case_common import (  # noqa: E402
     attach_pending_result_metadata,
     prepare_daemon_session,
     reset_pending_result_metadata,
+    wait_for_suite_quiescence,
 )
 
 DEFAULT_SUITE = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
@@ -611,7 +612,7 @@ def main(argv: list[str] | None = None) -> int:
         daemon_binary = Path(args.daemon).resolve()
         with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
             prepared = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
-            for case_name in cases_to_run:
+            for index, case_name in enumerate(cases_to_run):
                 print(f"\n{'='*60}")
                 print(f"  e2e: running {case_name}")
                 print(f"{'='*60}")
@@ -627,6 +628,8 @@ def main(argv: list[str] | None = None) -> int:
                 except Exception as exc:
                     print(f"  e2e: {case_name} FAILED: {exc}")
                     failed.append(case_name)
+                if index + 1 < len(cases_to_run):
+                    wait_for_suite_quiescence()
         if failed:
             print(f"\ne2e: FAILED cases: {', '.join(failed)}")
             return 1

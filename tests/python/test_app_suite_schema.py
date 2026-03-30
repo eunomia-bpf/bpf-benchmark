@@ -17,7 +17,7 @@ def test_load_app_suite_from_yaml_supports_shared_workload_schema_and_top_level_
         yaml.safe_dump(
             {
                 "schema_version": 1,
-                "defaults": {"repeat": 200, "duration_s": 10},
+                "defaults": {"samples": 200, "duration_s": 10},
                 "apps": [
                     {
                         "name": "bcc/execsnoop",
@@ -46,7 +46,7 @@ def test_load_app_suite_from_yaml_supports_shared_workload_schema_and_top_level_
     suite, summary = load_app_suite_from_yaml(manifest_path)
 
     assert summary["selected_apps"] == 2
-    assert suite.defaults["repeat"] == 200
+    assert suite.defaults["samples"] == 200
     assert suite.apps[0].args == {"tool": "execsnoop"}
     assert suite.apps[0].workload_for("corpus") == "exec_storm"
     assert suite.apps[1].workload_for("corpus") == "test_run"

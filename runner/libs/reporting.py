@@ -573,8 +573,8 @@ def render_rq_summary_markdown(
         lines.append(f"- Manifest: `{report.manifest.manifest_path}`")
     lines.append(f"- Host: `{host.get('hostname', 'unknown')}` on `{host.get('platform', 'unknown')}`")
     lines.append(
-        f"- Requested defaults: iterations={defaults.get('iterations')}, "
-        f"warmups={defaults.get('warmups')}, repeat={defaults.get('repeat')}, "
+        f"- Requested defaults: samples={defaults.get('samples')}, "
+        f"warmups={defaults.get('warmups')}, inner_repeat={defaults.get('inner_repeat')}, "
         f"perf_counters={defaults.get('perf_counters')}"
     )
     lines.append(f"- Shuffle seed: `{defaults.get('shuffle_seed')}`")

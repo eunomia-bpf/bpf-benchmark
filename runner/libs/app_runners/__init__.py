@@ -103,7 +103,7 @@ def _adapt_tracee(workload: str | None, app_name: str | None, kwargs: dict[str, 
     del app_name
     mapped = dict(kwargs)
     if workload:
-        kind = "exec_storm" if workload == "tracee_default" else str(workload).strip()
+        kind = str(workload).strip()
         mapped.setdefault("workload_spec", {"kind": kind, "name": kind})
     return mapped
 

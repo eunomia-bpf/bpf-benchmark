@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -21,6 +22,7 @@ from .tracee_support import (
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"
 DEFAULT_SETUP_SCRIPT = ROOT_DIR / "e2e" / "cases" / "tracee" / "setup.sh"
 DEFAULT_LOAD_TIMEOUT_S = 20
+DEFAULT_STARTUP_SETTLE_S = 5.0
 
 
 def _default_events() -> tuple[str, ...]:
@@ -39,6 +41,7 @@ class TraceeRunner(AppRunner):
         extra_args: Sequence[str] = (),
         expected_program_names: Sequence[str] = (),
         load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
+        startup_settle_s: float = DEFAULT_STARTUP_SETTLE_S,
         setup_script: Path | str = DEFAULT_SETUP_SCRIPT,
         workload_spec: Mapping[str, object] | None = None,
     ) -> None:
@@ -48,6 +51,7 @@ class TraceeRunner(AppRunner):
         self.extra_args = tuple(str(arg) for arg in extra_args)
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.load_timeout_s = int(load_timeout_s)
+        self.startup_settle_s = float(startup_settle_s)
         self.setup_script = Path(setup_script).resolve()
         self.session: Any | None = None
         self.setup_result: dict[str, object] = {"returncode": 0, "tracee_binary": None, "stdout_tail": "", "stderr_tail": ""}
@@ -103,6 +107,11 @@ class TraceeRunner(AppRunner):
             )
         self.tracee_binary = Path(tracee_binary).resolve()
         self.programs = programs
+        # Tracee can expose loader-owned program FDs before the probes begin
+        # processing events on slow single-vCPU TCG guests. Settle startup here
+        # so corpus/e2e measurements begin only after the native loader is ready.
+        if self.startup_settle_s > 0.0:
+            time.sleep(self.startup_settle_s)
         return [int(program["id"]) for program in programs if int(program.get("id", 0) or 0) > 0]
 
     def run_workload(self, seconds: float) -> WorkloadResult:
@@ -114,6 +123,24 @@ class TraceeRunner(AppRunner):
         if self.session is None:
             raise RuntimeError("TraceeRunner is not running")
         return run_tracee_workload(workload_spec, max(1, int(round(seconds))))
+
+    def select_corpus_program_ids(
+        self,
+        initial_stats: Mapping[int, Mapping[str, object]],
+        final_stats: Mapping[int, Mapping[str, object]],
+    ) -> list[int] | None:
+        selected: list[int] = []
+        for program in self.programs:
+            prog_id = int(program.get("id", 0) or 0)
+            if prog_id <= 0:
+                continue
+            before = initial_stats.get(prog_id) or {}
+            after = final_stats.get(prog_id) or {}
+            run_cnt_delta = int(after.get("run_cnt", 0) or 0) - int(before.get("run_cnt", 0) or 0)
+            run_time_delta = int(after.get("run_time_ns", 0) or 0) - int(before.get("run_time_ns", 0) or 0)
+            if run_cnt_delta > 0 or run_time_delta > 0:
+                selected.append(prog_id)
+        return selected
 
     def stop(self) -> None:
         if self.session is None:

@@ -31,10 +31,10 @@ DAEMON_SOCKET ?= /tmp/bpfrejit.sock
 TARGET ?=
 PROFILE ?=
 FILTERS ?=
-ITERATIONS ?= 3
+SAMPLES ?= 3
 WARMUPS ?= 1
-REPEAT ?= 100
-VM_CORPUS_REPEAT ?= 200
+INNER_REPEAT ?= 100
+VM_CORPUS_SAMPLES ?= 200
 VM_CORPUS_WORKLOAD_SECONDS ?=
 BENCH ?=
 FUZZ_ROUNDS ?= 1000
@@ -85,12 +85,12 @@ JOBS ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || ec
 BPFTOOL_JOBS ?= 1
 
 BENCH_FLAGS := $(foreach b,$(BENCH),--bench $(b))
-MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
-VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
+MICRO_ARGS := --samples $(SAMPLES) --warmups $(WARMUPS) --inner-repeat $(INNER_REPEAT) $(BENCH_FLAGS)
+VM_SMOKE_ARGS := --samples 1 --warmups 0 --inner-repeat 50
 FILTER_FLAGS := $(foreach filter,$(FILTERS),--filter "$(filter)")
-REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
-VM_CORPUS_REPEAT_VALUE := $(if $(strip $(REPEAT_IS_EXPLICIT)),$(REPEAT),$(VM_CORPUS_REPEAT))
-VM_CORPUS_REPEAT_FLAG := --repeat "$(VM_CORPUS_REPEAT_VALUE)"
+SAMPLES_IS_EXPLICIT := $(or $(findstring command line,$(origin SAMPLES)),$(findstring environment,$(origin SAMPLES)),$(findstring override,$(origin SAMPLES)))
+VM_CORPUS_SAMPLES_VALUE := $(if $(strip $(SAMPLES_IS_EXPLICIT)),$(SAMPLES),$(VM_CORPUS_SAMPLES))
+VM_CORPUS_SAMPLES_FLAG := --samples "$(VM_CORPUS_SAMPLES_VALUE)"
 VM_CORPUS_WORKLOAD_SECONDS_FLAG := $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),--workload-seconds "$(VM_CORPUS_WORKLOAD_SECONDS)",)
 
 .PHONY: all micro_exec vendor_libbpf vendor_bpftool \
@@ -309,7 +309,7 @@ vm-corpus: corpus-build corpus-build-native vendor_bpftool daemon-binary kernel-
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_CORPUS_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/driver.py" --daemon "$(DAEMON_PATH)" --output-json "$(VM_CORPUS_OUTPUT_JSON)" --output-md "$(VM_CORPUS_OUTPUT_MD)" $(VM_CORPUS_REPEAT_FLAG) $(VM_CORPUS_WORKLOAD_SECONDS_FLAG) $(FILTER_FLAGS)'
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/driver.py" --daemon "$(DAEMON_PATH)" --output-json "$(VM_CORPUS_OUTPUT_JSON)" --output-md "$(VM_CORPUS_OUTPUT_MD)" $(VM_CORPUS_SAMPLES_FLAG) $(VM_CORPUS_WORKLOAD_SECONDS_FLAG) $(FILTER_FLAGS)'
 
 vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"

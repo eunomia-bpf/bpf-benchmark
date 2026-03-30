@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import ctypes
+import functools
 import json
 import os
 import re
 import shlex
+import socket
 import subprocess
 import tempfile
 import threading
@@ -12,18 +14,21 @@ import time
 from collections import Counter, deque
 from pathlib import Path
 from typing import Any, Mapping, Sequence
+from urllib.error import URLError
+from urllib.request import urlopen
 
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, tail_text, which
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
 from ..metrics import sample_bpf_stats
 from ..workload import (
     WorkloadResult,
+    run_block_io_load,
     run_connect_storm,
-    run_dd_read_load,
     run_file_open_load,
     run_network_load,
     run_open_storm,
     run_scheduler_load,
+    run_tracee_default_load,
     run_user_exec_loop,
 )
 
@@ -34,6 +39,10 @@ TRACEE_STATS_PATTERN = re.compile(
 )
 SYS_PIDFD_GETFD = 438
 DEFAULT_CORPUS_TRACEE_BINARY = ROOT_DIR / "corpus" / "build" / "tracee" / "bin" / "tracee"
+TRACEE_RUNTIME_DIR = Path("/var/tmp/tracee")
+TRACEE_EVENT_OUTPUT_PATH = TRACEE_RUNTIME_DIR / "events.json"
+TRACEE_HEALTH_HOST = "127.0.0.1"
+TRACEE_HEALTH_PORT = 3366
 
 
 def _dup_fd_from_process(pid: int, target_fd: int) -> int:
@@ -60,6 +69,7 @@ class TraceeOutputCollector:
         self._condition = threading.Condition(self._lock)
         self.stdout_tail: deque[str] = deque(maxlen=200)
         self.stderr_tail: deque[str] = deque(maxlen=200)
+        self.event_tail: deque[str] = deque(maxlen=200)
         self.event_counts: Counter[str] = Counter()
         self.events: deque[dict[str, object]] = deque(maxlen=4096)
         self.total_events = 0
@@ -82,6 +92,37 @@ class TraceeOutputCollector:
             self._parse_stats_line(line)
         pipe.close()
 
+    def consume_event_file(self, path: Path, stop_event: threading.Event) -> None:
+        handle = None
+        try:
+            while True:
+                if handle is None:
+                    if stop_event.is_set():
+                        return
+                    try:
+                        handle = path.open("r", encoding="utf-8", errors="replace")
+                    except FileNotFoundError:
+                        time.sleep(0.05)
+                        continue
+                raw_line = handle.readline()
+                if raw_line:
+                    line = raw_line.rstrip()
+                    with self._lock:
+                        self.event_tail.append(line)
+                    self._parse_event_line(line)
+                    continue
+                if stop_event.is_set():
+                    break
+                time.sleep(0.05)
+        finally:
+            if handle is not None:
+                for raw_line in handle:
+                    line = raw_line.rstrip()
+                    with self._lock:
+                        self.event_tail.append(line)
+                    self._parse_event_line(line)
+                handle.close()
+
     def _parse_event_line(self, line: str) -> None:
         try:
             payload = json.loads(line)
@@ -89,7 +130,7 @@ class TraceeOutputCollector:
             return
         if not isinstance(payload, Mapping):
             return
-        event_name = payload.get("eventName") or payload.get("event_name")
+        event_name = payload.get("eventName") or payload.get("event_name") or payload.get("name")
         if not event_name:
             return
         with self._lock:
@@ -127,6 +168,7 @@ class TraceeOutputCollector:
                 "latest_stats": dict(self.latest_stats),
                 "stdout_tail": list(self.stdout_tail),
                 "stderr_tail": list(self.stderr_tail),
+                "event_tail": list(self.event_tail),
             }
 
     def wait_for_event(
@@ -174,6 +216,8 @@ class TraceeAgentSession:
         self.collector = TraceeOutputCollector()
         self.stdout_thread: threading.Thread | None = None
         self.stderr_thread: threading.Thread | None = None
+        self.event_thread: threading.Thread | None = None
+        self.event_stop = threading.Event()
         self.command_used: list[str] | None = None
         self.programs: list[dict[str, object]] = []
         self.program_fds: dict[int, int] = {}
@@ -181,10 +225,12 @@ class TraceeAgentSession:
     def __enter__(self) -> "TraceeAgentSession":
         preexisting_ids = set(sample_bpf_stats(_current_prog_ids()))
         failures: list[str] = []
-        tracee_tmpdir = Path("/var/tmp/tracee")
+        tracee_tmpdir = TRACEE_RUNTIME_DIR
         tracee_tmpdir.mkdir(parents=True, exist_ok=True)
+        TRACEE_EVENT_OUTPUT_PATH.unlink(missing_ok=True)
         for command in self.commands:
             self.collector = TraceeOutputCollector()
+            self.event_stop = threading.Event()
             proc = start_agent(
                 command[0],
                 command[1:],
@@ -201,14 +247,23 @@ class TraceeAgentSession:
             assert proc.stderr is not None
             self.stdout_thread = threading.Thread(target=self.collector.consume_stdout, args=(proc.stdout,), daemon=True)
             self.stderr_thread = threading.Thread(target=self.collector.consume_stderr, args=(proc.stderr,), daemon=True)
+            self.event_thread = threading.Thread(
+                target=self.collector.consume_event_file,
+                args=(TRACEE_EVENT_OUTPUT_PATH, self.event_stop),
+                daemon=True,
+            )
             self.stdout_thread.start()
             self.stderr_thread.start()
+            self.event_thread.start()
 
             try:
                 healthy = wait_healthy(
                     proc,
                     self.load_timeout,
-                    lambda: bool([item for item in find_bpf_programs(proc.pid or 0) if int(item.get("id", -1)) not in preexisting_ids]),
+                    lambda: _tracee_healthz_ready(TRACEE_HEALTH_HOST, TRACEE_HEALTH_PORT)
+                    and bool(
+                        [item for item in find_bpf_programs(proc.pid or 0) if int(item.get("id", -1)) not in preexisting_ids]
+                    ),
                 )
             except Exception:
                 self.close()
@@ -264,12 +319,16 @@ class TraceeAgentSession:
         if self.process is not None:
             stop_agent(self.process, timeout=8)
             self.process = None
+        self.event_stop.set()
         if self.stdout_thread is not None:
             self.stdout_thread.join(timeout=2.0)
             self.stdout_thread = None
         if self.stderr_thread is not None:
             self.stderr_thread.join(timeout=2.0)
             self.stderr_thread = None
+        if self.event_thread is not None:
+            self.event_thread.join(timeout=2.0)
+            self.event_thread = None
         if close_errors:
             raise RuntimeError("; ".join(close_errors))
 
@@ -323,15 +382,65 @@ def _ensure_empty_signatures_dir() -> Path:
     return sig_dir
 
 
+def _tracee_healthz_ready(host: str, port: int) -> bool:
+    try:
+        with urlopen(f"http://{host}:{int(port)}/healthz", timeout=1.0) as response:
+            return int(getattr(response, "status", 0) or 0) == 200
+    except (OSError, URLError):
+        return False
+
+
+@functools.lru_cache(maxsize=None)
+def _tracee_output_style(binary: str) -> str:
+    completed = run_command([binary, "man", "output"], check=False, timeout=10)
+    if completed.returncode != 0:
+        details = tail_text(completed.stderr or completed.stdout)
+        raise RuntimeError(f"Tracee output manual lookup failed for {binary}: {details}")
+    manual_text = f"{completed.stdout}\n{completed.stderr}"
+    if "destinations." in manual_text:
+        return "destinations"
+    return "legacy"
+
+
+def _tracee_output_args(binary: str, event_output_path: Path) -> list[str]:
+    if _tracee_output_style(binary) == "destinations":
+        return [
+            "--output",
+            "destinations.file_json.type=file",
+            "--output",
+            "destinations.file_json.format=json",
+            "--output",
+            f"destinations.file_json.path={event_output_path}",
+        ]
+    return ["--output", f"json:{event_output_path}"]
+
+
 def build_tracee_commands(binary: str, events: Sequence[str], extra_args: Sequence[str] = ()) -> list[list[str]]:
     event_text = ",".join(str(event) for event in events)
     sig_dir = _ensure_empty_signatures_dir()
-    return [[binary, "--events", event_text, "--output", "json", "--signatures-dir", str(sig_dir), *extra_args]]
+    output_args = _tracee_output_args(binary, TRACEE_EVENT_OUTPUT_PATH)
+    return [[
+        binary,
+        "--events",
+        event_text,
+        *output_args,
+        "--server",
+        "healthz",
+        "--server",
+        f"http-address=:{TRACEE_HEALTH_PORT}",
+        "--signatures-dir",
+        str(sig_dir),
+        *extra_args,
+    ]]
 
 
 def _format_launch_failure(command: Sequence[str], proc: subprocess.Popen[str] | None, snapshot: Mapping[str, object]) -> str:
     rendered = " ".join(shlex.quote(part) for part in command)
-    combined = "\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or []))
+    combined = "\n".join(
+        (snapshot.get("stderr_tail") or [])
+        + (snapshot.get("stdout_tail") or [])
+        + (snapshot.get("event_tail") or [])
+    )
     details = tail_text(combined, max_lines=40, max_chars=8000)
     if proc is not None and proc.poll() is not None:
         reason = f"command exited with code {proc.returncode}"
@@ -343,8 +452,10 @@ def _format_launch_failure(command: Sequence[str], proc: subprocess.Popen[str] |
 
 def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> WorkloadResult:
     kind = str(spec.get("kind", spec.get("name", "")))
-    if kind == "read":
-        return run_dd_read_load(duration_s)
+    if kind == "tracee_default":
+        return run_tracee_default_load(duration_s)
+    if kind == "block_io":
+        return run_block_io_load(duration_s)
     if kind == "exec_storm":
         return run_user_exec_loop(duration_s)
     if kind in {"file_io", "file_open"}:

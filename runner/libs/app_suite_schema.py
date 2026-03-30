@@ -26,6 +26,7 @@ class AppSpec:
     name: str
     runner: str
     workload: AppWorkload
+    duration_s: float | None = None
     args: dict[str, object] = field(default_factory=dict)
 
     def workload_for(self, mode: str) -> str:
@@ -67,11 +68,23 @@ def _workload_required(value: Any, *, field_name: str) -> AppWorkload:
     )
 
 
+def _optional_positive_float(value: Any, *, field_name: str) -> float | None:
+    if value is None or value == "":
+        return None
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError) as exc:
+        raise SystemExit(f"invalid app suite field: {field_name} must be a positive number") from exc
+    if parsed <= 0.0:
+        raise SystemExit(f"invalid app suite field: {field_name} must be > 0")
+    return parsed
+
+
 def _app_args(value: Any, *, field_name: str, raw_app: Mapping[str, object]) -> dict[str, object]:
     args = _mapping(value, field_name=field_name)
     for key, item in raw_app.items():
         normalized_key = str(key)
-        if normalized_key in {"name", "runner", "workload", "args"}:
+        if normalized_key in {"name", "runner", "workload", "duration_s", "args"}:
             continue
         if normalized_key in args:
             raise SystemExit(
@@ -124,6 +137,10 @@ def load_app_suite_from_yaml(
             name=_string_required(raw_app.get("name"), field_name=f"apps[{index}].name"),
             runner=_string_required(raw_app.get("runner"), field_name=f"apps[{index}].runner"),
             workload=_workload_required(raw_app.get("workload"), field_name=f"apps[{index}].workload"),
+            duration_s=_optional_positive_float(
+                raw_app.get("duration_s"),
+                field_name=f"apps[{index}].duration_s",
+            ),
             args=_app_args(
                 raw_app.get("args"),
                 field_name=f"apps[{index}].args",
