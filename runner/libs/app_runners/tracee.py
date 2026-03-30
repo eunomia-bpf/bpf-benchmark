@@ -40,7 +40,6 @@ class TraceeRunner:
         expected_program_names: Sequence[str] = (),
         load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
         setup_script: Path | str = DEFAULT_SETUP_SCRIPT,
-        skip_setup: bool = False,
     ) -> None:
         self.object_path = None if object_path is None else Path(object_path).resolve()
         self.tracee_binary = None if tracee_binary is None else Path(tracee_binary).resolve()
@@ -49,7 +48,6 @@ class TraceeRunner:
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.load_timeout_s = int(load_timeout_s)
         self.setup_script = Path(setup_script).resolve()
-        self.skip_setup = bool(skip_setup)
         self.session: Any | None = None
         self.programs: list[dict[str, object]] = []
         self.process_output: dict[str, object] = {}
@@ -85,7 +83,7 @@ class TraceeRunner:
 
     def _resolve_binary(self) -> str:
         resolved = resolve_tracee_binary(None if self.tracee_binary is None else str(self.tracee_binary), self.setup_result)
-        if resolved is None and not self.skip_setup:
+        if resolved is None:
             self.setup_result = run_setup_script(self.setup_script)
             if int(self.setup_result.get("returncode", 0) or 0) != 0:
                 details = str(self.setup_result.get("stderr_tail") or self.setup_result.get("stdout_tail") or self.setup_result)

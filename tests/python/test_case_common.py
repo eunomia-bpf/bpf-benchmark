@@ -7,12 +7,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from e2e import case_common
+from runner.libs import case_common
 
 
 def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: Path) -> None:
     case_common.reset_pending_result_metadata()
-    daemon_proc = object()
+    class FakeProc:
+        def poll(self) -> None:
+            return None
+
+    daemon_proc = FakeProc()
     daemon_socket = Path("/tmp/rejit.sock")
     daemon_stdout = tmp_path / "daemon.stdout.log"
     daemon_stderr = tmp_path / "daemon.stderr.log"
@@ -62,6 +66,13 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: 
         @classmethod
         def start(cls, daemon_binary: Path) -> "FakeDaemonSession":
             return cls(daemon_binary)
+
+        def __enter__(self) -> "FakeDaemonSession":
+            return self
+
+        def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
+            del exc_type, exc, tb
+            self.close()
 
         def scan_programs(self, prog_ids, *, timeout_seconds=60):
             calls.append(
@@ -142,15 +153,16 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: 
     def cleanup(_setup_state):
         phases.append("cleanup")
 
-    result = case_common.run_case_lifecycle(
-        daemon_binary=Path("/tmp/fake-daemon"),
-        setup=setup,
-        start=start,
-        workload=workload,
-        stop=stop,
-        cleanup=cleanup,
-        enabled_passes=["map_inline"],
-    )
+    with case_common.open_prepared_daemon_session(Path("/tmp/fake-daemon")) as daemon_session:
+        result = case_common.run_case_lifecycle(
+            daemon_session=daemon_session,
+            setup=setup,
+            start=start,
+            workload=workload,
+            stop=stop,
+            cleanup=cleanup,
+            enabled_passes=["map_inline"],
+        )
 
     assert result.baseline == {"phase": "baseline"}
     assert result.post_rejit == {"phase": "post_rejit"}
@@ -178,6 +190,10 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: 
 
 def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypatch, tmp_path: Path) -> None:
     case_common.reset_pending_result_metadata()
+    class FakeProc:
+        def poll(self) -> None:
+            return None
+
     daemon_stdout = tmp_path / "daemon.stdout.log"
     daemon_stderr = tmp_path / "daemon.stderr.log"
     daemon_stdout.write_text("serve: listening on /tmp/rejit.sock\n", encoding="utf-8")
@@ -201,7 +217,7 @@ def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypat
 
     class FakeDaemonSession:
         def __init__(self) -> None:
-            self.proc = object()
+            self.proc = FakeProc()
             self.socket_path = Path("/tmp/rejit.sock")
             self.socket_dir = "/tmp/rejit-dir"
             self.stdout_path = daemon_stdout
@@ -210,6 +226,13 @@ def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypat
         @classmethod
         def start(cls, _daemon_binary: Path) -> "FakeDaemonSession":
             return cls()
+
+        def __enter__(self) -> "FakeDaemonSession":
+            return self
+
+        def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
+            del exc_type, exc, tb
+            self.close()
 
         def scan_programs(self, _prog_ids, *, timeout_seconds=60):
             del timeout_seconds
@@ -238,20 +261,21 @@ def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypat
 
     phases: list[str] = []
 
-    result = case_common.run_case_lifecycle(
-        daemon_binary=Path("/tmp/fake-daemon"),
-        setup=lambda: {"runtime": "demo"},
-        start=lambda _setup_state: case_common.CaseLifecycleState(
-            runtime=object(),
-            apply_prog_ids=[101],
-        ),
-        workload=lambda _setup_state, _lifecycle_state, phase: phases.append(f"workload:{phase}") or {"phase": phase},
-        stop=lambda _setup_state, _lifecycle_state: phases.append("stop"),
-        cleanup=lambda _setup_state: phases.append("cleanup"),
-        should_run_post_rejit=lambda rejit_result: int(
-            (((rejit_result.get("counts") or {}).get("applied_sites", 0)) or 0)
-        ) > 0,
-    )
+    with case_common.open_prepared_daemon_session(Path("/tmp/fake-daemon")) as daemon_session:
+        result = case_common.run_case_lifecycle(
+            daemon_session=daemon_session,
+            setup=lambda: {"runtime": "demo"},
+            start=lambda _setup_state: case_common.CaseLifecycleState(
+                runtime=object(),
+                apply_prog_ids=[101],
+            ),
+            workload=lambda _setup_state, _lifecycle_state, phase: phases.append(f"workload:{phase}") or {"phase": phase},
+            stop=lambda _setup_state, _lifecycle_state: phases.append("stop"),
+            cleanup=lambda _setup_state: phases.append("cleanup"),
+            should_run_post_rejit=lambda rejit_result: int(
+                (((rejit_result.get("counts") or {}).get("applied_sites", 0)) or 0)
+            ) > 0,
+        )
 
     assert result.post_rejit == {"phase": "post_rejit"}
     assert phases == [

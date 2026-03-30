@@ -156,7 +156,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 	corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx \
 	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
 	daemon-tests python-tests check smoke validate \
-	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	vm-shell vm-test vm-selftest vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	arm64-worktree arm64-rootfs arm64-crossbuild-image cross-arm64 selftest-arm64 \
 	vm-arm64-smoke vm-arm64-selftest \
 	aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
@@ -169,7 +169,7 @@ help:
 	@echo "Build:  all runner micro daemon kernel kernel-clean kernel-rebuild kinsn-modules kernel-tests upstream-selftests-build kernel-arm64 cross-arm64"
 	@echo "Repos:  corpus-fetch corpus-build corpus-build-native corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace REPOS=\"katran tracee tetragon cilium bpftrace ...\""
 	@echo "Test:   smoke daemon-tests python-tests check"
-	@echo "VM x86: vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
+	@echo "VM x86: vm-shell vm-test vm-selftest vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "        vm-corpus (new orchestrator full corpus)"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
@@ -344,12 +344,6 @@ vm-selftest:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-selftest \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
 		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)"
-
-vm-static-test:
-	$(MAKE) -C "$(RUNNER_DIR)" vm-static-test \
-		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" \
-		STATIC_VERIFY_ARGS='$(STATIC_VERIFY_ARGS)'
 
 NEGATIVE_TEST_DIR := $(ROOT_DIR)/tests/negative
 FUZZ_ROUNDS ?= 1000

@@ -44,7 +44,7 @@ from runner.libs.metrics import (  # noqa: E402
 )
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
-from e2e.case_common import (  # noqa: E402
+from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     LifecycleAbort,
     host_metadata,
@@ -887,7 +887,8 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
         "stdout_tail": "",
         "stderr_tail": "",
     }
-    if not args.skip_setup:
+    tetragon_binary = resolve_tetragon_binary(args.tetragon_binary, setup_result)
+    if tetragon_binary is None:
         setup_result = run_setup_script(Path(args.setup_script).resolve())
 
     limitations: list[str] = []
@@ -960,7 +961,6 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--load-timeout", type=int, default=DEFAULT_LOAD_TIMEOUT_S)
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_S)
-    parser.add_argument("--skip-setup", action="store_true")
     return parser
 
 

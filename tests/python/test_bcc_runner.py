@@ -39,7 +39,7 @@ def test_bcc_runner_uses_tool_args_from_shared_config(monkeypatch, tmp_path: Pat
         },
     )
 
-    runner = bcc.BCCRunner(tool_name="execsnoop", tools_dir=tmp_path, skip_setup=True)
+    runner = bcc.BCCRunner(tool_name="execsnoop", tools_dir=tmp_path)
 
     assert runner.tool_args == ("-T", "-U", "-u", "65534")
 
@@ -63,7 +63,6 @@ def test_bcc_runner_start_fails_when_attached_program_count_is_short(monkeypatch
         tool_name="execsnoop",
         expected_programs=2,
         attach_timeout_s=1,
-        skip_setup=True,
     )
 
     try:
@@ -101,7 +100,6 @@ def test_bcc_runner_start_fails_when_expected_program_names_are_missing(monkeypa
             "tracepoint__syscalls__sys_enter_execveat",
         ),
         attach_timeout_s=1,
-        skip_setup=True,
     )
 
     try:

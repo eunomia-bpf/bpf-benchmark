@@ -25,7 +25,7 @@ def write_guest_script(
     script_dir = docs_tmp_dir("guest-scripts", stamp=scratch_stamp)
     handle = tempfile.NamedTemporaryFile(
         mode="w",
-        prefix="tracee-e2e-guest-",
+        prefix="benchmark-guest-",
         suffix=".sh",
         dir=script_dir,
         delete=False,
@@ -74,7 +74,7 @@ def wrap_with_vm_lock(
 def build_vng_command(
     *,
     kernel_path: str | Path,
-    guest_exec: str,
+    exec_path: str,
     cpus: int | None = None,
     mem: str | None = None,
     vm_executable: str | Path | None = None,
@@ -119,7 +119,7 @@ def build_vng_command(
         command.extend(["--rwdir", str(rwdir)])
     for network in networks:
         command.extend(["--network", str(network)])
-    command.extend(["--exec", guest_exec])
+    command.extend(["--exec", exec_path])
     return wrap_with_vm_lock(command, target=target, action=action)
 
 
@@ -139,7 +139,7 @@ def run_in_vm(
     guest_path = str(script)
     command = build_vng_command(
         kernel_path=kernel_path,
-        guest_exec=guest_path,
+        exec_path=guest_path,
         cpus=cpus,
         mem=mem,
         vm_executable=vm_executable,
@@ -163,7 +163,7 @@ def run_in_vm(
 def build_vm_shell_command(
     *,
     kernel_image: Path,
-    guest_exec: str,
+    command_text: str,
     timeout_seconds: int,
     vng_binary: str,
     nofile: int | None = None,
@@ -178,30 +178,14 @@ def build_vm_shell_command(
         "--timeout",
         str(timeout_seconds),
         "--command",
-        guest_exec,
+        command_text,
     ]
     if nofile is not None:
         command.extend(["--nofile", str(int(nofile))])
     if vng_binary != str(resolve_machine_executable(target=DEFAULT_VM_TARGET, action="vm-corpus")):
         command.extend(["--vm-executable", vng_binary])
     return command
-
-
-def build_guest_exec(
-    argv: list[str],
-    *,
-    load_script: str | Path | None = None,
-) -> str:
-    # Load kinsn kernel modules before running the guest command so the daemon
-    # can apply platform-specific rewrites (rotate, cond_select, extract).
-    resolved_load_script = Path(load_script).resolve() if load_script is not None else ROOT_DIR / "module" / "load_all.sh"
-    kinsn_load = f"{shlex.quote(str(resolved_load_script))} && "
-    main_cmd = " ".join(shlex.quote(part) for part in argv)
-    return kinsn_load + main_cmd
-
-
 __all__ = [
-    "build_guest_exec",
     "build_vm_shell_command",
     "DEFAULT_VM_TARGET",
     "build_vng_command",

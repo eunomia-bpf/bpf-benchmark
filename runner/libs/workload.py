@@ -99,7 +99,6 @@ def run_rapid_exec_storm(
     iterations: int | None = None,
     command: Sequence[str] | None = None,
     command_path: str = "/bin/true",
-    mark_fallback: bool = True,
 ) -> WorkloadResult:
     duration_limit, iteration_limit = _normalize_workload_limits(duration_s, iterations)
     start = time.monotonic()
@@ -109,11 +108,10 @@ def run_rapid_exec_storm(
         completed = run_command(exec_command, check=False, timeout=5)
         if completed.returncode != 0:
             details = tail_text(completed.stderr or completed.stdout)
-            raise RuntimeError(f"rapid exec fallback failed: {details}")
+            raise RuntimeError(f"rapid exec workload failed: {details}")
         ops_total += 1
     elapsed = time.monotonic() - start
-    stderr = "fallback=rapid_exec_loop" if mark_fallback else ""
-    return _finish_result(float(ops_total), elapsed, "", stderr)
+    return _finish_result(float(ops_total), elapsed, "", "")
 
 
 def run_user_exec_loop(
@@ -123,7 +121,6 @@ def run_user_exec_loop(
     uid: int = 65534,
     gid: int = 65534,
     command_path: str = "/bin/true",
-    mark_fallback: bool = True,
 ) -> WorkloadResult:
     command: list[str] = [command_path]
     if os.geteuid() == 0:
@@ -143,14 +140,13 @@ def run_user_exec_loop(
         iterations=iterations,
         command=command,
         command_path=command_path,
-        mark_fallback=mark_fallback,
     )
 
 
 def run_exec_storm(duration_s: int | float, rate: int) -> WorkloadResult:
     stress_ng = which("stress-ng")
     if stress_ng is None:
-        return run_user_exec_loop(duration_s)
+        raise RuntimeError("stress-ng is required for the exec_storm workload")
     run_cwd: Path | None = None
     command: list[str] = [
         stress_ng,
@@ -164,12 +160,10 @@ def run_exec_storm(duration_s: int | float, rate: int) -> WorkloadResult:
         f"{max(1, int(duration_s))}s",
         "--metrics-brief",
     ]
-    if stress_ng is None:
-        return run_rapid_exec_storm(duration_s, iterations=max(1, int(rate)) * max(1, int(duration_s)) * 200)
     if os.geteuid() == 0:
         setpriv = which("setpriv")
         if setpriv is None:
-            return run_rapid_exec_storm(duration_s, iterations=max(1, int(rate)) * max(1, int(duration_s)) * 200)
+            raise RuntimeError("setpriv is required for the exec_storm workload when running as root")
         command = [
             setpriv,
             "--reuid",
@@ -189,36 +183,11 @@ def run_exec_storm(duration_s: int | float, rate: int) -> WorkloadResult:
             timeout=max(float(duration_s) + 30, float(duration_s) * 12),
         )
     except subprocess.TimeoutExpired:
-        fallback = run_user_exec_loop(duration_s)
-        return WorkloadResult(
-            ops_total=fallback.ops_total,
-            ops_per_sec=fallback.ops_per_sec,
-            duration_s=fallback.duration_s,
-            stdout=fallback.stdout,
-            stderr=tail_text(
-                "stress-ng exec workload timed out; fell back to rapid exec loop\n"
-                + (fallback.stderr or ""),
-                max_lines=40,
-                max_chars=8000,
-            ),
-        )
+        raise RuntimeError("stress-ng exec workload timed out")
     elapsed = time.monotonic() - start
     if completed.returncode != 0:
-        fallback = run_user_exec_loop(duration_s)
-        return WorkloadResult(
-            ops_total=fallback.ops_total,
-            ops_per_sec=fallback.ops_per_sec,
-            duration_s=fallback.duration_s,
-            stdout=fallback.stdout,
-            stderr=tail_text(
-                "stress-ng exec workload failed; fell back to rapid exec loop\n"
-                + tail_text(completed.stderr or completed.stdout)
-                + "\n"
-                + (fallback.stderr or ""),
-                max_lines=40,
-                max_chars=8000,
-            ),
-        )
+        details = tail_text(completed.stderr or completed.stdout)
+        raise RuntimeError(f"stress-ng exec workload failed: {details}")
     combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
     ops_total = _parse_stress_ng_bogo_ops(combined, stressor="exec")
     if ops_total is None:
@@ -228,81 +197,43 @@ def run_exec_storm(duration_s: int | float, rate: int) -> WorkloadResult:
 
 def run_file_io(duration_s: int | float) -> WorkloadResult:
     fio_binary = which("fio")
-    if fio_binary:
-        with tempfile.TemporaryDirectory(prefix="tracee-fio-") as tempdir:
-            data_path = Path(tempdir) / "fio.bin"
-            command = [
-                fio_binary,
-                "--name=tracee-e2e",
-                f"--filename={data_path}",
-                "--rw=randread",
-                "--bs=4k",
-                "--size=100M",
-                f"--runtime={max(1, int(duration_s))}",
-                "--time_based=1",
-                "--ioengine=sync",
-                "--direct=0",
-                "--output-format=json",
-            ]
-            start = time.monotonic()
-            completed = run_command(command, check=False, timeout=float(duration_s) + 60)
-            elapsed = time.monotonic() - start
-            if completed.returncode == 0:
-                payload = json.loads(completed.stdout)
-                job = (payload.get("jobs") or [{}])[0]
-                read_stats = job.get("read") or {}
-                write_stats = job.get("write") or {}
-                ops_total = float(read_stats.get("total_ios", 0) or 0) + float(write_stats.get("total_ios", 0) or 0)
-                if ops_total <= 0:
-                    ops_total = (float(read_stats.get("iops", 0) or 0) + float(write_stats.get("iops", 0) or 0)) * elapsed
-                return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
-
-    dd_binary = which("dd") or "dd"
-    start = time.monotonic()
-    stderr_lines: list[str] = []
-    ops_total = 0.0
-    with tempfile.TemporaryDirectory(prefix="tracee-dd-") as tempdir:
-        data_path = Path(tempdir) / "dd.bin"
-        deadline = start + float(duration_s)
-        while time.monotonic() < deadline:
-            write_run = run_command(
-                [
-                    dd_binary,
-                    "if=/dev/zero",
-                    f"of={data_path}",
-                    "bs=4k",
-                    "count=256",
-                    "conv=fdatasync",
-                    "status=none",
-                ],
-                check=False,
-                timeout=30,
-            )
-            read_run = run_command(
-                [
-                    dd_binary,
-                    f"if={data_path}",
-                    "of=/dev/null",
-                    "bs=4k",
-                    "status=none",
-                ],
-                check=False,
-                timeout=30,
-            )
-            if write_run.returncode != 0 or read_run.returncode != 0:
-                details = tail_text((write_run.stderr or "") + "\n" + (read_run.stderr or ""))
-                raise RuntimeError(f"file_io dd fallback failed: {details}")
-            stderr_lines.append(write_run.stderr or "")
-            stderr_lines.append(read_run.stderr or "")
-            ops_total += 2.0
-    elapsed = time.monotonic() - start
-    return _finish_result(ops_total, elapsed, "", "\n".join(stderr_lines))
+    if fio_binary is None:
+        raise RuntimeError("fio is required for the file_io workload")
+    with tempfile.TemporaryDirectory(prefix="tracee-fio-") as tempdir:
+        data_path = Path(tempdir) / "fio.bin"
+        command = [
+            fio_binary,
+            "--name=tracee-e2e",
+            f"--filename={data_path}",
+            "--rw=randread",
+            "--bs=4k",
+            "--size=100M",
+            f"--runtime={max(1, int(duration_s))}",
+            "--time_based=1",
+            "--ioengine=sync",
+            "--direct=0",
+            "--output-format=json",
+        ]
+        start = time.monotonic()
+        completed = run_command(command, check=False, timeout=float(duration_s) + 60)
+        elapsed = time.monotonic() - start
+        if completed.returncode != 0:
+            details = tail_text(completed.stderr or completed.stdout)
+            raise RuntimeError(f"fio file_io workload failed: {details}")
+        payload = json.loads(completed.stdout)
+        job = (payload.get("jobs") or [{}])[0]
+        read_stats = job.get("read") or {}
+        write_stats = job.get("write") or {}
+        ops_total = float(read_stats.get("total_ios", 0) or 0) + float(write_stats.get("total_ios", 0) or 0)
+        if ops_total <= 0:
+            ops_total = (float(read_stats.get("iops", 0) or 0) + float(write_stats.get("iops", 0) or 0)) * elapsed
+        return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
 
 
 def run_python_http_loop(duration_s: int | float, url: str) -> WorkloadResult:
     parsed = urllib.parse.urlsplit(url)
     if parsed.scheme not in {"http", "https"}:
-        raise RuntimeError(f"unsupported URL scheme for python http fallback: {url}")
+        raise RuntimeError(f"unsupported URL scheme for python http workload: {url}")
     deadline = time.monotonic() + float(duration_s)
     ops_total = 0.0
     while time.monotonic() < deadline:
@@ -310,7 +241,7 @@ def run_python_http_loop(duration_s: int | float, url: str) -> WorkloadResult:
             response.read(1)
         ops_total += 1.0
     elapsed = max(0.0, float(duration_s))
-    return _finish_result(ops_total, elapsed, "", "fallback=python_http_loop")
+    return _finish_result(ops_total, elapsed, "", "")
 
 
 def _prepare_read_file(path: Path, size_mb: int = 64) -> None:
@@ -491,52 +422,9 @@ def run_bind_storm(
 
 
 def run_file_open_load(duration_s: int | float) -> WorkloadResult:
-    fio_binary = which("fio")
-    if fio_binary is not None:
-        with tempfile.TemporaryDirectory(prefix="tracee-open-") as tempdir:
-            directory = Path(tempdir)
-            file_count = 256
-            file_size = 4096
-            payload = b"\0" * file_size
-            for index in range(file_count):
-                (directory / f"open-{index}.bin").write_bytes(payload)
-            # Keep only one file descriptor open at a time so fio churns through
-            # many open/close operations while still reporting an application-level IOPS rate.
-            command = [
-                fio_binary,
-                "--name=open-latency",
-                f"--directory={directory}",
-                "--filename_format=open-$filenum.bin",
-                "--rw=randread",
-                "--bs=4k",
-                "--filesize=4k",
-                f"--nrfiles={file_count}",
-                "--openfiles=1",
-                "--ioengine=sync",
-                "--iodepth=1",
-                "--numjobs=1",
-                "--direct=0",
-                "--time_based=1",
-                f"--runtime={max(1, int(duration_s))}",
-                "--group_reporting",
-                "--output-format=json",
-            ]
-            start = time.monotonic()
-            completed = run_command(command, check=False, timeout=float(duration_s) + 60)
-            elapsed = time.monotonic() - start
-            if completed.returncode == 0:
-                payload = json.loads(completed.stdout)
-                job = (payload.get("jobs") or [{}])[0]
-                read_stats = job.get("read") or {}
-                write_stats = job.get("write") or {}
-                ops_total = float(read_stats.get("total_ios", 0) or 0) + float(write_stats.get("total_ios", 0) or 0)
-                if ops_total <= 0:
-                    ops_total = (float(read_stats.get("iops", 0) or 0) + float(write_stats.get("iops", 0) or 0)) * elapsed
-                return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
-
     stress_ng = which("stress-ng")
     if stress_ng is None:
-        raise RuntimeError("fio or stress-ng is required for file-open load")
+        raise RuntimeError("stress-ng is required for the file_open workload")
     command = [
         stress_ng,
         "--open",
@@ -550,7 +438,7 @@ def run_file_open_load(duration_s: int | float) -> WorkloadResult:
     elapsed = time.monotonic() - start
     if completed.returncode != 0:
         details = tail_text(completed.stderr or completed.stdout)
-        raise RuntimeError(f"file_open fallback failed: {details}")
+        raise RuntimeError(f"file_open workload failed: {details}")
     combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
     ops_total = _parse_stress_ng_bogo_ops(combined, stressor="open")
     if ops_total is None:
@@ -593,56 +481,36 @@ def run_dd_read_load(duration_s: int | float) -> WorkloadResult:
 
 
 def run_network_load(duration_s: int | float) -> WorkloadResult:
-    curl_binary = which("curl")
     wrk_binary = which("wrk")
+    if wrk_binary is None:
+        raise RuntimeError("wrk is required for the network workload")
     with LocalHttpServer() as server:
-        if wrk_binary is not None:
-            command = [
-                wrk_binary,
-                "-t2",
-                "-c10",
-                f"-d{max(1, int(duration_s))}s",
-                server.url,
-            ]
-            start = time.monotonic()
-            completed = run_command(command, check=False, timeout=float(duration_s) + 30)
-            elapsed = time.monotonic() - start
-            if completed.returncode != 0:
-                details = tail_text(completed.stderr or completed.stdout)
-                raise RuntimeError(f"network wrk load failed: {details}")
-            requests_per_sec = None
-            total_requests = None
-            for line in completed.stdout.splitlines():
-                line = line.strip()
-                req_match = re.search(r"Requests/sec:\s+([0-9.]+)", line)
-                if req_match:
-                    requests_per_sec = float(req_match.group(1))
-                total_match = re.search(r"([0-9]+)\s+requests in", line)
-                if total_match:
-                    total_requests = float(total_match.group(1))
-            if total_requests is None and requests_per_sec is not None:
-                total_requests = requests_per_sec * elapsed
-            return _finish_result(total_requests or 0.0, elapsed, completed.stdout or "", completed.stderr or "")
-
-        if curl_binary is None:
-            return run_python_http_loop(duration_s, server.url)
+        command = [
+            wrk_binary,
+            "-t2",
+            "-c10",
+            f"-d{max(1, int(duration_s))}s",
+            server.url,
+        ]
         start = time.monotonic()
-        deadline = start + float(duration_s)
-        ops_total = 0.0
-        stderr_lines: list[str] = []
-        while time.monotonic() < deadline:
-            completed = run_command(
-                [curl_binary, "-fsS", "--max-time", "2", server.url],
-                check=False,
-                timeout=5,
-            )
-            if completed.returncode != 0:
-                details = tail_text(completed.stderr or completed.stdout)
-                raise RuntimeError(f"network curl loop failed: {details}")
-            stderr_lines.append(completed.stderr or "")
-            ops_total += 1.0
+        completed = run_command(command, check=False, timeout=float(duration_s) + 30)
         elapsed = time.monotonic() - start
-        return _finish_result(ops_total, elapsed, "", "\n".join(stderr_lines))
+        if completed.returncode != 0:
+            details = tail_text(completed.stderr or completed.stdout)
+            raise RuntimeError(f"network wrk load failed: {details}")
+        requests_per_sec = None
+        total_requests = None
+        for line in completed.stdout.splitlines():
+            line = line.strip()
+            req_match = re.search(r"Requests/sec:\s+([0-9.]+)", line)
+            if req_match:
+                requests_per_sec = float(req_match.group(1))
+            total_match = re.search(r"([0-9]+)\s+requests in", line)
+            if total_match:
+                total_requests = float(total_match.group(1))
+        if total_requests is None and requests_per_sec is not None:
+            total_requests = requests_per_sec * elapsed
+        return _finish_result(total_requests or 0.0, elapsed, completed.stdout or "", completed.stderr or "")
 
 
 def run_tcp_connect_load(duration_s: int | float) -> WorkloadResult:
@@ -694,31 +562,7 @@ def run_scheduler_load(duration_s: int | float) -> WorkloadResult:
 
     stress_ng = which("stress-ng")
     if stress_ng is None:
-        start = time.monotonic()
-        deadline = start + float(duration_s)
-        switch_count = 0.0
-        stop_event = threading.Event()
-        lock = threading.Lock()
-
-        def worker() -> None:
-            nonlocal switch_count
-            local_switches = 0.0
-            while not stop_event.is_set():
-                time.sleep(0)
-                local_switches += 1.0
-            with lock:
-                switch_count += local_switches
-
-        threads = [threading.Thread(target=worker, daemon=True) for _ in range(4)]
-        for thread in threads:
-            thread.start()
-        while time.monotonic() < deadline:
-            time.sleep(0.05)
-        stop_event.set()
-        for thread in threads:
-            thread.join(timeout=1.0)
-        elapsed = time.monotonic() - start
-        return _finish_result(switch_count, elapsed, "", "fallback=python_thread_yield")
+        raise RuntimeError("hackbench or stress-ng is required for the scheduler workload")
     command = [
         stress_ng,
         "--switch",
@@ -732,10 +576,106 @@ def run_scheduler_load(duration_s: int | float) -> WorkloadResult:
     elapsed = time.monotonic() - start
     if completed.returncode != 0:
         details = tail_text(completed.stderr or completed.stdout)
-        raise RuntimeError(f"scheduler stress-ng fallback failed: {details}")
+        raise RuntimeError(f"scheduler stress-ng workload failed: {details}")
     combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
     ops_total = _parse_stress_ng_bogo_ops(combined, stressor="switch") or 0.0
     return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
+
+
+def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadResult:
+    seconds = max(1, int(round(float(duration_s))))
+    kind = str(workload_kind or "").strip()
+    if kind == "exec_storm":
+        return run_exec_storm(seconds, rate=2)
+    if kind == "file_open_storm":
+        return run_file_open_load(seconds)
+    if kind in {"network", "tracee_default"}:
+        return run_network_load(seconds)
+    if kind == "fio":
+        return run_file_io(seconds)
+    if kind == "hackbench":
+        return run_scheduler_load(seconds)
+    if kind == "bind_storm":
+        return run_bind_storm(seconds)
+    if kind == "minimal_syscall":
+        return run_user_exec_loop(seconds)
+    if kind == "iterator_poll":
+        start = time.monotonic()
+        deadline = start + float(seconds)
+        ops_total = 0.0
+        while time.monotonic() < deadline:
+            list(Path("/proc/self/task").iterdir())
+            ops_total += 1.0
+        elapsed = time.monotonic() - start
+        return _finish_result(ops_total, elapsed, "", "")
+    if kind == "mixed_system":
+        return _run_mixed_workload(float(seconds))
+    if kind == "security_policy_mix":
+        result = run_open_storm(seconds)
+        return WorkloadResult(
+            ops_total=result.ops_total,
+            ops_per_sec=result.ops_per_sec,
+            duration_s=result.duration_s,
+            stdout=result.stdout,
+            stderr=result.stderr,
+        )
+    if kind == "system_telemetry_mix":
+        return _run_mixed_workload(float(seconds))
+    if kind == "oom_stress":
+        stress_ng = which("stress-ng")
+        if stress_ng is None:
+            raise RuntimeError("stress-ng is required for the oom_stress workload")
+        command = [
+            stress_ng,
+            "--vm",
+            "1",
+            "--vm-bytes",
+            "75%",
+            "--oomable",
+            "--timeout",
+            f"{seconds}s",
+            "--metrics-brief",
+        ]
+        start = time.monotonic()
+        completed = run_command(command, check=False, timeout=float(seconds) + 30)
+        elapsed = time.monotonic() - start
+        if completed.returncode != 0:
+            details = tail_text(completed.stderr or completed.stdout)
+            raise RuntimeError(f"oom_stress workload failed: {details}")
+        combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
+        ops_total = _parse_stress_ng_bogo_ops(combined, stressor="vm") or 0.0
+        return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
+    if kind == "sysctl_write":
+        sysctl_binary = which("sysctl")
+        if sysctl_binary is None:
+            raise RuntimeError("sysctl is required for the sysctl_write workload")
+        start = time.monotonic()
+        deadline = start + float(seconds)
+        ops_total = 0.0
+        while time.monotonic() < deadline:
+            completed = run_command([sysctl_binary, "-n", "kernel.pid_max"], check=False, timeout=5)
+            if completed.returncode != 0:
+                details = tail_text(completed.stderr or completed.stdout)
+                raise RuntimeError(f"sysctl_write workload failed: {details}")
+            ops_total += 1.0
+        elapsed = time.monotonic() - start
+        return _finish_result(ops_total, elapsed, "", "")
+    if kind == "userns_unshare":
+        unshare_binary = which("unshare")
+        if unshare_binary is None:
+            raise RuntimeError("unshare is required for the userns_unshare workload")
+        start = time.monotonic()
+        deadline = start + float(seconds)
+        ops_total = 0.0
+        while time.monotonic() < deadline:
+            completed = run_command([unshare_binary, "-Ur", "/bin/true"], check=False, timeout=5)
+            if completed.returncode != 0:
+                details = tail_text(completed.stderr or completed.stdout)
+                raise RuntimeError(f"userns_unshare workload failed: {details}")
+            ops_total += 1.0
+        elapsed = time.monotonic() - start
+        return _finish_result(ops_total, elapsed, "", "")
+    raise RuntimeError(f"unsupported workload kind: {kind}")
 
 
 __all__ = [
@@ -751,6 +691,7 @@ __all__ = [
     "run_rapid_bind_storm",
     "run_rapid_connect_storm",
     "run_rapid_open_storm",
+    "run_named_workload",
     "run_scheduler_load",
     "run_tcp_connect_load",
     "run_user_exec_loop",

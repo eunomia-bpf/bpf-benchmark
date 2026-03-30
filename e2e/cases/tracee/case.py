@@ -58,7 +58,7 @@ from runner.libs.workload import (  # noqa: E402
     run_scheduler_load,
     run_user_exec_loop,
 )
-from e2e.case_common import (  # noqa: E402
+from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     LifecycleAbort,
     host_metadata,
@@ -1225,12 +1225,12 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "stderr_tail": "",
     }
     tracee_binary = resolve_tracee_binary(args.tracee_binary, setup_result)
-    if tracee_binary is None and not args.skip_setup:
+    if tracee_binary is None:
         setup_result = run_setup_script(Path(args.setup_script).resolve())
         tracee_binary = resolve_tracee_binary(args.tracee_binary, setup_result)
     elif tracee_binary is not None:
         setup_result["tracee_binary"] = tracee_binary
-        setup_result["stdout_tail"] = "Tracee setup skipped: using an already available binary."
+        setup_result["stdout_tail"] = "Using an already available Tracee binary."
 
     limitations: list[str] = []
     if setup_result["returncode"] != 0:
@@ -1575,7 +1575,6 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--load-timeout", type=int, default=20)
     parser.add_argument("--tracee-extra-arg", action="append", default=[])
-    parser.add_argument("--skip-setup", action="store_true")
     return parser
 
 

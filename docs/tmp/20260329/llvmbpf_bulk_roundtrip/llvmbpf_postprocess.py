@@ -15,9 +15,16 @@ from elftools.elf.relocation import RelocationSection
 
 
 HELPER_SYMBOL_RE = re.compile(r"^_bpf_helper_ext_(\d+)$")
+PSEUDO_MAP_FD_SYMBOL_RE = re.compile(r"^__llvmbpf_pseudo_map_fd_([0-9a-fA-F]{8})$")
+PSEUDO_MAP_VALUE_SYMBOL_RE = re.compile(
+    r"^__llvmbpf_pseudo_map_value_fd_([0-9a-fA-F]{8})_off_([0-9a-fA-F]{8})$"
+)
 SHF_EXECINSTR = 0x4
+BPF_LD_IMM64_OPCODE = 0x18
 BPF_CALL_OPCODE = 0x85
 BPF_EXIT_OPCODE = 0x95
+BPF_PSEUDO_MAP_FD = 1
+BPF_PSEUDO_MAP_VALUE = 2
 
 
 @dataclass
@@ -27,6 +34,8 @@ class PostprocessSummary:
     output_bin_path: str | None
     helper_call_rewrites: int
     rewritten_helpers: list[dict[str, Any]]
+    pseudo_map_ld_rewrites: int
+    rewritten_pseudo_map_lds: list[dict[str, Any]]
     removed_sections: list[str]
     executable_sections: list[dict[str, Any]]
 
@@ -37,6 +46,8 @@ class PostprocessSummary:
             "output_bin_path": self.output_bin_path,
             "helper_call_rewrites": self.helper_call_rewrites,
             "rewritten_helpers": self.rewritten_helpers,
+            "pseudo_map_ld_rewrites": self.pseudo_map_ld_rewrites,
+            "rewritten_pseudo_map_lds": self.rewritten_pseudo_map_lds,
             "removed_sections": self.removed_sections,
             "executable_sections": self.executable_sections,
         }
@@ -65,9 +76,14 @@ def run_command(argv: list[str]) -> subprocess.CompletedProcess[str]:
     return completed
 
 
+def _decode_i32_bits(hex_text: str) -> int:
+    return int(hex_text, 16) & 0xFFFFFFFF
+
+
 def _patch_helper_calls(input_path: Path, output_path: Path) -> PostprocessSummary:
     raw = bytearray(input_path.read_bytes())
     rewritten_helpers: list[dict[str, Any]] = []
+    rewritten_pseudo_map_lds: list[dict[str, Any]] = []
     removed_sections: list[str] = []
     executable_sections: list[dict[str, Any]] = []
 
@@ -99,52 +115,105 @@ def _patch_helper_calls(input_path: Path, output_path: Path) -> PostprocessSumma
 
             symtab = elf.get_section(section["sh_link"])
             helper_reloc_count = 0
+            pseudo_map_reloc_count = 0
             other_reloc_count = 0
 
             for relocation in section.iter_relocations():
                 symbol = symtab.get_symbol(relocation["r_info_sym"])
-                match = HELPER_SYMBOL_RE.fullmatch(symbol.name)
-                if not match:
-                    other_reloc_count += 1
-                    continue
-
-                helper_id = int(match.group(1))
-                helper_reloc_count += 1
                 insn_offset = int(relocation["r_offset"])
                 if insn_offset % 8 != 0:
                     raise RuntimeError(
-                        f"{input_path}: helper relocation {symbol.name} has non-insn offset {insn_offset}"
+                        f"{input_path}: relocation {symbol.name} has non-insn offset {insn_offset}"
                     )
-                if insn_offset + 8 > int(target["sh_size"]):
-                    raise RuntimeError(
-                        f"{input_path}: helper relocation {symbol.name} points past {target.name}"
-                    )
-
                 file_offset = int(target["sh_offset"]) + insn_offset
+
+                helper_match = HELPER_SYMBOL_RE.fullmatch(symbol.name)
+                if helper_match:
+                    helper_id = int(helper_match.group(1))
+                    helper_reloc_count += 1
+                    if insn_offset + 8 > int(target["sh_size"]):
+                        raise RuntimeError(
+                            f"{input_path}: helper relocation {symbol.name} points past {target.name}"
+                        )
+
+                    opcode = raw[file_offset]
+                    regs = raw[file_offset + 1]
+                    if opcode != BPF_CALL_OPCODE:
+                        raise RuntimeError(
+                            f"{input_path}: helper relocation {symbol.name} at {target.name}+0x{insn_offset:x} "
+                            f"does not target a BPF_CALL insn (opcode=0x{opcode:02x})"
+                        )
+
+                    old_src = (regs >> 4) & 0xF
+                    raw[file_offset + 1] = regs & 0x0F
+                    raw[file_offset + 4 : file_offset + 8] = helper_id.to_bytes(
+                        4, byteorder="little", signed=True
+                    )
+                    rewritten_helpers.append(
+                        {
+                            "section": target.name,
+                            "insn_index": insn_offset // 8,
+                            "symbol": symbol.name,
+                            "helper_id": helper_id,
+                            "old_src_reg": old_src,
+                        }
+                    )
+                    continue
+
+                pseudo_map_fd_match = PSEUDO_MAP_FD_SYMBOL_RE.fullmatch(symbol.name)
+                pseudo_map_value_match = PSEUDO_MAP_VALUE_SYMBOL_RE.fullmatch(symbol.name)
+                if not pseudo_map_fd_match and not pseudo_map_value_match:
+                    other_reloc_count += 1
+                    continue
+
+                pseudo_map_reloc_count += 1
+                if insn_offset + 16 > int(target["sh_size"]):
+                    raise RuntimeError(
+                        f"{input_path}: pseudo-map relocation {symbol.name} points past {target.name}"
+                    )
                 opcode = raw[file_offset]
                 regs = raw[file_offset + 1]
-                if opcode != BPF_CALL_OPCODE:
+                if opcode != BPF_LD_IMM64_OPCODE:
                     raise RuntimeError(
-                        f"{input_path}: helper relocation {symbol.name} at {target.name}+0x{insn_offset:x} "
-                        f"does not target a BPF_CALL insn (opcode=0x{opcode:02x})"
+                        f"{input_path}: pseudo-map relocation {symbol.name} at {target.name}+0x{insn_offset:x} "
+                        f"does not target a BPF_LD_IMM64 insn (opcode=0x{opcode:02x})"
                     )
 
+                dst_reg = regs & 0x0F
                 old_src = (regs >> 4) & 0xF
-                raw[file_offset + 1] = regs & 0x0F
-                raw[file_offset + 4 : file_offset + 8] = helper_id.to_bytes(
-                    4, byteorder="little", signed=True
+                if pseudo_map_fd_match:
+                    pseudo_src = BPF_PSEUDO_MAP_FD
+                    map_fd_bits = _decode_i32_bits(pseudo_map_fd_match.group(1))
+                    offset_bits = 0
+                    kind = "map_fd"
+                else:
+                    pseudo_src = BPF_PSEUDO_MAP_VALUE
+                    assert pseudo_map_value_match is not None
+                    map_fd_bits = _decode_i32_bits(pseudo_map_value_match.group(1))
+                    offset_bits = _decode_i32_bits(pseudo_map_value_match.group(2))
+                    kind = "map_value"
+
+                raw[file_offset + 1] = dst_reg | (pseudo_src << 4)
+                raw[file_offset + 4 : file_offset + 8] = map_fd_bits.to_bytes(
+                    4, byteorder="little", signed=False
                 )
-                rewritten_helpers.append(
+                raw[file_offset + 12 : file_offset + 16] = offset_bits.to_bytes(
+                    4, byteorder="little", signed=False
+                )
+                rewritten_pseudo_map_lds.append(
                     {
                         "section": target.name,
                         "insn_index": insn_offset // 8,
                         "symbol": symbol.name,
-                        "helper_id": helper_id,
+                        "kind": kind,
+                        "map_fd_bits": f"0x{map_fd_bits:08x}",
+                        "offset_bits": f"0x{offset_bits:08x}",
                         "old_src_reg": old_src,
+                        "new_src_reg": pseudo_src,
                     }
                 )
 
-            if helper_reloc_count > 0 and other_reloc_count == 0:
+            if helper_reloc_count + pseudo_map_reloc_count > 0 and other_reloc_count == 0:
                 removed_sections.append(section.name)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -155,6 +224,8 @@ def _patch_helper_calls(input_path: Path, output_path: Path) -> PostprocessSumma
         output_bin_path=None,
         helper_call_rewrites=len(rewritten_helpers),
         rewritten_helpers=rewritten_helpers,
+        pseudo_map_ld_rewrites=len(rewritten_pseudo_map_lds),
+        rewritten_pseudo_map_lds=rewritten_pseudo_map_lds,
         removed_sections=removed_sections,
         executable_sections=executable_sections,
     )

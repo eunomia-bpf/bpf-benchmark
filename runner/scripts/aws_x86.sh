@@ -821,7 +821,7 @@ ensure_local_kinsn_modules() {
 
 ensure_local_e2e_assets() {
     require_local_path "$ROOT_DIR/e2e/run.py" "e2e runner"
-    require_local_path "$ROOT_DIR/e2e/case_common.py" "e2e shared helpers"
+    require_local_path "$ROOT_DIR/runner/libs/case_common.py" "shared case helpers"
     require_local_path "$ROOT_DIR/corpus/config/benchmark_config.yaml" "benchmark config"
     require_local_path "$ROOT_DIR/corpus/inputs/katran_vip_packet_64.bin" "katran test packet"
 

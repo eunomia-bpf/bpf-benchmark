@@ -598,9 +598,6 @@ ensure_benchmark_bundle() {
     require_local_path "$ROOT_DIR/micro/programs/simple.bpf.o" "simple micro object"
     require_local_path "$ROOT_DIR/runner/libs/__init__.py" "runner python helpers"
     require_local_path "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" "ARM64 remote benchmark runner"
-    require_local_path "$ROOT_DIR/corpus/config/macro_corpus.yaml" "macro corpus manifest"
-    require_local_path "$ROOT_DIR/corpus/config/benchmark_config.yaml" "benchmark config"
-    require_local_path "$ROOT_DIR/corpus/results/expanded_corpus_build.latest.json" "corpus build report"
     require_local_path "$SMOKE_CORPUS_OBJECT" "daemon smoke object"
 
     rm -rf "$BENCHMARK_BUNDLE_DIR"
@@ -618,9 +615,7 @@ ensure_benchmark_bundle() {
         "$BENCHMARK_BUNDLE_DIR/micro/programs" \
         "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs" \
         "$BENCHMARK_BUNDLE_DIR/micro/config" \
-        "$BENCHMARK_BUNDLE_DIR/corpus/build/katran" \
-        "$BENCHMARK_BUNDLE_DIR/corpus/config" \
-        "$BENCHMARK_BUNDLE_DIR/corpus/results"
+        "$BENCHMARK_BUNDLE_DIR/corpus/build/katran"
 
     cp "$ARM64_CROSS_RUNNER" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec"
     cp "$ARM64_CROSS_RUNNER_REAL" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec.real"
@@ -650,9 +645,6 @@ ensure_benchmark_bundle() {
 
     cp "$SMOKE_CORPUS_OBJECT" "$BENCHMARK_BUNDLE_DIR/corpus/build/katran/balancer.bpf.o"
     cp -a "$ROOT_DIR/corpus/build/katran/." "$BENCHMARK_BUNDLE_DIR/corpus/build/katran/"
-    cp "$ROOT_DIR/corpus/config/macro_corpus.yaml" "$BENCHMARK_BUNDLE_DIR/corpus/config/"
-    cp "$ROOT_DIR/corpus/config/benchmark_config.yaml" "$BENCHMARK_BUNDLE_DIR/corpus/config/"
-    cp "$ROOT_DIR/corpus/results/expanded_corpus_build.latest.json" "$BENCHMARK_BUNDLE_DIR/corpus/results/"
 
     tar -C "$BENCHMARK_BUNDLE_DIR" -czf "$BENCHMARK_BUNDLE_TAR" .
 }
@@ -697,10 +689,6 @@ instance_id="$7"
 instance_type="$8"
 aws_profile="$9"
 aws_region="${10}"
-corpus_attempt="${11}"
-corpus_filters="${12}"
-corpus_max_programs="${13}"
-corpus_repeat="${14}"
 results_dir="$root/results"
 
 cd "$root"
@@ -730,11 +718,7 @@ sudo -n env \
         --instance-id "$instance_id" \
         --instance-type "$instance_type" \
         --aws-profile "$aws_profile" \
-        --aws-region "$aws_region" \
-        --corpus-attempt "$corpus_attempt" \
-        --corpus-filters "$corpus_filters" \
-        --corpus-max-programs "$corpus_max_programs" \
-        --corpus-repeat "$corpus_repeat"
+        --aws-region "$aws_region"
 
 sudo -n chown -R "$(id -un):$(id -gn)" "$results_dir"
 

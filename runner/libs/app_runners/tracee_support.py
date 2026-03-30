@@ -29,7 +29,6 @@ from ..workload import (
 
 
 CACHED_TRACEE_BINARY = ROOT_DIR / "e2e" / "cases" / "tracee" / "bin" / "tracee"
-FALLBACK_MARKERS = ("fallback=", "fell back")
 TRACEE_STATS_PATTERN = re.compile(
     r"EventCount[:=]\s*(?P<events>\d+).*?LostEvCount[:=]\s*(?P<lost>\d+)(?:.*?LostWrCount[:=]\s*(?P<lost_writes>\d+))?",
     re.IGNORECASE,
@@ -318,24 +317,15 @@ def _format_launch_failure(command: Sequence[str], proc: subprocess.Popen[str] |
         return f"{rendered}: {reason}: {details}"
     return f"{rendered}: {reason}"
 
-
-def _ensure_no_workload_fallback(kind: str, result: WorkloadResult) -> None:
-    combined = ((result.stdout or "") + "\n" + (result.stderr or "")).lower()
-    if any(marker in combined for marker in FALLBACK_MARKERS):
-        raise RuntimeError(f"{kind} workload fell back to a degraded generator: {tail_text(combined)}")
-
-
 def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> WorkloadResult:
     kind = str(spec.get("kind", spec.get("name", "")))
     if kind == "read":
         return run_dd_read_load(duration_s)
     if kind == "exec_storm":
-        result = run_user_exec_loop(duration_s, mark_fallback=False)
-        _ensure_no_workload_fallback(kind, result)
-        return result
+        return run_user_exec_loop(duration_s)
     if kind in {"file_io", "file_open"}:
-        if which("stress-ng") is None and which("fio") is None:
-            raise RuntimeError("fio or stress-ng is required for the Tracee file_open workload")
+        if which("stress-ng") is None:
+            raise RuntimeError("stress-ng is required for the Tracee file_open workload")
         return run_file_open_load(duration_s)
     if kind == "open_storm":
         return run_open_storm(duration_s)

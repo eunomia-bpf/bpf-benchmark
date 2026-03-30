@@ -27,9 +27,10 @@ from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
-from e2e.case_common import (  # noqa: E402
+from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     host_metadata,
+    open_prepared_daemon_session,
     summarize_numbers,
     percent_delta,
     percentile,
@@ -425,18 +426,19 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         def cleanup(_: object) -> None:
             return None
 
-        lifecycle_result = run_case_lifecycle(
-            daemon_binary=daemon_binary,
-            setup=setup,
-            start=start,
-            workload=workload,
-            stop=stop,
-            cleanup=cleanup,
-            enabled_passes=benchmark_rejit_enabled_passes(),
-            should_run_post_rejit=lambda result: int(
-                (((result.get("counts") or {}).get("applied_sites", 0)) or 0)
-            ) > 0,
-        )
+        with open_prepared_daemon_session(daemon_binary) as daemon_session:
+            lifecycle_result = run_case_lifecycle(
+                daemon_session=daemon_session,
+                setup=setup,
+                start=start,
+                workload=workload,
+                stop=stop,
+                cleanup=cleanup,
+                enabled_passes=benchmark_rejit_enabled_passes(),
+                should_run_post_rejit=lambda result: int(
+                    (((result.get("counts") or {}).get("applied_sites", 0)) or 0)
+                ) > 0,
+            )
         if lifecycle_result.state is None:
             raise RuntimeError("scx lifecycle completed without a live session")
         runner = lifecycle_result.state.runtime

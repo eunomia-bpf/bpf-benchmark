@@ -224,7 +224,6 @@ class BCCRunner:
         attach_timeout_s: int | None = None,
         tools_dir: Path | str | None = None,
         setup_script: Path | str = DEFAULT_SETUP_SCRIPT,
-        skip_setup: bool = False,
     ) -> None:
         resolved_object_path = Path(object_path).resolve() if object_path else None
         resolved_tool_name = (tool_name or (_tool_name_from_object(resolved_object_path) if resolved_object_path else "")).strip()
@@ -244,7 +243,6 @@ class BCCRunner:
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.object_path = resolved_object_path
         self.setup_script = Path(setup_script).resolve()
-        self.skip_setup = bool(skip_setup)
         self.setup_result: dict[str, object] = {
             "returncode": 0,
             "tools_dir": None,
@@ -265,12 +263,11 @@ class BCCRunner:
                 raise RuntimeError(f"BCC tool binary is not executable: {self.tool_binary}")
             return self.tool_binary
 
-        if not self.skip_setup:
-            self.setup_result = run_setup_script(self.setup_script)
-            if int(self.setup_result.get("returncode", 0) or 0) != 0:
-                stderr_tail = str(self.setup_result.get("stderr_tail") or "")
-                raise RuntimeError(f"BCC setup failed: {stderr_tail or self.setup_result}")
-            self.tools_dir = resolve_tools_dir(self.tools_dir, setup_result=self.setup_result)
+        self.setup_result = run_setup_script(self.setup_script)
+        if int(self.setup_result.get("returncode", 0) or 0) != 0:
+            stderr_tail = str(self.setup_result.get("stderr_tail") or "")
+            raise RuntimeError(f"BCC setup failed: {stderr_tail or self.setup_result}")
+        self.tools_dir = resolve_tools_dir(self.tools_dir, setup_result=self.setup_result)
 
         tool_binary = find_tool_binary(self.tools_dir, self.tool_name)
         if tool_binary is None:

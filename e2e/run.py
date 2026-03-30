@@ -71,7 +71,7 @@ from e2e.cases.tracee.case import (  # noqa: E402
     build_markdown as build_tracee_markdown,
     run_tracee_case,
 )
-from e2e.case_common import (  # noqa: E402
+from runner.libs.case_common import (  # noqa: E402
     attach_pending_result_metadata,
     reset_pending_result_metadata,
 )
@@ -163,11 +163,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--katran-wrk-threads", type=int)
     parser.add_argument("--katran-warmup-duration", type=float)
     parser.add_argument("--katran-samples", type=int)
-    parser.add_argument("--katran-skip-attach", action="store_true")
     parser.add_argument("--kernel-config", default=str(ROOT_DIR / "vendor" / "linux-framework" / ".config"))
     parser.add_argument("--bpftool", default="/usr/local/sbin/bpftool", help="Explicit bpftool path for Tetragon runs.")
     parser.add_argument("--scheduler-extra-arg", action="append", default=[])
-    parser.add_argument("--skip-setup", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--tools-dir", default="", help="Directory with compiled libbpf-tools binaries (bcc case).")
     parser.add_argument("--tool", action="append", dest="tools", help="Select specific libbpf-tools by name (bcc case).")
     parser.add_argument(

@@ -263,7 +263,6 @@ def resolve_program_enabled_passes(
     *,
     context: Mapping[str, Any] | None = None,
     site_counts: Mapping[str, Any] | None = None,
-    fallback_passes: Sequence[str] | None = None,
 ) -> list[str]:
     policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
     default_config = _mapping_dict(policy_config.get("default"), field_name="policy.default")
@@ -280,7 +279,7 @@ def resolve_program_enabled_passes(
     active_passes = list(
         default_passes
         if default_passes is not None
-        else (list(fallback_passes) if fallback_passes is not None else benchmark_config_enabled_passes(benchmark_config))
+        else benchmark_config_enabled_passes(benchmark_config)
     )
 
     for index, raw_rule in enumerate(raw_rules, start=1):

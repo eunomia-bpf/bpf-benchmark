@@ -15,7 +15,7 @@ BPFTOOL_BOOTSTRAP := $(BPFTOOL_BUILD_DIR)/bootstrap/bpftool
 BPFTOOL_RUNTIME ?= /usr/local/sbin/bpftool
 TOOLS_BUILD_DIR := $(BUILD_DIR)/tools
 MICRO_EXEC_ENABLE_LLVMBPF ?= ON
-LLVM_CONFIG ?= $(shell command -v llvm-config || true)
+LLVM_CONFIG ?= $(shell command -v llvm-config 2>/dev/null)
 LLVMBPF_CMAKE_CACHE := $(REPO_ROOT)/vendor/llvmbpf/build/CMakeCache.txt
 LLVMBPF_LLVM_DIR ?= $(shell sed -n 's/^LLVM_DIR:PATH=//p' "$(LLVMBPF_CMAKE_CACHE)" 2>/dev/null | head -n 1)
 LLVM_DIR_FLAG := $(if $(filter ON,$(MICRO_EXEC_ENABLE_LLVMBPF)),$(if $(strip $(LLVMBPF_LLVM_DIR)),-DLLVM_DIR=$(LLVMBPF_LLVM_DIR),$(if $(LLVM_CONFIG),-DLLVM_DIR=$$($(LLVM_CONFIG) --cmakedir),)),)
@@ -35,7 +35,6 @@ ITERATIONS ?= 3
 WARMUPS ?= 1
 REPEAT ?= 100
 BENCH ?=
-STATIC_VERIFY_ARGS ?=
 FUZZ_ROUNDS ?= 1000
 VM_COMMAND ?= /bin/bash
 E2E_CASE ?= all
@@ -60,13 +59,10 @@ VM_MICRO_SMOKE_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro_smoke.json
 VM_MICRO_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro.json
 VM_CORPUS_OUTPUT_JSON ?= $(CORPUS_RESULTS_DIR)/vm_corpus.json
 VM_CORPUS_OUTPUT_MD ?= $(CORPUS_RESULTS_DIR)/vm_corpus.md
-VM_STATIC_OUTPUT ?= $(REPO_ROOT)/daemon/tests/results/static_verify.json
-
 VM_CPUS ?=
 VM_MEM ?=
 VM_TEST_TIMEOUT ?= 3600
 VM_SELFTEST_TIMEOUT ?= 3600
-VM_STATIC_TIMEOUT ?= 7200
 VM_NEGATIVE_TIMEOUT ?= 3600
 VM_MICRO_TIMEOUT ?= 7200
 VM_CORPUS_TIMEOUT ?= 7200
@@ -100,7 +96,7 @@ VM_CORPUS_REPEAT_FLAG := $(if $(strip $(REPEAT_IS_EXPLICIT)),--repeat "$(REPEAT)
 	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
 	scx-artifacts e2e-prep e2e-tracee-setup e2e-tetragon-setup \
 	kernel-image unittest-build negative-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary \
-	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	vm-shell vm-test vm-selftest vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	clean
 
 all: micro_exec
@@ -280,16 +276,6 @@ vm-selftest: unittest-build negative-build kernel-image kinsn-modules-build
 		--timeout "$(VM_SELFTEST_TIMEOUT)" \
 		--command '$(VM_INIT) "$(ROOT_DIR)/scripts/vm-selftest.sh" "$(REPO_ROOT)" "$(REPO_ROOT)/tests/unittest" "$(KINSN_MODULE_DIR)" "$(NEGATIVE_TEST_DIR)" "$(FUZZ_ROUNDS)"'
 
-vm-static-test: micro-programs daemon-binary kernel-image kinsn-modules-build
-	mkdir -p "$(REPO_ROOT)/daemon/tests/results"
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
-		--action vm-static-test \
-		--kernel-image "$(BZIMAGE_PATH)" \
-		$(VM_CPU_FLAG) \
-		$(VM_MEM_FLAG) \
-		--timeout "$(VM_STATIC_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/daemon/tests/static_verify.py" --daemon-binary "$(DAEMON_PATH)" --daemon-args="$(DAEMON_ARGS)" --output "$(VM_STATIC_OUTPUT)" $(STATIC_VERIFY_ARGS)'
-
 vm-negative-test: scx-artifacts kernel-image kinsn-modules-build
 	$(MAKE) -C "$(NEGATIVE_TEST_DIR)"
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
@@ -328,7 +314,7 @@ vm-corpus: corpus-build corpus-build-native vendor_bpftool daemon-binary kernel-
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_CORPUS_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/orchestrator.py" --daemon "$(DAEMON_PATH)" --bpftool "$(BPFTOOL_RUNTIME)" --btf-custom-path /sys/kernel/btf/vmlinux --output-json "$(VM_CORPUS_OUTPUT_JSON)" $(VM_CORPUS_REPEAT_FLAG) $(FILTER_FLAGS)'
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/orchestrator.py" --daemon "$(DAEMON_PATH)" --output-json "$(VM_CORPUS_OUTPUT_JSON)" $(VM_CORPUS_REPEAT_FLAG) $(FILTER_FLAGS)'
 
 vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"
@@ -342,7 +328,6 @@ vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary ke
 
 vm-all:
 	$(MAKE) vm-test TARGET="$(TARGET)"
-	$(MAKE) vm-static-test TARGET="$(TARGET)"
 	$(MAKE) vm-micro TARGET="$(TARGET)"
 	$(MAKE) vm-corpus TARGET="$(TARGET)"
 	$(MAKE) vm-e2e TARGET="$(TARGET)"
@@ -350,4 +335,4 @@ vm-all:
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -f "$(VM_MICRO_SMOKE_OUTPUT)" "$(VM_MICRO_OUTPUT)" \
-		"$(VM_CORPUS_OUTPUT_JSON)" "$(VM_CORPUS_OUTPUT_MD)" "$(VM_STATIC_OUTPUT)"
+		"$(VM_CORPUS_OUTPUT_JSON)" "$(VM_CORPUS_OUTPUT_MD)"

@@ -35,10 +35,11 @@ from runner.libs.metrics import (  # noqa: E402
     sample_total_cpu_usage,
 )
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
-from e2e.case_common import (  # noqa: E402
+from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     attach_pending_result_metadata,
     host_metadata,
+    open_prepared_daemon_session,
     percent_delta,
     run_case_lifecycle,
 )
@@ -274,15 +275,16 @@ def run_phase(
     baseline_status = "error"
     baseline_reason = ""
     try:
-        lifecycle_result = run_case_lifecycle(
-            daemon_binary=daemon_binary,
-            setup=setup,
-            start=start,
-            workload=workload,
-            stop=stop,
-            cleanup=cleanup,
-            enabled_passes=benchmark_rejit_enabled_passes(),
-        )
+        with open_prepared_daemon_session(daemon_binary) as daemon_session:
+            lifecycle_result = run_case_lifecycle(
+                daemon_session=daemon_session,
+                setup=setup,
+                start=start,
+                workload=workload,
+                stop=stop,
+                cleanup=cleanup,
+                enabled_passes=benchmark_rejit_enabled_passes(),
+            )
         if lifecycle_result.baseline is not None:
             baseline_status = str(lifecycle_result.baseline.get("status") or "error")
             baseline_reason = str(lifecycle_result.baseline.get("reason") or "")

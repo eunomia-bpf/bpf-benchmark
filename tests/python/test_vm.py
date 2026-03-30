@@ -21,7 +21,7 @@ def test_write_guest_script_applies_requested_nofile_limit() -> None:
 def test_build_vm_shell_command_forwards_requested_nofile_limit() -> None:
     command = vm.build_vm_shell_command(
         kernel_image=Path("vendor/linux-framework/arch/x86/boot/bzImage"),
-        guest_exec="true",
+        command_text="true",
         timeout_seconds=30,
         vng_binary="runner/scripts/vng-wrapper.sh",
         nofile=65536,

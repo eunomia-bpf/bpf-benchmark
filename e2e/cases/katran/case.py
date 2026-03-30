@@ -41,7 +41,7 @@ from runner.libs.corpus import materialize_katran_packet  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 
-from e2e.case_common import (  # noqa: E402
+from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     host_metadata,
     open_prepared_daemon_session,
@@ -1056,7 +1056,7 @@ def reset_katran_state(session: KatranDirectSession) -> dict[str, object]:
                     key = next_key
                 action = "clear-keys"
             else:
-                action = f"skipped-{map_type or 'unknown'}"
+                raise RuntimeError(f"unsupported mutable map type for {map_name}: {map_type or 'unknown'}")
         finally:
             os.close(fd)
         reset_records.append(
@@ -1069,7 +1069,7 @@ def reset_katran_state(session: KatranDirectSession) -> dict[str, object]:
             }
         )
     return {
-        "strategy": "reset mutable stats/fallback maps before each phase",
+        "strategy": "reset mutable stats maps before each phase",
         "map_count": len(reset_records),
         "maps": reset_records,
     }
@@ -1745,9 +1745,6 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         os.environ["PATH"] = f"{Path(resolved_bpftool).parent}:{sys_path}"
         os.environ["BPFTOOL_BIN"] = resolved_bpftool
 
-    if args.katran_skip_attach:
-        raise RuntimeError("--katran-skip-attach is incompatible with the live DSR topology case")
-
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
     wrk_connections = max(
         1,
@@ -1806,8 +1803,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "stdout_tail": "",
         "stderr_tail": "",
     }
-    if not args.skip_setup:
-        setup_result = run_setup_script(setup_script)
+    setup_result = run_setup_script(setup_script)
 
     kernel_config = read_kernel_config(Path(args.kernel_config).resolve())
     object_program_listing = inspect_object_program(runner_binary, katran_object, DEFAULT_PROGRAM_NAME)
@@ -1983,7 +1979,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "warmup_packet_count": warmup_request_count,
         "warmup_duration_s": warmup_duration_s,
         "min_measurement_requests": minimum_requests,
-        "state_reset_strategy": "reset mutable stats/fallback maps before each phase warmup",
+        "state_reset_strategy": "reset mutable stats maps before each phase warmup",
         "katran_object": relpath(katran_object),
         "setup": setup_result,
         "host": host_metadata(),
@@ -2018,13 +2014,11 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--katran-wrk-threads", type=int)
     parser.add_argument("--katran-warmup-duration", type=float)
     parser.add_argument("--katran-samples", type=int)
-    parser.add_argument("--katran-skip-attach", action="store_true")
     parser.add_argument("--kernel-config", default=str(DEFAULT_KERNEL_CONFIG))
     parser.add_argument("--runner", default=str(DEFAULT_RUNNER))
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
-    parser.add_argument("--skip-setup", action="store_true")
     return parser
 
 

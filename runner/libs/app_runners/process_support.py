@@ -10,7 +10,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 from .. import ROOT_DIR, tail_text
 from ..agent import find_bpf_programs, stop_agent, wait_healthy
-from ..workload import WorkloadResult
+from ..workload import WorkloadResult, run_named_workload
 
 
 class ProcessOutputCollector:
@@ -152,12 +152,14 @@ class NativeProcessRunner:
         loader_args: Sequence[str] = (),
         expected_program_names: Sequence[str] = (),
         load_timeout_s: int = 20,
+        workload_kind: str | None = None,
     ) -> None:
         self.object_path = None if object_path is None else Path(object_path).resolve()
         self.loader_binary = None if loader_binary is None else Path(loader_binary).resolve()
         self.loader_args = tuple(str(arg) for arg in loader_args if str(arg).strip())
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.load_timeout_s = int(load_timeout_s)
+        self.workload_kind = str(workload_kind or "").strip()
         self.session: ManagedProcessSession | None = None
         self.programs: list[dict[str, object]] = []
         self.process_output: dict[str, object] = {}
@@ -236,6 +238,8 @@ class NativeProcessRunner:
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None:
             raise RuntimeError(f"{type(self).__name__} is not running")
+        if self.workload_kind:
+            return run_named_workload(self.workload_kind, seconds)
         return self._run_workload(seconds)
 
     def stop(self) -> None:

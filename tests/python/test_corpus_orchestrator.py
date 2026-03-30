@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import nullcontext
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -44,65 +45,44 @@ def test_infer_prog_type_name_uses_section_prefix_when_prog_type_is_unspec() -> 
     assert orchestrator._infer_prog_type_name(program) == "xdp"
 
 
-def test_run_suite_splits_program_measurements_and_routes_loader_instances(monkeypatch, tmp_path: Path) -> None:
-    manifest_path = tmp_path / "macro.yaml"
+def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_path: Path) -> None:
+    manifest_path = tmp_path / "macro_apps.yaml"
     manifest_path.write_text(
-        yaml.safe_dump({"schema_version": 2, "defaults": {"repeat": 7}, "objects": []}, sort_keys=False),
+        yaml.safe_dump(
+            {
+                "schema_version": 1,
+                "suite_name": "macro_apps",
+                "defaults": {
+                    "repeat": 7,
+                    "duration_s": 4,
+                },
+                "apps": [
+                    {
+                        "name": "alpha",
+                        "runner": "bcc",
+                        "workload": "exec_loop",
+                        "args": {"tool": "execsnoop"},
+                    },
+                    {
+                        "name": "beta",
+                        "runner": "tracee",
+                        "workload": "file_open",
+                    },
+                ],
+            },
+            sort_keys=False,
+        ),
         encoding="utf-8",
     )
     daemon_binary = tmp_path / "daemon"
     daemon_binary.write_text("", encoding="utf-8")
     daemon_binary.chmod(0o755)
 
-    objects = [
-        SimpleNamespace(
-            object_path="corpus/build/tracee/tracee.bpf.o",
-            object_abs_path=str(tmp_path / "tracee.bpf.o"),
-            repo="tracee",
-            measurement="app_native",
-            programs=(
-                SimpleNamespace(
-                    program_name="sys_enter_submit",
-                    measurement="app_native",
-                ),
-                SimpleNamespace(
-                    program_name="cgroup_skb_egress",
-                    measurement="test_run",
-                ),
-            ),
-        ),
-        SimpleNamespace(
-            object_path="corpus/build/bcc/execsnoop.bpf.o",
-            object_abs_path=str(tmp_path / "execsnoop.bpf.o"),
-            repo="bcc",
-            measurement="app_native",
-            programs=(
-                SimpleNamespace(
-                    program_name="tracepoint__syscalls__sys_enter_execve",
-                    measurement="app_native",
-                ),
-            ),
-        ),
-        SimpleNamespace(
-            object_path="corpus/build/bcc/opensnoop.bpf.o",
-            object_abs_path=str(tmp_path / "opensnoop.bpf.o"),
-            repo="bcc",
-            measurement="app_native",
-            programs=(
-                SimpleNamespace(
-                    program_name="tracepoint__syscalls__sys_enter_openat",
-                    measurement="app_native",
-                ),
-            ),
-        ),
-    ]
-
-    monkeypatch.setattr(orchestrator, "_manifest_build_report", lambda _path: {"path": _path, "summary": {}, "available_objects": set(), "supplemented_existing": 0})
-    monkeypatch.setattr(orchestrator, "load_targets_from_yaml", lambda *_args, **_kwargs: (objects, {"selected_objects": 3}))
-
     class FakeProc:
         def poll(self) -> None:
             return None
+
+    daemon_events: list[object] = []
 
     class FakeDaemonSession:
         def __init__(self) -> None:
@@ -110,7 +90,8 @@ def test_run_suite_splits_program_measurements_and_routes_loader_instances(monke
             self.socket_path = Path("/tmp/rejit.sock")
 
         @classmethod
-        def start(cls, _daemon: Path) -> "FakeDaemonSession":
+        def start(cls, daemon_binary: Path) -> "FakeDaemonSession":
+            daemon_events.append(("start", daemon_binary))
             return cls()
 
         def __enter__(self) -> "FakeDaemonSession":
@@ -118,46 +99,95 @@ def test_run_suite_splits_program_measurements_and_routes_loader_instances(monke
 
         def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
             del exc_type, exc, tb
+            daemon_events.append("stop")
 
-        def close(self) -> None:
-            return None
+        def apply_rejit(self, prog_ids, *, enabled_passes=None):
+            daemon_events.append(("apply", list(prog_ids), list(enabled_passes or [])))
+            prog_id = int(prog_ids[0])
+            if prog_id == 101:
+                return {"applied": True, "error": "", "counts": {"applied_sites": 3}}
+            return {"applied": False, "error": "demo apply failure", "counts": {"applied_sites": 0}}
+
+    runner_events: list[object] = []
+
+    class FakeRunner:
+        def __init__(self, *, app_name: str, workload: str, **kwargs) -> None:
+            self.app_name = app_name
+            self.workload = workload
+            self.kwargs = kwargs
+            self.process_output = {"returncode": 0, "stdout_tail": "", "stderr_tail": ""}
+            self.command_used = ["demo-runner", app_name]
+            prog_id = 101 if app_name == "alpha" else 202
+            self.programs = [{"id": prog_id, "name": f"{app_name}_prog", "type": "xdp"}]
+
+        def start(self) -> list[int]:
+            runner_events.append(("start", self.app_name, self.workload, dict(self.kwargs)))
+            return [int(self.programs[0]["id"])]
+
+        def run_workload(self, seconds: float) -> object:
+            runner_events.append(("workload", self.app_name, seconds))
+            return SimpleNamespace(
+                to_dict=lambda: {
+                    "app": self.app_name,
+                    "duration_s": float(seconds),
+                    "ops_per_sec": 10.0,
+                }
+            )
+
+        def stop(self) -> None:
+            runner_events.append(("stop", self.app_name))
+
+    snapshot_counts = {101: 0, 202: 0}
+
+    def fake_read_program_stats(prog_ids: list[int]) -> dict[int, dict[str, object]]:
+        prog_id = int(prog_ids[0])
+        snapshot_counts[prog_id] += 1
+        if prog_id == 101:
+            if snapshot_counts[prog_id] == 1:
+                return {
+                    101: {
+                        "id": 101,
+                        "name": "alpha_prog",
+                        "type": "xdp",
+                        "run_cnt": 5,
+                        "run_time_ns": 500,
+                        "bytes_jited": 64,
+                        "bytes_xlated": 32,
+                    }
+                }
+            return {
+                101: {
+                    "id": 101,
+                    "name": "alpha_prog",
+                    "type": "xdp",
+                    "run_cnt": 12,
+                    "run_time_ns": 1400,
+                    "bytes_jited": 64,
+                    "bytes_xlated": 32,
+                }
+            }
+        return {
+            202: {
+                "id": 202,
+                "name": "beta_prog",
+                "type": "tracepoint",
+                "run_cnt": 4,
+                "run_time_ns": 800,
+                "bytes_jited": 96,
+                "bytes_xlated": 48,
+            }
+        }
+
+    def fake_get_app_runner(_runner_name: str, **kwargs) -> FakeRunner:
+        app_name = str(kwargs.pop("app_name"))
+        workload = str(kwargs.pop("workload"))
+        return FakeRunner(app_name=app_name, workload=workload, **kwargs)
 
     monkeypatch.setattr(orchestrator, "DaemonSession", FakeDaemonSession)
-
-    batch_calls: list[tuple[str, tuple[str, ...], tuple[tuple[str, ...], ...]]] = []
-
-    def fake_run_app_native_loader_instance(indexed_group, *, loader_label, **_kwargs):
-        batch_calls.append(
-            (
-                loader_label,
-                tuple(obj.object_path for _, obj in indexed_group),
-                tuple(tuple(program.program_name for program in obj.programs) for _, obj in indexed_group),
-            )
-        )
-        return (
-            [
-                (
-                    index,
-                    {
-                        "object": obj.object_path,
-                        "measurement": obj.measurement,
-                        "status": "ok",
-                        "repo": obj.repo,
-                        "loader_instance": loader_label,
-                    },
-                )
-                for index, obj in indexed_group
-            ],
-            {
-                "repo": indexed_group[0][1].repo,
-                "loader_instance": loader_label,
-                "measurement": "app_native",
-                "status": "ok",
-                "objects": [obj.object_path for _, obj in indexed_group],
-            },
-        )
-
-    monkeypatch.setattr(orchestrator, "_run_app_native_loader_instance", fake_run_app_native_loader_instance)
+    monkeypatch.setattr(orchestrator, "get_app_runner", fake_get_app_runner)
+    monkeypatch.setattr(orchestrator, "enable_bpf_stats", lambda: nullcontext())
+    monkeypatch.setattr(orchestrator, "read_program_stats", fake_read_program_stats)
+    monkeypatch.setattr(orchestrator, "benchmark_rejit_enabled_passes", lambda: ["map_inline"])
 
     args = orchestrator.parse_args(
         [
@@ -170,73 +200,118 @@ def test_run_suite_splits_program_measurements_and_routes_loader_instances(monke
     payload = orchestrator.run_suite(args)
 
     assert payload["repeat"] == 7
-    assert payload["summary"]["selected_manifest_objects"] == 3
-    assert payload["summary"]["selected_execution_units"] == 4
-    assert payload["summary"]["selected_programs"] == 4
-    assert payload["summary"]["statuses"] == {"error": 1, "ok": 3}
-    assert payload["summary"]["measurements"] == {"app_native": 3, "test_run": 1}
+    assert payload["workload_seconds"] == 4.0
+    assert payload["suite_name"] == "macro_apps"
+    assert payload["suite_summary"]["selected_apps"] == 2
+    assert payload["summary"]["selected_apps"] == 2
+    assert payload["summary"]["discovered_programs"] == 2
+    assert payload["summary"]["statuses"] == {"error": 1, "ok": 1}
     assert payload["status"] == "error"
-    assert batch_calls == [
-        (
-            "tracee",
-            (
-                "corpus/build/tracee/tracee.bpf.o",
-            ),
-            (("sys_enter_submit",),),
-        ),
-        (
-            "bcc:execsnoop",
-            (
-                "corpus/build/bcc/execsnoop.bpf.o",
-            ),
-            (("tracepoint__syscalls__sys_enter_execve",),),
-        ),
-        (
-            "bcc:opensnoop",
-            (
-                "corpus/build/bcc/opensnoop.bpf.o",
-            ),
-            (("tracepoint__syscalls__sys_enter_openat",),),
-        )
+    assert [result["app"] for result in payload["results"]] == ["alpha", "beta"]
+    assert payload["results"][0]["status"] == "ok"
+    assert payload["results"][0]["baseline"]["programs"]["101"]["run_cnt"] == 5
+    assert payload["results"][0]["rejit"]["programs"]["101"]["run_cnt"] == 7
+    assert payload["results"][0]["baseline_workload"]["duration_s"] == 4.0
+    assert payload["results"][1]["status"] == "error"
+    assert payload["results"][1]["error"] == "demo apply failure"
+    assert daemon_events == [
+        ("start", daemon_binary.resolve()),
+        ("apply", [101], ["map_inline"]),
+        ("apply", [202], ["map_inline"]),
+        "stop",
     ]
-    assert payload["app_native_batches"] == [
-        {
-            "repo": "tracee",
-            "loader_instance": "tracee",
-            "measurement": "app_native",
-            "status": "ok",
-            "objects": [
-                "corpus/build/tracee/tracee.bpf.o",
-            ],
-        },
-        {
-            "repo": "bcc",
-            "loader_instance": "bcc:execsnoop",
-            "measurement": "app_native",
-            "status": "ok",
-            "objects": [
-                "corpus/build/bcc/execsnoop.bpf.o",
-            ],
-        },
-        {
-            "repo": "bcc",
-            "loader_instance": "bcc:opensnoop",
-            "measurement": "app_native",
-            "status": "ok",
-            "objects": [
-                "corpus/build/bcc/opensnoop.bpf.o",
-            ],
-        }
+    assert runner_events == [
+        ("start", "alpha", "exec_loop", {"tool": "execsnoop"}),
+        ("workload", "alpha", 4.0),
+        ("workload", "alpha", 4.0),
+        ("stop", "alpha"),
+        ("start", "beta", "file_open", {}),
+        ("workload", "beta", 4.0),
+        ("stop", "beta"),
     ]
-    assert any(
-        result["measurement"] == "test_run" and "unsupported corpus measurement" in result["error"]
-        for result in payload["results"]
+
+
+def test_run_suite_marks_remaining_apps_after_daemon_exit(monkeypatch, tmp_path: Path) -> None:
+    manifest_path = tmp_path / "macro_apps.yaml"
+    manifest_path.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": 1,
+                "apps": [
+                    {"name": "alpha", "runner": "bcc", "workload": "exec_loop"},
+                    {"name": "beta", "runner": "tracee", "workload": "file_open"},
+                    {"name": "gamma", "runner": "bpftrace", "workload": "exec_loop"},
+                ],
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
     )
+    daemon_binary = tmp_path / "daemon"
+    daemon_binary.write_text("", encoding="utf-8")
+    daemon_binary.chmod(0o755)
+
+    class FakeProc:
+        def __init__(self) -> None:
+            self.poll_calls = 0
+
+        def poll(self) -> int | None:
+            self.poll_calls += 1
+            return 17 if self.poll_calls >= 1 else None
+
+    class FakeDaemonSession:
+        def __init__(self) -> None:
+            self.proc = FakeProc()
+            self.socket_path = Path("/tmp/rejit.sock")
+
+        @classmethod
+        def start(cls, _daemon_binary: Path) -> "FakeDaemonSession":
+            return cls()
+
+        def __enter__(self) -> "FakeDaemonSession":
+            return self
+
+        def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
+            del exc_type, exc, tb
+
+    run_calls: list[str] = []
+
+    def fake_run_app(app, *, daemon_session, workload_seconds):
+        del daemon_session, workload_seconds
+        run_calls.append(app.name)
+        return {
+            "app": app.name,
+            "runner": app.runner,
+            "workload": app.workload,
+            "args": dict(app.args),
+            "status": "ok",
+        }
+
+    monkeypatch.setattr(orchestrator, "DaemonSession", FakeDaemonSession)
+    monkeypatch.setattr(orchestrator, "_run_app", fake_run_app)
+
+    payload = orchestrator.run_suite(
+        orchestrator.parse_args(
+            [
+                "--suite",
+                str(manifest_path),
+                "--daemon",
+                str(daemon_binary),
+            ]
+        )
+    )
+
+    assert run_calls == ["alpha"]
+    assert payload["status"] == "error"
+    assert payload["fatal_error"] == "daemon session exited early (rc=17)"
+    assert [result["status"] for result in payload["results"]] == ["ok", "error", "error"]
+    assert payload["results"][1]["error"] == "daemon session exited early (rc=17)"
+    assert payload["results"][2]["error"] == "daemon session exited early (rc=17)"
 
 
 def test_parse_args_rejects_invalid_repeat_and_workload_seconds() -> None:
     with pytest.raises(SystemExit, match="--repeat must be >= 0"):
         orchestrator.parse_args(["--repeat", "-1"])
 
-    with pytest.raises(SystemExit, match="--workload-seconds must be > 0"):
-        orchestrator.parse_args(["--workload-seconds", "0"])
+    with pytest.raises(SystemExit, match="--workload-seconds must be >= 0"):
+        orchestrator.parse_args(["--workload-seconds", "-1"])

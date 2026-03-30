@@ -9,7 +9,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from e2e import case_common
+from runner.libs import case_common
 from e2e import run as e2e_run
 from runner.libs import smoke_output_path
 

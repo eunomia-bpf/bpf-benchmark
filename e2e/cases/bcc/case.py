@@ -38,10 +38,11 @@ from runner.libs.metrics import (  # noqa: E402
     sample_total_cpu_usage,
 )
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
-from e2e.case_common import (  # noqa: E402
+from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     attach_pending_result_metadata,
     host_metadata,
+    open_prepared_daemon_session,
     percent_delta,
     run_case_lifecycle,
 )
@@ -253,15 +254,16 @@ def run_phase(
     baseline_reason = ""
     try:
         enabled_passes = list(spec.rejit_passes) if spec.rejit_passes else benchmark_rejit_enabled_passes()
-        lifecycle_result = run_case_lifecycle(
-            daemon_binary=daemon_binary,
-            setup=setup,
-            start=start,
-            workload=workload,
-            stop=stop,
-            cleanup=cleanup,
-            enabled_passes=enabled_passes,
-        )
+        with open_prepared_daemon_session(daemon_binary) as daemon_session:
+            lifecycle_result = run_case_lifecycle(
+                daemon_session=daemon_session,
+                setup=setup,
+                start=start,
+                workload=workload,
+                stop=stop,
+                cleanup=cleanup,
+                enabled_passes=enabled_passes,
+            )
         if lifecycle_result.baseline is not None:
             baseline_status = str(lifecycle_result.baseline.get("status") or "error")
             baseline_reason = str(lifecycle_result.baseline.get("reason") or "")
@@ -576,7 +578,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--smoke-duration", type=int, default=0)
     parser.add_argument("--attach-timeout", type=int, default=0)
     parser.add_argument("--tool", action="append", dest="tools")
-    parser.add_argument("--skip-setup", action="store_true")
     parser.add_argument("--smoke", action="store_true")
     return parser.parse_args()
 
@@ -592,8 +593,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
         "stdout_tail": "",
         "stderr_tail": "",
     }
-    if not getattr(args, "skip_setup", False):
-        setup_result = run_setup_script(Path(args.setup_script).resolve())
+    setup_result = run_setup_script(Path(args.setup_script).resolve())
 
     suite = load_config(Path(args.config).resolve())
     tools_dir = resolve_tools_dir(getattr(args, "tools_dir", None) or "", setup_result=setup_result)
