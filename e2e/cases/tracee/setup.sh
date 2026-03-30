@@ -134,7 +134,7 @@ apt_install() {
   if ! command -v apt-get >/dev/null 2>&1; then
     return 1
   fi
-  DEBIAN_FRONTEND=noninteractive apt-get update -y >/dev/null 2>&1 || true
+  DEBIAN_FRONTEND=noninteractive apt-get update -y >/dev/null 2>&1
   DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
 }
 
@@ -152,7 +152,7 @@ if ! command -v hackbench >/dev/null 2>&1; then
 fi
 if [[ "${#missing_pkgs[@]}" -gt 0 ]]; then
   for pkg in "${missing_pkgs[@]}"; do
-    apt_install "${pkg}" >/dev/null 2>&1 || true
+    apt_install "${pkg}" >/dev/null 2>&1
   done
 fi
 
@@ -164,7 +164,7 @@ if [[ -z "${tracee_bin}" ]]; then
     apt_candidate="$(apt-cache policy tracee 2>/dev/null | awk '/Candidate:/ {print $2; exit}')"
   fi
   if [[ -n "${apt_candidate}" && "${apt_candidate}" != "(none)" ]]; then
-    apt_install tracee >/dev/null 2>&1 || true
+    apt_install tracee >/dev/null 2>&1
     if command -v tracee >/dev/null 2>&1; then
       tracee_bin="$(command -v tracee)"
     fi

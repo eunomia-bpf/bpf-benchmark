@@ -13,33 +13,37 @@ DEFAULT_SCX_BINARY = DEFAULT_SCX_REPO / "target" / "release" / "scx_rusty"
 DEFAULT_LOAD_TIMEOUT_S = 20
 
 
-def _infer_scheduler_binary(object_path: Path | None) -> Path:
-    if object_path is None:
+def _scheduler_binary_for_name(scheduler: str | None) -> Path:
+    normalized = str(scheduler or "").strip()
+    if not normalized:
         return DEFAULT_SCX_BINARY
-    name = object_path.name
-    if name.startswith("scx_") and name.endswith("_main.bpf.o"):
-        return DEFAULT_SCX_REPO / "target" / "release" / name[: -len("_main.bpf.o")]
-    return DEFAULT_SCX_BINARY
+    return DEFAULT_SCX_REPO / "target" / "release" / f"scx_{normalized}"
 
 
 class ScxRunner:
     def __init__(
         self,
         *,
-        object_path: Path | str | None = None,
+        scheduler: str = "rusty",
         scheduler_binary: Path | str | None = None,
         scheduler_extra_args: Sequence[str] = (),
         load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
+        workload_spec: Mapping[str, object] | None = None,
     ) -> None:
-        self.object_path = None if object_path is None else Path(object_path).resolve()
-        inferred = _infer_scheduler_binary(self.object_path)
+        self.scheduler = str(scheduler).strip()
+        if not self.scheduler:
+            raise RuntimeError("ScxRunner requires a scheduler name")
+        inferred = _scheduler_binary_for_name(self.scheduler)
         self.scheduler_binary = Path(scheduler_binary).resolve() if scheduler_binary is not None else inferred.resolve()
         self.scheduler_extra_args = tuple(str(arg) for arg in scheduler_extra_args)
         self.load_timeout_s = int(load_timeout_s)
         self.session: Any | None = None
         self.programs: list[dict[str, object]] = []
         self.process_output: dict[str, object] = {}
-        self.workload_spec: Mapping[str, object] = {"name": "hackbench", "kind": "hackbench", "metric": "runs/s"}
+        self.workload_spec: Mapping[str, object] = dict(
+            workload_spec
+            or {"name": "hackbench", "kind": "hackbench", "metric": "runs/s"}
+        )
         self.last_workload_extra: dict[str, object] = {}
 
     @property
@@ -64,6 +68,13 @@ class ScxRunner:
         if self.session is None:
             raise RuntimeError("ScxRunner is not running")
         result, extra = run_workload(self.workload_spec, max(1, int(round(seconds))))
+        self.last_workload_extra = dict(extra)
+        return result
+
+    def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:
+        if self.session is None:
+            raise RuntimeError("ScxRunner is not running")
+        result, extra = run_workload(workload_spec, max(1, int(round(seconds))))
         self.last_workload_extra = dict(extra)
         return result
 

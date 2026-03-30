@@ -3,11 +3,7 @@
 from __future__ import annotations
 
 import importlib
-from pathlib import Path
 from typing import Any, Callable
-
-from .. import ROOT_DIR
-
 
 RunnerAdapter = Callable[[str | None, str | None, dict[str, object]], dict[str, object]]
 
@@ -22,18 +18,6 @@ def _leaf_name(app_name: str | None) -> str:
 def _pop_string(kwargs: dict[str, object], key: str) -> str:
     value = kwargs.pop(key, "")
     return str(value).strip() if value is not None else ""
-
-
-def _ensure_no_extra_args(runner: str, kwargs: dict[str, object]) -> None:
-    if not kwargs:
-        return
-    rendered = ", ".join(sorted(kwargs))
-    raise TypeError(f"unsupported args for runner {runner!r}: {rendered}")
-
-
-def _adapt_passthrough(workload: str | None, app_name: str | None, kwargs: dict[str, object]) -> dict[str, object]:
-    del workload, app_name
-    return kwargs
 
 
 def _adapt_bcc(workload: str | None, app_name: str | None, kwargs: dict[str, object]) -> dict[str, object]:
@@ -62,10 +46,10 @@ def _adapt_scx(workload: str | None, app_name: str | None, kwargs: dict[str, obj
     scheduler = _pop_string(kwargs, "scheduler") or _leaf_name(app_name)
     mapped = dict(kwargs)
     if scheduler:
-        mapped.setdefault("object_path", ROOT_DIR / "corpus" / "build" / "scx" / f"scx_{scheduler}_main.bpf.o")
-        mapped.setdefault("scheduler_binary", ROOT_DIR / "corpus" / "build" / "scx" / "bin" / f"scx_{scheduler}")
+        mapped.setdefault("scheduler", scheduler)
     if workload:
-        mapped.setdefault("workload_spec", {"name": str(workload), "kind": "hackbench", "metric": "runs/s"})
+        kind = str(workload).strip()
+        mapped.setdefault("workload_spec", {"name": kind, "kind": kind, "metric": "runs/s"})
     return mapped
 
 
@@ -74,10 +58,7 @@ def _adapt_libbpf_bootstrap(workload: str | None, app_name: str | None, kwargs: 
     if not example:
         raise TypeError("libbpf-bootstrap runner requires args.app or an app name leaf")
     mapped = dict(kwargs)
-    mapped.setdefault(
-        "object_path",
-        ROOT_DIR / "corpus" / "build" / "libbpf-bootstrap" / "examples" / "c" / f"{example}.bpf.o",
-    )
+    mapped.setdefault("app", example)
     if workload:
         mapped.setdefault("workload_kind", str(workload).strip())
     return mapped
@@ -88,7 +69,7 @@ def _adapt_systemd(workload: str | None, app_name: str | None, kwargs: dict[str,
     if not app:
         raise TypeError("systemd runner requires args.app or an app name leaf")
     mapped = dict(kwargs)
-    mapped.setdefault("object_path", ROOT_DIR / "corpus" / "build" / "systemd" / f"{app}.bpf.o")
+    mapped.setdefault("app", app)
     if workload:
         mapped.setdefault("workload_kind", str(workload).strip())
     return mapped
@@ -99,37 +80,18 @@ def _adapt_xdp_tools(workload: str | None, app_name: str | None, kwargs: dict[st
     if not tool:
         raise TypeError("xdp-tools runner requires args.tool or an app name leaf")
     mapped = dict(kwargs)
-    mapped.setdefault("object_path", ROOT_DIR / "corpus" / "build" / "xdp-tools" / f"{tool}.bpf.o")
+    mapped.setdefault("tool", tool)
     if workload:
         mapped.setdefault("workload_kind", str(workload).strip())
     return mapped
 
 
-_XDP_TUTORIAL_OBJECTS = {
-    "advanced03-AF_XDP": "advanced03-AF_XDP/af_xdp_kern.bpf.o",
-    "basic01-xdp-pass": "basic01-xdp-pass/xdp_pass_kern.bpf.o",
-    "basic02-prog-by-name": "basic02-prog-by-name/xdp_prog_kern.bpf.o",
-    "basic03-map-counter": "basic03-map-counter/xdp_prog_kern.bpf.o",
-    "basic04-pinning-maps": "basic04-pinning-maps/xdp_prog_kern.bpf.o",
-    "experiment01-tailgrow": "experiment01-tailgrow/xdp_prog_kern.bpf.o",
-    "packet-solutions": "packet-solutions/xdp_prog_kern_03.bpf.o",
-    "packet01-parsing": "packet01-parsing/xdp_prog_kern.bpf.o",
-    "packet02-rewriting": "packet02-rewriting/xdp_prog_kern.bpf.o",
-    "packet03-redirecting": "packet03-redirecting/xdp_prog_kern.bpf.o",
-    "tracing01-xdp-simple": "tracing01-xdp-simple/trace_prog_kern.bpf.o",
-    "tracing02-xdp-monitor": "tracing02-xdp-monitor/trace_prog_kern.bpf.o",
-    "tracing03-xdp-debug-print": "tracing03-xdp-debug-print/xdp_prog_kern.bpf.o",
-    "tracing04-xdp-tcpdump": "tracing04-xdp-tcpdump/xdp_sample_pkts_kern.bpf.o",
-}
-
-
 def _adapt_xdp_tutorial(workload: str | None, app_name: str | None, kwargs: dict[str, object]) -> dict[str, object]:
     app = _pop_string(kwargs, "app") or _leaf_name(app_name)
-    object_relpath = _XDP_TUTORIAL_OBJECTS.get(app)
-    if object_relpath is None:
+    if not app:
         raise TypeError(f"unknown xdp-tutorial app: {app!r}")
     mapped = dict(kwargs)
-    mapped.setdefault("object_path", ROOT_DIR / "corpus" / "build" / "xdp-tutorial" / object_relpath)
+    mapped.setdefault("app", app)
     if workload:
         mapped.setdefault("workload_kind", str(workload).strip())
     return mapped
@@ -167,7 +129,6 @@ _RUNNERS: dict[str, tuple[str, str, RunnerAdapter]] = {
     "calico": ("runner.libs.app_runners.calico", "CalicoRunner", _adapt_native_process),
     "coroot-node-agent": ("runner.libs.app_runners.coroot_node_agent", "CorootNodeAgentRunner", _adapt_native_process),
     "datadog-agent": ("runner.libs.app_runners.datadog_agent", "DatadogAgentRunner", _adapt_native_process),
-    "katran": ("runner.libs.app_runners.katran", "KatranRunner", _adapt_passthrough),
     "kubearmor": ("runner.libs.app_runners.kubearmor", "KubeArmorRunner", _adapt_native_process),
     "libbpf-bootstrap": ("runner.libs.app_runners.libbpf_bootstrap", "LibbpfBootstrapRunner", _adapt_libbpf_bootstrap),
     "loxilb": ("runner.libs.app_runners.loxilb", "LoxilbRunner", _adapt_native_process),
@@ -203,11 +164,7 @@ def get_app_runner(
     del module_name, class_name
     constructor_kwargs = adapter(workload, app_name, dict(kwargs))
     runner_class = _load_runner_class(normalized)
-    instance = runner_class(**constructor_kwargs)
-    workload_spec = constructor_kwargs.get("workload_spec")
-    if workload_spec is not None and hasattr(instance, "workload_spec"):
-        setattr(instance, "workload_spec", workload_spec)
-    return instance
+    return runner_class(**constructor_kwargs)
 
 
 __all__ = [

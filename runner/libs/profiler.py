@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 from . import resolve_bpftool_binary, resolve_perf_binary, run_json_command, tail_text
+from .daemon_session import DaemonSession
 from .metrics import compute_delta, sample_bpf_stats
-from .rejit import scan_programs
 
 DEFAULT_DAEMON = Path(__file__).resolve().parents[2] / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_PERF_EVENTS = ("cycles", "instructions", "branches", "branch-misses")
@@ -276,11 +276,10 @@ def profile_programs(
             perf_executor.shutdown(wait=True)
     after = sample_bpf_stats(selected_ids, prog_fds=prog_fds)
     delta = compute_delta(before, after)
-    scan_results = (
-        scan_programs(selected_ids, daemon_binary or DEFAULT_DAEMON, prog_fds=prog_fds)
-        if include_sites
-        else {}
-    )
+    scan_results: dict[int, dict[str, Any]] = {}
+    if include_sites:
+        with DaemonSession.start(daemon_binary or DEFAULT_DAEMON) as daemon_session:
+            scan_results = daemon_session.scan_programs(selected_ids)
 
     base_records: list[dict[str, Any]] = []
     total_run_cnt = 0

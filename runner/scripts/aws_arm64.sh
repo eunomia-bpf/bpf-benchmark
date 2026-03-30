@@ -24,10 +24,6 @@ AWS_ARM64_BENCH_WARMUPS="${AWS_ARM64_BENCH_WARMUPS:-0}"
 AWS_ARM64_BENCH_REPEAT="${AWS_ARM64_BENCH_REPEAT:-10}"
 AWS_ARM64_BENCH_CPU="${AWS_ARM64_BENCH_CPU:-0}"
 AWS_ARM64_REMOTE_RESULT_JSON="${AWS_ARM64_REMOTE_RESULT_JSON:-arm64_t4g_micro.json}"
-AWS_ARM64_CORPUS_ATTEMPT="${AWS_ARM64_CORPUS_ATTEMPT:-1}"
-AWS_ARM64_CORPUS_FILTERS="${AWS_ARM64_CORPUS_FILTERS:-katran}"
-AWS_ARM64_CORPUS_MAX_PROGRAMS="${AWS_ARM64_CORPUS_MAX_PROGRAMS:-3}"
-AWS_ARM64_CORPUS_REPEAT="${AWS_ARM64_CORPUS_REPEAT:-1}"
 AWS_REGION_VALUE="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
 
 ARM64_BUILD_DIR="${ARM64_BUILD_DIR:-$ROOT_DIR/vendor/linux-framework/build-arm64}"
@@ -39,8 +35,6 @@ ARM64_CROSS_DAEMON="${ARM64_CROSS_DAEMON:-$ARM64_CROSSBUILD_OUTPUT_DIR/daemon/bu
 ARM64_CROSS_DAEMON_REAL="${ARM64_CROSS_DAEMON_REAL:-$ARM64_CROSSBUILD_OUTPUT_DIR/daemon/build/bpfrejit-daemon.real}"
 ARM64_CROSS_LIB_DIR="${ARM64_CROSS_LIB_DIR:-$ARM64_CROSSBUILD_OUTPUT_DIR/lib}"
 CROSS_COMPILE_PREFIX="${CROSS_COMPILE_ARM64:-aarch64-linux-gnu-}"
-SMOKE_CORPUS_OBJECT="${SMOKE_CORPUS_OBJECT:-$ROOT_DIR/corpus/build/katran/balancer.bpf.o}"
-
 STATE_INSTANCE_ID=""
 STATE_INSTANCE_IP=""
 STATE_REGION=""
@@ -89,10 +83,6 @@ Optional env:
   AWS_ARM64_BENCH_ITERATIONS   default: 1
   AWS_ARM64_BENCH_WARMUPS      default: 0
   AWS_ARM64_BENCH_REPEAT       default: 10
-  AWS_ARM64_CORPUS_ATTEMPT     default: 1
-  AWS_ARM64_CORPUS_FILTERS     default: katran
-  AWS_ARM64_CORPUS_MAX_PROGRAMS default: 3
-  AWS_ARM64_CORPUS_REPEAT      default: 1
 EOF
 }
 
@@ -598,7 +588,6 @@ ensure_benchmark_bundle() {
     require_local_path "$ROOT_DIR/micro/programs/simple.bpf.o" "simple micro object"
     require_local_path "$ROOT_DIR/runner/libs/__init__.py" "runner python helpers"
     require_local_path "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" "ARM64 remote benchmark runner"
-    require_local_path "$SMOKE_CORPUS_OBJECT" "daemon smoke object"
 
     rm -rf "$BENCHMARK_BUNDLE_DIR"
     mkdir -p \
@@ -614,8 +603,7 @@ ensure_benchmark_bundle() {
         "$BENCHMARK_BUNDLE_DIR/lib" \
         "$BENCHMARK_BUNDLE_DIR/micro/programs" \
         "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs" \
-        "$BENCHMARK_BUNDLE_DIR/micro/config" \
-        "$BENCHMARK_BUNDLE_DIR/corpus/build/katran"
+        "$BENCHMARK_BUNDLE_DIR/micro/config"
 
     cp "$ARM64_CROSS_RUNNER" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec"
     cp "$ARM64_CROSS_RUNNER_REAL" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec.real"
@@ -642,9 +630,6 @@ ensure_benchmark_bundle() {
     cp -a "$ROOT_DIR/daemon/src/." "$BENCHMARK_BUNDLE_DIR/daemon/src/"
 
     cp -a "$ROOT_DIR/vendor/libbpf" "$BENCHMARK_BUNDLE_DIR/vendor/"
-
-    cp "$SMOKE_CORPUS_OBJECT" "$BENCHMARK_BUNDLE_DIR/corpus/build/katran/balancer.bpf.o"
-    cp -a "$ROOT_DIR/corpus/build/katran/." "$BENCHMARK_BUNDLE_DIR/corpus/build/katran/"
 
     tar -C "$BENCHMARK_BUNDLE_DIR" -czf "$BENCHMARK_BUNDLE_TAR" .
 }
@@ -675,9 +660,7 @@ EOF
     ssh_bash "$ip" "$AWS_ARM64_REMOTE_STAGE_DIR" \
         "$AWS_ARM64_BENCH_ITERATIONS" "$AWS_ARM64_BENCH_WARMUPS" "$AWS_ARM64_BENCH_REPEAT" \
         "$AWS_ARM64_BENCH_CPU" "$AWS_ARM64_REMOTE_RESULT_JSON" "$STATE_INSTANCE_ID" \
-        "$AWS_ARM64_INSTANCE_TYPE" "$AWS_ARM64_PROFILE" "$(resolve_region)" \
-        "$AWS_ARM64_CORPUS_ATTEMPT" "$AWS_ARM64_CORPUS_FILTERS" \
-        "$AWS_ARM64_CORPUS_MAX_PROGRAMS" "$AWS_ARM64_CORPUS_REPEAT" <<'EOF'
+        "$AWS_ARM64_INSTANCE_TYPE" "$AWS_ARM64_PROFILE" "$(resolve_region)" <<'EOF'
 set -euo pipefail
 root="$1"
 iterations="$2"

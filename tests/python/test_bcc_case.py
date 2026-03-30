@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from contextlib import contextmanager
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -106,11 +105,6 @@ def test_run_phase_uses_shared_bcc_runner(monkeypatch, tmp_path: Path) -> None:
 
     monkeypatch.setattr(case, "BCCRunner", FakeRunner)
     monkeypatch.setattr(case, "run_case_lifecycle", fake_run_case_lifecycle)
-    @contextmanager
-    def fake_open_prepared_daemon_session(_daemon_binary: Path):
-        yield object()
-
-    monkeypatch.setattr(case, "open_prepared_daemon_session", fake_open_prepared_daemon_session)
     monkeypatch.setattr(
         case,
         "measure_workload",
@@ -138,7 +132,7 @@ def test_run_phase_uses_shared_bcc_runner(monkeypatch, tmp_path: Path) -> None:
         tool_binary=tmp_path / "execsnoop",
         duration_s=5,
         attach_timeout=20,
-        daemon_binary=tmp_path / "daemon",
+        prepared_daemon_session=object(),
     )
 
     assert baseline["status"] == "ok"

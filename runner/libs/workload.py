@@ -539,47 +539,27 @@ def run_tcp_connect_load(duration_s: int | float) -> WorkloadResult:
 
 def run_scheduler_load(duration_s: int | float) -> WorkloadResult:
     hackbench = which("hackbench")
-    if hackbench is not None:
-        start = time.monotonic()
-        deadline = start + float(duration_s)
-        completed_runs = 0.0
-        stdout_lines: list[str] = []
-        stderr_lines: list[str] = []
-        while time.monotonic() < deadline:
-            completed = run_command(
-                [hackbench, "--pipe", "--groups", "8", "--fds", "16", "--loops", "10"],
-                check=False,
-                timeout=max(30, int(duration_s) + 10),
-            )
-            if completed.returncode != 0:
-                details = tail_text(completed.stderr or completed.stdout)
-                raise RuntimeError(f"scheduler hackbench failed: {details}")
-            stdout_lines.append(completed.stdout or "")
-            stderr_lines.append(completed.stderr or "")
-            completed_runs += 1.0
-        elapsed = time.monotonic() - start
-        return _finish_result(completed_runs, elapsed, "\n".join(stdout_lines), "\n".join(stderr_lines))
-
-    stress_ng = which("stress-ng")
-    if stress_ng is None:
-        raise RuntimeError("hackbench or stress-ng is required for the scheduler workload")
-    command = [
-        stress_ng,
-        "--switch",
-        "4",
-        "--timeout",
-        f"{max(1, int(duration_s))}s",
-        "--metrics-brief",
-    ]
+    if hackbench is None:
+        raise RuntimeError("hackbench is required for the scheduler workload")
     start = time.monotonic()
-    completed = run_command(command, check=False, timeout=float(duration_s) + 30)
+    deadline = start + float(duration_s)
+    completed_runs = 0.0
+    stdout_lines: list[str] = []
+    stderr_lines: list[str] = []
+    while time.monotonic() < deadline:
+        completed = run_command(
+            [hackbench, "--pipe", "--groups", "8", "--fds", "16", "--loops", "10"],
+            check=False,
+            timeout=max(30, int(duration_s) + 10),
+        )
+        if completed.returncode != 0:
+            details = tail_text(completed.stderr or completed.stdout)
+            raise RuntimeError(f"scheduler hackbench failed: {details}")
+        stdout_lines.append(completed.stdout or "")
+        stderr_lines.append(completed.stderr or "")
+        completed_runs += 1.0
     elapsed = time.monotonic() - start
-    if completed.returncode != 0:
-        details = tail_text(completed.stderr or completed.stdout)
-        raise RuntimeError(f"scheduler stress-ng workload failed: {details}")
-    combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
-    ops_total = _parse_stress_ng_bogo_ops(combined, stressor="switch") or 0.0
-    return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
+    return _finish_result(completed_runs, elapsed, "\n".join(stdout_lines), "\n".join(stderr_lines))
 
 
 def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadResult:

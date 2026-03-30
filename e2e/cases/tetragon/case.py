@@ -35,6 +35,7 @@ from runner.libs.app_runners.tetragon import (  # noqa: E402
     run_setup_script,
     run_tetragon_workload,
 )
+from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
     enable_bpf_stats,
@@ -48,9 +49,9 @@ from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     LifecycleAbort,
     host_metadata,
-    open_prepared_daemon_session,
     summarize_numbers,
     percent_delta,
+    prepare_daemon_session,
     speedup_ratio,
     persist_results,
     run_case_lifecycle,
@@ -244,9 +245,11 @@ def measure_workload(
     system_thread.start()
     threads.append(system_thread)
 
-    runner.workload_spec = {"kind": workload_spec.kind, "value": workload_spec.value}
-    runner.exec_workload_cgroup = exec_workload_cgroup
-    workload_result = runner.run_workload(duration_s)
+    workload_result = runner.run_workload_spec(
+        {"kind": workload_spec.kind, "value": workload_spec.value},
+        duration_s,
+        exec_workload_cgroup=exec_workload_cgroup,
+    )
 
     for thread in threads:
         thread.join()
@@ -767,18 +770,20 @@ def daemon_payload(
     def cleanup(state: object) -> None:
         del state
 
-    with open_prepared_daemon_session(daemon_binary) as daemon_session:
-        lifecycle_result = run_case_lifecycle(
-            daemon_session=daemon_session,
-            setup=setup,
-            start=start,
-            workload=workload,
-            stop=stop,
-            cleanup=cleanup,
-            before_baseline=before_baseline,
-            before_rejit=before_rejit,
-            enabled_passes=benchmark_rejit_enabled_passes(),
-        )
+    prepared_daemon_session = getattr(args, "_prepared_daemon_session", None)
+    if prepared_daemon_session is None:
+        raise RuntimeError("prepared daemon session is required")
+    lifecycle_result = run_case_lifecycle(
+        daemon_session=prepared_daemon_session,
+        setup=setup,
+        start=start,
+        workload=workload,
+        stop=stop,
+        cleanup=cleanup,
+        before_baseline=before_baseline,
+        before_rejit=before_rejit,
+        enabled_passes=benchmark_rejit_enabled_passes(),
+    )
     if lifecycle_result.abort is not None:
         return error_payload(
             config=config,
@@ -967,7 +972,10 @@ def build_case_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_case_parser()
     args = parser.parse_args(argv)
-    payload = run_tetragon_case(args)
+    daemon_binary = Path(args.daemon).resolve()
+    with DaemonSession.start(daemon_binary) as daemon_session:
+        args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
+        payload = run_tetragon_case(args)
     if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
         output_json = smoke_output_path(RESULTS_DIR, "tetragon")
     else:

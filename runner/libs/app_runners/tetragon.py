@@ -35,14 +35,13 @@ class TetragonRunner:
     def __init__(
         self,
         *,
-        object_path: Path | str | None = None,
         tetragon_binary: Path | str | None = None,
         tetragon_extra_args: Sequence[str] = (),
         expected_program_names: Sequence[str] = (),
         load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
         setup_script: Path | str = DEFAULT_SETUP_SCRIPT,
+        workload_spec: Mapping[str, object] | None = None,
     ) -> None:
-        self.object_path = None if object_path is None else Path(object_path).resolve()
         self.tetragon_binary = None if tetragon_binary is None else Path(tetragon_binary).resolve()
         self.tetragon_extra_args = tuple(str(arg) for arg in (tetragon_extra_args or _default_extra_args()) if str(arg).strip())
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
@@ -55,7 +54,7 @@ class TetragonRunner:
         self.session: Any | None = None
         self.programs: list[dict[str, object]] = []
         self.process_output: dict[str, object] = {}
-        self.workload_spec: Mapping[str, object] = {"kind": "exec_storm", "value": 2}
+        self.workload_spec: Mapping[str, object] = dict(workload_spec or {"kind": "exec_storm", "value": 2})
         self.exec_workload_cgroup = any(arg == "--cgroup-rate" for arg in self.tetragon_extra_args)
 
     def _fail_start(self, message: str) -> NoReturn:
@@ -131,6 +130,21 @@ class TetragonRunner:
             self.workload_spec,
             max(1, int(round(seconds))),
             exec_workload_cgroup=self.exec_workload_cgroup,
+        )
+
+    def run_workload_spec(
+        self,
+        workload_spec: Mapping[str, object],
+        seconds: float,
+        *,
+        exec_workload_cgroup: bool | None = None,
+    ) -> WorkloadResult:
+        if self.session is None:
+            raise RuntimeError("TetragonRunner is not running")
+        return run_tetragon_workload(
+            workload_spec,
+            max(1, int(round(seconds))),
+            exec_workload_cgroup=self.exec_workload_cgroup if exec_workload_cgroup is None else bool(exec_workload_cgroup),
         )
 
     def stop(self) -> None:

@@ -3,44 +3,65 @@ from __future__ import annotations
 from pathlib import Path
 
 from .. import ROOT_DIR
-from .process_support import NativeProcessRunner, run_sleep_workload
+from .process_support import NativeProcessRunner
 
 
 DEFAULT_BINARY_ROOT = ROOT_DIR / "corpus" / "build" / "xdp-tools" / "bin"
 _LOOPBACK = "lo"
+_XDP_BENCH = DEFAULT_BINARY_ROOT / "xdp-bench" / "xdp-bench"
+_XDP_FORWARD = DEFAULT_BINARY_ROOT / "xdp-forward" / "xdp-forward"
+_XDP_MONITOR = DEFAULT_BINARY_ROOT / "xdp-monitor" / "xdp-monitor"
+_XDP_TRAFFICGEN = DEFAULT_BINARY_ROOT / "xdp-trafficgen" / "xdp-trafficgen"
+_BINARY_BY_TOOL = {
+    "xdp_basic": _XDP_BENCH,
+    "xdp_load_bytes": _XDP_BENCH,
+    "xdp_redirect_basic": _XDP_BENCH,
+    "xdp_redirect_cpumap": _XDP_BENCH,
+    "xdp_redirect_devmap": _XDP_BENCH,
+    "xdp_redirect_devmap_multi": _XDP_BENCH,
+    "xdpsock": _XDP_BENCH,
+    "xdp_forward": _XDP_FORWARD,
+    "xdp_flowtable": _XDP_FORWARD,
+    "xdp_flowtable_sample": _XDP_FORWARD,
+    "xdp_monitor": _XDP_MONITOR,
+    "xdp_sample": _XDP_MONITOR,
+    "xdp_trafficgen": _XDP_TRAFFICGEN,
+}
 
 
 class XdpToolsRunner(NativeProcessRunner):
+    def __init__(self, *, tool: str, **kwargs: object) -> None:
+        self.tool = str(tool).strip()
+        if not self.tool:
+            raise RuntimeError("XdpToolsRunner requires a tool name")
+        super().__init__(**kwargs)
+
     def _default_binary_candidates(self) -> tuple[Path, ...]:
-        if self.object_path is None:
-            return ()
-        stem = self.object_path.name.removesuffix(".bpf.o")
-        if stem in {"xdp_basic", "xdp_redirect_basic", "xdp_redirect_cpumap", "xdp_redirect_devmap", "xdp_redirect_devmap_multi"}:
-            return (DEFAULT_BINARY_ROOT / "xdp-bench" / "xdp-bench",)
-        if stem in {"xdp_monitor", "xdp_sample"}:
-            return (DEFAULT_BINARY_ROOT / "xdp-monitor" / "xdp-monitor",)
-        if stem == "xdp_trafficgen":
-            return (DEFAULT_BINARY_ROOT / "xdp-trafficgen" / "xdp-trafficgen",)
-        return ()
+        candidate = _BINARY_BY_TOOL.get(self.tool)
+        return () if candidate is None else (candidate,)
 
     def _command(self, binary: Path) -> list[str]:
-        stem = "" if self.object_path is None else self.object_path.name.removesuffix(".bpf.o")
-        if stem == "xdp_basic":
+        if self.tool == "xdp_basic":
             return [str(binary), "pass", "--dev", _LOOPBACK, *self.loader_args]
-        if stem == "xdp_redirect_basic":
+        if self.tool == "xdp_load_bytes":
+            return [str(binary), "pass", "--dev", _LOOPBACK, "--load-mode", "load-bytes", *self.loader_args]
+        if self.tool == "xdp_redirect_basic":
             return [str(binary), "redirect", "--dev_in", _LOOPBACK, "--dev_out", _LOOPBACK, *self.loader_args]
-        if stem == "xdp_redirect_cpumap":
+        if self.tool == "xdp_redirect_cpumap":
             return [str(binary), "redirect-cpu", "--dev", _LOOPBACK, *self.loader_args]
-        if stem == "xdp_redirect_devmap":
+        if self.tool == "xdp_redirect_devmap":
             return [str(binary), "redirect-map", "--dev_in", _LOOPBACK, "--dev_out", _LOOPBACK, *self.loader_args]
-        if stem == "xdp_redirect_devmap_multi":
+        if self.tool == "xdp_redirect_devmap_multi":
             return [str(binary), "redirect-multi", "--devs", _LOOPBACK, *self.loader_args]
-        if stem == "xdp_trafficgen":
+        if self.tool == "xdpsock":
+            return [str(binary), "xsk-drop", "--dev", _LOOPBACK, *self.loader_args]
+        if self.tool == "xdp_forward":
+            return [str(binary), "load", _LOOPBACK, *self.loader_args]
+        if self.tool in {"xdp_flowtable", "xdp_flowtable_sample"}:
+            return [str(binary), "load", "--fwd-mode", "flowtable", _LOOPBACK, *self.loader_args]
+        if self.tool == "xdp_trafficgen":
             return [str(binary), "udp", "--interface", _LOOPBACK, *self.loader_args]
         return [str(binary), *self.loader_args]
-
-    def _run_workload(self, seconds: float):
-        return run_sleep_workload(seconds)
 
 
 __all__ = ["XdpToolsRunner"]

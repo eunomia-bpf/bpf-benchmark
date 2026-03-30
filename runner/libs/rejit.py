@@ -468,45 +468,16 @@ def scan_programs(
     requested_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
     if not requested_ids:
         return {}
-
-    if daemon_socket_path is not None:
-        return _scan_programs_via_socket(
-            requested_ids,
-            daemon_socket_path,
-            daemon_proc=daemon_proc,
-            stdout_path=daemon_stdout_path,
-            stderr_path=daemon_stderr_path,
-            timeout_seconds=timeout_seconds,
-        )
-
-    daemon_proc_local = None
-    daemon_socket_path_local = None
-    daemon_socket_dir = None
-    daemon_stdout_path_local = None
-    daemon_stderr_path_local = None
-    try:
-        (
-            daemon_proc_local,
-            daemon_socket_path_local,
-            daemon_socket_dir,
-            daemon_stdout_path_local,
-            daemon_stderr_path_local,
-        ) = _start_daemon_server(daemon)
-        return _scan_programs_via_socket(
-            requested_ids,
-            daemon_socket_path_local,
-            daemon_proc=daemon_proc_local,
-            stdout_path=daemon_stdout_path_local,
-            stderr_path=daemon_stderr_path_local,
-            timeout_seconds=timeout_seconds,
-        )
-    finally:
-        if (
-            daemon_proc_local is not None
-            and daemon_socket_path_local is not None
-            and daemon_socket_dir is not None
-        ):
-            _stop_daemon_server(daemon_proc_local, daemon_socket_path_local, daemon_socket_dir)
+    if daemon_socket_path is None:
+        raise ValueError("scan_programs requires daemon_socket_path")
+    return _scan_programs_via_socket(
+        requested_ids,
+        daemon_socket_path,
+        daemon_proc=daemon_proc,
+        stdout_path=daemon_stdout_path,
+        stderr_path=daemon_stderr_path,
+        timeout_seconds=timeout_seconds,
+    )
 
 
 def _scan_programs_via_socket(
@@ -518,39 +489,22 @@ def _scan_programs_via_socket(
     stderr_path: Path | None = None,
     timeout_seconds: int = 60,
 ) -> dict[int, dict[str, Any]]:
-    zero = _zero_site_counts()
     results: dict[int, dict[str, Any]] = {}
-    try:
-        for prog_id in requested_ids:
-            response = _optimize_request(
-                socket_path,
-                prog_id,
-                enabled_passes=None,
-                dry_run=True,
-                daemon_proc=daemon_proc,
-                stdout_path=stdout_path,
-                stderr_path=stderr_path,
-                timeout_seconds=float(timeout_seconds),
-            )
-            if str(response.get("status") or "") != "ok":
-                results[prog_id] = {
-                    "prog_id": int(prog_id),
-                    "sites": dict(zero),
-                    "counts": dict(zero),
-                    "error": str(response.get("message") or response.get("error") or "scan failed"),
-                }
-                continue
-            results[prog_id] = _scan_record_from_optimize_response(prog_id, response)
-    except Exception as exc:
-        error = str(exc)
-        for prog_id in requested_ids:
-            results[prog_id] = {
-                "prog_id": int(prog_id),
-                "sites": dict(zero),
-                "counts": dict(zero),
-                "error": error,
-            }
-
+    for prog_id in requested_ids:
+        response = _optimize_request(
+            socket_path,
+            prog_id,
+            enabled_passes=None,
+            dry_run=True,
+            daemon_proc=daemon_proc,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+            timeout_seconds=float(timeout_seconds),
+        )
+        if str(response.get("status") or "") != "ok":
+            message = str(response.get("message") or response.get("error") or "scan failed").strip()
+            raise RuntimeError(f"daemon scan failed for prog_id={prog_id}: {message}")
+        results[prog_id] = _scan_record_from_optimize_response(prog_id, response)
     return results
 
 
@@ -642,30 +596,6 @@ def _daemon_log_tail(stdout_path: Path | None, stderr_path: Path | None) -> str:
     return tail_text("\n".join(fragments), max_lines=80, max_chars=8000)
 
 
-def _daemon_error_response(
-    detail: str,
-    *,
-    daemon_proc: subprocess.Popen[str] | None = None,
-    stdout_path: Path | None = None,
-    stderr_path: Path | None = None,
-) -> dict[str, Any]:
-    notes: list[str] = [detail]
-    if daemon_proc is not None:
-        returncode = daemon_proc.poll()
-        notes.append(
-            f"daemon serve rc={returncode}" if returncode is not None else "daemon serve still running"
-        )
-
-    log_tail = _daemon_log_tail(stdout_path, stderr_path)
-    if log_tail:
-        notes.append(f"daemon log tail:\n{log_tail}")
-
-    return {
-        "status": "error",
-        "message": "\n".join(notes),
-    }
-
-
 def _start_daemon_server(
     daemon_binary: Path | str,
 ) -> tuple[subprocess.Popen[str], Path, str, Path, Path]:
@@ -743,44 +673,49 @@ def _daemon_request(
                 if b"\n" in chunk:
                     break
         except socket.timeout:
-            return _daemon_error_response(
-                f"daemon socket request timed out after {timeout_seconds:.0f}s",
-                daemon_proc=daemon_proc,
-                stdout_path=stdout_path,
-                stderr_path=stderr_path,
-            )
+            log_tail = _daemon_log_tail(stdout_path, stderr_path)
+            details = [f"daemon socket request timed out after {timeout_seconds:.0f}s"]
+            if daemon_proc is not None:
+                returncode = daemon_proc.poll()
+                details.append(
+                    f"daemon serve rc={returncode}" if returncode is not None else "daemon serve still running"
+                )
+            if log_tail:
+                details.append(f"daemon log tail:\n{log_tail}")
+            raise RuntimeError("\n".join(details))
         except OSError as exc:
-            return _daemon_error_response(
-                f"daemon socket request failed: {exc}",
-                daemon_proc=daemon_proc,
-                stdout_path=stdout_path,
-                stderr_path=stderr_path,
-            )
+            log_tail = _daemon_log_tail(stdout_path, stderr_path)
+            details = [f"daemon socket request failed: {exc}"]
+            if daemon_proc is not None:
+                returncode = daemon_proc.poll()
+                details.append(
+                    f"daemon serve rc={returncode}" if returncode is not None else "daemon serve still running"
+                )
+            if log_tail:
+                details.append(f"daemon log tail:\n{log_tail}")
+            raise RuntimeError("\n".join(details)) from exc
 
     line = b"".join(chunks).decode(errors="replace").strip()
     if not line:
-        return _daemon_error_response(
-            "daemon socket returned an empty response",
-            daemon_proc=daemon_proc,
-            stdout_path=stdout_path,
-            stderr_path=stderr_path,
-        )
+        log_tail = _daemon_log_tail(stdout_path, stderr_path)
+        detail = "daemon socket returned an empty response"
+        if log_tail:
+            detail += f"\ndaemon log tail:\n{log_tail}"
+        raise RuntimeError(detail)
     try:
         response = json.loads(line)
     except json.JSONDecodeError as exc:
-        return _daemon_error_response(
-            f"daemon socket returned invalid JSON: {exc}: {line[:400]}",
-            daemon_proc=daemon_proc,
-            stdout_path=stdout_path,
-            stderr_path=stderr_path,
-        )
+        log_tail = _daemon_log_tail(stdout_path, stderr_path)
+        detail = f"daemon socket returned invalid JSON: {exc}: {line[:400]}"
+        if log_tail:
+            detail += f"\ndaemon log tail:\n{log_tail}"
+        raise RuntimeError(detail) from exc
     if not isinstance(response, Mapping):
-        return _daemon_error_response(
-            f"daemon socket returned non-object JSON: {line[:400]}",
-            daemon_proc=daemon_proc,
-            stdout_path=stdout_path,
-            stderr_path=stderr_path,
-        )
+        log_tail = _daemon_log_tail(stdout_path, stderr_path)
+        detail = f"daemon socket returned non-object JSON: {line[:400]}"
+        if log_tail:
+            detail += f"\ndaemon log tail:\n{log_tail}"
+        raise RuntimeError(detail)
     return dict(response)
 
 

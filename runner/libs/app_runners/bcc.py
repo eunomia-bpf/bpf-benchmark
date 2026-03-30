@@ -75,15 +75,6 @@ def _bcc_tool_specs() -> dict[str, BCCWorkloadSpec]:
     return specs
 
 
-def _tool_name_from_object(object_path: Path | str) -> str:
-    name = Path(object_path).name
-    if name.endswith(".bpf.o"):
-        return name[: -len(".bpf.o")]
-    if name.endswith(".o"):
-        return name[: -len(".o")]
-    return Path(object_path).stem
-
-
 def run_setup_script(setup_script: Path = DEFAULT_SETUP_SCRIPT) -> dict[str, object]:
     completed = run_command(["bash", str(setup_script)], check=False, timeout=1800)
     result: dict[str, object] = {
@@ -215,7 +206,6 @@ class BCCRunner:
         self,
         *,
         tool_binary: Path | str | None = None,
-        object_path: Path | str | None = None,
         tool_name: str | None = None,
         tool_args: Sequence[str] | None = None,
         workload_kind: str | None = None,
@@ -225,10 +215,9 @@ class BCCRunner:
         tools_dir: Path | str | None = None,
         setup_script: Path | str = DEFAULT_SETUP_SCRIPT,
     ) -> None:
-        resolved_object_path = Path(object_path).resolve() if object_path else None
-        resolved_tool_name = (tool_name or (_tool_name_from_object(resolved_object_path) if resolved_object_path else "")).strip()
+        resolved_tool_name = str(tool_name or "").strip()
         if not resolved_tool_name and tool_binary is None:
-            raise RuntimeError("BCCRunner requires tool_binary, tool_name, or object_path")
+            raise RuntimeError("BCCRunner requires tool_binary or tool_name")
 
         spec = _bcc_tool_specs().get(resolved_tool_name)
         self.tool_name = resolved_tool_name or Path(str(tool_binary)).name
@@ -241,7 +230,6 @@ class BCCRunner:
         self.expected_programs = int(expected_programs or (spec.expected_programs if spec else max(1, len(tuple(expected_program_names)) or 1)))
         self.attach_timeout_s = int(attach_timeout_s or (spec.spawn_timeout_s if spec else DEFAULT_ATTACH_TIMEOUT_SECONDS))
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
-        self.object_path = resolved_object_path
         self.setup_script = Path(setup_script).resolve()
         self.setup_result: dict[str, object] = {
             "returncode": 0,

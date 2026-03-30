@@ -153,9 +153,14 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: 
     def cleanup(_setup_state):
         phases.append("cleanup")
 
-    with case_common.open_prepared_daemon_session(Path("/tmp/fake-daemon")) as daemon_session:
+    daemon_session = FakeDaemonSession.start(Path("/tmp/fake-daemon"))
+    prepared_daemon_session = case_common.prepare_daemon_session(
+        daemon_session,
+        daemon_binary=Path("/tmp/fake-daemon"),
+    )
+    try:
         result = case_common.run_case_lifecycle(
-            daemon_session=daemon_session,
+            daemon_session=prepared_daemon_session,
             setup=setup,
             start=start,
             workload=workload,
@@ -163,6 +168,8 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: 
             cleanup=cleanup,
             enabled_passes=["map_inline"],
         )
+    finally:
+        daemon_session.close()
 
     assert result.baseline == {"phase": "baseline"}
     assert result.post_rejit == {"phase": "post_rejit"}
@@ -261,9 +268,14 @@ def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypat
 
     phases: list[str] = []
 
-    with case_common.open_prepared_daemon_session(Path("/tmp/fake-daemon")) as daemon_session:
+    daemon_session = FakeDaemonSession.start(Path("/tmp/fake-daemon"))
+    prepared_daemon_session = case_common.prepare_daemon_session(
+        daemon_session,
+        daemon_binary=Path("/tmp/fake-daemon"),
+    )
+    try:
         result = case_common.run_case_lifecycle(
-            daemon_session=daemon_session,
+            daemon_session=prepared_daemon_session,
             setup=lambda: {"runtime": "demo"},
             start=lambda _setup_state: case_common.CaseLifecycleState(
                 runtime=object(),
@@ -276,6 +288,8 @@ def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypat
                 (((rejit_result.get("counts") or {}).get("applied_sites", 0)) or 0)
             ) > 0,
         )
+    finally:
+        daemon_session.close()
 
     assert result.post_rejit == {"phase": "post_rejit"}
     assert phases == [

@@ -17,24 +17,22 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    run_command,
     smoke_output_path,
-    tail_text,
     which,
 )
 from runner.libs.app_runners.scx import ScxRunner, preferred_path, read_scx_ops, read_scx_state  # noqa: E402
+from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
-from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     host_metadata,
-    open_prepared_daemon_session,
     summarize_numbers,
     percent_delta,
     percentile,
     persist_results,
+    prepare_daemon_session,
     run_case_lifecycle,
 )
 
@@ -43,10 +41,7 @@ DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "scx")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "scx-e2e.md"
 DEFAULT_SCX_BINARY = ROOT_DIR / "runner" / "repos" / "scx" / "target" / "release" / "scx_rusty"
 DEFAULT_SCX_REPO = ROOT_DIR / "runner" / "repos" / "scx"
-DEFAULT_SCX_OBJECT = ROOT_DIR / "corpus" / "build" / "scx" / "scx_rusty_main.bpf.o"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
-DEFAULT_KERNEL = ROOT_DIR / "vendor" / "linux-framework" / "arch" / "x86" / "boot" / "bzImage"
-DEFAULT_BPFTOOL = Path("/usr/local/sbin/bpftool")
 DEFAULT_LOAD_TIMEOUT = 20
 DEFAULT_DURATION_S = 30
 DEFAULT_SMOKE_DURATION_S = 10
@@ -96,14 +91,17 @@ def ensure_artifacts(daemon_binary: Path, scheduler_binary: Path, scx_repo: Path
 
 
 def workload_specs() -> list[dict[str, str]]:
-    specs: list[dict[str, str]] = []
-    if which("hackbench"):
-        specs.append({"name": "hackbench", "kind": "hackbench", "metric": "runs/s"})
-    if which("stress-ng"):
-        specs.append({"name": "stress-ng-cpu", "kind": "stress_ng_cpu", "metric": "bogo-ops/s"})
-    if which("sysbench"):
-        specs.append({"name": "sysbench-cpu", "kind": "sysbench_cpu", "metric": "events/s"})
-    return specs
+    required = (
+        ("hackbench", {"name": "hackbench", "kind": "hackbench", "metric": "runs/s"}),
+        ("stress-ng", {"name": "stress-ng-cpu", "kind": "stress_ng_cpu", "metric": "bogo-ops/s"}),
+        ("sysbench", {"name": "sysbench-cpu", "kind": "sysbench_cpu", "metric": "events/s"}),
+    )
+    missing = [binary for binary, _spec in required if not which(binary)]
+    if missing:
+        raise RuntimeError(
+            "scx benchmark requires fixed workload generators in PATH: " + ", ".join(missing)
+        )
+    return [dict(spec) for _binary, spec in required]
 
 
 def measure_workload(
@@ -133,8 +131,7 @@ def measure_workload(
     system_thread.start()
     threads.append(system_thread)
 
-    runner.workload_spec = dict(workload_spec)
-    workload_result = runner.run_workload(duration_s)
+    workload_result = runner.run_workload_spec(workload_spec, duration_s)
     extra = dict(runner.last_workload_extra)
 
     for thread in threads:
@@ -238,43 +235,6 @@ def compare_phases(baseline: Mapping[str, object] | None, post: Mapping[str, obj
         )
     return {"comparable": True, "workloads": workload_rows}
 
-
-def probe_bpftool_register(object_path: Path, bpftool_binary: Path) -> dict[str, object]:
-    before_state = read_scx_state()
-    completed = run_command(
-        [str(bpftool_binary), "struct_ops", "register", str(object_path)],
-        check=False,
-        timeout=60,
-    )
-    after_state = read_scx_state()
-    after_ops = read_scx_ops()
-    prog_count = 0
-    prog_show = run_command([str(bpftool_binary), "-j", "-p", "prog", "show"], check=False, timeout=30)
-    if prog_show.returncode == 0:
-        try:
-            payload = json.loads(prog_show.stdout)
-        except json.JSONDecodeError:
-            payload = []
-        if isinstance(payload, list):
-            prog_count = sum(
-                1
-                for item in payload
-                if isinstance(item, Mapping) and str(item.get("type", "")) == "struct_ops"
-            )
-    return {
-        "attempted": True,
-        "bpftool": str(bpftool_binary),
-        "returncode": completed.returncode,
-        "before_state": before_state,
-        "after_state": after_state,
-        "after_ops": after_ops,
-        "struct_ops_program_count_after": prog_count,
-        "usable": completed.returncode == 0 and after_state == "enabled" and bool(after_ops),
-        "stdout_tail": tail_text(completed.stdout or "", max_lines=40, max_chars=8000),
-        "stderr_tail": tail_text(completed.stderr or "", max_lines=40, max_chars=8000),
-    }
-
-
 def build_markdown(payload: Mapping[str, object]) -> str:
     status = str(payload.get("status") or "")
     lines = [
@@ -293,9 +253,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     preflight = payload.get("preflight") or {}
     lines.append(f"- sched_ext state before load: `{preflight.get('state_before')}`")
     lines.append(f"- workloads selected: `{preflight.get('available_workloads')}`")
-    lines.append(
-        f"- raw bpftool register usable: `{((preflight.get('bpftool_register_probe') or {}).get('usable'))}`"
-    )
     lines.append(
         f"- runtime counters exposed via bpftool: `{preflight.get('runtime_counters_available')}`"
     )
@@ -365,22 +322,13 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
     scheduler_binary = Path(args.scheduler_binary).resolve()
     scx_repo = Path(args.scx_repo).resolve()
-    object_path = Path(args.scheduler_object).resolve()
     daemon_binary = Path(args.daemon).resolve()
-    bpftool_binary = Path(args.bpftool).resolve()
     ensure_artifacts(daemon_binary, scheduler_binary, scx_repo)
 
     workloads = workload_specs()
-    if not workloads:
-        raise RuntimeError("no scheduler workloads are available; expected hackbench, stress-ng, or sysbench")
 
     limitations: list[str] = []
     state_before = read_scx_state()
-    bpftool_probe = probe_bpftool_register(object_path, bpftool_binary)
-    if not bpftool_probe.get("usable"):
-        limitations.append(
-            "Raw `bpftool struct_ops register` returned success but did not leave sched_ext enabled, so the standalone bpftool path is not a usable end-to-end loader here."
-        )
 
     baseline: dict[str, object] | None = None
     post_rejit: dict[str, object] | None = None
@@ -391,6 +339,9 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     scheduler_ops: list[str] = []
     runtime_counters_available = False
     loader_error: str | None = None
+    prepared_daemon_session = getattr(args, "_prepared_daemon_session", None)
+    if prepared_daemon_session is None:
+        raise RuntimeError("prepared daemon session is required")
 
     try:
         def setup() -> dict[str, object]:
@@ -398,10 +349,10 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
 
         def start(_: object) -> CaseLifecycleState:
             runner = ScxRunner(
-                object_path=object_path,
                 scheduler_binary=scheduler_binary,
                 scheduler_extra_args=args.scheduler_extra_arg or [],
                 load_timeout_s=int(args.load_timeout),
+                workload_spec={"name": "hackbench", "kind": "hackbench", "metric": "runs/s"},
             )
             runner.start()
             return CaseLifecycleState(
@@ -426,19 +377,18 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         def cleanup(_: object) -> None:
             return None
 
-        with open_prepared_daemon_session(daemon_binary) as daemon_session:
-            lifecycle_result = run_case_lifecycle(
-                daemon_session=daemon_session,
-                setup=setup,
-                start=start,
-                workload=workload,
-                stop=stop,
-                cleanup=cleanup,
-                enabled_passes=benchmark_rejit_enabled_passes(),
-                should_run_post_rejit=lambda result: int(
-                    (((result.get("counts") or {}).get("applied_sites", 0)) or 0)
-                ) > 0,
-            )
+        lifecycle_result = run_case_lifecycle(
+            daemon_session=prepared_daemon_session,
+            setup=setup,
+            start=start,
+            workload=workload,
+            stop=stop,
+            cleanup=cleanup,
+            enabled_passes=benchmark_rejit_enabled_passes(),
+            should_run_post_rejit=lambda result: int(
+                (((result.get("counts") or {}).get("applied_sites", 0)) or 0)
+            ) > 0,
+        )
         if lifecycle_result.state is None:
             raise RuntimeError("scx lifecycle completed without a live session")
         runner = lifecycle_result.state.runtime
@@ -462,7 +412,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         loader_error = str(exc)
         limitations.append(f"scx_rusty userspace loader failed: {loader_error}")
 
-    mode = "scx_rusty_loader" if baseline is not None else "probe_only"
+    mode = "scx_rusty_loader"
     scan_summary = {
         "scanned_programs": len(scan_results),
         "site_bearing_programs": sum(
@@ -480,7 +430,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         "smoke": bool(args.smoke),
         "duration_s": duration_s,
         "scheduler_binary": str(scheduler_binary) if scheduler_binary.exists() else None,
-        "scheduler_object": str(object_path),
         "scheduler_programs": scheduler_programs,
         "scheduler_ops": scheduler_ops,
         "scheduler_output": scheduler_snapshot,
@@ -489,7 +438,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
             "state_before": state_before,
             "runtime_counters_available": runtime_counters_available,
             "available_workloads": [spec["name"] for spec in workloads],
-            "bpftool_register_probe": bpftool_probe,
             "loader_error": loader_error,
         },
         "baseline": baseline,
@@ -509,78 +457,21 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--scheduler-binary", default=str(DEFAULT_SCX_BINARY))
-    parser.add_argument("--scheduler-object", default=str(DEFAULT_SCX_OBJECT))
     parser.add_argument("--scx-repo", default=str(DEFAULT_SCX_REPO))
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--bpftool", default=str(DEFAULT_BPFTOOL))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--load-timeout", type=int, default=DEFAULT_LOAD_TIMEOUT)
     parser.add_argument("--scheduler-extra-arg", action="append", default=[])
-    parser.add_argument("--vm", action="store_true")
-    parser.add_argument("--kernel", default=str(DEFAULT_KERNEL))
-    parser.add_argument("--cpus", type=int, default=4)
-    parser.add_argument("--mem", default="4G")
-    parser.add_argument("--timeout", type=int, default=3600)
     return parser
-
-
-def run_scx_vm(args: argparse.Namespace) -> int:
-    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
-        output_json = smoke_output_path(RESULTS_DIR, "scx")
-    else:
-        output_json = Path(args.output_json).resolve()
-    guest_command = [
-        "python3",
-        "e2e/cases/scx/case.py",
-        "--output-json",
-        str(output_json),
-        "--output-md",
-        str(Path(args.output_md).resolve()),
-        "--scheduler-binary",
-        str(Path(args.scheduler_binary).resolve()),
-        "--scheduler-object",
-        str(Path(args.scheduler_object).resolve()),
-        "--scx-repo",
-        str(Path(args.scx_repo).resolve()),
-        "--daemon",
-        str(Path(args.daemon).resolve()),
-        "--bpftool",
-        str(Path(args.bpftool).resolve()),
-        "--load-timeout",
-        str(int(args.load_timeout)),
-    ]
-    if args.smoke:
-        guest_command.append("--smoke")
-    if args.duration is not None:
-        guest_command.extend(["--duration", str(int(args.duration))])
-    for extra_arg in args.scheduler_extra_arg or []:
-        guest_command.extend(["--scheduler-extra-arg", extra_arg])
-
-    guest_script = write_guest_script([guest_command])
-    completed = run_in_vm(
-        args.kernel,
-        guest_script,
-        args.cpus,
-        args.mem,
-        args.timeout,
-        action="vm-e2e",
-    )
-    sys.stdout.write(completed.stdout)
-    sys.stderr.write(completed.stderr)
-    if completed.returncode != 0:
-        raise SystemExit(
-            f"vng run failed with exit {completed.returncode}: {tail_text(completed.stderr or completed.stdout)}"
-        )
-    return 0
-
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_case_parser()
     args = parser.parse_args(argv)
-    if args.vm:
-        return run_scx_vm(args)
-    payload = run_scx_case(args)
+    daemon_binary = Path(args.daemon).resolve()
+    with DaemonSession.start(daemon_binary) as daemon_session:
+        args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
+        payload = run_scx_case(args)
     if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
         output_json = smoke_output_path(RESULTS_DIR, "scx")
     else:

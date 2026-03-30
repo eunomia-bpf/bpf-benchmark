@@ -19,6 +19,7 @@ from runner.libs import (  # noqa: E402
     write_json,
     write_text,
 )
+from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.run_artifacts import (  # noqa: E402
     ArtifactSession,
@@ -32,14 +33,6 @@ from e2e.cases.bpftrace.case import (  # noqa: E402
     build_markdown as build_bpftrace_markdown,
     build_report as build_bpftrace_report,
     run_case as run_bpftrace_case,
-)
-from e2e.cases.katran.case import (  # noqa: E402
-    DEFAULT_KATRAN_OBJECT as DEFAULT_KATRAN_CASE_OBJECT,
-    DEFAULT_OUTPUT_JSON as DEFAULT_KATRAN_OUTPUT_JSON,
-    DEFAULT_OUTPUT_MD as DEFAULT_KATRAN_OUTPUT_MD,
-    DEFAULT_SETUP_SCRIPT as DEFAULT_KATRAN_SETUP_SCRIPT,
-    build_markdown as build_katran_markdown,
-    run_katran_case,
 )
 from e2e.cases.scx.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_SCX_OUTPUT_JSON,
@@ -73,6 +66,7 @@ from e2e.cases.tracee.case import (  # noqa: E402
 )
 from runner.libs.case_common import (  # noqa: E402
     attach_pending_result_metadata,
+    prepare_daemon_session,
     reset_pending_result_metadata,
 )
 
@@ -114,13 +108,6 @@ CASE_SPECS: dict[str, CaseSpec] = {
         default_output_json=DEFAULT_SCX_OUTPUT_JSON,
         default_output_md=DEFAULT_SCX_OUTPUT_MD,
     ),
-    "katran": CaseSpec(
-        run_case=run_katran_case,
-        build_markdown=build_katran_markdown,
-        default_output_json=DEFAULT_KATRAN_OUTPUT_JSON,
-        default_output_md=DEFAULT_KATRAN_OUTPUT_MD,
-        default_setup_script=str(DEFAULT_KATRAN_SETUP_SCRIPT),
-    ),
     "bcc": CaseSpec(
         run_case=run_bcc_case,
         build_markdown=build_bcc_markdown,
@@ -134,7 +121,7 @@ CASE_SPECS: dict[str, CaseSpec] = {
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Unified entrypoint for repository end-to-end benchmarks.")
-    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "katran", "bcc", "all"))
+    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "bcc", "all"))
     parser.add_argument("--smoke", action="store_true", help="Run the smoke-sized configuration.")
     parser.add_argument("--duration", type=int, help="Override the per-workload duration in seconds.")
     parser.add_argument("--tracee-binary", help="Explicit Tracee binary path.")
@@ -152,17 +139,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--tracee-extra-arg", action="append", default=[])
     parser.add_argument("--script", action="append", dest="scripts")
     parser.add_argument("--scheduler-binary", default=str(ROOT_DIR / "runner" / "repos" / "scx" / "target" / "release" / "scx_rusty"))
-    parser.add_argument("--scheduler-object", default=str(ROOT_DIR / "corpus" / "build" / "scx" / "scx_rusty_main.bpf.o"))
     parser.add_argument("--scx-repo", default=str(ROOT_DIR / "runner" / "repos" / "scx"))
-    parser.add_argument("--katran-object", default=str(DEFAULT_KATRAN_CASE_OBJECT))
-    parser.add_argument("--katran-iface", default="katran0")
-    parser.add_argument("--katran-router-peer-iface")
-    parser.add_argument("--katran-packet-repeat", type=int)
-    parser.add_argument("--katran-use-wrk", action="store_true")
-    parser.add_argument("--katran-wrk-connections", type=int)
-    parser.add_argument("--katran-wrk-threads", type=int)
-    parser.add_argument("--katran-warmup-duration", type=float)
-    parser.add_argument("--katran-samples", type=int)
     parser.add_argument("--kernel-config", default=str(ROOT_DIR / "vendor" / "linux-framework" / ".config"))
     parser.add_argument("--bpftool", default="/usr/local/sbin/bpftool", help="Explicit bpftool path for Tetragon runs.")
     parser.add_argument("--scheduler-extra-arg", action="append", default=[])
@@ -205,7 +182,7 @@ def resolve_primary_output_json(args: argparse.Namespace, spec: CaseSpec) -> Pat
     return output_json
 
 
-ALL_CASES = ("tracee", "tetragon", "bpftrace", "scx", "katran", "bcc")
+ALL_CASES = ("tracee", "tetragon", "bpftrace", "scx", "bcc")
 
 
 def _restore_environment(saved_env: dict[str, str]) -> None:
@@ -251,7 +228,12 @@ def build_run_metadata(
     return metadata
 
 
-def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) -> dict[str, object]:
+def _run_single_case(
+    args: argparse.Namespace,
+    *,
+    clear_existing: bool = False,
+    prepared_daemon_session: object | None = None,
+) -> dict[str, object]:
     """Run a single e2e case and persist its outputs progressively."""
     spec = CASE_SPECS[args.case]
     output_json = resolve_primary_output_json(args, spec)
@@ -294,6 +276,8 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
     reset_pending_result_metadata()
 
     try:
+        if prepared_daemon_session is not None:
+            setattr(args, "_prepared_daemon_session", prepared_daemon_session)
         payload = spec.run_case(args)
         attach_pending_result_metadata(payload)
         detail_texts = {"result.md": spec.build_markdown(payload) + "\n"}
@@ -386,24 +370,25 @@ def main(argv: list[str] | None = None) -> int:
         os.environ["BPFREJIT_BENCH_PASSES"] = str(args.rejit_passes).strip()
 
     if args.case == "all":
-        # Run all cases sequentially, each with its own default outputs.
         failed: list[str] = []
-        for case_name in ALL_CASES:
-            print(f"\n{'='*60}")
-            print(f"  e2e: running {case_name}")
-            print(f"{'='*60}")
-            # Build a fresh args copy with case-specific defaults.
-            case_argv = [case_name] + [
-                a for a in (argv or sys.argv[1:]) if a != "all"
-            ]
-            case_args = parser.parse_args(case_argv)
-            apply_case_defaults(case_args)
-            try:
-                _run_single_case(case_args)
-                print(f"  e2e: {case_name} OK")
-            except Exception as exc:
-                print(f"  e2e: {case_name} FAILED: {exc}")
-                failed.append(case_name)
+        daemon_binary = Path(args.daemon).resolve()
+        with DaemonSession.start(daemon_binary) as daemon_session:
+            prepared = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
+            for case_name in ALL_CASES:
+                print(f"\n{'='*60}")
+                print(f"  e2e: running {case_name}")
+                print(f"{'='*60}")
+                case_argv = [case_name] + [
+                    a for a in (argv or sys.argv[1:]) if a != "all"
+                ]
+                case_args = parser.parse_args(case_argv)
+                apply_case_defaults(case_args)
+                try:
+                    _run_single_case(case_args, prepared_daemon_session=prepared)
+                    print(f"  e2e: {case_name} OK")
+                except Exception as exc:
+                    print(f"  e2e: {case_name} FAILED: {exc}")
+                    failed.append(case_name)
         if failed:
             print(f"\ne2e: FAILED cases: {', '.join(failed)}")
             return 1
@@ -411,7 +396,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     apply_case_defaults(args)
-    _run_single_case(args)
+    daemon_binary = Path(args.daemon).resolve()
+    with DaemonSession.start(daemon_binary) as daemon_session:
+        prepared = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
+        _run_single_case(args, prepared_daemon_session=prepared)
     return 0
 
 

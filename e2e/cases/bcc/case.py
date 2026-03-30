@@ -30,6 +30,7 @@ from runner.libs import (  # noqa: E402
     write_text,
 )
 from runner.libs.app_runners.bcc import BCCRunner, find_tool_binary, resolve_tools_dir, run_setup_script  # noqa: E402
+from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
     enable_bpf_stats,
@@ -42,8 +43,8 @@ from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     attach_pending_result_metadata,
     host_metadata,
-    open_prepared_daemon_session,
     percent_delta,
+    prepare_daemon_session,
     run_case_lifecycle,
 )
 
@@ -184,7 +185,7 @@ def run_phase(
     *,
     duration_s: int,
     attach_timeout: int,
-    daemon_binary: Path,
+    prepared_daemon_session: object,
 ) -> tuple[dict[str, object], dict[str, object] | None]:
     """Run baseline then daemon-apply then post-rejit measurement for one tool.
 
@@ -252,18 +253,19 @@ def run_phase(
     post_measurement: dict[str, object] | None = None
     baseline_status = "error"
     baseline_reason = ""
+    if prepared_daemon_session is None:
+        raise RuntimeError("prepared daemon session is required")
     try:
         enabled_passes = list(spec.rejit_passes) if spec.rejit_passes else benchmark_rejit_enabled_passes()
-        with open_prepared_daemon_session(daemon_binary) as daemon_session:
-            lifecycle_result = run_case_lifecycle(
-                daemon_session=daemon_session,
-                setup=setup,
-                start=start,
-                workload=workload,
-                stop=stop,
-                cleanup=cleanup,
-                enabled_passes=enabled_passes,
-            )
+        lifecycle_result = run_case_lifecycle(
+            daemon_session=prepared_daemon_session,
+            setup=setup,
+            start=start,
+            workload=workload,
+            stop=stop,
+            cleanup=cleanup,
+            enabled_passes=enabled_passes,
+        )
         if lifecycle_result.baseline is not None:
             baseline_status = str(lifecycle_result.baseline.get("status") or "error")
             baseline_reason = str(lifecycle_result.baseline.get("reason") or "")
@@ -586,6 +588,9 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
     daemon_binary = Path(args.daemon).resolve()
     if not daemon_binary.exists():
         raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
+    prepared_daemon_session = getattr(args, "_prepared_daemon_session", None)
+    if prepared_daemon_session is None:
+        raise RuntimeError("prepared daemon session is required")
 
     setup_result = {
         "returncode": 0,
@@ -676,7 +681,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
                 tool_binary,
                 duration_s=duration_s,
                 attach_timeout=attach_timeout,
-                daemon_binary=daemon_binary,
+                prepared_daemon_session=prepared_daemon_session,
             )
             summary = summarize_tool(spec, baseline, rejit)
             records.append({
@@ -740,7 +745,10 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
 
 def main() -> None:
     args = parse_args()
-    payload = run_bcc_case(args)
+    daemon_binary = Path(args.daemon).resolve()
+    with DaemonSession.start(daemon_binary) as daemon_session:
+        args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
+        payload = run_bcc_case(args)
     attach_pending_result_metadata(payload)
 
     if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:

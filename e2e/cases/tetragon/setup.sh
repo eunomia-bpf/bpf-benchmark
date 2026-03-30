@@ -5,7 +5,7 @@ apt_install() {
   if ! command -v apt-get >/dev/null 2>&1; then
     return 1
   fi
-  DEBIAN_FRONTEND=noninteractive apt-get update -y >/dev/null 2>&1 || true
+  DEBIAN_FRONTEND=noninteractive apt-get update -y >/dev/null 2>&1
   DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
 }
 
@@ -33,7 +33,7 @@ for tool in stress-ng fio curl tar; do
   fi
 done
 if [[ "${#missing_pkgs[@]}" -gt 0 ]]; then
-  apt_install "${missing_pkgs[@]}" >/dev/null 2>&1 || true
+  apt_install "${missing_pkgs[@]}" >/dev/null 2>&1
 fi
 
 if ! command -v stress-ng >/dev/null 2>&1; then

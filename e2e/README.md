@@ -2,11 +2,11 @@
 
 `e2e/` is the deployment-layer benchmark harness. The unified entrypoint is `python3 e2e/run.py <case>`.
 
-Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `scx`, and `katran`. The former low-value XDP dataplane case was retired on 2026-03-18; `katran` is the current XDP replacement.
+Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, and `scx`.
 
 ## Layout
 
-- `run.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, `scx`, and `katran`
+- `run.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, and `scx`
 - `cases/`: per-system case logic, setup scripts, configs, and assets
 - `../runner/libs/`: shared helpers for agent lifecycle, workload generation, metrics, VM runs, and REJIT
 - `results/`: JSON/Markdown outputs
@@ -17,11 +17,11 @@ Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `scx`, and `katran
 source /home/yunwei37/workspace/.venv/bin/activate
 make micro
 make daemon
-make corpus-build REPOS="tracee tetragon scx katran"
+make corpus-build REPOS="tracee tetragon scx"
 ```
 
 - Most cases require root or passwordless `sudo -n`.
-- `tracee`, `tetragon`, `scx`, and `katran` consume objects from `corpus/build/`.
+- `tracee`, `tetragon`, and `scx` consume objects from `corpus/build/`.
 - `e2e` expects the daemon CLI at `daemon/target/release/bpfrejit-daemon`; `make daemon` builds it.
 
 ## Case Notes
@@ -55,13 +55,6 @@ make corpus-build REPOS="tracee tetragon scx katran"
 
 - `make vm-e2e` now prepares `runner/repos/scx` and `runner/repos/scx/target/release/scx_rusty` through the runner control plane before entering the VM
 - Uses `corpus/build/scx/scx_rusty_main.bpf.o`
-- Requires at least one workload generator in `PATH`: `hackbench`, `stress-ng`, or `sysbench`
+- Requires `hackbench`, `stress-ng`, and `sysbench` in `PATH`
 - Supports `--vm` and requires `--kernel` when enabled
 - Smoke example: `python3 e2e/run.py scx --smoke`
-
-### Katran
-
-- Setup helper: `e2e/cases/katran/setup.sh`
-- Uses `corpus/build/katran/balancer.bpf.o` plus the live DSR topology helper assets in the case directory
-- Supports `--vm` and requires `--kernel` when enabled
-- Smoke example: `python3 e2e/run.py katran --smoke`

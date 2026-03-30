@@ -14,13 +14,7 @@ from ..workload import WorkloadResult, run_connect_storm, run_exec_storm, run_fi
 
 
 def _bpftool_binary() -> str:
-    try:
-        return resolve_bpftool_binary()
-    except RuntimeError:
-        default = Path("/usr/local/sbin/bpftool")
-        if default.exists():
-            return str(default)
-        return "bpftool"
+    return resolve_bpftool_binary()
 
 
 class ProcessOutputCollector:
@@ -52,7 +46,7 @@ class ProcessOutputCollector:
 def current_programs() -> list[dict[str, object]]:
     payload = run_json_command([_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
     if not isinstance(payload, list):
-        return []
+        raise RuntimeError("bpftool prog show returned a non-list payload")
     return [dict(record) for record in payload if isinstance(record, dict) and "id" in record]
 
 

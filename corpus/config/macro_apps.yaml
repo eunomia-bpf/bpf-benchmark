@@ -306,10 +306,6 @@ apps:
     runner: datadog-agent
     workload: oom_stress
 
-  - name: katran/default
-    runner: katran
-    workload: network
-
   - name: libbpf-bootstrap/bootstrap
     runner: libbpf-bootstrap
     workload: exec_storm

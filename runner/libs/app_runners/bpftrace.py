@@ -16,7 +16,6 @@ class BpftraceRunner:
     def __init__(
         self,
         *,
-        object_path: Path | str | None = None,
         script_path: Path | str | None = None,
         script_name: str | None = None,
         workload_kind: str | None = None,
@@ -24,7 +23,6 @@ class BpftraceRunner:
         expected_program_names: Sequence[str] = (),
         attach_timeout_s: int = DEFAULT_ATTACH_TIMEOUT_S,
     ) -> None:
-        self.object_path = None if object_path is None else Path(object_path).resolve()
         self.script_path = None if script_path is None else Path(script_path).resolve()
         self.script_name = str(script_name or "").strip()
         self.workload_kind = workload_kind
@@ -66,9 +64,6 @@ class BpftraceRunner:
             stem = self.script_path.name.removesuffix(".bt")
             spec = specs.get(stem)
             return self.script_path, self.workload_kind or (spec.workload_kind if spec else ""), int(self.expected_programs or (spec.expected_programs if spec else 1))
-        if self.object_path is not None and self.object_path.suffix == ".bt":
-            self.script_path = self.object_path
-            return self._resolve_script()
         raise RuntimeError("BpftraceRunner requires script_name or script_path")
 
     def start(self) -> list[int]:

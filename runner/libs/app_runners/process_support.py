@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import subprocess
 import threading
-import time
 from collections import deque
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
@@ -129,32 +128,16 @@ class ManagedProcessSession:
         self.close()
 
 
-def run_sleep_workload(seconds: float) -> WorkloadResult:
-    duration_s = max(0.1, float(seconds))
-    start = time.monotonic()
-    time.sleep(duration_s)
-    elapsed = time.monotonic() - start
-    return WorkloadResult(
-        ops_total=elapsed,
-        ops_per_sec=(1.0 / elapsed) if elapsed > 0 else None,
-        duration_s=elapsed,
-        stdout="",
-        stderr="",
-    )
-
-
 class NativeProcessRunner:
     def __init__(
         self,
         *,
-        object_path: Path | str | None = None,
         loader_binary: Path | str | None = None,
         loader_args: Sequence[str] = (),
         expected_program_names: Sequence[str] = (),
         load_timeout_s: int = 20,
         workload_kind: str | None = None,
     ) -> None:
-        self.object_path = None if object_path is None else Path(object_path).resolve()
         self.loader_binary = None if loader_binary is None else Path(loader_binary).resolve()
         self.loader_args = tuple(str(arg) for arg in loader_args if str(arg).strip())
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
@@ -189,7 +172,9 @@ class NativeProcessRunner:
         return None
 
     def _run_workload(self, seconds: float) -> WorkloadResult:
-        return run_sleep_workload(seconds)
+        if not self.workload_kind:
+            raise RuntimeError(f"{type(self).__name__} requires an explicit workload_kind")
+        return run_named_workload(self.workload_kind, seconds)
 
     def _fail_start(self, message: str) -> None:
         try:

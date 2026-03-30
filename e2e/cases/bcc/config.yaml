@@ -5,7 +5,7 @@
 # workload_kind must be one of:
 #   tcp_connect  -- curl-based HTTP loopback connects
 #   dd_read      -- dd sequential reads from a temp file
-#   scheduler    -- hackbench or stress-ng --switch context-switch storm
+#   scheduler    -- scheduler-stress context-switch storm
 #   exec_storm   -- stress-ng --exec execve storm
 #   exec_loop    -- deterministic execve loop, optionally dropped to uid 65534
 #   file_open    -- fio/stress-ng open-close file storm

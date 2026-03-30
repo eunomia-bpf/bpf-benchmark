@@ -21,12 +21,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from runner.libs.catalog import DEFAULT_MICRO_MANIFEST, load_manifest as load_micro_suite
 from runner.libs.benchmarks import resolve_memory_file
-from runner.libs.rejit import (
-    _start_daemon_server,
-    _stop_daemon_server,
-    apply_daemon_rejit,
-    scan_programs,
-)
+from runner.libs.daemon_session import DaemonSession
 from runner.libs.run_artifacts import load_latest_result_for_output
 
 
@@ -168,22 +163,10 @@ def runner_supports_llvmbpf(runner_binary: Path) -> bool:
 
 
 def scan_program(
-    daemon_binary: Path,
+    daemon_session: DaemonSession,
     prog_id: int,
-    *,
-    daemon_socket_path: Path,
-    daemon_proc: subprocess.Popen[str],
-    daemon_stdout_path: Path,
-    daemon_stderr_path: Path,
 ) -> dict[str, Any]:
-    results = scan_programs(
-        [prog_id],
-        daemon_binary,
-        daemon_socket_path=daemon_socket_path,
-        daemon_proc=daemon_proc,
-        daemon_stdout_path=daemon_stdout_path,
-        daemon_stderr_path=daemon_stderr_path,
-    )
+    results = daemon_session.scan_programs([prog_id])
     record = results.get(int(prog_id))
     if not isinstance(record, dict):
         raise RuntimeError(f"daemon scan did not return a record for prog_id={prog_id}")
@@ -191,15 +174,6 @@ def scan_program(
     if error:
         raise RuntimeError(f"daemon scan failed for prog_id={prog_id}: {error}")
     return record
-
-
-def command_record(mode: str, completed: subprocess.CompletedProcess[str]) -> dict[str, Any]:
-    return {
-        "mode": mode,
-        "returncode": int(completed.returncode),
-        "stdout": completed.stdout,
-        "stderr": completed.stderr,
-    }
 
 
 def run_bpftool_samples(
@@ -283,11 +257,7 @@ def run_llvmbpf_vs_kernel(
 def run_daemon_stock_vs_rejit(
     *,
     runner_binary: Path,
-    daemon_binary: Path,
-    daemon_socket_path: Path,
-    daemon_proc: subprocess.Popen[str],
-    daemon_stdout_path: Path,
-    daemon_stderr_path: Path,
+    daemon_session: DaemonSession,
     bpftool_binary: str,
     iterations: int,
     warmups: int,
@@ -338,14 +308,7 @@ def run_daemon_stock_vs_rejit(
             if prog_id <= 0:
                 raise RuntimeError(f"{benchmark.name}: invalid prog id from pinned program")
 
-            scan_before = scan_program(
-                daemon_binary,
-                prog_id,
-                daemon_socket_path=daemon_socket_path,
-                daemon_proc=daemon_proc,
-                daemon_stdout_path=daemon_stdout_path,
-                daemon_stderr_path=daemon_stderr_path,
-            )
+            scan_before = scan_program(daemon_session, prog_id)
             stock = run_bpftool_samples(
                 bpftool_binary,
                 pin_path,
@@ -357,14 +320,7 @@ def run_daemon_stock_vs_rejit(
 
             total_sites = int(((scan_before.get("counts") or {}).get("total_sites", 0)) or 0)
             if total_sites > 0:
-                rejit_apply = apply_daemon_rejit(
-                    str(daemon_binary),
-                    [prog_id],
-                    daemon_socket_path=daemon_socket_path,
-                    daemon_proc=daemon_proc,
-                    daemon_stdout_path=daemon_stdout_path,
-                    daemon_stderr_path=daemon_stderr_path,
-                )
+                rejit_apply = daemon_session.apply_rejit([prog_id])
             else:
                 raise RuntimeError(f"{benchmark.name}: daemon scan found zero optimization sites")
 
@@ -425,110 +381,6 @@ def run_daemon_stock_vs_rejit(
         },
         "benchmarks": benchmarks,
     }
-
-
-def run_katran_smoke(
-    *,
-    daemon_binary: Path,
-    daemon_socket_path: Path,
-    daemon_proc: subprocess.Popen[str],
-    daemon_stdout_path: Path,
-    daemon_stderr_path: Path,
-    bpftool_binary: str,
-) -> dict[str, Any]:
-    ensure_bpffs_mounted()
-    object_path = (REPO_ROOT / "corpus" / "build" / "katran" / "balancer.bpf.o").resolve()
-    pin_root = Path("/sys/fs/bpf") / f"katran_t4g_{os.getpid()}"
-    pin_dir = pin_root / "progs"
-    map_dir = pin_root / "maps"
-    run_command(["rm", "-rf", str(pin_root)], check=False)
-    run_command(["mkdir", "-p", str(pin_dir), str(map_dir)])
-
-    loadall_attempts: list[dict[str, Any]] = []
-
-    try:
-        kernel_btf_attempt = subprocess.run(
-            [
-                bpftool_binary,
-                "prog",
-                "loadall",
-                str(object_path),
-                str(pin_dir),
-                "kernel_btf",
-                "/sys/kernel/btf/vmlinux",
-                "type",
-                "xdp",
-                "pinmaps",
-                str(map_dir),
-            ],
-            cwd=REPO_ROOT,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=180,
-        )
-        loadall_attempts.append(command_record("kernel_btf", kernel_btf_attempt))
-        selected_load_mode = "kernel_btf"
-        if kernel_btf_attempt.returncode != 0:
-            plain_xdp_attempt = subprocess.run(
-                [
-                    bpftool_binary,
-                    "prog",
-                    "loadall",
-                    str(object_path),
-                    str(pin_dir),
-                    "type",
-                    "xdp",
-                    "pinmaps",
-                    str(map_dir),
-                ],
-                cwd=REPO_ROOT,
-                capture_output=True,
-                text=True,
-                check=False,
-                timeout=180,
-            )
-            loadall_attempts.append(command_record("plain_xdp", plain_xdp_attempt))
-            selected_load_mode = "plain_xdp"
-            if plain_xdp_attempt.returncode != 0:
-                detail = plain_xdp_attempt.stderr.strip() or plain_xdp_attempt.stdout.strip()
-                raise RuntimeError(f"katran loadall failed ({plain_xdp_attempt.returncode}): {detail}")
-
-        pinned_program = bpftool_prog_show_pinned(bpftool_binary, pin_dir / "balancer_ingress")
-        prog_id = int(pinned_program.get("id", 0) or 0)
-        if prog_id <= 0:
-            raise RuntimeError("katran smoke did not produce a live program id")
-        scan_before = scan_program(
-            daemon_binary,
-            prog_id,
-            daemon_socket_path=daemon_socket_path,
-            daemon_proc=daemon_proc,
-            daemon_stdout_path=daemon_stdout_path,
-            daemon_stderr_path=daemon_stderr_path,
-        )
-        if int(((scan_before.get("counts") or {}).get("total_sites", 0)) or 0) > 0:
-            rejit_apply = apply_daemon_rejit(
-                str(daemon_binary),
-                [prog_id],
-                daemon_socket_path=daemon_socket_path,
-                daemon_proc=daemon_proc,
-                daemon_stdout_path=daemon_stdout_path,
-                daemon_stderr_path=daemon_stderr_path,
-            )
-        else:
-            raise RuntimeError("katran smoke found zero optimization sites")
-
-        return {
-            "object": str(object_path),
-            "pin_dir": str(pin_dir),
-            "loadall_attempts": loadall_attempts,
-            "selected_load_mode": selected_load_mode,
-            "pinned_program": pinned_program,
-            "scan_before": scan_before,
-            "rejit_apply": rejit_apply,
-        }
-    finally:
-        run_command(["rm", "-rf", str(pin_root)], check=False)
 
 
 def summarize_llvmbpf_vs_kernel(raw: dict[str, Any]) -> dict[str, Any]:
@@ -624,28 +476,6 @@ def summarize_rejit(raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def summarize_katran(raw: dict[str, Any]) -> dict[str, Any]:
-    attempts = raw.get("loadall_attempts") if isinstance(raw.get("loadall_attempts"), list) else []
-    scan_before = raw.get("scan_before") if isinstance(raw.get("scan_before"), dict) else {}
-    rejit_apply = raw.get("rejit_apply") if isinstance(raw.get("rejit_apply"), dict) else {}
-    attempt_by_mode = {
-        str(item.get("mode")): item
-        for item in attempts
-        if isinstance(item, dict) and item.get("mode")
-    }
-    return {
-        "selected_load_mode": raw.get("selected_load_mode"),
-        "loadall_attempts": len(attempts),
-        "loadall_kernel_btf_rc": int((attempt_by_mode.get("kernel_btf") or {}).get("returncode", 0) or 0),
-        "loadall_plain_xdp_rc": int((attempt_by_mode.get("plain_xdp") or {}).get("returncode", 0) or 0),
-        "pinned_program": raw.get("pinned_program"),
-        "total_sites": int((((scan_before.get("counts") or {}).get("total_sites", 0)) or 0)),
-        "applied_sites": int((((rejit_apply.get("counts") or {}).get("applied_sites", 0)) or 0)),
-        "rejit_applied": bool(rejit_apply.get("applied")),
-        "error": str(rejit_apply.get("error", scan_before.get("error", "")) or ""),
-    }
-
-
 def main() -> int:
     args = parse_args()
     output_path = Path(args.output).resolve()
@@ -672,15 +502,10 @@ def main() -> int:
     else:
         raise SystemExit("runner was cross-built without llvmbpf support")
 
-    daemon_proc, daemon_socket_path, daemon_socket_dir, daemon_stdout_path, daemon_stderr_path = _start_daemon_server(daemon_binary)
-    try:
+    with DaemonSession.start(daemon_binary) as daemon_session:
         raw_rejit = run_daemon_stock_vs_rejit(
             runner_binary=runner_binary,
-            daemon_binary=daemon_binary,
-            daemon_socket_path=daemon_socket_path,
-            daemon_proc=daemon_proc,
-            daemon_stdout_path=daemon_stdout_path,
-            daemon_stderr_path=daemon_stderr_path,
+            daemon_session=daemon_session,
             bpftool_binary=bpftool_binary,
             iterations=args.iterations,
             warmups=args.warmups,
@@ -688,16 +513,6 @@ def main() -> int:
             cpu=args.cpu,
             results_dir=results_dir,
         )
-        raw_katran = run_katran_smoke(
-            daemon_binary=daemon_binary,
-            daemon_socket_path=daemon_socket_path,
-            daemon_proc=daemon_proc,
-            daemon_stdout_path=daemon_stdout_path,
-            daemon_stderr_path=daemon_stderr_path,
-            bpftool_binary=bpftool_binary,
-        )
-    finally:
-        _stop_daemon_server(daemon_proc, daemon_socket_path, daemon_socket_dir)
 
     payload = {
         "run_date": datetime.now(timezone.utc).isoformat(),
@@ -726,12 +541,10 @@ def main() -> int:
         "summary": {
             "llvmbpf_vs_kernel": summarize_llvmbpf_vs_kernel(raw_llvmbpf_vs_kernel),
             "daemon_stock_vs_rejit": summarize_rejit(raw_rejit),
-            "katran_smoke": summarize_katran(raw_katran),
         },
         "raw": {
             "llvmbpf_vs_kernel": raw_llvmbpf_vs_kernel,
             "daemon_stock_vs_rejit": raw_rejit,
-            "katran_smoke": raw_katran,
         },
     }
 

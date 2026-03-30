@@ -25,7 +25,7 @@ apt_install() {
   if ! command -v apt-get >/dev/null 2>&1; then
     return 0
   fi
-  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$@" >/dev/null 2>&1 || true
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$@" >/dev/null 2>&1
 }
 
 need_tool() {
@@ -53,7 +53,7 @@ for tool in make clang llvm-strip pkg-config; do
   fi
 done
 if [[ "${#missing_build_tools[@]}" -gt 0 ]]; then
-  apt_install clang llvm make pkg-config libelf-dev zlib1g-dev || true
+  apt_install clang llvm make pkg-config libelf-dev zlib1g-dev
 fi
 
 # ── Install missing runtime workload tools ─────────────────────────────────────
@@ -64,7 +64,7 @@ for tool in stress-ng fio curl dd setpriv; do
   fi
 done
 if [[ "${#missing_workload_tools[@]}" -gt 0 ]]; then
-  apt_install stress-ng fio curl coreutils util-linux || true
+  apt_install stress-ng fio curl coreutils util-linux
 fi
 
 # ── Check if rebuild is needed ─────────────────────────────────────────────────

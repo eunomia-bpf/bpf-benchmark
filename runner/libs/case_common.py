@@ -1,7 +1,7 @@
 """Shared helpers for e2e benchmark cases.
 
 Consolidates utility functions that were previously copy-pasted across
-tracee, tetragon, bpftrace, katran, and scx case files.
+tracee, tetragon, bpftrace, and scx case files.
 """
 from __future__ import annotations
 
@@ -9,11 +9,10 @@ import copy
 import platform
 import statistics
 import sys
-from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Iterator, Mapping, Sequence
+from typing import Callable, Mapping, Sequence
 
 from runner.libs import (
     ROOT_DIR,
@@ -268,32 +267,34 @@ def _artifact_dict(value: Mapping[str, object] | None) -> dict[str, object]:
     return dict(value)
 
 
-@contextmanager
-def open_prepared_daemon_session(daemon_binary: Path) -> Iterator[PreparedDaemonSession]:
-    binary = daemon_binary.resolve()
+def prepare_daemon_session(
+    daemon_session: DaemonSession,
+    *,
+    daemon_binary: Path | None = None,
+) -> PreparedDaemonSession:
+    binary = (daemon_binary or daemon_session.daemon_binary).resolve()
     expected_modules = _expected_kinsn_modules()
     before_snapshot = _capture_kinsn_module_snapshot(expected_modules)
     module_load = _run_kinsn_module_loader(
         expected_modules,
         before_snapshot=before_snapshot,
     )
-    with DaemonSession.start(binary) as daemon_session:
-        metadata = {
-            "captured_at": datetime.now(timezone.utc).isoformat(),
-            "daemon_binary": relpath(binary),
-            "expected_modules": expected_modules,
-            "module_snapshot_before_daemon": before_snapshot,
-            "module_load": module_load,
-            "daemon_kinsn_discovery": _capture_daemon_kinsn_discovery(
-                daemon_session.stdout_path,
-                daemon_session.stderr_path,
-            ),
-            "status": "ready",
-        }
-        yield PreparedDaemonSession(
-            session=daemon_session,
-            metadata=metadata,
-        )
+    metadata = {
+        "captured_at": datetime.now(timezone.utc).isoformat(),
+        "daemon_binary": relpath(binary),
+        "expected_modules": expected_modules,
+        "module_snapshot_before_daemon": before_snapshot,
+        "module_load": module_load,
+        "daemon_kinsn_discovery": _capture_daemon_kinsn_discovery(
+            daemon_session.stdout_path,
+            daemon_session.stderr_path,
+        ),
+        "status": "ready",
+    }
+    return PreparedDaemonSession(
+        session=daemon_session,
+        metadata=metadata,
+    )
 
 
 def _clone_daemon_metadata(

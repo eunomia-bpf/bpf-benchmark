@@ -33,15 +33,14 @@ class TraceeRunner:
     def __init__(
         self,
         *,
-        object_path: Path | str | None = None,
         tracee_binary: Path | str | None = None,
         events: Sequence[str] = (),
         extra_args: Sequence[str] = (),
         expected_program_names: Sequence[str] = (),
         load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
         setup_script: Path | str = DEFAULT_SETUP_SCRIPT,
+        workload_spec: Mapping[str, object] | None = None,
     ) -> None:
-        self.object_path = None if object_path is None else Path(object_path).resolve()
         self.tracee_binary = None if tracee_binary is None else Path(tracee_binary).resolve()
         self.events = tuple(str(event) for event in (events or _default_events()) if str(event).strip())
         self.extra_args = tuple(str(arg) for arg in extra_args)
@@ -52,7 +51,7 @@ class TraceeRunner:
         self.programs: list[dict[str, object]] = []
         self.process_output: dict[str, object] = {}
         self.setup_result: dict[str, object] = {"returncode": 0, "tracee_binary": None, "stdout_tail": "", "stderr_tail": ""}
-        self.workload_spec: Mapping[str, object] = {"kind": "exec_storm"}
+        self.workload_spec: Mapping[str, object] = dict(workload_spec or {"kind": "exec_storm"})
         self.command_used: list[str] = []
 
     def _fail_start(self, message: str) -> NoReturn:
@@ -128,6 +127,11 @@ class TraceeRunner:
         if self.session is None:
             raise RuntimeError("TraceeRunner is not running")
         return run_tracee_workload(self.workload_spec, max(1, int(round(seconds))))
+
+    def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:
+        if self.session is None:
+            raise RuntimeError("TraceeRunner is not running")
+        return run_tracee_workload(workload_spec, max(1, int(round(seconds))))
 
     def stop(self) -> None:
         if self.session is None:

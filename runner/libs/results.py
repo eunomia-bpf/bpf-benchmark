@@ -114,14 +114,14 @@ def parse_last_json_line(stdout: str, *, label: str = "runner") -> Any:
 
 def parse_json_lines(stdout: str) -> list[Any]:
     payloads: list[Any] = []
-    for line in stdout.splitlines():
+    for line_number, line in enumerate(stdout.splitlines(), start=1):
         text = line.strip()
         if not text or (not text.startswith("{") and not text.startswith("[")):
             continue
         try:
             payloads.append(json.loads(text))
-        except json.JSONDecodeError:
-            continue
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(f"unable to parse JSON line {line_number}: {exc}: {text[:200]}") from exc
     return payloads
 
 

@@ -200,6 +200,5 @@ def test_artifact_entrypoints_compile() -> None:
         "e2e/run.py",
         "e2e/cases/bpftrace/case.py",
         "e2e/cases/tetragon/case.py",
-        "e2e/cases/katran/case.py",
     ):
         py_compile.compile(str(repo_root / relative_path), doraise=True)

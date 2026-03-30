@@ -40,6 +40,7 @@ from runner.libs.app_runners.tracee import (  # noqa: E402
     run_setup_script,
     run_tracee_workload,
 )
+from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
     enable_bpf_stats,
@@ -62,10 +63,10 @@ from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     LifecycleAbort,
     host_metadata,
-    open_prepared_daemon_session,
     percentile,
     summarize_numbers,
     percent_delta,
+    prepare_daemon_session,
     persist_results,
     run_case_lifecycle,
 )
@@ -502,8 +503,7 @@ def measure_workload(
     if runner is None:
         workload_result = run_tracee_workload(workload_spec, duration_s)
     else:
-        runner.workload_spec = dict(workload_spec)
-        workload_result = runner.run_workload(duration_s)
+        workload_result = runner.run_workload_spec(workload_spec, duration_s)
 
     for thread in threads:
         thread.join()
@@ -1276,218 +1276,220 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         tracee_programs: list[dict[str, object]] = []
         selected_programs: list[dict[str, object]] = []
         apply_programs: list[dict[str, object]] = []
+        prepared_daemon_session = getattr(args, "_prepared_daemon_session", None)
+        if prepared_daemon_session is None:
+            raise RuntimeError("prepared daemon session is required")
         with enable_bpf_stats():
-            with open_prepared_daemon_session(daemon_binary) as daemon_session:
-                for cycle_index in range(sample_count):
-                    cycle_seed = ci_seed + (cycle_index * 5000)
-                    control_phase = run_phase(
-                        workloads,
-                        duration_s,
-                        [],
+            for cycle_index in range(sample_count):
+                cycle_seed = ci_seed + (cycle_index * 5000)
+                control_phase = run_phase(
+                    workloads,
+                    duration_s,
+                    [],
+                    cycle_index=cycle_index,
+                    phase_name="control",
+                    warmup_duration_s=warmup_duration_s,
+                    latency_probe_count=0,
+                    latency_probe_timeout_s=latency_probe_timeout_s,
+                    ci_iterations=ci_iterations,
+                    ci_seed=cycle_seed,
+                    prog_fds=None,
+                    agent_pid=None,
+                    collector=None,
+                )
+                control_records = tuple(dict(record) for record in (control_phase.get("workloads") or []))
+                if not control_records:
+                    raise RuntimeError("control phase produced no workload measurements")
+
+                def setup() -> dict[str, object]:
+                    return {}
+
+                def start(_: object) -> CaseLifecycleState:
+                    runner = TraceeRunner(
+                        tracee_binary=tracee_binary,
+                        events=events,
+                        extra_args=args.tracee_extra_arg or [],
+                        load_timeout_s=int(args.load_timeout),
+                    )
+                    runner.start()
+                    cycle_selected_programs = select_tracee_programs(runner.programs, config)
+                    prog_ids = [int(program["id"]) for program in cycle_selected_programs]
+                    if config.get("apply_programs"):
+                        cycle_apply_programs = select_tracee_programs(
+                            runner.programs,
+                            config,
+                            config_key="apply_programs",
+                            allow_all_when_unset=False,
+                        )
+                        apply_prog_ids = [int(program["id"]) for program in cycle_apply_programs]
+                    else:
+                        cycle_apply_programs = [dict(program) for program in cycle_selected_programs]
+                        apply_prog_ids = list(prog_ids)
+                    return CaseLifecycleState(
+                        runtime=runner,
+                        target_prog_ids=prog_ids,
+                        apply_prog_ids=apply_prog_ids,
+                        scan_kwargs={"prog_fds": runner.program_fds},
+                        artifacts={
+                            "tracee_programs": runner.programs,
+                            "selected_tracee_programs": cycle_selected_programs,
+                            "apply_tracee_programs": cycle_apply_programs,
+                        },
+                    )
+
+                def before_baseline(_: object, lifecycle: CaseLifecycleState) -> LifecycleAbort | None:
+                    nonlocal preflight
+                    if preflight is not None or preflight_duration_s <= 0:
+                        return None
+                    runner = lifecycle.runtime
+                    assert isinstance(runner, TraceeRunner)
+                    preflight_prog_ids = sorted(set(lifecycle.target_prog_ids) | set(lifecycle.apply_prog_ids))
+                    preflight = run_phase(
+                        list(workloads),
+                        preflight_duration_s,
+                        preflight_prog_ids,
                         cycle_index=cycle_index,
-                        phase_name="control",
-                        warmup_duration_s=warmup_duration_s,
+                        phase_name="preflight",
+                        warmup_duration_s=0,
                         latency_probe_count=0,
                         latency_probe_timeout_s=latency_probe_timeout_s,
                         ci_iterations=ci_iterations,
-                        ci_seed=cycle_seed,
-                        prog_fds=None,
-                        agent_pid=None,
-                        collector=None,
+                        ci_seed=cycle_seed + 250,
+                        prog_fds=runner.program_fds,
+                        agent_pid=runner.pid,
+                        collector=runner.collector,
+                        runner=runner,
                     )
-                    control_records = tuple(dict(record) for record in (control_phase.get("workloads") or []))
-                    if not control_records:
-                        raise RuntimeError("control phase produced no workload measurements")
-
-                    def setup() -> dict[str, object]:
-                        return {}
-
-                    def start(_: object) -> CaseLifecycleState:
-                        runner = TraceeRunner(
-                            tracee_binary=tracee_binary,
-                            events=events,
-                            extra_args=args.tracee_extra_arg or [],
-                            load_timeout_s=int(args.load_timeout),
-                        )
-                        runner.start()
-                        cycle_selected_programs = select_tracee_programs(runner.programs, config)
-                        prog_ids = [int(program["id"]) for program in cycle_selected_programs]
-                        if config.get("apply_programs"):
-                            cycle_apply_programs = select_tracee_programs(
-                                runner.programs,
-                                config,
-                                config_key="apply_programs",
-                                allow_all_when_unset=False,
-                            )
-                            apply_prog_ids = [int(program["id"]) for program in cycle_apply_programs]
-                        else:
-                            cycle_apply_programs = [dict(program) for program in cycle_selected_programs]
-                            apply_prog_ids = list(prog_ids)
-                        return CaseLifecycleState(
-                            runtime=runner,
-                            target_prog_ids=prog_ids,
-                            apply_prog_ids=apply_prog_ids,
-                            scan_kwargs={"prog_fds": runner.program_fds},
-                            artifacts={
-                                "tracee_programs": runner.programs,
-                                "selected_tracee_programs": cycle_selected_programs,
-                                "apply_tracee_programs": cycle_apply_programs,
-                            },
-                        )
-
-                    def before_baseline(_: object, lifecycle: CaseLifecycleState) -> LifecycleAbort | None:
-                        nonlocal preflight
-                        if preflight is not None or preflight_duration_s <= 0:
-                            return None
-                        runner = lifecycle.runtime
-                        assert isinstance(runner, TraceeRunner)
-                        preflight_prog_ids = sorted(set(lifecycle.target_prog_ids) | set(lifecycle.apply_prog_ids))
-                        preflight = run_phase(
-                            list(workloads),
-                            preflight_duration_s,
-                            preflight_prog_ids,
-                            cycle_index=cycle_index,
-                            phase_name="preflight",
-                            warmup_duration_s=0,
-                            latency_probe_count=0,
-                            latency_probe_timeout_s=latency_probe_timeout_s,
-                            ci_iterations=ci_iterations,
-                            ci_seed=cycle_seed + 250,
-                            prog_fds=runner.program_fds,
-                            agent_pid=runner.pid,
-                            collector=runner.collector,
-                            runner=runner,
-                        )
-                        preflight["program_activity"] = {
-                            "target_programs": summarize_program_activity(preflight, lifecycle.target_prog_ids),
-                            "apply_programs": summarize_program_activity(preflight, lifecycle.apply_prog_ids),
-                        }
-                        lifecycle.artifacts["preflight"] = preflight
-                        if not require_program_activity:
-                            return None
-
-                        target_run_cnt = int(
-                            ((preflight.get("program_activity") or {}).get("target_programs") or {}).get("total_run_cnt", 0)
-                            or 0
-                        )
-                        apply_run_cnt = int(
-                            ((preflight.get("program_activity") or {}).get("apply_programs") or {}).get("total_run_cnt", 0)
-                            or 0
-                        )
-                        if target_run_cnt <= 0:
-                            limitations.append(
-                                "Configured Tracee events/workload did not execute the selected target programs during preflight."
-                            )
-                            return LifecycleAbort(
-                                status="error",
-                                reason="preflight observed zero target-program executions; target workload did not exercise the selected programs",
-                                artifacts={"preflight": preflight},
-                            )
-                        if config.get("apply_programs") and apply_run_cnt <= 0:
-                            limitations.append(
-                                "Configured Tracee events/workload did not execute the configured apply programs during preflight."
-                            )
-                            return LifecycleAbort(
-                                status="error",
-                                reason="preflight observed zero apply-program executions; configured apply programs were not exercised",
-                                artifacts={"preflight": preflight},
-                            )
+                    preflight["program_activity"] = {
+                        "target_programs": summarize_program_activity(preflight, lifecycle.target_prog_ids),
+                        "apply_programs": summarize_program_activity(preflight, lifecycle.apply_prog_ids),
+                    }
+                    lifecycle.artifacts["preflight"] = preflight
+                    if not require_program_activity:
                         return None
 
-                    def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
-                        runner = lifecycle.runtime
-                        assert isinstance(runner, TraceeRunner)
-                        phase_result = run_phase(
-                            workloads,
-                            duration_s,
-                            lifecycle.target_prog_ids,
-                            cycle_index=cycle_index,
-                            phase_name=phase_name,
-                            warmup_duration_s=warmup_duration_s,
-                            latency_probe_count=latency_probe_count,
-                            latency_probe_timeout_s=latency_probe_timeout_s,
-                            ci_iterations=ci_iterations,
-                            ci_seed=cycle_seed + (500 if phase_name == "post_rejit" else 0),
-                            prog_fds=runner.program_fds,
-                            agent_pid=runner.pid,
-                            collector=runner.collector,
-                            runner=runner,
-                            control_records=control_records,
-                            require_tracee_activity=True,
-                        )
-                        return attach_control_phase_metrics(
-                            phase_result,
-                            control_records,
-                            ci_iterations=ci_iterations,
-                            ci_seed=cycle_seed + (1500 if phase_name == "post_rejit" else 1000),
-                        )
-
-                    def stop(_: object, lifecycle: CaseLifecycleState) -> None:
-                        runner = lifecycle.runtime
-                        assert isinstance(runner, TraceeRunner)
-                        runner.stop()
-
-                    def cleanup(_: object) -> None:
-                        return None
-
-                    lifecycle_result = run_case_lifecycle(
-                        daemon_session=daemon_session,
-                        setup=setup,
-                        start=start,
-                        workload=workload,
-                        stop=stop,
-                        cleanup=cleanup,
-                        before_baseline=before_baseline,
-                        enabled_passes=benchmark_rejit_enabled_passes(),
+                    target_run_cnt = int(
+                        ((preflight.get("program_activity") or {}).get("target_programs") or {}).get("total_run_cnt", 0)
+                        or 0
                     )
-
-                    if lifecycle_result.abort is not None:
-                        return error_payload(
-                            config=config,
-                            duration_s=duration_s,
-                            tracee_binary=tracee_binary,
-                            setup_result=setup_result,
-                            smoke=bool(args.smoke),
-                            error_message=lifecycle_result.abort.reason,
-                            limitations=limitations,
-                            preflight=preflight,
+                    apply_run_cnt = int(
+                        ((preflight.get("program_activity") or {}).get("apply_programs") or {}).get("total_run_cnt", 0)
+                        or 0
+                    )
+                    if target_run_cnt <= 0:
+                        limitations.append(
+                            "Configured Tracee events/workload did not execute the selected target programs during preflight."
                         )
+                        return LifecycleAbort(
+                            status="error",
+                            reason="preflight observed zero target-program executions; target workload did not exercise the selected programs",
+                            artifacts={"preflight": preflight},
+                        )
+                    if config.get("apply_programs") and apply_run_cnt <= 0:
+                        limitations.append(
+                            "Configured Tracee events/workload did not execute the configured apply programs during preflight."
+                        )
+                        return LifecycleAbort(
+                            status="error",
+                            reason="preflight observed zero apply-program executions; configured apply programs were not exercised",
+                            artifacts={"preflight": preflight},
+                        )
+                    return None
 
-                    if lifecycle_result.state is None or lifecycle_result.baseline is None:
-                        raise RuntimeError(f"Tracee lifecycle cycle {cycle_index} completed without a baseline phase")
-                    if not lifecycle_result.rejit_result or not lifecycle_result.rejit_result.get("applied"):
-                        raise RuntimeError(f"Tracee reJIT did not apply in cycle {cycle_index}: {lifecycle_result.rejit_result}")
-                    if lifecycle_result.post_rejit is None:
-                        raise RuntimeError(f"Tracee post-ReJIT phase is missing in cycle {cycle_index}")
-
-                    cycle_scan_results = lifecycle_result.scan_results
-                    cycle_baseline = lifecycle_result.baseline
-                    cycle_post_rejit = lifecycle_result.post_rejit
-                    cycle_comparison = compare_phases(
-                        cycle_baseline,
-                        cycle_post_rejit,
-                        control=control_phase,
+                def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
+                    runner = lifecycle.runtime
+                    assert isinstance(runner, TraceeRunner)
+                    phase_result = run_phase(
+                        workloads,
+                        duration_s,
+                        lifecycle.target_prog_ids,
+                        cycle_index=cycle_index,
+                        phase_name=phase_name,
+                        warmup_duration_s=warmup_duration_s,
+                        latency_probe_count=latency_probe_count,
+                        latency_probe_timeout_s=latency_probe_timeout_s,
                         ci_iterations=ci_iterations,
-                        ci_seed=cycle_seed + 1000,
+                        ci_seed=cycle_seed + (500 if phase_name == "post_rejit" else 0),
+                        prog_fds=runner.program_fds,
+                        agent_pid=runner.pid,
+                        collector=runner.collector,
+                        runner=runner,
+                        control_records=control_records,
+                        require_tracee_activity=True,
                     )
-                    cycle_results.append(
-                        {
-                            "cycle_index": cycle_index,
-                            "control": control_phase,
-                            "baseline": cycle_baseline,
-                            "scan_results": {str(key): value for key, value in cycle_scan_results.items()},
-                            "rejit_result": lifecycle_result.rejit_result,
-                            "post_rejit": cycle_post_rejit,
-                            "comparison": cycle_comparison,
-                        }
+                    return attach_control_phase_metrics(
+                        phase_result,
+                        control_records,
+                        ci_iterations=ci_iterations,
+                        ci_seed=cycle_seed + (1500 if phase_name == "post_rejit" else 1000),
                     )
 
-                    if not tracee_programs:
-                        tracee_programs = list(lifecycle_result.artifacts.get("tracee_programs") or [])
-                    if not selected_programs:
-                        selected_programs = list(lifecycle_result.artifacts.get("selected_tracee_programs") or [])
-                    if not apply_programs:
-                        apply_programs = list(lifecycle_result.artifacts.get("apply_tracee_programs") or [])
+                def stop(_: object, lifecycle: CaseLifecycleState) -> None:
+                    runner = lifecycle.runtime
+                    assert isinstance(runner, TraceeRunner)
+                    runner.stop()
+
+                def cleanup(_: object) -> None:
+                    return None
+
+                lifecycle_result = run_case_lifecycle(
+                    daemon_session=prepared_daemon_session,
+                    setup=setup,
+                    start=start,
+                    workload=workload,
+                    stop=stop,
+                    cleanup=cleanup,
+                    before_baseline=before_baseline,
+                    enabled_passes=benchmark_rejit_enabled_passes(),
+                )
+
+                if lifecycle_result.abort is not None:
+                    return error_payload(
+                        config=config,
+                        duration_s=duration_s,
+                        tracee_binary=tracee_binary,
+                        setup_result=setup_result,
+                        smoke=bool(args.smoke),
+                        error_message=lifecycle_result.abort.reason,
+                        limitations=limitations,
+                        preflight=preflight,
+                    )
+
+                if lifecycle_result.state is None or lifecycle_result.baseline is None:
+                    raise RuntimeError(f"Tracee lifecycle cycle {cycle_index} completed without a baseline phase")
+                if not lifecycle_result.rejit_result or not lifecycle_result.rejit_result.get("applied"):
+                    raise RuntimeError(f"Tracee reJIT did not apply in cycle {cycle_index}: {lifecycle_result.rejit_result}")
+                if lifecycle_result.post_rejit is None:
+                    raise RuntimeError(f"Tracee post-ReJIT phase is missing in cycle {cycle_index}")
+
+                cycle_scan_results = lifecycle_result.scan_results
+                cycle_baseline = lifecycle_result.baseline
+                cycle_post_rejit = lifecycle_result.post_rejit
+                cycle_comparison = compare_phases(
+                    cycle_baseline,
+                    cycle_post_rejit,
+                    control=control_phase,
+                    ci_iterations=ci_iterations,
+                    ci_seed=cycle_seed + 1000,
+                )
+                cycle_results.append(
+                    {
+                        "cycle_index": cycle_index,
+                        "control": control_phase,
+                        "baseline": cycle_baseline,
+                        "scan_results": {str(key): value for key, value in cycle_scan_results.items()},
+                        "rejit_result": lifecycle_result.rejit_result,
+                        "post_rejit": cycle_post_rejit,
+                        "comparison": cycle_comparison,
+                    }
+                )
+
+                if not tracee_programs:
+                    tracee_programs = list(lifecycle_result.artifacts.get("tracee_programs") or [])
+                if not selected_programs:
+                    selected_programs = list(lifecycle_result.artifacts.get("selected_tracee_programs") or [])
+                if not apply_programs:
+                    apply_programs = list(lifecycle_result.artifacts.get("apply_tracee_programs") or [])
     except Exception as exc:
         return error_payload(
             config=config,
@@ -1581,7 +1583,10 @@ def build_case_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_case_parser()
     args = parser.parse_args(argv)
-    payload = run_tracee_case(args)
+    daemon_binary = Path(args.daemon).resolve()
+    with DaemonSession.start(daemon_binary) as daemon_session:
+        args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
+        payload = run_tracee_case(args)
     if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
         output_json = smoke_output_path(RESULTS_DIR, "tracee")
     else:

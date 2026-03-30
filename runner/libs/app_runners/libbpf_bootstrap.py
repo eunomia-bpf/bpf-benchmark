@@ -3,31 +3,21 @@ from __future__ import annotations
 from pathlib import Path
 
 from .. import ROOT_DIR
-from ..workload import run_exec_storm
-from .process_support import NativeProcessRunner, WorkloadResult, run_sleep_workload
+from .process_support import NativeProcessRunner
 
 
-DEFAULT_OBJECT_ROOT = ROOT_DIR / "corpus" / "build" / "libbpf-bootstrap" / "examples" / "c"
 DEFAULT_BINARY_ROOT = ROOT_DIR / "corpus" / "build" / "libbpf-bootstrap" / "bin"
 
 
-def _binary_name_for_object(object_path: Path) -> str:
-    return object_path.name.removesuffix(".bpf.o")
-
-
 class LibbpfBootstrapRunner(NativeProcessRunner):
-    def _default_binary_candidates(self) -> tuple[Path, ...]:
-        if self.object_path is None:
-            return ()
-        return (DEFAULT_BINARY_ROOT / _binary_name_for_object(self.object_path),)
+    def __init__(self, *, app: str, **kwargs: object) -> None:
+        self.app = str(app).strip()
+        if not self.app:
+            raise RuntimeError("LibbpfBootstrapRunner requires an app name")
+        super().__init__(**kwargs)
 
-    def _run_workload(self, seconds: float) -> WorkloadResult:
-        if self.object_path is None:
-            return run_sleep_workload(seconds)
-        stem = _binary_name_for_object(self.object_path)
-        if stem == "bootstrap":
-            return run_exec_storm(max(1, int(round(seconds))), 2)
-        return run_sleep_workload(seconds)
+    def _default_binary_candidates(self) -> tuple[Path, ...]:
+        return (DEFAULT_BINARY_ROOT / self.app,)
 
 
 __all__ = ["LibbpfBootstrapRunner"]

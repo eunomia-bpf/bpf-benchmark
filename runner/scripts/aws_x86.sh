@@ -17,7 +17,6 @@
 #   - runner binary: runner/build/micro_exec
 #   - daemon binary: daemon/target/release/bpfrejit-daemon
 #   - kinsn modules: module/x86/*.ko
-#   - micro smoke object: corpus/build/katran/balancer.bpf.o
 #   - e2e assets: e2e/, runner/libs/, corpus/config/benchmark_config.yaml, module/x86/*.ko
 set -euo pipefail
 
@@ -45,7 +44,7 @@ AWS_X86_BENCH_WARMUPS="${AWS_X86_BENCH_WARMUPS:-0}"
 AWS_X86_BENCH_REPEAT="${AWS_X86_BENCH_REPEAT:-10}"
 AWS_X86_BENCH_CPU="${AWS_X86_BENCH_CPU:-0}"
 AWS_X86_BENCH_MODE="${AWS_X86_BENCH_MODE:-micro}"
-AWS_X86_E2E_CASES="${AWS_X86_E2E_CASES:-tracee,tetragon,scx,katran}"
+AWS_X86_E2E_CASES="${AWS_X86_E2E_CASES:-tracee,tetragon,scx}"
 AWS_X86_E2E_SMOKE="${AWS_X86_E2E_SMOKE:-1}"
 AWS_X86_REMOTE_RESULT_JSON="${AWS_X86_REMOTE_RESULT_JSON:-x86_benchmark.json}"
 AWS_REGION_VALUE="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
@@ -60,8 +59,6 @@ X86_RUNNER="${X86_RUNNER:-$ROOT_DIR/runner/build/micro_exec}"
 X86_DAEMON="${X86_DAEMON:-$ROOT_DIR/daemon/target/release/bpfrejit-daemon}"
 X86_KINSN_MODULE_DIR="${X86_KINSN_MODULE_DIR:-$ROOT_DIR/module/x86}"
 X86_KINSN_LOAD_SCRIPT="${X86_KINSN_LOAD_SCRIPT:-$ROOT_DIR/module/load_all.sh}"
-SMOKE_CORPUS_OBJECT="${SMOKE_CORPUS_OBJECT:-$ROOT_DIR/corpus/build/katran/balancer.bpf.o}"
-
 STATE_INSTANCE_ID=""
 STATE_INSTANCE_IP=""
 STATE_REGION=""
@@ -118,8 +115,8 @@ Optional env:
   AWS_X86_BENCH_ITERATIONS     default: 1
   AWS_X86_BENCH_WARMUPS        default: 0
   AWS_X86_BENCH_REPEAT         default: 10
-  AWS_X86_E2E_CASES            default: tracee,tetragon,scx,katran
-                               values: all or a comma-separated subset of tracee,tetragon,scx,katran
+  AWS_X86_E2E_CASES            default: tracee,tetragon,scx
+                               values: all or a comma-separated subset of tracee,tetragon,scx
   AWS_X86_E2E_SMOKE            default: 1
 EOF
 }
@@ -151,7 +148,7 @@ validate_e2e_cases() {
     for token in "${_aws_x86_e2e_case_tokens[@]}"; do
         [[ -n "$token" ]] || continue
         case "$token" in
-            all|tracee|tetragon|scx|katran)
+            all|tracee|tetragon|scx)
                 ;;
             *)
                 die "unsupported AWS x86 E2E case: ${token}"
@@ -823,15 +820,6 @@ ensure_local_e2e_assets() {
     require_local_path "$ROOT_DIR/e2e/run.py" "e2e runner"
     require_local_path "$ROOT_DIR/runner/libs/case_common.py" "shared case helpers"
     require_local_path "$ROOT_DIR/corpus/config/benchmark_config.yaml" "benchmark config"
-    require_local_path "$ROOT_DIR/corpus/inputs/katran_vip_packet_64.bin" "katran test packet"
-
-    if e2e_case_selected katran; then
-        if [[ ! -f "$ROOT_DIR/corpus/build/katran/balancer.bpf.o" ]]; then
-            log "Building local Katran corpus objects"
-            make -C "$ROOT_DIR" corpus-build-katran >/dev/null
-        fi
-        require_local_path "$ROOT_DIR/corpus/build/katran/balancer.bpf.o" "katran object"
-    fi
 
     if e2e_case_selected scx; then
         if [[ ! -x "$ROOT_DIR/runner/repos/scx/target/release/scx_rusty" || \
@@ -995,7 +983,6 @@ ensure_benchmark_bundle() {
     require_local_path "$ROOT_DIR/micro/programs/simple.bpf.o" "simple micro object"
     require_local_path "$ROOT_DIR/runner/libs/__init__.py" "runner python helpers"
     require_local_path "$ROOT_DIR/runner/scripts/x86_remote_benchmark.py" "x86 remote benchmark runner"
-    require_local_path "$SMOKE_CORPUS_OBJECT" "daemon smoke object"
     require_local_path "$X86_KINSN_LOAD_SCRIPT" "kinsn module loader"
     if [[ "$bench_mode" == "e2e" ]]; then
         ensure_local_e2e_assets
@@ -1011,7 +998,6 @@ ensure_benchmark_bundle() {
         "$BENCHMARK_BUNDLE_DIR/micro/programs" \
         "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs" \
         "$BENCHMARK_BUNDLE_DIR/micro/config" \
-        "$BENCHMARK_BUNDLE_DIR/corpus/build/katran" \
         "$BENCHMARK_BUNDLE_DIR/module/x86"
     if [[ "$bench_mode" == "e2e" ]]; then
         mkdir -p \
@@ -1039,7 +1025,6 @@ ensure_benchmark_bundle() {
     cp "$ROOT_DIR/runner/scripts/x86_remote_benchmark.py" \
         "$BENCHMARK_BUNDLE_DIR/runner/scripts/"
 
-    cp "$SMOKE_CORPUS_OBJECT" "$BENCHMARK_BUNDLE_DIR/corpus/build/katran/balancer.bpf.o"
     cp "$X86_KINSN_LOAD_SCRIPT" "$BENCHMARK_BUNDLE_DIR/module/load_all.sh"
     cp "$X86_KINSN_MODULE_DIR"/*.ko "$BENCHMARK_BUNDLE_DIR/module/x86/"
 
@@ -1047,7 +1032,6 @@ ensure_benchmark_bundle() {
         local tracee_binary=""
         local tetragon_binary=""
         local tetra_binary=""
-        local katran_server_binary=""
         local wrk_binary=""
 
         tracee_binary="$(resolve_local_binary_candidate tracee \
@@ -1056,8 +1040,6 @@ ensure_benchmark_bundle() {
             "$ROOT_DIR/e2e/cases/tetragon/bin/tetragon" || true)"
         tetra_binary="$(resolve_local_binary_candidate tetra \
             "$ROOT_DIR/e2e/cases/tetragon/bin/tetra" || true)"
-        katran_server_binary="$(resolve_local_binary_candidate katran_server_grpc \
-            "$ROOT_DIR/e2e/cases/katran/bin/katran_server_grpc" || true)"
         wrk_binary="$(resolve_local_binary_candidate wrk || true)"
 
         cp -a "$ROOT_DIR/e2e/." "$BENCHMARK_BUNDLE_DIR/e2e/"
@@ -1065,10 +1047,8 @@ ensure_benchmark_bundle() {
 
         cp "$ROOT_DIR/corpus/config/benchmark_config.yaml" \
             "$BENCHMARK_BUNDLE_DIR/corpus/config/"
-        cp "$ROOT_DIR/corpus/inputs/katran_vip_packet_64.bin" \
-            "$BENCHMARK_BUNDLE_DIR/corpus/inputs/"
 
-        for corpus_family in katran scx tracee tetragon; do
+        for corpus_family in scx tracee tetragon; do
             if [[ -d "$ROOT_DIR/corpus/build/$corpus_family" ]]; then
                 mkdir -p "$BENCHMARK_BUNDLE_DIR/corpus/build/$corpus_family"
                 cp -a "$ROOT_DIR/corpus/build/$corpus_family/." \
@@ -1095,10 +1075,6 @@ ensure_benchmark_bundle() {
             "$tetra_binary" \
             "$BENCHMARK_BUNDLE_DIR/e2e/cases/tetragon/bin/tetra" \
             "tetra CLI"
-        wrap_bundled_x86_binary_if_present \
-            "$katran_server_binary" \
-            "$BENCHMARK_BUNDLE_DIR/e2e/cases/katran/bin/katran_server_grpc" \
-            "Katran gRPC server"
         wrap_bundled_x86_binary_if_present \
             "$wrk_binary" \
             "$BENCHMARK_BUNDLE_DIR/e2e/bin/wrk" \
