@@ -14,30 +14,23 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    smoke_output_path,
-    write_json,
-    write_text,
 )
 from runner.libs.app_runners.katran import (  # noqa: E402
     DEFAULT_INTERFACE,
     KatranRunner,
 )
 from runner.libs.case_common import (  # noqa: E402
-    attach_pending_result_metadata,
     host_metadata,
     percent_delta,
-    prepare_daemon_session,
     rejit_result_has_any_apply,
     run_app_runner_lifecycle,
     speedup_ratio,
 )
-from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
 
 
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "katran")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "katran-e2e.md"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_DURATION_S = 20
 DEFAULT_SMOKE_DURATION_S = 5
 
@@ -106,7 +99,9 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")
 
-    duration_s = int(args.duration or (args.smoke_duration if args.smoke else DEFAULT_DURATION_S))
+    smoke_duration_s = int(getattr(args, "smoke_duration", DEFAULT_SMOKE_DURATION_S) or DEFAULT_SMOKE_DURATION_S)
+    duration_override = int(getattr(args, "duration", 0) or 0)
+    duration_s = int(duration_override or (smoke_duration_s if args.smoke else DEFAULT_DURATION_S))
     workload_kind = str(getattr(args, "workload", "") or "network")
     runner = KatranRunner(
         iface=str(getattr(args, "iface", DEFAULT_INTERFACE)),
@@ -181,36 +176,3 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     if status == "error" and comparison_reason:
         payload["error_message"] = comparison_reason
     return payload
-
-
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run the Katran end-to-end benchmark case.")
-    parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
-    parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
-    parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--duration", type=int, default=0)
-    parser.add_argument("--smoke-duration", type=int, default=DEFAULT_SMOKE_DURATION_S)
-    parser.add_argument("--smoke", action="store_true")
-    parser.add_argument("--iface", default=DEFAULT_INTERFACE)
-    parser.add_argument("--router-peer-iface", default=None)
-    parser.add_argument("--concurrency", type=int, default=16)
-    parser.add_argument("--workload", default="network")
-    return parser
-
-
-def main(argv: list[str] | None = None) -> None:
-    parser = build_parser()
-    args = parser.parse_args(argv)
-    daemon_binary = Path(args.daemon).resolve()
-    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
-        args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
-        payload = run_katran_case(args)
-    attach_pending_result_metadata(payload)
-    output_json = smoke_output_path(RESULTS_DIR, "katran") if args.smoke and args.output_json == str(DEFAULT_OUTPUT_JSON) else Path(args.output_json).resolve()
-    output_md = Path(args.output_md).resolve()
-    write_json(output_json, payload)
-    write_text(output_md, build_markdown(payload) + "\n")
-
-
-if __name__ == "__main__":
-    main()

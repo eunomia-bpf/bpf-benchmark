@@ -11,7 +11,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from runner.libs import case_common
-from e2e import run as e2e_run
+from e2e import driver as e2e_run
 from runner.libs.app_suite_schema import AppSpec, AppWorkload
 from runner.libs import smoke_output_path
 

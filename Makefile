@@ -174,7 +174,7 @@ help:
 	@echo "Repos:  corpus-fetch corpus-build corpus-build-native corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace REPOS=\"katran tracee tetragon cilium bpftrace ...\""
 	@echo "Test:   smoke daemon-tests python-tests check"
 	@echo "VM x86: vm-shell vm-test vm-selftest vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
-	@echo "        vm-corpus (new orchestrator full corpus)"
+	@echo "        vm-corpus (full corpus suite driver)"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
 	@echo "        aws-x86-launch aws-x86-setup aws-x86-benchmark aws-x86-terminate aws-x86-full aws-x86"

@@ -90,23 +90,16 @@ def test_run_phase_uses_shared_bcc_runner(monkeypatch, tmp_path: Path) -> None:
         def stop(self) -> None:
             calls.append("stop")
 
-    def fake_run_app_runner_lifecycle(**kwargs):
+    def fake_run_app_runner_phase_records(**kwargs):
         runner = kwargs["runner"]
         prog_ids = list(runner.start())
         lifecycle = SimpleNamespace(runtime=runner, target_prog_ids=prog_ids)
         baseline = kwargs["measure"](lifecycle, "baseline")
         runner.stop()
-        return SimpleNamespace(
-            state=SimpleNamespace(target_prog_ids=prog_ids),
-            artifacts={"programs": list(runner.programs)},
-            baseline=baseline,
-            scan_results={},
-            rejit_result=None,
-            post_rejit=None,
-        )
+        return baseline, None
 
     monkeypatch.setattr(case, "BCCRunner", FakeRunner)
-    monkeypatch.setattr(case, "run_app_runner_lifecycle", fake_run_app_runner_lifecycle)
+    monkeypatch.setattr(case, "run_app_runner_phase_records", fake_run_app_runner_phase_records)
     monkeypatch.setattr(
         case,
         "measure_workload",

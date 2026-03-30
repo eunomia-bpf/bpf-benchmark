@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from __future__ import annotations
 
 import argparse
@@ -21,7 +20,6 @@ from runner.libs import (  # noqa: E402
     authoritative_output_path,
     run_command,
     run_json_command,
-    smoke_output_path,
     tail_text,
     which,
 )
@@ -34,7 +32,6 @@ from runner.libs.app_runners.tetragon import (  # noqa: E402
     run_setup_script,
     run_tetragon_workload,
 )
-from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
     enable_bpf_stats,
@@ -50,10 +47,8 @@ from runner.libs.case_common import (  # noqa: E402
     host_metadata,
     summarize_numbers,
     percent_delta,
-    prepare_daemon_session,
     rejit_result_has_any_apply,
     speedup_ratio,
-    persist_results,
     run_case_lifecycle,
 )
 
@@ -62,7 +57,6 @@ DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
 DEFAULT_CONFIG = Path(__file__).with_name("config_execve_rate.yaml")
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "tetragon")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tetragon-real-e2e.md"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_BPFTOOL = "/usr/local/sbin/bpftool"
 DEFAULT_DURATION_S = 30
 DEFAULT_SMOKE_DURATION_S = 8
@@ -849,12 +843,13 @@ def daemon_payload(
 
 
 def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
-    bpftool = str(Path(args.bpftool).resolve()) if Path(args.bpftool).exists() else str(args.bpftool)
+    bpftool_arg = str(getattr(args, "bpftool", DEFAULT_BPFTOOL))
+    bpftool = str(Path(bpftool_arg).resolve()) if Path(bpftool_arg).exists() else bpftool_arg
     os.environ["BPFTOOL_BIN"] = bpftool
     if Path(bpftool).exists():
         os.environ["PATH"] = f"{Path(bpftool).parent}:{os.environ.get('PATH', '')}"
 
-    config = load_config(Path(args.config).resolve())
+    config = load_config(Path(getattr(args, "config", DEFAULT_CONFIG)).resolve())
     duration_s = int(
         args.duration
         or (
@@ -881,15 +876,15 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
         "stdout_tail": "",
         "stderr_tail": "",
     }
-    tetragon_binary = resolve_tetragon_binary(args.tetragon_binary, setup_result)
+    tetragon_binary = resolve_tetragon_binary(getattr(args, "tetragon_binary", None), setup_result)
     if tetragon_binary is None:
-        setup_result = run_setup_script(Path(args.setup_script).resolve())
+        setup_result = run_setup_script(Path(getattr(args, "setup_script", DEFAULT_SETUP_SCRIPT)).resolve())
 
     limitations: list[str] = []
     if setup_result["returncode"] != 0:
         limitations.append("Setup script returned non-zero; only the real Tetragon binary path was attempted.")
 
-    tetragon_binary = resolve_tetragon_binary(args.tetragon_binary, setup_result)
+    tetragon_binary = resolve_tetragon_binary(getattr(args, "tetragon_binary", None), setup_result)
     if tetragon_binary is None:
         return error_payload(
             config=config,
@@ -926,7 +921,7 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
                 preflight_duration_s=preflight_duration_s,
                 require_program_activity=require_program_activity,
                 smoke=bool(args.smoke),
-                load_timeout=int(args.load_timeout),
+                load_timeout=int(getattr(args, "load_timeout", DEFAULT_LOAD_TIMEOUT_S) or DEFAULT_LOAD_TIMEOUT_S),
                 setup_result=setup_result,
                 limitations=limitations,
             )
@@ -940,39 +935,3 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
                 error_message=f"Tetragon case could not run: {exc}",
                 limitations=limitations,
             )
-
-
-def build_case_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run the Tetragon real end-to-end benchmark.")
-    parser.add_argument("--config", default=str(DEFAULT_CONFIG))
-    parser.add_argument("--setup-script", default=str(DEFAULT_SETUP_SCRIPT))
-    parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
-    parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
-    parser.add_argument("--tetragon-binary")
-    parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--bpftool", default=DEFAULT_BPFTOOL)
-    parser.add_argument("--duration", type=int)
-    parser.add_argument("--smoke", action="store_true")
-    parser.add_argument("--load-timeout", type=int, default=DEFAULT_LOAD_TIMEOUT_S)
-    parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_S)
-    return parser
-
-
-def main(argv: Sequence[str] | None = None) -> int:
-    parser = build_case_parser()
-    args = parser.parse_args(argv)
-    daemon_binary = Path(args.daemon).resolve()
-    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
-        args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
-        payload = run_tetragon_case(args)
-    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
-        output_json = smoke_output_path(RESULTS_DIR, "tetragon")
-    else:
-        output_json = Path(args.output_json).resolve()
-    persist_results(payload, output_json, Path(args.output_md).resolve(), build_markdown)
-    print(json.dumps(payload, indent=2, sort_keys=True))
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

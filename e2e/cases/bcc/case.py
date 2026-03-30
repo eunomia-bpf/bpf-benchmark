@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """BCC libbpf-tools E2E benchmark case.
 
 Each tool from runner/repos/bcc/libbpf-tools/ is started as a real userspace
@@ -24,23 +23,16 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    smoke_output_path,
-    write_json,
-    write_text,
 )
 from runner.libs.app_runners.bcc import BCCRunner, find_tool_binary, resolve_tools_dir, run_setup_script  # noqa: E402
-from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     enable_bpf_stats,
 )
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
-    attach_pending_result_metadata,
     host_metadata,
     measure_app_runner_workload,
     percent_delta,
-    prepare_daemon_session,
-    rejit_result_has_any_apply,
     run_app_runner_phase_records,
     zero_site_totals,
 )
@@ -51,7 +43,6 @@ DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "bcc")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bcc-e2e-report.md"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 
 
 # ---------------------------------------------------------------------------
@@ -393,27 +384,6 @@ def build_report(payload: Mapping[str, object]) -> str:
     return "\n".join(lines)
 
 
-# ---------------------------------------------------------------------------
-# Top-level entry points
-# ---------------------------------------------------------------------------
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the BCC libbpf-tools end-to-end benchmark case.")
-    parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
-    parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
-    parser.add_argument("--report-md", default=str(DEFAULT_REPORT_MD))
-    parser.add_argument("--setup-script", default=str(DEFAULT_SETUP_SCRIPT))
-    parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--tools-dir", default="", help="Directory with compiled libbpf-tools binaries.")
-    parser.add_argument("--config", default=str(DEFAULT_CONFIG))
-    parser.add_argument("--duration", type=int, default=0)
-    parser.add_argument("--smoke-duration", type=int, default=0)
-    parser.add_argument("--attach-timeout", type=int, default=0)
-    parser.add_argument("--tool", action="append", dest="tools")
-    parser.add_argument("--smoke", action="store_true")
-    return parser.parse_args()
-
-
 def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
     daemon_binary = Path(args.daemon).resolve()
     if not daemon_binary.exists():
@@ -428,17 +398,21 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
         "stdout_tail": "",
         "stderr_tail": "",
     }
-    setup_result = run_setup_script(Path(args.setup_script).resolve())
+    setup_script = Path(getattr(args, "setup_script", DEFAULT_SETUP_SCRIPT)).resolve()
+    setup_result = run_setup_script(setup_script)
 
-    suite = load_config(Path(args.config).resolve())
+    config_path = Path(getattr(args, "config", DEFAULT_CONFIG)).resolve()
+    suite = load_config(config_path)
     tools_dir = resolve_tools_dir(getattr(args, "tools_dir", None) or "", setup_result=setup_result)
 
     # Duration resolution: CLI > smoke flag > config
     smoke = bool(args.smoke)
-    if getattr(args, "smoke_duration", 0) and smoke:
-        duration_s = int(args.smoke_duration)
-    elif getattr(args, "duration", 0):
-        duration_s = int(args.duration)
+    smoke_duration_s = int(getattr(args, "smoke_duration", 0) or 0)
+    duration_override = int(getattr(args, "duration", 0) or 0)
+    if smoke_duration_s and smoke:
+        duration_s = smoke_duration_s
+    elif duration_override:
+        duration_s = duration_override
     elif smoke:
         duration_s = suite.smoke_duration_s
     else:
@@ -453,7 +427,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
         smoke_candidate = next((t for t in suite.tools if t.name == "capable"), None)
         selected = [smoke_candidate] if smoke_candidate else [suite.tools[0]]
     elif getattr(args, "tools", None):
-        wanted = {name.strip() for name in args.tools if name and name.strip()}
+        wanted = {name.strip() for name in getattr(args, "tools", []) if name and name.strip()}
         selected = [t for t in suite.tools if t.name in wanted]
     else:
         selected = list(suite.tools)
@@ -571,30 +545,3 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
     if errors:
         payload["error_message"] = "; ".join(errors)
     return payload
-
-
-def main() -> None:
-    args = parse_args()
-    daemon_binary = Path(args.daemon).resolve()
-    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
-        args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
-        payload = run_bcc_case(args)
-    attach_pending_result_metadata(payload)
-
-    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
-        output_json = smoke_output_path(RESULTS_DIR, "bcc")
-    else:
-        output_json = Path(args.output_json).resolve()
-    output_md = Path(args.output_md).resolve()
-    report_md = Path(args.report_md).resolve()
-
-    write_json(output_json, payload)
-    write_text(output_md, build_markdown(payload) + "\n")
-    write_text(report_md, build_report(payload) + "\n")
-    print(f"[ok] wrote {output_json}")
-    print(f"[ok] wrote {output_md}")
-    print(f"[ok] wrote {report_md}")
-
-
-if __name__ == "__main__":
-    main()

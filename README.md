@@ -89,8 +89,8 @@ make kernel-tests     # kernel recompile self-tests
 
 `micro/` owns the isolated benchmark manifests (`micro/config/micro_pure_jit.yaml`), input generators, and the Python suite driver (`micro/driver.py`).
 
-`corpus/` owns the 23-project real-world corpus, fetch/build tooling, declarative app suites in `corpus/config/`, and the measurement entrypoint in `corpus/orchestrator.py`.
+`corpus/` owns the 23-project real-world corpus, fetch/build tooling, declarative app suites in `corpus/config/`, and the measurement entrypoint in `corpus/driver.py`.
 
-`e2e/` owns full deployment-style evaluation via `e2e/run.py` plus per-case assets under `e2e/cases/`.
+`e2e/` owns full deployment-style evaluation via `e2e/driver.py` plus per-case assets under `e2e/cases/`.
 
 `daemon/` is the userspace front end for BpfReJIT: it scans live BPF programs via `BPF_PROG_GET_NEXT_ID`, identifies optimization sites, and triggers `BPF_PROG_REJIT`. See `daemon/README.md`.

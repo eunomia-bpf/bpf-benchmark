@@ -28,7 +28,6 @@ from runner.libs import (  # noqa: E402
     authoritative_output_path,
     resolve_bpftool_binary,
     run_command,
-    smoke_output_path,
     tail_text,
     which,
 )
@@ -40,7 +39,6 @@ from runner.libs.app_runners.tracee import (  # noqa: E402
     run_setup_script,
     run_tracee_workload,
 )
-from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
     enable_bpf_stats,
@@ -66,8 +64,6 @@ from runner.libs.case_common import (  # noqa: E402
     percentile,
     summarize_numbers,
     percent_delta,
-    prepare_daemon_session,
-    persist_results,
     rejit_result_has_any_apply,
     run_case_lifecycle,
 )
@@ -77,7 +73,6 @@ DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")
 DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "tracee")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tracee-e2e-real.md"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 CACHED_TRACEE_BINARY = ROOT_DIR / "e2e" / "cases" / "tracee" / "bin" / "tracee"
 DEFAULT_SAMPLE_COUNT = 5
 DEFAULT_SMOKE_SAMPLE_COUNT = 2
@@ -1197,9 +1192,10 @@ def error_payload(
 
 
 def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
-    config = load_config(Path(args.config).resolve())
-    duration_s = int(args.duration or config.get("measurement_duration_s") or 20)
-    if args.smoke and not args.duration:
+    config = load_config(Path(getattr(args, "config", DEFAULT_CONFIG)).resolve())
+    duration_override = int(getattr(args, "duration", 0) or 0)
+    duration_s = int(duration_override or config.get("measurement_duration_s") or 20)
+    if args.smoke and not duration_override:
         duration_s = int(config.get("smoke_duration_s") or 8)
     sample_count_value = config.get("smoke_sample_count") if args.smoke else config.get("sample_count")
     sample_count = int(sample_count_value or (DEFAULT_SMOKE_SAMPLE_COUNT if args.smoke else DEFAULT_SAMPLE_COUNT))
@@ -1225,10 +1221,10 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "stdout_tail": "",
         "stderr_tail": "",
     }
-    tracee_binary = resolve_tracee_binary(args.tracee_binary, setup_result)
+    tracee_binary = resolve_tracee_binary(getattr(args, "tracee_binary", None), setup_result)
     if tracee_binary is None:
-        setup_result = run_setup_script(Path(args.setup_script).resolve())
-        tracee_binary = resolve_tracee_binary(args.tracee_binary, setup_result)
+        setup_result = run_setup_script(Path(getattr(args, "setup_script", DEFAULT_SETUP_SCRIPT)).resolve())
+        tracee_binary = resolve_tracee_binary(getattr(args, "tracee_binary", None), setup_result)
     elif tracee_binary is not None:
         setup_result["tracee_binary"] = tracee_binary
         setup_result["stdout_tail"] = "Using an already available Tracee binary."
@@ -1270,7 +1266,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             limitations=limitations,
         )
     events = list(config.get("events") or [])
-    commands = build_tracee_commands(tracee_binary, events, args.tracee_extra_arg or [])
+    tracee_extra_args = getattr(args, "tracee_extra_arg", None) or []
+    commands = build_tracee_commands(tracee_binary, events, tracee_extra_args)
     preflight: dict[str, object] | None = None
     try:
         cycle_results: list[dict[str, object]] = []
@@ -1309,8 +1306,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     runner = TraceeRunner(
                         tracee_binary=tracee_binary,
                         events=events,
-                        extra_args=args.tracee_extra_arg or [],
-                        load_timeout_s=int(args.load_timeout),
+                        extra_args=tracee_extra_args,
+                        load_timeout_s=int(getattr(args, "load_timeout", 20) or 20),
                     )
                     runner.start()
                     cycle_selected_programs = select_tracee_programs(runner.programs, config)
@@ -1563,38 +1560,3 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "limitations": limitations,
     }
     return payload
-
-
-def build_case_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run the Tracee real end-to-end benchmark.")
-    parser.add_argument("--config", default=str(DEFAULT_CONFIG))
-    parser.add_argument("--setup-script", default=str(DEFAULT_SETUP_SCRIPT))
-    parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
-    parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
-    parser.add_argument("--tracee-binary")
-    parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--duration", type=int)
-    parser.add_argument("--smoke", action="store_true")
-    parser.add_argument("--load-timeout", type=int, default=20)
-    parser.add_argument("--tracee-extra-arg", action="append", default=[])
-    return parser
-
-
-def main(argv: Sequence[str] | None = None) -> int:
-    parser = build_case_parser()
-    args = parser.parse_args(argv)
-    daemon_binary = Path(args.daemon).resolve()
-    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
-        args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
-        payload = run_tracee_case(args)
-    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
-        output_json = smoke_output_path(RESULTS_DIR, "tracee")
-    else:
-        output_json = Path(args.output_json).resolve()
-    persist_results(payload, output_json, Path(args.output_md).resolve(), build_markdown)
-    print(json.dumps(payload, indent=2, sort_keys=True))
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

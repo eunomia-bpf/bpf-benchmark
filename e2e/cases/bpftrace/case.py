@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from __future__ import annotations
 
 import argparse
@@ -20,25 +19,18 @@ from runner.libs import (  # noqa: E402
     ROOT_DIR,
     authoritative_output_path,
     run_command,
-    smoke_output_path,
     tail_text,
     which,
-    write_json,
-    write_text,
 )
 from runner.libs.app_runners.bpftrace import BpftraceRunner, SCRIPTS, ScriptSpec  # noqa: E402
-from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     enable_bpf_stats,
 )
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     measure_app_runner_workload,
-    attach_pending_result_metadata,
     host_metadata,
     percent_delta,
-    prepare_daemon_session,
-    rejit_result_has_any_apply,
     run_app_runner_phase_records,
 )
 
@@ -47,23 +39,8 @@ DEFAULT_SCRIPT_DIR = Path(__file__).with_name("scripts")
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "bpftrace")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bpftrace-real-e2e-report.md"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_DURATION_S = 30
 MIN_BPFTRACE_VERSION = (0, 16, 0)
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the real end-to-end bpftrace benchmark case.")
-    parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
-    parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
-    parser.add_argument("--report-md", default=str(DEFAULT_REPORT_MD))
-    parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--duration", type=int, default=30)
-    parser.add_argument("--smoke-duration", type=int, default=5)
-    parser.add_argument("--attach-timeout", type=int, default=20)
-    parser.add_argument("--script", action="append", dest="scripts")
-    parser.add_argument("--smoke", action="store_true")
-    return parser.parse_args()
 
 
 def prepend_guest_tools_to_path() -> None:
@@ -125,10 +102,10 @@ def selected_scripts(args: argparse.Namespace) -> list[ScriptSpec]:
     workload_overrides = getattr(args, "_suite_workload_overrides", {}) or {}
     if args.smoke:
         selected = [next(spec for spec in SCRIPTS if spec.name == "capable")]
-    elif not args.scripts:
+    elif not getattr(args, "scripts", None):
         selected = list(SCRIPTS)
     else:
-        wanted = {name.strip() for name in args.scripts if name and name.strip()}
+        wanted = {name.strip() for name in getattr(args, "scripts", []) if name and name.strip()}
         selected = [spec for spec in SCRIPTS if spec.name in wanted]
     return [
         replace(spec, workload_kind=str(workload_overrides.get(spec.name) or spec.workload_kind))
@@ -426,7 +403,7 @@ def build_report(payload: Mapping[str, object]) -> str:
     return "\n".join(lines)
 
 
-def run_case(args: argparse.Namespace) -> dict[str, object]:
+def run_bpftrace_case(args: argparse.Namespace) -> dict[str, object]:
     prepend_guest_tools_to_path()
     prepared_daemon_session = getattr(args, "_prepared_daemon_session", None)
     if prepared_daemon_session is None:
@@ -440,14 +417,17 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
     if not scripts:
         raise RuntimeError("no scripts selected")
 
-    duration_s = int(args.smoke_duration if args.smoke else (args.duration or DEFAULT_DURATION_S))
+    smoke_duration_s = int(getattr(args, "smoke_duration", 5) or 5)
+    duration_override = int(getattr(args, "duration", 0) or 0)
+    duration_s = int(smoke_duration_s if args.smoke else (duration_override or DEFAULT_DURATION_S))
+    attach_timeout_s = int(getattr(args, "attach_timeout", 20) or 20)
     records: list[dict[str, object]] = []
     with enable_bpf_stats():
         for spec in scripts:
             baseline, rejit = run_phase(
                 spec,
                 duration_s=duration_s,
-                attach_timeout=int(args.attach_timeout),
+                attach_timeout=attach_timeout_s,
                 prepared_daemon_session=prepared_daemon_session,
             )
             summary = summarize_script(spec, baseline, rejit)
@@ -514,29 +494,3 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
     if errors:
         payload["error_message"] = "; ".join(errors)
     return payload
-
-
-def main() -> None:
-    args = parse_args()
-    daemon_binary = Path(args.daemon).resolve()
-    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
-        args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
-        payload = run_case(args)
-    attach_pending_result_metadata(payload)
-
-    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
-        output_json = smoke_output_path(RESULTS_DIR, "bpftrace")
-    else:
-        output_json = Path(args.output_json).resolve()
-    output_md = Path(args.output_md).resolve()
-    report_md = Path(args.report_md).resolve()
-    write_json(output_json, payload)
-    write_text(output_md, build_markdown(payload) + "\n")
-    write_text(report_md, build_report(payload) + "\n")
-    print(f"[ok] wrote {output_json}")
-    print(f"[ok] wrote {output_md}")
-    print(f"[ok] wrote {report_md}")
-
-
-if __name__ == "__main__":
-    main()

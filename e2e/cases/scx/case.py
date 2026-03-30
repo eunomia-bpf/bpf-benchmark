@@ -17,11 +17,9 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    smoke_output_path,
     which,
 )
 from runner.libs.app_runners.scx import ScxRunner, preferred_path, read_scx_ops, read_scx_state  # noqa: E402
-from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
@@ -31,8 +29,6 @@ from runner.libs.case_common import (  # noqa: E402
     summarize_numbers,
     percent_delta,
     percentile,
-    persist_results,
-    prepare_daemon_session,
     rejit_result_has_any_apply,
     run_case_lifecycle,
 )
@@ -42,7 +38,6 @@ DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "scx")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "scx-e2e.md"
 DEFAULT_SCX_BINARY = ROOT_DIR / "runner" / "repos" / "scx" / "target" / "release" / "scx_rusty"
 DEFAULT_SCX_REPO = ROOT_DIR / "runner" / "repos" / "scx"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_LOAD_TIMEOUT = 20
 DEFAULT_DURATION_S = 30
 DEFAULT_SMOKE_DURATION_S = 10
@@ -346,8 +341,8 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     os.environ["PATH"] = preferred_path()
 
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
-    scheduler_binary = Path(args.scheduler_binary).resolve()
-    scx_repo = Path(args.scx_repo).resolve()
+    scheduler_binary = Path(getattr(args, "scheduler_binary", DEFAULT_SCX_BINARY)).resolve()
+    scx_repo = Path(getattr(args, "scx_repo", DEFAULT_SCX_REPO)).resolve()
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary, scheduler_binary, scx_repo)
 
@@ -365,8 +360,8 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     def start(_: object) -> CaseLifecycleState:
         runner = ScxRunner(
             scheduler_binary=scheduler_binary,
-            scheduler_extra_args=args.scheduler_extra_arg or [],
-            load_timeout_s=int(args.load_timeout),
+            scheduler_extra_args=getattr(args, "scheduler_extra_arg", None) or [],
+            load_timeout_s=int(getattr(args, "load_timeout", DEFAULT_LOAD_TIMEOUT) or DEFAULT_LOAD_TIMEOUT),
             workload_spec={"name": "hackbench", "kind": "hackbench", "metric": "runs/s"},
         )
         runner.start()
@@ -464,36 +459,3 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     if error_message:
         payload["error_message"] = error_message
     return payload
-
-
-def build_case_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run the scx_rusty end-to-end benchmark.")
-    parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
-    parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
-    parser.add_argument("--scheduler-binary", default=str(DEFAULT_SCX_BINARY))
-    parser.add_argument("--scx-repo", default=str(DEFAULT_SCX_REPO))
-    parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--duration", type=int)
-    parser.add_argument("--smoke", action="store_true")
-    parser.add_argument("--load-timeout", type=int, default=DEFAULT_LOAD_TIMEOUT)
-    parser.add_argument("--scheduler-extra-arg", action="append", default=[])
-    return parser
-
-def main(argv: Sequence[str] | None = None) -> int:
-    parser = build_case_parser()
-    args = parser.parse_args(argv)
-    daemon_binary = Path(args.daemon).resolve()
-    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
-        args._prepared_daemon_session = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
-        payload = run_scx_case(args)
-    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
-        output_json = smoke_output_path(RESULTS_DIR, "scx")
-    else:
-        output_json = Path(args.output_json).resolve()
-    persist_results(payload, output_json, Path(args.output_md).resolve(), build_markdown)
-    print(json.dumps(payload, indent=2, sort_keys=True))
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

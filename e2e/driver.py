@@ -36,7 +36,7 @@ from e2e.cases.bpftrace.case import (  # noqa: E402
     DEFAULT_REPORT_MD as DEFAULT_BPFTRACE_REPORT_MD,
     build_markdown as build_bpftrace_markdown,
     build_report as build_bpftrace_report,
-    run_case as run_bpftrace_case,
+    run_bpftrace_case,
 )
 from e2e.cases.scx.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_SCX_OUTPUT_JSON,
@@ -53,6 +53,7 @@ from e2e.cases.tetragon.case import (  # noqa: E402
     run_tetragon_case,
 )
 from e2e.cases.bcc.case import (  # noqa: E402
+    DEFAULT_CONFIG as DEFAULT_BCC_CONFIG,
     DEFAULT_OUTPUT_JSON as DEFAULT_BCC_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_BCC_OUTPUT_MD,
     DEFAULT_REPORT_MD as DEFAULT_BCC_REPORT_MD,
@@ -62,6 +63,7 @@ from e2e.cases.bcc.case import (  # noqa: E402
     run_bcc_case,
 )
 from e2e.cases.tracee.case import (  # noqa: E402
+    DEFAULT_CONFIG as DEFAULT_TRACEE_CONFIG,
     DEFAULT_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD,
     DEFAULT_SETUP_SCRIPT as DEFAULT_TRACEE_SETUP_SCRIPT,
@@ -98,6 +100,8 @@ class CaseSpec:
     default_output_md: Path
     default_setup_script: str | None = None
     build_report: Callable[[dict[str, object]], str] | None = None
+    default_report_md: Path | None = None
+    default_config: Path | None = None
 
 
 CASE_SPECS: dict[str, CaseSpec] = {
@@ -107,6 +111,7 @@ CASE_SPECS: dict[str, CaseSpec] = {
         default_output_json=DEFAULT_OUTPUT_JSON,
         default_output_md=DEFAULT_OUTPUT_MD,
         default_setup_script=str(DEFAULT_TRACEE_SETUP_SCRIPT),
+        default_config=DEFAULT_TRACEE_CONFIG,
     ),
     "tetragon": CaseSpec(
         run_case=run_tetragon_case,
@@ -114,6 +119,7 @@ CASE_SPECS: dict[str, CaseSpec] = {
         default_output_json=DEFAULT_TETRAGON_OUTPUT_JSON,
         default_output_md=DEFAULT_TETRAGON_OUTPUT_MD,
         default_setup_script=str(DEFAULT_TETRAGON_SETUP_SCRIPT),
+        default_config=DEFAULT_TETRAGON_CONFIG,
     ),
     "bpftrace": CaseSpec(
         run_case=run_bpftrace_case,
@@ -121,6 +127,7 @@ CASE_SPECS: dict[str, CaseSpec] = {
         build_report=build_bpftrace_report,
         default_output_json=DEFAULT_BPFTRACE_OUTPUT_JSON,
         default_output_md=DEFAULT_BPFTRACE_OUTPUT_MD,
+        default_report_md=DEFAULT_BPFTRACE_REPORT_MD,
     ),
     "scx": CaseSpec(
         run_case=run_scx_case,
@@ -135,6 +142,8 @@ CASE_SPECS: dict[str, CaseSpec] = {
         default_output_json=DEFAULT_BCC_OUTPUT_JSON,
         default_output_md=DEFAULT_BCC_OUTPUT_MD,
         default_setup_script=str(DEFAULT_BCC_SETUP_SCRIPT),
+        default_report_md=DEFAULT_BCC_REPORT_MD,
+        default_config=DEFAULT_BCC_CONFIG,
     ),
     "katran": CaseSpec(
         run_case=run_katran_case,
@@ -146,31 +155,14 @@ CASE_SPECS: dict[str, CaseSpec] = {
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Unified entrypoint for repository end-to-end benchmarks.")
+    parser = argparse.ArgumentParser(description="Run the repository end-to-end benchmark suite driver.")
     parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran", "all"))
     parser.add_argument("--suite", default=str(DEFAULT_SUITE))
     parser.add_argument("--smoke", action="store_true", help="Run the smoke-sized configuration.")
     parser.add_argument("--duration", type=int, help="Override the per-workload duration in seconds.")
-    parser.add_argument("--tracee-binary", help="Explicit Tracee binary path.")
-    parser.add_argument("--tetragon-binary", help="Explicit Tetragon binary path.")
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
-    parser.add_argument("--report-md", default=str(DEFAULT_BPFTRACE_REPORT_MD))
-    parser.add_argument("--config", default=str(ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"))
-    parser.add_argument("--setup-script", default=str(DEFAULT_TRACEE_SETUP_SCRIPT))
     parser.add_argument("--daemon", default=str(ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"))
-    parser.add_argument("--load-timeout", type=int, default=20)
-    parser.add_argument("--attach-timeout", type=int, default=20)
-    parser.add_argument("--smoke-duration", type=int, default=5)
-    parser.add_argument("--tracee-extra-arg", action="append", default=[])
-    parser.add_argument("--script", action="append", dest="scripts")
-    parser.add_argument("--scheduler-binary", default=str(ROOT_DIR / "runner" / "repos" / "scx" / "target" / "release" / "scx_rusty"))
-    parser.add_argument("--scx-repo", default=str(ROOT_DIR / "runner" / "repos" / "scx"))
-    parser.add_argument("--kernel-config", default=str(ROOT_DIR / "vendor" / "linux-framework" / ".config"))
-    parser.add_argument("--bpftool", default="/usr/local/sbin/bpftool", help="Explicit bpftool path for Tetragon runs.")
-    parser.add_argument("--scheduler-extra-arg", action="append", default=[])
-    parser.add_argument("--tools-dir", default="", help="Directory with compiled libbpf-tools binaries (bcc case).")
-    parser.add_argument("--tool", action="append", dest="tools", help="Select specific libbpf-tools by name (bcc case).")
     parser.add_argument(
         "--rejit-passes",
         default=None,
@@ -187,17 +179,12 @@ def apply_case_defaults(args: argparse.Namespace) -> None:
         args.output_json = str(spec.default_output_json)
     if args.output_md == str(DEFAULT_OUTPUT_MD):
         args.output_md = str(spec.default_output_md)
-    if spec.default_setup_script is not None and args.setup_script == str(DEFAULT_TRACEE_SETUP_SCRIPT):
+    if spec.default_setup_script is not None and not hasattr(args, "setup_script"):
         args.setup_script = spec.default_setup_script
-    # BCC case: fix report_md and config defaults
-    if args.case == "bcc":
-        if args.report_md == str(DEFAULT_BPFTRACE_REPORT_MD):
-            args.report_md = str(DEFAULT_BCC_REPORT_MD)
-        if args.config == str(ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"):
-            args.config = str(ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml")
-    if args.case == "tetragon":
-        if args.config == str(ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"):
-            args.config = str(DEFAULT_TETRAGON_CONFIG)
+    if spec.default_report_md is not None and not hasattr(args, "report_md"):
+        args.report_md = str(spec.default_report_md)
+    if spec.default_config is not None and not hasattr(args, "config"):
+        args.config = str(spec.default_config)
 
 
 def resolve_primary_output_json(args: argparse.Namespace, spec: CaseSpec) -> Path:
@@ -338,7 +325,7 @@ def _configure_bcc_case_from_suite(args: argparse.Namespace, suite_apps: list[Ap
     if not suite_apps:
         return
     named = _named_suite_apps(suite_apps, key="tool")
-    explicit = [name.strip() for name in (args.tools or []) if str(name).strip()]
+    explicit = [name.strip() for name in (getattr(args, "tools", None) or []) if str(name).strip()]
     selected_names = explicit or list(named)
     missing = [name for name in selected_names if name not in named]
     if missing:
@@ -375,7 +362,7 @@ def _configure_bpftrace_case_from_suite(args: argparse.Namespace, suite_apps: li
     if not suite_apps:
         return
     named = _named_suite_apps(suite_apps, key="script")
-    explicit = [name.strip() for name in (args.scripts or []) if str(name).strip()]
+    explicit = [name.strip() for name in (getattr(args, "scripts", None) or []) if str(name).strip()]
     selected_names = explicit or list(named)
     missing = [name for name in selected_names if name not in named]
     if missing:
@@ -464,7 +451,9 @@ def build_run_metadata(
         "optimization_summary": _trim_e2e_value(payload),
     }
     metadata["output_hint_md"] = repo_relative_path(Path(args.output_md).resolve())
-    metadata["output_hint_report_md"] = repo_relative_path(Path(args.report_md).resolve())
+    report_md = getattr(args, "report_md", None)
+    if report_md:
+        metadata["output_hint_report_md"] = repo_relative_path(Path(report_md).resolve())
     return metadata
 
 
@@ -478,7 +467,8 @@ def _run_single_case(
     spec = CASE_SPECS[args.case]
     output_json = resolve_primary_output_json(args, spec)
     output_md = Path(args.output_md).resolve()
-    report_md = Path(args.report_md).resolve()
+    report_md_raw = getattr(args, "report_md", None)
+    report_md = Path(report_md_raw).resolve() if report_md_raw else None
     run_type = derive_run_type(output_json, args.case)
     started_at = datetime.now(timezone.utc).isoformat()
 
@@ -522,6 +512,8 @@ def _run_single_case(
         attach_pending_result_metadata(payload)
         detail_texts = {"result.md": spec.build_markdown(payload) + "\n"}
         if spec.build_report is not None:
+            if report_md is None:
+                raise RuntimeError(f"{args.case} requires a report output path")
             detail_texts["report.md"] = spec.build_report(payload) + "\n"
         payload_status = _payload_status(payload)
         if payload_status not in {"ok", "error"}:
@@ -537,7 +529,7 @@ def _run_single_case(
         metadata_payload = payload
         write_json(output_json, payload)
         write_text(output_md, detail_texts["result.md"])
-        if "report.md" in detail_texts:
+        if "report.md" in detail_texts and report_md is not None:
             write_text(report_md, detail_texts["report.md"])
         if payload_status == "ok":
             progress_payload = {

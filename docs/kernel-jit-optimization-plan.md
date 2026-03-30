@@ -540,7 +540,7 @@ runner/libs/app_runners/        ← Corpus 和 E2E 共享层
   bpftrace.py                     class BpftraceRunner: ...
   scx.py                          class ScxRunner: ...
 
-corpus/orchestrator.py          使用 app_runners + bpftool + bpf_stats → per-program exec_ns
+corpus/driver.py                使用 app_runners + bpftool + bpf_stats → per-program exec_ns
 e2e/cases/*/case.py             使用 app_runners + app benchmark → app throughput/latency
 ```
 
@@ -565,7 +565,7 @@ runner/                     # 共享基础设施
 
 corpus/                     # Corpus 评估层
   config/macro_corpus.yaml  #   程序列表 + 测量方式（app_native | test_run）
-  orchestrator.py           #   调度：app_runner 或 micro_exec → 聚合结果
+  driver.py                 #   调度：app_runner 或 micro_exec → 聚合结果
 
 e2e/                        # E2E 评估层
   cases/*/case.py           #   使用 app_runners，测 app-level metrics
@@ -1003,12 +1003,12 @@ make clean
 | **629** | bpftool 替代 C++ 调研 | ✅ | **大体可行**：loadall/pin/run/show/map update 均支持。6 个硬缺口：无 bpf_enable_stats CLI、37.7ms/次 overhead（repeat N 可摊薄）、短命进程模型。**结论**：corpus 用 Python+bpftool+ctypes，micro 保留 C++。报告：`bpftool_replacement_feasibility_20260329.md`。 |
 | **630** | **llvmbpf round-trip POC** | ✅ | **BPF → llvmbpf lift → opt -O2 → llc -march=bpf → BPF_PROG_LOAD 通过 kernel verifier ✅**。identity（-O0）不 work（`indirectbr` crash），必须 -O2 才能 canonicalize IR。测试程序：simple XDP（无 map）。下一步：有 map_lookup 的程序 + 常量注入。报告+脚本：`docs/tmp/20260329/llvmbpf_roundtrip_poc/`。 |
 | **631** | 大规模代码清理（2026-03-29） | ✅ | **C++ -4033 行**（删 batch_runner/daemon_client/json_parser/attach_trigger/prepared state，保留 test-run+llvmbpf）。**Python -5994 行**（删 batch plan/guest-host 双路径/trigger 命令/compile_only）。**Daemon -11 行**（已干净）。E2E 清理（旧 schema/兼容路径）。macro_corpus.yaml 统一 measurement: app_native/test_run。报告：`cpp_cleanup_report`/`python_cleanup_report`/`python_cleanup_review`/`e2e_review_and_cleanup`/`daemon_rust_cleanup`（均在 `docs/tmp/20260329/`）。 |
-| **632** | 新 benchmark 架构实现 | ✅ | `corpus/orchestrator.py` + `runner/libs/app_runners/bcc.py` + `runner/libs/bpf_stats.py` + `make vm-corpus-new`。**VM 验证通过**：BCC app_native exec_ns **3347ns**（baseline）→ **3564ns**（rejit）；test_run（bpftool）exec_ns **81→57ns（1.42x）**。65 pytest pass。报告：`new_orchestrator_implementation_20260329.md`。 |
+| **632** | 新 benchmark 架构实现 | ✅ | `corpus/driver.py` + `runner/libs/app_runners/bcc.py` + `runner/libs/bpf_stats.py` + `make vm-corpus-new`。**VM 验证通过**：BCC app_native exec_ns **3347ns**（baseline）→ **3564ns**（rejit）；test_run（bpftool）exec_ns **81→57ns（1.42x）**。65 pytest pass。报告：`new_orchestrator_implementation_20260329.md`。 |
 | **633** | llvmbpf bulk round-trip 170 objects | ✅ | **962 programs**：lift **556（57.8%）**→ lower **309（55.6%）**→ verifier **7（2.3%）**。4292 map_lookup sites。主失败：`last insn is not an exit or jmp`（subprog boundary）。报告：`llvmbpf_bulk_roundtrip_report_20260329.md`。 |
 | **634** | llvmbpf round-trip 四轮修复 | ✅ | **Round 1**：`last insn` 清零，lift 556→779，verifier 7→16（3.9%）。**Round 2**（.bpf.o 路径）：map relocation repair，verifier **157/413（38.0%）**。**Round 3**：GET_ORIGINAL+REJIT 正确路径打通，blocker 是 llvmbpf userspace 栈模型。**Round 4**：kernel_compatible_mode（512B stack + align 8 + implicit extern helper）。**BCC 17/17 全过**。**Tracee 9/33**（iter4）：kernel poke_tab 校验放宽（允许 insn_idx 变化）解决 tail-call EINVAL。剩余 24 fail：15 E2BIG + 8 ENOSPC + 1 verifier EPERM。-O1/Os/Oz 对 E2BIG 无帮助，需要 code-size 降低。报告：`llvmbpf_roundtrip_fix_report`、`llvmbpf_map_relocation_fix_report`、`llvmbpf_map_relocation_vm_results`、`llvmbpf_rejit_roundtrip_poc`、`llvmbpf_kernel_stack_fix_report`（均在 `docs/tmp/20260329/`）。 |
 | 635 | 更多 app runner 实现 | ✅ | 6 个 runner（bcc/tracee/katran/tetragon/bpftrace/scx）。Commit `86bc953`。 |
 | **636** | 全面 benchmark 架构 review | ✅ | 5 CRITICAL + 14 HIGH + 10 MEDIUM + 2 LOW。核心：bpftool loadall 残留、corpus repeat 没跑、rejit.py prog_fds 丢弃、大量 object-centric 死代码、silent fallback。报告：`strict_final_review_20260329.md`。 |
-| **637** | **新架构 corpus + E2E 端到端验证** | 🔄 | orchestrator 重写完成（loader-instance lifecycle）。大规模清理 **-21462 行**（`579c081`）。import cycle 修复 5/5（`2dd43c8`）。新增 9 个 app runner。残留清理+Tracee重构（`3101592`）。**待做**：VM 端到端验证、新 YAML schema（macro_apps.yaml 替代 macro_corpus.yaml）。报告：`corpus_app_native_coverage_and_e2e_dedup`、`benchmark_framework_redesign`、`benchmark_yaml_redesign`、`corpus_e2e_deep_review`（均在 `docs/tmp/20260329/`）。 |
+| **637** | **新架构 corpus + E2E 端到端验证** | 🔄 | corpus suite driver 重写完成（loader-instance lifecycle）。大规模清理 **-21462 行**（`579c081`）。import cycle 修复 5/5（`2dd43c8`）。新增 9 个 app runner。残留清理+Tracee重构（`3101592`）。**待做**：VM 端到端验证、新 YAML schema（macro_apps.yaml 替代 macro_corpus.yaml）。报告：`corpus_app_native_coverage_and_e2e_dedup`、`benchmark_framework_redesign`、`benchmark_yaml_redesign`、`corpus_e2e_deep_review`（均在 `docs/tmp/20260329/`）。 |
 | 638 | 新 kinsn 调研（6 组） | ✅ | 全部完成。结论：(1) POPCNT/CLZ/PDEP/PEXT/SHRX — **❌ 不做**（corpus 无 site）；(2) ARM64 CCMP — **✅ 值得做**（74 site），MADD/UBFX 低优先级；(3) Prefetch — **✅ 值得做**（17391 map_lookup site，需 PGO），NT store — ❌ 不做；(4) CRC32 — ⏸ 不做默认 pass（loxilb 2 site）；(5) RDTSC + ADC — 待评估；(6) PAUSE/YIELD — ❌ 不做（kernel 已有）。报告均在 `docs/tmp/20260329/`：`bit_ops_kinsn_research`、`arm64_kinsn_research`、`memory_hints_kinsn_research`、`crc32_kinsn_research`、`rdtsc_adc_kinsn_research`、`pause_yield_kinsn_research`。 |
 | **639** | **PGO 方案设计 + LBR 验证** | ✅ | **Host-side LBR 对 guest BPF 尚未验证可用**（5s 窗口 IP/branch 命中数=0）。推荐 **Hybrid PGO**：(1) profiler.rs 保留为 hotness collector；(2) sampling 零侵入发现（IP ~+1.37%, LBR ~+1.83%）；(3) selective instrumentation 给 hot subset 补精确 per-branch 数据。优先 BranchFlipPass，PrefetchPass 等 SPE/precise memory。**AWS**: t4g 有 SPE 硬件但 Nitro 是否暴露需实测，t3 有 LBR 但 guest 是否可用需实测，bare metal 才无限制。报告：`bpf_pgo_design_20260329.md`。 |
 | **640** | **Strict review 修复（删除为主）** | ✅ | **-2865 行**。删除：x86/arm64 远端 benchmark 脚本（bpftool loadall）、catalog.py/object_discovery.py/commands.py（object-centric 死代码）、results.py object-centric 函数、过时测试（test_micro_driver/test_runner_results）。修复：corpus repeat 真跑、rejit.py prog_fds 保留、tracee_support fallback→fail-fast、scx_support ulimit fail-fast。二次 review 确认全部落地，无误删。pytest **71 passed**，daemon-tests **535 passed**。报告：`strict_review_fixes_20260329.md`、`strict_review_second_pass_20260329.md`。 |

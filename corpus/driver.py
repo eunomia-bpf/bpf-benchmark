@@ -44,7 +44,7 @@ SECTION_TYPE_PREFIXES = {
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the app-native corpus orchestrator.")
+    parser = argparse.ArgumentParser(description="Run the app-native corpus suite driver.")
     parser.add_argument("--suite", default=str(DEFAULT_MACRO_APPS_YAML))
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--repeat", type=int, default=0)

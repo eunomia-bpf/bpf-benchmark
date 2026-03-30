@@ -1,12 +1,12 @@
 # End-to-End
 
-`e2e/` is the deployment-layer benchmark harness. The unified entrypoint is `python3 e2e/run.py <case>`.
+`e2e/` is the deployment-layer benchmark harness. The unified entrypoint is `python3 e2e/driver.py <case>`.
 
-Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, and `scx`.
+Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `bcc`, `scx`, and `katran`.
 
 ## Layout
 
-- `run.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, and `scx`
+- `driver.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, `scx`, `bcc`, and `katran`
 - `cases/`: per-system case logic, setup scripts, configs, and assets
 - `../runner/libs/`: shared helpers for agent lifecycle, workload generation, metrics, VM runs, and REJIT
 - `results/`: JSON/Markdown outputs
@@ -32,7 +32,7 @@ make corpus-build REPOS="tracee tetragon scx"
 - Auto-installs or downloads `tracee`, and tries to provision workload tools such as `stress-ng`, `fio`, `wrk`, and `hackbench`
 - Uses `e2e/cases/tracee/config.yaml` plus `corpus/build/tracee/tracee.bpf.o`
 - Supports `--vm` and `--kernel`
-- Smoke example: `python3 e2e/run.py tracee --smoke`
+- Smoke example: `python3 e2e/driver.py tracee --smoke`
 
 ### Tetragon
 
@@ -40,16 +40,16 @@ make corpus-build REPOS="tracee tetragon scx"
 - Tries to provision `stress-ng`, `fio`, `curl`, `tar`, then downloads a Tetragon release bundle when needed
 - Uses `corpus/build/tetragon/bpf_execve_event.bpf.o` and `corpus/build/tetragon/bpf_generic_kprobe.bpf.o`
 - Requires `bpftool` for attach/discovery paths
-- `--vm` is not supported in `e2e/run.py`
-- Smoke example: `python3 e2e/run.py tetragon --smoke`
+- `--vm` is not supported in `e2e/driver.py`
+- Smoke example: `python3 e2e/driver.py tetragon --smoke`
 
 ### bpftrace
 
 - No separate setup script; the case requires `bpftrace >= 0.16`, `bpftool`, and workload tools already in `PATH`
 - Scripts live under `e2e/cases/bpftrace/scripts/`
 - The case auto-builds `micro_exec` and the daemon CLI if they are missing
-- `--vm` is not supported in `e2e/run.py`
-- Smoke example: `python3 e2e/run.py bpftrace --smoke`
+- `--vm` is not supported in `e2e/driver.py`
+- Smoke example: `python3 e2e/driver.py bpftrace --smoke`
 
 ### scx
 
@@ -57,4 +57,4 @@ make corpus-build REPOS="tracee tetragon scx"
 - Uses `corpus/build/scx/scx_rusty_main.bpf.o`
 - Requires `hackbench`, `stress-ng`, and `sysbench` in `PATH`
 - Supports `--vm` and requires `--kernel` when enabled
-- Smoke example: `python3 e2e/run.py scx --smoke`
+- Smoke example: `python3 e2e/driver.py scx --smoke`
