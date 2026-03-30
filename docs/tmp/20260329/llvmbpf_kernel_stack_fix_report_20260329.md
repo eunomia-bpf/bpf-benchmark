@@ -76,10 +76,9 @@ Kernel-compatible mode now:
 - does not create `callItemCnt`
 - lowers `EXIT` directly to function return
 
-Current explicit limitation:
-
-- BPF-to-BPF calls are still rejected with a hard error in kernel-compatible
-  mode
+For programs without pseudo-calls, this removes the old synthetic llvmbpf
+userspace call-stack model entirely. Pseudo-call handling is covered below by
+preserving kernel call relocations plus the original subprogram region.
 
 ### 5. Preserved kernel pseudo map references as external symbols
 
@@ -110,16 +109,87 @@ for kernel-compatible AOT output.
 That avoids reintroducing userspace-style LDDW helper assumptions on the
 kernel round-trip path.
 
+### 8. Fixed kernel tail-call helper semantics
+
+In kernel-compatible mode, helper `bpf_tail_call#12` no longer:
+
+- writes a synthetic userspace-style return value into `r0`
+- forces the lifted function to exit immediately after the helper
+
+This removed the earlier Tracee-wide `R0 !read_ok` verifier failures.
+
+### 9. Added kernel-mode pseudo-call preservation for BPF-to-BPF programs
+
+Kernel-compatible lift no longer hard-fails on pseudo-calls.
+
+Current implementation:
+
+- kernel-mode pseudo-calls are emitted as external symbols like
+  `__llvmbpf_pseudo_call_pc_<pc>`
+- llvmbpf only codegens the main entry subprogram in kernel mode
+- postprocess rewrites those pseudo-call relocations back into
+  `BPF_PSEUDO_CALL` immediates
+- postprocess appends the original subprogram bytecode region unchanged
+
+This is a hybrid approach:
+
+- the main program is still lifted/optimized
+- subprogram bodies are preserved from the original kernel bytecode
+
+This was enough to move `sys_dup_exit_tail` from host-lift failure into real
+kernel `REJIT` validation.
+
+### 10. Added a verifier-bounds peephole for widened 16-bit compares
+
+Postprocess now rewrites a common LLVM shape:
+
+- `wtmp = widx`
+- `wtmp &= 0xffff`
+- compare on `wtmp`
+- later `ridx &= 0xffff`
+
+back into a compare on the original index register when it is safe to do so.
+
+The matcher was widened to tolerate a small number of non-clobbering
+instructions between the `AND32` and the compare. This removed the remaining
+`invalid access to map value` failure on
+`tracepoint__sched__sched_process_fork`.
+
+### 11. Relaxed REJIT tail-call poke matching for moved helper sites
+
+In `vendor/linux-framework/kernel/bpf/syscall.c`,
+`bpf_prog_rejit_update_poke_tab()` no longer requires the new lifted program to
+keep the exact original eBPF `insn_idx` for direct-tail-call poke entries.
+
+The updated check still requires:
+
+- same poke count
+- same poke reason ordering
+- same `(map, key)` ordering
+
+This is sufficient for the runtime update path, which only consumes the
+refreshed JIT addresses plus `(map, key)` metadata.
+
+This fixed the earlier `EINVAL` REJIT failures on:
+
+- `lkm_seeker_mod_tree_tail`
+- `send_bin`
+- `send_bin_tp`
+
 ## Explicit Remaining Limitations
 
 Kernel-compatible mode still rejects:
 
-- BPF-to-BPF calls
 - `var_addr` LDDW pseudos
 - `code_addr` LDDW pseudos
 - `map_by_idx` and `map_by_idx + map_val` LDDW pseudos
 
 These fail loudly by design.
+
+Additional current limitation:
+
+- kernel-mode pseudo-calls are preserved by appending the original subprogram
+  region; subprogram bodies are not yet re-lifted or re-optimized
 
 ## Validation
 
@@ -154,46 +224,129 @@ Notes:
 
 ### Tracee round-trip results
 
-Tracee attached 37 programs in this session.
+#### Iteration 1: tail-call + pseudo-call + map-bounds fixes
+
+Session:
+
+- `docs/tmp/20260329/llvmbpf_rejit_roundtrip_poc/sessions/tracee_live_iter3_20260329_201120`
+
+Tracee attached 29 programs in this session.
 
 Host-side prepare:
 
-- 35 / 37 programs lifted and lowered successfully
-- 2 / 37 failed during lift
-
-Lift failures:
-
-- `sys_dup_exit_tail`: `Kernel-compatible lift does not support BPF-to-BPF calls yet at pc 1127`
-- `syscall__accept4`: `Kernel-compatible lift does not support BPF-to-BPF calls yet at pc 804`
+- `29 / 29` programs lifted and lowered successfully
 
 End-to-end `REJIT` results:
 
-- 3 / 37 programs fully passed
-- 34 / 37 were not fully successful
+- `5 / 29` fully passed
+- `24 / 29` failed
 
 Programs that fully passed:
 
+- `tracepoint__raw_syscalls__sys_enter`
+- `sys_enter_init`
+- `tracepoint__raw_syscalls__sys_exit`
 - `lkm_seeker_new_mod_only_tail`
 - `tracepoint__sched__sched_process_free`
-- `syscall_checker`
 
-Failure breakdown for the remaining 34 programs:
+Important deltas vs. the earlier `3 / 37` Tracee baseline:
 
-- 15 hit verifier `R0 !read_ok` after tail-call-style paths
-- 9 hit verifier `invalid access to map value`
-- 5 failed `BPF_PROG_REJIT` with `E2BIG` (`Argument list too long`) on large
-  programs
-- 3 failed `BPF_PROG_REJIT` with `ENOSPC` (`No space left on device`) on very
-  large programs
-- 2 failed lift because kernel-compatible mode still rejects BPF-to-BPF calls
+- verifier `R0 !read_ok` failures dropped to `0`
+- verifier `invalid access to map value` failures dropped to `0`
+- pseudo-call programs no longer failed host lift
 
-Large-program examples:
+Failure breakdown:
 
-- `syscall__execve_enter`: `3956 -> 4780` insns, `E2BIG`
-- `syscall__execve_exit`: `3958 -> 4788` insns, `E2BIG`
-- `syscall__execveat_enter`: `4011 -> 4822` insns, `E2BIG`
-- `lkm_seeker_modtree_loop`: `14236 -> 14421` insns, `ENOSPC`
-- `lkm_seeker_kset_tail`: `14857 -> 14804` insns, `ENOSPC`
+- `14` hit `BPF_PROG_REJIT: E2BIG`
+- `7` hit `BPF_PROG_REJIT: ENOSPC`
+- `3` hit `BPF_PROG_REJIT: EINVAL`
+
+Representative examples:
+
+- `sys_dup_exit_tail`: host lift now succeeds, but `2342 -> 2735` insns still
+  fail `E2BIG`
+- `tracepoint__sched__sched_process_fork`: `4042 -> 4911` insns, now `E2BIG`
+  instead of `invalid access to map value`
+
+#### Iteration 2: kernel REJIT poke-tab relaxation
+
+Session:
+
+- `docs/tmp/20260329/llvmbpf_rejit_roundtrip_poc/sessions/tracee_live_iter4_20260329_201647`
+
+Tracee attached 33 programs in this session.
+
+Host-side prepare:
+
+- `33 / 33` programs lifted and lowered successfully
+
+End-to-end `REJIT` results:
+
+- `9 / 33` fully passed
+- `24 / 33` failed
+
+Programs that fully passed:
+
+- `tracepoint__raw_syscalls__sys_enter`
+- `sys_enter_init`
+- `tracepoint__raw_syscalls__sys_exit`
+- `lkm_seeker_mod_tree_tail`
+- `lkm_seeker_new_mod_only_tail`
+- `tracepoint__sched__sched_process_free`
+- `send_bin`
+- `send_bin_tp`
+- `syscall__init_module`
+
+Compared with Iteration 1:
+
+- `EINVAL` failures dropped from `3` to `0`
+- success count increased from `5` to `9`
+
+Failure breakdown:
+
+- `15` hit `BPF_PROG_REJIT: E2BIG`
+- `8` hit `BPF_PROG_REJIT: ENOSPC`
+- `1` hit verifier rejection surfaced as `BPF_PROG_REJIT: EPERM`
+
+The remaining verifier failure is:
+
+- `trace_ret_vfs_read_tail`
+  - syscall error: `Permission denied (os error 13)`
+  - verifier root cause: `R1 invalid mem access 'scalar'` at insn `4117`
+
+Notes:
+
+- the aggregate `results.json` in this session contains a broken giant JSON
+  string in one verifier-log payload, so the final counts above were computed
+  from per-program `programs/*/rejit.json`
+- a targeted `O1` follow-up session for `trace_ret_vfs_read_tail`
+  (`tracee_single_readtail_o1_20260329_202059`) was inconclusive because that
+  specific program did not attach in the narrower run
+
+#### Program-size findings
+
+`E2BIG` is now clearly a kernel page-budget failure, not a verifier failure.
+
+In `vendor/linux-framework/kernel/bpf/syscall.c`, REJIT rejects when:
+
+- `bpf_prog_size(tmp->len) > prog->pages * PAGE_SIZE`
+
+This explains why some relatively small deltas still fail, for example:
+
+- `sys_exit_init`: `482 -> 521` insns
+- `sys_dup_exit_tail`: `2342 -> 2735` insns
+
+Quick host-side opt-level experiments on representative `E2BIG` programs
+showed little leverage from changing `opt` level:
+
+- `sys_exit_init`: `521` insns at `O2/O3/Os/Oz`, `522` at `O1`
+- `sys_dup_exit_tail`: `2735` insns at `O2/O3/Os/Oz`, `2719` at `O1`
+- `tracepoint__sched__sched_process_fork`: `4911` insns at `O2/O3/Os/Oz`,
+  `4873` at `O1`
+- `sys_enter_submit`: `4609` insns at `O2/O3/Os/Oz`, `4640` at `O1`
+
+So simple `opt`-level retuning is not a promising path for the remaining
+size-limited failures.
 
 ## Current Status
 
@@ -202,26 +355,29 @@ What is fixed:
 - the kernel-stack incompatibility on the llvmbpf lift path
 - the `opensnoop` exit tracepoint host-lift failure
 - the 32-bit pointer-spill regression that still broke `REJIT` after lift
+- kernel tail-call helper semantics (`R0 !read_ok` is gone)
+- kernel pseudo-call handling for BPF-to-BPF callers in hybrid form
+- widened compare repair for bounded 16-bit map-value indexing
+- REJIT tail-call poke matching for moved helper sites
 - the tested BCC tool set now passes end-to-end: `17 / 17`
+- Tracee improved from `3 / 37` to `9 / 33` fully passing in current VM runs
 
 What remains for broader Tracee coverage:
 
-- real kernel-mode support for BPF-to-BPF calls
-- better preservation of tail-call semantics so transformed programs do not
-  read `R0` in verifier-invalid ways
-- better preservation of bounded map-value pointer arithmetic on large Tracee
-  programs
-- understanding whether the `E2BIG` / `ENOSPC` failures are pure syscall/log
-  size limits, program-size limits, or a byproduct of the transformed output
+- reducing llvmbpf code-size growth enough to fit the kernel REJIT page budget
+- understanding the remaining `ENOSPC` resource limit on large programs
+- fixing the remaining verifier failure in `trace_ret_vfs_read_tail`
+- replacing the hybrid pseudo-call preservation path with real lifted
+  subprogram support if full optimization coverage is required
 
 ## Takeaway
 
 The original llvmbpf kernel-stack problem is fixed for the tested round-trip
 path.
 
-The work is now past the original stack blocker and into second-order issues:
+The work is now past the original stack blocker and the early verifier
+semantic blockers. The remaining Tracee failures are dominated by:
 
-- kernel-mode BPF-to-BPF support
-- tail-call-sensitive verifier behavior
-- map-value bounds on large transformed Tracee programs
-- large-program `REJIT` limits
+- REJIT page-budget `E2BIG`
+- a still-unexplained large-program `ENOSPC`
+- one residual verifier scalar/stack-type bug

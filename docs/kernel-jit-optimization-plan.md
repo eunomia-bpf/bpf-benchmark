@@ -217,18 +217,25 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **SIMD (FPU)** | 是 | ❌ 不进 OSDI 主线 | **x86 SIMD 不做**：`kernel_fpu_begin/end` XSAVE/XRSTOR 开销 ~200-800 cycles，pair load/store 场景下远超收益；**ARM64 NEON 条件性 Phase 2**：仅 ≥1KiB + `may_use_simd()` 成立时考虑，no-FPU `LDP/STP` 优先。Linux crypto 模式（per-operation fpu_begin/end）不适用于 BPF 的细粒度调用 | **深度调研结论：x86 break-even ≥数百字节且需整次 BPF 调用摊销一次 FPU context；corpus 中绝大多数 copy/store ≤128B，不满足条件**。调研：`simd_fpu_kinsn_deep_research_20260326.md` |
 | **Tail-call specialization** | 否 | ✅ 调研完成 | **Phase 1**：dynamic-key monomorphic PIC（guarded constant-key fast path），复用 kernel `map_poke_run()`。**Kernel blocker**：`poke_tab` shape check 需放宽 | **537 sites / 31 对象(5.46%)；Cilium 216、Tetragon 118、Tracee 49；upstream 已有 constant-key direct jump → 论文新意在 dynamic-key PIC；break-even 命中率 ~8%**。调研：`tail_call_specialization_research_20260326.md` |
 | **Spill/fill 消除** | 否 | ❌ 不做 | 冗余 spill/fill 消除 | **内核已有 KF_FASTCALL，增量收益低** |
-| **POPCNT/CLZ/CTZ** | 是 | 📝 待做 | x86 `POPCNT`/`LZCNT`/`TZCNT` + ARM64 `CLZ`/`CTZ`。BPF 完全没有 bit counting 指令，当前用多条指令模拟。bloom filter、bitmap scan、路由表查找常用 | 待调研 corpus site 数量 |
-| **CRC32** | 是 | 📝 待做 | x86 `CRC32` + ARM64 `CRC32`。硬件 CRC32C，不需要 FPU。networking checksum 场景直接受益 | 待调研 |
-| **CCMP** | 是 | 📝 待做 | **ARM64 独有**。conditional compare chain，多条件判断不需要分支。packet classification 场景消除分支链 | 待调研 |
-| **Prefetch** | 是 | 📝 待做 | x86 `PREFETCHT0` + ARM64 `PRFM`。map lookup 前 prefetch bucket 隐藏内存延迟。**需要 PGO 数据决定哪个 map 是 hot** — 体现 runtime-guided 优势 | 待调研 |
-| **NT store** | 是 | 📝 待做 | x86 `MOVNTI`。写后不读的数据（perf buffer/ringbuf output）绕过 cache。**需要数据流分析** | 待调研 |
-| **PDEP/PEXT** | 是 | 📝 待做 | x86 BMI2 `PDEP`/`PEXT`。并行位提取/存放，packet header 字段解析。注意 AMD 部分 CPU 延迟高 | 待调研 |
-| **SHRX/SHLX** | 是 | 📝 待做 | x86 BMI2 无 flags 移位。避免 flag ��存器竞争，pipeline 更友好 | 待调研 |
-| **MADD/MSUB** | 是 | 📝 待做 | **ARM64 独有**。integer multiply-accumulate，hash 函数、地址计算常见 | 待调研 |
-| **UBFX/BFI** | 是 | 📝 待做 | **ARM64 独有**。bitfield extract/insert，比 BEXTR 更通用。协议头字段操作 | 待调研 |
+| **POPCNT/CLZ/CTZ** | 是 | ❌ 不做 | corpus 无可支撑的 pattern site。clang 已将 `__builtin_popcount` 展开为高效位操作序列，无循环可替换。调研：`bit_ops_kinsn_research_20260329.md` | 0 site |
+| **CRC32** | 是 | ⏸ 不做默认 pass | 仅 loxilb 有真实 CRC32 site（2 个 byte-update），broad corpus 覆盖低。`bpf_csum_diff` 等 helper 更广泛但走 helper 路径。调研：`crc32_kinsn_research_20260329.md` | loxilb 2 site |
+| **CCMP** | 是 | 📝 值得做 | **ARM64 独有**。conditional compare chain。**74 个 with-copy site**，restricted first wave。调研：`arm64_kinsn_research_20260329.md` | 74 site |
+| **Prefetch** | 是 | 📝 设计完成 | x86 `PREFETCHT0` + ARM64 `PRFM`。纯 hint kinsn，强 runtime-gate（只打开 hot+cache-miss site）。Phase 1：helper-before-lookup。Phase 2：map-inline direct-load。**完美体现 runtime-guided**（fixed JIT 不知道哪个 site 值得 prefetch）。调研：`memory_hints_kinsn_research_20260329.md`。设计：`prefetch_kinsn_design_20260329.md`（841 行）。 | 17391 潜在 site |
+| **NT store** | 是 | ❌ 不做 | 当前 corpus 无明确 streaming write 场景。调研：`memory_hints_kinsn_research_20260329.md` | 不值得 |
+| **PDEP/PEXT** | 是 | ❌ 不做 | corpus 无 site。调研：`bit_ops_kinsn_research_20260329.md` | 0 site |
+| **SHRX/SHLX** | 是 | ❌ 不做 | OoO CPU 上无增量收益。调研：`bit_ops_kinsn_research_20260329.md` | 不值得 |
+| **MADD/MSUB** | 是 | ⏸ 低优先级 | ARM64 独有。优先级低于 CCMP。调研：`arm64_kinsn_research_20260329.md` | |
+| **UBFX/BFI** | 是 | ⏸ 低优先级 | ARM64 独有。优先级低于 CCMP。调研：`arm64_kinsn_research_20260329.md` | |
 | **RDTSC** | 是 | 📝 待做 | x86 `RDTSC`/`RDTSCP` 内联时间戳。比 `bpf_ktime_get_ns()` helper call 快一个数量���。tracing/profiling 场景 | 待调研 |
 | **ADC/SBB** | 是 | 📝 待做 | x86 `ADC`/`SBB` 128-bit 算术。IPv6 地址操作、crypto | 待调研 |
-| **PAUSE/YIELD** | 是 | 📝 低优先级 | x86 `PAUSE` + ARM64 `YIELD`。BPF spin lock 自旋等待减少功耗 | BPF spin lock 使用频率低 |
+| **SETcc/CSET** | 是 | 📝 待做 | x86 `SETcc` + ARM64 `CSET`。比较结果直接存 0/1，不需要 branch+mov。和 CMOV 不同：CMOV 条件赋值任意值，SETcc 专门设置 boolean。BPF 里极常见（`if (x > 0) flag = 1`） | 待调研 |
+| **ANDN** | 是 | 📝 待做 | x86 BMI1 `ANDN`（`a & ~b` 一条指令）。mask 操作常见 | 待调研 |
+| **BLSI/BLSR/BLSMSK** | 是 | 📝 待做 | x86 BMI1 isolate/reset/mask lowest set bit。bitmap 操作 | 待调研 |
+| **除法强度削减** | 否 | 📝 待做 | 常量除数 → shift+multiply trick。DIV 40 cycles → 3 cycles。纯 bytecode 变换，需要 verifier const prop 提供常量。**完美体现 runtime-guided** | 待调研 |
+| **PAUSE/YIELD** | 是 | ❌ 不做 | x86 `PAUSE` + ARM64 `YIELD`。内核 BPF spin lock helper 内部已有 PAUSE/WFE，kinsn 无增量价值。调研：`pause_yield_kinsn_research_20260329.md` | corpus 中几乎无 BPF-level busy-wait |
+| **寄存器重分配** | 否 | 📝 待做 | BPF 10 个寄存器的 liveness 分析→callee-saved 重分配（R6-R9）减少 spill/fill。纯 bytecode 变换。daemon 已有 liveness 分析能力 | 待调研 |
+| **REJIT spill-to-register** | kernel 机制 | 📝 设计完成 | REJIT 接受可选 reg_map，daemon 指定 spill slot → native register 映射。**x86 只剩 R12**（1 个），**ARM64 有 x23/x24**（2 个）。Verifier 不需要改。分阶段：ARM64 先做 → x86 → 可配置 reg_map。调研：`rejit_register_mapping_research_20260329.md`（790 行） | |
+| **Region kinsn（寄存器扩展）** | 是 | 📝 待做 | 高寄存器压力的代码段包装为 region kinsn，emit callback 内部用 native 寄存器。需要 `model_call()` 支持 | 待调研 |
 
 ### 3.2 安全加固变换（暂不在 OSDI 评估范围）
 
@@ -998,7 +1005,8 @@ make clean
 | **631** | 大规模代码清理（2026-03-29） | ✅ | **C++ -4033 行**（删 batch_runner/daemon_client/json_parser/attach_trigger/prepared state，保留 test-run+llvmbpf）。**Python -5994 行**（删 batch plan/guest-host 双路径/trigger 命令/compile_only）。**Daemon -11 行**（已干净）。E2E 清理（旧 schema/兼容路径）。macro_corpus.yaml 统一 measurement: app_native/test_run。报告：`cpp_cleanup_report`/`python_cleanup_report`/`python_cleanup_review`/`e2e_review_and_cleanup`/`daemon_rust_cleanup`（均在 `docs/tmp/20260329/`）。 |
 | **632** | 新 benchmark 架构实现 | ✅ | `corpus/orchestrator.py` + `runner/libs/app_runners/bcc.py` + `runner/libs/bpf_stats.py` + `make vm-corpus-new`。**VM 验证通过**：BCC app_native exec_ns **3347ns**（baseline）→ **3564ns**（rejit）；test_run（bpftool）exec_ns **81→57ns（1.42x）**。65 pytest pass。报告：`new_orchestrator_implementation_20260329.md`。 |
 | **633** | llvmbpf bulk round-trip 170 objects | ✅ | **962 programs**：lift **556（57.8%）**→ lower **309（55.6%）**→ verifier **7（2.3%）**。4292 map_lookup sites。主失败：`last insn is not an exit or jmp`（subprog boundary）。报告：`llvmbpf_bulk_roundtrip_report_20260329.md`。 |
-| **634** | llvmbpf round-trip 四轮修复 | ✅ | **Round 1**：`last insn` 清零，lift 556→779，verifier 7→16（3.9%）。**Round 2**（.bpf.o 路径）：map relocation repair，verifier **157/413（38.0%）**。**Round 3**：GET_ORIGINAL+REJIT 正确路径打通，blocker 是 llvmbpf userspace 栈模型。**Round 4**：kernel_compatible_mode（512B stack + align 8 + implicit extern helper）。**BCC 17/17 全过**（execsnoop 2/2, opensnoop 6/6, filelife 5/5, capable 2/2, syscount 2/2）。**Tracee 3/37**（剩余：BPF-to-BPF call 不支持、tail-call R0 !read_ok、invalid map value access、E2BIG）。报告：`llvmbpf_roundtrip_fix_report`、`llvmbpf_map_relocation_fix_report`、`llvmbpf_map_relocation_vm_results`、`llvmbpf_rejit_roundtrip_poc`、`llvmbpf_kernel_stack_fix_report`（均在 `docs/tmp/20260329/`）。 |
+| **634** | llvmbpf round-trip 四轮修复 | ✅ | **Round 1**：`last insn` 清零，lift 556→779，verifier 7→16（3.9%）。**Round 2**（.bpf.o 路径）：map relocation repair，verifier **157/413（38.0%）**。**Round 3**：GET_ORIGINAL+REJIT 正确路径打通，blocker 是 llvmbpf userspace 栈模型。**Round 4**：kernel_compatible_mode（512B stack + align 8 + implicit extern helper）。**BCC 17/17 全过**。**Tracee 9/33**（iter4）：kernel poke_tab 校验放宽（允许 insn_idx 变化）解决 tail-call EINVAL。剩余 24 fail：15 E2BIG + 8 ENOSPC + 1 verifier EPERM。-O1/Os/Oz 对 E2BIG 无帮助，需要 code-size 降低。报告：`llvmbpf_roundtrip_fix_report`、`llvmbpf_map_relocation_fix_report`、`llvmbpf_map_relocation_vm_results`、`llvmbpf_rejit_roundtrip_poc`、`llvmbpf_kernel_stack_fix_report`（均在 `docs/tmp/20260329/`）。 |
 | 635 | 更多 app runner 实现 | ✅ | 6 个 runner（bcc/tracee/katran/tetragon/bpftrace/scx）。Commit `86bc953`。 |
 | **636** | 全面 benchmark 架构 review | 🔄 | 检查所有 C++/Python/Makefile/config 是否符合 §5.6。 |
-| **637** | **新架构 corpus + E2E 端到端验证** | 🔄 | orchestrator 重写中（按 repo 分组 lifecycle，和 E2E 共享 app runner）。覆盖率分析完成：179 obj / 1112 prog，理论可测 **879**（706 app_native + 173 test_run），233 需新 runner 或移除。5/6 app runner 有 import cycle（只 BCC 正确）。报告：`corpus_app_native_coverage_and_e2e_dedup_20260329.md`。 |
+| **637** | **新架构 corpus + E2E 端到端验证** | 🔄 | orchestrator 重写完成（loader-instance lifecycle）。大规模清理 **-21462 行**（`579c081`）。import cycle 修复 5/5（`2dd43c8`）。新增 9 个 app runner。残留清理+Tracee重构（`3101592`）。**待做**：VM 端到端验证、新 YAML schema（macro_apps.yaml 替代 macro_corpus.yaml）。报告：`corpus_app_native_coverage_and_e2e_dedup`、`benchmark_framework_redesign`、`benchmark_yaml_redesign`、`corpus_e2e_deep_review`（均在 `docs/tmp/20260329/`）。 |
+| 638 | 新 kinsn 调研（6 组） | ✅ | 全部完成。结论：(1) POPCNT/CLZ/PDEP/PEXT/SHRX — **❌ 不做**（corpus 无 site）；(2) ARM64 CCMP — **✅ 值得做**（74 site），MADD/UBFX 低优先级；(3) Prefetch — **✅ 值得做**（17391 map_lookup site，需 PGO），NT store — ❌ 不做；(4) CRC32 — ⏸ 不做默认 pass（loxilb 2 site）；(5) RDTSC + ADC — 待评估；(6) PAUSE/YIELD — ❌ 不做（kernel 已有）。报告均在 `docs/tmp/20260329/`：`bit_ops_kinsn_research`、`arm64_kinsn_research`、`memory_hints_kinsn_research`、`crc32_kinsn_research`、`rdtsc_adc_kinsn_research`、`pause_yield_kinsn_research`。 |

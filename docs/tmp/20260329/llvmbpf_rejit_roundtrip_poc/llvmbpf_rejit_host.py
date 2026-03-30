@@ -138,7 +138,12 @@ def prepare_program(program: dict[str, Any], opt_level: str, bpf_stack_size: int
         }
 
     try:
-        postprocess_summary = postprocess_roundtrip_object(raw_obj, obj_path, output_bin_path=bin_path)
+        postprocess_summary = postprocess_roundtrip_object(
+            raw_obj,
+            obj_path,
+            output_bin_path=bin_path,
+            original_bin_path=original_bin,
+        )
     except Exception as exc:  # noqa: BLE001
         (program_dir / "postprocess.stderr.log").write_text(f"{exc}\n", encoding="utf-8")
         return {
