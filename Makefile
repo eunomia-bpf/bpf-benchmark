@@ -84,6 +84,7 @@ DAEMON_ARGS ?=
 DAEMON_SOCKET ?= /tmp/bpfrejit.sock
 E2E_ARGS ?=
 E2E_CASE ?= all
+VM_CORPUS_ARGS ?=
 REPOS ?=
 PROFILE ?=
 FILTERS ?=
@@ -126,6 +127,7 @@ ROOT_VM_CORPUS_SAMPLES_VALUE := $(if $(strip $(ROOT_VM_CORPUS_SAMPLES_IS_EXPLICI
 ROOT_VM_CORPUS_SAMPLES_ARG := SAMPLES="$(ROOT_VM_CORPUS_SAMPLES_VALUE)"
 ROOT_VM_CORPUS_FILTERS_ARG := $(if $(strip $(FILTERS)),FILTERS="$(FILTERS)",)
 ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG := $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),VM_CORPUS_WORKLOAD_SECONDS="$(VM_CORPUS_WORKLOAD_SECONDS)",)
+ROOT_VM_CORPUS_EXTRA_ARGS := $(if $(strip $(VM_CORPUS_ARGS)),VM_CORPUS_ARGS='$(VM_CORPUS_ARGS)',)
 
 # Incremental rebuild sources
 MICRO_RUNNER_SOURCES := $(wildcard $(RUNNER_DIR)/src/*.cpp $(RUNNER_DIR)/include/*.hpp $(RUNNER_DIR)/CMakeLists.txt)
@@ -183,8 +185,8 @@ help:
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
 	@echo "        aws-x86-launch aws-x86-setup aws-x86-benchmark aws-x86-terminate aws-x86-full aws-x86"
 	@echo "Params: vm-micro SAMPLES=$(SAMPLES) WARMUPS=$(WARMUPS) INNER_REPEAT=$(INNER_REPEAT) BENCH=\"...\""
-	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) FILTERS=\"...\" TARGET=\"x86-benchmark|x86-dev|arm64|aws|...\""
-	@echo "        vm-e2e E2E_CASE=\"all|tracee|...\" PROFILE=$(PROFILE)"
+	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) FILTERS=\"...\" VM_CORPUS_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\" TARGET=\"x86-benchmark|x86-dev|arm64|aws|...\""
+	@echo "        vm-e2e E2E_CASE=\"all|tracee|...\" E2E_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\" PROFILE=$(PROFILE)"
 
 # ── Build ──────────────────────────────────────────────────────────────────────
 all:
@@ -426,7 +428,7 @@ vm-corpus:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-corpus \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
 		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" \
-		$(ROOT_VM_CORPUS_SAMPLES_ARG) $(ROOT_VM_CORPUS_FILTERS_ARG) $(ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG)
+		$(ROOT_VM_CORPUS_SAMPLES_ARG) $(ROOT_VM_CORPUS_FILTERS_ARG) $(ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG) $(ROOT_VM_CORPUS_EXTRA_ARGS)
 
 vm-e2e:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-e2e \

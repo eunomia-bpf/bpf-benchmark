@@ -108,6 +108,7 @@ def run_phase(
     *,
     duration_s: int,
     attach_timeout: int,
+    enabled_passes: Sequence[str],
     prepared_daemon_session: object,
 ) -> tuple[dict[str, object], dict[str, object] | None]:
     """Run baseline then daemon-apply then post-rejit measurement for one tool.
@@ -142,13 +143,12 @@ def run_phase(
 
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")
-    enabled_passes = list(spec.rejit_passes) if spec.rejit_passes else benchmark_rejit_enabled_passes()
     return run_app_runner_phase_records(
         runner=bcc_runner,
         prepared_daemon_session=prepared_daemon_session,
         measure=workload,
         site_totals_fields=BCC_SITE_TOTAL_FIELDS,
-        enabled_passes=enabled_passes,
+        enabled_passes=list(enabled_passes),
     )
 
 
@@ -436,13 +436,22 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
         raise RuntimeError("no tools selected")
 
     records: list[dict[str, object]] = []
+    default_rejit_passes = [str(pass_name) for pass_name in benchmark_rejit_enabled_passes()]
+    tool_rejit_passes: dict[str, list[str]] = {}
     with enable_bpf_stats():
         for spec in selected:
+            enabled_passes = (
+                [str(pass_name) for pass_name in spec.rejit_passes]
+                if spec.rejit_passes
+                else list(default_rejit_passes)
+            )
+            tool_rejit_passes[spec.name] = list(enabled_passes)
             tool_binary = find_tool_binary(tools_dir, spec.name)
             if tool_binary is None:
                 record: dict[str, object] = {
                     "name": spec.name,
                     "description": spec.description,
+                    "selected_rejit_passes": list(enabled_passes),
                     "tool_args": list(spec.tool_args),
                     "tool_binary": None,
                     "baseline": {
@@ -485,12 +494,14 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
                 tool_binary,
                 duration_s=duration_s,
                 attach_timeout=attach_timeout,
+                enabled_passes=enabled_passes,
                 prepared_daemon_session=prepared_daemon_session,
             )
             summary = summarize_tool(spec, baseline, rejit)
             records.append({
                 "name": spec.name,
                 "description": spec.description,
+                "selected_rejit_passes": list(enabled_passes),
                 "tool_args": list(spec.tool_args),
                 "tool_binary": str(tool_binary),
                 "baseline": baseline,
@@ -528,7 +539,9 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
         "status": "error" if errors else "ok",
         "smoke": smoke,
         "duration_s": duration_s,
+        "selected_rejit_passes": list(default_rejit_passes),
         "selected_tools": [spec.name for spec in selected],
+        "tool_rejit_passes": tool_rejit_passes,
         "tools_dir": str(tools_dir),
         "daemon": str(daemon_binary),
         "setup": dict(setup_result),

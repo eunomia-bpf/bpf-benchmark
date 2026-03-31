@@ -28,16 +28,14 @@ from runner.libs.app_runners.base import AppRunner
 from runner.libs.daemon_session import DaemonSession
 from runner.libs.kinsn import (
     capture_daemon_kinsn_discovery as _capture_daemon_kinsn_discovery,
-    capture_kinsn_module_snapshot as _capture_kinsn_module_snapshot,
-    expected_kinsn_modules as _expected_kinsn_modules,
     relpath,
-    run_kinsn_module_loader as _run_kinsn_module_loader,
 )
 from runner.libs.metrics import (
     compute_delta,
     sample_bpf_stats,
     sample_cpu_usage,
     sample_total_cpu_usage,
+    start_sampler_thread,
 )
 
 MAX_PERSISTED_STRING_CHARS = 16_384
@@ -231,19 +229,13 @@ def prepare_daemon_session(
 ) -> PreparedDaemonSession:
     binary = (daemon_binary or daemon_session.daemon_binary).resolve()
     metadata = copy.deepcopy(getattr(daemon_session, "kinsn_metadata", {}) or {})
-    if not metadata:
-        expected_modules = _expected_kinsn_modules()
-        before_snapshot = _capture_kinsn_module_snapshot(expected_modules)
-        module_load = _run_kinsn_module_loader(
-            expected_modules,
-            before_snapshot=before_snapshot,
+    if not bool(getattr(daemon_session, "load_kinsn", False)):
+        return PreparedDaemonSession(
+            session=daemon_session,
+            metadata={},
         )
-        metadata = {
-            "captured_at": datetime.now(timezone.utc).isoformat(),
-            "expected_modules": expected_modules,
-            "module_snapshot_before_daemon": before_snapshot,
-            "module_load": module_load,
-        }
+    if not metadata:
+        raise RuntimeError("daemon session requested kinsn loading but did not capture kinsn metadata")
     metadata["captured_at"] = datetime.now(timezone.utc).isoformat()
     metadata["daemon_binary"] = relpath(binary)
     metadata["daemon_kinsn_discovery"] = _capture_daemon_kinsn_discovery(
@@ -323,15 +315,16 @@ def run_case_lifecycle(
         requested_prog_ids = lifecycle_state.requested_prog_ids()
         if not requested_prog_ids:
             raise RuntimeError("lifecycle did not provide any requested program ids")
-        kinsn_metadata = _clone_daemon_metadata(daemon_session, requested_prog_ids)
+        if bool(getattr(active_daemon_session, "load_kinsn", False)):
+            kinsn_metadata = _clone_daemon_metadata(daemon_session, requested_prog_ids)
 
         if before_baseline is not None:
             abort = before_baseline(setup_state, lifecycle_state)
             if abort is not None:
-                assert kinsn_metadata is not None
-                kinsn_metadata["status"] = "aborted"
-                kinsn_metadata["reason"] = abort.reason
-                kinsn_metadata["abort_phase"] = "before_baseline"
+                if kinsn_metadata is not None:
+                    kinsn_metadata["status"] = "aborted"
+                    kinsn_metadata["reason"] = abort.reason
+                    kinsn_metadata["abort_phase"] = "before_baseline"
                 artifacts.update(_artifact_dict(abort.artifacts))
                 return LifecycleRunResult(
                     setup_state=setup_state,
@@ -356,10 +349,10 @@ def run_case_lifecycle(
         if before_rejit is not None:
             abort = before_rejit(setup_state, lifecycle_state, baseline)
             if abort is not None:
-                assert kinsn_metadata is not None
-                kinsn_metadata["status"] = "aborted"
-                kinsn_metadata["reason"] = abort.reason
-                kinsn_metadata["abort_phase"] = "before_rejit"
+                if kinsn_metadata is not None:
+                    kinsn_metadata["status"] = "aborted"
+                    kinsn_metadata["reason"] = abort.reason
+                    kinsn_metadata["abort_phase"] = "before_rejit"
                 artifacts.update(_artifact_dict(abort.artifacts))
                 return LifecycleRunResult(
                     setup_state=setup_state,
@@ -376,7 +369,8 @@ def run_case_lifecycle(
         requested_prog_ids = lifecycle_state.requested_prog_ids()
         if not requested_prog_ids:
             raise RuntimeError("lifecycle did not provide any requested program ids after baseline")
-        kinsn_metadata["requested_prog_ids"] = list(requested_prog_ids)
+        if kinsn_metadata is not None:
+            kinsn_metadata["requested_prog_ids"] = list(requested_prog_ids)
 
         daemon_error = _daemon_exit_error(active_daemon_session)
         if daemon_error is not None:
@@ -392,7 +386,8 @@ def run_case_lifecycle(
             requested_prog_ids,
             enabled_passes=enabled_passes or benchmark_rejit_enabled_passes(),
         )
-        kinsn_metadata["status"] = "completed"
+        if kinsn_metadata is not None:
+            kinsn_metadata["status"] = "completed"
         run_post_rejit = rejit_result_has_any_apply(rejit_result)
         if should_run_post_rejit is not None:
             run_post_rejit = bool(should_run_post_rejit(rejit_result))
@@ -518,21 +513,22 @@ def measure_app_runner_workload(
     }
     cpu_holder: dict[int, dict[str, float]] = {}
     system_cpu_holder: dict[str, float] = {}
+    sampler_errors: list[str] = []
     threads: list[threading.Thread] = []
 
     if agent_pid is not None and int(agent_pid) > 0:
-        cpu_thread = threading.Thread(
+        cpu_thread = start_sampler_thread(
+            label=f"agent cpu pid={int(agent_pid)}",
+            errors=sampler_errors,
             target=lambda: cpu_holder.update(sample_cpu_usage([int(agent_pid)], duration_s)),
-            daemon=True,
         )
-        cpu_thread.start()
         threads.append(cpu_thread)
 
-    system_thread = threading.Thread(
+    system_thread = start_sampler_thread(
+        label="system cpu",
+        errors=sampler_errors,
         target=lambda: system_cpu_holder.update(sample_total_cpu_usage(duration_s)),
-        daemon=True,
     )
-    system_thread.start()
     threads.append(system_thread)
 
     try:
@@ -540,6 +536,12 @@ def measure_app_runner_workload(
     finally:
         for thread in threads:
             thread.join()
+    if sampler_errors:
+        raise RuntimeError("; ".join(sampler_errors))
+    if not system_cpu_holder:
+        raise RuntimeError("system cpu sampler produced no data")
+    if agent_pid is not None and int(agent_pid) > 0 and int(agent_pid) not in cpu_holder:
+        raise RuntimeError(f"agent cpu sampler produced no data for pid={int(agent_pid)}")
 
     after_bpf = sample_bpf_stats(list(prog_ids), prog_fds=runner.program_fds)
     measurement = {

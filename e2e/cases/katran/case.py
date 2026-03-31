@@ -27,7 +27,7 @@ from runner.libs.case_common import (  # noqa: E402
     run_app_runner_lifecycle,
     speedup_ratio,
 )
-from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
+from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage, start_sampler_thread  # noqa: E402
 
 
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "katran")
@@ -58,15 +58,20 @@ def measure_workload(
 ) -> dict[str, object]:
     before_bpf = sample_bpf_stats(prog_ids)
     system_cpu_holder: dict[str, float] = {}
-    system_thread = threading.Thread(
+    sampler_errors: list[str] = []
+    system_thread = start_sampler_thread(
+        label="system cpu",
+        errors=sampler_errors,
         target=lambda: system_cpu_holder.update(sample_total_cpu_usage(duration_s)),
-        daemon=True,
     )
-    system_thread.start()
     try:
         workload_result = runner.run_workload(duration_s)
     finally:
         system_thread.join()
+    if sampler_errors:
+        raise RuntimeError("; ".join(sampler_errors))
+    if not system_cpu_holder:
+        raise RuntimeError("system cpu sampler produced no data")
     after_bpf = sample_bpf_stats(prog_ids)
     return {
         "workload": workload_result.to_dict(),

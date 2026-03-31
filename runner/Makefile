@@ -36,6 +36,7 @@ WARMUPS ?= 1
 INNER_REPEAT ?= 100
 VM_CORPUS_SAMPLES ?= 200
 VM_CORPUS_WORKLOAD_SECONDS ?=
+VM_CORPUS_ARGS ?=
 BENCH ?=
 FUZZ_ROUNDS ?= 1000
 VM_COMMAND ?= /bin/bash
@@ -309,7 +310,7 @@ vm-corpus: corpus-build corpus-build-native vendor_bpftool daemon-binary kernel-
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_CORPUS_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/driver.py" --daemon "$(DAEMON_PATH)" --output-json "$(VM_CORPUS_OUTPUT_JSON)" --output-md "$(VM_CORPUS_OUTPUT_MD)" $(VM_CORPUS_SAMPLES_FLAG) $(VM_CORPUS_WORKLOAD_SECONDS_FLAG) $(FILTER_FLAGS)'
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/driver.py" --daemon "$(DAEMON_PATH)" --output-json "$(VM_CORPUS_OUTPUT_JSON)" --output-md "$(VM_CORPUS_OUTPUT_MD)" $(VM_CORPUS_SAMPLES_FLAG) $(VM_CORPUS_WORKLOAD_SECONDS_FLAG) $(FILTER_FLAGS) $(VM_CORPUS_ARGS)'
 
 vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"

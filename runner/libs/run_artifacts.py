@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 import json
+import os
 import re
 import shutil
 import sys
@@ -116,6 +117,39 @@ def repo_relative_path(path: Path) -> str:
         return str(resolved.relative_to(ROOT_DIR))
     except ValueError:
         return str(resolved)
+
+
+def _read_proc_start_ticks(pid: int) -> int | None:
+    try:
+        fields = Path(f"/proc/{int(pid)}/stat").read_text().split()
+    except OSError:
+        return None
+    if len(fields) < 22:
+        return None
+    try:
+        return int(fields[21])
+    except ValueError:
+        return None
+
+
+def _read_boot_id() -> str | None:
+    try:
+        boot_id = Path("/proc/sys/kernel/random/boot_id").read_text().strip()
+    except OSError:
+        return None
+    return boot_id or None
+
+
+def current_process_identity() -> dict[str, object]:
+    pid = os.getpid()
+    payload = {"launcher_pid": int(pid)}
+    start_ticks = _read_proc_start_ticks(pid)
+    if start_ticks is not None:
+        payload["launcher_start_ticks"] = int(start_ticks)
+    boot_id = _read_boot_id()
+    if boot_id is not None:
+        payload["launcher_boot_id"] = boot_id
+    return payload
 
 
 def _managed_run_artifact_metadata(path: Path) -> dict[str, Any] | None:
@@ -364,10 +398,9 @@ def create_run_artifact_dir(
     results_dir = results_dir.resolve()
     if clear_existing:
         clear_previous_run_artifacts(results_dir)
-    _mark_stale_running_artifacts_aborted(
+    _ensure_no_running_artifacts(
         results_dir=results_dir,
         run_type=run_type,
-        reason="superseded by a newer benchmark session after the previous run did not complete",
     )
 
     run_dir = results_dir / f"{sanitize_artifact_token(run_type)}_{artifact_timestamp(generated_at)}"
@@ -469,16 +502,15 @@ def load_latest_result_for_output(output_path: Path, *, default_run_type: str) -
     return payload
 
 
-def _mark_stale_running_artifacts_aborted(
+def _ensure_no_running_artifacts(
     *,
     results_dir: Path,
     run_type: str,
-    reason: str,
 ) -> None:
     if not results_dir.is_dir():
         return
     run_type_token = sanitize_artifact_token(run_type)
-    updated_at = datetime.now(timezone.utc).isoformat()
+    running_paths: list[str] = []
     for child in sorted(results_dir.iterdir()):
         if not child.is_dir():
             continue
@@ -490,10 +522,89 @@ def _mark_stale_running_artifacts_aborted(
         status = str(metadata.get("status", "")).strip()
         if status != "running":
             continue
-        metadata_path = child / "metadata.json"
-        metadata_payload = dict(metadata)
-        metadata_payload["status"] = "aborted"
-        metadata_payload["last_updated_at"] = updated_at
-        metadata_payload["error_message"] = reason
-        metadata_payload.setdefault("aborted_at", updated_at)
-        metadata_path.write_text(json.dumps(metadata_payload, indent=2, sort_keys=True) + "\n")
+        pid_value = metadata.get("launcher_pid")
+        start_ticks_value = metadata.get("launcher_start_ticks")
+        boot_id_value = str(metadata.get("launcher_boot_id") or "").strip()
+        try:
+            launcher_pid = int(pid_value)
+        except (TypeError, ValueError):
+            launcher_pid = 0
+        try:
+            launcher_start_ticks = int(start_ticks_value)
+        except (TypeError, ValueError):
+            launcher_start_ticks = 0
+        if launcher_pid <= 0 or launcher_start_ticks <= 0 or not boot_id_value:
+            _mark_stale_running_artifact(
+                child,
+                metadata,
+                reason=(
+                    "previous benchmark artifact is still marked running but is missing launcher "
+                    "identity metadata; treating it as stale before starting a new session"
+                ),
+            )
+            continue
+        current_start_ticks = _read_proc_start_ticks(launcher_pid)
+        current_boot_id = _read_boot_id()
+        if current_start_ticks is None:
+            _mark_stale_running_artifact(
+                child,
+                metadata,
+                reason=f"previous benchmark launcher pid {launcher_pid} is no longer running",
+            )
+            continue
+        if current_boot_id != boot_id_value:
+            _mark_stale_running_artifact(
+                child,
+                metadata,
+                reason=(
+                    f"previous benchmark launcher pid {launcher_pid} belongs to boot_id={boot_id_value}, "
+                    f"current boot_id={current_boot_id or 'unknown'}"
+                ),
+            )
+            continue
+        if current_start_ticks != launcher_start_ticks:
+            _mark_stale_running_artifact(
+                child,
+                metadata,
+                reason=(
+                    f"previous benchmark launcher pid {launcher_pid} exited and pid was reused "
+                    f"(expected start_ticks={launcher_start_ticks}, found={current_start_ticks})"
+                ),
+            )
+            continue
+        running_paths.append(f"{child} (launcher_pid={launcher_pid})")
+    if running_paths:
+        raise RuntimeError(
+            "refusing to start a new benchmark session while prior run artifacts are still marked running: "
+            + ", ".join(running_paths)
+        )
+
+
+def _mark_stale_running_artifact(
+    run_dir: Path,
+    metadata: Mapping[str, Any],
+    *,
+    reason: str,
+) -> None:
+    updated_at = datetime.now(timezone.utc).isoformat()
+    updated_metadata = dict(metadata)
+    updated_metadata["status"] = "aborted"
+    updated_metadata["error_message"] = reason
+    updated_metadata["last_updated_at"] = updated_at
+    updated_metadata.setdefault("aborted_at", updated_at)
+    metadata_path = run_dir / "metadata.json"
+    metadata_path.write_text(json.dumps(updated_metadata, indent=2, sort_keys=True) + "\n")
+    progress_path = run_dir / "details" / "progress.json"
+    if progress_path.is_file():
+        try:
+            progress_payload = json.loads(progress_path.read_text())
+        except (OSError, json.JSONDecodeError) as exc:
+            raise RuntimeError(f"failed to read progress payload from {progress_path}: {exc}") from exc
+        if not isinstance(progress_payload, dict):
+            raise RuntimeError(f"progress payload is not a JSON object: {progress_path}")
+        updated_progress = dict(progress_payload)
+        updated_progress["status"] = "aborted"
+        updated_progress["error_message"] = reason
+        updated_progress["aborted_at"] = updated_at
+        progress_path.write_text(json.dumps(updated_progress, indent=2, sort_keys=True) + "\n")
+    print(f"warning: marked stale run artifact aborted: {run_dir}: {reason}", file=sys.stderr)

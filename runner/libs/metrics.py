@@ -3,7 +3,9 @@ from __future__ import annotations
 import ctypes
 import ctypes.util
 import os
+import threading
 import time
+from collections.abc import Callable
 from contextlib import contextmanager
 from functools import lru_cache
 from pathlib import Path
@@ -190,13 +192,13 @@ def sample_bpf_stats(
     return stats
 
 
-def _read_pid_ticks(pid: int) -> tuple[int, int] | None:
+def _read_pid_ticks(pid: int) -> tuple[int, int]:
     try:
         fields = Path(f"/proc/{pid}/stat").read_text().split()
-    except OSError:
-        return None
+    except OSError as exc:
+        raise RuntimeError(f"failed to read /proc/{pid}/stat: {exc}") from exc
     if len(fields) < 15:
-        return None
+        raise RuntimeError(f"/proc/{pid}/stat is truncated")
     return int(fields[13]), int(fields[14])
 
 
@@ -210,7 +212,7 @@ def sample_cpu_usage(pids: list[int] | tuple[int, ...], duration_s: int | float)
     time.sleep(max(0.0, float(duration_s)))
     elapsed = time.monotonic() - start
     if elapsed <= 0:
-        return {}
+        raise RuntimeError(f"invalid cpu sampling interval: {elapsed}")
 
     samples: dict[int, dict[str, float]] = {}
     for pid in requested:
@@ -227,14 +229,14 @@ def sample_cpu_usage(pids: list[int] | tuple[int, ...], duration_s: int | float)
     return samples
 
 
-def _read_total_cpu() -> tuple[int, int] | None:
+def _read_total_cpu() -> tuple[int, int]:
     try:
         line = Path("/proc/stat").read_text().splitlines()[0]
-    except (IndexError, OSError):
-        return None
+    except (IndexError, OSError) as exc:
+        raise RuntimeError(f"failed to read /proc/stat: {exc}") from exc
     parts = line.split()
     if not parts or parts[0] != "cpu":
-        return None
+        raise RuntimeError("/proc/stat does not start with aggregate cpu counters")
     values = [int(value) for value in parts[1:]]
     idle = values[3] + (values[4] if len(values) > 4 else 0)
     total = sum(values)
@@ -245,11 +247,26 @@ def sample_total_cpu_usage(duration_s: int | float) -> dict[str, float]:
     before = _read_total_cpu()
     time.sleep(max(0.0, float(duration_s)))
     after = _read_total_cpu()
-    if before is None or after is None:
-        return {}
     idle_delta = max(0, after[0] - before[0])
     total_delta = max(1, after[1] - before[1])
     return {"busy_pct": (1.0 - (idle_delta / total_delta)) * 100.0}
+
+
+def start_sampler_thread(
+    *,
+    label: str,
+    errors: list[str],
+    target: Callable[[], None],
+) -> threading.Thread:
+    def run() -> None:
+        try:
+            target()
+        except Exception as exc:
+            errors.append(f"{label}: {exc}")
+
+    thread = threading.Thread(target=run, daemon=True)
+    thread.start()
+    return thread
 
 
 def compute_delta(
@@ -293,4 +310,5 @@ __all__ = [
     "sample_bpf_stats",
     "sample_cpu_usage",
     "sample_total_cpu_usage",
+    "start_sampler_thread",
 ]

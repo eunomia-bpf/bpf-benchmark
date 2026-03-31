@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from collections import Counter
 from datetime import datetime, timezone
@@ -30,7 +31,12 @@ from runner.libs.case_common import (
 from runner.libs.daemon_session import DaemonSession
 from runner.libs.metrics import sample_bpf_stats
 from runner.libs.rejit import benchmark_rejit_enabled_passes
-from runner.libs.run_artifacts import ArtifactSession, derive_run_type, repo_relative_path
+from runner.libs.run_artifacts import (
+    ArtifactSession,
+    current_process_identity,
+    derive_run_type,
+    repo_relative_path,
+)
 from runner.libs.statistics import geometric_mean
 
 
@@ -56,6 +62,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--filter", action="append", dest="filters")
+    parser.add_argument(
+        "--rejit-passes",
+        default=None,
+        help="Comma-separated ReJIT passes to enable for corpus apply. Pass an empty string to run zero passes.",
+    )
+    parser.add_argument(
+        "--no-kinsn",
+        action="store_true",
+        help="Disable loading kinsn modules for this corpus run.",
+    )
     args = parser.parse_args(argv)
     if args.samples is not None and int(args.samples) < 0:
         raise SystemExit("--samples must be >= 0")
@@ -75,6 +91,13 @@ def _print_progress(event: str, **fields: object) -> None:
     payload = {"event": event}
     payload.update(fields)
     print(json.dumps(payload, sort_keys=True), flush=True)
+
+
+def _restore_environment(saved_env: dict[str, str]) -> None:
+    for key in list(os.environ.keys()):
+        if key not in saved_env:
+            del os.environ[key]
+    os.environ.update(saved_env)
 
 
 def _program_phase_stats(
@@ -773,7 +796,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
     fatal_error = ""
     reset_pending_result_metadata()
 
-    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
+    with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
         prepared_daemon_session = prepare_daemon_session(
             daemon_session,
             daemon_binary=daemon_binary,
@@ -872,33 +895,49 @@ def build_run_metadata(
     *,
     output_json: Path,
     output_md: Path,
+    resolved_samples: int,
+    resolved_workload_seconds: float,
 ) -> dict[str, object]:
-    return {
+    metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite": "corpus",
         "manifest": str(Path(args.suite).resolve()),
         "filters": list(args.filters or []),
-        "samples": int(args.samples or 0),
-        "workload_seconds": float(args.workload_seconds or 0.0),
+        "samples": int(resolved_samples),
+        "workload_seconds": float(resolved_workload_seconds),
+        "kinsn_enabled": not bool(args.no_kinsn),
         "selected_rejit_passes": benchmark_rejit_enabled_passes(),
         "output_hint_json": repo_relative_path(output_json),
         "output_hint_md": repo_relative_path(output_md),
         "optimization_summary": payload.get("summary") if isinstance(payload, Mapping) else {},
     }
+    metadata.update(current_process_identity())
+    return metadata
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    saved_env = os.environ.copy()
+    if args.rejit_passes is not None:
+        os.environ["BPFREJIT_BENCH_PASSES"] = str(args.rejit_passes).strip()
     output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()
+    metadata_suite_path = Path(args.suite).resolve()
+    metadata_suite, _metadata_suite_summary = load_app_suite_from_yaml(
+        metadata_suite_path,
+        filters=list(args.filters or []),
+    )
+    resolved_workload_seconds = _workload_seconds(args, metadata_suite.defaults)
+    resolved_samples = _sample_count(args, metadata_suite.defaults)
     run_type = derive_run_type(output_json, "vm_corpus")
     started_at = datetime.now(timezone.utc).isoformat()
     progress_payload: dict[str, object] = {
         "suite": "corpus",
         "status": "running",
         "filters": list(args.filters or []),
-        "samples": int(args.samples or 0),
-        "workload_seconds": float(args.workload_seconds or 0.0),
+        "samples": int(resolved_samples),
+        "workload_seconds": float(resolved_workload_seconds),
+        "kinsn_enabled": not bool(args.no_kinsn),
     }
     metadata_payload: dict[str, object] = progress_payload
 
@@ -913,6 +952,8 @@ def main(argv: list[str] | None = None) -> int:
             metadata_payload,
             output_json=output_json,
             output_md=output_md,
+            resolved_samples=resolved_samples,
+            resolved_workload_seconds=resolved_workload_seconds,
         )
         metadata["status"] = status
         metadata["started_at"] = session_started_at
@@ -939,8 +980,6 @@ def main(argv: list[str] | None = None) -> int:
         ensure_parent(output_md)
         ensure_parent(artifact_result_json)
         ensure_parent(artifact_result_md)
-        write_json(output_json, payload)
-        write_text(output_md, markdown)
         write_json(artifact_result_json, payload)
         write_text(artifact_result_md, markdown)
         payload_status = str(payload.get("status") or "error").lower()
@@ -969,6 +1008,8 @@ def main(argv: list[str] | None = None) -> int:
                 detail_texts={"result.md": markdown},
                 error_message=error_message or "corpus suite reported errors",
             )
+        write_json(output_json, payload)
+        write_text(output_md, markdown)
         print(
             json.dumps(
                 {
@@ -997,6 +1038,8 @@ def main(argv: list[str] | None = None) -> int:
             error_message=str(exc),
         )
         raise
+    finally:
+        _restore_environment(saved_env)
 
 
 if __name__ == "__main__":

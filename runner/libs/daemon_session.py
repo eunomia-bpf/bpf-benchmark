@@ -22,6 +22,7 @@ class DaemonSession:
     stdout_path: Path
     stderr_path: Path
     kinsn_metadata: dict[str, object] = field(default_factory=dict)
+    load_kinsn: bool = False
     _closed: bool = False
 
     @classmethod
@@ -51,6 +52,7 @@ class DaemonSession:
             stdout_path=stdout_path,
             stderr_path=stderr_path,
             kinsn_metadata=kinsn_metadata,
+            load_kinsn=bool(load_kinsn),
         )
 
     def __enter__(self) -> "DaemonSession":

@@ -45,6 +45,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_bpf_stats,
     sample_cpu_usage,
     sample_total_cpu_usage,
+    start_sampler_thread,
 )
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
@@ -483,21 +484,22 @@ def measure_workload(
     before_tracee = collector.snapshot() if collector is not None else None
     cpu_holder: dict[int, dict[str, float]] = {}
     system_cpu_holder: dict[str, float] = {}
+    sampler_errors: list[str] = []
     threads: list[threading.Thread] = []
 
     if agent_pid is not None:
-        cpu_thread = threading.Thread(
+        cpu_thread = start_sampler_thread(
+            label=f"agent cpu pid={agent_pid}",
+            errors=sampler_errors,
             target=lambda: cpu_holder.update(sample_cpu_usage([agent_pid], duration_s)),
-            daemon=True,
         )
-        cpu_thread.start()
         threads.append(cpu_thread)
 
-    system_thread = threading.Thread(
+    system_thread = start_sampler_thread(
+        label="system cpu",
+        errors=sampler_errors,
         target=lambda: system_cpu_holder.update(sample_total_cpu_usage(duration_s)),
-        daemon=True,
     )
-    system_thread.start()
     threads.append(system_thread)
 
     if runner is None:
@@ -507,6 +509,12 @@ def measure_workload(
 
     for thread in threads:
         thread.join()
+    if sampler_errors:
+        raise RuntimeError("; ".join(sampler_errors))
+    if not system_cpu_holder:
+        raise RuntimeError("system cpu sampler produced no data")
+    if agent_pid is not None and agent_pid not in cpu_holder:
+        raise RuntimeError(f"agent cpu sampler produced no data for pid={agent_pid}")
 
     after_bpf = sample_bpf_stats(prog_ids, prog_fds=prog_fds)
     after_tracee = collector.snapshot() if collector is not None else None

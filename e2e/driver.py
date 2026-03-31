@@ -27,6 +27,7 @@ from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.run_artifacts import (  # noqa: E402
     ArtifactSession,
+    current_process_identity,
     derive_run_type,
     repo_relative_path,
 )
@@ -168,6 +169,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--rejit-passes",
         default=None,
         help="Comma-separated ReJIT passes to enable for e2e apply. Pass an empty string to run zero passes.",
+    )
+    parser.add_argument(
+        "--no-kinsn",
+        action="store_true",
+        help="Disable loading kinsn modules for this e2e run.",
     )
     return parser
 
@@ -442,19 +448,34 @@ def build_run_metadata(
     *,
     primary_output_json: Path,
 ) -> dict[str, object]:
+    selected_rejit_passes = benchmark_rejit_enabled_passes()
+    if isinstance(payload, dict):
+        payload_selected_passes = payload.get("selected_rejit_passes")
+        if isinstance(payload_selected_passes, list):
+            selected_rejit_passes = [str(pass_name) for pass_name in payload_selected_passes]
     metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite": "e2e",
         "case": args.case,
         "smoke": bool(args.smoke),
-        "selected_rejit_passes": benchmark_rejit_enabled_passes(),
+        "kinsn_enabled": not bool(args.no_kinsn),
+        "selected_rejit_passes": selected_rejit_passes,
         "output_hint_json": repo_relative_path(primary_output_json),
         "optimization_summary": _trim_e2e_value(payload),
     }
+    metadata.update(current_process_identity())
     metadata["output_hint_md"] = repo_relative_path(Path(args.output_md).resolve())
     report_md = getattr(args, "report_md", None)
     if report_md:
         metadata["output_hint_report_md"] = repo_relative_path(Path(report_md).resolve())
+    if isinstance(payload, dict):
+        payload_tool_passes = payload.get("tool_rejit_passes")
+        if isinstance(payload_tool_passes, dict):
+            metadata["tool_rejit_passes"] = {
+                str(name): [str(pass_name) for pass_name in passes]
+                for name, passes in payload_tool_passes.items()
+                if isinstance(passes, (list, tuple))
+            }
     return metadata
 
 
@@ -477,6 +498,7 @@ def _run_single_case(
         "case": args.case,
         "status": "running",
         "smoke": bool(args.smoke),
+        "kinsn_enabled": not bool(args.no_kinsn),
     }
     metadata_payload: dict[str, object] = progress_payload
 
@@ -508,6 +530,7 @@ def _run_single_case(
     session.write(status="running", progress_payload=progress_payload)
     saved_env = os.environ.copy()
     reset_pending_result_metadata()
+    artifact_error_written = False
 
     try:
         if prepared_daemon_session is not None:
@@ -533,13 +556,10 @@ def _run_single_case(
         metadata_payload = payload
         write_json(artifact_result_json, payload)
         write_text(artifact_result_md, detail_texts["result.md"])
-        write_json(output_json, payload)
-        write_text(output_md, detail_texts["result.md"])
         if "report.md" in detail_texts and report_md is not None:
             if artifact_report_md is None:
                 raise RuntimeError(f"{args.case} requires an artifact report path")
             write_text(artifact_report_md, detail_texts["report.md"])
-            write_text(report_md, detail_texts["report.md"])
         if payload_status == "ok":
             progress_payload = {
                 "case": args.case,
@@ -554,6 +574,10 @@ def _run_single_case(
                 result_payload=payload,
                 detail_texts=detail_texts,
             )
+            write_json(output_json, payload)
+            write_text(output_md, detail_texts["result.md"])
+            if "report.md" in detail_texts and report_md is not None:
+                write_text(report_md, detail_texts["report.md"])
             return payload
 
         error_message = (
@@ -578,8 +602,15 @@ def _run_single_case(
             detail_texts=detail_texts,
             error_message=error_message,
         )
+        artifact_error_written = True
+        write_json(output_json, payload)
+        write_text(output_md, detail_texts["result.md"])
+        if "report.md" in detail_texts and report_md is not None:
+            write_text(report_md, detail_texts["report.md"])
         raise RuntimeError(error_message)
     except Exception as exc:
+        if artifact_error_written:
+            raise
         failed_at = datetime.now(timezone.utc).isoformat()
         error_payload = {
             "case": args.case,
@@ -618,7 +649,7 @@ def main(argv: list[str] | None = None) -> int:
             raise RuntimeError(f"shared suite selected zero e2e cases: {args.suite}")
         failed: list[str] = []
         daemon_binary = Path(args.daemon).resolve()
-        with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
+        with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
             prepared = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
             for index, case_name in enumerate(cases_to_run):
                 print(f"\n{'='*60}")
@@ -647,7 +678,7 @@ def main(argv: list[str] | None = None) -> int:
     apply_case_defaults(args)
     apply_suite_case_config(args, suite_case_apps)
     daemon_binary = Path(args.daemon).resolve()
-    with DaemonSession.start(daemon_binary, load_kinsn=True) as daemon_session:
+    with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
         prepared = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
         _run_single_case(args, prepared_daemon_session=prepared)
     return 0

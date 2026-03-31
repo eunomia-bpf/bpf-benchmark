@@ -21,7 +21,7 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.app_runners.base import AppRunner  # noqa: E402
 from runner.libs.app_runners.scx import ScxRunner, preferred_path, read_scx_ops, read_scx_state  # noqa: E402
-from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
+from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage, start_sampler_thread  # noqa: E402
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
@@ -140,21 +140,22 @@ def measure_workload(
     before_proc = read_proc_stat_fields()
     cpu_holder: dict[int, dict[str, float]] = {}
     system_cpu_holder: dict[str, float] = {}
+    sampler_errors: list[str] = []
     threads: list[threading.Thread] = []
 
     if agent_pid is not None:
-        cpu_thread = threading.Thread(
+        cpu_thread = start_sampler_thread(
+            label=f"agent cpu pid={agent_pid}",
+            errors=sampler_errors,
             target=lambda: cpu_holder.update(sample_cpu_usage([agent_pid], duration_s)),
-            daemon=True,
         )
-        cpu_thread.start()
         threads.append(cpu_thread)
 
-    system_thread = threading.Thread(
+    system_thread = start_sampler_thread(
+        label="system cpu",
+        errors=sampler_errors,
         target=lambda: system_cpu_holder.update(sample_total_cpu_usage(duration_s)),
-        daemon=True,
     )
-    system_thread.start()
     threads.append(system_thread)
 
     workload_result = runner.run_workload_spec(workload_spec, duration_s)
@@ -162,6 +163,12 @@ def measure_workload(
 
     for thread in threads:
         thread.join()
+    if sampler_errors:
+        raise RuntimeError("; ".join(sampler_errors))
+    if not system_cpu_holder:
+        raise RuntimeError("system cpu sampler produced no data")
+    if agent_pid is not None and agent_pid not in cpu_holder:
+        raise RuntimeError(f"agent cpu sampler produced no data for pid={agent_pid}")
 
     after_proc = read_proc_stat_fields()
     agent_cpu = cpu_holder.get(agent_pid or -1) if agent_pid is not None else None

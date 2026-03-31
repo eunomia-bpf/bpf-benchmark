@@ -159,16 +159,17 @@ def run_user_exec_loop(
     command: list[str] = [command_path]
     if os.geteuid() == 0:
         setpriv = which("setpriv")
-        if setpriv is not None:
-            command = [
-                setpriv,
-                "--reuid",
-                str(uid),
-                "--regid",
-                str(gid),
-                "--clear-groups",
-                command_path,
-            ]
+        if setpriv is None:
+            raise RuntimeError("setpriv is required for the exec_loop workload when running as root")
+        command = [
+            setpriv,
+            "--reuid",
+            str(uid),
+            "--regid",
+            str(gid),
+            "--clear-groups",
+            command_path,
+        ]
     return run_rapid_exec_storm(
         duration_s,
         iterations=iterations,
