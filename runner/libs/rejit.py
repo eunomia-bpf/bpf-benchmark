@@ -174,7 +174,6 @@ def _policy_rule_matches(
         "repo": ("repo",),
         "object": ("object", "object_basename"),
         "object_relpath": ("object_relpath",),
-        "object_path": ("object_path",),
         "program": ("program", "program_name"),
         "section": ("section", "section_name"),
         "prog_type": ("prog_type", "prog_type_name"),

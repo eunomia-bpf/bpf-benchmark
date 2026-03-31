@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import ctypes
 import functools
 import json
 import os
@@ -20,6 +19,7 @@ from urllib.request import urlopen
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, tail_text, which
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
 from ..metrics import sample_bpf_stats
+from ..process_fd import dup_fd_from_process
 from ..workload import (
     WorkloadResult,
     run_block_io_load,
@@ -37,30 +37,11 @@ TRACEE_STATS_PATTERN = re.compile(
     r"EventCount[:=]\s*(?P<events>\d+).*?LostEvCount[:=]\s*(?P<lost>\d+)(?:.*?LostWrCount[:=]\s*(?P<lost_writes>\d+))?",
     re.IGNORECASE,
 )
-SYS_PIDFD_GETFD = 438
 DEFAULT_CORPUS_TRACEE_BINARY = ROOT_DIR / "corpus" / "build" / "tracee" / "bin" / "tracee"
 TRACEE_RUNTIME_DIR = Path("/var/tmp/tracee")
 TRACEE_EVENT_OUTPUT_PATH = TRACEE_RUNTIME_DIR / "events.json"
 TRACEE_HEALTH_HOST = "127.0.0.1"
 TRACEE_HEALTH_PORT = 3366
-
-
-def _dup_fd_from_process(pid: int, target_fd: int) -> int:
-    if not hasattr(os, "pidfd_open"):
-        raise RuntimeError("Tracee FD duplication requires os.pidfd_open support")
-    pidfd = os.pidfd_open(int(pid), 0)
-    try:
-        libc = ctypes.CDLL(None, use_errno=True)
-        libc.syscall.restype = ctypes.c_long
-        result = int(libc.syscall(SYS_PIDFD_GETFD, int(pidfd), int(target_fd), 0))
-        if result < 0:
-            err = ctypes.get_errno()
-            raise RuntimeError(
-                f"pidfd_getfd failed for pid={pid} fd={target_fd}: {os.strerror(err)} (errno={err})"
-            )
-        return result
-    finally:
-        os.close(pidfd)
 
 
 class TraceeOutputCollector:
@@ -286,7 +267,7 @@ class TraceeAgentSession:
                                 raise RuntimeError(
                                     f"Tracee program {program_name!r} (id={prog_id}) did not expose a loader-owned FD"
                                 )
-                            self.program_fds[prog_id] = _dup_fd_from_process(
+                            self.program_fds[prog_id] = dup_fd_from_process(
                                 int(proc.pid or -1),
                                 int(owner_refs[0]["fd"]),
                             )

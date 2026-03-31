@@ -18,6 +18,9 @@ from typing import Sequence
 
 from . import run_command, tail_text, which
 
+LOOPBACK_LISTEN_BACKLOG = 128
+LOOPBACK_CONNECT_TIMEOUT_S = 2.0
+
 
 @dataclass(frozen=True, slots=True)
 class WorkloadResult:
@@ -369,7 +372,10 @@ def run_rapid_open_storm(
     file_count: int = 128,
 ) -> WorkloadResult:
     duration_limit, iteration_limit = _normalize_workload_limits(duration_s, iterations)
-    with tempfile.TemporaryDirectory(prefix="tetragon-open-storm-") as tempdir:
+    with tempfile.TemporaryDirectory(
+        prefix="loopback-open-storm-",
+        dir=str(_disk_backed_tmp_root()),
+    ) as tempdir:
         directory = Path(tempdir)
         files = [directory / f"open-{index}.dat" for index in range(max(1, int(file_count)))]
         for path in files:
@@ -411,7 +417,7 @@ def run_rapid_connect_storm(
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
                 listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 listener.bind(("127.0.0.1", 0))
-                listener.listen()
+                listener.listen(LOOPBACK_LISTEN_BACKLOG)
                 listener.settimeout(0.25)
                 port_holder.append(int(listener.getsockname()[1]))
                 ready.set()
@@ -448,7 +454,7 @@ def run_rapid_connect_storm(
     try:
         while _work_remaining(start, duration_limit, ops_total, iteration_limit):
             try:
-                with socket.create_connection(("127.0.0.1", port), timeout=1.0):
+                with socket.create_connection(("127.0.0.1", port), timeout=LOOPBACK_CONNECT_TIMEOUT_S):
                     pass
                 ops_total += 1
             except (TimeoutError, OSError) as exc:
@@ -508,28 +514,10 @@ def run_bind_storm(
 
 
 def run_file_open_load(duration_s: int | float) -> WorkloadResult:
-    stress_ng = which("stress-ng")
-    if stress_ng is None:
-        raise RuntimeError("stress-ng is required for the file_open workload")
-    command = [
-        stress_ng,
-        "--open",
-        "4",
-        "--timeout",
-        f"{max(1, int(duration_s))}s",
-        "--metrics-brief",
-    ]
-    start = time.monotonic()
-    completed = run_command(command, check=False, timeout=float(duration_s) + 30)
-    elapsed = time.monotonic() - start
-    if completed.returncode != 0:
-        details = tail_text(completed.stderr or completed.stdout)
-        raise RuntimeError(f"file_open workload failed: {details}")
-    combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
-    ops_total = _parse_stress_ng_bogo_ops(combined, stressor="open")
-    if ops_total is None:
-        ops_total = max(1.0, elapsed)
-    return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
+    # stress-ng --open is prone to destabilizing virtme guest sessions under
+    # heavy tracing. A simple bounded open loop still fires the same VFS open
+    # probes without depending on stress-ng's worker model.
+    return run_rapid_open_storm(duration_s, file_count=256)
 
 
 def run_block_io_load(duration_s: int | float) -> WorkloadResult:
@@ -611,6 +599,7 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
     if tc_binary is None:
         raise RuntimeError("tc is required for the tcp_retransmit workload")
     _load_kernel_module("sch_netem")
+    effective_duration = max(2.0, float(duration_s))
 
     ready = threading.Event()
     stop = threading.Event()
@@ -623,7 +612,7 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
                 listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 listener.bind(("127.0.0.1", 0))
-                listener.listen()
+                listener.listen(LOOPBACK_LISTEN_BACKLOG)
                 listener.settimeout(0.25)
                 port_holder.append(int(listener.getsockname()[1]))
                 ready.set()
@@ -633,9 +622,9 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
                     except (socket.timeout, TimeoutError):
                         continue
                     with conn:
-                        conn.settimeout(0.5)
+                        conn.settimeout(1.0)
                         try:
-                            for _ in range(16):
+                            for _ in range(128):
                                 if stop.is_set():
                                     break
                                 conn.sendall(payload)
@@ -661,13 +650,28 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
         raise RuntimeError("tcp retransmit server failed to publish a port")
 
     _run_tc_qdisc(
-        [tc_binary, "qdisc", "replace", "dev", "lo", "root", "netem", "delay", "20ms", "loss", "3%"],
+        [
+            tc_binary,
+            "qdisc",
+            "replace",
+            "dev",
+            "lo",
+            "root",
+            "netem",
+            "delay",
+            "40ms",
+            "loss",
+            "10%",
+            "reorder",
+            "10%",
+            "50%",
+        ],
         action="qdisc replace dev lo root netem",
     )
 
     port = port_holder[0]
     start = time.monotonic()
-    deadline = start + max(0.3, float(duration_s))
+    deadline = start + effective_duration
     attempts = 0
     successes = 0
     failures = 0
@@ -676,9 +680,9 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
             attempts += 1
             received = 0
             try:
-                with socket.create_connection(("127.0.0.1", port), timeout=1.0) as client:
-                    client.settimeout(0.5)
-                    while received < (256 * 1024) and time.monotonic() < deadline:
+                with socket.create_connection(("127.0.0.1", port), timeout=2.0) as client:
+                    client.settimeout(1.0)
+                    while received < (2 * 1024 * 1024) and time.monotonic() < deadline:
                         chunk = client.recv(65536)
                         if not chunk:
                             break

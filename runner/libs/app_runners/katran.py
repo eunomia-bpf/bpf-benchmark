@@ -9,7 +9,7 @@ from ..workload import WorkloadResult
 from .base import AppRunner
 from .katran_support import (
     CLIENT_NS,
-    DEFAULT_KATRAN_OBJECT,
+    DEFAULT_KATRAN_BALANCER_PROG_PATH,
     DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S,
     DEFAULT_KATRAN_STOP_SETTLE_S,
     KatranDsrTopology,
@@ -29,7 +29,7 @@ from .katran_support import (
 
 
 DEFAULT_INTERFACE = "katran0"
-DEFAULT_CONCURRENCY = 16
+DEFAULT_CONCURRENCY = 4
 DEFAULT_TEST_RUN_BATCH_REPEAT = 128
 DEFAULT_WORKLOAD_KIND = "network"
 DEFAULT_LOAD_TIMEOUT_S = DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S
@@ -50,7 +50,7 @@ class KatranRunner(AppRunner):
     ) -> None:
         super().__init__()
         self.loader_binary = None if loader_binary is None else Path(loader_binary).resolve()
-        self.object_path = DEFAULT_KATRAN_OBJECT.resolve()
+        self.balancer_prog_path = DEFAULT_KATRAN_BALANCER_PROG_PATH.resolve()
         self.iface = str(iface)
         self.router_peer_iface = None if router_peer_iface is None else str(router_peer_iface)
         self.load_timeout_s = int(load_timeout_s)
@@ -77,7 +77,7 @@ class KatranRunner(AppRunner):
         server_binary = resolve_katran_server_binary(self.loader_binary)
         session = KatranServerSession(
             server_binary=server_binary,
-            object_path=self.object_path,
+            balancer_prog_path=self.balancer_prog_path,
             iface=self.iface,
             default_router_mac=self.default_router_mac,
             load_timeout_s=self.load_timeout_s,
@@ -87,6 +87,8 @@ class KatranRunner(AppRunner):
             if http_server is not None:
                 http_server.__enter__()
             session.__enter__()
+            if self.workload_kind == "network":
+                session.reattach_xdpgeneric()
             self.artifacts = {
                 "topology": topology.metadata(),
                 "http_server": {} if http_server is None else http_server.metadata(),

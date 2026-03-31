@@ -410,16 +410,22 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         ("run_cnt" in program) or ("run_time_ns" in program)
         for program in scheduler_programs
     )
-    if not runtime_counters_available:
-        raise RuntimeError("scx loader did not expose per-program run_cnt/run_time_ns counters")
     baseline = lifecycle_result.baseline
     scan_results = lifecycle_result.scan_results
     rejit_result = lifecycle_result.rejit_result
     post_rejit = lifecycle_result.post_rejit
+    limitations: list[str] = []
+    if not runtime_counters_available:
+        limitations.append(
+            "bpftool does not expose per-program run_cnt/run_time_ns for these struct_ops programs on this kernel, so BPF runtime deltas are unavailable."
+        )
     error_message = ""
+    rejit_error = ""
     if isinstance(rejit_result, Mapping):
-        error_message = str(rejit_result.get("error") or "").strip()
-    if not error_message and rejit_result_has_any_apply(rejit_result) and post_rejit is None:
+        rejit_error = str(rejit_result.get("error") or "").strip()
+    if rejit_error:
+        limitations.append(f"Partial ReJIT/apply errors were reported: {rejit_error}")
+    if rejit_result_has_any_apply(rejit_result) and post_rejit is None:
         error_message = "scx post-ReJIT phase is missing"
 
     mode = "scx_rusty_loader"
@@ -455,6 +461,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         "rejit_result": rejit_result,
         "post_rejit": post_rejit,
         "comparison": compare_phases(baseline, post_rejit),
+        "limitations": limitations,
     }
     if error_message:
         payload["error_message"] = error_message

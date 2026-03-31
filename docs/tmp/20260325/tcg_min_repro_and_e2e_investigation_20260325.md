@@ -4,7 +4,7 @@ Date: 2026-03-25
 
 ## Scope
 
-This note records the post-reboot investigation after host `panic_on_oops` was disabled and all follow-up reproductions were switched to `QEMU TCG` (`local-x86-vng-tcg`, `--disable-kvm`).
+This note records the post-reboot investigation after host `panic_on_oops` was disabled and all follow-up reproductions were switched to QEMU TCG with hardware acceleration disabled.
 
 The main goal was to answer three questions:
 
@@ -44,7 +44,7 @@ Runner change:
 - Added `local-x86-vng-tcg` machine target in `runner/machines.yaml`
 - `runner/libs/machines.py` now parses optional machine `args`
 - `runner/libs/vm.py` now passes machine args to `vng`
-- Current TCG target uses `--disable-kvm`
+- Current TCG target ran without hardware acceleration
 
 This ensures guest workloads still run inside a VM, but without the host KVM path.
 
@@ -2425,7 +2425,7 @@ So the only safe conclusion from this run is narrower:
 
 配置：
 - QEMU 9.2.2（`/usr/local/bin/qemu-system-x86_64`）
-- TCG 模式（`--disable-kvm`）
+- TCG 模式（禁用硬件加速）
 - 非 KASAN 内核（#3, 17MB）
 - VM_CPUS=1, VM_MEM=8G
 - reproducer: `tests/negative/build/scx_prog_show_race --mode bpftool-loop --iterations 200`

@@ -13,6 +13,7 @@ from typing import Any, Mapping, Sequence
 
 from .. import run_command, tail_text, which
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
+from ..process_fd import dup_fd_from_process
 from ..workload import WorkloadResult
 
 
@@ -78,7 +79,10 @@ def read_scx_ops() -> list[str]:
     values: list[str] = []
     candidates = sorted(root.glob("*/ops"))
     if not candidates:
-        raise RuntimeError(f"sched_ext ops entries are missing under {root}")
+        state = read_scx_state()
+        if state == "disabled":
+            return []
+        raise RuntimeError(f"sched_ext ops entries are missing under {root} while sched_ext state is {state!r}")
     for candidate in candidates:
         try:
             text = candidate.read_text().strip()
@@ -87,7 +91,10 @@ def read_scx_ops() -> list[str]:
         if text:
             values.append(text)
     if not values:
-        raise RuntimeError(f"sched_ext ops entries under {root} were empty")
+        state = read_scx_state()
+        if state == "disabled":
+            return []
+        raise RuntimeError(f"sched_ext ops entries under {root} were empty while sched_ext state is {state!r}")
     return values
 
 
@@ -101,6 +108,7 @@ class ScxSchedulerSession:
         self.stdout_thread: threading.Thread | None = None
         self.stderr_thread: threading.Thread | None = None
         self.programs: list[dict[str, object]] = []
+        self.program_fds: dict[int, int] = {}
         self.command_used: list[str] | None = None
 
     def __enter__(self) -> "ScxSchedulerSession":
@@ -144,6 +152,7 @@ class ScxSchedulerSession:
             raise RuntimeError(f"scx_rusty did not become healthy: {details}")
 
         self.programs = self._discover_programs()
+        self.program_fds = self._dup_program_fds(self.programs)
         return self
 
     @property
@@ -164,7 +173,33 @@ class ScxSchedulerSession:
     def collector_snapshot(self) -> dict[str, object]:
         return self.collector.snapshot()
 
+    def _dup_program_fds(self, programs: Sequence[Mapping[str, object]]) -> dict[int, int]:
+        if self.pid is None:
+            raise RuntimeError("cannot duplicate scx program FDs without a live scheduler pid")
+        duplicated: dict[int, int] = {}
+        for program in programs:
+            prog_id = int(program.get("id", -1))
+            program_name = str(program.get("name") or prog_id)
+            owner_refs = [
+                ref
+                for ref in (program.get("owner_fds") or [])
+                if int(ref.get("pid", -1)) == int(self.pid)
+            ]
+            if not owner_refs:
+                raise RuntimeError(
+                    f"SCX program {program_name!r} (id={prog_id}) did not expose a scheduler-owned FD"
+                )
+            duplicated[prog_id] = dup_fd_from_process(int(self.pid), int(owner_refs[0]["fd"]))
+        return duplicated
+
     def close(self) -> None:
+        close_errors: list[str] = []
+        for fd in self.program_fds.values():
+            try:
+                os.close(fd)
+            except OSError as exc:
+                close_errors.append(f"failed to close SCX program fd {fd}: {exc}")
+        self.program_fds.clear()
         if self.process is not None:
             stop_agent(self.process, timeout=8)
             self.process = None
@@ -174,6 +209,8 @@ class ScxSchedulerSession:
         if self.stderr_thread is not None:
             self.stderr_thread.join(timeout=2.0)
             self.stderr_thread = None
+        if close_errors:
+            raise RuntimeError("; ".join(close_errors))
 
     def __exit__(self, exc_type, exc, tb) -> None:
         self.close()

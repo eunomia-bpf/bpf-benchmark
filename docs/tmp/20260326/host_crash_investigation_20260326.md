@@ -72,8 +72,8 @@
 - `local-x86-vng`：
   - `backend: vng`
   - `memory: 16G`
-  - **没有** `--disable-kvm`
-- 只有 `local-x86-vng-tcg` 才会加 `--disable-kvm`
+  - 默认启用硬件加速
+- 只有旧的 TCG 对照路径才会关闭硬件加速
 
 对应代码位置：
 
@@ -287,7 +287,7 @@ Mar 26 15:52:09 lab kernel: mce: [Hardware Error]: Machine check events logged
 - 这次 repo 当前默认走的是 `/usr/local/bin/qemu-system-x86_64`
 - 版本是 `9.2.2`
 - `vng --dry-run` 展开的是 `-machine accel=kvm:tcg`
-- `local-x86-vng` 目标没有 `--disable-kvm`
+- `local-x86-vng` 目标默认启用硬件加速
 
 所以：
 

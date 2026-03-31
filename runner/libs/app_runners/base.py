@@ -32,6 +32,9 @@ class AppRunner(ABC):
         del initial_stats, final_stats
         return None
 
+    def corpus_measurement_mode(self) -> str:
+        return "program"
+
     def _fail_start(self, message: str) -> NoReturn:
         try:
             self.stop()

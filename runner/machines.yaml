@@ -31,22 +31,11 @@ targets:
     memory: 16G
     lock_scope: vm_global
 
-  x86-debug-tcg:
-    backend: vng
-    arch: x86_64
-    executable: runner/scripts/vng-wrapper.sh
-    args:
-    - --disable-kvm
-    memory: 16G
-    lock_scope: vm_global
-
   x86-benchmark:
     backend: vng
     arch: x86_64
     executable: runner/scripts/vng-wrapper.sh
-    args:
-    - --disable-kvm
-    cpus: 1
+    cpus: 4
     memory: 16G
     lock_scope: vm_global
 

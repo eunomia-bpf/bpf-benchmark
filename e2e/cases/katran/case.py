@@ -16,6 +16,7 @@ from runner.libs import (  # noqa: E402
     authoritative_output_path,
 )
 from runner.libs.app_runners.katran import (  # noqa: E402
+    DEFAULT_CONCURRENCY,
     DEFAULT_INTERFACE,
     KatranRunner,
 )
@@ -106,7 +107,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     runner = KatranRunner(
         iface=str(getattr(args, "iface", DEFAULT_INTERFACE)),
         router_peer_iface=getattr(args, "router_peer_iface", None),
-        concurrency=int(getattr(args, "concurrency", 16)),
+        concurrency=int(getattr(args, "concurrency", DEFAULT_CONCURRENCY)),
         workload_kind=workload_kind,
     )
 

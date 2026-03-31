@@ -1,22 +1,21 @@
 # Corpus Authoritative Summary
 
-- Generated: 2026-03-30T20:36:46.402412+00:00
+- Generated: 2026-03-31T01:24:39.940184+00:00
 - Manifest: `/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml`
 - Daemon: `/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon`
 - Samples: `1`
-- Workload seconds: `5.0`
+- Workload seconds: `1.0`
 - Status: `ok`
-- Applied-only geomean (baseline/rejit): `1.040x`
-- All-comparable geomean (baseline/rejit): `1.040x`
-- Sample count: `5`
+- Applied-only geomean (baseline/rejit): `0.902x`
+- All-comparable geomean (baseline/rejit): `0.902x`
+- Sample count: `1`
 
 ## Per-App Breakdown
 
 | App | Runner | Workload | Programs | Applied | Comparable | Applied-only | All-comparable |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| katran | katran | test_run | 1 | 1 | 1 | 1.044x | 1.044x |
-| tracee/default | tracee | tracee_default | 13 | 13 | 4 | 1.040x | 1.040x |
+| katran | katran | test_run | 1 | 1 | 1 | 0.902x | 0.902x |
 
 ## Comparison Exclusion Reasons
 
-- `missing_baseline_exec_ns`: `9`
+- none

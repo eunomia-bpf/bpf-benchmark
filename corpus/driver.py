@@ -120,6 +120,15 @@ def _mean_exec_ns(records: Mapping[str, Mapping[str, object]]) -> float | None:
     return sum(values) / len(values)
 
 
+def _workload_ops_per_sec(workload: Mapping[str, object] | None) -> float | None:
+    if not isinstance(workload, Mapping):
+        return None
+    value = workload.get("ops_per_sec")
+    if not isinstance(value, (int, float)):
+        return None
+    return float(value)
+
+
 def _infer_prog_type_name(program: Any) -> str:
     prog_type = str(getattr(program, "prog_type_name", "") or "").strip().lower()
     if prog_type and prog_type != "unspec":
@@ -522,6 +531,7 @@ def _run_app(
     rejit_workloads: list[dict[str, object]] = []
     apply_result: dict[str, object] = {}
     had_post_rejit = False
+    measurement_mode = str(getattr(runner, "corpus_measurement_mode", lambda: "program")()).strip() or "program"
 
     def before_rejit(_setup_state: object, lifecycle: object, baseline: Mapping[str, object]) -> object | None:
         measurement = dict((baseline.get("measurement") or {}))
@@ -595,11 +605,11 @@ def _run_app(
     programs_by_id = _program_stats_by_prog_id(baseline_phase, prog_ids)
     rejit_programs_by_id = _program_stats_by_prog_id(rejit_phase, prog_ids)
     error = str(apply_result.get("error") or "").strip()
-    if not _has_phase_measurement(programs_by_id):
+    if measurement_mode == "program" and not _has_phase_measurement(programs_by_id):
         raise RuntimeError(
             f"{app.name}: workload {selected_workload!r} did not execute any target programs during baseline"
         )
-    if had_post_rejit and not error and not _has_phase_measurement(rejit_programs_by_id):
+    if measurement_mode == "program" and had_post_rejit and not error and not _has_phase_measurement(rejit_programs_by_id):
         raise RuntimeError(
             f"{app.name}: workload {selected_workload!r} did not execute any target programs after rejit"
         )
@@ -612,7 +622,23 @@ def _run_app(
         apply_result,
         had_post_rejit=had_post_rejit,
     )
-    if not error and not _has_comparable_measurement(program_measurements):
+    app_measurement: dict[str, object] | None = None
+    if measurement_mode == "app":
+        baseline_ops_per_sec = _workload_ops_per_sec(baseline_workload)
+        rejit_ops_per_sec = _workload_ops_per_sec(rejit_workload)
+        if baseline_ops_per_sec is None or baseline_ops_per_sec <= 0.0:
+            raise RuntimeError(f"{app.name}: workload {selected_workload!r} did not produce a baseline throughput measurement")
+        if had_post_rejit and not error and (rejit_ops_per_sec is None or rejit_ops_per_sec <= 0.0):
+            raise RuntimeError(f"{app.name}: workload {selected_workload!r} did not produce a post-rejit throughput measurement")
+        app_measurement = {
+            "metric": "ops_per_sec",
+            "baseline": baseline_ops_per_sec,
+            "post_rejit": rejit_ops_per_sec,
+            "speedup": None
+            if rejit_ops_per_sec is None
+            else (rejit_ops_per_sec / baseline_ops_per_sec),
+        }
+    elif not error and not _has_comparable_measurement(program_measurements):
         raise RuntimeError(
             f"{app.name}: workload {selected_workload!r} produced no comparable target program measurements"
         )
@@ -622,6 +648,7 @@ def _run_app(
         "runner": app.runner,
         "workload": _workload_payload(app.workload),
         "selected_workload": selected_workload,
+        "measurement_mode": measurement_mode,
         "configured_workload_seconds": float(workload_seconds),
         "args": dict(app.args),
         "status": status,
@@ -629,6 +656,7 @@ def _run_app(
         "prog_ids": prog_ids,
         "programs": live_programs,
         "program_measurements": program_measurements,
+        "app_measurement": app_measurement,
         "baseline": {
             "programs": programs_by_id,
             "exec_ns_mean": _mean_exec_ns(programs_by_id),

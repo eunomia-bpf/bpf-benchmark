@@ -53,6 +53,13 @@ class ScxRunner(AppRunner):
     def collector_snapshot(self) -> dict[str, object]:
         return {} if self.session is None else self.session.collector_snapshot()
 
+    def corpus_measurement_mode(self) -> str:
+        return "app"
+
+    @property
+    def program_fds(self) -> dict[int, int]:
+        return {} if self.session is None else dict(self.session.program_fds)
+
     def start(self) -> list[int]:
         if self.session is not None:
             raise RuntimeError("ScxRunner is already running")

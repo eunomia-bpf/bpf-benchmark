@@ -96,7 +96,7 @@ vng --run vendor/linux-framework/build-arm64/arch/arm64/boot/Image \
   --cross-compile aarch64-linux-gnu- \
   --root <arm64-root> \
   --root-release noble \
-  --disable-kvm
+  # cross-arch TCG-only boot
 ```
 
 Observed behavior:

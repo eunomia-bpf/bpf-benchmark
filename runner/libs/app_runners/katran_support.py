@@ -15,7 +15,7 @@ from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, 
 from .process_support import ManagedProcessSession
 
 
-DEFAULT_KATRAN_OBJECT = ROOT_DIR / "corpus" / "build" / "katran" / "balancer.bpf.o"
+DEFAULT_KATRAN_BALANCER_PROG_PATH = ROOT_DIR / "corpus" / "build" / "katran" / "balancer.bpf.o"
 DEFAULT_KATRAN_PROGRAM_NAME = "balancer_ingress"
 DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
 DEFAULT_KATRAN_SERVER_BINARY_CANDIDATES = (
@@ -115,6 +115,63 @@ def _attached_xdp_info(iface: str) -> dict[str, object]:
         if record.get("xdp") or record.get("xdp_attached"):
             return dict(record)
     return {}
+
+
+def _attached_xdp_mode(attach_info: Mapping[str, object] | None) -> str | None:
+    if not isinstance(attach_info, Mapping):
+        return None
+    xdp_records = attach_info.get("xdp")
+    if isinstance(xdp_records, list):
+        for entry in xdp_records:
+            if isinstance(entry, Mapping):
+                mode = str(entry.get("mode") or "").strip().lower()
+                if mode:
+                    return mode
+    mode = str(attach_info.get("attach_mode") or "").strip().lower()
+    return mode or None
+
+
+def _bpftool_attach_token(mode: str) -> str:
+    normalized = str(mode or "").strip().lower()
+    mapping = {
+        "driver": "xdp",
+        "native": "xdp",
+        "generic": "xdpgeneric",
+        "skb": "xdpgeneric",
+        "offload": "xdpoffload",
+    }
+    token = mapping.get(normalized)
+    if token is None:
+        raise RuntimeError(f"unsupported XDP attach mode for bpftool transition: {mode!r}")
+    return token
+
+
+def reattach_xdp_program(iface: str, prog_id: int, *, target_mode: str) -> dict[str, object]:
+    prog_id = int(prog_id)
+    if prog_id <= 0:
+        raise RuntimeError(f"invalid prog_id for XDP reattach: {prog_id}")
+    current_attach = _attached_xdp_info(iface)
+    current_mode = _attached_xdp_mode(current_attach)
+    target_token = _bpftool_attach_token(target_mode)
+    if current_mode == str(target_mode).strip().lower():
+        return current_attach
+    if current_mode is not None:
+        run_command(
+            [_bpftool_binary(), "net", "detach", _bpftool_attach_token(current_mode), "dev", str(iface)],
+            check=False,
+            timeout=15,
+        )
+    run_command(
+        [_bpftool_binary(), "net", "attach", target_token, "id", str(prog_id), "dev", str(iface), "overwrite"],
+        timeout=30,
+    )
+    attach_info = _attached_xdp_info(iface)
+    attached_mode = _attached_xdp_mode(attach_info)
+    if attached_mode != str(target_mode).strip().lower():
+        raise RuntimeError(
+            f"expected XDP attach mode {target_mode!r} on {iface}, got {attached_mode!r}: {attach_info}"
+        )
+    return attach_info
 
 
 def _current_prog_ids() -> set[int]:
@@ -635,13 +692,13 @@ class KatranServerSession:
         self,
         *,
         server_binary: Path,
-        object_path: Path,
+        balancer_prog_path: Path,
         iface: str,
         default_router_mac: str,
         load_timeout_s: int = DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S,
     ) -> None:
         self.server_binary = server_binary.resolve()
-        self.object_path = object_path.resolve()
+        self.balancer_prog_path = balancer_prog_path.resolve()
         self.iface = iface
         self.default_router_mac = default_router_mac
         self.load_timeout_s = int(load_timeout_s)
@@ -651,17 +708,19 @@ class KatranServerSession:
         self.program: dict[str, object] = {}
         self.maps_by_name: dict[str, dict[str, object]] = {}
         self.attach_info: dict[str, object] = {}
+        self.attach_mode_before_rebind: str | None = None
+        self.attach_info_before_rebind: dict[str, object] = {}
         self.ifindex = 0
 
     def __enter__(self) -> "KatranServerSession":
         if not link_exists(self.iface):
             raise RuntimeError(f"network interface does not exist: {self.iface}")
-        if not self.object_path.exists():
-            raise RuntimeError(f"Katran object not found: {self.object_path}")
+        if not self.balancer_prog_path.exists():
+            raise RuntimeError(f"Katran balancer program image not found: {self.balancer_prog_path}")
         self.ifindex = int(Path("/sys/class/net").joinpath(self.iface, "ifindex").read_text().strip())
         command = [
             str(self.server_binary),
-            f"-balancer_prog={self.object_path}",
+            f"-balancer_prog={self.balancer_prog_path}",
             f"-default_mac={self.default_router_mac}",
             f"-intf={self.iface}",
             "-hc_forwarding=false",
@@ -755,7 +814,7 @@ class KatranServerSession:
     def metadata(self) -> dict[str, object]:
         return {
             "server_binary": str(self.server_binary),
-            "object_path": str(self.object_path),
+            "balancer_prog_path": str(self.balancer_prog_path),
             "program": dict(self.program),
             "programs": [dict(program) for program in self.programs],
             "maps": {name: dict(record) for name, record in self.maps_by_name.items()},
@@ -763,9 +822,17 @@ class KatranServerSession:
             "ifindex": self.ifindex,
             "attached": bool(self.attach_info),
             "attach_info": self.attach_info,
+            "attach_mode": _attached_xdp_mode(self.attach_info),
+            "attach_mode_before_rebind": self.attach_mode_before_rebind,
+            "attach_info_before_rebind": dict(self.attach_info_before_rebind),
             "pid": self.pid,
             "command_used": list(self.command_used),
         }
+
+    def reattach_xdpgeneric(self) -> None:
+        self.attach_info_before_rebind = dict(self.attach_info)
+        self.attach_mode_before_rebind = _attached_xdp_mode(self.attach_info)
+        self.attach_info = reattach_xdp_program(self.iface, self.prog_id, target_mode="generic")
 
     def close(self) -> None:
         if self.session is None:
@@ -965,7 +1032,7 @@ __all__ = [
     "VIP_IP",
     "VIP_PORT",
     "XDP_TX",
-    "DEFAULT_KATRAN_OBJECT",
+    "DEFAULT_KATRAN_BALANCER_PROG_PATH",
     "DEFAULT_KATRAN_PROGRAM_NAME",
     "configure_katran_maps",
     "resolve_katran_server_binary",

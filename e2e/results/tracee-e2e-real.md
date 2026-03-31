@@ -1,12 +1,12 @@
 # Tracee Real End-to-End Benchmark
 
-- Generated: 2026-03-30T21:38:20.400647+00:00
+- Generated: 2026-03-31T01:00:07.290599+00:00
 - Mode: `tracee_daemon_same_image_paired_with_control`
-- Duration per workload: `6s`
-- Warmup per workload: `2.0s`
-- Paired cycles: `2`
-- Latency probes per phase: `3`
-- Smoke: `True`
+- Duration per workload: `20s`
+- Warmup per workload: `4.0s`
+- Paired cycles: `5`
+- Latency probes per phase: `8`
+- Smoke: `False`
 - Tracee binary: `/home/yunwei37/workspace/bpf-benchmark/corpus/build/tracee/bin/tracee`
 
 ## Setup
@@ -16,21 +16,21 @@
 
 ## Preflight
 
-- tracee_default: primary_events/s=726.6164590141551, bpf_avg_ns=2087.6653219751265, target_runs=146502
+- tracee_default: primary_events/s=34824.47752746483, bpf_avg_ns=108.79776329706056, target_runs=3099294
 
 ## Control
 
-- tracee_default: app_mean=906.3533239949796 ops/s, app_ci95=[881.3728340685004, 931.3338139214588]
+- tracee_default: app_mean=176481.07609761404 ops/s, app_ci95=[173157.84826779473, 181801.94314351553]
 
 ## Baseline
 
-- tracee_default: app_mean=344.19700170184115 ops/s, primary_events_mean=665.0419862645832/s, latency_p99_mean=51.74139764 ms, overhead_mean=62.02559179901624%, bpf_avg_ns_mean=2131.2591082132258
+- tracee_default: app_mean=37974.39578041771 ops/s, primary_events_mean=39353.998142093595/s, latency_p99_mean=47.104532542 ms, overhead_mean=78.46417870576464%, bpf_avg_ns_mean=102.42086895118423
 
 ## Post-ReJIT
 
-- tracee_default: app_mean=338.7691244964897 ops/s, primary_events_mean=662.6529300035004/s, latency_p99_mean=47.515688420000004 ms, overhead_mean=62.45847837284297%, bpf_avg_ns_mean=2198.8942496665018
+- tracee_default: app_mean=35650.38152494974 ops/s, primary_events_mean=37008.733693613634/s, latency_p99_mean=47.379569206 ms, overhead_mean=79.7970920178395%, bpf_avg_ns_mean=104.78131226008702
 
 ## Comparison
 
-- tracee_default: app_delta_mean=-1.1153860190791312%, event_delta_mean=-0.4749324503804928%, overhead_delta_mean=0.7071224936149658%, latency_p99_delta_mean=-7.296953862477329%, app_p=1.0, overhead_p=1.0
+- tracee_default: app_delta_mean=-6.095322012906029%, event_delta_mean=-5.9364435580804%, overhead_delta_mean=1.7064303769856872%, latency_p99_delta_mean=0.5921197756570775%, app_p=0.0625, overhead_p=0.0625
 
