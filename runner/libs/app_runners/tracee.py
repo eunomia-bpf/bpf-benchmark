@@ -28,8 +28,11 @@ DEFAULT_STARTUP_SETTLE_S = 5.0
 def _default_events() -> tuple[str, ...]:
     payload = yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
-        return ()
-    return tuple(str(event) for event in (payload.get("events") or []) if str(event).strip())
+        raise RuntimeError(f"Tracee config must be a mapping: {DEFAULT_CONFIG}")
+    raw_events = payload.get("events") or []
+    if not isinstance(raw_events, Sequence) or isinstance(raw_events, (str, bytes, bytearray)):
+        raise RuntimeError(f"Tracee config field 'events' must be a sequence: {DEFAULT_CONFIG}")
+    return tuple(str(event) for event in raw_events if str(event).strip())
 
 
 class TraceeRunner(AppRunner):
@@ -71,6 +74,10 @@ class TraceeRunner(AppRunner):
     @property
     def program_fds(self) -> dict[int, int]:
         return {} if self.session is None else dict(self.session.program_fds)
+
+    @property
+    def last_workload_details(self) -> Mapping[str, object]:
+        return {}
 
     def _resolve_binary(self) -> str:
         resolved = resolve_tracee_binary(None if self.tracee_binary is None else str(self.tracee_binary), self.setup_result)

@@ -266,9 +266,16 @@ def run_file_io(duration_s: int | float) -> WorkloadResult:
             details = tail_text(completed.stderr or completed.stdout)
             raise RuntimeError(f"fio file_io workload failed: {details}")
         payload = json.loads(completed.stdout)
-        job = (payload.get("jobs") or [{}])[0]
-        read_stats = job.get("read") or {}
-        write_stats = job.get("write") or {}
+        jobs = payload.get("jobs")
+        if not isinstance(jobs, list) or not jobs or not isinstance(jobs[0], dict):
+            details = tail_text(completed.stdout or json.dumps(payload))
+            raise RuntimeError(f"fio file_io workload returned no job stats: {details}")
+        job = jobs[0]
+        read_stats = job.get("read")
+        write_stats = job.get("write")
+        if not isinstance(read_stats, dict) or not isinstance(write_stats, dict):
+            details = tail_text(completed.stdout or json.dumps(payload))
+            raise RuntimeError(f"fio file_io workload returned malformed read/write stats: {details}")
         ops_total = float(read_stats.get("total_ios", 0) or 0) + float(write_stats.get("total_ios", 0) or 0)
         if ops_total <= 0:
             details = tail_text(completed.stdout or json.dumps(payload))
@@ -763,9 +770,10 @@ def run_network_load(duration_s: int | float) -> WorkloadResult:
             total_match = re.search(r"([0-9]+)\s+requests in", line)
             if total_match:
                 total_requests = float(total_match.group(1))
-        if total_requests is None and requests_per_sec is not None:
-            total_requests = requests_per_sec * elapsed
-        return _finish_result(total_requests or 0.0, elapsed, completed.stdout or "", completed.stderr or "")
+        if total_requests is None:
+            details = tail_text(completed.stdout or completed.stderr)
+            raise RuntimeError(f"network wrk load did not report total request metrics: {details}")
+        return _finish_result(total_requests, elapsed, completed.stdout or "", completed.stderr or "")
 
 
 def run_tcp_connect_load(duration_s: int | float) -> WorkloadResult:
@@ -888,7 +896,10 @@ def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadR
             details = tail_text(completed.stderr or completed.stdout)
             raise RuntimeError(f"oom_stress workload failed: {details}")
         combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
-        ops_total = _parse_stress_ng_bogo_ops(combined, stressor="vm") or 0.0
+        ops_total = _parse_stress_ng_bogo_ops(combined, stressor="vm")
+        if ops_total is None:
+            details = tail_text(combined)
+            raise RuntimeError(f"oom_stress workload did not report bogo-ops metrics: {details}")
         return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
     if kind == "sysctl_write":
         sysctl_binary = which("sysctl")

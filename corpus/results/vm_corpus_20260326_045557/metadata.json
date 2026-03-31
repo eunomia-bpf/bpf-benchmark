@@ -1,10 +1,12 @@
 {
+  "aborted_at": "2026-03-31T04:01:58.414674+00:00",
   "artifact_kind": "result_run",
   "artifact_version": 1,
   "blind_apply": false,
   "btf_custom_path": "vendor/linux-framework/vmlinux",
   "daemon_binary": "daemon/target/release/bpfrejit-daemon",
   "details_dir": "details",
+  "error_message": "superseded by a newer benchmark session after the previous run did not complete",
   "generated_at": "2026-03-26T04:55:57.553770+00:00",
   "guest_smoke": {
     "invocation": null,
@@ -19,7 +21,7 @@
   },
   "kernel_image": "vendor/linux-framework/arch/x86/boot/bzImage",
   "kernel_tree": "vendor/linux-framework",
-  "last_updated_at": "2026-03-26T04:56:01.555512+00:00",
+  "last_updated_at": "2026-03-31T04:01:58.414674+00:00",
   "macro_corpus_yaml": "corpus/config/macro_corpus.yaml",
   "mode": "packet",
   "output_hint_json": "corpus/results/vm_corpus.json",
@@ -133,7 +135,7 @@
   "runner_binary": "runner/build/micro_exec",
   "skip_families": [],
   "started_at": "2026-03-26T04:55:57.553770+00:00",
-  "status": "running",
+  "status": "aborted",
   "suite": "corpus",
   "summary": {
     "applied_programs": 0,

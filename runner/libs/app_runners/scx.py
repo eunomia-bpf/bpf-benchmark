@@ -68,6 +68,10 @@ class ScxRunner(AppRunner):
     def program_fds(self) -> dict[int, int]:
         return {} if self.session is None else dict(self.session.program_fds)
 
+    @property
+    def last_workload_details(self) -> Mapping[str, object]:
+        return dict(self.last_workload_extra)
+
     def start(self) -> list[int]:
         if self.session is not None:
             raise RuntimeError("ScxRunner is already running")

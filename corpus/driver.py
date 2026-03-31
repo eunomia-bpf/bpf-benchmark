@@ -220,6 +220,23 @@ def _measure_runner_phase(
     }
 
 
+def _normalized_stats_snapshot(raw_stats: Mapping[object, object] | None) -> dict[int, dict[str, object]]:
+    normalized: dict[int, dict[str, object]] = {}
+    if raw_stats is None:
+        return normalized
+    if not isinstance(raw_stats, Mapping):
+        raise RuntimeError(f"stats snapshot must be a mapping, got {type(raw_stats)!r}")
+    for raw_key, raw_value in raw_stats.items():
+        try:
+            prog_id = int(raw_key)
+        except (TypeError, ValueError) as exc:
+            raise RuntimeError(f"stats snapshot contains invalid program id: {raw_key!r}") from exc
+        if not isinstance(raw_value, Mapping):
+            raise RuntimeError(f"stats snapshot for program {prog_id} is not a mapping")
+        normalized[prog_id] = {str(field): value for field, value in raw_value.items()}
+    return normalized
+
+
 def _selected_live_programs(
     live_programs: Sequence[Mapping[str, object]],
     prog_ids: Sequence[int],
@@ -602,8 +619,8 @@ def _run_app(
 
     def before_rejit(_setup_state: object, lifecycle: object, baseline: Mapping[str, object]) -> object | None:
         measurement = dict((baseline.get("measurement") or {}))
-        initial_stats = measurement.get("initial_stats") or {}
-        final_stats = measurement.get("final_stats") or {}
+        initial_stats = _normalized_stats_snapshot(measurement.get("initial_stats"))
+        final_stats = _normalized_stats_snapshot(measurement.get("final_stats"))
         selected = runner.select_corpus_program_ids(initial_stats, final_stats)
         if selected is None:
             return None
@@ -648,8 +665,8 @@ def _run_app(
     prog_ids = [int(value) for value in lifecycle_result.state.target_prog_ids if int(value) > 0]
     live_programs = [dict(program) for program in (lifecycle_result.artifacts.get("programs") or [])]
     baseline_measurement = dict((lifecycle_result.baseline.get("measurement") or {}))
-    baseline_initial_snapshot = dict(baseline_measurement.get("initial_stats") or {})
-    baseline_final_snapshot = dict(baseline_measurement.get("final_stats") or {})
+    baseline_initial_snapshot = _normalized_stats_snapshot(baseline_measurement.get("initial_stats"))
+    baseline_final_snapshot = _normalized_stats_snapshot(baseline_measurement.get("final_stats"))
     baseline_workload = dict(baseline_measurement.get("workload") or {}) if baseline_measurement.get("workload") else None
     baseline_workloads = [dict(workload) for workload in (baseline_measurement.get("workloads") or [])]
     apply_result = dict(lifecycle_result.rejit_result or {})
@@ -660,8 +677,8 @@ def _run_app(
     baseline_phase = _program_phase_stats(baseline_final_snapshot, baseline_initial_snapshot)
     if had_post_rejit:
         rejit_measurement = dict((lifecycle_result.post_rejit or {}).get("measurement") or {})
-        rejit_initial_snapshot = dict(rejit_measurement.get("initial_stats") or {})
-        rejit_final_snapshot = dict(rejit_measurement.get("final_stats") or {})
+        rejit_initial_snapshot = _normalized_stats_snapshot(rejit_measurement.get("initial_stats"))
+        rejit_final_snapshot = _normalized_stats_snapshot(rejit_measurement.get("final_stats"))
         rejit_workload = dict(rejit_measurement.get("workload") or {}) if rejit_measurement.get("workload") else None
         rejit_workloads = [dict(workload) for workload in (rejit_measurement.get("workloads") or [])]
         rejit_phase = _program_phase_stats(rejit_final_snapshot, rejit_initial_snapshot)
@@ -910,6 +927,8 @@ def main(argv: list[str] | None = None) -> int:
         generated_at=started_at,
         metadata_builder=build_artifact_metadata,
     )
+    artifact_result_json = session.run_dir / "result.json"
+    artifact_result_md = session.run_dir / "result.md"
     session.write(status="running", progress_payload=progress_payload)
 
     try:
@@ -918,8 +937,12 @@ def main(argv: list[str] | None = None) -> int:
         metadata_payload = payload
         ensure_parent(output_json)
         ensure_parent(output_md)
+        ensure_parent(artifact_result_json)
+        ensure_parent(artifact_result_md)
         write_json(output_json, payload)
         write_text(output_md, markdown)
+        write_json(artifact_result_json, payload)
+        write_text(artifact_result_md, markdown)
         payload_status = str(payload.get("status") or "error").lower()
         error_message = str(payload.get("fatal_error") or "").strip()
         if payload_status == "ok":

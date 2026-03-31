@@ -163,7 +163,15 @@ class NativeProcessRunner(AppRunner):
         return "program"
 
     @property
+    def pid(self) -> int | None:
+        return None if self.session is None else self.session.pid
+
+    @property
     def program_fds(self) -> Mapping[int, int]:
+        return {}
+
+    @property
+    def last_workload_details(self) -> Mapping[str, object]:
         return {}
 
     def _default_binary_candidates(self) -> tuple[Path, ...]:
@@ -227,6 +235,18 @@ class NativeProcessRunner(AppRunner):
         if self.workload_kind:
             return run_named_workload(self.workload_kind, seconds)
         return self._run_workload(seconds)
+
+    def run_workload_spec(
+        self,
+        workload_spec: Mapping[str, object],
+        seconds: float,
+    ) -> WorkloadResult:
+        if self.session is None:
+            raise RuntimeError(f"{type(self).__name__} is not running")
+        requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or "").strip()
+        if not requested_kind:
+            raise RuntimeError(f"{type(self).__name__} workload spec is missing a workload kind")
+        return run_named_workload(requested_kind, seconds)
 
     def stop(self) -> None:
         if self.session is None:

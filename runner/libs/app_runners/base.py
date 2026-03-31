@@ -22,6 +22,14 @@ class AppRunner(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def run_workload_spec(
+        self,
+        workload_spec: Mapping[str, object],
+        seconds: float,
+    ) -> WorkloadResult:
+        raise NotImplementedError
+
+    @abstractmethod
     def stop(self) -> None:
         raise NotImplementedError
 
@@ -39,8 +47,17 @@ class AppRunner(ABC):
 
     @property
     @abstractmethod
+    def pid(self) -> int | None:
+        raise NotImplementedError
+
     @property
+    @abstractmethod
     def program_fds(self) -> Mapping[int, int]:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def last_workload_details(self) -> Mapping[str, object]:
         raise NotImplementedError
 
     def _fail_start(self, message: str) -> NoReturn:

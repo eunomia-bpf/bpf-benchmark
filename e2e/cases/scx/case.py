@@ -19,6 +19,7 @@ from runner.libs import (  # noqa: E402
     authoritative_output_path,
     which,
 )
+from runner.libs.app_runners.base import AppRunner  # noqa: E402
 from runner.libs.app_runners.scx import ScxRunner, preferred_path, read_scx_ops, read_scx_state  # noqa: E402
 from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
 from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
@@ -130,7 +131,7 @@ def select_workloads(
 
 
 def measure_workload(
-    runner: ScxRunner,
+    runner: AppRunner,
     workload_spec: Mapping[str, object],
     duration_s: int,
     *,
@@ -157,7 +158,7 @@ def measure_workload(
     threads.append(system_thread)
 
     workload_result = runner.run_workload_spec(workload_spec, duration_s)
-    extra = dict(runner.last_workload_extra)
+    extra = dict(runner.last_workload_details)
 
     for thread in threads:
         thread.join()
@@ -218,7 +219,7 @@ def summarize_phase(workloads: Sequence[Mapping[str, object]]) -> dict[str, obje
 
 
 def run_phase(
-    runner: ScxRunner,
+    runner: AppRunner,
     workloads: Sequence[Mapping[str, object]],
     duration_s: int,
     *,
@@ -380,12 +381,14 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
         del phase_name
         runner = lifecycle.runtime
-        assert isinstance(runner, ScxRunner)
+        if not isinstance(runner, AppRunner):
+            raise RuntimeError(f"scx lifecycle returned a non-runner runtime: {type(runner).__name__}")
         return run_phase(runner, workloads, duration_s, agent_pid=runner.pid)
 
     def stop(_: object, lifecycle: CaseLifecycleState) -> None:
         runner = lifecycle.runtime
-        assert isinstance(runner, ScxRunner)
+        if not isinstance(runner, AppRunner):
+            raise RuntimeError(f"scx lifecycle returned a non-runner runtime: {type(runner).__name__}")
         runner.stop()
 
     def cleanup(_: object) -> None:
@@ -406,7 +409,8 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     if lifecycle_result.state is None:
         raise RuntimeError("scx lifecycle completed without a live session")
     runner = lifecycle_result.state.runtime
-    assert isinstance(runner, ScxRunner)
+    if not isinstance(runner, AppRunner):
+        raise RuntimeError(f"scx lifecycle returned a non-runner runtime: {type(runner).__name__}")
     scheduler_programs = list(lifecycle_result.artifacts.get("scheduler_programs") or [])
     scheduler_ops = read_scx_ops()
     scheduler_snapshot = dict(runner.process_output)

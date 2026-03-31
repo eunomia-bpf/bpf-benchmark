@@ -68,6 +68,10 @@ class KatranRunner(AppRunner):
     def prog_id(self) -> int | None:
         return None if self.session is None else int(self.session.prog_id)
 
+    @property
+    def pid(self) -> int | None:
+        return None if self.session is None else self.session.pid
+
     def select_corpus_program_ids(
         self,
         initial_stats: Mapping[int, Mapping[str, object]],
@@ -82,6 +86,10 @@ class KatranRunner(AppRunner):
     @property
     def program_fds(self) -> Mapping[int, int]:
         return {}
+
+    @property
+    def last_workload_details(self) -> Mapping[str, object]:
+        return dict(self.last_request_summary)
 
     def start(self) -> list[int]:
         if self.session is not None:
@@ -184,6 +192,18 @@ class KatranRunner(AppRunner):
         if self.workload_kind != "network":
             raise RuntimeError(f"unsupported Katran workload kind: {self.workload_kind}")
         return self._run_network_workload(seconds)
+
+    def run_workload_spec(
+        self,
+        workload_spec: Mapping[str, object],
+        seconds: float,
+    ) -> WorkloadResult:
+        requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or self.workload_kind).strip().lower()
+        if requested_kind != self.workload_kind:
+            raise RuntimeError(
+                f"KatranRunner workload kind is fixed at start ({self.workload_kind}); requested {requested_kind}"
+            )
+        return self.run_workload(seconds)
 
     def stop(self) -> None:
         errors: list[str] = []

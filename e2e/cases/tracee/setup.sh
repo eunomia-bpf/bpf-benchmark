@@ -14,7 +14,13 @@ tracee_version() {
   if [[ ! -x "${bin}" ]]; then
     return 1
   fi
-  output="$("${bin}" --version 2>/dev/null || "${bin}" version 2>/dev/null || true)"
+  if output="$("${bin}" --version 2>/dev/null)"; then
+    :
+  elif output="$("${bin}" version 2>/dev/null)"; then
+    :
+  else
+    return 1
+  fi
   awk '
     match($0, /(v[0-9][^[:space:]]*)/, match_value) {
       print match_value[1]
@@ -66,7 +72,9 @@ build_patched_tracee_binary() {
   ' "${build_root}/pkg/ebpf/c/common/network.h"
 
   if ! make -C "${build_root}" -j"${jobs}" tracee RELEASE_VERSION="${PATCHED_VERSION}" >"${build_log}" 2>&1; then
-    tail -n 60 "${build_log}" >&2 || true
+    if [[ -f "${build_log}" ]]; then
+      tail -n 60 "${build_log}" >&2
+    fi
     return 1
   fi
 
@@ -108,7 +116,11 @@ select_tracee_binary() {
     fi
   fi
 
-  patched_binary="$(build_patched_tracee_binary || true)"
+  if patched_binary="$(build_patched_tracee_binary)"; then
+    :
+  else
+    patched_binary=""
+  fi
   if [[ -n "${patched_binary}" ]]; then
     printf '%s\n' "${patched_binary}"
     return 0
@@ -117,6 +129,7 @@ select_tracee_binary() {
   if [[ -n "${candidate}" ]]; then
     printf '%s\n' "${candidate}"
   fi
+  return 0
 }
 
 tracee_bin=""
@@ -156,7 +169,7 @@ if [[ "${#missing_pkgs[@]}" -gt 0 ]]; then
   done
 fi
 
-tracee_bin="$(select_tracee_binary "${tracee_bin}" || true)"
+tracee_bin="$(select_tracee_binary "${tracee_bin}")"
 
 if [[ -z "${tracee_bin}" ]]; then
   apt_candidate=""
@@ -171,7 +184,7 @@ if [[ -z "${tracee_bin}" ]]; then
   fi
 fi
 
-tracee_bin="$(select_tracee_binary "${tracee_bin}" || true)"
+tracee_bin="$(select_tracee_binary "${tracee_bin}")"
 
 if [[ -z "${tracee_bin}" ]]; then
   release_url="$(
@@ -208,31 +221,39 @@ PY
     rm -rf "${install_dir}"
     mkdir -p "${extract_dir}"
     mkdir -p "${install_dir}"
-    curl -fsSL -o "${archive}" "${release_url}" || true
-    if [[ -f "${archive}" ]]; then
-      tar -xzf "${archive}" -C "${extract_dir}" ./dist/tracee >/dev/null 2>&1 || true
-      if [[ -x "${extract_dir}/dist/tracee" ]]; then
-        cp "${extract_dir}/dist/tracee" "${install_dir}/tracee"
-        chmod +x "${install_dir}/tracee"
-        tracee_bin="${install_dir}/tracee"
-        cache_tracee_binary "${install_dir}/tracee"
+    if curl -fsSL -o "${archive}" "${release_url}"; then
+      tar -xzf "${archive}" -C "${extract_dir}" ./dist/tracee >/dev/null 2>&1
+      if [[ ! -x "${extract_dir}/dist/tracee" ]]; then
+        echo "downloaded Tracee archive did not contain ./dist/tracee" >&2
+        exit 1
       fi
+      cp "${extract_dir}/dist/tracee" "${install_dir}/tracee"
+      chmod +x "${install_dir}/tracee"
+      tracee_bin="${install_dir}/tracee"
+      cache_tracee_binary "${install_dir}/tracee"
+    else
+      echo "failed to download Tracee release archive: ${release_url}" >&2
+      exit 1
     fi
   fi
 fi
 
-tracee_bin="$(select_tracee_binary "${tracee_bin}" || true)"
+tracee_bin="$(select_tracee_binary "${tracee_bin}")"
 
 if [[ -n "${tracee_bin}" ]]; then
   if ! "${tracee_bin}" --version >/dev/null 2>&1; then
-    "${tracee_bin}" version >/dev/null 2>&1 || true
+    "${tracee_bin}" version >/dev/null 2>&1
   fi
-  cache_tracee_binary "${tracee_bin}" 2>/dev/null || true
+  cache_tracee_binary "${tracee_bin}"
 fi
 
 echo "TRACEE_BINARY=${tracee_bin}"
 if [[ -n "${tracee_bin}" ]]; then
-  "${tracee_bin}" --version 2>/dev/null || "${tracee_bin}" version 2>/dev/null || true
+  if "${tracee_bin}" --version 2>/dev/null; then
+    :
+  else
+    "${tracee_bin}" version 2>/dev/null
+  fi
   exit 0
 fi
 

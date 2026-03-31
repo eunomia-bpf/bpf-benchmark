@@ -67,6 +67,10 @@ class BpftraceRunner(AppRunner):
     def program_fds(self) -> Mapping[int, int]:
         return {}
 
+    @property
+    def last_workload_details(self) -> Mapping[str, object]:
+        return {}
+
     def start(self) -> list[int]:
         if self.process is not None:
             raise RuntimeError("BpftraceRunner is already running")
@@ -107,6 +111,18 @@ class BpftraceRunner(AppRunner):
         if not self.workload_kind:
             raise RuntimeError("bpftrace workload kind is not resolved")
         return run_named_workload(self.workload_kind, max(1, int(round(seconds))))
+
+    def run_workload_spec(
+        self,
+        workload_spec: Mapping[str, object],
+        seconds: float,
+    ) -> WorkloadResult:
+        if self.process is None:
+            raise RuntimeError("BpftraceRunner is not running")
+        requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or "").strip()
+        if not requested_kind:
+            raise RuntimeError("bpftrace workload spec is missing a workload kind")
+        return run_named_workload(requested_kind, max(1, int(round(seconds))))
 
     def stop(self) -> None:
         if self.process is None:

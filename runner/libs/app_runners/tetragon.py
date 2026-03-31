@@ -28,8 +28,11 @@ DEFAULT_LOAD_TIMEOUT_S = 20
 def _default_extra_args() -> tuple[str, ...]:
     payload = yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
-        return ()
-    return tuple(str(arg) for arg in (payload.get("tetragon_extra_args") or []) if str(arg).strip())
+        raise RuntimeError(f"Tetragon config must be a mapping: {DEFAULT_CONFIG}")
+    raw_args = payload.get("tetragon_extra_args") or []
+    if not isinstance(raw_args, Sequence) or isinstance(raw_args, (str, bytes, bytearray)):
+        raise RuntimeError(f"Tetragon config field 'tetragon_extra_args' must be a sequence: {DEFAULT_CONFIG}")
+    return tuple(str(arg) for arg in raw_args if str(arg).strip())
 
 
 class TetragonRunner(AppRunner):
@@ -75,6 +78,10 @@ class TetragonRunner(AppRunner):
     @property
     def pid(self) -> int | None:
         return None if self.session is None else self.session.pid
+
+    @property
+    def last_workload_details(self) -> Mapping[str, object]:
+        return {}
 
     def _resolve_binary(self) -> str:
         resolved = resolve_tetragon_binary(None if self.tetragon_binary is None else str(self.tetragon_binary), self.setup_result)
@@ -135,15 +142,22 @@ class TetragonRunner(AppRunner):
         self,
         workload_spec: Mapping[str, object],
         seconds: float,
-        *,
-        exec_workload_cgroup: bool | None = None,
     ) -> WorkloadResult:
         if self.session is None:
             raise RuntimeError("TetragonRunner is not running")
+        exec_workload_cgroup = workload_spec.get("exec_workload_cgroup")
+        if exec_workload_cgroup is None:
+            use_exec_workload_cgroup = self.exec_workload_cgroup
+        elif isinstance(exec_workload_cgroup, bool):
+            use_exec_workload_cgroup = exec_workload_cgroup
+        else:
+            raise RuntimeError(
+                "Tetragon workload spec field 'exec_workload_cgroup' must be a boolean when provided"
+            )
         return run_tetragon_workload(
             workload_spec,
             max(1, int(round(seconds))),
-            exec_workload_cgroup=self.exec_workload_cgroup if exec_workload_cgroup is None else bool(exec_workload_cgroup),
+            exec_workload_cgroup=use_exec_workload_cgroup,
         )
 
     def stop(self) -> None:

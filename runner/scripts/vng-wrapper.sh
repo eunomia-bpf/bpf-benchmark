@@ -28,7 +28,9 @@ ensure_repo_modules_fresh() {
     fi
 
     local kernel_real
-    kernel_real="$(realpath "$kernel_arg" 2>/dev/null || true)"
+    if ! kernel_real="$(realpath "$kernel_arg" 2>/dev/null)"; then
+        return 0
+    fi
     if [ "$kernel_real" != "$_repo_kernel_image" ]; then
         return 0
     fi

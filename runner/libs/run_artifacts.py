@@ -163,33 +163,6 @@ def clear_previous_run_artifacts(results_dir: Path) -> None:
             shutil.rmtree(child)
 
 
-def clear_previous_run_details(results_dir: Path, *, run_type: str, keep_run_dir: Path) -> None:
-    if not results_dir.is_dir():
-        return
-
-    normalized_run_type = sanitize_artifact_token(run_type)
-    keep_resolved = keep_run_dir.resolve()
-    for child in results_dir.iterdir():
-        if not child.is_dir():
-            continue
-        if child.resolve() == keep_resolved:
-            continue
-
-        try:
-            metadata = _managed_run_artifact_metadata(child)
-        except RuntimeError as exc:
-            _drop_corrupt_run_artifact(child, exc)
-            continue
-        if metadata is None:
-            continue
-        if sanitize_artifact_token(str(metadata.get("run_type", ""))) != normalized_run_type:
-            continue
-
-        details_dir = child / "details"
-        if details_dir.is_dir():
-            shutil.rmtree(details_dir)
-
-
 def summarize_benchmark_results(payload: Mapping[str, Any]) -> dict[str, Any]:
     summarized: dict[str, Any] = {
         key: value for key, value in payload.items() if key != "benchmarks"
@@ -391,11 +364,14 @@ def create_run_artifact_dir(
     results_dir = results_dir.resolve()
     if clear_existing:
         clear_previous_run_artifacts(results_dir)
+    _mark_stale_running_artifacts_aborted(
+        results_dir=results_dir,
+        run_type=run_type,
+        reason="superseded by a newer benchmark session after the previous run did not complete",
+    )
 
     run_dir = results_dir / f"{sanitize_artifact_token(run_type)}_{artifact_timestamp(generated_at)}"
     run_dir.mkdir(parents=True, exist_ok=False)
-    if not clear_existing:
-        clear_previous_run_details(results_dir, run_type=run_type, keep_run_dir=run_dir)
     return run_dir
 
 
@@ -491,3 +467,33 @@ def load_latest_result_for_output(output_path: Path, *, default_run_type: str) -
     if not isinstance(payload, dict):
         raise RuntimeError(f"result payload is not a JSON object: {result_path}")
     return payload
+
+
+def _mark_stale_running_artifacts_aborted(
+    *,
+    results_dir: Path,
+    run_type: str,
+    reason: str,
+) -> None:
+    if not results_dir.is_dir():
+        return
+    run_type_token = sanitize_artifact_token(run_type)
+    updated_at = datetime.now(timezone.utc).isoformat()
+    for child in sorted(results_dir.iterdir()):
+        if not child.is_dir():
+            continue
+        metadata = _managed_run_artifact_metadata(child)
+        if metadata is None:
+            continue
+        if sanitize_artifact_token(str(metadata.get("run_type", ""))) != run_type_token:
+            continue
+        status = str(metadata.get("status", "")).strip()
+        if status != "running":
+            continue
+        metadata_path = child / "metadata.json"
+        metadata_payload = dict(metadata)
+        metadata_payload["status"] = "aborted"
+        metadata_payload["last_updated_at"] = updated_at
+        metadata_payload["error_message"] = reason
+        metadata_payload.setdefault("aborted_at", updated_at)
+        metadata_path.write_text(json.dumps(metadata_payload, indent=2, sort_keys=True) + "\n")

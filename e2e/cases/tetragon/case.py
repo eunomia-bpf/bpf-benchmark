@@ -229,9 +229,12 @@ def measure_workload(
     threads.append(system_thread)
 
     workload_result = runner.run_workload_spec(
-        {"kind": workload_spec.kind, "value": workload_spec.value},
+        {
+            "kind": workload_spec.kind,
+            "value": workload_spec.value,
+            "exec_workload_cgroup": exec_workload_cgroup,
+        },
         duration_s,
-        exec_workload_cgroup=exec_workload_cgroup,
     )
 
     for thread in threads:

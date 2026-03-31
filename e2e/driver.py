@@ -502,6 +502,9 @@ def _run_single_case(
         clear_existing=clear_existing,
     )
     artifact_dir = session.run_dir
+    artifact_result_json = artifact_dir / "result.json"
+    artifact_result_md = artifact_dir / "result.md"
+    artifact_report_md = None if report_md is None else artifact_dir / "report.md"
     session.write(status="running", progress_payload=progress_payload)
     saved_env = os.environ.copy()
     reset_pending_result_metadata()
@@ -528,9 +531,14 @@ def _run_single_case(
 
         completed_at = datetime.now(timezone.utc).isoformat()
         metadata_payload = payload
+        write_json(artifact_result_json, payload)
+        write_text(artifact_result_md, detail_texts["result.md"])
         write_json(output_json, payload)
         write_text(output_md, detail_texts["result.md"])
         if "report.md" in detail_texts and report_md is not None:
+            if artifact_report_md is None:
+                raise RuntimeError(f"{args.case} requires an artifact report path")
+            write_text(artifact_report_md, detail_texts["report.md"])
             write_text(report_md, detail_texts["report.md"])
         if payload_status == "ok":
             progress_payload = {

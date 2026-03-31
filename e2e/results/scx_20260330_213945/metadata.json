@@ -1,14 +1,16 @@
 {
+  "aborted_at": "2026-03-31T04:01:58.414674+00:00",
   "artifact_kind": "result_run",
   "artifact_version": 1,
   "case": "scx",
   "details_dir": "details",
+  "error_message": "superseded by a newer benchmark session after the previous run did not complete",
   "generated_at": "2026-03-30T21:39:47.740539+00:00",
-  "last_updated_at": "2026-03-30T21:39:47.740415+00:00",
+  "last_updated_at": "2026-03-31T04:01:58.414674+00:00",
   "optimization_summary": {
     "case": "scx",
     "smoke": true,
-    "status": "running"
+    "status": "aborted"
   },
   "output_hint_json": "e2e/results/scx_smoke_20260330.json",
   "output_hint_md": "e2e/results/scx-e2e.md",
@@ -28,6 +30,6 @@
   ],
   "smoke": true,
   "started_at": "2026-03-30T21:39:45.216877+00:00",
-  "status": "running",
+  "status": "aborted",
   "suite": "e2e"
 }

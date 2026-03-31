@@ -38,7 +38,7 @@ from runner.libs.case_common import (  # noqa: E402
 DEFAULT_SCRIPT_DIR = Path(__file__).with_name("scripts")
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "bpftrace")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.md"
-DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bpftrace-real-e2e-report.md"
+DEFAULT_REPORT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e-report.md"
 DEFAULT_DURATION_S = 30
 MIN_BPFTRACE_VERSION = (0, 16, 0)
 

@@ -283,7 +283,15 @@ class BCCRunner(AppRunner):
         return "program"
 
     @property
+    def pid(self) -> int | None:
+        return None if self.session is None else int(self.session.process.pid or 0)
+
+    @property
     def program_fds(self) -> Mapping[int, int]:
+        return {}
+
+    @property
+    def last_workload_details(self) -> Mapping[str, object]:
         return {}
 
     def _resolve_tool_binary(self) -> Path:
@@ -368,6 +376,18 @@ class BCCRunner(AppRunner):
         if self.session is None:
             raise RuntimeError(f"BCC tool {self.tool_name} is not running")
         return _run_named_workload(self.workload_kind, seconds)
+
+    def run_workload_spec(
+        self,
+        workload_spec: Mapping[str, object],
+        seconds: float,
+    ) -> WorkloadResult:
+        if self.session is None:
+            raise RuntimeError(f"BCC tool {self.tool_name} is not running")
+        requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or "").strip()
+        if not requested_kind:
+            raise RuntimeError(f"BCC tool {self.tool_name} workload spec is missing a workload kind")
+        return _run_named_workload(requested_kind, seconds)
 
     def stop(self) -> None:
         if self.session is None:

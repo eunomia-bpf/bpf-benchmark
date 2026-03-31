@@ -507,11 +507,14 @@ def measure_app_runner_workload(
     agent_pid: int | None = None,
     initial_stats: Mapping[int, Mapping[str, object]] | None = None,
 ) -> dict[str, object]:
+    stats_source = (
+        sample_bpf_stats(list(prog_ids), prog_fds=runner.program_fds)
+        if initial_stats is None
+        else initial_stats
+    )
     before_bpf = {
         int(key): dict(value)
-        for key, value in (
-            initial_stats or sample_bpf_stats(list(prog_ids), prog_fds=runner.program_fds)
-        ).items()
+        for key, value in stats_source.items()
     }
     cpu_holder: dict[int, dict[str, float]] = {}
     system_cpu_holder: dict[str, float] = {}
@@ -541,8 +544,8 @@ def measure_app_runner_workload(
     after_bpf = sample_bpf_stats(list(prog_ids), prog_fds=runner.program_fds)
     measurement = {
         "workload": workload_result.to_dict(),
-        "initial_stats": {str(key): value for key, value in before_bpf.items()},
-        "final_stats": {str(key): value for key, value in after_bpf.items()},
+        "initial_stats": {int(key): dict(value) for key, value in before_bpf.items()},
+        "final_stats": {int(key): dict(value) for key, value in after_bpf.items()},
         "bpf": compute_delta(before_bpf, after_bpf),
         "system_cpu": system_cpu_holder,
     }

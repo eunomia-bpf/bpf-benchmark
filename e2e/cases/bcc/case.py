@@ -42,7 +42,7 @@ DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")
 DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "bcc")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e.md"
-DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bcc-e2e-report.md"
+DEFAULT_REPORT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e-report.md"
 
 
 # ---------------------------------------------------------------------------
