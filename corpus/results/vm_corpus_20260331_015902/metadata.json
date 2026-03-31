@@ -1,0 +1,31 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "details_dir": "details",
+  "filters": [],
+  "generated_at": "2026-03-31T01:59:03.216834+00:00",
+  "last_updated_at": "2026-03-31T01:59:03.216820+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "optimization_summary": null,
+  "output_hint_json": "corpus/results/vm_corpus.json",
+  "output_hint_md": "corpus/results/vm_corpus.md",
+  "run_type": "vm_corpus",
+  "samples": 1,
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "started_at": "2026-03-31T01:59:02.820148+00:00",
+  "status": "running",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

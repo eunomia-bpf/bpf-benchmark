@@ -181,7 +181,7 @@ def _lifecycle_metadata_payload(kinsn_metadata: Mapping[str, object] | None) -> 
 
 @dataclass(slots=True)
 class CaseLifecycleState:
-    runtime: object
+    runtime: AppRunner
     target_prog_ids: list[int] = field(default_factory=list)
     apply_prog_ids: list[int] = field(default_factory=list)
     scan_kwargs: dict[str, object] = field(default_factory=dict)
@@ -434,7 +434,7 @@ def _default_runner_lifecycle_state(
     prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
     if not prog_ids:
         raise RuntimeError("app runner did not return any live prog_ids")
-    programs = [dict(program) for program in getattr(runner, "programs", [])]
+    programs = [dict(program) for program in runner.programs]
     if not programs:
         raise RuntimeError("app runner did not expose any live programs")
     return CaseLifecycleState(
@@ -442,9 +442,9 @@ def _default_runner_lifecycle_state(
         target_prog_ids=list(prog_ids),
         apply_prog_ids=list(prog_ids),
         artifacts={
-            "runner_artifacts": dict(getattr(runner, "artifacts", {}) or {}),
+            "runner_artifacts": dict(runner.artifacts),
             "programs": programs,
-            "command_used": [str(item) for item in (getattr(runner, "command_used", []) or [])],
+            "command_used": [str(item) for item in runner.command_used],
         },
     )
 
@@ -509,7 +509,9 @@ def measure_app_runner_workload(
 ) -> dict[str, object]:
     before_bpf = {
         int(key): dict(value)
-        for key, value in (initial_stats or sample_bpf_stats(list(prog_ids))).items()
+        for key, value in (
+            initial_stats or sample_bpf_stats(list(prog_ids), prog_fds=runner.program_fds)
+        ).items()
     }
     cpu_holder: dict[int, dict[str, float]] = {}
     system_cpu_holder: dict[str, float] = {}
@@ -536,7 +538,7 @@ def measure_app_runner_workload(
         for thread in threads:
             thread.join()
 
-    after_bpf = sample_bpf_stats(list(prog_ids))
+    after_bpf = sample_bpf_stats(list(prog_ids), prog_fds=runner.program_fds)
     measurement = {
         "workload": workload_result.to_dict(),
         "initial_stats": {str(key): value for key, value in before_bpf.items()},
@@ -626,7 +628,7 @@ def run_app_runner_phase_records(
     except Exception as exc:
         baseline_reason = str(exc)
 
-    process_output = dict(getattr(runner, "process_output", {}))
+    process_output = dict(runner.process_output)
     site_totals = (
         aggregate_scan_site_totals(scan_results, fields=site_totals_fields)
         if scan_results

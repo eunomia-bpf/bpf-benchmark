@@ -151,6 +151,21 @@ class NativeProcessRunner(AppRunner):
         self.workload_kind = str(workload_kind or "").strip()
         self.session: ManagedProcessSession | None = None
 
+    def select_corpus_program_ids(
+        self,
+        initial_stats: Mapping[int, Mapping[str, object]],
+        final_stats: Mapping[int, Mapping[str, object]],
+    ) -> list[int] | None:
+        del initial_stats, final_stats
+        return None
+
+    def corpus_measurement_mode(self) -> str:
+        return "program"
+
+    @property
+    def program_fds(self) -> Mapping[int, int]:
+        return {}
+
     def _default_binary_candidates(self) -> tuple[Path, ...]:
         return ()
 

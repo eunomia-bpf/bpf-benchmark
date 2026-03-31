@@ -1,0 +1,75 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "completed_at": "2026-03-31T02:13:39.873252+00:00",
+  "details_dir": "details",
+  "filters": [
+    "bpftrace/biosnoop",
+    "bpftrace/tcpretrans"
+  ],
+  "generated_at": "2026-03-31T02:13:39.873255+00:00",
+  "last_updated_at": "2026-03-31T02:13:39.873252+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "optimization_summary": {
+    "all_comparable_geomean": 0.9474972490089878,
+    "applied_only_geomean": 0.9474972490089878,
+    "applied_sample_count": 3,
+    "comparison_exclusion_reason_counts": {},
+    "comparison_exclusion_reasons": [],
+    "discovered_programs": 3,
+    "per_app": [
+      {
+        "all_comparable_geomean": 1.0342588525736367,
+        "app": "bpftrace/biosnoop",
+        "applied_only_geomean": 1.0342588525736367,
+        "applied_program_count": 2,
+        "comparable_program_count": 2,
+        "comparison_exclusions": [],
+        "program_count": 2,
+        "runner": "bpftrace",
+        "sample_count": 2,
+        "status": "ok",
+        "workload": "block_io"
+      },
+      {
+        "all_comparable_geomean": 0.7951981836187532,
+        "app": "bpftrace/tcpretrans",
+        "applied_only_geomean": 0.7951981836187532,
+        "applied_program_count": 1,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [],
+        "program_count": 1,
+        "runner": "bpftrace",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "tcp_retransmit"
+      }
+    ],
+    "sample_count": 3,
+    "selected_apps": 2,
+    "statuses": {
+      "ok": 2
+    }
+  },
+  "output_hint_json": "corpus/results/vm_corpus.json",
+  "output_hint_md": "corpus/results/vm_corpus.md",
+  "run_type": "vm_corpus",
+  "samples": 1,
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "started_at": "2026-03-31T02:13:12.745849+00:00",
+  "status": "completed",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

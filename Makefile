@@ -304,7 +304,6 @@ __kernel-build-locked:
 		fi
 	@test -f "$(KERNEL_SYMVERS_PATH)"
 	@touch "$(KERNEL_SYMVERS_PATH)"
-	rm -rf "$(KERNEL_DIR)/.virtme_mods"
 	# Parallel sub-makes here occasionally race on generated kernel headers.
 	$(MAKE) -j1 -C "$(KERNEL_DIR)" $(VIRTME_HOSTFS_MODULES)
 	@for module in $(VIRTME_HOSTFS_MODULES); do \
@@ -314,6 +313,46 @@ __kernel-build-locked:
 		}; \
 	done
 	@printf '%s\n' $(VIRTME_HOSTFS_MODULE_ORDER) > "$(KERNEL_DIR)/modules.order"
+	@kernel_release="$$(cat "$(KERNEL_DIR)/include/config/kernel.release")"; \
+		test -n "$$kernel_release" || { \
+			echo "kernel release file is empty: $(KERNEL_DIR)/include/config/kernel.release" >&2; \
+			exit 1; \
+		}; \
+		stage_dir="$(KERNEL_DIR)/.virtme_mods"; \
+		modules_root="$$stage_dir/lib/modules/$$kernel_release"; \
+		fresh=1; \
+		test -f "$$modules_root/modules.dep" || fresh=0; \
+		if [ "$$fresh" -eq 1 ]; then \
+			for module in $(VIRTME_HOSTFS_MODULES); do \
+				installed_path="$$modules_root/kernel/$$module"; \
+				source_path="$(KERNEL_DIR)/$$module"; \
+				if [ ! -f "$$installed_path" ] || [ "$$installed_path" -ot "$$source_path" ]; then \
+					fresh=0; \
+					break; \
+				fi; \
+			done; \
+		fi; \
+		if [ "$$fresh" -eq 0 ]; then \
+			tmp_stage="$(KERNEL_DIR)/.virtme_mods.tmp"; \
+			prev_stage="$(KERNEL_DIR)/.virtme_mods.prev"; \
+			rm -rf "$$tmp_stage" "$$prev_stage"; \
+			mkdir -p "$$tmp_stage"; \
+			$(MAKE) -C "$(KERNEL_DIR)" INSTALL_MOD_PATH="$$tmp_stage" modules_install >/dev/null; \
+			rm -f "$$tmp_stage/lib/modules/$$kernel_release/build" \
+			      "$$tmp_stage/lib/modules/$$kernel_release/source"; \
+			for module in $(VIRTME_HOSTFS_MODULES); do \
+				installed_path="$$tmp_stage/lib/modules/$$kernel_release/kernel/$$module"; \
+				test -f "$$installed_path" || { \
+					echo "missing installed hostfs module: $$installed_path" >&2; \
+					exit 1; \
+				}; \
+			done; \
+			if [ -e "$$stage_dir" ]; then \
+				mv "$$stage_dir" "$$prev_stage"; \
+			fi; \
+			mv "$$tmp_stage" "$$stage_dir"; \
+			rm -rf "$$prev_stage"; \
+		fi
 	@touch "$(KERNEL_BUILD_STAMP)"
 
 # ── Local tests ────────────────────────────────────────────────────────────────

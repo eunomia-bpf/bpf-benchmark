@@ -271,6 +271,21 @@ class BCCRunner(AppRunner):
         self.tool_binary = Path(tool_binary).resolve() if tool_binary is not None else None
         self.session: ToolProcessSession | None = None
 
+    def select_corpus_program_ids(
+        self,
+        initial_stats: Mapping[int, Mapping[str, object]],
+        final_stats: Mapping[int, Mapping[str, object]],
+    ) -> list[int] | None:
+        del initial_stats, final_stats
+        return None
+
+    def corpus_measurement_mode(self) -> str:
+        return "program"
+
+    @property
+    def program_fds(self) -> Mapping[int, int]:
+        return {}
+
     def _resolve_tool_binary(self) -> Path:
         if self.tool_binary is not None:
             if not self.tool_binary.exists():

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 from .. import which
 from ..agent import start_agent, stop_agent
@@ -51,6 +51,21 @@ class BpftraceRunner(AppRunner):
             spec = specs.get(stem)
             return self.script_path, self.workload_kind or (spec.workload_kind if spec else ""), int(self.expected_programs or (spec.expected_programs if spec else 1))
         raise RuntimeError("BpftraceRunner requires script_name or script_path")
+
+    def select_corpus_program_ids(
+        self,
+        initial_stats: Mapping[int, Mapping[str, object]],
+        final_stats: Mapping[int, Mapping[str, object]],
+    ) -> list[int] | None:
+        del initial_stats, final_stats
+        return None
+
+    def corpus_measurement_mode(self) -> str:
+        return "program"
+
+    @property
+    def program_fds(self) -> Mapping[int, int]:
+        return {}
 
     def start(self) -> list[int]:
         if self.process is not None:

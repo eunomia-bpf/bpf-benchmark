@@ -65,6 +65,9 @@ class TraceeRunner(AppRunner):
     def collector(self) -> TraceeOutputCollector | None:
         return None if self.session is None else self.session.collector
 
+    def corpus_measurement_mode(self) -> str:
+        return "program"
+
     @property
     def program_fds(self) -> dict[int, int]:
         return {} if self.session is None else dict(self.session.program_fds)

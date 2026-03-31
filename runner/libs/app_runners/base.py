@@ -9,6 +9,7 @@ from ..workload import WorkloadResult
 class AppRunner(ABC):
     def __init__(self) -> None:
         self.programs: list[dict[str, object]] = []
+        self.artifacts: dict[str, object] = {}
         self.process_output: dict[str, object] = {}
         self.command_used: list[str] = []
 
@@ -24,16 +25,23 @@ class AppRunner(ABC):
     def stop(self) -> None:
         raise NotImplementedError
 
+    @abstractmethod
     def select_corpus_program_ids(
         self,
         initial_stats: Mapping[int, Mapping[str, object]],
         final_stats: Mapping[int, Mapping[str, object]],
     ) -> list[int] | None:
-        del initial_stats, final_stats
-        return None
+        raise NotImplementedError
 
+    @abstractmethod
     def corpus_measurement_mode(self) -> str:
-        return "program"
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    @property
+    def program_fds(self) -> Mapping[int, int]:
+        raise NotImplementedError
 
     def _fail_start(self, message: str) -> NoReturn:
         try:

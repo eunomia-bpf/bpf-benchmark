@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Sequence
 
 from . import run_command, tail_text, which
+from .kernel_modules import load_kernel_module
 
 LOOPBACK_LISTEN_BACKLOG = 128
 LOOPBACK_CONNECT_TIMEOUT_S = 2.0
@@ -224,7 +225,8 @@ def run_exec_storm(duration_s: int | float, rate: int) -> WorkloadResult:
     combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
     ops_total = _parse_stress_ng_bogo_ops(combined, stressor="exec")
     if ops_total is None:
-        ops_total = max(1.0, elapsed * max(1, int(rate)))
+        details = tail_text(combined)
+        raise RuntimeError(f"stress-ng exec workload did not report bogo-ops metrics: {details}")
     return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
 
 
@@ -269,7 +271,8 @@ def run_file_io(duration_s: int | float) -> WorkloadResult:
         write_stats = job.get("write") or {}
         ops_total = float(read_stats.get("total_ios", 0) or 0) + float(write_stats.get("total_ios", 0) or 0)
         if ops_total <= 0:
-            ops_total = (float(read_stats.get("iops", 0) or 0) + float(write_stats.get("iops", 0) or 0)) * elapsed
+            details = tail_text(completed.stdout or json.dumps(payload))
+            raise RuntimeError(f"fio file_io workload did not report total_ios metrics: {details}")
         return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
 
 
@@ -308,17 +311,7 @@ def _disk_backed_tmp_root() -> Path:
 
 
 def _load_kernel_module(module_name: str, *module_args: str) -> None:
-    modprobe_binary = which("modprobe")
-    if modprobe_binary is None:
-        raise RuntimeError(f"modprobe is required to load kernel module {module_name!r}")
-    completed = run_command(
-        [modprobe_binary, module_name, *module_args],
-        check=False,
-        timeout=10,
-    )
-    if completed.returncode != 0:
-        details = tail_text(completed.stderr or completed.stdout)
-        raise RuntimeError(f"modprobe {module_name} failed: {details}")
+    load_kernel_module(module_name, *module_args, timeout=10)
 
 
 def _wait_for_block_device(path: Path, *, timeout_s: float = 2.0) -> Path:
@@ -599,7 +592,8 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
     if tc_binary is None:
         raise RuntimeError("tc is required for the tcp_retransmit workload")
     _load_kernel_module("sch_netem")
-    effective_duration = max(2.0, float(duration_s))
+    effective_duration = max(3.0, float(duration_s))
+    transfer_target_bytes = 256 * 1024
 
     ready = threading.Event()
     stop = threading.Event()
@@ -659,12 +653,9 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
             "root",
             "netem",
             "delay",
-            "40ms",
+            "20ms",
             "loss",
             "10%",
-            "reorder",
-            "10%",
-            "50%",
         ],
         action="qdisc replace dev lo root netem",
     )
@@ -680,10 +671,15 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
             attempts += 1
             received = 0
             try:
-                with socket.create_connection(("127.0.0.1", port), timeout=2.0) as client:
-                    client.settimeout(1.0)
-                    while received < (2 * 1024 * 1024) and time.monotonic() < deadline:
-                        chunk = client.recv(65536)
+                with socket.create_connection(("127.0.0.1", port), timeout=1.0) as client:
+                    client.settimeout(0.25)
+                    while received < transfer_target_bytes and time.monotonic() < deadline:
+                        try:
+                            chunk = client.recv(65536)
+                        except socket.timeout:
+                            if received > 0:
+                                break
+                            raise
                         if not chunk:
                             break
                         received += len(chunk)

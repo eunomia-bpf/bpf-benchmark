@@ -57,6 +57,21 @@ class TetragonRunner(AppRunner):
         self.workload_spec: Mapping[str, object] = dict(workload_spec or {"kind": "exec_storm", "value": 2})
         self.exec_workload_cgroup = any(arg == "--cgroup-rate" for arg in self.tetragon_extra_args)
 
+    def select_corpus_program_ids(
+        self,
+        initial_stats: Mapping[int, Mapping[str, object]],
+        final_stats: Mapping[int, Mapping[str, object]],
+    ) -> list[int] | None:
+        del initial_stats, final_stats
+        return None
+
+    def corpus_measurement_mode(self) -> str:
+        return "program"
+
+    @property
+    def program_fds(self) -> Mapping[int, int]:
+        return {}
+
     @property
     def pid(self) -> int | None:
         return None if self.session is None else self.session.pid

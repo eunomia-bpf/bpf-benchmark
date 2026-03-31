@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
+from ..kernel_modules import load_kernel_module
 from .process_support import ManagedProcessSession
 
 
@@ -76,13 +77,6 @@ REAL_MAC = "02:00:00:00:00:2c"
 HTTP_TIMEOUT_S = 5.0
 SERVER_START_TIMEOUT_S = 15.0
 TOPOLOGY_SETTLE_S = 2.0
-
-MODULE_FALLBACK_CANDIDATES: dict[str, tuple[Path, ...]] = {
-    "veth": (ROOT_DIR / "vendor" / "linux-framework" / "drivers" / "net" / "veth.ko",),
-    "tunnel4": (ROOT_DIR / "vendor" / "linux-framework" / "net" / "ipv4" / "tunnel4.ko",),
-    "ip_tunnel": (ROOT_DIR / "vendor" / "linux-framework" / "net" / "ipv4" / "ip_tunnel.ko",),
-    "ipip": (ROOT_DIR / "vendor" / "linux-framework" / "net" / "ipv4" / "ipip.ko",),
-}
 
 
 def _bpftool_binary() -> str:
@@ -319,23 +313,10 @@ def module_loaded(name: str) -> bool:
 def ensure_kernel_module_loaded(name: str) -> None:
     if module_loaded(name):
         return
-    attempts: list[str] = []
-    modprobe = run_command(["modprobe", name], check=False, timeout=15)
-    if modprobe.returncode == 0 and module_loaded(name):
+    load_kernel_module(name, timeout=15)
+    if module_loaded(name):
         return
-    detail = (modprobe.stderr or modprobe.stdout).strip()
-    attempts.append(f"modprobe rc={modprobe.returncode}: {detail or 'no output'}")
-    candidates = [candidate for candidate in MODULE_FALLBACK_CANDIDATES.get(name, ()) if candidate.exists()]
-    for module_root in (Path("/lib/modules"), ROOT_DIR / "vendor" / "linux-framework" / ".virtme_mods" / "lib" / "modules"):
-        if module_root.exists():
-            candidates.extend(sorted(module_root.glob(f"**/{name}.ko")))
-    for candidate in dict.fromkeys(candidates):
-        insmod = run_command(["insmod", str(candidate)], check=False, timeout=15)
-        if insmod.returncode == 0 and module_loaded(name):
-            return
-        detail = (insmod.stderr or insmod.stdout).strip()
-        attempts.append(f"insmod {candidate} rc={insmod.returncode}: {detail or 'no output'}")
-    raise RuntimeError(f"failed to load kernel module {name}: {'; '.join(attempts)}")
+    raise RuntimeError(f"kernel module {name} still is not resident after modprobe")
 
 
 def set_ns_sysctl(namespace: str, key: str, value: int) -> None:

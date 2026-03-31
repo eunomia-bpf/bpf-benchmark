@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 from .. import tail_text
 from ..workload import WorkloadResult
@@ -67,6 +67,21 @@ class KatranRunner(AppRunner):
     @property
     def prog_id(self) -> int | None:
         return None if self.session is None else int(self.session.prog_id)
+
+    def select_corpus_program_ids(
+        self,
+        initial_stats: Mapping[int, Mapping[str, object]],
+        final_stats: Mapping[int, Mapping[str, object]],
+    ) -> list[int] | None:
+        del initial_stats, final_stats
+        return None
+
+    def corpus_measurement_mode(self) -> str:
+        return "program"
+
+    @property
+    def program_fds(self) -> Mapping[int, int]:
+        return {}
 
     def start(self) -> list[int]:
         if self.session is not None:

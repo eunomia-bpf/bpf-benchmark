@@ -56,6 +56,14 @@ class ScxRunner(AppRunner):
     def corpus_measurement_mode(self) -> str:
         return "app"
 
+    def select_corpus_program_ids(
+        self,
+        initial_stats: Mapping[int, Mapping[str, object]],
+        final_stats: Mapping[int, Mapping[str, object]],
+    ) -> list[int] | None:
+        del initial_stats, final_stats
+        return None
+
     @property
     def program_fds(self) -> dict[int, int]:
         return {} if self.session is None else dict(self.session.program_fds)

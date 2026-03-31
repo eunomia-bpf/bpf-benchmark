@@ -44,19 +44,23 @@ DEFAULT_SMOKE_DURATION_S = 10
 
 
 def read_proc_stat_fields() -> dict[str, int]:
-    fields = {"ctxt": 0, "processes": 0, "procs_running": 0}
+    wanted = ("ctxt", "processes", "procs_running")
+    fields: dict[str, int] = {}
     try:
         lines = Path("/proc/stat").read_text().splitlines()
-    except OSError:
-        return fields
+    except OSError as exc:
+        raise RuntimeError(f"failed to read /proc/stat: {exc}") from exc
     for line in lines:
         parts = line.split()
-        if len(parts) < 2 or parts[0] not in fields:
+        if len(parts) < 2 or parts[0] not in wanted:
             continue
         try:
             fields[parts[0]] = int(parts[1])
-        except ValueError:
-            continue
+        except ValueError as exc:
+            raise RuntimeError(f"failed to parse /proc/stat field {parts[0]!r}: {parts[1]!r}") from exc
+    missing = [field for field in wanted if field not in fields]
+    if missing:
+        raise RuntimeError("/proc/stat is missing required fields: " + ", ".join(missing))
     return fields
 
 

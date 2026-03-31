@@ -15,6 +15,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from runner.libs import ROOT_DIR, ensure_parent, write_json, write_text
 from runner.libs.app_runners import get_app_runner
+from runner.libs.app_runners.base import AppRunner
 from runner.libs.app_suite_schema import AppSpec, AppWorkload, load_app_suite_from_yaml
 from runner.libs.bpf_stats import enable_bpf_stats
 from runner.libs.case_common import (
@@ -29,6 +30,7 @@ from runner.libs.case_common import (
 from runner.libs.daemon_session import DaemonSession
 from runner.libs.metrics import sample_bpf_stats
 from runner.libs.rejit import benchmark_rejit_enabled_passes
+from runner.libs.run_artifacts import ArtifactSession, derive_run_type, repo_relative_path
 from runner.libs.statistics import geometric_mean
 
 
@@ -196,7 +198,7 @@ def _sample_count(args: argparse.Namespace, suite_defaults: Mapping[str, object]
 
 
 def _measure_runner_phase(
-    runner: object,
+    runner: AppRunner,
     prog_ids: Sequence[int],
     *,
     workload_seconds: float,
@@ -204,13 +206,12 @@ def _measure_runner_phase(
 ) -> dict[str, object]:
     workloads: list[dict[str, object]] = []
     last_workload: dict[str, object] | None = None
-    prog_fds = getattr(runner, "program_fds", None)
-    initial_stats = sample_bpf_stats(list(prog_ids), prog_fds=prog_fds)
+    initial_stats = sample_bpf_stats(list(prog_ids), prog_fds=runner.program_fds)
     for _ in range(samples):
         workload = runner.run_workload(workload_seconds).to_dict()
         last_workload = dict(workload)
         workloads.append(dict(workload))
-    final_stats = sample_bpf_stats(list(prog_ids), prog_fds=prog_fds)
+    final_stats = sample_bpf_stats(list(prog_ids), prog_fds=runner.program_fds)
     return {
         "workload": last_workload,
         "workloads": workloads,
@@ -331,6 +332,72 @@ def _build_program_measurements(
     return rows
 
 
+def _result_program_rows(result: Mapping[str, object]) -> list[dict[str, object]]:
+    return [
+        dict(row)
+        for row in (result.get("program_measurements") or {}).values()
+        if isinstance(row, Mapping)
+    ]
+
+
+def _app_measurement_row(result: Mapping[str, object]) -> dict[str, object] | None:
+    measurement = result.get("app_measurement")
+    if not isinstance(measurement, Mapping):
+        return None
+    app_name = str(result.get("app") or "")
+    apply_result = result.get("rejit_apply")
+    apply_record = dict(apply_result) if isinstance(apply_result, Mapping) else {}
+    any_applied = rejit_result_has_any_apply(apply_record)
+    baseline = measurement.get("baseline")
+    post_rejit = measurement.get("post_rejit")
+    speedup = measurement.get("speedup")
+    comparable = isinstance(speedup, (int, float)) and float(speedup) > 0.0
+    exclusion_reason = ""
+    apply_error = str(apply_record.get("error") or "").strip()
+    if not comparable:
+        if not isinstance(baseline, (int, float)):
+            exclusion_reason = "missing_baseline_app_metric"
+        elif float(baseline) <= 0.0:
+            exclusion_reason = "non_positive_baseline_app_metric"
+        elif not bool(result.get("had_post_rejit_measurement")):
+            if apply_error:
+                exclusion_reason = f"apply_error: {apply_error}"
+            elif not any_applied:
+                exclusion_reason = "no_programs_applied_in_loader"
+            else:
+                exclusion_reason = "missing_post_rejit_measurement"
+        elif not isinstance(post_rejit, (int, float)):
+            exclusion_reason = f"apply_error: {apply_error}" if apply_error else "missing_rejit_app_metric"
+        elif float(post_rejit) <= 0.0:
+            exclusion_reason = "non_positive_rejit_app_metric"
+        else:
+            exclusion_reason = "missing_app_speedup"
+    return {
+        "id": 0,
+        "label": f"{app_name}:app",
+        "name": "__app__",
+        "type": "app",
+        "unit": "app",
+        "metric": str(measurement.get("metric") or ""),
+        "applied": any_applied,
+        "comparable": comparable,
+        "speedup": float(speedup) if comparable else None,
+        "comparison_exclusion_reason": exclusion_reason,
+        "baseline": {"value": baseline},
+        "rejit": {"value": post_rejit} if bool(result.get("had_post_rejit_measurement")) else {},
+        "apply": apply_record,
+    }
+
+
+def _result_comparison_rows(result: Mapping[str, object]) -> list[dict[str, object]]:
+    rows = _result_program_rows(result)
+    if str(result.get("measurement_mode") or "").strip() == "app":
+        app_row = _app_measurement_row(result)
+        if app_row is not None:
+            rows.append(app_row)
+    return rows
+
+
 def _comparison_rows(
     results: Sequence[Mapping[str, object]],
 ) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]]]:
@@ -339,9 +406,7 @@ def _comparison_rows(
     excluded_rows: list[dict[str, object]] = []
     for result in results:
         app_name = str(result.get("app") or "")
-        for row in (result.get("program_measurements") or {}).values():
-            if not isinstance(row, Mapping):
-                continue
+        for row in _result_comparison_rows(result):
             row_payload = dict(row)
             row_payload["app"] = app_name
             if bool(row.get("comparable")):
@@ -352,6 +417,7 @@ def _comparison_rows(
             excluded_rows.append(
                 {
                     "app": app_name,
+                    "unit": str(row.get("unit") or "program"),
                     "program_id": int(row.get("id", 0) or 0),
                     "program": str(row.get("name") or ""),
                     "label": str(row.get("label") or ""),
@@ -366,19 +432,16 @@ def _comparison_rows(
 def _per_app_breakdown(results: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
     breakdown: list[dict[str, object]] = []
     for result in results:
-        program_rows = [
-            dict(row)
-            for row in (result.get("program_measurements") or {}).values()
-            if isinstance(row, Mapping)
-        ]
+        program_rows = _result_program_rows(result)
+        comparison_rows = _result_comparison_rows(result)
         comparable_speedups = [
             float(row["speedup"])
-            for row in program_rows
+            for row in comparison_rows
             if bool(row.get("comparable")) and isinstance(row.get("speedup"), (int, float))
         ]
         applied_speedups = [
             float(row["speedup"])
-            for row in program_rows
+            for row in comparison_rows
             if bool(row.get("applied")) and bool(row.get("comparable")) and isinstance(row.get("speedup"), (int, float))
         ]
         exclusions = [
@@ -386,9 +449,10 @@ def _per_app_breakdown(results: Sequence[Mapping[str, object]]) -> list[dict[str
                 "program_id": int(row.get("id", 0) or 0),
                 "program": str(row.get("name") or ""),
                 "label": str(row.get("label") or ""),
+                "unit": str(row.get("unit") or "program"),
                 "reason": str(row.get("comparison_exclusion_reason") or "unknown"),
             }
-            for row in program_rows
+            for row in comparison_rows
             if not bool(row.get("comparable"))
         ]
         breakdown.append(
@@ -396,6 +460,7 @@ def _per_app_breakdown(results: Sequence[Mapping[str, object]]) -> list[dict[str
                 "app": str(result.get("app") or ""),
                 "runner": str(result.get("runner") or ""),
                 "workload": str(result.get("selected_workload") or ""),
+                "measurement_mode": str(result.get("measurement_mode") or ""),
                 "status": str(result.get("status") or ""),
                 "program_count": len(program_rows),
                 "applied_program_count": sum(1 for row in program_rows if bool(row.get("applied"))),
@@ -428,7 +493,7 @@ def _build_summary(
     ]
     exclusion_reason_counts = Counter(str(row.get("reason") or "unknown") for row in excluded_rows)
     discovered_programs = sum(
-        len(result.get("program_measurements") or {})
+        len(_result_program_rows(result))
         for result in results
         if isinstance(result, Mapping)
     )
@@ -531,16 +596,15 @@ def _run_app(
     rejit_workloads: list[dict[str, object]] = []
     apply_result: dict[str, object] = {}
     had_post_rejit = False
-    measurement_mode = str(getattr(runner, "corpus_measurement_mode", lambda: "program")()).strip() or "program"
+    measurement_mode = runner.corpus_measurement_mode().strip()
+    if measurement_mode not in {"program", "app"}:
+        raise RuntimeError(f"{app.name}: runner returned unsupported corpus measurement mode {measurement_mode!r}")
 
     def before_rejit(_setup_state: object, lifecycle: object, baseline: Mapping[str, object]) -> object | None:
         measurement = dict((baseline.get("measurement") or {}))
         initial_stats = measurement.get("initial_stats") or {}
         final_stats = measurement.get("final_stats") or {}
-        selector = getattr(runner, "select_corpus_program_ids", None)
-        if not callable(selector):
-            return None
-        selected = selector(initial_stats, final_stats)
+        selected = runner.select_corpus_program_ids(initial_stats, final_stats)
         if selected is None:
             return None
         selected_prog_ids = [
@@ -671,8 +735,8 @@ def _run_app(
         "had_post_rejit_measurement": had_post_rejit,
         "rejit_workload": rejit_workload,
         "rejit_workloads": rejit_workloads,
-        "process": dict(getattr(runner, "process_output", {})),
-        "command_used": [str(item) for item in (lifecycle_result.artifacts.get("command_used") or getattr(runner, "command_used", []) or [])],
+        "process": dict(runner.process_output),
+        "command_used": [str(item) for item in lifecycle_result.artifacts.get("command_used", [])],
     }
 
 
@@ -785,26 +849,131 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
     return attach_pending_result_metadata(payload)
 
 
+def build_run_metadata(
+    args: argparse.Namespace,
+    payload: dict[str, object],
+    *,
+    output_json: Path,
+    output_md: Path,
+) -> dict[str, object]:
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "suite": "corpus",
+        "manifest": str(Path(args.suite).resolve()),
+        "filters": list(args.filters or []),
+        "samples": int(args.samples or 0),
+        "workload_seconds": float(args.workload_seconds or 0.0),
+        "selected_rejit_passes": benchmark_rejit_enabled_passes(),
+        "output_hint_json": repo_relative_path(output_json),
+        "output_hint_md": repo_relative_path(output_md),
+        "optimization_summary": payload.get("summary") if isinstance(payload, Mapping) else {},
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    payload = run_suite(args)
     output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()
-    ensure_parent(output_json)
-    ensure_parent(output_md)
-    write_json(output_json, payload)
-    write_text(output_md, build_markdown(payload) + "\n")
-    print(
-        json.dumps(
-            {
-                "status": payload["status"],
-                "output_json": str(output_json),
-                "output_md": str(output_md),
-            },
-            indent=2,
+    run_type = derive_run_type(output_json, "vm_corpus")
+    started_at = datetime.now(timezone.utc).isoformat()
+    progress_payload: dict[str, object] = {
+        "suite": "corpus",
+        "status": "running",
+        "filters": list(args.filters or []),
+        "samples": int(args.samples or 0),
+        "workload_seconds": float(args.workload_seconds or 0.0),
+    }
+    metadata_payload: dict[str, object] = progress_payload
+
+    def build_artifact_metadata(
+        status: str,
+        session_started_at: str,
+        updated_at: str,
+        error_message: str | None,
+    ) -> dict[str, object]:
+        metadata = build_run_metadata(
+            args,
+            metadata_payload,
+            output_json=output_json,
+            output_md=output_md,
         )
+        metadata["status"] = status
+        metadata["started_at"] = session_started_at
+        metadata["last_updated_at"] = updated_at
+        if error_message:
+            metadata["error_message"] = error_message
+        return metadata
+
+    session = ArtifactSession(
+        output_path=output_json,
+        run_type=run_type,
+        generated_at=started_at,
+        metadata_builder=build_artifact_metadata,
     )
-    return 0 if payload["status"] == "ok" else 1
+    session.write(status="running", progress_payload=progress_payload)
+
+    try:
+        payload = run_suite(args)
+        markdown = build_markdown(payload) + "\n"
+        metadata_payload = payload
+        ensure_parent(output_json)
+        ensure_parent(output_md)
+        write_json(output_json, payload)
+        write_text(output_md, markdown)
+        payload_status = str(payload.get("status") or "error").lower()
+        error_message = str(payload.get("fatal_error") or "").strip()
+        if payload_status == "ok":
+            session.write(
+                status="completed",
+                progress_payload={
+                    "suite": "corpus",
+                    "status": "completed",
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                },
+                result_payload=payload,
+                detail_texts={"result.md": markdown},
+            )
+        else:
+            session.write(
+                status="error",
+                progress_payload={
+                    "suite": "corpus",
+                    "status": "error",
+                    "failed_at": datetime.now(timezone.utc).isoformat(),
+                    "error_message": error_message or "corpus suite reported errors",
+                },
+                result_payload=payload,
+                detail_texts={"result.md": markdown},
+                error_message=error_message or "corpus suite reported errors",
+            )
+        print(
+            json.dumps(
+                {
+                    "status": payload_status,
+                    "output_json": str(output_json),
+                    "output_md": str(output_md),
+                    "artifact_metadata": str(session.run_dir / "metadata.json"),
+                },
+                indent=2,
+            )
+        )
+        return 0 if payload_status == "ok" else 1
+    except Exception as exc:
+        metadata_payload = {
+            "status": "error",
+            "error_message": str(exc),
+        }
+        session.write(
+            status="error",
+            progress_payload={
+                "suite": "corpus",
+                "status": "error",
+                "failed_at": datetime.now(timezone.utc).isoformat(),
+                "error_message": str(exc),
+            },
+            error_message=str(exc),
+        )
+        raise
 
 
 if __name__ == "__main__":
