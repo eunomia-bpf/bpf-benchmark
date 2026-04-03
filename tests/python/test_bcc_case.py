@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -63,6 +64,7 @@ attach_timeout_s: 20
 
 def test_run_phase_uses_shared_bcc_runner(monkeypatch, tmp_path: Path) -> None:
     calls: list[object] = []
+    captured: dict[str, object] = {}
 
     class FakeRunner:
         def __init__(self, **kwargs):
@@ -70,6 +72,8 @@ def test_run_phase_uses_shared_bcc_runner(monkeypatch, tmp_path: Path) -> None:
             self.session = SimpleNamespace(process=SimpleNamespace(pid=321))
             self.programs = [{"id": 101, "name": "tracepoint__syscalls__sys_enter_execve"}]
             self.process_output = {"returncode": 0, "stdout_tail": "", "stderr_tail": ""}
+            self.artifacts = {}
+            self.command_used = ["bcc-tool", "execsnoop"]
 
         def start(self) -> list[int]:
             calls.append("start")
@@ -91,9 +95,11 @@ def test_run_phase_uses_shared_bcc_runner(monkeypatch, tmp_path: Path) -> None:
             calls.append("stop")
 
     def fake_run_app_runner_phase_records(**kwargs):
+        captured["enabled_passes"] = kwargs["enabled_passes"]
         runner = kwargs["runner"]
         prog_ids = list(runner.start())
-        lifecycle = SimpleNamespace(runtime=runner, target_prog_ids=prog_ids)
+        lifecycle = kwargs["build_state"](runner, prog_ids)
+        captured["artifacts"] = dict(lifecycle.artifacts)
         baseline = kwargs["measure"](lifecycle, "baseline")
         runner.stop()
         return baseline, None
@@ -102,7 +108,7 @@ def test_run_phase_uses_shared_bcc_runner(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setattr(case, "run_app_runner_phase_records", fake_run_app_runner_phase_records)
     monkeypatch.setattr(
         case,
-        "measure_workload",
+        "measure_app_runner_workload",
         lambda _runner, duration_s, prog_ids, **_kwargs: {
             "bpf": {"summary": {"avg_ns_per_run": 12.0}},
             "workload": {"ops_per_sec": 2.0, "duration_s": duration_s},
@@ -126,12 +132,92 @@ def test_run_phase_uses_shared_bcc_runner(monkeypatch, tmp_path: Path) -> None:
         tool_binary=tmp_path / "execsnoop",
         duration_s=5,
         attach_timeout=20,
+        enabled_passes=None,
+        policy_context={"repo": "bcc", "category": "bcc", "level": "e2e"},
         prepared_daemon_session=object(),
     )
 
     assert baseline["status"] == "ok"
-    assert baseline["prog_ids"] == [101]
+    assert baseline["measurement"]["prog_ids"] == [101]
     assert rejit is None
+    assert captured["enabled_passes"] is None
+    assert captured["artifacts"]["rejit_policy_context"] == {
+        "repo": "bcc",
+        "category": "bcc",
+        "level": "e2e",
+    }
     assert calls[0][0] == "init"
     assert "start" in calls
     assert "stop" in calls
+
+
+def test_run_bcc_case_reports_effective_passes(monkeypatch, tmp_path: Path) -> None:
+    daemon_binary = tmp_path / "daemon"
+    daemon_binary.write_text("", encoding="utf-8")
+    daemon_binary.chmod(0o755)
+    tool_binary = tmp_path / "execsnoop"
+    tool_binary.write_text("", encoding="utf-8")
+    tool_binary.chmod(0o755)
+
+    config_path = tmp_path / "bcc-config.yaml"
+    config_path.write_text(
+        """
+tools:
+  - name: execsnoop
+    description: exec tracing
+    expected_programs: 2
+    workload_kind: exec_loop
+    spawn_timeout_s: 15
+measurement_duration_s: 30
+smoke_duration_s: 10
+attach_timeout_s: 20
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(case, "benchmark_rejit_enabled_passes", lambda: ["map_inline", "const_prop", "dce"])
+    monkeypatch.setattr(case, "run_setup_script", lambda _path: {"returncode": 0, "stdout_tail": "", "stderr_tail": ""})
+    monkeypatch.setattr(case, "resolve_tools_dir", lambda *_args, **_kwargs: tmp_path)
+    monkeypatch.setattr(case, "find_tool_binary", lambda *_args, **_kwargs: tool_binary)
+    monkeypatch.setattr(case, "host_metadata", lambda: {"kernel": "demo"})
+    monkeypatch.setattr(case, "enable_bpf_stats", lambda: nullcontext())
+    monkeypatch.setattr(
+        case,
+        "run_phase",
+        lambda *args, **kwargs: (
+            {
+                "status": "ok",
+                "site_totals": case.zero_site_totals(case.BCC_SITE_TOTAL_FIELDS),
+                "measurement": {},
+            },
+            {
+                "status": "ok",
+                "site_totals": case.zero_site_totals(case.BCC_SITE_TOTAL_FIELDS),
+                "measurement": {},
+                "rejit_result": {
+                    "effective_enabled_passes_by_program": {
+                        "101": ["map_inline"],
+                    }
+                },
+            },
+        ),
+    )
+
+    args = SimpleNamespace(
+        daemon=str(daemon_binary),
+        smoke=False,
+        smoke_duration=0,
+        duration=0,
+        setup_script=str(tmp_path / "setup.sh"),
+        config=str(config_path),
+        tools=None,
+        tools_dir=str(tmp_path),
+        _prepared_daemon_session=object(),
+    )
+
+    payload = case.run_bcc_case(args)
+
+    assert payload["selected_rejit_passes"] == ["map_inline"]
+    assert payload["requested_rejit_passes"] == ["map_inline", "const_prop", "dce"]
+    assert payload["tool_rejit_passes"] == {"execsnoop": ["map_inline"]}

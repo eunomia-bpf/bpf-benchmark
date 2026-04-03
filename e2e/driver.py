@@ -24,7 +24,7 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.app_suite_schema import AppSpec, load_app_suite_from_yaml  # noqa: E402
 from runner.libs.daemon_session import DaemonSession  # noqa: E402
-from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
+from runner.libs.rejit import benchmark_rejit_enabled_passes, collect_effective_enabled_passes  # noqa: E402
 from runner.libs.run_artifacts import (  # noqa: E402
     ArtifactSession,
     current_process_identity,
@@ -156,6 +156,44 @@ CASE_SPECS: dict[str, CaseSpec] = {
 }
 
 
+def _normalize_default_pathlike(value: object) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    return str(Path(text).resolve())
+
+
+def _known_case_default_values(attribute: str) -> set[str]:
+    values: set[str] = set()
+    for spec in CASE_SPECS.values():
+        value: object | None = None
+        if attribute == "setup_script":
+            value = spec.default_setup_script
+        elif attribute == "report_md":
+            value = spec.default_report_md
+        elif attribute == "config":
+            value = spec.default_config
+        if value is None:
+            continue
+        normalized = _normalize_default_pathlike(value)
+        if normalized:
+            values.add(normalized)
+    return values
+
+
+def _uses_known_case_default(args: argparse.Namespace, attribute: str) -> bool:
+    if not hasattr(args, attribute):
+        return True
+    current_value = _normalize_default_pathlike(getattr(args, attribute))
+    if not current_value:
+        return True
+    return current_value in _known_case_default_values(attribute)
+
+
+def _args_no_kinsn(args: argparse.Namespace) -> bool:
+    return bool(getattr(args, "no_kinsn", False))
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the repository end-to-end benchmark suite driver.")
     parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran", "all"))
@@ -186,11 +224,11 @@ def apply_case_defaults(args: argparse.Namespace) -> None:
         args.output_json = str(spec.default_output_json)
     if args.output_md == str(DEFAULT_OUTPUT_MD):
         args.output_md = str(spec.default_output_md)
-    if spec.default_setup_script is not None and not hasattr(args, "setup_script"):
+    if spec.default_setup_script is not None and _uses_known_case_default(args, "setup_script"):
         args.setup_script = spec.default_setup_script
-    if spec.default_report_md is not None and not hasattr(args, "report_md"):
+    if spec.default_report_md is not None and _uses_known_case_default(args, "report_md"):
         args.report_md = str(spec.default_report_md)
-    if spec.default_config is not None and not hasattr(args, "config"):
+    if spec.default_config is not None and _uses_known_case_default(args, "config"):
         args.config = str(spec.default_config)
 
 
@@ -448,21 +486,26 @@ def build_run_metadata(
     *,
     primary_output_json: Path,
 ) -> dict[str, object]:
-    selected_rejit_passes = benchmark_rejit_enabled_passes()
+    requested_rejit_passes = benchmark_rejit_enabled_passes()
+    selected_rejit_passes = collect_effective_enabled_passes(payload)
+    if not selected_rejit_passes:
+        selected_rejit_passes = list(requested_rejit_passes)
     if isinstance(payload, dict):
         payload_selected_passes = payload.get("selected_rejit_passes")
-        if isinstance(payload_selected_passes, list):
+        if not selected_rejit_passes and isinstance(payload_selected_passes, list):
             selected_rejit_passes = [str(pass_name) for pass_name in payload_selected_passes]
     metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite": "e2e",
         "case": args.case,
         "smoke": bool(args.smoke),
-        "kinsn_enabled": not bool(args.no_kinsn),
+        "kinsn_enabled": not _args_no_kinsn(args),
         "selected_rejit_passes": selected_rejit_passes,
         "output_hint_json": repo_relative_path(primary_output_json),
         "optimization_summary": _trim_e2e_value(payload),
     }
+    if selected_rejit_passes != requested_rejit_passes:
+        metadata["requested_rejit_passes"] = list(requested_rejit_passes)
     metadata.update(current_process_identity())
     metadata["output_hint_md"] = repo_relative_path(Path(args.output_md).resolve())
     report_md = getattr(args, "report_md", None)
@@ -498,7 +541,7 @@ def _run_single_case(
         "case": args.case,
         "status": "running",
         "smoke": bool(args.smoke),
-        "kinsn_enabled": not bool(args.no_kinsn),
+        "kinsn_enabled": not _args_no_kinsn(args),
     }
     metadata_payload: dict[str, object] = progress_payload
 

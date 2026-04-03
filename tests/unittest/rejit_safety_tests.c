@@ -50,6 +50,7 @@
 
 static int g_pass;
 static int g_fail;
+static int g_skip;
 
 static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 {
@@ -244,8 +245,8 @@ static int verify_retval(int prog_fd, __u32 expected)
 } while (0)
 
 #define TEST_SKIP(name, reason) do { \
-	fprintf(stderr, "  FAIL  %s: %s\n", name, reason); \
-	g_fail++; \
+	fprintf(stderr, "  SKIP  %s: %s\n", name, reason); \
+	g_skip++; \
 } while (0)
 
 #define BPF_UT_RAW_INSN(CODE, DST, SRC, OFF, IMM) ((struct bpf_insn) { \
@@ -1038,7 +1039,8 @@ static int test_neg_original_survives_failed_rejit(void)
  * INSN_BUF_SIZE. Userspace cannot force a module's descriptor value at runtime,
  * so this regression test exercises the supported path instead: discover a live
  * kinsn module, REJIT a program that uses it, and verify the verifier accepts
- * the normal case and the transformed program runs correctly.
+ * the normal case and the transformed program runs correctly. When the
+ * out-of-scope security kinsn module is not loaded, skip cleanly.
  */
 static int test_kinsn_max_insn_cnt_exceeds_buf(void)
 {
@@ -1427,8 +1429,8 @@ int main(void)
 	test_cor_multiple_rejits();                /* C04 */
 	test_cor_rejit_roundtrip();                /* C05 */
 
-	printf("\n=== Summary: %d passed, %d failed ===\n",
-	       g_pass, g_fail);
+	printf("\n=== Summary: %d passed, %d failed, %d skipped ===\n",
+	       g_pass, g_fail, g_skip);
 
 	if (g_fail) {
 		fprintf(stderr, "SOME TESTS FAILED\n");

@@ -26,7 +26,6 @@ from runner.libs.app_runners.bpftrace import BpftraceRunner, SCRIPTS, ScriptSpec
 from runner.libs.metrics import (  # noqa: E402
     enable_bpf_stats,
 )
-from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     measure_app_runner_workload,
     host_metadata,
@@ -162,7 +161,6 @@ def run_phase(
         prepared_daemon_session=prepared_daemon_session,
         measure=workload,
         site_totals_fields=BPFTRACE_SITE_TOTAL_FIELDS,
-        enabled_passes=benchmark_rejit_enabled_passes(),
     )
 
 

@@ -73,21 +73,18 @@ daemon 自己不实现 kinsn，只做三件事：
 
 当前 CLI 只保留一个子命令：
 
-1. `bpfrejit-daemon [--pgo] [--pgo-interval-ms N] [--no-rollback] serve [--socket PATH]`
+1. `bpfrejit-daemon serve [--socket PATH]`
 
-这里需要注意两点：
+这里需要注意：
 
 1. `serve` 是唯一的命令入口；历史上的 `watch`、`apply`、`apply-all`、`enumerate`、`rewrite` 已全部删除。
-2. `--pgo`、`--pgo-interval-ms`、`--no-rollback` 是顶层 CLI flag，但它们实际只对 `serve` 路径生效。
+2. 历史上的 `--pgo`、`--pgo-interval-ms`、`--no-rollback` 已移除；当前 profiling 通过 socket 协议里的 `profile-start` / `profile-stop` 请求触发。
 
 ### 2.2 `serve`
 
 输入：
 
 1. `--socket`，默认 `/var/run/bpfrejit.sock`
-2. 顶层 `--no-rollback`
-3. 顶层 `--pgo`
-4. 顶层 `--pgo-interval-ms`
 
 行为：
 
@@ -95,7 +92,7 @@ daemon 自己不实现 kinsn，只做三件事：
 2. 使用非阻塞 `accept()` 循环接收客户端。
 3. 每 1 秒跑一次 invalidation tick；`MapInvalidationTracker` 仍然由 `serve` 持有并在这里驱动。
 4. 对每一行请求做一次 JSON 解析和处理。
-5. 若以 `--pgo` 启动，则在每次 `optimize` / `optimize-all` / invalidation reoptimize 进入 pipeline 前，通过 `profiler` 收集一个短窗口运行统计。
+5. profiling 不是 CLI 模式，而是 request-scoped：客户端可在 `optimize` 前发送 `profile-start` / `profile-stop`，daemon 把采样结果注入后续 pipeline。
 
 `serve` 是唯一长期运行模式；不再存在独立的 watch / enumerate / rewrite / apply 子命令。live program 的枚举只发生在 `optimize-all` 请求或 invalidation 驱动的重优化路径里。
 
@@ -224,7 +221,7 @@ daemon 自己不实现 kinsn，只做三件事：
 6. `map_fd_bindings`
    稳定的 `old_fd -> map_id` 映射，用于在删除/重排 pseudo-map load 后仍能正确重定位 map FD。
 7. `branch_miss_rate`
-   由 `serve --pgo` 路径中的 `profiler` 注入的 PMU 分支失效率，供 `branch_flip` 使用。
+   由当前 daemon session 的 profiling 请求注入的 PMU 分支失效率，供 `branch_flip` 使用。
 8. `verifier_states`
    原始程序 `log_level=2` verifier 状态快照，用于 `map_inline` 的 verifier-guided key 提取。
 
@@ -248,7 +245,7 @@ daemon 自己不实现 kinsn，只做三件事：
 1. `branch_profile: Option<BranchProfile>`
 
 它主要服务 `BranchFlipPass`。也就是说，当前 annotation 机制是通用的，但真正写入的动态注解只有分支 profile。
-这些 per-site profile 也是由 `serve --pgo` 路径中的 `profiler` 采集并注入。
+这些 per-site profile 也是由当前 daemon session 的 profiling 请求采集并注入。
 
 ### 3.4 `PassContext`
 
@@ -946,7 +943,7 @@ rewrite：
 
 目标：
 
-1. 根据 `serve --pgo` 注入的 profile，把热点 taken-path 的 if/else diamond 翻面，使热点 path 变成 fallthrough。
+1. 根据当前 daemon session 注入的 profile，把热点 taken-path 的 if/else diamond 翻面，使热点 path 变成 fallthrough。
 
 匹配算法：
 
@@ -962,7 +959,7 @@ rewrite：
 2. 若 site 上有 `BranchProfile`，则要求 `taken_count / total >= min_bias`。
 3. 若 site 上没有 `BranchProfile`，但程序级 PMU miss-rate gate 已通过，则允许退化到一个保守的 size-asymmetry fallback：
    `else_len > 0 && then_len > 2 * else_len`
-4. 若完全没有 PMU 数据，则整个 pass 仍然跳过；也就是说 `branch_flip` 要真正生效，入口仍然是以 `--pgo` 启动 `serve`。
+4. 若完全没有 PMU 数据，则整个 pass 仍然跳过；也就是说 `branch_flip` 要真正生效，入口仍然是先通过 socket profile 请求为当前 daemon session 注入 profiling 数据。
 
 rewrite：
 
@@ -975,7 +972,7 @@ rewrite：
 
 1. 不接受 `JSET`，因为没有简单反操作。
 2. site 内不能有来自外部的 interior target，JCC 自己的 target 除外。
-3. 没有 PMU 数据时完全不做 fallback；只有 `serve --pgo` 成功收集到程序级 profile 后，才会考虑 per-site profile 或 size-asymmetry fallback。
+3. 没有 PMU 数据时完全不做 fallback；只有当前 daemon session 已成功收集到程序级 profile 后，才会考虑 per-site profile 或 size-asymmetry fallback。
 
 ### 6.10 `BoundsCheckMergePass`
 
@@ -1327,7 +1324,7 @@ rewrite：
 这里与 daemon 默认 pipeline 有一个刻意差异：
 
 1. 这 11 个 pass 覆盖了当前 benchmark 配置里默认启用的非 PGO pass。
-2. `branch_flip` 仍然在 daemon `PASS_REGISTRY` 里，但不在这个 `performance` 列表中；它只有在请求显式启用、并且 `serve` 以 `--pgo` 启动时才真正有意义。
+2. `branch_flip` 仍然在 daemon `PASS_REGISTRY` 里，但不在这个 `performance` 列表中；它只有在请求显式启用、并且该 session 已成功收集 profile 时才真正有意义。
 3. 三个安全 pass 既不在 registry 中，也不在 `benchmark_config.yaml` 中。
 
 ### 9.3 排序原因与依赖关系

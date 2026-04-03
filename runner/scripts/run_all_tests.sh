@@ -28,7 +28,7 @@ KERNEL_TEST_DIR="${ROOT_DIR}/tests/kernel"
 KERNEL_SELFTEST="${KERNEL_TEST_DIR}/build/test_recompile"
 UNITTEST_DIR="${ROOT_DIR}/tests/unittest"
 UNITTEST_BUILD_DIR="${UNITTEST_DIR}/build"
-UPSTREAM_BIN_DIR="${ROOT_DIR}/tests/kernel/build/upstream-bpf-selftests"
+UPSTREAM_BIN_DIR="${ROOT_DIR}/.cache/upstream-bpf-selftests"
 BPF_SELFTEST_FILTER="${BPF_SELFTEST_FILTER:-verifier jit}"
 
 cd "$ROOT_DIR"
@@ -36,11 +36,21 @@ cd "$ROOT_DIR"
 PASS=0
 FAIL=0
 
+LOAD_SCRIPT="${ROOT_DIR}/module/load_all.sh"
+
 run_section() {
     echo ""
     echo "========================================"
     echo "  $1"
     echo "========================================"
+}
+
+ensure_kinsn_modules_loaded() {
+    if [ ! -x "$LOAD_SCRIPT" ]; then
+        echo "ERROR: module/load_all.sh not found or not executable: $LOAD_SCRIPT"
+        exit 1
+    fi
+    "$LOAD_SCRIPT"
 }
 
 # --- Part 1: Kernel selftest (test_recompile) ---
@@ -58,6 +68,9 @@ fi
 
 # --- Part 2: unittest suite ---
 if [ "$SKIP_UNITTEST" -eq 0 ]; then
+    run_section "Loading kinsn modules"
+    ensure_kinsn_modules_loaded
+
     run_section "Running tests/unittest/ suite (pre-built)"
     cd "$UNITTEST_DIR"
     for t in $(find "$UNITTEST_BUILD_DIR" -maxdepth 1 -name 'rejit_*' -executable -printf '%f\n' 2>/dev/null | sort); do

@@ -20,6 +20,7 @@ from runner.libs.app_runners.base import AppRunner
 from runner.libs.app_suite_schema import AppSpec, AppWorkload, load_app_suite_from_yaml
 from runner.libs.bpf_stats import enable_bpf_stats
 from runner.libs.case_common import (
+    CaseLifecycleState,
     attach_pending_result_metadata,
     prepare_daemon_session,
     rejit_program_result,
@@ -30,7 +31,7 @@ from runner.libs.case_common import (
 )
 from runner.libs.daemon_session import DaemonSession
 from runner.libs.metrics import sample_bpf_stats
-from runner.libs.rejit import benchmark_rejit_enabled_passes
+from runner.libs.rejit import benchmark_rejit_enabled_passes, collect_effective_enabled_passes
 from runner.libs.run_artifacts import (
     ArtifactSession,
     current_process_identity,
@@ -666,11 +667,34 @@ def _run_app(
             lifecycle.artifacts["programs"] = selected_programs
         return None
 
+    def build_state(runner: AppRunner, started_prog_ids: list[int]) -> CaseLifecycleState:
+        prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
+        if not prog_ids:
+            raise RuntimeError(f"{app.name}: runner did not return any live prog_ids")
+        programs = [dict(program) for program in runner.programs]
+        if not programs:
+            raise RuntimeError(f"{app.name}: runner did not expose any live programs")
+        return CaseLifecycleState(
+            runtime=runner,
+            target_prog_ids=list(prog_ids),
+            apply_prog_ids=list(prog_ids),
+            artifacts={
+                "runner_artifacts": dict(runner.artifacts),
+                "programs": programs,
+                "command_used": [str(item) for item in runner.command_used],
+                "rejit_policy_context": {
+                    "repo": str(app.name).strip(),
+                    "category": str(app.runner).strip(),
+                    "level": "corpus",
+                },
+            },
+        )
+
     with enable_bpf_stats():
         lifecycle_result = run_app_runner_lifecycle(
             daemon_session=daemon_session,
             runner=runner,
-            enabled_passes=benchmark_rejit_enabled_passes(),
+            build_state=build_state,
             measure=lambda lifecycle, _phase_name: {
                 "measurement": _measure_runner_phase(
                     lifecycle.runtime,
@@ -898,6 +922,10 @@ def build_run_metadata(
     resolved_samples: int,
     resolved_workload_seconds: float,
 ) -> dict[str, object]:
+    requested_rejit_passes = benchmark_rejit_enabled_passes()
+    selected_rejit_passes = collect_effective_enabled_passes(payload)
+    if not selected_rejit_passes:
+        selected_rejit_passes = list(requested_rejit_passes)
     metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite": "corpus",
@@ -906,11 +934,13 @@ def build_run_metadata(
         "samples": int(resolved_samples),
         "workload_seconds": float(resolved_workload_seconds),
         "kinsn_enabled": not bool(args.no_kinsn),
-        "selected_rejit_passes": benchmark_rejit_enabled_passes(),
+        "selected_rejit_passes": selected_rejit_passes,
         "output_hint_json": repo_relative_path(output_json),
         "output_hint_md": repo_relative_path(output_md),
         "optimization_summary": payload.get("summary") if isinstance(payload, Mapping) else {},
     }
+    if selected_rejit_passes != requested_rejit_passes:
+        metadata["requested_rejit_passes"] = list(requested_rejit_passes)
     metadata.update(current_process_identity())
     return metadata
 

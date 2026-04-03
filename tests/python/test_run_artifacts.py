@@ -7,6 +7,7 @@ from pathlib import Path
 from runner.libs.run_artifacts import (
     ARTIFACT_KIND,
     ARTIFACT_VERSION,
+    ArtifactSession,
     artifact_timestamp,
     clear_previous_run_artifacts,
     create_run_artifact_dir,
@@ -87,6 +88,40 @@ def test_write_run_artifact_can_explicitly_replace_previous_managed_runs(tmp_pat
     assert not first_dir.exists()
     assert preserved_dir.exists()
     assert second_dir.is_dir()
+
+
+def test_artifact_session_preserves_previous_details_until_completion(tmp_path: Path) -> None:
+    output_path = tmp_path / "results" / "vm_micro.json"
+    first_dir = write_run_artifact(
+        results_dir=output_path.parent,
+        run_type="vm_micro",
+        metadata={
+            "generated_at": "2026-03-23T10:11:12+00:00",
+            "status": "completed",
+            "started_at": "2026-03-23T10:11:12+00:00",
+            "last_updated_at": "2026-03-23T10:11:30+00:00",
+        },
+        detail_payloads={"result.json": {"ok": True}},
+    )
+
+    session = ArtifactSession(
+        output_path=output_path,
+        run_type="vm_micro",
+        generated_at="2026-03-23T10:11:13+00:00",
+        metadata_builder=lambda status, started_at, updated_at, error_message: {
+            "generated_at": started_at,
+            "status": status,
+            "started_at": started_at,
+            "last_updated_at": updated_at,
+            "error_message": error_message,
+        },
+    )
+
+    session.write(status="running", progress_payload={"status": "running"})
+    assert (first_dir / "details" / "result.json").is_file()
+
+    session.write(status="completed", result_payload={"ok": False})
+    assert not (first_dir / "details").exists()
 
 
 def test_create_run_artifact_dir_can_skip_clear_existing(tmp_path: Path) -> None:

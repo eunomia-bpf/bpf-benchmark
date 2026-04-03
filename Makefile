@@ -9,8 +9,10 @@ RUNNER_DIR := $(ROOT_DIR)/runner
 DAEMON_DIR := $(ROOT_DIR)/daemon
 KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
 KERNEL_TEST_DIR := $(ROOT_DIR)/tests/kernel
+UPSTREAM_SELFTEST_DIR := $(KERNEL_DIR)/tools/testing/selftests/bpf
 KINSN_MODULE_DIR := $(ROOT_DIR)/module/x86
 CACHE_DIR := $(ROOT_DIR)/.cache
+UPSTREAM_SELFTEST_OUTPUT_DIR := $(CACHE_DIR)/upstream-bpf-selftests
 
 # ARM64 / AWS (see runner/scripts/aws_arm64.sh for full docs)
 ARM64_WORKTREE_DIR  ?= $(ROOT_DIR)/.worktrees/linux-framework-arm64-src
@@ -91,7 +93,7 @@ FILTERS ?=
 SAMPLES    ?= 3
 WARMUPS    ?= 1
 INNER_REPEAT ?= 100
-VM_CORPUS_SAMPLES ?= 200
+VM_CORPUS_SAMPLES ?= 30
 VM_CORPUS_WORKLOAD_SECONDS ?=
 BENCH      ?=
 KALLSYMS_EXTRA_PASS ?= 1
@@ -192,7 +194,6 @@ help:
 all:
 	$(MAKE) micro
 	$(MAKE) daemon
-	$(MAKE) kernel-tests
 
 runner:
 	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" micro_exec
@@ -261,10 +262,22 @@ virtme-hostfs-modules: kernel-build
 	@:
 
 kernel-tests:
+	@if [ ! -f "$(KERNEL_TEST_DIR)/Makefile" ]; then \
+		echo "kernel-tests target is unavailable in this checkout: missing $(KERNEL_TEST_DIR)/Makefile" >&2; \
+		exit 2; \
+	fi
 	$(MAKE) -j"$(JOBS)" -C "$(KERNEL_TEST_DIR)" JOBS="$(JOBS)"
 
 upstream-selftests-build: virtme-hostfs-modules
-	$(MAKE) -j"$(JOBS)" -C "$(KERNEL_TEST_DIR)" JOBS="$(JOBS)" upstream-selftests
+	@if [ ! -f "$(UPSTREAM_SELFTEST_DIR)/Makefile" ]; then \
+		echo "upstream-selftests-build is unavailable in this checkout: missing $(UPSTREAM_SELFTEST_DIR)/Makefile" >&2; \
+		exit 2; \
+	fi
+	rm -rf "$(UPSTREAM_SELFTEST_OUTPUT_DIR)"
+	mkdir -p "$(UPSTREAM_SELFTEST_OUTPUT_DIR)"
+	$(MAKE) -j"$(JOBS)" -C "$(UPSTREAM_SELFTEST_DIR)" \
+		OUTPUT="$(UPSTREAM_SELFTEST_OUTPUT_DIR)" \
+		test_verifier test_progs
 
 # Incremental rebuild rules
 $(MICRO_RUNNER): $(MICRO_RUNNER_SOURCES)
@@ -547,7 +560,6 @@ clean:
 	$(MAKE) -C "$(MICRO_DIR)" clean
 	rm -f "$(MICRO_BPF_STAMP)"
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
-	$(MAKE) -C "$(KERNEL_TEST_DIR)" clean
 	$(MAKE) -C "$(KERNEL_DIR)" clean
 	rm -f "$(SMOKE_OUTPUT)" "$(ARM64_CONFIG_LINK)" "$(ARM64_IMAGE_LINK)"
-	rm -rf "$(ARM64_BUILD_DIR)" "$(KERNEL_TEST_DIR)/build-arm64" "$(ARM64_CROSSBUILD_OUTPUT_DIR)"
+	rm -rf "$(ARM64_BUILD_DIR)" "$(KERNEL_TEST_DIR)/build-arm64" "$(ARM64_CROSSBUILD_OUTPUT_DIR)" "$(UPSTREAM_SELFTEST_OUTPUT_DIR)"

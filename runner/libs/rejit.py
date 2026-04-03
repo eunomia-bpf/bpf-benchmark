@@ -117,7 +117,49 @@ def load_benchmark_config(profile: str | None = None) -> dict[str, Any]:
 def _normalize_pass_list(raw: Any) -> list[str]:
     if not isinstance(raw, list):
         return []
-    return [str(value).strip() for value in raw if str(value).strip()]
+    return _ordered_unique_passes(str(value).strip() for value in raw if str(value).strip())
+
+
+def _ordered_unique_passes(raw: Sequence[str] | Sequence[object]) -> list[str]:
+    ordered: list[str] = []
+    seen: set[str] = set()
+    for value in raw:
+        name = str(value).strip()
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        ordered.append(name)
+    return ordered
+
+
+def collect_effective_enabled_passes(payload: object) -> list[str]:
+    ordered: list[str] = []
+    seen: set[str] = set()
+
+    def add_pass(pass_name: object) -> None:
+        name = str(pass_name).strip()
+        if not name or name in seen:
+            return
+        seen.add(name)
+        ordered.append(name)
+
+    def visit(node: object) -> None:
+        if isinstance(node, Mapping):
+            effective_by_program = node.get("effective_enabled_passes_by_program")
+            if isinstance(effective_by_program, Mapping):
+                for raw_passes in effective_by_program.values():
+                    if isinstance(raw_passes, Sequence) and not isinstance(raw_passes, (str, bytes, bytearray)):
+                        for pass_name in raw_passes:
+                            add_pass(pass_name)
+            for value in node.values():
+                visit(value)
+            return
+        if isinstance(node, Sequence) and not isinstance(node, (str, bytes, bytearray)):
+            for item in node:
+                visit(item)
+
+    visit(payload)
+    return ordered
 
 
 def _policy_pass_list(raw: Any, *, field_name: str) -> list[str] | None:
@@ -156,6 +198,8 @@ def _site_count_for_pass(site_counts: Mapping[str, Any] | None, pass_name: str) 
     if field_name:
         candidates.append(field_name)
     for key in candidates:
+        if key not in site_counts:
+            continue
         try:
             return max(0, int(site_counts.get(key, 0) or 0))
         except (TypeError, ValueError):
@@ -209,25 +253,25 @@ def benchmark_config_enabled_passes(benchmark_config: Mapping[str, Any] | None) 
         field_name="policy.default.passes",
     )
     if policy_default_passes is not None:
-        return policy_default_passes
+        return _ordered_unique_passes(policy_default_passes)
 
     passes_config = _mapping_dict((benchmark_config or {}).get("passes"), field_name="passes")
 
     active_list = _normalize_pass_list(passes_config.get("active_list"))
     if active_list:
-        return active_list
+        return _ordered_unique_passes(active_list)
 
     active_name = str(passes_config.get("active") or "").strip()
     if active_name:
         named_list = _normalize_pass_list(passes_config.get(active_name))
         if named_list:
-            return named_list
+            return _ordered_unique_passes(named_list)
 
     performance_list = _normalize_pass_list(passes_config.get("performance"))
     if performance_list:
-        return performance_list
+        return _ordered_unique_passes(performance_list)
 
-    return list(_DEFAULT_REJIT_ENABLED_PASSES)
+    return _ordered_unique_passes(_DEFAULT_REJIT_ENABLED_PASSES)
 
 
 def benchmark_policy_required_site_passes(
@@ -255,6 +299,42 @@ def benchmark_policy_required_site_passes(
             seen.add(pass_name)
             required.append(pass_name)
     return required
+
+
+def benchmark_policy_candidate_passes(
+    benchmark_config: Mapping[str, Any] | None,
+) -> list[str]:
+    policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
+    raw_rules = policy_config.get("rules")
+    if raw_rules is None:
+        raw_rules = []
+    if not isinstance(raw_rules, list):
+        raise SystemExit("invalid benchmark config field: policy.rules must be a sequence")
+
+    candidates = benchmark_config_enabled_passes(benchmark_config)
+    candidates.extend(benchmark_policy_required_site_passes(benchmark_config))
+    for index, raw_rule in enumerate(raw_rules, start=1):
+        if not isinstance(raw_rule, Mapping):
+            raise SystemExit(f"invalid benchmark config field: policy.rules[{index}] must be a mapping")
+        candidates.extend(
+            _policy_pass_list(
+                raw_rule.get("passes"),
+                field_name=f"policy.rules[{index}].passes",
+            ) or []
+        )
+        candidates.extend(
+            _policy_pass_list(
+                raw_rule.get("enable"),
+                field_name=f"policy.rules[{index}].enable",
+            ) or []
+        )
+    return _ordered_unique_passes(candidates)
+
+
+def benchmark_scan_enabled_passes(
+    benchmark_config: Mapping[str, Any] | None,
+) -> list[str]:
+    return benchmark_policy_candidate_passes(benchmark_config)
 
 
 def resolve_program_enabled_passes(
@@ -317,7 +397,7 @@ def resolve_program_enabled_passes(
         if disabled:
             active_passes = [pass_name for pass_name in active_passes if pass_name not in disabled]
 
-    return active_passes
+    return _ordered_unique_passes(active_passes)
 
 
 def _benchmark_int(
@@ -455,6 +535,7 @@ def scan_programs(
     daemon: Path | str,
     *,
     prog_fds: dict[int, int] | None = None,
+    enabled_passes: Sequence[str] | None = None,
     timeout_seconds: int = 60,
     daemon_socket_path: Path | None = None,
     daemon_proc: subprocess.Popen[str] | None = None,
@@ -481,6 +562,7 @@ def scan_programs(
     return _scan_programs_via_socket(
         requested_ids,
         daemon_socket_path,
+        enabled_passes=enabled_passes,
         daemon_proc=daemon_proc,
         stdout_path=daemon_stdout_path,
         stderr_path=daemon_stderr_path,
@@ -492,6 +574,7 @@ def _scan_programs_via_socket(
     requested_ids: list[int],
     socket_path: Path,
     *,
+    enabled_passes: Sequence[str] | None = None,
     daemon_proc: subprocess.Popen[str] | None = None,
     stdout_path: Path | None = None,
     stderr_path: Path | None = None,
@@ -502,7 +585,7 @@ def _scan_programs_via_socket(
         response = _optimize_request(
             socket_path,
             prog_id,
-            enabled_passes=None,
+            enabled_passes=enabled_passes,
             dry_run=True,
             daemon_proc=daemon_proc,
             stdout_path=stdout_path,
@@ -982,10 +1065,13 @@ __all__ = [
     "apply_daemon_rejit",
     "benchmark_config_enabled_passes",
     "benchmark_config_iterations",
+    "benchmark_policy_candidate_passes",
     "benchmark_policy_required_site_passes",
     "benchmark_config_repeat",
+    "benchmark_scan_enabled_passes",
     "benchmark_config_warmups",
     "benchmark_rejit_enabled_passes",
+    "collect_effective_enabled_passes",
     "load_benchmark_config",
     "resolve_program_enabled_passes",
     "scan_programs",

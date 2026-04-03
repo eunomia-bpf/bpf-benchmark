@@ -22,7 +22,6 @@ from runner.libs import (  # noqa: E402
 from runner.libs.app_runners.base import AppRunner  # noqa: E402
 from runner.libs.app_runners.scx import ScxRunner, preferred_path, read_scx_ops, read_scx_state  # noqa: E402
 from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage, start_sampler_thread  # noqa: E402
-from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
@@ -382,6 +381,10 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
             target_prog_ids=[int(program["id"]) for program in runner.programs],
             artifacts={
                 "scheduler_programs": runner.programs,
+                "rejit_policy_context": {
+                    "repo": "scx",
+                    "level": "e2e",
+                },
             },
         )
 
@@ -408,7 +411,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         workload=workload,
         stop=stop,
         cleanup=cleanup,
-        enabled_passes=benchmark_rejit_enabled_passes(),
         should_run_post_rejit=lambda result: int(
             (((result.get("counts") or {}).get("applied_sites", 0)) or 0)
         ) > 0,

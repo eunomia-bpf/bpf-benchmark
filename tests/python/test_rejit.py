@@ -108,10 +108,36 @@ def test_benchmark_rejit_enabled_passes_respects_explicit_empty_env(monkeypatch)
 def test_benchmark_rejit_enabled_passes_uses_default_when_env_missing(monkeypatch) -> None:
     monkeypatch.delenv("BPFREJIT_BENCH_PASSES", raising=False)
 
-    assert rejit.benchmark_rejit_enabled_passes() == [
-        "wide_mem", "rotate", "cond_select", "extract", "endian_fusion",
-        "map_inline", "const_prop", "dce",
-        "bounds_check_merge", "skb_load_bytes_spec", "bulk_memory",
+    assert rejit.benchmark_rejit_enabled_passes() == ["map_inline", "const_prop", "dce"]
+
+
+def test_collect_effective_enabled_passes_scans_nested_payloads() -> None:
+    payload = {
+        "results": [
+            {
+                "rejit_apply": {
+                    "effective_enabled_passes_by_program": {
+                        "101": ["map_inline", "const_prop"],
+                        "102": ["map_inline"],
+                    }
+                }
+            },
+            {
+                "rejit": {
+                    "rejit_result": {
+                        "effective_enabled_passes_by_program": {
+                            "103": ["dce", "const_prop"],
+                        }
+                    }
+                }
+            },
+        ]
+    }
+
+    assert rejit.collect_effective_enabled_passes(payload) == [
+        "map_inline",
+        "const_prop",
+        "dce",
     ]
 
 
@@ -144,6 +170,33 @@ def test_benchmark_policy_required_site_passes_collects_unique_values() -> None:
     assert rejit.benchmark_policy_required_site_passes(config) == [
         "map_inline",
         "const_prop",
+        "wide_mem",
+    ]
+
+
+def test_benchmark_scan_enabled_passes_includes_policy_candidates() -> None:
+    config = {
+        "policy": {
+            "default": {
+                "passes": ["const_prop", "dce"],
+            },
+            "rules": [
+                {
+                    "match": {"prog_type": "xdp"},
+                    "enable": ["wide_mem"],
+                },
+                {
+                    "match": {"has_sites": ["map_inline"]},
+                    "passes": ["map_inline", "const_prop"],
+                },
+            ],
+        },
+    }
+
+    assert rejit.benchmark_scan_enabled_passes(config) == [
+        "const_prop",
+        "dce",
+        "map_inline",
         "wide_mem",
     ]
 
@@ -305,6 +358,7 @@ def test_scan_programs_uses_supplied_daemon_socket_without_restart(monkeypatch) 
     result = rejit.scan_programs(
         [123],
         Path("/tmp/fake-daemon"),
+        enabled_passes=["map_inline"],
         daemon_socket_path=Path("/tmp/existing.sock"),
         daemon_proc=daemon_proc,
         daemon_stdout_path=Path("/tmp/daemon.stdout.log"),
@@ -320,7 +374,7 @@ def test_scan_programs_uses_supplied_daemon_socket_without_restart(monkeypatch) 
             (
                 Path("/tmp/existing.sock"),
                 123,
-                None,
+                ["map_inline"],
                 True,
                 {
                     "daemon_proc": daemon_proc,

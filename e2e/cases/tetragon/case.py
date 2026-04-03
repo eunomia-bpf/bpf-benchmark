@@ -40,7 +40,6 @@ from runner.libs.metrics import (  # noqa: E402
     sample_total_cpu_usage,
     start_sampler_thread,
 )
-from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
@@ -676,6 +675,10 @@ def daemon_payload(
                 "tetragon_programs": runner.programs,
                 "selected_tetragon_programs": selected_programs,
                 "apply_tetragon_programs": apply_programs,
+                "rejit_policy_context": {
+                    "repo": "tetragon",
+                    "level": "e2e",
+                },
             },
         )
 
@@ -776,7 +779,6 @@ def daemon_payload(
         cleanup=cleanup,
         before_baseline=before_baseline,
         before_rejit=before_rejit,
-        enabled_passes=benchmark_rejit_enabled_passes(),
     )
     if lifecycle_result.abort is not None:
         return error_payload(

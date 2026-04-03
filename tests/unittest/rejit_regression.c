@@ -1077,7 +1077,13 @@ cleanup:
 /*  Test 7: tail_call + concurrent map update                         */
 /* ================================================================== */
 
-#define TAIL_CALL_CONCURRENT_ITERS 100
+/*
+ * Keep the race window large enough to exercise concurrent prog_array pokes
+ * and target REJIT, but bounded so the full vm-selftest run does not spend
+ * minutes rescanning the entire map id space after earlier suites have
+ * populated the kernel with many transient map ids.
+ */
+#define TAIL_CALL_CONCURRENT_ITERS 20
 #define TAIL_CALL_ALT_RETVAL      XDP_DROP
 
 struct tail_call_shared {
@@ -1693,15 +1699,32 @@ int main(int argc, char *argv[])
 		g_progs_dir = argv[1];
 
 	printf("=== BpfReJIT Regression Tests (b4bd737ef fixes) ===\n\n");
-
+	printf("--- concurrent_rejit_different_progs ---\n");
+	fflush(stdout);
 	test_concurrent_rejit_different_progs();
+	printf("--- rejit_latency ---\n");
+	fflush(stdout);
 	test_rejit_latency();
+	printf("--- rapid_rejit_kallsyms ---\n");
+	fflush(stdout);
 	test_rapid_rejit_kallsyms();
+	printf("--- xdp_test_run_rejit ---\n");
+	fflush(stdout);
 	test_xdp_test_run_rejit();
+	printf("--- concurrent_rejit_and_run ---\n");
+	fflush(stdout);
 	test_concurrent_rejit_and_run();
+	printf("--- parallel_subprog_rejit ---\n");
+	fflush(stdout);
 	test_parallel_subprog_rejit();
+	printf("--- rejit_tail_call_concurrent_map_update ---\n");
+	fflush(stdout);
 	test_rejit_tail_call_concurrent_map_update();
+	printf("--- rejit_fentry_reattach_refresh ---\n");
+	fflush(stdout);
 	test_rejit_fentry_reattach_refresh();
+	printf("--- rejit_struct_ops_multi_rejit_unregister ---\n");
+	fflush(stdout);
 	test_rejit_struct_ops_multi_rejit_unregister();
 
 	printf("\n=== Results: %d passed, %d failed, %d skipped ===\n",

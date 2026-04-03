@@ -24,8 +24,31 @@ class _GoodRunner(AppRunner):
     def run_workload(self, seconds: float) -> WorkloadResult:
         return WorkloadResult(ops_total=0.0, ops_per_sec=0.0, duration_s=float(seconds), stdout="", stderr="")
 
+    def run_workload_spec(self, workload_spec, seconds: float) -> WorkloadResult:
+        del workload_spec
+        return self.run_workload(seconds)
+
     def stop(self) -> None:
         return None
+
+    def select_corpus_program_ids(self, initial_stats, final_stats) -> list[int] | None:
+        del initial_stats, final_stats
+        return None
+
+    def corpus_measurement_mode(self) -> str:
+        return "app"
+
+    @property
+    def pid(self) -> int | None:
+        return None
+
+    @property
+    def program_fds(self) -> dict[int, int]:
+        return {}
+
+    @property
+    def last_workload_details(self) -> dict[str, object]:
+        return {}
 
 
 class _BadRunner:

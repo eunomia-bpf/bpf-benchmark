@@ -1,0 +1,218 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "benchmarks": [
+    {
+      "category": "baseline",
+      "description": "Return-only baseline",
+      "expected_result": 12345678,
+      "family": "baseline",
+      "hypothesis": "Captures the staged harness floor for baseline subtraction",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/simple.mem",
+      "io_mode": "staged",
+      "level": "tiny",
+      "name": "simple",
+      "runs": [
+        {
+          "baseline_adjustment": {
+            "applied": true,
+            "baseline_benchmark": "simple",
+            "baseline_exec_ns": 160.0,
+            "baseline_io_mode": "staged",
+            "median_minus_baseline_ns": 0.0,
+            "median_over_baseline_ratio": 1.0
+          },
+          "compile_ns": {
+            "count": 1,
+            "max": 4822593,
+            "mean": 4822593,
+            "median": 4822593,
+            "min": 4822593,
+            "p95": 4822593,
+            "stdev": 0
+          },
+          "derived_metrics": {},
+          "exec_ns": {
+            "count": 1,
+            "max": 160,
+            "mean": 160,
+            "median": 160,
+            "min": 160,
+            "p95": 160,
+            "stdev": 0
+          },
+          "inner_repeat": 10,
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "optimization_summary": {
+            "daemon_debug_entries": 0,
+            "final_disabled_passes": {},
+            "passes_applied": {},
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected_samples": 0,
+            "errors": {},
+            "hardware_counters_observed": false,
+            "include_kernel": null,
+            "requested": false,
+            "scope": "full_repeat_raw",
+            "software_counters_observed": false
+          },
+          "phases_ns": {
+            "input_stage_ns": {
+              "count": 1,
+              "max": 440,
+              "mean": 440,
+              "median": 440,
+              "min": 440,
+              "p95": 440,
+              "stdev": 0
+            },
+            "jit_compile_ns": {
+              "count": 1,
+              "max": 4822593,
+              "mean": 4822593,
+              "median": 4822593,
+              "min": 4822593,
+              "p95": 4822593,
+              "stdev": 0
+            },
+            "memory_prepare_ns": {
+              "count": 1,
+              "max": 33593,
+              "mean": 33593,
+              "median": 33593,
+              "min": 33593,
+              "p95": 33593,
+              "stdev": 0
+            },
+            "program_image_ns": {
+              "count": 1,
+              "max": 98511,
+              "mean": 98511,
+              "median": 98511,
+              "min": 98511,
+              "p95": 98511,
+              "stdev": 0
+            },
+            "vm_load_code_ns": {
+              "count": 1,
+              "max": 1378,
+              "mean": 1378,
+              "median": 1378,
+              "min": 1378,
+              "p95": 1378,
+              "stdev": 0
+            }
+          },
+          "result_distribution": {
+            "12345678": 1
+          },
+          "runtime": "llvmbpf",
+          "sample_count": 1,
+          "timing_source": "rdtsc",
+          "wall_exec_ns": {
+            "count": 1,
+            "max": 2293,
+            "mean": 2293,
+            "median": 2293,
+            "min": 2293,
+            "p95": 2293,
+            "stdev": 0
+          }
+        }
+      ],
+      "tags": [
+        "baseline",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build/micro_exec"
+  },
+  "completed_at": "2026-04-03T01:06:20.341129+00:00",
+  "defaults": {
+    "inner_repeat": 10,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "generated_at": "2026-04-03T01:06:19.868746+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "powersave",
+    "git_sha": "e6f043c1f620a4171a16f48663a9a8ab86854744",
+    "hostname": "lab",
+    "kernel_cmdline": "BOOT_IMAGE=/boot/vmlinuz-6.15.11-061511-generic root=UUID=85355174-a2ad-4e84-bf78-53fac30b89fb ro panic=10 splash quiet iommu=pt vt.handoff=7",
+    "kernel_version": "6.15.11-061511-generic",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "0"
+  },
+  "last_updated_at": "2026-04-03T01:06:20.341129+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "optimization_summary": {
+    "benchmark_count": 1,
+    "correctness_mismatch_count": 0,
+    "correctness_mismatches": [],
+    "daemon_debug_entries": 0,
+    "final_disabled_passes": {},
+    "passes_applied": {},
+    "runtime_names": [
+      "llvmbpf"
+    ],
+    "total_sites_applied": 0,
+    "total_verifier_retries": 0
+  },
+  "output_hint": "micro/results/smoke.json",
+  "progress": {
+    "completed_benchmarks": 1,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 1
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "bare-metal",
+    "kernel_commit": "0725c44fd23ded1c023547d563042b55d38713b7",
+    "params": {
+      "inner_repeat": 10,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": true,
+    "repo_git_sha": "e6f043c1f620a4171a16f48663a9a8ab86854744",
+    "timestamp": "2026-04-03T01:06:20.174023+00:00"
+  },
+  "run_type": "smoke",
+  "sample_runtime_orders": {
+    "simple": [
+      [
+        "llvmbpf"
+      ]
+    ]
+  },
+  "started_at": "2026-04-03T01:06:19.868746+00:00",
+  "status": "completed",
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "bpftool": {
+      "root": "vendor/bpftool"
+    },
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}

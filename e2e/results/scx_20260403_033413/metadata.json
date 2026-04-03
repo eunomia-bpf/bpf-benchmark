@@ -1,0 +1,30 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "scx",
+  "details_dir": "details",
+  "generated_at": "2026-04-03T03:34:16.753404+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-03T03:34:16.753371+00:00",
+  "launcher_boot_id": "8aa7aad0-49d7-4407-b176-eb2b86f7cfa5",
+  "launcher_pid": 200,
+  "launcher_start_ticks": 198,
+  "optimization_summary": {
+    "case": "scx",
+    "kinsn_enabled": true,
+    "smoke": false,
+    "status": "running"
+  },
+  "output_hint_json": "e2e/results/scx_authoritative_20260403.json",
+  "output_hint_md": "e2e/results/scx-e2e.md",
+  "run_type": "scx",
+  "selected_rejit_passes": [
+    "map_inline",
+    "const_prop",
+    "dce"
+  ],
+  "smoke": false,
+  "started_at": "2026-04-03T03:34:13.440189+00:00",
+  "status": "running",
+  "suite": "e2e"
+}

@@ -771,6 +771,7 @@ benchmarks:
     level: medium
     hypothesis: Reuses the staged popcount kernel under a sched_cls hook to validate non-XDP packet execution
     base_name: tc_bitcount
+    program_name: tc_bitcount_prog
     io_mode: staged
     kernel_input_size: 2056
     input_generator: bitcount
@@ -784,6 +785,7 @@ benchmarks:
     level: medium
     hypothesis: Reuses the checksum reduction under a sched_cls hook with packet-fed staged input and skb-context result extraction
     base_name: tc_checksum
+    program_name: tc_checksum_prog
     io_mode: staged
     kernel_input_size: 1032
     input_generator: checksum
@@ -799,6 +801,7 @@ benchmarks:
     level: short
     hypothesis: Exercises a non-XDP cgroup_skb hook with packet-fed staged input and skb-context result extraction
     base_name: cgroup_hash_chain
+    program_name: cgroup_hash_chain_prog
     io_mode: staged
     kernel_input_size: 72
     input_generator: hash_chain

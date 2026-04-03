@@ -73,12 +73,14 @@ class DaemonSession:
         prog_ids: Sequence[int],
         *,
         prog_fds: dict[int, int] | None = None,
+        enabled_passes: Sequence[str] | None = None,
         timeout_seconds: int = 60,
     ) -> dict[int, dict[str, object]]:
         return scan_live_programs(
             [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0],
             self.daemon_binary,
             prog_fds=prog_fds,
+            enabled_passes=enabled_passes,
             timeout_seconds=timeout_seconds,
             daemon_socket_path=self.socket_path,
             daemon_proc=self.proc,

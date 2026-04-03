@@ -1,4 +1,5 @@
 {
+  "aborted_at": "2026-04-03T00:22:53.628636+00:00",
   "artifact_kind": "result_run",
   "artifact_version": 1,
   "benchmarks": [
@@ -4251,6 +4252,7 @@
     "warmups": 1
   },
   "details_dir": "details",
+  "error_message": "previous benchmark artifact is still marked running but is missing launcher identity metadata; treating it as stale before starting a new session",
   "generated_at": "2026-03-23T19:34:06.473300+00:00",
   "host": {
     "cpu_affinity": null,
@@ -4453,7 +4455,7 @@
       ]
     ]
   },
-  "last_updated_at": "2026-03-23T19:40:02.908997+00:00",
+  "last_updated_at": "2026-04-03T00:22:53.628636+00:00",
   "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
   "output_hint": "micro/results/vm_micro.json",
   "paper_summary": {
@@ -4498,7 +4500,7 @@
   },
   "run_type": "vm_micro",
   "started_at": "2026-03-23T19:34:06.473300+00:00",
-  "status": "running",
+  "status": "aborted",
   "suite": "micro_staged_codegen",
   "toolchains": {
     "bpftool": {

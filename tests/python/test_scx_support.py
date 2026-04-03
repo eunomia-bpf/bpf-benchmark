@@ -35,6 +35,12 @@ def test_scx_scheduler_session_uses_fail_fast_shell_wrapper(monkeypatch) -> None
         "_discover_programs",
         lambda self: [{"id": 101, "type": "struct_ops"}],
     )
+    monkeypatch.setattr(
+        scx_support.ScxSchedulerSession,
+        "_dup_program_fds",
+        lambda self, programs: {101: 55},
+    )
+    monkeypatch.setattr(scx_support.os, "close", lambda fd: None)
     monkeypatch.setattr(scx_support, "stop_agent", lambda proc, timeout=8: 0)
 
     session = scx_support.ScxSchedulerSession(Path("/tmp/scx_rusty"), ["--slice", "2"], 15)

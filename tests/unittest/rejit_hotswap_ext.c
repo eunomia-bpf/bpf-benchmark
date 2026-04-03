@@ -23,6 +23,7 @@
 static const char *g_progs_dir = "tests/unittest/build/progs";
 static int g_pass;
 static int g_fail;
+static int g_skip;
 
 struct ext_instance {
 	struct bpf_object *obj;
@@ -38,6 +39,11 @@ struct ext_instance {
 #define TEST_FAIL(name, reason) do { \
 	fprintf(stderr, "  FAIL  %s: %s\n", name, reason); \
 	g_fail++; \
+} while (0)
+
+#define TEST_SKIP(name, reason) do { \
+	fprintf(stderr, "  SKIP  %s: %s\n", name, reason); \
+	g_skip++; \
 } while (0)
 
 static void destroy_ext_instance(struct ext_instance *ext)
@@ -201,6 +207,7 @@ static int rejit_ext_return_value(int ext_fd, const struct bpf_insn *orig_insns,
 		fprintf(stderr, "    verifier log:\n%s\n", log_buf);
 		snprintf(reason, reason_sz,
 			 "kernel does not support live REJIT of attached EXT programs");
+		errno = EOPNOTSUPP;
 		goto out;
 	}
 
@@ -288,6 +295,11 @@ static int test_rejit_hotswap_ext(void)
 					   expected, log_buf,
 					   sizeof(log_buf),
 					   reason, sizeof(reason)) < 0) {
+			if (errno == EOPNOTSUPP) {
+				TEST_SKIP(name, reason);
+				ret = 0;
+				goto out;
+			}
 			TEST_FAIL(name, reason);
 			goto out;
 		}
@@ -319,6 +331,6 @@ int main(int argc, char **argv)
 	if (test_rejit_hotswap_ext())
 		return 1;
 
-	printf("\nSummary: pass=%d fail=%d\n", g_pass, g_fail);
+	printf("\nSummary: pass=%d fail=%d skip=%d\n", g_pass, g_fail, g_skip);
 	return g_fail ? 1 : 0;
 }

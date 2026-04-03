@@ -72,13 +72,20 @@ class ArtifactSession:
         if detail_payloads:
             merged_details.update(detail_payloads)
 
-        return update_run_artifact(
+        artifact_path = update_run_artifact(
             run_dir=self.run_dir,
             run_type=self.run_type,
             metadata=metadata,
             detail_payloads=merged_details or None,
             detail_texts=detail_texts,
         )
+        if str(status).startswith("completed"):
+            _prune_previous_run_details(
+                results_dir=result_root_for_output(self.output_path),
+                run_type=self.run_type,
+                preserve_run_dir=self.run_dir,
+            )
+        return artifact_path
 
 
 def sanitize_artifact_token(value: str) -> str:
@@ -385,6 +392,13 @@ def write_run_artifact(
         detail_payloads=detail_payloads,
         detail_texts=detail_texts,
     )
+    status = str(metadata.get("status") or "").strip().lower()
+    if not status or status.startswith("completed"):
+        _prune_previous_run_details(
+            results_dir=results_dir,
+            run_type=run_type,
+            preserve_run_dir=run_dir,
+        )
     return run_dir
 
 
@@ -514,7 +528,11 @@ def _ensure_no_running_artifacts(
     for child in sorted(results_dir.iterdir()):
         if not child.is_dir():
             continue
-        metadata = _managed_run_artifact_metadata(child)
+        try:
+            metadata = _managed_run_artifact_metadata(child)
+        except RuntimeError as exc:
+            _drop_corrupt_run_artifact(child, exc)
+            continue
         if metadata is None:
             continue
         if sanitize_artifact_token(str(metadata.get("run_type", ""))) != run_type_token:
@@ -578,6 +596,35 @@ def _ensure_no_running_artifacts(
             "refusing to start a new benchmark session while prior run artifacts are still marked running: "
             + ", ".join(running_paths)
         )
+
+
+def _prune_previous_run_details(
+    *,
+    results_dir: Path,
+    run_type: str,
+    preserve_run_dir: Path | None = None,
+) -> None:
+    if not results_dir.is_dir():
+        return
+    run_type_token = sanitize_artifact_token(run_type)
+    preserved = preserve_run_dir.resolve() if preserve_run_dir is not None else None
+    for child in sorted(results_dir.iterdir()):
+        if not child.is_dir():
+            continue
+        if preserved is not None and child.resolve() == preserved:
+            continue
+        try:
+            metadata = _managed_run_artifact_metadata(child)
+        except RuntimeError as exc:
+            _drop_corrupt_run_artifact(child, exc)
+            continue
+        if metadata is None:
+            continue
+        if sanitize_artifact_token(str(metadata.get("run_type", ""))) != run_type_token:
+            continue
+        details_dir = child / "details"
+        if details_dir.is_dir():
+            shutil.rmtree(details_dir)
 
 
 def _mark_stale_running_artifact(

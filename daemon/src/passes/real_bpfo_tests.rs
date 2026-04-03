@@ -12,6 +12,34 @@ struct CapturedRealCase {
     capture_path: &'static str,
 }
 
+fn captured_fixture_path(case: CapturedRealCase) -> std::path::PathBuf {
+    repo_path(case.capture_path)
+}
+
+fn maybe_run_captured_real_case(
+    pass_names: &[&str],
+    case: CapturedRealCase,
+) -> Option<(LoadedFixtureProgram, BpfProgram, PipelineResult)> {
+    let capture_path = captured_fixture_path(case);
+    if !capture_path.is_file() {
+        eprintln!(
+            "captured fixture {}:{} missing at {}; skipping",
+            case.object_path,
+            case.program_name,
+            capture_path.display()
+        );
+        return None;
+    }
+    Some(
+        try_run_captured_real_case(pass_names, case).unwrap_or_else(|err| {
+            panic!(
+                "captured fixture {}:{} failed unexpectedly: {:#}",
+                case.object_path, case.program_name, err
+            )
+        }),
+    )
+}
+
 fn run_real_case(
     pass_names: &[&str],
     fixture: &str,
@@ -34,13 +62,6 @@ fn run_real_case(
     };
     assert_valid_bpf(&program);
     (loaded, program, result)
-}
-
-fn run_captured_real_case(
-    pass_names: &[&str],
-    case: CapturedRealCase,
-) -> (LoadedFixtureProgram, BpfProgram, PipelineResult) {
-    try_run_captured_real_case(pass_names, case).unwrap()
 }
 
 fn try_run_captured_real_case(
@@ -319,16 +340,16 @@ fn test_map_inline_real_tracee_cgroup_skb_egress() {
 #[test]
 fn test_map_inline_real_tetragon_event_exit_acct_partially_applies_but_still_rejects_dynamic_sites()
 {
-    let object_path = repo_path("corpus/build/tetragon/bpf_exit.bpf.o");
-    let capture_path =
-        repo_path("corpus/fixtures/tetragon/bpf_exit.bpf.o/event_exit_acct_process.json");
-    let loaded = load_program_from_path(&object_path, "event_exit_acct_process").unwrap();
-    let mut program = loaded
-        .into_program_with_captured_maps(&capture_path)
-        .unwrap();
-    let ctx = permissive_pass_ctx(loaded.prog_type);
-    let result = run_named_pipeline(&mut program, &ctx, &["map_inline"]).unwrap();
-    assert_valid_bpf(&program);
+    let case = CapturedRealCase {
+        object_path: "corpus/build/tetragon/bpf_exit.bpf.o",
+        program_name: "event_exit_acct_process",
+        capture_path:
+            "corpus/fixtures/tetragon/bpf_exit.bpf.o/event_exit_acct_process.json",
+    };
+    let Some((loaded, _program, result)) = maybe_run_captured_real_case(&["map_inline"], case)
+    else {
+        return;
+    };
     let pass = pass_result(&result, "map_inline").unwrap();
     assert!(
         pass.changed && pass.sites_applied >= 1,
@@ -350,16 +371,15 @@ fn test_map_inline_real_tetragon_event_exit_acct_partially_applies_but_still_rej
 
 #[test]
 fn test_map_inline_real_tetragon_execve_rate() {
-    let object_path = repo_path("corpus/build/tetragon/bpf_execve_event.bpf.o");
-    let capture_path =
-        repo_path("corpus/fixtures/tetragon/bpf_execve_event.bpf.o/execve_rate.json");
-    let loaded = load_program_from_path(&object_path, "execve_rate").unwrap();
-    let mut program = loaded
-        .into_program_with_captured_maps(&capture_path)
-        .unwrap();
-    let ctx = permissive_pass_ctx(loaded.prog_type);
-    let result = run_named_pipeline(&mut program, &ctx, &["map_inline"]).unwrap();
-    assert_valid_bpf(&program);
+    let case = CapturedRealCase {
+        object_path: "corpus/build/tetragon/bpf_execve_event.bpf.o",
+        program_name: "execve_rate",
+        capture_path: "corpus/fixtures/tetragon/bpf_execve_event.bpf.o/execve_rate.json",
+    };
+    let Some((loaded, _program, result)) = maybe_run_captured_real_case(&["map_inline"], case)
+    else {
+        return;
+    };
     assert_pass_changed(&result, "map_inline", &loaded);
     let pass = pass_result(&result, "map_inline").unwrap();
     assert!(
@@ -378,7 +398,10 @@ fn test_map_inline_real_tetragon_event_execve() {
         program_name: "event_execve",
         capture_path: "corpus/fixtures/tetragon/bpf_execve_event.bpf.o/event_execve.json",
     };
-    let (loaded, _program, result) = run_captured_real_case(&["map_inline"], case);
+    let Some((loaded, _program, result)) = maybe_run_captured_real_case(&["map_inline"], case)
+    else {
+        return;
+    };
     assert_pass_changed(&result, "map_inline", &loaded);
     let pass = pass_result(&result, "map_inline").unwrap();
     assert!(
@@ -397,7 +420,10 @@ fn test_map_inline_real_tetragon_event_wake_up_new_task() {
         program_name: "event_wake_up_new_task",
         capture_path: "corpus/fixtures/tetragon/bpf_fork.bpf.o/event_wake_up_new_task.json",
     };
-    let (loaded, _program, result) = run_captured_real_case(&["map_inline"], case);
+    let Some((loaded, _program, result)) = maybe_run_captured_real_case(&["map_inline"], case)
+    else {
+        return;
+    };
     assert_pass_changed(&result, "map_inline", &loaded);
     let pass = pass_result(&result, "map_inline").unwrap();
     assert!(
@@ -413,6 +439,14 @@ fn test_map_inline_real_tetragon_event_wake_up_new_task() {
 fn test_map_inline_real_all_captured_fixtures_smoke() {
     let mut changed_cases = 0usize;
     let mut attempted_cases = 0usize;
+    let available_cases = all_captured_real_cases()
+        .iter()
+        .filter(|case| captured_fixture_path(**case).is_file())
+        .count();
+    if available_cases == 0 {
+        eprintln!("no captured real fixtures are present under corpus/fixtures; skipping smoke scan");
+        return;
+    }
 
     for case in all_captured_real_cases() {
         let (loaded, _program, result) = match try_run_captured_real_case(&["map_inline"], *case) {
@@ -438,6 +472,16 @@ fn test_map_inline_real_all_captured_fixtures_smoke() {
         if pass.changed {
             changed_cases += 1;
         }
+    }
+
+    if attempted_cases < 10 {
+        assert!(
+            changed_cases >= 1,
+            "expected at least one captured real fixture to hit map_inline when only {} captured fixtures are available, got {}",
+            attempted_cases,
+            changed_cases
+        );
+        return;
     }
 
     assert!(

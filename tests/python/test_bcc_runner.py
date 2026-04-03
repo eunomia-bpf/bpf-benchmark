@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import sys
 from pathlib import Path
 
@@ -9,9 +10,11 @@ from runner.libs.app_runners import bcc
 
 
 class _FakeProcess:
-    def __init__(self) -> None:
+    def __init__(self, *, stdout_text: str = "", stderr_text: str = "") -> None:
         self.pid = 4321
         self.returncode: int | None = None
+        self.stdout = io.StringIO(stdout_text)
+        self.stderr = io.StringIO(stderr_text)
 
     def poll(self) -> int | None:
         return self.returncode
@@ -110,3 +113,47 @@ def test_bcc_runner_start_fails_when_expected_program_names_are_missing(monkeypa
     else:
         raise AssertionError("runner.start() unexpectedly succeeded")
     assert runner.session is None
+
+
+def test_bcc_tail_capture_keeps_bounded_tail() -> None:
+    capture = bcc._TailCapture(max_lines=2, max_chars=20)
+    capture.append("line-1\n")
+    capture.append("line-2\n")
+    capture.append("line-3\n")
+
+    rendered = capture.render()
+
+    assert "line-1" not in rendered
+    assert "line-2" in rendered
+    assert "line-3" in rendered
+
+
+def test_bcc_runner_stop_captures_process_output(monkeypatch, tmp_path: Path) -> None:
+    process = _FakeProcess(stdout_text="out-1\nout-2\n", stderr_text="err-1\n")
+    monkeypatch.setattr(bcc.subprocess, "Popen", lambda *_args, **_kwargs: process)
+    monkeypatch.setattr(
+        bcc,
+        "wait_for_attached_programs",
+        lambda *_args, **_kwargs: [{"id": 101, "name": "tracepoint__syscalls__sys_enter_execve"}],
+    )
+    monkeypatch.setattr(
+        bcc,
+        "stop_agent",
+        lambda proc, timeout=8: setattr(proc, "returncode", 0) or 0,
+    )
+
+    runner = bcc.BCCRunner(
+        tool_binary=_make_tool(tmp_path),
+        tool_name="execsnoop",
+        expected_programs=1,
+        attach_timeout_s=1,
+    )
+
+    assert runner.start() == [101]
+
+    runner.stop()
+
+    assert runner.process_output["returncode"] == 0
+    assert "out-1" in str(runner.process_output["stdout_tail"])
+    assert "out-2" in str(runner.process_output["stdout_tail"])
+    assert "err-1" in str(runner.process_output["stderr_tail"])

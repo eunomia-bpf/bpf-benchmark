@@ -80,7 +80,7 @@ Results are written to:
 make micro            # micro_exec runner + BPF programs
 make daemon           # bpfrejit-daemon CLI
 make kernel           # bzImage from vendor/linux-framework
-make kernel-tests     # kernel recompile self-tests
+make kernel-tests     # legacy kernel selftest target; unavailable in this checkout without tests/kernel/Makefile
 ```
 
 ## Layer Notes

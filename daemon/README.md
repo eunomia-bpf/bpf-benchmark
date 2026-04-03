@@ -9,31 +9,24 @@ All active CLI usage goes through `serve`.
 ## Build
 
 ```bash
-cd daemon
-cargo build --release
-cargo test
+make daemon
+make daemon-tests
 ```
 
 The binary is produced at `daemon/target/release/bpfrejit-daemon`.
 
 ## Serve Mode
 
-Start the long-running Unix socket server:
+Start the long-running Unix socket server inside the benchmark VM/session:
 
 ```bash
-sudo daemon/target/release/bpfrejit-daemon serve
-sudo daemon/target/release/bpfrejit-daemon serve --socket /tmp/bpfrejit.sock
-sudo daemon/target/release/bpfrejit-daemon --pgo serve --socket /tmp/bpfrejit.sock
+daemon/target/release/bpfrejit-daemon serve
+daemon/target/release/bpfrejit-daemon serve --socket /tmp/bpfrejit.sock
 ```
 
 Flags:
 
 - `--socket PATH`: override the Unix socket path. Default: `/var/run/bpfrejit.sock`
-- `--pgo`: collect runtime profiling before each optimize request
-- `--pgo-interval-ms N`: PGO observation interval, default `500`
-- `--no-rollback`: disable verifier-guided pass rollback
-
-When `--pgo` is enabled, the kernel must have `kernel.bpf_stats_enabled=1`.
 
 ## JSON Protocol
 
@@ -88,24 +81,20 @@ Successful `optimize` responses embed the full structured result from
 {"status":"ok","total":100,"applied":5,"errors":0}
 ```
 
-## Pipeline
+## Pass Selection
 
 The daemon builds a pass pipeline in `daemon/src/passes/` and executes it
 through `PassManager` in `daemon/src/pass.rs`.
 
-The active benchmarked default pipeline is:
+Two defaults matter here:
 
-- `map_inline`
-- `const_prop`
-- `dce`
-- `wide_mem`
-- `rotate`
-- `cond_select`
-- `extract`
-- `endian_fusion`
-- `branch_flip`
+- Daemon request default: if a client omits `enabled_passes`, the daemon falls back to its internal registry order.
+- Benchmark/e2e default: repo runners send explicit pass lists derived from [corpus/config/benchmark_config.yaml](/home/yunwei37/workspace/bpf-benchmark/corpus/config/benchmark_config.yaml). The current default benchmark profile is `map_inline`, `const_prop`, `dce`.
 
-Security-oriented passes are not part of the default benchmark pipeline.
+`branch_flip` stays out of the default benchmark profile. If a caller explicitly
+enables it, the current implementation still requires PMU-friendly profiling
+context and may use a conservative size-asymmetry fallback when per-site branch
+profiles are unavailable.
 
 ## Layout
 

@@ -6,6 +6,7 @@ tracee, tetragon, bpftrace, and scx case files.
 from __future__ import annotations
 
 import copy
+import os
 import platform
 import statistics
 import sys
@@ -43,6 +44,7 @@ _PENDING_KINSN_METADATA: list[dict[str, object]] = []
 DEFAULT_SUITE_QUIESCE_TIMEOUT_S = 20.0
 DEFAULT_SUITE_QUIESCE_STABLE_S = 2.0
 DEFAULT_SUITE_QUIESCE_POLL_S = 0.2
+_BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
 
 
 def reset_pending_result_metadata() -> None:
@@ -267,6 +269,261 @@ def _daemon_exit_error(daemon_session: DaemonSession) -> str | None:
     return f"daemon session exited early (rc={returncode})"
 
 
+def _normalize_enabled_passes(enabled_passes: Sequence[str] | None) -> list[str]:
+    if enabled_passes is None:
+        return []
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for pass_name in enabled_passes:
+        name = str(pass_name).strip()
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        normalized.append(name)
+    return normalized
+
+
+def _program_records_by_id(programs: object) -> dict[int, dict[str, object]]:
+    if not isinstance(programs, Sequence) or isinstance(programs, (str, bytes, bytearray)):
+        return {}
+    records: dict[int, dict[str, object]] = {}
+    for raw_program in programs:
+        if not isinstance(raw_program, Mapping):
+            continue
+        prog_id = int(raw_program.get("id", 0) or 0)
+        if prog_id <= 0:
+            continue
+        records[prog_id] = dict(raw_program)
+    return records
+
+
+def _program_policy_context(
+    *,
+    prog_id: int,
+    program: Mapping[str, object] | None,
+    artifacts: Mapping[str, object],
+) -> dict[str, object]:
+    context: dict[str, object] = {}
+    base_context = artifacts.get("rejit_policy_context")
+    if isinstance(base_context, Mapping):
+        context.update(
+            {
+                str(key): value
+                for key, value in base_context.items()
+                if str(key).strip() and str(value).strip()
+            }
+        )
+
+    per_program_contexts = artifacts.get("rejit_policy_context_by_prog_id")
+    if isinstance(per_program_contexts, Mapping):
+        raw_program_context = per_program_contexts.get(int(prog_id))
+        if raw_program_context is None:
+            raw_program_context = per_program_contexts.get(str(int(prog_id)))
+        if isinstance(raw_program_context, Mapping):
+            context.update(
+                {
+                    str(key): value
+                    for key, value in raw_program_context.items()
+                    if str(key).strip() and str(value).strip()
+                }
+            )
+
+    if isinstance(program, Mapping):
+        object_value = (
+            program.get("object")
+            or program.get("object_basename")
+            or program.get("object_relpath")
+        )
+        program_value = program.get("program") or program.get("prog_name") or program.get("name")
+        section_value = program.get("section") or program.get("section_name")
+        prog_type_value = (
+            program.get("prog_type")
+            or program.get("prog_type_name")
+            or program.get("type")
+        )
+
+        if str(object_value or "").strip() and "object" not in context:
+            context["object"] = str(object_value).strip()
+        if str(program_value or "").strip() and "program" not in context:
+            context["program"] = str(program_value).strip()
+        if str(section_value or "").strip() and "section" not in context:
+            context["section"] = str(section_value).strip()
+        if str(prog_type_value or "").strip() and "prog_type" not in context:
+            context["prog_type"] = str(prog_type_value).strip()
+
+        for key in ("object_relpath", "object_basename", "family", "category", "level", "repo"):
+            value = program.get(key)
+            if str(value or "").strip() and key not in context:
+                context[key] = str(value).strip()
+
+    return context
+
+
+def _scan_record_counts(scan_results: Mapping[int, Mapping[str, object]], prog_id: int) -> dict[str, object]:
+    record = scan_results.get(int(prog_id))
+    if record is None:
+        record = scan_results.get(str(int(prog_id)))  # type: ignore[arg-type]
+    if not isinstance(record, Mapping):
+        return {}
+    counts = record.get("counts")
+    if isinstance(counts, Mapping):
+        return dict(counts)
+    sites = record.get("sites")
+    if isinstance(sites, Mapping):
+        return dict(sites)
+    return {}
+
+
+def _resolve_scan_pass_selection(
+    enabled_passes: Sequence[str] | None,
+) -> tuple[list[str], object | None, str]:
+    from runner.libs.rejit import (
+        benchmark_rejit_enabled_passes,
+        benchmark_scan_enabled_passes,
+        load_benchmark_config,
+    )
+
+    explicit_passes = _normalize_enabled_passes(enabled_passes)
+    if enabled_passes is not None:
+        return explicit_passes, None, "explicit"
+    if _BENCH_PASSES_ENV in os.environ:
+        return benchmark_rejit_enabled_passes(), None, "env_override"
+
+    benchmark_config = load_benchmark_config()
+    return benchmark_scan_enabled_passes(benchmark_config), benchmark_config, "benchmark_config"
+
+
+def _resolve_apply_passes_by_program(
+    *,
+    requested_prog_ids: Sequence[int],
+    lifecycle_state: CaseLifecycleState,
+    scan_results: Mapping[int, Mapping[str, object]],
+    enabled_passes: Sequence[str] | None,
+    benchmark_config: object | None,
+) -> dict[int, list[str]]:
+    from runner.libs.rejit import benchmark_rejit_enabled_passes, resolve_program_enabled_passes
+
+    explicit_passes = _normalize_enabled_passes(enabled_passes)
+    if enabled_passes is not None:
+        return {
+            int(prog_id): list(explicit_passes)
+            for prog_id in requested_prog_ids
+        }
+    if _BENCH_PASSES_ENV in os.environ:
+        selected = benchmark_rejit_enabled_passes()
+        return {
+            int(prog_id): list(selected)
+            for prog_id in requested_prog_ids
+        }
+    if not isinstance(benchmark_config, Mapping):
+        raise RuntimeError("benchmark pass plan expected a loaded benchmark config")
+
+    programs_by_id = _program_records_by_id(lifecycle_state.artifacts.get("programs"))
+    enabled_by_prog: dict[int, list[str]] = {}
+    for prog_id in requested_prog_ids:
+        enabled_by_prog[int(prog_id)] = resolve_program_enabled_passes(
+            benchmark_config,
+            context=_program_policy_context(
+                prog_id=int(prog_id),
+                program=programs_by_id.get(int(prog_id)),
+                artifacts=lifecycle_state.artifacts,
+            ),
+            site_counts=_scan_record_counts(scan_results, int(prog_id)),
+        )
+    return enabled_by_prog
+
+
+def _merge_group_rejit_results(
+    *,
+    requested_prog_ids: Sequence[int],
+    group_results: Sequence[tuple[list[int], Mapping[str, object]]],
+    enabled_passes_by_prog: Mapping[int, Sequence[str]],
+    scan_enabled_passes: Sequence[str],
+    selection_source: str,
+    benchmark_config: object | None,
+) -> dict[str, object]:
+    per_program: dict[int, dict[str, object]] = {}
+    outputs: list[str] = []
+    total_sites = 0
+    applied_sites = 0
+    exit_code = 0
+    errors: list[str] = []
+
+    for group_prog_ids, result in group_results:
+        output = str(result.get("output") or "")
+        if output:
+            outputs.append(output)
+        exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
+
+        counts = result.get("counts")
+        if isinstance(counts, Mapping):
+            total_sites += int(counts.get("total_sites", 0) or 0)
+            applied_sites += int(counts.get("applied_sites", 0) or 0)
+
+        error = str(result.get("error") or "").strip()
+        if error:
+            errors.append(error)
+
+        raw_per_program = result.get("per_program")
+        per_program_records = raw_per_program if isinstance(raw_per_program, Mapping) else {}
+        group_counts = counts if isinstance(counts, Mapping) else {}
+        fallback_applied = bool(result.get("all_applied", result.get("applied", False)))
+        for prog_id in group_prog_ids:
+            raw_record = per_program_records.get(int(prog_id))
+            if raw_record is None:
+                raw_record = per_program_records.get(str(int(prog_id)))
+            if isinstance(raw_record, Mapping):
+                per_program[int(prog_id)] = dict(raw_record)
+                continue
+            per_program[int(prog_id)] = {
+                "applied": fallback_applied,
+                "output": output,
+                "exit_code": int(result.get("exit_code", 0) or 0),
+                "counts": {
+                    "total_sites": int(group_counts.get("total_sites", 0) or 0)
+                    if len(group_prog_ids) == 1
+                    else 0,
+                    "applied_sites": int(group_counts.get("applied_sites", 0) or 0)
+                    if len(group_prog_ids) == 1
+                    else 0,
+                },
+                "error": error,
+            }
+
+    applied_any = any(bool(record.get("applied")) for record in per_program.values())
+    all_applied = bool(per_program) and all(bool(record.get("applied")) for record in per_program.values())
+    merged: dict[str, object] = {
+        "applied": applied_any,
+        "applied_any": applied_any,
+        "all_applied": all_applied,
+        "output": "\n".join(fragment for fragment in outputs if fragment),
+        "exit_code": exit_code,
+        "per_program": per_program,
+        "counts": {
+            "total_sites": total_sites,
+            "applied_sites": applied_sites,
+        },
+        "program_counts": {
+            "requested": len([int(prog_id) for prog_id in requested_prog_ids if int(prog_id) > 0]),
+            "applied": sum(1 for record in per_program.values() if bool(record.get("applied"))),
+            "not_applied": sum(1 for record in per_program.values() if not bool(record.get("applied"))),
+        },
+        "error": "; ".join(errors),
+        "selection_source": selection_source,
+        "scan_enabled_passes": list(scan_enabled_passes),
+        "effective_enabled_passes_by_program": {
+            str(int(prog_id)): [str(pass_name) for pass_name in enabled_passes_by_prog.get(int(prog_id), ())]
+            for prog_id in requested_prog_ids
+            if int(prog_id) > 0
+        },
+    }
+    if isinstance(benchmark_config, Mapping):
+        profile_name = str(benchmark_config.get("profile") or "").strip()
+        if profile_name:
+            merged["benchmark_profile"] = profile_name
+    return merged
+
+
 def run_case_lifecycle(
     *,
     daemon_session: PreparedDaemonSession,
@@ -296,8 +553,6 @@ def run_case_lifecycle(
     7. post-ReJIT workload
     8. stop + cleanup
     """
-    from runner.libs.rejit import benchmark_rejit_enabled_passes
-
     setup_state = setup()
     lifecycle_state: CaseLifecycleState | None = None
     baseline: Mapping[str, object] | None = None
@@ -372,19 +627,52 @@ def run_case_lifecycle(
         if kinsn_metadata is not None:
             kinsn_metadata["requested_prog_ids"] = list(requested_prog_ids)
 
+        scan_enabled_passes, benchmark_config, selection_source = _resolve_scan_pass_selection(
+            enabled_passes,
+        )
+
         daemon_error = _daemon_exit_error(active_daemon_session)
         if daemon_error is not None:
             raise RuntimeError(daemon_error)
+        scan_kwargs = dict(lifecycle_state.scan_kwargs)
+        scan_kwargs["enabled_passes"] = list(scan_enabled_passes)
         scan_results = active_daemon_session.scan_programs(
             requested_prog_ids,
-            **lifecycle_state.scan_kwargs,
+            **scan_kwargs,
         )
         daemon_error = _daemon_exit_error(active_daemon_session)
         if daemon_error is not None:
             raise RuntimeError(daemon_error)
-        rejit_result = active_daemon_session.apply_rejit(
-            requested_prog_ids,
-            enabled_passes=enabled_passes or benchmark_rejit_enabled_passes(),
+        apply_enabled_passes_by_prog = _resolve_apply_passes_by_program(
+            requested_prog_ids=requested_prog_ids,
+            lifecycle_state=lifecycle_state,
+            scan_results=scan_results,
+            enabled_passes=enabled_passes,
+            benchmark_config=benchmark_config,
+        )
+        grouped_prog_ids: dict[tuple[str, ...], list[int]] = {}
+        for prog_id in requested_prog_ids:
+            pass_tuple = tuple(apply_enabled_passes_by_prog.get(int(prog_id), ()))
+            grouped_prog_ids.setdefault(pass_tuple, []).append(int(prog_id))
+
+        group_rejit_results: list[tuple[list[int], Mapping[str, object]]] = []
+        for pass_tuple, group_prog_ids in grouped_prog_ids.items():
+            group_rejit_results.append(
+                (
+                    list(group_prog_ids),
+                    active_daemon_session.apply_rejit(
+                        group_prog_ids,
+                        enabled_passes=list(pass_tuple),
+                    ),
+                )
+            )
+        rejit_result = _merge_group_rejit_results(
+            requested_prog_ids=requested_prog_ids,
+            group_results=group_rejit_results,
+            enabled_passes_by_prog=apply_enabled_passes_by_prog,
+            scan_enabled_passes=scan_enabled_passes,
+            selection_source=selection_source,
+            benchmark_config=benchmark_config,
         )
         if kinsn_metadata is not None:
             kinsn_metadata["status"] = "completed"

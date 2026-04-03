@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import io
 import os
 import subprocess
-import tempfile
+import threading
 import time
+from collections import deque
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -46,11 +48,39 @@ class BCCWorkloadSpec:
 @dataclass(slots=True)
 class ToolProcessSession:
     process: subprocess.Popen[str]
-    tempdir: Any
-    stdout_path: Path
-    stderr_path: Path
-    stdout_handle: Any
-    stderr_handle: Any
+    stdout_capture: "_TailCapture"
+    stderr_capture: "_TailCapture"
+    stdout_thread: threading.Thread
+    stderr_thread: threading.Thread
+
+
+class _TailCapture:
+    def __init__(self, *, max_lines: int, max_chars: int) -> None:
+        self.max_lines = max(1, int(max_lines))
+        self.max_chars = max(1, int(max_chars))
+        self._chunks: deque[str] = deque()
+        self._chars = 0
+        self._lock = threading.Lock()
+
+    def append(self, text: str) -> None:
+        if not text:
+            return
+        with self._lock:
+            self._chunks.append(text)
+            self._chars += len(text)
+            while self._chars > self.max_chars and self._chunks:
+                removed = self._chunks.popleft()
+                self._chars -= len(removed)
+
+    def render(self) -> str:
+        with self._lock:
+            return tail_text("".join(self._chunks), max_lines=self.max_lines, max_chars=self.max_chars)
+
+
+def _drain_stream(stream: io.TextIOBase, capture: _TailCapture) -> None:
+    with stream:
+        for chunk in stream:
+            capture.append(chunk)
 
 
 @lru_cache(maxsize=1)
@@ -124,17 +154,6 @@ def find_tool_binary(tools_dir: Path, tool_name: str) -> Path | None:
         if candidate.is_file() and os.access(candidate, os.X_OK):
             return candidate.resolve()
     return None
-
-
-def _local_capture_root() -> Path:
-    for candidate in (Path("/dev/shm"), Path("/run"), Path("/tmp")):
-        try:
-            candidate.mkdir(parents=True, exist_ok=True)
-        except OSError:
-            continue
-        if os.access(candidate, os.W_OK | os.X_OK):
-            return candidate
-    raise RuntimeError("no writable guest-local temporary directory is available for BCC output capture")
 
 
 def wait_for_attached_programs(
@@ -319,14 +338,6 @@ class BCCRunner(AppRunner):
             raise RuntimeError(f"BCC tool {self.tool_name} is already running")
 
         tool_binary = self._resolve_tool_binary()
-        tempdir = tempfile.TemporaryDirectory(
-            prefix=f"bcc-{tool_binary.name}-",
-            dir=str(_local_capture_root()),
-        )
-        stdout_path = Path(tempdir.name) / "stdout.log"
-        stderr_path = Path(tempdir.name) / "stderr.log"
-        stdout_handle = stdout_path.open("w", encoding="utf-8")
-        stderr_handle = stderr_path.open("w", encoding="utf-8")
         command = [str(tool_binary), *self.tool_args]
         self.command_used = list(command)
         process = subprocess.Popen(
@@ -334,18 +345,34 @@ class BCCRunner(AppRunner):
             cwd=ROOT_DIR,
             env=os.environ.copy(),
             stdin=subprocess.DEVNULL,
-            stdout=stdout_handle,
-            stderr=stderr_handle,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
             bufsize=1,
         )
+        if process.stdout is None or process.stderr is None:
+            process.kill()
+            raise RuntimeError(f"BCC tool {self.tool_name} did not expose stdout/stderr pipes")
+        stdout_capture = _TailCapture(max_lines=40, max_chars=8000)
+        stderr_capture = _TailCapture(max_lines=40, max_chars=8000)
+        stdout_thread = threading.Thread(
+            target=_drain_stream,
+            args=(process.stdout, stdout_capture),
+            daemon=True,
+        )
+        stderr_thread = threading.Thread(
+            target=_drain_stream,
+            args=(process.stderr, stderr_capture),
+            daemon=True,
+        )
+        stdout_thread.start()
+        stderr_thread.start()
         self.session = ToolProcessSession(
             process=process,
-            tempdir=tempdir,
-            stdout_path=stdout_path,
-            stderr_path=stderr_path,
-            stdout_handle=stdout_handle,
-            stderr_handle=stderr_handle,
+            stdout_capture=stdout_capture,
+            stderr_capture=stderr_capture,
+            stdout_thread=stdout_thread,
+            stderr_thread=stderr_thread,
         )
         programs = wait_for_attached_programs(
             process,
@@ -401,32 +428,15 @@ class BCCRunner(AppRunner):
             stop_error = exc
 
         io_errors: list[str] = []
-        for handle in (session.stdout_handle, session.stderr_handle):
-            try:
-                handle.flush()
-            except Exception as exc:
-                io_errors.append(f"failed to flush {handle.name}: {exc}")
-            try:
-                handle.close()
-            except Exception as exc:
-                io_errors.append(f"failed to close {handle.name}: {exc}")
-
-        stdout = ""
-        stderr = ""
-        try:
-            stdout = session.stdout_path.read_text(encoding="utf-8", errors="replace")
-        except OSError as exc:
-            io_errors.append(f"failed to read {session.stdout_path}: {exc}")
-        try:
-            stderr = session.stderr_path.read_text(encoding="utf-8", errors="replace")
-        except OSError as exc:
-            io_errors.append(f"failed to read {session.stderr_path}: {exc}")
+        for name, thread in (("stdout", session.stdout_thread), ("stderr", session.stderr_thread)):
+            thread.join(timeout=2.0)
+            if thread.is_alive():
+                io_errors.append(f"timed out waiting for BCC {name} capture thread to drain")
         self.process_output = {
             "returncode": session.process.returncode,
-            "stdout_tail": tail_text(stdout, max_lines=40, max_chars=8000),
-            "stderr_tail": tail_text(stderr, max_lines=40, max_chars=8000),
+            "stdout_tail": session.stdout_capture.render(),
+            "stderr_tail": session.stderr_capture.render(),
         }
-        session.tempdir.cleanup()
 
         failures: list[str] = []
         if stop_error is not None:

@@ -47,7 +47,6 @@ from runner.libs.metrics import (  # noqa: E402
     sample_total_cpu_usage,
     start_sampler_thread,
 )
-from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_connect_storm,
@@ -1371,6 +1370,10 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                             "tracee_programs": runner.programs,
                             "selected_tracee_programs": cycle_selected_programs,
                             "apply_tracee_programs": cycle_apply_programs,
+                            "rejit_policy_context": {
+                                "repo": "tracee",
+                                "level": "e2e",
+                            },
                         },
                     )
 
@@ -1499,7 +1502,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     stop=stop,
                     cleanup=cleanup,
                     before_baseline=before_baseline,
-                    enabled_passes=benchmark_rejit_enabled_passes(),
                 )
 
                 if lifecycle_result.abort is not None:

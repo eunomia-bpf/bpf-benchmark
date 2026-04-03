@@ -98,6 +98,7 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
             self.socket_dir = "/tmp/rejit-dir"
             self.stdout_path = tmp_path / "daemon.stdout.log"
             self.stderr_path = tmp_path / "daemon.stderr.log"
+            self.load_kinsn = False
             self.stdout_path.write_text("serve: listening on /tmp/rejit.sock\n", encoding="utf-8")
             self.stderr_path.write_text("kinsn discovery:\n  module loaded\n", encoding="utf-8")
             self.kinsn_metadata = {
@@ -110,7 +111,9 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
         @classmethod
         def start(cls, daemon_binary: Path, *, load_kinsn: bool = False) -> "FakeDaemonSession":
             daemon_events.append(("start", daemon_binary, load_kinsn))
-            return cls()
+            session = cls()
+            session.load_kinsn = bool(load_kinsn)
+            return session
 
         def __enter__(self) -> "FakeDaemonSession":
             return self
@@ -119,8 +122,8 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
             del exc_type, exc, tb
             daemon_events.append("stop")
 
-        def scan_programs(self, prog_ids, *, timeout_seconds=60):
-            daemon_events.append(("scan", list(prog_ids), timeout_seconds))
+        def scan_programs(self, prog_ids, *, enabled_passes=None, timeout_seconds=60):
+            daemon_events.append(("scan", list(prog_ids), list(enabled_passes or []), timeout_seconds))
             prog_id = int(prog_ids[0])
             return {
                 prog_id: {
@@ -146,6 +149,7 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
             self.app_name = app_name
             self.workload = workload
             self.kwargs = kwargs
+            self._last_workload_details: dict[str, object] = {}
             self.process_output = {"returncode": 0, "stdout_tail": "", "stderr_tail": ""}
             self.command_used = ["demo-runner", app_name]
             prog_id = 101 if app_name == "alpha" else 202
@@ -162,43 +166,85 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
                     "app": self.app_name,
                     "duration_s": float(seconds),
                     "ops_per_sec": 10.0,
-                }
-            )
+                    }
+                )
+
+        def run_workload_spec(self, workload_spec, seconds: float) -> object:
+            del workload_spec
+            return self.run_workload(seconds)
 
         def stop(self) -> None:
             runner_events.append(("stop", self.app_name))
 
-    snapshot_counts = {101: 0, 202: 0}
+        def select_corpus_program_ids(self, initial_stats, final_stats) -> list[int] | None:
+            del initial_stats, final_stats
+            return None
 
-    def fake_read_program_stats(prog_ids: list[int]) -> dict[int, dict[str, object]]:
-        prog_id = int(prog_ids[0])
-        snapshot_counts[prog_id] += 1
-        if prog_id == 101:
-            if snapshot_counts[prog_id] == 1:
-                return {
-                    101: {
-                        "id": 101,
-                        "name": "alpha_prog",
-                        "type": "xdp",
-                        "run_cnt": 5,
-                        "run_time_ns": 500,
-                        "bytes_jited": 64,
-                        "bytes_xlated": 32,
-                    }
-                }
-            return {
-                101: {
-                    "id": 101,
-                    "name": "alpha_prog",
-                    "type": "xdp",
-                    "run_cnt": 12,
-                    "run_time_ns": 1400,
-                    "bytes_jited": 64,
-                    "bytes_xlated": 32,
-                }
-            }
-        return {
-            202: {
+        def corpus_measurement_mode(self) -> str:
+            return "program"
+
+        @property
+        def pid(self) -> int | None:
+            return None
+
+        @property
+        def program_fds(self) -> dict[int, int]:
+            return {}
+
+        @property
+        def last_workload_details(self) -> dict[str, object]:
+            return dict(self._last_workload_details)
+
+    snapshot_sequences = {
+        101: [
+            {
+                "id": 101,
+                "name": "alpha_prog",
+                "type": "xdp",
+                "run_cnt": 0,
+                "run_time_ns": 0,
+                "bytes_jited": 64,
+                "bytes_xlated": 32,
+            },
+            {
+                "id": 101,
+                "name": "alpha_prog",
+                "type": "xdp",
+                "run_cnt": 5,
+                "run_time_ns": 500,
+                "bytes_jited": 64,
+                "bytes_xlated": 32,
+            },
+            {
+                "id": 101,
+                "name": "alpha_prog",
+                "type": "xdp",
+                "run_cnt": 5,
+                "run_time_ns": 500,
+                "bytes_jited": 64,
+                "bytes_xlated": 32,
+            },
+            {
+                "id": 101,
+                "name": "alpha_prog",
+                "type": "xdp",
+                "run_cnt": 12,
+                "run_time_ns": 1400,
+                "bytes_jited": 64,
+                "bytes_xlated": 32,
+            },
+        ],
+        202: [
+            {
+                "id": 202,
+                "name": "beta_prog",
+                "type": "tracepoint",
+                "run_cnt": 0,
+                "run_time_ns": 0,
+                "bytes_jited": 96,
+                "bytes_xlated": 48,
+            },
+            {
                 "id": 202,
                 "name": "beta_prog",
                 "type": "tracepoint",
@@ -206,8 +252,20 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
                 "run_time_ns": 800,
                 "bytes_jited": 96,
                 "bytes_xlated": 48,
-            }
-        }
+            },
+        ],
+    }
+    snapshot_counts = {101: 0, 202: 0}
+
+    def fake_sample_bpf_stats(prog_ids: list[int], prog_fds=None) -> dict[int, dict[str, object]]:
+        del prog_fds
+        prog_id = int(prog_ids[0])
+        sequence = snapshot_sequences[prog_id]
+        index = snapshot_counts[prog_id]
+        if index >= len(sequence):
+            index = len(sequence) - 1
+        snapshot_counts[prog_id] += 1
+        return {prog_id: dict(sequence[index])}
 
     def fake_get_app_runner(_runner_name: str, **kwargs) -> FakeRunner:
         app_name = str(kwargs.pop("app_name"))
@@ -217,8 +275,9 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
     monkeypatch.setattr(driver, "DaemonSession", FakeDaemonSession)
     monkeypatch.setattr(driver, "get_app_runner", fake_get_app_runner)
     monkeypatch.setattr(driver, "enable_bpf_stats", lambda: nullcontext())
-    monkeypatch.setattr(driver, "read_program_stats", fake_read_program_stats)
-    monkeypatch.setattr(driver, "benchmark_rejit_enabled_passes", lambda: ["map_inline"])
+    monkeypatch.setattr(driver, "sample_bpf_stats", fake_sample_bpf_stats)
+    monkeypatch.setattr(driver, "wait_for_suite_quiescence", lambda: None)
+    monkeypatch.setenv("BPFREJIT_BENCH_PASSES", "map_inline")
 
     args = driver.parse_args(
         [
@@ -249,6 +308,7 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
             "program": "beta_prog",
             "program_id": 202,
             "reason": "apply_error: demo apply failure",
+            "unit": "program",
         }
     ]
     assert payload["status"] == "error"
@@ -271,9 +331,9 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
     assert payload["results"][1]["rejit_workloads"] == []
     assert daemon_events == [
         ("start", daemon_binary.resolve(), True),
-        ("scan", [101], 60),
+        ("scan", [101], ["map_inline"], 60),
         ("apply", [101], ["map_inline"]),
-        ("scan", [202], 60),
+        ("scan", [202], ["map_inline"], 60),
         ("apply", [202], ["map_inline"]),
         "stop",
     ]
@@ -380,3 +440,37 @@ def test_parse_args_rejects_invalid_samples_and_workload_seconds() -> None:
 
     with pytest.raises(SystemExit, match="--workload-seconds must be >= 0"):
         driver.parse_args(["--workload-seconds", "-1"])
+
+
+def test_build_run_metadata_prefers_effective_passes_from_payload(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(driver, "benchmark_rejit_enabled_passes", lambda: ["map_inline", "const_prop", "dce"])
+
+    args = SimpleNamespace(
+        suite=str(tmp_path / "suite.yaml"),
+        filters=[],
+        no_kinsn=False,
+    )
+    payload = {
+        "results": [
+            {
+                "rejit_apply": {
+                    "effective_enabled_passes_by_program": {
+                        "101": ["map_inline"],
+                    }
+                }
+            }
+        ],
+        "summary": {},
+    }
+
+    metadata = driver.build_run_metadata(
+        args,
+        payload,
+        output_json=tmp_path / "vm_corpus.json",
+        output_md=tmp_path / "vm_corpus.md",
+        resolved_samples=30,
+        resolved_workload_seconds=4.0,
+    )
+
+    assert metadata["selected_rejit_passes"] == ["map_inline"]
+    assert metadata["requested_rejit_passes"] == ["map_inline", "const_prop", "dce"]
