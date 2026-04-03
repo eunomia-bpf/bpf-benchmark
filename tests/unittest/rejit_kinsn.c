@@ -1699,6 +1699,101 @@ static int test_rejit_bulk_memcpy_jit_emits_rep_movsb(void)
 #endif
 }
 
+static int test_rejit_bulk_memcpy_kinsn_tmp_r7_saves_r13(void)
+{
+#if defined(__x86_64__)
+	static const __u8 push_r13[] = { 0x41, 0x55 };
+	static const __u8 pop_r13[] = { 0x41, 0x5d };
+	const __u64 payload = pack_bulk_memcpy_payload(BPF_REG_10, BPF_REG_10,
+						       -128, -96, 32,
+						       BPF_REG_7);
+	const char *name = "bulk_memcpy_kinsn_tmp_r7_saves_r13";
+	struct bpf_insn prog[] = {
+		BPF_ST_MEM(BPF_W, BPF_REG_10, -96, 0x04030201),
+		BPF_ST_MEM(BPF_W, BPF_REG_10, -92, 0x08070605),
+		BPF_ST_MEM(BPF_W, BPF_REG_10, -88, 0x0c0b0a09),
+		BPF_ST_MEM(BPF_W, BPF_REG_10, -84, 0x100f0e0d),
+		BPF_ST_MEM(BPF_W, BPF_REG_10, -80, 0x14131211),
+		BPF_ST_MEM(BPF_W, BPF_REG_10, -76, 0x18171615),
+		BPF_ST_MEM(BPF_W, BPF_REG_10, -72, 0x1c1b1a19),
+		BPF_ST_MEM(BPF_W, BPF_REG_10, -68, 0x201f1e1d),
+		BPF_KINSN_SIDECAR(payload),
+		BPF_CALL_KINSN(0, 0),
+		BPF_LDX_MEM(BPF_W, BPF_REG_1, BPF_REG_10, -100),
+		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0x201f1e1d, 1),
+		BPF_MOV64_IMM(BPF_REG_0, 0),
+		BPF_EXIT_INSN(),
+	};
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_BULK_MEMORY].btf_fd);
+	char log_buf[LOG_BUF_SIZE];
+	__u32 retval = 0;
+	__u8 *jited = NULL;
+	__u32 jited_len = 0;
+	int prog_fd;
+
+	if (skip_if_module_unavailable(name, MOD_BULK_MEMORY))
+		return 0;
+
+	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_MEMCPY_BULK].btf_id);
+
+	memset(log_buf, 0, sizeof(log_buf));
+	prog_fd = load_xdp_prog(prog_ret_0, ARRAY_SIZE(prog_ret_0),
+				NULL, 0, log_buf, sizeof(log_buf));
+	if (prog_fd < 0) {
+		TEST_FAIL(name, "base load failed");
+		return 1;
+	}
+
+	memset(log_buf, 0, sizeof(log_buf));
+	if (rejit_xdp_prog(prog_fd, prog, ARRAY_SIZE(prog), fd_array,
+			   ARRAY_SIZE(fd_array), log_buf, sizeof(log_buf)) < 0) {
+		if (should_skip_bulk_for_insn_buf_limit(MOD_BULK_MEMORY, log_buf)) {
+			close(prog_fd);
+			TEST_SKIP(name, "kernel kinsn proof buffer is limited to 32 insns");
+			return 0;
+		}
+		fprintf(stderr, "    verifier log:\n%s\n", log_buf);
+		TEST_FAIL(name, "REJIT failed");
+		close(prog_fd);
+		return 1;
+	}
+
+	if (test_run_xdp(prog_fd, &retval) < 0 || retval != 0) {
+		TEST_FAIL(name, "recompiled program returned wrong value");
+		close(prog_fd);
+		return 1;
+	}
+
+	if (get_jited_program(prog_fd, &jited, &jited_len) < 0) {
+		TEST_FAIL(name, "failed to fetch JIT image");
+		close(prog_fd);
+		return 1;
+	}
+
+	if (!find_bytes(jited, jited_len, push_r13, sizeof(push_r13))) {
+		TEST_FAIL(name, "push r13 not found in JIT image");
+		free(jited);
+		close(prog_fd);
+		return 1;
+	}
+
+	if (!find_bytes(jited, jited_len, pop_r13, sizeof(pop_r13))) {
+		TEST_FAIL(name, "pop r13 not found in JIT image");
+		free(jited);
+		close(prog_fd);
+		return 1;
+	}
+
+	free(jited);
+	close(prog_fd);
+	TEST_PASS(name);
+	return 0;
+#else
+	TEST_SKIP("bulk_memcpy_kinsn_tmp_r7_saves_r13", "x86_64 only");
+	return 0;
+#endif
+}
+
 static int test_rejit_bulk_memset_jit_emits_rep_stosb(void)
 {
 #if defined(__x86_64__)
@@ -1890,6 +1985,8 @@ int main(int argc, char **argv)
 		ret |= test_rejit_bulk_memset_invalid_width_rejected();
 	if (should_run_test(filter, "bulk_memcpy_jit_emits_rep_movsb"))
 		ret |= test_rejit_bulk_memcpy_jit_emits_rep_movsb();
+	if (should_run_test(filter, "bulk_memcpy_kinsn_tmp_r7_saves_r13"))
+		ret |= test_rejit_bulk_memcpy_kinsn_tmp_r7_saves_r13();
 	if (should_run_test(filter, "bulk_memset_jit_emits_rep_stosb"))
 		ret |= test_rejit_bulk_memset_jit_emits_rep_stosb();
 	if (should_run_test(filter, "ldp128_apply"))
