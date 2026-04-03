@@ -48,9 +48,6 @@ tools:
     workload_kind: exec_loop
     spawn_timeout_s: 15
     tool_args: ["-T", "-U", "-u", "65534"]
-    # map_inline alone is stable here; the newer map_inline->const_prop->dce
-    # cascade on this tool regresses exec throughput badly on the current kernel.
-    rejit_passes: ["map_inline"]
 
   - name: opensnoop
     description: "File open syscall tracing via tracepoints"

@@ -26,6 +26,7 @@ from runner.libs.app_runners.bpftrace import BpftraceRunner, SCRIPTS, ScriptSpec
 from runner.libs.metrics import (  # noqa: E402
     enable_bpf_stats,
 )
+from runner.libs.rejit import applied_site_totals_from_rejit_result  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     measure_app_runner_workload,
     host_metadata,
@@ -120,6 +121,31 @@ BPFTRACE_SITE_TOTAL_FIELDS = (
     "lea_sites",
 )
 
+SITE_BREAKDOWN_FIELDS = (
+    ("map_inline_sites", "map_inline"),
+    ("const_prop_sites", "const_prop"),
+    ("dce_sites", "dce"),
+    ("cmov_sites", "cond_select"),
+    ("wide_sites", "wide_mem"),
+    ("rotate_sites", "rotate"),
+    ("extract_sites", "extract"),
+    ("endian_sites", "endian_fusion"),
+    ("bounds_check_merge_sites", "bounds_check_merge"),
+    ("skb_load_bytes_spec_sites", "skb_load_bytes_spec"),
+    ("bulk_memory_sites", "bulk_memory"),
+    ("branch_flip_sites", "branch_flip"),
+    ("other_sites", "other"),
+)
+
+
+def format_site_breakdown(site_totals: Mapping[str, object]) -> str:
+    parts = [
+        f"{label}={int(site_totals.get(field_name, 0) or 0)}"
+        for field_name, label in SITE_BREAKDOWN_FIELDS
+        if int(site_totals.get(field_name, 0) or 0) > 0
+    ]
+    return ", ".join(parts) if parts else "none"
+
 
 def run_phase(
     spec: ScriptSpec,
@@ -173,7 +199,8 @@ def summarize_script(spec: ScriptSpec, baseline: Mapping[str, object], rejit: Ma
     workload_ops_rejit = ((rejit_measurement.get("workload") or {}).get("ops_per_sec"))
     cpu_baseline = ((baseline_measurement.get("agent_cpu") or {}).get("total_pct"))
     cpu_rejit = ((rejit_measurement.get("agent_cpu") or {}).get("total_pct"))
-    sites = int(((rejit or {}).get("site_totals") or baseline.get("site_totals") or {}).get("total_sites", 0) or 0)
+    site_totals = applied_site_totals_from_rejit_result((rejit or {}).get("rejit_result"))
+    sites = int(site_totals.get("total_sites", 0) or 0)
     speedup = None
     if stock_avg_ns not in (None, 0) and rejit_avg_ns not in (None, 0):
         speedup = float(stock_avg_ns) / float(rejit_avg_ns)
@@ -187,6 +214,7 @@ def summarize_script(spec: ScriptSpec, baseline: Mapping[str, object], rejit: Ma
     return {
         "name": spec.name,
         "sites": sites,
+        "site_totals": site_totals,
         "stock_avg_ns": stock_avg_ns,
         "rejit_avg_ns": rejit_avg_ns,
         "speedup": speedup,
@@ -264,12 +292,9 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Scripts selected: `{len(payload['selected_scripts'])}`",
         f"- Baseline successes: `{payload['summary']['baseline_successes']}`",
         f"- ReJIT successes: `{payload['summary']['rejit_successes']}`",
-        f"- Eligible-site scripts: `{payload['summary']['scripts_with_sites']}`",
-        f"- Aggregate sites: `{payload['summary']['site_totals']['total_sites']}` "
-        f"(cmov={payload['summary']['site_totals']['cmov_sites']}, "
-        f"wide={payload['summary']['site_totals']['wide_sites']}, "
-        f"rotate={payload['summary']['site_totals']['rotate_sites']}, "
-        f"lea={payload['summary']['site_totals']['lea_sites']})",
+        f"- Scripts with applied sites: `{payload['summary']['scripts_with_sites']}`",
+        f"- Aggregate applied sites: `{payload['summary']['site_totals']['total_sites']}` "
+        f"({format_site_breakdown(payload['summary']['site_totals'])})",
         f"- Geomean speedup: `{format_ratio(payload['summary']['speedup_geomean'])}`",
         "",
         "## Per-Script",
@@ -357,7 +382,7 @@ def build_report(payload: Mapping[str, object]) -> str:
         "## Outcome",
         "",
         "- This benchmark treats `bpftrace` itself as the tracing agent and measures application throughput plus bpftrace CPU while tracing is active.",
-        f"- Scripts with detected sites: `{payload['summary']['scripts_with_sites']}`; aggregate site count: `{payload['summary']['site_totals']['total_sites']}`.",
+        f"- Scripts with applied sites: `{payload['summary']['scripts_with_sites']}`; aggregate applied site count: `{payload['summary']['site_totals']['total_sites']}` ({format_site_breakdown(payload['summary']['site_totals'])}).",
         f"- Geomean BPF speedup across scripts with both baseline and ReJIT data: `{format_ratio(payload['summary']['speedup_geomean'])}`.",
         "",
         "## Per-Script",
@@ -393,8 +418,8 @@ def build_report(payload: Mapping[str, object]) -> str:
             "## Interpretation",
             "",
             "- The prior VM-only bpftrace measurements were pure BPF run-time deltas. This case adds application throughput and bpftrace CPU overhead, which makes the policy-sensitive regressions visible as honest end-to-end cost.",
-            f"- Eligible CMOV-bearing scripts split by workload: improved={improved or ['none']}, regressed={regressed or ['none']}. The overall geomean across scripts with stock+ReJIT data is `{format_ratio(payload['summary']['speedup_geomean'])}`.",
-            "- Scripts with zero eligible sites were still measured for the baseline end-to-end overhead, but their ReJIT columns remain `n/a` to avoid implying a meaningless comparison.",
+            f"- Scripts improved after applied ReJIT: {improved or ['none']}; regressed: {regressed or ['none']}. The overall geomean across scripts with stock+ReJIT data is `{format_ratio(payload['summary']['speedup_geomean'])}`.",
+            "- Scripts with zero applied sites were still measured for the baseline end-to-end overhead, but their ReJIT columns remain `n/a` to avoid implying a meaningless comparison.",
             "",
         ]
     )
@@ -441,13 +466,7 @@ def run_bpftrace_case(args: argparse.Namespace) -> dict[str, object]:
                 }
             )
 
-    site_totals = {
-        "total_sites": 0,
-        "cmov_sites": 0,
-        "wide_sites": 0,
-        "rotate_sites": 0,
-        "lea_sites": 0,
-    }
+    site_totals = applied_site_totals_from_rejit_result(None)
     speedups: list[float] = []
     baseline_successes = 0
     rejit_successes = 0
@@ -462,7 +481,7 @@ def run_bpftrace_case(args: argparse.Namespace) -> dict[str, object]:
             rejit_successes += 1
         if int((summary.get("sites") or 0)) > 0:
             scripts_with_sites += 1
-        counts = baseline.get("site_totals") or rejit.get("site_totals") or {}
+        counts = summary.get("site_totals") or {}
         for field in site_totals:
             site_totals[field] += int(counts.get(field, 0) or 0)
         speedup = summary.get("speedup")

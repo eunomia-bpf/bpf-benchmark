@@ -188,7 +188,11 @@ attach_timeout_s: 20
         lambda *args, **kwargs: (
             {
                 "status": "ok",
-                "site_totals": case.zero_site_totals(case.BCC_SITE_TOTAL_FIELDS),
+                "site_totals": {
+                    **case.zero_site_totals(case.BCC_SITE_TOTAL_FIELDS),
+                    "total_sites": 19,
+                    "map_inline_sites": 19,
+                },
                 "measurement": {},
             },
             {
@@ -196,6 +200,18 @@ attach_timeout_s: 20
                 "site_totals": case.zero_site_totals(case.BCC_SITE_TOTAL_FIELDS),
                 "measurement": {},
                 "rejit_result": {
+                    "counts": {"applied_sites": 3},
+                    "per_program": {
+                        "101": {
+                            "counts": {"applied_sites": 3},
+                            "debug_result": {
+                                "passes": [
+                                    {"pass_name": "map_inline", "sites_applied": 2},
+                                    {"pass_name": "const_prop", "sites_applied": 1},
+                                ]
+                            },
+                        }
+                    },
                     "effective_enabled_passes_by_program": {
                         "101": ["map_inline"],
                     }
@@ -221,3 +237,6 @@ attach_timeout_s: 20
     assert payload["selected_rejit_passes"] == ["map_inline"]
     assert payload["requested_rejit_passes"] == ["map_inline", "const_prop", "dce"]
     assert payload["tool_rejit_passes"] == {"execsnoop": ["map_inline"]}
+    assert payload["summary"]["site_totals"]["total_sites"] == 3
+    assert payload["summary"]["site_totals"]["map_inline_sites"] == 2
+    assert payload["summary"]["site_totals"]["const_prop_sites"] == 1

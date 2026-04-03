@@ -108,7 +108,19 @@ def test_benchmark_rejit_enabled_passes_respects_explicit_empty_env(monkeypatch)
 def test_benchmark_rejit_enabled_passes_uses_default_when_env_missing(monkeypatch) -> None:
     monkeypatch.delenv("BPFREJIT_BENCH_PASSES", raising=False)
 
-    assert rejit.benchmark_rejit_enabled_passes() == ["map_inline", "const_prop", "dce"]
+    assert rejit.benchmark_rejit_enabled_passes() == [
+        "wide_mem",
+        "rotate",
+        "cond_select",
+        "extract",
+        "endian_fusion",
+        "map_inline",
+        "const_prop",
+        "dce",
+        "bounds_check_merge",
+        "skb_load_bytes_spec",
+        "bulk_memory",
+    ]
 
 
 def test_collect_effective_enabled_passes_scans_nested_payloads() -> None:
@@ -139,6 +151,53 @@ def test_collect_effective_enabled_passes_scans_nested_payloads() -> None:
         "const_prop",
         "dce",
     ]
+
+
+def test_applied_site_totals_from_rejit_result_aggregates_per_program_pass_details() -> None:
+    result = {
+        "counts": {"applied_sites": 8},
+        "per_program": {
+            101: {
+                "counts": {"applied_sites": 5},
+                "debug_result": {
+                    "passes": [
+                        {"pass_name": "map_inline", "sites_applied": 2},
+                        {"pass_name": "const_prop", "sites_applied": 1},
+                        {"pass_name": "bulk_memory", "sites_applied": 2},
+                    ]
+                },
+            },
+            102: {
+                "counts": {"applied_sites": 3},
+                "debug_result": {
+                    "passes": [
+                        {"pass_name": "dce", "sites_applied": 1},
+                        {"pass_name": "bounds_check_merge", "sites_applied": 1},
+                        {"pass_name": "skb_load_bytes_spec", "sites_applied": 1},
+                    ]
+                },
+            },
+        },
+    }
+
+    assert rejit.applied_site_totals_from_rejit_result(result) == {
+        "total_sites": 8,
+        "map_inline_sites": 2,
+        "const_prop_sites": 1,
+        "dce_sites": 1,
+        "bounds_check_merge_sites": 1,
+        "bulk_memory_sites": 2,
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "extract_sites": 0,
+        "bitfield_sites": 0,
+        "endian_sites": 0,
+        "skb_load_bytes_spec_sites": 1,
+        "branch_flip_sites": 0,
+        "other_sites": 0,
+    }
 
 
 def test_benchmark_config_enabled_passes_prefers_policy_default() -> None:

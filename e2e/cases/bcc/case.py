@@ -28,7 +28,11 @@ from runner.libs.app_runners.bcc import BCCRunner, find_tool_binary, resolve_too
 from runner.libs.metrics import (  # noqa: E402
     enable_bpf_stats,
 )
-from runner.libs.rejit import benchmark_rejit_enabled_passes, collect_effective_enabled_passes  # noqa: E402
+from runner.libs.rejit import (  # noqa: E402
+    applied_site_totals_from_rejit_result,
+    benchmark_rejit_enabled_passes,
+    collect_effective_enabled_passes,
+)
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     host_metadata,
@@ -101,6 +105,31 @@ BCC_SITE_TOTAL_FIELDS = (
     "rotate_sites",
     "lea_sites",
 )
+
+SITE_BREAKDOWN_FIELDS = (
+    ("map_inline_sites", "map_inline"),
+    ("const_prop_sites", "const_prop"),
+    ("dce_sites", "dce"),
+    ("cmov_sites", "cond_select"),
+    ("wide_sites", "wide_mem"),
+    ("rotate_sites", "rotate"),
+    ("extract_sites", "extract"),
+    ("endian_sites", "endian_fusion"),
+    ("bounds_check_merge_sites", "bounds_check_merge"),
+    ("skb_load_bytes_spec_sites", "skb_load_bytes_spec"),
+    ("bulk_memory_sites", "bulk_memory"),
+    ("branch_flip_sites", "branch_flip"),
+    ("other_sites", "other"),
+)
+
+
+def format_site_breakdown(site_totals: Mapping[str, object]) -> str:
+    parts = [
+        f"{label}={int(site_totals.get(field_name, 0) or 0)}"
+        for field_name, label in SITE_BREAKDOWN_FIELDS
+        if int(site_totals.get(field_name, 0) or 0) > 0
+    ]
+    return ", ".join(parts) if parts else "none"
 
 
 def run_phase(
@@ -198,7 +227,8 @@ def summarize_tool(
     workload_ops_rejit = (rejit_measurement.get("workload") or {}).get("ops_per_sec")
     cpu_baseline = (baseline_measurement.get("agent_cpu") or {}).get("total_pct")
     cpu_rejit = (rejit_measurement.get("agent_cpu") or {}).get("total_pct")
-    sites = int(((rejit or {}).get("site_totals") or baseline.get("site_totals") or {}).get("total_sites", 0) or 0)
+    site_totals = applied_site_totals_from_rejit_result((rejit or {}).get("rejit_result"))
+    sites = int(site_totals.get("total_sites", 0) or 0)
 
     speedup: float | None = None
     if stock_avg_ns not in (None, 0) and rejit_avg_ns not in (None, 0):
@@ -215,6 +245,7 @@ def summarize_tool(
         "description": spec.description,
         "workload_kind": spec.workload_kind,
         "sites": sites,
+        "site_totals": site_totals,
         "stock_avg_ns": stock_avg_ns,
         "rejit_avg_ns": rejit_avg_ns,
         "speedup": speedup,
@@ -297,15 +328,8 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Tools selected: `{len(payload['selected_tools'])}`",
         f"- Baseline successes: `{payload['summary']['baseline_successes']}`",
         f"- ReJIT successes: `{payload['summary']['rejit_successes']}`",
-        f"- Tools with eligible sites: `{payload['summary']['tools_with_sites']}`",
-        f"- Aggregate sites: `{site_totals['total_sites']}` "
-        f"(map_inline={site_totals['map_inline_sites']}, "
-        f"const_prop={site_totals['const_prop_sites']}, "
-        f"dce={site_totals['dce_sites']}, "
-        f"cmov={site_totals['cmov_sites']}, "
-        f"wide={site_totals['wide_sites']}, "
-        f"rotate={site_totals['rotate_sites']}, "
-        f"lea={site_totals['lea_sites']})",
+        f"- Tools with applied sites: `{payload['summary']['tools_with_sites']}`",
+        f"- Aggregate applied sites: `{site_totals['total_sites']}` ({format_site_breakdown(site_totals)})",
         f"- Geomean speedup: `{_fmt_ratio(payload['summary']['speedup_geomean'])}`",
         "",
         "## Per-Tool",
@@ -378,9 +402,8 @@ def build_report(payload: Mapping[str, object]) -> str:
         "",
         "## Outcome",
         "",
-        f"- Tools with detected sites: `{payload['summary']['tools_with_sites']}`; "
-        f"aggregate site count: `{site_totals['total_sites']}` "
-        f"(map_inline=`{site_totals['map_inline_sites']}`, const_prop=`{site_totals['const_prop_sites']}`, dce=`{site_totals['dce_sites']}`).",
+        f"- Tools with applied sites: `{payload['summary']['tools_with_sites']}`; "
+        f"aggregate applied site count: `{site_totals['total_sites']}` ({format_site_breakdown(site_totals)}).",
         f"- Geomean BPF speedup across tools with both baseline and ReJIT data: "
         f"`{_fmt_ratio(payload['summary']['speedup_geomean'])}`.",
         "",
@@ -406,7 +429,7 @@ def build_report(payload: Mapping[str, object]) -> str:
         "exercising the full range of kprobes, tracepoints, and helper calls.",
         f"- Tools improved by ReJIT: {improved or ['none']}; regressed: {regressed or ['none']}.",
         f"- Geomean speedup: `{_fmt_ratio(payload['summary']['speedup_geomean'])}`.",
-        "- Tools with zero eligible sites are still measured for baseline overhead but "
+        "- Tools with zero applied sites are still measured for baseline overhead but "
         "their ReJIT columns remain `n/a`.",
         "",
     ])
@@ -554,7 +577,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             records.append(record)
 
     # Aggregate
-    site_totals = zero_site_totals(BCC_SITE_TOTAL_FIELDS)
+    site_totals = applied_site_totals_from_rejit_result(None)
     speedups: list[float] = []
     baseline_successes = 0
     rejit_successes = 0
@@ -569,7 +592,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             rejit_successes += 1
         if int((sm.get("sites") or 0)) > 0:
             tools_with_sites += 1
-        counts = bl.get("site_totals") or rj.get("site_totals") or {}
+        counts = sm.get("site_totals") or {}
         for field in site_totals:
             site_totals[field] += int(counts.get(field, 0) or 0)
         speedup = sm.get("speedup")

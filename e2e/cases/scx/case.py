@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import statistics
 import sys
@@ -22,6 +21,7 @@ from runner.libs import (  # noqa: E402
 from runner.libs.app_runners.base import AppRunner  # noqa: E402
 from runner.libs.app_runners.scx import ScxRunner, preferred_path, read_scx_ops, read_scx_state  # noqa: E402
 from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage, start_sampler_thread  # noqa: E402
+from runner.libs.rejit import applied_site_totals_from_rejit_result  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
@@ -64,21 +64,28 @@ def read_proc_stat_fields() -> dict[str, int]:
     return fields
 
 
-def aggregate_sites(records: Mapping[int | str, Mapping[str, object]]) -> dict[str, int]:
-    totals = {
-        "total_sites": 0,
-        "cmov_sites": 0,
-        "wide_sites": 0,
-        "rotate_sites": 0,
-        "lea_sites": 0,
-    }
-    for record in records.values():
-        sites = record.get("sites") or record.get("counts") or {}
-        if not isinstance(sites, Mapping):
-            continue
-        for field in totals:
-            totals[field] += int(sites.get(field, 0) or 0)
-    return totals
+def format_site_breakdown(site_totals: Mapping[str, object]) -> str:
+    ordered_fields = (
+        ("map_inline_sites", "map_inline"),
+        ("const_prop_sites", "const_prop"),
+        ("dce_sites", "dce"),
+        ("cmov_sites", "cond_select"),
+        ("wide_sites", "wide_mem"),
+        ("rotate_sites", "rotate"),
+        ("extract_sites", "extract"),
+        ("endian_sites", "endian_fusion"),
+        ("bounds_check_merge_sites", "bounds_check_merge"),
+        ("skb_load_bytes_spec_sites", "skb_load_bytes_spec"),
+        ("bulk_memory_sites", "bulk_memory"),
+        ("branch_flip_sites", "branch_flip"),
+        ("other_sites", "other"),
+    )
+    parts = [
+        f"{label}={int(site_totals.get(field_name, 0) or 0)}"
+        for field_name, label in ordered_fields
+        if int(site_totals.get(field_name, 0) or 0) > 0
+    ]
+    return ", ".join(parts) if parts else "none"
 
 
 def ensure_artifacts(daemon_binary: Path, scheduler_binary: Path, scx_repo: Path) -> None:
@@ -299,12 +306,11 @@ def build_markdown(payload: Mapping[str, object]) -> str:
             ]
         )
     lines.extend(["", "## Loaded Programs", ""])
-    site_totals = ((payload.get("scan_summary") or {}).get("site_totals") or {})
+    site_totals = ((payload.get("site_summary") or {}).get("site_totals") or {})
     lines.append(
         f"- Programs: `{len(payload.get('scheduler_programs') or [])}`; "
-        f"sites total=`{site_totals.get('total_sites')}`, "
-        f"cmov=`{site_totals.get('cmov_sites')}`, "
-        f"lea=`{site_totals.get('lea_sites')}`"
+        f"applied sites total=`{site_totals.get('total_sites')}`, "
+        f"breakdown=`{format_site_breakdown(site_totals)}`"
     )
     lines.append(f"- Active ops: `{payload.get('scheduler_ops') or []}`")
     lines.extend(["", "## Baseline", ""])
@@ -446,14 +452,19 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         error_message = "scx post-ReJIT phase is missing"
 
     mode = "scx_rusty_loader"
-    scan_summary = {
-        "scanned_programs": len(scan_results),
-        "site_bearing_programs": sum(
+    site_summary = {
+        "programs_with_sites": sum(
             1
-            for record in scan_results.values()
-            if int(((record.get("sites") or {}).get("total_sites", 0) or 0)) > 0
+            for record in ((rejit_result or {}).get("per_program") or {}).values()
+            if int(
+                applied_site_totals_from_rejit_result(record if isinstance(record, Mapping) else None).get(
+                    "total_sites",
+                    0,
+                )
+                or 0
+            ) > 0
         ),
-        "site_totals": aggregate_sites(scan_results),
+        "site_totals": applied_site_totals_from_rejit_result(rejit_result if isinstance(rejit_result, Mapping) else None),
     }
 
     payload = {
@@ -474,7 +485,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         },
         "baseline": baseline,
         "scan_results": {str(key): value for key, value in scan_results.items()},
-        "scan_summary": scan_summary,
+        "site_summary": site_summary,
         "rejit_result": rejit_result,
         "post_rejit": post_rejit,
         "comparison": compare_phases(baseline, post_rejit),

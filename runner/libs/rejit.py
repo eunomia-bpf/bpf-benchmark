@@ -22,10 +22,13 @@ _PASS_TO_SITE_FIELD = {
     "const_prop": "const_prop_sites",
     "dce": "dce_sites",
     "branch_flip": "branch_flip_sites",
+    "bounds_check_merge": "bounds_check_merge_sites",
+    "bulk_memory": "bulk_memory_sites",
     "cond_select": "cmov_sites",
     "endian_fusion": "endian_sites",
     "extract": "extract_sites",
     "rotate": "rotate_sites",
+    "skb_load_bytes_spec": "skb_load_bytes_spec_sites",
     "wide_mem": "wide_sites",
 }
 _DEFAULT_REJIT_ENABLED_PASSES = ("map_inline", "const_prop", "dce")
@@ -456,6 +459,8 @@ def _zero_site_counts() -> dict[str, int]:
         "map_inline_sites": 0,
         "const_prop_sites": 0,
         "dce_sites": 0,
+        "bounds_check_merge_sites": 0,
+        "bulk_memory_sites": 0,
         "cmov_sites": 0,
         "wide_sites": 0,
         "rotate_sites": 0,
@@ -463,7 +468,9 @@ def _zero_site_counts() -> dict[str, int]:
         "extract_sites": 0,
         "bitfield_sites": 0,
         "endian_sites": 0,
+        "skb_load_bytes_spec_sites": 0,
         "branch_flip_sites": 0,
+        "other_sites": 0,
     }
 
 
@@ -508,15 +515,104 @@ def _site_counts_from_optimize_response(response: Mapping[str, Any]) -> dict[str
             "map_inline_sites",
             "const_prop_sites",
             "dce_sites",
+            "bounds_check_merge_sites",
+            "bulk_memory_sites",
             "cmov_sites",
             "wide_sites",
             "rotate_sites",
             "lea_sites",
             "extract_sites",
             "endian_sites",
+            "skb_load_bytes_spec_sites",
+            "branch_flip_sites",
+            "other_sites",
+        )
+    )
+    return counts
+
+
+def _applied_site_totals_from_passes(raw_passes: object) -> dict[str, int]:
+    counts = _zero_site_counts()
+    if not isinstance(raw_passes, list):
+        return counts
+    for item in raw_passes:
+        if not isinstance(item, Mapping):
+            continue
+        pass_name = str(item.get("pass_name") or item.get("pass") or "").strip()
+        field_name = _PASS_TO_SITE_FIELD.get(pass_name)
+        if field_name is None:
+            continue
+        try:
+            counts[field_name] += max(0, int(item.get("sites_applied", 0) or 0))
+        except (TypeError, ValueError):
+            continue
+    counts["bitfield_sites"] = counts["extract_sites"]
+    counts["total_sites"] = sum(
+        counts[field_name]
+        for field_name in (
+            "map_inline_sites",
+            "const_prop_sites",
+            "dce_sites",
+            "bounds_check_merge_sites",
+            "bulk_memory_sites",
+            "cmov_sites",
+            "wide_sites",
+            "rotate_sites",
+            "extract_sites",
+            "endian_sites",
+            "skb_load_bytes_spec_sites",
             "branch_flip_sites",
         )
     )
+    return counts
+
+
+def applied_site_totals_from_rejit_result(result: Mapping[str, Any] | None) -> dict[str, int]:
+    counts = _zero_site_counts()
+    if not isinstance(result, Mapping):
+        return counts
+
+    per_program = result.get("per_program")
+    if isinstance(per_program, Mapping):
+        for record in per_program.values():
+            program_counts = applied_site_totals_from_rejit_result(record if isinstance(record, Mapping) else None)
+            for field_name in counts:
+                counts[field_name] += int(program_counts.get(field_name, 0) or 0)
+        raw_counts = result.get("counts") if isinstance(result.get("counts"), Mapping) else {}
+        try:
+            applied_sites = max(0, int((raw_counts or {}).get("applied_sites", 0) or 0))
+        except (TypeError, ValueError):
+            applied_sites = 0
+        if applied_sites > counts["total_sites"]:
+            counts["other_sites"] += applied_sites - counts["total_sites"]
+            counts["total_sites"] = applied_sites
+        counts["bitfield_sites"] = counts["extract_sites"]
+        return counts
+
+    debug_result = result.get("debug_result") if isinstance(result.get("debug_result"), Mapping) else {}
+    raw_passes = debug_result.get("passes")
+    if raw_passes is None:
+        raw_passes = result.get("passes")
+    counts = _applied_site_totals_from_passes(raw_passes)
+
+    raw_counts = result.get("counts") if isinstance(result.get("counts"), Mapping) else {}
+    try:
+        applied_sites = max(
+            0,
+            int(
+                (raw_counts or {}).get(
+                    "applied_sites",
+                    (raw_counts or {}).get("total_sites", 0),
+                )
+                or 0
+            ),
+        )
+    except (TypeError, ValueError):
+        applied_sites = 0
+    if applied_sites > counts["total_sites"]:
+        counts["other_sites"] = applied_sites - counts["total_sites"]
+        counts["total_sites"] = applied_sites
+    counts["bitfield_sites"] = counts["extract_sites"]
     return counts
 
 
@@ -1062,6 +1158,7 @@ def _apply_daemon_rejit_via_socket(
 
 
 __all__ = [
+    "applied_site_totals_from_rejit_result",
     "apply_daemon_rejit",
     "benchmark_config_enabled_passes",
     "benchmark_config_iterations",

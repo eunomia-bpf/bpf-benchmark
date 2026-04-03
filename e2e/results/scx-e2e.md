@@ -1,6 +1,6 @@
 # scx_rusty End-to-End Benchmark
 
-- Generated: 2026-04-03T02:14:41.657168+00:00
+- Generated: 2026-04-03T04:57:03.135809+00:00
 - Mode: `scx_rusty_loader`
 - Duration per workload: `30s`
 - Smoke: `False`
@@ -15,20 +15,20 @@
 
 ## Loaded Programs
 
-- Programs: `13`; sites total=`727`, cmov=`0`, lea=`0`
+- Programs: `13`; applied sites total=`359`, breakdown=`map_inline=145, const_prop=150, dce=57, extract=6, bulk_memory=1`
 - Active ops: `[]`
 
 ## Baseline
 
-- hackbench: throughput=3.2516727475265426 runs/s, lat_p50_ms=295.5, ctx/s=166055.22937865576, agent_cpu=0.09999920807960477
+- hackbench: throughput=3.231404578385113 runs/s, lat_p50_ms=296.0, ctx/s=169742.2179038468, agent_cpu=0.06666501693638108
 
 ## Post-ReJIT
 
-- hackbench: throughput=3.272108516790395 runs/s, lat_p50_ms=296.0, ctx/s=426930.37487589876, agent_cpu=0.0
+- hackbench: throughput=3.270831218904767 runs/s, lat_p50_ms=295.0, ctx/s=430887.11349851626, agent_cpu=0.0
 
 ## Comparison
 
-- hackbench: throughput_delta=0.6284694325220003%, ctx_delta=157.10143334442625%, lat_p50_delta=0.1692047377326565%, agent_cpu_delta=-100.0%
+- hackbench: throughput_delta=1.2201084563467852%, ctx_delta=153.8479341318606%, lat_p50_delta=-0.33783783783783783%, agent_cpu_delta=-100.0%
 
 ## Limitations
 

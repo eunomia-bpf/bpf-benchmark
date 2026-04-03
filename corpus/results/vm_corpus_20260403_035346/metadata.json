@@ -1,0 +1,1258 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "completed_at": "2026-04-03T04:36:58.424442+00:00",
+  "details_dir": "details",
+  "filters": [],
+  "generated_at": "2026-04-03T04:36:58.448540+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-03T04:36:58.424442+00:00",
+  "launcher_boot_id": "1da87647-132f-42e0-84c3-3162f05ec96c",
+  "launcher_pid": 199,
+  "launcher_start_ticks": 199,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "optimization_summary": {
+    "all_comparable_geomean": 1.0328579392552086,
+    "applied_only_geomean": 1.0328579392552086,
+    "applied_sample_count": 61,
+    "comparison_exclusion_reason_counts": {
+      "missing_baseline_exec_ns": 43,
+      "missing_rejit_exec_ns": 11
+    },
+    "comparison_exclusion_reasons": [
+      {
+        "app": "bcc/biosnoop",
+        "applied": true,
+        "apply_error": "",
+        "label": "bcc/biosnoop:blk_account_io_merge_bio#436",
+        "program": "blk_account_io_merge_bio",
+        "program_id": 436,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/vfsstat",
+        "applied": true,
+        "apply_error": "",
+        "label": "bcc/vfsstat:fentry_vfs_fsync#577",
+        "program": "fentry_vfs_fsync",
+        "program_id": 577,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/vfsstat",
+        "applied": true,
+        "apply_error": "",
+        "label": "bcc/vfsstat:fentry_vfs_create#579",
+        "program": "fentry_vfs_create",
+        "program_id": 579,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/opensnoop",
+        "applied": true,
+        "apply_error": "",
+        "label": "bcc/opensnoop:tracepoint__syscalls__sys_enter_open#715",
+        "program": "tracepoint__syscalls__sys_enter_open",
+        "program_id": 715,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/opensnoop",
+        "applied": true,
+        "apply_error": "",
+        "label": "bcc/opensnoop:tracepoint__syscalls__sys_enter_openat2#718",
+        "program": "tracepoint__syscalls__sys_enter_openat2",
+        "program_id": 718,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/opensnoop",
+        "applied": true,
+        "apply_error": "",
+        "label": "bcc/opensnoop:tracepoint__syscalls__sys_exit_open#719",
+        "program": "tracepoint__syscalls__sys_exit_open",
+        "program_id": 719,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/opensnoop",
+        "applied": true,
+        "apply_error": "",
+        "label": "bcc/opensnoop:tracepoint__syscalls__sys_exit_openat2#721",
+        "program": "tracepoint__syscalls__sys_exit_openat2",
+        "program_id": 721,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_select_cpu#1440",
+        "program": "rusty_select_cpu",
+        "program_id": 1440,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_enqueue#1442",
+        "program": "rusty_enqueue",
+        "program_id": 1442,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_dispatch#1443",
+        "program": "rusty_dispatch",
+        "program_id": 1443,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_runnable#1444",
+        "program": "rusty_runnable",
+        "program_id": 1444,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_running#1445",
+        "program": "rusty_running",
+        "program_id": 1445,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_stopping#1446",
+        "program": "rusty_stopping",
+        "program_id": 1446,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_quiescent#1447",
+        "program": "rusty_quiescent",
+        "program_id": 1447,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_set_weight#1448",
+        "program": "rusty_set_weight",
+        "program_id": 1448,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_set_cpumask#1449",
+        "program": "rusty_set_cpumask",
+        "program_id": 1449,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_init_task#1450",
+        "program": "rusty_init_task",
+        "program_id": 1450,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_exit_task#1451",
+        "program": "rusty_exit_task",
+        "program_id": 1451,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_init#1452",
+        "program": "rusty_init",
+        "program_id": 1452,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_exit#1453",
+        "program": "rusty_exit",
+        "program_id": 1453,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tetragon/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tetragon/default:execve_rate#1607",
+        "program": "execve_rate",
+        "program_id": 1607,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tetragon/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tetragon/default:execve_send#1608",
+        "program": "execve_send",
+        "program_id": 1608,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tetragon/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tetragon/default:execve_map_update#1614",
+        "program": "execve_map_update",
+        "program_id": 1614,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:sys_enter_init#1934",
+        "program": "sys_enter_init",
+        "program_id": 1934,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:sys_enter_submit#1935",
+        "program": "sys_enter_submit",
+        "program_id": 1935,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:sys_exit_init#1937",
+        "program": "sys_exit_init",
+        "program_id": 1937,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:sys_exit_submit#1938",
+        "program": "sys_exit_submit",
+        "program_id": 1938,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:syscall__execve_enter#1939",
+        "program": "syscall__execve_enter",
+        "program_id": 1939,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:syscall__execve_exit#1940",
+        "program": "syscall__execve_exit",
+        "program_id": 1940,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:syscall__execveat_enter#1941",
+        "program": "syscall__execveat_enter",
+        "program_id": 1941,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:syscall__execveat_exit#1942",
+        "program": "syscall__execveat_exit",
+        "program_id": 1942,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:sys_dup_exit_tail#1943",
+        "program": "sys_dup_exit_tail",
+        "program_id": 1943,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:lkm_seeker_modtree_loop#1946",
+        "program": "lkm_seeker_modtree_loop",
+        "program_id": 1946,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:lkm_seeker_kset_tail#1948",
+        "program": "lkm_seeker_kset_tail",
+        "program_id": 1948,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:lkm_seeker_mod_tree_tail#1949",
+        "program": "lkm_seeker_mod_tree_tail",
+        "program_id": 1949,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:lkm_seeker_proc_tail#1950",
+        "program": "lkm_seeker_proc_tail",
+        "program_id": 1950,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:lkm_seeker_new_mod_only_tail#1951",
+        "program": "lkm_seeker_new_mod_only_tail",
+        "program_id": 1951,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:sched_process_exec_event_submit_tail#1954",
+        "program": "sched_process_exec_event_submit_tail",
+        "program_id": 1954,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:syscall__accept4#1958",
+        "program": "syscall__accept4",
+        "program_id": 1958,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:send_bin#1961",
+        "program": "send_bin",
+        "program_id": 1961,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:send_bin_tp#1962",
+        "program": "send_bin_tp",
+        "program_id": 1962,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:trace_ret_vfs_write_tail#1963",
+        "program": "trace_ret_vfs_write_tail",
+        "program_id": 1963,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:trace_ret_vfs_writev_tail#1964",
+        "program": "trace_ret_vfs_writev_tail",
+        "program_id": 1964,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:trace_ret_kernel_write_tail#1965",
+        "program": "trace_ret_kernel_write_tail",
+        "program_id": 1965,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:trace_ret_vfs_read_tail#1966",
+        "program": "trace_ret_vfs_read_tail",
+        "program_id": 1966,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:trace_ret_vfs_readv_tail#1967",
+        "program": "trace_ret_vfs_readv_tail",
+        "program_id": 1967,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:syscall__init_module#1968",
+        "program": "syscall__init_module",
+        "program_id": 1968,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:process_execute_failed_tail#1970",
+        "program": "process_execute_failed_tail",
+        "program_id": 1970,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:syscall_checker#1971",
+        "program": "syscall_checker",
+        "program_id": 1971,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:cgroup_mkdir_signal#1972",
+        "program": "cgroup_mkdir_signal",
+        "program_id": 1972,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:cgroup_rmdir_signal#1973",
+        "program": "cgroup_rmdir_signal",
+        "program_id": 1973,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:uprobe__features_fallback_arena_tailcall#1974",
+        "program": "uprobe__features_fallback_arena_tailcall",
+        "program_id": 1974,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:uprobe__features_fallback_helper_tailcall#1975",
+        "program": "uprobe__features_fallback_helper_tailcall",
+        "program_id": 1975,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "label": "tracee/default:uprobe__features_fallback_minimal_tailcall#1976",
+        "program": "uprobe__features_fallback_minimal_tailcall",
+        "program_id": 1976,
+        "reason": "missing_baseline_exec_ns",
+        "unit": "program"
+      }
+    ],
+    "discovered_programs": 114,
+    "per_app": [
+      {
+        "all_comparable_geomean": 1.0160895129713123,
+        "app": "bcc/capable",
+        "applied_only_geomean": 1.0160895129713123,
+        "applied_program_count": 2,
+        "comparable_program_count": 2,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 2,
+        "runner": "bcc",
+        "sample_count": 2,
+        "status": "ok",
+        "workload": "exec_storm"
+      },
+      {
+        "all_comparable_geomean": 1.0044852496612227,
+        "app": "bcc/execsnoop",
+        "applied_only_geomean": 1.0044852496612227,
+        "applied_program_count": 2,
+        "comparable_program_count": 2,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 2,
+        "runner": "bcc",
+        "sample_count": 2,
+        "status": "ok",
+        "workload": "exec_storm"
+      },
+      {
+        "all_comparable_geomean": 1.003051810606936,
+        "app": "bcc/bindsnoop",
+        "applied_only_geomean": 1.003051810606936,
+        "applied_program_count": 4,
+        "comparable_program_count": 4,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 4,
+        "runner": "bcc",
+        "sample_count": 4,
+        "status": "ok",
+        "workload": "bind_storm"
+      },
+      {
+        "all_comparable_geomean": 1.0213634533625093,
+        "app": "bcc/biosnoop",
+        "applied_only_geomean": 1.0213634533625093,
+        "applied_program_count": 4,
+        "comparable_program_count": 3,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/biosnoop:blk_account_io_merge_bio#436",
+            "program": "blk_account_io_merge_bio",
+            "program_id": 436,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 4,
+        "runner": "bcc",
+        "sample_count": 3,
+        "status": "ok",
+        "workload": "block_io"
+      },
+      {
+        "all_comparable_geomean": 1.0010834967089335,
+        "app": "bcc/vfsstat",
+        "applied_only_geomean": 1.0010834967089335,
+        "applied_program_count": 8,
+        "comparable_program_count": 6,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/vfsstat:fentry_vfs_fsync#577",
+            "program": "fentry_vfs_fsync",
+            "program_id": 577,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/vfsstat:fentry_vfs_create#579",
+            "program": "fentry_vfs_create",
+            "program_id": 579,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 8,
+        "runner": "bcc",
+        "sample_count": 6,
+        "status": "ok",
+        "workload": "vfs_create_write_fsync"
+      },
+      {
+        "all_comparable_geomean": 1.0030631668659948,
+        "app": "bcc/opensnoop",
+        "applied_only_geomean": 1.0030631668659948,
+        "applied_program_count": 6,
+        "comparable_program_count": 2,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/opensnoop:tracepoint__syscalls__sys_enter_open#715",
+            "program": "tracepoint__syscalls__sys_enter_open",
+            "program_id": 715,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/opensnoop:tracepoint__syscalls__sys_enter_openat2#718",
+            "program": "tracepoint__syscalls__sys_enter_openat2",
+            "program_id": 718,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/opensnoop:tracepoint__syscalls__sys_exit_open#719",
+            "program": "tracepoint__syscalls__sys_exit_open",
+            "program_id": 719,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/opensnoop:tracepoint__syscalls__sys_exit_openat2#721",
+            "program": "tracepoint__syscalls__sys_exit_openat2",
+            "program_id": 721,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 6,
+        "runner": "bcc",
+        "sample_count": 2,
+        "status": "ok",
+        "workload": "file_open_storm"
+      },
+      {
+        "all_comparable_geomean": 1.0247380066520566,
+        "app": "bcc/syscount",
+        "applied_only_geomean": 1.0247380066520566,
+        "applied_program_count": 2,
+        "comparable_program_count": 2,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 2,
+        "runner": "bcc",
+        "sample_count": 2,
+        "status": "ok",
+        "workload": "file_open_storm"
+      },
+      {
+        "all_comparable_geomean": 0.9836783338712953,
+        "app": "bcc/tcpconnect",
+        "applied_only_geomean": 0.9836783338712953,
+        "applied_program_count": 4,
+        "comparable_program_count": 4,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 4,
+        "runner": "bcc",
+        "sample_count": 4,
+        "status": "ok",
+        "workload": "network"
+      },
+      {
+        "all_comparable_geomean": 1.071823217359278,
+        "app": "bcc/tcplife",
+        "applied_only_geomean": 1.071823217359278,
+        "applied_program_count": 1,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "bcc",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "network"
+      },
+      {
+        "all_comparable_geomean": 0.9848683710781921,
+        "app": "bcc/runqlat",
+        "applied_only_geomean": 0.9848683710781921,
+        "applied_program_count": 3,
+        "comparable_program_count": 3,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 3,
+        "runner": "bcc",
+        "sample_count": 3,
+        "status": "ok",
+        "workload": "hackbench"
+      },
+      {
+        "all_comparable_geomean": 0.9708824599954625,
+        "app": "scx/rusty",
+        "applied_only_geomean": 0.9708824599954625,
+        "applied_program_count": 13,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [
+          {
+            "label": "scx/rusty:rusty_select_cpu#1440",
+            "program": "rusty_select_cpu",
+            "program_id": 1440,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_enqueue#1442",
+            "program": "rusty_enqueue",
+            "program_id": 1442,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_dispatch#1443",
+            "program": "rusty_dispatch",
+            "program_id": 1443,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_runnable#1444",
+            "program": "rusty_runnable",
+            "program_id": 1444,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_running#1445",
+            "program": "rusty_running",
+            "program_id": 1445,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_stopping#1446",
+            "program": "rusty_stopping",
+            "program_id": 1446,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_quiescent#1447",
+            "program": "rusty_quiescent",
+            "program_id": 1447,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_set_weight#1448",
+            "program": "rusty_set_weight",
+            "program_id": 1448,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_set_cpumask#1449",
+            "program": "rusty_set_cpumask",
+            "program_id": 1449,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_init_task#1450",
+            "program": "rusty_init_task",
+            "program_id": 1450,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_exit_task#1451",
+            "program": "rusty_exit_task",
+            "program_id": 1451,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_init#1452",
+            "program": "rusty_init",
+            "program_id": 1452,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_exit#1453",
+            "program": "rusty_exit",
+            "program_id": 1453,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "app",
+        "program_count": 13,
+        "runner": "scx",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "hackbench"
+      },
+      {
+        "all_comparable_geomean": 1.4186202396050978,
+        "app": "tetragon/default",
+        "applied_only_geomean": 1.4186202396050978,
+        "applied_program_count": 8,
+        "comparable_program_count": 5,
+        "comparison_exclusions": [
+          {
+            "label": "tetragon/default:execve_rate#1607",
+            "program": "execve_rate",
+            "program_id": 1607,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tetragon/default:execve_send#1608",
+            "program": "execve_send",
+            "program_id": 1608,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tetragon/default:execve_map_update#1614",
+            "program": "execve_map_update",
+            "program_id": 1614,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 8,
+        "runner": "tetragon",
+        "sample_count": 5,
+        "status": "ok",
+        "workload": "exec_storm"
+      },
+      {
+        "all_comparable_geomean": 1.0136413784334597,
+        "app": "katran",
+        "applied_only_geomean": 1.0136413784334597,
+        "applied_program_count": 1,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "katran",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "test_run"
+      },
+      {
+        "all_comparable_geomean": 0.993052742244972,
+        "app": "tracee/default",
+        "applied_only_geomean": 0.993052742244972,
+        "applied_program_count": 44,
+        "comparable_program_count": 13,
+        "comparison_exclusions": [
+          {
+            "label": "tracee/default:sys_enter_init#1934",
+            "program": "sys_enter_init",
+            "program_id": 1934,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:sys_enter_submit#1935",
+            "program": "sys_enter_submit",
+            "program_id": 1935,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:sys_exit_init#1937",
+            "program": "sys_exit_init",
+            "program_id": 1937,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:sys_exit_submit#1938",
+            "program": "sys_exit_submit",
+            "program_id": 1938,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:syscall__execve_enter#1939",
+            "program": "syscall__execve_enter",
+            "program_id": 1939,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:syscall__execve_exit#1940",
+            "program": "syscall__execve_exit",
+            "program_id": 1940,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:syscall__execveat_enter#1941",
+            "program": "syscall__execveat_enter",
+            "program_id": 1941,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:syscall__execveat_exit#1942",
+            "program": "syscall__execveat_exit",
+            "program_id": 1942,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:sys_dup_exit_tail#1943",
+            "program": "sys_dup_exit_tail",
+            "program_id": 1943,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:lkm_seeker_modtree_loop#1946",
+            "program": "lkm_seeker_modtree_loop",
+            "program_id": 1946,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:lkm_seeker_kset_tail#1948",
+            "program": "lkm_seeker_kset_tail",
+            "program_id": 1948,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:lkm_seeker_mod_tree_tail#1949",
+            "program": "lkm_seeker_mod_tree_tail",
+            "program_id": 1949,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:lkm_seeker_proc_tail#1950",
+            "program": "lkm_seeker_proc_tail",
+            "program_id": 1950,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:lkm_seeker_new_mod_only_tail#1951",
+            "program": "lkm_seeker_new_mod_only_tail",
+            "program_id": 1951,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:sched_process_exec_event_submit_tail#1954",
+            "program": "sched_process_exec_event_submit_tail",
+            "program_id": 1954,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:syscall__accept4#1958",
+            "program": "syscall__accept4",
+            "program_id": 1958,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:send_bin#1961",
+            "program": "send_bin",
+            "program_id": 1961,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:send_bin_tp#1962",
+            "program": "send_bin_tp",
+            "program_id": 1962,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:trace_ret_vfs_write_tail#1963",
+            "program": "trace_ret_vfs_write_tail",
+            "program_id": 1963,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:trace_ret_vfs_writev_tail#1964",
+            "program": "trace_ret_vfs_writev_tail",
+            "program_id": 1964,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:trace_ret_kernel_write_tail#1965",
+            "program": "trace_ret_kernel_write_tail",
+            "program_id": 1965,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:trace_ret_vfs_read_tail#1966",
+            "program": "trace_ret_vfs_read_tail",
+            "program_id": 1966,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:trace_ret_vfs_readv_tail#1967",
+            "program": "trace_ret_vfs_readv_tail",
+            "program_id": 1967,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:syscall__init_module#1968",
+            "program": "syscall__init_module",
+            "program_id": 1968,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:process_execute_failed_tail#1970",
+            "program": "process_execute_failed_tail",
+            "program_id": 1970,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:syscall_checker#1971",
+            "program": "syscall_checker",
+            "program_id": 1971,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:cgroup_mkdir_signal#1972",
+            "program": "cgroup_mkdir_signal",
+            "program_id": 1972,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:cgroup_rmdir_signal#1973",
+            "program": "cgroup_rmdir_signal",
+            "program_id": 1973,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:uprobe__features_fallback_arena_tailcall#1974",
+            "program": "uprobe__features_fallback_arena_tailcall",
+            "program_id": 1974,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:uprobe__features_fallback_helper_tailcall#1975",
+            "program": "uprobe__features_fallback_helper_tailcall",
+            "program_id": 1975,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:uprobe__features_fallback_minimal_tailcall#1976",
+            "program": "uprobe__features_fallback_minimal_tailcall",
+            "program_id": 1976,
+            "reason": "missing_baseline_exec_ns",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 44,
+        "runner": "tracee",
+        "sample_count": 13,
+        "status": "ok",
+        "workload": "tracee_default"
+      },
+      {
+        "all_comparable_geomean": 0.9539851197427093,
+        "app": "bpftrace/capable",
+        "applied_only_geomean": 0.9539851197427093,
+        "applied_program_count": 1,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "bpftrace",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "exec_storm"
+      },
+      {
+        "all_comparable_geomean": 0.9355494011405436,
+        "app": "bpftrace/biosnoop",
+        "applied_only_geomean": 0.9355494011405436,
+        "applied_program_count": 2,
+        "comparable_program_count": 2,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 2,
+        "runner": "bpftrace",
+        "sample_count": 2,
+        "status": "ok",
+        "workload": "block_io"
+      },
+      {
+        "all_comparable_geomean": 1.064051075648645,
+        "app": "bpftrace/vfsstat",
+        "applied_only_geomean": 1.064051075648645,
+        "applied_program_count": 4,
+        "comparable_program_count": 4,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 4,
+        "runner": "bpftrace",
+        "sample_count": 4,
+        "status": "ok",
+        "workload": "vfs_create_write_fsync"
+      },
+      {
+        "all_comparable_geomean": 0.9943794987383621,
+        "app": "bpftrace/runqlat",
+        "applied_only_geomean": 0.9943794987383621,
+        "applied_program_count": 3,
+        "comparable_program_count": 3,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 3,
+        "runner": "bpftrace",
+        "sample_count": 3,
+        "status": "ok",
+        "workload": "hackbench"
+      },
+      {
+        "all_comparable_geomean": 1.226850247087777,
+        "app": "bpftrace/tcplife",
+        "applied_only_geomean": 1.226850247087777,
+        "applied_program_count": 1,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "bpftrace",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "network"
+      },
+      {
+        "all_comparable_geomean": 0.9408526175549741,
+        "app": "bpftrace/tcpretrans",
+        "applied_only_geomean": 0.9408526175549741,
+        "applied_program_count": 1,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "bpftrace",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "tcp_retransmit"
+      }
+    ],
+    "sample_count": 61,
+    "selected_apps": 20,
+    "statuses": {
+      "ok": 20
+    }
+  },
+  "output_hint_json": "corpus/results/vm_corpus.json",
+  "output_hint_md": "corpus/results/vm_corpus.md",
+  "run_type": "vm_corpus",
+  "samples": 30,
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "started_at": "2026-04-03T03:53:46.040593+00:00",
+  "status": "completed",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

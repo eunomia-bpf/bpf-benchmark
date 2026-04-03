@@ -109,6 +109,72 @@ def test_build_markdown_keeps_preflight_for_error_payload() -> None:
     assert "apply_runs=0" in markdown
 
 
+def test_build_program_summary_uses_applied_sites_instead_of_scan_candidates() -> None:
+    baseline = {
+        "workloads": [
+            {
+                "bpf": {
+                    "programs": {
+                        "17": {
+                            "id": 17,
+                            "name": "execve_rate",
+                            "type": "kprobe",
+                            "run_cnt_delta": 10,
+                            "run_time_ns_delta": 1000,
+                        }
+                    }
+                }
+            }
+        ]
+    }
+    post = {
+        "workloads": [
+            {
+                "bpf": {
+                    "programs": {
+                        "17": {
+                            "id": 17,
+                            "name": "execve_rate",
+                            "type": "kprobe",
+                            "run_cnt_delta": 12,
+                            "run_time_ns_delta": 900,
+                        }
+                    }
+                }
+            }
+        ]
+    }
+    rejit_result = {
+        "per_program": {
+            17: {
+                "counts": {"applied_sites": 2},
+                "debug_result": {
+                    "passes": [
+                        {"pass_name": "map_inline", "sites_applied": 1},
+                        {"pass_name": "const_prop", "sites_applied": 1},
+                    ]
+                },
+            }
+        }
+    }
+
+    summary = case.build_program_summary(rejit_result, baseline, post)
+
+    assert summary == [
+        {
+            "id": 17,
+            "name": "execve_rate",
+            "type": "kprobe",
+            "sites": 2,
+            "stock_avg_ns": 100.0,
+            "rejit_avg_ns": 75.0,
+            "speedup": pytest.approx(100.0 / 75.0),
+            "stock_events": 10,
+            "rejit_events": 12,
+        }
+    ]
+
+
 class _FakeProcess:
     def __init__(self) -> None:
         self.pid = 4242

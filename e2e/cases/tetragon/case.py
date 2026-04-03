@@ -40,6 +40,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_total_cpu_usage,
     start_sampler_thread,
 )
+from runner.libs.rejit import applied_site_totals_from_rejit_result  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
@@ -383,18 +384,21 @@ def summarize_program_activity(
 
 
 def build_program_summary(
-    scan_results: Mapping[int, Mapping[str, object]],
+    rejit_result: Mapping[str, object] | None,
     baseline: Mapping[str, object],
     post: Mapping[str, object] | None,
 ) -> list[dict[str, object]]:
     baseline_programs = aggregate_programs(baseline)
     post_programs = aggregate_programs(post or {})
+    per_program = (rejit_result or {}).get("per_program") if isinstance(rejit_result, Mapping) else {}
     rows: list[dict[str, object]] = []
     for prog_id in sorted(set(baseline_programs) | set(post_programs), key=int):
         before = baseline_programs.get(prog_id, {})
         after = post_programs.get(prog_id, {})
-        scan = scan_results.get(int(prog_id), {}) if isinstance(scan_results, dict) else {}
-        sites = ((scan.get("sites") or {}).get("total_sites"))
+        apply_record = {}
+        if isinstance(per_program, Mapping):
+            apply_record = per_program.get(int(prog_id)) or per_program.get(str(prog_id)) or {}
+        sites = applied_site_totals_from_rejit_result(apply_record if isinstance(apply_record, Mapping) else None).get("total_sites")
         stock_avg = before.get("avg_ns_per_run")
         rejit_avg = after.get("avg_ns_per_run")
         rows.append(
@@ -846,7 +850,10 @@ def daemon_payload(
         "scan_results": {str(key): value for key, value in scan_results.items()},
         "rejit_result": rejit_result,
         "post_rejit": post_rejit,
-        "programs": build_program_summary(scan_results, baseline, post_rejit),
+        "site_summary": {
+            "site_totals": applied_site_totals_from_rejit_result(rejit_result if isinstance(rejit_result, Mapping) else None),
+        },
+        "programs": build_program_summary(rejit_result if isinstance(rejit_result, Mapping) else None, baseline, post_rejit),
         "comparison": comparison,
         "limitations": limitations,
     }
