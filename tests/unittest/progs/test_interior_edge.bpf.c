@@ -38,7 +38,9 @@ int test_interior_edge(struct xdp_md *ctx)
 	false_v = p[3];
 	asm volatile(
 		"%[x] = %[true_v]\n\t"
-		"if %[gate] & 1 goto +1\n\t"
+		"r1 = %[gate]\n\t"
+		"r1 &= 1\n\t"
+		"if r1 != 0 goto +1\n\t"
 		"%[x] = %[true_v]\n\t"
 		"if %[cond_a] > %[cond_b] goto +1\n\t"
 		"%[x] = %[false_v]\n\t"
@@ -47,7 +49,8 @@ int test_interior_edge(struct xdp_md *ctx)
 		  [cond_a] "r"(cond_a),
 		  [cond_b] "r"(cond_b),
 		  [true_v] "r"(true_v),
-		  [false_v] "r"(false_v));
+		  [false_v] "r"(false_v)
+		: "r1");
 
 	slot = bpf_map_lookup_elem(&result_map, &key);
 	if (slot)

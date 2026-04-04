@@ -28,7 +28,7 @@
 
 #define STRUCT_OPS_VALUE_A 1111
 #define STRUCT_OPS_VALUE_B 2222
-#define STRUCT_OPS_CC_NAME "rjhtswp"
+#define STRUCT_OPS_CC_NAME "rjhtslr"
 #define MAP_WAIT_TIMEOUT_MS 1200
 #define MAP_SAMPLE_INTERVAL_US 25000
 #define WORKER_INTERVAL_US 10000
@@ -430,7 +430,8 @@ static void *struct_ops_worker(void *arg)
 		}
 
 		if (setsockopt(fd, IPPROTO_TCP, TCP_CONGESTION,
-			       STRUCT_OPS_CC_NAME, strlen(STRUCT_OPS_CC_NAME)) == 0)
+			       STRUCT_OPS_CC_NAME,
+			       strlen(STRUCT_OPS_CC_NAME)) == 0)
 			__atomic_fetch_add(&ctx->ok, 1, __ATOMIC_RELAXED);
 		else
 			__atomic_fetch_add(&ctx->err, 1, __ATOMIC_RELAXED);
@@ -531,11 +532,12 @@ static void test_t1_struct_ops_refresh_late_rollback(void)
 	int prog_fd;
 	int orig_cnt;
 
-	snprintf(obj_path, sizeof(obj_path), "%s/test_hotswap_struct_ops.bpf.o",
+	snprintf(obj_path, sizeof(obj_path),
+		 "%s/test_hotswap_struct_ops_late_rollback.bpf.o",
 		 g_progs_dir);
 	obj = bpf_object__open_file(obj_path, NULL);
 	if (!obj || libbpf_get_error(obj)) {
-		TEST_FAIL(name, "cannot open test_hotswap_struct_ops.bpf.o");
+		TEST_FAIL(name, "cannot open test_hotswap_struct_ops_late_rollback.bpf.o");
 		obj = NULL;
 		goto out;
 	}
@@ -835,11 +837,12 @@ static void test_t2_struct_ops_rejit_detach_race(void)
 	int prog_fd = -1;
 	int map_fd = -1;
 
-	snprintf(obj_path, sizeof(obj_path), "%s/test_hotswap_struct_ops.bpf.o",
+	snprintf(obj_path, sizeof(obj_path),
+		 "%s/test_hotswap_struct_ops_late_rollback.bpf.o",
 		 g_progs_dir);
 	obj = bpf_object__open_file(obj_path, NULL);
 	if (!obj || libbpf_get_error(obj)) {
-		TEST_FAIL(name, "cannot open test_hotswap_struct_ops.bpf.o");
+		TEST_FAIL(name, "cannot open test_hotswap_struct_ops_late_rollback.bpf.o");
 		obj = NULL;
 		goto out;
 	}

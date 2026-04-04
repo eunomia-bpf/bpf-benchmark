@@ -38,4 +38,8 @@ for ko in "$MODULE_DIR"/*.ko; do
         loaded=$((loaded + 1))
     fi
 done
+if [ "$total" -eq 0 ]; then
+    echo "ERROR: no kinsn modules found in $MODULE_DIR" >&2
+    exit 1
+fi
 echo "kinsn modules: ${loaded}/${total} loaded"

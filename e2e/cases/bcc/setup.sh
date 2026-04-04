@@ -18,6 +18,7 @@ VENDOR_BPFTOOL="${REPO_ROOT}/runner/build/vendor/bpftool/bootstrap/bpftool"
 VENDOR_INCLUDES="-I${BUILD_OUTPUT} -I${REPO_ROOT}/vendor/libbpf/include -I${REPO_ROOT}/vendor/libbpf/include/uapi -I${REPO_ROOT}/vendor/libbpf/src"
 # Binaries we actually need — must match config.yaml tool names
 REQUIRED_TOOLS=(tcplife biosnoop runqlat syscount execsnoop opensnoop capable vfsstat tcpconnect bindsnoop fsdist)
+REQUIRE_BUNDLED_TOOLS="${BCC_REQUIRE_BUNDLED_TOOLS:-0}"
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -33,6 +34,21 @@ need_tool() {
   command -v "${tool}" >/dev/null 2>&1
 }
 
+binary_matches_host_arch() {
+  local candidate="$1"
+  case "$(uname -m)" in
+    aarch64|arm64)
+      file "${candidate}" | grep -F "ARM aarch64" >/dev/null
+      ;;
+    x86_64|amd64)
+      file "${candidate}" | grep -F "x86-64" >/dev/null
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
 # ── Validate source tree ───────────────────────────────────────────────────────
 if [[ ! -d "${LIBBPF_TOOLS_SRC}" ]]; then
   echo "ERROR: libbpf-tools source not found at ${LIBBPF_TOOLS_SRC}" >&2
@@ -45,7 +61,46 @@ if [[ ! -f "${LIBBPF_TOOLS_SRC}/Makefile" ]]; then
   exit 1
 fi
 
-# ── Install missing build tools ────────────────────────────────────────────────
+# ── Check if rebuild is needed ─────────────────────────────────────────────────
+all_present=true
+for tool_name in "${REQUIRED_TOOLS[@]}"; do
+  if [[ ! -x "${BUILD_OUTPUT}/${tool_name}" ]]; then
+    all_present=false
+    break
+  fi
+done
+
+if "${all_present}"; then
+  for tool_name in "${REQUIRED_TOOLS[@]}"; do
+    if ! binary_matches_host_arch "${BUILD_OUTPUT}/${tool_name}"; then
+      echo "ERROR: bundled BCC tool has the wrong architecture: ${BUILD_OUTPUT}/${tool_name}" >&2
+      exit 1
+    fi
+  done
+  missing_workload_tools=()
+  for tool in stress-ng fio curl dd setpriv; do
+    if ! need_tool "${tool}"; then
+      missing_workload_tools+=("${tool}")
+    fi
+  done
+  if [[ "${#missing_workload_tools[@]}" -gt 0 ]]; then
+    if [[ "${REQUIRE_BUNDLED_TOOLS}" == "1" ]]; then
+      echo "ERROR: missing required workload tools for bundled BCC benchmark: ${missing_workload_tools[*]}" >&2
+      exit 1
+    fi
+    apt_install stress-ng fio curl coreutils util-linux
+  fi
+  echo "BCC_TOOLS_DIR=${BUILD_OUTPUT}"
+  exit 0
+fi
+
+if [[ "${REQUIRE_BUNDLED_TOOLS}" == "1" ]]; then
+  echo "ERROR: bundled BCC libbpf-tools are missing; expected prebuilt artifacts under ${BUILD_OUTPUT}" >&2
+  exit 1
+fi
+
+# ── Build ──────────────────────────────────────────────────────────────────────
+# Install missing build tools only when a rebuild is actually required.
 missing_build_tools=()
 for tool in make clang llvm-strip pkg-config; do
   if ! need_tool "${tool}"; then
@@ -56,7 +111,6 @@ if [[ "${#missing_build_tools[@]}" -gt 0 ]]; then
   apt_install clang llvm make pkg-config libelf-dev zlib1g-dev
 fi
 
-# ── Install missing runtime workload tools ─────────────────────────────────────
 missing_workload_tools=()
 for tool in stress-ng fio curl dd setpriv; do
   if ! need_tool "${tool}"; then
@@ -67,27 +121,6 @@ if [[ "${#missing_workload_tools[@]}" -gt 0 ]]; then
   apt_install stress-ng fio curl coreutils util-linux
 fi
 
-# ── Check if rebuild is needed ─────────────────────────────────────────────────
-all_present=true
-for tool_name in "${REQUIRED_TOOLS[@]}"; do
-  if [[ ! -x "${LIBBPF_TOOLS_SRC}/${tool_name}" ]] && [[ ! -x "${BUILD_OUTPUT}/${tool_name}" ]]; then
-    all_present=false
-    break
-  fi
-done
-
-if "${all_present}"; then
-  # Prefer binaries in BUILD_OUTPUT directory (standard libbpf-tools output location)
-  # Fall back to top-level LIBBPF_TOOLS_SRC
-  if [[ -x "${BUILD_OUTPUT}/tcplife" ]]; then
-    echo "BCC_TOOLS_DIR=${BUILD_OUTPUT}"
-  else
-    echo "BCC_TOOLS_DIR=${LIBBPF_TOOLS_SRC}"
-  fi
-  exit 0
-fi
-
-# ── Build ──────────────────────────────────────────────────────────────────────
 if ! need_tool clang; then
   echo "ERROR: clang is required to build libbpf-tools but was not found" >&2
   exit 1
@@ -139,14 +172,17 @@ fi
 
 # Verify the expected binaries are present
 for tool_name in "${REQUIRED_TOOLS[@]}"; do
-  if [[ ! -x "${LIBBPF_TOOLS_SRC}/${tool_name}" ]] && [[ ! -x "${BUILD_OUTPUT}/${tool_name}" ]]; then
+  if [[ ! -x "${BUILD_OUTPUT}/${tool_name}" ]]; then
     echo "ERROR: expected binary '${tool_name}' not found after build" >&2
     exit 1
   fi
 done
 
-if [[ -x "${BUILD_OUTPUT}/tcplife" ]]; then
-  echo "BCC_TOOLS_DIR=${BUILD_OUTPUT}"
-else
-  echo "BCC_TOOLS_DIR=${LIBBPF_TOOLS_SRC}"
-fi
+for tool_name in "${REQUIRED_TOOLS[@]}"; do
+  if ! binary_matches_host_arch "${BUILD_OUTPUT}/${tool_name}"; then
+    echo "ERROR: built BCC tool has the wrong architecture: ${BUILD_OUTPUT}/${tool_name}" >&2
+    exit 1
+  fi
+done
+
+echo "BCC_TOOLS_DIR=${BUILD_OUTPUT}"

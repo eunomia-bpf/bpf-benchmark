@@ -15,7 +15,7 @@ struct {
 	__type(value, struct hotswap_stats);
 } stats_map SEC(".maps");
 
-SEC("kprobe/__x64_sys_getpid")
+SEC("kprobe")
 int rejit_hotswap_kprobe(void *ctx)
 {
 	__u32 key = 0;

@@ -123,6 +123,30 @@ static void *kprobe_worker(void *arg)
 	return NULL;
 }
 
+static struct bpf_link *attach_kprobe_getpid(struct bpf_program *prog)
+{
+	static const char * const targets[] = {
+		"__arm64_sys_getpid",
+		"__x64_sys_getpid",
+		"__se_sys_getpid",
+		"__do_sys_getpid",
+		"ksys_getpid",
+		"sys_getpid",
+	};
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(targets); i++) {
+		struct bpf_link *link;
+
+		link = bpf_program__attach_kprobe(prog, false, targets[i]);
+		if (!link || libbpf_get_error(link))
+			continue;
+		return link;
+	}
+
+	return NULL;
+}
+
 static int test_rejit_hotswap_kprobe(void)
 {
 	const char *name = "rejit_hotswap_kprobe";
@@ -179,7 +203,7 @@ static int test_rejit_hotswap_kprobe(void)
 	}
 	fd_array[0] = map_fd;
 
-	link = bpf_program__attach(prog);
+	link = attach_kprobe_getpid(prog);
 	if (!link || libbpf_get_error(link)) {
 		TEST_FAIL(name, "failed to attach kprobe program");
 		link = NULL;

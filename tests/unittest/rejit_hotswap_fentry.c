@@ -171,6 +171,7 @@ static int preflight_fentry_rejit(int prog_fd, const struct bpf_insn *orig_insns
 static int set_fentry_attach_target(struct bpf_program *prog)
 {
 	static const char * const targets[] = {
+		"__arm64_sys_getpid",
 		"__x64_sys_getpid",
 		"__se_sys_getpid",
 		"__do_sys_getpid",

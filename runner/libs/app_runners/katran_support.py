@@ -228,6 +228,9 @@ def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
     candidates: list[Path] = []
     if explicit is not None and str(explicit).strip():
         candidates.append(Path(explicit).expanduser().resolve())
+    env_binary = os.environ.get("KATRAN_SERVER_BINARY", "").strip()
+    if env_binary:
+        candidates.append(Path(env_binary).expanduser().resolve())
     candidates.extend(candidate.resolve() for candidate in katran_server_binary_candidates())
     for candidate in candidates:
         if candidate.is_file() and os.access(candidate, os.X_OK):
@@ -242,6 +245,13 @@ def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
 
 def katran_server_env(server_binary: Path) -> dict[str, str]:
     library_dirs: list[str] = []
+    env_lib_dir = os.environ.get("KATRAN_SERVER_LIB_DIR", "").strip()
+    if env_lib_dir:
+        candidate = Path(env_lib_dir).expanduser()
+        if candidate.is_dir():
+            rendered = str(candidate.resolve())
+            if rendered not in library_dirs:
+                library_dirs.append(rendered)
     for candidate in (
         server_binary.resolve().parent.parent / "lib",
         DEFAULT_KATRAN_SERVER_LIB_DIR,

@@ -4,6 +4,10 @@
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 
+#ifndef HOTSWAP_STRUCT_OPS_NAME
+#define HOTSWAP_STRUCT_OPS_NAME "rjhtswp"
+#endif
+
 struct {
 	__uint(type, BPF_MAP_TYPE_ARRAY);
 	__uint(max_entries, 1);
@@ -46,7 +50,7 @@ struct tcp_congestion_ops rejit_hotswap_ca = {
 	.ssthresh = (void *)rejit_hotswap_struct_ops_ssthresh,
 	.cong_avoid = (void *)rejit_hotswap_struct_ops_cong_avoid,
 	.undo_cwnd = (void *)rejit_hotswap_struct_ops_undo_cwnd,
-	.name = "rjhtswp",
+	.name = HOTSWAP_STRUCT_OPS_NAME,
 };
 
 char LICENSE[] SEC("license") = "GPL";
