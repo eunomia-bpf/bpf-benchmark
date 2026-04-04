@@ -63,7 +63,7 @@ usage: aws_arm64.sh <launch|setup|benchmark|terminate|full> [arg]
 Commands:
   launch               Launch or reuse a tagged EC2 ARM64 instance.
   setup <instance_ip>  Upload/install the ARM64 kernel + modules, reboot, verify.
-  benchmark <ip>       Upload local cross-built ARM64 binaries and run ARM64 micro + corpus attempt.
+  benchmark <ip>       Upload the ARM64 benchmark bundle, run the remote micro benchmark, and download the run artifact.
   terminate <id>       Terminate the EC2 instance and clear cached state.
   full                 Local cross-build -> launch -> setup -> benchmark -> terminate.
 
@@ -442,14 +442,18 @@ set -euo pipefail
 sudo dnf -y install \
     bpftool \
     cargo \
+    clang \
     cmake \
     dracut \
     elfutils-libelf \
     elfutils-libelf-devel \
     gcc-c++ \
+    git \
     grubby \
     gzip \
+    llvm-devel \
     make \
+    ncurses-devel \
     ncurses-libs \
     pkgconf-pkg-config \
     python3 \
@@ -461,6 +465,7 @@ sudo dnf -y install \
     yaml-cpp-devel \
     zlib \
     zlib-devel \
+    libzstd-devel \
     zstd >/dev/null
 if ! rpm -q python3.11-pyyaml >/dev/null 2>&1; then
     if ! sudo dnf -y install python3.11-pyyaml >/dev/null 2>&1; then
@@ -476,10 +481,13 @@ if ! python3.11 -c 'import elftools' >/dev/null 2>&1; then
 fi
 command -v bpftool >/dev/null
 command -v cargo >/dev/null
+command -v clang >/dev/null
 command -v cmake >/dev/null
 command -v c++ >/dev/null
 command -v dracut >/dev/null
+command -v git >/dev/null
 command -v grubby >/dev/null
+command -v llvm-config >/dev/null
 command -v make >/dev/null
 command -v python3 >/dev/null
 command -v python3.11 >/dev/null
@@ -601,7 +609,8 @@ ensure_benchmark_bundle() {
         "$BENCHMARK_BUNDLE_DIR/lib" \
         "$BENCHMARK_BUNDLE_DIR/micro/programs" \
         "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs" \
-        "$BENCHMARK_BUNDLE_DIR/micro/config"
+        "$BENCHMARK_BUNDLE_DIR/micro/config" \
+        "$BENCHMARK_BUNDLE_DIR/module/arm64"
 
     cp "$ARM64_CROSS_RUNNER" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec"
     cp "$ARM64_CROSS_RUNNER_REAL" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec.real"
@@ -625,12 +634,115 @@ ensure_benchmark_bundle() {
     cp -a "$ROOT_DIR/daemon/src/." "$BENCHMARK_BUNDLE_DIR/daemon/src/"
 
     cp -a "$ROOT_DIR/vendor/libbpf" "$BENCHMARK_BUNDLE_DIR/vendor/"
+    cp "$ROOT_DIR/module/load_all.sh" "$BENCHMARK_BUNDLE_DIR/module/"
+    cp "$ROOT_DIR"/module/arm64/*.ko "$BENCHMARK_BUNDLE_DIR/module/arm64/"
 
     tar -C "$BENCHMARK_BUNDLE_DIR" -czf "$BENCHMARK_BUNDLE_TAR" .
 }
 
 benchmark_instance() {
-    die "AWS ARM64 remote benchmark flow was retired with strict review cleanup; use the supported VM/native benchmark entrypoints instead"
+    local ip="${1:-${STATE_INSTANCE_IP:-}}"
+    [[ -n "$ip" ]] || die "benchmark requires an instance IP"
+
+    load_state
+    log "Waiting for SSH on ${ip}"
+    wait_for_ssh "$ip"
+    ensure_remote_runtime_prereqs "$ip"
+    ensure_benchmark_bundle
+
+    local stamp local_result_dir local_archive local_log remote_archive remote_log
+    stamp="benchmark_$(date -u +%Y%m%d_%H%M%S)"
+    local_result_dir="$RESULTS_DIR/$stamp"
+    local_archive="$RESULTS_DIR/${stamp}.tar.gz"
+    local_log="$local_result_dir/remote.log"
+    remote_archive="$AWS_ARM64_REMOTE_STAGE_DIR/${stamp}.tar.gz"
+    remote_log="$AWS_ARM64_REMOTE_STAGE_DIR/${stamp}.log"
+
+    mkdir -p "$local_result_dir"
+
+    ssh_bash "$ip" "$AWS_ARM64_REMOTE_STAGE_DIR" <<'EOF'
+set -euo pipefail
+stage_dir="$1"
+mkdir -p "$stage_dir"
+EOF
+
+    scp_to "$ip" "$BENCHMARK_BUNDLE_TAR" "$AWS_ARM64_REMOTE_STAGE_DIR/"
+
+    log "Running ARM64 remote micro benchmark on ${ip}"
+    ssh_bash \
+        "$ip" \
+        "$AWS_ARM64_REMOTE_STAGE_DIR" \
+        "$(basename "$BENCHMARK_BUNDLE_TAR")" \
+        "$AWS_ARM64_REMOTE_RESULT_JSON" \
+        "$remote_archive" \
+        "$remote_log" \
+        "$AWS_ARM64_BENCH_SAMPLES" \
+        "$AWS_ARM64_BENCH_WARMUPS" \
+        "$AWS_ARM64_BENCH_INNER_REPEAT" \
+        "$AWS_ARM64_BENCH_CPU" <<'EOF'
+set -euo pipefail
+stage_dir="$1"
+bundle_name="$2"
+result_json_name="$3"
+archive_path="$4"
+log_path="$5"
+samples="$6"
+warmups="$7"
+inner_repeat="$8"
+cpu="$9"
+workspace="$stage_dir/workspace"
+bundle_path="$stage_dir/$bundle_name"
+
+rm -rf "$workspace"
+mkdir -p "$workspace"
+tar -xzf "$bundle_path" -C "$workspace"
+cd "$workspace"
+
+export PYTHONPATH="$workspace"
+export LD_LIBRARY_PATH="$workspace/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+: >"$log_path"
+if ! "$workspace/runner/build/micro_exec" --help 2>&1 | grep -q 'run-llvmbpf'; then
+    echo "[aws-arm64] bundled runner lacks llvmbpf support; rebuilding native ARM64 runner" >>"$log_path"
+    make -C "$workspace/runner" JOBS=1 MICRO_EXEC_ENABLE_LLVMBPF=ON micro_exec >>"$log_path" 2>&1
+fi
+
+output_hint="$workspace/micro/results/dev/$result_json_name"
+mkdir -p "$(dirname "$output_hint")"
+run_type="$(basename "$result_json_name" .json)"
+
+cmd=(
+    python3.11 "$workspace/micro/driver.py"
+    --runtime llvmbpf
+    --runtime kernel
+    --samples "$samples"
+    --warmups "$warmups"
+    --inner-repeat "$inner_repeat"
+    --output "$output_hint"
+)
+if [[ -n "$cpu" ]]; then
+    cmd=(taskset -c "$cpu" "${cmd[@]}")
+fi
+
+"${cmd[@]}" >>"$log_path" 2>&1
+
+artifact_dir="$(find "$workspace/micro/results" -maxdepth 1 -mindepth 1 -type d -name "${run_type}_*" | sort | tail -n1)"
+[[ -n "$artifact_dir" ]] || {
+    cat "$log_path" >&2
+    exit 1
+}
+
+rm -f "$archive_path"
+tar -C "$workspace" -czf "$archive_path" "${artifact_dir#"$workspace/"}"
+printf 'ARTIFACT_DIR=%s\n' "${artifact_dir#"$workspace/"}"
+EOF
+
+    scp_from "$ip" "$remote_archive" "$local_archive"
+    scp_from "$ip" "$remote_log" "$local_log"
+    tar -xzf "$local_archive" -C "$local_result_dir"
+
+    log "ARM64 benchmark archive: ${local_archive}"
+    log "ARM64 benchmark log: ${local_log}"
 }
 
 terminate_instance() {

@@ -15,12 +15,17 @@ if __package__ in {None, ""}:
 from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
-    authoritative_output_path,
     which,
 )
 from runner.libs.app_runners.base import AppRunner  # noqa: E402
 from runner.libs.app_runners.scx import ScxRunner, preferred_path, read_scx_ops, read_scx_state  # noqa: E402
-from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage, start_sampler_thread  # noqa: E402
+from runner.libs.metrics import (  # noqa: E402
+    compute_delta,
+    sample_bpf_stats,
+    sample_cpu_usage,
+    sample_total_cpu_usage,
+    start_sampler_thread,
+)
 from runner.libs.rejit import applied_site_totals_from_rejit_result  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
@@ -34,7 +39,7 @@ from runner.libs.case_common import (  # noqa: E402
 )
 
 
-DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "scx")
+DEFAULT_OUTPUT_JSON = RESULTS_DIR / "scx.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "scx-e2e.md"
 DEFAULT_SCX_BINARY = ROOT_DIR / "runner" / "repos" / "scx" / "target" / "release" / "scx_rusty"
 DEFAULT_SCX_REPO = ROOT_DIR / "runner" / "repos" / "scx"
@@ -142,7 +147,13 @@ def measure_workload(
     duration_s: int,
     *,
     agent_pid: int | None,
+    prog_ids: Sequence[int],
+    prog_fds: Mapping[int, int],
 ) -> dict[str, object]:
+    target_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
+    if not target_prog_ids:
+        raise RuntimeError("scx workload measurement requires at least one live program id")
+    before_bpf = sample_bpf_stats(target_prog_ids, prog_fds=dict(prog_fds))
     before_proc = read_proc_stat_fields()
     cpu_holder: dict[int, dict[str, float]] = {}
     system_cpu_holder: dict[str, float] = {}
@@ -166,6 +177,7 @@ def measure_workload(
 
     workload_result = runner.run_workload_spec(workload_spec, duration_s)
     extra = dict(runner.last_workload_details)
+    after_bpf = sample_bpf_stats(target_prog_ids, prog_fds=dict(prog_fds))
 
     for thread in threads:
         thread.join()
@@ -199,6 +211,7 @@ def measure_workload(
         "context_switches_total": ctxt_delta,
         "context_switches_per_sec": (ctxt_delta / workload_result.duration_s) if workload_result.duration_s > 0 else None,
         "processes_started": proc_delta,
+        "bpf": compute_delta(before_bpf, after_bpf),
         "agent_cpu": {
             "user_pct": None if agent_cpu is None else agent_cpu["user_pct"],
             "sys_pct": None if agent_cpu is None else agent_cpu["sys_pct"],
@@ -213,6 +226,12 @@ def measure_workload(
 def summarize_phase(workloads: Sequence[Mapping[str, object]]) -> dict[str, object]:
     return {
         "throughput": summarize_numbers([record.get("ops_per_sec") for record in workloads]),
+        "bpf_avg_ns_per_run": summarize_numbers(
+            [
+                (((record.get("bpf") or {}).get("summary") or {}).get("avg_ns_per_run"))
+                for record in workloads
+            ]
+        ),
         "context_switches_per_sec": summarize_numbers([record.get("context_switches_per_sec") for record in workloads]),
         "latency_ms_p50": summarize_numbers([record.get("latency_ms_p50") for record in workloads]),
         "latency_ms_p95": summarize_numbers([record.get("latency_ms_p95") for record in workloads]),
@@ -238,8 +257,19 @@ def run_phase(
     *,
     agent_pid: int | None,
 ) -> dict[str, object]:
+    prog_ids = [int(program.get("id", 0) or 0) for program in getattr(runner, "programs", []) if int(program.get("id", 0) or 0) > 0]
+    if not prog_ids:
+        raise RuntimeError("scx runner did not expose any live scheduler programs")
+    prog_fds = getattr(runner, "program_fds", {})
     records = [
-        measure_workload(runner, workload_spec, duration_s, agent_pid=agent_pid)
+        measure_workload(
+            runner,
+            workload_spec,
+            duration_s,
+            agent_pid=agent_pid,
+            prog_ids=prog_ids,
+            prog_fds=prog_fds,
+        )
         for workload_spec in workloads
     ]
     return {
@@ -260,10 +290,16 @@ def compare_phases(baseline: Mapping[str, object] | None, post: Mapping[str, obj
         after = post_by_name[name]
         before_cpu = ((before.get("agent_cpu") or {}).get("total_pct"))
         after_cpu = ((after.get("agent_cpu") or {}).get("total_pct"))
+        before_bpf = (((before.get("bpf") or {}).get("summary") or {}).get("avg_ns_per_run"))
+        after_bpf = (((after.get("bpf") or {}).get("summary") or {}).get("avg_ns_per_run"))
         workload_rows.append(
             {
                 "name": name,
                 "throughput_delta_pct": percent_delta(before.get("ops_per_sec"), after.get("ops_per_sec")),
+                "bpf_avg_ns_delta_pct": percent_delta(before_bpf, after_bpf),
+                "bpf_avg_ns_speedup": None
+                if before_bpf in (None, 0) or after_bpf in (None, 0)
+                else (float(before_bpf) / float(after_bpf)),
                 "context_switches_delta_pct": percent_delta(
                     before.get("context_switches_per_sec"),
                     after.get("context_switches_per_sec"),
@@ -293,7 +329,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     lines.append(f"- sched_ext state before load: `{preflight.get('state_before')}`")
     lines.append(f"- workloads selected: `{preflight.get('available_workloads')}`")
     lines.append(
-        f"- runtime counters exposed via bpftool: `{preflight.get('runtime_counters_available')}`"
+        f"- runtime counters available for live scheduler programs: `{preflight.get('runtime_counters_available')}`"
     )
     if status != "ok":
         lines.extend(
@@ -316,8 +352,10 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     lines.extend(["", "## Baseline", ""])
     baseline = payload.get("baseline") or {}
     for workload in baseline.get("workloads") or []:
+        bpf_avg_ns = (((workload.get("bpf") or {}).get("summary") or {}).get("avg_ns_per_run"))
         lines.append(
             f"- {workload['name']}: throughput={workload.get('ops_per_sec')} {workload['metric']}, "
+            f"avg_ns={bpf_avg_ns}, "
             f"lat_p50_ms={workload.get('latency_ms_p50')}, "
             f"ctx/s={workload.get('context_switches_per_sec')}, "
             f"agent_cpu={((workload.get('agent_cpu') or {}).get('total_pct'))}"
@@ -326,8 +364,10 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     if post:
         lines.extend(["", "## Post-ReJIT", ""])
         for workload in post.get("workloads") or []:
+            bpf_avg_ns = (((workload.get("bpf") or {}).get("summary") or {}).get("avg_ns_per_run"))
             lines.append(
                 f"- {workload['name']}: throughput={workload.get('ops_per_sec')} {workload['metric']}, "
+                f"avg_ns={bpf_avg_ns}, "
                 f"lat_p50_ms={workload.get('latency_ms_p50')}, "
                 f"ctx/s={workload.get('context_switches_per_sec')}, "
                 f"agent_cpu={((workload.get('agent_cpu') or {}).get('total_pct'))}"
@@ -338,6 +378,8 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         for workload in comparison.get("workloads") or []:
             lines.append(
                 f"- {workload['name']}: throughput_delta={workload.get('throughput_delta_pct')}%, "
+                f"bpf_avg_ns_delta={workload.get('bpf_avg_ns_delta_pct')}%, "
+                f"bpf_speedup={workload.get('bpf_avg_ns_speedup')}, "
                 f"ctx_delta={workload.get('context_switches_delta_pct')}%, "
                 f"lat_p50_delta={workload.get('latency_p50_delta_pct')}%, "
                 f"agent_cpu_delta={workload.get('agent_cpu_delta_pct')}%"
@@ -429,18 +471,19 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     scheduler_programs = list(lifecycle_result.artifacts.get("scheduler_programs") or [])
     scheduler_ops = read_scx_ops()
     scheduler_snapshot = dict(runner.process_output)
-    runtime_counters_available = any(
-        ("run_cnt" in program) or ("run_time_ns" in program)
-        for program in scheduler_programs
-    )
     baseline = lifecycle_result.baseline
     scan_results = lifecycle_result.scan_results
     rejit_result = lifecycle_result.rejit_result
     post_rejit = lifecycle_result.post_rejit
+    runtime_counters_available = any(
+        (((record.get("bpf") or {}).get("summary") or {}).get("avg_ns_per_run")) not in (None, 0)
+        for record in ((baseline or {}).get("workloads") or [])
+        if isinstance(record, Mapping)
+    )
     limitations: list[str] = []
     if not runtime_counters_available:
         limitations.append(
-            "bpftool does not expose per-program run_cnt/run_time_ns for these struct_ops programs on this kernel, so BPF runtime deltas are unavailable."
+            "selected scx workloads did not accumulate measurable per-program run_cnt/run_time_ns during this run."
         )
     error_message = ""
     rejit_error = ""

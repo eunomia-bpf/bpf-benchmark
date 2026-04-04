@@ -13,7 +13,6 @@ if __package__ in {None, ""}:
 from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
-    authoritative_output_path,
 )
 from runner.libs.app_runners.katran import (  # noqa: E402
     DEFAULT_CONCURRENCY,
@@ -30,7 +29,7 @@ from runner.libs.case_common import (  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage, start_sampler_thread  # noqa: E402
 
 
-DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "katran")
+DEFAULT_OUTPUT_JSON = RESULTS_DIR / "katran.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "katran-e2e.md"
 DEFAULT_DURATION_S = 20
 DEFAULT_SMOKE_DURATION_S = 5

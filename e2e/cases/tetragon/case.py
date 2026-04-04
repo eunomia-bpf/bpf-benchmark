@@ -17,7 +17,6 @@ if __package__ in {None, ""}:
 from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
-    authoritative_output_path,
     run_command,
     run_json_command,
     tail_text,
@@ -56,7 +55,7 @@ from runner.libs.case_common import (  # noqa: E402
 
 DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
 DEFAULT_CONFIG = Path(__file__).with_name("config_execve_rate.yaml")
-DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "tetragon")
+DEFAULT_OUTPUT_JSON = RESULTS_DIR / "tetragon.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tetragon-real-e2e.md"
 DEFAULT_BPFTOOL = "/usr/local/sbin/bpftool"
 DEFAULT_DURATION_S = 30

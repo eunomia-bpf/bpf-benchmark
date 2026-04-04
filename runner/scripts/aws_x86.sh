@@ -92,7 +92,7 @@ usage: aws_x86.sh <launch|setup|benchmark|terminate|full> [arg]
 Commands:
   launch               Launch or reuse a tagged EC2 x86 instance.
   setup <instance_ip>  Upload/install the local x86 kernel + modules, reboot, verify.
-  benchmark <ip>       Upload local x86 binaries/modules and run smoke benchmarks.
+  benchmark <ip>       Upload the x86 benchmark bundle, run the selected remote benchmark mode, and download the run artifact.
   terminate <id>       Terminate the EC2 instance and clear cached state.
   full                 Launch -> setup -> benchmark -> terminate, with EXIT cleanup.
 
@@ -1086,7 +1086,161 @@ ensure_benchmark_bundle() {
 }
 
 benchmark_instance() {
-    die "AWS x86 remote benchmark flow was retired with strict review cleanup; use make vm-corpus or make vm-e2e instead"
+    local ip="${1:-${STATE_INSTANCE_IP:-}}"
+    [[ -n "$ip" ]] || die "benchmark requires an instance IP"
+
+    load_state
+    validate_benchmark_mode
+    if [[ "$(normalize_benchmark_mode)" == "e2e" ]]; then
+        validate_e2e_cases
+    fi
+
+    log "Waiting for SSH on ${ip}"
+    wait_for_ssh "$ip"
+    ensure_remote_runtime_prereqs "$ip"
+    ensure_benchmark_bundle
+
+    local stamp local_result_dir local_archive local_log remote_archive remote_log
+    stamp="benchmark_$(date -u +%Y%m%d_%H%M%S)"
+    local_result_dir="$RESULTS_DIR/$stamp"
+    local_archive="$RESULTS_DIR/${stamp}.tar.gz"
+    local_log="$local_result_dir/remote.log"
+    remote_archive="$AWS_X86_REMOTE_STAGE_DIR/${stamp}.tar.gz"
+    remote_log="$AWS_X86_REMOTE_STAGE_DIR/${stamp}.log"
+
+    mkdir -p "$local_result_dir"
+
+    ssh_bash "$ip" "$AWS_X86_REMOTE_STAGE_DIR" <<'EOF'
+set -euo pipefail
+stage_dir="$1"
+mkdir -p "$stage_dir"
+EOF
+
+    scp_to "$ip" "$BENCHMARK_BUNDLE_TAR" "$AWS_X86_REMOTE_STAGE_DIR/"
+
+    log "Running AWS x86 benchmark mode=$(normalize_benchmark_mode) on ${ip}"
+    ssh_bash \
+        "$ip" \
+        "$AWS_X86_REMOTE_STAGE_DIR" \
+        "$(basename "$BENCHMARK_BUNDLE_TAR")" \
+        "$(normalize_benchmark_mode)" \
+        "$AWS_X86_REMOTE_RESULT_JSON" \
+        "$remote_archive" \
+        "$remote_log" \
+        "$AWS_X86_BENCH_SAMPLES" \
+        "$AWS_X86_BENCH_WARMUPS" \
+        "$AWS_X86_BENCH_INNER_REPEAT" \
+        "$AWS_X86_BENCH_CPU" \
+        "$(normalize_e2e_cases_csv)" \
+        "$AWS_X86_E2E_SMOKE" <<'EOF'
+set -euo pipefail
+stage_dir="$1"
+bundle_name="$2"
+bench_mode="$3"
+result_json_name="$4"
+archive_path="$5"
+log_path="$6"
+samples="$7"
+warmups="$8"
+inner_repeat="$9"
+cpu="${10}"
+case_csv="${11}"
+e2e_smoke="${12}"
+workspace="$stage_dir/workspace"
+bundle_path="$stage_dir/$bundle_name"
+
+rm -rf "$workspace"
+mkdir -p "$workspace"
+tar -xzf "$bundle_path" -C "$workspace"
+cd "$workspace"
+
+export PYTHONPATH="$workspace"
+export LD_LIBRARY_PATH="$workspace/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+: >"$log_path"
+
+if [[ "$bench_mode" == "micro" ]]; then
+    "$workspace/runner/build/micro_exec" --help 2>&1 | grep -q 'run-llvmbpf' \
+        || { echo "bundled x86 runner lacks llvmbpf support" >>"$log_path"; cat "$log_path" >&2; exit 1; }
+
+    output_hint="$workspace/micro/results/dev/$result_json_name"
+    mkdir -p "$(dirname "$output_hint")"
+    run_type="$(basename "$result_json_name" .json)"
+    cmd=(
+        python3.11 "$workspace/micro/driver.py"
+        --runtime llvmbpf
+        --runtime kernel
+        --samples "$samples"
+        --warmups "$warmups"
+        --inner-repeat "$inner_repeat"
+        --output "$output_hint"
+    )
+    if [[ -n "$cpu" ]]; then
+        cmd=(taskset -c "$cpu" "${cmd[@]}")
+    fi
+    "${cmd[@]}" >>"$log_path" 2>&1
+
+    artifact_dir="$(find "$workspace/micro/results" -maxdepth 1 -mindepth 1 -type d -name "${run_type}_*" | sort | tail -n1)"
+    [[ -n "$artifact_dir" ]] || {
+        cat "$log_path" >&2
+        exit 1
+    }
+
+    rm -f "$archive_path"
+    tar -C "$workspace" -czf "$archive_path" "${artifact_dir#"$workspace/"}"
+else
+    suite_path="$workspace/corpus/config/aws_x86_suite.yaml"
+    python3.11 - "$workspace/corpus/config/macro_apps.yaml" "$suite_path" "$case_csv" >>"$log_path" 2>&1 <<'PY'
+import sys
+from pathlib import Path
+
+import yaml
+
+src = Path(sys.argv[1])
+dst = Path(sys.argv[2])
+case_csv = sys.argv[3]
+requested_cases = {token for token in case_csv.split(",") if token}
+if not requested_cases or "all" in requested_cases:
+    requested_cases = {"tracee", "tetragon", "scx"}
+runner_for_case = {
+    "tracee": "tracee",
+    "tetragon": "tetragon",
+    "scx": "scx",
+}
+wanted_runners = {runner_for_case[name] for name in requested_cases}
+payload = yaml.safe_load(src.read_text())
+apps = payload.get("apps") or []
+filtered = [app for app in apps if str(app.get("runner")) in wanted_runners]
+if not filtered:
+    raise SystemExit(f"filtered AWS x86 suite selected zero apps for cases={sorted(requested_cases)}")
+payload["apps"] = filtered
+dst.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+PY
+
+    cmd=(
+        python3.11 "$workspace/e2e/driver.py"
+        all
+        --suite "$suite_path"
+        --daemon "$workspace/daemon/target/release/bpfrejit-daemon"
+    )
+    if [[ "$e2e_smoke" == "1" ]]; then
+        cmd+=(--smoke)
+    fi
+    if [[ -n "$cpu" ]]; then
+        cmd=(taskset -c "$cpu" "${cmd[@]}")
+    fi
+    "${cmd[@]}" >>"$log_path" 2>&1
+
+    rm -f "$archive_path"
+    tar -C "$workspace" -czf "$archive_path" e2e/results
+fi
+EOF
+
+    scp_from "$ip" "$remote_archive" "$local_archive"
+    scp_from "$ip" "$remote_log" "$local_log"
+    tar -xzf "$local_archive" -C "$local_result_dir"
+
+    log "AWS x86 benchmark archive: ${local_archive}"
+    log "AWS x86 benchmark log: ${local_log}"
 }
 
 terminate_instance() {

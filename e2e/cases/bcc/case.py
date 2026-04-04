@@ -22,7 +22,6 @@ if __package__ in {None, ""}:
 from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
-    authoritative_output_path,
 )
 from runner.libs.app_runners.bcc import BCCRunner, find_tool_binary, resolve_tools_dir, run_setup_script  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
@@ -45,7 +44,7 @@ from runner.libs.case_common import (  # noqa: E402
 
 DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")
 DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
-DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "bcc")
+DEFAULT_OUTPUT_JSON = RESULTS_DIR / "bcc.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e-report.md"
 

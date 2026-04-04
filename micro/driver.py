@@ -313,12 +313,10 @@ def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: 
 def build_run_metadata(
     results: dict[str, Any],
     *,
-    output_hint: Path,
     run_type: str,
 ) -> dict[str, Any]:
     metadata = summarize_benchmark_results(results)
     metadata["run_type"] = run_type
-    metadata["output_hint"] = repo_relative_path(output_hint)
     metadata["optimization_summary"]["daemon_debug_entries"] = 0
     return metadata
 
@@ -487,7 +485,6 @@ def main(argv: list[str] | None = None) -> int:
         attach_baseline_adjustments(results, suite.analysis.baseline_benchmark)
         artifact_metadata = build_run_metadata(
             results,
-            output_hint=output_path,
             run_type=run_type,
         )
         artifact_metadata["status"] = status

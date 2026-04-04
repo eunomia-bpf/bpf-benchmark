@@ -27,7 +27,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from micro.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
-from runner.libs import latest_output_path
+from runner.libs.run_artifacts import load_latest_result_for_output
 
 
 plt.rcParams.update(
@@ -53,7 +53,7 @@ RESULTS_DIR = MICRO_DIR / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 DEFAULT_MICRO_CATALOG = load_manifest(DEFAULT_MICRO_MANIFEST)
 PURE_JIT_RESULTS = DEFAULT_MICRO_CATALOG.defaults.output
-CAUSAL_RESULTS = latest_output_path(RESULTS_DIR, "causal_isolation")
+CAUSAL_RESULTS = PURE_JIT_RESULTS
 CATEGORY_DISPLAY = {
     "baseline": {"label": "baseline", "color": "#4E79A7"},
     "alu-mix": {"label": "alu\nmix", "color": "#F28E2B"},
@@ -146,7 +146,9 @@ def parse_args() -> argparse.Namespace:
 
 
 def load_results(path: Path) -> dict[str, object]:
-    return json.loads(path.read_text())
+    if path.is_file():
+        return json.loads(path.read_text())
+    return load_latest_result_for_output(path, default_run_type=path.stem)
 
 
 def build_category_context(

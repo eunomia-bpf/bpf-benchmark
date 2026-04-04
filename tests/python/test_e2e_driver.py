@@ -69,10 +69,11 @@ def test_run_single_case_writes_primary_outputs(tmp_path: Path, monkeypatch) -> 
     assert result["status"] == "ok"
     assert result["value"] == 7
     assert result["metadata"]["kinsn_modules"]["count"] == 1
-    written = json.loads((tmp_path / "dummy.json").read_text())
+    run_dir = next(tmp_path.glob("dummy_*"))
+    written = json.loads((run_dir / "result.json").read_text())
     assert written["metadata"]["kinsn_modules"]["lifecycle_runs"][0]["requested_prog_ids"] == [7]
-    assert (tmp_path / "dummy.md").read_text() == "value=7\n"
-    assert (tmp_path / "dummy-report.md").read_text() == "report=7\n"
+    assert (run_dir / "result.md").read_text() == "value=7\n"
+    assert (run_dir / "report.md").read_text() == "report=7\n"
 
 
 def test_run_single_case_raises_for_error_payload(tmp_path: Path, monkeypatch) -> None:
@@ -106,9 +107,10 @@ def test_run_single_case_raises_for_error_payload(tmp_path: Path, monkeypatch) -
     else:
         raise AssertionError("error payload should fail the case")
 
-    assert json.loads((tmp_path / "dummy.json").read_text()) == payload
-    assert (tmp_path / "dummy.md").read_text() == "status=error\n"
-    assert (tmp_path / "dummy-report.md").read_text() == "report=error\n"
+    run_dir = next(tmp_path.glob("dummy_*"))
+    assert json.loads((run_dir / "result.json").read_text()) == payload
+    assert (run_dir / "result.md").read_text() == "status=error\n"
+    assert (run_dir / "report.md").read_text() == "report=error\n"
 
 
 def test_run_single_case_rejects_skipped_payload(tmp_path: Path, monkeypatch) -> None:
@@ -137,7 +139,8 @@ def test_run_single_case_rejects_skipped_payload(tmp_path: Path, monkeypatch) ->
     with pytest.raises(RuntimeError, match="returned an invalid status: 'skipped'"):
         e2e_driver._run_single_case(args, clear_existing=True)
 
-    written = json.loads((tmp_path / "dummy.json").read_text())
+    run_dir = next(tmp_path.glob("dummy_*"))
+    written = json.loads((run_dir / "result.json").read_text())
     assert written["status"] == "skipped"
 
 
@@ -230,11 +233,7 @@ def test_build_run_metadata_prefers_effective_passes_from_payload(tmp_path: Path
         },
     }
 
-    metadata = e2e_driver.build_run_metadata(
-        args,
-        payload,
-        primary_output_json=tmp_path / "tracee.json",
-    )
+    metadata = e2e_driver.build_run_metadata(args, payload)
 
     assert metadata["selected_rejit_passes"] == ["map_inline"]
     assert metadata["requested_rejit_passes"] == ["map_inline", "const_prop", "dce"]

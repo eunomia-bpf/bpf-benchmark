@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import shlex
 import subprocess
 from datetime import datetime, timezone
@@ -20,7 +19,6 @@ DEFAULT_BPFTOOL_CANDIDATES = (
 DEFAULT_PERF_CANDIDATES = (
     ROOT_DIR / "vendor" / "linux-framework" / "tools" / "perf" / "perf",
 )
-RESULT_FILE_RE = re.compile(r"^(?P<suite>.+)_(?P<kind>authoritative|smoke)_(?P<date>\d{8})\.json$")
 BPFTOOL_ENV_VARS = ("BPFTOOL_BIN", "BPFTOOL")
 PERF_ENV_VARS = ("PERF_BIN", "PERF")
 
@@ -64,16 +62,8 @@ def docs_tmp_dir(*parts: str | Path, stamp: str | None = None, ensure: bool = Tr
     return path
 
 
-def authoritative_output_path(results_dir: Path, suite: str, *, stamp: str | None = None) -> Path:
-    return results_dir / f"{suite}_authoritative_{stamp or result_date_stamp()}.json"
-
-
 def smoke_output_path(results_dir: Path, suite: str, *, stamp: str | None = None) -> Path:
     return results_dir / f"{suite}_smoke_{stamp or result_date_stamp()}.json"
-
-
-def latest_output_path(results_dir: Path, suite: str) -> Path:
-    return results_dir / f"{suite}.latest.json"
 
 def tail_text(text: str, *, max_lines: int = 12, max_chars: int = 4000) -> str:
     lines = [line.rstrip() for line in text.splitlines() if line.strip()]
@@ -233,10 +223,8 @@ __all__ = [
     "DEFAULT_VENV_ACTIVATE",
     "RESULTS_DIR",
     "ROOT_DIR",
-    "authoritative_output_path",
     "docs_tmp_dir",
     "ensure_parent",
-    "latest_output_path",
     "prepare_bpftool_environment",
     "resolve_binary",
     "resolve_bpftool_binary",

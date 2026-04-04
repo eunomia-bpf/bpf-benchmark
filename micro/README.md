@@ -10,7 +10,7 @@
 
 ## Directory Layout
 
-- `driver.py`: consolidated micro suite driver; `python3 micro/driver.py ...` is the canonical entrypoint
+- `driver.py`: consolidated micro suite driver; `make vm-micro` is the canonical benchmark entrypoint and `python3 micro/driver.py ...` is the direct driver entrypoint
 - `catalog.py`: micro-only suite YAML parser
 - `input_generators.py`: deterministic input generation for active benchmarks
 - `summarize_rq.py`, `generate_figures.py`: active reporting utilities
@@ -37,7 +37,7 @@ python3 micro/driver.py --list
 Run the suite on the host:
 
 ```bash
-python3 micro/driver.py --runtime llvmbpf --runtime kernel --runtime kernel-rejit
+python3 micro/driver.py --runtime llvmbpf --runtime kernel
 ```
 
 Run llvmbpf only:
@@ -74,5 +74,6 @@ python3 micro/driver.py \
 Results live under `micro/results/`.
 
 - Each run lives under `micro/results/<run_type>_<timestamp>/`
-- `metadata.json` is always kept
-- Older runs of the same type keep metadata and drop `details/`
+- `metadata.json` is the canonical summary for that run
+- `details/` contains `result.json` plus any retained per-sample payloads
+- Older runs of the same type keep metadata and may drop `details/`

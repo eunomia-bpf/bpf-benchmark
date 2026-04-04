@@ -483,8 +483,6 @@ def _trim_e2e_value(value: object) -> object:
 def build_run_metadata(
     args: argparse.Namespace,
     payload: dict[str, object],
-    *,
-    primary_output_json: Path,
 ) -> dict[str, object]:
     requested_rejit_passes = benchmark_rejit_enabled_passes()
     selected_rejit_passes = collect_effective_enabled_passes(payload)
@@ -501,16 +499,11 @@ def build_run_metadata(
         "smoke": bool(args.smoke),
         "kinsn_enabled": not _args_no_kinsn(args),
         "selected_rejit_passes": selected_rejit_passes,
-        "output_hint_json": repo_relative_path(primary_output_json),
         "optimization_summary": _trim_e2e_value(payload),
     }
     if selected_rejit_passes != requested_rejit_passes:
         metadata["requested_rejit_passes"] = list(requested_rejit_passes)
     metadata.update(current_process_identity())
-    metadata["output_hint_md"] = repo_relative_path(Path(args.output_md).resolve())
-    report_md = getattr(args, "report_md", None)
-    if report_md:
-        metadata["output_hint_report_md"] = repo_relative_path(Path(report_md).resolve())
     if isinstance(payload, dict):
         payload_tool_passes = payload.get("tool_rejit_passes")
         if isinstance(payload_tool_passes, dict):
@@ -551,7 +544,7 @@ def _run_single_case(
         updated_at: str,
         error_message: str | None,
     ) -> dict[str, object]:
-        metadata = build_run_metadata(args, metadata_payload, primary_output_json=output_json)
+        metadata = build_run_metadata(args, metadata_payload)
         metadata["status"] = status
         metadata["started_at"] = session_started_at
         metadata["last_updated_at"] = updated_at
@@ -617,10 +610,6 @@ def _run_single_case(
                 result_payload=payload,
                 detail_texts=detail_texts,
             )
-            write_json(output_json, payload)
-            write_text(output_md, detail_texts["result.md"])
-            if "report.md" in detail_texts and report_md is not None:
-                write_text(report_md, detail_texts["report.md"])
             return payload
 
         error_message = (
@@ -646,10 +635,6 @@ def _run_single_case(
             error_message=error_message,
         )
         artifact_error_written = True
-        write_json(output_json, payload)
-        write_text(output_md, detail_texts["result.md"])
-        if "report.md" in detail_texts and report_md is not None:
-            write_text(report_md, detail_texts["report.md"])
         raise RuntimeError(error_message)
     except Exception as exc:
         if artifact_error_written:

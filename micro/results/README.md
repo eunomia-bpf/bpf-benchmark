@@ -3,14 +3,9 @@
 Top-level `micro/results/` stores one timestamped directory per run.
 
 - Each run lives under `micro/results/<run_type>_<timestamp>/`.
-- `metadata.json` is always kept.
-- Older runs of the same type keep `metadata.json` but have `details/` pruned.
-- Large per-sample logs live under `details/`.
+- `metadata.json` is the canonical run summary.
+- `details/` holds `result.json`, progress payloads, and any large per-sample logs.
+- Older runs of the same `run_type` keep `metadata.json` but may have `details/` pruned.
 
-Current top-level authoritative JSON:
-
-- `vm_micro_authoritative_20260318.json`
-- `vm_micro_authoritative_20260314.json`
-- `smoke_authoritative_20260313.json`
-- `vm_micro_smoke_authoritative_20260313.json`
-- `kernel_recompile_v2_fixed_authoritative_20260312.json`
+There is no top-level authoritative alias, latest pointer, or duplicated JSON copy.
+If a document needs to cite a micro run, cite the concrete timestamped directory.

@@ -6,6 +6,7 @@ import json
 import os
 import sys
 from collections import Counter
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -20,6 +21,11 @@ from runner.libs.app_runners.base import AppRunner
 from runner.libs.app_suite_schema import AppSpec, AppWorkload, load_app_suite_from_yaml
 from runner.libs.bpf_stats import enable_bpf_stats
 from runner.libs.case_common import (
+    _append_pending_kinsn_metadata,
+    _clone_daemon_metadata,
+    _merge_group_rejit_results,
+    _resolve_apply_passes_by_program,
+    _resolve_scan_pass_selection,
     CaseLifecycleState,
     attach_pending_result_metadata,
     prepare_daemon_session,
@@ -613,133 +619,267 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     return "\n".join(lines)
 
 
-def _run_app(
+def _active_program_ids(
+    initial_stats: Mapping[int, Mapping[str, object]],
+    final_stats: Mapping[int, Mapping[str, object]],
+    candidate_prog_ids: Sequence[int],
+) -> list[int]:
+    selected: list[int] = []
+    for prog_id in candidate_prog_ids:
+        normalized_prog_id = int(prog_id)
+        if normalized_prog_id <= 0:
+            continue
+        before = initial_stats.get(normalized_prog_id) or {}
+        after = final_stats.get(normalized_prog_id) or {}
+        run_cnt_delta = int(after.get("run_cnt", 0) or 0) - int(before.get("run_cnt", 0) or 0)
+        run_time_delta = int(after.get("run_time_ns", 0) or 0) - int(before.get("run_time_ns", 0) or 0)
+        if run_cnt_delta > 0 or run_time_delta > 0:
+            selected.append(normalized_prog_id)
+    return selected
+
+
+def _build_runner_state(
+    app: AppSpec,
+    runner: AppRunner,
+    started_prog_ids: Sequence[int],
+) -> CaseLifecycleState:
+    prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
+    if not prog_ids:
+        raise RuntimeError(f"{app.name}: runner did not return any live prog_ids")
+    programs = [dict(program) for program in runner.programs]
+    if not programs:
+        raise RuntimeError(f"{app.name}: runner did not expose any live programs")
+    return CaseLifecycleState(
+        runtime=runner,
+        target_prog_ids=list(prog_ids),
+        apply_prog_ids=list(prog_ids),
+        artifacts={
+            "runner_artifacts": dict(runner.artifacts),
+            "programs": programs,
+            "command_used": [str(item) for item in runner.command_used],
+            "rejit_policy_context": {
+                "repo": str(app.name).strip(),
+                "category": str(app.runner).strip(),
+                "level": "corpus",
+            },
+        },
+    )
+
+
+def _configure_program_selection(
+    app: AppSpec,
+    runner: AppRunner,
+    lifecycle: CaseLifecycleState,
+    *,
+    measurement_mode: str,
+    baseline_measurement: Mapping[str, object],
+) -> None:
+    initial_stats = _normalized_stats_snapshot(baseline_measurement.get("initial_stats"))
+    final_stats = _normalized_stats_snapshot(baseline_measurement.get("final_stats"))
+    selected = runner.select_corpus_program_ids(initial_stats, final_stats)
+    if selected is None and measurement_mode == "program":
+        selected = _active_program_ids(initial_stats, final_stats, lifecycle.target_prog_ids)
+    if selected is None:
+        return
+    selected_prog_ids = [
+        int(prog_id)
+        for prog_id in selected
+        if int(prog_id) > 0
+    ]
+    if not selected_prog_ids:
+        raise RuntimeError(
+            f"{app.name}: workload {app.workload_for('corpus')!r} did not execute any target programs during baseline"
+        )
+    lifecycle.target_prog_ids = list(selected_prog_ids)
+    lifecycle.apply_prog_ids = list(selected_prog_ids)
+    selected_programs = _selected_live_programs(
+        lifecycle.artifacts.get("programs") or [],
+        selected_prog_ids,
+    )
+    if selected_programs:
+        lifecycle.artifacts["programs"] = selected_programs
+
+
+def _build_app_error_result(
     app: AppSpec,
     *,
-    daemon_session: object,
     workload_seconds: float,
-    samples: int,
+    error: str,
+    measurement_mode: str | None = None,
+    runner: AppRunner | None = None,
+    state: CaseLifecycleState | None = None,
+    baseline_measurement: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
-    selected_workload = app.workload_for("corpus")
-    runner = get_app_runner(
-        app.runner,
-        app_name=app.name,
-        workload=selected_workload,
-        **app.args,
-    )
-    prog_ids: list[int] = []
-    live_programs: list[dict[str, object]] = []
-    baseline_phase: dict[int, dict[str, object]] = {}
-    rejit_phase: dict[int, dict[str, object]] = {}
-    baseline_workload: dict[str, object] | None = None
+    baseline_workload = None
     baseline_workloads: list[dict[str, object]] = []
-    rejit_workload: dict[str, object] | None = None
-    rejit_workloads: list[dict[str, object]] = []
-    apply_result: dict[str, object] = {}
-    had_post_rejit = False
-    measurement_mode = runner.corpus_measurement_mode().strip()
-    if measurement_mode not in {"program", "app"}:
-        raise RuntimeError(f"{app.name}: runner returned unsupported corpus measurement mode {measurement_mode!r}")
-
-    def before_rejit(_setup_state: object, lifecycle: object, baseline: Mapping[str, object]) -> object | None:
-        measurement = dict((baseline.get("measurement") or {}))
-        initial_stats = _normalized_stats_snapshot(measurement.get("initial_stats"))
-        final_stats = _normalized_stats_snapshot(measurement.get("final_stats"))
-        selected = runner.select_corpus_program_ids(initial_stats, final_stats)
-        if selected is None:
-            return None
-        selected_prog_ids = [
-            int(prog_id)
-            for prog_id in selected
-            if int(prog_id) > 0
+    if isinstance(baseline_measurement, Mapping):
+        raw_baseline_workload = baseline_measurement.get("workload")
+        if isinstance(raw_baseline_workload, Mapping):
+            baseline_workload = dict(raw_baseline_workload)
+        baseline_workloads = [
+            dict(workload)
+            for workload in (baseline_measurement.get("workloads") or [])
+            if isinstance(workload, Mapping)
         ]
-        if not selected_prog_ids:
-            raise RuntimeError(
-                f"{app.name}: workload {selected_workload!r} did not execute any runner-selected programs during baseline"
-            )
-        lifecycle.target_prog_ids = list(selected_prog_ids)
-        lifecycle.apply_prog_ids = list(selected_prog_ids)
-        selected_programs = _selected_live_programs(
-            lifecycle.artifacts.get("programs") or [],
-            selected_prog_ids,
-        )
-        if selected_programs:
-            lifecycle.artifacts["programs"] = selected_programs
-        return None
+    return {
+        "app": app.name,
+        "runner": app.runner,
+        "workload": _workload_payload(app.workload),
+        "selected_workload": app.workload_for("corpus"),
+        "measurement_mode": str(measurement_mode or ""),
+        "configured_workload_seconds": float(workload_seconds),
+        "args": dict(app.args),
+        "status": "error",
+        "error": str(error),
+        "prog_ids": [] if state is None else [int(value) for value in state.target_prog_ids if int(value) > 0],
+        "programs": [] if state is None else [dict(program) for program in (state.artifacts.get("programs") or [])],
+        "program_measurements": {},
+        "app_measurement": None,
+        "baseline": {"programs": {}, "exec_ns_mean": None},
+        "baseline_workload": baseline_workload,
+        "baseline_workloads": baseline_workloads,
+        "rejit_apply": {},
+        "rejit": None,
+        "had_post_rejit_measurement": False,
+        "rejit_workload": None,
+        "rejit_workloads": [],
+        "process": {} if runner is None else dict(runner.process_output),
+        "command_used": []
+        if state is None
+        else [str(item) for item in (state.artifacts.get("command_used") or [])],
+    }
 
-    def build_state(runner: AppRunner, started_prog_ids: list[int]) -> CaseLifecycleState:
-        prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
-        if not prog_ids:
-            raise RuntimeError(f"{app.name}: runner did not return any live prog_ids")
-        programs = [dict(program) for program in runner.programs]
-        if not programs:
-            raise RuntimeError(f"{app.name}: runner did not expose any live programs")
-        return CaseLifecycleState(
-            runtime=runner,
-            target_prog_ids=list(prog_ids),
-            apply_prog_ids=list(prog_ids),
-            artifacts={
-                "runner_artifacts": dict(runner.artifacts),
-                "programs": programs,
-                "command_used": [str(item) for item in runner.command_used],
-                "rejit_policy_context": {
-                    "repo": str(app.name).strip(),
-                    "category": str(app.runner).strip(),
-                    "level": "corpus",
-                },
-            },
-        )
 
-    with enable_bpf_stats():
-        lifecycle_result = run_app_runner_lifecycle(
-            daemon_session=daemon_session,
-            runner=runner,
-            build_state=build_state,
-            measure=lambda lifecycle, _phase_name: {
-                "measurement": _measure_runner_phase(
-                    lifecycle.runtime,
-                    lifecycle.target_prog_ids,
-                    workload_seconds=workload_seconds,
-                    samples=samples,
-                )
-            },
-            before_rejit=before_rejit,
-        )
+def _slice_scan_results(
+    scan_results: Mapping[int, Mapping[str, object]],
+    prog_ids: Sequence[int],
+) -> dict[int, dict[str, object]]:
+    return {
+        int(prog_id): dict(scan_results[int(prog_id)])
+        for prog_id in prog_ids
+        if int(prog_id) in scan_results
+    }
 
-    if lifecycle_result.state is None or lifecycle_result.baseline is None:
-        raise RuntimeError(f"{app.name}: runner lifecycle did not produce a baseline measurement")
 
-    prog_ids = [int(value) for value in lifecycle_result.state.target_prog_ids if int(value) > 0]
-    live_programs = [dict(program) for program in (lifecycle_result.artifacts.get("programs") or [])]
-    baseline_measurement = dict((lifecycle_result.baseline.get("measurement") or {}))
+def _slice_rejit_result(
+    rejit_result: Mapping[str, object],
+    prog_ids: Sequence[int],
+) -> dict[str, object]:
+    requested_prog_ids = [int(value) for value in prog_ids if int(value) > 0]
+    if not requested_prog_ids:
+        return {}
+
+    per_program: dict[int, dict[str, object]] = {}
+    outputs: list[str] = []
+    errors: list[str] = []
+    total_sites = 0
+    applied_sites = 0
+    exit_code = 0
+    effective_enabled_passes_by_program: dict[str, list[str]] = {}
+    raw_effective_enabled = rejit_result.get("effective_enabled_passes_by_program")
+    for prog_id in requested_prog_ids:
+        record = rejit_program_result(rejit_result, prog_id)
+        if not record:
+            continue
+        per_program[int(prog_id)] = dict(record)
+        output = str(record.get("output") or "")
+        if output:
+            outputs.append(output)
+        exit_code = max(exit_code, int(record.get("exit_code", 0) or 0))
+        counts = record.get("counts")
+        if isinstance(counts, Mapping):
+            total_sites += int(counts.get("total_sites", 0) or 0)
+            applied_sites += int(counts.get("applied_sites", 0) or 0)
+        error = str(record.get("error") or "").strip()
+        if error:
+            errors.append(error)
+        if isinstance(raw_effective_enabled, Mapping):
+            raw_passes = raw_effective_enabled.get(str(int(prog_id)))
+            if raw_passes is None:
+                raw_passes = raw_effective_enabled.get(int(prog_id))
+            if isinstance(raw_passes, Sequence) and not isinstance(raw_passes, (str, bytes, bytearray)):
+                effective_enabled_passes_by_program[str(int(prog_id))] = [
+                    str(pass_name)
+                    for pass_name in raw_passes
+                    if str(pass_name).strip()
+                ]
+
+    applied_any = any(bool(record.get("applied")) for record in per_program.values())
+    all_applied = bool(per_program) and all(bool(record.get("applied")) for record in per_program.values())
+    error_message = "; ".join(errors)
+    if not error_message and not per_program:
+        error_message = str(rejit_result.get("error") or "").strip()
+    sliced = {
+        "applied": applied_any,
+        "applied_any": applied_any,
+        "all_applied": all_applied,
+        "output": "\n".join(fragment for fragment in outputs if fragment),
+        "exit_code": exit_code,
+        "per_program": per_program,
+        "counts": {
+            "total_sites": total_sites,
+            "applied_sites": applied_sites,
+        },
+        "program_counts": {
+            "requested": len(requested_prog_ids),
+            "applied": sum(1 for record in per_program.values() if bool(record.get("applied"))),
+            "not_applied": sum(1 for record in per_program.values() if not bool(record.get("applied"))),
+        },
+        "error": error_message,
+        "selection_source": str(rejit_result.get("selection_source") or ""),
+        "scan_enabled_passes": list(rejit_result.get("scan_enabled_passes") or []),
+        "effective_enabled_passes_by_program": effective_enabled_passes_by_program,
+    }
+    benchmark_profile = str(rejit_result.get("benchmark_profile") or "").strip()
+    if benchmark_profile:
+        sliced["benchmark_profile"] = benchmark_profile
+    return sliced
+
+
+def _finalize_app_result(
+    app: AppSpec,
+    *,
+    runner: AppRunner,
+    state: CaseLifecycleState,
+    workload_seconds: float,
+    measurement_mode: str,
+    baseline_measurement: Mapping[str, object],
+    apply_result: Mapping[str, object] | None,
+    rejit_measurement: Mapping[str, object] | None,
+) -> dict[str, object]:
+    prog_ids = [int(value) for value in state.target_prog_ids if int(value) > 0]
+    live_programs = [dict(program) for program in (state.artifacts.get("programs") or [])]
+    if not live_programs:
+        raise RuntimeError(f"{app.name}: runner lifecycle did not expose any live programs")
+
     baseline_initial_snapshot = _normalized_stats_snapshot(baseline_measurement.get("initial_stats"))
     baseline_final_snapshot = _normalized_stats_snapshot(baseline_measurement.get("final_stats"))
     baseline_workload = dict(baseline_measurement.get("workload") or {}) if baseline_measurement.get("workload") else None
     baseline_workloads = [dict(workload) for workload in (baseline_measurement.get("workloads") or [])]
-    apply_result = dict(lifecycle_result.rejit_result or {})
-    had_post_rejit = lifecycle_result.post_rejit is not None
-    if not live_programs:
-        raise RuntimeError(f"{app.name}: runner lifecycle did not expose any live programs")
-
     baseline_phase = _program_phase_stats(baseline_final_snapshot, baseline_initial_snapshot)
+    programs_by_id = _program_stats_by_prog_id(baseline_phase, prog_ids)
+
+    had_post_rejit = rejit_measurement is not None
+    rejit_programs_by_id: dict[str, dict[str, object]] = {}
+    rejit_workload: dict[str, object] | None = None
+    rejit_workloads: list[dict[str, object]] = []
     if had_post_rejit:
-        rejit_measurement = dict((lifecycle_result.post_rejit or {}).get("measurement") or {})
         rejit_initial_snapshot = _normalized_stats_snapshot(rejit_measurement.get("initial_stats"))
         rejit_final_snapshot = _normalized_stats_snapshot(rejit_measurement.get("final_stats"))
         rejit_workload = dict(rejit_measurement.get("workload") or {}) if rejit_measurement.get("workload") else None
         rejit_workloads = [dict(workload) for workload in (rejit_measurement.get("workloads") or [])]
         rejit_phase = _program_phase_stats(rejit_final_snapshot, rejit_initial_snapshot)
+        rejit_programs_by_id = _program_stats_by_prog_id(rejit_phase, prog_ids)
 
-    programs_by_id = _program_stats_by_prog_id(baseline_phase, prog_ids)
-    rejit_programs_by_id = _program_stats_by_prog_id(rejit_phase, prog_ids)
-    error = str(apply_result.get("error") or "").strip()
+    normalized_apply_result = dict(apply_result or {})
+    error = str(normalized_apply_result.get("error") or "").strip()
     if measurement_mode == "program" and not _has_phase_measurement(programs_by_id):
         raise RuntimeError(
-            f"{app.name}: workload {selected_workload!r} did not execute any target programs during baseline"
+            f"{app.name}: workload {app.workload_for('corpus')!r} did not execute any target programs during baseline"
         )
     if measurement_mode == "program" and had_post_rejit and not error and not _has_phase_measurement(rejit_programs_by_id):
         raise RuntimeError(
-            f"{app.name}: workload {selected_workload!r} did not execute any target programs after rejit"
+            f"{app.name}: workload {app.workload_for('corpus')!r} did not execute any target programs after rejit"
         )
     status = "error" if error else "ok"
     program_measurements = _build_program_measurements(
@@ -747,7 +887,7 @@ def _run_app(
         live_programs,
         programs_by_id,
         rejit_programs_by_id,
-        apply_result,
+        normalized_apply_result,
         had_post_rejit=had_post_rejit,
     )
     app_measurement: dict[str, object] | None = None
@@ -755,9 +895,9 @@ def _run_app(
         baseline_ops_per_sec = _workload_ops_per_sec(baseline_workload)
         rejit_ops_per_sec = _workload_ops_per_sec(rejit_workload)
         if baseline_ops_per_sec is None or baseline_ops_per_sec <= 0.0:
-            raise RuntimeError(f"{app.name}: workload {selected_workload!r} did not produce a baseline throughput measurement")
+            raise RuntimeError(f"{app.name}: workload {app.workload_for('corpus')!r} did not produce a baseline throughput measurement")
         if had_post_rejit and not error and (rejit_ops_per_sec is None or rejit_ops_per_sec <= 0.0):
-            raise RuntimeError(f"{app.name}: workload {selected_workload!r} did not produce a post-rejit throughput measurement")
+            raise RuntimeError(f"{app.name}: workload {app.workload_for('corpus')!r} did not produce a post-rejit throughput measurement")
         app_measurement = {
             "metric": "ops_per_sec",
             "baseline": baseline_ops_per_sec,
@@ -768,14 +908,14 @@ def _run_app(
         }
     elif not error and not _has_comparable_measurement(program_measurements):
         raise RuntimeError(
-            f"{app.name}: workload {selected_workload!r} produced no comparable target program measurements"
+            f"{app.name}: workload {app.workload_for('corpus')!r} produced no comparable target program measurements"
         )
 
     return {
         "app": app.name,
         "runner": app.runner,
         "workload": _workload_payload(app.workload),
-        "selected_workload": selected_workload,
+        "selected_workload": app.workload_for("corpus"),
         "measurement_mode": measurement_mode,
         "configured_workload_seconds": float(workload_seconds),
         "args": dict(app.args),
@@ -791,7 +931,7 @@ def _run_app(
         },
         "baseline_workload": baseline_workload,
         "baseline_workloads": baseline_workloads,
-        "rejit_apply": dict(apply_result),
+        "rejit_apply": normalized_apply_result,
         "rejit": {
             "programs": rejit_programs_by_id,
             "exec_ns_mean": _mean_exec_ns(rejit_programs_by_id),
@@ -800,8 +940,99 @@ def _run_app(
         "rejit_workload": rejit_workload,
         "rejit_workloads": rejit_workloads,
         "process": dict(runner.process_output),
-        "command_used": [str(item) for item in lifecycle_result.artifacts.get("command_used", [])],
+        "command_used": [str(item) for item in (state.artifacts.get("command_used") or [])],
     }
+
+
+@dataclass(slots=True)
+class CorpusAppSession:
+    app: AppSpec
+    runner: AppRunner
+    state: CaseLifecycleState
+    measurement_mode: str
+    workload_seconds: float
+    kinsn_metadata: dict[str, object] | None = None
+    baseline_measurement: dict[str, object] | None = None
+    scan_results: dict[int, dict[str, object]] = field(default_factory=dict)
+    apply_result: dict[str, object] = field(default_factory=dict)
+    rejit_measurement: dict[str, object] | None = None
+    error: str = ""
+    stop_error: str = ""
+    stopped: bool = False
+    kinsn_recorded: bool = False
+
+    def requested_prog_ids(self) -> list[int]:
+        return [int(value) for value in self.state.apply_prog_ids if int(value) > 0]
+
+
+def _run_app(
+    app: AppSpec,
+    *,
+    daemon_session: object,
+    workload_seconds: float,
+    samples: int,
+) -> dict[str, object]:
+    selected_workload = app.workload_for("corpus")
+    runner = get_app_runner(
+        app.runner,
+        app_name=app.name,
+        workload=selected_workload,
+        **app.args,
+    )
+    measurement_mode = runner.corpus_measurement_mode().strip()
+    if measurement_mode not in {"program", "app"}:
+        raise RuntimeError(f"{app.name}: runner returned unsupported corpus measurement mode {measurement_mode!r}")
+
+    def before_rejit(_setup_state: object, lifecycle: object, baseline: Mapping[str, object]) -> object | None:
+        measurement = dict((baseline.get("measurement") or {}))
+        _configure_program_selection(
+            app,
+            runner,
+            lifecycle,
+            measurement_mode=measurement_mode,
+            baseline_measurement=measurement,
+        )
+        return None
+
+    with enable_bpf_stats():
+        lifecycle_result = run_app_runner_lifecycle(
+            daemon_session=daemon_session,
+            runner=runner,
+            build_state=lambda current_runner, started_prog_ids: _build_runner_state(
+                app,
+                current_runner,
+                started_prog_ids,
+            ),
+            measure=lambda lifecycle, _phase_name: {
+                "measurement": _measure_runner_phase(
+                    lifecycle.runtime,
+                    lifecycle.target_prog_ids,
+                    workload_seconds=workload_seconds,
+                    samples=samples,
+                )
+            },
+            before_rejit=before_rejit,
+        )
+
+    if lifecycle_result.state is None or lifecycle_result.baseline is None:
+        raise RuntimeError(f"{app.name}: runner lifecycle did not produce a baseline measurement")
+
+    baseline_measurement = dict((lifecycle_result.baseline.get("measurement") or {}))
+    rejit_measurement = (
+        dict((lifecycle_result.post_rejit or {}).get("measurement") or {})
+        if lifecycle_result.post_rejit is not None
+        else None
+    )
+    return _finalize_app_result(
+        app,
+        runner=runner,
+        state=lifecycle_result.state,
+        workload_seconds=workload_seconds,
+        measurement_mode=measurement_mode,
+        baseline_measurement=baseline_measurement,
+        apply_result=lifecycle_result.rejit_result,
+        rejit_measurement=rejit_measurement,
+    )
 
 
 def run_suite(args: argparse.Namespace) -> dict[str, object]:
@@ -816,7 +1047,8 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
 
     workload_seconds = _workload_seconds(args, suite.defaults)
     samples = _sample_count(args, suite.defaults)
-    results: list[dict[str, object]] = []
+    results_by_name: dict[str, dict[str, object]] = {}
+    completed_apps: set[str] = set()
     fatal_error = ""
     reset_pending_result_metadata()
 
@@ -825,69 +1057,300 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
             daemon_session,
             daemon_binary=daemon_binary,
         )
-        for index, app in enumerate(suite.apps):
-            _print_progress(
-                "app_start",
-                app=app.name,
-                runner=app.runner,
-                workload=app.workload_for("corpus"),
-            )
-            try:
-                app_workload_seconds = _app_workload_seconds(args, suite.defaults, app)
-                result = _run_app(
-                    app,
-                    daemon_session=prepared_daemon_session,
-                    workload_seconds=app_workload_seconds,
-                    samples=samples,
+        sessions: list[CorpusAppSession] = []
+        active_sessions: list[CorpusAppSession] = []
+
+        try:
+            with enable_bpf_stats():
+                for app in suite.apps:
+                    _print_progress(
+                        "app_start",
+                        app=app.name,
+                        runner=app.runner,
+                        workload=app.workload_for("corpus"),
+                    )
+                    app_workload_seconds = _app_workload_seconds(args, suite.defaults, app)
+                    runner: AppRunner | None = None
+                    try:
+                        runner = get_app_runner(
+                            app.runner,
+                            app_name=app.name,
+                            workload=app.workload_for("corpus"),
+                            **app.args,
+                        )
+                        measurement_mode = runner.corpus_measurement_mode().strip()
+                        if measurement_mode not in {"program", "app"}:
+                            raise RuntimeError(
+                                f"{app.name}: runner returned unsupported corpus measurement mode {measurement_mode!r}"
+                            )
+                        started_prog_ids = [int(value) for value in runner.start() if int(value) > 0]
+                        state = _build_runner_state(app, runner, started_prog_ids)
+                        session = CorpusAppSession(
+                            app=app,
+                            runner=runner,
+                            state=state,
+                            measurement_mode=measurement_mode,
+                            workload_seconds=app_workload_seconds,
+                            kinsn_metadata=(
+                                _clone_daemon_metadata(prepared_daemon_session, state.requested_prog_ids())
+                                if bool(getattr(daemon_session, "load_kinsn", False))
+                                else None
+                            ),
+                        )
+                        sessions.append(session)
+                        active_sessions.append(session)
+                    except Exception as exc:
+                        if runner is not None:
+                            try:
+                                runner.stop()
+                            except Exception:
+                                pass
+                        result = _build_app_error_result(
+                            app,
+                            workload_seconds=app_workload_seconds,
+                            error=str(exc),
+                        )
+                        results_by_name[app.name] = result
+                        completed_apps.add(app.name)
+                        _print_progress(
+                            "app_done",
+                            app=app.name,
+                            status=result.get("status"),
+                            error=result.get("error"),
+                            program_count=0,
+                        )
+                    daemon_error = _daemon_exit_error(daemon_session)
+                    if daemon_error is not None:
+                        fatal_error = daemon_error
+                        break
+
+                if not fatal_error:
+                    surviving_sessions: list[CorpusAppSession] = []
+                    for session in active_sessions:
+                        try:
+                            session.baseline_measurement = _measure_runner_phase(
+                                session.runner,
+                                session.state.target_prog_ids,
+                                workload_seconds=session.workload_seconds,
+                                samples=samples,
+                            )
+                            _configure_program_selection(
+                                session.app,
+                                session.runner,
+                                session.state,
+                                measurement_mode=session.measurement_mode,
+                                baseline_measurement=session.baseline_measurement,
+                            )
+                            surviving_sessions.append(session)
+                        except Exception as exc:
+                            session.error = str(exc)
+                            if session.kinsn_metadata is not None:
+                                session.kinsn_metadata["status"] = "error"
+                                session.kinsn_metadata["error"] = session.error
+                            try:
+                                session.runner.stop()
+                                session.stopped = True
+                            except Exception as stop_exc:
+                                session.stop_error = str(stop_exc)
+                            try:
+                                wait_for_suite_quiescence()
+                            except Exception as quiesce_exc:
+                                session.error = f"{session.error}; {quiesce_exc}"
+                            error_message = session.error
+                            if session.stop_error:
+                                error_message = f"{error_message}; stop failed: {session.stop_error}"
+                            result = _build_app_error_result(
+                                session.app,
+                                workload_seconds=session.workload_seconds,
+                                error=error_message,
+                                measurement_mode=session.measurement_mode,
+                                runner=session.runner,
+                                state=session.state,
+                                baseline_measurement=session.baseline_measurement,
+                            )
+                            results_by_name[session.app.name] = result
+                            completed_apps.add(session.app.name)
+                            _print_progress(
+                                "app_done",
+                                app=session.app.name,
+                                status=result.get("status"),
+                                error=result.get("error"),
+                                program_count=0,
+                            )
+                        daemon_error = _daemon_exit_error(daemon_session)
+                        if daemon_error is not None:
+                            fatal_error = daemon_error
+                            break
+                    active_sessions = surviving_sessions
+
+                if not fatal_error and active_sessions:
+                    requested_prog_ids = [
+                        prog_id
+                        for session in active_sessions
+                        for prog_id in session.requested_prog_ids()
+                    ]
+                    scan_enabled_passes, benchmark_config, selection_source = _resolve_scan_pass_selection(None)
+                    scan_results = prepared_daemon_session.session.scan_programs(
+                        requested_prog_ids,
+                        enabled_passes=scan_enabled_passes,
+                    )
+                    apply_enabled_passes_by_prog: dict[int, list[str]] = {}
+                    for session in active_sessions:
+                        apply_enabled_passes_by_prog.update(
+                            _resolve_apply_passes_by_program(
+                                requested_prog_ids=session.requested_prog_ids(),
+                                lifecycle_state=session.state,
+                                scan_results=scan_results,
+                                enabled_passes=None,
+                                benchmark_config=benchmark_config,
+                            )
+                        )
+                        session.scan_results = _slice_scan_results(
+                            scan_results,
+                            session.requested_prog_ids(),
+                        )
+
+                    grouped_prog_ids: dict[tuple[str, ...], list[int]] = {}
+                    for prog_id in requested_prog_ids:
+                        pass_tuple = tuple(apply_enabled_passes_by_prog.get(int(prog_id), ()))
+                        grouped_prog_ids.setdefault(pass_tuple, []).append(int(prog_id))
+
+                    group_rejit_results: list[tuple[list[int], Mapping[str, object]]] = []
+                    for pass_tuple, group_prog_ids in grouped_prog_ids.items():
+                        group_rejit_results.append(
+                            (
+                                list(group_prog_ids),
+                                prepared_daemon_session.session.apply_rejit(
+                                    group_prog_ids,
+                                    enabled_passes=list(pass_tuple),
+                                ),
+                            )
+                        )
+
+                    merged_rejit_result = _merge_group_rejit_results(
+                        requested_prog_ids=requested_prog_ids,
+                        group_results=group_rejit_results,
+                        enabled_passes_by_prog=apply_enabled_passes_by_prog,
+                        scan_enabled_passes=scan_enabled_passes,
+                        selection_source=selection_source,
+                        benchmark_config=benchmark_config,
+                    )
+                    for session in active_sessions:
+                        session.apply_result = _slice_rejit_result(
+                            merged_rejit_result,
+                            session.requested_prog_ids(),
+                        )
+                        if session.kinsn_metadata is not None:
+                            session.kinsn_metadata["status"] = "completed"
+
+                    daemon_error = _daemon_exit_error(daemon_session)
+                    if daemon_error is not None:
+                        fatal_error = daemon_error
+
+                if not fatal_error:
+                    for session in active_sessions:
+                        if not rejit_result_has_any_apply(session.apply_result):
+                            continue
+                        try:
+                            session.rejit_measurement = _measure_runner_phase(
+                                session.runner,
+                                session.state.target_prog_ids,
+                                workload_seconds=session.workload_seconds,
+                                samples=samples,
+                            )
+                        except Exception as exc:
+                            session.error = str(exc)
+                            if session.kinsn_metadata is not None:
+                                session.kinsn_metadata["status"] = "error"
+                                session.kinsn_metadata["error"] = session.error
+                        daemon_error = _daemon_exit_error(daemon_session)
+                        if daemon_error is not None:
+                            fatal_error = daemon_error
+                            break
+        finally:
+            for session in sessions:
+                if not session.stopped:
+                    try:
+                        session.runner.stop()
+                    except Exception as exc:
+                        session.stop_error = str(exc)
+                    finally:
+                        session.stopped = True
+                if session.kinsn_metadata is not None and not session.kinsn_recorded:
+                    if str(session.kinsn_metadata.get("status") or "").strip() == "":
+                        session.kinsn_metadata["status"] = "error" if fatal_error or session.error else "completed"
+                    if session.error and str(session.kinsn_metadata.get("error") or "").strip() == "":
+                        session.kinsn_metadata["error"] = session.error
+                    if fatal_error and str(session.kinsn_metadata.get("error") or "").strip() == "":
+                        session.kinsn_metadata["error"] = fatal_error
+                    _append_pending_kinsn_metadata(session.kinsn_metadata)
+                    session.kinsn_recorded = True
+
+        for session in sessions:
+            if session.app.name in completed_apps:
+                continue
+            error_message = session.error
+            if fatal_error:
+                error_message = fatal_error if not error_message else f"{error_message}; {fatal_error}"
+            if session.stop_error:
+                error_message = session.stop_error if not error_message else f"{error_message}; stop failed: {session.stop_error}"
+            if error_message:
+                result = _build_app_error_result(
+                    session.app,
+                    workload_seconds=session.workload_seconds,
+                    error=error_message,
+                    measurement_mode=session.measurement_mode,
+                    runner=session.runner,
+                    state=session.state,
+                    baseline_measurement=session.baseline_measurement,
                 )
-            except Exception as exc:
-                result = {
-                    "app": app.name,
-                    "runner": app.runner,
-                    "workload": _workload_payload(app.workload),
-                    "selected_workload": app.workload_for("corpus"),
-                    "configured_workload_seconds": _app_workload_seconds(args, suite.defaults, app),
-                    "args": dict(app.args),
-                    "status": "error",
-                    "error": str(exc),
-                    "program_measurements": {},
-                }
-            results.append(result)
+            else:
+                try:
+                    result = _finalize_app_result(
+                        session.app,
+                        runner=session.runner,
+                        state=session.state,
+                        workload_seconds=session.workload_seconds,
+                        measurement_mode=session.measurement_mode,
+                        baseline_measurement=session.baseline_measurement or {},
+                        apply_result=session.apply_result,
+                        rejit_measurement=session.rejit_measurement,
+                    )
+                    if session.stop_error:
+                        result["status"] = "error"
+                        result["error"] = session.stop_error
+                except Exception as exc:
+                    result = _build_app_error_result(
+                        session.app,
+                        workload_seconds=session.workload_seconds,
+                        error=str(exc),
+                        measurement_mode=session.measurement_mode,
+                        runner=session.runner,
+                        state=session.state,
+                        baseline_measurement=session.baseline_measurement,
+                    )
+            results_by_name[session.app.name] = result
+            completed_apps.add(session.app.name)
             _print_progress(
                 "app_done",
-                app=app.name,
+                app=session.app.name,
                 status=result.get("status"),
                 error=result.get("error"),
                 program_count=len(result.get("program_measurements") or {}),
             )
-            daemon_error = _daemon_exit_error(daemon_session)
-            if daemon_error is not None:
-                fatal_error = daemon_error
-                break
-            if index + 1 < len(suite.apps):
-                wait_for_suite_quiescence()
 
-        if fatal_error:
-            selected_names = {str(result.get("app") or "") for result in results}
-            for app in suite.apps:
-                if app.name in selected_names:
-                    continue
-                results.append(
-                    {
-                        "app": app.name,
-                        "runner": app.runner,
-                        "workload": _workload_payload(app.workload),
-                        "selected_workload": app.workload_for("corpus"),
-                        "configured_workload_seconds": _app_workload_seconds(args, suite.defaults, app),
-                        "args": dict(app.args),
-                        "status": "error",
-                        "error": fatal_error,
-                        "program_measurements": {},
-                    }
-                )
         daemon_socket = str(prepared_daemon_session.session.socket_path)
         kinsn_metadata = dict(prepared_daemon_session.metadata)
 
+    results = [
+        results_by_name.get(app.name)
+        or _build_app_error_result(
+            app,
+            workload_seconds=_app_workload_seconds(args, suite.defaults, app),
+            error=fatal_error or "corpus suite did not produce a result",
+        )
+        for app in suite.apps
+    ]
     status_counts = Counter(str(result.get("status") or "error") for result in results)
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -917,8 +1380,6 @@ def build_run_metadata(
     args: argparse.Namespace,
     payload: dict[str, object],
     *,
-    output_json: Path,
-    output_md: Path,
     resolved_samples: int,
     resolved_workload_seconds: float,
 ) -> dict[str, object]:
@@ -935,8 +1396,6 @@ def build_run_metadata(
         "workload_seconds": float(resolved_workload_seconds),
         "kinsn_enabled": not bool(args.no_kinsn),
         "selected_rejit_passes": selected_rejit_passes,
-        "output_hint_json": repo_relative_path(output_json),
-        "output_hint_md": repo_relative_path(output_md),
         "optimization_summary": payload.get("summary") if isinstance(payload, Mapping) else {},
     }
     if selected_rejit_passes != requested_rejit_passes:
@@ -980,8 +1439,6 @@ def main(argv: list[str] | None = None) -> int:
         metadata = build_run_metadata(
             args,
             metadata_payload,
-            output_json=output_json,
-            output_md=output_md,
             resolved_samples=resolved_samples,
             resolved_workload_seconds=resolved_workload_seconds,
         )
@@ -1006,8 +1463,6 @@ def main(argv: list[str] | None = None) -> int:
         payload = run_suite(args)
         markdown = build_markdown(payload) + "\n"
         metadata_payload = payload
-        ensure_parent(output_json)
-        ensure_parent(output_md)
         ensure_parent(artifact_result_json)
         ensure_parent(artifact_result_md)
         write_json(artifact_result_json, payload)
@@ -1038,14 +1493,11 @@ def main(argv: list[str] | None = None) -> int:
                 detail_texts={"result.md": markdown},
                 error_message=error_message or "corpus suite reported errors",
             )
-        write_json(output_json, payload)
-        write_text(output_md, markdown)
         print(
             json.dumps(
                 {
                     "status": payload_status,
-                    "output_json": str(output_json),
-                    "output_md": str(output_md),
+                    "artifact_run_dir": str(session.run_dir),
                     "artifact_metadata": str(session.run_dir / "metadata.json"),
                 },
                 indent=2,

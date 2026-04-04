@@ -124,22 +124,39 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
 
         def scan_programs(self, prog_ids, *, enabled_passes=None, timeout_seconds=60):
             daemon_events.append(("scan", list(prog_ids), list(enabled_passes or []), timeout_seconds))
-            prog_id = int(prog_ids[0])
             return {
-                prog_id: {
-                    "prog_id": prog_id,
+                int(prog_id): {
+                    "prog_id": int(prog_id),
                     "sites": {},
                     "counts": {},
                     "error": "",
                 }
+                for prog_id in prog_ids
             }
 
         def apply_rejit(self, prog_ids, *, enabled_passes=None):
             daemon_events.append(("apply", list(prog_ids), list(enabled_passes or [])))
-            prog_id = int(prog_ids[0])
-            if prog_id == 101:
-                return {"applied": True, "error": "", "counts": {"applied_sites": 3}}
-            return {"applied": False, "error": "demo apply failure", "counts": {"applied_sites": 0}}
+            return {
+                "applied": True,
+                "error": "demo apply failure",
+                "counts": {"applied_sites": 3},
+                "per_program": {
+                    101: {
+                        "applied": True,
+                        "error": "",
+                        "counts": {"total_sites": 3, "applied_sites": 3},
+                        "exit_code": 0,
+                        "output": "alpha ok",
+                    },
+                    202: {
+                        "applied": False,
+                        "error": "demo apply failure",
+                        "counts": {"total_sites": 0, "applied_sites": 0},
+                        "exit_code": 1,
+                        "output": "beta failed",
+                    },
+                },
+            }
 
     runner_events: list[object] = []
 
@@ -331,10 +348,8 @@ def test_run_suite_uses_app_manifest_and_single_daemon_session(monkeypatch, tmp_
     assert payload["results"][1]["rejit_workloads"] == []
     assert daemon_events == [
         ("start", daemon_binary.resolve(), True),
-        ("scan", [101], ["map_inline"], 60),
-        ("apply", [101], ["map_inline"]),
-        ("scan", [202], ["map_inline"], 60),
-        ("apply", [202], ["map_inline"]),
+        ("scan", [101, 202], ["map_inline"], 60),
+        ("apply", [101, 202], ["map_inline"]),
         "stop",
     ]
     assert runner_events[0] == ("start", "alpha", "exec_loop", {"tool": "execsnoop"})
@@ -401,19 +416,58 @@ def test_run_suite_marks_remaining_apps_after_daemon_exit(monkeypatch, tmp_path:
 
     run_calls: list[str] = []
 
-    def fake_run_app(app, *, daemon_session, workload_seconds, samples):
-        del daemon_session, workload_seconds, samples
-        run_calls.append(app.name)
-        return {
-            "app": app.name,
-            "runner": app.runner,
-            "workload": app.workload,
-            "args": dict(app.args),
-            "status": "ok",
-        }
+    class FakeRunner(AppRunner):
+        def __init__(self, *, app_name: str, workload: str, **kwargs) -> None:
+            del kwargs
+            super().__init__()
+            self.app_name = app_name
+            self.workload = workload
+            self.command_used = ["fake-runner", app_name]
+            self.process_output = {"returncode": 0, "stdout_tail": "", "stderr_tail": ""}
+            self.programs = [{"id": 100 + len(run_calls), "name": f"{app_name}_prog", "type": "xdp"}]
+
+        def start(self) -> list[int]:
+            run_calls.append(self.app_name)
+            return [int(self.programs[0]["id"])]
+
+        def run_workload(self, seconds: float) -> object:
+            del seconds
+            raise AssertionError("fatal daemon exit should abort before workload measurement")
+
+        def run_workload_spec(self, workload_spec, seconds: float) -> object:
+            del workload_spec, seconds
+            raise AssertionError("fatal daemon exit should abort before workload measurement")
+
+        def stop(self) -> None:
+            return None
+
+        def select_corpus_program_ids(self, initial_stats, final_stats) -> list[int] | None:
+            del initial_stats, final_stats
+            return None
+
+        def corpus_measurement_mode(self) -> str:
+            return "program"
+
+        @property
+        def pid(self) -> int | None:
+            return None
+
+        @property
+        def program_fds(self) -> dict[int, int]:
+            return {}
+
+        @property
+        def last_workload_details(self) -> dict[str, object]:
+            return {}
+
+    def fake_get_app_runner(_runner_name: str, **kwargs) -> FakeRunner:
+        app_name = str(kwargs.pop("app_name"))
+        workload = str(kwargs.pop("workload"))
+        return FakeRunner(app_name=app_name, workload=workload, **kwargs)
 
     monkeypatch.setattr(driver, "DaemonSession", FakeDaemonSession)
-    monkeypatch.setattr(driver, "_run_app", fake_run_app)
+    monkeypatch.setattr(driver, "get_app_runner", fake_get_app_runner)
+    monkeypatch.setattr(driver, "enable_bpf_stats", lambda: nullcontext())
 
     payload = driver.run_suite(
         driver.parse_args(
@@ -429,7 +483,8 @@ def test_run_suite_marks_remaining_apps_after_daemon_exit(monkeypatch, tmp_path:
     assert run_calls == ["alpha"]
     assert payload["status"] == "error"
     assert payload["fatal_error"] == "daemon session exited early (rc=17)"
-    assert [result["status"] for result in payload["results"]] == ["ok", "error", "error"]
+    assert [result["status"] for result in payload["results"]] == ["error", "error", "error"]
+    assert payload["results"][0]["error"] == "daemon session exited early (rc=17)"
     assert payload["results"][1]["error"] == "daemon session exited early (rc=17)"
     assert payload["results"][2]["error"] == "daemon session exited early (rc=17)"
 
@@ -466,8 +521,6 @@ def test_build_run_metadata_prefers_effective_passes_from_payload(monkeypatch, t
     metadata = driver.build_run_metadata(
         args,
         payload,
-        output_json=tmp_path / "vm_corpus.json",
-        output_md=tmp_path / "vm_corpus.md",
         resolved_samples=30,
         resolved_workload_seconds=4.0,
     )

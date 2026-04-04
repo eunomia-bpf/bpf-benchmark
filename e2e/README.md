@@ -1,6 +1,6 @@
 # End-to-End
 
-`e2e/` is the deployment-layer benchmark harness. The unified entrypoint is `python3 e2e/driver.py <case>`.
+`e2e/` is the deployment-layer benchmark harness. `make vm-e2e` is the canonical benchmark entrypoint, and `python3 e2e/driver.py <case>` is the direct driver entrypoint.
 
 Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `bcc`, `scx`, and `katran`.
 
@@ -9,7 +9,7 @@ Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `bcc`, `scx`, and 
 - `driver.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, `scx`, `bcc`, and `katran`
 - `cases/`: per-system case logic, setup scripts, configs, and assets
 - `../runner/libs/`: shared helpers for agent lifecycle, workload generation, metrics, VM runs, and REJIT
-- `results/`: JSON/Markdown outputs
+- `results/`: timestamped run-artifact directories
 
 ## Shared Prerequisites
 
@@ -23,6 +23,8 @@ make corpus-build REPOS="tracee tetragon scx"
 - Most cases require root or passwordless `sudo -n`.
 - `tracee`, `tetragon`, and `scx` consume objects from `corpus/build/`.
 - `e2e` expects the daemon CLI at `daemon/target/release/bpfrejit-daemon`; `make daemon` builds it.
+
+Results live under `e2e/results/<run_type>_<timestamp>/`. `metadata.json` is the canonical run summary; `details/` contains `result.json`, `result.md`, optional `report.md`, and any retained per-case payloads.
 
 ## Case Notes
 

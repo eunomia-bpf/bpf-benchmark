@@ -17,7 +17,6 @@ if __package__ in {None, ""}:
 from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
-    authoritative_output_path,
     run_command,
     tail_text,
     which,
@@ -36,7 +35,7 @@ from runner.libs.case_common import (  # noqa: E402
 
 
 DEFAULT_SCRIPT_DIR = Path(__file__).with_name("scripts")
-DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "bpftrace")
+DEFAULT_OUTPUT_JSON = RESULTS_DIR / "bpftrace.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e-report.md"
 DEFAULT_DURATION_S = 30

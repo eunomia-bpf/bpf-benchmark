@@ -638,25 +638,25 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 命令 | 作用 |
 |------|------|
 | `make smoke` | 构建 + 本地 llvmbpf smoke test (simple, 1 iter, 10 repeat) |
-| `make daemon-tests` | 构建 + 运行 daemon unit tests (ctest) |
-| `make check` | = `all` + `daemon-tests` + `smoke`（完整本地验证） |
+| `make daemon-tests` | 构建 + 运行 daemon unit tests (`cargo test`) |
+| `make check` | = `all` + `daemon-tests` + `python-tests` + `smoke`（完整本地验证） |
 
 #### VM 目标（需要 bzImage + vng）
 
 | 命令 | 作用 |
 |------|------|
-| `make vm-selftest` | VM 中跑 kernel self-tests (rejit_poc + rejit_safety_tests) |
-| `make vm-micro-smoke` | VM 中跑 micro smoke (simple + load_byte_recompose + cmov_dense, kernel + kernel-rejit) |
-| `make vm-micro` | VM 中跑全量 micro suite (kernel + kernel-rejit, 默认 3iter/1warm/100rep) |
+| `make vm-selftest` | VM 中跑 repo 自己的 unittest `rejit_*` 集合，并追加 negative tests (`adversarial_rejit` + `fuzz_rejit`) |
+| `make vm-micro-smoke` | VM 中跑 micro smoke (simple + load_byte_recompose + cmov_dense, llvmbpf + kernel) |
+| `make vm-micro` | VM 中跑全量 micro suite (llvmbpf + kernel, 默认 3iter/1warm/100rep) |
 | `make vm-corpus` | 跑 corpus batch（单 VM batch，daemon serve 常驻，用 policy，默认 30 samples） |
-| `make vm-e2e` | 跑全部 E2E (tracee + tetragon + bpftrace + scx；`xdp_forwarding` 已退役) |
-| `make vm-all` | = `vm-selftest` + `vm-micro` + `vm-corpus` + `vm-e2e`（完整 VM 验证） |
-| `make validate` | = `check` + `vm-selftest` + `vm-micro-smoke`（最小 VM 验证） |
+| `make vm-e2e` | 跑全部 E2E (tracee + tetragon + bpftrace + scx + bcc + katran；`xdp_forwarding` 已退役) |
+| `make vm-all` | = `vm-test` + `vm-micro` + `vm-corpus` + `vm-e2e`（完整 VM 验证） |
+| `make validate` | = `check` + `vm-test` + `vm-micro-smoke`（最小 VM 验证） |
 
 #### 可调参数
 
 ```bash
-make vm-micro ITERATIONS=10 WARMUPS=2 REPEAT=500         # strict run
+make vm-micro SAMPLES=10 WARMUPS=2 INNER_REPEAT=500      # strict run
 make vm-micro BZIMAGE=/path/to/other/bzImage              # 自定义 kernel
 make vm-corpus SAMPLES=10                                 # 快速 corpus
 ```
