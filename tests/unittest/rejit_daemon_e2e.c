@@ -111,12 +111,25 @@ static int join_path(char *dst, size_t dst_sz, const char *prefix,
 static void init_default_paths(void)
 {
 	char repo_root[PATH_MAX];
+	const char *override;
 
 	if (get_repo_root(repo_root, sizeof(repo_root)) < 0)
 		return;
 
-	join_path(g_progs_dir, sizeof(g_progs_dir), repo_root,
-		  "/tests/unittest/build/progs");
+	override = getenv("BPFREJIT_PROGS_DIR");
+	if (override && override[0]) {
+		snprintf(g_progs_dir, sizeof(g_progs_dir), "%s", override);
+	} else {
+		join_path(g_progs_dir, sizeof(g_progs_dir), repo_root,
+			  "/tests/unittest/build/progs");
+	}
+
+	override = getenv("BPFREJIT_DAEMON_PATH");
+	if (override && override[0]) {
+		snprintf(g_daemon_path, sizeof(g_daemon_path), "%s", override);
+		return;
+	}
+
 	join_path(g_daemon_path, sizeof(g_daemon_path), repo_root,
 		  "/daemon/target/release/bpfrejit-daemon");
 }
@@ -261,12 +274,13 @@ static int run_daemon_optimize_all_request(char *reason, size_t reason_sz)
 {
 	char socket_dir_template[] = "/tmp/rejit-daemon-e2e.XXXXXX";
 	char socket_path[PATH_MAX];
-	char response[256];
+	char response[65536];
 	struct sockaddr_un addr = {};
 	pid_t pid;
 	int fd = -1;
 	ssize_t nread;
 	int status;
+	size_t used = 0;
 
 	if (!mkdtemp(socket_dir_template)) {
 		snprintf(reason, reason_sz, "mkdtemp failed: %s", strerror(errno));
@@ -332,8 +346,18 @@ static int run_daemon_optimize_all_request(char *reason, size_t reason_sz)
 	}
 
 	memset(response, 0, sizeof(response));
-	nread = read(fd, response, sizeof(response) - 1);
-	if (nread <= 0) {
+	while (used + 1 < sizeof(response)) {
+		nread = read(fd, response + used, sizeof(response) - used - 1);
+		if (nread < 0 && errno == EINTR)
+			continue;
+		if (nread <= 0)
+			break;
+		used += (size_t)nread;
+		response[used] = '\0';
+		if (strchr(response, '\n'))
+			break;
+	}
+	if (used == 0) {
 		snprintf(reason, reason_sz, "read failed: %s",
 			 nread < 0 ? strerror(errno) : "empty response");
 		goto fail;

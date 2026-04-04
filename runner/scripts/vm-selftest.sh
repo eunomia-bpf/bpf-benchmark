@@ -19,13 +19,16 @@ NEGATIVE_BUILD_DIR="${7:-${NEGATIVE_DIR}/build}"
 
 cd "$ROOT_DIR"
 
+export BPFREJIT_PROGS_DIR="${BUILD_DIR}/progs"
+export BPFREJIT_DAEMON_PATH="${BPFREJIT_DAEMON_PATH:-${ROOT_DIR}/daemon/target/release/bpfrejit-daemon}"
+
 # Load kinsn modules via the unified loader.
 LOAD_SCRIPT="${ROOT_DIR}/module/load_all.sh"
 if [ ! -x "$LOAD_SCRIPT" ]; then
     echo "ERROR: module/load_all.sh not found or not executable: $LOAD_SCRIPT"
     exit 1
 fi
-"$LOAD_SCRIPT"
+"$LOAD_SCRIPT" "$KINSN_MODULE_DIR"
 
 PASS=0
 FAIL=0

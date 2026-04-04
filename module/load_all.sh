@@ -3,12 +3,19 @@
 # Run inside VM after boot. Idempotent: skips already-loaded modules.
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ARCH=$(uname -m)
-case "$ARCH" in
-    x86_64) MODULE_DIR="$SCRIPT_DIR/x86" ;;
-    aarch64) MODULE_DIR="$SCRIPT_DIR/arm64" ;;
-    *) echo "Unsupported arch: $ARCH"; exit 1 ;;
-esac
+MODULE_DIR="${1:-}"
+if [ -z "$MODULE_DIR" ]; then
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64) MODULE_DIR="$SCRIPT_DIR/x86" ;;
+        aarch64) MODULE_DIR="$SCRIPT_DIR/arm64" ;;
+        *) echo "Unsupported arch: $ARCH"; exit 1 ;;
+    esac
+fi
+if [ ! -d "$MODULE_DIR" ]; then
+    echo "ERROR: module directory not found: $MODULE_DIR" >&2
+    exit 1
+fi
 loaded=0
 total=0
 for ko in "$MODULE_DIR"/*.ko; do
