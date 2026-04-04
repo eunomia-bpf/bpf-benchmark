@@ -1,0 +1,3187 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "daemon_socket": "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260403/vm-tmp/bpfrejit-daemon-rxpt1k95/daemon.sock",
+  "filters": [
+    "scx"
+  ],
+  "generated_at": "2026-04-03T20:11:51.781078+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-04-03T20:11:44.547725+00:00",
+    "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+    "daemon_kinsn_discovery": {
+      "captured_at": "2026-04-03T20:11:44.551153+00:00",
+      "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=147702 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=147704 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=147679 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=147697 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=147698 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=147681 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=147682 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=147683 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+      "status": "ok",
+      "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=147702 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=147704 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=147679 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=147697 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=147698 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=147681 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=147682 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=147683 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+      "stderr_path": "docs/tmp/20260403/vm-tmp/bpfrejit-daemon-rxpt1k95/daemon.stderr.log",
+      "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260403/vm-tmp/bpfrejit-daemon-rxpt1k95/daemon.sock",
+      "stdout_path": "docs/tmp/20260403/vm-tmp/bpfrejit-daemon-rxpt1k95/daemon.stdout.log"
+    },
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "exit_code": 0,
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-04-03T20:11:44.480379+00:00",
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "newly_loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "script_path": "module/load_all.sh",
+      "snapshot_after": {
+        "captured_at": "2026-04-03T20:11:44.480358+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "stderr": "",
+      "stdout": "Loaded bpf_bulk_memory\nLoaded bpf_endian\nLoaded bpf_extract\nLoaded bpf_rotate\nLoaded bpf_select\nkinsn modules: 5/5 loaded"
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-04-03T20:11:44.238721+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [],
+      "missing_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "raw_output": "",
+      "resident_expected_modules": [],
+      "source": "lsmod"
+    },
+    "status": "ready"
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "metadata": {
+    "kinsn_modules": {
+      "count": 1,
+      "lifecycle_runs": [
+        {
+          "captured_at": "2026-04-03T20:11:45.796964+00:00",
+          "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+          "daemon_kinsn_discovery": {
+            "captured_at": "2026-04-03T20:11:44.551153+00:00",
+            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=147702 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=147704 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=147679 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=147697 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=147698 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=147681 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=147682 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=147683 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "status": "ok",
+            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=147702 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=147704 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=147679 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=147697 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=147698 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=147681 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=147682 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=147683 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr_path": "docs/tmp/20260403/vm-tmp/bpfrejit-daemon-rxpt1k95/daemon.stderr.log",
+            "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260403/vm-tmp/bpfrejit-daemon-rxpt1k95/daemon.sock",
+            "stdout_path": "docs/tmp/20260403/vm-tmp/bpfrejit-daemon-rxpt1k95/daemon.stdout.log"
+          },
+          "expected_modules": [
+            "bpf_bulk_memory",
+            "bpf_endian",
+            "bpf_extract",
+            "bpf_rotate",
+            "bpf_select"
+          ],
+          "lifecycle_index": 1,
+          "module_load": {
+            "exit_code": 0,
+            "expected_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "failed_modules": [],
+            "invoked_at": "2026-04-03T20:11:44.480379+00:00",
+            "loaded_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "newly_loaded_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "script_path": "module/load_all.sh",
+            "snapshot_after": {
+              "captured_at": "2026-04-03T20:11:44.480358+00:00",
+              "expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "loaded_bpf_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "missing_expected_modules": [],
+              "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+              "resident_expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "source": "lsmod"
+            },
+            "status": "ok",
+            "stderr": "",
+            "stdout": "Loaded bpf_bulk_memory\nLoaded bpf_endian\nLoaded bpf_extract\nLoaded bpf_rotate\nLoaded bpf_select\nkinsn modules: 5/5 loaded"
+          },
+          "module_snapshot_before_daemon": {
+            "captured_at": "2026-04-03T20:11:44.238721+00:00",
+            "expected_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "loaded_bpf_modules": [],
+            "missing_expected_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "raw_output": "",
+            "resident_expected_modules": [],
+            "source": "lsmod"
+          },
+          "requested_prog_ids": [
+            7,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "status": "completed"
+        }
+      ]
+    }
+  },
+  "results": [
+    {
+      "app": "scx/rusty",
+      "app_measurement": null,
+      "args": {
+        "scheduler": "rusty"
+      },
+      "baseline": {
+        "exec_ns_mean": 346.18760214924487,
+        "programs": {
+          "10": {
+            "bytes_jited": 725,
+            "bytes_xlated": 1336,
+            "exec_ns": 505.16858640293736,
+            "id": 10,
+            "name": "rusty_dispatch",
+            "run_cnt": 202632,
+            "run_time_ns": 102363321,
+            "type": "struct_ops"
+          },
+          "11": {
+            "bytes_jited": 312,
+            "bytes_xlated": 3656,
+            "exec_ns": 99.07147609495976,
+            "id": 11,
+            "name": "rusty_runnable",
+            "run_cnt": 202907,
+            "run_time_ns": 20102296,
+            "type": "struct_ops"
+          },
+          "12": {
+            "bytes_jited": 464,
+            "bytes_xlated": 952,
+            "exec_ns": 126.01298471257977,
+            "id": 12,
+            "name": "rusty_running",
+            "run_cnt": 203239,
+            "run_time_ns": 25610753,
+            "type": "struct_ops"
+          },
+          "13": {
+            "bytes_jited": 278,
+            "bytes_xlated": 1840,
+            "exec_ns": 63.92461584636807,
+            "id": 13,
+            "name": "rusty_stopping",
+            "run_cnt": 203239,
+            "run_time_ns": 12991975,
+            "type": "struct_ops"
+          },
+          "14": {
+            "bytes_jited": 260,
+            "bytes_xlated": 3808,
+            "exec_ns": 84.90960390720872,
+            "id": 14,
+            "name": "rusty_quiescent",
+            "run_cnt": 202907,
+            "run_time_ns": 17228753,
+            "type": "struct_ops"
+          },
+          "15": {
+            "bytes_jited": 124,
+            "bytes_xlated": 392,
+            "exec_ns": 29.993817619783616,
+            "id": 15,
+            "name": "rusty_set_weigh",
+            "run_cnt": 647,
+            "run_time_ns": 19406,
+            "type": "struct_ops"
+          },
+          "16": {
+            "bytes_jited": 165,
+            "bytes_xlated": 10360,
+            "exec_ns": 768.3333333333334,
+            "id": 16,
+            "name": "rusty_set_cpuma",
+            "run_cnt": 3,
+            "run_time_ns": 2305,
+            "type": "struct_ops"
+          },
+          "17": {
+            "bytes_jited": 537,
+            "bytes_xlated": 8848,
+            "exec_ns": 1106.5712074303406,
+            "id": 17,
+            "name": "rusty_init_task",
+            "run_cnt": 646,
+            "run_time_ns": 714845,
+            "type": "struct_ops"
+          },
+          "18": {
+            "bytes_jited": 166,
+            "bytes_xlated": 2792,
+            "exec_ns": 875.5875968992248,
+            "id": 18,
+            "name": "rusty_exit_task",
+            "run_cnt": 645,
+            "run_time_ns": 564754,
+            "type": "struct_ops"
+          },
+          "7": {
+            "bytes_jited": 3072,
+            "bytes_xlated": 6624,
+            "exec_ns": 110.00659366770292,
+            "id": 7,
+            "name": "rusty_select_cp",
+            "run_cnt": 202012,
+            "run_time_ns": 22222652,
+            "type": "struct_ops"
+          },
+          "9": {
+            "bytes_jited": 1045,
+            "bytes_xlated": 13064,
+            "exec_ns": 38.48380772725477,
+            "id": 9,
+            "name": "rusty_enqueue",
+            "run_cnt": 202504,
+            "run_time_ns": 7793125,
+            "type": "struct_ops"
+          }
+        }
+      },
+      "baseline_workload": {
+        "duration_s": 1.2630264569999996,
+        "ops_per_sec": 3.166996208061223,
+        "ops_total": 4.0,
+        "stderr": "",
+        "stdout": "Running in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.295\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.315\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.300\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.293"
+      },
+      "baseline_workloads": [
+        {
+          "duration_s": 1.2630264569999996,
+          "ops_per_sec": 3.166996208061223,
+          "ops_total": 4.0,
+          "stderr": "",
+          "stdout": "Running in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.295\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.315\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.300\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.293"
+        }
+      ],
+      "command_used": [
+        "bash",
+        "-lc",
+        "set -euo pipefail; ulimit -l unlimited; exec /home/yunwei37/workspace/bpf-benchmark/runner/repos/scx/target/release/scx_rusty --stats 1"
+      ],
+      "configured_workload_seconds": 1.0,
+      "error": "",
+      "had_post_rejit_measurement": true,
+      "measurement_mode": "program",
+      "process": {
+        "stderr_tail": [
+          "13:11:44 \u001b[0m\u001b[34m[INFO] \u001b[0mRunning scx_rusty (build ID: 1.1.0 x86_64-unknown-linux-gnu)",
+          "13:11:44 \u001b[0m\u001b[34m[INFO] \u001b[0mNODE[00] mask= f",
+          "13:11:44 \u001b[0m\u001b[34m[INFO] \u001b[0m DOM[00] mask= f",
+          "13:11:44 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_attach not found in kernel, skipping it as it's set to zero",
+          "",
+          "13:11:44 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_detach not found in kernel, skipping it as it's set to zero",
+          "",
+          "13:11:44 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_cgroup_id not found in kernel, skipping it as it's set to zero",
+          "",
+          "13:11:44 \u001b[0m\u001b[33m[WARN] \u001b[0mlibbpf: map 'rusty': BPF map skeleton link is uninitialized",
+          "",
+          "13:11:44 \u001b[0m\u001b[34m[INFO] \u001b[0mRusty scheduler started! Run `scx_rusty --monitor` for metrics."
+        ],
+        "stdout_tail": [
+          "###### Fri, 3 Apr 2026 13:11:45 -0700, load balance @  -875.6ms ######",
+          "cpu=   0.00 load=   -0.00 mig=0 task_err=0 time_used= 0.0ms",
+          "tot=      4 sync_prev_idle= 0.00 wsync= 0.00",
+          "prev_idle=100.00 greedy_idle= 0.00 pin= 0.00",
+          "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+          "dsq= 0.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+          "kick_greedy= 0.00 rep= 0.00",
+          "dl_clamp= 0.00 dl_preset= 0.00",
+          "slice=20000us",
+          "direct_greedy_cpus=f",
+          "  kick_greedy_cpus=f",
+          "###### Fri, 3 Apr 2026 13:11:46 -0700, load balance @ -1879.6ms ######",
+          "cpu=  71.75 load=   -0.00 mig=0 task_err=0 time_used= 0.3ms",
+          "tot= 131830 sync_prev_idle= 0.13 wsync= 0.02",
+          "prev_idle= 0.98 greedy_idle= 0.00 pin= 0.00",
+          "dir= 0.48 dir_greedy= 0.00 dir_greedy_far= 0.00",
+          "dsq=98.39 greedy_local= 0.00 greedy_xnuma= 0.00",
+          "kick_greedy= 0.00 rep= 0.00",
+          "dl_clamp= 3.37 dl_preset=95.08",
+          "slice=1000us",
+          "direct_greedy_cpus=0",
+          "  kick_greedy_cpus=f",
+          "###### Fri, 3 Apr 2026 13:11:47 -0700, load balance @  -874.2ms ######",
+          "cpu=  58.75 load=   54.60 mig=0 task_err=0 time_used=10.9ms",
+          "tot=  72119 sync_prev_idle= 0.81 wsync= 0.01",
+          "prev_idle= 1.17 greedy_idle= 0.00 pin= 0.00",
+          "dir= 1.25 dir_greedy= 0.00 dir_greedy_far= 0.00",
+          "dsq=96.77 greedy_local= 0.00 greedy_xnuma= 0.00",
+          "kick_greedy= 0.00 rep= 0.00",
+          "dl_clamp= 4.81 dl_preset=91.84",
+          "slice=20000us",
+          "direct_greedy_cpus=f",
+          "  kick_greedy_cpus=f",
+          "  NODE[00] load= 54.60 imbal=  +0.00 delta=  +0.00",
+          "   DOM[00] load= 54.60 imbal=  +0.00 delta=  +0.00",
+          "###### Fri, 3 Apr 2026 13:11:48 -0700, load balance @ -1876.7ms ######",
+          "cpu=  10.20 load=   54.60 mig=0 task_err=0 time_used= 0.5ms",
+          "tot=    167 sync_prev_idle= 8.38 wsync= 4.19",
+          "prev_idle=61.68 greedy_idle= 0.00 pin= 0.00",
+          "dir= 5.99 dir_greedy= 0.00 dir_greedy_far= 0.00",
+          "dsq=19.76 greedy_local= 0.00 greedy_xnuma= 0.00",
+          "kick_greedy= 4.79 rep= 0.00",
+          "dl_clamp=13.17 dl_preset= 7.19",
+          "slice=20000us",
+          "direct_greedy_cpus=f",
+          "  kick_greedy_cpus=f",
+          "  NODE[00] load= 54.60 imbal=  +0.00 delta=  +0.00",
+          "   DOM[00] load= 54.60 imbal=  +0.00 delta=  +0.00",
+          "###### Fri, 3 Apr 2026 13:11:49 -0700, load balance @  -884.5ms ######",
+          "cpu=   9.98 load=   18.99 mig=0 task_err=0 time_used= 1.0ms",
+          "tot=    278 sync_prev_idle= 3.60 wsync= 5.40",
+          "prev_idle=56.47 greedy_idle= 0.00 pin= 0.00",
+          "dir= 4.68 dir_greedy= 0.00 dir_greedy_far= 0.00",
+          "dsq=29.86 greedy_local= 0.00 greedy_xnuma= 0.00",
+          "kick_greedy= 1.80 rep= 0.00",
+          "dl_clamp=19.78 dl_preset= 9.71",
+          "slice=20000us",
+          "direct_greedy_cpus=f",
+          "  kick_greedy_cpus=f",
+          "  NODE[00] load= 18.99 imbal=  +0.00 delta=  +0.00",
+          "   DOM[00] load= 18.99 imbal=  +0.00 delta=  +0.00",
+          "###### Fri, 3 Apr 2026 13:11:50 -0700, load balance @ -1886.1ms ######",
+          "cpu=  48.75 load=   18.99 mig=0 task_err=0 time_used= 0.5ms",
+          "tot=  70215 sync_prev_idle= 0.17 wsync= 0.01",
+          "prev_idle= 1.14 greedy_idle= 0.00 pin= 0.00",
+          "dir= 0.65 dir_greedy= 0.00 dir_greedy_far= 0.00",
+          "dsq=98.04 greedy_local= 0.00 greedy_xnuma= 0.00",
+          "kick_greedy= 0.00 rep= 0.00",
+          "dl_clamp= 3.34 dl_preset=94.83",
+          "slice=20000us",
+          "direct_greedy_cpus=f",
+          "  kick_greedy_cpus=f",
+          "  NODE[00] load= 18.99 imbal=  +0.00 delta=  +0.00",
+          "   DOM[00] load= 18.99 imbal=  +0.00 delta=  +0.00"
+        ]
+      },
+      "prog_ids": [
+        7,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "program_measurements": {
+        "10": {
+          "applied": true,
+          "apply": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 273,
+                  "insns_before": 273,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 10,
+              "program": {
+                "final_insn_count": 273,
+                "insn_delta": 0,
+                "orig_insn_count": 273,
+                "prog_id": 10,
+                "prog_name": "rusty_dispatch",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 341360,
+                "rejit_syscall_ns": 0,
+                "total_ns": 8541989
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_dispatch",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 273, \"insns_before\": 273, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 10, \"program\": {\"final_insn_count\": 273, \"insn_delta\": 0, \"orig_insn_count\": 273, \"prog_id\": 10, \"prog_name\": \"rusty_dispatch\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 341360, \"rejit_syscall_ns\": 0, \"total_ns\": 8541989}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "baseline": {
+            "bytes_jited": 725,
+            "bytes_xlated": 1336,
+            "exec_ns": 505.16858640293736,
+            "id": 10,
+            "name": "rusty_dispatch",
+            "run_cnt": 202632,
+            "run_time_ns": 102363321,
+            "type": "struct_ops"
+          },
+          "comparable": true,
+          "comparison_exclusion_reason": "",
+          "id": 10,
+          "label": "scx/rusty:rusty_dispatch#10",
+          "name": "rusty_dispatch",
+          "rejit": {
+            "bytes_jited": 725,
+            "bytes_xlated": 1336,
+            "exec_ns": 507.42819536481284,
+            "id": 10,
+            "name": "rusty_dispatch",
+            "run_cnt": 230584,
+            "run_time_ns": 117004823,
+            "type": "struct_ops"
+          },
+          "speedup": 0.9955469384978678,
+          "type": "struct_ops"
+        },
+        "11": {
+          "applied": true,
+          "apply": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 611,
+                  "insns_before": 611,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 11,
+              "program": {
+                "final_insn_count": 611,
+                "insn_delta": 0,
+                "orig_insn_count": 611,
+                "prog_id": 11,
+                "prog_name": "rusty_runnable",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 378973,
+                "rejit_syscall_ns": 0,
+                "total_ns": 5514004
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_runnable",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 611, \"insns_before\": 611, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 11, \"program\": {\"final_insn_count\": 611, \"insn_delta\": 0, \"orig_insn_count\": 611, \"prog_id\": 11, \"prog_name\": \"rusty_runnable\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 378973, \"rejit_syscall_ns\": 0, \"total_ns\": 5514004}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "baseline": {
+            "bytes_jited": 312,
+            "bytes_xlated": 3656,
+            "exec_ns": 99.07147609495976,
+            "id": 11,
+            "name": "rusty_runnable",
+            "run_cnt": 202907,
+            "run_time_ns": 20102296,
+            "type": "struct_ops"
+          },
+          "comparable": true,
+          "comparison_exclusion_reason": "",
+          "id": 11,
+          "label": "scx/rusty:rusty_runnable#11",
+          "name": "rusty_runnable",
+          "rejit": {
+            "bytes_jited": 312,
+            "bytes_xlated": 3656,
+            "exec_ns": 99.51004548408058,
+            "id": 11,
+            "name": "rusty_runnable",
+            "run_cnt": 230850,
+            "run_time_ns": 22971894,
+            "type": "struct_ops"
+          },
+          "speedup": 0.9955927124041866,
+          "type": "struct_ops"
+        },
+        "12": {
+          "applied": true,
+          "apply": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 115,
+                  "insns_before": 115,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 12,
+              "program": {
+                "final_insn_count": 115,
+                "insn_delta": 0,
+                "orig_insn_count": 115,
+                "prog_id": 12,
+                "prog_name": "rusty_running",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 155107,
+                "rejit_syscall_ns": 0,
+                "total_ns": 3915557
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_running",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 115, \"insns_before\": 115, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 12, \"program\": {\"final_insn_count\": 115, \"insn_delta\": 0, \"orig_insn_count\": 115, \"prog_id\": 12, \"prog_name\": \"rusty_running\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 155107, \"rejit_syscall_ns\": 0, \"total_ns\": 3915557}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "baseline": {
+            "bytes_jited": 464,
+            "bytes_xlated": 952,
+            "exec_ns": 126.01298471257977,
+            "id": 12,
+            "name": "rusty_running",
+            "run_cnt": 203239,
+            "run_time_ns": 25610753,
+            "type": "struct_ops"
+          },
+          "comparable": true,
+          "comparison_exclusion_reason": "",
+          "id": 12,
+          "label": "scx/rusty:rusty_running#12",
+          "name": "rusty_running",
+          "rejit": {
+            "bytes_jited": 464,
+            "bytes_xlated": 952,
+            "exec_ns": 126.13210975045311,
+            "id": 12,
+            "name": "rusty_running",
+            "run_cnt": 231179,
+            "run_time_ns": 29159095,
+            "type": "struct_ops"
+          },
+          "speedup": 0.9990555534343394,
+          "type": "struct_ops"
+        },
+        "13": {
+          "applied": true,
+          "apply": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 223,
+                  "insns_before": 223,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 13,
+              "program": {
+                "final_insn_count": 223,
+                "insn_delta": 0,
+                "orig_insn_count": 223,
+                "prog_id": 13,
+                "prog_name": "rusty_stopping",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 151067,
+                "rejit_syscall_ns": 0,
+                "total_ns": 79259742
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_stopping",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 223, \"insns_before\": 223, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 13, \"program\": {\"final_insn_count\": 223, \"insn_delta\": 0, \"orig_insn_count\": 223, \"prog_id\": 13, \"prog_name\": \"rusty_stopping\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 151067, \"rejit_syscall_ns\": 0, \"total_ns\": 79259742}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "baseline": {
+            "bytes_jited": 278,
+            "bytes_xlated": 1840,
+            "exec_ns": 63.92461584636807,
+            "id": 13,
+            "name": "rusty_stopping",
+            "run_cnt": 203239,
+            "run_time_ns": 12991975,
+            "type": "struct_ops"
+          },
+          "comparable": true,
+          "comparison_exclusion_reason": "",
+          "id": 13,
+          "label": "scx/rusty:rusty_stopping#13",
+          "name": "rusty_stopping",
+          "rejit": {
+            "bytes_jited": 278,
+            "bytes_xlated": 1840,
+            "exec_ns": 63.03469173238054,
+            "id": 13,
+            "name": "rusty_stopping",
+            "run_cnt": 231179,
+            "run_time_ns": 14572297,
+            "type": "struct_ops"
+          },
+          "speedup": 1.0141180053321397,
+          "type": "struct_ops"
+        },
+        "14": {
+          "applied": true,
+          "apply": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 603,
+                  "insns_before": 603,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 14,
+              "program": {
+                "final_insn_count": 603,
+                "insn_delta": 0,
+                "orig_insn_count": 603,
+                "prog_id": 14,
+                "prog_name": "rusty_quiescent",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 350541,
+                "rejit_syscall_ns": 0,
+                "total_ns": 5214305
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_quiescent",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 603, \"insns_before\": 603, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 14, \"program\": {\"final_insn_count\": 603, \"insn_delta\": 0, \"orig_insn_count\": 603, \"prog_id\": 14, \"prog_name\": \"rusty_quiescent\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 350541, \"rejit_syscall_ns\": 0, \"total_ns\": 5214305}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "baseline": {
+            "bytes_jited": 260,
+            "bytes_xlated": 3808,
+            "exec_ns": 84.90960390720872,
+            "id": 14,
+            "name": "rusty_quiescent",
+            "run_cnt": 202907,
+            "run_time_ns": 17228753,
+            "type": "struct_ops"
+          },
+          "comparable": true,
+          "comparison_exclusion_reason": "",
+          "id": 14,
+          "label": "scx/rusty:rusty_quiescent#14",
+          "name": "rusty_quiescent",
+          "rejit": {
+            "bytes_jited": 260,
+            "bytes_xlated": 3808,
+            "exec_ns": 84.52102230885856,
+            "id": 14,
+            "name": "rusty_quiescent",
+            "run_cnt": 230850,
+            "run_time_ns": 19511678,
+            "type": "struct_ops"
+          },
+          "speedup": 1.0045974550204824,
+          "type": "struct_ops"
+        },
+        "15": {
+          "applied": true,
+          "apply": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 68,
+                  "insns_before": 68,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 15,
+              "program": {
+                "final_insn_count": 68,
+                "insn_delta": 0,
+                "orig_insn_count": 68,
+                "prog_id": 15,
+                "prog_name": "rusty_set_weigh",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 332069,
+                "rejit_syscall_ns": 0,
+                "total_ns": 1881791
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_set_weigh",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 68, \"insns_before\": 68, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 15, \"program\": {\"final_insn_count\": 68, \"insn_delta\": 0, \"orig_insn_count\": 68, \"prog_id\": 15, \"prog_name\": \"rusty_set_weigh\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 332069, \"rejit_syscall_ns\": 0, \"total_ns\": 1881791}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "baseline": {
+            "bytes_jited": 124,
+            "bytes_xlated": 392,
+            "exec_ns": 29.993817619783616,
+            "id": 15,
+            "name": "rusty_set_weigh",
+            "run_cnt": 647,
+            "run_time_ns": 19406,
+            "type": "struct_ops"
+          },
+          "comparable": true,
+          "comparison_exclusion_reason": "",
+          "id": 15,
+          "label": "scx/rusty:rusty_set_weight#15",
+          "name": "rusty_set_weight",
+          "rejit": {
+            "bytes_jited": 124,
+            "bytes_xlated": 392,
+            "exec_ns": 25.170542635658915,
+            "id": 15,
+            "name": "rusty_set_weigh",
+            "run_cnt": 645,
+            "run_time_ns": 16235,
+            "type": "struct_ops"
+          },
+          "speedup": 1.1916237982605749,
+          "type": "struct_ops"
+        },
+        "16": {
+          "applied": true,
+          "apply": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "rolled_back",
+                  "changed": false,
+                  "diagnostics": [
+                    "removed 16 dead-def insns"
+                  ],
+                  "insn_delta": 0,
+                  "insns_after": 2093,
+                  "insns_before": 2093,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "rollback": {
+                    "action": "restored_pre_pass_snapshot",
+                    "restored_insn_count": 2093
+                  },
+                  "sites_applied": 16,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "error_message": "BPF_PROG_LOAD: Permission denied (os error 13)",
+                    "status": "rejected"
+                  },
+                  "verify_error": "BPF_PROG_LOAD: Permission denied (os error 13)",
+                  "verify_result": "rejected"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 16,
+              "program": {
+                "final_insn_count": 2093,
+                "insn_delta": 0,
+                "orig_insn_count": 2093,
+                "prog_id": 16,
+                "prog_name": "rusty_set_cpuma",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 1
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 14058855,
+                "rejit_syscall_ns": 6478129,
+                "total_ns": 43324466
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_set_cpuma",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"removed 16 dead-def insns\"], \"insn_delta\": 0, \"insns_after\": 2093, \"insns_before\": 2093, \"pass\": \"dce\", \"pass_name\": \"dce\", \"rollback\": {\"action\": \"restored_pre_pass_snapshot\", \"restored_insn_count\": 2093}, \"sites_applied\": 16, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"error_message\": \"BPF_PROG_LOAD: Permission denied (os error 13)\", \"status\": \"rejected\"}, \"verify_error\": \"BPF_PROG_LOAD: Permission denied (os error 13)\", \"verify_result\": \"rejected\"}], \"passes_applied\": [], \"prog_id\": 16, \"program\": {\"final_insn_count\": 2093, \"insn_delta\": 0, \"orig_insn_count\": 2093, \"prog_id\": 16, \"prog_name\": \"rusty_set_cpuma\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 1}, \"timings_ns\": {\"pipeline_run_ns\": 14058855, \"rejit_syscall_ns\": 6478129, \"total_ns\": 43324466}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 1
+            }
+          },
+          "baseline": {
+            "bytes_jited": 165,
+            "bytes_xlated": 10360,
+            "exec_ns": 768.3333333333334,
+            "id": 16,
+            "name": "rusty_set_cpuma",
+            "run_cnt": 3,
+            "run_time_ns": 2305,
+            "type": "struct_ops"
+          },
+          "comparable": true,
+          "comparison_exclusion_reason": "",
+          "id": 16,
+          "label": "scx/rusty:rusty_set_cpumask#16",
+          "name": "rusty_set_cpumask",
+          "rejit": {
+            "bytes_jited": 165,
+            "bytes_xlated": 10360,
+            "exec_ns": 658.0,
+            "id": 16,
+            "name": "rusty_set_cpuma",
+            "run_cnt": 2,
+            "run_time_ns": 1316,
+            "type": "struct_ops"
+          },
+          "speedup": 1.1676798378926039,
+          "type": "struct_ops"
+        },
+        "17": {
+          "applied": true,
+          "apply": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "rolled_back",
+                  "changed": false,
+                  "diagnostics": [
+                    "removed 16 dead-def insns"
+                  ],
+                  "insn_delta": 0,
+                  "insns_after": 2847,
+                  "insns_before": 2847,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "rollback": {
+                    "action": "restored_pre_pass_snapshot",
+                    "restored_insn_count": 2847
+                  },
+                  "sites_applied": 16,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "error_message": "BPF_PROG_LOAD: Invalid argument (os error 22)",
+                    "status": "rejected"
+                  },
+                  "verify_error": "BPF_PROG_LOAD: Invalid argument (os error 22)",
+                  "verify_result": "rejected"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 17,
+              "program": {
+                "final_insn_count": 2847,
+                "insn_delta": 0,
+                "orig_insn_count": 2847,
+                "prog_id": 17,
+                "prog_name": "rusty_init_task",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 1
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 13843015,
+                "rejit_syscall_ns": 3620814,
+                "total_ns": 180406798
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_init_task",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"removed 16 dead-def insns\"], \"insn_delta\": 0, \"insns_after\": 2847, \"insns_before\": 2847, \"pass\": \"dce\", \"pass_name\": \"dce\", \"rollback\": {\"action\": \"restored_pre_pass_snapshot\", \"restored_insn_count\": 2847}, \"sites_applied\": 16, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"error_message\": \"BPF_PROG_LOAD: Invalid argument (os error 22)\", \"status\": \"rejected\"}, \"verify_error\": \"BPF_PROG_LOAD: Invalid argument (os error 22)\", \"verify_result\": \"rejected\"}], \"passes_applied\": [], \"prog_id\": 17, \"program\": {\"final_insn_count\": 2847, \"insn_delta\": 0, \"orig_insn_count\": 2847, \"prog_id\": 17, \"prog_name\": \"rusty_init_task\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 1}, \"timings_ns\": {\"pipeline_run_ns\": 13843015, \"rejit_syscall_ns\": 3620814, \"total_ns\": 180406798}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 1
+            }
+          },
+          "baseline": {
+            "bytes_jited": 537,
+            "bytes_xlated": 8848,
+            "exec_ns": 1106.5712074303406,
+            "id": 17,
+            "name": "rusty_init_task",
+            "run_cnt": 646,
+            "run_time_ns": 714845,
+            "type": "struct_ops"
+          },
+          "comparable": true,
+          "comparison_exclusion_reason": "",
+          "id": 17,
+          "label": "scx/rusty:rusty_init_task#17",
+          "name": "rusty_init_task",
+          "rejit": {
+            "bytes_jited": 537,
+            "bytes_xlated": 8848,
+            "exec_ns": 1068.2356589147287,
+            "id": 17,
+            "name": "rusty_init_task",
+            "run_cnt": 645,
+            "run_time_ns": 689012,
+            "type": "struct_ops"
+          },
+          "speedup": 1.0358867897693649,
+          "type": "struct_ops"
+        },
+        "18": {
+          "applied": true,
+          "apply": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 276,
+                  "insns_before": 276,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 18,
+              "program": {
+                "final_insn_count": 276,
+                "insn_delta": 0,
+                "orig_insn_count": 276,
+                "prog_id": 18,
+                "prog_name": "rusty_exit_task",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 243547,
+                "rejit_syscall_ns": 0,
+                "total_ns": 9742153
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_exit_task",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 276, \"insns_before\": 276, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 18, \"program\": {\"final_insn_count\": 276, \"insn_delta\": 0, \"orig_insn_count\": 276, \"prog_id\": 18, \"prog_name\": \"rusty_exit_task\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 243547, \"rejit_syscall_ns\": 0, \"total_ns\": 9742153}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "baseline": {
+            "bytes_jited": 166,
+            "bytes_xlated": 2792,
+            "exec_ns": 875.5875968992248,
+            "id": 18,
+            "name": "rusty_exit_task",
+            "run_cnt": 645,
+            "run_time_ns": 564754,
+            "type": "struct_ops"
+          },
+          "comparable": true,
+          "comparison_exclusion_reason": "",
+          "id": 18,
+          "label": "scx/rusty:rusty_exit_task#18",
+          "name": "rusty_exit_task",
+          "rejit": {
+            "bytes_jited": 166,
+            "bytes_xlated": 2792,
+            "exec_ns": 894.4883720930233,
+            "id": 18,
+            "name": "rusty_exit_task",
+            "run_cnt": 645,
+            "run_time_ns": 576945,
+            "type": "struct_ops"
+          },
+          "speedup": 0.9788697362833545,
+          "type": "struct_ops"
+        },
+        "7": {
+          "applied": true,
+          "apply": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 733,
+                  "insns_before": 733,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 7,
+              "program": {
+                "final_insn_count": 733,
+                "insn_delta": 0,
+                "orig_insn_count": 733,
+                "prog_id": 7,
+                "prog_name": "rusty_select_cp",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 2063618,
+                "rejit_syscall_ns": 0,
+                "total_ns": 14659304
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_select_cp",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 733, \"insns_before\": 733, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 7, \"program\": {\"final_insn_count\": 733, \"insn_delta\": 0, \"orig_insn_count\": 733, \"prog_id\": 7, \"prog_name\": \"rusty_select_cp\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 2063618, \"rejit_syscall_ns\": 0, \"total_ns\": 14659304}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "baseline": {
+            "bytes_jited": 3072,
+            "bytes_xlated": 6624,
+            "exec_ns": 110.00659366770292,
+            "id": 7,
+            "name": "rusty_select_cp",
+            "run_cnt": 202012,
+            "run_time_ns": 22222652,
+            "type": "struct_ops"
+          },
+          "comparable": true,
+          "comparison_exclusion_reason": "",
+          "id": 7,
+          "label": "scx/rusty:rusty_select_cpu#7",
+          "name": "rusty_select_cpu",
+          "rejit": {
+            "bytes_jited": 3072,
+            "bytes_xlated": 6624,
+            "exec_ns": 109.14642939459962,
+            "id": 7,
+            "name": "rusty_select_cp",
+            "run_cnt": 229947,
+            "run_time_ns": 25097894,
+            "type": "struct_ops"
+          },
+          "speedup": 1.0078808283319423,
+          "type": "struct_ops"
+        },
+        "9": {
+          "applied": true,
+          "apply": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "rolled_back",
+                  "changed": false,
+                  "diagnostics": [
+                    "removed 13 dead-def insns"
+                  ],
+                  "insn_delta": 0,
+                  "insns_after": 2194,
+                  "insns_before": 2194,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "rollback": {
+                    "action": "restored_pre_pass_snapshot",
+                    "restored_insn_count": 2194
+                  },
+                  "sites_applied": 13,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "error_message": "BPF_PROG_LOAD: Invalid argument (os error 22)",
+                    "status": "rejected"
+                  },
+                  "verify_error": "BPF_PROG_LOAD: Invalid argument (os error 22)",
+                  "verify_result": "rejected"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 9,
+              "program": {
+                "final_insn_count": 2194,
+                "insn_delta": 0,
+                "orig_insn_count": 2194,
+                "prog_id": 9,
+                "prog_name": "rusty_enqueue",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 1
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 8877107,
+                "rejit_syscall_ns": 4351899,
+                "total_ns": 260561356
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_enqueue",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"removed 13 dead-def insns\"], \"insn_delta\": 0, \"insns_after\": 2194, \"insns_before\": 2194, \"pass\": \"dce\", \"pass_name\": \"dce\", \"rollback\": {\"action\": \"restored_pre_pass_snapshot\", \"restored_insn_count\": 2194}, \"sites_applied\": 13, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"error_message\": \"BPF_PROG_LOAD: Invalid argument (os error 22)\", \"status\": \"rejected\"}, \"verify_error\": \"BPF_PROG_LOAD: Invalid argument (os error 22)\", \"verify_result\": \"rejected\"}], \"passes_applied\": [], \"prog_id\": 9, \"program\": {\"final_insn_count\": 2194, \"insn_delta\": 0, \"orig_insn_count\": 2194, \"prog_id\": 9, \"prog_name\": \"rusty_enqueue\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 1}, \"timings_ns\": {\"pipeline_run_ns\": 8877107, \"rejit_syscall_ns\": 4351899, \"total_ns\": 260561356}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 1
+            }
+          },
+          "baseline": {
+            "bytes_jited": 1045,
+            "bytes_xlated": 13064,
+            "exec_ns": 38.48380772725477,
+            "id": 9,
+            "name": "rusty_enqueue",
+            "run_cnt": 202504,
+            "run_time_ns": 7793125,
+            "type": "struct_ops"
+          },
+          "comparable": true,
+          "comparison_exclusion_reason": "",
+          "id": 9,
+          "label": "scx/rusty:rusty_enqueue#9",
+          "name": "rusty_enqueue",
+          "rejit": {
+            "bytes_jited": 1045,
+            "bytes_xlated": 13064,
+            "exec_ns": 38.20396472712123,
+            "id": 9,
+            "name": "rusty_enqueue",
+            "run_cnt": 230432,
+            "run_time_ns": 8803416,
+            "type": "struct_ops"
+          },
+          "speedup": 1.0073249727386246,
+          "type": "struct_ops"
+        }
+      },
+      "programs": [
+        {
+          "btf_id": 24,
+          "bytes_jited": 3072,
+          "bytes_memlock": 8192,
+          "bytes_xlated": 6624,
+          "gpl_compatible": true,
+          "id": 7,
+          "jited": true,
+          "loaded_at": 1775247104,
+          "map_ids": [
+            11,
+            12,
+            2,
+            14,
+            7,
+            13,
+            6,
+            9,
+            16,
+            8,
+            4
+          ],
+          "name": "rusty_select_cpu",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 32,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12571,
+          "run_time_ns": 983495,
+          "tag": "2f385306b0fddf97",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 1045,
+          "bytes_memlock": 20480,
+          "bytes_xlated": 13064,
+          "gpl_compatible": true,
+          "id": 9,
+          "jited": true,
+          "loaded_at": 1775247104,
+          "map_ids": [
+            7,
+            12,
+            11,
+            14,
+            13,
+            6,
+            9,
+            16,
+            8,
+            2,
+            5
+          ],
+          "name": "rusty_enqueue",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 33,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12608,
+          "run_time_ns": 519505,
+          "tag": "e2238ede8b497e42",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 725,
+          "bytes_memlock": 4096,
+          "bytes_xlated": 1336,
+          "gpl_compatible": true,
+          "id": 10,
+          "jited": true,
+          "loaded_at": 1775247104,
+          "map_ids": [
+            12,
+            11,
+            13,
+            7,
+            16
+          ],
+          "name": "rusty_dispatch",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 34,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12751,
+          "run_time_ns": 525550,
+          "tag": "37be2db8355d675f",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 312,
+          "bytes_memlock": 8192,
+          "bytes_xlated": 3656,
+          "gpl_compatible": true,
+          "id": 11,
+          "jited": true,
+          "loaded_at": 1775247104,
+          "map_ids": [
+            13,
+            12,
+            9,
+            11,
+            16,
+            8,
+            5
+          ],
+          "name": "rusty_runnable",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 35,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12638,
+          "run_time_ns": 1017746,
+          "tag": "4d0d9b1a62b86d1a",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 464,
+          "bytes_memlock": 4096,
+          "bytes_xlated": 952,
+          "gpl_compatible": true,
+          "id": 12,
+          "jited": true,
+          "loaded_at": 1775247104,
+          "map_ids": [
+            13,
+            12,
+            2,
+            9,
+            11,
+            16,
+            8
+          ],
+          "name": "rusty_running",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 36,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12643,
+          "run_time_ns": 1929102,
+          "tag": "5cce52ee44d49629",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 278,
+          "bytes_memlock": 4096,
+          "bytes_xlated": 1840,
+          "gpl_compatible": true,
+          "id": 13,
+          "jited": true,
+          "loaded_at": 1775247104,
+          "map_ids": [
+            12,
+            13,
+            9,
+            11,
+            16,
+            8
+          ],
+          "name": "rusty_stopping",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 37,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12649,
+          "run_time_ns": 820632,
+          "tag": "b3ec3c0247826ff7",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 260,
+          "bytes_memlock": 8192,
+          "bytes_xlated": 3808,
+          "gpl_compatible": true,
+          "id": 14,
+          "jited": true,
+          "loaded_at": 1775247104,
+          "map_ids": [
+            13,
+            12,
+            9,
+            11,
+            16,
+            8,
+            5
+          ],
+          "name": "rusty_quiescent",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 38,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12649,
+          "run_time_ns": 1269598,
+          "tag": "dd496bdb61213a31",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 124,
+          "bytes_memlock": 4096,
+          "bytes_xlated": 392,
+          "gpl_compatible": true,
+          "id": 15,
+          "jited": true,
+          "loaded_at": 1775247104,
+          "map_ids": [
+            13,
+            12,
+            9,
+            11,
+            16,
+            8
+          ],
+          "name": "rusty_set_weight",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 39,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 133,
+          "run_time_ns": 4514,
+          "tag": "c7a6f0fe04406143",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 165,
+          "bytes_memlock": 20480,
+          "bytes_xlated": 10360,
+          "gpl_compatible": true,
+          "id": 16,
+          "jited": true,
+          "loaded_at": 1775247104,
+          "map_ids": [
+            13,
+            14,
+            9,
+            11,
+            12,
+            16,
+            8,
+            6,
+            2,
+            5
+          ],
+          "name": "rusty_set_cpumask",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 40,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 118,
+          "run_time_ns": 17723,
+          "tag": "53d0925748da9997",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 537,
+          "bytes_memlock": 24576,
+          "bytes_xlated": 8848,
+          "gpl_compatible": true,
+          "id": 17,
+          "jited": true,
+          "loaded_at": 1775247104,
+          "map_ids": [
+            12,
+            6,
+            13,
+            9,
+            11,
+            17,
+            8,
+            16,
+            2,
+            5
+          ],
+          "name": "rusty_init_task",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 41,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 146,
+          "run_time_ns": 196300,
+          "tag": "a27ab535782b5df2",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 166,
+          "bytes_memlock": 4096,
+          "bytes_xlated": 2792,
+          "gpl_compatible": true,
+          "id": 18,
+          "jited": true,
+          "loaded_at": 1775247104,
+          "map_ids": [
+            6,
+            7,
+            9,
+            11,
+            12,
+            16,
+            8,
+            17,
+            13
+          ],
+          "name": "rusty_exit_task",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 42,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 1,
+          "run_time_ns": 5200,
+          "tag": "e3a0f57883b208e2",
+          "type": "struct_ops",
+          "uid": 0
+        }
+      ],
+      "rejit": {
+        "exec_ns_mean": 333.988275673247,
+        "programs": {
+          "10": {
+            "bytes_jited": 725,
+            "bytes_xlated": 1336,
+            "exec_ns": 507.42819536481284,
+            "id": 10,
+            "name": "rusty_dispatch",
+            "run_cnt": 230584,
+            "run_time_ns": 117004823,
+            "type": "struct_ops"
+          },
+          "11": {
+            "bytes_jited": 312,
+            "bytes_xlated": 3656,
+            "exec_ns": 99.51004548408058,
+            "id": 11,
+            "name": "rusty_runnable",
+            "run_cnt": 230850,
+            "run_time_ns": 22971894,
+            "type": "struct_ops"
+          },
+          "12": {
+            "bytes_jited": 464,
+            "bytes_xlated": 952,
+            "exec_ns": 126.13210975045311,
+            "id": 12,
+            "name": "rusty_running",
+            "run_cnt": 231179,
+            "run_time_ns": 29159095,
+            "type": "struct_ops"
+          },
+          "13": {
+            "bytes_jited": 278,
+            "bytes_xlated": 1840,
+            "exec_ns": 63.03469173238054,
+            "id": 13,
+            "name": "rusty_stopping",
+            "run_cnt": 231179,
+            "run_time_ns": 14572297,
+            "type": "struct_ops"
+          },
+          "14": {
+            "bytes_jited": 260,
+            "bytes_xlated": 3808,
+            "exec_ns": 84.52102230885856,
+            "id": 14,
+            "name": "rusty_quiescent",
+            "run_cnt": 230850,
+            "run_time_ns": 19511678,
+            "type": "struct_ops"
+          },
+          "15": {
+            "bytes_jited": 124,
+            "bytes_xlated": 392,
+            "exec_ns": 25.170542635658915,
+            "id": 15,
+            "name": "rusty_set_weigh",
+            "run_cnt": 645,
+            "run_time_ns": 16235,
+            "type": "struct_ops"
+          },
+          "16": {
+            "bytes_jited": 165,
+            "bytes_xlated": 10360,
+            "exec_ns": 658.0,
+            "id": 16,
+            "name": "rusty_set_cpuma",
+            "run_cnt": 2,
+            "run_time_ns": 1316,
+            "type": "struct_ops"
+          },
+          "17": {
+            "bytes_jited": 537,
+            "bytes_xlated": 8848,
+            "exec_ns": 1068.2356589147287,
+            "id": 17,
+            "name": "rusty_init_task",
+            "run_cnt": 645,
+            "run_time_ns": 689012,
+            "type": "struct_ops"
+          },
+          "18": {
+            "bytes_jited": 166,
+            "bytes_xlated": 2792,
+            "exec_ns": 894.4883720930233,
+            "id": 18,
+            "name": "rusty_exit_task",
+            "run_cnt": 645,
+            "run_time_ns": 576945,
+            "type": "struct_ops"
+          },
+          "7": {
+            "bytes_jited": 3072,
+            "bytes_xlated": 6624,
+            "exec_ns": 109.14642939459962,
+            "id": 7,
+            "name": "rusty_select_cp",
+            "run_cnt": 229947,
+            "run_time_ns": 25097894,
+            "type": "struct_ops"
+          },
+          "9": {
+            "bytes_jited": 1045,
+            "bytes_xlated": 13064,
+            "exec_ns": 38.20396472712123,
+            "id": 9,
+            "name": "rusty_enqueue",
+            "run_cnt": 230432,
+            "run_time_ns": 8803416,
+            "type": "struct_ops"
+          }
+        }
+      },
+      "rejit_apply": {
+        "all_applied": true,
+        "applied": true,
+        "applied_any": true,
+        "counts": {
+          "applied_sites": 0,
+          "total_sites": 0
+        },
+        "effective_enabled_passes_by_program": {
+          "10": [
+            "dce"
+          ],
+          "11": [
+            "dce"
+          ],
+          "12": [
+            "dce"
+          ],
+          "13": [
+            "dce"
+          ],
+          "14": [
+            "dce"
+          ],
+          "15": [
+            "dce"
+          ],
+          "16": [
+            "dce"
+          ],
+          "17": [
+            "dce"
+          ],
+          "18": [
+            "dce"
+          ],
+          "7": [
+            "dce"
+          ],
+          "9": [
+            "dce"
+          ]
+        },
+        "error": "",
+        "exit_code": 0,
+        "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 733, \"insns_before\": 733, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 7, \"program\": {\"final_insn_count\": 733, \"insn_delta\": 0, \"orig_insn_count\": 733, \"prog_id\": 7, \"prog_name\": \"rusty_select_cp\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 2063618, \"rejit_syscall_ns\": 0, \"total_ns\": 14659304}}\n{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"removed 13 dead-def insns\"], \"insn_delta\": 0, \"insns_after\": 2194, \"insns_before\": 2194, \"pass\": \"dce\", \"pass_name\": \"dce\", \"rollback\": {\"action\": \"restored_pre_pass_snapshot\", \"restored_insn_count\": 2194}, \"sites_applied\": 13, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"error_message\": \"BPF_PROG_LOAD: Invalid argument (os error 22)\", \"status\": \"rejected\"}, \"verify_error\": \"BPF_PROG_LOAD: Invalid argument (os error 22)\", \"verify_result\": \"rejected\"}], \"passes_applied\": [], \"prog_id\": 9, \"program\": {\"final_insn_count\": 2194, \"insn_delta\": 0, \"orig_insn_count\": 2194, \"prog_id\": 9, \"prog_name\": \"rusty_enqueue\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 1}, \"timings_ns\": {\"pipeline_run_ns\": 8877107, \"rejit_syscall_ns\": 4351899, \"total_ns\": 260561356}}\n{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 273, \"insns_before\": 273, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 10, \"program\": {\"final_insn_count\": 273, \"insn_delta\": 0, \"orig_insn_count\": 273, \"prog_id\": 10, \"prog_name\": \"rusty_dispatch\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 341360, \"rejit_syscall_ns\": 0, \"total_ns\": 8541989}}\n{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 611, \"insns_before\": 611, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 11, \"program\": {\"final_insn_count\": 611, \"insn_delta\": 0, \"orig_insn_count\": 611, \"prog_id\": 11, \"prog_name\": \"rusty_runnable\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 378973, \"rejit_syscall_ns\": 0, \"total_ns\": 5514004}}\n{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 115, \"insns_before\": 115, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 12, \"program\": {\"final_insn_count\": 115, \"insn_delta\": 0, \"orig_insn_count\": 115, \"prog_id\": 12, \"prog_name\": \"rusty_running\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 155107, \"rejit_syscall_ns\": 0, \"total_ns\": 3915557}}\n{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 223, \"insns_before\": 223, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 13, \"program\": {\"final_insn_count\": 223, \"insn_delta\": 0, \"orig_insn_count\": 223, \"prog_id\": 13, \"prog_name\": \"rusty_stopping\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 151067, \"rejit_syscall_ns\": 0, \"total_ns\": 79259742}}\n{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 603, \"insns_before\": 603, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 14, \"program\": {\"final_insn_count\": 603, \"insn_delta\": 0, \"orig_insn_count\": 603, \"prog_id\": 14, \"prog_name\": \"rusty_quiescent\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 350541, \"rejit_syscall_ns\": 0, \"total_ns\": 5214305}}\n{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 68, \"insns_before\": 68, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 15, \"program\": {\"final_insn_count\": 68, \"insn_delta\": 0, \"orig_insn_count\": 68, \"prog_id\": 15, \"prog_name\": \"rusty_set_weigh\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 332069, \"rejit_syscall_ns\": 0, \"total_ns\": 1881791}}\n{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"removed 16 dead-def insns\"], \"insn_delta\": 0, \"insns_after\": 2093, \"insns_before\": 2093, \"pass\": \"dce\", \"pass_name\": \"dce\", \"rollback\": {\"action\": \"restored_pre_pass_snapshot\", \"restored_insn_count\": 2093}, \"sites_applied\": 16, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"error_message\": \"BPF_PROG_LOAD: Permission denied (os error 13)\", \"status\": \"rejected\"}, \"verify_error\": \"BPF_PROG_LOAD: Permission denied (os error 13)\", \"verify_result\": \"rejected\"}], \"passes_applied\": [], \"prog_id\": 16, \"program\": {\"final_insn_count\": 2093, \"insn_delta\": 0, \"orig_insn_count\": 2093, \"prog_id\": 16, \"prog_name\": \"rusty_set_cpuma\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 1}, \"timings_ns\": {\"pipeline_run_ns\": 14058855, \"rejit_syscall_ns\": 6478129, \"total_ns\": 43324466}}\n{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"removed 16 dead-def insns\"], \"insn_delta\": 0, \"insns_after\": 2847, \"insns_before\": 2847, \"pass\": \"dce\", \"pass_name\": \"dce\", \"rollback\": {\"action\": \"restored_pre_pass_snapshot\", \"restored_insn_count\": 2847}, \"sites_applied\": 16, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"error_message\": \"BPF_PROG_LOAD: Invalid argument (os error 22)\", \"status\": \"rejected\"}, \"verify_error\": \"BPF_PROG_LOAD: Invalid argument (os error 22)\", \"verify_result\": \"rejected\"}], \"passes_applied\": [], \"prog_id\": 17, \"program\": {\"final_insn_count\": 2847, \"insn_delta\": 0, \"orig_insn_count\": 2847, \"prog_id\": 17, \"prog_name\": \"rusty_init_task\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 1}, \"timings_ns\": {\"pipeline_run_ns\": 13843015, \"rejit_syscall_ns\": 3620814, \"total_ns\": 180406798}}\n{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 276, \"insns_before\": 276, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 18, \"program\": {\"final_insn_count\": 276, \"insn_delta\": 0, \"orig_insn_count\": 276, \"prog_id\": 18, \"prog_name\": \"rusty_exit_task\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 243547, \"rejit_syscall_ns\": 0, \"total_ns\": 9742153}}",
+        "per_program": {
+          "7": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 733,
+                  "insns_before": 733,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 7,
+              "program": {
+                "final_insn_count": 733,
+                "insn_delta": 0,
+                "orig_insn_count": 733,
+                "prog_id": 7,
+                "prog_name": "rusty_select_cp",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 2063618,
+                "rejit_syscall_ns": 0,
+                "total_ns": 14659304
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_select_cp",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 733, \"insns_before\": 733, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 7, \"program\": {\"final_insn_count\": 733, \"insn_delta\": 0, \"orig_insn_count\": 733, \"prog_id\": 7, \"prog_name\": \"rusty_select_cp\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 2063618, \"rejit_syscall_ns\": 0, \"total_ns\": 14659304}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "9": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "rolled_back",
+                  "changed": false,
+                  "diagnostics": [
+                    "removed 13 dead-def insns"
+                  ],
+                  "insn_delta": 0,
+                  "insns_after": 2194,
+                  "insns_before": 2194,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "rollback": {
+                    "action": "restored_pre_pass_snapshot",
+                    "restored_insn_count": 2194
+                  },
+                  "sites_applied": 13,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "error_message": "BPF_PROG_LOAD: Invalid argument (os error 22)",
+                    "status": "rejected"
+                  },
+                  "verify_error": "BPF_PROG_LOAD: Invalid argument (os error 22)",
+                  "verify_result": "rejected"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 9,
+              "program": {
+                "final_insn_count": 2194,
+                "insn_delta": 0,
+                "orig_insn_count": 2194,
+                "prog_id": 9,
+                "prog_name": "rusty_enqueue",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 1
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 8877107,
+                "rejit_syscall_ns": 4351899,
+                "total_ns": 260561356
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_enqueue",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"removed 13 dead-def insns\"], \"insn_delta\": 0, \"insns_after\": 2194, \"insns_before\": 2194, \"pass\": \"dce\", \"pass_name\": \"dce\", \"rollback\": {\"action\": \"restored_pre_pass_snapshot\", \"restored_insn_count\": 2194}, \"sites_applied\": 13, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"error_message\": \"BPF_PROG_LOAD: Invalid argument (os error 22)\", \"status\": \"rejected\"}, \"verify_error\": \"BPF_PROG_LOAD: Invalid argument (os error 22)\", \"verify_result\": \"rejected\"}], \"passes_applied\": [], \"prog_id\": 9, \"program\": {\"final_insn_count\": 2194, \"insn_delta\": 0, \"orig_insn_count\": 2194, \"prog_id\": 9, \"prog_name\": \"rusty_enqueue\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 1}, \"timings_ns\": {\"pipeline_run_ns\": 8877107, \"rejit_syscall_ns\": 4351899, \"total_ns\": 260561356}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 1
+            }
+          },
+          "10": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 273,
+                  "insns_before": 273,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 10,
+              "program": {
+                "final_insn_count": 273,
+                "insn_delta": 0,
+                "orig_insn_count": 273,
+                "prog_id": 10,
+                "prog_name": "rusty_dispatch",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 341360,
+                "rejit_syscall_ns": 0,
+                "total_ns": 8541989
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_dispatch",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 273, \"insns_before\": 273, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 10, \"program\": {\"final_insn_count\": 273, \"insn_delta\": 0, \"orig_insn_count\": 273, \"prog_id\": 10, \"prog_name\": \"rusty_dispatch\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 341360, \"rejit_syscall_ns\": 0, \"total_ns\": 8541989}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "11": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 611,
+                  "insns_before": 611,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 11,
+              "program": {
+                "final_insn_count": 611,
+                "insn_delta": 0,
+                "orig_insn_count": 611,
+                "prog_id": 11,
+                "prog_name": "rusty_runnable",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 378973,
+                "rejit_syscall_ns": 0,
+                "total_ns": 5514004
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_runnable",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 611, \"insns_before\": 611, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 11, \"program\": {\"final_insn_count\": 611, \"insn_delta\": 0, \"orig_insn_count\": 611, \"prog_id\": 11, \"prog_name\": \"rusty_runnable\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 378973, \"rejit_syscall_ns\": 0, \"total_ns\": 5514004}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "12": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 115,
+                  "insns_before": 115,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 12,
+              "program": {
+                "final_insn_count": 115,
+                "insn_delta": 0,
+                "orig_insn_count": 115,
+                "prog_id": 12,
+                "prog_name": "rusty_running",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 155107,
+                "rejit_syscall_ns": 0,
+                "total_ns": 3915557
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_running",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 115, \"insns_before\": 115, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 12, \"program\": {\"final_insn_count\": 115, \"insn_delta\": 0, \"orig_insn_count\": 115, \"prog_id\": 12, \"prog_name\": \"rusty_running\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 155107, \"rejit_syscall_ns\": 0, \"total_ns\": 3915557}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "13": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 223,
+                  "insns_before": 223,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 13,
+              "program": {
+                "final_insn_count": 223,
+                "insn_delta": 0,
+                "orig_insn_count": 223,
+                "prog_id": 13,
+                "prog_name": "rusty_stopping",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 151067,
+                "rejit_syscall_ns": 0,
+                "total_ns": 79259742
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_stopping",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 223, \"insns_before\": 223, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 13, \"program\": {\"final_insn_count\": 223, \"insn_delta\": 0, \"orig_insn_count\": 223, \"prog_id\": 13, \"prog_name\": \"rusty_stopping\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 151067, \"rejit_syscall_ns\": 0, \"total_ns\": 79259742}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "14": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 603,
+                  "insns_before": 603,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 14,
+              "program": {
+                "final_insn_count": 603,
+                "insn_delta": 0,
+                "orig_insn_count": 603,
+                "prog_id": 14,
+                "prog_name": "rusty_quiescent",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 350541,
+                "rejit_syscall_ns": 0,
+                "total_ns": 5214305
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_quiescent",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 603, \"insns_before\": 603, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 14, \"program\": {\"final_insn_count\": 603, \"insn_delta\": 0, \"orig_insn_count\": 603, \"prog_id\": 14, \"prog_name\": \"rusty_quiescent\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 350541, \"rejit_syscall_ns\": 0, \"total_ns\": 5214305}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "15": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 68,
+                  "insns_before": 68,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 15,
+              "program": {
+                "final_insn_count": 68,
+                "insn_delta": 0,
+                "orig_insn_count": 68,
+                "prog_id": 15,
+                "prog_name": "rusty_set_weigh",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 332069,
+                "rejit_syscall_ns": 0,
+                "total_ns": 1881791
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_set_weigh",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 68, \"insns_before\": 68, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 15, \"program\": {\"final_insn_count\": 68, \"insn_delta\": 0, \"orig_insn_count\": 68, \"prog_id\": 15, \"prog_name\": \"rusty_set_weigh\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 332069, \"rejit_syscall_ns\": 0, \"total_ns\": 1881791}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          },
+          "16": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "rolled_back",
+                  "changed": false,
+                  "diagnostics": [
+                    "removed 16 dead-def insns"
+                  ],
+                  "insn_delta": 0,
+                  "insns_after": 2093,
+                  "insns_before": 2093,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "rollback": {
+                    "action": "restored_pre_pass_snapshot",
+                    "restored_insn_count": 2093
+                  },
+                  "sites_applied": 16,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "error_message": "BPF_PROG_LOAD: Permission denied (os error 13)",
+                    "status": "rejected"
+                  },
+                  "verify_error": "BPF_PROG_LOAD: Permission denied (os error 13)",
+                  "verify_result": "rejected"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 16,
+              "program": {
+                "final_insn_count": 2093,
+                "insn_delta": 0,
+                "orig_insn_count": 2093,
+                "prog_id": 16,
+                "prog_name": "rusty_set_cpuma",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 1
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 14058855,
+                "rejit_syscall_ns": 6478129,
+                "total_ns": 43324466
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_set_cpuma",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"removed 16 dead-def insns\"], \"insn_delta\": 0, \"insns_after\": 2093, \"insns_before\": 2093, \"pass\": \"dce\", \"pass_name\": \"dce\", \"rollback\": {\"action\": \"restored_pre_pass_snapshot\", \"restored_insn_count\": 2093}, \"sites_applied\": 16, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"error_message\": \"BPF_PROG_LOAD: Permission denied (os error 13)\", \"status\": \"rejected\"}, \"verify_error\": \"BPF_PROG_LOAD: Permission denied (os error 13)\", \"verify_result\": \"rejected\"}], \"passes_applied\": [], \"prog_id\": 16, \"program\": {\"final_insn_count\": 2093, \"insn_delta\": 0, \"orig_insn_count\": 2093, \"prog_id\": 16, \"prog_name\": \"rusty_set_cpuma\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 1}, \"timings_ns\": {\"pipeline_run_ns\": 14058855, \"rejit_syscall_ns\": 6478129, \"total_ns\": 43324466}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 1
+            }
+          },
+          "17": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "rolled_back",
+                  "changed": false,
+                  "diagnostics": [
+                    "removed 16 dead-def insns"
+                  ],
+                  "insn_delta": 0,
+                  "insns_after": 2847,
+                  "insns_before": 2847,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "rollback": {
+                    "action": "restored_pre_pass_snapshot",
+                    "restored_insn_count": 2847
+                  },
+                  "sites_applied": 16,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "error_message": "BPF_PROG_LOAD: Invalid argument (os error 22)",
+                    "status": "rejected"
+                  },
+                  "verify_error": "BPF_PROG_LOAD: Invalid argument (os error 22)",
+                  "verify_result": "rejected"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 17,
+              "program": {
+                "final_insn_count": 2847,
+                "insn_delta": 0,
+                "orig_insn_count": 2847,
+                "prog_id": 17,
+                "prog_name": "rusty_init_task",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 1
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 13843015,
+                "rejit_syscall_ns": 3620814,
+                "total_ns": 180406798
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_init_task",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"removed 16 dead-def insns\"], \"insn_delta\": 0, \"insns_after\": 2847, \"insns_before\": 2847, \"pass\": \"dce\", \"pass_name\": \"dce\", \"rollback\": {\"action\": \"restored_pre_pass_snapshot\", \"restored_insn_count\": 2847}, \"sites_applied\": 16, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"error_message\": \"BPF_PROG_LOAD: Invalid argument (os error 22)\", \"status\": \"rejected\"}, \"verify_error\": \"BPF_PROG_LOAD: Invalid argument (os error 22)\", \"verify_result\": \"rejected\"}], \"passes_applied\": [], \"prog_id\": 17, \"program\": {\"final_insn_count\": 2847, \"insn_delta\": 0, \"orig_insn_count\": 2847, \"prog_id\": 17, \"prog_name\": \"rusty_init_task\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 1}, \"timings_ns\": {\"pipeline_run_ns\": 13843015, \"rejit_syscall_ns\": 3620814, \"total_ns\": 180406798}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 1
+            }
+          },
+          "18": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 0,
+              "total_sites": 0
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "no_change"
+                }
+              ],
+              "changed": false,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 276,
+                  "insns_before": 276,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [],
+              "prog_id": 18,
+              "program": {
+                "final_insn_count": 276,
+                "insn_delta": 0,
+                "orig_insn_count": 276,
+                "prog_id": 18,
+                "prog_name": "rusty_exit_task",
+                "prog_type": 27
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 0,
+                "passes_executed": 1,
+                "program_changed": false,
+                "total_sites_applied": 0,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 243547,
+                "rejit_syscall_ns": 0,
+                "total_ns": 9742153
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "rusty_exit_task",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 276, \"insns_before\": 276, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [], \"prog_id\": 18, \"program\": {\"final_insn_count\": 276, \"insn_delta\": 0, \"orig_insn_count\": 276, \"prog_id\": 18, \"prog_name\": \"rusty_exit_task\", \"prog_type\": 27}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"program_changed\": false, \"total_sites_applied\": 0, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 243547, \"rejit_syscall_ns\": 0, \"total_ns\": 9742153}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 0
+            }
+          }
+        },
+        "program_counts": {
+          "applied": 11,
+          "not_applied": 0,
+          "requested": 11
+        },
+        "scan_enabled_passes": [
+          "dce"
+        ],
+        "selection_source": "env_override"
+      },
+      "rejit_workload": {
+        "duration_s": 1.2822006020000014,
+        "ops_per_sec": 3.119636657291162,
+        "ops_total": 4.0,
+        "stderr": "",
+        "stdout": "Running in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.303\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.314\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.289\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.324"
+      },
+      "rejit_workloads": [
+        {
+          "duration_s": 1.2822006020000014,
+          "ops_per_sec": 3.119636657291162,
+          "ops_total": 4.0,
+          "stderr": "",
+          "stdout": "Running in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.303\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.314\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.289\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.324"
+        }
+      ],
+      "runner": "scx",
+      "selected_workload": "hackbench",
+      "status": "ok",
+      "workload": {
+        "corpus": "hackbench",
+        "e2e": "hackbench"
+      }
+    }
+  ],
+  "samples": 1,
+  "status": "ok",
+  "suite_name": "macro_apps",
+  "suite_summary": {
+    "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+    "schema_version": 1,
+    "selected_apps": 1,
+    "suite_name": "macro_apps",
+    "total_apps": 20
+  },
+  "summary": {
+    "all_comparable_geomean": 1.034036073015829,
+    "applied_only_geomean": 1.034036073015829,
+    "applied_sample_count": 11,
+    "comparison_exclusion_reason_counts": {},
+    "comparison_exclusion_reasons": [],
+    "discovered_programs": 11,
+    "per_app": [
+      {
+        "all_comparable_geomean": 1.034036073015829,
+        "app": "scx/rusty",
+        "applied_only_geomean": 1.034036073015829,
+        "applied_program_count": 11,
+        "comparable_program_count": 11,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 11,
+        "runner": "scx",
+        "sample_count": 11,
+        "status": "ok",
+        "workload": "hackbench"
+      }
+    ],
+    "sample_count": 11,
+    "selected_apps": 1,
+    "statuses": {
+      "ok": 1
+    }
+  },
+  "workload_seconds": 1.0
+}

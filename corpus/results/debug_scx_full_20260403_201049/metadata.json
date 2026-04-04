@@ -1,0 +1,255 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "details_dir": "details",
+  "error_message": "corpus suite reported errors",
+  "filters": [
+    "scx"
+  ],
+  "generated_at": "2026-04-03T20:10:58.285002+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-03T20:10:58.282011+00:00",
+  "launcher_boot_id": "d9f1fc08-5af0-4b49-861d-0c4ffd88168a",
+  "launcher_pid": 199,
+  "launcher_start_ticks": 193,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "optimization_summary": {
+    "all_comparable_geomean": null,
+    "applied_only_geomean": null,
+    "applied_sample_count": 0,
+    "comparison_exclusion_reason_counts": {
+      "missing_rejit_exec_ns": 11
+    },
+    "comparison_exclusion_reasons": [
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_select_cpu#7",
+        "program": "rusty_select_cpu",
+        "program_id": 7,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_enqueue#9",
+        "program": "rusty_enqueue",
+        "program_id": 9,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_dispatch#10",
+        "program": "rusty_dispatch",
+        "program_id": 10,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_runnable#11",
+        "program": "rusty_runnable",
+        "program_id": 11,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_running#12",
+        "program": "rusty_running",
+        "program_id": 12,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_stopping#13",
+        "program": "rusty_stopping",
+        "program_id": 13,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_quiescent#14",
+        "program": "rusty_quiescent",
+        "program_id": 14,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_set_weight#15",
+        "program": "rusty_set_weight",
+        "program_id": 15,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_set_cpumask#16",
+        "program": "rusty_set_cpumask",
+        "program_id": 16,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_init_task#17",
+        "program": "rusty_init_task",
+        "program_id": 17,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "label": "scx/rusty:rusty_exit_task#18",
+        "program": "rusty_exit_task",
+        "program_id": 18,
+        "reason": "missing_rejit_exec_ns",
+        "unit": "program"
+      }
+    ],
+    "discovered_programs": 11,
+    "per_app": [
+      {
+        "all_comparable_geomean": null,
+        "app": "scx/rusty",
+        "applied_only_geomean": null,
+        "applied_program_count": 11,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [
+          {
+            "label": "scx/rusty:rusty_select_cpu#7",
+            "program": "rusty_select_cpu",
+            "program_id": 7,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_enqueue#9",
+            "program": "rusty_enqueue",
+            "program_id": 9,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_dispatch#10",
+            "program": "rusty_dispatch",
+            "program_id": 10,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_runnable#11",
+            "program": "rusty_runnable",
+            "program_id": 11,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_running#12",
+            "program": "rusty_running",
+            "program_id": 12,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_stopping#13",
+            "program": "rusty_stopping",
+            "program_id": 13,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_quiescent#14",
+            "program": "rusty_quiescent",
+            "program_id": 14,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_set_weight#15",
+            "program": "rusty_set_weight",
+            "program_id": 15,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_set_cpumask#16",
+            "program": "rusty_set_cpumask",
+            "program_id": 16,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_init_task#17",
+            "program": "rusty_init_task",
+            "program_id": 17,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_exit_task#18",
+            "program": "rusty_exit_task",
+            "program_id": 18,
+            "reason": "missing_rejit_exec_ns",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 11,
+        "runner": "scx",
+        "sample_count": 0,
+        "status": "error",
+        "workload": "hackbench"
+      }
+    ],
+    "sample_count": 0,
+    "selected_apps": 1,
+    "statuses": {
+      "error": 1
+    }
+  },
+  "run_type": "debug_scx_full",
+  "samples": 1,
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "started_at": "2026-04-03T20:10:49.788840+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

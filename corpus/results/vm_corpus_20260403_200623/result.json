@@ -1,0 +1,926 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "daemon_socket": "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260403/vm-tmp/bpfrejit-daemon-ey_xbka_/daemon.sock",
+  "filters": [
+    "scx"
+  ],
+  "generated_at": "2026-04-03T20:06:31.762694+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-04-03T20:06:24.548174+00:00",
+    "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+    "daemon_kinsn_discovery": {
+      "captured_at": "2026-04-03T20:06:24.550478+00:00",
+      "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=147702 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=147704 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=147679 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=147697 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=147698 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=147681 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=147682 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=147683 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+      "status": "ok",
+      "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=147702 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=147704 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=147679 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=147697 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=147698 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=147681 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=147682 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=147683 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+      "stderr_path": "docs/tmp/20260403/vm-tmp/bpfrejit-daemon-ey_xbka_/daemon.stderr.log",
+      "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260403/vm-tmp/bpfrejit-daemon-ey_xbka_/daemon.sock",
+      "stdout_path": "docs/tmp/20260403/vm-tmp/bpfrejit-daemon-ey_xbka_/daemon.stdout.log"
+    },
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "exit_code": 0,
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-04-03T20:06:24.483361+00:00",
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "newly_loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "script_path": "module/load_all.sh",
+      "snapshot_after": {
+        "captured_at": "2026-04-03T20:06:24.483348+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "stderr": "",
+      "stdout": "Loaded bpf_bulk_memory\nLoaded bpf_endian\nLoaded bpf_extract\nLoaded bpf_rotate\nLoaded bpf_select\nkinsn modules: 5/5 loaded"
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-04-03T20:06:24.272186+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [],
+      "missing_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "raw_output": "",
+      "resident_expected_modules": [],
+      "source": "lsmod"
+    },
+    "status": "ready"
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "metadata": {
+    "kinsn_modules": {
+      "count": 1,
+      "lifecycle_runs": [
+        {
+          "captured_at": "2026-04-03T20:06:25.679547+00:00",
+          "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+          "daemon_kinsn_discovery": {
+            "captured_at": "2026-04-03T20:06:24.550478+00:00",
+            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=147702 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=147704 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=147679 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=147697 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=147698 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=147681 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=147682 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=147683 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "status": "ok",
+            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=147702 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=147704 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=147679 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=147697 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=147698 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=147681 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=147682 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=147683 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr_path": "docs/tmp/20260403/vm-tmp/bpfrejit-daemon-ey_xbka_/daemon.stderr.log",
+            "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260403/vm-tmp/bpfrejit-daemon-ey_xbka_/daemon.sock",
+            "stdout_path": "docs/tmp/20260403/vm-tmp/bpfrejit-daemon-ey_xbka_/daemon.stdout.log"
+          },
+          "expected_modules": [
+            "bpf_bulk_memory",
+            "bpf_endian",
+            "bpf_extract",
+            "bpf_rotate",
+            "bpf_select"
+          ],
+          "lifecycle_index": 1,
+          "module_load": {
+            "exit_code": 0,
+            "expected_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "failed_modules": [],
+            "invoked_at": "2026-04-03T20:06:24.483361+00:00",
+            "loaded_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "newly_loaded_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "script_path": "module/load_all.sh",
+            "snapshot_after": {
+              "captured_at": "2026-04-03T20:06:24.483348+00:00",
+              "expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "loaded_bpf_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "missing_expected_modules": [],
+              "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+              "resident_expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "source": "lsmod"
+            },
+            "status": "ok",
+            "stderr": "",
+            "stdout": "Loaded bpf_bulk_memory\nLoaded bpf_endian\nLoaded bpf_extract\nLoaded bpf_rotate\nLoaded bpf_select\nkinsn modules: 5/5 loaded"
+          },
+          "module_snapshot_before_daemon": {
+            "captured_at": "2026-04-03T20:06:24.272186+00:00",
+            "expected_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "loaded_bpf_modules": [],
+            "missing_expected_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "raw_output": "",
+            "resident_expected_modules": [],
+            "source": "lsmod"
+          },
+          "requested_prog_ids": [
+            7,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "status": "completed"
+        }
+      ]
+    }
+  },
+  "results": [
+    {
+      "app": "scx/rusty",
+      "app_measurement": null,
+      "args": {
+        "scheduler": "rusty"
+      },
+      "baseline": {
+        "exec_ns_mean": null,
+        "programs": {}
+      },
+      "baseline_workload": {
+        "duration_s": 1.2812659169999998,
+        "ops_per_sec": 3.12191243591786,
+        "ops_total": 4.0,
+        "stderr": "",
+        "stdout": "Running in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.310\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.299\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.315\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.303"
+      },
+      "baseline_workloads": [
+        {
+          "duration_s": 1.2812659169999998,
+          "ops_per_sec": 3.12191243591786,
+          "ops_total": 4.0,
+          "stderr": "",
+          "stdout": "Running in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.310\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.299\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.315\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.303"
+        }
+      ],
+      "command_used": [
+        "bash",
+        "-lc",
+        "set -euo pipefail; ulimit -l unlimited; exec /home/yunwei37/workspace/bpf-benchmark/runner/repos/scx/target/release/scx_rusty --stats 1"
+      ],
+      "configured_workload_seconds": 1.0,
+      "error": "scx/rusty: workload 'hackbench' did not execute any target programs after rejit",
+      "had_post_rejit_measurement": false,
+      "measurement_mode": "program",
+      "process": {
+        "stderr_tail": [
+          "13:06:24 \u001b[0m\u001b[34m[INFO] \u001b[0mRunning scx_rusty (build ID: 1.1.0 x86_64-unknown-linux-gnu)",
+          "13:06:24 \u001b[0m\u001b[34m[INFO] \u001b[0mNODE[00] mask= f",
+          "13:06:24 \u001b[0m\u001b[34m[INFO] \u001b[0m DOM[00] mask= f",
+          "13:06:24 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_attach not found in kernel, skipping it as it's set to zero",
+          "",
+          "13:06:24 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_detach not found in kernel, skipping it as it's set to zero",
+          "",
+          "13:06:24 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_cgroup_id not found in kernel, skipping it as it's set to zero",
+          "",
+          "13:06:24 \u001b[0m\u001b[33m[WARN] \u001b[0mlibbpf: map 'rusty': BPF map skeleton link is uninitialized",
+          "",
+          "13:06:24 \u001b[0m\u001b[34m[INFO] \u001b[0mRusty scheduler started! Run `scx_rusty --monitor` for metrics.",
+          "",
+          "DEBUG DUMP",
+          "================================================================================",
+          "",
+          "bpfrejit-daemon[237] triggered exit kind 1025:",
+          "  scx_bpf_error (src/bpf/main.bpf.c:880: Failed to acquire dom0 cpumask kptr)",
+          "",
+          "Backtrace:",
+          "  scx_exit+0x50/0x80",
+          "  scx_bpf_error_bstr+0x7a/0xa0",
+          "  bpf_prog_36caaa020d84025c_rusty_select_cp+0x3b3/0xa3b",
+          "  bpf__sched_ext_ops_select_cpu+0x4f/0xb4",
+          "  select_task_rq_scx+0xc7/0x290",
+          "  try_to_wake_up+0x172/0x800",
+          "  pollwake+0x77/0xa0",
+          "  __wake_up_common+0x78/0xb0",
+          "  __wake_up_sync_key+0x3b/0x60",
+          "  sock_def_readable+0x43/0xd0",
+          "  unix_stream_sendmsg+0x2bb/0x710",
+          "  __sys_sendto+0x1ee/0x200",
+          "  __x64_sys_sendto+0x24/0x40",
+          "  do_syscall_64+0xcf/0x1570",
+          "  entry_SYSCALL_64_after_hwframe+0x76/0x7e",
+          "",
+          "CPU states",
+          "----------",
+          "",
+          "CPU 0   : nr_run=1 flags=0x1 cpu_rel=0 ops_qseq=51579 ksync=105594",
+          "          curr=bpfrejit-daemon[237] class=ext_sched_class",
+          "",
+          " *R bpfrejit-daemon[237] -1ms",
+          "      scx_state/flags=3/0xd dsq_flags=0x0 ops_state/qseq=0/0",
+          "      sticky/holding_cpu=-1/-1 dsq_id=(n/a)",
+          "      dsq_vtime=2685260435 slice=19919599 weight=100",
+          "      cpus=f no_mig=0",
+          "",
+          "    scx_dump_state+0x8e6/0x9d0",
+          "    scx_error_irq_workfn+0x32/0x40",
+          "    irq_work_run_list+0x56/0xa0",
+          "    irq_work_run+0x18/0x50",
+          "    __sysvec_irq_work+0x1d/0xe0",
+          "    sysvec_irq_work+0x7b/0xb0",
+          "    asm_sysvec_irq_work+0x1a/0x20",
+          "    sock_def_readable+0x43/0xd0",
+          "    unix_stream_sendmsg+0x2bb/0x710",
+          "    __sys_sendto+0x1ee/0x200",
+          "    __x64_sys_sendto+0x24/0x40",
+          "    do_syscall_64+0xcf/0x1570",
+          "    entry_SYSCALL_64_after_hwframe+0x76/0x7e",
+          "",
+          "CPU 3   : nr_run=1 flags=0x1 cpu_rel=0 ops_qseq=64355 ksync=133012",
+          "          curr=python3[200] class=ext_sched_class",
+          "",
+          " *R python3[200] +0ms",
+          "      scx_state/flags=3/0xd dsq_flags=0x0 ops_state/qseq=0/0",
+          "      sticky/holding_cpu=-1/-1 dsq_id=(n/a)",
+          "      dsq_vtime=170334227 slice=20000000 weight=100",
+          "      cpus=f no_mig=0",
+          "",
+          "Event counters",
+          "--------------",
+          "              SCX_EV_SELECT_CPU_FALLBACK:                0",
+          "       SCX_EV_DISPATCH_LOCAL_DSQ_OFFLINE:                0",
+          "               SCX_EV_DISPATCH_KEEP_LAST:              250",
+          "                 SCX_EV_ENQ_SKIP_EXITING:              161",
+          "      SCX_EV_ENQ_SKIP_MIGRATION_DISABLED:                0",
+          "                 SCX_EV_REFILL_SLICE_DFL:              412",
+          "                  SCX_EV_BYPASS_DURATION:         10295535",
+          "                  SCX_EV_BYPASS_DISPATCH:                1",
+          "                  SCX_EV_BYPASS_ACTIVATE:                1",
+          "",
+          "================================================================================",
+          "",
+          "13:06:28 \u001b[0m\u001b[34m[INFO] \u001b[0mUnregister scx_rusty scheduler",
+          "Error: EXIT: scx_bpf_error (src/bpf/main.bpf.c:880: Failed to acquire dom0 cpumask kptr)"
+        ],
+        "stdout_tail": [
+          "###### Fri, 3 Apr 2026 13:06:25 -0700, load balance @  -882.1ms ######",
+          "cpu=   0.00 load=   -0.00 mig=0 task_err=0 time_used= 0.0ms",
+          "tot=      4 sync_prev_idle= 0.00 wsync= 0.00",
+          "prev_idle=75.00 greedy_idle= 0.00 pin= 0.00",
+          "dir=25.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+          "dsq= 0.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+          "kick_greedy= 0.00 rep= 0.00",
+          "dl_clamp= 0.00 dl_preset= 0.00",
+          "slice=20000us",
+          "direct_greedy_cpus=f",
+          "  kick_greedy_cpus=f",
+          "###### Fri, 3 Apr 2026 13:06:26 -0700, load balance @ -1885.1ms ######",
+          "cpu=  85.79 load=   -0.00 mig=0 task_err=0 time_used= 0.3ms",
+          "tot= 150795 sync_prev_idle= 0.27 wsync= 0.01",
+          "prev_idle= 0.66 greedy_idle= 0.00 pin= 0.00",
+          "dir= 0.61 dir_greedy= 0.00 dir_greedy_far= 0.00",
+          "dsq=98.45 greedy_local= 0.00 greedy_xnuma= 0.00",
+          "kick_greedy= 0.00 rep= 0.00",
+          "dl_clamp= 2.86 dl_preset=95.67",
+          "slice=1000us",
+          "direct_greedy_cpus=0",
+          "  kick_greedy_cpus=f",
+          "###### Fri, 3 Apr 2026 13:06:27 -0700, load balance @  -884.2ms ######",
+          "cpu=  47.87 load=   40.44 mig=0 task_err=0 time_used= 2.0ms",
+          "tot=  80709 sync_prev_idle= 0.39 wsync= 0.02",
+          "prev_idle= 1.16 greedy_idle= 0.00 pin= 0.00",
+          "dir= 0.69 dir_greedy= 0.00 dir_greedy_far= 0.00",
+          "dsq=97.73 greedy_local= 0.00 greedy_xnuma= 0.00",
+          "kick_greedy= 0.00 rep= 0.00",
+          "dl_clamp= 4.20 dl_preset=93.40",
+          "slice=20000us",
+          "direct_greedy_cpus=f",
+          "  kick_greedy_cpus=f",
+          "  NODE[00] load= 40.44 imbal=  +0.00 delta=  +0.00",
+          "   DOM[00] load= 40.44 imbal=  +0.00 delta=  +0.00"
+        ]
+      },
+      "prog_ids": [
+        7,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "program_measurements": {},
+      "programs": [
+        {
+          "btf_id": 24,
+          "bytes_jited": 3072,
+          "bytes_memlock": 8192,
+          "bytes_xlated": 6624,
+          "gpl_compatible": true,
+          "id": 7,
+          "jited": true,
+          "loaded_at": 1775246784,
+          "map_ids": [
+            11,
+            12,
+            2,
+            14,
+            7,
+            13,
+            6,
+            9,
+            16,
+            8,
+            4
+          ],
+          "name": "rusty_select_cpu",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 32,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12415,
+          "run_time_ns": 1095713,
+          "tag": "2f385306b0fddf97",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 1045,
+          "bytes_memlock": 20480,
+          "bytes_xlated": 13064,
+          "gpl_compatible": true,
+          "id": 9,
+          "jited": true,
+          "loaded_at": 1775246784,
+          "map_ids": [
+            7,
+            12,
+            11,
+            14,
+            13,
+            6,
+            9,
+            16,
+            8,
+            2,
+            5
+          ],
+          "name": "rusty_enqueue",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 33,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12524,
+          "run_time_ns": 526853,
+          "tag": "e2238ede8b497e42",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 725,
+          "bytes_memlock": 4096,
+          "bytes_xlated": 1336,
+          "gpl_compatible": true,
+          "id": 10,
+          "jited": true,
+          "loaded_at": 1775246784,
+          "map_ids": [
+            12,
+            11,
+            13,
+            7,
+            16
+          ],
+          "name": "rusty_dispatch",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 34,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12663,
+          "run_time_ns": 595677,
+          "tag": "37be2db8355d675f",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 312,
+          "bytes_memlock": 8192,
+          "bytes_xlated": 3656,
+          "gpl_compatible": true,
+          "id": 11,
+          "jited": true,
+          "loaded_at": 1775246784,
+          "map_ids": [
+            13,
+            12,
+            9,
+            11,
+            16,
+            8,
+            5
+          ],
+          "name": "rusty_runnable",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 35,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12568,
+          "run_time_ns": 1093363,
+          "tag": "4d0d9b1a62b86d1a",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 464,
+          "bytes_memlock": 4096,
+          "bytes_xlated": 952,
+          "gpl_compatible": true,
+          "id": 12,
+          "jited": true,
+          "loaded_at": 1775246784,
+          "map_ids": [
+            13,
+            12,
+            2,
+            9,
+            11,
+            16,
+            8
+          ],
+          "name": "rusty_running",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 36,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12587,
+          "run_time_ns": 2080716,
+          "tag": "5cce52ee44d49629",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 278,
+          "bytes_memlock": 4096,
+          "bytes_xlated": 1840,
+          "gpl_compatible": true,
+          "id": 13,
+          "jited": true,
+          "loaded_at": 1775246784,
+          "map_ids": [
+            12,
+            13,
+            9,
+            11,
+            16,
+            8
+          ],
+          "name": "rusty_stopping",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 37,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12595,
+          "run_time_ns": 831938,
+          "tag": "b3ec3c0247826ff7",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 260,
+          "bytes_memlock": 8192,
+          "bytes_xlated": 3808,
+          "gpl_compatible": true,
+          "id": 14,
+          "jited": true,
+          "loaded_at": 1775246784,
+          "map_ids": [
+            13,
+            12,
+            9,
+            11,
+            16,
+            8,
+            5
+          ],
+          "name": "rusty_quiescent",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 38,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 12593,
+          "run_time_ns": 1436329,
+          "tag": "dd496bdb61213a31",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 124,
+          "bytes_memlock": 4096,
+          "bytes_xlated": 392,
+          "gpl_compatible": true,
+          "id": 15,
+          "jited": true,
+          "loaded_at": 1775246784,
+          "map_ids": [
+            13,
+            12,
+            9,
+            11,
+            16,
+            8
+          ],
+          "name": "rusty_set_weight",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 39,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 135,
+          "run_time_ns": 9288,
+          "tag": "c7a6f0fe04406143",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 165,
+          "bytes_memlock": 20480,
+          "bytes_xlated": 10360,
+          "gpl_compatible": true,
+          "id": 16,
+          "jited": true,
+          "loaded_at": 1775246784,
+          "map_ids": [
+            13,
+            14,
+            9,
+            11,
+            12,
+            16,
+            8,
+            6,
+            2,
+            5
+          ],
+          "name": "rusty_set_cpumask",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 40,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 119,
+          "run_time_ns": 14052,
+          "tag": "53d0925748da9997",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 537,
+          "bytes_memlock": 24576,
+          "bytes_xlated": 8848,
+          "gpl_compatible": true,
+          "id": 17,
+          "jited": true,
+          "loaded_at": 1775246784,
+          "map_ids": [
+            12,
+            6,
+            13,
+            9,
+            11,
+            17,
+            8,
+            16,
+            2,
+            5
+          ],
+          "name": "rusty_init_task",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 41,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 147,
+          "run_time_ns": 164387,
+          "tag": "a27ab535782b5df2",
+          "type": "struct_ops",
+          "uid": 0
+        },
+        {
+          "btf_id": 24,
+          "bytes_jited": 166,
+          "bytes_memlock": 4096,
+          "bytes_xlated": 2792,
+          "gpl_compatible": true,
+          "id": 18,
+          "jited": true,
+          "loaded_at": 1775246784,
+          "map_ids": [
+            6,
+            7,
+            9,
+            11,
+            12,
+            16,
+            8,
+            17,
+            13
+          ],
+          "name": "rusty_exit_task",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 42,
+              "pid": 239
+            }
+          ],
+          "owner_pids": [
+            239
+          ],
+          "pids": [
+            {
+              "comm": "scx_rusty",
+              "pid": 239
+            }
+          ],
+          "run_cnt": 1,
+          "run_time_ns": 4752,
+          "tag": "e3a0f57883b208e2",
+          "type": "struct_ops",
+          "uid": 0
+        }
+      ],
+      "rejit": null,
+      "rejit_apply": {},
+      "rejit_workload": null,
+      "rejit_workloads": [],
+      "runner": "scx",
+      "selected_workload": "hackbench",
+      "status": "error",
+      "workload": {
+        "corpus": "hackbench",
+        "e2e": "hackbench"
+      }
+    }
+  ],
+  "samples": 1,
+  "status": "error",
+  "suite_name": "macro_apps",
+  "suite_summary": {
+    "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+    "schema_version": 1,
+    "selected_apps": 1,
+    "suite_name": "macro_apps",
+    "total_apps": 20
+  },
+  "summary": {
+    "all_comparable_geomean": null,
+    "applied_only_geomean": null,
+    "applied_sample_count": 0,
+    "comparison_exclusion_reason_counts": {},
+    "comparison_exclusion_reasons": [],
+    "discovered_programs": 0,
+    "per_app": [
+      {
+        "all_comparable_geomean": null,
+        "app": "scx/rusty",
+        "applied_only_geomean": null,
+        "applied_program_count": 0,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 0,
+        "runner": "scx",
+        "sample_count": 0,
+        "status": "error",
+        "workload": "hackbench"
+      }
+    ],
+    "sample_count": 0,
+    "selected_apps": 1,
+    "statuses": {
+      "error": 1
+    }
+  },
+  "workload_seconds": 1.0
+}

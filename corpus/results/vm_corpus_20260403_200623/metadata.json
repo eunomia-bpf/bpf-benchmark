@@ -1,0 +1,56 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "details_dir": "details",
+  "error_message": "corpus suite reported errors",
+  "filters": [
+    "scx"
+  ],
+  "generated_at": "2026-04-03T20:06:31.776161+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-03T20:06:31.775836+00:00",
+  "launcher_boot_id": "638d7820-594d-4da9-ad29-21da5f69c2da",
+  "launcher_pid": 200,
+  "launcher_start_ticks": 198,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "optimization_summary": {
+    "all_comparable_geomean": null,
+    "applied_only_geomean": null,
+    "applied_sample_count": 0,
+    "comparison_exclusion_reason_counts": {},
+    "comparison_exclusion_reasons": [],
+    "discovered_programs": 0,
+    "per_app": [
+      {
+        "all_comparable_geomean": null,
+        "app": "scx/rusty",
+        "applied_only_geomean": null,
+        "applied_program_count": 0,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 0,
+        "runner": "scx",
+        "sample_count": 0,
+        "status": "error",
+        "workload": "hackbench"
+      }
+    ],
+    "sample_count": 0,
+    "selected_apps": 1,
+    "statuses": {
+      "error": 1
+    }
+  },
+  "run_type": "vm_corpus",
+  "samples": 1,
+  "selected_rejit_passes": [
+    "map_inline",
+    "const_prop",
+    "dce"
+  ],
+  "started_at": "2026-04-03T20:06:23.934312+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}
