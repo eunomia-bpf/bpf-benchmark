@@ -157,10 +157,18 @@ For AWS runs, local bundle preparation is not a separate public action.
 It remains an internal explicit step of `aws_executor.sh run` after machine and
 kernel readiness are established.
 
-The canonical run manifest is now immutable after creation.
-Local-only bundle staging inputs are passed to `build_remote_bundle.sh` through
-the executor process environment and are not appended back into
-`run-contract.env`.
+The canonical run manifest is immutable at creation time for target/suite
+contract fields. Executor-local staging paths are not part of the contract.
+
+For canonical local KVM execution, `prepare_run_inputs.sh` now materializes a
+staged workspace snapshot and then writes only these local execution pointers
+back into the per-run manifest:
+
+- `RUN_LOCAL_STAGE_ROOT`
+- `RUN_LOCAL_STAGE_MANIFEST`
+
+This keeps the target/suite contract stable while letting the KVM executor run
+against the same kind of staged workspace that AWS consumes.
 
 AWS launch parameters now also follow the same rule:
 
@@ -212,14 +220,17 @@ the manifest:
 `runner/scripts/kvm_executor.sh` passes that explicit contract into
 `runner/scripts/run_vm_shell.py`.
 
-`runner/Makefile` no longer exposes a second live `vm-test/vm-micro/vm-corpus/vm-e2e`
-execution plane. The remaining direct runner targets are debug-only helpers
-that still consume explicit `VM_*` variables:
+`runner/Makefile` no longer exposes the old direct VM entrypoints at all:
 
 - `vm-shell`
 - `vm-selftest`
 - `vm-negative-test`
 - `vm-micro-smoke`
+
+The root `Makefile` also no longer exposes local ARM QEMU execution targets:
+
+- `vm-arm64-smoke`
+- `vm-arm64-selftest`
 
 Canonical KVM suite execution now also performs an explicit guest-side prereq
 validation step before entering the shared suite entrypoint:
@@ -308,25 +319,30 @@ steps, not remote execution or source-tree patching:
 This is much cleaner than patching tracked third-party trees, but it is still
 design debt and should be reviewed explicitly.
 
-### 7.3 Manifest strictness still needs validation
+### 7.3 KVM and AWS still need one stricter staged-input contract
 
-The new flow now creates a per-run staged workspace before execution.
-The staged bundle path is executor-local state and is not recorded back into the
-canonical manifest.
+KVM now executes from a staged workspace snapshot instead of the live repo
+checkout. That removes the biggest control-plane split and fixes the manifest
+lifetime issue.
 
-However this still needs validation under real runs to prove:
+What still needs more cleanup is the host-side artifact preparation shape:
 
-- no stale `.cache/aws-arm64/binaries/*` outputs leak into unrelated suites
-- no missing selected artifact is silently replaced by a system-installed equivalent
+- AWS prebuilds more artifacts into cache-local promotion roots before staging
+- KVM still builds some inputs in the repo checkout and then snapshots them
 
-### 7.4 Direct runner debug paths now use explicit VM variables
+That is much better than running directly from the live workspace, but the
+remaining difference should still be reduced further.
 
-The debug boundary is now:
+### 7.4 Guest prerequisite policy is still duplicated
 
-- canonical product paths use `target + suite -> manifest -> executor`
-- direct `make -C runner vm-*` uses explicit `VM_BACKEND/VM_EXECUTABLE/VM_LOCK_SCOPE/VM_MACHINE_*`
+Guest/runtime prerequisite mapping is still spread across:
 
-The old target-alias layer is gone; there is only one KVM machine contract path.
+- `runner/scripts/install_guest_prereqs.sh`
+- `runner/scripts/validate_guest_prereqs.sh`
+- `runner/scripts/aws_remote_prereqs.sh`
+
+This is still design debt and should eventually be collapsed into one shared
+prereq contract with executor-specific transport only.
 
 ## 8. Tetragon Contract Change
 
@@ -349,7 +365,8 @@ This is the required order from this point onward.
 
 1. Static-check the new shell scripts and any touched Python modules.
 2. Verify there are no remaining repo-tracked references to the deleted AWS monoliths in active code paths.
-3. Review the new `aws_executor.sh` / `build_remote_bundle.sh` / `suite_entrypoint.sh` contract for unnecessary coupling.
+3. Keep deleting remaining legacy entrypoints and bypasses instead of leaving them as debug helpers.
+4. Review the new `aws_executor.sh` / `build_remote_bundle.sh` / `suite_entrypoint.sh` contract for unnecessary coupling.
 
 ### 9.2 Review before testing
 
@@ -359,18 +376,18 @@ This is the required order from this point onward.
 
 ### 9.3 Validation order after review
 
-1. `make aws-arm64-test`
-2. `make aws-arm64-benchmark AWS_ARM64_BENCH_MODE=micro`
-3. `make aws-arm64-benchmark AWS_ARM64_BENCH_MODE=corpus`
-4. `make aws-arm64-benchmark AWS_ARM64_BENCH_MODE=e2e`
-5. `make aws-x86-test`
-6. `make aws-x86-benchmark AWS_X86_BENCH_MODE=micro`
-7. `make aws-x86-benchmark AWS_X86_BENCH_MODE=corpus`
-8. `make aws-x86-benchmark AWS_X86_BENCH_MODE=e2e`
-9. `make vm-test`
-10. `make vm-micro`
-11. `make vm-corpus`
-12. `make vm-e2e`
+1. `make vm-test`
+2. `make vm-micro`
+3. `make vm-corpus`
+4. `make vm-e2e`
+5. `make aws-arm64-test`
+6. `make aws-arm64-benchmark AWS_ARM64_BENCH_MODE=micro`
+7. `make aws-arm64-benchmark AWS_ARM64_BENCH_MODE=corpus`
+8. `make aws-arm64-benchmark AWS_ARM64_BENCH_MODE=e2e`
+9. `make aws-x86-test`
+10. `make aws-x86-benchmark AWS_X86_BENCH_MODE=micro`
+11. `make aws-x86-benchmark AWS_X86_BENCH_MODE=corpus`
+12. `make aws-x86-benchmark AWS_X86_BENCH_MODE=e2e`
 
 Performance suites must remain serialized.
 
@@ -452,6 +469,21 @@ Performance suites must remain serialized.
 - Added explicit KVM guest-side prereq validation before suite execution.
 - Added repo-owned KVM guest prereq installation so canonical local `x86-kvm`
   no longer silently depends on ambient guest tool availability.
+- Removed guest-side auto-sourcing of host virtualenv activation from
+  `runner/libs/vm.py`; canonical KVM guest execution no longer inherits host
+  Python environment state through generated guest scripts.
+- Switched canonical KVM execution from the live repo checkout to a staged
+  workspace snapshot generated by `build_remote_bundle.sh`, and wrote only
+  `RUN_LOCAL_STAGE_ROOT` / `RUN_LOCAL_STAGE_MANIFEST` back into the run-local
+  manifest so guest execution no longer depends on the launcher temp manifest.
+- Removed the remaining direct runner VM entrypoints and root local ARM QEMU
+  execution targets, deleting the last active non-manifest execution surface.
+- Tightened AWS setup reuse so cached instance state now includes an explicit
+  local setup fingerprint derived from the staged kernel image, `vmlinux`, and
+  modules tarball; reuse is no longer keyed only to `uname -r`.
+- Narrowed AWS remote prereq stamping to the runtime/prereq contract instead of
+  the full benchmark manifest, so changing samples/filters/cases does not force
+  host package reprovisioning.
 - Restored the old `vm-corpus` default sample semantics in the manifest layer:
   `VM_CORPUS_SAMPLES` remains the canonical default unless `SAMPLES` is
   explicitly overridden.
@@ -496,6 +528,9 @@ Performance suites must remain serialized.
 - No full AWS ARM64 validation run after this refactor yet.
 - No full AWS x86 validation run after this refactor yet.
 - No full x86 KVM validation run after this refactor yet.
+- Guest prerequisite policy is still split across three active scripts.
+- KVM host-side artifact preparation still needs another pass to match the AWS
+  staged-input model more closely.
 - No claim of green status should be made until the review pass and ordered validation pass complete.
 
 ## 11. Open Questions To Resolve In Review
@@ -506,7 +541,9 @@ The subagent review should focus on these points:
 - Is any remaining path still relying on ambient environment instead of explicit manifest data?
 - Is bundle assembly truly manifest-driven, or are there still stale-output leak paths?
 - Is any remote suite path still mutating machine-global state outside kernel install / package prereqs?
-- Is the new x86 KVM wiring through `kvm_executor.sh` thin and correct, or does it still preserve too much old special-casing?
+- Is the new x86 KVM staged-workspace wiring through `prepare_run_inputs.sh`
+  and `kvm_executor.sh` thin and correct, or does it still preserve too much
+  host-side special-casing?
 - Is the remaining third-party build compatibility handling
   (`suite_entrypoint.sh`, `build_corpus_native.py`) the minimum necessary shape, or
   can it be reduced further without reintroducing source patching or remote

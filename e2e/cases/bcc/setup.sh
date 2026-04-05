@@ -3,7 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd -- "${SCRIPT_DIR}/../../.." && pwd)
-BUILD_OUTPUT="${REPO_ROOT}/runner/repos/bcc/libbpf-tools/.output"
+EXPLICIT_BUILD_OUTPUT="${BCC_TOOLS_DIR:-}"
+BUNDLED_BUILD_OUTPUT="${REPO_ROOT}/corpus/build/bcc/libbpf-tools/.output"
 REQUIRED_TOOLS=(tcplife biosnoop runqlat syscount execsnoop opensnoop capable vfsstat tcpconnect bindsnoop fsdist)
 
 need_tool() {
@@ -25,6 +26,18 @@ binary_matches_host_arch() {
       ;;
   esac
 }
+
+BUILD_OUTPUT=""
+for candidate in "${EXPLICIT_BUILD_OUTPUT}" "${BUNDLED_BUILD_OUTPUT}"; do
+  [[ -n "${candidate}" ]] || continue
+  [[ -d "${candidate}" ]] || continue
+  BUILD_OUTPUT="${candidate}"
+  break
+done
+if [[ -z "${BUILD_OUTPUT}" ]]; then
+  echo "ERROR: missing bundled BCC libbpf-tools output; checked ${EXPLICIT_BUILD_OUTPUT:-<unset>} and ${BUNDLED_BUILD_OUTPUT}" >&2
+  exit 1
+fi
 
 for tool_name in "${REQUIRED_TOOLS[@]}"; do
   if [[ ! -x "${BUILD_OUTPUT}/${tool_name}" ]]; then

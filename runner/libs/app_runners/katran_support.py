@@ -21,9 +21,8 @@ DEFAULT_KATRAN_PROGRAM_NAME = "balancer_ingress"
 DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
 DEFAULT_KATRAN_SERVER_BINARY_CANDIDATES = (
     ROOT_DIR / "corpus" / "build" / "katran" / "bin" / "katran_server_grpc",
-    ROOT_DIR / "e2e" / "cases" / "katran" / "bin" / "katran_server_grpc",
 )
-DEFAULT_KATRAN_SERVER_LIB_DIR = ROOT_DIR / "e2e" / "cases" / "katran" / "lib"
+DEFAULT_KATRAN_SERVER_LIB_DIR = ROOT_DIR / "corpus" / "build" / "katran" / "lib"
 DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 30
 DEFAULT_KATRAN_STOP_TIMEOUT_S = 10.0
 DEFAULT_KATRAN_STOP_SETTLE_S = 2.0

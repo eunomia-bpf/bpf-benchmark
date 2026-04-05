@@ -372,11 +372,12 @@ def build_bcc(stage_root: Path, jobs: int) -> RepoBuildResult:
 
     object_paths = sorted((tool_dir / ".output").glob("*.bpf.o"))
     binary_paths = bcc_binaries(tool_dir)
-    object_count = stage_many(object_paths, lambda src: stage_root / "libbpf-tools" / src.name)
-    binary_count = stage_many(binary_paths, lambda src: stage_root / "bin" / src.name)
+    staged_output_dir = stage_root / "libbpf-tools" / ".output"
+    object_count = stage_many(object_paths, lambda src: staged_output_dir / src.name)
+    binary_count = stage_many(binary_paths, lambda src: staged_output_dir / src.name)
     remove_staged_temp_objects(stage_root)
 
-    verify_cmd = (str(stage_root / "bin" / "bindsnoop"), "-h")
+    verify_cmd = (str(staged_output_dir / "bindsnoop"), "-h")
     return RepoBuildResult(
         name="bcc",
         stage_dir=stage_root,
@@ -708,10 +709,15 @@ def build_tetragon(stage_root: Path, jobs: int) -> RepoBuildResult:
     object_paths = sorted(path for path in objects_dir.glob("*.o") if is_bpf_object(path))
     object_count = stage_many(object_paths, lambda src: stage_root / bpf_stage_relative(Path(src.name)))
 
-    binary_paths: list[Path] = []
-    if (repo_dir / "cmd" / "tetragon").exists():
-        run(["make", f"-j{jobs}", "tetragon", "EXTRA_GO_BUILD_FLAGS=-mod=mod"], cwd=repo_dir)
-        binary_paths = [path for path in (repo_dir / "tetragon",) if is_executable_file(path)]
+    if not (repo_dir / "cmd" / "tetragon").is_dir():
+        raise CommandError(
+            f"tetragon checkout is missing cmd/tetragon under {repo_dir}; "
+            "fetch the repo without a sparse tree that omits the userspace agent"
+        )
+    run(["make", f"-j{jobs}", "tetragon", "EXTRA_GO_BUILD_FLAGS=-mod=mod"], cwd=repo_dir)
+    binary_paths = [path for path in (repo_dir / "tetragon",) if is_executable_file(path)]
+    if not binary_paths:
+        raise CommandError(f"Tetragon build completed without producing {repo_dir / 'tetragon'}")
     binary_count = stage_many(binary_paths, lambda src: stage_root / "bin" / src.name)
     remove_staged_temp_objects(stage_root)
 

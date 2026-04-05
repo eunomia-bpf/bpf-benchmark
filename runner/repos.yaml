@@ -95,8 +95,6 @@ repos:
   - name: tetragon
     url: https://github.com/cilium/tetragon.git
     branch: main
-    sparse_paths:
-      - bpf
     harvest_globs:
       - bpf/**/*.c
     exclude_globs:
