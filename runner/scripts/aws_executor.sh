@@ -11,6 +11,7 @@ MANIFEST_PATH="${2:?usage: aws_executor.sh <run|terminate> <manifest_path>}"
 # shellcheck disable=SC1090
 source "$MANIFEST_PATH"
 
+MANIFEST_HASH="$(sha256sum "$MANIFEST_PATH" | awk '{print $1}')"
 CACHE_DIR="$ROOT_DIR/.cache/${RUN_TARGET_NAME}"
 STATE_DIR="$CACHE_DIR/state"
 STATE_FILE="$STATE_DIR/instance.env"
@@ -19,7 +20,7 @@ RESULTS_DIR="$CACHE_DIR/results"
 MODULES_STAGE_DIR="$CACHE_DIR/modules-stage"
 LOCAL_REPO_ROOT="$CACHE_DIR/repos"
 LOCAL_PROMOTE_ROOT="$CACHE_DIR/bundle-inputs"
-AWS_REMOTE_PREREQS_STAMP="${AWS_REMOTE_PREREQS_STAMP:-/var/tmp/bpf-benchmark/prereqs.ready}"
+AWS_REMOTE_PREREQS_STAMP="${AWS_REMOTE_PREREQS_STAMP:-/var/tmp/bpf-benchmark/prereqs.${MANIFEST_HASH}.ready}"
 KERNEL_DIR="${KERNEL_DIR:-$ROOT_DIR/vendor/linux-framework}"
 KERNEL_BUILD_LOCK_FILE="${KERNEL_BUILD_LOCK_FILE:-$ROOT_DIR/.cache/kernel-build.lock}"
 KERNEL_DEFCONFIG_SRC="${KERNEL_DEFCONFIG_SRC:-$ROOT_DIR/vendor/bpfrejit_defconfig}"
@@ -27,10 +28,16 @@ KERNEL_CONFIG_STAMP_FILE="$KERNEL_DIR/.bpfrejit_config.stamp"
 X86_BZIMAGE="${X86_BZIMAGE:-$KERNEL_DIR/arch/x86/boot/bzImage}"
 X86_VMLINUX="${X86_VMLINUX:-$KERNEL_DIR/vmlinux}"
 X86_KINSN_MODULE_DIR="${X86_KINSN_MODULE_DIR:-$ROOT_DIR/module/x86}"
-X86_UPSTREAM_SELFTEST_DIR="${X86_UPSTREAM_SELFTEST_DIR:-$ROOT_DIR/.cache/upstream-bpf-selftests}"
+X86_KINSN_MODULE_STAGE_DIR="${X86_KINSN_MODULE_STAGE_DIR:-$CACHE_DIR/test-artifacts/kinsn-modules/x86}"
+X86_TEST_ARTIFACTS_ROOT="${X86_TEST_ARTIFACTS_ROOT:-$CACHE_DIR/test-artifacts}"
+X86_TEST_UNITTEST_BUILD_DIR="${X86_TEST_UNITTEST_BUILD_DIR:-$X86_TEST_ARTIFACTS_ROOT/unittest/build}"
+X86_TEST_NEGATIVE_BUILD_DIR="${X86_TEST_NEGATIVE_BUILD_DIR:-$X86_TEST_ARTIFACTS_ROOT/negative/build}"
+X86_UPSTREAM_SELFTEST_SOURCE_DIR="${X86_UPSTREAM_SELFTEST_SOURCE_DIR:-$ROOT_DIR/.cache/upstream-bpf-selftests}"
+X86_UPSTREAM_SELFTEST_DIR="${X86_UPSTREAM_SELFTEST_DIR:-$X86_TEST_ARTIFACTS_ROOT/upstream-bpf-selftests}"
 ARM64_WORKTREE_DIR="${ARM64_WORKTREE_DIR:-$ROOT_DIR/.worktrees/linux-framework-arm64-src}"
 ARM64_AWS_BUILD_DIR="${ARM64_AWS_BUILD_DIR:-$ROOT_DIR/.cache/aws-arm64/kernel-build}"
 ARM64_AWS_BASE_CONFIG="${ARM64_AWS_BASE_CONFIG:-$ROOT_DIR/.cache/aws-arm64/config-al2023-arm64}"
+ARM64_KINSN_MODULE_STAGE_DIR="${ARM64_KINSN_MODULE_STAGE_DIR:-$CACHE_DIR/test-artifacts/kinsn-modules/arm64}"
 ARM64_UPSTREAM_TEST_KMODS_SOURCE_DIR="${ARM64_UPSTREAM_TEST_KMODS_SOURCE_DIR:-$ROOT_DIR/vendor/linux-framework/tools/testing/selftests/bpf/test_kmods}"
 ARM64_UPSTREAM_TEST_KMODS_DIR="${ARM64_UPSTREAM_TEST_KMODS_DIR:-$ROOT_DIR/.cache/aws-arm64/upstream-selftests-kmods-arm64}"
 ARM64_CROSSBUILD_OUTPUT_DIR="${ARM64_CROSSBUILD_OUTPUT_DIR:-$ROOT_DIR/.cache/aws-arm64/binaries}"
@@ -46,16 +53,12 @@ ARM64_CROSS_LIB_DIR="${ARM64_CROSS_LIB_DIR:-$ARM64_CROSSBUILD_OUTPUT_DIR/lib}"
 ARM64_KATRAN_SERVER_BINARY="${ARM64_KATRAN_SERVER_BINARY:-$ARM64_CROSSBUILD_OUTPUT_DIR/katran/bin/katran_server_grpc}"
 ARM64_KATRAN_SERVER_LIB_DIR="${ARM64_KATRAN_SERVER_LIB_DIR:-$ARM64_CROSSBUILD_OUTPUT_DIR/katran/lib}"
 CROSS_COMPILE_PREFIX="${CROSS_COMPILE_ARM64:-aarch64-linux-gnu-}"
-AWS_REGION_VALUE="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
-AWS_PROFILE_VALUE="${AWS_PROFILE:-codex-ec2}"
+AWS_REGION_VALUE="${RUN_AWS_REGION:-}"
+AWS_PROFILE_VALUE="${RUN_AWS_PROFILE:-}"
 BUILD_KERNEL_RELEASE=""
 STATE_INSTANCE_ID=""
 STATE_INSTANCE_IP=""
 STATE_REGION=""
-STATE_KEY_PATH=""
-STATE_KEY_NAME=""
-STATE_SECURITY_GROUP_ID=""
-STATE_SUBNET_ID=""
 STATE_KERNEL_RELEASE=""
 
 log() {
@@ -79,6 +82,18 @@ dir_has_entries() {
     find "$path" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null | grep -q .
 }
 
+stage_module_binaries() {
+    local source_dir="$1"
+    local stage_dir="$2"
+    local ko_count
+    require_local_path "$source_dir" "kinsn module source dir"
+    rm -rf "$stage_dir"
+    mkdir -p "$stage_dir"
+    find "$source_dir" -maxdepth 1 -type f -name '*.ko' -exec cp '{}' "$stage_dir/" \;
+    ko_count="$(find "$stage_dir" -maxdepth 1 -name '*.ko' | wc -l | tr -d ' ')"
+    [[ "$ko_count" -gt 0 ]] || die "no kinsn modules staged under ${stage_dir}"
+}
+
 ensure_dirs() {
     mkdir -p "$CACHE_DIR" "$STATE_DIR" "$ARTIFACT_DIR" "$RESULTS_DIR"
 }
@@ -95,18 +110,10 @@ load_state() {
         STATE_INSTANCE_ID \
         STATE_INSTANCE_IP \
         STATE_REGION \
-        STATE_KEY_PATH \
-        STATE_KEY_NAME \
-        STATE_SECURITY_GROUP_ID \
-        STATE_SUBNET_ID \
         STATE_KERNEL_RELEASE
     STATE_INSTANCE_ID=""
     STATE_INSTANCE_IP=""
     STATE_REGION=""
-    STATE_KEY_PATH=""
-    STATE_KEY_NAME=""
-    STATE_SECURITY_GROUP_ID=""
-    STATE_SUBNET_ID=""
     STATE_KERNEL_RELEASE=""
     if [[ -f "$STATE_FILE" ]]; then
         # shellcheck disable=SC1090
@@ -118,21 +125,13 @@ save_state() {
     local instance_id="$1"
     local instance_ip="$2"
     local region="$3"
-    local key_path="$4"
-    local key_name="$5"
-    local kernel_release="${6:-}"
-    local security_group_id="${7:-}"
-    local subnet_id="${8:-}"
+    local kernel_release="${4:-}"
     ensure_dirs
     cat >"$STATE_FILE" <<EOF
 STATE_INSTANCE_ID=$(printf '%q' "$instance_id")
 STATE_INSTANCE_IP=$(printf '%q' "$instance_ip")
 STATE_REGION=$(printf '%q' "$region")
-STATE_KEY_PATH=$(printf '%q' "$key_path")
-STATE_KEY_NAME=$(printf '%q' "$key_name")
 STATE_KERNEL_RELEASE=$(printf '%q' "$kernel_release")
-STATE_SECURITY_GROUP_ID=$(printf '%q' "$security_group_id")
-STATE_SUBNET_ID=$(printf '%q' "$subnet_id")
 EOF
 }
 
@@ -142,35 +141,20 @@ clear_state() {
         STATE_INSTANCE_ID \
         STATE_INSTANCE_IP \
         STATE_REGION \
-        STATE_KEY_PATH \
-        STATE_KEY_NAME \
-        STATE_SECURITY_GROUP_ID \
-        STATE_SUBNET_ID \
         STATE_KERNEL_RELEASE
     STATE_INSTANCE_ID=""
     STATE_INSTANCE_IP=""
     STATE_REGION=""
-    STATE_KEY_PATH=""
-    STATE_KEY_NAME=""
-    STATE_SECURITY_GROUP_ID=""
-    STATE_SUBNET_ID=""
     STATE_KERNEL_RELEASE=""
 }
 
 resolve_region() {
-    local region=""
-    if [[ -n "$AWS_REGION_VALUE" ]]; then
-        printf '%s\n' "$AWS_REGION_VALUE"
-        return 0
-    fi
-    if region="$(AWS_PAGER="" aws --profile "$AWS_PROFILE_VALUE" configure get region 2>/dev/null)" && [[ -n "$region" ]]; then
-        printf '%s\n' "$region"
-        return 0
-    fi
-    die "AWS region is unset. Export AWS_REGION/AWS_DEFAULT_REGION or configure it in profile ${AWS_PROFILE_VALUE}."
+    [[ -n "$AWS_REGION_VALUE" ]] || die "manifest AWS region is empty for ${RUN_TARGET_NAME}"
+    printf '%s\n' "$AWS_REGION_VALUE"
 }
 
 _aws() {
+    [[ -n "$AWS_PROFILE_VALUE" ]] || die "manifest AWS profile is empty for ${RUN_TARGET_NAME}"
     AWS_PAGER="" aws --profile "$AWS_PROFILE_VALUE" "$@"
 }
 
@@ -188,9 +172,18 @@ ensure_aws_identity() {
 
 lookup_existing_instance() {
     local region="$1"
+    local ami_id="$2"
+    local key_name="$3"
+    local security_group_id="$4"
+    local subnet_id="$5"
     aws_cmd "$region" ec2 describe-instances \
         --filters \
             "Name=tag:Name,Values=${RUN_NAME_TAG}" \
+            "Name=image-id,Values=${ami_id}" \
+            "Name=instance-type,Values=${RUN_INSTANCE_TYPE}" \
+            "Name=key-name,Values=${key_name}" \
+            "Name=instance.group-id,Values=${security_group_id}" \
+            "Name=subnet-id,Values=${subnet_id}" \
             "Name=instance-state-name,Values=pending,running" \
         --query 'Reservations[].Instances[0].[InstanceId,State.Name,PublicIpAddress]' \
         --output text 2>/dev/null || true
@@ -215,6 +208,24 @@ describe_instance() {
         --output text 2>/dev/null || true
 }
 
+describe_instance_type() {
+    local region="$1"
+    local instance_id="$2"
+    aws_cmd "$region" ec2 describe-instances \
+        --instance-ids "$instance_id" \
+        --query 'Reservations[0].Instances[0].InstanceType' \
+        --output text 2>/dev/null || true
+}
+
+describe_instance_launch_contract() {
+    local region="$1"
+    local instance_id="$2"
+    aws_cmd "$region" ec2 describe-instances \
+        --instance-ids "$instance_id" \
+        --query "Reservations[0].Instances[0].[ImageId,KeyName,SubnetId,join(',', sort_by(SecurityGroups,&GroupId)[].GroupId)]" \
+        --output text 2>/dev/null || true
+}
+
 instance_state_is_reusable() {
     case "${1:-}" in
         pending|running) return 0 ;;
@@ -229,7 +240,7 @@ ssh_base_args() {
         -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o ConnectTimeout=15 \
-        -i "${STATE_KEY_PATH:-${AWS_KEY_PATH:-}}"
+        -i "${RUN_AWS_KEY_PATH}"
 }
 
 ssh_bash() {
@@ -284,12 +295,12 @@ launch_instance() {
     load_state
     ensure_aws_identity
 
-    local region key_path key_name security_group_id subnet_id instance_id="" instance_state="" instance_ip="" ami_id root_device_name
+    local region key_path key_name security_group_id subnet_id instance_id="" instance_state="" instance_ip="" instance_type="" ami_id root_device_name current_image_id="" current_key_name="" current_subnet_id="" current_security_groups=""
     region="$(resolve_region)"
-    key_name="${RUN_AWS_KEY_NAME:-${STATE_KEY_NAME:-}}"
-    key_path="${RUN_AWS_KEY_PATH:-${STATE_KEY_PATH:-}}"
-    security_group_id="${RUN_AWS_SECURITY_GROUP_ID:-${STATE_SECURITY_GROUP_ID:-}}"
-    subnet_id="${RUN_AWS_SUBNET_ID:-${STATE_SUBNET_ID:-}}"
+    key_name="${RUN_AWS_KEY_NAME:-}"
+    key_path="${RUN_AWS_KEY_PATH:-}"
+    security_group_id="${RUN_AWS_SECURITY_GROUP_ID:-}"
+    subnet_id="${RUN_AWS_SUBNET_ID:-}"
     [[ -n "$key_name" ]] || die "AWS key name is unset for ${RUN_TARGET_NAME}"
     [[ -n "$key_path" ]] || die "AWS key path is unset for ${RUN_TARGET_NAME}"
     [[ -n "$security_group_id" ]] || die "AWS security group id is unset for ${RUN_TARGET_NAME}"
@@ -297,9 +308,16 @@ launch_instance() {
     [[ -f "$key_path" ]] || die "SSH key does not exist: $key_path"
     [[ "$RUN_ROOT_VOLUME_GB" =~ ^[0-9]+$ ]] || die "RUN_ROOT_VOLUME_GB must be a positive integer"
     (( RUN_ROOT_VOLUME_GB > 0 )) || die "RUN_ROOT_VOLUME_GB must be greater than zero"
+    if [[ -n "${RUN_AMI_ID:-}" ]]; then
+        ami_id="${RUN_AMI_ID}"
+    else
+        ami_id="$(aws_cmd "$region" ssm get-parameter --name "$RUN_AMI_PARAM" --query 'Parameter.Value' --output text)"
+    fi
 
     if [[ -n "${STATE_INSTANCE_ID:-}" ]]; then
         read -r instance_id instance_state instance_ip <<<"$(describe_instance "$region" "$STATE_INSTANCE_ID")"
+        instance_type="$(describe_instance_type "$region" "$STATE_INSTANCE_ID")"
+        read -r current_image_id current_key_name current_subnet_id current_security_groups <<<"$(describe_instance_launch_contract "$region" "$STATE_INSTANCE_ID")"
         case "$instance_state" in
             stopped|stopping)
                 terminate_instance "${STATE_INSTANCE_ID}"
@@ -308,17 +326,32 @@ launch_instance() {
                 instance_ip=""
                 ;;
         esac
+        if [[ -n "$instance_id" && "$instance_id" != "None" && "$instance_type" != "$RUN_INSTANCE_TYPE" ]]; then
+            terminate_instance "${STATE_INSTANCE_ID}"
+            instance_id=""
+            instance_state=""
+            instance_ip=""
+        fi
+        if [[ -n "$instance_id" && "$instance_id" != "None" ]] && { [[ "$current_image_id" != "$ami_id" ]] || [[ "$current_key_name" != "$key_name" ]] || [[ "$current_subnet_id" != "$subnet_id" ]] || [[ "$current_security_groups" != "$security_group_id" ]]; }; then
+            terminate_instance "${STATE_INSTANCE_ID}"
+            instance_id=""
+            instance_state=""
+            instance_ip=""
+        fi
     fi
     if [[ -z "$instance_id" || "$instance_id" == "None" ]] || ! instance_state_is_reusable "$instance_state"; then
-        read -r instance_id instance_state instance_ip <<<"$(lookup_existing_instance "$region")"
+        read -r instance_id instance_state instance_ip <<<"$(lookup_existing_instance "$region" "$ami_id" "$key_name" "$security_group_id" "$subnet_id")"
+        if [[ -n "$instance_id" && "$instance_id" != "None" ]]; then
+            read -r current_image_id current_key_name current_subnet_id current_security_groups <<<"$(describe_instance_launch_contract "$region" "$instance_id")"
+            if [[ "$current_image_id" != "$ami_id" || "$current_key_name" != "$key_name" || "$current_subnet_id" != "$subnet_id" || "$current_security_groups" != "$security_group_id" ]]; then
+                instance_id=""
+                instance_state=""
+                instance_ip=""
+            fi
+        fi
     fi
 
     if [[ -z "$instance_id" || "$instance_id" == "None" ]]; then
-        if [[ -n "${AWS_AMI_ID:-}" ]]; then
-            ami_id="${AWS_AMI_ID}"
-        else
-            ami_id="$(aws_cmd "$region" ssm get-parameter --name "$RUN_AMI_PARAM" --query 'Parameter.Value' --output text)"
-        fi
         root_device_name="$(resolve_root_device_name "$region" "$ami_id")"
         log "Launching ${RUN_TARGET_NAME} instance ${RUN_INSTANCE_TYPE} in ${region}"
         instance_id="$(aws_cmd "$region" ec2 run-instances \
@@ -336,12 +369,12 @@ launch_instance() {
         log "Reusing existing EC2 instance ${instance_id} (${instance_state})"
     fi
 
-    save_state "$instance_id" "${instance_ip:-}" "$region" "$key_path" "$key_name" "${STATE_KERNEL_RELEASE:-}" "$security_group_id" "$subnet_id"
+    save_state "$instance_id" "${instance_ip:-}" "$region" "${STATE_KERNEL_RELEASE:-}"
     aws_cmd "$region" ec2 wait instance-running --instance-ids "$instance_id"
     aws_cmd "$region" ec2 wait instance-status-ok --instance-ids "$instance_id"
     read -r instance_id instance_state instance_ip <<<"$(describe_instance "$region" "$instance_id")"
     [[ -n "$instance_ip" && "$instance_ip" != "None" ]] || die "instance ${instance_id} has no public IP"
-    save_state "$instance_id" "$instance_ip" "$region" "$key_path" "$key_name" "${STATE_KERNEL_RELEASE:-}" "$security_group_id" "$subnet_id"
+    save_state "$instance_id" "$instance_ip" "$region" "${STATE_KERNEL_RELEASE:-}"
 }
 
 remote_kernel_release() {
@@ -607,19 +640,24 @@ ensure_x86_daemon_ready() {
 
 ensure_x86_kinsn_modules_ready() {
     make -C "$ROOT_DIR" kinsn-modules >/dev/null
-    local ko_count
-    ko_count="$(find "$X86_KINSN_MODULE_DIR" -maxdepth 1 -name '*.ko' | wc -l | tr -d ' ')"
-    [[ "$ko_count" -gt 0 ]] || die "no x86 kinsn modules found under ${X86_KINSN_MODULE_DIR}"
+    stage_module_binaries "$X86_KINSN_MODULE_DIR" "$X86_KINSN_MODULE_STAGE_DIR"
 }
 
 ensure_x86_selftest_outputs() {
     make -C "$ROOT_DIR/runner" unittest-build negative-build >/dev/null
-    file "$ROOT_DIR/tests/unittest/build/rejit_kinsn" | grep -F "x86-64" >/dev/null || die "x86 unittest binary is not x86_64"
-    file "$ROOT_DIR/tests/negative/build/adversarial_rejit" | grep -F "x86-64" >/dev/null || die "x86 negative binary is not x86_64"
+    rm -rf "$X86_TEST_UNITTEST_BUILD_DIR" "$X86_TEST_NEGATIVE_BUILD_DIR"
+    mkdir -p "$(dirname "$X86_TEST_UNITTEST_BUILD_DIR")" "$(dirname "$X86_TEST_NEGATIVE_BUILD_DIR")"
+    cp -a "$ROOT_DIR/tests/unittest/build" "$X86_TEST_UNITTEST_BUILD_DIR"
+    cp -a "$ROOT_DIR/tests/negative/build" "$X86_TEST_NEGATIVE_BUILD_DIR"
+    file "$X86_TEST_UNITTEST_BUILD_DIR/rejit_kinsn" | grep -F "x86-64" >/dev/null || die "x86 unittest binary is not x86_64"
+    file "$X86_TEST_NEGATIVE_BUILD_DIR/adversarial_rejit" | grep -F "x86-64" >/dev/null || die "x86 negative binary is not x86_64"
 }
 
 ensure_x86_upstream_selftests_ready() {
     make -C "$ROOT_DIR" upstream-selftests-build >/dev/null
+    rm -rf "$X86_UPSTREAM_SELFTEST_DIR"
+    mkdir -p "$(dirname "$X86_UPSTREAM_SELFTEST_DIR")"
+    cp -a "$X86_UPSTREAM_SELFTEST_SOURCE_DIR" "$X86_UPSTREAM_SELFTEST_DIR"
     require_local_path "$X86_UPSTREAM_SELFTEST_DIR/test_verifier" "x86 upstream test_verifier"
     require_local_path "$X86_UPSTREAM_SELFTEST_DIR/test_progs" "x86 upstream test_progs"
 }
@@ -669,6 +707,7 @@ ensure_arm64_kinsn_modules_ready() {
             [[ "$actual_release" == "$expected_release" ]] || die "ARM64 kinsn module release mismatch for $(basename "$module_path")"
         done
     fi
+    stage_module_binaries "$ROOT_DIR/module/arm64" "$ARM64_KINSN_MODULE_STAGE_DIR"
 }
 
 ensure_arm64_upstream_test_kmods_ready() {
@@ -878,14 +917,9 @@ prepare_local_suite_artifacts() {
     esac
 }
 
-append_manifest_var() {
-    local key="$1"
-    local value="$2"
-    printf '%s=%q\n' "$key" "$value" >>"$MANIFEST_PATH"
-}
-
 prepare_local_bundle() {
     local stage_token stage_root bundle_tar
+    local -a bundle_env=()
     stage_token="$(basename "$MANIFEST_PATH" .env)"
     stage_root="$CACHE_DIR/staged/${stage_token}/workspace"
     bundle_tar="$CACHE_DIR/staged/${stage_token}.tar.gz"
@@ -893,36 +927,46 @@ prepare_local_bundle() {
     RUN_BUNDLE_TAR="$bundle_tar"
     rm -rf "$stage_root"
     mkdir -p "$(dirname "$bundle_tar")"
-    append_manifest_var "RUN_INPUT_STAGE_ROOT" "$RUN_INPUT_STAGE_ROOT"
-    append_manifest_var "RUN_BUNDLE_TAR" "$RUN_BUNDLE_TAR"
-    append_manifest_var "RUNNER_REPOS_ROOT_OVERRIDE" "$LOCAL_REPO_ROOT"
-    append_manifest_var "BUNDLE_PROMOTE_ROOT" "$LOCAL_PROMOTE_ROOT"
+    bundle_env+=(
+        "RUN_INPUT_STAGE_ROOT=$RUN_INPUT_STAGE_ROOT"
+        "RUN_BUNDLE_TAR=$RUN_BUNDLE_TAR"
+        "RUNNER_REPOS_ROOT_OVERRIDE=$LOCAL_REPO_ROOT"
+        "BUNDLE_PROMOTE_ROOT=$LOCAL_PROMOTE_ROOT"
+    )
     case "$RUN_TARGET_NAME" in
         aws-arm64)
-            append_manifest_var "ARM64_CROSSBUILD_OUTPUT_DIR" "$ARM64_CROSSBUILD_OUTPUT_DIR"
-            append_manifest_var "ARM64_CROSS_RUNNER" "$ARM64_CROSS_RUNNER"
-            append_manifest_var "ARM64_CROSS_RUNNER_REAL" "$ARM64_CROSS_RUNNER_REAL"
-            append_manifest_var "ARM64_CROSS_DAEMON" "$ARM64_CROSS_DAEMON"
-            append_manifest_var "ARM64_CROSS_DAEMON_REAL" "$ARM64_CROSS_DAEMON_REAL"
-            append_manifest_var "ARM64_CROSS_LIB_DIR" "$ARM64_CROSS_LIB_DIR"
-            append_manifest_var "ARM64_KATRAN_SERVER_BINARY" "$ARM64_KATRAN_SERVER_BINARY"
-            append_manifest_var "ARM64_KATRAN_SERVER_LIB_DIR" "$ARM64_KATRAN_SERVER_LIB_DIR"
-            append_manifest_var "ARM64_TEST_ARTIFACTS_ROOT" "$ARM64_TEST_ARTIFACTS_ROOT"
-            append_manifest_var "ARM64_TEST_UNITTEST_BUILD_DIR" "$ARM64_TEST_UNITTEST_BUILD_DIR"
-            append_manifest_var "ARM64_TEST_NEGATIVE_BUILD_DIR" "$ARM64_TEST_NEGATIVE_BUILD_DIR"
-            append_manifest_var "ARM64_UPSTREAM_SELFTEST_DIR" "$ARM64_UPSTREAM_SELFTEST_DIR"
-            append_manifest_var "ARM64_UPSTREAM_TEST_KMODS_DIR" "$ARM64_UPSTREAM_TEST_KMODS_DIR"
+            bundle_env+=(
+                "ARM64_CROSSBUILD_OUTPUT_DIR=$ARM64_CROSSBUILD_OUTPUT_DIR"
+                "ARM64_CROSS_RUNNER=$ARM64_CROSS_RUNNER"
+                "ARM64_CROSS_RUNNER_REAL=$ARM64_CROSS_RUNNER_REAL"
+                "ARM64_CROSS_DAEMON=$ARM64_CROSS_DAEMON"
+                "ARM64_CROSS_DAEMON_REAL=$ARM64_CROSS_DAEMON_REAL"
+                "ARM64_CROSS_LIB_DIR=$ARM64_CROSS_LIB_DIR"
+                "ARM64_KATRAN_SERVER_BINARY=$ARM64_KATRAN_SERVER_BINARY"
+                "ARM64_KATRAN_SERVER_LIB_DIR=$ARM64_KATRAN_SERVER_LIB_DIR"
+                "RUN_KINSN_MODULE_DIR=$ARM64_KINSN_MODULE_STAGE_DIR"
+                "ARM64_TEST_ARTIFACTS_ROOT=$ARM64_TEST_ARTIFACTS_ROOT"
+                "ARM64_TEST_UNITTEST_BUILD_DIR=$ARM64_TEST_UNITTEST_BUILD_DIR"
+                "ARM64_TEST_NEGATIVE_BUILD_DIR=$ARM64_TEST_NEGATIVE_BUILD_DIR"
+                "ARM64_UPSTREAM_SELFTEST_DIR=$ARM64_UPSTREAM_SELFTEST_DIR"
+                "ARM64_UPSTREAM_TEST_KMODS_DIR=$ARM64_UPSTREAM_TEST_KMODS_DIR"
+            )
             ;;
         aws-x86)
-            append_manifest_var "X86_RUNNER" "$X86_RUNNER"
-            append_manifest_var "X86_DAEMON" "$X86_DAEMON"
-            append_manifest_var "X86_UPSTREAM_SELFTEST_DIR" "$X86_UPSTREAM_SELFTEST_DIR"
+            bundle_env+=(
+                "X86_RUNNER=$X86_RUNNER"
+                "X86_DAEMON=$X86_DAEMON"
+                "RUN_KINSN_MODULE_DIR=$X86_KINSN_MODULE_STAGE_DIR"
+                "X86_TEST_UNITTEST_BUILD_DIR=$X86_TEST_UNITTEST_BUILD_DIR"
+                "X86_TEST_NEGATIVE_BUILD_DIR=$X86_TEST_NEGATIVE_BUILD_DIR"
+                "X86_UPSTREAM_SELFTEST_DIR=$X86_UPSTREAM_SELFTEST_DIR"
+            )
             ;;
         *)
             die "unsupported AWS target for local bundle preparation: ${RUN_TARGET_NAME}"
             ;;
     esac
-    "$ROOT_DIR/runner/scripts/build_remote_bundle.sh" "$MANIFEST_PATH" "$RUN_INPUT_STAGE_ROOT" "$RUN_BUNDLE_TAR"
+    env "${bundle_env[@]}" "$ROOT_DIR/runner/scripts/build_remote_bundle.sh" "$MANIFEST_PATH" "$RUN_INPUT_STAGE_ROOT" "$RUN_BUNDLE_TAR"
 }
 
 prepare_local_inputs() {
@@ -1035,7 +1079,7 @@ test "$(sudo grubby --default-kernel)" = "/boot/vmlinuz-$ver"
 test -s /sys/kernel/btf/vmlinux
 test -e /sys/kernel/sched_ext/state
 EOF
-    save_state "$instance_id" "$ip" "$region" "${STATE_KEY_PATH:-${AWS_X86_KEY_PATH:-}}" "${STATE_KEY_NAME:-${AWS_X86_KEY_NAME:-}}" "$kernel_release" "${STATE_SECURITY_GROUP_ID:-${AWS_X86_SECURITY_GROUP_ID:-}}" "${STATE_SUBNET_ID:-${AWS_X86_SUBNET_ID:-}}"
+    save_state "$instance_id" "$ip" "$region" "$kernel_release"
 }
 
 setup_arm64_instance() {
@@ -1095,7 +1139,7 @@ test "$(sudo grubby --default-kernel)" = "/boot/vmlinuz-$ver"
 test -s /sys/kernel/btf/vmlinux
 test -e /sys/kernel/sched_ext/state
 EOF
-    save_state "$instance_id" "$ip" "$region" "${STATE_KEY_PATH:-${AWS_ARM64_KEY_PATH:-}}" "${STATE_KEY_NAME:-${AWS_ARM64_KEY_NAME:-}}" "$kernel_release" "${STATE_SECURITY_GROUP_ID:-${AWS_ARM64_SECURITY_GROUP_ID:-}}" "${STATE_SUBNET_ID:-${AWS_ARM64_SUBNET_ID:-}}"
+    save_state "$instance_id" "$ip" "$region" "$kernel_release"
 }
 
 setup_instance() {
@@ -1110,37 +1154,37 @@ setup_instance() {
 
 run_remote_suite() {
     local ip="$1"
-    local stamp local_result_dir local_archive local_log remote_archive remote_log
+    local stamp local_result_dir local_archive local_log remote_run_dir remote_archive remote_log
     wait_for_ssh "$ip"
     verify_remote_runtime_prereqs "$ip" || die "remote prerequisites stamp is missing on ${ip}; run setup first"
-    [[ -n "${RUN_BUNDLE_TAR:-}" ]] || die "manifest is missing RUN_BUNDLE_TAR; local bundle preparation did not run"
+    [[ -n "${RUN_BUNDLE_TAR:-}" ]] || die "local bundle path is unset; local bundle preparation did not run"
     [[ -f "${RUN_BUNDLE_TAR}" ]] || die "prepared remote bundle is missing: ${RUN_BUNDLE_TAR}"
 
     stamp="${RUN_SUITE_NAME}_$(date -u +%Y%m%d_%H%M%S)"
     local_result_dir="$RESULTS_DIR/$stamp"
     local_archive="$local_result_dir/results.tar.gz"
     local_log="$local_result_dir/remote.log"
-    remote_archive="$RUN_REMOTE_STAGE_DIR/${stamp}.tar.gz"
-    remote_log="$RUN_REMOTE_STAGE_DIR/${stamp}.log"
+    remote_run_dir="$RUN_REMOTE_STAGE_DIR/runs/$stamp"
+    remote_archive="$remote_run_dir/results.tar.gz"
+    remote_log="$remote_run_dir/remote.log"
     mkdir -p "$local_result_dir"
 
-    ssh_bash "$ip" "$RUN_REMOTE_STAGE_DIR" <<'EOF'
+    ssh_bash "$ip" "$remote_run_dir" <<'EOF'
 set -euo pipefail
-stage_dir="$1"
-sudo pkill -f "$stage_dir/workspace" >/dev/null 2>&1 || true
-sudo rm -rf "$stage_dir/workspace"
-mkdir -p "$stage_dir"
+run_dir="$1"
+sudo rm -rf "$run_dir"
+mkdir -p "$run_dir"
 EOF
-    scp_to "$ip" "$RUN_BUNDLE_TAR" "$RUN_REMOTE_STAGE_DIR/bundle.tar.gz"
+    scp_to "$ip" "$RUN_BUNDLE_TAR" "$remote_run_dir/bundle.tar.gz"
     local remote_status=0
     set +e
-    ssh_bash "$ip" "$RUN_REMOTE_STAGE_DIR" "$remote_archive" "$remote_log" <<'EOF'
+    ssh_bash "$ip" "$remote_run_dir" "$remote_archive" "$remote_log" <<'EOF'
 set -euo pipefail
-stage_dir="$1"
+run_dir="$1"
 archive_path="$2"
 log_path="$3"
-workspace="$stage_dir/workspace"
-bundle_path="$stage_dir/bundle.tar.gz"
+workspace="$run_dir/workspace"
+bundle_path="$run_dir/bundle.tar.gz"
 sudo rm -rf "$workspace"
 mkdir -p "$workspace"
 tar -xzf "$bundle_path" -C "$workspace"
@@ -1150,8 +1194,8 @@ test -f "$workspace/run-contract.env"
 source "$workspace/run-contract.env"
 [[ -n "${RUN_SUITE_ENTRYPOINT:-}" ]] || exit 1
 chmod +x "$workspace/$RUN_SUITE_ENTRYPOINT"
-sudo -E env PYTHON_BIN=python3.11 bash "$workspace/$RUN_SUITE_ENTRYPOINT" \
-    "$workspace" "$workspace/run-contract.env" "$archive_path" >"$log_path" 2>&1
+    sudo -E bash "$workspace/$RUN_SUITE_ENTRYPOINT" \
+        "$workspace" "$workspace/run-contract.env" "$archive_path" >"$log_path" 2>&1
 EOF
     remote_status=$?
     set -e
@@ -1165,14 +1209,19 @@ EOF
     (( remote_status == 0 )) || die "remote ${RUN_TARGET_NAME}/${RUN_SUITE_NAME} suite failed; inspect ${local_log}"
     scp_from "$ip" "$remote_archive" "$local_archive"
     tar -xzf "$local_archive" -C "$local_result_dir"
+    ssh_bash "$ip" "$remote_run_dir" <<'EOF' >/dev/null 2>&1 || true
+set -euo pipefail
+sudo rm -rf "$1"
+EOF
     log "Fetched ${RUN_TARGET_NAME}/${RUN_SUITE_NAME} results to ${local_result_dir}"
 }
 
 ensure_instance_for_suite() {
-    local current_kernel root_volume_gb current_instance_id="" current_instance_state="" current_instance_ip=""
+    local current_kernel root_volume_gb current_instance_id="" current_instance_state="" current_instance_ip="" current_instance_type=""
     load_state
     if [[ -n "${STATE_INSTANCE_ID:-}" ]]; then
         read -r current_instance_id current_instance_state current_instance_ip <<<"$(describe_instance "${STATE_REGION:-$(resolve_region)}" "$STATE_INSTANCE_ID")"
+        current_instance_type="$(describe_instance_type "${STATE_REGION:-$(resolve_region)}" "$STATE_INSTANCE_ID")"
         case "$current_instance_state" in
             stopped|stopping)
                 terminate_instance "${STATE_INSTANCE_ID}"
@@ -1190,6 +1239,12 @@ ensure_instance_for_suite() {
                 STATE_INSTANCE_IP=""
                 ;;
         esac
+        if [[ -n "${STATE_INSTANCE_ID:-}" && "$current_instance_type" != "$RUN_INSTANCE_TYPE" ]]; then
+            terminate_instance "${STATE_INSTANCE_ID}"
+            load_state
+            STATE_INSTANCE_ID=""
+            STATE_INSTANCE_IP=""
+        fi
     fi
     if [[ -z "${STATE_INSTANCE_IP:-}" ]]; then
         launch_instance

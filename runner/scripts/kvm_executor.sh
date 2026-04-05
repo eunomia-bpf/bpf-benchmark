@@ -22,31 +22,29 @@ die() {
 [[ -n "${RUN_VM_BACKEND:-}" ]] || die "manifest VM backend is empty for suite ${RUN_SUITE_NAME}"
 [[ -n "${RUN_VM_EXECUTABLE:-}" ]] || die "manifest VM executable is empty for suite ${RUN_SUITE_NAME}"
 [[ -n "${RUN_VM_LOCK_SCOPE:-}" ]] || die "manifest VM lock scope is empty for suite ${RUN_SUITE_NAME}"
+[[ -n "${RUN_HOST_PYTHON_BIN:-}" ]] || die "manifest KVM host python is empty for suite ${RUN_SUITE_NAME}"
+[[ -n "${RUN_VM_KERNEL_IMAGE:-}" ]] || die "manifest KVM kernel image is empty for suite ${RUN_SUITE_NAME}"
+[[ -n "${RUN_VM_TIMEOUT_SECONDS:-}" ]] || die "manifest KVM timeout is empty for suite ${RUN_SUITE_NAME}"
 [[ -n "${RUN_SUITE_ENTRYPOINT:-}" ]] || die "manifest suite entrypoint is empty"
 
 suite_command() {
     cat <<EOF
 cd "$REPO_ROOT" && \
-SCX_PROG_SHOW_RACE_MODE="${SCX_PROG_SHOW_RACE_MODE:-bpftool-loop}" \
-SCX_PROG_SHOW_RACE_ITERATIONS="${SCX_PROG_SHOW_RACE_ITERATIONS:-20}" \
-SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="${SCX_PROG_SHOW_RACE_LOAD_TIMEOUT:-20}" \
-SCX_PROG_SHOW_RACE_SKIP_PROBE="${SCX_PROG_SHOW_RACE_SKIP_PROBE:-0}" \
-FUZZ_ROUNDS="${FUZZ_ROUNDS:-1000}" \
-PYTHON_BIN="${PYTHON:-python3}" \
+bash "$REPO_ROOT/runner/scripts/validate_guest_prereqs.sh" "$REPO_ROOT" "$MANIFEST_PATH" && \
 bash "$REPO_ROOT/${RUN_SUITE_ENTRYPOINT}" "$REPO_ROOT" "$MANIFEST_PATH"
 EOF
 }
 
 cmd=(
-    "${PYTHON:-python3}" "$RUNNER_DIR/scripts/run_vm_shell.py"
+    "${RUN_HOST_PYTHON_BIN}" "$RUNNER_DIR/scripts/run_vm_shell.py"
     --vm-backend "${RUN_VM_BACKEND}"
     --vm-executable "${RUN_VM_EXECUTABLE}"
     --vm-lock-scope "${RUN_VM_LOCK_SCOPE}"
     --vm-machine-name "${RUN_VM_MACHINE_NAME:-$RUN_TARGET_NAME}"
     --vm-machine-arch "${RUN_VM_MACHINE_ARCH:-$RUN_TARGET_ARCH}"
     --action "vm-${RUN_SUITE_NAME}"
-    --kernel-image "${BZIMAGE_PATH:-$REPO_ROOT/vendor/linux-framework/arch/x86/boot/bzImage}"
-    --timeout "${RUN_VM_TIMEOUT_SECONDS:-7200}"
+    --kernel-image "${RUN_VM_KERNEL_IMAGE}"
+    --timeout "${RUN_VM_TIMEOUT_SECONDS}"
     --command "$(suite_command)"
 )
 

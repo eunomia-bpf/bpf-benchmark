@@ -43,6 +43,11 @@ NEGATIVE_BUILD_DIR="${NEGATIVE_BUILD_DIR:-${NEGATIVE_DIR}/build}"
 NEGATIVE_SKIP_BUILD="${NEGATIVE_SKIP_BUILD:-0}"
 BPFREJIT_MODULE_DIR="${BPFREJIT_MODULE_DIR:-}"
 CROSS_RUNTIME_LD_LIBRARY_PATH="${CROSS_RUNTIME_LD_LIBRARY_PATH:-}"
+FUZZ_ROUNDS="${FUZZ_ROUNDS:?FUZZ_ROUNDS is required}"
+SCX_PROG_SHOW_RACE_MODE="${SCX_PROG_SHOW_RACE_MODE:?SCX_PROG_SHOW_RACE_MODE is required}"
+SCX_PROG_SHOW_RACE_ITERATIONS="${SCX_PROG_SHOW_RACE_ITERATIONS:?SCX_PROG_SHOW_RACE_ITERATIONS is required}"
+SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="${SCX_PROG_SHOW_RACE_LOAD_TIMEOUT:?SCX_PROG_SHOW_RACE_LOAD_TIMEOUT is required}"
+SCX_PROG_SHOW_RACE_SKIP_PROBE="${SCX_PROG_SHOW_RACE_SKIP_PROBE:?SCX_PROG_SHOW_RACE_SKIP_PROBE is required}"
 
 cd "$ROOT_DIR"
 
@@ -152,9 +157,6 @@ if [ "$SKIP_UNITTEST" -eq 0 ]; then
 fi
 
 # --- Part 2b: negative / adversarial tests ---
-SCX_PROG_SHOW_RACE_MODE="${SCX_PROG_SHOW_RACE_MODE:-bpftool-loop}"
-SCX_PROG_SHOW_RACE_ITERATIONS="${SCX_PROG_SHOW_RACE_ITERATIONS:-20}"
-SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="${SCX_PROG_SHOW_RACE_LOAD_TIMEOUT:-20}"
 SCX_PROG_SHOW_RACE_ARGS=(
     "$ROOT_DIR"
     --mode "$SCX_PROG_SHOW_RACE_MODE"
@@ -162,7 +164,7 @@ SCX_PROG_SHOW_RACE_ARGS=(
     --load-timeout "$SCX_PROG_SHOW_RACE_LOAD_TIMEOUT"
 )
 
-if [ "${SCX_PROG_SHOW_RACE_SKIP_PROBE:-0}" = "1" ]; then
+if [ "${SCX_PROG_SHOW_RACE_SKIP_PROBE}" = "1" ]; then
     SCX_PROG_SHOW_RACE_ARGS+=(--skip-probe)
 fi
 
@@ -184,8 +186,8 @@ if [ "$SKIP_NEGATIVE" -eq 0 ] && [ -d "$NEGATIVE_DIR" ]; then
         echo "FAIL: adversarial_rejit"
     fi
 
-    echo "--- fuzz_rejit (1000 rounds) ---"
-    if run_cross_binary "${NEGATIVE_BUILD_DIR}/fuzz_rejit" 1000; then
+    echo "--- fuzz_rejit (${FUZZ_ROUNDS} rounds) ---"
+    if run_cross_binary "${NEGATIVE_BUILD_DIR}/fuzz_rejit" "$FUZZ_ROUNDS"; then
         PASS=$((PASS + 1))
     else
         FAIL=$((FAIL + 1))

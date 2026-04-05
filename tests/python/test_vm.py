@@ -19,24 +19,6 @@ def test_write_guest_script_applies_requested_nofile_limit() -> None:
     assert "ulimit -HSn 65536" in contents
 
 
-def test_build_vm_shell_command_forwards_requested_nofile_limit() -> None:
-    command = vm.build_vm_shell_command(
-        kernel_image=Path("vendor/linux-framework/arch/x86/boot/bzImage"),
-        command_text="true",
-        timeout_seconds=30,
-        vng_binary="runner/scripts/vng-wrapper.sh",
-        nofile=65536,
-    )
-
-    assert "--nofile" in command
-    nofile_index = command.index("--nofile")
-    assert command[nofile_index + 1] == "65536"
-    assert "--vm-backend" in command
-    assert "--vm-lock-scope" in command
-    assert "--vm-machine-name" in command
-    assert "--vm-machine-arch" in command
-
-
 def test_build_vng_command_accepts_explicit_machine_contract() -> None:
     command = vm.build_vng_command(
         kernel_path=Path("vendor/linux-framework/arch/x86/boot/bzImage"),

@@ -20,6 +20,7 @@ RUNNER_DIR = SCRIPT_DIR.parent
 REPO_ROOT = RUNNER_DIR.parent
 RUNNER_REPOS_DIR = Path(os.environ.get("RUNNER_REPOS_DIR_OVERRIDE", str(RUNNER_DIR / "repos"))).resolve()
 CORPUS_BUILD_ROOT = REPO_ROOT / "corpus" / "build"
+ACTIVE_BUILD_ROOT = CORPUS_BUILD_ROOT
 IMPLEMENTED_REPOS = (
     "bcc",
     "libbpf-bootstrap",
@@ -95,6 +96,14 @@ def capture(command: list[str], *, cwd: Path | None = None, env: dict[str, str] 
     where = f" (cwd={cwd})" if cwd else ""
     print(f"[run] {printable_command(command)}{where}")
     return subprocess.run(command, cwd=cwd, env=env, text=True, capture_output=True, check=False)
+
+
+def ensure_vendor_bpftool() -> Path:
+    vendor_build_root = ACTIVE_BUILD_ROOT / "_runner-vendor"
+    bpftool = vendor_build_root / "vendor" / "bpftool" / "bootstrap" / "bpftool"
+    if not bpftool.is_file():
+        run(["make", "-C", str(RUNNER_DIR), f"BUILD_DIR={vendor_build_root}", "vendor_bpftool"])
+    return bpftool
 
 
 def summarize_process_output(completed: subprocess.CompletedProcess[str]) -> str:
@@ -220,16 +229,16 @@ def clang_bpf_sys_includes(clang: str = "clang") -> list[str]:
 
 def locate_cached_vmlinux_header() -> Path | None:
     prioritized = [
-        REPO_ROOT / "corpus" / "build" / "bcc" / "vmlinux.h",
-        REPO_ROOT / "corpus" / "build" / "katran" / "vmlinux.h",
-        REPO_ROOT / "corpus" / "build" / "cilium" / "vmlinux.h",
-        REPO_ROOT / "corpus" / "build" / "linux-selftests" / "vmlinux.h",
-        REPO_ROOT / "corpus" / "build" / "manual-test" / "vmlinux.h",
+        ACTIVE_BUILD_ROOT / "bcc" / "vmlinux.h",
+        ACTIVE_BUILD_ROOT / "katran" / "vmlinux.h",
+        ACTIVE_BUILD_ROOT / "cilium" / "vmlinux.h",
+        ACTIVE_BUILD_ROOT / "linux-selftests" / "vmlinux.h",
+        ACTIVE_BUILD_ROOT / "manual-test" / "vmlinux.h",
     ]
     for candidate in prioritized:
         if candidate.is_file():
             return candidate
-    build_root = REPO_ROOT / "corpus" / "build"
+    build_root = ACTIVE_BUILD_ROOT
     if build_root.is_dir():
         for candidate in sorted(build_root.rglob("vmlinux.h")):
             if candidate.is_file():
@@ -346,10 +355,8 @@ def bcc_binaries(tool_dir: Path) -> list[Path]:
 def build_bcc(stage_root: Path, jobs: int) -> RepoBuildResult:
     repo_dir = repo_checkout("bcc")
     tool_dir = repo_dir / "libbpf-tools"
-    bpftool = RUNNER_DIR / "build" / "vendor" / "bpftool" / "bootstrap" / "bpftool"
+    bpftool = ensure_vendor_bpftool()
     clang_value = " ".join(["clang", *clang_bpf_sys_includes()])
-    if not bpftool.is_file():
-        run(["make", "-C", str(RUNNER_DIR), "vendor_bpftool"])
     clean_stage_dir(stage_root)
     run(
         [
@@ -402,10 +409,8 @@ $(foreach app,$(BPF_APP_STEMS),$(eval $(call LIBBPF_BOOTSTRAP_EXPLICIT_BPF_RULE,
 def build_libbpf_bootstrap(stage_root: Path, jobs: int) -> RepoBuildResult:
     repo_dir = repo_checkout("libbpf-bootstrap")
     example_dir = repo_dir / "examples" / "c"
-    bpftool = RUNNER_DIR / "build" / "vendor" / "bpftool" / "bootstrap" / "bpftool"
+    bpftool = ensure_vendor_bpftool()
     vmlinux = find_cached_vmlinux_header()
-    if not bpftool.is_file():
-        run(["make", "-C", str(RUNNER_DIR), "vendor_bpftool"])
 
     clean_stage_dir(stage_root)
     with tempfile.TemporaryDirectory(prefix="libbpf-bootstrap-wrapper-") as temp_dir:
@@ -451,9 +456,7 @@ def build_libbpf_bootstrap(stage_root: Path, jobs: int) -> RepoBuildResult:
 
 def build_xdp_tools(stage_root: Path, jobs: int) -> RepoBuildResult:
     repo_dir = repo_checkout("xdp-tools")
-    bpftool = RUNNER_DIR / "build" / "vendor" / "bpftool" / "bootstrap" / "bpftool"
-    if not bpftool.is_file():
-        run(["make", "-C", str(RUNNER_DIR), "vendor_bpftool"])
+    bpftool = ensure_vendor_bpftool()
     clean_stage_dir(stage_root)
     run(["make", f"-j{jobs}", f"BPFTOOL={bpftool}"], cwd=repo_dir)
 
@@ -868,8 +871,10 @@ BUILDERS: dict[str, Callable[[Path, int], RepoBuildResult]] = {
 
 
 def main() -> int:
+    global ACTIVE_BUILD_ROOT
     args = parse_args()
     build_root = Path(args.build_root).resolve()
+    ACTIVE_BUILD_ROOT = build_root
     build_root.mkdir(parents=True, exist_ok=True)
 
     requested = args.repos or list(IMPLEMENTED_REPOS)

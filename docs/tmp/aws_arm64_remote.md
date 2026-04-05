@@ -157,6 +157,23 @@ For AWS runs, local bundle preparation is not a separate public action.
 It remains an internal explicit step of `aws_executor.sh run` after machine and
 kernel readiness are established.
 
+The canonical run manifest is now immutable after creation.
+Local-only bundle staging inputs are passed to `build_remote_bundle.sh` through
+the executor process environment and are not appended back into
+`run-contract.env`.
+
+AWS launch parameters now also follow the same rule:
+
+- the manifest carries the resolved SSH/AWS launch contract
+- `aws_executor.sh` no longer falls back to cached key/subnet/security-group state
+- target-specific AMI overrides must be represented in the manifest, not through
+  a generic ambient `AWS_AMI_ID`
+- guest-side Python selection is part of the manifest contract; executors do not
+  inject `PYTHON_BIN` out-of-band
+- AWS region/account selection is part of the manifest contract through
+  `RUN_AWS_REGION` and `RUN_AWS_PROFILE`, with explicit `AWS_PROFILE` required for
+  canonical AWS runs
+
 ### 4.4 Deleted legacy AWS control scripts
 
 The old AWS monoliths and ARM64-specific helper chain have been deleted:
@@ -186,10 +203,27 @@ the manifest:
 - machine name
 - machine arch
 - cpu/memory sizing
+- host Python launcher
+- guest kernel image path
+- suite timeout
+- test-only knobs such as `FUZZ_ROUNDS` and `scx_prog_show_race_*`
 
 `runner/scripts/kvm_executor.sh` passes that explicit contract into
-`runner/scripts/run_vm_shell.py`, and `runner/Makefile` debug VM targets now use
-explicit `VM_*` variables rather than a legacy target name.
+`runner/scripts/run_vm_shell.py`.
+
+`runner/Makefile` no longer exposes a second live `vm-test/vm-micro/vm-corpus/vm-e2e`
+execution plane. The remaining direct runner targets are debug-only helpers
+that still consume explicit `VM_*` variables:
+
+- `vm-shell`
+- `vm-selftest`
+- `vm-negative-test`
+- `vm-micro-smoke`
+
+Canonical KVM suite execution now also performs an explicit guest-side prereq
+validation step before entering the shared suite entrypoint:
+
+- `runner/scripts/validate_guest_prereqs.sh`
 
 ## 5. Hard Constraints
 
@@ -202,6 +236,8 @@ These rules are now mandatory:
 - Do not silently fall back to a different artifact or environment shape.
 - Do not let stale `.cache` contents leak into bundles outside the manifest-selected artifact set.
 - Do not write bundled benchmark assets into machine-global locations on the remote host.
+- Do not let cached AWS instance metadata act as a fallback control plane for
+  required launch parameters.
 - Do not proactively close reviewer subagents just because they are slow.
   Reviewer agents should be allowed to run longer unless the user explicitly
   asks to stop them or they have already produced a final result.
@@ -220,9 +256,13 @@ The refactor has already removed these specific problems:
 - `tetragon` strict bundled mode writing `.bpf.o` payloads into `/usr/local/lib/tetragon/bpf`
 - the entire `runner/machines.yaml` / `runner.libs.machines` compatibility layer
 - executor-specific suite logic split between KVM `vm-*` targets and AWS remote script entrypoints
+- `runner/Makefile` carrying a second live `vm-test/vm-micro/vm-corpus/vm-e2e` execution plane
 - root `validate` bypassing the canonical target/suite layer for VM micro smoke
 - remote execution silently falling back from `python3.11` to `python3`
 - requested remote workload tools being treated as optional installs
+- AWS launch silently reusing cached key/subnet/security-group metadata outside the manifest
+- generic ambient `AWS_AMI_ID` overriding the target-selected AMI outside the manifest
+- bundle assembly copying the repo-root `module/` tree wholesale
 - setup-script split between repo-managed artifact mode and fallback local-build mode for BCC / Tracee / Tetragon
 - bundle assembly copying repo-owned source trees with broad directory copies instead of tracked-only snapshots
 - Tracee runner picking up ambient `corpus/build/tracee` state before running setup
@@ -251,17 +291,7 @@ This is better than before because suite behavior itself now lives in the shared
 through `prepare_run_inputs.sh`. But the AWS executor is still larger than it
 should be and needs another shrinking pass.
 
-### 7.2 Workload tools are still a mixed model
-
-Current state:
-
-- bundled tools are added to `PATH` from `workspace/tools/bin` if present
-- requested workload tools now install as hard requirements when selected by the manifest
-- missing bundled-or-installed tools still fail loudly inside the suite setup path
-
-This is cleaner than before, but it is not yet a fully “local prepare, remote execute only” benchmark shape.
-
-### 7.3 Third-party build compatibility still exists in isolated local builders
+### 7.2 Third-party build compatibility still exists in isolated local builders
 
 The remaining third-party compatibility handling is now isolated to local build
 steps, not remote execution or source-tree patching:
@@ -277,17 +307,18 @@ steps, not remote execution or source-tree patching:
 This is much cleaner than patching tracked third-party trees, but it is still
 design debt and should be reviewed explicitly.
 
-### 7.4 Manifest strictness still needs validation
+### 7.3 Manifest strictness still needs validation
 
-The new flow now creates a per-run staged workspace before execution and records
-that staged bundle path in the manifest.
+The new flow now creates a per-run staged workspace before execution.
+The staged bundle path is executor-local state and is not recorded back into the
+canonical manifest.
 
 However this still needs validation under real runs to prove:
 
 - no stale `.cache/aws-arm64/binaries/*` outputs leak into unrelated suites
 - no missing selected artifact is silently replaced by a system-installed equivalent
 
-### 7.5 Direct runner debug paths now use explicit VM variables
+### 7.4 Direct runner debug paths now use explicit VM variables
 
 The debug boundary is now:
 
@@ -358,6 +389,59 @@ Performance suites must remain serialized.
   keeping AWS machine/kernel setup ahead of ARM64 artifact preparation.
 - Tightened bundle assembly so repo-owned source trees are staged from tracked
   files only, reducing untracked-file leakage into remote bundles.
+- Removed the last hardcoded KVM `e2e` host setup path; KVM preflight now
+  consumes only manifest-selected repos and native artifacts.
+- Removed the duplicate runner-local `vm-test/vm-micro/vm-corpus/vm-e2e`
+  execution plane; canonical KVM execution now lives only at the root target layer.
+- Removed root-`Makefile` AWS machine defaults so target profiles are now the
+  only source of truth for AWS launch and remote-stage defaults.
+- Made AWS x86 test bundles consume explicit staged unittest/negative/upstream
+  selftest inputs instead of ambient repo-root build directories.
+- Slimmed AWS remote prereq installation and verification down to execution-host
+  requirements; remote build-toolchain installation is no longer canonical.
+- Stopped mutating the canonical AWS run manifest with local bundle paths; the
+  executor now passes local-only staging inputs as process-local environment.
+- Removed cached-state fallback for AWS key/subnet/security-group launch
+  parameters; launch now fails unless the manifest already carries the full
+  required AWS contract.
+- Moved target-specific AMI override handling into the manifest contract via
+  `RUN_AMI_ID`; ambient generic `AWS_AMI_ID` no longer bypasses the target layer.
+- Added AWS instance-type reuse checks so cached/tagged instances that do not
+  match the requested target contract are terminated and relaunched.
+- Stopped bundling untracked module build output from the repo root; the remote
+  bundle now stages the tracked `module/` tree plus the explicit selected built
+  kinsn module directory for the target arch.
+- Stopped reading the KVM host Python launcher, guest kernel image path, suite
+  timeout, and test knobs from ambient executor state; canonical KVM execution
+  now consumes those values from the manifest.
+- Moved guest-side Python selection into `RUN_REMOTE_PYTHON_BIN`; KVM and AWS
+  now use the same manifest-written interpreter contract instead of executor-side
+  `PYTHON_BIN` injection.
+- Moved AWS region/profile into the manifest and stopped resolving them from the
+  executor host shell after manifest creation.
+- Tightened AWS instance reuse so existing instances are reused only when the
+  manifest-selected AMI/key/subnet/security-group contract still matches exactly.
+- Extended AWS terminate manifests to carry the name-tag/region/profile contract,
+  so `aws-*-terminate` no longer depends on ambient AWS CLI state.
+- Moved native corpus vendor `bpftool` builds under the active build root instead
+  of sharing repo-root `runner/build/vendor/bpftool`.
+- Tightened AWS remote prereqs so Python/bpftool provisioning is driven by the
+  explicit manifest runtime contract rather than a second hardcoded policy.
+- Replaced repo-root module build outputs in canonical AWS bundle assembly with
+  explicit staged `.ko` directories.
+- Removed the last hardcoded `FUZZ_ROUNDS` / `scx_prog_show_race_*` fallback in
+  `runner/scripts/run_all_tests.sh`; canonical test execution now consumes the
+  manifest-written test contract end to end.
+- Replaced shell-string `RUN_CORPUS_ARGS` / `RUN_E2E_ARGS` reconstruction with
+  manifest argv arrays (`RUN_CORPUS_ARGV` / `RUN_E2E_ARGV`) parsed via `shlex`.
+- Tightened AWS remote prereqs so unknown workload-tool tokens fail immediately
+  instead of being ignored until later runtime failure.
+- Moved ARM64 cross-build roots under repo-local cache paths instead of shared
+  `/tmp/codex/...` directories.
+- Added explicit KVM guest-side prereq validation before suite execution.
+- Restored the old `vm-corpus` default sample semantics in the manifest layer:
+  `VM_CORPUS_SAMPLES` remains the canonical default unless `SAMPLES` is
+  explicitly overridden.
 - Extracted shared ARM kernel config.
 - Removed Tetragon’s machine-global bundled BPF install path.
 - Made canonical `x86-kvm` a single explicit-machine-contract VM target with no
@@ -378,10 +462,13 @@ Performance suites must remain serialized.
   last legacy target-alias VM control plane.
 - Removed `--target` support from `runner/scripts/run_vm_shell.py` and
   `runner/scripts/with_vm_lock.py`; both now consume only explicit machine data.
+- Removed the dead `SUITE_NEEDS_DAEMON` knob from suite definitions.
+- Removed the stale `runner.libs.vm.build_vm_shell_command()` compatibility
+  helper and its test-only usage.
 - Revalidated the explicit-machine-only KVM path with `python3 -m py_compile`
   on the touched VM helpers and `pytest -q tests/python/test_vm.py
-  tests/python/test_case_common.py tests/python/test_corpus_driver.py`
-  (`24 passed`).
+  tests/python/test_case_common.py tests/python/test_corpus_driver.py
+  tests/python/test_rejit.py` (`46 passed`).
 
 ### 10.2 Intentionally not done yet
 

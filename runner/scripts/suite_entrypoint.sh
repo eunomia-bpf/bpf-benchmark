@@ -11,8 +11,12 @@ ARCHIVE_PATH="${3:-}"
 # shellcheck disable=SC1090
 source "$MANIFEST_PATH"
 
-PYTHON_BIN="${PYTHON_BIN:-python3.11}"
-FUZZ_ROUNDS="${FUZZ_ROUNDS:-1000}"
+PYTHON_BIN="${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}"
+FUZZ_ROUNDS="${RUN_TEST_FUZZ_ROUNDS:-}"
+SCX_PROG_SHOW_RACE_MODE="${RUN_TEST_SCX_PROG_SHOW_RACE_MODE:-}"
+SCX_PROG_SHOW_RACE_ITERATIONS="${RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS:-}"
+SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="${RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT:-}"
+SCX_PROG_SHOW_RACE_SKIP_PROBE="${RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE:-}"
 RESULT_ROOT="${WORKSPACE}/.cache/suite-results"
 RUN_TOKEN="$(date -u +%Y%m%d_%H%M%S)"
 ARTIFACT_DIR="${RESULT_ROOT}/${RUN_TARGET_NAME}_${RUN_SUITE_NAME}_${RUN_TOKEN}"
@@ -49,9 +53,6 @@ cross_runtime_ld_library_path() {
     [[ -d "$WORKSPACE/lib" ]] && entries+=("$WORKSPACE/lib")
     [[ -d "$WORKSPACE/tests/unittest/build-arm64/lib" ]] && entries+=("$WORKSPACE/tests/unittest/build-arm64/lib")
     [[ -d "$WORKSPACE/tests/unittest/build/lib" ]] && entries+=("$WORKSPACE/tests/unittest/build/lib")
-    if [[ -n "${LD_LIBRARY_PATH:-}" ]]; then
-        entries+=("$LD_LIBRARY_PATH")
-    fi
     local joined=""
     local entry
     for entry in "${entries[@]}"; do
@@ -152,8 +153,17 @@ prepare_environment() {
     mkdir -p "$ARTIFACT_DIR"
     cd "$WORKSPACE"
     export PYTHONPATH="$WORKSPACE"
-    export BPFTOOL_BIN="${BPFTOOL_BIN:-$(command -v bpftool)}"
+    export BPFTOOL_BIN="${RUN_BPFTOOL_BIN:?RUN_BPFTOOL_BIN is required}"
+    require_cmd "$BPFTOOL_BIN"
     require_cmd "$PYTHON_BIN"
+}
+
+validate_test_contract() {
+    [[ -n "$FUZZ_ROUNDS" ]] || die "manifest test fuzz rounds is empty"
+    [[ -n "$SCX_PROG_SHOW_RACE_MODE" ]] || die "manifest scx_prog_show_race mode is empty"
+    [[ -n "$SCX_PROG_SHOW_RACE_ITERATIONS" ]] || die "manifest scx_prog_show_race iterations is empty"
+    [[ -n "$SCX_PROG_SHOW_RACE_LOAD_TIMEOUT" ]] || die "manifest scx_prog_show_race load timeout is empty"
+    [[ -n "$SCX_PROG_SHOW_RACE_SKIP_PROBE" ]] || die "manifest scx_prog_show_race skip-probe flag is empty"
 }
 
 run_selftest_mode() {
@@ -183,10 +193,10 @@ run_negative_mode() {
     env LD_LIBRARY_PATH="$runtime_ld" "$negative_build/fuzz_rejit" "$FUZZ_ROUNDS"
     env LD_LIBRARY_PATH="$runtime_ld" "$negative_build/scx_prog_show_race" \
         "$WORKSPACE" \
-        --mode "${SCX_PROG_SHOW_RACE_MODE:-bpftool-loop}" \
-        --iterations "${SCX_PROG_SHOW_RACE_ITERATIONS:-20}" \
-        --load-timeout "${SCX_PROG_SHOW_RACE_LOAD_TIMEOUT:-20}" \
-        $(if [[ "${SCX_PROG_SHOW_RACE_SKIP_PROBE:-0}" == "1" ]]; then printf '%s' '--skip-probe'; fi)
+        --mode "${SCX_PROG_SHOW_RACE_MODE}" \
+        --iterations "${SCX_PROG_SHOW_RACE_ITERATIONS}" \
+        --load-timeout "${SCX_PROG_SHOW_RACE_LOAD_TIMEOUT}" \
+        $(if [[ "${SCX_PROG_SHOW_RACE_SKIP_PROBE}" == "1" ]]; then printf '%s' '--skip-probe'; fi)
 }
 
 run_full_test_mode() {
@@ -207,15 +217,16 @@ run_full_test_mode() {
     BPFREJIT_DAEMON_PATH="$daemon_path" \
     BPFTOOL_BIN="$upstream_bpftool" \
     CROSS_RUNTIME_LD_LIBRARY_PATH="$runtime_ld" \
-    SCX_PROG_SHOW_RACE_MODE="${SCX_PROG_SHOW_RACE_MODE:-bpftool-loop}" \
-    SCX_PROG_SHOW_RACE_ITERATIONS="${SCX_PROG_SHOW_RACE_ITERATIONS:-20}" \
-    SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="${SCX_PROG_SHOW_RACE_LOAD_TIMEOUT:-20}" \
-    SCX_PROG_SHOW_RACE_SKIP_PROBE="${SCX_PROG_SHOW_RACE_SKIP_PROBE:-0}" \
+    SCX_PROG_SHOW_RACE_MODE="${SCX_PROG_SHOW_RACE_MODE}" \
+    SCX_PROG_SHOW_RACE_ITERATIONS="${SCX_PROG_SHOW_RACE_ITERATIONS}" \
+    SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="${SCX_PROG_SHOW_RACE_LOAD_TIMEOUT}" \
+    SCX_PROG_SHOW_RACE_SKIP_PROBE="${SCX_PROG_SHOW_RACE_SKIP_PROBE}" \
         "$WORKSPACE/runner/scripts/run_all_tests.sh" "$WORKSPACE"
     copy_result_dir "$WORKSPACE/.cache/upstream-bpf-selftests" "$ARTIFACT_DIR"
 }
 
 run_test_suite() {
+    validate_test_contract
     case "${RUN_TEST_MODE}" in
         selftest) run_selftest_mode ;;
         negative) run_negative_mode ;;
@@ -232,9 +243,9 @@ run_micro_suite() {
         "$PYTHON_BIN" "$WORKSPACE/micro/driver.py"
         --runtime llvmbpf
         --runtime kernel
-        --samples "${RUN_BENCH_SAMPLES:-1}"
-        --warmups "${RUN_BENCH_WARMUPS:-0}"
-        --inner-repeat "${RUN_BENCH_INNER_REPEAT:-10}"
+        --samples "${RUN_BENCH_SAMPLES:?RUN_BENCH_SAMPLES is required}"
+        --warmups "${RUN_BENCH_WARMUPS:?RUN_BENCH_WARMUPS is required}"
+        --inner-repeat "${RUN_BENCH_INNER_REPEAT:?RUN_BENCH_INNER_REPEAT is required}"
         --output "$output_json"
     )
     env LD_LIBRARY_PATH="$runtime_ld" "${cmd[@]}"
@@ -252,7 +263,7 @@ run_corpus_suite() {
     cmd=(
         "$PYTHON_BIN" "$WORKSPACE/corpus/driver.py"
         --daemon "$WORKSPACE/daemon/target/release/bpfrejit-daemon"
-        --samples "${RUN_BENCH_SAMPLES:-1}"
+        --samples "${RUN_BENCH_SAMPLES:?RUN_BENCH_SAMPLES is required}"
         --output-json "$output_json"
         --output-md "$output_md"
     )
@@ -264,10 +275,8 @@ run_corpus_suite() {
         [[ -n "$filter" ]] || continue
         cmd+=(--filter "$filter")
     done
-    if [[ -n "${RUN_CORPUS_ARGS:-}" ]]; then
-        # shellcheck disable=SC2206
-        local extra_args=( $RUN_CORPUS_ARGS )
-        cmd+=("${extra_args[@]}")
+    if (( ${#RUN_CORPUS_ARGV[@]} )); then
+        cmd+=("${RUN_CORPUS_ARGV[@]}")
     fi
     env LD_LIBRARY_PATH="$runtime_ld" "${cmd[@]}"
     copy_result_dir "$(latest_result_dir "$WORKSPACE/corpus/results" "${RUN_TARGET_NAME}_corpus")" "$ARTIFACT_DIR"
@@ -282,13 +291,11 @@ run_e2e_case() {
         "$case_name"
         --daemon "$WORKSPACE/daemon/target/release/bpfrejit-daemon"
     )
-    if [[ "${RUN_E2E_SMOKE:-0}" == "1" ]]; then
+    if [[ "${RUN_E2E_SMOKE:?RUN_E2E_SMOKE is required}" == "1" ]]; then
         cmd+=(--smoke)
     fi
-    if [[ -n "${RUN_E2E_ARGS:-}" ]]; then
-        # shellcheck disable=SC2206
-        local extra_args=( $RUN_E2E_ARGS )
-        cmd+=("${extra_args[@]}")
+    if (( ${#RUN_E2E_ARGV[@]} )); then
+        cmd+=("${RUN_E2E_ARGV[@]}")
     fi
     env LD_LIBRARY_PATH="$runtime_ld" "${cmd[@]}"
 }
@@ -297,7 +304,7 @@ run_e2e_suite() {
     local case_name cases_csv
     ensure_benchmark_repos
     ensure_scx_artifacts
-    cases_csv="${RUN_E2E_CASES:-all}"
+    cases_csv="${RUN_E2E_CASES:?RUN_E2E_CASES is required}"
     if [[ "$cases_csv" == "all" ]]; then
         ensure_katran_bundle
         run_e2e_case all

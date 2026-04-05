@@ -28,7 +28,10 @@ ARM64_UPSTREAM_SELFTEST_DIR="${ARM64_UPSTREAM_SELFTEST_DIR:-}"
 ARM64_UPSTREAM_TEST_KMODS_DIR="${ARM64_UPSTREAM_TEST_KMODS_DIR:-}"
 X86_RUNNER="${X86_RUNNER:-}"
 X86_DAEMON="${X86_DAEMON:-}"
+X86_TEST_UNITTEST_BUILD_DIR="${X86_TEST_UNITTEST_BUILD_DIR:-}"
+X86_TEST_NEGATIVE_BUILD_DIR="${X86_TEST_NEGATIVE_BUILD_DIR:-}"
 X86_UPSTREAM_SELFTEST_DIR="${X86_UPSTREAM_SELFTEST_DIR:-}"
+RUN_KINSN_MODULE_DIR="${RUN_KINSN_MODULE_DIR:-}"
 RUNNER_REPOS_ROOT_OVERRIDE="${RUNNER_REPOS_ROOT_OVERRIDE:-}"
 BUNDLE_PROMOTE_ROOT="${BUNDLE_PROMOTE_ROOT:-}"
 
@@ -38,10 +41,10 @@ die() {
 }
 
 if [[ -n "${RUN_INPUT_STAGE_ROOT:-}" && "$BUNDLE_DIR" != "$RUN_INPUT_STAGE_ROOT" ]]; then
-    die "bundle dir does not match manifest RUN_INPUT_STAGE_ROOT: ${BUNDLE_DIR} != ${RUN_INPUT_STAGE_ROOT}"
+    die "bundle dir does not match supplied RUN_INPUT_STAGE_ROOT: ${BUNDLE_DIR} != ${RUN_INPUT_STAGE_ROOT}"
 fi
 if [[ -n "${RUN_BUNDLE_TAR:-}" && "$BUNDLE_TAR" != "$RUN_BUNDLE_TAR" ]]; then
-    die "bundle tar does not match manifest RUN_BUNDLE_TAR: ${BUNDLE_TAR} != ${RUN_BUNDLE_TAR}"
+    die "bundle tar does not match supplied RUN_BUNDLE_TAR: ${BUNDLE_TAR} != ${RUN_BUNDLE_TAR}"
 fi
 
 require_local_path() {
@@ -158,7 +161,7 @@ bundle_lib_path="\$bundle_root/lib"
 if [[ -d "\$case_lib_dir" ]]; then
     bundle_lib_path="\$case_lib_dir:\$bundle_lib_path"
 fi
-exec "\$bundle_root/lib/${loader_name}" --library-path "\$bundle_lib_path\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}" "${real_binary}" "\$@"
+exec "\$bundle_root/lib/${loader_name}" --library-path "\$bundle_lib_path" "${real_binary}" "\$@"
 EOF
     chmod +x "$wrapper_path"
 }
@@ -237,15 +240,24 @@ bundle_stage_target_runtime() {
 }
 
 bundle_stage_modules() {
-    bundle_copy_tree "$ROOT_DIR/module" "$BUNDLE_DIR/module"
+    local module_subdir=""
+    bundle_copy_tracked_tree "module" "$BUNDLE_DIR"
     case "$RUN_TARGET_ARCH" in
         arm64)
-            rm -rf "$BUNDLE_DIR/module/x86"
+            module_subdir="arm64"
+            rm -rf "$BUNDLE_DIR/module/x86" "$BUNDLE_DIR/module/arm64"
             ;;
         x86_64)
-            rm -rf "$BUNDLE_DIR/module/arm64"
+            module_subdir="x86"
+            rm -rf "$BUNDLE_DIR/module/arm64" "$BUNDLE_DIR/module/x86"
+            ;;
+        *)
+            die "unsupported target arch for bundled modules: ${RUN_TARGET_ARCH}"
             ;;
     esac
+    [[ -n "$RUN_KINSN_MODULE_DIR" ]] || die "explicit module input is missing for ${RUN_TARGET_NAME}"
+    require_local_path "$RUN_KINSN_MODULE_DIR" "selected kinsn module dir"
+    bundle_copy_tree "$RUN_KINSN_MODULE_DIR" "$BUNDLE_DIR/module/$module_subdir"
 }
 
 bundle_stage_scx() {
@@ -363,12 +375,12 @@ prepare_test_bundle() {
         mkdir -p "$BUNDLE_DIR/upstream-selftests-kmods"
         cp "$ARM64_UPSTREAM_TEST_KMODS_DIR"/*.ko "$BUNDLE_DIR/upstream-selftests-kmods/"
     else
-        [[ -n "$X86_UPSTREAM_SELFTEST_DIR" ]] || die "manifest is missing explicit x86 upstream selftest dir"
-        bundle_copy_tree "$ROOT_DIR/tests/unittest/build" "$BUNDLE_DIR/tests/unittest/build"
-        bundle_copy_tree "$ROOT_DIR/tests/negative/build" "$BUNDLE_DIR/tests/negative/build"
-        if [[ -d "$X86_UPSTREAM_SELFTEST_DIR" ]]; then
+        [[ -n "$X86_TEST_UNITTEST_BUILD_DIR" && -n "$X86_TEST_NEGATIVE_BUILD_DIR" && -n "$X86_UPSTREAM_SELFTEST_DIR" ]] \
+            || die "manifest is missing explicit x86 test artifact inputs"
+        require_local_path "$X86_UPSTREAM_SELFTEST_DIR" "x86 upstream selftest dir"
+        bundle_copy_tree "$X86_TEST_UNITTEST_BUILD_DIR" "$BUNDLE_DIR/tests/unittest/build"
+        bundle_copy_tree "$X86_TEST_NEGATIVE_BUILD_DIR" "$BUNDLE_DIR/tests/negative/build"
         bundle_copy_tree "$X86_UPSTREAM_SELFTEST_DIR" "$BUNDLE_DIR/.cache/upstream-bpf-selftests"
-        fi
     fi
     bundle_copy_tracked_tree "vendor/linux-framework/tools/build" "$BUNDLE_DIR"
     bundle_copy_tracked_tree "vendor/linux-framework/tools/bpf" "$BUNDLE_DIR"

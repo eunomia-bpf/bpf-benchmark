@@ -40,43 +40,61 @@ dnf_install() {
 }
 
 install_base_packages() {
-    log "Installing base packages for ${RUN_TARGET_NAME}/${RUN_SUITE_NAME}"
+    log "Installing execution prerequisites for ${RUN_TARGET_NAME}/${RUN_SUITE_NAME}"
     dnf_install \
-        bpftool \
-        bpftrace \
-        cargo \
-        clang20 \
-        cmake \
         curl-minimal \
         dracut \
         elfutils-libelf \
-        elfutils-libelf-devel \
         file \
-        fio \
-        gcc \
-        gcc-c++ \
-        git \
-        golang \
         grubby \
         gzip \
         iproute \
         kmod \
-        llvm20 \
-        llvm20-devel \
-        lld20 \
-        make \
         ncurses-libs \
         procps-ng \
-        python3 \
-        python3.11 \
-        python3.11-pip \
-        stress-ng \
         tar \
         util-linux \
         which \
         zlib \
-        zlib-devel \
         zstd
+}
+
+python_runtime_packages() {
+    case "${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}" in
+        python3.11)
+            printf '%s\n' python3.11 python3.11-pip
+            ;;
+        python3)
+            printf '%s\n' python3 python3-pip
+            ;;
+        *)
+            die "unsupported remote python contract: ${RUN_REMOTE_PYTHON_BIN}"
+            ;;
+    esac
+}
+
+bpftool_runtime_packages() {
+    case "${RUN_BPFTOOL_BIN:?RUN_BPFTOOL_BIN is required}" in
+        bpftool)
+            printf '%s\n' bpftool
+            ;;
+        *)
+            die "unsupported remote bpftool contract: ${RUN_BPFTOOL_BIN}"
+            ;;
+    esac
+}
+
+install_explicit_runtime_packages() {
+    local -a packages=()
+    while IFS= read -r package; do
+        [[ -n "$package" ]] || continue
+        packages+=("$package")
+    done < <(bpftool_runtime_packages)
+    while IFS= read -r package; do
+        [[ -n "$package" ]] || continue
+        packages+=("$package")
+    done < <(python_runtime_packages)
+    dnf_install "${packages[@]}"
 }
 
 install_optional_tool_packages() {
@@ -97,15 +115,17 @@ install_optional_tool_packages() {
                 dnf_install rt-tests
                 ;;
             stress-ng|fio|bpftrace)
+                dnf_install "$tool"
                 ;;
             *)
+                die "unsupported workload tool in manifest: ${tool}"
                 ;;
         esac
     done
 }
 
 install_python_modules() {
-    sudo python3.11 -m pip install --quiet PyYAML pyelftools >/dev/null
+    sudo "${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}" -m pip install --quiet PyYAML pyelftools >/dev/null
 }
 
 ensure_swap() {
@@ -133,29 +153,17 @@ ensure_swap() {
 
 verify_environment() {
     local command_name
-    require_cmd bpftool
-    require_cmd cargo
-    require_any_cmd clang clang-20 clang20
-    require_cmd cmake
+    require_cmd "${RUN_BPFTOOL_BIN:?RUN_BPFTOOL_BIN is required}"
     require_cmd curl
     require_cmd dracut
     require_cmd file
-    require_cmd fio
-    require_cmd git
     require_cmd grubby
     require_cmd insmod
     require_cmd ip
-    require_any_cmd llc llc-20 llc20
-    require_any_cmd llvm-config llvm-config-20 llvm-config20
-    require_any_cmd llvm-objcopy llvm-objcopy-20 llvm-objcopy20
-    require_any_cmd llvm-strip llvm-strip-20 llvm-strip20
-    require_cmd make
-    require_cmd python3
-    require_cmd python3.11
-    require_cmd rustc
-    require_cmd stress-ng
+    require_cmd "${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}"
     require_cmd taskset
-    python3.11 -c 'import yaml, elftools' >/dev/null
+    require_cmd tar
+    "${RUN_REMOTE_PYTHON_BIN}" -c 'import yaml, elftools' >/dev/null
     IFS=',' read -r -a _run_remote_required <<<"${RUN_REMOTE_COMMANDS_CSV:-}"
     for command_name in "${_run_remote_required[@]}"; do
         [[ -n "$command_name" ]] || continue
@@ -165,6 +173,7 @@ verify_environment() {
 
 main() {
     install_base_packages
+    install_explicit_runtime_packages
     install_optional_tool_packages
     install_python_modules
     ensure_swap

@@ -61,13 +61,6 @@ ARM64_TEST_CARGO_HOME_DIR ?= $(ARM64_TEST_ARTIFACTS_ROOT)/cargo-home
 ARM64_CROSSBUILD_OUTPUT_DIR ?= $(AWS_ARM64_CACHE_DIR)/binaries
 ARM64_CROSS_RUNNER_REAL  := $(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/build/micro_exec.real
 ARM64_CROSS_DAEMON_REAL  := $(ARM64_CROSSBUILD_OUTPUT_DIR)/daemon/build/bpfrejit-daemon.real
-AWS_ARM64_NAME_TAG       ?= bpf-benchmark-arm64
-AWS_ARM64_INSTANCE_TYPE  ?= t4g.micro
-AWS_ARM64_REMOTE_USER    ?= ec2-user
-AWS_ARM64_REMOTE_STAGE_DIR        ?= /home/$(AWS_ARM64_REMOTE_USER)/bpf-benchmark-arm64
-AWS_ARM64_REMOTE_KERNEL_STAGE_DIR ?= /home/$(AWS_ARM64_REMOTE_USER)/codex-kernel-stage
-AWS_ARM64_AMI_PARAM      ?= /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64
-AWS_ARM64_ROOT_VOLUME_GB ?= 32
 AWS_ARM64_BENCH_SAMPLES ?= 1
 AWS_ARM64_BENCH_WARMUPS    ?= 0
 AWS_ARM64_BENCH_INNER_REPEAT ?= 10
@@ -93,16 +86,10 @@ export CROSS_COMPILE_ARM64 ARM64_BUILD_DIR ARM64_WORKTREE_DIR ARM64_AWS_BUILD_DI
 export ARM64_DOCKER_PLATFORM ARM64_CROSSBUILD_OUTPUT_DIR ARM64_CROSSBUILD_JOBS
 export ARM64_TEST_ARTIFACTS_ROOT ARM64_TEST_UNITTEST_BUILD_DIR ARM64_TEST_NEGATIVE_BUILD_DIR
 export ARM64_TEST_DAEMON_TARGET_DIR ARM64_TEST_DAEMON_OUTPUT_DIR ARM64_TEST_CARGO_HOME_DIR
+export BZIMAGE PYTHON VM_TEST_TIMEOUT VM_MICRO_TIMEOUT VM_CORPUS_TIMEOUT VM_E2E_TIMEOUT
 export FUZZ_ROUNDS SCX_PROG_SHOW_RACE_MODE SCX_PROG_SHOW_RACE_ITERATIONS SCX_PROG_SHOW_RACE_LOAD_TIMEOUT SCX_PROG_SHOW_RACE_SKIP_PROBE
 
 AWS_X86_CACHE_DIR         ?= $(ROOT_DIR)/.cache/aws-x86
-AWS_X86_NAME_TAG          ?= bpf-benchmark-x86
-AWS_X86_INSTANCE_TYPE     ?= t3.micro
-AWS_X86_REMOTE_USER       ?= ec2-user
-AWS_X86_REMOTE_STAGE_DIR  ?= /home/$(AWS_X86_REMOTE_USER)/bpf-benchmark-x86
-AWS_X86_REMOTE_KERNEL_STAGE_DIR ?= /home/$(AWS_X86_REMOTE_USER)/codex-kernel-stage-x86
-AWS_X86_AMI_PARAM         ?= /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
-AWS_X86_ROOT_VOLUME_GB    ?= 32
 AWS_X86_BENCH_SAMPLES     ?= 1
 AWS_X86_BENCH_WARMUPS     ?= 0
 AWS_X86_BENCH_INNER_REPEAT ?= 10
@@ -236,7 +223,7 @@ help:
 	@echo "Params: vm-micro SAMPLES=$(SAMPLES) WARMUPS=$(WARMUPS) INNER_REPEAT=$(INNER_REPEAT) BENCH=\"...\""
 	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) FILTERS=\"...\" VM_CORPUS_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
 	@echo "        vm-e2e E2E_CASE=\"all|tracee|...\" E2E_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\" PROFILE=$(PROFILE)"
-	@echo "        aws-arm64-test/aws-arm64-benchmark AWS_ARM64_ROOT_VOLUME_GB=$(AWS_ARM64_ROOT_VOLUME_GB)"
+	@echo "        aws-arm64-test/aws-arm64-benchmark AWS_ARM64_ROOT_VOLUME_GB=<override>"
 	@echo "        aws-arm64-test AWS_ARM64_TEST_MODE=$(AWS_ARM64_TEST_MODE)"
 	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=$(AWS_ARM64_BENCH_MODE) AWS_ARM64_E2E_CASES=$(AWS_ARM64_E2E_CASES)"
 	@echo "        aws-x86-test AWS_X86_TEST_MODE=$(AWS_X86_TEST_MODE)"
@@ -533,13 +520,13 @@ cross-arm64: arm64-crossbuild-image
 		-v "$(ROOT_DIR)":/workspace -w /workspace \
 		-e HOME=/tmp/codex \
 		-e CARGO_HOME="/workspace/.cache/aws-arm64/cargo-home" \
-		-e HOST_UID="$$(id -u)" \
-		-e HOST_GID="$$(id -g)" \
-		-e ARM64_CROSSBUILD_OUTPUT_DIR="/workspace/.cache/aws-arm64/binaries.tmp" \
-		-e ARM64_CROSSBUILD_BUILD_ROOT="/tmp/codex/arm64-crossbuild-work" \
-		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
-		-e ARM64_CROSSBUILD_SCX_PACKAGES="$(ARM64_CROSSBUILD_SCX_PACKAGES)" \
-		-e MICRO_EXEC_ENABLE_LLVMBPF="$(ARM64_CROSSBUILD_ENABLE_LLVMBPF)" \
+			-e HOST_UID="$$(id -u)" \
+			-e HOST_GID="$$(id -g)" \
+			-e ARM64_CROSSBUILD_OUTPUT_DIR="/workspace/.cache/aws-arm64/binaries.tmp" \
+			-e ARM64_CROSSBUILD_BUILD_ROOT="/workspace/.cache/aws-arm64/build-roots/main" \
+			-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
+			-e ARM64_CROSSBUILD_SCX_PACKAGES="$(ARM64_CROSSBUILD_SCX_PACKAGES)" \
+			-e MICRO_EXEC_ENABLE_LLVMBPF="$(ARM64_CROSSBUILD_ENABLE_LLVMBPF)" \
 		"$(ARM64_CROSSBUILD_IMAGE)" /workspace/runner/scripts/cross-arm64-build.sh
 	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)" && mv "$(ARM64_CROSSBUILD_OUTPUT_DIR).tmp" "$(ARM64_CROSSBUILD_OUTPUT_DIR)"
 	file "$(ARM64_CROSS_RUNNER_REAL)" | grep -F "ARM aarch64"
@@ -551,13 +538,13 @@ cross-arm64-scx: arm64-crossbuild-image
 		-v "$(ROOT_DIR)":/workspace -w /workspace \
 		-e HOME=/tmp/codex \
 		-e CARGO_HOME="/workspace/.cache/aws-arm64/cargo-home" \
-		-e HOST_UID="$$(id -u)" \
-		-e HOST_GID="$$(id -g)" \
-		-e ARM64_CROSSBUILD_OUTPUT_DIR="/workspace/.cache/aws-arm64/binaries.scx.tmp" \
-		-e ARM64_CROSSBUILD_BUILD_ROOT="/tmp/codex/arm64-crossbuild-scx-work" \
-		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
-		-e ARM64_CROSSBUILD_SCX_PACKAGES="$(ARM64_CROSSBUILD_SCX_PACKAGES)" \
-		-e ARM64_CROSSBUILD_ONLY_SCX=1 \
+			-e HOST_UID="$$(id -u)" \
+			-e HOST_GID="$$(id -g)" \
+			-e ARM64_CROSSBUILD_OUTPUT_DIR="/workspace/.cache/aws-arm64/binaries.scx.tmp" \
+			-e ARM64_CROSSBUILD_BUILD_ROOT="/workspace/.cache/aws-arm64/build-roots/scx" \
+			-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
+			-e ARM64_CROSSBUILD_SCX_PACKAGES="$(ARM64_CROSSBUILD_SCX_PACKAGES)" \
+			-e ARM64_CROSSBUILD_ONLY_SCX=1 \
 		"$(ARM64_CROSSBUILD_IMAGE)" /workspace/runner/scripts/cross-arm64-build.sh
 	test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/runner/repos/scx/target/release"
 	test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/corpus/build/scx"
@@ -574,13 +561,13 @@ cross-arm64-bench: arm64-crossbuild-image
 		-v "$(ROOT_DIR)":/workspace -w /workspace \
 		-e HOME=/tmp/codex \
 		-e CARGO_HOME="/workspace/.cache/aws-arm64/cargo-home" \
-		-e HOST_UID="$$(id -u)" \
-		-e HOST_GID="$$(id -g)" \
-		-e ARM64_CROSSBUILD_OUTPUT_DIR="/workspace/.cache/aws-arm64/binaries.bench.tmp" \
-		-e ARM64_CROSSBUILD_BUILD_ROOT="/tmp/codex/arm64-crossbuild-bench-work" \
-		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
-		-e ARM64_CROSSBUILD_BENCH_REPOS="$(ARM64_CROSSBUILD_BENCH_REPOS)" \
-		-e ARM64_CROSSBUILD_ONLY_BENCH=1 \
+			-e HOST_UID="$$(id -u)" \
+			-e HOST_GID="$$(id -g)" \
+			-e ARM64_CROSSBUILD_OUTPUT_DIR="/workspace/.cache/aws-arm64/binaries.bench.tmp" \
+			-e ARM64_CROSSBUILD_BUILD_ROOT="/workspace/.cache/aws-arm64/build-roots/bench" \
+			-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
+			-e ARM64_CROSSBUILD_BENCH_REPOS="$(ARM64_CROSSBUILD_BENCH_REPOS)" \
+			-e ARM64_CROSSBUILD_ONLY_BENCH=1 \
 		"$(ARM64_CROSSBUILD_IMAGE)" /workspace/runner/scripts/cross-arm64-build.sh
 	@set -e; repo_csv="$(ARM64_CROSSBUILD_BENCH_REPOS)"; \
 	case ",$$repo_csv," in \

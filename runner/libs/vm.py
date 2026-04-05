@@ -184,43 +184,7 @@ def run_in_vm(
         script.unlink(missing_ok=True)
 
 
-def build_vm_shell_command(
-    *,
-    kernel_image: Path,
-    command_text: str,
-    timeout_seconds: int,
-    vng_binary: str,
-    nofile: int | None = None,
-    vm_lock_scope: str = "vm_global",
-    vm_machine_name: str = "x86-kvm",
-    vm_machine_arch: str = "x86_64",
-) -> list[str]:
-    command = [
-        sys.executable,
-        str(ROOT_DIR / "runner" / "scripts" / "run_vm_shell.py"),
-        "--action",
-        "vm-corpus",
-        "--vm-backend",
-        "vng",
-        "--vm-lock-scope",
-        vm_lock_scope,
-        "--vm-machine-name",
-        vm_machine_name,
-        "--vm-machine-arch",
-        vm_machine_arch,
-        "--kernel-image",
-        str(kernel_image),
-        "--timeout",
-        str(timeout_seconds),
-        "--command",
-        command_text,
-    ]
-    if nofile is not None:
-        command.extend(["--nofile", str(int(nofile))])
-    command.extend(["--vm-executable", vng_binary])
-    return command
 __all__ = [
-    "build_vm_shell_command",
     "build_vng_command",
     "run_in_vm",
     "wrap_with_vm_lock",

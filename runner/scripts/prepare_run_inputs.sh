@@ -19,6 +19,7 @@ die() {
 prepare_kvm_inputs() {
     local native_repos="${RUN_NATIVE_REPOS_CSV:-}"
     local benchmark_repos="${RUN_BENCHMARK_REPOS_CSV:-}"
+    local scx_packages="${RUN_SCX_PACKAGES_CSV:-}"
     case "$RUN_SUITE_NAME" in
         test)
             make -C "$RUNNER_DIR" scx-artifacts daemon-binary kernel-image upstream-selftests-build unittest-build negative-build kinsn-modules-build
@@ -40,7 +41,10 @@ prepare_kvm_inputs() {
             if [[ -n "$native_repos" ]]; then
                 make -C "$RUNNER_DIR" corpus-build-native REPOS="${native_repos//,/ }"
             fi
-            make -C "$RUNNER_DIR" e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
+            if [[ -n "$scx_packages" ]]; then
+                make -C "$RUNNER_DIR" scx-artifacts
+            fi
+            make -C "$RUNNER_DIR" micro_exec daemon-binary kernel-image kinsn-modules-build
             ;;
         *)
             die "unsupported KVM suite: ${RUN_SUITE_NAME}"

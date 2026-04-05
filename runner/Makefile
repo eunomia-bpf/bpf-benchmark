@@ -63,8 +63,6 @@ NEGATIVE_TEST_DIR := $(REPO_ROOT)/tests/negative
 MICRO_RESULTS_DIR := $(REPO_ROOT)/micro/results
 CORPUS_RESULTS_DIR := $(REPO_ROOT)/corpus/results
 E2E_RESULTS_DIR := $(REPO_ROOT)/e2e/results
-TRACEE_SETUP_SCRIPT := $(REPO_ROOT)/e2e/cases/tracee/setup.sh
-TETRAGON_SETUP_SCRIPT := $(REPO_ROOT)/e2e/cases/tetragon/setup.sh
 VM_MICRO_SMOKE_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro_smoke.json
 VM_MICRO_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro.json
 VM_CORPUS_OUTPUT_JSON ?= $(CORPUS_RESULTS_DIR)/vm_corpus.json
@@ -110,9 +108,9 @@ VM_CORPUS_WORKLOAD_SECONDS_FLAG := $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),-
 	corpus-fetch corpus-build corpus-build-native \
 	corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx \
 	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
-	scx-artifacts e2e-prep e2e-tracee-setup e2e-tetragon-setup \
+	scx-artifacts e2e-prep \
 	kernel-image unittest-build negative-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary \
-	vm-shell vm-test vm-selftest vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	vm-shell vm-selftest vm-negative-test vm-micro-smoke \
 	clean
 
 all: micro_exec
@@ -126,16 +124,16 @@ endif
 
 corpus-build: corpus-fetch corpus-build-native
 
-corpus-build-native: corpus-fetch vendor_bpftool
+corpus-build-native: corpus-fetch
 	KATRAN_SERVER_BINARY="$(KATRAN_SERVER_BINARY)" \
 	KATRAN_SERVER_LIB_DIR="$(KATRAN_SERVER_LIB_DIR)" \
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" $(REPO_FLAGS)
 
-corpus-build-bcc: vendor_bpftool
+corpus-build-bcc:
 	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo bcc
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo bcc
 
-corpus-build-libbpf-bootstrap: vendor_bpftool
+corpus-build-libbpf-bootstrap:
 	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo libbpf-bootstrap
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo libbpf-bootstrap
 
@@ -180,19 +178,23 @@ scx-artifacts:
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_scx_artifacts.py"
 
 e2e-prep:
-	@if [ ! -d "$(REPO_ROOT)/runner/repos/bcc" ] || [ ! -d "$(REPO_ROOT)/runner/repos/scx" ] || [ ! -d "$(REPO_ROOT)/runner/repos/tracee" ] || [ ! -d "$(REPO_ROOT)/runner/repos/tetragon" ] || [ ! -d "$(REPO_ROOT)/runner/repos/katran" ]; then \
-		$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo bcc --repo scx --repo tracee --repo tetragon --repo katran; \
+	@repos="$(strip $(REPOS))"; \
+	if [ -z "$$repos" ]; then \
+		case "$(strip $(E2E_CASE))" in \
+			""|all) repos="tracee tetragon bpftrace scx bcc katran" ;; \
+			*) repos="$$(printf '%s\n' "$(strip $(E2E_CASE))" | tr ',' ' ')" ;; \
+		esac; \
+	fi; \
+	native_repos="$$(printf '%s\n' "$$repos" | tr ' ' '\n' | awk '/^(bcc|katran|tracee|tetragon)$$/ { print }' | paste -sd' ' -)"; \
+	if [ -n "$$repos" ]; then \
+		$(MAKE) corpus-fetch REPOS="$$repos"; \
+	fi; \
+	if [ -n "$$native_repos" ]; then \
+		$(MAKE) corpus-build-native REPOS="$$native_repos"; \
+	fi; \
+	if printf '%s\n' "$$repos" | tr ' ' '\n' | grep -Fx scx >/dev/null; then \
+		$(MAKE) scx-artifacts; \
 	fi
-	KATRAN_SERVER_BINARY="$(KATRAN_SERVER_BINARY)" \
-	KATRAN_SERVER_LIB_DIR="$(KATRAN_SERVER_LIB_DIR)" \
-	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo bcc --repo tracee --repo tetragon --repo katran
-	$(PYTHON) "$(ROOT_DIR)/scripts/build_scx_artifacts.py"
-
-e2e-tracee-setup:
-	bash "$(TRACEE_SETUP_SCRIPT)"
-
-e2e-tetragon-setup:
-	bash "$(TETRAGON_SETUP_SCRIPT)"
 
 vendor_libbpf: $(LIBBPF_A) $(LIBBPF_HEADER)
 
@@ -275,25 +277,6 @@ vm-shell: kernel-image kinsn-modules-build
 		--timeout "$(VM_TEST_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) $(VM_COMMAND)'
 
-vm-test: scx-artifacts daemon-binary
-	$(MAKE) kernel-image BZIMAGE="$(BZIMAGE)"
-	$(MAKE) upstream-selftests-build BZIMAGE="$(BZIMAGE)"
-	$(MAKE) unittest-build
-	$(MAKE) negative-build
-	$(MAKE) kinsn-modules-build BZIMAGE="$(BZIMAGE)"
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
-		$(VM_BACKEND_FLAG) \
-		$(VM_EXECUTABLE_FLAG) \
-		$(VM_LOCK_SCOPE_FLAG) \
-		$(VM_MACHINE_NAME_FLAG) \
-		$(VM_MACHINE_ARCH_FLAG) \
-		--action vm-test \
-		--kernel-image "$(BZIMAGE_PATH)" \
-		$(VM_CPU_FLAG) \
-		$(VM_MEM_FLAG) \
-		--timeout "$(VM_TEST_TIMEOUT)" \
-		--command 'SCX_PROG_SHOW_RACE_MODE="$(SCX_PROG_SHOW_RACE_MODE)" SCX_PROG_SHOW_RACE_ITERATIONS="$(SCX_PROG_SHOW_RACE_ITERATIONS)" SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="$(SCX_PROG_SHOW_RACE_LOAD_TIMEOUT)" SCX_PROG_SHOW_RACE_SKIP_PROBE="$(SCX_PROG_SHOW_RACE_SKIP_PROBE)" $(VM_INIT) "$(ROOT_DIR)/scripts/run_all_tests.sh" "$(REPO_ROOT)"'
-
 vm-selftest: unittest-build negative-build daemon-binary kernel-image kinsn-modules-build
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
 		$(VM_BACKEND_FLAG) \
@@ -337,57 +320,6 @@ vm-micro-smoke: micro_exec micro-programs kernel-image
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_MICRO_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VENV_ACTIVATE) python3 "$(REPO_ROOT)/micro/driver.py" --runtime llvmbpf --runtime kernel $(VM_SMOKE_ARGS) --output "$(VM_MICRO_SMOKE_OUTPUT)"'
-
-vm-micro: micro_exec micro-programs kernel-image
-	mkdir -p "$(MICRO_RESULTS_DIR)"
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
-		$(VM_BACKEND_FLAG) \
-		$(VM_EXECUTABLE_FLAG) \
-		$(VM_LOCK_SCOPE_FLAG) \
-		$(VM_MACHINE_NAME_FLAG) \
-		$(VM_MACHINE_ARCH_FLAG) \
-		--action vm-micro \
-		--kernel-image "$(BZIMAGE_PATH)" \
-		$(VM_CPU_FLAG) \
-		$(VM_MEM_FLAG) \
-		--timeout "$(VM_MICRO_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VENV_ACTIVATE) python3 "$(REPO_ROOT)/micro/driver.py" --runtime llvmbpf --runtime kernel $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'
-
-vm-corpus: corpus-build corpus-build-native vendor_bpftool daemon-binary kernel-image kinsn-modules-build
-	mkdir -p "$(CORPUS_RESULTS_DIR)"
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
-		$(VM_BACKEND_FLAG) \
-		$(VM_EXECUTABLE_FLAG) \
-		$(VM_LOCK_SCOPE_FLAG) \
-		$(VM_MACHINE_NAME_FLAG) \
-		$(VM_MACHINE_ARCH_FLAG) \
-		--action vm-corpus \
-		--kernel-image "$(BZIMAGE_PATH)" \
-		$(VM_CPU_FLAG) \
-		$(VM_MEM_FLAG) \
-		--timeout "$(VM_CORPUS_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/driver.py" --daemon "$(DAEMON_PATH)" --output-json "$(VM_CORPUS_OUTPUT_JSON)" --output-md "$(VM_CORPUS_OUTPUT_MD)" $(VM_CORPUS_SAMPLES_FLAG) $(VM_CORPUS_WORKLOAD_SECONDS_FLAG) $(FILTER_FLAGS) $(VM_CORPUS_ARGS)'
-
-vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
-	mkdir -p "$(E2E_RESULTS_DIR)"
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
-		$(VM_BACKEND_FLAG) \
-		$(VM_EXECUTABLE_FLAG) \
-		$(VM_LOCK_SCOPE_FLAG) \
-		$(VM_MACHINE_NAME_FLAG) \
-		$(VM_MACHINE_ARCH_FLAG) \
-		--action vm-e2e \
-		--kernel-image "$(BZIMAGE_PATH)" \
-		$(VM_CPU_FLAG) \
-		$(VM_MEM_FLAG) \
-		--timeout "$(VM_E2E_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/e2e/driver.py" $(E2E_CASE) $(E2E_ARGS)'
-
-vm-all:
-	$(MAKE) vm-test
-	$(MAKE) vm-micro
-	$(MAKE) vm-corpus
-	$(MAKE) vm-e2e
 
 clean:
 	rm -rf $(BUILD_DIR)
