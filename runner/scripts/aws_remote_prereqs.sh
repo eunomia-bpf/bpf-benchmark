@@ -35,6 +35,14 @@ require_any_cmd() {
     die "required command is missing: $*"
 }
 
+python_import_for_package() {
+    case "$1" in
+        PyYAML) printf '%s\n' yaml ;;
+        pyelftools) printf '%s\n' elftools ;;
+        *) die "unsupported python package contract: $1" ;;
+    esac
+}
+
 dnf_install() {
     sudo dnf -y install "$@"
 }
@@ -125,7 +133,11 @@ install_optional_tool_packages() {
 }
 
 install_python_modules() {
-    sudo "${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}" -m pip install --quiet PyYAML pyelftools >/dev/null
+    local package_csv="${RUN_REMOTE_PYTHON_MODULES_CSV:-}"
+    [[ -n "$package_csv" ]] || return 0
+    IFS=',' read -r -a _run_python_packages <<<"$package_csv"
+    [[ "${#_run_python_packages[@]}" -gt 0 ]] || return 0
+    sudo "${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}" -m pip install --quiet "${_run_python_packages[@]}" >/dev/null
 }
 
 ensure_swap() {
@@ -152,7 +164,7 @@ ensure_swap() {
 }
 
 verify_environment() {
-    local command_name
+    local command_name package_name imports=() import_name
     require_cmd "${RUN_BPFTOOL_BIN:?RUN_BPFTOOL_BIN is required}"
     require_cmd curl
     require_cmd dracut
@@ -163,7 +175,21 @@ verify_environment() {
     require_cmd "${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}"
     require_cmd taskset
     require_cmd tar
-    "${RUN_REMOTE_PYTHON_BIN}" -c 'import yaml, elftools' >/dev/null
+    IFS=',' read -r -a _run_python_packages <<<"${RUN_REMOTE_PYTHON_MODULES_CSV:-}"
+    for package_name in "${_run_python_packages[@]}"; do
+        [[ -n "$package_name" ]] || continue
+        import_name="$(python_import_for_package "$package_name")"
+        imports+=("$import_name")
+    done
+    if (( ${#imports[@]} )); then
+        "${RUN_REMOTE_PYTHON_BIN}" - "${imports[@]}" >/dev/null <<'PY'
+import importlib
+import sys
+
+for module_name in sys.argv[1:]:
+    importlib.import_module(module_name)
+PY
+    fi
     IFS=',' read -r -a _run_remote_required <<<"${RUN_REMOTE_COMMANDS_CSV:-}"
     for command_name in "${_run_remote_required[@]}"; do
         [[ -n "$command_name" ]] || continue

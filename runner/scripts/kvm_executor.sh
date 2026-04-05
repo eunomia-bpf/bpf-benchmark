@@ -30,6 +30,7 @@ die() {
 suite_command() {
     cat <<EOF
 cd "$REPO_ROOT" && \
+bash "$REPO_ROOT/runner/scripts/install_guest_prereqs.sh" "$REPO_ROOT" "$MANIFEST_PATH" && \
 bash "$REPO_ROOT/runner/scripts/validate_guest_prereqs.sh" "$REPO_ROOT" "$MANIFEST_PATH" && \
 bash "$REPO_ROOT/${RUN_SUITE_ENTRYPOINT}" "$REPO_ROOT" "$MANIFEST_PATH"
 EOF

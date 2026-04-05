@@ -53,6 +53,13 @@ require_local_path() {
     [[ -e "$path" ]] || die "${description} not found: ${path}"
 }
 
+require_nonempty_dir() {
+    local path="$1"
+    local description="$2"
+    [[ -d "$path" ]] || die "${description} is not a directory: ${path}"
+    find "$path" -mindepth 1 -print -quit 2>/dev/null | grep -q . || die "${description} is empty: ${path}"
+}
+
 bundle_copy_tree() {
     local src="$1"
     local dest="$2"
@@ -300,7 +307,7 @@ bundle_stage_repo_build_dir() {
             source_dir="$BUNDLE_PROMOTE_ROOT/corpus/build/$repo_name"
             ;;
     esac
-    require_local_path "$source_dir" "bundled native repo build dir for ${repo_name}"
+    require_nonempty_dir "$source_dir" "bundled native repo build dir for ${repo_name}"
     mkdir -p "$BUNDLE_DIR/corpus/build/$repo_name"
     cp -a "$source_dir/." "$BUNDLE_DIR/corpus/build/$repo_name/"
 }
@@ -393,14 +400,26 @@ prepare_test_bundle() {
     bundle_stage_scx
 }
 
-prepare_benchmark_bundle() {
+prepare_micro_bundle() {
     bundle_copy_tracked_tree "micro" "$BUNDLE_DIR"
     rm -rf "$BUNDLE_DIR/micro/results"
+}
+
+prepare_corpus_bundle() {
     bundle_copy_tracked_tree "corpus" "$BUNDLE_DIR"
     rm -rf "$BUNDLE_DIR/corpus/results" "$BUNDLE_DIR/corpus/build"
     mkdir -p "$BUNDLE_DIR/corpus/build"
+    bundle_stage_selected_repos
+    bundle_stage_scx
+    bundle_stage_native_repo_build_dirs
+    bundle_stage_katran_server
+}
+
+prepare_e2e_bundle() {
     bundle_copy_tracked_tree "e2e" "$BUNDLE_DIR"
     rm -rf "$BUNDLE_DIR/e2e/results"
+    bundle_copy_tracked_tree "corpus/config" "$BUNDLE_DIR"
+    mkdir -p "$BUNDLE_DIR/corpus/build"
     bundle_stage_selected_repos
     bundle_stage_scx
     bundle_stage_native_repo_build_dirs
@@ -410,7 +429,9 @@ prepare_benchmark_bundle() {
 prepare_common_bundle
 case "$RUN_SUITE_NAME" in
     test) prepare_test_bundle ;;
-    micro|corpus|e2e) prepare_benchmark_bundle ;;
+    micro) prepare_micro_bundle ;;
+    corpus) prepare_corpus_bundle ;;
+    e2e) prepare_e2e_bundle ;;
     *) die "unsupported suite for remote bundle: ${RUN_SUITE_NAME}" ;;
 esac
 

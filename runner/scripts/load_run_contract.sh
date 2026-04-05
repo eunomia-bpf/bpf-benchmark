@@ -48,16 +48,6 @@ run_contract_resolve_repo_path() {
     fi
 }
 
-run_contract_resolve_aws_region() {
-    local region=""
-    region="$(run_contract_env_or_default AWS_REGION "$(run_contract_env_or_default AWS_DEFAULT_REGION "")")"
-    if [[ -n "$region" ]]; then
-        printf '%s\n' "$region"
-        return 0
-    fi
-    run_contract_die "AWS region is unset. Export AWS_REGION or AWS_DEFAULT_REGION explicitly."
-}
-
 run_contract_parse_shell_words() {
     local raw="$1"
     local out_name="$2"
@@ -281,6 +271,8 @@ run_contract_write_manifest() {
     local run_vm_kernel_image=""
     local run_vm_timeout_seconds=""
     local run_remote_python_bin=""
+    local run_remote_python_modules="PyYAML"
+    local run_guest_package_manager=""
     local run_test_fuzz_rounds=""
     local run_test_scx_prog_show_race_mode=""
     local run_test_scx_prog_show_race_iterations=""
@@ -301,6 +293,8 @@ run_contract_write_manifest() {
     run_workload_tools="${SUITE_DEFAULT_WORKLOAD_TOOLS:-}"
     run_needs_katran_bundle="${SUITE_NEEDS_KATRAN_BUNDLE:-0}"
     run_remote_python_bin="${SUITE_DEFAULT_REMOTE_PYTHON_BIN:-}"
+    run_remote_python_bin="${TARGET_REMOTE_PYTHON_DEFAULT:-${SUITE_DEFAULT_REMOTE_PYTHON_BIN:-}}"
+    run_guest_package_manager="${TARGET_GUEST_PACKAGE_MANAGER:-}"
     if [[ "${TARGET_EXECUTOR:-}" == "aws-ssh" ]]; then
         local aws_env_prefix="${TARGET_AWS_ENV_PREFIX:-}"
         [[ -n "$aws_env_prefix" ]] || run_contract_die "AWS target ${target_name} is missing TARGET_AWS_ENV_PREFIX"
@@ -326,9 +320,10 @@ run_contract_write_manifest() {
         run_aws_key_path="$(run_contract_prefixed_env_or_default "$aws_env_prefix" KEY_PATH)"
         run_aws_security_group_id="$(run_contract_prefixed_env_or_default "$aws_env_prefix" SECURITY_GROUP_ID)"
         run_aws_subnet_id="$(run_contract_prefixed_env_or_default "$aws_env_prefix" SUBNET_ID)"
-        run_aws_region="$(run_contract_resolve_aws_region)"
-        run_aws_profile="$(run_contract_env_or_default AWS_PROFILE "")"
-        [[ -n "$run_aws_profile" ]] || run_contract_die "AWS_PROFILE is required for AWS targets"
+        run_aws_region="$(run_contract_prefixed_env_or_default "$aws_env_prefix" REGION "")"
+        [[ -n "$run_aws_region" ]] || run_contract_die "${aws_env_prefix}_REGION is required for AWS targets"
+        run_aws_profile="$(run_contract_prefixed_env_or_default "$aws_env_prefix" PROFILE "")"
+        [[ -n "$run_aws_profile" ]] || run_contract_die "${aws_env_prefix}_PROFILE is required for AWS targets"
     fi
 
     case "$target_name" in
@@ -400,7 +395,7 @@ run_contract_write_manifest() {
             ;;
     esac
     run_contract_validate_test_mode "$run_test_mode"
-    [[ -n "$run_remote_python_bin" ]] || run_contract_die "suite ${suite_name} is missing SUITE_DEFAULT_REMOTE_PYTHON_BIN"
+    [[ -n "$run_remote_python_bin" ]] || run_contract_die "suite ${suite_name} is missing remote python contract"
     [[ -n "$run_bpftool_bin" ]] || run_contract_die "suite ${suite_name} is missing RUN_BPFTOOL_BIN"
     run_contract_parse_shell_words "$run_corpus_args" run_corpus_argv
     run_contract_parse_shell_words "$run_e2e_args" run_e2e_argv
@@ -490,6 +485,8 @@ RUN_HOST_PYTHON_BIN=$(printf '%q' "$run_host_python_bin")
 RUN_VM_KERNEL_IMAGE=$(printf '%q' "$run_vm_kernel_image")
 RUN_VM_TIMEOUT_SECONDS=$(printf '%q' "$run_vm_timeout_seconds")
 RUN_REMOTE_PYTHON_BIN=$(printf '%q' "$run_remote_python_bin")
+RUN_REMOTE_PYTHON_MODULES_CSV=$(printf '%q' "$run_remote_python_modules")
+RUN_GUEST_PACKAGE_MANAGER=$(printf '%q' "$run_guest_package_manager")
 RUN_SUITE_ENTRYPOINT=$(printf '%q' "$run_suite_entrypoint")
 RUN_TEST_MODE=$(printf '%q' "$run_test_mode")
 RUN_TEST_FUZZ_ROUNDS=$(printf '%q' "$run_test_fuzz_rounds")
@@ -528,9 +525,10 @@ run_contract_write_target_manifest() {
         local aws_env_prefix="${TARGET_AWS_ENV_PREFIX:-}"
         [[ -n "$aws_env_prefix" ]] || run_contract_die "AWS target ${target_name} is missing TARGET_AWS_ENV_PREFIX"
         run_name_tag="$(run_contract_prefixed_env_or_default "$aws_env_prefix" NAME_TAG "${TARGET_NAME_TAG_DEFAULT:-}")"
-        run_aws_region="$(run_contract_resolve_aws_region)"
-        run_aws_profile="$(run_contract_env_or_default AWS_PROFILE "")"
-        [[ -n "$run_aws_profile" ]] || run_contract_die "AWS_PROFILE is required for AWS targets"
+        run_aws_region="$(run_contract_prefixed_env_or_default "$aws_env_prefix" REGION "")"
+        [[ -n "$run_aws_region" ]] || run_contract_die "${aws_env_prefix}_REGION is required for AWS targets"
+        run_aws_profile="$(run_contract_prefixed_env_or_default "$aws_env_prefix" PROFILE "")"
+        [[ -n "$run_aws_profile" ]] || run_contract_die "${aws_env_prefix}_PROFILE is required for AWS targets"
     fi
     cat >"$manifest_path" <<EOF
 RUN_TARGET_NAME=$(printf '%q' "$target_name")

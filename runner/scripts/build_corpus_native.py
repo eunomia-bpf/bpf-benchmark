@@ -917,8 +917,8 @@ def main() -> int:
     if partial:
         print(f"\npartial native build results for: {', '.join(partial)}", file=sys.stderr)
     if failed:
-        print(f"\nnon-fatal native build failures for: {', '.join(failed)}", file=sys.stderr)
-    if len(results) == 1 and failed:
+        print(f"\nfatal native build failures for: {', '.join(failed)}", file=sys.stderr)
+    if partial or failed:
         return 1
     return 0
 

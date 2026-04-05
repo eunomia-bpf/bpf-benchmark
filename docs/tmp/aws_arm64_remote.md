@@ -171,8 +171,9 @@ AWS launch parameters now also follow the same rule:
 - guest-side Python selection is part of the manifest contract; executors do not
   inject `PYTHON_BIN` out-of-band
 - AWS region/account selection is part of the manifest contract through
-  `RUN_AWS_REGION` and `RUN_AWS_PROFILE`, with explicit `AWS_PROFILE` required for
-  canonical AWS runs
+  `RUN_AWS_REGION` and `RUN_AWS_PROFILE`, with target-prefixed
+  `AWS_ARM64_REGION` / `AWS_ARM64_PROFILE` and `AWS_X86_REGION` /
+  `AWS_X86_PROFILE` as the only canonical inputs
 
 ### 4.4 Deleted legacy AWS control scripts
 
@@ -427,6 +428,16 @@ Performance suites must remain serialized.
   of sharing repo-root `runner/build/vendor/bpftool`.
 - Tightened AWS remote prereqs so Python/bpftool provisioning is driven by the
   explicit manifest runtime contract rather than a second hardcoded policy.
+- Tightened native corpus prebuilds so any requested repo with `failed` or
+  `partial` status now fails the whole prep step; canonical bundle staging also
+  rejects empty staged native repo directories.
+- Added repo-owned KVM guest prereq installation so canonical local execution no
+  longer relies on ambient guest tooling; the x86 KVM target now carries its own
+  remote Python default (`python3`) instead of inheriting the AWS-oriented
+  `python3.11` contract, plus an explicit guest package-manager contract (`apt`)
+  and manifest-written runtime Python module requirement (`PyYAML`).
+- Split benchmark bundle assembly by suite so `micro`, `corpus`, and `e2e`
+  bundles stage only the code each suite actually runs.
 - Replaced repo-root module build outputs in canonical AWS bundle assembly with
   explicit staged `.ko` directories.
 - Removed the last hardcoded `FUZZ_ROUNDS` / `scx_prog_show_race_*` fallback in
@@ -439,6 +450,8 @@ Performance suites must remain serialized.
 - Moved ARM64 cross-build roots under repo-local cache paths instead of shared
   `/tmp/codex/...` directories.
 - Added explicit KVM guest-side prereq validation before suite execution.
+- Added repo-owned KVM guest prereq installation so canonical local `x86-kvm`
+  no longer silently depends on ambient guest tool availability.
 - Restored the old `vm-corpus` default sample semantics in the manifest layer:
   `VM_CORPUS_SAMPLES` remains the canonical default unless `SAMPLES` is
   explicitly overridden.
@@ -451,6 +464,14 @@ Performance suites must remain serialized.
 - Removed silent per-program REJIT fallback synthesis from `runner/libs/case_common.py`
   and `corpus/driver.py`.
 - Removed Tetragon ambient binary fallback to `corpus/build/tetragon/bin/tetragon`.
+- Made multi-repo native corpus preparation fail-fast on any requested repo with
+  `failed` or `partial` status; canonical bundle staging no longer tolerates
+  empty placeholder repo build dirs.
+- Narrowed remote benchmark tarballs so `micro`, `corpus`, and `e2e` each stage
+  only the suite tree they actually execute.
+- Restored the `e2e` bundle contract by staging `corpus/config/` alongside
+  `e2e/`, so `e2e/driver.py` can still resolve the default
+  `corpus/config/macro_apps.yaml`.
 - Removed the Tracee output-style compatibility branch; the runner now uses the
   repo-managed Tracee `json:` output contract directly.
 - Removed the bpftrace `usdt` stdlib temporary-source rewrite; bpftrace now

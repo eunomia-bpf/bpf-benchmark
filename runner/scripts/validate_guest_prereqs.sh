@@ -25,8 +25,16 @@ require_cmd() {
     command -v "$1" >/dev/null 2>&1 || die "required guest command is missing: $1"
 }
 
+python_import_for_package() {
+    case "$1" in
+        PyYAML) printf '%s\n' yaml ;;
+        pyelftools) printf '%s\n' elftools ;;
+        *) die "unsupported python package contract: $1" ;;
+    esac
+}
+
 main() {
-    local command_name tool_name
+    local command_name tool_name package_name imports=() import_name
     cd "$WORKSPACE"
     require_cmd bash
     require_cmd "${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}"
@@ -41,6 +49,21 @@ main() {
         [[ -n "$tool_name" ]] || continue
         require_cmd "$tool_name"
     done
+    IFS=',' read -r -a _run_python_packages <<<"${RUN_REMOTE_PYTHON_MODULES_CSV:-}"
+    for package_name in "${_run_python_packages[@]}"; do
+        [[ -n "$package_name" ]] || continue
+        import_name="$(python_import_for_package "$package_name")"
+        imports+=("$import_name")
+    done
+    if (( ${#imports[@]} )); then
+        "${RUN_REMOTE_PYTHON_BIN}" - "${imports[@]}" <<'PY'
+import importlib
+import sys
+
+for module_name in sys.argv[1:]:
+    importlib.import_module(module_name)
+PY
+    fi
 }
 
 main "$@"
