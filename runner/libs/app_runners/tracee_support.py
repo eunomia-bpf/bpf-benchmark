@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import functools
 import json
 import os
 import re
@@ -37,7 +36,6 @@ TRACEE_STATS_PATTERN = re.compile(
     r"EventCount[:=]\s*(?P<events>\d+).*?LostEvCount[:=]\s*(?P<lost>\d+)(?:.*?LostWrCount[:=]\s*(?P<lost_writes>\d+))?",
     re.IGNORECASE,
 )
-DEFAULT_CORPUS_TRACEE_BINARY = ROOT_DIR / "corpus" / "build" / "tracee" / "bin" / "tracee"
 TRACEE_RUNTIME_DIR = Path("/var/tmp/tracee")
 TRACEE_EVENT_OUTPUT_PATH = TRACEE_RUNTIME_DIR / "events.json"
 TRACEE_HEALTH_HOST = "127.0.0.1"
@@ -346,8 +344,6 @@ def resolve_tracee_binary(explicit: str | None, setup_result: Mapping[str, objec
         if not candidate.exists():
             raise RuntimeError(f"Tracee binary not found: {candidate}")
         return str(candidate)
-    if DEFAULT_CORPUS_TRACEE_BINARY.exists():
-        return str(DEFAULT_CORPUS_TRACEE_BINARY.resolve())
     scripted = str(setup_result.get("tracee_binary") or "").strip()
     if scripted:
         candidate = Path(scripted).resolve()
@@ -371,35 +367,14 @@ def _tracee_healthz_ready(host: str, port: int) -> bool:
         return False
 
 
-@functools.lru_cache(maxsize=None)
-def _tracee_output_style(binary: str) -> str:
-    completed = run_command([binary, "man", "output"], check=False, timeout=10)
-    if completed.returncode != 0:
-        details = tail_text(completed.stderr or completed.stdout)
-        raise RuntimeError(f"Tracee output manual lookup failed for {binary}: {details}")
-    manual_text = f"{completed.stdout}\n{completed.stderr}"
-    if "destinations." in manual_text:
-        return "destinations"
-    return "legacy"
-
-
-def _tracee_output_args(binary: str, event_output_path: Path) -> list[str]:
-    if _tracee_output_style(binary) == "destinations":
-        return [
-            "--output",
-            "destinations.file_json.type=file",
-            "--output",
-            "destinations.file_json.format=json",
-            "--output",
-            f"destinations.file_json.path={event_output_path}",
-        ]
+def _tracee_output_args(event_output_path: Path) -> list[str]:
     return ["--output", f"json:{event_output_path}"]
 
 
 def build_tracee_commands(binary: str, events: Sequence[str], extra_args: Sequence[str] = ()) -> list[list[str]]:
     event_text = ",".join(str(event) for event in events)
     sig_dir = _ensure_empty_signatures_dir()
-    output_args = _tracee_output_args(binary, TRACEE_EVENT_OUTPUT_PATH)
+    output_args = _tracee_output_args(TRACEE_EVENT_OUTPUT_PATH)
     return [[
         binary,
         "--events",

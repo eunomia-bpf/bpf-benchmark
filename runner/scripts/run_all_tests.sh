@@ -193,7 +193,10 @@ if [ "$SKIP_NEGATIVE" -eq 0 ] && [ -d "$NEGATIVE_DIR" ]; then
     fi
 
     echo "--- scx_prog_show_race (${SCX_PROG_SHOW_RACE_MODE}) ---"
-    if "${NEGATIVE_BUILD_DIR}/scx_prog_show_race" "${SCX_PROG_SHOW_RACE_ARGS[@]}"; then
+    if env \
+        SCX_RUNTIME_LD_LIBRARY_PATH="${CROSS_RUNTIME_LD_LIBRARY_PATH}" \
+        LD_LIBRARY_PATH="${CROSS_RUNTIME_LD_LIBRARY_PATH}" \
+        "${NEGATIVE_BUILD_DIR}/scx_prog_show_race" "${SCX_PROG_SHOW_RACE_ARGS[@]}"; then
         PASS=$((PASS + 1))
     else
         FAIL=$((FAIL + 1))

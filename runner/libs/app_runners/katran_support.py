@@ -20,10 +20,8 @@ DEFAULT_KATRAN_BALANCER_PROG_PATH = ROOT_DIR / "corpus" / "build" / "katran" / "
 DEFAULT_KATRAN_PROGRAM_NAME = "balancer_ingress"
 DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
 DEFAULT_KATRAN_SERVER_BINARY_CANDIDATES = (
+    ROOT_DIR / "corpus" / "build" / "katran" / "bin" / "katran_server_grpc",
     ROOT_DIR / "e2e" / "cases" / "katran" / "bin" / "katran_server_grpc",
-    Path("/usr/local/bin/katran_server_grpc"),
-    Path("/usr/local/sbin/katran_server_grpc"),
-    Path("/opt/katran/bin/katran_server_grpc"),
 )
 DEFAULT_KATRAN_SERVER_LIB_DIR = ROOT_DIR / "e2e" / "cases" / "katran" / "lib"
 DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 30
@@ -235,10 +233,6 @@ def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
     for candidate in candidates:
         if candidate.is_file() and os.access(candidate, os.X_OK):
             return candidate
-    for binary_name in ("katran_server_grpc", "katran_server"):
-        resolved = which(binary_name)
-        if resolved:
-            return Path(resolved).resolve()
     rendered = ", ".join(str(candidate) for candidate in candidates) or "<none>"
     raise RuntimeError(f"Katran server binary not found or not executable; tried: {rendered}")
 

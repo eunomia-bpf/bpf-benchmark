@@ -460,7 +460,11 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         stop=stop,
         cleanup=cleanup,
         should_run_post_rejit=lambda result: int(
-            (((result.get("counts") or {}).get("applied_sites", 0)) or 0)
+            applied_site_totals_from_rejit_result(result if isinstance(result, Mapping) else None).get(
+                "total_sites",
+                0,
+            )
+            or 0
         ) > 0,
     )
     if lifecycle_result.state is None:
@@ -485,20 +489,20 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         limitations.append(
             "selected scx workloads did not accumulate measurable per-program run_cnt/run_time_ns during this run."
         )
-    error_message = ""
-    rejit_error = ""
+    per_program_records: Mapping[object, object] = {}
     if isinstance(rejit_result, Mapping):
-        rejit_error = str(rejit_result.get("error") or "").strip()
-    if rejit_error:
-        limitations.append(f"Partial ReJIT/apply errors were reported: {rejit_error}")
-    if rejit_result_has_any_apply(rejit_result) and post_rejit is None:
-        error_message = "scx post-ReJIT phase is missing"
+        raw_per_program = rejit_result.get("per_program")
+        if raw_per_program is None:
+            per_program_records = {}
+        elif isinstance(raw_per_program, Mapping):
+            per_program_records = raw_per_program
+        else:
+            raise RuntimeError("scx REJIT result is missing per_program records")
 
-    mode = "scx_rusty_loader"
     site_summary = {
         "programs_with_sites": sum(
             1
-            for record in ((rejit_result or {}).get("per_program") or {}).values()
+            for record in per_program_records.values()
             if int(
                 applied_site_totals_from_rejit_result(record if isinstance(record, Mapping) else None).get(
                     "total_sites",
@@ -509,6 +513,23 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         ),
         "site_totals": applied_site_totals_from_rejit_result(rejit_result if isinstance(rejit_result, Mapping) else None),
     }
+    applied_site_total = int(((site_summary.get("site_totals") or {}).get("total_sites", 0)) or 0)
+    comparison = (
+        compare_phases(baseline, post_rejit)
+        if applied_site_total > 0
+        else {"comparable": False, "reason": "no scheduler programs changed during ReJIT apply"}
+    )
+
+    error_message = ""
+    rejit_error = ""
+    if isinstance(rejit_result, Mapping):
+        rejit_error = str(rejit_result.get("error") or "").strip()
+    if rejit_error:
+        limitations.append(f"Partial ReJIT/apply errors were reported: {rejit_error}")
+    if applied_site_total > 0 and post_rejit is None:
+        error_message = "scx post-ReJIT phase is missing"
+
+    mode = "scx_rusty_loader"
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -531,7 +552,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         "site_summary": site_summary,
         "rejit_result": rejit_result,
         "post_rejit": post_rejit,
-        "comparison": compare_phases(baseline, post_rejit),
+        "comparison": comparison,
         "limitations": limitations,
     }
     if error_message:

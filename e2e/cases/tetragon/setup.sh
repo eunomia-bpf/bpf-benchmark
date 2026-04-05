@@ -1,24 +1,47 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-apt_install() {
-  if ! command -v apt-get >/dev/null 2>&1; then
-    return 1
-  fi
-  DEBIAN_FRONTEND=noninteractive apt-get update -y >/dev/null 2>&1
-  DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd -- "${SCRIPT_DIR}/../../.." && pwd)
+BUNDLED_TETRAGON_BINARY="${REPO_ROOT}/corpus/build/tetragon/bin/tetragon"
+BUNDLED_BPF_DIR="${REPO_ROOT}/corpus/build/tetragon"
+EXPLICIT_TETRAGON_BINARY="${TETRAGON_BINARY:-}"
+EXPLICIT_BPF_DIR="${TETRAGON_BPF_LIB_DIR:-}"
+
+binary_matches_host_arch() {
+  local candidate="$1"
+  case "$(uname -m)" in
+    aarch64|arm64)
+      file "${candidate}" | grep -F "ARM aarch64" >/dev/null
+      ;;
+    x86_64|amd64)
+      file "${candidate}" | grep -F "x86-64" >/dev/null
+      ;;
+    *)
+      return 0
+      ;;
+  esac
 }
 
-find_binary() {
-  local name="$1"
-  shift
-  if command -v "${name}" >/dev/null 2>&1; then
-    command -v "${name}"
-    return 0
-  fi
+pick_binary() {
   local candidate
   for candidate in "$@"; do
-    if [[ -x "${candidate}" ]]; then
+    [[ -n "${candidate}" ]] || continue
+    [[ -x "${candidate}" ]] || continue
+    if binary_matches_host_arch "${candidate}"; then
+      printf '%s\n' "${candidate}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+pick_bpf_lib_dir() {
+  local candidate
+  for candidate in "${EXPLICIT_BPF_DIR}" "${BUNDLED_BPF_DIR}"; do
+    [[ -n "${candidate}" ]] || continue
+    [[ -d "${candidate}" ]] || continue
+    if find "${candidate}" -maxdepth 1 -type f -name '*.bpf.o' | grep -q .; then
       printf '%s\n' "${candidate}"
       return 0
     fi
@@ -33,7 +56,8 @@ for tool in stress-ng fio curl tar; do
   fi
 done
 if [[ "${#missing_pkgs[@]}" -gt 0 ]]; then
-  apt_install "${missing_pkgs[@]}" >/dev/null 2>&1
+  echo "missing required Tetragon workload tools: ${missing_pkgs[*]}" >&2
+  exit 1
 fi
 
 if ! command -v stress-ng >/dev/null 2>&1; then
@@ -41,56 +65,25 @@ if ! command -v stress-ng >/dev/null 2>&1; then
   exit 1
 fi
 
-install_dir="/tmp/tetragon-e2e"
-if tetragon_bin="$(find_binary tetragon \
-  /usr/local/bin/tetragon \
-  /tmp/tetragon/tetragon \
-  ${install_dir}/tetragon)"; then
-  :
-else
-  tetragon_bin=""
-fi
-if tetra_bin="$(find_binary tetra \
-  /usr/local/bin/tetra \
-  /tmp/tetragon/tetra \
-  ${install_dir}/tetra)"; then
-  :
-else
-  tetra_bin=""
+tetragon_bin=""
+tetragon_bin="$(pick_binary \
+  "${EXPLICIT_TETRAGON_BINARY}" \
+  "${BUNDLED_TETRAGON_BINARY}" || true)"
+if [[ -z "${tetragon_bin}" ]]; then
+  echo "missing repo-managed Tetragon binary; checked ${EXPLICIT_TETRAGON_BINARY:-<unset>} and ${BUNDLED_TETRAGON_BINARY}" >&2
+  exit 1
 fi
 
-if [[ -z "${tetragon_bin}" ]] && command -v curl >/dev/null 2>&1; then
-  rm -rf "${install_dir}"
-  mkdir -p "${install_dir}"
-  # Determine the latest release tag for the correct archive name
-  if ! latest_tag="$(curl -sfL -o /dev/null -w '%{url_effective}' https://github.com/cilium/tetragon/releases/latest | grep -oP 'tag/\K.*')"; then
-    echo "failed to resolve latest tetragon release tag" >&2
-    exit 1
-  fi
-  archive_name="tetragon-${latest_tag}-amd64.tar.gz"
-  archive_path="${install_dir}/${archive_name}"
-  if curl --retry 3 --retry-delay 1 --retry-connrefused -sfL \
-    -o "${archive_path}" \
-    "https://github.com/cilium/tetragon/releases/download/${latest_tag}/${archive_name}" &&
-    tar -xzf "${archive_path}" -C "${install_dir}"; then
-    found_tetragon="$(find "${install_dir}" -maxdepth 2 -type f -name tetragon -perm -u+x | head -n1)"
-    found_tetra="$(find "${install_dir}" -maxdepth 2 -type f -name tetra -perm -u+x | head -n1)"
-    if [[ -n "${found_tetragon}" ]]; then
-      tetragon_bin="${found_tetragon}"
-    fi
-    if [[ -n "${found_tetra}" ]]; then
-      tetra_bin="${found_tetra}"
-    fi
-  else
-    echo "failed to download or extract tetragon release ${latest_tag}" >&2
-    exit 1
-  fi
+bpf_lib_dir=""
+if bpf_lib_dir="$(pick_bpf_lib_dir)"; then
+  :
+else
+  echo "missing bundled Tetragon .bpf.o files under ${BUNDLED_BPF_DIR}" >&2
+  exit 1
 fi
 
 echo "TETRAGON_BINARY=${tetragon_bin}"
-echo "TETRA_BINARY=${tetra_bin}"
+echo "TETRAGON_BPF_LIB_DIR=${bpf_lib_dir}"
 echo "STRESS_NG_BINARY=$(command -v stress-ng)"
 
-if [[ -n "${tetragon_bin}" ]]; then
-  timeout 5s "${tetragon_bin}" --help >/dev/null 2>&1
-fi
+timeout 5s "${tetragon_bin}" --help >/dev/null 2>&1

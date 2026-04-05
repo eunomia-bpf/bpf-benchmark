@@ -19,6 +19,8 @@ LLVM_CONFIG ?= $(shell command -v llvm-config 2>/dev/null)
 LLVMBPF_CMAKE_CACHE := $(REPO_ROOT)/vendor/llvmbpf/build/CMakeCache.txt
 LLVMBPF_LLVM_DIR ?= $(shell sed -n 's/^LLVM_DIR:PATH=//p' "$(LLVMBPF_CMAKE_CACHE)" 2>/dev/null | head -n 1)
 LLVM_DIR_FLAG := $(if $(filter ON,$(MICRO_EXEC_ENABLE_LLVMBPF)),$(if $(strip $(LLVMBPF_LLVM_DIR)),-DLLVM_DIR=$(LLVMBPF_LLVM_DIR),$(if $(LLVM_CONFIG),-DLLVM_DIR=$$($(LLVM_CONFIG) --cmakedir),)),)
+MICRO_LLVMBPF_LIBRARY ?=
+MICRO_LLVMBPF_BUILD_CACHE ?=
 PYTHON ?= python3
 REPOS ?=
 SKIP_CORPUS_FETCH ?= 0
@@ -28,7 +30,11 @@ BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
 DAEMON ?= daemon/target/release/bpfrejit-daemon
 DAEMON_ARGS ?=
 DAEMON_SOCKET ?= /tmp/bpfrejit.sock
-TARGET ?=
+VM_BACKEND ?= vng
+VM_EXECUTABLE ?= $(ROOT_DIR)/scripts/vng-wrapper.sh
+VM_LOCK_SCOPE ?= vm_global
+VM_MACHINE_NAME ?= x86-kvm
+VM_MACHINE_ARCH ?= x86_64
 PROFILE ?=
 FILTERS ?=
 SAMPLES ?= 3
@@ -45,6 +51,8 @@ E2E_ARGS ?=
 
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(REPO_ROOT)/$(BZIMAGE))
 DAEMON_PATH := $(if $(filter /%,$(DAEMON)),$(DAEMON),$(REPO_ROOT)/$(DAEMON))
+KATRAN_SERVER_BINARY ?= $(REPO_ROOT)/e2e/cases/katran/bin/katran_server_grpc
+KATRAN_SERVER_LIB_DIR ?= $(REPO_ROOT)/e2e/cases/katran/lib
 VMLINUX_PATH := $(REPO_ROOT)/vendor/linux-framework/vmlinux
 MICRO_RUNNER := $(ROOT_DIR)/build/micro_exec
 KERNEL_TEST_DIR := $(REPO_ROOT)/tests/kernel
@@ -79,7 +87,11 @@ _VENV_FOUND := $(firstword $(foreach v,$(_VENV_CANDIDATES),$(if $(wildcard $(v)/
 VENV ?= $(_VENV_FOUND)
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 VM_INIT := $(VENV_ACTIVATE)
-TARGET_FLAG := $(if $(strip $(TARGET)),--target "$(TARGET)",)
+VM_BACKEND_FLAG := $(if $(strip $(VM_BACKEND)),--vm-backend "$(VM_BACKEND)",)
+VM_EXECUTABLE_FLAG := $(if $(strip $(VM_EXECUTABLE)),--vm-executable "$(VM_EXECUTABLE)",)
+VM_LOCK_SCOPE_FLAG := $(if $(strip $(VM_LOCK_SCOPE)),--vm-lock-scope "$(VM_LOCK_SCOPE)",)
+VM_MACHINE_NAME_FLAG := $(if $(strip $(VM_MACHINE_NAME)),--vm-machine-name "$(VM_MACHINE_NAME)",)
+VM_MACHINE_ARCH_FLAG := $(if $(strip $(VM_MACHINE_ARCH)),--vm-machine-arch "$(VM_MACHINE_ARCH)",)
 VM_CPU_FLAG := $(if $(strip $(VM_CPUS)),--cpus "$(VM_CPUS)",)
 VM_MEM_FLAG := $(if $(strip $(VM_MEM)),--mem "$(VM_MEM)",)
 JOBS ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
@@ -115,6 +127,8 @@ endif
 corpus-build: corpus-fetch corpus-build-native
 
 corpus-build-native: corpus-fetch vendor_bpftool
+	KATRAN_SERVER_BINARY="$(KATRAN_SERVER_BINARY)" \
+	KATRAN_SERVER_LIB_DIR="$(KATRAN_SERVER_LIB_DIR)" \
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" $(REPO_FLAGS)
 
 corpus-build-bcc: vendor_bpftool
@@ -139,6 +153,8 @@ corpus-build-scx:
 
 corpus-build-katran:
 	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo katran
+	KATRAN_SERVER_BINARY="$(KATRAN_SERVER_BINARY)" \
+	KATRAN_SERVER_LIB_DIR="$(KATRAN_SERVER_LIB_DIR)" \
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo katran
 
 corpus-build-tracee:
@@ -164,9 +180,12 @@ scx-artifacts:
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_scx_artifacts.py"
 
 e2e-prep:
-	@if [ ! -d "$(REPO_ROOT)/runner/repos/bcc" ] || [ ! -d "$(REPO_ROOT)/runner/repos/scx" ]; then \
-		$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo bcc --repo scx; \
+	@if [ ! -d "$(REPO_ROOT)/runner/repos/bcc" ] || [ ! -d "$(REPO_ROOT)/runner/repos/scx" ] || [ ! -d "$(REPO_ROOT)/runner/repos/tracee" ] || [ ! -d "$(REPO_ROOT)/runner/repos/tetragon" ] || [ ! -d "$(REPO_ROOT)/runner/repos/katran" ]; then \
+		$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo bcc --repo scx --repo tracee --repo tetragon --repo katran; \
 	fi
+	KATRAN_SERVER_BINARY="$(KATRAN_SERVER_BINARY)" \
+	KATRAN_SERVER_LIB_DIR="$(KATRAN_SERVER_LIB_DIR)" \
+	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo bcc --repo tracee --repo tetragon --repo katran
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_scx_artifacts.py"
 
 e2e-tracee-setup:
@@ -209,6 +228,8 @@ micro_exec: $(LIBBPF_A) $(LIBBPF_HEADER) | $(BUILD_DIR)
 		-DMICRO_LIBBPF_PREFIX=$(LIBBPF_PREFIX) \
 		-DMICRO_LIBBPF_LIBRARY=$(LIBBPF_A) \
 		$(LLVM_DIR_FLAG) \
+		$(if $(strip $(MICRO_LLVMBPF_LIBRARY)),-DMICRO_LLVMBPF_LIBRARY=$(MICRO_LLVMBPF_LIBRARY),) \
+		$(if $(strip $(MICRO_LLVMBPF_BUILD_CACHE)),-DMICRO_LLVMBPF_BUILD_CACHE=$(MICRO_LLVMBPF_BUILD_CACHE),) \
 		-DMICRO_EXEC_ENABLE_LLVMBPF=$(MICRO_EXEC_ENABLE_LLVMBPF)
 	cmake --build $(BUILD_DIR) --target micro_exec -j "$(JOBS)"
 
@@ -241,7 +262,12 @@ daemon-binary:
 	cargo build --release --manifest-path "$(REPO_ROOT)/daemon/Cargo.toml"
 
 vm-shell: kernel-image kinsn-modules-build
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
+	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
+		$(VM_BACKEND_FLAG) \
+		$(VM_EXECUTABLE_FLAG) \
+		$(VM_LOCK_SCOPE_FLAG) \
+		$(VM_MACHINE_NAME_FLAG) \
+		$(VM_MACHINE_ARCH_FLAG) \
 		--action vm-test \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		$(VM_CPU_FLAG) \
@@ -249,13 +275,18 @@ vm-shell: kernel-image kinsn-modules-build
 		--timeout "$(VM_TEST_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) $(VM_COMMAND)'
 
-vm-test: scx-artifacts
+vm-test: scx-artifacts daemon-binary
 	$(MAKE) kernel-image BZIMAGE="$(BZIMAGE)"
 	$(MAKE) upstream-selftests-build BZIMAGE="$(BZIMAGE)"
 	$(MAKE) unittest-build
 	$(MAKE) negative-build
 	$(MAKE) kinsn-modules-build BZIMAGE="$(BZIMAGE)"
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
+	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
+		$(VM_BACKEND_FLAG) \
+		$(VM_EXECUTABLE_FLAG) \
+		$(VM_LOCK_SCOPE_FLAG) \
+		$(VM_MACHINE_NAME_FLAG) \
+		$(VM_MACHINE_ARCH_FLAG) \
 		--action vm-test \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		$(VM_CPU_FLAG) \
@@ -263,8 +294,13 @@ vm-test: scx-artifacts
 		--timeout "$(VM_TEST_TIMEOUT)" \
 		--command 'SCX_PROG_SHOW_RACE_MODE="$(SCX_PROG_SHOW_RACE_MODE)" SCX_PROG_SHOW_RACE_ITERATIONS="$(SCX_PROG_SHOW_RACE_ITERATIONS)" SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="$(SCX_PROG_SHOW_RACE_LOAD_TIMEOUT)" SCX_PROG_SHOW_RACE_SKIP_PROBE="$(SCX_PROG_SHOW_RACE_SKIP_PROBE)" $(VM_INIT) "$(ROOT_DIR)/scripts/run_all_tests.sh" "$(REPO_ROOT)"'
 
-vm-selftest: unittest-build negative-build kernel-image kinsn-modules-build
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
+vm-selftest: unittest-build negative-build daemon-binary kernel-image kinsn-modules-build
+	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
+		$(VM_BACKEND_FLAG) \
+		$(VM_EXECUTABLE_FLAG) \
+		$(VM_LOCK_SCOPE_FLAG) \
+		$(VM_MACHINE_NAME_FLAG) \
+		$(VM_MACHINE_ARCH_FLAG) \
 		--action vm-selftest \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		$(VM_CPU_FLAG) \
@@ -274,7 +310,12 @@ vm-selftest: unittest-build negative-build kernel-image kinsn-modules-build
 
 vm-negative-test: scx-artifacts kernel-image kinsn-modules-build
 	$(MAKE) -C "$(NEGATIVE_TEST_DIR)"
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
+	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
+		$(VM_BACKEND_FLAG) \
+		$(VM_EXECUTABLE_FLAG) \
+		$(VM_LOCK_SCOPE_FLAG) \
+		$(VM_MACHINE_NAME_FLAG) \
+		$(VM_MACHINE_ARCH_FLAG) \
 		--action vm-negative-test \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		$(VM_CPU_FLAG) \
@@ -284,7 +325,12 @@ vm-negative-test: scx-artifacts kernel-image kinsn-modules-build
 
 vm-micro-smoke: micro_exec micro-programs kernel-image
 	mkdir -p "$(MICRO_RESULTS_DIR)"
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
+	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
+		$(VM_BACKEND_FLAG) \
+		$(VM_EXECUTABLE_FLAG) \
+		$(VM_LOCK_SCOPE_FLAG) \
+		$(VM_MACHINE_NAME_FLAG) \
+		$(VM_MACHINE_ARCH_FLAG) \
 		--action vm-micro-smoke \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		$(VM_CPU_FLAG) \
@@ -294,7 +340,12 @@ vm-micro-smoke: micro_exec micro-programs kernel-image
 
 vm-micro: micro_exec micro-programs kernel-image
 	mkdir -p "$(MICRO_RESULTS_DIR)"
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
+	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
+		$(VM_BACKEND_FLAG) \
+		$(VM_EXECUTABLE_FLAG) \
+		$(VM_LOCK_SCOPE_FLAG) \
+		$(VM_MACHINE_NAME_FLAG) \
+		$(VM_MACHINE_ARCH_FLAG) \
 		--action vm-micro \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		$(VM_CPU_FLAG) \
@@ -304,7 +355,12 @@ vm-micro: micro_exec micro-programs kernel-image
 
 vm-corpus: corpus-build corpus-build-native vendor_bpftool daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(CORPUS_RESULTS_DIR)"
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
+	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
+		$(VM_BACKEND_FLAG) \
+		$(VM_EXECUTABLE_FLAG) \
+		$(VM_LOCK_SCOPE_FLAG) \
+		$(VM_MACHINE_NAME_FLAG) \
+		$(VM_MACHINE_ARCH_FLAG) \
 		--action vm-corpus \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		$(VM_CPU_FLAG) \
@@ -314,7 +370,12 @@ vm-corpus: corpus-build corpus-build-native vendor_bpftool daemon-binary kernel-
 
 vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"
-	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
+	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" \
+		$(VM_BACKEND_FLAG) \
+		$(VM_EXECUTABLE_FLAG) \
+		$(VM_LOCK_SCOPE_FLAG) \
+		$(VM_MACHINE_NAME_FLAG) \
+		$(VM_MACHINE_ARCH_FLAG) \
 		--action vm-e2e \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		$(VM_CPU_FLAG) \
@@ -323,10 +384,10 @@ vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary ke
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/e2e/driver.py" $(E2E_CASE) $(E2E_ARGS)'
 
 vm-all:
-	$(MAKE) vm-test TARGET="$(TARGET)"
-	$(MAKE) vm-micro TARGET="$(TARGET)"
-	$(MAKE) vm-corpus TARGET="$(TARGET)"
-	$(MAKE) vm-e2e TARGET="$(TARGET)"
+	$(MAKE) vm-test
+	$(MAKE) vm-micro
+	$(MAKE) vm-corpus
+	$(MAKE) vm-e2e
 
 clean:
 	rm -rf $(BUILD_DIR)

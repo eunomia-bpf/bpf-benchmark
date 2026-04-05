@@ -389,14 +389,24 @@ def build_program_summary(
 ) -> list[dict[str, object]]:
     baseline_programs = aggregate_programs(baseline)
     post_programs = aggregate_programs(post or {})
-    per_program = (rejit_result or {}).get("per_program") if isinstance(rejit_result, Mapping) else {}
+    per_program: Mapping[object, object] = {}
+    if isinstance(rejit_result, Mapping):
+        raw_per_program = rejit_result.get("per_program")
+        if raw_per_program is None:
+            per_program = {}
+        elif isinstance(raw_per_program, Mapping):
+            per_program = raw_per_program
+        else:
+            raise RuntimeError("tetragon REJIT result is missing per_program records")
     rows: list[dict[str, object]] = []
     for prog_id in sorted(set(baseline_programs) | set(post_programs), key=int):
         before = baseline_programs.get(prog_id, {})
         after = post_programs.get(prog_id, {})
         apply_record = {}
-        if isinstance(per_program, Mapping):
+        if per_program:
             apply_record = per_program.get(int(prog_id)) or per_program.get(str(prog_id)) or {}
+            if not isinstance(apply_record, Mapping):
+                raise RuntimeError(f"tetragon REJIT result is missing per-program apply record for prog {prog_id}")
         sites = applied_site_totals_from_rejit_result(apply_record if isinstance(apply_record, Mapping) else None).get("total_sites")
         stock_avg = before.get("avg_ns_per_run")
         rejit_avg = after.get("avg_ns_per_run")

@@ -285,6 +285,7 @@ static int spawn_scx(const char *scx_binary, struct scx_child *child)
 {
 	char command[PATH_MAX + 128];
 	char path_env[4096];
+	const char *ld_library_path;
 	int out_fd = -1;
 	int err_fd = -1;
 
@@ -308,6 +309,9 @@ static int spawn_scx(const char *scx_binary, struct scx_child *child)
 	if (child->pid == 0) {
 		append_usr_local_sbin(path_env, sizeof(path_env));
 		setenv("PATH", path_env, 1);
+		ld_library_path = getenv("SCX_RUNTIME_LD_LIBRARY_PATH");
+		if (ld_library_path && ld_library_path[0] != '\0')
+			setenv("LD_LIBRARY_PATH", ld_library_path, 1);
 
 		out_fd = open(child->stdout_path, O_WRONLY | O_TRUNC);
 		err_fd = open(child->stderr_path, O_WRONLY | O_TRUNC);

@@ -44,8 +44,12 @@ set(MICRO_EXEC_SOURCES
 )
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)
-    set(MICRO_LLVMBPF_LIBRARY "${MICRO_REPO_ROOT}/vendor/llvmbpf/libllvmbpf_vm.a")
-    set(MICRO_LLVMBPF_BUILD_CACHE "${MICRO_REPO_ROOT}/vendor/llvmbpf/build/CMakeCache.txt")
+    if(NOT DEFINED MICRO_LLVMBPF_LIBRARY)
+        set(MICRO_LLVMBPF_LIBRARY "${MICRO_REPO_ROOT}/vendor/llvmbpf/libllvmbpf_vm.a")
+    endif()
+    if(NOT DEFINED MICRO_LLVMBPF_BUILD_CACHE)
+        set(MICRO_LLVMBPF_BUILD_CACHE "${MICRO_REPO_ROOT}/vendor/llvmbpf/build/CMakeCache.txt")
+    endif()
     if(NOT EXISTS "${MICRO_LLVMBPF_LIBRARY}")
         message(FATAL_ERROR "MICRO_EXEC_ENABLE_LLVMBPF=ON requires ${MICRO_LLVMBPF_LIBRARY}")
     endif()
@@ -84,11 +88,12 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
     endif()
     separate_arguments(LLVM_LINK_FLAGS NATIVE_COMMAND "${LLVM_LINK_FLAGS_RAW}")
 
+    get_filename_component(MICRO_LLVMBPF_BUILD_DIR "${MICRO_LLVMBPF_BUILD_CACHE}" DIRECTORY)
     set(MICRO_LLVMBPF_SPDLOG_LIBRARY "")
     foreach(
         SPDLOG_CANDIDATE
-        "${MICRO_REPO_ROOT}/vendor/llvmbpf/build/_deps/spdlog-build/libspdlogd.a"
-        "${MICRO_REPO_ROOT}/vendor/llvmbpf/build/_deps/spdlog-build/libspdlog.a"
+        "${MICRO_LLVMBPF_BUILD_DIR}/_deps/spdlog-build/libspdlogd.a"
+        "${MICRO_LLVMBPF_BUILD_DIR}/_deps/spdlog-build/libspdlog.a"
     )
         if(EXISTS "${SPDLOG_CANDIDATE}")
             set(MICRO_LLVMBPF_SPDLOG_LIBRARY "${SPDLOG_CANDIDATE}")

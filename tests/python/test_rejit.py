@@ -391,6 +391,31 @@ def test_apply_daemon_rejit_branch_flip_profiles_before_optimize(monkeypatch) ->
     assert ("socket", (Path("/tmp/daemon.sock"), 123, ["branch_flip"])) in calls
 
 
+def test_apply_daemon_rejit_branch_flip_profile_failure_populates_per_program_records(monkeypatch) -> None:
+    monkeypatch.setattr(
+        rejit,
+        "_prepare_branch_flip_profile",
+        lambda socket_path, **kwargs: {
+            "output": f"profile failed on {socket_path}",
+            "exit_code": 7,
+            "error": "profile collection failed",
+        },
+    )
+
+    result = rejit.apply_daemon_rejit(
+        [101, 102],
+        enabled_passes=["branch_flip"],
+        daemon_socket_path=Path("/tmp/daemon.sock"),
+    )
+
+    assert result["applied"] is False
+    assert result["exit_code"] == 7
+    assert sorted(result["per_program"].keys()) == [101, 102]
+    assert result["per_program"][101]["applied"] is False
+    assert result["per_program"][101]["changed"] is False
+    assert result["per_program"][101]["error"] == "profile collection failed"
+
+
 def test_scan_programs_uses_supplied_daemon_socket_without_restart(monkeypatch) -> None:
     calls: list[tuple[str, object]] = []
     daemon_proc = object()

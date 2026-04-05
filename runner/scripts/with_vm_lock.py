@@ -6,21 +6,32 @@ import fcntl
 import json
 import os
 import subprocess
-import sys
 import time
 from pathlib import Path
 from typing import Any
 
-if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+ROOT_DIR = Path(__file__).resolve().parents[2]
+VM_LOCK_ROOT = ROOT_DIR / ".cache" / "runner" / "vm-locks"
+VM_QUEUE_ROOT = ROOT_DIR / ".cache" / "runner" / "vm-queue"
 
-from runner.libs.machines import lock_path_for_machine, queue_path_for_machine, resolve_machine  # noqa: E402
+
+def lock_path_for_scope(lock_scope: str) -> Path:
+    VM_LOCK_ROOT.mkdir(parents=True, exist_ok=True)
+    return VM_LOCK_ROOT / f"{lock_scope}.lock"
+
+
+def queue_path_for_scope(lock_scope: str) -> Path:
+    VM_QUEUE_ROOT.mkdir(parents=True, exist_ok=True)
+    return VM_QUEUE_ROOT / f"{lock_scope}.json"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run a VM-related command under the runner VM lock.")
-    parser.add_argument("--target", help="Machine target or alias from runner/machines.yaml.")
-    parser.add_argument("--action", help="Optional action name used to resolve the default machine.")
+    parser.add_argument("--action", help="Optional action name recorded in queue metadata.")
+    parser.add_argument("--lock-scope", required=True, help="Explicit VM lock scope.")
+    parser.add_argument("--machine-name", required=True, help="Explicit machine name for queue metadata.")
+    parser.add_argument("--backend", required=True, help="Explicit VM backend for queue metadata.")
+    parser.add_argument("--arch", required=True, help="Explicit VM architecture for queue metadata.")
     parser.add_argument("command", nargs=argparse.REMAINDER, help="Command to execute after --.")
     return parser.parse_args()
 
@@ -38,19 +49,21 @@ def main() -> int:
     if not command:
         raise SystemExit("with_vm_lock.py requires a command after --")
 
-    machine = resolve_machine(target=args.target, action=args.action)
-    lock_path = lock_path_for_machine(target=args.target, action=args.action)
-    queue_path = queue_path_for_machine(target=args.target, action=args.action)
+    lock_path = lock_path_for_scope(args.lock_scope)
+    queue_path = queue_path_for_scope(args.lock_scope)
+    machine_name = args.machine_name
+    backend = args.backend
+    arch = args.arch
+    lock_scope = args.lock_scope
     started_waiting = time.time()
     payload: dict[str, Any] = {
         "status": "queued",
         "pid": os.getpid(),
         "action": args.action,
-        "target": args.target,
-        "machine": machine.name,
-        "backend": machine.backend,
-        "arch": machine.arch,
-        "lock_scope": machine.lock_scope,
+        "machine": machine_name,
+        "backend": backend,
+        "arch": arch,
+        "lock_scope": lock_scope,
         "lock_path": str(lock_path),
         "command": command,
         "queued_at": started_waiting,

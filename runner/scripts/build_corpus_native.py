@@ -18,7 +18,7 @@ from elftools.elf.elffile import ELFFile
 SCRIPT_DIR = Path(__file__).resolve().parent
 RUNNER_DIR = SCRIPT_DIR.parent
 REPO_ROOT = RUNNER_DIR.parent
-RUNNER_REPOS_DIR = RUNNER_DIR / "repos"
+RUNNER_REPOS_DIR = Path(os.environ.get("RUNNER_REPOS_DIR_OVERRIDE", str(RUNNER_DIR / "repos"))).resolve()
 CORPUS_BUILD_ROOT = REPO_ROOT / "corpus" / "build"
 IMPLEMENTED_REPOS = (
     "bcc",
@@ -158,11 +158,11 @@ def is_bpf_object(path: Path) -> bool:
     return str(machine) in {"EM_BPF", "Linux BPF", str(BPF_ELF_MACHINE)}
 
 
-def verify_binary(command: list[str]) -> bool:
+def verify_binary(command: list[str], *, env: dict[str, str] | None = None) -> bool:
     if not command:
         return True
     try:
-        completed = subprocess.run(command, capture_output=True, text=True, timeout=30, check=False)
+        completed = subprocess.run(command, capture_output=True, text=True, timeout=30, check=False, env=env)
     except OSError:
         return False
     output = f"{completed.stdout}\n{completed.stderr}".lower()
@@ -247,12 +247,6 @@ def find_cached_vmlinux_header() -> Path:
     )
 
 
-def replace_once(text: str, old: str, new: str, *, context: str) -> str:
-    if old not in text:
-        raise CommandError(f"failed to rewrite {context}: expected source pattern missing")
-    return text.replace(old, new, 1)
-
-
 def bpftrace_target_arch_define() -> str:
     machine = platform.machine().lower()
     arch_map = {
@@ -286,69 +280,19 @@ def resolve_bpftrace_llvm_cmake_dirs() -> tuple[Path, Path]:
     raise CommandError("missing supported LLVM/Clang CMake packages for bpftrace userspace build (need 18-22)")
 
 
-def prepare_bpftrace_stdlib_source(
-    source: Path,
-    *,
-    stdlib_dir: Path,
-    temp_root: Path,
-    cached_vmlinux_text: str | None,
-) -> tuple[Path, list[str]]:
-    relative = source.relative_to(stdlib_dir)
-    relative_posix = relative.as_posix()
-    source_text = source.read_text()
-    rewritten_text = source_text
-    extra_flags: list[str] = []
-
-    if (
-        relative_posix == "task/vma.bpf.c"
-        and cached_vmlinux_text is not None
-        and "extern int bpf_iter_task_vma_new(struct bpf_iter_task_vma *it" in cached_vmlinux_text
-    ):
-        compat_block = """// We can guarantee that struct task_struct is defined in vmlinux.h, but
-// cannot guarantee that bpf_iter_task_vma is declared. The symbols will
-// be resolved as a weak references, and nulled if they are present, but
-// we need to add a manually forward declaration here.
-struct __compat_bpf_iter_task_vma {
-  __u64 __opaque[1];
-} __attribute__((aligned(8)));
-
-extern int bpf_iter_task_vma_new(struct __compat_bpf_iter_task_vma *it,
-                                 struct task_struct *task,
-                                 u64 addr) __ksym __weak;
-extern struct vm_area_struct *bpf_iter_task_vma_next(
-    struct __compat_bpf_iter_task_vma *it) __ksym __weak;
-extern void bpf_iter_task_vma_destroy(
-    struct __compat_bpf_iter_task_vma *it) __ksym __weak;
-"""
-        rewritten_text = replace_once(
-            rewritten_text,
-            compat_block,
-            "/* cached vmlinux.h already declares bpf_iter_task_vma helpers. */\n",
-            context="bpftrace task/vma stdlib shim block",
-        )
-        rewritten_text = replace_once(
-            rewritten_text,
-            "struct __compat_bpf_iter_task_vma vma_it;",
-            "struct bpf_iter_task_vma vma_it;",
-            context="bpftrace task/vma iterator type",
-        )
-
-    if relative_posix == "usdt/usdt.bpf.c":
-        rewritten_text = replace_once(
-            rewritten_text,
-            "#define __VMLINUX_H__\n",
-            "",
-            context="bpftrace usdt vmlinux guard",
-        )
-        extra_flags.append(f"-D{bpftrace_target_arch_define()}")
-
-    if rewritten_text == source_text:
-        return source, extra_flags
-
-    patched = temp_root / "patched-src" / relative
-    patched.parent.mkdir(parents=True, exist_ok=True)
-    patched.write_text(rewritten_text)
-    return patched, extra_flags
+def prepare_bpftrace_vmlinux_header(cached_vmlinux: Path, *, temp_root: Path) -> Path:
+    text = cached_vmlinux.read_text()
+    filtered_lines = [
+        line
+        for line in text.splitlines()
+        if "bpf_iter_task_vma_new(struct bpf_iter_task_vma *it" not in line
+        and "bpf_iter_task_vma_next(struct bpf_iter_task_vma *it)" not in line
+        and "bpf_iter_task_vma_destroy(struct bpf_iter_task_vma *it)" not in line
+    ]
+    staged_header = temp_root / "include" / "vmlinux.h"
+    staged_header.parent.mkdir(parents=True, exist_ok=True)
+    staged_header.write_text("\n".join(filtered_lines) + "\n")
+    return staged_header
 
 
 def bpf_stage_relative(path: Path) -> Path:
@@ -610,11 +554,18 @@ def build_xdp_tutorial(stage_root: Path, jobs: int) -> RepoBuildResult:
 
 
 def build_scx(stage_root: Path, jobs: int) -> RepoBuildResult:
-    del jobs
     repo_dir = repo_checkout("scx")
     clean_stage_dir(stage_root)
-    run([sys.executable, str(RUNNER_DIR / "scripts" / "build_scx_artifacts.py"), "--force"], cwd=REPO_ROOT)
-
+    run(
+        [
+            sys.executable,
+            str(RUNNER_DIR / "scripts" / "build_scx_artifacts.py"),
+            "--force",
+            "--jobs",
+            str(max(1, jobs)),
+        ],
+        cwd=REPO_ROOT,
+    )
     object_names = (
         "scx_bpfland_main.bpf.o",
         "scx_flash_main.bpf.o",
@@ -648,7 +599,10 @@ def build_scx(stage_root: Path, jobs: int) -> RepoBuildResult:
 def build_katran(stage_root: Path, jobs: int) -> RepoBuildResult:
     repo_dir = repo_checkout("katran")
     lib_dir = repo_dir / "katran" / "lib"
+    clang = str(os.environ.get("CLANG", "clang")).strip() or "clang"
+    llc = str(os.environ.get("LLC", "llc")).strip() or "llc"
     clean_stage_dir(stage_root)
+    binary_count = 0
     with tempfile.TemporaryDirectory(prefix="katran-bpf-build-") as temp_dir:
         work_dir = Path(temp_dir)
         (work_dir / "include").mkdir(parents=True, exist_ok=True)
@@ -660,16 +614,48 @@ def build_katran(stage_root: Path, jobs: int) -> RepoBuildResult:
         for header in (lib_dir / "linux_includes").iterdir():
             if header.is_file():
                 stage_file(header, work_dir / "include" / header.name)
-        run(["make", f"-j{jobs}", "CLANG=clang", "LLC=llc"], cwd=work_dir)
+        run(["make", f"-j{jobs}", f"CLANG={clang}", f"LLC={llc}"], cwd=work_dir)
         object_paths = sorted(path for path in (work_dir / "bpf").glob("*.o") if is_bpf_object(path))
         object_count = stage_many(object_paths, lambda src: stage_root / bpf_stage_relative(Path(src.name)))
+
+    explicit_binary = str(os.environ.get("KATRAN_SERVER_BINARY", "")).strip()
+    explicit_lib_dir = str(os.environ.get("KATRAN_SERVER_LIB_DIR", "")).strip()
+    if explicit_binary:
+        binary_path = Path(explicit_binary).expanduser()
+        staged_lib_dir = Path(explicit_lib_dir).expanduser() if explicit_lib_dir else None
+        if not is_executable_file(binary_path):
+            raise CommandError(f"explicit Katran server binary is not executable: {binary_path}")
+        if explicit_lib_dir and (staged_lib_dir is None or not staged_lib_dir.is_dir()):
+            raise CommandError(f"explicit Katran server lib dir is invalid: {explicit_lib_dir}")
+        verify_env = None
+        if staged_lib_dir is not None and staged_lib_dir.is_dir():
+            verify_env = os.environ.copy()
+            verify_env["KATRAN_SERVER_LIB_DIR"] = str(staged_lib_dir.resolve())
+            current_ld = verify_env.get("LD_LIBRARY_PATH", "")
+            verify_env["LD_LIBRARY_PATH"] = (
+                f"{verify_env['KATRAN_SERVER_LIB_DIR']}{os.pathsep}{current_ld}"
+                if current_ld
+                else verify_env["KATRAN_SERVER_LIB_DIR"]
+            )
+        if not verify_binary([str(binary_path), "--help"], env=verify_env):
+            raise CommandError(f"explicit Katran server binary failed verification: {binary_path}")
+        binary_count = stage_many([binary_path], lambda src: stage_root / "bin" / src.name)
+        if staged_lib_dir is not None and staged_lib_dir.is_dir():
+            stage_many(
+                [path for path in staged_lib_dir.iterdir() if path.is_file()],
+                lambda src: stage_root / "lib" / src.name,
+            )
+    else:
+        raise CommandError(
+            "Katran staging requires explicit KATRAN_SERVER_BINARY and KATRAN_SERVER_LIB_DIR"
+        )
 
     remove_staged_temp_objects(stage_root)
     return RepoBuildResult(
         name="katran",
         stage_dir=stage_root,
         object_count=object_count,
-        binary_count=0,
+        binary_count=binary_count,
         verify_command=(),
         verify_ok=True,
         status="ok",
@@ -720,12 +706,9 @@ def build_tetragon(stage_root: Path, jobs: int) -> RepoBuildResult:
     object_count = stage_many(object_paths, lambda src: stage_root / bpf_stage_relative(Path(src.name)))
 
     binary_paths: list[Path] = []
-    if (repo_dir / "cmd" / "tetragon").exists() and (repo_dir / "cmd" / "tetra").exists():
-        run(
-            ["make", f"-j{jobs}", "tetragon", "tetra", "EXTRA_GO_BUILD_FLAGS=-mod=mod"],
-            cwd=repo_dir,
-        )
-        binary_paths = [path for path in (repo_dir / "tetragon", repo_dir / "tetra") if is_executable_file(path)]
+    if (repo_dir / "cmd" / "tetragon").exists():
+        run(["make", f"-j{jobs}", "tetragon", "EXTRA_GO_BUILD_FLAGS=-mod=mod"], cwd=repo_dir)
+        binary_paths = [path for path in (repo_dir / "tetragon",) if is_executable_file(path)]
     binary_count = stage_many(binary_paths, lambda src: stage_root / "bin" / src.name)
     remove_staged_temp_objects(stage_root)
 
@@ -805,14 +788,19 @@ def build_bpftrace(stage_root: Path, jobs: int) -> RepoBuildResult:
 
     stdlib_dir = repo_dir / "src" / "stdlib"
     cached_vmlinux = locate_cached_vmlinux_header()
-    cached_vmlinux_text = cached_vmlinux.read_text() if cached_vmlinux is not None else None
     stdlib_failures: list[str] = []
     stdlib_objects: list[Path] = []
     common_clang_flags = ["clang", "-target", "bpf", "-g", "-O2", "-I", str(stdlib_dir / "include"), *clang_bpf_sys_includes()]
     with tempfile.TemporaryDirectory(prefix="bpftrace-stdlib-") as temp_dir:
         temp_root = Path(temp_dir)
+        bpftrace_vmlinux = (
+            prepare_bpftrace_vmlinux_header(cached_vmlinux, temp_root=temp_root)
+            if cached_vmlinux is not None
+            else None
+        )
         for source in sorted(stdlib_dir.rglob("*.bpf.c")):
             relative = source.relative_to(stdlib_dir)
+            relative_posix = relative.as_posix()
             output = temp_root / bpf_object_path_from_source(relative)
             output.parent.mkdir(parents=True, exist_ok=True)
 
@@ -822,16 +810,13 @@ def build_bpftrace(stage_root: Path, jobs: int) -> RepoBuildResult:
                 continue
 
             command = list(common_clang_flags)
-            compile_source, extra_flags = prepare_bpftrace_stdlib_source(
-                source,
-                stdlib_dir=stdlib_dir,
-                temp_root=temp_root,
-                cached_vmlinux_text=cached_vmlinux_text,
-            )
-            command.extend(extra_flags)
-            if needs_vmlinux and cached_vmlinux is not None:
-                command.extend(["-I", str(cached_vmlinux.parent)])
-            command.extend(["-c", str(compile_source), "-o", str(output)])
+            if relative_posix == "usdt/usdt.bpf.c":
+                command.append(f"-D{bpftrace_target_arch_define()}")
+                if bpftrace_vmlinux is not None:
+                    command.extend(["-include", str(bpftrace_vmlinux)])
+            if needs_vmlinux and bpftrace_vmlinux is not None:
+                command.extend(["-I", str(bpftrace_vmlinux.parent)])
+            command.extend(["-c", str(source), "-o", str(output)])
             completed = capture(command)
             if completed.returncode == 0 and is_bpf_object(output):
                 stdlib_objects.append(output)

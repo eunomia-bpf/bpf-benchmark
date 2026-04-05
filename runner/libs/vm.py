@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import shlex
 import subprocess
 import sys
@@ -9,10 +8,8 @@ from pathlib import Path
 from typing import Sequence
 
 from . import DEFAULT_VENV_ACTIVATE, ROOT_DIR, docs_tmp_dir, scratch_date_stamp
-from .machines import resolve_machine, resolve_machine_executable
 
 
-DEFAULT_VM_TARGET = os.environ.get("TARGET", "").strip() or "x86-dev"
 DEFAULT_GUEST_NOFILE = 65536
 
 
@@ -57,15 +54,20 @@ def write_guest_script(
 def wrap_with_vm_lock(
     command: Sequence[str],
     *,
-    target: str | None = None,
     action: str | None = None,
+    lock_scope: str,
+    machine_name: str,
+    backend: str,
+    arch: str,
 ) -> list[str]:
     wrapper = ROOT_DIR / "runner" / "scripts" / "with_vm_lock.py"
     locked = [sys.executable, str(wrapper)]
-    if target:
-        locked.extend(["--target", target])
     if action:
         locked.extend(["--action", action])
+    locked.extend(["--lock-scope", lock_scope])
+    locked.extend(["--machine-name", machine_name])
+    locked.extend(["--backend", backend])
+    locked.extend(["--arch", arch])
     locked.append("--")
     locked.extend(str(part) for part in command)
     return locked
@@ -77,28 +79,37 @@ def build_vng_command(
     exec_path: str,
     cpus: int | None = None,
     mem: str | None = None,
-    vm_executable: str | Path | None = None,
-    target: str = DEFAULT_VM_TARGET,
+    vm_executable: str | Path,
     action: str | None = None,
+    machine_backend: str,
+    machine_lock_scope: str,
+    machine_name: str,
+    machine_arch: str,
     networks: Sequence[str] = (),
     rwdirs: Sequence[str | Path] = (),
 ) -> list[str]:
-    machine = resolve_machine(target=target, action=action)
-    if machine.backend != "vng":
+    resolved_backend = str(machine_backend).strip()
+    if resolved_backend != "vng":
         raise ValueError(
-            f"machine target {machine.name} uses backend {machine.backend!r}; "
-            "runner.libs.vm.build_vng_command only supports vng targets"
+            f"explicit machine backend {resolved_backend!r} is unsupported; "
+            "runner.libs.vm.build_vng_command only supports vng"
         )
-    vng_path = str(vm_executable) if vm_executable is not None else str(
-        resolve_machine_executable(target=target, action=action)
-    )
+    resolved_machine_name = str(machine_name).strip()
+    if not resolved_machine_name:
+        raise ValueError("explicit vng machine configuration requires machine_name")
+    resolved_machine_arch = str(machine_arch).strip()
+    if not resolved_machine_arch:
+        raise ValueError("explicit vng machine configuration requires machine_arch")
+    resolved_lock_scope = str(machine_lock_scope).strip()
+    if not resolved_lock_scope:
+        raise ValueError("explicit vng machine configuration requires machine_lock_scope")
+    vng_path = str(Path(vm_executable).resolve())
+    resolved_cpus = max(1, int(cpus if cpus is not None else 1))
+    resolved_mem = str(mem if mem is not None else "4G")
     kernel = Path(kernel_path).resolve()
-    resolved_cpus = max(1, int(cpus if cpus is not None else machine.cpus or 1))
-    resolved_mem = str(mem if mem is not None else machine.memory or "4G")
 
     command = [
         vng_path,
-        *machine.args,
         "--run",
         str(kernel),
         "--cwd",
@@ -120,7 +131,14 @@ def build_vng_command(
     for network in networks:
         command.extend(["--network", str(network)])
     command.extend(["--exec", exec_path])
-    return wrap_with_vm_lock(command, target=target, action=action)
+    return wrap_with_vm_lock(
+        command,
+        action=action,
+        lock_scope=resolved_lock_scope,
+        machine_name=resolved_machine_name,
+        backend=resolved_backend,
+        arch=resolved_machine_arch,
+    )
 
 
 def run_in_vm(
@@ -130,9 +148,12 @@ def run_in_vm(
     mem: str | None,
     timeout: int,
     *,
-    vm_executable: str | Path | None = None,
-    target: str = DEFAULT_VM_TARGET,
+    vm_executable: str | Path,
     action: str | None = None,
+    machine_backend: str,
+    machine_lock_scope: str,
+    machine_name: str,
+    machine_arch: str,
     networks: Sequence[str] = (),
 ) -> subprocess.CompletedProcess[str]:
     script = Path(script_path).resolve()
@@ -143,8 +164,11 @@ def run_in_vm(
         cpus=cpus,
         mem=mem,
         vm_executable=vm_executable,
-        target=target,
         action=action,
+        machine_backend=machine_backend,
+        machine_lock_scope=machine_lock_scope,
+        machine_name=machine_name,
+        machine_arch=machine_arch,
         networks=networks,
     )
     try:
@@ -167,12 +191,23 @@ def build_vm_shell_command(
     timeout_seconds: int,
     vng_binary: str,
     nofile: int | None = None,
+    vm_lock_scope: str = "vm_global",
+    vm_machine_name: str = "x86-kvm",
+    vm_machine_arch: str = "x86_64",
 ) -> list[str]:
     command = [
         sys.executable,
         str(ROOT_DIR / "runner" / "scripts" / "run_vm_shell.py"),
         "--action",
         "vm-corpus",
+        "--vm-backend",
+        "vng",
+        "--vm-lock-scope",
+        vm_lock_scope,
+        "--vm-machine-name",
+        vm_machine_name,
+        "--vm-machine-arch",
+        vm_machine_arch,
         "--kernel-image",
         str(kernel_image),
         "--timeout",
@@ -182,12 +217,10 @@ def build_vm_shell_command(
     ]
     if nofile is not None:
         command.extend(["--nofile", str(int(nofile))])
-    if vng_binary != str(resolve_machine_executable(target=DEFAULT_VM_TARGET, action="vm-corpus")):
-        command.extend(["--vm-executable", vng_binary])
+    command.extend(["--vm-executable", vng_binary])
     return command
 __all__ = [
     "build_vm_shell_command",
-    "DEFAULT_VM_TARGET",
     "build_vng_command",
     "run_in_vm",
     "wrap_with_vm_lock",

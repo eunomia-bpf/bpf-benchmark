@@ -20,13 +20,19 @@ UPSTREAM_SELFTEST_LLVM_CONFIG ?= llvm-config$(UPSTREAM_SELFTEST_LLVM_SUFFIX)
 UPSTREAM_SELFTEST_LLVM_OBJCOPY ?= llvm-objcopy$(UPSTREAM_SELFTEST_LLVM_SUFFIX)
 UPSTREAM_SELFTEST_LLVM_STRIP ?= llvm-strip$(UPSTREAM_SELFTEST_LLVM_SUFFIX)
 
-# ARM64 / AWS (see runner/scripts/aws_arm64.sh for full docs)
+# ARM64 / AWS
 ARM64_WORKTREE_DIR  ?= $(ROOT_DIR)/.worktrees/linux-framework-arm64-src
 ARM64_BUILD_DIR     ?= $(KERNEL_DIR)/build-arm64
 ARM64_BUILD_CONFIG  := $(ARM64_BUILD_DIR)/.config
 ARM64_IMAGE         := $(ARM64_BUILD_DIR)/arch/arm64/boot/Image
+ARM64_EFI_IMAGE     := $(ARM64_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
 ARM64_IMAGE_LINK    := $(KERNEL_DIR)/arch/arm64/boot/Image
 ARM64_CONFIG_LINK   := $(KERNEL_DIR)/.config.arm64
+ARM64_AWS_BUILD_DIR ?= $(CACHE_DIR)/aws-arm64/kernel-build
+ARM64_AWS_BUILD_CONFIG := $(ARM64_AWS_BUILD_DIR)/.config
+ARM64_AWS_IMAGE     := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/Image
+ARM64_AWS_EFI_IMAGE := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
+ARM64_AWS_BASE_CONFIG ?=
 ARM64_ROOTFS_DIR    ?= $(HOME)/.cache/bpf-benchmark/arm64-rootfs
 ARM64_ROOTFS_RELEASE ?= noble
 ARM64_ROOTFS_MIRROR ?= http://ports.ubuntu.com/ubuntu-ports
@@ -37,14 +43,21 @@ ARM64_CROSSBUILD_DOCKERFILE := $(ROOT_DIR)/runner/docker/arm64-crossbuild.Docker
 ARM64_CROSSBUILD_CONTEXT    := $(ROOT_DIR)/runner/docker
 ARM64_CROSSBUILD_IMAGE      ?= bpf-benchmark-arm64-crossbuild:latest
 ARM64_CROSSBUILD_STAMP      := $(ROOT_DIR)/.cache/arm64-crossbuild-image.stamp
+ARM64_CROSSBUILD_LOCK       := $(ROOT_DIR)/.cache/arm64-crossbuild-image.lock
 ARM64_DOCKER_PLATFORM       ?= linux/arm64
 ARM64_REPO_GUEST_MOUNT      ?= /mnt
 ARM64_SELFTEST_GUEST_ROOT   ?= $(ARM64_REPO_GUEST_MOUNT)/tests/kernel
 ARM64_CROSSBUILD_ENABLE_LLVMBPF ?= OFF
 ARM64_CROSSBUILD_JOBS       ?= 4
 ARM64_KERNEL_MAKEFLAGS      := $(filter-out B,$(MAKEFLAGS))
-AWS_ARM64_SCRIPT         := $(ROOT_DIR)/runner/scripts/aws_arm64.sh
+RUN_TARGET_SUITE_SCRIPT  := $(ROOT_DIR)/runner/scripts/run_target_suite.sh
 AWS_ARM64_CACHE_DIR      ?= $(ROOT_DIR)/.cache/aws-arm64
+ARM64_TEST_ARTIFACTS_ROOT ?= $(AWS_ARM64_CACHE_DIR)/test-artifacts
+ARM64_TEST_UNITTEST_BUILD_DIR ?= $(ARM64_TEST_ARTIFACTS_ROOT)/unittest/build-arm64
+ARM64_TEST_NEGATIVE_BUILD_DIR ?= $(ARM64_TEST_ARTIFACTS_ROOT)/negative/build-arm64
+ARM64_TEST_DAEMON_TARGET_DIR ?= $(ARM64_TEST_ARTIFACTS_ROOT)/daemon-target
+ARM64_TEST_DAEMON_OUTPUT_DIR ?= $(ARM64_TEST_ARTIFACTS_ROOT)/daemon
+ARM64_TEST_CARGO_HOME_DIR ?= $(ARM64_TEST_ARTIFACTS_ROOT)/cargo-home
 ARM64_CROSSBUILD_OUTPUT_DIR ?= $(AWS_ARM64_CACHE_DIR)/binaries
 ARM64_CROSS_RUNNER_REAL  := $(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/build/micro_exec.real
 ARM64_CROSS_DAEMON_REAL  := $(ARM64_CROSSBUILD_OUTPUT_DIR)/daemon/build/bpfrejit-daemon.real
@@ -54,20 +67,34 @@ AWS_ARM64_REMOTE_USER    ?= ec2-user
 AWS_ARM64_REMOTE_STAGE_DIR        ?= /home/$(AWS_ARM64_REMOTE_USER)/bpf-benchmark-arm64
 AWS_ARM64_REMOTE_KERNEL_STAGE_DIR ?= /home/$(AWS_ARM64_REMOTE_USER)/codex-kernel-stage
 AWS_ARM64_AMI_PARAM      ?= /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64
+AWS_ARM64_ROOT_VOLUME_GB ?= 32
 AWS_ARM64_BENCH_SAMPLES ?= 1
 AWS_ARM64_BENCH_WARMUPS    ?= 0
 AWS_ARM64_BENCH_INNER_REPEAT ?= 10
+AWS_ARM64_BENCH_MODE ?= all
+AWS_ARM64_TEST_MODE ?= test
+AWS_ARM64_CORPUS_FILTERS ?=
+AWS_ARM64_CORPUS_ARGS ?=
+AWS_ARM64_CORPUS_WORKLOAD_SECONDS ?=
+AWS_ARM64_E2E_CASES ?= all
+AWS_ARM64_E2E_ARGS ?=
+AWS_ARM64_E2E_SMOKE ?= 0
 
 export AWS_REGION AWS_DEFAULT_REGION AWS_PROFILE
 export AWS_ARM64_CACHE_DIR AWS_ARM64_NAME_TAG AWS_ARM64_INSTANCE_TYPE
 export AWS_ARM64_REMOTE_USER AWS_ARM64_REMOTE_STAGE_DIR AWS_ARM64_REMOTE_KERNEL_STAGE_DIR
 export AWS_ARM64_KEY_NAME AWS_ARM64_KEY_PATH AWS_ARM64_SECURITY_GROUP_ID AWS_ARM64_SUBNET_ID
 export AWS_ARM64_AMI_PARAM AWS_ARM64_AMI_ID
+export AWS_ARM64_ROOT_VOLUME_GB
 export AWS_ARM64_BENCH_SAMPLES AWS_ARM64_BENCH_WARMUPS AWS_ARM64_BENCH_INNER_REPEAT
-export CROSS_COMPILE_ARM64 ARM64_BUILD_DIR ARM64_WORKTREE_DIR
+export AWS_ARM64_BENCH_MODE AWS_ARM64_TEST_MODE AWS_ARM64_CORPUS_FILTERS AWS_ARM64_CORPUS_ARGS
+export AWS_ARM64_CORPUS_WORKLOAD_SECONDS AWS_ARM64_E2E_CASES AWS_ARM64_E2E_ARGS AWS_ARM64_E2E_SMOKE
+export CROSS_COMPILE_ARM64 ARM64_BUILD_DIR ARM64_WORKTREE_DIR ARM64_AWS_BUILD_DIR ARM64_AWS_BASE_CONFIG
 export ARM64_DOCKER_PLATFORM ARM64_CROSSBUILD_OUTPUT_DIR ARM64_CROSSBUILD_JOBS
+export ARM64_TEST_ARTIFACTS_ROOT ARM64_TEST_UNITTEST_BUILD_DIR ARM64_TEST_NEGATIVE_BUILD_DIR
+export ARM64_TEST_DAEMON_TARGET_DIR ARM64_TEST_DAEMON_OUTPUT_DIR ARM64_TEST_CARGO_HOME_DIR
+export FUZZ_ROUNDS SCX_PROG_SHOW_RACE_MODE SCX_PROG_SHOW_RACE_ITERATIONS SCX_PROG_SHOW_RACE_LOAD_TIMEOUT SCX_PROG_SHOW_RACE_SKIP_PROBE
 
-AWS_X86_SCRIPT            := $(ROOT_DIR)/runner/scripts/aws_x86.sh
 AWS_X86_CACHE_DIR         ?= $(ROOT_DIR)/.cache/aws-x86
 AWS_X86_NAME_TAG          ?= bpf-benchmark-x86
 AWS_X86_INSTANCE_TYPE     ?= t3.micro
@@ -75,15 +102,27 @@ AWS_X86_REMOTE_USER       ?= ec2-user
 AWS_X86_REMOTE_STAGE_DIR  ?= /home/$(AWS_X86_REMOTE_USER)/bpf-benchmark-x86
 AWS_X86_REMOTE_KERNEL_STAGE_DIR ?= /home/$(AWS_X86_REMOTE_USER)/codex-kernel-stage-x86
 AWS_X86_AMI_PARAM         ?= /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+AWS_X86_ROOT_VOLUME_GB    ?= 32
 AWS_X86_BENCH_SAMPLES     ?= 1
 AWS_X86_BENCH_WARMUPS     ?= 0
 AWS_X86_BENCH_INNER_REPEAT ?= 10
+AWS_X86_BENCH_MODE        ?= all
+AWS_X86_TEST_MODE         ?= test
+AWS_X86_CORPUS_FILTERS    ?=
+AWS_X86_CORPUS_ARGS       ?=
+AWS_X86_CORPUS_WORKLOAD_SECONDS ?=
+AWS_X86_E2E_CASES         ?= all
+AWS_X86_E2E_ARGS          ?=
+AWS_X86_E2E_SMOKE         ?= 0
 
 export AWS_X86_CACHE_DIR AWS_X86_NAME_TAG AWS_X86_INSTANCE_TYPE
 export AWS_X86_REMOTE_USER AWS_X86_REMOTE_STAGE_DIR AWS_X86_REMOTE_KERNEL_STAGE_DIR
 export AWS_X86_KEY_NAME AWS_X86_KEY_PATH AWS_X86_SECURITY_GROUP_ID AWS_X86_SUBNET_ID
 export AWS_X86_AMI_PARAM AWS_X86_AMI_ID
+export AWS_X86_ROOT_VOLUME_GB
 export AWS_X86_BENCH_SAMPLES AWS_X86_BENCH_WARMUPS AWS_X86_BENCH_INNER_REPEAT
+export AWS_X86_BENCH_MODE AWS_X86_TEST_MODE AWS_X86_CORPUS_FILTERS AWS_X86_CORPUS_ARGS
+export AWS_X86_CORPUS_WORKLOAD_SECONDS AWS_X86_E2E_CASES AWS_X86_E2E_ARGS AWS_X86_E2E_SMOKE
 
 # Tunables
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
@@ -174,27 +213,34 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 	corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx \
 	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
 	daemon-tests python-tests check smoke validate \
-	vm-shell vm-test vm-selftest vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
-	arm64-worktree arm64-rootfs arm64-crossbuild-image cross-arm64 selftest-arm64 \
+	vm-test vm-micro vm-corpus vm-e2e vm-all \
+	arm64-worktree arm64-rootfs arm64-crossbuild-image cross-arm64 arm64-test-artifacts \
+	cross-arm64-bench kernel-arm64-aws \
 	vm-arm64-smoke vm-arm64-selftest \
-	aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
-	aws-x86-launch aws-x86-setup aws-x86-benchmark aws-x86-terminate aws-x86-full aws-x86 \
+	aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
+	aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86 \
 	__kernel-config-locked __kernel-build-locked \
 	help clean
 
 # ── Help ───────────────────────────────────────────────────────────────────────
 help:
-	@echo "Build:  all runner micro daemon kernel kernel-clean kernel-rebuild kinsn-modules kernel-tests upstream-selftests-build kernel-arm64 cross-arm64"
+	@echo "Build:  all runner micro daemon kernel kernel-clean kernel-rebuild kinsn-modules kernel-tests upstream-selftests-build kernel-arm64 cross-arm64 cross-arm64-bench"
 	@echo "Repos:  corpus-fetch corpus-build corpus-build-native corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace REPOS=\"katran tracee tetragon cilium bpftrace ...\""
 	@echo "Test:   smoke daemon-tests python-tests check"
-	@echo "VM x86: vm-shell vm-test vm-selftest vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
+	@echo "VM x86 canonical: vm-test vm-micro vm-corpus vm-e2e vm-all validate"
+	@echo "        internal debug helpers remain under: make -C runner vm-shell vm-selftest vm-negative-test vm-micro-smoke"
 	@echo "        vm-corpus (full corpus suite driver)"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
-	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
-	@echo "        aws-x86-launch aws-x86-setup aws-x86-benchmark aws-x86-terminate aws-x86-full aws-x86"
+	@echo "AWS:    aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64"
+	@echo "        aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86"
 	@echo "Params: vm-micro SAMPLES=$(SAMPLES) WARMUPS=$(WARMUPS) INNER_REPEAT=$(INNER_REPEAT) BENCH=\"...\""
-	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) FILTERS=\"...\" VM_CORPUS_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\" TARGET=\"x86-benchmark|x86-dev|arm64|aws|...\""
+	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) FILTERS=\"...\" VM_CORPUS_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
 	@echo "        vm-e2e E2E_CASE=\"all|tracee|...\" E2E_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\" PROFILE=$(PROFILE)"
+	@echo "        aws-arm64-test/aws-arm64-benchmark AWS_ARM64_ROOT_VOLUME_GB=$(AWS_ARM64_ROOT_VOLUME_GB)"
+	@echo "        aws-arm64-test AWS_ARM64_TEST_MODE=$(AWS_ARM64_TEST_MODE)"
+	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=$(AWS_ARM64_BENCH_MODE) AWS_ARM64_E2E_CASES=$(AWS_ARM64_E2E_CASES)"
+	@echo "        aws-x86-test AWS_X86_TEST_MODE=$(AWS_X86_TEST_MODE)"
+	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=$(AWS_X86_BENCH_MODE) AWS_X86_E2E_CASES=$(AWS_X86_E2E_CASES)"
 
 # ── Build ──────────────────────────────────────────────────────────────────────
 all:
@@ -401,64 +447,20 @@ check:
 validate:
 	$(MAKE) check
 	$(MAKE) vm-test
-	$(MAKE) vm-micro-smoke
+	SAMPLES=1 WARMUPS=0 INNER_REPEAT=50 "$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm micro
 
 # ── VM (x86) ──────────────────────────────────────────────────────────────────
-vm-shell:
-	$(MAKE) -C "$(RUNNER_DIR)" vm-shell \
-		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)" \
-		VM_COMMAND='$(VM_COMMAND)'
-
 vm-test:
-	$(MAKE) -C "$(RUNNER_DIR)" vm-test \
-		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)"
-
-vm-selftest:
-	$(MAKE) -C "$(RUNNER_DIR)" vm-selftest \
-		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)"
-
-NEGATIVE_TEST_DIR := $(ROOT_DIR)/tests/negative
-FUZZ_ROUNDS ?= 1000
-
-vm-negative-test:
-	$(MAKE) -C "$(RUNNER_DIR)" vm-negative-test \
-		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)" FUZZ_ROUNDS="$(FUZZ_ROUNDS)" \
-		SCX_PROG_SHOW_RACE_MODE="$(SCX_PROG_SHOW_RACE_MODE)" \
-		SCX_PROG_SHOW_RACE_ITERATIONS="$(SCX_PROG_SHOW_RACE_ITERATIONS)" \
-		SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="$(SCX_PROG_SHOW_RACE_LOAD_TIMEOUT)" \
-		SCX_PROG_SHOW_RACE_SKIP_PROBE="$(SCX_PROG_SHOW_RACE_SKIP_PROBE)"
-
-SCX_PROG_SHOW_RACE_MODE ?= bpftool-loop
-SCX_PROG_SHOW_RACE_ITERATIONS ?= 20
-SCX_PROG_SHOW_RACE_LOAD_TIMEOUT ?= 20
-SCX_PROG_SHOW_RACE_SKIP_PROBE ?= 0
-
-vm-micro-smoke:
-	$(MAKE) -C "$(RUNNER_DIR)" vm-micro-smoke \
-		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)"
+	"$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm test
 
 vm-micro:
-	$(MAKE) -C "$(RUNNER_DIR)" vm-micro \
-		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)" \
-		SAMPLES="$(SAMPLES)" WARMUPS="$(WARMUPS)" INNER_REPEAT="$(INNER_REPEAT)" BENCH="$(BENCH)"
+	"$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm micro
 
 vm-corpus:
-	$(MAKE) -C "$(RUNNER_DIR)" vm-corpus \
-		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" \
-		$(ROOT_VM_CORPUS_SAMPLES_ARG) $(ROOT_VM_CORPUS_FILTERS_ARG) $(ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG) $(ROOT_VM_CORPUS_EXTRA_ARGS)
+	"$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm corpus
 
 vm-e2e:
-	$(MAKE) -C "$(RUNNER_DIR)" vm-e2e \
-		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" \
-		E2E_CASE="$(E2E_CASE)" E2E_ARGS="$(E2E_ARGS)"
+	"$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm e2e
 
 vm-all:
 	$(MAKE) vm-test
@@ -469,13 +471,14 @@ vm-all:
 # ── ARM64 kernel ───────────────────────────────────────────────────────────────
 arm64-worktree:
 	@mkdir -p "$(dir $(ARM64_WORKTREE_DIR))"
+	@git -C "$(KERNEL_DIR)" worktree prune
 	@if [ ! -e "$(ARM64_WORKTREE_DIR)/.git" ]; then \
 		git -C "$(KERNEL_DIR)" worktree add --detach "$(ARM64_WORKTREE_DIR)" "$$(git -C "$(KERNEL_DIR)" rev-parse HEAD)"; \
 	else \
 		git -C "$(ARM64_WORKTREE_DIR)" checkout --detach "$$(git -C "$(KERNEL_DIR)" rev-parse HEAD)" >/dev/null; \
 	fi
 
-$(ARM64_BUILD_CONFIG): | arm64-worktree
+$(ARM64_BUILD_CONFIG): $(ROOT_DIR)/runner/scripts/arm64-kernel-config.sh | arm64-worktree
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" "$(ROOT_DIR)/runner/scripts/arm64-kernel-config.sh" \
 		"$(ARM64_WORKTREE_DIR)" "$(ARM64_BUILD_DIR)" "$(CROSS_COMPILE_ARM64)"
 	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
@@ -485,9 +488,27 @@ $(ARM64_IMAGE): $(ARM64_BUILD_CONFIG) | arm64-worktree
 		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" Image -j"$(NPROC)"
 	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
 
-kernel-arm64: $(ARM64_IMAGE)
+$(ARM64_EFI_IMAGE): $(ARM64_BUILD_CONFIG) | arm64-worktree
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
+		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" vmlinuz.efi -j"$(NPROC)"
+
+kernel-arm64: $(ARM64_IMAGE) $(ARM64_EFI_IMAGE)
 	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
 	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
+
+$(ARM64_AWS_BUILD_CONFIG): $(ROOT_DIR)/runner/scripts/aws_arm64_kernel_config.sh | arm64-worktree
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" ARM64_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)" "$(ROOT_DIR)/runner/scripts/aws_arm64_kernel_config.sh" \
+		"$(ARM64_WORKTREE_DIR)" "$(ARM64_AWS_BUILD_DIR)" "$(CROSS_COMPILE_ARM64)"
+
+$(ARM64_AWS_IMAGE): $(ARM64_AWS_BUILD_CONFIG) | arm64-worktree
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
+		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" Image -j"$(NPROC)"
+
+$(ARM64_AWS_EFI_IMAGE): $(ARM64_AWS_BUILD_CONFIG) | arm64-worktree
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
+		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" vmlinuz.efi -j"$(NPROC)"
+
+kernel-arm64-aws: $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE)
 
 $(ARM64_ROOTFS_DIR)/bin/sh:
 	sudo mkdir -p "$(dir $(ARM64_ROOTFS_DIR))"
@@ -500,70 +521,163 @@ arm64-rootfs: $(ARM64_ROOTFS_DIR)/bin/sh
 # ── ARM64 cross-build & VM ────────────────────────────────────────────────────
 $(ARM64_CROSSBUILD_STAMP): $(ARM64_CROSSBUILD_DOCKERFILE)
 	mkdir -p "$(dir $(ARM64_CROSSBUILD_STAMP))"
-	"$(DOCKER)" buildx build --load --platform "$(ARM64_DOCKER_PLATFORM)" \
+	flock "$(ARM64_CROSSBUILD_LOCK)" "$(DOCKER)" buildx build --load --platform "$(ARM64_DOCKER_PLATFORM)" \
 		-f "$(ARM64_CROSSBUILD_DOCKERFILE)" -t "$(ARM64_CROSSBUILD_IMAGE)" "$(ARM64_CROSSBUILD_CONTEXT)"
 	touch "$@"
 
 arm64-crossbuild-image: $(ARM64_CROSSBUILD_STAMP)
 
-cross-arm64:
-	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)" && mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR)"
-	ARM64_CROSSBUILD_OUTPUT_DIR="$(ARM64_CROSSBUILD_OUTPUT_DIR)" \
-	ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
-	CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
-	MICRO_EXEC_ENABLE_LLVMBPF="$(ARM64_CROSSBUILD_ENABLE_LLVMBPF)" \
-	"$(ROOT_DIR)/runner/scripts/cross-arm64-build.sh"
+cross-arm64: arm64-crossbuild-image
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR).tmp" && mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR).tmp"
+	"$(DOCKER)" run --rm --platform "$(ARM64_DOCKER_PLATFORM)" \
+		-v "$(ROOT_DIR)":/workspace -w /workspace \
+		-e HOME=/tmp/codex \
+		-e CARGO_HOME="/workspace/.cache/aws-arm64/cargo-home" \
+		-e HOST_UID="$$(id -u)" \
+		-e HOST_GID="$$(id -g)" \
+		-e ARM64_CROSSBUILD_OUTPUT_DIR="/workspace/.cache/aws-arm64/binaries.tmp" \
+		-e ARM64_CROSSBUILD_BUILD_ROOT="/tmp/codex/arm64-crossbuild-work" \
+		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
+		-e ARM64_CROSSBUILD_SCX_PACKAGES="$(ARM64_CROSSBUILD_SCX_PACKAGES)" \
+		-e MICRO_EXEC_ENABLE_LLVMBPF="$(ARM64_CROSSBUILD_ENABLE_LLVMBPF)" \
+		"$(ARM64_CROSSBUILD_IMAGE)" /workspace/runner/scripts/cross-arm64-build.sh
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)" && mv "$(ARM64_CROSSBUILD_OUTPUT_DIR).tmp" "$(ARM64_CROSSBUILD_OUTPUT_DIR)"
 	file "$(ARM64_CROSS_RUNNER_REAL)" | grep -F "ARM aarch64"
 	file "$(ARM64_CROSS_DAEMON_REAL)" | grep -F "ARM aarch64"
 
-selftest-arm64: arm64-crossbuild-image
+cross-arm64-scx: arm64-crossbuild-image
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp" && mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp"
+	"$(DOCKER)" run --rm --platform "$(ARM64_DOCKER_PLATFORM)" \
+		-v "$(ROOT_DIR)":/workspace -w /workspace \
+		-e HOME=/tmp/codex \
+		-e CARGO_HOME="/workspace/.cache/aws-arm64/cargo-home" \
+		-e HOST_UID="$$(id -u)" \
+		-e HOST_GID="$$(id -g)" \
+		-e ARM64_CROSSBUILD_OUTPUT_DIR="/workspace/.cache/aws-arm64/binaries.scx.tmp" \
+		-e ARM64_CROSSBUILD_BUILD_ROOT="/tmp/codex/arm64-crossbuild-scx-work" \
+		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
+		-e ARM64_CROSSBUILD_SCX_PACKAGES="$(ARM64_CROSSBUILD_SCX_PACKAGES)" \
+		-e ARM64_CROSSBUILD_ONLY_SCX=1 \
+		"$(ARM64_CROSSBUILD_IMAGE)" /workspace/runner/scripts/cross-arm64-build.sh
+	test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/runner/repos/scx/target/release"
+	test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/corpus/build/scx"
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos/scx" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/scx"
+	mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos/scx/target/release" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/scx" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/lib"
+	cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/runner/repos/scx/target/release/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos/scx/target/release/"
+	cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/corpus/build/scx/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/scx/"
+	if [ -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/lib" ]; then cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/lib/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/lib/"; fi
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp"
+
+cross-arm64-bench: arm64-crossbuild-image
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp" && mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp"
+	"$(DOCKER)" run --rm --platform "$(ARM64_DOCKER_PLATFORM)" \
+		-v "$(ROOT_DIR)":/workspace -w /workspace \
+		-e HOME=/tmp/codex \
+		-e CARGO_HOME="/workspace/.cache/aws-arm64/cargo-home" \
+		-e HOST_UID="$$(id -u)" \
+		-e HOST_GID="$$(id -g)" \
+		-e ARM64_CROSSBUILD_OUTPUT_DIR="/workspace/.cache/aws-arm64/binaries.bench.tmp" \
+		-e ARM64_CROSSBUILD_BUILD_ROOT="/tmp/codex/arm64-crossbuild-bench-work" \
+		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
+		-e ARM64_CROSSBUILD_BENCH_REPOS="$(ARM64_CROSSBUILD_BENCH_REPOS)" \
+		-e ARM64_CROSSBUILD_ONLY_BENCH=1 \
+		"$(ARM64_CROSSBUILD_IMAGE)" /workspace/runner/scripts/cross-arm64-build.sh
+	@set -e; repo_csv="$(ARM64_CROSSBUILD_BENCH_REPOS)"; \
+	case ",$$repo_csv," in \
+		*,bcc,*) test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/runner/repos/bcc/libbpf-tools/.output" && test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/bcc/libbpf-tools" ;; \
+	esac; \
+	case ",$$repo_csv," in \
+		*,katran,*) test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/katran" && test -x "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/katran/bin/katran_server_grpc" && test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/katran/lib" ;; \
+	esac; \
+	case ",$$repo_csv," in \
+		*,tracee,*) test -x "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/tracee/bin/tracee" && test -f "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/tracee/tracee.bpf.o" ;; \
+	esac; \
+	case ",$$repo_csv," in \
+		*,tetragon,*) test -x "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/tetragon/bin/tetragon" ;; \
+	esac
+	@if printf ',%s,' "$(ARM64_CROSSBUILD_BENCH_REPOS)" | grep -q ',bcc,'; then \
+		rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos/bcc" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/bcc"; \
+	fi
+	@if printf ',%s,' "$(ARM64_CROSSBUILD_BENCH_REPOS)" | grep -q ',katran,'; then \
+		rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/katran" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/katran"; \
+	fi
+	@if printf ',%s,' "$(ARM64_CROSSBUILD_BENCH_REPOS)" | grep -q ',tracee,'; then \
+		rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/tracee"; \
+	fi
+	@if printf ',%s,' "$(ARM64_CROSSBUILD_BENCH_REPOS)" | grep -q ',tetragon,'; then \
+		rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/tetragon"; \
+	fi
+	mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/lib"
+	if [ -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/runner/repos" ]; then cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/runner/repos/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos/"; fi
+	if [ -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build" ]; then cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/"; fi
+	if [ -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/katran" ]; then mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR)/katran" && cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/katran/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/katran/"; fi
+	if [ -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/lib" ]; then cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/lib/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/lib/"; fi
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp"
+
+arm64-test-artifacts: arm64-crossbuild-image
 	"$(DOCKER)" run --rm --platform "$(ARM64_DOCKER_PLATFORM)" --user "$$(id -u):$$(id -g)" \
 		-v "$(ROOT_DIR)":/workspace -w /workspace \
+		-e VMLINUX_BTF="$(VMLINUX_BTF)" \
+		-e ARM64_TEST_ARTIFACTS_ROOT="$(ARM64_TEST_ARTIFACTS_ROOT)" \
+		-e ARM64_TEST_UNITTEST_BUILD_DIR="$(ARM64_TEST_UNITTEST_BUILD_DIR)" \
+		-e ARM64_TEST_NEGATIVE_BUILD_DIR="$(ARM64_TEST_NEGATIVE_BUILD_DIR)" \
+		-e ARM64_TEST_DAEMON_TARGET_DIR="$(ARM64_TEST_DAEMON_TARGET_DIR)" \
+		-e ARM64_TEST_DAEMON_OUTPUT_DIR="$(ARM64_TEST_DAEMON_OUTPUT_DIR)" \
+		-e ARM64_TEST_CARGO_HOME_DIR="$(ARM64_TEST_CARGO_HOME_DIR)" \
 		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
-		"$(ARM64_CROSSBUILD_IMAGE)" /workspace/runner/scripts/cross-arm64-selftest.sh
-	file "$(ROOT_DIR)/tests/unittest/build-arm64/rejit_kinsn" | grep -F "ELF 64-bit LSB executable, ARM aarch64"
-	file "$(ROOT_DIR)/tests/negative/build-arm64/adversarial_rejit" | grep -F "ELF 64-bit LSB executable, ARM aarch64"
+		"$(ARM64_CROSSBUILD_IMAGE)" /workspace/runner/scripts/build-arm64-test-artifacts.sh
+	file "$(ARM64_TEST_UNITTEST_BUILD_DIR)/rejit_kinsn" | grep -F "ELF 64-bit LSB executable, ARM aarch64"
+	file "$(ARM64_TEST_NEGATIVE_BUILD_DIR)/adversarial_rejit" | grep -F "ELF 64-bit LSB executable, ARM aarch64"
+
+kinsn-modules-arm64: $(ARM64_IMAGE) | arm64-worktree
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
+		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" modules_prepare
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
+		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" M="$(ROOT_DIR)/module/arm64" modules
 
 vm-arm64-smoke: $(ARM64_IMAGE) $(ARM64_ROOTFS_DIR)/bin/sh
 	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/runner/scripts/arm64_qemu_smoke.py" \
 		--qemu "$(ARM64_QEMU)" --kernel "$(ARM64_IMAGE)" --rootfs "$(ARM64_ROOTFS_DIR)"
 
-vm-arm64-selftest: $(ARM64_IMAGE) $(ARM64_ROOTFS_DIR)/bin/sh selftest-arm64
+vm-arm64-selftest: $(ARM64_IMAGE) $(ARM64_ROOTFS_DIR)/bin/sh arm64-test-artifacts
 	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/runner/scripts/arm64_qemu_smoke.py" \
 		--qemu "$(ARM64_QEMU)" --kernel "$(ARM64_IMAGE)" --rootfs "$(ARM64_ROOTFS_DIR)" \
 		--host-share "$(ROOT_DIR)" --guest-mount "$(ARM64_REPO_GUEST_MOUNT)" \
 		--command 'LD_LIBRARY_PATH="$(ARM64_REPO_GUEST_MOUNT)/tests/unittest/build-arm64/lib" "$(ARM64_REPO_GUEST_MOUNT)/runner/scripts/vm-selftest.sh" "$(ARM64_REPO_GUEST_MOUNT)" "$(ARM64_REPO_GUEST_MOUNT)/tests/unittest" "$(ARM64_REPO_GUEST_MOUNT)/module/arm64" "$(ARM64_REPO_GUEST_MOUNT)/tests/negative" "$(FUZZ_ROUNDS)" "$(ARM64_REPO_GUEST_MOUNT)/tests/unittest/build-arm64" "$(ARM64_REPO_GUEST_MOUNT)/tests/negative/build-arm64"'
 
 # ── AWS ARM64 ─────────────────────────────────────────────────────────────────
-aws-arm64-launch:
-	"$(AWS_ARM64_SCRIPT)" launch
-aws-arm64-setup:
-	@test -n "$(INSTANCE_IP)" || (echo "ERROR: INSTANCE_IP= required" && exit 1)
-	"$(AWS_ARM64_SCRIPT)" setup "$(INSTANCE_IP)"
-aws-arm64-benchmark: cross-arm64
-	@test -n "$(INSTANCE_IP)" || (echo "ERROR: INSTANCE_IP= required" && exit 1)
-	"$(AWS_ARM64_SCRIPT)" benchmark "$(INSTANCE_IP)"
+aws-arm64-test:
+	"$(RUN_TARGET_SUITE_SCRIPT)" run aws-arm64 test
+aws-arm64-benchmark:
+	@case "$(AWS_ARM64_BENCH_MODE)" in \
+		micro) "$(RUN_TARGET_SUITE_SCRIPT)" run aws-arm64 micro ;; \
+		corpus) "$(RUN_TARGET_SUITE_SCRIPT)" run aws-arm64 corpus ;; \
+		e2e) "$(RUN_TARGET_SUITE_SCRIPT)" run aws-arm64 e2e ;; \
+		all) "$(RUN_TARGET_SUITE_SCRIPT)" run aws-arm64 micro && \
+		     "$(RUN_TARGET_SUITE_SCRIPT)" run aws-arm64 corpus && \
+		     "$(RUN_TARGET_SUITE_SCRIPT)" run aws-arm64 e2e ;; \
+		*) echo "ERROR: AWS_ARM64_BENCH_MODE must be one of micro, corpus, e2e, all" >&2; exit 1 ;; \
+	esac
 aws-arm64-terminate:
-	@test -n "$(INSTANCE_ID)" || (echo "ERROR: INSTANCE_ID= required" && exit 1)
-	"$(AWS_ARM64_SCRIPT)" terminate "$(INSTANCE_ID)"
-aws-arm64: cross-arm64
-	"$(AWS_ARM64_SCRIPT)" full
+	"$(RUN_TARGET_SUITE_SCRIPT)" terminate aws-arm64
+aws-arm64: aws-arm64-test aws-arm64-benchmark
 
 # ── AWS x86 ───────────────────────────────────────────────────────────────────
-aws-x86-launch:
-	"$(AWS_X86_SCRIPT)" launch
-aws-x86-setup:
-	@test -n "$(INSTANCE_IP)" || (echo "ERROR: INSTANCE_IP= required" && exit 1)
-	"$(AWS_X86_SCRIPT)" setup "$(INSTANCE_IP)"
+aws-x86-test:
+	"$(RUN_TARGET_SUITE_SCRIPT)" run aws-x86 test
 aws-x86-benchmark:
-	@test -n "$(INSTANCE_IP)" || (echo "ERROR: INSTANCE_IP= required" && exit 1)
-	"$(AWS_X86_SCRIPT)" benchmark "$(INSTANCE_IP)"
+	@case "$(AWS_X86_BENCH_MODE)" in \
+		micro) "$(RUN_TARGET_SUITE_SCRIPT)" run aws-x86 micro ;; \
+		corpus) "$(RUN_TARGET_SUITE_SCRIPT)" run aws-x86 corpus ;; \
+		e2e) "$(RUN_TARGET_SUITE_SCRIPT)" run aws-x86 e2e ;; \
+		all) "$(RUN_TARGET_SUITE_SCRIPT)" run aws-x86 micro && \
+		     "$(RUN_TARGET_SUITE_SCRIPT)" run aws-x86 corpus && \
+		     "$(RUN_TARGET_SUITE_SCRIPT)" run aws-x86 e2e ;; \
+		*) echo "ERROR: AWS_X86_BENCH_MODE must be one of micro, corpus, e2e, all" >&2; exit 1 ;; \
+	esac
 aws-x86-terminate:
-	@test -n "$(INSTANCE_ID)" || (echo "ERROR: INSTANCE_ID= required" && exit 1)
-	"$(AWS_X86_SCRIPT)" terminate "$(INSTANCE_ID)"
-aws-x86-full:
-	"$(AWS_X86_SCRIPT)" full
-aws-x86: aws-x86-full
+	"$(RUN_TARGET_SUITE_SCRIPT)" terminate aws-x86
+aws-x86: aws-x86-test aws-x86-benchmark
 
 # ── Clean ──────────────────────────────────────────────────────────────────────
 clean:
@@ -573,4 +687,4 @@ clean:
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	$(MAKE) -C "$(KERNEL_DIR)" clean
 	rm -f "$(SMOKE_OUTPUT)" "$(ARM64_CONFIG_LINK)" "$(ARM64_IMAGE_LINK)"
-	rm -rf "$(ARM64_BUILD_DIR)" "$(KERNEL_TEST_DIR)/build-arm64" "$(ARM64_CROSSBUILD_OUTPUT_DIR)" "$(UPSTREAM_SELFTEST_OUTPUT_DIR)"
+	rm -rf "$(ARM64_BUILD_DIR)" "$(KERNEL_TEST_DIR)/build-arm64" "$(ARM64_CROSSBUILD_OUTPUT_DIR)" "$(ARM64_TEST_ARTIFACTS_ROOT)" "$(UPSTREAM_SELFTEST_OUTPUT_DIR)"

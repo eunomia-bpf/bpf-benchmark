@@ -13,15 +13,19 @@ from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run a shell command inside a runner-managed VM.")
-    parser.add_argument("--action", required=True, help="Machine action name from runner/machines.yaml.")
-    parser.add_argument("--target", help="Optional machine target or alias override.")
+    parser.add_argument("--action", required=True, help="Logical suite action name for queue metadata.")
+    parser.add_argument("--vm-backend", required=True, help="Explicit VM backend for execution.")
+    parser.add_argument("--vm-lock-scope", required=True, help="Explicit VM lock scope.")
+    parser.add_argument("--vm-machine-name", required=True, help="Explicit VM machine name for queue metadata.")
+    parser.add_argument("--vm-machine-arch", required=True, help="Explicit VM architecture for queue metadata.")
     parser.add_argument("--kernel-image", required=True, help="Kernel image passed to the VM backend.")
     parser.add_argument("--cpus", type=int, help="Optional guest CPU count override.")
     parser.add_argument("--mem", help="Optional guest memory override.")
     parser.add_argument("--nofile", type=int, help="Optional guest RLIMIT_NOFILE soft/hard value.")
     parser.add_argument(
         "--vm-executable",
-        help="Optional backend executable override (for example a custom vng binary).",
+        required=True,
+        help="Backend executable path (for example a custom vng binary).",
     )
     parser.add_argument("--timeout", type=int, default=3600, help="End-to-end timeout in seconds.")
     parser.add_argument("--network", action="append", default=[], help="Repeatable VM network configuration.")
@@ -38,9 +42,12 @@ def main() -> int:
         args.cpus,
         args.mem,
         args.timeout,
-        vm_executable=args.vm_executable or None,
-        target=args.target or None,
+        vm_executable=args.vm_executable,
         action=args.action,
+        machine_backend=args.vm_backend,
+        machine_lock_scope=args.vm_lock_scope,
+        machine_name=args.vm_machine_name,
+        machine_arch=args.vm_machine_arch,
         networks=args.network or (),
     )
     if completed.stdout:

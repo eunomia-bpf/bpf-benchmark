@@ -79,6 +79,9 @@ repos:
     url: https://github.com/facebookincubator/katran.git
     branch: main
     sparse_paths:
+      - build
+      - cmake
+      - example_grpc
       - katran/lib
     harvest_globs:
       - katran/lib/**/*.bpf.c

@@ -36,6 +36,12 @@ Repository-level constraints for coding agents working in this tree.
 
 - **Never use shell `&` or `2>&1 &` to background `codex exec`.**  The outer shell exits immediately, causing false "completed" notifications while the codex child process is still running. Use the Bash tool's `run_in_background: true` parameter instead.
 
+## Reviewer Patience
+
+- Do not proactively close reviewer or explorer subagents just because they are slow to respond.
+- When a full-project review is in progress, prefer waiting longer over restarting or narrowing the review scope.
+- Only stop a slow reviewer if the user explicitly asks to stop it, or if the reviewer has already returned a final result.
+
 ## Code Change Scope
 
 - Delete v1 and dead code when v2 replaces it.

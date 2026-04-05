@@ -12,7 +12,6 @@ from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, 
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
 from ..workload import WorkloadResult, run_connect_storm, run_exec_storm, run_file_io, run_open_storm
 
-
 def _bpftool_binary() -> str:
     return resolve_bpftool_binary()
 
@@ -201,7 +200,7 @@ def run_setup_script(setup_script: Path) -> dict[str, object]:
     result = {
         "returncode": completed.returncode,
         "tetragon_binary": None,
-        "tetra_binary": None,
+        "tetragon_bpf_lib_dir": None,
         "stdout_tail": tail_text(completed.stdout or "", max_lines=60, max_chars=12000),
         "stderr_tail": tail_text(completed.stderr or "", max_lines=60, max_chars=12000),
     }
@@ -209,9 +208,9 @@ def run_setup_script(setup_script: Path) -> dict[str, object]:
         if line.startswith("TETRAGON_BINARY="):
             value = line.split("=", 1)[1].strip()
             result["tetragon_binary"] = value or None
-        if line.startswith("TETRA_BINARY="):
+        if line.startswith("TETRAGON_BPF_LIB_DIR="):
             value = line.split("=", 1)[1].strip()
-            result["tetra_binary"] = value or None
+            result["tetragon_bpf_lib_dir"] = value or None
     return result
 
 

@@ -30,7 +30,6 @@ from runner.libs.case_common import (
     attach_pending_result_metadata,
     prepare_daemon_session,
     rejit_program_result,
-    rejit_result_has_any_apply,
     reset_pending_result_metadata,
     run_app_runner_lifecycle,
     wait_for_suite_quiescence,
@@ -267,6 +266,20 @@ def _normalized_stats_snapshot(raw_stats: Mapping[object, object] | None) -> dic
     return normalized
 
 
+def _measurement_program_stats(
+    measurement: Mapping[str, object] | None,
+    prog_ids: Sequence[int],
+) -> dict[str, dict[str, object]]:
+    if not isinstance(measurement, Mapping):
+        return {}
+    initial_snapshot = _normalized_stats_snapshot(measurement.get("initial_stats"))
+    final_snapshot = _normalized_stats_snapshot(measurement.get("final_stats"))
+    return _program_stats_by_prog_id(
+        _program_phase_stats(final_snapshot, initial_snapshot),
+        prog_ids,
+    )
+
+
 def _selected_live_programs(
     live_programs: Sequence[Mapping[str, object]],
     prog_ids: Sequence[int],
@@ -292,12 +305,52 @@ def _phase_exec_ns(record: Mapping[str, object] | None) -> float | None:
     return float(value)
 
 
+def _apply_record_changed(apply_record: Mapping[str, object] | None) -> bool:
+    if not isinstance(apply_record, Mapping):
+        return False
+    counts = apply_record.get("counts")
+    if isinstance(counts, Mapping) and int(counts.get("applied_sites", 0) or 0) > 0:
+        return True
+    summary = apply_record.get("summary")
+    if isinstance(summary, Mapping):
+        if bool(summary.get("program_changed")):
+            return True
+        if int(summary.get("total_sites_applied", 0) or 0) > 0:
+            return True
+    debug_result = apply_record.get("debug_result")
+    if isinstance(debug_result, Mapping):
+        if bool(debug_result.get("changed")):
+            return True
+        debug_summary = debug_result.get("summary")
+        if isinstance(debug_summary, Mapping):
+            if bool(debug_summary.get("program_changed")):
+                return True
+            if int(debug_summary.get("total_sites_applied", 0) or 0) > 0:
+                return True
+        raw_passes_applied = debug_result.get("passes_applied")
+        if isinstance(raw_passes_applied, Sequence) and not isinstance(raw_passes_applied, (str, bytes, bytearray)):
+            return any(str(pass_name).strip() for pass_name in raw_passes_applied)
+    return False
+
+
+def _rejit_result_has_any_change(rejit_result: Mapping[str, object] | None) -> bool:
+    if not isinstance(rejit_result, Mapping):
+        return False
+    per_program = rejit_result.get("per_program")
+    if isinstance(per_program, Mapping) and per_program:
+        return any(
+            _apply_record_changed(record if isinstance(record, Mapping) else None)
+            for record in per_program.values()
+        )
+    return _apply_record_changed(rejit_result)
+
+
 def _comparison_exclusion_reason(
     baseline_exec_ns: float | None,
     rejit_exec_ns: float | None,
     *,
     had_post_rejit: bool,
-    any_applied: bool,
+    any_changed: bool,
     apply_record: Mapping[str, object],
 ) -> str:
     apply_error = str(apply_record.get("error") or "").strip()
@@ -305,11 +358,15 @@ def _comparison_exclusion_reason(
         return "missing_baseline_exec_ns"
     if baseline_exec_ns <= 0.0:
         return "non_positive_baseline_exec_ns"
+    if not _apply_record_changed(apply_record):
+        if apply_error:
+            return f"apply_error: {apply_error}"
+        return "no_programs_changed_in_loader"
     if not had_post_rejit:
         if apply_error:
             return f"apply_error: {apply_error}"
-        if not any_applied:
-            return "no_programs_applied_in_loader"
+        if not any_changed:
+            return "no_programs_changed_in_loader"
         return "missing_post_rejit_measurement"
     if rejit_exec_ns is None:
         if apply_error:
@@ -330,7 +387,7 @@ def _build_program_measurements(
     had_post_rejit: bool,
 ) -> dict[str, dict[str, object]]:
     rows: dict[str, dict[str, object]] = {}
-    any_applied = rejit_result_has_any_apply(apply_result)
+    any_changed = _rejit_result_has_any_change(apply_result)
     for live_program in live_programs:
         prog_id = int(live_program.get("id", 0) or 0)
         if prog_id <= 0:
@@ -339,16 +396,17 @@ def _build_program_measurements(
         baseline_record = dict(baseline_programs.get(str(prog_id), {}))
         rejit_record = dict(rejit_programs.get(str(prog_id), {}))
         apply_record = rejit_program_result(apply_result, prog_id)
-        if not apply_record and isinstance(apply_result, Mapping):
-            apply_record = {
-                "applied": bool(apply_result.get("applied")),
-                "error": str(apply_result.get("error") or ""),
-                "counts": dict(apply_result.get("counts") or {}) if isinstance(apply_result.get("counts"), Mapping) else {},
-            }
+        if not apply_record:
+            raise RuntimeError(
+                f"{app_name}: REJIT result is missing per-program apply record for prog {prog_id}"
+            )
+        applied = bool(apply_record.get("applied"))
+        changed = _apply_record_changed(apply_record)
         baseline_exec_ns = _phase_exec_ns(baseline_record)
         rejit_exec_ns = _phase_exec_ns(rejit_record)
         comparable = (
-            baseline_exec_ns is not None
+            changed
+            and baseline_exec_ns is not None
             and baseline_exec_ns > 0.0
             and rejit_exec_ns is not None
             and rejit_exec_ns > 0.0
@@ -360,7 +418,7 @@ def _build_program_measurements(
                 baseline_exec_ns,
                 rejit_exec_ns,
                 had_post_rejit=had_post_rejit,
-                any_applied=any_applied,
+                any_changed=any_changed,
                 apply_record=apply_record,
             )
         rows[str(prog_id)] = {
@@ -368,7 +426,8 @@ def _build_program_measurements(
             "label": _program_label(app_name, program_name, prog_id),
             "name": program_name,
             "type": str(live_program.get("type") or _infer_prog_type_name(live_program)),
-            "applied": bool(apply_record.get("applied")),
+            "applied": applied,
+            "changed": changed,
             "comparable": comparable,
             "speedup": speedup,
             "comparison_exclusion_reason": exclusion_reason,
@@ -394,11 +453,12 @@ def _app_measurement_row(result: Mapping[str, object]) -> dict[str, object] | No
     app_name = str(result.get("app") or "")
     apply_result = result.get("rejit_apply")
     apply_record = dict(apply_result) if isinstance(apply_result, Mapping) else {}
-    any_applied = rejit_result_has_any_apply(apply_record)
+    applied = bool(apply_record.get("applied"))
+    changed = _apply_record_changed(apply_record)
     baseline = measurement.get("baseline")
     post_rejit = measurement.get("post_rejit")
     speedup = measurement.get("speedup")
-    comparable = isinstance(speedup, (int, float)) and float(speedup) > 0.0
+    comparable = changed and isinstance(speedup, (int, float)) and float(speedup) > 0.0
     exclusion_reason = ""
     apply_error = str(apply_record.get("error") or "").strip()
     if not comparable:
@@ -406,11 +466,11 @@ def _app_measurement_row(result: Mapping[str, object]) -> dict[str, object] | No
             exclusion_reason = "missing_baseline_app_metric"
         elif float(baseline) <= 0.0:
             exclusion_reason = "non_positive_baseline_app_metric"
+        elif not changed:
+            exclusion_reason = f"apply_error: {apply_error}" if apply_error else "no_programs_changed_in_loader"
         elif not bool(result.get("had_post_rejit_measurement")):
             if apply_error:
                 exclusion_reason = f"apply_error: {apply_error}"
-            elif not any_applied:
-                exclusion_reason = "no_programs_applied_in_loader"
             else:
                 exclusion_reason = "missing_post_rejit_measurement"
         elif not isinstance(post_rejit, (int, float)):
@@ -426,7 +486,8 @@ def _app_measurement_row(result: Mapping[str, object]) -> dict[str, object] | No
         "type": "app",
         "unit": "app",
         "metric": str(measurement.get("metric") or ""),
-        "applied": any_applied,
+        "applied": applied,
+        "changed": changed,
         "comparable": comparable,
         "speedup": float(speedup) if comparable else None,
         "comparison_exclusion_reason": exclusion_reason,
@@ -469,6 +530,7 @@ def _comparison_rows(
                     "program": str(row.get("name") or ""),
                     "label": str(row.get("label") or ""),
                     "applied": bool(row.get("applied")),
+                    "changed": bool(row.get("changed")),
                     "reason": str(row.get("comparison_exclusion_reason") or "unknown"),
                     "apply_error": str(((row.get("apply") or {}).get("error")) or ""),
                 }
@@ -709,6 +771,8 @@ def _build_app_error_result(
     runner: AppRunner | None = None,
     state: CaseLifecycleState | None = None,
     baseline_measurement: Mapping[str, object] | None = None,
+    apply_result: Mapping[str, object] | None = None,
+    rejit_measurement: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     baseline_workload = None
     baseline_workloads: list[dict[str, object]] = []
@@ -721,6 +785,38 @@ def _build_app_error_result(
             for workload in (baseline_measurement.get("workloads") or [])
             if isinstance(workload, Mapping)
         ]
+    prog_ids = [] if state is None else [int(value) for value in state.target_prog_ids if int(value) > 0]
+    live_programs = [] if state is None else [dict(program) for program in (state.artifacts.get("programs") or [])]
+    baseline_programs = _measurement_program_stats(baseline_measurement, prog_ids)
+    had_post_rejit = isinstance(rejit_measurement, Mapping)
+    rejit_programs = _measurement_program_stats(rejit_measurement, prog_ids)
+    rejit_workload = None
+    rejit_workloads: list[dict[str, object]] = []
+    if isinstance(rejit_measurement, Mapping):
+        raw_rejit_workload = rejit_measurement.get("workload")
+        if isinstance(raw_rejit_workload, Mapping):
+            rejit_workload = dict(raw_rejit_workload)
+        rejit_workloads = [
+            dict(workload)
+            for workload in (rejit_measurement.get("workloads") or [])
+            if isinstance(workload, Mapping)
+        ]
+    normalized_apply_result = dict(apply_result or {})
+    program_measurements = {}
+    raw_apply_per_program = normalized_apply_result.get("per_program")
+    if (
+        str(measurement_mode or "").strip() == "program"
+        and live_programs
+        and isinstance(raw_apply_per_program, Mapping)
+    ):
+        program_measurements = _build_program_measurements(
+            app.name,
+            live_programs,
+            baseline_programs,
+            rejit_programs,
+            normalized_apply_result,
+            had_post_rejit=had_post_rejit,
+        )
     return {
         "app": app.name,
         "runner": app.runner,
@@ -731,18 +827,24 @@ def _build_app_error_result(
         "args": dict(app.args),
         "status": "error",
         "error": str(error),
-        "prog_ids": [] if state is None else [int(value) for value in state.target_prog_ids if int(value) > 0],
-        "programs": [] if state is None else [dict(program) for program in (state.artifacts.get("programs") or [])],
-        "program_measurements": {},
+        "prog_ids": prog_ids,
+        "programs": live_programs,
+        "program_measurements": program_measurements,
         "app_measurement": None,
-        "baseline": {"programs": {}, "exec_ns_mean": None},
+        "baseline": {
+            "programs": baseline_programs,
+            "exec_ns_mean": _mean_exec_ns(baseline_programs),
+        },
         "baseline_workload": baseline_workload,
         "baseline_workloads": baseline_workloads,
-        "rejit_apply": {},
-        "rejit": None,
-        "had_post_rejit_measurement": False,
-        "rejit_workload": None,
-        "rejit_workloads": [],
+        "rejit_apply": normalized_apply_result,
+        "rejit": {
+            "programs": rejit_programs,
+            "exec_ns_mean": _mean_exec_ns(rejit_programs),
+        } if had_post_rejit else None,
+        "had_post_rejit_measurement": had_post_rejit,
+        "rejit_workload": rejit_workload,
+        "rejit_workloads": rejit_workloads,
         "process": {} if runner is None else dict(runner.process_output),
         "command_used": []
         if state is None
@@ -906,7 +1008,7 @@ def _finalize_app_result(
             if rejit_ops_per_sec is None
             else (rejit_ops_per_sec / baseline_ops_per_sec),
         }
-    elif not error and not _has_comparable_measurement(program_measurements):
+    elif not error and _rejit_result_has_any_change(normalized_apply_result) and not _has_comparable_measurement(program_measurements):
         raise RuntimeError(
             f"{app.name}: workload {app.workload_for('corpus')!r} produced no comparable target program measurements"
         )
@@ -1167,6 +1269,8 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                                 runner=session.runner,
                                 state=session.state,
                                 baseline_measurement=session.baseline_measurement,
+                                apply_result=session.apply_result,
+                                rejit_measurement=session.rejit_measurement,
                             )
                             results_by_name[session.app.name] = result
                             completed_apps.add(session.app.name)
@@ -1249,7 +1353,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
 
                 if not fatal_error:
                     for session in active_sessions:
-                        if not rejit_result_has_any_apply(session.apply_result):
+                        if not _rejit_result_has_any_change(session.apply_result):
                             continue
                         try:
                             session.rejit_measurement = _measure_runner_phase(
@@ -1303,6 +1407,8 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                     runner=session.runner,
                     state=session.state,
                     baseline_measurement=session.baseline_measurement,
+                    apply_result=session.apply_result,
+                    rejit_measurement=session.rejit_measurement,
                 )
             else:
                 try:
@@ -1328,6 +1434,8 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         runner=session.runner,
                         state=session.state,
                         baseline_measurement=session.baseline_measurement,
+                        apply_result=session.apply_result,
+                        rejit_measurement=session.rejit_measurement,
                     )
             results_by_name[session.app.name] = result
             completed_apps.add(session.app.name)

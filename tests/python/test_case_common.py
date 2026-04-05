@@ -108,7 +108,13 @@ def test_run_case_lifecycle_reuses_single_daemon_session(monkeypatch, tmp_path: 
                 "applied": True,
                 "output": "",
                 "exit_code": 0,
-                "per_program": {},
+                "per_program": {
+                    101: {
+                        "prog_id": 101,
+                        "applied": True,
+                        "error": "",
+                    }
+                },
                 "counts": {
                     "total_sites": 0,
                     "applied_sites": 0,
@@ -237,7 +243,13 @@ def test_run_case_lifecycle_can_measure_post_phase_after_partial_apply(monkeypat
                 "applied": False,
                 "output": "",
                 "exit_code": 1,
-                "per_program": {},
+                "per_program": {
+                    101: {
+                        "prog_id": 101,
+                        "applied": False,
+                        "error": "prog 101: id changed after struct_ops refresh",
+                    }
+                },
                 "counts": {
                     "total_sites": 7,
                     "applied_sites": 7,

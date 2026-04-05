@@ -233,15 +233,14 @@ def require_suite_artifacts(suite: SuiteSpec) -> None:
     require_existing_paths(required_paths)
 
 
-def runner_supports_llvmbpf(runner_binary: Path) -> bool:
+def runner_help_text(runner_binary: Path) -> str:
     completed = run_command(
         [str(runner_binary), "--help"],
         cwd=ROOT_DIR,
         check=False,
         timeout=30,
     )
-    text = "\n".join([completed.stdout, completed.stderr])
-    return "run-llvmbpf" in text
+    return "\n".join([completed.stdout, completed.stderr])
 
 
 def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: str | None) -> None:
@@ -428,10 +427,15 @@ def main(argv: list[str] | None = None) -> int:
 
     require_suite_artifacts(suite)
     runner_binary = Path(suite.build.runner_binary).resolve()
-    if any(runtime.mode == "llvmbpf" for runtime in runtimes) and not runner_supports_llvmbpf(runner_binary):
-        raise RuntimeError(
-            f"selected llvmbpf runtime but runner build does not expose run-llvmbpf: {runner_binary}"
-        )
+    if any(runtime.mode == "llvmbpf" for runtime in runtimes):
+        runner_help = runner_help_text(runner_binary)
+        if "run-llvmbpf" not in runner_help:
+            detail = tail_text(runner_help, max_lines=20, max_chars=4000)
+            detail_suffix = f"\n{detail}" if detail else ""
+            raise RuntimeError(
+                f"selected llvmbpf runtime but runner build does not expose run-llvmbpf: {runner_binary}"
+                f"{detail_suffix}"
+            )
 
     results: dict[str, Any] = {
         "suite": suite.suite_name,

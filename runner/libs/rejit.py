@@ -1096,13 +1096,31 @@ def _apply_daemon_rejit_via_socket(
             stderr_path=stderr_path,
         )
         if profile_error is not None:
+            profile_exit_code = int(profile_error.get("exit_code", 1) or 1)
+            profile_output = str(profile_error.get("output") or "")
+            profile_message = str(profile_error.get("error") or "profile collection failed")
+            per_program = {
+                int(prog_id): {
+                    "prog_id": int(prog_id),
+                    "applied": False,
+                    "changed": False,
+                    "output": profile_output,
+                    "exit_code": profile_exit_code,
+                    "counts": {
+                        "total_sites": 0,
+                        "applied_sites": 0,
+                    },
+                    "error": profile_message,
+                }
+                for prog_id in requested_prog_ids
+            }
             return {
                 "applied": False,
                 "applied_any": False,
                 "all_applied": False,
-                "output": str(profile_error.get("output") or ""),
-                "exit_code": int(profile_error.get("exit_code", 1) or 1),
-                "per_program": {},
+                "output": profile_output,
+                "exit_code": profile_exit_code,
+                "per_program": per_program,
                 "counts": {
                     "total_sites": 0,
                     "applied_sites": 0,

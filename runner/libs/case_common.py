@@ -449,11 +449,33 @@ def _merge_group_rejit_results(
     exit_code = 0
     errors: list[str] = []
 
+    def failure_record_for_prog(
+        prog_id: int,
+        *,
+        group_exit_code: int,
+        group_error: str,
+        group_counts: Mapping[str, object] | None,
+    ) -> dict[str, object]:
+        counts_mapping = group_counts if isinstance(group_counts, Mapping) else {}
+        return {
+            "prog_id": int(prog_id),
+            "applied": False,
+            "changed": False,
+            "output": "",
+            "exit_code": group_exit_code,
+            "counts": {
+                "total_sites": int(counts_mapping.get("total_sites", 0) or 0),
+                "applied_sites": int(counts_mapping.get("applied_sites", 0) or 0),
+            },
+            "error": group_error,
+        }
+
     for group_prog_ids, result in group_results:
         output = str(result.get("output") or "")
         if output:
             outputs.append(output)
-        exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
+        group_exit_code = int(result.get("exit_code", 0) or 0)
+        exit_code = max(exit_code, group_exit_code)
 
         counts = result.get("counts")
         if isinstance(counts, Mapping):
@@ -465,9 +487,18 @@ def _merge_group_rejit_results(
             errors.append(error)
 
         raw_per_program = result.get("per_program")
-        per_program_records = raw_per_program if isinstance(raw_per_program, Mapping) else {}
-        group_counts = counts if isinstance(counts, Mapping) else {}
-        fallback_applied = bool(result.get("all_applied", result.get("applied", False)))
+        if not isinstance(raw_per_program, Mapping):
+            if group_exit_code != 0 or error:
+                for prog_id in group_prog_ids:
+                    per_program[int(prog_id)] = failure_record_for_prog(
+                        int(prog_id),
+                        group_exit_code=group_exit_code,
+                        group_error=error or "group REJIT apply failed before per-program records were available",
+                        group_counts=counts if isinstance(counts, Mapping) else None,
+                    )
+                continue
+            raise RuntimeError("group REJIT result is missing per_program records")
+        per_program_records = raw_per_program
         for prog_id in group_prog_ids:
             raw_record = per_program_records.get(int(prog_id))
             if raw_record is None:
@@ -475,20 +506,15 @@ def _merge_group_rejit_results(
             if isinstance(raw_record, Mapping):
                 per_program[int(prog_id)] = dict(raw_record)
                 continue
-            per_program[int(prog_id)] = {
-                "applied": fallback_applied,
-                "output": output,
-                "exit_code": int(result.get("exit_code", 0) or 0),
-                "counts": {
-                    "total_sites": int(group_counts.get("total_sites", 0) or 0)
-                    if len(group_prog_ids) == 1
-                    else 0,
-                    "applied_sites": int(group_counts.get("applied_sites", 0) or 0)
-                    if len(group_prog_ids) == 1
-                    else 0,
-                },
-                "error": error,
-            }
+            if group_exit_code != 0 or error:
+                per_program[int(prog_id)] = failure_record_for_prog(
+                    int(prog_id),
+                    group_exit_code=group_exit_code,
+                    group_error=error or f"group REJIT apply failed for prog {prog_id}",
+                    group_counts=counts if isinstance(counts, Mapping) else None,
+                )
+                continue
+            raise RuntimeError(f"group REJIT result is missing per_program record for prog {prog_id}")
 
     applied_any = any(bool(record.get("applied")) for record in per_program.values())
     all_applied = bool(per_program) and all(bool(record.get("applied")) for record in per_program.values())

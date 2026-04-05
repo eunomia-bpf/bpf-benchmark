@@ -52,7 +52,7 @@ class TetragonRunner(AppRunner):
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.load_timeout_s = int(load_timeout_s)
         self.setup_script = Path(setup_script).resolve()
-        self.setup_result: dict[str, object] = {"returncode": 0, "tetragon_binary": None, "tetra_binary": None, "stdout_tail": "", "stderr_tail": ""}
+        self.setup_result: dict[str, object] | None = None
         self.tempdir: tempfile.TemporaryDirectory[str] | None = None
         self.policy_paths: list[Path] = []
         self.command: list[str] = []
@@ -84,16 +84,15 @@ class TetragonRunner(AppRunner):
         return {}
 
     def _resolve_binary(self) -> str:
-        resolved = resolve_tetragon_binary(None if self.tetragon_binary is None else str(self.tetragon_binary), self.setup_result)
-        if resolved is None:
+        if self.setup_result is None:
             self.setup_result = run_setup_script(self.setup_script)
-            if int(self.setup_result.get("returncode", 0) or 0) != 0:
-                details = str(self.setup_result.get("stderr_tail") or self.setup_result.get("stdout_tail") or self.setup_result)
-                raise RuntimeError(f"Tetragon setup failed: {details}")
-            resolved = resolve_tetragon_binary(
-                None if self.tetragon_binary is None else str(self.tetragon_binary),
-                self.setup_result,
-            )
+        if int(self.setup_result.get("returncode", 0) or 0) != 0:
+            details = str(self.setup_result.get("stderr_tail") or self.setup_result.get("stdout_tail") or self.setup_result)
+            raise RuntimeError(f"Tetragon setup failed: {details}")
+        resolved = resolve_tetragon_binary(
+            None if self.tetragon_binary is None else str(self.tetragon_binary),
+            self.setup_result,
+        )
         if resolved is None:
             raise RuntimeError("Tetragon binary not found; provide --tetragon-binary or run the Tetragon setup script")
         return resolved
@@ -106,7 +105,11 @@ class TetragonRunner(AppRunner):
         self.tempdir = tempfile.TemporaryDirectory(prefix="tetragon-policy-")
         policy_dir = Path(self.tempdir.name)
         self.policy_paths = write_tetragon_policies(policy_dir)
-        self.command = [tetragon_binary, *self.tetragon_extra_args, "--tracing-policy-dir", str(policy_dir)]
+        self.command = [tetragon_binary, *self.tetragon_extra_args]
+        tetragon_bpf_lib_dir = str((self.setup_result or {}).get("tetragon_bpf_lib_dir") or "").strip()
+        if tetragon_bpf_lib_dir:
+            self.command.extend(["--bpf-lib", tetragon_bpf_lib_dir])
+        self.command.extend(["--tracing-policy-dir", str(policy_dir)])
         self.command_used = list(self.command)
         session = TetragonAgentSession(self.command, self.load_timeout_s)
         try:
