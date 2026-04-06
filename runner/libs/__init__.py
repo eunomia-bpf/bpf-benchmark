@@ -23,22 +23,6 @@ BPFTOOL_ENV_VARS = ("BPFTOOL_BIN", "BPFTOOL")
 PERF_ENV_VARS = ("PERF_BIN", "PERF")
 
 
-def _find_venv_activate() -> Path:
-    candidates = [
-        Path.home() / "workspace" / ".venv" / "bin" / "activate",
-        Path.home() / ".venv" / "bin" / "activate",
-        ROOT_DIR / ".venv" / "bin" / "activate",
-        ROOT_DIR / "venv" / "bin" / "activate",
-    ]
-    for candidate in candidates:
-        if candidate.exists():
-            return candidate
-    return candidates[0]
-
-
-DEFAULT_VENV_ACTIVATE = _find_venv_activate()
-
-
 def ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -220,7 +204,6 @@ def write_text(path: Path, text: str) -> None:
 __all__ = [
     "BPFTOOL_ENV_VARS",
     "DEFAULT_BPFTOOL_CANDIDATES",
-    "DEFAULT_VENV_ACTIVATE",
     "RESULTS_DIR",
     "ROOT_DIR",
     "docs_tmp_dir",

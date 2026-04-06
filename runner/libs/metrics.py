@@ -64,7 +64,17 @@ class BpfProgInfo(ctypes.Structure):
 
 @lru_cache(maxsize=1)
 def _libbpf() -> ctypes.CDLL:
-    path = ctypes.util.find_library("bpf") or "libbpf.so.1"
+    path = os.environ.get("BPFREJIT_LIBBPF_PATH", "").strip()
+    if not path:
+        for entry in os.environ.get("LD_LIBRARY_PATH", "").split(os.pathsep):
+            if not entry:
+                continue
+            candidate = os.path.join(entry, "libbpf.so.1")
+            if os.path.isfile(candidate):
+                path = candidate
+                break
+    if not path:
+        path = ctypes.util.find_library("bpf") or "libbpf.so.1"
     lib = ctypes.CDLL(path, use_errno=True)
     lib.bpf_enable_stats.argtypes = [ctypes.c_int]
     lib.bpf_enable_stats.restype = ctypes.c_int
@@ -149,18 +159,21 @@ def sample_bpf_stats(
             "bytes_xlated": int(record.get("bytes_xlated", 0) or 0),
         }
     for prog_id in wanted:
+        entry = stats.get(int(prog_id))
         fd = None
         if prog_fds and int(prog_id) in prog_fds:
             fd = os.dup(int(prog_fds[int(prog_id)]))
         else:
             fd = _prog_fd_by_id(int(prog_id))
         if fd is None:
-            errors.append(f"prog_id={prog_id}: failed to resolve program FD")
+            if entry is None:
+                errors.append(f"prog_id={prog_id}: failed to resolve program FD")
             continue
         try:
             info = _prog_info_from_fd(fd)
             if info is None:
-                errors.append(f"prog_id={prog_id}: failed to read program info by FD")
+                if entry is None:
+                    errors.append(f"prog_id={prog_id}: failed to read program info by FD")
                 continue
             entry = stats.setdefault(
                 int(prog_id),

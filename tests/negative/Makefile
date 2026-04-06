@@ -3,7 +3,7 @@ NEGATIVE_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 BUILD_DIR ?= $(NEGATIVE_DIR)/build
 
 CC ?= cc
-CFLAGS ?= -O2 -g -Wall -Wno-\#warnings
+CFLAGS ?= -O2 -g -Wall -Wno-cpp
 # Use -I (not -isystem) so vendor REJIT headers override system linux/bpf.h
 INCLUDES := -I$(ROOT_DIR)/vendor/linux-framework/include/uapi
 

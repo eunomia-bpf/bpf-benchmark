@@ -7,7 +7,11 @@ from . import ROOT_DIR, run_command, tail_text, which
 
 
 def repo_kernel_modules_root() -> Path:
-    root = (ROOT_DIR / "vendor" / "linux-framework" / ".virtme_mods").resolve()
+    override = os.environ.get("BPFREJIT_KERNEL_MODULES_ROOT", "").strip()
+    if override:
+        root = Path(override).expanduser().resolve()
+    else:
+        root = (ROOT_DIR / "vendor" / "linux-framework" / ".virtme_mods").resolve()
     release_dir = root / "lib" / "modules" / os.uname().release
     if not release_dir.is_dir():
         raise RuntimeError(
@@ -35,4 +39,3 @@ def load_kernel_module(module_name: str, *module_args: str, timeout: int | float
     if completed.returncode != 0:
         details = tail_text(completed.stderr or completed.stdout)
         raise RuntimeError(f"modprobe {module_name} failed: {details}")
-

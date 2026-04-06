@@ -631,7 +631,7 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | `make micro` | 只构建 micro_exec 和 BPF programs |
 | `make daemon` | 只构建 bpfrejit-daemon CLI |
 | `make kernel` | 编译 bzImage（vendor/linux-framework） |
-| `make kernel-tests` | 旧的 kernel selftest 子树入口；当前 checkout 缺少 `tests/kernel/Makefile` 时会显式报错 |
+| `make upstream-selftests-build` | 构建 vendored upstream BPF selftests；`kernel-tests` 已删除 |
 
 #### 快速验证（无需 VM）
 
@@ -848,7 +848,7 @@ make clean
 | 467 | **Runner 统一第三方 repo 控制面** | ✅ | `runner/repos.yaml` + fetch/build + Make 薄封装均已落地。新架构（§5.6 app_runners）取代旧消费层。 |
 | 468 | Corpus 补全 | ✅ | +61 条目。~60→~155。 |
 | 469 | Runner infra 全量验证+提速 | ✅ | debug artifact 默认关闭。micro 154→119s，corpus 703→514s。 |
-| 470 | Runner VM/机器调度控制面 | ✅ | `machines.yaml` + `with_vm_lock.py`。新架构取代旧 VM 路径。 |
+| 470 | Runner VM/机器调度控制面 | ✅（后续继续收口） | 早期实现是 `machines.yaml` + `with_vm_lock.py`；当前 active 控制面已迁移到 `runner/targets/*.env`、`runner/suites/*.env` 和显式 KVM/AWS executors。 |
 | 471 | benchmark 死代码清理 | ✅ | 删 v1 helpers。Commits `d3879ba`/`3b98b53`/`eeef9f4`。 |
 | 472 | **未实现优化深度调研** | ✅ | 8 份设计/调研报告全部完成，均在 `docs/tmp/20260324/`：(a) `dynamic_map_inlining_design`、(b) `verifier_constprop_dce_design`、(c) `lfence_nospec_elimination_design`、(d) `bounds_check_elimination_research`、(e) `128bit_wide_loadstore_research`、(f) `addr_calc_lea_research`（**14 sites，ROI 低**）、(g) `simd_kinsn_design`、(h) `helper_call_inlining_research`（`skb_load_bytes` 最可行）。 |
 | 473 | Related Work survey | ✅ | → `docs/tmp/20260324/related_work_comprehensive_analysis_20260324.md` |

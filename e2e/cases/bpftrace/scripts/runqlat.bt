@@ -44,24 +44,24 @@ BEGIN
 tracepoint:sched:sched_wakeup,
 tracepoint:sched:sched_wakeup_new
 {
-  @qtime[args.pid] = nsecs;
+  @qtime[args->pid] = nsecs;
 }
 
 tracepoint:sched:sched_switch
 {
-  if (args.prev_state == TASK_RUNNING) {
-    @qtime[args.prev_pid] = nsecs;
+  if (args->prev_state == TASK_RUNNING) {
+    @qtime[args->prev_pid] = nsecs;
   }
   // Ignore the idle task
-  if (args.next_pid == 0) {
+  if (args->next_pid == 0) {
     return;
   }
 
-  $ns = @qtime[args.next_pid];
+  $ns = @qtime[args->next_pid];
   if ($ns) {
     @usecs = hist((nsecs - $ns) / 1000);
     // Swallowing deletion failures as they are expected
-    delete(@qtime[args.next_pid]);
+    delete(@qtime[args->next_pid]);
   }
 }
 

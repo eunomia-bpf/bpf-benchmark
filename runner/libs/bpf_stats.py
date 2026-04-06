@@ -59,28 +59,35 @@ class BpfProgInfo(ctypes.Structure):
 
 @lru_cache(maxsize=1)
 def _libbpf() -> ctypes.CDLL:
-    path = ctypes.util.find_library("bpf")
-    if path is None:
+    path = os.environ.get("BPFREJIT_LIBBPF_PATH", "").strip()
+    if not path:
+        for entry in os.environ.get("LD_LIBRARY_PATH", "").split(os.pathsep):
+            if not entry:
+                continue
+            candidate = os.path.join(entry, "libbpf.so.1")
+            if os.path.isfile(candidate):
+                path = candidate
+                break
+    if not path:
+        path = ctypes.util.find_library("bpf")
+    if path is None or not str(path).strip():
         raise RuntimeError("libbpf could not be found in the current environment")
     lib = ctypes.CDLL(path, use_errno=True)
     lib.bpf_enable_stats.argtypes = [ctypes.c_int]
     lib.bpf_enable_stats.restype = ctypes.c_int
-    if not hasattr(lib, "bpf_prog_get_next_id"):
-        raise RuntimeError(f"libbpf is missing bpf_prog_get_next_id: {path}")
-    if not hasattr(lib, "bpf_prog_get_fd_by_id"):
-        raise RuntimeError(f"libbpf is missing bpf_prog_get_fd_by_id: {path}")
-    if not hasattr(lib, "bpf_prog_get_info_by_fd"):
-        raise RuntimeError(f"libbpf is missing bpf_prog_get_info_by_fd: {path}")
-    lib.bpf_prog_get_next_id.argtypes = [ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32)]
-    lib.bpf_prog_get_next_id.restype = ctypes.c_int
-    lib.bpf_prog_get_fd_by_id.argtypes = [ctypes.c_uint32]
-    lib.bpf_prog_get_fd_by_id.restype = ctypes.c_int
-    lib.bpf_prog_get_info_by_fd.argtypes = [
-        ctypes.c_int,
-        ctypes.POINTER(BpfProgInfo),
-        ctypes.POINTER(ctypes.c_uint32),
-    ]
-    lib.bpf_prog_get_info_by_fd.restype = ctypes.c_int
+    if hasattr(lib, "bpf_prog_get_next_id"):
+        lib.bpf_prog_get_next_id.argtypes = [ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32)]
+        lib.bpf_prog_get_next_id.restype = ctypes.c_int
+    if hasattr(lib, "bpf_prog_get_fd_by_id"):
+        lib.bpf_prog_get_fd_by_id.argtypes = [ctypes.c_uint32]
+        lib.bpf_prog_get_fd_by_id.restype = ctypes.c_int
+    if hasattr(lib, "bpf_prog_get_info_by_fd"):
+        lib.bpf_prog_get_info_by_fd.argtypes = [
+            ctypes.c_int,
+            ctypes.POINTER(BpfProgInfo),
+            ctypes.POINTER(ctypes.c_uint32),
+        ]
+        lib.bpf_prog_get_info_by_fd.restype = ctypes.c_int
     return lib
 
 
@@ -97,14 +104,20 @@ def enable_bpf_stats() -> Any:
 
 
 def _prog_fd_by_id(prog_id: int) -> int | None:
-    fd = int(_libbpf().bpf_prog_get_fd_by_id(int(prog_id)))
+    try:
+        fd = int(_libbpf().bpf_prog_get_fd_by_id(int(prog_id)))
+    except AttributeError as exc:
+        raise RuntimeError("libbpf is missing bpf_prog_get_fd_by_id") from exc
     if fd < 0:
         return None
     return fd
 
 
 def _prog_info_from_fd(fd: int) -> BpfProgInfo | None:
-    prog_get_info_by_fd = _libbpf().bpf_prog_get_info_by_fd
+    try:
+        prog_get_info_by_fd = _libbpf().bpf_prog_get_info_by_fd
+    except AttributeError as exc:
+        raise RuntimeError("libbpf is missing bpf_prog_get_info_by_fd") from exc
     info = BpfProgInfo()
     info_len = ctypes.c_uint32(ctypes.sizeof(info))
     rc = prog_get_info_by_fd(fd, ctypes.byref(info), ctypes.byref(info_len))
@@ -114,7 +127,10 @@ def _prog_info_from_fd(fd: int) -> BpfProgInfo | None:
 
 
 def list_program_ids() -> list[int]:
-    prog_get_next_id = _libbpf().bpf_prog_get_next_id
+    try:
+        prog_get_next_id = _libbpf().bpf_prog_get_next_id
+    except AttributeError as exc:
+        raise RuntimeError("libbpf is missing bpf_prog_get_next_id") from exc
     program_ids: list[int] = []
     current_id = 0
     while True:

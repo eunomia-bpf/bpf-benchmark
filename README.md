@@ -14,14 +14,12 @@ The historical multi-runtime userspace benchmark layer has been removed; the act
 
 ```text
 bpf-benchmark/
-├── runner/                # Shared C++ runner (micro_exec) + reusable Python libs
+├── runner/                # Target/suite contracts, executors, shared libs, and micro_exec
 ├── micro/                 # Isolated micro-benchmark suites, drivers, and inputs
 ├── corpus/                # 23-project real-world corpus, fetch/build, and measurement
 ├── e2e/                   # End-to-end workloads (tracee, tetragon, bpftrace, scx, katran)
 ├── daemon/                # Userspace BPF daemon (bpfrejit-daemon CLI)
 ├── config/                # YAML benchmark suite manifests (micro_pure_jit.yaml etc.)
-├── scripts/               # Operator helpers (AWS ARM64, QEMU smoke)
-├── docker/                # Container definitions for cross-build helpers
 ├── tests/                 # Userspace/kernel self-tests
 ├── docs/                  # Research plans, reports, and temporary experiment notes
 └── vendor/                # Vendored kernel (linux-framework) + tooling dependencies
@@ -47,7 +45,7 @@ make all
 # Quick smoke test (no VM required)
 make smoke
 
-# Full micro benchmark suite in VM → micro/results/dev/vm_micro.json
+# Full micro benchmark suite in VM → micro/results/<run_type>_<timestamp>/
 make vm-micro
 
 # Show all targets and parameters
@@ -61,17 +59,17 @@ make help
 ```bash
 make vm-micro                        # full micro suite in VM
 make vm-micro BENCH="simple bitcount"  # subset of benchmarks
-make vm-micro ITERATIONS=10 WARMUPS=2 REPEAT=500
+make vm-micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
 make vm-corpus                       # corpus benchmark in VM
+make vm-corpus FILTERS=scx VM_CORPUS_WORKLOAD_SECONDS=10
 make vm-e2e                          # E2E benchmarks in VM
-make vm-all                          # all VM benchmarks
+make vm-e2e E2E_CASE=scx E2E_SMOKE=1
 ```
 
 Results are written to:
-- `micro/results/dev/` — default Makefile micro outputs
-- `corpus/results/dev/` — default Makefile corpus outputs
-- `e2e/results/dev/` — default Makefile E2E outputs
-- `*/results/` top-level — checked-in authoritative JSON only
+- `micro/results/<run_type>_<timestamp>/` — checked-in canonical micro artifacts
+- `corpus/results/<run_type>_<timestamp>/` — checked-in canonical corpus artifacts
+- `e2e/results/<run_type>_<timestamp>/` — checked-in canonical E2E artifacts
 - `docs/tmp/` — analysis reports (.md only, never JSON results)
 
 ## Building Components Individually
@@ -80,12 +78,12 @@ Results are written to:
 make micro            # micro_exec runner + BPF programs
 make daemon           # bpfrejit-daemon CLI
 make kernel           # bzImage from vendor/linux-framework
-make kernel-tests     # legacy kernel selftest target; unavailable in this checkout without tests/kernel/Makefile
+make upstream-selftests-build
 ```
 
 ## Layer Notes
 
-`runner/` owns the shared `micro_exec` C++ runner plus shared Python libraries in `runner/libs/`.
+`runner/` owns target/suite contracts under `runner/targets/` and `runner/suites/`, the shared `micro_exec` C++ runner, executors under `runner/scripts/`, and shared Python libraries in `runner/libs/`.
 
 `micro/` owns the isolated benchmark manifests (`micro/config/micro_pure_jit.yaml`), input generators, and the Python suite driver (`micro/driver.py`).
 

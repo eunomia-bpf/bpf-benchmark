@@ -4,6 +4,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 SOURCE_REPO_ROOT="${ARM64_SOURCE_REPO_ROOT:-${REPO_ROOT}/runner/repos}"
+if [[ -n "${SOURCE_REPO_ROOT}" && "${SOURCE_REPO_ROOT}" != /* ]]; then
+    SOURCE_REPO_ROOT="${REPO_ROOT}/${SOURCE_REPO_ROOT}"
+fi
 
 JOBS="${ARM64_CROSSBUILD_JOBS:-4}"
 PREFERRED_LLVM_SUFFIX="${ARM64_CROSSBUILD_LLVM_SUFFIX:-20}"
@@ -12,13 +15,14 @@ SCX_PACKAGES_RAW="${ARM64_CROSSBUILD_SCX_PACKAGES:-}"
 ONLY_SCX="${ARM64_CROSSBUILD_ONLY_SCX:-0}"
 BENCH_REPOS_RAW="${ARM64_CROSSBUILD_BENCH_REPOS:-}"
 ONLY_BENCH="${ARM64_CROSSBUILD_ONLY_BENCH:-0}"
+RUNTIME_TARGETS_RAW="${ARM64_CROSSBUILD_RUNTIME_TARGETS:-runner,daemon}"
 OUTPUT_ROOT="${ARM64_CROSSBUILD_OUTPUT_DIR:-${OUT_DIR:-}}"
 BUILD_ROOT="${ARM64_CROSSBUILD_BUILD_ROOT:-${OUTPUT_ROOT:-/out}/.build-root}"
 HOST_UID="${HOST_UID:-}"
 HOST_GID="${HOST_GID:-}"
+PREBUILT_DAEMON_BINARY="${ARM64_PREBUILT_DAEMON_BINARY:-}"
 RUNNER_BUILD_DIR="${BUILD_ROOT}/runner"
 RUNNER_VENDOR_BUILD_DIR="${BUILD_ROOT}/runner-vendor"
-DAEMON_TARGET_DIR="${BUILD_ROOT}/daemon-target"
 LLVMBPF_BUILD_DIR="${BUILD_ROOT}/llvmbpf-build"
 LLVMBPF_LIBRARY="${BUILD_ROOT}/libllvmbpf_vm.a"
 SCX_BUILD_REPO_ROOT="${BUILD_ROOT}/runner/repos"
@@ -39,6 +43,18 @@ LLVM_STRIP_BIN=""
 LLVM_OBJCOPY_BIN=""
 LD_LLD_BIN=""
 
+runtime_target_enabled() {
+    local target="$1"
+    case ",${RUNTIME_TARGETS_RAW}," in
+        *,"${target}",*)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
 log() {
     printf '[cross-arm64] %s\n' "$*" >&2
 }
@@ -57,6 +73,9 @@ fix_output_ownership() {
     fi
     [[ -e "${OUTPUT_ROOT}" ]] || return 0
     chown -R "${HOST_UID}:${HOST_GID}" "${OUTPUT_ROOT}"
+    if [[ -e "${BUILD_ROOT}" ]]; then
+        chown -R "${HOST_UID}:${HOST_GID}" "${BUILD_ROOT}"
+    fi
     if [[ -n "${CARGO_HOME:-}" && -e "${CARGO_HOME}" ]]; then
         chown -R "${HOST_UID}:${HOST_GID}" "${CARGO_HOME}"
     fi
@@ -65,6 +84,25 @@ fix_output_ownership() {
 require_command() {
     local cmd="$1"
     command -v "$cmd" >/dev/null 2>&1 || die "missing required command: ${cmd}"
+}
+
+git_path_is_clean() {
+    local repo_root="$1"
+    local pathspec="${2:-}"
+    if [[ -n "$pathspec" ]]; then
+        git -C "$repo_root" diff --quiet -- "$pathspec" || return 1
+        git -C "$repo_root" diff --cached --quiet -- "$pathspec" || return 1
+    else
+        git -C "$repo_root" diff --quiet || return 1
+        git -C "$repo_root" diff --cached --quiet || return 1
+    fi
+}
+
+require_nonempty_dir() {
+    local path="$1"
+    [[ -d "$path" ]] || die "required directory is missing: ${path}"
+    find "$path" -mindepth 1 -print -quit 2>/dev/null | grep -q . \
+        || die "required directory is empty: ${path}"
 }
 
 resolve_llvm_tool() {
@@ -120,9 +158,13 @@ require_command make
 require_command cmake
 require_command cargo
 require_command file
+require_command git
 require_command ldd
 require_command python3
+require_command tar
 prepare_llvm_toolchain
+mkdir -p "${HOME:-/tmp/codex}"
+git config --global --add safe.directory '*' >/dev/null
 
 trap fix_output_ownership EXIT
 
@@ -132,24 +174,42 @@ fi
 
 mkdir -p "${OUTPUT_ROOT}/lib"
 if [[ "${ONLY_SCX}" != "1" ]]; then
-    mkdir -p "${OUTPUT_ROOT}/runner/build" "${OUTPUT_ROOT}/daemon/build"
+    if runtime_target_enabled runner; then
+        mkdir -p "${OUTPUT_ROOT}/runner/build"
+    fi
+    if runtime_target_enabled daemon; then
+        mkdir -p "${OUTPUT_ROOT}/daemon/build"
+    fi
 fi
 mkdir -p "${BUILD_ROOT}"
 if [[ "${ONLY_SCX}" != "1" ]]; then
-    rm -rf "${RUNNER_BUILD_DIR}" "${DAEMON_TARGET_DIR}"
+    if runtime_target_enabled runner; then
+        rm -rf "${RUNNER_BUILD_DIR}"
+    fi
 fi
 
 prepare_repo_copy() {
     local repo_name="$1"
     local dest_dir="$2"
-    [[ -d "${SOURCE_REPO_ROOT}/${repo_name}" ]] || die "source repo ${SOURCE_REPO_ROOT}/${repo_name} is missing; fetch it locally first"
+    local src_dir="${SOURCE_REPO_ROOT}/${repo_name}"
+    [[ -d "${src_dir}" ]] || die "source repo ${src_dir} is missing; fetch it locally first"
     rm -rf "${dest_dir}"
-    mkdir -p "$(dirname "${dest_dir}")"
-    cp -a "${SOURCE_REPO_ROOT}/${repo_name}" "${dest_dir}"
+    mkdir -p "${dest_dir}"
+    if git -C "${src_dir}" rev-parse --verify HEAD >/dev/null 2>&1; then
+        git_path_is_clean "${src_dir}" \
+            || die "source repo ${src_dir} has local modifications and cannot be sealed"
+        git -C "${src_dir}" archive --format=tar HEAD | tar -xf - -C "${dest_dir}"
+    else
+        require_nonempty_dir "${src_dir}"
+        cp -a "${src_dir}/." "${dest_dir}/"
+    fi
+    require_nonempty_dir "${dest_dir}"
 }
 
 build_vendor_bpftool() {
-    make -C "${REPO_ROOT}/runner" BUILD_DIR="${RUNNER_VENDOR_BUILD_DIR}" JOBS=1 vendor_bpftool >/dev/null
+    local build_dir
+    build_dir="$(readlink -f "${RUNNER_VENDOR_BUILD_DIR}")"
+    make -C "${REPO_ROOT}/runner" BUILD_DIR="${build_dir}" JOBS=1 vendor_bpftool >/dev/null
 }
 
 build_bcc_artifacts() {
@@ -173,14 +233,15 @@ build_bcc_artifacts() {
 
     mkdir -p \
         "${OUTPUT_ROOT}/runner/repos/bcc/libbpf-tools/.output" \
-        "${OUTPUT_ROOT}/corpus/build/bcc/libbpf-tools"
+        "${OUTPUT_ROOT}/corpus/build/bcc/libbpf-tools/.output"
     while IFS= read -r -d '' obj_path; do
         obj_name="$(basename "${obj_path}")"
         cp "${obj_path}" "${OUTPUT_ROOT}/runner/repos/bcc/libbpf-tools/.output/${obj_name}"
-        cp "${obj_path}" "${OUTPUT_ROOT}/corpus/build/bcc/libbpf-tools/${obj_name}"
+        cp "${obj_path}" "${OUTPUT_ROOT}/corpus/build/bcc/libbpf-tools/.output/${obj_name}"
         tool_name="${obj_name%.bpf.o}"
         if [[ -x "${tool_dir}/${tool_name}" ]]; then
             cp "${tool_dir}/${tool_name}" "${OUTPUT_ROOT}/runner/repos/bcc/libbpf-tools/.output/${tool_name}"
+            cp "${tool_dir}/${tool_name}" "${OUTPUT_ROOT}/corpus/build/bcc/libbpf-tools/.output/${tool_name}"
         fi
     done < <(find "${tool_dir}/.output" -maxdepth 1 -type f -name '*.bpf.o' -print0)
 }
@@ -336,11 +397,11 @@ build_isolated_native_corpus_repo() {
     prepare_repo_copy "${repo_name}" "${BENCH_BUILD_REPO_ROOT}/${repo_name}"
     rm -rf "${stage_dir}"
     mkdir -p "${BENCH_STAGE_ROOT}"
-    RUNNER_REPOS_DIR_OVERRIDE="${BENCH_BUILD_REPO_ROOT}" \
-        python3 "${REPO_ROOT}/runner/scripts/build_corpus_native.py" \
-            --jobs "${JOBS}" \
-            --build-root "${BENCH_STAGE_ROOT}" \
-            --repo "${repo_name}"
+    python3 "${REPO_ROOT}/runner/scripts/build_corpus_native.py" \
+        --jobs "${JOBS}" \
+        --repo-root "${BENCH_BUILD_REPO_ROOT}" \
+        --build-root "${BENCH_STAGE_ROOT}" \
+        --repo "${repo_name}"
     [[ -d "${stage_dir}" ]] || die "missing staged ARM64 ${repo_name} artifacts: ${stage_dir}"
 }
 
@@ -384,34 +445,34 @@ build_llvmbpf_if_needed() {
     log "Building ARM64 llvmbpf static library"
     cmake -S "${REPO_ROOT}/vendor/llvmbpf" -B "${LLVMBPF_BUILD_DIR}" \
         -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_COMPILER="${CLANG_BIN}" \
+        -DCMAKE_CXX_COMPILER="${CLANGXX_BIN}" \
         -DLLVM_DIR="$(${LLVM_CONFIG_BIN} --cmakedir)"
     cmake --build "${LLVMBPF_BUILD_DIR}" --target llvmbpf_vm -j "${JOBS}"
     [[ -f "${LLVMBPF_LIBRARY}" ]] || die "missing ARM64 llvmbpf archive: ${LLVMBPF_LIBRARY}"
 }
 
 build_runner() {
+    local llvmbpf_library_path=""
+    local llvmbpf_cache_path=""
+    local runner_build_dir=""
     log "Building ARM64 runner (MICRO_EXEC_ENABLE_LLVMBPF=${MICRO_EXEC_ENABLE_LLVMBPF})"
+    if [[ "${MICRO_EXEC_ENABLE_LLVMBPF}" == "ON" ]]; then
+        llvmbpf_library_path="$(readlink -f "${LLVMBPF_LIBRARY}")"
+        llvmbpf_cache_path="$(readlink -f "${LLVMBPF_BUILD_DIR}/CMakeCache.txt")"
+    fi
+    runner_build_dir="$(readlink -f "${RUNNER_BUILD_DIR}")"
+    CC="${CLANG_BIN}" \
+    CXX="${CLANGXX_BIN}" \
     make -C "${REPO_ROOT}/runner" \
-        BUILD_DIR="${RUNNER_BUILD_DIR}" \
+        BUILD_DIR="${runner_build_dir}" \
         JOBS="1" \
         LLVM_CONFIG="${LLVM_CONFIG_BIN}" \
         LLVMBPF_LLVM_DIR="$(${LLVM_CONFIG_BIN} --cmakedir)" \
         MICRO_EXEC_ENABLE_LLVMBPF="${MICRO_EXEC_ENABLE_LLVMBPF}" \
-        MICRO_LLVMBPF_LIBRARY="${LLVMBPF_LIBRARY}" \
-        MICRO_LLVMBPF_BUILD_CACHE="${LLVMBPF_BUILD_DIR}/CMakeCache.txt" \
+        MICRO_LLVMBPF_LIBRARY="${llvmbpf_library_path}" \
+        MICRO_LLVMBPF_BUILD_CACHE="${llvmbpf_cache_path}" \
         micro_exec
-}
-
-build_daemon() {
-    log "Building ARM64 daemon"
-    CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER="${NATIVE_CARGO_LINKER}" \
-    CARGO_TARGET_DIR="${DAEMON_TARGET_DIR}" \
-    CC="${CLANG_BIN}" \
-    CXX="${CLANGXX_BIN}" \
-        cargo build \
-            --release \
-            -j "${JOBS}" \
-            --manifest-path "${REPO_ROOT}/daemon/Cargo.toml"
 }
 
 copy_runtime_bundle() {
@@ -470,10 +531,7 @@ WRAPPER
 }
 
 prepare_scx_checkout() {
-    [[ -d "${SOURCE_REPO_ROOT}/scx" ]] || die "source repo ${SOURCE_REPO_ROOT}/scx is missing; fetch it locally before cross-arm64"
-    rm -rf "${SCX_BUILD_REPO_DIR}"
-    mkdir -p "$(dirname "${SCX_BUILD_REPO_DIR}")"
-    cp -a "${SOURCE_REPO_ROOT}/scx" "${SCX_BUILD_REPO_DIR}"
+    prepare_repo_copy "scx" "${SCX_BUILD_REPO_DIR}"
     rm -rf "${SCX_BUILD_REPO_DIR}/target"
 }
 
@@ -524,17 +582,26 @@ if [[ "${ONLY_BENCH}" == "1" ]]; then
 fi
 
 build_llvmbpf_if_needed
-build_runner
-build_daemon
+runtime_target_enabled runner || runtime_target_enabled daemon \
+    || die "ARM64 runtime build requested with no runtime targets enabled"
 
-cp "${RUNNER_BUILD_DIR}/micro_exec" "${OUTPUT_ROOT}/runner/build/micro_exec.real"
-cp "${DAEMON_TARGET_DIR}/release/bpfrejit-daemon" "${OUTPUT_ROOT}/daemon/build/bpfrejit-daemon.real"
+if runtime_target_enabled runner; then
+    build_runner
+    cp "${RUNNER_BUILD_DIR}/micro_exec" "${OUTPUT_ROOT}/runner/build/micro_exec.real"
+    copy_runtime_bundle "${OUTPUT_ROOT}/runner/build/micro_exec.real"
+    copy_wrapper "${OUTPUT_ROOT}/runner/build/micro_exec" "micro_exec.real"
+    file "${OUTPUT_ROOT}/runner/build/micro_exec.real" | grep -F "ARM aarch64"
+fi
 
-copy_runtime_bundle "${OUTPUT_ROOT}/runner/build/micro_exec.real"
-copy_runtime_bundle "${OUTPUT_ROOT}/daemon/build/bpfrejit-daemon.real"
-
-copy_wrapper "${OUTPUT_ROOT}/runner/build/micro_exec" "micro_exec.real"
-copy_wrapper "${OUTPUT_ROOT}/daemon/build/bpfrejit-daemon" "bpfrejit-daemon.real"
-
-file "${OUTPUT_ROOT}/runner/build/micro_exec.real" | grep -F "ARM aarch64"
-file "${OUTPUT_ROOT}/daemon/build/bpfrejit-daemon.real" | grep -F "ARM aarch64"
+if runtime_target_enabled daemon; then
+    [[ -n "${PREBUILT_DAEMON_BINARY}" ]] \
+        || die "ARM64 runtime build requires ARM64_PREBUILT_DAEMON_BINARY when daemon target is enabled"
+    [[ -f "${PREBUILT_DAEMON_BINARY}" ]] \
+        || die "missing prebuilt ARM64 daemon binary: ${PREBUILT_DAEMON_BINARY}"
+    file "${PREBUILT_DAEMON_BINARY}" | grep -F "ARM aarch64" >/dev/null \
+        || die "prebuilt ARM64 daemon is not an aarch64 binary: ${PREBUILT_DAEMON_BINARY}"
+    cp "${PREBUILT_DAEMON_BINARY}" "${OUTPUT_ROOT}/daemon/build/bpfrejit-daemon.real"
+    copy_runtime_bundle "${OUTPUT_ROOT}/daemon/build/bpfrejit-daemon.real"
+    copy_wrapper "${OUTPUT_ROOT}/daemon/build/bpfrejit-daemon" "bpfrejit-daemon.real"
+    file "${OUTPUT_ROOT}/daemon/build/bpfrejit-daemon.real" | grep -F "ARM aarch64"
+fi

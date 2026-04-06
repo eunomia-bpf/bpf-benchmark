@@ -32,24 +32,24 @@ BEGIN
 
 tracepoint:block:block_io_start
 {
-  @start[args.dev, args.sector] = nsecs;
-  @iopid[args.dev, args.sector] = pid;
-  @iocomm[args.dev, args.sector] = comm;
+  @start[args->dev, args->sector] = nsecs;
+  @iopid[args->dev, args->sector] = pid;
+  @iocomm[args->dev, args->sector] = comm;
 }
 
 tracepoint:block:block_io_done
-/@start[args.dev, args.sector]/
+/@start[args->dev, args->sector]/
 {
   $now = nsecs;
-  $major = args.dev >> 20;
-  $minor = args.dev & ((1 << 20) - 1);
+  $major = args->dev >> 20;
+  $minor = args->dev & ((1 << 20) - 1);
   printf("%-12u %-5d %-8d %-16s %-6d %7d\n", elapsed / 1e6,
-         $major, $minor, @iocomm[args.dev, args.sector], @iopid[args.dev, args.sector],
-         ($now - @start[args.dev, args.sector]) / 1e6);
+         $major, $minor, @iocomm[args->dev, args->sector], @iopid[args->dev, args->sector],
+         ($now - @start[args->dev, args->sector]) / 1e6);
 
-  delete(@start[args.dev, args.sector]);
-  delete(@iopid[args.dev, args.sector]);
-  delete(@iocomm[args.dev, args.sector]);
+  delete(@start[args->dev, args->sector]);
+  delete(@iopid[args->dev, args->sector]);
+  delete(@iocomm[args->dev, args->sector]);
 }
 
 END

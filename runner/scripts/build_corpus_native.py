@@ -18,7 +18,6 @@ from elftools.elf.elffile import ELFFile
 SCRIPT_DIR = Path(__file__).resolve().parent
 RUNNER_DIR = SCRIPT_DIR.parent
 REPO_ROOT = RUNNER_DIR.parent
-RUNNER_REPOS_DIR = Path(os.environ.get("RUNNER_REPOS_DIR_OVERRIDE", str(RUNNER_DIR / "repos"))).resolve()
 CORPUS_BUILD_ROOT = REPO_ROOT / "corpus" / "build"
 ACTIVE_BUILD_ROOT = CORPUS_BUILD_ROOT
 IMPLEMENTED_REPOS = (
@@ -66,6 +65,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repo", action="append", dest="repos", help="Build only the selected repo.")
     parser.add_argument("--jobs", type=int, default=max(1, os.cpu_count() or 1), help="Parallel build jobs.")
     parser.add_argument(
+        "--repo-root",
+        default=str(RUNNER_DIR / "repos"),
+        help="Corpus repo checkout root.",
+    )
+    parser.add_argument(
         "--build-root",
         default=str(CORPUS_BUILD_ROOT),
         help="Unified corpus build output directory.",
@@ -73,8 +77,8 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def repo_checkout(name: str) -> Path:
-    path = RUNNER_REPOS_DIR / name
+def repo_checkout(repo_root: Path, name: str) -> Path:
+    path = repo_root / name
     if not path.exists():
         raise CommandError(f"repo checkout missing for `{name}`: {path} (run `make corpus-fetch` first)")
     return path
@@ -352,8 +356,8 @@ def bcc_binaries(tool_dir: Path) -> list[Path]:
     return binaries
 
 
-def build_bcc(stage_root: Path, jobs: int) -> RepoBuildResult:
-    repo_dir = repo_checkout("bcc")
+def build_bcc(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
+    repo_dir = repo_checkout(repo_root, "bcc")
     tool_dir = repo_dir / "libbpf-tools"
     bpftool = ensure_vendor_bpftool()
     clang_value = " ".join(["clang", *clang_bpf_sys_includes()])
@@ -407,8 +411,8 @@ $(foreach app,$(BPF_APP_STEMS),$(eval $(call LIBBPF_BOOTSTRAP_EXPLICIT_BPF_RULE,
 """
 
 
-def build_libbpf_bootstrap(stage_root: Path, jobs: int) -> RepoBuildResult:
-    repo_dir = repo_checkout("libbpf-bootstrap")
+def build_libbpf_bootstrap(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
+    repo_dir = repo_checkout(repo_root, "libbpf-bootstrap")
     example_dir = repo_dir / "examples" / "c"
     bpftool = ensure_vendor_bpftool()
     vmlinux = find_cached_vmlinux_header()
@@ -455,8 +459,8 @@ def build_libbpf_bootstrap(stage_root: Path, jobs: int) -> RepoBuildResult:
     )
 
 
-def build_xdp_tools(stage_root: Path, jobs: int) -> RepoBuildResult:
-    repo_dir = repo_checkout("xdp-tools")
+def build_xdp_tools(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
+    repo_dir = repo_checkout(repo_root, "xdp-tools")
     bpftool = ensure_vendor_bpftool()
     clean_stage_dir(stage_root)
     run(["make", f"-j{jobs}", f"BPFTOOL={bpftool}"], cwd=repo_dir)
@@ -498,9 +502,9 @@ def tutorial_binary_dirs(repo_dir: Path) -> list[Path]:
     return dirs
 
 
-def build_xdp_tutorial(stage_root: Path, jobs: int) -> RepoBuildResult:
-    repo_dir = repo_checkout("xdp-tutorial")
-    xdp_tools_dir = repo_checkout("xdp-tools")
+def build_xdp_tutorial(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
+    repo_dir = repo_checkout(repo_root, "xdp-tutorial")
+    xdp_tools_dir = repo_checkout(repo_root, "xdp-tools")
     loader_dir = xdp_tools_dir / "xdp-loader"
     extra_cflags = "-Wno-error=macro-redefined -Wno-macro-redefined"
 
@@ -557,9 +561,16 @@ def build_xdp_tutorial(stage_root: Path, jobs: int) -> RepoBuildResult:
     )
 
 
-def build_scx(stage_root: Path, jobs: int) -> RepoBuildResult:
-    repo_dir = repo_checkout("scx")
+def build_scx(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
+    repo_dir = repo_checkout(repo_root, "scx")
     clean_stage_dir(stage_root)
+    stage_root = stage_root.resolve()
+    if stage_root.name != "scx" or stage_root.parent.name != "build" or stage_root.parent.parent.name != "corpus":
+        raise CommandError(
+            "scx stage root must follow <promote-root>/corpus/build/scx; "
+            f"got {stage_root}"
+        )
+    promote_root = stage_root.parents[2]
     run(
         [
             sys.executable,
@@ -567,6 +578,10 @@ def build_scx(stage_root: Path, jobs: int) -> RepoBuildResult:
             "--force",
             "--jobs",
             str(max(1, jobs)),
+            "--repo-root",
+            str(repo_root),
+            "--promote-root",
+            str(promote_root),
         ],
         cwd=REPO_ROOT,
     )
@@ -600,8 +615,8 @@ def build_scx(stage_root: Path, jobs: int) -> RepoBuildResult:
     )
 
 
-def build_katran(stage_root: Path, jobs: int) -> RepoBuildResult:
-    repo_dir = repo_checkout("katran")
+def build_katran(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
+    repo_dir = repo_checkout(repo_root, "katran")
     lib_dir = repo_dir / "katran" / "lib"
     clang = str(os.environ.get("CLANG", "clang")).strip() or "clang"
     llc = str(os.environ.get("LLC", "llc")).strip() or "llc"
@@ -666,10 +681,21 @@ def build_katran(stage_root: Path, jobs: int) -> RepoBuildResult:
     )
 
 
-def build_tracee(stage_root: Path, jobs: int) -> RepoBuildResult:
-    repo_dir = repo_checkout("tracee")
+def build_tracee(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
+    repo_dir = repo_checkout(repo_root, "tracee")
     clean_stage_dir(stage_root)
-    run(["make", f"-j{jobs}", "bpf", "tracee", "evt", "traceectl", "lsm-check"], cwd=repo_dir)
+    build_env = os.environ.copy()
+    goflags = build_env.get("GOFLAGS", "").strip()
+    build_env["GOFLAGS"] = (
+        f"{goflags} -buildvcs=false".strip()
+        if "-buildvcs=false" not in goflags.split()
+        else goflags
+    )
+    run(
+        ["make", f"-j{jobs}", "bpf", "tracee", "evt", "traceectl", "lsm-check"],
+        cwd=repo_dir,
+        env=build_env,
+    )
 
     dist_dir = repo_dir / "dist"
     object_paths = [dist_dir / "tracee.bpf.o", *(dist_dir / "lsm_support").glob("*.bpf.o")]
@@ -700,8 +726,8 @@ def build_tracee(stage_root: Path, jobs: int) -> RepoBuildResult:
     )
 
 
-def build_tetragon(stage_root: Path, jobs: int) -> RepoBuildResult:
-    repo_dir = repo_checkout("tetragon")
+def build_tetragon(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
+    repo_dir = repo_checkout(repo_root, "tetragon")
     clean_stage_dir(stage_root)
     run(["make", f"-j{jobs}", "tetragon-bpf", "LOCAL_CLANG=1", f"JOBS={jobs}"], cwd=repo_dir)
 
@@ -733,8 +759,8 @@ def build_tetragon(stage_root: Path, jobs: int) -> RepoBuildResult:
     )
 
 
-def build_cilium(stage_root: Path, jobs: int) -> RepoBuildResult:
-    repo_dir = repo_checkout("cilium")
+def build_cilium(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
+    repo_dir = repo_checkout(repo_root, "cilium")
     bpf_dir = repo_dir / "bpf"
     clean_stage_dir(stage_root)
     run(["make", "clean"], cwd=bpf_dir)
@@ -755,8 +781,8 @@ def build_cilium(stage_root: Path, jobs: int) -> RepoBuildResult:
     )
 
 
-def build_bpftrace(stage_root: Path, jobs: int) -> RepoBuildResult:
-    repo_dir = repo_checkout("bpftrace")
+def build_bpftrace(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
+    repo_dir = repo_checkout(repo_root, "bpftrace")
     clean_stage_dir(stage_root)
     llvm_dir, clang_dir = resolve_bpftrace_llvm_cmake_dirs()
     llvm_major = llvm_dir.parent.name.removeprefix("llvm-")
@@ -862,7 +888,7 @@ def build_bpftrace(stage_root: Path, jobs: int) -> RepoBuildResult:
     )
 
 
-BUILDERS: dict[str, Callable[[Path, int], RepoBuildResult]] = {
+BUILDERS: dict[str, Callable[[Path, Path, int], RepoBuildResult]] = {
     "bcc": build_bcc,
     "libbpf-bootstrap": build_libbpf_bootstrap,
     "xdp-tools": build_xdp_tools,
@@ -879,6 +905,7 @@ BUILDERS: dict[str, Callable[[Path, int], RepoBuildResult]] = {
 def main() -> int:
     global ACTIVE_BUILD_ROOT
     args = parse_args()
+    repo_root = Path(args.repo_root).resolve()
     build_root = Path(args.build_root).resolve()
     ACTIVE_BUILD_ROOT = build_root
     build_root.mkdir(parents=True, exist_ok=True)
@@ -897,7 +924,7 @@ def main() -> int:
         stage_dir = build_root / name
         print(f"[repo] {name}")
         try:
-            result = BUILDERS[name](stage_dir, args.jobs)
+            result = BUILDERS[name](repo_root, stage_dir, args.jobs)
         except Exception as exc:
             result = build_failure_result(name, stage_dir, str(exc))
         results.append(result)

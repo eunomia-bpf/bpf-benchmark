@@ -6,6 +6,7 @@ RUN dnf install -y --setopt=install_weak_deps=False \
         clang20 \
         cmake \
         dnf-plugins-core \
+        diffutils \
         elfutils-libelf-devel \
         file \
         gcc-c++ \
@@ -20,6 +21,7 @@ RUN dnf install -y --setopt=install_weak_deps=False \
         make \
         ncurses-devel \
         ninja-build \
+        openssl \
         openssl-devel \
         python3 \
         python3-pip \

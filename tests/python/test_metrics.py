@@ -30,5 +30,19 @@ def test_sample_bpf_stats_fails_when_prog_info_lookup_fails(monkeypatch) -> None
     monkeypatch.setattr(metrics, "_prog_info_from_fd", lambda _fd: None)
     monkeypatch.setattr(metrics.os, "close", lambda _fd: None)
 
+    stats = metrics.sample_bpf_stats([7])
+
+    assert stats[7]["name"] == "demo"
+    assert stats[7]["run_cnt"] == 1
+    assert stats[7]["run_time_ns"] == 10
+
+
+def test_sample_bpf_stats_still_fails_without_bpftool_or_fd_info(monkeypatch) -> None:
+    monkeypatch.setattr(metrics, "resolve_bpftool_binary", lambda: "bpftool")
+    monkeypatch.setattr(metrics, "run_json_command", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(metrics, "_prog_fd_by_id", lambda _prog_id: 91)
+    monkeypatch.setattr(metrics, "_prog_info_from_fd", lambda _fd: None)
+    monkeypatch.setattr(metrics.os, "close", lambda _fd: None)
+
     with pytest.raises(RuntimeError, match="failed to read program info by FD"):
         metrics.sample_bpf_stats([7])

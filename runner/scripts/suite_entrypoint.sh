@@ -12,6 +12,7 @@ ARCHIVE_PATH="${3:-}"
 source "$MANIFEST_PATH"
 
 PYTHON_BIN="${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}"
+RUNNER_BINARY_MODE="${RUN_RUNNER_BINARY_MODE:-bundled}"
 FUZZ_ROUNDS="${RUN_TEST_FUZZ_ROUNDS:-}"
 SCX_PROG_SHOW_RACE_MODE="${RUN_TEST_SCX_PROG_SHOW_RACE_MODE:-}"
 SCX_PROG_SHOW_RACE_ITERATIONS="${RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS:-}"
@@ -20,6 +21,7 @@ SCX_PROG_SHOW_RACE_SKIP_PROBE="${RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE:-}"
 RESULT_ROOT="${WORKSPACE}/.cache/suite-results"
 RUN_TOKEN="$(date -u +%Y%m%d_%H%M%S)"
 ARTIFACT_DIR="${RESULT_ROOT}/${RUN_TARGET_NAME}_${RUN_SUITE_NAME}_${RUN_TOKEN}"
+REMOTE_WORKLOAD_TOOL_BIN="${RUN_REMOTE_WORKLOAD_TOOL_BIN:-$WORKSPACE/.cache/workload-tools/bin}"
 
 log() {
     printf '[suite-entrypoint] %s\n' "$*" >&2
@@ -34,10 +36,30 @@ require_cmd() {
     command -v "$1" >/dev/null 2>&1 || die "required command is missing: $1"
 }
 
+resolve_llvm_tool() {
+    local base="$1"
+    local candidate
+    for candidate in "${base}-20" "${base}20" "$base"; do
+        if command -v "$candidate" >/dev/null 2>&1; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+    die "required LLVM tool is missing for remote-native runner build: ${base}"
+}
+
 latest_result_dir() {
     local parent="$1"
     local prefix="$2"
     find "$parent" -maxdepth 1 -mindepth 1 -type d -name "${prefix}_*" | sort | tail -n1
+}
+
+sanitize_artifact_token() {
+    local value="$1"
+    local token
+    token="$(printf '%s' "$value" | sed -E 's/[^[:alnum:]]+/_/g; s/^_+//; s/_+$//')"
+    [[ -n "$token" ]] || token="run"
+    printf '%s\n' "$token"
 }
 
 copy_result_dir() {
@@ -50,9 +72,10 @@ copy_result_dir() {
 
 cross_runtime_ld_library_path() {
     local entries=()
-    [[ -d "$WORKSPACE/lib" ]] && entries+=("$WORKSPACE/lib")
-    [[ -d "$WORKSPACE/tests/unittest/build-arm64/lib" ]] && entries+=("$WORKSPACE/tests/unittest/build-arm64/lib")
-    [[ -d "$WORKSPACE/tests/unittest/build/lib" ]] && entries+=("$WORKSPACE/tests/unittest/build/lib")
+    if [[ "$RUN_TARGET_ARCH" == "arm64" ]]; then
+        [[ -d "$WORKSPACE/tests/unittest/build-arm64/lib" ]] && entries+=("$WORKSPACE/tests/unittest/build-arm64/lib")
+        [[ -d "$WORKSPACE/tests/unittest/build/lib" ]] && entries+=("$WORKSPACE/tests/unittest/build/lib")
+    fi
     local joined=""
     local entry
     for entry in "${entries[@]}"; do
@@ -95,6 +118,68 @@ resolve_test_daemon() {
     printf '%s\n' "$candidate"
 }
 
+build_llvmbpf_remote_native() {
+    local llvm_config_bin clang_bin clangxx_bin jobs llvmbpf_root llvmbpf_build_dir
+    llvm_config_bin="$(resolve_llvm_tool llvm-config)"
+    clang_bin="$(resolve_llvm_tool clang)"
+    clangxx_bin="$(resolve_llvm_tool clang++)"
+    jobs="$(nproc 2>/dev/null || echo 1)"
+    llvmbpf_root="$WORKSPACE/vendor/llvmbpf"
+    llvmbpf_build_dir="$llvmbpf_root/build"
+    [[ -d "$llvmbpf_root" ]] || die "remote-native llvmbpf source tree is missing: $llvmbpf_root"
+    if [[ -f "$llvmbpf_root/libllvmbpf_vm.a" && -f "$llvmbpf_build_dir/CMakeCache.txt" ]]; then
+        return 0
+    fi
+    cmake -S "$llvmbpf_root" -B "$llvmbpf_build_dir" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_COMPILER="$clang_bin" \
+        -DCMAKE_CXX_COMPILER="$clangxx_bin" \
+        -DLLVM_DIR="$("$llvm_config_bin" --cmakedir)" >/dev/null
+    cmake --build "$llvmbpf_build_dir" --target llvmbpf_vm -j "$jobs" >/dev/null
+    [[ -f "$llvmbpf_root/libllvmbpf_vm.a" ]] || die "remote-native llvmbpf build did not produce $llvmbpf_root/libllvmbpf_vm.a"
+}
+
+build_runner_remote_native() {
+    local build_dir="$WORKSPACE/runner/build"
+    local llvm_config_bin clang_bin clangxx_bin jobs llvmbpf_mode
+    llvm_config_bin="$(resolve_llvm_tool llvm-config)"
+    clang_bin="$(resolve_llvm_tool clang)"
+    clangxx_bin="$(resolve_llvm_tool clang++)"
+    jobs="$(nproc 2>/dev/null || echo 1)"
+    case "${RUN_SUITE_NEEDS_LLVMBPF:-0}" in
+        1) llvmbpf_mode=ON ;;
+        0) llvmbpf_mode=OFF ;;
+        *) die "unsupported RUN_SUITE_NEEDS_LLVMBPF value: ${RUN_SUITE_NEEDS_LLVMBPF:-}" ;;
+    esac
+    if [[ "$llvmbpf_mode" == "ON" ]]; then
+        build_llvmbpf_remote_native
+    fi
+    make -C "$WORKSPACE/runner" \
+        BUILD_DIR="$build_dir" \
+        JOBS="$jobs" \
+        CC="$clang_bin" \
+        CXX="$clangxx_bin" \
+        LLVM_CONFIG="$llvm_config_bin" \
+        MICRO_EXEC_ENABLE_LLVMBPF="$llvmbpf_mode" \
+        micro_exec >/dev/null
+}
+
+ensure_runner_binary() {
+    [[ "${RUN_NEEDS_RUNNER_BINARY:-0}" == "1" ]] || return 0
+    case "$RUNNER_BINARY_MODE" in
+        bundled)
+            [[ -x "$WORKSPACE/runner/build/micro_exec" ]] || die "bundled runner binary is missing: $WORKSPACE/runner/build/micro_exec"
+            ;;
+        remote-native)
+            build_runner_remote_native
+            [[ -x "$WORKSPACE/runner/build/micro_exec" ]] || die "remote-native runner build did not produce $WORKSPACE/runner/build/micro_exec"
+            ;;
+        *)
+            die "unsupported runner binary mode: ${RUNNER_BINARY_MODE}"
+            ;;
+    esac
+}
+
 ensure_scx_artifacts() {
     local package
     [[ -n "${RUN_SCX_PACKAGES_CSV:-}" ]] || return 0
@@ -128,10 +213,39 @@ ensure_katran_bundle() {
     export KATRAN_SERVER_LIB_DIR="$WORKSPACE/e2e/cases/katran/lib"
 }
 
+build_upstream_selftests_remote_native() {
+    local output_dir="$WORKSPACE/.cache/upstream-bpf-selftests"
+    local source_dir="$WORKSPACE/vendor/linux-framework/tools/testing/selftests/bpf"
+    local build_jobs
+    [[ -f /sys/kernel/btf/vmlinux ]] || die "runtime BTF is missing for remote-native upstream selftests build"
+    [[ -d "$source_dir" ]] || die "bundled upstream selftest source dir is missing: $source_dir"
+    build_jobs="$(nproc 2>/dev/null || echo 1)"
+    (
+        UPSTREAM_SELFTEST_SOURCE_DIR="$source_dir" \
+        UPSTREAM_SELFTEST_OUTPUT_DIR="$output_dir" \
+        VMLINUX_BTF=/sys/kernel/btf/vmlinux \
+        JOBS="$build_jobs" \
+        UPSTREAM_SELFTEST_LLVM_SUFFIX="${RUN_UPSTREAM_SELFTEST_LLVM_SUFFIX:-}" \
+            "$WORKSPACE/runner/scripts/build_upstream_selftests.sh"
+    ) 2>&1 | tee "$ARTIFACT_DIR/upstream-build.log"
+}
+
 ensure_upstream_selftests() {
     local output_dir="$WORKSPACE/.cache/upstream-bpf-selftests"
-    [[ -x "$output_dir/test_verifier" ]] || die "bundled upstream test_verifier is missing: $output_dir/test_verifier"
-    [[ -x "$output_dir/test_progs" ]] || die "bundled upstream test_progs is missing: $output_dir/test_progs"
+    case "${RUN_UPSTREAM_SELFTEST_EXEC_MODE:-bundled}" in
+        bundled)
+            [[ -x "$output_dir/test_verifier" ]] || die "bundled upstream test_verifier is missing or not executable: $output_dir/test_verifier"
+            [[ -x "$output_dir/test_progs" ]] || die "bundled upstream test_progs is missing or not executable: $output_dir/test_progs"
+            ;;
+        remote-native)
+            build_upstream_selftests_remote_native
+            [[ -x "$output_dir/test_verifier" ]] || die "remote-native upstream test_verifier build did not produce an executable: $output_dir/test_verifier"
+            [[ -x "$output_dir/test_progs" ]] || die "remote-native upstream test_progs build did not produce an executable: $output_dir/test_progs"
+            ;;
+        *)
+            die "unsupported upstream selftest execution mode: ${RUN_UPSTREAM_SELFTEST_EXEC_MODE:-}"
+            ;;
+    esac
     if [[ -d "$WORKSPACE/upstream-selftests-kmods" ]]; then
         cp "$WORKSPACE/upstream-selftests-kmods"/*.ko "$output_dir"/
     elif [[ "$RUN_TARGET_ARCH" == "arm64" ]]; then
@@ -145,13 +259,41 @@ ensure_workload_tools() {
     IFS=',' read -r -a _run_workload_tools <<<"$RUN_WORKLOAD_TOOLS_CSV"
     for tool in "${_run_workload_tools[@]}"; do
         [[ -n "$tool" ]] || continue
-        require_cmd "$tool"
+        [[ -x "${REMOTE_WORKLOAD_TOOL_BIN}/${tool}" ]] \
+            || die "required workload tool is missing from the workspace-local tool bin: ${REMOTE_WORKLOAD_TOOL_BIN}/${tool}"
     done
+}
+
+ensure_bpf_stats_enabled() {
+    [[ "${RUN_NEEDS_DAEMON_BINARY:-0}" == "1" ]] || return 0
+    if [[ ! -w /proc/sys/kernel/bpf_stats_enabled ]]; then
+        die "kernel bpf_stats_enabled sysctl is not writable"
+    fi
+    if command -v sysctl >/dev/null 2>&1; then
+        sysctl -q -w kernel.bpf_stats_enabled=1 >/dev/null
+    else
+        printf '1\n' >/proc/sys/kernel/bpf_stats_enabled
+    fi
+    if [[ "$(tr -d '[:space:]' </proc/sys/kernel/bpf_stats_enabled)" != "1" ]]; then
+        die "failed to enable kernel.bpf_stats_enabled=1"
+    fi
 }
 
 prepare_environment() {
     mkdir -p "$ARTIFACT_DIR"
     cd "$WORKSPACE"
+    cp "$MANIFEST_PATH" "$ARTIFACT_DIR/run-contract.env"
+    if [[ -d "$REMOTE_WORKLOAD_TOOL_BIN" ]]; then
+        export PATH="$REMOTE_WORKLOAD_TOOL_BIN:$PATH"
+    fi
+    if [[ -f "$WORKSPACE/lib/libbpf.so.1" ]]; then
+        export BPFREJIT_LIBBPF_PATH="$WORKSPACE/lib/libbpf.so.1"
+    fi
+    case "${RUN_TARGET_NAME}" in
+        aws-arm64|aws-x86)
+            export BPFREJIT_KERNEL_MODULES_ROOT=/
+            ;;
+    esac
     export PYTHONPATH="$WORKSPACE"
     export BPFTOOL_BIN="${RUN_BPFTOOL_BIN:?RUN_BPFTOOL_BIN is required}"
     require_cmd "$BPFTOOL_BIN"
@@ -172,16 +314,18 @@ run_selftest_mode() {
     unittest_build="$(test_unittest_build_dir)"
     negative_build="$(test_negative_build_dir)"
     module_dir="$(test_kinsn_module_dir)"
-    BPFREJIT_PROGS_DIR="${unittest_build}/progs" \
-    BPFREJIT_DAEMON_PATH="$daemon_path" \
-        "$WORKSPACE/runner/scripts/vm-selftest.sh" \
-        "$WORKSPACE" \
-        "$WORKSPACE/tests/unittest" \
-        "$module_dir" \
-        "$WORKSPACE/tests/negative" \
-        "$FUZZ_ROUNDS" \
-        "$unittest_build" \
-        "$negative_build"
+    (
+        BPFREJIT_PROGS_DIR="${unittest_build}/progs" \
+        BPFREJIT_DAEMON_PATH="$daemon_path" \
+            "$WORKSPACE/runner/scripts/vm-selftest.sh" \
+            "$WORKSPACE" \
+            "$WORKSPACE/tests/unittest" \
+            "$module_dir" \
+            "$WORKSPACE/tests/negative" \
+            "$FUZZ_ROUNDS" \
+            "$unittest_build" \
+            "$negative_build"
+    ) 2>&1 | tee "$ARTIFACT_DIR/selftest.log"
 }
 
 run_negative_mode() {
@@ -189,14 +333,16 @@ run_negative_mode() {
     negative_build="$(test_negative_build_dir)"
     runtime_ld="$(cross_runtime_ld_library_path)"
     ensure_scx_artifacts
-    env LD_LIBRARY_PATH="$runtime_ld" "$negative_build/adversarial_rejit"
-    env LD_LIBRARY_PATH="$runtime_ld" "$negative_build/fuzz_rejit" "$FUZZ_ROUNDS"
-    env LD_LIBRARY_PATH="$runtime_ld" "$negative_build/scx_prog_show_race" \
-        "$WORKSPACE" \
-        --mode "${SCX_PROG_SHOW_RACE_MODE}" \
-        --iterations "${SCX_PROG_SHOW_RACE_ITERATIONS}" \
-        --load-timeout "${SCX_PROG_SHOW_RACE_LOAD_TIMEOUT}" \
-        $(if [[ "${SCX_PROG_SHOW_RACE_SKIP_PROBE}" == "1" ]]; then printf '%s' '--skip-probe'; fi)
+    (
+        env LD_LIBRARY_PATH="$runtime_ld" "$negative_build/adversarial_rejit"
+        env LD_LIBRARY_PATH="$runtime_ld" "$negative_build/fuzz_rejit" "$FUZZ_ROUNDS"
+        env LD_LIBRARY_PATH="$runtime_ld" "$negative_build/scx_prog_show_race" \
+            "$WORKSPACE" \
+            --mode "${SCX_PROG_SHOW_RACE_MODE}" \
+            --iterations "${SCX_PROG_SHOW_RACE_ITERATIONS}" \
+            --load-timeout "${SCX_PROG_SHOW_RACE_LOAD_TIMEOUT}" \
+            $(if [[ "${SCX_PROG_SHOW_RACE_SKIP_PROBE}" == "1" ]]; then printf '%s' '--skip-probe'; fi)
+    ) 2>&1 | tee "$ARTIFACT_DIR/negative.log"
 }
 
 run_full_test_mode() {
@@ -217,6 +363,7 @@ run_full_test_mode() {
     BPFREJIT_DAEMON_PATH="$daemon_path" \
     BPFTOOL_BIN="$upstream_bpftool" \
     CROSS_RUNTIME_LD_LIBRARY_PATH="$runtime_ld" \
+    FUZZ_ROUNDS="${FUZZ_ROUNDS}" \
     SCX_PROG_SHOW_RACE_MODE="${SCX_PROG_SHOW_RACE_MODE}" \
     SCX_PROG_SHOW_RACE_ITERATIONS="${SCX_PROG_SHOW_RACE_ITERATIONS}" \
     SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="${SCX_PROG_SHOW_RACE_LOAD_TIMEOUT}" \
@@ -236,9 +383,11 @@ run_test_suite() {
 }
 
 run_micro_suite() {
-    local runtime_ld output_json cmd=()
+    local runtime_ld output_json run_type cmd=()
     runtime_ld="$(cross_runtime_ld_library_path)"
+    ensure_runner_binary
     output_json="$WORKSPACE/micro/results/${RUN_TARGET_NAME}_micro.json"
+    run_type="$(sanitize_artifact_token "${RUN_TARGET_NAME}_micro")"
     cmd=(
         "$PYTHON_BIN" "$WORKSPACE/micro/driver.py"
         --runtime llvmbpf
@@ -249,17 +398,18 @@ run_micro_suite() {
         --output "$output_json"
     )
     env LD_LIBRARY_PATH="$runtime_ld" "${cmd[@]}"
-    copy_result_dir "$(latest_result_dir "$WORKSPACE/micro/results" "${RUN_TARGET_NAME}_micro")" "$ARTIFACT_DIR"
+    copy_result_dir "$(latest_result_dir "$WORKSPACE/micro/results" "$run_type")" "$ARTIFACT_DIR"
 }
 
 run_corpus_suite() {
-    local runtime_ld output_json output_md cmd=() filter
+    local runtime_ld output_json output_md run_type cmd=() filter
     runtime_ld="$(cross_runtime_ld_library_path)"
     ensure_benchmark_repos
     ensure_scx_artifacts
     ensure_katran_bundle
     output_json="$WORKSPACE/corpus/results/${RUN_TARGET_NAME}_corpus.json"
     output_md="$WORKSPACE/corpus/results/${RUN_TARGET_NAME}_corpus.md"
+    run_type="$(sanitize_artifact_token "${RUN_TARGET_NAME}_corpus")"
     cmd=(
         "$PYTHON_BIN" "$WORKSPACE/corpus/driver.py"
         --daemon "$WORKSPACE/daemon/target/release/bpfrejit-daemon"
@@ -279,7 +429,7 @@ run_corpus_suite() {
         cmd+=("${RUN_CORPUS_ARGV[@]}")
     fi
     env LD_LIBRARY_PATH="$runtime_ld" "${cmd[@]}"
-    copy_result_dir "$(latest_result_dir "$WORKSPACE/corpus/results" "${RUN_TARGET_NAME}_corpus")" "$ARTIFACT_DIR"
+    copy_result_dir "$(latest_result_dir "$WORKSPACE/corpus/results" "$run_type")" "$ARTIFACT_DIR"
 }
 
 run_e2e_case() {
@@ -326,6 +476,7 @@ run_e2e_suite() {
 
 main() {
     prepare_environment
+    ensure_bpf_stats_enabled
     ensure_workload_tools
     case "${RUN_SUITE_NAME}" in
         test) run_test_suite ;;

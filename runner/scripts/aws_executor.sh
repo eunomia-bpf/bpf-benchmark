@@ -10,41 +10,90 @@ MANIFEST_PATH="${2:?usage: aws_executor.sh <run|terminate> <manifest_path>}"
 }
 # shellcheck disable=SC1090
 source "$MANIFEST_PATH"
+HOST_PYTHON_BIN="${RUN_HOST_PYTHON_BIN:-}"
+[[ -n "$HOST_PYTHON_BIN" ]] || {
+    printf '[aws-executor][ERROR] manifest host python is missing: %s\n' "$MANIFEST_PATH" >&2
+    exit 1
+}
+
+RUN_AWS_INSTANCE_MODE="${RUN_AWS_INSTANCE_MODE:-shared}"
+case "$RUN_AWS_INSTANCE_MODE" in
+    shared|dedicated) ;;
+    *)
+        printf '[aws-executor][ERROR] unsupported RUN_AWS_INSTANCE_MODE: %s\n' "$RUN_AWS_INSTANCE_MODE" >&2
+        exit 1
+        ;;
+esac
 
 MANIFEST_HASH="$(sha256sum "$MANIFEST_PATH" | awk '{print $1}')"
-CACHE_DIR="$ROOT_DIR/.cache/${RUN_TARGET_NAME}"
-STATE_DIR="$CACHE_DIR/state"
+RUN_TOKEN="$(basename "$MANIFEST_PATH" .env)"
+TARGET_CACHE_DIR="$ROOT_DIR/.cache/${RUN_TARGET_NAME}"
+SHARED_STATE_DIR="$TARGET_CACHE_DIR/state"
+RUN_STATE_DIR="$TARGET_CACHE_DIR/run-state/$RUN_TOKEN"
+if [[ "$ACTION" == "run" && "$RUN_AWS_INSTANCE_MODE" == "dedicated" ]]; then
+    RUN_NAME_TAG="${RUN_NAME_TAG}-${RUN_TOKEN}"
+    STATE_DIR="$RUN_STATE_DIR"
+else
+    STATE_DIR="$SHARED_STATE_DIR"
+fi
 STATE_FILE="$STATE_DIR/instance.env"
-ARTIFACT_DIR="$CACHE_DIR/artifacts"
-RESULTS_DIR="$CACHE_DIR/results"
-MODULES_STAGE_DIR="$CACHE_DIR/modules-stage"
-LOCAL_REPO_ROOT="$CACHE_DIR/repos"
-LOCAL_PROMOTE_ROOT="$CACHE_DIR/bundle-inputs"
-AWS_REMOTE_PREREQS_STAMP="${AWS_REMOTE_PREREQS_STAMP:-/var/tmp/bpf-benchmark/prereqs.${MANIFEST_HASH}.ready}"
+RUN_PREP_ROOT="$TARGET_CACHE_DIR/runs/$RUN_TOKEN"
+ARTIFACT_DIR="$RUN_PREP_ROOT/artifacts"
+RESULTS_DIR="$TARGET_CACHE_DIR/results"
+MODULES_STAGE_DIR="$RUN_PREP_ROOT/modules-stage"
+LOCAL_REPO_ROOT="$RUN_PREP_ROOT/repos"
+LOCAL_PROMOTE_ROOT="$RUN_PREP_ROOT/bundle-inputs"
+SETUP_ARTIFACT_CACHE_ROOT="$TARGET_CACHE_DIR/setup-artifacts"
 KERNEL_DIR="${KERNEL_DIR:-$ROOT_DIR/vendor/linux-framework}"
-KERNEL_BUILD_LOCK_FILE="${KERNEL_BUILD_LOCK_FILE:-$ROOT_DIR/.cache/kernel-build.lock}"
+X86_KERNEL_BUILD_LOCK_FILE="${X86_KERNEL_BUILD_LOCK_FILE:-$ROOT_DIR/.cache/kernel-build-x86.lock}"
+ARM64_KERNEL_BUILD_LOCK_FILE="${ARM64_KERNEL_BUILD_LOCK_FILE:-$ROOT_DIR/.cache/kernel-build-arm64.lock}"
 KERNEL_DEFCONFIG_SRC="${KERNEL_DEFCONFIG_SRC:-$ROOT_DIR/vendor/bpfrejit_defconfig}"
 KERNEL_CONFIG_STAMP_FILE="$KERNEL_DIR/.bpfrejit_config.stamp"
 X86_BZIMAGE="${X86_BZIMAGE:-$KERNEL_DIR/arch/x86/boot/bzImage}"
 X86_VMLINUX="${X86_VMLINUX:-$KERNEL_DIR/vmlinux}"
 X86_KINSN_MODULE_DIR="${X86_KINSN_MODULE_DIR:-$ROOT_DIR/module/x86}"
-X86_KINSN_MODULE_STAGE_DIR="${X86_KINSN_MODULE_STAGE_DIR:-$CACHE_DIR/test-artifacts/kinsn-modules/x86}"
-X86_TEST_ARTIFACTS_ROOT="${X86_TEST_ARTIFACTS_ROOT:-$CACHE_DIR/test-artifacts}"
+X86_SETUP_ARTIFACT_ROOT="${X86_SETUP_ARTIFACT_ROOT:-$SETUP_ARTIFACT_CACHE_ROOT/x86}"
+X86_KINSN_MODULE_BUILD_SRC="${X86_KINSN_MODULE_BUILD_SRC:-$RUN_PREP_ROOT/module-src/x86}"
+X86_KINSN_MODULE_STAGE_DIR="${X86_KINSN_MODULE_STAGE_DIR:-$RUN_PREP_ROOT/test-artifacts/kinsn-modules/x86}"
+X86_TEST_ARTIFACTS_ROOT="${X86_TEST_ARTIFACTS_ROOT:-$RUN_PREP_ROOT/test-artifacts}"
+X86_RUNNER_BUILD_DIR="${X86_RUNNER_BUILD_DIR:-$LOCAL_PROMOTE_ROOT/runner/build}"
+X86_RUNNER="${X86_RUNNER:-$X86_RUNNER_BUILD_DIR/micro_exec}"
+X86_DAEMON_TARGET_DIR="${X86_DAEMON_TARGET_DIR:-$LOCAL_PROMOTE_ROOT/daemon/target}"
+X86_DAEMON="${X86_DAEMON:-$X86_DAEMON_TARGET_DIR/release/bpfrejit-daemon}"
 X86_TEST_UNITTEST_BUILD_DIR="${X86_TEST_UNITTEST_BUILD_DIR:-$X86_TEST_ARTIFACTS_ROOT/unittest/build}"
 X86_TEST_NEGATIVE_BUILD_DIR="${X86_TEST_NEGATIVE_BUILD_DIR:-$X86_TEST_ARTIFACTS_ROOT/negative/build}"
-X86_UPSTREAM_SELFTEST_SOURCE_DIR="${X86_UPSTREAM_SELFTEST_SOURCE_DIR:-$ROOT_DIR/.cache/upstream-bpf-selftests}"
 X86_UPSTREAM_SELFTEST_DIR="${X86_UPSTREAM_SELFTEST_DIR:-$X86_TEST_ARTIFACTS_ROOT/upstream-bpf-selftests}"
+MICRO_PROGRAMS_GENERATED_DIR="${MICRO_PROGRAMS_GENERATED_DIR:-$LOCAL_PROMOTE_ROOT/micro/programs}"
 ARM64_WORKTREE_DIR="${ARM64_WORKTREE_DIR:-$ROOT_DIR/.worktrees/linux-framework-arm64-src}"
 ARM64_AWS_BUILD_DIR="${ARM64_AWS_BUILD_DIR:-$ROOT_DIR/.cache/aws-arm64/kernel-build}"
 ARM64_AWS_BASE_CONFIG="${ARM64_AWS_BASE_CONFIG:-$ROOT_DIR/.cache/aws-arm64/config-al2023-arm64}"
-ARM64_KINSN_MODULE_STAGE_DIR="${ARM64_KINSN_MODULE_STAGE_DIR:-$CACHE_DIR/test-artifacts/kinsn-modules/arm64}"
+ARM64_SETUP_ARTIFACT_ROOT="${ARM64_SETUP_ARTIFACT_ROOT:-$ROOT_DIR/.cache/aws-arm64/setup-artifacts}"
+ARM64_CROSSBUILD_ROOT="${ARM64_CROSSBUILD_ROOT:-$RUN_PREP_ROOT/arm64-cross}"
+ARM64_CROSSBUILD_OUTPUT_DIR="${ARM64_CROSSBUILD_OUTPUT_DIR:-$LOCAL_PROMOTE_ROOT}"
+ARM64_CROSSBUILD_BUILD_ROOT="${ARM64_CROSSBUILD_BUILD_ROOT:-$ARM64_CROSSBUILD_ROOT/build}"
+ARM64_CROSSBUILD_CARGO_HOME="${ARM64_CROSSBUILD_CARGO_HOME:-$ARM64_CROSSBUILD_ROOT/cargo-home}"
+ARM64_KINSN_MODULE_BUILD_SRC="${ARM64_KINSN_MODULE_BUILD_SRC:-$RUN_PREP_ROOT/module-src/arm64}"
+ARM64_KINSN_MODULE_STAGE_DIR="${ARM64_KINSN_MODULE_STAGE_DIR:-$RUN_PREP_ROOT/test-artifacts/kinsn-modules/arm64}"
 ARM64_UPSTREAM_TEST_KMODS_SOURCE_DIR="${ARM64_UPSTREAM_TEST_KMODS_SOURCE_DIR:-$ROOT_DIR/vendor/linux-framework/tools/testing/selftests/bpf/test_kmods}"
 ARM64_UPSTREAM_TEST_KMODS_DIR="${ARM64_UPSTREAM_TEST_KMODS_DIR:-$ROOT_DIR/.cache/aws-arm64/upstream-selftests-kmods-arm64}"
-ARM64_CROSSBUILD_OUTPUT_DIR="${ARM64_CROSSBUILD_OUTPUT_DIR:-$ROOT_DIR/.cache/aws-arm64/binaries}"
-ARM64_TEST_ARTIFACTS_ROOT="${ARM64_TEST_ARTIFACTS_ROOT:-$CACHE_DIR/test-artifacts}"
+ARM64_TEST_ARTIFACTS_ROOT="${ARM64_TEST_ARTIFACTS_ROOT:-$RUN_PREP_ROOT/test-artifacts}"
 ARM64_TEST_UNITTEST_BUILD_DIR="${ARM64_TEST_UNITTEST_BUILD_DIR:-$ARM64_TEST_ARTIFACTS_ROOT/unittest/build-arm64}"
 ARM64_TEST_NEGATIVE_BUILD_DIR="${ARM64_TEST_NEGATIVE_BUILD_DIR:-$ARM64_TEST_ARTIFACTS_ROOT/negative/build-arm64}"
 ARM64_UPSTREAM_SELFTEST_DIR="${ARM64_UPSTREAM_SELFTEST_DIR:-$ARM64_TEST_ARTIFACTS_ROOT/upstream-bpf-selftests}"
+ARM64_HOST_DAEMON_ROOT="${ARM64_HOST_DAEMON_ROOT:-$RUN_PREP_ROOT/arm64-daemon-host-cross}"
+ARM64_HOST_DAEMON_TARGET_DIR="${ARM64_HOST_DAEMON_TARGET_DIR:-$ARM64_HOST_DAEMON_ROOT/target}"
+ARM64_HOST_DAEMON_OUTPUT_DIR="${ARM64_HOST_DAEMON_OUTPUT_DIR:-$ARM64_HOST_DAEMON_ROOT/output}"
+ARM64_HOST_DAEMON_BINARY="${ARM64_HOST_DAEMON_BINARY:-$ARM64_HOST_DAEMON_OUTPUT_DIR/bpfrejit-daemon}"
+ARM64_HOST_DAEMON_CARGO_HOME="${ARM64_HOST_DAEMON_CARGO_HOME:-$ARM64_HOST_DAEMON_ROOT/cargo-home}"
+ARM64_HOST_SCX_ROOT="${ARM64_HOST_SCX_ROOT:-$RUN_PREP_ROOT/arm64-scx-host-cross}"
+ARM64_HOST_SCX_BUILD_ROOT="${ARM64_HOST_SCX_BUILD_ROOT:-$ARM64_HOST_SCX_ROOT/build}"
+ARM64_HOST_SCX_CARGO_HOME="${ARM64_HOST_SCX_CARGO_HOME:-$ARM64_HOST_SCX_ROOT/cargo-home}"
+ARM64_SOURCE_REPO_ROOT="${ARM64_SOURCE_REPO_ROOT:-$LOCAL_REPO_ROOT}"
+ARM64_SYSROOT_ROOT="${ARM64_SYSROOT_ROOT:-$ROOT_DIR/.cache/aws-arm64/sysroot}"
+ARM64_SYSROOT_LOCK_FILE="${ARM64_SYSROOT_LOCK_FILE:-$ROOT_DIR/.cache/aws-arm64/sysroot.lock}"
+ARM64_SYSROOT_REMOTE_HOST="${ARM64_SYSROOT_REMOTE_HOST:-}"
+ARM64_SYSROOT_REMOTE_USER="${ARM64_SYSROOT_REMOTE_USER:-${RUN_REMOTE_USER:-}}"
+ARM64_SYSROOT_SSH_KEY_PATH="${ARM64_SYSROOT_SSH_KEY_PATH:-${RUN_AWS_KEY_PATH:-}}"
 ARM64_CROSS_RUNNER="${ARM64_CROSS_RUNNER:-$ARM64_CROSSBUILD_OUTPUT_DIR/runner/build/micro_exec}"
 ARM64_CROSS_RUNNER_REAL="${ARM64_CROSS_RUNNER_REAL:-$ARM64_CROSSBUILD_OUTPUT_DIR/runner/build/micro_exec.real}"
 ARM64_CROSS_DAEMON="${ARM64_CROSS_DAEMON:-$ARM64_CROSSBUILD_OUTPUT_DIR/daemon/build/bpfrejit-daemon}"
@@ -60,9 +109,18 @@ STATE_INSTANCE_ID=""
 STATE_INSTANCE_IP=""
 STATE_REGION=""
 STATE_KERNEL_RELEASE=""
+DEDICATED_RUN_ACTIVE=0
 
 log() {
     printf '[aws-executor] %s\n' "$*" >&2
+}
+
+aws_instance_mode_is_shared() {
+    [[ "$RUN_AWS_INSTANCE_MODE" == "shared" ]]
+}
+
+aws_instance_mode_is_dedicated() {
+    [[ "$RUN_AWS_INSTANCE_MODE" == "dedicated" ]]
 }
 
 die() {
@@ -76,10 +134,65 @@ require_local_path() {
     [[ -e "$path" ]] || die "${description} not found: ${path}"
 }
 
+require_nonempty_dir() {
+    local path="$1"
+    local description="$2"
+    [[ -d "$path" ]] || die "${description} is not a directory: ${path}"
+    find "$path" -mindepth 1 -print -quit 2>/dev/null | grep -q . || die "${description} is empty: ${path}"
+}
+
 dir_has_entries() {
     local path="$1"
     [[ -d "$path" ]] || return 1
     find "$path" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null | grep -q .
+}
+
+configure_arm64_sysroot_contract() {
+    [[ "${RUN_TARGET_NAME:-}" == "aws-arm64" ]] || return 0
+    [[ -n "${STATE_INSTANCE_IP:-}" ]] || die "ARM64 sysroot source requires a resolved instance IP"
+    [[ -n "${RUN_REMOTE_USER:-}" ]] || die "ARM64 sysroot source requires RUN_REMOTE_USER"
+    [[ -n "${RUN_AWS_KEY_PATH:-}" ]] || die "ARM64 sysroot source requires RUN_AWS_KEY_PATH"
+    ARM64_SYSROOT_REMOTE_HOST="$STATE_INSTANCE_IP"
+    ARM64_SYSROOT_REMOTE_USER="$RUN_REMOTE_USER"
+    ARM64_SYSROOT_SSH_KEY_PATH="$RUN_AWS_KEY_PATH"
+}
+
+git_path_is_clean() {
+    local repo_root="$1"
+    local pathspec="${2:-}"
+    if [[ -n "$pathspec" ]]; then
+        git -C "$repo_root" diff --quiet -- "$pathspec" || return 1
+        git -C "$repo_root" diff --cached --quiet -- "$pathspec" || return 1
+    else
+        git -C "$repo_root" diff --quiet || return 1
+        git -C "$repo_root" diff --cached --quiet || return 1
+    fi
+}
+
+snapshot_git_subtree() {
+    local repo_root="$1"
+    local src_rel="$2"
+    local dest="$3"
+    local strip_components=0
+    git -C "$repo_root" rev-parse --verify HEAD >/dev/null 2>&1 \
+        || die "expected git checkout for promoted snapshot: ${repo_root}"
+    if [[ -n "$src_rel" ]]; then
+        git_path_is_clean "$repo_root" "$src_rel" \
+            || die "git subtree has local modifications and cannot be promoted: ${repo_root}/${src_rel}"
+        strip_components="$(awk -F/ '{print NF}' <<<"$src_rel")"
+    else
+        git_path_is_clean "$repo_root" \
+            || die "git checkout has local modifications and cannot be promoted: ${repo_root}"
+    fi
+    mkdir -p "$dest"
+    if [[ -n "$src_rel" ]]; then
+        git -C "$repo_root" archive --format=tar HEAD -- "$src_rel" \
+            | tar -xf - -C "$dest" --strip-components="$strip_components"
+    else
+        git -C "$repo_root" archive --format=tar HEAD | tar -xf - -C "$dest"
+    fi
+    find "$dest" -mindepth 1 -print -quit 2>/dev/null | grep -q . \
+        || die "promoted snapshot is empty: ${repo_root}${src_rel:+/${src_rel}}"
 }
 
 stage_module_binaries() {
@@ -94,16 +207,190 @@ stage_module_binaries() {
     [[ "$ko_count" -gt 0 ]] || die "no kinsn modules staged under ${stage_dir}"
 }
 
-ensure_dirs() {
-    mkdir -p "$CACHE_DIR" "$STATE_DIR" "$ARTIFACT_DIR" "$RESULTS_DIR"
+snapshot_kinsn_module_source_tree() {
+    local arch_dir_rel="$1"
+    local dest_dir="$2"
+    local parent_dir
+    parent_dir="$(dirname "$dest_dir")"
+    rm -rf "$dest_dir" "$parent_dir/include"
+    mkdir -p "$parent_dir"
+    snapshot_git_subtree "$ROOT_DIR" "module/include" "$parent_dir/include"
+    snapshot_git_subtree "$ROOT_DIR" "$arch_dir_rel" "$dest_dir"
 }
 
-with_kernel_lock() (
-    mkdir -p "$(dirname "$KERNEL_BUILD_LOCK_FILE")"
-    exec 9>"$KERNEL_BUILD_LOCK_FILE"
-    flock 9
-    "$@"
-)
+x86_cached_kinsn_modules_dir() {
+    local cache_dir="$1"
+    printf '%s\n' "$cache_dir/kinsn-modules/x86"
+}
+
+x86_cached_setup_config_fingerprint_path() {
+    local cache_dir="$1"
+    printf '%s\n' "$cache_dir/config.sha256"
+}
+
+x86_setup_config_fingerprint() {
+    require_local_path "$KERNEL_DIR/.config" "x86 kernel config"
+    sha256sum "$KERNEL_DIR/.config" | awk '{print $1}'
+}
+
+x86_cached_setup_matches_config() {
+    local cache_dir="$1"
+    local expected_fingerprint="$2"
+    local fingerprint_path actual_fingerprint
+    fingerprint_path="$(x86_cached_setup_config_fingerprint_path "$cache_dir")"
+    [[ -f "$fingerprint_path" ]] || return 1
+    actual_fingerprint="$(<"$fingerprint_path")"
+    [[ -n "$actual_fingerprint" && "$actual_fingerprint" == "$expected_fingerprint" ]]
+}
+
+x86_write_cached_setup_fingerprint() {
+    local cache_dir="$1"
+    local fingerprint="$2"
+    printf '%s\n' "$fingerprint" >"$(x86_cached_setup_config_fingerprint_path "$cache_dir")"
+}
+
+x86_cached_setup_artifacts_ready() {
+    local cache_dir="$1"
+    local kernel_release="$2"
+    local kernel_image_filename="$3"
+    local config_fingerprint="$4"
+    cached_setup_artifacts_ready "$cache_dir" "$kernel_release" "$kernel_image_filename" \
+        && x86_cached_setup_matches_config "$cache_dir" "$config_fingerprint"
+}
+
+x86_reuse_cached_setup_artifacts() {
+    local cache_dir="$1"
+    local kernel_release="$2"
+    local kernel_image_filename="$3"
+    local config_fingerprint="$4"
+    x86_cached_setup_artifacts_ready "$cache_dir" "$kernel_release" "$kernel_image_filename" "$config_fingerprint" \
+        || return 1
+    link_cached_setup_artifacts "$cache_dir" "$kernel_release" "$kernel_image_filename"
+    BUILD_KERNEL_RELEASE="$kernel_release"
+    return 0
+}
+
+x86_cached_kinsn_modules_ready() {
+    local cache_dir="$1"
+    local kernel_release="$2"
+    local module_dir module_path actual_release
+    module_dir="$(x86_cached_kinsn_modules_dir "$cache_dir")"
+    [[ -d "$module_dir" ]] || return 1
+    find "$module_dir" -maxdepth 1 -type f -name '*.ko' -print -quit 2>/dev/null | grep -q . || return 1
+    while IFS= read -r -d '' module_path; do
+        actual_release="$(modinfo -F vermagic "$module_path" 2>/dev/null | awk '{print $1}')"
+        [[ "$actual_release" == "$kernel_release" ]] || return 1
+    done < <(find "$module_dir" -maxdepth 1 -type f -name '*.ko' -print0)
+    return 0
+}
+
+build_x86_kinsn_modules_into_cache() {
+    local cache_dir="$1"
+    local cached_module_dir
+    snapshot_kinsn_module_source_tree "module/x86" "$X86_KINSN_MODULE_BUILD_SRC"
+    make -C "$X86_KINSN_MODULE_BUILD_SRC" KDIR="$KERNEL_DIR" clean >/dev/null
+    make -C "$X86_KINSN_MODULE_BUILD_SRC" KDIR="$KERNEL_DIR" >/dev/null
+    cached_module_dir="$(x86_cached_kinsn_modules_dir "$cache_dir")"
+    stage_module_binaries "$X86_KINSN_MODULE_BUILD_SRC" "$cached_module_dir"
+}
+
+arm64_cached_kinsn_modules_dir() {
+    local cache_dir="$1"
+    printf '%s\n' "$cache_dir/kinsn-modules/arm64"
+}
+
+arm64_cached_kinsn_modules_ready() {
+    local cache_dir="$1"
+    local kernel_release="$2"
+    local module_dir module_path actual_release
+    module_dir="$(arm64_cached_kinsn_modules_dir "$cache_dir")"
+    [[ -d "$module_dir" ]] || return 1
+    find "$module_dir" -maxdepth 1 -type f -name '*.ko' -print -quit 2>/dev/null | grep -q . || return 1
+    while IFS= read -r -d '' module_path; do
+        actual_release="$(modinfo -F vermagic "$module_path" 2>/dev/null | awk '{print $1}')"
+        [[ "$actual_release" == "$kernel_release" ]] || return 1
+    done < <(find "$module_dir" -maxdepth 1 -type f -name '*.ko' -print0)
+    return 0
+}
+
+cached_setup_artifacts_ready() {
+    local cache_dir="$1"
+    local kernel_release="$2"
+    local kernel_image_filename="$3"
+    [[ -f "$cache_dir/vmlinux-$kernel_release" ]] \
+        && [[ -f "$cache_dir/$kernel_image_filename" ]] \
+        && [[ -f "$cache_dir/modules-$kernel_release.tar.gz" ]]
+}
+
+link_cached_setup_artifacts() {
+    local cache_dir="$1"
+    local kernel_release="$2"
+    local kernel_image_filename="$3"
+    rm -rf "$ARTIFACT_DIR"
+    mkdir -p "$ARTIFACT_DIR"
+    ln -sfn "$cache_dir/vmlinux-$kernel_release" "$ARTIFACT_DIR/vmlinux-$kernel_release"
+    ln -sfn "$cache_dir/$kernel_image_filename" "$ARTIFACT_DIR/$kernel_image_filename"
+    ln -sfn "$cache_dir/modules-$kernel_release.tar.gz" "$ARTIFACT_DIR/modules-$kernel_release.tar.gz"
+}
+
+reuse_cached_setup_artifacts() {
+    local cache_dir="$1"
+    local kernel_release="$2"
+    local kernel_image_filename="$3"
+    cached_setup_artifacts_ready "$cache_dir" "$kernel_release" "$kernel_image_filename" || return 1
+    link_cached_setup_artifacts "$cache_dir" "$kernel_release" "$kernel_image_filename"
+    BUILD_KERNEL_RELEASE="$kernel_release"
+    return 0
+}
+
+ensure_dirs() {
+    mkdir -p "$TARGET_CACHE_DIR" "$STATE_DIR" "$ARTIFACT_DIR" "$RESULTS_DIR" "$RUN_PREP_ROOT"
+}
+
+with_locked_file() {
+    local lock_path="$1"
+    local lock_fd
+    local status=0
+    shift
+    mkdir -p "$(dirname "$lock_path")"
+    exec {lock_fd}>"$lock_path"
+    flock "$lock_fd"
+    "$@" || status=$?
+    exec {lock_fd}>&-
+    return "$status"
+}
+
+with_x86_kernel_lock() {
+    with_locked_file "$X86_KERNEL_BUILD_LOCK_FILE" "$@"
+}
+
+with_arm64_kernel_lock() {
+    with_locked_file "$ARM64_KERNEL_BUILD_LOCK_FILE" "$@"
+}
+
+with_state_lock() {
+    with_locked_file "$STATE_DIR/instance.lock" "$@"
+}
+
+with_remote_execution_lock() {
+    with_locked_file "$SHARED_STATE_DIR/remote-exec.lock" "$@"
+}
+
+remote_prereq_dir() {
+    printf '%s\n' "$RUN_REMOTE_STAGE_DIR/prereq/$RUN_TOKEN"
+}
+
+remote_prereq_stamp_path() {
+    printf '%s\n' "$(remote_prereq_dir)/prereqs.ready"
+}
+
+remote_prereq_workload_tool_root() {
+    printf '%s\n' "$(remote_prereq_dir)/workload-tools"
+}
+
+remote_prereq_workload_tool_bin() {
+    printf '%s\n' "$(remote_prereq_workload_tool_root)/bin"
+}
 
 load_state() {
     unset \
@@ -146,6 +433,15 @@ clear_state() {
     STATE_INSTANCE_IP=""
     STATE_REGION=""
     STATE_KERNEL_RELEASE=""
+}
+
+cleanup_local_run_prep_root() {
+    [[ -n "${RUN_PREP_ROOT:-}" ]] || return 0
+    [[ -e "$RUN_PREP_ROOT" ]] || return 0
+    rm -rf "$RUN_PREP_ROOT" 2>/dev/null || true
+    if [[ -e "$RUN_PREP_ROOT" ]]; then
+        sudo rm -rf "$RUN_PREP_ROOT" || true
+    fi
 }
 
 resolve_region() {
@@ -196,6 +492,17 @@ lookup_any_tagged_instance() {
             "Name=tag:Name,Values=${RUN_NAME_TAG}" \
             "Name=instance-state-name,Values=pending,running,stopping,stopped" \
         --query 'Reservations[].Instances[0].[InstanceId,State.Name,PublicIpAddress]' \
+        --output text 2>/dev/null || true
+}
+
+lookup_target_instance_ids() {
+    local region="$1"
+    aws_cmd "$region" ec2 describe-instances \
+        --filters \
+            "Name=tag:Project,Values=bpf-benchmark" \
+            "Name=tag:Role,Values=${RUN_TARGET_NAME}" \
+            "Name=instance-state-name,Values=pending,running,stopping,stopped" \
+        --query 'Reservations[].Instances[].InstanceId' \
         --output text 2>/dev/null || true
 }
 
@@ -464,37 +771,58 @@ prepare_x86_aws_config_locked() {
 }
 
 build_x86_kernel_artifacts_locked() {
-    local kernel_release modules_root
+    local kernel_release modules_root cached_dir cached_stage config_fingerprint
     BUILD_KERNEL_RELEASE=""
     prepare_x86_aws_config_locked
+    config_fingerprint="$(x86_setup_config_fingerprint)"
     log "Building x86 AWS kernel image and modules"
     make -C "$KERNEL_DIR" -j"$(nproc)" bzImage modules_prepare >/dev/null
     if [[ -f "$KERNEL_DIR/vmlinux.symvers" ]]; then
         cp "$KERNEL_DIR/vmlinux.symvers" "$KERNEL_DIR/Module.symvers"
     fi
-    make -C "$KERNEL_DIR" -j"$(nproc)" modules >/dev/null
 
     kernel_release="$(<"$KERNEL_DIR/include/config/kernel.release")"
     [[ -n "$kernel_release" ]] || die "x86 kernel release is empty"
-    rm -rf "$MODULES_STAGE_DIR"
-    mkdir -p "$MODULES_STAGE_DIR" "$ARTIFACT_DIR"
-    make -C "$KERNEL_DIR" INSTALL_MOD_PATH="$MODULES_STAGE_DIR" modules_install >/dev/null
-    rm -f "$MODULES_STAGE_DIR/lib/modules/$kernel_release/build" "$MODULES_STAGE_DIR/lib/modules/$kernel_release/source"
-    modules_root="$MODULES_STAGE_DIR/lib/modules/$kernel_release"
+    cached_dir="$X86_SETUP_ARTIFACT_ROOT/$kernel_release"
+    if x86_reuse_cached_setup_artifacts "$cached_dir" "$kernel_release" "bzImage-$kernel_release" "$config_fingerprint"; then
+        modules_tar_has_entry "$cached_dir/modules-$kernel_release.tar.gz" '/modules\.dep$' \
+            || rm -rf "$cached_dir"
+    fi
+    if x86_reuse_cached_setup_artifacts "$cached_dir" "$kernel_release" "bzImage-$kernel_release" "$config_fingerprint"; then
+        x86_cached_kinsn_modules_ready "$cached_dir" "$kernel_release" || rm -rf "$cached_dir"
+    fi
+    if x86_reuse_cached_setup_artifacts "$cached_dir" "$kernel_release" "bzImage-$kernel_release" "$config_fingerprint"; then
+        return 0
+    fi
+    cached_stage="$cached_dir/modules-stage"
+    rm -rf "$cached_dir"
+    mkdir -p "$cached_dir" "$cached_stage"
+    make -C "$KERNEL_DIR" -j"$(nproc)" modules >/dev/null
+    make -C "$KERNEL_DIR" INSTALL_MOD_PATH="$cached_stage" modules_install >/dev/null
+    rm -f "$cached_stage/lib/modules/$kernel_release/build" "$cached_stage/lib/modules/$kernel_release/source"
+    modules_root="$cached_stage/lib/modules/$kernel_release"
     require_local_path "$modules_root/kernel/drivers/nvme/host/nvme-core.ko" "x86 nvme-core module"
     require_local_path "$modules_root/kernel/drivers/nvme/host/nvme.ko" "x86 nvme module"
     require_local_path "$modules_root/kernel/fs/ext4/ext4.ko" "x86 ext4 module"
     require_local_path "$modules_root/kernel/fs/xfs/xfs.ko" "x86 xfs module"
     require_local_path "$modules_root/kernel/drivers/block/virtio_blk.ko" "x86 virtio_blk module"
-    cp "$X86_VMLINUX" "$ARTIFACT_DIR/vmlinux-$kernel_release"
-    cp "$X86_BZIMAGE" "$ARTIFACT_DIR/bzImage-$kernel_release"
-    tar -C "$MODULES_STAGE_DIR" -czf "$ARTIFACT_DIR/modules-$kernel_release.tar.gz" lib/modules
+    cp "$X86_VMLINUX" "$cached_dir/vmlinux-$kernel_release"
+    cp "$X86_BZIMAGE" "$cached_dir/bzImage-$kernel_release"
+    tar -C "$cached_stage" -czf "$cached_dir/modules-$kernel_release.tar.gz" lib/modules
+    rm -rf "$cached_stage"
+    modules_tar_has_entry "$cached_dir/modules-$kernel_release.tar.gz" '/modules\.dep$' \
+        || die "generated x86 modules archive is invalid"
+    build_x86_kinsn_modules_into_cache "$cached_dir"
+    x86_cached_kinsn_modules_ready "$cached_dir" "$kernel_release" \
+        || die "generated x86 kinsn module cache is invalid"
+    x86_write_cached_setup_fingerprint "$cached_dir" "$config_fingerprint"
+    link_cached_setup_artifacts "$cached_dir" "$kernel_release" "bzImage-$kernel_release"
     BUILD_KERNEL_RELEASE="$kernel_release"
 }
 
 build_x86_kernel_artifacts() {
     ensure_dirs
-    with_kernel_lock build_x86_kernel_artifacts_locked
+    with_x86_kernel_lock build_x86_kernel_artifacts_locked
 }
 
 arm64_build_config_matches_aws_base() {
@@ -520,7 +848,7 @@ refresh_aws_arm64_base_config() {
         fi
         die "cannot seed AWS ARM64 base config from non-stock kernel ${remote_release}; relaunch a fresh AL2023 instance"
     fi
-    tmp_config="$(mktemp "${CACHE_DIR}/config-al2023-arm64.XXXXXX")"
+    tmp_config="$(mktemp "${TARGET_CACHE_DIR}/config-al2023-arm64.XXXXXX")"
     if ! ssh_bash "$ip" <<'EOF' >"$tmp_config"
 set -euo pipefail
 release="$(uname -r)"
@@ -550,21 +878,21 @@ refresh_arm64_kernel_build_from_base() {
 }
 
 rebuild_arm64_kinsn_modules() {
-    rm -f \
-        "$ROOT_DIR"/module/arm64/*.ko \
-        "$ROOT_DIR"/module/arm64/*.o \
-        "$ROOT_DIR"/module/arm64/*.mod \
-        "$ROOT_DIR"/module/arm64/*.mod.c \
-        "$ROOT_DIR"/module/arm64/.*.cmd \
-        "$ROOT_DIR"/module/arm64/.module-common.o \
-        "$ROOT_DIR"/module/arm64/Module.symvers \
-        "$ROOT_DIR"/module/arm64/modules.order
+    snapshot_kinsn_module_source_tree "module/arm64" "$ARM64_KINSN_MODULE_BUILD_SRC"
     make -C "$ARM64_WORKTREE_DIR" O="$ARM64_AWS_BUILD_DIR" \
         ARCH=arm64 CROSS_COMPILE="$CROSS_COMPILE_PREFIX" \
         modules_prepare >/dev/null
     make -C "$ARM64_WORKTREE_DIR" O="$ARM64_AWS_BUILD_DIR" \
         ARCH=arm64 CROSS_COMPILE="$CROSS_COMPILE_PREFIX" \
-        M="$ROOT_DIR/module/arm64" modules >/dev/null
+        M="$ARM64_KINSN_MODULE_BUILD_SRC" modules >/dev/null
+}
+
+build_arm64_kinsn_modules_into_cache() {
+    local cache_dir="$1"
+    local cached_module_dir
+    rebuild_arm64_kinsn_modules
+    cached_module_dir="$(arm64_cached_kinsn_modules_dir "$cache_dir")"
+    stage_module_binaries "$ARM64_KINSN_MODULE_BUILD_SRC" "$cached_module_dir"
 }
 
 rebuild_arm64_upstream_test_kmods() {
@@ -592,8 +920,8 @@ efi_binary_is_valid() {
     file "$image_path" 2>/dev/null | grep -F 'EFI application' >/dev/null
 }
 
-build_arm64_kernel_artifacts() {
-    ensure_dirs
+build_arm64_kernel_artifacts_locked() {
+    local kernel_release cached_dir cached_stage
     BUILD_KERNEL_RELEASE=""
     rm -f \
         "$ARM64_AWS_BUILD_DIR/.config" \
@@ -605,59 +933,88 @@ build_arm64_kernel_artifacts() {
     log "Building ARM64 AWS kernel image and modules"
     ARM64_AWS_BUILD_DIR="$ARM64_AWS_BUILD_DIR" ARM64_AWS_BASE_CONFIG="$ARM64_AWS_BASE_CONFIG" \
         make -C "$ROOT_DIR" kernel-arm64-aws >/dev/null
-    local kernel_release
     kernel_release="$(<"$ARM64_AWS_BUILD_DIR/include/config/kernel.release")"
     [[ -n "$kernel_release" ]] || die "ARM64 kernel release is empty"
+    cached_dir="$ARM64_SETUP_ARTIFACT_ROOT/$kernel_release"
+    if reuse_cached_setup_artifacts "$cached_dir" "$kernel_release" "vmlinuz-$kernel_release.efi"; then
+        elf_has_btf "$cached_dir/vmlinux-$kernel_release" || die "cached ARM64 vmlinux is missing .BTF"
+        efi_binary_is_valid "$cached_dir/vmlinuz-$kernel_release.efi" || die "cached ARM64 EFI kernel image is invalid"
+        modules_tar_has_entry "$cached_dir/modules-$kernel_release.tar.gz" '/modules\.dep$' || die "cached ARM64 modules archive is missing modules.dep"
+        return 0
+    fi
     make -C "$ARM64_WORKTREE_DIR" O="$ARM64_AWS_BUILD_DIR" \
         ARCH=arm64 CROSS_COMPILE="$CROSS_COMPILE_PREFIX" \
         modules -j"$(nproc)" >/dev/null
-    rm -rf "$MODULES_STAGE_DIR"
-    mkdir -p "$MODULES_STAGE_DIR" "$ARTIFACT_DIR"
+    cached_stage="$cached_dir/modules-stage"
+    rm -rf "$cached_dir"
+    mkdir -p "$cached_dir" "$cached_stage"
     make -C "$ARM64_WORKTREE_DIR" O="$ARM64_AWS_BUILD_DIR" \
         ARCH=arm64 CROSS_COMPILE="$CROSS_COMPILE_PREFIX" \
-        INSTALL_MOD_PATH="$MODULES_STAGE_DIR" modules_install >/dev/null
-    rm -f "$MODULES_STAGE_DIR/lib/modules/$kernel_release/build" "$MODULES_STAGE_DIR/lib/modules/$kernel_release/source"
+        INSTALL_MOD_PATH="$cached_stage" modules_install >/dev/null
+    rm -f "$cached_stage/lib/modules/$kernel_release/build" "$cached_stage/lib/modules/$kernel_release/source"
     require_local_path "$ARM64_AWS_BUILD_DIR/vmlinux" "ARM64 vmlinux"
     require_local_path "$ARM64_AWS_BUILD_DIR/arch/arm64/boot/vmlinuz.efi" "ARM64 EFI kernel image"
-    cp "$ARM64_AWS_BUILD_DIR/vmlinux" "$ARTIFACT_DIR/vmlinux-$kernel_release"
-    cp "$ARM64_AWS_BUILD_DIR/arch/arm64/boot/vmlinuz.efi" "$ARTIFACT_DIR/vmlinuz-$kernel_release.efi"
-    tar -C "$MODULES_STAGE_DIR" -czf "$ARTIFACT_DIR/modules-$kernel_release.tar.gz" lib/modules
-    elf_has_btf "$ARTIFACT_DIR/vmlinux-$kernel_release" || die "generated ARM64 vmlinux is missing .BTF"
-    efi_binary_is_valid "$ARTIFACT_DIR/vmlinuz-$kernel_release.efi" || die "generated ARM64 EFI kernel image is invalid"
-    modules_tar_has_entry "$ARTIFACT_DIR/modules-$kernel_release.tar.gz" '/modules\.dep$' || die "generated ARM64 modules archive is missing modules.dep"
+    cp "$ARM64_AWS_BUILD_DIR/vmlinux" "$cached_dir/vmlinux-$kernel_release"
+    cp "$ARM64_AWS_BUILD_DIR/arch/arm64/boot/vmlinuz.efi" "$cached_dir/vmlinuz-$kernel_release.efi"
+    tar -C "$cached_stage" -czf "$cached_dir/modules-$kernel_release.tar.gz" lib/modules
+    rm -rf "$cached_stage"
+    elf_has_btf "$cached_dir/vmlinux-$kernel_release" || die "generated ARM64 vmlinux is missing .BTF"
+    efi_binary_is_valid "$cached_dir/vmlinuz-$kernel_release.efi" || die "generated ARM64 EFI kernel image is invalid"
+    modules_tar_has_entry "$cached_dir/modules-$kernel_release.tar.gz" '/modules\.dep$' || die "generated ARM64 modules archive is missing modules.dep"
+    link_cached_setup_artifacts "$cached_dir" "$kernel_release" "vmlinuz-$kernel_release.efi"
     BUILD_KERNEL_RELEASE="$kernel_release"
 }
 
+build_arm64_kernel_artifacts() {
+    ensure_dirs
+    with_arm64_kernel_lock build_arm64_kernel_artifacts_locked
+}
+
 ensure_x86_runner_ready() {
-    make -C "$ROOT_DIR" runner >/dev/null
-    file "$ROOT_DIR/runner/build/micro_exec" | grep -F "x86-64" >/dev/null || die "x86 runner is not an x86_64 binary"
+    make -C "$ROOT_DIR/runner" BUILD_DIR="$X86_RUNNER_BUILD_DIR" micro_exec >/dev/null
+    file "$X86_RUNNER" | grep -F "x86-64" >/dev/null || die "x86 runner is not an x86_64 binary"
 }
 
 ensure_x86_daemon_ready() {
-    make -C "$ROOT_DIR" daemon >/dev/null
-    file "$ROOT_DIR/daemon/target/release/bpfrejit-daemon" | grep -F "x86-64" >/dev/null || die "x86 daemon is not an x86_64 binary"
+    make -C "$ROOT_DIR/runner" DAEMON_TARGET_DIR="$X86_DAEMON_TARGET_DIR" daemon-binary >/dev/null
+    file "$X86_DAEMON" | grep -F "x86-64" >/dev/null || die "x86 daemon is not an x86_64 binary"
+}
+
+ensure_x86_kinsn_modules_ready_locked() {
+    local expected_release cached_dir cached_module_dir config_fingerprint
+    prepare_x86_aws_config_locked
+    config_fingerprint="$(x86_setup_config_fingerprint)"
+    expected_release="${STATE_KERNEL_RELEASE:-}"
+    [[ -n "$expected_release" ]] || die "x86 kinsn module staging requires STATE_KERNEL_RELEASE"
+    cached_dir="$X86_SETUP_ARTIFACT_ROOT/$expected_release"
+    if ! x86_reuse_cached_setup_artifacts "$cached_dir" "$expected_release" "bzImage-$expected_release" "$config_fingerprint" >/dev/null \
+        || ! x86_cached_kinsn_modules_ready "$cached_dir" "$expected_release"
+    then
+        rm -rf "$cached_dir"
+        build_x86_kernel_artifacts_locked
+    fi
+    x86_cached_kinsn_modules_ready "$cached_dir" "$expected_release" \
+        || die "x86 cached kinsn modules are missing or invalid for ${expected_release}"
+    cached_module_dir="$(x86_cached_kinsn_modules_dir "$cached_dir")"
+    stage_module_binaries "$cached_module_dir" "$X86_KINSN_MODULE_STAGE_DIR"
 }
 
 ensure_x86_kinsn_modules_ready() {
-    make -C "$ROOT_DIR" kinsn-modules >/dev/null
-    stage_module_binaries "$X86_KINSN_MODULE_DIR" "$X86_KINSN_MODULE_STAGE_DIR"
+    with_x86_kernel_lock ensure_x86_kinsn_modules_ready_locked
+    dir_has_entries "$X86_KINSN_MODULE_STAGE_DIR" || die "x86 kinsn module stage dir is empty: ${X86_KINSN_MODULE_STAGE_DIR}"
 }
 
 ensure_x86_selftest_outputs() {
-    make -C "$ROOT_DIR/runner" unittest-build negative-build >/dev/null
-    rm -rf "$X86_TEST_UNITTEST_BUILD_DIR" "$X86_TEST_NEGATIVE_BUILD_DIR"
-    mkdir -p "$(dirname "$X86_TEST_UNITTEST_BUILD_DIR")" "$(dirname "$X86_TEST_NEGATIVE_BUILD_DIR")"
-    cp -a "$ROOT_DIR/tests/unittest/build" "$X86_TEST_UNITTEST_BUILD_DIR"
-    cp -a "$ROOT_DIR/tests/negative/build" "$X86_TEST_NEGATIVE_BUILD_DIR"
+    make -C "$ROOT_DIR/runner" \
+        UNITTEST_BUILD_DIR="$X86_TEST_UNITTEST_BUILD_DIR" \
+        NEGATIVE_BUILD_DIR="$X86_TEST_NEGATIVE_BUILD_DIR" \
+        unittest-build negative-build >/dev/null
     file "$X86_TEST_UNITTEST_BUILD_DIR/rejit_kinsn" | grep -F "x86-64" >/dev/null || die "x86 unittest binary is not x86_64"
     file "$X86_TEST_NEGATIVE_BUILD_DIR/adversarial_rejit" | grep -F "x86-64" >/dev/null || die "x86 negative binary is not x86_64"
 }
 
 ensure_x86_upstream_selftests_ready() {
-    make -C "$ROOT_DIR" upstream-selftests-build >/dev/null
-    rm -rf "$X86_UPSTREAM_SELFTEST_DIR"
-    mkdir -p "$(dirname "$X86_UPSTREAM_SELFTEST_DIR")"
-    cp -a "$X86_UPSTREAM_SELFTEST_SOURCE_DIR" "$X86_UPSTREAM_SELFTEST_DIR"
+    make -C "$ROOT_DIR/runner" UPSTREAM_SELFTEST_OUTPUT_DIR="$X86_UPSTREAM_SELFTEST_DIR" upstream-selftests-build >/dev/null
     require_local_path "$X86_UPSTREAM_SELFTEST_DIR/test_verifier" "x86 upstream test_verifier"
     require_local_path "$X86_UPSTREAM_SELFTEST_DIR/test_progs" "x86 upstream test_progs"
 }
@@ -665,52 +1022,74 @@ ensure_x86_upstream_selftests_ready() {
 ensure_cross_arm64_runtime() {
     local require_llvmbpf="${1:-0}"
     local llvmbpf_setting="${ARM64_CROSSBUILD_ENABLE_LLVMBPF:-OFF}"
+    local runtime_targets=()
     if [[ "$require_llvmbpf" == "1" ]]; then
         llvmbpf_setting=ON
     fi
-    make -C "$ROOT_DIR" cross-arm64 ARM64_CROSSBUILD_ENABLE_LLVMBPF="$llvmbpf_setting" >/dev/null
-    file "$ARM64_CROSS_RUNNER_REAL" | grep -F "ARM aarch64" >/dev/null || die "ARM64 runner is not an aarch64 binary"
-    file "$ARM64_CROSS_DAEMON_REAL" | grep -F "ARM aarch64" >/dev/null || die "ARM64 daemon is not an aarch64 binary"
+    if [[ "${RUN_NEEDS_RUNNER_BINARY:-0}" == "1" && "${RUN_RUNNER_BINARY_MODE:-bundled}" == "bundled" ]]; then
+        runtime_targets+=(runner)
+    fi
+    if [[ "${RUN_NEEDS_DAEMON_BINARY:-0}" == "1" ]]; then
+        runtime_targets+=(daemon)
+    fi
+    [[ "${#runtime_targets[@]}" -gt 0 ]] || return 0
+    configure_arm64_sysroot_contract
+    make -C "$ROOT_DIR" __cross-arm64 \
+        ARM64_SOURCE_REPO_ROOT="$ARM64_SOURCE_REPO_ROOT" \
+        ARM64_CROSSBUILD_OUTPUT_DIR="$ARM64_CROSSBUILD_OUTPUT_DIR" \
+        ARM64_CROSSBUILD_BUILD_ROOT="$ARM64_CROSSBUILD_BUILD_ROOT" \
+        ARM64_CROSSBUILD_CARGO_HOME="$ARM64_CROSSBUILD_CARGO_HOME" \
+        ARM64_HOST_DAEMON_TARGET_DIR="$ARM64_HOST_DAEMON_TARGET_DIR" \
+        ARM64_HOST_DAEMON_OUTPUT_DIR="$ARM64_HOST_DAEMON_OUTPUT_DIR" \
+        ARM64_HOST_DAEMON_BINARY="$ARM64_HOST_DAEMON_BINARY" \
+        ARM64_HOST_DAEMON_CARGO_HOME="$ARM64_HOST_DAEMON_CARGO_HOME" \
+        ARM64_SYSROOT_ROOT="$ARM64_SYSROOT_ROOT" \
+        ARM64_SYSROOT_LOCK_FILE="$ARM64_SYSROOT_LOCK_FILE" \
+        ARM64_SYSROOT_REMOTE_HOST="$ARM64_SYSROOT_REMOTE_HOST" \
+        ARM64_SYSROOT_REMOTE_USER="$ARM64_SYSROOT_REMOTE_USER" \
+        ARM64_SYSROOT_SSH_KEY_PATH="$ARM64_SYSROOT_SSH_KEY_PATH" \
+        ARM64_CROSSBUILD_RUNTIME_TARGETS="$(IFS=,; printf '%s' "${runtime_targets[*]}")" \
+        ARM64_CROSSBUILD_ENABLE_LLVMBPF="$llvmbpf_setting" >/dev/null
+    if [[ "${RUN_NEEDS_RUNNER_BINARY:-0}" == "1" && "${RUN_RUNNER_BINARY_MODE:-bundled}" == "bundled" ]]; then
+        file "$ARM64_CROSS_RUNNER_REAL" | grep -F "ARM aarch64" >/dev/null || die "ARM64 runner is not an aarch64 binary"
+    fi
+    if [[ "${RUN_NEEDS_DAEMON_BINARY:-0}" == "1" ]]; then
+        file "$ARM64_CROSS_DAEMON_REAL" | grep -F "ARM aarch64" >/dev/null || die "ARM64 daemon is not an aarch64 binary"
+    fi
     dir_has_entries "$ARM64_CROSS_LIB_DIR" || die "ARM64 runtime lib dir is empty: ${ARM64_CROSS_LIB_DIR}"
 }
 
-ensure_arm64_kinsn_modules_ready() {
-    local required_modules=(
-        "$ROOT_DIR/module/arm64/bpf_bulk_memory.ko"
-        "$ROOT_DIR/module/arm64/bpf_endian.ko"
-        "$ROOT_DIR/module/arm64/bpf_extract.ko"
-        "$ROOT_DIR/module/arm64/bpf_ldp.ko"
-        "$ROOT_DIR/module/arm64/bpf_rotate.ko"
-        "$ROOT_DIR/module/arm64/bpf_select.ko"
-    )
-    local module_path expected_release actual_release
+ensure_arm64_kinsn_modules_ready_locked() {
+    local expected_release cached_dir cached_module_dir current_build_release
     expected_release="${STATE_KERNEL_RELEASE:-}"
-    if [[ -f "$ARM64_AWS_BASE_CONFIG" ]] && ! arm64_build_config_matches_aws_base; then
-        refresh_arm64_kernel_build_from_base
+    [[ -n "$expected_release" ]] || die "ARM64 kinsn module staging requires STATE_KERNEL_RELEASE"
+    cached_dir="$ARM64_SETUP_ARTIFACT_ROOT/$expected_release"
+    if ! reuse_cached_setup_artifacts "$cached_dir" "$expected_release" "vmlinuz-$expected_release.efi" >/dev/null; then
+        rm -rf "$cached_dir"
+        build_arm64_kernel_artifacts_locked
     fi
-    for module_path in "${required_modules[@]}"; do
-        if [[ ! -f "$module_path" ]]; then
-            rebuild_arm64_kinsn_modules
-            break
-        fi
-        if [[ -n "$expected_release" ]]; then
-            actual_release="$(modinfo -F vermagic "$module_path" 2>/dev/null | awk '{print $1}')"
-            if [[ "$actual_release" != "$expected_release" ]]; then
-                rebuild_arm64_kinsn_modules
-                break
-            fi
-        fi
-    done
-    if [[ -n "$expected_release" ]]; then
-        for module_path in "${required_modules[@]}"; do
-            actual_release="$(modinfo -F vermagic "$module_path" 2>/dev/null | awk '{print $1}')"
-            [[ "$actual_release" == "$expected_release" ]] || die "ARM64 kinsn module release mismatch for $(basename "$module_path")"
-        done
+    if [[ -f "$ARM64_AWS_BASE_CONFIG" && ! arm64_build_config_matches_aws_base ]]; then
+        build_arm64_kernel_artifacts_locked
     fi
-    stage_module_binaries "$ROOT_DIR/module/arm64" "$ARM64_KINSN_MODULE_STAGE_DIR"
+    current_build_release="$(<"$ARM64_AWS_BUILD_DIR/include/config/kernel.release" 2>/dev/null || true)"
+    if [[ "$current_build_release" != "$expected_release" ]]; then
+        build_arm64_kernel_artifacts_locked
+    fi
+    if ! arm64_cached_kinsn_modules_ready "$cached_dir" "$expected_release"; then
+        rm -rf "$(arm64_cached_kinsn_modules_dir "$cached_dir")"
+        build_arm64_kinsn_modules_into_cache "$cached_dir"
+    fi
+    arm64_cached_kinsn_modules_ready "$cached_dir" "$expected_release" \
+        || die "ARM64 cached kinsn modules are missing or invalid for ${expected_release}"
+    cached_module_dir="$(arm64_cached_kinsn_modules_dir "$cached_dir")"
+    stage_module_binaries "$cached_module_dir" "$ARM64_KINSN_MODULE_STAGE_DIR"
 }
 
-ensure_arm64_upstream_test_kmods_ready() {
+ensure_arm64_kinsn_modules_ready() {
+    with_arm64_kernel_lock ensure_arm64_kinsn_modules_ready_locked
+}
+
+ensure_arm64_upstream_test_kmods_ready_locked() {
     local required_modules=(
         "$ARM64_UPSTREAM_TEST_KMODS_DIR/bpf_testmod.ko"
         "$ARM64_UPSTREAM_TEST_KMODS_DIR/bpf_test_no_cfi.ko"
@@ -741,13 +1120,29 @@ ensure_arm64_upstream_test_kmods_ready() {
     fi
 }
 
+ensure_arm64_upstream_test_kmods_ready() {
+    with_arm64_kernel_lock ensure_arm64_upstream_test_kmods_ready_locked
+}
+
 ensure_arm64_selftest_outputs() {
     [[ -f "$ARM64_AWS_BUILD_DIR/vmlinux" ]] || die "AWS ARM64 selftest build requires ${ARM64_AWS_BUILD_DIR}/vmlinux"
-    make -C "$ROOT_DIR" arm64-test-artifacts \
+    configure_arm64_sysroot_contract
+    make -C "$ROOT_DIR" __arm64-test-artifacts \
         VMLINUX_BTF="$ARM64_AWS_BUILD_DIR/vmlinux" \
+        ARM64_TEST_MODE="${RUN_TEST_MODE:-test}" \
         ARM64_TEST_ARTIFACTS_ROOT="$ARM64_TEST_ARTIFACTS_ROOT" \
         ARM64_TEST_UNITTEST_BUILD_DIR="$ARM64_TEST_UNITTEST_BUILD_DIR" \
         ARM64_TEST_NEGATIVE_BUILD_DIR="$ARM64_TEST_NEGATIVE_BUILD_DIR" \
+        ARM64_TEST_DAEMON_OUTPUT_DIR="$ARM64_TEST_ARTIFACTS_ROOT/daemon" \
+        ARM64_HOST_DAEMON_TARGET_DIR="$ARM64_HOST_DAEMON_TARGET_DIR" \
+        ARM64_HOST_DAEMON_OUTPUT_DIR="$ARM64_HOST_DAEMON_OUTPUT_DIR" \
+        ARM64_HOST_DAEMON_BINARY="$ARM64_HOST_DAEMON_BINARY" \
+        ARM64_HOST_DAEMON_CARGO_HOME="$ARM64_HOST_DAEMON_CARGO_HOME" \
+        ARM64_SYSROOT_ROOT="$ARM64_SYSROOT_ROOT" \
+        ARM64_SYSROOT_LOCK_FILE="$ARM64_SYSROOT_LOCK_FILE" \
+        ARM64_SYSROOT_REMOTE_HOST="$ARM64_SYSROOT_REMOTE_HOST" \
+        ARM64_SYSROOT_REMOTE_USER="$ARM64_SYSROOT_REMOTE_USER" \
+        ARM64_SYSROOT_SSH_KEY_PATH="$ARM64_SYSROOT_SSH_KEY_PATH" \
         ARM64_UPSTREAM_SELFTEST_OUTPUT_DIR="$ARM64_UPSTREAM_SELFTEST_DIR" >/dev/null
     file "$ARM64_TEST_UNITTEST_BUILD_DIR/rejit_kinsn" | grep -F "ARM aarch64" >/dev/null || die "ARM64 unittest binary is not aarch64"
     file "$ARM64_TEST_NEGATIVE_BUILD_DIR/adversarial_rejit" | grep -F "ARM aarch64" >/dev/null || die "ARM64 negative binary is not aarch64"
@@ -767,7 +1162,7 @@ ensure_selected_repos_fetched() {
         args+=(--repo "$repo")
     done
     [[ "${#args[@]}" -gt 0 ]] || return 0
-    python3 "$ROOT_DIR/runner/scripts/fetch_corpus_repos.py" --repo-root "$LOCAL_REPO_ROOT" "${args[@]}" >/dev/null
+    "$HOST_PYTHON_BIN" "$ROOT_DIR/runner/scripts/fetch_corpus_repos.py" --repo-root "$LOCAL_REPO_ROOT" "${args[@]}" >/dev/null
 }
 
 ensure_x86_scx_artifacts_ready() {
@@ -777,7 +1172,7 @@ ensure_x86_scx_artifacts_ready() {
     IFS=',' read -r -a _scx_packages <<<"$RUN_SCX_PACKAGES_CSV"
     for package in "${_scx_packages[@]}"; do
         [[ -n "$package" ]] || continue
-        python3 "$ROOT_DIR/runner/scripts/build_scx_artifacts.py" \
+        "$HOST_PYTHON_BIN" "$ROOT_DIR/runner/scripts/build_scx_artifacts.py" \
             --force \
             --repo-root "$LOCAL_REPO_ROOT" \
             --promote-root "$LOCAL_PROMOTE_ROOT" \
@@ -791,9 +1186,18 @@ ensure_arm64_scx_artifacts_ready() {
     local package
     [[ -n "${RUN_SCX_PACKAGES_CSV:-}" ]] || return 0
     ensure_selected_repos_fetched "scx"
+    configure_arm64_sysroot_contract
     IFS=',' read -r -a _scx_packages <<<"$RUN_SCX_PACKAGES_CSV"
-    make -C "$ROOT_DIR" cross-arm64-scx \
+    make -C "$ROOT_DIR" __cross-arm64-scx \
         ARM64_SOURCE_REPO_ROOT="$LOCAL_REPO_ROOT" \
+        ARM64_CROSSBUILD_OUTPUT_DIR="$ARM64_CROSSBUILD_OUTPUT_DIR" \
+        ARM64_HOST_SCX_BUILD_ROOT="$ARM64_HOST_SCX_BUILD_ROOT" \
+        ARM64_HOST_SCX_CARGO_HOME="$ARM64_HOST_SCX_CARGO_HOME" \
+        ARM64_SYSROOT_ROOT="$ARM64_SYSROOT_ROOT" \
+        ARM64_SYSROOT_LOCK_FILE="$ARM64_SYSROOT_LOCK_FILE" \
+        ARM64_SYSROOT_REMOTE_HOST="$ARM64_SYSROOT_REMOTE_HOST" \
+        ARM64_SYSROOT_REMOTE_USER="$ARM64_SYSROOT_REMOTE_USER" \
+        ARM64_SYSROOT_SSH_KEY_PATH="$ARM64_SYSROOT_SSH_KEY_PATH" \
         ARM64_CROSSBUILD_SCX_PACKAGES="$RUN_SCX_PACKAGES_CSV" >/dev/null
     for package in "${_scx_packages[@]}"; do
         file "$ARM64_CROSSBUILD_OUTPUT_DIR/runner/repos/scx/target/release/$package" | grep -F "ARM aarch64" >/dev/null \
@@ -803,7 +1207,7 @@ ensure_arm64_scx_artifacts_ready() {
 }
 
 ensure_x86_native_repo_artifacts_ready() {
-    local repo args=()
+    local repo katran_input_root args=()
     [[ -n "${RUN_NATIVE_REPOS_CSV:-}" ]] || return 0
     ensure_selected_repos_fetched "$RUN_BENCHMARK_REPOS_CSV"
     mkdir -p "$LOCAL_PROMOTE_ROOT/corpus/build"
@@ -813,13 +1217,28 @@ ensure_x86_native_repo_artifacts_ready() {
         args+=(--repo "$repo")
     done
     [[ "${#args[@]}" -gt 0 ]] || return 0
-    RUNNER_REPOS_DIR_OVERRIDE="$LOCAL_REPO_ROOT" \
-        KATRAN_SERVER_BINARY="$ROOT_DIR/e2e/cases/katran/bin/katran_server_grpc" \
-        KATRAN_SERVER_LIB_DIR="$ROOT_DIR/e2e/cases/katran/lib" \
-        python3 "$ROOT_DIR/runner/scripts/build_corpus_native.py" \
-            --jobs "$(nproc)" \
-            --build-root "$LOCAL_PROMOTE_ROOT/corpus/build" \
-            "${args[@]}" >/dev/null
+    if [[ ",${RUN_NATIVE_REPOS_CSV:-}," == *",katran,"* ]]; then
+        katran_input_root="$LOCAL_PROMOTE_ROOT/.inputs/katran"
+        rm -rf "$katran_input_root"
+        mkdir -p "$katran_input_root/bin" "$katran_input_root/lib"
+        snapshot_git_subtree "$ROOT_DIR" "e2e/cases/katran/bin" "$katran_input_root/bin"
+        snapshot_git_subtree "$ROOT_DIR" "e2e/cases/katran/lib" "$katran_input_root/lib"
+        require_local_path "$katran_input_root/bin/katran_server_grpc" "sealed AWS x86 Katran server source bundle"
+        require_nonempty_dir "$katran_input_root/lib" "sealed AWS x86 Katran lib dir"
+        KATRAN_SERVER_BINARY="$katran_input_root/bin/katran_server_grpc" \
+            KATRAN_SERVER_LIB_DIR="$katran_input_root/lib" \
+            "$HOST_PYTHON_BIN" "$ROOT_DIR/runner/scripts/build_corpus_native.py" \
+                --jobs "$(nproc)" \
+                --repo-root "$LOCAL_REPO_ROOT" \
+                --build-root "$LOCAL_PROMOTE_ROOT/corpus/build" \
+                "${args[@]}" >/dev/null
+        return 0
+    fi
+    "$HOST_PYTHON_BIN" "$ROOT_DIR/runner/scripts/build_corpus_native.py" \
+        --jobs "$(nproc)" \
+        --repo-root "$LOCAL_REPO_ROOT" \
+        --build-root "$LOCAL_PROMOTE_ROOT/corpus/build" \
+        "${args[@]}" >/dev/null
 }
 
 arm64_local_katran_bundle_available() {
@@ -833,8 +1252,11 @@ ensure_arm64_native_repo_artifacts_ready() {
     [[ -n "${RUN_NATIVE_REPOS_CSV:-}" ]] || return 0
     ensure_selected_repos_fetched "$RUN_BENCHMARK_REPOS_CSV"
     IFS=',' read -r -a _native_repos <<<"$RUN_NATIVE_REPOS_CSV"
-    make -C "$ROOT_DIR" cross-arm64-bench \
+    make -C "$ROOT_DIR" __cross-arm64-bench \
         ARM64_SOURCE_REPO_ROOT="$LOCAL_REPO_ROOT" \
+        ARM64_CROSSBUILD_OUTPUT_DIR="$ARM64_CROSSBUILD_OUTPUT_DIR" \
+        ARM64_CROSSBUILD_BUILD_ROOT="$ARM64_CROSSBUILD_BUILD_ROOT" \
+        ARM64_CROSSBUILD_CARGO_HOME="$ARM64_CROSSBUILD_CARGO_HOME" \
         ARM64_CROSSBUILD_BENCH_REPOS="$RUN_NATIVE_REPOS_CSV" >/dev/null
     for repo in "${_native_repos[@]}"; do
         [[ -n "$repo" ]] || continue
@@ -888,23 +1310,45 @@ prepare_local_test_artifacts() {
 }
 
 prepare_local_benchmark_artifacts() {
-    make -C "$ROOT_DIR/micro" programs >/dev/null
-    case "$RUN_TARGET_NAME" in
-        aws-arm64)
-            ensure_cross_arm64_runtime "${RUN_SUITE_NEEDS_LLVMBPF:-0}"
-            ensure_arm64_scx_artifacts_ready
-            ensure_arm64_kinsn_modules_ready
-            ensure_arm64_native_repo_artifacts_ready
+    case "$RUN_SUITE_NAME" in
+        micro)
+            make -C "$ROOT_DIR/runner" MICRO_PROGRAM_OUTPUT_DIR="$MICRO_PROGRAMS_GENERATED_DIR" micro-programs >/dev/null
+            require_nonempty_dir "$MICRO_PROGRAMS_GENERATED_DIR" "micro generated programs dir"
+            case "$RUN_TARGET_NAME" in
+                aws-arm64)
+                    if [[ "${RUN_RUNNER_BINARY_MODE:-bundled}" == "bundled" ]]; then
+                        ensure_cross_arm64_runtime "${RUN_SUITE_NEEDS_LLVMBPF:-0}"
+                    fi
+                    ;;
+                aws-x86)
+                    ensure_x86_runner_ready
+                    ;;
+                *)
+                    die "unsupported AWS micro target: ${RUN_TARGET_NAME}"
+                    ;;
+            esac
             ;;
-        aws-x86)
-            ensure_x86_runner_ready
-            ensure_x86_daemon_ready
-            ensure_x86_scx_artifacts_ready
-            ensure_x86_kinsn_modules_ready
-            ensure_x86_native_repo_artifacts_ready
+        corpus|e2e)
+            case "$RUN_TARGET_NAME" in
+                aws-arm64)
+                    ensure_cross_arm64_runtime "${RUN_SUITE_NEEDS_LLVMBPF:-0}"
+                    ensure_arm64_scx_artifacts_ready
+                    ensure_arm64_kinsn_modules_ready
+                    ensure_arm64_native_repo_artifacts_ready
+                    ;;
+                aws-x86)
+                    ensure_x86_daemon_ready
+                    ensure_x86_scx_artifacts_ready
+                    ensure_x86_kinsn_modules_ready
+                    ensure_x86_native_repo_artifacts_ready
+                    ;;
+                *)
+                    die "unsupported AWS benchmark target: ${RUN_TARGET_NAME}"
+                    ;;
+            esac
             ;;
         *)
-            die "unsupported AWS benchmark target: ${RUN_TARGET_NAME}"
+            die "unsupported benchmark suite for local artifact preparation: ${RUN_SUITE_NAME}"
             ;;
     esac
 }
@@ -918,55 +1362,39 @@ prepare_local_suite_artifacts() {
 }
 
 prepare_local_bundle() {
-    local stage_token stage_root bundle_tar
-    local -a bundle_env=()
-    stage_token="$(basename "$MANIFEST_PATH" .env)"
-    stage_root="$CACHE_DIR/staged/${stage_token}/workspace"
-    bundle_tar="$CACHE_DIR/staged/${stage_token}.tar.gz"
+    local stage_root bundle_tar bundle_inputs_path
+    stage_root="$RUN_PREP_ROOT/workspace"
+    bundle_tar="$RUN_PREP_ROOT/bundle.tar.gz"
+    bundle_inputs_path="$RUN_PREP_ROOT/bundle-inputs.env"
     RUN_INPUT_STAGE_ROOT="$stage_root"
     RUN_BUNDLE_TAR="$bundle_tar"
     rm -rf "$stage_root"
     mkdir -p "$(dirname "$bundle_tar")"
-    bundle_env+=(
-        "RUN_INPUT_STAGE_ROOT=$RUN_INPUT_STAGE_ROOT"
-        "RUN_BUNDLE_TAR=$RUN_BUNDLE_TAR"
-        "RUNNER_REPOS_ROOT_OVERRIDE=$LOCAL_REPO_ROOT"
-        "BUNDLE_PROMOTE_ROOT=$LOCAL_PROMOTE_ROOT"
-    )
-    case "$RUN_TARGET_NAME" in
-        aws-arm64)
-            bundle_env+=(
-                "ARM64_CROSSBUILD_OUTPUT_DIR=$ARM64_CROSSBUILD_OUTPUT_DIR"
-                "ARM64_CROSS_RUNNER=$ARM64_CROSS_RUNNER"
-                "ARM64_CROSS_RUNNER_REAL=$ARM64_CROSS_RUNNER_REAL"
-                "ARM64_CROSS_DAEMON=$ARM64_CROSS_DAEMON"
-                "ARM64_CROSS_DAEMON_REAL=$ARM64_CROSS_DAEMON_REAL"
-                "ARM64_CROSS_LIB_DIR=$ARM64_CROSS_LIB_DIR"
-                "ARM64_KATRAN_SERVER_BINARY=$ARM64_KATRAN_SERVER_BINARY"
-                "ARM64_KATRAN_SERVER_LIB_DIR=$ARM64_KATRAN_SERVER_LIB_DIR"
-                "RUN_KINSN_MODULE_DIR=$ARM64_KINSN_MODULE_STAGE_DIR"
-                "ARM64_TEST_ARTIFACTS_ROOT=$ARM64_TEST_ARTIFACTS_ROOT"
-                "ARM64_TEST_UNITTEST_BUILD_DIR=$ARM64_TEST_UNITTEST_BUILD_DIR"
-                "ARM64_TEST_NEGATIVE_BUILD_DIR=$ARM64_TEST_NEGATIVE_BUILD_DIR"
-                "ARM64_UPSTREAM_SELFTEST_DIR=$ARM64_UPSTREAM_SELFTEST_DIR"
-                "ARM64_UPSTREAM_TEST_KMODS_DIR=$ARM64_UPSTREAM_TEST_KMODS_DIR"
-            )
-            ;;
-        aws-x86)
-            bundle_env+=(
-                "X86_RUNNER=$X86_RUNNER"
-                "X86_DAEMON=$X86_DAEMON"
-                "RUN_KINSN_MODULE_DIR=$X86_KINSN_MODULE_STAGE_DIR"
-                "X86_TEST_UNITTEST_BUILD_DIR=$X86_TEST_UNITTEST_BUILD_DIR"
-                "X86_TEST_NEGATIVE_BUILD_DIR=$X86_TEST_NEGATIVE_BUILD_DIR"
-                "X86_UPSTREAM_SELFTEST_DIR=$X86_UPSTREAM_SELFTEST_DIR"
-            )
-            ;;
-        *)
-            die "unsupported AWS target for local bundle preparation: ${RUN_TARGET_NAME}"
-            ;;
-    esac
-    env "${bundle_env[@]}" "$ROOT_DIR/runner/scripts/build_remote_bundle.sh" "$MANIFEST_PATH" "$RUN_INPUT_STAGE_ROOT" "$RUN_BUNDLE_TAR"
+    cat >"$bundle_inputs_path" <<EOF
+RUN_LOCAL_PROMOTE_ROOT=$(printf '%q' "$LOCAL_PROMOTE_ROOT")
+RUN_LOCAL_REPO_ROOT=$(printf '%q' "$LOCAL_REPO_ROOT")
+MICRO_PROGRAMS_GENERATED_DIR=$(printf '%q' "$MICRO_PROGRAMS_GENERATED_DIR")
+RUN_KINSN_MODULE_DIR=$(printf '%q' "$([[ "$RUN_TARGET_NAME" == "aws-arm64" ]] && printf '%s' "$ARM64_KINSN_MODULE_STAGE_DIR" || printf '%s' "$X86_KINSN_MODULE_STAGE_DIR")")
+X86_RUNNER=$(printf '%q' "$X86_RUNNER")
+X86_DAEMON=$(printf '%q' "$X86_DAEMON")
+X86_TEST_UNITTEST_BUILD_DIR=$(printf '%q' "$X86_TEST_UNITTEST_BUILD_DIR")
+X86_TEST_NEGATIVE_BUILD_DIR=$(printf '%q' "$X86_TEST_NEGATIVE_BUILD_DIR")
+X86_UPSTREAM_SELFTEST_DIR=$(printf '%q' "$X86_UPSTREAM_SELFTEST_DIR")
+ARM64_CROSSBUILD_OUTPUT_DIR=$(printf '%q' "$ARM64_CROSSBUILD_OUTPUT_DIR")
+ARM64_CROSS_RUNNER=$(printf '%q' "$ARM64_CROSS_RUNNER")
+ARM64_CROSS_RUNNER_REAL=$(printf '%q' "$ARM64_CROSS_RUNNER_REAL")
+ARM64_CROSS_DAEMON=$(printf '%q' "$ARM64_CROSS_DAEMON")
+ARM64_CROSS_DAEMON_REAL=$(printf '%q' "$ARM64_CROSS_DAEMON_REAL")
+ARM64_CROSS_LIB_DIR=$(printf '%q' "$ARM64_CROSS_LIB_DIR")
+ARM64_KATRAN_SERVER_BINARY=$(printf '%q' "$ARM64_KATRAN_SERVER_BINARY")
+ARM64_KATRAN_SERVER_LIB_DIR=$(printf '%q' "$ARM64_KATRAN_SERVER_LIB_DIR")
+ARM64_TEST_ARTIFACTS_ROOT=$(printf '%q' "$ARM64_TEST_ARTIFACTS_ROOT")
+ARM64_TEST_UNITTEST_BUILD_DIR=$(printf '%q' "$ARM64_TEST_UNITTEST_BUILD_DIR")
+ARM64_TEST_NEGATIVE_BUILD_DIR=$(printf '%q' "$ARM64_TEST_NEGATIVE_BUILD_DIR")
+ARM64_UPSTREAM_SELFTEST_DIR=$(printf '%q' "$ARM64_UPSTREAM_SELFTEST_DIR")
+ARM64_UPSTREAM_TEST_KMODS_DIR=$(printf '%q' "$ARM64_UPSTREAM_TEST_KMODS_DIR")
+EOF
+    "$ROOT_DIR/runner/scripts/build_remote_bundle.sh" "$MANIFEST_PATH" "$bundle_inputs_path" "$RUN_INPUT_STAGE_ROOT" "$RUN_BUNDLE_TAR"
 }
 
 prepare_local_inputs() {
@@ -976,27 +1404,35 @@ prepare_local_inputs() {
 
 setup_remote_runtime_prereqs() {
     local ip="$1"
-    local remote_manifest="$RUN_REMOTE_STAGE_DIR/run-contract.env"
-    ssh_bash "$ip" "$RUN_REMOTE_STAGE_DIR" <<'EOF'
+    local remote_prereq_dir remote_stamp_path remote_tool_root
+    remote_prereq_dir="$(remote_prereq_dir)"
+    remote_stamp_path="$(remote_prereq_stamp_path)"
+    remote_tool_root="$(remote_prereq_workload_tool_root)"
+    local remote_helper="$remote_prereq_dir/aws_remote_prereqs.sh"
+    local remote_prereq_contract="$remote_prereq_dir/prereq_contract.sh"
+    local remote_manifest="$remote_prereq_dir/run-contract.env"
+    ssh_bash "$ip" "$remote_prereq_dir" <<'EOF'
 set -euo pipefail
 mkdir -p "$1"
 EOF
-    scp_to "$ip" "$ROOT_DIR/runner/scripts/aws_remote_prereqs.sh" "$RUN_REMOTE_STAGE_DIR/"
+    scp_to "$ip" "$ROOT_DIR/runner/scripts/aws_remote_prereqs.sh" "$remote_helper"
+    scp_to "$ip" "$ROOT_DIR/runner/scripts/prereq_contract.sh" "$remote_prereq_contract"
     scp_to "$ip" "$MANIFEST_PATH" "$remote_manifest"
-    ssh_bash "$ip" "$RUN_REMOTE_STAGE_DIR/aws_remote_prereqs.sh" "$remote_manifest" "$AWS_REMOTE_PREREQS_STAMP" <<'EOF'
+    ssh_bash "$ip" "$remote_helper" "$remote_manifest" "$remote_stamp_path" "$remote_tool_root" <<'EOF'
 set -euo pipefail
 helper="$1"
 manifest="$2"
 stamp_path="$3"
+tool_root="$4"
 chmod +x "$helper"
-sudo env PATH="$PATH" AWS_REMOTE_PREREQS_STAMP="$stamp_path" bash "$helper" "$manifest"
+sudo env PATH="$PATH" AWS_REMOTE_PREREQS_STAMP="$stamp_path" RUN_REMOTE_WORKLOAD_TOOL_ROOT="$tool_root" bash "$helper" "$manifest"
 test -f "$stamp_path"
 EOF
 }
 
 verify_remote_runtime_prereqs() {
     local ip="$1"
-    ssh_bash "$ip" "$AWS_REMOTE_PREREQS_STAMP" <<'EOF'
+    ssh_bash "$ip" "$(remote_prereq_stamp_path)" <<'EOF'
 set -euo pipefail
 test -f "$1"
 EOF
@@ -1154,17 +1590,19 @@ setup_instance() {
 
 run_remote_suite() {
     local ip="$1"
-    local stamp local_result_dir local_archive local_log remote_run_dir remote_archive remote_log
+    local stamp local_result_dir local_archive local_log remote_run_dir remote_archive remote_log remote_tool_bin remote_tool_root
     wait_for_ssh "$ip"
     verify_remote_runtime_prereqs "$ip" || die "remote prerequisites stamp is missing on ${ip}; run setup first"
     [[ -n "${RUN_BUNDLE_TAR:-}" ]] || die "local bundle path is unset; local bundle preparation did not run"
     [[ -f "${RUN_BUNDLE_TAR}" ]] || die "prepared remote bundle is missing: ${RUN_BUNDLE_TAR}"
 
-    stamp="${RUN_SUITE_NAME}_$(date -u +%Y%m%d_%H%M%S)"
+    stamp="${RUN_SUITE_NAME}_${RUN_TOKEN}_$(date -u +%Y%m%d_%H%M%S)"
     local_result_dir="$RESULTS_DIR/$stamp"
     local_archive="$local_result_dir/results.tar.gz"
     local_log="$local_result_dir/remote.log"
     remote_run_dir="$RUN_REMOTE_STAGE_DIR/runs/$stamp"
+    remote_tool_root="$(remote_prereq_workload_tool_root)"
+    remote_tool_bin="$(remote_prereq_workload_tool_bin)"
     remote_archive="$remote_run_dir/results.tar.gz"
     remote_log="$remote_run_dir/remote.log"
     mkdir -p "$local_result_dir"
@@ -1178,17 +1616,29 @@ EOF
     scp_to "$ip" "$RUN_BUNDLE_TAR" "$remote_run_dir/bundle.tar.gz"
     local remote_status=0
     set +e
-    ssh_bash "$ip" "$remote_run_dir" "$remote_archive" "$remote_log" <<'EOF'
+    ssh_bash "$ip" "$remote_run_dir" "$remote_archive" "$remote_log" "$remote_tool_root" "$remote_tool_bin" <<'EOF'
 set -euo pipefail
 run_dir="$1"
 archive_path="$2"
 log_path="$3"
+tool_root="$4"
+tool_bin="$5"
 workspace="$run_dir/workspace"
 bundle_path="$run_dir/bundle.tar.gz"
 sudo rm -rf "$workspace"
 mkdir -p "$workspace"
 tar -xzf "$bundle_path" -C "$workspace"
 rm -f "$bundle_path"
+if [[ -d "$tool_root" ]]; then
+    mkdir -p "$workspace/.cache"
+    rm -rf "$workspace/.cache/workload-tools"
+    cp -a "$tool_root" "$workspace/.cache/workload-tools"
+fi
+if [[ -d "$workspace/.cache/workload-tools/bin" ]]; then
+    export PATH="$workspace/.cache/workload-tools/bin:$PATH"
+elif [[ -d "$tool_bin" ]]; then
+    export PATH="$tool_bin:$PATH"
+fi
 test -f "$workspace/run-contract.env"
 # shellcheck disable=SC1090
 source "$workspace/run-contract.env"
@@ -1214,6 +1664,56 @@ set -euo pipefail
 sudo rm -rf "$1"
 EOF
     log "Fetched ${RUN_TARGET_NAME}/${RUN_SUITE_NAME} results to ${local_result_dir}"
+}
+
+dedicated_instance_cleanup() {
+    cleanup_local_run_prep_root
+    if (( DEDICATED_RUN_ACTIVE == 0 )); then
+        return 0
+    fi
+    load_state
+    if [[ -n "${STATE_INSTANCE_ID:-}" ]]; then
+        terminate_instance "${STATE_INSTANCE_ID}" || true
+    fi
+    rm -rf "$RUN_STATE_DIR"
+}
+
+run_shared_remote_execution() {
+    with_state_lock ensure_instance_for_suite
+    load_state
+    [[ -n "${STATE_INSTANCE_IP:-}" ]] || die "shared AWS run is missing STATE_INSTANCE_IP before remote execution"
+    run_remote_suite "$STATE_INSTANCE_IP"
+}
+
+run_shared_suite_action() {
+    trap cleanup_local_run_prep_root EXIT
+    with_state_lock ensure_instance_for_suite
+    prepare_local_inputs
+    with_remote_execution_lock run_shared_remote_execution
+    trap - EXIT
+    cleanup_local_run_prep_root
+}
+
+run_suite_action() {
+    local instance_ip=""
+    if aws_instance_mode_is_shared; then
+        run_shared_suite_action
+        return 0
+    fi
+
+    DEDICATED_RUN_ACTIVE=1
+    trap dedicated_instance_cleanup EXIT
+    with_state_lock ensure_instance_for_suite
+    load_state
+    instance_ip="${STATE_INSTANCE_IP:-}"
+    [[ -n "$instance_ip" ]] || die "dedicated AWS run is missing STATE_INSTANCE_IP before remote execution"
+    prepare_local_inputs
+    run_remote_suite "$instance_ip"
+    cleanup_local_run_prep_root
+    DEDICATED_RUN_ACTIVE=0
+    trap - EXIT
+    terminate_instance "${STATE_INSTANCE_ID:-}"
+    rm -rf "$RUN_STATE_DIR"
 }
 
 ensure_instance_for_suite() {
@@ -1292,13 +1792,20 @@ ensure_instance_for_suite() {
 terminate_instance() {
     load_state
     ensure_aws_identity
-    local region instance_id="${1:-${STATE_INSTANCE_ID:-}}" state
+    local region explicit_instance_id="${1:-}" instance_id state
+    local -a target_instance_ids=()
     region="$(resolve_region)"
-    if [[ -z "$instance_id" || "$instance_id" == "None" ]]; then
-        read -r instance_id state _ <<<"$(lookup_any_tagged_instance "$region")"
-    else
-        read -r _ state _ <<<"$(describe_instance "$region" "$instance_id")"
+    if [[ -z "$explicit_instance_id" || "$explicit_instance_id" == "None" ]]; then
+        read -r -a target_instance_ids <<<"$(lookup_target_instance_ids "$region")"
+        if [[ "${#target_instance_ids[@]}" -gt 0 ]]; then
+            aws_cmd "$region" ec2 terminate-instances --instance-ids "${target_instance_ids[@]}" >/dev/null
+            aws_cmd "$region" ec2 wait instance-terminated --instance-ids "${target_instance_ids[@]}"
+        fi
+        rm -rf "$SHARED_STATE_DIR" "$TARGET_CACHE_DIR/run-state"
+        return 0
     fi
+    instance_id="$explicit_instance_id"
+    read -r _ state _ <<<"$(describe_instance "$region" "$instance_id")"
     [[ -n "$instance_id" && "$instance_id" != "None" ]] || die "terminate requires an instance ID"
     case "$state" in
         terminated|shutting-down|"") ;;
@@ -1315,12 +1822,10 @@ terminate_instance() {
 main() {
     case "$ACTION" in
         run)
-            ensure_instance_for_suite
-            prepare_local_inputs
-            run_remote_suite "$STATE_INSTANCE_IP"
+            run_suite_action
             ;;
         terminate)
-            terminate_instance "${STATE_INSTANCE_ID:-}"
+            terminate_instance
             ;;
         *)
             die "unsupported aws executor action: ${ACTION}"

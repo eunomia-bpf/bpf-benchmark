@@ -252,6 +252,8 @@ run_contract_write_manifest() {
     local run_aws_subnet_id=""
     local run_aws_region=""
     local run_aws_profile=""
+    local run_remote_swap_size_gb=""
+    local run_aws_instance_mode=""
     local run_bench_samples=""
     local run_bench_warmups=""
     local run_bench_inner_repeat=""
@@ -267,25 +269,36 @@ run_contract_write_manifest() {
     local run_vm_machine_arch=""
     local run_vm_cpus=""
     local run_vm_mem=""
-    local run_host_python_bin=""
+    local run_host_python_bin="$(run_contract_env_or_default PYTHON python3)"
     local run_vm_kernel_image=""
     local run_vm_timeout_seconds=""
     local run_remote_python_bin=""
     local run_remote_python_modules="PyYAML"
     local run_guest_package_manager=""
+    local run_needs_runner_binary="0"
+    local run_needs_daemon_binary="0"
+    local run_needs_kinsn_modules="0"
     local run_test_fuzz_rounds=""
     local run_test_scx_prog_show_race_mode=""
     local run_test_scx_prog_show_race_iterations=""
     local run_test_scx_prog_show_race_load_timeout=""
     local run_test_scx_prog_show_race_skip_probe=""
+    local run_upstream_selftest_exec_mode=""
+    local run_upstream_selftest_llvm_suffix=""
+    local run_runner_binary_mode=""
     local -a run_corpus_argv=()
     local -a run_e2e_argv=()
     local run_suite_entrypoint="runner/scripts/suite_entrypoint.sh"
 
     run_contract_load_target "$target_name"
     run_contract_load_suite "$suite_name"
+    run_upstream_selftest_exec_mode="${TARGET_UPSTREAM_SELFTEST_EXEC_MODE:-bundled}"
+    run_runner_binary_mode="${TARGET_RUNNER_BINARY_MODE_DEFAULT:-bundled}"
     run_needs_sched_ext="${SUITE_NEEDS_SCHED_EXT:-0}"
     run_needs_llvmbpf="${SUITE_NEEDS_LLVMBPF:-0}"
+    run_needs_runner_binary="${SUITE_NEEDS_RUNNER_BINARY:-0}"
+    run_needs_daemon_binary="${SUITE_NEEDS_DAEMON_BINARY:-0}"
+    run_needs_kinsn_modules="${SUITE_NEEDS_KINSN_MODULES:-0}"
     run_benchmark_repos="${SUITE_DEFAULT_REPOS:-}"
     run_native_repos="${SUITE_DEFAULT_NATIVE_REPOS:-}"
     run_scx_packages="${SUITE_DEFAULT_SCX_PACKAGES:-}"
@@ -298,6 +311,10 @@ run_contract_write_manifest() {
     if [[ "${TARGET_EXECUTOR:-}" == "aws-ssh" ]]; then
         local aws_env_prefix="${TARGET_AWS_ENV_PREFIX:-}"
         [[ -n "$aws_env_prefix" ]] || run_contract_die "AWS target ${target_name} is missing TARGET_AWS_ENV_PREFIX"
+        case "${SUITE_VM_CLASS:-}" in
+            benchmark) run_aws_instance_mode="dedicated" ;;
+            *) run_aws_instance_mode="shared" ;;
+        esac
         run_name_tag="$(run_contract_prefixed_env_or_default "$aws_env_prefix" NAME_TAG "${TARGET_NAME_TAG_DEFAULT:-}")"
         run_instance_type="$(run_contract_prefixed_env_or_default "$aws_env_prefix" INSTANCE_TYPE "${TARGET_INSTANCE_TYPE_DEFAULT:-}")"
         run_remote_user="$(run_contract_prefixed_env_or_default "$aws_env_prefix" REMOTE_USER "${TARGET_REMOTE_USER_DEFAULT:-}")"
@@ -306,6 +323,7 @@ run_contract_write_manifest() {
         run_ami_param="$(run_contract_prefixed_env_or_default "$aws_env_prefix" AMI_PARAM "${TARGET_AMI_PARAM_DEFAULT:-}")"
         run_ami_id="$(run_contract_prefixed_env_or_default "$aws_env_prefix" AMI_ID)"
         run_root_volume_gb="$(run_contract_prefixed_env_or_default "$aws_env_prefix" ROOT_VOLUME_GB "${TARGET_ROOT_VOLUME_GB_DEFAULT:-}")"
+        run_remote_swap_size_gb="$(run_contract_prefixed_env_or_default "$aws_env_prefix" REMOTE_SWAP_SIZE_GB "${TARGET_REMOTE_SWAP_SIZE_GB_DEFAULT:-8}")"
         run_test_mode="$(printf '%s' "$(run_contract_prefixed_env_or_default "$aws_env_prefix" TEST_MODE test)" | tr '[:upper:]' '[:lower:]')"
         run_bench_samples="$(run_contract_prefixed_env_or_default "$aws_env_prefix" BENCH_SAMPLES 1)"
         run_bench_warmups="$(run_contract_prefixed_env_or_default "$aws_env_prefix" BENCH_WARMUPS 0)"
@@ -383,6 +401,7 @@ run_contract_write_manifest() {
             run_test_scx_prog_show_race_iterations="$(run_contract_env_or_default SCX_PROG_SHOW_RACE_ITERATIONS "${SUITE_DEFAULT_SCX_PROG_SHOW_RACE_ITERATIONS:-20}")"
             run_test_scx_prog_show_race_load_timeout="$(run_contract_env_or_default SCX_PROG_SHOW_RACE_LOAD_TIMEOUT "${SUITE_DEFAULT_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT:-20}")"
             run_test_scx_prog_show_race_skip_probe="$(run_contract_env_or_default SCX_PROG_SHOW_RACE_SKIP_PROBE "${SUITE_DEFAULT_SCX_PROG_SHOW_RACE_SKIP_PROBE:-0}")"
+            run_upstream_selftest_llvm_suffix="$(run_contract_env_or_default UPSTREAM_SELFTEST_LLVM_SUFFIX "${SUITE_DEFAULT_UPSTREAM_SELFTEST_LLVM_SUFFIX:--20}")"
             ;;
         micro)
             run_vm_timeout_seconds="$(run_contract_env_or_default VM_MICRO_TIMEOUT "$run_vm_timeout_seconds")"
@@ -395,6 +414,14 @@ run_contract_write_manifest() {
             ;;
     esac
     run_contract_validate_test_mode "$run_test_mode"
+    case "$run_upstream_selftest_exec_mode" in
+        bundled|remote-native) ;;
+        *) run_contract_die "unsupported upstream selftest execution mode: ${run_upstream_selftest_exec_mode}" ;;
+    esac
+    case "$run_runner_binary_mode" in
+        bundled|remote-native) ;;
+        *) run_contract_die "unsupported runner binary mode: ${run_runner_binary_mode}" ;;
+    esac
     [[ -n "$run_remote_python_bin" ]] || run_contract_die "suite ${suite_name} is missing remote python contract"
     [[ -n "$run_bpftool_bin" ]] || run_contract_die "suite ${suite_name} is missing RUN_BPFTOOL_BIN"
     run_contract_parse_shell_words "$run_corpus_args" run_corpus_argv
@@ -405,6 +432,21 @@ run_contract_write_manifest() {
             run_benchmark_repos=""
             run_native_repos=""
             run_workload_tools=""
+            case "$run_test_mode" in
+                selftest)
+                    run_scx_packages=""
+                    run_needs_sched_ext="0"
+                    ;;
+                negative)
+                    run_needs_daemon_binary="0"
+                    run_needs_kinsn_modules="0"
+                    ;;
+                test)
+                    ;;
+                *)
+                    run_contract_die "unsupported test mode: ${run_test_mode}"
+                    ;;
+            esac
             ;;
         micro)
             run_benchmark_repos=""
@@ -460,6 +502,10 @@ RUN_SUITE_NAME=$(printf '%q' "$suite_name")
 RUN_SUITE_NEEDS_RUNTIME_BTF=$(printf '%q' "${SUITE_NEEDS_RUNTIME_BTF:-0}")
 RUN_SUITE_NEEDS_SCHED_EXT=$(printf '%q' "$run_needs_sched_ext")
 RUN_SUITE_NEEDS_LLVMBPF=$(printf '%q' "$run_needs_llvmbpf")
+RUN_NEEDS_RUNNER_BINARY=$(printf '%q' "$run_needs_runner_binary")
+RUN_RUNNER_BINARY_MODE=$(printf '%q' "$run_runner_binary_mode")
+RUN_NEEDS_DAEMON_BINARY=$(printf '%q' "$run_needs_daemon_binary")
+RUN_NEEDS_KINSN_MODULES=$(printf '%q' "$run_needs_kinsn_modules")
 RUN_NAME_TAG=$(printf '%q' "$run_name_tag")
 RUN_INSTANCE_TYPE=$(printf '%q' "$run_instance_type")
 RUN_REMOTE_USER=$(printf '%q' "$run_remote_user")
@@ -468,12 +514,14 @@ RUN_REMOTE_KERNEL_STAGE_DIR=$(printf '%q' "$run_remote_kernel_stage_dir")
 RUN_AMI_PARAM=$(printf '%q' "$run_ami_param")
 RUN_AMI_ID=$(printf '%q' "$run_ami_id")
 RUN_ROOT_VOLUME_GB=$(printf '%q' "$run_root_volume_gb")
+RUN_REMOTE_SWAP_SIZE_GB=$(printf '%q' "$run_remote_swap_size_gb")
 RUN_AWS_KEY_NAME=$(printf '%q' "$run_aws_key_name")
 RUN_AWS_KEY_PATH=$(printf '%q' "$run_aws_key_path")
 RUN_AWS_SECURITY_GROUP_ID=$(printf '%q' "$run_aws_security_group_id")
 RUN_AWS_SUBNET_ID=$(printf '%q' "$run_aws_subnet_id")
 RUN_AWS_REGION=$(printf '%q' "$run_aws_region")
 RUN_AWS_PROFILE=$(printf '%q' "$run_aws_profile")
+RUN_AWS_INSTANCE_MODE=$(printf '%q' "$run_aws_instance_mode")
 RUN_VM_BACKEND=$(printf '%q' "$run_vm_backend")
 RUN_VM_EXECUTABLE=$(printf '%q' "$run_vm_executable")
 RUN_VM_LOCK_SCOPE=$(printf '%q' "$run_vm_lock_scope")
@@ -494,6 +542,8 @@ RUN_TEST_SCX_PROG_SHOW_RACE_MODE=$(printf '%q' "$run_test_scx_prog_show_race_mod
 RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS=$(printf '%q' "$run_test_scx_prog_show_race_iterations")
 RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT=$(printf '%q' "$run_test_scx_prog_show_race_load_timeout")
 RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE=$(printf '%q' "$run_test_scx_prog_show_race_skip_probe")
+RUN_UPSTREAM_SELFTEST_EXEC_MODE=$(printf '%q' "$run_upstream_selftest_exec_mode")
+RUN_UPSTREAM_SELFTEST_LLVM_SUFFIX=$(printf '%q' "$run_upstream_selftest_llvm_suffix")
 RUN_BENCH_SAMPLES=$(printf '%q' "$run_bench_samples")
 RUN_BENCH_WARMUPS=$(printf '%q' "$run_bench_warmups")
 RUN_BENCH_INNER_REPEAT=$(printf '%q' "$run_bench_inner_repeat")

@@ -3,9 +3,10 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 RUNNER_DIR="$ROOT_DIR/runner"
-REPO_ROOT="$ROOT_DIR"
 
-MANIFEST_PATH="${1:?usage: kvm_executor.sh <manifest>}"
+MANIFEST_PATH="${1:?usage: kvm_executor.sh <manifest> <stage_root> <stage_manifest>}"
+RUN_LOCAL_STAGE_ROOT="${2:?usage: kvm_executor.sh <manifest> <stage_root> <stage_manifest>}"
+RUN_LOCAL_STAGE_MANIFEST="${3:?usage: kvm_executor.sh <manifest> <stage_root> <stage_manifest>}"
 [[ -f "$MANIFEST_PATH" ]] || {
     printf '[kvm-executor][ERROR] manifest is missing: %s\n' "$MANIFEST_PATH" >&2
     exit 1
@@ -26,13 +27,17 @@ die() {
 [[ -n "${RUN_VM_KERNEL_IMAGE:-}" ]] || die "manifest KVM kernel image is empty for suite ${RUN_SUITE_NAME}"
 [[ -n "${RUN_VM_TIMEOUT_SECONDS:-}" ]] || die "manifest KVM timeout is empty for suite ${RUN_SUITE_NAME}"
 [[ -n "${RUN_SUITE_ENTRYPOINT:-}" ]] || die "manifest suite entrypoint is empty"
+[[ -d "${RUN_LOCAL_STAGE_ROOT}" ]] || die "staged KVM workspace is missing: ${RUN_LOCAL_STAGE_ROOT}"
+[[ -f "${RUN_LOCAL_STAGE_MANIFEST}" ]] || die "staged KVM manifest is missing: ${RUN_LOCAL_STAGE_MANIFEST}"
 
 suite_command() {
+    local workspace_root="${RUN_LOCAL_STAGE_ROOT}"
+    local workspace_manifest="${RUN_LOCAL_STAGE_MANIFEST}"
     cat <<EOF
-cd "$REPO_ROOT" && \
-bash "$REPO_ROOT/runner/scripts/install_guest_prereqs.sh" "$REPO_ROOT" "$MANIFEST_PATH" && \
-bash "$REPO_ROOT/runner/scripts/validate_guest_prereqs.sh" "$REPO_ROOT" "$MANIFEST_PATH" && \
-bash "$REPO_ROOT/${RUN_SUITE_ENTRYPOINT}" "$REPO_ROOT" "$MANIFEST_PATH"
+cd "$workspace_root" && \
+bash "$workspace_root/runner/scripts/install_guest_prereqs.sh" "$workspace_root" "$workspace_manifest" && \
+bash "$workspace_root/runner/scripts/validate_guest_prereqs.sh" "$workspace_root" "$workspace_manifest" && \
+bash "$workspace_root/${RUN_SUITE_ENTRYPOINT}" "$workspace_root" "$workspace_manifest"
 EOF
 }
 
@@ -46,6 +51,8 @@ cmd=(
     --action "vm-${RUN_SUITE_NAME}"
     --kernel-image "${RUN_VM_KERNEL_IMAGE}"
     --timeout "${RUN_VM_TIMEOUT_SECONDS}"
+    --cwd "${RUN_LOCAL_STAGE_ROOT}"
+    --rwdir "${RUN_LOCAL_STAGE_ROOT}"
     --command "$(suite_command)"
 )
 

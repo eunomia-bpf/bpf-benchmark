@@ -28,20 +28,24 @@ def parse_args() -> argparse.Namespace:
         help="Backend executable path (for example a custom vng binary).",
     )
     parser.add_argument("--timeout", type=int, default=3600, help="End-to-end timeout in seconds.")
+    parser.add_argument("--cwd", help="Guest-visible working directory to mount and enter before running the command.")
     parser.add_argument("--network", action="append", default=[], help="Repeatable VM network configuration.")
+    parser.add_argument("--rwdir", action="append", default=[], help="Extra writable directories to expose inside the guest.")
     parser.add_argument("--command", required=True, help="Shell command to run inside the guest.")
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    guest_script = write_guest_script([args.command], nofile=args.nofile)
+    guest_script = write_guest_script([args.command], nofile=args.nofile, initial_cwd=args.cwd)
     completed = run_in_vm(
         args.kernel_image,
         guest_script,
         args.cpus,
         args.mem,
         args.timeout,
+        cwd=args.cwd,
+        rwdirs=args.rwdir or (),
         vm_executable=args.vm_executable,
         action=args.action,
         machine_backend=args.vm_backend,

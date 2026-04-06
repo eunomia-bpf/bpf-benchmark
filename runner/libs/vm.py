@@ -7,7 +7,7 @@ import tempfile
 from pathlib import Path
 from typing import Sequence
 
-from . import DEFAULT_VENV_ACTIVATE, ROOT_DIR, docs_tmp_dir, scratch_date_stamp
+from . import ROOT_DIR, docs_tmp_dir, scratch_date_stamp
 
 
 DEFAULT_GUEST_NOFILE = 65536
@@ -17,6 +17,7 @@ def write_guest_script(
     commands: Sequence[str | Sequence[str]],
     *,
     nofile: int | None = None,
+    initial_cwd: str | Path | None = None,
 ) -> Path:
     scratch_stamp = scratch_date_stamp()
     script_dir = docs_tmp_dir("guest-scripts", stamp=scratch_stamp)
@@ -31,14 +32,13 @@ def write_guest_script(
     # Python's tempfile module (and any subprocesses) can create temp files even
     # when the VM's /tmp is read-only (virtme-ng only mounts specific --rwdir paths).
     vm_tmp_dir = docs_tmp_dir("vm-tmp", stamp=scratch_stamp)
+    resolved_initial_cwd = Path(initial_cwd).resolve() if initial_cwd is not None else ROOT_DIR
     with handle:
         handle.write("#!/bin/bash\nset -eu\n")
-        handle.write(f"cd {shlex.quote(str(ROOT_DIR))}\n")
+        handle.write(f"cd {shlex.quote(str(resolved_initial_cwd))}\n")
         handle.write('export PATH="/usr/local/sbin:$PATH"\n')
         handle.write(f"mkdir -p {shlex.quote(str(vm_tmp_dir))}\n")
         handle.write(f"export TMPDIR={shlex.quote(str(vm_tmp_dir))}\n")
-        if DEFAULT_VENV_ACTIVATE.exists():
-            handle.write(f". {shlex.quote(str(DEFAULT_VENV_ACTIVATE))}\n")
         if nofile is not None:
             handle.write(f"ulimit -HSn {int(nofile)}\n")
         for command in commands:
@@ -86,6 +86,7 @@ def build_vng_command(
     machine_name: str,
     machine_arch: str,
     networks: Sequence[str] = (),
+    cwd: str | Path | None = None,
     rwdirs: Sequence[str | Path] = (),
 ) -> list[str]:
     resolved_backend = str(machine_backend).strip()
@@ -107,20 +108,21 @@ def build_vng_command(
     resolved_cpus = max(1, int(cpus if cpus is not None else 1))
     resolved_mem = str(mem if mem is not None else "4G")
     kernel = Path(kernel_path).resolve()
+    resolved_cwd = Path(cwd).resolve() if cwd is not None else ROOT_DIR
 
     command = [
         vng_path,
         "--run",
         str(kernel),
         "--cwd",
-        str(ROOT_DIR),
+        str(resolved_cwd),
         "--disable-monitor",
         "--cpus",
         str(resolved_cpus),
         "--mem",
         resolved_mem,
     ]
-    rwdir_values = [ROOT_DIR / "docs" / "tmp", ROOT_DIR]
+    rwdir_values = [ROOT_DIR / "docs" / "tmp", resolved_cwd]
     rwdir_values.extend(Path(value).resolve() for value in rwdirs)
     seen: set[Path] = set()
     for rwdir in rwdir_values:
@@ -148,6 +150,8 @@ def run_in_vm(
     mem: str | None,
     timeout: int,
     *,
+    cwd: str | Path | None = None,
+    rwdirs: Sequence[str | Path] = (),
     vm_executable: str | Path,
     action: str | None = None,
     machine_backend: str,
@@ -170,6 +174,8 @@ def run_in_vm(
         machine_name=machine_name,
         machine_arch=machine_arch,
         networks=networks,
+        cwd=cwd,
+        rwdirs=rwdirs,
     )
     try:
         return subprocess.run(
