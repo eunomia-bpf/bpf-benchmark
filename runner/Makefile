@@ -77,7 +77,7 @@ UPSTREAM_SELFTEST_PKGCONFIG_LIBDIR ?=
 
 .PHONY: all micro_exec vendor_libbpf vendor_bpftool \
 	corpus-fetch corpus-build corpus-build-native \
-	corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx \
+	corpus-build-bcc corpus-build-scx \
 	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
 	scx-artifacts \
 	kernel-image unittest-build negative-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary daemon-tests \
@@ -103,18 +103,6 @@ corpus-build-native: corpus-fetch
 corpus-build-bcc:
 	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo bcc
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo bcc
-
-corpus-build-libbpf-bootstrap:
-	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo libbpf-bootstrap
-	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo libbpf-bootstrap
-
-corpus-build-xdp-tools:
-	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo xdp-tools
-	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo xdp-tools
-
-corpus-build-xdp-tutorial:
-	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo xdp-tutorial --repo xdp-tools
-	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo xdp-tutorial
 
 corpus-build-scx:
 	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo scx

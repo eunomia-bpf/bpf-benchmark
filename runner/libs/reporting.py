@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import math
 import random
-import statistics
 from dataclasses import dataclass
 from typing import Mapping, Sequence
 
 from micro.catalog import ManifestSpec, load_manifest_from_results
+from runner.libs.statistics import geometric_mean
 
 
 PRIMARY_RUNTIME = "llvmbpf"
@@ -128,13 +128,6 @@ def percentile(sorted_values: list[float], probability: float) -> float:
         return sorted_values[lower]
     weight = rank - lower
     return sorted_values[lower] * (1.0 - weight) + sorted_values[upper] * weight
-
-
-def geometric_mean(values: list[float]) -> float | None:
-    filtered = [value for value in values if value > 0.0]
-    if not filtered:
-        return None
-    return math.exp(sum(math.log(value) for value in filtered) / len(filtered))
 
 
 def bootstrap_geometric_mean_ci(
