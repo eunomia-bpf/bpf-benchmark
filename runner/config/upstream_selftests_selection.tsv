@@ -1,0 +1,9 @@
+# kind	value	reason
+make_target	test_verifier	canonical upstream verifier runner
+make_target	test_progs	canonical upstream BPF test runner
+source_exclude	progs/bpf_smc.c	canonical kernels do not provide the bpf_smc contract required to build this upstream case
+source_exclude	prog_tests/test_bpf_smc.c	pairs with progs/bpf_smc.c and must be excluded with it
+source_exclude	progs/bpf_qdisc_fifo.c	canonical kernels do not yet expose the qdisc kfunc contract required by this upstream case
+source_exclude	progs/bpf_qdisc_fq.c	canonical kernels do not yet expose the qdisc kfunc contract required by this upstream case
+source_exclude	progs/bpf_qdisc_fail__incompl_ops.c	canonical kernels do not yet expose the qdisc kfunc contract required by this upstream case
+source_exclude	prog_tests/bpf_qdisc.c	pairs with the qdisc BPF program sources and must be excluded with them
