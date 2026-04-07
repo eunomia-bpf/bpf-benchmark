@@ -145,11 +145,19 @@ fn install_empty_map(map_id: u32, map_type: u32, value_size: u32, max_entries: u
     // Array/percpu-array maps return zeroes for any valid key in the kernel,
     // so pre-populate zero-filled entries for all keys.
     let mut values = HashMap::new();
-    let is_array = map_type == 2 || map_type == BPF_MAP_TYPE_PERCPU_ARRAY;
+    let is_array = map_type == 2;
+    let is_percpu_array = map_type == BPF_MAP_TYPE_PERCPU_ARRAY;
     if is_array {
         let zero_value = vec![0u8; value_size as usize];
         for key_idx in 0..max_entries {
             values.insert(key_idx.to_le_bytes().to_vec(), zero_value.clone());
+        }
+    } else if is_percpu_array {
+        // PERCPU_ARRAY: kernel returns num_cpus * round_up_8(value_size) blob.
+        // Use 2 CPU slots for tests.
+        let zero_blob = make_percpu_blob(&vec![0u8; value_size as usize], 2);
+        for key_idx in 0..max_entries {
+            values.insert(key_idx.to_le_bytes().to_vec(), zero_blob.clone());
         }
     }
 
@@ -168,7 +176,7 @@ fn install_percpu_array_map(
     value_size: u32,
     max_entries: u32,
     frozen: bool,
-    values: HashMap<Vec<u8>, Vec<u8>>,
+    mut values: HashMap<Vec<u8>, Vec<u8>>,
 ) {
     let mut info = BpfMapInfo::default();
     info.map_type = BPF_MAP_TYPE_PERCPU_ARRAY;
@@ -176,6 +184,13 @@ fn install_percpu_array_map(
     info.key_size = 4;
     info.value_size = value_size;
     info.max_entries = max_entries;
+
+    // PERCPU_ARRAY: pre-populate missing keys with zero-filled percpu blobs.
+    let zero_blob = make_percpu_blob(&vec![0u8; value_size as usize], 2);
+    for key_idx in 0..max_entries {
+        let key = key_idx.to_le_bytes().to_vec();
+        values.entry(key).or_insert_with(|| zero_blob.clone());
+    }
 
     install_mock_map(
         map_id,

@@ -103,8 +103,10 @@ pub fn fixture_path(rel_path: &str) -> PathBuf {
 }
 
 pub fn repo_path(rel_path: &str) -> PathBuf {
+    // CARGO_MANIFEST_DIR = bpfopt-suite/crates/bpfopt-core
+    // repo root = bpfopt-suite/../../  (i.e. bpf-benchmark/)
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("..")
+        .join("../../..")
         .join(rel_path)
 }
 
