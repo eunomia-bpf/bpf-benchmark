@@ -1,0 +1,16 @@
+[package]
+name = "bpfopt"
+version = "0.1.0"
+edition = "2021"
+description = "BPF bytecode optimizer CLI"
+
+[[bin]]
+name = "bpfopt"
+path = "src/main.rs"
+
+[dependencies]
+bpfopt-core = { path = "../bpfopt-core" }
+anyhow.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true

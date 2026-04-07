@@ -1,0 +1,17 @@
+[package]
+name = "bpfrejit-daemon"
+version = "0.1.0"
+edition = "2021"
+description = "BpfReJIT watch daemon — triggers external optimization on new BPF programs"
+
+[[bin]]
+name = "bpfrejit-daemon"
+path = "src/main.rs"
+
+[dependencies]
+kernel-sys = { path = "../kernel-sys" }
+anyhow.workspace = true
+clap.workspace = true
+libc.workspace = true
+serde.workspace = true
+serde_json.workspace = true
