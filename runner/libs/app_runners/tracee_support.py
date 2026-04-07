@@ -17,7 +17,7 @@ from urllib.request import urlopen
 
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, tail_text, which
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
-from ..metrics import sample_bpf_stats
+from ..bpf_stats import sample_bpf_stats
 from ..process_fd import dup_fd_from_process
 from ..workload import (
     WorkloadResult,

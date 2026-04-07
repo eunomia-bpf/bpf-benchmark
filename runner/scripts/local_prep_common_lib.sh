@@ -165,6 +165,22 @@ local_prep_stage_x86_workload_tools() {
     root_output_ref="$output_root"
 }
 
+local_prep_stage_matching_micro_sidecars() {
+    local output_dir="$1"
+    local source_dir="$2"
+    local generated_file program_name source_name staged_name
+    [[ -d "$output_dir" ]] || return 0
+    [[ -d "$source_dir" ]] || return 0
+    while IFS= read -r -d '' generated_file; do
+        program_name="$(basename "$generated_file" .bpf.o)"
+        for source_name in directive.bin policy.bin; do
+            [[ -f "$source_dir/${program_name}.${source_name}" ]] || continue
+            staged_name="${program_name}.${source_name}"
+            cp -a "$source_dir/${program_name}.${source_name}" "$output_dir/$staged_name"
+        done
+    done < <(find "$output_dir" -maxdepth 1 -type f -name '*.bpf.o' -print0)
+}
+
 local_prep_stage_katran_source_bundle() {
     local project_root="$1"
     local katran_input_root="$2"

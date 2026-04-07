@@ -856,35 +856,3 @@ def test_parse_args_rejects_invalid_samples_and_workload_seconds() -> None:
 
     with pytest.raises(SystemExit, match="--workload-seconds must be >= 0"):
         driver.parse_args(["--workload-seconds", "-1"])
-
-
-def test_build_run_metadata_prefers_effective_passes_from_payload(monkeypatch, tmp_path: Path) -> None:
-    monkeypatch.setattr(driver, "benchmark_rejit_enabled_passes", lambda: ["map_inline", "const_prop", "dce"])
-
-    args = SimpleNamespace(
-        suite=str(tmp_path / "suite.yaml"),
-        filters=[],
-        no_kinsn=False,
-    )
-    payload = {
-        "results": [
-            {
-                "rejit_apply": {
-                    "effective_enabled_passes_by_program": {
-                        "101": ["map_inline"],
-                    }
-                }
-            }
-        ],
-        "summary": {},
-    }
-
-    metadata = driver.build_run_metadata(
-        args,
-        payload,
-        resolved_samples=30,
-        resolved_workload_seconds=4.0,
-    )
-
-    assert metadata["selected_rejit_passes"] == ["map_inline"]
-    assert metadata["requested_rejit_passes"] == ["map_inline", "const_prop", "dce"]

@@ -8,6 +8,8 @@ from contextlib import contextmanager
 from functools import lru_cache
 from typing import Any
 
+from . import resolve_bpftool_binary, run_json_command
+
 BPF_STATS_RUN_TIME = 0
 BPF_TAG_SIZE = 8
 BPF_OBJ_NAME_LEN = 16
@@ -69,25 +71,36 @@ def _libbpf() -> ctypes.CDLL:
                 path = candidate
                 break
     if not path:
-        path = ctypes.util.find_library("bpf")
-    if path is None or not str(path).strip():
-        raise RuntimeError("libbpf could not be found in the current environment")
+        path = ctypes.util.find_library("bpf") or "libbpf.so.1"
     lib = ctypes.CDLL(path, use_errno=True)
-    lib.bpf_enable_stats.argtypes = [ctypes.c_int]
-    lib.bpf_enable_stats.restype = ctypes.c_int
+    required_symbols = {
+        "bpf_enable_stats": (
+            [ctypes.c_int],
+            ctypes.c_int,
+        ),
+        "bpf_prog_get_fd_by_id": (
+            [ctypes.c_uint32],
+            ctypes.c_int,
+        ),
+        "bpf_prog_get_info_by_fd": (
+            [
+                ctypes.c_int,
+                ctypes.POINTER(BpfProgInfo),
+                ctypes.POINTER(ctypes.c_uint32),
+            ],
+            ctypes.c_int,
+        ),
+    }
+    for symbol, (argtypes, restype) in required_symbols.items():
+        try:
+            func = getattr(lib, symbol)
+        except AttributeError as exc:
+            raise RuntimeError(f"libbpf is missing required symbol {symbol} from {path}") from exc
+        func.argtypes = argtypes
+        func.restype = restype
     if hasattr(lib, "bpf_prog_get_next_id"):
         lib.bpf_prog_get_next_id.argtypes = [ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32)]
         lib.bpf_prog_get_next_id.restype = ctypes.c_int
-    if hasattr(lib, "bpf_prog_get_fd_by_id"):
-        lib.bpf_prog_get_fd_by_id.argtypes = [ctypes.c_uint32]
-        lib.bpf_prog_get_fd_by_id.restype = ctypes.c_int
-    if hasattr(lib, "bpf_prog_get_info_by_fd"):
-        lib.bpf_prog_get_info_by_fd.argtypes = [
-            ctypes.c_int,
-            ctypes.POINTER(BpfProgInfo),
-            ctypes.POINTER(ctypes.c_uint32),
-        ]
-        lib.bpf_prog_get_info_by_fd.restype = ctypes.c_int
     return lib
 
 
@@ -187,8 +200,85 @@ def read_program_stats(prog_ids: list[int] | tuple[int, ...]) -> dict[int, dict[
     return stats
 
 
+def sample_bpf_stats(
+    prog_ids: list[int] | tuple[int, ...],
+    *,
+    prog_fds: dict[int, int] | None = None,
+) -> dict[int, dict[str, object]]:
+    if not prog_ids:
+        return {}
+
+    wanted = {int(prog_id) for prog_id in prog_ids if int(prog_id) > 0}
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
+    if not isinstance(payload, list):
+        raise RuntimeError("bpftool prog show returned unexpected payload")
+
+    stats: dict[int, dict[str, object]] = {}
+    errors: list[str] = []
+    for record in payload:
+        if not isinstance(record, dict):
+            continue
+        prog_id = int(record.get("id", -1))
+        if prog_id not in wanted:
+            continue
+        stats[prog_id] = {
+            "id": prog_id,
+            "name": str(record.get("name", "")),
+            "type": str(record.get("type", "")),
+            "run_cnt": int(record.get("run_cnt", 0) or 0),
+            "run_time_ns": int(record.get("run_time_ns", 0) or 0),
+            "bytes_jited": int(record.get("bytes_jited", 0) or 0),
+            "bytes_xlated": int(record.get("bytes_xlated", 0) or 0),
+        }
+
+    for prog_id in wanted:
+        fd = None
+        if prog_fds and int(prog_id) in prog_fds:
+            fd = os.dup(int(prog_fds[int(prog_id)]))
+        else:
+            fd = _prog_fd_by_id(int(prog_id))
+        if fd is None:
+            errors.append(f"prog_id={prog_id}: failed to resolve program FD")
+            continue
+        try:
+            info = _prog_info_from_fd(fd)
+            if info is None:
+                errors.append(f"prog_id={prog_id}: failed to read program info by FD")
+                continue
+            entry = stats.setdefault(
+                int(prog_id),
+                {
+                    "id": int(prog_id),
+                    "name": "",
+                    "type": "",
+                    "run_cnt": 0,
+                    "run_time_ns": 0,
+                    "bytes_jited": 0,
+                    "bytes_xlated": 0,
+                },
+            )
+            entry["id"] = int(info.id)
+            entry["name"] = bytes(info.name).split(b"\0", 1)[0].decode("utf-8", "replace")
+            entry["run_cnt"] = int(info.run_cnt)
+            entry["run_time_ns"] = int(info.run_time_ns)
+            entry["bytes_jited"] = int(info.jited_prog_len)
+            entry["bytes_xlated"] = int(info.xlated_prog_len)
+        finally:
+            os.close(fd)
+
+    missing = sorted(int(prog_id) for prog_id in wanted if int(prog_id) not in stats)
+    if missing:
+        errors.append(
+            "missing stats for requested prog_ids: " + ", ".join(str(prog_id) for prog_id in missing)
+        )
+    if errors:
+        raise RuntimeError("failed to sample BPF stats: " + "; ".join(errors))
+    return stats
+
+
 __all__ = [
     "enable_bpf_stats",
     "list_program_ids",
     "read_program_stats",
+    "sample_bpf_stats",
 ]

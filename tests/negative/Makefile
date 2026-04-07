@@ -24,6 +24,9 @@ run: all
 	@echo "=== Running adversarial_rejit ==="
 	$(BUILD_DIR)/adversarial_rejit
 	@echo ""
+	@echo "=== Running scx_bad_rejit_replay ==="
+	$(BUILD_DIR)/scx_bad_rejit_replay
+	@echo ""
 	@echo "=== Running fuzz_rejit (1000 rounds) ==="
 	$(BUILD_DIR)/fuzz_rejit 1000
 

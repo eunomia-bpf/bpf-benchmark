@@ -504,14 +504,6 @@ def build_run_metadata(
     if selected_rejit_passes != requested_rejit_passes:
         metadata["requested_rejit_passes"] = list(requested_rejit_passes)
     metadata.update(current_process_identity())
-    if isinstance(payload, dict):
-        payload_tool_passes = payload.get("tool_rejit_passes")
-        if isinstance(payload_tool_passes, dict):
-            metadata["tool_rejit_passes"] = {
-                str(name): [str(pass_name) for pass_name in passes]
-                for name, passes in payload_tool_passes.items()
-                if isinstance(passes, (list, tuple))
-            }
     return metadata
 
 

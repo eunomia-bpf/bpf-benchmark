@@ -22,8 +22,40 @@ die() {
     exit 1
 }
 
+resolve_workspace_contract_path() {
+    local path="$1"
+    if [[ "$path" = /* ]]; then
+        printf '%s\n' "$path"
+    else
+        printf '%s\n' "$WORKSPACE/$path"
+    fi
+}
+
+resolve_remote_workload_tool_bin_contract() {
+    [[ -n "${RUN_WORKLOAD_TOOLS_CSV:-}" ]] || {
+        printf '%s\n' ""
+        return 0
+    }
+    [[ -n "${RUN_REMOTE_WORKLOAD_TOOL_BIN:-}" ]] \
+        || die "manifest remote workload-tool bin is missing while workload tools are requested"
+    printf '%s\n' "$(resolve_workspace_contract_path "$RUN_REMOTE_WORKLOAD_TOOL_BIN")"
+}
+
+REMOTE_WORKLOAD_TOOL_BIN="$(resolve_remote_workload_tool_bin_contract)"
+if [[ -n "$REMOTE_WORKLOAD_TOOL_BIN" && -d "$REMOTE_WORKLOAD_TOOL_BIN" ]]; then
+    export PATH="$REMOTE_WORKLOAD_TOOL_BIN:$PATH"
+fi
+
 require_cmd() {
     command -v "$1" >/dev/null 2>&1 || die "required guest command is missing: $1"
+}
+
+workload_tool_is_bundled() {
+    local tool="$1"
+    case ",${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}," in
+        *,"${tool}",*) return 0 ;;
+    esac
+    return 1
 }
 
 main() {
@@ -33,6 +65,9 @@ main() {
     prereq_collect_required_commands required_commands
     for command_name in "${required_commands[@]}"; do
         [[ -n "$command_name" ]] || continue
+        if workload_tool_is_bundled "$command_name" && [[ ! -x "${REMOTE_WORKLOAD_TOOL_BIN}/${command_name}" ]]; then
+            die "required bundled workload tool is missing from the guest tool bin: ${command_name}"
+        fi
         require_cmd "$command_name"
     done
     IFS=',' read -r -a _run_python_packages <<<"${RUN_REMOTE_PYTHON_MODULES_CSV:-}"

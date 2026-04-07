@@ -17,15 +17,34 @@ MANIFEST_PATH="${2:?usage: install_guest_prereqs.sh <workspace> <manifest_path>}
 source "$MANIFEST_PATH"
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/prereq_contract.sh"
 
-REMOTE_WORKLOAD_TOOL_BIN="${RUN_REMOTE_WORKLOAD_TOOL_BIN:-$WORKSPACE/.cache/workload-tools/bin}"
-if [[ -d "$REMOTE_WORKLOAD_TOOL_BIN" ]]; then
-    export PATH="$REMOTE_WORKLOAD_TOOL_BIN:$PATH"
-fi
-
 die() {
     printf '[install-guest-prereqs][ERROR] %s\n' "$*" >&2
     exit 1
 }
+
+resolve_workspace_contract_path() {
+    local path="$1"
+    if [[ "$path" = /* ]]; then
+        printf '%s\n' "$path"
+    else
+        printf '%s\n' "$WORKSPACE/$path"
+    fi
+}
+
+resolve_remote_workload_tool_bin_contract() {
+    [[ -n "${RUN_WORKLOAD_TOOLS_CSV:-}" ]] || {
+        printf '%s\n' ""
+        return 0
+    }
+    [[ -n "${RUN_REMOTE_WORKLOAD_TOOL_BIN:-}" ]] \
+        || die "manifest remote workload-tool bin is missing while workload tools are requested"
+    printf '%s\n' "$(resolve_workspace_contract_path "$RUN_REMOTE_WORKLOAD_TOOL_BIN")"
+}
+
+REMOTE_WORKLOAD_TOOL_BIN="$(resolve_remote_workload_tool_bin_contract)"
+if [[ -n "$REMOTE_WORKLOAD_TOOL_BIN" && -d "$REMOTE_WORKLOAD_TOOL_BIN" ]]; then
+    export PATH="$REMOTE_WORKLOAD_TOOL_BIN:$PATH"
+fi
 
 have_cmd() {
     command -v "$1" >/dev/null 2>&1

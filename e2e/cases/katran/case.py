@@ -19,6 +19,7 @@ from runner.libs.app_runners.katran import (  # noqa: E402
     DEFAULT_INTERFACE,
     KatranRunner,
 )
+from runner.libs.bpf_stats import enable_bpf_stats, sample_bpf_stats  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     host_metadata,
     percent_delta,
@@ -26,7 +27,7 @@ from runner.libs.case_common import (  # noqa: E402
     run_app_runner_lifecycle,
     speedup_ratio,
 )
-from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage, start_sampler_thread  # noqa: E402
+from runner.libs.metrics import compute_delta, sample_total_cpu_usage, start_sampler_thread  # noqa: E402
 
 
 DEFAULT_OUTPUT_JSON = RESULTS_DIR / "katran.json"

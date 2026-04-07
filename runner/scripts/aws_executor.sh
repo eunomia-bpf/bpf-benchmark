@@ -24,7 +24,7 @@ source "$ROOT_DIR/runner/scripts/aws_common_lib.sh"
 
 run_remote_suite() {
     local ip="$1"
-    local stamp local_result_dir local_archive local_log remote_run_dir remote_archive remote_log remote_tool_bin remote_tool_root
+    local stamp local_result_dir local_archive local_log remote_run_dir remote_archive remote_log remote_tool_root
     wait_for_ssh "$ip"
     [[ -n "${RUN_BUNDLE_TAR:-}" ]] || die "local bundle path is unset; local bundle preparation did not run"
     [[ -f "${RUN_BUNDLE_TAR}" ]] || die "prepared remote bundle is missing: ${RUN_BUNDLE_TAR}"
@@ -36,7 +36,6 @@ run_remote_suite() {
     local_log="$local_result_dir/remote.log"
     remote_run_dir="$RUN_REMOTE_STAGE_DIR/runs/$stamp"
     remote_tool_root="$(remote_prereq_workload_tool_root)"
-    remote_tool_bin="$(remote_prereq_workload_tool_bin)"
     remote_archive="$remote_run_dir/results.tar.gz"
     remote_log="$remote_run_dir/remote.log"
     mkdir -p "$local_result_dir"
@@ -50,13 +49,12 @@ EOF
     scp_to "$ip" "$RUN_BUNDLE_TAR" "$remote_run_dir/bundle.tar.gz"
     local remote_status=0
     set +e
-    ssh_bash "$ip" "$remote_run_dir" "$remote_archive" "$remote_log" "$remote_tool_root" "$remote_tool_bin" <<'EOF'
+    ssh_bash "$ip" "$remote_run_dir" "$remote_archive" "$remote_log" "$remote_tool_root" <<'EOF'
 set -euo pipefail
 run_dir="$1"
 archive_path="$2"
 log_path="$3"
 tool_root="$4"
-tool_bin="$5"
 workspace="$run_dir/workspace"
 bundle_path="$run_dir/bundle.tar.gz"
 sudo rm -rf "$workspace"
@@ -68,18 +66,7 @@ if [[ -d "$tool_root" ]]; then
     mkdir -p "$workspace/.cache/workload-tools"
     cp -a "$tool_root/." "$workspace/.cache/workload-tools/"
 fi
-if [[ -d "$workspace/.cache/workload-tools/bin" ]]; then
-    export PATH="$workspace/.cache/workload-tools/bin:$PATH"
-elif [[ -d "$tool_bin" ]]; then
-    export PATH="$tool_bin:$PATH"
-fi
 test -f "$workspace/run-contract.env"
-if [[ -d "$tool_root" ]]; then
-    printf 'RUN_REMOTE_WORKLOAD_TOOL_ROOT=%q\n' "$tool_root" >>"$workspace/run-contract.env"
-fi
-if [[ -d "$tool_bin" ]]; then
-    printf 'RUN_REMOTE_WORKLOAD_TOOL_BIN=%q\n' "$tool_bin" >>"$workspace/run-contract.env"
-fi
 # shellcheck disable=SC1090
 source "$workspace/run-contract.env"
 [[ -n "${RUN_SUITE_ENTRYPOINT:-}" ]] || exit 1

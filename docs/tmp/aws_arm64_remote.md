@@ -337,6 +337,8 @@ What is still incomplete:
   the internal prep orchestration is still split between
   `kvm_local_prep_lib.sh` and `aws_local_prep_lib.sh`
 - repo selection is now explicit:
+  - the old manifest field `RUN_BENCHMARK_REPOS_CSV` is no longer part of the
+    active contract
   - `RUN_BUNDLED_REPOS_CSV` defines which repos must be sealed into the bundle
   - `RUN_FETCH_REPOS_CSV` defines the full local fetch set needed before
     bundle/native-build prep begins
@@ -345,8 +347,15 @@ What is still incomplete:
   - local prep materializes bundled tools under a local tool root
   - bundle inputs write both `RUN_BUNDLED_WORKLOAD_TOOLS_CSV` and
     `RUN_LOCAL_WORKLOAD_TOOL_ROOT`
-  - guest prereq install now recognizes bundled workload tools before falling
-    back to guest package installation
+  - the bundle manifest now also carries workspace-local
+    `RUN_REMOTE_WORKLOAD_TOOL_ROOT` / `RUN_REMOTE_WORKLOAD_TOOL_BIN`
+  - guest prereq install and guest prereq validation now recognize bundled
+    workload tools before falling back to guest package installation
+- AWS executor no longer appends workload-tool paths into `run-contract.env`
+  during execution; the workspace-local tool contract is now sealed during
+  bundle creation
+- KVM and AWS now stage the same micro sidecar shape (`*.directive.bin` /
+  `*.policy.bin`) during local prep
 - upstream selftests no longer depend on repo-owned compat headers or stub
   skeletons; exclusions now live only in the tracked selection manifest
   `runner/config/upstream_selftests_selection.tsv`
@@ -399,9 +408,23 @@ The root `Makefile` has also been thinned further on the developer-build side:
 What still remains as developer-only direct-build surface in the root
 `Makefile` is explicit and temporary:
 
+- `all`
+- `runner`
+- `corpus-fetch`
+- `corpus-build`
+- `corpus-build-native`
+- `corpus-build-*`
 - `micro`
+- `daemon`
+- `daemon-tests`
 - `kernel` / `kernel-build` / `kernel-clean` / `kernel-rebuild`
+- `kernel-arm64`
+- `kernel-arm64-aws`
 - `kinsn-modules`
+- `virtme-hostfs-modules`
+- `upstream-selftests-build`
+- `arm64-worktree`
+- `python-tests`
 - `smoke`
 - `check`
 - `validate`
@@ -865,9 +888,16 @@ locks during local prep.
 
 ### 9.5 Current active todo and review gate
 
+This subsection is the authoritative current gate. Historical entries later in
+the document are retained as chronology, but this block overrides any stale
+intermediate status below.
+
 Refactor-first gate:
 
-- no new real-path validation runs should start until items 1-4 are structurally clean
+- no new real-path validation runs should start until whole-tree static review
+  returns `No findings`
+- no new compat layers, hidden fallbacks, or third-party source patches may be
+  introduced while closing the remaining findings
 
 Current ordered todo:
 
@@ -883,41 +913,42 @@ Current ordered todo:
      `local_prep_common_lib.sh`
    - keep moving suite orchestration out of target-specific libraries where the
      behavior is actually shared
-3. Keep the explicit bundle-input contract clean:
-   - `build_remote_bundle.sh` now consumes only explicit input paths
-   - do not reintroduce `RUN_LOCAL_PROMOTE_ROOT`-anchored derivation
-   - keep AWS base prereqs free of runtime-only workload-tool staging
-   - keep repo selection split clean:
-     - `RUN_BUNDLED_REPOS_CSV` only for repos that must exist in the workspace
-     - `RUN_FETCH_REPOS_CSV` for the full local fetch set
-   - keep KVM guest prereqs aware of bundled workload tools so they do not
-     silently install host-owned tools from the guest package manager
+3. Keep the explicit bundle/runtime contract strict:
+   - repo selection stays split between `RUN_BUNDLED_REPOS_CSV` and
+     `RUN_FETCH_REPOS_CSV`
+   - workload-tool paths must be explicit whenever `RUN_WORKLOAD_TOOLS_CSV` is
+     non-empty; do not rely on hard-coded `.cache/workload-tools/bin` fallbacks
+   - KVM/AWS guest/runtime prereq paths must consume the sealed workspace-local
+     manifest contract, not executor-side mutation
 4. Reduce the remaining ARM canonical local-prep qemu/container path:
-   - move `micro_exec` toward a host-cross helper now that `runner/CMakeLists.txt`
-     no longer requires a runnable `llvm-config`
-   - keep extending the ARM sysroot contract only as needed to support that
-     host-cross path
-   - keep `__cross-arm64*` only for the minimum still-unavoidable ARM-native
-     work
-5. Keep `build_upstream_selftests.sh` on the explicit selection path:
+   - keep moving host-crossable ARM work out of `__cross-arm64*`
+   - keep extending the ARM sysroot contract only where it is needed for
+     host-cross support
+5. Keep upstream selftests on the tracked selection path:
    - selection lives only in `runner/config/upstream_selftests_selection.tsv`
-   - no script-local hidden blacklists
-   - no source filtering that silently ignores stale exclusions
+   - no script-local hidden exclusions
+   - no source filtering that silently ignores stale manifest rows
 6. Finish one more stale-reference sweep in active code, `README.md`, and this
    document.
-7. Wait for the full-context subagent review and fold any remaining structural findings back into the tree.
+7. Re-run whole-tree reviewer passes and fold any remaining structural findings
+   back into the tree.
 8. Re-run full static review gates:
    - `bash -n`
    - `git diff --check`
-   - `pytest`
+   - `python3 -m pytest -q tests/python/test_runner_contract.py tests/python/test_bcc_runner.py tests/python/test_bpf_stats.py tests/python/test_vm.py tests/python/test_corpus_driver.py tests/python/test_rejit.py`
    - `make -n` on canonical aliases
 9. Only after reviewer output is `No findings`:
    - restart real-path validation in the documented matrix order
 
-Current live-run state:
+Current real-path validation state:
 
 - all interrupted `aws-arm64-test`, `aws-x86-test`, and `vm-test` runs were stopped
 - no canonical real-path validation process is intentionally left running
+- the current static gate is green:
+  - `bash -n` passed on the active runner scripts
+  - `git diff --check` passed
+  - `python3 -m pytest -q tests/python/test_runner_contract.py tests/python/test_bcc_runner.py tests/python/test_bpf_stats.py tests/python/test_vm.py tests/python/test_corpus_driver.py tests/python/test_rejit.py` passed with `50 passed`
+  - `make -n aws-arm64-test aws-x86-test aws-arm64-benchmark AWS_ARM64_BENCH_MODE=all aws-x86-benchmark AWS_X86_BENCH_MODE=all vm-test` remained pure static thin aliases
    - completed:
      - `AWS_*_BENCH_MODE=all` no longer uses recursive `$(MAKE)`
      - `make -n` now stays static and never launches real AWS work
@@ -2262,6 +2293,9 @@ The current workload-tool contract is:
   `RUN_BUNDLED_WORKLOAD_TOOLS_CSV`
 - the local path that feeds the bundle is declared explicitly by
   `RUN_LOCAL_WORKLOAD_TOOL_ROOT`
+- the workspace-local runtime path is sealed explicitly by:
+  - `RUN_REMOTE_WORKLOAD_TOOL_ROOT`
+  - `RUN_REMOTE_WORKLOAD_TOOL_BIN`
 - remote/guest prereqs must recognize bundled tools before falling back to the
   package manager
 - no remote source-build of workload tools
@@ -2275,20 +2309,28 @@ Current status:
 - the tree is in refactor + static-review mode
 - the immediate goal is to finish structural cleanup and get reviewer
   `No findings` before restarting runtime validation
+- current static gates are green:
+  - `bash -n`
+  - `git diff --check`
+  - `pytest` focused runner suite: `48 passed`
+  - `make -n` on canonical aliases stays thin and side-effect free
 
 ### 13.5 Current Immediate Todo
 
 1. Finish the remaining local-prep convergence work so KVM and AWS differ only
    in executor transport and machine lifecycle.
 2. Keep the repo-selection contract explicit:
+   - do not reintroduce `RUN_BENCHMARK_REPOS_CSV`
    - `RUN_BUNDLED_REPOS_CSV` for repos that must exist in the bundle
    - `RUN_FETCH_REPOS_CSV` for the full local fetch set
 3. Keep the workload-tool contract explicit:
    - local prep stages bundled tools
    - bundle inputs carry the tool root explicitly
-   - remote/guest prereqs must not silently replace missing bundled tools with
-     system-package installs
+   - remote/guest prereqs and validation must not silently replace missing
+     bundled tools with system-package installs
 4. Keep shrinking the remaining ARM qemu/containerized prep surface.
+   - ARM workload-tool source fetch is now pinned to explicit refs and cached
+     under the local source-cache root instead of cloning upstream HEAD
 5. Re-run whole-tree reviewer passes and keep fixing findings until they return
    `No findings`.
 6. Only after that, restart the real validation matrix.
@@ -3026,7 +3068,7 @@ The repo-owned fix was minimal:
     fails a run if the program already has a complete `bpftool` record
   - missing program IDs still fail loudly
 - tests updated and passing:
-  - `python3 -m pytest -q tests/python/test_bpf_stats.py tests/python/test_metrics.py tests/python/test_corpus_driver.py`
+  - `python3 -m pytest -q tests/python/test_bpf_stats.py tests/python/test_runner_contract.py tests/python/test_corpus_driver.py`
   - `14 passed`
 
 This keeps the design simpler:

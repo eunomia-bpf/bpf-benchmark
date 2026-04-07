@@ -19,7 +19,7 @@ from runner.libs import ROOT_DIR, ensure_parent, write_json, write_text
 from runner.libs.app_runners import get_app_runner
 from runner.libs.app_runners.base import AppRunner
 from runner.libs.app_suite_schema import AppSpec, AppWorkload, load_app_suite_from_yaml
-from runner.libs.bpf_stats import enable_bpf_stats
+from runner.libs.bpf_stats import enable_bpf_stats, sample_bpf_stats
 from runner.libs.case_common import (
     _append_pending_kinsn_metadata,
     _clone_daemon_metadata,
@@ -35,7 +35,6 @@ from runner.libs.case_common import (
     wait_for_suite_quiescence,
 )
 from runner.libs.daemon_session import DaemonSession
-from runner.libs.metrics import sample_bpf_stats
 from runner.libs.rejit import benchmark_rejit_enabled_passes, collect_effective_enabled_passes
 from runner.libs.run_artifacts import (
     ArtifactSession,

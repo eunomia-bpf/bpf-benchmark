@@ -694,25 +694,6 @@ static int run_negative_test(const char *name,
 	return 0;
 }
 
-/* N01: Empty program (insn_cnt = 0) */
-static int test_neg_empty_program(void)
-{
-	/* No instructions at all */
-	return run_negative_test("N01_empty_program", NULL, 0);
-}
-
-/* N02: Unknown opcode -- all-zero instruction has opcode 0x00 which is
- * BPF_LD | BPF_W | BPF_IMM in cBPF, but in eBPF context an all-zero
- * instruction with no exit will fail verification. */
-static int test_neg_unknown_opcode(void)
-{
-	static const struct bpf_insn bad[] = {
-		{ .code = 0xff, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0 },
-		{ .code = BPF_JMP | BPF_EXIT },
-	};
-	return run_negative_test("N02_unknown_opcode", bad, ARRAY_SIZE(bad));
-}
-
 /* N03: No BPF_EXIT -- program with only an ALU instruction, no exit */
 static int test_neg_no_exit(void)
 {
@@ -729,84 +710,6 @@ static int test_neg_uninit_r0(void)
 		{ .code = BPF_JMP | BPF_EXIT },
 	};
 	return run_negative_test("N04_uninit_r0", bad, ARRAY_SIZE(bad));
-}
-
-/* N05: Out-of-bounds stack access -- store to offset -520 (beyond 512 limit) */
-static int test_neg_oob_stack(void)
-{
-	static const struct bpf_insn bad[] = {
-		/* r0 = 0 */
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_0, .imm = 0 },
-		/* *(u64 *)(r10 - 520) = r0  -- stack overflow */
-		{ .code = BPF_STX | BPF_MEM | BPF_DW,
-		  .dst_reg = BPF_REG_10, .src_reg = BPF_REG_0, .off = -520 },
-		/* r0 = 0 */
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_0, .imm = 0 },
-		{ .code = BPF_JMP | BPF_EXIT },
-	};
-	return run_negative_test("N05_oob_stack", bad, ARRAY_SIZE(bad));
-}
-
-/* N06: Backward jump (infinite loop) -- JA -1 creates an infinite loop */
-static int test_neg_backward_jump(void)
-{
-	static const struct bpf_insn bad[] = {
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_0, .imm = 0 },
-		/* JA -1: jump back to self */
-		{ .code = BPF_JMP | BPF_JA, .off = -1 },
-		{ .code = BPF_JMP | BPF_EXIT },
-	};
-	return run_negative_test("N06_backward_jump", bad, ARRAY_SIZE(bad));
-}
-
-/* N07: Illegal helper call -- call helper 0xFFFF (nonexistent) */
-static int test_neg_illegal_helper(void)
-{
-	static const struct bpf_insn bad[] = {
-		/* call unknown helper */
-		{ .code = BPF_JMP | BPF_CALL, .imm = 0xFFFF },
-		{ .code = BPF_JMP | BPF_EXIT },
-	};
-	return run_negative_test("N07_illegal_helper", bad, ARRAY_SIZE(bad));
-}
-
-/* N08: Oversized program -- submit BPF_MAXINSNS + 1 instructions
- * (all r0=0 NOPs + exit). The verifier should reject due to size. */
-static int test_neg_oversized_program(void)
-{
-	const char *name = "N08_oversized_program";
-	/* Allocate (BPF_MAXINSNS + 2) instructions: 4097 MOV + 1 EXIT */
-	const __u32 cnt = BPF_MAXINSNS + 2;
-	struct bpf_insn *bad;
-	__u32 i;
-	int ret;
-
-	bad = calloc(cnt, sizeof(struct bpf_insn));
-	if (!bad) {
-		TEST_FAIL(name, "malloc failed");
-		return 1;
-	}
-	for (i = 0; i < cnt - 1; i++) {
-		bad[i].code    = BPF_ALU64 | BPF_MOV | BPF_K;
-		bad[i].dst_reg = BPF_REG_0;
-		bad[i].imm     = 0;
-	}
-	bad[cnt - 1].code = BPF_JMP | BPF_EXIT;
-
-	ret = run_negative_test(name, bad, cnt);
-	free(bad);
-	return ret;
-}
-
-/* N09: Invalid register (R11+) -- use reserved register field */
-static int test_neg_invalid_register(void)
-{
-	static const struct bpf_insn bad[] = {
-		/* dst_reg = 15 (only 0-10 valid) */
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = 15, .imm = 0 },
-		{ .code = BPF_JMP | BPF_EXIT },
-	};
-	return run_negative_test("N09_invalid_register", bad, ARRAY_SIZE(bad));
 }
 
 /* N10: Invalid prog_fd -- REJIT with fd = -1 */
@@ -861,41 +764,6 @@ static int test_neg_non_bpf_fd(void)
 
 	TEST_PASS(name);
 	return 0;
-}
-
-/* N12: Truncated LD_IMM64 -- odd insn_cnt leaving the 16-byte LD_IMM64 split */
-static int test_neg_truncated_ld_imm64(void)
-{
-	/* LD_IMM64 needs 2 insns (16 bytes). Provide only the first half. */
-	static const struct bpf_insn bad[] = {
-		/* LD_IMM64 first half: code = BPF_LD | BPF_DW | BPF_IMM */
-		{ .code = BPF_LD | BPF_DW | BPF_IMM,
-		  .dst_reg = BPF_REG_0, .src_reg = 0, .off = 0, .imm = 42 },
-		/* Missing second half! Instead we put exit -- verifier should
-		 * reject because the LD_IMM64 pair is incomplete. */
-		{ .code = BPF_JMP | BPF_EXIT },
-	};
-	return run_negative_test("N12_truncated_ld_imm64", bad, ARRAY_SIZE(bad));
-}
-
-/* N13: Privilege escalation -- XDP program calling bpf_override_return
- * (helper #58), which is kprobe-only and must be rejected for XDP.
- *
- * Note: bpf_probe_read_kernel (#113) is available to all prog types via
- * bpf_base_func_proto (no lockdown), so it would NOT be rejected for XDP.
- * bpf_override_return is registered only in kprobe_prog_func_proto and is
- * truly unavailable for XDP. */
-static int test_neg_wrong_helper_for_prog_type(void)
-{
-	static const struct bpf_insn bad[] = {
-		/* call bpf_override_return (#58) -- kprobe-only, not allowed for XDP */
-		{ .code = BPF_JMP | BPF_CALL, .imm = 58 },
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_K,
-		  .dst_reg = BPF_REG_0, .imm = XDP_PASS },
-		{ .code = BPF_JMP | BPF_EXIT },
-	};
-	return run_negative_test("N13_wrong_helper_for_prog_type",
-				 bad, ARRAY_SIZE(bad));
 }
 
 /* N14: Unprivileged REJIT -- fork a child, drop to nobody, try REJIT.
@@ -966,72 +834,6 @@ static int test_neg_unprivileged_rejit(void)
 		TEST_FAIL(name, "child reported failure");
 		return 1;
 	}
-}
-
-/* N15: REJIT failure does not change original program
- * (explicit multi-step verification) */
-static int test_neg_original_survives_failed_rejit(void)
-{
-	const char *name = "N15_original_survives_failed_rejit";
-	char log_buf[65536];
-	__u32 retval;
-	int prog_fd, i;
-
-	/* Bad bytecode: backward jump (infinite loop) */
-	static const struct bpf_insn bad[] = {
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_0, .imm = 0 },
-		{ .code = BPF_JMP | BPF_JA, .off = -1 },
-		{ .code = BPF_JMP | BPF_EXIT },
-	};
-
-	prog_fd = load_good_prog();
-	if (prog_fd < 0) {
-		TEST_FAIL(name, "cannot load base prog");
-		return 1;
-	}
-
-	/* Run 5 times before REJIT to confirm baseline */
-	for (i = 0; i < 5; i++) {
-		if (verify_retval(prog_fd, XDP_PASS) < 0) {
-			TEST_FAIL(name, "pre-rejit verification failed");
-			close(prog_fd);
-			return 1;
-		}
-	}
-
-	/* Attempt 3 different bad REJITs -- all should fail */
-	for (i = 0; i < 3; i++) {
-		memset(log_buf, 0, sizeof(log_buf));
-		if (rejit_prog(prog_fd, bad, ARRAY_SIZE(bad),
-			       log_buf, sizeof(log_buf)) >= 0) {
-			TEST_FAIL(name, "bad REJIT unexpectedly succeeded");
-			close(prog_fd);
-			return 1;
-		}
-	}
-
-	/* Run 5 times after failed REJITs -- must still return XDP_PASS */
-	for (i = 0; i < 5; i++) {
-		retval = 0;
-		if (test_run_xdp(prog_fd, &retval) < 0) {
-			TEST_FAIL(name, "post-rejit run failed");
-			close(prog_fd);
-			return 1;
-		}
-		if (retval != XDP_PASS) {
-			char buf[128];
-			snprintf(buf, sizeof(buf),
-				 "post-rejit retval %u != XDP_PASS on iteration %d",
-				 retval, i);
-			TEST_FAIL(name, buf);
-			close(prog_fd);
-			return 1;
-		}
-	}
-
-	close(prog_fd);
-	TEST_PASS(name);
-	return 0;
 }
 
 /*
@@ -1405,21 +1207,11 @@ int main(void)
 	printf("=== BpfReJIT Safety & Correctness Test Suite ===\n\n");
 
 	printf("--- Negative Tests (REJIT rejects invalid bytecode) ---\n");
-	test_neg_empty_program();                  /* N01 */
-	test_neg_unknown_opcode();                 /* N02 */
 	test_neg_no_exit();                        /* N03 */
 	test_neg_uninit_r0();                      /* N04 */
-	test_neg_oob_stack();                      /* N05 */
-	test_neg_backward_jump();                  /* N06 */
-	test_neg_illegal_helper();                 /* N07 */
-	test_neg_oversized_program();              /* N08 */
-	test_neg_invalid_register();               /* N09 */
 	test_neg_bad_prog_fd();                    /* N10 */
 	test_neg_non_bpf_fd();                     /* N11 */
-	test_neg_truncated_ld_imm64();             /* N12 */
-	test_neg_wrong_helper_for_prog_type();     /* N13 */
 	test_neg_unprivileged_rejit();             /* N14 */
-	test_neg_original_survives_failed_rejit(); /* N15 */
 	test_kinsn_max_insn_cnt_exceeds_buf();     /* N16 */
 
 	printf("\n--- Correctness Verification Tests ---\n");

@@ -20,7 +20,7 @@ SCX_PROG_SHOW_RACE_SKIP_PROBE="${RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE:-}"
 RESULT_ROOT="${WORKSPACE}/.cache/suite-results"
 RUN_TOKEN="$(date -u +%Y%m%d_%H%M%S)"
 ARTIFACT_DIR="${RESULT_ROOT}/${RUN_TARGET_NAME}_${RUN_SUITE_NAME}_${RUN_TOKEN}"
-REMOTE_WORKLOAD_TOOL_BIN="${RUN_REMOTE_WORKLOAD_TOOL_BIN:-$WORKSPACE/.cache/workload-tools/bin}"
+REMOTE_WORKLOAD_TOOL_BIN=""
 
 log() {
     printf '[suite-entrypoint] %s\n' "$*" >&2
@@ -33,6 +33,25 @@ die() {
 
 require_cmd() {
     command -v "$1" >/dev/null 2>&1 || die "required command is missing: $1"
+}
+
+resolve_workspace_contract_path() {
+    local path="$1"
+    if [[ "$path" = /* ]]; then
+        printf '%s\n' "$path"
+    else
+        printf '%s\n' "$WORKSPACE/$path"
+    fi
+}
+
+resolve_remote_workload_tool_bin_contract() {
+    [[ -n "${RUN_WORKLOAD_TOOLS_CSV:-}" ]] || {
+        printf '%s\n' ""
+        return 0
+    }
+    [[ -n "${RUN_REMOTE_WORKLOAD_TOOL_BIN:-}" ]] \
+        || die "manifest remote workload-tool bin is missing while workload tools are requested"
+    printf '%s\n' "$(resolve_workspace_contract_path "$RUN_REMOTE_WORKLOAD_TOOL_BIN")"
 }
 
 latest_result_dir() {
@@ -195,11 +214,12 @@ ensure_bpf_stats_enabled() {
 }
 
 prepare_environment() {
+    REMOTE_WORKLOAD_TOOL_BIN="$(resolve_remote_workload_tool_bin_contract)"
     mkdir -p "$ARTIFACT_DIR"
     cd "$WORKSPACE"
     cp "$MANIFEST_PATH" "$ARTIFACT_DIR/run-contract.env"
     export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${PATH:-}"
-    if [[ -d "$REMOTE_WORKLOAD_TOOL_BIN" ]]; then
+    if [[ -n "$REMOTE_WORKLOAD_TOOL_BIN" && -d "$REMOTE_WORKLOAD_TOOL_BIN" ]]; then
         export PATH="$REMOTE_WORKLOAD_TOOL_BIN:$PATH"
     fi
     if [[ "$RUN_TARGET_ARCH" == "arm64" && -f "$WORKSPACE/lib/libbpf.so.1" ]]; then
@@ -368,7 +388,7 @@ run_e2e_case() {
 
 run_e2e_suite() {
     local case_name cases_csv
-    ensure_benchmark_repos
+    ensure_bundled_repos
     ensure_scx_artifacts
     cases_csv="${RUN_E2E_CASES:?RUN_E2E_CASES is required}"
     if [[ "$cases_csv" == "all" ]]; then

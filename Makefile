@@ -144,7 +144,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 	corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx \
 	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
 	daemon-tests python-tests check smoke validate \
-	vm-test vm-micro vm-corpus vm-e2e vm-all \
+	vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	arm64-worktree \
 	kernel-arm64-aws \
 	aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
@@ -157,7 +157,7 @@ help:
 	@echo "Build:  all runner micro daemon kernel kernel-clean kernel-rebuild kinsn-modules upstream-selftests-build kernel-arm64"
 	@echo "Repos:  corpus-fetch corpus-build corpus-build-native corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace REPOS=\"katran tracee tetragon cilium bpftrace ...\""
 	@echo "Test:   smoke daemon-tests python-tests check"
-	@echo "VM x86 canonical: vm-test vm-micro vm-corpus vm-e2e vm-all validate"
+	@echo "VM x86 canonical: vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "        vm-corpus (full corpus suite driver)"
 	@echo "AWS:    aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64"
 	@echo "        aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86"
@@ -379,11 +379,20 @@ check:
 validate:
 	$(MAKE) check
 	$(MAKE) vm-test
-	SAMPLES=1 WARMUPS=0 INNER_REPEAT=50 "$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm micro
+	$(MAKE) vm-micro-smoke
 
 # ── VM (x86) ──────────────────────────────────────────────────────────────────
+vm-selftest:
+	TEST_MODE=selftest "$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm test
+
+vm-negative-test:
+	TEST_MODE=negative "$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm test
+
 vm-test:
 	"$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm test
+
+vm-micro-smoke:
+	SAMPLES=1 WARMUPS=0 INNER_REPEAT=50 "$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm micro
 
 vm-micro:
 	"$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm micro

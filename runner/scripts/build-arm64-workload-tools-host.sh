@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 HOST_CACHE_ROOT="${ARM64_HOST_CACHE_ROOT:-$ROOT_DIR/.cache/arm64-host}"
-SOURCE_ROOT="${ARM64_WORKLOAD_TOOLS_SOURCE_ROOT:-$ROOT_DIR/runner/repos}"
+SOURCE_CACHE_ROOT="${ARM64_WORKLOAD_TOOLS_SOURCE_ROOT:-$HOST_CACHE_ROOT/workload-tool-sources}"
 BUILD_ROOT="${ARM64_WORKLOAD_TOOLS_BUILD_ROOT:-$HOST_CACHE_ROOT/workload-tools-host}"
 OUTPUT_ROOT="${ARM64_WORKLOAD_TOOLS_OUTPUT_ROOT:-$HOST_CACHE_ROOT/workload-tools-output}"
 TOOLS_RAW="${ARM64_WORKLOAD_TOOLS_LIST:-}"
@@ -28,6 +28,12 @@ SYSROOT_PKGCONFIG_DIR="$SYSROOT_LIB_DIR/pkgconfig"
 OUTPUT_TOOL_ROOT="$OUTPUT_ROOT/workload-tools"
 OUTPUT_TOOL_BIN_DIR="$OUTPUT_TOOL_ROOT/bin"
 OUTPUT_TOOL_LIB_DIR="$OUTPUT_TOOL_ROOT/lib"
+RT_TESTS_REPO_URL="https://git.kernel.org/pub/scm/utils/rt-tests/rt-tests.git"
+RT_TESTS_REF="${ARM64_WORKLOAD_TOOL_RT_TESTS_REF:-f9c82184ce88d8de3ffe588279b0bc41d3887998}"
+SYSBENCH_REPO_URL="https://github.com/akopytov/sysbench.git"
+SYSBENCH_REF="${ARM64_WORKLOAD_TOOL_SYSBENCH_REF:-3ceba0b1e115f8c50d1d045a4574d8ed643bd497}"
+WRK_REPO_URL="https://github.com/wg/wrk.git"
+WRK_REF="${ARM64_WORKLOAD_TOOL_WRK_REF:-a211dd5a7050b1f9e8a9870b95513060e72ac4a0}"
 
 log() {
     printf '[arm64-workload-tools-host] %s\n' "$*" >&2
@@ -98,9 +104,25 @@ EOF
 
 prepare_source_checkout() {
     local repo_url="$1"
-    local dest_dir="$2"
+    local repo_ref="$2"
+    local repo_name="$3"
+    local dest_dir="$4"
+    local cache_dir="$SOURCE_CACHE_ROOT/.workload-tool-sources/$repo_name"
     rm -rf "$dest_dir"
-    git clone --depth 1 "$repo_url" "$dest_dir" >/dev/null
+    mkdir -p "$(dirname "$cache_dir")"
+    if [[ -d "$cache_dir/.git" ]]; then
+        if ! git_path_is_clean "$cache_dir"; then
+            rm -rf "$cache_dir"
+        fi
+    fi
+    if [[ ! -d "$cache_dir/.git" ]]; then
+        git clone --no-checkout "$repo_url" "$cache_dir" >/dev/null
+    fi
+    if [[ "$(git -C "$cache_dir" rev-parse HEAD 2>/dev/null || true)" != "$repo_ref" ]]; then
+        git -C "$cache_dir" fetch --depth 1 origin "$repo_ref" >/dev/null
+        git -C "$cache_dir" checkout --detach FETCH_HEAD >/dev/null
+    fi
+    snapshot_git_subtree "$cache_dir" "" "$dest_dir"
     require_nonempty_dir "$dest_dir"
 }
 
@@ -121,7 +143,7 @@ stage_portable_binary() {
 build_hackbench_tool() {
     local src_root="$WORKLOAD_SRC_ROOT/rt-tests"
     log "Building ARM64 hackbench on host"
-    prepare_source_checkout "https://git.kernel.org/pub/scm/utils/rt-tests/rt-tests.git" "$src_root"
+    prepare_source_checkout "$RT_TESTS_REPO_URL" "$RT_TESTS_REF" "rt-tests" "$src_root"
     env CROSS_COMPILE="${WORKLOAD_CROSS_PREFIX}" \
         make -C "$src_root" -j"$(nproc)" hackbench >/dev/null
     stage_portable_binary "hackbench" "$src_root/hackbench"
@@ -130,7 +152,7 @@ build_hackbench_tool() {
 build_sysbench_tool() {
     local src_root="$WORKLOAD_SRC_ROOT/sysbench"
     log "Building ARM64 sysbench on host"
-    prepare_source_checkout "https://github.com/akopytov/sysbench.git" "$src_root"
+    prepare_source_checkout "$SYSBENCH_REPO_URL" "$SYSBENCH_REF" "sysbench" "$src_root"
     (
         cd "$src_root"
         CC="$WORKLOAD_TOOLCHAIN_DIR/gcc" \
@@ -170,7 +192,7 @@ build_wrk_tool() {
     local luajit_dir
     local openssl_root="$src_root/obj/openssl-root"
     log "Building ARM64 wrk on host"
-    prepare_source_checkout "https://github.com/wg/wrk.git" "$src_root"
+    prepare_source_checkout "$WRK_REPO_URL" "$WRK_REF" "wrk" "$src_root"
     (
         cd "$src_root"
         unzip -q deps/LuaJIT*.zip -d obj >/dev/null

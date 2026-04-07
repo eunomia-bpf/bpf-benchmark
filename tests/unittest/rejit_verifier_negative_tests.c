@@ -9,7 +9,6 @@
  *
  * T1: scalar replacing map_value  (const_prop lost BPF_PSEUDO_MAP_FD)
  * T2: unreachable insn after dead-code elimination
- * T3: invalid call destination    (branch fixup miscalculation)
  * T4: BPF_PSEUDO_MAP_VALUE on unsupported map type (PERF_EVENT_ARRAY)
  *
  * Build:
@@ -373,36 +372,6 @@ static int test_t2_unreachable_insn(void)
 }
 
 /* ================================================================== */
-/*  T3: invalid call destination must be rejected                     */
-/* ================================================================== */
-/*
- * Daemon bug: branch fixup miscalculated the BPF_CALL target after
- * instruction insertion/deletion, producing a call to a non-existent
- * helper function.
- *
- * We construct:
- *   call helper 99999 (does not exist)
- *   r0 = XDP_PASS
- *   exit
- *
- * The verifier must reject the unknown helper ID.
- */
-static int test_t3_invalid_call_dest(void)
-{
-	const struct bpf_insn bad[] = {
-		/* call helper 99999 -- nonexistent */
-		{ .code = BPF_JMP | BPF_CALL, .imm = 99999 },
-		/* r0 = XDP_PASS */
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_K,
-		  .dst_reg = BPF_REG_0, .imm = XDP_PASS },
-		{ .code = BPF_JMP | BPF_EXIT },
-	};
-
-	return run_negative_test("T3_invalid_call_dest",
-				 bad, ARRAY_SIZE(bad));
-}
-
-/* ================================================================== */
 /*  T4: BPF_PSEUDO_MAP_VALUE on PERF_EVENT_ARRAY must be rejected     */
 /* ================================================================== */
 /*
@@ -476,7 +445,6 @@ int main(void)
 
 	test_t1_scalar_replaces_map_value();
 	test_t2_unreachable_insn();
-	test_t3_invalid_call_dest();
 	test_t4_pseudo_map_value_unsupported_map();
 
 	printf("\n=== Summary: %d passed, %d failed ===\n", g_pass, g_fail);

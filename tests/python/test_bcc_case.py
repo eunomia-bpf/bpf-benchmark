@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from e2e.cases.bcc import case
 
 
-def test_load_config_parses_tool_specific_rejit_pass_overrides(tmp_path: Path) -> None:
+def test_load_config_reads_tool_arguments(tmp_path: Path) -> None:
     config_path = tmp_path / "bcc-config.yaml"
     config_path.write_text(
         """
@@ -21,7 +21,6 @@ tools:
     workload_kind: exec_loop
     spawn_timeout_s: 15
     tool_args: ["-T"]
-    rejit_passes: ["map_inline"]
 measurement_duration_s: 30
 smoke_duration_s: 10
 attach_timeout_s: 20
@@ -34,33 +33,7 @@ attach_timeout_s: 20
 
     assert len(config.tools) == 1
     assert config.tools[0].name == "execsnoop"
-    assert config.tools[0].rejit_passes == ("map_inline",)
     assert config.tools[0].tool_args == ("-T",)
-
-
-def test_load_config_defaults_rejit_passes_to_empty_tuple(tmp_path: Path) -> None:
-    config_path = tmp_path / "bcc-config.yaml"
-    config_path.write_text(
-        """
-tools:
-  - name: tcplife
-    description: tcp tracing
-    expected_programs: 2
-    workload_kind: tcp_connect
-    spawn_timeout_s: 15
-measurement_duration_s: 30
-smoke_duration_s: 10
-attach_timeout_s: 20
-""".strip()
-        + "\n",
-        encoding="utf-8",
-    )
-
-    config = case.load_config(config_path)
-
-    assert len(config.tools) == 1
-    assert config.tools[0].rejit_passes == ()
-
 
 def test_run_phase_uses_shared_bcc_runner(monkeypatch, tmp_path: Path) -> None:
     calls: list[object] = []
@@ -124,7 +97,6 @@ def test_run_phase_uses_shared_bcc_runner(monkeypatch, tmp_path: Path) -> None:
         workload_kind="exec_loop",
         spawn_timeout_s=15,
         tool_args=("-T",),
-        rejit_passes=(),
     )
 
     baseline, rejit = case.run_phase(
@@ -236,7 +208,6 @@ attach_timeout_s: 20
 
     assert payload["selected_rejit_passes"] == ["map_inline"]
     assert payload["requested_rejit_passes"] == ["map_inline", "const_prop", "dce"]
-    assert payload["tool_rejit_passes"] == {"execsnoop": ["map_inline"]}
     assert payload["summary"]["site_totals"]["total_sites"] == 3
     assert payload["summary"]["site_totals"]["map_inline_sites"] == 2
     assert payload["summary"]["site_totals"]["const_prop_sites"] == 1

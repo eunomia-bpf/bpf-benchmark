@@ -22,7 +22,7 @@ from runner.libs import (  # noqa: E402
     which,
 )
 from runner.libs.app_runners.bpftrace import BpftraceRunner, SCRIPTS, ScriptSpec  # noqa: E402
-from runner.libs.metrics import (  # noqa: E402
+from runner.libs.bpf_stats import (  # noqa: E402
     enable_bpf_stats,
 )
 from runner.libs.rejit import applied_site_totals_from_rejit_result  # noqa: E402

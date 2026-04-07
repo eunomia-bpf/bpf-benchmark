@@ -12,20 +12,6 @@ RUNNER_DIR="${RUNNER_DIR:-$ROOT_DIR/runner}"
 # shellcheck disable=SC1090
 source "$ROOT_DIR/runner/scripts/local_prep_common_lib.sh"
 
-stage_matching_micro_sidecars() {
-    local output_dir="$1"
-    local source_dir="$ROOT_DIR/micro/generated-inputs"
-    local generated_file program_name source_name staged_name
-    while IFS= read -r -d '' generated_file; do
-        program_name="$(basename "$generated_file" .bpf.o)"
-        for source_name in directive.bin policy.bin; do
-            [[ -f "$source_dir/${program_name}.${source_name}" ]] || continue
-            staged_name="${program_name}.bpf.o.${source_name}"
-            cp -a "$source_dir/${program_name}.${source_name}" "$output_dir/$staged_name"
-        done
-    done < <(find "$output_dir" -maxdepth 1 -type f -name '*.bpf.o' -print0)
-}
-
 fetch_promoted_repos() {
     local promote_root="$1"
     local repo_csv="$2"
@@ -46,7 +32,7 @@ promote_micro_program_outputs() {
     local output_dir="$1"
     rm -rf "$output_dir"
     make -C "$RUNNER_DIR" MICRO_PROGRAM_OUTPUT_DIR="$output_dir" micro-programs >/dev/null
-    stage_matching_micro_sidecars "$output_dir"
+    local_prep_stage_matching_micro_sidecars "$output_dir" "$ROOT_DIR/micro/generated-inputs"
     touch "$output_dir/.build.stamp"
     require_nonempty_dir "$output_dir" "micro generated programs dir"
 }

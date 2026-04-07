@@ -19,9 +19,9 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.app_runners.base import AppRunner  # noqa: E402
 from runner.libs.app_runners.scx import ScxRunner, preferred_path, read_scx_ops, read_scx_state  # noqa: E402
+from runner.libs.bpf_stats import sample_bpf_stats  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
-    sample_bpf_stats,
     sample_cpu_usage,
     sample_total_cpu_usage,
     start_sampler_thread,

@@ -24,7 +24,7 @@ from runner.libs import (  # noqa: E402
     ROOT_DIR,
 )
 from runner.libs.app_runners.bcc import BCCRunner, find_tool_binary, resolve_tools_dir, run_setup_script  # noqa: E402
-from runner.libs.metrics import (  # noqa: E402
+from runner.libs.bpf_stats import (  # noqa: E402
     enable_bpf_stats,
 )
 from runner.libs.rejit import (  # noqa: E402
@@ -61,7 +61,6 @@ class ToolSpec:
     workload_kind: str
     spawn_timeout_s: int
     tool_args: tuple[str, ...]
-    rejit_passes: tuple[str, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -82,7 +81,6 @@ def load_config(path: Path) -> SuiteConfig:
             workload_kind=entry["workload_kind"],
             spawn_timeout_s=int(entry.get("spawn_timeout_s", 20)),
             tool_args=tuple(str(arg) for arg in entry.get("tool_args", [])),
-            rejit_passes=tuple(str(name) for name in entry.get("rejit_passes", [])),
         )
         for entry in raw.get("tools", [])
     )
@@ -488,24 +486,13 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
 
     records: list[dict[str, object]] = []
     default_requested_passes = [str(pass_name) for pass_name in benchmark_rejit_enabled_passes()]
-    tool_rejit_passes: dict[str, list[str]] = {}
-    tool_requested_rejit_passes: dict[str, list[str]] = {}
     with enable_bpf_stats():
         for spec in selected:
-            requested_passes = (
-                [str(pass_name) for pass_name in spec.rejit_passes]
-                if spec.rejit_passes
-                else None
-            )
-            requested_display_passes = list(requested_passes) if requested_passes is not None else list(default_requested_passes)
-            tool_requested_rejit_passes[spec.name] = list(requested_display_passes)
             tool_binary = find_tool_binary(tools_dir, spec.name)
             if tool_binary is None:
-                tool_rejit_passes[spec.name] = list(requested_display_passes)
                 record: dict[str, object] = {
                     "name": spec.name,
                     "description": spec.description,
-                    "selected_rejit_passes": list(requested_display_passes),
                     "tool_args": list(spec.tool_args),
                     "tool_binary": None,
                     "baseline": {
@@ -548,7 +535,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
                 tool_binary,
                 duration_s=duration_s,
                 attach_timeout=attach_timeout,
-                enabled_passes=requested_passes,
+                enabled_passes=None,
                 policy_context={
                     "repo": "bcc",
                     "category": "bcc",
@@ -558,21 +545,17 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             )
             selected_passes = collect_effective_enabled_passes({"rejit": rejit})
             if not selected_passes:
-                selected_passes = list(requested_display_passes)
-            tool_rejit_passes[spec.name] = list(selected_passes)
+                selected_passes = list(default_requested_passes)
             summary = summarize_tool(spec, baseline, rejit)
             record = {
                 "name": spec.name,
                 "description": spec.description,
-                "selected_rejit_passes": list(selected_passes),
                 "tool_args": list(spec.tool_args),
                 "tool_binary": str(tool_binary),
                 "baseline": baseline,
                 "rejit": rejit,
                 "summary": summary,
             }
-            if selected_passes != requested_display_passes:
-                record["requested_rejit_passes"] = list(requested_display_passes)
             records.append(record)
 
     # Aggregate
@@ -610,7 +593,6 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
         "duration_s": duration_s,
         "selected_rejit_passes": selected_rejit_passes,
         "selected_tools": [spec.name for spec in selected],
-        "tool_rejit_passes": tool_rejit_passes,
         "tools_dir": str(tools_dir),
         "daemon": str(daemon_binary),
         "setup": dict(setup_result),
@@ -624,12 +606,8 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             "speedup_geomean": geomean(speedups),
         },
     }
-    if selected_rejit_passes != default_requested_passes or any(
-        tool_rejit_passes.get(name) != tool_requested_rejit_passes.get(name)
-        for name in tool_requested_rejit_passes
-    ):
+    if selected_rejit_passes != default_requested_passes:
         payload["requested_rejit_passes"] = list(default_requested_passes)
-        payload["tool_requested_rejit_passes"] = tool_requested_rejit_passes
     if errors:
         payload["error_message"] = "; ".join(errors)
     return payload

@@ -26,6 +26,7 @@ from runner.libs import (
     write_text,
 )
 from runner.libs.app_runners.base import AppRunner
+from runner.libs.bpf_stats import sample_bpf_stats
 from runner.libs.daemon_session import DaemonSession
 from runner.libs.kinsn import (
     capture_daemon_kinsn_discovery as _capture_daemon_kinsn_discovery,
@@ -33,7 +34,6 @@ from runner.libs.kinsn import (
 )
 from runner.libs.metrics import (
     compute_delta,
-    sample_bpf_stats,
     sample_cpu_usage,
     sample_total_cpu_usage,
     start_sampler_thread,

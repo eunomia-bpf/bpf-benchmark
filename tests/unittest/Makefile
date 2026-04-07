@@ -74,11 +74,12 @@ MODULE_TEST_BINS := $(addprefix $(BUILD_DIR)/,$(MODULE_TESTS))
 BPF_PROGS_DIR := $(UNITTEST_DIR)/progs
 BPF_SRCS := $(wildcard $(BPF_PROGS_DIR)/*.bpf.c)
 BPF_OBJS := $(patsubst $(BPF_PROGS_DIR)/%.bpf.c,$(BUILD_DIR)/progs/%.bpf.o,$(BPF_SRCS))
-DEPFILES := $(TEST_BINS:=.d) $(MODULE_TEST_BINS:=.d) $(BPF_OBJS:=.d)
+ALIAS_BPF_OBJS := $(BUILD_DIR)/progs/test_hotswap_struct_ops_late_rollback.bpf.o
+DEPFILES := $(TEST_BINS:=.d) $(MODULE_TEST_BINS:=.d) $(BPF_OBJS:=.d) $(ALIAS_BPF_OBJS:=.d)
 
 .PHONY: all clean run
 
-all: $(TEST_BINS) $(MODULE_TEST_BINS) $(BPF_OBJS)
+all: $(TEST_BINS) $(MODULE_TEST_BINS) $(BPF_OBJS) $(ALIAS_BPF_OBJS)
 
 # Unified build rule: all tests get libbpf includes and link flags.
 # Tests that don't use libbpf symbols won't pull anything in (static archive).
@@ -113,6 +114,9 @@ endif
 
 $(BUILD_DIR)/progs/%.bpf.o: $(BPF_PROGS_DIR)/%.bpf.c $(LIBBPF_HDR) $(VMLINUX_HDR) | $(BUILD_DIR)/progs
 	$(CLANG) $(BPF_CFLAGS) -MMD -MP -MF $@.d -MT $@ $(BPF_INCLUDES) $(CLANG_SYS_INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/progs/test_hotswap_struct_ops_late_rollback.bpf.o: $(BPF_PROGS_DIR)/test_hotswap_struct_ops.bpf.c $(LIBBPF_HDR) $(VMLINUX_HDR) | $(BUILD_DIR)/progs
+	$(CLANG) $(BPF_CFLAGS) -DHOTSWAP_STRUCT_OPS_NAME=\"rjhtslr\" -MMD -MP -MF $@.d -MT $@ $(BPF_INCLUDES) $(CLANG_SYS_INCLUDES) -c $< -o $@
 
 $(BUILD_DIR) $(BUILD_DIR)/progs $(BUILD_DIR)/module $(VMLINUX_INCLUDE_DIR):
 	mkdir -p $@

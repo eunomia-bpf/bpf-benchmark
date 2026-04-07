@@ -84,8 +84,8 @@ else
     echo "  FAIL: fuzz_rejit"
 fi
 
-# scx_bad_rejit_replay and scx_prog_show_race require a running scx scheduler;
-# they are integration tests and run separately via `make vm-negative-test`.
+# scx_prog_show_race requires a running scx scheduler and runs via
+# `make vm-negative-test`.
 
 echo ""
 echo "=== vm-selftest: ${PASS} passed, ${FAIL} failed ==="

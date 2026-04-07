@@ -12,10 +12,9 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/prereq_contract.sh"
 
 MANIFEST_DIR="$(cd "$(dirname "$MANIFEST_PATH")" && pwd)"
 STAMP_PATH="${AWS_REMOTE_PREREQS_STAMP:-${MANIFEST_DIR}/prereqs.ready}"
-WORKLOAD_TOOL_ROOT="${RUN_REMOTE_WORKLOAD_TOOL_ROOT:-${MANIFEST_DIR}/workload-tools}"
-WORKLOAD_TOOL_BIN_DIR="${RUN_REMOTE_WORKLOAD_TOOL_BIN:-${WORKLOAD_TOOL_ROOT}/bin}"
+WORKLOAD_TOOL_ROOT=""
+WORKLOAD_TOOL_BIN_DIR=""
 PREREQ_MODE="${AWS_REMOTE_PREREQS_MODE:-runtime}"
-export PATH="${WORKLOAD_TOOL_BIN_DIR}:${PATH}"
 
 case "$PREREQ_MODE" in
     base|runtime) ;;
@@ -33,6 +32,33 @@ die() {
     printf '[aws-remote-prereqs][ERROR] %s\n' "$*" >&2
     exit 1
 }
+
+resolve_remote_workload_tool_contract() {
+    [[ -n "${RUN_WORKLOAD_TOOLS_CSV:-}" ]] || {
+        WORKLOAD_TOOL_ROOT=""
+        WORKLOAD_TOOL_BIN_DIR=""
+        return 0
+    }
+    [[ -n "${RUN_REMOTE_WORKLOAD_TOOL_ROOT:-}" ]] \
+        || die "manifest remote workload-tool root is missing while workload tools are requested"
+    [[ -n "${RUN_REMOTE_WORKLOAD_TOOL_BIN:-}" ]] \
+        || die "manifest remote workload-tool bin is missing while workload tools are requested"
+    if [[ "$RUN_REMOTE_WORKLOAD_TOOL_ROOT" = /* ]]; then
+        WORKLOAD_TOOL_ROOT="$RUN_REMOTE_WORKLOAD_TOOL_ROOT"
+    else
+        WORKLOAD_TOOL_ROOT="${MANIFEST_DIR}/${RUN_REMOTE_WORKLOAD_TOOL_ROOT}"
+    fi
+    if [[ "$RUN_REMOTE_WORKLOAD_TOOL_BIN" = /* ]]; then
+        WORKLOAD_TOOL_BIN_DIR="$RUN_REMOTE_WORKLOAD_TOOL_BIN"
+    else
+        WORKLOAD_TOOL_BIN_DIR="${MANIFEST_DIR}/${RUN_REMOTE_WORKLOAD_TOOL_BIN}"
+    fi
+}
+
+resolve_remote_workload_tool_contract
+if [[ -n "$WORKLOAD_TOOL_BIN_DIR" ]]; then
+    export PATH="${WORKLOAD_TOOL_BIN_DIR}:${PATH}"
+fi
 
 require_cmd() {
     command -v "$1" >/dev/null 2>&1 || die "required command is missing: $1"
@@ -246,6 +272,7 @@ verify_environment() {
     require_cmd "${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}"
     require_cmd taskset
     require_cmd tar
+    [[ "$PREREQ_MODE" == "runtime" ]] || return 0
     IFS=',' read -r -a _run_python_packages <<<"${RUN_REMOTE_PYTHON_MODULES_CSV:-}"
     for package_name in "${_run_python_packages[@]}"; do
         [[ -n "$package_name" ]] || continue
@@ -261,7 +288,6 @@ for module_name in sys.argv[1:]:
     importlib.import_module(module_name)
 PY
     fi
-    [[ "$PREREQ_MODE" == "runtime" ]] || return 0
     local required_commands=()
     prereq_collect_required_commands required_commands
     for command_name in "${required_commands[@]}"; do

@@ -377,7 +377,7 @@ ensure_arm64_workload_tools_ready() {
         return 0
     }
     make -C "$ROOT_DIR/runner" __arm64-workload-tools-host-cross \
-        ARM64_WORKLOAD_TOOLS_SOURCE_ROOT="$LOCAL_REPO_ROOT" \
+        ARM64_WORKLOAD_TOOLS_SOURCE_ROOT="$ARM64_HOST_CACHE_ROOT" \
         ARM64_WORKLOAD_TOOLS_BUILD_ROOT="$RUN_PREP_ROOT/arm64-workload-tools-host" \
         ARM64_WORKLOAD_TOOLS_OUTPUT_ROOT="$ARM64_CROSSBUILD_OUTPUT_DIR" \
         ARM64_WORKLOAD_TOOLS_LIST="$bundled_csv" \
@@ -476,11 +476,13 @@ aws_prepare_local_benchmark_artifacts() {
                 aws-arm64)
                     ensure_cross_arm64_runtime "${RUN_SUITE_NEEDS_LLVMBPF:-0}"
                     make -C "$ROOT_DIR/runner" MICRO_PROGRAM_OUTPUT_DIR="$MICRO_PROGRAMS_GENERATED_DIR" micro-programs >/dev/null
+                    local_prep_stage_matching_micro_sidecars "$MICRO_PROGRAMS_GENERATED_DIR" "$ROOT_DIR/micro/generated-inputs"
                     require_nonempty_dir "$MICRO_PROGRAMS_GENERATED_DIR" "micro generated programs dir"
                     ;;
                 aws-x86)
                     ensure_x86_runner_ready
                     make -C "$ROOT_DIR/runner" MICRO_PROGRAM_OUTPUT_DIR="$MICRO_PROGRAMS_GENERATED_DIR" micro-programs >/dev/null
+                    local_prep_stage_matching_micro_sidecars "$MICRO_PROGRAMS_GENERATED_DIR" "$ROOT_DIR/micro/generated-inputs"
                     require_nonempty_dir "$MICRO_PROGRAMS_GENERATED_DIR" "micro generated programs dir"
                     ;;
                 *)

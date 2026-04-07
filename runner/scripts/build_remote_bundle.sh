@@ -499,6 +499,10 @@ prepare_common_bundle() {
     mkdir -p "$BUNDLE_DIR"
     cp "$MANIFEST_PATH" "$BUNDLE_DIR/run-contract.env"
     printf 'RUN_BUNDLED_WORKLOAD_TOOLS_CSV=%q\n' "${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}" >>"$BUNDLE_DIR/run-contract.env"
+    if [[ -n "${RUN_WORKLOAD_TOOLS_CSV:-}" ]]; then
+        printf 'RUN_REMOTE_WORKLOAD_TOOL_ROOT=%q\n' ".cache/workload-tools" >>"$BUNDLE_DIR/run-contract.env"
+        printf 'RUN_REMOTE_WORKLOAD_TOOL_BIN=%q\n' ".cache/workload-tools/bin" >>"$BUNDLE_DIR/run-contract.env"
+    fi
     bundle_copy_runner_tree
     bundle_stage_modules
     bundle_stage_target_runtime

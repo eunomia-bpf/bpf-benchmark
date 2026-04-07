@@ -9,8 +9,9 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 from . import resolve_bpftool_binary, resolve_perf_binary, run_json_command, tail_text
+from .bpf_stats import sample_bpf_stats
 from .daemon_session import DaemonSession
-from .metrics import compute_delta, sample_bpf_stats
+from .metrics import compute_delta
 
 DEFAULT_DAEMON = Path(__file__).resolve().parents[2] / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_PERF_EVENTS = ("cycles", "instructions", "branches", "branch-misses")

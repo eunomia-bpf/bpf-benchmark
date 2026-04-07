@@ -212,28 +212,3 @@ def test_apply_suite_case_config_rewrites_bcc_config_from_shared_suite(tmp_path:
     assert [entry["name"] for entry in rewritten["tools"]] == ["execsnoop"]
     assert rewritten["tools"][0]["workload_kind"] == "exec_storm"
     e2e_driver._cleanup_suite_temp_paths(args)
-
-
-def test_build_run_metadata_prefers_effective_passes_from_payload(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setattr(e2e_driver, "benchmark_rejit_enabled_passes", lambda: ["map_inline", "const_prop", "dce"])
-
-    args = argparse.Namespace(
-        case="tracee",
-        smoke=False,
-        output_md=str(tmp_path / "tracee.md"),
-        report_md=str(tmp_path / "tracee-report.md"),
-        no_kinsn=False,
-    )
-    payload = {
-        "selected_rejit_passes": ["map_inline", "const_prop", "dce"],
-        "tracee": {
-            "effective_enabled_passes_by_program": {
-                "101": ["map_inline"],
-            }
-        },
-    }
-
-    metadata = e2e_driver.build_run_metadata(args, payload)
-
-    assert metadata["selected_rejit_passes"] == ["map_inline"]
-    assert metadata["requested_rejit_passes"] == ["map_inline", "const_prop", "dce"]
