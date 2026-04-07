@@ -30,11 +30,8 @@ def test_sample_bpf_stats_fails_when_prog_info_lookup_fails(monkeypatch) -> None
     monkeypatch.setattr(metrics, "_prog_info_from_fd", lambda _fd: None)
     monkeypatch.setattr(metrics.os, "close", lambda _fd: None)
 
-    stats = metrics.sample_bpf_stats([7])
-
-    assert stats[7]["name"] == "demo"
-    assert stats[7]["run_cnt"] == 1
-    assert stats[7]["run_time_ns"] == 10
+    with pytest.raises(RuntimeError, match="failed to read program info by FD"):
+        metrics.sample_bpf_stats([7])
 
 
 def test_sample_bpf_stats_still_fails_without_bpftool_or_fd_info(monkeypatch) -> None:
@@ -46,3 +43,20 @@ def test_sample_bpf_stats_still_fails_without_bpftool_or_fd_info(monkeypatch) ->
 
     with pytest.raises(RuntimeError, match="failed to read program info by FD"):
         metrics.sample_bpf_stats([7])
+
+
+def test_libbpf_missing_required_symbol_fails_loudly(monkeypatch) -> None:
+    def enable_stats(_mode: int) -> int:
+        return 0
+
+    class FakeLib:
+        def __init__(self) -> None:
+            self.bpf_enable_stats = enable_stats
+
+    metrics._libbpf.cache_clear()
+    monkeypatch.setattr(metrics.ctypes, "CDLL", lambda *_args, **_kwargs: FakeLib())
+
+    with pytest.raises(RuntimeError, match="bpf_prog_get_fd_by_id"):
+        metrics._libbpf()
+
+    metrics._libbpf.cache_clear()

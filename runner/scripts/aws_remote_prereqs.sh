@@ -14,9 +14,16 @@ MANIFEST_DIR="$(cd "$(dirname "$MANIFEST_PATH")" && pwd)"
 STAMP_PATH="${AWS_REMOTE_PREREQS_STAMP:-${MANIFEST_DIR}/prereqs.ready}"
 WORKLOAD_TOOL_ROOT="${RUN_REMOTE_WORKLOAD_TOOL_ROOT:-${MANIFEST_DIR}/workload-tools}"
 WORKLOAD_TOOL_BIN_DIR="${RUN_REMOTE_WORKLOAD_TOOL_BIN:-${WORKLOAD_TOOL_ROOT}/bin}"
-WORKLOAD_TOOL_SRC_ROOT="${WORKLOAD_TOOL_ROOT}/src"
-WORKLOAD_TOOL_BUILD_ROOT="${WORKLOAD_TOOL_ROOT}/build"
+PREREQ_MODE="${AWS_REMOTE_PREREQS_MODE:-runtime}"
 export PATH="${WORKLOAD_TOOL_BIN_DIR}:${PATH}"
+
+case "$PREREQ_MODE" in
+    base|runtime) ;;
+    *)
+        printf '[aws-remote-prereqs][ERROR] unsupported AWS_REMOTE_PREREQS_MODE: %s\n' "$PREREQ_MODE" >&2
+        exit 1
+        ;;
+esac
 
 log() {
     printf '[aws-remote-prereqs] %s\n' "$*" >&2
@@ -42,6 +49,14 @@ require_any_cmd() {
     die "required command is missing: $*"
 }
 
+workload_tool_is_bundled() {
+    local tool="$1"
+    case ",${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}," in
+        *,"${tool}",*) return 0 ;;
+    esac
+    return 1
+}
+
 dnf_install() {
     sudo dnf -y install "$@"
 }
@@ -50,25 +65,6 @@ dnf_has_package() {
     local package="$1"
     sudo dnf -q list --available "$package" >/dev/null 2>&1 \
         || sudo dnf -q list --installed "$package" >/dev/null 2>&1
-}
-
-install_workload_build_deps() {
-    dnf_install \
-        autoconf \
-        automake \
-        coreutils \
-        diffutils \
-        gcc \
-        gcc-c++ \
-        git \
-        libaio-devel \
-        libtool \
-        make \
-        numactl-devel \
-        openssl-devel \
-        perl \
-        pkgconfig \
-        which
 }
 
 ensure_workload_tool_bin_dir() {
@@ -82,72 +78,6 @@ stage_system_tool_into_run() {
     [[ -n "$tool_path" ]] || die "required system tool is missing after install: ${tool}"
     ensure_workload_tool_bin_dir
     sudo ln -sfn "$tool_path" "${WORKLOAD_TOOL_BIN_DIR}/${tool}"
-}
-
-workload_build_jobs() {
-    nproc 2>/dev/null || echo 1
-}
-
-install_hackbench_from_source() {
-    local src_root="${WORKLOAD_TOOL_SRC_ROOT}/rt-tests"
-    local build_root="${WORKLOAD_TOOL_BUILD_ROOT}/rt-tests"
-    local obj_root="${build_root}/obj"
-    local jobs
-    if [[ -x "${WORKLOAD_TOOL_BIN_DIR}/hackbench" ]]; then
-        return 0
-    fi
-    log "Installing hackbench from source"
-    install_workload_build_deps
-    sudo rm -rf "$src_root" "$build_root"
-    sudo mkdir -p "$WORKLOAD_TOOL_BIN_DIR" "$WORKLOAD_TOOL_SRC_ROOT" "$WORKLOAD_TOOL_BUILD_ROOT"
-    sudo git clone --depth 1 https://git.kernel.org/pub/scm/utils/rt-tests/rt-tests.git "$src_root" >/dev/null
-    sudo mkdir -p "$build_root"
-    jobs="$(workload_build_jobs)"
-    sudo make -C "$src_root" OBJDIR="$obj_root" -j"$jobs" hackbench >/dev/null
-    [[ -x "${src_root}/hackbench" ]] || die "hackbench source build did not produce ${src_root}/hackbench"
-    sudo install -m 0755 "${src_root}/hackbench" "${WORKLOAD_TOOL_BIN_DIR}/hackbench"
-}
-
-install_sysbench_from_source() {
-    local src_root="${WORKLOAD_TOOL_SRC_ROOT}/sysbench"
-    local build_root="${WORKLOAD_TOOL_BUILD_ROOT}/sysbench"
-    local jobs
-    if [[ -x "${WORKLOAD_TOOL_BIN_DIR}/sysbench" ]]; then
-        return 0
-    fi
-    log "Installing sysbench from source"
-    install_workload_build_deps
-    sudo rm -rf "$src_root" "$build_root"
-    sudo mkdir -p "$WORKLOAD_TOOL_BIN_DIR" "$WORKLOAD_TOOL_SRC_ROOT" "$WORKLOAD_TOOL_BUILD_ROOT"
-    sudo git clone --depth 1 https://github.com/akopytov/sysbench.git "$src_root" >/dev/null
-    jobs="$(workload_build_jobs)"
-    sudo bash -lc "
-        set -euo pipefail
-        cd '$src_root'
-        ./autogen.sh >/dev/null
-        ./configure --without-mysql --without-pgsql --prefix='$build_root/install' >/dev/null
-        make -j'$jobs' >/dev/null
-        make install >/dev/null
-    "
-    [[ -x "${build_root}/install/bin/sysbench" ]] || die "sysbench source build did not produce ${build_root}/install/bin/sysbench"
-    sudo install -m 0755 "${build_root}/install/bin/sysbench" "${WORKLOAD_TOOL_BIN_DIR}/sysbench"
-}
-
-install_wrk_from_source() {
-    local src_root="${WORKLOAD_TOOL_SRC_ROOT}/wrk"
-    local jobs
-    if [[ -x "${WORKLOAD_TOOL_BIN_DIR}/wrk" ]]; then
-        return 0
-    fi
-    log "Installing wrk from source"
-    install_workload_build_deps
-    sudo rm -rf "$src_root"
-    sudo mkdir -p "$WORKLOAD_TOOL_BIN_DIR" "$WORKLOAD_TOOL_SRC_ROOT"
-    sudo git clone --depth 1 https://github.com/wg/wrk.git "$src_root" >/dev/null
-    jobs="$(workload_build_jobs)"
-    sudo make -C "$src_root" -j"$jobs" >/dev/null
-    [[ -x "${src_root}/wrk" ]] || die "wrk source build did not produce ${src_root}/wrk"
-    sudo install -m 0755 "${src_root}/wrk" "${WORKLOAD_TOOL_BIN_DIR}/wrk"
 }
 
 install_workload_tool() {
@@ -178,49 +108,7 @@ install_workload_tool() {
             fi
         fi
     fi
-
-    case "$tool" in
-        hackbench)
-            install_hackbench_from_source
-            ;;
-        sysbench)
-            install_sysbench_from_source
-            ;;
-        wrk)
-            install_wrk_from_source
-            ;;
-        *)
-            die "required tool is unavailable via package manager and has no source-build fallback: ${tool}"
-            ;;
-    esac
-    [[ -x "${WORKLOAD_TOOL_BIN_DIR}/${tool}" ]] || die "workload tool install did not produce command: ${WORKLOAD_TOOL_BIN_DIR}/${tool}"
-}
-
-needs_remote_native_upstream_selftests() {
-    [[ "${RUN_SUITE_NAME:-}" == "test" && "${RUN_TEST_MODE:-test}" == "test" && "${RUN_UPSTREAM_SELFTEST_EXEC_MODE:-bundled}" == "remote-native" ]]
-}
-
-needs_remote_native_runner_build() {
-    [[ "${RUN_NEEDS_RUNNER_BINARY:-0}" == "1" && "${RUN_RUNNER_BINARY_MODE:-bundled}" == "remote-native" ]]
-}
-
-resolve_llvm_tool() {
-    local base="$1"
-    local suffix="${RUN_UPSTREAM_SELFTEST_LLVM_SUFFIX:-}"
-    local candidate
-    if [[ -n "$suffix" ]]; then
-        for candidate in "${base}-${suffix}" "${base}${suffix}"; do
-            if command -v "$candidate" >/dev/null 2>&1; then
-                printf '%s\n' "$candidate"
-                return 0
-            fi
-        done
-    fi
-    if command -v "$base" >/dev/null 2>&1; then
-        printf '%s\n' "$base"
-        return 0
-    fi
-    die "required LLVM tool is missing: ${base}"
+    die "required workload tool must be bundled during local prep or available via package manager: ${tool}"
 }
 
 install_base_packages() {
@@ -266,10 +154,15 @@ install_explicit_runtime_packages() {
 
 install_optional_tool_packages() {
     local required_commands=() tool package packages=()
-    prereq_collect_required_commands required_commands
+    if [[ "$PREREQ_MODE" == "runtime" ]]; then
+        prereq_collect_required_commands required_commands
+    else
+        prereq_collect_base_commands required_commands
+    fi
     for tool in "${required_commands[@]}"; do
         [[ "$tool" == "${RUN_BPFTOOL_BIN:?RUN_BPFTOOL_BIN is required}" ]] && continue
         [[ "$tool" == "${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}" ]] && continue
+        workload_tool_is_bundled "$tool" && continue
         case "$tool" in
             wrk|sysbench|hackbench)
                 continue
@@ -282,9 +175,11 @@ install_optional_tool_packages() {
     done
     [[ "${#packages[@]}" -gt 0 ]] || return 0
     dnf_install "${packages[@]}"
+    [[ "$PREREQ_MODE" == "runtime" ]] || return 0
     for tool in "${required_commands[@]}"; do
         [[ "$tool" == "${RUN_BPFTOOL_BIN:?RUN_BPFTOOL_BIN is required}" ]] && continue
         [[ "$tool" == "${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}" ]] && continue
+        workload_tool_is_bundled "$tool" && continue
         case "$tool" in
             wrk|sysbench|hackbench)
                 continue
@@ -299,46 +194,13 @@ install_workload_tools() {
     local required_commands=() tool
     prereq_collect_required_commands required_commands
     for tool in "${required_commands[@]}"; do
+        workload_tool_is_bundled "$tool" && continue
         case "$tool" in
             wrk|sysbench|hackbench)
                 install_workload_tool "$tool"
                 ;;
         esac
     done
-}
-
-install_upstream_selftest_build_packages() {
-    needs_remote_native_upstream_selftests || return 0
-    dnf_install \
-        clang20 \
-        llvm20-devel \
-        lld20 \
-        gcc \
-        gcc-c++ \
-        make \
-        elfutils-libelf-devel \
-        zlib-devel \
-        glibc-devel \
-        libcap-devel \
-        openssl-devel \
-        kernel-headers
-}
-
-install_runner_build_packages() {
-    needs_remote_native_runner_build || return 0
-    dnf_install \
-        clang20 \
-        llvm20-devel \
-        lld20 \
-        cmake \
-        gcc \
-        gcc-c++ \
-        git \
-        make \
-        pkgconfig \
-        yaml-cpp-devel \
-        elfutils-libelf-devel \
-        zlib-devel
 }
 
 install_python_modules() {
@@ -384,14 +246,6 @@ verify_environment() {
     require_cmd "${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}"
     require_cmd taskset
     require_cmd tar
-    if needs_remote_native_runner_build; then
-        require_any_cmd clang-20 clang20 clang
-        require_any_cmd clang++-20 clang++20 clang++
-        require_any_cmd llvm-config-20 llvm-config20 llvm-config
-        require_cmd cmake
-        require_cmd make
-        require_cmd git
-    fi
     IFS=',' read -r -a _run_python_packages <<<"${RUN_REMOTE_PYTHON_MODULES_CSV:-}"
     for package_name in "${_run_python_packages[@]}"; do
         [[ -n "$package_name" ]] || continue
@@ -407,36 +261,25 @@ for module_name in sys.argv[1:]:
     importlib.import_module(module_name)
 PY
     fi
+    [[ "$PREREQ_MODE" == "runtime" ]] || return 0
     local required_commands=()
     prereq_collect_required_commands required_commands
     for command_name in "${required_commands[@]}"; do
         [[ -n "$command_name" ]] || continue
+        workload_tool_is_bundled "$command_name" && continue
         require_cmd "$command_name"
     done
-    if needs_remote_native_upstream_selftests; then
-        require_cmd make
-        require_cmd gcc
-        require_cmd g++
-        require_cmd "$(resolve_llvm_tool clang)"
-        require_cmd "$(resolve_llvm_tool clang++)"
-        require_cmd "$(resolve_llvm_tool ld.lld)"
-        require_cmd "$(resolve_llvm_tool llvm-ar)"
-        require_cmd "$(resolve_llvm_tool llc)"
-        require_cmd "$(resolve_llvm_tool llvm-config)"
-        require_cmd "$(resolve_llvm_tool llvm-objcopy)"
-        require_cmd "$(resolve_llvm_tool llvm-strip)"
-    fi
 }
 
 main() {
     install_base_packages
     install_explicit_runtime_packages
     install_optional_tool_packages
-    install_workload_tools
-    install_upstream_selftest_build_packages
-    install_runner_build_packages
-    install_python_modules
-    ensure_swap
+    if [[ "$PREREQ_MODE" == "runtime" ]]; then
+        install_python_modules
+        ensure_swap
+        install_workload_tools
+    fi
     verify_environment
     sudo mkdir -p "$(dirname "$STAMP_PATH")"
     sudo touch "$STAMP_PATH"

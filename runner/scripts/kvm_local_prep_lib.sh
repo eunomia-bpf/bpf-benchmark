@@ -29,55 +29,17 @@ stage_matching_micro_sidecars() {
 fetch_promoted_repos() {
     local promote_root="$1"
     local repo_csv="$2"
-    local repo
-    local args=()
-    [[ -n "$repo_csv" ]] || return 0
-    IFS=',' read -r -a _promote_fetch_repos <<<"$repo_csv"
-    for repo in "${_promote_fetch_repos[@]}"; do
-        [[ -n "$repo" ]] || continue
-        args+=(--repo "$repo")
-    done
-    [[ "${#args[@]}" -gt 0 ]] || return 0
-    "$HOST_PYTHON_BIN" "$RUNNER_DIR/scripts/fetch_corpus_repos.py" \
-        --repo-root "$promote_root/runner/repos" \
-        "${args[@]}" >/dev/null
+    local_prep_fetch_selected_repos "$promote_root/runner/repos" "$repo_csv" "$HOST_PYTHON_BIN" "$ROOT_DIR"
 }
 
 build_promoted_native_repos() {
     local promote_root="$1"
-    local promoted_repos_root="$promote_root/runner/repos"
-    local katran_input_root="$promote_root/.inputs/katran"
-    local repo
-    local args=()
-    [[ -n "${RUN_NATIVE_REPOS_CSV:-}" ]] || return 0
-    [[ -d "$promoted_repos_root" ]] || die "promoted repo root missing for native repo build: ${promoted_repos_root}"
-    IFS=',' read -r -a _promote_native_repos <<<"$RUN_NATIVE_REPOS_CSV"
-    for repo in "${_promote_native_repos[@]}"; do
-        [[ -n "$repo" ]] || continue
-        args+=(--repo "$repo")
-    done
-    [[ "${#args[@]}" -gt 0 ]] || return 0
-    if [[ ",${RUN_NATIVE_REPOS_CSV:-}," == *",katran,"* ]]; then
-        rm -rf "$katran_input_root"
-        mkdir -p "$katran_input_root/bin" "$katran_input_root/lib"
-        snapshot_git_subtree "$ROOT_DIR" "e2e/cases/katran/bin" "$katran_input_root/bin"
-        snapshot_git_subtree "$ROOT_DIR" "e2e/cases/katran/lib" "$katran_input_root/lib"
-        require_local_path "$katran_input_root/bin/katran_server_grpc" "sealed KVM Katran server source bundle"
-        require_nonempty_dir "$katran_input_root/lib" "sealed KVM Katran lib dir"
-        KATRAN_SERVER_BINARY="$katran_input_root/bin/katran_server_grpc" \
-            KATRAN_SERVER_LIB_DIR="$katran_input_root/lib" \
-            "$HOST_PYTHON_BIN" "$RUNNER_DIR/scripts/build_corpus_native.py" \
-                --jobs "$(nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)" \
-                --repo-root "$promoted_repos_root" \
-                --build-root "$promote_root/corpus/build" \
-                "${args[@]}" >/dev/null
-        return 0
-    fi
-    "$HOST_PYTHON_BIN" "$RUNNER_DIR/scripts/build_corpus_native.py" \
-        --jobs "$(nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)" \
-        --repo-root "$promoted_repos_root" \
-        --build-root "$promote_root/corpus/build" \
-        "${args[@]}" >/dev/null
+    local_prep_build_native_repo_artifacts \
+        "$promote_root/runner/repos" \
+        "$promote_root" \
+        "${RUN_NATIVE_REPOS_CSV:-}" \
+        "$HOST_PYTHON_BIN" \
+        "$ROOT_DIR"
 }
 
 promote_micro_program_outputs() {
@@ -91,37 +53,61 @@ promote_micro_program_outputs() {
 
 build_promoted_scx_artifacts() {
     local promote_root="$1"
-    local package
-    local scx_args=()
     [[ -n "${RUN_SCX_PACKAGES_CSV:-}" ]] || return 0
     fetch_promoted_repos "$promote_root" "scx"
-    IFS=',' read -r -a _promote_scx_packages <<<"$RUN_SCX_PACKAGES_CSV"
-    for package in "${_promote_scx_packages[@]}"; do
-        [[ -n "$package" ]] || continue
-        scx_args+=(--package "$package")
-    done
-    [[ "${#scx_args[@]}" -gt 0 ]] || die "manifest scx package contract is empty"
-    "$HOST_PYTHON_BIN" "$ROOT_DIR/runner/scripts/build_scx_artifacts.py" \
-        --force \
-        --repo-root "$promote_root/runner/repos" \
-        --promote-root "$promote_root" \
-        "${scx_args[@]}" >/dev/null
+    local_prep_build_scx_artifacts \
+        "$promote_root/runner/repos" \
+        "$promote_root" \
+        "$RUN_SCX_PACKAGES_CSV" \
+        "$HOST_PYTHON_BIN" \
+        "$ROOT_DIR"
+}
+
+ensure_kvm_x86_workload_tools_ready() {
+    local local_tool_root="$1"
+    local_prep_stage_x86_workload_tools \
+        "${RUN_WORKLOAD_TOOLS_CSV:-}" \
+        "$local_tool_root" \
+        RUN_BUNDLED_WORKLOAD_TOOLS_CSV \
+        RUN_LOCAL_WORKLOAD_TOOL_ROOT
 }
 
 write_kvm_bundle_inputs() {
     local promote_root="$1"
     local bundle_inputs_path="$2"
+    local test_artifacts_root="$promote_root/test-artifacts"
+    local repo_root="$promote_root/runner/repos"
+    local native_build_root="$promote_root/corpus/build"
     : >"$bundle_inputs_path"
-    write_bundle_input_var "$bundle_inputs_path" RUN_LOCAL_PROMOTE_ROOT "$promote_root"
+    write_bundle_input_var "$bundle_inputs_path" RUN_LOCAL_REPO_ROOT "$repo_root"
+    write_bundle_input_var "$bundle_inputs_path" RUN_BUNDLED_WORKLOAD_TOOLS_CSV "${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}"
+    write_bundle_input_var_if_set "$bundle_inputs_path" RUN_LOCAL_WORKLOAD_TOOL_ROOT "${RUN_LOCAL_WORKLOAD_TOOL_ROOT:-}"
+    write_bundle_input_var_if_set "$bundle_inputs_path" MICRO_PROGRAMS_GENERATED_DIR "$promote_root/micro/programs"
+    write_bundle_input_var_if_set "$bundle_inputs_path" RUN_KINSN_MODULE_DIR "$test_artifacts_root/kinsn-modules/x86"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_RUNNER "$promote_root/runner/build/micro_exec"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_DAEMON "$promote_root/daemon/target/release/bpfrejit-daemon"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_TEST_UNITTEST_BUILD_DIR "$test_artifacts_root/unittest/build"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_TEST_NEGATIVE_BUILD_DIR "$test_artifacts_root/negative/build"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_UPSTREAM_SELFTEST_DIR "$test_artifacts_root/upstream-bpf-selftests"
+    if [[ -d "$promote_root/portable-libbpf/lib" ]]; then
+        write_bundle_input_var "$bundle_inputs_path" X86_PORTABLE_LIBBPF_ROOT "$promote_root/portable-libbpf"
+    fi
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_NATIVE_BUILD_ROOT "$native_build_root"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_SCX_BINARY_ROOT "$repo_root/scx/target/release"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_SCX_OBJECT_ROOT "$native_build_root/scx"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_KATRAN_SERVER_BINARY "$native_build_root/katran/bin/katran_server_grpc"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_KATRAN_SERVER_LIB_DIR "$native_build_root/katran/lib"
 }
 
 prepare_kvm_inputs() {
     local promote_root="$1"
     local native_repos="${RUN_NATIVE_REPOS_CSV:-}"
-    local benchmark_repos="${RUN_BENCHMARK_REPOS_CSV:-}"
+    local fetch_repos="${RUN_FETCH_REPOS_CSV:-}"
     local scx_packages="${RUN_SCX_PACKAGES_CSV:-}"
     local test_mode="${RUN_TEST_MODE:-test}"
     local test_artifacts_root="$promote_root/test-artifacts"
+    RUN_LOCAL_WORKLOAD_TOOL_ROOT=""
+    RUN_BUNDLED_WORKLOAD_TOOLS_CSV=""
     rm -rf "$promote_root"
     mkdir -p "$promote_root"
     case "$RUN_SUITE_NAME" in
@@ -135,17 +121,26 @@ prepare_kvm_inputs() {
             fi
             case "$test_mode" in
                 selftest)
-                    make -C "$RUNNER_DIR" UNITTEST_BUILD_DIR="$test_artifacts_root/unittest/build" unittest-build >/dev/null
-                    make -C "$RUNNER_DIR" NEGATIVE_BUILD_DIR="$test_artifacts_root/negative/build" negative-build >/dev/null
+                    local_prep_build_x86_repo_tests \
+                        "$RUNNER_DIR" \
+                        "$test_artifacts_root/unittest/build" \
+                        "$test_artifacts_root/negative/build"
                     ;;
                 negative)
                     make -C "$RUNNER_DIR" NEGATIVE_BUILD_DIR="$test_artifacts_root/negative/build" negative-build >/dev/null
                     build_promoted_scx_artifacts "$promote_root"
                     ;;
                 test)
-                    make -C "$RUNNER_DIR" UNITTEST_BUILD_DIR="$test_artifacts_root/unittest/build" unittest-build >/dev/null
-                    make -C "$RUNNER_DIR" NEGATIVE_BUILD_DIR="$test_artifacts_root/negative/build" negative-build >/dev/null
-                    make -C "$RUNNER_DIR" UPSTREAM_SELFTEST_OUTPUT_DIR="$test_artifacts_root/upstream-bpf-selftests" upstream-selftests-build >/dev/null
+                    local_prep_build_x86_repo_tests \
+                        "$RUNNER_DIR" \
+                        "$test_artifacts_root/unittest/build" \
+                        "$test_artifacts_root/negative/build"
+                    local_prep_build_x86_upstream_selftests \
+                        "$RUNNER_DIR" \
+                        "$test_artifacts_root/upstream-bpf-selftests" \
+                        "$ROOT_DIR/vendor/linux-framework/vmlinux" \
+                        "$HOST_PYTHON_BIN" \
+                        "${RUN_UPSTREAM_SELFTEST_LLVM_SUFFIX:-}"
                     build_promoted_scx_artifacts "$promote_root"
                     ;;
                 *)
@@ -168,11 +163,12 @@ prepare_kvm_inputs() {
             if [[ "${RUN_NEEDS_KINSN_MODULES:-0}" == "1" ]]; then
                 make -C "$RUNNER_DIR" KINSN_MODULE_OUTPUT_DIR="$test_artifacts_root/kinsn-modules/x86" kinsn-modules-build >/dev/null
             fi
-            if [[ -n "$benchmark_repos" ]]; then
-                fetch_promoted_repos "$promote_root" "$benchmark_repos"
+            if [[ -n "$fetch_repos" ]]; then
+                fetch_promoted_repos "$promote_root" "$fetch_repos"
             fi
             build_promoted_scx_artifacts "$promote_root"
             build_promoted_native_repos "$promote_root"
+            ensure_kvm_x86_workload_tools_ready "$promote_root/workload-tools"
             ;;
         e2e)
             make -C "$RUNNER_DIR" kernel-image >/dev/null
@@ -185,8 +181,8 @@ prepare_kvm_inputs() {
             if [[ "${RUN_NEEDS_KINSN_MODULES:-0}" == "1" ]]; then
                 make -C "$RUNNER_DIR" KINSN_MODULE_OUTPUT_DIR="$test_artifacts_root/kinsn-modules/x86" kinsn-modules-build >/dev/null
             fi
-            if [[ -n "$benchmark_repos" ]]; then
-                fetch_promoted_repos "$promote_root" "$benchmark_repos"
+            if [[ -n "$fetch_repos" ]]; then
+                fetch_promoted_repos "$promote_root" "$fetch_repos"
             fi
             if [[ -n "$native_repos" ]]; then
                 build_promoted_native_repos "$promote_root"
@@ -194,6 +190,7 @@ prepare_kvm_inputs() {
             if [[ -n "$scx_packages" ]]; then
                 build_promoted_scx_artifacts "$promote_root"
             fi
+            ensure_kvm_x86_workload_tools_ready "$promote_root/workload-tools"
             ;;
         *)
             die "unsupported KVM suite: ${RUN_SUITE_NAME}"

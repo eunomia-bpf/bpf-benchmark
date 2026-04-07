@@ -73,20 +73,41 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
         find_package(LLVM REQUIRED CONFIG)
     endif()
 
-    if(LLVM_TOOLS_BINARY_DIR AND EXISTS "${LLVM_TOOLS_BINARY_DIR}/llvm-config")
-        set(LLVM_CONFIG_BIN "${LLVM_TOOLS_BINARY_DIR}/llvm-config")
-    else()
-        find_program(LLVM_CONFIG_BIN NAMES llvm-config REQUIRED)
-    endif()
-    execute_process(
-        COMMAND "${LLVM_CONFIG_BIN}" --ldflags --libs --system-libs
-        OUTPUT_VARIABLE LLVM_LINK_FLAGS_RAW
-        OUTPUT_STRIP_TRAILING_WHITESPACE
+    # Keep this list aligned with vendor/llvmbpf/CMakeLists.txt so host-cross
+    # builds can link against target LLVM libraries without executing a target
+    # llvm-config binary on the host.
+    set(MICRO_EXEC_LLVM_COMPONENTS
+        ${LLVM_TARGETS_TO_BUILD}
+        Core
+        Support
+        Target
+        Analysis
+        ipo
+        TransformUtils
+        BitReader
+        AsmParser
+        Linker
+        MC
+        MCParser
+        MCDisassembler
+        Object
+        ExecutionEngine
+        RuntimeDyld
+        OrcJIT
+        MCJIT
+        X86CodeGen
+        X86Desc
+        X86Info
+        X86AsmParser
+        NVPTXCodeGen
+        NVPTXDesc
+        NVPTXInfo
+        AArch64CodeGen
+        AArch64Desc
+        AArch64Info
+        AArch64AsmParser
     )
-    if("${LLVM_LINK_FLAGS_RAW}" STREQUAL "")
-        message(FATAL_ERROR "failed to resolve LLVM link flags from ${LLVM_CONFIG_BIN}")
-    endif()
-    separate_arguments(LLVM_LINK_FLAGS NATIVE_COMMAND "${LLVM_LINK_FLAGS_RAW}")
+    llvm_map_components_to_libnames(MICRO_EXEC_LLVM_LIBS ${MICRO_EXEC_LLVM_COMPONENTS})
 
     get_filename_component(MICRO_LLVMBPF_BUILD_DIR "${MICRO_LLVMBPF_BUILD_CACHE}" DIRECTORY)
     set(MICRO_LLVMBPF_SPDLOG_LIBRARY "")
@@ -144,7 +165,7 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
     target_link_libraries(micro_exec
         PRIVATE
             vendor_llvmbpf
-            ${LLVM_LINK_FLAGS}
+            ${MICRO_EXEC_LLVM_LIBS}
     )
     if(TARGET vendor_llvmbpf_spdlog)
         target_link_libraries(micro_exec PRIVATE vendor_llvmbpf_spdlog)

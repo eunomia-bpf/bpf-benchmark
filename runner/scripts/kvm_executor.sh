@@ -4,15 +4,20 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 RUNNER_DIR="$ROOT_DIR/runner"
 
-MANIFEST_PATH="${1:?usage: kvm_executor.sh <manifest> <stage_root> <stage_manifest>}"
-RUN_LOCAL_STAGE_ROOT="${2:?usage: kvm_executor.sh <manifest> <stage_root> <stage_manifest>}"
-RUN_LOCAL_STAGE_MANIFEST="${3:?usage: kvm_executor.sh <manifest> <stage_root> <stage_manifest>}"
+MANIFEST_PATH="${1:?usage: kvm_executor.sh <manifest> <local_state_path>}"
+LOCAL_STATE_PATH="${2:?usage: kvm_executor.sh <manifest> <local_state_path>}"
 [[ -f "$MANIFEST_PATH" ]] || {
     printf '[kvm-executor][ERROR] manifest is missing: %s\n' "$MANIFEST_PATH" >&2
     exit 1
 }
+[[ -f "$LOCAL_STATE_PATH" ]] || {
+    printf '[kvm-executor][ERROR] local state file is missing: %s\n' "$LOCAL_STATE_PATH" >&2
+    exit 1
+}
 # shellcheck disable=SC1090
 source "$MANIFEST_PATH"
+# shellcheck disable=SC1090
+source "$LOCAL_STATE_PATH"
 
 die() {
     printf '[kvm-executor][ERROR] %s\n' "$*" >&2

@@ -24,8 +24,9 @@ prereq_python_import_for_package() {
     esac
 }
 
-prereq_collect_required_commands() {
+prereq_collect_commands_for_mode() {
     local -n out_ref="$1"
+    local mode="${2:-runtime}"
     local token
     out_ref=()
     prereq_append_unique out_ref "${RUN_BPFTOOL_BIN:?RUN_BPFTOOL_BIN is required}"
@@ -35,11 +36,20 @@ prereq_collect_required_commands() {
         [[ -n "$token" ]] || continue
         prereq_append_unique out_ref "$token"
     done
+    [[ "$mode" == "runtime" ]] || return 0
     IFS=',' read -r -a _run_workload_tools <<<"${RUN_WORKLOAD_TOOLS_CSV:-}"
     for token in "${_run_workload_tools[@]}"; do
         [[ -n "$token" ]] || continue
         prereq_append_unique out_ref "$token"
     done
+}
+
+prereq_collect_required_commands() {
+    prereq_collect_commands_for_mode "$1" runtime
+}
+
+prereq_collect_base_commands() {
+    prereq_collect_commands_for_mode "$1" base
 }
 
 prereq_map_tool_packages() {
@@ -69,4 +79,3 @@ prereq_map_tool_packages() {
         *) prereq_contract_die "unsupported tool contract on ${manager}: ${tool}" ;;
     esac
 }
-

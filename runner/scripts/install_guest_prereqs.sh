@@ -17,6 +17,11 @@ MANIFEST_PATH="${2:?usage: install_guest_prereqs.sh <workspace> <manifest_path>}
 source "$MANIFEST_PATH"
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/prereq_contract.sh"
 
+REMOTE_WORKLOAD_TOOL_BIN="${RUN_REMOTE_WORKLOAD_TOOL_BIN:-$WORKSPACE/.cache/workload-tools/bin}"
+if [[ -d "$REMOTE_WORKLOAD_TOOL_BIN" ]]; then
+    export PATH="$REMOTE_WORKLOAD_TOOL_BIN:$PATH"
+fi
+
 die() {
     printf '[install-guest-prereqs][ERROR] %s\n' "$*" >&2
     exit 1
@@ -24,6 +29,14 @@ die() {
 
 have_cmd() {
     command -v "$1" >/dev/null 2>&1
+}
+
+workload_tool_is_bundled() {
+    local tool="$1"
+    case ",${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}," in
+        *,"${tool}",*) return 0 ;;
+    esac
+    return 1
 }
 
 python_module_available() {
@@ -68,7 +81,13 @@ main() {
     cd "$WORKSPACE"
     prereq_collect_required_commands required_commands
     for command_name in "${required_commands[@]}"; do
-        have_cmd "$command_name" || missing_commands+=("$command_name")
+        if have_cmd "$command_name"; then
+            continue
+        fi
+        if workload_tool_is_bundled "$command_name"; then
+            die "required bundled workload tool is missing from the guest tool bin: ${command_name}"
+        fi
+        missing_commands+=("$command_name")
     done
 
     if [[ -n "${RUN_REMOTE_PYTHON_MODULES_CSV:-}" ]]; then

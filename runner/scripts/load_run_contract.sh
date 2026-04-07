@@ -52,13 +52,14 @@ run_contract_parse_shell_words() {
     local raw="$1"
     local out_name="$2"
     local -n out_ref="$out_name"
+    local python_bin="${PYTHON:-python3}"
     out_ref=()
     [[ -n "$raw" ]] || return 0
     local token
     while IFS= read -r -d '' token; do
         out_ref+=("$token")
     done < <(
-        python3 - "$raw" <<'PY'
+        "$python_bin" - "$raw" <<'PY'
 import shlex
 import sys
 
@@ -238,6 +239,8 @@ run_contract_write_manifest() {
     local run_test_mode="test"
     local run_e2e_cases="all"
     local run_benchmark_repos=""
+    local run_bundled_repos=""
+    local run_fetch_repos=""
     local run_native_repos=""
     local run_scx_packages=""
     local run_needs_sched_ext=""
@@ -283,17 +286,13 @@ run_contract_write_manifest() {
     local run_test_scx_prog_show_race_iterations=""
     local run_test_scx_prog_show_race_load_timeout=""
     local run_test_scx_prog_show_race_skip_probe=""
-    local run_upstream_selftest_exec_mode=""
     local run_upstream_selftest_llvm_suffix=""
-    local run_runner_binary_mode=""
     local -a run_corpus_argv=()
     local -a run_e2e_argv=()
     local run_suite_entrypoint="runner/scripts/suite_entrypoint.sh"
 
     run_contract_load_target "$target_name"
     run_contract_load_suite "$suite_name"
-    run_upstream_selftest_exec_mode="${TARGET_UPSTREAM_SELFTEST_EXEC_MODE:-bundled}"
-    run_runner_binary_mode="${TARGET_RUNNER_BINARY_MODE_DEFAULT:-bundled}"
     run_needs_sched_ext="${SUITE_NEEDS_SCHED_EXT:-0}"
     run_needs_llvmbpf="${SUITE_NEEDS_LLVMBPF:-0}"
     run_needs_runner_binary="${SUITE_NEEDS_RUNNER_BINARY:-0}"
@@ -305,7 +304,6 @@ run_contract_write_manifest() {
     run_remote_commands="${SUITE_DEFAULT_REMOTE_COMMANDS:-}"
     run_workload_tools="${SUITE_DEFAULT_WORKLOAD_TOOLS:-}"
     run_needs_katran_bundle="${SUITE_NEEDS_KATRAN_BUNDLE:-0}"
-    run_remote_python_bin="${SUITE_DEFAULT_REMOTE_PYTHON_BIN:-}"
     run_remote_python_bin="${TARGET_REMOTE_PYTHON_DEFAULT:-${SUITE_DEFAULT_REMOTE_PYTHON_BIN:-}}"
     run_guest_package_manager="${TARGET_GUEST_PACKAGE_MANAGER:-}"
     if [[ "${TARGET_EXECUTOR:-}" == "aws-ssh" ]]; then
@@ -335,12 +333,16 @@ run_contract_write_manifest() {
         run_e2e_args="$(run_contract_prefixed_env_or_default "$aws_env_prefix" E2E_ARGS "")"
         run_e2e_smoke="$(run_contract_prefixed_env_or_default "$aws_env_prefix" E2E_SMOKE 0)"
         run_aws_key_name="$(run_contract_prefixed_env_or_default "$aws_env_prefix" KEY_NAME)"
+        [[ -n "$run_aws_key_name" ]] || run_contract_die "${aws_env_prefix}_KEY_NAME is required for AWS targets"
         run_aws_key_path="$(run_contract_prefixed_env_or_default "$aws_env_prefix" KEY_PATH)"
+        [[ -n "$run_aws_key_path" ]] || run_contract_die "${aws_env_prefix}_KEY_PATH is required for AWS targets"
         run_aws_security_group_id="$(run_contract_prefixed_env_or_default "$aws_env_prefix" SECURITY_GROUP_ID)"
+        [[ -n "$run_aws_security_group_id" ]] || run_contract_die "${aws_env_prefix}_SECURITY_GROUP_ID is required for AWS targets"
         run_aws_subnet_id="$(run_contract_prefixed_env_or_default "$aws_env_prefix" SUBNET_ID)"
-        run_aws_region="$(run_contract_prefixed_env_or_default "$aws_env_prefix" REGION "")"
+        [[ -n "$run_aws_subnet_id" ]] || run_contract_die "${aws_env_prefix}_SUBNET_ID is required for AWS targets"
+        run_aws_region="$(run_contract_prefixed_env_or_default "$aws_env_prefix" REGION "${TARGET_AWS_REGION_DEFAULT:-}")"
         [[ -n "$run_aws_region" ]] || run_contract_die "${aws_env_prefix}_REGION is required for AWS targets"
-        run_aws_profile="$(run_contract_prefixed_env_or_default "$aws_env_prefix" PROFILE "")"
+        run_aws_profile="$(run_contract_prefixed_env_or_default "$aws_env_prefix" PROFILE)"
         [[ -n "$run_aws_profile" ]] || run_contract_die "${aws_env_prefix}_PROFILE is required for AWS targets"
     fi
 
@@ -414,14 +416,6 @@ run_contract_write_manifest() {
             ;;
     esac
     run_contract_validate_test_mode "$run_test_mode"
-    case "$run_upstream_selftest_exec_mode" in
-        bundled|remote-native) ;;
-        *) run_contract_die "unsupported upstream selftest execution mode: ${run_upstream_selftest_exec_mode}" ;;
-    esac
-    case "$run_runner_binary_mode" in
-        bundled|remote-native) ;;
-        *) run_contract_die "unsupported runner binary mode: ${run_runner_binary_mode}" ;;
-    esac
     [[ -n "$run_remote_python_bin" ]] || run_contract_die "suite ${suite_name} is missing remote python contract"
     [[ -n "$run_bpftool_bin" ]] || run_contract_die "suite ${suite_name} is missing RUN_BPFTOOL_BIN"
     run_contract_parse_shell_words "$run_corpus_args" run_corpus_argv
@@ -493,6 +487,9 @@ run_contract_write_manifest() {
         run_contract_die "target ${target_name} does not support required sched_ext for suite ${suite_name}"
     fi
 
+    run_bundled_repos="$run_benchmark_repos"
+    run_fetch_repos="$(run_contract_append_csv_list "$run_bundled_repos" "$run_native_repos")"
+
     mkdir -p "$(dirname "$manifest_path")"
     cat >"$manifest_path" <<EOF
 RUN_TARGET_NAME=$(printf '%q' "$target_name")
@@ -503,7 +500,6 @@ RUN_SUITE_NEEDS_RUNTIME_BTF=$(printf '%q' "${SUITE_NEEDS_RUNTIME_BTF:-0}")
 RUN_SUITE_NEEDS_SCHED_EXT=$(printf '%q' "$run_needs_sched_ext")
 RUN_SUITE_NEEDS_LLVMBPF=$(printf '%q' "$run_needs_llvmbpf")
 RUN_NEEDS_RUNNER_BINARY=$(printf '%q' "$run_needs_runner_binary")
-RUN_RUNNER_BINARY_MODE=$(printf '%q' "$run_runner_binary_mode")
 RUN_NEEDS_DAEMON_BINARY=$(printf '%q' "$run_needs_daemon_binary")
 RUN_NEEDS_KINSN_MODULES=$(printf '%q' "$run_needs_kinsn_modules")
 RUN_NAME_TAG=$(printf '%q' "$run_name_tag")
@@ -542,7 +538,6 @@ RUN_TEST_SCX_PROG_SHOW_RACE_MODE=$(printf '%q' "$run_test_scx_prog_show_race_mod
 RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS=$(printf '%q' "$run_test_scx_prog_show_race_iterations")
 RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT=$(printf '%q' "$run_test_scx_prog_show_race_load_timeout")
 RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE=$(printf '%q' "$run_test_scx_prog_show_race_skip_probe")
-RUN_UPSTREAM_SELFTEST_EXEC_MODE=$(printf '%q' "$run_upstream_selftest_exec_mode")
 RUN_UPSTREAM_SELFTEST_LLVM_SUFFIX=$(printf '%q' "$run_upstream_selftest_llvm_suffix")
 RUN_BENCH_SAMPLES=$(printf '%q' "$run_bench_samples")
 RUN_BENCH_WARMUPS=$(printf '%q' "$run_bench_warmups")
@@ -552,6 +547,8 @@ RUN_CORPUS_WORKLOAD_SECONDS=$(printf '%q' "$run_corpus_workload_seconds")
 RUN_E2E_CASES=$(printf '%q' "$run_e2e_cases")
 RUN_E2E_SMOKE=$(printf '%q' "$run_e2e_smoke")
 RUN_BENCHMARK_REPOS_CSV=$(printf '%q' "$run_benchmark_repos")
+RUN_BUNDLED_REPOS_CSV=$(printf '%q' "$run_bundled_repos")
+RUN_FETCH_REPOS_CSV=$(printf '%q' "$run_fetch_repos")
 RUN_NATIVE_REPOS_CSV=$(printf '%q' "$run_native_repos")
 RUN_SCX_PACKAGES_CSV=$(printf '%q' "$run_scx_packages")
 RUN_REMOTE_COMMANDS_CSV=$(printf '%q' "$run_remote_commands")
@@ -575,9 +572,9 @@ run_contract_write_target_manifest() {
         local aws_env_prefix="${TARGET_AWS_ENV_PREFIX:-}"
         [[ -n "$aws_env_prefix" ]] || run_contract_die "AWS target ${target_name} is missing TARGET_AWS_ENV_PREFIX"
         run_name_tag="$(run_contract_prefixed_env_or_default "$aws_env_prefix" NAME_TAG "${TARGET_NAME_TAG_DEFAULT:-}")"
-        run_aws_region="$(run_contract_prefixed_env_or_default "$aws_env_prefix" REGION "")"
+        run_aws_region="$(run_contract_prefixed_env_or_default "$aws_env_prefix" REGION "${TARGET_AWS_REGION_DEFAULT:-}")"
         [[ -n "$run_aws_region" ]] || run_contract_die "${aws_env_prefix}_REGION is required for AWS targets"
-        run_aws_profile="$(run_contract_prefixed_env_or_default "$aws_env_prefix" PROFILE "")"
+        run_aws_profile="$(run_contract_prefixed_env_or_default "$aws_env_prefix" PROFILE)"
         [[ -n "$run_aws_profile" ]] || run_contract_die "${aws_env_prefix}_PROFILE is required for AWS targets"
     fi
     cat >"$manifest_path" <<EOF

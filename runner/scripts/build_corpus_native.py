@@ -189,6 +189,30 @@ def clean_stage_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
+def materialize_library_soname_links(lib_dir: Path) -> None:
+    if not lib_dir.is_dir():
+        return
+    for lib_path in sorted(path for path in lib_dir.iterdir() if path.is_file()):
+        completed = subprocess.run(
+            ["readelf", "-d", str(lib_path)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if completed.returncode != 0:
+            continue
+        soname = ""
+        for line in completed.stdout.splitlines():
+            if "Library soname:" not in line:
+                continue
+            soname = line.split("[", 1)[1].split("]", 1)[0].strip()
+            break
+        if soname and soname != lib_path.name:
+            link_path = lib_dir / soname
+            if not link_path.exists():
+                link_path.symlink_to(lib_path.name)
+
+
 def remove_staged_temp_objects(path: Path) -> None:
     for pattern in ("*.tmp.o", "*.tmp.bpf.o", "*.bpf.tmp.o"):
         for candidate in path.rglob(pattern):
@@ -664,6 +688,7 @@ def build_katran(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResul
                 [path for path in staged_lib_dir.iterdir() if path.is_file()],
                 lambda src: stage_root / "lib" / src.name,
             )
+            materialize_library_soname_links(stage_root / "lib")
     else:
         raise CommandError(
             "Katran staging requires explicit KATRAN_SERVER_BINARY and KATRAN_SERVER_LIB_DIR"
@@ -733,7 +758,9 @@ def build_tetragon(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildRes
 
     objects_dir = repo_dir / "bpf" / "objs"
     object_paths = sorted(path for path in objects_dir.glob("*.o") if is_bpf_object(path))
-    object_count = stage_many(object_paths, lambda src: stage_root / bpf_stage_relative(Path(src.name)))
+    # Tetragon resolves these objects by their original basename at runtime
+    # (for example bpf_alignchecker.o), so preserve the upstream filenames.
+    object_count = stage_many(object_paths, lambda src: stage_root / src.name)
 
     if not (repo_dir / "cmd" / "tetragon").is_dir():
         raise CommandError(

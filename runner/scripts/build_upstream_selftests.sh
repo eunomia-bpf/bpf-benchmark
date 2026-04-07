@@ -7,31 +7,83 @@ UPSTREAM_SELFTEST_OUTPUT_DIR="${UPSTREAM_SELFTEST_OUTPUT_DIR:?UPSTREAM_SELFTEST_
 VMLINUX_BTF="${VMLINUX_BTF:?VMLINUX_BTF is required}"
 JOBS="${JOBS:-1}"
 UPSTREAM_SELFTEST_LLVM_SUFFIX="${UPSTREAM_SELFTEST_LLVM_SUFFIX:-}"
-UPSTREAM_SELFTEST_SKEL_BLACKLIST="${UPSTREAM_SELFTEST_SKEL_BLACKLIST:-btf__% test_pinning_invalid.c test_sk_assign.c bpf_smc.c}"
-COMPAT_DIR="${UPSTREAM_SELFTEST_COMPAT_DIR:-$ROOT_DIR/runner/compat/upstream_selftests}"
+UPSTREAM_SELFTEST_HOST_PYTHON_BIN="${UPSTREAM_SELFTEST_HOST_PYTHON_BIN:-python3}"
+UPSTREAM_SELFTEST_SELECTION_FILE="$ROOT_DIR/runner/config/upstream_selftests_selection.tsv"
 UPSTREAM_SELFTEST_ARCH="${UPSTREAM_SELFTEST_ARCH:-}"
 UPSTREAM_SELFTEST_CROSS_COMPILE="${UPSTREAM_SELFTEST_CROSS_COMPILE:-}"
 UPSTREAM_SELFTEST_SYSROOT_ROOT="${UPSTREAM_SELFTEST_SYSROOT_ROOT:-}"
 UPSTREAM_SELFTEST_PKGCONFIG_LIBDIR="${UPSTREAM_SELFTEST_PKGCONFIG_LIBDIR:-}"
 UPSTREAM_SELFTEST_TOOLCHAIN_DIR="${UPSTREAM_SELFTEST_TOOLCHAIN_DIR:-$UPSTREAM_SELFTEST_OUTPUT_DIR/toolchain}"
+GENERATED_INCLUDE_DIR="${UPSTREAM_SELFTEST_OUTPUT_DIR}/build-include"
+KERNEL_SOURCE_ROOT="$(cd "$UPSTREAM_SELFTEST_SOURCE_DIR/../../../.." && pwd)"
+
+declare -a UPSTREAM_SELFTEST_BUILD_TARGETS=()
+declare -a UPSTREAM_SELFTEST_SOURCE_EXCLUDES=()
 
 die() {
     printf '[build-upstream-selftests][ERROR] %s\n' "$*" >&2
     exit 1
 }
 
-blacklist_has_entry() {
-    local needle="$1"
-    local entry
-    for entry in $UPSTREAM_SELFTEST_SKEL_BLACKLIST; do
-        [[ "$entry" == "$needle" ]] && return 0
-    done
-    return 1
-}
-
 require_file() {
     local path="$1"
     [[ -f "$path" ]] || die "required file is missing: $path"
+}
+
+join_by_space() {
+    local out=""
+    local item
+    for item in "$@"; do
+        if [[ -n "$out" ]]; then
+            out+=" "
+        fi
+        out+="$item"
+    done
+    printf '%s\n' "$out"
+}
+
+load_selection_manifest() {
+    local manifest="$UPSTREAM_SELFTEST_SELECTION_FILE"
+    local line_no=0
+    local raw_line=""
+    local kind=""
+    local value=""
+    local reason=""
+    declare -A seen=()
+
+    require_file "$manifest"
+    while IFS= read -r raw_line || [[ -n "$raw_line" ]]; do
+        line_no=$((line_no + 1))
+        [[ -z "$raw_line" ]] && continue
+        [[ "$raw_line" =~ ^# ]] && continue
+        IFS=$'\t' read -r kind value reason <<<"$raw_line"
+        [[ -n "$kind" && -n "$value" && -n "$reason" ]] \
+            || die "invalid selection entry at ${manifest}:${line_no}; expected <kind><TAB><value><TAB><reason>"
+        if [[ -n "${seen["$kind:$value"]:-}" ]]; then
+            die "duplicate selection entry at ${manifest}:${line_no}: ${kind} ${value}"
+        fi
+        seen["$kind:$value"]=1
+        case "$kind" in
+            make_target)
+                UPSTREAM_SELFTEST_BUILD_TARGETS+=("$value")
+                ;;
+            source_exclude)
+                UPSTREAM_SELFTEST_SOURCE_EXCLUDES+=("$value")
+                ;;
+            *)
+                die "unknown selection kind at ${manifest}:${line_no}: ${kind}"
+                ;;
+        esac
+    done <"$manifest"
+
+    [[ "${#UPSTREAM_SELFTEST_BUILD_TARGETS[@]}" -gt 0 ]] \
+        || die "selection manifest defines no build targets: ${manifest}"
+
+    printf '[build-upstream-selftests] selection manifest: %s\n' "$manifest"
+    printf '[build-upstream-selftests] build targets: %s\n' "$(join_by_space "${UPSTREAM_SELFTEST_BUILD_TARGETS[@]}")"
+    if [[ "${#UPSTREAM_SELFTEST_SOURCE_EXCLUDES[@]}" -gt 0 ]]; then
+        printf '[build-upstream-selftests] source excludes: %s\n' "$(join_by_space "${UPSTREAM_SELFTEST_SOURCE_EXCLUDES[@]}")"
+    fi
 }
 
 resolve_llvm_tool() {
@@ -92,11 +144,41 @@ EOF
     chmod +x "$cross_bin_dir/cc" "$cross_bin_dir/cxx" "$cross_bin_dir/ld" "$cross_bin_dir/pkg-config"
 }
 
+normalize_kernel_arch() {
+    local arch="${1:-}"
+    case "$arch" in
+        aarch64) printf '%s\n' arm64 ;;
+        x86_64) printf '%s\n' x86 ;;
+        amd64) printf '%s\n' x86 ;;
+        *) printf '%s\n' "$arch" ;;
+    esac
+}
+
+prepare_generated_include_dir() {
+    local kernel_arch="${UPSTREAM_SELFTEST_ARCH:-$(uname -m)}"
+    local alt_header=""
+    kernel_arch="$(normalize_kernel_arch "$kernel_arch")"
+
+    rm -rf "$GENERATED_INCLUDE_DIR"
+    mkdir -p "$GENERATED_INCLUDE_DIR"
+
+    mkdir -p "$GENERATED_INCLUDE_DIR/linux"
+    cp "$KERNEL_SOURCE_ROOT/include/linux/kasan-checks.h" "$GENERATED_INCLUDE_DIR/linux/kasan-checks.h"
+
+    alt_header="$KERNEL_SOURCE_ROOT/arch/${kernel_arch}/include/asm/alternative-macros.h"
+    if [[ -f "$alt_header" ]]; then
+        mkdir -p "$GENERATED_INCLUDE_DIR/asm"
+        cp "$alt_header" "$GENERATED_INCLUDE_DIR/asm/alternative-macros.h"
+    fi
+}
+
 sanitize_generated_vmlinux_header() {
     local header="$UPSTREAM_SELFTEST_OUTPUT_DIR/tools/include/vmlinux.h"
     [[ -f "$header" ]] || die "expected generated vmlinux header is missing: $header"
+    command -v "$UPSTREAM_SELFTEST_HOST_PYTHON_BIN" >/dev/null 2>&1 \
+        || die "required host python is missing: ${UPSTREAM_SELFTEST_HOST_PYTHON_BIN}"
 
-    python3 - "$header" <<'PY'
+    "$UPSTREAM_SELFTEST_HOST_PYTHON_BIN" - "$header" <<'PY'
 import pathlib
 import sys
 
@@ -113,8 +195,8 @@ header.write_text("\n".join(filtered) + "\n")
 PY
 }
 
-prepare_filtered_source_dir() {
-    if ! blacklist_has_entry "bpf_smc.c"; then
+prepare_selected_source_dir() {
+    if [[ "${#UPSTREAM_SELFTEST_SOURCE_EXCLUDES[@]}" -eq 0 ]]; then
         printf '%s\n' "$UPSTREAM_SELFTEST_SOURCE_DIR"
         return 0
     fi
@@ -124,40 +206,63 @@ prepare_filtered_source_dir() {
     local kernel_root
     local entry
     local base
-    local filtered_root="${UPSTREAM_SELFTEST_OUTPUT_DIR}.source-tree"
-    local filtered_dir="$filtered_root/tools/testing/selftests/bpf"
+    local rel_path
+    local selected_root="${UPSTREAM_SELFTEST_OUTPUT_DIR}.source-tree"
+    local selected_dir="$selected_root/tools/testing/selftests/bpf"
+    local excluded_csv=","
 
     source_root="$(cd "$UPSTREAM_SELFTEST_SOURCE_DIR/../../.." && pwd)"
     selftests_root="$source_root/testing/selftests"
     kernel_root="$(cd "$UPSTREAM_SELFTEST_SOURCE_DIR/../../../.." && pwd)"
 
-    rm -rf "$filtered_root"
-    mkdir -p "$filtered_root/tools/testing/selftests"
-    ln -s "$kernel_root/include" "$filtered_root/include"
-    ln -s "$kernel_root/arch" "$filtered_root/arch"
-    ln -s "$source_root/build" "$filtered_root/tools/build"
-    ln -s "$source_root/scripts" "$filtered_root/tools/scripts"
-    ln -s "$source_root/lib" "$filtered_root/tools/lib"
-    ln -s "$source_root/include" "$filtered_root/tools/include"
-    ln -s "$source_root/arch" "$filtered_root/tools/arch"
-    ln -s "$source_root/bpf" "$filtered_root/tools/bpf"
-    ln -s "$kernel_root/kernel" "$filtered_root/kernel"
-    ln -s "$kernel_root/scripts" "$filtered_root/scripts"
+    rm -rf "$selected_root"
+    mkdir -p "$selected_root/tools/testing/selftests"
+    ln -s "$kernel_root/include" "$selected_root/include"
+    ln -s "$kernel_root/arch" "$selected_root/arch"
+    ln -s "$source_root/build" "$selected_root/tools/build"
+    ln -s "$source_root/scripts" "$selected_root/tools/scripts"
+    ln -s "$source_root/lib" "$selected_root/tools/lib"
+    ln -s "$source_root/include" "$selected_root/tools/include"
+    ln -s "$source_root/arch" "$selected_root/tools/arch"
+    ln -s "$source_root/bpf" "$selected_root/tools/bpf"
+    ln -s "$kernel_root/kernel" "$selected_root/kernel"
+    ln -s "$kernel_root/scripts" "$selected_root/scripts"
+    for rel_path in "${UPSTREAM_SELFTEST_SOURCE_EXCLUDES[@]}"; do
+        [[ -e "$UPSTREAM_SELFTEST_SOURCE_DIR/$rel_path" ]] \
+            || die "selection manifest excludes missing upstream selftest source: $rel_path"
+        excluded_csv+="${rel_path},"
+    done
+
     for entry in "$selftests_root"/*; do
         base="$(basename "$entry")"
         [[ "$base" == "bpf" ]] && continue
-        ln -s "$entry" "$filtered_root/tools/testing/selftests/$base"
+        ln -s "$entry" "$selected_root/tools/testing/selftests/$base"
     done
-    cp -a "$UPSTREAM_SELFTEST_SOURCE_DIR/." "$filtered_dir/"
-    rm -f "$filtered_dir/progs/bpf_smc.c" "$filtered_dir/prog_tests/test_bpf_smc.c"
-    printf '%s\n' "$filtered_dir"
+    mkdir -p "$selected_dir"
+    while IFS= read -r -d '' entry; do
+        rel_path="${entry#$UPSTREAM_SELFTEST_SOURCE_DIR/}"
+        case "$excluded_csv" in
+            *,"${rel_path}",*)
+                continue
+                ;;
+        esac
+        if [[ -d "$entry" ]]; then
+            mkdir -p "$selected_dir/$rel_path"
+            continue
+        fi
+        mkdir -p "$(dirname "$selected_dir/$rel_path")"
+        cp -a "$entry" "$selected_dir/$rel_path"
+    done < <(find "$UPSTREAM_SELFTEST_SOURCE_DIR" -mindepth 1 -print0)
+    for rel_path in "${UPSTREAM_SELFTEST_SOURCE_EXCLUDES[@]}"; do
+        [[ ! -e "$selected_dir/$rel_path" ]] \
+            || die "selected upstream selftest exclusion leaked into selected source view: $rel_path"
+    done
+    printf '%s\n' "$selected_dir"
 }
 
 require_file "$VMLINUX_BTF"
-require_file "$COMPAT_DIR/bpf_smc.skel.h"
-require_file "$COMPAT_DIR/remote_selftest_compat.h"
-require_file "$COMPAT_DIR/linux/kasan-checks.h"
 [[ -d "$UPSTREAM_SELFTEST_SOURCE_DIR" ]] || die "selftest source dir is missing: $UPSTREAM_SELFTEST_SOURCE_DIR"
+load_selection_manifest
 
 clang_bin="$(resolve_llvm_tool clang)"
 cxx_bin="$(resolve_llvm_tool clang++)"
@@ -170,9 +275,8 @@ llvm_strip="$(resolve_llvm_tool llvm-strip)"
 
 rm -rf "$UPSTREAM_SELFTEST_OUTPUT_DIR"
 mkdir -p "$UPSTREAM_SELFTEST_OUTPUT_DIR"
-cp "$COMPAT_DIR/bpf_smc.skel.h" "$UPSTREAM_SELFTEST_OUTPUT_DIR/bpf_smc.skel.h"
-cp "$COMPAT_DIR/remote_selftest_compat.h" "$UPSTREAM_SELFTEST_OUTPUT_DIR/remote_selftest_compat.h"
-SOURCE_DIR="$(prepare_filtered_source_dir)"
+prepare_generated_include_dir
+SOURCE_DIR="$(prepare_selected_source_dir)"
 
 make_args=(
     -C "$SOURCE_DIR"
@@ -191,7 +295,6 @@ make_args=(
     OUTPUT="$UPSTREAM_SELFTEST_OUTPUT_DIR"
     TEST_KMODS=
     SKIP_DOCS=1
-    "SKEL_BLACKLIST=$UPSTREAM_SELFTEST_SKEL_BLACKLIST"
 )
 
 if [[ -n "$UPSTREAM_SELFTEST_CROSS_COMPILE" ]]; then
@@ -204,8 +307,8 @@ if [[ -n "$UPSTREAM_SELFTEST_CROSS_COMPILE" ]]; then
         LD="$UPSTREAM_SELFTEST_TOOLCHAIN_DIR/ld"
         AR="${UPSTREAM_SELFTEST_CROSS_COMPILE}ar"
         PKG_CONFIG="$UPSTREAM_SELFTEST_TOOLCHAIN_DIR/pkg-config"
-        "USERCFLAGS=-I${COMPAT_DIR}"
-        "EXTRA_CFLAGS=-include ${UPSTREAM_SELFTEST_OUTPUT_DIR}/remote_selftest_compat.h -I${COMPAT_DIR} -D__GLIBC_USE_DEPRECATED_SCANF=1 -D__GLIBC_USE_C2X_STRTOL=0"
+        "USERCFLAGS=-I${GENERATED_INCLUDE_DIR}"
+        "EXTRA_CFLAGS=-I${GENERATED_INCLUDE_DIR} -D__GLIBC_USE_DEPRECATED_SCANF=1 -D__GLIBC_USE_C2X_STRTOL=0"
     )
 else
     make_args+=(
@@ -213,11 +316,11 @@ else
         CXX="$cxx_bin"
         LD="$ld_bin"
         AR="$host_ar_bin"
-        "USERCFLAGS=-I${COMPAT_DIR}"
-        "EXTRA_CFLAGS=-include ${UPSTREAM_SELFTEST_OUTPUT_DIR}/remote_selftest_compat.h -I${COMPAT_DIR}"
+        "USERCFLAGS=-I${GENERATED_INCLUDE_DIR}"
+        "EXTRA_CFLAGS=-I${GENERATED_INCLUDE_DIR}"
     )
 fi
 
 make "${make_args[@]}" "$UPSTREAM_SELFTEST_OUTPUT_DIR/tools/include/vmlinux.h"
 sanitize_generated_vmlinux_header
-make "${make_args[@]}" test_verifier test_progs
+make "${make_args[@]}" "${UPSTREAM_SELFTEST_BUILD_TARGETS[@]}"

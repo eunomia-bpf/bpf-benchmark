@@ -2,8 +2,9 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-SYSROOT_ROOT="${ARM64_SYSROOT_ROOT:-$ROOT_DIR/.cache/aws-arm64/sysroot}"
-SYSROOT_LOCK_FILE="${ARM64_SYSROOT_LOCK_FILE:-$ROOT_DIR/.cache/aws-arm64/sysroot.lock}"
+HOST_CACHE_ROOT="${ARM64_HOST_CACHE_ROOT:-$ROOT_DIR/.cache/arm64-host}"
+SYSROOT_ROOT="${ARM64_SYSROOT_ROOT:-$HOST_CACHE_ROOT/sysroot}"
+SYSROOT_LOCK_FILE="${ARM64_SYSROOT_LOCK_FILE:-$HOST_CACHE_ROOT/sysroot.lock}"
 SYSROOT_REMOTE_HOST="${ARM64_SYSROOT_REMOTE_HOST:-}"
 SYSROOT_REMOTE_USER="${ARM64_SYSROOT_REMOTE_USER:-ec2-user}"
 SYSROOT_SSH_KEY_PATH="${ARM64_SYSROOT_SSH_KEY_PATH:-}"
@@ -18,16 +19,23 @@ readonly REQUIRED_PATHS=(
     "$SYSROOT_ROOT/usr/lib64/libpthread.so.0"
     "$SYSROOT_ROOT/lib64/libgcc_s.so.1"
     "$SYSROOT_ROOT/usr/include/libelf.h"
+    "$SYSROOT_ROOT/usr/include/llvm/IR/LLVMContext.h"
+    "$SYSROOT_ROOT/usr/include/yaml-cpp/yaml.h"
     "$SYSROOT_ROOT/usr/include/zlib.h"
     "$SYSROOT_ROOT/usr/include/zstd.h"
     "$SYSROOT_ROOT/usr/lib64/libelf.so"
     "$SYSROOT_ROOT/usr/lib64/libelf.so.1"
+    "$SYSROOT_ROOT/usr/lib64/libLLVM-15.so"
+    "$SYSROOT_ROOT/usr/lib64/libyaml-cpp.so"
+    "$SYSROOT_ROOT/usr/lib64/libyaml-cpp.so.0.6"
     "$SYSROOT_ROOT/usr/lib64/libz.so"
     "$SYSROOT_ROOT/usr/lib64/libz.so.1"
     "$SYSROOT_ROOT/usr/lib64/libzstd.so"
     "$SYSROOT_ROOT/usr/lib64/libzstd.so.1"
     "$SYSROOT_ROOT/usr/lib64/libcrypto.so.3"
+    "$SYSROOT_ROOT/usr/lib64/cmake/llvm/LLVMConfig.cmake"
     "$SYSROOT_ROOT/usr/lib64/pkgconfig/libelf.pc"
+    "$SYSROOT_ROOT/usr/lib64/pkgconfig/yaml-cpp.pc"
     "$SYSROOT_ROOT/usr/lib64/pkgconfig/zlib.pc"
     "$SYSROOT_ROOT/usr/lib64/pkgconfig/libzstd.pc"
 )
@@ -40,6 +48,10 @@ readonly REQUIRED_REMOTE_PACKAGES=(
     libstdc++
     libstdc++-devel
     elfutils-libelf-devel
+    llvm-libs
+    llvm-devel
+    yaml-cpp
+    yaml-cpp-devel
     zlib
     zlib-devel
     libzstd
@@ -99,6 +111,21 @@ remote_package_fingerprint() {
     remote_exec "
 packages=(${package_list})
 rpm -q \"\${packages[@]}\"
+"
+}
+
+ensure_remote_packages_installed() {
+    local package_list
+    package_list="$(printf "'%s' " "${REQUIRED_REMOTE_PACKAGES[@]}")"
+    remote_exec "
+packages=(${package_list})
+missing=()
+for pkg in \"\${packages[@]}\"; do
+    rpm -q \"\$pkg\" >/dev/null 2>&1 || missing+=(\"\$pkg\")
+done
+if (( \${#missing[@]} )); then
+    sudo dnf -y install \"\${missing[@]}\" >/dev/null
+fi
 "
 }
 
@@ -166,6 +193,7 @@ ensure_sysroot_current() {
     local remote_fingerprint
     if have_sysroot; then
         require_remote_contract
+        ensure_remote_packages_installed
         remote_fingerprint="$(remote_package_fingerprint)"
         if [[ "$(cat "$SYSROOT_FINGERPRINT_FILE")" == "$remote_fingerprint" ]]; then
             return 0
@@ -173,6 +201,7 @@ ensure_sysroot_current() {
         log "Refreshing ARM64 sysroot because remote package fingerprint changed"
     else
         require_remote_contract
+        ensure_remote_packages_installed
         log "Preparing repo-local ARM64 sysroot under $SYSROOT_ROOT"
     fi
     populate_sysroot_from_remote

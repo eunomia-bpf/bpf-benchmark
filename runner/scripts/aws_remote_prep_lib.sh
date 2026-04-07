@@ -216,10 +216,6 @@ ensure_instance_for_suite() {
         setup_remote_base_prereqs "$STATE_INSTANCE_IP"
         return 0
     fi
-    if ! verify_remote_runtime_prereqs "$STATE_INSTANCE_IP"; then
-        setup_remote_runtime_prereqs "$STATE_INSTANCE_IP"
-        return 0
-    fi
     if [[ "${RUN_SUITE_NEEDS_RUNTIME_BTF:-0}" == "1" ]] && ! remote_has_runtime_btf "$STATE_INSTANCE_IP"; then
         setup_instance "$STATE_INSTANCE_IP"
         load_state

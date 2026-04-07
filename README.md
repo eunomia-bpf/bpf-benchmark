@@ -45,7 +45,7 @@ make all
 # Quick smoke test (no VM required)
 make smoke
 
-# Full micro benchmark suite in VM → micro/results/<run_type>_<timestamp>/
+# Full micro benchmark suite in VM
 make vm-micro
 
 # Show all targets and parameters
@@ -64,13 +64,27 @@ make vm-corpus                       # corpus benchmark in VM
 make vm-corpus FILTERS=scx VM_CORPUS_WORKLOAD_SECONDS=10
 make vm-e2e                          # E2E benchmarks in VM
 make vm-e2e E2E_CASE=scx E2E_SMOKE=1
+make aws-arm64-test                  # AWS ARM64 correctness path
+make aws-arm64-benchmark AWS_ARM64_BENCH_MODE=micro
+make aws-x86-test                    # AWS x86 correctness path
+make aws-x86-benchmark AWS_X86_BENCH_MODE=e2e
 ```
 
+AWS targets require explicit local configuration for:
+- `AWS_ARM64_KEY_NAME` / `AWS_X86_KEY_NAME`
+- `AWS_ARM64_KEY_PATH` / `AWS_X86_KEY_PATH`
+- `AWS_ARM64_SECURITY_GROUP_ID` / `AWS_X86_SECURITY_GROUP_ID`
+- `AWS_ARM64_SUBNET_ID` / `AWS_X86_SUBNET_ID`
+- `AWS_ARM64_PROFILE` / `AWS_X86_PROFILE`
+
 Results are written to:
-- `micro/results/<run_type>_<timestamp>/` — checked-in canonical micro artifacts
-- `corpus/results/<run_type>_<timestamp>/` — checked-in canonical corpus artifacts
-- `e2e/results/<run_type>_<timestamp>/` — checked-in canonical E2E artifacts
+- `micro/results/` — direct local smoke outputs such as `make smoke`
+- `.cache/kvm-staged/<run_token>/workspace/.cache/suite-results/<target>_<suite>_<timestamp>/` — staged local-KVM suite artifacts copied out by the suite entrypoint
+- `.cache/aws-arm64/results/<suite>_<token>_<timestamp>/` — fetched AWS ARM64 suite outputs
+- `.cache/aws-x86/results/<suite>_<token>_<timestamp>/` — fetched AWS x86 suite outputs
 - `docs/tmp/` — analysis reports (.md only, never JSON results)
+
+`make clean` preserves fetched AWS result directories under `.cache/aws-*/results/`.
 
 ## Building Components Individually
 

@@ -286,7 +286,8 @@ class BCCRunner(AppRunner):
             "stdout_tail": "",
             "stderr_tail": "",
         }
-        self.tools_dir = resolve_tools_dir(tools_dir)
+        self.explicit_tools_dir = Path(tools_dir).resolve() if tools_dir is not None else None
+        self.tools_dir = resolve_tools_dir(self.explicit_tools_dir)
         self.tool_binary = Path(tool_binary).resolve() if tool_binary is not None else None
         self.session: ToolProcessSession | None = None
 
@@ -325,7 +326,7 @@ class BCCRunner(AppRunner):
         if int(self.setup_result.get("returncode", 0) or 0) != 0:
             stderr_tail = str(self.setup_result.get("stderr_tail") or "")
             raise RuntimeError(f"BCC setup failed: {stderr_tail or self.setup_result}")
-        self.tools_dir = resolve_tools_dir(self.tools_dir, setup_result=self.setup_result)
+        self.tools_dir = resolve_tools_dir(self.explicit_tools_dir, setup_result=self.setup_result)
 
         tool_binary = find_tool_binary(self.tools_dir, self.tool_name)
         if tool_binary is None:

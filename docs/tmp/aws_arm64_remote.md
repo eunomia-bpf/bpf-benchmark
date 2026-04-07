@@ -17,6 +17,15 @@ This document intentionally combines:
 
 The goal is to keep one precise record instead of multiple drifting notes.
 
+Historical log sections later in this document preserve intermediate states.
+If an older log entry conflicts with sections 2-5 or 9.4-9.5, the design and
+todo sections win.
+
+In particular, older historical notes may still mention intermediate names such
+as `RUN_LOCAL_PROMOTE_ROOT` or `RUN_RUNNER_BINARY_MODE`. Those names are not
+part of the current active contract unless reintroduced explicitly in sections
+2-5.
+
 ## 2. Product Goal
 
 The desired end-state is:
@@ -24,6 +33,7 @@ The desired end-state is:
 - one canonical root-`Makefile` entrypoint family
 - one target/suite contract
 - one manifest-driven bundle path
+- one public local-prep entrypoint
 - two executors only:
   - `kvm`
   - `aws-ssh`
@@ -56,7 +66,137 @@ The user-facing entrypoints remain:
 
 These aliases must stay thin.
 
-## 3. Non-Goals
+## 3. Design Summary
+
+### 3.1 Four-layer boundary
+
+The runner should have exactly four layers:
+
+- `target`
+  - describes machine capability and execution mode only
+  - examples: `x86-kvm`, `aws-x86`, `aws-arm64`
+- `suite`
+  - describes what a run needs, not where it runs
+  - examples: `test`, `micro`, `corpus`, `e2e`
+- `local prep`
+  - prepares suite-input repos, artifacts, bundles, and staged workspaces
+  - is the only public suite-input prep phase
+- `executor`
+  - only executes an already prepared run
+  - `kvm_executor.sh` for local VM execution
+  - `aws_executor.sh` for AWS lifecycle, SSH execution, and result fetch
+
+Any logic that mixes these layers is considered design debt.
+
+For AWS, one extra internal step exists before local prep:
+
+- remote preflight / remote prep
+  - launches or reuses the instance
+  - reconciles machine-global remote state such as kernel and remote prereqs
+  - may build host-side machine-setup artifacts needed for that reconciliation
+  - must hand off any resolved remote state to local prep explicitly
+
+### 3.2 Canonical control flow
+
+The canonical flow is:
+
+- root `Makefile` thin alias
+- `runner/scripts/run_target_suite.sh`
+- `runner/scripts/load_run_contract.sh`
+- internal AWS-only remote preflight when `RUN_EXECUTOR=aws-ssh`
+- `runner/scripts/prepare_local_inputs.sh`
+- executor:
+  - `runner/scripts/kvm_executor.sh`
+  - `runner/scripts/aws_executor.sh`
+- shared remote/local suite runtime:
+  - `runner/scripts/suite_entrypoint.sh`
+
+`prepare_local_inputs.sh` is the only public local-prep entrypoint.
+Executors must not expose their own separate public local-prep control plane.
+
+### 3.3 KVM / AWS parity rule
+
+KVM and AWS should not have different product-level prep or suite logic.
+
+They should share:
+
+- the same target/suite manifest model
+- the same public local-prep entrypoint
+- the same staged-input / bundle-input contract
+- the same suite entrypoint inside the staged workspace
+
+They may differ only in executor transport and machine lifecycle:
+
+- `kvm_executor.sh`
+- `aws_executor.sh`
+
+If KVM and AWS require different runtime assets, those assets must still be
+expressed through the same local-prep contract shape rather than separate
+public prep flows.
+
+### 3.4 Shared `corpus` / `e2e` contract
+
+`corpus` and `e2e` should share as much of the contract as possible:
+
+- same prerequisite model
+- same bundle/staging model
+- same runtime environment model
+- same app setup contract
+- same result/artifact structure shape
+
+They should differ only in:
+
+- workload triggering
+- measurement method
+- case selection
+- result aggregation
+
+If a bug affects paths, tools, setup, staged artifacts, remote env, or app
+setup, it should be fixed in the shared contract instead of by suite-specific
+branching.
+
+### 3.5 Parallel execution policy
+
+The intended policy is:
+
+- local KVM execution is serialized
+- AWS runs may execute in parallel
+- AWS benchmark runs must use:
+  - dedicated per-run instances
+  - dedicated per-run prep roots
+  - dedicated per-run remote stage/work directories
+- shared host resources may still use explicit locks
+- no benchmark lane may depend on another benchmark lane's prep root, bundle,
+  or remote workspace
+
+This means "AWS may run in parallel" is a design requirement, but the way to
+achieve it is explicit per-run isolation, not ambient shared cache behavior.
+
+Canonical AWS target profiles may keep portable defaults such as region,
+instance type, and remote stage paths, but they must not hard-code one
+developer's key/profile/network configuration. The following must come from
+explicit env or a non-versioned local config layer:
+
+- `*_KEY_NAME`
+- `*_KEY_PATH`
+- `*_SECURITY_GROUP_ID`
+- `*_SUBNET_ID`
+- `*_PROFILE`
+
+### 3.6 Prohibited design patterns
+
+The following are explicitly disallowed:
+
+- patching third-party source trees
+- keeping two control planes for one target/suite pair
+- large monolithic helper stacks that merely shuttle env around
+- hidden fallbacks when required artifacts are missing
+- bundle assembly that guesses inputs from stale cache layout
+- machine-global writes for benchmark assets on remote hosts
+- duplicate canonical results such as `latest.json` / `authoritative.json`
+- bundle sealing that depends on the caller shell's ambient `LD_LIBRARY_PATH`
+
+## 4. Non-Goals
 
 Out of scope:
 
@@ -66,9 +206,9 @@ Out of scope:
 - a large orchestration framework with many helper layers
 - dynamic fallback behavior when a required artifact or dependency is missing
 
-## 4. Current In-Tree Shape
+## 5. Current Refactor State
 
-### 4.1 New contract files
+### 5.1 Current in-tree contract files
 
 The refactor now centers on:
 
@@ -81,21 +221,29 @@ The refactor now centers on:
 - `runner/suites/e2e.env`
 - `runner/scripts/load_run_contract.sh`
 - `runner/scripts/run_target_suite.sh`
-- `runner/scripts/prepare_run_inputs.sh`
+- `runner/scripts/prepare_local_inputs.sh`
+- `runner/scripts/kvm_local_prep_lib.sh`
 - `runner/scripts/kvm_executor.sh`
+- `runner/scripts/aws_common_lib.sh`
+- `runner/scripts/aws_prep_paths_lib.sh`
+- `runner/scripts/aws_kernel_artifacts_lib.sh`
+- `runner/scripts/aws_remote_prep.sh`
+- `runner/scripts/aws_remote_prep_lib.sh`
+- `runner/scripts/aws_local_prep_lib.sh`
 - `runner/scripts/aws_executor.sh`
 - `runner/scripts/build_remote_bundle.sh`
 - `runner/scripts/aws_remote_prereqs.sh`
 - `runner/scripts/suite_entrypoint.sh`
 - `runner/scripts/build-arm64-daemon-host.sh`
+- `runner/scripts/build-arm64-portable-binary-host.sh`
 - `runner/scripts/build-arm64-repo-tests-host.sh`
 - `runner/scripts/build-arm64-scx-host.sh`
+- `runner/scripts/arm64_runtime_bundle_lib.sh`
 - `runner/scripts/prepare-arm64-sysroot.sh`
 - `runner/scripts/build_upstream_selftests.sh`
-- `runner/compat/upstream_selftests/*`
 
-For canonical local x86 execution, the manifest now carries explicit VM execution
-fields instead of translating back to legacy machine profile names:
+For canonical local x86 execution, the manifest now carries explicit VM
+execution fields instead of translating back to legacy machine profile names:
 
 - `RUN_VM_BACKEND`
 - `RUN_VM_EXECUTABLE`
@@ -106,8 +254,8 @@ fields instead of translating back to legacy machine profile names:
 - `RUN_VM_MEM`
 - `RUN_SUITE_ENTRYPOINT`
 
-For canonical AWS execution, the manifest now also carries the resolved local
-AWS launch contract instead of making `aws_executor.sh` branch on target names:
+For canonical AWS execution, the manifest now also carries the resolved launch
+contract instead of making `aws_executor.sh` branch on target names:
 
 - `RUN_AWS_KEY_NAME`
 - `RUN_AWS_KEY_PATH`
@@ -119,7 +267,91 @@ The manifest also declares the shared suite entrypoint itself:
 
 - `RUN_SUITE_ENTRYPOINT`
 
-### 4.2 ARM kernel config split
+### 5.2 Current local-prep and executor split
+
+Current intended state:
+
+- `prepare_local_inputs.sh` is the single public local-prep entrypoint
+- `kvm_local_prep.sh` and `aws_local_prep.sh` are deleted
+- AWS remote preflight is a separate internal step:
+  - `runner/scripts/aws_remote_prep.sh`
+- KVM local-prep-only artifact staging lives in:
+  - `runner/scripts/kvm_local_prep_lib.sh`
+- shared local-prep helper rules live in:
+  - `runner/scripts/local_prep_common_lib.sh`
+- shared AWS lifecycle/state/setup helpers live in:
+  - `runner/scripts/aws_common_lib.sh`
+- AWS prep/build path defaults live in:
+  - `runner/scripts/aws_prep_paths_lib.sh`
+- AWS host-side kernel/cache/build helpers live in:
+  - `runner/scripts/aws_kernel_artifacts_lib.sh`
+- AWS remote-prep-only instance/setup reconciliation lives in:
+  - `runner/scripts/aws_remote_prep_lib.sh`
+- AWS local-prep-only artifact staging lives in:
+  - `runner/scripts/aws_local_prep_lib.sh`
+- `kvm_executor.sh` consumes only staged KVM state
+- `aws_executor.sh` consumes prepared state and handles only:
+  - remote execution
+  - result fetch
+
+Current intended staged-input rule:
+
+- both KVM and AWS local prep may use per-run local prep roots internally
+- `build_remote_bundle.sh` must not derive staged inputs from a promote-root
+  convention
+- bundle-input files now carry explicit bundle input paths for:
+  - repos
+  - runtime binaries
+  - test artifacts
+  - native repo build roots
+  - SCX binary/object roots
+  - workload-tool roots
+  - module dirs
+  - micro generated-program dirs
+- `RUN_LOCAL_PROMOTE_ROOT` is no longer part of the active bundle contract
+
+Current canonical AWS control flow is now:
+
+- `run_target_suite.sh`
+- `aws_remote_prep.sh`
+  - may launch/reuse instance
+  - may install kernel / prereqs
+  - may update cached AWS state
+  - emits an explicit remote-prep state handoff for local prep
+- `prepare_local_inputs.sh`
+  - local-only
+  - no AWS remote mutations
+  - consumes the explicit remote-prep state file handoff passed by
+    `run_target_suite.sh` instead of re-reading hidden shared AWS state
+- `aws_executor.sh run`
+  - consumes existing AWS state plus local bundle state
+  - does not call `ensure_instance_for_suite`
+  - only uploads, runs, fetches, and terminates dedicated instances when needed
+
+What is still incomplete:
+
+- `aws_common_lib.sh` still needs one more review pass to make sure it only
+  carries shared AWS state / SSH / remote-prereq behavior and does not drift
+  back into target/suite policy
+- KVM/AWS local prep now converge on one explicit bundle-input contract, but
+  the internal prep orchestration is still split between
+  `kvm_local_prep_lib.sh` and `aws_local_prep_lib.sh`
+- repo selection is now explicit:
+  - `RUN_BUNDLED_REPOS_CSV` defines which repos must be sealed into the bundle
+  - `RUN_FETCH_REPOS_CSV` defines the full local fetch set needed before
+    bundle/native-build prep begins
+- KVM now participates in the same explicit workload-tool bundle contract as
+  AWS x86:
+  - local prep materializes bundled tools under a local tool root
+  - bundle inputs write both `RUN_BUNDLED_WORKLOAD_TOOLS_CSV` and
+    `RUN_LOCAL_WORKLOAD_TOOL_ROOT`
+  - guest prereq install now recognizes bundled workload tools before falling
+    back to guest package installation
+- upstream selftests no longer depend on repo-owned compat headers or stub
+  skeletons; exclusions now live only in the tracked selection manifest
+  `runner/config/upstream_selftests_selection.tsv`
+
+### 5.3 ARM kernel config split
 
 ARM kernel config now has:
 
@@ -132,7 +364,7 @@ ARM kernel config now has:
 
 This removes the duplicated repo-required BPF/tracing option block.
 
-### 4.3 Root `Makefile` state
+### 5.4 Root `Makefile` state
 
 The root `Makefile` now routes the main suite targets through the new contract:
 
@@ -141,41 +373,43 @@ The root `Makefile` now routes the main suite targets through the new contract:
 - `vm-corpus` -> `run_target_suite.sh run x86-kvm corpus`
 - `vm-e2e` -> `run_target_suite.sh run x86-kvm e2e`
 - `aws-arm64-test` -> `run_target_suite.sh run aws-arm64 test`
-- `aws-arm64-benchmark` -> mode dispatch for `micro|corpus|e2e`, with `AWS_ARM64_BENCH_MODE=all` fanning out those three remote benchmark lanes in parallel
+- `aws-arm64-benchmark` -> `run_target_suite.sh benchmark aws-arm64 <mode>`
 - `aws-arm64-terminate` -> `run_target_suite.sh terminate aws-arm64`
 - `aws-x86-test` -> `run_target_suite.sh run aws-x86 test`
-- `aws-x86-benchmark` -> mode dispatch for `micro|corpus|e2e`, with `AWS_X86_BENCH_MODE=all` fanning out those three remote benchmark lanes in parallel
+- `aws-x86-benchmark` -> `run_target_suite.sh benchmark aws-x86 <mode>`
 - `aws-x86-terminate` -> `run_target_suite.sh terminate aws-x86`
+
+The `all` benchmark fanout no longer lives in the root `Makefile`. It now
+lives inside `run_target_suite.sh benchmark ...`, so the root aliases stay
+thin and `make -n` remains purely static.
 
 The root `Makefile` no longer carries AWS wrapper env blocks such as
 `AWS_ARM64_RUN_ENV` / `AWS_X86_RUN_ENV`. Canonical AWS targets now call
 `run_target_suite.sh` directly, so `load_run_contract.sh` is the only place
 that resolves target-prefixed AWS inputs.
 
-The canonical flow is now:
+The root `Makefile` has also been thinned further on the developer-build side:
 
-- `run_target_suite.sh` writes the manifest
-- local KVM runs perform host-side build work via `prepare_run_inputs.sh`
-- AWS runs perform machine prep first, then explicit local bundle preparation, then invoke one shared suite entrypoint
-- the suite behavior itself lives in:
-  - `runner/scripts/suite_entrypoint.sh`
+- root `daemon` and the `$(DAEMON_PATH)` incremental rule now delegate to
+  `runner/Makefile`'s `daemon-binary`
+- root `daemon-tests` now delegates to `runner/Makefile`'s `daemon-tests`
+- the `$(MICRO_BPF_STAMP)` incremental rule now delegates to
+  `runner/Makefile`'s `micro-programs`
 
-For AWS runs, local bundle preparation is not a separate public action.
-It remains an internal explicit step of `aws_executor.sh run` after machine and
-kernel readiness are established.
+What still remains as developer-only direct-build surface in the root
+`Makefile` is explicit and temporary:
 
-AWS instance usage is now explicit:
-
-- `test` uses a shared cached instance per target
-- `micro`, `corpus`, and `e2e` use dedicated per-run instances
-
-That keeps correctness reuse cheap while making AWS benchmark execution
-parallel-safe without sharing one cached benchmark machine.
+- `micro`
+- `kernel` / `kernel-build` / `kernel-clean` / `kernel-rebuild`
+- `kinsn-modules`
+- `smoke`
+- `check`
+- `validate`
 
 The canonical run manifest is immutable at creation time for target/suite
 contract fields. Executor-local staging paths are not part of the contract.
 
-For canonical local KVM execution, `prepare_run_inputs.sh` now materializes a
+For canonical local KVM execution, `prepare_local_inputs.sh` materializes a
 staged workspace snapshot and then writes only these local execution pointers
 into a run-local sidecar state file consumed by `run_target_suite.sh`:
 
@@ -201,14 +435,15 @@ AWS launch parameters now also follow the same rule:
 
 Local bundle assembly now follows the same explicit pattern:
 
-- executors write a local-only `bundle-inputs.env`
+- local prep writes a local-only `bundle-inputs.env`
 - `build_remote_bundle.sh` consumes:
   - the run manifest
   - the bundle-input spec
-- bundle construction no longer depends on large executor-specific ambient
-  env injection
+- bundle construction no longer depends on:
+  - executor-specific ambient env injection
+  - `RUN_LOCAL_PROMOTE_ROOT`-anchored path guessing
 
-### 4.4 Deleted legacy AWS control scripts
+### 5.5 Deleted legacy AWS control scripts
 
 The old AWS monoliths and ARM64-specific helper chain have been deleted:
 
@@ -219,7 +454,7 @@ The old AWS monoliths and ARM64-specific helper chain have been deleted:
 - `runner/scripts/aws_arm64_remote_prereqs.sh`
 - `runner/scripts/aws_arm64_remote_suite.sh`
 
-### 4.5 Machine config cleanup
+### 5.6 Machine config cleanup
 
 The legacy machine-table layer has been removed completely:
 
@@ -309,6 +544,9 @@ The refactor has already removed these specific problems:
 - generic ambient `AWS_AMI_ID` overriding the target-selected AMI outside the manifest
 - bundle assembly copying the repo-root `module/` tree wholesale
 - setup-script split between repo-managed artifact mode and fallback local-build mode for BCC / Tracee / Tetragon
+- AWS remote prereqs acting as an x86 workload-tool source-build plane for
+  `wrk`, `sysbench`, or `hackbench`; remote prereqs now allow only bundled
+  tools or package-manager-installed tools
 - bundle assembly copying repo-owned source trees with broad directory copies instead of tracked-only snapshots
 - Tracee runner picking up ambient `corpus/build/tracee` state before running setup
 - Katran native staging picking up ambient `e2e/cases/katran/{bin,lib}` state without an explicit caller contract
@@ -326,6 +564,9 @@ The refactor has already removed these specific problems:
 - full `test` mode over-declaring the same local prep for `selftest`,
   `negative`, and `test`; canonical manifests and bundle assembly now split
   those three modes cleanly
+- `selftest` / `negative` test bundles carrying full upstream-selftests build
+  inputs even when upstream tests were not part of the requested mode; those
+  assets are now bundled only for full `test`
 - `arm64-test-artifacts` always rebuilding the ARM64 Docker/qemu image even
   for `selftest` or `negative`; those modes now stay entirely on the host-cross
   path and only full `test` still enters the upstream-selftest container path
@@ -347,56 +588,91 @@ The refactor has already removed these specific problems:
 
 The refactor is not finished yet.
 
-### 7.1 `runner/scripts/aws_executor.sh` is still large
+### 7.1 Shared AWS helper code is now structurally split
 
-The new shape is better than the deleted monoliths, but `aws_executor.sh` still owns:
+The new shape is materially better than the deleted monoliths. Current state:
 
-- AWS lifecycle
-- state management
-- kernel setup
-- local artifact preparation
-- bundle upload/run/fetch
+- `aws_executor.sh` now owns only:
+  - remote execution
+  - result fetch
+  - dedicated/shared AWS run coordination
+- `aws_common_lib.sh` owns:
+  - AWS lifecycle
+  - state management
+  - remote prereq verification/setup
+- `aws_prep_paths_lib.sh` owns:
+  - AWS host-prep/build path defaults
+- `aws_kernel_artifacts_lib.sh` owns:
+  - AWS host-side kernel/cache/build helpers
+- `aws_remote_prep_lib.sh` owns:
+  - AWS remote-prep-only instance/setup reconciliation
+- `aws_local_prep_lib.sh` owns:
+  - AWS local artifact preparation
+  - AWS bundle assembly
 
-This is better than before because suite behavior itself now lives in the shared
-`suite_entrypoint.sh`, and host-side build/stage work is triggered explicitly
-through `prepare_run_inputs.sh`. But the AWS executor is still larger than it
-should be and needs another shrinking pass.
+`aws_common_lib.sh` is no longer carrying host-prep/build helpers or suite
+policy. It is still a relatively large shared control-plane library, but that
+is now an implementation-size concern rather than a structural blocker. Further
+splitting should happen only if a new concrete boundary emerges.
 
-### 7.2 Third-party build compatibility still exists in isolated local builders
+### 7.2 Third-party source handling is now explicit and tracked
 
-The remaining third-party compatibility handling is now isolated to local build
-steps, not remote execution or source-tree patching:
+Tracked third-party trees are no longer patched and active runner code no
+longer relies on repo-owned compat headers or stub skeletons for upstream
+selftests.
 
-- `runner/scripts/build_upstream_selftests.sh` still injects repo-owned
-  compatibility assets from `runner/compat/upstream_selftests/*` into the
-  *output directory* when building ARM64 upstream selftests locally
-- `runner/scripts/build_corpus_native.py` still builds some `bpftrace`
-  stdlib objects against a build-local filtered `vmlinux.h` compatibility
-  header when the cached header contains declarations that collide with the
-  checked-out third-party source
+The remaining source-side handling is now limited to:
 
-This is much cleaner than patching tracked third-party trees, but it is still
-design debt and should be reviewed explicitly.
+- `runner/scripts/build_upstream_selftests.sh`
+  - reads a tracked selection manifest at
+    `runner/config/upstream_selftests_selection.tsv`
+  - the manifest explicitly records canonical build targets and source-level
+    exclusions with reasons
+  - every declared source exclusion must still exist in the vendored upstream
+    tree or the build fails fast
+  - upstream still owns its own `SKEL_BLACKLIST`; the repo contract does not
+    shadow or override it
+  - the build still uses a filtered local copy when selected upstream sources
+    must be excluded from the build, but selection is now explicit and
+    auditable instead of being embedded as shell defaults
+- `runner/scripts/build_corpus_native.py`
+  - still sanitizes a build-local generated `vmlinux.h` when cached declarations
+    collide with third-party build inputs
 
-### 7.3 KVM and AWS still need one stricter staged-input contract
+This keeps the contract at explicit build selection plus generated-header
+sanitation only; there is no accepted repo-owned third-party compat layer in
+the active runner path.
+
+### 7.3 ARM host/cross toolchain contracts are now explicit
+
+Active ARM build paths no longer hide tool or sysroot behavior through
+fallback shims:
+
+- `runner/scripts/cross-arm64-build.sh`
+  - requires a real `rustfmt` binary via the same explicit contract used by
+    host-cross SCX builds
+  - no longer injects a repo-owned fake `rustfmt`
+- `runner/scripts/prepare-arm64-sysroot.sh`
+  - requires an explicit remote sysroot source
+  - no longer exposes a cache-only bypass for canonical or debug flows
+
+### 7.4 KVM and AWS now share one explicit staged-input contract
 
 KVM now executes from a staged workspace snapshot instead of the live repo
 checkout. That removes the biggest control-plane split and fixes the manifest
 lifetime issue.
 
-What still needs more cleanup is the host-side artifact preparation shape:
+The staged-input shape is now:
 
-- AWS prebuilds more artifacts into cache-local promotion roots before staging
-- KVM now promotes runtime binaries, unittest/negative outputs, upstream
-  selftests, selected repos, native repo build dirs, SCX artifacts, and micro
-  generated objects into a per-run isolated prep root before staging the final
-  workspace snapshot
-- AWS x86 still needs the same stricter promoted-artifact shape; its x86 bundle
-  path is not fully aligned yet with the new KVM promotion model
+- local prep may use per-run prep roots internally
+- `build_remote_bundle.sh` consumes only explicit bundle-input paths
+- KVM and AWS write the same kind of bundle-input file instead of relying on
+  a promote-root convention
+- the active contract no longer uses `RUN_LOCAL_PROMOTE_ROOT`
 
-That is now much closer to the AWS bundle model. The remaining work is to make
-AWS x86 consume the same promoted-artifact contract and remove any remaining
-live-output coupling there as well.
+What still needs review is whether any remaining duplicated bundle input can be
+shared through a smaller repo-owned helper without reintroducing hidden path
+derivation.
 
 ### 7.4 Guest prerequisite execution is still split, but the policy is shared
 
@@ -411,21 +687,21 @@ What still remains split is the executor-side transport/execution shape:
 - `runner/scripts/aws_remote_prereqs.sh`
 
 That remaining split is acceptable for now, but transport should stay thin and
-must not reintroduce duplicated tool/package policy.
+must not reintroduce duplicated tool/package policy or remote source-build
+fallbacks for tools that belong in the local-prep/bundle contract.
 
 ### 7.5 Latest review findings still being closed
 
 The latest full-project reviewers highlighted these remaining issues:
 
-- KVM staged-only execution still needs full runtime validation after the new
-  per-run prep-root changes
 - AWS ARM64 `test` no longer uses Docker/qemu for repo-owned unittest /
   negative binaries, but it still relies on a native remote build for upstream
   selftests
 - `micro_exec` is still on the ARM64 Docker/qemu path
 - same-target shared correctness execution still uses a shared cached instance,
   so only the remote execution step is serialized there
-- `aws_executor.sh` is still too large even after the current cleanup pass
+- upstream selftests filtering should keep shrinking as vendored inputs catch
+  up, but there should be no repo-owned compat assets left in active code
 
 These are being actively fixed before the ordered validation pass is declared
 complete.
@@ -438,13 +714,15 @@ artifact.
 What has moved out of qemu already:
 
 - the repo-owned ARM64 daemon (`bpfrejit-daemon`)
+- daemon-only portable runtime bundling for canonical ARM64 `test/corpus/e2e`
+  local prep
 - `scx` userspace artifacts (`scx_rusty` host-cross path validated)
 - repo-owned ARM64 unittest / negative binaries
 
 What still remains in the ARM64 Docker/qemu path today:
 
 - `micro_exec`
-- ARM64 upstream selftest kmods
+- ARM64 native benchmark repo builds (`bcc`, `katran`, `tracee`, `tetragon`)
 
 The current host-cross shape for `scx` is:
 
@@ -476,12 +754,14 @@ This path has been validated through the canonical target:
 So the remaining qemu-only work is now narrower still:
 
 - `micro_exec`
-- ARM64 upstream selftest kmods
+- ARM64 native benchmark repo builds (`bcc`, `katran`, `tracee`, `tetragon`)
 
 For ARM64 upstream selftests themselves, the canonical `aws-arm64 test` path
-now ships the filtered checked-out tree plus repo-owned compat overlays and
-builds them natively on the AWS ARM instance. That avoids patching upstream
-sources and avoids routing the whole selftest build through local qemu.
+now builds and bundles them during local prep using the repo-owned
+`runner/scripts/build_upstream_selftests.sh` contract. The remote suite only
+validates and executes the bundled `test_verifier` and `test_progs` outputs.
+That avoids patching upstream sources, avoids any repo-owned compat layer, and
+keeps the remote side on pure execution.
 
 ## 8. Tetragon Contract Change
 
@@ -522,9 +802,7 @@ This is the required order from this point onward.
 
 1. Run subagent review on the current refactor shape only.
 2. Fix review findings.
-3. Keep the review running while validation progresses, but do not declare the
-   refactor complete or cut the final cleanup commit until the review findings
-   are closed.
+3. Do not restart real-path validation until the review findings are closed.
 
 ### 9.3 Validation order after review
 
@@ -550,120 +828,264 @@ locks during local prep.
 ### 9.4 Immediate next todo
 
 1. Keep the document current after each newly observed blocker or milestone.
-2. Finish stabilizing canonical `x86-kvm` test execution.
-3. Use explicit canonical AWS inputs only:
-   - `AWS_ARM64_REGION`
-   - `AWS_ARM64_PROFILE`
-   - `AWS_ARM64_KEY_NAME`
-   - `AWS_ARM64_KEY_PATH`
-   - `AWS_ARM64_SECURITY_GROUP_ID`
-   - `AWS_ARM64_SUBNET_ID`
-   - `AWS_X86_REGION`
-   - `AWS_X86_PROFILE`
-4. Run `make aws-arm64-test` with explicit target-prefixed AWS inputs and fix the
-   first real remote blocker.
-5. Run `make aws-x86-test` only after the ARM64 test path is stable.
-6. Keep only local KVM serialized; AWS local prep may overlap, and AWS
-   benchmark runs may overlap remotely through dedicated per-run instances and
-   dedicated remote workspaces.
-7. Fix the current ARM64 micro local-prep blocker (`micro_exec` link failure in
-   the ARM userspace toolchain) and rerun the dedicated benchmark lane.
-8. Keep x86 micro progressing in parallel so the dedicated-instance AWS
-   benchmark model is exercised on both architectures, and keep `BENCH_MODE=all`
-   aligned with that same parallel remote fan-out model.
+2. Keep the bundle-input contract explicit and auditable:
+   - no `RUN_LOCAL_PROMOTE_ROOT`-anchored path guessing in
+     `build_remote_bundle.sh`
+   - no hidden path reconstruction from cache layout
+   - only explicit bundle input paths written by local prep
+   - repo selection must stay explicit:
+     - `RUN_BUNDLED_REPOS_CSV` for repos sealed into the bundle
+     - `RUN_FETCH_REPOS_CSV` for the local fetch set
+   - workload-tool selection must stay explicit:
+     - `RUN_BUNDLED_WORKLOAD_TOOLS_CSV`
+     - `RUN_LOCAL_WORKLOAD_TOOL_ROOT`
+3. Keep `prepare_local_inputs.sh` as the only public local-prep entrypoint and
+   prevent any drift back toward executor-owned prep logic.
+4. Review `aws_common_lib.sh` for any remaining target/suite policy that should
+   instead live in the manifest or already-isolated internal libraries.
+5. Keep upstream selftests build selection explicit and auditable:
+   - no repo-owned compat headers
+   - no stub skeleton headers
+   - no patches to vendor trees
+   - no `runner/compat/**` directory in active code
+   - all source-level exclusions must live in
+     `runner/config/upstream_selftests_selection.tsv` with reasons
+   - every declared source exclusion must fail fast if it no longer exists in
+     the vendored upstream tree
+   - the canonical LLVM tool suffix contract must flow from the manifest into
+     both x86 and ARM upstream-selftests builds
+6. Remove stale historical language in this document that still reflects
+   intermediate refactor states rather than the current structure.
+7. Keep replacing hidden env handoffs with explicit manifest/state-file
+   handoffs whenever an executor or local-prep step still relies on ambient
+   process state.
+8. Run full-project static review only after items 2-7 are clean.
+9. Do not restart real-path validation until the structural review returns
+   `No findings`.
 
-### 9.5 Current active todo and commit gate
+### 9.5 Current active todo and review gate
 
-Status as of the latest live runs:
+Refactor-first gate:
 
-1. `aws-arm64-test`
-   - status: done
-   - latest green run:
-     `./.cache/aws-arm64/results/test_run.aws-arm64.test.LoYLwx_20260405_141935`
-2. `aws-x86-test`
-   - status: paused by operator request
-   - latest active token before pause: `run.aws-x86.test.1xrAOp`
-   - reason:
-     - benchmark execution is now the active priority
-     - x86 correctness validation will resume after the dedicated-instance AWS
-       benchmark pass
-   - latest observed progress before pause:
-     - remote x86 instance SSH/host verification had already succeeded
-     - the run had progressed into local x86 kernel / upstream-selftests prep
-3. Manifest surface cleanup
+- no new real-path validation runs should start until items 1-4 are structurally clean
+
+Current ordered todo:
+
+1. Finish collapsing the remaining developer-only direct-build surface in the
+   root `Makefile`:
+   - keep `vm-*` / `aws-*` / `run_target_suite.sh` as the only canonical run
+     control plane
+   - keep developer build helpers thin and repo-owned; do not let them drift
+     into a second orchestration layer
+2. Continue reducing the remaining KVM/AWS local-prep orchestration split:
+   - keep shared repo fetch, x86 native repo build, x86 SCX build, x86 repo
+     tests, x86 workload-tool staging, and x86 upstream selftests in
+     `local_prep_common_lib.sh`
+   - keep moving suite orchestration out of target-specific libraries where the
+     behavior is actually shared
+3. Keep the explicit bundle-input contract clean:
+   - `build_remote_bundle.sh` now consumes only explicit input paths
+   - do not reintroduce `RUN_LOCAL_PROMOTE_ROOT`-anchored derivation
+   - keep AWS base prereqs free of runtime-only workload-tool staging
+   - keep repo selection split clean:
+     - `RUN_BUNDLED_REPOS_CSV` only for repos that must exist in the workspace
+     - `RUN_FETCH_REPOS_CSV` for the full local fetch set
+   - keep KVM guest prereqs aware of bundled workload tools so they do not
+     silently install host-owned tools from the guest package manager
+4. Reduce the remaining ARM canonical local-prep qemu/container path:
+   - move `micro_exec` toward a host-cross helper now that `runner/CMakeLists.txt`
+     no longer requires a runnable `llvm-config`
+   - keep extending the ARM sysroot contract only as needed to support that
+     host-cross path
+   - keep `__cross-arm64*` only for the minimum still-unavoidable ARM-native
+     work
+5. Keep `build_upstream_selftests.sh` on the explicit selection path:
+   - selection lives only in `runner/config/upstream_selftests_selection.tsv`
+   - no script-local hidden blacklists
+   - no source filtering that silently ignores stale exclusions
+6. Finish one more stale-reference sweep in active code, `README.md`, and this
+   document.
+7. Wait for the full-context subagent review and fold any remaining structural findings back into the tree.
+8. Re-run full static review gates:
+   - `bash -n`
+   - `git diff --check`
+   - `pytest`
+   - `make -n` on canonical aliases
+9. Only after reviewer output is `No findings`:
+   - restart real-path validation in the documented matrix order
+
+Current live-run state:
+
+- all interrupted `aws-arm64-test`, `aws-x86-test`, and `vm-test` runs were stopped
+- no canonical real-path validation process is intentionally left running
+   - completed:
+     - `AWS_*_BENCH_MODE=all` no longer uses recursive `$(MAKE)`
+     - `make -n` now stays static and never launches real AWS work
+     - canonical root aliases no longer expose deleted local-prep entrypoints
+     - AWS benchmark fanout now lives in `run_target_suite.sh benchmark ...`
+       instead of the root `Makefile`
+   - remaining:
+     - keep root aliases thin and avoid reintroducing orchestration there
+     - keep shrinking the remaining developer-only direct-build surface in the
+       root `Makefile` (`micro`, `daemon`, `kernel`, `kinsn-modules`, `smoke`,
+       `check`, `validate`) so it does not drift back into a second control
+       plane for canonical runner behavior
+2. Shared AWS split
+   - status: done pending final reviewer confirmation
+   - completed:
+      - `aws_common_lib.sh` now holds shared AWS state/lifecycle/setup helpers
+      - `aws_prep_paths_lib.sh` now holds AWS prep/build path defaults
+      - `aws_kernel_artifacts_lib.sh` now holds AWS host-side kernel/cache/build helpers
+      - `aws_remote_prep_lib.sh` now holds AWS remote-prep-only
+        instance/setup reconciliation
+      - `aws_local_prep_lib.sh` now holds AWS local-prep artifact/bundle logic
+      - `aws_remote_prep.sh` now owns AWS remote preflight
+      - AWS remote preflight now emits an explicit state handoff for local prep
+      - `prepare_local_inputs.sh` no longer mutates AWS remote state
+      - `prepare_local_inputs.sh` now consumes an explicit remote-prep state
+        file handoff instead of re-reading hidden shared AWS state
+      - the remote-prep state handoff now uses an explicit positional file
+        argument instead of an ambient `AWS_STATE_OVERRIDE_PATH` env override
+      - `aws_executor.sh run` no longer re-runs `ensure_instance_for_suite`
+      - the obsolete `AWS_LOCAL_PREP_MODE` compatibility branch is deleted
+      - generic local-prep helpers and AWS host-prep/build helpers no longer
+        live in `aws_common_lib.sh`
+   - remaining:
+     - keep `aws_common_lib.sh` from reabsorbing host-prep/build or
+       target/suite policy as later changes land
+3. Local prep unification
+   - status: mostly done, pending review
+   - completed:
+     - `prepare_local_inputs.sh` is now the only public local-prep entrypoint
+     - `kvm_local_prep.sh` and `aws_local_prep.sh` are deleted
+     - `kvm_local_prep_lib.sh` now holds KVM-only local prep internals
+     - `local_prep_common_lib.sh` now carries shared `require_*`,
+       `git_path_is_clean`, `snapshot_git_subtree`, `dir_has_entries`,
+       `csv_append_unique`, and `stage_module_binaries`
+     - KVM and AWS bundle-input files now use the same shared
+       `write_bundle_input_var` helper
+     - `build_remote_bundle.sh` and host-cross prep helpers now use the shared
+       local-prep helper contract instead of defining their own copies
+     - KVM and AWS local prep now converge on the same
+       `RUN_LOCAL_PROMOTE_ROOT`-anchored staged-input contract
+     - `build_remote_bundle.sh` now derives standard x86/ARM64 runtime and
+       test-artifact subpaths from the promote root instead of requiring each
+       prep path to emit long duplicated subpath lists
+     - bundled workload-tool roots are now derived from the same promote root
+       instead of being carried as a separate drifting path
+     - shared bundle/runtime scripts now prefer `RUN_TARGET_ARCH` /
+       `RUN_EXECUTOR` contract fields over hard-coding concrete target names
+       where the behavior is really arch/executor-specific
+   - remaining:
+     - keep KVM/AWS prep semantics aligned as new artifact classes are added
+     - review whether any remaining bundle-input variable is truly an extra
+       input instead of another path derivable from the promote root
+4. Repo cleanup and documentation drift
    - status: in progress
-   - latest cleanup:
-     - `build_remote_bundle.sh` now derives standard ARM64 runtime/test bundle
-       paths from `ARM64_CROSSBUILD_OUTPUT_DIR` and
-       `ARM64_TEST_ARTIFACTS_ROOT`
-     - `aws_executor.sh` no longer writes derived `ARM64_CROSS_*`,
-       `ARM64_KATRAN_*`, or per-subdir `ARM64_TEST_*` paths back into the
-       manifest
-     - `build_corpus_native.py` no longer depends on
-       `RUNNER_REPOS_DIR_OVERRIDE`; callers now pass an explicit `--repo-root`
-     - active code no longer contains `RUNNER_REPOS_DIR_OVERRIDE`
-     - sealed snapshot helpers now reject both worktree-local and
-       staged-but-uncommitted changes before archiving `HEAD`
-     - canonical KVM promoted prep now fetches third-party repos directly into
-       the per-run promoted repo root instead of mutating shared `runner/repos`
-     - ARM helper paths now follow the same sealed-snapshot rule:
-       `cross-arm64-build.sh` and `build-arm64-scx-host.sh` both reject dirty
-       git checkouts before staging `scx`
-4. Narrow commit candidate
-   - status: blocked on a later clean x86 validation rerun
-   - scope if green:
-     - `runner/scripts/build_remote_bundle.sh`
-     - `runner/scripts/aws_executor.sh`
-     - the accompanying status update in this document
-   - do not mix this with the broader runner refactor while the full-tree review
-     still says the large diff is not commit-clean
-5. Broad refactor cleanup still required before any large refactor commit
-   - seal bundle assembly to the manifest only
-   - keep shrinking `aws_executor.sh`
-   - keep reducing the remaining ARM local-input manifest surface so
-     `ARM64_CROSSBUILD_OUTPUT_DIR` and `ARM64_TEST_ARTIFACTS_ROOT` are the
-     canonical ARM bundle roots instead of long lists of derived subpaths
-   - keep removing remaining env-injected local repo path contracts in favor of
-     explicit `--repo-root` style call sites
-6. Active benchmark order
-   - first validate remote-overlap shape with:
-     `aws-arm64 micro || aws-x86 micro`
-   - then continue with:
-     `aws-arm64 corpus || aws-x86 corpus`
-     `aws-arm64 e2e || aws-x86 e2e`
-   - then return to correctness validation:
-     `aws-x86-test -> vm-test -> vm-micro -> vm-corpus -> vm-e2e`
-7. Current benchmark status
-   - `aws-arm64 micro`
-     - token: `run.aws-arm64.micro.aI6Fn4`
-     - dedicated instance: `i-0079638290f34bcda`
-     - result: failed during local prep
-     - first blocker:
-       - `micro_exec` link failed in the ARM userspace toolchain
-       - `libLLVM-20.so` referenced `GLIBCXX_3.4.30` /
-         `std::__glibcxx_assert_fail`
-       - failure happened while building ARM64 `micro_exec` in `__cross-arm64`
-     - active fix:
-       - ARM runner smoke now forces `clang/clang++` for both `llvmbpf` and
-         `micro_exec`
-       - isolated validation run:
-       `make __cross-arm64 ARM64_CROSSBUILD_RUNTIME_TARGETS=runner ...`
-         is in progress and has already passed the old compiler-identification
-         stage with `Clang 20.1.8`
-   - `aws-x86 benchmark all`
-     - current token group:
-       - `run.aws-x86.micro.Utamiq`
-       - `run.aws-x86.corpus.DGOFbH`
-       - `run.aws-x86.e2e.XWU06A`
-     - dedicated instances:
-       - `micro` -> `i-0747eadcfefac84c8`
-       - `corpus` -> `i-01eaa8b34820fb4f7`
-       - `e2e` -> `i-0c2337e0beb83192e`
-     - current status:
-       - this is the first canonical `AWS_X86_BENCH_MODE=all` run after wiring
-         `all` to parallel fan-out on dedicated remote instances
-       - all three lanes have launched and are progressing through setup/local
-         prep on the cleaned contract
+   - completed:
+     - design summary at the front of this document now reflects the current
+       runner shape
+     - upstream selftests no longer use repo-owned compat headers or stub
+       skeletons; the build now materializes an explicit selected-source view
+       from `runner/config/upstream_selftests_selection.tsv` instead
+     - upstream selftests now fail fast if a declared source exclusion no
+       longer exists in the vendored upstream tree
+     - the manifest-derived LLVM suffix contract now flows through x86 KVM,
+       AWS x86, and AWS ARM upstream-selftests builds instead of silently
+       falling back to unsuffixed tool names
+     - `runner/CMakeLists.txt` no longer executes a runnable `llvm-config`
+       binary to resolve llvmbpf link flags; it now links via
+       `LLVMConfig.cmake` component resolution, which is a prerequisite for
+       future ARM host-cross `micro_exec`
+     - `prepare-arm64-sysroot.sh` now includes ARM LLVM headers, shared
+       libraries, and `LLVMConfig.cmake` in the sysroot contract so future
+       host-cross `micro_exec/llvmbpf` work is not blocked on missing target
+       LLVM metadata
+     - `runner/compat/` has been deleted from active code; no runner path now
+       copies or references repo-owned upstream-selftest compat assets
+     - AWS target profiles no longer hard-code operator-local key, subnet,
+       security-group, or profile defaults; those are now explicit required
+       inputs
+     - `RUN_RUNNER_BINARY_MODE` and `TARGET_RUNNER_BINARY_MODE_DEFAULT` were
+       removed from active code
+     - `make clean` now preserves fetched AWS results and removes only
+       prep/build/state subtrees under `.cache/aws-*`
+     - shared ARM64 defaults now live in `runner/mk/arm64_defaults.mk`
+       instead of being duplicated across the root and runner `Makefile`s
+     - `README.md` no longer claims that canonical `vm-*` / `aws-*` runner
+       outputs land directly in checked-in top-level `micro/results`,
+       `corpus/results`, and `e2e/results`; it now reflects staged KVM and
+       fetched AWS result locations
+     - generic ARM host-side helper caches no longer default under
+       `.cache/aws-arm64/*`; shared host-cross/sysroot/test-artifact defaults
+       now use a generic ARM host cache root, while AWS target-local kernel and
+       setup caches remain under the AWS target cache
+   - remaining:
+     - remove remaining deleted-script references, old names, and stale
+       historical language that contradicts the new structure
+5. Full-project review gate
+   - status: static review clean pending final reviewer confirmation
+   - only after items 1-4 are clean:
+     - run full-project static review
+     - run a full-tree reviewer
+     - if reviewer finds remaining structural issues, fix them and review again
+   - current state:
+     - `bash -n` on the key runner scripts is green
+     - `git diff --check` is green
+     - `pytest` on the runner/static regression set is green
+     - `make -n` on the canonical runner aliases is green and no longer starts
+       real AWS work
+     - a full-context subagent structural review has been launched against the
+       current dirty tree and is pending return
+   - current self-review status before the next reviewer pass:
+     - fixed:
+       - AWS local prep no longer performs remote setup/prereq side effects
+       - `aws_executor.sh` no longer re-runs remote preflight during `run`
+       - remote-prep-only entrypoints no longer live in the shared AWS common
+         lib surface
+       - duplicated local-prep helper definitions were reduced into
+         `local_prep_common_lib.sh`
+       - KVM and AWS local prep now share the same promote-root-based staged
+         input contract for standard runtime/test/repo inputs
+       - AWS remote preflight now hands resolved remote state to local prep
+         explicitly instead of relying on an implicit shared state-file read
+       - KVM and AWS executors now both consume a local-state handoff file
+         rather than using different positional-vs-sourced handoff shapes
+       - the remote-prep state handoff no longer uses an ambient env override
+       - shared bundle/runtime scripts now prefer `RUN_TARGET_ARCH` /
+         `RUN_EXECUTOR` over hard-coded concrete target names where the
+         behavior is really arch/executor-specific
+       - benchmark fanout now lives in `run_target_suite.sh benchmark ...`
+         instead of the root `Makefile`
+       - bundle sealing no longer depends on the caller shell's ambient
+         `LD_LIBRARY_PATH`
+       - AWS remote prereqs no longer source-build workload tools and now
+         require either bundled tools or package-manager-provided tools
+       - dedicated AWS runs now clean up leaked instances/run-state if
+         remote-prep or local prep fails before the executor starts
+       - active code no longer carries the dead runner-binary mode knob
+       - canonical ARM daemon-only local prep no longer routes through
+         `__cross-arm64`; it now uses host-cross daemon output plus a
+         host-side portable runtime bundle step
+   - latest reviewer status:
+     - reviewer A:
+       - found that canonical AWS local prep still accepted an optional
+         remote-prep handoff and could therefore fall back to cached AWS state
+       - fix applied:
+         - `prepare_local_inputs.sh` now requires an explicit remote-prep
+           state file for canonical AWS local prep
+         - `aws_local_prep_lib.sh` now loads that handoff via
+           `load_remote_prep_state()` instead of generic `load_state()`
+     - reviewer B:
+       - found stale README result-path language
+       - fix applied: README now reflects staged KVM and fetched AWS result
+         locations instead of top-level checked-in suite result dirs
+   - current conclusion:
+     - no active compat debt remains in active runner code
+     - one remaining structural issue is still under active review:
+       canonical AWS ARM local prep still routes `micro_exec` and native
+       benchmark repo builds through `__cross-arm64*` and
+       `docker --platform linux/arm64`
 
 ## 10. Current Progress Log
 
@@ -671,7 +1093,7 @@ Status as of the latest live runs:
 
 - Introduced target profiles and suite plans.
 - Added generic contract loader and entrypoint.
-- Added explicit host-side KVM preflight via `prepare_run_inputs.sh`.
+- Added explicit host-side KVM preflight via `prepare_local_inputs.sh`.
 - Added `kvm` and `aws-ssh` executors.
 - Rewired canonical root targets to the new contract.
 - Added explicit AWS instance-mode contract in the manifest:
@@ -712,12 +1134,23 @@ Status as of the latest live runs:
   - `__cross-arm64-bench`
   - `__arm64-test-artifacts`
 - Reduced one more executor/bundle coupling layer:
-  - `prepare_run_inputs.sh` and `aws_executor.sh` now invoke
+  - `prepare_local_inputs.sh` and `aws_executor.sh` now invoke
     `build_remote_bundle.sh` through the same explicit env-input contract
   - KVM no longer mutates the manifest with `RUN_LOCAL_PROMOTE_ROOT` just to
     drive bundle assembly
   - the manifest stays the target/suite contract, while bundle-local prep roots
     remain executor-local inputs
+- Split the remaining shared AWS host-prep layer again:
+  - `aws_prep_paths_lib.sh` now owns AWS prep/build path defaults
+  - `aws_kernel_artifacts_lib.sh` now owns AWS host-side kernel/cache/build
+    helpers
+  - `aws_common_lib.sh` is reduced to shared AWS control-plane/state/SSH and
+    remote-prereq behavior
+- Tightened the staged-input contract around `RUN_LOCAL_PROMOTE_ROOT`:
+  - KVM and AWS now derive standard x86/ARM64 runtime and test-artifact
+    subpaths from one promote root
+  - bundle-input files no longer need to enumerate long duplicated lists of
+    x86/ARM64 subpaths just to describe the same staged tree
 - Deleted the legacy AWS ARM64/x86 monoliths.
 - Removed the old AWS ARM64 helper-chain files.
 - Replaced executor-specific suite entrypoints with one shared `suite_entrypoint.sh`.
@@ -827,7 +1260,7 @@ Status as of the latest live runs:
   - bundled `vendor/linux-framework` subtrees now fail on dirty local
     modifications instead of silently copying working-tree content
 - Removed the last KVM manifest impurity for staged execution:
-  - `prepare_run_inputs.sh` now emits local stage-root state separately
+  - `prepare_local_inputs.sh` now emits local stage-root state separately
   - `run_target_suite.sh` passes that local state explicitly to
     `kvm_executor.sh`
   - `kvm_executor.sh` no longer requires executor scratch fields inside the
@@ -1305,18 +1738,18 @@ Status as of the latest live runs:
     picked up `tools/include/asm/barrier.h -> arch/arm64/include/asm/barrier.h`
     and then failed on:
     - `fatal error: 'linux/kasan-checks.h' file not found`
-  - this showed that the compat overlay path was only reaching the
-    `EXTRA_CFLAGS`-driven BPF/feature compile surface, not the generic
-    userspace `CFLAGS` surface used by `xsk.c`
+- this showed that the staged support-include path was only reaching the
+  `EXTRA_CFLAGS`-driven BPF/feature compile surface, not the generic
+  userspace `CFLAGS` surface used by `xsk.c`
 - The fix is repo-owned and contract-level:
   - `runner/scripts/build_upstream_selftests.sh` now also passes
-    `USERCFLAGS=-I<compat-dir>`
-  - the compat overlay remains source-tree external and still does not patch
+    `USERCFLAGS=-I<support-include-dir>`
+  - that support-include directory remains source-tree external and still does not patch
     any upstream file
 - That fix has been validated directly on the live AWS ARM instance:
   - compiling `xsk.c` with the same selftest include layout plus
-    `-I runner/compat/upstream_selftests` now succeeds
-  - `/tmp/xsk-compat.o` was produced as
+    `-I <support-include-dir>` now succeeds
+  - `/tmp/xsk-support.o` was produced as
     `ELF 64-bit LSB relocatable, ARM aarch64`
 - The current `dTsYAx` canonical run was started before that fix, so it should
   be treated as obsolete once it exits. The next source of truth is the first
@@ -1357,9 +1790,8 @@ Status as of the latest live runs:
     host-cross artifacts
   - the remote suite now builds upstream selftests natively from bundled
     `vendor/linux-framework/tools/testing/selftests/bpf` source plus
-    repo-owned `runner/scripts/build_upstream_selftests.sh` and
-    `runner/compat/upstream_selftests/*`
-- The first remote-native rerun exposed two concrete contract bugs, both now
+    repo-owned `runner/scripts/build_upstream_selftests.sh`
+- The first temporary `remote-native` rerun exposed two concrete contract bugs, both now
   fixed:
   - AWS remote prereq installation originally added `llvm20` instead of
     `llvm20-devel`, so `llvm-config-20` was still missing on the instance
@@ -1368,7 +1800,7 @@ Status as of the latest live runs:
     `build_remote_bundle.sh` used the root repo's `git ls-files` against the
     nested `vendor/linux-framework` checkout instead of the nested repo's own
     tracked file list
-- The next remote-native rerun exposed one more filtered-source-tree bug, also
+- The next temporary `remote-native` rerun exposed one more filtered-source-tree bug, also
   now fixed:
   - `build_upstream_selftests.sh` created a filtered root that symlinked
     `kernel/` and `scripts/` but not the top-level kernel `include/`
@@ -1381,32 +1813,33 @@ Status as of the latest live runs:
   - adding the whole bundled kernel `include/` directory to `EXTRA_CFLAGS`
     turned out to be too broad and caused userspace/kernel header collisions
     during libbpf compilation
-  - the current repo-owned fix is therefore narrower: upstream selftests now
-    use a compat overlay header at
-    `runner/compat/upstream_selftests/linux/kasan-checks.h`, and
-    `build_upstream_selftests.sh` only adds that compat include root instead of
-    exposing the full kernel include tree
-- The next remote-native ARM-only blockers were all more localized, and all
+  - the current repo-owned fix is therefore narrower: `build_upstream_selftests.sh`
+    now copies only the needed kernel headers into a generated include
+    directory under the output tree and only adds that generated include root
+    instead of exposing the full kernel include tree
+- The next temporary `remote-native` ARM-only blockers were all more localized, and all
   point in the same direction: keep feeding upstream selftests a minimal
-  repo-owned overlay and explicit toolchain contract instead of widening the
+  repo-owned generated-include overlay and explicit toolchain contract instead
+  of widening the
   bundled kernel header surface:
   - `arch/arm64/include/asm/barrier.h` next failed on
-    `asm/alternative-macros.h`, so a second repo-owned compat overlay was added
-    at `runner/compat/upstream_selftests/asm/alternative-macros.h`
+    `asm/alternative-macros.h`, so `build_upstream_selftests.sh` was extended
+    to copy that arch header into the same generated include directory when it
+    exists
   - once libbpf built and bpftool advanced, the remote instance then failed on
     `openssl/opensslv.h`, so `aws_remote_prereqs.sh` was updated to install
     `openssl-devel`
   - the remote-native build also still assumed a bare `llvm-ar` name even
     though the instance only had `llvm-ar-20`; `build_upstream_selftests.sh`
     now pins native `AR` to the same resolved suffixed LLVM tool as `HOSTAR`
-- The current source of truth is therefore:
-  - AWS ARM64 `test` uses remote-native upstream selftests
+- The source of truth at that point was therefore:
+  - AWS ARM64 `test` used temporary `remote-native` upstream selftests
   - the bundle now includes the upstream selftests source tree
   - remote prereq stamping now includes both the upstream-selftest execution
     mode and the `aws_remote_prereqs.sh` script content, so dependency changes
     invalidate the remote prereq stamp correctly
 - The next concrete blocker after upstream selftests moved fully into the
-  remote-native path was no longer upstream at all; it was the repo-owned ARM
+  then-`remote-native` path was no longer upstream at all; it was the repo-owned ARM
   binaries built locally for `tests/unittest/` and `tests/negative/`:
   - the rerun tied to `run.aws-arm64.test.E0I2zy` reached the repo-owned test
     section and failed 21 cases with the same loader error
@@ -1625,12 +2058,14 @@ Status as of the latest live runs:
     `vm-micro`, `vm-corpus`, `vm-e2e`
 - ARM64 still uses the Docker/qemu path for `micro_exec`. `daemon`, `scx`, and
   repo-owned ARM test binaries have now been moved out, and upstream selftests
-  have been moved to remote-native build on AWS ARM instead of local qemu
+  have been moved to a remote-native build phase on AWS ARM instead of local qemu.
+  That was a temporary transition stage; the runner-binary mode knob has since
+  been removed from active code.
   host-cross.
 - Guest prerequisite policy is still split across three active scripts.
-- `aws_executor.sh` is still too large; it still combines EC2 lifecycle,
-  local setup/build orchestration, bundle prep, and remote execution in one
-  script.
+- `aws_executor.sh` is now a pure executor entrypoint; the remaining AWS design
+  debt is concentrated in `aws_common_lib.sh` and shared local-prep contracts,
+  not in the public executor surface.
 - The root `Makefile` no longer exports broad mutable `AWS_*` helper defaults
   into the whole build, but it still remains a thin user-input layer on top of
   the target contract. That part is acceptable; the remaining cleanup is in the
@@ -1652,11 +2087,11 @@ Status as of the latest live runs:
 
 The subagent review should focus on these points:
 
-- Is `aws_executor.sh` still carrying target/suite policy that should live in the manifest instead?
+- Is `aws_common_lib.sh` still carrying target/suite policy that should live in the manifest instead?
 - Is any remaining path still relying on ambient environment instead of explicit manifest data?
 - Is bundle assembly truly manifest-driven, or are there still stale-output leak paths?
 - Is any remote suite path still mutating machine-global state outside kernel install / package prereqs?
-- Is the new x86 KVM staged-workspace wiring through `prepare_run_inputs.sh`
+- Is the new x86 KVM staged-workspace wiring through `prepare_local_inputs.sh`
   and `kvm_executor.sh` thin and correct, or does it still preserve too much
   host-side special-casing?
 - Is the remaining third-party build compatibility handling
@@ -1697,7 +2132,7 @@ The current dirty worktree looks cleanest when split this way:
 
 2. Staged bundle / suite-needs / KVM explicit-workspace changes:
    - `runner/scripts/build_remote_bundle.sh`
-   - `runner/scripts/prepare_run_inputs.sh`
+   - `runner/scripts/prepare_local_inputs.sh`
    - `runner/scripts/kvm_executor.sh`
    - `runner/scripts/load_run_contract.sh`
    - `runner/scripts/run_target_suite.sh`
@@ -1730,8 +2165,8 @@ same remaining issues:
 
 - The broad refactor is still not commit-clean.
 - The biggest remaining structural problems are:
-  - `aws_executor.sh` is still too large and still mixes lifecycle, local prep,
-    bundle assembly, and remote execution in one file
+  - `aws_common_lib.sh` is still too large and still mixes multiple AWS shared
+    concerns in one file
   - remote bundle assembly still depends on executor-injected or
     executor-written local-input paths rather than a smaller sealed manifest
   - the AWS ARM upstream-selftests path still changes the effective upstream
@@ -1739,12 +2174,11 @@ same remaining issues:
 
 The concrete high-severity reviewer findings to keep in view are:
 
-- `aws_executor.sh` is still the least-settled file in the tree:
-  - it still owns EC2 lifecycle, setup gating, local prep orchestration,
-    bundle preparation, upload, remote execution, and artifact fetch in one
-    script
-  - it still writes many executor-local staging paths back into the per-run
-    manifest
+- `aws_common_lib.sh` is still the least-settled file in the tree:
+  - it still owns EC2 lifecycle, setup gating, kernel/setup helper logic, and
+    other shared AWS concerns in one file
+  - it still deserves another shrinking pass even though public local prep and
+    public execution are now split out cleanly
 - `build_remote_bundle.sh` still consumes many local bundle-input paths through
   the per-run manifest. x86 now derives runner/daemon/test/repo/micro inputs
   from `RUN_LOCAL_PROMOTE_ROOT`, and ARM64 now derives most runtime/test
@@ -1797,120 +2231,67 @@ It remains valid and separate.
 
 ### 13.1 Active Execution Policy
 
-The canonical execution policy is now:
+The current execution policy is:
 
 - local KVM suite execution stays serialized
 - AWS local prep/build may overlap when each run uses an isolated per-run root
   and explicit host locks only around truly shared mutable resources
-- AWS benchmark remote execution may overlap when each benchmark run owns a
-  dedicated instance and a dedicated remote workspace
-- shared AWS correctness runs keep remote execution serialized on the cached
-  shared instance, but their local prep is now outside the remote execution
-  lock so host-side bundle preparation can overlap cleanly
-
-This is reflected both in `AGENTS.md` and in the current `Makefile` / runner
-contract.
+- AWS benchmark remote execution is intended to overlap only after the
+  refactor gate below is clean and reviewers return `No findings`
+- no new real-path validation runs should start while the tree is still in the
+  refactor-and-static-review phase
 
 ### 13.2 Current Remote Benchmark Contract
 
-AWS benchmark `all` mode now fans out `micro`, `corpus`, and `e2e` as separate
-canonical runs instead of multiplexing them through one cached benchmark
-instance.
-
-The current intended shape is:
+The intended remote benchmark contract remains:
 
 - one local per-run prep root per lane
 - one dedicated AWS instance per benchmark lane
 - one dedicated remote workspace per lane
+- remote prep owns only instance / kernel / base-prereq convergence
+- local prep owns all bundle inputs
+- runtime prereqs consume only the finished bundle contract
 - no shared remote benchmark execution lock across benchmark lanes
 
 ### 13.3 Workload Tool Provisioning Decision
 
-Amazon Linux 2023 default repositories do not provide:
+The current workload-tool contract is:
 
-- `rt-tests` / `hackbench`
-- `sysbench`
-- `wrk`
+- x86 and KVM both stage the same bundle-owned workload tools during local prep
+- bundled workload tools are declared explicitly by
+  `RUN_BUNDLED_WORKLOAD_TOOLS_CSV`
+- the local path that feeds the bundle is declared explicitly by
+  `RUN_LOCAL_WORKLOAD_TOOL_ROOT`
+- remote/guest prereqs must recognize bundled tools before falling back to the
+  package manager
+- no remote source-build of workload tools
+- no writes of bundle-owned tools into machine-global system paths
 
-So the canonical repo-owned fallback is now:
+### 13.4 Current Review Gate
 
-- build missing workload tools from source on the remote benchmark instance
-- install them into `/var/tmp/bpf-benchmark/workload-tools/bin`
-- prepend that path explicitly during suite execution
-- do not write them into `/usr/local/bin`
-- do not rely on third-party package repositories as the only provisioning path
+Current status:
 
-The currently implemented source-build fallbacks are:
+- no canonical real-path validation process is intentionally left running
+- the tree is in refactor + static-review mode
+- the immediate goal is to finish structural cleanup and get reviewer
+  `No findings` before restarting runtime validation
 
-- `hackbench` from `rt-tests`
-- `sysbench` from `akopytov/sysbench`
-- `wrk` from `wg/wrk`
+### 13.5 Current Immediate Todo
 
-This keeps the benchmark lane self-contained enough to run on dedicated AWS
-instances without depending on AL2023 package availability for those tools.
-
-### 13.4 ARM Crossbuild Cleanup Status
-
-The recent ARM host/cross cleanup now includes:
-
-- ARM daemon host cross-build instead of building the daemon inside the
-  `linux/arm64` container
-- `cross-arm64-build.sh` now seeds `git safe.directory='*'` inside the
-  container so llvmbpf `FetchContent` git repos no longer fail with dubious
-  ownership
-- the script also creates the container `HOME` directory before touching
-  `~/.gitconfig`
-- the llvmbpf cache/library paths passed into the runner build are now absolute
-- ARM setup artifact caching now keeps the EFI image name stable as
-  `vmlinuz-<release>.efi`; the earlier cache/reuse path had drifted to
-  `vmlinuz-<release>` and would have broken cached setup reuse
-
-The current ARM runner smoke rerun is session `13036`.
-It has already moved past the previous `safe.directory` and `HOME/.gitconfig`
-failures and is now compiling the staged ARM runner.
-
-### 13.5 Current Live Runs
-
-The current canonical parallel benchmark fan-out runs are:
-
-- `make aws-arm64-benchmark AWS_ARM64_BENCH_MODE=all`
-  - session `84216`
-  - all three remote benchmark lanes have already started launching dedicated
-    `t4g.micro` instances
-  - current lane tokens:
-    - `run.aws-arm64.micro.8I1TbC`
-    - `run.aws-arm64.corpus.6orVHT`
-    - `run.aws-arm64.e2e.jtcKJ8`
-- `make aws-x86-benchmark AWS_X86_BENCH_MODE=all`
-  - session `75939`
-  - all three remote benchmark lanes have already started launching dedicated
-    `t3.micro` instances
-  - current lane tokens:
-    - `run.aws-x86.micro.L95ETZ`
-    - `run.aws-x86.corpus.dHiH7e`
-    - `run.aws-x86.e2e.3Oq1Ps`
-
-This is the first canonical run where the new policy is exercised directly:
-
-- one local per-run prep root per lane
-- per-arch host locks only around truly shared local resources
-- no shared remote benchmark execution lock across benchmark lanes
-- no multiplexing all benchmark lanes through one cached AWS instance
-
-### 13.6 Immediate Todo
-
-1. Let the live canonical AWS benchmark fan-out runs (`84216` and `75939`)
-   advance far enough to expose the first real lane-level blocker or the first
-   fresh benchmark result directories.
-2. Keep polling the ARM runner smoke path in parallel; if it still exposes a
-   separate ARM local-prep blocker, treat that as an independent host-cross
-   issue rather than mixing it into benchmark semantics.
-3. Feed the updated executor/parallelization tree back through full-project
-   reviewer agents once the first benchmark lanes have either completed or
-   failed with concrete blockers.
-4. Only cut a commit once the latest executor repair and the live AWS
-   benchmark-parallel contract have both been validated by real runs and by
-   reviewer feedback.
+1. Finish the remaining local-prep convergence work so KVM and AWS differ only
+   in executor transport and machine lifecycle.
+2. Keep the repo-selection contract explicit:
+   - `RUN_BUNDLED_REPOS_CSV` for repos that must exist in the bundle
+   - `RUN_FETCH_REPOS_CSV` for the full local fetch set
+3. Keep the workload-tool contract explicit:
+   - local prep stages bundled tools
+   - bundle inputs carry the tool root explicitly
+   - remote/guest prereqs must not silently replace missing bundled tools with
+     system-package installs
+4. Keep shrinking the remaining ARM qemu/containerized prep surface.
+5. Re-run whole-tree reviewer passes and keep fixing findings until they return
+   `No findings`.
+6. Only after that, restart the real validation matrix.
 
 ### 13.7 2026-04-05 Parallel Benchmark Blocker And Fix
 
@@ -2357,27 +2738,25 @@ What was confirmed:
     the host's current apt resolver breakage and was not adopted as a repo
     contract
 
-The repo-owned fix now applied is explicit and minimal:
+The temporary fix applied at that point was explicit and minimal:
 
-- new manifest contract:
+- a short-lived manifest contract:
   - `RUN_RUNNER_BINARY_MODE=bundled|remote-native`
-- `runner/targets/aws-arm64.env` now defaults ARM runner binaries to
+- `runner/targets/aws-arm64.env` temporarily defaulted ARM runner binaries to
   `remote-native`
-- `build_remote_bundle.sh` now stages the tracked runner source tree, plus
-  `vendor/libbpf` and `vendor/llvmbpf`, when the runner mode is
-  `remote-native`
-- `suite_entrypoint.sh` now builds `runner/build/micro_exec` on the dedicated
-  remote ARM instance when `RUN_RUNNER_BINARY_MODE=remote-native`
-- `aws_remote_prereqs.sh` installs the remote-native runner build dependencies
-  (`clang20`, `llvm20-devel`, `lld20`, `cmake`, `yaml-cpp-devel`,
-  `elfutils-libelf-devel`, `zlib-devel`, etc.)
-- `aws_executor.sh` now computes ARM local runtime targets precisely:
-  - `micro` no longer forces local `__cross-arm64` when runner mode is
-    `remote-native`
-  - `corpus` / `e2e` no longer ask the ARM container to build `runner` when
-    they only need `daemon`
+- `build_remote_bundle.sh` temporarily staged the tracked runner source tree,
+  plus `vendor/libbpf` and `vendor/llvmbpf`, when that mode was selected
+- `suite_entrypoint.sh` temporarily built `runner/build/micro_exec` on the
+  dedicated remote ARM instance in that mode
+- `aws_remote_prereqs.sh` installed the then-needed remote-native runner build
+  dependencies (`clang20`, `llvm20-devel`, `lld20`, `cmake`,
+  `yaml-cpp-devel`, `elfutils-libelf-devel`, `zlib-devel`, etc.)
+- `aws_executor.sh` computed ARM local runtime targets precisely:
+  - `micro` no longer forced local `__cross-arm64` in that temporary mode
+  - `corpus` / `e2e` no longer asked the ARM container to build `runner` when
+    they only needed `daemon`
 
-This means the benchmark contract is now:
+The benchmark contract at that point became:
 
 - AWS ARM `micro`:
   - local: build/stage programs, fetch repos, seal bundle
@@ -2444,7 +2823,7 @@ The first real blocker from the fresh ARM benchmark-all rerun was on the
 - failure:
   `MICRO_EXEC_ENABLE_LLVMBPF=ON requires .../workspace/vendor/llvmbpf/libllvmbpf_vm.a`
 
-This showed that the new ARM `remote-native` runner contract was only half
+This showed that the then-new temporary ARM `remote-native` runner contract was only half
 complete:
 
 - the remote host was now correctly building `runner/build/micro_exec`
@@ -2525,7 +2904,7 @@ halfway:
 
 The repo-owned fix was minimal and keeps the same build contract:
 
-- `suite_entrypoint.sh` now builds `vendor/llvmbpf` natively on the dedicated
+- `suite_entrypoint.sh` then built `vendor/llvmbpf` natively on the dedicated
   remote ARM instance before `make -C runner micro_exec`
 - it uses the same layout already assumed by `runner/CMakeLists.txt`:
   - source root: `vendor/llvmbpf`
@@ -2565,7 +2944,7 @@ This is the current intended execution shape:
 ### 13.24 2026-04-06 ARM Micro Green, x86 Micro Python Loader Pollution
 
 The fresh ARM `micro` rerun with token `run.aws-arm64.micro.bbGt7a` validated
-the `remote-native` runner fix end-to-end:
+that temporary `remote-native` runner fix end-to-end:
 
 - the earlier fatal error about missing
   `vendor/llvmbpf/libllvmbpf_vm.a` no longer reproduced
@@ -2705,7 +3084,7 @@ Two full-project reviewers converged on the same design problems:
   - a fake `rustfmt` wrapper in `build-arm64-scx-host.sh`
   - silent reuse of a cached sysroot when the remote source contract was unset
 - canonical KVM staged prep still had a broken local contract:
-  - `prepare_run_inputs.sh` called `require_nonempty_dir()` without defining it
+  - `prepare_local_inputs.sh` called `require_nonempty_dir()` without defining it
   - local prep still hard-coded `python3` instead of consuming the manifest's
     host-Python contract
 - bundle assembly still had a path-derivation fallback layer:
@@ -2725,7 +3104,7 @@ The repo-owned fixes applied in this round are:
   - now also requires `.source` alongside `.package-fingerprint`
 - `runner/scripts/load_run_contract.sh`
   - always emits `RUN_HOST_PYTHON_BIN`, not just on the KVM path
-- `runner/scripts/prepare_run_inputs.sh`
+- `runner/scripts/prepare_local_inputs.sh`
   - now defines `require_nonempty_dir()`
   - now uses `RUN_HOST_PYTHON_BIN` for repo fetch/native build/scx prep
   - now writes explicit KVM bundle inputs instead of relying on
@@ -2753,7 +3132,7 @@ Static verification after these fixes:
 - `bash -n` passed for:
   - `build-arm64-scx-host.sh`
   - `prepare-arm64-sysroot.sh`
-  - `prepare_run_inputs.sh`
+  - `prepare_local_inputs.sh`
   - `aws_executor.sh`
   - `build_remote_bundle.sh`
 - `python3 -m py_compile` passed for:

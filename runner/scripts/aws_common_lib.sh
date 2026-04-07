@@ -109,16 +109,24 @@ remote_prereq_dir() {
     printf '%s\n' "$RUN_REMOTE_STAGE_DIR/prereq/$RUN_TOKEN"
 }
 
+remote_base_prereq_dir() {
+    printf '%s\n' "$RUN_REMOTE_STAGE_DIR/prereq/base"
+}
+
 remote_prereq_stamp_path() {
     printf '%s\n' "$(remote_prereq_dir)/prereqs.ready"
 }
 
 remote_base_prereq_stamp_path() {
-    printf '%s\n' "$(remote_prereq_dir)/base.ready"
+    printf '%s\n' "$(remote_base_prereq_dir)/base.ready"
 }
 
 remote_prereq_workload_tool_root() {
     printf '%s\n' "$(remote_prereq_dir)/workload-tools"
+}
+
+remote_base_prereq_workload_tool_root() {
+    printf '%s\n' "$(remote_base_prereq_dir)/workload-tools"
 }
 
 remote_prereq_workload_tool_bin() {
@@ -145,6 +153,22 @@ load_state() {
         # shellcheck disable=SC1090
         source "$STATE_FILE"
     fi
+}
+
+load_remote_prep_state() {
+    unset \
+        STATE_INSTANCE_ID \
+        STATE_INSTANCE_IP \
+        STATE_REGION \
+        STATE_KERNEL_RELEASE
+    STATE_INSTANCE_ID=""
+    STATE_INSTANCE_IP=""
+    STATE_REGION=""
+    STATE_KERNEL_RELEASE=""
+    [[ -n "$AWS_REMOTE_PREP_STATE_PATH" ]] || die "AWS remote-prep state path is required for canonical AWS local prep"
+    [[ -f "$AWS_REMOTE_PREP_STATE_PATH" ]] || die "AWS remote-prep state file is missing: ${AWS_REMOTE_PREP_STATE_PATH}"
+    # shellcheck disable=SC1090
+    source "$AWS_REMOTE_PREP_STATE_PATH"
 }
 
 save_state() {
@@ -465,13 +489,19 @@ setup_remote_prereqs_mode() {
     local ip="$1"
     local mode="$2"
     local remote_prereq_dir remote_stamp_path remote_tool_root
-    remote_prereq_dir="$(remote_prereq_dir)"
     case "$mode" in
-        base) remote_stamp_path="$(remote_base_prereq_stamp_path)" ;;
-        runtime) remote_stamp_path="$(remote_prereq_stamp_path)" ;;
+        base)
+            remote_prereq_dir="$(remote_base_prereq_dir)"
+            remote_stamp_path="$(remote_base_prereq_stamp_path)"
+            remote_tool_root="$(remote_base_prereq_workload_tool_root)"
+            ;;
+        runtime)
+            remote_prereq_dir="$(remote_prereq_dir)"
+            remote_stamp_path="$(remote_prereq_stamp_path)"
+            remote_tool_root="$(remote_prereq_workload_tool_root)"
+            ;;
         *) die "unsupported AWS prereq mode: ${mode}" ;;
     esac
-    remote_tool_root="$(remote_prereq_workload_tool_root)"
     local remote_helper="$remote_prereq_dir/aws_remote_prereqs.sh"
     local remote_prereq_contract="$remote_prereq_dir/prereq_contract.sh"
     local remote_manifest="$remote_prereq_dir/run-contract.env"
@@ -513,14 +543,6 @@ setup_remote_runtime_prereqs() {
 verify_remote_base_prereqs() {
     local ip="$1"
     ssh_bash "$ip" "$(remote_base_prereq_stamp_path)" <<'EOF'
-set -euo pipefail
-test -f "$1"
-EOF
-}
-
-verify_remote_runtime_prereqs() {
-    local ip="$1"
-    ssh_bash "$ip" "$(remote_prereq_stamp_path)" <<'EOF'
 set -euo pipefail
 test -f "$1"
 EOF

@@ -35,6 +35,7 @@ KATRAN_BUILD_DIR="${KATRAN_SOURCE_DIR}/_build"
 KATRAN_INSTALL_DIR="${KATRAN_BUILD_DIR}/deps"
 TOOLCHAIN_BIN_DIR="${BUILD_ROOT}/toolchain/bin"
 NATIVE_CARGO_LINKER="${ARM64_NATIVE_CARGO_LINKER:-gcc}"
+RUSTFMT_BIN="${ARM64_CROSSBUILD_RUSTFMT:-rustfmt}"
 CLANG_BIN=""
 CLANGXX_BIN=""
 LLC_BIN=""
@@ -64,6 +65,9 @@ die() {
     exit 1
 }
 
+# shellcheck disable=SC1090
+source "$REPO_ROOT/runner/scripts/local_prep_common_lib.sh"
+
 fix_output_ownership() {
     if [[ "${EUID}" -ne 0 ]]; then
         return 0
@@ -86,24 +90,7 @@ require_command() {
     command -v "$cmd" >/dev/null 2>&1 || die "missing required command: ${cmd}"
 }
 
-git_path_is_clean() {
-    local repo_root="$1"
-    local pathspec="${2:-}"
-    if [[ -n "$pathspec" ]]; then
-        git -C "$repo_root" diff --quiet -- "$pathspec" || return 1
-        git -C "$repo_root" diff --cached --quiet -- "$pathspec" || return 1
-    else
-        git -C "$repo_root" diff --quiet || return 1
-        git -C "$repo_root" diff --cached --quiet || return 1
-    fi
-}
-
-require_nonempty_dir() {
-    local path="$1"
-    [[ -d "$path" ]] || die "required directory is missing: ${path}"
-    find "$path" -mindepth 1 -print -quit 2>/dev/null | grep -q . \
-        || die "required directory is empty: ${path}"
-}
+HOST_PYTHON_BIN="${ARM64_HOST_PYTHON_BIN:-python3}"
 
 resolve_llvm_tool() {
     local base="$1"
@@ -135,14 +122,7 @@ prepare_llvm_toolchain() {
     ln -sfn "$(command -v "${LLVM_STRIP_BIN}")" "${TOOLCHAIN_BIN_DIR}/llvm-strip"
     ln -sfn "$(command -v "${LLVM_OBJCOPY_BIN}")" "${TOOLCHAIN_BIN_DIR}/llvm-objcopy"
     ln -sfn "$(command -v "${LD_LLD_BIN}")" "${TOOLCHAIN_BIN_DIR}/ld.lld"
-    # Generated scx bindgen/skeleton output should not depend on rustfmt
-    # availability or rustfmt correctness inside the ARM crossbuild container.
-    cat >"${TOOLCHAIN_BIN_DIR}/rustfmt" <<'EOF'
-#!/usr/bin/env bash
-cat
-EOF
-    chmod +x "${TOOLCHAIN_BIN_DIR}/rustfmt"
-    ln -sfn rustfmt "${TOOLCHAIN_BIN_DIR}/disable_rustfmt"
+    ln -sfn "$(command -v "${RUSTFMT_BIN}")" "${TOOLCHAIN_BIN_DIR}/rustfmt"
     export PATH="${TOOLCHAIN_BIN_DIR}:${PATH}"
 }
 
@@ -160,7 +140,8 @@ require_command cargo
 require_command file
 require_command git
 require_command ldd
-require_command python3
+require_command "$HOST_PYTHON_BIN"
+require_command "$RUSTFMT_BIN"
 require_command tar
 prepare_llvm_toolchain
 mkdir -p "${HOME:-/tmp/codex}"
@@ -216,9 +197,22 @@ build_bcc_artifacts() {
     local repo_dir="${BENCH_BUILD_REPO_ROOT}/bcc"
     local tool_dir="${repo_dir}/libbpf-tools"
     local bpftool="${RUNNER_VENDOR_BUILD_DIR}/vendor/bpftool/bootstrap/bpftool"
+    local -a bcc_required_tools=(
+        capable
+        execsnoop
+        bindsnoop
+        biosnoop
+        vfsstat
+        opensnoop
+        syscount
+        tcpconnect
+        tcplife
+        runqlat
+        fsdist
+    )
     local obj_path obj_name tool_name
 
-    log "Building ARM64 bcc libbpf-tools artifacts"
+    log "Building ARM64 bcc libbpf-tools artifacts (benchmark subset only)"
     prepare_repo_copy "bcc" "${repo_dir}"
     build_vendor_bpftool
     [[ -x "${bpftool}" ]] || die "missing vendor bpftool for ARM64 bcc build: ${bpftool}"
@@ -229,7 +223,8 @@ build_bcc_artifacts() {
         LLVM_STRIP="${LLVM_STRIP_BIN}" \
         USE_BLAZESYM=0 \
         BPFTOOL="${bpftool}" \
-        LIBBPF_SRC="${REPO_ROOT}/vendor/libbpf/src" >/dev/null
+        LIBBPF_SRC="${REPO_ROOT}/vendor/libbpf/src" \
+        "${bcc_required_tools[@]}" >/dev/null
 
     mkdir -p \
         "${OUTPUT_ROOT}/runner/repos/bcc/libbpf-tools/.output" \
@@ -286,11 +281,35 @@ prepare_local_katran_dependencies() {
     local src_dir="$1"
     local build_dir="$2"
     local install_dir="$3"
+    local shim_dir="${build_dir}/pkgshim"
 
     log "Preparing local ARM64 Katran dependencies"
+    mkdir -p "$build_dir" "$install_dir" "$shim_dir"
+    cat >"${shim_dir}/yum" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+echo "[cross-arm64][katran] skipping upstream yum invocation: $*" >&2
+exit 0
+EOF
+    cat >"${shim_dir}/yum-config-manager" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+echo "[cross-arm64][katran] skipping upstream yum-config-manager invocation: $*" >&2
+exit 0
+EOF
+    cat >"${shim_dir}/sudo" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ $# -eq 0 ]]; then
+    exit 0
+fi
+exec "$@"
+EOF
+    chmod +x "${shim_dir}/yum" "${shim_dir}/yum-config-manager" "${shim_dir}/sudo"
     (
         cd "$src_dir"
         env \
+            PATH="${shim_dir}:${PATH}" \
             CC="${CLANG_BIN}" \
             CXX="${CLANGXX_BIN}" \
             LD="${LD_LLD_BIN}" \
@@ -397,7 +416,7 @@ build_isolated_native_corpus_repo() {
     prepare_repo_copy "${repo_name}" "${BENCH_BUILD_REPO_ROOT}/${repo_name}"
     rm -rf "${stage_dir}"
     mkdir -p "${BENCH_STAGE_ROOT}"
-    python3 "${REPO_ROOT}/runner/scripts/build_corpus_native.py" \
+    "$HOST_PYTHON_BIN" "${REPO_ROOT}/runner/scripts/build_corpus_native.py" \
         --jobs "${JOBS}" \
         --repo-root "${BENCH_BUILD_REPO_ROOT}" \
         --build-root "${BENCH_STAGE_ROOT}" \
@@ -556,7 +575,7 @@ build_scx_artifacts() {
     LLVM_STRIP="${LLVM_STRIP_BIN}" \
     CC="${CLANG_BIN}" \
     CXX="${CLANGXX_BIN}" \
-        python3 "${REPO_ROOT}/runner/scripts/build_scx_artifacts.py" \
+        "$HOST_PYTHON_BIN" "${REPO_ROOT}/runner/scripts/build_scx_artifacts.py" \
             --force \
             --jobs "${JOBS}" \
             --repo-root "${SCX_BUILD_REPO_ROOT}" \

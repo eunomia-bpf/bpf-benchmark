@@ -47,6 +47,31 @@ def test_bcc_runner_uses_tool_args_from_shared_config(monkeypatch, tmp_path: Pat
     assert runner.tool_args == ("-T", "-U", "-u", "65534")
 
 
+def test_bcc_runner_prefers_setup_tools_dir_over_default_repo_path(monkeypatch, tmp_path: Path) -> None:
+    default_tools_dir = tmp_path / "default-tools"
+    default_tools_dir.mkdir()
+    bundled_tools_dir = tmp_path / "bundled-tools"
+    bundled_tools_dir.mkdir()
+    bundled_tool = _make_tool(bundled_tools_dir, "execsnoop")
+
+    monkeypatch.setattr(bcc, "DEFAULT_TOOLS_DIR", default_tools_dir)
+    monkeypatch.setattr(
+        bcc,
+        "run_setup_script",
+        lambda *_args, **_kwargs: {
+            "returncode": 0,
+            "tools_dir": str(bundled_tools_dir),
+            "stdout_tail": "",
+            "stderr_tail": "",
+        },
+    )
+
+    runner = bcc.BCCRunner(tool_name="execsnoop")
+
+    assert runner._resolve_tool_binary() == bundled_tool.resolve()
+    assert runner.tools_dir == bundled_tools_dir.resolve()
+
+
 def test_bcc_runner_start_fails_when_attached_program_count_is_short(monkeypatch, tmp_path: Path) -> None:
     process = _FakeProcess()
     monkeypatch.setattr(bcc.subprocess, "Popen", lambda *_args, **_kwargs: process)

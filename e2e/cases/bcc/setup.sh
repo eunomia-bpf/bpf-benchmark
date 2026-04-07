@@ -14,12 +14,19 @@ need_tool() {
 
 binary_matches_host_arch() {
   local candidate="$1"
+  local file_output
+  file_output="$(file "${candidate}")"
+  case "${file_output}" in
+    *"shell script"*|*"Python script"*|*"Perl script"*|*"text executable"*)
+      return 0
+      ;;
+  esac
   case "$(uname -m)" in
     aarch64|arm64)
-      file "${candidate}" | grep -F "ARM aarch64" >/dev/null
+      grep -F "ARM aarch64" <<<"${file_output}" >/dev/null
       ;;
     x86_64|amd64)
-      file "${candidate}" | grep -F "x86-64" >/dev/null
+      grep -F "x86-64" <<<"${file_output}" >/dev/null
       ;;
     *)
       return 0

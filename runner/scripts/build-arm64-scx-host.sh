@@ -2,15 +2,16 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+HOST_CACHE_ROOT="${ARM64_HOST_CACHE_ROOT:-$ROOT_DIR/.cache/arm64-host}"
 SOURCE_REPO_ROOT="${ARM64_SCX_SOURCE_REPO_ROOT:-$ROOT_DIR/runner/repos}"
-BUILD_ROOT="${ARM64_SCX_BUILD_ROOT:-$ROOT_DIR/.cache/aws-arm64/scx-host-build}"
-PROMOTE_ROOT="${ARM64_SCX_PROMOTE_ROOT:-$ROOT_DIR/.cache/aws-arm64/binaries}"
-CARGO_HOME_DIR="${ARM64_SCX_CARGO_HOME:-$ROOT_DIR/.cache/aws-arm64/cargo-home-host-scx}"
+BUILD_ROOT="${ARM64_SCX_BUILD_ROOT:-$HOST_CACHE_ROOT/scx-host-build}"
+PROMOTE_ROOT="${ARM64_SCX_PROMOTE_ROOT:-$HOST_CACHE_ROOT/binaries}"
+CARGO_HOME_DIR="${ARM64_SCX_CARGO_HOME:-$HOST_CACHE_ROOT/cargo-home-host-scx}"
 PACKAGES_RAW="${ARM64_SCX_PACKAGES:-}"
 TARGET_TRIPLE="${ARM64_SCX_TARGET_TRIPLE:-aarch64-unknown-linux-gnu}"
 NATIVE_CARGO_LINKER_BIN="${ARM64_NATIVE_CARGO_LINKER:-${CROSS_COMPILE_ARM64:-aarch64-linux-gnu-}gcc}"
-SYSROOT_ROOT="${ARM64_SYSROOT_ROOT:-$ROOT_DIR/.cache/aws-arm64/sysroot}"
-SYSROOT_LOCK_FILE="${ARM64_SYSROOT_LOCK_FILE:-$ROOT_DIR/.cache/aws-arm64/sysroot.lock}"
+SYSROOT_ROOT="${ARM64_SYSROOT_ROOT:-$HOST_CACHE_ROOT/sysroot}"
+SYSROOT_LOCK_FILE="${ARM64_SYSROOT_LOCK_FILE:-$HOST_CACHE_ROOT/sysroot.lock}"
 SYSROOT_REMOTE_HOST="${ARM64_SYSROOT_REMOTE_HOST:-}"
 SYSROOT_REMOTE_USER="${ARM64_SYSROOT_REMOTE_USER:-ec2-user}"
 SYSROOT_SSH_KEY_PATH="${ARM64_SYSROOT_SSH_KEY_PATH:-}"
@@ -26,6 +27,7 @@ PREFERRED_LLVM_SUFFIX="${ARM64_CROSSBUILD_LLVM_SUFFIX:-20}"
 READELF_BIN="${ARM64_CROSSBUILD_READELF:-aarch64-linux-gnu-readelf}"
 LINKER_WRAPPER="$TOOLCHAIN_BIN_DIR/aarch64-linux-gnu-gcc-sysroot"
 RUSTFMT_BIN="${ARM64_CROSSBUILD_RUSTFMT:-rustfmt}"
+HOST_PYTHON_BIN="${ARM64_HOST_PYTHON_BIN:-python3}"
 
 log() {
     printf '[arm64-scx-host] %s\n' "$*" >&2
@@ -36,21 +38,14 @@ die() {
     exit 1
 }
 
+# shellcheck disable=SC1090
+source "$ROOT_DIR/runner/scripts/local_prep_common_lib.sh"
+# shellcheck disable=SC1090
+source "$ROOT_DIR/runner/scripts/arm64_runtime_bundle_lib.sh"
+
 require_command() {
     local cmd="$1"
     command -v "$cmd" >/dev/null 2>&1 || die "missing required command: ${cmd}"
-}
-
-git_path_is_clean() {
-    local repo_root="$1"
-    local pathspec="${2:-}"
-    if [[ -n "$pathspec" ]]; then
-        git -C "$repo_root" diff --quiet -- "$pathspec" || return 1
-        git -C "$repo_root" diff --cached --quiet -- "$pathspec" || return 1
-    else
-        git -C "$repo_root" diff --quiet || return 1
-        git -C "$repo_root" diff --cached --quiet || return 1
-    fi
 }
 
 resolve_llvm_tool() {
@@ -78,69 +73,6 @@ exec "$NATIVE_CARGO_LINKER_BIN" --sysroot="$SYSROOT_ROOT" \
     "\$@"
 EOF
     chmod +x "$LINKER_WRAPPER"
-}
-
-copy_runtime_bundle() {
-    local binary="$1"
-    local output_lib_dir="${2:-$PROMOTE_ROOT/lib}"
-    local -a queue=("$binary")
-    local current lib resolved resolved_base requested_base soname
-    declare -A seen=()
-
-    mkdir -p "$output_lib_dir"
-    while ((${#queue[@]})); do
-        current="${queue[0]}"
-        queue=("${queue[@]:1}")
-        [[ -e "$current" ]] || continue
-        if [[ -n "${seen["$current"]:-}" ]]; then
-            continue
-        fi
-        seen["$current"]=1
-        while IFS= read -r lib; do
-            [[ -n "$lib" ]] || continue
-            resolved="$(resolve_arm64_library_path "$lib")"
-            resolved_base="$(basename "$resolved")"
-            requested_base="$(basename "$lib")"
-            case "$resolved_base" in
-                ld-linux-aarch64.so.1|libc.so.6|libm.so.6|libpthread.so.0|librt.so.1|libdl.so.2|libresolv.so.2|libutil.so.1)
-                    continue
-                    ;;
-            esac
-            cp -L "$resolved" "$output_lib_dir/$resolved_base"
-            if [[ "$requested_base" != "$resolved_base" ]]; then
-                ln -sfn "$resolved_base" "$output_lib_dir/$requested_base"
-            fi
-            soname="$(readelf -d "$resolved" 2>/dev/null | sed -n 's/.*Library soname: \[\(.*\)\].*/\1/p' | head -n1)"
-            if [[ -n "$soname" && "$soname" != "$resolved_base" ]]; then
-                ln -sfn "$resolved_base" "$output_lib_dir/$soname"
-            fi
-            queue+=("$resolved")
-        done < <(read_needed_libraries "$current")
-    done
-}
-
-read_needed_libraries() {
-    local binary="$1"
-    "$READELF_BIN" -d "$binary" 2>/dev/null | sed -n 's/.*Shared library: \[\(.*\)\].*/\1/p' | sort -u
-}
-
-resolve_arm64_library_path() {
-    local soname="$1"
-    local candidate
-
-    for candidate in \
-        "$SYSROOT_USR_LIB_DIR/$soname" \
-        "$SYSROOT_LIB_DIR/$soname" \
-        "$SYSROOT_LEGACY_LIB_DIR/$soname" \
-        "$SYSROOT_ALT_LIB_DIR/$soname"
-    do
-        if [[ -e "$candidate" ]]; then
-            printf '%s\n' "$candidate"
-            return 0
-        fi
-    done
-
-    die "unable to resolve ARM64 shared library ${soname}"
 }
 
 prepare_scx_checkout() {
@@ -209,7 +141,7 @@ build_scx_artifacts() {
         LLVM_STRIP="$llvm_strip_bin" \
         CC="$clang_bin" \
         CXX="${clang_bin/clang/clang++}" \
-        python3 "$ROOT_DIR/runner/scripts/build_scx_artifacts.py" \
+        "$HOST_PYTHON_BIN" "$ROOT_DIR/runner/scripts/build_scx_artifacts.py" \
             --force \
             --jobs "${ARM64_CROSSBUILD_JOBS:-4}" \
             --target-triple "$TARGET_TRIPLE" \
@@ -224,11 +156,11 @@ build_scx_artifacts() {
         [[ -x "$current_release_dir/$package" ]] || die "expected scx binary missing after build: $current_release_dir/$package"
         destination="$PROMOTE_ROOT/runner/repos/scx/target/release/$package"
         cp "$current_release_dir/$package" "$destination"
-        copy_runtime_bundle "$destination"
+        arm64_bundle_copy_runtime_bundle "$destination" "$PROMOTE_ROOT/lib"
     done
 }
 
-require_command python3
+require_command "$HOST_PYTHON_BIN"
 require_command cargo
 require_command file
 require_command readelf

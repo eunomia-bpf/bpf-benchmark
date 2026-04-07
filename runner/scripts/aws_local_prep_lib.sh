@@ -104,16 +104,21 @@ ensure_x86_kinsn_modules_ready() {
 }
 
 ensure_x86_selftest_outputs() {
-    make -C "$ROOT_DIR/runner" \
-        UNITTEST_BUILD_DIR="$X86_TEST_UNITTEST_BUILD_DIR" \
-        NEGATIVE_BUILD_DIR="$X86_TEST_NEGATIVE_BUILD_DIR" \
-        unittest-build negative-build >/dev/null
+    local_prep_build_x86_repo_tests \
+        "$ROOT_DIR/runner" \
+        "$X86_TEST_UNITTEST_BUILD_DIR" \
+        "$X86_TEST_NEGATIVE_BUILD_DIR"
     file "$X86_TEST_UNITTEST_BUILD_DIR/rejit_kinsn" | grep -F "x86-64" >/dev/null || die "x86 unittest binary is not x86_64"
     file "$X86_TEST_NEGATIVE_BUILD_DIR/adversarial_rejit" | grep -F "x86-64" >/dev/null || die "x86 negative binary is not x86_64"
 }
 
 ensure_x86_upstream_selftests_ready() {
-    make -C "$ROOT_DIR/runner" UPSTREAM_SELFTEST_OUTPUT_DIR="$X86_UPSTREAM_SELFTEST_DIR" upstream-selftests-build >/dev/null
+    local_prep_build_x86_upstream_selftests \
+        "$ROOT_DIR/runner" \
+        "$X86_UPSTREAM_SELFTEST_DIR" \
+        "$ROOT_DIR/vendor/linux-framework/vmlinux" \
+        "$HOST_PYTHON_BIN" \
+        "${RUN_UPSTREAM_SELFTEST_LLVM_SUFFIX:-}"
     require_local_path "$X86_UPSTREAM_SELFTEST_DIR/test_verifier" "x86 upstream test_verifier"
     require_local_path "$X86_UPSTREAM_SELFTEST_DIR/test_progs" "x86 upstream test_progs"
 }
@@ -133,6 +138,26 @@ ensure_cross_arm64_runtime() {
     fi
     [[ "${#runtime_targets[@]}" -gt 0 ]] || return 0
     configure_arm64_sysroot_contract
+    if [[ "${#runtime_targets[@]}" -eq 1 && "${runtime_targets[0]}" == "daemon" ]]; then
+        make -C "$ROOT_DIR/runner" __arm64-daemon-host-cross \
+            ARM64_HOST_DAEMON_TARGET_DIR="$ARM64_HOST_DAEMON_TARGET_DIR" \
+            ARM64_HOST_DAEMON_OUTPUT_DIR="$ARM64_HOST_DAEMON_OUTPUT_DIR" \
+            ARM64_HOST_DAEMON_BINARY="$ARM64_HOST_DAEMON_BINARY" \
+            ARM64_HOST_DAEMON_CARGO_HOME="$ARM64_HOST_DAEMON_CARGO_HOME" \
+            ARM64_SYSROOT_ROOT="$ARM64_SYSROOT_ROOT" \
+            ARM64_SYSROOT_LOCK_FILE="$ARM64_SYSROOT_LOCK_FILE" \
+            ARM64_SYSROOT_REMOTE_HOST="$ARM64_SYSROOT_REMOTE_HOST" \
+            ARM64_SYSROOT_REMOTE_USER="$ARM64_SYSROOT_REMOTE_USER" \
+            ARM64_SYSROOT_SSH_KEY_PATH="$ARM64_SYSROOT_SSH_KEY_PATH" >/dev/null
+        bash "$ROOT_DIR/runner/scripts/build-arm64-portable-binary-host.sh" \
+            "$ARM64_HOST_DAEMON_BINARY" \
+            "$ARM64_CROSS_DAEMON_REAL" \
+            "$ARM64_CROSS_DAEMON" \
+            "$ARM64_CROSS_LIB_DIR" >/dev/null
+        file "$ARM64_CROSS_DAEMON_REAL" | grep -F "ARM aarch64" >/dev/null || die "ARM64 daemon is not an aarch64 binary"
+        [[ -d "$ARM64_CROSS_LIB_DIR" ]] || die "ARM64 runtime lib dir is missing: ${ARM64_CROSS_LIB_DIR}"
+        return 0
+    fi
     make -C "$ROOT_DIR/runner" __cross-arm64 \
         ARM64_SOURCE_REPO_ROOT="$ARM64_SOURCE_REPO_ROOT" \
         ARM64_CROSSBUILD_OUTPUT_DIR="$ARM64_CROSSBUILD_OUTPUT_DIR" \
@@ -155,7 +180,7 @@ ensure_cross_arm64_runtime() {
     if [[ "${RUN_NEEDS_DAEMON_BINARY:-0}" == "1" ]]; then
         file "$ARM64_CROSS_DAEMON_REAL" | grep -F "ARM aarch64" >/dev/null || die "ARM64 daemon is not an aarch64 binary"
     fi
-    dir_has_entries "$ARM64_CROSS_LIB_DIR" || die "ARM64 runtime lib dir is empty: ${ARM64_CROSS_LIB_DIR}"
+    [[ -d "$ARM64_CROSS_LIB_DIR" ]] || die "ARM64 runtime lib dir is missing: ${ARM64_CROSS_LIB_DIR}"
 }
 
 ensure_arm64_kinsn_modules_ready_locked() {
@@ -227,6 +252,7 @@ ensure_arm64_selftest_outputs() {
     [[ -f "$ARM64_AWS_BUILD_DIR/vmlinux" ]] || die "AWS ARM64 selftest build requires ${ARM64_AWS_BUILD_DIR}/vmlinux"
     configure_arm64_sysroot_contract
     make -C "$ROOT_DIR/runner" __arm64-test-artifacts \
+        PYTHON="$HOST_PYTHON_BIN" \
         VMLINUX_BTF="$ARM64_AWS_BUILD_DIR/vmlinux" \
         ARM64_TEST_MODE="${RUN_TEST_MODE:-test}" \
         ARM64_TEST_ARTIFACTS_ROOT="$ARM64_TEST_ARTIFACTS_ROOT" \
@@ -237,11 +263,13 @@ ensure_arm64_selftest_outputs() {
         ARM64_HOST_DAEMON_OUTPUT_DIR="$ARM64_HOST_DAEMON_OUTPUT_DIR" \
         ARM64_HOST_DAEMON_BINARY="$ARM64_HOST_DAEMON_BINARY" \
         ARM64_HOST_DAEMON_CARGO_HOME="$ARM64_HOST_DAEMON_CARGO_HOME" \
+        ARM64_HOST_PYTHON_BIN="$HOST_PYTHON_BIN" \
         ARM64_SYSROOT_ROOT="$ARM64_SYSROOT_ROOT" \
         ARM64_SYSROOT_LOCK_FILE="$ARM64_SYSROOT_LOCK_FILE" \
         ARM64_SYSROOT_REMOTE_HOST="$ARM64_SYSROOT_REMOTE_HOST" \
         ARM64_SYSROOT_REMOTE_USER="$ARM64_SYSROOT_REMOTE_USER" \
         ARM64_SYSROOT_SSH_KEY_PATH="$ARM64_SYSROOT_SSH_KEY_PATH" \
+        ARM64_UPSTREAM_SELFTEST_LLVM_SUFFIX="${RUN_UPSTREAM_SELFTEST_LLVM_SUFFIX:-}" \
         ARM64_UPSTREAM_SELFTEST_OUTPUT_DIR="$ARM64_UPSTREAM_SELFTEST_DIR" >/dev/null
     file "$ARM64_TEST_UNITTEST_BUILD_DIR/rejit_kinsn" | grep -F "ARM aarch64" >/dev/null || die "ARM64 unittest binary is not aarch64"
     file "$ARM64_TEST_NEGATIVE_BUILD_DIR/adversarial_rejit" | grep -F "ARM aarch64" >/dev/null || die "ARM64 negative binary is not aarch64"
@@ -251,31 +279,22 @@ ensure_arm64_selftest_outputs() {
 
 ensure_selected_repos_fetched() {
     local repo_csv="$1"
-    local repo
-    local args=()
-    [[ -n "$repo_csv" ]] || return 0
-    mkdir -p "$LOCAL_REPO_ROOT"
-    IFS=',' read -r -a _selected_repos <<<"$repo_csv"
-    for repo in "${_selected_repos[@]}"; do
-        [[ -n "$repo" ]] || continue
-        args+=(--repo "$repo")
-    done
-    [[ "${#args[@]}" -gt 0 ]] || return 0
-    "$HOST_PYTHON_BIN" "$ROOT_DIR/runner/scripts/fetch_corpus_repos.py" --repo-root "$LOCAL_REPO_ROOT" "${args[@]}" >/dev/null
+    local_prep_fetch_selected_repos "$LOCAL_REPO_ROOT" "$repo_csv" "$HOST_PYTHON_BIN" "$ROOT_DIR"
 }
 
 ensure_x86_scx_artifacts_ready() {
     local package
     [[ -n "${RUN_SCX_PACKAGES_CSV:-}" ]] || return 0
     ensure_selected_repos_fetched "scx"
-    IFS=',' read -r -a _scx_packages <<<"$RUN_SCX_PACKAGES_CSV"
-    for package in "${_scx_packages[@]}"; do
+    local_prep_build_scx_artifacts \
+        "$LOCAL_REPO_ROOT" \
+        "$LOCAL_PROMOTE_ROOT" \
+        "$RUN_SCX_PACKAGES_CSV" \
+        "$HOST_PYTHON_BIN" \
+        "$ROOT_DIR"
+    IFS=',' read -r -a _aws_x86_scx_packages <<<"$RUN_SCX_PACKAGES_CSV"
+    for package in "${_aws_x86_scx_packages[@]}"; do
         [[ -n "$package" ]] || continue
-        "$HOST_PYTHON_BIN" "$ROOT_DIR/runner/scripts/build_scx_artifacts.py" \
-            --force \
-            --repo-root "$LOCAL_REPO_ROOT" \
-            --promote-root "$LOCAL_PROMOTE_ROOT" \
-            --package "$package" >/dev/null
         file "$LOCAL_REPO_ROOT/scx/target/release/$package" | grep -F "x86-64" >/dev/null || die "x86 scx binary is not x86_64: $package"
         require_local_path "$LOCAL_PROMOTE_ROOT/corpus/build/scx/${package}_main.bpf.o" "x86 scx object ${package}_main.bpf.o"
     done
@@ -306,51 +325,21 @@ ensure_arm64_scx_artifacts_ready() {
 }
 
 ensure_x86_native_repo_artifacts_ready() {
-    local repo katran_input_root args=()
     [[ -n "${RUN_NATIVE_REPOS_CSV:-}" ]] || return 0
-    ensure_selected_repos_fetched "$RUN_BENCHMARK_REPOS_CSV"
+    ensure_selected_repos_fetched "${RUN_FETCH_REPOS_CSV:-}"
     mkdir -p "$LOCAL_PROMOTE_ROOT/corpus/build"
-    IFS=',' read -r -a _native_repos <<<"$RUN_NATIVE_REPOS_CSV"
-    for repo in "${_native_repos[@]}"; do
-        [[ -n "$repo" ]] || continue
-        args+=(--repo "$repo")
-    done
-    [[ "${#args[@]}" -gt 0 ]] || return 0
-    if [[ ",${RUN_NATIVE_REPOS_CSV:-}," == *",katran,"* ]]; then
-        katran_input_root="$LOCAL_PROMOTE_ROOT/.inputs/katran"
-        rm -rf "$katran_input_root"
-        mkdir -p "$katran_input_root/bin" "$katran_input_root/lib"
-        snapshot_git_subtree "$ROOT_DIR" "e2e/cases/katran/bin" "$katran_input_root/bin"
-        snapshot_git_subtree "$ROOT_DIR" "e2e/cases/katran/lib" "$katran_input_root/lib"
-        require_local_path "$katran_input_root/bin/katran_server_grpc" "sealed AWS x86 Katran server source bundle"
-        require_nonempty_dir "$katran_input_root/lib" "sealed AWS x86 Katran lib dir"
-        KATRAN_SERVER_BINARY="$katran_input_root/bin/katran_server_grpc" \
-            KATRAN_SERVER_LIB_DIR="$katran_input_root/lib" \
-            "$HOST_PYTHON_BIN" "$ROOT_DIR/runner/scripts/build_corpus_native.py" \
-                --jobs "$(nproc)" \
-                --repo-root "$LOCAL_REPO_ROOT" \
-                --build-root "$LOCAL_PROMOTE_ROOT/corpus/build" \
-                "${args[@]}" >/dev/null
-        return 0
-    fi
-    "$HOST_PYTHON_BIN" "$ROOT_DIR/runner/scripts/build_corpus_native.py" \
-        --jobs "$(nproc)" \
-        --repo-root "$LOCAL_REPO_ROOT" \
-        --build-root "$LOCAL_PROMOTE_ROOT/corpus/build" \
-        "${args[@]}" >/dev/null
+    local_prep_build_native_repo_artifacts \
+        "$LOCAL_REPO_ROOT" \
+        "$LOCAL_PROMOTE_ROOT" \
+        "$RUN_NATIVE_REPOS_CSV" \
+        "$HOST_PYTHON_BIN" \
+        "$ROOT_DIR"
 }
 
 ensure_x86_portable_libbpf_ready() {
     bash "$ROOT_DIR/runner/scripts/build-x86-portable-libbpf.sh" "$X86_PORTABLE_LIBBPF_ROOT" >/dev/null
     require_nonempty_dir "$X86_PORTABLE_LIBBPF_ROOT/lib" "portable x86 libbpf dir"
     require_local_path "$X86_PORTABLE_LIBBPF_ROOT/lib/libbpf.so.1" "portable x86 libbpf soname"
-}
-
-x86_tool_should_be_bundled() {
-    case "$1" in
-        wrk|sysbench|hackbench|stress-ng|fio|bpftrace) return 0 ;;
-    esac
-    return 1
 }
 
 arm64_tool_should_be_bundled() {
@@ -361,38 +350,12 @@ arm64_tool_should_be_bundled() {
 }
 
 ensure_x86_workload_tools_ready() {
-    local tool bundled_csv="" local_tool_root tool_path
-    [[ -n "${RUN_WORKLOAD_TOOLS_CSV:-}" ]] || {
-        RUN_LOCAL_WORKLOAD_TOOL_ROOT=""
-        RUN_BUNDLED_WORKLOAD_TOOLS_CSV=""
-        return 0
-    }
-    IFS=',' read -r -a _x86_workload_tools <<<"$RUN_WORKLOAD_TOOLS_CSV"
-    for tool in "${_x86_workload_tools[@]}"; do
-        [[ -n "$tool" ]] || continue
-        x86_tool_should_be_bundled "$tool" || continue
-        bundled_csv="$(csv_append_unique "$bundled_csv" "$tool")"
-    done
-    [[ -n "$bundled_csv" ]] || {
-        RUN_LOCAL_WORKLOAD_TOOL_ROOT=""
-        RUN_BUNDLED_WORKLOAD_TOOLS_CSV=""
-        return 0
-    }
-    local_tool_root="$LOCAL_PROMOTE_ROOT/workload-tools"
-    rm -rf "$local_tool_root"
-    mkdir -p "$local_tool_root/bin"
-    for tool in "${_x86_workload_tools[@]}"; do
-        [[ -n "$tool" ]] || continue
-        x86_tool_should_be_bundled "$tool" || continue
-        tool_path="$(command -v "$tool" 2>/dev/null || true)"
-        [[ -n "$tool_path" && -x "$tool_path" ]] \
-            || die "required x86 bundled workload tool is missing on the host: ${tool}"
-        cp -L "$tool_path" "$local_tool_root/bin/$tool"
-        chmod 0755 "$local_tool_root/bin/$tool"
-        require_local_path "$local_tool_root/bin/$tool" "x86 bundled workload tool ${tool}"
-    done
-    RUN_LOCAL_WORKLOAD_TOOL_ROOT="$local_tool_root"
-    RUN_BUNDLED_WORKLOAD_TOOLS_CSV="$bundled_csv"
+    local local_tool_root="$LOCAL_PROMOTE_ROOT/workload-tools"
+    local_prep_stage_x86_workload_tools \
+        "${RUN_WORKLOAD_TOOLS_CSV:-}" \
+        "$local_tool_root" \
+        RUN_BUNDLED_WORKLOAD_TOOLS_CSV \
+        RUN_LOCAL_WORKLOAD_TOOL_ROOT
 }
 
 ensure_arm64_workload_tools_ready() {
@@ -447,7 +410,7 @@ arm64_local_katran_bundle_available() {
 ensure_arm64_native_repo_artifacts_ready() {
     local repo
     [[ -n "${RUN_NATIVE_REPOS_CSV:-}" ]] || return 0
-    ensure_selected_repos_fetched "$RUN_BENCHMARK_REPOS_CSV"
+    ensure_selected_repos_fetched "${RUN_FETCH_REPOS_CSV:-}"
     IFS=',' read -r -a _native_repos <<<"$RUN_NATIVE_REPOS_CSV"
     make -C "$ROOT_DIR/runner" __cross-arm64-bench \
         ARM64_SOURCE_REPO_ROOT="$LOCAL_REPO_ROOT" \
@@ -526,6 +489,7 @@ aws_prepare_local_benchmark_artifacts() {
             esac
             ;;
         corpus|e2e)
+            ensure_selected_repos_fetched "${RUN_FETCH_REPOS_CSV:-}"
             case "$RUN_TARGET_NAME" in
                 aws-arm64)
                     ensure_cross_arm64_runtime "${RUN_SUITE_NEEDS_LLVMBPF:-0}"
@@ -571,8 +535,42 @@ aws_prepare_local_bundle() {
     rm -rf "$stage_root"
     mkdir -p "$(dirname "$bundle_tar")"
     : >"$bundle_inputs_path"
-    write_bundle_input_var "$bundle_inputs_path" RUN_LOCAL_PROMOTE_ROOT "$LOCAL_PROMOTE_ROOT"
     write_bundle_input_var "$bundle_inputs_path" RUN_BUNDLED_WORKLOAD_TOOLS_CSV "${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}"
+    write_bundle_input_var "$bundle_inputs_path" RUN_LOCAL_REPO_ROOT "$LOCAL_REPO_ROOT"
+    write_bundle_input_var_if_set "$bundle_inputs_path" RUN_LOCAL_WORKLOAD_TOOL_ROOT "${RUN_LOCAL_WORKLOAD_TOOL_ROOT:-}"
+    write_bundle_input_var_if_set "$bundle_inputs_path" MICRO_PROGRAMS_GENERATED_DIR "$MICRO_PROGRAMS_GENERATED_DIR"
+    if [[ "${RUN_NEEDS_KINSN_MODULES:-0}" == "1" ]]; then
+        case "$RUN_TARGET_ARCH" in
+            arm64) write_bundle_input_var "$bundle_inputs_path" RUN_KINSN_MODULE_DIR "$ARM64_KINSN_MODULE_STAGE_DIR" ;;
+            x86_64) write_bundle_input_var "$bundle_inputs_path" RUN_KINSN_MODULE_DIR "$X86_KINSN_MODULE_STAGE_DIR" ;;
+            *) die "unsupported target arch for bundled module inputs: ${RUN_TARGET_ARCH}" ;;
+        esac
+    fi
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_RUNNER "$X86_RUNNER"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_DAEMON "$X86_DAEMON"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_TEST_UNITTEST_BUILD_DIR "$X86_TEST_UNITTEST_BUILD_DIR"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_TEST_NEGATIVE_BUILD_DIR "$X86_TEST_NEGATIVE_BUILD_DIR"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_UPSTREAM_SELFTEST_DIR "$X86_UPSTREAM_SELFTEST_DIR"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_PORTABLE_LIBBPF_ROOT "$X86_PORTABLE_LIBBPF_ROOT"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_NATIVE_BUILD_ROOT "$LOCAL_PROMOTE_ROOT/corpus/build"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_SCX_BINARY_ROOT "$LOCAL_REPO_ROOT/scx/target/release"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_SCX_OBJECT_ROOT "$LOCAL_PROMOTE_ROOT/corpus/build/scx"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_KATRAN_SERVER_BINARY "$LOCAL_PROMOTE_ROOT/corpus/build/katran/bin/katran_server_grpc"
+    write_bundle_input_var_if_set "$bundle_inputs_path" X86_KATRAN_SERVER_LIB_DIR "$LOCAL_PROMOTE_ROOT/corpus/build/katran/lib"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_CROSS_RUNNER "$ARM64_CROSS_RUNNER"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_CROSS_RUNNER_REAL "$ARM64_CROSS_RUNNER_REAL"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_CROSS_DAEMON "$ARM64_CROSS_DAEMON"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_CROSS_DAEMON_REAL "$ARM64_CROSS_DAEMON_REAL"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_CROSS_LIB_DIR "$ARM64_CROSS_LIB_DIR"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_TEST_UNITTEST_BUILD_DIR "$ARM64_TEST_UNITTEST_BUILD_DIR"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_TEST_NEGATIVE_BUILD_DIR "$ARM64_TEST_NEGATIVE_BUILD_DIR"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_UPSTREAM_SELFTEST_DIR "$ARM64_UPSTREAM_SELFTEST_DIR"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_UPSTREAM_TEST_KMODS_DIR "$ARM64_UPSTREAM_TEST_KMODS_DIR"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_NATIVE_BUILD_ROOT "$ARM64_CROSSBUILD_OUTPUT_DIR/corpus/build"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_SCX_BINARY_ROOT "$ARM64_CROSSBUILD_OUTPUT_DIR/runner/repos/scx/target/release"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_SCX_OBJECT_ROOT "$ARM64_CROSSBUILD_OUTPUT_DIR/corpus/build/scx"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_KATRAN_SERVER_BINARY "$ARM64_KATRAN_SERVER_BINARY"
+    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_KATRAN_SERVER_LIB_DIR "$ARM64_KATRAN_SERVER_LIB_DIR"
     "$ROOT_DIR/runner/scripts/build_remote_bundle.sh" "$MANIFEST_PATH" "$bundle_inputs_path" "$RUN_INPUT_STAGE_ROOT" "$RUN_BUNDLE_TAR"
 }
 
@@ -583,13 +581,12 @@ aws_emit_local_state() {
     printf 'RUN_LOCAL_STAGE_MANIFEST=%q\n' "$RUN_INPUT_STAGE_ROOT/run-contract.env"
     printf 'RUN_INPUT_STAGE_ROOT=%q\n' "$RUN_INPUT_STAGE_ROOT"
     printf 'RUN_BUNDLE_TAR=%q\n' "$RUN_BUNDLE_TAR"
-    printf 'RUN_LOCAL_PROMOTE_ROOT=%q\n' "$LOCAL_PROMOTE_ROOT"
     printf 'RUN_BUNDLED_WORKLOAD_TOOLS_CSV=%q\n' "${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}"
 }
 
 aws_prepare_local_action() {
     ensure_dirs
-    load_state
+    load_remote_prep_state
     aws_prepare_local_suite_artifacts
     aws_prepare_local_bundle
     aws_emit_local_state

@@ -4,6 +4,34 @@ SHELL := /bin/bash
 ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 REPO_ROOT := $(abspath $(ROOT_DIR)/..)
 
+include $(ROOT_DIR)/mk/arm64_defaults.mk
+
+ARM64_CROSSBUILD_OUTPUT_DIR ?= $(ARM64_HOST_CACHE_ROOT)/binaries
+ARM64_CROSSBUILD_BUILD_ROOT ?= $(ARM64_HOST_CACHE_ROOT)/arm64-cross/build
+ARM64_CROSSBUILD_CARGO_HOME ?= $(ARM64_HOST_CACHE_ROOT)/cargo-home
+ARM64_HOST_DAEMON_TARGET_DIR ?= $(ARM64_HOST_CACHE_ROOT)/daemon-host-cross/target
+ARM64_HOST_DAEMON_OUTPUT_DIR ?= $(ARM64_HOST_CACHE_ROOT)/daemon-host-cross/output
+ARM64_HOST_DAEMON_BINARY ?= $(ARM64_HOST_DAEMON_OUTPUT_DIR)/bpfrejit-daemon
+ARM64_HOST_DAEMON_CARGO_HOME ?= $(ARM64_HOST_CACHE_ROOT)/cargo-home-host-daemon
+ARM64_HOST_SCX_BUILD_ROOT ?= $(ARM64_HOST_CACHE_ROOT)/scx-host-cross/build
+ARM64_HOST_SCX_CARGO_HOME ?= $(ARM64_HOST_CACHE_ROOT)/scx-host-cross/cargo-home
+ARM64_SOURCE_REPO_ROOT ?= $(REPO_ROOT)/runner/repos
+ARM64_SYSROOT_ROOT ?= $(ARM64_HOST_CACHE_ROOT)/sysroot
+ARM64_SYSROOT_LOCK_FILE ?= $(ARM64_HOST_CACHE_ROOT)/sysroot.lock
+ARM64_SYSROOT_REMOTE_HOST ?=
+ARM64_SYSROOT_REMOTE_USER ?=
+ARM64_SYSROOT_SSH_KEY_PATH ?=
+ARM64_CROSS_RUNNER_REAL ?= $(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/build/micro_exec.real
+ARM64_CROSS_DAEMON_REAL ?= $(ARM64_CROSSBUILD_OUTPUT_DIR)/daemon/build/bpfrejit-daemon.real
+ARM64_TEST_MODE ?= test
+ARM64_TEST_ARTIFACTS_ROOT ?= $(ARM64_HOST_CACHE_ROOT)/test-artifacts
+ARM64_TEST_UNITTEST_BUILD_DIR ?= $(ARM64_TEST_ARTIFACTS_ROOT)/unittest/build-arm64
+ARM64_TEST_NEGATIVE_BUILD_DIR ?= $(ARM64_TEST_ARTIFACTS_ROOT)/negative/build-arm64
+ARM64_TEST_DAEMON_OUTPUT_DIR ?= $(ARM64_TEST_ARTIFACTS_ROOT)/daemon
+ARM64_UPSTREAM_SELFTEST_OUTPUT_DIR ?= $(ARM64_TEST_ARTIFACTS_ROOT)/upstream-bpf-selftests
+VMLINUX_BTF ?=
+arm64_container_path = $(patsubst $(REPO_ROOT)%,/workspace%,$(1))
+
 BUILD_DIR ?= $(ROOT_DIR)/build
 LIBBPF_BUILD_DIR := $(BUILD_DIR)/vendor/libbpf
 LIBBPF_OBJDIR := $(LIBBPF_BUILD_DIR)/obj
@@ -38,13 +66,20 @@ DAEMON_TARGET_DIR ?= $(REPO_ROOT)/daemon/target
 KINSN_MODULE_OUTPUT_DIR ?=
 JOBS ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
 BPFTOOL_JOBS ?= 1
+UPSTREAM_SELFTEST_SOURCE_DIR ?= $(REPO_ROOT)/vendor/linux-framework/tools/testing/selftests/bpf
+UPSTREAM_SELFTEST_HOST_PYTHON_BIN ?= $(PYTHON)
+UPSTREAM_SELFTEST_ARCH ?=
+UPSTREAM_SELFTEST_CROSS_COMPILE ?=
+UPSTREAM_SELFTEST_SYSROOT_ROOT ?=
+UPSTREAM_SELFTEST_PKGCONFIG_LIBDIR ?=
 
 .PHONY: all micro_exec vendor_libbpf vendor_bpftool \
 	corpus-fetch corpus-build corpus-build-native \
 	corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx \
 	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
 	scx-artifacts \
-	kernel-image unittest-build negative-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary \
+	kernel-image unittest-build negative-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary daemon-tests \
+	__arm64-crossbuild-image __arm64-daemon-host-cross __arm64-workload-tools-host-cross __cross-arm64 __cross-arm64-scx __cross-arm64-bench __arm64-test-artifacts \
 	clean
 
 all: micro_exec
@@ -166,9 +201,16 @@ negative-build:
 	$(MAKE) -C "$(NEGATIVE_TEST_DIR)" BUILD_DIR="$(NEGATIVE_BUILD_DIR)" all
 
 upstream-selftests-build:
-	$(MAKE) -C "$(REPO_ROOT)" upstream-selftests-build \
-		BZIMAGE="$(BZIMAGE)" \
-		UPSTREAM_SELFTEST_OUTPUT_DIR="$(UPSTREAM_SELFTEST_OUTPUT_DIR)"
+	UPSTREAM_SELFTEST_SOURCE_DIR="$(UPSTREAM_SELFTEST_SOURCE_DIR)" \
+	UPSTREAM_SELFTEST_OUTPUT_DIR="$(UPSTREAM_SELFTEST_OUTPUT_DIR)" \
+	UPSTREAM_SELFTEST_HOST_PYTHON_BIN="$(UPSTREAM_SELFTEST_HOST_PYTHON_BIN)" \
+	UPSTREAM_SELFTEST_ARCH="$(UPSTREAM_SELFTEST_ARCH)" \
+	UPSTREAM_SELFTEST_CROSS_COMPILE="$(UPSTREAM_SELFTEST_CROSS_COMPILE)" \
+	UPSTREAM_SELFTEST_SYSROOT_ROOT="$(UPSTREAM_SELFTEST_SYSROOT_ROOT)" \
+	UPSTREAM_SELFTEST_PKGCONFIG_LIBDIR="$(UPSTREAM_SELFTEST_PKGCONFIG_LIBDIR)" \
+	UPSTREAM_SELFTEST_LLVM_SUFFIX="$(UPSTREAM_SELFTEST_LLVM_SUFFIX)" \
+	VMLINUX_BTF="$(VMLINUX_BTF)" \
+		bash "$(ROOT_DIR)/scripts/build_upstream_selftests.sh"
 
 kinsn-modules-build:
 	$(MAKE) -C "$(REPO_ROOT)" kinsn-modules \
@@ -183,6 +225,202 @@ micro-programs:
 
 daemon-binary:
 	cargo build --release --target-dir "$(DAEMON_TARGET_DIR)" --manifest-path "$(REPO_ROOT)/daemon/Cargo.toml"
+
+daemon-tests:
+	cargo test --manifest-path "$(REPO_ROOT)/daemon/Cargo.toml"
+
+$(ARM64_CROSSBUILD_STAMP): $(ARM64_CROSSBUILD_DOCKERFILE)
+	mkdir -p "$(dir $(ARM64_CROSSBUILD_STAMP))"
+	flock "$(ARM64_CROSSBUILD_LOCK)" "$(DOCKER)" buildx build --load --platform "$(ARM64_DOCKER_PLATFORM)" \
+		-f "$(ARM64_CROSSBUILD_DOCKERFILE)" -t "$(ARM64_CROSSBUILD_IMAGE)" "$(ARM64_CROSSBUILD_CONTEXT)"
+	touch "$@"
+
+__arm64-crossbuild-image: $(ARM64_CROSSBUILD_STAMP)
+
+__arm64-daemon-host-cross:
+	ARM64_HOST_DAEMON_TARGET_DIR="$(ARM64_HOST_DAEMON_TARGET_DIR)" \
+	ARM64_HOST_DAEMON_OUTPUT_DIR="$(ARM64_HOST_DAEMON_OUTPUT_DIR)" \
+	ARM64_HOST_DAEMON_BINARY="$(ARM64_HOST_DAEMON_BINARY)" \
+	ARM64_HOST_DAEMON_CARGO_HOME="$(ARM64_HOST_DAEMON_CARGO_HOME)" \
+	ARM64_SYSROOT_ROOT="$(ARM64_SYSROOT_ROOT)" \
+	ARM64_SYSROOT_LOCK_FILE="$(ARM64_SYSROOT_LOCK_FILE)" \
+	ARM64_SYSROOT_REMOTE_HOST="$(ARM64_SYSROOT_REMOTE_HOST)" \
+	ARM64_SYSROOT_REMOTE_USER="$(ARM64_SYSROOT_REMOTE_USER)" \
+	ARM64_SYSROOT_SSH_KEY_PATH="$(ARM64_SYSROOT_SSH_KEY_PATH)" \
+	CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
+	bash "$(REPO_ROOT)/runner/scripts/build-arm64-daemon-host.sh"
+	file "$(ARM64_HOST_DAEMON_BINARY)" | grep -F "ELF 64-bit LSB pie executable, ARM aarch64"
+
+__arm64-workload-tools-host-cross:
+	ARM64_WORKLOAD_TOOLS_SOURCE_ROOT="$(ARM64_WORKLOAD_TOOLS_SOURCE_ROOT)" \
+	ARM64_WORKLOAD_TOOLS_BUILD_ROOT="$(ARM64_WORKLOAD_TOOLS_BUILD_ROOT)" \
+	ARM64_WORKLOAD_TOOLS_OUTPUT_ROOT="$(ARM64_WORKLOAD_TOOLS_OUTPUT_ROOT)" \
+	ARM64_WORKLOAD_TOOLS_LIST="$(ARM64_WORKLOAD_TOOLS_LIST)" \
+	ARM64_SYSROOT_ROOT="$(ARM64_SYSROOT_ROOT)" \
+	ARM64_SYSROOT_LOCK_FILE="$(ARM64_SYSROOT_LOCK_FILE)" \
+	ARM64_SYSROOT_REMOTE_HOST="$(ARM64_SYSROOT_REMOTE_HOST)" \
+	ARM64_SYSROOT_REMOTE_USER="$(ARM64_SYSROOT_REMOTE_USER)" \
+	ARM64_SYSROOT_SSH_KEY_PATH="$(ARM64_SYSROOT_SSH_KEY_PATH)" \
+	CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
+		bash "$(REPO_ROOT)/runner/scripts/build-arm64-workload-tools-host.sh"
+	@if [ -n "$(ARM64_WORKLOAD_TOOLS_LIST)" ]; then \
+		tool_root="$(ARM64_WORKLOAD_TOOLS_OUTPUT_ROOT)/workload-tools"; \
+		test -d "$$tool_root/bin"; \
+		for tool in $$(printf '%s' "$(ARM64_WORKLOAD_TOOLS_LIST)" | tr ',' ' '); do \
+			test -x "$$tool_root/bin/$$tool"; \
+			test -f "$$tool_root/bin/$$tool.real"; \
+			file "$$tool_root/bin/$$tool.real" | grep -F "ARM aarch64" >/dev/null; \
+		done; \
+	fi
+
+__cross-arm64: __arm64-crossbuild-image
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR).tmp" && mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR).tmp"
+	@if [ -z "$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" ] || printf ',%s,' "$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" | grep -q ',daemon,'; then \
+		$(MAKE) __arm64-daemon-host-cross \
+			ARM64_HOST_DAEMON_TARGET_DIR="$(ARM64_HOST_DAEMON_TARGET_DIR)" \
+			ARM64_HOST_DAEMON_OUTPUT_DIR="$(ARM64_HOST_DAEMON_OUTPUT_DIR)" \
+			ARM64_HOST_DAEMON_BINARY="$(ARM64_HOST_DAEMON_BINARY)" \
+			ARM64_HOST_DAEMON_CARGO_HOME="$(ARM64_HOST_DAEMON_CARGO_HOME)" \
+			ARM64_SYSROOT_ROOT="$(ARM64_SYSROOT_ROOT)" \
+			ARM64_SYSROOT_LOCK_FILE="$(ARM64_SYSROOT_LOCK_FILE)" \
+			ARM64_SYSROOT_REMOTE_HOST="$(ARM64_SYSROOT_REMOTE_HOST)" \
+			ARM64_SYSROOT_REMOTE_USER="$(ARM64_SYSROOT_REMOTE_USER)" \
+			ARM64_SYSROOT_SSH_KEY_PATH="$(ARM64_SYSROOT_SSH_KEY_PATH)"; \
+	fi
+	"$(DOCKER)" run --rm --platform "$(ARM64_DOCKER_PLATFORM)" \
+		-v "$(REPO_ROOT)":/workspace -w /workspace \
+		-e HOME=/tmp/codex \
+		-e CARGO_HOME="$(call arm64_container_path,$(ARM64_CROSSBUILD_CARGO_HOME))" \
+		-e HOST_UID="$$(id -u)" \
+		-e HOST_GID="$$(id -g)" \
+		-e ARM64_SOURCE_REPO_ROOT="$(call arm64_container_path,$(ARM64_SOURCE_REPO_ROOT))" \
+		-e ARM64_CROSSBUILD_OUTPUT_DIR="$(call arm64_container_path,$(ARM64_CROSSBUILD_OUTPUT_DIR)).tmp" \
+		-e ARM64_CROSSBUILD_BUILD_ROOT="$(call arm64_container_path,$(ARM64_CROSSBUILD_BUILD_ROOT))" \
+		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
+			-e ARM64_CROSSBUILD_SCX_PACKAGES="$(ARM64_CROSSBUILD_SCX_PACKAGES)" \
+			-e ARM64_CROSSBUILD_RUNTIME_TARGETS="$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" \
+			-e ARM64_HOST_PYTHON_BIN="$(PYTHON)" \
+			-e ARM64_PREBUILT_DAEMON_BINARY="$(call arm64_container_path,$(ARM64_HOST_DAEMON_BINARY))" \
+			-e MICRO_EXEC_ENABLE_LLVMBPF="$(ARM64_CROSSBUILD_ENABLE_LLVMBPF)" \
+	"$(ARM64_CROSSBUILD_IMAGE)" bash /workspace/runner/scripts/cross-arm64-build.sh
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)" && mv "$(ARM64_CROSSBUILD_OUTPUT_DIR).tmp" "$(ARM64_CROSSBUILD_OUTPUT_DIR)"
+	@if [ -z "$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" ] || printf ',%s,' "$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" | grep -q ',runner,'; then \
+		file "$(ARM64_CROSS_RUNNER_REAL)" | grep -F "ARM aarch64"; \
+	fi
+	@if [ -z "$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" ] || printf ',%s,' "$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" | grep -q ',daemon,'; then \
+		file "$(ARM64_CROSS_DAEMON_REAL)" | grep -F "ARM aarch64"; \
+	fi
+
+__cross-arm64-scx:
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp" && mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp"
+	ARM64_SCX_SOURCE_REPO_ROOT="$(ARM64_SOURCE_REPO_ROOT)" \
+	ARM64_SCX_BUILD_ROOT="$(ARM64_HOST_SCX_BUILD_ROOT)" \
+	ARM64_SCX_PROMOTE_ROOT="$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp" \
+	ARM64_SCX_CARGO_HOME="$(ARM64_HOST_SCX_CARGO_HOME)" \
+	ARM64_SCX_PACKAGES="$(ARM64_CROSSBUILD_SCX_PACKAGES)" \
+	ARM64_SYSROOT_ROOT="$(ARM64_SYSROOT_ROOT)" \
+	ARM64_SYSROOT_LOCK_FILE="$(ARM64_SYSROOT_LOCK_FILE)" \
+		ARM64_SYSROOT_REMOTE_HOST="$(ARM64_SYSROOT_REMOTE_HOST)" \
+		ARM64_SYSROOT_REMOTE_USER="$(ARM64_SYSROOT_REMOTE_USER)" \
+		ARM64_SYSROOT_SSH_KEY_PATH="$(ARM64_SYSROOT_SSH_KEY_PATH)" \
+		ARM64_HOST_PYTHON_BIN="$(PYTHON)" \
+		CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
+		ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
+			bash "$(REPO_ROOT)/runner/scripts/build-arm64-scx-host.sh"
+	test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/runner/repos/scx/target/release"
+	test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/corpus/build/scx"
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos/scx" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/scx"
+	mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos/scx/target/release" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/scx" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/lib"
+	cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/runner/repos/scx/target/release/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos/scx/target/release/"
+	cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/corpus/build/scx/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/scx/"
+	if [ -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/lib" ]; then cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/lib/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/lib/"; fi
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp"
+
+__cross-arm64-bench: __arm64-crossbuild-image
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp" && mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp"
+	"$(DOCKER)" run --rm --platform "$(ARM64_DOCKER_PLATFORM)" \
+		-v "$(REPO_ROOT)":/workspace -w /workspace \
+		-e HOME=/tmp/codex \
+		-e CARGO_HOME="$(call arm64_container_path,$(ARM64_CROSSBUILD_CARGO_HOME))" \
+		-e HOST_UID="$$(id -u)" \
+		-e HOST_GID="$$(id -g)" \
+		-e ARM64_SOURCE_REPO_ROOT="$(call arm64_container_path,$(ARM64_SOURCE_REPO_ROOT))" \
+		-e ARM64_CROSSBUILD_OUTPUT_DIR="$(call arm64_container_path,$(ARM64_CROSSBUILD_OUTPUT_DIR)).bench.tmp" \
+			-e ARM64_CROSSBUILD_BUILD_ROOT="$(call arm64_container_path,$(ARM64_CROSSBUILD_BUILD_ROOT))" \
+			-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
+			-e ARM64_CROSSBUILD_BENCH_REPOS="$(ARM64_CROSSBUILD_BENCH_REPOS)" \
+			-e ARM64_HOST_PYTHON_BIN="$(PYTHON)" \
+			-e ARM64_CROSSBUILD_ONLY_BENCH=1 \
+			"$(ARM64_CROSSBUILD_IMAGE)" bash /workspace/runner/scripts/cross-arm64-build.sh
+	@set -e; repo_csv="$(ARM64_CROSSBUILD_BENCH_REPOS)"; \
+	case ",$$repo_csv," in \
+		*,bcc,*) test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/runner/repos/bcc/libbpf-tools/.output" && test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/bcc/libbpf-tools" ;; \
+	esac; \
+	case ",$$repo_csv," in \
+		*,katran,*) test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/katran" && test -x "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/katran/bin/katran_server_grpc" && test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/katran/lib" ;; \
+	esac; \
+	case ",$$repo_csv," in \
+		*,tracee,*) test -x "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/tracee/bin/tracee" && test -f "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/tracee/tracee.bpf.o" ;; \
+	esac; \
+	case ",$$repo_csv," in \
+		*,tetragon,*) test -x "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/tetragon/bin/tetragon" ;; \
+	esac
+	@if printf ',%s,' "$(ARM64_CROSSBUILD_BENCH_REPOS)" | grep -q ',bcc,'; then \
+		rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos/bcc" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/bcc"; \
+	fi
+	@if printf ',%s,' "$(ARM64_CROSSBUILD_BENCH_REPOS)" | grep -q ',katran,'; then \
+		rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/katran" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/katran"; \
+	fi
+	@if printf ',%s,' "$(ARM64_CROSSBUILD_BENCH_REPOS)" | grep -q ',tracee,'; then \
+		rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/tracee"; \
+	fi
+	@if printf ',%s,' "$(ARM64_CROSSBUILD_BENCH_REPOS)" | grep -q ',tetragon,'; then \
+		rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/tetragon"; \
+	fi
+	mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/lib"
+	if [ -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/runner/repos" ]; then cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/runner/repos/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos/"; fi
+	if [ -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build" ]; then cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/"; fi
+	if [ -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/katran" ]; then mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR)/katran" && cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/katran/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/katran/"; fi
+	if [ -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/lib" ]; then cp -a "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/lib/." "$(ARM64_CROSSBUILD_OUTPUT_DIR)/lib/"; fi
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp"
+
+__arm64-test-artifacts:
+	@if [ "$(ARM64_TEST_MODE)" = "selftest" ] || [ "$(ARM64_TEST_MODE)" = "test" ]; then \
+		$(MAKE) __arm64-daemon-host-cross \
+			ARM64_HOST_DAEMON_TARGET_DIR="$(ARM64_HOST_DAEMON_TARGET_DIR)" \
+			ARM64_HOST_DAEMON_OUTPUT_DIR="$(ARM64_HOST_DAEMON_OUTPUT_DIR)" \
+			ARM64_HOST_DAEMON_BINARY="$(ARM64_HOST_DAEMON_BINARY)" \
+			ARM64_HOST_DAEMON_CARGO_HOME="$(ARM64_HOST_DAEMON_CARGO_HOME)" \
+			ARM64_SYSROOT_ROOT="$(ARM64_SYSROOT_ROOT)" \
+			ARM64_SYSROOT_LOCK_FILE="$(ARM64_SYSROOT_LOCK_FILE)" \
+			ARM64_SYSROOT_REMOTE_HOST="$(ARM64_SYSROOT_REMOTE_HOST)" \
+			ARM64_SYSROOT_REMOTE_USER="$(ARM64_SYSROOT_REMOTE_USER)" \
+			ARM64_SYSROOT_SSH_KEY_PATH="$(ARM64_SYSROOT_SSH_KEY_PATH)"; \
+	fi
+	VMLINUX_BTF="$(VMLINUX_BTF)" \
+	ARM64_TEST_MODE="$(ARM64_TEST_MODE)" \
+	ARM64_TEST_ARTIFACTS_ROOT="$(ARM64_TEST_ARTIFACTS_ROOT)" \
+	ARM64_TEST_UNITTEST_BUILD_DIR="$(ARM64_TEST_UNITTEST_BUILD_DIR)" \
+	ARM64_TEST_NEGATIVE_BUILD_DIR="$(ARM64_TEST_NEGATIVE_BUILD_DIR)" \
+		ARM64_TEST_DAEMON_OUTPUT_DIR="$(ARM64_TEST_DAEMON_OUTPUT_DIR)" \
+		ARM64_UPSTREAM_SELFTEST_OUTPUT_DIR="$(ARM64_UPSTREAM_SELFTEST_OUTPUT_DIR)" \
+	ARM64_TEST_PREBUILT_DAEMON_BINARY="$(ARM64_HOST_DAEMON_BINARY)" \
+	ARM64_HOST_PYTHON_BIN="$(PYTHON)" \
+	ARM64_UPSTREAM_SELFTEST_LLVM_SUFFIX="$(UPSTREAM_SELFTEST_LLVM_SUFFIX)" \
+	ARM64_SYSROOT_ROOT="$(ARM64_SYSROOT_ROOT)" \
+	ARM64_SYSROOT_LOCK_FILE="$(ARM64_SYSROOT_LOCK_FILE)" \
+	ARM64_SYSROOT_REMOTE_HOST="$(ARM64_SYSROOT_REMOTE_HOST)" \
+	ARM64_SYSROOT_REMOTE_USER="$(ARM64_SYSROOT_REMOTE_USER)" \
+	ARM64_SYSROOT_SSH_KEY_PATH="$(ARM64_SYSROOT_SSH_KEY_PATH)" \
+		ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
+		CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
+			bash "$(REPO_ROOT)/runner/scripts/build-arm64-repo-tests-host.sh"
+	@if [ "$(ARM64_TEST_MODE)" != "negative" ]; then \
+		file "$(ARM64_TEST_UNITTEST_BUILD_DIR)/rejit_kinsn" | grep -F "ARM aarch64"; \
+	fi
+	@if [ "$(ARM64_TEST_MODE)" = "selftest" ] || [ "$(ARM64_TEST_MODE)" = "negative" ] || [ "$(ARM64_TEST_MODE)" = "test" ]; then \
+		file "$(ARM64_TEST_NEGATIVE_BUILD_DIR)/adversarial_rejit" | grep -F "ARM aarch64"; \
+	fi
 
 clean:
 	rm -rf $(BUILD_DIR)

@@ -12,7 +12,6 @@ ARCHIVE_PATH="${3:-}"
 source "$MANIFEST_PATH"
 
 PYTHON_BIN="${RUN_REMOTE_PYTHON_BIN:?RUN_REMOTE_PYTHON_BIN is required}"
-RUNNER_BINARY_MODE="${RUN_RUNNER_BINARY_MODE:-bundled}"
 FUZZ_ROUNDS="${RUN_TEST_FUZZ_ROUNDS:-}"
 SCX_PROG_SHOW_RACE_MODE="${RUN_TEST_SCX_PROG_SHOW_RACE_MODE:-}"
 SCX_PROG_SHOW_RACE_ITERATIONS="${RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS:-}"
@@ -34,18 +33,6 @@ die() {
 
 require_cmd() {
     command -v "$1" >/dev/null 2>&1 || die "required command is missing: $1"
-}
-
-resolve_llvm_tool() {
-    local base="$1"
-    local candidate
-    for candidate in "${base}-20" "${base}20" "$base"; do
-        if command -v "$candidate" >/dev/null 2>&1; then
-            printf '%s\n' "$candidate"
-            return 0
-        fi
-    done
-    die "required LLVM tool is missing for remote-native runner build: ${base}"
 }
 
 latest_result_dir() {
@@ -118,66 +105,9 @@ resolve_test_daemon() {
     printf '%s\n' "$candidate"
 }
 
-build_llvmbpf_remote_native() {
-    local llvm_config_bin clang_bin clangxx_bin jobs llvmbpf_root llvmbpf_build_dir
-    llvm_config_bin="$(resolve_llvm_tool llvm-config)"
-    clang_bin="$(resolve_llvm_tool clang)"
-    clangxx_bin="$(resolve_llvm_tool clang++)"
-    jobs="$(nproc 2>/dev/null || echo 1)"
-    llvmbpf_root="$WORKSPACE/vendor/llvmbpf"
-    llvmbpf_build_dir="$llvmbpf_root/build"
-    [[ -d "$llvmbpf_root" ]] || die "remote-native llvmbpf source tree is missing: $llvmbpf_root"
-    if [[ -f "$llvmbpf_root/libllvmbpf_vm.a" && -f "$llvmbpf_build_dir/CMakeCache.txt" ]]; then
-        return 0
-    fi
-    cmake -S "$llvmbpf_root" -B "$llvmbpf_build_dir" \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_C_COMPILER="$clang_bin" \
-        -DCMAKE_CXX_COMPILER="$clangxx_bin" \
-        -DLLVM_DIR="$("$llvm_config_bin" --cmakedir)" >/dev/null
-    cmake --build "$llvmbpf_build_dir" --target llvmbpf_vm -j "$jobs" >/dev/null
-    [[ -f "$llvmbpf_root/libllvmbpf_vm.a" ]] || die "remote-native llvmbpf build did not produce $llvmbpf_root/libllvmbpf_vm.a"
-}
-
-build_runner_remote_native() {
-    local build_dir="$WORKSPACE/runner/build"
-    local llvm_config_bin clang_bin clangxx_bin jobs llvmbpf_mode
-    llvm_config_bin="$(resolve_llvm_tool llvm-config)"
-    clang_bin="$(resolve_llvm_tool clang)"
-    clangxx_bin="$(resolve_llvm_tool clang++)"
-    jobs="$(nproc 2>/dev/null || echo 1)"
-    case "${RUN_SUITE_NEEDS_LLVMBPF:-0}" in
-        1) llvmbpf_mode=ON ;;
-        0) llvmbpf_mode=OFF ;;
-        *) die "unsupported RUN_SUITE_NEEDS_LLVMBPF value: ${RUN_SUITE_NEEDS_LLVMBPF:-}" ;;
-    esac
-    if [[ "$llvmbpf_mode" == "ON" ]]; then
-        build_llvmbpf_remote_native
-    fi
-    make -C "$WORKSPACE/runner" \
-        BUILD_DIR="$build_dir" \
-        JOBS="$jobs" \
-        CC="$clang_bin" \
-        CXX="$clangxx_bin" \
-        LLVM_CONFIG="$llvm_config_bin" \
-        MICRO_EXEC_ENABLE_LLVMBPF="$llvmbpf_mode" \
-        micro_exec >/dev/null
-}
-
 ensure_runner_binary() {
     [[ "${RUN_NEEDS_RUNNER_BINARY:-0}" == "1" ]] || return 0
-    case "$RUNNER_BINARY_MODE" in
-        bundled)
-            [[ -x "$WORKSPACE/runner/build/micro_exec" ]] || die "bundled runner binary is missing: $WORKSPACE/runner/build/micro_exec"
-            ;;
-        remote-native)
-            build_runner_remote_native
-            [[ -x "$WORKSPACE/runner/build/micro_exec" ]] || die "remote-native runner build did not produce $WORKSPACE/runner/build/micro_exec"
-            ;;
-        *)
-            die "unsupported runner binary mode: ${RUNNER_BINARY_MODE}"
-            ;;
-    esac
+    [[ -x "$WORKSPACE/runner/build/micro_exec" ]] || die "bundled runner binary is missing: $WORKSPACE/runner/build/micro_exec"
 }
 
 ensure_scx_artifacts() {
@@ -193,11 +123,11 @@ ensure_scx_artifacts() {
     done
 }
 
-ensure_benchmark_repos() {
+ensure_bundled_repos() {
     local repo
-    [[ -n "${RUN_BENCHMARK_REPOS_CSV:-}" ]] || return 0
-    IFS=',' read -r -a _run_benchmark_repos <<<"$RUN_BENCHMARK_REPOS_CSV"
-    for repo in "${_run_benchmark_repos[@]}"; do
+    [[ -n "${RUN_BUNDLED_REPOS_CSV:-}" ]] || return 0
+    IFS=',' read -r -a _run_bundled_repos <<<"$RUN_BUNDLED_REPOS_CSV"
+    for repo in "${_run_bundled_repos[@]}"; do
         [[ -n "$repo" ]] || continue
         [[ -d "$WORKSPACE/runner/repos/$repo" ]] || die "bundled repo is missing: $WORKSPACE/runner/repos/$repo"
     done
@@ -213,39 +143,10 @@ ensure_katran_bundle() {
     export KATRAN_SERVER_LIB_DIR="$WORKSPACE/e2e/cases/katran/lib"
 }
 
-build_upstream_selftests_remote_native() {
-    local output_dir="$WORKSPACE/.cache/upstream-bpf-selftests"
-    local source_dir="$WORKSPACE/vendor/linux-framework/tools/testing/selftests/bpf"
-    local build_jobs
-    [[ -f /sys/kernel/btf/vmlinux ]] || die "runtime BTF is missing for remote-native upstream selftests build"
-    [[ -d "$source_dir" ]] || die "bundled upstream selftest source dir is missing: $source_dir"
-    build_jobs="$(nproc 2>/dev/null || echo 1)"
-    (
-        UPSTREAM_SELFTEST_SOURCE_DIR="$source_dir" \
-        UPSTREAM_SELFTEST_OUTPUT_DIR="$output_dir" \
-        VMLINUX_BTF=/sys/kernel/btf/vmlinux \
-        JOBS="$build_jobs" \
-        UPSTREAM_SELFTEST_LLVM_SUFFIX="${RUN_UPSTREAM_SELFTEST_LLVM_SUFFIX:-}" \
-            "$WORKSPACE/runner/scripts/build_upstream_selftests.sh"
-    ) 2>&1 | tee "$ARTIFACT_DIR/upstream-build.log"
-}
-
 ensure_upstream_selftests() {
     local output_dir="$WORKSPACE/.cache/upstream-bpf-selftests"
-    case "${RUN_UPSTREAM_SELFTEST_EXEC_MODE:-bundled}" in
-        bundled)
-            [[ -x "$output_dir/test_verifier" ]] || die "bundled upstream test_verifier is missing or not executable: $output_dir/test_verifier"
-            [[ -x "$output_dir/test_progs" ]] || die "bundled upstream test_progs is missing or not executable: $output_dir/test_progs"
-            ;;
-        remote-native)
-            build_upstream_selftests_remote_native
-            [[ -x "$output_dir/test_verifier" ]] || die "remote-native upstream test_verifier build did not produce an executable: $output_dir/test_verifier"
-            [[ -x "$output_dir/test_progs" ]] || die "remote-native upstream test_progs build did not produce an executable: $output_dir/test_progs"
-            ;;
-        *)
-            die "unsupported upstream selftest execution mode: ${RUN_UPSTREAM_SELFTEST_EXEC_MODE:-}"
-            ;;
-    esac
+    [[ -x "$output_dir/test_verifier" ]] || die "bundled upstream test_verifier is missing or not executable: $output_dir/test_verifier"
+    [[ -x "$output_dir/test_progs" ]] || die "bundled upstream test_progs is missing or not executable: $output_dir/test_progs"
     if [[ -d "$WORKSPACE/upstream-selftests-kmods" ]]; then
         cp "$WORKSPACE/upstream-selftests-kmods"/*.ko "$output_dir"/
     elif [[ "$RUN_TARGET_ARCH" == "arm64" ]]; then
@@ -253,14 +154,28 @@ ensure_upstream_selftests() {
     fi
 }
 
+workload_tool_is_bundled() {
+    local tool="$1"
+    case ",${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}," in
+        *,"${tool}",*) return 0 ;;
+    esac
+    return 1
+}
+
 ensure_workload_tools() {
-    local tool
+    local tool resolved
     [[ -n "${RUN_WORKLOAD_TOOLS_CSV:-}" ]] || return 0
     IFS=',' read -r -a _run_workload_tools <<<"$RUN_WORKLOAD_TOOLS_CSV"
     for tool in "${_run_workload_tools[@]}"; do
         [[ -n "$tool" ]] || continue
-        [[ -x "${REMOTE_WORKLOAD_TOOL_BIN}/${tool}" ]] \
-            || die "required workload tool is missing from the workspace-local tool bin: ${REMOTE_WORKLOAD_TOOL_BIN}/${tool}"
+        if workload_tool_is_bundled "$tool"; then
+            [[ -x "${REMOTE_WORKLOAD_TOOL_BIN}/${tool}" ]] \
+                || die "required bundled workload tool is missing from the remote tool bin: ${tool}"
+            continue
+        fi
+        resolved="$(command -v "$tool" 2>/dev/null || true)"
+        [[ -n "$resolved" && -x "$resolved" ]] \
+            || die "required workload tool is missing from both the remote tool bin and PATH: ${tool}"
     done
 }
 
@@ -283,17 +198,18 @@ prepare_environment() {
     mkdir -p "$ARTIFACT_DIR"
     cd "$WORKSPACE"
     cp "$MANIFEST_PATH" "$ARTIFACT_DIR/run-contract.env"
+    export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${PATH:-}"
     if [[ -d "$REMOTE_WORKLOAD_TOOL_BIN" ]]; then
         export PATH="$REMOTE_WORKLOAD_TOOL_BIN:$PATH"
     fi
-    if [[ -f "$WORKSPACE/lib/libbpf.so.1" ]]; then
+    if [[ "$RUN_TARGET_ARCH" == "arm64" && -f "$WORKSPACE/lib/libbpf.so.1" ]]; then
         export BPFREJIT_LIBBPF_PATH="$WORKSPACE/lib/libbpf.so.1"
+    elif [[ "$RUN_TARGET_ARCH" == "x86_64" && -f "$WORKSPACE/.cache/portable-libbpf/lib/libbpf.so.1" ]]; then
+        export BPFREJIT_LIBBPF_PATH="$WORKSPACE/.cache/portable-libbpf/lib/libbpf.so.1"
     fi
-    case "${RUN_TARGET_NAME}" in
-        aws-arm64|aws-x86)
-            export BPFREJIT_KERNEL_MODULES_ROOT=/
-            ;;
-    esac
+    if [[ "${RUN_EXECUTOR}" == "aws-ssh" ]]; then
+        export BPFREJIT_KERNEL_MODULES_ROOT=/
+    fi
     export PYTHONPATH="$WORKSPACE"
     export BPFTOOL_BIN="${RUN_BPFTOOL_BIN:?RUN_BPFTOOL_BIN is required}"
     require_cmd "$BPFTOOL_BIN"
@@ -404,7 +320,7 @@ run_micro_suite() {
 run_corpus_suite() {
     local runtime_ld output_json output_md run_type cmd=() filter
     runtime_ld="$(cross_runtime_ld_library_path)"
-    ensure_benchmark_repos
+    ensure_bundled_repos
     ensure_scx_artifacts
     ensure_katran_bundle
     output_json="$WORKSPACE/corpus/results/${RUN_TARGET_NAME}_corpus.json"

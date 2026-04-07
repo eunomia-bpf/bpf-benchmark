@@ -40,68 +40,12 @@ die() {
 
 # shellcheck disable=SC1090
 source "$ROOT_DIR/runner/scripts/local_prep_common_lib.sh"
+# shellcheck disable=SC1090
+source "$ROOT_DIR/runner/scripts/arm64_runtime_bundle_lib.sh"
 
 require_command() {
     local cmd="$1"
     command -v "$cmd" >/dev/null 2>&1 || die "missing required command: ${cmd}"
-}
-
-read_needed_libraries() {
-    local binary="$1"
-    "$READELF_BIN" -d "$binary" 2>/dev/null | sed -n 's/.*Shared library: \[\(.*\)\].*/\1/p' | sort -u
-}
-
-resolve_arm64_library_path() {
-    local soname="$1"
-    local candidate
-    for candidate in \
-        "$SYSROOT_USR_LIB_DIR/$soname" \
-        "$SYSROOT_LIB_DIR/$soname" \
-        "$SYSROOT_LEGACY_LIB_DIR/$soname" \
-        "$SYSROOT_ALT_LIB_DIR/$soname"
-    do
-        [[ -e "$candidate" ]] && {
-            printf '%s\n' "$candidate"
-            return 0
-        }
-    done
-    die "unable to resolve ARM64 shared library ${soname}"
-}
-
-copy_runtime_bundle() {
-    local binary="$1"
-    local current lib resolved resolved_base requested_base soname
-    local -a queue=("$binary")
-    declare -A seen=()
-
-    mkdir -p "$OUTPUT_TOOL_LIB_DIR"
-    while ((${#queue[@]})); do
-        current="${queue[0]}"
-        queue=("${queue[@]:1}")
-        [[ -e "$current" ]] || continue
-        [[ -z "${seen["$current"]:-}" ]] || continue
-        seen["$current"]=1
-        while IFS= read -r lib; do
-            [[ -n "$lib" ]] || continue
-            resolved="$(resolve_arm64_library_path "$lib")"
-            resolved_base="$(basename "$resolved")"
-            requested_base="$(basename "$lib")"
-            case "$resolved_base" in
-                ld-linux-aarch64.so.1|libc.so.6|libm.so.6|libpthread.so.0|librt.so.1|libdl.so.2|libresolv.so.2|libutil.so.1)
-                    continue
-                    ;;
-            esac
-            cp -L "$resolved" "$OUTPUT_TOOL_LIB_DIR/$resolved_base"
-            if [[ "$requested_base" != "$resolved_base" ]]; then
-                ln -sfn "$resolved_base" "$OUTPUT_TOOL_LIB_DIR/$requested_base"
-            fi
-            soname="$("$READELF_BIN" -d "$resolved" 2>/dev/null | sed -n 's/.*Library soname: \[\(.*\)\].*/\1/p' | head -n1)"
-            if [[ -n "$soname" && "$soname" != "$resolved_base" ]]; then
-                ln -sfn "$resolved_base" "$OUTPUT_TOOL_LIB_DIR/$soname"
-            fi
-            queue+=("$resolved")
-        done < <(read_needed_libraries "$current")
-    done
 }
 
 copy_sibling_lib_wrapper() {
@@ -170,7 +114,7 @@ stage_portable_binary() {
     "$STRIP_BIN" "$real_binary" >/dev/null 2>&1 || true
     file "$real_binary" | grep -F "ARM aarch64" >/dev/null \
         || die "built workload tool is not ARM64: ${real_binary}"
-    copy_runtime_bundle "$real_binary"
+    arm64_bundle_copy_runtime_bundle "$real_binary" "$OUTPUT_TOOL_LIB_DIR"
     copy_sibling_lib_wrapper "$OUTPUT_TOOL_BIN_DIR/${tool_name}" "${tool_name}.real"
 }
 

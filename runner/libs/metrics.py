@@ -76,22 +76,31 @@ def _libbpf() -> ctypes.CDLL:
     if not path:
         path = ctypes.util.find_library("bpf") or "libbpf.so.1"
     lib = ctypes.CDLL(path, use_errno=True)
-    lib.bpf_enable_stats.argtypes = [ctypes.c_int]
-    lib.bpf_enable_stats.restype = ctypes.c_int
-    try:
-        lib.bpf_prog_get_fd_by_id.argtypes = [ctypes.c_uint32]
-        lib.bpf_prog_get_fd_by_id.restype = ctypes.c_int
-    except AttributeError:
-        pass
-    try:
-        lib.bpf_prog_get_info_by_fd.argtypes = [
+    required_symbols = {
+        "bpf_enable_stats": (
+            [ctypes.c_int],
             ctypes.c_int,
-            ctypes.POINTER(BpfProgInfo),
-            ctypes.POINTER(ctypes.c_uint32),
-        ]
-        lib.bpf_prog_get_info_by_fd.restype = ctypes.c_int
-    except AttributeError:
-        pass
+        ),
+        "bpf_prog_get_fd_by_id": (
+            [ctypes.c_uint32],
+            ctypes.c_int,
+        ),
+        "bpf_prog_get_info_by_fd": (
+            [
+                ctypes.c_int,
+                ctypes.POINTER(BpfProgInfo),
+                ctypes.POINTER(ctypes.c_uint32),
+            ],
+            ctypes.c_int,
+        ),
+    }
+    for symbol, (argtypes, restype) in required_symbols.items():
+        try:
+            func = getattr(lib, symbol)
+        except AttributeError as exc:
+            raise RuntimeError(f"libbpf is missing required symbol {symbol} from {path}") from exc
+        func.argtypes = argtypes
+        func.restype = restype
     return lib
 
 
@@ -108,20 +117,14 @@ def enable_bpf_stats() -> object:
 
 
 def _prog_fd_by_id(prog_id: int) -> int | None:
-    try:
-        fd = int(_libbpf().bpf_prog_get_fd_by_id(int(prog_id)))
-    except AttributeError:
-        return None
+    fd = int(_libbpf().bpf_prog_get_fd_by_id(int(prog_id)))
     if fd < 0:
         return None
     return fd
 
 
 def _prog_info_from_fd(fd: int) -> BpfProgInfo | None:
-    try:
-        prog_get_info_by_fd = _libbpf().bpf_prog_get_info_by_fd
-    except AttributeError:
-        return None
+    prog_get_info_by_fd = _libbpf().bpf_prog_get_info_by_fd
     info = BpfProgInfo()
     info_len = ctypes.c_uint32(ctypes.sizeof(info))
     rc = prog_get_info_by_fd(fd, ctypes.byref(info), ctypes.byref(info_len))
@@ -166,14 +169,12 @@ def sample_bpf_stats(
         else:
             fd = _prog_fd_by_id(int(prog_id))
         if fd is None:
-            if entry is None:
-                errors.append(f"prog_id={prog_id}: failed to resolve program FD")
+            errors.append(f"prog_id={prog_id}: failed to resolve program FD")
             continue
         try:
             info = _prog_info_from_fd(fd)
             if info is None:
-                if entry is None:
-                    errors.append(f"prog_id={prog_id}: failed to read program info by FD")
+                errors.append(f"prog_id={prog_id}: failed to read program info by FD")
                 continue
             entry = stats.setdefault(
                 int(prog_id),
