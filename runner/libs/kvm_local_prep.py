@@ -13,10 +13,13 @@ from runner.libs.local_prep_common import (
     build_x86_runner_binary,
     build_x86_upstream_selftests,
     die,
+    finalize_staged_bundle,
     fetch_selected_repos,
     make_runner,
+    run_local_prep_phases,
     run_command,
     stage_x86_workload_tools,
+    x86_bundle_inputs,
 )
 from runner.libs.state_file import merge_state, write_state
 
@@ -139,42 +142,28 @@ class KVMPrep:
                 self.bundle_inputs_path,
                 {"RUN_KINSN_MODULE_DIR": str(self.test_artifacts_root / "kinsn-modules" / "x86")},
             )
-        portable_libbpf_root = self.promote_root / "portable-libbpf"
-        values = {
-            "X86_RUNNER": str(self.promote_root / "runner" / "build" / "micro_exec"),
-            "X86_DAEMON": str(self.promote_root / "daemon" / "target" / "release" / "bpfrejit-daemon"),
-            "X86_TEST_UNITTEST_BUILD_DIR": str(self.test_artifacts_root / "unittest" / "build"),
-            "X86_TEST_NEGATIVE_BUILD_DIR": str(self.test_artifacts_root / "negative" / "build"),
-            "X86_UPSTREAM_SELFTEST_DIR": str(self.test_artifacts_root / "upstream-bpf-selftests"),
-            "X86_NATIVE_BUILD_ROOT": str(self.promote_root / "corpus" / "build"),
-            "X86_SCX_BINARY_ROOT": str(self.local_repo_root / "scx" / "target" / "release"),
-            "X86_SCX_OBJECT_ROOT": str(self.promote_root / "corpus" / "build" / "scx"),
-            "X86_KATRAN_SERVER_BINARY": str(self.promote_root / "corpus" / "build" / "katran" / "bin" / "katran_server_grpc"),
-            "X86_KATRAN_SERVER_LIB_DIR": str(self.promote_root / "corpus" / "build" / "katran" / "lib"),
-        }
-        if (portable_libbpf_root / "lib").is_dir():
-            values["X86_PORTABLE_LIBBPF_ROOT"] = str(portable_libbpf_root)
-        merge_state(self.bundle_inputs_path, values)
+        merge_state(
+            self.bundle_inputs_path,
+            x86_bundle_inputs(
+                promote_root=self.promote_root,
+                local_repo_root=self.local_repo_root,
+                test_artifacts_root=self.test_artifacts_root,
+                portable_libbpf_root=self.promote_root / "portable-libbpf",
+            ),
+        )
 
     def finalize(self) -> None:
         self._write_bundle_inputs()
-        self.stage_root.parent.mkdir(parents=True, exist_ok=True)
-        self.bundle_tar.parent.mkdir(parents=True, exist_ok=True)
-        run_command(
-            [
-                self.host_python_bin,
-                "-m",
-                "runner.libs.build_remote_bundle",
-                str(self.manifest_path),
-                str(self.bundle_inputs_path),
-                str(self.stage_root),
-                str(self.bundle_tar),
-            ],
+        finalize_staged_bundle(
+            manifest_path=self.manifest_path,
+            bundle_inputs_path=self.bundle_inputs_path,
+            stage_root=self.stage_root,
+            bundle_tar=self.bundle_tar,
+            local_state_path=self.local_state_path,
+            host_python_bin=self.host_python_bin,
             env=self.env,
+            executor_name="KVM",
         )
-        if not self.bundle_tar.is_file():
-            die(f"staged KVM bundle tar is missing: {self.bundle_tar}")
-        write_state(self.local_state_path, {"RUN_BUNDLE_TAR": str(self.bundle_tar)})
 
 
 def run_local_prep(*, manifest_path: Path, local_state_path: Path, env: dict[str, str], phases: list[str]) -> None:
@@ -192,9 +181,5 @@ def run_local_prep(*, manifest_path: Path, local_state_path: Path, env: dict[str
         "native": prep.prepare_native_repo_artifacts,
         "workload_tools": prep.prepare_workload_tools,
     }
-    for phase in phases:
-        handler = phase_handlers.get(phase)
-        if handler is None:
-            die(f"no local-prep phase mapping for kvm:{phase}")
-        handler()
+    run_local_prep_phases(phases=phases, phase_handlers=phase_handlers, executor_name="kvm")
     prep.finalize()

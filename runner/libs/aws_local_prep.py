@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 import shutil
-import subprocess
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
+from runner.libs.aws_kernel_artifacts import (
+    build_paths_from_prep,
+    ensure_arm64_kinsn_modules_ready,
+    ensure_arm64_upstream_test_kmods_ready,
+    ensure_x86_kinsn_modules_ready,
+)
 from runner.libs.local_prep_common import (
     build_micro_program_outputs,
     build_native_repo_artifacts,
@@ -16,109 +21,19 @@ from runner.libs.local_prep_common import (
     csv_append_unique,
     csv_tokens,
     die,
+    finalize_staged_bundle,
     fetch_selected_repos,
     make_runner,
     require_file_contains,
     require_nonempty_dir,
     require_path,
+    run_local_prep_phases,
     run_command,
     stage_x86_workload_tools,
+    x86_bundle_inputs,
 )
 from runner.libs.portable_runtime import build_x86_portable_libbpf, bundle_arm64_portable_binary
 from runner.libs.state_file import merge_state, read_state, write_state
-
-
-_AWS_KERNEL_PRELUDE = """
-set -euo pipefail
-source "$ROOT_DIR/runner/scripts/aws_common_lib.sh"
-source "$ROOT_DIR/runner/scripts/aws_prep_paths_lib.sh"
-source "$ROOT_DIR/runner/scripts/aws_kernel_artifacts_lib.sh"
-"""
-
-_X86_KINSN_HELPER = """
-ensure_x86_kinsn_modules_ready_py() {
-    local expected_release cached_dir cached_module_dir config_fingerprint
-    prepare_x86_aws_config_locked
-    config_fingerprint="$(x86_setup_config_fingerprint)"
-    expected_release="${STATE_KERNEL_RELEASE:-}"
-    [[ -n "$expected_release" ]] || die "x86 kinsn module staging requires STATE_KERNEL_RELEASE"
-    cached_dir="$X86_SETUP_ARTIFACT_ROOT/$expected_release"
-    if ! x86_reuse_cached_setup_artifacts "$cached_dir" "$expected_release" "bzImage-$expected_release" "$config_fingerprint" >/dev/null \
-        || ! x86_cached_kinsn_modules_ready "$cached_dir" "$expected_release"
-    then
-        rm -rf "$cached_dir"
-        build_x86_kernel_artifacts_locked
-    fi
-    x86_cached_kinsn_modules_ready "$cached_dir" "$expected_release" \
-        || die "x86 cached kinsn modules are missing or invalid for ${expected_release}"
-    cached_module_dir="$(x86_cached_kinsn_modules_dir "$cached_dir")"
-    stage_module_binaries "$cached_module_dir" "$X86_KINSN_MODULE_STAGE_DIR"
-}
-with_x86_kernel_lock ensure_x86_kinsn_modules_ready_py
-"""
-
-_ARM64_KINSN_HELPER = """
-ensure_arm64_kinsn_modules_ready_py() {
-    local expected_release cached_dir cached_module_dir current_build_release
-    expected_release="${STATE_KERNEL_RELEASE:-}"
-    [[ -n "$expected_release" ]] || die "ARM64 kinsn module staging requires STATE_KERNEL_RELEASE"
-    cached_dir="$ARM64_SETUP_ARTIFACT_ROOT/$expected_release"
-    if ! reuse_cached_setup_artifacts "$cached_dir" "$expected_release" "vmlinuz-$expected_release.efi" >/dev/null; then
-        rm -rf "$cached_dir"
-        build_arm64_kernel_artifacts_locked
-    fi
-    if [[ -f "$ARM64_AWS_BASE_CONFIG" && ! arm64_build_config_matches_aws_base ]]; then
-        build_arm64_kernel_artifacts_locked
-    fi
-    current_build_release="$(<"$ARM64_AWS_BUILD_DIR/include/config/kernel.release" 2>/dev/null || true)"
-    if [[ "$current_build_release" != "$expected_release" ]]; then
-        build_arm64_kernel_artifacts_locked
-    fi
-    if ! arm64_cached_kinsn_modules_ready "$cached_dir" "$expected_release"; then
-        rm -rf "$(arm64_cached_kinsn_modules_dir "$cached_dir")"
-        build_arm64_kinsn_modules_into_cache "$cached_dir"
-    fi
-    arm64_cached_kinsn_modules_ready "$cached_dir" "$expected_release" \
-        || die "ARM64 cached kinsn modules are missing or invalid for ${expected_release}"
-    cached_module_dir="$(arm64_cached_kinsn_modules_dir "$cached_dir")"
-    stage_module_binaries "$cached_module_dir" "$ARM64_KINSN_MODULE_STAGE_DIR"
-}
-with_arm64_kernel_lock ensure_arm64_kinsn_modules_ready_py
-"""
-
-_ARM64_UPSTREAM_TEST_KMODS_HELPER = """
-ensure_arm64_upstream_test_kmods_ready_py() {
-    local required_modules=(
-        "$ARM64_UPSTREAM_TEST_KMODS_DIR/bpf_testmod.ko"
-        "$ARM64_UPSTREAM_TEST_KMODS_DIR/bpf_test_no_cfi.ko"
-        "$ARM64_UPSTREAM_TEST_KMODS_DIR/bpf_test_modorder_x.ko"
-        "$ARM64_UPSTREAM_TEST_KMODS_DIR/bpf_test_modorder_y.ko"
-        "$ARM64_UPSTREAM_TEST_KMODS_DIR/bpf_test_rqspinlock.ko"
-    )
-    local module_path expected_release actual_release
-    expected_release="${STATE_KERNEL_RELEASE:-}"
-    for module_path in "${required_modules[@]}"; do
-        if [[ ! -f "$module_path" ]]; then
-            rebuild_arm64_upstream_test_kmods
-            break
-        fi
-        if [[ -n "$expected_release" ]]; then
-            actual_release="$(modinfo -F vermagic "$module_path" 2>/dev/null | awk '{print $1}')"
-            if [[ "$actual_release" != "$expected_release" ]]; then
-                rebuild_arm64_upstream_test_kmods
-                break
-            fi
-        fi
-    done
-    if [[ -n "$expected_release" ]]; then
-        for module_path in "${required_modules[@]}"; do
-            actual_release="$(modinfo -F vermagic "$module_path" 2>/dev/null | awk '{print $1}')"
-            [[ "$actual_release" == "$expected_release" ]] || die "ARM64 upstream selftest kmod release mismatch for $(basename "$module_path")"
-        done
-    fi
-}
-with_arm64_kernel_lock ensure_arm64_upstream_test_kmods_ready_py
-"""
 
 
 class AWSPrep:
@@ -304,19 +219,6 @@ class AWSPrep:
         self.arm64_sysroot_remote_user = remote_user
         self.arm64_sysroot_ssh_key_path = key_path
 
-    def _shell_kernel_helper(self, body: str) -> None:
-        command = f"{_AWS_KERNEL_PRELUDE}\n{body}\n"
-        completed = subprocess.run(
-            ["/bin/bash", "-lc", command],
-            cwd=ROOT_DIR,
-            env=self._env_with_paths(),
-            text=True,
-            capture_output=False,
-            check=False,
-        )
-        if completed.returncode != 0:
-            raise SystemExit(completed.returncode)
-
     def _make_runner(self, *targets: str, **extra_env: str) -> None:
         make_runner(*targets, env=self._env_with_paths(**extra_env))
 
@@ -440,10 +342,11 @@ class AWSPrep:
 
     def prepare_kinsn_modules(self) -> None:
         if self.target_arch == "x86_64":
-            self._shell_kernel_helper(_X86_KINSN_HELPER)
+            ensure_x86_kinsn_modules_ready(build_paths_from_prep(self))
             return
         if self.target_arch == "arm64":
-            self._shell_kernel_helper(_ARM64_KINSN_HELPER)
+            state_kernel_release = self.remote_state.get("STATE_KERNEL_RELEASE", "").strip()
+            ensure_arm64_kinsn_modules_ready(build_paths_from_prep(self), state_kernel_release=state_kernel_release)
             return
         die(f"unsupported AWS target arch for kinsn prep: {self.target_arch}")
 
@@ -503,7 +406,8 @@ class AWSPrep:
             return
         if self.target_arch != "arm64":
             die(f"unsupported AWS target arch for upstream test kmods prep: {self.target_arch}")
-        self._shell_kernel_helper(_ARM64_UPSTREAM_TEST_KMODS_HELPER)
+        state_kernel_release = self.remote_state.get("STATE_KERNEL_RELEASE", "").strip()
+        ensure_arm64_upstream_test_kmods_ready(build_paths_from_prep(self), kernel_release=state_kernel_release)
 
     def prepare_micro_programs(self) -> None:
         build_micro_program_outputs(output_dir=self.micro_programs_generated_dir, env=self._env_with_paths())
@@ -676,17 +580,16 @@ class AWSPrep:
             merge_state(self.bundle_inputs_path, {"RUN_KINSN_MODULE_DIR": str(module_dir)})
         merge_state(
             self.bundle_inputs_path,
+            x86_bundle_inputs(
+                promote_root=self.promote_root,
+                local_repo_root=self.local_repo_root,
+                test_artifacts_root=self.test_artifacts_root,
+                portable_libbpf_root=self.x86_portable_libbpf_root,
+            ),
+        )
+        merge_state(
+            self.bundle_inputs_path,
             {
-                "X86_RUNNER": str(self.x86_runner),
-                "X86_DAEMON": str(self.x86_daemon),
-                "X86_TEST_UNITTEST_BUILD_DIR": str(self.x86_unittest_dir),
-                "X86_TEST_NEGATIVE_BUILD_DIR": str(self.x86_negative_dir),
-                "X86_UPSTREAM_SELFTEST_DIR": str(self.x86_upstream_selftests_dir),
-                "X86_NATIVE_BUILD_ROOT": str(self.promote_root / "corpus" / "build"),
-                "X86_SCX_BINARY_ROOT": str(self.local_repo_root / "scx" / "target" / "release"),
-                "X86_SCX_OBJECT_ROOT": str(self.promote_root / "corpus" / "build" / "scx"),
-                "X86_KATRAN_SERVER_BINARY": str(self.promote_root / "corpus" / "build" / "katran" / "bin" / "katran_server_grpc"),
-                "X86_KATRAN_SERVER_LIB_DIR": str(self.promote_root / "corpus" / "build" / "katran" / "lib"),
                 "ARM64_CROSS_RUNNER": str(self.arm64_cross_runner),
                 "ARM64_CROSS_RUNNER_REAL": str(self.arm64_cross_runner_real),
                 "ARM64_CROSS_DAEMON": str(self.arm64_cross_daemon),
@@ -703,28 +606,19 @@ class AWSPrep:
                 "ARM64_KATRAN_SERVER_LIB_DIR": str(self.arm64_katran_server_lib_dir),
             },
         )
-        if (self.x86_portable_libbpf_root / "lib").is_dir():
-            merge_state(self.bundle_inputs_path, {"X86_PORTABLE_LIBBPF_ROOT": str(self.x86_portable_libbpf_root)})
 
     def finalize(self) -> None:
         self._write_bundle_inputs()
-        self.stage_root.parent.mkdir(parents=True, exist_ok=True)
-        self.bundle_tar.parent.mkdir(parents=True, exist_ok=True)
-        run_command(
-            [
-                self.host_python_bin,
-                "-m",
-                "runner.libs.build_remote_bundle",
-                str(self.manifest_path),
-                str(self.bundle_inputs_path),
-                str(self.stage_root),
-                str(self.bundle_tar),
-            ],
+        finalize_staged_bundle(
+            manifest_path=self.manifest_path,
+            bundle_inputs_path=self.bundle_inputs_path,
+            stage_root=self.stage_root,
+            bundle_tar=self.bundle_tar,
+            local_state_path=self.local_state_path,
+            host_python_bin=self.host_python_bin,
             env=self._env_with_paths(),
+            executor_name="AWS",
         )
-        if not self.bundle_tar.is_file():
-            die(f"staged AWS bundle tar is missing: {self.bundle_tar}")
-        write_state(self.local_state_path, {"RUN_BUNDLE_TAR": str(self.bundle_tar)})
 
 
 def run_local_prep(
@@ -755,9 +649,5 @@ def run_local_prep(
         "workload_tools": prep.prepare_workload_tools,
         "benchmark_extra": prep.prepare_benchmark_extra,
     }
-    for phase in phases:
-        handler = phase_handlers.get(phase)
-        if handler is None:
-            die(f"no local-prep phase mapping for aws-ssh:{phase}")
-        handler()
+    run_local_prep_phases(phases=phases, phase_handlers=phase_handlers, executor_name="aws-ssh")
     prep.finalize()

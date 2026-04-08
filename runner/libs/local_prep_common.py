@@ -5,9 +5,10 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import NoReturn
+from typing import Callable, NoReturn
 
 from runner.libs import ROOT_DIR
+from runner.libs.state_file import write_state
 
 
 RUNNER_DIR = ROOT_DIR / "runner"
@@ -70,10 +71,72 @@ def run_command(command: list[str], *, env: dict[str, str], cwd: Path = ROOT_DIR
         raise SystemExit(completed.returncode)
 
 
+def run_local_prep_phases(*, phases: list[str], phase_handlers: dict[str, Callable[[], None]], executor_name: str) -> None:
+    for phase in phases:
+        handler = phase_handlers.get(phase)
+        if handler is None:
+            die(f"no local-prep phase mapping for {executor_name}:{phase}")
+        handler()
+
+
 def make_runner(*targets: str, env: dict[str, str], **extra_env: str) -> None:
     run_env = dict(env)
     run_env.update(extra_env)
     run_command(["make", "-C", str(RUNNER_DIR), *targets], env=run_env)
+
+
+def x86_bundle_inputs(
+    *,
+    promote_root: Path,
+    local_repo_root: Path,
+    test_artifacts_root: Path,
+    portable_libbpf_root: Path | None = None,
+) -> dict[str, str]:
+    values = {
+        "X86_RUNNER": str(promote_root / "runner" / "build" / "micro_exec"),
+        "X86_DAEMON": str(promote_root / "daemon" / "target" / "release" / "bpfrejit-daemon"),
+        "X86_TEST_UNITTEST_BUILD_DIR": str(test_artifacts_root / "unittest" / "build"),
+        "X86_TEST_NEGATIVE_BUILD_DIR": str(test_artifacts_root / "negative" / "build"),
+        "X86_UPSTREAM_SELFTEST_DIR": str(test_artifacts_root / "upstream-bpf-selftests"),
+        "X86_NATIVE_BUILD_ROOT": str(promote_root / "corpus" / "build"),
+        "X86_SCX_BINARY_ROOT": str(local_repo_root / "scx" / "target" / "release"),
+        "X86_SCX_OBJECT_ROOT": str(promote_root / "corpus" / "build" / "scx"),
+        "X86_KATRAN_SERVER_BINARY": str(promote_root / "corpus" / "build" / "katran" / "bin" / "katran_server_grpc"),
+        "X86_KATRAN_SERVER_LIB_DIR": str(promote_root / "corpus" / "build" / "katran" / "lib"),
+    }
+    if portable_libbpf_root is not None and (portable_libbpf_root / "lib").is_dir():
+        values["X86_PORTABLE_LIBBPF_ROOT"] = str(portable_libbpf_root)
+    return values
+
+
+def finalize_staged_bundle(
+    *,
+    manifest_path: Path,
+    bundle_inputs_path: Path,
+    stage_root: Path,
+    bundle_tar: Path,
+    local_state_path: Path,
+    host_python_bin: str,
+    env: dict[str, str],
+    executor_name: str,
+) -> None:
+    stage_root.parent.mkdir(parents=True, exist_ok=True)
+    bundle_tar.parent.mkdir(parents=True, exist_ok=True)
+    run_command(
+        [
+            host_python_bin,
+            "-m",
+            "runner.libs.build_remote_bundle",
+            str(manifest_path),
+            str(bundle_inputs_path),
+            str(stage_root),
+            str(bundle_tar),
+        ],
+        env=env,
+    )
+    if not bundle_tar.is_file():
+        die(f"staged {executor_name} bundle tar is missing: {bundle_tar}")
+    write_state(local_state_path, {"RUN_BUNDLE_TAR": str(bundle_tar)})
 
 
 def run_python_script(

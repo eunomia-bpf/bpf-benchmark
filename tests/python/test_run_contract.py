@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 from runner.libs.run_contract import (
@@ -12,6 +13,8 @@ from runner.libs.run_contract import (
     render_shell_assignments,
     write_manifest_file,
 )
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
 def test_parse_manifest_reads_scalars_and_arrays(tmp_path: Path) -> None:
@@ -26,6 +29,7 @@ def test_parse_manifest_reads_scalars_and_arrays(tmp_path: Path) -> None:
     assert parsed["RUN_TARGET_NAME"] == "aws-x86"
     assert parsed["RUN_REMOTE_PYTHON_BIN"] == "python3.11"
     assert parsed["RUN_CORPUS_ARGV"] == ["--foo", "bar baz"]
+
 
 def test_render_shell_assignments_preserves_scalars_and_arrays(tmp_path: Path) -> None:
     manifest = tmp_path / "run-contract.env"
@@ -111,3 +115,80 @@ def test_test_manifest_includes_upstream_test_progs_selection_contract() -> None
     )
     assert manifest["RUN_UPSTREAM_TEST_PROGS_FILTERS"] == "verifier,jit"
     assert manifest["RUN_UPSTREAM_TEST_PROGS_DENY"] == "verifier_private_stack"
+
+
+def test_validate_guest_prereqs_accepts_bundled_workload_tools(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    tool_bin = workspace / ".cache" / "workload-tools" / "bin"
+    tool_bin.mkdir(parents=True)
+    bundled_tool = tool_bin / "wrk"
+    bundled_tool.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+    bundled_tool.chmod(0o755)
+
+    manifest = tmp_path / "run-contract.env"
+    manifest.write_text(
+        "\n".join(
+            [
+                "RUN_BPFTOOL_BIN=true",
+                "RUN_REMOTE_PYTHON_BIN=python3",
+                "RUN_REMOTE_COMMANDS_CSV=",
+                "RUN_WORKLOAD_TOOLS_CSV=wrk",
+                "RUN_BUNDLED_WORKLOAD_TOOLS_CSV=wrk",
+                "RUN_REMOTE_WORKLOAD_TOOL_BIN=.cache/workload-tools/bin",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    subprocess.run(
+        [
+            "python3",
+            "-m",
+            "runner.libs.guest_prereqs",
+            "validate",
+            str(workspace),
+            str(manifest),
+        ],
+        cwd=ROOT_DIR,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def test_validate_guest_prereqs_requires_explicit_remote_tool_bin(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    manifest = tmp_path / "run-contract.env"
+    manifest.write_text(
+        "\n".join(
+            [
+                "RUN_BPFTOOL_BIN=true",
+                "RUN_REMOTE_PYTHON_BIN=python3",
+                "RUN_REMOTE_COMMANDS_CSV=",
+                "RUN_WORKLOAD_TOOLS_CSV=wrk",
+                "RUN_BUNDLED_WORKLOAD_TOOLS_CSV=",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    completed = subprocess.run(
+        [
+            "python3",
+            "-m",
+            "runner.libs.guest_prereqs",
+            "validate",
+            str(workspace),
+            str(manifest),
+        ],
+        cwd=ROOT_DIR,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode != 0
+    assert "manifest remote workload-tool bin is missing" in completed.stderr

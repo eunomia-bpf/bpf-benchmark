@@ -9,6 +9,7 @@ from collections import deque
 from pathlib import Path
 from typing import NoReturn
 
+from runner.libs.arm64_sysroot import Arm64SysrootConfig, ensure_sysroot
 from runner.libs import ROOT_DIR
 
 
@@ -72,17 +73,15 @@ def _ensure_arm64_sysroot(
     remote_user: str,
     ssh_key_path: str,
 ) -> None:
-    env = os.environ.copy()
-    env.update(
-        {
-            "ARM64_SYSROOT_ROOT": str(sysroot_root),
-            "ARM64_SYSROOT_LOCK_FILE": str(sysroot_lock_file),
-            "ARM64_SYSROOT_REMOTE_HOST": remote_host,
-            "ARM64_SYSROOT_REMOTE_USER": remote_user,
-            "ARM64_SYSROOT_SSH_KEY_PATH": ssh_key_path,
-        }
+    ensure_sysroot(
+        Arm64SysrootConfig(
+            sysroot_root=sysroot_root,
+            sysroot_lock_file=sysroot_lock_file,
+            remote_host=remote_host,
+            remote_user=remote_user,
+            ssh_key_path=Path(ssh_key_path),
+        )
     )
-    _run(["bash", str(ROOT_DIR / "runner/scripts/prepare-arm64-sysroot.sh")], env=env)
 
 
 def _readelf_needed_libraries(binary: Path, *, readelf_bin: str) -> list[str]:
@@ -161,7 +160,6 @@ def bundle_arm64_portable_binary(
     readelf_bin: str = "",
     strip_bin: str = "",
 ) -> None:
-    _require_command("bash")
     readelf = readelf_bin or _require_command("aarch64-linux-gnu-readelf")
     if not input_binary.is_file():
         _die(f"input ARM64 binary is missing: {input_binary}")

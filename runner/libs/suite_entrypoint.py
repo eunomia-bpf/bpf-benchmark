@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import cast
 
 from runner.libs.guest_prereqs import resolve_remote_workload_tool_bin, workload_tool_is_bundled
+from runner.libs.kinsn import load_kinsn_modules
 from runner.libs.run_contract import parse_manifest
 
 
@@ -278,6 +279,17 @@ class SuiteEntrypoint:
     def _test_kinsn_module_dir(self) -> Path:
         return self.workspace / "module" / ("arm64" if self.target_arch == "arm64" else "x86")
 
+    def _expected_kinsn_modules(self) -> list[str]:
+        module_dir = self._test_kinsn_module_dir()
+        modules = sorted(
+            path.stem
+            for path in module_dir.glob("bpf_*.ko")
+            if path.is_file() and path.stem != "bpf_barrier"
+        )
+        if not modules:
+            _die(f"no kinsn modules found under {module_dir}")
+        return modules
+
     def _resolve_test_daemon(self) -> Path:
         return _require_executable(
             self.workspace / "daemon" / "target" / "release" / "bpfrejit-daemon",
@@ -376,9 +388,10 @@ class SuiteEntrypoint:
         print("========================================", file=sys.stderr)
 
     def _load_kinsn_modules(self) -> None:
-        load_script = self.workspace / "module" / "load_all.sh"
-        _require_executable(load_script, "module/load_all.sh")
-        _run_checked([str(load_script), str(self._test_kinsn_module_dir())], cwd=self.workspace, env=os.environ.copy())
+        load_kinsn_modules(
+            self._expected_kinsn_modules(),
+            module_dir=self._test_kinsn_module_dir(),
+        )
 
     def _discover_unittest_binaries(self) -> list[Path]:
         build_dir = self._test_unittest_build_dir()

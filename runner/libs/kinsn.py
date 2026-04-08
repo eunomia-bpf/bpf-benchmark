@@ -25,10 +25,7 @@ def relpath(path: Path | None) -> str | None:
 
 
 def expected_kinsn_modules() -> list[str]:
-    arch_dir = _KINSN_MODULE_ARCH_DIRS.get(platform.machine())
-    if arch_dir is None:
-        raise RuntimeError(f"unsupported architecture for kinsn modules: {platform.machine()}")
-    module_dir = ROOT_DIR / "module" / arch_dir
+    module_dir = resolve_kinsn_module_dir()
     if not module_dir.is_dir():
         raise RuntimeError(f"kinsn module directory is missing: {module_dir}")
     modules = sorted(
@@ -39,6 +36,18 @@ def expected_kinsn_modules() -> list[str]:
     if not modules:
         raise RuntimeError(f"no kinsn modules found under {module_dir}")
     return modules
+
+
+def resolve_kinsn_module_dir(module_dir: Path | None = None) -> Path:
+    if module_dir is not None:
+        resolved = Path(module_dir).resolve()
+        if not resolved.is_dir():
+            raise RuntimeError(f"kinsn module directory is missing: {resolved}")
+        return resolved
+    arch_dir = _KINSN_MODULE_ARCH_DIRS.get(platform.machine())
+    if arch_dir is None:
+        raise RuntimeError(f"unsupported architecture for kinsn modules: {platform.machine()}")
+    return ROOT_DIR / "module" / arch_dir
 
 
 def _loaded_bpf_modules_from_lsmod() -> tuple[list[str], str] | None:
@@ -81,17 +90,40 @@ def capture_kinsn_module_snapshot(expected_modules: Sequence[str]) -> dict[str, 
     }
 
 
-def run_kinsn_module_loader(
+def _module_is_resident(module_name: str) -> bool:
+    snapshot = _loaded_bpf_modules_from_lsmod()
+    if snapshot is not None:
+        return module_name in snapshot[0]
+    return (Path("/sys/module") / module_name).is_dir()
+
+
+def load_kinsn_modules(
     expected_modules: Sequence[str],
     *,
+    module_dir: Path | None = None,
     before_snapshot: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     snapshot_before = dict(before_snapshot) if before_snapshot is not None else capture_kinsn_module_snapshot(expected_modules)
-    script_path = ROOT_DIR / "module" / "load_all.sh"
-    if not script_path.exists():
-        raise RuntimeError(f"kinsn module loader script is missing: {script_path}")
+    resolved_module_dir = resolve_kinsn_module_dir(module_dir)
+    loaded = 0
+    total = 0
+    for ko_path in sorted(resolved_module_dir.glob("*.ko")):
+        if not ko_path.is_file():
+            continue
+        module_name = ko_path.stem
+        if module_name == "bpf_barrier":
+            continue
+        total += 1
+        if not _module_is_resident(module_name):
+            completed = run_command(["insmod", str(ko_path)], timeout=120, check=False)
+            if completed.returncode != 0:
+                output = (completed.stderr or completed.stdout or "").strip()
+                raise RuntimeError(f"failed to load {module_name}: {output}")
+        if _module_is_resident(module_name):
+            loaded += 1
+    if total == 0:
+        raise RuntimeError(f"no kinsn modules found in {resolved_module_dir}")
 
-    completed = run_command([str(script_path)], timeout=120, check=False)
     after_snapshot = capture_kinsn_module_snapshot(expected_modules)
 
     expected = list(after_snapshot.get("expected_modules") or [])
@@ -109,11 +141,6 @@ def run_kinsn_module_loader(
     loaded_modules = [name for name in expected if name in after_loaded]
     newly_loaded_modules = [name for name in expected if name in after_loaded and name not in before_loaded]
     failed_modules = [name for name in expected if name not in after_loaded]
-    if completed.returncode != 0:
-        raise RuntimeError(
-            f"kinsn module loader failed with exit code {completed.returncode}: "
-            f"{(completed.stderr or completed.stdout).strip()}"
-        )
     if failed_modules:
         raise RuntimeError(
             "kinsn module loader did not load all expected modules: "
@@ -122,11 +149,11 @@ def run_kinsn_module_loader(
 
     return {
         "invoked_at": datetime.now(timezone.utc).isoformat(),
-        "script_path": relpath(script_path),
+        "loader": "runner.libs.kinsn.load_kinsn_modules",
+        "module_dir": relpath(resolved_module_dir),
         "status": "ok",
-        "exit_code": completed.returncode,
-        "stdout": (completed.stdout or "").strip(),
-        "stderr": (completed.stderr or "").strip(),
+        "loaded_count": loaded,
+        "total_count": total,
         "expected_modules": expected,
         "loaded_modules": loaded_modules,
         "newly_loaded_modules": newly_loaded_modules,
@@ -138,7 +165,7 @@ def run_kinsn_module_loader(
 def prepare_kinsn_modules() -> dict[str, object]:
     expected_modules = expected_kinsn_modules()
     before_snapshot = capture_kinsn_module_snapshot(expected_modules)
-    module_load = run_kinsn_module_loader(
+    module_load = load_kinsn_modules(
         expected_modules,
         before_snapshot=before_snapshot,
     )

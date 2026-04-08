@@ -9,6 +9,12 @@ from typing import NoReturn
 
 from runner.libs import ROOT_DIR
 from runner.libs import aws_executor
+from runner.libs.aws_kernel_artifacts import (
+    build_arm64_kernel_artifacts,
+    build_paths_from_ctx,
+    build_x86_kernel_artifacts,
+    refresh_aws_arm64_base_config,
+)
 from runner.libs.run_contract import parse_manifest
 from runner.libs.state_file import read_state, write_state
 
@@ -27,58 +33,6 @@ def _base_env_from_contract(contract: dict[str, str | list[str]]) -> dict[str, s
     for name, value in contract.items():
         env[name] = shlex.join(value) if isinstance(value, list) else value
     return env
-
-
-def _kernel_helper_env(ctx: aws_executor.AwsExecutorContext) -> dict[str, str]:
-    env = _base_env_from_contract(ctx.contract)
-    env["ROOT_DIR"] = str(ROOT_DIR)
-    env["PYTHONPATH"] = f"{ROOT_DIR}{':' + env['PYTHONPATH'] if env.get('PYTHONPATH') else ''}"
-    env["RUN_CONTRACT_PYTHON_BIN"] = sys.executable
-    env["ACTION"] = "run"
-    env["MANIFEST_PATH"] = str(ctx.manifest_path)
-    env.pop("AWS_REMOTE_PREP_STATE_PATH", None)
-    return env
-
-
-def _run_kernel_helper_query(
-    ctx: aws_executor.AwsExecutorContext,
-    *,
-    body: str,
-    result_keys: tuple[str, ...],
-) -> dict[str, str]:
-    command = "\n".join(
-        (
-            "set -euo pipefail",
-            'source "$ROOT_DIR/runner/scripts/aws_common_lib.sh"',
-            'source "$ROOT_DIR/runner/scripts/aws_prep_paths_lib.sh"',
-            'source "$ROOT_DIR/runner/scripts/aws_kernel_artifacts_lib.sh"',
-            body,
-        )
-    )
-    completed = subprocess.run(
-        ["/bin/bash", "-lc", command],
-        cwd=ROOT_DIR,
-        env=_kernel_helper_env(ctx),
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-    if completed.returncode != 0:
-        if completed.stdout:
-            print(completed.stdout, file=sys.stderr, end="")
-        if completed.stderr:
-            print(completed.stderr, file=sys.stderr, end="")
-        raise SystemExit(completed.returncode)
-    values: dict[str, str] = {}
-    for line in completed.stdout.splitlines():
-        if "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        values[key.strip()] = value.strip()
-    missing = [key for key in result_keys if not values.get(key, "").strip()]
-    if missing:
-        _die(f"kernel helper did not report required values: {', '.join(missing)}")
-    return values
 
 
 def _effective_name_tag(ctx: aws_executor.AwsExecutorContext) -> str:
@@ -362,18 +316,13 @@ test -f "$1"
 
 
 def _refresh_aws_arm64_base_config(ctx: aws_executor.AwsExecutorContext, ip: str) -> None:
-    env = _kernel_helper_env(ctx)
-    base_config_path = Path(env["ARM64_AWS_BASE_CONFIG"])
     remote_release = _remote_kernel_release(ctx, ip)
-    if not remote_release.endswith(".amzn2023.aarch64"):
-        if base_config_path.is_file():
-            return
-        _die(f"cannot seed AWS ARM64 base config from non-stock kernel {remote_release}; relaunch a fresh AL2023 instance")
-    tmp_config = base_config_path.parent / f"{base_config_path.name}.tmp"
-    completed = aws_executor._ssh_bash(
-        ctx,
-        ip,
-        script="""
+
+    def _fetch_config_text() -> str:
+        completed = aws_executor._ssh_bash(
+            ctx,
+            ip,
+            script="""
 set -euo pipefail
 release="$(uname -r)"
 if [[ -r "/boot/config-$release" ]]; then
@@ -386,53 +335,22 @@ if command -v zcat >/dev/null 2>&1 && [[ -r /proc/config.gz ]]; then
 fi
 exit 1
 """,
-        check=False,
-        capture_output=True,
-    )
-    if completed.returncode != 0:
-        _die(f"failed to capture AWS ARM64 base kernel config from {ip}")
-    tmp_config.parent.mkdir(parents=True, exist_ok=True)
-    tmp_config.write_text(completed.stdout, encoding="utf-8")
-    if "CONFIG_ARM64=y" not in completed.stdout:
-        tmp_config.unlink(missing_ok=True)
-        _die(f"captured AWS ARM64 base config is invalid: {tmp_config}")
-    tmp_config.replace(base_config_path)
+            check=False,
+            capture_output=True,
+        )
+        if completed.returncode != 0:
+            _die(f"failed to capture AWS ARM64 base kernel config from {ip}")
+        return completed.stdout
+
+    refresh_aws_arm64_base_config(build_paths_from_ctx(ctx), remote_kernel_release=remote_release, fetch_config_text=_fetch_config_text)
 
 
 def _build_x86_kernel_artifacts(ctx: aws_executor.AwsExecutorContext) -> tuple[str, Path, Path]:
-    values = _run_kernel_helper_query(
-        ctx,
-        body="""
-build_x86_kernel_artifacts
-printf 'BUILD_KERNEL_RELEASE=%s\n' "$BUILD_KERNEL_RELEASE"
-printf 'KERNEL_IMAGE=%s\n' "$ARTIFACT_DIR/bzImage-$BUILD_KERNEL_RELEASE"
-printf 'MODULES_TAR=%s\n' "$ARTIFACT_DIR/modules-$BUILD_KERNEL_RELEASE.tar.gz"
-""",
-        result_keys=("BUILD_KERNEL_RELEASE", "KERNEL_IMAGE", "MODULES_TAR"),
-    )
-    return (
-        values["BUILD_KERNEL_RELEASE"],
-        Path(values["KERNEL_IMAGE"]).resolve(),
-        Path(values["MODULES_TAR"]).resolve(),
-    )
+    return build_x86_kernel_artifacts(build_paths_from_ctx(ctx))
 
 
 def _build_arm64_kernel_artifacts(ctx: aws_executor.AwsExecutorContext) -> tuple[str, Path, Path]:
-    values = _run_kernel_helper_query(
-        ctx,
-        body="""
-build_arm64_kernel_artifacts
-printf 'BUILD_KERNEL_RELEASE=%s\n' "$BUILD_KERNEL_RELEASE"
-printf 'KERNEL_IMAGE=%s\n' "$ARTIFACT_DIR/vmlinuz-$BUILD_KERNEL_RELEASE.efi"
-printf 'MODULES_TAR=%s\n' "$ARTIFACT_DIR/modules-$BUILD_KERNEL_RELEASE.tar.gz"
-""",
-        result_keys=("BUILD_KERNEL_RELEASE", "KERNEL_IMAGE", "MODULES_TAR"),
-    )
-    return (
-        values["BUILD_KERNEL_RELEASE"],
-        Path(values["KERNEL_IMAGE"]).resolve(),
-        Path(values["MODULES_TAR"]).resolve(),
-    )
+    return build_arm64_kernel_artifacts(build_paths_from_ctx(ctx))
 
 
 def _setup_x86_instance(ctx: aws_executor.AwsExecutorContext, ip: str) -> None:

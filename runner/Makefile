@@ -210,7 +210,7 @@ __arm64-daemon-host-cross:
 	ARM64_SYSROOT_REMOTE_USER="$(ARM64_SYSROOT_REMOTE_USER)" \
 	ARM64_SYSROOT_SSH_KEY_PATH="$(ARM64_SYSROOT_SSH_KEY_PATH)" \
 	CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
-	bash "$(REPO_ROOT)/runner/scripts/build-arm64-daemon-host.sh"
+	"$(PYTHON)" -m runner.libs.arm64_host_build daemon
 	file "$(ARM64_HOST_DAEMON_BINARY)" | grep -F "ELF 64-bit LSB pie executable, ARM aarch64"
 
 __arm64-runner-host-cross:
@@ -224,7 +224,7 @@ __arm64-runner-host-cross:
 	ARM64_SYSROOT_SSH_KEY_PATH="$(ARM64_SYSROOT_SSH_KEY_PATH)" \
 	CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
 	MICRO_EXEC_ENABLE_LLVMBPF="$(MICRO_EXEC_ENABLE_LLVMBPF)" \
-		bash "$(REPO_ROOT)/runner/scripts/build-arm64-runner-host.sh"
+		"$(PYTHON)" -m runner.libs.arm64_host_build runner
 	file "$(ARM64_HOST_RUNNER_BINARY)" | grep -F "ELF 64-bit LSB pie executable, ARM aarch64"
 
 __arm64-workload-tools-host-cross:
@@ -238,7 +238,7 @@ __arm64-workload-tools-host-cross:
 	ARM64_SYSROOT_REMOTE_USER="$(ARM64_SYSROOT_REMOTE_USER)" \
 	ARM64_SYSROOT_SSH_KEY_PATH="$(ARM64_SYSROOT_SSH_KEY_PATH)" \
 	CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
-		bash "$(REPO_ROOT)/runner/scripts/build-arm64-workload-tools-host.sh"
+		"$(PYTHON)" -m runner.libs.arm64_host_build workload-tools
 	@if [ -n "$(ARM64_WORKLOAD_TOOLS_LIST)" ]; then \
 		tool_root="$(ARM64_WORKLOAD_TOOLS_OUTPUT_ROOT)/workload-tools"; \
 		test -d "$$tool_root/bin"; \
@@ -273,12 +273,12 @@ __cross-arm64: __arm64-crossbuild-image
 		-e ARM64_CROSSBUILD_OUTPUT_DIR="$(call arm64_container_path,$(ARM64_CROSSBUILD_OUTPUT_DIR)).tmp" \
 		-e ARM64_CROSSBUILD_BUILD_ROOT="$(call arm64_container_path,$(ARM64_CROSSBUILD_BUILD_ROOT))" \
 		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
-			-e ARM64_CROSSBUILD_SCX_PACKAGES="$(ARM64_CROSSBUILD_SCX_PACKAGES)" \
-			-e ARM64_CROSSBUILD_RUNTIME_TARGETS="$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" \
+		-e ARM64_CROSSBUILD_SCX_PACKAGES="$(ARM64_CROSSBUILD_SCX_PACKAGES)" \
+		-e ARM64_CROSSBUILD_RUNTIME_TARGETS="$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" \
 			-e ARM64_HOST_PYTHON_BIN="$(PYTHON)" \
 			-e ARM64_PREBUILT_DAEMON_BINARY="$(call arm64_container_path,$(ARM64_HOST_DAEMON_BINARY))" \
 			-e MICRO_EXEC_ENABLE_LLVMBPF="$(ARM64_CROSSBUILD_ENABLE_LLVMBPF)" \
-	"$(ARM64_CROSSBUILD_IMAGE)" bash /workspace/runner/scripts/cross-arm64-build.sh
+	"$(ARM64_CROSSBUILD_IMAGE)" python3 -m runner.libs.arm64_container_build
 	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)" && mv "$(ARM64_CROSSBUILD_OUTPUT_DIR).tmp" "$(ARM64_CROSSBUILD_OUTPUT_DIR)"
 	@if [ -z "$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" ] || printf ',%s,' "$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" | grep -q ',runner,'; then \
 		file "$(ARM64_CROSS_RUNNER_REAL)" | grep -F "ARM aarch64"; \
@@ -302,7 +302,7 @@ __cross-arm64-scx:
 		ARM64_HOST_PYTHON_BIN="$(PYTHON)" \
 		CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
 		ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
-			bash "$(REPO_ROOT)/runner/scripts/build-arm64-scx-host.sh"
+			"$(PYTHON)" -m runner.libs.arm64_host_build scx
 	test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/runner/repos/scx/target/release"
 	test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).scx.tmp/corpus/build/scx"
 	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/repos/scx" "$(ARM64_CROSSBUILD_OUTPUT_DIR)/corpus/build/scx"
@@ -324,10 +324,10 @@ __cross-arm64-bench: __arm64-crossbuild-image
 		-e ARM64_CROSSBUILD_OUTPUT_DIR="$(call arm64_container_path,$(ARM64_CROSSBUILD_OUTPUT_DIR)).bench.tmp" \
 			-e ARM64_CROSSBUILD_BUILD_ROOT="$(call arm64_container_path,$(ARM64_CROSSBUILD_BUILD_ROOT))" \
 			-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
-			-e ARM64_CROSSBUILD_BENCH_REPOS="$(ARM64_CROSSBUILD_BENCH_REPOS)" \
+		-e ARM64_CROSSBUILD_BENCH_REPOS="$(ARM64_CROSSBUILD_BENCH_REPOS)" \
 			-e ARM64_HOST_PYTHON_BIN="$(PYTHON)" \
 			-e ARM64_CROSSBUILD_ONLY_BENCH=1 \
-			"$(ARM64_CROSSBUILD_IMAGE)" bash /workspace/runner/scripts/cross-arm64-build.sh
+			"$(ARM64_CROSSBUILD_IMAGE)" python3 -m runner.libs.arm64_container_build
 	@set -e; repo_csv="$(ARM64_CROSSBUILD_BENCH_REPOS)"; \
 	case ",$$repo_csv," in \
 		*,bcc,*) test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/runner/repos/bcc/libbpf-tools/.output" && test -d "$(ARM64_CROSSBUILD_OUTPUT_DIR).bench.tmp/corpus/build/bcc/libbpf-tools" ;; \
@@ -390,7 +390,7 @@ __arm64-test-artifacts:
 	ARM64_SYSROOT_SSH_KEY_PATH="$(ARM64_SYSROOT_SSH_KEY_PATH)" \
 		ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
 		CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
-			bash "$(REPO_ROOT)/runner/scripts/build-arm64-repo-tests-host.sh"
+			"$(PYTHON)" -m runner.libs.arm64_host_build repo-tests
 	@if [ "$(ARM64_TEST_MODE)" != "negative" ]; then \
 		file "$(ARM64_TEST_UNITTEST_BUILD_DIR)/rejit_kinsn" | grep -F "ARM aarch64"; \
 	fi

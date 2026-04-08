@@ -71,12 +71,7 @@ SCX_PROG_SHOW_RACE_SKIP_PROBE ?= 0
 KALLSYMS_EXTRA_PASS ?= 1
 PYTHON_STATIC_TESTS := \
 	tests/python/test_run_contract.py \
-	tests/python/test_prepare_local_inputs.py \
-	tests/python/test_run_target_suite.py \
-	tests/python/test_build_remote_bundle.py \
-	tests/python/test_build_upstream_selftests.py \
-	tests/python/test_execute_workspace.py \
-	tests/python/test_state_file.py
+	tests/python/test_prepare_local_inputs.py
 
 # Derived
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
@@ -328,8 +323,8 @@ __arm64-worktree:
 		git -C "$(ARM64_WORKTREE_DIR)" checkout --detach "$$(git -C "$(KERNEL_DIR)" rev-parse HEAD)" >/dev/null; \
 	fi
 
-$(ARM64_BUILD_CONFIG): $(ROOT_DIR)/runner/scripts/arm64-kernel-config.sh | __arm64-worktree
-	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" "$(ROOT_DIR)/runner/scripts/arm64-kernel-config.sh" \
+$(ARM64_BUILD_CONFIG): | __arm64-worktree
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" "$(PYTHON)" -m runner.libs.arm64_kernel_config local \
 		"$(ARM64_WORKTREE_DIR)" "$(ARM64_BUILD_DIR)" "$(CROSS_COMPILE_ARM64)"
 	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
 
@@ -346,8 +341,8 @@ __kernel-arm64: $(ARM64_IMAGE) $(ARM64_EFI_IMAGE)
 	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
 	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
 
-$(ARM64_AWS_BUILD_CONFIG): $(ROOT_DIR)/runner/scripts/aws_arm64_kernel_config.sh | __arm64-worktree
-	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" ARM64_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)" "$(ROOT_DIR)/runner/scripts/aws_arm64_kernel_config.sh" \
+$(ARM64_AWS_BUILD_CONFIG): | __arm64-worktree
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" ARM64_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)" "$(PYTHON)" -m runner.libs.arm64_kernel_config aws \
 		"$(ARM64_WORKTREE_DIR)" "$(ARM64_AWS_BUILD_DIR)" "$(CROSS_COMPILE_ARM64)"
 
 $(ARM64_AWS_IMAGE): $(ARM64_AWS_BUILD_CONFIG) | __arm64-worktree

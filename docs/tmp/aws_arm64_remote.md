@@ -72,14 +72,15 @@ contract tests are only:
 
 - `tests/python/test_run_contract.py`
 - `tests/python/test_prepare_local_inputs.py`
-- `tests/python/test_run_target_suite.py`
-- `tests/python/test_build_remote_bundle.py`
-- `tests/python/test_build_upstream_selftests.py`
-- `tests/python/test_execute_workspace.py`
-- `tests/python/test_state_file.py`
 
 The previous mock-heavy and case-specific Python tests were deleted on purpose.
 The repo should add tests back only when a concrete bug justifies new coverage.
+
+As of the current cleanup pass, `tests/python/` contains only:
+
+- `conftest.py`
+- `test_run_contract.py`
+- `test_prepare_local_inputs.py`
 
 ## 3. Design Summary
 
@@ -131,7 +132,23 @@ The canonical flow is:
 `runner.libs.prepare_local_inputs` is the only public local-prep entrypoint.
 Executors must not expose their own separate public local-prep control plane.
 
-### 3.3 KVM / AWS parity rule
+### 3.3 Current cleanup status
+
+As of the current refactor pass:
+
+- `runner/scripts/` contains no active `.sh` control-plane scripts
+- the old AWS shell helper layer has been deleted
+- KVM and AWS local prep now share one public Python entrypoint:
+  - `runner.libs.prepare_local_inputs`
+- remaining shell usage in active paths is limited to:
+  - root / runner `Makefile` shell execution
+  - VM guest script materialization inside `runner.libs.vm`
+  - third-party or app-specific fixture/setup scripts
+
+Historical log entries later in this document may still mention deleted shell
+helpers. Those entries are chronology only and do not reflect the active tree.
+
+### 3.4 KVM / AWS parity rule
 
 KVM and AWS should not have different product-level prep or suite logic.
 
@@ -151,7 +168,7 @@ If KVM and AWS require different runtime assets, those assets must still be
 expressed through the same local-prep contract shape rather than separate
 public prep flows.
 
-### 3.4 Shared `corpus` / `e2e` contract
+### 3.5 Shared `corpus` / `e2e` contract
 
 `corpus` and `e2e` should share as much of the contract as possible:
 
@@ -172,7 +189,7 @@ If a bug affects paths, tools, setup, staged artifacts, remote env, or app
 setup, it should be fixed in the shared contract instead of by suite-specific
 branching.
 
-### 3.5 Parallel execution policy
+### 3.6 Parallel execution policy
 
 The intended policy is:
 
@@ -200,7 +217,7 @@ explicit env or a non-versioned local config layer:
 - `*_SUBNET_ID`
 - `*_PROFILE`
 
-### 3.6 Prohibited design patterns
+### 3.7 Prohibited design patterns
 
 The following are explicitly disallowed:
 
@@ -247,17 +264,21 @@ The refactor now centers on:
 - `runner/libs/aws_executor.py`
 - `runner/libs/build_remote_bundle.py`
 - `runner/libs/build_upstream_selftests.py`
+- `runner/libs/arm64_host_build.py`
 - `runner/libs/portable_runtime.py`
 - `runner/libs/aws_remote_prereqs.py`
 - `runner/scripts/aws_common_lib.sh`
 - `runner/scripts/aws_prep_paths_lib.sh`
 - `runner/scripts/aws_kernel_artifacts_lib.sh`
-- `runner/scripts/build-arm64-daemon-host.sh`
-- `runner/scripts/build-arm64-runner-host.sh`
 - `runner/scripts/build-arm64-repo-tests-host.sh`
 - `runner/scripts/build-arm64-scx-host.sh`
-- `runner/scripts/arm64_runtime_bundle_lib.sh`
 - `runner/scripts/prepare-arm64-sysroot.sh`
+- `runner/scripts/build-arm64-workload-tools-host.sh`
+- `runner/scripts/cross-arm64-build.sh`
+- `runner/scripts/arm64-kernel-config.sh`
+- `runner/scripts/aws_arm64_kernel_config.sh`
+- `runner/scripts/arm64_kernel_config_common.sh`
+- `runner/scripts/vng-wrapper.sh`
 - `runner/libs/prepare_local_inputs.py`
 - `runner/libs/kvm_executor.py`
 - `runner/libs/run_target_suite.py`
@@ -453,11 +474,17 @@ What is still incomplete:
 - KVM and AWS now stage the same micro sidecar shape (`*.directive.bin` /
   `*.policy.bin`) during local prep
 - ARM host-cross now covers more of canonical runtime prep:
-  - `runner/scripts/build-arm64-daemon-host.sh`
-  - `runner/scripts/build-arm64-runner-host.sh`
+  - `runner.libs.arm64_host_build`
   - `runner.libs.portable_runtime`
   - canonical ARM runtime prep should only fall back to `__cross-arm64` when
     `llvmbpf` or repo-specific benchmark builds still require an ARM userspace
+- the deleted shell layers in this pass were:
+  - `runner/scripts/build-arm64-daemon-host.sh`
+  - `runner/scripts/build-arm64-runner-host.sh`
+  - `runner/scripts/build-arm64-portable-binary-host.sh`
+  - `runner/scripts/build-x86-portable-libbpf.sh`
+  - `runner/scripts/local_prep_common_lib.sh`
+  - `runner/scripts/arm64_runtime_bundle_lib.sh`
 - upstream selftests no longer depend on repo-owned compat headers or stub
   skeletons; exclusions now live only in the tracked selection manifest
   `runner/config/upstream_selftests_selection.tsv`
@@ -960,8 +987,11 @@ locks during local prep.
      - `RUN_LOCAL_WORKLOAD_TOOL_ROOT`
 3. Keep `runner.libs.prepare_local_inputs` as the only public local-prep entrypoint and
    prevent any drift back toward executor-owned prep logic.
-4. Review `aws_common_lib.sh` for any remaining target/suite policy that should
-   instead live in the manifest or already-isolated internal libraries.
+4. Keep the active control plane Python-only:
+   - `runner/scripts/` must stay free of `.sh` control-plane code
+   - do not reintroduce shell wrapper libraries for AWS or KVM orchestration
+   - if shell remains in an active path, it must be third-party/app-specific or
+     VM guest fixture logic rather than runner control plane
 5. Keep upstream selftests build selection explicit and auditable:
    - no repo-owned compat headers
    - no stub skeleton headers
@@ -976,7 +1006,8 @@ locks during local prep.
    - the canonical LLVM tool suffix contract must flow from the manifest into
      both x86 and ARM upstream-selftests builds
 6. Remove stale historical language in this document that still reflects
-   intermediate refactor states rather than the current structure.
+   deleted shell helpers or intermediate refactor states rather than the
+   current structure.
 7. Keep replacing hidden env handoffs with explicit manifest/state-file
    handoffs whenever an executor or local-prep step still relies on ambient
    process state.
@@ -997,6 +1028,14 @@ Refactor-first gate:
 - no new compat layers, hidden fallbacks, or third-party source patches may be
   introduced while closing the remaining findings
 
+Current structural status:
+
+- `runner/scripts/` no longer contains any `.sh` control-plane scripts
+- `module/load_all.sh` has been deleted from the active path; kinsn module
+  loading now goes through `runner.libs.kinsn`
+- KVM and AWS local-prep phase dispatch / bundle finalization now share Python
+  helpers in `runner.libs.local_prep_common`
+
 Current ordered todo:
 
 1. Finish collapsing the remaining developer-only direct-build surface in the
@@ -1007,12 +1046,13 @@ Current ordered todo:
    - keep `check` / `validate` from drifting into a second orchestration layer
    - do not advertise internal helpers in `make help` or `README.md` as part of
      the canonical user-facing surface
-2. Continue reducing the remaining AWS-shell / Python split:
-   - local prep and remote preflight orchestration are now Python-owned
-   - keep shell limited to low-level build/bootstrap helpers only
-   - review `aws_common_lib.sh`, `aws_prep_paths_lib.sh`, and
-     `aws_kernel_artifacts_lib.sh` for any remaining policy or orchestration
-     leakage
+2. Keep local prep as one Python control plane:
+   - `runner.libs.prepare_local_inputs` remains the only public local-prep
+     entrypoint
+   - KVM/AWS phase dispatch and bundle finalization should keep using shared
+     Python helpers rather than duplicating orchestration in target-specific
+     modules
+   - do not reintroduce executor-owned prep side paths
 3. Keep the explicit bundle/runtime contract strict:
    - repo selection stays split between `RUN_BUNDLED_REPOS_CSV` and
      `RUN_FETCH_REPOS_CSV`
@@ -1057,12 +1097,11 @@ Current ordered todo:
    - local-prep phase ordering now lives in Python; shell no longer owns the
      suite phase graph
    - contract/state rehydration in shell no longer uses `eval`
-   - next candidates are the remaining shell-first policy surfaces:
-     - AWS remote preflight state machine inside `aws_remote_prep_lib.sh`
-    - the remaining AWS shell-first remote preflight state machine in
-      `aws_remote_prep_lib.sh`
-    - the remaining low-level ARM host/cross helper scripts under
-      `runner/scripts/build-arm64-*.sh`
+   - `runner/scripts/` is now shell-free; remaining shell in active paths is
+     limited to:
+     - root / runner `Makefile` command execution
+     - VM guest script materialization in `runner.libs.vm`
+     - third-party or app fixture/setup scripts
 8. Re-run whole-tree reviewer passes and fold any remaining structural findings
    back into the tree.
    - the latest confirmed runtime/build regressions from review have been
@@ -1240,8 +1279,8 @@ Current real-path validation state:
        - `aws_executor.sh` no longer re-runs remote preflight during `run`
        - remote-prep-only entrypoints no longer live in the shared AWS common
          lib surface
-       - duplicated local-prep helper definitions were reduced into
-         `local_prep_common_lib.sh`
+      - duplicated local-prep helper definitions were reduced into shared
+        Python prep helpers before the remaining shell helper lib was deleted
        - KVM and AWS local prep now share the same promote-root-based staged
          input contract for standard runtime/test/repo inputs
        - AWS remote preflight now hands resolved remote state to local prep
@@ -3415,3 +3454,46 @@ Current live benchmark lanes after this fix:
 At this point, all four AWS benchmark lanes are again live in parallel on
 dedicated instances. The next action remains to keep polling only the fresh
 reruns and take the first new blocker from each architecture/suite pair.
+
+### 13.29 2026-04-07 Portable Runtime Shell Prune And Python Test Floor
+
+This round intentionally cut more shell and test surface area instead of
+preserving broad compatibility scaffolding.
+
+What was deleted:
+
+- dead portable-wrapper shell helpers:
+  - `runner/scripts/build-arm64-portable-binary-host.sh`
+  - `runner/scripts/build-x86-portable-libbpf.sh`
+  - `runner/scripts/arm64_runtime_bundle_lib.sh`
+- almost the entire residual Python test tree under `tests/python/`
+
+What replaced the deleted shell:
+
+- `runner/libs/portable_runtime.py` now owns:
+  - ARM64 runtime library discovery and copy
+  - ARM64 portable wrapper generation
+  - x86 portable `libbpf` build orchestration
+  - a small CLI so the remaining host-cross shell entrypoints can call Python
+    instead of sourcing another bash library
+- `runner/scripts/build-arm64-scx-host.sh` now shells out to
+  `python3 -m runner.libs.portable_runtime bundle-arm64-runtime`
+  instead of sourcing `arm64_runtime_bundle_lib.sh`
+- `runner/scripts/build-arm64-workload-tools-host.sh` now does the same for
+  bundled workload tools
+
+The reduced Python test floor is now just:
+
+- `tests/python/test_run_contract.py`
+- `tests/python/test_prepare_local_inputs.py`
+
+The retained coverage is deliberately narrow:
+
+- manifest parsing / contract rendering
+- guest prereq validation CLI smoke
+- local-prep dispatch
+- execute-workspace orchestration ordering
+
+Everything else was dropped on purpose so new Python control-plane paths can be
+rebuilt incrementally instead of dragging a large mock-heavy compatibility
+suite through each refactor.
