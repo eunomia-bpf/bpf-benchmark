@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import argparse
 import os
-import statistics
 import sys
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Mapping, Sequence
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -27,14 +26,11 @@ from runner.libs.metrics import (  # noqa: E402
     start_sampler_thread,
 )
 from runner.libs.rejit import applied_site_totals_from_rejit_result  # noqa: E402
-from runner.libs.workload import WorkloadResult  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     host_metadata,
     summarize_numbers,
     percent_delta,
-    percentile,
-    rejit_result_has_any_apply,
     run_case_lifecycle,
 )
 

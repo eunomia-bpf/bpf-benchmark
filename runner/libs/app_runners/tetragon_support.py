@@ -11,6 +11,7 @@ from typing import Any, Mapping, Sequence
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
 from ..workload import WorkloadResult, run_connect_storm, run_exec_storm, run_file_io, run_open_storm
+from .setup_support import first_existing_dir, missing_required_commands, pick_host_executable
 
 def _bpftool_binary() -> str:
     return resolve_bpftool_binary()
@@ -195,23 +196,67 @@ spec:
     return [tracepoint_path, kprobe_path]
 
 
-def run_setup_script(setup_script: Path) -> dict[str, object]:
-    completed = run_command(["bash", str(setup_script)], check=False, timeout=1800)
-    result = {
-        "returncode": completed.returncode,
-        "tetragon_binary": None,
-        "tetragon_bpf_lib_dir": None,
-        "stdout_tail": tail_text(completed.stdout or "", max_lines=60, max_chars=12000),
-        "stderr_tail": tail_text(completed.stderr or "", max_lines=60, max_chars=12000),
+def inspect_tetragon_setup() -> dict[str, object]:
+    bundled_tetragon_binary = ROOT_DIR / "corpus" / "build" / "tetragon" / "bin" / "tetragon"
+    bundled_bpf_dir = ROOT_DIR / "corpus" / "build" / "tetragon"
+    explicit_binary = os.environ.get("TETRAGON_BINARY", "").strip() or None
+    explicit_bpf_dir = os.environ.get("TETRAGON_BPF_LIB_DIR", "").strip() or None
+
+    missing_tools = missing_required_commands(("stress-ng", "fio", "curl", "tar"))
+    if missing_tools:
+        return {
+            "returncode": 1,
+            "tetragon_binary": None,
+            "tetragon_bpf_lib_dir": None,
+            "stdout_tail": "",
+            "stderr_tail": f"missing required Tetragon workload tools: {' '.join(missing_tools)}",
+        }
+
+    tetragon_binary = pick_host_executable(explicit_binary, bundled_tetragon_binary)
+    if tetragon_binary is None:
+        checked = [explicit_binary or "<unset>", str(bundled_tetragon_binary)]
+        return {
+            "returncode": 1,
+            "tetragon_binary": None,
+            "tetragon_bpf_lib_dir": None,
+            "stdout_tail": "",
+            "stderr_tail": f"missing repo-managed Tetragon binary; checked {', '.join(checked)}",
+        }
+
+    bpf_lib_dir = first_existing_dir(explicit_bpf_dir, bundled_bpf_dir)
+    if bpf_lib_dir is None or not any(bpf_lib_dir.glob("*.o")) and not any(bpf_lib_dir.glob("*.bpf.o")):
+        return {
+            "returncode": 1,
+            "tetragon_binary": str(tetragon_binary),
+            "tetragon_bpf_lib_dir": None,
+            "stdout_tail": "",
+            "stderr_tail": f"missing bundled Tetragon .bpf.o files under {bundled_bpf_dir}",
+        }
+
+    help_probe = run_command(["timeout", "5s", str(tetragon_binary), "--help"], check=False, timeout=15)
+    if help_probe.returncode != 0:
+        return {
+            "returncode": help_probe.returncode,
+            "tetragon_binary": str(tetragon_binary),
+            "tetragon_bpf_lib_dir": str(bpf_lib_dir),
+            "stdout_tail": tail_text(help_probe.stdout or "", max_lines=60, max_chars=12000),
+            "stderr_tail": tail_text(help_probe.stderr or "", max_lines=60, max_chars=12000),
+        }
+
+    stress_ng = which("stress-ng")
+    return {
+        "returncode": 0,
+        "tetragon_binary": str(tetragon_binary),
+        "tetragon_bpf_lib_dir": str(bpf_lib_dir),
+        "stdout_tail": "\n".join(
+            [
+                f"TETRAGON_BINARY={tetragon_binary}",
+                f"TETRAGON_BPF_LIB_DIR={bpf_lib_dir}",
+                f"STRESS_NG_BINARY={stress_ng or ''}",
+            ]
+        ),
+        "stderr_tail": "",
     }
-    for line in (completed.stdout or "").splitlines():
-        if line.startswith("TETRAGON_BINARY="):
-            value = line.split("=", 1)[1].strip()
-            result["tetragon_binary"] = value or None
-        if line.startswith("TETRAGON_BPF_LIB_DIR="):
-            value = line.split("=", 1)[1].strip()
-            result["tetragon_bpf_lib_dir"] = value or None
-    return result
 
 
 def resolve_tetragon_binary(explicit: str | None, setup_result: Mapping[str, object]) -> str | None:

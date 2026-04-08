@@ -1,20 +1,18 @@
 from __future__ import annotations
 
-import os
 import shutil
 import subprocess
 import sys
 import tarfile
+from functools import partial
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
+from runner.libs.cli_support import fail
 from runner.libs.run_contract import parse_manifest
 from runner.libs.state_file import read_state
 
-
-def _die(message: str) -> "NoReturn":
-    print(f"[kvm-executor][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+_die = partial(fail, "kvm-executor")
 
 
 def _require_scalar(mapping: dict[str, str | list[str]], name: str) -> str:

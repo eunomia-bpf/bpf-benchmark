@@ -9,7 +9,7 @@ import struct
 import subprocess
 import time
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Mapping
 
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
 from ..kernel_modules import load_kernel_module

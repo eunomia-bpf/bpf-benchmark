@@ -5,7 +5,6 @@ import os
 import re
 import statistics
 import sys
-import time
 from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path

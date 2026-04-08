@@ -9,11 +9,11 @@ from collections import deque
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Mapping, Sequence
 
 import yaml
 
-from .. import ROOT_DIR, run_command, tail_text
+from .. import ROOT_DIR, tail_text
 from ..agent import find_bpf_programs, stop_agent
 from ..workload import (
     WorkloadResult,
@@ -22,15 +22,15 @@ from ..workload import (
     run_exec_storm,
     run_file_io,
     run_file_open_load,
+    run_mixed_workload,
     run_named_workload as run_shared_workload,
     run_scheduler_load,
     run_tcp_connect_load,
     run_user_exec_loop,
 )
 from .base import AppRunner
+from .setup_support import binary_matches_host_arch, first_existing_dir, missing_required_commands
 
-
-DEFAULT_SETUP_SCRIPT = ROOT_DIR / "e2e" / "cases" / "bcc" / "setup.sh"
 DEFAULT_TOOLS_DIR = ROOT_DIR / "runner" / "repos" / "bcc" / "libbpf-tools"
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml"
 DEFAULT_ATTACH_TIMEOUT_SECONDS = 20
@@ -108,20 +108,54 @@ def _bcc_tool_specs() -> dict[str, BCCWorkloadSpec]:
     return specs
 
 
-def run_setup_script(setup_script: Path = DEFAULT_SETUP_SCRIPT) -> dict[str, object]:
-    completed = run_command(["bash", str(setup_script)], check=False, timeout=1800)
-    result: dict[str, object] = {
-        "returncode": completed.returncode,
-        "tools_dir": None,
-        "stdout_tail": tail_text(completed.stdout or "", max_lines=60, max_chars=12000),
-        "stderr_tail": tail_text(completed.stderr or "", max_lines=60, max_chars=12000),
+def inspect_bcc_setup() -> dict[str, object]:
+    explicit_build_output = os.environ.get("BCC_TOOLS_DIR", "").strip() or None
+    bundled_build_output = DEFAULT_TOOLS_DIR / ".output"
+    build_output = first_existing_dir(explicit_build_output, bundled_build_output)
+    if build_output is None:
+        checked = [
+            explicit_build_output or "<unset>",
+            str(bundled_build_output),
+        ]
+        return {
+            "returncode": 1,
+            "tools_dir": None,
+            "stdout_tail": "",
+            "stderr_tail": f"missing bundled BCC libbpf-tools output; checked {', '.join(checked)}",
+        }
+
+    for tool_name in _bcc_tool_specs():
+        candidate = build_output / tool_name
+        if not candidate.is_file() or not os.access(candidate, os.X_OK):
+            return {
+                "returncode": 1,
+                "tools_dir": str(build_output),
+                "stdout_tail": "",
+                "stderr_tail": f"missing repo-managed BCC libbpf-tools under {build_output}; missing {tool_name}",
+            }
+        if not binary_matches_host_arch(candidate):
+            return {
+                "returncode": 1,
+                "tools_dir": str(build_output),
+                "stdout_tail": "",
+                "stderr_tail": f"bundled BCC tool has the wrong architecture: {candidate}",
+            }
+
+    missing_workload_tools = missing_required_commands(("stress-ng", "fio", "curl", "dd", "setpriv"))
+    if missing_workload_tools:
+        return {
+            "returncode": 1,
+            "tools_dir": str(build_output),
+            "stdout_tail": "",
+            "stderr_tail": f"missing required workload tools for BCC benchmark: {' '.join(missing_workload_tools)}",
+        }
+
+    return {
+        "returncode": 0,
+        "tools_dir": str(build_output),
+        "stdout_tail": f"BCC_TOOLS_DIR={build_output}",
+        "stderr_tail": "",
     }
-    for line in (completed.stdout or "").splitlines():
-        if line.startswith("BCC_TOOLS_DIR="):
-            value = line.split("=", 1)[1].strip()
-            result["tools_dir"] = value or None
-            break
-    return result
 
 
 def resolve_tools_dir(
@@ -188,7 +222,7 @@ def _run_named_workload(kind: str, duration_s: float) -> WorkloadResult:
     whole_seconds = max(1, int(round(duration_s)))
     normalized = str(kind or "").strip()
     if normalized == "mixed":
-        return _run_mixed_workload(duration_s)
+        return run_mixed_workload(duration_s)
     if kind == "tcp_connect":
         return run_tcp_connect_load(whole_seconds)
     if kind == "block_io":
@@ -214,39 +248,8 @@ def _run_named_workload(kind: str, duration_s: float) -> WorkloadResult:
         # the lightest workload that still fires these probes reliably in VM.
         return run_tcp_connect_load(whole_seconds)
     if normalized == "mixed_system":
-        return _run_mixed_workload(duration_s)
+        return run_mixed_workload(duration_s)
     return run_shared_workload(normalized, whole_seconds)
-
-
-def _run_mixed_workload(duration_s: float) -> WorkloadResult:
-    segments = (
-        ("exec_loop", 0.25),
-        ("file_open", 0.20),
-        ("block_io", 0.20),
-        ("tcp_connect", 0.20),
-        ("bind_storm", 0.10),
-        ("scheduler", 0.05),
-    )
-    remaining = max(1.0, float(duration_s))
-    results: list[WorkloadResult] = []
-    for index, (kind, share) in enumerate(segments, start=1):
-        if index == len(segments):
-            slice_seconds = max(1.0, remaining)
-        else:
-            slice_seconds = max(1.0, round(duration_s * share))
-            remaining -= slice_seconds
-        results.append(_run_named_workload(kind, slice_seconds))
-    total_duration = sum(result.duration_s for result in results)
-    total_ops = sum(result.ops_total for result in results)
-    stdout = "\n".join(result.stdout for result in results if result.stdout)
-    stderr = "\n".join(result.stderr for result in results if result.stderr)
-    return WorkloadResult(
-        ops_total=total_ops,
-        ops_per_sec=(total_ops / total_duration) if total_duration > 0 else None,
-        duration_s=total_duration,
-        stdout=tail_text(stdout, max_lines=80, max_chars=12000),
-        stderr=tail_text(stderr, max_lines=80, max_chars=12000),
-    )
 
 
 class BCCRunner(AppRunner):
@@ -261,7 +264,6 @@ class BCCRunner(AppRunner):
         expected_program_names: Sequence[str] = (),
         attach_timeout_s: int | None = None,
         tools_dir: Path | str | None = None,
-        setup_script: Path | str = DEFAULT_SETUP_SCRIPT,
     ) -> None:
         super().__init__()
         resolved_tool_name = str(tool_name or "").strip()
@@ -279,7 +281,6 @@ class BCCRunner(AppRunner):
         self.expected_programs = int(expected_programs or (spec.expected_programs if spec else max(1, len(tuple(expected_program_names)) or 1)))
         self.attach_timeout_s = int(attach_timeout_s or (spec.spawn_timeout_s if spec else DEFAULT_ATTACH_TIMEOUT_SECONDS))
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
-        self.setup_script = Path(setup_script).resolve()
         self.setup_result: dict[str, object] = {
             "returncode": 0,
             "tools_dir": None,
@@ -322,7 +323,7 @@ class BCCRunner(AppRunner):
                 raise RuntimeError(f"BCC tool binary is not executable: {self.tool_binary}")
             return self.tool_binary
 
-        self.setup_result = run_setup_script(self.setup_script)
+        self.setup_result = inspect_bcc_setup()
         if int(self.setup_result.get("returncode", 0) or 0) != 0:
             stderr_tail = str(self.setup_result.get("stderr_tail") or "")
             raise RuntimeError(f"BCC setup failed: {stderr_tail or self.setup_result}")
@@ -450,6 +451,6 @@ class BCCRunner(AppRunner):
 __all__ = [
     "BCCRunner",
     "find_tool_binary",
+    "inspect_bcc_setup",
     "resolve_tools_dir",
-    "run_setup_script",
 ]

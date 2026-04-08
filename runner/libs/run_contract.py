@@ -4,9 +4,11 @@ import os
 import re
 import shlex
 import sys
+from functools import partial
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
+from runner.libs.cli_support import fail
 
 
 TARGETS_DIR = ROOT_DIR / "runner" / "targets"
@@ -16,9 +18,7 @@ SCALAR_PATTERN = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$")
 ARRAY_PATTERN = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=\((.*)\)$")
 
 
-def _die(message: str) -> "NoReturn":
-    print(f"[run-contract][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+_die = partial(fail, "run-contract")
 
 
 def parse_manifest(manifest_path: Path) -> dict[str, str | list[str]]:
@@ -139,6 +139,9 @@ def _append_csv_list(csv: str, extra_csv: str) -> str:
 _COMMON_MANIFEST_INPUTS = {
     "PYTHON",
     "RUN_TOKEN",
+    "CROSS_COMPILE_ARM64",
+    "ARM64_DOCKER_PLATFORM",
+    "ARM64_CROSSBUILD_JOBS",
 }
 
 _KVM_MANIFEST_INPUTS = {

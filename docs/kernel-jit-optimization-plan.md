@@ -628,19 +628,19 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 
 | 命令 | 作用 |
 |------|------|
-| `make -C runner micro_exec` | 构建 `runner/build/micro_exec` |
-| `make -C runner MICRO_PROGRAM_OUTPUT_DIR="$PWD/micro/programs" micro-programs` | 构建 micro `.bpf.o` 输入 |
-| `make -C runner DAEMON_TARGET_DIR="$PWD/daemon/target" daemon-binary` | 构建 `bpfrejit-daemon` CLI |
-| `make kernel` | 编译 bzImage（vendor/linux-framework） |
-| `make -C runner upstream-selftests-build` | 构建 vendored upstream BPF selftests；`kernel-tests` 已删除 |
+| `make vm-test` | canonical 本地 x86 KVM 测试入口；按 contract 自动准备 runner/daemon/test artifacts |
+| `make vm-micro` | canonical 本地 x86 KVM micro benchmark 入口 |
+| `make aws-arm64-test` | canonical AWS ARM64 测试入口 |
+| `make aws-x86-test` | canonical AWS x86 测试入口 |
+| `make __kernel` | 内部 x86 kernel 构建 helper；不属于公开控制面 |
 
 #### 快速验证（无需 VM）
 
 | 命令 | 作用 |
 |------|------|
 | `python3 micro/driver.py --bench simple --runtime llvmbpf --samples 1 --warmups 0 --inner-repeat 10` | 本地 llvmbpf smoke test (simple, 1 iter, 10 repeat) |
-| `make -C runner daemon-tests` | 运行 daemon unit tests (`cargo test`) |
-| `make check` | 运行根入口定义的完整本地验证（构建 + Python tests + smoke） |
+| `python3 -m pytest -q tests/python` | 运行当前保留的静态 runner contract tests |
+| `make check` | 运行根入口定义的静态回归门禁（当前仅 Python contract tests） |
 
 #### VM 目标（需要 bzImage + vng）
 

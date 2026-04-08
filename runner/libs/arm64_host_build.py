@@ -5,17 +5,16 @@ import os
 import shutil
 import subprocess
 import sys
+from functools import partial
 from pathlib import Path
-from typing import NoReturn
 
 from runner.libs import ROOT_DIR
 from runner.libs.arm64_sysroot import Arm64SysrootConfig, ensure_sysroot
+from runner.libs.cli_support import fail, require_nonempty_dir as _require_nonempty_dir
 from runner.libs.portable_runtime import copy_arm64_runtime_bundle
 
-
-def _die(message: str) -> NoReturn:
-    print(f"[arm64-host-build][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+_die = partial(fail, "arm64-host-build")
+_require_nonempty_dir = partial(_require_nonempty_dir, tag="arm64-host-build")
 
 
 def _log(scope: str, message: str) -> None:
@@ -31,6 +30,13 @@ def _require_command(name: str) -> str:
     if not resolved:
         _die(f"missing required command: {name}")
     return resolved
+
+
+def _require_env(name: str) -> str:
+    value = _env(name)
+    if not value:
+        _die(f"{name} is required")
+    return value
 
 
 def _run(
@@ -92,15 +98,6 @@ def _git_path_is_clean(repo_root: Path, pathspec: str = "") -> bool:
     )
 
 
-def _require_nonempty_dir(path: Path, description: str) -> None:
-    if not path.is_dir():
-        _die(f"{description} is not a directory: {path}")
-    try:
-        next(path.iterdir())
-    except StopIteration:
-        _die(f"{description} is empty: {path}")
-
-
 def _snapshot_git_subtree(repo_root: Path, src_rel: str, dest: Path) -> None:
     if subprocess.run(["git", "-C", str(repo_root), "rev-parse", "--verify", "HEAD"], check=False).returncode != 0:
         _die(f"expected git checkout for promoted snapshot: {repo_root}")
@@ -138,12 +135,12 @@ def _snapshot_git_subtree(repo_root: Path, src_rel: str, dest: Path) -> None:
 
 
 def _ensure_arm64_sysroot_from_env() -> Path:
-    host_cache_root = Path(_env("ARM64_HOST_CACHE_ROOT", str(ROOT_DIR / ".cache/arm64-host")))
+    host_cache_root = ROOT_DIR / ".cache/arm64-host"
     config = Arm64SysrootConfig(
         sysroot_root=Path(_env("ARM64_SYSROOT_ROOT", str(host_cache_root / "sysroot"))),
         sysroot_lock_file=Path(_env("ARM64_SYSROOT_LOCK_FILE", str(host_cache_root / "sysroot.lock"))),
         remote_host=_env("ARM64_SYSROOT_REMOTE_HOST"),
-        remote_user=_env("ARM64_SYSROOT_REMOTE_USER", "ec2-user") or "ec2-user",
+        remote_user=_env("ARM64_SYSROOT_REMOTE_USER"),
         ssh_key_path=Path(_env("ARM64_SYSROOT_SSH_KEY_PATH")),
         ssh_port=int(_env("ARM64_SYSROOT_SSH_PORT", "22") or "22"),
     )
@@ -186,7 +183,7 @@ def _copy_optional_libs(lib_dir: Path, output_lib_dir: Path) -> None:
 
 
 def build_daemon_from_env() -> None:
-    host_cache_root = Path(_env("ARM64_HOST_CACHE_ROOT", str(ROOT_DIR / ".cache/arm64-host")))
+    host_cache_root = ROOT_DIR / ".cache/arm64-host"
     rust_target = _env("ARM64_HOST_DAEMON_RUST_TARGET", "aarch64-unknown-linux-gnu") or "aarch64-unknown-linux-gnu"
     cross_linker = _env("ARM64_HOST_CARGO_LINKER", f"{_env('CROSS_COMPILE_ARM64', 'aarch64-linux-gnu-')}gcc")
     target_dir = Path(_env("ARM64_HOST_DAEMON_TARGET_DIR", str(host_cache_root / "daemon-host-cross/target")))
@@ -229,7 +226,7 @@ def build_daemon_from_env() -> None:
 
 
 def build_runner_from_env() -> None:
-    host_cache_root = Path(_env("ARM64_HOST_CACHE_ROOT", str(ROOT_DIR / ".cache/arm64-host")))
+    host_cache_root = ROOT_DIR / ".cache/arm64-host"
     build_dir = Path(_env("ARM64_HOST_RUNNER_BUILD_DIR", str(host_cache_root / "runner-host-cross/build")))
     output_dir = Path(_env("ARM64_HOST_RUNNER_OUTPUT_DIR", str(host_cache_root / "runner-host-cross/output")))
     output_binary = Path(_env("ARM64_HOST_RUNNER_BINARY", str(output_dir / "micro_exec")))
@@ -298,7 +295,7 @@ def build_runner_from_env() -> None:
 
 
 def build_repo_tests_from_env() -> None:
-    host_cache_root = Path(_env("ARM64_HOST_CACHE_ROOT", str(ROOT_DIR / ".cache/arm64-host")))
+    host_cache_root = ROOT_DIR / ".cache/arm64-host"
     jobs = _env("ARM64_CROSSBUILD_JOBS", "4") or "4"
     test_mode = (_env("ARM64_TEST_MODE", "test") or "test").lower()
     artifacts_root = Path(_env("ARM64_TEST_ARTIFACTS_ROOT", str(host_cache_root / "test-artifacts")))
@@ -309,7 +306,7 @@ def build_repo_tests_from_env() -> None:
     llvm_suffix = _env("ARM64_UPSTREAM_SELFTEST_LLVM_SUFFIX", "")
     prebuilt_daemon = Path(_env("ARM64_TEST_PREBUILT_DAEMON_BINARY"))
     vmlinux_btf = _env("VMLINUX_BTF")
-    host_python = _env("ARM64_HOST_PYTHON_BIN", "python3") or "python3"
+    host_python = _require_env("ARM64_HOST_PYTHON_BIN")
     sysroot_root = _ensure_arm64_sysroot_from_env()
     usr_lib = sysroot_root / "usr/lib"
     usr_lib64 = sysroot_root / "usr/lib64"
@@ -434,7 +431,7 @@ def build_repo_tests_from_env() -> None:
 
 
 def build_scx_from_env() -> None:
-    host_cache_root = Path(_env("ARM64_HOST_CACHE_ROOT", str(ROOT_DIR / ".cache/arm64-host")))
+    host_cache_root = ROOT_DIR / ".cache/arm64-host"
     source_repo_root = Path(_env("ARM64_SCX_SOURCE_REPO_ROOT", str(ROOT_DIR / "runner/repos")))
     build_root = Path(_env("ARM64_SCX_BUILD_ROOT", str(host_cache_root / "scx-host-build")))
     promote_root = Path(_env("ARM64_SCX_PROMOTE_ROOT", str(host_cache_root / "binaries")))
@@ -445,11 +442,9 @@ def build_scx_from_env() -> None:
     preferred_suffix = _env("ARM64_CROSSBUILD_LLVM_SUFFIX", "20")
     readelf_bin = _env("ARM64_CROSSBUILD_READELF", "aarch64-linux-gnu-readelf")
     rustfmt_bin = _env("ARM64_CROSSBUILD_RUSTFMT", "rustfmt")
-    host_python = _env("ARM64_HOST_PYTHON_BIN", "python3") or "python3"
+    host_python = _require_env("ARM64_HOST_PYTHON_BIN")
     sysroot_root = _ensure_arm64_sysroot_from_env()
-    usr_lib = sysroot_root / "usr/lib"
     usr_lib64 = sysroot_root / "usr/lib64"
-    lib = sysroot_root / "lib"
     lib64 = sysroot_root / "lib64"
     pkgconfig_dir = usr_lib64 / "pkgconfig"
     scx_build_repo_root = build_root / "runner/repos"
@@ -619,7 +614,7 @@ def _stage_arm64_portable_binary(
 
 
 def build_workload_tools_from_env() -> None:
-    host_cache_root = Path(_env("ARM64_HOST_CACHE_ROOT", str(ROOT_DIR / ".cache/arm64-host")))
+    host_cache_root = ROOT_DIR / ".cache/arm64-host"
     source_cache_root = Path(_env("ARM64_WORKLOAD_TOOLS_SOURCE_ROOT", str(host_cache_root / "workload-tool-sources")))
     build_root = Path(_env("ARM64_WORKLOAD_TOOLS_BUILD_ROOT", str(host_cache_root / "workload-tools-host")))
     output_root = Path(_env("ARM64_WORKLOAD_TOOLS_OUTPUT_ROOT", str(host_cache_root / "workload-tools-output")))
@@ -629,16 +624,13 @@ def build_workload_tools_from_env() -> None:
     host_cc = _env("ARM64_WORKLOAD_TOOLS_HOST_CC", "gcc")
     strip_bin = _env("ARM64_WORKLOAD_TOOLS_STRIP", f"{toolchain_prefix}strip")
     readelf_bin = _env("ARM64_WORKLOAD_TOOLS_READELF", f"{toolchain_prefix}readelf")
-    host_python = _env("ARM64_HOST_PYTHON_BIN", "python3") or "python3"
+    host_python = _require_env("ARM64_HOST_PYTHON_BIN")
 
     workload_root = build_root / "workload-tools"
     workload_src_root = workload_root / "src"
     toolchain_dir = workload_root / "toolchain/bin"
     cross_prefix = toolchain_dir / toolchain_prefix
-    usr_lib = sysroot_root / "usr/lib"
     usr_lib64 = sysroot_root / "usr/lib64"
-    lib = sysroot_root / "lib"
-    lib64 = sysroot_root / "lib64"
     pkgconfig_libdir = f"{usr_lib64 / 'pkgconfig'}:{sysroot_root / 'usr/share/pkgconfig'}"
     output_tool_root = output_root / "workload-tools"
     output_bin_dir = output_tool_root / "bin"

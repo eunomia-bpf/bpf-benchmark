@@ -9,17 +9,16 @@ import sys
 import tarfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from functools import partial
 from pathlib import Path
 from typing import cast
 
+from runner.libs.cli_support import fail
 from runner.libs.guest_prereqs import resolve_remote_workload_tool_bin, workload_tool_is_bundled
 from runner.libs.kinsn import load_kinsn_modules
 from runner.libs.run_contract import parse_manifest
 
-
-def _die(message: str) -> "NoReturn":
-    print(f"[suite-entrypoint][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+_die = partial(fail, "suite-entrypoint")
 
 def _parse_shell_argv(serialized: str) -> list[str]:
     text = serialized.strip()

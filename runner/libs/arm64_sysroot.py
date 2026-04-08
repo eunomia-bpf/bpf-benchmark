@@ -5,15 +5,14 @@ import fcntl
 import os
 import shutil
 import subprocess
-import sys
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
-from typing import NoReturn
 
+from runner.libs import ROOT_DIR
+from runner.libs.cli_support import fail
 
-def _die(message: str) -> NoReturn:
-    print(f"[arm64-sysroot][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+_die = partial(fail, "arm64-sysroot")
 
 
 def _env(name: str, default: str = "") -> str:
@@ -297,12 +296,12 @@ def ensure_sysroot(config: Arm64SysrootConfig) -> Path:
 
 
 def ensure_sysroot_from_env() -> Path:
-    host_cache_root = Path(_env("ARM64_HOST_CACHE_ROOT", ".cache/arm64-host"))
+    host_cache_root = ROOT_DIR / ".cache/arm64-host"
     config = Arm64SysrootConfig(
         sysroot_root=Path(_env("ARM64_SYSROOT_ROOT", str(host_cache_root / "sysroot"))),
         sysroot_lock_file=Path(_env("ARM64_SYSROOT_LOCK_FILE", str(host_cache_root / "sysroot.lock"))),
         remote_host=_env("ARM64_SYSROOT_REMOTE_HOST"),
-        remote_user=_env("ARM64_SYSROOT_REMOTE_USER", "ec2-user") or "ec2-user",
+        remote_user=_env("ARM64_SYSROOT_REMOTE_USER"),
         ssh_key_path=Path(_env("ARM64_SYSROOT_SSH_KEY_PATH")),
         ssh_port=int(_env("ARM64_SYSROOT_SSH_PORT", "22") or "22"),
     )

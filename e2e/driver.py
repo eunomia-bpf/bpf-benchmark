@@ -29,7 +29,6 @@ from runner.libs.run_artifacts import (  # noqa: E402
     ArtifactSession,
     current_process_identity,
     derive_run_type,
-    repo_relative_path,
 )
 from e2e.cases.bpftrace.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_BPFTRACE_OUTPUT_JSON,
@@ -49,7 +48,6 @@ from e2e.cases.tetragon.case import (  # noqa: E402
     DEFAULT_CONFIG as DEFAULT_TETRAGON_CONFIG,
     DEFAULT_OUTPUT_JSON as DEFAULT_TETRAGON_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_TETRAGON_OUTPUT_MD,
-    DEFAULT_SETUP_SCRIPT as DEFAULT_TETRAGON_SETUP_SCRIPT,
     build_markdown as build_tetragon_markdown,
     run_tetragon_case,
 )
@@ -58,7 +56,6 @@ from e2e.cases.bcc.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_BCC_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_BCC_OUTPUT_MD,
     DEFAULT_REPORT_MD as DEFAULT_BCC_REPORT_MD,
-    DEFAULT_SETUP_SCRIPT as DEFAULT_BCC_SETUP_SCRIPT,
     build_markdown as build_bcc_markdown,
     build_report as build_bcc_report,
     run_bcc_case,
@@ -67,7 +64,6 @@ from e2e.cases.tracee.case import (  # noqa: E402
     DEFAULT_CONFIG as DEFAULT_TRACEE_CONFIG,
     DEFAULT_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD,
-    DEFAULT_SETUP_SCRIPT as DEFAULT_TRACEE_SETUP_SCRIPT,
     build_markdown as build_tracee_markdown,
     run_tracee_case,
 )
@@ -100,7 +96,6 @@ class CaseSpec:
     build_markdown: Callable[[dict[str, object]], str]
     default_output_json: Path
     default_output_md: Path
-    default_setup_script: str | None = None
     build_report: Callable[[dict[str, object]], str] | None = None
     default_report_md: Path | None = None
     default_config: Path | None = None
@@ -112,7 +107,6 @@ CASE_SPECS: dict[str, CaseSpec] = {
         build_markdown=build_tracee_markdown,
         default_output_json=DEFAULT_OUTPUT_JSON,
         default_output_md=DEFAULT_OUTPUT_MD,
-        default_setup_script=str(DEFAULT_TRACEE_SETUP_SCRIPT),
         default_config=DEFAULT_TRACEE_CONFIG,
     ),
     "tetragon": CaseSpec(
@@ -120,7 +114,6 @@ CASE_SPECS: dict[str, CaseSpec] = {
         build_markdown=build_tetragon_markdown,
         default_output_json=DEFAULT_TETRAGON_OUTPUT_JSON,
         default_output_md=DEFAULT_TETRAGON_OUTPUT_MD,
-        default_setup_script=str(DEFAULT_TETRAGON_SETUP_SCRIPT),
         default_config=DEFAULT_TETRAGON_CONFIG,
     ),
     "bpftrace": CaseSpec(
@@ -143,7 +136,6 @@ CASE_SPECS: dict[str, CaseSpec] = {
         build_report=build_bcc_report,
         default_output_json=DEFAULT_BCC_OUTPUT_JSON,
         default_output_md=DEFAULT_BCC_OUTPUT_MD,
-        default_setup_script=str(DEFAULT_BCC_SETUP_SCRIPT),
         default_report_md=DEFAULT_BCC_REPORT_MD,
         default_config=DEFAULT_BCC_CONFIG,
     ),
@@ -167,9 +159,7 @@ def _known_case_default_values(attribute: str) -> set[str]:
     values: set[str] = set()
     for spec in CASE_SPECS.values():
         value: object | None = None
-        if attribute == "setup_script":
-            value = spec.default_setup_script
-        elif attribute == "report_md":
+        if attribute == "report_md":
             value = spec.default_report_md
         elif attribute == "config":
             value = spec.default_config
@@ -224,8 +214,6 @@ def apply_case_defaults(args: argparse.Namespace) -> None:
         args.output_json = str(spec.default_output_json)
     if args.output_md == str(DEFAULT_OUTPUT_MD):
         args.output_md = str(spec.default_output_md)
-    if spec.default_setup_script is not None and _uses_known_case_default(args, "setup_script"):
-        args.setup_script = spec.default_setup_script
     if spec.default_report_md is not None and _uses_known_case_default(args, "report_md"):
         args.report_md = str(spec.default_report_md)
     if spec.default_config is not None and _uses_known_case_default(args, "config"):
@@ -516,7 +504,6 @@ def _run_single_case(
     """Run a single e2e case and persist its outputs progressively."""
     spec = CASE_SPECS[args.case]
     output_json = resolve_primary_output_json(args, spec)
-    output_md = Path(args.output_md).resolve()
     report_md_raw = getattr(args, "report_md", None)
     report_md = Path(report_md_raw).resolve() if report_md_raw else None
     run_type = derive_run_type(output_json, args.case)

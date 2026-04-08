@@ -761,13 +761,9 @@ def run_network_load(duration_s: int | float) -> WorkloadResult:
         if completed.returncode != 0:
             details = tail_text(completed.stderr or completed.stdout)
             raise RuntimeError(f"network wrk load failed: {details}")
-        requests_per_sec = None
         total_requests = None
         for line in completed.stdout.splitlines():
             line = line.strip()
-            req_match = re.search(r"Requests/sec:\s+([0-9.]+)", line)
-            if req_match:
-                requests_per_sec = float(req_match.group(1))
             total_match = re.search(r"([0-9]+)\s+requests in", line)
             if total_match:
                 total_requests = float(total_match.group(1))
@@ -828,6 +824,27 @@ def run_scheduler_load(duration_s: int | float) -> WorkloadResult:
     return _finish_result(completed_runs, elapsed, "\n".join(stdout_lines), "\n".join(stderr_lines))
 
 
+def run_mixed_workload(duration_s: float) -> WorkloadResult:
+    segments = (
+        (run_user_exec_loop, 0.25),
+        (run_file_open_load, 0.20),
+        (run_block_io_load, 0.20),
+        (run_tcp_connect_load, 0.20),
+        (run_bind_storm, 0.10),
+        (run_scheduler_load, 0.05),
+    )
+    remaining = max(1.0, float(duration_s))
+    results: list[WorkloadResult] = []
+    for index, (runner, share) in enumerate(segments, start=1):
+        if index == len(segments):
+            slice_seconds = max(1.0, remaining)
+        else:
+            slice_seconds = max(1.0, round(float(duration_s) * share))
+            remaining -= slice_seconds
+        results.append(runner(slice_seconds))
+    return _merge_workload_results(results)
+
+
 def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadResult:
     seconds = max(1, int(round(float(duration_s))))
     kind = str(workload_kind or "").strip()
@@ -863,7 +880,7 @@ def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadR
         elapsed = time.monotonic() - start
         return _finish_result(ops_total, elapsed, "", "")
     if kind == "mixed_system":
-        return _run_mixed_workload(float(seconds))
+        return run_mixed_workload(float(seconds))
     if kind == "security_policy_mix":
         result = run_open_storm(seconds)
         return WorkloadResult(
@@ -874,7 +891,7 @@ def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadR
             stderr=result.stderr,
         )
     if kind == "system_telemetry_mix":
-        return _run_mixed_workload(float(seconds))
+        return run_mixed_workload(float(seconds))
     if kind == "oom_stress":
         stress_ng = which("stress-ng")
         if stress_ng is None:
@@ -955,4 +972,5 @@ __all__ = [
     "run_tracee_default_load",
     "run_vfs_create_write_fsync_load",
     "run_user_exec_loop",
+    "run_mixed_workload",
 ]

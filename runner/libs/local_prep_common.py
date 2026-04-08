@@ -3,21 +3,21 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
-import sys
+from functools import partial
 from pathlib import Path
-from typing import Callable, NoReturn
+from typing import Callable
 
 from runner.libs import ROOT_DIR
+from runner.libs.cli_support import fail, require_nonempty_dir as _require_nonempty_dir, require_path as _require_path
 from runner.libs.state_file import write_state
 
 
-RUNNER_DIR = ROOT_DIR / "runner"
 SUPPORTED_BUNDLED_X86_TOOLS = {"wrk", "sysbench", "hackbench", "stress-ng", "fio", "bpftrace"}
 
 
-def die(message: str) -> NoReturn:
-    print(f"[local-prep][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+die = partial(fail, "local-prep")
+require_path = partial(_require_path, tag="local-prep")
+require_nonempty_dir = partial(_require_nonempty_dir, tag="local-prep")
 
 
 def csv_tokens(value: str) -> list[str]:
@@ -31,18 +31,6 @@ def csv_append_unique(csv: str, token: str) -> str:
     if token in tokens:
         return csv
     return token if not csv else f"{csv},{token}"
-
-
-def require_path(path: Path, description: str) -> None:
-    if not path.exists():
-        die(f"{description} not found: {path}")
-
-
-def require_nonempty_dir(path: Path, description: str) -> None:
-    if not path.is_dir():
-        die(f"{description} is not a directory: {path}")
-    if not any(path.iterdir()):
-        die(f"{description} is empty: {path}")
 
 
 def require_file_contains(path: Path, needle: str, description: str) -> None:
@@ -79,12 +67,6 @@ def run_local_prep_phases(*, phases: list[str], phase_handlers: dict[str, Callab
         handler()
 
 
-def make_runner(*targets: str, env: dict[str, str], **extra_env: str) -> None:
-    run_env = dict(env)
-    run_env.update(extra_env)
-    run_command(["make", "-C", str(RUNNER_DIR), *targets], env=run_env)
-
-
 def x86_bundle_inputs(
     *,
     promote_root: Path,
@@ -107,6 +89,41 @@ def x86_bundle_inputs(
     if portable_libbpf_root is not None and (portable_libbpf_root / "lib").is_dir():
         values["X86_PORTABLE_LIBBPF_ROOT"] = str(portable_libbpf_root)
     return values
+
+
+def _jobs_from_env(env: dict[str, str]) -> str:
+    explicit = env.get("JOBS", "").strip()
+    if explicit:
+        return explicit
+    return str(max(os.cpu_count() or 1, 1))
+
+
+def _resolve_llvm_cmake_dir(env: dict[str, str]) -> str:
+    explicit = env.get("LLVM_DIR", "").strip()
+    if explicit:
+        return explicit
+    llvm_config = env.get("LLVM_CONFIG", "").strip()
+    if not llvm_config:
+        llvm_config = shutil.which("llvm-config") or ""
+    if llvm_config:
+        completed = subprocess.run(
+            [llvm_config, "--cmakedir"],
+            check=False,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if completed.returncode == 0:
+            cmake_dir = completed.stdout.strip()
+            if cmake_dir:
+                return cmake_dir
+    cache_path = ROOT_DIR / "vendor" / "llvmbpf" / "build" / "CMakeCache.txt"
+    if cache_path.is_file():
+        for line in cache_path.read_text(encoding="utf-8").splitlines():
+            prefix = "LLVM_DIR:PATH="
+            if line.startswith(prefix):
+                return line.removeprefix(prefix).strip()
+    return ""
 
 
 def finalize_staged_bundle(
@@ -160,14 +177,81 @@ def stage_matching_micro_sidecars(output_dir: Path, source_dir: Path) -> None:
 
 
 def build_x86_runner_binary(*, build_dir: Path, env: dict[str, str]) -> Path:
-    make_runner("micro_exec", env=env, BUILD_DIR=str(build_dir))
+    jobs = _jobs_from_env(env)
+    libbpf_build_dir = build_dir / "vendor" / "libbpf"
+    libbpf_objdir = libbpf_build_dir / "obj"
+    libbpf_prefix = libbpf_build_dir / "prefix"
+    libbpf_a = libbpf_objdir / "libbpf.a"
+    llvmbpf_setting = env.get("MICRO_EXEC_ENABLE_LLVMBPF", "ON").strip() or "ON"
+    libbpf_objdir.mkdir(parents=True, exist_ok=True)
+    (libbpf_prefix / "include").mkdir(parents=True, exist_ok=True)
+    run_command(
+        [
+            "make",
+            "-C",
+            str(ROOT_DIR / "vendor" / "libbpf" / "src"),
+            f"-j{jobs}",
+            "BUILD_STATIC_ONLY=1",
+            f"OBJDIR={libbpf_objdir}",
+            "DESTDIR=",
+            f"PREFIX={libbpf_prefix}",
+            str(libbpf_a),
+            "install_headers",
+        ],
+        env=env,
+    )
+    cmake_command = [
+        "cmake",
+        "-S",
+        str(ROOT_DIR / "runner"),
+        "-B",
+        str(build_dir),
+        "-DCMAKE_BUILD_TYPE=Release",
+        f"-DMICRO_REPO_ROOT={ROOT_DIR}",
+        f"-DMICRO_LIBBPF_PREFIX={libbpf_prefix}",
+        f"-DMICRO_LIBBPF_LIBRARY={libbpf_a}",
+        f"-DMICRO_EXEC_ENABLE_LLVMBPF={llvmbpf_setting}",
+    ]
+    llvm_dir = _resolve_llvm_cmake_dir(env)
+    if llvm_dir:
+        cmake_command.append(f"-DLLVM_DIR={llvm_dir}")
+    micro_llvmbpf_library = env.get("MICRO_LLVMBPF_LIBRARY", "").strip()
+    if micro_llvmbpf_library:
+        cmake_command.append(f"-DMICRO_LLVMBPF_LIBRARY={micro_llvmbpf_library}")
+    micro_llvmbpf_build_cache = env.get("MICRO_LLVMBPF_BUILD_CACHE", "").strip()
+    if micro_llvmbpf_build_cache:
+        cmake_command.append(f"-DMICRO_LLVMBPF_BUILD_CACHE={micro_llvmbpf_build_cache}")
+    run_command(cmake_command, env=env)
+    run_command(
+        [
+            "cmake",
+            "--build",
+            str(build_dir),
+            "--target",
+            "micro_exec",
+            "-j",
+            jobs,
+        ],
+        env=env,
+    )
     binary = build_dir / "micro_exec"
     require_file_contains(binary, "x86-64", "x86 runner binary")
     return binary
 
 
 def build_x86_daemon_binary(*, daemon_target_dir: Path, env: dict[str, str]) -> Path:
-    make_runner("daemon-binary", env=env, DAEMON_TARGET_DIR=str(daemon_target_dir))
+    run_command(
+        [
+            "cargo",
+            "build",
+            "--release",
+            "--target-dir",
+            str(daemon_target_dir),
+            "--manifest-path",
+            str(ROOT_DIR / "daemon" / "Cargo.toml"),
+        ],
+        env=env,
+    )
     binary = daemon_target_dir / "release" / "bpfrejit-daemon"
     require_file_contains(binary, "x86-64", "x86 daemon binary")
     return binary
@@ -181,18 +265,36 @@ def build_x86_repo_tests(
     test_mode: str,
 ) -> None:
     if test_mode in {"selftest", "test"}:
-        make_runner(
-            "unittest-build",
-            "negative-build",
+        run_command(
+            [
+                "make",
+                "-C",
+                str(ROOT_DIR / "tests" / "unittest"),
+                f"BUILD_DIR={unittest_build_dir}",
+                "all",
+            ],
             env=env,
-            UNITTEST_BUILD_DIR=str(unittest_build_dir),
-            NEGATIVE_BUILD_DIR=str(negative_build_dir),
+        )
+        run_command(
+            [
+                "make",
+                "-C",
+                str(ROOT_DIR / "tests" / "negative"),
+                f"BUILD_DIR={negative_build_dir}",
+                "all",
+            ],
+            env=env,
         )
     elif test_mode == "negative":
-        make_runner(
-            "negative-build",
+        run_command(
+            [
+                "make",
+                "-C",
+                str(ROOT_DIR / "tests" / "negative"),
+                f"BUILD_DIR={negative_build_dir}",
+                "all",
+            ],
             env=env,
-            NEGATIVE_BUILD_DIR=str(negative_build_dir),
         )
     else:
         die(f"unsupported x86 test mode: {test_mode}")
@@ -208,21 +310,36 @@ def build_x86_upstream_selftests(
     env: dict[str, str],
     llvm_suffix: str,
 ) -> None:
-    make_runner(
-        "upstream-selftests-build",
-        env=env,
-        PYTHON=host_python_bin,
-        VMLINUX_BTF=str(ROOT_DIR / "vendor/linux-framework/vmlinux"),
-        UPSTREAM_SELFTEST_OUTPUT_DIR=str(output_dir),
-        UPSTREAM_SELFTEST_HOST_PYTHON_BIN=host_python_bin,
-        UPSTREAM_SELFTEST_LLVM_SUFFIX=llvm_suffix,
+    run_command(
+        [host_python_bin, "-m", "runner.libs.build_upstream_selftests"],
+        env={
+            **env,
+            "VMLINUX_BTF": str(ROOT_DIR / "vendor/linux-framework" / "vmlinux"),
+            "UPSTREAM_SELFTEST_SOURCE_DIR": str(ROOT_DIR / "vendor/linux-framework" / "tools/testing/selftests/bpf"),
+            "UPSTREAM_SELFTEST_OUTPUT_DIR": str(output_dir),
+            "UPSTREAM_SELFTEST_HOST_PYTHON_BIN": host_python_bin,
+            "UPSTREAM_SELFTEST_LLVM_SUFFIX": llvm_suffix,
+            "UPSTREAM_SELFTEST_ARCH": "",
+            "UPSTREAM_SELFTEST_CROSS_COMPILE": "",
+            "UPSTREAM_SELFTEST_SYSROOT_ROOT": "",
+            "UPSTREAM_SELFTEST_PKGCONFIG_LIBDIR": "",
+        },
     )
     require_path(output_dir / "test_verifier", "x86 upstream test_verifier")
     require_path(output_dir / "test_progs", "x86 upstream test_progs")
 
 
 def build_micro_program_outputs(*, output_dir: Path, env: dict[str, str]) -> None:
-    make_runner("micro-programs", env=env, MICRO_PROGRAM_OUTPUT_DIR=str(output_dir))
+    run_command(
+        [
+            "make",
+            "-C",
+            str(ROOT_DIR / "micro"),
+            "programs",
+            f"PROGRAM_OUTPUT_DIR={output_dir}",
+        ],
+        env=env,
+    )
     stage_matching_micro_sidecars(output_dir, ROOT_DIR / "micro" / "generated-inputs")
     require_nonempty_dir(output_dir, "micro generated programs dir")
 
@@ -254,7 +371,7 @@ def build_scx_artifacts(
 ) -> None:
     if not package_csv:
         return
-    fetch_selected_repos(repo_root=repo_root, repo_csv="scx", host_python_bin=host_python_bin, env=env)
+    require_nonempty_dir(repo_root / "scx", "sealed scx source repo")
     args: list[str] = []
     for package in csv_tokens(package_csv):
         args.extend(["--package", package])
@@ -287,16 +404,8 @@ def build_native_repo_artifacts(
     if not repo_root.is_dir():
         die(f"repo root missing for native repo build: {repo_root}")
     args: list[str] = []
-    env_with_bundle = dict(env)
     for repo in csv_tokens(native_repo_csv):
         args.extend(["--repo", repo])
-    if "katran" in csv_tokens(native_repo_csv):
-        katran_bin = ROOT_DIR / "e2e/cases/katran/bin/katran_server_grpc"
-        katran_lib = ROOT_DIR / "e2e/cases/katran/lib"
-        require_path(katran_bin, "sealed Katran server source bundle")
-        require_nonempty_dir(katran_lib, "sealed Katran lib dir")
-        env_with_bundle["KATRAN_SERVER_BINARY"] = str(katran_bin)
-        env_with_bundle["KATRAN_SERVER_LIB_DIR"] = str(katran_lib)
     run_python_script(
         host_python_bin,
         "runner/scripts/build_corpus_native.py",
@@ -307,7 +416,7 @@ def build_native_repo_artifacts(
         "--build-root",
         str(promote_root / "corpus" / "build"),
         *args,
-        env=env_with_bundle,
+        env=env,
     )
 
 

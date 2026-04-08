@@ -1,17 +1,16 @@
 from __future__ import annotations
 import os
-import subprocess
 import shutil
+import subprocess
 import sys
+from functools import partial
 from pathlib import Path
 
+from runner.libs.cli_support import fail
 from runner.libs.prereq_contract import env_csv, python_import_name, required_commands, tool_packages
 from runner.libs.run_contract import parse_manifest
 
-
-def die(message: str) -> "NoReturn":
-    print(f"[guest-prereqs][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+die = partial(fail, "guest-prereqs")
 
 
 def resolve_workspace_contract_path(workspace: Path, path: str) -> Path:

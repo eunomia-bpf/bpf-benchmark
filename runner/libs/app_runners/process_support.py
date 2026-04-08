@@ -5,7 +5,7 @@ import subprocess
 import threading
 from collections import deque
 from pathlib import Path
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, tail_text
 from ..agent import find_bpf_programs, stop_agent, wait_healthy

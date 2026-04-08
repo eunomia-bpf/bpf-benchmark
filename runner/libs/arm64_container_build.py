@@ -2,20 +2,17 @@ from __future__ import annotations
 
 import argparse
 import os
-import pwd
-import grp
 import shutil
 import subprocess
 import sys
+from functools import partial
 from pathlib import Path
-from typing import NoReturn
 
 from runner.libs import ROOT_DIR
+from runner.libs.cli_support import fail, require_nonempty_dir as _require_nonempty_dir
 
-
-def _die(message: str) -> NoReturn:
-    print(f"[cross-arm64][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+_die = partial(fail, "cross-arm64")
+_require_nonempty_dir = partial(_require_nonempty_dir, tag="cross-arm64")
 
 
 def _log(message: str) -> None:
@@ -24,6 +21,13 @@ def _log(message: str) -> None:
 
 def _env(name: str, default: str = "") -> str:
     return os.environ.get(name, default).strip()
+
+
+def _require_env(name: str) -> str:
+    value = _env(name)
+    if not value:
+        _die(f"{name} is required")
+    return value
 
 
 def _require_command(name: str) -> str:
@@ -70,15 +74,6 @@ def _git_path_is_clean(repo_root: Path, pathspec: str = "") -> bool:
         subprocess.run(diff, check=False).returncode == 0
         and subprocess.run(cached, check=False).returncode == 0
     )
-
-
-def _require_nonempty_dir(path: Path, description: str) -> None:
-    if not path.is_dir():
-        _die(f"{description} is not a directory: {path}")
-    try:
-        next(path.iterdir())
-    except StopIteration:
-        _die(f"{description} is empty: {path}")
 
 
 def _snapshot_git_tree(repo_root: Path, dest: Path) -> None:
@@ -143,10 +138,11 @@ class Arm64ContainerBuild:
         self.katran_source_dir = self.katran_build_root / "src"
         self.katran_build_dir = self.katran_source_dir / "_build"
         self.katran_install_dir = self.katran_build_dir / "deps"
+        self.katran_getdeps_root = self.katran_build_root / "getdeps"
         self.toolchain_dir = self.build_root / "toolchain/bin"
         self.native_cargo_linker = _env("ARM64_NATIVE_CARGO_LINKER", "gcc") or "gcc"
         self.rustfmt_bin = _env("ARM64_CROSSBUILD_RUSTFMT", "rustfmt") or "rustfmt"
-        self.host_python = _env("ARM64_HOST_PYTHON_BIN", "python3") or "python3"
+        self.host_python = _require_env("ARM64_HOST_PYTHON_BIN")
         self.clang_bin = ""
         self.clangxx_bin = ""
         self.llc_bin = ""
@@ -317,44 +313,98 @@ class Arm64ContainerBuild:
         shutil.copytree(repo_dir, self.katran_source_dir, dirs_exist_ok=True)
 
     def prepare_local_katran_dependencies(self, src_dir: Path, build_dir: Path, install_dir: Path) -> None:
-        _log("Preparing local ARM64 Katran dependencies")
-        shim_dir = build_dir / "pkgshim"
+        _log("Preparing local ARM64 Katran dependencies via getdeps")
         build_dir.mkdir(parents=True, exist_ok=True)
         install_dir.mkdir(parents=True, exist_ok=True)
-        shim_dir.mkdir(parents=True, exist_ok=True)
-        shim_scripts = {
-            "yum": '#!/usr/bin/env bash\nset -euo pipefail\necho "[cross-arm64][katran] skipping upstream yum invocation: $*" >&2\nexit 0\n',
-            "yum-config-manager": '#!/usr/bin/env bash\nset -euo pipefail\necho "[cross-arm64][katran] skipping upstream yum-config-manager invocation: $*" >&2\nexit 0\n',
-            "sudo": '#!/usr/bin/env bash\nset -euo pipefail\nif [[ $# -eq 0 ]]; then\n    exit 0\nfi\nexec "$@"\n',
-        }
-        for name, content in shim_scripts.items():
-            path = shim_dir / name
-            path.write_text(content, encoding="utf-8")
-            path.chmod(0o755)
+        self.katran_getdeps_root.mkdir(parents=True, exist_ok=True)
         env = os.environ.copy()
         env.update(
             {
-                "PATH": f"{shim_dir}:{env.get('PATH', '')}",
                 "CC": self.clang_bin,
                 "CXX": self.clangxx_bin,
                 "LD": self.ld_lld_bin,
-                "CLANG": self.clang_bin,
-                "LLC": self.llc_bin,
-                "LLVM_CONFIG": self.llvm_config_bin,
-                "LLVM_OBJCOPY": self.llvm_objcopy_bin,
-                "LLVM_STRIP": self.llvm_strip_bin,
-                "INSTALL_DEPS_ONLY": "1",
-                "BUILD_EXAMPLE_GRPC": "1",
-                "NCPUS": self.jobs,
             }
         )
-        _run_passthrough(["bash", str(src_dir / "build_katran.sh"), "-p", str(build_dir), "-i", str(install_dir)], cwd=src_dir, env=env)
+        _run_passthrough(
+            [
+                self.host_python,
+                str(src_dir / "build/fbcode_builder/getdeps.py"),
+                "--scratch-path",
+                str(self.katran_getdeps_root),
+                "--num-jobs",
+                self.jobs,
+                "--allow-system-packages",
+                "--shared-libs",
+                "build",
+                "--no-tests",
+                "--only-deps",
+                "--current-project",
+                "katran",
+                "--src-dir",
+                str(src_dir),
+                "katran",
+            ],
+            cwd=src_dir,
+            env=env,
+        )
+
+    def katran_dependency_prefixes(self, src_dir: Path) -> list[str]:
+        completed = _run(
+            [
+                self.host_python,
+                str(src_dir / "build/fbcode_builder/getdeps.py"),
+                "--scratch-path",
+                str(self.katran_getdeps_root),
+                "--allow-system-packages",
+                "--shared-libs",
+                "query-paths",
+                "--recursive",
+                "--no-tests",
+                "--current-project",
+                "katran",
+                "--src-dir",
+                str(src_dir),
+                "katran",
+            ],
+            cwd=src_dir,
+        )
+        prefixes: list[str] = []
+        for raw_line in completed.stdout.splitlines():
+            line = raw_line.strip()
+            if not line or "_INSTALL=" not in line:
+                continue
+            name, value = line.split("_INSTALL=", 1)
+            if name == "katran":
+                continue
+            value = value.strip()
+            if value and value not in prefixes:
+                prefixes.append(value)
+        if not prefixes:
+            _die("failed to resolve Katran dependency install prefixes from getdeps")
+        return prefixes
 
     def build_katran_binary_with_wrapper(self, src_dir: Path, build_dir: Path, install_dir: Path) -> None:
         cmake_build_dir = build_dir / "build"
         cmake_build_dir.mkdir(parents=True, exist_ok=True)
+        dependency_prefixes = self.katran_dependency_prefixes(src_dir)
+        prefix_path = ":".join([*dependency_prefixes, str(install_dir)])
+        pkgconfig_paths: list[str] = []
+        for prefix in dependency_prefixes:
+            for suffix in ("lib/pkgconfig", "lib64/pkgconfig", "share/pkgconfig"):
+                candidate = Path(prefix) / suffix
+                if candidate.is_dir():
+                    pkgconfig_paths.append(str(candidate))
         env = os.environ.copy()
-        env.update({"CC": self.clang_bin, "CXX": self.clangxx_bin, "LD": self.ld_lld_bin})
+        env.update(
+            {
+                "CC": self.clang_bin,
+                "CXX": self.clangxx_bin,
+                "LD": self.ld_lld_bin,
+                "CMAKE_PREFIX_PATH": prefix_path,
+                "PKG_CONFIG_PATH": ":".join(pkgconfig_paths),
+                "GETDEPS_INSTALL_DIR": str(self.katran_getdeps_root / "installed"),
+            }
+        )
         _run_passthrough(
             [
                 "cmake",
@@ -363,7 +413,7 @@ class Arm64ContainerBuild:
                 f"-DCMAKE_C_COMPILER={self.clang_bin}",
                 f"-DCMAKE_CXX_COMPILER={self.clangxx_bin}",
                 f"-DCMAKE_LINKER={self.ld_lld_bin}",
-                f"-DCMAKE_PREFIX_PATH={install_dir}",
+                f"-DCMAKE_PREFIX_PATH={prefix_path}",
                 f"-DCMAKE_INSTALL_PREFIX={install_dir}",
                 "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
                 "-DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON",

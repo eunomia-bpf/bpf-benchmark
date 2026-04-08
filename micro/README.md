@@ -19,14 +19,10 @@
 
 ## Build
 
-```bash
-git submodule update --init --recursive
-make -C runner micro_exec
-make -C runner MICRO_PROGRAM_OUTPUT_DIR="$PWD/micro/programs" micro-programs
-```
-
-These runner-owned build targets produce `runner/build/micro_exec` plus the
-active benchmark `.bpf.o` objects under `micro/programs/`.
+Canonical preparation goes through the root `Makefile` (`make vm-micro`) and
+the Python local-prep pipeline. Direct `python3 micro/driver.py ...` execution
+assumes `runner/build/micro_exec` plus the staged `.bpf.o` inputs under
+`micro/programs/` already exist.
 
 ## Usage
 

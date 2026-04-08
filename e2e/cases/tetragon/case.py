@@ -7,7 +7,7 @@ import threading
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Mapping, Sequence
 
 import yaml
 
@@ -17,18 +17,13 @@ if __package__ in {None, ""}:
 from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
-    run_command,
-    run_json_command,
-    tail_text,
-    which,
 )
 from runner.libs.app_runners.tetragon import (  # noqa: E402
-    TetragonAgentSession,
     TetragonRunner,
     describe_agent_exit,
+    inspect_tetragon_setup,
     resolve_tetragon_binary,
     run_exec_storm_in_cgroup as runner_run_exec_storm_in_cgroup,
-    run_setup_script,
     run_tetragon_workload,
 )
 from runner.libs.bpf_stats import enable_bpf_stats, sample_bpf_stats  # noqa: E402
@@ -52,7 +47,6 @@ from runner.libs.case_common import (  # noqa: E402
 )
 
 
-DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
 DEFAULT_CONFIG = Path(__file__).with_name("config_execve_rate.yaml")
 DEFAULT_OUTPUT_JSON = RESULTS_DIR / "tetragon.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tetragon-real-e2e.md"
@@ -906,11 +900,11 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
     }
     tetragon_binary = resolve_tetragon_binary(getattr(args, "tetragon_binary", None), setup_result)
     if tetragon_binary is None:
-        setup_result = run_setup_script(Path(getattr(args, "setup_script", DEFAULT_SETUP_SCRIPT)).resolve())
+        setup_result = inspect_tetragon_setup()
 
     limitations: list[str] = []
     if setup_result["returncode"] != 0:
-        limitations.append("Setup script returned non-zero; only the real Tetragon binary path was attempted.")
+        limitations.append("Tetragon setup inspection failed before execution.")
 
     tetragon_binary = resolve_tetragon_binary(getattr(args, "tetragon_binary", None), setup_result)
     if tetragon_binary is None:

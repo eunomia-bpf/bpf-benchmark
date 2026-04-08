@@ -13,14 +13,13 @@ from .tracee_support import (
     TraceeAgentSession,
     TraceeOutputCollector,
     build_tracee_commands,
+    inspect_tracee_setup,
     resolve_tracee_binary,
-    run_setup_script,
     run_tracee_workload,
 )
 
 
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"
-DEFAULT_SETUP_SCRIPT = ROOT_DIR / "e2e" / "cases" / "tracee" / "setup.sh"
 DEFAULT_LOAD_TIMEOUT_S = 20
 DEFAULT_STARTUP_SETTLE_S = 5.0
 
@@ -45,7 +44,6 @@ class TraceeRunner(AppRunner):
         expected_program_names: Sequence[str] = (),
         load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
         startup_settle_s: float = DEFAULT_STARTUP_SETTLE_S,
-        setup_script: Path | str = DEFAULT_SETUP_SCRIPT,
         workload_spec: Mapping[str, object] | None = None,
     ) -> None:
         super().__init__()
@@ -55,7 +53,6 @@ class TraceeRunner(AppRunner):
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.load_timeout_s = int(load_timeout_s)
         self.startup_settle_s = float(startup_settle_s)
-        self.setup_script = Path(setup_script).resolve()
         self.session: Any | None = None
         self.setup_result: dict[str, object] = {"returncode": 0, "tracee_binary": None, "stdout_tail": "", "stderr_tail": ""}
         self.workload_spec: Mapping[str, object] = dict(workload_spec or {"kind": "exec_storm"})
@@ -82,7 +79,7 @@ class TraceeRunner(AppRunner):
     def _resolve_binary(self) -> str:
         resolved = resolve_tracee_binary(None if self.tracee_binary is None else str(self.tracee_binary), self.setup_result)
         if resolved is None:
-            self.setup_result = run_setup_script(self.setup_script)
+            self.setup_result = inspect_tracee_setup()
             if int(self.setup_result.get("returncode", 0) or 0) != 0:
                 details = str(self.setup_result.get("stderr_tail") or self.setup_result.get("stdout_tail") or self.setup_result)
                 raise RuntimeError(f"Tracee setup failed: {details}")
@@ -91,7 +88,7 @@ class TraceeRunner(AppRunner):
                 self.setup_result,
             )
         if resolved is None:
-            raise RuntimeError("Tracee binary not found; provide --tracee-binary or run the Tracee setup script")
+            raise RuntimeError("Tracee binary not found; provide --tracee-binary or prepare the repo-managed Tracee binary")
         return resolved
 
     def start(self) -> list[int]:
@@ -173,7 +170,7 @@ __all__ = [
     "TraceeOutputCollector",
     "TraceeRunner",
     "build_tracee_commands",
+    "inspect_tracee_setup",
     "resolve_tracee_binary",
-    "run_setup_script",
     "run_tracee_workload",
 ]

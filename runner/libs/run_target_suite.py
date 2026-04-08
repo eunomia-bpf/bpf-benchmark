@@ -7,19 +7,19 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from functools import partial
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
-from runner.libs import aws_executor
+from runner.libs import aws_common
+from runner.libs.cli_support import fail
 from runner.libs.run_contract import build_manifest, build_target_manifest, parse_manifest, write_manifest_file
 
 
 CACHE_DIR = ROOT_DIR / ".cache" / "runner-contracts"
 
 
-def _die(message: str) -> "NoReturn":
-    print(f"[run-target-suite][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+_die = partial(fail, "run-target-suite")
 
 
 def _run_checked(command: list[str]) -> None:
@@ -47,16 +47,16 @@ def _write_target_manifest(target_name: str, manifest_path: Path) -> None:
 
 
 def _cleanup_failed_dedicated_aws_prep(manifest_path: Path) -> None:
-    ctx = aws_executor._build_context("run", manifest_path, None)
+    ctx = aws_common._build_context("run", manifest_path, None)
     if ctx.instance_mode != "dedicated":
         return
     state: dict[str, str] = {}
     if ctx.state_file.is_file():
-        state = aws_executor._load_instance_state(ctx)
+        state = aws_common._load_instance_state(ctx)
     instance_id = state.get("STATE_INSTANCE_ID", "").strip()
     if instance_id:
         try:
-            aws_executor._terminate_instance(ctx, instance_id)
+            aws_common._terminate_instance(ctx, instance_id)
         except Exception:
             pass
     shutil.rmtree(ctx.run_state_dir, ignore_errors=True)

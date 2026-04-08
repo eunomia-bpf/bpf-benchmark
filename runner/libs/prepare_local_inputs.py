@@ -3,17 +3,16 @@ from __future__ import annotations
 import os
 import shlex
 import sys
+from functools import partial
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.aws_local_prep import run_local_prep as run_aws_local_prep
+from runner.libs.cli_support import fail
 from runner.libs.kvm_local_prep import run_local_prep as run_kvm_local_prep
 from runner.libs.run_contract import parse_manifest
 
-
-def _die(message: str) -> "NoReturn":
-    print(f"[prepare-local-inputs][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+_die = partial(fail, "prepare-local-inputs")
 
 
 def _csv_tokens(value: str) -> list[str]:

@@ -1,28 +1,26 @@
 # End-to-End
 
-`e2e/` is the deployment-layer benchmark harness. `make vm-e2e` is the canonical benchmark entrypoint, and `python3 e2e/driver.py <case>` is the direct driver entrypoint.
+`e2e/` is the deployment-layer benchmark harness. `make vm-e2e` and the AWS
+benchmark aliases are the canonical entrypoints; `python3 e2e/driver.py <case>`
+is a developer/debug entrypoint only.
 
 Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `bcc`, `scx`, and `katran`.
 
 ## Layout
 
 - `driver.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, `scx`, `bcc`, and `katran`
-- `cases/`: per-system case logic, setup scripts, configs, and assets
+- `cases/`: per-system case logic, configs, and assets
 - `../runner/libs/`: shared helpers for agent lifecycle, workload generation, metrics, VM runs, and REJIT
 - `results/`: timestamped run-artifact directories
 
 ## Shared Prerequisites
 
-```bash
-source /home/yunwei37/workspace/.venv/bin/activate
-make -C runner micro_exec
-make -C runner DAEMON_TARGET_DIR="$PWD/daemon/target" daemon-binary
-make -C runner REPOS="tracee tetragon scx" corpus-build-native
-```
-
 - Most cases require root or passwordless `sudo -n`.
 - `tracee`, `tetragon`, and `scx` consume objects from `corpus/build/`.
-- `e2e` expects the daemon CLI at `daemon/target/release/bpfrejit-daemon`; `make -C runner DAEMON_TARGET_DIR="$PWD/daemon/target" daemon-binary` builds it.
+- Canonical runs should go through the root `Makefile` aliases (`make vm-e2e`,
+  `make aws-x86-benchmark`, `make aws-arm64-benchmark`). Direct
+  `python3 e2e/driver.py ...` execution assumes the required runtime, daemon,
+  and `corpus/build` artifacts already exist at their canonical paths.
 
 Results live under `e2e/results/<run_type>_<timestamp>/`. `metadata.json` is the canonical run summary; `details/` contains `result.json`, `result.md`, optional `report.md`, and any retained per-case payloads.
 
@@ -30,20 +28,24 @@ Results live under `e2e/results/<run_type>_<timestamp>/`. `metadata.json` is the
 
 ### Tracee
 
-- Setup helper: `e2e/cases/tracee/setup.sh`
-- Auto-installs or downloads `tracee`, and tries to provision workload tools such as `stress-ng`, `fio`, `wrk`, and `hackbench`
+- Setup is Python-only and validates the bundled `tracee` binary plus required workload tools such as `stress-ng`, `fio`, `wrk`, and `hackbench`
 - Uses `e2e/cases/tracee/config.yaml` plus `corpus/build/tracee/tracee.bpf.o`
 - Supports `--vm` and `--kernel`
 - Smoke example: `python3 e2e/driver.py tracee --smoke`
 
 ### Tetragon
 
-- Setup helper: `e2e/cases/tetragon/setup.sh`
-- Tries to provision `stress-ng`, `fio`, `curl`, `tar`, then downloads a Tetragon release bundle when needed
+- Setup is Python-only and validates the bundled Tetragon binary, bundled `.bpf.o` assets, and required workload tools
 - Uses `corpus/build/tetragon/bpf_execve_event.bpf.o` and `corpus/build/tetragon/bpf_generic_kprobe.bpf.o`
 - Requires `bpftool` for attach/discovery paths
 - `--vm` is not supported in `e2e/driver.py`
 - Smoke example: `python3 e2e/driver.py tetragon --smoke`
+
+### BCC
+
+- Setup is Python-only and validates bundled repo-managed BCC libbpf-tools plus required workload tools
+- Uses `corpus/build/bcc/libbpf-tools/.output`
+- Smoke example: `python3 e2e/driver.py bcc --smoke`
 
 ### bpftrace
 

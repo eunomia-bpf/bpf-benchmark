@@ -75,19 +75,12 @@ PYTHON_STATIC_TESTS := \
 
 # Derived
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
-KERNEL_SYMVERS_PATH := $(KERNEL_DIR)/Module.symvers
 KERNEL_CONFIG_PATH := $(KERNEL_DIR)/.config
-KERNEL_CONFIG_STAMP := $(KERNEL_DIR)/.bpfrejit_config.stamp
-KERNEL_BUILD_STAMP := $(KERNEL_DIR)/.bpfrejit_kernel_build.stamp
-KERNEL_BUILD_LOCK := $(CACHE_DIR)/kernel-build.lock
 NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
 JOBS         ?= $(NPROC)
 DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_defconfig
-arm64_container_path = $(patsubst $(ROOT_DIR)%,/workspace%,$(1))
-
 # Results
 MICRO_RESULTS_DIR      := $(ROOT_DIR)/micro/results
-SMOKE_OUTPUT           := $(MICRO_RESULTS_DIR)/smoke.json
 
 # Python / venv
 _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
@@ -100,7 +93,6 @@ export FUZZ_ROUNDS SCX_PROG_SHOW_RACE_MODE SCX_PROG_SHOW_RACE_ITERATIONS SCX_PRO
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 
 # Benchmark args
-LOCAL_SMOKE_ARGS := --bench simple --samples 1 --warmups 0 --inner-repeat 10
 ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT := $(or $(findstring command line,$(origin SAMPLES)),$(findstring environment,$(origin SAMPLES)),$(findstring override,$(origin SAMPLES)))
 ROOT_VM_CORPUS_SAMPLES_VALUE := $(if $(strip $(ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT)),$(SAMPLES),$(VM_CORPUS_SAMPLES))
 ROOT_VM_CORPUS_SAMPLES_ARG := SAMPLES="$(ROOT_VM_CORPUS_SAMPLES_VALUE)"
@@ -108,40 +100,13 @@ ROOT_VM_CORPUS_FILTERS_ARG := $(if $(strip $(FILTERS)),FILTERS="$(FILTERS)",)
 ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG := $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),VM_CORPUS_WORKLOAD_SECONDS="$(VM_CORPUS_WORKLOAD_SECONDS)",)
 ROOT_VM_CORPUS_EXTRA_ARGS := $(if $(strip $(VM_CORPUS_ARGS)),VM_CORPUS_ARGS='$(VM_CORPUS_ARGS)',)
 
-VIRTME_HOSTFS_MODULES := \
-	drivers/block/null_blk/null_blk.ko \
-	drivers/net/veth.ko \
-	net/ipv4/ip_tunnel.ko \
-	net/ipv4/tunnel4.ko \
-	net/ipv4/ipip.ko \
-	net/sched/sch_netem.ko \
-	fs/netfs/netfs.ko \
-	net/9p/9pnet.ko \
-	net/9p/9pnet_virtio.ko \
-	fs/9p/9p.ko \
-	fs/fuse/virtiofs.ko \
-	fs/overlayfs/overlay.ko
-VIRTME_HOSTFS_MODULE_ORDER := \
-	drivers/block/null_blk/null_blk.o \
-	drivers/net/veth.o \
-	net/ipv4/ip_tunnel.o \
-	net/ipv4/tunnel4.o \
-	net/ipv4/ipip.o \
-	net/sched/sch_netem.o \
-	fs/netfs/netfs.o \
-	net/9p/9pnet.o \
-	net/9p/9pnet_virtio.o \
-	fs/9p/9p.o \
-	fs/fuse/virtiofs.o \
-	fs/overlayfs/overlay.o
-.PHONY: __kernel __kernel-build __kernel-clean __kernel-rebuild __kernel-arm64 __kinsn-modules __virtme-hostfs-modules \
+.PHONY: __kernel __kernel-clean __kernel-rebuild __kernel-arm64 __kinsn-modules \
 		check validate \
 		vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 		__arm64-worktree \
 		__kernel-arm64-aws \
 		aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
 		aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86 \
-		__kernel-config-locked __kernel-build-locked \
 	help clean
 
 # ── Help ───────────────────────────────────────────────────────────────────────
@@ -161,129 +126,38 @@ help:
 	@echo "        AWS benchmark mode 'all' fans out micro/corpus/e2e in parallel on dedicated remote instances"
 	@echo "Developer-only raw build helpers still exist internally but are intentionally omitted here."
 
-__kernel: __kernel-build
-	@test -f "$(BZIMAGE_PATH)"
+__kernel:
+	"$(PYTHON)" -m runner.libs.x86_kernel_artifacts ensure-kvm-kernel \
+		--kernel-dir "$(KERNEL_DIR)" \
+		--defconfig "$(DEFCONFIG_SRC)" \
+		--bzimage "$(BZIMAGE_PATH)" \
+		--jobs "$(JOBS)"
 
 __kernel-clean:
 	$(MAKE) -C "$(KERNEL_DIR)" clean
-	rm -f "$(KERNEL_CONFIG_STAMP)"
-	rm -f "$(KERNEL_BUILD_STAMP)"
 
 __kernel-rebuild: __kernel-clean
 	$(MAKE) __kernel BZIMAGE="$(BZIMAGE)"
 
-__kinsn-modules: __kernel-build
-	$(MAKE) -C "$(KINSN_MODULE_DIR)" KDIR="$(KERNEL_DIR)" clean
-	$(MAKE) -C "$(KINSN_MODULE_DIR)" KDIR="$(KERNEL_DIR)"
-	@if [ -n "$(KINSN_MODULE_OUTPUT_DIR)" ]; then \
-		rm -rf "$(KINSN_MODULE_OUTPUT_DIR)"; \
-		mkdir -p "$(KINSN_MODULE_OUTPUT_DIR)"; \
-		find "$(KINSN_MODULE_DIR)" -maxdepth 1 -type f -name '*.ko' -exec cp '{}' "$(KINSN_MODULE_OUTPUT_DIR)/" \;; \
-		count="$$(find "$(KINSN_MODULE_OUTPUT_DIR)" -maxdepth 1 -type f -name '*.ko' | wc -l | tr -d ' ')"; \
-		test "$$count" -gt 0 || { \
-			echo "no kinsn modules staged under $(KINSN_MODULE_OUTPUT_DIR)" >&2; \
-			exit 1; \
-		}; \
+__kinsn-modules: __kernel
+	@if [ -z "$(KINSN_MODULE_OUTPUT_DIR)" ]; then \
+		echo "KINSN_MODULE_OUTPUT_DIR is required" >&2; \
+		exit 1; \
 	fi
-
-__virtme-hostfs-modules: __kernel-build
-	@:
+	"$(PYTHON)" -m runner.libs.x86_kernel_artifacts stage-kinsn \
+		--kernel-dir "$(KERNEL_DIR)" \
+		--module-dir "$(KINSN_MODULE_DIR)" \
+		--output-dir "$(KINSN_MODULE_OUTPUT_DIR)"
 
 $(KERNEL_CONFIG_PATH):
 	cp "$(DEFCONFIG_SRC)" "$@"
 
-__kernel-config-locked:
-	@if ! diff -q "$(DEFCONFIG_SRC)" "$(KERNEL_CONFIG_PATH)" >/dev/null 2>&1; then \
-		cp "$(DEFCONFIG_SRC)" "$(KERNEL_CONFIG_PATH)"; \
-	fi
-	"$(KERNEL_DIR)/scripts/config" --file "$(KERNEL_CONFIG_PATH)" \
-		--enable UNWINDER_ORC \
-		--disable UNWINDER_FRAME_POINTER \
-		--set-str SYSTEM_TRUSTED_KEYS "" \
-		--set-str SYSTEM_REVOCATION_KEYS ""
-	$(MAKE) -C "$(KERNEL_DIR)" olddefconfig
-	touch "$(KERNEL_CONFIG_STAMP)"
-
-__kernel-build:
-	@mkdir -p "$(dir $(KERNEL_BUILD_LOCK))"
-	flock "$(KERNEL_BUILD_LOCK)" $(MAKE) __kernel-build-locked
-
-__kernel-build-locked:
-	$(MAKE) __kernel-config-locked
-	# Let kbuild decide what is stale. Skipping here can leave the guest
-	# booting an older bzImage while hostfs modules are rebuilt for the
-	# current tree, which breaks Katran's veth/ipip module loading path.
-	$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" bzImage modules_prepare
-	@if [ -f "$(KERNEL_DIR)/vmlinux.symvers" ]; then \
-		cp "$(KERNEL_DIR)/vmlinux.symvers" "$(KERNEL_SYMVERS_PATH)"; \
-		fi
-	@test -f "$(KERNEL_SYMVERS_PATH)"
-	@touch "$(KERNEL_SYMVERS_PATH)"
-	# Parallel sub-makes here occasionally race on generated kernel headers.
-	$(MAKE) -j1 -C "$(KERNEL_DIR)" $(VIRTME_HOSTFS_MODULES)
-	@for module in $(VIRTME_HOSTFS_MODULES); do \
-		test -f "$(KERNEL_DIR)/$$module" || { \
-			echo "missing built hostfs module: $(KERNEL_DIR)/$$module" >&2; \
-			exit 1; \
-		}; \
-	done
-	@printf '%s\n' $(VIRTME_HOSTFS_MODULE_ORDER) > "$(KERNEL_DIR)/modules.order"
-	@kernel_release="$$(cat "$(KERNEL_DIR)/include/config/kernel.release")"; \
-		test -n "$$kernel_release" || { \
-			echo "kernel release file is empty: $(KERNEL_DIR)/include/config/kernel.release" >&2; \
-			exit 1; \
-		}; \
-		stage_dir="$(KERNEL_DIR)/.virtme_mods"; \
-		modules_root="$$stage_dir/lib/modules/$$kernel_release"; \
-		fresh=1; \
-		test -f "$$modules_root/modules.dep" || fresh=0; \
-		if [ "$$fresh" -eq 1 ]; then \
-			for module in $(VIRTME_HOSTFS_MODULES); do \
-				installed_path="$$modules_root/kernel/$$module"; \
-				source_path="$(KERNEL_DIR)/$$module"; \
-				if [ ! -f "$$installed_path" ] || [ "$$installed_path" -ot "$$source_path" ]; then \
-					fresh=0; \
-					break; \
-				fi; \
-			done; \
-		fi; \
-		if [ "$$fresh" -eq 0 ]; then \
-			tmp_stage="$(KERNEL_DIR)/.virtme_mods.tmp"; \
-			prev_stage="$(KERNEL_DIR)/.virtme_mods.prev"; \
-			rm -rf "$$tmp_stage" "$$prev_stage"; \
-			mkdir -p "$$tmp_stage"; \
-			$(MAKE) -C "$(KERNEL_DIR)" INSTALL_MOD_PATH="$$tmp_stage" modules_install >/dev/null; \
-			rm -f "$$tmp_stage/lib/modules/$$kernel_release/build" \
-			      "$$tmp_stage/lib/modules/$$kernel_release/source"; \
-			for module in $(VIRTME_HOSTFS_MODULES); do \
-				installed_path="$$tmp_stage/lib/modules/$$kernel_release/kernel/$$module"; \
-				test -f "$$installed_path" || { \
-					echo "missing installed hostfs module: $$installed_path" >&2; \
-					exit 1; \
-				}; \
-			done; \
-			if [ -e "$$stage_dir" ]; then \
-				mv "$$stage_dir" "$$prev_stage"; \
-			fi; \
-			mv "$$tmp_stage" "$$stage_dir"; \
-			rm -rf "$$prev_stage"; \
-		fi
-	@touch "$(KERNEL_BUILD_STAMP)"
-
 check:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" \
-		MICRO_PROGRAM_OUTPUT_DIR="$(MICRO_DIR)/programs" \
-		micro_exec micro-programs
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" DAEMON_TARGET_DIR="$(DAEMON_DIR)/target" daemon-binary
-	$(MAKE) -C "$(RUNNER_DIR)" daemon-tests
 	$(PYTHON) -m pytest $(PYTHON_STATIC_TESTS) -v
-	mkdir -p "$(MICRO_RESULTS_DIR)"
-	$(VENV_ACTIVATE) "$(PYTHON)" "$(MICRO_DIR)/driver.py" --runtime llvmbpf $(LOCAL_SMOKE_ARGS) --output "$(SMOKE_OUTPUT)"
 
 validate:
 	$(MAKE) check
 	$(MAKE) vm-test
-	$(MAKE) vm-micro-smoke
 
 # ── VM (x86) ──────────────────────────────────────────────────────────────────
 vm-selftest:
@@ -380,7 +254,7 @@ aws-x86: aws-x86-test aws-x86-benchmark
 
 # ── Clean ──────────────────────────────────────────────────────────────────────
 clean:
-	$(MAKE) -C "$(RUNNER_DIR)" clean
+	rm -rf "$(RUNNER_DIR)/build"
 	$(MAKE) -C "$(MICRO_DIR)" clean
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	$(MAKE) -C "$(KERNEL_DIR)" clean

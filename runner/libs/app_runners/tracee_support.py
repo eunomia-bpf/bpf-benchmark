@@ -28,6 +28,7 @@ from ..workload import (
     run_tracee_default_load,
     run_user_exec_loop,
 )
+from .setup_support import missing_required_commands, pick_host_executable
 
 
 TRACEE_STATS_PATTERN = re.compile(
@@ -321,18 +322,54 @@ def _current_prog_ids() -> list[int]:
     return [int(record["id"]) for record in parsed if isinstance(record, dict) and "id" in record]
 
 
-def run_setup_script(setup_script: Path) -> dict[str, object]:
-    completed = run_command(["bash", str(setup_script)], check=False, timeout=1800)
-    tracee_binary = ""
-    for line in (completed.stdout or "").splitlines():
-        if line.startswith("TRACEE_BINARY="):
-            tracee_binary = line.split("=", 1)[1].strip()
-            break
+def inspect_tracee_setup() -> dict[str, object]:
+    corpus_binary = ROOT_DIR / "corpus" / "build" / "tracee" / "bin" / "tracee"
+    explicit_binary = os.environ.get("TRACEE_BINARY", "").strip() or None
+
+    required_tools = ["curl"]
+    requested_csv = os.environ.get("RUN_WORKLOAD_TOOLS_CSV", "").strip()
+    if requested_csv:
+        for tool in requested_csv.split(","):
+            normalized = str(tool).strip()
+            if normalized in {"curl", "fio", "hackbench", "stress-ng", "wrk"} and normalized not in required_tools:
+                required_tools.append(normalized)
+    else:
+        required_tools.extend(["stress-ng", "fio", "wrk", "hackbench"])
+
+    missing_tools = missing_required_commands(required_tools)
+    if missing_tools:
+        return {
+            "returncode": 1,
+            "tracee_binary": None,
+            "stdout_tail": "",
+            "stderr_tail": f"missing required Tracee workload tools: {' '.join(missing_tools)}",
+        }
+
+    tracee_binary = pick_host_executable(explicit_binary, corpus_binary)
+    if tracee_binary is None:
+        checked = [explicit_binary or "<unset>", str(corpus_binary)]
+        return {
+            "returncode": 1,
+            "tracee_binary": None,
+            "stdout_tail": "",
+            "stderr_tail": f"missing repo-managed Tracee binary; checked {', '.join(checked)}",
+        }
+
+    version_probe = run_command([str(tracee_binary), "--version"], check=False, timeout=30)
+    if version_probe.returncode != 0:
+        version_probe = run_command([str(tracee_binary), "version"], check=False, timeout=30)
+    if version_probe.returncode != 0:
+        return {
+            "returncode": version_probe.returncode,
+            "tracee_binary": str(tracee_binary),
+            "stdout_tail": tail_text(version_probe.stdout or "", max_lines=40, max_chars=8000),
+            "stderr_tail": tail_text(version_probe.stderr or "", max_lines=40, max_chars=8000),
+        }
     return {
-        "returncode": completed.returncode,
-        "tracee_binary": tracee_binary or None,
-        "stdout_tail": tail_text(completed.stdout or "", max_lines=40, max_chars=8000),
-        "stderr_tail": tail_text(completed.stderr or "", max_lines=40, max_chars=8000),
+        "returncode": 0,
+        "tracee_binary": str(tracee_binary),
+        "stdout_tail": f"TRACEE_BINARY={tracee_binary}",
+        "stderr_tail": "",
     }
 
 

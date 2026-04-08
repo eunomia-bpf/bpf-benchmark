@@ -4,15 +4,14 @@ import os
 import shutil
 import subprocess
 import sys
+from functools import partial
 from pathlib import Path
 
+from runner.libs.cli_support import fail
 from runner.libs.prereq_contract import required_commands, tool_packages
 from runner.libs.run_contract import parse_manifest
 
-
-def die(message: str) -> "NoReturn":
-    print(f"[aws-remote-prereqs][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+die = partial(fail, "aws-remote-prereqs")
 
 
 def log(message: str) -> None:

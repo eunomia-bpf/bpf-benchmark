@@ -3,14 +3,11 @@ from __future__ import annotations
 import argparse
 import os
 import subprocess
-import sys
+from functools import partial
 from pathlib import Path
-from typing import NoReturn
+from runner.libs.cli_support import fail
 
-
-def _die(message: str) -> NoReturn:
-    print(f"[arm64-kernel-config][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+_die = partial(fail, "arm64-kernel-config")
 
 
 def _run(command: list[str], *, input_text: str | None = None, env: dict[str, str] | None = None) -> None:
@@ -184,9 +181,9 @@ def generate_aws_config(worktree: Path, build_dir: Path, cross_compile: str, bas
     config_path.write_bytes(base_config.read_bytes())
     ena_mode = ""
     config_text = config_path.read_text(encoding="utf-8", errors="replace")
-    if "CONFIG_AMAZON_ENA_ETHERNET=y" in config_text:
+    if "CONFIG_ENA_ETHERNET=y" in config_text:
         ena_mode = "y"
-    elif "CONFIG_AMAZON_ENA_ETHERNET=m" in config_text:
+    elif "CONFIG_ENA_ETHERNET=m" in config_text:
         ena_mode = "m"
     apply_repo_required_config(worktree, config_path)
     _scripts_config(

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 from pathlib import Path
 
@@ -23,7 +24,6 @@ from runner.libs.local_prep_common import (
     die,
     finalize_staged_bundle,
     fetch_selected_repos,
-    make_runner,
     require_file_contains,
     require_nonempty_dir,
     require_path,
@@ -118,6 +118,13 @@ class AWSPrep:
         self.arm64_sysroot_remote_user = self.env.get("ARM64_SYSROOT_REMOTE_USER", "").strip()
         self.arm64_sysroot_ssh_key_path = self.env.get("ARM64_SYSROOT_SSH_KEY_PATH", "").strip()
         self.x86_setup_artifact_root = self.target_cache_dir / "setup-artifacts" / "x86"
+        self.docker_bin = "docker"
+        self.arm64_docker_platform = self.env.get("ARM64_DOCKER_PLATFORM", "linux/arm64").strip() or "linux/arm64"
+        self.arm64_crossbuild_dockerfile = (ROOT_DIR / "runner" / "docker" / "arm64-crossbuild.Dockerfile").resolve()
+        self.arm64_crossbuild_context = (ROOT_DIR / "runner" / "docker").resolve()
+        self.arm64_crossbuild_image = "bpf-benchmark-arm64-crossbuild:latest"
+        self.arm64_crossbuild_stamp = (ROOT_DIR / ".cache" / "arm64-crossbuild-image.stamp").resolve()
+        self.arm64_crossbuild_lock = (ROOT_DIR / ".cache" / "arm64-crossbuild-image.lock").resolve()
         self.remote_state: dict[str, str] = {}
         self.bundled_workload_tools_csv = ""
         self.local_workload_tool_root = ""
@@ -139,12 +146,11 @@ class AWSPrep:
                 "ACTION": "run",
                 "RUN_CONTRACT_PYTHON_BIN": self.host_python_bin,
                 "HOST_PYTHON_BIN": self.host_python_bin,
+                "ARM64_HOST_PYTHON_BIN": self.host_python_bin,
                 "TARGET_CACHE_DIR": str(self.target_cache_dir),
                 "RUN_PREP_ROOT": str(self.run_prep_root),
                 "ARTIFACT_DIR": str(self.artifact_dir),
                 "RESULTS_DIR": str(self.results_dir),
-                "LOCAL_PROMOTE_ROOT": str(self.promote_root),
-                "LOCAL_REPO_ROOT": str(self.local_repo_root),
                 "MICRO_PROGRAMS_GENERATED_DIR": str(self.micro_programs_generated_dir),
                 "X86_PORTABLE_LIBBPF_ROOT": str(self.x86_portable_libbpf_root),
                 "X86_RUNNER_BUILD_DIR": str(self.x86_runner_build_dir),
@@ -183,7 +189,6 @@ class AWSPrep:
                 "ARM64_KATRAN_SERVER_BINARY": str(self.arm64_katran_server_binary),
                 "ARM64_KATRAN_SERVER_LIB_DIR": str(self.arm64_katran_server_lib_dir),
                 "ARM64_WORKTREE_DIR": str(self.arm64_worktree_dir),
-                "ARM64_HOST_CACHE_ROOT": str(self.arm64_host_cache_root),
                 "ARM64_AWS_BUILD_DIR": str(self.arm64_aws_build_dir),
                 "ARM64_AWS_BASE_CONFIG": str(self.arm64_aws_base_config),
                 "ARM64_SETUP_ARTIFACT_ROOT": str(self.arm64_setup_artifact_root),
@@ -206,21 +211,109 @@ class AWSPrep:
             if not self.arm64_sysroot_ssh_key_path:
                 die("ARM64 sysroot source requires ARM64_SYSROOT_SSH_KEY_PATH")
             return
-        state_ip = self.remote_state.get("STATE_INSTANCE_IP", "").strip()
-        if not state_ip:
+        state_host = self.remote_state.get("STATE_SYSROOT_REMOTE_HOST", "").strip()
+        if not state_host:
             return
-        remote_user = self.env.get("RUN_REMOTE_USER", "").strip()
-        key_path = self.env.get("RUN_AWS_KEY_PATH", "").strip()
+        remote_user = self.remote_state.get("STATE_SYSROOT_REMOTE_USER", "").strip()
+        key_path = self.remote_state.get("STATE_SYSROOT_SSH_KEY_PATH", "").strip()
         if not remote_user:
-            die("ARM64 sysroot source requires RUN_REMOTE_USER")
+            die("ARM64 sysroot source requires STATE_SYSROOT_REMOTE_USER from remote prep")
         if not key_path:
-            die("ARM64 sysroot source requires RUN_AWS_KEY_PATH")
-        self.arm64_sysroot_remote_host = state_ip
+            die("ARM64 sysroot source requires STATE_SYSROOT_SSH_KEY_PATH from remote prep")
+        self.arm64_sysroot_remote_host = state_host
         self.arm64_sysroot_remote_user = remote_user
         self.arm64_sysroot_ssh_key_path = key_path
 
-    def _make_runner(self, *targets: str, **extra_env: str) -> None:
-        make_runner(*targets, env=self._env_with_paths(**extra_env))
+    def _run_host_python_module(self, module: str, mode: str, **extra_env: str) -> None:
+        run_command(
+            [self.host_python_bin, "-m", module, mode],
+            env=self._env_with_paths(**extra_env),
+        )
+
+    def _container_path(self, path: Path) -> str:
+        resolved = path.resolve()
+        try:
+            relative = resolved.relative_to(ROOT_DIR)
+        except ValueError as exc:
+            die(f"ARM64 container path must stay inside repo root: {resolved} ({exc})")
+        return str(Path("/workspace") / relative)
+
+    def _ensure_arm64_crossbuild_image(self) -> None:
+        if self.arm64_crossbuild_stamp.is_file() and self.arm64_crossbuild_stamp.stat().st_mtime >= self.arm64_crossbuild_dockerfile.stat().st_mtime:
+            return
+        self.arm64_crossbuild_stamp.parent.mkdir(parents=True, exist_ok=True)
+        run_command(
+            [
+                "flock",
+                str(self.arm64_crossbuild_lock),
+                self.docker_bin,
+                "buildx",
+                "build",
+                "--load",
+                "--platform",
+                self.arm64_docker_platform,
+                "-f",
+                str(self.arm64_crossbuild_dockerfile),
+                "-t",
+                self.arm64_crossbuild_image,
+                str(self.arm64_crossbuild_context),
+            ],
+            env=self._env_with_paths(),
+        )
+        self.arm64_crossbuild_stamp.touch()
+
+    def _run_arm64_container_build(
+        self,
+        *,
+        runtime_targets_csv: str = "",
+        llvmbpf_setting: str = "OFF",
+        bench_repos_csv: str = "",
+    ) -> None:
+        self._ensure_arm64_crossbuild_image()
+        run_command(
+            [
+                self.docker_bin,
+                "run",
+                "--rm",
+                "--platform",
+                self.arm64_docker_platform,
+                "-v",
+                f"{ROOT_DIR}:/workspace",
+                "-w",
+                "/workspace",
+                "-e",
+                "HOME=/tmp/codex",
+                "-e",
+                f"CARGO_HOME={self._container_path(self.arm64_crossbuild_cargo_home)}",
+                "-e",
+                f"HOST_UID={os.getuid()}",
+                "-e",
+                f"HOST_GID={os.getgid()}",
+                "-e",
+                f"ARM64_SOURCE_REPO_ROOT={self._container_path(self.local_repo_root)}",
+                "-e",
+                f"ARM64_CROSSBUILD_OUTPUT_DIR={self._container_path(self.arm64_crossbuild_output_dir)}",
+                "-e",
+                f"ARM64_CROSSBUILD_BUILD_ROOT={self._container_path(self.arm64_crossbuild_build_root)}",
+                "-e",
+                f"ARM64_CROSSBUILD_JOBS={self.env.get('ARM64_CROSSBUILD_JOBS', '4').strip() or '4'}",
+                "-e",
+                f"ARM64_CROSSBUILD_RUNTIME_TARGETS={runtime_targets_csv}",
+                "-e",
+                f"ARM64_CROSSBUILD_ENABLE_LLVMBPF={llvmbpf_setting}",
+                "-e",
+                f"ARM64_PREBUILT_DAEMON_BINARY={self._container_path(self.arm64_host_daemon_binary)}",
+                "-e",
+                f"ARM64_CROSSBUILD_BENCH_REPOS={bench_repos_csv}",
+                "-e",
+                f"ARM64_CROSSBUILD_ONLY_BENCH={'1' if bench_repos_csv else '0'}",
+                self.arm64_crossbuild_image,
+                "python3",
+                "-m",
+                "runner.libs.arm64_container_build",
+            ],
+            env=self._env_with_paths(),
+        )
 
     def prepare_runtime_artifacts(self) -> None:
         if self.target_arch == "x86_64":
@@ -235,9 +328,7 @@ class AWSPrep:
 
     def _prepare_arm64_runtime_artifacts(self) -> None:
         runtime_targets: list[str] = []
-        llvmbpf_setting = self.env.get("ARM64_CROSSBUILD_ENABLE_LLVMBPF", "OFF").strip() or "OFF"
-        if self.env.get("RUN_SUITE_NEEDS_LLVMBPF", "0").strip() == "1":
-            llvmbpf_setting = "ON"
+        llvmbpf_setting = "ON" if self.env.get("RUN_SUITE_NEEDS_LLVMBPF", "0").strip() == "1" else "OFF"
         if self.env.get("RUN_NEEDS_RUNNER_BINARY", "0").strip() == "1":
             runtime_targets.append("runner")
         if self.env.get("RUN_NEEDS_DAEMON_BINARY", "0").strip() == "1":
@@ -246,6 +337,7 @@ class AWSPrep:
             return
         runtime_targets_csv = ",".join(runtime_targets)
         use_host_runner_cross = llvmbpf_setting != "ON" and "runner" in runtime_targets
+        daemon_enabled = "daemon" in runtime_targets
         common_env = {
             "ARM64_SYSROOT_ROOT": str(self.arm64_sysroot_root),
             "ARM64_SYSROOT_LOCK_FILE": str(self.arm64_sysroot_lock_file),
@@ -254,8 +346,9 @@ class AWSPrep:
             "ARM64_SYSROOT_SSH_KEY_PATH": self.arm64_sysroot_ssh_key_path,
         }
         if runtime_targets == ["daemon"]:
-            self._make_runner(
-                "__arm64-daemon-host-cross",
+            self._run_host_python_module(
+                "runner.libs.arm64_host_build",
+                "daemon",
                 ARM64_HOST_DAEMON_TARGET_DIR=str(self.arm64_host_daemon_target_dir),
                 ARM64_HOST_DAEMON_OUTPUT_DIR=str(self.arm64_host_daemon_output_dir),
                 ARM64_HOST_DAEMON_BINARY=str(self.arm64_host_daemon_binary),
@@ -277,8 +370,9 @@ class AWSPrep:
             require_nonempty_dir(self.arm64_cross_lib_dir, "ARM64 runtime lib dir")
             return
         if use_host_runner_cross:
-            self._make_runner(
-                "__arm64-runner-host-cross",
+            self._run_host_python_module(
+                "runner.libs.arm64_host_build",
+                "runner",
                 ARM64_HOST_RUNNER_BUILD_DIR=str(self.arm64_host_runner_build_dir),
                 ARM64_HOST_RUNNER_OUTPUT_DIR=str(self.arm64_host_runner_output_dir),
                 ARM64_HOST_RUNNER_BINARY=str(self.arm64_host_runner_binary),
@@ -297,9 +391,10 @@ class AWSPrep:
                 ssh_key_path=self.arm64_sysroot_ssh_key_path,
             )
             require_file_contains(self.arm64_cross_runner_real, "ARM aarch64", "ARM64 runner binary")
-            if "daemon" in runtime_targets:
-                self._make_runner(
-                    "__arm64-daemon-host-cross",
+            if daemon_enabled:
+                self._run_host_python_module(
+                    "runner.libs.arm64_host_build",
+                    "daemon",
                     ARM64_HOST_DAEMON_TARGET_DIR=str(self.arm64_host_daemon_target_dir),
                     ARM64_HOST_DAEMON_OUTPUT_DIR=str(self.arm64_host_daemon_output_dir),
                     ARM64_HOST_DAEMON_BINARY=str(self.arm64_host_daemon_binary),
@@ -320,19 +415,19 @@ class AWSPrep:
                 require_file_contains(self.arm64_cross_daemon_real, "ARM aarch64", "ARM64 daemon binary")
             require_nonempty_dir(self.arm64_cross_lib_dir, "ARM64 runtime lib dir")
             return
-        self._make_runner(
-            "__cross-arm64",
-            ARM64_SOURCE_REPO_ROOT=str(self.local_repo_root),
-            ARM64_CROSSBUILD_OUTPUT_DIR=str(self.arm64_crossbuild_output_dir),
-            ARM64_CROSSBUILD_BUILD_ROOT=str(self.arm64_crossbuild_build_root),
-            ARM64_CROSSBUILD_CARGO_HOME=str(self.arm64_crossbuild_cargo_home),
-            ARM64_HOST_DAEMON_TARGET_DIR=str(self.arm64_host_daemon_target_dir),
-            ARM64_HOST_DAEMON_OUTPUT_DIR=str(self.arm64_host_daemon_output_dir),
-            ARM64_HOST_DAEMON_BINARY=str(self.arm64_host_daemon_binary),
-            ARM64_HOST_DAEMON_CARGO_HOME=str(self.arm64_host_daemon_cargo_home),
-            ARM64_CROSSBUILD_RUNTIME_TARGETS=runtime_targets_csv,
-            ARM64_CROSSBUILD_ENABLE_LLVMBPF=llvmbpf_setting,
-            **common_env,
+        if daemon_enabled:
+            self._run_host_python_module(
+                "runner.libs.arm64_host_build",
+                "daemon",
+                ARM64_HOST_DAEMON_TARGET_DIR=str(self.arm64_host_daemon_target_dir),
+                ARM64_HOST_DAEMON_OUTPUT_DIR=str(self.arm64_host_daemon_output_dir),
+                ARM64_HOST_DAEMON_BINARY=str(self.arm64_host_daemon_binary),
+                ARM64_HOST_DAEMON_CARGO_HOME=str(self.arm64_host_daemon_cargo_home),
+                **common_env,
+            )
+        self._run_arm64_container_build(
+            runtime_targets_csv=runtime_targets_csv,
+            llvmbpf_setting=llvmbpf_setting,
         )
         if "runner" in runtime_targets:
             require_file_contains(self.arm64_cross_runner_real, "ARM aarch64", "ARM64 runner binary")
@@ -361,15 +456,16 @@ class AWSPrep:
             return
         if self.target_arch != "arm64":
             die(f"unsupported AWS target arch for test artifact prep: {self.target_arch}")
-        self._make_runner(
-            "__arm64-test-artifacts",
-            PYTHON=self.host_python_bin,
+        self._run_host_python_module(
+            "runner.libs.arm64_host_build",
+            "repo-tests",
             VMLINUX_BTF=str(self.arm64_aws_build_dir / "vmlinux"),
             ARM64_TEST_MODE=self.env.get("RUN_TEST_MODE", "test").strip() or "test",
             ARM64_TEST_ARTIFACTS_ROOT=str(self.test_artifacts_root),
             ARM64_TEST_UNITTEST_BUILD_DIR=str(self.arm64_unittest_dir),
             ARM64_TEST_NEGATIVE_BUILD_DIR=str(self.arm64_negative_dir),
             ARM64_TEST_DAEMON_OUTPUT_DIR=str(self.test_artifacts_root / "daemon"),
+            ARM64_TEST_PREBUILT_DAEMON_BINARY=str(self.arm64_host_daemon_binary),
             ARM64_HOST_DAEMON_TARGET_DIR=str(self.arm64_host_daemon_target_dir),
             ARM64_HOST_DAEMON_OUTPUT_DIR=str(self.arm64_host_daemon_output_dir),
             ARM64_HOST_DAEMON_BINARY=str(self.arm64_host_daemon_binary),
@@ -385,8 +481,9 @@ class AWSPrep:
         if (self.env.get("RUN_TEST_MODE", "test").strip() or "test") != "negative":
             require_file_contains(self.arm64_unittest_dir / "rejit_kinsn", "ARM aarch64", "ARM64 unittest binary")
         require_file_contains(self.arm64_negative_dir / "adversarial_rejit", "ARM aarch64", "ARM64 negative binary")
-        require_file_contains(self.arm64_upstream_selftests_dir / "test_verifier", "ARM aarch64", "ARM64 upstream test_verifier")
-        require_file_contains(self.arm64_upstream_selftests_dir / "test_progs", "ARM aarch64", "ARM64 upstream test_progs")
+        if (self.env.get("RUN_TEST_MODE", "test").strip() or "test") == "test":
+            require_file_contains(self.arm64_upstream_selftests_dir / "test_verifier", "ARM aarch64", "ARM64 upstream test_verifier")
+            require_file_contains(self.arm64_upstream_selftests_dir / "test_progs", "ARM aarch64", "ARM64 upstream test_progs")
 
     def prepare_upstream_selftests(self) -> None:
         if self.target_arch == "x86_64":
@@ -436,14 +533,15 @@ class AWSPrep:
             return
         if self.target_arch != "arm64":
             die(f"unsupported AWS target arch for scx prep: {self.target_arch}")
-        fetch_selected_repos(repo_root=self.local_repo_root, repo_csv="scx", host_python_bin=self.host_python_bin, env=self._env_with_paths())
-        self._make_runner(
-            "__cross-arm64-scx",
-            ARM64_SOURCE_REPO_ROOT=str(self.local_repo_root),
-            ARM64_CROSSBUILD_OUTPUT_DIR=str(self.arm64_crossbuild_output_dir),
+        require_nonempty_dir(self.local_repo_root / "scx", "sealed scx source repo")
+        self._run_host_python_module(
+            "runner.libs.arm64_host_build",
+            "scx",
+            ARM64_SCX_SOURCE_REPO_ROOT=str(self.local_repo_root),
+            ARM64_SCX_PROMOTE_ROOT=str(self.arm64_crossbuild_output_dir),
             ARM64_HOST_SCX_BUILD_ROOT=str(self.arm64_host_scx_build_root),
             ARM64_HOST_SCX_CARGO_HOME=str(self.arm64_host_scx_cargo_home),
-            ARM64_CROSSBUILD_SCX_PACKAGES=package_csv,
+            ARM64_SCX_PACKAGES=package_csv,
             ARM64_SYSROOT_ROOT=str(self.arm64_sysroot_root),
             ARM64_SYSROOT_LOCK_FILE=str(self.arm64_sysroot_lock_file),
             ARM64_SYSROOT_REMOTE_HOST=self.arm64_sysroot_remote_host,
@@ -476,20 +574,7 @@ class AWSPrep:
             return
         if self.target_arch != "arm64":
             die(f"unsupported AWS target arch for native repo prep: {self.target_arch}")
-        fetch_selected_repos(
-            repo_root=self.local_repo_root,
-            repo_csv=self.env.get("RUN_FETCH_REPOS_CSV", "").strip(),
-            host_python_bin=self.host_python_bin,
-            env=self._env_with_paths(),
-        )
-        self._make_runner(
-            "__cross-arm64-bench",
-            ARM64_SOURCE_REPO_ROOT=str(self.local_repo_root),
-            ARM64_CROSSBUILD_OUTPUT_DIR=str(self.arm64_crossbuild_output_dir),
-            ARM64_CROSSBUILD_BUILD_ROOT=str(self.arm64_crossbuild_build_root),
-            ARM64_CROSSBUILD_CARGO_HOME=str(self.arm64_crossbuild_cargo_home),
-            ARM64_CROSSBUILD_BENCH_REPOS=native_repo_csv,
-        )
+        self._run_arm64_container_build(bench_repos_csv=native_repo_csv)
         for repo in csv_tokens(native_repo_csv):
             if repo == "bcc":
                 require_nonempty_dir(
@@ -534,9 +619,9 @@ class AWSPrep:
             self.bundled_workload_tools_csv = ""
             self.local_workload_tool_root = ""
             return
-        self._make_runner(
-            "__arm64-workload-tools-host-cross",
-            ARM64_WORKLOAD_TOOLS_SOURCE_ROOT=str(self.arm64_host_cache_root),
+        self._run_host_python_module(
+            "runner.libs.arm64_host_build",
+            "workload-tools",
             ARM64_WORKLOAD_TOOLS_BUILD_ROOT=str(self.run_prep_root / "arm64-workload-tools-host"),
             ARM64_WORKLOAD_TOOLS_OUTPUT_ROOT=str(self.arm64_crossbuild_output_dir),
             ARM64_WORKLOAD_TOOLS_LIST=bundled_csv,

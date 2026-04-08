@@ -12,16 +12,15 @@ from .base import AppRunner
 from .tetragon_support import (
     TetragonAgentSession,
     describe_agent_exit,
+    inspect_tetragon_setup,
     resolve_tetragon_binary,
     run_exec_storm_in_cgroup,
-    run_setup_script,
     run_tetragon_workload,
     write_tetragon_policies,
 )
 
 
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "tetragon" / "config_execve_rate.yaml"
-DEFAULT_SETUP_SCRIPT = ROOT_DIR / "e2e" / "cases" / "tetragon" / "setup.sh"
 DEFAULT_LOAD_TIMEOUT_S = 20
 
 
@@ -43,7 +42,6 @@ class TetragonRunner(AppRunner):
         tetragon_extra_args: Sequence[str] = (),
         expected_program_names: Sequence[str] = (),
         load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
-        setup_script: Path | str = DEFAULT_SETUP_SCRIPT,
         workload_spec: Mapping[str, object] | None = None,
     ) -> None:
         super().__init__()
@@ -51,7 +49,6 @@ class TetragonRunner(AppRunner):
         self.tetragon_extra_args = tuple(str(arg) for arg in (tetragon_extra_args or _default_extra_args()) if str(arg).strip())
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.load_timeout_s = int(load_timeout_s)
-        self.setup_script = Path(setup_script).resolve()
         self.setup_result: dict[str, object] | None = None
         self.tempdir: tempfile.TemporaryDirectory[str] | None = None
         self.policy_paths: list[Path] = []
@@ -85,7 +82,7 @@ class TetragonRunner(AppRunner):
 
     def _resolve_binary(self) -> str:
         if self.setup_result is None:
-            self.setup_result = run_setup_script(self.setup_script)
+            self.setup_result = inspect_tetragon_setup()
         if int(self.setup_result.get("returncode", 0) or 0) != 0:
             details = str(self.setup_result.get("stderr_tail") or self.setup_result.get("stdout_tail") or self.setup_result)
             raise RuntimeError(f"Tetragon setup failed: {details}")
@@ -94,7 +91,7 @@ class TetragonRunner(AppRunner):
             self.setup_result,
         )
         if resolved is None:
-            raise RuntimeError("Tetragon binary not found; provide --tetragon-binary or run the Tetragon setup script")
+            raise RuntimeError("Tetragon binary not found; provide --tetragon-binary or prepare the repo-managed Tetragon binary")
         return resolved
 
     def start(self) -> list[int]:
@@ -189,9 +186,9 @@ __all__ = [
     "TetragonAgentSession",
     "TetragonRunner",
     "describe_agent_exit",
+    "inspect_tetragon_setup",
     "resolve_tetragon_binary",
     "run_exec_storm_in_cgroup",
-    "run_setup_script",
     "run_tetragon_workload",
     "write_tetragon_policies",
 ]

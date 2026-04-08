@@ -39,7 +39,7 @@ bpf-benchmark/
 git submodule update --init --recursive
 source /home/yunwei37/workspace/.venv/bin/activate   # workspace venv (optional)
 
-# Local host-side validation
+# Local static validation
 make check
 
 # Full micro benchmark suite in VM
@@ -77,18 +77,18 @@ AWS targets require explicit local configuration for:
 
 Results are written to:
 - `micro/results/` — direct local smoke outputs from host-side micro driver runs
-- `.cache/kvm-staged/<run_token>/workspace/.cache/suite-results/<target>_<suite>_<timestamp>/` — staged local-KVM suite artifacts written inside the staged workspace by the shared suite runtime
+- `.cache/x86-kvm/runs/<run_token>/workspace/.cache/suite-results/<target>_<suite>_<timestamp>/` — staged local-KVM suite artifacts written inside the staged workspace by the shared suite runtime
 - `.cache/aws-arm64/results/<suite>_<token>_<timestamp>/` — fetched AWS ARM64 suite outputs
 - `.cache/aws-x86/results/<suite>_<token>_<timestamp>/` — fetched AWS x86 suite outputs
 - `docs/tmp/` — analysis reports (.md only, never JSON results)
 
 `make clean` preserves fetched AWS result directories under `.cache/aws-*/results/`.
 
-Most direct host-side build helpers now live under `runner/Makefile` or the
-component-local toolchain (`cargo`, subdir `Makefile`s). The root `Makefile`
-surface is primarily reserved for canonical run/validation entrypoints, plus a
-small kernel/module lifecycle surface that the canonical runners still depend
-on.
+The root `Makefile` surface is reserved for canonical run/validation entrypoints,
+plus a small developer helper surface for direct kernel/module lifecycle work.
+Active local prep/build now flows through the Python runner libraries; there is
+no second public runner `Makefile` control plane, and the remaining helper
+targets delegate to the same Python implementations.
 
 ## Layer Notes
 

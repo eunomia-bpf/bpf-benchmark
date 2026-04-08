@@ -4,13 +4,13 @@ import argparse
 import os
 import shutil
 import subprocess
-import sys
 from collections import deque
+from functools import partial
 from pathlib import Path
-from typing import NoReturn
 
-from runner.libs.arm64_sysroot import Arm64SysrootConfig, ensure_sysroot
 from runner.libs import ROOT_DIR
+from runner.libs.arm64_sysroot import Arm64SysrootConfig, ensure_sysroot
+from runner.libs.cli_support import fail
 
 
 _SKIP_ARM64_RUNTIME_LIBS = {
@@ -25,9 +25,7 @@ _SKIP_ARM64_RUNTIME_LIBS = {
 }
 
 
-def _die(message: str) -> NoReturn:
-    print(f"[portable-runtime][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+_die = partial(fail, "portable-runtime")
 
 
 def _run(command: list[str], *, env: dict[str, str] | None = None, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:

@@ -3,12 +3,11 @@ from __future__ import annotations
 import json
 import shlex
 import sys
+from functools import partial
 from pathlib import Path
+from runner.libs.cli_support import fail
 
-
-def _die(message: str) -> "NoReturn":
-    print(f"[state-file][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+_die = partial(fail, "state-file")
 
 
 def read_state(path: Path) -> dict[str, str]:

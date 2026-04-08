@@ -18,7 +18,6 @@ from pathlib import Path
 from typing import Callable, Mapping, Sequence
 
 from runner.libs import (
-    ROOT_DIR,
     resolve_bpftool_binary,
     run_command,
     run_json_command,
@@ -890,8 +889,8 @@ def aggregate_scan_site_totals(
     totals = zero_site_totals(fields)
     for record in records.values():
         counts = record.get("sites") or record.get("counts") or {}
-        for field in totals:
-            totals[field] += int(counts.get(field, 0) or 0)
+        for site_field in totals:
+            totals[site_field] += int(counts.get(site_field, 0) or 0)
     return totals
 
 

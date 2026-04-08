@@ -6,29 +6,17 @@ import stat
 import subprocess
 import sys
 import tarfile
+from functools import partial
 from pathlib import Path
-from typing import NoReturn
 
 from runner.libs import ROOT_DIR
+from runner.libs.cli_support import fail, require_nonempty_dir, require_path
 from runner.libs.run_contract import parse_manifest, render_shell_assignments_from_mapping
 from runner.libs.state_file import read_state
 
-
-def _die(message: str) -> NoReturn:
-    print(f"[build-remote-bundle][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
-
-
-def _require_path(path: Path, description: str) -> None:
-    if not path.exists():
-        _die(f"{description} not found: {path}")
-
-
-def _require_nonempty_dir(path: Path, description: str) -> None:
-    if not path.is_dir():
-        _die(f"{description} is not a directory: {path}")
-    if not any(path.iterdir()):
-        _die(f"{description} is empty: {path}")
+_die = partial(fail, "build-remote-bundle")
+_require_path = partial(require_path, tag="build-remote-bundle")
+_require_nonempty_dir = partial(require_nonempty_dir, tag="build-remote-bundle")
 
 
 def _parse_scalar_manifest(path: Path) -> dict[str, str]:
@@ -343,7 +331,6 @@ class BundleBuilder:
         for rel in (
             "runner/__init__.py",
             "runner/CMakeLists.txt",
-            "runner/Makefile",
             "runner/include",
             "runner/repos.yaml",
             "runner/libs",

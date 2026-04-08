@@ -15,13 +15,13 @@ from runner.libs.local_prep_common import (
     die,
     finalize_staged_bundle,
     fetch_selected_repos,
-    make_runner,
     run_local_prep_phases,
-    run_command,
     stage_x86_workload_tools,
     x86_bundle_inputs,
 )
+from runner.libs.portable_runtime import build_x86_portable_libbpf
 from runner.libs.state_file import merge_state, write_state
+from runner.libs.x86_kernel_artifacts import ensure_kvm_kernel_ready, stage_kinsn_modules
 
 
 class KVMPrep:
@@ -29,31 +29,38 @@ class KVMPrep:
         self.env = env
         self.manifest_path = manifest_path
         self.local_state_path = local_state_path
+        self.target_name = env.get("RUN_TARGET_NAME", "").strip() or "x86-kvm"
         self.run_token = env.get("RUN_TOKEN", "").strip()
         if not self.run_token:
             die("manifest RUN_TOKEN is empty for KVM local prep")
         self.host_python_bin = env.get("RUN_HOST_PYTHON_BIN", "").strip()
         if not self.host_python_bin:
             die("manifest host python is missing")
-        self.promote_root = ROOT_DIR / ".cache" / "kvm-staged" / self.run_token / "prep"
+        self.target_cache_dir = ROOT_DIR / ".cache" / self.target_name
+        self.run_prep_root = self.target_cache_dir / "runs" / self.run_token
+        self.promote_root = self.run_prep_root / "bundle-inputs"
         self.test_artifacts_root = self.promote_root / "test-artifacts"
-        self.bundle_inputs_path = ROOT_DIR / ".cache" / "kvm-staged" / self.run_token / "bundle-inputs.json"
-        self.stage_root = ROOT_DIR / ".cache" / "kvm-staged" / self.run_token / "workspace"
-        self.bundle_tar = ROOT_DIR / ".cache" / "kvm-staged" / f"{self.run_token}.tar.gz"
+        self.bundle_inputs_path = self.run_prep_root / "bundle-inputs.json"
+        self.stage_root = self.run_prep_root / "workspace"
+        self.bundle_tar = self.run_prep_root / "bundle.tar.gz"
         self.local_repo_root = self.promote_root / "runner" / "repos"
         self.micro_programs_generated_dir = self.promote_root / "micro" / "programs"
         self.bundled_workload_tools_csv = ""
         self.local_workload_tool_root = ""
 
     def init(self) -> None:
-        shutil.rmtree(self.promote_root, ignore_errors=True)
+        shutil.rmtree(self.run_prep_root, ignore_errors=True)
         self.promote_root.mkdir(parents=True, exist_ok=True)
 
-    def _make_runner(self, *targets: str, **extra_env: str) -> None:
-        make_runner(*targets, env=self.env, **extra_env)
-
     def ensure_kernel_image_ready(self) -> None:
-        self._make_runner("kernel-image")
+        kernel_image = self.env.get("RUN_VM_KERNEL_IMAGE", "").strip()
+        if not kernel_image:
+            die("manifest RUN_VM_KERNEL_IMAGE is empty for KVM local prep")
+        jobs = int((self.env.get("JOBS", "").strip() or "0") or 0) or None
+        ensure_kvm_kernel_ready(
+            jobs=jobs,
+            bzimage=(ROOT_DIR / kernel_image).resolve() if not kernel_image.startswith("/") else Path(kernel_image).resolve(),
+        )
 
     def prepare_runtime_artifacts(self) -> None:
         if self.env.get("RUN_NEEDS_RUNNER_BINARY", "0").strip() == "1":
@@ -62,10 +69,8 @@ class KVMPrep:
             build_x86_daemon_binary(daemon_target_dir=self.promote_root / "daemon" / "target", env=self.env)
 
     def prepare_kinsn_modules(self) -> None:
-        self._make_runner(
-            "kinsn-modules-build",
-            KINSN_MODULE_OUTPUT_DIR=str(self.test_artifacts_root / "kinsn-modules" / "x86"),
-        )
+        output_dir = self.test_artifacts_root / "kinsn-modules" / "x86"
+        stage_kinsn_modules(output_dir=output_dir)
 
     def prepare_test_outputs(self) -> None:
         build_x86_repo_tests(
@@ -124,6 +129,9 @@ class KVMPrep:
         self.bundled_workload_tools_csv = bundled_csv
         self.local_workload_tool_root = tool_root
 
+    def prepare_benchmark_extra(self) -> None:
+        build_x86_portable_libbpf(self.promote_root / "portable-libbpf")
+
     def _write_bundle_inputs(self) -> None:
         write_state(self.bundle_inputs_path, {})
         merge_state(
@@ -179,6 +187,7 @@ def run_local_prep(*, manifest_path: Path, local_state_path: Path, env: dict[str
         "fetch_repos": prep.prepare_fetch_repos,
         "scx": prep.prepare_scx_artifacts,
         "native": prep.prepare_native_repo_artifacts,
+        "benchmark_extra": prep.prepare_benchmark_extra,
         "workload_tools": prep.prepare_workload_tools,
     }
     run_local_prep_phases(phases=phases, phase_handlers=phase_handlers, executor_name="kvm")

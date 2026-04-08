@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import itertools
 import math
-import os
 import random
 import socket
 import statistics
@@ -12,10 +11,10 @@ import tempfile
 import threading
 import time
 import uuid
-from collections import Counter, deque
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Mapping, Sequence
 
 import yaml
 
@@ -25,17 +24,15 @@ if __package__ in {None, ""}:
 from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
-    resolve_bpftool_binary,
     run_command,
     tail_text,
-    which,
 )
 from runner.libs.app_runners.tracee import (  # noqa: E402
     TraceeOutputCollector,
     TraceeRunner,
     build_tracee_commands,
+    inspect_tracee_setup,
     resolve_tracee_binary,
-    run_setup_script,
     run_tracee_workload,
 )
 from runner.libs.bpf_stats import enable_bpf_stats, sample_bpf_stats  # noqa: E402
@@ -44,15 +41,6 @@ from runner.libs.metrics import (  # noqa: E402
     sample_cpu_usage,
     sample_total_cpu_usage,
     start_sampler_thread,
-)
-from runner.libs.workload import (  # noqa: E402
-    WorkloadResult,
-    run_connect_storm,
-    run_file_open_load,
-    run_network_load,
-    run_open_storm,
-    run_scheduler_load,
-    run_user_exec_loop,
 )
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
@@ -67,7 +55,6 @@ from runner.libs.case_common import (  # noqa: E402
 
 
 DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")
-DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
 DEFAULT_OUTPUT_JSON = RESULTS_DIR / "tracee.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tracee-e2e-real.md"
 CACHED_TRACEE_BINARY = ROOT_DIR / "e2e" / "cases" / "tracee" / "bin" / "tracee"
@@ -1259,7 +1246,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     }
     tracee_binary = resolve_tracee_binary(getattr(args, "tracee_binary", None), setup_result)
     if tracee_binary is None:
-        setup_result = run_setup_script(Path(getattr(args, "setup_script", DEFAULT_SETUP_SCRIPT)).resolve())
+        setup_result = inspect_tracee_setup()
         tracee_binary = resolve_tracee_binary(getattr(args, "tracee_binary", None), setup_result)
     elif tracee_binary is not None:
         setup_result["tracee_binary"] = tracee_binary
@@ -1267,7 +1254,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
 
     limitations: list[str] = []
     if setup_result["returncode"] != 0:
-        limitations.append("Setup script returned non-zero; only the real Tracee binary path was attempted.")
+        limitations.append("Tracee setup inspection failed before execution.")
     if tracee_binary is None:
         return error_payload(
             config=config,

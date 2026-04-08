@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Callable
 
 from runner.libs import ROOT_DIR
+from runner.libs.arm64_kernel_config import generate_aws_config
 from runner.libs.local_prep_common import die, require_nonempty_dir, require_path
 
 
@@ -369,59 +370,70 @@ def _build_x86_kinsn_modules_into_cache(paths: AwsKernelPaths, cache_dir: Path) 
     stage_module_binaries(paths.x86_kinsn_module_build_src, _x86_cached_kinsn_modules_dir(cache_dir))
 
 
-def build_x86_kernel_artifacts(paths: AwsKernelPaths) -> tuple[str, Path, Path]:
-    def _build() -> None:
-        nonlocal kernel_release, cache_dir
-        _prepare_x86_aws_config_locked(paths)
-        config_fingerprint = _x86_setup_config_fingerprint(paths)
-        _run_passthrough(["make", "-C", str(paths.kernel_dir), f"-j{os.cpu_count() or 1}", "bzImage", "modules_prepare"])
-        if (paths.kernel_dir / "vmlinux.symvers").is_file():
-            shutil.copy2(paths.kernel_dir / "vmlinux.symvers", paths.kernel_dir / "Module.symvers")
-        kernel_release = (paths.kernel_dir / "include/config/kernel.release").read_text(encoding="utf-8").strip()
-        if not kernel_release:
-            die("x86 kernel release is empty")
-        cache_dir = paths.x86_setup_artifact_root / kernel_release
-        if _x86_cached_setup_artifacts_ready(cache_dir, kernel_release, f"bzImage-{kernel_release}", config_fingerprint):
-            if _modules_tar_has_entry(cache_dir / f"modules-{kernel_release}.tar.gz", "modules.dep") and _x86_cached_kinsn_modules_ready(cache_dir, kernel_release):
-                _link_cached_setup_artifacts(paths, cache_dir, kernel_release, f"bzImage-{kernel_release}")
-                return
-            shutil.rmtree(cache_dir, ignore_errors=True)
-        _run_passthrough(["make", "-C", str(paths.kernel_dir), f"-j{os.cpu_count() or 1}", "modules"])
-        cached_stage = cache_dir / "modules-stage"
+def _build_x86_kernel_artifacts_locked(paths: AwsKernelPaths) -> tuple[str, Path, Path]:
+    _prepare_x86_aws_config_locked(paths)
+    config_fingerprint = _x86_setup_config_fingerprint(paths)
+    _run_passthrough(["make", "-C", str(paths.kernel_dir), f"-j{os.cpu_count() or 1}", "bzImage", "modules_prepare"])
+    if (paths.kernel_dir / "vmlinux.symvers").is_file():
+        shutil.copy2(paths.kernel_dir / "vmlinux.symvers", paths.kernel_dir / "Module.symvers")
+    kernel_release = (paths.kernel_dir / "include/config/kernel.release").read_text(encoding="utf-8").strip()
+    if not kernel_release:
+        die("x86 kernel release is empty")
+    cache_dir = paths.x86_setup_artifact_root / kernel_release
+    if _x86_cached_setup_artifacts_ready(cache_dir, kernel_release, f"bzImage-{kernel_release}", config_fingerprint):
+        if _modules_tar_has_entry(cache_dir / f"modules-{kernel_release}.tar.gz", "modules.dep") and _x86_cached_kinsn_modules_ready(cache_dir, kernel_release):
+            _link_cached_setup_artifacts(paths, cache_dir, kernel_release, f"bzImage-{kernel_release}")
+            return (
+                kernel_release,
+                (paths.artifact_dir / f"bzImage-{kernel_release}").resolve(),
+                (paths.artifact_dir / f"modules-{kernel_release}.tar.gz").resolve(),
+            )
         shutil.rmtree(cache_dir, ignore_errors=True)
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        cached_stage.mkdir(parents=True, exist_ok=True)
-        _run_passthrough(["make", "-C", str(paths.kernel_dir), f"INSTALL_MOD_PATH={cached_stage}", "modules_install"])
-        modules_root = cached_stage / f"lib/modules/{kernel_release}"
-        for link_name in ("build", "source"):
-            (modules_root / link_name).unlink(missing_ok=True)
-        require_path(modules_root / "kernel/drivers/nvme/host/nvme-core.ko", "x86 nvme-core module")
-        require_path(modules_root / "kernel/drivers/nvme/host/nvme.ko", "x86 nvme module")
-        require_path(modules_root / "kernel/fs/ext4/ext4.ko", "x86 ext4 module")
-        require_path(modules_root / "kernel/fs/xfs/xfs.ko", "x86 xfs module")
-        require_path(modules_root / "kernel/drivers/block/virtio_blk.ko", "x86 virtio_blk module")
-        shutil.copy2(paths.x86_vmlinux, cache_dir / f"vmlinux-{kernel_release}")
-        shutil.copy2(paths.x86_bzimage, cache_dir / f"bzImage-{kernel_release}")
-        with tarfile.open(cache_dir / f"modules-{kernel_release}.tar.gz", "w:gz") as handle:
-            handle.add(cached_stage / "lib/modules", arcname="lib/modules")
-        shutil.rmtree(cached_stage, ignore_errors=True)
-        if not _modules_tar_has_entry(cache_dir / f"modules-{kernel_release}.tar.gz", "modules.dep"):
-            die("generated x86 modules archive is invalid")
-        _build_x86_kinsn_modules_into_cache(paths, cache_dir)
-        if not _x86_cached_kinsn_modules_ready(cache_dir, kernel_release):
-            die("generated x86 kinsn module cache is invalid")
-        _x86_write_cached_setup_fingerprint(cache_dir, config_fingerprint)
-        _link_cached_setup_artifacts(paths, cache_dir, kernel_release, f"bzImage-{kernel_release}")
-
-    kernel_release = ""
-    cache_dir = Path()
-    paths.artifact_dir.mkdir(parents=True, exist_ok=True)
-    _with_lock(paths.x86_kernel_build_lock_file, _build)
+    _run_passthrough(["make", "-C", str(paths.kernel_dir), f"-j{os.cpu_count() or 1}", "modules"])
+    cached_stage = cache_dir / "modules-stage"
+    shutil.rmtree(cache_dir, ignore_errors=True)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cached_stage.mkdir(parents=True, exist_ok=True)
+    _run_passthrough(["make", "-C", str(paths.kernel_dir), f"INSTALL_MOD_PATH={cached_stage}", "modules_install"])
+    modules_root = cached_stage / f"lib/modules/{kernel_release}"
+    for link_name in ("build", "source"):
+        (modules_root / link_name).unlink(missing_ok=True)
+    require_path(modules_root / "kernel/drivers/nvme/host/nvme-core.ko", "x86 nvme-core module")
+    require_path(modules_root / "kernel/drivers/nvme/host/nvme.ko", "x86 nvme module")
+    require_path(modules_root / "kernel/fs/ext4/ext4.ko", "x86 ext4 module")
+    require_path(modules_root / "kernel/fs/xfs/xfs.ko", "x86 xfs module")
+    require_path(modules_root / "kernel/drivers/block/virtio_blk.ko", "x86 virtio_blk module")
+    shutil.copy2(paths.x86_vmlinux, cache_dir / f"vmlinux-{kernel_release}")
+    shutil.copy2(paths.x86_bzimage, cache_dir / f"bzImage-{kernel_release}")
+    with tarfile.open(cache_dir / f"modules-{kernel_release}.tar.gz", "w:gz") as handle:
+        handle.add(cached_stage / "lib/modules", arcname="lib/modules")
+    shutil.rmtree(cached_stage, ignore_errors=True)
+    if not _modules_tar_has_entry(cache_dir / f"modules-{kernel_release}.tar.gz", "modules.dep"):
+        die("generated x86 modules archive is invalid")
+    _build_x86_kinsn_modules_into_cache(paths, cache_dir)
+    if not _x86_cached_kinsn_modules_ready(cache_dir, kernel_release):
+        die("generated x86 kinsn module cache is invalid")
+    _x86_write_cached_setup_fingerprint(cache_dir, config_fingerprint)
+    _link_cached_setup_artifacts(paths, cache_dir, kernel_release, f"bzImage-{kernel_release}")
     return (
         kernel_release,
         (paths.artifact_dir / f"bzImage-{kernel_release}").resolve(),
         (paths.artifact_dir / f"modules-{kernel_release}.tar.gz").resolve(),
     )
+
+
+def build_x86_kernel_artifacts(paths: AwsKernelPaths) -> tuple[str, Path, Path]:
+    result: tuple[str, Path, Path] | None = None
+
+    def _build() -> None:
+        nonlocal result
+        result = _build_x86_kernel_artifacts_locked(paths)
+
+    paths.artifact_dir.mkdir(parents=True, exist_ok=True)
+    _with_lock(paths.x86_kernel_build_lock_file, _build)
+    if result is None:
+        die("x86 kernel artifact build returned no result")
+    return result
 
 
 def ensure_x86_kinsn_modules_ready(paths: AwsKernelPaths) -> None:
@@ -430,12 +442,12 @@ def ensure_x86_kinsn_modules_ready(paths: AwsKernelPaths) -> None:
         config_fingerprint = _x86_setup_config_fingerprint(paths)
         expected_release = (paths.kernel_dir / "include/config/kernel.release").read_text(encoding="utf-8").strip() if (paths.kernel_dir / "include/config/kernel.release").is_file() else ""
         if not expected_release:
-            build_x86_kernel_artifacts(paths)
+            _build_x86_kernel_artifacts_locked(paths)
             return
         cache_dir = paths.x86_setup_artifact_root / expected_release
         if not _x86_cached_setup_artifacts_ready(cache_dir, expected_release, f"bzImage-{expected_release}", config_fingerprint):
             shutil.rmtree(cache_dir, ignore_errors=True)
-            build_x86_kernel_artifacts(paths)
+            _build_x86_kernel_artifacts_locked(paths)
             return
         if not _x86_cached_kinsn_modules_ready(cache_dir, expected_release):
             shutil.rmtree(_x86_cached_kinsn_modules_dir(cache_dir), ignore_errors=True)
@@ -470,6 +482,7 @@ def refresh_aws_arm64_base_config(paths: AwsKernelPaths, *, remote_kernel_releas
 
 
 def _rebuild_arm64_kinsn_modules(paths: AwsKernelPaths) -> None:
+    _ensure_arm64_worktree(paths)
     _snapshot_kinsn_module_source_tree(paths, "module/arm64", paths.arm64_kinsn_module_build_src)
     _run_passthrough(
         [
@@ -503,6 +516,7 @@ def _build_arm64_kinsn_modules_into_cache(paths: AwsKernelPaths, cache_dir: Path
 
 def ensure_arm64_upstream_test_kmods_ready(paths: AwsKernelPaths, *, kernel_release: str) -> None:
     def _rebuild() -> None:
+        _ensure_arm64_worktree(paths)
         require_path(paths.arm64_upstream_test_kmods_source_dir, "ARM64 upstream selftest kmod source dir")
         shutil.rmtree(paths.arm64_upstream_test_kmods_dir, ignore_errors=True)
         paths.arm64_upstream_test_kmods_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -550,82 +564,118 @@ def ensure_arm64_upstream_test_kmods_ready(paths: AwsKernelPaths, *, kernel_rele
     _with_lock(paths.arm64_kernel_build_lock_file, _ensure)
 
 
-def build_arm64_kernel_artifacts(paths: AwsKernelPaths) -> tuple[str, Path, Path]:
-    def _build() -> None:
-        nonlocal kernel_release, cache_dir
-        for path in (
-            paths.arm64_aws_build_dir / ".config",
-            paths.arm64_aws_build_dir / "arch/arm64/boot/Image",
-            paths.arm64_aws_build_dir / "arch/arm64/boot/vmlinuz",
-            paths.arm64_aws_build_dir / "arch/arm64/boot/vmlinuz.efi",
-            paths.arm64_aws_build_dir / "arch/arm64/boot/vmlinuz.efi.elf",
-            paths.arm64_aws_build_dir / "vmlinux",
-        ):
-            path.unlink(missing_ok=True)
-        _run_passthrough(["make", "-C", str(paths.root_dir), "__kernel-arm64-aws"], env=os.environ | {"ARM64_AWS_BUILD_DIR": str(paths.arm64_aws_build_dir), "ARM64_AWS_BASE_CONFIG": str(paths.arm64_aws_base_config)})
-        kernel_release = (paths.arm64_aws_build_dir / "include/config/kernel.release").read_text(encoding="utf-8").strip()
-        if not kernel_release:
-            die("ARM64 kernel release is empty")
-        cache_dir = paths.arm64_setup_artifact_root / kernel_release
-        if _cached_setup_artifacts_ready(cache_dir, kernel_release, f"vmlinuz-{kernel_release}.efi"):
-            if _elf_has_btf(cache_dir / f"vmlinux-{kernel_release}") and _efi_binary_is_valid(cache_dir / f"vmlinuz-{kernel_release}.efi") and _modules_tar_has_entry(cache_dir / f"modules-{kernel_release}.tar.gz", "modules.dep"):
-                _link_cached_setup_artifacts(paths, cache_dir, kernel_release, f"vmlinuz-{kernel_release}.efi")
-                return
-        _run_passthrough(
-            [
-                "make",
-                "-C",
-                str(paths.arm64_worktree_dir),
-                f"O={paths.arm64_aws_build_dir}",
-                "ARCH=arm64",
-                f"CROSS_COMPILE={paths.cross_compile_prefix}",
-                "modules",
-                f"-j{os.cpu_count() or 1}",
-            ]
-        )
-        cached_stage = cache_dir / "modules-stage"
-        shutil.rmtree(cache_dir, ignore_errors=True)
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        cached_stage.mkdir(parents=True, exist_ok=True)
-        _run_passthrough(
-            [
-                "make",
-                "-C",
-                str(paths.arm64_worktree_dir),
-                f"O={paths.arm64_aws_build_dir}",
-                "ARCH=arm64",
-                f"CROSS_COMPILE={paths.cross_compile_prefix}",
-                f"INSTALL_MOD_PATH={cached_stage}",
-                "modules_install",
-            ]
-        )
-        modules_root = cached_stage / f"lib/modules/{kernel_release}"
-        for link_name in ("build", "source"):
-            (modules_root / link_name).unlink(missing_ok=True)
-        require_path(paths.arm64_aws_build_dir / "vmlinux", "ARM64 vmlinux")
-        require_path(paths.arm64_aws_build_dir / "arch/arm64/boot/vmlinuz.efi", "ARM64 EFI kernel image")
-        shutil.copy2(paths.arm64_aws_build_dir / "vmlinux", cache_dir / f"vmlinux-{kernel_release}")
-        shutil.copy2(paths.arm64_aws_build_dir / "arch/arm64/boot/vmlinuz.efi", cache_dir / f"vmlinuz-{kernel_release}.efi")
-        with tarfile.open(cache_dir / f"modules-{kernel_release}.tar.gz", "w:gz") as handle:
-            handle.add(cached_stage / "lib/modules", arcname="lib/modules")
-        shutil.rmtree(cached_stage, ignore_errors=True)
-        if not _elf_has_btf(cache_dir / f"vmlinux-{kernel_release}"):
-            die("generated ARM64 vmlinux is missing .BTF")
-        if not _efi_binary_is_valid(cache_dir / f"vmlinuz-{kernel_release}.efi"):
-            die("generated ARM64 EFI kernel image is invalid")
-        if not _modules_tar_has_entry(cache_dir / f"modules-{kernel_release}.tar.gz", "modules.dep"):
-            die("generated ARM64 modules archive is missing modules.dep")
-        _link_cached_setup_artifacts(paths, cache_dir, kernel_release, f"vmlinuz-{kernel_release}.efi")
-
-    kernel_release = ""
-    cache_dir = Path()
-    paths.artifact_dir.mkdir(parents=True, exist_ok=True)
-    _with_lock(paths.arm64_kernel_build_lock_file, _build)
+def _build_arm64_kernel_artifacts_locked(paths: AwsKernelPaths) -> tuple[str, Path, Path]:
+    _ensure_arm64_worktree(paths)
+    for path in (
+        paths.arm64_aws_build_dir / ".config",
+        paths.arm64_aws_build_dir / "arch/arm64/boot/Image",
+        paths.arm64_aws_build_dir / "arch/arm64/boot/vmlinuz",
+        paths.arm64_aws_build_dir / "arch/arm64/boot/vmlinuz.efi",
+        paths.arm64_aws_build_dir / "arch/arm64/boot/vmlinuz.efi.elf",
+        paths.arm64_aws_build_dir / "vmlinux",
+    ):
+        path.unlink(missing_ok=True)
+    generate_aws_config(paths.arm64_worktree_dir, paths.arm64_aws_build_dir, paths.cross_compile_prefix, paths.arm64_aws_base_config)
+    _run_passthrough(
+        [
+            "make",
+            "-C",
+            str(paths.arm64_worktree_dir),
+            f"O={paths.arm64_aws_build_dir}",
+            "ARCH=arm64",
+            f"CROSS_COMPILE={paths.cross_compile_prefix}",
+            "Image",
+            f"-j{os.cpu_count() or 1}",
+        ]
+    )
+    _run_passthrough(
+        [
+            "make",
+            "-C",
+            str(paths.arm64_worktree_dir),
+            f"O={paths.arm64_aws_build_dir}",
+            "ARCH=arm64",
+            f"CROSS_COMPILE={paths.cross_compile_prefix}",
+            "vmlinuz.efi",
+            f"-j{os.cpu_count() or 1}",
+        ]
+    )
+    kernel_release = (paths.arm64_aws_build_dir / "include/config/kernel.release").read_text(encoding="utf-8").strip()
+    if not kernel_release:
+        die("ARM64 kernel release is empty")
+    cache_dir = paths.arm64_setup_artifact_root / kernel_release
+    if _cached_setup_artifacts_ready(cache_dir, kernel_release, f"vmlinuz-{kernel_release}.efi"):
+        if _elf_has_btf(cache_dir / f"vmlinux-{kernel_release}") and _efi_binary_is_valid(cache_dir / f"vmlinuz-{kernel_release}.efi") and _modules_tar_has_entry(cache_dir / f"modules-{kernel_release}.tar.gz", "modules.dep"):
+            _link_cached_setup_artifacts(paths, cache_dir, kernel_release, f"vmlinuz-{kernel_release}.efi")
+            return (
+                kernel_release,
+                (paths.artifact_dir / f"vmlinuz-{kernel_release}.efi").resolve(),
+                (paths.artifact_dir / f"modules-{kernel_release}.tar.gz").resolve(),
+            )
+    _run_passthrough(
+        [
+            "make",
+            "-C",
+            str(paths.arm64_worktree_dir),
+            f"O={paths.arm64_aws_build_dir}",
+            "ARCH=arm64",
+            f"CROSS_COMPILE={paths.cross_compile_prefix}",
+            "modules",
+            f"-j{os.cpu_count() or 1}",
+        ]
+    )
+    cached_stage = cache_dir / "modules-stage"
+    shutil.rmtree(cache_dir, ignore_errors=True)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cached_stage.mkdir(parents=True, exist_ok=True)
+    _run_passthrough(
+        [
+            "make",
+            "-C",
+            str(paths.arm64_worktree_dir),
+            f"O={paths.arm64_aws_build_dir}",
+            "ARCH=arm64",
+            f"CROSS_COMPILE={paths.cross_compile_prefix}",
+            f"INSTALL_MOD_PATH={cached_stage}",
+            "modules_install",
+        ]
+    )
+    modules_root = cached_stage / f"lib/modules/{kernel_release}"
+    for link_name in ("build", "source"):
+        (modules_root / link_name).unlink(missing_ok=True)
+    require_path(paths.arm64_aws_build_dir / "vmlinux", "ARM64 vmlinux")
+    require_path(paths.arm64_aws_build_dir / "arch/arm64/boot/vmlinuz.efi", "ARM64 EFI kernel image")
+    shutil.copy2(paths.arm64_aws_build_dir / "vmlinux", cache_dir / f"vmlinux-{kernel_release}")
+    shutil.copy2(paths.arm64_aws_build_dir / "arch/arm64/boot/vmlinuz.efi", cache_dir / f"vmlinuz-{kernel_release}.efi")
+    with tarfile.open(cache_dir / f"modules-{kernel_release}.tar.gz", "w:gz") as handle:
+        handle.add(cached_stage / "lib/modules", arcname="lib/modules")
+    shutil.rmtree(cached_stage, ignore_errors=True)
+    if not _elf_has_btf(cache_dir / f"vmlinux-{kernel_release}"):
+        die("generated ARM64 vmlinux is missing .BTF")
+    if not _efi_binary_is_valid(cache_dir / f"vmlinuz-{kernel_release}.efi"):
+        die("generated ARM64 EFI kernel image is invalid")
+    if not _modules_tar_has_entry(cache_dir / f"modules-{kernel_release}.tar.gz", "modules.dep"):
+        die("generated ARM64 modules archive is missing modules.dep")
+    _link_cached_setup_artifacts(paths, cache_dir, kernel_release, f"vmlinuz-{kernel_release}.efi")
     return (
         kernel_release,
         (paths.artifact_dir / f"vmlinuz-{kernel_release}.efi").resolve(),
         (paths.artifact_dir / f"modules-{kernel_release}.tar.gz").resolve(),
     )
+
+
+def build_arm64_kernel_artifacts(paths: AwsKernelPaths) -> tuple[str, Path, Path]:
+    result: tuple[str, Path, Path] | None = None
+
+    def _build() -> None:
+        nonlocal result
+        result = _build_arm64_kernel_artifacts_locked(paths)
+
+    paths.artifact_dir.mkdir(parents=True, exist_ok=True)
+    _with_lock(paths.arm64_kernel_build_lock_file, _build)
+    if result is None:
+        die("ARM64 kernel artifact build returned no result")
+    return result
 
 
 def ensure_arm64_kinsn_modules_ready(paths: AwsKernelPaths, *, state_kernel_release: str) -> None:
@@ -636,12 +686,12 @@ def ensure_arm64_kinsn_modules_ready(paths: AwsKernelPaths, *, state_kernel_rele
         cache_dir = paths.arm64_setup_artifact_root / expected_release
         if not _cached_setup_artifacts_ready(cache_dir, expected_release, f"vmlinuz-{expected_release}.efi"):
             shutil.rmtree(cache_dir, ignore_errors=True)
-            build_arm64_kernel_artifacts(paths)
+            _build_arm64_kernel_artifacts_locked(paths)
         if paths.arm64_aws_base_config.is_file() and not _arm64_build_config_matches_aws_base(paths):
-            build_arm64_kernel_artifacts(paths)
+            _build_arm64_kernel_artifacts_locked(paths)
         current_build_release = (paths.arm64_aws_build_dir / "include/config/kernel.release").read_text(encoding="utf-8").strip() if (paths.arm64_aws_build_dir / "include/config/kernel.release").is_file() else ""
         if current_build_release != expected_release:
-            build_arm64_kernel_artifacts(paths)
+            _build_arm64_kernel_artifacts_locked(paths)
         if not _arm64_cached_kinsn_modules_ready(cache_dir, expected_release):
             shutil.rmtree(_arm64_cached_kinsn_modules_dir(cache_dir), ignore_errors=True)
             _build_arm64_kinsn_modules_into_cache(paths, cache_dir)
@@ -650,3 +700,35 @@ def ensure_arm64_kinsn_modules_ready(paths: AwsKernelPaths, *, state_kernel_rele
         stage_module_binaries(_arm64_cached_kinsn_modules_dir(cache_dir), paths.arm64_kinsn_module_stage_dir)
 
     _with_lock(paths.arm64_kernel_build_lock_file, _ensure)
+
+
+def _ensure_arm64_worktree(paths: AwsKernelPaths) -> None:
+    paths.arm64_worktree_dir.parent.mkdir(parents=True, exist_ok=True)
+    _run_passthrough(["git", "-C", str(paths.kernel_dir), "worktree", "prune"])
+    head = _run(["git", "-C", str(paths.kernel_dir), "rev-parse", "HEAD"]).stdout.strip()
+    if not head:
+        die("failed to resolve linux-framework HEAD for ARM64 worktree")
+    if not (paths.arm64_worktree_dir / ".git").exists():
+        _run_passthrough(
+            [
+                "git",
+                "-C",
+                str(paths.kernel_dir),
+                "worktree",
+                "add",
+                "--detach",
+                str(paths.arm64_worktree_dir),
+                head,
+            ]
+        )
+        return
+    _run_passthrough(
+        [
+            "git",
+            "-C",
+            str(paths.arm64_worktree_dir),
+            "checkout",
+            "--detach",
+            head,
+        ]
+    )

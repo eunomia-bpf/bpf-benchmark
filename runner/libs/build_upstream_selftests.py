@@ -1,22 +1,21 @@
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import stat
 import subprocess
-import sys
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
-from typing import NoReturn
+
+from runner.libs.cli_support import fail
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 SELECTION_FILE = ROOT_DIR / "runner" / "config" / "upstream_selftests_selection.tsv"
 
-
-def _die(message: str) -> NoReturn:
-    print(f"[build-upstream-selftests][ERROR] {message}", file=sys.stderr)
-    raise SystemExit(1)
+_die = partial(fail, "build-upstream-selftests")
 
 
 def _env_required(name: str) -> str:
@@ -70,7 +69,8 @@ def _write_executable(path: Path, content: str) -> None:
 @dataclass(frozen=True)
 class SelectionManifest:
     build_targets: tuple[str, ...]
-    source_excludes: tuple[str, ...]
+    build_view_excludes: tuple[str, ...]
+    vmlinux_header_excludes: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -107,7 +107,7 @@ class BuildConfig:
             vmlinux_btf=vmlinux_btf,
             jobs=_env_optional("JOBS", default="1") or "1",
             llvm_suffix=_env_optional("UPSTREAM_SELFTEST_LLVM_SUFFIX"),
-            host_python_bin=_env_optional("UPSTREAM_SELFTEST_HOST_PYTHON_BIN", default="python3") or "python3",
+            host_python_bin=_env_required("UPSTREAM_SELFTEST_HOST_PYTHON_BIN"),
             arch=_env_optional("UPSTREAM_SELFTEST_ARCH"),
             cross_compile=_env_optional("UPSTREAM_SELFTEST_CROSS_COMPILE"),
             sysroot_root=_env_optional("UPSTREAM_SELFTEST_SYSROOT_ROOT"),
@@ -127,7 +127,8 @@ def load_selection_manifest(path: Path = SELECTION_FILE) -> SelectionManifest:
     _require_file(path, "selection manifest")
     seen: set[tuple[str, str]] = set()
     build_targets: list[str] = []
-    source_excludes: list[str] = []
+    build_view_excludes: list[str] = []
+    vmlinux_header_excludes: list[str] = []
     for line_no, raw_line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
         if not raw_line or raw_line.startswith("#"):
             continue
@@ -144,13 +145,19 @@ def load_selection_manifest(path: Path = SELECTION_FILE) -> SelectionManifest:
         seen.add(key)
         if kind == "make_target":
             build_targets.append(value)
-        elif kind == "source_exclude":
-            source_excludes.append(value)
+        elif kind == "build_view_exclude":
+            build_view_excludes.append(value)
+        elif kind == "vmlinux_header_exclude":
+            vmlinux_header_excludes.append(value)
         else:
             _die(f"unknown selection kind at {path}:{line_no}: {kind}")
     if not build_targets:
         _die(f"selection manifest defines no build targets: {path}")
-    return SelectionManifest(tuple(build_targets), tuple(source_excludes))
+    return SelectionManifest(
+        tuple(build_targets),
+        tuple(build_view_excludes),
+        tuple(vmlinux_header_excludes),
+    )
 
 
 def prepare_cross_toolchain(config: BuildConfig) -> None:
@@ -243,17 +250,17 @@ def _copy_or_link(entry: Path, destination: Path) -> None:
     shutil.copy2(entry, destination)
 
 
-def prepare_selected_source_dir(config: BuildConfig, selection: SelectionManifest) -> Path:
-    if not selection.source_excludes:
+def prepare_selected_build_view(config: BuildConfig, selection: SelectionManifest) -> Path:
+    if not selection.build_view_excludes:
         return config.source_dir
 
-    selected_root = Path(f"{config.output_dir}.source-tree")
+    selected_root = Path(f"{config.output_dir}.build-view")
     selected_dir = selected_root / "tools" / "testing" / "selftests" / "bpf"
     source_root = config.source_dir.parents[2]
     selftests_root = source_root / "testing" / "selftests"
     kernel_root = config.source_dir.parents[3]
 
-    excluded = set(selection.source_excludes)
+    excluded = set(selection.build_view_excludes)
     for rel_path in excluded:
         if not (config.source_dir / rel_path).exists():
             _die(f"selection manifest excludes missing upstream selftest source: {rel_path}")
@@ -295,20 +302,27 @@ def prepare_selected_source_dir(config: BuildConfig, selection: SelectionManifes
     return selected_dir
 
 
-def sanitize_generated_vmlinux_header(header_path: Path) -> None:
+def sanitize_generated_vmlinux_header(header_path: Path, excluded_tokens: tuple[str, ...]) -> None:
     _require_file(header_path, "generated vmlinux header")
-    targets = (
-        "bpf_arena_alloc_pages(",
-        "bpf_arena_free_pages(",
-        "bpf_arena_reserve_pages(",
-        "bpf_path_d_path(",
-    )
+    if not excluded_tokens:
+        return
     filtered = [
         line
         for line in header_path.read_text(encoding="utf-8").splitlines()
-        if not any(target in line for target in targets)
+        if not any(target in line for target in excluded_tokens)
     ]
     header_path.write_text("\n".join(filtered) + "\n", encoding="utf-8")
+
+
+def write_selection_report(config: BuildConfig, selection: SelectionManifest) -> None:
+    report_path = config.output_dir / "selection.json"
+    report = {
+        "selection_manifest": str(SELECTION_FILE),
+        "build_targets": list(selection.build_targets),
+        "build_view_excludes": list(selection.build_view_excludes),
+        "vmlinux_header_excludes": list(selection.vmlinux_header_excludes),
+    }
+    report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def _make_args(config: BuildConfig, source_dir: Path) -> list[str]:
@@ -388,21 +402,27 @@ def build_upstream_selftests(config: BuildConfig, selection: SelectionManifest) 
         "[build-upstream-selftests] build targets: "
         + " ".join(selection.build_targets)
     )
-    if selection.source_excludes:
+    if selection.build_view_excludes:
         print(
-            "[build-upstream-selftests] source excludes: "
-            + " ".join(selection.source_excludes)
+            "[build-upstream-selftests] build-view excludes: "
+            + " ".join(selection.build_view_excludes)
+        )
+    if selection.vmlinux_header_excludes:
+        print(
+            "[build-upstream-selftests] vmlinux.h excludes: "
+            + " ".join(selection.vmlinux_header_excludes)
         )
 
     shutil.rmtree(config.output_dir, ignore_errors=True)
     config.output_dir.mkdir(parents=True, exist_ok=True)
+    write_selection_report(config, selection)
     prepare_generated_include_dir(config)
-    source_dir = prepare_selected_source_dir(config, selection)
+    source_dir = prepare_selected_build_view(config, selection)
     make_args = _make_args(config, source_dir)
 
     generated_header = config.output_dir / "tools" / "include" / "vmlinux.h"
     _run_checked(make_args + [str(generated_header)])
-    sanitize_generated_vmlinux_header(generated_header)
+    sanitize_generated_vmlinux_header(generated_header, selection.vmlinux_header_excludes)
     _run_checked(make_args + list(selection.build_targets))
 
 
