@@ -1,72 +1,61 @@
 from __future__ import annotations
 
 import os
-import re
 import shlex
+import subprocess
 import sys
 from functools import partial
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
+from runner.libs.app_suite_schema import load_app_suite_from_yaml
 from runner.libs.cli_support import fail
+from runner.libs.manifest_file import (
+    parse_manifest,
+    render_null_assignments,
+    render_shell_assignments,
+    render_shell_assignments_from_mapping,
+)
 
 
 TARGETS_DIR = ROOT_DIR / "runner" / "targets"
 SUITES_DIR = ROOT_DIR / "runner" / "suites"
+DEFAULT_CORPUS_APP_SUITE = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
+WORKLOAD_TOOL_ORDER = ("stress-ng", "fio", "hackbench", "sysbench", "bpftrace", "wrk")
+REMOTE_COMMAND_ORDER = ("taskset", "curl", "tar")
 
-SCALAR_PATTERN = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$")
-ARRAY_PATTERN = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=\((.*)\)$")
+CORPUS_WORKLOAD_KIND_TOOLS = {
+    "exec_storm": ("stress-ng",),
+    "hackbench": ("hackbench",),
+    "network": ("wrk",),
+    "oom_stress": ("stress-ng",),
+}
 
+CORPUS_RUNNER_EXTRA_TOOLS = {
+    "bcc": ("fio",),
+    "bpftrace": ("bpftrace",),
+    "tetragon": ("fio",),
+}
+
+E2E_CASE_WORKLOAD_TOOLS = {
+    "bcc": ("stress-ng", "fio", "hackbench"),
+    "bpftrace": ("stress-ng", "fio", "hackbench", "wrk", "bpftrace"),
+    "katran": ("wrk",),
+    "scx": ("stress-ng", "hackbench", "sysbench"),
+    "tetragon": ("stress-ng", "fio"),
+    "tracee": (),
+}
+
+E2E_CASE_REMOTE_COMMANDS = {
+    "bcc": ("taskset", "curl"),
+    "bpftrace": ("taskset",),
+    "katran": ("taskset",),
+    "scx": ("taskset",),
+    "tetragon": ("taskset", "curl", "tar"),
+    "tracee": ("taskset", "curl"),
+}
 
 _die = partial(fail, "run-contract")
-
-
-def parse_manifest(manifest_path: Path) -> dict[str, str | list[str]]:
-    parsed: dict[str, str | list[str]] = {}
-    for raw_line in manifest_path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#"):
-            continue
-        array_match = ARRAY_PATTERN.match(line)
-        if array_match:
-            name, raw_value = array_match.groups()
-            parsed[name] = shlex.split(raw_value)
-            continue
-        scalar_match = SCALAR_PATTERN.match(line)
-        if scalar_match:
-            name, raw_value = scalar_match.groups()
-            values = shlex.split(raw_value)
-            parsed[name] = values[0] if values else ""
-            continue
-        raise RuntimeError(f"unsupported manifest line: {raw_line}")
-    return parsed
-
-
-def render_shell_assignments(manifest_path: Path) -> str:
-    return render_shell_assignments_from_mapping(parse_manifest(manifest_path))
-
-
-def render_shell_assignments_from_mapping(values: dict[str, str | list[str]]) -> str:
-    lines: list[str] = []
-    for name, value in values.items():
-        if isinstance(value, list):
-            rendered = " ".join(shlex.quote(token) for token in value)
-            lines.append(f"{name}=( {rendered} )")
-        else:
-            lines.append(f"{name}={shlex.quote(value)}")
-    return "\n".join(lines)
-
-
-def render_null_assignments_from_mapping(values: dict[str, str | list[str]]) -> bytes:
-    parts: list[bytes] = []
-    for name, value in values.items():
-        scalar = shlex.join(value) if isinstance(value, list) else value
-        parts.append(f"{name}={scalar}".encode("utf-8") + b"\0")
-    return b"".join(parts)
-
-
-def render_null_assignments(manifest_path: Path) -> bytes:
-    return render_null_assignments_from_mapping(parse_manifest(manifest_path))
 
 
 def _load_assignment_file(path: Path) -> dict[str, str]:
@@ -100,6 +89,28 @@ def _resolve_repo_path(path: str) -> str:
     if candidate.is_absolute():
         return str(candidate)
     return str((ROOT_DIR / candidate).resolve())
+
+
+def _resolve_manifest_llvm_dir(values: dict[str, str]) -> str:
+    explicit_dir = _env_or_default(values, "LLVM_DIR")
+    if explicit_dir:
+        return _resolve_repo_path(explicit_dir)
+    llvm_config = _env_or_default(values, "LLVM_CONFIG")
+    if not llvm_config:
+        return ""
+    completed = subprocess.run(
+        [llvm_config, "--cmakedir"],
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if completed.returncode != 0:
+        _die(f"LLVM_CONFIG failed to resolve cmake dir: {llvm_config}")
+    cmake_dir = completed.stdout.strip()
+    if not cmake_dir:
+        _die(f"LLVM_CONFIG returned an empty cmake dir: {llvm_config}")
+    return cmake_dir
 
 
 def _host_cpu_count() -> int:
@@ -136,12 +147,99 @@ def _append_csv_list(csv: str, extra_csv: str) -> str:
     return merged
 
 
+def _join_csv(tokens: list[str]) -> str:
+    return ",".join(token for token in tokens if token)
+
+
+def _ordered_csv_from_tokens(tokens: set[str], *, order: tuple[str, ...]) -> str:
+    return ",".join(token for token in order if token in tokens)
+
+
+def _corpus_workload_tools_for_selection(app_suite: object) -> str:
+    selected_tokens: set[str] = set()
+    for app in getattr(app_suite, "apps", ()):
+        runner = str(getattr(app, "runner", "") or "").strip()
+        workload_kind = str(app.workload_for("corpus") or "").strip()
+        selected_tokens.update(CORPUS_RUNNER_EXTRA_TOOLS.get(runner, ()))
+        selected_tokens.update(CORPUS_WORKLOAD_KIND_TOOLS.get(workload_kind, ()))
+    return _ordered_csv_from_tokens(selected_tokens, order=WORKLOAD_TOOL_ORDER)
+
+
+def _apply_corpus_filter_selection(
+    *,
+    run_corpus_filters: str,
+    suite: dict[str, str],
+    run_benchmark_repos: str,
+    run_native_repos: str,
+    run_scx_packages: str,
+    run_needs_sched_ext: str,
+    run_needs_katran_bundle: str,
+) -> tuple[str, str, str, str, str, str]:
+    filters = _csv_tokens(run_corpus_filters)
+    app_suite, _summary = load_app_suite_from_yaml(DEFAULT_CORPUS_APP_SUITE, filters=filters)
+    selected_runners = {app.runner for app in app_suite.apps}
+    filtered_benchmark_repos = _join_csv(
+        [token for token in _csv_tokens(run_benchmark_repos) if token in selected_runners]
+    )
+    filtered_native_repos = _join_csv(
+        [token for token in _csv_tokens(run_native_repos) if token in selected_runners]
+    )
+    filtered_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "") if "scx" in selected_runners else ""
+    filtered_needs_sched_ext = "1" if "scx" in selected_runners else "0"
+    filtered_needs_katran_bundle = "1" if "katran" in selected_runners else "0"
+    filtered_workload_tools = _corpus_workload_tools_for_selection(app_suite)
+    return (
+        filtered_benchmark_repos,
+        filtered_native_repos,
+        filtered_scx_packages,
+        filtered_needs_sched_ext,
+        filtered_needs_katran_bundle,
+        filtered_workload_tools,
+    )
+
+
+def _apply_e2e_case_selection(
+    *,
+    run_e2e_cases: str,
+    suite: dict[str, str],
+) -> tuple[str, str, str, str, str, str, str]:
+    selected_cases = set(_csv_tokens(run_e2e_cases))
+    include_all = "all" in selected_cases
+    run_benchmark_repos = _suite_repos_for_e2e_cases(run_e2e_cases)
+    run_native_repos = _native_repos_for_e2e_cases(run_e2e_cases)
+    run_scx_packages = ""
+    run_needs_sched_ext = "0"
+    run_needs_katran_bundle = "0"
+    workload_tools: set[str] = set()
+    remote_commands: set[str] = set()
+    for case_name, tools in E2E_CASE_WORKLOAD_TOOLS.items():
+        if include_all or case_name in selected_cases:
+            workload_tools.update(tools)
+            remote_commands.update(E2E_CASE_REMOTE_COMMANDS.get(case_name, ()))
+    if include_all or "scx" in selected_cases:
+        run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")
+        run_needs_sched_ext = "1"
+    if include_all or "katran" in selected_cases:
+        run_needs_katran_bundle = "1"
+    return (
+        run_benchmark_repos,
+        run_native_repos,
+        run_scx_packages,
+        run_needs_sched_ext,
+        run_needs_katran_bundle,
+        _ordered_csv_from_tokens(workload_tools, order=WORKLOAD_TOOL_ORDER),
+        _ordered_csv_from_tokens(remote_commands, order=REMOTE_COMMAND_ORDER),
+    )
+
+
 _COMMON_MANIFEST_INPUTS = {
     "PYTHON",
     "RUN_TOKEN",
     "CROSS_COMPILE_ARM64",
     "ARM64_DOCKER_PLATFORM",
     "ARM64_CROSSBUILD_JOBS",
+    "LLVM_CONFIG",
+    "LLVM_DIR",
 }
 
 _KVM_MANIFEST_INPUTS = {
@@ -203,7 +301,7 @@ _AWS_MANIFEST_SUFFIXES = {
 
 
 def _filtered_manifest_inputs(target_name: str, env: dict[str, str] | None) -> dict[str, str]:
-    source = os.environ if env is None else env
+    source_env = os.environ if env is None else env
     filtered: dict[str, str] = {}
     allowed = set(_COMMON_MANIFEST_INPUTS)
     if target_name == "x86-kvm":
@@ -214,7 +312,7 @@ def _filtered_manifest_inputs(target_name: str, env: dict[str, str] | None) -> d
         if aws_env_prefix:
             allowed.update(f"{aws_env_prefix}_{suffix}" for suffix in _AWS_MANIFEST_SUFFIXES)
     for key in allowed:
-        value = source.get(key)
+        value = source_env.get(key)
         if value is not None:
             filtered[key] = value
     return filtered
@@ -277,6 +375,7 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")
     run_needs_sched_ext = suite.get("SUITE_NEEDS_SCHED_EXT", "0")
     run_needs_llvmbpf = suite.get("SUITE_NEEDS_LLVMBPF", "0")
+    run_llvm_dir = ""
     run_remote_commands = suite.get("SUITE_DEFAULT_REMOTE_COMMANDS", "")
     run_workload_tools = suite.get("SUITE_DEFAULT_WORKLOAD_TOOLS", "")
     run_needs_katran_bundle = suite.get("SUITE_NEEDS_KATRAN_BUNDLE", "0")
@@ -461,25 +560,38 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     elif suite_name == "corpus":
         if target_name == "x86-kvm" and not values.get("SAMPLES", "").strip():
             run_bench_samples = _env_or_default(values, "VM_CORPUS_SAMPLES", "30")
+        (
+            run_benchmark_repos,
+            run_native_repos,
+            run_scx_packages,
+            run_needs_sched_ext,
+            run_needs_katran_bundle,
+            run_workload_tools,
+        ) = _apply_corpus_filter_selection(
+            run_corpus_filters=run_corpus_filters,
+            suite=suite,
+            run_benchmark_repos=run_benchmark_repos,
+            run_native_repos=run_native_repos,
+            run_scx_packages=run_scx_packages,
+            run_needs_sched_ext=run_needs_sched_ext,
+            run_needs_katran_bundle=run_needs_katran_bundle,
+        )
     elif suite_name == "e2e":
         if not run_e2e_cases:
             run_e2e_cases = suite.get("SUITE_DEFAULT_E2E_CASES", "all")
         _validate_e2e_cases(run_e2e_cases)
-        run_benchmark_repos = _suite_repos_for_e2e_cases(run_e2e_cases)
-        run_native_repos = _native_repos_for_e2e_cases(run_e2e_cases)
-        run_scx_packages = ""
-        if _csv_has(run_e2e_cases, "all") or _csv_has(run_e2e_cases, "scx"):
-            run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")
-            run_needs_sched_ext = "1"
-            run_workload_tools = _append_csv_list(run_workload_tools, suite.get("SUITE_E2E_SCX_WORKLOAD_TOOLS", ""))
-        else:
-            run_needs_sched_ext = "0"
-        if _csv_has(run_e2e_cases, "all") or _csv_has(run_e2e_cases, "tracee"):
-            run_workload_tools = _append_csv_list(run_workload_tools, suite.get("SUITE_E2E_TRACEE_WORKLOAD_TOOLS", ""))
-        if _csv_has(run_e2e_cases, "all") or _csv_has(run_e2e_cases, "bpftrace"):
-            run_workload_tools = _append_csv_list(run_workload_tools, suite.get("SUITE_E2E_BPFTRACE_WORKLOAD_TOOLS", ""))
-        if _csv_has(run_e2e_cases, "all") or _csv_has(run_e2e_cases, "katran"):
-            run_needs_katran_bundle = "1"
+        (
+            run_benchmark_repos,
+            run_native_repos,
+            run_scx_packages,
+            run_needs_sched_ext,
+            run_needs_katran_bundle,
+            run_workload_tools,
+            run_remote_commands,
+        ) = _apply_e2e_case_selection(
+            run_e2e_cases=run_e2e_cases,
+            suite=suite,
+        )
     else:
         _die(f"unsupported suite: {suite_name}")
 
@@ -488,6 +600,12 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
 
     run_bundled_repos = run_benchmark_repos
     run_fetch_repos = _append_csv_list(run_bundled_repos, run_native_repos)
+    if run_scx_packages:
+        run_fetch_repos = _append_csv(run_fetch_repos, "scx")
+    if run_needs_llvmbpf == "1":
+        run_llvm_dir = _resolve_manifest_llvm_dir(values)
+        if not run_llvm_dir:
+            _die(f"suite {suite_name} requires explicit LLVM_DIR or LLVM_CONFIG")
 
     return {
         "RUN_TARGET_NAME": target_name,
@@ -498,6 +616,7 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         "RUN_SUITE_NEEDS_RUNTIME_BTF": suite.get("SUITE_NEEDS_RUNTIME_BTF", "0"),
         "RUN_SUITE_NEEDS_SCHED_EXT": run_needs_sched_ext,
         "RUN_SUITE_NEEDS_LLVMBPF": run_needs_llvmbpf,
+        "RUN_LLVM_DIR": run_llvm_dir,
         "RUN_NEEDS_RUNNER_BINARY": run_needs_runner_binary,
         "RUN_NEEDS_DAEMON_BINARY": run_needs_daemon_binary,
         "RUN_NEEDS_KINSN_MODULES": run_needs_kinsn_modules,

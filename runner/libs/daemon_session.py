@@ -13,7 +13,7 @@ from .rejit import (
 )
 
 
-@dataclass(slots=True)
+@dataclass
 class DaemonSession:
     daemon_binary: Path
     proc: object

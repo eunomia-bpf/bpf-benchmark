@@ -10,7 +10,7 @@ from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
-from runner.libs.run_contract import parse_manifest
+from runner.libs.manifest_file import parse_manifest
 from runner.libs.state_file import read_state
 
 

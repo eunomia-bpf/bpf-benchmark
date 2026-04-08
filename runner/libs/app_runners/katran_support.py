@@ -19,10 +19,6 @@ from .process_support import ManagedProcessSession
 DEFAULT_KATRAN_BALANCER_PROG_PATH = ROOT_DIR / "corpus" / "build" / "katran" / "balancer.bpf.o"
 DEFAULT_KATRAN_PROGRAM_NAME = "balancer_ingress"
 DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
-DEFAULT_KATRAN_SERVER_BINARY_CANDIDATES = (
-    ROOT_DIR / "corpus" / "build" / "katran" / "bin" / "katran_server_grpc",
-)
-DEFAULT_KATRAN_SERVER_LIB_DIR = ROOT_DIR / "corpus" / "build" / "katran" / "lib"
 DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 30
 DEFAULT_KATRAN_STOP_TIMEOUT_S = 10.0
 DEFAULT_KATRAN_STOP_SETTLE_S = 2.0
@@ -217,10 +213,6 @@ def wait_for_katran_teardown(
     )
 
 
-def katran_server_binary_candidates() -> tuple[Path, ...]:
-    return DEFAULT_KATRAN_SERVER_BINARY_CANDIDATES
-
-
 def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
     candidates: list[Path] = []
     if explicit is not None and str(explicit).strip():
@@ -228,11 +220,12 @@ def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
     env_binary = os.environ.get("KATRAN_SERVER_BINARY", "").strip()
     if env_binary:
         candidates.append(Path(env_binary).expanduser().resolve())
-    candidates.extend(candidate.resolve() for candidate in katran_server_binary_candidates())
     for candidate in candidates:
         if candidate.is_file() and os.access(candidate, os.X_OK):
             return candidate
-    rendered = ", ".join(str(candidate) for candidate in candidates) or "<none>"
+    if not candidates:
+        raise RuntimeError("Katran server binary was not provided by the sealed workspace contract")
+    rendered = ", ".join(str(candidate) for candidate in candidates)
     raise RuntimeError(f"Katran server binary not found or not executable; tried: {rendered}")
 
 
@@ -245,23 +238,14 @@ def katran_server_env(server_binary: Path) -> dict[str, str]:
             rendered = str(candidate.resolve())
             if rendered not in library_dirs:
                 library_dirs.append(rendered)
-    for candidate in (
-        server_binary.resolve().parent.parent / "lib",
-        DEFAULT_KATRAN_SERVER_LIB_DIR,
-    ):
-        if candidate.is_dir():
-            rendered = str(candidate.resolve())
-            if rendered not in library_dirs:
-                library_dirs.append(rendered)
-    current = os.environ.get("LD_LIBRARY_PATH", "")
-    current_entries = [entry for entry in current.split(os.pathsep) if entry]
-    merged: list[str] = []
-    for entry in [*library_dirs, *current_entries]:
-        if entry not in merged:
-            merged.append(entry)
-    if not merged:
-        return {}
-    return {"LD_LIBRARY_PATH": os.pathsep.join(merged)}
+    bundle_lib_dir = server_binary.resolve().parent.parent / "lib"
+    if bundle_lib_dir.is_dir():
+        rendered = str(bundle_lib_dir.resolve())
+        if rendered not in library_dirs:
+            library_dirs.append(rendered)
+    if not library_dirs:
+        raise RuntimeError(f"Katran runtime lib dir is missing for bundled server {server_binary}")
+    return {"LD_LIBRARY_PATH": os.pathsep.join(library_dirs)}
 
 def ip_binary() -> str:
     for candidate in DEFAULT_IP_CANDIDATES:
@@ -272,6 +256,10 @@ def ip_binary() -> str:
     if resolved:
         return resolved
     raise RuntimeError("ip is required for the katran runner")
+
+
+def remote_python_binary() -> str:
+    return os.environ.get("RUN_REMOTE_PYTHON_BIN", "").strip() or "python3"
 
 
 def _normalize_ip_command(command: list[str] | tuple[str, ...]) -> list[str]:
@@ -612,7 +600,7 @@ class NamespaceHttpServer:
 
     def __enter__(self) -> "NamespaceHttpServer":
         self.process = subprocess.Popen(
-            [ip_binary(), "netns", "exec", self.namespace, "python3", "-u", "-c", NAMESPACE_HTTP_SERVER_SCRIPT, self.bind_ip, str(self.port)],
+            [ip_binary(), "netns", "exec", self.namespace, remote_python_binary(), "-u", "-c", NAMESPACE_HTTP_SERVER_SCRIPT, self.bind_ip, str(self.port)],
             cwd=ROOT_DIR,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -635,7 +623,7 @@ class NamespaceHttpServer:
                 self.stdout_tail = tail_text(stdout or "", max_lines=20, max_chars=4000)
                 self.stderr_tail = tail_text(stderr or "", max_lines=20, max_chars=4000)
                 raise RuntimeError(f"http server exited early: {self.stderr_tail or self.stdout_tail}")
-            completed = ns_exec_command(self.namespace, ["python3", "-c", probe, self.bind_ip, str(self.port)], check=False, timeout=5)
+            completed = ns_exec_command(self.namespace, [remote_python_binary(), "-c", probe, self.bind_ip, str(self.port)], check=False, timeout=5)
             if completed.returncode == 0:
                 return
             time.sleep(0.1)
@@ -989,7 +977,7 @@ def run_parallel_http_load(*, duration_s: int | float, concurrency: int) -> dict
             "netns",
             "exec",
             CLIENT_NS,
-            "python3",
+            remote_python_binary(),
             "-c",
             PARALLEL_CLIENT_REQUEST_SCRIPT,
             VIP_IP,

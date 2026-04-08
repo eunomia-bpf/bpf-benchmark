@@ -113,10 +113,11 @@ class KVMPrep:
         )
 
     def prepare_native_repo_artifacts(self) -> None:
+        native_repo_csv = self.env.get("RUN_NATIVE_REPOS_CSV", "").strip()
         build_native_repo_artifacts(
             repo_root=self.local_repo_root,
             promote_root=self.promote_root,
-            native_repo_csv=self.env.get("RUN_NATIVE_REPOS_CSV", "").strip(),
+            native_repo_csv=native_repo_csv,
             host_python_bin=self.host_python_bin,
             env=self.env,
         )

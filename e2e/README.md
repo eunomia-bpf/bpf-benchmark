@@ -51,7 +51,7 @@ Results live under `e2e/results/<run_type>_<timestamp>/`. `metadata.json` is the
 
 - No separate setup script; the case requires `bpftrace >= 0.16`, `bpftool`, and workload tools already in `PATH`
 - Scripts live under `e2e/cases/bpftrace/scripts/`
-- The case auto-builds `micro_exec` and the daemon CLI if they are missing
+- The case expects the canonical runner and daemon artifacts to already exist at their prepared paths
 - `--vm` is not supported in `e2e/driver.py`
 - Smoke example: `python3 e2e/driver.py bpftrace --smoke`
 

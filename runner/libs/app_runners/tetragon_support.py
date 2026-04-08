@@ -339,10 +339,10 @@ exit "$status"
         rendered = shlex.join(command)
         raise RuntimeError(f"tetragon cgroup-rate exec workload failed ({completed.returncode}) for {rendered}: {details}")
 
-    from runner.libs.workload import _parse_stress_ng_bogo_ops  # noqa: PLC0415
+    from runner.libs.workload import parse_stress_ng_bogo_ops  # noqa: PLC0415
 
     combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
-    ops_total_value = _parse_stress_ng_bogo_ops(combined, stressor="exec")
+    ops_total_value = parse_stress_ng_bogo_ops(combined, stressor="exec")
     if ops_total_value is None:
         ops_total_value = max(1.0, elapsed * max(1, int(rate)))
     return WorkloadResult(

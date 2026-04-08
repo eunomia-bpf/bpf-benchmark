@@ -74,7 +74,7 @@ class RunnerSample(TypedDict, total=False):
     rejit: RejitSummary
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class UnifiedResultRecord:
     """Core schema shared by micro suite, corpus rejit, and rigorous drivers."""
 

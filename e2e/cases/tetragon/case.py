@@ -57,7 +57,7 @@ DEFAULT_LOAD_TIMEOUT_S = 20
 DEFAULT_TIMEOUT_S = 180
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class WorkloadSpec:
     name: str
     kind: str

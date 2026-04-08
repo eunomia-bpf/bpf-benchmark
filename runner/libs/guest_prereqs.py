@@ -7,8 +7,8 @@ from functools import partial
 from pathlib import Path
 
 from runner.libs.cli_support import fail
+from runner.libs.manifest_file import parse_manifest
 from runner.libs.prereq_contract import env_csv, python_import_name, required_commands, tool_packages
-from runner.libs.run_contract import parse_manifest
 
 die = partial(fail, "guest-prereqs")
 

@@ -52,7 +52,7 @@ def _require_command(name: str) -> str:
 
 
 def _require_arch_signature(path: Path, needle: str, description: str) -> None:
-    completed = _run(["file", str(path)])
+    completed = _run(["file", "-L", str(path)])
     if needle not in completed.stdout:
         _die(f"{description} does not match expected file signature {needle}: {path}")
 
@@ -235,11 +235,16 @@ def build_x86_portable_libbpf(output_root: Path) -> None:
             container_command,
         ]
     )
-    candidates = list(output_lib_dir.glob("libbpf.so.*"))
+    candidates = sorted(output_lib_dir.glob("libbpf.so.*"))
     if not candidates:
         _die(f"portable x86 libbpf build did not produce libbpf.so.* under {output_lib_dir}")
+    validated: set[Path] = set()
     for candidate in candidates:
-        _require_arch_signature(candidate, "x86-64", "portable x86 libbpf output")
+        resolved = candidate.resolve()
+        if resolved in validated:
+            continue
+        _require_arch_signature(resolved, "x86-64", "portable x86 libbpf output")
+        validated.add(resolved)
 
 
 def main(argv: list[str] | None = None) -> None:

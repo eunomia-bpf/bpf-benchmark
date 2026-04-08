@@ -12,6 +12,7 @@ from runner.libs import ROOT_DIR
 from runner.libs.arm64_sysroot import Arm64SysrootConfig, ensure_sysroot
 from runner.libs.cli_support import fail, require_nonempty_dir as _require_nonempty_dir
 from runner.libs.portable_runtime import copy_arm64_runtime_bundle
+from runner.libs.runner_artifacts import build_runner_binary
 
 _die = partial(fail, "arm64-host-build")
 _require_nonempty_dir = partial(_require_nonempty_dir, tag="arm64-host-build")
@@ -98,9 +99,26 @@ def _git_path_is_clean(repo_root: Path, pathspec: str = "") -> bool:
     )
 
 
+def _git_untracked_paths(repo_root: Path, pathspec: str = "") -> list[Path]:
+    command = ["git", "-C", str(repo_root), "ls-files", "--others", "--exclude-standard", "-z"]
+    if pathspec:
+        command.extend(["--", pathspec])
+    completed = subprocess.run(command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if completed.returncode != 0:
+        message = completed.stderr.decode("utf-8", errors="replace").strip() or "git ls-files failed"
+        _die(message)
+    tokens = [token.decode("utf-8") for token in completed.stdout.split(b"\0") if token]
+    return [Path(token) for token in tokens]
+
+
 def _snapshot_git_subtree(repo_root: Path, src_rel: str, dest: Path) -> None:
     if subprocess.run(["git", "-C", str(repo_root), "rev-parse", "--verify", "HEAD"], check=False).returncode != 0:
         _die(f"expected git checkout for promoted snapshot: {repo_root}")
+    untracked = _git_untracked_paths(repo_root, src_rel)
+    if untracked:
+        sample = ", ".join(str(path) for path in untracked[:5])
+        extra = "" if len(untracked) <= 5 else f" (+{len(untracked) - 5} more)"
+        _die(f"git subtree has untracked files and cannot be promoted: {repo_root / src_rel} ({sample}{extra})")
     if src_rel:
         if not _git_path_is_clean(repo_root, src_rel):
             _die(f"git subtree has local modifications and cannot be promoted: {repo_root / src_rel}")
@@ -279,18 +297,13 @@ def build_runner_from_env() -> None:
             "MICRO_EXEC_ENABLE_LLVMBPF": "OFF",
         }
     )
-    _run(
-        [
-            "make",
-            "-C",
-            str(ROOT_DIR / "runner"),
-            f"BUILD_DIR={build_dir}",
-            "JOBS=1",
-            "micro_exec",
-        ],
-        env=env,
+    built_binary = build_runner_binary(
+        build_dir=build_dir,
+        env={**env, "JOBS": "1"},
+        expected_arch_signature="ARM aarch64",
+        llvmbpf_default="OFF",
     )
-    shutil.copy2(build_dir / "micro_exec", output_binary)
+    shutil.copy2(built_binary, output_binary)
     _require_arch_signature(output_binary, "ARM aarch64", "host runner cross-build")
 
 
@@ -433,15 +446,14 @@ def build_repo_tests_from_env() -> None:
 def build_scx_from_env() -> None:
     host_cache_root = ROOT_DIR / ".cache/arm64-host"
     source_repo_root = Path(_env("ARM64_SCX_SOURCE_REPO_ROOT", str(ROOT_DIR / "runner/repos")))
-    build_root = Path(_env("ARM64_SCX_BUILD_ROOT", str(host_cache_root / "scx-host-build")))
+    build_root = Path(_env("ARM64_HOST_SCX_BUILD_ROOT", str(host_cache_root / "scx-host-build")))
     promote_root = Path(_env("ARM64_SCX_PROMOTE_ROOT", str(host_cache_root / "binaries")))
-    cargo_home = Path(_env("ARM64_SCX_CARGO_HOME", str(host_cache_root / "cargo-home-host-scx")))
+    cargo_home = Path(_env("ARM64_HOST_SCX_CARGO_HOME", str(host_cache_root / "cargo-home-host-scx")))
     packages_raw = _env("ARM64_SCX_PACKAGES")
     target_triple = _env("ARM64_SCX_TARGET_TRIPLE", "aarch64-unknown-linux-gnu") or "aarch64-unknown-linux-gnu"
     linker = _env("ARM64_NATIVE_CARGO_LINKER", f"{_env('CROSS_COMPILE_ARM64', 'aarch64-linux-gnu-')}gcc")
     preferred_suffix = _env("ARM64_CROSSBUILD_LLVM_SUFFIX", "20")
     readelf_bin = _env("ARM64_CROSSBUILD_READELF", "aarch64-linux-gnu-readelf")
-    rustfmt_bin = _env("ARM64_CROSSBUILD_RUSTFMT", "rustfmt")
     host_python = _require_env("ARM64_HOST_PYTHON_BIN")
     sysroot_root = _ensure_arm64_sysroot_from_env()
     usr_lib64 = sysroot_root / "usr/lib64"
@@ -467,7 +479,6 @@ def build_scx_from_env() -> None:
     _require_command("tar")
     _require_command(linker)
     _require_command(readelf_bin)
-    _require_command(rustfmt_bin)
 
     source_checkout = source_repo_root / "scx"
     if not source_checkout.is_dir():
@@ -501,7 +512,6 @@ def build_scx_from_env() -> None:
             "PATH": f"{toolchain_dir}:{env.get('PATH', '')}",
             "CARGO_HOME": str(cargo_home),
             "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER": str(linker_wrapper),
-            "RUSTFMT": rustfmt_bin,
             "RUSTFLAGS": f"-L native={usr_lib64} -L native={lib64}" + (f" {env['RUSTFLAGS']}" if env.get("RUSTFLAGS") else ""),
             "PKG_CONFIG_SYSROOT_DIR": str(sysroot_root),
             "PKG_CONFIG_LIBDIR": f"{pkgconfig_dir}:{sysroot_root / 'usr/share/pkgconfig'}",

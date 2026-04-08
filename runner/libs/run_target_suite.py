@@ -13,7 +13,8 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs import aws_common
 from runner.libs.cli_support import fail
-from runner.libs.run_contract import build_manifest, build_target_manifest, parse_manifest, write_manifest_file
+from runner.libs.manifest_file import parse_manifest
+from runner.libs.run_contract import build_manifest, build_target_manifest, write_manifest_file
 
 
 CACHE_DIR = ROOT_DIR / ".cache" / "runner-contracts"
@@ -99,6 +100,7 @@ def _run_action(target_name: str, suite_name: str) -> None:
     local_state_path = _temp_json_path(f"local-state.{run_token}.")
     remote_prep_state_path = _temp_json_path(f"remote-state.{run_token}.")
     prep_cleanup_armed = False
+    success = False
     try:
         _write_manifest(target_name, suite_name, run_token, manifest_path)
         contract = parse_manifest(manifest_path)
@@ -130,6 +132,7 @@ def _run_action(target_name: str, suite_name: str) -> None:
                     str(local_state_path),
                 )
             )
+            success = True
             return
         if executor == "kvm":
             _run_checked(
@@ -146,13 +149,19 @@ def _run_action(target_name: str, suite_name: str) -> None:
                     str(local_state_path),
                 )
             )
+            success = True
             return
         _die(f"unsupported executor: {executor}")
     finally:
         if prep_cleanup_armed:
             _cleanup_failed_dedicated_aws_prep(manifest_path)
-        for path in (manifest_path, local_state_path, remote_prep_state_path):
-            path.unlink(missing_ok=True)
+        if success:
+            for path in (manifest_path, local_state_path, remote_prep_state_path):
+                path.unlink(missing_ok=True)
+        else:
+            for path in (manifest_path, local_state_path, remote_prep_state_path):
+                if path.exists():
+                    print(f"[run-target-suite][ERROR] preserved debug artifact: {path}", file=sys.stderr)
 
 
 def _benchmark_action(target_name: str, mode: str) -> None:

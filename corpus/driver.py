@@ -18,6 +18,7 @@ if str(REPO_ROOT) not in sys.path:
 from runner.libs import ROOT_DIR, ensure_parent, write_json, write_text
 from runner.libs.app_runners import get_app_runner
 from runner.libs.app_runners.base import AppRunner
+from runner.libs.app_runners.scx import ScxRunner
 from runner.libs.app_suite_schema import AppSpec, AppWorkload, load_app_suite_from_yaml
 from runner.libs.bpf_stats import enable_bpf_stats, sample_bpf_stats
 from runner.libs.case_common import (
@@ -40,7 +41,6 @@ from runner.libs.run_artifacts import (
     ArtifactSession,
     current_process_identity,
     derive_run_type,
-    repo_relative_path,
 )
 from runner.libs.statistics import geometric_mean
 
@@ -175,6 +175,12 @@ def _infer_prog_type_name(program: Any) -> str:
 
 def _has_phase_measurement(records: Mapping[str, Mapping[str, object]]) -> bool:
     for record in records.values():
+        run_cnt = record.get("run_cnt")
+        if isinstance(run_cnt, (int, float)) and float(run_cnt) > 0.0:
+            return True
+        run_time_ns = record.get("run_time_ns")
+        if isinstance(run_time_ns, (int, float)) and float(run_time_ns) > 0.0:
+            return True
         exec_ns = record.get("exec_ns")
         if isinstance(exec_ns, (int, float)) and float(exec_ns) > 0.0:
             return True
@@ -231,15 +237,47 @@ def _measure_runner_phase(
     *,
     workload_seconds: float,
     samples: int,
+    sampled_prog_id_map: Mapping[int, int] | None = None,
 ) -> dict[str, object]:
+    target_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
+    sampled_prog_ids = (
+        [
+            int(sampled_prog_id_map.get(prog_id, 0) or 0)
+            for prog_id in target_prog_ids
+            if int(sampled_prog_id_map.get(prog_id, 0) or 0) > 0
+        ]
+        if sampled_prog_id_map is not None
+        else list(target_prog_ids)
+    )
     workloads: list[dict[str, object]] = []
     last_workload: dict[str, object] | None = None
-    initial_stats = sample_bpf_stats(list(prog_ids), prog_fds=runner.program_fds)
+    initial_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=runner.program_fds)
     for _ in range(samples):
         workload = runner.run_workload(workload_seconds).to_dict()
         last_workload = dict(workload)
         workloads.append(dict(workload))
-    final_stats = sample_bpf_stats(list(prog_ids), prog_fds=runner.program_fds)
+    final_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=runner.program_fds)
+    if sampled_prog_id_map is not None:
+        sampled_to_target = {
+            int(sampled_prog_id): int(target_prog_id)
+            for target_prog_id, sampled_prog_id in sampled_prog_id_map.items()
+            if int(target_prog_id) > 0 and int(sampled_prog_id) > 0
+        }
+
+        def remap_stats(raw_stats: Mapping[int, Mapping[str, object]]) -> dict[int, dict[str, object]]:
+            remapped: dict[int, dict[str, object]] = {}
+            for sampled_prog_id, record in raw_stats.items():
+                target_prog_id = sampled_to_target.get(int(sampled_prog_id))
+                if target_prog_id is None:
+                    continue
+                entry = dict(record)
+                entry["sampled_prog_id"] = int(sampled_prog_id)
+                entry["id"] = int(target_prog_id)
+                remapped[int(target_prog_id)] = entry
+            return remapped
+
+        initial_stats = remap_stats(initial_stats)
+        final_stats = remap_stats(final_stats)
     return {
         "workload": last_workload,
         "workloads": workloads,
@@ -293,6 +331,42 @@ def _selected_live_programs(
 
 def _program_label(app_name: str, program_name: str, prog_id: int) -> str:
     return f"{app_name}:{program_name or f'prog_{prog_id}'}#{prog_id}"
+
+
+def _scx_post_rejit_prog_id_map(lifecycle: CaseLifecycleState) -> dict[int, int]:
+    runner = lifecycle.runtime
+    if not isinstance(runner, ScxRunner):
+        return {}
+    previous_programs = [
+        dict(program)
+        for program in (lifecycle.artifacts.get("programs") or [])
+        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
+    ]
+    if not previous_programs:
+        return {}
+    previous_name_by_id = {
+        int(program["id"]): str(program["name"]).strip()
+        for program in previous_programs
+    }
+    refreshed_programs = runner.refresh_live_programs()
+    lifecycle.artifacts["post_rejit_programs"] = [dict(program) for program in refreshed_programs]
+    refreshed_id_by_name = {
+        str(program.get("name") or "").strip(): int(program.get("id", 0) or 0)
+        for program in refreshed_programs
+        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
+    }
+    remapped = {
+        int(logical_prog_id): int(refreshed_id_by_name[program_name])
+        for logical_prog_id, program_name in previous_name_by_id.items()
+        if int(logical_prog_id) in {int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0}
+        and int(refreshed_id_by_name.get(program_name, 0) or 0) > 0
+    }
+    if remapped:
+        lifecycle.artifacts["post_rejit_program_id_map"] = {
+            str(logical_prog_id): int(sampled_prog_id)
+            for logical_prog_id, sampled_prog_id in remapped.items()
+        }
+    return remapped
 
 
 def _phase_exec_ns(record: Mapping[str, object] | None) -> float | None:
@@ -1045,7 +1119,7 @@ def _finalize_app_result(
     }
 
 
-@dataclass(slots=True)
+@dataclass
 class CorpusAppSession:
     app: AppSpec
     runner: AppRunner
@@ -1104,12 +1178,17 @@ def _run_app(
                 current_runner,
                 started_prog_ids,
             ),
-            measure=lambda lifecycle, _phase_name: {
+            measure=lambda lifecycle, phase_name: {
                 "measurement": _measure_runner_phase(
                     lifecycle.runtime,
                     lifecycle.target_prog_ids,
                     workload_seconds=workload_seconds,
                     samples=samples,
+                    sampled_prog_id_map=(
+                        _scx_post_rejit_prog_id_map(lifecycle)
+                        if phase_name == "post_rejit"
+                        else None
+                    ),
                 )
             },
             before_rejit=before_rejit,
@@ -1517,7 +1596,6 @@ def main(argv: list[str] | None = None) -> int:
     if args.rejit_passes is not None:
         os.environ["BPFREJIT_BENCH_PASSES"] = str(args.rejit_passes).strip()
     output_json = Path(args.output_json).resolve()
-    output_md = Path(args.output_md).resolve()
     metadata_suite_path = Path(args.suite).resolve()
     metadata_suite, _metadata_suite_summary = load_app_suite_from_yaml(
         metadata_suite_path,

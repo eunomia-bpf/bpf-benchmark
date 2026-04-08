@@ -219,6 +219,36 @@ def measure_workload(
     }
 
 
+def _post_rejit_scx_prog_ids(lifecycle: CaseLifecycleState) -> list[int]:
+    runner = lifecycle.runtime
+    if not isinstance(runner, ScxRunner):
+        return [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
+    previous_programs = [
+        dict(program)
+        for program in (lifecycle.artifacts.get("scheduler_programs") or [])
+        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
+    ]
+    refreshed_programs = runner.refresh_live_programs()
+    lifecycle.artifacts["post_rejit_scheduler_programs"] = [dict(program) for program in refreshed_programs]
+    previous_name_by_id = {
+        int(program["id"]): str(program["name"]).strip()
+        for program in previous_programs
+    }
+    target_prog_ids = {int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0}
+    refreshed_id_by_name = {
+        str(program.get("name") or "").strip(): int(program.get("id", 0) or 0)
+        for program in refreshed_programs
+        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
+    }
+    remapped = [
+        int(refreshed_id_by_name[program_name])
+        for logical_prog_id, program_name in previous_name_by_id.items()
+        if int(logical_prog_id) in target_prog_ids
+        and int(refreshed_id_by_name.get(program_name, 0) or 0) > 0
+    ]
+    return remapped or [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
+
+
 def summarize_phase(workloads: Sequence[Mapping[str, object]]) -> dict[str, object]:
     return {
         "throughput": summarize_numbers([record.get("ops_per_sec") for record in workloads]),
@@ -433,11 +463,15 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         )
 
     def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
-        del phase_name
         runner = lifecycle.runtime
         if not isinstance(runner, AppRunner):
             raise RuntimeError(f"scx lifecycle returned a non-runner runtime: {type(runner).__name__}")
-        return run_phase(runner, workloads, duration_s, agent_pid=runner.pid)
+        prog_ids = (
+            _post_rejit_scx_prog_ids(lifecycle)
+            if phase_name == "post_rejit"
+            else [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
+        )
+        return run_phase(runner, workloads, duration_s, agent_pid=runner.pid, prog_ids=prog_ids)
 
     def stop(_: object, lifecycle: CaseLifecycleState) -> None:
         runner = lifecycle.runtime

@@ -21,7 +21,7 @@ from ..workload import (
 DEFAULT_SCRIPT_DIR = ROOT_DIR / "e2e" / "cases" / "bpftrace" / "scripts"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ScriptSpec:
     name: str
     script_path: Path

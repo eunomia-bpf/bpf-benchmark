@@ -32,6 +32,8 @@ bpf-benchmark/
 - Python 3 with PyYAML: `pip install pyyaml` (or use the workspace venv)
 - `sudo -n` (passwordless) required for kernel eBPF runtime
 - `vng` (virtme-ng) required for VM benchmark targets
+- `docker buildx` with runnable `linux/arm64` userspace support is still
+  required for the current canonical AWS ARM64 benchmark local-prep path
 
 ## Quick Start
 
@@ -74,6 +76,14 @@ AWS targets require explicit local configuration for:
 - `AWS_ARM64_SECURITY_GROUP_ID` / `AWS_X86_SECURITY_GROUP_ID`
 - `AWS_ARM64_SUBNET_ID` / `AWS_X86_SUBNET_ID`
 - `AWS_ARM64_PROFILE` / `AWS_X86_PROFILE`
+
+The canonical lookup source is:
+- process environment only
+
+Micro suite runs also require an explicit LLVM contract for llvmbpf-enabled
+runner builds:
+- `LLVM_DIR`, or
+- `LLVM_CONFIG` (the root `Makefile` defaults this to `llvm-config$(UPSTREAM_SELFTEST_LLVM_SUFFIX)`)
 
 Results are written to:
 - `micro/results/` — direct local smoke outputs from host-side micro driver runs

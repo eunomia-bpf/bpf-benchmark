@@ -36,7 +36,7 @@ DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml"
 DEFAULT_ATTACH_TIMEOUT_SECONDS = 20
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class BCCWorkloadSpec:
     name: str
     workload_kind: str
@@ -45,7 +45,7 @@ class BCCWorkloadSpec:
     tool_args: tuple[str, ...]
 
 
-@dataclass(slots=True)
+@dataclass
 class ToolProcessSession:
     process: subprocess.Popen[str]
     stdout_capture: "_TailCapture"

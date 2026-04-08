@@ -20,6 +20,15 @@ from runner.libs.state_file import write_state
 
 _die = partial(fail, "aws-remote-prep")
 
+REMOTE_PREREQ_ASSETS = (
+    ("runner/__init__.py", "__init__.py"),
+    ("runner/libs/__init__.py", "libs/__init__.py"),
+    ("runner/libs/cli_support.py", "libs/cli_support.py"),
+    ("runner/libs/manifest_file.py", "libs/manifest_file.py"),
+    ("runner/libs/prereq_contract.py", "libs/prereq_contract.py"),
+    ("runner/libs/aws_remote_prereqs.py", "libs/aws_remote_prereqs.py"),
+)
+
 
 def _base_env_from_contract(contract: dict[str, str | list[str]]) -> dict[str, str]:
     env: dict[str, str] = {}
@@ -58,6 +67,15 @@ def _save_state(
             "STATE_SYSROOT_SSH_KEY_PATH": str(ctx.key_path),
         },
     )
+
+
+def _require_aws_success(completed, *, operation: str) -> None:
+    if completed.returncode == 0:
+        return
+    detail = completed.stderr.strip() or completed.stdout.strip()
+    if detail:
+        _die(f"{operation} failed: {detail}")
+    raise SystemExit(completed.returncode)
 
 
 def _describe_instance_type(ctx: aws_common.AwsExecutorContext, instance_id: str) -> str:
@@ -146,8 +164,7 @@ def _resolve_root_device_name(ctx: aws_common.AwsExecutorContext, ami_id: str) -
         "text",
         capture_output=True,
     )
-    if completed.returncode != 0:
-        raise SystemExit(completed.returncode)
+    _require_aws_success(completed, operation=f"describe root device for AMI {ami_id}")
     root_device_name = completed.stdout.strip()
     if not root_device_name or root_device_name == "None":
         return "/dev/xvda"
@@ -262,13 +279,7 @@ mkdir -p "$1"
 """,
     )
     aws_common._scp_to(ctx, ip, ctx.manifest_path, remote_manifest)
-    for rel_src, rel_dest in (
-        ("runner/__init__.py", "__init__.py"),
-        ("runner/libs/__init__.py", "libs/__init__.py"),
-        ("runner/libs/prereq_contract.py", "libs/prereq_contract.py"),
-        ("runner/libs/run_contract.py", "libs/run_contract.py"),
-        ("runner/libs/aws_remote_prereqs.py", "libs/aws_remote_prereqs.py"),
-    ):
+    for rel_src, rel_dest in REMOTE_PREREQ_ASSETS:
         aws_common._scp_to(ctx, ip, ROOT_DIR / rel_src, f"{remote_runner_root}/{rel_dest}")
     aws_common._ssh_bash(
         ctx,
@@ -557,8 +568,7 @@ def _launch_instance(ctx: aws_common.AwsExecutorContext) -> None:
             "text",
             capture_output=True,
         )
-        if completed.returncode != 0:
-            raise SystemExit(completed.returncode)
+        _require_aws_success(completed, operation=f"resolve AMI param {ami_param}")
         ami_id = completed.stdout.strip()
 
     state = aws_common._load_instance_state(ctx)
@@ -627,8 +637,7 @@ def _launch_instance(ctx: aws_common.AwsExecutorContext) -> None:
             "text",
             capture_output=True,
         )
-        if completed.returncode != 0:
-            raise SystemExit(completed.returncode)
+        _require_aws_success(completed, operation=f"launch instance for {ctx.run_token}")
         instance_id = completed.stdout.strip()
 
     _save_state(ctx, instance_id=instance_id, instance_ip=instance_ip, kernel_release=state.get("STATE_KERNEL_RELEASE", ""))

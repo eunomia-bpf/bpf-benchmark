@@ -4,7 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from runner.libs import execute_workspace, prepare_local_inputs
+from runner.libs import aws_local_prep, execute_workspace, local_prep_common, prepare_local_inputs
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
 def test_prepare_local_inputs_dispatches_kvm(monkeypatch, tmp_path: Path) -> None:
@@ -88,6 +90,28 @@ def test_prepare_local_inputs_dispatches_aws_without_base_phase(monkeypatch, tmp
     assert seen["phases"] == ["runtime", "test_outputs", "upstream_selftests"]
 
 
+def test_prepare_local_inputs_test_suite_fetches_repos_before_scx(monkeypatch, tmp_path: Path) -> None:
+    manifest = tmp_path / "run-contract.env"
+    local_state = tmp_path / "local-state.json"
+    manifest.write_text(
+        "RUN_EXECUTOR=kvm\n"
+        "RUN_SUITE_NAME=test\n"
+        "RUN_HOST_PYTHON_BIN=python3\n"
+        "RUN_FETCH_REPOS_CSV=scx\n"
+        "RUN_SCX_PACKAGES_CSV=scx_rusty\n",
+        encoding="utf-8",
+    )
+    seen: dict[str, object] = {}
+
+    def fake_kvm_local_prep(*, manifest_path: Path, local_state_path: Path, env: dict[str, str], phases: list[str]) -> None:
+        seen["phases"] = phases
+
+    monkeypatch.setattr(prepare_local_inputs, "run_kvm_local_prep", fake_kvm_local_prep)
+    prepare_local_inputs.main([str(manifest), str(local_state)])
+
+    assert seen["phases"] == ["base", "runtime", "test_outputs", "upstream_selftests", "fetch_repos", "scx"]
+
+
 def test_execute_workspace_runs_install_validate_then_suite(monkeypatch, tmp_path: Path) -> None:
     workspace = tmp_path / "workspace"
     workspace.mkdir()
@@ -134,3 +158,54 @@ def test_execute_workspace_runs_install_validate_then_suite(monkeypatch, tmp_pat
         "contract:workspace:run-contract.env:None",
         "run",
     ]
+
+
+def test_x86_bundle_inputs_use_native_katran_stage_root(tmp_path: Path) -> None:
+    promote_root = tmp_path / "bundle-inputs"
+    test_artifacts_root = promote_root / "test-artifacts"
+    repo_root = promote_root / "runner" / "repos"
+
+    values = local_prep_common.x86_bundle_inputs(
+        promote_root=promote_root,
+        local_repo_root=repo_root,
+        test_artifacts_root=test_artifacts_root,
+    )
+
+    assert values["RUN_KATRAN_SERVER_BINARY"] == str(promote_root / "corpus" / "build" / "katran" / "bin" / "katran_server_grpc")
+    assert values["RUN_KATRAN_SERVER_LIB_DIR"] == str(promote_root / "corpus" / "build" / "katran" / "lib")
+
+
+def test_aws_arm64_container_build_uses_container_python_and_llvmbpf_env(monkeypatch, tmp_path: Path) -> None:
+    manifest = tmp_path / "run-contract.env"
+    local_state = tmp_path / "local-state.json"
+    remote_state = tmp_path / "remote-state.json"
+    remote_state.write_text("{}\n", encoding="utf-8")
+
+    prep = aws_local_prep.AWSPrep(
+        env={
+            "RUN_TOKEN": "run.aws-arm64.corpus.test",
+            "RUN_TARGET_NAME": "aws-arm64",
+            "RUN_TARGET_ARCH": "arm64",
+            "RUN_HOST_PYTHON_BIN": str(tmp_path / ".venv" / "bin" / "python3"),
+        },
+        manifest_path=manifest,
+        local_state_path=local_state,
+        remote_prep_state_path=remote_state,
+    )
+
+    seen: dict[str, object] = {}
+
+    monkeypatch.setattr(prep, "_ensure_arm64_crossbuild_image", lambda: None)
+
+    def fake_run_command(command: list[str], *, env: dict[str, str], cwd: Path = ROOT_DIR) -> None:
+        seen["command"] = command
+        seen["env"] = env
+
+    monkeypatch.setattr(aws_local_prep, "run_command", fake_run_command)
+
+    prep._run_arm64_container_build(runtime_targets_csv="runner", llvmbpf_setting="ON", bench_repos_csv="bcc")
+
+    command = seen["command"]
+    assert "ARM64_HOST_PYTHON_BIN=python3" in command
+    assert f"ARM64_HOST_PYTHON_BIN={prep.host_python_bin}" not in command
+    assert "MICRO_EXEC_ENABLE_LLVMBPF=ON" in command

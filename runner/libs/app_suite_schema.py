@@ -7,7 +7,7 @@ from typing import Any, Mapping
 import yaml
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class AppWorkload:
     corpus: str
     e2e: str
@@ -21,7 +21,7 @@ class AppWorkload:
         raise ValueError(f"unsupported app workload mode: {mode!r}")
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class AppSpec:
     name: str
     runner: str
@@ -33,7 +33,7 @@ class AppSpec:
         return self.workload.for_mode(mode)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class AppSuite:
     manifest_path: Path
     suite_name: str

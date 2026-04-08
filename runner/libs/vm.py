@@ -104,14 +104,19 @@ def build_vng_command(
     resolved_lock_scope = str(machine_lock_scope).strip()
     if not resolved_lock_scope:
         raise ValueError("explicit vng machine configuration requires machine_lock_scope")
-    vng_path = str(Path(vm_executable).resolve())
+    resolved_vm_executable = Path(vm_executable).resolve()
+    launch_prefix: list[str]
+    if resolved_vm_executable.suffix == ".py":
+        launch_prefix = [sys.executable, str(resolved_vm_executable)]
+    else:
+        launch_prefix = [str(resolved_vm_executable)]
     resolved_cpus = max(1, int(cpus if cpus is not None else 1))
     resolved_mem = str(mem if mem is not None else "4G")
     kernel = Path(kernel_path).resolve()
     resolved_cwd = Path(cwd).resolve() if cwd is not None else ROOT_DIR
 
     command = [
-        vng_path,
+        *launch_prefix,
         "--run",
         str(kernel),
         "--cwd",

@@ -9,8 +9,6 @@ import subprocess
 import tempfile
 import threading
 import time
-import urllib.parse
-import urllib.request
 from dataclasses import asdict, dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -23,7 +21,7 @@ LOOPBACK_LISTEN_BACKLOG = 128
 LOOPBACK_CONNECT_TIMEOUT_S = 2.0
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class WorkloadResult:
     ops_total: float
     ops_per_sec: float | None
@@ -112,18 +110,20 @@ def _merge_workload_results(results: Sequence[WorkloadResult]) -> WorkloadResult
     )
 
 
-def _parse_stress_ng_bogo_ops(text: str, *, stressor: str | None = None) -> float | None:
+def parse_stress_ng_bogo_ops(text: str, *, stressor: str | None = None) -> float | None:
     for line in text.splitlines():
-        if "stress-ng:" not in line:
+        if "stress-ng: metrc:" not in line:
             continue
-        if stressor and f" {stressor} " not in f" {line} ":
+        match = re.search(r"stress-ng:\s+metrc:\s+\[\d+\]\s+(\S+)\s+([-+]?\d+(?:\.\d+)?)", line)
+        if not match:
             continue
-        values = re.findall(r"[-+]?\d+(?:\.\d+)?", line)
-        if values:
-            try:
-                return float(values[0])
-            except ValueError:
-                continue
+        matched_stressor, bogo_ops = match.groups()
+        if stressor and matched_stressor != stressor:
+            continue
+        try:
+            return float(bogo_ops)
+        except ValueError:
+            continue
     return None
 
 
@@ -224,7 +224,7 @@ def run_exec_storm(duration_s: int | float, rate: int) -> WorkloadResult:
         details = tail_text(completed.stderr or completed.stdout)
         raise RuntimeError(f"stress-ng exec workload failed: {details}")
     combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
-    ops_total = _parse_stress_ng_bogo_ops(combined, stressor="exec")
+    ops_total = parse_stress_ng_bogo_ops(combined, stressor="exec")
     if ops_total is None:
         details = tail_text(combined)
         raise RuntimeError(f"stress-ng exec workload did not report bogo-ops metrics: {details}")
@@ -283,28 +283,6 @@ def run_file_io(duration_s: int | float) -> WorkloadResult:
             raise RuntimeError(f"fio file_io workload did not report total_ios metrics: {details}")
         return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
 
-
-def run_python_http_loop(duration_s: int | float, url: str) -> WorkloadResult:
-    parsed = urllib.parse.urlsplit(url)
-    if parsed.scheme not in {"http", "https"}:
-        raise RuntimeError(f"unsupported URL scheme for python http workload: {url}")
-    deadline = time.monotonic() + float(duration_s)
-    ops_total = 0.0
-    while time.monotonic() < deadline:
-        with urllib.request.urlopen(url, timeout=2.0) as response:
-            response.read(1)
-        ops_total += 1.0
-    elapsed = max(0.0, float(duration_s))
-    return _finish_result(ops_total, elapsed, "", "")
-
-
-def _prepare_read_file(path: Path, size_mb: int = 64) -> None:
-    if path.exists() and path.stat().st_size >= size_mb * 1024 * 1024:
-        return
-    chunk = b"\0" * (1024 * 1024)
-    with path.open("wb") as handle:
-        for _ in range(max(1, int(size_mb))):
-            handle.write(chunk)
 
 
 def _disk_backed_tmp_root() -> Path:
@@ -600,8 +578,11 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
     if tc_binary is None:
         raise RuntimeError("tc is required for the tcp_retransmit workload")
     _load_kernel_module("sch_netem")
-    effective_duration = max(3.0, float(duration_s))
-    transfer_target_bytes = 256 * 1024
+    # Short corpus smoke runs need a denser retransmit pattern than the default
+    # loopback path naturally produces, otherwise the tracing program can stay
+    # attached but never accumulate a measurable baseline delta.
+    effective_duration = max(5.0, float(duration_s))
+    transfer_target_bytes = 64 * 1024
 
     ready = threading.Event()
     stop = threading.Event()
@@ -661,9 +642,9 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
             "root",
             "netem",
             "delay",
-            "20ms",
+            "40ms",
             "loss",
-            "10%",
+            "30%",
         ],
         action="qdisc replace dev lo root netem",
     )
@@ -914,7 +895,7 @@ def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadR
             details = tail_text(completed.stderr or completed.stdout)
             raise RuntimeError(f"oom_stress workload failed: {details}")
         combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
-        ops_total = _parse_stress_ng_bogo_ops(combined, stressor="vm")
+        ops_total = parse_stress_ng_bogo_ops(combined, stressor="vm")
         if ops_total is None:
             details = tail_text(combined)
             raise RuntimeError(f"oom_stress workload did not report bogo-ops metrics: {details}")
@@ -954,6 +935,7 @@ def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadR
 
 __all__ = [
     "WorkloadResult",
+    "parse_stress_ng_bogo_ops",
     "run_block_io_load",
     "run_connect_storm",
     "run_exec_storm",

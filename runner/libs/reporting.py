@@ -14,14 +14,14 @@ PRIMARY_RUNTIME = "llvmbpf"
 BASELINE_RUNTIME = "kernel"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ComparisonSummary:
     geomean: float | None
     ci: tuple[float, float] | None
     wins: tuple[int, int, int]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class BenchmarkStatistics:
     name: str
     category: str | None
@@ -37,7 +37,7 @@ class BenchmarkStatistics:
     is_baseline: bool = False
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class GroupStatistics:
     group_name: str
     benchmark_count: int
@@ -46,7 +46,7 @@ class GroupStatistics:
     wins: tuple[int, int, int]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class PerfRuntimeStatistics:
     runtime: str
     benchmark_count: int
@@ -57,7 +57,7 @@ class PerfRuntimeStatistics:
     cache_miss_rate_median: float | None
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class RQReport:
     suite_name: str
     manifest: ManifestSpec | None

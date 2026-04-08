@@ -11,12 +11,11 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
-from typing import cast
 
 from runner.libs.cli_support import fail
 from runner.libs.guest_prereqs import resolve_remote_workload_tool_bin, workload_tool_is_bundled
 from runner.libs.kinsn import load_kinsn_modules
-from runner.libs.run_contract import parse_manifest
+from runner.libs.manifest_file import parse_manifest
 
 _die = partial(fail, "suite-entrypoint")
 
@@ -259,8 +258,30 @@ class SuiteEntrypoint:
             x86_libbpf = self.workspace / ".cache" / "portable-libbpf" / "lib" / "libbpf.so.1"
             if x86_libbpf.is_file():
                 env["BPFREJIT_LIBBPF_PATH"] = str(x86_libbpf)
+        extra_ld_library_dirs: list[str] = []
+        if existing_ld_library_path := os.environ.get("LD_LIBRARY_PATH", "").strip():
+            extra_ld_library_dirs.append(existing_ld_library_path)
+        for repo_name in self._csv_contract("RUN_NATIVE_REPOS_CSV"):
+            lib_dir = self.workspace / "corpus" / "build" / repo_name / "lib"
+            lib64_dir = self.workspace / "corpus" / "build" / repo_name / "lib64"
+            if lib_dir.is_dir():
+                extra_ld_library_dirs.append(str(lib_dir))
+            if lib64_dir.is_dir():
+                extra_ld_library_dirs.append(str(lib64_dir))
+        if extra_ld_library_dirs:
+            env["LD_LIBRARY_PATH"] = ":".join(extra_ld_library_dirs)
+        bcc_tools_dir = self._optional_contract("RUN_BCC_TOOLS_DIR")
+        if bcc_tools_dir:
+            resolved_bcc_tools_dir = _resolve_workspace_contract_path(self.workspace, bcc_tools_dir)
+            if not resolved_bcc_tools_dir.is_dir():
+                _die(f"bundled BCC tools dir is missing: {resolved_bcc_tools_dir}")
+            env["BCC_TOOLS_DIR"] = str(resolved_bcc_tools_dir)
         if self.executor == "aws-ssh":
             env["BPFREJIT_KERNEL_MODULES_ROOT"] = "/"
+        elif self.executor == "kvm":
+            staged_kernel_modules_root = self.workspace / "vendor" / "linux-framework" / ".virtme_mods"
+            if staged_kernel_modules_root.is_dir():
+                env["BPFREJIT_KERNEL_MODULES_ROOT"] = str(staged_kernel_modules_root)
         env["PYTHONPATH"] = str(self.workspace)
         env["BPFTOOL_BIN"] = self.bpftool_bin
         if shutil.which(self.bpftool_bin, path=env["PATH"]) is None:
@@ -323,10 +344,10 @@ class SuiteEntrypoint:
         if not self._bool_contract("RUN_NEEDS_KATRAN_BUNDLE"):
             return
         binary = _require_executable(
-            self.workspace / "e2e" / "cases" / "katran" / "bin" / "katran_server_grpc",
+            _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_KATRAN_SERVER_BINARY")),
             "bundled Katran server",
         )
-        lib_dir = self.workspace / "e2e" / "cases" / "katran" / "lib"
+        lib_dir = _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_KATRAN_SERVER_LIB_DIR"))
         if not lib_dir.is_dir():
             _die("bundled Katran runtime lib dir is missing")
         env["KATRAN_SERVER_BINARY"] = str(binary)
@@ -715,7 +736,7 @@ def main(argv: list[str] | None = None) -> None:
     if not workspace.is_dir():
         _die(f"workspace is missing: {workspace}")
     contract = parse_manifest(manifest_path)
-    SuiteEntrypoint.from_contract(workspace, manifest_path, archive_path, cast(dict[str, str | list[str]], contract)).run()
+    SuiteEntrypoint.from_contract(workspace, manifest_path, archive_path, contract).run()
 
 
 if __name__ == "__main__":

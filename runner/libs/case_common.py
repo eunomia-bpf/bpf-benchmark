@@ -178,7 +178,7 @@ def _lifecycle_metadata_payload(kinsn_metadata: Mapping[str, object] | None) -> 
 # Lifecycle helpers
 # ---------------------------------------------------------------------------
 
-@dataclass(slots=True)
+@dataclass
 class CaseLifecycleState:
     runtime: AppRunner
     target_prog_ids: list[int] = field(default_factory=list)
@@ -191,20 +191,20 @@ class CaseLifecycleState:
         return [int(value) for value in raw_prog_ids if int(value) > 0]
 
 
-@dataclass(slots=True)
+@dataclass
 class PreparedDaemonSession:
     session: DaemonSession
     metadata: dict[str, object]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class LifecycleAbort:
     status: str
     reason: str
     artifacts: Mapping[str, object] | None = None
 
 
-@dataclass(slots=True)
+@dataclass
 class LifecycleRunResult:
     setup_state: object
     state: CaseLifecycleState | None

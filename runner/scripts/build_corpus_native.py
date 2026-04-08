@@ -14,6 +14,8 @@ from typing import Callable, Iterable
 
 from elftools.elf.elffile import ELFFile
 
+from runner.libs.runner_artifacts import build_vendor_bpftool
+
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 RUNNER_DIR = SCRIPT_DIR.parent
@@ -104,10 +106,7 @@ def capture(command: list[str], *, cwd: Path | None = None, env: dict[str, str] 
 
 def ensure_vendor_bpftool() -> Path:
     vendor_build_root = ACTIVE_BUILD_ROOT / "_runner-vendor"
-    bpftool = vendor_build_root / "vendor" / "bpftool" / "bootstrap" / "bpftool"
-    if not bpftool.is_file():
-        run(["make", "-C", str(RUNNER_DIR), f"BUILD_DIR={vendor_build_root}", "vendor_bpftool"])
-    return bpftool
+    return build_vendor_bpftool(build_dir=vendor_build_root, env=os.environ.copy())
 
 
 def summarize_process_output(completed: subprocess.CompletedProcess[str]) -> str:
@@ -142,6 +141,22 @@ def stage_file(src: Path, dst: Path) -> None:
     shutil.copy2(src, dst)
 
 
+def stage_file_or_symlink(src: Path, dst: Path) -> None:
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    if src.is_symlink():
+        if dst.exists() or dst.is_symlink():
+            dst.unlink()
+        target = os.readlink(src)
+        target_path = Path(target)
+        if target_path.is_absolute():
+            sibling_target = src.parent / target_path.name
+            if sibling_target.exists():
+                target = sibling_target.name
+        os.symlink(target, dst)
+        return
+    shutil.copy2(src, dst)
+
+
 def stage_many(files: Iterable[Path], dest_fn: Callable[[Path], Path]) -> int:
     staged = 0
     seen: dict[Path, Path] = {}
@@ -158,6 +173,46 @@ def stage_many(files: Iterable[Path], dest_fn: Callable[[Path], Path]) -> int:
 
 def is_executable_file(path: Path) -> bool:
     return path.is_file() and os.access(path, os.X_OK)
+
+
+def git_path_is_pristine(repo_root: Path, pathspec: str) -> bool:
+    completed = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo_root),
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=all",
+            "--",
+            pathspec,
+        ],
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if completed.returncode != 0:
+        raise CommandError(completed.stderr.strip() or f"failed to inspect git status for {pathspec}")
+    return not completed.stdout.strip()
+
+
+def iter_git_tracked_paths(repo_root: Path, pathspec: str) -> list[Path]:
+    completed = subprocess.run(
+        ["git", "-C", str(repo_root), "ls-files", "-z", "--", pathspec],
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=False,
+    )
+    if completed.returncode != 0:
+        message = completed.stderr.decode("utf-8", errors="replace").strip() or f"failed to list tracked files under {pathspec}"
+        raise CommandError(message)
+    return [
+        repo_root / rel.decode("utf-8", errors="replace").strip()
+        for rel in completed.stdout.split(b"\0")
+        if rel
+    ]
 
 
 def is_bpf_object(path: Path) -> bool:
@@ -187,30 +242,6 @@ def verify_binary(command: list[str], *, env: dict[str, str] | None = None) -> b
 def clean_stage_dir(path: Path) -> None:
     shutil.rmtree(path, ignore_errors=True)
     path.mkdir(parents=True, exist_ok=True)
-
-
-def materialize_library_soname_links(lib_dir: Path) -> None:
-    if not lib_dir.is_dir():
-        return
-    for lib_path in sorted(path for path in lib_dir.iterdir() if path.is_file()):
-        completed = subprocess.run(
-            ["readelf", "-d", str(lib_path)],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if completed.returncode != 0:
-            continue
-        soname = ""
-        for line in completed.stdout.splitlines():
-            if "Library soname:" not in line:
-                continue
-            soname = line.split("[", 1)[1].split("]", 1)[0].strip()
-            break
-        if soname and soname != lib_path.name:
-            link_path = lib_dir / soname
-            if not link_path.exists():
-                link_path.symlink_to(lib_path.name)
 
 
 def remove_staged_temp_objects(path: Path) -> None:
@@ -642,10 +673,12 @@ def build_scx(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
 def build_katran(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
     repo_dir = repo_checkout(repo_root, "katran")
     lib_dir = repo_dir / "katran" / "lib"
+    helper_root = REPO_ROOT / "e2e" / "cases" / "katran"
+    helper_binary = helper_root / "bin" / "katran_server_grpc"
+    helper_lib_root = helper_root / "lib"
     clang = str(os.environ.get("CLANG", "clang")).strip() or "clang"
     llc = str(os.environ.get("LLC", "llc")).strip() or "llc"
     clean_stage_dir(stage_root)
-    binary_count = 0
     with tempfile.TemporaryDirectory(prefix="katran-bpf-build-") as temp_dir:
         work_dir = Path(temp_dir)
         (work_dir / "include").mkdir(parents=True, exist_ok=True)
@@ -661,45 +694,27 @@ def build_katran(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResul
         object_paths = sorted(path for path in (work_dir / "bpf").glob("*.o") if is_bpf_object(path))
         object_count = stage_many(object_paths, lambda src: stage_root / bpf_stage_relative(Path(src.name)))
 
-    explicit_binary = str(os.environ.get("KATRAN_SERVER_BINARY", "")).strip()
-    explicit_lib_dir = str(os.environ.get("KATRAN_SERVER_LIB_DIR", "")).strip()
-    if explicit_binary:
-        binary_path = Path(explicit_binary).expanduser()
-        staged_lib_dir = Path(explicit_lib_dir).expanduser() if explicit_lib_dir else None
-        if not is_executable_file(binary_path):
-            raise CommandError(f"explicit Katran server binary is not executable: {binary_path}")
-        if explicit_lib_dir and (staged_lib_dir is None or not staged_lib_dir.is_dir()):
-            raise CommandError(f"explicit Katran server lib dir is invalid: {explicit_lib_dir}")
-        verify_env = None
-        if staged_lib_dir is not None and staged_lib_dir.is_dir():
-            verify_env = os.environ.copy()
-            verify_env["KATRAN_SERVER_LIB_DIR"] = str(staged_lib_dir.resolve())
-            current_ld = verify_env.get("LD_LIBRARY_PATH", "")
-            verify_env["LD_LIBRARY_PATH"] = (
-                f"{verify_env['KATRAN_SERVER_LIB_DIR']}{os.pathsep}{current_ld}"
-                if current_ld
-                else verify_env["KATRAN_SERVER_LIB_DIR"]
-            )
-        if not verify_binary([str(binary_path), "--help"], env=verify_env):
-            raise CommandError(f"explicit Katran server binary failed verification: {binary_path}")
-        binary_count = stage_many([binary_path], lambda src: stage_root / "bin" / src.name)
-        if staged_lib_dir is not None and staged_lib_dir.is_dir():
-            stage_many(
-                [path for path in staged_lib_dir.iterdir() if path.is_file()],
-                lambda src: stage_root / "lib" / src.name,
-            )
-            materialize_library_soname_links(stage_root / "lib")
-    else:
-        raise CommandError(
-            "Katran staging requires explicit KATRAN_SERVER_BINARY and KATRAN_SERVER_LIB_DIR"
-        )
+    if not git_path_is_pristine(REPO_ROOT, "e2e/cases/katran/bin"):
+        raise CommandError("x86 Katran helper bin dir has local modifications and cannot be staged")
+    if not git_path_is_pristine(REPO_ROOT, "e2e/cases/katran/lib"):
+        raise CommandError("x86 Katran helper lib dir has local modifications and cannot be staged")
+    tracked_binary_paths = iter_git_tracked_paths(REPO_ROOT, "e2e/cases/katran/bin/katran_server_grpc")
+    if tracked_binary_paths != [helper_binary]:
+        raise CommandError(f"x86 Katran server helper must be git-tracked: {helper_binary}")
+    if not helper_binary.is_file() or not os.access(helper_binary, os.X_OK):
+        raise CommandError(f"missing shared Katran server helper: {helper_binary}")
+    if not helper_lib_root.is_dir():
+        raise CommandError(f"missing shared Katran runtime lib dir: {helper_lib_root}")
+    stage_file_or_symlink(helper_binary, stage_root / "bin" / helper_binary.name)
+    for path in sorted(iter_git_tracked_paths(REPO_ROOT, "e2e/cases/katran/lib")):
+        stage_file_or_symlink(path, stage_root / "lib" / path.name)
 
     remove_staged_temp_objects(stage_root)
     return RepoBuildResult(
         name="katran",
         stage_dir=stage_root,
         object_count=object_count,
-        binary_count=binary_count,
+        binary_count=0,
         verify_command=(),
         verify_ok=True,
         status="ok",

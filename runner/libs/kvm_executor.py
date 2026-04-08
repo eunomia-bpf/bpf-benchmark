@@ -4,12 +4,13 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import tempfile
 from functools import partial
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
-from runner.libs.run_contract import parse_manifest
+from runner.libs.manifest_file import parse_manifest
 from runner.libs.state_file import read_state
 
 _die = partial(fail, "kvm-executor")
@@ -26,9 +27,10 @@ def _require_scalar(mapping: dict[str, str | list[str]], name: str) -> str:
 
 
 def bundle_stage_root(bundle_tar: Path) -> Path:
-    stage_token = bundle_tar.name.removesuffix(".tar.gz")
-    stage_root = bundle_tar.parent / stage_token / "workspace"
-    shutil.rmtree(stage_root, ignore_errors=True)
+    stage_token = bundle_tar.parent.name or bundle_tar.name.removesuffix(".tar.gz")
+    stage_bundle_root = Path(tempfile.gettempdir()) / "bpf-benchmark-kvm" / stage_token
+    stage_root = stage_bundle_root / "workspace"
+    shutil.rmtree(stage_bundle_root, ignore_errors=True)
     stage_root.mkdir(parents=True, exist_ok=True)
     with tarfile.open(bundle_tar, "r:gz") as archive:
         archive.extractall(stage_root, filter="data")

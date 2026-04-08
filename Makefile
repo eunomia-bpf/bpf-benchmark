@@ -21,6 +21,7 @@ UPSTREAM_SELFTEST_LLC ?= llc$(UPSTREAM_SELFTEST_LLVM_SUFFIX)
 UPSTREAM_SELFTEST_LLVM_CONFIG ?= llvm-config$(UPSTREAM_SELFTEST_LLVM_SUFFIX)
 UPSTREAM_SELFTEST_LLVM_OBJCOPY ?= llvm-objcopy$(UPSTREAM_SELFTEST_LLVM_SUFFIX)
 UPSTREAM_SELFTEST_LLVM_STRIP ?= llvm-strip$(UPSTREAM_SELFTEST_LLVM_SUFFIX)
+LLVM_CONFIG ?= $(UPSTREAM_SELFTEST_LLVM_CONFIG)
 
 include $(RUNNER_DIR)/mk/arm64_defaults.mk
 
@@ -44,9 +45,6 @@ AWS_X86_BENCH_MODE        ?= all
 
 # Tunables
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
-DAEMON  ?= daemon/target/release/bpfrejit-daemon
-DAEMON_ARGS ?=
-DAEMON_SOCKET ?= /tmp/bpfrejit.sock
 E2E_ARGS ?=
 E2E_CASE ?= all
 VM_CORPUS_ARGS ?=
@@ -71,7 +69,10 @@ SCX_PROG_SHOW_RACE_SKIP_PROBE ?= 0
 KALLSYMS_EXTRA_PASS ?= 1
 PYTHON_STATIC_TESTS := \
 	tests/python/test_run_contract.py \
-	tests/python/test_prepare_local_inputs.py
+	tests/python/test_prepare_local_inputs.py \
+	tests/python/test_build_remote_bundle.py \
+	tests/python/test_runtime_file_signatures.py \
+	tests/python/test_workload_api.py
 
 # Derived
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
@@ -87,7 +88,7 @@ _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
 _VENV_FOUND := $(firstword $(foreach v,$(_VENV_CANDIDATES),$(if $(wildcard $(v)/bin/activate),$(v),)))
 VENV ?= $(_VENV_FOUND)
 PYTHON := $(if $(VENV),$(VENV)/bin/python3,python3)
-export BZIMAGE PYTHON
+export BZIMAGE PYTHON LLVM_CONFIG
 export VM_TEST_TIMEOUT VM_MICRO_TIMEOUT VM_CORPUS_TIMEOUT VM_E2E_TIMEOUT
 export FUZZ_ROUNDS SCX_PROG_SHOW_RACE_MODE SCX_PROG_SHOW_RACE_ITERATIONS SCX_PROG_SHOW_RACE_LOAD_TIMEOUT SCX_PROG_SHOW_RACE_SKIP_PROBE
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
@@ -258,7 +259,7 @@ clean:
 	$(MAKE) -C "$(MICRO_DIR)" clean
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	$(MAKE) -C "$(KERNEL_DIR)" clean
-	rm -f "$(SMOKE_OUTPUT)" "$(ARM64_CONFIG_LINK)" "$(ARM64_IMAGE_LINK)"
+	rm -f "$(ARM64_CONFIG_LINK)" "$(ARM64_IMAGE_LINK)"
 	rm -rf "$(ARM64_BUILD_DIR)" "$(UPSTREAM_SELFTEST_OUTPUT_DIR)" "$(CACHE_DIR)/arm64-host"
 	rm -rf \
 		"$(CACHE_DIR)/aws-arm64/kernel-build" \

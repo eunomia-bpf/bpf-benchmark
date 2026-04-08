@@ -82,6 +82,12 @@ class ScxRunner(AppRunner):
     def last_workload_details(self) -> Mapping[str, object]:
         return dict(self.last_workload_extra)
 
+    def refresh_live_programs(self) -> list[dict[str, object]]:
+        if self.session is None:
+            raise RuntimeError("ScxRunner is not running")
+        self.programs = self.session.refresh_programs()
+        return [dict(program) for program in self.programs]
+
     def start(self) -> list[int]:
         if self.session is not None:
             raise RuntimeError("ScxRunner is already running")

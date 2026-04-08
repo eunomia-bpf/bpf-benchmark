@@ -105,8 +105,8 @@ class AWSPrep:
         self.arm64_cross_daemon = self.arm64_crossbuild_output_dir / "daemon" / "build" / "bpfrejit-daemon"
         self.arm64_cross_daemon_real = self.arm64_crossbuild_output_dir / "daemon" / "build" / "bpfrejit-daemon.real"
         self.arm64_cross_lib_dir = self.arm64_crossbuild_output_dir / "lib"
-        self.arm64_katran_server_binary = self.arm64_crossbuild_output_dir / "katran" / "bin" / "katran_server_grpc"
-        self.arm64_katran_server_lib_dir = self.arm64_crossbuild_output_dir / "katran" / "lib"
+        self.arm64_katran_server_binary = self.arm64_crossbuild_output_dir / "corpus" / "build" / "katran" / "bin" / "katran_server_grpc"
+        self.arm64_katran_server_lib_dir = self.arm64_crossbuild_output_dir / "corpus" / "build" / "katran" / "lib"
         self.arm64_worktree_dir = ROOT_DIR / ".worktrees" / "linux-framework-arm64-src"
         self.arm64_host_cache_root = ROOT_DIR / ".cache" / "arm64-host"
         self.arm64_aws_build_dir = self.target_cache_dir / "kernel-build"
@@ -186,8 +186,6 @@ class AWSPrep:
                 "ARM64_CROSS_DAEMON": str(self.arm64_cross_daemon),
                 "ARM64_CROSS_DAEMON_REAL": str(self.arm64_cross_daemon_real),
                 "ARM64_CROSS_LIB_DIR": str(self.arm64_cross_lib_dir),
-                "ARM64_KATRAN_SERVER_BINARY": str(self.arm64_katran_server_binary),
-                "ARM64_KATRAN_SERVER_LIB_DIR": str(self.arm64_katran_server_lib_dir),
                 "ARM64_WORKTREE_DIR": str(self.arm64_worktree_dir),
                 "ARM64_AWS_BUILD_DIR": str(self.arm64_aws_build_dir),
                 "ARM64_AWS_BASE_CONFIG": str(self.arm64_aws_base_config),
@@ -270,6 +268,9 @@ class AWSPrep:
         bench_repos_csv: str = "",
     ) -> None:
         self._ensure_arm64_crossbuild_image()
+        # The crossbuild container only sees /workspace, so the host venv path
+        # from RUN_HOST_PYTHON_BIN is not usable inside the container.
+        container_python_bin = "python3"
         run_command(
             [
                 self.docker_bin,
@@ -300,9 +301,11 @@ class AWSPrep:
                 "-e",
                 f"ARM64_CROSSBUILD_RUNTIME_TARGETS={runtime_targets_csv}",
                 "-e",
-                f"ARM64_CROSSBUILD_ENABLE_LLVMBPF={llvmbpf_setting}",
+                f"MICRO_EXEC_ENABLE_LLVMBPF={llvmbpf_setting}",
                 "-e",
                 f"ARM64_PREBUILT_DAEMON_BINARY={self._container_path(self.arm64_host_daemon_binary)}",
+                "-e",
+                f"ARM64_HOST_PYTHON_BIN={container_python_bin}",
                 "-e",
                 f"ARM64_CROSSBUILD_BENCH_REPOS={bench_repos_csv}",
                 "-e",
@@ -470,7 +473,7 @@ class AWSPrep:
             ARM64_HOST_DAEMON_OUTPUT_DIR=str(self.arm64_host_daemon_output_dir),
             ARM64_HOST_DAEMON_BINARY=str(self.arm64_host_daemon_binary),
             ARM64_HOST_DAEMON_CARGO_HOME=str(self.arm64_host_daemon_cargo_home),
-            UPSTREAM_SELFTEST_LLVM_SUFFIX=self.env.get("RUN_UPSTREAM_SELFTEST_LLVM_SUFFIX", "").strip(),
+            ARM64_UPSTREAM_SELFTEST_LLVM_SUFFIX=self.env.get("RUN_UPSTREAM_SELFTEST_LLVM_SUFFIX", "").strip(),
             ARM64_UPSTREAM_SELFTEST_OUTPUT_DIR=str(self.arm64_upstream_selftests_dir),
             ARM64_SYSROOT_ROOT=str(self.arm64_sysroot_root),
             ARM64_SYSROOT_LOCK_FILE=str(self.arm64_sysroot_lock_file),
@@ -663,34 +666,36 @@ class AWSPrep:
         if self.env.get("RUN_NEEDS_KINSN_MODULES", "0").strip() == "1":
             module_dir = self.arm64_kinsn_stage_dir if self.target_arch == "arm64" else self.x86_kinsn_stage_dir
             merge_state(self.bundle_inputs_path, {"RUN_KINSN_MODULE_DIR": str(module_dir)})
-        merge_state(
-            self.bundle_inputs_path,
-            x86_bundle_inputs(
-                promote_root=self.promote_root,
-                local_repo_root=self.local_repo_root,
-                test_artifacts_root=self.test_artifacts_root,
-                portable_libbpf_root=self.x86_portable_libbpf_root,
-            ),
-        )
-        merge_state(
-            self.bundle_inputs_path,
-            {
-                "ARM64_CROSS_RUNNER": str(self.arm64_cross_runner),
-                "ARM64_CROSS_RUNNER_REAL": str(self.arm64_cross_runner_real),
-                "ARM64_CROSS_DAEMON": str(self.arm64_cross_daemon),
-                "ARM64_CROSS_DAEMON_REAL": str(self.arm64_cross_daemon_real),
-                "ARM64_CROSS_LIB_DIR": str(self.arm64_cross_lib_dir),
-                "ARM64_TEST_UNITTEST_BUILD_DIR": str(self.arm64_unittest_dir),
-                "ARM64_TEST_NEGATIVE_BUILD_DIR": str(self.arm64_negative_dir),
-                "ARM64_UPSTREAM_SELFTEST_DIR": str(self.arm64_upstream_selftests_dir),
-                "ARM64_UPSTREAM_TEST_KMODS_DIR": str(self.arm64_upstream_test_kmods_dir),
-                "ARM64_NATIVE_BUILD_ROOT": str(self.arm64_crossbuild_output_dir / "corpus" / "build"),
-                "ARM64_SCX_BINARY_ROOT": str(self.arm64_crossbuild_output_dir / "runner" / "repos" / "scx" / "target" / "release"),
-                "ARM64_SCX_OBJECT_ROOT": str(self.arm64_crossbuild_output_dir / "corpus" / "build" / "scx"),
-                "ARM64_KATRAN_SERVER_BINARY": str(self.arm64_katran_server_binary),
-                "ARM64_KATRAN_SERVER_LIB_DIR": str(self.arm64_katran_server_lib_dir),
-            },
-        )
+        if self.target_arch == "x86_64":
+            merge_state(
+                self.bundle_inputs_path,
+                x86_bundle_inputs(
+                    promote_root=self.promote_root,
+                    local_repo_root=self.local_repo_root,
+                    test_artifacts_root=self.test_artifacts_root,
+                    portable_libbpf_root=self.x86_portable_libbpf_root,
+                ),
+            )
+        if self.target_arch == "arm64":
+            merge_state(
+                self.bundle_inputs_path,
+                {
+                    "ARM64_CROSS_RUNNER": str(self.arm64_cross_runner),
+                    "ARM64_CROSS_RUNNER_REAL": str(self.arm64_cross_runner_real),
+                    "ARM64_CROSS_DAEMON": str(self.arm64_cross_daemon),
+                    "ARM64_CROSS_DAEMON_REAL": str(self.arm64_cross_daemon_real),
+                    "ARM64_CROSS_LIB_DIR": str(self.arm64_cross_lib_dir),
+                    "ARM64_TEST_UNITTEST_BUILD_DIR": str(self.arm64_unittest_dir),
+                    "ARM64_TEST_NEGATIVE_BUILD_DIR": str(self.arm64_negative_dir),
+                    "ARM64_UPSTREAM_SELFTEST_DIR": str(self.arm64_upstream_selftests_dir),
+                    "ARM64_UPSTREAM_TEST_KMODS_DIR": str(self.arm64_upstream_test_kmods_dir),
+                    "ARM64_NATIVE_BUILD_ROOT": str(self.arm64_crossbuild_output_dir / "corpus" / "build"),
+                    "ARM64_SCX_BINARY_ROOT": str(self.arm64_crossbuild_output_dir / "runner" / "repos" / "scx" / "target" / "release"),
+                    "ARM64_SCX_OBJECT_ROOT": str(self.arm64_crossbuild_output_dir / "corpus" / "build" / "scx"),
+                    "RUN_KATRAN_SERVER_BINARY": str(self.arm64_katran_server_binary),
+                    "RUN_KATRAN_SERVER_LIB_DIR": str(self.arm64_katran_server_lib_dir),
+                },
+            )
 
     def finalize(self) -> None:
         self._write_bundle_inputs()

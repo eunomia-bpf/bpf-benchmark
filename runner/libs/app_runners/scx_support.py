@@ -173,6 +173,21 @@ class ScxSchedulerSession:
     def collector_snapshot(self) -> dict[str, object]:
         return self.collector.snapshot()
 
+    def refresh_programs(self) -> list[dict[str, object]]:
+        refreshed = self._discover_programs()
+        refreshed_fds = self._dup_program_fds(refreshed)
+        close_errors: list[str] = []
+        for fd in self.program_fds.values():
+            try:
+                os.close(fd)
+            except OSError as exc:
+                close_errors.append(f"failed to close stale SCX program fd {fd}: {exc}")
+        self.programs = refreshed
+        self.program_fds = refreshed_fds
+        if close_errors:
+            raise RuntimeError("; ".join(close_errors))
+        return [dict(program) for program in self.programs]
+
     def _dup_program_fds(self, programs: Sequence[Mapping[str, object]]) -> dict[int, int]:
         if self.pid is None:
             raise RuntimeError("cannot duplicate scx program FDs without a live scheduler pid")

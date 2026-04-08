@@ -13,12 +13,7 @@ toolchains:
     root: vendor/bpftool
 
 build:
-  commands:
-    micro_exec: [make, -C, runner, micro_exec]
-    programs: [make, -C, micro, programs]
-    bpftool: [make, -C, runner, vendor_bpftool]
   runner_binary: runner/build/micro_exec
-  bpftool_binary: runner/build/vendor/bpftool/bpftool
 
 defaults:
   samples: 10

@@ -39,7 +39,7 @@ class AwsKernelPaths:
 
     @property
     def x86_kernel_build_lock_file(self) -> Path:
-        return self.root_dir / ".cache/kernel-build-x86.lock"
+        return self.root_dir / ".cache/kernel-build.lock"
 
     @property
     def arm64_kernel_build_lock_file(self) -> Path:
@@ -370,6 +370,21 @@ def _build_x86_kinsn_modules_into_cache(paths: AwsKernelPaths, cache_dir: Path) 
     stage_module_binaries(paths.x86_kinsn_module_build_src, _x86_cached_kinsn_modules_dir(cache_dir))
 
 
+def _require_installed_kernel_module(modules_root: Path, relative_path: str, description: str) -> None:
+    base = modules_root / relative_path
+    candidates = (
+        base,
+        base.with_name(base.name + ".zst"),
+        base.with_name(base.name + ".xz"),
+        base.with_name(base.name + ".gz"),
+    )
+    for candidate in candidates:
+        if candidate.is_file():
+            return
+    tried = ", ".join(str(candidate) for candidate in candidates)
+    die(f"{description} not found: tried {tried}")
+
+
 def _build_x86_kernel_artifacts_locked(paths: AwsKernelPaths) -> tuple[str, Path, Path]:
     _prepare_x86_aws_config_locked(paths)
     config_fingerprint = _x86_setup_config_fingerprint(paths)
@@ -398,11 +413,11 @@ def _build_x86_kernel_artifacts_locked(paths: AwsKernelPaths) -> tuple[str, Path
     modules_root = cached_stage / f"lib/modules/{kernel_release}"
     for link_name in ("build", "source"):
         (modules_root / link_name).unlink(missing_ok=True)
-    require_path(modules_root / "kernel/drivers/nvme/host/nvme-core.ko", "x86 nvme-core module")
-    require_path(modules_root / "kernel/drivers/nvme/host/nvme.ko", "x86 nvme module")
-    require_path(modules_root / "kernel/fs/ext4/ext4.ko", "x86 ext4 module")
-    require_path(modules_root / "kernel/fs/xfs/xfs.ko", "x86 xfs module")
-    require_path(modules_root / "kernel/drivers/block/virtio_blk.ko", "x86 virtio_blk module")
+    _require_installed_kernel_module(modules_root, "kernel/drivers/nvme/host/nvme-core.ko", "x86 nvme-core module")
+    _require_installed_kernel_module(modules_root, "kernel/drivers/nvme/host/nvme.ko", "x86 nvme module")
+    _require_installed_kernel_module(modules_root, "kernel/fs/ext4/ext4.ko", "x86 ext4 module")
+    _require_installed_kernel_module(modules_root, "kernel/fs/xfs/xfs.ko", "x86 xfs module")
+    _require_installed_kernel_module(modules_root, "kernel/drivers/block/virtio_blk.ko", "x86 virtio_blk module")
     shutil.copy2(paths.x86_vmlinux, cache_dir / f"vmlinux-{kernel_release}")
     shutil.copy2(paths.x86_bzimage, cache_dir / f"bzImage-{kernel_release}")
     with tarfile.open(cache_dir / f"modules-{kernel_release}.tar.gz", "w:gz") as handle:

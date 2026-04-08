@@ -109,10 +109,8 @@ class CatalogTarget:
 
 @dataclass(frozen=True, slots=True)
 class CatalogBuild:
-    commands: Mapping[str, tuple[str, ...]]
     runner_binary: Path | None = None
     daemon_binary: Path | None = None
-    bpftool_binary: str | Path | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -179,12 +177,6 @@ class CatalogManifest:
             "policy_mode": summarize(runtime_policy_modes),
             "transport": summarize(runtime_transports),
         }
-
-
-def _normalize_commands(raw_commands: Mapping[str, Sequence[str]] | None) -> dict[str, tuple[str, ...]]:
-    if not raw_commands:
-        return {}
-    return {str(name): tuple(str(token) for token in command) for name, command in raw_commands.items()}
 
 
 def _load_runtimes(
@@ -291,9 +283,7 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
             raw=defaults_raw,
         ),
         build=CatalogBuild(
-            commands=_normalize_commands(build_data.get("commands")),
             runner_binary=_resolve_path(build_data.get("runner_binary"), root_dir),
-            bpftool_binary=_resolve_path(build_data.get("bpftool_binary"), root_dir) if build_data.get("bpftool_binary") else None,
         ),
         runtimes=runtimes,
         targets=_validate_target_names(targets),

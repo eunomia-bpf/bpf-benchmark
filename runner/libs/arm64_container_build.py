@@ -10,6 +10,7 @@ from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail, require_nonempty_dir as _require_nonempty_dir
+from runner.libs.runner_artifacts import build_runner_binary, build_vendor_bpftool
 
 _die = partial(fail, "cross-arm64")
 _require_nonempty_dir = partial(_require_nonempty_dir, tag="cross-arm64")
@@ -76,9 +77,26 @@ def _git_path_is_clean(repo_root: Path, pathspec: str = "") -> bool:
     )
 
 
+def _git_untracked_paths(repo_root: Path, pathspec: str = "") -> list[Path]:
+    command = ["git", "-C", str(repo_root), "ls-files", "--others", "--exclude-standard", "-z"]
+    if pathspec:
+        command.extend(["--", pathspec])
+    completed = subprocess.run(command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if completed.returncode != 0:
+        message = completed.stderr.decode("utf-8", errors="replace").strip() or "git ls-files failed"
+        _die(message)
+    tokens = [token.decode("utf-8") for token in completed.stdout.split(b"\0") if token]
+    return [Path(token) for token in tokens]
+
+
 def _snapshot_git_tree(repo_root: Path, dest: Path) -> None:
     if subprocess.run(["git", "-C", str(repo_root), "rev-parse", "--verify", "HEAD"], check=False).returncode != 0:
         _die(f"expected git checkout for promoted snapshot: {repo_root}")
+    untracked = _git_untracked_paths(repo_root)
+    if untracked:
+        sample = ", ".join(str(path) for path in untracked[:5])
+        extra = "" if len(untracked) <= 5 else f" (+{len(untracked) - 5} more)"
+        _die(f"source repo {repo_root} has untracked files and cannot be sealed: {sample}{extra}")
     if not _git_path_is_clean(repo_root):
         _die(f"source repo {repo_root} has local modifications and cannot be sealed")
     shutil.rmtree(dest, ignore_errors=True)
@@ -141,7 +159,6 @@ class Arm64ContainerBuild:
         self.katran_getdeps_root = self.katran_build_root / "getdeps"
         self.toolchain_dir = self.build_root / "toolchain/bin"
         self.native_cargo_linker = _env("ARM64_NATIVE_CARGO_LINKER", "gcc") or "gcc"
-        self.rustfmt_bin = _env("ARM64_CROSSBUILD_RUSTFMT", "rustfmt") or "rustfmt"
         self.host_python = _require_env("ARM64_HOST_PYTHON_BIN")
         self.clang_bin = ""
         self.clangxx_bin = ""
@@ -162,11 +179,20 @@ class Arm64ContainerBuild:
         for path in (self.output_root, self.build_root, Path(os.environ.get("CARGO_HOME", "")) if os.environ.get("CARGO_HOME") else None):
             if path and path.exists():
                 for root, dirs, files in os.walk(path):
-                    os.chown(root, uid, gid)
+                    try:
+                        os.chown(root, uid, gid)
+                    except FileNotFoundError:
+                        continue
                     for name in dirs:
-                        os.chown(os.path.join(root, name), uid, gid)
+                        try:
+                            os.chown(os.path.join(root, name), uid, gid)
+                        except FileNotFoundError:
+                            continue
                     for name in files:
-                        os.chown(os.path.join(root, name), uid, gid)
+                        try:
+                            os.chown(os.path.join(root, name), uid, gid)
+                        except FileNotFoundError:
+                            continue
 
     def resolve_llvm_tool(self, base: str) -> str:
         candidates = [f"{base}-{self.preferred_llvm_suffix}", f"{base}{self.preferred_llvm_suffix}", base]
@@ -194,7 +220,6 @@ class Arm64ContainerBuild:
             "llvm-strip": self.llvm_strip_bin,
             "llvm-objcopy": self.llvm_objcopy_bin,
             "ld.lld": self.ld_lld_bin,
-            "rustfmt": _require_command(self.rustfmt_bin),
         }
         for name, target in link_map.items():
             link = self.toolchain_dir / name
@@ -218,22 +243,17 @@ class Arm64ContainerBuild:
             shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
             _require_nonempty_dir(dest_dir, str(dest_dir))
 
-    def build_vendor_bpftool(self) -> None:
-        _run_passthrough(
-            [
-                "make",
-                "-C",
-                str(self.repo_root / "runner"),
-                f"BUILD_DIR={self.runner_vendor_build_dir.resolve()}",
-                "JOBS=1",
-                "vendor_bpftool",
-            ]
+    def build_vendor_bpftool(self) -> Path:
+        return build_vendor_bpftool(
+            build_dir=self.runner_vendor_build_dir.resolve(),
+            env={**os.environ, "BPFTOOL_JOBS": "1"},
+            expected_arch_signature="ARM aarch64",
         )
 
     def build_bcc_artifacts(self) -> None:
         repo_dir = self.bench_build_repo_root / "bcc"
         tool_dir = repo_dir / "libbpf-tools"
-        bpftool = self.runner_vendor_build_dir / "vendor/bpftool/bootstrap/bpftool"
+        bpftool = self.build_vendor_bpftool()
         required_tools = [
             "capable",
             "execsnoop",
@@ -249,7 +269,6 @@ class Arm64ContainerBuild:
         ]
         _log("Building ARM64 bcc libbpf-tools artifacts (benchmark subset only)")
         self.prepare_repo_copy("bcc", repo_dir)
-        self.build_vendor_bpftool()
         if not bpftool.is_file():
             _die(f"missing vendor bpftool for ARM64 bcc build: {bpftool}")
         _run_passthrough(
@@ -506,7 +525,7 @@ class Arm64ContainerBuild:
 
     def build_katran_server_bundle(self) -> None:
         repo_dir = self.bench_build_repo_root / "katran"
-        bundle_dir = self.output_root / "katran"
+        bundle_dir = self.output_root / "corpus" / "build" / "katran"
         binary_path = self.katran_build_dir / "build/example_grpc/katran_server_grpc"
         _log("Building local ARM64 katran_server_grpc bundle")
         self.sync_katran_source_tree(repo_dir)
@@ -616,21 +635,31 @@ class Arm64ContainerBuild:
         _log(f"Building ARM64 runner (MICRO_EXEC_ENABLE_LLVMBPF={self.micro_exec_enable_llvmbpf})")
         llvmbpf_library_path = str(self.llvmbpf_library.resolve()) if self.micro_exec_enable_llvmbpf == "ON" else ""
         llvmbpf_cache_path = str((self.llvmbpf_build_dir / "CMakeCache.txt").resolve()) if self.micro_exec_enable_llvmbpf == "ON" else ""
-        _run_passthrough(
-            [
-                "make",
-                "-C",
-                str(self.repo_root / "runner"),
-                f"BUILD_DIR={self.runner_build_dir.resolve()}",
-                "JOBS=1",
-                f"LLVM_CONFIG={self.llvm_config_bin}",
-                f"LLVMBPF_LLVM_DIR={_run([self.llvm_config_bin, '--cmakedir']).stdout.strip()}",
-                f"MICRO_EXEC_ENABLE_LLVMBPF={self.micro_exec_enable_llvmbpf}",
-                f"MICRO_LLVMBPF_LIBRARY={llvmbpf_library_path}",
-                f"MICRO_LLVMBPF_BUILD_CACHE={llvmbpf_cache_path}",
-                "micro_exec",
-            ],
-            env=os.environ | {"CC": self.clang_bin, "CXX": self.clangxx_bin},
+        llvmbpf_spdlog_library = ""
+        if self.micro_exec_enable_llvmbpf == "ON":
+            for candidate in (
+                self.llvmbpf_build_dir / "_deps" / "spdlog-build" / "libspdlogd.a",
+                self.llvmbpf_build_dir / "_deps" / "spdlog-build" / "libspdlog.a",
+            ):
+                if candidate.is_file():
+                    llvmbpf_spdlog_library = str(candidate.resolve())
+                    break
+        llvm_cmake_dir = _run([self.llvm_config_bin, "--cmakedir"]).stdout.strip()
+        build_runner_binary(
+            build_dir=self.runner_build_dir.resolve(),
+            env={
+                **os.environ,
+                "CC": self.clang_bin,
+                "CXX": self.clangxx_bin,
+                "JOBS": "1",
+                "RUN_LLVM_DIR": llvm_cmake_dir,
+                "MICRO_EXEC_ENABLE_LLVMBPF": self.micro_exec_enable_llvmbpf,
+                "MICRO_LLVMBPF_LIBRARY": llvmbpf_library_path,
+                "MICRO_LLVMBPF_BUILD_CACHE": llvmbpf_cache_path,
+                "MICRO_LLVMBPF_SPDLOG_LIBRARY": llvmbpf_spdlog_library,
+            },
+            expected_arch_signature="ARM aarch64",
+            llvmbpf_default=self.micro_exec_enable_llvmbpf,
         )
 
     def prepare_scx_checkout(self) -> None:
@@ -687,7 +716,7 @@ class Arm64ContainerBuild:
             self.copy_runtime_bundle(destination)
 
     def run(self) -> None:
-        for cmd in ("make", "cmake", "cargo", "file", "git", "ldd", self.host_python, self.rustfmt_bin, "tar"):
+        for cmd in ("make", "cmake", "cargo", "file", "git", "ldd", self.host_python, "tar"):
             _require_command(cmd)
         self.prepare_llvm_toolchain()
         Path(os.environ.get("HOME", "/tmp/codex")).mkdir(parents=True, exist_ok=True)

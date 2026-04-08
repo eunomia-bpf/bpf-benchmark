@@ -72,6 +72,9 @@ contract tests are only:
 
 - `tests/python/test_run_contract.py`
 - `tests/python/test_prepare_local_inputs.py`
+- `tests/python/test_build_remote_bundle.py`
+- `tests/python/test_runtime_file_signatures.py`
+- `tests/python/test_workload_api.py`
 
 The previous mock-heavy and case-specific Python tests were deleted on purpose.
 The repo should add tests back only when a concrete bug justifies new coverage.
@@ -81,6 +84,9 @@ As of the current cleanup pass, `tests/python/` contains only:
 - `conftest.py`
 - `test_run_contract.py`
 - `test_prepare_local_inputs.py`
+- `test_build_remote_bundle.py`
+- `test_runtime_file_signatures.py`
+- `test_workload_api.py`
 
 ## 3. Design Summary
 
@@ -992,10 +998,18 @@ This subsection is the authoritative current gate. Historical entries later in
 the document are retained as chronology, but this block overrides any stale
 intermediate status below.
 
-Refactor-first gate:
+Current review-and-runtime gate:
 
-- no new real-path validation runs should start until whole-tree static review
-  returns `No findings`
+- whole-tree static review continues in parallel with the fresh runtime lanes
+  already in flight for:
+  - `x86-kvm corpus`
+  - `aws-x86 corpus`
+  - `aws-x86 e2e`
+  - `aws-arm64 corpus`
+  - `aws-arm64 e2e`
+- new code changes during this phase may only:
+  - fix a fresh blocker from one of those lanes
+  - remove stale control planes / fallback paths / dead code
 - no new compat layers, hidden fallbacks, or third-party source patches may be
   introduced while closing the remaining findings
 
@@ -1017,8 +1031,14 @@ Current structural status:
 - KVM per-run local prep now uses the same `target-cache/runs/<token>` shape as
   AWS instead of a separate `.cache/kvm-staged/*` layout
 - `make -C runner` is no longer part of the active contract
+- active Python build paths no longer shell out to deleted `runner/Makefile`
+  targets for `micro_exec` / `vendor_bpftool`; those builds now go through the
+  shared Python module `runner.libs.runner_artifacts`
 - `runner.libs.aws_remote_prep` now imports the shared AWS helper plane as
   `runner.libs.aws_common` directly; the old `aws_executor` alias leak is gone
+- active Katran runtime resolution no longer falls back to repo-global
+  `corpus/build/katran/{bin,lib}` or caller ambient `LD_LIBRARY_PATH`; sealed
+  bundle paths are now mandatory in the active runner path
 - tracked repo-owned `.sh` files remain only in archived `docs/tmp/**` notes or
   deleted historical files pending commit; active source files are Python /
   Makefile only
@@ -1035,21 +1055,39 @@ Current ordered todo:
 2. Keep the explicit bundle/runtime contract strict:
    - repo selection stays split between `RUN_BUNDLED_REPOS_CSV` and
      `RUN_FETCH_REPOS_CSV`
+   - tracked-tree sealing must reject untracked files under active runtime
+     trees instead of silently omitting them from bundles
    - workload-tool paths must be explicit whenever `RUN_WORKLOAD_TOOLS_CSV` is
      non-empty; do not rely on hard-coded `.cache/workload-tools/bin` fallbacks
    - KVM/AWS guest/runtime prereq paths must consume the sealed workspace-local
      manifest contract, not executor-side mutation
    - AWS base remote prereqs must stay machine-global only; runtime prereqs must
      not reappear as a second executor-side control plane
+   - `run_contract` must consume only explicit process environment plus
+     checked-in target/suite files; no `~/.config/...` or extra local env side
+     plane is allowed
+   - sealed runner trees must explicitly include every active runtime module
+     needed by `execute_workspace` and `guest_prereqs`; no live import may rely
+     on an untracked file being absent from the bundle
 3. Reduce the remaining ARM canonical local-prep qemu/container path:
    - `ARM64 runner` with `MICRO_EXEC_ENABLE_LLVMBPF=OFF` should prefer host-cross
      and portable bundling over the containerized ARM build path
    - keep moving host-crossable ARM work out of `runner.libs.arm64_container_build`
    - keep extending the ARM sysroot contract only where it is needed for
      host-cross support
-   - ARM Katran dependency prep no longer calls upstream `build_katran.sh`;
+   - `aws-arm64 micro` must not pull daemon/sysroot/cargo work unless the suite
+     contract explicitly needs the daemon
+  - ARM Katran dependency prep no longer calls upstream `build_katran.sh`;
      keep the Python `getdeps.py --only-deps` path as the only active dependency
      plane for that build
+  - keep closing the remaining x86/arm64 Katran build-source divergence:
+    both arches now hand `build_remote_bundle` the same staged runtime contract
+    (`RUN_KATRAN_SERVER_BINARY` / `RUN_KATRAN_SERVER_LIB_DIR`) rooted at the
+    same sealed workspace path `corpus/build/katran/{bin,lib}`, while
+    `corpus/build/katran` still also carries Katran BPF objects; arm64 still
+    source-builds that runtime bundle from `runner/repos/katran` while x86
+    still seals the checked-in helper bundle, so the sealed-workspace path is
+    unified but the build-source split is still a remaining cleanup target
 4. Keep upstream selftests on the tracked selection path:
    - selection lives only in `runner/config/upstream_selftests_selection.tsv`
    - no script-local hidden exclusions
@@ -1062,8 +1100,8 @@ Current ordered todo:
      `selection.json` into the output dir
    - no build helper may silently ignore stale manifest rows
 5. Finish one more stale-reference sweep in active code, `README.md`, and this
-   document, especially for deleted shell libraries and older shell entrypoint
-   names.
+   document, especially for deleted shell libraries, deleted `runner/Makefile`
+   targets, and older shell entrypoint names.
 6. Keep root `Makefile` as thin public surface plus developer helpers that
    call the same Python implementation:
    - x86 kernel/module helpers now delegate to
@@ -1091,8 +1129,33 @@ Current ordered todo:
        `runner.libs.aws_common`
      - `runner.libs.aws_remote_prep` no longer leaks the old
        `aws_executor` alias name into the active Python control plane
-     - ARM Katran dependency prep now runs through Python-owned `getdeps.py`
-       invocation instead of upstream `build_katran.sh`
+     - repo materialization is no longer re-triggered inside SCX/native
+       artifact builders; canonical fetch remains in the explicit
+       `fetch_repos` prep phase
+    - Katran staging now uses one sealed runtime path for both x86 and arm64:
+      `RUN_KATRAN_SERVER_BINARY` / `RUN_KATRAN_SERVER_LIB_DIR` resolve inside
+      `corpus/build/katran/{bin,lib}` and no longer fall back to repo-global
+      runtime trees or ambient library search paths
+    - bundle sealing now removes tracked `e2e/cases/katran/bin|lib` before
+      staging prepared runtime inputs, so ARM bundles cannot retain stale x86
+      Katran helper files through overlay copy
+    - active bundle assembly now consumes only the generic
+      `RUN_KATRAN_SERVER_*` contract; arch-specific `X86_KATRAN_SERVER_*` /
+      `ARM64_KATRAN_SERVER_*` bundle keys are gone
+    - ARM Katran dependency prep now runs through Python-owned `getdeps.py`
+      invocation instead of upstream `build_katran.sh`
+     - active Python build paths no longer call deleted `runner/Makefile`
+       targets for `micro_exec` or `vendor_bpftool`
+     - Katran runtime resolution no longer falls back to repo-global build
+       outputs or ambient `LD_LIBRARY_PATH`
+     - ARM host SCX prep no longer hard-requires `rustfmt` or exports
+       `RUSTFMT` on build paths that do not use it
+     - `runner.libs.aws_remote_prereqs` now reuses
+       `runner.libs.run_contract.parse_manifest` and
+       `runner.libs.cli_support.fail`; it no longer carries a second manifest
+       grammar/error plane
+     - dead ARM container knob `ARM64_CROSSBUILD_ENABLE_LLVMBPF` is removed
+       from the active local-prep contract
 9. Keep root `Makefile` thin:
    - `vm-*` / `aws-*` remain the only public run entrypoints
    - internal `__*` targets remain internal-only
@@ -1129,8 +1192,8 @@ Current real-path validation state:
   - `python3 -m pyflakes runner/libs runner/scripts tests/python e2e docs/paper/helpers` passed
   - `git diff --check` passed
   - `python3 -m pytest -q tests/python` passed with `14 passed`
-  - `make -n aws-arm64-test aws-x86-test aws-arm64-benchmark AWS_ARM64_BENCH_MODE=all aws-x86-benchmark AWS_X86_BENCH_MODE=all vm-test` remained pure static thin aliases
-  - `make -n check validate clean` completed without re-entering deleted control planes
+  - `make -n aws-arm64-test aws-x86-test aws-arm64-benchmark AWS_ARM64_BENCH_MODE=all aws-x86-benchmark AWS_X86_BENCH_MODE=all vm-test check validate clean` remained pure static thin aliases
+  - a full repo grep no longer finds active `make -C ... runner` or `runner/Makefile` references outside archived notes
 - latest refactor closures in this gate:
   - host-side benchmark fanout and temp state handling now live in
     `runner/libs/run_target_suite.py`, not shell wrappers
@@ -3500,7 +3563,554 @@ The retained coverage is deliberately narrow:
 - guest prereq validation CLI smoke
 - local-prep dispatch
 - execute-workspace orchestration ordering
+- architecture-signature checks follow symlinks
+- workload metric parsing for stress-ng bogo-ops
 
 Everything else was dropped on purpose so new Python control-plane paths can be
 rebuilt incrementally instead of dragging a large mock-heavy compatibility
 suite through each refactor.
+
+### 13.30 2026-04-08 Active Control-Plane Shell Removal And Live Lane State
+
+The active runner control plane is now Python-only inside `runner/`.
+
+Confirmed state:
+
+- `runner/` contains no active `.sh` or `.bash` files
+- current shell files still visible in the repo are limited to:
+  - historical result artifacts under `corpus/results/` and `runner/corpus/results/`
+  - third-party or external source trees such as `runner/repos/`, `vendor/`,
+    and `.worktrees/`
+
+This means the current canonical control plane is:
+
+- root `Makefile` alias
+- `python -m runner.libs.run_target_suite`
+- `python -m runner.libs.aws_remote_prep` for AWS only
+- `python -m runner.libs.prepare_local_inputs`
+- `python -m runner.libs.aws_executor` or `python -m runner.libs.kvm_executor`
+- `python -m runner.libs.execute_workspace`
+- `python -m runner.libs.guest_prereqs`
+- `python -m runner.libs.suite_entrypoint`
+
+Current live lane state while this document was updated:
+
+- `aws-x86 corpus`
+  - still active
+  - now past the previous lock-only state
+  - currently uploading `modules-7.0.0-rc2+.tar.gz` during remote-prep
+- `aws-x86 e2e`
+  - still active
+  - waiting behind the same x86 kernel/setup artifact lock held by
+    `aws-x86 corpus`
+- `aws-arm64 corpus`
+  - still active
+  - in local prep under `arm64_container_build`
+  - current hot path is Katran dependency bootstrap via
+    `getdeps.py ... katran` under qemu-user
+- `aws-arm64 e2e`
+  - still active
+  - same ARM local-prep bottleneck as `aws-arm64 corpus`
+- `x86-kvm corpus`
+  - still active
+  - no longer only waiting on the kernel-build lock
+  - now cloning/staging repos and building local corpus inputs
+
+No new canonical result directories had landed yet at the time of this update.
+The main remaining runtime cost is now ARM local Katran dependency build under
+qemu-user, not AWS lifecycle or guest SSH setup.
+
+### 13.31 2026-04-08 Sparse Snapshot And Katran Runtime Contract Cleanup
+
+This round addressed three real runtime-contract bugs while keeping the static
+gate small.
+
+Fixed:
+
+- sparse-checkout repo sealing no longer copies tracked paths out of the
+  working tree; `runner.libs.build_remote_bundle` now uses `git archive HEAD`
+  to seal git checkouts. This fixes the `bcc/.github/.../action.yml` failure
+  seen during `x86-kvm corpus`.
+- ARM64 repo-test prep now passes the correct
+  `ARM64_UPSTREAM_SELFTEST_LLVM_SUFFIX` handoff into
+  `runner.libs.arm64_host_build`.
+- the ARM64 daemon wrapper is now kept on the actual execution path inside the
+  sealed bundle:
+  - `daemon/target/release/bpfrejit-daemon`
+  - `daemon/target/release/bpfrejit-daemon.real`
+
+Katran contract was also simplified:
+
+- e2e now explicitly declares `SUITE_NEEDS_KATRAN_BUNDLE=1`
+- `build_remote_bundle` writes the Katran runtime contract into the sealed
+  manifest instead of hardcoding `e2e/cases/katran/bin|lib` inside
+  `suite_entrypoint`
+- `suite_entrypoint` now resolves:
+  - `RUN_KATRAN_SERVER_BINARY`
+  - `RUN_KATRAN_SERVER_LIB_DIR`
+  from the sealed manifest
+- e2e bundles now always include `corpus/inputs`, so the Katran packet fixture
+  is present in the sealed workspace
+- x86 Katran runtime is no longer a second bundle input tree outside
+  `corpus/build/katran`; the x86 native build stage now owns the staged server
+  binary and staged runtime lib dir together with the staged BPF objects
+
+The minimal Python regression floor is now:
+
+- `tests/python/test_run_contract.py`
+- `tests/python/test_prepare_local_inputs.py`
+- `tests/python/test_build_remote_bundle.py`
+- `tests/python/test_runtime_file_signatures.py`
+- `tests/python/test_workload_api.py`
+
+Current static state after these fixes:
+
+- `python3 -m compileall -q runner/libs runner/scripts tests/python e2e daemon docs/paper/helpers`
+- `python3 -m pyflakes runner/libs runner/scripts tests/python e2e docs/paper/helpers`
+- `python3 -m pytest -q tests/python`
+  - `30 passed`
+- `git diff --check`
+- `make -n check`
+
+Runtime state at the end of this cleanup step:
+
+- stale AWS x86/arm `corpus/e2e` lanes from before the Katran contract changes
+  are still running and being monitored, but they do not validate the newest
+  bundle layout
+- a fresh latest-code local run was started for:
+  - `x86-kvm corpus`
+  - `SAMPLES=1`
+  - `VM_CORPUS_WORKLOAD_SECONDS=1`
+  - log: `.cache/runtime-logs/x86-kvm-corpus-latest.log`
+
+### 13.32 2026-04-08 Remote Python 3.9 Execute-Workspace Crash
+
+Fresh `aws-x86 corpus/e2e` reruns reached remote workspace execution and failed
+with a new runtime bug:
+
+- `TypeError: unsupported operand type(s) for |: 'type' and 'types.GenericAlias'`
+- this came from runtime evaluation of:
+  - `cast(dict[str, str | list[str]], contract)`
+  - inside:
+    - `runner.libs.execute_workspace`
+    - `runner.libs.suite_entrypoint`
+
+Root cause:
+
+- remote Amazon Linux still runs Python `3.9`
+- `from __future__ import annotations` protects annotations, but not runtime
+  expressions inside `typing.cast(...)`
+- the remote entrypoints were evaluating a PEP 604 union at runtime
+
+Fixed:
+
+- removed those runtime `cast(...)` expressions entirely and passed the parsed
+  manifest mapping through directly
+- added a source-level regression in
+  `tests/python/test_runtime_file_signatures.py` to prevent reintroducing this
+  exact remote-entrypoint pattern
+
+Static gate after the fix:
+
+- `python3 -m pytest -q tests/python/test_runtime_file_signatures.py tests/python/test_build_remote_bundle.py tests/python/test_prepare_local_inputs.py tests/python/test_run_contract.py`
+  - `30 passed`
+- `python3 -m pyflakes runner/libs/execute_workspace.py runner/libs/suite_entrypoint.py tests/python/test_runtime_file_signatures.py`
+- `git diff --check`
+
+Latest live state after the fix:
+
+- fresh latest-code reruns were started for:
+  - `aws-x86 corpus`
+    - log: `.cache/runtime-logs/aws-x86-corpus-latest.log`
+  - `aws-x86 e2e`
+    - log: `.cache/runtime-logs/aws-x86-e2e-latest.log`
+- existing `aws-arm64 corpus/e2e` runs were left active because they were still
+  in local prep and had not yet sealed their final workspace bundle
+- `x86-kvm corpus` remains active on the latest tree
+
+### 13.33 2026-04-08 Corpus Filter Contract And ARM SCX Wrapper Cleanup
+
+This round kept working on the runner shape while live lanes continued.
+
+Fixed:
+
+- `RUN_CORPUS_FILTERS` is no longer runtime-only for the most important prep
+  contracts. When corpus filters are present, `runner.libs.run_contract` now
+  derives the selected runner set from `corpus/config/macro_apps.yaml` and
+  prunes:
+  - `RUN_BUNDLED_REPOS_CSV`
+  - `RUN_NATIVE_REPOS_CSV`
+  - `RUN_FETCH_REPOS_CSV`
+  - `RUN_SCX_PACKAGES_CSV`
+  - `RUN_SUITE_NEEDS_SCHED_EXT`
+  - `RUN_NEEDS_KATRAN_BUNDLE`
+  This means a filtered corpus rerun is no longer forced to prep Katran or SCX
+  when the selected app set does not include them.
+- ARM64 `scx` scheduler binaries are no longer sealed as raw ELFs on the
+  execution path. `runner.libs.build_remote_bundle` now wraps staged ARM64 SCX
+  binaries with the same portable runtime wrapper pattern used for the ARM64
+  daemon:
+  - wrapper on the execution path
+  - real binary at `*.bin`
+  - bundle root `lib/` used as the runtime library source
+
+Structure checks:
+
+- active runner entrypoints are now Python-only:
+  - `runner/scripts/` contains only `.py`
+  - no second shell control plane remains under `runner/scripts`
+
+Static gate after these changes:
+
+- `python3 -m pytest -q tests/python`
+  - `34 passed`
+- `python3 -m pyflakes runner/libs runner/scripts tests/python e2e docs/paper/helpers`
+- `python3 -m compileall -q runner/libs runner/scripts tests/python e2e daemon docs/paper/helpers`
+- `git diff --check`
+
+Live runtime state while this cleanup landed:
+
+- latest-code `aws-x86 corpus` and `aws-x86 e2e` reruns are active
+- the current x86 blocker that was already observed and fixed in-tree was the
+  remote Python 3.9 `execute_workspace` crash
+- latest-code `x86-kvm corpus` remains active
+- existing `aws-arm64 corpus/e2e` lanes remain in local prep under ARM64
+  container build, now with the SCX wrapper fix available before final bundle
+  sealing
+
+### 13.34 2026-04-08 Manifest Parser Split And Fresh x86 AWS Reruns
+
+Fresh `aws-x86 corpus/e2e` reruns exposed a new remote-preflight blocker.
+
+Observed:
+
+- both fresh reruns failed in remote base prereq before suite execution
+- remote `aws_remote_prereqs.py` imported `runner.libs.run_contract.parse_manifest`
+- `run_contract.py` now imports `runner.libs.app_suite_schema`, but the remote
+  prereq bundle intentionally does not ship the full local schema/build plane
+- result: remote Amazon Linux failed with
+  `ModuleNotFoundError: No module named 'runner.libs.app_suite_schema'`
+
+Fixed:
+
+- split manifest parsing/rendering into a new minimal module:
+  - `runner/libs/manifest_file.py`
+- moved active runtime consumers off heavy `run_contract` imports:
+  - `runner/libs/aws_remote_prereqs.py`
+  - `runner/libs/execute_workspace.py`
+  - `runner/libs/suite_entrypoint.py`
+  - `runner/libs/run_target_suite.py`
+  - `runner/libs/kvm_executor.py`
+  - `runner/libs/aws_common.py`
+  - `runner/libs/guest_prereqs.py`
+  - `runner/libs/prepare_local_inputs.py`
+  - `runner/libs/build_remote_bundle.py`
+- `run_contract.py` now consumes that minimal module instead of owning a second
+  parser copy
+
+Why this matters:
+
+- remote prereq / execute-workspace paths no longer depend on local manifest
+  schema loading
+- the parser contract is now one small Python module instead of being buried in
+  the heavy manifest-construction layer
+- this removes another hidden coupling between local contract construction and
+  remote execution
+
+Static gate after the split:
+
+- `python3 -m pyflakes runner/libs/manifest_file.py runner/libs/run_contract.py runner/libs/aws_remote_prereqs.py runner/libs/execute_workspace.py runner/libs/suite_entrypoint.py runner/libs/run_target_suite.py runner/libs/kvm_executor.py runner/libs/aws_common.py runner/libs/guest_prereqs.py runner/libs/prepare_local_inputs.py runner/libs/build_remote_bundle.py tests/python/test_run_contract.py`
+- `python3 -m pytest -q tests/python/test_run_contract.py tests/python/test_prepare_local_inputs.py tests/python/test_runtime_file_signatures.py tests/python/test_build_remote_bundle.py tests/python/test_vm_launcher.py`
+  - `34 passed`
+- `git diff --check`
+
+Live state after the fix:
+
+- fresh reruns were restarted for:
+  - `aws-x86 corpus`
+  - `aws-x86 e2e`
+- `x86-kvm corpus` stayed active and continued moving through local prep on the
+  latest tree
+
+### 13.35 2026-04-08 x86 KVM Corpus Runtime Fixes And Fresh x86 AWS Reruns
+
+This round fixed the latest `x86-kvm corpus` runtime blockers while keeping
+fresh `aws-x86 corpus/e2e` reruns active.
+
+Observed on the latest `x86-kvm corpus` rerun:
+
+- BCC still resolved tools from the tracked repo checkout instead of the sealed
+  native build tree.
+- bundled `stress-ng` failed with `Permission denied` when `setpriv` dropped to
+  `65534:65534`, because the KVM executor exposed the guest workspace from a
+  host path rooted under `/home/yunwei37`, and `/home/yunwei37` is not
+  world-traversable.
+- `bpftrace` and Katran inherited a stale implicit module-tree contract:
+  runtime defaulted to `vendor/linux-framework/.virtme_mods`, but the sealed
+  KVM bundle did not stage that tree.
+- `tracee` remained brittle under the x86 portable-wrapper model because its
+  readiness/FD-owner checks use the launcher pid directly.
+
+Fixed:
+
+- sealed bundles now publish `RUN_BCC_TOOLS_DIR=corpus/build/bcc/libbpf-tools/.output`,
+  and `suite_entrypoint` exports that as `BCC_TOOLS_DIR` for runtime consumers.
+- the KVM executor no longer extracts the sealed workspace under the repo cache
+  path; it now stages under host `/tmp/bpf-benchmark-kvm/...`, which is
+  guest-visible and world-traversable for `setpriv` workloads.
+- x86 KVM bundles now stage `vendor/linux-framework/.virtme_mods`, and KVM
+  runtime explicitly sets `BPFREJIT_KERNEL_MODULES_ROOT` to that sealed path.
+- x86 native repo build trees still wrap most dynamic executables, but `tracee`
+  is now left unwrapped; its staged `corpus/build/tracee/lib` directory is
+  instead added to runtime `LD_LIBRARY_PATH`.
+
+Reviewer results on this slice:
+
+- focused BCC review: `No findings` after the sealed `RUN_BCC_TOOLS_DIR`
+  contract landed.
+- focused KVM permission review: confirmed that moving the staged KVM workspace
+  to host `/tmp` is the design-correct fix.
+- focused `.virtme_mods` review: confirmed that staging `.virtme_mods` into the
+  sealed KVM bundle and exporting `BPFREJIT_KERNEL_MODULES_ROOT` is the minimal
+  correct fix.
+
+Static gate after these fixes:
+
+- `python3 -m pyflakes runner/libs/kvm_executor.py runner/libs/build_remote_bundle.py runner/libs/suite_entrypoint.py tests/python/test_build_remote_bundle.py tests/python/test_suite_entrypoint.py tests/python/test_kvm_executor.py`
+- `python3 -m pytest -q tests/python/test_build_remote_bundle.py tests/python/test_suite_entrypoint.py tests/python/test_kvm_executor.py tests/python/test_run_contract.py tests/python/test_aws_remote_prep.py tests/python/test_prepare_local_inputs.py`
+  - `37 passed`
+- `git diff --check`
+
+Live state after these fixes:
+
+- fresh `aws-x86 corpus` rerun is active in remote prereq/setup on the latest
+  tree
+- fresh `aws-x86 e2e` rerun is active in local kernel prep on the latest tree
+- fresh `x86-kvm corpus` rerun is active on the latest tree and now includes:
+  - sealed `RUN_BCC_TOOLS_DIR`
+  - KVM staging under host `/tmp`
+  - sealed `.virtme_mods`
+  - unwrapped staged `tracee` binary with explicit runtime library path
+
+### 13.36 2026-04-08 Sealed Runner Tree Missing `manifest_file.py`
+
+The next shared runtime blocker for `x86-kvm corpus` and `aws-x86 corpus/e2e`
+was a missing live runner module in the sealed workspace:
+
+- `runner.libs.execute_workspace` imported `runner.libs.guest_prereqs`
+- `guest_prereqs` imported `runner.libs.manifest_file`
+- both KVM and AWS sealed runner trees omitted `runner/libs/manifest_file.py`
+
+This happened because sealed runner-tree copying still used the tracked-tree
+copy of `runner/libs`, while `manifest_file.py` had become a new active runtime
+module in the current tree.
+
+Fixed:
+
+- `runner.libs.build_remote_bundle.BundleBuilder.copy_runner_tree()` now copies
+  `runner/libs/manifest_file.py` explicitly into the sealed runner tree when it
+  exists
+
+Fresh reruns were restarted immediately after the fix for:
+
+- `x86-kvm corpus`
+- `aws-x86 corpus`
+- `aws-x86 e2e`
+
+Current live state after the reruns:
+
+- `x86-kvm corpus` has already moved past the old `manifest_file.py` import
+  crash and is back in staged local-prep/native-build work
+- `aws-x86 corpus/e2e` are alive again and back in AWS remote preflight / local
+  prep on the latest tree
+
+Follow-up cleanup in the same lane:
+
+- `run_contract` no longer reads `~/.config/bpf-benchmark/*.env` or
+  `BPF_BENCHMARK_LOCAL_ENV`; manifests are now determined only by explicit
+  process environment plus checked-in target/suite files
+- tracked-tree sealing now rejects untracked files under active runtime trees,
+  instead of silently omitting them from sealed bundles
+- KVM `/tmp` staging now keys the extracted workspace by run token instead of
+  the constant tarball basename, so concurrent KVM runs cannot wipe each
+  other's extracted workspace
+
+### 13.37 2026-04-08 Live Corpus/E2E Status, Snapshot Sealing, And `scx` Post-ReJIT Refresh
+
+Current active corpus/e2e lanes:
+
+- `x86-kvm corpus`
+  - current token: `run.x86-kvm.corpus.d6421dfc`
+  - current state: still alive, currently in local x86 kernel/modules build on
+    the fresh tree
+- `aws-x86 corpus`
+  - current token: `run.aws-x86.corpus.e4f42729`
+  - current state: alive; old `manifest_file.py` crash is stale and this rerun
+    is now in deeper local prep / repo build (`scx_rusty` build)
+- `aws-x86 e2e`
+  - current token: `run.aws-x86.e2e.961c343f`
+  - current state: alive; old `manifest_file.py` crash is stale and this rerun
+    is now in later prep/build after remote setup
+- `aws-arm64 corpus`
+  - current token: `run.aws-arm64.corpus.d8e4af69`
+  - current state: alive; still bottlenecked in local ARM qemu/container prep,
+    currently inside Katran getdeps/CMake
+- `aws-arm64 e2e`
+  - current token: `run.aws-arm64.e2e.1cce46c3`
+  - current state: alive; also still bottlenecked in local ARM qemu/container
+    prep
+
+New structural/runtime fixes landed in this round:
+
+- `git archive`-based sealing paths now reject untracked files too; they no
+  longer silently drop untracked runtime inputs from sealed snapshots.
+  This was fixed in:
+  - `runner/libs/build_remote_bundle.py`
+  - `runner/libs/arm64_container_build.py`
+  - `runner/libs/arm64_host_build.py`
+- `scx` now refreshes live scheduler programs after ReJIT before post-ReJIT
+  measurement, instead of continuing to sample stale pre-ReJIT `struct_ops`
+  prog_ids.
+  This was fixed in:
+  - `runner/libs/app_runners/scx_support.py`
+  - `runner/libs/app_runners/scx.py`
+  - `corpus/driver.py`
+  - `e2e/cases/scx/case.py`
+
+Why the `scx` fix matters:
+
+- the old code selected `struct_ops` prog_ids from baseline and reused them
+  after ReJIT
+- if `scx_rusty` reloads/recreates live scheduler programs during apply, those
+  prog_ids can change
+- that could falsely surface as:
+  - `did not execute any target programs after rejit`
+  - missing post-ReJIT BPF runtime counters even though the scheduler really ran
+
+The new behavior is intentionally narrow:
+
+- only `scx` refreshes live programs after ReJIT
+- corpus remaps sampled post-ReJIT stats back onto the original logical program
+  ids by stable program name, so apply records and baseline accounting stay on
+  one control plane
+- e2e `scx` refreshes only the measurement ids for post-ReJIT workload
+  sampling; it does not introduce a new generic runner abstraction
+
+Static gate after the latest fixes:
+
+- `python3 -m pyflakes runner/libs/app_runners/scx.py runner/libs/app_runners/scx_support.py corpus/driver.py e2e/cases/scx/case.py runner/libs/build_remote_bundle.py runner/libs/arm64_container_build.py runner/libs/arm64_host_build.py`
+- `python3 -m pytest -q tests/python/test_build_remote_bundle.py tests/python/test_prepare_local_inputs.py tests/python/test_run_contract.py tests/python/test_suite_entrypoint.py tests/python/test_aws_remote_prep.py tests/python/test_kvm_executor.py tests/python/test_vm_launcher.py tests/python/test_workload_api.py tests/python/test_runtime_file_signatures.py`
+  - `42 passed`
+- `git diff --check`
+
+Current active todo:
+
+1. keep monitoring the live `x86-kvm/aws-x86/aws-arm64` corpus/e2e lanes until
+   each either finishes or exposes a new first blocker
+2. if `x86-kvm corpus` fails again, treat `tracee` readiness and `scx` runtime
+   semantics as the most likely next blockers
+3. if `aws-x86 corpus/e2e` fail again, inspect the fresh result dirs before
+   changing code; the old `manifest_file.py` crash is no longer the active
+   blocker
+4. keep reviewing the remaining `katran` userspace control plane split:
+   - x86 still stages a tracked helper runtime
+   - arm64 still builds a userspace bundle locally inside qemu/container prep
+   - this is the remaining obvious second control plane in corpus/e2e runtime
+
+
+### 13.38 2026-04-08: runtime compatibility and fresh x86 corpus/e2e reruns
+
+- New real blocker from fresh `aws-x86 corpus/e2e` reruns was remote Python compatibility, not manifest/prep.
+- Remote `python3` rejected `@dataclass(..., slots=True)` in runtime modules loaded by `corpus/driver.py` and `suite_entrypoint.py`.
+- Fixed by removing `slots=True` from runtime dataclasses in active `runner/libs`, `corpus`, and `e2e` paths while keeping `frozen=True` where used.
+- Also fixed a corpus false-negative: program-mode phase measurement now treats `run_cnt > 0` or `run_time_ns > 0` as execution, instead of requiring only positive `exec_ns`.
+- Static gate after this fix stayed green:
+  - `pyflakes runner/libs runner/scripts corpus e2e`
+  - `compileall runner/libs runner/scripts corpus e2e`
+  - focused pytest set `42 passed`
+- Fresh reruns started with explicit x86 AWS env restored from cached manifest contract:
+  - `aws-x86 corpus`
+  - `aws-x86 e2e`
+- Existing live lanes kept running:
+  - `x86-kvm corpus`
+  - `aws-arm64 corpus`
+  - `aws-arm64 e2e`
+
+Active todo:
+1. Monitor fresh `aws-x86 corpus/e2e` until new result or blocker lands.
+2. Keep `x86-kvm corpus` moving; once green, start `x86-kvm e2e`.
+3. Keep `aws-arm64 corpus/e2e` alive; next blocker is still local arm64 qemu/container prep unless new result lands first.
+4. Re-review `scx`/Katran control-plane findings after the fresh reruns, using current code rather than stale review snapshots.
+
+
+### 13.39 2026-04-08: x86-kvm corpus blockers and shared policy/workload fixes
+
+- Fresh `x86-kvm corpus` rerun exposed two real runtime blockers:
+  - `bpftrace/tcpretrans`: baseline process emitted retransmit events but the short smoke workload still produced no measurable program delta.
+  - `scx/rusty`: post-ReJIT scheduler run failed with a real `sched_ext` error (`Failed to acquire dom0 cpumask kptr`), then program counters stayed zero.
+- Applied two minimal shared fixes before the next rerun:
+  - `runner/libs/workload.py`: made `tcp_retransmit` smoke runs denser and more deterministic by increasing minimum runtime, shrinking per-connection transfer target, and increasing loopback netem loss/delay.
+  - `corpus/config/benchmark_config.yaml`: added an explicit shared policy rule for `prog_type=struct_ops` to disable `map_inline` and `dce`; current evidence points to those passes destabilizing `scx_rusty` live scheduler state after apply.
+- Focused static gate after these fixes stayed green:
+  - `pyflakes`
+  - `compileall`
+  - focused pytest (`7 passed`)
+- Fresh local rerun started:
+  - `x86-kvm corpus`
+- Fresh AWS x86 reruns are also live again with explicit x86 AWS env restored from cached manifests.
+
+Active todo:
+1. Wait for fresh `x86-kvm corpus` result after the `tcpretrans` + `struct_ops` fixes.
+2. Wait for fresh `aws-x86 corpus/e2e` result after the remote Python compatibility fix.
+3. Keep `aws-arm64 corpus/e2e` alive through local arm64 prep; fix the next concrete blocker when it lands.
+4. After fresh corpus results, start/restart `x86-kvm e2e` on the same updated code.
+
+
+### 13.40 2026-04-08: x86 lanes moved past setup, arm64 lanes still in native repo prep
+
+- Fresh `aws-x86 corpus` and `aws-x86 e2e` are no longer failing in remote prep or
+  runtime import compatibility.
+- Fresh `x86-kvm corpus` is also no longer blocked in kernel/module prep or the
+  previous immediate runtime failures.
+- All three x86 lanes now completed:
+  - kernel/module prep
+  - sealed repo fetch
+  - native repo build for:
+    - `bcc`
+    - `katran`
+    - `tracee`
+    - `tetragon`
+  - and have moved into `runner.libs.build_remote_bundle`
+- Fresh x86 lane state at this point:
+  - `aws-x86 corpus`: local prep has finished native repo build and entered
+    bundle sealing
+  - `aws-x86 e2e`: local prep has finished native repo build and entered bundle
+    sealing
+  - `x86-kvm corpus`: local prep has finished native repo build and entered
+    bundle sealing
+- The two long-running ARM64 lanes are still not deadlocked:
+  - `aws-arm64 corpus`
+  - `aws-arm64 e2e`
+  - both still have active compiler children under
+    `runner.libs.arm64_container_build`
+  - current hotspot is still local ARM64 Katran dependency prep
+    (`getdeps.py --only-deps` + downstream CMake build), not remote AWS
+    execution
+
+Interpretation:
+
+- x86 is now past the last known shared setup/runtime import blockers; the next
+  fresh result should represent either real remote/guest execution or the next
+  concrete runtime issue after bundle sealing
+- arm64 is still dominated by per-run local native repo prep latency; the next
+  change there should be driven by a real failure or by eliminating obviously
+  duplicated heavy prep rather than by more ad hoc runtime patching
+
+Active todo:
+1. Wait for fresh `aws-x86 corpus` and `aws-x86 e2e` results on the updated
+   code.
+2. Wait for fresh `x86-kvm corpus` result on the updated workload/policy code;
+   if green, start `x86-kvm e2e`.
+3. Keep `aws-arm64 corpus/e2e` alive; if the next blocker is not a concrete
+   runtime failure but duplicated heavy native prep, move more ARM64 native repo
+   work out of per-run qemu/container prep.

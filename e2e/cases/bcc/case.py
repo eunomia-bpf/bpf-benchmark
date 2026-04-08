@@ -52,7 +52,7 @@ DEFAULT_REPORT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e-report.md"
 # Config dataclasses
 # ---------------------------------------------------------------------------
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ToolSpec:
     name: str
     description: str
@@ -62,7 +62,7 @@ class ToolSpec:
     tool_args: tuple[str, ...]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class SuiteConfig:
     tools: tuple[ToolSpec, ...]
     measurement_duration_s: int

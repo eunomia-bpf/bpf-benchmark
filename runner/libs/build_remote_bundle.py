@@ -11,7 +11,7 @@ from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail, require_nonempty_dir, require_path
-from runner.libs.run_contract import parse_manifest, render_shell_assignments_from_mapping
+from runner.libs.manifest_file import parse_manifest, render_shell_assignments_from_mapping
 from runner.libs.state_file import read_state
 
 _die = partial(fail, "build-remote-bundle")
@@ -40,6 +40,15 @@ def _git_output(args: list[str], *, cwd: Path) -> bytes:
         message = completed.stderr.decode("utf-8", errors="replace").strip() or "git command failed"
         _die(message)
     return completed.stdout
+
+
+def _git_untracked_paths(repo_root: Path, pathspec: str | None = None) -> list[Path]:
+    args = ["git", "ls-files", "--others", "--exclude-standard", "-z"]
+    if pathspec:
+        args.extend(["--", pathspec])
+    raw = _git_output(args, cwd=repo_root)
+    tokens = [token.decode("utf-8") for token in raw.split(b"\0") if token]
+    return [Path(token) for token in tokens]
 
 
 def _git_path_is_clean(repo_root: Path, pathspec: str | None = None) -> bool:
@@ -85,6 +94,11 @@ def _iter_git_tracked_paths(repo_root: Path, pathspec: str | None = None) -> lis
 
 
 def _copy_tracked_tree(repo_root: Path, src_rel: str, dest_root: Path) -> None:
+    untracked = _git_untracked_paths(repo_root, src_rel)
+    if untracked:
+        sample = ", ".join(str(path) for path in untracked[:5])
+        extra = "" if len(untracked) <= 5 else f" (+{len(untracked) - 5} more)"
+        _die(f"bundled tracked tree contains untracked files and cannot be sealed: {sample}{extra}")
     for rel_path in _iter_git_tracked_paths(repo_root, src_rel):
         _copy_path(repo_root / rel_path, dest_root / rel_path)
 
@@ -99,10 +113,38 @@ def _copy_repo_tracked_tree(repo_root: Path, src_rel: str, dest_root: Path) -> N
 
 def _copy_git_snapshot(src: Path, dest: Path) -> None:
     if _git_ok(["git", "rev-parse", "--verify", "HEAD"], cwd=src):
+        untracked = _git_untracked_paths(src)
+        if untracked:
+            sample = ", ".join(str(path) for path in untracked[:5])
+            extra = "" if len(untracked) <= 5 else f" (+{len(untracked) - 5} more)"
+            _die(f"bundled repo snapshot contains untracked files and cannot be sealed: {sample}{extra}")
         if not _git_path_is_clean(src):
             _die(f"bundled repo snapshot has local modifications and cannot be sealed: {src}")
-        for rel_path in _iter_git_tracked_paths(src):
-            _copy_path(src / rel_path, dest / rel_path)
+        shutil.rmtree(dest, ignore_errors=True)
+        dest.mkdir(parents=True, exist_ok=True)
+        archive = subprocess.Popen(
+            ["git", "-C", str(src), "archive", "--format=tar", "HEAD"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        extract = subprocess.run(
+            ["tar", "-xf", "-", "-C", str(dest)],
+            stdin=archive.stdout,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+            text=False,
+        )
+        stderr_bytes = archive.stderr.read() if archive.stderr is not None else b""
+        archive_code = archive.wait()
+        if archive.stdout is not None:
+            archive.stdout.close()
+        if archive.stderr is not None:
+            archive.stderr.close()
+        if archive_code != 0:
+            _die(stderr_bytes.decode("utf-8", errors="replace").strip() or f"git archive failed for {src}")
+        if extract.returncode != 0:
+            _die(extract.stderr.decode("utf-8", errors="replace").strip() or f"failed to extract snapshot from {src}")
         if not dest.exists() or not any(dest.iterdir()):
             _die(f"bundled repo snapshot is empty: {src}")
         return
@@ -306,6 +348,9 @@ class BundleBuilder:
     def target_arch_is_x86(self) -> bool:
         return self.value("RUN_TARGET_ARCH") == "x86_64"
 
+    def executor_is_kvm(self) -> bool:
+        return self.value("RUN_EXECUTOR") == "kvm"
+
     def test_mode_needs_unittest(self) -> bool:
         return self.value("RUN_TEST_MODE", "test") in {"selftest", "test"}
 
@@ -382,7 +427,8 @@ class BundleBuilder:
                 _require_path(daemon_real, "ARM64 daemon binary")
                 shutil.copy2(daemon_wrapper, self.bundle_dir / "daemon/build/bpfrejit-daemon")
                 shutil.copy2(daemon_real, self.bundle_dir / "daemon/build/bpfrejit-daemon.real")
-                shutil.copy2(daemon_real, self.bundle_dir / "daemon/target/release/bpfrejit-daemon")
+                shutil.copy2(daemon_wrapper, self.bundle_dir / "daemon/target/release/bpfrejit-daemon")
+                shutil.copy2(daemon_real, self.bundle_dir / "daemon/target/release/bpfrejit-daemon.real")
             return
         if self.target_arch_is_x86():
             if needs_runner:
@@ -450,10 +496,19 @@ class BundleBuilder:
         release_dir.mkdir(parents=True, exist_ok=True)
         object_dir.mkdir(parents=True, exist_ok=True)
         for package in packages:
-            shutil.copy2(binary_root / package, release_dir / package)
+            destination = release_dir / package
+            shutil.copy2(binary_root / package, destination)
             shutil.copy2(object_root / f"{package}_main.bpf.o", object_dir / f"{package}_main.bpf.o")
         if self.target_arch_is_x86():
             _wrap_dynamic_executable_tree(release_dir, "ld-linux-x86-64.so.2", bundle_lib_dir=self.bundle_dir / "lib")
+            return
+        if self.target_arch_is_arm64():
+            for package in packages:
+                candidate = release_dir / package
+                wrapped_binary = candidate.with_name(candidate.name + ".bin")
+                candidate.rename(wrapped_binary)
+                wrapped_binary.chmod(wrapped_binary.stat().st_mode & ~stat.S_IXUSR & ~stat.S_IXGRP & ~stat.S_IXOTH)
+                _write_portable_runtime_wrapper(candidate, "ld-linux-aarch64.so.1")
 
     def stage_repo_build_dir(self, repo_name: str) -> None:
         root_key = "ARM64_NATIVE_BUILD_ROOT" if self.target_arch_is_arm64() else "X86_NATIVE_BUILD_ROOT"
@@ -465,30 +520,13 @@ class BundleBuilder:
         if lib_dir.is_dir():
             _materialize_library_soname_links(lib_dir)
 
-    def stage_katran_server(self) -> None:
-        if self.value("RUN_NEEDS_KATRAN_BUNDLE", "0") != "1":
-            return
-        bin_dir = self.bundle_dir / "e2e/cases/katran/bin"
-        lib_dir = self.bundle_dir / "e2e/cases/katran/lib"
-        bin_dir.mkdir(parents=True, exist_ok=True)
-        lib_dir.mkdir(parents=True, exist_ok=True)
-        if self.target_arch_is_arm64():
-            server_binary = Path(self.required_value("ARM64_KATRAN_SERVER_BINARY", "ARM64 Katran server"))
-            server_lib_dir = Path(self.required_value("ARM64_KATRAN_SERVER_LIB_DIR", "ARM64 Katran lib dir"))
-            _require_path(server_binary, "ARM64 Katran server")
-            _require_path(server_lib_dir, "ARM64 Katran lib dir")
-        elif self.target_arch_is_x86():
-            server_binary = Path(self.required_value("X86_KATRAN_SERVER_BINARY", "x86 Katran server"))
-            server_lib_dir = Path(self.required_value("X86_KATRAN_SERVER_LIB_DIR", "x86 Katran lib dir"))
-            _require_path(server_binary, "x86 Katran server")
-            _require_path(server_lib_dir, "x86 Katran lib dir")
-        else:
-            _die(f"unsupported target arch for Katran bundle inputs: {self.value('RUN_TARGET_ARCH')}")
-        shutil.copy2(server_binary, bin_dir / "katran_server_grpc")
-        shutil.copytree(server_lib_dir, lib_dir, symlinks=True, dirs_exist_ok=True)
-        if self.target_arch_is_x86():
-            _wrap_dynamic_executable_tree(bin_dir, "ld-linux-x86-64.so.2", bundle_lib_dir=self.bundle_dir / "lib")
-        _materialize_library_soname_links(lib_dir)
+    def remove_tracked_katran_runtime_tree(self) -> None:
+        for stale in (
+            self.bundle_dir / "e2e/cases/katran/bin",
+            self.bundle_dir / "e2e/cases/katran/lib",
+        ):
+            if stale.exists():
+                shutil.rmtree(stale, ignore_errors=True)
 
     def stage_selected_repos(self) -> None:
         repos = [token for token in self.value("RUN_BUNDLED_REPOS_CSV").split(",") if token]
@@ -522,7 +560,7 @@ class BundleBuilder:
         repos = [token for token in self.value("RUN_NATIVE_REPOS_CSV").split(",") if token]
         for repo in repos:
             self.stage_repo_build_dir(repo)
-            if self.target_arch_is_x86():
+            if self.target_arch_is_x86() and repo != "tracee":
                 _wrap_dynamic_executable_tree(
                     self.bundle_dir / f"corpus/build/{repo}",
                     "ld-linux-x86-64.so.2",
@@ -534,8 +572,20 @@ class BundleBuilder:
         manifest["RUN_BUNDLED_WORKLOAD_TOOLS_CSV"] = self.value("RUN_BUNDLED_WORKLOAD_TOOLS_CSV", "")
         if self.value("RUN_WORKLOAD_TOOLS_CSV"):
             manifest["RUN_REMOTE_WORKLOAD_TOOL_BIN"] = ".cache/workload-tools/bin"
+        if "bcc" in [token for token in self.value("RUN_NATIVE_REPOS_CSV").split(",") if token]:
+            manifest["RUN_BCC_TOOLS_DIR"] = "corpus/build/bcc/libbpf-tools/.output"
+        if self.value("RUN_NEEDS_KATRAN_BUNDLE", "0") == "1":
+            manifest["RUN_KATRAN_SERVER_BINARY"] = "corpus/build/katran/bin/katran_server_grpc"
+            manifest["RUN_KATRAN_SERVER_LIB_DIR"] = "corpus/build/katran/lib"
         rendered = render_shell_assignments_from_mapping(manifest)
         (self.bundle_dir / "run-contract.env").write_text(rendered + "\n", encoding="utf-8")
+
+    def stage_kvm_kernel_module_tree(self) -> None:
+        if not (self.executor_is_kvm() and self.target_arch_is_x86()):
+            return
+        source = ROOT_DIR / "vendor" / "linux-framework" / ".virtme_mods"
+        _require_nonempty_dir(source, "x86 KVM kernel module tree")
+        self.copy_tree(source, self.bundle_dir / "vendor/linux-framework/.virtme_mods")
 
     def prepare_common_bundle(self) -> None:
         shutil.rmtree(self.bundle_dir, ignore_errors=True)
@@ -548,6 +598,7 @@ class BundleBuilder:
         self.copy_git_snapshot(ROOT_DIR / "vendor/bpftool", self.bundle_dir / "vendor/bpftool")
         for rel in ("include", "scripts", "arch"):
             self.copy_repo_tracked_tree(ROOT_DIR / "vendor/linux-framework", rel, self.bundle_dir / "vendor/linux-framework")
+        self.stage_kvm_kernel_module_tree()
 
     def prepare_test_bundle(self) -> None:
         self.copy_test_runner_tree()
@@ -620,6 +671,7 @@ class BundleBuilder:
     def prepare_corpus_bundle(self) -> None:
         self.copy_tracked_tree("corpus", self.bundle_dir)
         self.copy_tracked_tree("e2e/cases", self.bundle_dir)
+        self.remove_tracked_katran_runtime_tree()
         shutil.rmtree(self.bundle_dir / "corpus/results", ignore_errors=True)
         shutil.rmtree(self.bundle_dir / "corpus/build", ignore_errors=True)
         (self.bundle_dir / "corpus/build").mkdir(parents=True, exist_ok=True)
@@ -628,19 +680,19 @@ class BundleBuilder:
         self.stage_selected_repos()
         self.stage_scx()
         self.stage_native_repo_build_dirs()
-        self.stage_katran_server()
 
     def prepare_e2e_bundle(self) -> None:
         self.copy_tracked_tree("e2e", self.bundle_dir)
+        self.remove_tracked_katran_runtime_tree()
         shutil.rmtree(self.bundle_dir / "e2e/results", ignore_errors=True)
         self.copy_tracked_tree("corpus/config", self.bundle_dir)
+        self.copy_tracked_tree("corpus/inputs", self.bundle_dir)
         (self.bundle_dir / "corpus/build").mkdir(parents=True, exist_ok=True)
         self.stage_workload_tools()
         self.stage_x86_portable_libbpf()
         self.stage_selected_repos()
         self.stage_scx()
         self.stage_native_repo_build_dirs()
-        self.stage_katran_server()
 
     def archive_bundle(self) -> None:
         self.bundle_tar.parent.mkdir(parents=True, exist_ok=True)

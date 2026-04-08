@@ -2,13 +2,17 @@ from __future__ import annotations
 
 import os
 import shutil
-import subprocess
 from functools import partial
 from pathlib import Path
 from typing import Callable
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail, require_nonempty_dir as _require_nonempty_dir, require_path as _require_path
+from runner.libs.runner_artifacts import (
+    build_runner_binary,
+    require_file_contains,
+    run_command,
+)
 from runner.libs.state_file import write_state
 
 
@@ -33,32 +37,6 @@ def csv_append_unique(csv: str, token: str) -> str:
     return token if not csv else f"{csv},{token}"
 
 
-def require_file_contains(path: Path, needle: str, description: str) -> None:
-    require_path(path, description)
-    completed = subprocess.run(
-        ["file", str(path)],
-        check=False,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    if completed.returncode != 0 or needle not in completed.stdout:
-        die(f"{description} does not match expected file signature {needle}: {path}")
-
-
-def run_command(command: list[str], *, env: dict[str, str], cwd: Path = ROOT_DIR) -> None:
-    completed = subprocess.run(
-        command,
-        cwd=cwd,
-        env=env,
-        text=True,
-        capture_output=False,
-        check=False,
-    )
-    if completed.returncode != 0:
-        raise SystemExit(completed.returncode)
-
-
 def run_local_prep_phases(*, phases: list[str], phase_handlers: dict[str, Callable[[], None]], executor_name: str) -> None:
     for phase in phases:
         handler = phase_handlers.get(phase)
@@ -74,6 +52,7 @@ def x86_bundle_inputs(
     test_artifacts_root: Path,
     portable_libbpf_root: Path | None = None,
 ) -> dict[str, str]:
+    katran_runtime_root = promote_root / "corpus" / "build" / "katran"
     values = {
         "X86_RUNNER": str(promote_root / "runner" / "build" / "micro_exec"),
         "X86_DAEMON": str(promote_root / "daemon" / "target" / "release" / "bpfrejit-daemon"),
@@ -83,47 +62,12 @@ def x86_bundle_inputs(
         "X86_NATIVE_BUILD_ROOT": str(promote_root / "corpus" / "build"),
         "X86_SCX_BINARY_ROOT": str(local_repo_root / "scx" / "target" / "release"),
         "X86_SCX_OBJECT_ROOT": str(promote_root / "corpus" / "build" / "scx"),
-        "X86_KATRAN_SERVER_BINARY": str(promote_root / "corpus" / "build" / "katran" / "bin" / "katran_server_grpc"),
-        "X86_KATRAN_SERVER_LIB_DIR": str(promote_root / "corpus" / "build" / "katran" / "lib"),
+        "RUN_KATRAN_SERVER_BINARY": str(katran_runtime_root / "bin" / "katran_server_grpc"),
+        "RUN_KATRAN_SERVER_LIB_DIR": str(katran_runtime_root / "lib"),
     }
     if portable_libbpf_root is not None and (portable_libbpf_root / "lib").is_dir():
         values["X86_PORTABLE_LIBBPF_ROOT"] = str(portable_libbpf_root)
     return values
-
-
-def _jobs_from_env(env: dict[str, str]) -> str:
-    explicit = env.get("JOBS", "").strip()
-    if explicit:
-        return explicit
-    return str(max(os.cpu_count() or 1, 1))
-
-
-def _resolve_llvm_cmake_dir(env: dict[str, str]) -> str:
-    explicit = env.get("LLVM_DIR", "").strip()
-    if explicit:
-        return explicit
-    llvm_config = env.get("LLVM_CONFIG", "").strip()
-    if not llvm_config:
-        llvm_config = shutil.which("llvm-config") or ""
-    if llvm_config:
-        completed = subprocess.run(
-            [llvm_config, "--cmakedir"],
-            check=False,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        if completed.returncode == 0:
-            cmake_dir = completed.stdout.strip()
-            if cmake_dir:
-                return cmake_dir
-    cache_path = ROOT_DIR / "vendor" / "llvmbpf" / "build" / "CMakeCache.txt"
-    if cache_path.is_file():
-        for line in cache_path.read_text(encoding="utf-8").splitlines():
-            prefix = "LLVM_DIR:PATH="
-            if line.startswith(prefix):
-                return line.removeprefix(prefix).strip()
-    return ""
 
 
 def finalize_staged_bundle(
@@ -177,66 +121,12 @@ def stage_matching_micro_sidecars(output_dir: Path, source_dir: Path) -> None:
 
 
 def build_x86_runner_binary(*, build_dir: Path, env: dict[str, str]) -> Path:
-    jobs = _jobs_from_env(env)
-    libbpf_build_dir = build_dir / "vendor" / "libbpf"
-    libbpf_objdir = libbpf_build_dir / "obj"
-    libbpf_prefix = libbpf_build_dir / "prefix"
-    libbpf_a = libbpf_objdir / "libbpf.a"
-    llvmbpf_setting = env.get("MICRO_EXEC_ENABLE_LLVMBPF", "ON").strip() or "ON"
-    libbpf_objdir.mkdir(parents=True, exist_ok=True)
-    (libbpf_prefix / "include").mkdir(parents=True, exist_ok=True)
-    run_command(
-        [
-            "make",
-            "-C",
-            str(ROOT_DIR / "vendor" / "libbpf" / "src"),
-            f"-j{jobs}",
-            "BUILD_STATIC_ONLY=1",
-            f"OBJDIR={libbpf_objdir}",
-            "DESTDIR=",
-            f"PREFIX={libbpf_prefix}",
-            str(libbpf_a),
-            "install_headers",
-        ],
+    return build_runner_binary(
+        build_dir=build_dir,
         env=env,
+        expected_arch_signature="x86-64",
+        llvmbpf_default="ON",
     )
-    cmake_command = [
-        "cmake",
-        "-S",
-        str(ROOT_DIR / "runner"),
-        "-B",
-        str(build_dir),
-        "-DCMAKE_BUILD_TYPE=Release",
-        f"-DMICRO_REPO_ROOT={ROOT_DIR}",
-        f"-DMICRO_LIBBPF_PREFIX={libbpf_prefix}",
-        f"-DMICRO_LIBBPF_LIBRARY={libbpf_a}",
-        f"-DMICRO_EXEC_ENABLE_LLVMBPF={llvmbpf_setting}",
-    ]
-    llvm_dir = _resolve_llvm_cmake_dir(env)
-    if llvm_dir:
-        cmake_command.append(f"-DLLVM_DIR={llvm_dir}")
-    micro_llvmbpf_library = env.get("MICRO_LLVMBPF_LIBRARY", "").strip()
-    if micro_llvmbpf_library:
-        cmake_command.append(f"-DMICRO_LLVMBPF_LIBRARY={micro_llvmbpf_library}")
-    micro_llvmbpf_build_cache = env.get("MICRO_LLVMBPF_BUILD_CACHE", "").strip()
-    if micro_llvmbpf_build_cache:
-        cmake_command.append(f"-DMICRO_LLVMBPF_BUILD_CACHE={micro_llvmbpf_build_cache}")
-    run_command(cmake_command, env=env)
-    run_command(
-        [
-            "cmake",
-            "--build",
-            str(build_dir),
-            "--target",
-            "micro_exec",
-            "-j",
-            jobs,
-        ],
-        env=env,
-    )
-    binary = build_dir / "micro_exec"
-    require_file_contains(binary, "x86-64", "x86 runner binary")
-    return binary
 
 
 def build_x86_daemon_binary(*, daemon_target_dir: Path, env: dict[str, str]) -> Path:

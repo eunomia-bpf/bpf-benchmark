@@ -13,7 +13,13 @@ _die = partial(fail, "state-file")
 def read_state(path: Path) -> dict[str, str]:
     if not path.is_file():
         _die(f"state file is missing: {path}")
-    raw = json.loads(path.read_text(encoding="utf-8"))
+    text = path.read_text(encoding="utf-8")
+    if not text.strip():
+        _die(f"state file is empty: {path}")
+    try:
+        raw = json.loads(text)
+    except json.JSONDecodeError as exc:
+        _die(f"state file is not valid JSON: {path} ({exc})")
     if not isinstance(raw, dict):
         _die(f"state file must contain a JSON object: {path}")
     state: dict[str, str] = {}

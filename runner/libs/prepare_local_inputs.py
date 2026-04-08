@@ -10,7 +10,7 @@ from runner.libs import ROOT_DIR
 from runner.libs.aws_local_prep import run_local_prep as run_aws_local_prep
 from runner.libs.cli_support import fail
 from runner.libs.kvm_local_prep import run_local_prep as run_kvm_local_prep
-from runner.libs.run_contract import parse_manifest
+from runner.libs.manifest_file import parse_manifest
 
 _die = partial(fail, "prepare-local-inputs")
 
@@ -46,6 +46,8 @@ def _suite_phases(env: dict[str, str]) -> list[str]:
             phases.append("upstream_selftests")
             if executor == "aws-ssh" and env.get("RUN_TARGET_ARCH", "").strip() == "arm64":
                 phases.append("upstream_test_kmods")
+        if _csv_tokens(env.get("RUN_FETCH_REPOS_CSV", "").strip()):
+            phases.append("fetch_repos")
         if _csv_tokens(env.get("RUN_SCX_PACKAGES_CSV", "").strip()):
             phases.append("scx")
         return phases

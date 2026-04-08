@@ -3,11 +3,10 @@ from __future__ import annotations
 import sys
 from functools import partial
 from pathlib import Path
-from typing import cast
 
 from runner.libs.cli_support import fail
 from runner.libs.guest_prereqs import install_guest_prereqs, validate_guest_prereqs
-from runner.libs.run_contract import parse_manifest
+from runner.libs.manifest_file import parse_manifest
 from runner.libs.suite_entrypoint import SuiteEntrypoint
 
 _die = partial(fail, "execute-workspace")
@@ -26,13 +25,13 @@ def main(argv: list[str] | None = None) -> None:
         _die(f"manifest is missing: {manifest_path}")
 
     contract = parse_manifest(manifest_path)
-    install_guest_prereqs(workspace, cast(dict[str, str | list[str]], contract))
-    validate_guest_prereqs(workspace, cast(dict[str, str | list[str]], contract))
+    install_guest_prereqs(workspace, contract)
+    validate_guest_prereqs(workspace, contract)
     SuiteEntrypoint.from_contract(
         workspace,
         manifest_path,
         archive_path,
-        cast(dict[str, str | list[str]], contract),
+        contract,
     ).run()
 
 

@@ -44,14 +44,14 @@ set(MICRO_EXEC_SOURCES
 )
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)
-    if(NOT DEFINED MICRO_LLVMBPF_LIBRARY)
-        set(MICRO_LLVMBPF_LIBRARY "${MICRO_REPO_ROOT}/vendor/llvmbpf/libllvmbpf_vm.a")
-    endif()
-    if(NOT DEFINED MICRO_LLVMBPF_BUILD_CACHE)
-        set(MICRO_LLVMBPF_BUILD_CACHE "${MICRO_REPO_ROOT}/vendor/llvmbpf/build/CMakeCache.txt")
+    if(NOT DEFINED MICRO_LLVMBPF_LIBRARY OR "${MICRO_LLVMBPF_LIBRARY}" STREQUAL "")
+        message(FATAL_ERROR "MICRO_EXEC_ENABLE_LLVMBPF=ON requires explicit MICRO_LLVMBPF_LIBRARY")
     endif()
     if(NOT EXISTS "${MICRO_LLVMBPF_LIBRARY}")
         message(FATAL_ERROR "MICRO_EXEC_ENABLE_LLVMBPF=ON requires ${MICRO_LLVMBPF_LIBRARY}")
+    endif()
+    if(NOT DEFINED LLVM_DIR OR "${LLVM_DIR}" STREQUAL "")
+        message(FATAL_ERROR "MICRO_EXEC_ENABLE_LLVMBPF=ON requires explicit LLVM_DIR")
     endif()
 
     add_library(vendor_llvmbpf STATIC IMPORTED GLOBAL)
@@ -59,19 +59,7 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
         IMPORTED_LOCATION "${MICRO_LLVMBPF_LIBRARY}"
         INTERFACE_INCLUDE_DIRECTORIES "${MICRO_REPO_ROOT}/vendor/llvmbpf/include;${MICRO_REPO_ROOT}/vendor/llvmbpf/src"
     )
-
-    if((NOT DEFINED LLVM_DIR OR "${LLVM_DIR}" STREQUAL "") AND EXISTS "${MICRO_LLVMBPF_BUILD_CACHE}")
-        file(STRINGS "${MICRO_LLVMBPF_BUILD_CACHE}" MICRO_LLVMBPF_LLVM_DIR_LINE REGEX "^LLVM_DIR:PATH=")
-        if(MICRO_LLVMBPF_LLVM_DIR_LINE)
-            string(REPLACE "LLVM_DIR:PATH=" "" LLVM_DIR "${MICRO_LLVMBPF_LLVM_DIR_LINE}")
-        endif()
-    endif()
-
-    if(DEFINED LLVM_DIR)
-        find_package(LLVM REQUIRED CONFIG PATHS "${LLVM_DIR}" NO_DEFAULT_PATH)
-    else()
-        find_package(LLVM REQUIRED CONFIG)
-    endif()
+    find_package(LLVM REQUIRED CONFIG PATHS "${LLVM_DIR}" NO_DEFAULT_PATH)
 
     # Keep this list aligned with vendor/llvmbpf/CMakeLists.txt so host-cross
     # builds can link against target LLVM libraries without executing a target
@@ -109,18 +97,24 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
     )
     llvm_map_components_to_libnames(MICRO_EXEC_LLVM_LIBS ${MICRO_EXEC_LLVM_COMPONENTS})
 
-    get_filename_component(MICRO_LLVMBPF_BUILD_DIR "${MICRO_LLVMBPF_BUILD_CACHE}" DIRECTORY)
     set(MICRO_LLVMBPF_SPDLOG_LIBRARY "")
-    foreach(
-        SPDLOG_CANDIDATE
-        "${MICRO_LLVMBPF_BUILD_DIR}/_deps/spdlog-build/libspdlogd.a"
-        "${MICRO_LLVMBPF_BUILD_DIR}/_deps/spdlog-build/libspdlog.a"
-    )
-        if(EXISTS "${SPDLOG_CANDIDATE}")
-            set(MICRO_LLVMBPF_SPDLOG_LIBRARY "${SPDLOG_CANDIDATE}")
-            break()
+    if(DEFINED MICRO_LLVMBPF_SPDLOG_LIBRARY AND NOT "${MICRO_LLVMBPF_SPDLOG_LIBRARY}" STREQUAL "")
+        if(NOT EXISTS "${MICRO_LLVMBPF_SPDLOG_LIBRARY}")
+            message(FATAL_ERROR "MICRO_LLVMBPF_SPDLOG_LIBRARY is missing: ${MICRO_LLVMBPF_SPDLOG_LIBRARY}")
         endif()
-    endforeach()
+    elseif(DEFINED MICRO_LLVMBPF_BUILD_CACHE AND NOT "${MICRO_LLVMBPF_BUILD_CACHE}" STREQUAL "")
+        get_filename_component(MICRO_LLVMBPF_BUILD_DIR "${MICRO_LLVMBPF_BUILD_CACHE}" DIRECTORY)
+        foreach(
+            SPDLOG_CANDIDATE
+            "${MICRO_LLVMBPF_BUILD_DIR}/_deps/spdlog-build/libspdlogd.a"
+            "${MICRO_LLVMBPF_BUILD_DIR}/_deps/spdlog-build/libspdlog.a"
+        )
+            if(EXISTS "${SPDLOG_CANDIDATE}")
+                set(MICRO_LLVMBPF_SPDLOG_LIBRARY "${SPDLOG_CANDIDATE}")
+                break()
+            endif()
+        endforeach()
+    endif()
     if(MICRO_LLVMBPF_SPDLOG_LIBRARY)
         add_library(vendor_llvmbpf_spdlog STATIC IMPORTED GLOBAL)
         set_target_properties(vendor_llvmbpf_spdlog PROPERTIES
