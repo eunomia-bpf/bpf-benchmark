@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tarfile
 from pathlib import Path
 
@@ -12,16 +13,20 @@ def test_kvm_executor_builds_vm_command_from_manifest_and_local_state(
 ) -> None:
     bundle_root = tmp_path / "bundle"
     workspace = bundle_root / "workspace"
-    (workspace / "runner/scripts").mkdir(parents=True)
-    (workspace / "runner/scripts/execute_workspace.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (workspace / "runner/libs").mkdir(parents=True)
+    (workspace / "runner/__init__.py").write_text("", encoding="utf-8")
+    (workspace / "runner/libs/__init__.py").write_text("", encoding="utf-8")
+    (workspace / "runner/libs/execute_workspace.py").write_text("", encoding="utf-8")
     (workspace / "run-contract.env").write_text("RUN_TARGET_NAME=x86-kvm\n", encoding="utf-8")
 
     bundle_tar = tmp_path / "bundle.tar.gz"
     with tarfile.open(bundle_tar, "w:gz") as archive:
         archive.add(workspace / "run-contract.env", arcname="run-contract.env")
+        archive.add(workspace / "runner/__init__.py", arcname="runner/__init__.py")
+        archive.add(workspace / "runner/libs/__init__.py", arcname="runner/libs/__init__.py")
         archive.add(
-            workspace / "runner/scripts/execute_workspace.sh",
-            arcname="runner/scripts/execute_workspace.sh",
+            workspace / "runner/libs/execute_workspace.py",
+            arcname="runner/libs/execute_workspace.py",
         )
 
     manifest = tmp_path / "manifest.env"
@@ -30,11 +35,14 @@ def test_kvm_executor_builds_vm_command_from_manifest_and_local_state(
             [
                 "RUN_EXECUTOR=kvm",
                 "RUN_HOST_PYTHON_BIN=python3",
-                "RUN_VM_BACKEND=vng",
-                "RUN_VM_EXECUTABLE=vng",
-                "RUN_VM_LOCK_SCOPE=x86-kvm",
+                    "RUN_VM_BACKEND=vng",
+                    "RUN_VM_EXECUTABLE=vng",
+                    "RUN_VM_LOCK_SCOPE=x86-kvm",
+                    "RUN_VM_MACHINE_NAME=x86-kvm",
+                "RUN_VM_MACHINE_ARCH=x86_64",
                 "RUN_VM_KERNEL_IMAGE=/tmp/bzImage",
                 "RUN_VM_TIMEOUT_SECONDS=3600",
+                "RUN_REMOTE_PYTHON_BIN=python3",
                 "RUN_TARGET_NAME=x86-kvm",
                 "RUN_TARGET_ARCH=x86_64",
                 "RUN_SUITE_NAME=test",
@@ -43,8 +51,8 @@ def test_kvm_executor_builds_vm_command_from_manifest_and_local_state(
         ),
         encoding="utf-8",
     )
-    local_state = tmp_path / "local-state.env"
-    local_state.write_text(f"RUN_BUNDLE_TAR={bundle_tar}\n", encoding="utf-8")
+    local_state = tmp_path / "local-state.json"
+    local_state.write_text(json.dumps({"RUN_BUNDLE_TAR": str(bundle_tar)}) + "\n", encoding="utf-8")
 
     calls: list[list[str]] = []
 
@@ -68,4 +76,6 @@ def test_kvm_executor_builds_vm_command_from_manifest_and_local_state(
     assert command[1].endswith("runner/scripts/run_vm_shell.py")
     assert "--vm-backend" in command
     assert "--command" in command
-    assert "execute_workspace.sh" in command[command.index("--command") + 1]
+    vm_command = command[command.index("--command") + 1]
+    assert "runner.libs.execute_workspace" in vm_command
+    assert 'PYTHONPATH="' in vm_command

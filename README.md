@@ -39,11 +39,8 @@ bpf-benchmark/
 git submodule update --init --recursive
 source /home/yunwei37/workspace/.venv/bin/activate   # workspace venv (optional)
 
-# Build micro runner + BPF programs + daemon
-make all
-
-# Quick smoke test (no VM required)
-make smoke
+# Local host-side validation
+make check
 
 # Full micro benchmark suite in VM
 make vm-micro
@@ -54,7 +51,8 @@ make help
 
 ## Running Benchmarks
 
-**The root `Makefile` is the single canonical entry point for all benchmarks.**
+**The root `Makefile` is the canonical user-facing entrypoint family; its thin
+aliases dispatch into `python -m runner.libs.run_target_suite`.**
 
 ```bash
 make vm-micro                        # full micro suite in VM
@@ -78,26 +76,21 @@ AWS targets require explicit local configuration for:
 - `AWS_ARM64_PROFILE` / `AWS_X86_PROFILE`
 
 Results are written to:
-- `micro/results/` — direct local smoke outputs such as `make smoke`
-- `.cache/kvm-staged/<run_token>/workspace/.cache/suite-results/<target>_<suite>_<timestamp>/` — staged local-KVM suite artifacts copied out by the suite entrypoint
+- `micro/results/` — direct local smoke outputs from host-side micro driver runs
+- `.cache/kvm-staged/<run_token>/workspace/.cache/suite-results/<target>_<suite>_<timestamp>/` — staged local-KVM suite artifacts written inside the staged workspace by the shared suite runtime
 - `.cache/aws-arm64/results/<suite>_<token>_<timestamp>/` — fetched AWS ARM64 suite outputs
 - `.cache/aws-x86/results/<suite>_<token>_<timestamp>/` — fetched AWS x86 suite outputs
 - `docs/tmp/` — analysis reports (.md only, never JSON results)
 
 `make clean` preserves fetched AWS result directories under `.cache/aws-*/results/`.
 
-## Building Components Individually
-
-```bash
-make micro            # micro_exec runner + BPF programs
-make daemon           # bpfrejit-daemon CLI
-make kernel           # bzImage from vendor/linux-framework
-make upstream-selftests-build
-```
+Direct host-side build helpers now live under `runner/Makefile` or the
+component-local toolchain (`cargo`, subdir `Makefile`s). The root `Makefile`
+surface is intentionally reserved for canonical run/validation entrypoints.
 
 ## Layer Notes
 
-`runner/` owns target/suite contracts under `runner/targets/` and `runner/suites/`, the shared `micro_exec` C++ runner, executors under `runner/scripts/`, and shared Python libraries in `runner/libs/`.
+`runner/` owns target/suite contracts under `runner/targets/` and `runner/suites/`, the shared `micro_exec` C++ runner, Python executors/orchestrators under `runner/libs/`, and lower-level build/packaging helpers under `runner/scripts/`.
 
 `micro/` owns the isolated benchmark manifests (`micro/config/micro_pure_jit.yaml`), input generators, and the Python suite driver (`micro/driver.py`).
 

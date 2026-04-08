@@ -1,6 +1,4 @@
 from __future__ import annotations
-
-import importlib
 import os
 import subprocess
 import shutil
@@ -189,7 +187,10 @@ def validate_guest_prereqs(workspace: Path) -> None:
 
     for package_name in env_csv("RUN_REMOTE_PYTHON_MODULES_CSV"):
         import_name = python_import_name(package_name)
-        importlib.import_module(import_name)
+        if not python_bin:
+            die("RUN_REMOTE_PYTHON_BIN is required when guest Python modules are requested")
+        if not python_module_available(python_bin, import_name, path_value=path_value):
+            die(f"required guest Python module is missing for {python_bin}: {package_name}")
 
 
 def main(argv: list[str] | None = None) -> None:

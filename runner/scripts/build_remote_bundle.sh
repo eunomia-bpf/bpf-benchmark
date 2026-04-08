@@ -6,6 +6,7 @@ MANIFEST_PATH="${1:?usage: build_remote_bundle.sh <manifest_path> <bundle_inputs
 BUNDLE_INPUTS_PATH="${2:?usage: build_remote_bundle.sh <manifest_path> <bundle_inputs_path> <bundle_dir> <bundle_tar>}"
 BUNDLE_DIR="${3:?usage: build_remote_bundle.sh <manifest_path> <bundle_inputs_path> <bundle_dir> <bundle_tar>}"
 BUNDLE_TAR="${4:?usage: build_remote_bundle.sh <manifest_path> <bundle_inputs_path> <bundle_dir> <bundle_tar>}"
+RUN_CONTRACT_PYTHON_BIN="${RUN_CONTRACT_PYTHON_BIN:-${PYTHON:-python3}}"
 
 [[ -f "$MANIFEST_PATH" ]] || {
     printf '[build-remote-bundle][ERROR] manifest is missing: %s\n' "$MANIFEST_PATH" >&2
@@ -15,10 +16,27 @@ BUNDLE_TAR="${4:?usage: build_remote_bundle.sh <manifest_path> <bundle_inputs_pa
     printf '[build-remote-bundle][ERROR] bundle inputs are missing: %s\n' "$BUNDLE_INPUTS_PATH" >&2
     exit 1
 }
-# shellcheck disable=SC1090
-source "$MANIFEST_PATH"
-# shellcheck disable=SC1090
-source "$BUNDLE_INPUTS_PATH"
+
+load_shell_contract_file() {
+    local path="$1"
+    [[ -f "$path" ]] || die "contract file is missing: ${path}"
+    eval "$(
+        PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}" \
+            "$RUN_CONTRACT_PYTHON_BIN" -m runner.libs.run_contract export "$path"
+    )"
+}
+
+load_shell_state_file() {
+    local path="$1"
+    [[ -f "$path" ]] || die "state file is missing: ${path}"
+    eval "$(
+        PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}" \
+            "$RUN_CONTRACT_PYTHON_BIN" -m runner.libs.state_file export "$path"
+    )"
+}
+
+load_shell_contract_file "$MANIFEST_PATH"
+load_shell_state_file "$BUNDLE_INPUTS_PATH"
 
 ARM64_CROSS_RUNNER="${ARM64_CROSS_RUNNER:-}"
 ARM64_CROSS_RUNNER_REAL="${ARM64_CROSS_RUNNER_REAL:-}"
@@ -229,8 +247,12 @@ done
 script_dir="\$(cd "\$(dirname "\$script_path")" && pwd)"
 bundle_lib_path="\$script_dir"
 case_lib_dir="\$script_dir/../lib"
+case_lib64_dir="\$script_dir/../lib64"
 if [[ -d "\$case_lib_dir" ]]; then
     bundle_lib_path="\$bundle_lib_path:\$case_lib_dir"
+fi
+if [[ -d "\$case_lib64_dir" ]]; then
+    bundle_lib_path="\$bundle_lib_path:\$case_lib64_dir"
 fi
 bundle_lib_path="\$bundle_lib_path:\$bundle_root/lib"
 [[ -f "\$real_binary" ]] || {
@@ -267,10 +289,6 @@ bundle_copy_runner_tree() {
     bundle_copy_tracked_tree "runner/repos.yaml" "$BUNDLE_DIR"
     bundle_copy_tracked_tree "runner/libs" "$BUNDLE_DIR"
     bundle_copy_tracked_tree "runner/src" "$BUNDLE_DIR"
-    bundle_copy_tracked_tree "runner/scripts/install_guest_prereqs.sh" "$BUNDLE_DIR"
-    bundle_copy_tracked_tree "runner/scripts/prereq_contract.sh" "$BUNDLE_DIR"
-    bundle_copy_tracked_tree "runner/scripts/suite_entrypoint.sh" "$BUNDLE_DIR"
-    bundle_copy_tracked_tree "runner/scripts/validate_guest_prereqs.sh" "$BUNDLE_DIR"
     rm -rf \
         "$BUNDLE_DIR/runner/__pycache__" \
         "$BUNDLE_DIR/runner/scripts/__pycache__" \
@@ -279,10 +297,7 @@ bundle_copy_runner_tree() {
 }
 
 bundle_copy_test_runner_tree() {
-    bundle_copy_tracked_tree "runner/scripts/run_all_tests.sh" "$BUNDLE_DIR"
-    bundle_copy_tracked_tree "runner/scripts/vm-selftest.sh" "$BUNDLE_DIR"
     if test_mode_needs_upstream; then
-        bundle_copy_tracked_tree "runner/scripts/build_upstream_selftests.sh" "$BUNDLE_DIR"
         bundle_copy_tracked_tree "runner/config" "$BUNDLE_DIR"
     fi
 }
@@ -500,7 +515,6 @@ prepare_common_bundle() {
     cp "$MANIFEST_PATH" "$BUNDLE_DIR/run-contract.env"
     printf 'RUN_BUNDLED_WORKLOAD_TOOLS_CSV=%q\n' "${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}" >>"$BUNDLE_DIR/run-contract.env"
     if [[ -n "${RUN_WORKLOAD_TOOLS_CSV:-}" ]]; then
-        printf 'RUN_REMOTE_WORKLOAD_TOOL_ROOT=%q\n' ".cache/workload-tools" >>"$BUNDLE_DIR/run-contract.env"
         printf 'RUN_REMOTE_WORKLOAD_TOOL_BIN=%q\n' ".cache/workload-tools/bin" >>"$BUNDLE_DIR/run-contract.env"
     fi
     bundle_copy_runner_tree

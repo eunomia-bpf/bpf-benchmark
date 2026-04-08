@@ -9,6 +9,7 @@ from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.run_contract import load_manifest_environment
+from runner.libs.state_file import read_state
 
 
 def _die(message: str) -> "NoReturn":
@@ -38,9 +39,11 @@ def bundle_stage_root(bundle_tar: Path) -> Path:
 
 def suite_command(workspace_root: Path) -> str:
     workspace_manifest = workspace_root / "run-contract.env"
+    remote_python = _require_env("RUN_REMOTE_PYTHON_BIN")
     return (
         f'cd "{workspace_root}" && '
-        f'bash "{workspace_root}/runner/scripts/execute_workspace.sh" '
+        f'PYTHONPATH="{workspace_root}${{PYTHONPATH:+:${{PYTHONPATH}}}}" '
+        f'"{remote_python}" -m runner.libs.execute_workspace '
         f'"{workspace_root}" "{workspace_manifest}"'
     )
 
@@ -57,9 +60,9 @@ def build_vm_command(workspace_root: Path) -> list[str]:
         "--vm-lock-scope",
         _require_env("RUN_VM_LOCK_SCOPE"),
         "--vm-machine-name",
-        os.environ.get("RUN_VM_MACHINE_NAME", "").strip() or _require_env("RUN_TARGET_NAME"),
+        _require_env("RUN_VM_MACHINE_NAME"),
         "--vm-machine-arch",
-        os.environ.get("RUN_VM_MACHINE_ARCH", "").strip() or _require_env("RUN_TARGET_ARCH"),
+        _require_env("RUN_VM_MACHINE_ARCH"),
         "--action",
         f"vm-{_require_env('RUN_SUITE_NAME')}",
         "--kernel-image",
@@ -92,7 +95,8 @@ def main(argv: list[str] | None = None) -> None:
         _die(f"local state file is missing: {local_state_path}")
 
     load_manifest_environment(manifest_path)
-    load_manifest_environment(local_state_path)
+    for name, value in read_state(local_state_path).items():
+        os.environ[name] = value
 
     if os.environ.get("RUN_EXECUTOR", "").strip() != "kvm":
         _die(f"manifest executor is not kvm: {os.environ.get('RUN_EXECUTOR', '').strip()}")

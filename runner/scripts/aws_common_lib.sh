@@ -14,6 +14,7 @@ ACTION="${ACTION:-}"
 MANIFEST_PATH="${MANIFEST_PATH:-}"
 LOCAL_STATE_PATH="${LOCAL_STATE_PATH:-}"
 AWS_REMOTE_PREP_STATE_PATH="${AWS_REMOTE_PREP_STATE_PATH:-}"
+RUN_CONTRACT_PYTHON_BIN="${RUN_CONTRACT_PYTHON_BIN:-${PYTHON:-python3}}"
 
 [[ -n "$ACTION" ]] || {
     printf '[aws-common][ERROR] ACTION must be set before sourcing aws_common_lib.sh\n' >&2
@@ -27,10 +28,32 @@ AWS_REMOTE_PREP_STATE_PATH="${AWS_REMOTE_PREP_STATE_PATH:-}"
     printf '[aws-common][ERROR] manifest is missing: %s\n' "$MANIFEST_PATH" >&2
     exit 1
 }
-if [[ -z "${RUN_TARGET_NAME:-}" || -z "${RUN_SUITE_NAME:-}" ]]; then
-    # shellcheck disable=SC1090
-    source "$MANIFEST_PATH"
-fi
+
+load_shell_contract_file() {
+    local path="$1"
+    [[ -f "$path" ]] || {
+        printf '[aws-common][ERROR] contract file is missing: %s\n' "$path" >&2
+        exit 1
+    }
+    eval "$(
+        PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}" \
+            "$RUN_CONTRACT_PYTHON_BIN" -m runner.libs.run_contract export "$path"
+    )"
+}
+
+load_shell_state_file() {
+    local path="$1"
+    [[ -f "$path" ]] || {
+        printf '[aws-common][ERROR] state file is missing: %s\n' "$path" >&2
+        exit 1
+    }
+    eval "$(
+        PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}" \
+            "$RUN_CONTRACT_PYTHON_BIN" -m runner.libs.state_file export "$path"
+    )"
+}
+
+load_shell_contract_file "$MANIFEST_PATH"
 
 RUN_AWS_INSTANCE_MODE="${RUN_AWS_INSTANCE_MODE:-shared}"
 case "$RUN_AWS_INSTANCE_MODE" in
@@ -41,7 +64,11 @@ case "$RUN_AWS_INSTANCE_MODE" in
         ;;
 esac
 
-RUN_TOKEN="$(basename "$MANIFEST_PATH" .env)"
+RUN_TOKEN="${RUN_TOKEN:-}"
+[[ -n "$RUN_TOKEN" ]] || {
+    printf '[aws-common][ERROR] manifest RUN_TOKEN is empty\n' >&2
+    exit 1
+}
 TARGET_CACHE_DIR="$ROOT_DIR/.cache/${RUN_TARGET_NAME}"
 SHARED_STATE_DIR="$TARGET_CACHE_DIR/state"
 RUN_STATE_DIR="$TARGET_CACHE_DIR/run-state/$RUN_TOKEN"
@@ -51,7 +78,7 @@ if [[ "$ACTION" != "terminate" && "$RUN_AWS_INSTANCE_MODE" == "dedicated" ]]; th
 else
     STATE_DIR="$SHARED_STATE_DIR"
 fi
-STATE_FILE="$STATE_DIR/instance.env"
+STATE_FILE="$STATE_DIR/instance.json"
 RUN_PREP_ROOT="$TARGET_CACHE_DIR/runs/$RUN_TOKEN"
 ARTIFACT_DIR="$RUN_PREP_ROOT/artifacts"
 RESULTS_DIR="$TARGET_CACHE_DIR/results"
@@ -105,32 +132,12 @@ with_remote_execution_lock() {
     with_locked_file "$SHARED_STATE_DIR/remote-exec.lock" "$@"
 }
 
-remote_prereq_dir() {
-    printf '%s\n' "$RUN_REMOTE_STAGE_DIR/prereq/$RUN_TOKEN"
-}
-
 remote_base_prereq_dir() {
     printf '%s\n' "$RUN_REMOTE_STAGE_DIR/prereq/base"
 }
 
-remote_prereq_stamp_path() {
-    printf '%s\n' "$(remote_prereq_dir)/prereqs.ready"
-}
-
 remote_base_prereq_stamp_path() {
     printf '%s\n' "$(remote_base_prereq_dir)/base.ready"
-}
-
-remote_prereq_workload_tool_root() {
-    printf '%s\n' "$(remote_prereq_dir)/workload-tools"
-}
-
-remote_base_prereq_workload_tool_root() {
-    printf '%s\n' "$(remote_base_prereq_dir)/workload-tools"
-}
-
-remote_prereq_workload_tool_bin() {
-    printf '%s\n' "$(remote_prereq_workload_tool_root)/bin"
 }
 
 load_state() {
@@ -145,13 +152,11 @@ load_state() {
     STATE_KERNEL_RELEASE=""
     if [[ -n "$AWS_REMOTE_PREP_STATE_PATH" ]]; then
         [[ -f "$AWS_REMOTE_PREP_STATE_PATH" ]] || die "AWS remote-prep state file is missing: ${AWS_REMOTE_PREP_STATE_PATH}"
-        # shellcheck disable=SC1090
-        source "$AWS_REMOTE_PREP_STATE_PATH"
+        load_shell_state_file "$AWS_REMOTE_PREP_STATE_PATH"
         return 0
     fi
     if [[ -f "$STATE_FILE" ]]; then
-        # shellcheck disable=SC1090
-        source "$STATE_FILE"
+        load_shell_state_file "$STATE_FILE"
     fi
 }
 
@@ -167,8 +172,7 @@ load_remote_prep_state() {
     STATE_KERNEL_RELEASE=""
     [[ -n "$AWS_REMOTE_PREP_STATE_PATH" ]] || die "AWS remote-prep state path is required for canonical AWS local prep"
     [[ -f "$AWS_REMOTE_PREP_STATE_PATH" ]] || die "AWS remote-prep state file is missing: ${AWS_REMOTE_PREP_STATE_PATH}"
-    # shellcheck disable=SC1090
-    source "$AWS_REMOTE_PREP_STATE_PATH"
+    load_shell_state_file "$AWS_REMOTE_PREP_STATE_PATH"
 }
 
 save_state() {
@@ -177,12 +181,12 @@ save_state() {
     local region="$3"
     local kernel_release="${4:-}"
     ensure_dirs
-    cat >"$STATE_FILE" <<EOF
-STATE_INSTANCE_ID=$(printf '%q' "$instance_id")
-STATE_INSTANCE_IP=$(printf '%q' "$instance_ip")
-STATE_REGION=$(printf '%q' "$region")
-STATE_KERNEL_RELEASE=$(printf '%q' "$kernel_release")
-EOF
+    PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}" \
+        "$RUN_CONTRACT_PYTHON_BIN" -m runner.libs.state_file write "$STATE_FILE" \
+            "STATE_INSTANCE_ID=$instance_id" \
+            "STATE_INSTANCE_IP=$instance_ip" \
+            "STATE_REGION=$region" \
+            "STATE_KERNEL_RELEASE=$kernel_release"
 }
 
 clear_state() {
@@ -481,63 +485,51 @@ EOF
 load_local_state_if_present() {
     [[ -n "${LOCAL_STATE_PATH:-}" ]] || return 0
     [[ -f "$LOCAL_STATE_PATH" ]] || die "local state file is missing: ${LOCAL_STATE_PATH}"
-    # shellcheck disable=SC1090
-    source "$LOCAL_STATE_PATH"
-}
-
-setup_remote_prereqs_mode() {
-    local ip="$1"
-    local mode="$2"
-    local remote_prereq_dir remote_stamp_path remote_tool_root
-    case "$mode" in
-        base)
-            remote_prereq_dir="$(remote_base_prereq_dir)"
-            remote_stamp_path="$(remote_base_prereq_stamp_path)"
-            remote_tool_root="$(remote_base_prereq_workload_tool_root)"
-            ;;
-        runtime)
-            remote_prereq_dir="$(remote_prereq_dir)"
-            remote_stamp_path="$(remote_prereq_stamp_path)"
-            remote_tool_root="$(remote_prereq_workload_tool_root)"
-            ;;
-        *) die "unsupported AWS prereq mode: ${mode}" ;;
-    esac
-    local remote_helper="$remote_prereq_dir/aws_remote_prereqs.sh"
-    local remote_prereq_contract="$remote_prereq_dir/prereq_contract.sh"
-    local remote_manifest="$remote_prereq_dir/run-contract.env"
-    ssh_bash "$ip" "$remote_prereq_dir" <<'EOF'
-set -euo pipefail
-mkdir -p "$1"
-EOF
-    scp_to "$ip" "$ROOT_DIR/runner/scripts/aws_remote_prereqs.sh" "$remote_helper"
-    scp_to "$ip" "$ROOT_DIR/runner/scripts/prereq_contract.sh" "$remote_prereq_contract"
-    scp_to "$ip" "$MANIFEST_PATH" "$remote_manifest"
-    ssh_bash "$ip" "$remote_helper" "$remote_manifest" "$remote_stamp_path" "$remote_tool_root" "$mode" <<'EOF' >&2
-set -euo pipefail
-helper="$1"
-manifest="$2"
-stamp_path="$3"
-tool_root="$4"
-prereq_mode="$5"
-chmod +x "$helper"
-sudo env PATH="$PATH" \
-    AWS_REMOTE_PREREQS_MODE="$prereq_mode" \
-    AWS_REMOTE_PREREQS_STAMP="$stamp_path" \
-    RUN_REMOTE_WORKLOAD_TOOL_ROOT="$tool_root" \
-    RUN_BUNDLED_WORKLOAD_TOOLS_CSV="${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}" \
-    bash "$helper" "$manifest"
-test -f "$stamp_path"
-EOF
+    load_shell_state_file "$LOCAL_STATE_PATH"
 }
 
 setup_remote_base_prereqs() {
     local ip="$1"
-    setup_remote_prereqs_mode "$ip" base
+    local remote_prereq_dir remote_stamp_path
+    remote_prereq_dir="$(remote_base_prereq_dir)"
+    remote_stamp_path="$(remote_base_prereq_stamp_path)"
+    local remote_manifest="$remote_prereq_dir/run-contract.env"
+    local remote_runner_root="$remote_prereq_dir/runner"
+    local remote_runner_lib_root="$remote_runner_root/libs"
+    ssh_bash "$ip" "$remote_prereq_dir" <<'EOF'
+set -euo pipefail
+mkdir -p "$1"
+EOF
+    ssh_bash "$ip" "$remote_runner_lib_root" <<'EOF'
+set -euo pipefail
+mkdir -p "$1"
+EOF
+    scp_to "$ip" "$MANIFEST_PATH" "$remote_manifest"
+    scp_to "$ip" "$ROOT_DIR/runner/__init__.py" "$remote_runner_root/__init__.py"
+    scp_to "$ip" "$ROOT_DIR/runner/libs/__init__.py" "$remote_runner_lib_root/__init__.py"
+    scp_to "$ip" "$ROOT_DIR/runner/libs/prereq_contract.py" "$remote_runner_lib_root/prereq_contract.py"
+    scp_to "$ip" "$ROOT_DIR/runner/libs/run_contract.py" "$remote_runner_lib_root/run_contract.py"
+    scp_to "$ip" "$ROOT_DIR/runner/libs/aws_remote_prereqs.py" "$remote_runner_lib_root/aws_remote_prereqs.py"
+    ssh_bash "$ip" "$remote_prereq_dir" "$remote_manifest" "$remote_stamp_path" <<'EOF' >&2
+set -euo pipefail
+prereq_root="$1"
+manifest="$2"
+stamp_path="$3"
+python_bin=""
+for candidate in python3 python; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+        python_bin="$candidate"
+        break
+    fi
+done
+[[ -n "$python_bin" ]] || {
+    echo "[aws-remote-prereqs][ERROR] no Python launcher is available" >&2
+    exit 1
 }
-
-setup_remote_runtime_prereqs() {
-    local ip="$1"
-    setup_remote_prereqs_mode "$ip" runtime
+sudo env PATH="$PATH" PYTHONPATH="$prereq_root" \
+    "$python_bin" -m runner.libs.aws_remote_prereqs "$manifest" "$stamp_path"
+test -f "$stamp_path"
+EOF
 }
 
 verify_remote_base_prereqs() {

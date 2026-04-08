@@ -1,5 +1,9 @@
 # bpf-benchmark 工程化 Review: Testing
 
+本文件是 2026-04-07 某一轮 testing review 的历史快照，不是当前
+canonical runner contract 或当前 active findings。当前有效的设计、todo、
+和最新状态统一以 `docs/tmp/aws_arm64_remote.md` 为准。
+
 日期：2026-04-07
 
 范围：已逐个阅读以下范围内的文件内容，而不是只按文件名判断。

@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import os
+import re
+import secrets
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
-from runner.libs.run_contract import parse_manifest
+from runner.libs.run_contract import build_manifest, build_target_manifest, parse_manifest, write_manifest_file
 
 
 CACHE_DIR = ROOT_DIR / ".cache" / "runner-contracts"
@@ -18,70 +20,28 @@ def _die(message: str) -> "NoReturn":
     raise SystemExit(1)
 
 
-def _run_checked(command: list[str], *, stdout_path: Path | None = None) -> None:
-    stdout_handle = None
-    try:
-        if stdout_path is not None:
-            stdout_path.parent.mkdir(parents=True, exist_ok=True)
-            stdout_handle = stdout_path.open("w", encoding="utf-8")
-        completed = subprocess.run(
-            command,
-            cwd=ROOT_DIR,
-            text=True,
-            stdout=stdout_handle,
-            stderr=None,
-            check=False,
-        )
-    finally:
-        if stdout_handle is not None:
-            stdout_handle.close()
-    if completed.returncode != 0:
-        raise SystemExit(completed.returncode)
-
-
-def _write_manifest(target_name: str, suite_name: str, manifest_path: Path) -> None:
-    env = os.environ.copy()
-    env["ROOT_DIR"] = str(ROOT_DIR)
-    env["RUN_TARGET_NAME"] = target_name
-    env["RUN_SUITE_NAME"] = suite_name
-    env["RUN_MANIFEST_OUT"] = str(manifest_path)
-    script = """
-set -euo pipefail
-source "$ROOT_DIR/runner/scripts/load_run_contract.sh"
-run_contract_write_manifest "$RUN_TARGET_NAME" "$RUN_SUITE_NAME" "$RUN_MANIFEST_OUT"
-"""
+def _run_checked(command: list[str]) -> None:
     completed = subprocess.run(
-        ["/bin/bash", "-lc", script],
+        command,
         cwd=ROOT_DIR,
-        env=env,
         text=True,
-        capture_output=False,
         check=False,
     )
     if completed.returncode != 0:
         raise SystemExit(completed.returncode)
+
+
+def _python_module_command(module: str, *args: str) -> list[str]:
+    return [sys.executable, "-m", module, *args]
+
+def _write_manifest(target_name: str, suite_name: str, run_token: str, manifest_path: Path) -> None:
+    env = os.environ.copy()
+    env["RUN_TOKEN"] = run_token
+    write_manifest_file(manifest_path, build_manifest(target_name, suite_name, env=env))
 
 
 def _write_target_manifest(target_name: str, manifest_path: Path) -> None:
-    env = os.environ.copy()
-    env["ROOT_DIR"] = str(ROOT_DIR)
-    env["RUN_TARGET_NAME"] = target_name
-    env["RUN_MANIFEST_OUT"] = str(manifest_path)
-    script = """
-set -euo pipefail
-source "$ROOT_DIR/runner/scripts/load_run_contract.sh"
-run_contract_write_target_manifest "$RUN_TARGET_NAME" "$RUN_MANIFEST_OUT"
-"""
-    completed = subprocess.run(
-        ["/bin/bash", "-lc", script],
-        cwd=ROOT_DIR,
-        env=env,
-        text=True,
-        capture_output=False,
-        check=False,
-    )
-    if completed.returncode != 0:
-        raise SystemExit(completed.returncode)
+    write_manifest_file(manifest_path, build_target_manifest(target_name, env=os.environ.copy()))
 
 
 def _cleanup_failed_dedicated_aws_prep(manifest_path: Path) -> None:
@@ -122,58 +82,76 @@ def _temp_env_path(prefix: str) -> Path:
     return Path(handle.name)
 
 
+def _temp_json_path(prefix: str) -> Path:
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    handle = tempfile.NamedTemporaryFile(
+        mode="w",
+        prefix=prefix,
+        suffix=".json",
+        dir=CACHE_DIR,
+        delete=False,
+    )
+    handle.close()
+    return Path(handle.name)
+
+
+def _run_token(target_name: str, suite_name: str) -> str:
+    token = f"run.{target_name}.{suite_name}.{secrets.token_hex(4)}"
+    return re.sub(r"[^0-9A-Za-z._-]+", "_", token)
+
+
 def _run_action(target_name: str, suite_name: str) -> None:
-    manifest_path = _temp_env_path(f"run.{target_name}.{suite_name}.")
-    local_state_path = _temp_env_path(f"run-local.{target_name}.{suite_name}.")
-    remote_prep_state_path = _temp_env_path(f"run-remote.{target_name}.{suite_name}.")
+    run_token = _run_token(target_name, suite_name)
+    manifest_path = _temp_env_path(f"manifest.{run_token}.")
+    local_state_path = _temp_json_path(f"local-state.{run_token}.")
+    remote_prep_state_path = _temp_json_path(f"remote-state.{run_token}.")
     prep_cleanup_armed = False
     try:
-        _write_manifest(target_name, suite_name, manifest_path)
+        _write_manifest(target_name, suite_name, run_token, manifest_path)
         contract = parse_manifest(manifest_path)
         executor = str(contract.get("RUN_EXECUTOR", ""))
         if executor == "aws-ssh":
             if str(contract.get("RUN_AWS_INSTANCE_MODE", "shared")) == "dedicated":
                 prep_cleanup_armed = True
             _run_checked(
-                ["/bin/bash", str(ROOT_DIR / "runner/scripts/aws_remote_prep.sh"), str(manifest_path)],
-                stdout_path=remote_prep_state_path,
-            )
-            _run_checked(
-                [
-                    "/bin/bash",
-                    str(ROOT_DIR / "runner/scripts/prepare_local_inputs.sh"),
+                _python_module_command(
+                    "runner.libs.aws_remote_prep",
                     str(manifest_path),
                     str(remote_prep_state_path),
-                ],
-                stdout_path=local_state_path,
+                ),
+            )
+            _run_checked(
+                _python_module_command(
+                    "runner.libs.prepare_local_inputs",
+                    str(manifest_path),
+                    str(local_state_path),
+                    str(remote_prep_state_path),
+                ),
             )
             prep_cleanup_armed = False
             _run_checked(
-                [
-                    "/bin/bash",
-                    str(ROOT_DIR / "runner/scripts/aws_executor.sh"),
+                _python_module_command(
+                    "runner.libs.aws_executor",
                     "run",
                     str(manifest_path),
                     str(local_state_path),
-                ]
+                )
             )
             return
         if executor == "kvm":
             _run_checked(
-                [
-                    "/bin/bash",
-                    str(ROOT_DIR / "runner/scripts/prepare_local_inputs.sh"),
-                    str(manifest_path),
-                ],
-                stdout_path=local_state_path,
-            )
-            _run_checked(
-                [
-                    "/bin/bash",
-                    str(ROOT_DIR / "runner/scripts/kvm_executor.sh"),
+                _python_module_command(
+                    "runner.libs.prepare_local_inputs",
                     str(manifest_path),
                     str(local_state_path),
-                ]
+                ),
+            )
+            _run_checked(
+                _python_module_command(
+                    "runner.libs.kvm_executor",
+                    str(manifest_path),
+                    str(local_state_path),
+                )
             )
             return
         _die(f"unsupported executor: {executor}")
@@ -227,12 +205,11 @@ def _terminate_action(target_name: str) -> None:
         if executor != "aws-ssh":
             _die("terminate is only valid for AWS targets")
         _run_checked(
-            [
-                "/bin/bash",
-                str(ROOT_DIR / "runner/scripts/aws_executor.sh"),
+            _python_module_command(
+                "runner.libs.aws_executor",
                 "terminate",
                 str(manifest_path),
-            ]
+            )
         )
     finally:
         manifest_path.unlink(missing_ok=True)

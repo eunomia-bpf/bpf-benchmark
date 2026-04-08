@@ -187,7 +187,8 @@ if [[ "$NEED_UPSTREAM" -eq 1 ]]; then
     UPSTREAM_SELFTEST_PKGCONFIG_LIBDIR="$SYSROOT_PKGCONFIG_LIBDIR" \
     UPSTREAM_SELFTEST_LLVM_SUFFIX="$UPSTREAM_SELFTEST_LLVM_SUFFIX" \
     VMLINUX_BTF="$VMLINUX_BTF" \
-        bash "$ROOT_DIR/runner/scripts/build_upstream_selftests.sh" >/dev/null
+    PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}" \
+        "$HOST_PYTHON_BIN" -m runner.libs.build_upstream_selftests >/dev/null
 fi
 
 if [[ "$NEED_UNITTEST" -eq 1 ]]; then

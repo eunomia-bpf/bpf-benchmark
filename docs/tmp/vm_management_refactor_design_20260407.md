@@ -1,5 +1,9 @@
 # VM 管理重构设计文档
 
+本文件是 2026-04-07 某一轮重构时的历史设计快照，不是当前 canonical
+runner contract。当前有效的设计、active todo、以及最新重构状态统一以
+`docs/tmp/aws_arm64_remote.md` 为准。
+
 日期：2026-04-07
 
 ## 1. 现状分析

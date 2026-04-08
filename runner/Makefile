@@ -13,6 +13,9 @@ ARM64_HOST_DAEMON_TARGET_DIR ?= $(ARM64_HOST_CACHE_ROOT)/daemon-host-cross/targe
 ARM64_HOST_DAEMON_OUTPUT_DIR ?= $(ARM64_HOST_CACHE_ROOT)/daemon-host-cross/output
 ARM64_HOST_DAEMON_BINARY ?= $(ARM64_HOST_DAEMON_OUTPUT_DIR)/bpfrejit-daemon
 ARM64_HOST_DAEMON_CARGO_HOME ?= $(ARM64_HOST_CACHE_ROOT)/cargo-home-host-daemon
+ARM64_HOST_RUNNER_BUILD_DIR ?= $(ARM64_HOST_CACHE_ROOT)/runner-host-cross/build
+ARM64_HOST_RUNNER_OUTPUT_DIR ?= $(ARM64_HOST_CACHE_ROOT)/runner-host-cross/output
+ARM64_HOST_RUNNER_BINARY ?= $(ARM64_HOST_RUNNER_OUTPUT_DIR)/micro_exec
 ARM64_HOST_SCX_BUILD_ROOT ?= $(ARM64_HOST_CACHE_ROOT)/scx-host-cross/build
 ARM64_HOST_SCX_CARGO_HOME ?= $(ARM64_HOST_CACHE_ROOT)/scx-host-cross/cargo-home
 ARM64_SOURCE_REPO_ROOT ?= $(REPO_ROOT)/runner/repos
@@ -81,7 +84,7 @@ UPSTREAM_SELFTEST_PKGCONFIG_LIBDIR ?=
 	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
 	scx-artifacts \
 	kernel-image unittest-build negative-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary daemon-tests \
-	__arm64-crossbuild-image __arm64-daemon-host-cross __arm64-workload-tools-host-cross __cross-arm64 __cross-arm64-scx __cross-arm64-bench __arm64-test-artifacts \
+	__arm64-crossbuild-image __arm64-daemon-host-cross __arm64-runner-host-cross __arm64-workload-tools-host-cross __cross-arm64 __cross-arm64-scx __cross-arm64-bench __arm64-test-artifacts \
 	clean
 
 all: micro_exec
@@ -200,7 +203,8 @@ upstream-selftests-build:
 	UPSTREAM_SELFTEST_PKGCONFIG_LIBDIR="$(UPSTREAM_SELFTEST_PKGCONFIG_LIBDIR)" \
 	UPSTREAM_SELFTEST_LLVM_SUFFIX="$(UPSTREAM_SELFTEST_LLVM_SUFFIX)" \
 	VMLINUX_BTF="$(VMLINUX_BTF)" \
-		bash "$(ROOT_DIR)/scripts/build_upstream_selftests.sh"
+	PYTHONPATH="$(REPO_ROOT)$${PYTHONPATH:+:$${PYTHONPATH}}" \
+	"$(UPSTREAM_SELFTEST_HOST_PYTHON_BIN)" -m runner.libs.build_upstream_selftests
 
 kinsn-modules-build:
 	$(MAKE) -C "$(REPO_ROOT)" kinsn-modules \
@@ -240,6 +244,20 @@ __arm64-daemon-host-cross:
 	CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
 	bash "$(REPO_ROOT)/runner/scripts/build-arm64-daemon-host.sh"
 	file "$(ARM64_HOST_DAEMON_BINARY)" | grep -F "ELF 64-bit LSB pie executable, ARM aarch64"
+
+__arm64-runner-host-cross:
+	ARM64_HOST_RUNNER_BUILD_DIR="$(ARM64_HOST_RUNNER_BUILD_DIR)" \
+	ARM64_HOST_RUNNER_OUTPUT_DIR="$(ARM64_HOST_RUNNER_OUTPUT_DIR)" \
+	ARM64_HOST_RUNNER_BINARY="$(ARM64_HOST_RUNNER_BINARY)" \
+	ARM64_SYSROOT_ROOT="$(ARM64_SYSROOT_ROOT)" \
+	ARM64_SYSROOT_LOCK_FILE="$(ARM64_SYSROOT_LOCK_FILE)" \
+	ARM64_SYSROOT_REMOTE_HOST="$(ARM64_SYSROOT_REMOTE_HOST)" \
+	ARM64_SYSROOT_REMOTE_USER="$(ARM64_SYSROOT_REMOTE_USER)" \
+	ARM64_SYSROOT_SSH_KEY_PATH="$(ARM64_SYSROOT_SSH_KEY_PATH)" \
+	CROSS_COMPILE_ARM64="$(CROSS_COMPILE_ARM64)" \
+	MICRO_EXEC_ENABLE_LLVMBPF="$(MICRO_EXEC_ENABLE_LLVMBPF)" \
+		bash "$(REPO_ROOT)/runner/scripts/build-arm64-runner-host.sh"
+	file "$(ARM64_HOST_RUNNER_BINARY)" | grep -F "ELF 64-bit LSB pie executable, ARM aarch64"
 
 __arm64-workload-tools-host-cross:
 	ARM64_WORKLOAD_TOOLS_SOURCE_ROOT="$(ARM64_WORKLOAD_TOOLS_SOURCE_ROOT)" \

@@ -35,7 +35,7 @@ ARM64_AWS_BUILD_CONFIG := $(ARM64_AWS_BUILD_DIR)/.config
 ARM64_AWS_IMAGE     := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/Image
 ARM64_AWS_EFI_IMAGE := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
 ARM64_KERNEL_MAKEFLAGS      := $(filter-out B,$(MAKEFLAGS))
-RUN_TARGET_SUITE_SCRIPT  := $(ROOT_DIR)/runner/scripts/run_target_suite.sh
+RUN_TARGET_SUITE_CMD  = "$(PYTHON)" -m runner.libs.run_target_suite
 AWS_ARM64_BENCH_MODE ?= all
 
 export CROSS_COMPILE_ARM64 ARM64_BUILD_DIR ARM64_WORKTREE_DIR
@@ -72,8 +72,6 @@ KALLSYMS_EXTRA_PASS ?= 1
 
 # Derived
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
-DAEMON_PATH  := $(if $(filter /%,$(DAEMON)),$(DAEMON),$(ROOT_DIR)/$(DAEMON))
-MICRO_RUNNER := $(RUNNER_DIR)/build/micro_exec
 KERNEL_SYMVERS_PATH := $(KERNEL_DIR)/Module.symvers
 KERNEL_CONFIG_PATH := $(KERNEL_DIR)/.config
 KERNEL_CONFIG_STAMP := $(KERNEL_DIR)/.bpfrejit_config.stamp
@@ -107,10 +105,6 @@ ROOT_VM_CORPUS_FILTERS_ARG := $(if $(strip $(FILTERS)),FILTERS="$(FILTERS)",)
 ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG := $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),VM_CORPUS_WORKLOAD_SECONDS="$(VM_CORPUS_WORKLOAD_SECONDS)",)
 ROOT_VM_CORPUS_EXTRA_ARGS := $(if $(strip $(VM_CORPUS_ARGS)),VM_CORPUS_ARGS='$(VM_CORPUS_ARGS)',)
 
-# Incremental rebuild sources
-MICRO_RUNNER_SOURCES := $(wildcard $(RUNNER_DIR)/src/*.cpp $(RUNNER_DIR)/include/*.hpp $(RUNNER_DIR)/CMakeLists.txt)
-MICRO_BPF_SOURCES    := $(wildcard $(MICRO_DIR)/programs/*.bpf.c $(MICRO_DIR)/programs/common.h)
-DAEMON_SOURCES       := $(wildcard $(DAEMON_DIR)/src/*.rs $(DAEMON_DIR)/Cargo.toml $(DAEMON_DIR)/Cargo.lock)
 VIRTME_HOSTFS_MODULES := \
 	drivers/block/null_blk/null_blk.ko \
 	drivers/net/veth.ko \
@@ -137,13 +131,8 @@ VIRTME_HOSTFS_MODULE_ORDER := \
 	fs/9p/9p.o \
 	fs/fuse/virtiofs.o \
 	fs/overlayfs/overlay.o
-MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
-
-.PHONY: all runner micro daemon kernel kernel-build kernel-clean kernel-rebuild kernel-arm64 kinsn-modules virtme-hostfs-modules upstream-selftests-build \
-	corpus-fetch corpus-build corpus-build-native \
-	corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx \
-	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
-	daemon-tests python-tests check smoke validate \
+.PHONY: kernel kernel-build kernel-clean kernel-rebuild kernel-arm64 kinsn-modules virtme-hostfs-modules \
+	check validate \
 	vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	arm64-worktree \
 	kernel-arm64-aws \
@@ -154,13 +143,10 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 
 # ── Help ───────────────────────────────────────────────────────────────────────
 help:
-	@echo "Build:  all runner micro daemon kernel kernel-clean kernel-rebuild kinsn-modules upstream-selftests-build kernel-arm64"
-	@echo "Repos:  corpus-fetch corpus-build corpus-build-native corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace REPOS=\"katran tracee tetragon cilium bpftrace ...\""
-	@echo "Test:   smoke daemon-tests python-tests check"
-	@echo "VM x86 canonical: vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
-	@echo "        vm-corpus (full corpus suite driver)"
-	@echo "AWS:    aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64"
-	@echo "        aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86"
+	@echo "Canonical run targets:"
+	@echo "  VM x86:   vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
+	@echo "  AWS ARM:  aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64"
+	@echo "  AWS x86:  aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86"
 	@echo "Params: vm-micro SAMPLES=$(SAMPLES) WARMUPS=$(WARMUPS) INNER_REPEAT=$(INNER_REPEAT) BENCH=\"...\""
 	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) FILTERS=\"...\" VM_CORPUS_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
 	@echo "        vm-e2e E2E_CASE=\"all|tracee|...\" E2E_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\" PROFILE=$(PROFILE)"
@@ -170,61 +156,7 @@ help:
 	@echo "        aws-x86-test AWS_X86_REGION=<region> AWS_X86_PROFILE=<profile> AWS_X86_TEST_MODE=<selftest|negative|test>"
 	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=$(AWS_X86_BENCH_MODE) AWS_X86_E2E_CASES=<all|tracee,tetragon,...>"
 	@echo "        AWS benchmark mode 'all' fans out micro/corpus/e2e in parallel on dedicated remote instances"
-
-# ── Build ──────────────────────────────────────────────────────────────────────
-all:
-	$(MAKE) micro
-	$(MAKE) daemon
-
-runner:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" micro_exec
-
-corpus-fetch:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" REPOS="$(REPOS)" corpus-fetch
-
-corpus-build:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" REPOS="$(REPOS)" corpus-build
-
-corpus-build-native:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" REPOS="$(REPOS)" corpus-build-native
-
-corpus-build-bcc:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-bcc
-
-corpus-build-libbpf-bootstrap:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-libbpf-bootstrap
-
-corpus-build-xdp-tools:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-xdp-tools
-
-corpus-build-xdp-tutorial:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-xdp-tutorial
-
-corpus-build-scx:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-scx
-
-corpus-build-katran:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-katran
-
-corpus-build-tracee:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-tracee
-
-corpus-build-tetragon:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-tetragon
-
-corpus-build-cilium:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-cilium
-
-corpus-build-bpftrace:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-bpftrace
-
-micro:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" \
-		MICRO_PROGRAM_OUTPUT_DIR="$(MICRO_DIR)/programs" \
-		micro_exec micro-programs
-
-daemon:
-	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" DAEMON_TARGET_DIR="$(DAEMON_DIR)/target" daemon-binary
+	@echo "Developer-only raw build helpers still exist internally but are intentionally omitted here."
 
 kernel: kernel-build
 	@test -f "$(BZIMAGE_PATH)"
@@ -253,30 +185,6 @@ kinsn-modules: kernel-build
 
 virtme-hostfs-modules: kernel-build
 	@:
-
-upstream-selftests-build: virtme-hostfs-modules
-	@if [ ! -f "$(UPSTREAM_SELFTEST_DIR)/Makefile" ]; then \
-		echo "upstream-selftests-build is unavailable in this checkout: missing $(UPSTREAM_SELFTEST_DIR)/Makefile" >&2; \
-		exit 2; \
-	fi
-	$(MAKE) -C "$(RUNNER_DIR)" \
-		PYTHON="$(PYTHON)" \
-		VMLINUX_BTF="$(KERNEL_DIR)/vmlinux" \
-		UPSTREAM_SELFTEST_OUTPUT_DIR="$(UPSTREAM_SELFTEST_OUTPUT_DIR)" \
-		UPSTREAM_SELFTEST_HOST_PYTHON_BIN="$(PYTHON)" \
-		UPSTREAM_SELFTEST_LLVM_SUFFIX="$(patsubst -%,%,$(UPSTREAM_SELFTEST_LLVM_SUFFIX))" \
-		upstream-selftests-build
-
-# Incremental rebuild rules
-$(MICRO_RUNNER): $(MICRO_RUNNER_SOURCES)
-	$(MAKE) -C "$(RUNNER_DIR)" micro_exec
-
-$(MICRO_BPF_STAMP): $(MICRO_BPF_SOURCES)
-	$(MAKE) -C "$(RUNNER_DIR)" MICRO_PROGRAM_OUTPUT_DIR="$(MICRO_DIR)/programs" micro-programs
-	touch "$@"
-
-$(DAEMON_PATH): $(DAEMON_SOURCES)
-	$(MAKE) -C "$(RUNNER_DIR)" DAEMON_TARGET_DIR="$(DAEMON_DIR)/target" daemon-binary
 
 $(KERNEL_CONFIG_PATH):
 	cp "$(DEFCONFIG_SRC)" "$@"
@@ -359,22 +267,15 @@ __kernel-build-locked:
 		fi
 	@touch "$(KERNEL_BUILD_STAMP)"
 
-# ── Local tests ────────────────────────────────────────────────────────────────
-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
+check:
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" \
+		MICRO_PROGRAM_OUTPUT_DIR="$(MICRO_DIR)/programs" \
+		micro_exec micro-programs
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" DAEMON_TARGET_DIR="$(DAEMON_DIR)/target" daemon-binary
+	$(MAKE) -C "$(RUNNER_DIR)" daemon-tests
+	$(PYTHON) -m pytest tests/python/ -v
 	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VENV_ACTIVATE) "$(PYTHON)" "$(MICRO_DIR)/driver.py" --runtime llvmbpf $(LOCAL_SMOKE_ARGS) --output "$(SMOKE_OUTPUT)"
-
-daemon-tests:
-	$(MAKE) -C "$(RUNNER_DIR)" daemon-tests
-
-python-tests:
-	$(PYTHON) -m pytest tests/python/ -v
-
-check:
-	$(MAKE) all
-	$(MAKE) daemon-tests
-	$(MAKE) python-tests
-	$(MAKE) smoke
 
 validate:
 	$(MAKE) check
@@ -383,25 +284,25 @@ validate:
 
 # ── VM (x86) ──────────────────────────────────────────────────────────────────
 vm-selftest:
-	TEST_MODE=selftest "$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm test
+	TEST_MODE=selftest $(RUN_TARGET_SUITE_CMD) run x86-kvm test
 
 vm-negative-test:
-	TEST_MODE=negative "$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm test
+	TEST_MODE=negative $(RUN_TARGET_SUITE_CMD) run x86-kvm test
 
 vm-test:
-	"$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm test
+	$(RUN_TARGET_SUITE_CMD) run x86-kvm test
 
 vm-micro-smoke:
-	SAMPLES=1 WARMUPS=0 INNER_REPEAT=50 "$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm micro
+	SAMPLES=1 WARMUPS=0 INNER_REPEAT=50 $(RUN_TARGET_SUITE_CMD) run x86-kvm micro
 
 vm-micro:
-	"$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm micro
+	$(RUN_TARGET_SUITE_CMD) run x86-kvm micro
 
 vm-corpus:
-	"$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm corpus
+	$(RUN_TARGET_SUITE_CMD) run x86-kvm corpus
 
 vm-e2e:
-	"$(RUN_TARGET_SUITE_SCRIPT)" run x86-kvm e2e
+	$(RUN_TARGET_SUITE_CMD) run x86-kvm e2e
 
 vm-all:
 	$(MAKE) vm-test
@@ -453,24 +354,24 @@ kernel-arm64-aws: $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE)
 
 # ── AWS aliases ───────────────────────────────────────────────────────────────
 aws-arm64-test:
-	"$(RUN_TARGET_SUITE_SCRIPT)" run aws-arm64 test
+	$(RUN_TARGET_SUITE_CMD) run aws-arm64 test
 
 aws-arm64-benchmark:
-	"$(RUN_TARGET_SUITE_SCRIPT)" benchmark aws-arm64 "$(AWS_ARM64_BENCH_MODE)"
+	$(RUN_TARGET_SUITE_CMD) benchmark aws-arm64 "$(AWS_ARM64_BENCH_MODE)"
 
 aws-arm64-terminate:
-	"$(RUN_TARGET_SUITE_SCRIPT)" terminate aws-arm64
+	$(RUN_TARGET_SUITE_CMD) terminate aws-arm64
 
 aws-arm64: aws-arm64-test aws-arm64-benchmark
 
 aws-x86-test:
-	"$(RUN_TARGET_SUITE_SCRIPT)" run aws-x86 test
+	$(RUN_TARGET_SUITE_CMD) run aws-x86 test
 
 aws-x86-benchmark:
-	"$(RUN_TARGET_SUITE_SCRIPT)" benchmark aws-x86 "$(AWS_X86_BENCH_MODE)"
+	$(RUN_TARGET_SUITE_CMD) benchmark aws-x86 "$(AWS_X86_BENCH_MODE)"
 
 aws-x86-terminate:
-	"$(RUN_TARGET_SUITE_SCRIPT)" terminate aws-x86
+	$(RUN_TARGET_SUITE_CMD) terminate aws-x86
 
 aws-x86: aws-x86-test aws-x86-benchmark
 
@@ -478,7 +379,6 @@ aws-x86: aws-x86-test aws-x86-benchmark
 clean:
 	$(MAKE) -C "$(RUNNER_DIR)" clean
 	$(MAKE) -C "$(MICRO_DIR)" clean
-	rm -f "$(MICRO_BPF_STAMP)"
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	$(MAKE) -C "$(KERNEL_DIR)" clean
 	rm -f "$(SMOKE_OUTPUT)" "$(ARM64_CONFIG_LINK)" "$(ARM64_IMAGE_LINK)"

@@ -37,6 +37,10 @@ if [[ "${ARM64_UPSTREAM_TEST_KMODS_DIR:-}" == "$TARGET_CACHE_DIR/upstream-selfte
     ARM64_UPSTREAM_TEST_KMODS_DIR="$ARM64_TEST_ARTIFACTS_ROOT/upstream-selftests-kmods"
 fi
 ARM64_UPSTREAM_TEST_KMODS_DIR="${ARM64_UPSTREAM_TEST_KMODS_DIR:-$ARM64_TEST_ARTIFACTS_ROOT/upstream-selftests-kmods}"
+ARM64_HOST_RUNNER_ROOT="${ARM64_HOST_RUNNER_ROOT:-$RUN_PREP_ROOT/arm64-runner-host-cross}"
+ARM64_HOST_RUNNER_BUILD_DIR="${ARM64_HOST_RUNNER_BUILD_DIR:-$ARM64_HOST_RUNNER_ROOT/build}"
+ARM64_HOST_RUNNER_OUTPUT_DIR="${ARM64_HOST_RUNNER_OUTPUT_DIR:-$ARM64_HOST_RUNNER_ROOT/output}"
+ARM64_HOST_RUNNER_BINARY="${ARM64_HOST_RUNNER_BINARY:-$ARM64_HOST_RUNNER_OUTPUT_DIR/micro_exec}"
 ARM64_HOST_DAEMON_ROOT="${ARM64_HOST_DAEMON_ROOT:-$RUN_PREP_ROOT/arm64-daemon-host-cross}"
 ARM64_HOST_DAEMON_TARGET_DIR="${ARM64_HOST_DAEMON_TARGET_DIR:-$ARM64_HOST_DAEMON_ROOT/target}"
 ARM64_HOST_DAEMON_OUTPUT_DIR="${ARM64_HOST_DAEMON_OUTPUT_DIR:-$ARM64_HOST_DAEMON_ROOT/output}"
@@ -55,7 +59,7 @@ ARM64_KATRAN_SERVER_BINARY="${ARM64_KATRAN_SERVER_BINARY:-$ARM64_CROSSBUILD_OUTP
 ARM64_KATRAN_SERVER_LIB_DIR="${ARM64_KATRAN_SERVER_LIB_DIR:-$ARM64_CROSSBUILD_OUTPUT_DIR/katran/lib}"
 
 configure_arm64_sysroot_contract() {
-    [[ "${RUN_TARGET_NAME:-}" == "aws-arm64" ]] || return 0
+    [[ "${RUN_EXECUTOR:-}" == "aws-ssh" && "${RUN_TARGET_ARCH:-}" == "arm64" ]] || return 0
     if [[ -n "${ARM64_SYSROOT_REMOTE_HOST:-}" ]]; then
         [[ -n "${ARM64_SYSROOT_REMOTE_USER:-}" ]] || die "ARM64 sysroot source requires ARM64_SYSROOT_REMOTE_USER"
         [[ -n "${ARM64_SYSROOT_SSH_KEY_PATH:-}" ]] || die "ARM64 sysroot source requires ARM64_SYSROOT_SSH_KEY_PATH"
@@ -70,12 +74,12 @@ configure_arm64_sysroot_contract() {
 }
 
 ensure_x86_runner_ready() {
-    make -C "$ROOT_DIR/runner" BUILD_DIR="$X86_RUNNER_BUILD_DIR" micro_exec >/dev/null
+    local_prep_build_runner_binary "$ROOT_DIR/runner" "$X86_RUNNER_BUILD_DIR"
     file "$X86_RUNNER" | grep -F "x86-64" >/dev/null || die "x86 runner is not an x86_64 binary"
 }
 
 ensure_x86_daemon_ready() {
-    make -C "$ROOT_DIR/runner" DAEMON_TARGET_DIR="$X86_DAEMON_TARGET_DIR" daemon-binary >/dev/null
+    local_prep_build_daemon_binary "$ROOT_DIR/runner" "$X86_DAEMON_TARGET_DIR"
     file "$X86_DAEMON" | grep -F "x86-64" >/dev/null || die "x86 daemon is not an x86_64 binary"
 }
 
@@ -127,6 +131,8 @@ ensure_cross_arm64_runtime() {
     local require_llvmbpf="${1:-0}"
     local llvmbpf_setting="${ARM64_CROSSBUILD_ENABLE_LLVMBPF:-OFF}"
     local runtime_targets=()
+    local runtime_targets_csv=""
+    local use_host_runner_cross="0"
     if [[ "$require_llvmbpf" == "1" ]]; then
         llvmbpf_setting=ON
     fi
@@ -137,6 +143,12 @@ ensure_cross_arm64_runtime() {
         runtime_targets+=(daemon)
     fi
     [[ "${#runtime_targets[@]}" -gt 0 ]] || return 0
+    runtime_targets_csv="$(IFS=,; printf '%s' "${runtime_targets[*]}")"
+    if [[ "$llvmbpf_setting" != "ON" ]]; then
+        case ",${runtime_targets_csv}," in
+            *,runner,*) use_host_runner_cross="1" ;;
+        esac
+    fi
     configure_arm64_sysroot_contract
     if [[ "${#runtime_targets[@]}" -eq 1 && "${runtime_targets[0]}" == "daemon" ]]; then
         make -C "$ROOT_DIR/runner" __arm64-daemon-host-cross \
@@ -158,6 +170,46 @@ ensure_cross_arm64_runtime() {
         [[ -d "$ARM64_CROSS_LIB_DIR" ]] || die "ARM64 runtime lib dir is missing: ${ARM64_CROSS_LIB_DIR}"
         return 0
     fi
+    if [[ "$use_host_runner_cross" == "1" ]]; then
+        make -C "$ROOT_DIR/runner" __arm64-runner-host-cross \
+            ARM64_HOST_RUNNER_BUILD_DIR="$ARM64_HOST_RUNNER_BUILD_DIR" \
+            ARM64_HOST_RUNNER_OUTPUT_DIR="$ARM64_HOST_RUNNER_OUTPUT_DIR" \
+            ARM64_HOST_RUNNER_BINARY="$ARM64_HOST_RUNNER_BINARY" \
+            ARM64_SYSROOT_ROOT="$ARM64_SYSROOT_ROOT" \
+            ARM64_SYSROOT_LOCK_FILE="$ARM64_SYSROOT_LOCK_FILE" \
+            ARM64_SYSROOT_REMOTE_HOST="$ARM64_SYSROOT_REMOTE_HOST" \
+            ARM64_SYSROOT_REMOTE_USER="$ARM64_SYSROOT_REMOTE_USER" \
+            ARM64_SYSROOT_SSH_KEY_PATH="$ARM64_SYSROOT_SSH_KEY_PATH" \
+            MICRO_EXEC_ENABLE_LLVMBPF=OFF >/dev/null
+        bash "$ROOT_DIR/runner/scripts/build-arm64-portable-binary-host.sh" \
+            "$ARM64_HOST_RUNNER_BINARY" \
+            "$ARM64_CROSS_RUNNER_REAL" \
+            "$ARM64_CROSS_RUNNER" \
+            "$ARM64_CROSS_LIB_DIR" >/dev/null
+        file "$ARM64_CROSS_RUNNER_REAL" | grep -F "ARM aarch64" >/dev/null || die "ARM64 runner is not an aarch64 binary"
+        case ",${runtime_targets_csv}," in
+            *,daemon,*)
+            make -C "$ROOT_DIR/runner" __arm64-daemon-host-cross \
+                ARM64_HOST_DAEMON_TARGET_DIR="$ARM64_HOST_DAEMON_TARGET_DIR" \
+                ARM64_HOST_DAEMON_OUTPUT_DIR="$ARM64_HOST_DAEMON_OUTPUT_DIR" \
+                ARM64_HOST_DAEMON_BINARY="$ARM64_HOST_DAEMON_BINARY" \
+                ARM64_HOST_DAEMON_CARGO_HOME="$ARM64_HOST_DAEMON_CARGO_HOME" \
+                ARM64_SYSROOT_ROOT="$ARM64_SYSROOT_ROOT" \
+                ARM64_SYSROOT_LOCK_FILE="$ARM64_SYSROOT_LOCK_FILE" \
+                ARM64_SYSROOT_REMOTE_HOST="$ARM64_SYSROOT_REMOTE_HOST" \
+                ARM64_SYSROOT_REMOTE_USER="$ARM64_SYSROOT_REMOTE_USER" \
+                ARM64_SYSROOT_SSH_KEY_PATH="$ARM64_SYSROOT_SSH_KEY_PATH" >/dev/null
+            bash "$ROOT_DIR/runner/scripts/build-arm64-portable-binary-host.sh" \
+                "$ARM64_HOST_DAEMON_BINARY" \
+                "$ARM64_CROSS_DAEMON_REAL" \
+                "$ARM64_CROSS_DAEMON" \
+                "$ARM64_CROSS_LIB_DIR" >/dev/null
+            file "$ARM64_CROSS_DAEMON_REAL" | grep -F "ARM aarch64" >/dev/null || die "ARM64 daemon is not an aarch64 binary"
+                ;;
+        esac
+        [[ -d "$ARM64_CROSS_LIB_DIR" ]] || die "ARM64 runtime lib dir is missing: ${ARM64_CROSS_LIB_DIR}"
+        return 0
+    fi
     make -C "$ROOT_DIR/runner" __cross-arm64 \
         ARM64_SOURCE_REPO_ROOT="$ARM64_SOURCE_REPO_ROOT" \
         ARM64_CROSSBUILD_OUTPUT_DIR="$ARM64_CROSSBUILD_OUTPUT_DIR" \
@@ -172,7 +224,7 @@ ensure_cross_arm64_runtime() {
         ARM64_SYSROOT_REMOTE_HOST="$ARM64_SYSROOT_REMOTE_HOST" \
         ARM64_SYSROOT_REMOTE_USER="$ARM64_SYSROOT_REMOTE_USER" \
         ARM64_SYSROOT_SSH_KEY_PATH="$ARM64_SYSROOT_SSH_KEY_PATH" \
-        ARM64_CROSSBUILD_RUNTIME_TARGETS="$(IFS=,; printf '%s' "${runtime_targets[*]}")" \
+        ARM64_CROSSBUILD_RUNTIME_TARGETS="$runtime_targets_csv" \
         ARM64_CROSSBUILD_ENABLE_LLVMBPF="$llvmbpf_setting" >/dev/null
     if [[ "${RUN_NEEDS_RUNNER_BINARY:-0}" == "1" ]]; then
         file "$ARM64_CROSS_RUNNER_REAL" | grep -F "ARM aarch64" >/dev/null || die "ARM64 runner is not an aarch64 binary"
@@ -446,150 +498,208 @@ ensure_arm64_native_repo_artifacts_ready() {
     done
 }
 
-aws_prepare_local_test_artifacts() {
-    case "$RUN_TARGET_NAME" in
-        aws-arm64)
+prepare_aws_runtime_artifacts() {
+    case "$RUN_TARGET_ARCH" in
+        arm64)
             ensure_cross_arm64_runtime "${RUN_SUITE_NEEDS_LLVMBPF:-0}"
-            ensure_arm64_scx_artifacts_ready
+            ;;
+        x86_64)
+            if [[ "${RUN_NEEDS_RUNNER_BINARY:-0}" == "1" ]]; then
+                ensure_x86_runner_ready
+            fi
+            if [[ "${RUN_NEEDS_DAEMON_BINARY:-0}" == "1" ]]; then
+                ensure_x86_daemon_ready
+            fi
+            ;;
+        *)
+            die "unsupported AWS target arch for runtime prep: ${RUN_TARGET_ARCH}"
+            ;;
+    esac
+}
+
+prepare_aws_kinsn_modules() {
+    case "$RUN_TARGET_ARCH" in
+        arm64)
             ensure_arm64_kinsn_modules_ready
-            ensure_arm64_selftest_outputs
-            ensure_arm64_upstream_test_kmods_ready
             ;;
-        aws-x86)
-            ensure_x86_runner_ready
-            ensure_x86_daemon_ready
-            ensure_x86_scx_artifacts_ready
+        x86_64)
             ensure_x86_kinsn_modules_ready
+            ;;
+        *)
+            die "unsupported AWS target arch for kinsn prep: ${RUN_TARGET_ARCH}"
+            ;;
+    esac
+}
+
+prepare_aws_test_outputs() {
+    case "$RUN_TARGET_ARCH" in
+        arm64)
+            ensure_arm64_selftest_outputs
+            ;;
+        x86_64)
             ensure_x86_selftest_outputs
-            ensure_x86_upstream_selftests_ready
             ;;
         *)
-            die "unsupported AWS test target: ${RUN_TARGET_NAME}"
+            die "unsupported AWS target arch for test artifact prep: ${RUN_TARGET_ARCH}"
             ;;
     esac
 }
 
-aws_prepare_local_benchmark_artifacts() {
-    case "$RUN_SUITE_NAME" in
-        micro)
-            case "$RUN_TARGET_NAME" in
-                aws-arm64)
-                    ensure_cross_arm64_runtime "${RUN_SUITE_NEEDS_LLVMBPF:-0}"
-                    make -C "$ROOT_DIR/runner" MICRO_PROGRAM_OUTPUT_DIR="$MICRO_PROGRAMS_GENERATED_DIR" micro-programs >/dev/null
-                    local_prep_stage_matching_micro_sidecars "$MICRO_PROGRAMS_GENERATED_DIR" "$ROOT_DIR/micro/generated-inputs"
-                    require_nonempty_dir "$MICRO_PROGRAMS_GENERATED_DIR" "micro generated programs dir"
-                    ;;
-                aws-x86)
-                    ensure_x86_runner_ready
-                    make -C "$ROOT_DIR/runner" MICRO_PROGRAM_OUTPUT_DIR="$MICRO_PROGRAMS_GENERATED_DIR" micro-programs >/dev/null
-                    local_prep_stage_matching_micro_sidecars "$MICRO_PROGRAMS_GENERATED_DIR" "$ROOT_DIR/micro/generated-inputs"
-                    require_nonempty_dir "$MICRO_PROGRAMS_GENERATED_DIR" "micro generated programs dir"
-                    ;;
-                *)
-                    die "unsupported AWS micro target: ${RUN_TARGET_NAME}"
-                    ;;
-            esac
+prepare_aws_upstream_selftests() {
+    case "$RUN_TARGET_ARCH" in
+        arm64) ;;
+        x86_64) ensure_x86_upstream_selftests_ready ;;
+        *) die "unsupported AWS target arch for upstream selftest prep: ${RUN_TARGET_ARCH}" ;;
+    esac
+}
+
+prepare_aws_upstream_test_kmods() {
+    case "$RUN_TARGET_ARCH" in
+        arm64) ensure_arm64_upstream_test_kmods_ready ;;
+        x86_64) ;;
+        *) die "unsupported AWS target arch for upstream test kmods prep: ${RUN_TARGET_ARCH}" ;;
+    esac
+}
+
+prepare_aws_micro_programs() {
+    local_prep_build_micro_program_outputs \
+        "$ROOT_DIR/runner" \
+        "$MICRO_PROGRAMS_GENERATED_DIR" \
+        "$ROOT_DIR/micro/generated-inputs"
+}
+
+prepare_aws_fetch_repos() {
+    ensure_selected_repos_fetched "${RUN_FETCH_REPOS_CSV:-}"
+}
+
+prepare_aws_scx_artifacts() {
+    case "$RUN_TARGET_ARCH" in
+        arm64)
+            ensure_arm64_scx_artifacts_ready
             ;;
-        corpus|e2e)
-            ensure_selected_repos_fetched "${RUN_FETCH_REPOS_CSV:-}"
-            case "$RUN_TARGET_NAME" in
-                aws-arm64)
-                    ensure_cross_arm64_runtime "${RUN_SUITE_NEEDS_LLVMBPF:-0}"
-                    ensure_arm64_scx_artifacts_ready
-                    ensure_arm64_kinsn_modules_ready
-                    ensure_arm64_native_repo_artifacts_ready
-                    ensure_arm64_workload_tools_ready
-                    ;;
-                aws-x86)
-                    ensure_x86_daemon_ready
-                    ensure_x86_scx_artifacts_ready
-                    ensure_x86_kinsn_modules_ready
-                    ensure_x86_native_repo_artifacts_ready
-                    ensure_x86_portable_libbpf_ready
-                    ensure_x86_workload_tools_ready
-                    ;;
-                *)
-                    die "unsupported AWS benchmark target: ${RUN_TARGET_NAME}"
-                    ;;
-            esac
+        x86_64)
+            ensure_x86_scx_artifacts_ready
             ;;
         *)
-            die "unsupported benchmark suite for local artifact preparation: ${RUN_SUITE_NAME}"
+            die "unsupported AWS target arch for scx prep: ${RUN_TARGET_ARCH}"
             ;;
     esac
 }
 
-aws_prepare_local_suite_artifacts() {
-    case "$RUN_SUITE_NAME" in
-        test) aws_prepare_local_test_artifacts ;;
-        micro|corpus|e2e) aws_prepare_local_benchmark_artifacts ;;
-        *) die "unsupported suite for local artifact preparation: ${RUN_SUITE_NAME}" ;;
+prepare_aws_native_repo_artifacts() {
+    case "$RUN_TARGET_ARCH" in
+        arm64)
+            ensure_arm64_native_repo_artifacts_ready
+            ;;
+        x86_64)
+            ensure_x86_native_repo_artifacts_ready
+            ;;
+        *)
+            die "unsupported AWS target arch for native repo prep: ${RUN_TARGET_ARCH}"
+            ;;
     esac
+}
+
+prepare_aws_workload_tools() {
+    case "$RUN_TARGET_ARCH" in
+        arm64)
+            ensure_arm64_workload_tools_ready
+            ;;
+        x86_64)
+            ensure_x86_workload_tools_ready
+            ;;
+        *)
+            die "unsupported AWS target arch for workload-tool prep: ${RUN_TARGET_ARCH}"
+            ;;
+    esac
+}
+
+prepare_aws_benchmark_extra() {
+    case "$RUN_TARGET_ARCH" in
+        arm64) ;;
+        x86_64) ensure_x86_portable_libbpf_ready ;;
+        *) die "unsupported AWS target arch for benchmark extra prep: ${RUN_TARGET_ARCH}" ;;
+    esac
+}
+
+aws_prepare_local_init() {
+    ensure_dirs
+    load_remote_prep_state
 }
 
 aws_prepare_local_bundle() {
     local stage_root bundle_tar bundle_inputs_path
     stage_root="$RUN_PREP_ROOT/workspace"
     bundle_tar="$RUN_PREP_ROOT/bundle.tar.gz"
-    bundle_inputs_path="$RUN_PREP_ROOT/bundle-inputs.env"
-    RUN_INPUT_STAGE_ROOT="$stage_root"
+    bundle_inputs_path="$RUN_PREP_ROOT/bundle-inputs.json"
     RUN_BUNDLE_TAR="$bundle_tar"
-    rm -rf "$stage_root"
-    mkdir -p "$(dirname "$bundle_tar")"
-    : >"$bundle_inputs_path"
-    write_bundle_input_var "$bundle_inputs_path" RUN_BUNDLED_WORKLOAD_TOOLS_CSV "${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}"
-    write_bundle_input_var "$bundle_inputs_path" RUN_LOCAL_REPO_ROOT "$LOCAL_REPO_ROOT"
-    write_bundle_input_var_if_set "$bundle_inputs_path" RUN_LOCAL_WORKLOAD_TOOL_ROOT "${RUN_LOCAL_WORKLOAD_TOOL_ROOT:-}"
-    write_bundle_input_var_if_set "$bundle_inputs_path" MICRO_PROGRAMS_GENERATED_DIR "$MICRO_PROGRAMS_GENERATED_DIR"
-    if [[ "${RUN_NEEDS_KINSN_MODULES:-0}" == "1" ]]; then
-        case "$RUN_TARGET_ARCH" in
-            arm64) write_bundle_input_var "$bundle_inputs_path" RUN_KINSN_MODULE_DIR "$ARM64_KINSN_MODULE_STAGE_DIR" ;;
-            x86_64) write_bundle_input_var "$bundle_inputs_path" RUN_KINSN_MODULE_DIR "$X86_KINSN_MODULE_STAGE_DIR" ;;
-            *) die "unsupported target arch for bundled module inputs: ${RUN_TARGET_ARCH}" ;;
-        esac
-    fi
-    write_bundle_input_var_if_set "$bundle_inputs_path" X86_RUNNER "$X86_RUNNER"
-    write_bundle_input_var_if_set "$bundle_inputs_path" X86_DAEMON "$X86_DAEMON"
-    write_bundle_input_var_if_set "$bundle_inputs_path" X86_TEST_UNITTEST_BUILD_DIR "$X86_TEST_UNITTEST_BUILD_DIR"
-    write_bundle_input_var_if_set "$bundle_inputs_path" X86_TEST_NEGATIVE_BUILD_DIR "$X86_TEST_NEGATIVE_BUILD_DIR"
-    write_bundle_input_var_if_set "$bundle_inputs_path" X86_UPSTREAM_SELFTEST_DIR "$X86_UPSTREAM_SELFTEST_DIR"
-    write_bundle_input_var_if_set "$bundle_inputs_path" X86_PORTABLE_LIBBPF_ROOT "$X86_PORTABLE_LIBBPF_ROOT"
-    write_bundle_input_var_if_set "$bundle_inputs_path" X86_NATIVE_BUILD_ROOT "$LOCAL_PROMOTE_ROOT/corpus/build"
-    write_bundle_input_var_if_set "$bundle_inputs_path" X86_SCX_BINARY_ROOT "$LOCAL_REPO_ROOT/scx/target/release"
-    write_bundle_input_var_if_set "$bundle_inputs_path" X86_SCX_OBJECT_ROOT "$LOCAL_PROMOTE_ROOT/corpus/build/scx"
-    write_bundle_input_var_if_set "$bundle_inputs_path" X86_KATRAN_SERVER_BINARY "$LOCAL_PROMOTE_ROOT/corpus/build/katran/bin/katran_server_grpc"
-    write_bundle_input_var_if_set "$bundle_inputs_path" X86_KATRAN_SERVER_LIB_DIR "$LOCAL_PROMOTE_ROOT/corpus/build/katran/lib"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_CROSS_RUNNER "$ARM64_CROSS_RUNNER"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_CROSS_RUNNER_REAL "$ARM64_CROSS_RUNNER_REAL"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_CROSS_DAEMON "$ARM64_CROSS_DAEMON"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_CROSS_DAEMON_REAL "$ARM64_CROSS_DAEMON_REAL"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_CROSS_LIB_DIR "$ARM64_CROSS_LIB_DIR"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_TEST_UNITTEST_BUILD_DIR "$ARM64_TEST_UNITTEST_BUILD_DIR"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_TEST_NEGATIVE_BUILD_DIR "$ARM64_TEST_NEGATIVE_BUILD_DIR"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_UPSTREAM_SELFTEST_DIR "$ARM64_UPSTREAM_SELFTEST_DIR"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_UPSTREAM_TEST_KMODS_DIR "$ARM64_UPSTREAM_TEST_KMODS_DIR"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_NATIVE_BUILD_ROOT "$ARM64_CROSSBUILD_OUTPUT_DIR/corpus/build"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_SCX_BINARY_ROOT "$ARM64_CROSSBUILD_OUTPUT_DIR/runner/repos/scx/target/release"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_SCX_OBJECT_ROOT "$ARM64_CROSSBUILD_OUTPUT_DIR/corpus/build/scx"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_KATRAN_SERVER_BINARY "$ARM64_KATRAN_SERVER_BINARY"
-    write_bundle_input_var_if_set "$bundle_inputs_path" ARM64_KATRAN_SERVER_LIB_DIR "$ARM64_KATRAN_SERVER_LIB_DIR"
-    "$ROOT_DIR/runner/scripts/build_remote_bundle.sh" "$MANIFEST_PATH" "$bundle_inputs_path" "$RUN_INPUT_STAGE_ROOT" "$RUN_BUNDLE_TAR"
+    write_common_bundle_inputs \
+        "$bundle_inputs_path" \
+        "$LOCAL_REPO_ROOT" \
+        "${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}" \
+        "${RUN_LOCAL_WORKLOAD_TOOL_ROOT:-}" \
+        "$MICRO_PROGRAMS_GENERATED_DIR"
+    case "${RUN_TARGET_ARCH}" in
+        arm64)
+            write_kinsn_bundle_input \
+                "$bundle_inputs_path" \
+                "${RUN_NEEDS_KINSN_MODULES:-0}" \
+                "$ARM64_KINSN_MODULE_STAGE_DIR"
+            ;;
+        x86_64)
+            write_kinsn_bundle_input \
+                "$bundle_inputs_path" \
+                "${RUN_NEEDS_KINSN_MODULES:-0}" \
+                "$X86_KINSN_MODULE_STAGE_DIR"
+            ;;
+        *)
+            die "unsupported target arch for bundled module inputs: ${RUN_TARGET_ARCH}"
+            ;;
+    esac
+    write_x86_bundle_inputs \
+        "$bundle_inputs_path" \
+        "$X86_RUNNER" \
+        "$X86_DAEMON" \
+        "$X86_TEST_UNITTEST_BUILD_DIR" \
+        "$X86_TEST_NEGATIVE_BUILD_DIR" \
+        "$X86_UPSTREAM_SELFTEST_DIR" \
+        "$X86_PORTABLE_LIBBPF_ROOT" \
+        "$LOCAL_PROMOTE_ROOT/corpus/build" \
+        "$LOCAL_REPO_ROOT/scx/target/release" \
+        "$LOCAL_PROMOTE_ROOT/corpus/build/scx" \
+        "$LOCAL_PROMOTE_ROOT/corpus/build/katran/bin/katran_server_grpc" \
+        "$LOCAL_PROMOTE_ROOT/corpus/build/katran/lib"
+    write_arm64_bundle_inputs \
+        "$bundle_inputs_path" \
+        "$ARM64_CROSS_RUNNER" \
+        "$ARM64_CROSS_RUNNER_REAL" \
+        "$ARM64_CROSS_DAEMON" \
+        "$ARM64_CROSS_DAEMON_REAL" \
+        "$ARM64_CROSS_LIB_DIR" \
+        "$ARM64_TEST_UNITTEST_BUILD_DIR" \
+        "$ARM64_TEST_NEGATIVE_BUILD_DIR" \
+        "$ARM64_UPSTREAM_SELFTEST_DIR" \
+        "$ARM64_UPSTREAM_TEST_KMODS_DIR" \
+        "$ARM64_CROSSBUILD_OUTPUT_DIR/corpus/build" \
+        "$ARM64_CROSSBUILD_OUTPUT_DIR/runner/repos/scx/target/release" \
+        "$ARM64_CROSSBUILD_OUTPUT_DIR/corpus/build/scx" \
+        "$ARM64_KATRAN_SERVER_BINARY" \
+        "$ARM64_KATRAN_SERVER_LIB_DIR"
+    local_prep_build_workspace_bundle \
+        "$ROOT_DIR" \
+        "$MANIFEST_PATH" \
+        "$bundle_inputs_path" \
+        "$stage_root" \
+        "$RUN_BUNDLE_TAR"
 }
 
 aws_emit_local_state() {
-    [[ -n "${RUN_INPUT_STAGE_ROOT:-}" ]] || die "local stage root is unset"
     [[ -n "${RUN_BUNDLE_TAR:-}" ]] || die "local bundle tar is unset"
-    printf 'RUN_LOCAL_STAGE_ROOT=%q\n' "$RUN_INPUT_STAGE_ROOT"
-    printf 'RUN_LOCAL_STAGE_MANIFEST=%q\n' "$RUN_INPUT_STAGE_ROOT/run-contract.env"
-    printf 'RUN_INPUT_STAGE_ROOT=%q\n' "$RUN_INPUT_STAGE_ROOT"
-    printf 'RUN_BUNDLE_TAR=%q\n' "$RUN_BUNDLE_TAR"
-    printf 'RUN_BUNDLED_WORKLOAD_TOOLS_CSV=%q\n' "${RUN_BUNDLED_WORKLOAD_TOOLS_CSV:-}"
+    [[ -n "${LOCAL_STATE_PATH:-}" ]] || die "LOCAL_STATE_PATH is required for AWS local prep"
+    write_state_json "$LOCAL_STATE_PATH" "RUN_BUNDLE_TAR=$RUN_BUNDLE_TAR"
 }
 
-aws_prepare_local_action() {
-    ensure_dirs
-    load_remote_prep_state
-    aws_prepare_local_suite_artifacts
+aws_finalize_local_prep() {
     aws_prepare_local_bundle
     aws_emit_local_state
 }

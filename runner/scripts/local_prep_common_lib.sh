@@ -60,7 +60,9 @@ write_bundle_input_var() {
     local output_path="$1"
     local key="$2"
     local value="${3-}"
-    printf '%s=%q\n' "$key" "$value" >>"$output_path"
+    local python_bin="${HOST_PYTHON_BIN:-${RUN_HOST_PYTHON_BIN:-python3}}"
+    PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}" \
+        "$python_bin" -m runner.libs.state_file merge "$output_path" "$key=$value"
 }
 
 write_bundle_input_var_if_set() {
@@ -69,6 +71,94 @@ write_bundle_input_var_if_set() {
     local value="${3-}"
     [[ -n "$value" ]] || return 0
     write_bundle_input_var "$output_path" "$key" "$value"
+}
+
+write_state_json() {
+    local output_path="$1"
+    shift
+    local python_bin="${HOST_PYTHON_BIN:-${RUN_HOST_PYTHON_BIN:-python3}}"
+    PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}" \
+        "$python_bin" -m runner.libs.state_file write "$output_path" "$@"
+}
+
+write_common_bundle_inputs() {
+    local output_path="$1"
+    local local_repo_root="$2"
+    local bundled_workload_tools_csv="${3-}"
+    local local_workload_tool_root="${4-}"
+    local micro_programs_generated_dir="${5-}"
+    rm -f "$output_path"
+    write_state_json "$output_path"
+    write_bundle_input_var "$output_path" RUN_LOCAL_REPO_ROOT "$local_repo_root"
+    write_bundle_input_var "$output_path" RUN_BUNDLED_WORKLOAD_TOOLS_CSV "$bundled_workload_tools_csv"
+    write_bundle_input_var_if_set "$output_path" RUN_LOCAL_WORKLOAD_TOOL_ROOT "$local_workload_tool_root"
+    write_bundle_input_var_if_set "$output_path" MICRO_PROGRAMS_GENERATED_DIR "$micro_programs_generated_dir"
+}
+
+write_kinsn_bundle_input() {
+    local output_path="$1"
+    local needs_kinsn_modules="$2"
+    local module_dir="${3-}"
+    [[ "$needs_kinsn_modules" == "1" ]] || return 0
+    write_bundle_input_var_if_set "$output_path" RUN_KINSN_MODULE_DIR "$module_dir"
+}
+
+write_x86_bundle_inputs() {
+    local output_path="$1"
+    local runner_path="${2-}"
+    local daemon_path="${3-}"
+    local unittest_build_dir="${4-}"
+    local negative_build_dir="${5-}"
+    local upstream_selftest_dir="${6-}"
+    local portable_libbpf_root="${7-}"
+    local native_build_root="${8-}"
+    local scx_binary_root="${9-}"
+    local scx_object_root="${10-}"
+    local katran_server_binary="${11-}"
+    local katran_server_lib_dir="${12-}"
+    write_bundle_input_var_if_set "$output_path" X86_RUNNER "$runner_path"
+    write_bundle_input_var_if_set "$output_path" X86_DAEMON "$daemon_path"
+    write_bundle_input_var_if_set "$output_path" X86_TEST_UNITTEST_BUILD_DIR "$unittest_build_dir"
+    write_bundle_input_var_if_set "$output_path" X86_TEST_NEGATIVE_BUILD_DIR "$negative_build_dir"
+    write_bundle_input_var_if_set "$output_path" X86_UPSTREAM_SELFTEST_DIR "$upstream_selftest_dir"
+    write_bundle_input_var_if_set "$output_path" X86_PORTABLE_LIBBPF_ROOT "$portable_libbpf_root"
+    write_bundle_input_var_if_set "$output_path" X86_NATIVE_BUILD_ROOT "$native_build_root"
+    write_bundle_input_var_if_set "$output_path" X86_SCX_BINARY_ROOT "$scx_binary_root"
+    write_bundle_input_var_if_set "$output_path" X86_SCX_OBJECT_ROOT "$scx_object_root"
+    write_bundle_input_var_if_set "$output_path" X86_KATRAN_SERVER_BINARY "$katran_server_binary"
+    write_bundle_input_var_if_set "$output_path" X86_KATRAN_SERVER_LIB_DIR "$katran_server_lib_dir"
+}
+
+write_arm64_bundle_inputs() {
+    local output_path="$1"
+    local runner_wrapper="${2-}"
+    local runner_real="${3-}"
+    local daemon_wrapper="${4-}"
+    local daemon_real="${5-}"
+    local runtime_lib_dir="${6-}"
+    local unittest_build_dir="${7-}"
+    local negative_build_dir="${8-}"
+    local upstream_selftest_dir="${9-}"
+    local upstream_test_kmods_dir="${10-}"
+    local native_build_root="${11-}"
+    local scx_binary_root="${12-}"
+    local scx_object_root="${13-}"
+    local katran_server_binary="${14-}"
+    local katran_server_lib_dir="${15-}"
+    write_bundle_input_var_if_set "$output_path" ARM64_CROSS_RUNNER "$runner_wrapper"
+    write_bundle_input_var_if_set "$output_path" ARM64_CROSS_RUNNER_REAL "$runner_real"
+    write_bundle_input_var_if_set "$output_path" ARM64_CROSS_DAEMON "$daemon_wrapper"
+    write_bundle_input_var_if_set "$output_path" ARM64_CROSS_DAEMON_REAL "$daemon_real"
+    write_bundle_input_var_if_set "$output_path" ARM64_CROSS_LIB_DIR "$runtime_lib_dir"
+    write_bundle_input_var_if_set "$output_path" ARM64_TEST_UNITTEST_BUILD_DIR "$unittest_build_dir"
+    write_bundle_input_var_if_set "$output_path" ARM64_TEST_NEGATIVE_BUILD_DIR "$negative_build_dir"
+    write_bundle_input_var_if_set "$output_path" ARM64_UPSTREAM_SELFTEST_DIR "$upstream_selftest_dir"
+    write_bundle_input_var_if_set "$output_path" ARM64_UPSTREAM_TEST_KMODS_DIR "$upstream_test_kmods_dir"
+    write_bundle_input_var_if_set "$output_path" ARM64_NATIVE_BUILD_ROOT "$native_build_root"
+    write_bundle_input_var_if_set "$output_path" ARM64_SCX_BINARY_ROOT "$scx_binary_root"
+    write_bundle_input_var_if_set "$output_path" ARM64_SCX_OBJECT_ROOT "$scx_object_root"
+    write_bundle_input_var_if_set "$output_path" ARM64_KATRAN_SERVER_BINARY "$katran_server_binary"
+    write_bundle_input_var_if_set "$output_path" ARM64_KATRAN_SERVER_LIB_DIR "$katran_server_lib_dir"
 }
 
 dir_has_entries() {
@@ -118,6 +208,29 @@ local_prep_fetch_selected_repos() {
     "$host_python_bin" "$project_root/runner/scripts/fetch_corpus_repos.py" \
         --repo-root "$repo_root" \
         "${args[@]}" >/dev/null
+}
+
+local_prep_build_runner_binary() {
+    local runner_dir="$1"
+    local build_dir="$2"
+    make -C "$runner_dir" BUILD_DIR="$build_dir" micro_exec >/dev/null
+}
+
+local_prep_build_daemon_binary() {
+    local runner_dir="$1"
+    local daemon_target_dir="$2"
+    make -C "$runner_dir" DAEMON_TARGET_DIR="$daemon_target_dir" daemon-binary >/dev/null
+}
+
+local_prep_build_micro_program_outputs() {
+    local runner_dir="$1"
+    local output_dir="$2"
+    local generated_inputs_dir="$3"
+    rm -rf "$output_dir"
+    make -C "$runner_dir" MICRO_PROGRAM_OUTPUT_DIR="$output_dir" micro-programs >/dev/null
+    local_prep_stage_matching_micro_sidecars "$output_dir" "$generated_inputs_dir"
+    touch "$output_dir/.build.stamp"
+    require_nonempty_dir "$output_dir" "micro generated programs dir"
 }
 
 x86_tool_should_be_bundled() {
@@ -257,6 +370,21 @@ local_prep_build_x86_repo_tests() {
         UNITTEST_BUILD_DIR="$unittest_build_dir" \
         NEGATIVE_BUILD_DIR="$negative_build_dir" \
         unittest-build negative-build >/dev/null
+}
+
+local_prep_build_workspace_bundle() {
+    local project_root="$1"
+    local manifest_path="$2"
+    local bundle_inputs_path="$3"
+    local stage_root="$4"
+    local bundle_tar="$5"
+    rm -rf "$stage_root"
+    mkdir -p "$(dirname "$bundle_tar")"
+    "$project_root/runner/scripts/build_remote_bundle.sh" \
+        "$manifest_path" \
+        "$bundle_inputs_path" \
+        "$stage_root" \
+        "$bundle_tar"
 }
 
 local_prep_build_x86_upstream_selftests() {

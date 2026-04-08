@@ -1,5 +1,9 @@
 # Engineering Cleanup Execution 2026-04-07
 
+This file is a historical execution log for one cleanup lane. It is not the
+canonical current runner contract. For the current refactor design, active todo,
+and current code/log status, use `docs/tmp/aws_arm64_remote.md`.
+
 ## Scope
 
 - Kept review item `#1` intact as requested. Per-program pass tracking remains in place, including `effective_enabled_passes_by_program` and the related daemon/benchmark reporting path.

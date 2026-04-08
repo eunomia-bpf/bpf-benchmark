@@ -202,8 +202,6 @@ def write_text(path: Path, text: str) -> None:
 
 
 __all__ = [
-    "BPFTOOL_ENV_VARS",
-    "DEFAULT_BPFTOOL_CANDIDATES",
     "RESULTS_DIR",
     "ROOT_DIR",
     "docs_tmp_dir",

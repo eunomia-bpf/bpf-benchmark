@@ -52,3 +52,26 @@ def test_install_guest_prereqs_rejects_missing_bundled_tool(monkeypatch: pytest.
     monkeypatch.setenv("RUN_GUEST_PACKAGE_MANAGER", "dnf")
     with pytest.raises(SystemExit):
         guest_prereqs.install_guest_prereqs(workspace)
+
+
+def test_validate_guest_prereqs_checks_modules_with_remote_python(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    monkeypatch.setenv("RUN_BPFTOOL_BIN", "true")
+    monkeypatch.setenv("RUN_REMOTE_PYTHON_BIN", "python3")
+    monkeypatch.setenv("RUN_REMOTE_COMMANDS_CSV", "")
+    monkeypatch.setenv("RUN_WORKLOAD_TOOLS_CSV", "")
+    monkeypatch.setenv("RUN_BUNDLED_WORKLOAD_TOOLS_CSV", "")
+    monkeypatch.setenv("RUN_REMOTE_PYTHON_MODULES_CSV", "PyYAML")
+
+    observed: list[tuple[str, str]] = []
+
+    def fake_python_module_available(python_bin: str, import_name: str, *, path_value: str) -> bool:
+        observed.append((python_bin, import_name))
+        return True
+
+    monkeypatch.setattr(guest_prereqs, "python_module_available", fake_python_module_available)
+    guest_prereqs.validate_guest_prereqs(workspace)
+    assert observed == [("python3", "yaml")]

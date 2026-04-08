@@ -1,26 +1,12 @@
 from __future__ import annotations
 
-import os
 from pathlib import Path
 import subprocess
-import sys
+
+from runner.libs.run_contract import build_manifest, write_manifest_file
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
-
-
-def _run_bash(script: str, *, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
-    merged_env = os.environ.copy()
-    if env:
-        merged_env.update(env)
-    return subprocess.run(
-        ["/bin/bash", "-lc", script],
-        cwd=ROOT_DIR,
-        env=merged_env,
-        text=True,
-        capture_output=True,
-        check=True,
-    )
 
 
 def test_run_contract_uses_explicit_repo_selection_fields() -> None:
@@ -32,18 +18,27 @@ def test_run_contract_uses_explicit_repo_selection_fields() -> None:
         "AWS_X86_SECURITY_GROUP_ID": "sg-12345678",
         "AWS_X86_SUBNET_ID": "subnet-12345678",
     }
-    script = """
-source runner/scripts/load_run_contract.sh
-manifest="$(mktemp)"
-run_contract_write_manifest aws-x86 e2e "$manifest"
-cat "$manifest"
-rm -f "$manifest"
-"""
-    completed = _run_bash(script, env=env)
-    manifest = completed.stdout
-    assert "RUN_BUNDLED_REPOS_CSV=" in manifest
-    assert "RUN_FETCH_REPOS_CSV=" in manifest
-    assert "RUN_BENCHMARK_REPOS_CSV=" not in manifest
+    manifest = build_manifest("aws-x86", "e2e", env=env)
+    assert "RUN_BUNDLED_REPOS_CSV" in manifest
+    assert "RUN_FETCH_REPOS_CSV" in manifest
+    assert "RUN_BENCHMARK_REPOS_CSV" not in manifest
+
+
+def test_manifest_writer_emits_repo_selection_fields(tmp_path: Path) -> None:
+    manifest_path = tmp_path / "run-contract.env"
+    env = {
+        "AWS_X86_REGION": "us-east-1",
+        "AWS_X86_PROFILE": "test-profile",
+        "AWS_X86_KEY_NAME": "test-key",
+        "AWS_X86_KEY_PATH": "/tmp/test-key.pem",
+        "AWS_X86_SECURITY_GROUP_ID": "sg-12345678",
+        "AWS_X86_SUBNET_ID": "subnet-12345678",
+    }
+    write_manifest_file(manifest_path, build_manifest("aws-x86", "e2e", env=env))
+    manifest_text = manifest_path.read_text(encoding="utf-8")
+    assert "RUN_BUNDLED_REPOS_CSV=" in manifest_text
+    assert "RUN_FETCH_REPOS_CSV=" in manifest_text
+    assert "RUN_BENCHMARK_REPOS_CSV=" not in manifest_text
 
 
 def test_validate_guest_prereqs_accepts_bundled_workload_tools(tmp_path: Path) -> None:
@@ -63,7 +58,6 @@ def test_validate_guest_prereqs_accepts_bundled_workload_tools(tmp_path: Path) -
                 "RUN_REMOTE_COMMANDS_CSV=",
                 "RUN_WORKLOAD_TOOLS_CSV=wrk",
                 "RUN_BUNDLED_WORKLOAD_TOOLS_CSV=wrk",
-                "RUN_REMOTE_WORKLOAD_TOOL_ROOT=.cache/workload-tools",
                 "RUN_REMOTE_WORKLOAD_TOOL_BIN=.cache/workload-tools/bin",
                 "",
             ]
@@ -73,8 +67,10 @@ def test_validate_guest_prereqs_accepts_bundled_workload_tools(tmp_path: Path) -
 
     subprocess.run(
         [
-            "/bin/bash",
-            "runner/scripts/validate_guest_prereqs.sh",
+            "python3",
+            "-m",
+            "runner.libs.guest_prereqs",
+            "validate",
             str(workspace),
             str(manifest),
         ],
@@ -105,8 +101,10 @@ def test_validate_guest_prereqs_requires_explicit_remote_tool_bin(tmp_path: Path
 
     completed = subprocess.run(
         [
-            "/bin/bash",
-            "runner/scripts/validate_guest_prereqs.sh",
+            "python3",
+            "-m",
+            "runner.libs.guest_prereqs",
+            "validate",
             str(workspace),
             str(manifest),
         ],

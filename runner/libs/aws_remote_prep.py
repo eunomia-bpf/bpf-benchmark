@@ -23,26 +23,30 @@ source "$ROOT_DIR/runner/scripts/aws_kernel_artifacts_lib.sh"
 source "$ROOT_DIR/runner/scripts/aws_remote_prep_lib.sh"
 with_state_lock ensure_instance_for_suite
 load_state
-printf 'STATE_INSTANCE_ID=%q\n' "${STATE_INSTANCE_ID:-}"
-printf 'STATE_INSTANCE_IP=%q\n' "${STATE_INSTANCE_IP:-}"
-printf 'STATE_REGION=%q\n' "${STATE_REGION:-}"
-printf 'STATE_KERNEL_RELEASE=%q\n' "${STATE_KERNEL_RELEASE:-}"
+"$RUN_HOST_PYTHON_BIN" -m runner.libs.state_file write "$STATE_OUTPUT_PATH" \
+    "STATE_INSTANCE_ID=${STATE_INSTANCE_ID:-}" \
+    "STATE_INSTANCE_IP=${STATE_INSTANCE_IP:-}" \
+    "STATE_REGION=${STATE_REGION:-}" \
+    "STATE_KERNEL_RELEASE=${STATE_KERNEL_RELEASE:-}"
 """
 
 
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) != 1:
-        _die("usage: aws_remote_prep.py <manifest_path>")
+    if len(args) != 2:
+        _die("usage: aws_remote_prep.py <manifest_path> <state_path>")
     manifest_path = Path(args[0]).resolve()
+    state_path = Path(args[1]).resolve()
     if not manifest_path.is_file():
         _die(f"manifest is missing: {manifest_path}")
 
     load_manifest_environment(manifest_path)
     env = os.environ.copy()
     env["ROOT_DIR"] = str(ROOT_DIR)
+    env["PYTHONPATH"] = f"{ROOT_DIR}{':' + env['PYTHONPATH'] if env.get('PYTHONPATH') else ''}"
     env["ACTION"] = "run"
     env["MANIFEST_PATH"] = str(manifest_path)
+    env["STATE_OUTPUT_PATH"] = str(state_path)
     completed = subprocess.run(
         ["/bin/bash", "-lc", _shell_script()],
         cwd=ROOT_DIR,

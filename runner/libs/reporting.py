@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import random
+import statistics
 from dataclasses import dataclass
 from typing import Mapping, Sequence
 
@@ -377,10 +378,6 @@ def compute_per_benchmark_statistics(
 
     return tuple(statistics_rows)
 
-
-per_benchmark_statistics = compute_per_benchmark_statistics
-
-
 def _comparison_summary(
     ratios: list[float],
     *,
@@ -753,7 +750,6 @@ __all__ = [
     "format_ns",
     "format_ratio",
     "format_ratio_value",
-    "per_benchmark_statistics",
     "render_corpus_summary_markdown",
     "render_rq_summary_markdown",
 ]
