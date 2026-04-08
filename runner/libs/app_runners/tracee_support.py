@@ -4,9 +4,7 @@ import json
 import os
 import re
 import shlex
-import socket
 import subprocess
-import tempfile
 import threading
 import time
 from collections import Counter, deque

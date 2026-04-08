@@ -177,19 +177,6 @@ csv_append_unique() {
     esac
 }
 
-csv_merge_unique() {
-    local merged="" csv token
-    for csv in "$@"; do
-        [[ -n "$csv" ]] || continue
-        IFS=',' read -r -a _csv_merge_tokens <<<"$csv"
-        for token in "${_csv_merge_tokens[@]}"; do
-            [[ -n "$token" ]] || continue
-            merged="$(csv_append_unique "$merged" "$token")"
-        done
-    done
-    printf '%s\n' "$merged"
-}
-
 local_prep_fetch_selected_repos() {
     local repo_root="$1"
     local repo_csv="$2"
@@ -378,9 +365,11 @@ local_prep_build_workspace_bundle() {
     local bundle_inputs_path="$3"
     local stage_root="$4"
     local bundle_tar="$5"
+    local host_python_bin="${HOST_PYTHON_BIN:-${RUN_HOST_PYTHON_BIN:-python3}}"
     rm -rf "$stage_root"
     mkdir -p "$(dirname "$bundle_tar")"
-    "$project_root/runner/scripts/build_remote_bundle.sh" \
+    PYTHONPATH="$project_root${PYTHONPATH:+:$PYTHONPATH}" \
+    "$host_python_bin" -m runner.libs.build_remote_bundle \
         "$manifest_path" \
         "$bundle_inputs_path" \
         "$stage_root" \

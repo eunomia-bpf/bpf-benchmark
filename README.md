@@ -84,9 +84,11 @@ Results are written to:
 
 `make clean` preserves fetched AWS result directories under `.cache/aws-*/results/`.
 
-Direct host-side build helpers now live under `runner/Makefile` or the
+Most direct host-side build helpers now live under `runner/Makefile` or the
 component-local toolchain (`cargo`, subdir `Makefile`s). The root `Makefile`
-surface is intentionally reserved for canonical run/validation entrypoints.
+surface is primarily reserved for canonical run/validation entrypoints, plus a
+small kernel/module lifecycle surface that the canonical runners still depend
+on.
 
 ## Layer Notes
 

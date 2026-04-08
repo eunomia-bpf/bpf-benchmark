@@ -122,9 +122,12 @@ def _locked_file(path: Path):
 
 def _aws_cmd(ctx: AwsExecutorContext, *args: str, capture_output: bool = False) -> subprocess.CompletedProcess[str]:
     command = ["aws", "--profile", ctx.aws_profile, "--region", ctx.aws_region, *args]
+    env = os.environ.copy()
+    env["AWS_PAGER"] = ""
     return subprocess.run(
         command,
         cwd=ROOT_DIR,
+        env=env,
         text=True,
         capture_output=capture_output,
         check=False,
@@ -307,6 +310,21 @@ def _cleanup_local_run_prep_root(ctx: AwsExecutorContext) -> None:
     shutil.rmtree(ctx.run_prep_root, ignore_errors=True)
 
 
+def _cleanup_failed_dedicated_run(ctx: AwsExecutorContext, state: dict[str, str] | None = None) -> None:
+    _cleanup_local_run_prep_root(ctx)
+    current_state = dict(state or {})
+    if not current_state:
+        with _locked_file(ctx.state_lock):
+            current_state = _load_instance_state(ctx)
+    instance_id = current_state.get("STATE_INSTANCE_ID", "").strip()
+    if instance_id:
+        try:
+            _terminate_instance(ctx, instance_id)
+        except Exception:
+            pass
+    shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
+
+
 def _run_remote_suite(ctx: AwsExecutorContext, ip: str, bundle_tar: Path) -> None:
     _wait_for_ssh(ctx, ip)
     if not bundle_tar.is_file():
@@ -412,14 +430,7 @@ def _run_dedicated(ctx: AwsExecutorContext, bundle_tar: Path) -> None:
             _die("dedicated AWS run is missing STATE_INSTANCE_IP before remote execution")
         _run_remote_suite(ctx, instance_ip, bundle_tar)
     except BaseException:
-        _cleanup_local_run_prep_root(ctx)
-        instance_id = state.get("STATE_INSTANCE_ID", "").strip()
-        if instance_id:
-            try:
-                _terminate_instance(ctx, instance_id)
-            except Exception:
-                pass
-        shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
+        _cleanup_failed_dedicated_run(ctx, state)
         raise
     _cleanup_local_run_prep_root(ctx)
     _terminate_instance(ctx, state.get("STATE_INSTANCE_ID", "").strip())
@@ -427,23 +438,30 @@ def _run_dedicated(ctx: AwsExecutorContext, bundle_tar: Path) -> None:
 
 
 def _run_action(ctx: AwsExecutorContext) -> None:
-    if ctx.local_state_path is None:
-        _die("run requires a local state path")
-    if not ctx.remote_user:
-        _die("manifest RUN_REMOTE_USER is empty")
-    if not ctx.remote_stage_dir:
-        _die("manifest RUN_REMOTE_STAGE_DIR is empty")
-    if not ctx.key_path.is_file():
-        _die(f"manifest RUN_AWS_KEY_PATH does not exist: {ctx.key_path}")
-    local_state = _load_local_state(ctx)
-    bundle_tar_value = local_state.get("RUN_BUNDLE_TAR", "").strip()
-    if not bundle_tar_value:
-        _die("local bundle path is unset; run canonical local prep first")
-    bundle_tar = Path(bundle_tar_value).resolve()
-    if ctx.instance_mode == "shared":
-        _run_shared(ctx, bundle_tar)
-        return
-    _run_dedicated(ctx, bundle_tar)
+    dedicated_execute_started = False
+    try:
+        if ctx.local_state_path is None:
+            _die("run requires a local state path")
+        if not ctx.remote_user:
+            _die("manifest RUN_REMOTE_USER is empty")
+        if not ctx.remote_stage_dir:
+            _die("manifest RUN_REMOTE_STAGE_DIR is empty")
+        if not ctx.key_path.is_file():
+            _die(f"manifest RUN_AWS_KEY_PATH does not exist: {ctx.key_path}")
+        local_state = _load_local_state(ctx)
+        bundle_tar_value = local_state.get("RUN_BUNDLE_TAR", "").strip()
+        if not bundle_tar_value:
+            _die("local bundle path is unset; run canonical local prep first")
+        bundle_tar = Path(bundle_tar_value).resolve()
+        if ctx.instance_mode == "shared":
+            _run_shared(ctx, bundle_tar)
+            return
+        dedicated_execute_started = True
+        _run_dedicated(ctx, bundle_tar)
+    except BaseException:
+        if ctx.instance_mode == "dedicated" and not dedicated_execute_started:
+            _cleanup_failed_dedicated_run(ctx)
+        raise
 
 
 def main(argv: list[str] | None = None) -> None:

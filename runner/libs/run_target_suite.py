@@ -3,12 +3,14 @@ from __future__ import annotations
 import os
 import re
 import secrets
+import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
+from runner.libs import aws_executor
 from runner.libs.run_contract import build_manifest, build_target_manifest, parse_manifest, write_manifest_file
 
 
@@ -45,28 +47,19 @@ def _write_target_manifest(target_name: str, manifest_path: Path) -> None:
 
 
 def _cleanup_failed_dedicated_aws_prep(manifest_path: Path) -> None:
-    env = os.environ.copy()
-    env["ROOT_DIR"] = str(ROOT_DIR)
-    env["ACTION"] = "run"
-    env["MANIFEST_PATH"] = str(manifest_path)
-    script = """
-set -euo pipefail
-source "$ROOT_DIR/runner/scripts/aws_common_lib.sh"
-[[ "${RUN_AWS_INSTANCE_MODE:-shared}" == "dedicated" ]] || exit 0
-load_state
-if [[ -n "${STATE_INSTANCE_ID:-}" ]]; then
-    terminate_instance "${STATE_INSTANCE_ID}" || true
-fi
-rm -rf "$RUN_STATE_DIR"
-"""
-    subprocess.run(
-        ["/bin/bash", "-lc", script],
-        cwd=ROOT_DIR,
-        env=env,
-        text=True,
-        capture_output=False,
-        check=False,
-    )
+    ctx = aws_executor._build_context("run", manifest_path, None)
+    if ctx.instance_mode != "dedicated":
+        return
+    state: dict[str, str] = {}
+    if ctx.state_file.is_file():
+        state = aws_executor._load_instance_state(ctx)
+    instance_id = state.get("STATE_INSTANCE_ID", "").strip()
+    if instance_id:
+        try:
+            aws_executor._terminate_instance(ctx, instance_id)
+        except Exception:
+            pass
+    shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
 
 
 def _temp_env_path(prefix: str) -> Path:

@@ -9,8 +9,8 @@ All active CLI usage goes through `serve`.
 ## Build
 
 ```bash
-make daemon
-make daemon-tests
+make -C runner DAEMON_TARGET_DIR="$PWD/daemon/target" daemon-binary
+make -C runner daemon-tests
 ```
 
 The binary is produced at `daemon/target/release/bpfrejit-daemon`.

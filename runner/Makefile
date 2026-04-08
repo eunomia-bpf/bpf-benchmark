@@ -79,13 +79,11 @@ UPSTREAM_SELFTEST_SYSROOT_ROOT ?=
 UPSTREAM_SELFTEST_PKGCONFIG_LIBDIR ?=
 
 .PHONY: all micro_exec vendor_libbpf vendor_bpftool \
-	corpus-fetch corpus-build corpus-build-native \
-	corpus-build-bcc corpus-build-scx \
-	corpus-build-katran corpus-build-tracee corpus-build-tetragon corpus-build-cilium corpus-build-bpftrace \
-	scx-artifacts \
-	kernel-image unittest-build negative-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary daemon-tests \
-	__arm64-crossbuild-image __arm64-daemon-host-cross __arm64-runner-host-cross __arm64-workload-tools-host-cross __cross-arm64 __cross-arm64-scx __cross-arm64-bench __arm64-test-artifacts \
-	clean
+		corpus-fetch corpus-build corpus-build-native \
+		scx-artifacts \
+		kernel-image unittest-build negative-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary daemon-tests \
+		__arm64-crossbuild-image __arm64-daemon-host-cross __arm64-runner-host-cross __arm64-workload-tools-host-cross __cross-arm64 __cross-arm64-scx __cross-arm64-bench __arm64-test-artifacts \
+		clean
 
 all: micro_exec
 
@@ -102,36 +100,6 @@ corpus-build-native: corpus-fetch
 	KATRAN_SERVER_BINARY="$(KATRAN_SERVER_BINARY)" \
 	KATRAN_SERVER_LIB_DIR="$(KATRAN_SERVER_LIB_DIR)" \
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" $(REPO_FLAGS)
-
-corpus-build-bcc:
-	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo bcc
-	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo bcc
-
-corpus-build-scx:
-	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo scx
-	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo scx
-
-corpus-build-katran:
-	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo katran
-	KATRAN_SERVER_BINARY="$(KATRAN_SERVER_BINARY)" \
-	KATRAN_SERVER_LIB_DIR="$(KATRAN_SERVER_LIB_DIR)" \
-	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo katran
-
-corpus-build-tracee:
-	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo tracee
-	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo tracee
-
-corpus-build-tetragon:
-	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo tetragon
-	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo tetragon
-
-corpus-build-cilium:
-	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo cilium
-	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo cilium
-
-corpus-build-bpftrace:
-	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo bpftrace
-	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo bpftrace
 
 scx-artifacts:
 	@if [ ! -d "$(REPO_ROOT)/runner/repos/scx" ]; then \
@@ -188,7 +156,7 @@ vendor_bpftool: | $(BPFTOOL_BUILD_DIR)
 		bootstrap
 
 kernel-image:
-	$(MAKE) -C "$(REPO_ROOT)" kernel BZIMAGE="$(BZIMAGE)"
+	$(MAKE) -C "$(REPO_ROOT)" __kernel BZIMAGE="$(BZIMAGE)"
 
 negative-build:
 	$(MAKE) -C "$(NEGATIVE_TEST_DIR)" BUILD_DIR="$(NEGATIVE_BUILD_DIR)" all
@@ -207,7 +175,7 @@ upstream-selftests-build:
 	"$(UPSTREAM_SELFTEST_HOST_PYTHON_BIN)" -m runner.libs.build_upstream_selftests
 
 kinsn-modules-build:
-	$(MAKE) -C "$(REPO_ROOT)" kinsn-modules \
+	$(MAKE) -C "$(REPO_ROOT)" __kinsn-modules \
 		BZIMAGE="$(BZIMAGE)" \
 		KINSN_MODULE_OUTPUT_DIR="$(KINSN_MODULE_OUTPUT_DIR)"
 

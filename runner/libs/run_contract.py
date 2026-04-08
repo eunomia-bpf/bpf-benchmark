@@ -64,6 +64,18 @@ def render_shell_assignments_from_mapping(values: dict[str, str | list[str]]) ->
     return "\n".join(lines)
 
 
+def render_null_assignments_from_mapping(values: dict[str, str | list[str]]) -> bytes:
+    parts: list[bytes] = []
+    for name, value in values.items():
+        scalar = shlex.join(value) if isinstance(value, list) else value
+        parts.append(f"{name}={scalar}".encode("utf-8") + b"\0")
+    return b"".join(parts)
+
+
+def render_null_assignments(manifest_path: Path) -> bytes:
+    return render_null_assignments_from_mapping(parse_manifest(manifest_path))
+
+
 def _load_assignment_file(path: Path) -> dict[str, str]:
     if not path.is_file():
         _die(f"missing required file: {path}")
@@ -517,6 +529,11 @@ def main(argv: list[str] | None = None) -> None:
         if len(args) != 2:
             _die("usage: python -m runner.libs.run_contract export <manifest_path>")
         print(render_shell_assignments(Path(args[1]).resolve()))
+        return
+    if action == "export0":
+        if len(args) != 2:
+            _die("usage: python -m runner.libs.run_contract export0 <manifest_path>")
+        sys.stdout.buffer.write(render_null_assignments(Path(args[1]).resolve()))
         return
     if action == "write-manifest":
         if len(args) != 4:

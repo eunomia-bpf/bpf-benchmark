@@ -22,3 +22,12 @@ def test_state_file_export_renders_shell_assignments(tmp_path: Path) -> None:
     rendered = state_file.render_shell_assignments(path)
 
     assert "RUN_BUNDLE_TAR='/tmp/with space.tar.gz'" in rendered
+
+
+def test_state_file_export0_renders_null_assignments(tmp_path: Path) -> None:
+    path = tmp_path / "state.json"
+    state_file.write_state(path, {"RUN_BUNDLE_TAR": "/tmp/bundle.tar.gz", "STATE_REGION": "us-east-1"})
+
+    rendered = state_file.render_null_assignments(path)
+
+    assert rendered == b"RUN_BUNDLE_TAR=/tmp/bundle.tar.gz\0STATE_REGION=us-east-1\0"

@@ -106,7 +106,6 @@ The canonical flow is:
 
 - root `Makefile` thin alias
 - `python -m runner.libs.run_target_suite`
-- `python -m runner.libs.run_contract`
 - internal AWS-only remote preflight when `RUN_EXECUTOR=aws-ssh`:
   - `runner.libs.aws_remote_prep`
 - `runner.libs.prepare_local_inputs`
@@ -228,17 +227,18 @@ The refactor now centers on:
 - `runner/suites/e2e.env`
 - `runner/libs/run_contract.py`
 - `runner/libs/run_target_suite.py`
-- `runner/scripts/kvm_local_prep_lib.sh`
 - `runner/libs/prepare_local_inputs.py`
+- `runner/libs/local_prep_common.py`
+- `runner/libs/kvm_local_prep.py`
+- `runner/libs/aws_local_prep.py`
 - `runner/libs/kvm_executor.py`
 - `runner/scripts/aws_common_lib.sh`
 - `runner/scripts/aws_prep_paths_lib.sh`
 - `runner/scripts/aws_kernel_artifacts_lib.sh`
 - `runner/scripts/aws_remote_prep_lib.sh`
-- `runner/scripts/aws_local_prep_lib.sh`
 - `runner/libs/aws_remote_prep.py`
 - `runner/libs/aws_executor.py`
-- `runner/scripts/build_remote_bundle.sh`
+- `runner/libs/build_remote_bundle.py`
 - `runner/libs/aws_remote_prereqs.py`
 - `runner/scripts/build-arm64-daemon-host.sh`
 - `runner/scripts/build-arm64-runner-host.sh`
@@ -289,8 +289,9 @@ written by `runner/libs/state_file.py`.
 
 Local-prep suite phase ordering is also no longer owned by shell callback
 graphs. `runner/libs/prepare_local_inputs.py` computes the phase list and
-explicit phase-function plan, and the target shell libraries now expose only
-`init`, primitive prep functions, and `finalize`.
+invokes `init`, per-phase primitive prep functions, and `finalize`
+sequentially from Python; the target shell libraries no longer own the phase
+graph.
 
 ### 5.2 Current local-prep and executor split
 
@@ -301,10 +302,14 @@ Current intended state:
 - `kvm_local_prep.sh` and `aws_local_prep.sh` are deleted
 - AWS remote preflight is a separate internal step:
   - `runner/libs/aws_remote_prep.py`
-- KVM local-prep-only artifact staging lives in:
-  - `runner/scripts/kvm_local_prep_lib.sh`
-- shared local-prep helper rules live in:
-  - `runner/scripts/local_prep_common_lib.sh`
+- Python-owned bundle assembly now lives in:
+  - `runner/libs/build_remote_bundle.py`
+- shared Python local-prep helpers now live in:
+  - `runner/libs/local_prep_common.py`
+- KVM local-prep now lives in:
+  - `runner/libs/kvm_local_prep.py`
+- AWS local-prep now lives in:
+  - `runner/libs/aws_local_prep.py`
 - shared AWS lifecycle/state/setup helpers live in:
   - `runner/scripts/aws_common_lib.sh`
 - AWS prep/build path defaults live in:
@@ -313,8 +318,6 @@ Current intended state:
   - `runner/scripts/aws_kernel_artifacts_lib.sh`
 - AWS remote-prep-only instance/setup reconciliation lives in:
   - `runner/scripts/aws_remote_prep_lib.sh`
-- AWS local-prep-only artifact staging lives in:
-  - `runner/scripts/aws_local_prep_lib.sh`
 - `runner.libs.kvm_executor` consumes only staged KVM state
 - `runner.libs.aws_executor` consumes prepared state and handles only:
   - remote execution
@@ -327,7 +330,8 @@ Current intended state:
 Current intended staged-input rule:
 
 - both KVM and AWS local prep may use per-run local prep roots internally
-- `build_remote_bundle.sh` must not derive staged inputs from a promote-root
+- `runner.libs.build_remote_bundle` must not derive staged inputs from a
+  promote-root
   convention
 - bundle-input files now carry explicit bundle input paths for:
   - repos
@@ -366,11 +370,17 @@ What is still incomplete:
 - `aws_common_lib.sh` still needs one more review pass to make sure it only
   carries shared AWS state / SSH / base-remote-prereq behavior and does not drift
   back into target/suite policy
-- KVM/AWS local prep now converge on one explicit bundle-input contract and a
-  shared suite-plan helper in `local_prep_common_lib.sh`, but the target-specific
-  callbacks still live in:
-  - `kvm_local_prep_lib.sh`
-  - `aws_local_prep_lib.sh`
+- local prep phase orchestration now lives entirely in Python for both KVM and AWS:
+  - `runner/libs/prepare_local_inputs.py`
+  - `runner/libs/kvm_local_prep.py`
+  - `runner/libs/aws_local_prep.py`
+- remaining shell ownership is now at the low-level helper layer:
+  - AWS remote preflight and setup reconciliation in
+    `runner/scripts/aws_common_lib.sh` / `runner/scripts/aws_remote_prep_lib.sh`
+  - AWS host-side kernel/cache/build helpers in
+    `runner/scripts/aws_kernel_artifacts_lib.sh`
+  - ARM host/cross build helpers such as
+    `runner/scripts/build-arm64-*.sh` and `runner/scripts/prepare-arm64-sysroot.sh`
 - host-side top-level control flow now also lives in Python:
   - `runner/libs/run_target_suite.py`
   - `runner/libs/aws_remote_prep.py`
@@ -380,7 +390,12 @@ What is still incomplete:
 - remaining env-file parsing is still confined to internal shell libraries where
   the underlying implementation is still shell-first:
   - `runner/scripts/aws_common_lib.sh`
-  - `runner/scripts/build_remote_bundle.sh`
+  - `runner/scripts/aws_remote_prep_lib.sh`
+  Those internal shell consumers no longer use `eval "$( … export … )"`; they
+  now import manifest/state data via explicit NUL-delimited assignment streams.
+- canonical manifest resolution is still broader than ideal:
+  - `runner/libs/run_contract.py` still resolves many knobs directly from caller
+    env instead of a narrower explicit input schema
 - guest-side prereq installation, validation, and suite orchestration live in
   Python:
   - `runner/libs/execute_workspace.py`
@@ -398,8 +413,9 @@ What is still incomplete:
     now Python-owned
   - it currently still requires a bootstrap `python3` or `python` to exist on
     the remote host
-  - the package/import/required-command contract is now shared with guest-side
-    prereq handling through Python, not duplicated in a shell helper
+  - guest-side prereq validation still re-runs inside
+    `runner.libs.execute_workspace` before suite execution; the duplicated
+    contract now lives in Python, not in a second shell helper
 - repo selection is now explicit:
   - the old manifest field `RUN_BENCHMARK_REPOS_CSV` is no longer part of the
     active contract
@@ -431,7 +447,6 @@ What is still incomplete:
   `runner/config/upstream_selftests_selection.tsv`
 - canonical guest execution no longer relies on separate shell wrappers for
   prereq install, prereq validation, and suite entry:
-  - `runner/scripts/execute_workspace.sh` now launches Python once
   - `runner/libs/execute_workspace.py` loads `run-contract.env`, installs and
     validates guest prereqs, then dispatches into `runner/libs/suite_entrypoint.py`
 - the sealed workload-tool runtime contract is now:
@@ -483,23 +498,22 @@ The root `Makefile` has also been thinned further on the developer-build side:
 - `check` now calls runner build/test steps, Python tests, and smoke directly
 - canonical `vm-*` / `aws-*` aliases remain thin wrappers over
   `runner.libs.run_target_suite`
+- raw kernel/module helper targets are now internal-only (`__kernel*`,
+  `__kernel-arm64*`, `__kinsn-modules`, `__virtme-hostfs-modules`,
+  `__arm64-worktree`) and are no longer part of the public root surface
 
-What still remains as intentional root-level build/control surface is mostly:
+What still remains as intentional root-level build/control surface is:
 
-- kernel and module lifecycle (`kernel*`, `kernel-arm64*`, `kinsn-modules`,
-  `virtme-hostfs-modules`, `arm64-worktree`)
-- final validation entrypoints (`check`, `validate`)
 - the canonical suite aliases (`vm-*`, `aws-*`)
-- `check`
-- `validate`
+- final validation entrypoints (`check`, `validate`)
 
 The canonical run manifest is immutable at creation time for target/suite
 contract fields. Executor-local staging paths are not part of the contract.
 
-For canonical local KVM execution, `prepare_local_inputs.sh` now follows the
+For canonical local KVM execution, `runner.libs.prepare_local_inputs` now follows the
 same local-state handoff shape as AWS local prep: it seals a bundle tar and
 writes only this local execution pointer into a run-local sidecar state file
-consumed by `run_target_suite.sh`:
+consumed by `runner.libs.run_target_suite`:
 
 - `RUN_BUNDLE_TAR`
 
@@ -510,7 +524,7 @@ executor untar the same kind of staged workspace that AWS consumes.
 AWS launch parameters now also follow the same rule:
 
 - the manifest carries the resolved SSH/AWS launch contract
-- `aws_executor.sh` no longer falls back to cached key/subnet/security-group state
+- `runner.libs.aws_executor` no longer falls back to cached key/subnet/security-group state
 - target-specific AMI overrides must be represented in the manifest, not through
   a generic ambient `AWS_AMI_ID`
 - guest-side Python selection is part of the manifest contract; executors do not
@@ -523,7 +537,7 @@ AWS launch parameters now also follow the same rule:
 Local bundle assembly now follows the same explicit pattern:
 
 - local prep writes a local-only `bundle-inputs.json`
-- `build_remote_bundle.sh` consumes:
+- `runner.libs.build_remote_bundle` consumes:
   - the run manifest
   - the bundle-input state file
 - bundle construction no longer depends on:
@@ -564,7 +578,7 @@ the manifest:
 - suite timeout
 - test-only knobs such as `FUZZ_ROUNDS` and `scx_prog_show_race_*`
 
-`runner/scripts/kvm_executor.sh` passes that explicit contract into
+`runner.libs.kvm_executor` passes that explicit contract into
 `runner/scripts/run_vm_shell.py`.
 
 `runner/Makefile` no longer exposes the old direct VM entrypoints at all:
@@ -582,7 +596,7 @@ The root `Makefile` also no longer exposes local ARM QEMU execution targets:
 Canonical KVM suite execution now performs guest-side prereq installation,
 validation, and suite dispatch through one shared workspace launcher:
 
-- `runner/scripts/execute_workspace.sh`
+- `runner.libs.execute_workspace`
 
 ## 5. Hard Constraints
 
@@ -679,7 +693,7 @@ The refactor is not finished yet.
 
 The new shape is materially better than the deleted monoliths. Current state:
 
-- `aws_executor.sh` now owns only:
+- `runner.libs.aws_executor` now owns only:
   - remote execution
   - result fetch
   - dedicated/shared AWS run coordination
@@ -693,9 +707,10 @@ The new shape is materially better than the deleted monoliths. Current state:
   - AWS host-side kernel/cache/build helpers
 - `aws_remote_prep_lib.sh` owns:
   - AWS remote-prep-only instance/setup reconciliation
-- `aws_local_prep_lib.sh` owns:
+- `runner.libs.aws_local_prep` now owns:
   - AWS local artifact preparation
-  - AWS bundle assembly
+  - AWS bundle-input planning
+  - AWS workspace bundle assembly
 
 `aws_common_lib.sh` is no longer carrying host-prep/build helpers or suite
 policy. It is still a relatively large shared control-plane library, but that
@@ -710,7 +725,7 @@ selftests.
 
 The remaining source-side handling is now limited to:
 
-- `runner/scripts/build_upstream_selftests.sh`
+- `runner/libs/build_upstream_selftests.py`
   - reads a tracked selection manifest at
     `runner/config/upstream_selftests_selection.tsv`
   - the manifest explicitly records canonical build targets and source-level
@@ -752,7 +767,7 @@ lifetime issue.
 The staged-input shape is now:
 
 - local prep may use per-run prep roots internally
-- `build_remote_bundle.sh` consumes only explicit bundle-input paths
+- `runner.libs.build_remote_bundle` consumes only explicit bundle-input paths
 - KVM and AWS write the same kind of bundle-input file instead of relying on
   a promote-root convention
 - the active contract no longer uses `RUN_LOCAL_PROMOTE_ROOT`
@@ -767,13 +782,15 @@ The command/package/python-import policy now lives in one Python place:
 
 - `runner/libs/prereq_contract.py`
 
-The remaining shell bootstrap layer is now:
+The remaining shell bootstrap layer is now limited to internal SSH/bootstrap
+primitives under `runner/scripts/aws_common_lib.sh`; the active public guest
+execution and remote-prereq entrypoints are Python-owned:
 
-- `runner/scripts/execute_workspace.sh`
-- `runner/scripts/aws_remote_prereqs.sh`
+- `runner.libs.execute_workspace`
+- `runner.libs.aws_remote_prereqs`
 
-That remaining split is acceptable for now, but transport should stay thin and
-must not reintroduce duplicated tool/package policy or remote source-build
+That remaining transport shell is acceptable for now, but it must stay thin
+and must not reintroduce duplicated tool/package policy or remote source-build
 fallbacks for tools that belong in the local-prep/bundle contract.
 
 ### 7.5 Latest review findings still being closed
@@ -916,7 +933,7 @@ locks during local prep.
 1. Keep the document current after each newly observed blocker or milestone.
 2. Keep the bundle-input contract explicit and auditable:
    - no `RUN_LOCAL_PROMOTE_ROOT`-anchored path guessing in
-     `build_remote_bundle.sh`
+     `runner.libs.build_remote_bundle`
    - no hidden path reconstruction from cache layout
    - only explicit bundle input paths written by local prep
    - repo selection must stay explicit:
@@ -925,7 +942,7 @@ locks during local prep.
    - workload-tool selection must stay explicit:
      - `RUN_BUNDLED_WORKLOAD_TOOLS_CSV`
      - `RUN_LOCAL_WORKLOAD_TOOL_ROOT`
-3. Keep `prepare_local_inputs.sh` as the only public local-prep entrypoint and
+3. Keep `runner.libs.prepare_local_inputs` as the only public local-prep entrypoint and
    prevent any drift back toward executor-owned prep logic.
 4. Review `aws_common_lib.sh` for any remaining target/suite policy that should
    instead live in the manifest or already-isolated internal libraries.
@@ -968,18 +985,18 @@ Current ordered todo:
 
 1. Finish collapsing the remaining developer-only direct-build surface in the
    root `Makefile`:
-   - keep `vm-*` / `aws-*` / `run_target_suite.sh` as the only canonical run
-     control plane
-   - keep developer build helpers thin and repo-owned; do not let them drift
-     into a second orchestration layer
-   - do not advertise raw build helpers in `make help` or `README.md` as part
-     of the canonical user-facing surface
-2. Continue reducing the remaining KVM/AWS local-prep orchestration split:
+   - keep `vm-*` / `aws-*` as the only canonical run control plane
+   - raw kernel/module helpers are now internal-only `__*` targets; keep them
+     that way and do not re-expose them as public root targets
+   - keep `check` / `validate` from drifting into a second orchestration layer
+   - do not advertise internal helpers in `make help` or `README.md` as part of
+     the canonical user-facing surface
+2. Continue reducing the remaining AWS-shell / Python local-prep split:
    - keep shared repo fetch, native repo build, SCX build, repo tests,
      workload-tool staging, and upstream-selftest build rules in
      `local_prep_common_lib.sh` where they are target-agnostic
-   - keep target-specific local-prep libraries limited to target/arch callbacks
-     and artifact paths
+   - keep AWS target-specific local-prep shell limited to target/arch callbacks
+     and artifact paths only
    - keep shell limited to transport/bootstrap/build steps; host-side control
      flow should continue moving into Python
 3. Keep the explicit bundle/runtime contract strict:
@@ -1006,29 +1023,40 @@ Current ordered todo:
    document.
 7. Keep moving orchestration/contract logic into Python where it materially
    shrinks shell control planes:
-   - prefer thin shell launchers for manifest loading / transport only
+   - prefer Python module entrypoints for orchestration and contract parsing
+   - keep shell only for transport/bootstrap/build primitives where Python does
+     not materially simplify the implementation
    - current Pythonized host control now includes:
      - `runner/libs/run_target_suite.py`
      - `runner/libs/run_contract.py`
      - `runner/libs/prepare_local_inputs.py`
      - `runner/libs/kvm_executor.py`
      - `runner/libs/aws_remote_prep.py`
+     - `runner/libs/aws_executor.py`
+     - `runner/libs/build_remote_bundle.py`
+     - `runner/libs/aws_remote_prereqs.py`
      - `runner/libs/build_upstream_selftests.py`
      - `runner/libs/state_file.py`
-   - local-prep phase ordering no longer lives in
-     `local_prep_orchestrate_suite_plan`
-   - next candidates are internal shell-first env/control surfaces such as
-     bundle assembly in `build_remote_bundle.sh` and the remaining
-     executor/local-prep phase drivers
-    - keep package-manager or raw build steps in shell only when Python would
-      not reduce complexity
+     - `runner/libs/guest_prereqs.py`
+     - `runner/libs/execute_workspace.py`
+   - local-prep phase ordering now lives in Python; shell no longer owns the
+     suite phase graph
+   - contract/state rehydration in shell no longer uses `eval`
+   - next candidates are the remaining shell-first policy surfaces:
+     - AWS remote preflight state machine inside `aws_remote_prep_lib.sh`
+    - the remaining AWS shell-first remote preflight state machine in
+      `aws_remote_prep_lib.sh`
+    - the remaining low-level ARM host/cross helper scripts under
+      `runner/scripts/build-arm64-*.sh`
 8. Re-run whole-tree reviewer passes and fold any remaining structural findings
    back into the tree.
    - the latest confirmed runtime/build regressions from review have been
      closed:
      - `runner/libs/reporting.py` now imports `statistics`
-     - `runner/scripts/aws_remote_prep.sh` now forwards both
-       `<manifest_path> <state_path>`
+     - thin wrappers `aws_remote_prep.sh`, `prepare_local_inputs.sh`,
+       `run_target_suite.sh`, `kvm_executor.sh`, `aws_executor.sh`,
+       `execute_workspace.sh`, `build_upstream_selftests.sh`, and
+       `aws_remote_prereqs.sh` are no longer part of the active path
      - dead root `Makefile` targets
        `corpus-build-libbpf-bootstrap`,
        `corpus-build-xdp-tools`, and
@@ -1051,41 +1079,41 @@ Current real-path validation state:
  - `git diff --check` passed
  - focused refactor Python test set passed with `17 passed`
  - `make -n aws-arm64-test aws-x86-test aws-arm64-benchmark AWS_ARM64_BENCH_MODE=all aws-x86-benchmark AWS_X86_BENCH_MODE=all vm-test` remained pure static thin aliases
- - latest refactor closures in this gate:
-   - `run_target_suite.sh` is now a thin Python launcher over
-     `runner/libs/run_target_suite.py`; host-side benchmark fanout and temp
-     state handling no longer live in shell
-   - `prepare_local_inputs.sh` and `kvm_executor.sh` are now thin Python
-     launchers over:
-     - `runner/libs/prepare_local_inputs.py`
-     - `runner/libs/kvm_executor.py`
-   - the old guest-side wrapper trio has been deleted from active code
-   - canonical KVM/AWS guest execution now goes through the shared
-     `runner/scripts/execute_workspace.sh` ->
-     `runner/libs/execute_workspace.py` path, so executors no longer open-code
+   - latest refactor closures in this gate:
+     - host-side benchmark fanout and temp state handling now live in
+       `runner/libs/run_target_suite.py`, not shell wrappers
+     - host-side local prep and KVM execution now enter directly through:
+       - `runner/libs/prepare_local_inputs.py`
+       - `runner/libs/kvm_local_prep.py`
+       - `runner/libs/kvm_executor.py`
+      - `runner/scripts/kvm_local_prep_lib.sh` has been deleted from the active
+        path
+      - the old guest-side wrapper trio has been deleted from active code
+      - canonical KVM/AWS guest execution now goes directly through
+        `runner/libs/execute_workspace.py`, so executors no longer open-code
      `install -> validate -> suite` as three separate shell steps
-   - KVM/AWS bundle-input emission now shares common writers in
-     `runner/scripts/local_prep_common_lib.sh` instead of duplicating the same
-     contract keys in both target-specific local-prep libraries
-   - x86 runner/daemon/micro-program local-prep build steps now also share
-     common helpers in `runner/scripts/local_prep_common_lib.sh` instead of
-     being open-coded in both KVM and AWS target-specific prep libraries
-   - `RUN_SUITE_ENTRYPOINT` has been removed from the active contract
-   - AWS local prep now branches on `RUN_TARGET_ARCH` for arch-specific
-     behavior instead of carrying extra concrete target-name branches where the
-     behavior is really x86-vs-arm64
+   - KVM/AWS local prep now shares Python helper code in
+     `runner/libs/local_prep_common.py` instead of duplicating the same bundle
+     input writers and x86 staging rules in target-specific shell libraries
+   - x86 runner/daemon/micro-program local-prep build steps now share Python
+     helpers in `runner/libs/local_prep_common.py`
+      - `RUN_SUITE_ENTRYPOINT` has been removed from the active contract
+      - dead `runner/Makefile` `corpus-build-*` leaf targets have been deleted
+      - dead AWS shell helpers have been deleted from `aws_common_lib.sh`
+      - AWS local prep now branches on `RUN_TARGET_ARCH` for arch-specific
+        behavior instead of carrying extra concrete target-name branches where the
+        behavior is really x86-vs-arm64
    - completed:
      - `AWS_*_BENCH_MODE=all` no longer uses recursive `$(MAKE)`
      - `make -n` now stays static and never launches real AWS work
      - canonical root aliases no longer expose deleted local-prep entrypoints
-     - AWS benchmark fanout now lives in `run_target_suite.sh benchmark ...`
-       instead of the root `Makefile`
+     - AWS benchmark fanout now lives in
+       `python -m runner.libs.run_target_suite benchmark ...` instead of the
+       root `Makefile`
    - remaining:
      - keep root aliases thin and avoid reintroducing orchestration there
-     - keep shrinking the remaining developer-only direct-build surface in the
-       root `Makefile` (`micro`, `daemon`, `kernel`, `kinsn-modules`, `smoke`,
-       `check`, `validate`) so it does not drift back into a second control
-       plane for canonical runner behavior
+     - keep `check` / `validate` from drifting into a second control plane for
+       canonical runner behavior
 2. Shared AWS split
    - status: done pending final reviewer confirmation
    - completed:
@@ -1094,15 +1122,15 @@ Current real-path validation state:
       - `aws_kernel_artifacts_lib.sh` now holds AWS host-side kernel/cache/build helpers
       - `aws_remote_prep_lib.sh` now holds AWS remote-prep-only
         instance/setup reconciliation
-      - `aws_local_prep_lib.sh` now holds AWS local-prep artifact/bundle logic
-      - `aws_remote_prep.sh` now owns AWS remote preflight
+      - `runner.libs.aws_local_prep` now holds AWS local-prep artifact/bundle logic
+      - `runner.libs.aws_remote_prep` now owns AWS remote preflight
       - AWS remote preflight now emits an explicit state handoff for local prep
-      - `prepare_local_inputs.sh` no longer mutates AWS remote state
-      - `prepare_local_inputs.sh` now consumes an explicit remote-prep state
+      - `runner.libs.prepare_local_inputs` no longer mutates AWS remote state
+      - `runner.libs.prepare_local_inputs` now consumes an explicit remote-prep state
         file handoff instead of re-reading hidden shared AWS state
       - the remote-prep state handoff now uses an explicit positional file
         argument instead of an ambient `AWS_STATE_OVERRIDE_PATH` env override
-      - `aws_executor.sh run` no longer re-runs `ensure_instance_for_suite`
+      - `runner.libs.aws_executor run` no longer re-runs `ensure_instance_for_suite`
       - the obsolete `AWS_LOCAL_PREP_MODE` compatibility branch is deleted
       - generic local-prep helpers and AWS host-prep/build helpers no longer
         live in `aws_common_lib.sh`
@@ -1112,22 +1140,20 @@ Current real-path validation state:
 3. Local prep unification
    - status: mostly done, pending review
    - completed:
-     - `prepare_local_inputs.sh` is now the only public local-prep entrypoint
-     - `kvm_local_prep.sh` and `aws_local_prep.sh` are deleted
-     - `kvm_local_prep_lib.sh` now holds KVM-only local prep internals
-     - `local_prep_common_lib.sh` now carries shared `require_*`,
-       `git_path_is_clean`, `snapshot_git_subtree`, `dir_has_entries`,
-       `csv_append_unique`, and `stage_module_binaries`
-     - KVM and AWS bundle-input files now use the same shared
-       `write_bundle_input_var` helper
-     - `build_remote_bundle.sh` and host-cross prep helpers now use the shared
-       local-prep helper contract instead of defining their own copies
-     - KVM and AWS local prep now converge on the same
-       `RUN_LOCAL_PROMOTE_ROOT`-anchored staged-input contract
-     - `build_remote_bundle.sh` now derives standard x86/ARM64 runtime and
-       test-artifact subpaths from the promote root instead of requiring each
-       prep path to emit long duplicated subpath lists
-     - bundled workload-tool roots are now derived from the same promote root
+     - `runner.libs.prepare_local_inputs` is now the only public local-prep entrypoint
+    - `kvm_local_prep.sh` and `aws_local_prep.sh` are deleted
+    - `runner.libs.kvm_local_prep` now owns KVM-only local prep internals
+     - `runner.libs.local_prep_common` now carries shared local-prep helpers for:
+       x86 runtime/test prep, repo fetch/native build, SCX staging, workload-tool
+       staging, and common path validation
+     - KVM and AWS bundle-input files now converge on the same explicit
+       JSON state contract emitted by Python local-prep code
+     - KVM and AWS local prep now converge on the same explicit
+       `bundle-inputs.json` contract
+     - `runner.libs.build_remote_bundle` now consumes explicit runtime and
+       test-artifact paths instead of a promote-root convention
+     - bundled workload-tool roots are now carried through the same explicit
+       bundle-input contract
        instead of being carried as a separate drifting path
      - shared bundle/runtime scripts now prefer `RUN_TARGET_ARCH` /
        `RUN_EXECUTOR` contract fields over hard-coding concrete target names
@@ -1228,10 +1254,11 @@ Current real-path validation state:
        - found that canonical AWS local prep still accepted an optional
          remote-prep handoff and could therefore fall back to cached AWS state
        - fix applied:
-         - `prepare_local_inputs.sh` now requires an explicit remote-prep
+         - `runner.libs.prepare_local_inputs` now requires an explicit remote-prep
            state file for canonical AWS local prep
-         - `aws_local_prep_lib.sh` now loads that handoff via
-           `load_remote_prep_state()` instead of generic `load_state()`
+         - AWS local prep now lives in `runner.libs.aws_local_prep`, which
+           requires an explicit remote-prep state file and does not fall back to
+           cached AWS state
      - reviewer B:
        - found stale README result-path language
        - fix applied: README now reflects staged KVM and fetched AWS result
@@ -1249,7 +1276,7 @@ Current real-path validation state:
 
 - Introduced target profiles and suite plans.
 - Added generic contract loader and entrypoint.
-- Added explicit host-side KVM preflight via `prepare_local_inputs.sh`.
+- Added explicit host-side KVM preflight via `runner.libs.prepare_local_inputs`.
 - Added `kvm` and `aws-ssh` executors.
 - Rewired canonical root targets to the new contract.
 - Added explicit AWS instance-mode contract in the manifest:
@@ -1276,11 +1303,11 @@ Current real-path validation state:
   bundles.
 - AWS bundle preparation no longer writes executor-local staging roots back into
   the manifest just to drive local bundle assembly; those roots are now passed
-  as explicit environment inputs to `build_remote_bundle.sh`.
+  as explicit bundle-input state into `runner.libs.build_remote_bundle`.
 - `Makefile` benchmark mode `all` now fans out `micro/corpus/e2e` in parallel
   for AWS targets instead of serializing them through one shell branch.
 - Removed the root `Makefile` AWS wrapper env blocks entirely; canonical AWS
-  targets now call `run_target_suite.sh` directly, so the public AWS input
+  targets now call `runner.libs.run_target_suite` directly, so the public AWS input
   surface lives only in `runner/libs/run_contract.py`.
 - Renamed ARM-only helper targets to internal-only names:
   - `__arm64-crossbuild-image`
@@ -1290,12 +1317,12 @@ Current real-path validation state:
   - `__cross-arm64-bench`
   - `__arm64-test-artifacts`
 - Reduced one more executor/bundle coupling layer:
-  - `prepare_local_inputs.sh` and `aws_executor.sh` now invoke
-    `build_remote_bundle.sh` through the same explicit env-input contract
+  - `runner.libs.prepare_local_inputs` and `runner.libs.aws_executor` now use
+    the same explicit bundle/local-state contract
   - KVM no longer mutates the manifest with `RUN_LOCAL_PROMOTE_ROOT` just to
     drive bundle assembly
-  - the manifest stays the target/suite contract, while bundle-local prep roots
-    remain executor-local inputs
+  - the manifest stays the target/suite contract, while bundle-local prep state
+    remains executor-local input
 - Split the remaining shared AWS host-prep layer again:
   - `aws_prep_paths_lib.sh` now owns AWS prep/build path defaults
   - `aws_kernel_artifacts_lib.sh` now owns AWS host-side kernel/cache/build

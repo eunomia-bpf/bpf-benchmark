@@ -628,19 +628,19 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 
 | 命令 | 作用 |
 |------|------|
-| `make all` | 构建 micro_exec + BPF programs + daemon |
-| `make micro` | 只构建 micro_exec 和 BPF programs |
-| `make daemon` | 只构建 bpfrejit-daemon CLI |
+| `make -C runner micro_exec` | 构建 `runner/build/micro_exec` |
+| `make -C runner MICRO_PROGRAM_OUTPUT_DIR="$PWD/micro/programs" micro-programs` | 构建 micro `.bpf.o` 输入 |
+| `make -C runner DAEMON_TARGET_DIR="$PWD/daemon/target" daemon-binary` | 构建 `bpfrejit-daemon` CLI |
 | `make kernel` | 编译 bzImage（vendor/linux-framework） |
-| `make upstream-selftests-build` | 构建 vendored upstream BPF selftests；`kernel-tests` 已删除 |
+| `make -C runner upstream-selftests-build` | 构建 vendored upstream BPF selftests；`kernel-tests` 已删除 |
 
 #### 快速验证（无需 VM）
 
 | 命令 | 作用 |
 |------|------|
-| `make smoke` | 构建 + 本地 llvmbpf smoke test (simple, 1 iter, 10 repeat) |
-| `make daemon-tests` | 构建 + 运行 daemon unit tests (`cargo test`) |
-| `make check` | = `all` + `daemon-tests` + `python-tests` + `smoke`（完整本地验证） |
+| `python3 micro/driver.py --bench simple --runtime llvmbpf --samples 1 --warmups 0 --inner-repeat 10` | 本地 llvmbpf smoke test (simple, 1 iter, 10 repeat) |
+| `make -C runner daemon-tests` | 运行 daemon unit tests (`cargo test`) |
+| `make check` | 运行根入口定义的完整本地验证（构建 + Python tests + smoke） |
 
 #### VM 目标（需要 bzImage + vng）
 

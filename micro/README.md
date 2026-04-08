@@ -21,10 +21,12 @@
 
 ```bash
 git submodule update --init --recursive
-make micro
+make -C runner micro_exec
+make -C runner MICRO_PROGRAM_OUTPUT_DIR="$PWD/micro/programs" micro-programs
 ```
 
-`make micro` builds `runner/build/micro_exec` plus the active benchmark `.bpf.o` objects.
+These runner-owned build targets produce `runner/build/micro_exec` plus the
+active benchmark `.bpf.o` objects under `micro/programs/`.
 
 ## Usage
 

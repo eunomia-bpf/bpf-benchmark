@@ -353,7 +353,7 @@ build_arm64_kernel_artifacts_locked() {
         "$ARM64_AWS_BUILD_DIR/vmlinux"
     log "Building ARM64 AWS kernel image and modules"
     ARM64_AWS_BUILD_DIR="$ARM64_AWS_BUILD_DIR" ARM64_AWS_BASE_CONFIG="$ARM64_AWS_BASE_CONFIG" \
-        make -C "$ROOT_DIR" kernel-arm64-aws >/dev/null
+        make -C "$ROOT_DIR" __kernel-arm64-aws >/dev/null
     kernel_release="$(<"$ARM64_AWS_BUILD_DIR/include/config/kernel.release")"
     [[ -n "$kernel_release" ]] || die "ARM64 kernel release is empty"
     cached_dir="$ARM64_SETUP_ARTIFACT_ROOT/$kernel_release"

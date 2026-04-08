@@ -6,6 +6,14 @@ canonical runner contract 或当前 active findings。当前有效的设计、to
 
 日期：2026-04-07
 
+后续 closure note：
+
+- 本文件中的 `R2-BUG-1` 已经随着 `runner/scripts/kvm_local_prep_lib.sh`
+  从 active path 删除而失效；当前 KVM local-prep 已迁到
+  `runner/libs/kvm_local_prep.py`。
+- 本文件中的 `R2-DEAD-4` 也已关闭；`runner/Makefile` 里的 7 个
+  `corpus-build-*` 子目标已经删除。
+
 范围：已逐个阅读以下范围内的文件内容，而不是只按文件名判断。
 
 - `tests/python/`
@@ -131,4 +139,111 @@ canonical runner contract 或当前 active findings。当前有效的设计、to
 
 - 上述行数按最小实施范围估算，只统计本次 review 范围内的测试与测试相关 driver/lib/Makefile 代码。
 - 没把 build 产物、结果目录、未跟踪二进制算进删除量。
-- 我刻意把“正常工作但只是可读性一般”的代码排除在外，只统计重复、过时、与设计不符、或测试价值明显偏低的部分。
+- 我刻意把”正常工作但只是可读性一般”的代码排除在外，只统计重复、过时、与设计不符、或测试价值明显偏低的部分。
+
+---
+
+## Round 2 深度 Review: runner/ 工程质量 (2026-04-07)
+
+本节是对 `runner/libs/*.py`、`runner/scripts/*.sh`、`runner/Makefile`、顶层 `Makefile`、`tests/python/*.py` 的第二轮检查，在两轮 cleanup（删 11 个 app runner、去重 geometric_mean、删 Makefile dead target）之后进行。
+
+### R2-BUG-1: `prepare_kvm_inputs` 被调用但从未定义（严重 BUG）
+
+**文件**: `runner/scripts/kvm_local_prep_lib.sh`, 第 178 行
+**证据**:
+```bash
+stage_kvm_workspace() {
+    prepare_kvm_inputs “$promote_root”   # 第 178 行，调用了不存在的函数
+}
+```
+
+`grep -rn “^prepare_kvm_inputs()” runner/scripts/` 无结果。`kvm_finalize_local_prep()` → `stage_kvm_workspace()` → `prepare_kvm_inputs()` 的调用链是 KVM 每次 local prep 必走的最终步骤，会影响 `vm-micro`、`vm-corpus`、`vm-e2e` 等所有 KVM 目标。
+
+**修复**: 定义 `prepare_kvm_inputs()` 函数（应调用各 phase prepare 函数），或删除该调用并内联逻辑。
+
+---
+
+### R2-DEAD-1: `aws_executor.py` 中的 `import os` 完全未使用
+
+**文件**: `runner/libs/aws_executor.py`, 第 4 行
+**证据**: `grep -n “os\b” aws_executor.py` 只有第 4 行的 import 本身，没有任何 `os.` 调用。
+**修复**: 删除 `import os`。
+
+### R2-DEAD-2: `tracee_support.py` 中 `socket` 和 `tempfile` 未使用
+
+**文件**: `runner/libs/app_runners/tracee_support.py`, 第 7、9 行
+**证据**:
+- `grep -n “socket\.” tracee_support.py` → 无结果
+- `grep -n “tempfile\.” tracee_support.py` → 无结果
+
+**修复**: 删除 `import socket` (第 7 行) 和 `import tempfile` (第 9 行)。
+
+---
+
+### R2-DEAD-3: `aws_common_lib.sh` 中三个死函数
+
+**文件**: `runner/scripts/aws_common_lib.sh`
+
+**`aws_instance_mode_is_shared()` (第 102 行)**:
+`grep -rn “aws_instance_mode_is_shared” runner/scripts/` 只返回定义，无调用方。等价逻辑已由 Python 侧 `_optional_scalar(contract, “RUN_AWS_INSTANCE_MODE”, “shared”)` 处理。
+
+**`with_remote_execution_lock()` (第 135 行)**:
+`grep -rn “with_remote_execution_lock” runner/scripts/` 只返回定义。等价锁已在 `aws_executor.py:396` 的 Python 层实现 (`_locked_file(ctx.remote_execution_lock)`)，Shell 层这个函数是死代码。
+
+**`load_local_state_if_present()` (第 489 行)**:
+`grep -rn “load_local_state_if_present” runner/scripts/` 只返回定义，无调用方。
+
+**修复**: 删除以上三个函数定义（共约 15 行）。
+
+---
+
+### R2-DEAD-4: `runner/Makefile` 中 7 个 `corpus-build-*` 子目标无调用方
+
+**文件**: `runner/Makefile`, 第 106–134 行（及 `.PHONY` 声明第 83–84 行）
+
+涉及目标：`corpus-build-bcc`、`corpus-build-scx`、`corpus-build-katran`、`corpus-build-tracee`、`corpus-build-tetragon`、`corpus-build-cilium`、`corpus-build-bpftrace`
+
+**证据**:
+- 顶层 `Makefile` 不含任何 `corpus-build-*` 引用（`grep -n “corpus-build” Makefile` 无结果）
+- Benchmark 流程通过 `run_target_suite.py` → `local_prep_build_native_repo_artifacts()` 走，不用这些 `make` 目标
+- `grep -rn “corpus-build-katran\|corpus-build-tracee...” Makefile runner/` 只返回 `runner/Makefile` 内的定义
+
+**修复**: 删除 `runner/Makefile` 第 83–84 行（`.PHONY` 中的声明）和第 106–134 行（7 个目标的具体实现，共约 35 行）。
+
+---
+
+### R2-STALE-1: `test_aws_remote_prep_wrapper` 的残留 `.pyc` 文件
+
+**文件**: `tests/python/__pycache__/test_aws_remote_prep_wrapper.cpython-312-pytest-9.0.2.pyc`
+**证据**: 对应的 `.py` 源文件不存在。这是随 `aws_remote_prep.sh` 删除后遗留的孤立缓存文件。
+**修复**: 删除该 `.pyc`；将 `tests/python/__pycache__/` 加入 `.gitignore`（如未加）。
+
+---
+
+### R2-COVERAGE-1: `aws_remote_prep.py` 无单元测试
+
+**证据**: `grep -rn “aws_remote_prep” tests/` 无结果。同期引入的 `kvm_executor.py`、`prepare_local_inputs.py`、`run_target_suite.py`、`build_upstream_selftests.py` 均有对应测试；独缺 `aws_remote_prep.py`。
+
+`main()` 的逻辑可测：(a) 错误参数数量应 exit(1)，(b) manifest 文件缺失应 exit(1)，(c) 正常流程应向 subprocess 传递正确环境变量。
+
+**修复**: 创建 `tests/python/test_aws_remote_prep.py` 覆盖以上三个场景。
+
+---
+
+### 先前 review 三条声称发现的验证结论
+
+**声称 1**: “`reporting.py` 缺少 `import statistics`，但在多处调用 `statistics.median()`”
+**结论: 错误。** `reporting.py` 第 5 行明确有 `import statistics`。第 175、176、187、188、461、462、463 行的调用均有效。
+
+**声称 2**: “`aws_remote_prep.sh` 只接受 `$1`，但 Python 层期望 2 个参数”
+**结论: 过时。** `aws_remote_prep.sh` 已不存在。`runner/libs/aws_remote_prep.py` 在第 36–37 行正确要求恰好 2 个参数，`run_target_suite.py` 第 118–122 行也恰好传入 2 个参数，没有 mismatch。
+
+**声称 3**: “顶层 `Makefile` 第 192–199 行有 3 个死的 `corpus-build-*` 目标”
+**结论: 定位错误。** 顶层 `Makefile` 第 192–199 行是 `__kernel-config-locked` 目标，完全没有 `corpus-build`。死的 `corpus-build-*` 目标在 `runner/Makefile` 第 106–134 行（共 7 个子目标，非 3 个），已记录于 R2-DEAD-4。
+
+---
+
+### 低优先级：重复的 `_die()` / `log()` / `die()`
+
+- 顶层 Python 模块（`aws_remote_prep.py`、`kvm_executor.py`、`prepare_local_inputs.py`、`run_target_suite.py`）各自定义了几乎相同的 `_die()` 函数，可合并至 `runner/libs/__init__.py`。
+- 约 9 个独立 Shell 脚本（`build-arm64-*.sh` 等）各自定义 `log()` 和 `die()`。这些脚本是独立调用的，重复有合理理由，但如果要清理可提取一个公共 preamble。

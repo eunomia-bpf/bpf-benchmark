@@ -15,14 +15,14 @@ Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `bcc`, `scx`, and 
 
 ```bash
 source /home/yunwei37/workspace/.venv/bin/activate
-make micro
-make daemon
-make corpus-build REPOS="tracee tetragon scx"
+make -C runner micro_exec
+make -C runner DAEMON_TARGET_DIR="$PWD/daemon/target" daemon-binary
+make -C runner REPOS="tracee tetragon scx" corpus-build-native
 ```
 
 - Most cases require root or passwordless `sudo -n`.
 - `tracee`, `tetragon`, and `scx` consume objects from `corpus/build/`.
-- `e2e` expects the daemon CLI at `daemon/target/release/bpfrejit-daemon`; `make daemon` builds it.
+- `e2e` expects the daemon CLI at `daemon/target/release/bpfrejit-daemon`; `make -C runner DAEMON_TARGET_DIR="$PWD/daemon/target" daemon-binary` builds it.
 
 Results live under `e2e/results/<run_type>_<timestamp>/`. `metadata.json` is the canonical run summary; `details/` contains `result.json`, `result.md`, optional `report.md`, and any retained per-case payloads.
 

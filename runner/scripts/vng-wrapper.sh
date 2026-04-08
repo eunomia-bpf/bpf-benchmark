@@ -81,11 +81,11 @@ ensure_repo_modules_fresh() {
 
     if [ "$rebuild_hostfs" -eq 1 ]; then
         echo "vng-wrapper: refreshing repo hostfs modules for $(basename "$_repo_kernel_image")" >&2
-        make -C "$_repo_root" virtme-hostfs-modules BZIMAGE="$_repo_kernel_image" >&2
+        make -C "$_repo_root" __virtme-hostfs-modules BZIMAGE="$_repo_kernel_image" >&2
     fi
     if [ "$rebuild_kinsn" -eq 1 ]; then
         echo "vng-wrapper: refreshing repo kinsn modules for $(basename "$_repo_kernel_image")" >&2
-        make -C "$_repo_root" kinsn-modules BZIMAGE="$_repo_kernel_image" >&2
+        make -C "$_repo_root" __kinsn-modules BZIMAGE="$_repo_kernel_image" >&2
     fi
 }
 

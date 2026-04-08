@@ -9,6 +9,7 @@ from runner.libs.run_contract import (
     load_manifest_environment,
     main as run_contract_main,
     parse_manifest,
+    render_null_assignments,
     render_shell_assignments,
     write_manifest_file,
 )
@@ -58,6 +59,17 @@ def test_run_contract_export_cli_prints_shell_assignments(capsys, tmp_path: Path
     manifest.write_text("RUN_TARGET_NAME=aws-x86\n", encoding="utf-8")
     run_contract_main(["export", str(manifest)])
     assert capsys.readouterr().out.strip() == "RUN_TARGET_NAME=aws-x86"
+
+
+def test_render_null_assignments_preserves_scalars_and_arrays(tmp_path: Path) -> None:
+    manifest = tmp_path / "run-contract.env"
+    manifest.write_text(
+        "RUN_TARGET_NAME=aws-x86\n"
+        "RUN_CORPUS_ARGV=( --foo 'bar baz' )\n",
+        encoding="utf-8",
+    )
+    rendered = render_null_assignments(manifest)
+    assert rendered == b"RUN_TARGET_NAME=aws-x86\0RUN_CORPUS_ARGV=--foo 'bar baz'\0"
 
 
 def test_manifest_writer_emits_explicit_run_token(tmp_path: Path) -> None:

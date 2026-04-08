@@ -131,14 +131,14 @@ VIRTME_HOSTFS_MODULE_ORDER := \
 	fs/9p/9p.o \
 	fs/fuse/virtiofs.o \
 	fs/overlayfs/overlay.o
-.PHONY: kernel kernel-build kernel-clean kernel-rebuild kernel-arm64 kinsn-modules virtme-hostfs-modules \
-	check validate \
-	vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
-	arm64-worktree \
-	kernel-arm64-aws \
-	aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
-	aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86 \
-	__kernel-config-locked __kernel-build-locked \
+.PHONY: __kernel __kernel-build __kernel-clean __kernel-rebuild __kernel-arm64 __kinsn-modules __virtme-hostfs-modules \
+		check validate \
+		vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+		__arm64-worktree \
+		__kernel-arm64-aws \
+		aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
+		aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86 \
+		__kernel-config-locked __kernel-build-locked \
 	help clean
 
 # ── Help ───────────────────────────────────────────────────────────────────────
@@ -158,18 +158,18 @@ help:
 	@echo "        AWS benchmark mode 'all' fans out micro/corpus/e2e in parallel on dedicated remote instances"
 	@echo "Developer-only raw build helpers still exist internally but are intentionally omitted here."
 
-kernel: kernel-build
+__kernel: __kernel-build
 	@test -f "$(BZIMAGE_PATH)"
 
-kernel-clean:
+__kernel-clean:
 	$(MAKE) -C "$(KERNEL_DIR)" clean
 	rm -f "$(KERNEL_CONFIG_STAMP)"
 	rm -f "$(KERNEL_BUILD_STAMP)"
 
-kernel-rebuild: kernel-clean
-	$(MAKE) kernel BZIMAGE="$(BZIMAGE)"
+__kernel-rebuild: __kernel-clean
+	$(MAKE) __kernel BZIMAGE="$(BZIMAGE)"
 
-kinsn-modules: kernel-build
+__kinsn-modules: __kernel-build
 	$(MAKE) -C "$(KINSN_MODULE_DIR)" KDIR="$(KERNEL_DIR)" clean
 	$(MAKE) -C "$(KINSN_MODULE_DIR)" KDIR="$(KERNEL_DIR)"
 	@if [ -n "$(KINSN_MODULE_OUTPUT_DIR)" ]; then \
@@ -183,7 +183,7 @@ kinsn-modules: kernel-build
 		}; \
 	fi
 
-virtme-hostfs-modules: kernel-build
+__virtme-hostfs-modules: __kernel-build
 	@:
 
 $(KERNEL_CONFIG_PATH):
@@ -201,7 +201,7 @@ __kernel-config-locked:
 	$(MAKE) -C "$(KERNEL_DIR)" olddefconfig
 	touch "$(KERNEL_CONFIG_STAMP)"
 
-kernel-build:
+__kernel-build:
 	@mkdir -p "$(dir $(KERNEL_BUILD_LOCK))"
 	flock "$(KERNEL_BUILD_LOCK)" $(MAKE) __kernel-build-locked
 
@@ -311,7 +311,7 @@ vm-all:
 	$(MAKE) vm-e2e
 
 # ── ARM64 kernel ───────────────────────────────────────────────────────────────
-arm64-worktree:
+__arm64-worktree:
 	@mkdir -p "$(dir $(ARM64_WORKTREE_DIR))"
 	@git -C "$(KERNEL_DIR)" worktree prune
 	@if [ ! -e "$(ARM64_WORKTREE_DIR)/.git" ]; then \
@@ -320,37 +320,37 @@ arm64-worktree:
 		git -C "$(ARM64_WORKTREE_DIR)" checkout --detach "$$(git -C "$(KERNEL_DIR)" rev-parse HEAD)" >/dev/null; \
 	fi
 
-$(ARM64_BUILD_CONFIG): $(ROOT_DIR)/runner/scripts/arm64-kernel-config.sh | arm64-worktree
+$(ARM64_BUILD_CONFIG): $(ROOT_DIR)/runner/scripts/arm64-kernel-config.sh | __arm64-worktree
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" "$(ROOT_DIR)/runner/scripts/arm64-kernel-config.sh" \
 		"$(ARM64_WORKTREE_DIR)" "$(ARM64_BUILD_DIR)" "$(CROSS_COMPILE_ARM64)"
 	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
 
-$(ARM64_IMAGE): $(ARM64_BUILD_CONFIG) | arm64-worktree
+$(ARM64_IMAGE): $(ARM64_BUILD_CONFIG) | __arm64-worktree
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" Image -j"$(NPROC)"
 	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
 
-$(ARM64_EFI_IMAGE): $(ARM64_BUILD_CONFIG) | arm64-worktree
+$(ARM64_EFI_IMAGE): $(ARM64_BUILD_CONFIG) | __arm64-worktree
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" vmlinuz.efi -j"$(NPROC)"
 
-kernel-arm64: $(ARM64_IMAGE) $(ARM64_EFI_IMAGE)
+__kernel-arm64: $(ARM64_IMAGE) $(ARM64_EFI_IMAGE)
 	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
 	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
 
-$(ARM64_AWS_BUILD_CONFIG): $(ROOT_DIR)/runner/scripts/aws_arm64_kernel_config.sh | arm64-worktree
+$(ARM64_AWS_BUILD_CONFIG): $(ROOT_DIR)/runner/scripts/aws_arm64_kernel_config.sh | __arm64-worktree
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" ARM64_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)" "$(ROOT_DIR)/runner/scripts/aws_arm64_kernel_config.sh" \
 		"$(ARM64_WORKTREE_DIR)" "$(ARM64_AWS_BUILD_DIR)" "$(CROSS_COMPILE_ARM64)"
 
-$(ARM64_AWS_IMAGE): $(ARM64_AWS_BUILD_CONFIG) | arm64-worktree
+$(ARM64_AWS_IMAGE): $(ARM64_AWS_BUILD_CONFIG) | __arm64-worktree
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" Image -j"$(NPROC)"
 
-$(ARM64_AWS_EFI_IMAGE): $(ARM64_AWS_BUILD_CONFIG) | arm64-worktree
+$(ARM64_AWS_EFI_IMAGE): $(ARM64_AWS_BUILD_CONFIG) | __arm64-worktree
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" vmlinuz.efi -j"$(NPROC)"
 
-kernel-arm64-aws: $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE)
+__kernel-arm64-aws: $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE)
 
 # ── AWS aliases ───────────────────────────────────────────────────────────────
 aws-arm64-test:

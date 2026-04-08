@@ -474,8 +474,8 @@ class SuiteEntrypoint:
         if not test_progs.is_file():
             print(f"SKIP: test_progs not found at {test_progs}", file=sys.stderr)
             return 0, 0
-        filter_tokens = os.environ.get("BPF_SELFTEST_FILTER", "verifier jit").split()
-        deny_tokens = os.environ.get("BPF_SELFTEST_DENY", "verifier_private_stack").split()
+        filter_tokens = _env_csv("RUN_UPSTREAM_TEST_PROGS_FILTERS")
+        deny_tokens = _env_csv("RUN_UPSTREAM_TEST_PROGS_DENY")
         self._log_test_section(
             f"Upstream test_progs (filter: {' '.join(filter_tokens)}; deny: {' '.join(deny_tokens)})"
         )

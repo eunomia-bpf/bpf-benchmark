@@ -42,15 +42,24 @@ def render_shell_assignments(path: Path) -> str:
     return "\n".join(f"{name}={shlex.quote(value)}" for name, value in read_state(path).items())
 
 
+def render_null_assignments(path: Path) -> bytes:
+    return b"".join(f"{name}={value}".encode("utf-8") + b"\0" for name, value in read_state(path).items())
+
+
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args:
-        _die("usage: state_file.py <export|write> ...")
+        _die("usage: state_file.py <export|export0|write|merge> ...")
     action = args[0]
     if action == "export":
         if len(args) != 2:
             _die("usage: state_file.py export <path>")
         print(render_shell_assignments(Path(args[1]).resolve()))
+        return
+    if action == "export0":
+        if len(args) != 2:
+            _die("usage: state_file.py export0 <path>")
+        sys.stdout.buffer.write(render_null_assignments(Path(args[1]).resolve()))
         return
     if action == "write":
         if len(args) < 2:

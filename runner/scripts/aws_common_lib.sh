@@ -14,7 +14,7 @@ ACTION="${ACTION:-}"
 MANIFEST_PATH="${MANIFEST_PATH:-}"
 LOCAL_STATE_PATH="${LOCAL_STATE_PATH:-}"
 AWS_REMOTE_PREP_STATE_PATH="${AWS_REMOTE_PREP_STATE_PATH:-}"
-RUN_CONTRACT_PYTHON_BIN="${RUN_CONTRACT_PYTHON_BIN:-${PYTHON:-python3}}"
+RUN_CONTRACT_PYTHON_BIN="${RUN_CONTRACT_PYTHON_BIN:-}"
 
 [[ -n "$ACTION" ]] || {
     printf '[aws-common][ERROR] ACTION must be set before sourcing aws_common_lib.sh\n' >&2
@@ -28,6 +28,10 @@ RUN_CONTRACT_PYTHON_BIN="${RUN_CONTRACT_PYTHON_BIN:-${PYTHON:-python3}}"
     printf '[aws-common][ERROR] manifest is missing: %s\n' "$MANIFEST_PATH" >&2
     exit 1
 }
+[[ -n "$RUN_CONTRACT_PYTHON_BIN" ]] || {
+    printf '[aws-common][ERROR] RUN_CONTRACT_PYTHON_BIN must be set before sourcing aws_common_lib.sh\n' >&2
+    exit 1
+}
 
 load_shell_contract_file() {
     local path="$1"
@@ -35,10 +39,12 @@ load_shell_contract_file() {
         printf '[aws-common][ERROR] contract file is missing: %s\n' "$path" >&2
         exit 1
     }
-    eval "$(
+    while IFS= read -r -d '' assignment; do
+        export "$assignment"
+    done < <(
         PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}" \
-            "$RUN_CONTRACT_PYTHON_BIN" -m runner.libs.run_contract export "$path"
-    )"
+            "$RUN_CONTRACT_PYTHON_BIN" -m runner.libs.run_contract export0 "$path"
+    )
 }
 
 load_shell_state_file() {
@@ -47,10 +53,12 @@ load_shell_state_file() {
         printf '[aws-common][ERROR] state file is missing: %s\n' "$path" >&2
         exit 1
     }
-    eval "$(
+    while IFS= read -r -d '' assignment; do
+        export "$assignment"
+    done < <(
         PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}" \
-            "$RUN_CONTRACT_PYTHON_BIN" -m runner.libs.state_file export "$path"
-    )"
+            "$RUN_CONTRACT_PYTHON_BIN" -m runner.libs.state_file export0 "$path"
+    )
 }
 
 load_shell_contract_file "$MANIFEST_PATH"
@@ -95,10 +103,6 @@ log() {
     printf '[aws-common] %s\n' "$*" >&2
 }
 
-aws_instance_mode_is_shared() {
-    [[ "$RUN_AWS_INSTANCE_MODE" == "shared" ]]
-}
-
 die() {
     printf '[aws-common][ERROR] %s\n' "$*" >&2
     exit 1
@@ -128,10 +132,6 @@ with_state_lock() {
     with_locked_file "$STATE_DIR/instance.lock" "$@"
 }
 
-with_remote_execution_lock() {
-    with_locked_file "$SHARED_STATE_DIR/remote-exec.lock" "$@"
-}
-
 remote_base_prereq_dir() {
     printf '%s\n' "$RUN_REMOTE_STAGE_DIR/prereq/base"
 }
@@ -150,11 +150,6 @@ load_state() {
     STATE_INSTANCE_IP=""
     STATE_REGION=""
     STATE_KERNEL_RELEASE=""
-    if [[ -n "$AWS_REMOTE_PREP_STATE_PATH" ]]; then
-        [[ -f "$AWS_REMOTE_PREP_STATE_PATH" ]] || die "AWS remote-prep state file is missing: ${AWS_REMOTE_PREP_STATE_PATH}"
-        load_shell_state_file "$AWS_REMOTE_PREP_STATE_PATH"
-        return 0
-    fi
     if [[ -f "$STATE_FILE" ]]; then
         load_shell_state_file "$STATE_FILE"
     fi
@@ -480,12 +475,6 @@ remote_has_sched_ext() {
 set -euo pipefail
 test -e /sys/kernel/sched_ext/state
 EOF
-}
-
-load_local_state_if_present() {
-    [[ -n "${LOCAL_STATE_PATH:-}" ]] || return 0
-    [[ -f "$LOCAL_STATE_PATH" ]] || die "local state file is missing: ${LOCAL_STATE_PATH}"
-    load_shell_state_file "$LOCAL_STATE_PATH"
 }
 
 setup_remote_base_prereqs() {
