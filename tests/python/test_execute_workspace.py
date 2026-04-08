@@ -13,15 +13,15 @@ def test_execute_workspace_runs_install_validate_then_suite(monkeypatch, tmp_pat
 
     calls: list[str] = []
 
-    def fake_load_manifest_environment(path: Path) -> dict[str, str]:
-        calls.append(f"load:{path.name}")
+    def fake_parse_manifest(path: Path) -> dict[str, str]:
+        calls.append(f"parse:{path.name}")
         return {"RUN_TARGET_NAME": "x86-kvm", "RUN_SUITE_NAME": "test"}
 
-    def fake_install_guest_prereqs(path: Path) -> None:
-        calls.append(f"install:{path.name}")
+    def fake_install_guest_prereqs(path: Path, contract: dict[str, str]) -> None:
+        calls.append(f"install:{path.name}:{contract['RUN_SUITE_NAME']}")
 
-    def fake_validate_guest_prereqs(path: Path) -> None:
-        calls.append(f"validate:{path.name}")
+    def fake_validate_guest_prereqs(path: Path, contract: dict[str, str]) -> None:
+        calls.append(f"validate:{path.name}:{contract['RUN_TARGET_NAME']}")
 
     class FakeSuite:
         def run(self) -> None:
@@ -37,7 +37,7 @@ def test_execute_workspace_runs_install_validate_then_suite(monkeypatch, tmp_pat
         assert contract["RUN_TARGET_NAME"] == "x86-kvm"
         return FakeSuite()
 
-    monkeypatch.setattr(execute_workspace, "load_manifest_environment", fake_load_manifest_environment)
+    monkeypatch.setattr(execute_workspace, "parse_manifest", fake_parse_manifest)
     monkeypatch.setattr(execute_workspace, "install_guest_prereqs", fake_install_guest_prereqs)
     monkeypatch.setattr(execute_workspace, "validate_guest_prereqs", fake_validate_guest_prereqs)
     monkeypatch.setattr(execute_workspace.SuiteEntrypoint, "from_contract", staticmethod(fake_from_contract))
@@ -45,9 +45,9 @@ def test_execute_workspace_runs_install_validate_then_suite(monkeypatch, tmp_pat
     execute_workspace.main([str(workspace), str(manifest)])
 
     assert calls == [
-        "load:run-contract.env",
-        "install:workspace",
-        "validate:workspace",
+        "parse:run-contract.env",
+        "install:workspace:test",
+        "validate:workspace:x86-kvm",
         "contract:workspace:run-contract.env:None",
         "run",
     ]

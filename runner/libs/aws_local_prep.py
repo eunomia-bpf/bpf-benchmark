@@ -24,6 +24,7 @@ from runner.libs.local_prep_common import (
     run_command,
     stage_x86_workload_tools,
 )
+from runner.libs.portable_runtime import build_x86_portable_libbpf, bundle_arm64_portable_binary
 from runner.libs.state_file import merge_state, read_state, write_state
 
 
@@ -319,9 +320,6 @@ class AWSPrep:
     def _make_runner(self, *targets: str, **extra_env: str) -> None:
         make_runner(*targets, env=self._env_with_paths(**extra_env))
 
-    def _run_script(self, script_rel: str, *args: str, **extra_env: str) -> None:
-        run_command(["bash", str(ROOT_DIR / script_rel), *args], env=self._env_with_paths(**extra_env))
-
     def prepare_runtime_artifacts(self) -> None:
         if self.target_arch == "x86_64":
             if self.env.get("RUN_NEEDS_RUNNER_BINARY", "0").strip() == "1":
@@ -362,12 +360,16 @@ class AWSPrep:
                 ARM64_HOST_DAEMON_CARGO_HOME=str(self.arm64_host_daemon_cargo_home),
                 **common_env,
             )
-            self._run_script(
-                "runner/scripts/build-arm64-portable-binary-host.sh",
-                str(self.arm64_host_daemon_binary),
-                str(self.arm64_cross_daemon_real),
-                str(self.arm64_cross_daemon),
-                str(self.arm64_cross_lib_dir),
+            bundle_arm64_portable_binary(
+                input_binary=self.arm64_host_daemon_binary,
+                real_output=self.arm64_cross_daemon_real,
+                wrapper_output=self.arm64_cross_daemon,
+                lib_output_dir=self.arm64_cross_lib_dir,
+                sysroot_root=self.arm64_sysroot_root,
+                sysroot_lock_file=self.arm64_sysroot_lock_file,
+                remote_host=self.arm64_sysroot_remote_host,
+                remote_user=self.arm64_sysroot_remote_user,
+                ssh_key_path=self.arm64_sysroot_ssh_key_path,
             )
             require_file_contains(self.arm64_cross_daemon_real, "ARM aarch64", "ARM64 daemon binary")
             require_nonempty_dir(self.arm64_cross_lib_dir, "ARM64 runtime lib dir")
@@ -381,12 +383,16 @@ class AWSPrep:
                 MICRO_EXEC_ENABLE_LLVMBPF="OFF",
                 **common_env,
             )
-            self._run_script(
-                "runner/scripts/build-arm64-portable-binary-host.sh",
-                str(self.arm64_host_runner_binary),
-                str(self.arm64_cross_runner_real),
-                str(self.arm64_cross_runner),
-                str(self.arm64_cross_lib_dir),
+            bundle_arm64_portable_binary(
+                input_binary=self.arm64_host_runner_binary,
+                real_output=self.arm64_cross_runner_real,
+                wrapper_output=self.arm64_cross_runner,
+                lib_output_dir=self.arm64_cross_lib_dir,
+                sysroot_root=self.arm64_sysroot_root,
+                sysroot_lock_file=self.arm64_sysroot_lock_file,
+                remote_host=self.arm64_sysroot_remote_host,
+                remote_user=self.arm64_sysroot_remote_user,
+                ssh_key_path=self.arm64_sysroot_ssh_key_path,
             )
             require_file_contains(self.arm64_cross_runner_real, "ARM aarch64", "ARM64 runner binary")
             if "daemon" in runtime_targets:
@@ -398,12 +404,16 @@ class AWSPrep:
                     ARM64_HOST_DAEMON_CARGO_HOME=str(self.arm64_host_daemon_cargo_home),
                     **common_env,
                 )
-                self._run_script(
-                    "runner/scripts/build-arm64-portable-binary-host.sh",
-                    str(self.arm64_host_daemon_binary),
-                    str(self.arm64_cross_daemon_real),
-                    str(self.arm64_cross_daemon),
-                    str(self.arm64_cross_lib_dir),
+                bundle_arm64_portable_binary(
+                    input_binary=self.arm64_host_daemon_binary,
+                    real_output=self.arm64_cross_daemon_real,
+                    wrapper_output=self.arm64_cross_daemon,
+                    lib_output_dir=self.arm64_cross_lib_dir,
+                    sysroot_root=self.arm64_sysroot_root,
+                    sysroot_lock_file=self.arm64_sysroot_lock_file,
+                    remote_host=self.arm64_sysroot_remote_host,
+                    remote_user=self.arm64_sysroot_remote_user,
+                    ssh_key_path=self.arm64_sysroot_ssh_key_path,
                 )
                 require_file_contains(self.arm64_cross_daemon_real, "ARM aarch64", "ARM64 daemon binary")
             require_nonempty_dir(self.arm64_cross_lib_dir, "ARM64 runtime lib dir")
@@ -645,7 +655,7 @@ class AWSPrep:
             return
         if self.target_arch != "x86_64":
             die(f"unsupported AWS target arch for benchmark extra prep: {self.target_arch}")
-        self._run_script("runner/scripts/build-x86-portable-libbpf.sh", str(self.x86_portable_libbpf_root))
+        build_x86_portable_libbpf(self.x86_portable_libbpf_root)
         require_nonempty_dir(self.x86_portable_libbpf_root / "lib", "portable x86 libbpf dir")
         require_path(self.x86_portable_libbpf_root / "lib" / "libbpf.so.1", "portable x86 libbpf soname")
 

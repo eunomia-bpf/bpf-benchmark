@@ -13,31 +13,12 @@ from pathlib import Path
 from typing import cast
 
 from runner.libs.guest_prereqs import resolve_remote_workload_tool_bin, workload_tool_is_bundled
-from runner.libs.run_contract import load_manifest_environment
+from runner.libs.run_contract import parse_manifest
 
 
 def _die(message: str) -> "NoReturn":
     print(f"[suite-entrypoint][ERROR] {message}", file=sys.stderr)
     raise SystemExit(1)
-
-
-def _env_required(name: str) -> str:
-    value = os.environ.get(name, "").strip()
-    if not value:
-        _die(f"manifest {name} is empty")
-    return value
-
-
-def _env_csv(name: str) -> list[str]:
-    value = os.environ.get(name, "").strip()
-    if not value:
-        return []
-    return [token for token in value.split(",") if token]
-
-
-def _env_bool(name: str, *, default: str = "0") -> bool:
-    return os.environ.get(name, default).strip() == "1"
-
 
 def _parse_shell_argv(serialized: str) -> list[str]:
     text = serialized.strip()
@@ -166,6 +147,7 @@ def _require_executable(path: Path, description: str) -> Path:
 
 @dataclass
 class SuiteEntrypoint:
+    contract: dict[str, str | list[str]]
     workspace: Path
     manifest_path: Path
     archive_path: Path | None
@@ -181,6 +163,27 @@ class SuiteEntrypoint:
     workload_tools: list[str]
     corpus_argv: list[str]
     e2e_argv: list[str]
+
+    def _required_contract(self, name: str) -> str:
+        value = self.contract.get(name, "")
+        if isinstance(value, list) or not str(value).strip():
+            _die(f"manifest {name} is empty")
+        return str(value).strip()
+
+    def _optional_contract(self, name: str, default: str = "") -> str:
+        value = self.contract.get(name, default)
+        if isinstance(value, list):
+            _die(f"manifest {name} must be scalar")
+        return str(value).strip()
+
+    def _csv_contract(self, name: str) -> list[str]:
+        value = self.contract.get(name, "")
+        if isinstance(value, list):
+            return [token for token in value if token]
+        return [token for token in str(value).split(",") if token]
+
+    def _bool_contract(self, name: str, *, default: str = "0") -> bool:
+        return self._optional_contract(name, default) == "1"
 
     @classmethod
     def from_contract(
@@ -222,6 +225,7 @@ class SuiteEntrypoint:
         artifact_dir = result_root / f"{run_token}_{stamp}"
         workload_tools = csv_value("RUN_WORKLOAD_TOOLS_CSV")
         return cls(
+            contract=contract,
             workspace=workspace,
             manifest_path=manifest_path,
             archive_path=archive_path,
@@ -232,7 +236,7 @@ class SuiteEntrypoint:
             python_bin=python_bin,
             bpftool_bin=bpftool_bin,
             artifact_dir=artifact_dir,
-            remote_workload_tool_bin=resolve_remote_workload_tool_bin(workspace),
+            remote_workload_tool_bin=resolve_remote_workload_tool_bin(workspace, contract),
             bundled_workload_tools=csv_value("RUN_BUNDLED_WORKLOAD_TOOLS_CSV"),
             workload_tools=workload_tools,
             corpus_argv=argv_value("RUN_CORPUS_ARGV"),
@@ -281,12 +285,12 @@ class SuiteEntrypoint:
         )
 
     def _ensure_runner_binary(self) -> None:
-        if not _env_bool("RUN_NEEDS_RUNNER_BINARY"):
+        if not self._bool_contract("RUN_NEEDS_RUNNER_BINARY"):
             return
         _require_executable(self.workspace / "runner" / "build" / "micro_exec", "bundled runner binary")
 
     def _ensure_scx_artifacts(self) -> None:
-        packages = _env_csv("RUN_SCX_PACKAGES_CSV")
+        packages = self._csv_contract("RUN_SCX_PACKAGES_CSV")
         if not packages:
             return
         for package in packages:
@@ -299,13 +303,13 @@ class SuiteEntrypoint:
                 _die(f"bundled scx object is missing: {object_path}")
 
     def _ensure_bundled_repos(self) -> None:
-        for repo in _env_csv("RUN_BUNDLED_REPOS_CSV"):
+        for repo in self._csv_contract("RUN_BUNDLED_REPOS_CSV"):
             repo_dir = self.workspace / "runner" / "repos" / repo
             if not repo_dir.is_dir():
                 _die(f"bundled repo is missing: {repo_dir}")
 
     def _ensure_katran_bundle(self, env: dict[str, str]) -> None:
-        if not _env_bool("RUN_NEEDS_KATRAN_BUNDLE"):
+        if not self._bool_contract("RUN_NEEDS_KATRAN_BUNDLE"):
             return
         binary = _require_executable(
             self.workspace / "e2e" / "cases" / "katran" / "bin" / "katran_server_grpc",
@@ -332,7 +336,7 @@ class SuiteEntrypoint:
         if not self.workload_tools:
             return
         for tool in self.workload_tools:
-            if workload_tool_is_bundled(tool):
+            if workload_tool_is_bundled(self.contract, tool):
                 if self.remote_workload_tool_bin is None:
                     _die("manifest remote workload-tool bin is missing while workload tools are requested")
                 bundled_tool = self.remote_workload_tool_bin / tool
@@ -342,7 +346,7 @@ class SuiteEntrypoint:
                 _die(f"required workload tool is missing from both the remote tool bin and PATH: {tool}")
 
     def _ensure_bpf_stats_enabled(self) -> None:
-        if not _env_bool("RUN_NEEDS_DAEMON_BINARY"):
+        if not self._bool_contract("RUN_NEEDS_DAEMON_BINARY"):
             return
         bpf_stats_path = Path("/proc/sys/kernel/bpf_stats_enabled")
         if not os.access(bpf_stats_path, os.W_OK):
@@ -363,7 +367,7 @@ class SuiteEntrypoint:
             "RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT",
             "RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE",
         ):
-            _env_required(name)
+            self._required_contract(name)
 
     def _log_test_section(self, title: str) -> None:
         print("", file=sys.stderr)
@@ -426,8 +430,8 @@ class SuiteEntrypoint:
         tests: list[tuple[str, list[str], dict[str, str]]] = [
             ("adversarial_rejit", [str(negative_build / "adversarial_rejit")], runtime_env.copy()),
             (
-                f"fuzz_rejit ({_env_required('RUN_TEST_FUZZ_ROUNDS')} rounds)",
-                [str(negative_build / "fuzz_rejit"), _env_required("RUN_TEST_FUZZ_ROUNDS")],
+                f"fuzz_rejit ({self._required_contract('RUN_TEST_FUZZ_ROUNDS')} rounds)",
+                [str(negative_build / "fuzz_rejit"), self._required_contract("RUN_TEST_FUZZ_ROUNDS")],
                 runtime_env.copy(),
             ),
         ]
@@ -438,15 +442,15 @@ class SuiteEntrypoint:
                 str(negative_build / "scx_prog_show_race"),
                 str(self.workspace),
                 "--mode",
-                _env_required("RUN_TEST_SCX_PROG_SHOW_RACE_MODE"),
+                self._required_contract("RUN_TEST_SCX_PROG_SHOW_RACE_MODE"),
                 "--iterations",
-                _env_required("RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS"),
+                self._required_contract("RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS"),
                 "--load-timeout",
-                _env_required("RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT"),
+                self._required_contract("RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT"),
             ]
-            if _env_bool("RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE"):
+            if self._bool_contract("RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE"):
                 scx_command.append("--skip-probe")
-            tests.append((f"scx_prog_show_race ({_env_required('RUN_TEST_SCX_PROG_SHOW_RACE_MODE')})", scx_command, scx_env))
+            tests.append((f"scx_prog_show_race ({self._required_contract('RUN_TEST_SCX_PROG_SHOW_RACE_MODE')})", scx_command, scx_env))
         for label, command, command_env in tests:
             print(f"--- {label} ---", file=sys.stderr)
             if _run_with_status(command, cwd=self.workspace, env=command_env, log_path=log_path):
@@ -474,8 +478,8 @@ class SuiteEntrypoint:
         if not test_progs.is_file():
             print(f"SKIP: test_progs not found at {test_progs}", file=sys.stderr)
             return 0, 0
-        filter_tokens = _env_csv("RUN_UPSTREAM_TEST_PROGS_FILTERS")
-        deny_tokens = _env_csv("RUN_UPSTREAM_TEST_PROGS_DENY")
+        filter_tokens = self._csv_contract("RUN_UPSTREAM_TEST_PROGS_FILTERS")
+        deny_tokens = self._csv_contract("RUN_UPSTREAM_TEST_PROGS_DENY")
         self._log_test_section(
             f"Upstream test_progs (filter: {' '.join(filter_tokens)}; deny: {' '.join(deny_tokens)})"
         )
@@ -555,7 +559,7 @@ class SuiteEntrypoint:
     def _run_test_suite(self, env: dict[str, str]) -> None:
         self._validate_test_contract()
         self._ensure_scx_artifacts()
-        mode = _env_required("RUN_TEST_MODE")
+        mode = self._required_contract("RUN_TEST_MODE")
         if mode == "selftest":
             self._run_selftest_mode(env)
         elif mode == "negative":
@@ -580,11 +584,11 @@ class SuiteEntrypoint:
             "--runtime",
             "kernel",
             "--samples",
-            _env_required("RUN_BENCH_SAMPLES"),
+            self._required_contract("RUN_BENCH_SAMPLES"),
             "--warmups",
-            _env_required("RUN_BENCH_WARMUPS"),
+            self._required_contract("RUN_BENCH_WARMUPS"),
             "--inner-repeat",
-            _env_required("RUN_BENCH_INNER_REPEAT"),
+            self._required_contract("RUN_BENCH_INNER_REPEAT"),
             "--output",
             str(output_json),
         ]
@@ -610,16 +614,16 @@ class SuiteEntrypoint:
             "--daemon",
             str(self.workspace / "daemon" / "target" / "release" / "bpfrejit-daemon"),
             "--samples",
-            _env_required("RUN_BENCH_SAMPLES"),
+            self._required_contract("RUN_BENCH_SAMPLES"),
             "--output-json",
             str(output_json),
             "--output-md",
             str(output_md),
         ]
-        workload_seconds = os.environ.get("RUN_CORPUS_WORKLOAD_SECONDS", "").strip()
+        workload_seconds = self._optional_contract("RUN_CORPUS_WORKLOAD_SECONDS")
         if workload_seconds:
             command += ["--workload-seconds", workload_seconds]
-        for filter_name in _env_csv("RUN_CORPUS_FILTERS"):
+        for filter_name in self._csv_contract("RUN_CORPUS_FILTERS"):
             command += ["--filter", filter_name]
         command.extend(self.corpus_argv)
         _run_checked(command, cwd=self.workspace, env=runtime_env)
@@ -640,7 +644,7 @@ class SuiteEntrypoint:
             "--daemon",
             str(self.workspace / "daemon" / "target" / "release" / "bpfrejit-daemon"),
         ]
-        if _env_bool("RUN_E2E_SMOKE"):
+        if self._bool_contract("RUN_E2E_SMOKE"):
             command.append("--smoke")
         command.extend(self.e2e_argv)
         _run_checked(command, cwd=self.workspace, env=runtime_env)
@@ -648,7 +652,7 @@ class SuiteEntrypoint:
     def _run_e2e_suite(self, env: dict[str, str]) -> None:
         self._ensure_bundled_repos()
         self._ensure_scx_artifacts()
-        cases = _env_required("RUN_E2E_CASES")
+        cases = self._required_contract("RUN_E2E_CASES")
         if cases == "all":
             all_env = env.copy()
             self._ensure_katran_bundle(all_env)
@@ -698,7 +702,7 @@ def main(argv: list[str] | None = None) -> None:
         _die(f"manifest is missing: {manifest_path}")
     if not workspace.is_dir():
         _die(f"workspace is missing: {workspace}")
-    contract = load_manifest_environment(manifest_path)
+    contract = parse_manifest(manifest_path)
     SuiteEntrypoint.from_contract(workspace, manifest_path, archive_path, cast(dict[str, str | list[str]], contract)).run()
 
 

@@ -24,11 +24,8 @@ todo sections win.
 In particular, older historical notes may still mention intermediate names such
 as `RUN_LOCAL_PROMOTE_ROOT`, `RUN_LOCAL_STAGE_ROOT`,
 `RUN_LOCAL_STAGE_MANIFEST`, `RUN_RUNNER_BINARY_MODE`, or deleted shell wrapper
-entrypoints such as `run_target_suite.sh`, `prepare_local_inputs.sh`,
-`aws_remote_prep.sh`, `kvm_executor.sh`, `aws_executor.sh`,
-`execute_workspace.sh`, and `build_upstream_selftests.sh`. Those names are not
-part of the current active contract unless reintroduced explicitly in sections
-2-5.
+entrypoints. Those names are not part of the current active contract unless
+reintroduced explicitly in sections 2-5.
 
 ## 2. Product Goal
 
@@ -69,6 +66,20 @@ The user-facing entrypoints remain:
 - `make aws-x86-terminate`
 
 These aliases must stay thin.
+
+The static Python regression gate is intentionally minimal now. The kept
+contract tests are only:
+
+- `tests/python/test_run_contract.py`
+- `tests/python/test_prepare_local_inputs.py`
+- `tests/python/test_run_target_suite.py`
+- `tests/python/test_build_remote_bundle.py`
+- `tests/python/test_build_upstream_selftests.py`
+- `tests/python/test_execute_workspace.py`
+- `tests/python/test_state_file.py`
+
+The previous mock-heavy and case-specific Python tests were deleted on purpose.
+The repo should add tests back only when a concrete bug justifies new coverage.
 
 ## 3. Design Summary
 
@@ -231,23 +242,22 @@ The refactor now centers on:
 - `runner/libs/local_prep_common.py`
 - `runner/libs/kvm_local_prep.py`
 - `runner/libs/aws_local_prep.py`
+- `runner/libs/aws_remote_prep.py`
 - `runner/libs/kvm_executor.py`
+- `runner/libs/aws_executor.py`
+- `runner/libs/build_remote_bundle.py`
+- `runner/libs/build_upstream_selftests.py`
+- `runner/libs/portable_runtime.py`
+- `runner/libs/aws_remote_prereqs.py`
 - `runner/scripts/aws_common_lib.sh`
 - `runner/scripts/aws_prep_paths_lib.sh`
 - `runner/scripts/aws_kernel_artifacts_lib.sh`
-- `runner/scripts/aws_remote_prep_lib.sh`
-- `runner/libs/aws_remote_prep.py`
-- `runner/libs/aws_executor.py`
-- `runner/libs/build_remote_bundle.py`
-- `runner/libs/aws_remote_prereqs.py`
 - `runner/scripts/build-arm64-daemon-host.sh`
 - `runner/scripts/build-arm64-runner-host.sh`
-- `runner/scripts/build-arm64-portable-binary-host.sh`
 - `runner/scripts/build-arm64-repo-tests-host.sh`
 - `runner/scripts/build-arm64-scx-host.sh`
 - `runner/scripts/arm64_runtime_bundle_lib.sh`
 - `runner/scripts/prepare-arm64-sysroot.sh`
-- `runner/libs/build_upstream_selftests.py`
 - `runner/libs/prepare_local_inputs.py`
 - `runner/libs/kvm_executor.py`
 - `runner/libs/run_target_suite.py`
@@ -283,6 +293,13 @@ Run identity is also now explicit in the manifest:
 
 - `RUN_TOKEN`
 
+Temporary engineering review/execution docs were also collapsed again into this
+file. The removed duplicates were:
+
+- `docs/tmp/engineering_cleanup_execution_20260407.md`
+- `docs/tmp/engineering_review_testing_20260407.md`
+- `docs/tmp/vm_management_refactor_design_20260407.md`
+
 Host-side prep handoff is no longer `stdout` shell assignments. Canonical
 remote-prep/local-prep state now moves through explicit JSON state files
 written by `runner/libs/state_file.py`.
@@ -316,8 +333,6 @@ Current intended state:
   - `runner/scripts/aws_prep_paths_lib.sh`
 - AWS host-side kernel/cache/build helpers live in:
   - `runner/scripts/aws_kernel_artifacts_lib.sh`
-- AWS remote-prep-only instance/setup reconciliation lives in:
-  - `runner/scripts/aws_remote_prep_lib.sh`
 - `runner.libs.kvm_executor` consumes only staged KVM state
 - `runner.libs.aws_executor` consumes prepared state and handles only:
   - remote execution
@@ -368,15 +383,15 @@ Current canonical AWS control flow is now:
 What is still incomplete:
 
 - `aws_common_lib.sh` still needs one more review pass to make sure it only
-  carries shared AWS state / SSH / base-remote-prereq behavior and does not drift
-  back into target/suite policy
+  carries shared AWS state / SSH / kernel-build helper behavior and does not
+  drift back into target/suite policy
 - local prep phase orchestration now lives entirely in Python for both KVM and AWS:
   - `runner/libs/prepare_local_inputs.py`
   - `runner/libs/kvm_local_prep.py`
   - `runner/libs/aws_local_prep.py`
 - remaining shell ownership is now at the low-level helper layer:
-  - AWS remote preflight and setup reconciliation in
-    `runner/scripts/aws_common_lib.sh` / `runner/scripts/aws_remote_prep_lib.sh`
+  - AWS shared SSH/state/kernel helper functions in
+    `runner/scripts/aws_common_lib.sh`
   - AWS host-side kernel/cache/build helpers in
     `runner/scripts/aws_kernel_artifacts_lib.sh`
   - ARM host/cross build helpers such as
@@ -384,15 +399,16 @@ What is still incomplete:
 - host-side top-level control flow now also lives in Python:
   - `runner/libs/run_target_suite.py`
   - `runner/libs/aws_remote_prep.py`
+  - `runner/libs/aws_remote_prereqs.py`
 - host-side local-prep dispatch and KVM execution also live in Python:
   - `runner/libs/prepare_local_inputs.py`
   - `runner/libs/kvm_executor.py`
-- remaining env-file parsing is still confined to internal shell libraries where
+- remaining env-file parsing is now confined to internal shell libraries where
   the underlying implementation is still shell-first:
   - `runner/scripts/aws_common_lib.sh`
-  - `runner/scripts/aws_remote_prep_lib.sh`
   Those internal shell consumers no longer use `eval "$( … export … )"`; they
-  now import manifest/state data via explicit NUL-delimited assignment streams.
+  import manifest/state data via explicit NUL-delimited assignment streams and
+  are no longer the owner of AWS remote-preflight orchestration.
 - canonical manifest resolution is still broader than ideal:
   - `runner/libs/run_contract.py` still resolves many knobs directly from caller
     env instead of a narrower explicit input schema
@@ -439,7 +455,7 @@ What is still incomplete:
 - ARM host-cross now covers more of canonical runtime prep:
   - `runner/scripts/build-arm64-daemon-host.sh`
   - `runner/scripts/build-arm64-runner-host.sh`
-  - `runner/scripts/build-arm64-portable-binary-host.sh`
+  - `runner.libs.portable_runtime`
   - canonical ARM runtime prep should only fall back to `__cross-arm64` when
     `llvmbpf` or repo-specific benchmark builds still require an ARM userspace
 - upstream selftests no longer depend on repo-owned compat headers or stub
@@ -705,7 +721,7 @@ The new shape is materially better than the deleted monoliths. Current state:
   - AWS host-prep/build path defaults
 - `aws_kernel_artifacts_lib.sh` owns:
   - AWS host-side kernel/cache/build helpers
-- `aws_remote_prep_lib.sh` owns:
+- `runner.libs.aws_remote_prep` owns:
   - AWS remote-prep-only instance/setup reconciliation
 - `runner.libs.aws_local_prep` now owns:
   - AWS local artifact preparation
@@ -991,14 +1007,12 @@ Current ordered todo:
    - keep `check` / `validate` from drifting into a second orchestration layer
    - do not advertise internal helpers in `make help` or `README.md` as part of
      the canonical user-facing surface
-2. Continue reducing the remaining AWS-shell / Python local-prep split:
-   - keep shared repo fetch, native repo build, SCX build, repo tests,
-     workload-tool staging, and upstream-selftest build rules in
-     `local_prep_common_lib.sh` where they are target-agnostic
-   - keep AWS target-specific local-prep shell limited to target/arch callbacks
-     and artifact paths only
-   - keep shell limited to transport/bootstrap/build steps; host-side control
-     flow should continue moving into Python
+2. Continue reducing the remaining AWS-shell / Python split:
+   - local prep and remote preflight orchestration are now Python-owned
+   - keep shell limited to low-level build/bootstrap helpers only
+   - review `aws_common_lib.sh`, `aws_prep_paths_lib.sh`, and
+     `aws_kernel_artifacts_lib.sh` for any remaining policy or orchestration
+     leakage
 3. Keep the explicit bundle/runtime contract strict:
    - repo selection stays split between `RUN_BUNDLED_REPOS_CSV` and
      `RUN_FETCH_REPOS_CSV`
@@ -1020,7 +1034,8 @@ Current ordered todo:
    - selection/staging logic lives in `runner/libs/build_upstream_selftests.py`
    - no source filtering that silently ignores stale manifest rows
 6. Finish one more stale-reference sweep in active code, `README.md`, and this
-   document.
+   document, especially for deleted shell libraries and older shell entrypoint
+   names.
 7. Keep moving orchestration/contract logic into Python where it materially
    shrinks shell control planes:
    - prefer Python module entrypoints for orchestration and contract parsing

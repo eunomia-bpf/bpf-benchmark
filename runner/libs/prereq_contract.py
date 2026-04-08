@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from typing import Mapping
 
 
 PYTHON_IMPORT_MAP = {
@@ -42,8 +43,17 @@ TOOL_PACKAGE_MAP = {
 }
 
 
-def env_csv(name: str) -> list[str]:
-    value = os.environ.get(name, "").strip()
+def _contract_scalar(contract: Mapping[str, str | list[str]] | None, name: str) -> str:
+    if contract is None:
+        return os.environ.get(name, "").strip()
+    value = contract.get(name, "")
+    if isinstance(value, list):
+        return " ".join(value).strip()
+    return value.strip()
+
+
+def env_csv(name: str, *, contract: Mapping[str, str | list[str]] | None = None) -> list[str]:
+    value = _contract_scalar(contract, name)
     if not value:
         return []
     return [token for token in value.split(",") if token]
@@ -56,17 +66,21 @@ def python_import_name(package_name: str) -> str:
         raise RuntimeError(f"unsupported python package contract: {package_name}") from exc
 
 
-def required_commands(*, mode: str = "runtime") -> list[str]:
+def required_commands(
+    *,
+    mode: str = "runtime",
+    contract: Mapping[str, str | list[str]] | None = None,
+) -> list[str]:
     commands: list[str] = []
     for token in (
-        os.environ.get("RUN_BPFTOOL_BIN", "").strip(),
-        os.environ.get("RUN_REMOTE_PYTHON_BIN", "").strip(),
-        *env_csv("RUN_REMOTE_COMMANDS_CSV"),
+        _contract_scalar(contract, "RUN_BPFTOOL_BIN"),
+        _contract_scalar(contract, "RUN_REMOTE_PYTHON_BIN"),
+        *env_csv("RUN_REMOTE_COMMANDS_CSV", contract=contract),
     ):
         if token and token not in commands:
             commands.append(token)
     if mode == "runtime":
-        for token in env_csv("RUN_WORKLOAD_TOOLS_CSV"):
+        for token in env_csv("RUN_WORKLOAD_TOOLS_CSV", contract=contract):
             if token and token not in commands:
                 commands.append(token)
     return commands

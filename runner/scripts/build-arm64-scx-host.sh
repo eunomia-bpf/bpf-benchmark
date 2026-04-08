@@ -40,8 +40,6 @@ die() {
 
 # shellcheck disable=SC1090
 source "$ROOT_DIR/runner/scripts/local_prep_common_lib.sh"
-# shellcheck disable=SC1090
-source "$ROOT_DIR/runner/scripts/arm64_runtime_bundle_lib.sh"
 
 require_command() {
     local cmd="$1"
@@ -156,7 +154,11 @@ build_scx_artifacts() {
         [[ -x "$current_release_dir/$package" ]] || die "expected scx binary missing after build: $current_release_dir/$package"
         destination="$PROMOTE_ROOT/runner/repos/scx/target/release/$package"
         cp "$current_release_dir/$package" "$destination"
-        arm64_bundle_copy_runtime_bundle "$destination" "$PROMOTE_ROOT/lib"
+        "$HOST_PYTHON_BIN" -m runner.libs.portable_runtime bundle-arm64-runtime \
+            "$destination" \
+            "$PROMOTE_ROOT/lib" \
+            "$SYSROOT_ROOT" \
+            --readelf-bin "$READELF_BIN"
     done
 }
 

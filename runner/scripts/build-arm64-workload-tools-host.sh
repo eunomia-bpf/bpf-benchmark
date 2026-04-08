@@ -34,6 +34,7 @@ SYSBENCH_REPO_URL="https://github.com/akopytov/sysbench.git"
 SYSBENCH_REF="${ARM64_WORKLOAD_TOOL_SYSBENCH_REF:-3ceba0b1e115f8c50d1d045a4574d8ed643bd497}"
 WRK_REPO_URL="https://github.com/wg/wrk.git"
 WRK_REF="${ARM64_WORKLOAD_TOOL_WRK_REF:-a211dd5a7050b1f9e8a9870b95513060e72ac4a0}"
+HOST_PYTHON_BIN="${ARM64_HOST_PYTHON_BIN:-python3}"
 
 log() {
     printf '[arm64-workload-tools-host] %s\n' "$*" >&2
@@ -46,8 +47,6 @@ die() {
 
 # shellcheck disable=SC1090
 source "$ROOT_DIR/runner/scripts/local_prep_common_lib.sh"
-# shellcheck disable=SC1090
-source "$ROOT_DIR/runner/scripts/arm64_runtime_bundle_lib.sh"
 
 require_command() {
     local cmd="$1"
@@ -136,7 +135,11 @@ stage_portable_binary() {
     "$STRIP_BIN" "$real_binary" >/dev/null 2>&1 || true
     file "$real_binary" | grep -F "ARM aarch64" >/dev/null \
         || die "built workload tool is not ARM64: ${real_binary}"
-    arm64_bundle_copy_runtime_bundle "$real_binary" "$OUTPUT_TOOL_LIB_DIR"
+    "$HOST_PYTHON_BIN" -m runner.libs.portable_runtime bundle-arm64-runtime \
+        "$real_binary" \
+        "$OUTPUT_TOOL_LIB_DIR" \
+        "$SYSROOT_ROOT" \
+        --readelf-bin "$READELF_BIN"
     copy_sibling_lib_wrapper "$OUTPUT_TOOL_BIN_DIR/${tool_name}" "${tool_name}.real"
 }
 
@@ -239,6 +242,7 @@ build_requested_tools() {
 
 require_command git
 require_command unzip
+require_command "$HOST_PYTHON_BIN"
 require_command "$HOST_CC_BIN"
 require_command "${TOOLCHAIN_PREFIX}ar"
 require_command "${TOOLCHAIN_PREFIX}ranlib"

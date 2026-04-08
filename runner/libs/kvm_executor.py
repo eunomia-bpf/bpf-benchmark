@@ -8,7 +8,7 @@ import tarfile
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
-from runner.libs.run_contract import load_manifest_environment
+from runner.libs.run_contract import parse_manifest
 from runner.libs.state_file import read_state
 
 
@@ -17,8 +17,11 @@ def _die(message: str) -> "NoReturn":
     raise SystemExit(1)
 
 
-def _require_env(name: str) -> str:
-    value = os.environ.get(name, "").strip()
+def _require_scalar(mapping: dict[str, str | list[str]], name: str) -> str:
+    value = mapping.get(name, "")
+    if isinstance(value, list):
+        _die(f"manifest {name} must be scalar")
+    value = value.strip()
     if not value:
         _die(f"manifest {name} is empty")
     return value
@@ -37,9 +40,9 @@ def bundle_stage_root(bundle_tar: Path) -> Path:
     return stage_root
 
 
-def suite_command(workspace_root: Path) -> str:
+def suite_command(workspace_root: Path, contract: dict[str, str | list[str]]) -> str:
     workspace_manifest = workspace_root / "run-contract.env"
-    remote_python = _require_env("RUN_REMOTE_PYTHON_BIN")
+    remote_python = _require_scalar(contract, "RUN_REMOTE_PYTHON_BIN")
     return (
         f'cd "{workspace_root}" && '
         f'PYTHONPATH="{workspace_root}${{PYTHONPATH:+:${{PYTHONPATH}}}}" '
@@ -48,39 +51,46 @@ def suite_command(workspace_root: Path) -> str:
     )
 
 
-def build_vm_command(workspace_root: Path) -> list[str]:
+def build_vm_command(workspace_root: Path, contract: dict[str, str | list[str]]) -> list[str]:
     runner_dir = ROOT_DIR / "runner"
     command = [
-        _require_env("RUN_HOST_PYTHON_BIN"),
+        _require_scalar(contract, "RUN_HOST_PYTHON_BIN"),
         str(runner_dir / "scripts" / "run_vm_shell.py"),
         "--vm-backend",
-        _require_env("RUN_VM_BACKEND"),
+        _require_scalar(contract, "RUN_VM_BACKEND"),
         "--vm-executable",
-        _require_env("RUN_VM_EXECUTABLE"),
+        _require_scalar(contract, "RUN_VM_EXECUTABLE"),
         "--vm-lock-scope",
-        _require_env("RUN_VM_LOCK_SCOPE"),
+        _require_scalar(contract, "RUN_VM_LOCK_SCOPE"),
         "--vm-machine-name",
-        _require_env("RUN_VM_MACHINE_NAME"),
+        _require_scalar(contract, "RUN_VM_MACHINE_NAME"),
         "--vm-machine-arch",
-        _require_env("RUN_VM_MACHINE_ARCH"),
+        _require_scalar(contract, "RUN_VM_MACHINE_ARCH"),
         "--action",
-        f"vm-{_require_env('RUN_SUITE_NAME')}",
+        f"vm-{_require_scalar(contract, 'RUN_SUITE_NAME')}",
         "--kernel-image",
-        _require_env("RUN_VM_KERNEL_IMAGE"),
+        _require_scalar(contract, "RUN_VM_KERNEL_IMAGE"),
         "--timeout",
-        _require_env("RUN_VM_TIMEOUT_SECONDS"),
+        _require_scalar(contract, "RUN_VM_TIMEOUT_SECONDS"),
         "--cwd",
         str(workspace_root),
         "--rwdir",
         str(workspace_root),
         "--command",
-        suite_command(workspace_root),
+        suite_command(workspace_root, contract),
     ]
-    if os.environ.get("RUN_VM_CPUS", "").strip():
-        command.extend(["--cpus", os.environ["RUN_VM_CPUS"].strip()])
-    if os.environ.get("RUN_VM_MEM", "").strip():
-        command.extend(["--mem", os.environ["RUN_VM_MEM"].strip()])
+    if cpus := _require_optional_scalar(contract, "RUN_VM_CPUS"):
+        command.extend(["--cpus", cpus])
+    if mem := _require_optional_scalar(contract, "RUN_VM_MEM"):
+        command.extend(["--mem", mem])
     return command
+
+
+def _require_optional_scalar(mapping: dict[str, str | list[str]], name: str) -> str:
+    value = mapping.get(name, "")
+    if isinstance(value, list):
+        _die(f"manifest {name} must be scalar")
+    return value.strip()
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -94,13 +104,13 @@ def main(argv: list[str] | None = None) -> None:
     if not local_state_path.is_file():
         _die(f"local state file is missing: {local_state_path}")
 
-    load_manifest_environment(manifest_path)
-    for name, value in read_state(local_state_path).items():
-        os.environ[name] = value
+    contract = parse_manifest(manifest_path)
+    local_state = read_state(local_state_path)
 
-    if os.environ.get("RUN_EXECUTOR", "").strip() != "kvm":
-        _die(f"manifest executor is not kvm: {os.environ.get('RUN_EXECUTOR', '').strip()}")
-    bundle_tar_value = os.environ.get("RUN_BUNDLE_TAR", "").strip()
+    executor = _require_scalar(contract, "RUN_EXECUTOR")
+    if executor != "kvm":
+        _die(f"manifest executor is not kvm: {executor}")
+    bundle_tar_value = local_state.get("RUN_BUNDLE_TAR", "").strip()
     if not bundle_tar_value:
         _die("staged KVM bundle tar is missing from local state")
     bundle_tar = Path(bundle_tar_value).resolve()
@@ -109,7 +119,7 @@ def main(argv: list[str] | None = None) -> None:
 
     workspace_root = bundle_stage_root(bundle_tar)
     completed = subprocess.run(
-        build_vm_command(workspace_root),
+        build_vm_command(workspace_root, contract),
         cwd=ROOT_DIR,
         text=True,
         capture_output=False,

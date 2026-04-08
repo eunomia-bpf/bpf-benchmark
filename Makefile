@@ -69,6 +69,14 @@ SCX_PROG_SHOW_RACE_ITERATIONS ?= 20
 SCX_PROG_SHOW_RACE_LOAD_TIMEOUT ?= 20
 SCX_PROG_SHOW_RACE_SKIP_PROBE ?= 0
 KALLSYMS_EXTRA_PASS ?= 1
+PYTHON_STATIC_TESTS := \
+	tests/python/test_run_contract.py \
+	tests/python/test_prepare_local_inputs.py \
+	tests/python/test_run_target_suite.py \
+	tests/python/test_build_remote_bundle.py \
+	tests/python/test_build_upstream_selftests.py \
+	tests/python/test_execute_workspace.py \
+	tests/python/test_state_file.py
 
 # Derived
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
@@ -273,7 +281,7 @@ check:
 		micro_exec micro-programs
 	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" DAEMON_TARGET_DIR="$(DAEMON_DIR)/target" daemon-binary
 	$(MAKE) -C "$(RUNNER_DIR)" daemon-tests
-	$(PYTHON) -m pytest tests/python/ -v
+	$(PYTHON) -m pytest $(PYTHON_STATIC_TESTS) -v
 	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VENV_ACTIVATE) "$(PYTHON)" "$(MICRO_DIR)/driver.py" --runtime llvmbpf $(LOCAL_SMOKE_ARGS) --output "$(SMOKE_OUTPUT)"
 

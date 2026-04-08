@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import cast
 
 from runner.libs.guest_prereqs import install_guest_prereqs, validate_guest_prereqs
-from runner.libs.run_contract import load_manifest_environment
+from runner.libs.run_contract import parse_manifest
 from runner.libs.suite_entrypoint import SuiteEntrypoint
 
 
@@ -26,9 +26,9 @@ def main(argv: list[str] | None = None) -> None:
     if not manifest_path.is_file():
         _die(f"manifest is missing: {manifest_path}")
 
-    contract = load_manifest_environment(manifest_path)
-    install_guest_prereqs(workspace)
-    validate_guest_prereqs(workspace)
+    contract = parse_manifest(manifest_path)
+    install_guest_prereqs(workspace, cast(dict[str, str | list[str]], contract))
+    validate_guest_prereqs(workspace, cast(dict[str, str | list[str]], contract))
     SuiteEntrypoint.from_contract(
         workspace,
         manifest_path,

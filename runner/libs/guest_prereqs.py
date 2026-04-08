@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from runner.libs.prereq_contract import env_csv, python_import_name, required_commands, tool_packages
-from runner.libs.run_contract import load_manifest_environment
+from runner.libs.run_contract import parse_manifest
 
 
 def die(message: str) -> "NoReturn":
@@ -21,21 +21,28 @@ def resolve_workspace_contract_path(workspace: Path, path: str) -> Path:
     return workspace / candidate
 
 
-def workload_tool_is_bundled(tool: str) -> bool:
-    return tool in env_csv("RUN_BUNDLED_WORKLOAD_TOOLS_CSV")
+def _scalar(contract: dict[str, str | list[str]], name: str) -> str:
+    value = contract.get(name, "")
+    if isinstance(value, list):
+        die(f"manifest {name} must be scalar")
+    return value.strip()
 
 
-def resolve_remote_workload_tool_bin(workspace: Path) -> Path | None:
-    if not env_csv("RUN_WORKLOAD_TOOLS_CSV"):
+def workload_tool_is_bundled(contract: dict[str, str | list[str]], tool: str) -> bool:
+    return tool in env_csv("RUN_BUNDLED_WORKLOAD_TOOLS_CSV", contract=contract)
+
+
+def resolve_remote_workload_tool_bin(workspace: Path, contract: dict[str, str | list[str]]) -> Path | None:
+    if not env_csv("RUN_WORKLOAD_TOOLS_CSV", contract=contract):
         return None
-    remote_tool_bin = os.environ.get("RUN_REMOTE_WORKLOAD_TOOL_BIN", "").strip()
+    remote_tool_bin = _scalar(contract, "RUN_REMOTE_WORKLOAD_TOOL_BIN")
     if not remote_tool_bin:
         die("manifest remote workload-tool bin is missing while workload tools are requested")
     return resolve_workspace_contract_path(workspace, remote_tool_bin)
 
 
-def runtime_path_value(workspace: Path) -> str:
-    remote_tool_bin = resolve_remote_workload_tool_bin(workspace)
+def runtime_path_value(workspace: Path, contract: dict[str, str | list[str]]) -> str:
+    remote_tool_bin = resolve_remote_workload_tool_bin(workspace, contract)
     path_value = os.environ.get("PATH", "")
     if remote_tool_bin and remote_tool_bin.is_dir():
         return f"{remote_tool_bin}:{path_value}" if path_value else str(remote_tool_bin)
@@ -115,11 +122,11 @@ def ensure_python_pip(python_bin: str, *, path_value: str) -> None:
         die(f"python pip is unavailable for {resolved_python}")
 
 
-def install_python_modules(workspace: Path, python_bin: str) -> None:
-    package_csv = env_csv("RUN_REMOTE_PYTHON_MODULES_CSV")
+def install_python_modules(workspace: Path, contract: dict[str, str | list[str]], python_bin: str) -> None:
+    package_csv = env_csv("RUN_REMOTE_PYTHON_MODULES_CSV", contract=contract)
     if not package_csv:
         return
-    path_value = runtime_path_value(workspace)
+    path_value = runtime_path_value(workspace, contract)
     resolved_python = shutil.which(python_bin, path=path_value)
     if resolved_python is None:
         die(f"required guest command is missing: {python_bin}")
@@ -132,20 +139,20 @@ def install_python_modules(workspace: Path, python_bin: str) -> None:
     )
 
 
-def install_guest_prereqs(workspace: Path) -> None:
-    path_value = runtime_path_value(workspace)
+def install_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
+    path_value = runtime_path_value(workspace, contract)
     missing_commands: list[str] = []
-    python_bin = os.environ.get("RUN_REMOTE_PYTHON_BIN", "").strip()
-    for command_name in required_commands(mode="runtime"):
+    python_bin = _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+    for command_name in required_commands(mode="runtime", contract=contract):
         if have_cmd(command_name, path_value=path_value):
             continue
-        if workload_tool_is_bundled(command_name):
+        if workload_tool_is_bundled(contract, command_name):
             die(f"required bundled workload tool is missing from the guest tool bin: {command_name}")
         if command_name not in missing_commands:
             missing_commands.append(command_name)
 
     missing_python_packages: list[str] = []
-    for package_name in env_csv("RUN_REMOTE_PYTHON_MODULES_CSV"):
+    for package_name in env_csv("RUN_REMOTE_PYTHON_MODULES_CSV", contract=contract):
         import_name = python_import_name(package_name)
         if not python_module_available(python_bin, import_name, path_value=path_value):
             if package_name not in missing_python_packages:
@@ -154,7 +161,7 @@ def install_guest_prereqs(workspace: Path) -> None:
     if not missing_commands and not missing_python_packages:
         return
 
-    manager = os.environ.get("RUN_GUEST_PACKAGE_MANAGER", "").strip()
+    manager = _scalar(contract, "RUN_GUEST_PACKAGE_MANAGER")
     if not manager:
         die("RUN_GUEST_PACKAGE_MANAGER is required for guest provisioning")
     packages: list[str] = []
@@ -164,15 +171,15 @@ def install_guest_prereqs(workspace: Path) -> None:
                 packages.append(package_name)
     install_packages(manager, packages, path_value=path_value)
     if missing_python_packages:
-        install_python_modules(workspace, python_bin)
+        install_python_modules(workspace, contract, python_bin)
 
 
-def validate_guest_prereqs(workspace: Path) -> None:
-    remote_tool_bin = resolve_remote_workload_tool_bin(workspace)
-    path_value = runtime_path_value(workspace)
+def validate_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
+    remote_tool_bin = resolve_remote_workload_tool_bin(workspace, contract)
+    path_value = runtime_path_value(workspace, contract)
 
-    for command_name in required_commands(mode="runtime"):
-        if workload_tool_is_bundled(command_name):
+    for command_name in required_commands(mode="runtime", contract=contract):
+        if workload_tool_is_bundled(contract, command_name):
             if remote_tool_bin is None:
                 die("manifest remote workload-tool bin is missing while workload tools are requested")
             bundled_tool = remote_tool_bin / command_name
@@ -181,11 +188,11 @@ def validate_guest_prereqs(workspace: Path) -> None:
         if shutil.which(command_name, path=path_value) is None:
             die(f"required guest command is missing: {command_name}")
 
-    python_bin = os.environ.get("RUN_REMOTE_PYTHON_BIN", "").strip()
+    python_bin = _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
     if python_bin and shutil.which(python_bin, path=path_value) is None:
         die(f"required guest command is missing: {python_bin}")
 
-    for package_name in env_csv("RUN_REMOTE_PYTHON_MODULES_CSV"):
+    for package_name in env_csv("RUN_REMOTE_PYTHON_MODULES_CSV", contract=contract):
         import_name = python_import_name(package_name)
         if not python_bin:
             die("RUN_REMOTE_PYTHON_BIN is required when guest Python modules are requested")
@@ -203,11 +210,11 @@ def main(argv: list[str] | None = None) -> None:
         die(f"workspace is missing: {workspace}")
     if not manifest_path.is_file():
         die(f"manifest is missing: {manifest_path}")
-    load_manifest_environment(manifest_path)
+    contract = parse_manifest(manifest_path)
     if args[0] == "install":
-        install_guest_prereqs(workspace)
+        install_guest_prereqs(workspace, contract)
         return
-    validate_guest_prereqs(workspace)
+    validate_guest_prereqs(workspace, contract)
 
 
 if __name__ == "__main__":

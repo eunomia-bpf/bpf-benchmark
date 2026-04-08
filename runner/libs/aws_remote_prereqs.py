@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from runner.libs.prereq_contract import required_commands, tool_packages
-from runner.libs.run_contract import load_manifest_environment
+from runner.libs.run_contract import parse_manifest
 
 
 def die(message: str) -> "NoReturn":
@@ -17,6 +17,13 @@ def die(message: str) -> "NoReturn":
 
 def log(message: str) -> None:
     print(f"[aws-remote-prereqs] {message}", file=sys.stderr)
+
+
+def _scalar(contract: dict[str, str | list[str]], name: str) -> str:
+    value = contract.get(name, "")
+    if isinstance(value, list):
+        die(f"manifest {name} must be scalar")
+    return value.strip()
 
 
 def have_cmd(command_name: str) -> bool:
@@ -46,10 +53,10 @@ def dnf_install(packages: list[str]) -> None:
     run_command(["dnf", "-y", "install", *packages], sudo=True)
 
 
-def install_base_packages() -> None:
+def install_base_packages(contract: dict[str, str | list[str]]) -> None:
     log(
         "Installing base AWS execution prerequisites "
-        f"for {os.environ.get('RUN_TARGET_NAME', '')}/{os.environ.get('RUN_SUITE_NAME', '')}"
+        f"for {_scalar(contract, 'RUN_TARGET_NAME')}/{_scalar(contract, 'RUN_SUITE_NAME')}"
     )
     dnf_install(
         [
@@ -72,11 +79,11 @@ def install_base_packages() -> None:
     )
 
 
-def install_explicit_runtime_packages() -> None:
+def install_explicit_runtime_packages(contract: dict[str, str | list[str]]) -> None:
     packages: list[str] = []
     for tool in (
-        os.environ.get("RUN_BPFTOOL_BIN", "").strip(),
-        os.environ.get("RUN_REMOTE_PYTHON_BIN", "").strip(),
+        _scalar(contract, "RUN_BPFTOOL_BIN"),
+        _scalar(contract, "RUN_REMOTE_PYTHON_BIN"),
     ):
         if not tool:
             continue
@@ -86,11 +93,11 @@ def install_explicit_runtime_packages() -> None:
     dnf_install(packages)
 
 
-def install_optional_base_packages() -> None:
+def install_optional_base_packages(contract: dict[str, str | list[str]]) -> None:
     packages: list[str] = []
-    python_bin = os.environ.get("RUN_REMOTE_PYTHON_BIN", "").strip()
-    bpftool_bin = os.environ.get("RUN_BPFTOOL_BIN", "").strip()
-    for tool in required_commands(mode="base"):
+    python_bin = _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+    bpftool_bin = _scalar(contract, "RUN_BPFTOOL_BIN")
+    for tool in required_commands(mode="base", contract=contract):
         if tool in {python_bin, bpftool_bin}:
             continue
         for package_name in tool_packages("dnf", tool):
@@ -99,22 +106,22 @@ def install_optional_base_packages() -> None:
     dnf_install(packages)
 
 
-def verify_environment() -> None:
+def verify_environment(contract: dict[str, str | list[str]]) -> None:
     for command_name in (
-        os.environ.get("RUN_BPFTOOL_BIN", "").strip(),
+        _scalar(contract, "RUN_BPFTOOL_BIN"),
         "curl",
         "dracut",
         "file",
         "grubby",
         "insmod",
         "ip",
-        os.environ.get("RUN_REMOTE_PYTHON_BIN", "").strip(),
+        _scalar(contract, "RUN_REMOTE_PYTHON_BIN"),
         "taskset",
         "tar",
     ):
         if command_name:
             require_cmd(command_name)
-    for command_name in required_commands(mode="base"):
+    for command_name in required_commands(mode="base", contract=contract):
         if command_name:
             require_cmd(command_name)
 
@@ -127,11 +134,11 @@ def main(argv: list[str] | None = None) -> None:
     stamp_path = Path(args[1]).resolve()
     if not manifest_path.is_file():
         die(f"manifest is missing: {manifest_path}")
-    load_manifest_environment(manifest_path)
-    install_base_packages()
-    install_explicit_runtime_packages()
-    install_optional_base_packages()
-    verify_environment()
+    contract = parse_manifest(manifest_path)
+    install_base_packages(contract)
+    install_explicit_runtime_packages(contract)
+    install_optional_base_packages(contract)
+    verify_environment(contract)
     stamp_path.parent.mkdir(parents=True, exist_ok=True)
     stamp_path.touch()
 

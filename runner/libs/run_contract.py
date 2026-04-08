@@ -42,13 +42,6 @@ def parse_manifest(manifest_path: Path) -> dict[str, str | list[str]]:
     return parsed
 
 
-def load_manifest_environment(manifest_path: Path) -> dict[str, str | list[str]]:
-    parsed = parse_manifest(manifest_path)
-    for name, value in parsed.items():
-        os.environ[name] = shlex.join(value) if isinstance(value, list) else value
-    return parsed
-
-
 def render_shell_assignments(manifest_path: Path) -> str:
     return render_shell_assignments_from_mapping(parse_manifest(manifest_path))
 
@@ -143,6 +136,87 @@ def _append_csv_list(csv: str, extra_csv: str) -> str:
     return merged
 
 
+_COMMON_MANIFEST_INPUTS = {
+    "PYTHON",
+    "RUN_TOKEN",
+}
+
+_KVM_MANIFEST_INPUTS = {
+    "BZIMAGE",
+    "TEST_MODE",
+    "SAMPLES",
+    "WARMUPS",
+    "INNER_REPEAT",
+    "FILTERS",
+    "VM_CORPUS_ARGS",
+    "VM_CORPUS_SAMPLES",
+    "VM_CORPUS_WORKLOAD_SECONDS",
+    "E2E_CASE",
+    "E2E_ARGS",
+    "E2E_SMOKE",
+    "VM_CPUS",
+    "VM_MEM",
+    "VM_TEST_TIMEOUT",
+    "VM_MICRO_TIMEOUT",
+    "VM_CORPUS_TIMEOUT",
+    "VM_E2E_TIMEOUT",
+    "FUZZ_ROUNDS",
+    "SCX_PROG_SHOW_RACE_MODE",
+    "SCX_PROG_SHOW_RACE_ITERATIONS",
+    "SCX_PROG_SHOW_RACE_LOAD_TIMEOUT",
+    "SCX_PROG_SHOW_RACE_SKIP_PROBE",
+    "UPSTREAM_SELFTEST_LLVM_SUFFIX",
+    "UPSTREAM_TEST_PROGS_FILTERS",
+    "UPSTREAM_TEST_PROGS_DENY",
+}
+
+_AWS_MANIFEST_SUFFIXES = {
+    "NAME_TAG",
+    "INSTANCE_TYPE",
+    "REMOTE_USER",
+    "REMOTE_STAGE_DIR",
+    "REMOTE_KERNEL_STAGE_DIR",
+    "AMI_PARAM",
+    "AMI_ID",
+    "ROOT_VOLUME_GB",
+    "REMOTE_SWAP_SIZE_GB",
+    "TEST_MODE",
+    "BENCH_SAMPLES",
+    "BENCH_WARMUPS",
+    "BENCH_INNER_REPEAT",
+    "CORPUS_FILTERS",
+    "CORPUS_ARGS",
+    "CORPUS_WORKLOAD_SECONDS",
+    "E2E_CASES",
+    "E2E_ARGS",
+    "E2E_SMOKE",
+    "KEY_NAME",
+    "KEY_PATH",
+    "SECURITY_GROUP_ID",
+    "SUBNET_ID",
+    "REGION",
+    "PROFILE",
+}
+
+
+def _filtered_manifest_inputs(target_name: str, env: dict[str, str] | None) -> dict[str, str]:
+    source = os.environ if env is None else env
+    filtered: dict[str, str] = {}
+    allowed = set(_COMMON_MANIFEST_INPUTS)
+    if target_name == "x86-kvm":
+        allowed.update(_KVM_MANIFEST_INPUTS)
+    else:
+        target = _load_assignment_file(TARGETS_DIR / f"{target_name}.env")
+        aws_env_prefix = target.get("TARGET_AWS_ENV_PREFIX", "")
+        if aws_env_prefix:
+            allowed.update(f"{aws_env_prefix}_{suffix}" for suffix in _AWS_MANIFEST_SUFFIXES)
+    for key in allowed:
+        value = source.get(key)
+        if value is not None:
+            filtered[key] = value
+    return filtered
+
+
 def _validate_test_mode(mode: str) -> None:
     if mode not in {"selftest", "negative", "test"}:
         _die(f"unsupported test mode: {mode}")
@@ -178,7 +252,7 @@ def _native_repos_for_e2e_cases(cases_csv: str) -> str:
 
 
 def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str, str] | None = None) -> dict[str, str | list[str]]:
-    values = dict(os.environ if env is None else env)
+    values = _filtered_manifest_inputs(target_name, env)
     target = _load_assignment_file(TARGETS_DIR / f"{target_name}.env")
     suite = _load_assignment_file(SUITES_DIR / f"{suite_name}.env")
 
@@ -487,7 +561,7 @@ def build_manifest(target_name: str, suite_name: str, *, env: dict[str, str] | N
 
 
 def build_target_manifest(target_name: str, *, env: dict[str, str] | None = None) -> dict[str, str | list[str]]:
-    values = dict(os.environ if env is None else env)
+    values = _filtered_manifest_inputs(target_name, env)
     target = _load_assignment_file(TARGETS_DIR / f"{target_name}.env")
     run_token = values.get("RUN_TOKEN", "").strip() or f"target_{target_name}"
     run_name_tag = ""
