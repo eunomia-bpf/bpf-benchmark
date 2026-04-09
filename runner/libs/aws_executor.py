@@ -11,6 +11,7 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs import aws_common
 from runner.libs.cli_support import fail
+from runner.libs.workspace_layout import remote_transfer_roots
 
 _die = partial(fail, "aws-executor")
 
@@ -54,17 +55,32 @@ def _cleanup_failed_dedicated_run(ctx: AwsExecutorContext, state: dict[str, str]
 
 
 def _sync_remote_roots(ctx: AwsExecutorContext, ip: str) -> None:
-    selected_roots = [
-        entry.strip()
-        for entry in str(ctx.contract.get("RUN_REMOTE_TRANSFER_ROOTS_CSV", "")).split(",")
-        if entry.strip()
-    ]
+    selected_roots = remote_transfer_roots(
+        suite_name=str(ctx.contract.get("RUN_SUITE_NAME", "")).strip(),
+        target_arch=str(ctx.contract.get("RUN_TARGET_ARCH", "")).strip(),
+        executor=str(ctx.contract.get("RUN_EXECUTOR", "")).strip(),
+        needs_runner_binary=str(ctx.contract.get("RUN_NEEDS_RUNNER_BINARY", "0")).strip() == "1",
+        needs_daemon_binary=str(ctx.contract.get("RUN_NEEDS_DAEMON_BINARY", "0")).strip() == "1",
+        needs_kinsn_modules=str(ctx.contract.get("RUN_NEEDS_KINSN_MODULES", "0")).strip() == "1",
+        needs_workload_tools=str(ctx.contract.get("RUN_NEEDS_WORKLOAD_TOOLS", "0")).strip() == "1",
+        native_repos=[
+            entry.strip()
+            for entry in str(ctx.contract.get("RUN_NATIVE_REPOS_CSV", "")).split(",")
+            if entry.strip()
+        ],
+        scx_packages=[
+            entry.strip()
+            for entry in str(ctx.contract.get("RUN_SCX_PACKAGES_CSV", "")).split(",")
+            if entry.strip()
+        ],
+        needs_katran_bundle=str(ctx.contract.get("RUN_NEEDS_KATRAN_BUNDLE", "0")).strip() == "1",
+    )
     if not selected_roots:
-        _die("manifest RUN_REMOTE_TRANSFER_ROOTS_CSV selected no existing roots")
+        _die("derived remote transfer roots selected no existing roots")
     missing_roots = [entry for entry in selected_roots if not (ROOT_DIR / entry).exists()]
     if missing_roots:
         _die(
-            "manifest RUN_REMOTE_TRANSFER_ROOTS_CSV lists missing local roots: "
+            "derived remote transfer roots list missing local roots: "
             + ", ".join(missing_roots)
         )
     _ssh_exec(ctx, ip, "mkdir", "-p", ctx.remote_stage_dir)

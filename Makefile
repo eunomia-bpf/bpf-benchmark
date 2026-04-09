@@ -17,8 +17,8 @@ ARM64_AWS_KERNEL_LOCK := $(ARTIFACT_ROOT)/arm64-aws-kernel.lock
 RUNNER_BUILD_DIR ?= $(RUNNER_DIR)/build
 
 include $(RUNNER_DIR)/mk/arm64_defaults.mk
-include $(RUNNER_DIR)/mk/local_prep.mk
 include $(RUNNER_DIR)/mk/build.mk
+include $(RUNNER_DIR)/mk/local_prep.mk
 
 # ARM64 / AWS
 ARM64_BUILD_DIR     ?= $(KERNEL_DIR)/build-arm64
@@ -89,11 +89,8 @@ ROOT_VM_CORPUS_FILTERS_ARG := $(if $(strip $(FILTERS)),FILTERS="$(FILTERS)",)
 ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG := $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),VM_CORPUS_WORKLOAD_SECONDS="$(VM_CORPUS_WORKLOAD_SECONDS)",)
 ROOT_VM_CORPUS_EXTRA_ARGS := $(if $(strip $(VM_CORPUS_ARGS)),VM_CORPUS_ARGS='$(VM_CORPUS_ARGS)',)
 
-.PHONY: __kernel __kernel-inner __kernel-clean __kernel-rebuild __kernel-arm64 __kernel-x86-artifacts __kernel-arm64-aws-artifacts \
-		__prepare-local \
-		check validate \
+.PHONY: check validate \
 		vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
-		__kernel-arm64-aws \
 		aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
 		aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86 \
 	help clean
@@ -214,7 +211,7 @@ vm-all:
 	$(MAKE) vm-e2e
 
 # ── ARM64 kernel ───────────────────────────────────────────────────────────────
-$(ARM64_BUILD_CONFIG): __require-arm64-toolchain
+$(ARM64_BUILD_CONFIG): $(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" "$(PYTHON)" -m runner.libs.arm64_kernel_config local \
 		"$(KERNEL_DIR)" "$(ARM64_BUILD_DIR)" "$(ARM64_CROSS_PREFIX)"
 	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
@@ -232,7 +229,7 @@ __kernel-arm64: $(ARM64_IMAGE) $(ARM64_EFI_IMAGE)
 	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
 	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
 
-$(ARM64_AWS_BUILD_CONFIG): __require-arm64-toolchain
+$(ARM64_AWS_BUILD_CONFIG): $(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" ARM64_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)" "$(PYTHON)" -m runner.libs.arm64_kernel_config aws \
 		"$(KERNEL_DIR)" "$(ARM64_AWS_BUILD_DIR)" "$(ARM64_CROSS_PREFIX)"
 

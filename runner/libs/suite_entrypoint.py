@@ -16,6 +16,16 @@ from runner.libs.cli_support import fail
 from runner.libs.guest_prereqs import runtime_path_value
 from runner.libs.kinsn import load_kinsn_modules
 from runner.libs.manifest_file import parse_manifest
+from runner.libs.workspace_layout import (
+    daemon_binary_path,
+    kernel_modules_root,
+    kinsn_module_dir,
+    libbpf_runtime_path,
+    repo_artifact_root,
+    runner_binary_path,
+    test_negative_build_dir,
+    test_unittest_build_dir,
+)
 
 _die = partial(fail, "suite-entrypoint")
 
@@ -264,13 +274,10 @@ class SuiteEntrypoint:
                 extra_ld_library_dirs.append(str(lib_dir))
         if extra_ld_library_dirs:
             env["LD_LIBRARY_PATH"] = ":".join(extra_ld_library_dirs)
-        kernel_modules_root = _resolve_workspace_contract_path(
-            self.workspace,
-            self._required_contract("RUN_KERNEL_MODULES_ROOT"),
-        )
-        if not kernel_modules_root.is_dir():
-            _die(f"bundled kernel modules root is missing: {kernel_modules_root}")
-        env["BPFREJIT_KERNEL_MODULES_ROOT"] = str(kernel_modules_root)
+        kernel_modules_dir = kernel_modules_root(self.workspace, self.target_arch, self.executor)
+        if not kernel_modules_dir.is_dir():
+            _die(f"bundled kernel modules root is missing: {kernel_modules_dir}")
+        env["BPFREJIT_KERNEL_MODULES_ROOT"] = str(kernel_modules_dir)
         rejit_passes = ""
         if self.suite_name == "corpus":
             rejit_passes = _argv_option_value(self.corpus_argv, "--rejit-passes")
@@ -287,25 +294,24 @@ class SuiteEntrypoint:
         return env
 
     def _repo_build_root(self) -> Path:
-        return _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_REPO_ARTIFACT_ROOT"))
+        return repo_artifact_root(self.workspace, self.target_arch)
 
     def _libbpf_runtime_path(self) -> Path | None:
-        configured = self._optional_contract("RUN_LIBBPF_RUNTIME_PATH")
-        if not configured:
+        candidate = libbpf_runtime_path(self.workspace, self.target_arch, self.suite_name)
+        if candidate is None:
             return None
-        candidate = _resolve_workspace_contract_path(self.workspace, configured)
         if not candidate.is_file():
             _die(f"bundled libbpf runtime is missing: {candidate}")
         return candidate
 
     def _test_unittest_build_dir(self) -> Path:
-        return _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_TEST_UNITTEST_BUILD_DIR"))
+        return test_unittest_build_dir(self.workspace, self.target_arch)
 
     def _test_negative_build_dir(self) -> Path:
-        return _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_TEST_NEGATIVE_BUILD_DIR"))
+        return test_negative_build_dir(self.workspace, self.target_arch)
 
     def _test_kinsn_module_dir(self) -> Path:
-        return _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_KINSN_MODULE_DIR"))
+        return kinsn_module_dir(self.workspace, self.target_arch)
 
     def _expected_kinsn_modules(self) -> list[str]:
         module_dir = self._test_kinsn_module_dir()
@@ -322,7 +328,7 @@ class SuiteEntrypoint:
         return self._resolve_daemon_binary()
 
     def _resolve_daemon_binary(self) -> Path:
-        candidate = _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_DAEMON_BINARY_PATH"))
+        candidate = daemon_binary_path(self.workspace, self.target_arch)
         if candidate.is_file() and os.access(candidate, os.X_OK):
             return candidate
         _die(f"bundled daemon is missing or not executable: {candidate}")
@@ -331,7 +337,7 @@ class SuiteEntrypoint:
         if not self._bool_contract("RUN_NEEDS_RUNNER_BINARY"):
             return
         _require_executable(
-            _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_RUNNER_BINARY_PATH")),
+            runner_binary_path(self.workspace, self.target_arch),
             "bundled runner binary",
         )
 
