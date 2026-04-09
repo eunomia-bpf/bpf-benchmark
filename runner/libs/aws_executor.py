@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import shutil
-import shlex
-import subprocess
+import os
+import re
 import sys
-import tarfile
 from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
@@ -22,9 +21,21 @@ _locked_file = aws_common._locked_file
 _require_scalar = aws_common._require_scalar
 _scp_from = aws_common._scp_from
 _scp_to = aws_common._scp_to
-_ssh_bash = aws_common._ssh_bash
+_ssh_exec = aws_common._ssh_exec
 _terminate_instance = aws_common._terminate_instance
+_run_remote_helper = aws_common._run_remote_helper
 _wait_for_ssh = aws_common._wait_for_ssh
+
+
+def _artifact_dir_from_log(log_path: Path) -> str:
+    artifact_dir = ""
+    for line in log_path.read_text(encoding="utf-8").splitlines():
+        match = re.match(r"^ARTIFACT_DIR=(.+)$", line.strip())
+        if match:
+            artifact_dir = match.group(1).strip()
+    if not artifact_dir:
+        _die(f"remote suite log is missing ARTIFACT_DIR marker: {log_path}")
+    return artifact_dir
 
 
 def _cleanup_failed_dedicated_run(ctx: AwsExecutorContext, state: dict[str, str] | None = None) -> None:
@@ -41,161 +52,75 @@ def _cleanup_failed_dedicated_run(ctx: AwsExecutorContext, state: dict[str, str]
     shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
 
 
-def _stream_workspace_to_remote(
-    ctx: AwsExecutorContext,
-    ip: str,
-    local_workspace: Path,
-    remote_workspace: str,
-) -> None:
-    transfer_entries = ["runner"]
-    if _require_scalar(ctx.contract, "RUN_NEEDS_DAEMON_BINARY") == "1":
-        transfer_entries.append("daemon")
-    if _require_scalar(ctx.contract, "RUN_NEEDS_KINSN_MODULES") == "1":
-        transfer_entries.append("module")
-    if ctx.suite_name == "test":
-        transfer_entries.append("tests")
-    if ctx.suite_name == "micro":
-        transfer_entries.append("micro")
-    if ctx.suite_name in {"corpus", "e2e"}:
-        transfer_entries.append("corpus")
-    if ctx.suite_name == "e2e":
-        transfer_entries.append("e2e")
-    selected_entries = [
-        entry
-        for entry in dict.fromkeys(transfer_entries)
-        if (local_workspace / entry).exists()
+def _sync_remote_roots(ctx: AwsExecutorContext, ip: str) -> None:
+    selected_roots = [
+        entry.strip()
+        for entry in str(ctx.contract.get("RUN_REMOTE_TRANSFER_ROOTS_CSV", "")).split(",")
+        if entry.strip()
     ]
-    if not selected_entries:
-        _die(f"no local workspace entries selected for {ctx.target_name}/{ctx.suite_name}")
-    tar_command = [
-        "tar",
-        "--exclude=runner/repos",
-        "--exclude=runner/repos/*",
-        "--exclude=runner/repos/**",
-        "--exclude=e2e/cases/katran/bin",
-        "--exclude=e2e/cases/katran/bin/*",
-        "--exclude=e2e/cases/katran/lib",
-        "--exclude=e2e/cases/katran/lib/*",
-        "--exclude=corpus/results",
-        "--exclude=e2e/results",
-        "--exclude=micro/results",
-        "--exclude=__pycache__",
-        "-C",
-        str(local_workspace),
-        "-chf",
-        "-",
-        *selected_entries,
-    ]
-    remote_command = (
-        "set -euo pipefail; "
-        f"rm -rf {shlex.quote(remote_workspace)}; "
-        f"mkdir -p {shlex.quote(remote_workspace)}; "
-        f"tar -xf - -C {shlex.quote(remote_workspace)}"
-    )
-    ssh_command = [
-        "ssh",
-        *aws_common._ssh_base_args(ctx, ip),
-        f"{ctx.remote_user}@{ip}",
-        f"bash -lc {shlex.quote(remote_command)}",
-    ]
-    tar_proc = subprocess.Popen(
-        tar_command,
-        cwd=local_workspace,
-        stdout=subprocess.PIPE,
-        text=False,
-    )
-    try:
-        ssh_completed = subprocess.run(
-            ssh_command,
-            cwd=ROOT_DIR,
-            stdin=tar_proc.stdout,
-            check=False,
+    if not selected_roots:
+        _die("manifest RUN_REMOTE_TRANSFER_ROOTS_CSV selected no existing roots")
+    missing_roots = [entry for entry in selected_roots if not (ROOT_DIR / entry).exists()]
+    if missing_roots:
+        _die(
+            "manifest RUN_REMOTE_TRANSFER_ROOTS_CSV lists missing local roots: "
+            + ", ".join(missing_roots)
         )
-    finally:
-        if tar_proc.stdout is not None:
-            tar_proc.stdout.close()
-    tar_return = tar_proc.wait()
-    if tar_return != 0:
-        raise SystemExit(tar_return)
-    if ssh_completed.returncode != 0:
-        raise SystemExit(ssh_completed.returncode)
+    _ssh_exec(ctx, ip, "mkdir", "-p", ctx.remote_stage_dir)
+    for entry in selected_roots:
+        source_path = ROOT_DIR / entry
+        remote_path = f"{ctx.remote_stage_dir}/{entry}"
+        remote_parent = os.path.dirname(remote_path)
+        _ssh_exec(ctx, ip, "mkdir", "-p", remote_parent)
+        _run_remote_helper(ctx, ip, _require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN"), "cleanup-path", remote_path, check=False)
+        if source_path.is_dir():
+            _scp_to(ctx, ip, source_path, remote_parent, recursive=True)
+        else:
+            _scp_to(ctx, ip, source_path, remote_path)
 
 
 def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
     _wait_for_ssh(ctx, ip)
     stamp = f"{ctx.suite_name}_{ctx.run_token}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     local_result_dir = ctx.results_dir / stamp
-    local_archive = local_result_dir / "results.tar.gz"
     local_log = local_result_dir / "remote.log"
     remote_run_dir = f"{ctx.remote_stage_dir}/runs/{stamp}"
-    remote_archive = f"{remote_run_dir}/results.tar.gz"
     remote_log = f"{remote_run_dir}/remote.log"
     remote_python = _require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    local_workspace = ROOT_DIR
-    remote_workspace = f"{remote_run_dir}/workspace"
+    remote_workspace = ctx.remote_stage_dir
     local_result_dir.mkdir(parents=True, exist_ok=True)
+    ctx.run_state_dir.mkdir(parents=True, exist_ok=True)
 
-    _ssh_bash(
+    _run_remote_helper(ctx, ip, remote_python, "prepare-dir", remote_run_dir)
+    _sync_remote_roots(ctx, ip)
+    _scp_to(ctx, ip, ctx.manifest_path, f"{remote_run_dir}/run-contract.env")
+    remote_completed = _run_remote_helper(
         ctx,
         ip,
-        remote_run_dir,
-        script="""
-set -euo pipefail
-run_dir="$1"
-rm -rf "$run_dir"
-mkdir -p "$run_dir"
-""",
-    )
-    _stream_workspace_to_remote(ctx, ip, local_workspace, remote_workspace)
-    _scp_to(ctx, ip, ctx.manifest_path, f"{remote_workspace}/run-contract.env")
-    remote_completed = _ssh_bash(
-        ctx,
-        ip,
-        remote_run_dir,
-        remote_archive,
+        remote_python,
+        "run-workspace",
+        remote_workspace,
+        f"{remote_run_dir}/run-contract.env",
         remote_log,
         remote_python,
-        script="""
-set -euo pipefail
-run_dir="$1"
-archive_path="$2"
-log_path="$3"
-remote_python="$4"
-workspace="$run_dir/workspace"
-test -f "$workspace/run-contract.env"
-env PYTHONPATH="$workspace${PYTHONPATH:+:$PYTHONPATH}" \
-    "$remote_python" -m runner.libs.execute_workspace \
-    "$workspace" "$workspace/run-contract.env" "$archive_path" >"$log_path" 2>&1
-""",
         check=False,
     )
-    log_exists = _ssh_bash(
+    log_exists = _run_remote_helper(
         ctx,
         ip,
+        remote_python,
+        "path-exists",
         remote_log,
-        script="""
-set -euo pipefail
-test -f "$1"
-""",
         check=False,
     ).returncode == 0
     if log_exists:
         _scp_from(ctx, ip, remote_log, local_log)
     if remote_completed.returncode != 0:
         _die(f"remote {ctx.target_name}/{ctx.suite_name} suite failed; inspect {local_log}")
-    _scp_from(ctx, ip, remote_archive, local_archive)
-    with tarfile.open(local_archive, "r:gz") as archive:
-        archive.extractall(local_result_dir, filter="data")
-    _ssh_bash(
-        ctx,
-        ip,
-        remote_run_dir,
-        script="""
-set -euo pipefail
-rm -rf "$1"
-""",
-        check=False,
-    )
+    remote_artifact_dir = f"{remote_workspace}/{_artifact_dir_from_log(local_log)}"
+    _scp_from(ctx, ip, remote_artifact_dir, local_result_dir, recursive=True)
+    _run_remote_helper(ctx, ip, remote_python, "cleanup-path", remote_run_dir, check=False)
+    _run_remote_helper(ctx, ip, remote_python, "cleanup-path", remote_artifact_dir, check=False)
     print(
         f"[aws-executor] Fetched {ctx.target_name}/{ctx.suite_name} results to {local_result_dir}",
         file=sys.stderr,

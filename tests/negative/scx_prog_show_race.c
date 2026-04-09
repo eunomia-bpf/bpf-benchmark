@@ -605,12 +605,7 @@ int main(int argc, char **argv)
 	struct scx_child child;
 	char scx_binary[PATH_MAX];
 	char scx_object[PATH_MAX];
-	const char *arch_dir =
-#if defined(__aarch64__) || defined(__arm64__)
-		"arm64";
-#else
-		"x86_64";
-#endif
+	const char *repo_artifact_root;
 	char state[64];
 	int rc = 1;
 
@@ -619,13 +614,19 @@ int main(int argc, char **argv)
 		return 2;
 	}
 
+	repo_artifact_root = getenv("BPFREJIT_REPO_ARTIFACT_ROOT");
+	if (repo_artifact_root == NULL || repo_artifact_root[0] == '\0') {
+		fprintf(stderr, "BPFREJIT_REPO_ARTIFACT_ROOT is required\n");
+		return 2;
+	}
+
 	if (snprintf(scx_binary, sizeof(scx_binary),
-		     "%s/corpus/build/%s/scx/bin/scx_rusty",
-		     opts.repo_root, arch_dir) >= (int)sizeof(scx_binary))
+		     "%s/scx/bin/scx_rusty",
+		     repo_artifact_root) >= (int)sizeof(scx_binary))
 		return 2;
 	if (snprintf(scx_object, sizeof(scx_object),
-		     "%s/corpus/build/%s/scx/scx_rusty_main.bpf.o",
-		     opts.repo_root, arch_dir) >= (int)sizeof(scx_object))
+		     "%s/scx/scx_rusty_main.bpf.o",
+		     repo_artifact_root) >= (int)sizeof(scx_object))
 		return 2;
 
 	if (access(scx_binary, X_OK) != 0) {

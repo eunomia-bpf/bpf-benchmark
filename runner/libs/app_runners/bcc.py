@@ -29,11 +29,14 @@ from ..workload import (
     run_user_exec_loop,
 )
 from .base import AppRunner
-from .setup_support import binary_matches_host_arch, first_existing_dir, missing_required_commands
+from .setup_support import binary_matches_host_arch, first_existing_dir, repo_artifact_root
 
-DEFAULT_TOOLS_DIR = ROOT_DIR / "runner" / "repos" / "bcc" / "libbpf-tools"
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml"
 DEFAULT_ATTACH_TIMEOUT_SECONDS = 20
+
+
+def _default_tools_dir() -> Path:
+    return repo_artifact_root() / "bcc" / "libbpf-tools"
 
 
 @dataclass(frozen=True)
@@ -109,19 +112,14 @@ def _bcc_tool_specs() -> dict[str, BCCWorkloadSpec]:
 
 
 def inspect_bcc_setup() -> dict[str, object]:
-    explicit_build_output = os.environ.get("BCC_TOOLS_DIR", "").strip() or None
-    bundled_build_output = DEFAULT_TOOLS_DIR / ".output"
-    build_output = first_existing_dir(explicit_build_output, bundled_build_output)
+    bundled_build_output = _default_tools_dir() / ".output"
+    build_output = first_existing_dir(bundled_build_output)
     if build_output is None:
-        checked = [
-            explicit_build_output or "<unset>",
-            str(bundled_build_output),
-        ]
         return {
             "returncode": 1,
             "tools_dir": None,
             "stdout_tail": "",
-            "stderr_tail": f"missing bundled BCC libbpf-tools output; checked {', '.join(checked)}",
+            "stderr_tail": f"missing bundled BCC libbpf-tools output under {bundled_build_output}",
         }
 
     for tool_name in _bcc_tool_specs():
@@ -141,15 +139,6 @@ def inspect_bcc_setup() -> dict[str, object]:
                 "stderr_tail": f"bundled BCC tool has the wrong architecture: {candidate}",
             }
 
-    missing_workload_tools = missing_required_commands(("stress-ng", "fio", "curl", "dd", "setpriv"))
-    if missing_workload_tools:
-        return {
-            "returncode": 1,
-            "tools_dir": str(build_output),
-            "stdout_tail": "",
-            "stderr_tail": f"missing required workload tools for BCC benchmark: {' '.join(missing_workload_tools)}",
-        }
-
     return {
         "returncode": 0,
         "tools_dir": str(build_output),
@@ -167,20 +156,15 @@ def resolve_tools_dir(
         candidate = Path(explicit)
         if candidate.is_dir():
             return candidate.resolve()
-    env_dir = os.environ.get("BCC_TOOLS_DIR", "").strip()
-    if env_dir:
-        candidate = Path(env_dir)
-        if candidate.is_dir():
-            return candidate.resolve()
     setup_dir = str((setup_result or {}).get("tools_dir") or "").strip()
     if setup_dir:
         candidate = Path(setup_dir)
         if candidate.is_dir():
             return candidate.resolve()
-    output_subdir = DEFAULT_TOOLS_DIR / ".output"
+    output_subdir = _default_tools_dir() / ".output"
     if output_subdir.is_dir():
         return output_subdir.resolve()
-    return DEFAULT_TOOLS_DIR.resolve()
+    return _default_tools_dir().resolve()
 
 
 def find_tool_binary(tools_dir: Path, tool_name: str) -> Path | None:

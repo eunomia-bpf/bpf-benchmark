@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import ctypes
-import ctypes.util
 import errno
 import os
 import socket
@@ -14,9 +13,8 @@ from typing import Mapping
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
 from ..kernel_modules import load_kernel_module
 from .process_support import ManagedProcessSession
+from .setup_support import repo_artifact_root
 
-
-DEFAULT_KATRAN_BALANCER_PROG_PATH = ROOT_DIR / "corpus" / "build" / ("arm64" if os.uname().machine in {"aarch64", "arm64"} else "x86_64") / "katran" / "balancer.bpf.o"
 DEFAULT_KATRAN_PROGRAM_NAME = "balancer_ingress"
 DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
 DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 30
@@ -74,6 +72,14 @@ TOPOLOGY_SETTLE_S = 2.0
 
 def _bpftool_binary() -> str:
     return resolve_bpftool_binary()
+
+
+def default_katran_balancer_prog_path() -> Path:
+    return repo_artifact_root() / "katran" / "balancer.bpf.o"
+
+
+def default_katran_server_binary_path() -> Path:
+    return repo_artifact_root() / "katran" / "bin" / "katran_server_grpc"
 
 
 def _map_show_records() -> list[dict[str, object]]:
@@ -217,9 +223,8 @@ def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
     candidates: list[Path] = []
     if explicit is not None and str(explicit).strip():
         candidates.append(Path(explicit).expanduser().resolve())
-    env_binary = os.environ.get("KATRAN_SERVER_BINARY", "").strip()
-    if env_binary:
-        candidates.append(Path(env_binary).expanduser().resolve())
+    else:
+        candidates.append(default_katran_server_binary_path().resolve())
     for candidate in candidates:
         if candidate.is_file() and os.access(candidate, os.X_OK):
             return candidate
@@ -230,22 +235,13 @@ def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
 
 
 def katran_server_env(server_binary: Path) -> dict[str, str]:
-    library_dirs: list[str] = []
-    env_lib_dir = os.environ.get("KATRAN_SERVER_LIB_DIR", "").strip()
-    if env_lib_dir:
-        candidate = Path(env_lib_dir).expanduser()
-        if candidate.is_dir():
-            rendered = str(candidate.resolve())
-            if rendered not in library_dirs:
-                library_dirs.append(rendered)
-    bundle_lib_dir = server_binary.resolve().parent.parent / "lib"
-    if bundle_lib_dir.is_dir():
-        rendered = str(bundle_lib_dir.resolve())
-        if rendered not in library_dirs:
-            library_dirs.append(rendered)
-    if not library_dirs:
-        raise RuntimeError(f"Katran runtime lib dir is missing for bundled server {server_binary}")
-    return {"LD_LIBRARY_PATH": os.pathsep.join(library_dirs)}
+    lib_dir = server_binary.resolve().parent.parent / "lib"
+    if not lib_dir.is_dir():
+        raise RuntimeError(f"Katran server runtime library directory is missing: {lib_dir}")
+    env = os.environ.copy()
+    existing = env.get("LD_LIBRARY_PATH", "").strip()
+    env["LD_LIBRARY_PATH"] = str(lib_dir) if not existing else f"{lib_dir}:{existing}"
+    return env
 
 def ip_binary() -> str:
     for candidate in DEFAULT_IP_CANDIDATES:
@@ -259,7 +255,10 @@ def ip_binary() -> str:
 
 
 def remote_python_binary() -> str:
-    return os.environ.get("RUN_REMOTE_PYTHON_BIN", "").strip() or "python3"
+    configured = os.environ.get("BPFREJIT_REMOTE_PYTHON_BIN", "").strip()
+    if not configured:
+        raise RuntimeError("BPFREJIT_REMOTE_PYTHON_BIN is required for the Katran runner")
+    return configured
 
 
 def _normalize_ip_command(command: list[str] | tuple[str, ...]) -> list[str]:
@@ -344,7 +343,11 @@ class BpfTestRunOpts(ctypes.Structure):
 
 class LibbpfMapApi:
     def __init__(self) -> None:
-        path = ctypes.util.find_library("bpf") or "libbpf.so.1"
+        path = os.environ.get("BPFREJIT_LIBBPF_PATH", "").strip()
+        if not path:
+            raise RuntimeError("BPFREJIT_LIBBPF_PATH is required for Katran map access")
+        if not Path(path).is_file():
+            raise RuntimeError(f"BPFREJIT_LIBBPF_PATH does not exist: {path}")
         self.lib = ctypes.CDLL(path, use_errno=True)
         self.lib.bpf_obj_get.argtypes = [ctypes.c_char_p]
         self.lib.bpf_obj_get.restype = ctypes.c_int
@@ -1004,7 +1007,7 @@ __all__ = [
     "VIP_IP",
     "VIP_PORT",
     "XDP_TX",
-    "DEFAULT_KATRAN_BALANCER_PROG_PATH",
+    "default_katran_balancer_prog_path",
     "DEFAULT_KATRAN_PROGRAM_NAME",
     "configure_katran_maps",
     "resolve_katran_server_binary",

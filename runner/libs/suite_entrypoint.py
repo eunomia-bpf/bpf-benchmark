@@ -6,11 +6,11 @@ import shlex
 import shutil
 import subprocess
 import sys
-import tarfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
+from typing import Sequence
 
 from runner.libs.cli_support import fail
 from runner.libs.guest_prereqs import runtime_path_value
@@ -24,6 +24,17 @@ def _parse_shell_argv(serialized: str) -> list[str]:
     if not text:
         return []
     return shlex.split(text)
+
+
+def _argv_option_value(argv: Sequence[str], option: str) -> str:
+    for index, token in enumerate(argv):
+        if token == option:
+            if index + 1 >= len(argv):
+                _die(f"missing value for {option}")
+            return str(argv[index + 1]).strip()
+        if token.startswith(option + "="):
+            return token.split("=", 1)[1].strip()
+    return ""
 
 
 def _resolve_workspace_contract_path(workspace: Path, path: str) -> Path:
@@ -146,7 +157,6 @@ class SuiteEntrypoint:
     contract: dict[str, str | list[str]]
     workspace: Path
     manifest_path: Path
-    archive_path: Path | None
     target_name: str
     suite_name: str
     target_arch: str
@@ -154,7 +164,6 @@ class SuiteEntrypoint:
     python_bin: str
     bpftool_bin: str
     artifact_dir: Path
-    workload_tools: list[str]
     corpus_argv: list[str]
     e2e_argv: list[str]
 
@@ -184,7 +193,6 @@ class SuiteEntrypoint:
         cls,
         workspace: Path,
         manifest_path: Path,
-        archive_path: Path | None,
         contract: dict[str, str | list[str]],
     ) -> "SuiteEntrypoint":
         def required_scalar(name: str) -> str:
@@ -217,12 +225,10 @@ class SuiteEntrypoint:
         run_token = _sanitize_artifact_token(f"{target_name}_{suite_name}")
         stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         artifact_dir = result_root / f"{run_token}_{stamp}"
-        workload_tools = csv_value("RUN_WORKLOAD_TOOLS_CSV")
         return cls(
             contract=contract,
             workspace=workspace,
             manifest_path=manifest_path,
-            archive_path=archive_path,
             target_name=target_name,
             suite_name=suite_name,
             target_arch=target_arch,
@@ -230,44 +236,45 @@ class SuiteEntrypoint:
             python_bin=python_bin,
             bpftool_bin=bpftool_bin,
             artifact_dir=artifact_dir,
-            workload_tools=workload_tools,
             corpus_argv=argv_value("RUN_CORPUS_ARGV"),
             e2e_argv=argv_value("RUN_E2E_ARGV"),
         )
 
     def _runtime_env(self) -> dict[str, str]:
-        env = os.environ.copy()
-        corpus_build_root = self.workspace / "corpus" / "build" / self.target_arch
+        env: dict[str, str] = {}
+        for name in ("HOME", "USER", "LOGNAME", "TERM", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE", "SHELL"):
+            value = os.environ.get(name, "").strip()
+            if value:
+                env[name] = value
+        repo_build_root = self._repo_build_root()
         env["PATH"] = runtime_path_value(self.workspace, self.contract)
-        if self.target_arch == "arm64":
-            arm_libbpf = self.workspace / "lib" / "libbpf.so.1"
-            if arm_libbpf.is_file():
-                env["BPFREJIT_LIBBPF_PATH"] = str(arm_libbpf)
-        elif self.target_arch == "x86_64":
-            x86_libbpf = self.workspace / "runner" / "build" / "x86-portable-libbpf" / "lib" / "libbpf.so.1"
-            if x86_libbpf.is_file():
-                env["BPFREJIT_LIBBPF_PATH"] = str(x86_libbpf)
+        env["BPFREJIT_REPO_ARTIFACT_ROOT"] = str(repo_build_root)
+        env["BPFREJIT_REMOTE_PYTHON_BIN"] = self.python_bin
         extra_ld_library_dirs: list[str] = []
-        if existing_ld_library_path := os.environ.get("LD_LIBRARY_PATH", "").strip():
-            extra_ld_library_dirs.append(existing_ld_library_path)
+        libbpf_runtime = self._libbpf_runtime_path()
+        if libbpf_runtime is not None:
+            env["BPFREJIT_LIBBPF_PATH"] = str(libbpf_runtime)
+            extra_ld_library_dirs.append(str(libbpf_runtime.parent))
         for repo_name in self._csv_contract("RUN_NATIVE_REPOS_CSV"):
-            lib_dir = corpus_build_root / repo_name / "lib"
-            lib64_dir = corpus_build_root / repo_name / "lib64"
+            lib_dir = repo_build_root / repo_name / "lib"
             if lib_dir.is_dir():
                 extra_ld_library_dirs.append(str(lib_dir))
-            if lib64_dir.is_dir():
-                extra_ld_library_dirs.append(str(lib64_dir))
         if extra_ld_library_dirs:
             env["LD_LIBRARY_PATH"] = ":".join(extra_ld_library_dirs)
-        bcc_tools_dir = corpus_build_root / "bcc" / "libbpf-tools" / ".output"
-        if bcc_tools_dir.is_dir():
-            env["BCC_TOOLS_DIR"] = str(bcc_tools_dir)
-        if self.executor == "aws-ssh":
-            env["BPFREJIT_KERNEL_MODULES_ROOT"] = "/"
-        elif self.executor == "kvm":
-            staged_kernel_modules_root = self.workspace / "vendor" / "linux-framework" / ".virtme_mods"
-            if staged_kernel_modules_root.is_dir():
-                env["BPFREJIT_KERNEL_MODULES_ROOT"] = str(staged_kernel_modules_root)
+        kernel_modules_root = _resolve_workspace_contract_path(
+            self.workspace,
+            self._required_contract("RUN_KERNEL_MODULES_ROOT"),
+        )
+        if not kernel_modules_root.is_dir():
+            _die(f"bundled kernel modules root is missing: {kernel_modules_root}")
+        env["BPFREJIT_KERNEL_MODULES_ROOT"] = str(kernel_modules_root)
+        rejit_passes = ""
+        if self.suite_name == "corpus":
+            rejit_passes = _argv_option_value(self.corpus_argv, "--rejit-passes")
+        elif self.suite_name == "e2e":
+            rejit_passes = _argv_option_value(self.e2e_argv, "--rejit-passes")
+        if rejit_passes:
+            env["BPFREJIT_BENCH_PASSES"] = rejit_passes
         env["PYTHONPATH"] = str(self.workspace)
         env["BPFTOOL_BIN"] = self.bpftool_bin
         if shutil.which(self.bpftool_bin, path=env["PATH"]) is None:
@@ -276,14 +283,26 @@ class SuiteEntrypoint:
             _die(f"required command is missing: {self.python_bin}")
         return env
 
+    def _repo_build_root(self) -> Path:
+        return _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_REPO_ARTIFACT_ROOT"))
+
+    def _libbpf_runtime_path(self) -> Path | None:
+        configured = self._optional_contract("RUN_LIBBPF_RUNTIME_PATH")
+        if not configured:
+            return None
+        candidate = _resolve_workspace_contract_path(self.workspace, configured)
+        if not candidate.is_file():
+            _die(f"bundled libbpf runtime is missing: {candidate}")
+        return candidate
+
     def _test_unittest_build_dir(self) -> Path:
-        return self.workspace / "tests" / "unittest" / ("build-arm64" if self.target_arch == "arm64" else "build")
+        return _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_TEST_UNITTEST_BUILD_DIR"))
 
     def _test_negative_build_dir(self) -> Path:
-        return self.workspace / "tests" / "negative" / ("build-arm64" if self.target_arch == "arm64" else "build")
+        return _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_TEST_NEGATIVE_BUILD_DIR"))
 
     def _test_kinsn_module_dir(self) -> Path:
-        return self.workspace / "module" / ("arm64" if self.target_arch == "arm64" else "x86")
+        return _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_KINSN_MODULE_DIR"))
 
     def _expected_kinsn_modules(self) -> list[str]:
         module_dir = self._test_kinsn_module_dir()
@@ -300,25 +319,24 @@ class SuiteEntrypoint:
         return self._resolve_daemon_binary()
 
     def _resolve_daemon_binary(self) -> Path:
-        if self.target_arch == "arm64":
-            candidates = [self.workspace / "daemon" / "target" / "aarch64-unknown-linux-gnu" / "release" / "bpfrejit-daemon"]
-        else:
-            candidates = [self.workspace / "daemon" / "target" / "release" / "bpfrejit-daemon"]
-        for candidate in candidates:
-            if candidate.is_file() and os.access(candidate, os.X_OK):
-                return candidate
-        _die(f"bundled daemon is missing or not executable: {candidates[0]}")
+        candidate = _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_DAEMON_BINARY_PATH"))
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return candidate
+        _die(f"bundled daemon is missing or not executable: {candidate}")
 
     def _ensure_runner_binary(self) -> None:
         if not self._bool_contract("RUN_NEEDS_RUNNER_BINARY"):
             return
-        _require_executable(self.workspace / "runner" / "build" / "micro_exec", "bundled runner binary")
+        _require_executable(
+            _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_RUNNER_BINARY_PATH")),
+            "bundled runner binary",
+        )
 
     def _ensure_scx_artifacts(self) -> None:
         packages = self._csv_contract("RUN_SCX_PACKAGES_CSV")
         if not packages:
             return
-        scx_root = self.workspace / "corpus" / "build" / self.target_arch / "scx"
+        scx_root = self._repo_build_root() / "scx"
         for package in packages:
             _require_executable(
                 scx_root / "bin" / package,
@@ -328,28 +346,20 @@ class SuiteEntrypoint:
             if not object_path.is_file():
                 _die(f"bundled scx object is missing: {object_path}")
 
-    def _ensure_katran_bundle(self, env: dict[str, str]) -> None:
+    def _ensure_katran_bundle(self) -> None:
         if not self._bool_contract("RUN_NEEDS_KATRAN_BUNDLE"):
             return
-        katran_root = self.workspace / "corpus" / "build" / self.target_arch / "katran"
-        binary = _require_executable(
+        katran_root = self._repo_build_root() / "katran"
+        _require_executable(
             katran_root / "bin" / "katran_server_grpc",
             "bundled Katran server",
         )
-        lib_dir = katran_root / "lib"
-        if not lib_dir.is_dir():
-            lib_dir = katran_root / "lib64"
-        if not lib_dir.is_dir():
-            _die("bundled Katran runtime lib dir is missing")
-        env["KATRAN_SERVER_BINARY"] = str(binary)
-        env["KATRAN_SERVER_LIB_DIR"] = str(lib_dir)
-
-    def _ensure_workload_tools(self, env: dict[str, str]) -> None:
-        if not self.workload_tools:
-            return
-        for tool in self.workload_tools:
-            if shutil.which(tool, path=env.get("PATH")) is None:
-                _die(f"required workload tool is missing from PATH: {tool}")
+        katran_lib_root = katran_root / "lib"
+        if not katran_lib_root.is_dir():
+            _die(f"bundled Katran runtime library directory is missing: {katran_lib_root}")
+        balancer_prog = katran_root / "balancer.bpf.o"
+        if not balancer_prog.is_file():
+            _die(f"bundled Katran balancer program is missing: {balancer_prog}")
 
     def _ensure_bpf_stats_enabled(self) -> None:
         if not self._bool_contract("RUN_NEEDS_DAEMON_BINARY"):
@@ -359,7 +369,8 @@ class SuiteEntrypoint:
             _die("kernel bpf_stats_enabled sysctl is not writable")
         sysctl_bin = shutil.which("sysctl")
         if sysctl_bin:
-            _run_checked([sysctl_bin, "-q", "-w", "kernel.bpf_stats_enabled=1"], cwd=self.workspace, env=os.environ.copy())
+            env = {"PATH": os.environ.get("PATH", "") or "/usr/sbin:/usr/bin:/sbin:/bin"}
+            _run_checked([sysctl_bin, "-q", "-w", "kernel.bpf_stats_enabled=1"], cwd=self.workspace, env=env)
         else:
             bpf_stats_path.write_text("1\n", encoding="utf-8")
         if bpf_stats_path.read_text(encoding="utf-8").strip() != "1":
@@ -473,7 +484,8 @@ class SuiteEntrypoint:
             print(f"SKIP: test_recompile not found at {kernel_selftest}", file=sys.stderr)
             return 0, 0
         self._log_test_section("Kernel selftest (test_recompile)")
-        if _run_with_status([str(kernel_selftest)], cwd=self.workspace, env=os.environ.copy()):
+        env = self._runtime_env()
+        if _run_with_status([str(kernel_selftest)], cwd=self.workspace, env=env):
             return 1, 0
         print("FAIL: test_recompile", file=sys.stderr)
         return 0, 1
@@ -570,7 +582,7 @@ class SuiteEntrypoint:
         runtime_ld = _cross_runtime_ld_library_path(self.workspace, self.target_arch)
         if runtime_ld:
             runtime_env["LD_LIBRARY_PATH"] = runtime_ld
-        self._ensure_katran_bundle(runtime_env)
+        self._ensure_katran_bundle()
         output_json = self.workspace / "corpus" / "results" / f"{self.target_name}_corpus.json"
         output_md = self.workspace / "corpus" / "results" / f"{self.target_name}_corpus.md"
         command = [
@@ -619,7 +631,7 @@ class SuiteEntrypoint:
         cases = self._required_contract("RUN_E2E_CASES")
         if cases == "all":
             all_env = env.copy()
-            self._ensure_katran_bundle(all_env)
+            self._ensure_katran_bundle()
             self._run_e2e_case("all", all_env)
             for case_name in ("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran"):
                 _copy_result_dir(_latest_result_dir(self.workspace / "e2e" / "results", case_name), self.artifact_dir)
@@ -627,7 +639,7 @@ class SuiteEntrypoint:
         for case_name in [token for token in cases.split(",") if token]:
             case_env = env.copy()
             if case_name == "katran":
-                self._ensure_katran_bundle(case_env)
+                self._ensure_katran_bundle()
             self._run_e2e_case(case_name, case_env)
             _copy_result_dir(_latest_result_dir(self.workspace / "e2e" / "results", case_name), self.artifact_dir)
 
@@ -637,7 +649,6 @@ class SuiteEntrypoint:
         os.chdir(self.workspace)
         shutil.copy2(self.manifest_path, self.artifact_dir / "run-contract.env")
         self._ensure_bpf_stats_enabled()
-        self._ensure_workload_tools(env)
         if self.suite_name == "test":
             self._run_test_suite(env)
         elif self.suite_name == "micro":
@@ -648,26 +659,21 @@ class SuiteEntrypoint:
             self._run_e2e_suite(env)
         else:
             _die(f"unsupported suite: {self.suite_name}")
-        if self.archive_path is not None:
-            self.archive_path.parent.mkdir(parents=True, exist_ok=True)
-            with tarfile.open(self.archive_path, "w:gz") as tar:
-                tar.add(self.artifact_dir, arcname=str(self.artifact_dir.relative_to(self.workspace)))
         print(f"ARTIFACT_DIR={self.artifact_dir.relative_to(self.workspace)}")
 
 
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) not in {2, 3}:
-        _die("usage: suite_entrypoint.py <workspace> <manifest_path> [archive_path]")
+    if len(args) != 2:
+        _die("usage: suite_entrypoint.py <workspace> <manifest_path>")
     workspace = Path(args[0]).resolve()
     manifest_path = Path(args[1]).resolve()
-    archive_path = Path(args[2]).resolve() if len(args) == 3 and args[2] else None
     if not manifest_path.is_file():
         _die(f"manifest is missing: {manifest_path}")
     if not workspace.is_dir():
         _die(f"workspace is missing: {workspace}")
     contract = parse_manifest(manifest_path)
-    SuiteEntrypoint.from_contract(workspace, manifest_path, archive_path, contract).run()
+    SuiteEntrypoint.from_contract(workspace, manifest_path, contract).run()
 
 
 if __name__ == "__main__":

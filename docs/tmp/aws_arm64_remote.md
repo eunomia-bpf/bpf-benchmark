@@ -22,7 +22,6 @@ The cleanup rule is strict:
 - no second control plane
 - root `Makefile` plus `runner/mk/*.mk` are the single active Make-side build surface
 - no bundle-cache / version-cache design
-- no clone / checkout in the canonical run path
 - no patching third-party source trees
 
 ## Current Control Flow
@@ -40,6 +39,7 @@ What each layer owns:
   - includes `runner/mk/local_prep.mk` and `runner/mk/build.mk`
   - this is the only active Make-side control plane
   - no `runner/Makefile` second control plane
+  - no ARM toolchain bootstrap target in the canonical run surface
 - `run_target_suite.py`
   - per-run manifest and control directory
   - selects executor
@@ -55,10 +55,11 @@ What each layer owns:
   - remote base prereqs via SSH shell only
   - no local build logic
 - `aws_executor.py`
-  - streams the repository workspace
+  - syncs selected fixed roots into the fixed remote stage root
   - uploads manifest
-  - executes workspace remotely
+  - executes from the fixed remote stage root
   - fetches results
+  - uploads the tracked helper `runner/libs/aws_remote_host.py`
 - `kvm_executor.py`
   - launches local VM
   - runs the same repository workspace inside VM
@@ -114,29 +115,163 @@ The design is:
   - manifest
   - control state
   - results
-- there is no separate per-run workspace or tar-bundle layer
+- remote execution syncs selected fixed roots into a fixed remote workspace per suite
 - there is no versioned bundle-cache layer
 
 The canonical run path must not:
 
-- clone repos
-- checkout temporary source trees
 - compute user-visible cache keys
 - maintain a separate versioned cache system
 
 ## What Still Needs Work
 
-The main remaining architecture debt is ARM benchmark prep.
+The remaining architecture debt is now narrower and explicit:
 
-Today:
+- build/install ownership must stay in `Makefile` / `runner/mk/*.mk` / repo-native build systems and not drift back into Python
+- ARM toolchain prep must stay a single fixed out-of-tree root
+  - canonical local prep only validates it
+  - provisioning it is an explicit bootstrap step, not part of normal `corpus/e2e` runs
+- Katran must stay on:
+  - repo-native build from `runner/repos/katran`
+  - original repo BPF build for `balancer.bpf.o`
+  - original repo userspace server build for `katran_server_grpc`
+  - no checked-in grpc helper bundle
+- AWS remote transfer must stay explicit in the manifest:
+  - suite config owns the base transfer roots
+  - manifest carries `RUN_REMOTE_TRANSFER_ROOTS_CSV`
+  - executor only consumes the contract
+- prereq handling must stay single-plane:
+  - no fake `required_commands(mode=...)`
+  - guest base prereqs and bundled workload tools must not be mixed
+  - if `corpus/e2e` transfer `.cache/workload-tools`, AWS remote-prep must not try to install `wrk/sysbench/hackbench`
+- whole-tree review must keep checking that no second control plane, fallback path, or dead build surface reappears
 
-- our own binaries and most local prep are Make-driven
-- but ARM benchmark prep still has container / qemu-backed paths for some repo-native artifacts
+Latest focused cleanup applied on the current tree:
 
-That means the main remaining cleanup target is:
+- `RUN_REMOTE_TRANSFER_ROOTS_CSV` is now treated as a sealed contract
+  - the executor no longer silently drops missing listed roots
+  - missing listed roots are now fatal local-prep errors
+- Tracee runtime no longer writes signatures under `e2e/cases/tracee/bin/signatures`
+  - signatures now live under `RUN_REPO_ARTIFACT_ROOT/tracee/signatures`
+- ARM build rules are moving onto a single validated toolchain plane in `runner/mk/build.mk`
+  - `__repo-test-binaries-arm64`
+  - `__native-repo-bcc-arm64`
+  - `__native-repo-tracee-arm64`
+  - `__native-repo-tetragon-arm64`
+  now require the validated toolchain root instead of ambient ad hoc compiler fallback
+- x86 KVM kernel builds are now serialized at `__kernel`
+  - parallel `vm-corpus` / `vm-e2e` no longer race in the same x86 kernel tree
 
-- move ARM benchmark artifact prep further toward Make-driven host-visible build roots
-- keep Python as a thin caller only
+Current status:
+
+- ARM cross toolchain root now comes from explicit non-active bootstrap target `make -f runner/mk/bootstrap.mk bootstrap-arm64-toolchain`
+  - fixed output root: `runner/build-arm64/toolchain`
+  - canonical local prep no longer provisions it
+  - no persistent `toolchain-debs` tree
+- libbpf runtime now comes from explicit Make targets:
+  - `__libbpf-runtime-x86_64`
+  - `__libbpf-runtime-arm64`
+- ARM native repos no longer run as one big containerized prep step:
+  - `tracee`
+  - `tetragon`
+  - `katran`
+  - `bcc`
+  now build on the host Make path
+- Katran active path no longer uses:
+  - `e2e/cases/katran/bin/katran_server_grpc`
+  - `e2e/cases/katran/lib/*`
+  Canonical path is now:
+  - Make-built `runner/repos/katran/katran/lib/Makefile-bpf` output for `balancer.bpf.o`
+  - repo-native `build_katran.sh` + top-level CMake output for `katran_server_grpc`
+- `runner/Makefile` is gone from the active path
+- `runner/docker/arm64-crossbuild.Dockerfile` and the old crossbuild-image target are gone from the active path
+- `run` path clone/checkout logic is gone from active code; source roots are the tracked repo trees plus existing cached source/build trees
+- `aws_executor.py` no longer hardcodes the remote transfer roots or tar excludes; those now come from manifest contract
+- `required_commands()` no longer pretends to have separate base/runtime modes
+- local prep fanout now lives only in `runner/mk/local_prep.mk`; Python just calls `make __prepare-local`
+- BCC native repo prep now requires the vendored `bpftool`; there is no host `bpftool` fallback
+- Katran runtime now resolves only:
+  - `RUN_REPO_ARTIFACT_ROOT/katran/bin/katran_server_grpc`
+  - `RUN_REPO_ARTIFACT_ROOT/katran/balancer.bpf.o`
+- `suite_entrypoint` now resolves `scx` and `katran` artifacts only from explicit `RUN_REPO_ARTIFACT_ROOT`
+- `suite_entrypoint` now resolves libbpf only from explicit `RUN_LIBBPF_RUNTIME_PATH`
+- `execute_workspace` no longer bulk-exports manifest `RUN_*` scalars into runtime env
+- app-runner helpers no longer read ambient `RUN_*` contract names directly; runtime-only env now uses explicit `BPFREJIT_*` names prepared by `suite_entrypoint`
+- runtime no longer inherits host `LD_LIBRARY_PATH` into bundled benchmark execution
+- `aws_executor.py` no longer creates a per-run `workspace.tar.gz`; it syncs selected fixed roots directly into `RUN_REMOTE_STAGE_DIR`
+- guest runtime PATH now prepends:
+  - `workspace/.cache/workload-tools/<arch>/bin`
+  when present, before fixed guest system directories
+  - there is no generic `workspace/.cache/workload-tools/bin` fallback anymore
+- `hackbench`, `sysbench`, and `wrk` are now explicit bundled workload-tool artifacts for `corpus/e2e`
+  - transferred via `SUITE_REMOTE_TRANSFER_ROOTS=.cache/workload-tools`
+  - validated by Make targets:
+    - `__workload-tools-x86_64`
+    - `__workload-tools-arm64`
+  - filtered out of AWS remote-prep package installation when bundled
+- workload-tool source trees now come only from `runner/repos/workload-tools/*`
+  - `.cache/workload-tool-sources` is no longer part of the active path
+  - x86 workload tools now build from repo sources into:
+    - `.cache/workload-tools-build/<arch>`
+    - `.cache/workload-tools/<arch>`
+  - there is no host-installed `hackbench/sysbench/wrk` fallback in active x86 prep
+- app-runners no longer accept ambient runtime overrides for:
+  - `BCC_TOOLS_DIR`
+  - `TRACEE_BINARY`
+  - `TETRAGON_BINARY`
+  - `TETRAGON_BPF_LIB_DIR`
+  - `KATRAN_SERVER_BINARY`
+  - `KATRAN_SERVER_LIB_DIR`
+- ARM sysroot bootstrap now lives outside the canonical control plane:
+- `make -f runner/mk/bootstrap.mk bootstrap-arm64-toolchain`
+  - output root: `runner/build-arm64/toolchain/.ready`
+  - no `.cache/arm64-host/*` control plane
+  - no inline cache-only short-circuit branch
+  - active build targets now depend on `__require-arm64-toolchain`, which validates the fixed root instead of provisioning it
+  - validated locally: `make -f runner/mk/bootstrap.mk bootstrap-arm64-toolchain` succeeds and materializes `runner/build-arm64/toolchain/usr/lib64/*`
+- KVM kinsn modules are now normalized to the real `kernel_release` during Make-side prep; the executor no longer rewrites `.virtme_mods/lib/modules/0.0.0` at runtime
+- KVM runtime kernel modules now come only from:
+  - `RUN_KERNEL_MODULES_ROOT=.cache/repo-artifacts/x86_64/kernel-modules`
+  - there is no `.virtme_mods` fallback in runtime code
+- ARM `corpus/e2e` native repo prep no longer routes through a `linux/arm64` container
+  - the remaining containerized path is only the arm64 runner binary for `micro`
+
+The main remaining cleanup target is therefore:
+
+- keep repo-managed runtime artifact roots explicit-only
+- keep remaining workload/native-repo build recipes from drifting back out of Make-owned source/build/install roots
+- keep `runner/mk/build.mk` from turning into a second ad hoc orchestration surface
+- finish whole-tree review and only then restart `corpus/e2e`
+- keep deleting source-tree/build-side intermediates that are not part of the final runtime contract
+
+## Current TODO
+
+1. finish the current whole-tree review pass and confirm:
+   - no deadcode
+   - no fallback
+   - no compat
+   - no second control plane
+2. keep deleting source-tree/build-side leftovers that are not part of the runtime contract
+   - no `.cache/workload-tool-sources` active-path dependency
+   - no checked-in Katran grpc bundle path
+   - no old `corpus/build/<arch>` references in active docs/code
+3. finish the remaining architecture cleanup before trusting fresh runtime results:
+   - keep `RUN_REMOTE_TRANSFER_ROOTS_CSV` sealed
+   - keep Tracee runtime on repo-artifact roots only
+   - keep Katran on repo-native build only
+   - keep workload tools on repo-source + build/install roots only
+4. after the review gate is clean, restart:
+   - `x86-kvm corpus`
+   - `x86-kvm e2e`
+   - `aws-x86 corpus`
+   - `aws-x86 e2e`
+   - `aws-arm64 corpus`
+   - `aws-arm64 e2e`
+5. fix runtime blockers immediately as they appear and keep tightening repeated build cost
+5. for each runtime failure:
+   - capture the first real blocker
+   - fix it without adding fallback/compat/new control planes
+   - rerun the affected lane immediately
 
 ## Runtime Validation Goal
 
@@ -157,124 +292,167 @@ The success rule is:
 
 ## Current Runtime Status
 
-Fresh live lanes are:
+Runtime reruns are active again on the current tree:
 
 - `x86-kvm corpus`
+- `x86-kvm e2e`
 - `aws-x86 corpus`
 - `aws-x86 e2e`
 - `aws-arm64 corpus`
 - `aws-arm64 e2e`
 
-Recent runtime fixes already applied:
+Recent runtime-relevant fixes already applied:
 
 - `kernelrelease` no longer comes from `make kernelrelease`; artifact packaging now reads `include/config/kernel.release` directly for x86 and ARM.
-- KVM now clears `vendor/linux-framework/.virtme_mods` before each VM launch, so stale symlinks no longer abort `vm-corpus`.
+- KVM kinsn modules no longer use the `vendor/linux-framework/.virtme_mods` staging tree.
+  - Make-side prep now builds and installs them directly into `RUN_REPO_ARTIFACT_ROOT/kernel-modules`.
 - ARM kernel artifact packaging now runs `modules_install CONFIG_MODULE_SIG=n`, so AWS ARM setup is no longer blocked by module signing failures in `bpf_preload.ko`.
+- `corpus/e2e` now use a single guest runtime command contract plus an explicit bundled workload-tool root:
+  - guest runtime discovers bundled tools through `workspace/.cache/workload-tools/<arch>/bin`
+  - AWS remote-prep no longer tries to install `wrk/sysbench/hackbench` when `.cache/workload-tools` is part of transfer roots
+- AWS remote base-prereq validation now uses a normalized remote PATH that includes `/usr/sbin` and `/sbin`.
+  - this fixed the false `required command is missing: tc` failures on fresh AWS `corpus/e2e` runs
+- current x86 Katran repo-native canary has already passed the previous Folly configure/compiler-flag crash.
+  - the next active blocker is deeper in gRPC build/install and is being reduced from the current canary log
+- ARM native repo prep for `bcc/tracee/tetragon/katran` now runs on the host Make path.
+- ARM `scx` binaries now also run on the host Make path with an explicit ARM sysroot contract; the old `docker --platform linux/arm64` `scx` prep path is gone.
+- ARM runner-binary prep now also runs on the host Make path with an ARM sysroot and a dedicated `runner/build-arm64` tree; the old arm64 container wrapper is gone from the active path.
+- `local_prep.mk` no longer encodes suite/target prep fanout with nested `if`/suite targets; target env files now declare `TARGET_LOCAL_PREP_TARGETS_<SUITE>` and the manifest just carries the explicit prep list.
+- repo-managed runtime artifact roots are now explicit-only:
+  - `RUN_REPO_ARTIFACT_ROOT` is required
+  - there is no active-path fallback to `.cache/repo-artifacts/<arch>`
+- BCC native repo prep no longer falls back to host `bpftool`.
+- Katran runtime no longer carries the stale `lib`/`lib64` compat branch.
+- bundled workload tools now use an explicit contract:
+  - `SUITE_NEEDS_WORKLOAD_TOOLS=1` on `corpus/e2e`
+  - `RUN_NEEDS_WORKLOAD_TOOLS` drives both local prep and guest prereq validation
+  - the old implicit `RUN_REMOTE_TRANSFER_ROOTS_CSV contains .cache/workload-tools` control plane is gone
+- `.cache/workload-tool-sources` is no longer part of the active path and has been removed locally.
+- x86 Katran repo-native userland build now uses host `gcc/g++`; only BPF object build stays on `clang/llc`.
+- kernel artifact tarballs now drop `lib/modules/<release>/{build,source}` before packaging.
+  - this fixes the AWS ARM setup crash in `aws_remote_host.py` when Python `tarfile(filter="data")` rejects absolute symlinks
+- Katran repo-native server build now requires C++20 explicitly on both x86 and arm64.
+  - this fixes the current Folly `constinit` compile failure when building `katran_server_grpc`
 
-The current runtime focus remains:
+The next runtime focus is:
 
-- get `x86-kvm corpus` green
-- let `aws-x86 corpus/e2e` finish on the repaired x86 kernel artifact path
-- let `aws-arm64 corpus/e2e` finish on the repaired ARM kernel artifact path
-- only then start `x86-kvm e2e`
+- keep the current reruns moving while architecture review continues
+- rerun any lane that started before a structural fix landed
+- keep reducing runtime blockers one at a time until all six `corpus/e2e` lanes pass
+- current live reruns:
+  - `x86-kvm corpus`
+  - `x86-kvm e2e`
+  - `aws-x86 corpus`
+  - `aws-x86 e2e`
+  - `aws-arm64 corpus`
+  - `aws-arm64 e2e`
+- current active structural/runtime cleanup just before these reruns:
+  - `RUN_NEEDS_WORKLOAD_TOOLS` is now explicit in the manifest
+  - the old implicit `RUN_REMOTE_TRANSFER_ROOTS_CSV contains .cache/workload-tools` control plane is gone
+  - x86 Katran userland build switched from `clang/clang++` to `gcc/g++` to avoid the current gRPC/abseil compile failure on this host toolchain
+  - `.cache/workload-tool-sources` was deleted locally and is no longer part of the active path
+  - stale reruns that were still holding old x86 Katran build locks were terminated
+  - the first arm64 rerun (`rerun5`) still reused a stale local setup artifact tar under `.cache/aws-arm64/setup-artifacts/arm64`
+  - that tar still contained `lib/modules/<release>/build` as an absolute symlink, so remote safe extract failed with `tarfile.AbsoluteLinkError`
+  - root `Makefile` now strips the `build` and `source` symlinks before packing the kernel modules tar
+  - the stale arm64 setup artifact roots were deleted locally:
+    - `.cache/aws-arm64/setup-artifacts/arm64`
+    - `.cache/aws-arm64/setup-artifacts/7.0.0-rc2+`
+  - fresh reruns are now:
+    - `x86-kvm corpus`: `vm-corpus-20260409-rerun3.log`
+    - `x86-kvm e2e`: `vm-e2e-20260409-rerun4.log`
+    - `aws-x86 corpus`: `aws-x86-corpus-20260409-rerun5.log`
+    - `aws-x86 e2e`: `aws-x86-e2e-20260409-rerun5.log`
+    - `aws-arm64 corpus`: `aws-arm64-corpus-20260409-rerun6.log`
+    - `aws-arm64 e2e`: `aws-arm64-e2e-20260409-rerun6.log`
+  - the four AWS reruns are currently past launch and waiting in `aws_remote_prep` for `instance-status-ok`
+  - the two KVM reruns are in `__prepare-local` behind the shared x86 kernel/local-prep path
 
 ## Current Todo
 
-1. Delete the tracked `runner/Makefile` permanently and keep `runner/mk/*.mk` as the only Make-side auxiliary surface.
-2. Remove any remaining direct build recipe from Python if one still exists in active code.
-3. Keep deleting old/dead Make / Python / shell control surfaces instead of layering replacements.
-4. Finish ARM benchmark prep cleanup so `corpus/e2e` no longer depend on avoidable qemu-heavy build steps.
-5. Re-run whole-tree review and require a clean findings / no-findings result on the current active path.
-6. Then run the full `corpus/e2e` matrix.
+1. Whole-tree review on the current active path:
+   - no dead/fallback/compat logic
+   - no second control plane
+   - `corpus/e2e` bundled workload-tool contract is coherent end-to-end
+   - Tracee runtime uses only repo-artifact/workspace paths
+   - ARM sysroot/toolchain is a single plane
+2. Keep build/install/cache in Make-side control:
+   - no Python build recipe re-growth
+   - no `runner/Makefile`
+   - no hidden shell orchestration path
+   - no reintroduction of ARM container/qemu-only benchmark prep
+3. Keep source/build/install roots explicit and minimal:
+   - no run-path clone/fetch/checkout
+   - no bundle-cache/version-cache control plane
+   - no heavy per-run workspace staging
+   - per-run state remains only manifest/control/results
+4. Keep running and rerunning the full `corpus/e2e` matrix until all six paths pass:
+   - `x86-kvm corpus`
+   - `x86-kvm e2e`
+   - `aws-x86 corpus`
+   - `aws-x86 e2e`
+   - `aws-arm64 corpus`
+   - `aws-arm64 e2e`
+5. Keep runtime blockers narrow and explicit:
+   - no guest package fallback for bundled workload tools
+   - no stale local setup artifact reuse after kernel packaging fixes
+   - no reintroduction of checked-in Katran bundle or second Katran runtime path
 
+## Review Gate
 
-## Live Status 2026-04-09 00:11
+Current static gate:
 
-Current fresh live benchmark lanes:
-- aws-x86 corpus: `run.aws-x86.corpus.8ab8ea71` (front session 78354)
-- aws-x86 e2e: `run.aws-x86.e2e.4bfb4857`
-- aws-arm64 corpus: `run.aws-arm64.corpus.0fad18a2`
-- aws-arm64 e2e: `run.aws-arm64.e2e.baecb423`
+- `python3 -m pyflakes runner/libs runner/mk corpus e2e`
+- `python3 -m compileall -q runner/libs runner/mk corpus e2e`
+- `git diff --check`
+- active-path grep for runtime env mutation is clean:
+  - no `prepare_bpftool_environment()`
+  - no active `os.environ[...]` mutation in `corpus/e2e`
+  - `BPFREJIT_BENCH_PASSES` is injected only by `suite_entrypoint`
+- `make -n aws-x86-benchmark AWS_X86_BENCH_MODE=e2e`
+- `make -n aws-x86-benchmark AWS_X86_BENCH_MODE=corpus`
+- `make -n aws-arm64-benchmark AWS_ARM64_BENCH_MODE=corpus`
+- `make -n aws-arm64-benchmark AWS_ARM64_BENCH_MODE=e2e`
+- `make -n vm-corpus`
+- `make -n vm-e2e`
 
-Notes:
-- `aws_executor.py` now streams only selected top-level directories instead of tarring the entire repo root.
-- Current tree still uses guest package manager for workload tools (`stress-ng/fio/hackbench/sysbench/bpftrace/wrk/tc`); there is no active bundled workload-tool build path in `runner/mk/build.mk`.
-- Old ARM `sudo` logs from stale runs should not be treated as current blockers.
+Note:
 
+- `tests/python` is currently empty, so `pytest -q tests/python` returns `5` with `no tests ran`
+- that is documentation state, not the current runtime gate
+- whole-tree reviewer re-check is in progress
+- real `corpus/e2e` reruns are active in parallel; review is used to keep deleting architecture debt while runtime blockers are reduced
 
-## Live Status 2026-04-09 00:20
+## Latest 2026-04-09 Runtime Status
 
-Fresh active lanes after shared bundle fix:
-- aws-x86 corpus: `run.aws-x86.corpus.36b2aa39`
-- aws-x86 e2e: `run.aws-x86.e2e.8e2d285f`
-- aws-arm64 corpus: `run.aws-arm64.corpus.245b78ac`
-- aws-arm64 e2e: `run.aws-arm64.e2e.e9b50dec`
+- active path no longer references:
+  - `runner/Makefile`
+  - `make -C runner`
+  - `__bundle-cache`
+  - `prepared-workspace`
+  - `workload-tool-sources`
+- `runner/repos/workload-tools` is now the only active workload-tool source root.
+- current repo-native Katran x86 build blocker has been reduced:
+  - first failure was Folly `FOLLY_XLOG_STRIP_PREFIXES` being passed as an unquoted path macro
+  - current `runner/mk/build.mk` overrides this through `CXXFLAGS` on the Katran build invocation
+  - current standalone Katran x86 canary is no longer dying in Folly and is progressing through later dependencies (`gtest`, then `grpc`)
+- current ARM blocker that was fixed:
+  - `__kinsn-modules-arm64` now passes `ARM64_AWS_BASE_CONFIG` through to `__kernel-arm64-aws`
+  - this removed the immediate local-prep crash in fresh AWS ARM64 `corpus/e2e` reruns
 
-Shared bug fixed in this round:
-- `aws_executor.py` no longer allows `runner/repos/**` into the streamed AWS workspace bundle. The previous behavior raced against live repo builds and failed with `tar: File removed before we read it`.
+- current live reruns on the fixed tree:
+  - `aws-arm64 corpus`: `run.aws-arm64.corpus.9ef234ba`
+  - `aws-arm64 e2e`: `run.aws-arm64.e2e.1ffe0cc1`
+  - `aws-x86 corpus`: `run.aws-x86.corpus.cacfe98d`
+  - `aws-x86 e2e`: `run.aws-x86.e2e.2068eae0`
+  - `x86-kvm corpus`: `run.x86-kvm.corpus` foreground rerun
 
-Runtime note:
-- A previous `aws-arm64 e2e` rerun failed with `VcpuLimitExceeded`. Four stale dedicated benchmark instances were terminated before starting the fresh `e9b50dec` rerun.
-
-## Live Status 2026-04-09 00:28
-
-Fresh current-code lanes now in flight:
-- `aws-x86 corpus`: `run.aws-x86.corpus.472ecfb8`
-- `aws-x86 e2e`: `run.aws-x86.e2e.5015db3a`
-- `aws-arm64 corpus`: `run.aws-arm64.corpus.e39b65dc`
-- `aws-arm64 e2e`: `run.aws-arm64.e2e.e6061297`
-- `x86-kvm e2e`: `run.x86-kvm.e2e.936e8dca`
-
-New runtime findings from the previous round:
-- `aws-x86 e2e` hit a new workspace streaming race:
-  - `tar: e2e/cases/katran/lib/liblzma.so: File removed before we read it`
-  - root cause: repo-tree Katran helper artifacts under `e2e/cases/katran/bin|lib` were still present in the streamed AWS workspace even though runtime uses the bundled `corpus/build/<arch>/katran` artifacts
-- both old ARM lanes (`245b78ac`, `e9b50dec`) confirmed the same repaired-arm setup bug:
-  - `bash: line 7: /usr/bin/sudo: cannot execute: required file not found`
-  - these failures happened before the new `aws_remote_prep.py` module-install fix was applied
-
-Fixes applied before the current reruns:
-- `aws_executor.py` now excludes `e2e/cases/katran/bin/*` and `e2e/cases/katran/lib/*` from streamed AWS workspaces
-- `aws_remote_prep.py` no longer untars module artifacts directly into `/`; it now extracts into a temporary directory and copies only `lib/modules/<release>` into `/lib/modules/<release>`
-
-Live evidence after the fix:
-- `aws-arm64 e2e` has already progressed past the old immediate `sudo` failure point and is actively uploading `vmlinuz-7.0.0-rc2+.efi` and `modules-7.0.0-rc2+.tar.gz`
-- all four AWS corpus/e2e lanes are running on dedicated benchmark-sized instances:
-  - x86: `t3.large`
-  - arm64: `t4g.large`
-
-## Live Status 2026-04-09 00:40
-
-Fresh runtime findings from the current round:
-- the old `aws-x86 corpus` result `36b2aa39` was still failing in guest prereqs with:
-  - `No match for argument: rt-tests`
-  - `No match for argument: wrk`
-  - `required guest command is missing: tc`
-- root cause was not a missing guest package on fresh runs; it was a shared contract bug:
-  - bundled workload tools already live under `workspace/.cache/workload-tools/bin`
-  - but `guest_prereqs.runtime_path_value()` only searched system directories, so runtime provisioning kept trying to install `wrk` / `hackbench` instead of seeing the bundled copies
-  - `dnf` mapping for `tc` was also wrong for AL2023; it pointed to `iproute-tc` instead of `iproute`
-
-Fixes applied in this round:
-- `guest_prereqs.py` now prepends `workspace/.cache/workload-tools/bin` to runtime `PATH`
-- `prereq_contract.py` now maps `dnf + tc` to `iproute`
-
-## Live Status 2026-04-09 00:48
-
-New x86 parallel-runtime finding:
-- fresh `aws-x86 e2e` run `5015db3a` progressed past the old Katran helper tar race, but failed later with:
-  - `tar: corpus/build: file changed as we read it`
-- root cause: `aws-x86 corpus` and `aws-x86 e2e` were sharing the same mutable `corpus/build/x86_64` tree
-  - one lane was still rewriting stage files while the other lane streamed the workspace to AWS
-
-Fixes applied in this round:
-- `runner/mk/build.mk` now uses per-arch/per-repo host locks under `.cache/.../locks`
-- shared `scx`, `bcc`, `tracee`, `tetragon`, and `katran` stage targets no longer `rm -rf` the shared stage roots on each invocation
-- those stage targets now only overwrite staged files when the source content actually changed
-
-Current fresh active lanes:
-- `aws-x86 corpus`: `run.aws-x86.corpus.472ecfb8`
-- `aws-x86 e2e`: `run.aws-x86.e2e.32840fdd`
-- `aws-arm64 corpus`: `run.aws-arm64.corpus.c8300251`
-- `aws-arm64 e2e`: `run.aws-arm64.e2e.0b0e2a77`
-- `x86-kvm e2e`: `run.x86-kvm.e2e.936e8dca`
+- current todo for the live matrix:
+  1. wait for the standalone x86 Katran repo-native build to finish on the fixed tree
+  2. if Katran x86 completes, reuse that cached artifact path for:
+     - `x86-kvm corpus`
+     - `aws-x86 corpus`
+     - `aws-x86 e2e`
+  3. keep AWS ARM64 `corpus/e2e` reruns moving on the fixed `ARM64_AWS_BASE_CONFIG` path and capture the next real blocker if they stop
+  4. once `corpus` is green on a target, rerun `e2e` on the same fixed tree if needed
+  5. keep removing deadcode / fallback / second-control-plane drift while runs are active

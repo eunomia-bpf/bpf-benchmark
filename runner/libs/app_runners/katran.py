@@ -9,7 +9,6 @@ from ..workload import WorkloadResult
 from .base import AppRunner
 from .katran_support import (
     CLIENT_NS,
-    DEFAULT_KATRAN_BALANCER_PROG_PATH,
     DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S,
     DEFAULT_KATRAN_STOP_SETTLE_S,
     KatranDsrTopology,
@@ -21,6 +20,7 @@ from .katran_support import (
     VIP_IP,
     VIP_PORT,
     configure_katran_maps,
+    default_katran_balancer_prog_path,
     resolve_katran_server_binary,
     run_katran_prog_test_run,
     run_parallel_http_load,
@@ -50,7 +50,7 @@ class KatranRunner(AppRunner):
     ) -> None:
         super().__init__()
         self.loader_binary = None if loader_binary is None else Path(loader_binary).resolve()
-        self.balancer_prog_path = DEFAULT_KATRAN_BALANCER_PROG_PATH.resolve()
+        self.balancer_prog_path = default_katran_balancer_prog_path().resolve()
         self.iface = str(iface)
         self.router_peer_iface = None if router_peer_iface is None else str(router_peer_iface)
         self.load_timeout_s = int(load_timeout_s)

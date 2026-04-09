@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import ctypes
-import ctypes.util
 import errno
 import os
 from contextlib import contextmanager
@@ -63,15 +62,9 @@ class BpfProgInfo(ctypes.Structure):
 def _libbpf() -> ctypes.CDLL:
     path = os.environ.get("BPFREJIT_LIBBPF_PATH", "").strip()
     if not path:
-        for entry in os.environ.get("LD_LIBRARY_PATH", "").split(os.pathsep):
-            if not entry:
-                continue
-            candidate = os.path.join(entry, "libbpf.so.1")
-            if os.path.isfile(candidate):
-                path = candidate
-                break
-    if not path:
-        path = ctypes.util.find_library("bpf") or "libbpf.so.1"
+        raise RuntimeError("BPFREJIT_LIBBPF_PATH is required for libbpf access")
+    if not os.path.isfile(path):
+        raise RuntimeError(f"BPFREJIT_LIBBPF_PATH does not exist: {path}")
     lib = ctypes.CDLL(path, use_errno=True)
     required_symbols = {
         "bpf_enable_stats": (

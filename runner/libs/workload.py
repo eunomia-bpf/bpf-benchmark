@@ -500,7 +500,9 @@ def run_file_open_load(duration_s: int | float) -> WorkloadResult:
 
 
 def run_block_io_load(duration_s: int | float) -> WorkloadResult:
-    dd_binary = which("dd") or "dd"
+    dd_binary = which("dd")
+    if dd_binary is None:
+        raise RuntimeError("dd is required for the block_io workload")
     block_size = "4k"
     block_count = 4096
     _load_kernel_module("null_blk", "nr_devices=1", "queue_mode=2")

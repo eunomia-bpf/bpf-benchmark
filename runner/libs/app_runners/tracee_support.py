@@ -4,6 +4,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import threading
 import time
@@ -28,7 +29,7 @@ from ..workload import (
     run_tracee_default_load,
     run_user_exec_loop,
 )
-from .setup_support import missing_required_commands, pick_host_executable
+from .setup_support import pick_host_executable, repo_artifact_root
 
 
 TRACEE_STATS_PATTERN = re.compile(
@@ -326,35 +327,15 @@ def _current_prog_ids() -> list[int]:
 
 
 def inspect_tracee_setup() -> dict[str, object]:
-    arch_dir = "arm64" if os.uname().machine in {"aarch64", "arm64"} else "x86_64"
-    corpus_binary = ROOT_DIR / "corpus" / "build" / arch_dir / "tracee" / "bin" / "tracee"
-    explicit_binary = os.environ.get("TRACEE_BINARY", "").strip() or None
+    corpus_binary = repo_artifact_root() / "tracee" / "bin" / "tracee"
 
-    required_tools: list[str] = []
-    requested_csv = os.environ.get("RUN_WORKLOAD_TOOLS_CSV", "").strip()
-    if requested_csv:
-        for tool in requested_csv.split(","):
-            normalized = str(tool).strip()
-            if normalized in {"curl", "fio", "hackbench", "stress-ng", "wrk"} and normalized not in required_tools:
-                required_tools.append(normalized)
-
-    missing_tools = missing_required_commands(required_tools)
-    if missing_tools:
-        return {
-            "returncode": 1,
-            "tracee_binary": None,
-            "stdout_tail": "",
-            "stderr_tail": f"missing required Tracee workload tools: {' '.join(missing_tools)}",
-        }
-
-    tracee_binary = pick_host_executable(explicit_binary, corpus_binary)
+    tracee_binary = pick_host_executable(corpus_binary)
     if tracee_binary is None:
-        checked = [explicit_binary or "<unset>", str(corpus_binary)]
         return {
             "returncode": 1,
             "tracee_binary": None,
             "stdout_tail": "",
-            "stderr_tail": f"missing repo-managed Tracee binary; checked {', '.join(checked)}",
+            "stderr_tail": f"missing repo-managed Tracee binary under {corpus_binary}",
         }
 
     version_probe = run_command([str(tracee_binary), "--version"], check=False, timeout=30)
@@ -391,7 +372,9 @@ def resolve_tracee_binary(explicit: str | None, setup_result: Mapping[str, objec
 
 
 def _ensure_empty_signatures_dir() -> Path:
-    sig_dir = ROOT_DIR / "e2e" / "cases" / "tracee" / "bin" / "signatures"
+    sig_dir = repo_artifact_root() / "tracee" / "signatures"
+    if sig_dir.exists():
+        shutil.rmtree(sig_dir)
     sig_dir.mkdir(parents=True, exist_ok=True)
     return sig_dir
 

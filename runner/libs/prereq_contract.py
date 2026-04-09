@@ -24,12 +24,16 @@ TOOL_PACKAGE_MAP = {
     ("dnf", "tar"): ("tar",),
     ("apt", "taskset"): ("util-linux",),
     ("dnf", "taskset"): ("util-linux",),
+    ("apt", "setpriv"): ("util-linux",),
+    ("dnf", "setpriv"): ("util-linux",),
     ("apt", "insmod"): ("kmod",),
     ("dnf", "insmod"): ("kmod",),
+    ("apt", "dd"): ("coreutils",),
+    ("dnf", "dd"): ("coreutils",),
     ("apt", "ip"): ("iproute2",),
     ("dnf", "ip"): ("iproute",),
     ("apt", "tc"): ("iproute2",),
-    ("dnf", "tc"): ("iproute",),
+    ("dnf", "tc"): ("iproute-tc",),
     ("apt", "wrk"): ("wrk",),
     ("dnf", "wrk"): ("wrk",),
     ("apt", "sysbench"): ("sysbench",),
@@ -68,11 +72,7 @@ def python_import_name(package_name: str) -> str:
         raise RuntimeError(f"unsupported python package contract: {package_name}") from exc
 
 
-def required_commands(
-    *,
-    mode: str = "runtime",
-    contract: Mapping[str, str | list[str]] | None = None,
-) -> list[str]:
+def required_commands(*, contract: Mapping[str, str | list[str]] | None = None) -> list[str]:
     commands: list[str] = []
     for token in (
         _contract_scalar(contract, "RUN_BPFTOOL_BIN"),
@@ -81,11 +81,13 @@ def required_commands(
     ):
         if token and token not in commands:
             commands.append(token)
-    if mode == "runtime":
-        for token in env_csv("RUN_WORKLOAD_TOOLS_CSV", contract=contract):
-            if token and token not in commands:
-                commands.append(token)
     return commands
+
+
+def bundled_commands(*, contract: Mapping[str, str | list[str]] | None = None) -> list[str]:
+    if _contract_scalar(contract, "RUN_NEEDS_WORKLOAD_TOOLS") != "1":
+        return []
+    return ["hackbench", "sysbench", "wrk"]
 
 
 def tool_packages(manager: str, tool: str) -> tuple[str, ...]:

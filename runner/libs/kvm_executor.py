@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import shutil
 import subprocess
 import sys
 from functools import partial
@@ -25,14 +24,8 @@ def _require_scalar(mapping: dict[str, str | list[str]], name: str) -> str:
 
 def suite_command(workspace_root: Path, manifest_path: Path, contract: dict[str, str | list[str]]) -> str:
     remote_python = _require_scalar(contract, "RUN_REMOTE_PYTHON_BIN")
-    staged_modules_root = workspace_root / "vendor" / "linux-framework" / ".virtme_mods"
     return (
         f'cd "{workspace_root}" && '
-        f'kernel_release="$(uname -r)" && '
-        f'mods_root="{staged_modules_root}" && '
-        f'if [ -d "$mods_root/lib/modules/0.0.0" ] && [ ! -e "$mods_root/lib/modules/$kernel_release" ]; then '
-        f'ln -sfn 0.0.0 "$mods_root/lib/modules/$kernel_release"; '
-        f'fi && '
         f'PYTHONPATH="{workspace_root}${{PYTHONPATH:+:${{PYTHONPATH}}}}" '
         f'"{remote_python}" -m runner.libs.execute_workspace '
         f'"{workspace_root}" "{manifest_path}"'
@@ -94,8 +87,6 @@ def main(argv: list[str] | None = None) -> None:
     executor = _require_scalar(contract, "RUN_EXECUTOR")
     if executor != "kvm":
         _die(f"manifest executor is not kvm: {executor}")
-    staged_modules_root = ROOT_DIR / "vendor" / "linux-framework" / ".virtme_mods"
-    shutil.rmtree(staged_modules_root, ignore_errors=True)
     workspace_root = ROOT_DIR
     completed = subprocess.run(
         build_vm_command(workspace_root, manifest_path, contract),

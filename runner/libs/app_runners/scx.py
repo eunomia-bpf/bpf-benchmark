@@ -1,25 +1,28 @@
 from __future__ import annotations
-
-import os
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from .. import ROOT_DIR
 from ..workload import WorkloadResult
 from .base import AppRunner
+from .setup_support import repo_artifact_root
 from .scx_support import ScxSchedulerSession, preferred_path, read_scx_ops, read_scx_state, run_workload
 
-
-DEFAULT_SCX_BINARY_DIR = ROOT_DIR / "corpus" / "build" / ("arm64" if os.uname().machine in {"aarch64", "arm64"} else "x86_64") / "scx" / "bin"
-DEFAULT_SCX_BINARY = DEFAULT_SCX_BINARY_DIR / "scx_rusty"
 DEFAULT_LOAD_TIMEOUT_S = 20
+
+
+def _default_scx_binary_dir() -> Path:
+    return repo_artifact_root() / "scx" / "bin"
+
+
+def _default_scx_binary() -> Path:
+    return _default_scx_binary_dir() / "scx_rusty"
 
 
 def _scheduler_binary_for_name(scheduler: str | None) -> Path:
     normalized = str(scheduler or "").strip()
     if not normalized:
-        return DEFAULT_SCX_BINARY
-    return DEFAULT_SCX_BINARY_DIR / f"scx_{normalized}"
+        return _default_scx_binary()
+    return _default_scx_binary_dir() / f"scx_{normalized}"
 
 
 class ScxRunner(AppRunner):

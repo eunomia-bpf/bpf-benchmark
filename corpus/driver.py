@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 from collections import Counter
 from dataclasses import dataclass, field
@@ -96,13 +95,6 @@ def _print_progress(event: str, **fields: object) -> None:
     payload = {"event": event}
     payload.update(fields)
     print(json.dumps(payload, sort_keys=True), flush=True)
-
-
-def _restore_environment(saved_env: dict[str, str]) -> None:
-    for key in list(os.environ.keys()):
-        if key not in saved_env:
-            del os.environ[key]
-    os.environ.update(saved_env)
 
 
 def _program_phase_stats(
@@ -1592,9 +1584,6 @@ def build_run_metadata(
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    saved_env = os.environ.copy()
-    if args.rejit_passes is not None:
-        os.environ["BPFREJIT_BENCH_PASSES"] = str(args.rejit_passes).strip()
     output_json = Path(args.output_json).resolve()
     metadata_suite_path = Path(args.suite).resolve()
     metadata_suite, _metadata_suite_summary = load_app_suite_from_yaml(
@@ -1705,9 +1694,6 @@ def main(argv: list[str] | None = None) -> int:
             error_message=str(exc),
         )
         raise
-    finally:
-        _restore_environment(saved_env)
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

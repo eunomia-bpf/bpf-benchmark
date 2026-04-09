@@ -11,7 +11,7 @@ from typing import Any, Mapping, Sequence
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
 from ..workload import WorkloadResult, run_connect_storm, run_exec_storm, run_file_io, run_open_storm
-from .setup_support import first_existing_dir, missing_required_commands, pick_host_executable
+from .setup_support import missing_required_commands, pick_host_executable, repo_artifact_root
 
 def _bpftool_binary() -> str:
     return resolve_bpftool_binary()
@@ -197,11 +197,9 @@ spec:
 
 
 def inspect_tetragon_setup() -> dict[str, object]:
-    arch_dir = "arm64" if os.uname().machine in {"aarch64", "arm64"} else "x86_64"
-    bundled_tetragon_binary = ROOT_DIR / "corpus" / "build" / arch_dir / "tetragon" / "bin" / "tetragon"
-    bundled_bpf_dir = ROOT_DIR / "corpus" / "build" / arch_dir / "tetragon"
-    explicit_binary = os.environ.get("TETRAGON_BINARY", "").strip() or None
-    explicit_bpf_dir = os.environ.get("TETRAGON_BPF_LIB_DIR", "").strip() or None
+    bundled_root = repo_artifact_root() / "tetragon"
+    bundled_tetragon_binary = bundled_root / "bin" / "tetragon"
+    bundled_bpf_dir = bundled_root
 
     missing_tools = missing_required_commands(("stress-ng", "fio", "curl", "tar"))
     if missing_tools:
@@ -213,18 +211,17 @@ def inspect_tetragon_setup() -> dict[str, object]:
             "stderr_tail": f"missing required Tetragon workload tools: {' '.join(missing_tools)}",
         }
 
-    tetragon_binary = pick_host_executable(explicit_binary, bundled_tetragon_binary)
+    tetragon_binary = pick_host_executable(bundled_tetragon_binary)
     if tetragon_binary is None:
-        checked = [explicit_binary or "<unset>", str(bundled_tetragon_binary)]
         return {
             "returncode": 1,
             "tetragon_binary": None,
             "tetragon_bpf_lib_dir": None,
             "stdout_tail": "",
-            "stderr_tail": f"missing repo-managed Tetragon binary; checked {', '.join(checked)}",
+            "stderr_tail": f"missing repo-managed Tetragon binary under {bundled_tetragon_binary}",
         }
 
-    bpf_lib_dir = first_existing_dir(explicit_bpf_dir, bundled_bpf_dir)
+    bpf_lib_dir = bundled_bpf_dir if bundled_bpf_dir.is_dir() else None
     if bpf_lib_dir is None or not any(bpf_lib_dir.glob("*.o")) and not any(bpf_lib_dir.glob("*.bpf.o")):
         return {
             "returncode": 1,

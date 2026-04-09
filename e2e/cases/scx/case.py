@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 import threading
 from datetime import datetime, timezone
@@ -16,8 +15,9 @@ from runner.libs import (  # noqa: E402
     ROOT_DIR,
     which,
 )
+from runner.libs.app_runners.setup_support import repo_artifact_root  # noqa: E402
 from runner.libs.app_runners.base import AppRunner  # noqa: E402
-from runner.libs.app_runners.scx import ScxRunner, preferred_path, read_scx_ops, read_scx_state  # noqa: E402
+from runner.libs.app_runners.scx import ScxRunner, read_scx_ops, read_scx_state  # noqa: E402
 from runner.libs.bpf_stats import sample_bpf_stats  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     compute_delta,
@@ -37,10 +37,13 @@ from runner.libs.case_common import (  # noqa: E402
 
 DEFAULT_OUTPUT_JSON = RESULTS_DIR / "scx.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "scx-e2e.md"
-DEFAULT_SCX_BINARY = ROOT_DIR / "corpus" / "build" / ("arm64" if os.uname().machine in {"aarch64", "arm64"} else "x86_64") / "scx" / "bin" / "scx_rusty"
 DEFAULT_LOAD_TIMEOUT = 20
 DEFAULT_DURATION_S = 30
 DEFAULT_SMOKE_DURATION_S = 10
+
+
+def default_scx_binary() -> Path:
+    return repo_artifact_root() / "scx" / "bin" / "scx_rusty"
 
 
 def read_proc_stat_fields() -> dict[str, int]:
@@ -436,10 +439,9 @@ def build_markdown(payload: Mapping[str, object]) -> str:
 
 
 def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
-    os.environ["PATH"] = preferred_path()
-
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
-    scheduler_binary = Path(getattr(args, "scheduler_binary", DEFAULT_SCX_BINARY)).resolve()
+    scheduler_binary_arg = getattr(args, "scheduler_binary", None)
+    scheduler_binary = Path(scheduler_binary_arg).resolve() if scheduler_binary_arg else default_scx_binary().resolve()
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary, scheduler_binary)
 

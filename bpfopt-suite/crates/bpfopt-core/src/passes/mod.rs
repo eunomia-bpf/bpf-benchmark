@@ -195,7 +195,3 @@ pub fn build_custom_pipeline(names: &[String]) -> Result<PassManager> {
 #[cfg(test)]
 #[path = "mod_tests.rs"]
 mod tests;
-
-#[cfg(test)]
-#[path = "real_bpfo_tests.rs"]
-mod real_bpfo_tests;

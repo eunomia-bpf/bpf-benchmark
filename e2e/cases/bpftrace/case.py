@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import os
 import re
 import statistics
 import sys
@@ -39,14 +38,6 @@ DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e-report.md"
 DEFAULT_DURATION_S = 30
 MIN_BPFTRACE_VERSION = (0, 16, 0)
-
-
-def prepend_guest_tools_to_path() -> None:
-    preferred = "/usr/local/sbin"
-    current = os.environ.get("PATH", "")
-    parts = [part for part in current.split(os.pathsep) if part]
-    if preferred not in parts:
-        os.environ["PATH"] = preferred + (os.pathsep + current if current else "")
 
 
 def parse_version(text: str) -> tuple[int, int, int] | None:
@@ -425,7 +416,6 @@ def build_report(payload: Mapping[str, object]) -> str:
 
 
 def run_bpftrace_case(args: argparse.Namespace) -> dict[str, object]:
-    prepend_guest_tools_to_path()
     prepared_daemon_session = getattr(args, "_prepared_daemon_session", None)
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")

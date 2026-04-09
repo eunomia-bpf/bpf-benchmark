@@ -57,7 +57,6 @@ from runner.libs.case_common import (  # noqa: E402
 DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")
 DEFAULT_OUTPUT_JSON = RESULTS_DIR / "tracee.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tracee-e2e-real.md"
-CACHED_TRACEE_BINARY = ROOT_DIR / "e2e" / "cases" / "tracee" / "bin" / "tracee"
 DEFAULT_SAMPLE_COUNT = 5
 DEFAULT_SMOKE_SAMPLE_COUNT = 2
 DEFAULT_WARMUP_DURATION_S = 5

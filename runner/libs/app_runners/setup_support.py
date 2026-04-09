@@ -6,7 +6,7 @@ import struct
 from pathlib import Path
 from typing import Sequence
 
-from .. import which
+from .. import ROOT_DIR, which
 
 _ELF_MAGIC = b"\x7fELF"
 _HOST_ELF_MACHINES = {
@@ -45,6 +45,16 @@ def binary_matches_host_arch(candidate: str | Path) -> bool:
     return machine == expected
 
 
+def repo_artifact_root() -> Path:
+    configured = os.environ.get("BPFREJIT_REPO_ARTIFACT_ROOT", "").strip()
+    if not configured:
+        raise RuntimeError("BPFREJIT_REPO_ARTIFACT_ROOT is required for repo-managed runtime artifacts")
+    candidate = Path(configured).expanduser()
+    if not candidate.is_absolute():
+        candidate = (ROOT_DIR / candidate).resolve()
+    return candidate
+
+
 def pick_host_executable(*candidates: str | Path | None) -> Path | None:
     for candidate in candidates:
         if candidate is None:
@@ -73,4 +83,3 @@ def first_existing_dir(*candidates: str | Path | None) -> Path | None:
         if path.is_dir():
             return path.resolve()
     return None
-

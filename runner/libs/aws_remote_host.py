@@ -9,6 +9,8 @@ import tarfile
 import tempfile
 from pathlib import Path
 
+STANDARD_REMOTE_PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 
 def die(message: str) -> None:
     print(f"[aws-remote-host][ERROR] {message}", file=sys.stderr)
@@ -19,11 +21,19 @@ def run_checked(*command: str, sudo: bool = False, capture_output: bool = False)
     final_command = list(command)
     if sudo and os.geteuid() != 0:
         final_command = ["sudo", *final_command]
+    env = os.environ.copy()
+    existing_path = env.get("PATH", "")
+    path_entries: list[str] = []
+    for entry in (STANDARD_REMOTE_PATH.split(":") + existing_path.split(":")):
+        if entry and entry not in path_entries:
+            path_entries.append(entry)
+    env["PATH"] = ":".join(path_entries)
     completed = subprocess.run(
         final_command,
         text=True,
         capture_output=capture_output,
         check=False,
+        env=env,
     )
     if completed.returncode != 0:
         raise SystemExit(completed.returncode)
@@ -98,7 +108,7 @@ def cmd_install_base_prereqs(args: argparse.Namespace) -> None:
     if packages:
         run_checked("dnf", "-y", "install", *packages, sudo=True)
     for command_name in commands:
-        if shutil.which(command_name) is None:
+        if shutil.which(command_name, path=STANDARD_REMOTE_PATH) is None:
             die(f"required command is missing: {command_name}")
     Path(args.stamp_path).touch()
 
@@ -253,7 +263,6 @@ def cmd_run_workspace(args: argparse.Namespace) -> None:
                 "runner.libs.execute_workspace",
                 args.workspace,
                 args.manifest_path,
-                args.archive_path,
             ],
             env=env,
             stdout=log_file,
@@ -263,15 +272,6 @@ def cmd_run_workspace(args: argparse.Namespace) -> None:
         )
     if completed.returncode != 0:
         raise SystemExit(completed.returncode)
-
-
-def cmd_extract_archive(args: argparse.Namespace) -> None:
-    destination = Path(args.destination_dir)
-    shutil.rmtree(destination, ignore_errors=True)
-    destination.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(args.archive_path, "r:gz") as archive:
-        archive.extractall(destination, filter="data")
-
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="aws_remote_host.py")
@@ -329,15 +329,9 @@ def build_parser() -> argparse.ArgumentParser:
     run_workspace = subparsers.add_parser("run-workspace")
     run_workspace.add_argument("workspace")
     run_workspace.add_argument("manifest_path")
-    run_workspace.add_argument("archive_path")
     run_workspace.add_argument("log_path")
     run_workspace.add_argument("remote_python")
     run_workspace.set_defaults(func=cmd_run_workspace)
-
-    extract_archive = subparsers.add_parser("extract-archive")
-    extract_archive.add_argument("archive_path")
-    extract_archive.add_argument("destination_dir")
-    extract_archive.set_defaults(func=cmd_extract_archive)
     return parser
 
 

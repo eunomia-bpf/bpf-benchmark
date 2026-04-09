@@ -21,39 +21,31 @@ from runner.libs.manifest_file import (
 TARGETS_DIR = ROOT_DIR / "runner" / "targets"
 SUITES_DIR = ROOT_DIR / "runner" / "suites"
 DEFAULT_CORPUS_APP_SUITE = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
-WORKLOAD_TOOL_ORDER = ("stress-ng", "fio", "hackbench", "sysbench", "bpftrace", "wrk", "curl", "tc")
-REMOTE_COMMAND_ORDER = ("ip", "taskset", "curl", "tar", "tc")
+REMOTE_COMMAND_ORDER = ("ip", "taskset", "setpriv", "curl", "tar", "dd", "tc", "stress-ng", "fio", "bpftrace", "hackbench", "sysbench", "wrk")
 
-CORPUS_WORKLOAD_KIND_TOOLS = {
-    "exec_storm": ("stress-ng",),
+CORPUS_WORKLOAD_KIND_COMMANDS = {
+    "exec_storm": ("stress-ng", "setpriv"),
     "hackbench": ("hackbench",),
     "network": ("wrk",),
+    "tracee_default": ("setpriv", "wrk"),
+    "block_io": ("dd",),
     "oom_stress": ("stress-ng",),
     "tcp_retransmit": ("tc",),
 }
 
-CORPUS_RUNNER_EXTRA_TOOLS = {
+CORPUS_RUNNER_EXTRA_COMMANDS = {
     "bcc": ("fio",),
     "bpftrace": ("bpftrace",),
     "tetragon": ("fio",),
 }
 
-E2E_CASE_WORKLOAD_TOOLS = {
-    "bcc": ("stress-ng", "fio", "hackbench", "wrk"),
-    "bpftrace": ("stress-ng", "fio", "hackbench", "bpftrace", "wrk", "tc"),
-    "katran": ("wrk",),
-    "scx": ("stress-ng", "hackbench", "sysbench"),
-    "tetragon": ("stress-ng", "fio"),
-    "tracee": (),
-}
-
 E2E_CASE_REMOTE_COMMANDS = {
-    "bcc": ("ip", "taskset", "curl"),
-    "bpftrace": ("ip", "taskset"),
-    "katran": ("ip", "taskset"),
-    "scx": ("ip", "taskset"),
-    "tetragon": ("ip", "taskset", "curl", "tar"),
-    "tracee": ("ip", "taskset", "curl"),
+    "bcc": ("ip", "taskset", "setpriv", "curl", "stress-ng", "fio", "dd", "hackbench", "wrk"),
+    "bpftrace": ("ip", "taskset", "setpriv", "stress-ng", "fio", "dd", "bpftrace", "tc", "hackbench", "wrk"),
+    "katran": ("ip", "taskset", "wrk"),
+    "scx": ("ip", "taskset", "stress-ng", "hackbench", "sysbench"),
+    "tetragon": ("ip", "taskset", "setpriv", "curl", "tar", "stress-ng", "fio"),
+    "tracee": ("ip", "taskset", "setpriv", "curl", "wrk"),
 }
 
 _die = partial(fail, "run-contract")
@@ -156,14 +148,20 @@ def _ordered_csv_from_tokens(tokens: set[str], *, order: tuple[str, ...]) -> str
     return ",".join(token for token in order if token in tokens)
 
 
-def _corpus_workload_tools_for_selection(app_suite: object) -> str:
-    selected_tokens: set[str] = set()
+def _ordered_csv_with_tail(tokens: set[str], *, order: tuple[str, ...]) -> str:
+    ordered = [token for token in order if token in tokens]
+    ordered.extend(sorted(token for token in tokens if token not in order))
+    return ",".join(ordered)
+
+
+def _corpus_workload_requirements_for_selection(app_suite: object) -> str:
+    remote_commands: set[str] = set()
     for app in getattr(app_suite, "apps", ()):
         runner = str(getattr(app, "runner", "") or "").strip()
         workload_kind = str(app.workload_for("corpus") or "").strip()
-        selected_tokens.update(CORPUS_RUNNER_EXTRA_TOOLS.get(runner, ()))
-        selected_tokens.update(CORPUS_WORKLOAD_KIND_TOOLS.get(workload_kind, ()))
-    return _ordered_csv_from_tokens(selected_tokens, order=WORKLOAD_TOOL_ORDER)
+        remote_commands.update(CORPUS_RUNNER_EXTRA_COMMANDS.get(runner, ()))
+        remote_commands.update(CORPUS_WORKLOAD_KIND_COMMANDS.get(workload_kind, ()))
+    return _ordered_csv_from_tokens(remote_commands, order=REMOTE_COMMAND_ORDER)
 
 
 def _apply_corpus_filter_selection(
@@ -188,14 +186,14 @@ def _apply_corpus_filter_selection(
     filtered_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "") if "scx" in selected_runners else ""
     filtered_needs_sched_ext = "1" if "scx" in selected_runners else "0"
     filtered_needs_katran_bundle = "1" if "katran" in selected_runners else "0"
-    filtered_workload_tools = _corpus_workload_tools_for_selection(app_suite)
+    filtered_remote_commands = _corpus_workload_requirements_for_selection(app_suite)
     return (
         filtered_benchmark_repos,
         filtered_native_repos,
         filtered_scx_packages,
         filtered_needs_sched_ext,
         filtered_needs_katran_bundle,
-        filtered_workload_tools,
+        filtered_remote_commands,
     )
 
 
@@ -203,7 +201,7 @@ def _apply_e2e_case_selection(
     *,
     run_e2e_cases: str,
     suite: dict[str, str],
-) -> tuple[str, str, str, str, str, str, str]:
+) -> tuple[str, str, str, str, str, str]:
     selected_cases = set(_csv_tokens(run_e2e_cases))
     include_all = "all" in selected_cases
     run_benchmark_repos = _suite_repos_for_e2e_cases(run_e2e_cases)
@@ -211,12 +209,10 @@ def _apply_e2e_case_selection(
     run_scx_packages = ""
     run_needs_sched_ext = "0"
     run_needs_katran_bundle = "0"
-    workload_tools: set[str] = set()
     remote_commands: set[str] = set()
-    for case_name, tools in E2E_CASE_WORKLOAD_TOOLS.items():
+    for case_name, commands in E2E_CASE_REMOTE_COMMANDS.items():
         if include_all or case_name in selected_cases:
-            workload_tools.update(tools)
-            remote_commands.update(E2E_CASE_REMOTE_COMMANDS.get(case_name, ()))
+            remote_commands.update(commands)
     if include_all or "scx" in selected_cases:
         run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")
         run_needs_sched_ext = "1"
@@ -228,15 +224,32 @@ def _apply_e2e_case_selection(
         run_scx_packages,
         run_needs_sched_ext,
         run_needs_katran_bundle,
-        _ordered_csv_from_tokens(workload_tools, order=WORKLOAD_TOOL_ORDER),
         _ordered_csv_from_tokens(remote_commands, order=REMOTE_COMMAND_ORDER),
     )
+
+
+def _remote_transfer_roots(
+    *,
+    suite: dict[str, str],
+    suite_name: str,
+    run_needs_daemon_binary: str,
+    run_needs_kinsn_modules: str,
+    run_repo_artifact_root: str,
+    include_repo_artifact_root: bool,
+) -> str:
+    roots: set[str] = set(_csv_tokens(suite.get("SUITE_REMOTE_TRANSFER_ROOTS", "")))
+    if run_needs_daemon_binary == "1":
+        roots.add("daemon")
+    if run_needs_kinsn_modules == "1":
+        roots.add("module")
+    if include_repo_artifact_root and run_repo_artifact_root:
+        roots.add(run_repo_artifact_root)
+    return _ordered_csv_with_tail(roots, order=("runner", "daemon", "module", "tests", "micro", "corpus", "e2e"))
 
 
 _COMMON_MANIFEST_INPUTS = {
     "PYTHON",
     "RUN_TOKEN",
-    "CROSS_COMPILE_ARM64",
     "LLVM_CONFIG",
     "LLVM_DIR",
 }
@@ -371,7 +384,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     run_needs_llvmbpf = suite.get("SUITE_NEEDS_LLVMBPF", "0")
     run_llvm_dir = ""
     run_remote_commands = suite.get("SUITE_DEFAULT_REMOTE_COMMANDS", "")
-    run_workload_tools = suite.get("SUITE_DEFAULT_WORKLOAD_TOOLS", "")
     run_needs_katran_bundle = suite.get("SUITE_NEEDS_KATRAN_BUNDLE", "0")
     run_bpftool_bin = "bpftool"
     run_aws_key_name = ""
@@ -413,6 +425,14 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     run_test_scx_prog_show_race_skip_probe = ""
     run_corpus_argv: list[str] = []
     run_e2e_argv: list[str] = []
+    run_repo_artifact_root = f".cache/repo-artifacts/{target.get('TARGET_ARCH', '')}"
+    run_libbpf_runtime_path = ""
+    run_daemon_binary_path = ""
+    run_runner_binary_path = ""
+    run_test_unittest_build_dir = ""
+    run_test_negative_build_dir = ""
+    run_kinsn_module_dir = ""
+    run_remote_transfer_roots = ""
 
     if target.get("TARGET_EXECUTOR", "") == "aws-ssh":
         aws_env_prefix = target.get("TARGET_AWS_ENV_PREFIX", "")
@@ -443,12 +463,14 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         run_e2e_cases = _normalize_csv(_prefixed_env_or_default(values, aws_env_prefix, "E2E_CASES", suite.get("SUITE_DEFAULT_E2E_CASES", "all")))
         run_e2e_args = _prefixed_env_or_default(values, aws_env_prefix, "E2E_ARGS", "")
         run_e2e_smoke = _prefixed_env_or_default(values, aws_env_prefix, "E2E_SMOKE", "0")
-        run_aws_key_name = _prefixed_env_or_default(values, aws_env_prefix, "KEY_NAME")
-        if not run_aws_key_name:
-            _die(f"{aws_env_prefix}_KEY_NAME is required for AWS targets")
         run_aws_key_path = _prefixed_env_or_default(values, aws_env_prefix, "KEY_PATH")
         if not run_aws_key_path:
             _die(f"{aws_env_prefix}_KEY_PATH is required for AWS targets")
+        run_aws_key_name = _prefixed_env_or_default(values, aws_env_prefix, "KEY_NAME")
+        if not run_aws_key_name:
+            run_aws_key_name = Path(run_aws_key_path).stem
+        if not run_aws_key_name:
+            _die(f"{aws_env_prefix}_KEY_NAME could not be derived from {aws_env_prefix}_KEY_PATH")
         run_aws_security_group_id = _prefixed_env_or_default(values, aws_env_prefix, "SECURITY_GROUP_ID")
         if not run_aws_security_group_id:
             _die(f"{aws_env_prefix}_SECURITY_GROUP_ID is required for AWS targets")
@@ -524,7 +546,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     if suite_name == "test":
         run_benchmark_repos = ""
         run_native_repos = ""
-        run_workload_tools = ""
         if run_test_mode == "selftest":
             run_scx_packages = ""
             run_needs_sched_ext = "0"
@@ -537,7 +558,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         run_benchmark_repos = ""
         run_native_repos = ""
         run_scx_packages = ""
-        run_workload_tools = ""
     elif suite_name == "corpus":
         if target_name == "x86-kvm" and not values.get("SAMPLES", "").strip():
             run_bench_samples = _env_or_default(values, "VM_CORPUS_SAMPLES", "30")
@@ -547,7 +567,7 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
             run_scx_packages,
             run_needs_sched_ext,
             run_needs_katran_bundle,
-            run_workload_tools,
+            corpus_remote_commands,
         ) = _apply_corpus_filter_selection(
             run_corpus_filters=run_corpus_filters,
             suite=suite,
@@ -557,6 +577,7 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
             run_needs_sched_ext=run_needs_sched_ext,
             run_needs_katran_bundle=run_needs_katran_bundle,
         )
+        run_remote_commands = _append_csv_list(run_remote_commands, corpus_remote_commands)
     elif suite_name == "e2e":
         if not run_e2e_cases:
             run_e2e_cases = suite.get("SUITE_DEFAULT_E2E_CASES", "all")
@@ -567,23 +588,57 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
             run_scx_packages,
             run_needs_sched_ext,
             run_needs_katran_bundle,
-            run_workload_tools,
             run_remote_commands,
         ) = _apply_e2e_case_selection(
             run_e2e_cases=run_e2e_cases,
             suite=suite,
         )
+        run_remote_commands = _append_csv_list(suite.get("SUITE_DEFAULT_REMOTE_COMMANDS", ""), run_remote_commands)
     else:
         _die(f"unsupported suite: {suite_name}")
 
     if run_needs_sched_ext == "1" and target.get("TARGET_SUPPORTS_SCHED_EXT", "0") != "1":
         _die(f"target {target_name} does not support required sched_ext for suite {suite_name}")
 
+    run_needs_workload_tools = suite.get("SUITE_NEEDS_WORKLOAD_TOOLS", "0")
     if run_needs_llvmbpf == "1":
         run_llvm_dir = _resolve_manifest_llvm_dir(values)
         if not run_llvm_dir:
             _die(f"suite {suite_name} requires explicit LLVM_DIR or LLVM_CONFIG")
 
+    if suite_name in {"test", "corpus", "e2e"}:
+        run_libbpf_runtime_path = f"{run_repo_artifact_root}/libbpf/lib/libbpf.so"
+    if target.get("TARGET_ARCH", "") == "arm64":
+        run_daemon_binary_path = "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon"
+        run_runner_binary_path = "runner/build-arm64/micro_exec"
+        run_test_unittest_build_dir = "tests/unittest/build-arm64"
+        run_test_negative_build_dir = "tests/negative/build-arm64"
+        run_kinsn_module_dir = "module/arm64"
+    else:
+        run_daemon_binary_path = "daemon/target/release/bpfrejit-daemon"
+        run_runner_binary_path = "runner/build/micro_exec"
+        run_test_unittest_build_dir = "tests/unittest/build"
+        run_test_negative_build_dir = "tests/negative/build"
+        run_kinsn_module_dir = "module/x86"
+    if target.get("TARGET_EXECUTOR", "") == "kvm":
+        run_kernel_modules_root = f"{run_repo_artifact_root}/kernel-modules"
+    else:
+        run_kernel_modules_root = "/"
+    include_repo_artifact_root = bool(
+        run_libbpf_runtime_path
+        or run_native_repos
+        or run_scx_packages
+        or run_needs_katran_bundle == "1"
+        or (target.get("TARGET_EXECUTOR", "") == "kvm" and run_needs_kinsn_modules == "1")
+    )
+    run_remote_transfer_roots = _remote_transfer_roots(
+        suite=suite,
+        suite_name=suite_name,
+        run_needs_daemon_binary=run_needs_daemon_binary,
+        run_needs_kinsn_modules=run_needs_kinsn_modules,
+        run_repo_artifact_root=run_repo_artifact_root,
+        include_repo_artifact_root=include_repo_artifact_root,
+    )
     return {
         "RUN_TARGET_NAME": target_name,
         "RUN_TARGET_ARCH": target.get("TARGET_ARCH", ""),
@@ -597,6 +652,7 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         "RUN_NEEDS_RUNNER_BINARY": run_needs_runner_binary,
         "RUN_NEEDS_DAEMON_BINARY": run_needs_daemon_binary,
         "RUN_NEEDS_KINSN_MODULES": run_needs_kinsn_modules,
+        "RUN_NEEDS_WORKLOAD_TOOLS": run_needs_workload_tools,
         "RUN_NAME_TAG": run_name_tag,
         "RUN_INSTANCE_TYPE": run_instance_type,
         "RUN_REMOTE_USER": run_remote_user,
@@ -641,8 +697,16 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         "RUN_E2E_SMOKE": run_e2e_smoke,
         "RUN_NATIVE_REPOS_CSV": run_native_repos,
         "RUN_SCX_PACKAGES_CSV": run_scx_packages,
+        "RUN_REPO_ARTIFACT_ROOT": run_repo_artifact_root,
         "RUN_REMOTE_COMMANDS_CSV": run_remote_commands,
-        "RUN_WORKLOAD_TOOLS_CSV": run_workload_tools,
+        "RUN_LIBBPF_RUNTIME_PATH": run_libbpf_runtime_path,
+        "RUN_DAEMON_BINARY_PATH": run_daemon_binary_path,
+        "RUN_RUNNER_BINARY_PATH": run_runner_binary_path,
+        "RUN_TEST_UNITTEST_BUILD_DIR": run_test_unittest_build_dir,
+        "RUN_TEST_NEGATIVE_BUILD_DIR": run_test_negative_build_dir,
+        "RUN_KINSN_MODULE_DIR": run_kinsn_module_dir,
+        "RUN_KERNEL_MODULES_ROOT": run_kernel_modules_root,
+        "RUN_REMOTE_TRANSFER_ROOTS_CSV": run_remote_transfer_roots,
         "RUN_NEEDS_KATRAN_BUNDLE": run_needs_katran_bundle,
         "RUN_BPFTOOL_BIN": run_bpftool_bin,
         "RUN_CORPUS_ARGV": run_corpus_argv,

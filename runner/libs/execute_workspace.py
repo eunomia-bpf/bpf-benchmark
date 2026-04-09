@@ -14,11 +14,10 @@ _die = partial(fail, "execute-workspace")
 
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) not in {2, 3}:
-        _die("usage: execute_workspace.py <workspace> <manifest_path> [archive_path]")
+    if len(args) != 2:
+        _die("usage: execute_workspace.py <workspace> <manifest_path>")
     workspace = Path(args[0]).resolve()
     manifest_path = Path(args[1]).resolve()
-    archive_path = Path(args[2]).resolve() if len(args) == 3 and args[2] else None
     if not workspace.is_dir():
         _die(f"workspace is missing: {workspace}")
     if not manifest_path.is_file():
@@ -30,7 +29,6 @@ def main(argv: list[str] | None = None) -> None:
     SuiteEntrypoint.from_contract(
         workspace,
         manifest_path,
-        archive_path,
         contract,
     ).run()
 

@@ -11,7 +11,7 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs import aws_common
 from runner.libs.cli_support import fail
-from runner.libs.prereq_contract import required_commands, tool_packages
+from runner.libs.prereq_contract import bundled_commands, required_commands, tool_packages
 from runner.libs.state_file import write_state
 
 _die = partial(fail, "aws-remote-prep")
@@ -171,35 +171,24 @@ def _instance_state_is_reusable(state: str) -> bool:
 
 
 def _remote_kernel_release(ctx: aws_common.AwsExecutorContext, ip: str) -> str:
-    completed = aws_common._ssh_bash(
+    remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
+    completed = aws_common._run_remote_helper(
         ctx,
         ip,
-        script="""
-set -euo pipefail
-uname -r
-""",
+        remote_python,
+        "uname-r",
         capture_output=True,
     )
     return completed.stdout.strip()
 
 
 def _remote_root_volume_size_gb(ctx: aws_common.AwsExecutorContext, ip: str) -> int | None:
-    completed = aws_common._ssh_bash(
+    remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
+    completed = aws_common._run_remote_helper(
         ctx,
         ip,
-        script="""
-set -euo pipefail
-root_source="$(findmnt -n -o SOURCE /)"
-[[ -n "$root_source" ]] || exit 1
-root_device="$root_source"
-parent_kname="$(lsblk -no PKNAME "$root_source" 2>/dev/null | head -n1 || true)"
-if [[ -n "$parent_kname" ]]; then
-    root_device="/dev/${parent_kname}"
-fi
-size_bytes="$(lsblk -nb -o SIZE "$root_device" 2>/dev/null | head -n1 || true)"
-[[ -n "$size_bytes" ]] || exit 1
-echo $(((size_bytes + 1073741824 - 1) / 1073741824))
-""",
+        remote_python,
+        "root-volume-size-gb",
         check=False,
         capture_output=True,
     )
@@ -212,14 +201,13 @@ echo $(((size_bytes + 1073741824 - 1) / 1073741824))
 
 
 def _remote_has_runtime_btf(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
+    remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
     return (
-        aws_common._ssh_bash(
+        aws_common._run_remote_helper(
             ctx,
             ip,
-            script="""
-set -euo pipefail
-test -s /sys/kernel/btf/vmlinux
-""",
+            remote_python,
+            "has-runtime-btf",
             check=False,
         ).returncode
         == 0
@@ -227,14 +215,13 @@ test -s /sys/kernel/btf/vmlinux
 
 
 def _remote_has_sched_ext(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
+    remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
     return (
-        aws_common._ssh_bash(
+        aws_common._run_remote_helper(
             ctx,
             ip,
-            script="""
-set -euo pipefail
-test -e /sys/kernel/sched_ext/state
-""",
+            remote_python,
+            "has-sched-ext",
             check=False,
         ).returncode
         == 0
@@ -282,9 +269,12 @@ def _remote_prereq_packages(contract: dict[str, str | list[str]]) -> list[str]:
     packages = list(_remote_base_packages())
     python_bin = aws_common._require_scalar(contract, "RUN_REMOTE_PYTHON_BIN")
     bpftool_bin = aws_common._require_scalar(contract, "RUN_BPFTOOL_BIN")
+    bundled = set(bundled_commands(contract=contract))
     for tool in (bpftool_bin, python_bin):
         packages.extend(tool_packages(manager, tool))
-    for tool in required_commands(mode="base", contract=contract):
+    for tool in required_commands(contract=contract):
+        if tool in bundled:
+            continue
         if tool in {python_bin, bpftool_bin}:
             continue
         packages.extend(tool_packages(manager, tool))
@@ -294,6 +284,7 @@ def _remote_prereq_packages(contract: dict[str, str | list[str]]) -> list[str]:
 def _remote_required_commands(contract: dict[str, str | list[str]]) -> list[str]:
     python_bin = aws_common._require_scalar(contract, "RUN_REMOTE_PYTHON_BIN")
     bpftool_bin = aws_common._require_scalar(contract, "RUN_BPFTOOL_BIN")
+    bundled = set(bundled_commands(contract=contract))
     commands = [
         bpftool_bin,
         "curl",
@@ -306,7 +297,11 @@ def _remote_required_commands(contract: dict[str, str | list[str]]) -> list[str]
         "taskset",
         "tar",
     ]
-    commands.extend(required_commands(mode="base", contract=contract))
+    commands.extend(
+        command
+        for command in required_commands(contract=contract)
+        if command not in bundled
+    )
     return _ordered_unique(commands)
 
 
@@ -315,54 +310,28 @@ def _setup_remote_base_prereqs(ctx: aws_common.AwsExecutorContext, ip: str) -> N
     remote_stamp_path = _remote_base_prereq_stamp_path(ctx)
     packages = _remote_prereq_packages(ctx.contract)
     commands = _remote_required_commands(ctx.contract)
-    aws_common._ssh_bash(
+    remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
+    aws_common._run_remote_helper(
         ctx,
         ip,
+        remote_python,
+        "install-base-prereqs",
         remote_prereq_dir,
         remote_stamp_path,
-        *packages,
-        "--",
-        *commands,
-        script="""
-set -euo pipefail
-prereq_root="$1"
-stamp_path="$2"
-shift 2
-packages=()
-while [ "$#" -gt 0 ] && [ "$1" != "--" ]; do
-    packages+=("$1")
-    shift
-done
-if [ "$#" -gt 0 ] && [ "$1" = "--" ]; then
-    shift
-fi
-commands=("$@")
-mkdir -p "$prereq_root"
-if [ "${#packages[@]}" -gt 0 ]; then
-    sudo dnf -y install "${packages[@]}"
-fi
-for command_name in "${commands[@]}"; do
-    command -v "$command_name" >/dev/null 2>&1 || {
-        echo "[aws-remote-prereqs][ERROR] required command is missing: $command_name" >&2
-        exit 1
-    }
-done
-touch "$stamp_path"
-test -f "$stamp_path"
-""",
+        ",".join(packages),
+        ",".join(commands),
     )
 
 
 def _verify_remote_base_prereqs(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
+    remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
     return (
-        aws_common._ssh_bash(
+        aws_common._run_remote_helper(
             ctx,
             ip,
+            remote_python,
+            "path-exists",
             _remote_base_prereq_stamp_path(ctx),
-            script="""
-set -euo pipefail
-test -f "$1"
-""",
             check=False,
         ).returncode
         == 0
@@ -371,24 +340,14 @@ test -f "$1"
 
 def _refresh_aws_arm64_base_config(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     remote_release = _remote_kernel_release(ctx, ip)
+    remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
 
     def _fetch_config_text() -> str:
-        completed = aws_common._ssh_bash(
+        completed = aws_common._run_remote_helper(
             ctx,
             ip,
-            script="""
-set -euo pipefail
-release="$(uname -r)"
-if [[ -r "/boot/config-$release" ]]; then
-    cat "/boot/config-$release"
-    exit 0
-fi
-if command -v zcat >/dev/null 2>&1 && [[ -r /proc/config.gz ]]; then
-    zcat /proc/config.gz
-    exit 0
-fi
-exit 1
-""",
+            remote_python,
+            "print-kernel-config",
             check=False,
             capture_output=True,
         )
@@ -443,66 +402,18 @@ def _setup_x86_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     setup_result_dir = ctx.results_dir / setup_stamp
     verify_log = setup_result_dir / "setup_verify.log"
     setup_result_dir.mkdir(parents=True, exist_ok=True)
-    aws_common._ssh_bash(
-        ctx,
-        ip,
-        ctx.contract.get("RUN_REMOTE_KERNEL_STAGE_DIR", ""),  # type: ignore[arg-type]
-        script="""
-set -euo pipefail
-mkdir -p "$1/boot"
-""",
-    )
     remote_kernel_stage_dir = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_KERNEL_STAGE_DIR")
+    remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
+    aws_common._ssh_exec(ctx, ip, "mkdir", "-p", f"{remote_kernel_stage_dir}/boot")
     aws_common._scp_to(ctx, ip, kernel_image, f"{remote_kernel_stage_dir}/boot/")
     aws_common._scp_to(ctx, ip, modules_tar, f"{remote_kernel_stage_dir}/")
-    aws_common._ssh_bash(
+    aws_common._run_remote_helper(
         ctx,
         ip,
+        remote_python,
+        "setup-kernel-x86",
         kernel_release,
         remote_kernel_stage_dir,
-        script="""
-set -euo pipefail
-ver="$1"
-stage_dir="$2"
-title="Codex x86 ($ver)"
-primary_netdev="$(ip -brief link | awk '$1 != "lo" { print $1; exit }')"
-[[ -n "$primary_netdev" ]] || exit 1
-primary_mac="$(cat "/sys/class/net/$primary_netdev/address")"
-[[ -n "$primary_mac" ]] || exit 1
-
-sudo tar -xzf "$stage_dir/modules-$ver.tar.gz" -C /
-tmp_modules_root="$(mktemp -d "$stage_dir/modules-${ver}.XXXXXX")"
-tar -xzf "$stage_dir/modules-$ver.tar.gz" -C "$tmp_modules_root"
-test -d "$tmp_modules_root/lib/modules/$ver"
-sudo rm -rf "/lib/modules/$ver"
-sudo mkdir -p /lib/modules
-sudo cp -a "$tmp_modules_root/lib/modules/$ver" /lib/modules/
-rm -rf "$tmp_modules_root"
-sudo install -o root -g root -m 0755 "$stage_dir/boot/bzImage-$ver" "/boot/vmlinuz-$ver"
-sudo depmod -a "$ver"
-sudo dracut --force --no-hostonly --add-drivers "nvme nvme-core xfs ext4 virtio_blk" "/boot/initramfs-$ver.img" "$ver"
-cat <<EOF_LINK | sudo tee /etc/systemd/network/10-codex-ena.link >/dev/null
-[Match]
-MACAddress=${primary_mac}
-
-[Link]
-Name=ens5
-EOF_LINK
-cat <<EOF_NET | sudo tee /etc/systemd/network/10-codex-ena.network >/dev/null
-[Match]
-MACAddress=${primary_mac}
-
-[Network]
-DHCP=yes
-LinkLocalAddressing=yes
-IPv6AcceptRA=yes
-EOF_NET
-sudo grubby --add-kernel "/boot/vmlinuz-$ver" \
-    --initrd "/boot/initramfs-$ver.img" \
-    --title "$title" \
-    --copy-default
-sudo grubby --set-default "/boot/vmlinuz-$ver"
-""",
     )
     completed = aws_common._aws_cmd(ctx, "ec2", "reboot-instances", "--instance-ids", instance_id)
     if completed.returncode != 0:
@@ -514,21 +425,13 @@ sudo grubby --set-default "/boot/vmlinuz-$ver"
     if not updated_ip or updated_ip == "None":
         _die(f"instance {instance_id} has no public IP after x86 reboot")
     aws_common._wait_for_ssh(ctx, updated_ip)
-    verify = aws_common._ssh_bash(
+    verify = aws_common._run_remote_helper(
         ctx,
         updated_ip,
+        remote_python,
+        "verify-kernel",
         kernel_release,
-        script="""
-set -euo pipefail
-ver="$1"
-uname -r
-ip -brief addr show ens5 || ip -brief addr
-sudo grubby --default-kernel
-test "$(uname -r)" = "$ver"
-test "$(sudo grubby --default-kernel)" = "/boot/vmlinuz-$ver"
-test -s /sys/kernel/btf/vmlinux
-test -e /sys/kernel/sched_ext/state
-""",
+        "1",
         capture_output=True,
     )
     verify_log.write_text(verify.stdout, encoding="utf-8")
@@ -549,43 +452,17 @@ def _setup_arm64_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     verify_log = setup_result_dir / "setup_verify.log"
     setup_result_dir.mkdir(parents=True, exist_ok=True)
     remote_kernel_stage_dir = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_KERNEL_STAGE_DIR")
-    aws_common._ssh_bash(
-        ctx,
-        ip,
-        remote_kernel_stage_dir,
-        script="""
-set -euo pipefail
-mkdir -p "$1/boot"
-""",
-    )
+    remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
+    aws_common._ssh_exec(ctx, ip, "mkdir", "-p", f"{remote_kernel_stage_dir}/boot")
     aws_common._scp_to(ctx, ip, kernel_image, f"{remote_kernel_stage_dir}/boot/")
     aws_common._scp_to(ctx, ip, modules_tar, f"{remote_kernel_stage_dir}/")
-    aws_common._ssh_bash(
+    aws_common._run_remote_helper(
         ctx,
         ip,
+        remote_python,
+        "setup-kernel-arm64",
         kernel_release,
         remote_kernel_stage_dir,
-        script="""
-set -euo pipefail
-ver="$1"
-stage_dir="$2"
-title="Codex ARM64 ($ver)"
-tmp_modules_root="$(mktemp -d "$stage_dir/modules-${ver}.XXXXXX")"
-tar -xzf "$stage_dir/modules-$ver.tar.gz" -C "$tmp_modules_root"
-test -d "$tmp_modules_root/lib/modules/$ver"
-sudo rm -rf "/lib/modules/$ver"
-sudo mkdir -p /lib/modules
-sudo cp -a "$tmp_modules_root/lib/modules/$ver" /lib/modules/
-rm -rf "$tmp_modules_root"
-sudo install -o root -g root -m 0755 "$stage_dir/boot/vmlinuz-$ver.efi" "/boot/vmlinuz-$ver"
-sudo depmod -a "$ver"
-sudo dracut --force "/boot/initramfs-$ver.img" "$ver"
-sudo grubby --add-kernel "/boot/vmlinuz-$ver" \
-    --initrd "/boot/initramfs-$ver.img" \
-    --title "$title" \
-    --copy-default
-sudo grubby --set-default "/boot/vmlinuz-$ver"
-""",
     )
     completed = aws_common._aws_cmd(ctx, "ec2", "reboot-instances", "--instance-ids", instance_id)
     if completed.returncode != 0:
@@ -597,21 +474,13 @@ sudo grubby --set-default "/boot/vmlinuz-$ver"
     if not updated_ip or updated_ip == "None":
         _die(f"instance {instance_id} has no public IP after ARM64 reboot")
     aws_common._wait_for_ssh(ctx, updated_ip)
-    verify = aws_common._ssh_bash(
+    verify = aws_common._run_remote_helper(
         ctx,
         updated_ip,
+        remote_python,
+        "verify-kernel",
         kernel_release,
-        script="""
-set -euo pipefail
-ver="$1"
-uname -r
-ip -brief addr show ens5 || ip -brief addr
-sudo grubby --default-kernel
-test "$(uname -r)" = "$ver"
-test "$(sudo grubby --default-kernel)" = "/boot/vmlinuz-$ver"
-test -s /sys/kernel/btf/vmlinux
-test -e /sys/kernel/sched_ext/state
-""",
+        "1",
         capture_output=True,
     )
     verify_log.write_text(verify.stdout, encoding="utf-8")

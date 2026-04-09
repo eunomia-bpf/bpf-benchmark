@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 import tempfile
 from dataclasses import dataclass
@@ -17,7 +16,6 @@ if __package__ in {None, ""}:
 
 from runner.libs import (  # noqa: E402
     ROOT_DIR,
-    prepare_bpftool_environment,
     smoke_output_path,
     write_json,
     write_text,
@@ -445,13 +443,6 @@ def apply_suite_case_config(args: argparse.Namespace, suite_case_apps: dict[str,
         _configure_katran_case_from_suite(args, apps)
 
 
-def _restore_environment(saved_env: dict[str, str]) -> None:
-    for key in list(os.environ.keys()):
-        if key not in saved_env:
-            del os.environ[key]
-    os.environ.update(saved_env)
-
-
 def _payload_status(payload: object) -> str:
     if not isinstance(payload, dict):
         return ""
@@ -543,7 +534,6 @@ def _run_single_case(
     artifact_result_md = artifact_dir / "result.md"
     artifact_report_md = None if report_md is None else artifact_dir / "report.md"
     session.write(status="running", progress_payload=progress_payload)
-    saved_env = os.environ.copy()
     reset_pending_result_metadata()
     artifact_error_written = False
 
@@ -635,7 +625,6 @@ def _run_single_case(
         )
         raise
     finally:
-        _restore_environment(saved_env)
         _cleanup_suite_temp_paths(args)
 
     print(f"  e2e: wrote {artifact_dir / 'metadata.json'}")
@@ -645,10 +634,7 @@ def _run_single_case(
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    prepare_bpftool_environment()
     suite_case_apps = _load_suite_case_apps(Path(args.suite).resolve())
-    if args.rejit_passes is not None:
-        os.environ["BPFREJIT_BENCH_PASSES"] = str(args.rejit_passes).strip()
 
     if args.case == "all":
         cases_to_run = [case_name for case_name in ALL_CASES if suite_case_apps.get(case_name)]

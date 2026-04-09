@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 import threading
 from dataclasses import dataclass
@@ -865,16 +864,6 @@ def daemon_payload(
 
 
 def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
-    bpftool_arg = str(
-        getattr(args, "bpftool", None)
-        or os.environ.get("BPFTOOL_BIN", "").strip()
-        or DEFAULT_BPFTOOL
-    )
-    bpftool = str(Path(bpftool_arg).resolve()) if Path(bpftool_arg).exists() else bpftool_arg
-    os.environ["BPFTOOL_BIN"] = bpftool
-    if Path(bpftool).exists():
-        os.environ["PATH"] = f"{Path(bpftool).parent}:{os.environ.get('PATH', '')}"
-
     config = load_config(Path(getattr(args, "config", DEFAULT_CONFIG)).resolve())
     duration_s = int(
         args.duration

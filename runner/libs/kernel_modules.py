@@ -3,15 +3,14 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from . import ROOT_DIR, run_command, tail_text, which
+from . import run_command, tail_text, which
 
 
 def repo_kernel_modules_root() -> Path:
     override = os.environ.get("BPFREJIT_KERNEL_MODULES_ROOT", "").strip()
-    if override:
-        root = Path(override).expanduser().resolve()
-    else:
-        root = (ROOT_DIR / "vendor" / "linux-framework" / ".virtme_mods").resolve()
+    if not override:
+        raise RuntimeError("BPFREJIT_KERNEL_MODULES_ROOT is required")
+    root = Path(override).expanduser().resolve()
     release_dir = root / "lib" / "modules" / os.uname().release
     if not release_dir.is_dir():
         raise RuntimeError(
