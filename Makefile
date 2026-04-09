@@ -12,9 +12,15 @@ KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
 KERNEL_TEST_DIR := $(ROOT_DIR)/tests/kernel
 ARTIFACT_ROOT := $(ROOT_DIR)/.cache
 X86_BUILD_DIR ?= $(ARTIFACT_ROOT)/x86-kernel-build
-X86_KERNEL_LOCK := $(ARTIFACT_ROOT)/x86-kernel.lock
-ARM64_AWS_KERNEL_LOCK := $(ARTIFACT_ROOT)/arm64-aws-kernel.lock
 RUNNER_BUILD_DIR ?= $(RUNNER_DIR)/build
+AWS_X86_SETUP_ROOT := $(ARTIFACT_ROOT)/aws-x86/setup-artifacts/x86
+AWS_X86_SETUP_KERNEL_RELEASE_FILE := $(AWS_X86_SETUP_ROOT)/kernel-release.txt
+AWS_X86_SETUP_KERNEL_IMAGE := $(AWS_X86_SETUP_ROOT)/boot/bzImage
+AWS_X86_SETUP_MODULES_ARCHIVE := $(AWS_X86_SETUP_ROOT)/modules.tar.gz
+AWS_ARM64_SETUP_ROOT := $(ARTIFACT_ROOT)/aws-arm64/setup-artifacts/arm64
+AWS_ARM64_SETUP_KERNEL_RELEASE_FILE := $(AWS_ARM64_SETUP_ROOT)/kernel-release.txt
+AWS_ARM64_SETUP_KERNEL_IMAGE := $(AWS_ARM64_SETUP_ROOT)/boot/vmlinuz.efi
+AWS_ARM64_SETUP_MODULES_ARCHIVE := $(AWS_ARM64_SETUP_ROOT)/modules.tar.gz
 
 include $(RUNNER_DIR)/mk/arm64_defaults.mk
 include $(RUNNER_DIR)/mk/build.mk
@@ -112,30 +118,7 @@ help:
 	@echo "        AWS benchmark mode 'all' fans out micro/corpus/e2e in parallel on dedicated remote instances"
 	@echo "Developer-only raw build helpers still exist internally but are intentionally omitted here."
 
-__kernel:
-	@mkdir -p "$(ARTIFACT_ROOT)"; \
-	flock "$(X86_KERNEL_LOCK)" "$(MAKE)" --no-print-directory __kernel-inner BZIMAGE="$(BZIMAGE)"
-
-__kernel-inner:
-	@test -n "$(BZIMAGE_PATH)" || { echo "BZIMAGE_PATH is required" >&2; exit 1; }
-	@mkdir -p "$(X86_BUILD_DIR)"
-	@if [ ! -f "$(KERNEL_CONFIG_PATH)" ]; then cp "$(DEFCONFIG_SRC)" "$(KERNEL_CONFIG_PATH)"; fi
-	@$(MAKE) -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" olddefconfig
-	@set -e; \
-	if [ -f "$(X86_BUILD_DIR)/arch/x86/boot/bzImage" ]; then \
-		if $(MAKE) -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" -q bzImage modules; then \
-			echo "[kernel] reuse existing x86 bzImage/modules"; \
-		else \
-			status="$$?"; \
-			if [ "$$status" -eq 1 ]; then \
-				$(MAKE) -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" -j"$(JOBS)" bzImage modules; \
-			else \
-				exit "$$status"; \
-			fi; \
-		fi; \
-	else \
-		$(MAKE) -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" -j"$(JOBS)" bzImage modules; \
-	fi
+__kernel: $(X86_BUILD_DIR)/arch/x86/boot/bzImage
 	@if [ "$(BZIMAGE_PATH)" != "$(X86_BUILD_DIR)/arch/x86/boot/bzImage" ]; then \
 		mkdir -p "$$(dirname "$(BZIMAGE_PATH)")"; \
 		cp "$(X86_BUILD_DIR)/arch/x86/boot/bzImage" "$(BZIMAGE_PATH)"; \
@@ -147,30 +130,27 @@ __kernel-clean:
 __kernel-rebuild: __kernel-clean
 	$(MAKE) __kernel BZIMAGE="$(BZIMAGE)"
 
-__kernel-x86-artifacts:
-	@test -n "$(OUTPUT_ROOT)" || { echo "OUTPUT_ROOT is required" >&2; exit 1; }
-	@mkdir -p "$(ARTIFACT_ROOT)"; \
-	flock "$(X86_KERNEL_LOCK)" bash -eu -o pipefail -c '\
-		artifact_root="$(OUTPUT_ROOT)"; \
-		$(MAKE) --no-print-directory __kernel-inner BZIMAGE="$(BZIMAGE)"; \
+$(AWS_X86_SETUP_KERNEL_RELEASE_FILE) $(AWS_X86_SETUP_KERNEL_IMAGE) $(AWS_X86_SETUP_MODULES_ARCHIVE) &: $(X86_BUILD_DIR)/arch/x86/boot/bzImage
+	@bash -eu -o pipefail -c '\
+		artifact_root="$(AWS_X86_SETUP_ROOT)"; \
+		release_file="$(AWS_X86_SETUP_KERNEL_RELEASE_FILE)"; \
+		kernel_image="$(AWS_X86_SETUP_KERNEL_IMAGE)"; \
+		modules_archive="$(AWS_X86_SETUP_MODULES_ARCHIVE)"; \
+		install_root="$(AWS_X86_SETUP_ROOT)/modules.root"; \
 		kernel_release_file="$(X86_BUILD_DIR)/include/config/kernel.release"; \
 		[[ -f "$$kernel_release_file" ]] || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
 		kernel_release="$$(tr -d '\''\n'\'' < "$$kernel_release_file")"; \
-		install_root="$$artifact_root/modules-$$kernel_release.root"; \
-		boot_artifact="$$artifact_root/boot/bzImage-$$kernel_release"; \
-		modules_artifact="$$artifact_root/modules-$$kernel_release.tar.gz"; \
-		if [[ -f "$$artifact_root/kernel-release.txt" ]] && [[ "$$(tr -d '\''\n'\'' < "$$artifact_root/kernel-release.txt")" = "$$kernel_release" ]] && [[ -f "$$boot_artifact" ]] && [[ -f "$$modules_artifact" ]] && [[ "$$boot_artifact" -nt "$(X86_BUILD_DIR)/arch/x86/boot/bzImage" ]] && [[ "$$modules_artifact" -nt "$(X86_BUILD_DIR)/modules.order" ]]; then \
-			echo "[kernel-artifacts] reuse x86 $$kernel_release"; \
-			exit 0; \
-		fi; \
 		rm -rf "$$artifact_root"; \
 		mkdir -p "$$artifact_root/boot"; \
 		mkdir -p "$$install_root"; \
-		cp "$(X86_BUILD_DIR)/arch/x86/boot/bzImage" "$$boot_artifact"; \
-		printf "%s\n" "$$kernel_release" > "$$artifact_root/kernel-release.txt"; \
+		cp "$(X86_BUILD_DIR)/arch/x86/boot/bzImage" "$$kernel_image"; \
+		printf "%s\n" "$$kernel_release" > "$$release_file"; \
 		$(MAKE) --no-print-directory -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" INSTALL_MOD_PATH="$$install_root" DEPMOD=true CONFIG_MODULE_SIG=n modules_install; \
 		rm -f "$$install_root/lib/modules/$$kernel_release/build" "$$install_root/lib/modules/$$kernel_release/source"; \
-		tar -C "$$install_root" -czf "$$modules_artifact" lib'
+		tar -C "$$install_root" -czf "$$modules_archive" lib; \
+		test -f "$$release_file"; \
+		test -f "$$kernel_image"; \
+		test -f "$$modules_archive"'
 
 $(KERNEL_CONFIG_PATH):
 	cp "$(DEFCONFIG_SRC)" "$@"
@@ -241,32 +221,27 @@ $(ARM64_AWS_EFI_IMAGE): $(ARM64_AWS_BUILD_CONFIG)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" vmlinuz.efi -j"$(NPROC)"
 
-__kernel-arm64-aws: $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE)
-
-__kernel-arm64-aws-artifacts:
-	@test -n "$(OUTPUT_ROOT)" || { echo "OUTPUT_ROOT is required" >&2; exit 1; }
-	@mkdir -p "$(ARTIFACT_ROOT)"; \
-	flock "$(ARM64_AWS_KERNEL_LOCK)" bash -eu -o pipefail -c '\
-		artifact_root="$(OUTPUT_ROOT)"; \
-		$(MAKE) --no-print-directory __kernel-arm64-aws ARM64_AWS_BUILD_DIR="$(ARM64_AWS_BUILD_DIR)" ARM64_AWS_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)"; \
+$(AWS_ARM64_SETUP_KERNEL_RELEASE_FILE) $(AWS_ARM64_SETUP_KERNEL_IMAGE) $(AWS_ARM64_SETUP_MODULES_ARCHIVE) &: $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE)
+	@bash -eu -o pipefail -c '\
+		artifact_root="$(AWS_ARM64_SETUP_ROOT)"; \
+		release_file="$(AWS_ARM64_SETUP_KERNEL_RELEASE_FILE)"; \
+		kernel_image="$(AWS_ARM64_SETUP_KERNEL_IMAGE)"; \
+		modules_archive="$(AWS_ARM64_SETUP_MODULES_ARCHIVE)"; \
+		install_root="$(AWS_ARM64_SETUP_ROOT)/modules.root"; \
 		kernel_release_file="$(ARM64_AWS_BUILD_DIR)/include/config/kernel.release"; \
 		[[ -f "$$kernel_release_file" ]] || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
 		kernel_release="$$(tr -d '\''\n'\'' < "$$kernel_release_file")"; \
-		install_root="$$artifact_root/modules-$$kernel_release.root"; \
-		boot_artifact="$$artifact_root/boot/vmlinuz-$$kernel_release.efi"; \
-		modules_artifact="$$artifact_root/modules-$$kernel_release.tar.gz"; \
-		if [[ -f "$$artifact_root/kernel-release.txt" ]] && [[ "$$(tr -d '\''\n'\'' < "$$artifact_root/kernel-release.txt")" = "$$kernel_release" ]] && [[ -f "$$boot_artifact" ]] && [[ -f "$$modules_artifact" ]] && [[ "$$boot_artifact" -nt "$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi" ]] && [[ "$$modules_artifact" -nt "$(ARM64_AWS_BUILD_DIR)/modules.order" ]]; then \
-			echo "[kernel-artifacts] reuse arm64 $$kernel_release"; \
-			exit 0; \
-		fi; \
 		rm -rf "$$artifact_root"; \
 		mkdir -p "$$artifact_root/boot"; \
 		mkdir -p "$$install_root"; \
-		cp "$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi" "$$boot_artifact"; \
-		printf "%s\n" "$$kernel_release" > "$$artifact_root/kernel-release.txt"; \
+		cp "$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi" "$$kernel_image"; \
+		printf "%s\n" "$$kernel_release" > "$$release_file"; \
 		$(MAKE) --no-print-directory -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" INSTALL_MOD_PATH="$$install_root" DEPMOD=true CONFIG_MODULE_SIG=n modules_install; \
 		rm -f "$$install_root/lib/modules/$$kernel_release/build" "$$install_root/lib/modules/$$kernel_release/source"; \
-		tar -C "$$install_root" -czf "$$modules_artifact" lib'
+		tar -C "$$install_root" -czf "$$modules_archive" lib; \
+		test -f "$$release_file"; \
+		test -f "$$kernel_image"; \
+		test -f "$$modules_archive"'
 
 # ── AWS aliases ───────────────────────────────────────────────────────────────
 aws-arm64-test:

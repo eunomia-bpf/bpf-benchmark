@@ -6,8 +6,17 @@ REPO_TRACEE_ROOT := $(REPO_ARTIFACT_ROOT)/tracee
 REPO_TETRAGON_ROOT := $(REPO_ARTIFACT_ROOT)/tetragon
 REPO_KATRAN_ROOT := $(REPO_ARTIFACT_ROOT)/katran
 REPO_KERNEL_MODULES_ROOT := $(REPO_ARTIFACT_ROOT)/kernel-modules
-REPO_ARTIFACT_ROOT_X86 := $(ROOT_DIR)/.cache/repo-artifacts/x86_64
-REPO_ARTIFACT_ROOT_ARM64 := $(ROOT_DIR)/.cache/repo-artifacts/arm64
+REPO_BUILD_ROOT := $(ARTIFACT_ROOT)/repo-build/$(RUN_TARGET_ARCH)
+SCX_BUILD_ROOT := $(REPO_BUILD_ROOT)/scx
+SCX_CARGO_TARGET_DIR := $(SCX_BUILD_ROOT)/target
+BCC_BUILD_ROOT := $(REPO_BUILD_ROOT)/bcc
+BCC_BUILD_REPO := $(BCC_BUILD_ROOT)/src
+TRACEE_BUILD_ROOT := $(REPO_BUILD_ROOT)/tracee
+TRACEE_BUILD_REPO := $(TRACEE_BUILD_ROOT)/src
+TRACEE_BUILD_OUTPUT_ROOT := $(TRACEE_BUILD_ROOT)/dist
+TRACEE_BUILD_GOENV_MK := $(TRACEE_BUILD_ROOT)/goenv.mk
+TETRAGON_BUILD_ROOT := $(REPO_BUILD_ROOT)/tetragon
+TETRAGON_BUILD_REPO := $(TETRAGON_BUILD_ROOT)/src
 
 RUNNER_BUILD_DIR_ACTIVE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(RUNNER_DIR)/build-arm64,$(RUNNER_DIR)/build)
 RUNNER_LIBBPF_BUILD_DIR := $(RUNNER_BUILD_DIR_ACTIVE)/vendor/libbpf
@@ -22,10 +31,6 @@ KATRAN_ARM64_CACHE_ROOT := $(ARTIFACT_ROOT)/arm64-host/katran
 KATRAN_ARM64_BUILD_ROOT := $(KATRAN_ARM64_CACHE_ROOT)/build
 KATRAN_ARM64_INSTALL_ROOT := $(KATRAN_ARM64_CACHE_ROOT)/install
 KATRAN_ARM64_CMAKE_OVERRIDE := $(KATRAN_ARM64_CACHE_ROOT)/cxx-override.cmake
-X86_PORTABLE_LIBBPF_ROOT := $(ARTIFACT_ROOT)/libbpf-runtime/x86_64/portable
-LOCK_ROOT := $(ARTIFACT_ROOT)/locks
-TRACEE_X86_BUILD_ROOT := $(ARTIFACT_ROOT)/x86_64-tracee-build
-TRACEE_ARM64_BUILD_ROOT := $(ARTIFACT_ROOT)/arm64-tracee-build
 ACTIVE_WORKLOAD_TOOLS_INSTALL_ROOT := $(ARTIFACT_ROOT)/workload-tools/$(RUN_TARGET_ARCH)
 ACTIVE_WORKLOAD_TOOLS_BIN_ROOT := $(ACTIVE_WORKLOAD_TOOLS_INSTALL_ROOT)/bin
 ACTIVE_DAEMON_BINARY := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(DAEMON_DIR)/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon,$(DAEMON_DIR)/target/release/bpfrejit-daemon)
@@ -40,15 +45,10 @@ ACTIVE_KINSN_PRIMARY := $(ACTIVE_KINSN_MODULE_DIR)/bpf_rotate.ko
 ACTIVE_KINSN_SECONDARIES := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ACTIVE_KINSN_MODULE_DIR)/bpf_select.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_extract.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_endian.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_ldp.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_bulk_memory.ko,$(ACTIVE_KINSN_MODULE_DIR)/bpf_select.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_extract.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_endian.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_bulk_memory.ko)
 ACTIVE_LIBBPF_RUNTIME_PRIMARY := $(REPO_ARTIFACT_ROOT)/libbpf/lib/libbpf.so
 ACTIVE_BCC_TOOLS := capable execsnoop bindsnoop biosnoop vfsstat opensnoop syscount tcpconnect tcplife runqlat
-ACTIVE_BCC_PRIMARY := $(REPO_BCC_ROOT)/capable
 ACTIVE_BCC_REQUIRED := $(addprefix $(REPO_BCC_ROOT)/,$(ACTIVE_BCC_TOOLS)) $(addsuffix .bpf.o,$(addprefix $(REPO_BCC_ROOT)/,$(ACTIVE_BCC_TOOLS)))
-ACTIVE_TRACEE_PRIMARY := $(REPO_TRACEE_ROOT)/bin/tracee
-ACTIVE_TRACEE_REQUIRED := $(ACTIVE_TRACEE_PRIMARY) $(REPO_TRACEE_ROOT)/tracee.bpf.o $(REPO_TRACEE_ROOT)/lsm_support/kprobe_check.bpf.o $(REPO_TRACEE_ROOT)/lsm_support/lsm_check.bpf.o
-ACTIVE_TETRAGON_PRIMARY := $(REPO_TETRAGON_ROOT)/bin/tetragon
-ACTIVE_TETRAGON_REQUIRED := $(ACTIVE_TETRAGON_PRIMARY) $(REPO_TETRAGON_ROOT)/bpf_execve_event.o $(REPO_TETRAGON_ROOT)/bpf_generic_kprobe.o
-ACTIVE_KATRAN_PRIMARY := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc
-ACTIVE_KATRAN_REQUIRED := $(ACTIVE_KATRAN_PRIMARY) $(REPO_KATRAN_ROOT)/balancer.bpf.o $(REPO_KATRAN_ROOT)/healthchecking_ipip.bpf.o
-ACTIVE_WORKLOAD_TOOLS_PRIMARY := $(ACTIVE_WORKLOAD_TOOLS_BIN_ROOT)/hackbench
+ACTIVE_TRACEE_REQUIRED := $(REPO_TRACEE_ROOT)/bin/tracee $(REPO_TRACEE_ROOT)/tracee.bpf.o $(REPO_TRACEE_ROOT)/lsm_support/kprobe_check.bpf.o $(REPO_TRACEE_ROOT)/lsm_support/lsm_check.bpf.o
+ACTIVE_TETRAGON_REQUIRED := $(REPO_TETRAGON_ROOT)/bin/tetragon $(REPO_TETRAGON_ROOT)/bpf_execve_event.o $(REPO_TETRAGON_ROOT)/bpf_generic_kprobe.o
+ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATRAN_ROOT)/balancer.bpf.o $(REPO_KATRAN_ROOT)/healthchecking_ipip.bpf.o
 ACTIVE_WORKLOAD_TOOLS_REQUIRED := $(ACTIVE_WORKLOAD_TOOLS_BIN_ROOT)/hackbench $(ACTIVE_WORKLOAD_TOOLS_BIN_ROOT)/sysbench $(ACTIVE_WORKLOAD_TOOLS_BIN_ROOT)/wrk
 DAEMON_SOURCE_FILES = $(shell find "$(ROOT_DIR)/daemon/src" -type f 2>/dev/null) $(ROOT_DIR)/daemon/Cargo.toml $(ROOT_DIR)/daemon/Cargo.lock $(ROOT_DIR)/daemon/Makefile
 RUNNER_SOURCE_FILES = $(shell find "$(RUNNER_DIR)/src" "$(RUNNER_DIR)/include" -type f 2>/dev/null) $(RUNNER_DIR)/CMakeLists.txt
@@ -67,8 +67,24 @@ $(RUNNER_LIBBPF_A):
 	@mkdir -p "$(RUNNER_LIBBPF_OBJDIR)" "$(RUNNER_LIBBPF_PREFIX)/include"
 	$(MAKE) -C "$(ROOT_DIR)/vendor/libbpf/src" -j"$(JOBS)" BUILD_STATIC_ONLY=1 OBJDIR="$(RUNNER_LIBBPF_OBJDIR)" DESTDIR= PREFIX="$(RUNNER_LIBBPF_PREFIX)" "$(RUNNER_LIBBPF_A)" install_headers
 
-$(X86_BUILD_DIR)/arch/x86/boot/bzImage:
-	@$(MAKE) -C "$(ROOT_DIR)" --no-print-directory __kernel
+$(X86_BUILD_DIR)/arch/x86/boot/bzImage: $(KERNEL_CONFIG_PATH)
+	@mkdir -p "$(X86_BUILD_DIR)"
+	@$(MAKE) -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" olddefconfig
+	@set -e; \
+	if [ -f "$@" ]; then \
+		if $(MAKE) -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" -q bzImage modules; then \
+			echo "[kernel] reuse existing x86 bzImage/modules"; \
+		else \
+			status="$$?"; \
+			if [ "$$status" -eq 1 ]; then \
+				$(MAKE) -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" -j"$(JOBS)" bzImage modules; \
+			else \
+				exit "$$status"; \
+			fi; \
+		fi; \
+	else \
+		$(MAKE) -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" -j"$(JOBS)" bzImage modules; \
+	fi
 
 $(ACTIVE_DAEMON_BINARY): $(DAEMON_SOURCE_FILES)
 	@mkdir -p "$(dir $@)"
@@ -131,9 +147,6 @@ $(ACTIVE_KINSN_SECONDARIES): $(ACTIVE_KINSN_PRIMARY)
 $(REPO_KERNEL_MODULES_ROOT)/lib/modules: $(X86_BUILD_DIR)/arch/x86/boot/bzImage
 	@kernel_release_file="$(X86_BUILD_DIR)/include/config/kernel.release"; \
 	stage_root="$(REPO_KERNEL_MODULES_ROOT)"; \
-	lock_path="$(LOCK_ROOT)/x86_64-kernel-modules.lock"; \
-	mkdir -p "$(LOCK_ROOT)"; \
-	exec 9>"$$lock_path"; flock 9; \
 	test -f "$$kernel_release_file" || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
 	kernel_release="$$(tr -d '\n' < "$$kernel_release_file")"; \
 	release_root="$$stage_root/lib/modules/$$kernel_release"; \
@@ -145,12 +158,13 @@ $(REPO_KERNEL_MODULES_ROOT)/lib/modules: $(X86_BUILD_DIR)/arch/x86/boot/bzImage
 	test -f "$$release_root/kernel/drivers/block/null_blk/null_blk.ko"; \
 	test -f "$$release_root/kernel/net/sched/sch_netem.ko"
 
-$(X86_PORTABLE_LIBBPF_ROOT)/lib/libbpf.so:
-	@mkdir -p "$(X86_PORTABLE_LIBBPF_ROOT)" "$(X86_LIBBPF_RUNTIME_BUILD_ROOT)"
+$(ACTIVE_LIBBPF_RUNTIME_PRIMARY):
+	@runtime_root="$(REPO_ARTIFACT_ROOT)/libbpf"; \
+	mkdir -p "$$runtime_root" "$(X86_LIBBPF_RUNTIME_BUILD_ROOT)"
 	@docker run --rm --platform linux/amd64 \
 		-v "$(ROOT_DIR):/workspace:ro" \
 		-v "$(X86_LIBBPF_RUNTIME_BUILD_ROOT):/build" \
-		-v "$(X86_PORTABLE_LIBBPF_ROOT):/out" \
+		-v "$$runtime_root:/out" \
 		amazonlinux:2023 \
 		bash -lc 'set -euo pipefail; \
 			dnf -y install gcc make elfutils-libelf-devel binutils >/dev/null 2>&1; \
@@ -170,27 +184,15 @@ $(X86_PORTABLE_LIBBPF_ROOT)/lib/libbpf.so:
 			mv /out/lib.tmp /out/lib; \
 			chown -R $(shell id -u):$(shell id -g) /out /build'
 
-$(ACTIVE_LIBBPF_RUNTIME_PRIMARY): $(X86_PORTABLE_LIBBPF_ROOT)/lib/libbpf.so
-	@src_root="$(X86_PORTABLE_LIBBPF_ROOT)/lib"; \
-	dst_root="$(REPO_ARTIFACT_ROOT)/libbpf/lib"; \
-	mkdir -p "$$dst_root"; \
-	find "$$src_root" -maxdepth 1 \( -type f -o -type l \) | while read -r src; do \
-		[ -e "$$src" ] || continue; \
-		dst="$$dst_root/$${src##*/}"; \
-		rm -f "$$dst"; \
-		cp -a "$$src" "$$dst"; \
-	done
-
 $(REPO_SCX_ROOT)/bin/%: $(SCX_SOURCE_FILES) $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF))
 	@package="$*"; \
 	repo_root="$(REPOS_DIR)/scx"; \
 	corpus_root="$(REPO_SCX_ROOT)"; \
 	bin_root="$$corpus_root/bin"; \
-	lock_path="$(LOCK_ROOT)/$(RUN_TARGET_ARCH)-scx.lock"; \
-	mkdir -p "$$bin_root" "$$corpus_root" "$(LOCK_ROOT)"; \
-	exec 9>"$$lock_path"; flock 9; \
+	target_dir="$(SCX_CARGO_TARGET_DIR)"; \
+	mkdir -p "$$bin_root" "$$corpus_root" "$$target_dir"; \
 	if [ "$(RUN_TARGET_ARCH)" = "arm64" ]; then \
-		target_release_dir="$$repo_root/target/aarch64-unknown-linux-gnu/release"; \
+		target_release_dir="$$target_dir/aarch64-unknown-linux-gnu/release"; \
 		PKG_CONFIG_ALLOW_CROSS=1 \
 		PKG_CONFIG_SYSROOT_DIR="$(ARM64_TOOLCHAIN_ROOT)" \
 		PKG_CONFIG_LIBDIR="$(ARM64_TOOLCHAIN_PKGCONFIG_DIRS)" \
@@ -203,12 +205,14 @@ $(REPO_SCX_ROOT)/bin/%: $(SCX_SOURCE_FILES) $(if $(filter arm64,$(RUN_TARGET_ARC
 		CXX_aarch64_unknown_linux_gnu="$(ARM64_CXX)" \
 		AR_aarch64_unknown_linux_gnu="$(ARM64_AR)" \
 		RANLIB_aarch64_unknown_linux_gnu="$(ARM64_RANLIB)" \
+		CARGO_TARGET_DIR="$$target_dir" \
 		cargo build --release --target "aarch64-unknown-linux-gnu" --manifest-path "$$repo_root/Cargo.toml" --package "$$package"; \
 		test -x "$$target_release_dir/$$package"; \
 		cp -f "$$target_release_dir/$$package" "$@"; \
 		object_path="$$(find "$$target_release_dir/build" -path "*/$$package-*/out/main.bpf.o" | sort | tail -n1)"; \
 	else \
-		target_release_dir="$$repo_root/target/release"; \
+		target_release_dir="$$target_dir/release"; \
+		CARGO_TARGET_DIR="$$target_dir" \
 		cargo build --release --manifest-path "$$repo_root/Cargo.toml" --package "$$package"; \
 		test -x "$$target_release_dir/$$package"; \
 		cp -f "$$target_release_dir/$$package" "$@"; \
@@ -221,47 +225,48 @@ $(REPO_SCX_ROOT)/bin/%: $(SCX_SOURCE_FILES) $(if $(filter arm64,$(RUN_TARGET_ARC
 $(REPO_SCX_ROOT)/%_main.bpf.o: $(REPO_SCX_ROOT)/bin/%
 	@test -f "$@"
 
-$(ACTIVE_BCC_PRIMARY): $(BCC_SOURCE_FILES)
-	@repo_root="$(REPOS_DIR)/bcc/libbpf-tools"; \
+$(ACTIVE_BCC_REQUIRED) &: $(BCC_SOURCE_FILES)
+	@repo_src="$(REPOS_DIR)/bcc"; \
+	build_root="$(BCC_BUILD_ROOT)"; \
+	build_repo="$(BCC_BUILD_REPO)"; \
+	repo_root="$$build_repo/libbpf-tools"; \
 	stage_root="$(REPO_BCC_ROOT)"; \
-	lock_path="$(LOCK_ROOT)/$(RUN_TARGET_ARCH)-bcc.lock"; \
-	mkdir -p "$$stage_root" "$(LOCK_ROOT)"; \
-	exec 9>"$$lock_path"; flock 9; \
+	mkdir -p "$$build_root"; \
+	rsync -a --delete --exclude '.git' --exclude 'libbpf-tools/.output' "$$repo_src/" "$$build_repo/"; \
+	mkdir -p "$$stage_root"; \
+	for tool in $(ACTIVE_BCC_TOOLS); do \
+		rm -f "$$repo_root/$$tool"; \
+	done; \
 	bpftool_cmd="$(ROOT_DIR)/vendor/linux-framework/tools/bpf/bpftool/bpftool"; \
 	test -x "$$bpftool_cmd" || { echo "missing vendored bpftool build output: $$bpftool_cmd" >&2; exit 1; }; \
 	make_args='LIBBPF_SRC="$(ROOT_DIR)/vendor/libbpf/src" BPFTOOL="'"$$bpftool_cmd"'" USE_BLAZESYM=0'; \
 	if [ "$(RUN_TARGET_ARCH)" = "arm64" ]; then \
 		make_args="$$make_args ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE_ARM64) CC=\"$(ARM64_CC)\" LD=\"$(ARM64_HOST_CROSS_PREFIX)ld\""; \
 	fi; \
-	eval $(MAKE) -C "\"$$repo_root\"" -j"$(JOBS)" $$make_args; \
-	find "$$repo_root/.output" -maxdepth 1 -type f -name '*.bpf.o' | while read -r src; do \
-		dst="$$stage_root/$${src##*/}"; \
-		cp -f "$$src" "$$dst"; \
+	eval $(MAKE) -C "\"$$repo_root\"" -j"$(JOBS)" $$make_args $(ACTIVE_BCC_TOOLS); \
+	rm -rf "$$stage_root"; \
+	mkdir -p "$$stage_root"; \
+	for tool in $(ACTIVE_BCC_TOOLS); do \
+		test -x "$$repo_root/$$tool" || { echo "missing bcc tool build output: $$repo_root/$$tool" >&2; exit 1; }; \
+		test -f "$$repo_root/.output/$$tool.bpf.o" || { echo "missing bcc BPF object: $$repo_root/.output/$$tool.bpf.o" >&2; exit 1; }; \
+		cp -f "$$repo_root/$$tool" "$$stage_root/$$tool"; \
+		cp -f "$$repo_root/.output/$$tool.bpf.o" "$$stage_root/$$tool.bpf.o"; \
 	done; \
-	for obj in "$$repo_root"/.output/*.bpf.o; do \
-		[ -f "$$obj" ] || continue; \
-		tool_name="$${obj##*/}"; \
-		tool_name="$${tool_name%.bpf.o}"; \
-		if [ -x "$$repo_root/$$tool_name" ]; then \
-			dst="$$stage_root/$$tool_name"; \
-			cp -f "$$repo_root/$$tool_name" "$$dst"; \
-		fi; \
+	for path in $(ACTIVE_BCC_REQUIRED); do \
+		test -e "$$path"; \
 	done
 
-$(filter-out $(ACTIVE_BCC_PRIMARY),$(ACTIVE_BCC_REQUIRED)): $(ACTIVE_BCC_PRIMARY)
-	@test -e "$@"
-
-$(ACTIVE_TRACEE_PRIMARY): $(TRACEE_SOURCE_FILES)
-	@repo_root="$(REPOS_DIR)/tracee"; \
+$(ACTIVE_TRACEE_REQUIRED) &: $(TRACEE_SOURCE_FILES)
+	@repo_src="$(REPOS_DIR)/tracee"; \
+	build_root="$(TRACEE_BUILD_ROOT)"; \
+	repo_root="$(TRACEE_BUILD_REPO)"; \
+	output_root="$(TRACEE_BUILD_OUTPUT_ROOT)"; \
+	goenv_mk="$(TRACEE_BUILD_GOENV_MK)"; \
 	stage_root="$(REPO_TRACEE_ROOT)"; \
-	lock_path="$(LOCK_ROOT)/tracee.lock"; \
+	mkdir -p "$$build_root"; \
+	rsync -a --delete --exclude '.git' --exclude 'dist' --exclude 'build' "$$repo_src/" "$$repo_root/"; \
+	rm -f "$$repo_root/.build_libbpf" "$$repo_root/.build_libbpf_fix" "$$repo_root/.eval_goenv" "$$repo_root/.checklib_libbpf" "$$repo_root/goenv.mk"; \
 	if [ "$(RUN_TARGET_ARCH)" = "arm64" ]; then \
-		build_root="$(TRACEE_ARM64_BUILD_ROOT)"; \
-		output_root="$$build_root/dist"; \
-		goenv_mk="$$build_root/goenv.mk"; \
-		mkdir -p "$$stage_root/bin" "$$stage_root/lsm_support" "$$build_root" "$(LOCK_ROOT)"; \
-		exec 9>"$$lock_path"; flock 9; \
-		rm -f "$$repo_root/.build_libbpf" "$$repo_root/.build_libbpf_fix" "$$repo_root/.eval_goenv" "$$repo_root/.checklib_libbpf" "$$repo_root/goenv.mk"; \
 		docker build -t "$(ARM64_CROSSBUILD_IMAGE)" -f "$(RUNNER_DIR)/docker/arm64-crossbuild.Dockerfile" "$(ROOT_DIR)"; \
 		docker run --rm --platform linux/arm64 \
 			-v "$(ROOT_DIR):$(ROOT_DIR)" \
@@ -269,45 +274,42 @@ $(ACTIVE_TRACEE_PRIMARY): $(TRACEE_SOURCE_FILES)
 			"$(ARM64_CROSSBUILD_IMAGE)" \
 			make -j"$(JOBS)" OUTPUT_DIR="$$output_root" GOENV_MK="$$goenv_mk" GOOS=linux GOARCH=arm64 GO_ARCH=arm64 bpf tracee; \
 	else \
-		build_root="$(TRACEE_X86_BUILD_ROOT)"; \
-		output_root="$$build_root/dist"; \
-		goenv_mk="$$build_root/goenv.mk"; \
-		mkdir -p "$$stage_root/bin" "$$stage_root/lsm_support" "$$build_root" "$(LOCK_ROOT)"; \
-		exec 9>"$$lock_path"; flock 9; \
-		rm -f "$$repo_root/.build_libbpf" "$$repo_root/.build_libbpf_fix" "$$repo_root/.eval_goenv" "$$repo_root/.checklib_libbpf" "$$repo_root/goenv.mk"; \
 		$(MAKE) -C "$$repo_root" -j"$(JOBS)" OUTPUT_DIR="$$output_root" GOENV_MK="$$goenv_mk" GOOS=linux GOARCH=amd64 GO_ARCH=amd64 bpf tracee; \
 	fi; \
+	rm -rf "$$stage_root"; \
+	mkdir -p "$$stage_root/bin" "$$stage_root/lsm_support"; \
 	cp -f "$$output_root/tracee.bpf.o" "$(REPO_TRACEE_ROOT)/tracee.bpf.o"; \
 	find "$$output_root/lsm_support" -maxdepth 1 -type f -name '*.bpf.o' | while read -r src; do \
 		dst="$(REPO_TRACEE_ROOT)/lsm_support/$${src##*/}"; \
 		cp -f "$$src" "$$dst"; \
 	done; \
-	cp -f "$$output_root/tracee" "$@"
+	cp -f "$$output_root/tracee" "$(REPO_TRACEE_ROOT)/bin/tracee"; \
+	for path in $(ACTIVE_TRACEE_REQUIRED); do \
+		test -e "$$path"; \
+	done
 
-$(filter-out $(ACTIVE_TRACEE_PRIMARY),$(ACTIVE_TRACEE_REQUIRED)): $(ACTIVE_TRACEE_PRIMARY)
-	@test -e "$@"
-
-$(ACTIVE_TETRAGON_PRIMARY): $(TETRAGON_SOURCE_FILES)
-	@repo_root="$(REPOS_DIR)/tetragon"; \
+$(ACTIVE_TETRAGON_REQUIRED) &: $(TETRAGON_SOURCE_FILES)
+	@repo_src="$(REPOS_DIR)/tetragon"; \
+	build_root="$(TETRAGON_BUILD_ROOT)"; \
+	repo_root="$(TETRAGON_BUILD_REPO)"; \
 	stage_root="$(REPO_TETRAGON_ROOT)"; \
 	target_arch="$$( [ "$(RUN_TARGET_ARCH)" = "arm64" ] && printf 'arm64' || printf 'amd64' )"; \
-	lock_path="$(LOCK_ROOT)/$(RUN_TARGET_ARCH)-tetragon.lock"; \
-	mkdir -p "$$stage_root/bin" "$(LOCK_ROOT)"; \
-	exec 9>"$$lock_path"; flock 9; \
+	mkdir -p "$$build_root"; \
+	rsync -a --delete --exclude '.git' --exclude 'build' --exclude 'bpf/objs' "$$repo_src/" "$$repo_root/"; \
+	rm -f "$$repo_root/tetragon"; \
 	$(MAKE) -C "$$repo_root" -j"$(JOBS)" TARGET_ARCH="$$target_arch" LOCAL_CLANG=1 tetragon-bpf; \
 	$(MAKE) -C "$$repo_root" -j"$(JOBS)" TARGET_ARCH="$$target_arch" tetragon EXTRA_GO_BUILD_FLAGS=-mod=mod; \
-	find "$$repo_root/bpf/objs" -maxdepth 1 -type f -name '*.o' | while read -r src; do \
-		dst="$$stage_root/$${src##*/}"; \
-		cp -f "$$src" "$$dst"; \
-	done; \
-	cp -f "$$repo_root/tetragon" "$@"
+	rm -rf "$$stage_root"; \
+	mkdir -p "$$stage_root/bin"; \
+	cp -f "$$repo_root/bpf/objs/bpf_execve_event.o" "$$stage_root/bpf_execve_event.o"; \
+	cp -f "$$repo_root/bpf/objs/bpf_generic_kprobe.o" "$$stage_root/bpf_generic_kprobe.o"; \
+	cp -f "$$repo_root/tetragon" "$$stage_root/bin/tetragon"; \
+	for path in $(ACTIVE_TETRAGON_REQUIRED); do \
+		test -e "$$path"; \
+	done
 
-$(filter-out $(ACTIVE_TETRAGON_PRIMARY),$(ACTIVE_TETRAGON_REQUIRED)): $(ACTIVE_TETRAGON_PRIMARY)
-	@test -e "$@"
-
-$(ACTIVE_KATRAN_PRIMARY): $(KATRAN_SOURCE_FILES)
+$(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES)
 	@stage_root="$(REPO_KATRAN_ROOT)"; \
-	lock_path="$(LOCK_ROOT)/$(RUN_TARGET_ARCH)-katran.lock"; \
 	if [ "$(RUN_TARGET_ARCH)" = "arm64" ]; then \
 		build_root="$(KATRAN_ARM64_BUILD_ROOT)"; \
 		install_root="$(KATRAN_ARM64_INSTALL_ROOT)"; \
@@ -318,8 +320,7 @@ $(ACTIVE_KATRAN_PRIMARY): $(KATRAN_SOURCE_FILES)
 		override_file="$(KATRAN_X86_CMAKE_OVERRIDE)"; \
 	fi; \
 	folly_xlog_prefixes="-DFOLLY_XLOG_STRIP_PREFIXES=\\\\\\\"$$build_root/deps/folly:$$build_root/deps/folly/build\\\\\\\""; \
-	mkdir -p "$$stage_root/bin" "$$stage_root/lib" "$$build_root" "$$install_root" "$(LOCK_ROOT)"; \
-	exec 9>"$$lock_path"; flock 9; \
+	mkdir -p "$$stage_root/bin" "$$stage_root/lib" "$$build_root" "$$install_root"; \
 	printf '%s\n' 'set(CMAKE_CXX_COMPILE_OBJECT "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -std=gnu++20 -o <OBJECT> -c <SOURCE>")' > "$$override_file"; \
 	cd "$(REPOS_DIR)/katran" && \
 	env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR \
@@ -340,7 +341,9 @@ $(ACTIVE_KATRAN_PRIMARY): $(KATRAN_SOURCE_FILES)
 		-DBUILD_TESTS=OFF; \
 	cmake --build "$$build_root/build" --target katran_server_grpc -j"$(JOBS)"; \
 	cd "$(REPOS_DIR)/katran" && ./build_bpf_modules_opensource.sh -s "$(REPOS_DIR)/katran" -b "$$build_root"; \
-	cp -f "$$build_root/build/example_grpc/katran_server_grpc" "$@"; \
+	rm -rf "$$stage_root"; \
+	mkdir -p "$$stage_root/bin" "$$stage_root/lib"; \
+	cp -f "$$build_root/build/example_grpc/katran_server_grpc" "$$stage_root/bin/katran_server_grpc"; \
 	for src in \
 		"$$build_root/deps/bpfprog/bpf/balancer.bpf.o" \
 		"$$build_root/deps/bpfprog/bpf/healthchecking_ipip.o" \
@@ -357,10 +360,10 @@ $(ACTIVE_KATRAN_PRIMARY): $(KATRAN_SOURCE_FILES)
 	find "$$install_root/lib" -maxdepth 1 -type f | while read -r src; do \
 		dst="$$stage_root/lib/$${src##*/}"; \
 		cp -f "$$src" "$$dst"; \
+	done; \
+	for path in $(ACTIVE_KATRAN_REQUIRED); do \
+		test -e "$$path"; \
 	done
-
-$(filter-out $(ACTIVE_KATRAN_PRIMARY),$(ACTIVE_KATRAN_REQUIRED)): $(ACTIVE_KATRAN_PRIMARY)
-	@test -e "$@"
 
 ARM64_TOOLCHAIN_ROOT := $(RUNNER_DIR)/build-arm64/toolchain
 ARM64_TOOLCHAIN_BIN := $(ARM64_TOOLCHAIN_ROOT)/bin
@@ -394,9 +397,6 @@ $(WORKLOAD_TOOLS_HOST_LUAJIT_BIN): $(WORKLOAD_TOOLS_HOST_LUAJIT_SOURCE_FILES)
 	@source_root="$(WORKLOAD_TOOLS_SOURCE_ROOT)/sysbench/third_party/luajit"; \
 	build_root="$(WORKLOAD_TOOLS_HOST_BUILD_ROOT)/luajit-src"; \
 	install_root="$(WORKLOAD_TOOLS_HOST_LUAJIT_ROOT)"; \
-	lock_path="$(LOCK_ROOT)/host-luajit.lock"; \
-	mkdir -p "$(LOCK_ROOT)"; \
-	exec 9>"$$lock_path"; flock 9; \
 	rm -rf "$$build_root/luajit" "$$install_root"; \
 	mkdir -p "$$build_root"; \
 	cp -a "$$source_root/luajit" "$$build_root/luajit"; \
@@ -404,18 +404,16 @@ $(WORKLOAD_TOOLS_HOST_LUAJIT_BIN): $(WORKLOAD_TOOLS_HOST_LUAJIT_SOURCE_FILES)
 	mkdir -p "$$install_root/bin"; \
 	ln -sf "luajit-2.1.0-beta3" "$$install_root/bin/luajit"
 
-$(ACTIVE_WORKLOAD_TOOLS_PRIMARY): $(WORKLOAD_TOOLS_HOST_LUAJIT_BIN) $(WORKLOAD_TOOLS_SOURCE_FILES) $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF))
+$(ACTIVE_WORKLOAD_TOOLS_REQUIRED) &: $(WORKLOAD_TOOLS_HOST_LUAJIT_BIN) $(WORKLOAD_TOOLS_SOURCE_FILES) $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF))
 	@if [ "$(RUN_TARGET_ARCH)" = "arm64" ]; then \
 		build_root="$(WORKLOAD_TOOLS_ARM64_BUILD_ROOT)"; \
 		install_root="$(ACTIVE_WORKLOAD_TOOLS_INSTALL_ROOT)"; \
 		toolchain_root="$(ARM64_TOOLCHAIN_ROOT)"; \
-		lock_path="$(LOCK_ROOT)/arm64-workload-tools.lock"; \
 		cc_value="$(ARM64_GCC) --sysroot=$$toolchain_root"; \
 	else \
 		build_root="$(WORKLOAD_TOOLS_X86_BUILD_ROOT)"; \
 		install_root="$(ACTIVE_WORKLOAD_TOOLS_INSTALL_ROOT)"; \
 		toolchain_root=""; \
-		lock_path="$(LOCK_ROOT)/x86_64-workload-tools.lock"; \
 		cc_value="cc"; \
 	fi; \
 	source_root="$(WORKLOAD_TOOLS_SOURCE_ROOT)"; \
@@ -427,8 +425,6 @@ $(ACTIVE_WORKLOAD_TOOLS_PRIMARY): $(WORKLOAD_TOOLS_HOST_LUAJIT_BIN) $(WORKLOAD_T
 	host_luajit_root="$(WORKLOAD_TOOLS_HOST_LUAJIT_ROOT)"; \
 	bin_root="$$install_root/bin"; \
 	lib_root="$$install_root/lib"; \
-	mkdir -p "$(LOCK_ROOT)"; \
-	exec 9>"$$lock_path"; flock 9; \
 	test -d "$$source_root/rt-tests" || { echo "missing workload tool source root: $$source_root/rt-tests" >&2; exit 1; }; \
 	test -d "$$source_root/sysbench" || { echo "missing workload tool source root: $$source_root/sysbench" >&2; exit 1; }; \
 	test -d "$$source_root/wrk" || { echo "missing workload tool source root: $$source_root/wrk" >&2; exit 1; }; \
@@ -533,13 +529,13 @@ $(ACTIVE_WORKLOAD_TOOLS_PRIMARY): $(WORKLOAD_TOOLS_HOST_LUAJIT_BIN) $(WORKLOAD_T
 			'script_path="$$(readlink -f "$$0")"' \
 			'script_dir="$$(cd "$$(dirname "$$script_path")" && pwd)"' \
 			'real_binary="$${script_path}.real"' \
-			"loader=\"\${script_dir}/../lib/$$loader_name\"" \
+			"loader=\"\\$${script_dir}/../lib/$$loader_name\"" \
 			'[[ -x "$$loader" ]] || { echo "portable runtime loader not found for $$script_path" >&2; exit 1; }' \
 			'[[ -f "$$real_binary" ]] || { echo "wrapped binary is missing for $$script_path: $$real_binary" >&2; exit 1; }' \
 			'exec "$$loader" --library-path "$${script_dir}/../lib" "$$real_binary" "$$@"' \
 			> "$$bin_root/$$tool"; \
 		chmod +x "$$bin_root/$$tool"; \
+	done; \
+	for path in $(ACTIVE_WORKLOAD_TOOLS_REQUIRED); do \
+		test -x "$$path"; \
 	done
-
-$(filter-out $(ACTIVE_WORKLOAD_TOOLS_PRIMARY),$(ACTIVE_WORKLOAD_TOOLS_REQUIRED)): $(ACTIVE_WORKLOAD_TOOLS_PRIMARY)
-	@test -x "$@"
