@@ -29,6 +29,9 @@ def _scalar(contract: dict[str, str | list[str]], name: str) -> str:
 
 def runtime_path_value(workspace: Path, contract: dict[str, str | list[str]]) -> str:
     path_entries: list[str] = []
+    bundled_tool_bin = workspace / ".cache" / "workload-tools" / "bin"
+    if bundled_tool_bin.is_dir():
+        path_entries.append(str(bundled_tool_bin))
     existing = os.environ.get("PATH", "")
     if existing:
         path_entries.extend(token for token in existing.split(":") if token)

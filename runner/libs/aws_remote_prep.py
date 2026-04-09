@@ -471,6 +471,13 @@ primary_mac="$(cat "/sys/class/net/$primary_netdev/address")"
 [[ -n "$primary_mac" ]] || exit 1
 
 sudo tar -xzf "$stage_dir/modules-$ver.tar.gz" -C /
+tmp_modules_root="$(mktemp -d "$stage_dir/modules-${ver}.XXXXXX")"
+tar -xzf "$stage_dir/modules-$ver.tar.gz" -C "$tmp_modules_root"
+test -d "$tmp_modules_root/lib/modules/$ver"
+sudo rm -rf "/lib/modules/$ver"
+sudo mkdir -p /lib/modules
+sudo cp -a "$tmp_modules_root/lib/modules/$ver" /lib/modules/
+rm -rf "$tmp_modules_root"
 sudo install -o root -g root -m 0755 "$stage_dir/boot/bzImage-$ver" "/boot/vmlinuz-$ver"
 sudo depmod -a "$ver"
 sudo dracut --force --no-hostonly --add-drivers "nvme nvme-core xfs ext4 virtio_blk" "/boot/initramfs-$ver.img" "$ver"
@@ -563,7 +570,13 @@ set -euo pipefail
 ver="$1"
 stage_dir="$2"
 title="Codex ARM64 ($ver)"
-sudo tar -xzf "$stage_dir/modules-$ver.tar.gz" -C /
+tmp_modules_root="$(mktemp -d "$stage_dir/modules-${ver}.XXXXXX")"
+tar -xzf "$stage_dir/modules-$ver.tar.gz" -C "$tmp_modules_root"
+test -d "$tmp_modules_root/lib/modules/$ver"
+sudo rm -rf "/lib/modules/$ver"
+sudo mkdir -p /lib/modules
+sudo cp -a "$tmp_modules_root/lib/modules/$ver" /lib/modules/
+rm -rf "$tmp_modules_root"
 sudo install -o root -g root -m 0755 "$stage_dir/boot/vmlinuz-$ver.efi" "/boot/vmlinuz-$ver"
 sudo depmod -a "$ver"
 sudo dracut --force "/boot/initramfs-$ver.img" "$ver"

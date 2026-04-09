@@ -70,6 +70,12 @@ def _stream_workspace_to_remote(
     tar_command = [
         "tar",
         "--exclude=runner/repos",
+        "--exclude=runner/repos/*",
+        "--exclude=runner/repos/**",
+        "--exclude=e2e/cases/katran/bin",
+        "--exclude=e2e/cases/katran/bin/*",
+        "--exclude=e2e/cases/katran/lib",
+        "--exclude=e2e/cases/katran/lib/*",
         "--exclude=corpus/results",
         "--exclude=e2e/results",
         "--exclude=micro/results",

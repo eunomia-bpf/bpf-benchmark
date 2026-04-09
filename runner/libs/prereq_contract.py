@@ -29,7 +29,7 @@ TOOL_PACKAGE_MAP = {
     ("apt", "ip"): ("iproute2",),
     ("dnf", "ip"): ("iproute",),
     ("apt", "tc"): ("iproute2",),
-    ("dnf", "tc"): ("iproute-tc",),
+    ("dnf", "tc"): ("iproute",),
     ("apt", "wrk"): ("wrk",),
     ("dnf", "wrk"): ("wrk",),
     ("apt", "sysbench"): ("sysbench",),
