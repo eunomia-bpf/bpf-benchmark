@@ -21,14 +21,15 @@ from runner.libs.manifest_file import (
 TARGETS_DIR = ROOT_DIR / "runner" / "targets"
 SUITES_DIR = ROOT_DIR / "runner" / "suites"
 DEFAULT_CORPUS_APP_SUITE = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
-WORKLOAD_TOOL_ORDER = ("stress-ng", "fio", "hackbench", "sysbench", "bpftrace", "wrk")
-REMOTE_COMMAND_ORDER = ("taskset", "curl", "tar")
+WORKLOAD_TOOL_ORDER = ("stress-ng", "fio", "hackbench", "sysbench", "bpftrace", "wrk", "curl", "tc")
+REMOTE_COMMAND_ORDER = ("ip", "taskset", "curl", "tar", "tc")
 
 CORPUS_WORKLOAD_KIND_TOOLS = {
     "exec_storm": ("stress-ng",),
     "hackbench": ("hackbench",),
-    "network": ("wrk",),
+    "network": ("curl",),
     "oom_stress": ("stress-ng",),
+    "tcp_retransmit": ("tc",),
 }
 
 CORPUS_RUNNER_EXTRA_TOOLS = {
@@ -38,21 +39,21 @@ CORPUS_RUNNER_EXTRA_TOOLS = {
 }
 
 E2E_CASE_WORKLOAD_TOOLS = {
-    "bcc": ("stress-ng", "fio", "hackbench"),
-    "bpftrace": ("stress-ng", "fio", "hackbench", "wrk", "bpftrace"),
+    "bcc": ("stress-ng", "fio", "hackbench", "curl"),
+    "bpftrace": ("stress-ng", "fio", "hackbench", "bpftrace", "curl", "tc"),
     "katran": ("wrk",),
     "scx": ("stress-ng", "hackbench", "sysbench"),
     "tetragon": ("stress-ng", "fio"),
-    "tracee": (),
+    "tracee": ("stress-ng", "fio", "hackbench", "wrk"),
 }
 
 E2E_CASE_REMOTE_COMMANDS = {
-    "bcc": ("taskset", "curl"),
-    "bpftrace": ("taskset",),
-    "katran": ("taskset",),
-    "scx": ("taskset",),
-    "tetragon": ("taskset", "curl", "tar"),
-    "tracee": ("taskset", "curl"),
+    "bcc": ("ip", "taskset", "curl"),
+    "bpftrace": ("ip", "taskset"),
+    "katran": ("ip", "taskset"),
+    "scx": ("ip", "taskset"),
+    "tetragon": ("ip", "taskset", "curl", "tar"),
+    "tracee": ("ip", "taskset", "curl"),
 }
 
 _die = partial(fail, "run-contract")
@@ -429,7 +430,12 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
             _die(f"AWS target {target_name} is missing TARGET_AWS_ENV_PREFIX")
         run_aws_instance_mode = "dedicated" if suite.get("SUITE_VM_CLASS", "") == "benchmark" else "shared"
         run_name_tag = _prefixed_env_or_default(values, aws_env_prefix, "NAME_TAG", target.get("TARGET_NAME_TAG_DEFAULT", ""))
-        run_instance_type = _prefixed_env_or_default(values, aws_env_prefix, "INSTANCE_TYPE", target.get("TARGET_INSTANCE_TYPE_DEFAULT", ""))
+        default_instance_type = target.get("TARGET_INSTANCE_TYPE_DEFAULT", "")
+        if suite.get("SUITE_VM_CLASS", "") == "benchmark":
+            default_instance_type = target.get("TARGET_BENCH_INSTANCE_TYPE_DEFAULT", default_instance_type)
+        else:
+            default_instance_type = target.get("TARGET_TEST_INSTANCE_TYPE_DEFAULT", default_instance_type)
+        run_instance_type = _prefixed_env_or_default(values, aws_env_prefix, "INSTANCE_TYPE", default_instance_type)
         run_remote_user = _prefixed_env_or_default(values, aws_env_prefix, "REMOTE_USER", target.get("TARGET_REMOTE_USER_DEFAULT", ""))
         run_remote_stage_dir = _prefixed_env_or_default(values, aws_env_prefix, "REMOTE_STAGE_DIR", target.get("TARGET_REMOTE_STAGE_DIR_DEFAULT", ""))
         run_remote_kernel_stage_dir = _prefixed_env_or_default(values, aws_env_prefix, "REMOTE_KERNEL_STAGE_DIR", target.get("TARGET_REMOTE_KERNEL_STAGE_DIR_DEFAULT", ""))
@@ -689,6 +695,7 @@ def build_target_manifest(target_name: str, *, env: dict[str, str] | None = None
     run_name_tag = ""
     run_aws_region = ""
     run_aws_profile = ""
+    run_guest_package_manager = target.get("TARGET_GUEST_PACKAGE_MANAGER", "")
     if target.get("TARGET_EXECUTOR", "") == "aws-ssh":
         aws_env_prefix = target.get("TARGET_AWS_ENV_PREFIX", "")
         if not aws_env_prefix:
@@ -708,6 +715,7 @@ def build_target_manifest(target_name: str, *, env: dict[str, str] | None = None
         "RUN_NAME_TAG": run_name_tag,
         "RUN_AWS_REGION": run_aws_region,
         "RUN_AWS_PROFILE": run_aws_profile,
+        "RUN_GUEST_PACKAGE_MANAGER": run_guest_package_manager,
     }
 
 

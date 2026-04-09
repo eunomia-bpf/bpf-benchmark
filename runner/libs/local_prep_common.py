@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Callable
 
 from runner.libs import ROOT_DIR
+from runner.libs.build_remote_bundle import compute_bundle_cache_key
 from runner.libs.cli_support import fail, require_nonempty_dir as _require_nonempty_dir, require_path as _require_path
 from runner.libs.runner_artifacts import (
     build_runner_binary,
@@ -14,9 +15,6 @@ from runner.libs.runner_artifacts import (
     run_command,
 )
 from runner.libs.state_file import write_state
-
-
-SUPPORTED_BUNDLED_X86_TOOLS = {"wrk", "sysbench", "hackbench", "stress-ng", "fio", "bpftrace"}
 
 
 die = partial(fail, "local-prep")
@@ -74,30 +72,39 @@ def finalize_staged_bundle(
     *,
     manifest_path: Path,
     bundle_inputs_path: Path,
-    stage_root: Path,
-    bundle_tar: Path,
     local_state_path: Path,
     host_python_bin: str,
     env: dict[str, str],
     executor_name: str,
 ) -> None:
-    stage_root.parent.mkdir(parents=True, exist_ok=True)
-    bundle_tar.parent.mkdir(parents=True, exist_ok=True)
+    target_name = env.get("RUN_TARGET_NAME", "").strip()
+    if not target_name:
+        die("manifest RUN_TARGET_NAME is missing for bundle cache")
+    cache_key = compute_bundle_cache_key(manifest_path, bundle_inputs_path)
+    cache_root = ROOT_DIR / ".cache" / target_name / "bundle-cache"
+    cache_dir = cache_root / cache_key
+    cached_bundle_tar = cache_dir / "bundle.tar.gz"
     run_command(
         [
-            host_python_bin,
-            "-m",
-            "runner.libs.build_remote_bundle",
-            str(manifest_path),
-            str(bundle_inputs_path),
-            str(stage_root),
-            str(bundle_tar),
+            "make",
+            "-C",
+            str(ROOT_DIR),
+            "__bundle-cache",
+            f"PYTHON={host_python_bin}",
+            f"BUNDLE_MANIFEST_PATH={manifest_path}",
+            f"BUNDLE_INPUTS_PATH={bundle_inputs_path}",
+            f"BUNDLE_CACHE_DIR={cache_dir}",
         ],
         env=env,
     )
-    if not bundle_tar.is_file():
-        die(f"staged {executor_name} bundle tar is missing: {bundle_tar}")
-    write_state(local_state_path, {"RUN_BUNDLE_TAR": str(bundle_tar)})
+    if not cached_bundle_tar.is_file():
+        die(f"cached {executor_name} bundle tar is missing: {cached_bundle_tar}")
+    write_state(
+        local_state_path,
+        {
+            "RUN_BUNDLE_TAR": str(cached_bundle_tar),
+        },
+    )
 
 
 def run_python_script(
@@ -201,7 +208,13 @@ def build_x86_upstream_selftests(
     llvm_suffix: str,
 ) -> None:
     run_command(
-        [host_python_bin, "-m", "runner.libs.build_upstream_selftests"],
+        [
+            "make",
+            "-C",
+            str(ROOT_DIR),
+            "__upstream-selftests",
+            f"PYTHON={host_python_bin}",
+        ],
         env={
             **env,
             "VMLINUX_BTF": str(ROOT_DIR / "vendor/linux-framework" / "vmlinux"),
@@ -262,18 +275,18 @@ def build_scx_artifacts(
     if not package_csv:
         return
     require_nonempty_dir(repo_root / "scx", "sealed scx source repo")
-    args: list[str] = []
-    for package in csv_tokens(package_csv):
-        args.extend(["--package", package])
-    run_python_script(
-        host_python_bin,
-        "runner/scripts/build_scx_artifacts.py",
-        "--force",
-        "--repo-root",
-        str(repo_root),
-        "--promote-root",
-        str(promote_root),
-        *args,
+    run_command(
+        [
+            "make",
+            "-C",
+            str(ROOT_DIR),
+            "__scx-build",
+            f"PYTHON={host_python_bin}",
+            f"JOBS={max(os.cpu_count() or 1, 1)}",
+            f"SCX_REPO_ROOT={repo_root}",
+            f"SCX_PROMOTE_ROOT={promote_root}",
+            f"SCX_PACKAGES_CSV={package_csv}",
+        ],
         env=env,
     )
     for package in csv_tokens(package_csv):
@@ -285,46 +298,38 @@ def build_native_repo_artifacts(
     *,
     repo_root: Path,
     promote_root: Path,
+    build_cache_root: Path,
     native_repo_csv: str,
     host_python_bin: str,
     env: dict[str, str],
+    vmlinux_btf: Path | None = None,
 ) -> None:
     if not native_repo_csv:
         return
     if not repo_root.is_dir():
         die(f"repo root missing for native repo build: {repo_root}")
-    args: list[str] = []
-    for repo in csv_tokens(native_repo_csv):
-        args.extend(["--repo", repo])
-    run_python_script(
-        host_python_bin,
-        "runner/scripts/build_corpus_native.py",
-        "--jobs",
-        str(max(os.cpu_count() or 1, 1)),
-        "--repo-root",
-        str(repo_root),
-        "--build-root",
-        str(promote_root / "corpus" / "build"),
-        *args,
+    vmlinux_arg = f"NATIVE_VMLINUX_BTF={vmlinux_btf}" if vmlinux_btf is not None else ""
+    run_command(
+        [
+            "make",
+            "-C",
+            str(ROOT_DIR),
+            "__native-repo-build",
+            f"PYTHON={host_python_bin}",
+            f"JOBS={max(os.cpu_count() or 1, 1)}",
+            f"NATIVE_REPO_ROOT={repo_root}",
+            f"NATIVE_BUILD_ROOT={build_cache_root}",
+            f"NATIVE_STAGE_ROOT={promote_root / 'corpus' / 'build'}",
+            f"NATIVE_REPOS_CSV={native_repo_csv}",
+            *([vmlinux_arg] if vmlinux_arg else []),
+        ],
         env=env,
     )
 
 
 def stage_x86_workload_tools(*, requested_csv: str, output_root: Path) -> tuple[str, str]:
-    bundled_csv = ""
-    if not requested_csv:
-        return "", ""
-    shutil.rmtree(output_root, ignore_errors=True)
-    (output_root / "bin").mkdir(parents=True, exist_ok=True)
-    for tool in csv_tokens(requested_csv):
-        if tool not in SUPPORTED_BUNDLED_X86_TOOLS:
-            continue
-        tool_path = shutil.which(tool)
-        if not tool_path:
-            die(f"required x86 bundled workload tool is missing on the host: {tool}")
-        target = output_root / "bin" / tool
-        shutil.copy2(tool_path, target)
-        target.chmod(0o755)
-        require_path(target, f"x86 bundled workload tool {tool}")
-        bundled_csv = csv_append_unique(bundled_csv, tool)
-    return bundled_csv, str(output_root) if bundled_csv else ""
+    del requested_csv, output_root
+    # x86 guests should consume workload tools from the guest package manager.
+    # Bundling host binaries creates a second tool plane and, on AWS, can route
+    # setpriv-executed workloads through non-traversable workspace paths.
+    return "", ""

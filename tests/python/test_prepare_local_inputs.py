@@ -175,6 +175,135 @@ def test_x86_bundle_inputs_use_native_katran_stage_root(tmp_path: Path) -> None:
     assert values["RUN_KATRAN_SERVER_LIB_DIR"] == str(promote_root / "corpus" / "build" / "katran" / "lib")
 
 
+def test_build_native_repo_artifacts_invokes_make_wrapper(monkeypatch, tmp_path: Path) -> None:
+    repo_root = tmp_path / "repos"
+    repo_root.mkdir()
+    seen: dict[str, object] = {}
+
+    def fake_run_command(command: list[str], *, env: dict[str, str]) -> None:
+        seen["command"] = command
+        seen["env"] = env
+
+    monkeypatch.setattr(local_prep_common, "run_command", fake_run_command)
+    local_prep_common.build_native_repo_artifacts(
+        repo_root=repo_root,
+        promote_root=tmp_path / "promote",
+        build_cache_root=tmp_path / "cache",
+        native_repo_csv="bcc,tracee",
+        host_python_bin="python3",
+        env={"HOME": str(tmp_path)},
+        vmlinux_btf=tmp_path / "vmlinux",
+    )
+
+    command = seen["command"]
+    assert command[:4] == ["make", "-C", str(ROOT_DIR), "__native-repo-build"]
+    assert "PYTHON=python3" in command
+    assert f"NATIVE_REPO_ROOT={repo_root}" in command
+    assert f"NATIVE_BUILD_ROOT={tmp_path / 'cache'}" in command
+    assert f"NATIVE_STAGE_ROOT={tmp_path / 'promote' / 'corpus' / 'build'}" in command
+    assert "NATIVE_REPOS_CSV=bcc,tracee" in command
+    assert f"NATIVE_VMLINUX_BTF={tmp_path / 'vmlinux'}" in command
+
+
+def test_build_scx_artifacts_invokes_make_wrapper(monkeypatch, tmp_path: Path) -> None:
+    repo_root = tmp_path / "repos"
+    (repo_root / "scx").mkdir(parents=True)
+    promote_root = tmp_path / "promote"
+    (repo_root / "scx" / "target" / "release").mkdir(parents=True)
+    (repo_root / "scx" / "target" / "release" / "scx_rusty").write_text("x86-64\n", encoding="utf-8")
+    (promote_root / "corpus" / "build" / "scx").mkdir(parents=True)
+    (promote_root / "corpus" / "build" / "scx" / "scx_rusty_main.bpf.o").write_text("obj\n", encoding="utf-8")
+    seen: dict[str, object] = {}
+
+    def fake_run_command(command: list[str], *, env: dict[str, str]) -> None:
+        seen["command"] = command
+        seen["env"] = env
+
+    monkeypatch.setattr(local_prep_common, "run_command", fake_run_command)
+    monkeypatch.setattr(local_prep_common, "require_file_contains", lambda *args, **kwargs: None)
+    monkeypatch.setattr(local_prep_common, "require_path", lambda *args, **kwargs: None)
+
+    local_prep_common.build_scx_artifacts(
+        repo_root=repo_root,
+        promote_root=promote_root,
+        package_csv="scx_rusty",
+        host_python_bin="python3",
+        env={"HOME": str(tmp_path)},
+        arch_signature="x86-64",
+    )
+
+    command = seen["command"]
+    assert command[:4] == ["make", "-C", str(ROOT_DIR), "__scx-build"]
+    assert "PYTHON=python3" in command
+    assert f"SCX_REPO_ROOT={repo_root}" in command
+    assert f"SCX_PROMOTE_ROOT={promote_root}" in command
+    assert "SCX_PACKAGES_CSV=scx_rusty" in command
+
+
+def test_build_x86_upstream_selftests_invokes_make_wrapper(monkeypatch, tmp_path: Path) -> None:
+    seen: dict[str, object] = {}
+
+    def fake_run_command(command: list[str], *, env: dict[str, str]) -> None:
+        seen["command"] = command
+        seen["env"] = env
+
+    monkeypatch.setattr(local_prep_common, "run_command", fake_run_command)
+    monkeypatch.setattr(local_prep_common, "require_path", lambda *args, **kwargs: None)
+
+    local_prep_common.build_x86_upstream_selftests(
+        output_dir=tmp_path / "upstream",
+        host_python_bin="python3",
+        env={"HOME": str(tmp_path)},
+        llvm_suffix="20",
+    )
+
+    command = seen["command"]
+    assert command[:4] == ["make", "-C", str(ROOT_DIR), "__upstream-selftests"]
+    assert "PYTHON=python3" in command
+
+
+def test_stage_x86_workload_tools_prefers_guest_package_manager(tmp_path: Path) -> None:
+    bundled_csv, tool_root = local_prep_common.stage_x86_workload_tools(
+        requested_csv="stress-ng,fio,hackbench,wrk",
+        output_root=tmp_path / "workload-tools",
+    )
+
+    assert bundled_csv == ""
+    assert tool_root == ""
+
+
+def test_aws_arm64_host_build_invokes_make_wrapper(tmp_path: Path, monkeypatch) -> None:
+    manifest = tmp_path / "run-contract.env"
+    local_state = tmp_path / "local-state.json"
+    remote_state = tmp_path / "remote-state.json"
+    remote_state.write_text("{}\n", encoding="utf-8")
+    prep = aws_local_prep.AWSPrep(
+        env={
+            "RUN_TOKEN": "run.aws-arm64.test.hostbuild",
+            "RUN_TARGET_NAME": "aws-arm64",
+            "RUN_TARGET_ARCH": "arm64",
+            "RUN_HOST_PYTHON_BIN": "python3",
+        },
+        manifest_path=manifest,
+        local_state_path=local_state,
+        remote_prep_state_path=remote_state,
+    )
+    seen: dict[str, object] = {}
+
+    def fake_run_command(command: list[str], *, env: dict[str, str], cwd: Path = ROOT_DIR) -> None:
+        seen["command"] = command
+        seen["env"] = env
+
+    monkeypatch.setattr(aws_local_prep, "run_command", fake_run_command)
+    prep._run_arm64_host_build("daemon", FOO="bar")
+
+    command = seen["command"]
+    assert command[:4] == ["make", "-C", str(ROOT_DIR), "__arm64-host-build"]
+    assert "PYTHON=python3" in command
+    assert "ARM64_HOST_BUILD_MODE=daemon" in command
+    assert seen["env"]["FOO"] == "bar"
+
+
 def test_aws_arm64_container_build_uses_container_python_and_llvmbpf_env(monkeypatch, tmp_path: Path) -> None:
     manifest = tmp_path / "run-contract.env"
     local_state = tmp_path / "local-state.json"
@@ -195,8 +324,6 @@ def test_aws_arm64_container_build_uses_container_python_and_llvmbpf_env(monkeyp
 
     seen: dict[str, object] = {}
 
-    monkeypatch.setattr(prep, "_ensure_arm64_crossbuild_image", lambda: None)
-
     def fake_run_command(command: list[str], *, env: dict[str, str], cwd: Path = ROOT_DIR) -> None:
         seen["command"] = command
         seen["env"] = env
@@ -206,6 +333,12 @@ def test_aws_arm64_container_build_uses_container_python_and_llvmbpf_env(monkeyp
     prep._run_arm64_container_build(runtime_targets_csv="runner", llvmbpf_setting="ON", bench_repos_csv="bcc")
 
     command = seen["command"]
-    assert "ARM64_HOST_PYTHON_BIN=python3" in command
-    assert f"ARM64_HOST_PYTHON_BIN={prep.host_python_bin}" not in command
+    assert command[:4] == ["make", "-C", str(ROOT_DIR), "__arm64-container-build"]
+    assert f"PYTHON={prep.host_python_bin}" in command
+    assert f"ARM64_BENCH_REPO_ROOT={prep._container_path(prep.arm64_native_repo_checkout_root)}" in command
+    assert f"ARM64_NATIVE_REPO_BUILD_ROOT={prep._container_path(prep.arm64_native_repo_build_root)}" in command
+    assert f"ARM64_KATRAN_GETDEPS_ROOT={prep._container_path(prep.arm64_katran_getdeps_root)}" in command
+    assert f"ARM64_KATRAN_GETDEPS_LOCK={prep._container_path(prep.arm64_katran_getdeps_lock)}" in command
+    assert f"ARM64_VENDOR_BPFTOOL_ROOT={prep._container_path(prep.arm64_vendor_bpftool_root)}" in command
+    assert f"ARM64_VENDOR_BPFTOOL_LOCK={prep._container_path(prep.arm64_vendor_bpftool_lock)}" in command
     assert "MICRO_EXEC_ENABLE_LLVMBPF=ON" in command

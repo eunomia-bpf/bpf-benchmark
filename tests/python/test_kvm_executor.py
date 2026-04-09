@@ -17,7 +17,7 @@ def test_bundle_stage_root_extracts_under_tmpdir(tmp_path: Path) -> None:
     with tarfile.open(bundle_tar, "w:gz") as archive:
         archive.add(source, arcname=".")
 
-    stage_root = bundle_stage_root(bundle_tar)
+    stage_root = bundle_stage_root(bundle_tar, "run.x86-kvm.corpus.token123")
 
     assert stage_root.is_dir()
     assert str(stage_root).startswith(str(Path(tempfile.gettempdir()) / "bpf-benchmark-kvm"))

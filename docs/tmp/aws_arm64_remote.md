@@ -4114,3 +4114,836 @@ Active todo:
 3. Keep `aws-arm64 corpus/e2e` alive; if the next blocker is not a concrete
    runtime failure but duplicated heavy native prep, move more ARM64 native repo
    work out of per-run qemu/container prep.
+
+
+### 13.41 2026-04-08: x86 runtime type-alias fix, KVM corpus green, ARM getdeps cache
+
+- Fresh `aws-x86 corpus` exposed a new remote runtime blocker after the earlier
+  dataclass compatibility cleanup:
+  - remote import of `runner.libs.app_runners` failed under system `python3`
+    because top-level `Callable[...]` aliases still used PEP 604 unions
+    (`str | None`) that are evaluated at import time.
+- Fixed by replacing the two remaining runtime-evaluated aliases with
+  `Optional[...]`:
+  - `runner/libs/app_runners/__init__.py`
+  - `runner/libs/run_artifacts.py`
+- Focused static gate after the alias fix stayed green:
+  - `pyflakes`
+  - `compileall`
+  - `git diff --check`
+- Fresh reruns started immediately after the fix:
+  - `aws-x86 corpus`
+  - `aws-x86 e2e`
+
+- Fresh `x86-kvm corpus` rerun is now green:
+  - result directory:
+    - `/tmp/bpf-benchmark-kvm/run.x86-kvm.corpus.d6e961b7/workspace/corpus/results/x86_kvm_corpus_20260408_195323`
+  - status: `ok`
+  - sample count: `36`
+  - applied-only / all-comparable geomean: `0.828x`
+- With local KVM corpus green on updated code, the single allowed local lane
+  was advanced to:
+  - `x86-kvm e2e`
+
+- ARM benchmark prep remained dominated by duplicated Katran dependency builds
+  under qemu-backed `arm64_container_build`.
+- The main repeated hotspot was:
+  - `getdeps.py --only-deps`
+  - compiling bundled CMake and its dependency tree
+  - once for `aws-arm64 corpus`
+  - once again for `aws-arm64 e2e`
+- To reduce this, ARM local prep now exports a shared Katran dependency cache
+  contract:
+  - `ARM64_KATRAN_GETDEPS_ROOT`
+  - `ARM64_KATRAN_GETDEPS_LOCK`
+- `runner.libs.arm64_container_build` now uses that shared cache root and takes
+  an exclusive lock around both:
+  - Katran dependency materialization
+  - dependency prefix discovery
+- The intended effect is:
+  - one lane builds or refreshes Katran deps
+  - the other waits on the lock and then reuses the same dependency cache
+  - no second full `cmake/getdeps` rebuild per rerun
+- The stale ARM qemu containers from the previous per-run-only strategy were
+  killed, and fresh `aws-arm64 corpus/e2e` reruns were started on the new
+  shared-cache contract.
+
+Active todo:
+1. Wait for fresh `aws-x86 corpus` and `aws-x86 e2e` results after the Python
+   3.9 type-alias fix.
+2. Keep `x86-kvm e2e` moving on the now-green local KVM corpus baseline.
+3. Verify that fresh `aws-arm64 corpus/e2e` now reuse a shared Katran getdeps
+   cache instead of rebuilding dependency scratch independently.
+4. If ARM prep is still dominated by userspace-native builds after shared
+   getdeps reuse, move the next largest remaining repo artifact off qemu.
+
+
+### 13.42 2026-04-08: live corpus/e2e status, fresh KVM rerun, ARM vendor-bpftool cache
+
+- Live `aws-x86 corpus/e2e` are now both past the earlier remote-prep and
+  Python-3.9 import crashes and are deep into native repo prep:
+  - `aws-x86 corpus`: `run.aws-x86.corpus.93ae8275`
+  - `aws-x86 e2e`: `run.aws-x86.e2e.a8ca092f`
+- Both x86 AWS lanes have already completed:
+  - local `scx_rusty` build
+  - native `bcc`
+  - native `katran` BPF objects
+  - native `tracee`
+  - native `tetragon`
+- That means the shared x86 setup/runtime blockers are no longer the gate; the
+  next fresh result should represent actual remote benchmark execution or the
+  next concrete runtime failure after bundle sealing.
+
+- The earlier preserved-debug-artifact-only failure from `x86-kvm e2e`
+  (`run.x86-kvm.e2e.ca3d3df1`) did not leave a useful guest-side log. Instead
+  of treating that final `255` as actionable by itself, a fresh canonical
+  rerun was started:
+  - `make vm-e2e`
+  - live session: `4640`
+- The rerun is currently still in the host kernel build stage; the next useful
+  KVM action is to wait for the first real guest/runtime error rather than keep
+  diagnosing the stale preserved-artifact tail message.
+
+- Fresh `aws-arm64 corpus/e2e` are both still blocked in local `arm64_container_build`,
+  but the concrete hotspot is now clearer:
+  - both lanes are compiling the same vendored `bpftool/bootstrap/libbpf`
+    tree before they can build ARM64 `bcc` artifacts
+  - current live processes:
+    - `run.aws-arm64.corpus.38df857b`
+    - `run.aws-arm64.e2e.6af4228d`
+- To reduce the next rerun's qemu time, ARM local prep now exports another
+  shared host cache contract:
+  - `ARM64_VENDOR_BPFTOOL_ROOT`
+  - `ARM64_VENDOR_BPFTOOL_LOCK`
+- `runner.libs.arm64_container_build` now reuses one shared ARM64 vendored
+  `bpftool` bootstrap build across lanes under an exclusive lock, the same way
+  Katran getdeps was already shared.
+- This change does not affect the already-running ARM lanes, but it should
+  remove another duplicated qemu-heavy build from the next rerun.
+
+Active todo:
+1. Keep polling live `aws-x86 corpus/e2e` until a fresh result directory or a
+   concrete runtime blocker lands.
+2. Keep polling live `aws-arm64 corpus/e2e`; once they reach Katran deps,
+   verify the shared getdeps cache is actually used.
+3. Let fresh `x86-kvm e2e` reach the first real guest/runtime error or pass;
+   fix that actual blocker, not the stale `255` tail from the previous run.
+4. If ARM still spends most wall clock in qemu after shared Katran deps and
+   shared vendored bpftool, move the next largest repo artifact off
+   `arm64_container_build`.
+
+
+### 13.43 2026-04-08: build-cache boundary clarification and x86 native build-root split
+
+- The intended cache model is now explicit:
+  - tracked source trees under `vendor/` and repo checkouts should stay
+    source-only
+  - Make/CMake/Cargo own incrementality inside stable build roots
+  - Python local prep should only:
+    - pick cache roots
+    - lock
+    - select deterministic bundle inputs
+    - hand sealed bundle generation off to Make
+- This means:
+  - `vendor/libbpf` should keep using `OBJDIR` / `PREFIX` outside the tracked
+    source tree
+  - `vendor/llvmbpf` should keep using `cmake -S ... -B <stable-build-dir>`
+  - `runner` should keep using `cmake -S runner -B <stable-build-dir>`
+  - in-tree build systems under fetched repos should ultimately build in
+    stable cached build copies, not in the tracked source checkout and not in
+    the per-run bundle stage root
+
+- As the first step toward that contract, `build_corpus_native.py` now treats
+  `--build-root` and `--stage-root` as separate concepts:
+  - `--build-root`: stable native build cache root
+  - `--stage-root`: per-run staged output tree copied into the bundle
+- KVM and AWS x86 local prep now pass:
+  - a shared x86 host native build cache root
+  - the per-run bundle stage root separately
+- ARM containerized native repo prep now uses the same explicit split in its
+  `build_corpus_native.py` calls:
+  - `--build-root`: ARM native build cache root
+  - `--stage-root`: staged per-run artifact tree
+- This is not the final shape yet because native repo compilation still runs
+  inside the selected repo checkout; the next cleanup step is to move those
+  in-tree build systems to stable cached build copies outside the per-run
+  sealed checkout.
+
+Active todo:
+1. Keep monitoring live `aws-x86 corpus/e2e`, `aws-arm64 corpus/e2e`, and
+   `x86-kvm e2e`.
+2. Continue shrinking ARM qemu time by moving the next heaviest repo artifact
+   off `arm64_container_build`.
+3. Move x86 native repo compilation off the per-run sealed checkout and into a
+   stable cached build-copy root so Make/CMake/Cargo caches actually persist
+   across reruns.
+
+
+### 13.45 2026-04-08: content-addressed sealed bundle cache via Make
+
+- The previous bundle model still rebuilt a heavy per-run workspace:
+  - local prep assembled `workspace/`
+  - local prep wrote a per-run `bundle.tar.gz`
+  - even when every bundled input was identical, the staging copy work
+    repeated on every run
+- That is now being reduced to the intended contract:
+  - deterministic prep outputs are cached
+  - per-run state stays per-run
+  - sealed bundle generation is content-addressed
+
+- `runner.libs.build_remote_bundle` now computes a deterministic cache key from:
+  - manifest values, excluding `RUN_TOKEN`
+  - bundle-input scalars
+  - content hashes of bundled input paths
+  - tracked git revisions for the repo root and vendored source trees
+- `Makefile::__bundle-cache` now owns sealed bundle reuse:
+  - cache key -> `.cache/<target>/bundle-cache/<key>/bundle.tar.gz`
+  - `flock` serializes first-writer creation
+  - the cached tarball is built once and then reused
+  - the temporary workspace used to build the tarball is deleted before the
+    cache entry is finalized
+- local prep no longer points executors at a per-run heavy tarball:
+  - `RUN_BUNDLE_TAR` now points at the cached tarball
+  - per-run state only records:
+    - `RUN_BUNDLE_TAR`
+    - `RUN_BUNDLE_CACHE_KEY`
+    - `RUN_BUNDLE_CACHE_DIR`
+
+- This does not eliminate all per-run staging yet:
+  - bundle inputs are still written per run
+  - run manifest/state/results remain per run
+  - native repo outputs and workload tools still need more cache unification
+- But it does remove one major repeated cost:
+  - same inputs no longer cause a full workspace copy and tar rebuild on every
+    run
+
+Static verification:
+- `pytest -q tests/python/test_build_remote_bundle.py tests/python/test_prepare_local_inputs.py`
+  -> `17 passed`
+- `python3 -m pyflakes runner/libs/build_remote_bundle.py runner/libs/local_prep_common.py tests/python/test_build_remote_bundle.py`
+  -> clean
+- `git diff --check`
+  -> clean
+- `make -n __bundle-cache ...`
+  -> thin Make-driven cache path only
+
+Active todo:
+1. Extend the same cache boundary to the heaviest ARM repo-native benchmark
+   builds so cached bundle reuse is not hidden behind qemu-heavy prep.
+2. Keep moving native repo builds toward stable out-of-tree build roots instead
+   of per-run copied checkouts.
+3. Re-run `corpus/e2e` after the remaining ARM prep wall-clock is reduced
+   enough that the cache changes materially shorten reruns.
+
+
+### 13.46 2026-04-08: active native repo build entrypoint moved under Make
+
+- The next deterministic prep surface after bundle assembly is native repo
+  artifact build for `corpus/e2e`.
+- That active entrypoint is no longer Python calling the corpus-native build
+  script directly:
+  - root `Makefile` now owns `__native-repo-build`
+  - local prep calls the Make target
+  - ARM container prep calls the same Make target inside the container
+- This is not yet the final state because the repo-specific build logic still
+  lives in `runner/scripts/build_corpus_native.py`, but the active control
+  surface is now:
+  - manifest/state in Python
+  - deterministic native repo build entry in Make
+  - repo-native compilation still delegated to Make/CMake/Cargo/Go inside that
+    path
+
+Static verification:
+- `pytest -q tests/python/test_prepare_local_inputs.py tests/python/test_build_remote_bundle.py`
+  -> `18 passed`
+- `python3 -m pyflakes runner/libs/local_prep_common.py runner/libs/arm64_container_build.py tests/python/test_prepare_local_inputs.py`
+  -> clean
+- `git diff --check`
+  -> clean
+- `make -n __native-repo-build ...`
+  -> thin Make wrapper over the current corpus-native builder
+
+Active todo:
+1. Keep shrinking the Python role inside native repo build by moving the
+   remaining repo-specific orchestration into repo-owned Make fragments where
+   feasible.
+2. Continue moving ARM repo-native benchmark prep off qemu/container where
+   host-cross is possible.
+3. Re-run `corpus/e2e` only after the remaining ARM prep hotspots are reduced
+   enough to make the new cache path meaningful.
+
+
+### 13.47 2026-04-08: remove dead per-run bundle state and start shared ARM benchmark repo cache
+
+- The earlier bundle-cache migration left one layer of dead state behind:
+  - `AWSPrep` still carried `stage_root` and `bundle_tar`
+  - `KVMPrep` still carried `stage_root` and `bundle_tar`
+  - both still passed those dead paths into `finalize_staged_bundle()`
+- That dead state is now deleted:
+  - local prep only produces:
+    - `bundle-inputs.json`
+    - `RUN_BUNDLE_TAR` pointing at the content-addressed cached tar
+    - per-run manifest/state/results
+  - the heavy per-run `workspace/` and per-run bundle tar are no longer part of
+    the local-prep contract
+
+- ARM benchmark prep also moved one layer closer to a stable cache boundary:
+  - `arm64_container_build` now takes `ARM64_BENCH_REPO_ROOT`
+  - benchmark repo checkouts now live under a shared ARM host cache root
+  - each cached repo copy is sealed by a source stamp
+  - per-repo locks serialize refresh/build so parallel runs do not trample the
+    same cached checkout
+- This does not yet eliminate qemu/container time:
+  - `bcc/tracee/tetragon/katran` benchmark prep still runs inside the ARM
+    container userspace
+  - but repeated repo copy cost is no longer supposed to scale with every run
+
+Static verification:
+- `pytest -q tests/python/test_prepare_local_inputs.py tests/python/test_build_remote_bundle.py`
+  -> `18 passed`
+- `python3 -m pyflakes runner/libs/arm64_container_build.py runner/libs/aws_local_prep.py runner/libs/kvm_local_prep.py runner/libs/local_prep_common.py tests/python/test_prepare_local_inputs.py`
+  -> clean
+- `python3 -m compileall -q runner/libs`
+  -> clean
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Finish pushing ARM benchmark repo prep from shared cached checkouts toward
+   shared cached build roots so qemu/container time drops materially.
+2. Keep deleting dead per-run staging assumptions after each cache migration;
+   no orphan `stage_root` / `bundle_tar` / fallback env should remain in active
+   local-prep paths.
+3. Run another full-tree review for dead code, second control planes, and
+   compile logic that still belongs in Make/CMake/Cargo instead of Python.
+
+
+### 13.48 2026-04-08: delete dead profiler CLI/library pair
+
+- A full-tree reference scan showed that:
+  - `runner/scripts/bpf_profiler.py` had no active callers
+  - `runner/libs/profiler.py` was only referenced by that CLI
+  - outside `docs/tmp`, there were no remaining active imports or entrypoints
+- That pair has now been deleted instead of kept as orphan functionality.
+- After deletion:
+  - `pytest -q tests/python` still passes
+  - `pyflakes` and `compileall` still pass
+  - no active tree references remain outside historical `docs/tmp`
+
+Active todo:
+1. Continue deleting dead code the same way:
+   - prove no active callers
+   - delete the orphan pair/group
+   - rerun static gates immediately
+2. Keep pushing ARM benchmark prep toward shared cached build roots so the next
+   runtime phase is shorter and cleaner.
+3. Wait for full-tree reviewers and address any new findings before reopening
+   real-path benchmark validation.
+
+
+### 13.49 2026-04-08: fix bundle-cache dirty-tree blindness and KVM cache-tar collision
+
+- A full-tree reviewer caught two runtime-level problems in the first
+  content-addressed bundle-cache pass:
+  - the cache key still keyed the root worktree mostly by `HEAD`, while bundle
+    assembly copied tracked files from the live checkout
+  - KVM derived its extraction root from the cached tar path, so identical
+    inputs across runs would collide under `/tmp`
+- Both are now fixed:
+  - `build_remote_bundle` now hashes the actual tracked tree contents for every
+    tracked subtree copied into the bundle
+  - dirty tracked deletions are treated as part of current content instead of
+    exploding as missing tracked inputs
+  - `kvm_executor` now derives the extraction root from `RUN_TOKEN`, not the
+    bundle-cache directory name
+- The bundle-cache metadata that nobody consumed was also deleted:
+  - local prep writes only `RUN_BUNDLE_TAR`
+  - the cached tar directory no longer writes `cache-key.txt`
+
+Static verification:
+- `pytest -q tests/python/test_build_remote_bundle.py tests/python/test_prepare_local_inputs.py tests/python/test_kvm_executor.py`
+  -> `19 passed`
+- `pytest -q tests/python`
+  -> `45 passed`
+- `python3 -m pyflakes runner/libs runner/scripts tests/python e2e daemon docs/paper/helpers`
+  -> clean
+- `python3 -m compileall -q runner/libs runner/scripts tests/python e2e daemon docs/paper/helpers`
+  -> clean
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Finish reviewer follow-up on the latest bundle-cache/KVM fixes.
+2. Keep deleting dead code and second-control-plane state as soon as it is
+   proven unused.
+3. Continue reducing ARM benchmark prep wall-clock by moving the next
+   deterministic repo-artifact surfaces toward shared cached build roots.
+
+
+### 13.50 2026-04-08: move active `scx` build entrypoint under Make
+
+- `scx` was still one more place where active prep called a Python build script
+  directly.
+- That is now aligned with the same pattern as native repo build:
+  - root `Makefile` owns `__scx-build`
+  - `runner.libs.local_prep_common.build_scx_artifacts()` now calls Make
+  - `runner.libs.arm64_container_build` also calls the same Make target
+- The repo-specific `runner/scripts/build_scx_artifacts.py` logic still exists,
+  but it is no longer an active control-plane entrypoint; it is behind the
+  root Make target.
+
+Static verification:
+- `pytest -q tests/python/test_prepare_local_inputs.py tests/python/test_build_remote_bundle.py tests/python/test_kvm_executor.py`
+  -> `20 passed`
+- `pytest -q tests/python`
+  -> `46 passed`
+- `python3 -m pyflakes runner/libs/local_prep_common.py runner/libs/arm64_container_build.py tests/python/test_prepare_local_inputs.py`
+  -> clean
+- `make -n __scx-build ...`
+  -> thin Make wrapper over the current scx builder
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Keep migrating deterministic build entrypoints behind root Make targets until
+   Python is down to manifest/state/orchestration only.
+2. Continue shrinking ARM qemu/container prep by pushing the next repo-artifact
+   surfaces toward shared cached build roots.
+3. Wait for the remaining reviewer pass, then decide whether structural cleanup
+   is complete enough to reopen real-path `corpus/e2e` validation.
+
+
+### 13.51 2026-04-08: collapse active `scx` build callers to a single Make entrypoint
+
+- After adding `__scx-build`, there were still multiple Python direct callers of
+  `runner/scripts/build_scx_artifacts.py`.
+- That fanout is now gone:
+  - `runner.libs.local_prep_common` uses `__scx-build`
+  - `runner.libs.arm64_container_build` uses `__scx-build`
+  - `runner.libs.arm64_host_build` uses `__scx-build`
+  - `runner/scripts/build_corpus_native.py` now also uses `__scx-build`
+- The remaining active call graph is therefore:
+  - root `Makefile::__scx-build`
+  - `runner/scripts/build_scx_artifacts.py`
+- That is still not the final state because repo-specific `scx` build logic is
+  not yet encoded in repo-owned Make/CMake files, but the second control plane
+  is gone.
+
+Static verification:
+- `pytest -q tests/python`
+  -> `46 passed`
+- `python3 -m pyflakes runner/scripts/build_corpus_native.py runner/libs/arm64_host_build.py runner/libs/arm64_container_build.py runner/libs/local_prep_common.py tests/python/test_prepare_local_inputs.py`
+  -> clean
+- `git diff --check`
+  -> clean
+- `rg -n "build_scx_artifacts.py" runner tests/python Makefile`
+  -> only `Makefile::__scx-build` remains
+
+Active todo:
+1. Continue collapsing other deterministic build entrypoints the same way until
+   root Make is the only active compile/build surface.
+2. Keep reducing ARM benchmark prep wall-clock by moving the next repo-artifact
+   surfaces from per-run container work into shared cached build roots.
+3. Re-run reviewer on the latest Make consolidation pass and only reopen
+   runtime `corpus/e2e` after the structural findings stop changing.
+
+
+### 13.52 2026-04-08: move upstream-selftests and ARM container build behind root Make
+
+- Two more active compile/build entrypoints were still being invoked directly
+  from Python:
+  - `runner.libs.build_upstream_selftests`
+  - the `docker buildx` + `docker run` path that launched
+    `runner.libs.arm64_container_build`
+- Both are now behind root Make targets:
+  - `__upstream-selftests`
+  - `__arm64-container-build`
+- The active callers were updated accordingly:
+  - `runner.libs.local_prep_common.build_x86_upstream_selftests()`
+  - ARM upstream selftests inside `runner.libs.arm64_host_build`
+  - `runner.libs.aws_local_prep._run_arm64_container_build()`
+- The result is simpler control flow:
+  - Python prepares manifest/state and chooses which build surface is needed
+  - root Make owns the active compile/build entrypoint
+  - the containerized ARM build remains a runtime implementation detail of the
+    Make target instead of a second public control plane
+- The old Python-local `_ensure_arm64_crossbuild_image()` path was deleted.
+- Active-path shell review stays the same:
+  - no `.sh` control-plane scripts remain in the runner path
+  - remaining shell usage is limited to root Make, VM guest script emission, or
+    third-party build steps such as `autogen.sh`
+
+Static verification:
+- `pytest -q tests/python/test_prepare_local_inputs.py tests/python/test_build_remote_bundle.py tests/python/test_kvm_executor.py`
+  -> `21 passed`
+- `pytest -q tests/python`
+  -> `47 passed`
+- `python3 -m pyflakes runner/libs/aws_local_prep.py runner/libs/local_prep_common.py runner/libs/arm64_host_build.py tests/python/test_prepare_local_inputs.py`
+  -> clean
+- `make -n __upstream-selftests ...`
+  -> thin Make wrapper over upstream selftest build
+- `make -n __arm64-container-build ...`
+  -> thin Make wrapper over ARM64 container build
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Continue deleting dead direct-build surfaces until root Make is the only
+   active compile/build surface for deterministic prep.
+2. Keep shrinking ARM benchmark prep by moving the remaining repo-artifact
+   builders (`bcc`, `katran`, `tracee`, `tetragon`, and `llvmbpf` runner path)
+   from container/per-run behavior toward stable cached build roots.
+3. Keep waiting for reviewer confirmation on the latest ARM prep cleanup; do not
+   reopen real-path `corpus/e2e` until the structural findings stop changing.
+
+
+### 13.53 2026-04-08: move ARM host-build modes behind root Make
+
+- `runner.libs.aws_local_prep` still had one more direct Python compile/build
+  control plane:
+  - `runner.libs.arm64_host_build daemon`
+  - `runner.libs.arm64_host_build runner`
+  - `runner.libs.arm64_host_build repo-tests`
+  - `runner.libs.arm64_host_build scx`
+  - `runner.libs.arm64_host_build workload-tools`
+- Those modes now enter through a single root Make target:
+  - `__arm64-host-build`
+- The effect is:
+  - AWS local prep no longer shells directly into the host-build module
+  - root Make owns the active build surface for ARM host-cross prep
+  - Python stays responsible for contract/state/env selection rather than being
+    the public compile surface
+- After this pass, the remaining active deterministic build surfaces visible to
+  the runner are:
+  - `__native-repo-build`
+  - `__scx-build`
+  - `__upstream-selftests`
+  - `__arm64-container-build`
+  - `__arm64-host-build`
+- That is still not the final state, but it is a much smaller and more explicit
+  compile surface than the earlier mix of direct Python entrypoints.
+
+Static verification:
+- `pytest -q tests/python/test_prepare_local_inputs.py tests/python/test_build_remote_bundle.py tests/python/test_kvm_executor.py`
+  -> `22 passed`
+- `pytest -q tests/python`
+  -> `48 passed`
+- `python3 -m pyflakes runner/libs/aws_local_prep.py runner/libs/local_prep_common.py runner/libs/arm64_host_build.py tests/python/test_prepare_local_inputs.py tests/python/test_build_remote_bundle.py`
+  -> clean
+- `make -n __arm64-host-build PYTHON=python3 ARM64_HOST_BUILD_MODE=daemon`
+  -> thin Make wrapper over ARM64 host build
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Continue deleting dead or duplicate direct-build surfaces until the root
+   Make targets above are the only remaining deterministic build entrypoints.
+2. Keep shrinking ARM benchmark prep by moving the remaining repo-artifact
+   builders (`bcc`, `katran`, `tracee`, `tetragon`, and `llvmbpf` runner path)
+   toward stable cached build roots and away from container/per-run rebuilds.
+3. Keep waiting for reviewer confirmation on the latest ARM prep cleanup; do not
+   reopen real-path `corpus/e2e` until the structural findings stop changing.
+
+
+### 13.54 2026-04-08: delete stale container-side SCX mode and extra ARM repo staging
+
+- Reviewer findings on the ARM benchmark prep path exposed three more pieces of
+  unnecessary surface area:
+  - stale container-side `scx` mode in `arm64_container_build`
+  - an extra `benchmark/stage` copy layer for `tracee` and `tetragon`
+  - duplicate ARM build env keys in `AWSPrep._env_with_paths()`
+- Those are now removed:
+  - `arm64_container_build` no longer carries `ARM64_CROSSBUILD_SCX_PACKAGES`,
+    `ARM64_CROSSBUILD_ONLY_SCX`, or its own `build_scx_artifacts()` path
+  - `tracee` and `tetragon` now stage directly into the final
+    `output_root/corpus/build/<repo>` tree instead of building into an
+    intermediate `benchmark/stage` tree and copying again
+  - `_env_with_paths()` no longer exports dead duplicate ARM host-build and
+    cargo-home keys that are only supplied explicitly at the call sites
+- This further shrinks ARM benchmark prep to one actual container build plane:
+  - runtime runner/daemon build when host-cross is not enough
+  - cached native benchmark repo build outputs for the remaining repos
+
+Static verification:
+- `pytest -q tests/python/test_prepare_local_inputs.py tests/python/test_build_remote_bundle.py tests/python/test_kvm_executor.py`
+  -> `22 passed`
+- `pytest -q tests/python`
+  -> `48 passed`
+- `python3 -m pyflakes runner/libs/aws_local_prep.py runner/libs/arm64_container_build.py runner/libs/arm64_host_build.py tests/python/test_prepare_local_inputs.py tests/python/test_build_remote_bundle.py`
+  -> clean
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Continue deleting dead or duplicate deterministic build surfaces until the
+   remaining root Make targets are the only active compile entrypoints.
+2. Keep shrinking ARM benchmark prep by moving the remaining container-heavy
+   repo-artifact builders (`bcc`, `katran`, `tracee`, `tetragon`, and the
+   `llvmbpf=ON` runner path) toward stable cached build roots.
+3. Wait for reviewer confirmation on the latest ARM benchmark prep cleanup
+   before reopening real-path `corpus/e2e`.
+
+
+### 13.55 2026-04-08: simplify ARM Katran server build around cached repo copy
+
+- The ARM Katran server build still carried one unnecessary copy layer:
+  - copy cached repo -> `katranbuild/src`
+  - build there
+  - then stage the bundle
+- That extra source-tree sync is now gone.
+- The server build now uses the stable cached repo copy under
+  `ARM64_BENCH_REPO_ROOT/katran` directly and keeps `_build` there.
+- This removes another per-run copy step from the ARM benchmark prep path and
+  makes the Katran build root more obviously cache-oriented.
+- The old container-side `native_cargo_linker` field was also deleted after the
+  stale container-side `scx` mode removal, since it no longer had any consumer.
+
+Static verification:
+- `pytest -q tests/python`
+  -> `48 passed`
+- `python3 -m pyflakes runner/libs/arm64_container_build.py runner/libs/aws_local_prep.py`
+  -> clean
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Keep `corpus/e2e` running for `aws-arm64`, `aws-x86`, and local `x86-kvm`; fix the first runtime blocker that lands on each lane.
+2. Continue shrinking ARM benchmark prep by removing the next avoidable rebuild or
+   recopy step in the remaining repo-artifact builders.
+3. Re-review active runner/build paths after each runtime blocker fix and keep the document current.
+
+
+### 13.56 2026-04-08: x86 corpus/e2e runtime blockers and fresh reruns
+
+- The first fresh `aws-x86 corpus/e2e` reruns moved past setup and exposed real
+  runtime failures instead of prep/control-plane breakage:
+  - bundled `stress-ng` under the remote workspace failed with `Permission denied`
+    when launched through `setpriv`
+  - `tracee` failed on AL2023 with `GLIBC_2.38 not found`
+  - `tetragon` still defaulted to `/usr/local/sbin/bpftool`
+  - `scx` e2e still called `run_phase(..., prog_ids=...)` after the local
+    helper signature had been narrowed
+- These are now fixed in-tree:
+  - AWS remote stage defaults moved from `/home/ec2-user/...` to `/var/tmp/...`
+    for both x86 and arm64 so unprivileged workload tools can traverse the
+    bundled path
+  - x86 native repo bundle wrapping now includes `tracee`, so the staged binary
+    carries its own portable runtime instead of requiring the remote glibc
+  - `tetragon` now defaults to `BPFTOOL_BIN`/`bpftool`, not
+    `/usr/local/sbin/bpftool`
+  - `scx` `run_phase()` again accepts explicit `prog_ids`
+  - `tcp_retransmit` now contributes `tc` to the explicit runtime tool contract
+- Fresh reruns were launched after these fixes for:
+  - `aws-x86 corpus`
+  - `aws-x86 e2e`
+- Live matrix at this point:
+  - `x86-kvm corpus`
+  - `aws-x86 corpus`
+  - `aws-x86 e2e`
+  - `aws-arm64 corpus`
+  - `aws-arm64 e2e`
+
+Static verification:
+- `python3 -m pyflakes runner/libs/run_contract.py runner/libs/prereq_contract.py runner/libs/build_remote_bundle.py e2e/cases/scx/case.py e2e/cases/tetragon/case.py`
+  -> clean
+- `python3 -m pytest -q tests/python/test_run_contract.py tests/python/test_build_remote_bundle.py`
+  -> `29 passed`
+- `python3 -m compileall -q runner/libs e2e`
+  -> clean
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Keep the fresh `aws-x86 corpus/e2e` reruns running until they land new
+   result dirs or the next real runtime blocker.
+2. Keep `x86-kvm corpus` running and compare its first new failure, if any,
+   against the AWS x86 blockers to keep shared setup/runtime fixes shared.
+3. Continue shrinking the ARM qemu/container benchmark prep path while the ARM
+   `corpus/e2e` lanes are still building.
+
+
+### 13.57 2026-04-08: ARM shared cache roots now propagate into container prep
+
+- The current live `aws-arm64 corpus/e2e` lanes are still the old runs and are
+  visibly compiling `katran getdeps` twice under per-run paths:
+  - `run.aws-arm64.corpus.38df857b/.../katranbuild/getdeps`
+  - `run.aws-arm64.e2e.6af4228d/.../katranbuild/getdeps`
+- The root cause was not missing cache design; the stable cache roots already
+  existed in `AWSPrep`, but the active `__arm64-container-build` invocation was
+  not propagating all of them into the container.
+- This is now fixed in-tree:
+  - `aws_local_prep.py` passes
+    `ARM64_KATRAN_GETDEPS_ROOT/LOCK` and
+    `ARM64_VENDOR_BPFTOOL_ROOT/LOCK` into the Make wrapper
+  - the root `Makefile` forwards those variables into `docker run`
+  - the regression is covered by the ARM local-prep unit test
+- I did not kill the two currently running ARM lanes after this fix because they
+  are already deep into the qemu-based CMake build; restarting immediately would
+  discard multiple hours of progress. The next fresh ARM rerun will use the new
+  shared cache contract.
+
+Static verification:
+- `python3 -m pytest -q tests/python/test_prepare_local_inputs.py`
+  -> `11 passed`
+- `python3 -m pyflakes runner/libs/aws_local_prep.py tests/python/test_prepare_local_inputs.py`
+  -> clean
+- `git diff --check`
+  -> clean
+- `make -n aws-x86-benchmark AWS_X86_BENCH_MODE=corpus`
+  -> still a thin alias to `run_target_suite`
+
+Active todo:
+1. Keep the current `aws-x86 corpus/e2e` live reruns running and capture the
+   first new runtime blocker or fresh result directory.
+2. Keep the current `aws-arm64 corpus/e2e` lanes running to completion, then
+   rerun them on the new shared-cache contract if needed.
+3. Continue moving remaining ARM benchmark prep cost out of per-run qemu work
+   and into stable cached build roots.
+
+
+### 13.58 2026-04-08: x86-kvm corpus failed at VM bootstrap, not in-suite
+
+- The failed `vm-corpus` run was replayed down to the raw `vng` invocation with
+  `--verbose`, and the failure is now explicit:
+  - the guest panicked before entering the staged workspace
+  - `virtme-ng` tried to load hostfs/9p/overlay modules from
+    `vendor/linux-framework/.virtme_mods/lib/modules/0.0.0`
+  - those modules were not the fresh `modules_install` copies; the `0.0.0`
+    tree still contained symlinks back to source-tree `.ko` files
+  - the source-tree `.ko` files no longer matched the installed module tree, so
+    `netfs/9p/virtiofs/overlay` all failed with `invalid module format`
+- This is now fixed in-tree:
+  - `x86_kernel_artifacts._stage_virtme_modules()` rewrites the `0.0.0` alias
+    tree as a real copy of the current `kernel.release` module tree
+  - `build/source` links are stripped from the alias tree after the copy
+  - the behavior is covered by `tests/python/test_x86_kernel_artifacts.py`
+
+Static verification:
+- `python3 -m pytest -q tests/python/test_x86_kernel_artifacts.py tests/python/test_prepare_local_inputs.py`
+  -> `12 passed`
+- `python3 -m pyflakes runner/libs/x86_kernel_artifacts.py tests/python/test_x86_kernel_artifacts.py`
+  -> clean
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Fresh-rerun `vm-corpus` on the repaired `.virtme_mods` contract.
+2. Keep the current `aws-x86 corpus/e2e` live reruns running and capture the
+   first new runtime blocker or fresh result directory.
+3. Keep the current `aws-arm64 corpus/e2e` lanes running to completion, then
+   rerun them on the new shared-cache contract if needed.
+
+
+### 13.44 2026-04-08: benchmark instance sizing and medium canary limit
+
+- The fresh `aws-x86 corpus` runtime failure is now clearly tied to instance
+  sizing, not setup:
+  - the suite started multiple runners successfully
+  - `corpus/driver.py` was then terminated with `SIGKILL (-9)` on the remote
+    host
+- The target contract now distinguishes test and benchmark instance defaults:
+  - `aws-x86`: `t3.micro` for test, `t3.large` for benchmark
+  - `aws-arm64`: `t4g.micro` for test, `t4g.large` for benchmark
+- A `medium + larger swap` canary was attempted for both x86 and arm64 corpus:
+  - x86: `t3.medium + 16G swap`
+  - arm64: `t4g.medium + 16G swap`
+- Both canaries failed before launch with `VcpuLimitExceeded`, which means the
+  current AWS account vCPU quota is the blocker for that extra parallel canary,
+  not the benchmark contract itself.
+- The existing large benchmark lanes remain the active truth:
+  - `aws-x86 corpus/e2e`
+  - `aws-arm64 corpus/e2e`
+  - `x86-kvm e2e`
+
+Active todo:
+1. Keep monitoring the active large-lane `corpus/e2e` runs and fix the first
+   new runtime blocker that lands.
+2. Continue reducing ARM qemu-local prep wall clock, especially around Katran
+   getdeps and the remaining native repo builds.
+3. Continue moving x86 native repo builds off per-run sealed checkouts and into
+   stable cached build copies.
+4. If another canary sizing pass is needed later, do it without exceeding the
+   current AWS account vCPU quota.
+
+
+### 13.59 2026-04-08: fresh x86 reruns are active, stale ARM lanes were killed, and x86 native repo builds now take explicit vmlinux BTF
+
+- The current live matrix is:
+  - `x86-kvm corpus`: active fresh rerun
+  - `aws-x86 corpus`: active fresh rerun
+  - `aws-x86 e2e`: active fresh rerun
+  - `aws-arm64 corpus`: active fresh rerun
+  - `aws-arm64 e2e`: active fresh rerun
+- The old ARM dedicated `corpus/e2e` lanes that were still compiling under
+  per-run qemu/container paths after their remote instances had already been
+  terminated were explicitly killed locally. They are no longer the active
+  truth.
+- The x86 workload-tool contract is now simpler and shared:
+  - x86 no longer bundles package-manager-installable workload tools
+  - `corpus/e2e` now declare `curl` and `tc` explicitly where the workloads
+    actually need them
+  - `RUN_REMOTE_WORKLOAD_TOOL_BIN` is only written when bundled tools are
+    actually present
+- A correctness bug in the shared x86 native-repo build cache has now been
+  fixed:
+  - `build_corpus_native.py` previously scanned the entire shared
+    `ACTIVE_BUILD_ROOT` for an arbitrary cached `vmlinux.h`
+  - that meant a stale header from a previous kernel/build could leak into a
+    new `corpus/e2e` native-repo build
+  - the native-repo build path now accepts explicit `NATIVE_VMLINUX_BTF` and
+    generates a shared cached `vmlinux.h` from that exact BTF input instead of
+    scanning the build root
+  - KVM and AWS x86 local prep now pass the canonical
+    `vendor/linux-framework/vmlinux` path explicitly into the Make wrapper
+
+Static verification:
+- `python3 -m pytest -q tests/python/test_prepare_local_inputs.py tests/python/test_build_corpus_native.py tests/python/test_build_remote_bundle.py tests/python/test_run_contract.py`
+  -> `45 passed`
+- `python3 -m pyflakes runner/scripts/build_corpus_native.py runner/libs/local_prep_common.py runner/libs/kvm_local_prep.py runner/libs/aws_local_prep.py tests/python/test_build_corpus_native.py tests/python/test_prepare_local_inputs.py`
+  -> clean
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Keep the live `x86-kvm corpus`, `aws-x86 corpus`, and `aws-x86 e2e` runs
+   moving until they land fresh result directories or the next real runtime
+   blocker.
+2. Keep the fresh `aws-arm64 corpus/e2e` reruns moving on the new contract and
+   capture the first new runtime blocker or fresh result directory.
+3. Continue shrinking ARM qemu/container prep wall clock while the fresh ARM
+   lanes run, especially the remaining benchmark-native repo builds.
+
+
+### 13.60 2026-04-08: corpus/e2e now declare `ip` explicitly and guest provisioning brings `lo` up
+
+- The fresh `x86-kvm corpus` rerun made it past the old bootstrap/module issues
+  and exposed a shared guest runtime assumption instead:
+  - `tracee/default` failed to become healthy
+  - `bcc/tcpconnect` timed out against `127.0.0.1`
+  - `bpftrace/tcpretrans` completed with no successful loopback transfers
+- This is now treated as a shared `corpus/e2e` guest contract issue, not a
+  case-local workaround:
+  - `runner/suites/corpus.env` and `runner/suites/e2e.env` now declare `ip` in
+    `SUITE_DEFAULT_REMOTE_COMMANDS`
+  - `runner.libs.run_contract` now preserves `ip` through e2e case selection
+  - `runner.libs.guest_prereqs.install_guest_prereqs()` now brings `lo` up
+    explicitly when `ip` is available on the guest
+- The manifest/unit tests were updated to match the new contract.
+
+Static verification:
+- `python3 -m pytest -q tests/python/test_run_contract.py`
+  -> `21 passed`
+- `python3 -m pyflakes runner/libs/guest_prereqs.py runner/libs/run_contract.py tests/python/test_run_contract.py`
+  -> clean
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Keep the current `aws-x86 corpus/e2e` reruns moving; if they still fail, the
+   next rerun should consume the explicit `ip + lo-up` guest contract.
+2. Keep the fresh `aws-arm64 corpus/e2e` reruns moving on the shared cache
+   contract and capture the first real runtime blocker.
+3. Keep the fresh `x86-kvm corpus` rerun moving on the new loopback contract,
+   then start `x86-kvm e2e` behind it.
+4. Continue shrinking ARM qemu/container prep wall clock while the ARM lanes
+   build, especially the remaining native repo artifacts.

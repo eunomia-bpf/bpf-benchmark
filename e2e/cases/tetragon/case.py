@@ -50,7 +50,7 @@ from runner.libs.case_common import (  # noqa: E402
 DEFAULT_CONFIG = Path(__file__).with_name("config_execve_rate.yaml")
 DEFAULT_OUTPUT_JSON = RESULTS_DIR / "tetragon.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tetragon-real-e2e.md"
-DEFAULT_BPFTOOL = "/usr/local/sbin/bpftool"
+DEFAULT_BPFTOOL = "bpftool"
 DEFAULT_DURATION_S = 30
 DEFAULT_SMOKE_DURATION_S = 8
 DEFAULT_LOAD_TIMEOUT_S = 20
@@ -865,7 +865,11 @@ def daemon_payload(
 
 
 def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
-    bpftool_arg = str(getattr(args, "bpftool", DEFAULT_BPFTOOL))
+    bpftool_arg = str(
+        getattr(args, "bpftool", None)
+        or os.environ.get("BPFTOOL_BIN", "").strip()
+        or DEFAULT_BPFTOOL
+    )
     bpftool = str(Path(bpftool_arg).resolve()) if Path(bpftool_arg).exists() else bpftool_arg
     os.environ["BPFTOOL_BIN"] = bpftool
     if Path(bpftool).exists():

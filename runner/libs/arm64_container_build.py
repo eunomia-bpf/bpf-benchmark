@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import fcntl
+import hashlib
 import os
 import shutil
 import subprocess
 import sys
+from contextlib import contextmanager
 from functools import partial
 from pathlib import Path
 
@@ -134,8 +137,6 @@ class Arm64ContainerBuild:
         self.jobs = _env("ARM64_CROSSBUILD_JOBS", "4") or "4"
         self.preferred_llvm_suffix = _env("ARM64_CROSSBUILD_LLVM_SUFFIX", "20")
         self.micro_exec_enable_llvmbpf = _env("MICRO_EXEC_ENABLE_LLVMBPF", "OFF") or "OFF"
-        self.scx_packages_raw = _env("ARM64_CROSSBUILD_SCX_PACKAGES")
-        self.only_scx = _env("ARM64_CROSSBUILD_ONLY_SCX", "0") == "1"
         self.bench_repos_raw = _env("ARM64_CROSSBUILD_BENCH_REPOS")
         self.only_bench = _env("ARM64_CROSSBUILD_ONLY_BENCH", "0") == "1"
         self.runtime_targets_raw = _env("ARM64_CROSSBUILD_RUNTIME_TARGETS", "runner,daemon") or "runner,daemon"
@@ -148,17 +149,18 @@ class Arm64ContainerBuild:
         self.runner_vendor_build_dir = self.build_root / "runner-vendor"
         self.llvmbpf_build_dir = self.build_root / "llvmbpf-build"
         self.llvmbpf_library = self.build_root / "libllvmbpf_vm.a"
-        self.scx_build_repo_root = self.build_root / "runner/repos"
-        self.scx_build_repo_dir = self.scx_build_repo_root / "scx"
-        self.bench_build_repo_root = self.build_root / "benchmark/repos"
-        self.bench_stage_root = self.build_root / "benchmark/stage"
+        self.bench_build_repo_root = Path(_env("ARM64_BENCH_REPO_ROOT", str(self.build_root / "benchmark/repos")))
+        self.bench_repo_lock_root = self.bench_build_repo_root.parent / ".repo-locks"
+        self.native_repo_build_root = Path(_env("ARM64_NATIVE_REPO_BUILD_ROOT", str(self.build_root / "benchmark/native-build-cache")))
         self.katran_build_root = Path(_env("ARM64_KATRAN_BUILD_ROOT", str(self.build_root / "katranbuild")))
-        self.katran_source_dir = self.katran_build_root / "src"
+        self.katran_source_dir = self.bench_build_repo_root / "katran"
         self.katran_build_dir = self.katran_source_dir / "_build"
         self.katran_install_dir = self.katran_build_dir / "deps"
-        self.katran_getdeps_root = self.katran_build_root / "getdeps"
+        self.katran_getdeps_root = Path(_env("ARM64_KATRAN_GETDEPS_ROOT", str(self.katran_build_root / "getdeps")))
+        self.katran_getdeps_lock = Path(_env("ARM64_KATRAN_GETDEPS_LOCK", str(self.katran_getdeps_root.parent / "katran-getdeps.lock")))
+        self.vendor_bpftool_root = Path(_env("ARM64_VENDOR_BPFTOOL_ROOT", str(self.build_root / "vendor-bpftool")))
+        self.vendor_bpftool_lock = Path(_env("ARM64_VENDOR_BPFTOOL_LOCK", str(self.vendor_bpftool_root.parent / "vendor-bpftool.lock")))
         self.toolchain_dir = self.build_root / "toolchain/bin"
-        self.native_cargo_linker = _env("ARM64_NATIVE_CARGO_LINKER", "gcc") or "gcc"
         self.host_python = _require_env("ARM64_HOST_PYTHON_BIN")
         self.clang_bin = ""
         self.clangxx_bin = ""
@@ -176,7 +178,15 @@ class Arm64ContainerBuild:
             return
         uid = int(self.host_uid)
         gid = int(self.host_gid)
-        for path in (self.output_root, self.build_root, Path(os.environ.get("CARGO_HOME", "")) if os.environ.get("CARGO_HOME") else None):
+        for path in (
+            self.output_root,
+            self.build_root,
+            self.bench_build_repo_root,
+            self.native_repo_build_root,
+            self.katran_getdeps_root,
+            self.vendor_bpftool_root,
+            Path(os.environ.get("CARGO_HOME", "")) if os.environ.get("CARGO_HOME") else None,
+        ):
             if path and path.exists():
                 for root, dirs, files in os.walk(path):
                     try:
@@ -232,23 +242,63 @@ class Arm64ContainerBuild:
         src_dir = self.source_repo_root / repo_name
         if not src_dir.is_dir():
             _die(f"source repo {src_dir} is missing; fetch it locally first")
-        shutil.rmtree(dest_dir, ignore_errors=True)
-        dest_dir.mkdir(parents=True, exist_ok=True)
+        stamp = self._source_repo_stamp(src_dir)
+        stamp_path = dest_dir.parent / f".{repo_name}.source-stamp"
+        with self._lock_repo(repo_name, suffix=".source.lock"):
+            if dest_dir.is_dir() and stamp_path.is_file() and stamp_path.read_text(encoding="utf-8").strip() == stamp:
+                _require_nonempty_dir(dest_dir, str(dest_dir))
+                return
+            shutil.rmtree(dest_dir, ignore_errors=True)
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            if subprocess.run(["git", "-C", str(src_dir), "rev-parse", "--verify", "HEAD"], check=False).returncode == 0:
+                if not _git_path_is_clean(src_dir):
+                    _die(f"source repo {src_dir} has local modifications and cannot be sealed")
+                _snapshot_git_tree(src_dir, dest_dir)
+            else:
+                _require_nonempty_dir(src_dir, str(src_dir))
+                shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
+                _require_nonempty_dir(dest_dir, str(dest_dir))
+            stamp_path.parent.mkdir(parents=True, exist_ok=True)
+            stamp_path.write_text(stamp + "\n", encoding="utf-8")
+
+    def _source_repo_stamp(self, src_dir: Path) -> str:
         if subprocess.run(["git", "-C", str(src_dir), "rev-parse", "--verify", "HEAD"], check=False).returncode == 0:
             if not _git_path_is_clean(src_dir):
                 _die(f"source repo {src_dir} has local modifications and cannot be sealed")
-            _snapshot_git_tree(src_dir, dest_dir)
-        else:
-            _require_nonempty_dir(src_dir, str(src_dir))
-            shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
-            _require_nonempty_dir(dest_dir, str(dest_dir))
+            untracked = _git_untracked_paths(src_dir)
+            if untracked:
+                sample = ", ".join(str(path) for path in untracked[:5])
+                extra = "" if len(untracked) <= 5 else f" (+{len(untracked) - 5} more)"
+                _die(f"source repo {src_dir} has untracked files and cannot be sealed: {sample}{extra}")
+            head = _run(["git", "-C", str(src_dir), "rev-parse", "HEAD"]).stdout.strip()
+            return f"git:{head}"
+        digest = hashlib.sha256()
+        for path in sorted(src_dir.rglob("*")):
+            rel = path.relative_to(src_dir).as_posix()
+            digest.update(rel.encode("utf-8"))
+            if path.is_file():
+                stat = path.stat()
+                digest.update(str(stat.st_size).encode("utf-8"))
+                digest.update(str(stat.st_mtime_ns).encode("utf-8"))
+        return f"tree:{digest.hexdigest()}"
+
+    @contextmanager
+    def _lock_repo(self, repo_name: str, *, suffix: str = ".build.lock"):
+        with self._lock_file(self.bench_repo_lock_root / f"{repo_name}{suffix}"):
+            yield
 
     def build_vendor_bpftool(self) -> Path:
-        return build_vendor_bpftool(
-            build_dir=self.runner_vendor_build_dir.resolve(),
-            env={**os.environ, "BPFTOOL_JOBS": "1"},
-            expected_arch_signature="ARM aarch64",
-        )
+        cached_binary = self.vendor_bpftool_root / "vendor" / "bpftool" / "bootstrap" / "bpftool"
+        if cached_binary.is_file():
+            return cached_binary
+        with self._lock_file(self.vendor_bpftool_lock):
+            if cached_binary.is_file():
+                return cached_binary
+            return build_vendor_bpftool(
+                build_dir=self.vendor_bpftool_root.resolve(),
+                env={**os.environ, "BPFTOOL_JOBS": "1"},
+                expected_arch_signature="ARM aarch64",
+            )
 
     def build_bcc_artifacts(self) -> None:
         repo_dir = self.bench_build_repo_root / "bcc"
@@ -269,34 +319,35 @@ class Arm64ContainerBuild:
         ]
         _log("Building ARM64 bcc libbpf-tools artifacts (benchmark subset only)")
         self.prepare_repo_copy("bcc", repo_dir)
-        if not bpftool.is_file():
-            _die(f"missing vendor bpftool for ARM64 bcc build: {bpftool}")
-        _run_passthrough(
-            [
-                "make",
-                "-C",
-                str(tool_dir),
-                f"-j{self.jobs}",
-                f"CLANG={self.clang_bin}",
-                f"LLVM_STRIP={self.llvm_strip_bin}",
-                "USE_BLAZESYM=0",
-                f"BPFTOOL={bpftool}",
-                f"LIBBPF_SRC={self.repo_root / 'vendor/libbpf/src'}",
-                *required_tools,
-            ]
-        )
-        repo_output = self.output_root / "runner/repos/bcc/libbpf-tools/.output"
-        corpus_output = self.output_root / "corpus/build/bcc/libbpf-tools/.output"
-        repo_output.mkdir(parents=True, exist_ok=True)
-        corpus_output.mkdir(parents=True, exist_ok=True)
-        for obj_path in sorted((tool_dir / ".output").glob("*.bpf.o")):
-            shutil.copy2(obj_path, repo_output / obj_path.name)
-            shutil.copy2(obj_path, corpus_output / obj_path.name)
-            tool_name = obj_path.name.removesuffix(".bpf.o")
-            tool_binary = tool_dir / tool_name
-            if tool_binary.is_file() and os.access(tool_binary, os.X_OK):
-                shutil.copy2(tool_binary, repo_output / tool_name)
-                shutil.copy2(tool_binary, corpus_output / tool_name)
+        with self._lock_repo("bcc"):
+            if not bpftool.is_file():
+                _die(f"missing vendor bpftool for ARM64 bcc build: {bpftool}")
+            _run_passthrough(
+                [
+                    "make",
+                    "-C",
+                    str(tool_dir),
+                    f"-j{self.jobs}",
+                    f"CLANG={self.clang_bin}",
+                    f"LLVM_STRIP={self.llvm_strip_bin}",
+                    "USE_BLAZESYM=0",
+                    f"BPFTOOL={bpftool}",
+                    f"LIBBPF_SRC={self.repo_root / 'vendor/libbpf/src'}",
+                    *required_tools,
+                ]
+            )
+            repo_output = self.output_root / "runner/repos/bcc/libbpf-tools/.output"
+            corpus_output = self.output_root / "corpus/build/bcc/libbpf-tools/.output"
+            repo_output.mkdir(parents=True, exist_ok=True)
+            corpus_output.mkdir(parents=True, exist_ok=True)
+            for obj_path in sorted((tool_dir / ".output").glob("*.bpf.o")):
+                shutil.copy2(obj_path, repo_output / obj_path.name)
+                shutil.copy2(obj_path, corpus_output / obj_path.name)
+                tool_name = obj_path.name.removesuffix(".bpf.o")
+                tool_binary = tool_dir / tool_name
+                if tool_binary.is_file() and os.access(tool_binary, os.X_OK):
+                    shutil.copy2(tool_binary, repo_output / tool_name)
+                    shutil.copy2(tool_binary, corpus_output / tool_name)
 
     def build_katran_bpf_artifacts(self) -> None:
         repo_dir = self.bench_build_repo_root / "katran"
@@ -320,17 +371,6 @@ class Arm64ContainerBuild:
             stage_name = obj_path.name[:-2] + ".bpf.o" if obj_path.suffix == ".o" and not obj_path.name.endswith(".bpf.o") else obj_path.name
             shutil.copy2(obj_path, output_dir / stage_name)
 
-    def sync_katran_source_tree(self, repo_dir: Path) -> None:
-        self.katran_source_dir.mkdir(parents=True, exist_ok=True)
-        for child in list(self.katran_source_dir.iterdir()):
-            if child.name == "_build":
-                continue
-            if child.is_dir():
-                shutil.rmtree(child)
-            else:
-                child.unlink()
-        shutil.copytree(repo_dir, self.katran_source_dir, dirs_exist_ok=True)
-
     def prepare_local_katran_dependencies(self, src_dir: Path, build_dir: Path, install_dir: Path) -> None:
         _log("Preparing local ARM64 Katran dependencies via getdeps")
         build_dir.mkdir(parents=True, exist_ok=True)
@@ -344,49 +384,51 @@ class Arm64ContainerBuild:
                 "LD": self.ld_lld_bin,
             }
         )
-        _run_passthrough(
-            [
-                self.host_python,
-                str(src_dir / "build/fbcode_builder/getdeps.py"),
-                "--scratch-path",
-                str(self.katran_getdeps_root),
-                "--num-jobs",
-                self.jobs,
-                "--allow-system-packages",
-                "--shared-libs",
-                "build",
-                "--no-tests",
-                "--only-deps",
-                "--current-project",
-                "katran",
-                "--src-dir",
-                str(src_dir),
-                "katran",
-            ],
-            cwd=src_dir,
-            env=env,
-        )
+        with self._lock_katran_getdeps():
+            _run_passthrough(
+                [
+                    self.host_python,
+                    str(src_dir / "build/fbcode_builder/getdeps.py"),
+                    "--scratch-path",
+                    str(self.katran_getdeps_root),
+                    "--num-jobs",
+                    self.jobs,
+                    "--allow-system-packages",
+                    "--shared-libs",
+                    "build",
+                    "--no-tests",
+                    "--only-deps",
+                    "--current-project",
+                    "katran",
+                    "--src-dir",
+                    str(src_dir),
+                    "katran",
+                ],
+                cwd=src_dir,
+                env=env,
+            )
 
     def katran_dependency_prefixes(self, src_dir: Path) -> list[str]:
-        completed = _run(
-            [
-                self.host_python,
-                str(src_dir / "build/fbcode_builder/getdeps.py"),
-                "--scratch-path",
-                str(self.katran_getdeps_root),
-                "--allow-system-packages",
-                "--shared-libs",
-                "query-paths",
-                "--recursive",
-                "--no-tests",
-                "--current-project",
-                "katran",
-                "--src-dir",
-                str(src_dir),
-                "katran",
-            ],
-            cwd=src_dir,
-        )
+        with self._lock_katran_getdeps():
+            completed = _run(
+                [
+                    self.host_python,
+                    str(src_dir / "build/fbcode_builder/getdeps.py"),
+                    "--scratch-path",
+                    str(self.katran_getdeps_root),
+                    "--allow-system-packages",
+                    "--shared-libs",
+                    "query-paths",
+                    "--recursive",
+                    "--no-tests",
+                    "--current-project",
+                    "katran",
+                    "--src-dir",
+                    str(src_dir),
+                    "katran",
+                ],
+                cwd=src_dir,
+            )
         prefixes: list[str] = []
         for raw_line in completed.stdout.splitlines():
             line = raw_line.strip()
@@ -401,6 +443,21 @@ class Arm64ContainerBuild:
         if not prefixes:
             _die("failed to resolve Katran dependency install prefixes from getdeps")
         return prefixes
+
+    @contextmanager
+    def _lock_katran_getdeps(self):
+        with self._lock_file(self.katran_getdeps_lock):
+            yield
+
+    @contextmanager
+    def _lock_file(self, path: Path):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w", encoding="utf-8") as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
     def build_katran_binary_with_wrapper(self, src_dir: Path, build_dir: Path, install_dir: Path) -> None:
         cmake_build_dir = build_dir / "build"
@@ -528,11 +585,9 @@ class Arm64ContainerBuild:
         bundle_dir = self.output_root / "corpus" / "build" / "katran"
         binary_path = self.katran_build_dir / "build/example_grpc/katran_server_grpc"
         _log("Building local ARM64 katran_server_grpc bundle")
-        self.sync_katran_source_tree(repo_dir)
-        shutil.rmtree(self.katran_build_dir / "build", ignore_errors=True)
         shutil.rmtree(bundle_dir, ignore_errors=True)
-        self.prepare_local_katran_dependencies(self.katran_source_dir, self.katran_build_dir, self.katran_install_dir)
-        self.build_katran_binary_with_wrapper(self.katran_source_dir, self.katran_build_dir, self.katran_install_dir)
+        self.prepare_local_katran_dependencies(repo_dir, self.katran_build_dir, self.katran_install_dir)
+        self.build_katran_binary_with_wrapper(repo_dir, self.katran_build_dir, self.katran_install_dir)
         if not binary_path.is_file() or not os.access(binary_path, os.X_OK):
             _die(f"missing local ARM64 katran_server_grpc: {binary_path}")
         _run(["file", str(binary_path)])
@@ -544,56 +599,45 @@ class Arm64ContainerBuild:
         self.copy_runtime_bundle(bundle_bin / "katran_server_grpc", bundle_lib)
 
     def build_katran_artifacts(self) -> None:
-        repo_dir = self.bench_build_repo_root / "katran"
-        self.prepare_repo_copy("katran", repo_dir)
+        self.prepare_repo_copy("katran", self.bench_build_repo_root / "katran")
         self.build_katran_bpf_artifacts()
         self.build_katran_server_bundle()
 
     def build_isolated_native_corpus_repo(self, repo_name: str) -> None:
-        stage_dir = self.bench_stage_root / repo_name
+        output_dir = self.output_root / f"corpus/build/{repo_name}"
         _log(f"Building isolated ARM64 {repo_name} artifacts")
         self.prepare_repo_copy(repo_name, self.bench_build_repo_root / repo_name)
-        shutil.rmtree(stage_dir, ignore_errors=True)
-        self.bench_stage_root.mkdir(parents=True, exist_ok=True)
-        _run_passthrough(
-            [
-                self.host_python,
-                str(self.repo_root / "runner/scripts/build_corpus_native.py"),
-                "--jobs",
-                self.jobs,
-                "--repo-root",
-                str(self.bench_build_repo_root),
-                "--build-root",
-                str(self.bench_stage_root),
-                "--repo",
-                repo_name,
-            ]
-        )
-        if not stage_dir.is_dir():
-            _die(f"missing staged ARM64 {repo_name} artifacts: {stage_dir}")
-
-    def copy_staged_corpus_repo_tree(self, repo_name: str) -> None:
-        stage_dir = self.bench_stage_root / repo_name
-        output_dir = self.output_root / f"corpus/build/{repo_name}"
-        if not stage_dir.is_dir():
-            _die(f"missing staged ARM64 {repo_name} tree: {stage_dir}")
         shutil.rmtree(output_dir, ignore_errors=True)
-        output_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(stage_dir, output_dir, dirs_exist_ok=True)
+        output_dir.parent.mkdir(parents=True, exist_ok=True)
+        with self._lock_repo(repo_name):
+            _run_passthrough(
+                [
+                    "make",
+                    "-C",
+                    str(self.repo_root),
+                    "__native-repo-build",
+                    f"PYTHON={self.host_python}",
+                    f"JOBS={self.jobs}",
+                    f"NATIVE_REPO_ROOT={self.bench_build_repo_root}",
+                    f"NATIVE_BUILD_ROOT={self.native_repo_build_root}",
+                    f"NATIVE_STAGE_ROOT={self.output_root / 'corpus' / 'build'}",
+                    f"NATIVE_REPOS_CSV={repo_name}",
+                ]
+            )
+        if not output_dir.is_dir():
+            _die(f"missing staged ARM64 {repo_name} artifacts: {output_dir}")
 
     def build_tracee_artifacts(self) -> None:
         self.build_isolated_native_corpus_repo("tracee")
-        binary = self.bench_stage_root / "tracee/bin/tracee"
+        binary = self.output_root / "corpus" / "build" / "tracee" / "bin" / "tracee"
         if not binary.is_file():
             _die(f"missing staged ARM64 tracee binary: {binary}")
-        self.copy_staged_corpus_repo_tree("tracee")
 
     def build_tetragon_artifacts(self) -> None:
         self.build_isolated_native_corpus_repo("tetragon")
-        binary = self.bench_stage_root / "tetragon/bin/tetragon"
+        binary = self.output_root / "corpus" / "build" / "tetragon" / "bin" / "tetragon"
         if not binary.is_file():
             _die(f"missing staged ARM64 tetragon binary: {binary}")
-        self.copy_staged_corpus_repo_tree("tetragon")
 
     def build_benchmark_repo_artifacts(self) -> None:
         if not self.bench_repos_raw:
@@ -662,59 +706,6 @@ class Arm64ContainerBuild:
             llvmbpf_default=self.micro_exec_enable_llvmbpf,
         )
 
-    def prepare_scx_checkout(self) -> None:
-        self.prepare_repo_copy("scx", self.scx_build_repo_dir)
-        shutil.rmtree(self.scx_build_repo_dir / "target", ignore_errors=True)
-
-    def build_scx_artifacts(self) -> None:
-        if not self.scx_packages_raw:
-            return
-        _log(f"Building ARM64 scx artifacts: {self.scx_packages_raw}")
-        self.prepare_scx_checkout()
-        packages = [token for token in self.scx_packages_raw.split(",") if token]
-        command = [
-            self.host_python,
-            str(self.repo_root / "runner/scripts/build_scx_artifacts.py"),
-            "--force",
-            "--jobs",
-            self.jobs,
-            "--repo-root",
-            str(self.scx_build_repo_root),
-            "--promote-root",
-            str(self.output_root),
-        ]
-        for package in packages:
-            command.extend(["--package", package])
-        env = os.environ.copy()
-        env.update(
-            {
-                "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER": self.native_cargo_linker,
-                "SCX_BUILD_JOBS": self.jobs,
-                "BPF_CLANG": self.clang_bin,
-                "CLANG": self.clang_bin,
-                "LLC": self.llc_bin,
-                "LLVM_CONFIG": self.llvm_config_bin,
-                "LLVM_OBJCOPY": self.llvm_objcopy_bin,
-                "LLVM_STRIP": self.llvm_strip_bin,
-                "CC": self.clang_bin,
-                "CXX": self.clangxx_bin,
-            }
-        )
-        _run_passthrough(command, env=env)
-        release_dir = self.scx_build_repo_dir / "target/release"
-        if not release_dir.is_dir():
-            release_dir = self.scx_build_repo_dir / "target/aarch64-unknown-linux-gnu/release"
-        target_release_dir = self.output_root / "runner/repos/scx/target/release"
-        target_release_dir.mkdir(parents=True, exist_ok=True)
-        (self.output_root / "corpus/build/scx").mkdir(parents=True, exist_ok=True)
-        for package in packages:
-            binary = release_dir / package
-            if not binary.is_file():
-                _die(f"expected scx binary missing after build: {binary}")
-            destination = target_release_dir / package
-            shutil.copy2(binary, destination)
-            self.copy_runtime_bundle(destination)
-
     def run(self) -> None:
         for cmd in ("make", "cmake", "cargo", "file", "git", "ldd", self.host_python, "tar"):
             _require_command(cmd)
@@ -724,16 +715,12 @@ class Arm64ContainerBuild:
         if os.uname().machine != "aarch64":
             _die("arm64_container_build.py must run inside an aarch64 userspace")
         (self.output_root / "lib").mkdir(parents=True, exist_ok=True)
-        if not self.only_scx:
-            if self.runtime_target_enabled("runner"):
-                (self.output_root / "runner/build").mkdir(parents=True, exist_ok=True)
-                shutil.rmtree(self.runner_build_dir, ignore_errors=True)
-            if self.runtime_target_enabled("daemon"):
-                (self.output_root / "daemon/build").mkdir(parents=True, exist_ok=True)
+        if self.runtime_target_enabled("runner"):
+            (self.output_root / "runner/build").mkdir(parents=True, exist_ok=True)
+            shutil.rmtree(self.runner_build_dir, ignore_errors=True)
+        if self.runtime_target_enabled("daemon"):
+            (self.output_root / "daemon/build").mkdir(parents=True, exist_ok=True)
         self.build_root.mkdir(parents=True, exist_ok=True)
-        self.build_scx_artifacts()
-        if self.only_scx:
-            return
         if self.only_bench:
             self.build_benchmark_repo_artifacts()
             return

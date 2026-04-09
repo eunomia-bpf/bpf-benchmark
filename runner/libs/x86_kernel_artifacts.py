@@ -135,6 +135,12 @@ def _stage_virtme_modules(kernel_dir: Path) -> None:
         installed_path = modules_root / "kernel" / module
         if not installed_path.is_file():
             die(f"missing installed hostfs module: {installed_path}")
+    virtme_release_root = tmp_stage / "lib" / "modules" / "0.0.0"
+    if virtme_release_root.exists():
+        shutil.rmtree(virtme_release_root)
+    shutil.copytree(modules_root, virtme_release_root, symlinks=False)
+    for link_name in ("build", "source"):
+        (virtme_release_root / link_name).unlink(missing_ok=True)
     shutil.rmtree(prev_stage, ignore_errors=True)
     if stage_dir.exists():
         stage_dir.rename(prev_stage)

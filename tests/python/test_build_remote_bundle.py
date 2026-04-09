@@ -97,6 +97,32 @@ def test_write_bundle_manifest_pins_bcc_tools_dir_to_staged_native_tree(tmp_path
     assert "RUN_BCC_TOOLS_DIR=corpus/build/bcc/libbpf-tools/.output" in rendered
 
 
+def test_write_bundle_manifest_omits_remote_tool_bin_without_bundled_tools(tmp_path: Path) -> None:
+    manifest = tmp_path / "run-contract.env"
+    manifest.write_text(
+        "\n".join(
+            [
+                "RUN_SUITE_NAME=corpus",
+                "RUN_TARGET_ARCH=x86_64",
+                "RUN_WORKLOAD_TOOLS_CSV=stress-ng,fio",
+                "RUN_REMOTE_WORKLOAD_TOOL_BIN=.cache/workload-tools/bin",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    bundle_inputs = tmp_path / "bundle-inputs.json"
+    bundle_inputs.write_text(json.dumps({"RUN_BUNDLED_WORKLOAD_TOOLS_CSV": ""}) + "\n", encoding="utf-8")
+    bundle_dir = tmp_path / "bundle"
+    builder = build_remote_bundle.BundleBuilder(manifest, bundle_inputs, bundle_dir, tmp_path / "bundle.tar.gz")
+
+    bundle_dir.mkdir()
+    builder.write_bundle_manifest()
+    rendered = (bundle_dir / "run-contract.env").read_text(encoding="utf-8")
+
+    assert "RUN_REMOTE_WORKLOAD_TOOL_BIN" not in rendered
+
+
 def test_stage_target_runtime_keeps_arm64_daemon_wrapper_on_execution_path(tmp_path: Path) -> None:
     manifest = tmp_path / "run-contract.env"
     manifest.write_text(
@@ -160,18 +186,16 @@ def test_arm64_prepare_test_outputs_passes_arch_specific_llvm_suffix(monkeypatch
     )
     seen: dict[str, str] = {}
 
-    def fake_run_host_python_module(module: str, mode: str, **extra_env: str) -> None:
-        seen["module"] = module
+    def fake_run_arm64_host_build(mode: str, **extra_env: str) -> None:
         seen["mode"] = mode
         seen["llvm_suffix"] = extra_env.get("ARM64_UPSTREAM_SELFTEST_LLVM_SUFFIX", "")
         seen["legacy_suffix"] = extra_env.get("UPSTREAM_SELFTEST_LLVM_SUFFIX", "")
 
-    monkeypatch.setattr(prep, "_run_host_python_module", fake_run_host_python_module)
+    monkeypatch.setattr(prep, "_run_arm64_host_build", fake_run_arm64_host_build)
     monkeypatch.setattr(aws_local_prep, "require_file_contains", lambda *args, **kwargs: None)
 
     prep.prepare_test_outputs()
 
-    assert seen["module"] == "runner.libs.arm64_host_build"
     assert seen["mode"] == "repo-tests"
     assert seen["llvm_suffix"] == "-20"
     assert seen["legacy_suffix"] == ""
@@ -281,3 +305,59 @@ def test_stage_native_repo_build_dirs_keeps_tracee_binary_unwrapped(tmp_path: Pa
     staged_binary = bundle_dir / "corpus" / "build" / "tracee" / "bin" / "tracee"
     assert staged_binary.read_text(encoding="utf-8") == "tracee\n"
     assert not staged_binary.with_name("tracee.bin").exists()
+
+
+def test_bundle_cache_key_ignores_run_token_and_absolute_stage_path(tmp_path: Path) -> None:
+    generated_a = tmp_path / "a" / "micro"
+    generated_b = tmp_path / "b" / "micro"
+    for root in (generated_a, generated_b):
+        root.mkdir(parents=True)
+        (root / "sample.bpf.o").write_text("obj\n", encoding="utf-8")
+        (root / "sample.directive.bin").write_text("directive\n", encoding="utf-8")
+
+    manifest_a = tmp_path / "run-a.env"
+    manifest_b = tmp_path / "run-b.env"
+    manifest_a.write_text(
+        "RUN_SUITE_NAME=micro\nRUN_TARGET_ARCH=x86_64\nRUN_EXECUTOR=kvm\nRUN_TOKEN=run.a\n",
+        encoding="utf-8",
+    )
+    manifest_b.write_text(
+        "RUN_SUITE_NAME=micro\nRUN_TARGET_ARCH=x86_64\nRUN_EXECUTOR=kvm\nRUN_TOKEN=run.b\n",
+        encoding="utf-8",
+    )
+    inputs_a = tmp_path / "inputs-a.json"
+    inputs_b = tmp_path / "inputs-b.json"
+    inputs_a.write_text(json.dumps({"MICRO_PROGRAMS_GENERATED_DIR": str(generated_a)}) + "\n", encoding="utf-8")
+    inputs_b.write_text(json.dumps({"MICRO_PROGRAMS_GENERATED_DIR": str(generated_b)}) + "\n", encoding="utf-8")
+
+    builder_a = build_remote_bundle.BundleBuilder(manifest_a, inputs_a, tmp_path / "bundle-a", tmp_path / "bundle-a.tar.gz")
+    builder_b = build_remote_bundle.BundleBuilder(manifest_b, inputs_b, tmp_path / "bundle-b", tmp_path / "bundle-b.tar.gz")
+
+    assert builder_a.compute_cache_key() == builder_b.compute_cache_key()
+
+
+def test_bundle_cache_key_changes_when_bundled_input_content_changes(tmp_path: Path) -> None:
+    generated = tmp_path / "micro"
+    generated.mkdir(parents=True)
+    (generated / "sample.bpf.o").write_text("obj-v1\n", encoding="utf-8")
+
+    manifest = tmp_path / "run.env"
+    manifest.write_text(
+        "RUN_SUITE_NAME=micro\nRUN_TARGET_ARCH=x86_64\nRUN_EXECUTOR=kvm\nRUN_TOKEN=run.a\n",
+        encoding="utf-8",
+    )
+    inputs = tmp_path / "inputs.json"
+    inputs.write_text(json.dumps({"MICRO_PROGRAMS_GENERATED_DIR": str(generated)}) + "\n", encoding="utf-8")
+
+    builder = build_remote_bundle.BundleBuilder(manifest, inputs, tmp_path / "bundle", tmp_path / "bundle.tar.gz")
+    first_key = builder.compute_cache_key()
+
+    (generated / "sample.bpf.o").write_text("obj-v2\n", encoding="utf-8")
+    second_key = build_remote_bundle.BundleBuilder(
+        manifest,
+        inputs,
+        tmp_path / "bundle2",
+        tmp_path / "bundle2.tar.gz",
+    ).compute_cache_key()
+
+    assert first_key != second_key

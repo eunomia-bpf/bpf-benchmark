@@ -22,6 +22,7 @@ RUNNER_DIR = SCRIPT_DIR.parent
 REPO_ROOT = RUNNER_DIR.parent
 CORPUS_BUILD_ROOT = REPO_ROOT / "corpus" / "build"
 ACTIVE_BUILD_ROOT = CORPUS_BUILD_ROOT
+ACTIVE_VMLINUX_BTF: Path | None = None
 IMPLEMENTED_REPOS = (
     "bcc",
     "libbpf-bootstrap",
@@ -74,7 +75,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--build-root",
         default=str(CORPUS_BUILD_ROOT),
-        help="Unified corpus build output directory.",
+        help="Stable native build cache root.",
+    )
+    parser.add_argument(
+        "--stage-root",
+        default="",
+        help="Per-run staged output directory. Defaults to --build-root.",
+    )
+    parser.add_argument(
+        "--vmlinux-btf",
+        default="",
+        help="Explicit vmlinux BTF file used to generate a shared cached vmlinux.h for native repo builds.",
     )
     return parser.parse_args()
 
@@ -286,7 +297,37 @@ def clang_bpf_sys_includes(clang: str = "clang") -> list[str]:
     return includes
 
 
+def ensure_cached_vmlinux_header(vmlinux_btf: Path) -> Path:
+    vmlinux_btf = vmlinux_btf.resolve()
+    if not vmlinux_btf.is_file():
+        raise CommandError(f"missing explicit vmlinux BTF: {vmlinux_btf}")
+    cache_dir = ACTIVE_BUILD_ROOT / "_shared"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    header_path = cache_dir / "vmlinux.h"
+    stamp_path = cache_dir / "vmlinux.h.source"
+    source_signature = f"{vmlinux_btf}:{vmlinux_btf.stat().st_size}:{vmlinux_btf.stat().st_mtime_ns}"
+    if header_path.is_file() and stamp_path.is_file() and stamp_path.read_text().strip() == source_signature:
+        return header_path
+
+    bpftool = ensure_vendor_bpftool()
+    print(f"[run] {bpftool} btf dump file {vmlinux_btf} format c > {header_path}")
+    with header_path.open("w", encoding="utf-8") as handle:
+        completed = subprocess.run(
+            [str(bpftool), "btf", "dump", "file", str(vmlinux_btf), "format", "c"],
+            stdout=handle,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+    if completed.returncode != 0:
+        raise CommandError(completed.stderr.strip() or f"failed to generate cached vmlinux.h from {vmlinux_btf}")
+    stamp_path.write_text(source_signature + "\n", encoding="utf-8")
+    return header_path
+
+
 def locate_cached_vmlinux_header() -> Path | None:
+    if ACTIVE_VMLINUX_BTF is not None:
+        return ensure_cached_vmlinux_header(ACTIVE_VMLINUX_BTF)
     prioritized = [
         ACTIVE_BUILD_ROOT / "bcc" / "vmlinux.h",
         ACTIVE_BUILD_ROOT / "katran" / "vmlinux.h",
@@ -628,15 +669,14 @@ def build_scx(repo_root: Path, stage_root: Path, jobs: int) -> RepoBuildResult:
     promote_root = stage_root.parents[2]
     run(
         [
-            sys.executable,
-            str(RUNNER_DIR / "scripts" / "build_scx_artifacts.py"),
-            "--force",
-            "--jobs",
-            str(max(1, jobs)),
-            "--repo-root",
-            str(repo_root),
-            "--promote-root",
-            str(promote_root),
+            "make",
+            "-C",
+            str(REPO_ROOT),
+            "__scx-build",
+            f"PYTHON={sys.executable}",
+            f"JOBS={max(1, jobs)}",
+            f"SCX_REPO_ROOT={repo_root}",
+            f"SCX_PROMOTE_ROOT={promote_root}",
         ],
         cwd=REPO_ROOT,
     )
@@ -945,12 +985,15 @@ BUILDERS: dict[str, Callable[[Path, Path, int], RepoBuildResult]] = {
 
 
 def main() -> int:
-    global ACTIVE_BUILD_ROOT
+    global ACTIVE_BUILD_ROOT, ACTIVE_VMLINUX_BTF
     args = parse_args()
     repo_root = Path(args.repo_root).resolve()
     build_root = Path(args.build_root).resolve()
+    stage_root = Path(args.stage_root).resolve() if args.stage_root else build_root
     ACTIVE_BUILD_ROOT = build_root
+    ACTIVE_VMLINUX_BTF = Path(args.vmlinux_btf).resolve() if args.vmlinux_btf else None
     build_root.mkdir(parents=True, exist_ok=True)
+    stage_root.mkdir(parents=True, exist_ok=True)
 
     requested = args.repos or list(IMPLEMENTED_REPOS)
     unknown = sorted(set(requested) - set(IMPLEMENTED_REPOS))
@@ -963,7 +1006,7 @@ def main() -> int:
 
     results: list[RepoBuildResult] = []
     for name in requested:
-        stage_dir = build_root / name
+        stage_dir = stage_root / name
         print(f"[repo] {name}")
         try:
             result = BUILDERS[name](repo_root, stage_dir, args.jobs)

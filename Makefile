@@ -106,6 +106,9 @@ ROOT_VM_CORPUS_EXTRA_ARGS := $(if $(strip $(VM_CORPUS_ARGS)),VM_CORPUS_ARGS='$(V
 		vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 		__arm64-worktree \
 		__kernel-arm64-aws \
+	__native-repo-build \
+		__scx-build \
+		__bundle-cache \
 		aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
 		aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86 \
 	help clean
@@ -252,6 +255,150 @@ aws-x86-terminate:
 	$(RUN_TARGET_SUITE_CMD) terminate aws-x86
 
 aws-x86: aws-x86-test aws-x86-benchmark
+
+# ── Native Repo Build ──────────────────────────────────────────────────────────
+__native-repo-build:
+	@test -n "$(NATIVE_REPO_ROOT)" || { echo "NATIVE_REPO_ROOT is required" >&2; exit 1; }
+	@test -n "$(NATIVE_BUILD_ROOT)" || { echo "NATIVE_BUILD_ROOT is required" >&2; exit 1; }
+	@test -n "$(NATIVE_STAGE_ROOT)" || { echo "NATIVE_STAGE_ROOT is required" >&2; exit 1; }
+	@repo_args=(); \
+	if [ -n "$(NATIVE_REPOS_CSV)" ]; then \
+		IFS=, read -r -a repos <<< "$(NATIVE_REPOS_CSV)"; \
+		for repo in "$${repos[@]}"; do \
+			[ -n "$$repo" ] || continue; \
+			repo_args+=(--repo "$$repo"); \
+		done; \
+	fi; \
+	vmlinux_args=(); \
+	if [ -n "$(NATIVE_VMLINUX_BTF)" ]; then \
+		vmlinux_args+=(--vmlinux-btf "$(NATIVE_VMLINUX_BTF)"); \
+	fi; \
+	"$(PYTHON)" "$(ROOT_DIR)/runner/scripts/build_corpus_native.py" \
+		--jobs "$(JOBS)" \
+		--repo-root "$(NATIVE_REPO_ROOT)" \
+		--build-root "$(NATIVE_BUILD_ROOT)" \
+		--stage-root "$(NATIVE_STAGE_ROOT)" \
+		"$${vmlinux_args[@]}" \
+		"$${repo_args[@]}"
+
+# ── SCX Build ──────────────────────────────────────────────────────────────────
+__scx-build:
+	@test -n "$(SCX_REPO_ROOT)" || { echo "SCX_REPO_ROOT is required" >&2; exit 1; }
+	@test -n "$(SCX_PROMOTE_ROOT)" || { echo "SCX_PROMOTE_ROOT is required" >&2; exit 1; }
+	@package_args=(); \
+	if [ -n "$(SCX_PACKAGES_CSV)" ]; then \
+		IFS=, read -r -a packages <<< "$(SCX_PACKAGES_CSV)"; \
+		for package in "$${packages[@]}"; do \
+			[ -n "$$package" ] || continue; \
+			package_args+=(--package "$$package"); \
+		done; \
+	fi; \
+	target_args=(); \
+	if [ -n "$(SCX_TARGET_TRIPLE)" ]; then \
+		target_args+=(--target-triple "$(SCX_TARGET_TRIPLE)"); \
+	fi; \
+	"$(PYTHON)" "$(ROOT_DIR)/runner/scripts/build_scx_artifacts.py" \
+		--force \
+		--jobs "$(JOBS)" \
+		--repo-root "$(SCX_REPO_ROOT)" \
+		--promote-root "$(SCX_PROMOTE_ROOT)" \
+		"$${target_args[@]}" \
+		"$${package_args[@]}"
+
+# ── Upstream Selftests Build ───────────────────────────────────────────────────
+__upstream-selftests:
+	@test -n "$(UPSTREAM_SELFTEST_SOURCE_DIR)" || { echo "UPSTREAM_SELFTEST_SOURCE_DIR is required" >&2; exit 1; }
+	@test -n "$(UPSTREAM_SELFTEST_OUTPUT_DIR)" || { echo "UPSTREAM_SELFTEST_OUTPUT_DIR is required" >&2; exit 1; }
+	@test -n "$(UPSTREAM_SELFTEST_HOST_PYTHON_BIN)" || { echo "UPSTREAM_SELFTEST_HOST_PYTHON_BIN is required" >&2; exit 1; }
+	@test -n "$(VMLINUX_BTF)" || { echo "VMLINUX_BTF is required" >&2; exit 1; }
+	@"$(PYTHON)" -m runner.libs.build_upstream_selftests
+
+# ── ARM64 Container Build ──────────────────────────────────────────────────────
+__arm64-container-build:
+	@test -n "$(ARM64_DOCKER_PLATFORM)" || { echo "ARM64_DOCKER_PLATFORM is required" >&2; exit 1; }
+	@test -n "$(ARM64_CROSSBUILD_DOCKERFILE)" || { echo "ARM64_CROSSBUILD_DOCKERFILE is required" >&2; exit 1; }
+	@test -n "$(ARM64_CROSSBUILD_CONTEXT)" || { echo "ARM64_CROSSBUILD_CONTEXT is required" >&2; exit 1; }
+	@test -n "$(ARM64_CROSSBUILD_IMAGE)" || { echo "ARM64_CROSSBUILD_IMAGE is required" >&2; exit 1; }
+	@test -n "$(ARM64_CROSSBUILD_STAMP)" || { echo "ARM64_CROSSBUILD_STAMP is required" >&2; exit 1; }
+	@test -n "$(ARM64_CROSSBUILD_LOCK)" || { echo "ARM64_CROSSBUILD_LOCK is required" >&2; exit 1; }
+	@test -n "$(ARM64_CROSSBUILD_OUTPUT_DIR)" || { echo "ARM64_CROSSBUILD_OUTPUT_DIR is required" >&2; exit 1; }
+	@test -n "$(ARM64_CROSSBUILD_BUILD_ROOT)" || { echo "ARM64_CROSSBUILD_BUILD_ROOT is required" >&2; exit 1; }
+	@test -n "$(ARM64_SOURCE_REPO_ROOT)" || { echo "ARM64_SOURCE_REPO_ROOT is required" >&2; exit 1; }
+	@test -n "$(ARM64_HOST_PYTHON_BIN)" || { echo "ARM64_HOST_PYTHON_BIN is required" >&2; exit 1; }
+	@stamp_path="$(ARM64_CROSSBUILD_STAMP)"; \
+	lock_path="$(ARM64_CROSSBUILD_LOCK)"; \
+	dockerfile_path="$(ARM64_CROSSBUILD_DOCKERFILE)"; \
+	mkdir -p "$$(dirname "$$stamp_path")" "$$(dirname "$$lock_path")"; \
+	flock "$$lock_path" bash -eu -o pipefail -c '\
+		stamp_path="$$1"; \
+		dockerfile_path="$$2"; \
+		image="$$3"; \
+		platform="$$4"; \
+		context_dir="$$5"; \
+		if [ -f "$$stamp_path" ] && [ "$$stamp_path" -nt "$$dockerfile_path" ]; then \
+			exit 0; \
+		fi; \
+		docker buildx build --load --platform "$$platform" -f "$$dockerfile_path" -t "$$image" "$$context_dir"; \
+		touch "$$stamp_path"; \
+	' _ "$$stamp_path" "$$dockerfile_path" "$(ARM64_CROSSBUILD_IMAGE)" "$(ARM64_DOCKER_PLATFORM)" "$(ARM64_CROSSBUILD_CONTEXT)"; \
+	docker run --rm --platform "$(ARM64_DOCKER_PLATFORM)" \
+		-v "$(ROOT_DIR):/workspace" \
+		-w /workspace \
+		-e HOME=/tmp/codex \
+		-e CARGO_HOME="$(ARM64_CROSSBUILD_CARGO_HOME)" \
+		-e HOST_UID="$(HOST_UID)" \
+		-e HOST_GID="$(HOST_GID)" \
+		-e ARM64_SOURCE_REPO_ROOT="$(ARM64_SOURCE_REPO_ROOT)" \
+		-e ARM64_CROSSBUILD_OUTPUT_DIR="$(ARM64_CROSSBUILD_OUTPUT_DIR)" \
+		-e ARM64_CROSSBUILD_BUILD_ROOT="$(ARM64_CROSSBUILD_BUILD_ROOT)" \
+		-e ARM64_BENCH_REPO_ROOT="$(ARM64_BENCH_REPO_ROOT)" \
+		-e ARM64_NATIVE_REPO_BUILD_ROOT="$(ARM64_NATIVE_REPO_BUILD_ROOT)" \
+		-e ARM64_KATRAN_GETDEPS_ROOT="$(ARM64_KATRAN_GETDEPS_ROOT)" \
+		-e ARM64_KATRAN_GETDEPS_LOCK="$(ARM64_KATRAN_GETDEPS_LOCK)" \
+		-e ARM64_VENDOR_BPFTOOL_ROOT="$(ARM64_VENDOR_BPFTOOL_ROOT)" \
+		-e ARM64_VENDOR_BPFTOOL_LOCK="$(ARM64_VENDOR_BPFTOOL_LOCK)" \
+		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
+		-e ARM64_CROSSBUILD_RUNTIME_TARGETS="$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" \
+		-e MICRO_EXEC_ENABLE_LLVMBPF="$(MICRO_EXEC_ENABLE_LLVMBPF)" \
+		-e ARM64_PREBUILT_DAEMON_BINARY="$(ARM64_PREBUILT_DAEMON_BINARY)" \
+		-e ARM64_HOST_PYTHON_BIN=python3 \
+		-e ARM64_CROSSBUILD_BENCH_REPOS="$(ARM64_CROSSBUILD_BENCH_REPOS)" \
+		-e ARM64_CROSSBUILD_ONLY_BENCH="$(ARM64_CROSSBUILD_ONLY_BENCH)" \
+		"$(ARM64_CROSSBUILD_IMAGE)" \
+		python3 -m runner.libs.arm64_container_build
+
+# ── ARM64 Host Build ───────────────────────────────────────────────────────────
+__arm64-host-build:
+	@test -n "$(ARM64_HOST_BUILD_MODE)" || { echo "ARM64_HOST_BUILD_MODE is required" >&2; exit 1; }
+	@"$(PYTHON)" -m runner.libs.arm64_host_build "$(ARM64_HOST_BUILD_MODE)"
+
+# ── Bundle Cache ───────────────────────────────────────────────────────────────
+__bundle-cache:
+	@test -n "$(BUNDLE_MANIFEST_PATH)" || { echo "BUNDLE_MANIFEST_PATH is required" >&2; exit 1; }
+	@test -n "$(BUNDLE_INPUTS_PATH)" || { echo "BUNDLE_INPUTS_PATH is required" >&2; exit 1; }
+	@test -n "$(BUNDLE_CACHE_DIR)" || { echo "BUNDLE_CACHE_DIR is required" >&2; exit 1; }
+	@cache_dir="$(BUNDLE_CACHE_DIR)"; \
+	cache_root="$$(dirname "$$cache_dir")"; \
+	lock_dir="$$cache_root/.locks"; \
+	cache_key="$$(basename "$$cache_dir")"; \
+	lock_file="$$lock_dir/$$cache_key.lock"; \
+	mkdir -p "$$lock_dir" "$$cache_root"; \
+	flock "$$lock_file" bash -eu -o pipefail -c '\
+		cache_dir="$$1"; \
+		manifest_path="$$2"; \
+		bundle_inputs_path="$$3"; \
+		python_bin="$$4"; \
+		if [ -f "$$cache_dir/bundle.tar.gz" ] && tar -tzf "$$cache_dir/bundle.tar.gz" >/dev/null 2>&1; then \
+			exit 0; \
+		fi; \
+		rm -rf "$$cache_dir"; \
+		tmp_dir="$${cache_dir}.tmp.$$PPID"; \
+		rm -rf "$$tmp_dir"; \
+		mkdir -p "$$tmp_dir"; \
+		"$$python_bin" -m runner.libs.build_remote_bundle "$$manifest_path" "$$bundle_inputs_path" "$$tmp_dir/workspace" "$$tmp_dir/bundle.tar.gz"; \
+		rm -rf "$$tmp_dir/workspace"; \
+		mv "$$tmp_dir" "$$cache_dir"; \
+	' _ "$$cache_dir" "$(BUNDLE_MANIFEST_PATH)" "$(BUNDLE_INPUTS_PATH)" "$(PYTHON)"
 
 # ── Clean ──────────────────────────────────────────────────────────────────────
 clean:

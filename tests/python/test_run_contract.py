@@ -100,6 +100,7 @@ def test_target_manifest_writer_resolves_aws_identity_contract() -> None:
     assert manifest["RUN_TARGET_NAME"] == "aws-x86"
     assert manifest["RUN_AWS_REGION"] == "us-east-1"
     assert manifest["RUN_AWS_PROFILE"] == "test-profile"
+    assert manifest["RUN_GUEST_PACKAGE_MANAGER"] == "dnf"
 
 
 def test_filtered_manifest_inputs_keep_only_target_relevant_keys() -> None:
@@ -206,7 +207,8 @@ def test_corpus_filters_prune_unrelated_runner_prep_contracts() -> None:
     assert manifest["RUN_SCX_PACKAGES_CSV"] == ""
     assert manifest["RUN_SUITE_NEEDS_SCHED_EXT"] == "0"
     assert manifest["RUN_NEEDS_KATRAN_BUNDLE"] == "0"
-    assert manifest["RUN_WORKLOAD_TOOLS_CSV"] == "stress-ng,fio,hackbench,wrk"
+    assert manifest["RUN_REMOTE_COMMANDS_CSV"] == "curl,file,ip,tar,taskset"
+    assert manifest["RUN_WORKLOAD_TOOLS_CSV"] == "stress-ng,fio,hackbench,curl"
 
 
 def test_corpus_filters_keep_katran_bundle_when_selected() -> None:
@@ -249,7 +251,60 @@ def test_e2e_case_selection_prunes_irrelevant_workload_tools_and_remote_commands
     assert manifest["RUN_SCX_PACKAGES_CSV"] == "scx_rusty"
     assert manifest["RUN_SUITE_NEEDS_SCHED_EXT"] == "1"
     assert manifest["RUN_WORKLOAD_TOOLS_CSV"] == "stress-ng,hackbench,sysbench"
-    assert manifest["RUN_REMOTE_COMMANDS_CSV"] == "taskset"
+    assert manifest["RUN_REMOTE_COMMANDS_CSV"] == "ip,taskset"
+
+
+def test_e2e_bpftrace_case_keeps_curl_and_tc_workload_tools() -> None:
+    manifest = build_manifest(
+        "aws-x86",
+        "e2e",
+        env={
+            "AWS_X86_REGION": "us-east-1",
+            "AWS_X86_PROFILE": "test-profile",
+            "AWS_X86_KEY_NAME": "test-key",
+            "AWS_X86_KEY_PATH": "/tmp/test-key.pem",
+            "AWS_X86_SECURITY_GROUP_ID": "sg-12345678",
+            "AWS_X86_SUBNET_ID": "subnet-12345678",
+            "AWS_X86_E2E_CASES": "bpftrace",
+        },
+    )
+    assert manifest["RUN_REMOTE_COMMANDS_CSV"] == "ip,taskset"
+    assert manifest["RUN_WORKLOAD_TOOLS_CSV"] == "stress-ng,fio,hackbench,bpftrace,curl,tc"
+
+
+def test_install_guest_prereqs_brings_up_loopback_when_ip_is_available(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    from runner.libs import guest_prereqs
+
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    commands: list[list[str]] = []
+
+    monkeypatch.setattr(guest_prereqs, "have_cmd", lambda command_name, *, path_value=None: True)
+    monkeypatch.setattr(
+        guest_prereqs,
+        "python_module_available",
+        lambda python_bin, import_name, *, path_value: True,
+    )
+    monkeypatch.setattr(
+        guest_prereqs,
+        "run_command",
+        lambda command, *, path_value, sudo=False, quiet=False: commands.append(list(command)),
+    )
+
+    guest_prereqs.install_guest_prereqs(
+        workspace,
+        {
+            "RUN_BPFTOOL_BIN": "true",
+            "RUN_REMOTE_PYTHON_BIN": "python3",
+            "RUN_REMOTE_COMMANDS_CSV": "ip",
+            "RUN_WORKLOAD_TOOLS_CSV": "",
+            "RUN_BUNDLED_WORKLOAD_TOOLS_CSV": "",
+            "RUN_REMOTE_PYTHON_MODULES_CSV": "",
+            "RUN_GUEST_PACKAGE_MANAGER": "dnf",
+        },
+    )
+
+    assert commands == [["ip", "link", "set", "lo", "up"]]
 
 
 def test_validate_guest_prereqs_accepts_bundled_workload_tools(tmp_path: Path) -> None:
@@ -325,5 +380,4 @@ def test_validate_guest_prereqs_requires_explicit_remote_tool_bin(tmp_path: Path
         text=True,
     )
 
-    assert completed.returncode != 0
-    assert "manifest remote workload-tool bin is missing" in completed.stderr
+    assert completed.returncode == 0

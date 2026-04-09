@@ -282,9 +282,16 @@ def run_phase(
     duration_s: int,
     *,
     agent_pid: int | None,
+    prog_ids: Sequence[int] | None = None,
 ) -> dict[str, object]:
-    prog_ids = [int(program.get("id", 0) or 0) for program in getattr(runner, "programs", []) if int(program.get("id", 0) or 0) > 0]
-    if not prog_ids:
+    target_prog_ids = [int(prog_id) for prog_id in (prog_ids or []) if int(prog_id) > 0]
+    if not target_prog_ids:
+        target_prog_ids = [
+            int(program.get("id", 0) or 0)
+            for program in getattr(runner, "programs", [])
+            if int(program.get("id", 0) or 0) > 0
+        ]
+    if not target_prog_ids:
         raise RuntimeError("scx runner did not expose any live scheduler programs")
     prog_fds = getattr(runner, "program_fds", {})
     records = [
@@ -293,7 +300,7 @@ def run_phase(
             workload_spec,
             duration_s,
             agent_pid=agent_pid,
-            prog_ids=prog_ids,
+            prog_ids=target_prog_ids,
             prog_fds=prog_fds,
         )
         for workload_spec in workloads

@@ -8,7 +8,7 @@ import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Mapping, Optional
 
 from . import ROOT_DIR, ensure_parent
 
@@ -20,7 +20,7 @@ _STAMP_SUFFIX_RE = re.compile(
     r"_(?:authoritative|smoke)_\d{8}(?:_\d{6})?$|_\d{8}(?:_\d{6})?$"
 )
 
-MetadataBuilder = Callable[[str, str, str, str | None], Mapping[str, Any]]
+MetadataBuilder = Callable[[str, str, str, Optional[str]], Mapping[str, Any]]
 
 
 class ArtifactSession:

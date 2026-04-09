@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import importlib
-from typing import Callable
+from typing import Callable, Optional
 
 from .base import AppRunner
 
-RunnerAdapter = Callable[[str | None, str | None, dict[str, object]], dict[str, object]]
+RunnerAdapter = Callable[[Optional[str], Optional[str], dict[str, object]], dict[str, object]]
 
 
 def _leaf_name(app_name: str | None) -> str:

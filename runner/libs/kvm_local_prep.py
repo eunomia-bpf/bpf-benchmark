@@ -37,13 +37,13 @@ class KVMPrep:
         if not self.host_python_bin:
             die("manifest host python is missing")
         self.target_cache_dir = ROOT_DIR / ".cache" / self.target_name
+        self.x86_host_cache_root = ROOT_DIR / ".cache" / "x86-host"
         self.run_prep_root = self.target_cache_dir / "runs" / self.run_token
         self.promote_root = self.run_prep_root / "bundle-inputs"
         self.test_artifacts_root = self.promote_root / "test-artifacts"
         self.bundle_inputs_path = self.run_prep_root / "bundle-inputs.json"
-        self.stage_root = self.run_prep_root / "workspace"
-        self.bundle_tar = self.run_prep_root / "bundle.tar.gz"
         self.local_repo_root = self.promote_root / "runner" / "repos"
+        self.x86_native_repo_build_root = self.x86_host_cache_root / "native-repos"
         self.micro_programs_generated_dir = self.promote_root / "micro" / "programs"
         self.bundled_workload_tools_csv = ""
         self.local_workload_tool_root = ""
@@ -117,9 +117,11 @@ class KVMPrep:
         build_native_repo_artifacts(
             repo_root=self.local_repo_root,
             promote_root=self.promote_root,
+            build_cache_root=self.x86_native_repo_build_root,
             native_repo_csv=native_repo_csv,
             host_python_bin=self.host_python_bin,
             env=self.env,
+            vmlinux_btf=(ROOT_DIR / "vendor" / "linux-framework" / "vmlinux"),
         )
 
     def prepare_workload_tools(self) -> None:
@@ -166,8 +168,6 @@ class KVMPrep:
         finalize_staged_bundle(
             manifest_path=self.manifest_path,
             bundle_inputs_path=self.bundle_inputs_path,
-            stage_root=self.stage_root,
-            bundle_tar=self.bundle_tar,
             local_state_path=self.local_state_path,
             host_python_bin=self.host_python_bin,
             env=self.env,

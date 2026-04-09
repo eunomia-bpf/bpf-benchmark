@@ -430,7 +430,16 @@ def build_repo_tests_from_env() -> None:
                 "PYTHONPATH": str(ROOT_DIR) + (f":{os.environ['PYTHONPATH']}" if os.environ.get("PYTHONPATH") else ""),
             }
         )
-        _run([host_python, "-m", "runner.libs.build_upstream_selftests"], env=env)
+        _run(
+            [
+                "make",
+                "-C",
+                str(ROOT_DIR),
+                "__upstream-selftests",
+                f"PYTHON={host_python}",
+            ],
+            env=env,
+        )
 
     if need_unittest:
         _require_arch_signature(unittest_build_dir / "rejit_kinsn", "ARM aarch64", "host unittest cross-build")
@@ -529,23 +538,22 @@ def build_scx_from_env() -> None:
             "CXX": clangxx_bin,
         }
     )
-    command = [
-        host_python,
-        str(ROOT_DIR / "runner/scripts/build_scx_artifacts.py"),
-        "--force",
-        "--jobs",
-        jobs,
-        "--target-triple",
-        target_triple,
-        "--repo-root",
-        str(scx_build_repo_root),
-        "--promote-root",
-        str(promote_root),
-    ]
-    for package in packages:
-        command.extend(["--package", package])
     _log("arm64-scx-host", f"Building ARM64 scx artifacts on host for {packages_raw}")
-    _run(command, env=env)
+    _run(
+        [
+            "make",
+            "-C",
+            str(ROOT_DIR),
+            "__scx-build",
+            f"PYTHON={host_python}",
+            f"JOBS={jobs}",
+            f"SCX_REPO_ROOT={scx_build_repo_root}",
+            f"SCX_PROMOTE_ROOT={promote_root}",
+            f"SCX_PACKAGES_CSV={packages_raw}",
+            f"SCX_TARGET_TRIPLE={target_triple}",
+        ],
+        env=env,
+    )
 
     release_dir = scx_build_repo_dir / "target" / target_triple / "release"
     destination_release_dir = promote_root / "runner/repos/scx/target/release"

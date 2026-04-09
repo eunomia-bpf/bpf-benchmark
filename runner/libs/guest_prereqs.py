@@ -32,11 +32,11 @@ def workload_tool_is_bundled(contract: dict[str, str | list[str]], tool: str) ->
 
 
 def resolve_remote_workload_tool_bin(workspace: Path, contract: dict[str, str | list[str]]) -> Path | None:
-    if not env_csv("RUN_WORKLOAD_TOOLS_CSV", contract=contract):
+    if not env_csv("RUN_BUNDLED_WORKLOAD_TOOLS_CSV", contract=contract):
         return None
     remote_tool_bin = _scalar(contract, "RUN_REMOTE_WORKLOAD_TOOL_BIN")
     if not remote_tool_bin:
-        die("manifest remote workload-tool bin is missing while workload tools are requested")
+        die("manifest remote workload-tool bin is missing while bundled workload tools are requested")
     return resolve_workspace_contract_path(workspace, remote_tool_bin)
 
 
@@ -138,6 +138,12 @@ def install_python_modules(workspace: Path, contract: dict[str, str | list[str]]
     )
 
 
+def ensure_loopback_up(*, path_value: str) -> None:
+    if not have_cmd("ip", path_value=path_value):
+        return
+    run_command(["ip", "link", "set", "lo", "up"], path_value=path_value, sudo=os.geteuid() != 0, quiet=True)
+
+
 def install_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
     path_value = runtime_path_value(workspace, contract)
     missing_commands: list[str] = []
@@ -158,6 +164,7 @@ def install_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]])
                 missing_python_packages.append(package_name)
 
     if not missing_commands and not missing_python_packages:
+        ensure_loopback_up(path_value=path_value)
         return
 
     manager = _scalar(contract, "RUN_GUEST_PACKAGE_MANAGER")
@@ -171,6 +178,7 @@ def install_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]])
     install_packages(manager, packages, path_value=path_value)
     if missing_python_packages:
         install_python_modules(workspace, contract, python_bin)
+    ensure_loopback_up(path_value=path_value)
 
 
 def validate_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:

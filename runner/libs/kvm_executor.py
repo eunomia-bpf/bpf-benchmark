@@ -26,8 +26,10 @@ def _require_scalar(mapping: dict[str, str | list[str]], name: str) -> str:
     return value
 
 
-def bundle_stage_root(bundle_tar: Path) -> Path:
-    stage_token = bundle_tar.parent.name or bundle_tar.name.removesuffix(".tar.gz")
+def bundle_stage_root(bundle_tar: Path, run_token: str) -> Path:
+    stage_token = run_token.strip()
+    if not stage_token:
+        _die("manifest RUN_TOKEN is empty for KVM bundle staging")
     stage_bundle_root = Path(tempfile.gettempdir()) / "bpf-benchmark-kvm" / stage_token
     stage_root = stage_bundle_root / "workspace"
     shutil.rmtree(stage_bundle_root, ignore_errors=True)
@@ -117,7 +119,7 @@ def main(argv: list[str] | None = None) -> None:
     if not bundle_tar.is_file():
         _die(f"staged KVM bundle tar does not exist: {bundle_tar}")
 
-    workspace_root = bundle_stage_root(bundle_tar)
+    workspace_root = bundle_stage_root(bundle_tar, _require_scalar(contract, "RUN_TOKEN"))
     completed = subprocess.run(
         build_vm_command(workspace_root, contract),
         cwd=ROOT_DIR,

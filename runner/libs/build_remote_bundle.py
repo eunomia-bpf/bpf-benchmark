@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import shutil
 import stat
@@ -17,6 +19,8 @@ from runner.libs.state_file import read_state
 _die = partial(fail, "build-remote-bundle")
 _require_path = partial(require_path, tag="build-remote-bundle")
 _require_nonempty_dir = partial(require_nonempty_dir, tag="build-remote-bundle")
+
+_BUNDLE_CACHE_IGNORED_MANIFEST_KEYS = {"RUN_TOKEN"}
 
 
 def _parse_scalar_manifest(path: Path) -> dict[str, str]:
@@ -93,6 +97,40 @@ def _iter_git_tracked_paths(repo_root: Path, pathspec: str | None = None) -> lis
     return [Path(token) for token in tokens]
 
 
+def _hash_git_tracked_tree(repo_root: Path, pathspec: str) -> str:
+    if not _git_ok(["git", "rev-parse", "--verify", "HEAD"], cwd=repo_root):
+        _die(f"expected git checkout for tracked-tree hash: {repo_root}")
+    untracked = _git_untracked_paths(repo_root, pathspec)
+    if untracked:
+        sample = ", ".join(str(path) for path in untracked[:5])
+        extra = "" if len(untracked) <= 5 else f" (+{len(untracked) - 5} more)"
+        _die(f"bundled tracked tree contains untracked files and cannot be sealed: {sample}{extra}")
+    digest = hashlib.sha256()
+    digest.update(pathspec.encode("utf-8"))
+    digest.update(b"\0")
+    for rel_path in _iter_git_tracked_paths(repo_root, pathspec):
+        absolute = repo_root / rel_path
+        digest.update(rel_path.as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        if not absolute.exists() and not absolute.is_symlink():
+            digest.update(b"MISSING\0")
+            continue
+        if absolute.is_symlink():
+            digest.update(b"L\0")
+            digest.update(os.readlink(absolute).encode("utf-8"))
+            digest.update(b"\0")
+            continue
+        if absolute.is_dir():
+            digest.update(b"D\0")
+            continue
+        if not absolute.is_file():
+            _die(f"tracked bundle input is missing: {absolute}")
+        digest.update(b"F\0")
+        digest.update(_hash_file(absolute).encode("utf-8"))
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
 def _copy_tracked_tree(repo_root: Path, src_rel: str, dest_root: Path) -> None:
     untracked = _git_untracked_paths(repo_root, src_rel)
     if untracked:
@@ -100,7 +138,10 @@ def _copy_tracked_tree(repo_root: Path, src_rel: str, dest_root: Path) -> None:
         extra = "" if len(untracked) <= 5 else f" (+{len(untracked) - 5} more)"
         _die(f"bundled tracked tree contains untracked files and cannot be sealed: {sample}{extra}")
     for rel_path in _iter_git_tracked_paths(repo_root, src_rel):
-        _copy_path(repo_root / rel_path, dest_root / rel_path)
+        source = repo_root / rel_path
+        if not source.exists() and not source.is_symlink():
+            continue
+        _copy_path(source, dest_root / rel_path)
 
 
 def _copy_repo_tracked_tree(repo_root: Path, src_rel: str, dest_root: Path) -> None:
@@ -163,6 +204,69 @@ def _readelf_output(binary: Path, *args: str) -> str:
     if completed.returncode != 0:
         return ""
     return completed.stdout
+
+
+def _sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def _hash_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _hash_tree(path: Path) -> str:
+    digest = hashlib.sha256()
+    root = path.resolve()
+    if not root.exists():
+        _die(f"cache input path is missing: {root}")
+    if root.is_symlink():
+        digest.update(b"L\0")
+        digest.update(os.readlink(root).encode("utf-8"))
+        return digest.hexdigest()
+    if root.is_file():
+        digest.update(b"F\0")
+        digest.update(root.name.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(_hash_file(root).encode("utf-8"))
+        return digest.hexdigest()
+    digest.update(b"D\0")
+    for candidate in sorted(root.rglob("*")):
+        rel = candidate.relative_to(root).as_posix().encode("utf-8")
+        digest.update(rel)
+        digest.update(b"\0")
+        if candidate.is_symlink():
+            digest.update(b"L\0")
+            digest.update(os.readlink(candidate).encode("utf-8"))
+            digest.update(b"\0")
+            continue
+        if candidate.is_dir():
+            digest.update(b"D\0")
+            continue
+        digest.update(b"F\0")
+        digest.update(_hash_file(candidate).encode("utf-8"))
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def _git_head_revision(path: Path) -> str:
+    completed = subprocess.run(
+        ["git", "-C", str(path), "rev-parse", "HEAD"],
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if completed.returncode != 0:
+        message = completed.stderr.strip() or f"failed to resolve git revision for {path}"
+        _die(message)
+    revision = completed.stdout.strip()
+    if not revision:
+        _die(f"empty git revision for {path}")
+    return revision
 
 
 def _binary_requires_runtime_loader(binary: Path) -> bool:
@@ -319,7 +423,13 @@ def _wrap_dynamic_executable_tree(root: Path, loader_name: str, *, bundle_lib_di
 
 
 class BundleBuilder:
-    def __init__(self, manifest_path: Path, bundle_inputs_path: Path, bundle_dir: Path, bundle_tar: Path) -> None:
+    def __init__(
+        self,
+        manifest_path: Path,
+        bundle_inputs_path: Path,
+        bundle_dir: Path | None = None,
+        bundle_tar: Path | None = None,
+    ) -> None:
         self.manifest_path = manifest_path
         self.bundle_inputs_path = bundle_inputs_path
         self.bundle_dir = bundle_dir
@@ -331,6 +441,13 @@ class BundleBuilder:
         self.manifest = _parse_scalar_manifest(manifest_path)
         self.bundle_inputs = read_state(bundle_inputs_path)
         self.values = {**self.manifest, **self.bundle_inputs}
+
+    def _cache_manifest_values(self) -> dict[str, str]:
+        return {
+            key: value
+            for key, value in self.manifest.items()
+            if key not in _BUNDLE_CACHE_IGNORED_MANIFEST_KEYS
+        }
 
     def value(self, key: str, default: str = "") -> str:
         return self.values.get(key, default)
@@ -371,6 +488,177 @@ class BundleBuilder:
 
     def copy_git_snapshot(self, src: Path, dest: Path) -> None:
         _copy_git_snapshot(src, dest)
+
+    def _cache_path_inputs(self) -> list[tuple[str, Path]]:
+        inputs: list[tuple[str, Path]] = []
+        if self.value("RUN_NEEDS_RUNNER_BINARY", "0") == "1":
+            if self.target_arch_is_arm64():
+                inputs.extend(
+                    [
+                        ("arm64-cross-runner", Path(self.required_value("ARM64_CROSS_RUNNER", "ARM64 runner wrapper"))),
+                        ("arm64-cross-runner-real", Path(self.required_value("ARM64_CROSS_RUNNER_REAL", "ARM64 runner binary"))),
+                        ("arm64-cross-lib", Path(self.required_value("ARM64_CROSS_LIB_DIR", "ARM64 runtime lib dir"))),
+                    ]
+                )
+            elif self.target_arch_is_x86():
+                inputs.append(("x86-runner", Path(self.required_value("X86_RUNNER", "x86 runner binary"))))
+        if self.value("RUN_NEEDS_DAEMON_BINARY", "0") == "1":
+            if self.target_arch_is_arm64():
+                inputs.extend(
+                    [
+                        ("arm64-cross-daemon", Path(self.required_value("ARM64_CROSS_DAEMON", "ARM64 daemon wrapper"))),
+                        ("arm64-cross-daemon-real", Path(self.required_value("ARM64_CROSS_DAEMON_REAL", "ARM64 daemon binary"))),
+                        ("arm64-cross-lib", Path(self.required_value("ARM64_CROSS_LIB_DIR", "ARM64 runtime lib dir"))),
+                    ]
+                )
+            elif self.target_arch_is_x86():
+                inputs.append(("x86-daemon", Path(self.required_value("X86_DAEMON", "x86 daemon binary"))))
+        if self.value("RUN_NEEDS_KINSN_MODULES", "0") == "1":
+            inputs.append(("kinsn-modules", Path(self.required_value("RUN_KINSN_MODULE_DIR", "selected kinsn module dir"))))
+        scx_packages = [token for token in self.value("RUN_SCX_PACKAGES_CSV").split(",") if token]
+        if scx_packages:
+            if self.target_arch_is_arm64():
+                inputs.extend(
+                    [
+                        ("arm64-scx-binaries", Path(self.required_value("ARM64_SCX_BINARY_ROOT", "manifest scx binary root"))),
+                        ("arm64-scx-objects", Path(self.required_value("ARM64_SCX_OBJECT_ROOT", "manifest scx object root"))),
+                    ]
+                )
+            elif self.target_arch_is_x86():
+                inputs.extend(
+                    [
+                        ("x86-scx-binaries", Path(self.required_value("X86_SCX_BINARY_ROOT", "manifest scx binary root"))),
+                        ("x86-scx-objects", Path(self.required_value("X86_SCX_OBJECT_ROOT", "manifest scx object root"))),
+                    ]
+                )
+        bundled_repos = [token for token in self.value("RUN_BUNDLED_REPOS_CSV").split(",") if token]
+        if bundled_repos:
+            repo_root = Path(self.required_value("RUN_LOCAL_REPO_ROOT", "local repo root"))
+            for repo in bundled_repos:
+                inputs.append((f"bundled-repo:{repo}", repo_root / repo))
+        bundled_tools = self.value("RUN_BUNDLED_WORKLOAD_TOOLS_CSV")
+        if bundled_tools:
+            inputs.append(("bundled-workload-tools", Path(self.required_value("RUN_LOCAL_WORKLOAD_TOOL_ROOT", "local bundled workload tool root"))))
+        if self.target_arch_is_x86() and self.value("X86_PORTABLE_LIBBPF_ROOT"):
+            inputs.append(("x86-portable-libbpf", Path(self.value("X86_PORTABLE_LIBBPF_ROOT"))))
+        native_repos = [token for token in self.value("RUN_NATIVE_REPOS_CSV").split(",") if token]
+        if native_repos:
+            root_key = "ARM64_NATIVE_BUILD_ROOT" if self.target_arch_is_arm64() else "X86_NATIVE_BUILD_ROOT"
+            native_root = Path(self.required_value(root_key, root_key))
+            for repo in native_repos:
+                inputs.append((f"native-repo:{repo}", native_root / repo))
+        suite = self.value("RUN_SUITE_NAME")
+        if suite == "test":
+            if self.target_arch_is_arm64():
+                if self.test_mode_needs_unittest():
+                    inputs.append(("arm64-test-unittest", Path(self.required_value("ARM64_TEST_UNITTEST_BUILD_DIR", "bundled ARM64 unittest inputs"))))
+                if self.test_mode_needs_negative():
+                    inputs.append(("arm64-test-negative", Path(self.required_value("ARM64_TEST_NEGATIVE_BUILD_DIR", "bundled ARM64 negative inputs"))))
+                if self.test_mode_needs_upstream():
+                    inputs.append(("arm64-upstream-selftests", Path(self.required_value("ARM64_UPSTREAM_SELFTEST_DIR", "bundled ARM64 upstream selftest inputs"))))
+                    inputs.append(("arm64-upstream-kmods", Path(self.required_value("ARM64_UPSTREAM_TEST_KMODS_DIR", "bundled ARM64 upstream selftest kmods"))))
+            else:
+                if self.test_mode_needs_unittest():
+                    inputs.append(("x86-test-unittest", Path(self.required_value("X86_TEST_UNITTEST_BUILD_DIR", "bundled x86 unittest inputs"))))
+                if self.test_mode_needs_negative():
+                    inputs.append(("x86-test-negative", Path(self.required_value("X86_TEST_NEGATIVE_BUILD_DIR", "bundled x86 negative inputs"))))
+                if self.test_mode_needs_upstream():
+                    inputs.append(("x86-upstream-selftests", Path(self.required_value("X86_UPSTREAM_SELFTEST_DIR", "x86 upstream selftest dir"))))
+        elif suite == "micro":
+            inputs.append(("micro-programs", Path(self.required_value("MICRO_PROGRAMS_GENERATED_DIR", "micro generated programs dir"))))
+        if self.executor_is_kvm() and self.target_arch_is_x86():
+            inputs.append(("kvm-virtme-mods", ROOT_DIR / "vendor/linux-framework/.virtme_mods"))
+        deduped: list[tuple[str, Path]] = []
+        seen: set[tuple[str, str]] = set()
+        for label, path in inputs:
+            key = (label, str(path.resolve()))
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append((label, path.resolve()))
+        return deduped
+
+    def compute_cache_key(self) -> str:
+        payload = {
+            "version": 2,
+            "manifest": self._cache_manifest_values(),
+            "bundle_inputs": {},
+            "source_revisions": {
+                "vendor_libbpf": _git_head_revision(ROOT_DIR / "vendor/libbpf"),
+                "vendor_bpftool": _git_head_revision(ROOT_DIR / "vendor/bpftool"),
+            },
+            "path_inputs": [],
+            "tracked_tree_inputs": [],
+        }
+        for key, value in sorted(self.bundle_inputs.items()):
+            candidate = Path(value)
+            if candidate.is_absolute() and candidate.exists():
+                payload["bundle_inputs"][key] = {"path_tree_sha256": _hash_tree(candidate)}
+            else:
+                payload["bundle_inputs"][key] = {"scalar": value}
+        for label, path in self._cache_path_inputs():
+            payload["path_inputs"].append({"label": label, "tree_sha256": _hash_tree(path)})
+        for label, repo_root, pathspec in self._cache_tracked_tree_inputs():
+            payload["tracked_tree_inputs"].append(
+                {
+                    "label": label,
+                    "repo_root": str(repo_root),
+                    "pathspec": pathspec,
+                    "tree_sha256": _hash_git_tracked_tree(repo_root, pathspec),
+                }
+            )
+        encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return _sha256_bytes(encoded)
+
+    def _cache_tracked_tree_inputs(self) -> list[tuple[str, Path, str]]:
+        suite = self.value("RUN_SUITE_NAME")
+        inputs: list[tuple[str, Path, str]] = [
+            ("runner-init", ROOT_DIR, "runner/__init__.py"),
+            ("runner-cmake", ROOT_DIR, "runner/CMakeLists.txt"),
+            ("runner-include", ROOT_DIR, "runner/include"),
+            ("runner-repos-yaml", ROOT_DIR, "runner/repos.yaml"),
+            ("runner-libs", ROOT_DIR, "runner/libs"),
+            ("runner-src", ROOT_DIR, "runner/src"),
+            ("vendor-linux-include", ROOT_DIR / "vendor/linux-framework", "include"),
+            ("vendor-linux-scripts", ROOT_DIR / "vendor/linux-framework", "scripts"),
+            ("vendor-linux-arch", ROOT_DIR / "vendor/linux-framework", "arch"),
+        ]
+        if self.value("RUN_NEEDS_KINSN_MODULES", "0") == "1":
+            inputs.append(("module-tree", ROOT_DIR, "module"))
+        if suite == "test":
+            inputs.append(("tests-tree", ROOT_DIR, "tests"))
+            if self.test_mode_needs_upstream():
+                inputs.extend(
+                    [
+                        ("runner-config", ROOT_DIR, "runner/config"),
+                        ("vendor-linux-tools-build", ROOT_DIR / "vendor/linux-framework", "tools/build"),
+                        ("vendor-linux-tools-bpf", ROOT_DIR / "vendor/linux-framework", "tools/bpf"),
+                        ("vendor-linux-tools-include", ROOT_DIR / "vendor/linux-framework", "tools/include"),
+                        ("vendor-linux-tools-lib", ROOT_DIR / "vendor/linux-framework", "tools/lib"),
+                        ("vendor-linux-tools-scripts", ROOT_DIR / "vendor/linux-framework", "tools/scripts"),
+                        ("vendor-linux-tools-testing", ROOT_DIR / "vendor/linux-framework", "tools/testing"),
+                        ("vendor-linux-disasm-c", ROOT_DIR / "vendor/linux-framework", "kernel/bpf/disasm.c"),
+                        ("vendor-linux-disasm-h", ROOT_DIR / "vendor/linux-framework", "kernel/bpf/disasm.h"),
+                    ]
+                )
+        elif suite == "micro":
+            inputs.append(("micro-tree", ROOT_DIR, "micro"))
+        elif suite == "corpus":
+            inputs.extend(
+                [
+                    ("corpus-tree", ROOT_DIR, "corpus"),
+                    ("e2e-cases-tree", ROOT_DIR, "e2e/cases"),
+                ]
+            )
+        elif suite == "e2e":
+            inputs.extend(
+                [
+                    ("e2e-tree", ROOT_DIR, "e2e"),
+                    ("corpus-config-tree", ROOT_DIR, "corpus/config"),
+                    ("corpus-inputs-tree", ROOT_DIR, "corpus/inputs"),
+                ]
+            )
+        return inputs
 
     def copy_runner_tree(self) -> None:
         for rel in (
@@ -560,7 +848,7 @@ class BundleBuilder:
         repos = [token for token in self.value("RUN_NATIVE_REPOS_CSV").split(",") if token]
         for repo in repos:
             self.stage_repo_build_dir(repo)
-            if self.target_arch_is_x86() and repo != "tracee":
+            if self.target_arch_is_x86():
                 _wrap_dynamic_executable_tree(
                     self.bundle_dir / f"corpus/build/{repo}",
                     "ld-linux-x86-64.so.2",
@@ -570,8 +858,10 @@ class BundleBuilder:
     def write_bundle_manifest(self) -> None:
         manifest = parse_manifest(self.manifest_path)
         manifest["RUN_BUNDLED_WORKLOAD_TOOLS_CSV"] = self.value("RUN_BUNDLED_WORKLOAD_TOOLS_CSV", "")
-        if self.value("RUN_WORKLOAD_TOOLS_CSV"):
+        if self.value("RUN_BUNDLED_WORKLOAD_TOOLS_CSV"):
             manifest["RUN_REMOTE_WORKLOAD_TOOL_BIN"] = ".cache/workload-tools/bin"
+        else:
+            manifest.pop("RUN_REMOTE_WORKLOAD_TOOL_BIN", None)
         if "bcc" in [token for token in self.value("RUN_NATIVE_REPOS_CSV").split(",") if token]:
             manifest["RUN_BCC_TOOLS_DIR"] = "corpus/build/bcc/libbpf-tools/.output"
         if self.value("RUN_NEEDS_KATRAN_BUNDLE", "0") == "1":
@@ -695,12 +985,16 @@ class BundleBuilder:
         self.stage_native_repo_build_dirs()
 
     def archive_bundle(self) -> None:
+        if self.bundle_tar is None or self.bundle_dir is None:
+            _die("bundle builder archive requires an explicit bundle_dir and bundle_tar")
         self.bundle_tar.parent.mkdir(parents=True, exist_ok=True)
         with tarfile.open(self.bundle_tar, "w:gz") as archive:
             for child in sorted(self.bundle_dir.iterdir()):
                 archive.add(child, arcname=child.name, recursive=True)
 
     def build(self) -> None:
+        if self.bundle_dir is None or self.bundle_tar is None:
+            _die("bundle builder build requires an explicit bundle_dir and bundle_tar")
         self.prepare_common_bundle()
         suite = self.value("RUN_SUITE_NAME")
         if suite == "test":
@@ -714,6 +1008,10 @@ class BundleBuilder:
         else:
             _die(f"unsupported suite for remote bundle: {suite}")
         self.archive_bundle()
+
+
+def compute_bundle_cache_key(manifest_path: Path, bundle_inputs_path: Path) -> str:
+    return BundleBuilder(manifest_path, bundle_inputs_path).compute_cache_key()
 
 
 def main(argv: list[str] | None = None) -> None:
