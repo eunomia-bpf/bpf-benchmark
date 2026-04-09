@@ -11,6 +11,7 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs import aws_common
 from runner.libs.cli_support import fail
+from runner.libs.prereq_contract import required_commands, tool_packages
 from runner.libs.state_file import write_state
 
 _die = partial(fail, "aws-remote-prep")
@@ -59,9 +60,6 @@ def _save_state(
             "STATE_INSTANCE_IP": instance_ip,
             "STATE_REGION": ctx.aws_region,
             "STATE_KERNEL_RELEASE": kernel_release,
-            "STATE_SYSROOT_REMOTE_HOST": instance_ip,
-            "STATE_SYSROOT_REMOTE_USER": ctx.remote_user,
-            "STATE_SYSROOT_SSH_KEY_PATH": str(ctx.key_path),
         },
     )
 
@@ -251,53 +249,105 @@ def _remote_base_prereq_stamp_path(ctx: aws_common.AwsExecutorContext) -> str:
     return f"{_remote_base_prereq_dir(ctx)}/base.ready"
 
 
+def _ordered_unique(tokens: list[str]) -> list[str]:
+    ordered: list[str] = []
+    for token in tokens:
+        if token and token not in ordered:
+            ordered.append(token)
+    return ordered
+
+
+def _remote_base_packages() -> list[str]:
+    return [
+        "curl-minimal",
+        "dracut",
+        "elfutils-libelf",
+        "file",
+        "grubby",
+        "gzip",
+        "iproute",
+        "kmod",
+        "ncurses-libs",
+        "procps-ng",
+        "tar",
+        "util-linux",
+        "which",
+        "zlib",
+        "zstd",
+    ]
+
+
+def _remote_prereq_packages(contract: dict[str, str | list[str]]) -> list[str]:
+    manager = "dnf"
+    packages = list(_remote_base_packages())
+    python_bin = aws_common._require_scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+    bpftool_bin = aws_common._require_scalar(contract, "RUN_BPFTOOL_BIN")
+    for tool in (bpftool_bin, python_bin):
+        packages.extend(tool_packages(manager, tool))
+    for tool in required_commands(mode="base", contract=contract):
+        if tool in {python_bin, bpftool_bin}:
+            continue
+        packages.extend(tool_packages(manager, tool))
+    return _ordered_unique(packages)
+
+
+def _remote_required_commands(contract: dict[str, str | list[str]]) -> list[str]:
+    python_bin = aws_common._require_scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+    bpftool_bin = aws_common._require_scalar(contract, "RUN_BPFTOOL_BIN")
+    commands = [
+        bpftool_bin,
+        "curl",
+        "dracut",
+        "file",
+        "grubby",
+        "insmod",
+        "ip",
+        python_bin,
+        "taskset",
+        "tar",
+    ]
+    commands.extend(required_commands(mode="base", contract=contract))
+    return _ordered_unique(commands)
+
+
 def _setup_remote_base_prereqs(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     remote_prereq_dir = _remote_base_prereq_dir(ctx)
     remote_stamp_path = _remote_base_prereq_stamp_path(ctx)
-    remote_manifest = f"{remote_prereq_dir}/run-contract.env"
-    remote_runner_root = f"{remote_prereq_dir}/runner"
-    remote_runner_lib_root = f"{remote_runner_root}/libs"
+    packages = _remote_prereq_packages(ctx.contract)
+    commands = _remote_required_commands(ctx.contract)
     aws_common._ssh_bash(
         ctx,
         ip,
         remote_prereq_dir,
-        script="""
-set -euo pipefail
-mkdir -p "$1"
-""",
-    )
-    aws_common._ssh_bash(
-        ctx,
-        ip,
-        remote_runner_lib_root,
-        script="""
-set -euo pipefail
-mkdir -p "$1"
-""",
-    )
-    aws_common._scp_to(ctx, ip, ctx.manifest_path, remote_manifest)
-    aws_common._scp_to(ctx, ip, ROOT_DIR / "runner" / "__init__.py", f"{remote_runner_root}/__init__.py")
-    for source_path in sorted((ROOT_DIR / "runner" / "libs").glob("*.py")):
-        aws_common._scp_to(ctx, ip, source_path, f"{remote_runner_lib_root}/{source_path.name}")
-    aws_common._ssh_bash(
-        ctx,
-        ip,
-        remote_prereq_dir,
-        remote_manifest,
         remote_stamp_path,
-        aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN"),
+        *packages,
+        "--",
+        *commands,
         script="""
 set -euo pipefail
 prereq_root="$1"
-manifest="$2"
-stamp_path="$3"
-python_bin="$4"
-command -v "$python_bin" >/dev/null 2>&1 || {
-    echo "[aws-remote-prereqs][ERROR] required remote Python launcher is missing: $python_bin" >&2
-    exit 1
-}
-sudo env PATH="$PATH" PYTHONPATH="$prereq_root" \
-    "$python_bin" -m runner.libs.aws_remote_prereqs "$manifest" "$stamp_path"
+stamp_path="$2"
+shift 2
+packages=()
+while [ "$#" -gt 0 ] && [ "$1" != "--" ]; do
+    packages+=("$1")
+    shift
+done
+if [ "$#" -gt 0 ] && [ "$1" = "--" ]; then
+    shift
+fi
+commands=("$@")
+mkdir -p "$prereq_root"
+if [ "${#packages[@]}" -gt 0 ]; then
+    sudo dnf -y install "${packages[@]}"
+fi
+for command_name in "${commands[@]}"; do
+    command -v "$command_name" >/dev/null 2>&1 || {
+        echo "[aws-remote-prereqs][ERROR] required command is missing: $command_name" >&2
+        exit 1
+    }
+done
+touch "$stamp_path"
 test -f "$stamp_path"
 """,
     )
@@ -345,7 +395,7 @@ exit 1
         if completed.returncode != 0:
             _die(f"failed to capture AWS ARM64 base kernel config from {ip}")
         return completed.stdout
-    base_config = ctx.target_cache_dir / "config-al2023-arm64"
+    base_config = ctx.target_root / "config-al2023-arm64"
     base_config.parent.mkdir(parents=True, exist_ok=True)
     base_config.write_text(_fetch_config_text(), encoding="utf-8")
     release_file = base_config.with_suffix(".release")
@@ -353,7 +403,7 @@ exit 1
 
 
 def _build_x86_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
-    build_dir = ctx.target_cache_dir / "setup-artifacts" / "x86"
+    build_dir = ctx.target_root / "setup-artifacts" / "x86"
     _run_local_make(
         "__kernel-x86-artifacts",
         f"OUTPUT_ROOT={build_dir}",
@@ -366,9 +416,9 @@ def _build_x86_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str
 
 
 def _build_arm64_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
-    build_dir = ctx.target_cache_dir / "kernel-build"
-    base_config = ctx.target_cache_dir / "config-al2023-arm64"
-    setup_root = ctx.target_cache_dir / "setup-artifacts" / "arm64"
+    build_dir = ctx.target_root / "kernel-build"
+    base_config = ctx.target_root / "config-al2023-arm64"
+    setup_root = ctx.target_root / "setup-artifacts" / "arm64"
     _run_local_make(
         "__kernel-arm64-aws-artifacts",
         f"OUTPUT_ROOT={setup_root}",
@@ -730,26 +780,13 @@ def _ensure_instance_for_suite(ctx: aws_common.AwsExecutorContext) -> dict[str, 
 
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) != 2:
-        _die("usage: aws_remote_prep.py <manifest_path> <state_path>")
+    if len(args) != 1:
+        _die("usage: aws_remote_prep.py <manifest_path>")
     manifest_path = Path(args[0]).resolve()
-    state_path = Path(args[1]).resolve()
     if not manifest_path.is_file():
         _die(f"manifest is missing: {manifest_path}")
-    ctx = aws_common._build_context("run", manifest_path, None)
-    state = _ensure_instance_for_suite(ctx)
-    write_state(
-        state_path,
-        {
-            "STATE_INSTANCE_ID": state.get("STATE_INSTANCE_ID", ""),
-            "STATE_INSTANCE_IP": state.get("STATE_INSTANCE_IP", ""),
-            "STATE_REGION": state.get("STATE_REGION", ""),
-            "STATE_KERNEL_RELEASE": state.get("STATE_KERNEL_RELEASE", ""),
-            "STATE_SYSROOT_REMOTE_HOST": state.get("STATE_SYSROOT_REMOTE_HOST", ""),
-            "STATE_SYSROOT_REMOTE_USER": state.get("STATE_SYSROOT_REMOTE_USER", ""),
-            "STATE_SYSROOT_SSH_KEY_PATH": state.get("STATE_SYSROOT_SSH_KEY_PATH", ""),
-        },
-    )
+    ctx = aws_common._build_context("run", manifest_path)
+    _ensure_instance_for_suite(ctx)
 
 
 if __name__ == "__main__":

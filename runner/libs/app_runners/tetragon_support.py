@@ -197,8 +197,9 @@ spec:
 
 
 def inspect_tetragon_setup() -> dict[str, object]:
-    bundled_tetragon_binary = ROOT_DIR / "corpus" / "build" / "tetragon" / "bin" / "tetragon"
-    bundled_bpf_dir = ROOT_DIR / "corpus" / "build" / "tetragon"
+    arch_dir = "arm64" if os.uname().machine in {"aarch64", "arm64"} else "x86_64"
+    bundled_tetragon_binary = ROOT_DIR / "corpus" / "build" / arch_dir / "tetragon" / "bin" / "tetragon"
+    bundled_bpf_dir = ROOT_DIR / "corpus" / "build" / arch_dir / "tetragon"
     explicit_binary = os.environ.get("TETRAGON_BINARY", "").strip() or None
     explicit_bpf_dir = os.environ.get("TETRAGON_BPF_LIB_DIR", "").strip() or None
 

@@ -605,6 +605,12 @@ int main(int argc, char **argv)
 	struct scx_child child;
 	char scx_binary[PATH_MAX];
 	char scx_object[PATH_MAX];
+	const char *arch_dir =
+#if defined(__aarch64__) || defined(__arm64__)
+		"arm64";
+#else
+		"x86_64";
+#endif
 	char state[64];
 	int rc = 1;
 
@@ -614,12 +620,12 @@ int main(int argc, char **argv)
 	}
 
 	if (snprintf(scx_binary, sizeof(scx_binary),
-		     "%s/runner/repos/scx/target/release/scx_rusty",
-		     opts.repo_root) >= (int)sizeof(scx_binary))
+		     "%s/corpus/build/%s/scx/bin/scx_rusty",
+		     opts.repo_root, arch_dir) >= (int)sizeof(scx_binary))
 		return 2;
 	if (snprintf(scx_object, sizeof(scx_object),
-		     "%s/corpus/build/scx/scx_rusty_main.bpf.o",
-		     opts.repo_root) >= (int)sizeof(scx_object))
+		     "%s/corpus/build/%s/scx/scx_rusty_main.bpf.o",
+		     opts.repo_root, arch_dir) >= (int)sizeof(scx_object))
 		return 2;
 
 	if (access(scx_binary, X_OK) != 0) {

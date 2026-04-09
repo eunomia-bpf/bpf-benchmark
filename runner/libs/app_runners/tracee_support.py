@@ -326,7 +326,8 @@ def _current_prog_ids() -> list[int]:
 
 
 def inspect_tracee_setup() -> dict[str, object]:
-    corpus_binary = ROOT_DIR / "corpus" / "build" / "tracee" / "bin" / "tracee"
+    arch_dir = "arm64" if os.uname().machine in {"aarch64", "arm64"} else "x86_64"
+    corpus_binary = ROOT_DIR / "corpus" / "build" / arch_dir / "tracee" / "bin" / "tracee"
     explicit_binary = os.environ.get("TRACEE_BINARY", "").strip() or None
 
     required_tools: list[str] = []

@@ -12,7 +12,6 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs import aws_common
 from runner.libs.cli_support import fail
-from runner.libs.state_file import read_state
 
 _die = partial(fail, "aws-executor")
 
@@ -28,20 +27,7 @@ _terminate_instance = aws_common._terminate_instance
 _wait_for_ssh = aws_common._wait_for_ssh
 
 
-def _load_local_state(ctx: AwsExecutorContext) -> dict[str, str]:
-    if ctx.local_state_path is None:
-        return {}
-    if not ctx.local_state_path.is_file():
-        _die(f"local state file is missing: {ctx.local_state_path}")
-    return read_state(ctx.local_state_path)
-
-
-def _cleanup_local_run_prep_root(ctx: AwsExecutorContext) -> None:
-    shutil.rmtree(ctx.run_prep_root, ignore_errors=True)
-
-
 def _cleanup_failed_dedicated_run(ctx: AwsExecutorContext, state: dict[str, str] | None = None) -> None:
-    _cleanup_local_run_prep_root(ctx)
     current_state = dict(state or {})
     if not current_state:
         with _locked_file(ctx.state_lock):
@@ -55,19 +41,60 @@ def _cleanup_failed_dedicated_run(ctx: AwsExecutorContext, state: dict[str, str]
     shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
 
 
-def _stream_workspace_to_remote(ctx: AwsExecutorContext, ip: str, workspace_root: Path, remote_workspace: str) -> None:
-    tar_command = ["tar", "-C", str(workspace_root), "-chf", "-", "."]
+def _stream_workspace_to_remote(
+    ctx: AwsExecutorContext,
+    ip: str,
+    local_workspace: Path,
+    remote_workspace: str,
+) -> None:
+    transfer_entries = ["runner"]
+    if _require_scalar(ctx.contract, "RUN_NEEDS_DAEMON_BINARY") == "1":
+        transfer_entries.append("daemon")
+    if _require_scalar(ctx.contract, "RUN_NEEDS_KINSN_MODULES") == "1":
+        transfer_entries.append("module")
+    if ctx.suite_name == "test":
+        transfer_entries.append("tests")
+    if ctx.suite_name == "micro":
+        transfer_entries.append("micro")
+    if ctx.suite_name in {"corpus", "e2e"}:
+        transfer_entries.append("corpus")
+    if ctx.suite_name == "e2e":
+        transfer_entries.append("e2e")
+    selected_entries = [
+        entry
+        for entry in dict.fromkeys(transfer_entries)
+        if (local_workspace / entry).exists()
+    ]
+    if not selected_entries:
+        _die(f"no local workspace entries selected for {ctx.target_name}/{ctx.suite_name}")
+    tar_command = [
+        "tar",
+        "--exclude=runner/repos",
+        "--exclude=corpus/results",
+        "--exclude=e2e/results",
+        "--exclude=micro/results",
+        "--exclude=__pycache__",
+        "-C",
+        str(local_workspace),
+        "-chf",
+        "-",
+        *selected_entries,
+    ]
+    remote_command = (
+        "set -euo pipefail; "
+        f"rm -rf {shlex.quote(remote_workspace)}; "
+        f"mkdir -p {shlex.quote(remote_workspace)}; "
+        f"tar -xf - -C {shlex.quote(remote_workspace)}"
+    )
     ssh_command = [
         "ssh",
         *aws_common._ssh_base_args(ctx, ip),
         f"{ctx.remote_user}@{ip}",
-        "bash",
-        "-lc",
-        f'set -euo pipefail; rm -rf {shlex.quote(remote_workspace)}; mkdir -p {shlex.quote(remote_workspace)}; tar -xf - -C {shlex.quote(remote_workspace)}',
+        f"bash -lc {shlex.quote(remote_command)}",
     ]
     tar_proc = subprocess.Popen(
         tar_command,
-        cwd=ROOT_DIR,
+        cwd=local_workspace,
         stdout=subprocess.PIPE,
         text=False,
     )
@@ -88,7 +115,7 @@ def _stream_workspace_to_remote(ctx: AwsExecutorContext, ip: str, workspace_root
         raise SystemExit(ssh_completed.returncode)
 
 
-def _run_remote_suite(ctx: AwsExecutorContext, ip: str, workspace_root: Path) -> None:
+def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
     _wait_for_ssh(ctx, ip)
     stamp = f"{ctx.suite_name}_{ctx.run_token}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     local_result_dir = ctx.results_dir / stamp
@@ -98,6 +125,7 @@ def _run_remote_suite(ctx: AwsExecutorContext, ip: str, workspace_root: Path) ->
     remote_archive = f"{remote_run_dir}/results.tar.gz"
     remote_log = f"{remote_run_dir}/remote.log"
     remote_python = _require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
+    local_workspace = ROOT_DIR
     remote_workspace = f"{remote_run_dir}/workspace"
     local_result_dir.mkdir(parents=True, exist_ok=True)
 
@@ -108,11 +136,12 @@ def _run_remote_suite(ctx: AwsExecutorContext, ip: str, workspace_root: Path) ->
         script="""
 set -euo pipefail
 run_dir="$1"
-sudo rm -rf "$run_dir"
+rm -rf "$run_dir"
 mkdir -p "$run_dir"
 """,
     )
-    _stream_workspace_to_remote(ctx, ip, workspace_root, remote_workspace)
+    _stream_workspace_to_remote(ctx, ip, local_workspace, remote_workspace)
+    _scp_to(ctx, ip, ctx.manifest_path, f"{remote_workspace}/run-contract.env")
     remote_completed = _ssh_bash(
         ctx,
         ip,
@@ -128,7 +157,7 @@ log_path="$3"
 remote_python="$4"
 workspace="$run_dir/workspace"
 test -f "$workspace/run-contract.env"
-sudo -E env PYTHONPATH="$workspace${PYTHONPATH:+:$PYTHONPATH}" \
+env PYTHONPATH="$workspace${PYTHONPATH:+:$PYTHONPATH}" \
     "$remote_python" -m runner.libs.execute_workspace \
     "$workspace" "$workspace/run-contract.env" "$archive_path" >"$log_path" 2>&1
 """,
@@ -157,7 +186,7 @@ test -f "$1"
         remote_run_dir,
         script="""
 set -euo pipefail
-sudo rm -rf "$1"
+rm -rf "$1"
 """,
         check=False,
     )
@@ -167,17 +196,17 @@ sudo rm -rf "$1"
     )
 
 
-def _run_shared(ctx: AwsExecutorContext, workspace_root: Path) -> None:
+def _run_shared(ctx: AwsExecutorContext) -> None:
     with _locked_file(ctx.remote_execution_lock):
         with _locked_file(ctx.state_lock):
             state = _load_instance_state(ctx)
         instance_ip = state.get("STATE_INSTANCE_IP", "").strip()
         if not instance_ip:
             _die("shared AWS run is missing STATE_INSTANCE_IP before remote execution")
-        _run_remote_suite(ctx, instance_ip, workspace_root)
+        _run_remote_suite(ctx, instance_ip)
 
 
-def _run_dedicated(ctx: AwsExecutorContext, workspace_root: Path) -> None:
+def _run_dedicated(ctx: AwsExecutorContext) -> None:
     state = {}
     try:
         with _locked_file(ctx.state_lock):
@@ -185,11 +214,10 @@ def _run_dedicated(ctx: AwsExecutorContext, workspace_root: Path) -> None:
         instance_ip = state.get("STATE_INSTANCE_IP", "").strip()
         if not instance_ip:
             _die("dedicated AWS run is missing STATE_INSTANCE_IP before remote execution")
-        _run_remote_suite(ctx, instance_ip, workspace_root)
+        _run_remote_suite(ctx, instance_ip)
     except BaseException:
         _cleanup_failed_dedicated_run(ctx, state)
         raise
-    _cleanup_local_run_prep_root(ctx)
     _terminate_instance(ctx, state.get("STATE_INSTANCE_ID", "").strip())
     shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
 
@@ -197,26 +225,17 @@ def _run_dedicated(ctx: AwsExecutorContext, workspace_root: Path) -> None:
 def _run_action(ctx: AwsExecutorContext) -> None:
     dedicated_execute_started = False
     try:
-        if ctx.local_state_path is None:
-            _die("run requires a local state path")
         if not ctx.remote_user:
             _die("manifest RUN_REMOTE_USER is empty")
         if not ctx.remote_stage_dir:
             _die("manifest RUN_REMOTE_STAGE_DIR is empty")
         if not ctx.key_path.is_file():
             _die(f"manifest RUN_AWS_KEY_PATH does not exist: {ctx.key_path}")
-        local_state = _load_local_state(ctx)
-        workspace_root_value = local_state.get("RUN_LOCAL_WORKSPACE_ROOT", "").strip()
-        if not workspace_root_value:
-            _die("local workspace root is unset; run canonical local prep first")
-        workspace_root = Path(workspace_root_value).resolve()
-        if not workspace_root.is_dir():
-            _die(f"local workspace root does not exist: {workspace_root}")
         if ctx.instance_mode == "shared":
-            _run_shared(ctx, workspace_root)
+            _run_shared(ctx)
             return
         dedicated_execute_started = True
-        _run_dedicated(ctx, workspace_root)
+        _run_dedicated(ctx)
     except BaseException:
         if ctx.instance_mode == "dedicated" and not dedicated_execute_started:
             _cleanup_failed_dedicated_run(ctx)
@@ -226,13 +245,12 @@ def _run_action(ctx: AwsExecutorContext) -> None:
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
     if len(args) < 2:
-        _die("usage: aws_executor.py <run|terminate> <manifest_path> [local_state_path]")
+        _die("usage: aws_executor.py <run|terminate> <manifest_path>")
     action = args[0]
     manifest_path = Path(args[1]).resolve()
-    local_state_path = Path(args[2]).resolve() if len(args) > 2 and args[2] else None
     if not manifest_path.is_file():
         _die(f"manifest is missing: {manifest_path}")
-    ctx = _build_context(action, manifest_path, local_state_path)
+    ctx = _build_context(action, manifest_path)
     if action == "run":
         _run_action(ctx)
         return

@@ -27,22 +27,8 @@ def _scalar(contract: dict[str, str | list[str]], name: str) -> str:
     return value.strip()
 
 
-def workload_tool_is_bundled(contract: dict[str, str | list[str]], tool: str) -> bool:
-    return tool in env_csv("RUN_WORKLOAD_TOOLS_CSV", contract=contract)
-
-
-def resolve_remote_workload_tool_bin(workspace: Path, contract: dict[str, str | list[str]]) -> Path | None:
-    remote_tool_bin = workspace / ".cache" / "workload-tools" / "bin"
-    if remote_tool_bin.is_dir():
-        return remote_tool_bin
-    return None
-
-
 def runtime_path_value(workspace: Path, contract: dict[str, str | list[str]]) -> str:
-    remote_tool_bin = resolve_remote_workload_tool_bin(workspace, contract)
     path_entries: list[str] = []
-    if remote_tool_bin and remote_tool_bin.is_dir():
-        path_entries.append(str(remote_tool_bin))
     existing = os.environ.get("PATH", "")
     if existing:
         path_entries.extend(token for token in existing.split(":") if token)
@@ -152,16 +138,8 @@ def install_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]])
     path_value = runtime_path_value(workspace, contract)
     missing_commands: list[str] = []
     python_bin = _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
-    remote_tool_bin = resolve_remote_workload_tool_bin(workspace, contract)
     for command_name in required_commands(mode="runtime", contract=contract):
         if have_cmd(command_name, path_value=path_value):
-            continue
-        if workload_tool_is_bundled(contract, command_name):
-            if remote_tool_bin is None:
-                die("manifest remote workload-tool bin is missing while workload tools are requested")
-            bundled_tool = remote_tool_bin / command_name
-            if not bundled_tool.is_file() or not os.access(bundled_tool, os.X_OK):
-                die(f"required bundled workload tool is missing from the guest tool bin: {command_name}")
             continue
         if command_name not in missing_commands:
             missing_commands.append(command_name)
@@ -192,16 +170,9 @@ def install_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]])
 
 
 def validate_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
-    remote_tool_bin = resolve_remote_workload_tool_bin(workspace, contract)
     path_value = runtime_path_value(workspace, contract)
 
     for command_name in required_commands(mode="runtime", contract=contract):
-        if workload_tool_is_bundled(contract, command_name):
-            if remote_tool_bin is None:
-                die("manifest remote workload-tool bin is missing while workload tools are requested")
-            bundled_tool = remote_tool_bin / command_name
-            if not bundled_tool.is_file() or not os.access(bundled_tool, os.X_OK):
-                die(f"required bundled workload tool is missing from the guest tool bin: {command_name}")
         if shutil.which(command_name, path=path_value) is None:
             die(f"required guest command is missing: {command_name}")
 

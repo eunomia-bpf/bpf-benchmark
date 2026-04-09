@@ -67,13 +67,6 @@ repos:
       - scx_rusty
       - scx_lavd
       - scx_flash
-    promoted_objects:
-      scx_bpfland: corpus/build/scx/scx_bpfland_main.bpf.o
-      scx_rusty: corpus/build/scx/scx_rusty_main.bpf.o
-      scx_lavd: corpus/build/scx/scx_lavd_main.bpf.o
-      scx_flash: corpus/build/scx/scx_flash_main.bpf.o
-    e2e_binary:
-      path: target/release/scx_rusty
 
   - name: katran
     url: https://github.com/facebookincubator/katran.git

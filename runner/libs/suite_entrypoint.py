@@ -13,7 +13,7 @@ from functools import partial
 from pathlib import Path
 
 from runner.libs.cli_support import fail
-from runner.libs.guest_prereqs import resolve_remote_workload_tool_bin, workload_tool_is_bundled
+from runner.libs.guest_prereqs import runtime_path_value
 from runner.libs.kinsn import load_kinsn_modules
 from runner.libs.manifest_file import parse_manifest
 
@@ -63,10 +63,7 @@ def _cross_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
     if target_arch != "arm64":
         return ""
     entries: list[str] = []
-    for path in (
-        workspace / "tests" / "unittest" / "build-arm64" / "lib",
-        workspace / "tests" / "unittest" / "build" / "lib",
-    ):
+    for path in (workspace / "tests" / "unittest" / "build-arm64" / "lib",):
         if path.is_dir():
             entries.append(str(path))
     return ":".join(entries)
@@ -157,7 +154,6 @@ class SuiteEntrypoint:
     python_bin: str
     bpftool_bin: str
     artifact_dir: Path
-    remote_workload_tool_bin: Path | None
     workload_tools: list[str]
     corpus_argv: list[str]
     e2e_argv: list[str]
@@ -234,7 +230,6 @@ class SuiteEntrypoint:
             python_bin=python_bin,
             bpftool_bin=bpftool_bin,
             artifact_dir=artifact_dir,
-            remote_workload_tool_bin=resolve_remote_workload_tool_bin(workspace, contract),
             workload_tools=workload_tools,
             corpus_argv=argv_value("RUN_CORPUS_ARGV"),
             e2e_argv=argv_value("RUN_E2E_ARGV"),
@@ -242,33 +237,29 @@ class SuiteEntrypoint:
 
     def _runtime_env(self) -> dict[str, str]:
         env = os.environ.copy()
-        env["PATH"] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-        current_path = os.environ.get("PATH", "")
-        if current_path:
-            env["PATH"] = f'{env["PATH"]}:{current_path}'
-        if self.remote_workload_tool_bin and self.remote_workload_tool_bin.is_dir():
-            env["PATH"] = f"{self.remote_workload_tool_bin}:{env['PATH']}"
+        corpus_build_root = self.workspace / "corpus" / "build" / self.target_arch
+        env["PATH"] = runtime_path_value(self.workspace, self.contract)
         if self.target_arch == "arm64":
             arm_libbpf = self.workspace / "lib" / "libbpf.so.1"
             if arm_libbpf.is_file():
                 env["BPFREJIT_LIBBPF_PATH"] = str(arm_libbpf)
         elif self.target_arch == "x86_64":
-            x86_libbpf = self.workspace / ".cache" / "portable-libbpf" / "lib" / "libbpf.so.1"
+            x86_libbpf = self.workspace / "runner" / "build" / "x86-portable-libbpf" / "lib" / "libbpf.so.1"
             if x86_libbpf.is_file():
                 env["BPFREJIT_LIBBPF_PATH"] = str(x86_libbpf)
         extra_ld_library_dirs: list[str] = []
         if existing_ld_library_path := os.environ.get("LD_LIBRARY_PATH", "").strip():
             extra_ld_library_dirs.append(existing_ld_library_path)
         for repo_name in self._csv_contract("RUN_NATIVE_REPOS_CSV"):
-            lib_dir = self.workspace / "corpus" / "build" / repo_name / "lib"
-            lib64_dir = self.workspace / "corpus" / "build" / repo_name / "lib64"
+            lib_dir = corpus_build_root / repo_name / "lib"
+            lib64_dir = corpus_build_root / repo_name / "lib64"
             if lib_dir.is_dir():
                 extra_ld_library_dirs.append(str(lib_dir))
             if lib64_dir.is_dir():
                 extra_ld_library_dirs.append(str(lib64_dir))
         if extra_ld_library_dirs:
             env["LD_LIBRARY_PATH"] = ":".join(extra_ld_library_dirs)
-        bcc_tools_dir = self.workspace / "corpus" / "build" / "bcc" / "libbpf-tools" / ".output"
+        bcc_tools_dir = corpus_build_root / "bcc" / "libbpf-tools" / ".output"
         if bcc_tools_dir.is_dir():
             env["BCC_TOOLS_DIR"] = str(bcc_tools_dir)
         if self.executor == "aws-ssh":
@@ -310,10 +301,7 @@ class SuiteEntrypoint:
 
     def _resolve_daemon_binary(self) -> Path:
         if self.target_arch == "arm64":
-            candidates = [
-                self.workspace / "daemon" / "target" / "aarch64-unknown-linux-gnu" / "release" / "bpfrejit-daemon",
-                self.workspace / "daemon" / "target" / "release" / "bpfrejit-daemon",
-            ]
+            candidates = [self.workspace / "daemon" / "target" / "aarch64-unknown-linux-gnu" / "release" / "bpfrejit-daemon"]
         else:
             candidates = [self.workspace / "daemon" / "target" / "release" / "bpfrejit-daemon"]
         for candidate in candidates:
@@ -330,25 +318,27 @@ class SuiteEntrypoint:
         packages = self._csv_contract("RUN_SCX_PACKAGES_CSV")
         if not packages:
             return
+        scx_root = self.workspace / "corpus" / "build" / self.target_arch / "scx"
         for package in packages:
             _require_executable(
-                self.workspace / "runner" / "repos" / "scx" / "target" / "release" / package,
+                scx_root / "bin" / package,
                 "bundled scx binary",
             )
-            object_path = self.workspace / "corpus" / "build" / "scx" / f"{package}_main.bpf.o"
+            object_path = scx_root / f"{package}_main.bpf.o"
             if not object_path.is_file():
                 _die(f"bundled scx object is missing: {object_path}")
 
     def _ensure_katran_bundle(self, env: dict[str, str]) -> None:
         if not self._bool_contract("RUN_NEEDS_KATRAN_BUNDLE"):
             return
+        katran_root = self.workspace / "corpus" / "build" / self.target_arch / "katran"
         binary = _require_executable(
-            self.workspace / "corpus" / "build" / "katran" / "bin" / "katran_server_grpc",
+            katran_root / "bin" / "katran_server_grpc",
             "bundled Katran server",
         )
-        lib_dir = self.workspace / "corpus" / "build" / "katran" / "lib"
+        lib_dir = katran_root / "lib"
         if not lib_dir.is_dir():
-            lib_dir = self.workspace / "corpus" / "build" / "katran" / "lib64"
+            lib_dir = katran_root / "lib64"
         if not lib_dir.is_dir():
             _die("bundled Katran runtime lib dir is missing")
         env["KATRAN_SERVER_BINARY"] = str(binary)
@@ -358,14 +348,8 @@ class SuiteEntrypoint:
         if not self.workload_tools:
             return
         for tool in self.workload_tools:
-            if workload_tool_is_bundled(self.contract, tool):
-                if self.remote_workload_tool_bin is None:
-                    _die("manifest remote workload-tool bin is missing while workload tools are requested")
-                bundled_tool = self.remote_workload_tool_bin / tool
-                _require_executable(bundled_tool, "required bundled workload tool")
-                continue
             if shutil.which(tool, path=env.get("PATH")) is None:
-                _die(f"required workload tool is missing from both the remote tool bin and PATH: {tool}")
+                _die(f"required workload tool is missing from PATH: {tool}")
 
     def _ensure_bpf_stats_enabled(self) -> None:
         if not self._bool_contract("RUN_NEEDS_DAEMON_BINARY"):

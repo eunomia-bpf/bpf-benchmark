@@ -1,4 +1,3 @@
-PREP_X86_PORTABLE_LIBBPF_ROOT := $(CACHE_DIR)/x86-host/portable-libbpf
 PREP_BASE_TARGET := $(if $(filter kvm,$(RUN_EXECUTOR)),__prepare-local-base-kvm,__prepare-local-noop)
 PREP_RUNTIME_TARGET := __prepare-local-runtime-$(RUN_TARGET_ARCH)
 PREP_KINSN_TARGET := $(if $(filter 1,$(RUN_NEEDS_KINSN_MODULES)),__prepare-local-kinsn-$(RUN_TARGET_ARCH),__prepare-local-noop)
@@ -46,61 +45,52 @@ __prepare-local-base-kvm:
 
 __prepare-local-runtime-x86_64:
 	@if [ "$(RUN_NEEDS_DAEMON_BINARY)" = "1" ]; then \
-		$(MAKE) --no-print-directory __daemon-binary DAEMON_TARGET_DIR="$(DAEMON_DIR)/target"; \
+		$(MAKE) --no-print-directory __daemon-binary-x86_64; \
 	fi
 	@if [ "$(RUN_NEEDS_RUNNER_BINARY)" = "1" ]; then \
-		$(MAKE) --no-print-directory __runner-binary RUNNER_BUILD_DIR="$(RUNNER_DIR)/build" MICRO_EXEC_ENABLE_LLVMBPF="$(RUN_SUITE_NEEDS_LLVMBPF)"; \
+		$(MAKE) --no-print-directory __runner-binary-x86_64; \
 	fi
 
 __prepare-local-runtime-arm64:
 	@if [ "$(RUN_NEEDS_DAEMON_BINARY)" = "1" ]; then \
-		$(MAKE) --no-print-directory __daemon-binary DAEMON_TARGET_DIR="$(DAEMON_DIR)/target" DAEMON_TARGET_TRIPLE="aarch64-unknown-linux-gnu"; \
+		$(MAKE) --no-print-directory __daemon-binary-arm64; \
 	fi
 	@if [ "$(RUN_NEEDS_RUNNER_BINARY)" = "1" ]; then \
-		echo "arm64 runner binary prep is not yet Make-backed" >&2; \
-		exit 1; \
+		$(MAKE) --no-print-directory __runner-binary-arm64; \
 	fi
 
 __prepare-local-kinsn-x86_64:
-	@$(MAKE) --no-print-directory __kinsn-modules KINSN_MODULE_OUTPUT_DIR="$(KINSN_MODULE_DIR)"
+	@$(MAKE) --no-print-directory __kinsn-modules-x86_64
 
 __prepare-local-kinsn-arm64:
-	@true
+	@$(MAKE) --no-print-directory __kinsn-modules-arm64
 
 __prepare-local-test-outputs-x86_64:
-	@$(MAKE) --no-print-directory __repo-test-binaries \
-		UNITTEST_BUILD_DIR="$(ROOT_DIR)/tests/unittest/build" \
-		NEGATIVE_BUILD_DIR="$(ROOT_DIR)/tests/negative/build"
+	@$(MAKE) --no-print-directory __repo-test-binaries-x86_64
 
 __prepare-local-test-outputs-arm64:
-	@true
+	@$(MAKE) --no-print-directory __repo-test-binaries-arm64
 
 __prepare-local-micro-programs-x86_64:
-	@$(MAKE) --no-print-directory __micro-programs MICRO_PROGRAMS_OUTPUT_DIR="$(ROOT_DIR)/micro/programs"
+	@$(MAKE) --no-print-directory __micro-programs
 
 __prepare-local-micro-programs-arm64:
-	@$(MAKE) --no-print-directory __micro-programs MICRO_PROGRAMS_OUTPUT_DIR="$(ROOT_DIR)/micro/programs"
+	@$(MAKE) --no-print-directory __micro-programs
 
 __prepare-local-scx-x86_64:
-	@$(MAKE) --no-print-directory __scx-binaries SCX_PACKAGES_CSV="$(RUN_SCX_PACKAGES_CSV)"
+	@$(MAKE) --no-print-directory __scx-binaries-x86_64
 
 __prepare-local-scx-arm64:
-	@$(MAKE) --no-print-directory __scx-binaries \
-		SCX_PACKAGES_CSV="$(RUN_SCX_PACKAGES_CSV)" \
-		SCX_TARGET_TRIPLE="aarch64-unknown-linux-gnu"
+	@$(MAKE) --no-print-directory __scx-binaries-arm64
 
 __prepare-local-native-x86_64:
-	@$(MAKE) --no-print-directory __native-repos \
-		NATIVE_REPOS_CSV="$(RUN_NATIVE_REPOS_CSV)" \
-		NATIVE_TARGET_ARCH="x86_64"
+	@$(MAKE) --no-print-directory __native-repos-x86_64
 
 __prepare-local-native-arm64:
-	@$(MAKE) --no-print-directory __native-repos \
-		NATIVE_REPOS_CSV="$(RUN_NATIVE_REPOS_CSV)" \
-		NATIVE_TARGET_ARCH="arm64"
+	@$(MAKE) --no-print-directory __native-repos-arm64
 
 __prepare-local-benchmark-extra-x86_64:
-	@$(MAKE) --no-print-directory __x86-portable-libbpf X86_PORTABLE_LIBBPF_ROOT="$(PREP_X86_PORTABLE_LIBBPF_ROOT)"
+	@$(MAKE) --no-print-directory __x86-portable-libbpf
 
 __prepare-local-benchmark-extra-arm64:
 	@true

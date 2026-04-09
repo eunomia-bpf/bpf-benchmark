@@ -17,7 +17,7 @@ from runner.libs.manifest_file import parse_manifest
 from runner.libs.run_contract import build_manifest, build_target_manifest, write_manifest_file
 
 
-CACHE_DIR = ROOT_DIR / ".cache" / "runner-contracts"
+CONTROL_ROOT = ROOT_DIR / ".state" / "runner-contracts"
 
 
 _die = partial(fail, "run-target-suite")
@@ -49,11 +49,7 @@ def _base_env_from_contract(contract: dict[str, str | list[str]]) -> dict[str, s
     return env
 
 
-def _run_local_prep(
-    manifest_path: Path,
-    local_state_path: Path,
-    remote_prep_state_path: Path | None = None,
-) -> None:
+def _run_local_prep(manifest_path: Path) -> None:
     contract = parse_manifest(manifest_path)
     env = _base_env_from_contract(contract)
     host_python_bin = str(contract.get("RUN_HOST_PYTHON_BIN", "")).strip()
@@ -64,19 +60,12 @@ def _run_local_prep(
             "ROOT_DIR": str(ROOT_DIR),
             "PYTHONPATH": f"{ROOT_DIR}{':' + env['PYTHONPATH'] if env.get('PYTHONPATH') else ''}",
             "MANIFEST_PATH": str(manifest_path),
-            "LOCAL_STATE_PATH": str(local_state_path),
             "HOST_PYTHON_BIN": host_python_bin,
             "RUN_CONTRACT_PYTHON_BIN": host_python_bin,
         }
     )
     executor = str(contract.get("RUN_EXECUTOR", "")).strip()
-    if executor == "aws-ssh":
-        if remote_prep_state_path is None:
-            _die("AWS local prep requires an explicit remote-prep state path")
-        if not remote_prep_state_path.is_file():
-            _die(f"AWS remote-prep state is missing: {remote_prep_state_path}")
-        env["AWS_REMOTE_PREP_STATE_PATH"] = str(remote_prep_state_path)
-    elif executor != "kvm":
+    if executor not in {"aws-ssh", "kvm"}:
         _die(f"unsupported executor for local prep: {executor}")
     completed = subprocess.run(
         [
@@ -85,8 +74,6 @@ def _run_local_prep(
             str(ROOT_DIR),
             "__prepare-local",
             f"PYTHON={host_python_bin}",
-            f"MANIFEST_PATH={manifest_path}",
-            f"LOCAL_STATE_PATH={local_state_path}",
         ],
         cwd=ROOT_DIR,
         env=env,
@@ -107,7 +94,9 @@ def _write_target_manifest(target_name: str, manifest_path: Path) -> None:
 
 
 def _cleanup_failed_dedicated_aws_prep(manifest_path: Path) -> None:
-    ctx = aws_common._build_context("run", manifest_path, None)
+    if not manifest_path.is_file():
+        return
+    ctx = aws_common._build_context("run", manifest_path)
     if ctx.instance_mode != "dedicated":
         return
     state: dict[str, str] = {}
@@ -128,7 +117,7 @@ def _run_token(target_name: str, suite_name: str) -> str:
 
 
 def _control_dir(run_token: str) -> Path:
-    control_dir = CACHE_DIR / run_token
+    control_dir = CONTROL_ROOT / run_token
     control_dir.mkdir(parents=True, exist_ok=True)
     return control_dir
 
@@ -137,8 +126,6 @@ def _run_action(target_name: str, suite_name: str) -> None:
     run_token = _run_token(target_name, suite_name)
     control_dir = _control_dir(run_token)
     manifest_path = control_dir / "manifest.env"
-    local_state_path = control_dir / "local-state.json"
-    remote_prep_state_path = control_dir / "remote-state.json"
     prep_cleanup_armed = False
     success = False
     try:
@@ -152,28 +139,25 @@ def _run_action(target_name: str, suite_name: str) -> None:
                 _python_module_command(
                     "runner.libs.aws_remote_prep",
                     str(manifest_path),
-                    str(remote_prep_state_path),
                 ),
             )
-            _run_local_prep(manifest_path, local_state_path, remote_prep_state_path)
+            _run_local_prep(manifest_path)
             prep_cleanup_armed = False
             _run_checked(
                 _python_module_command(
                     "runner.libs.aws_executor",
                     "run",
                     str(manifest_path),
-                    str(local_state_path),
                 )
             )
             success = True
             return
         if executor == "kvm":
-            _run_local_prep(manifest_path, local_state_path)
+            _run_local_prep(manifest_path)
             _run_checked(
                 _python_module_command(
                     "runner.libs.kvm_executor",
                     str(manifest_path),
-                    str(local_state_path),
                 )
             )
             success = True
@@ -195,8 +179,8 @@ def _benchmark_action(target_name: str, mode: str) -> None:
         return
     if mode != "all":
         _die(f"unsupported benchmark mode: {mode}")
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    target_manifest = CACHE_DIR / f"benchmark-target.{target_name}.env"
+    CONTROL_ROOT.mkdir(parents=True, exist_ok=True)
+    target_manifest = CONTROL_ROOT / f"benchmark-target.{target_name}.env"
     try:
         _write_target_manifest(target_name, target_manifest)
         contract = parse_manifest(target_manifest)
@@ -225,8 +209,8 @@ def _benchmark_action(target_name: str, mode: str) -> None:
 
 
 def _terminate_action(target_name: str) -> None:
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    manifest_path = CACHE_DIR / f"terminate.{target_name}.env"
+    CONTROL_ROOT.mkdir(parents=True, exist_ok=True)
+    manifest_path = CONTROL_ROOT / f"terminate.{target_name}.env"
     try:
         _write_target_manifest(target_name, manifest_path)
         contract = parse_manifest(manifest_path)

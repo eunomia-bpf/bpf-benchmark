@@ -232,18 +232,21 @@ def sample_bpf_stats(
         }
 
     for prog_id in wanted:
+        existing_entry = stats.get(int(prog_id))
         fd = None
         if prog_fds and int(prog_id) in prog_fds:
             fd = os.dup(int(prog_fds[int(prog_id)]))
         else:
             fd = _prog_fd_by_id(int(prog_id))
         if fd is None:
-            errors.append(f"prog_id={prog_id}: failed to resolve program FD")
+            if existing_entry is None:
+                errors.append(f"prog_id={prog_id}: failed to resolve program FD")
             continue
         try:
             info = _prog_info_from_fd(fd)
             if info is None:
-                errors.append(f"prog_id={prog_id}: failed to read program info by FD")
+                if existing_entry is None:
+                    errors.append(f"prog_id={prog_id}: failed to read program info by FD")
                 continue
             entry = stats.setdefault(
                 int(prog_id),

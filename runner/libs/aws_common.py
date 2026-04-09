@@ -36,7 +36,6 @@ class AwsExecutorContext:
     action: str
     manifest_path: Path
     contract: dict[str, str | list[str]]
-    local_state_path: Path | None
     target_name: str
     suite_name: str
     run_token: str
@@ -46,12 +45,11 @@ class AwsExecutorContext:
     key_path: Path
     aws_region: str
     aws_profile: str
-    target_cache_dir: Path
+    target_root: Path
     shared_state_dir: Path
     run_state_dir: Path
     state_dir: Path
     state_file: Path
-    run_prep_root: Path
     results_dir: Path
 
     @property
@@ -63,16 +61,16 @@ class AwsExecutorContext:
         return self.state_dir / "instance.lock"
 
 
-def _build_context(action: str, manifest_path: Path, local_state_path: Path | None) -> AwsExecutorContext:
+def _build_context(action: str, manifest_path: Path) -> AwsExecutorContext:
     contract = parse_manifest(manifest_path)
     target_name = _require_scalar(contract, "RUN_TARGET_NAME")
     run_token = _require_scalar(contract, "RUN_TOKEN")
     instance_mode = _optional_scalar(contract, "RUN_AWS_INSTANCE_MODE", "shared")
     if instance_mode not in {"shared", "dedicated"}:
         fail("aws-common", f"unsupported RUN_AWS_INSTANCE_MODE: {instance_mode}")
-    target_cache_dir = ROOT_DIR / ".cache" / target_name
-    shared_state_dir = target_cache_dir / "state"
-    run_state_dir = target_cache_dir / "run-state" / run_token
+    target_root = ROOT_DIR / ".cache" / target_name
+    shared_state_dir = target_root / "state"
+    run_state_dir = target_root / "run-state" / run_token
     if action != "terminate" and instance_mode == "dedicated":
         state_dir = run_state_dir
     else:
@@ -81,7 +79,6 @@ def _build_context(action: str, manifest_path: Path, local_state_path: Path | No
         action=action,
         manifest_path=manifest_path,
         contract=contract,
-        local_state_path=local_state_path,
         target_name=target_name,
         suite_name=_optional_scalar(contract, "RUN_SUITE_NAME"),
         run_token=run_token,
@@ -91,13 +88,12 @@ def _build_context(action: str, manifest_path: Path, local_state_path: Path | No
         key_path=Path(_optional_scalar(contract, "RUN_AWS_KEY_PATH")).resolve(),
         aws_region=_require_scalar(contract, "RUN_AWS_REGION"),
         aws_profile=_require_scalar(contract, "RUN_AWS_PROFILE"),
-        target_cache_dir=target_cache_dir,
+        target_root=target_root,
         shared_state_dir=shared_state_dir,
         run_state_dir=run_state_dir,
         state_dir=state_dir,
         state_file=state_dir / "instance.json",
-        run_prep_root=target_cache_dir / "runs" / run_token,
-        results_dir=target_cache_dir / "results",
+        results_dir=target_root / "results",
     )
 
 
@@ -273,7 +269,7 @@ def _terminate_instance(ctx: AwsExecutorContext, explicit_instance_id: str = "")
             if completed.returncode != 0:
                 raise SystemExit(completed.returncode)
         shutil.rmtree(ctx.shared_state_dir, ignore_errors=True)
-        shutil.rmtree(ctx.target_cache_dir / "run-state", ignore_errors=True)
+        shutil.rmtree(ctx.target_root / "run-state", ignore_errors=True)
         return
 
     _, state, _ = _describe_instance(ctx, instance_id)

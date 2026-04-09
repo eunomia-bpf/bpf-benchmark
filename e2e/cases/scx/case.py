@@ -37,8 +37,7 @@ from runner.libs.case_common import (  # noqa: E402
 
 DEFAULT_OUTPUT_JSON = RESULTS_DIR / "scx.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "scx-e2e.md"
-DEFAULT_SCX_BINARY = ROOT_DIR / "runner" / "repos" / "scx" / "target" / "release" / "scx_rusty"
-DEFAULT_SCX_REPO = ROOT_DIR / "runner" / "repos" / "scx"
+DEFAULT_SCX_BINARY = ROOT_DIR / "corpus" / "build" / ("arm64" if os.uname().machine in {"aarch64", "arm64"} else "x86_64") / "scx" / "bin" / "scx_rusty"
 DEFAULT_LOAD_TIMEOUT = 20
 DEFAULT_DURATION_S = 30
 DEFAULT_SMOKE_DURATION_S = 10
@@ -89,13 +88,11 @@ def format_site_breakdown(site_totals: Mapping[str, object]) -> str:
     return ", ".join(parts) if parts else "none"
 
 
-def ensure_artifacts(daemon_binary: Path, scheduler_binary: Path, scx_repo: Path) -> None:
+def ensure_artifacts(daemon_binary: Path, scheduler_binary: Path) -> None:
     if not daemon_binary.exists():
         raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
     if not scheduler_binary.exists():
         raise RuntimeError(f"scx_rusty binary not found: {scheduler_binary}")
-    if not scx_repo.exists():
-        raise RuntimeError(f"scx repo missing: {scx_repo}")
 
 
 def workload_specs() -> list[dict[str, str]]:
@@ -443,9 +440,8 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
 
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
     scheduler_binary = Path(getattr(args, "scheduler_binary", DEFAULT_SCX_BINARY)).resolve()
-    scx_repo = Path(getattr(args, "scx_repo", DEFAULT_SCX_REPO)).resolve()
     daemon_binary = Path(args.daemon).resolve()
-    ensure_artifacts(daemon_binary, scheduler_binary, scx_repo)
+    ensure_artifacts(daemon_binary, scheduler_binary)
 
     workloads = select_workloads(workload_specs(), getattr(args, "workloads", None))
 

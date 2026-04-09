@@ -16,7 +16,7 @@ from ..kernel_modules import load_kernel_module
 from .process_support import ManagedProcessSession
 
 
-DEFAULT_KATRAN_BALANCER_PROG_PATH = ROOT_DIR / "corpus" / "build" / "katran" / "balancer.bpf.o"
+DEFAULT_KATRAN_BALANCER_PROG_PATH = ROOT_DIR / "corpus" / "build" / ("arm64" if os.uname().machine in {"aarch64", "arm64"} else "x86_64") / "katran" / "balancer.bpf.o"
 DEFAULT_KATRAN_PROGRAM_NAME = "balancer_ingress"
 DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
 DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 30

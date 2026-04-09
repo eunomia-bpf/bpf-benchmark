@@ -10,13 +10,14 @@ RUNNER_DIR := $(ROOT_DIR)/runner
 DAEMON_DIR := $(ROOT_DIR)/daemon
 KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
 KERNEL_TEST_DIR := $(ROOT_DIR)/tests/kernel
-KINSN_MODULE_DIR := $(ROOT_DIR)/module/x86
-CACHE_DIR := $(ROOT_DIR)/.cache
-KINSN_MODULE_OUTPUT_DIR ?=
+ARTIFACT_ROOT := $(ROOT_DIR)/.cache
+X86_KERNEL_LOCK := $(ARTIFACT_ROOT)/x86-kernel.lock
+ARM64_AWS_KERNEL_LOCK := $(ARTIFACT_ROOT)/arm64-aws-kernel.lock
 RUNNER_BUILD_DIR ?= $(RUNNER_DIR)/build
 
 include $(RUNNER_DIR)/mk/arm64_defaults.mk
 include $(RUNNER_DIR)/mk/local_prep.mk
+include $(RUNNER_DIR)/mk/build.mk
 
 # ARM64 / AWS
 ARM64_BUILD_DIR     ?= $(KERNEL_DIR)/build-arm64
@@ -87,9 +88,8 @@ ROOT_VM_CORPUS_FILTERS_ARG := $(if $(strip $(FILTERS)),FILTERS="$(FILTERS)",)
 ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG := $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),VM_CORPUS_WORKLOAD_SECONDS="$(VM_CORPUS_WORKLOAD_SECONDS)",)
 ROOT_VM_CORPUS_EXTRA_ARGS := $(if $(strip $(VM_CORPUS_ARGS)),VM_CORPUS_ARGS='$(VM_CORPUS_ARGS)',)
 
-.PHONY: __kernel __kernel-clean __kernel-rebuild __kernel-arm64 __kernel-x86-artifacts __kernel-arm64-aws-artifacts __kinsn-modules \
-		__runner-binary __daemon-binary __x86-portable-libbpf __native-repos __prepare-local \
-		__repo-test-binaries __micro-programs __scx-binaries \
+.PHONY: __kernel __kernel-clean __kernel-rebuild __kernel-arm64 __kernel-x86-artifacts __kernel-arm64-aws-artifacts \
+		__prepare-local \
 		check validate \
 		vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 		__kernel-arm64-aws \
@@ -117,8 +117,22 @@ help:
 __kernel:
 	@test -n "$(BZIMAGE_PATH)" || { echo "BZIMAGE_PATH is required" >&2; exit 1; }
 	@if [ ! -f "$(KERNEL_CONFIG_PATH)" ]; then cp "$(DEFCONFIG_SRC)" "$(KERNEL_CONFIG_PATH)"; fi
-	$(MAKE) -C "$(KERNEL_DIR)" olddefconfig
-	$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" bzImage modules
+	@$(MAKE) -C "$(KERNEL_DIR)" olddefconfig
+	@set -e; \
+	if [ -f "$(KERNEL_DIR)/arch/x86/boot/bzImage" ]; then \
+		if $(MAKE) -C "$(KERNEL_DIR)" -q bzImage modules; then \
+			echo "[kernel] reuse existing x86 bzImage/modules"; \
+		else \
+			status="$$?"; \
+			if [ "$$status" -eq 1 ]; then \
+				$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" bzImage modules; \
+			else \
+				exit "$$status"; \
+			fi; \
+		fi; \
+	else \
+		$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" bzImage modules; \
+	fi
 	@if [ "$(BZIMAGE_PATH)" != "$(KERNEL_DIR)/arch/x86/boot/bzImage" ]; then \
 		mkdir -p "$$(dirname "$(BZIMAGE_PATH)")"; \
 		cp "$(KERNEL_DIR)/arch/x86/boot/bzImage" "$(BZIMAGE_PATH)"; \
@@ -130,24 +144,29 @@ __kernel-clean:
 __kernel-rebuild: __kernel-clean
 	$(MAKE) __kernel BZIMAGE="$(BZIMAGE)"
 
-__kernel-x86-artifacts: __kernel
+__kernel-x86-artifacts:
 	@test -n "$(OUTPUT_ROOT)" || { echo "OUTPUT_ROOT is required" >&2; exit 1; }
-	@artifact_root="$(OUTPUT_ROOT)"; \
-	rm -rf "$$artifact_root"; \
-	mkdir -p "$$artifact_root/boot"; \
-	kernel_release="$$( $(MAKE) -s -C "$(KERNEL_DIR)" kernelrelease )"; \
-	install_root="$$artifact_root/modules-$$kernel_release.root"; \
-	mkdir -p "$$install_root"; \
-	cp "$(KERNEL_DIR)/arch/x86/boot/bzImage" "$$artifact_root/boot/bzImage-$$kernel_release"; \
-	printf '%s\n' "$$kernel_release" > "$$artifact_root/kernel-release.txt"; \
-	$(MAKE) -C "$(KERNEL_DIR)" INSTALL_MOD_PATH="$$install_root" DEPMOD=true modules_install; \
-	tar -C "$$install_root" -czf "$$artifact_root/modules-$$kernel_release.tar.gz" lib
-
-__kinsn-modules: __kernel
-	@module_output_dir="$(if $(strip $(KINSN_MODULE_OUTPUT_DIR)),$(KINSN_MODULE_OUTPUT_DIR),$(KINSN_MODULE_DIR))"; \
-	$(MAKE) -C "$(KINSN_MODULE_DIR)" KDIR="$(KERNEL_DIR)"; \
-	mkdir -p "$$module_output_dir"; \
-	find "$(KINSN_MODULE_DIR)" -maxdepth 1 -type f \( -name '*.ko' -o -name 'modules.order' -o -name 'Module.symvers' \) -exec cp {} "$$module_output_dir"/ \;
+	@mkdir -p "$(ARTIFACT_ROOT)"; \
+	flock "$(X86_KERNEL_LOCK)" bash -eu -o pipefail -c '\
+		artifact_root="$(OUTPUT_ROOT)"; \
+		$(MAKE) --no-print-directory __kernel BZIMAGE="$(BZIMAGE)"; \
+		kernel_release_file="$(KERNEL_DIR)/include/config/kernel.release"; \
+		[[ -f "$$kernel_release_file" ]] || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
+		kernel_release="$$(tr -d '\''\n'\'' < "$$kernel_release_file")"; \
+		install_root="$$artifact_root/modules-$$kernel_release.root"; \
+		boot_artifact="$$artifact_root/boot/bzImage-$$kernel_release"; \
+		modules_artifact="$$artifact_root/modules-$$kernel_release.tar.gz"; \
+		if [[ -f "$$artifact_root/kernel-release.txt" ]] && [[ "$$(tr -d '\''\n'\'' < "$$artifact_root/kernel-release.txt")" = "$$kernel_release" ]] && [[ -f "$$boot_artifact" ]] && [[ -f "$$modules_artifact" ]] && [[ "$$boot_artifact" -nt "$(KERNEL_DIR)/arch/x86/boot/bzImage" ]] && [[ "$$modules_artifact" -nt "$(KERNEL_DIR)/modules.order" ]]; then \
+			echo "[kernel-artifacts] reuse x86 $$kernel_release"; \
+			exit 0; \
+		fi; \
+		rm -rf "$$artifact_root"; \
+		mkdir -p "$$artifact_root/boot"; \
+		mkdir -p "$$install_root"; \
+		cp "$(KERNEL_DIR)/arch/x86/boot/bzImage" "$$boot_artifact"; \
+		printf "%s\n" "$$kernel_release" > "$$artifact_root/kernel-release.txt"; \
+		$(MAKE) --no-print-directory -C "$(KERNEL_DIR)" INSTALL_MOD_PATH="$$install_root" DEPMOD=true CONFIG_MODULE_SIG=n modules_install; \
+		tar -C "$$install_root" -czf "$$modules_artifact" lib'
 
 $(KERNEL_CONFIG_PATH):
 	cp "$(DEFCONFIG_SRC)" "$@"
@@ -220,18 +239,29 @@ $(ARM64_AWS_EFI_IMAGE): $(ARM64_AWS_BUILD_CONFIG)
 
 __kernel-arm64-aws: $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE)
 
-__kernel-arm64-aws-artifacts: __kernel-arm64-aws
+__kernel-arm64-aws-artifacts:
 	@test -n "$(OUTPUT_ROOT)" || { echo "OUTPUT_ROOT is required" >&2; exit 1; }
-	@artifact_root="$(OUTPUT_ROOT)"; \
-	rm -rf "$$artifact_root"; \
-	mkdir -p "$$artifact_root/boot"; \
-	kernel_release="$$( $(MAKE) -s -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" kernelrelease )"; \
-	install_root="$$artifact_root/modules-$$kernel_release.root"; \
-	mkdir -p "$$install_root"; \
-	cp "$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi" "$$artifact_root/boot/vmlinuz-$$kernel_release.efi"; \
-	printf '%s\n' "$$kernel_release" > "$$artifact_root/kernel-release.txt"; \
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" INSTALL_MOD_PATH="$$install_root" DEPMOD=true modules_install; \
-	tar -C "$$install_root" -czf "$$artifact_root/modules-$$kernel_release.tar.gz" lib
+	@mkdir -p "$(ARTIFACT_ROOT)"; \
+	flock "$(ARM64_AWS_KERNEL_LOCK)" bash -eu -o pipefail -c '\
+		artifact_root="$(OUTPUT_ROOT)"; \
+		$(MAKE) --no-print-directory __kernel-arm64-aws ARM64_AWS_BUILD_DIR="$(ARM64_AWS_BUILD_DIR)" ARM64_AWS_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)"; \
+		kernel_release_file="$(ARM64_AWS_BUILD_DIR)/include/config/kernel.release"; \
+		[[ -f "$$kernel_release_file" ]] || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
+		kernel_release="$$(tr -d '\''\n'\'' < "$$kernel_release_file")"; \
+		install_root="$$artifact_root/modules-$$kernel_release.root"; \
+		boot_artifact="$$artifact_root/boot/vmlinuz-$$kernel_release.efi"; \
+		modules_artifact="$$artifact_root/modules-$$kernel_release.tar.gz"; \
+		if [[ -f "$$artifact_root/kernel-release.txt" ]] && [[ "$$(tr -d '\''\n'\'' < "$$artifact_root/kernel-release.txt")" = "$$kernel_release" ]] && [[ -f "$$boot_artifact" ]] && [[ -f "$$modules_artifact" ]] && [[ "$$boot_artifact" -nt "$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi" ]] && [[ "$$modules_artifact" -nt "$(ARM64_AWS_BUILD_DIR)/modules.order" ]]; then \
+			echo "[kernel-artifacts] reuse arm64 $$kernel_release"; \
+			exit 0; \
+		fi; \
+		rm -rf "$$artifact_root"; \
+		mkdir -p "$$artifact_root/boot"; \
+		mkdir -p "$$install_root"; \
+		cp "$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi" "$$boot_artifact"; \
+		printf "%s\n" "$$kernel_release" > "$$artifact_root/kernel-release.txt"; \
+		$(MAKE) --no-print-directory -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" INSTALL_MOD_PATH="$$install_root" DEPMOD=true CONFIG_MODULE_SIG=n modules_install; \
+		tar -C "$$install_root" -czf "$$modules_artifact" lib'
 
 # ── AWS aliases ───────────────────────────────────────────────────────────────
 aws-arm64-test:
@@ -256,51 +286,6 @@ aws-x86-terminate:
 
 aws-x86: aws-x86-test aws-x86-benchmark
 
-# ── Runner / Daemon ────────────────────────────────────────────────────────────
-__daemon-binary:
-	@test -n "$(DAEMON_TARGET_DIR)" || { echo "DAEMON_TARGET_DIR is required" >&2; exit 1; }
-	@$(MAKE) -C "$(DAEMON_DIR)" release TARGET_DIR="$(DAEMON_TARGET_DIR)" TARGET_TRIPLE="$${DAEMON_TARGET_TRIPLE:-}"
-
-__runner-binary:
-	@test -n "$(RUNNER_BUILD_DIR)" || { echo "RUNNER_BUILD_DIR is required" >&2; exit 1; }
-	@$(MAKE) -C "$(RUNNER_DIR)" --no-print-directory micro_exec \
-		BUILD_DIR="$(RUNNER_BUILD_DIR)" \
-		JOBS="$(or $(JOBS),$(NPROC))" \
-		MICRO_REPO_ROOT="$(ROOT_DIR)" \
-		MICRO_EXEC_ENABLE_LLVMBPF="$${MICRO_EXEC_ENABLE_LLVMBPF:-OFF}" \
-		LLVM_DIR="$${RUN_LLVM_DIR:-$${LLVM_DIR:-}}"
-
-__x86-portable-libbpf:
-	@test -n "$(X86_PORTABLE_LIBBPF_ROOT)" || { echo "X86_PORTABLE_LIBBPF_ROOT is required" >&2; exit 1; }
-	@$(MAKE) -C "$(RUNNER_DIR)" --no-print-directory portable-libbpf \
-		OUTPUT_ROOT="$(X86_PORTABLE_LIBBPF_ROOT)"
-
-__native-repos:
-	@test -n "$(NATIVE_REPOS_CSV)" || { echo "NATIVE_REPOS_CSV is required" >&2; exit 1; }
-	@test -n "$(NATIVE_TARGET_ARCH)" || { echo "NATIVE_TARGET_ARCH is required" >&2; exit 1; }
-	@$(MAKE) -C "$(RUNNER_DIR)" native-repos \
-		CORPUS_BUILD_DIR="$(ROOT_DIR)/corpus/build" \
-		NATIVE_REPOS_CSV="$(NATIVE_REPOS_CSV)" \
-		NATIVE_TARGET_ARCH="$(NATIVE_TARGET_ARCH)" \
-		JOBS="$(or $(JOBS),$(NPROC))"
-
-__repo-test-binaries:
-	@test -n "$(UNITTEST_BUILD_DIR)" || { echo "UNITTEST_BUILD_DIR is required" >&2; exit 1; }
-	@test -n "$(NEGATIVE_BUILD_DIR)" || { echo "NEGATIVE_BUILD_DIR is required" >&2; exit 1; }
-	@$(MAKE) -C "$(ROOT_DIR)/tests/unittest" BUILD_DIR="$(UNITTEST_BUILD_DIR)"
-	@$(MAKE) -C "$(ROOT_DIR)/tests/negative" BUILD_DIR="$(NEGATIVE_BUILD_DIR)"
-
-__micro-programs:
-	@test -n "$(MICRO_PROGRAMS_OUTPUT_DIR)" || { echo "MICRO_PROGRAMS_OUTPUT_DIR is required" >&2; exit 1; }
-	@$(MAKE) -C "$(ROOT_DIR)/micro/programs" OUTPUT_DIR="$(MICRO_PROGRAMS_OUTPUT_DIR)"
-
-__scx-binaries:
-	@test -n "$(SCX_PACKAGES_CSV)" || { echo "SCX_PACKAGES_CSV is required" >&2; exit 1; }
-	@$(MAKE) -C "$(RUNNER_DIR)" --no-print-directory scx-binaries \
-		SCX_PACKAGES_CSV="$(SCX_PACKAGES_CSV)" \
-		SCX_TARGET_TRIPLE="$${SCX_TARGET_TRIPLE:-}" \
-		CORPUS_BUILD_DIR="$(ROOT_DIR)/corpus/build"
-
 # ── Clean ──────────────────────────────────────────────────────────────────────
 clean:
 	rm -rf "$(RUNNER_BUILD_DIR)"
@@ -308,15 +293,15 @@ clean:
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	$(MAKE) -C "$(KERNEL_DIR)" clean
 	rm -f "$(ARM64_CONFIG_LINK)" "$(ARM64_IMAGE_LINK)"
-	rm -rf "$(ARM64_BUILD_DIR)" "$(CACHE_DIR)/arm64-host"
+	rm -rf "$(ARM64_BUILD_DIR)" "$(ARTIFACT_ROOT)/arm64-host" "$(ROOT_DIR)/.state/runner-contracts"
 	rm -rf \
-		"$(CACHE_DIR)/aws-arm64/kernel-build" \
-		"$(CACHE_DIR)/aws-arm64/setup-artifacts" \
-		"$(CACHE_DIR)/aws-arm64/run-state" \
-		"$(CACHE_DIR)/aws-arm64/runs" \
-		"$(CACHE_DIR)/aws-arm64/state" \
-		"$(CACHE_DIR)/aws-x86/kernel-build" \
-		"$(CACHE_DIR)/aws-x86/setup-artifacts" \
-		"$(CACHE_DIR)/aws-x86/run-state" \
-		"$(CACHE_DIR)/aws-x86/runs" \
-		"$(CACHE_DIR)/aws-x86/state"
+		"$(ARTIFACT_ROOT)/aws-arm64/kernel-build" \
+		"$(ARTIFACT_ROOT)/aws-arm64/setup-artifacts" \
+		"$(ARTIFACT_ROOT)/aws-arm64/run-state" \
+		"$(ARTIFACT_ROOT)/aws-arm64/runs" \
+		"$(ARTIFACT_ROOT)/aws-arm64/state" \
+		"$(ARTIFACT_ROOT)/aws-x86/kernel-build" \
+		"$(ARTIFACT_ROOT)/aws-x86/setup-artifacts" \
+		"$(ARTIFACT_ROOT)/aws-x86/run-state" \
+		"$(ARTIFACT_ROOT)/aws-x86/runs" \
+		"$(ARTIFACT_ROOT)/aws-x86/state"
