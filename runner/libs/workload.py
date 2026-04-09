@@ -21,6 +21,19 @@ LOOPBACK_LISTEN_BACKLOG = 128
 LOOPBACK_CONNECT_TIMEOUT_S = 2.0
 
 
+def resolve_workload_tool(name: str) -> str:
+    tool_dir = os.environ.get("BPFREJIT_WORKLOAD_TOOL_BIN_DIR", "").strip()
+    if tool_dir:
+        candidate = Path(tool_dir) / name
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return str(candidate)
+        raise RuntimeError(f"{name} is required in bundled workload tool dir: {candidate}")
+    resolved = which(name)
+    if resolved is not None:
+        return resolved
+    raise RuntimeError(f"{name} is required for this workload")
+
+
 @dataclass(frozen=True)
 class WorkloadResult:
     ops_total: float
@@ -727,9 +740,7 @@ def run_vfs_create_write_fsync_load(duration_s: int | float) -> WorkloadResult:
 
 
 def run_network_load(duration_s: int | float) -> WorkloadResult:
-    wrk_binary = which("wrk")
-    if wrk_binary is None:
-        raise RuntimeError("wrk is required for the network workload")
+    wrk_binary = resolve_workload_tool("wrk")
     with LocalHttpServer() as server:
         command = [
             wrk_binary,
@@ -783,9 +794,7 @@ def run_tcp_connect_load(duration_s: int | float) -> WorkloadResult:
 
 
 def run_scheduler_load(duration_s: int | float) -> WorkloadResult:
-    hackbench = which("hackbench")
-    if hackbench is None:
-        raise RuntimeError("hackbench is required for the scheduler workload")
+    hackbench = resolve_workload_tool("hackbench")
     start = time.monotonic()
     deadline = start + float(duration_s)
     completed_runs = 0.0

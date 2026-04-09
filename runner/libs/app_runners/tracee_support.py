@@ -20,6 +20,7 @@ from ..bpf_stats import sample_bpf_stats
 from ..process_fd import dup_fd_from_process
 from ..workload import (
     WorkloadResult,
+    resolve_workload_tool,
     run_block_io_load,
     run_connect_storm,
     run_file_open_load,
@@ -447,8 +448,7 @@ def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> Workload
         return run_open_storm(duration_s)
     if kind in {"network", "connect_storm"}:
         if kind == "network":
-            if which("wrk") is None:
-                raise RuntimeError("wrk is required for the Tracee network workload")
+            resolve_workload_tool("wrk")
             return run_network_load(duration_s)
         return run_connect_storm(duration_s)
     if kind == "scheduler":

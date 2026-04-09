@@ -33,6 +33,28 @@ def runtime_path_value(workspace: Path, contract: dict[str, str | list[str]]) ->
     return ":".join(path_entries)
 
 
+def bundled_tool_dir(workspace: Path, contract: dict[str, str | list[str]]) -> Path | None:
+    target_arch = _scalar(contract, "RUN_TARGET_ARCH")
+    if not target_arch:
+        return None
+    candidate = workspace / ".cache" / "workload-tools" / target_arch / "bin"
+    if not candidate.is_dir():
+        return None
+    return candidate
+
+
+def bundled_command_available(
+    workspace: Path,
+    contract: dict[str, str | list[str]],
+    command_name: str,
+) -> bool:
+    tool_dir = bundled_tool_dir(workspace, contract)
+    if tool_dir is None:
+        return False
+    candidate = tool_dir / command_name
+    return candidate.is_file() and os.access(candidate, os.X_OK)
+
+
 def have_cmd(command_name: str, *, path_value: str | None = None) -> bool:
     return shutil.which(command_name, path=path_value) is not None
 
@@ -135,6 +157,12 @@ def install_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]])
     python_bin = _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
     bundled = set(bundled_commands(contract=contract))
     for command_name in required_commands(contract=contract):
+        if command_name in bundled:
+            if bundled_command_available(workspace, contract, command_name):
+                continue
+            if command_name not in missing_commands:
+                missing_commands.append(command_name)
+            continue
         if have_cmd(command_name, path_value=path_value):
             continue
         if command_name not in missing_commands:
@@ -176,8 +204,16 @@ def install_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]])
 
 def validate_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
     path_value = runtime_path_value(workspace, contract)
+    bundled = set(bundled_commands(contract=contract))
 
     for command_name in required_commands(contract=contract):
+        if command_name in bundled:
+            if bundled_command_available(workspace, contract, command_name):
+                continue
+            die(
+                "required bundled guest command is missing from workspace/.cache/workload-tools/<arch>/bin: "
+                f"{command_name}"
+            )
         if shutil.which(command_name, path=path_value) is None:
             die(f"required guest command is missing: {command_name}")
 

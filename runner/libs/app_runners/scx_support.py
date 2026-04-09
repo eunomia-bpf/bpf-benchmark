@@ -14,7 +14,7 @@ from typing import Any, Mapping, Sequence
 from .. import run_command, tail_text, which
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
 from ..process_fd import dup_fd_from_process
-from ..workload import WorkloadResult
+from ..workload import WorkloadResult, resolve_workload_tool
 
 
 HACKBENCH_TIME_RE = re.compile(r"Time:\s*([0-9.]+)")
@@ -243,9 +243,7 @@ def _percentile(values: Sequence[float], percentile: float) -> float:
 
 
 def run_hackbench(duration_s: int) -> tuple[WorkloadResult, dict[str, object]]:
-    hackbench = which("hackbench")
-    if hackbench is None:
-        raise RuntimeError("hackbench is required for the hackbench workload")
+    hackbench = resolve_workload_tool("hackbench")
     command = [hackbench, "-g", "4", "-l", "1000"]
     start = time.monotonic()
     deadline = start + float(duration_s)
@@ -308,9 +306,7 @@ def run_stress_ng_cpu(duration_s: int) -> tuple[WorkloadResult, dict[str, object
 
 
 def run_sysbench_cpu(duration_s: int) -> tuple[WorkloadResult, dict[str, object]]:
-    sysbench = which("sysbench")
-    if sysbench is None:
-        raise RuntimeError("sysbench is required for the sysbench-cpu workload")
+    sysbench = resolve_workload_tool("sysbench")
     command = [sysbench, "cpu", "--threads=4", f"--time={max(1, int(duration_s))}", "run"]
     start = time.monotonic()
     completed = run_command(command, check=False, timeout=float(duration_s) + 60)

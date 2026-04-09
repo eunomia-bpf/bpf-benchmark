@@ -76,7 +76,10 @@ def attach_pending_result_metadata(payload: dict[str, object]) -> dict[str, obje
 
 
 def _current_program_ids() -> tuple[int, ...]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
+    command = [resolve_bpftool_binary(), "-j", "-p", "prog", "show"]
+    if os.geteuid() != 0:
+        command = ["sudo", *command]
+    payload = run_json_command(command, timeout=30)
     if not isinstance(payload, list):
         raise RuntimeError("bpftool prog show returned unexpected payload while waiting for suite quiescence")
     prog_ids = sorted(

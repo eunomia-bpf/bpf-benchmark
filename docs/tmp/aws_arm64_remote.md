@@ -246,7 +246,7 @@ The main remaining cleanup target is therefore:
 
 ## Current TODO
 
-1. finish the current whole-tree review pass and confirm:
+1. keep deleting anything that is not part of the final control/data plane:
    - no deadcode
    - no fallback
    - no compat
@@ -255,20 +255,23 @@ The main remaining cleanup target is therefore:
    - no `.cache/workload-tool-sources` active-path dependency
    - no checked-in Katran grpc bundle path
    - no old `corpus/build/<arch>` references in active docs/code
-3. finish the remaining architecture cleanup before trusting fresh runtime results:
+3. keep tightening the remaining architecture edges while the runtime matrix is running:
    - keep `RUN_REMOTE_TRANSFER_ROOTS_CSV` sealed
    - keep Tracee runtime on repo-artifact roots only
    - keep Katran on repo-native build only
    - keep workload tools on repo-source + build/install roots only
-4. after the review gate is clean, restart:
+4. keep the fresh runtime matrix moving until all six paths pass:
    - `x86-kvm corpus`
    - `x86-kvm e2e`
    - `aws-x86 corpus`
    - `aws-x86 e2e`
    - `aws-arm64 corpus`
    - `aws-arm64 e2e`
-5. fix runtime blockers immediately as they appear and keep tightening repeated build cost
-5. for each runtime failure:
+5. keep pushing `corpus/e2e` toward “cache-hit means run, not rebuild”:
+   - no per-run clone/checkout
+   - no per-run heavy workspace staging
+   - no rebuild when stable Make/CMake outputs are already warm
+6. for each runtime failure:
    - capture the first real blocker
    - fix it without adding fallback/compat/new control planes
    - rerun the affected lane immediately
@@ -294,12 +297,12 @@ The success rule is:
 
 Runtime reruns are active again on the current tree:
 
-- `x86-kvm corpus`
-- `x86-kvm e2e`
-- `aws-x86 corpus`
-- `aws-x86 e2e`
-- `aws-arm64 corpus`
-- `aws-arm64 e2e`
+- `2026-04-09 12:26:32` fresh runtime matrix:
+  - `x86-kvm`: `vm-corpus -> vm-e2e` single local sequence
+  - `aws-x86 corpus`
+  - `aws-x86 e2e`
+  - `aws-arm64 corpus`
+  - `aws-arm64 e2e`
 
 Recent runtime-relevant fixes already applied:
 
@@ -454,15 +457,43 @@ Note:
   - `aws-arm64 e2e`
 
 - new runtime blockers fixed before the current fresh reruns:
+  - bundled workload tools are now explicit bundle contract, not guest-system fallback.
+    - `guest_prereqs` now validates `hackbench/sysbench/wrk` directly under `workspace/.cache/workload-tools/<arch>/bin`
+    - guest system `PATH` no longer counts as satisfying bundled-tool requirements
+  - `corpus/e2e` remote transfer roots are no longer whole-tree copies.
+    - `runner` is now transferred as `runner/__init__.py + runner/libs`
+    - `corpus` is now transferred as `corpus/driver.py + corpus/config`
+    - `e2e` is now transferred as `e2e/driver.py + e2e/cases`
+    - this removes the previous `rsync` of `runner/repos/*` and old `corpus/e2e results/*` trees into the remote stage
   - `aws-x86 corpus/e2e` no longer transfer the whole `.cache/repo-artifacts/<arch>` tree to the remote instance.
     - manifests now transfer only the runtime subtrees actually needed by the selected suite (`bcc`, `tracee`, `tetragon`, `katran`, `scx`, `libbpf`, bundled workload tools)
     - this removes the old shared-instance `/var/tmp` exhaustion caused by repeatedly rsyncing full `kernel-modules`
+  - the stale remote stage trees on the shared AWS instances were explicitly purged before the fresh reruns.
+    - `aws-x86` recovered to `19G` free on `/var/tmp`
+    - `aws-arm64` recovered to `28G` free on `/var/tmp`
   - `aws-arm64 corpus/e2e` no longer fail in local prep on `scx_rusty` linking with `-lelf`
     - `__scx-binaries-arm64` now uses the ARM sysroot/pkg-config/library/include contract explicitly
+  - shared heavy prep targets now short-circuit inside their build locks instead of rebuilding on every run.
+    - `bcc`
+    - `tracee`
+    - `tetragon`
+    - `workload-tools x86`
+    - `workload-tools arm64`
+    - host `luajit`
   - `x86-kvm corpus` no longer uses broken x86 bundled workload wrappers
     - the portable `hackbench/sysbench/wrk` scripts now preserve runtime variables correctly
   - `x86-kvm corpus` kernel module staging now runs `depmod` and preserves `build/source` symlinks into the mounted workspace
     - this is required for `modprobe veth` and for bpftrace programs that need `/lib/modules/<release>/build/include/linux/kconfig.h`
+  - all four AWS `corpus/e2e` reruns converged on the same shared runtime blocker:
+    - `kernel bpf_stats_enabled sysctl is not writable`
+    - `suite_entrypoint` now enables `kernel.bpf_stats_enabled=1` through `sudo sysctl` when not already root
+    - this is now a shared contract fix instead of four target-specific failures
+  - the next shared runtime blocker across AWS `corpus/e2e` was root-only module and bpftool operations.
+    - `kinsn` module loading now uses `sudo insmod` when the suite is not already root
+    - `bpftool -j -p prog show` now runs through `sudo` in shared runtime helpers instead of failing with `Operation not permitted`
+  - the next shared `corpus` blocker across x86 and arm64 AWS was guest `libbpf` runtime incompatibility.
+    - bundled host-built `libbpf.so` required guest-incompatible glibc symbols
+    - shared runtime now prefers guest-native system `libbpf` and only uses an explicit bundled path when it is loadable
 
 - current todo for the live matrix:
   1. keep all five fresh `corpus/e2e` reruns moving on the fixed tree until they either pass or expose the next real runtime blocker

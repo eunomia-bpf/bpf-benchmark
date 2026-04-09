@@ -248,6 +248,9 @@ class SuiteEntrypoint:
                 env[name] = value
         repo_build_root = self._repo_build_root()
         env["PATH"] = runtime_path_value(self.workspace, self.contract)
+        bundled_tool_bin = self.workspace / ".cache" / "workload-tools" / self.target_arch / "bin"
+        if bundled_tool_bin.is_dir():
+            env["BPFREJIT_WORKLOAD_TOOL_BIN_DIR"] = str(bundled_tool_bin)
         env["BPFREJIT_REPO_ARTIFACT_ROOT"] = str(repo_build_root)
         env["BPFREJIT_REMOTE_PYTHON_BIN"] = self.python_bin
         extra_ld_library_dirs: list[str] = []
@@ -365,14 +368,19 @@ class SuiteEntrypoint:
         if not self._bool_contract("RUN_NEEDS_DAEMON_BINARY"):
             return
         bpf_stats_path = Path("/proc/sys/kernel/bpf_stats_enabled")
-        if not os.access(bpf_stats_path, os.W_OK):
-            _die("kernel bpf_stats_enabled sysctl is not writable")
         sysctl_bin = shutil.which("sysctl")
+        command_prefix: list[str] = []
+        if os.geteuid() != 0:
+            sudo_bin = shutil.which("sudo")
+            if sudo_bin is None:
+                _die("kernel bpf_stats_enabled requires root or sudo")
+            command_prefix = [sudo_bin]
         if sysctl_bin:
             env = {"PATH": os.environ.get("PATH", "") or "/usr/sbin:/usr/bin:/sbin:/bin"}
-            _run_checked([sysctl_bin, "-q", "-w", "kernel.bpf_stats_enabled=1"], cwd=self.workspace, env=env)
+            _run_checked([*command_prefix, sysctl_bin, "-q", "-w", "kernel.bpf_stats_enabled=1"], cwd=self.workspace, env=env)
         else:
-            bpf_stats_path.write_text("1\n", encoding="utf-8")
+            command = [*command_prefix, "sh", "-c", "printf '1\\n' > /proc/sys/kernel/bpf_stats_enabled"]
+            _run_checked(command, cwd=self.workspace, env=os.environ.copy())
         if bpf_stats_path.read_text(encoding="utf-8").strip() != "1":
             _die("failed to enable kernel.bpf_stats_enabled=1")
 

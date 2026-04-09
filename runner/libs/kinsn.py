@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import os
 import platform
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Mapping, Sequence
 
-from . import ROOT_DIR, run_command
+from . import ROOT_DIR, resolve_binary, run_command
 
 
 _KINSN_MODULE_ARCH_DIRS = {
@@ -115,7 +116,10 @@ def load_kinsn_modules(
             continue
         total += 1
         if not _module_is_resident(module_name):
-            completed = run_command(["insmod", str(ko_path)], timeout=120, check=False)
+            command_prefix: list[str] = []
+            if os.geteuid() != 0:
+                command_prefix = [resolve_binary("sudo")]
+            completed = run_command([*command_prefix, "insmod", str(ko_path)], timeout=120, check=False)
             if completed.returncode != 0:
                 output = (completed.stderr or completed.stdout or "").strip()
                 raise RuntimeError(f"failed to load {module_name}: {output}")

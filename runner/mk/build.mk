@@ -22,28 +22,10 @@ KATRAN_ARM64_BUILD_ROOT := $(KATRAN_ARM64_CACHE_ROOT)/build
 KATRAN_ARM64_INSTALL_ROOT := $(KATRAN_ARM64_CACHE_ROOT)/install
 KATRAN_ARM64_CMAKE_OVERRIDE := $(KATRAN_ARM64_CACHE_ROOT)/cxx-override.cmake
 X86_PORTABLE_LIBBPF_ROOT := $(ARTIFACT_ROOT)/libbpf-runtime/x86_64/portable
-X86_PORTABLE_LIBBPF_STAMP := $(X86_PORTABLE_LIBBPF_ROOT)/.ready
-X86_PORTABLE_LIBBPF_SOURCE_INPUTS := $(shell find "$(ROOT_DIR)/vendor/libbpf/src" "$(ROOT_DIR)/vendor/libbpf/include" -type f ! -path '*/.git/*' 2>/dev/null | sort)
-LIBBPF_SOURCE_INPUTS := $(shell find "$(ROOT_DIR)/vendor/libbpf/src" "$(ROOT_DIR)/vendor/libbpf/include" -type f ! -path '*/.git/*' 2>/dev/null | sort)
 ARM64_CROSSBUILD_STAMP := $(ARTIFACT_ROOT)/arm64-host/crossbuild-image.stamp
 LOCK_ROOT := $(ARTIFACT_ROOT)/locks
-SCX_SOURCE_INPUTS := $(shell find "$(REPOS_DIR)/scx" \( -path '*/.git' -o -path '*/target' \) -prune -o -type f -print 2>/dev/null | sort)
-BCC_SOURCE_INPUTS := $(shell find "$(REPOS_DIR)/bcc/libbpf-tools" \( -path '*/.git' -o -path '*/.output' \) -prune -o -type f -print 2>/dev/null | sort)
-TRACEE_SOURCE_INPUTS := $(shell find "$(REPOS_DIR)/tracee" \( -path '*/.git' -o -path '*/dist' \) -prune -o -type f -print 2>/dev/null | sort)
-TETRAGON_SOURCE_INPUTS := $(shell find "$(REPOS_DIR)/tetragon" \( -path '*/.git' -o -path '*/vendor' -o -path '*/bpf/objs' \) -prune -o -type f -print 2>/dev/null | sort)
-KATRAN_SOURCE_INPUTS := $(shell find "$(REPOS_DIR)/katran" -path '*/.git' -prune -o -type f -print 2>/dev/null | sort)
-SCX_X86_STAGE_STAMP := $(REPO_ARTIFACT_ROOT_X86)/scx/.ready
-SCX_ARM64_STAGE_STAMP := $(REPO_ARTIFACT_ROOT_ARM64)/scx/.ready
-BCC_STAGE_STAMP := $(REPO_ARTIFACT_ROOT)/bcc/.ready
-TRACEE_STAGE_STAMP := $(REPO_TRACEE_ROOT)/.ready
-TETRAGON_STAGE_STAMP := $(REPO_TETRAGON_ROOT)/.ready
-KATRAN_X86_STAGE_STAMP := $(REPO_ARTIFACT_ROOT_X86)/katran/.ready
-KATRAN_ARM64_STAGE_STAMP := $(REPO_ARTIFACT_ROOT_ARM64)/katran/.ready
-KINSN_X86_READY_STAMP := $(ROOT_DIR)/module/x86/.ready
-KINSN_ARM64_READY_STAMP := $(ROOT_DIR)/module/arm64/.ready
-KINSN_X86_SOURCE_INPUTS := $(shell find "$(ROOT_DIR)/module/x86" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' -o -name 'Kbuild' \) 2>/dev/null | sort)
-KINSN_ARM64_SOURCE_INPUTS := $(shell find "$(ROOT_DIR)/module/arm64" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' -o -name 'Kbuild' \) 2>/dev/null | sort)
-ARM64_LIBBPF_RUNTIME_STAMP := $(REPO_ARTIFACT_ROOT)/libbpf/.ready
+TRACEE_X86_BUILD_ROOT := $(ARTIFACT_ROOT)/x86_64-tracee-build
+TRACEE_ARM64_BUILD_ROOT := $(ARTIFACT_ROOT)/arm64-tracee-build
 
 .PHONY: __arm64-crossbuild-image \
 	__daemon-binary-x86_64 __daemon-binary-arm64 \
@@ -105,29 +87,13 @@ $(RUNNER_LIBBPF_A):
 
 __kinsn-modules-x86_64:
 	@module_dir="$(ROOT_DIR)/module/x86"; \
-		ready_stamp="$(KINSN_X86_READY_STAMP)"; \
 		$(MAKE) -C "$(ROOT_DIR)" --no-print-directory __kernel; \
-		if [ -f "$$ready_stamp" ] && \
-			[ "$$ready_stamp" -nt "$(X86_BUILD_DIR)/vmlinux" ] && \
-			test -f "$$module_dir/bpf_decode.ko" && \
-			test -f "$$module_dir/bpf_printk.ko"; then \
-			exit 0; \
-		fi; \
-		$(MAKE) -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" M="$$module_dir" modules; \
-		touch "$$ready_stamp"
+		$(MAKE) -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" M="$$module_dir" modules
 
 __kinsn-modules-arm64:
 	@module_dir="$(ROOT_DIR)/module/arm64"; \
-		ready_stamp="$(KINSN_ARM64_READY_STAMP)"; \
 		$(MAKE) -C "$(ROOT_DIR)" --no-print-directory __kernel-arm64-aws ARM64_AWS_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)"; \
-		if [ -f "$$ready_stamp" ] && \
-			[ "$$ready_stamp" -nt "$(ARM64_AWS_BUILD_DIR)/vmlinux" ] && \
-			test -f "$$module_dir/bpf_decode.ko" && \
-			test -f "$$module_dir/bpf_printk.ko"; then \
-			exit 0; \
-		fi; \
-		$(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" M="$$module_dir" modules; \
-		touch "$$ready_stamp"
+		$(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" M="$$module_dir" modules
 
 __kernel-modules-x86_64:
 	@kernel_release_file="$(X86_BUILD_DIR)/include/config/kernel.release"; \
@@ -139,23 +105,13 @@ __kernel-modules-x86_64:
 	test -f "$$kernel_release_file" || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
 	kernel_release="$$(tr -d '\n' < "$$kernel_release_file")"; \
 	release_root="$$stage_root/lib/modules/$$kernel_release"; \
-	ready_stamp="$$stage_root/.ready"; \
-	if [ -f "$$ready_stamp" ] && \
-		[ "$$ready_stamp" -nt "$(RUNNER_DIR)/mk/build.mk" ] && \
-		[ "$$ready_stamp" -nt "$(X86_BUILD_DIR)/modules.order" ] && \
-		[ -f "$$release_root/kernel/drivers/block/null_blk/null_blk.ko" ] && \
-		[ -f "$$release_root/kernel/net/sched/sch_netem.ko" ]; then \
-		exit 0; \
-	fi; \
-	rm -rf "$$stage_root"; \
 	mkdir -p "$$stage_root"; \
 	$(MAKE) --no-print-directory -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" INSTALL_MOD_PATH="$$stage_root" DEPMOD=true CONFIG_MODULE_SIG=n modules_install >/dev/null; \
 	depmod -b "$$stage_root" "$$kernel_release" >/dev/null; \
 	ln -sfn "$(X86_BUILD_DIR)" "$$release_root/build"; \
 	ln -sfn "$(KERNEL_DIR)" "$$release_root/source"; \
 	test -f "$$release_root/kernel/drivers/block/null_blk/null_blk.ko"; \
-	test -f "$$release_root/kernel/net/sched/sch_netem.ko"; \
-	touch "$$ready_stamp"
+	test -f "$$release_root/kernel/net/sched/sch_netem.ko"
 
 __repo-test-binaries-x86_64:
 	@mkdir -p "$(ROOT_DIR)/tests/unittest/build" "$(ROOT_DIR)/tests/unittest/build/vendor/bpftool" "$(ROOT_DIR)/tests/negative/build"
@@ -170,32 +126,31 @@ __repo-test-binaries-arm64:
 __micro-programs:
 	@$(MAKE) -C "$(ROOT_DIR)/micro/programs" OUTPUT_DIR="$(ROOT_DIR)/micro/programs"
 
-__x86-portable-libbpf: $(X86_PORTABLE_LIBBPF_STAMP)
-
-$(X86_PORTABLE_LIBBPF_STAMP): $(X86_PORTABLE_LIBBPF_SOURCE_INPUTS)
-	@mkdir -p "$(X86_PORTABLE_LIBBPF_ROOT)"
+__x86-portable-libbpf:
+	@mkdir -p "$(X86_PORTABLE_LIBBPF_ROOT)" "$(X86_LIBBPF_RUNTIME_BUILD_ROOT)"
 	@docker run --rm --platform linux/amd64 \
 		-v "$(ROOT_DIR):/workspace:ro" \
+		-v "$(X86_LIBBPF_RUNTIME_BUILD_ROOT):/build" \
 		-v "$(X86_PORTABLE_LIBBPF_ROOT):/out" \
 		amazonlinux:2023 \
 		bash -lc 'set -euo pipefail; \
 			dnf -y install gcc make elfutils-libelf-devel binutils >/dev/null 2>&1; \
-			rm -rf /tmp/libbpf-obj /tmp/libbpf-stage /out/lib; \
-			mkdir -p /out/lib; \
-			make -C /workspace/vendor/libbpf/src -j"$$(nproc)" OBJDIR=/tmp/libbpf-obj DESTDIR=/tmp/libbpf-stage prefix= install >/dev/null; \
-			lib_dir=/tmp/libbpf-stage/usr/lib64; \
+			mkdir -p /build/obj /build/stage /out; \
+			make -C /workspace/vendor/libbpf/src -j"$$(nproc)" OBJDIR=/build/obj DESTDIR=/build/stage prefix= install >/dev/null; \
+			lib_dir=/build/stage/usr/lib64; \
 			real_so="$$(find "$$lib_dir" -maxdepth 1 -type f -name "libbpf.so.*" | sort | tail -n1)"; \
 			test -n "$$real_so"; \
-			cp -L "$$real_so" /out/lib/; \
+			rm -rf /out/lib.tmp; \
+			mkdir -p /out/lib.tmp; \
+			cp -L "$$real_so" /out/lib.tmp/; \
 			real_name="$$(basename "$$real_so")"; \
 			soname="$$(readelf -d "$$real_so" | sed -n "s/.*Library soname: \\[\\(.*\\)\\].*/\\1/p" | head -n1)"; \
-			if [[ -n "$$soname" && "$$soname" != "$$real_name" ]]; then ln -sfn "$$real_name" "/out/lib/$$soname"; fi; \
-			chown -R $(shell id -u):$(shell id -g) /out'
-	@touch "$@"
+			if [[ -n "$$soname" && "$$soname" != "$$real_name" ]]; then ln -sfn "$$real_name" "/out/lib.tmp/$$soname"; fi; \
+			rm -rf /out/lib; \
+			mv /out/lib.tmp /out/lib; \
+			chown -R $(shell id -u):$(shell id -g) /out /build'
 
-__scx-binaries-x86_64: $(SCX_X86_STAGE_STAMP)
-
-$(SCX_X86_STAGE_STAMP): $(SCX_SOURCE_INPUTS)
+__scx-binaries-x86_64:
 	@test -n "$(RUN_SCX_PACKAGES_CSV)" || { echo "RUN_SCX_PACKAGES_CSV is required" >&2; exit 1; }
 	@repo_root="$(REPOS_DIR)/scx"; \
 	corpus_root="$(REPO_SCX_ROOT)"; \
@@ -213,12 +168,9 @@ $(SCX_X86_STAGE_STAMP): $(SCX_SOURCE_INPUTS)
 		test -n "$$object_path"; \
 		obj_dst="$$corpus_root/$${package}_main.bpf.o"; \
 		if ! cmp -s "$$object_path" "$$obj_dst" 2>/dev/null; then cp -f "$$object_path" "$$obj_dst"; fi; \
-	done; \
-	touch "$@"
+	done
 
-__scx-binaries-arm64: __require-arm64-toolchain $(SCX_ARM64_STAGE_STAMP)
-
-$(SCX_ARM64_STAGE_STAMP): $(SCX_SOURCE_INPUTS)
+__scx-binaries-arm64: __require-arm64-toolchain
 	@test -n "$(RUN_SCX_PACKAGES_CSV)" || { echo "RUN_SCX_PACKAGES_CSV is required" >&2; exit 1; }
 	@repo_root="$(REPOS_DIR)/scx"; \
 	corpus_root="$(REPO_SCX_ROOT)"; \
@@ -249,8 +201,7 @@ $(SCX_ARM64_STAGE_STAMP): $(SCX_SOURCE_INPUTS)
 		test -n "$$object_path"; \
 		obj_dst="$$corpus_root/$${package}_main.bpf.o"; \
 		if ! cmp -s "$$object_path" "$$obj_dst" 2>/dev/null; then cp -f "$$object_path" "$$obj_dst"; fi; \
-	done; \
-	touch "$@"
+	done
 
 __native-repos-x86_64:
 	@test -n "$(RUN_NATIVE_REPOS_CSV)" || { echo "RUN_NATIVE_REPOS_CSV is required" >&2; exit 1; }
@@ -272,9 +223,7 @@ __native-repos-arm64-inner:
 		$(MAKE) --no-print-directory "$$repo_target"; \
 	done
 
-__native-repo-bcc: $(BCC_STAGE_STAMP)
-
-$(BCC_STAGE_STAMP): $(BCC_SOURCE_INPUTS)
+__native-repo-bcc:
 	@repo_root="$(REPOS_DIR)/bcc/libbpf-tools"; \
 	stage_root="$(REPO_BCC_ROOT)"; \
 	lock_path="$(LOCK_ROOT)/$(RUN_TARGET_ARCH)-bcc.lock"; \
@@ -299,35 +248,31 @@ $(BCC_STAGE_STAMP): $(BCC_SOURCE_INPUTS)
 			dst="$$stage_root/$$tool_name"; \
 			if ! cmp -s "$$repo_root/$$tool_name" "$$dst" 2>/dev/null; then cp -f "$$repo_root/$$tool_name" "$$dst"; fi; \
 		fi; \
-	done; \
-	touch "$@"
+	done
 
-__native-repo-tracee: $(TRACEE_STAGE_STAMP)
-
-$(TRACEE_STAGE_STAMP): $(TRACEE_SOURCE_INPUTS)
+__native-repo-tracee:
 	@repo_root="$(REPOS_DIR)/tracee"; \
 	stage_root="$(REPO_TRACEE_ROOT)"; \
+	build_root="$$( [ "$(RUN_TARGET_ARCH)" = "arm64" ] && printf '%s' "$(TRACEE_ARM64_BUILD_ROOT)" || printf '%s' "$(TRACEE_X86_BUILD_ROOT)" )"; \
+	output_root="$$build_root/dist"; \
 	go_arch="$$( [ "$(RUN_TARGET_ARCH)" = "arm64" ] && printf 'arm64' || printf 'amd64' )"; \
 	lock_path="$(LOCK_ROOT)/$(RUN_TARGET_ARCH)-tracee.lock"; \
-	mkdir -p "$$stage_root/bin" "$$stage_root/lsm_support" "$(LOCK_ROOT)"; \
+	mkdir -p "$$stage_root/bin" "$$stage_root/lsm_support" "$$build_root" "$(LOCK_ROOT)"; \
 	exec 9>"$$lock_path"; flock 9; \
 	rm -f "$$repo_root/goenv.mk"; \
-	$(MAKE) -C "$$repo_root" -j"$(JOBS)" GO_ARCH="$$go_arch" bpf tracee evt traceectl lsm-check; \
-	if ! cmp -s "$$repo_root/dist/tracee.bpf.o" "$$stage_root/tracee.bpf.o" 2>/dev/null; then cp -f "$$repo_root/dist/tracee.bpf.o" "$$stage_root/tracee.bpf.o"; fi; \
-	find "$$repo_root/dist/lsm_support" -maxdepth 1 -type f -name '*.bpf.o' | while read -r src; do \
+	$(MAKE) -C "$$repo_root" -j"$(JOBS)" OUTPUT_DIR="$$output_root" GOOS=linux GOARCH="$$go_arch" GO_ARCH="$$go_arch" bpf tracee evt traceectl; \
+	if ! cmp -s "$$output_root/tracee.bpf.o" "$$stage_root/tracee.bpf.o" 2>/dev/null; then cp -f "$$output_root/tracee.bpf.o" "$$stage_root/tracee.bpf.o"; fi; \
+	find "$$output_root/lsm_support" -maxdepth 1 -type f -name '*.bpf.o' | while read -r src; do \
 		dst="$$stage_root/lsm_support/$${src##*/}"; \
 		if ! cmp -s "$$src" "$$dst" 2>/dev/null; then cp -f "$$src" "$$dst"; fi; \
 	done; \
-	for bin in tracee evt traceectl lsm-check; do \
-		test -x "$$repo_root/dist/$$bin"; \
+	for bin in tracee evt traceectl; do \
+		test -x "$$output_root/$$bin"; \
 		dst="$$stage_root/bin/$$bin"; \
-		if ! cmp -s "$$repo_root/dist/$$bin" "$$dst" 2>/dev/null; then cp -f "$$repo_root/dist/$$bin" "$$dst"; fi; \
-	done; \
-	touch "$@"
+		if ! cmp -s "$$output_root/$$bin" "$$dst" 2>/dev/null; then cp -f "$$output_root/$$bin" "$$dst"; fi; \
+	done
 
-__native-repo-tetragon: $(TETRAGON_STAGE_STAMP)
-
-$(TETRAGON_STAGE_STAMP): $(TETRAGON_SOURCE_INPUTS)
+__native-repo-tetragon:
 	@repo_root="$(REPOS_DIR)/tetragon"; \
 	stage_root="$(REPO_TETRAGON_ROOT)"; \
 	target_arch="$$( [ "$(RUN_TARGET_ARCH)" = "arm64" ] && printf 'arm64' || printf 'amd64' )"; \
@@ -341,12 +286,9 @@ $(TETRAGON_STAGE_STAMP): $(TETRAGON_SOURCE_INPUTS)
 		if ! cmp -s "$$src" "$$dst" 2>/dev/null; then cp -f "$$src" "$$dst"; fi; \
 	done; \
 	test -x "$$repo_root/tetragon"; \
-	if ! cmp -s "$$repo_root/tetragon" "$$stage_root/bin/tetragon" 2>/dev/null; then cp -f "$$repo_root/tetragon" "$$stage_root/bin/tetragon"; fi; \
-	touch "$@"
+	if ! cmp -s "$$repo_root/tetragon" "$$stage_root/bin/tetragon" 2>/dev/null; then cp -f "$$repo_root/tetragon" "$$stage_root/bin/tetragon"; fi
 
-__native-repo-katran-x86_64: $(KATRAN_X86_STAGE_STAMP)
-
-$(KATRAN_X86_STAGE_STAMP): $(KATRAN_SOURCE_INPUTS)
+__native-repo-katran-x86_64:
 	@stage_root="$(REPO_KATRAN_ROOT)"; \
 		build_root="$(KATRAN_X86_BUILD_ROOT)"; \
 		install_root="$(KATRAN_X86_INSTALL_ROOT)"; \
@@ -359,7 +301,6 @@ $(KATRAN_X86_STAGE_STAMP): $(KATRAN_SOURCE_INPUTS)
 		cd "$(REPOS_DIR)/katran" && \
 		env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR \
 		CC=clang CXX=clang++ CXXFLAGS="$$folly_xlog_prefixes" BUILD_EXAMPLE_GRPC=1 BUILD_DIR="$$build_root" INSTALL_DIR="$$install_root" INSTALL_DEPS_ONLY=1 ./build_katran.sh; \
-		rm -rf "$$build_root/build"; \
 		mkdir -p "$$install_root/grpc/_build"; \
 		ln -sfn "$$install_root/bin/grpc_cpp_plugin" "$$install_root/grpc/_build/grpc_cpp_plugin"; \
 		cd "$(REPOS_DIR)/katran" && \
@@ -390,16 +331,13 @@ $(KATRAN_X86_STAGE_STAMP): $(KATRAN_SOURCE_INPUTS)
 		esac; \
 		dst="$$stage_root/$$dst_name"; \
 		if ! cmp -s "$$src" "$$dst" 2>/dev/null; then cp -f "$$src" "$$dst"; fi; \
-	done; \
-	find "$$install_root/lib" -maxdepth 1 -type f | while read -r src; do \
-		dst="$$stage_root/lib/$${src##*/}"; \
-		if ! cmp -s "$$src" "$$dst" 2>/dev/null; then cp -f "$$src" "$$dst"; fi; \
-	done; \
-	touch "$@"
+		done; \
+		find "$$install_root/lib" -maxdepth 1 -type f | while read -r src; do \
+			dst="$$stage_root/lib/$${src##*/}"; \
+			if ! cmp -s "$$src" "$$dst" 2>/dev/null; then cp -f "$$src" "$$dst"; fi; \
+		done
 
-__native-repo-katran-arm64: $(KATRAN_ARM64_STAGE_STAMP)
-
-$(KATRAN_ARM64_STAGE_STAMP): $(KATRAN_SOURCE_INPUTS)
+__native-repo-katran-arm64:
 	@stage_root="$(REPO_KATRAN_ROOT)"; \
 		build_root="$(KATRAN_ARM64_BUILD_ROOT)"; \
 		install_root="$(KATRAN_ARM64_INSTALL_ROOT)"; \
@@ -412,7 +350,6 @@ $(KATRAN_ARM64_STAGE_STAMP): $(KATRAN_SOURCE_INPUTS)
 		cd "$(REPOS_DIR)/katran" && \
 		env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR \
 		CC=clang CXX=clang++ CXXFLAGS="$$folly_xlog_prefixes" BUILD_EXAMPLE_GRPC=1 BUILD_DIR="$$build_root" INSTALL_DIR="$$install_root" INSTALL_DEPS_ONLY=1 ./build_katran.sh; \
-		rm -rf "$$build_root/build"; \
 		mkdir -p "$$install_root/grpc/_build"; \
 		ln -sfn "$$install_root/bin/grpc_cpp_plugin" "$$install_root/grpc/_build/grpc_cpp_plugin"; \
 		cd "$(REPOS_DIR)/katran" && \
@@ -443,12 +380,11 @@ $(KATRAN_ARM64_STAGE_STAMP): $(KATRAN_SOURCE_INPUTS)
 		esac; \
 		dst="$$stage_root/$$dst_name"; \
 		if ! cmp -s "$$src" "$$dst" 2>/dev/null; then cp -f "$$src" "$$dst"; fi; \
-	done; \
-	find "$$install_root/lib" -maxdepth 1 -type f | while read -r src; do \
-		dst="$$stage_root/lib/$${src##*/}"; \
-		if ! cmp -s "$$src" "$$dst" 2>/dev/null; then cp -f "$$src" "$$dst"; fi; \
-	done; \
-	touch "$@"
+		done; \
+		find "$$install_root/lib" -maxdepth 1 -type f | while read -r src; do \
+			dst="$$stage_root/lib/$${src##*/}"; \
+			if ! cmp -s "$$src" "$$dst" 2>/dev/null; then cp -f "$$src" "$$dst"; fi; \
+		done
 
 ARM64_TOOLCHAIN_ROOT := $(RUNNER_DIR)/build-arm64/toolchain
 ARM64_TOOLCHAIN_BIN := $(ARM64_TOOLCHAIN_ROOT)/bin
@@ -473,9 +409,6 @@ WORKLOAD_TOOLS_X86_BUILD_ROOT := $(WORKLOAD_TOOLS_BUILD_ROOT)/x86_64
 WORKLOAD_TOOLS_ARM64_BUILD_ROOT := $(WORKLOAD_TOOLS_BUILD_ROOT)/arm64
 WORKLOAD_TOOLS_HOST_LUAJIT_ROOT := $(WORKLOAD_TOOLS_HOST_BUILD_ROOT)/luajit
 WORKLOAD_TOOLS_HOST_LUAJIT_BIN := $(WORKLOAD_TOOLS_HOST_LUAJIT_ROOT)/bin/luajit
-WORKLOAD_TOOLS_X86_INSTALL_STAMP := $(WORKLOAD_TOOLS_INSTALL_ROOT)/x86_64/.ready
-WORKLOAD_TOOLS_ARM64_INSTALL_STAMP := $(WORKLOAD_TOOLS_INSTALL_ROOT)/arm64/.ready
-WORKLOAD_TOOLS_SOURCE_INPUTS := $(shell find "$(WORKLOAD_TOOLS_SOURCE_ROOT)/rt-tests" "$(WORKLOAD_TOOLS_SOURCE_ROOT)/sysbench" "$(WORKLOAD_TOOLS_SOURCE_ROOT)/wrk" -type f ! -path '*/.git/*' 2>/dev/null | sort)
 X86_LIBBPF_RUNTIME_BUILD_ROOT := $(ARTIFACT_ROOT)/libbpf-runtime/x86_64/build
 ARM64_LIBBPF_RUNTIME_BUILD_ROOT := $(ARTIFACT_ROOT)/libbpf-runtime/arm64/build
 
@@ -497,29 +430,32 @@ __libbpf-runtime-x86_64: __x86-portable-libbpf
 	done
 
 __libbpf-runtime-arm64: __require-arm64-toolchain
-__libbpf-runtime-arm64: $(ARM64_LIBBPF_RUNTIME_STAMP)
-
-$(ARM64_LIBBPF_RUNTIME_STAMP): $(LIBBPF_SOURCE_INPUTS)
 	@build_root="$(ARM64_LIBBPF_RUNTIME_BUILD_ROOT)"; \
+		stage_root="$$build_root/stage"; \
 		dst_root="$(REPO_ARTIFACT_ROOT)/libbpf"; \
 		obj_root="$$build_root/obj"; \
-		mkdir -p "$$obj_root" "$$dst_root"; \
+		lock_path="$(LOCK_ROOT)/arm64-libbpf-runtime.lock"; \
+		mkdir -p "$$obj_root" "$$dst_root" "$(LOCK_ROOT)"; \
+		exec 9>"$$lock_path"; flock 9; \
+		rm -rf "$$stage_root"; \
 		$(MAKE) -C "$(ROOT_DIR)/vendor/libbpf/src" -j"$(JOBS)" \
 			OBJDIR="$$obj_root" \
-			DESTDIR= \
-			PREFIX="$$dst_root" \
-			LIBDIR="$$dst_root/lib" \
-			INCLUDEDIR="$$dst_root/include" \
+			DESTDIR="$$stage_root" \
+			PREFIX="/usr" \
+			LIBDIR="/usr/lib" \
+			INCLUDEDIR="/usr/include" \
 			CC="$(ARM64_CC)" \
 			AR="$(ARM64_AR)" \
 			RANLIB="$(ARM64_RANLIB)" \
 			BUILD_STATIC_ONLY=0 install >/dev/null; \
-		test -f "$$dst_root/lib/libbpf.so" -o -f "$$dst_root/lib/libbpf.so."* -o -f "$$dst_root/lib64/libbpf.so" -o -f "$$dst_root/lib64/libbpf.so."*; \
-		touch "$@"
+		rm -rf "$$dst_root/include" "$$dst_root/lib" "$$dst_root/lib64"; \
+		mkdir -p "$$dst_root"; \
+		if [ -d "$$stage_root/usr/include" ]; then cp -a "$$stage_root/usr/include" "$$dst_root/"; fi; \
+		if [ -d "$$stage_root/usr/lib" ]; then cp -a "$$stage_root/usr/lib" "$$dst_root/"; fi; \
+		if [ -d "$$stage_root/usr/lib64" ]; then cp -a "$$stage_root/usr/lib64" "$$dst_root/"; fi; \
+		test -f "$$dst_root/lib/libbpf.so" -o -f "$$dst_root/lib/libbpf.so."* -o -f "$$dst_root/lib64/libbpf.so" -o -f "$$dst_root/lib64/libbpf.so."*
 
-__workload-tools-x86_64: $(WORKLOAD_TOOLS_X86_INSTALL_STAMP)
-
-$(WORKLOAD_TOOLS_X86_INSTALL_STAMP): $(WORKLOAD_TOOLS_SOURCE_INPUTS) $(WORKLOAD_TOOLS_BUILD_RULES)
+__workload-tools-x86_64: $(WORKLOAD_TOOLS_HOST_LUAJIT_BIN)
 	@source_root="$(WORKLOAD_TOOLS_SOURCE_ROOT)"; \
 	build_root="$(WORKLOAD_TOOLS_X86_BUILD_ROOT)"; \
 	work_root="$$build_root/src"; \
@@ -537,14 +473,10 @@ $(WORKLOAD_TOOLS_X86_INSTALL_STAMP): $(WORKLOAD_TOOLS_SOURCE_INPUTS) $(WORKLOAD_
 	test -d "$$source_root/rt-tests" || { echo "missing workload tool source root: $$source_root/rt-tests" >&2; exit 1; }; \
 	test -d "$$source_root/sysbench" || { echo "missing workload tool source root: $$source_root/sysbench" >&2; exit 1; }; \
 	test -d "$$source_root/wrk" || { echo "missing workload tool source root: $$source_root/wrk" >&2; exit 1; }; \
-	rm -rf "$$work_root"; \
-	mkdir -p "$$work_root"; \
-	cp -a "$$source_root/rt-tests" "$$rt_tests_src"; \
-	cp -a "$$source_root/sysbench" "$$sysbench_src"; \
-	cp -a "$$source_root/wrk" "$$wrk_src"; \
-	rm -rf "$$rt_tests_src/bld"; \
-	$(MAKE) -C "$$sysbench_src" distclean >/dev/null 2>&1 || true; \
-	rm -rf "$$build_root/sysbench-install" "$$wrk_luajit_root"; \
+	mkdir -p "$$rt_tests_src" "$$sysbench_src" "$$wrk_src" "$$build_root/sysbench-install" "$$wrk_luajit_root"; \
+	cp -a "$$source_root/rt-tests/." "$$rt_tests_src/"; \
+	cp -a "$$source_root/sysbench/." "$$sysbench_src/"; \
+	cp -a "$$source_root/wrk/." "$$wrk_src/"; \
 	$(MAKE) -C "$$rt_tests_src" -j"$(JOBS)" CC="cc" hackbench >/dev/null; \
 	cd "$$sysbench_src"; \
 	./configure --prefix="$$build_root/sysbench-install" --without-mysql --without-pgsql >/dev/null; \
@@ -558,7 +490,6 @@ $(WORKLOAD_TOOLS_X86_INSTALL_STAMP): $(WORKLOAD_TOOLS_SOURCE_INPUTS) $(WORKLOAD_
 		CC="cc" \
 		WITH_LUAJIT="$$wrk_luajit_root" >/dev/null; \
 	test -x "$$wrk_src/wrk" || { echo "missing x86 wrk build output: $$wrk_src/wrk" >&2; exit 1; }; \
-	rm -rf "$$install_root"; \
 	mkdir -p "$$bin_root" "$$lib_root"; \
 	cp -f "$$rt_tests_src/hackbench" "$$bin_root/hackbench.real"; \
 	cp -f "$$build_root/sysbench-install/bin/sysbench" "$$bin_root/sysbench.real"; \
@@ -596,8 +527,7 @@ $(WORKLOAD_TOOLS_X86_INSTALL_STAMP): $(WORKLOAD_TOOLS_SOURCE_INPUTS) $(WORKLOAD_
 			'exec "$$loader" --library-path "$${script_dir}/../lib" "$$real_binary" "$$@"' \
 			> "$$bin_root/$$tool"; \
 		chmod +x "$$bin_root/$$tool"; \
-	done; \
-	touch "$@"
+	done
 
 $(WORKLOAD_TOOLS_HOST_LUAJIT_BIN): $(WORKLOAD_TOOLS_SOURCE_ROOT)/sysbench/third_party/luajit/luajit/src/Makefile $(WORKLOAD_TOOLS_BUILD_RULES)
 	@source_root="$(WORKLOAD_TOOLS_SOURCE_ROOT)/sysbench/third_party/luajit"; \
@@ -606,15 +536,12 @@ $(WORKLOAD_TOOLS_HOST_LUAJIT_BIN): $(WORKLOAD_TOOLS_SOURCE_ROOT)/sysbench/third_
 	lock_path="$(LOCK_ROOT)/host-luajit.lock"; \
 	mkdir -p "$(LOCK_ROOT)"; \
 	exec 9>"$$lock_path"; flock 9; \
-	rm -rf "$$build_root" "$$install_root"; \
-	mkdir -p "$$build_root"; \
-	tar -C "$$source_root" -cf - luajit | tar -xf - -C "$$build_root"; \
+	mkdir -p "$$build_root/luajit"; \
+	cp -a "$$source_root/luajit/." "$$build_root/luajit/"; \
 	$(MAKE) -C "$$build_root/luajit" PREFIX="$$install_root" BUILDMODE=static install >/dev/null; \
 	ln -sf "luajit-2.1.0-beta3" "$$install_root/bin/luajit"
 
-__workload-tools-arm64: $(WORKLOAD_TOOLS_ARM64_INSTALL_STAMP)
-
-$(WORKLOAD_TOOLS_ARM64_INSTALL_STAMP): __require-arm64-toolchain $(WORKLOAD_TOOLS_HOST_LUAJIT_BIN) $(WORKLOAD_TOOLS_SOURCE_INPUTS) $(WORKLOAD_TOOLS_BUILD_RULES)
+__workload-tools-arm64: __require-arm64-toolchain $(WORKLOAD_TOOLS_HOST_LUAJIT_BIN)
 	@source_root="$(WORKLOAD_TOOLS_SOURCE_ROOT)"; \
 	build_root="$(WORKLOAD_TOOLS_ARM64_BUILD_ROOT)"; \
 	work_root="$$build_root/src"; \
@@ -633,14 +560,10 @@ $(WORKLOAD_TOOLS_ARM64_INSTALL_STAMP): __require-arm64-toolchain $(WORKLOAD_TOOL
 	test -d "$$source_root/rt-tests" || { echo "missing workload tool source root: $$source_root/rt-tests" >&2; exit 1; }; \
 	test -d "$$source_root/sysbench" || { echo "missing workload tool source root: $$source_root/sysbench" >&2; exit 1; }; \
 	test -d "$$source_root/wrk" || { echo "missing workload tool source root: $$source_root/wrk" >&2; exit 1; }; \
-	rm -rf "$$work_root"; \
-	mkdir -p "$$work_root"; \
-	cp -a "$$source_root/rt-tests" "$$rt_tests_src"; \
-	cp -a "$$source_root/sysbench" "$$sysbench_src"; \
-	cp -a "$$source_root/wrk" "$$wrk_src"; \
-	rm -rf "$$rt_tests_src/bld"; \
-	$(MAKE) -C "$$sysbench_src" distclean >/dev/null 2>&1 || true; \
-	rm -rf "$$build_root/sysbench-install" "$$wrk_luajit_root"; \
+	mkdir -p "$$rt_tests_src" "$$sysbench_src" "$$wrk_src" "$$build_root/sysbench-install" "$$wrk_luajit_root"; \
+	cp -a "$$source_root/rt-tests/." "$$rt_tests_src/"; \
+	cp -a "$$source_root/sysbench/." "$$sysbench_src/"; \
+	cp -a "$$source_root/wrk/." "$$wrk_src/"; \
 	$(MAKE) -C "$$rt_tests_src" -j"$(JOBS)" CC="$(ARM64_GCC)" hackbench; \
 	cd "$$sysbench_src"; \
 	PKG_CONFIG_ALLOW_CROSS=1 \
@@ -663,7 +586,6 @@ $(WORKLOAD_TOOLS_ARM64_INSTALL_STAMP): __require-arm64-toolchain $(WORKLOAD_TOOL
 		WITH_LUAJIT="$$wrk_luajit_root" \
 		WITH_OPENSSL="$$toolchain_root/usr"; \
 	test -x "$$wrk_src/wrk" || { echo "missing arm64 wrk build output: $$wrk_src/wrk" >&2; exit 1; }; \
-	rm -rf "$$install_root"; \
 	mkdir -p "$$bin_root" "$$lib_root"; \
 	cp -f "$$rt_tests_src/hackbench" "$$bin_root/hackbench.real"; \
 	cp -f "$$build_root/sysbench-install/bin/sysbench" "$$bin_root/sysbench.real"; \
@@ -708,5 +630,4 @@ $(WORKLOAD_TOOLS_ARM64_INSTALL_STAMP): __require-arm64-toolchain $(WORKLOAD_TOOL
 			'exec "$$loader" --library-path "$${script_dir}/../lib" "$$real_binary" "$$@"' \
 			> "$$bin_root/$$tool"; \
 		chmod +x "$$bin_root/$$tool"; \
-	done; \
-	touch "$@"
+	done

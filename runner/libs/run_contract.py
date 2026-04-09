@@ -630,7 +630,7 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         if not run_llvm_dir:
             _die(f"suite {suite_name} requires explicit LLVM_DIR or LLVM_CONFIG")
 
-    if suite_name in {"test", "corpus", "e2e"}:
+    if suite_name in {"test", "corpus", "e2e"} and target.get("TARGET_ARCH", "") != "arm64":
         run_libbpf_runtime_path = f"{run_repo_artifact_root}/libbpf/lib/libbpf.so"
     if target.get("TARGET_ARCH", "") == "arm64":
         run_daemon_binary_path = "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon"
