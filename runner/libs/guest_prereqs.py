@@ -28,16 +28,14 @@ def _scalar(contract: dict[str, str | list[str]], name: str) -> str:
 
 
 def workload_tool_is_bundled(contract: dict[str, str | list[str]], tool: str) -> bool:
-    return tool in env_csv("RUN_BUNDLED_WORKLOAD_TOOLS_CSV", contract=contract)
+    return tool in env_csv("RUN_WORKLOAD_TOOLS_CSV", contract=contract)
 
 
 def resolve_remote_workload_tool_bin(workspace: Path, contract: dict[str, str | list[str]]) -> Path | None:
-    if not env_csv("RUN_BUNDLED_WORKLOAD_TOOLS_CSV", contract=contract):
-        return None
-    remote_tool_bin = _scalar(contract, "RUN_REMOTE_WORKLOAD_TOOL_BIN")
-    if not remote_tool_bin:
-        die("manifest remote workload-tool bin is missing while bundled workload tools are requested")
-    return resolve_workspace_contract_path(workspace, remote_tool_bin)
+    remote_tool_bin = workspace / ".cache" / "workload-tools" / "bin"
+    if remote_tool_bin.is_dir():
+        return remote_tool_bin
+    return None
 
 
 def runtime_path_value(workspace: Path, contract: dict[str, str | list[str]]) -> str:
@@ -154,11 +152,17 @@ def install_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]])
     path_value = runtime_path_value(workspace, contract)
     missing_commands: list[str] = []
     python_bin = _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+    remote_tool_bin = resolve_remote_workload_tool_bin(workspace, contract)
     for command_name in required_commands(mode="runtime", contract=contract):
         if have_cmd(command_name, path_value=path_value):
             continue
         if workload_tool_is_bundled(contract, command_name):
-            die(f"required bundled workload tool is missing from the guest tool bin: {command_name}")
+            if remote_tool_bin is None:
+                die("manifest remote workload-tool bin is missing while workload tools are requested")
+            bundled_tool = remote_tool_bin / command_name
+            if not bundled_tool.is_file() or not os.access(bundled_tool, os.X_OK):
+                die(f"required bundled workload tool is missing from the guest tool bin: {command_name}")
+            continue
         if command_name not in missing_commands:
             missing_commands.append(command_name)
 

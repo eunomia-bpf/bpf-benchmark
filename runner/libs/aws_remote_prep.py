@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import shlex
+import subprocess
 import sys
 from datetime import datetime, timezone
 from functools import partial
@@ -9,26 +10,10 @@ from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs import aws_common
-from runner.libs.aws_kernel_artifacts import (
-    build_arm64_kernel_artifacts,
-    build_paths_from_ctx,
-    build_x86_kernel_artifacts,
-    refresh_aws_arm64_base_config,
-)
 from runner.libs.cli_support import fail
 from runner.libs.state_file import write_state
 
 _die = partial(fail, "aws-remote-prep")
-
-REMOTE_PREREQ_ASSETS = (
-    ("runner/__init__.py", "__init__.py"),
-    ("runner/libs/__init__.py", "libs/__init__.py"),
-    ("runner/libs/cli_support.py", "libs/cli_support.py"),
-    ("runner/libs/manifest_file.py", "libs/manifest_file.py"),
-    ("runner/libs/prereq_contract.py", "libs/prereq_contract.py"),
-    ("runner/libs/aws_remote_prereqs.py", "libs/aws_remote_prereqs.py"),
-)
-
 
 def _base_env_from_contract(contract: dict[str, str | list[str]]) -> dict[str, str]:
     env: dict[str, str] = {}
@@ -39,6 +24,18 @@ def _base_env_from_contract(contract: dict[str, str | list[str]]) -> dict[str, s
     for name, value in contract.items():
         env[name] = shlex.join(value) if isinstance(value, list) else value
     return env
+
+
+def _run_local_make(*args: str, env: dict[str, str] | None = None) -> None:
+    completed = subprocess.run(
+        ["make", "-C", str(ROOT_DIR), *args],
+        cwd=ROOT_DIR,
+        env=env,
+        text=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise SystemExit(completed.returncode)
 
 
 def _effective_name_tag(ctx: aws_common.AwsExecutorContext) -> str:
@@ -279,8 +276,9 @@ mkdir -p "$1"
 """,
     )
     aws_common._scp_to(ctx, ip, ctx.manifest_path, remote_manifest)
-    for rel_src, rel_dest in REMOTE_PREREQ_ASSETS:
-        aws_common._scp_to(ctx, ip, ROOT_DIR / rel_src, f"{remote_runner_root}/{rel_dest}")
+    aws_common._scp_to(ctx, ip, ROOT_DIR / "runner" / "__init__.py", f"{remote_runner_root}/__init__.py")
+    for source_path in sorted((ROOT_DIR / "runner" / "libs").glob("*.py")):
+        aws_common._scp_to(ctx, ip, source_path, f"{remote_runner_lib_root}/{source_path.name}")
     aws_common._ssh_bash(
         ctx,
         ip,
@@ -347,16 +345,40 @@ exit 1
         if completed.returncode != 0:
             _die(f"failed to capture AWS ARM64 base kernel config from {ip}")
         return completed.stdout
-
-    refresh_aws_arm64_base_config(build_paths_from_ctx(ctx), remote_kernel_release=remote_release, fetch_config_text=_fetch_config_text)
+    base_config = ctx.target_cache_dir / "config-al2023-arm64"
+    base_config.parent.mkdir(parents=True, exist_ok=True)
+    base_config.write_text(_fetch_config_text(), encoding="utf-8")
+    release_file = base_config.with_suffix(".release")
+    release_file.write_text(remote_release + "\n", encoding="utf-8")
 
 
 def _build_x86_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
-    return build_x86_kernel_artifacts(build_paths_from_ctx(ctx))
+    build_dir = ctx.target_cache_dir / "setup-artifacts" / "x86"
+    _run_local_make(
+        "__kernel-x86-artifacts",
+        f"OUTPUT_ROOT={build_dir}",
+        f"JOBS={max(os.cpu_count() or 1, 1)}",
+    )
+    kernel_release = (build_dir / "kernel-release.txt").read_text(encoding="utf-8").strip()
+    kernel_image = build_dir / "boot" / f"bzImage-{kernel_release}"
+    modules_tar = build_dir / f"modules-{kernel_release}.tar.gz"
+    return kernel_release, kernel_image, modules_tar
 
 
 def _build_arm64_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
-    return build_arm64_kernel_artifacts(build_paths_from_ctx(ctx))
+    build_dir = ctx.target_cache_dir / "kernel-build"
+    base_config = ctx.target_cache_dir / "config-al2023-arm64"
+    setup_root = ctx.target_cache_dir / "setup-artifacts" / "arm64"
+    _run_local_make(
+        "__kernel-arm64-aws-artifacts",
+        f"OUTPUT_ROOT={setup_root}",
+        f"ARM64_AWS_BUILD_DIR={build_dir}",
+        f"ARM64_AWS_BASE_CONFIG={base_config}",
+    )
+    kernel_release = (setup_root / "kernel-release.txt").read_text(encoding="utf-8").strip()
+    kernel_image = setup_root / "boot" / f"vmlinuz-{kernel_release}.efi"
+    modules_tar = setup_root / f"modules-{kernel_release}.tar.gz"
+    return kernel_release, kernel_image, modules_tar
 
 
 def _setup_x86_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:

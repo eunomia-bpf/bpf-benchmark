@@ -43,7 +43,6 @@ from runner.libs.results import (
 from runner.libs.run_artifacts import (
     ArtifactSession,
     derive_run_type,
-    repo_relative_path,
     sanitize_artifact_token,
     summarize_benchmark_results,
 )

@@ -10,20 +10,13 @@ RUNNER_DIR := $(ROOT_DIR)/runner
 DAEMON_DIR := $(ROOT_DIR)/daemon
 KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
 KERNEL_TEST_DIR := $(ROOT_DIR)/tests/kernel
-UPSTREAM_SELFTEST_DIR := $(KERNEL_DIR)/tools/testing/selftests/bpf
 KINSN_MODULE_DIR := $(ROOT_DIR)/module/x86
 CACHE_DIR := $(ROOT_DIR)/.cache
-UPSTREAM_SELFTEST_OUTPUT_DIR := $(CACHE_DIR)/upstream-bpf-selftests
 KINSN_MODULE_OUTPUT_DIR ?=
-UPSTREAM_SELFTEST_LLVM_SUFFIX ?= -20
-UPSTREAM_SELFTEST_CLANG ?= clang$(UPSTREAM_SELFTEST_LLVM_SUFFIX)
-UPSTREAM_SELFTEST_LLC ?= llc$(UPSTREAM_SELFTEST_LLVM_SUFFIX)
-UPSTREAM_SELFTEST_LLVM_CONFIG ?= llvm-config$(UPSTREAM_SELFTEST_LLVM_SUFFIX)
-UPSTREAM_SELFTEST_LLVM_OBJCOPY ?= llvm-objcopy$(UPSTREAM_SELFTEST_LLVM_SUFFIX)
-UPSTREAM_SELFTEST_LLVM_STRIP ?= llvm-strip$(UPSTREAM_SELFTEST_LLVM_SUFFIX)
-LLVM_CONFIG ?= $(UPSTREAM_SELFTEST_LLVM_CONFIG)
+RUNNER_BUILD_DIR ?= $(RUNNER_DIR)/build
 
 include $(RUNNER_DIR)/mk/arm64_defaults.mk
+include $(RUNNER_DIR)/mk/local_prep.mk
 
 # ARM64 / AWS
 ARM64_BUILD_DIR     ?= $(KERNEL_DIR)/build-arm64
@@ -39,8 +32,7 @@ ARM64_KERNEL_MAKEFLAGS      := $(filter-out B,$(MAKEFLAGS))
 RUN_TARGET_SUITE_CMD  = "$(PYTHON)" -m runner.libs.run_target_suite
 AWS_ARM64_BENCH_MODE ?= all
 
-export CROSS_COMPILE_ARM64 ARM64_BUILD_DIR ARM64_WORKTREE_DIR
-export ARM64_DOCKER_PLATFORM ARM64_CROSSBUILD_JOBS
+export CROSS_COMPILE_ARM64 ARM64_BUILD_DIR
 AWS_X86_BENCH_MODE        ?= all
 
 # Tunables
@@ -95,14 +87,12 @@ ROOT_VM_CORPUS_FILTERS_ARG := $(if $(strip $(FILTERS)),FILTERS="$(FILTERS)",)
 ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG := $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),VM_CORPUS_WORKLOAD_SECONDS="$(VM_CORPUS_WORKLOAD_SECONDS)",)
 ROOT_VM_CORPUS_EXTRA_ARGS := $(if $(strip $(VM_CORPUS_ARGS)),VM_CORPUS_ARGS='$(VM_CORPUS_ARGS)',)
 
-.PHONY: __kernel __kernel-clean __kernel-rebuild __kernel-arm64 __kinsn-modules \
+.PHONY: __kernel __kernel-clean __kernel-rebuild __kernel-arm64 __kernel-x86-artifacts __kernel-arm64-aws-artifacts __kinsn-modules \
+		__runner-binary __daemon-binary __x86-portable-libbpf __native-repos __prepare-local \
+		__repo-test-binaries __micro-programs __scx-binaries \
 		check validate \
 		vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
-		__arm64-worktree \
 		__kernel-arm64-aws \
-	__native-repo-build \
-		__scx-build \
-		__bundle-cache \
 		aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
 		aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86 \
 	help clean
@@ -125,11 +115,14 @@ help:
 	@echo "Developer-only raw build helpers still exist internally but are intentionally omitted here."
 
 __kernel:
-	"$(PYTHON)" -m runner.libs.x86_kernel_artifacts ensure-kvm-kernel \
-		--kernel-dir "$(KERNEL_DIR)" \
-		--defconfig "$(DEFCONFIG_SRC)" \
-		--bzimage "$(BZIMAGE_PATH)" \
-		--jobs "$(JOBS)"
+	@test -n "$(BZIMAGE_PATH)" || { echo "BZIMAGE_PATH is required" >&2; exit 1; }
+	@if [ ! -f "$(KERNEL_CONFIG_PATH)" ]; then cp "$(DEFCONFIG_SRC)" "$(KERNEL_CONFIG_PATH)"; fi
+	$(MAKE) -C "$(KERNEL_DIR)" olddefconfig
+	$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" bzImage modules
+	@if [ "$(BZIMAGE_PATH)" != "$(KERNEL_DIR)/arch/x86/boot/bzImage" ]; then \
+		mkdir -p "$$(dirname "$(BZIMAGE_PATH)")"; \
+		cp "$(KERNEL_DIR)/arch/x86/boot/bzImage" "$(BZIMAGE_PATH)"; \
+	fi
 
 __kernel-clean:
 	$(MAKE) -C "$(KERNEL_DIR)" clean
@@ -137,15 +130,24 @@ __kernel-clean:
 __kernel-rebuild: __kernel-clean
 	$(MAKE) __kernel BZIMAGE="$(BZIMAGE)"
 
+__kernel-x86-artifacts: __kernel
+	@test -n "$(OUTPUT_ROOT)" || { echo "OUTPUT_ROOT is required" >&2; exit 1; }
+	@artifact_root="$(OUTPUT_ROOT)"; \
+	rm -rf "$$artifact_root"; \
+	mkdir -p "$$artifact_root/boot"; \
+	kernel_release="$$( $(MAKE) -s -C "$(KERNEL_DIR)" kernelrelease )"; \
+	install_root="$$artifact_root/modules-$$kernel_release.root"; \
+	mkdir -p "$$install_root"; \
+	cp "$(KERNEL_DIR)/arch/x86/boot/bzImage" "$$artifact_root/boot/bzImage-$$kernel_release"; \
+	printf '%s\n' "$$kernel_release" > "$$artifact_root/kernel-release.txt"; \
+	$(MAKE) -C "$(KERNEL_DIR)" INSTALL_MOD_PATH="$$install_root" DEPMOD=true modules_install; \
+	tar -C "$$install_root" -czf "$$artifact_root/modules-$$kernel_release.tar.gz" lib
+
 __kinsn-modules: __kernel
-	@if [ -z "$(KINSN_MODULE_OUTPUT_DIR)" ]; then \
-		echo "KINSN_MODULE_OUTPUT_DIR is required" >&2; \
-		exit 1; \
-	fi
-	"$(PYTHON)" -m runner.libs.x86_kernel_artifacts stage-kinsn \
-		--kernel-dir "$(KERNEL_DIR)" \
-		--module-dir "$(KINSN_MODULE_DIR)" \
-		--output-dir "$(KINSN_MODULE_OUTPUT_DIR)"
+	@module_output_dir="$(if $(strip $(KINSN_MODULE_OUTPUT_DIR)),$(KINSN_MODULE_OUTPUT_DIR),$(KINSN_MODULE_DIR))"; \
+	$(MAKE) -C "$(KINSN_MODULE_DIR)" KDIR="$(KERNEL_DIR)"; \
+	mkdir -p "$$module_output_dir"; \
+	find "$(KINSN_MODULE_DIR)" -maxdepth 1 -type f \( -name '*.ko' -o -name 'modules.order' -o -name 'Module.symvers' \) -exec cp {} "$$module_output_dir"/ \;
 
 $(KERNEL_CONFIG_PATH):
 	cp "$(DEFCONFIG_SRC)" "$@"
@@ -186,46 +188,50 @@ vm-all:
 	$(MAKE) vm-e2e
 
 # ── ARM64 kernel ───────────────────────────────────────────────────────────────
-__arm64-worktree:
-	@mkdir -p "$(dir $(ARM64_WORKTREE_DIR))"
-	@git -C "$(KERNEL_DIR)" worktree prune
-	@if [ ! -e "$(ARM64_WORKTREE_DIR)/.git" ]; then \
-		git -C "$(KERNEL_DIR)" worktree add --detach "$(ARM64_WORKTREE_DIR)" "$$(git -C "$(KERNEL_DIR)" rev-parse HEAD)"; \
-	else \
-		git -C "$(ARM64_WORKTREE_DIR)" checkout --detach "$$(git -C "$(KERNEL_DIR)" rev-parse HEAD)" >/dev/null; \
-	fi
-
-$(ARM64_BUILD_CONFIG): | __arm64-worktree
+$(ARM64_BUILD_CONFIG):
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" "$(PYTHON)" -m runner.libs.arm64_kernel_config local \
-		"$(ARM64_WORKTREE_DIR)" "$(ARM64_BUILD_DIR)" "$(CROSS_COMPILE_ARM64)"
+		"$(KERNEL_DIR)" "$(ARM64_BUILD_DIR)" "$(CROSS_COMPILE_ARM64)"
 	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
 
-$(ARM64_IMAGE): $(ARM64_BUILD_CONFIG) | __arm64-worktree
-	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
+$(ARM64_IMAGE): $(ARM64_BUILD_CONFIG)
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" Image -j"$(NPROC)"
 	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
 
-$(ARM64_EFI_IMAGE): $(ARM64_BUILD_CONFIG) | __arm64-worktree
-	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
+$(ARM64_EFI_IMAGE): $(ARM64_BUILD_CONFIG)
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" vmlinuz.efi -j"$(NPROC)"
 
 __kernel-arm64: $(ARM64_IMAGE) $(ARM64_EFI_IMAGE)
 	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
 	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
 
-$(ARM64_AWS_BUILD_CONFIG): | __arm64-worktree
+$(ARM64_AWS_BUILD_CONFIG):
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" ARM64_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)" "$(PYTHON)" -m runner.libs.arm64_kernel_config aws \
-		"$(ARM64_WORKTREE_DIR)" "$(ARM64_AWS_BUILD_DIR)" "$(CROSS_COMPILE_ARM64)"
+		"$(KERNEL_DIR)" "$(ARM64_AWS_BUILD_DIR)" "$(CROSS_COMPILE_ARM64)"
 
-$(ARM64_AWS_IMAGE): $(ARM64_AWS_BUILD_CONFIG) | __arm64-worktree
-	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
+$(ARM64_AWS_IMAGE): $(ARM64_AWS_BUILD_CONFIG)
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" Image -j"$(NPROC)"
 
-$(ARM64_AWS_EFI_IMAGE): $(ARM64_AWS_BUILD_CONFIG) | __arm64-worktree
-	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
+$(ARM64_AWS_EFI_IMAGE): $(ARM64_AWS_BUILD_CONFIG)
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" vmlinuz.efi -j"$(NPROC)"
 
 __kernel-arm64-aws: $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE)
+
+__kernel-arm64-aws-artifacts: __kernel-arm64-aws
+	@test -n "$(OUTPUT_ROOT)" || { echo "OUTPUT_ROOT is required" >&2; exit 1; }
+	@artifact_root="$(OUTPUT_ROOT)"; \
+	rm -rf "$$artifact_root"; \
+	mkdir -p "$$artifact_root/boot"; \
+	kernel_release="$$( $(MAKE) -s -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" kernelrelease )"; \
+	install_root="$$artifact_root/modules-$$kernel_release.root"; \
+	mkdir -p "$$install_root"; \
+	cp "$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi" "$$artifact_root/boot/vmlinuz-$$kernel_release.efi"; \
+	printf '%s\n' "$$kernel_release" > "$$artifact_root/kernel-release.txt"; \
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" INSTALL_MOD_PATH="$$install_root" DEPMOD=true modules_install; \
+	tar -C "$$install_root" -czf "$$artifact_root/modules-$$kernel_release.tar.gz" lib
 
 # ── AWS aliases ───────────────────────────────────────────────────────────────
 aws-arm64-test:
@@ -250,158 +256,59 @@ aws-x86-terminate:
 
 aws-x86: aws-x86-test aws-x86-benchmark
 
-# ── Native Repo Build ──────────────────────────────────────────────────────────
-__native-repo-build:
-	@test -n "$(NATIVE_REPO_ROOT)" || { echo "NATIVE_REPO_ROOT is required" >&2; exit 1; }
-	@test -n "$(NATIVE_BUILD_ROOT)" || { echo "NATIVE_BUILD_ROOT is required" >&2; exit 1; }
-	@test -n "$(NATIVE_STAGE_ROOT)" || { echo "NATIVE_STAGE_ROOT is required" >&2; exit 1; }
-	@repo_args=(); \
-	if [ -n "$(NATIVE_REPOS_CSV)" ]; then \
-		IFS=, read -r -a repos <<< "$(NATIVE_REPOS_CSV)"; \
-		for repo in "$${repos[@]}"; do \
-			[ -n "$$repo" ] || continue; \
-			repo_args+=(--repo "$$repo"); \
-		done; \
-	fi; \
-	vmlinux_args=(); \
-	if [ -n "$(NATIVE_VMLINUX_BTF)" ]; then \
-		vmlinux_args+=(--vmlinux-btf "$(NATIVE_VMLINUX_BTF)"); \
-	fi; \
-	"$(PYTHON)" "$(ROOT_DIR)/runner/scripts/build_corpus_native.py" \
-		--jobs "$(JOBS)" \
-		--repo-root "$(NATIVE_REPO_ROOT)" \
-		--build-root "$(NATIVE_BUILD_ROOT)" \
-		--stage-root "$(NATIVE_STAGE_ROOT)" \
-		"$${vmlinux_args[@]}" \
-		"$${repo_args[@]}"
+# ── Runner / Daemon ────────────────────────────────────────────────────────────
+__daemon-binary:
+	@test -n "$(DAEMON_TARGET_DIR)" || { echo "DAEMON_TARGET_DIR is required" >&2; exit 1; }
+	@$(MAKE) -C "$(DAEMON_DIR)" release TARGET_DIR="$(DAEMON_TARGET_DIR)" TARGET_TRIPLE="$${DAEMON_TARGET_TRIPLE:-}"
 
-# ── SCX Build ──────────────────────────────────────────────────────────────────
-__scx-build:
-	@test -n "$(SCX_REPO_ROOT)" || { echo "SCX_REPO_ROOT is required" >&2; exit 1; }
-	@test -n "$(SCX_PROMOTE_ROOT)" || { echo "SCX_PROMOTE_ROOT is required" >&2; exit 1; }
-	@package_args=(); \
-	if [ -n "$(SCX_PACKAGES_CSV)" ]; then \
-		IFS=, read -r -a packages <<< "$(SCX_PACKAGES_CSV)"; \
-		for package in "$${packages[@]}"; do \
-			[ -n "$$package" ] || continue; \
-			package_args+=(--package "$$package"); \
-		done; \
-	fi; \
-	target_args=(); \
-	if [ -n "$(SCX_TARGET_TRIPLE)" ]; then \
-		target_args+=(--target-triple "$(SCX_TARGET_TRIPLE)"); \
-	fi; \
-	"$(PYTHON)" "$(ROOT_DIR)/runner/scripts/build_scx_artifacts.py" \
-		--force \
-		--jobs "$(JOBS)" \
-		--repo-root "$(SCX_REPO_ROOT)" \
-		--promote-root "$(SCX_PROMOTE_ROOT)" \
-		"$${target_args[@]}" \
-		"$${package_args[@]}"
+__runner-binary:
+	@test -n "$(RUNNER_BUILD_DIR)" || { echo "RUNNER_BUILD_DIR is required" >&2; exit 1; }
+	@$(MAKE) -C "$(RUNNER_DIR)" --no-print-directory micro_exec \
+		BUILD_DIR="$(RUNNER_BUILD_DIR)" \
+		JOBS="$(or $(JOBS),$(NPROC))" \
+		MICRO_REPO_ROOT="$(ROOT_DIR)" \
+		MICRO_EXEC_ENABLE_LLVMBPF="$${MICRO_EXEC_ENABLE_LLVMBPF:-OFF}" \
+		LLVM_DIR="$${RUN_LLVM_DIR:-$${LLVM_DIR:-}}"
 
-# ── Upstream Selftests Build ───────────────────────────────────────────────────
-__upstream-selftests:
-	@test -n "$(UPSTREAM_SELFTEST_SOURCE_DIR)" || { echo "UPSTREAM_SELFTEST_SOURCE_DIR is required" >&2; exit 1; }
-	@test -n "$(UPSTREAM_SELFTEST_OUTPUT_DIR)" || { echo "UPSTREAM_SELFTEST_OUTPUT_DIR is required" >&2; exit 1; }
-	@test -n "$(UPSTREAM_SELFTEST_HOST_PYTHON_BIN)" || { echo "UPSTREAM_SELFTEST_HOST_PYTHON_BIN is required" >&2; exit 1; }
-	@test -n "$(VMLINUX_BTF)" || { echo "VMLINUX_BTF is required" >&2; exit 1; }
-	@"$(PYTHON)" -m runner.libs.build_upstream_selftests
+__x86-portable-libbpf:
+	@test -n "$(X86_PORTABLE_LIBBPF_ROOT)" || { echo "X86_PORTABLE_LIBBPF_ROOT is required" >&2; exit 1; }
+	@$(MAKE) -C "$(RUNNER_DIR)" --no-print-directory portable-libbpf \
+		OUTPUT_ROOT="$(X86_PORTABLE_LIBBPF_ROOT)"
 
-# ── ARM64 Container Build ──────────────────────────────────────────────────────
-__arm64-container-build:
-	@test -n "$(ARM64_DOCKER_PLATFORM)" || { echo "ARM64_DOCKER_PLATFORM is required" >&2; exit 1; }
-	@test -n "$(ARM64_CROSSBUILD_DOCKERFILE)" || { echo "ARM64_CROSSBUILD_DOCKERFILE is required" >&2; exit 1; }
-	@test -n "$(ARM64_CROSSBUILD_CONTEXT)" || { echo "ARM64_CROSSBUILD_CONTEXT is required" >&2; exit 1; }
-	@test -n "$(ARM64_CROSSBUILD_IMAGE)" || { echo "ARM64_CROSSBUILD_IMAGE is required" >&2; exit 1; }
-	@test -n "$(ARM64_CROSSBUILD_STAMP)" || { echo "ARM64_CROSSBUILD_STAMP is required" >&2; exit 1; }
-	@test -n "$(ARM64_CROSSBUILD_LOCK)" || { echo "ARM64_CROSSBUILD_LOCK is required" >&2; exit 1; }
-	@test -n "$(ARM64_CROSSBUILD_OUTPUT_DIR)" || { echo "ARM64_CROSSBUILD_OUTPUT_DIR is required" >&2; exit 1; }
-	@test -n "$(ARM64_CROSSBUILD_BUILD_ROOT)" || { echo "ARM64_CROSSBUILD_BUILD_ROOT is required" >&2; exit 1; }
-	@test -n "$(ARM64_SOURCE_REPO_ROOT)" || { echo "ARM64_SOURCE_REPO_ROOT is required" >&2; exit 1; }
-	@test -n "$(ARM64_HOST_PYTHON_BIN)" || { echo "ARM64_HOST_PYTHON_BIN is required" >&2; exit 1; }
-	@stamp_path="$(ARM64_CROSSBUILD_STAMP)"; \
-	lock_path="$(ARM64_CROSSBUILD_LOCK)"; \
-	dockerfile_path="$(ARM64_CROSSBUILD_DOCKERFILE)"; \
-	mkdir -p "$$(dirname "$$stamp_path")" "$$(dirname "$$lock_path")"; \
-	flock "$$lock_path" bash -eu -o pipefail -c '\
-		stamp_path="$$1"; \
-		dockerfile_path="$$2"; \
-		image="$$3"; \
-		platform="$$4"; \
-		context_dir="$$5"; \
-		if [ -f "$$stamp_path" ] && [ "$$stamp_path" -nt "$$dockerfile_path" ]; then \
-			exit 0; \
-		fi; \
-		docker buildx build --load --platform "$$platform" -f "$$dockerfile_path" -t "$$image" "$$context_dir"; \
-		touch "$$stamp_path"; \
-	' _ "$$stamp_path" "$$dockerfile_path" "$(ARM64_CROSSBUILD_IMAGE)" "$(ARM64_DOCKER_PLATFORM)" "$(ARM64_CROSSBUILD_CONTEXT)"; \
-	docker run --rm --platform "$(ARM64_DOCKER_PLATFORM)" \
-		-v "$(ROOT_DIR):/workspace" \
-		-w /workspace \
-		-e HOME=/tmp/codex \
-		-e CARGO_HOME="$(ARM64_CROSSBUILD_CARGO_HOME)" \
-		-e HOST_UID="$(HOST_UID)" \
-		-e HOST_GID="$(HOST_GID)" \
-		-e ARM64_SOURCE_REPO_ROOT="$(ARM64_SOURCE_REPO_ROOT)" \
-		-e ARM64_CROSSBUILD_OUTPUT_DIR="$(ARM64_CROSSBUILD_OUTPUT_DIR)" \
-		-e ARM64_CROSSBUILD_BUILD_ROOT="$(ARM64_CROSSBUILD_BUILD_ROOT)" \
-		-e ARM64_BENCH_REPO_ROOT="$(ARM64_BENCH_REPO_ROOT)" \
-		-e ARM64_NATIVE_REPO_BUILD_ROOT="$(ARM64_NATIVE_REPO_BUILD_ROOT)" \
-		-e ARM64_KATRAN_GETDEPS_ROOT="$(ARM64_KATRAN_GETDEPS_ROOT)" \
-		-e ARM64_KATRAN_GETDEPS_LOCK="$(ARM64_KATRAN_GETDEPS_LOCK)" \
-		-e ARM64_VENDOR_BPFTOOL_ROOT="$(ARM64_VENDOR_BPFTOOL_ROOT)" \
-		-e ARM64_VENDOR_BPFTOOL_LOCK="$(ARM64_VENDOR_BPFTOOL_LOCK)" \
-		-e ARM64_CROSSBUILD_JOBS="$(ARM64_CROSSBUILD_JOBS)" \
-		-e ARM64_CROSSBUILD_RUNTIME_TARGETS="$(ARM64_CROSSBUILD_RUNTIME_TARGETS)" \
-		-e MICRO_EXEC_ENABLE_LLVMBPF="$(MICRO_EXEC_ENABLE_LLVMBPF)" \
-		-e ARM64_PREBUILT_DAEMON_BINARY="$(ARM64_PREBUILT_DAEMON_BINARY)" \
-		-e ARM64_HOST_PYTHON_BIN=python3 \
-		-e ARM64_CROSSBUILD_BENCH_REPOS="$(ARM64_CROSSBUILD_BENCH_REPOS)" \
-		-e ARM64_CROSSBUILD_ONLY_BENCH="$(ARM64_CROSSBUILD_ONLY_BENCH)" \
-		"$(ARM64_CROSSBUILD_IMAGE)" \
-		python3 -m runner.libs.arm64_container_build
+__native-repos:
+	@test -n "$(NATIVE_REPOS_CSV)" || { echo "NATIVE_REPOS_CSV is required" >&2; exit 1; }
+	@test -n "$(NATIVE_TARGET_ARCH)" || { echo "NATIVE_TARGET_ARCH is required" >&2; exit 1; }
+	@$(MAKE) -C "$(RUNNER_DIR)" native-repos \
+		CORPUS_BUILD_DIR="$(ROOT_DIR)/corpus/build" \
+		NATIVE_REPOS_CSV="$(NATIVE_REPOS_CSV)" \
+		NATIVE_TARGET_ARCH="$(NATIVE_TARGET_ARCH)" \
+		JOBS="$(or $(JOBS),$(NPROC))"
 
-# ── ARM64 Host Build ───────────────────────────────────────────────────────────
-__arm64-host-build:
-	@test -n "$(ARM64_HOST_BUILD_MODE)" || { echo "ARM64_HOST_BUILD_MODE is required" >&2; exit 1; }
-	@"$(PYTHON)" -m runner.libs.arm64_host_build "$(ARM64_HOST_BUILD_MODE)"
+__repo-test-binaries:
+	@test -n "$(UNITTEST_BUILD_DIR)" || { echo "UNITTEST_BUILD_DIR is required" >&2; exit 1; }
+	@test -n "$(NEGATIVE_BUILD_DIR)" || { echo "NEGATIVE_BUILD_DIR is required" >&2; exit 1; }
+	@$(MAKE) -C "$(ROOT_DIR)/tests/unittest" BUILD_DIR="$(UNITTEST_BUILD_DIR)"
+	@$(MAKE) -C "$(ROOT_DIR)/tests/negative" BUILD_DIR="$(NEGATIVE_BUILD_DIR)"
 
-# ── Bundle Cache ───────────────────────────────────────────────────────────────
-__bundle-cache:
-	@test -n "$(BUNDLE_MANIFEST_PATH)" || { echo "BUNDLE_MANIFEST_PATH is required" >&2; exit 1; }
-	@test -n "$(BUNDLE_INPUTS_PATH)" || { echo "BUNDLE_INPUTS_PATH is required" >&2; exit 1; }
-	@test -n "$(BUNDLE_CACHE_DIR)" || { echo "BUNDLE_CACHE_DIR is required" >&2; exit 1; }
-	@cache_dir="$(BUNDLE_CACHE_DIR)"; \
-	cache_root="$$(dirname "$$cache_dir")"; \
-	lock_dir="$$cache_root/.locks"; \
-	cache_key="$$(basename "$$cache_dir")"; \
-	lock_file="$$lock_dir/$$cache_key.lock"; \
-	mkdir -p "$$lock_dir" "$$cache_root"; \
-	flock "$$lock_file" bash -eu -o pipefail -c '\
-		cache_dir="$$1"; \
-		manifest_path="$$2"; \
-		bundle_inputs_path="$$3"; \
-		python_bin="$$4"; \
-		if [ -f "$$cache_dir/bundle.tar.gz" ] && tar -tzf "$$cache_dir/bundle.tar.gz" >/dev/null 2>&1; then \
-			exit 0; \
-		fi; \
-		rm -rf "$$cache_dir"; \
-		tmp_dir="$${cache_dir}.tmp.$$PPID"; \
-		rm -rf "$$tmp_dir"; \
-		mkdir -p "$$tmp_dir"; \
-		"$$python_bin" -m runner.libs.build_remote_bundle "$$manifest_path" "$$bundle_inputs_path" "$$tmp_dir/workspace" "$$tmp_dir/bundle.tar.gz"; \
-		rm -rf "$$tmp_dir/workspace"; \
-		mv "$$tmp_dir" "$$cache_dir"; \
-	' _ "$$cache_dir" "$(BUNDLE_MANIFEST_PATH)" "$(BUNDLE_INPUTS_PATH)" "$(PYTHON)"
+__micro-programs:
+	@test -n "$(MICRO_PROGRAMS_OUTPUT_DIR)" || { echo "MICRO_PROGRAMS_OUTPUT_DIR is required" >&2; exit 1; }
+	@$(MAKE) -C "$(ROOT_DIR)/micro/programs" OUTPUT_DIR="$(MICRO_PROGRAMS_OUTPUT_DIR)"
+
+__scx-binaries:
+	@test -n "$(SCX_PACKAGES_CSV)" || { echo "SCX_PACKAGES_CSV is required" >&2; exit 1; }
+	@$(MAKE) -C "$(RUNNER_DIR)" --no-print-directory scx-binaries \
+		SCX_PACKAGES_CSV="$(SCX_PACKAGES_CSV)" \
+		SCX_TARGET_TRIPLE="$${SCX_TARGET_TRIPLE:-}" \
+		CORPUS_BUILD_DIR="$(ROOT_DIR)/corpus/build"
 
 # ── Clean ──────────────────────────────────────────────────────────────────────
 clean:
-	rm -rf "$(RUNNER_DIR)/build"
+	rm -rf "$(RUNNER_BUILD_DIR)"
 	$(MAKE) -C "$(MICRO_DIR)" clean
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	$(MAKE) -C "$(KERNEL_DIR)" clean
 	rm -f "$(ARM64_CONFIG_LINK)" "$(ARM64_IMAGE_LINK)"
-	rm -rf "$(ARM64_BUILD_DIR)" "$(UPSTREAM_SELFTEST_OUTPUT_DIR)" "$(CACHE_DIR)/arm64-host"
+	rm -rf "$(ARM64_BUILD_DIR)" "$(CACHE_DIR)/arm64-host"
 	rm -rf \
 		"$(CACHE_DIR)/aws-arm64/kernel-build" \
 		"$(CACHE_DIR)/aws-arm64/setup-artifacts" \

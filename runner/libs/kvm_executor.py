@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-import shutil
 import subprocess
 import sys
-import tarfile
-import tempfile
 from functools import partial
 from pathlib import Path
 
@@ -24,22 +21,6 @@ def _require_scalar(mapping: dict[str, str | list[str]], name: str) -> str:
     if not value:
         _die(f"manifest {name} is empty")
     return value
-
-
-def bundle_stage_root(bundle_tar: Path, run_token: str) -> Path:
-    stage_token = run_token.strip()
-    if not stage_token:
-        _die("manifest RUN_TOKEN is empty for KVM bundle staging")
-    stage_bundle_root = Path(tempfile.gettempdir()) / "bpf-benchmark-kvm" / stage_token
-    stage_root = stage_bundle_root / "workspace"
-    shutil.rmtree(stage_bundle_root, ignore_errors=True)
-    stage_root.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(bundle_tar, "r:gz") as archive:
-        archive.extractall(stage_root, filter="data")
-    manifest_path = stage_root / "run-contract.env"
-    if not manifest_path.is_file():
-        _die(f"staged KVM manifest is missing after untar: {manifest_path}")
-    return stage_root
 
 
 def suite_command(workspace_root: Path, contract: dict[str, str | list[str]]) -> str:
@@ -75,9 +56,9 @@ def build_vm_command(workspace_root: Path, contract: dict[str, str | list[str]])
         "--timeout",
         _require_scalar(contract, "RUN_VM_TIMEOUT_SECONDS"),
         "--cwd",
-        str(workspace_root),
+        str(ROOT_DIR),
         "--rwdir",
-        str(workspace_root),
+        str(ROOT_DIR),
         "--command",
         suite_command(workspace_root, contract),
     ]
@@ -112,14 +93,12 @@ def main(argv: list[str] | None = None) -> None:
     executor = _require_scalar(contract, "RUN_EXECUTOR")
     if executor != "kvm":
         _die(f"manifest executor is not kvm: {executor}")
-    bundle_tar_value = local_state.get("RUN_BUNDLE_TAR", "").strip()
-    if not bundle_tar_value:
-        _die("staged KVM bundle tar is missing from local state")
-    bundle_tar = Path(bundle_tar_value).resolve()
-    if not bundle_tar.is_file():
-        _die(f"staged KVM bundle tar does not exist: {bundle_tar}")
-
-    workspace_root = bundle_stage_root(bundle_tar, _require_scalar(contract, "RUN_TOKEN"))
+    workspace_root_value = local_state.get("RUN_LOCAL_WORKSPACE_ROOT", "").strip()
+    if not workspace_root_value:
+        _die("local workspace root is missing from local state")
+    workspace_root = Path(workspace_root_value).resolve()
+    if not workspace_root.is_dir():
+        _die(f"local workspace root does not exist: {workspace_root}")
     completed = subprocess.run(
         build_vm_command(workspace_root, contract),
         cwd=ROOT_DIR,

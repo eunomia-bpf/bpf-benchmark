@@ -3,10 +3,10 @@ from __future__ import annotations
 import os
 import re
 import secrets
+import shlex
 import shutil
 import subprocess
 import sys
-import tempfile
 from functools import partial
 from pathlib import Path
 
@@ -37,6 +37,65 @@ def _run_checked(command: list[str]) -> None:
 def _python_module_command(module: str, *args: str) -> list[str]:
     return [sys.executable, "-m", module, *args]
 
+
+def _base_env_from_contract(contract: dict[str, str | list[str]]) -> dict[str, str]:
+    env: dict[str, str] = {}
+    for name in ("PATH", "HOME", "USER", "LOGNAME", "TERM", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE", "SHELL"):
+        value = os.environ.get(name, "").strip()
+        if value:
+            env[name] = value
+    for name, value in contract.items():
+        env[name] = shlex.join(value) if isinstance(value, list) else value
+    return env
+
+
+def _run_local_prep(
+    manifest_path: Path,
+    local_state_path: Path,
+    remote_prep_state_path: Path | None = None,
+) -> None:
+    contract = parse_manifest(manifest_path)
+    env = _base_env_from_contract(contract)
+    host_python_bin = str(contract.get("RUN_HOST_PYTHON_BIN", "")).strip()
+    if not host_python_bin:
+        _die("manifest host python is missing")
+    env.update(
+        {
+            "ROOT_DIR": str(ROOT_DIR),
+            "PYTHONPATH": f"{ROOT_DIR}{':' + env['PYTHONPATH'] if env.get('PYTHONPATH') else ''}",
+            "MANIFEST_PATH": str(manifest_path),
+            "LOCAL_STATE_PATH": str(local_state_path),
+            "HOST_PYTHON_BIN": host_python_bin,
+            "RUN_CONTRACT_PYTHON_BIN": host_python_bin,
+        }
+    )
+    executor = str(contract.get("RUN_EXECUTOR", "")).strip()
+    if executor == "aws-ssh":
+        if remote_prep_state_path is None:
+            _die("AWS local prep requires an explicit remote-prep state path")
+        if not remote_prep_state_path.is_file():
+            _die(f"AWS remote-prep state is missing: {remote_prep_state_path}")
+        env["AWS_REMOTE_PREP_STATE_PATH"] = str(remote_prep_state_path)
+    elif executor != "kvm":
+        _die(f"unsupported executor for local prep: {executor}")
+    completed = subprocess.run(
+        [
+            "make",
+            "-C",
+            str(ROOT_DIR),
+            "__prepare-local",
+            f"PYTHON={host_python_bin}",
+            f"MANIFEST_PATH={manifest_path}",
+            f"LOCAL_STATE_PATH={local_state_path}",
+        ],
+        cwd=ROOT_DIR,
+        env=env,
+        text=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise SystemExit(completed.returncode)
+
 def _write_manifest(target_name: str, suite_name: str, run_token: str, manifest_path: Path) -> None:
     env = os.environ.copy()
     env["RUN_TOKEN"] = run_token
@@ -63,42 +122,23 @@ def _cleanup_failed_dedicated_aws_prep(manifest_path: Path) -> None:
     shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
 
 
-def _temp_env_path(prefix: str) -> Path:
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    handle = tempfile.NamedTemporaryFile(
-        mode="w",
-        prefix=prefix,
-        suffix=".env",
-        dir=CACHE_DIR,
-        delete=False,
-    )
-    handle.close()
-    return Path(handle.name)
-
-
-def _temp_json_path(prefix: str) -> Path:
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    handle = tempfile.NamedTemporaryFile(
-        mode="w",
-        prefix=prefix,
-        suffix=".json",
-        dir=CACHE_DIR,
-        delete=False,
-    )
-    handle.close()
-    return Path(handle.name)
-
-
 def _run_token(target_name: str, suite_name: str) -> str:
     token = f"run.{target_name}.{suite_name}.{secrets.token_hex(4)}"
     return re.sub(r"[^0-9A-Za-z._-]+", "_", token)
 
 
+def _control_dir(run_token: str) -> Path:
+    control_dir = CACHE_DIR / run_token
+    control_dir.mkdir(parents=True, exist_ok=True)
+    return control_dir
+
+
 def _run_action(target_name: str, suite_name: str) -> None:
     run_token = _run_token(target_name, suite_name)
-    manifest_path = _temp_env_path(f"manifest.{run_token}.")
-    local_state_path = _temp_json_path(f"local-state.{run_token}.")
-    remote_prep_state_path = _temp_json_path(f"remote-state.{run_token}.")
+    control_dir = _control_dir(run_token)
+    manifest_path = control_dir / "manifest.env"
+    local_state_path = control_dir / "local-state.json"
+    remote_prep_state_path = control_dir / "remote-state.json"
     prep_cleanup_armed = False
     success = False
     try:
@@ -115,14 +155,7 @@ def _run_action(target_name: str, suite_name: str) -> None:
                     str(remote_prep_state_path),
                 ),
             )
-            _run_checked(
-                _python_module_command(
-                    "runner.libs.prepare_local_inputs",
-                    str(manifest_path),
-                    str(local_state_path),
-                    str(remote_prep_state_path),
-                ),
-            )
+            _run_local_prep(manifest_path, local_state_path, remote_prep_state_path)
             prep_cleanup_armed = False
             _run_checked(
                 _python_module_command(
@@ -135,13 +168,7 @@ def _run_action(target_name: str, suite_name: str) -> None:
             success = True
             return
         if executor == "kvm":
-            _run_checked(
-                _python_module_command(
-                    "runner.libs.prepare_local_inputs",
-                    str(manifest_path),
-                    str(local_state_path),
-                ),
-            )
+            _run_local_prep(manifest_path, local_state_path)
             _run_checked(
                 _python_module_command(
                     "runner.libs.kvm_executor",
@@ -156,12 +183,10 @@ def _run_action(target_name: str, suite_name: str) -> None:
         if prep_cleanup_armed:
             _cleanup_failed_dedicated_aws_prep(manifest_path)
         if success:
-            for path in (manifest_path, local_state_path, remote_prep_state_path):
-                path.unlink(missing_ok=True)
+            shutil.rmtree(control_dir, ignore_errors=True)
         else:
-            for path in (manifest_path, local_state_path, remote_prep_state_path):
-                if path.exists():
-                    print(f"[run-target-suite][ERROR] preserved debug artifact: {path}", file=sys.stderr)
+            if control_dir.exists():
+                print(f"[run-target-suite][ERROR] preserved debug artifact: {control_dir}", file=sys.stderr)
 
 
 def _benchmark_action(target_name: str, mode: str) -> None:
@@ -170,7 +195,8 @@ def _benchmark_action(target_name: str, mode: str) -> None:
         return
     if mode != "all":
         _die(f"unsupported benchmark mode: {mode}")
-    target_manifest = _temp_env_path(f"benchmark-target.{target_name}.")
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    target_manifest = CACHE_DIR / f"benchmark-target.{target_name}.env"
     try:
         _write_target_manifest(target_name, target_manifest)
         contract = parse_manifest(target_manifest)
@@ -199,7 +225,8 @@ def _benchmark_action(target_name: str, mode: str) -> None:
 
 
 def _terminate_action(target_name: str) -> None:
-    manifest_path = _temp_env_path(f"terminate.{target_name}.")
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    manifest_path = CACHE_DIR / f"terminate.{target_name}.env"
     try:
         _write_target_manifest(target_name, manifest_path)
         contract = parse_manifest(manifest_path)

@@ -158,7 +158,6 @@ class SuiteEntrypoint:
     bpftool_bin: str
     artifact_dir: Path
     remote_workload_tool_bin: Path | None
-    bundled_workload_tools: list[str]
     workload_tools: list[str]
     corpus_argv: list[str]
     e2e_argv: list[str]
@@ -236,7 +235,6 @@ class SuiteEntrypoint:
             bpftool_bin=bpftool_bin,
             artifact_dir=artifact_dir,
             remote_workload_tool_bin=resolve_remote_workload_tool_bin(workspace, contract),
-            bundled_workload_tools=csv_value("RUN_BUNDLED_WORKLOAD_TOOLS_CSV"),
             workload_tools=workload_tools,
             corpus_argv=argv_value("RUN_CORPUS_ARGV"),
             e2e_argv=argv_value("RUN_E2E_ARGV"),
@@ -270,12 +268,9 @@ class SuiteEntrypoint:
                 extra_ld_library_dirs.append(str(lib64_dir))
         if extra_ld_library_dirs:
             env["LD_LIBRARY_PATH"] = ":".join(extra_ld_library_dirs)
-        bcc_tools_dir = self._optional_contract("RUN_BCC_TOOLS_DIR")
-        if bcc_tools_dir:
-            resolved_bcc_tools_dir = _resolve_workspace_contract_path(self.workspace, bcc_tools_dir)
-            if not resolved_bcc_tools_dir.is_dir():
-                _die(f"bundled BCC tools dir is missing: {resolved_bcc_tools_dir}")
-            env["BCC_TOOLS_DIR"] = str(resolved_bcc_tools_dir)
+        bcc_tools_dir = self.workspace / "corpus" / "build" / "bcc" / "libbpf-tools" / ".output"
+        if bcc_tools_dir.is_dir():
+            env["BCC_TOOLS_DIR"] = str(bcc_tools_dir)
         if self.executor == "aws-ssh":
             env["BPFREJIT_KERNEL_MODULES_ROOT"] = "/"
         elif self.executor == "kvm":
@@ -311,10 +306,20 @@ class SuiteEntrypoint:
         return modules
 
     def _resolve_test_daemon(self) -> Path:
-        return _require_executable(
-            self.workspace / "daemon" / "target" / "release" / "bpfrejit-daemon",
-            "test daemon",
-        )
+        return self._resolve_daemon_binary()
+
+    def _resolve_daemon_binary(self) -> Path:
+        if self.target_arch == "arm64":
+            candidates = [
+                self.workspace / "daemon" / "target" / "aarch64-unknown-linux-gnu" / "release" / "bpfrejit-daemon",
+                self.workspace / "daemon" / "target" / "release" / "bpfrejit-daemon",
+            ]
+        else:
+            candidates = [self.workspace / "daemon" / "target" / "release" / "bpfrejit-daemon"]
+        for candidate in candidates:
+            if candidate.is_file() and os.access(candidate, os.X_OK):
+                return candidate
+        _die(f"bundled daemon is missing or not executable: {candidates[0]}")
 
     def _ensure_runner_binary(self) -> None:
         if not self._bool_contract("RUN_NEEDS_RUNNER_BINARY"):
@@ -334,35 +339,20 @@ class SuiteEntrypoint:
             if not object_path.is_file():
                 _die(f"bundled scx object is missing: {object_path}")
 
-    def _ensure_bundled_repos(self) -> None:
-        for repo in self._csv_contract("RUN_BUNDLED_REPOS_CSV"):
-            repo_dir = self.workspace / "runner" / "repos" / repo
-            if not repo_dir.is_dir():
-                _die(f"bundled repo is missing: {repo_dir}")
-
     def _ensure_katran_bundle(self, env: dict[str, str]) -> None:
         if not self._bool_contract("RUN_NEEDS_KATRAN_BUNDLE"):
             return
         binary = _require_executable(
-            _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_KATRAN_SERVER_BINARY")),
+            self.workspace / "corpus" / "build" / "katran" / "bin" / "katran_server_grpc",
             "bundled Katran server",
         )
-        lib_dir = _resolve_workspace_contract_path(self.workspace, self._required_contract("RUN_KATRAN_SERVER_LIB_DIR"))
+        lib_dir = self.workspace / "corpus" / "build" / "katran" / "lib"
+        if not lib_dir.is_dir():
+            lib_dir = self.workspace / "corpus" / "build" / "katran" / "lib64"
         if not lib_dir.is_dir():
             _die("bundled Katran runtime lib dir is missing")
         env["KATRAN_SERVER_BINARY"] = str(binary)
         env["KATRAN_SERVER_LIB_DIR"] = str(lib_dir)
-
-    def _ensure_upstream_selftests(self) -> None:
-        output_dir = self.workspace / ".cache" / "upstream-bpf-selftests"
-        _require_executable(output_dir / "test_verifier", "bundled upstream test_verifier")
-        _require_executable(output_dir / "test_progs", "bundled upstream test_progs")
-        kmods_dir = self.workspace / "upstream-selftests-kmods"
-        if kmods_dir.is_dir():
-            for module in kmods_dir.glob("*.ko"):
-                shutil.copy2(module, output_dir / module.name)
-        elif self.target_arch == "arm64":
-            _die("bundled upstream selftest kmods are missing from the workspace")
 
     def _ensure_workload_tools(self, env: dict[str, str]) -> None:
         if not self.workload_tools:
@@ -493,39 +483,6 @@ class SuiteEntrypoint:
                 print(f"FAIL: {label.split(' (')[0]}", file=sys.stderr)
         return passed, failed
 
-    def _run_upstream_test_verifier(self) -> tuple[int, int]:
-        upstream_dir = self.workspace / ".cache" / "upstream-bpf-selftests"
-        verifier = upstream_dir / "test_verifier"
-        if not verifier.is_file():
-            print(f"SKIP: test_verifier not found at {verifier}", file=sys.stderr)
-            return 0, 0
-        self._log_test_section("Upstream test_verifier")
-        if _run_with_status([str(verifier)], cwd=upstream_dir, env={"PATH": os.environ.get("PATH", "")}):
-            return 1, 0
-        print("FAIL: test_verifier", file=sys.stderr)
-        return 0, 1
-
-    def _run_upstream_test_progs(self) -> tuple[int, int]:
-        upstream_dir = self.workspace / ".cache" / "upstream-bpf-selftests"
-        test_progs = upstream_dir / "test_progs"
-        if not test_progs.is_file():
-            print(f"SKIP: test_progs not found at {test_progs}", file=sys.stderr)
-            return 0, 0
-        filter_tokens = self._csv_contract("RUN_UPSTREAM_TEST_PROGS_FILTERS")
-        deny_tokens = self._csv_contract("RUN_UPSTREAM_TEST_PROGS_DENY")
-        self._log_test_section(
-            f"Upstream test_progs (filter: {' '.join(filter_tokens)}; deny: {' '.join(deny_tokens)})"
-        )
-        command = [str(test_progs)]
-        for token in filter_tokens:
-            command += ["-t", token]
-        for token in deny_tokens:
-            command += ["-d", token]
-        if _run_with_status(command, cwd=upstream_dir, env={"PATH": os.environ.get("PATH", "")}):
-            return 1, 0
-        print("FAIL: test_progs", file=sys.stderr)
-        return 0, 1
-
     def _run_kernel_selftest(self) -> tuple[int, int]:
         kernel_selftest = self.workspace / "tests" / "kernel" / "build" / "test_recompile"
         if not kernel_selftest.is_file():
@@ -563,13 +520,9 @@ class SuiteEntrypoint:
             _die("vm-negative-test failed")
 
     def _run_full_test_mode(self, env: dict[str, str]) -> None:
-        self._ensure_upstream_selftests()
         total_pass = 0
         total_fail = 0
         passed, failed = self._run_kernel_selftest()
-        total_pass += passed
-        total_fail += failed
-        passed, failed = self._run_upstream_test_verifier()
         total_pass += passed
         total_fail += failed
         self._log_test_section("Loading kinsn modules")
@@ -580,14 +533,10 @@ class SuiteEntrypoint:
         passed, failed = self._run_negative_suite(env, include_scx_race=True)
         total_pass += passed
         total_fail += failed
-        passed, failed = self._run_upstream_test_progs()
-        total_pass += passed
-        total_fail += failed
         self._print_test_summary(total_pass, total_fail)
         if total_fail:
             _die("vm-test failed")
         print("vm-test: ALL PASSED", file=sys.stderr)
-        _copy_result_dir(self.workspace / ".cache" / "upstream-bpf-selftests", self.artifact_dir)
 
     def _run_test_suite(self, env: dict[str, str]) -> None:
         self._validate_test_contract()
@@ -632,7 +581,6 @@ class SuiteEntrypoint:
         )
 
     def _run_corpus_suite(self, env: dict[str, str]) -> None:
-        self._ensure_bundled_repos()
         self._ensure_scx_artifacts()
         runtime_env = env.copy()
         runtime_ld = _cross_runtime_ld_library_path(self.workspace, self.target_arch)
@@ -645,7 +593,7 @@ class SuiteEntrypoint:
             self.python_bin,
             str(self.workspace / "corpus" / "driver.py"),
             "--daemon",
-            str(self.workspace / "daemon" / "target" / "release" / "bpfrejit-daemon"),
+            str(self._resolve_daemon_binary()),
             "--samples",
             self._required_contract("RUN_BENCH_SAMPLES"),
             "--output-json",
@@ -675,7 +623,7 @@ class SuiteEntrypoint:
             str(self.workspace / "e2e" / "driver.py"),
             case_name,
             "--daemon",
-            str(self.workspace / "daemon" / "target" / "release" / "bpfrejit-daemon"),
+            str(self._resolve_daemon_binary()),
         ]
         if self._bool_contract("RUN_E2E_SMOKE"):
             command.append("--smoke")
@@ -683,7 +631,6 @@ class SuiteEntrypoint:
         _run_checked(command, cwd=self.workspace, env=runtime_env)
 
     def _run_e2e_suite(self, env: dict[str, str]) -> None:
-        self._ensure_bundled_repos()
         self._ensure_scx_artifacts()
         cases = self._required_contract("RUN_E2E_CASES")
         if cases == "all":

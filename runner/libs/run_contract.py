@@ -237,8 +237,6 @@ _COMMON_MANIFEST_INPUTS = {
     "PYTHON",
     "RUN_TOKEN",
     "CROSS_COMPILE_ARM64",
-    "ARM64_DOCKER_PLATFORM",
-    "ARM64_CROSSBUILD_JOBS",
     "LLVM_CONFIG",
     "LLVM_DIR",
 }
@@ -267,9 +265,6 @@ _KVM_MANIFEST_INPUTS = {
     "SCX_PROG_SHOW_RACE_ITERATIONS",
     "SCX_PROG_SHOW_RACE_LOAD_TIMEOUT",
     "SCX_PROG_SHOW_RACE_SKIP_PROBE",
-    "UPSTREAM_SELFTEST_LLVM_SUFFIX",
-    "UPSTREAM_TEST_PROGS_FILTERS",
-    "UPSTREAM_TEST_PROGS_DENY",
 }
 
 _AWS_MANIFEST_SUFFIXES = {
@@ -370,8 +365,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     run_test_mode = "test"
     run_e2e_cases = "all"
     run_benchmark_repos = suite.get("SUITE_DEFAULT_REPOS", "")
-    run_bundled_repos = ""
-    run_fetch_repos = ""
     run_native_repos = suite.get("SUITE_DEFAULT_NATIVE_REPOS", "")
     run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")
     run_needs_sched_ext = suite.get("SUITE_NEEDS_SCHED_EXT", "0")
@@ -418,9 +411,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     run_test_scx_prog_show_race_iterations = ""
     run_test_scx_prog_show_race_load_timeout = ""
     run_test_scx_prog_show_race_skip_probe = ""
-    run_upstream_selftest_llvm_suffix = ""
-    run_upstream_test_progs_filters = ""
-    run_upstream_test_progs_deny = ""
     run_corpus_argv: list[str] = []
     run_e2e_argv: list[str] = []
 
@@ -516,21 +506,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         run_test_scx_prog_show_race_iterations = _env_or_default(values, "SCX_PROG_SHOW_RACE_ITERATIONS", suite.get("SUITE_DEFAULT_SCX_PROG_SHOW_RACE_ITERATIONS", "20"))
         run_test_scx_prog_show_race_load_timeout = _env_or_default(values, "SCX_PROG_SHOW_RACE_LOAD_TIMEOUT", suite.get("SUITE_DEFAULT_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT", "20"))
         run_test_scx_prog_show_race_skip_probe = _env_or_default(values, "SCX_PROG_SHOW_RACE_SKIP_PROBE", suite.get("SUITE_DEFAULT_SCX_PROG_SHOW_RACE_SKIP_PROBE", "0"))
-        run_upstream_selftest_llvm_suffix = _env_or_default(values, "UPSTREAM_SELFTEST_LLVM_SUFFIX", suite.get("SUITE_DEFAULT_UPSTREAM_SELFTEST_LLVM_SUFFIX", "-20"))
-        run_upstream_test_progs_filters = _normalize_csv(
-            _env_or_default(
-                values,
-                "UPSTREAM_TEST_PROGS_FILTERS",
-                suite.get("SUITE_DEFAULT_UPSTREAM_TEST_PROGS_FILTERS", "verifier,jit"),
-            )
-        )
-        run_upstream_test_progs_deny = _normalize_csv(
-            _env_or_default(
-                values,
-                "UPSTREAM_TEST_PROGS_DENY",
-                suite.get("SUITE_DEFAULT_UPSTREAM_TEST_PROGS_DENY", "verifier_private_stack"),
-            )
-        )
     elif suite_name == "micro":
         run_vm_timeout_seconds = _env_or_default(values, "VM_MICRO_TIMEOUT", run_vm_timeout_seconds)
     elif suite_name == "corpus":
@@ -604,10 +579,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     if run_needs_sched_ext == "1" and target.get("TARGET_SUPPORTS_SCHED_EXT", "0") != "1":
         _die(f"target {target_name} does not support required sched_ext for suite {suite_name}")
 
-    run_bundled_repos = run_benchmark_repos
-    run_fetch_repos = _append_csv_list(run_bundled_repos, run_native_repos)
-    if run_scx_packages:
-        run_fetch_repos = _append_csv(run_fetch_repos, "scx")
     if run_needs_llvmbpf == "1":
         run_llvm_dir = _resolve_manifest_llvm_dir(values)
         if not run_llvm_dir:
@@ -661,9 +632,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         "RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS": run_test_scx_prog_show_race_iterations,
         "RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT": run_test_scx_prog_show_race_load_timeout,
         "RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE": run_test_scx_prog_show_race_skip_probe,
-        "RUN_UPSTREAM_SELFTEST_LLVM_SUFFIX": run_upstream_selftest_llvm_suffix,
-        "RUN_UPSTREAM_TEST_PROGS_FILTERS": run_upstream_test_progs_filters,
-        "RUN_UPSTREAM_TEST_PROGS_DENY": run_upstream_test_progs_deny,
         "RUN_BENCH_SAMPLES": run_bench_samples,
         "RUN_BENCH_WARMUPS": run_bench_warmups,
         "RUN_BENCH_INNER_REPEAT": run_bench_inner_repeat,
@@ -671,8 +639,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         "RUN_CORPUS_WORKLOAD_SECONDS": run_corpus_workload_seconds,
         "RUN_E2E_CASES": run_e2e_cases,
         "RUN_E2E_SMOKE": run_e2e_smoke,
-        "RUN_BUNDLED_REPOS_CSV": run_bundled_repos,
-        "RUN_FETCH_REPOS_CSV": run_fetch_repos,
         "RUN_NATIVE_REPOS_CSV": run_native_repos,
         "RUN_SCX_PACKAGES_CSV": run_scx_packages,
         "RUN_REMOTE_COMMANDS_CSV": run_remote_commands,

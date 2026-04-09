@@ -5247,3 +5247,106 @@ Active todo:
 4. Continue shrinking ARM qemu/container prep wall clock, especially the
    remaining benchmark-native repo builds and any warm-cache misses that still
    force full getdeps/CMake work.
+
+
+### 13.70 2026-04-09: active-path cleanup resumed before another full runtime pass
+
+- The next cleanup pass intentionally stopped adding compatibility shims and
+  instead kept deleting active Python build/control-plane logic.
+- `runner/libs/aws_local_prep.py`, `runner/libs/kvm_local_prep.py`, and
+  `runner/libs/local_prep_common.py` are deleted from the active path.
+- Local prep is now driven by root `Make` through `runner/mk/local_prep.mk`,
+  and `prepare_local_inputs.py` is back to being a thin orchestration wrapper.
+- Root `Make` now owns:
+  - `__prepare-local`
+  - `__kernel-x86-artifacts`
+  - `__kernel-arm64-aws-artifacts`
+  - `__workspace-archive`
+- `aws_remote_prep.py` still owns AWS lifecycle/setup, but the kernel/modules
+  artifact build itself now goes through `Make`.
+- `aws_executor.py` no longer creates the transport tarball itself; it now
+  shells out to `make __workspace-archive`.
+- Two fully dead modules were removed from `runner/libs`:
+  - `arm64_sysroot.py`
+  - `repo_registry.py`
+- One redundant manifest/control-plane field was removed:
+  - `RUN_BUNDLED_REPOS_CSV`
+
+Reviewer findings on this cleanup round:
+- Fixed high-priority regression:
+  - bundled workload-tool detection in `guest_prereqs.py` now checks only the
+    explicit workload-tool contract instead of treating every required command
+    as bundled
+- Fixed KVM workspace breakage:
+  - `kvm_executor.py` now mounts the repo root instead of only the workspace
+    root, so the prepared workspace can reference the repo tree without
+    dangling guest symlinks
+- Fixed ARM wrong-arch fallback:
+  - ARM daemon now builds through `daemon/Makefile` with
+    `TARGET_TRIPLE=aarch64-unknown-linux-gnu`
+  - ARM local prep now fails explicitly for still-unmigrated `runner/scx`,
+    native-repo, and workload-tool prep instead of silently reusing x86 or
+    stale side effects
+- Removed dead manifest knobs from the active path:
+  - `ARM64_DOCKER_PLATFORM`
+  - `ARM64_CROSSBUILD_JOBS`
+
+Remaining architecture work before the next full runtime pass:
+1. Keep deleting Python-side build/staging logic that is still not strictly
+   lifecycle/runtime orchestration:
+   - especially the remaining AWS remote-prep packaging surface
+2. Keep moving deterministic build entrypoints to `Make` rather than adding
+   new Python prep helpers
+3. Re-run a whole-tree architecture review and only then re-open the full
+   `corpus/e2e` runtime matrix
+
+### 13.71 2026-04-09: delete upstream-selftests control plane and ARM worktree
+
+- The active runner path no longer carries an upstream-selftests build/selection
+  control plane.
+- Deleted from the active tree:
+  - `runner/config/README.md`
+  - `runner/config/upstream_selftests_selection.tsv`
+- `vm-test` now runs only repo-owned kernel selftest + unittest + negative
+  suites; the upstream selftests layer is no longer part of the canonical
+  runner contract.
+- `prepare_local_inputs.py` no longer computes phase lists. It now only:
+  - parses the manifest
+  - wires the minimal environment
+  - dispatches to `make __prepare-local`
+- `runner/mk/local_prep.mk` now dispatches by explicit suite target:
+  - `__prepare-local-test`
+  - `__prepare-local-micro`
+  - `__prepare-local-corpus`
+  - `__prepare-local-e2e`
+  instead of a Python-computed phase list and a generic loop over phase names.
+- ARM kernel prep no longer creates or reuses `.worktrees/linux-framework-arm64-src`.
+  It now builds directly from vendored `vendor/linux-framework` with `O=...`
+  out-of-tree build dirs.
+
+Current todo before reopening runtime:
+1. Keep deleting Python-side packaging/control logic that is not strictly
+   executor/runtime orchestration.
+2. Keep moving native repo prep toward direct Make/native-build entrypoints,
+   especially the remaining ARM benchmark-prep path.
+3. Finish whole-tree review on the current dirty tree; only after that reopen
+   `corpus/e2e` runtime validation.
+
+### 13.72 2026-04-09: delete one more Python prep layer and random temp state
+
+- Deleted dead `runner/libs/agent.py`; active code no longer imports it.
+- Deleted `runner/libs/prepare_local_inputs.py`; local prep now runs directly
+  from `runner.libs.run_target_suite`.
+- `run_target_suite` no longer allocates random temp manifest/state files. It
+  now uses a fixed per-run control directory under `.cache/runner-contracts/`.
+- `aws_executor` no longer allocates a random temporary bundle tarball. It now
+  uses a fixed `workspace.tar.gz` inside the run prep root.
+
+Updated todo:
+1. Keep deleting dead modules and stale helper targets in `runner/libs` and
+   root `Makefile`.
+2. Keep moving ARM benchmark prep off Python-owned repo-build paths and onto
+   Make/native build roots.
+3. Re-review the remaining AWS remote packaging path for more deletions.
+4. Only after the above and another whole-tree review, reopen `corpus/e2e`
+   runtime validation.
