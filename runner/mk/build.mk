@@ -6,6 +6,8 @@ REPO_TRACEE_ROOT := $(REPO_ARTIFACT_ROOT)/tracee
 REPO_TETRAGON_ROOT := $(REPO_ARTIFACT_ROOT)/tetragon
 REPO_KATRAN_ROOT := $(REPO_ARTIFACT_ROOT)/katran
 REPO_KERNEL_MODULES_ROOT := $(REPO_ARTIFACT_ROOT)/kernel-modules
+REPO_ARTIFACT_ROOT_X86 := $(ROOT_DIR)/.cache/repo-artifacts/x86_64
+REPO_ARTIFACT_ROOT_ARM64 := $(ROOT_DIR)/.cache/repo-artifacts/arm64
 
 RUNNER_LIBBPF_BUILD_DIR := $(RUNNER_BUILD_DIR)/vendor/libbpf
 RUNNER_LIBBPF_OBJDIR := $(RUNNER_LIBBPF_BUILD_DIR)/obj
@@ -14,14 +16,34 @@ RUNNER_LIBBPF_A := $(RUNNER_LIBBPF_OBJDIR)/libbpf.a
 KATRAN_X86_CACHE_ROOT := $(ARTIFACT_ROOT)/x86-host/katran
 KATRAN_X86_BUILD_ROOT := $(KATRAN_X86_CACHE_ROOT)/build
 KATRAN_X86_INSTALL_ROOT := $(KATRAN_X86_CACHE_ROOT)/install
+KATRAN_X86_CMAKE_OVERRIDE := $(KATRAN_X86_CACHE_ROOT)/cxx-override.cmake
 KATRAN_ARM64_CACHE_ROOT := $(ARTIFACT_ROOT)/arm64-host/katran
 KATRAN_ARM64_BUILD_ROOT := $(KATRAN_ARM64_CACHE_ROOT)/build
 KATRAN_ARM64_INSTALL_ROOT := $(KATRAN_ARM64_CACHE_ROOT)/install
+KATRAN_ARM64_CMAKE_OVERRIDE := $(KATRAN_ARM64_CACHE_ROOT)/cxx-override.cmake
 X86_PORTABLE_LIBBPF_ROOT := $(ARTIFACT_ROOT)/libbpf-runtime/x86_64/portable
 X86_PORTABLE_LIBBPF_STAMP := $(X86_PORTABLE_LIBBPF_ROOT)/.ready
 X86_PORTABLE_LIBBPF_SOURCE_INPUTS := $(shell find "$(ROOT_DIR)/vendor/libbpf/src" "$(ROOT_DIR)/vendor/libbpf/include" -type f ! -path '*/.git/*' 2>/dev/null | sort)
+LIBBPF_SOURCE_INPUTS := $(shell find "$(ROOT_DIR)/vendor/libbpf/src" "$(ROOT_DIR)/vendor/libbpf/include" -type f ! -path '*/.git/*' 2>/dev/null | sort)
 ARM64_CROSSBUILD_STAMP := $(ARTIFACT_ROOT)/arm64-host/crossbuild-image.stamp
 LOCK_ROOT := $(ARTIFACT_ROOT)/locks
+SCX_SOURCE_INPUTS := $(shell find "$(REPOS_DIR)/scx" \( -path '*/.git' -o -path '*/target' \) -prune -o -type f -print 2>/dev/null | sort)
+BCC_SOURCE_INPUTS := $(shell find "$(REPOS_DIR)/bcc/libbpf-tools" \( -path '*/.git' -o -path '*/.output' \) -prune -o -type f -print 2>/dev/null | sort)
+TRACEE_SOURCE_INPUTS := $(shell find "$(REPOS_DIR)/tracee" \( -path '*/.git' -o -path '*/dist' \) -prune -o -type f -print 2>/dev/null | sort)
+TETRAGON_SOURCE_INPUTS := $(shell find "$(REPOS_DIR)/tetragon" \( -path '*/.git' -o -path '*/vendor' -o -path '*/bpf/objs' \) -prune -o -type f -print 2>/dev/null | sort)
+KATRAN_SOURCE_INPUTS := $(shell find "$(REPOS_DIR)/katran" -path '*/.git' -prune -o -type f -print 2>/dev/null | sort)
+SCX_X86_STAGE_STAMP := $(REPO_ARTIFACT_ROOT_X86)/scx/.ready
+SCX_ARM64_STAGE_STAMP := $(REPO_ARTIFACT_ROOT_ARM64)/scx/.ready
+BCC_STAGE_STAMP := $(REPO_ARTIFACT_ROOT)/bcc/.ready
+TRACEE_STAGE_STAMP := $(REPO_TRACEE_ROOT)/.ready
+TETRAGON_STAGE_STAMP := $(REPO_TETRAGON_ROOT)/.ready
+KATRAN_X86_STAGE_STAMP := $(REPO_ARTIFACT_ROOT_X86)/katran/.ready
+KATRAN_ARM64_STAGE_STAMP := $(REPO_ARTIFACT_ROOT_ARM64)/katran/.ready
+KINSN_X86_READY_STAMP := $(ROOT_DIR)/module/x86/.ready
+KINSN_ARM64_READY_STAMP := $(ROOT_DIR)/module/arm64/.ready
+KINSN_X86_SOURCE_INPUTS := $(shell find "$(ROOT_DIR)/module/x86" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' -o -name 'Kbuild' \) 2>/dev/null | sort)
+KINSN_ARM64_SOURCE_INPUTS := $(shell find "$(ROOT_DIR)/module/arm64" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' -o -name 'Kbuild' \) 2>/dev/null | sort)
+ARM64_LIBBPF_RUNTIME_STAMP := $(REPO_ARTIFACT_ROOT)/libbpf/.ready
 
 .PHONY: __arm64-crossbuild-image \
 	__daemon-binary-x86_64 __daemon-binary-arm64 \
@@ -31,7 +53,7 @@ LOCK_ROOT := $(ARTIFACT_ROOT)/locks
 	__repo-test-binaries-x86_64 __repo-test-binaries-arm64 \
 	__micro-programs \
 	__x86-portable-libbpf \
-	__scx-binaries-x86_64 __scx-binaries-arm64 __scx-binaries-arm64-inner \
+	__scx-binaries-x86_64 __scx-binaries-arm64 \
 	__native-repos-x86_64 __native-repos-arm64 __native-repos-arm64-inner \
 	__native-repo-bcc __native-repo-tracee __native-repo-tetragon \
 	__native-repo-katran-x86_64 __native-repo-katran-arm64
@@ -83,13 +105,29 @@ $(RUNNER_LIBBPF_A):
 
 __kinsn-modules-x86_64:
 	@module_dir="$(ROOT_DIR)/module/x86"; \
+		ready_stamp="$(KINSN_X86_READY_STAMP)"; \
 		$(MAKE) -C "$(ROOT_DIR)" --no-print-directory __kernel; \
-		$(MAKE) -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" M="$$module_dir" modules
+		if [ -f "$$ready_stamp" ] && \
+			[ "$$ready_stamp" -nt "$(X86_BUILD_DIR)/vmlinux" ] && \
+			test -f "$$module_dir/bpf_decode.ko" && \
+			test -f "$$module_dir/bpf_printk.ko"; then \
+			exit 0; \
+		fi; \
+		$(MAKE) -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" M="$$module_dir" modules; \
+		touch "$$ready_stamp"
 
 __kinsn-modules-arm64:
 	@module_dir="$(ROOT_DIR)/module/arm64"; \
+		ready_stamp="$(KINSN_ARM64_READY_STAMP)"; \
 		$(MAKE) -C "$(ROOT_DIR)" --no-print-directory __kernel-arm64-aws ARM64_AWS_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)"; \
-		$(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" M="$$module_dir" modules
+		if [ -f "$$ready_stamp" ] && \
+			[ "$$ready_stamp" -nt "$(ARM64_AWS_BUILD_DIR)/vmlinux" ] && \
+			test -f "$$module_dir/bpf_decode.ko" && \
+			test -f "$$module_dir/bpf_printk.ko"; then \
+			exit 0; \
+		fi; \
+		$(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" M="$$module_dir" modules; \
+		touch "$$ready_stamp"
 
 __kernel-modules-x86_64:
 	@kernel_release_file="$(X86_BUILD_DIR)/include/config/kernel.release"; \
@@ -103,6 +141,7 @@ __kernel-modules-x86_64:
 	release_root="$$stage_root/lib/modules/$$kernel_release"; \
 	ready_stamp="$$stage_root/.ready"; \
 	if [ -f "$$ready_stamp" ] && \
+		[ "$$ready_stamp" -nt "$(RUNNER_DIR)/mk/build.mk" ] && \
 		[ "$$ready_stamp" -nt "$(X86_BUILD_DIR)/modules.order" ] && \
 		[ -f "$$release_root/kernel/drivers/block/null_blk/null_blk.ko" ] && \
 		[ -f "$$release_root/kernel/net/sched/sch_netem.ko" ]; then \
@@ -111,7 +150,9 @@ __kernel-modules-x86_64:
 	rm -rf "$$stage_root"; \
 	mkdir -p "$$stage_root"; \
 	$(MAKE) --no-print-directory -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" INSTALL_MOD_PATH="$$stage_root" DEPMOD=true CONFIG_MODULE_SIG=n modules_install >/dev/null; \
-	rm -f "$$release_root/build" "$$release_root/source"; \
+	depmod -b "$$stage_root" "$$kernel_release" >/dev/null; \
+	ln -sfn "$(X86_BUILD_DIR)" "$$release_root/build"; \
+	ln -sfn "$(KERNEL_DIR)" "$$release_root/source"; \
 	test -f "$$release_root/kernel/drivers/block/null_blk/null_blk.ko"; \
 	test -f "$$release_root/kernel/net/sched/sch_netem.ko"; \
 	touch "$$ready_stamp"
@@ -152,7 +193,9 @@ $(X86_PORTABLE_LIBBPF_STAMP): $(X86_PORTABLE_LIBBPF_SOURCE_INPUTS)
 			chown -R $(shell id -u):$(shell id -g) /out'
 	@touch "$@"
 
-__scx-binaries-x86_64:
+__scx-binaries-x86_64: $(SCX_X86_STAGE_STAMP)
+
+$(SCX_X86_STAGE_STAMP): $(SCX_SOURCE_INPUTS)
 	@test -n "$(RUN_SCX_PACKAGES_CSV)" || { echo "RUN_SCX_PACKAGES_CSV is required" >&2; exit 1; }
 	@repo_root="$(REPOS_DIR)/scx"; \
 	corpus_root="$(REPO_SCX_ROOT)"; \
@@ -170,11 +213,12 @@ __scx-binaries-x86_64:
 		test -n "$$object_path"; \
 		obj_dst="$$corpus_root/$${package}_main.bpf.o"; \
 		if ! cmp -s "$$object_path" "$$obj_dst" 2>/dev/null; then cp -f "$$object_path" "$$obj_dst"; fi; \
-	done
+	done; \
+	touch "$@"
 
-__scx-binaries-arm64: __require-arm64-toolchain __scx-binaries-arm64-inner
+__scx-binaries-arm64: __require-arm64-toolchain $(SCX_ARM64_STAGE_STAMP)
 
-__scx-binaries-arm64-inner:
+$(SCX_ARM64_STAGE_STAMP): $(SCX_SOURCE_INPUTS)
 	@test -n "$(RUN_SCX_PACKAGES_CSV)" || { echo "RUN_SCX_PACKAGES_CSV is required" >&2; exit 1; }
 	@repo_root="$(REPOS_DIR)/scx"; \
 	corpus_root="$(REPO_SCX_ROOT)"; \
@@ -185,9 +229,16 @@ __scx-binaries-arm64-inner:
 	exec 9>"$$lock_path"; flock 9; \
 	for package in $$(printf '%s' "$(RUN_SCX_PACKAGES_CSV)" | tr ',' ' '); do \
 		[ -n "$$package" ] || continue; \
+		PKG_CONFIG_ALLOW_CROSS=1 \
+		PKG_CONFIG_SYSROOT_DIR="$(ARM64_TOOLCHAIN_ROOT)" \
+		PKG_CONFIG_LIBDIR="$(ARM64_TOOLCHAIN_PKGCONFIG_DIRS)" \
+		LIBRARY_PATH="$(ARM64_TOOLCHAIN_LIBRARY_DIRS)" \
+		LD_LIBRARY_PATH="$(ARM64_TOOLCHAIN_LIBRARY_DIRS)" \
+		BINDGEN_EXTRA_CLANG_ARGS_aarch64_unknown_linux_gnu="--sysroot=$(ARM64_TOOLCHAIN_ROOT) $(foreach dir,$(subst :, ,$(ARM64_TOOLCHAIN_INCLUDE_DIRS)),-I$(dir))" \
 		CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER="$(ARM64_GCC)" \
-		CC_aarch64_unknown_linux_gnu="$(ARM64_GCC)" \
-		CXX_aarch64_unknown_linux_gnu="$(ARM64_GXX)" \
+		CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS="-Clink-arg=--sysroot=$(ARM64_TOOLCHAIN_ROOT) $(foreach dir,$(subst :, ,$(ARM64_TOOLCHAIN_LIBRARY_DIRS)),-Clink-arg=-L$(dir))" \
+		CC_aarch64_unknown_linux_gnu="$(ARM64_CC)" \
+		CXX_aarch64_unknown_linux_gnu="$(ARM64_CXX)" \
 		AR_aarch64_unknown_linux_gnu="$(ARM64_AR)" \
 		RANLIB_aarch64_unknown_linux_gnu="$(ARM64_RANLIB)" \
 		cargo build --release --target "aarch64-unknown-linux-gnu" --manifest-path "$$repo_root/Cargo.toml" --package "$$package"; \
@@ -198,7 +249,8 @@ __scx-binaries-arm64-inner:
 		test -n "$$object_path"; \
 		obj_dst="$$corpus_root/$${package}_main.bpf.o"; \
 		if ! cmp -s "$$object_path" "$$obj_dst" 2>/dev/null; then cp -f "$$object_path" "$$obj_dst"; fi; \
-	done
+	done; \
+	touch "$@"
 
 __native-repos-x86_64:
 	@test -n "$(RUN_NATIVE_REPOS_CSV)" || { echo "RUN_NATIVE_REPOS_CSV is required" >&2; exit 1; }
@@ -220,7 +272,9 @@ __native-repos-arm64-inner:
 		$(MAKE) --no-print-directory "$$repo_target"; \
 	done
 
-__native-repo-bcc:
+__native-repo-bcc: $(BCC_STAGE_STAMP)
+
+$(BCC_STAGE_STAMP): $(BCC_SOURCE_INPUTS)
 	@repo_root="$(REPOS_DIR)/bcc/libbpf-tools"; \
 	stage_root="$(REPO_BCC_ROOT)"; \
 	lock_path="$(LOCK_ROOT)/$(RUN_TARGET_ARCH)-bcc.lock"; \
@@ -245,9 +299,12 @@ __native-repo-bcc:
 			dst="$$stage_root/$$tool_name"; \
 			if ! cmp -s "$$repo_root/$$tool_name" "$$dst" 2>/dev/null; then cp -f "$$repo_root/$$tool_name" "$$dst"; fi; \
 		fi; \
-	done
+	done; \
+	touch "$@"
 
-__native-repo-tracee:
+__native-repo-tracee: $(TRACEE_STAGE_STAMP)
+
+$(TRACEE_STAGE_STAMP): $(TRACEE_SOURCE_INPUTS)
 	@repo_root="$(REPOS_DIR)/tracee"; \
 	stage_root="$(REPO_TRACEE_ROOT)"; \
 	go_arch="$$( [ "$(RUN_TARGET_ARCH)" = "arm64" ] && printf 'arm64' || printf 'amd64' )"; \
@@ -265,9 +322,12 @@ __native-repo-tracee:
 		test -x "$$repo_root/dist/$$bin"; \
 		dst="$$stage_root/bin/$$bin"; \
 		if ! cmp -s "$$repo_root/dist/$$bin" "$$dst" 2>/dev/null; then cp -f "$$repo_root/dist/$$bin" "$$dst"; fi; \
-	done
+	done; \
+	touch "$@"
 
-__native-repo-tetragon:
+__native-repo-tetragon: $(TETRAGON_STAGE_STAMP)
+
+$(TETRAGON_STAGE_STAMP): $(TETRAGON_SOURCE_INPUTS)
 	@repo_root="$(REPOS_DIR)/tetragon"; \
 	stage_root="$(REPO_TETRAGON_ROOT)"; \
 	target_arch="$$( [ "$(RUN_TARGET_ARCH)" = "arm64" ] && printf 'arm64' || printf 'amd64' )"; \
@@ -281,26 +341,49 @@ __native-repo-tetragon:
 		if ! cmp -s "$$src" "$$dst" 2>/dev/null; then cp -f "$$src" "$$dst"; fi; \
 	done; \
 	test -x "$$repo_root/tetragon"; \
-	if ! cmp -s "$$repo_root/tetragon" "$$stage_root/bin/tetragon" 2>/dev/null; then cp -f "$$repo_root/tetragon" "$$stage_root/bin/tetragon"; fi
+	if ! cmp -s "$$repo_root/tetragon" "$$stage_root/bin/tetragon" 2>/dev/null; then cp -f "$$repo_root/tetragon" "$$stage_root/bin/tetragon"; fi; \
+	touch "$@"
 
-__native-repo-katran-x86_64:
+__native-repo-katran-x86_64: $(KATRAN_X86_STAGE_STAMP)
+
+$(KATRAN_X86_STAGE_STAMP): $(KATRAN_SOURCE_INPUTS)
 	@stage_root="$(REPO_KATRAN_ROOT)"; \
 		build_root="$(KATRAN_X86_BUILD_ROOT)"; \
 		install_root="$(KATRAN_X86_INSTALL_ROOT)"; \
+		override_file="$(KATRAN_X86_CMAKE_OVERRIDE)"; \
 		folly_xlog_prefixes="-DFOLLY_XLOG_STRIP_PREFIXES=\\\\\\\"$$build_root/deps/folly:$$build_root/deps/folly/build\\\\\\\""; \
 		lock_path="$(LOCK_ROOT)/x86_64-katran.lock"; \
 		mkdir -p "$$stage_root/bin" "$$stage_root/lib" "$$build_root" "$$install_root" "$(LOCK_ROOT)"; \
 		exec 9>"$$lock_path"; flock 9; \
+		printf '%s\n' 'set(CMAKE_CXX_COMPILE_OBJECT "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -std=gnu++20 -o <OBJECT> -c <SOURCE>")' > "$$override_file"; \
 		cd "$(REPOS_DIR)/katran" && \
 		env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR \
-		CC=clang CXX=clang++ CXXFLAGS="$$folly_xlog_prefixes" BUILD_EXAMPLE_GRPC=1 BUILD_DIR="$$build_root" INSTALL_DIR="$$install_root" ./build_katran.sh; \
+		CC=clang CXX=clang++ CXXFLAGS="$$folly_xlog_prefixes" BUILD_EXAMPLE_GRPC=1 BUILD_DIR="$$build_root" INSTALL_DIR="$$install_root" INSTALL_DEPS_ONLY=1 ./build_katran.sh; \
+		rm -rf "$$build_root/build"; \
+		mkdir -p "$$install_root/grpc/_build"; \
+		ln -sfn "$$install_root/bin/grpc_cpp_plugin" "$$install_root/grpc/_build/grpc_cpp_plugin"; \
+		cd "$(REPOS_DIR)/katran" && \
+		env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR CMAKE_BUILD_EXAMPLE_GRPC=1 \
+		CC=clang CXX=clang++ \
+		cmake -S . -B "$$build_root/build" \
+			-DCMAKE_PREFIX_PATH="$$install_root" \
+			-DCMAKE_INSTALL_PREFIX="$$install_root" \
+			-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+			-DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
+			-DLIB_BPF_PREFIX="$$install_root" \
+			-DCMAKE_CXX_STANDARD=20 \
+			-DCMAKE_USER_MAKE_RULES_OVERRIDE_CXX="$$override_file" \
+			-DBUILD_TESTS=OFF; \
+		cmake --build "$$build_root/build" --target katran_server_grpc -j"$(JOBS)"; \
+		cd "$(REPOS_DIR)/katran" && ./build_bpf_modules_opensource.sh -s "$(REPOS_DIR)/katran" -b "$$build_root"; \
+		test -x "$$build_root/build/example_grpc/katran_server_grpc"; \
 		if ! cmp -s "$$build_root/build/example_grpc/katran_server_grpc" "$$stage_root/bin/katran_server_grpc" 2>/dev/null; then cp -f "$$build_root/build/example_grpc/katran_server_grpc" "$$stage_root/bin/katran_server_grpc"; fi; \
 	for src in \
-		"$$install_root/bpfprog/bpf/balancer.bpf.o" \
-		"$$install_root/bpfprog/bpf/healthchecking_ipip.o" \
-		"$$install_root/bpfprog/bpf/healthchecking.bpf.o" \
-		"$$install_root/bpfprog/bpf/xdp_pktcntr.o" \
-		"$$install_root/bpfprog/bpf/xdp_root.o"; do \
+		"$$build_root/deps/bpfprog/bpf/balancer.bpf.o" \
+		"$$build_root/deps/bpfprog/bpf/healthchecking_ipip.o" \
+		"$$build_root/deps/bpfprog/bpf/healthchecking.bpf.o" \
+		"$$build_root/deps/bpfprog/bpf/xdp_pktcntr.o" \
+		"$$build_root/deps/bpfprog/bpf/xdp_root.o"; do \
 		dst_name="$${src##*/}"; \
 		case "$$dst_name" in \
 			healthchecking_ipip.o) dst_name="healthchecking_ipip.bpf.o" ;; \
@@ -311,26 +394,49 @@ __native-repo-katran-x86_64:
 	find "$$install_root/lib" -maxdepth 1 -type f | while read -r src; do \
 		dst="$$stage_root/lib/$${src##*/}"; \
 		if ! cmp -s "$$src" "$$dst" 2>/dev/null; then cp -f "$$src" "$$dst"; fi; \
-	done
+	done; \
+	touch "$@"
 
-__native-repo-katran-arm64:
+__native-repo-katran-arm64: $(KATRAN_ARM64_STAGE_STAMP)
+
+$(KATRAN_ARM64_STAGE_STAMP): $(KATRAN_SOURCE_INPUTS)
 	@stage_root="$(REPO_KATRAN_ROOT)"; \
 		build_root="$(KATRAN_ARM64_BUILD_ROOT)"; \
 		install_root="$(KATRAN_ARM64_INSTALL_ROOT)"; \
+		override_file="$(KATRAN_ARM64_CMAKE_OVERRIDE)"; \
 		folly_xlog_prefixes="-DFOLLY_XLOG_STRIP_PREFIXES=\\\\\\\"$$build_root/deps/folly:$$build_root/deps/folly/build\\\\\\\""; \
 		lock_path="$(LOCK_ROOT)/arm64-katran.lock"; \
 		mkdir -p "$$stage_root/bin" "$$stage_root/lib" "$$build_root" "$$install_root" "$(LOCK_ROOT)"; \
 		exec 9>"$$lock_path"; flock 9; \
+		printf '%s\n' 'set(CMAKE_CXX_COMPILE_OBJECT "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -std=gnu++20 -o <OBJECT> -c <SOURCE>")' > "$$override_file"; \
 		cd "$(REPOS_DIR)/katran" && \
 		env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR \
-		CC=clang CXX=clang++ CXXFLAGS="$$folly_xlog_prefixes" BUILD_EXAMPLE_GRPC=1 BUILD_DIR="$$build_root" INSTALL_DIR="$$install_root" ./build_katran.sh; \
+		CC=clang CXX=clang++ CXXFLAGS="$$folly_xlog_prefixes" BUILD_EXAMPLE_GRPC=1 BUILD_DIR="$$build_root" INSTALL_DIR="$$install_root" INSTALL_DEPS_ONLY=1 ./build_katran.sh; \
+		rm -rf "$$build_root/build"; \
+		mkdir -p "$$install_root/grpc/_build"; \
+		ln -sfn "$$install_root/bin/grpc_cpp_plugin" "$$install_root/grpc/_build/grpc_cpp_plugin"; \
+		cd "$(REPOS_DIR)/katran" && \
+		env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR CMAKE_BUILD_EXAMPLE_GRPC=1 \
+		CC=clang CXX=clang++ \
+		cmake -S . -B "$$build_root/build" \
+			-DCMAKE_PREFIX_PATH="$$install_root" \
+			-DCMAKE_INSTALL_PREFIX="$$install_root" \
+			-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+			-DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
+			-DLIB_BPF_PREFIX="$$install_root" \
+			-DCMAKE_CXX_STANDARD=20 \
+			-DCMAKE_USER_MAKE_RULES_OVERRIDE_CXX="$$override_file" \
+			-DBUILD_TESTS=OFF; \
+		cmake --build "$$build_root/build" --target katran_server_grpc -j"$(JOBS)"; \
+		cd "$(REPOS_DIR)/katran" && ./build_bpf_modules_opensource.sh -s "$(REPOS_DIR)/katran" -b "$$build_root"; \
+		test -x "$$build_root/build/example_grpc/katran_server_grpc"; \
 		if ! cmp -s "$$build_root/build/example_grpc/katran_server_grpc" "$$stage_root/bin/katran_server_grpc" 2>/dev/null; then cp -f "$$build_root/build/example_grpc/katran_server_grpc" "$$stage_root/bin/katran_server_grpc"; fi; \
 	for src in \
-		"$$install_root/bpfprog/bpf/balancer.bpf.o" \
-		"$$install_root/bpfprog/bpf/healthchecking_ipip.o" \
-		"$$install_root/bpfprog/bpf/healthchecking.bpf.o" \
-		"$$install_root/bpfprog/bpf/xdp_pktcntr.o" \
-		"$$install_root/bpfprog/bpf/xdp_root.o"; do \
+		"$$build_root/deps/bpfprog/bpf/balancer.bpf.o" \
+		"$$build_root/deps/bpfprog/bpf/healthchecking_ipip.o" \
+		"$$build_root/deps/bpfprog/bpf/healthchecking.bpf.o" \
+		"$$build_root/deps/bpfprog/bpf/xdp_pktcntr.o" \
+		"$$build_root/deps/bpfprog/bpf/xdp_root.o"; do \
 		dst_name="$${src##*/}"; \
 		case "$$dst_name" in \
 			healthchecking_ipip.o) dst_name="healthchecking_ipip.bpf.o" ;; \
@@ -341,11 +447,14 @@ __native-repo-katran-arm64:
 	find "$$install_root/lib" -maxdepth 1 -type f | while read -r src; do \
 		dst="$$stage_root/lib/$${src##*/}"; \
 		if ! cmp -s "$$src" "$$dst" 2>/dev/null; then cp -f "$$src" "$$dst"; fi; \
-	done
+	done; \
+	touch "$@"
 
 ARM64_TOOLCHAIN_ROOT := $(RUNNER_DIR)/build-arm64/toolchain
 ARM64_TOOLCHAIN_BIN := $(ARM64_TOOLCHAIN_ROOT)/bin
-ARM64_TOOLCHAIN_PKGCONFIG_DIRS := $(ARM64_TOOLCHAIN_ROOT)/usr/lib64/pkgconfig:$(ARM64_TOOLCHAIN_ROOT)/usr/share/pkgconfig
+ARM64_TOOLCHAIN_PKGCONFIG_DIRS := $(ARM64_TOOLCHAIN_ROOT)/usr/lib/aarch64-linux-gnu/pkgconfig:$(ARM64_TOOLCHAIN_ROOT)/usr/lib/pkgconfig:$(ARM64_TOOLCHAIN_ROOT)/usr/lib64/pkgconfig:$(ARM64_TOOLCHAIN_ROOT)/usr/share/pkgconfig
+ARM64_TOOLCHAIN_LIBRARY_DIRS := $(ARM64_TOOLCHAIN_ROOT)/usr/lib/aarch64-linux-gnu:$(ARM64_TOOLCHAIN_ROOT)/usr/lib:$(ARM64_TOOLCHAIN_ROOT)/lib/aarch64-linux-gnu:$(ARM64_TOOLCHAIN_ROOT)/lib
+ARM64_TOOLCHAIN_INCLUDE_DIRS := $(ARM64_TOOLCHAIN_ROOT)/usr/include:$(ARM64_TOOLCHAIN_ROOT)/usr/include/aarch64-linux-gnu
 ARM64_HOST_CROSS_PREFIX := $(ARM64_TOOLCHAIN_BIN)/$(CROSS_COMPILE_ARM64)
 ARM64_CROSS_PREFIX ?= $(CROSS_COMPILE_ARM64)
 ARM64_GCC := $(ARM64_HOST_CROSS_PREFIX)gcc
@@ -388,6 +497,9 @@ __libbpf-runtime-x86_64: __x86-portable-libbpf
 	done
 
 __libbpf-runtime-arm64: __require-arm64-toolchain
+__libbpf-runtime-arm64: $(ARM64_LIBBPF_RUNTIME_STAMP)
+
+$(ARM64_LIBBPF_RUNTIME_STAMP): $(LIBBPF_SOURCE_INPUTS)
 	@build_root="$(ARM64_LIBBPF_RUNTIME_BUILD_ROOT)"; \
 		dst_root="$(REPO_ARTIFACT_ROOT)/libbpf"; \
 		obj_root="$$build_root/obj"; \
@@ -402,7 +514,8 @@ __libbpf-runtime-arm64: __require-arm64-toolchain
 			AR="$(ARM64_AR)" \
 			RANLIB="$(ARM64_RANLIB)" \
 			BUILD_STATIC_ONLY=0 install >/dev/null; \
-		test -f "$$dst_root/lib/libbpf.so" -o -f "$$dst_root/lib/libbpf.so."* -o -f "$$dst_root/lib64/libbpf.so" -o -f "$$dst_root/lib64/libbpf.so."*
+		test -f "$$dst_root/lib/libbpf.so" -o -f "$$dst_root/lib/libbpf.so."* -o -f "$$dst_root/lib64/libbpf.so" -o -f "$$dst_root/lib64/libbpf.so."*; \
+		touch "$@"
 
 __workload-tools-x86_64: $(WORKLOAD_TOOLS_X86_INSTALL_STAMP)
 
@@ -476,11 +589,11 @@ $(WORKLOAD_TOOLS_X86_INSTALL_STAMP): $(WORKLOAD_TOOLS_SOURCE_INPUTS) $(WORKLOAD_
 			'set -euo pipefail' \
 			'script_path="$$(readlink -f "$$0")"' \
 			'script_dir="$$(cd "$$(dirname "$$script_path")" && pwd)"' \
-			'real_binary="${script_path}.real"' \
-			'loader="${script_dir}/../lib/ld-linux-x86-64.so.2"' \
+			'real_binary="$${script_path}.real"' \
+			'loader="$${script_dir}/../lib/ld-linux-x86-64.so.2"' \
 			'[[ -x "$$loader" ]] || { echo "portable runtime loader not found for $$script_path" >&2; exit 1; }' \
 			'[[ -f "$$real_binary" ]] || { echo "wrapped binary is missing for $$script_path: $$real_binary" >&2; exit 1; }' \
-			'exec "$$loader" --library-path "${script_dir}/../lib" "$$real_binary" "$$@"' \
+			'exec "$$loader" --library-path "$${script_dir}/../lib" "$$real_binary" "$$@"' \
 			> "$$bin_root/$$tool"; \
 		chmod +x "$$bin_root/$$tool"; \
 	done; \
@@ -588,11 +701,11 @@ $(WORKLOAD_TOOLS_ARM64_INSTALL_STAMP): __require-arm64-toolchain $(WORKLOAD_TOOL
 			'set -euo pipefail' \
 			'script_path="$$(readlink -f "$$0")"' \
 			'script_dir="$$(cd "$$(dirname "$$script_path")" && pwd)"' \
-			'real_binary="${script_path}.real"' \
-			'loader="${script_dir}/../lib/ld-linux-aarch64.so.1"' \
+			'real_binary="$${script_path}.real"' \
+			'loader="$${script_dir}/../lib/ld-linux-aarch64.so.1"' \
 			'[[ -x "$$loader" ]] || { echo "portable runtime loader not found for $$script_path" >&2; exit 1; }' \
 			'[[ -f "$$real_binary" ]] || { echo "wrapped binary is missing for $$script_path: $$real_binary" >&2; exit 1; }' \
-			'exec "$$loader" --library-path "${script_dir}/../lib" "$$real_binary" "$$@"' \
+			'exec "$$loader" --library-path "$${script_dir}/../lib" "$$real_binary" "$$@"' \
 			> "$$bin_root/$$tool"; \
 		chmod +x "$$bin_root/$$tool"; \
 	done; \

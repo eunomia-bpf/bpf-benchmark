@@ -55,7 +55,8 @@ class AwsExecutorContext:
 
     @property
     def remote_execution_lock(self) -> Path:
-        return self.shared_state_dir / "remote-exec.lock"
+        suffix = self.remote_stage_dir.strip("/").replace("/", "_") or "root"
+        return self.shared_state_dir / f"remote-exec.{suffix}.lock"
 
     @property
     def state_lock(self) -> Path:
@@ -247,6 +248,27 @@ def _scp_to(ctx: AwsExecutorContext, ip: str, src: Path, dest: str, *, recursive
     if recursive:
         command.append("-r")
     command.extend([str(src), f"{ctx.remote_user}@{ip}:{dest}"])
+    completed = subprocess.run(
+        command,
+        cwd=ROOT_DIR,
+        text=True,
+        capture_output=False,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise SystemExit(completed.returncode)
+
+
+def _rsync_to(ctx: AwsExecutorContext, ip: str, src: Path, dest: str) -> None:
+    command = [
+        "rsync",
+        "-a",
+        "--delete",
+        "-e",
+        shlex.join(["ssh", *_ssh_base_args(ctx, ip)]),
+        f"{src}/",
+        f"{ctx.remote_user}@{ip}:{dest}/",
+    ]
     completed = subprocess.run(
         command,
         cwd=ROOT_DIR,

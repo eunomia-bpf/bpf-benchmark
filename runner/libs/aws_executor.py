@@ -19,6 +19,7 @@ _build_context = aws_common._build_context
 _load_instance_state = aws_common._load_instance_state
 _locked_file = aws_common._locked_file
 _require_scalar = aws_common._require_scalar
+_rsync_to = aws_common._rsync_to
 _scp_from = aws_common._scp_from
 _scp_to = aws_common._scp_to
 _ssh_exec = aws_common._ssh_exec
@@ -72,9 +73,9 @@ def _sync_remote_roots(ctx: AwsExecutorContext, ip: str) -> None:
         remote_path = f"{ctx.remote_stage_dir}/{entry}"
         remote_parent = os.path.dirname(remote_path)
         _ssh_exec(ctx, ip, "mkdir", "-p", remote_parent)
-        _run_remote_helper(ctx, ip, _require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN"), "cleanup-path", remote_path, check=False)
         if source_path.is_dir():
-            _scp_to(ctx, ip, source_path, remote_parent, recursive=True)
+            _ssh_exec(ctx, ip, "mkdir", "-p", remote_path)
+            _rsync_to(ctx, ip, source_path, remote_path)
         else:
             _scp_to(ctx, ip, source_path, remote_path)
 

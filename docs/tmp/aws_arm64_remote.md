@@ -316,7 +316,9 @@ Recent runtime-relevant fixes already applied:
   - the next active blocker is deeper in gRPC build/install and is being reduced from the current canary log
 - ARM native repo prep for `bcc/tracee/tetragon/katran` now runs on the host Make path.
 - ARM `scx` binaries now also run on the host Make path with an explicit ARM sysroot contract; the old `docker --platform linux/arm64` `scx` prep path is gone.
-- ARM runner-binary prep now also runs on the host Make path with an ARM sysroot and a dedicated `runner/build-arm64` tree; the old arm64 container wrapper is gone from the active path.
+- ARM `corpus/e2e` no longer route native repo prep through an arm64 userspace container.
+  - the remaining arm64 containerized path is the runner binary for `micro`
+  - `corpus/e2e` themselves do not require `RUN_NEEDS_RUNNER_BINARY=1`
 - `local_prep.mk` no longer encodes suite/target prep fanout with nested `if`/suite targets; target env files now declare `TARGET_LOCAL_PREP_TARGETS_<SUITE>` and the manifest just carries the explicit prep list.
 - repo-managed runtime artifact roots are now explicit-only:
   - `RUN_REPO_ARTIFACT_ROOT` is required
@@ -436,23 +438,35 @@ Note:
   - first failure was Folly `FOLLY_XLOG_STRIP_PREFIXES` being passed as an unquoted path macro
   - current `runner/mk/build.mk` overrides this through `CXXFLAGS` on the Katran build invocation
   - current standalone Katran x86 canary is no longer dying in Folly and is progressing through later dependencies (`gtest`, then `grpc`)
+- current repo-native Katran x86 build now passes the previous `katran_server_grpc` C++20/Folly blocker.
+  - the next shared blocker that was fixed was the staged BPF object path
+  - repo-native Katran BPF outputs are under `deps/bpfprog/bpf/*.o`
+  - active Make staging now copies from that actual output directory instead of the stale `deps/bpfprog/katran/lib/bpf/*.o` path
 - current ARM blocker that was fixed:
   - `__kinsn-modules-arm64` now passes `ARM64_AWS_BASE_CONFIG` through to `__kernel-arm64-aws`
   - this removed the immediate local-prep crash in fresh AWS ARM64 `corpus/e2e` reruns
 
-- current live reruns on the fixed tree:
-  - `aws-arm64 corpus`: `run.aws-arm64.corpus.9ef234ba`
-  - `aws-arm64 e2e`: `run.aws-arm64.e2e.1ffe0cc1`
-  - `aws-x86 corpus`: `run.aws-x86.corpus.cacfe98d`
-  - `aws-x86 e2e`: `run.aws-x86.e2e.2068eae0`
-  - `x86-kvm corpus`: `run.x86-kvm.corpus` foreground rerun
+- current fresh reruns on the fixed tree:
+  - `x86-kvm corpus`
+  - `aws-x86 corpus`
+  - `aws-x86 e2e`
+  - `aws-arm64 corpus`
+  - `aws-arm64 e2e`
+
+- new runtime blockers fixed before the current fresh reruns:
+  - `aws-x86 corpus/e2e` no longer transfer the whole `.cache/repo-artifacts/<arch>` tree to the remote instance.
+    - manifests now transfer only the runtime subtrees actually needed by the selected suite (`bcc`, `tracee`, `tetragon`, `katran`, `scx`, `libbpf`, bundled workload tools)
+    - this removes the old shared-instance `/var/tmp` exhaustion caused by repeatedly rsyncing full `kernel-modules`
+  - `aws-arm64 corpus/e2e` no longer fail in local prep on `scx_rusty` linking with `-lelf`
+    - `__scx-binaries-arm64` now uses the ARM sysroot/pkg-config/library/include contract explicitly
+  - `x86-kvm corpus` no longer uses broken x86 bundled workload wrappers
+    - the portable `hackbench/sysbench/wrk` scripts now preserve runtime variables correctly
+  - `x86-kvm corpus` kernel module staging now runs `depmod` and preserves `build/source` symlinks into the mounted workspace
+    - this is required for `modprobe veth` and for bpftrace programs that need `/lib/modules/<release>/build/include/linux/kconfig.h`
 
 - current todo for the live matrix:
-  1. wait for the standalone x86 Katran repo-native build to finish on the fixed tree
-  2. if Katran x86 completes, reuse that cached artifact path for:
-     - `x86-kvm corpus`
-     - `aws-x86 corpus`
-     - `aws-x86 e2e`
-  3. keep AWS ARM64 `corpus/e2e` reruns moving on the fixed `ARM64_AWS_BASE_CONFIG` path and capture the next real blocker if they stop
-  4. once `corpus` is green on a target, rerun `e2e` on the same fixed tree if needed
-  5. keep removing deadcode / fallback / second-control-plane drift while runs are active
+  1. keep all five fresh `corpus/e2e` reruns moving on the fixed tree until they either pass or expose the next real runtime blocker
+  2. if x86 AWS still fails, capture the first fresh blocker from the new suite-specific remote stage and fix that shared contract
+  3. if `x86-kvm corpus` still fails, keep fixing the shared runtime contract there before opening `x86-kvm e2e`
+  4. once `corpus` is green on each target, keep `e2e` running on the same warmed/cached inputs rather than rebuilding
+  5. continue deleting deadcode / fallback / second-control-plane drift while the reruns are active

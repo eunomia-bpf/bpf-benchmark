@@ -78,6 +78,7 @@ def required_commands(*, contract: Mapping[str, str | list[str]] | None = None) 
         _contract_scalar(contract, "RUN_BPFTOOL_BIN"),
         _contract_scalar(contract, "RUN_REMOTE_PYTHON_BIN"),
         *env_csv("RUN_REMOTE_COMMANDS_CSV", contract=contract),
+        *bundled_commands(contract=contract),
     ):
         if token and token not in commands:
             commands.append(token)

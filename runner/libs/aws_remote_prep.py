@@ -229,7 +229,8 @@ def _remote_has_sched_ext(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
 
 
 def _remote_base_prereq_dir(ctx: aws_common.AwsExecutorContext) -> str:
-    return f"{ctx.remote_stage_dir}/prereq/base"
+    remote_kernel_stage_dir = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_KERNEL_STAGE_DIR")
+    return f"{remote_kernel_stage_dir}/prereq/base"
 
 
 def _remote_base_prereq_stamp_path(ctx: aws_common.AwsExecutorContext) -> str:
@@ -256,6 +257,7 @@ def _remote_base_packages() -> list[str]:
         "kmod",
         "ncurses-libs",
         "procps-ng",
+        "rsync",
         "tar",
         "util-linux",
         "which",
@@ -294,6 +296,7 @@ def _remote_required_commands(contract: dict[str, str | list[str]]) -> list[str]
         "insmod",
         "ip",
         python_bin,
+        "rsync",
         "taskset",
         "tar",
     ]

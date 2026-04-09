@@ -232,18 +232,39 @@ def _remote_transfer_roots(
     *,
     suite: dict[str, str],
     suite_name: str,
+    target_arch: str,
     run_needs_daemon_binary: str,
     run_needs_kinsn_modules: str,
     run_repo_artifact_root: str,
-    include_repo_artifact_root: bool,
+    run_libbpf_runtime_path: str,
+    run_native_repos: str,
+    run_scx_packages: str,
+    run_needs_katran_bundle: str,
+    executor: str,
 ) -> str:
     roots: set[str] = set(_csv_tokens(suite.get("SUITE_REMOTE_TRANSFER_ROOTS", "")))
+    normalized_roots: set[str] = set()
+    for root in roots:
+        if root == ".cache/workload-tools":
+            normalized_roots.add(f"{root}/{target_arch}")
+        else:
+            normalized_roots.add(root)
+    roots = normalized_roots
     if run_needs_daemon_binary == "1":
         roots.add("daemon")
     if run_needs_kinsn_modules == "1":
         roots.add("module")
-    if include_repo_artifact_root and run_repo_artifact_root:
-        roots.add(run_repo_artifact_root)
+    if run_repo_artifact_root:
+        if run_libbpf_runtime_path:
+            roots.add(f"{run_repo_artifact_root}/libbpf")
+        if run_scx_packages:
+            roots.add(f"{run_repo_artifact_root}/scx")
+        for repo in _csv_tokens(run_native_repos):
+            roots.add(f"{run_repo_artifact_root}/{repo}")
+        if run_needs_katran_bundle == "1":
+            roots.add(f"{run_repo_artifact_root}/katran")
+        if executor == "kvm" and run_needs_kinsn_modules == "1":
+            roots.add(f"{run_repo_artifact_root}/kernel-modules")
     return _ordered_csv_with_tail(roots, order=("runner", "daemon", "module", "tests", "micro", "corpus", "e2e"))
 
 
@@ -438,7 +459,7 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         aws_env_prefix = target.get("TARGET_AWS_ENV_PREFIX", "")
         if not aws_env_prefix:
             _die(f"AWS target {target_name} is missing TARGET_AWS_ENV_PREFIX")
-        run_aws_instance_mode = "dedicated" if suite.get("SUITE_VM_CLASS", "") == "benchmark" else "shared"
+        run_aws_instance_mode = _prefixed_env_or_default(values, aws_env_prefix, "INSTANCE_MODE", "shared")
         run_name_tag = _prefixed_env_or_default(values, aws_env_prefix, "NAME_TAG", target.get("TARGET_NAME_TAG_DEFAULT", ""))
         default_instance_type = target.get("TARGET_INSTANCE_TYPE_DEFAULT", "")
         if suite.get("SUITE_VM_CLASS", "") == "benchmark":
@@ -447,7 +468,10 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
             default_instance_type = target.get("TARGET_TEST_INSTANCE_TYPE_DEFAULT", default_instance_type)
         run_instance_type = _prefixed_env_or_default(values, aws_env_prefix, "INSTANCE_TYPE", default_instance_type)
         run_remote_user = _prefixed_env_or_default(values, aws_env_prefix, "REMOTE_USER", target.get("TARGET_REMOTE_USER_DEFAULT", ""))
-        run_remote_stage_dir = _prefixed_env_or_default(values, aws_env_prefix, "REMOTE_STAGE_DIR", target.get("TARGET_REMOTE_STAGE_DIR_DEFAULT", ""))
+        remote_stage_root = _prefixed_env_or_default(values, aws_env_prefix, "REMOTE_STAGE_DIR", target.get("TARGET_REMOTE_STAGE_DIR_DEFAULT", ""))
+        run_remote_stage_dir = remote_stage_root.rstrip("/")
+        if suite_name:
+            run_remote_stage_dir = f"{run_remote_stage_dir}/{suite_name}"
         run_remote_kernel_stage_dir = _prefixed_env_or_default(values, aws_env_prefix, "REMOTE_KERNEL_STAGE_DIR", target.get("TARGET_REMOTE_KERNEL_STAGE_DIR_DEFAULT", ""))
         run_ami_param = _prefixed_env_or_default(values, aws_env_prefix, "AMI_PARAM", target.get("TARGET_AMI_PARAM_DEFAULT", ""))
         run_ami_id = _prefixed_env_or_default(values, aws_env_prefix, "AMI_ID")
@@ -624,20 +648,18 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         run_kernel_modules_root = f"{run_repo_artifact_root}/kernel-modules"
     else:
         run_kernel_modules_root = "/"
-    include_repo_artifact_root = bool(
-        run_libbpf_runtime_path
-        or run_native_repos
-        or run_scx_packages
-        or run_needs_katran_bundle == "1"
-        or (target.get("TARGET_EXECUTOR", "") == "kvm" and run_needs_kinsn_modules == "1")
-    )
     run_remote_transfer_roots = _remote_transfer_roots(
         suite=suite,
         suite_name=suite_name,
+        target_arch=target.get("TARGET_ARCH", ""),
         run_needs_daemon_binary=run_needs_daemon_binary,
         run_needs_kinsn_modules=run_needs_kinsn_modules,
         run_repo_artifact_root=run_repo_artifact_root,
-        include_repo_artifact_root=include_repo_artifact_root,
+        run_libbpf_runtime_path=run_libbpf_runtime_path,
+        run_native_repos=run_native_repos,
+        run_scx_packages=run_scx_packages,
+        run_needs_katran_bundle=run_needs_katran_bundle,
+        executor=target.get("TARGET_EXECUTOR", ""),
     )
     return {
         "RUN_TARGET_NAME": target_name,
