@@ -328,8 +328,20 @@ def build_native_repo_artifacts(
 
 
 def stage_x86_workload_tools(*, requested_csv: str, output_root: Path) -> tuple[str, str]:
-    del requested_csv, output_root
-    # x86 guests should consume workload tools from the guest package manager.
-    # Bundling host binaries creates a second tool plane and, on AWS, can route
-    # setpriv-executed workloads through non-traversable workspace paths.
-    return "", ""
+    bundled_candidates = {"hackbench", "sysbench", "wrk"}
+    bundled_csv = ""
+    shutil.rmtree(output_root, ignore_errors=True)
+    bin_dir = output_root / "bin"
+    for tool in csv_tokens(requested_csv):
+        if tool not in bundled_candidates:
+            continue
+        resolved = shutil.which(tool)
+        if not resolved:
+            continue
+        bin_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(resolved, bin_dir / tool)
+        bundled_csv = csv_append_unique(bundled_csv, tool)
+    if not bundled_csv:
+        shutil.rmtree(output_root, ignore_errors=True)
+        return "", ""
+    return bundled_csv, str(output_root)

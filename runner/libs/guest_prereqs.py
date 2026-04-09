@@ -42,10 +42,16 @@ def resolve_remote_workload_tool_bin(workspace: Path, contract: dict[str, str | 
 
 def runtime_path_value(workspace: Path, contract: dict[str, str | list[str]]) -> str:
     remote_tool_bin = resolve_remote_workload_tool_bin(workspace, contract)
-    path_value = os.environ.get("PATH", "")
+    path_entries: list[str] = []
     if remote_tool_bin and remote_tool_bin.is_dir():
-        return f"{remote_tool_bin}:{path_value}" if path_value else str(remote_tool_bin)
-    return path_value
+        path_entries.append(str(remote_tool_bin))
+    existing = os.environ.get("PATH", "")
+    if existing:
+        path_entries.extend(token for token in existing.split(":") if token)
+    for standard_dir in ("/usr/local/sbin", "/usr/local/bin", "/usr/sbin", "/usr/bin", "/sbin", "/bin"):
+        if standard_dir not in path_entries:
+            path_entries.append(standard_dir)
+    return ":".join(path_entries)
 
 
 def have_cmd(command_name: str, *, path_value: str | None = None) -> bool:

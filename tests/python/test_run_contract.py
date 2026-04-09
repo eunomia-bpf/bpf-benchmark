@@ -10,6 +10,7 @@ from runner.libs.manifest_file import (
     render_null_assignments,
     render_shell_assignments,
 )
+from runner.libs.prereq_contract import tool_packages
 from runner.libs.run_contract import (
     _filtered_manifest_inputs,
     build_manifest,
@@ -20,6 +21,10 @@ from runner.libs.run_contract import (
 from runner.libs.state_file import read_state
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
+
+
+def test_dnf_tc_contract_installs_iproute_tc() -> None:
+    assert tool_packages("dnf", "tc") == ("iproute-tc",)
 
 
 def test_parse_manifest_reads_scalars_and_arrays(tmp_path: Path) -> None:
@@ -208,7 +213,7 @@ def test_corpus_filters_prune_unrelated_runner_prep_contracts() -> None:
     assert manifest["RUN_SUITE_NEEDS_SCHED_EXT"] == "0"
     assert manifest["RUN_NEEDS_KATRAN_BUNDLE"] == "0"
     assert manifest["RUN_REMOTE_COMMANDS_CSV"] == "curl,file,ip,tar,taskset"
-    assert manifest["RUN_WORKLOAD_TOOLS_CSV"] == "stress-ng,fio,hackbench,curl"
+    assert manifest["RUN_WORKLOAD_TOOLS_CSV"] == "stress-ng,fio,hackbench,wrk"
 
 
 def test_corpus_filters_keep_katran_bundle_when_selected() -> None:
@@ -269,7 +274,25 @@ def test_e2e_bpftrace_case_keeps_curl_and_tc_workload_tools() -> None:
         },
     )
     assert manifest["RUN_REMOTE_COMMANDS_CSV"] == "ip,taskset"
-    assert manifest["RUN_WORKLOAD_TOOLS_CSV"] == "stress-ng,fio,hackbench,bpftrace,curl,tc"
+    assert manifest["RUN_WORKLOAD_TOOLS_CSV"] == "stress-ng,fio,hackbench,bpftrace,wrk,tc"
+
+
+def test_e2e_tracee_case_does_not_require_wrk_by_default() -> None:
+    manifest = build_manifest(
+        "aws-x86",
+        "e2e",
+        env={
+            "AWS_X86_REGION": "us-east-1",
+            "AWS_X86_PROFILE": "test-profile",
+            "AWS_X86_KEY_NAME": "test-key",
+            "AWS_X86_KEY_PATH": "/tmp/test-key.pem",
+            "AWS_X86_SECURITY_GROUP_ID": "sg-12345678",
+            "AWS_X86_SUBNET_ID": "subnet-12345678",
+            "AWS_X86_E2E_CASES": "tracee",
+        },
+    )
+    assert manifest["RUN_WORKLOAD_TOOLS_CSV"] == ""
+    assert manifest["RUN_REMOTE_COMMANDS_CSV"] == "ip,taskset,curl"
 
 
 def test_install_guest_prereqs_brings_up_loopback_when_ip_is_available(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -305,6 +328,19 @@ def test_install_guest_prereqs_brings_up_loopback_when_ip_is_available(monkeypat
     )
 
     assert commands == [["ip", "link", "set", "lo", "up"]]
+
+
+def test_runtime_path_value_includes_standard_sbin_dirs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from runner.libs.guest_prereqs import runtime_path_value
+
+    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+
+    path_value = runtime_path_value(workspace, {})
+
+    assert "/usr/sbin" in path_value.split(":")
+    assert "/sbin" in path_value.split(":")
 
 
 def test_validate_guest_prereqs_accepts_bundled_workload_tools(tmp_path: Path) -> None:

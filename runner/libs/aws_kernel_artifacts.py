@@ -12,6 +12,7 @@ from typing import Callable
 from runner.libs import ROOT_DIR
 from runner.libs.arm64_kernel_config import generate_aws_config
 from runner.libs.local_prep_common import die, require_nonempty_dir, require_path
+from runner.libs.source_tree import snapshot_git_subtree
 
 
 @dataclass(frozen=True)
@@ -143,55 +144,6 @@ def _with_lock(lock_path: Path, fn: Callable[[], None]) -> None:
             fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
-def _git_path_is_clean(repo_root: Path, pathspec: str = "") -> bool:
-    diff = ["git", "-C", str(repo_root), "diff", "--quiet"]
-    cached = ["git", "-C", str(repo_root), "diff", "--cached", "--quiet"]
-    if pathspec:
-        diff.extend(["--", pathspec])
-        cached.extend(["--", pathspec])
-    return (
-        subprocess.run(diff, check=False).returncode == 0
-        and subprocess.run(cached, check=False).returncode == 0
-    )
-
-
-def _snapshot_git_subtree(repo_root: Path, src_rel: str, dest: Path) -> None:
-    if subprocess.run(["git", "-C", str(repo_root), "rev-parse", "--verify", "HEAD"], check=False).returncode != 0:
-        die(f"expected git checkout for promoted snapshot: {repo_root}")
-    if src_rel:
-        if not _git_path_is_clean(repo_root, src_rel):
-            die(f"git subtree has local modifications and cannot be promoted: {repo_root / src_rel}")
-    else:
-        if not _git_path_is_clean(repo_root):
-            die(f"git checkout has local modifications and cannot be promoted: {repo_root}")
-    shutil.rmtree(dest, ignore_errors=True)
-    dest.mkdir(parents=True, exist_ok=True)
-    archive = subprocess.Popen(
-        ["git", "-C", str(repo_root), "archive", "--format=tar", "HEAD", *(["--", src_rel] if src_rel else [])],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    extract = subprocess.run(
-        ["tar", "-xf", "-", "-C", str(dest), *(["--strip-components", str(len(Path(src_rel).parts))] if src_rel else [])],
-        stdin=archive.stdout,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=False,
-        text=False,
-    )
-    stderr_bytes = archive.stderr.read() if archive.stderr is not None else b""
-    archive_code = archive.wait()
-    if archive.stdout is not None:
-        archive.stdout.close()
-    if archive.stderr is not None:
-        archive.stderr.close()
-    if archive_code != 0:
-        die(stderr_bytes.decode("utf-8", errors="replace").strip() or f"git archive failed for {repo_root}")
-    if extract.returncode != 0:
-        die(extract.stderr.decode("utf-8", errors="replace").strip() or f"failed to extract snapshot from {repo_root}")
-    require_nonempty_dir(dest, f"promoted snapshot {dest}")
-
-
 def stage_module_binaries(source_dir: Path, dest_dir: Path) -> None:
     shutil.rmtree(dest_dir, ignore_errors=True)
     dest_dir.mkdir(parents=True, exist_ok=True)
@@ -208,8 +160,8 @@ def _snapshot_kinsn_module_source_tree(paths: AwsKernelPaths, arch_dir_rel: str,
     shutil.rmtree(dest_dir, ignore_errors=True)
     shutil.rmtree(parent_dir / "include", ignore_errors=True)
     parent_dir.mkdir(parents=True, exist_ok=True)
-    _snapshot_git_subtree(paths.root_dir, "module/include", parent_dir / "include")
-    _snapshot_git_subtree(paths.root_dir, arch_dir_rel, dest_dir)
+    snapshot_git_subtree(paths.root_dir, "module/include", parent_dir / "include", die=die)
+    snapshot_git_subtree(paths.root_dir, arch_dir_rel, dest_dir, die=die)
 
 
 def _modules_tar_has_entry(modules_tar: Path, suffix: str) -> bool:
@@ -388,6 +340,20 @@ def _require_installed_kernel_module(modules_root: Path, relative_path: str, des
 def _build_x86_kernel_artifacts_locked(paths: AwsKernelPaths) -> tuple[str, Path, Path]:
     _prepare_x86_aws_config_locked(paths)
     config_fingerprint = _x86_setup_config_fingerprint(paths)
+    release_path = paths.kernel_dir / "include/config/kernel.release"
+    if release_path.is_file():
+        cached_release = release_path.read_text(encoding="utf-8").strip()
+        if cached_release:
+            cache_dir = paths.x86_setup_artifact_root / cached_release
+            if _x86_cached_setup_artifacts_ready(cache_dir, cached_release, f"bzImage-{cached_release}", config_fingerprint):
+                if _modules_tar_has_entry(cache_dir / f"modules-{cached_release}.tar.gz", "modules.dep") and _x86_cached_kinsn_modules_ready(cache_dir, cached_release):
+                    _link_cached_setup_artifacts(paths, cache_dir, cached_release, f"bzImage-{cached_release}")
+                    return (
+                        cached_release,
+                        (paths.artifact_dir / f"bzImage-{cached_release}").resolve(),
+                        (paths.artifact_dir / f"modules-{cached_release}.tar.gz").resolve(),
+                    )
+                shutil.rmtree(cache_dir, ignore_errors=True)
     _run_passthrough(["make", "-C", str(paths.kernel_dir), f"-j{os.cpu_count() or 1}", "bzImage", "modules_prepare"])
     if (paths.kernel_dir / "vmlinux.symvers").is_file():
         shutil.copy2(paths.kernel_dir / "vmlinux.symvers", paths.kernel_dir / "Module.symvers")

@@ -27,7 +27,7 @@ REMOTE_COMMAND_ORDER = ("ip", "taskset", "curl", "tar", "tc")
 CORPUS_WORKLOAD_KIND_TOOLS = {
     "exec_storm": ("stress-ng",),
     "hackbench": ("hackbench",),
-    "network": ("curl",),
+    "network": ("wrk",),
     "oom_stress": ("stress-ng",),
     "tcp_retransmit": ("tc",),
 }
@@ -39,12 +39,12 @@ CORPUS_RUNNER_EXTRA_TOOLS = {
 }
 
 E2E_CASE_WORKLOAD_TOOLS = {
-    "bcc": ("stress-ng", "fio", "hackbench", "curl"),
-    "bpftrace": ("stress-ng", "fio", "hackbench", "bpftrace", "curl", "tc"),
+    "bcc": ("stress-ng", "fio", "hackbench", "wrk"),
+    "bpftrace": ("stress-ng", "fio", "hackbench", "bpftrace", "wrk", "tc"),
     "katran": ("wrk",),
     "scx": ("stress-ng", "hackbench", "sysbench"),
     "tetragon": ("stress-ng", "fio"),
-    "tracee": ("stress-ng", "fio", "hackbench", "wrk"),
+    "tracee": (),
 }
 
 E2E_CASE_REMOTE_COMMANDS = {

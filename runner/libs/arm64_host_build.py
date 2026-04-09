@@ -13,6 +13,7 @@ from runner.libs.arm64_sysroot import Arm64SysrootConfig, ensure_sysroot
 from runner.libs.cli_support import fail, require_nonempty_dir as _require_nonempty_dir
 from runner.libs.portable_runtime import copy_arm64_runtime_bundle
 from runner.libs.runner_artifacts import build_runner_binary
+from runner.libs.source_tree import git_path_is_clean, snapshot_git_subtree
 
 _die = partial(fail, "arm64-host-build")
 _require_nonempty_dir = partial(_require_nonempty_dir, tag="arm64-host-build")
@@ -85,71 +86,6 @@ def _resolve_llvm_tool(base: str, *, preferred_suffix: str = "", preferred_name:
         if resolved:
             return resolved
     _die(f"missing LLVM tool: {base}")
-
-
-def _git_path_is_clean(repo_root: Path, pathspec: str = "") -> bool:
-    diff = ["git", "-C", str(repo_root), "diff", "--quiet"]
-    cached = ["git", "-C", str(repo_root), "diff", "--cached", "--quiet"]
-    if pathspec:
-        diff.extend(["--", pathspec])
-        cached.extend(["--", pathspec])
-    return (
-        subprocess.run(diff, check=False).returncode == 0
-        and subprocess.run(cached, check=False).returncode == 0
-    )
-
-
-def _git_untracked_paths(repo_root: Path, pathspec: str = "") -> list[Path]:
-    command = ["git", "-C", str(repo_root), "ls-files", "--others", "--exclude-standard", "-z"]
-    if pathspec:
-        command.extend(["--", pathspec])
-    completed = subprocess.run(command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if completed.returncode != 0:
-        message = completed.stderr.decode("utf-8", errors="replace").strip() or "git ls-files failed"
-        _die(message)
-    tokens = [token.decode("utf-8") for token in completed.stdout.split(b"\0") if token]
-    return [Path(token) for token in tokens]
-
-
-def _snapshot_git_subtree(repo_root: Path, src_rel: str, dest: Path) -> None:
-    if subprocess.run(["git", "-C", str(repo_root), "rev-parse", "--verify", "HEAD"], check=False).returncode != 0:
-        _die(f"expected git checkout for promoted snapshot: {repo_root}")
-    untracked = _git_untracked_paths(repo_root, src_rel)
-    if untracked:
-        sample = ", ".join(str(path) for path in untracked[:5])
-        extra = "" if len(untracked) <= 5 else f" (+{len(untracked) - 5} more)"
-        _die(f"git subtree has untracked files and cannot be promoted: {repo_root / src_rel} ({sample}{extra})")
-    if src_rel:
-        if not _git_path_is_clean(repo_root, src_rel):
-            _die(f"git subtree has local modifications and cannot be promoted: {repo_root / src_rel}")
-    else:
-        if not _git_path_is_clean(repo_root):
-            _die(f"git checkout has local modifications and cannot be promoted: {repo_root}")
-    shutil.rmtree(dest, ignore_errors=True)
-    dest.mkdir(parents=True, exist_ok=True)
-    archive = subprocess.Popen(
-        ["git", "-C", str(repo_root), "archive", "--format=tar", "HEAD", *(["--", src_rel] if src_rel else [])],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    extract = subprocess.run(
-        ["tar", "-xf", "-", "-C", str(dest), *(["--strip-components", str(len(Path(src_rel).parts))] if src_rel else [])],
-        stdin=archive.stdout,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=False,
-    )
-    stderr_bytes = archive.stderr.read() if archive.stderr is not None else b""
-    archive_code = archive.wait()
-    if archive.stdout is not None:
-        archive.stdout.close()
-    if archive.stderr is not None:
-        archive.stderr.close()
-    if archive_code != 0:
-        _die(stderr_bytes.decode("utf-8", errors="replace").strip() or f"git archive failed for {repo_root}")
-    if extract.returncode != 0:
-        _die(extract.stderr.decode("utf-8", errors="replace").strip() or f"failed to extract snapshot from {repo_root}")
-    _require_nonempty_dir(dest, "promoted snapshot")
 
 
 def _ensure_arm64_sysroot_from_env() -> Path:
@@ -500,7 +436,7 @@ def build_scx_from_env() -> None:
     shutil.rmtree(scx_build_repo_dir, ignore_errors=True)
     scx_build_repo_dir.mkdir(parents=True, exist_ok=True)
     _log("arm64-scx-host", f"Staging tracked scx checkout at {archive_commit} into {scx_build_repo_dir}")
-    _snapshot_git_subtree(source_checkout, "", scx_build_repo_dir)
+    snapshot_git_subtree(source_checkout, "", scx_build_repo_dir, die=_die)
 
     clang_bin = _resolve_llvm_tool("clang", preferred_suffix=preferred_suffix)
     clangxx_bin = _resolve_llvm_tool("clang++", preferred_suffix=preferred_suffix)
@@ -584,7 +520,7 @@ def _prepare_source_checkout(repo_url: str, repo_ref: str, repo_name: str, dest_
     if current_head != repo_ref:
         _run(["git", "-C", str(cache_dir), "fetch", "--depth", "1", "origin", repo_ref])
         _run(["git", "-C", str(cache_dir), "checkout", "--detach", "FETCH_HEAD"])
-    _snapshot_git_subtree(cache_dir, "", dest_dir)
+    snapshot_git_subtree(cache_dir, "", dest_dir, die=_die)
 
 
 def _copy_sibling_lib_wrapper(wrapper: Path, real_name: str) -> None:

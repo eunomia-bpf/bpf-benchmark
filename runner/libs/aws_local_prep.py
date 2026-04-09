@@ -566,7 +566,7 @@ class AWSPrep:
         if self.target_arch == "x86_64":
             bundled_csv, tool_root = stage_x86_workload_tools(
                 requested_csv=requested_csv,
-                output_root=self.promote_root / "workload-tools",
+                output_root=self.x86_host_cache_root / "workload-tools" / (requested_csv.replace(",", "_") or "none"),
             )
             self.bundled_workload_tools_csv = bundled_csv
             self.local_workload_tool_root = tool_root

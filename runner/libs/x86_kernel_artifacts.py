@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import fcntl
+import hashlib
 import os
 import shutil
 import subprocess
@@ -18,6 +19,7 @@ KERNEL_DIR = ROOT_DIR / "vendor" / "linux-framework"
 DEFCONFIG_SRC = ROOT_DIR / "vendor" / "bpfrejit_defconfig"
 KINSN_MODULE_DIR = ROOT_DIR / "module" / "x86"
 KERNEL_BUILD_LOCK = ROOT_DIR / ".cache" / "kernel-build.lock"
+KVM_SETUP_CACHE_ROOT = ROOT_DIR / ".cache" / "setup-artifacts" / "x86-kvm"
 VIRTME_MODULE_STAGE = KERNEL_DIR / ".virtme_mods"
 VIRTME_HOSTFS_MODULES = (
     "drivers/block/null_blk/null_blk.ko",
@@ -122,6 +124,60 @@ def _kernel_release(kernel_dir: Path) -> str:
     return release
 
 
+def _config_fingerprint(config_path: Path) -> str:
+    require_path(config_path, tag="x86-kernel-artifacts", description="x86 kernel config")
+    return hashlib.sha256(config_path.read_bytes()).hexdigest()
+
+
+def _module_install_entry_exists(base: Path) -> bool:
+    for candidate in (
+        base,
+        base.with_name(base.name + ".zst"),
+        base.with_name(base.name + ".xz"),
+        base.with_name(base.name + ".gz"),
+    ):
+        if candidate.is_file():
+            return True
+    return False
+
+
+def _kvm_setup_fingerprint_path(cache_dir: Path) -> Path:
+    return cache_dir / "config.sha256"
+
+
+def _kvm_cached_setup_matches_config(cache_dir: Path, expected_fingerprint: str) -> bool:
+    fingerprint_path = _kvm_setup_fingerprint_path(cache_dir)
+    return fingerprint_path.is_file() and fingerprint_path.read_text(encoding="utf-8").strip() == expected_fingerprint
+
+
+def _write_kvm_cached_setup_fingerprint(cache_dir: Path, fingerprint: str) -> None:
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    _kvm_setup_fingerprint_path(cache_dir).write_text(f"{fingerprint}\n", encoding="utf-8")
+
+
+def _virtme_stage_ready(kernel_dir: Path, kernel_release: str) -> bool:
+    stage_modules_root = kernel_dir / ".virtme_mods" / "lib" / "modules"
+    alias_root = stage_modules_root / "0.0.0"
+    release_root = stage_modules_root / kernel_release
+    if not (alias_root / "modules.dep").is_file():
+        return False
+    if not (release_root / "modules.dep").is_file():
+        return False
+    for module in VIRTME_HOSTFS_MODULES:
+        release_path = release_root / "kernel" / module
+        alias_path = alias_root / "kernel" / module
+        if not _module_install_entry_exists(release_path):
+            return False
+        if not _module_install_entry_exists(alias_path):
+            return False
+    return True
+
+
+def _kvm_cached_setup_ready(kernel_dir: Path, bzimage: Path, kernel_release: str, config_fingerprint: str) -> bool:
+    cache_dir = KVM_SETUP_CACHE_ROOT / kernel_release
+    return bzimage.is_file() and _virtme_stage_ready(kernel_dir, kernel_release) and _kvm_cached_setup_matches_config(cache_dir, config_fingerprint)
+
+
 def _stage_virtme_modules(kernel_dir: Path) -> None:
     kernel_release = _kernel_release(kernel_dir)
     stage_dir = kernel_dir / ".virtme_mods"
@@ -162,6 +218,10 @@ def ensure_kvm_kernel_ready(
 
     def _build() -> None:
         _sync_config(resolved_kernel_dir, resolved_defconfig)
+        kernel_release = _kernel_release(resolved_kernel_dir)
+        config_fingerprint = _config_fingerprint(resolved_kernel_dir / ".config")
+        if _kvm_cached_setup_ready(resolved_kernel_dir, resolved_bzimage, kernel_release, config_fingerprint):
+            return
         _run(["make", "-C", str(resolved_kernel_dir), f"-j{job_count}", "bzImage", "modules_prepare"])
         if (resolved_kernel_dir / "vmlinux.symvers").is_file():
             shutil.copy2(resolved_kernel_dir / "vmlinux.symvers", resolved_kernel_dir / "Module.symvers")
@@ -180,6 +240,7 @@ def ensure_kvm_kernel_ready(
         _stage_virtme_modules(resolved_kernel_dir)
         if not resolved_bzimage.is_file():
             die(f"missing built kernel image: {resolved_bzimage}")
+        _write_kvm_cached_setup_fingerprint(KVM_SETUP_CACHE_ROOT / kernel_release, config_fingerprint)
 
     _with_lock(KERNEL_BUILD_LOCK, _build)
 

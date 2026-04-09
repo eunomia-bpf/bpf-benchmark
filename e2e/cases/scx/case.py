@@ -246,7 +246,16 @@ def _post_rejit_scx_prog_ids(lifecycle: CaseLifecycleState) -> list[int]:
         if int(logical_prog_id) in target_prog_ids
         and int(refreshed_id_by_name.get(program_name, 0) or 0) > 0
     ]
-    return remapped or [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
+    if remapped:
+        return remapped
+    refreshed_ids = [
+        int(program.get("id", 0) or 0)
+        for program in refreshed_programs
+        if int(program.get("id", 0) or 0) > 0
+    ]
+    if refreshed_ids:
+        return refreshed_ids
+    return [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
 
 
 def summarize_phase(workloads: Sequence[Mapping[str, object]]) -> dict[str, object]:

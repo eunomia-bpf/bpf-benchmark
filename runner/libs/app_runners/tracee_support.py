@@ -238,7 +238,10 @@ class TraceeAgentSession:
                 healthy = wait_healthy(
                     proc,
                     self.load_timeout,
-                    lambda: _tracee_healthz_ready(TRACEE_HEALTH_HOST, TRACEE_HEALTH_PORT)
+                    lambda: (
+                        _tracee_healthz_ready(TRACEE_HEALTH_HOST, TRACEE_HEALTH_PORT)
+                        or _tracee_collector_has_activity(self.collector)
+                    )
                     and bool(
                         [item for item in find_bpf_programs(proc.pid or 0) if int(item.get("id", -1)) not in preexisting_ids]
                     ),
@@ -326,15 +329,13 @@ def inspect_tracee_setup() -> dict[str, object]:
     corpus_binary = ROOT_DIR / "corpus" / "build" / "tracee" / "bin" / "tracee"
     explicit_binary = os.environ.get("TRACEE_BINARY", "").strip() or None
 
-    required_tools = ["curl"]
+    required_tools: list[str] = []
     requested_csv = os.environ.get("RUN_WORKLOAD_TOOLS_CSV", "").strip()
     if requested_csv:
         for tool in requested_csv.split(","):
             normalized = str(tool).strip()
             if normalized in {"curl", "fio", "hackbench", "stress-ng", "wrk"} and normalized not in required_tools:
                 required_tools.append(normalized)
-    else:
-        required_tools.extend(["stress-ng", "fio", "wrk", "hackbench"])
 
     missing_tools = missing_required_commands(required_tools)
     if missing_tools:
@@ -400,6 +401,11 @@ def _tracee_healthz_ready(host: str, port: int) -> bool:
             return int(getattr(response, "status", 0) or 0) == 200
     except (OSError, URLError):
         return False
+
+
+def _tracee_collector_has_activity(collector: TraceeOutputCollector) -> bool:
+    snapshot = collector.snapshot()
+    return bool(snapshot.get("event_tail") or snapshot.get("stdout_tail") or snapshot.get("stderr_tail"))
 
 
 def _tracee_output_args(event_output_path: Path) -> list[str]:

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import fcntl
-import hashlib
 import os
 import shutil
 import subprocess
@@ -14,6 +13,7 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail, require_nonempty_dir as _require_nonempty_dir
 from runner.libs.runner_artifacts import build_runner_binary, build_vendor_bpftool
+from runner.libs.source_tree import snapshot_git_tree, source_tree_stamp
 
 _die = partial(fail, "cross-arm64")
 _require_nonempty_dir = partial(_require_nonempty_dir, tag="cross-arm64")
@@ -68,68 +68,6 @@ def _run_passthrough(command: list[str], *, cwd: Path | None = None, env: dict[s
         raise SystemExit(completed.returncode)
 
 
-def _git_path_is_clean(repo_root: Path, pathspec: str = "") -> bool:
-    diff = ["git", "-C", str(repo_root), "diff", "--quiet"]
-    cached = ["git", "-C", str(repo_root), "diff", "--cached", "--quiet"]
-    if pathspec:
-        diff.extend(["--", pathspec])
-        cached.extend(["--", pathspec])
-    return (
-        subprocess.run(diff, check=False).returncode == 0
-        and subprocess.run(cached, check=False).returncode == 0
-    )
-
-
-def _git_untracked_paths(repo_root: Path, pathspec: str = "") -> list[Path]:
-    command = ["git", "-C", str(repo_root), "ls-files", "--others", "--exclude-standard", "-z"]
-    if pathspec:
-        command.extend(["--", pathspec])
-    completed = subprocess.run(command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if completed.returncode != 0:
-        message = completed.stderr.decode("utf-8", errors="replace").strip() or "git ls-files failed"
-        _die(message)
-    tokens = [token.decode("utf-8") for token in completed.stdout.split(b"\0") if token]
-    return [Path(token) for token in tokens]
-
-
-def _snapshot_git_tree(repo_root: Path, dest: Path) -> None:
-    if subprocess.run(["git", "-C", str(repo_root), "rev-parse", "--verify", "HEAD"], check=False).returncode != 0:
-        _die(f"expected git checkout for promoted snapshot: {repo_root}")
-    untracked = _git_untracked_paths(repo_root)
-    if untracked:
-        sample = ", ".join(str(path) for path in untracked[:5])
-        extra = "" if len(untracked) <= 5 else f" (+{len(untracked) - 5} more)"
-        _die(f"source repo {repo_root} has untracked files and cannot be sealed: {sample}{extra}")
-    if not _git_path_is_clean(repo_root):
-        _die(f"source repo {repo_root} has local modifications and cannot be sealed")
-    shutil.rmtree(dest, ignore_errors=True)
-    dest.mkdir(parents=True, exist_ok=True)
-    archive = subprocess.Popen(
-        ["git", "-C", str(repo_root), "archive", "--format=tar", "HEAD"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    extract = subprocess.run(
-        ["tar", "-xf", "-", "-C", str(dest)],
-        stdin=archive.stdout,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=False,
-        text=False,
-    )
-    stderr_bytes = archive.stderr.read() if archive.stderr is not None else b""
-    archive_code = archive.wait()
-    if archive.stdout is not None:
-        archive.stdout.close()
-    if archive.stderr is not None:
-        archive.stderr.close()
-    if archive_code != 0:
-        _die(stderr_bytes.decode("utf-8", errors="replace").strip() or f"git archive failed for {repo_root}")
-    if extract.returncode != 0:
-        _die(extract.stderr.decode("utf-8", errors="replace").strip() or f"failed to extract snapshot from {repo_root}")
-    _require_nonempty_dir(dest, str(dest))
-
-
 class Arm64ContainerBuild:
     def __init__(self) -> None:
         self.repo_root = ROOT_DIR
@@ -154,8 +92,11 @@ class Arm64ContainerBuild:
         self.native_repo_build_root = Path(_env("ARM64_NATIVE_REPO_BUILD_ROOT", str(self.build_root / "benchmark/native-build-cache")))
         self.katran_build_root = Path(_env("ARM64_KATRAN_BUILD_ROOT", str(self.build_root / "katranbuild")))
         self.katran_source_dir = self.bench_build_repo_root / "katran"
-        self.katran_build_dir = self.katran_source_dir / "_build"
-        self.katran_install_dir = self.katran_build_dir / "deps"
+        # Keep Katran source and build trees separate so the shared source cache
+        # stays pristine across reruns and CMake can reuse a stable out-of-tree
+        # build/install root.
+        self.katran_build_dir = self.katran_build_root / "cmake"
+        self.katran_install_dir = self.katran_build_root / "deps"
         self.katran_getdeps_root = Path(_env("ARM64_KATRAN_GETDEPS_ROOT", str(self.katran_build_root / "getdeps")))
         self.katran_getdeps_lock = Path(_env("ARM64_KATRAN_GETDEPS_LOCK", str(self.katran_getdeps_root.parent / "katran-getdeps.lock")))
         self.vendor_bpftool_root = Path(_env("ARM64_VENDOR_BPFTOOL_ROOT", str(self.build_root / "vendor-bpftool")))
@@ -250,10 +191,8 @@ class Arm64ContainerBuild:
                 return
             shutil.rmtree(dest_dir, ignore_errors=True)
             dest_dir.mkdir(parents=True, exist_ok=True)
-            if subprocess.run(["git", "-C", str(src_dir), "rev-parse", "--verify", "HEAD"], check=False).returncode == 0:
-                if not _git_path_is_clean(src_dir):
-                    _die(f"source repo {src_dir} has local modifications and cannot be sealed")
-                _snapshot_git_tree(src_dir, dest_dir)
+            if stamp.startswith("git:"):
+                snapshot_git_tree(src_dir, dest_dir, die=_die)
             else:
                 _require_nonempty_dir(src_dir, str(src_dir))
                 shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
@@ -262,25 +201,7 @@ class Arm64ContainerBuild:
             stamp_path.write_text(stamp + "\n", encoding="utf-8")
 
     def _source_repo_stamp(self, src_dir: Path) -> str:
-        if subprocess.run(["git", "-C", str(src_dir), "rev-parse", "--verify", "HEAD"], check=False).returncode == 0:
-            if not _git_path_is_clean(src_dir):
-                _die(f"source repo {src_dir} has local modifications and cannot be sealed")
-            untracked = _git_untracked_paths(src_dir)
-            if untracked:
-                sample = ", ".join(str(path) for path in untracked[:5])
-                extra = "" if len(untracked) <= 5 else f" (+{len(untracked) - 5} more)"
-                _die(f"source repo {src_dir} has untracked files and cannot be sealed: {sample}{extra}")
-            head = _run(["git", "-C", str(src_dir), "rev-parse", "HEAD"]).stdout.strip()
-            return f"git:{head}"
-        digest = hashlib.sha256()
-        for path in sorted(src_dir.rglob("*")):
-            rel = path.relative_to(src_dir).as_posix()
-            digest.update(rel.encode("utf-8"))
-            if path.is_file():
-                stat = path.stat()
-                digest.update(str(stat.st_size).encode("utf-8"))
-                digest.update(str(stat.st_mtime_ns).encode("utf-8"))
-        return f"tree:{digest.hexdigest()}"
+        return source_tree_stamp(src_dir, die=_die)
 
     @contextmanager
     def _lock_repo(self, repo_name: str, *, suffix: str = ".build.lock"):
@@ -376,6 +297,8 @@ class Arm64ContainerBuild:
         build_dir.mkdir(parents=True, exist_ok=True)
         install_dir.mkdir(parents=True, exist_ok=True)
         self.katran_getdeps_root.mkdir(parents=True, exist_ok=True)
+        getdeps_stamp = self._katran_getdeps_stamp(src_dir)
+        getdeps_stamp_path = self.katran_getdeps_root / ".katran-deps.stamp"
         env = os.environ.copy()
         env.update(
             {
@@ -385,6 +308,17 @@ class Arm64ContainerBuild:
             }
         )
         with self._lock_katran_getdeps():
+            if getdeps_stamp_path.is_file() and getdeps_stamp_path.read_text(encoding="utf-8").strip() == getdeps_stamp:
+                prefixes = self._katran_dependency_prefixes_unlocked(src_dir)
+                if prefixes:
+                    _log("Reusing cached ARM64 Katran getdeps outputs")
+                    return
+            # fbcode_builder patches extracted sources in-place. When we need to
+            # rerun getdeps on the shared scratch root, keep immutable downloads
+            # and installed prefixes, but reset mutable extracted/build trees so
+            # patch application starts from a clean source state.
+            for mutable_dir in (self.katran_getdeps_root / "build", self.katran_getdeps_root / "extracted"):
+                shutil.rmtree(mutable_dir, ignore_errors=True)
             _run_passthrough(
                 [
                     self.host_python,
@@ -407,28 +341,32 @@ class Arm64ContainerBuild:
                 cwd=src_dir,
                 env=env,
             )
+            getdeps_stamp_path.write_text(getdeps_stamp + "\n", encoding="utf-8")
 
     def katran_dependency_prefixes(self, src_dir: Path) -> list[str]:
         with self._lock_katran_getdeps():
-            completed = _run(
-                [
-                    self.host_python,
-                    str(src_dir / "build/fbcode_builder/getdeps.py"),
-                    "--scratch-path",
-                    str(self.katran_getdeps_root),
-                    "--allow-system-packages",
-                    "--shared-libs",
-                    "query-paths",
-                    "--recursive",
-                    "--no-tests",
-                    "--current-project",
-                    "katran",
-                    "--src-dir",
-                    str(src_dir),
-                    "katran",
-                ],
-                cwd=src_dir,
-            )
+            return self._katran_dependency_prefixes_unlocked(src_dir)
+
+    def _katran_dependency_prefixes_unlocked(self, src_dir: Path) -> list[str]:
+        completed = _run(
+            [
+                self.host_python,
+                str(src_dir / "build/fbcode_builder/getdeps.py"),
+                "--scratch-path",
+                str(self.katran_getdeps_root),
+                "--allow-system-packages",
+                "--shared-libs",
+                "query-paths",
+                "--recursive",
+                "--no-tests",
+                "--current-project",
+                "katran",
+                "--src-dir",
+                str(src_dir),
+                "katran",
+            ],
+            cwd=src_dir,
+        )
         prefixes: list[str] = []
         for raw_line in completed.stdout.splitlines():
             line = raw_line.strip()
@@ -464,6 +402,8 @@ class Arm64ContainerBuild:
         cmake_build_dir.mkdir(parents=True, exist_ok=True)
         dependency_prefixes = self.katran_dependency_prefixes(src_dir)
         prefix_path = ":".join([*dependency_prefixes, str(install_dir)])
+        configure_stamp = self._katran_configure_stamp(src_dir, prefix_path, install_dir)
+        configure_stamp_path = build_dir / ".katran-cmake.stamp"
         pkgconfig_paths: list[str] = []
         for prefix in dependency_prefixes:
             for suffix in ("lib/pkgconfig", "lib64/pkgconfig", "share/pkgconfig"):
@@ -481,31 +421,64 @@ class Arm64ContainerBuild:
                 "GETDEPS_INSTALL_DIR": str(self.katran_getdeps_root / "installed"),
             }
         )
-        _run_passthrough(
-            [
-                "cmake",
-                "-G",
-                "Ninja",
-                f"-DCMAKE_C_COMPILER={self.clang_bin}",
-                f"-DCMAKE_CXX_COMPILER={self.clangxx_bin}",
-                f"-DCMAKE_LINKER={self.ld_lld_bin}",
-                f"-DCMAKE_PREFIX_PATH={prefix_path}",
-                f"-DCMAKE_INSTALL_PREFIX={install_dir}",
-                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
-                "-DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON",
-                f"-DLIB_BPF_PREFIX={install_dir}",
-                "-DCMAKE_CXX_STANDARD=17",
-                "-DBUILD_TESTS=OFF",
-                "-DCMAKE_BUILD_EXAMPLE_GRPC=ON",
-                "-DCMAKE_BUILD_EXAMPLE_THRIFT=OFF",
-                "-DCMAKE_BUILD_TOOLS=OFF",
-                "-DCMAKE_BUILD_KATRAN_TPR=OFF",
-                str(src_dir),
-            ],
-            cwd=cmake_build_dir,
-            env=env,
-        )
+        cache_file = cmake_build_dir / "CMakeCache.txt"
+        if not (cache_file.is_file() and configure_stamp_path.is_file() and configure_stamp_path.read_text(encoding="utf-8").strip() == configure_stamp):
+            _run_passthrough(
+                [
+                    "cmake",
+                    "-G",
+                    "Ninja",
+                    f"-DCMAKE_C_COMPILER={self.clang_bin}",
+                    f"-DCMAKE_CXX_COMPILER={self.clangxx_bin}",
+                    f"-DCMAKE_LINKER={self.ld_lld_bin}",
+                    f"-DCMAKE_PREFIX_PATH={prefix_path}",
+                    f"-DCMAKE_INSTALL_PREFIX={install_dir}",
+                    "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                    "-DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON",
+                    f"-DLIB_BPF_PREFIX={install_dir}",
+                    "-DCMAKE_CXX_STANDARD=17",
+                    "-DBUILD_TESTS=OFF",
+                    "-DCMAKE_BUILD_EXAMPLE_GRPC=ON",
+                    "-DCMAKE_BUILD_EXAMPLE_THRIFT=OFF",
+                    "-DCMAKE_BUILD_TOOLS=OFF",
+                    "-DCMAKE_BUILD_KATRAN_TPR=OFF",
+                    str(src_dir),
+                ],
+                cwd=cmake_build_dir,
+                env=env,
+            )
+            configure_stamp_path.write_text(configure_stamp + "\n", encoding="utf-8")
+        else:
+            _log("Reusing cached ARM64 Katran CMake configure")
         _run_passthrough(["cmake", "--build", ".", f"-j{self.jobs}", "--target", "katran_server_grpc"], cwd=cmake_build_dir, env=env)
+
+    def _katran_getdeps_stamp(self, src_dir: Path) -> str:
+        digest = hashlib.sha256()
+        for token in (
+            self._source_repo_stamp(src_dir),
+            self.host_python,
+            self.clang_bin,
+            self.clangxx_bin,
+            self.ld_lld_bin,
+        ):
+            digest.update(token.encode("utf-8"))
+            digest.update(b"\0")
+        return digest.hexdigest()
+
+    def _katran_configure_stamp(self, src_dir: Path, prefix_path: str, install_dir: Path) -> str:
+        digest = hashlib.sha256()
+        for token in (
+            self._source_repo_stamp(src_dir),
+            prefix_path,
+            str(install_dir.resolve()),
+            self.clang_bin,
+            self.clangxx_bin,
+            self.ld_lld_bin,
+            self.jobs,
+        ):
+            digest.update(token.encode("utf-8"))
+            digest.update(b"\0")
+        return digest.hexdigest()
 
     def copy_runtime_bundle(self, binary: Path, output_lib_dir: Path | None = None) -> None:
         output_lib_dir = output_lib_dir or (self.output_root / "lib")

@@ -4947,3 +4947,303 @@ Active todo:
    then start `x86-kvm e2e` behind it.
 4. Continue shrinking ARM qemu/container prep wall clock while the ARM lanes
    build, especially the remaining native repo artifacts.
+
+
+### 13.61 2026-04-08: x86 corpus/e2e now bundle `hackbench/wrk/sysbench` instead of depending on missing AL2023 packages
+
+- The next fresh `aws-x86 corpus/e2e` failures were no longer path/setup bugs;
+  they were guest package-manager misses:
+  - `rt-tests` (for `hackbench`) is not available in the default AL2023 repos
+  - `sysbench` and `wrk` are also not available in that same guest package set
+- The x86 local-prep contract now stages the unstable guest-package tools as
+  portable bundled tools:
+  - `hackbench`
+  - `wrk`
+  - `sysbench`
+- This uses the existing x86 portable-runtime wrapping that already seals host
+  binaries together with their runtime loader/libs into the bundle; it does not
+  reintroduce a third control plane.
+- Fresh `aws-x86 corpus` and `aws-x86 e2e` reruns were started after this
+  change.
+
+Static verification:
+- `python3 -m pytest -q tests/python/test_prepare_local_inputs.py tests/python/test_run_contract.py tests/python/test_arm64_container_build.py`
+  -> `34 passed`
+- `python3 -m pyflakes runner/libs/local_prep_common.py tests/python/test_prepare_local_inputs.py runner/libs/arm64_container_build.py tests/python/test_arm64_container_build.py runner/libs/guest_prereqs.py runner/libs/run_contract.py tests/python/test_run_contract.py`
+  -> clean
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Keep the fresh `aws-x86 corpus/e2e` reruns moving on the new bundled-tool
+   contract and capture the first new runtime blocker or result directory.
+2. Keep the fresh `aws-arm64 corpus/e2e` reruns moving on the repaired Katran
+   prep order and capture the first new runtime blocker or result directory.
+3. Keep the fresh `x86-kvm corpus` rerun moving; once it lands, start
+   `x86-kvm e2e`.
+4. Continue shrinking ARM qemu/container prep wall clock while the ARM lanes
+   build, especially the remaining native repo artifacts.
+
+
+### 13.62 2026-04-08: x86 corpus/e2e exposed a shared guest PATH contract and x86 tools now use a stable shared cache root
+
+- The next fresh `aws-x86 corpus/e2e` reruns moved past the missing-package
+  blocker and reached a tighter shared guest contract failure instead:
+  - guest prereq installation succeeded
+  - `iproute` was present
+  - but the runtime PATH still omitted the standard `sbin` directories, so both
+    reruns failed with `required guest command is missing: tc`
+- The shared guest runtime contract is now explicit:
+  - `runner.libs.guest_prereqs.runtime_path_value()` appends
+    `/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin`
+  - this keeps bundled tool precedence while still making standard distro
+    admin tools (`tc`, `ip`, etc.) visible on the guest
+- The x86 bundled workload tools are also no longer copied into a fresh per-run
+  directory every time:
+  - `runner.libs.aws_local_prep` and `runner.libs.kvm_local_prep` now stage
+    them under a shared `x86-host/workload-tools` cache root
+  - per-run state only records the selected cached bundle inputs
+- `x86-kvm corpus` also exposed the same shared guest-runtime theme in practice:
+  - `tracee/default` failed its `127.0.0.1:3366` health check
+  - `bpftrace/tcpretrans` reported zero successful transfers
+  - a fresh rerun was started immediately after the `ip + lo-up + sbin PATH`
+    fixes, instead of treating those as case-local problems
+
+Static verification:
+- `python3 -m pytest -q tests/python/test_run_contract.py`
+  -> `22 passed`
+- `python3 -m pyflakes runner/libs/guest_prereqs.py tests/python/test_run_contract.py`
+  -> clean
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Keep the fresh `aws-x86 corpus/e2e` reruns moving on the repaired guest PATH
+   contract and capture the first new runtime blocker or fresh result directory.
+2. Keep the fresh `x86-kvm corpus` rerun moving on the shared loopback/PATH
+   contract; if it lands, start `x86-kvm e2e` immediately behind it.
+3. Keep the still-live `aws-arm64 corpus/e2e` reruns moving while Katran
+   `getdeps` finishes on the shared cache root, and capture the first new
+   runtime blocker or result directory.
+4. Continue shrinking ARM qemu/container prep wall clock while the ARM lanes
+   build, especially the remaining benchmark-native repo artifacts.
+
+
+### 13.63 2026-04-09: x86 local kernel prep now short-circuits on hot cache
+
+- While the fresh `x86-kvm corpus` and `aws-x86 corpus/e2e` reruns were
+  progressing, the next obvious wall-clock waste was local x86 kernel prep:
+  the same `bzImage/modules_prepare` work was being re-entered even when the
+  inputs had not changed.
+- The x86 kernel prep paths now short-circuit on matching cached inputs:
+  - `runner.libs.x86_kernel_artifacts.ensure_kvm_kernel_ready()` now records a
+    config fingerprint under `.cache/setup-artifacts/x86-kvm/<release>/` and
+    reuses the existing `bzImage + .virtme_mods` tree when the config still
+    matches
+  - `runner.libs.aws_kernel_artifacts._build_x86_kernel_artifacts_locked()` now
+    checks the existing cached `bzImage/modules/kinsn` artifact set before
+    dropping back into a fresh `make bzImage modules_prepare`
+- This does not change the runtime contract; it only removes repeated local
+  kernel work on reruns where the source/config are unchanged.
+
+Static verification:
+- `python3 -m pytest -q tests/python/test_x86_kernel_artifacts.py tests/python/test_run_contract.py tests/python/test_prepare_local_inputs.py`
+  -> `36 passed`
+- `python3 -m pyflakes runner/libs/x86_kernel_artifacts.py runner/libs/aws_kernel_artifacts.py tests/python/test_x86_kernel_artifacts.py`
+  -> clean
+- `git diff --check`
+  -> clean
+
+Active todo:
+1. Keep the live `x86-kvm corpus` rerun moving on the new shared loopback/PATH
+   contract; if it lands, start `x86-kvm e2e` next.
+2. Keep the live `aws-x86 corpus/e2e` reruns moving; the current goal is to get
+   past the old `tc`/guest-path blocker and observe the next real runtime
+   result.
+3. Keep the live `aws-arm64 corpus/e2e` reruns moving while the shared Katran
+   `getdeps` cache finishes warming; capture the first real runtime blocker or
+   fresh result directory.
+4. Continue shrinking ARM qemu/container prep wall clock, especially the
+   remaining benchmark-native repo builds.
+
+
+### 13.64 2026-04-09: AL2023 needs `iproute-tc`, not `iproute`, for the shared `tc` guest contract
+
+- The first fresh `aws-x86 corpus/e2e` reruns after the PATH widening still
+  failed with the same guest-prereq error:
+  - `required guest command is missing: tc`
+- The remote logs made the actual root cause clear:
+  - the guest package manager had already installed `iproute`
+  - but `tc` still was not present on Amazon Linux 2023
+- The package mapping was wrong in the shared prereq contract:
+  - `runner.libs.prereq_contract.TOOL_PACKAGE_MAP[("dnf", "tc")]` used
+    `iproute`
+  - AL2023 provides `tc` via `iproute-tc`
+- The contract is now corrected in one place, so both `aws-x86 corpus` and
+  `aws-x86 e2e` pick it up on the next rerun.
+
+Static verification:
+- `python3 -m pytest -q tests/python/test_run_contract.py`
+  -> `23 passed`
+- `python3 -m pyflakes runner/libs/prereq_contract.py tests/python/test_run_contract.py`
+  -> clean
+- `git diff --check`
+  -> clean
+
+
+### 13.65 2026-04-09: the last failed KVM corpus rerun exposed bundle/runtime contract gaps, not guest-loopback gaps
+
+- After the shared `ip + lo-up + sbin PATH` fixes, the last failed
+  `x86-kvm corpus` rerun progressed deep into execution and exposed a different
+  class of problems:
+  - BCC apps failed because runtime could not see bundled `libbpf-tools`
+    output, even though the native x86 repo build had produced it
+  - several apps failed because the staged `.virtme_mods` tree was not visible
+    under the path expected by runtime
+  - bundled `stress-ng` failed with `Permission denied` in the guest
+- In other words, the KVM blocker has moved on from guest prereq policy to
+  bundle/runtime contract correctness.
+- A fresh `x86-kvm corpus` rerun was started immediately on the current tree so
+  the next failure is measured against the repaired x86 tool cache, repaired
+  bundle cache, and the current KVM extractor path.
+
+Active todo:
+1. Keep the fresh `aws-x86 corpus/e2e` reruns moving on the corrected
+   `iproute-tc` contract and capture the first new runtime blocker or fresh
+   result directory.
+2. Keep the fresh `x86-kvm corpus` rerun moving and use its next result to
+   settle the remaining shared bundle/runtime gaps:
+   bundled BCC tools, staged `.virtme_mods`, and bundled workload-tool
+   executability.
+3. Keep the live `aws-arm64 corpus/e2e` reruns moving while the shared Katran
+   `getdeps` cache finishes warming; capture the first real runtime blocker or
+   fresh result directory.
+4. Continue shrinking ARM qemu/container prep wall clock, especially the
+   remaining benchmark-native repo builds.
+
+
+### 13.66 2026-04-09: ARM Katran warm runs now skip `getdeps` and CMake configure on cache hit
+
+- The biggest remaining ARM wall-clock sink was still local Katran prep:
+  - `getdeps.py build --only-deps`
+  - followed by a fresh CMake configure
+- That work was already using shared roots, but it still re-ran on warm paths.
+- The ARM Katran prep now keeps explicit warm-cache stamps:
+  - a shared getdeps stamp under the shared `katran-getdeps` root
+  - a per-build-tree CMake configure stamp under the shared Katran build root
+- On cache hit:
+  - Katran dependency resolution now skips the expensive `getdeps build` step
+    and reuses the existing shared install prefixes
+  - Katran binary prep skips CMake configure and goes straight to
+    `cmake --build --target katran_server_grpc`
+- This does not change the artifact contract; it only removes repeated prep
+  work on warm ARM reruns.
+
+Static verification:
+- `python3 -m pytest -q tests/python/test_arm64_container_build.py tests/python/test_run_contract.py`
+  -> `26 passed`
+- `python3 -m pyflakes runner/libs/arm64_container_build.py tests/python/test_arm64_container_build.py`
+  -> clean
+- `git diff --check`
+  -> clean
+
+
+### 13.67 2026-04-09: the first x86 reruns after the `tc` fix were still old runs, so they were stopped and restarted on the current tree
+
+- After the shared `tc -> iproute-tc` mapping fix landed, the previously
+  running `aws-x86 corpus/e2e` jobs were still the pre-fix runs:
+  - the latest fetched result directories still contained only `remote.log`
+  - both remote logs still ended in the same old failure:
+    - `[guest-prereqs][ERROR] required guest command is missing: tc`
+  - the logs also showed the old package line:
+    - `Package iproute-... is already installed.`
+- That meant the fix had not yet been validated by runtime; those jobs were
+  still executing against old local-prep/bundle state.
+- The stale x86 `corpus` and `e2e` jobs were therefore terminated and both
+  lanes were started again on the current tree.
+- The fresh logs are now:
+  - `.cache/runtime-logs/aws-x86-corpus-rerun-20260408_174333.log`
+  - `.cache/runtime-logs/aws-x86-e2e-rerun-20260408_174333.log`
+- The current validation goal is no longer "wait for the old jobs"; it is:
+  - get the new x86 reruns past guest prereqs on the corrected `iproute-tc`
+    contract
+  - capture the next real runtime blocker or the first fresh result directory
+
+Active todo:
+1. Keep the fresh `aws-x86 corpus/e2e` reruns moving on the corrected
+   `iproute-tc` contract and ignore the older stale result directories when
+   judging progress.
+2. Keep the fresh `x86-kvm corpus` rerun moving and use its next result to
+   settle the remaining shared bundle/runtime gaps:
+   bundled BCC tools, staged `.virtme_mods`, and bundled workload-tool
+   executability.
+3. Keep the live `aws-arm64 corpus/e2e` reruns moving while the shared Katran
+   `getdeps` cache finishes warming; capture the first real runtime blocker or
+   fresh result directory.
+4. Continue shrinking ARM qemu/container prep wall clock, especially the
+   remaining benchmark-native repo builds.
+
+
+### 13.68 2026-04-09: the next x86 blockers are shared Tracee/scx contract bugs, and all corpus/e2e lanes were restarted on the current tree
+
+- The next fresh `aws-x86 corpus/e2e` reruns finally got past the old `tc`
+  guest-prereq blocker and exposed the next real runtime failures:
+  - `aws-x86 corpus` failed only at `tracee/default`:
+    - `Tracee setup failed: missing required Tracee workload tools: wrk`
+  - `aws-x86 e2e` failed in two places:
+    - `tracee`: the case generated events but still failed strict health-only
+      startup gating
+    - `scx`: post-reJIT stats sampling still used stale pre-refresh program IDs
+- Those failures were shared contract bugs, not per-run cloud noise:
+  - the network workload contract still modeled `curl` where runtime really
+    uses `wrk`
+  - Tracee setup still defaulted to an oversized workload-tool requirement set
+    when the explicit workload contract was absent
+  - the SCX case still fell back to stale pre-refresh prog IDs after reJIT
+- The contract was corrected in one place:
+  - `network` workload tools now require `wrk`
+  - `tracee` e2e now carries no default benchmark-tool requirement unless the
+    manifest explicitly requests it
+  - Tracee health gating now accepts real collector activity plus visible
+    programs instead of only HTTP healthz
+  - SCX post-reJIT stats now prefer refreshed live prog IDs over stale saved
+    ones
+- Because the latest fetched x86 result directories were still the pre-fix
+  runs, all `corpus/e2e` lanes were restarted on the current tree:
+  - `x86-kvm corpus`: `.cache/runtime-logs/x86-kvm-corpus-rerun-20260408_193830.log`
+  - `aws-x86 corpus`: `.cache/runtime-logs/aws-x86-corpus-rerun-20260408_193830.log`
+  - `aws-x86 e2e`: `.cache/runtime-logs/aws-x86-e2e-rerun-20260408_193830.log`
+  - `aws-arm64 corpus`: `.cache/runtime-logs/aws-arm64-corpus-rerun-20260408_193830.log`
+  - `aws-arm64 e2e`: `.cache/runtime-logs/aws-arm64-e2e-rerun-20260408_193830.log`
+
+
+### 13.69 2026-04-09: `zlib patch` is a Katran getdeps cache-mutation bug, not a new repo patch
+
+- The recent ARM `e2e` failure mentioning `zlib` was not a new repo patch and
+  not a new vendor modification by this project.
+- Katran still uses `fbcode_builder/getdeps.py` to build its dependency graph.
+  That tool applies its own vendored patch set to extracted third-party source
+  trees such as `zlib`.
+- The shared ARM Katran cache originally reused a mutable extracted source tree
+  under the shared getdeps root.
+- On a later warm run, `getdeps.py` tried to apply the same vendored `zlib`
+  patch again and failed because the extracted tree was already patched.
+- The fix keeps only the immutable/reusable parts of the cache:
+  - preserve `downloads/`
+  - preserve `installed/`
+  - clear mutable `build/` and `extracted/` before a real rebuild
+- That means:
+  - warm runs still reuse the expensive downloads and installed prefixes
+  - but they do not reuse already-mutated extracted sources
+  - the failure mode becomes deterministic and auditable
+
+Active todo:
+1. Keep the fresh `x86-kvm corpus` rerun moving and use its next result to
+   validate the shared Tracee/tool-contract fixes on the local KVM path.
+2. Keep the fresh `aws-x86 corpus/e2e` reruns moving and capture whether the
+   new Tracee/scx fixes clear the latest x86 blockers.
+3. Keep the fresh `aws-arm64 corpus/e2e` reruns moving and validate the Katran
+   getdeps cache fix on the current tree.
+4. Continue shrinking ARM qemu/container prep wall clock, especially the
+   remaining benchmark-native repo builds and any warm-cache misses that still
+   force full getdeps/CMake work.

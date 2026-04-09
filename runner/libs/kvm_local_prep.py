@@ -125,9 +125,10 @@ class KVMPrep:
         )
 
     def prepare_workload_tools(self) -> None:
+        requested_csv = self.env.get("RUN_WORKLOAD_TOOLS_CSV", "").strip()
         bundled_csv, tool_root = stage_x86_workload_tools(
-            requested_csv=self.env.get("RUN_WORKLOAD_TOOLS_CSV", "").strip(),
-            output_root=self.promote_root / "workload-tools",
+            requested_csv=requested_csv,
+            output_root=self.x86_host_cache_root / "workload-tools" / (requested_csv.replace(",", "_") or "none"),
         )
         self.bundled_workload_tools_csv = bundled_csv
         self.local_workload_tool_root = tool_root
