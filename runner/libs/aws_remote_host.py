@@ -144,9 +144,9 @@ def cmd_setup_kernel_x86(args: argparse.Namespace) -> None:
     stage_dir = Path(args.stage_dir)
     temp_root = _extract_modules_archive(stage_dir, version)
     try:
-        run_checked("rm", "-rf", f"/lib/modules/{version}", sudo=True)
-        run_checked("mkdir", "-p", "/lib/modules", sudo=True)
-        run_checked("cp", "-a", str(temp_root / "lib" / "modules" / version), "/lib/modules/", sudo=True)
+        target_root = Path("/lib/modules") / version
+        run_checked("mkdir", "-p", str(target_root), sudo=True)
+        run_checked("rsync", "-a", "--delete", f"{temp_root / 'lib' / 'modules' / version}/", f"{target_root}/", sudo=True)
     finally:
         shutil.rmtree(temp_root, ignore_errors=True)
 
@@ -206,9 +206,9 @@ def cmd_setup_kernel_arm64(args: argparse.Namespace) -> None:
     stage_dir = Path(args.stage_dir)
     temp_root = _extract_modules_archive(stage_dir, version)
     try:
-        run_checked("rm", "-rf", f"/lib/modules/{version}", sudo=True)
-        run_checked("mkdir", "-p", "/lib/modules", sudo=True)
-        run_checked("cp", "-a", str(temp_root / "lib" / "modules" / version), "/lib/modules/", sudo=True)
+        target_root = Path("/lib/modules") / version
+        run_checked("mkdir", "-p", str(target_root), sudo=True)
+        run_checked("rsync", "-a", "--delete", f"{temp_root / 'lib' / 'modules' / version}/", f"{target_root}/", sudo=True)
     finally:
         shutil.rmtree(temp_root, ignore_errors=True)
 

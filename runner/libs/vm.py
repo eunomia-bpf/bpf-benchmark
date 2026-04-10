@@ -38,6 +38,7 @@ def write_guest_script(
         handle.write(f"cd {shlex.quote(str(resolved_initial_cwd))}\n")
         handle.write('export PATH="/usr/local/sbin:$PATH"\n')
         handle.write(f"mkdir -p {shlex.quote(str(vm_tmp_dir))}\n")
+        handle.write(f"chmod 1777 {shlex.quote(str(vm_tmp_dir))}\n")
         handle.write(f"export TMPDIR={shlex.quote(str(vm_tmp_dir))}\n")
         if nofile is not None:
             handle.write(f"ulimit -HSn {int(nofile)}\n")

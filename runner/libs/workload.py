@@ -195,23 +195,26 @@ def run_exec_storm(duration_s: int | float, rate: int) -> WorkloadResult:
     stress_ng = which("stress-ng")
     if stress_ng is None:
         raise RuntimeError("stress-ng is required for the exec_storm workload")
+    temp_root = _disk_backed_tmp_root()
     run_cwd: Path | None = None
-    command: list[str] = [
-        stress_ng,
+    stress_ng_args: list[str] = [
         "--exec",
         str(max(1, int(rate))),
         "--exec-method",
         "execve",
         "--temp-path",
-        "/tmp",
+        str(temp_root),
         "--timeout",
         f"{max(1, int(duration_s))}s",
         "--metrics-brief",
     ]
+    command: list[str] = [stress_ng, *stress_ng_args]
     if os.geteuid() == 0:
         setpriv = which("setpriv")
         if setpriv is None:
             raise RuntimeError("setpriv is required for the exec_storm workload when running as root")
+        temp_root = _shared_unprivileged_tmp_root()
+        stress_ng_args[5] = str(temp_root)
         command = [
             setpriv,
             "--reuid",
@@ -219,9 +222,10 @@ def run_exec_storm(duration_s: int | float, rate: int) -> WorkloadResult:
             "--regid",
             "65534",
             "--clear-groups",
-            *command,
+            stress_ng,
+            *stress_ng_args,
         ]
-        run_cwd = Path("/tmp")
+        run_cwd = temp_root
     start = time.monotonic()
     try:
         completed = run_command(
@@ -299,14 +303,44 @@ def run_file_io(duration_s: int | float) -> WorkloadResult:
 
 
 def _disk_backed_tmp_root() -> Path:
-    for candidate in (Path("/var/tmp"), Path("/tmp")):
+    seen: set[Path] = set()
+    candidates: list[Path] = []
+    for name in ("BPFREJIT_RUNTIME_TMPDIR", "TMPDIR", "TMP", "TEMP"):
+        value = os.environ.get(name, "").strip()
+        if value:
+            candidates.append(Path(value))
+    candidates.extend((Path("/var/tmp"), Path("/tmp")))
+    for candidate in candidates:
+        resolved = candidate.expanduser()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        try:
+            resolved.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            continue
+        if os.access(resolved, os.W_OK | os.X_OK):
+            return resolved
+    raise RuntimeError("no writable disk-backed temporary directory is available")
+
+
+def _shared_unprivileged_tmp_root() -> Path:
+    for candidate in (Path("/dev/shm"), Path("/tmp"), Path("/var/tmp")):
         try:
             candidate.mkdir(parents=True, exist_ok=True)
         except OSError:
             continue
-        if os.access(candidate, os.W_OK | os.X_OK):
-            return candidate
-    raise RuntimeError("no writable disk-backed temporary directory is available")
+        if not os.access(candidate, os.W_OK | os.X_OK):
+            continue
+        runtime_root = candidate / "bpf-benchmark"
+        try:
+            runtime_root.mkdir(parents=True, exist_ok=True)
+            runtime_root.chmod(0o1777)
+        except OSError:
+            continue
+        if os.access(runtime_root, os.W_OK | os.X_OK):
+            return runtime_root
+    raise RuntimeError("no writable shared temporary directory is available for exec_storm")
 
 
 def _load_kernel_module(module_name: str, *module_args: str) -> None:

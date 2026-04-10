@@ -235,6 +235,17 @@ class SuiteEntrypoint:
             value = os.environ.get(name, "").strip()
             if value:
                 env[name] = value
+        if not env.get("TMPDIR"):
+            runtime_tmpdir = self.workspace / "docs" / "tmp" / "runtime" / self._required_contract("RUN_TOKEN")
+            runtime_tmpdir.mkdir(parents=True, exist_ok=True)
+            runtime_tmpdir.chmod(0o1777)
+            env["TMPDIR"] = str(runtime_tmpdir)
+        else:
+            Path(env["TMPDIR"]).mkdir(parents=True, exist_ok=True)
+            Path(env["TMPDIR"]).chmod(0o1777)
+        env.setdefault("TMP", env["TMPDIR"])
+        env.setdefault("TEMP", env["TMPDIR"])
+        env["BPFREJIT_RUNTIME_TMPDIR"] = env["TMPDIR"]
         repo_build_root = self._repo_build_root()
         env["PATH"] = runtime_path_value(self.workspace, self.contract)
         bundled_tool_bin = self.workspace / ".cache" / "workload-tools" / self.target_arch / "bin"

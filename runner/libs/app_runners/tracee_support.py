@@ -4,7 +4,6 @@ import json
 import os
 import re
 import shlex
-import shutil
 import subprocess
 import threading
 import time
@@ -37,10 +36,20 @@ TRACEE_STATS_PATTERN = re.compile(
     r"EventCount[:=]\s*(?P<events>\d+).*?LostEvCount[:=]\s*(?P<lost>\d+)(?:.*?LostWrCount[:=]\s*(?P<lost_writes>\d+))?",
     re.IGNORECASE,
 )
-TRACEE_RUNTIME_DIR = Path("/var/tmp/tracee")
-TRACEE_EVENT_OUTPUT_PATH = TRACEE_RUNTIME_DIR / "events.json"
 TRACEE_HEALTH_HOST = "127.0.0.1"
 TRACEE_HEALTH_PORT = 3366
+
+
+def _tracee_runtime_dir() -> Path:
+    for name in ("BPFREJIT_RUNTIME_TMPDIR", "TMPDIR", "TMP", "TEMP"):
+        value = os.environ.get(name, "").strip()
+        if value:
+            return Path(value) / "tracee"
+    return Path("/var/tmp/tracee")
+
+
+def _tracee_event_output_path() -> Path:
+    return _tracee_runtime_dir() / "events.json"
 
 
 class TraceeOutputCollector:
@@ -205,9 +214,10 @@ class TraceeAgentSession:
     def __enter__(self) -> "TraceeAgentSession":
         preexisting_ids = set(sample_bpf_stats(_current_prog_ids()))
         failures: list[str] = []
-        tracee_tmpdir = TRACEE_RUNTIME_DIR
+        tracee_tmpdir = _tracee_runtime_dir()
+        event_output_path = _tracee_event_output_path()
         tracee_tmpdir.mkdir(parents=True, exist_ok=True)
-        TRACEE_EVENT_OUTPUT_PATH.unlink(missing_ok=True)
+        event_output_path.unlink(missing_ok=True)
         for command in self.commands:
             self.collector = TraceeOutputCollector()
             self.event_stop = threading.Event()
@@ -229,7 +239,7 @@ class TraceeAgentSession:
             self.stderr_thread = threading.Thread(target=self.collector.consume_stderr, args=(proc.stderr,), daemon=True)
             self.event_thread = threading.Thread(
                 target=self.collector.consume_event_file,
-                args=(TRACEE_EVENT_OUTPUT_PATH, self.event_stop),
+                args=(event_output_path, self.event_stop),
                 daemon=True,
             )
             self.stdout_thread.start()
@@ -372,10 +382,8 @@ def resolve_tracee_binary(explicit: str | None, setup_result: Mapping[str, objec
     return None
 
 
-def _ensure_empty_signatures_dir() -> Path:
-    sig_dir = repo_artifact_root() / "tracee" / "signatures"
-    if sig_dir.exists():
-        shutil.rmtree(sig_dir)
+def _tracee_signatures_dir() -> Path:
+    sig_dir = _tracee_runtime_dir() / "signatures"
     sig_dir.mkdir(parents=True, exist_ok=True)
     return sig_dir
 
@@ -399,8 +407,8 @@ def _tracee_output_args(event_output_path: Path) -> list[str]:
 
 def build_tracee_commands(binary: str, events: Sequence[str], extra_args: Sequence[str] = ()) -> list[list[str]]:
     event_text = ",".join(str(event) for event in events)
-    sig_dir = _ensure_empty_signatures_dir()
-    output_args = _tracee_output_args(TRACEE_EVENT_OUTPUT_PATH)
+    sig_dir = _tracee_signatures_dir()
+    output_args = _tracee_output_args(_tracee_event_output_path())
     return [[
         binary,
         "--events",

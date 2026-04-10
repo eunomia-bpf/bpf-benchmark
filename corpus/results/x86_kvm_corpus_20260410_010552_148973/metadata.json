@@ -1,0 +1,102 @@
+{
+  "completed_at": "2026-04-10T01:07:45.480474+00:00",
+  "details_dir": "details",
+  "filters": [
+    "tracee/default"
+  ],
+  "generated_at": "2026-04-10T01:07:45.482436+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-10T01:07:45.480474+00:00",
+  "launcher_boot_id": "7acf8cfd-4189-4c38-a6ba-7774dcd54281",
+  "launcher_pid": 209,
+  "launcher_start_ticks": 239,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "optimization_summary": {
+    "all_comparable_geomean": 0.9663506955885718,
+    "applied_only_geomean": 0.9663506955885718,
+    "applied_sample_count": 2,
+    "comparison_exclusion_reason_counts": {
+      "no_programs_changed_in_loader": 2
+    },
+    "comparison_exclusion_reasons": [
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "tracee/default:tracepoint__raw_syscalls__sys_enter#17",
+        "program": "tracepoint__raw_syscalls__sys_enter",
+        "program_id": 17,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "tracee/default",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "tracee/default:tracepoint__raw_syscalls__sys_exit#21",
+        "program": "tracepoint__raw_syscalls__sys_exit",
+        "program_id": 21,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      }
+    ],
+    "discovered_programs": 4,
+    "per_app": [
+      {
+        "all_comparable_geomean": 0.9663506955885718,
+        "app": "tracee/default",
+        "applied_only_geomean": 0.9663506955885718,
+        "applied_program_count": 4,
+        "comparable_program_count": 2,
+        "comparison_exclusions": [
+          {
+            "label": "tracee/default:tracepoint__raw_syscalls__sys_enter#17",
+            "program": "tracepoint__raw_syscalls__sys_enter",
+            "program_id": 17,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "tracee/default:tracepoint__raw_syscalls__sys_exit#21",
+            "program": "tracepoint__raw_syscalls__sys_exit",
+            "program_id": 21,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 4,
+        "runner": "tracee",
+        "sample_count": 2,
+        "status": "ok",
+        "workload": "tracee_default"
+      }
+    ],
+    "sample_count": 2,
+    "selected_apps": 1,
+    "statuses": {
+      "ok": 1
+    }
+  },
+  "run_type": "x86_kvm_corpus",
+  "samples": 30,
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "started_at": "2026-04-10T01:05:52.148973+00:00",
+  "status": "completed",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

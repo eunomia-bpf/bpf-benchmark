@@ -100,13 +100,13 @@ def _sync_remote_roots(ctx: AwsExecutorContext, ip: str) -> None:
 def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
     _wait_for_ssh(ctx, ip)
     stamp = f"{ctx.suite_name}_{ctx.run_token}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
-    local_result_dir = ctx.results_dir / stamp
-    local_log = local_result_dir / "remote.log"
+    local_log_dir = ctx.results_dir / "logs"
+    local_log = local_log_dir / f"{stamp}.remote.log"
     remote_run_dir = f"{ctx.remote_stage_dir}/runs/{stamp}"
     remote_log = f"{remote_run_dir}/remote.log"
     remote_python = _require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
     remote_workspace = ctx.remote_stage_dir
-    local_result_dir.mkdir(parents=True, exist_ok=True)
+    local_log_dir.mkdir(parents=True, exist_ok=True)
     ctx.run_state_dir.mkdir(parents=True, exist_ok=True)
 
     _run_remote_helper(ctx, ip, remote_python, "prepare-dir", remote_run_dir)
@@ -139,13 +139,22 @@ def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
         f"{remote_workspace}/{artifact_dir}"
         for artifact_dir in _artifact_dirs_from_log(local_log)
     ]
-    for remote_artifact_dir in remote_artifact_dirs:
-        _scp_from(ctx, ip, remote_artifact_dir, local_result_dir, recursive=True)
+    local_artifact_dirs = [
+        ROOT_DIR / artifact_dir
+        for artifact_dir in _artifact_dirs_from_log(local_log)
+    ]
+    for remote_artifact_dir, local_artifact_dir in zip(remote_artifact_dirs, local_artifact_dirs):
+        local_artifact_dir.parent.mkdir(parents=True, exist_ok=True)
+        _scp_from(ctx, ip, remote_artifact_dir, local_artifact_dir.parent, recursive=True)
     _run_remote_helper(ctx, ip, remote_python, "cleanup-path", remote_run_dir, check=False)
     for remote_artifact_dir in remote_artifact_dirs:
         _run_remote_helper(ctx, ip, remote_python, "cleanup-path", remote_artifact_dir, check=False)
+    if len(local_artifact_dirs) == 1:
+        shutil.copy2(local_log, local_artifact_dirs[0] / "aws-remote.log")
     print(
-        f"[aws-executor] Fetched {ctx.target_name}/{ctx.suite_name} results to {local_result_dir}",
+        "[aws-executor] Fetched "
+        f"{ctx.target_name}/{ctx.suite_name} results to "
+        + ", ".join(str(path) for path in local_artifact_dirs),
         file=sys.stderr,
     )
 
