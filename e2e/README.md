@@ -16,8 +16,8 @@ Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `bcc`, `scx`, and 
 ## Shared Prerequisites
 
 - Most cases require root or passwordless `sudo -n`.
-- Repo-managed runtime artifacts come from `RUN_REPO_ARTIFACT_ROOT`, which resolves to
-  `.cache/repo-artifacts/<arch>` on canonical runs.
+- Repo-managed runtime artifacts are prepared by Make under
+  `.cache/repo-artifacts/<arch>` before the suite enters the VM or AWS host.
 - Canonical runs should go through the root `Makefile` aliases (`make vm-e2e`,
   `make aws-x86-benchmark`, `make aws-arm64-benchmark`). Direct
   `python3 e2e/driver.py ...` execution assumes the required runtime, daemon,

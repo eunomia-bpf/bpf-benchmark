@@ -9,46 +9,6 @@ PYTHON_IMPORT_MAP = {
     "pyelftools": "elftools",
 }
 
-TOOL_PACKAGE_MAP = {
-    ("apt", "bpftool"): ("bpftool",),
-    ("dnf", "bpftool"): ("bpftool",),
-    ("apt", "python3"): ("python3", "python3-pip"),
-    ("dnf", "python3"): ("python3", "python3-pip"),
-    ("apt", "python3.11"): ("python3.11", "python3-pip"),
-    ("dnf", "python3.11"): ("python3.11", "python3.11-pip"),
-    ("apt", "curl"): ("curl",),
-    ("dnf", "curl"): ("curl-minimal",),
-    ("apt", "file"): ("file",),
-    ("dnf", "file"): ("file",),
-    ("apt", "tar"): ("tar",),
-    ("dnf", "tar"): ("tar",),
-    ("apt", "taskset"): ("util-linux",),
-    ("dnf", "taskset"): ("util-linux",),
-    ("apt", "setpriv"): ("util-linux",),
-    ("dnf", "setpriv"): ("util-linux",),
-    ("apt", "insmod"): ("kmod",),
-    ("dnf", "insmod"): ("kmod",),
-    ("apt", "dd"): ("coreutils",),
-    ("dnf", "dd"): ("coreutils",),
-    ("apt", "ip"): ("iproute2",),
-    ("dnf", "ip"): ("iproute",),
-    ("apt", "tc"): ("iproute2",),
-    ("dnf", "tc"): ("iproute-tc",),
-    ("apt", "wrk"): ("wrk",),
-    ("dnf", "wrk"): ("wrk",),
-    ("apt", "sysbench"): ("sysbench",),
-    ("dnf", "sysbench"): ("sysbench",),
-    ("apt", "hackbench"): ("rt-tests",),
-    ("dnf", "hackbench"): ("rt-tests",),
-    ("apt", "stress-ng"): ("stress-ng",),
-    ("dnf", "stress-ng"): ("stress-ng",),
-    ("apt", "fio"): ("fio",),
-    ("dnf", "fio"): ("fio",),
-    ("apt", "bpftrace"): ("bpftrace",),
-    ("dnf", "bpftrace"): ("bpftrace",),
-}
-
-
 def _contract_scalar(contract: Mapping[str, str | list[str]] | None, name: str) -> str:
     if contract is None:
         return os.environ.get(name, "").strip()
@@ -89,10 +49,3 @@ def bundled_commands(*, contract: Mapping[str, str | list[str]] | None = None) -
     if _contract_scalar(contract, "RUN_NEEDS_WORKLOAD_TOOLS") != "1":
         return []
     return ["hackbench", "sysbench", "wrk"]
-
-
-def tool_packages(manager: str, tool: str) -> tuple[str, ...]:
-    try:
-        return TOOL_PACKAGE_MAP[(manager, tool)]
-    except KeyError as exc:
-        raise RuntimeError(f"unsupported tool contract on {manager}: {tool}") from exc

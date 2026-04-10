@@ -22,7 +22,8 @@
 Canonical preparation goes through the root `Makefile` (`make vm-micro`) and
 the Python local-prep pipeline. Direct `python3 micro/driver.py ...` execution
 assumes `runner/build/micro_exec` plus the staged `.bpf.o` inputs under
-`micro/programs/` already exist.
+`.cache/micro-programs/<arch>/` already exist. For direct driver debugging, set
+`BPFREJIT_MICRO_PROGRAM_DIR` to the prepared program directory.
 
 ## Usage
 
@@ -74,4 +75,3 @@ Results live under `micro/results/`.
 - Each run lives under `micro/results/<run_type>_<timestamp>/`
 - `metadata.json` is the canonical summary for that run
 - `details/` contains `result.json` plus any retained per-sample payloads
-- Older runs of the same type keep metadata and may drop `details/`

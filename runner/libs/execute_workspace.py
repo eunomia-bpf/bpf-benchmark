@@ -5,7 +5,7 @@ from functools import partial
 from pathlib import Path
 
 from runner.libs.cli_support import fail
-from runner.libs.guest_prereqs import install_guest_prereqs, validate_guest_prereqs
+from runner.libs.guest_prereqs import ensure_guest_prereqs, validate_guest_prereqs
 from runner.libs.manifest_file import parse_manifest
 from runner.libs.suite_entrypoint import SuiteEntrypoint
 
@@ -24,7 +24,7 @@ def main(argv: list[str] | None = None) -> None:
         _die(f"manifest is missing: {manifest_path}")
 
     contract = parse_manifest(manifest_path)
-    install_guest_prereqs(workspace, contract)
+    ensure_guest_prereqs(workspace, contract)
     validate_guest_prereqs(workspace, contract)
     SuiteEntrypoint.from_contract(
         workspace,

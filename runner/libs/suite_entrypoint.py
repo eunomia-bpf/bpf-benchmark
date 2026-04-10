@@ -19,6 +19,7 @@ from runner.libs.workspace_layout import (
     kernel_modules_root,
     kinsn_module_dir,
     libbpf_runtime_path,
+    micro_program_root,
     native_repo_targets,
     repo_artifact_root,
     runner_binary_path,
@@ -213,7 +214,7 @@ class SuiteEntrypoint:
         bpftool_bin = required_scalar("RUN_BPFTOOL_BIN")
         artifact_dir = None
         if suite_name == "test":
-            artifact_dir = workspace / ".cache" / "suite-results" / run_token
+            artifact_dir = workspace / "tests" / "results" / run_token
         return cls(
             contract=contract,
             workspace=workspace,
@@ -543,6 +544,7 @@ class SuiteEntrypoint:
     def _run_micro_suite(self, env: dict[str, str]) -> None:
         self._ensure_runner_binary()
         runtime_env = env.copy()
+        runtime_env["BPFREJIT_MICRO_PROGRAM_DIR"] = str(micro_program_root(self.workspace, self.target_arch))
         runtime_ld = _cross_runtime_ld_library_path(self.workspace, self.target_arch)
         if runtime_ld:
             runtime_env["LD_LIBRARY_PATH"] = runtime_ld

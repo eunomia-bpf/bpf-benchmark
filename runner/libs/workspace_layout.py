@@ -24,6 +24,10 @@ def workload_tools_root(workspace: Path, target_arch: str) -> Path:
     return workspace / ".cache" / "workload-tools" / str(target_arch).strip()
 
 
+def micro_program_root(workspace: Path, target_arch: str) -> Path:
+    return workspace / ".cache" / "micro-programs" / str(target_arch).strip()
+
+
 def daemon_binary_path(workspace: Path, target_arch: str) -> Path:
     if str(target_arch).strip() == "arm64":
         return workspace / "daemon" / "target" / "aarch64-unknown-linux-gnu" / "release" / "bpfrejit-daemon"
@@ -138,26 +142,49 @@ def workload_tool_targets(workspace: Path, target_arch: str) -> list[Path]:
     return [root / "hackbench", root / "sysbench", root / "wrk"]
 
 
-def _artifact_transfer_root(workspace: Path, target_arch: str, target: Path) -> Path | None:
+def micro_program_targets(workspace: Path, target_arch: str) -> list[Path]:
+    return [micro_program_root(workspace, target_arch) / "simple.bpf.o"]
+
+
+def _base_transfer_paths(workspace: Path, suite_name: str) -> list[Path]:
+    return [workspace / entry for entry in _BASE_TRANSFER_ROOTS.get(str(suite_name).strip(), ())]
+
+
+def _artifact_bundle_paths(
+    *,
+    workspace: Path,
+    suite_name: str,
+    target_arch: str,
+    needs_runner_binary: bool,
+    needs_daemon_binary: bool,
+    needs_kinsn_modules: bool,
+    needs_workload_tools: bool,
+    native_repos: list[str],
+    scx_packages: list[str],
+) -> list[Path]:
     arch = str(target_arch).strip()
+    paths: list[Path] = []
     artifact_root = repo_artifact_root(workspace, arch)
-    if target.is_relative_to(artifact_root):
-        relative = target.relative_to(artifact_root)
-        if relative.parts:
-            return artifact_root / relative.parts[0]
-    workload_root = workload_tools_root(workspace, arch)
-    if target.is_relative_to(workload_root):
-        return workload_root
-    daemon_binary = daemon_binary_path(workspace, arch)
-    if target == daemon_binary:
-        return daemon_binary.parent.parent
-    runner_binary = runner_binary_path(workspace, arch)
-    if target == runner_binary:
-        return runner_binary.parent
-    module_root = workspace / "module"
-    if target.is_relative_to(module_root):
-        return module_root
-    return None
+    if libbpf_runtime_path(workspace, arch, suite_name) is not None:
+        paths.append(artifact_root / "libbpf")
+    if needs_daemon_binary:
+        paths.append(daemon_binary_path(workspace, arch).parent)
+    if needs_runner_binary:
+        paths.append(runner_binary_path(workspace, arch).parent)
+    if needs_kinsn_modules:
+        paths.append(workspace / "module")
+    if needs_workload_tools:
+        paths.append(workload_tools_root(workspace, arch))
+    if str(suite_name).strip() == "micro":
+        paths.append(micro_program_root(workspace, arch))
+    if scx_packages:
+        paths.append(artifact_root / "scx")
+    for repo_name in native_repos:
+        paths.append(artifact_root / str(repo_name).strip())
+    if str(suite_name).strip() == "test":
+        paths.append(test_unittest_build_dir(workspace, arch))
+        paths.append(test_negative_build_dir(workspace, arch))
+    return paths
 
 
 def local_prep_targets(
@@ -196,7 +223,7 @@ def local_prep_targets(
     if needs_workload_tools:
         targets.extend(workload_tool_targets(workspace, arch))
     if suite == "micro":
-        targets.append(workspace / "micro" / "programs" / "simple.bpf.o")
+        targets.extend(micro_program_targets(workspace, arch))
     ordered: list[Path] = []
     seen: set[Path] = set()
     for target in targets:
@@ -219,24 +246,31 @@ def remote_transfer_roots(
     native_repos: list[str],
     scx_packages: list[str],
 ) -> list[str]:
-    roots = set(_BASE_TRANSFER_ROOTS.get(str(suite_name).strip(), ()))
-    arch = str(target_arch).strip()
-    for target in local_prep_targets(
-        workspace=ROOT_DIR,
-        suite_name=suite_name,
-        target_arch=arch,
-        executor=executor,
-        needs_runner_binary=needs_runner_binary,
-        needs_daemon_binary=needs_daemon_binary,
-        needs_kinsn_modules=needs_kinsn_modules,
-        needs_workload_tools=needs_workload_tools,
-        native_repos=native_repos,
-        scx_packages=scx_packages,
-    ):
-        transfer_root = _artifact_transfer_root(ROOT_DIR, arch, target)
-        if transfer_root is None:
+    del executor
+    roots: list[str] = []
+    seen: set[str] = set()
+    for path in [
+        *_base_transfer_paths(ROOT_DIR, suite_name),
+        *_artifact_bundle_paths(
+            workspace=ROOT_DIR,
+            suite_name=suite_name,
+            target_arch=target_arch,
+            needs_runner_binary=needs_runner_binary,
+            needs_daemon_binary=needs_daemon_binary,
+            needs_kinsn_modules=needs_kinsn_modules,
+            needs_workload_tools=needs_workload_tools,
+            native_repos=native_repos,
+            scx_packages=scx_packages,
+        ),
+    ]:
+        try:
+            relative = str(path.relative_to(ROOT_DIR))
+        except ValueError:
             continue
-        roots.add(str(transfer_root.relative_to(ROOT_DIR)))
-    ordered = [entry for entry in _TRANSFER_ROOT_ORDER if entry in roots]
-    ordered.extend(sorted(entry for entry in roots if entry not in _TRANSFER_ROOT_ORDER))
+        if relative in seen:
+            continue
+        seen.add(relative)
+        roots.append(relative)
+    ordered = [entry for entry in _TRANSFER_ROOT_ORDER if entry in seen]
+    ordered.extend(entry for entry in roots if entry not in _TRANSFER_ROOT_ORDER)
     return ordered

@@ -5,7 +5,6 @@ import os
 import shutil
 import subprocess
 import sys
-import tarfile
 import tempfile
 from pathlib import Path
 
@@ -57,10 +56,6 @@ def cmd_prepare_dir(args: argparse.Namespace) -> None:
     run_checked("chown", f"{os.getuid()}:{os.getgid()}", str(path), sudo=True)
 
 
-def cmd_cleanup_path(args: argparse.Namespace) -> None:
-    run_checked("rm", "-rf", str(Path(args.path)), sudo=True)
-
-
 def cmd_path_exists(args: argparse.Namespace) -> None:
     if not Path(args.path).exists():
         raise SystemExit(1)
@@ -100,17 +95,11 @@ def cmd_has_sched_ext(args: argparse.Namespace) -> None:
         raise SystemExit(1)
 
 
-def cmd_install_base_prereqs(args: argparse.Namespace) -> None:
-    prereq_root = Path(args.prereq_root)
-    prereq_root.mkdir(parents=True, exist_ok=True)
-    packages = [token for token in args.packages_csv.split(",") if token]
+def cmd_verify_base_prereqs(args: argparse.Namespace) -> None:
     commands = [token for token in args.commands_csv.split(",") if token]
-    if packages:
-        run_checked("dnf", "-y", "install", *packages, sudo=True)
     for command_name in commands:
         if shutil.which(command_name, path=STANDARD_REMOTE_PATH) is None:
             die(f"required command is missing: {command_name}")
-    Path(args.stamp_path).touch()
 
 
 def cmd_print_kernel_config(args: argparse.Namespace) -> None:
@@ -128,27 +117,20 @@ def cmd_print_kernel_config(args: argparse.Namespace) -> None:
     raise SystemExit(1)
 
 
-def _extract_modules_archive(stage_dir: Path, version: str) -> Path:
-    modules_archive = stage_dir / "modules.tar.gz"
-    temp_root = Path(tempfile.mkdtemp(prefix=f"modules-{version}.", dir=str(stage_dir)))
-    with tarfile.open(modules_archive, "r:gz") as archive:
-        archive.extractall(temp_root, filter="data")
-    modules_root = temp_root / "lib" / "modules" / version
+def _staged_modules_root(stage_dir: Path, version: str) -> Path:
+    modules_root = stage_dir / "lib" / "modules" / version
     if not modules_root.is_dir():
-        die(f"kernel modules are missing from {modules_archive}")
-    return temp_root
+        die(f"kernel modules are missing from {modules_root}")
+    return modules_root
 
 
 def cmd_setup_kernel_x86(args: argparse.Namespace) -> None:
     version = args.version
     stage_dir = Path(args.stage_dir)
-    temp_root = _extract_modules_archive(stage_dir, version)
-    try:
-        target_root = Path("/lib/modules") / version
-        run_checked("mkdir", "-p", str(target_root), sudo=True)
-        run_checked("rsync", "-a", "--delete", f"{temp_root / 'lib' / 'modules' / version}/", f"{target_root}/", sudo=True)
-    finally:
-        shutil.rmtree(temp_root, ignore_errors=True)
+    modules_root = _staged_modules_root(stage_dir, version)
+    target_root = Path("/lib/modules") / version
+    run_checked("mkdir", "-p", str(target_root), sudo=True)
+    run_checked("rsync", "-a", "--delete", f"{modules_root}/", f"{target_root}/", sudo=True)
 
     kernel_image = stage_dir / "boot" / "bzImage"
     run_checked("install", "-o", "root", "-g", "root", "-m", "0755", str(kernel_image), f"/boot/vmlinuz-{version}", sudo=True)
@@ -204,13 +186,10 @@ def cmd_setup_kernel_x86(args: argparse.Namespace) -> None:
 def cmd_setup_kernel_arm64(args: argparse.Namespace) -> None:
     version = args.version
     stage_dir = Path(args.stage_dir)
-    temp_root = _extract_modules_archive(stage_dir, version)
-    try:
-        target_root = Path("/lib/modules") / version
-        run_checked("mkdir", "-p", str(target_root), sudo=True)
-        run_checked("rsync", "-a", "--delete", f"{temp_root / 'lib' / 'modules' / version}/", f"{target_root}/", sudo=True)
-    finally:
-        shutil.rmtree(temp_root, ignore_errors=True)
+    modules_root = _staged_modules_root(stage_dir, version)
+    target_root = Path("/lib/modules") / version
+    run_checked("mkdir", "-p", str(target_root), sudo=True)
+    run_checked("rsync", "-a", "--delete", f"{modules_root}/", f"{target_root}/", sudo=True)
 
     kernel_image = stage_dir / "boot" / "vmlinuz.efi"
     run_checked("install", "-o", "root", "-g", "root", "-m", "0755", str(kernel_image), f"/boot/vmlinuz-{version}", sudo=True)
@@ -289,10 +268,6 @@ def build_parser() -> argparse.ArgumentParser:
     prepare_dir.add_argument("path")
     prepare_dir.set_defaults(func=cmd_prepare_dir)
 
-    cleanup_path = subparsers.add_parser("cleanup-path")
-    cleanup_path.add_argument("path")
-    cleanup_path.set_defaults(func=cmd_cleanup_path)
-
     path_exists = subparsers.add_parser("path-exists")
     path_exists.add_argument("path")
     path_exists.set_defaults(func=cmd_path_exists)
@@ -309,12 +284,9 @@ def build_parser() -> argparse.ArgumentParser:
     sched_ext = subparsers.add_parser("has-sched-ext")
     sched_ext.set_defaults(func=cmd_has_sched_ext)
 
-    install_prereqs = subparsers.add_parser("install-base-prereqs")
-    install_prereqs.add_argument("prereq_root")
-    install_prereqs.add_argument("stamp_path")
-    install_prereqs.add_argument("packages_csv")
-    install_prereqs.add_argument("commands_csv")
-    install_prereqs.set_defaults(func=cmd_install_base_prereqs)
+    verify_prereqs = subparsers.add_parser("verify-base-prereqs")
+    verify_prereqs.add_argument("commands_csv")
+    verify_prereqs.set_defaults(func=cmd_verify_base_prereqs)
 
     kernel_config = subparsers.add_parser("print-kernel-config")
     kernel_config.set_defaults(func=cmd_print_kernel_config)

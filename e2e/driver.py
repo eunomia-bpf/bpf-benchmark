@@ -490,7 +490,6 @@ def build_run_metadata(
 def _run_single_case(
     args: argparse.Namespace,
     *,
-    clear_existing: bool = False,
     prepared_daemon_session: object | None = None,
 ) -> dict[str, object]:
     """Run a single e2e case and persist its outputs progressively."""
@@ -528,7 +527,6 @@ def _run_single_case(
         run_type=run_type,
         generated_at=started_at,
         metadata_builder=build_artifact_metadata,
-        clear_existing=clear_existing,
     )
     artifact_dir = session.run_dir
     artifact_result_json = artifact_dir / "result.json"

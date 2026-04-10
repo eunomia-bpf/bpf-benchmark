@@ -8,7 +8,7 @@ from pathlib import Path
 
 from runner.libs.cli_support import fail
 from runner.libs.manifest_file import parse_manifest
-from runner.libs.prereq_contract import bundled_commands, env_csv, python_import_name, required_commands, tool_packages
+from runner.libs.prereq_contract import bundled_commands, env_csv, python_import_name, required_commands
 
 die = partial(fail, "guest-prereqs")
 
@@ -79,7 +79,7 @@ def run_command(command: list[str], *, path_value: str, sudo: bool = False, quie
     final_command = list(command)
     if sudo and os.geteuid() != 0:
         if shutil.which("sudo") is None:
-            die("guest package installation requires sudo or root")
+            die("guest prerequisite command requires sudo or root")
         final_command = ["sudo", *final_command]
     stdout = subprocess.DEVNULL if quiet else None
     stderr = subprocess.DEVNULL if quiet else None
@@ -91,67 +91,13 @@ def run_command(command: list[str], *, path_value: str, sudo: bool = False, quie
         die(f"command failed ({exc.returncode}): {' '.join(final_command)}")
 
 
-def install_packages(manager: str, packages: list[str], *, path_value: str) -> None:
-    if not packages:
-        return
-    if manager == "apt":
-        run_command(["apt-get", "update"], path_value=path_value, sudo=True)
-        env_command = ["env", "DEBIAN_FRONTEND=noninteractive", "apt-get", "install", "-y", *packages]
-        run_command(env_command, path_value=path_value, sudo=True)
-        return
-    if manager == "dnf":
-        run_command(["dnf", "-y", "install", *packages], path_value=path_value, sudo=True)
-        return
-    die(f"unsupported guest package manager contract: {manager}")
-
-
-def ensure_python_pip(python_bin: str, *, path_value: str) -> None:
-    resolved_python = shutil.which(python_bin, path=path_value)
-    if resolved_python is None:
-        die(f"required guest command is missing: {python_bin}")
-    result = subprocess.run(
-        [resolved_python, "-m", "pip", "--version"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        check=False,
-    )
-    if result.returncode == 0:
-        return
-    run_command([resolved_python, "-m", "ensurepip", "--upgrade"], path_value=path_value, sudo=os.geteuid() != 0, quiet=True)
-    result = subprocess.run(
-        [resolved_python, "-m", "pip", "--version"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        check=False,
-    )
-    if result.returncode != 0:
-        die(f"python pip is unavailable for {resolved_python}")
-
-
-def install_python_modules(workspace: Path, contract: dict[str, str | list[str]], python_bin: str) -> None:
-    package_csv = env_csv("RUN_REMOTE_PYTHON_MODULES_CSV", contract=contract)
-    if not package_csv:
-        return
-    path_value = runtime_path_value(workspace, contract)
-    resolved_python = shutil.which(python_bin, path=path_value)
-    if resolved_python is None:
-        die(f"required guest command is missing: {python_bin}")
-    ensure_python_pip(python_bin, path_value=path_value)
-    run_command(
-        [resolved_python, "-m", "pip", "install", "--quiet", *package_csv],
-        path_value=path_value,
-        sudo=os.geteuid() != 0,
-        quiet=True,
-    )
-
-
 def ensure_loopback_up(*, path_value: str) -> None:
     if not have_cmd("ip", path_value=path_value):
         return
     run_command(["ip", "link", "set", "lo", "up"], path_value=path_value, sudo=os.geteuid() != 0, quiet=True)
 
 
-def install_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
+def ensure_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
     path_value = runtime_path_value(workspace, contract)
     missing_commands: list[str] = []
     python_bin = _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
@@ -186,20 +132,12 @@ def install_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]])
         ensure_loopback_up(path_value=path_value)
         return
 
-    manager = _scalar(contract, "RUN_GUEST_PACKAGE_MANAGER")
-    if not manager:
-        die("RUN_GUEST_PACKAGE_MANAGER is required for guest provisioning")
-    packages: list[str] = []
-    for command_name in missing_commands:
-        if command_name in bundled:
-            continue
-        for package_name in tool_packages(manager, command_name):
-            if package_name not in packages:
-                packages.append(package_name)
-    install_packages(manager, packages, path_value=path_value)
-    if missing_python_packages:
-        install_python_modules(workspace, contract, python_bin)
-    ensure_loopback_up(path_value=path_value)
+    missing = [f"command:{name}" for name in missing_commands if name not in bundled]
+    missing.extend(f"python:{name}" for name in missing_python_packages)
+    die(
+        "guest image is missing required prerequisites; bake them into the VM/AMI or transfer them as artifacts: "
+        + " ".join(missing)
+    )
 
 
 def validate_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
@@ -231,8 +169,8 @@ def validate_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]
 
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) != 3 or args[0] not in {"install", "validate"}:
-        die("usage: guest_prereqs.py <install|validate> <workspace> <manifest_path>")
+    if len(args) != 3 or args[0] not in {"ensure", "validate"}:
+        die("usage: guest_prereqs.py <ensure|validate> <workspace> <manifest_path>")
     workspace = Path(args[1]).resolve()
     manifest_path = Path(args[2]).resolve()
     if not workspace.is_dir():
@@ -240,8 +178,8 @@ def main(argv: list[str] | None = None) -> None:
     if not manifest_path.is_file():
         die(f"manifest is missing: {manifest_path}")
     contract = parse_manifest(manifest_path)
-    if args[0] == "install":
-        install_guest_prereqs(workspace, contract)
+    if args[0] == "ensure":
+        ensure_guest_prereqs(workspace, contract)
         return
     validate_guest_prereqs(workspace, contract)
 

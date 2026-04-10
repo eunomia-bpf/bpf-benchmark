@@ -11,7 +11,7 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs import aws_common
 from runner.libs.cli_support import fail
-from runner.libs.prereq_contract import bundled_commands, required_commands, tool_packages
+from runner.libs.prereq_contract import bundled_commands, required_commands
 from runner.libs.state_file import write_state
 
 _die = partial(fail, "aws-remote-prep")
@@ -228,59 +228,12 @@ def _remote_has_sched_ext(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
     )
 
 
-def _remote_base_prereq_dir(ctx: aws_common.AwsExecutorContext) -> str:
-    remote_kernel_stage_dir = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_KERNEL_STAGE_DIR")
-    return f"{remote_kernel_stage_dir}/prereq/base"
-
-
-def _remote_base_prereq_stamp_path(ctx: aws_common.AwsExecutorContext) -> str:
-    return f"{_remote_base_prereq_dir(ctx)}/base.ready"
-
-
 def _ordered_unique(tokens: list[str]) -> list[str]:
     ordered: list[str] = []
     for token in tokens:
         if token and token not in ordered:
             ordered.append(token)
     return ordered
-
-
-def _remote_base_packages() -> list[str]:
-    return [
-        "curl-minimal",
-        "dracut",
-        "elfutils-libelf",
-        "file",
-        "grubby",
-        "gzip",
-        "iproute",
-        "kmod",
-        "ncurses-libs",
-        "procps-ng",
-        "rsync",
-        "tar",
-        "util-linux",
-        "which",
-        "zlib",
-        "zstd",
-    ]
-
-
-def _remote_prereq_packages(contract: dict[str, str | list[str]]) -> list[str]:
-    manager = "dnf"
-    packages = list(_remote_base_packages())
-    python_bin = aws_common._require_scalar(contract, "RUN_REMOTE_PYTHON_BIN")
-    bpftool_bin = aws_common._require_scalar(contract, "RUN_BPFTOOL_BIN")
-    bundled = set(bundled_commands(contract=contract))
-    for tool in (bpftool_bin, python_bin):
-        packages.extend(tool_packages(manager, tool))
-    for tool in required_commands(contract=contract):
-        if tool in bundled:
-            continue
-        if tool in {python_bin, bpftool_bin}:
-            continue
-        packages.extend(tool_packages(manager, tool))
-    return _ordered_unique(packages)
 
 
 def _remote_required_commands(contract: dict[str, str | list[str]]) -> list[str]:
@@ -308,37 +261,25 @@ def _remote_required_commands(contract: dict[str, str | list[str]]) -> list[str]
     return _ordered_unique(commands)
 
 
-def _setup_remote_base_prereqs(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
-    remote_prereq_dir = _remote_base_prereq_dir(ctx)
-    remote_stamp_path = _remote_base_prereq_stamp_path(ctx)
-    packages = _remote_prereq_packages(ctx.contract)
-    commands = _remote_required_commands(ctx.contract)
-    remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    aws_common._run_remote_helper(
-        ctx,
-        ip,
-        remote_python,
-        "install-base-prereqs",
-        remote_prereq_dir,
-        remote_stamp_path,
-        ",".join(packages),
-        ",".join(commands),
-    )
-
-
 def _verify_remote_base_prereqs(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
+    commands = _remote_required_commands(ctx.contract)
     remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
     return (
         aws_common._run_remote_helper(
             ctx,
             ip,
             remote_python,
-            "path-exists",
-            _remote_base_prereq_stamp_path(ctx),
+            "verify-base-prereqs",
+            ",".join(commands),
             check=False,
         ).returncode
         == 0
     )
+
+
+def _require_remote_base_prereqs(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
+    if not _verify_remote_base_prereqs(ctx, ip):
+        _die("AWS instance image is missing required base prerequisites; bake them into the AMI")
 
 
 def _refresh_aws_arm64_base_config(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
@@ -364,42 +305,84 @@ def _refresh_aws_arm64_base_config(ctx: aws_common.AwsExecutorContext, ip: str) 
     release_file.write_text(remote_release + "\n", encoding="utf-8")
 
 
+def _require_kernel_release(release_file: Path, *, arch: str) -> str:
+    if not release_file.is_file():
+        _die(f"missing {arch} kernel release file: {release_file}")
+    kernel_release = release_file.read_text(encoding="utf-8").strip()
+    if not kernel_release:
+        _die(f"empty {arch} kernel release file: {release_file}")
+    return kernel_release
+
+
+def _require_modules_root(modules_root: Path, *, arch: str) -> Path:
+    if not modules_root.is_dir():
+        _die(f"missing canonical {arch} kernel modules root: {modules_root}")
+    return modules_root
+
+
 def _build_x86_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
-    build_dir = ctx.target_root / "setup-artifacts" / "x86"
-    kernel_release_file = build_dir / "kernel-release.txt"
-    kernel_image = build_dir / "boot" / "bzImage"
-    modules_tar = build_dir / "modules.tar.gz"
-    if os.environ.get("RUN_SKIP_AWS_SHARED_ARTIFACT_MAKE", "").strip() != "1":
-        _run_local_make(
-            str(kernel_release_file),
-            str(kernel_image),
-            str(modules_tar),
-            f"JOBS={max(os.cpu_count() or 1, 1)}",
-        )
-    if not kernel_release_file.is_file() or not kernel_image.is_file() or not modules_tar.is_file():
-        _die("missing prebuilt x86 AWS kernel artifacts")
-    kernel_release = kernel_release_file.read_text(encoding="utf-8").strip()
-    return kernel_release, kernel_image, modules_tar
+    del ctx
+    build_dir = ROOT_DIR / ".cache" / "x86-kernel-build"
+    kernel_image = build_dir / "arch" / "x86" / "boot" / "bzImage"
+    modules_target = ROOT_DIR / ".cache" / "repo-artifacts" / "x86_64" / "kernel-modules" / "lib" / "modules"
+    _run_local_make(
+        str(kernel_image),
+        str(modules_target),
+        "RUN_TARGET_ARCH=x86_64",
+        f"JOBS={max(os.cpu_count() or 1, 1)}",
+    )
+    if not kernel_image.is_file():
+        _die(f"missing x86 AWS kernel image: {kernel_image}")
+    kernel_release = _require_kernel_release(build_dir / "include" / "config" / "kernel.release", arch="x86")
+    modules_root = _require_modules_root(modules_target / kernel_release, arch="x86")
+    return kernel_release, kernel_image, modules_root
 
 
 def _build_arm64_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
-    setup_root = ctx.target_root / "setup-artifacts" / "arm64"
-    kernel_release_file = setup_root / "kernel-release.txt"
-    kernel_image = setup_root / "boot" / "vmlinuz.efi"
-    modules_tar = setup_root / "modules.tar.gz"
-    if os.environ.get("RUN_SKIP_AWS_SHARED_ARTIFACT_MAKE", "").strip() != "1":
-        _run_local_make(
-            str(kernel_release_file),
-            str(kernel_image),
-            str(modules_tar),
-            f"ARM64_AWS_BUILD_DIR={ctx.target_root / 'kernel-build'}",
-            f"ARM64_AWS_BASE_CONFIG={ctx.target_root / 'config-al2023-arm64'}",
-            f"JOBS={max(os.cpu_count() or 1, 1)}",
-        )
-    if not kernel_release_file.is_file() or not kernel_image.is_file() or not modules_tar.is_file():
-        _die("missing prebuilt ARM64 AWS kernel artifacts")
-    kernel_release = kernel_release_file.read_text(encoding="utf-8").strip()
-    return kernel_release, kernel_image, modules_tar
+    build_dir = ctx.target_root / "kernel-build"
+    base_config = ctx.target_root / "config-al2023-arm64"
+    kernel_image = build_dir / "arch" / "arm64" / "boot" / "vmlinuz.efi"
+    modules_target = ROOT_DIR / ".cache" / "repo-artifacts" / "arm64" / "kernel-modules" / "lib" / "modules"
+    _run_local_make(
+        str(kernel_image),
+        str(modules_target),
+        "RUN_TARGET_ARCH=arm64",
+        f"ARM64_AWS_BUILD_DIR={build_dir}",
+        f"ARM64_AWS_BASE_CONFIG={base_config}",
+        f"JOBS={max(os.cpu_count() or 1, 1)}",
+    )
+    if not kernel_image.is_file():
+        _die(f"missing ARM64 AWS kernel image: {kernel_image}")
+    kernel_release = _require_kernel_release(build_dir / "include" / "config" / "kernel.release", arch="ARM64")
+    modules_root = _require_modules_root(modules_target / kernel_release, arch="ARM64")
+    return kernel_release, kernel_image, modules_root
+
+
+def _sync_kernel_stage(
+    ctx: aws_common.AwsExecutorContext,
+    ip: str,
+    *,
+    kernel_release: str,
+    kernel_image: Path,
+    modules_root: Path,
+    remote_kernel_stage_dir: str,
+) -> None:
+    aws_common._ssh_exec(
+        ctx,
+        ip,
+        "mkdir",
+        "-p",
+        f"{remote_kernel_stage_dir}/boot",
+        f"{remote_kernel_stage_dir}/lib/modules/{kernel_release}",
+    )
+    aws_common._scp_to(ctx, ip, kernel_image, f"{remote_kernel_stage_dir}/boot/")
+    aws_common._rsync_to(
+        ctx,
+        ip,
+        modules_root,
+        f"{remote_kernel_stage_dir}/lib/modules/{kernel_release}",
+        excludes=("build", "source"),
+    )
 
 
 def _setup_x86_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
@@ -408,17 +391,22 @@ def _setup_x86_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     if not instance_id:
         _die("x86 setup requires a cached instance ID")
     aws_common._wait_for_ssh(ctx, ip)
-    _setup_remote_base_prereqs(ctx, ip)
-    kernel_release, kernel_image, modules_tar = _build_x86_kernel_artifacts(ctx)
+    _require_remote_base_prereqs(ctx, ip)
+    kernel_release, kernel_image, modules_root = _build_x86_kernel_artifacts(ctx)
     setup_stamp = f"setup_{kernel_release}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     setup_result_dir = ctx.results_dir / setup_stamp
     verify_log = setup_result_dir / "setup_verify.log"
     setup_result_dir.mkdir(parents=True, exist_ok=True)
     remote_kernel_stage_dir = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_KERNEL_STAGE_DIR")
     remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    aws_common._ssh_exec(ctx, ip, "mkdir", "-p", f"{remote_kernel_stage_dir}/boot")
-    aws_common._scp_to(ctx, ip, kernel_image, f"{remote_kernel_stage_dir}/boot/")
-    aws_common._scp_to(ctx, ip, modules_tar, f"{remote_kernel_stage_dir}/")
+    _sync_kernel_stage(
+        ctx,
+        ip,
+        kernel_release=kernel_release,
+        kernel_image=kernel_image,
+        modules_root=modules_root,
+        remote_kernel_stage_dir=remote_kernel_stage_dir,
+    )
     aws_common._run_remote_helper(
         ctx,
         ip,
@@ -457,17 +445,22 @@ def _setup_arm64_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
         _die("ARM64 setup requires a cached instance ID")
     aws_common._wait_for_ssh(ctx, ip)
     _refresh_aws_arm64_base_config(ctx, ip)
-    _setup_remote_base_prereqs(ctx, ip)
-    kernel_release, kernel_image, modules_tar = _build_arm64_kernel_artifacts(ctx)
+    _require_remote_base_prereqs(ctx, ip)
+    kernel_release, kernel_image, modules_root = _build_arm64_kernel_artifacts(ctx)
     setup_stamp = f"setup_{kernel_release}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     setup_result_dir = ctx.results_dir / setup_stamp
     verify_log = setup_result_dir / "setup_verify.log"
     setup_result_dir.mkdir(parents=True, exist_ok=True)
     remote_kernel_stage_dir = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_KERNEL_STAGE_DIR")
     remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    aws_common._ssh_exec(ctx, ip, "mkdir", "-p", f"{remote_kernel_stage_dir}/boot")
-    aws_common._scp_to(ctx, ip, kernel_image, f"{remote_kernel_stage_dir}/boot/")
-    aws_common._scp_to(ctx, ip, modules_tar, f"{remote_kernel_stage_dir}/")
+    _sync_kernel_stage(
+        ctx,
+        ip,
+        kernel_release=kernel_release,
+        kernel_image=kernel_image,
+        modules_root=modules_root,
+        remote_kernel_stage_dir=remote_kernel_stage_dir,
+    )
     aws_common._run_remote_helper(
         ctx,
         ip,
@@ -653,8 +646,7 @@ def _ensure_instance_for_suite(ctx: aws_common.AwsExecutorContext) -> dict[str, 
         _setup_instance(ctx, instance_ip)
         return aws_common._load_instance_state(ctx)
 
-    if not _verify_remote_base_prereqs(ctx, instance_ip):
-        _setup_remote_base_prereqs(ctx, instance_ip)
+    _require_remote_base_prereqs(ctx, instance_ip)
 
     if aws_common._optional_scalar(ctx.contract, "RUN_SUITE_NEEDS_RUNTIME_BTF", "0") == "1" and not _remote_has_runtime_btf(ctx, instance_ip):
         _setup_instance(ctx, instance_ip)

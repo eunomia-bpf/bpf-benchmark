@@ -13,22 +13,11 @@ KERNEL_TEST_DIR := $(ROOT_DIR)/tests/kernel
 ARTIFACT_ROOT := $(ROOT_DIR)/.cache
 X86_BUILD_DIR ?= $(ARTIFACT_ROOT)/x86-kernel-build
 RUNNER_BUILD_DIR ?= $(RUNNER_DIR)/build
-AWS_X86_SETUP_ROOT := $(ARTIFACT_ROOT)/aws-x86/setup-artifacts/x86
-AWS_X86_SETUP_KERNEL_RELEASE_FILE := $(AWS_X86_SETUP_ROOT)/kernel-release.txt
-AWS_X86_SETUP_KERNEL_IMAGE := $(AWS_X86_SETUP_ROOT)/boot/bzImage
-AWS_X86_SETUP_MODULES_ARCHIVE := $(AWS_X86_SETUP_ROOT)/modules.tar.gz
-AWS_X86_CANONICAL_MODULES_ROOT := $(ARTIFACT_ROOT)/repo-artifacts/x86_64/kernel-modules/lib/modules
-AWS_ARM64_SETUP_ROOT := $(ARTIFACT_ROOT)/aws-arm64/setup-artifacts/arm64
-AWS_ARM64_SETUP_KERNEL_RELEASE_FILE := $(AWS_ARM64_SETUP_ROOT)/kernel-release.txt
-AWS_ARM64_SETUP_KERNEL_IMAGE := $(AWS_ARM64_SETUP_ROOT)/boot/vmlinuz.efi
-AWS_ARM64_SETUP_MODULES_ARCHIVE := $(AWS_ARM64_SETUP_ROOT)/modules.tar.gz
-AWS_ARM64_CANONICAL_MODULES_ROOT := $(ARTIFACT_ROOT)/repo-artifacts/arm64/kernel-modules/lib/modules
 
 include $(RUNNER_DIR)/mk/arm64_defaults.mk
-include $(RUNNER_DIR)/mk/build.mk
 
 # ARM64 / AWS
-ARM64_BUILD_DIR     ?= $(KERNEL_DIR)/build-arm64
+ARM64_BUILD_DIR     ?= $(ARTIFACT_ROOT)/arm64-kernel-build
 ARM64_BUILD_CONFIG  := $(ARM64_BUILD_DIR)/.config
 ARM64_IMAGE         := $(ARM64_BUILD_DIR)/arch/arm64/boot/Image
 ARM64_EFI_IMAGE     := $(ARM64_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
@@ -39,7 +28,9 @@ ARM64_KERNEL_MAKEFLAGS      := $(filter-out B,$(MAKEFLAGS))
 RUN_TARGET_SUITE_CMD  = "$(PYTHON)" -m runner.libs.run_target_suite
 AWS_ARM64_BENCH_MODE ?= all
 
-export CROSS_COMPILE_ARM64 ARM64_BUILD_DIR
+include $(RUNNER_DIR)/mk/build.mk
+
+export ARM64_BUILD_DIR
 AWS_X86_BENCH_MODE        ?= all
 
 # Tunables
@@ -98,7 +89,7 @@ ROOT_VM_CORPUS_EXTRA_ARGS := $(if $(strip $(VM_CORPUS_ARGS)),VM_CORPUS_ARGS='$(V
 		vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
 	aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86 \
-	help clean clean-aws-x86-setup clean-aws-arm64-setup
+	help clean
 
 # ── Help ───────────────────────────────────────────────────────────────────────
 help:
@@ -114,33 +105,11 @@ help:
 	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=$(AWS_ARM64_BENCH_MODE) AWS_ARM64_E2E_CASES=<all|tracee,tetragon,...>"
 	@echo "        aws-x86-test AWS_X86_REGION=<region> AWS_X86_PROFILE=<profile> AWS_X86_TEST_MODE=<selftest|negative|test>"
 	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=$(AWS_X86_BENCH_MODE) AWS_X86_E2E_CASES=<all|tracee,tetragon,...>"
-	@echo "        AWS benchmark mode 'all' fans out micro/corpus/e2e in parallel on dedicated remote instances"
-
-$(AWS_X86_SETUP_KERNEL_RELEASE_FILE) $(AWS_X86_SETUP_KERNEL_IMAGE) $(AWS_X86_SETUP_MODULES_ARCHIVE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(X86_BUILD_DIR)/arch/x86/boot/bzImage $(AWS_X86_CANONICAL_MODULES_ROOT)
-	@bash -eu -o pipefail -c '\
-		artifact_root="$(AWS_X86_SETUP_ROOT)"; \
-		release_file="$(AWS_X86_SETUP_KERNEL_RELEASE_FILE)"; \
-		kernel_image="$(AWS_X86_SETUP_KERNEL_IMAGE)"; \
-		modules_archive="$(AWS_X86_SETUP_MODULES_ARCHIVE)"; \
-		kernel_release_file="$(X86_BUILD_DIR)/include/config/kernel.release"; \
-		[[ -f "$$kernel_release_file" ]] || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
-		kernel_release="$$(tr -d '\''\n'\'' < "$$kernel_release_file")"; \
-		source_modules_root="$(AWS_X86_CANONICAL_MODULES_ROOT)/$$kernel_release"; \
-		[[ -d "$$source_modules_root" ]] || { echo "missing canonical x86 modules root: $$source_modules_root" >&2; exit 1; }; \
-		mkdir -p "$$artifact_root"; \
-		mkdir -p "$$artifact_root/boot"; \
-		ln -f "$(X86_BUILD_DIR)/arch/x86/boot/bzImage" "$$kernel_image"; \
-		printf "%s\n" "$$kernel_release" > "$$release_file"; \
-		tar -C "$(AWS_X86_CANONICAL_MODULES_ROOT)" \
-			--exclude="$$kernel_release/build" \
-			--exclude="$$kernel_release/source" \
-			--transform "s,^$$kernel_release,lib/modules/$$kernel_release," \
-			-czf "$$modules_archive" "$$kernel_release"; \
-		test -f "$$release_file"; \
-		test -f "$$kernel_image"; \
-		test -f "$$modules_archive"'
+	@echo "        containerized local builds: CONTAINER_RUNTIME=<docker|podman>"
+	@echo "        AWS benchmark mode 'all' runs micro/corpus/e2e through the target runner"
 
 $(KERNEL_CONFIG_PATH): $(DEFCONFIG_SRC)
+	mkdir -p "$(dir $@)"
 	cp "$(DEFCONFIG_SRC)" "$@"
 
 check:
@@ -179,51 +148,46 @@ vm-all:
 	$(MAKE) vm-e2e
 
 # ── ARM64 kernel ───────────────────────────────────────────────────────────────
-$(ARM64_BUILD_CONFIG): $(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF) $(ARM64_KERNEL_CONFIG_SCRIPT) $(KERNEL_BUILD_META_FILES)
-	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" "$(PYTHON)" -m runner.libs.arm64_kernel_config local \
-		"$(KERNEL_DIR)" "$(ARM64_BUILD_DIR)" "$(ARM64_CROSS_PREFIX)"
+$(ARM64_BUILD_CONFIG): $(ARM64_RUNNER_BUILD_IMAGE_STATE) $(ARM64_KERNEL_CONFIG_SCRIPT) $(KERNEL_BUILD_META_FILES)
+	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
+		--user "$(HOST_UID):$(HOST_GID)" \
+		-e HOME=/tmp/bpf-benchmark-container \
+		-e MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" \
+		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		-w "$(ROOT_DIR)" \
+		"$(ARM64_RUNNER_BUILD_IMAGE)" \
+		python3 -m runner.libs.arm64_kernel_config local "$(KERNEL_DIR)" "$(ARM64_BUILD_DIR)" ""
 
 $(ARM64_IMAGE) $(ARM64_EFI_IMAGE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
-	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_BUILD_DIR)" \
-		ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" \
-		CC="$(ARM64_GCC)" LD="$(ARM64_LD)" AR="$(ARM64_AR)" RANLIB="$(ARM64_RANLIB)" \
-		NM="$(ARM64_NM)" OBJCOPY="$(ARM64_OBJCOPY)" OBJDUMP="$(ARM64_OBJDUMP)" STRIP="$(ARM64_STRIP)" \
-		Image vmlinuz.efi -j"$(NPROC)"
+	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
+		--user "$(HOST_UID):$(HOST_GID)" \
+		-e HOME=/tmp/bpf-benchmark-container \
+		-e MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" \
+		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		-w "$(ROOT_DIR)" \
+		"$(ARM64_RUNNER_BUILD_IMAGE)" \
+		make -C "$(KERNEL_DIR)" O="$(ARM64_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE= Image vmlinuz.efi -j"$(NPROC)"
 
-$(ARM64_AWS_BUILD_CONFIG): $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF) $(ARM64_KERNEL_CONFIG_SCRIPT) $(ARM64_AWS_BASE_CONFIG) $(KERNEL_BUILD_META_FILES)
-	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" ARM64_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)" "$(PYTHON)" -m runner.libs.arm64_kernel_config aws \
-		"$(KERNEL_DIR)" "$(ARM64_AWS_BUILD_DIR)" "$(ARM64_CROSS_PREFIX)"
+$(ARM64_AWS_BUILD_CONFIG): $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_RUNNER_BUILD_IMAGE_STATE) $(ARM64_KERNEL_CONFIG_SCRIPT) $(ARM64_AWS_BASE_CONFIG) $(KERNEL_BUILD_META_FILES)
+	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
+		--user "$(HOST_UID):$(HOST_GID)" \
+		-e HOME=/tmp/bpf-benchmark-container \
+		-e MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" \
+		-e ARM64_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)" \
+		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		-w "$(ROOT_DIR)" \
+		"$(ARM64_RUNNER_BUILD_IMAGE)" \
+		python3 -m runner.libs.arm64_kernel_config aws "$(KERNEL_DIR)" "$(ARM64_AWS_BUILD_DIR)" ""
 
 $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_AWS_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
-	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
-		ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" \
-		CC="$(ARM64_GCC)" LD="$(ARM64_LD)" AR="$(ARM64_AR)" RANLIB="$(ARM64_RANLIB)" \
-		NM="$(ARM64_NM)" OBJCOPY="$(ARM64_OBJCOPY)" OBJDUMP="$(ARM64_OBJDUMP)" STRIP="$(ARM64_STRIP)" \
-		Image vmlinuz.efi -j"$(NPROC)"
-
-$(AWS_ARM64_SETUP_KERNEL_RELEASE_FILE) $(AWS_ARM64_SETUP_KERNEL_IMAGE) $(AWS_ARM64_SETUP_MODULES_ARCHIVE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE) $(AWS_ARM64_CANONICAL_MODULES_ROOT)
-	@bash -eu -o pipefail -c '\
-		artifact_root="$(AWS_ARM64_SETUP_ROOT)"; \
-		release_file="$(AWS_ARM64_SETUP_KERNEL_RELEASE_FILE)"; \
-		kernel_image="$(AWS_ARM64_SETUP_KERNEL_IMAGE)"; \
-		modules_archive="$(AWS_ARM64_SETUP_MODULES_ARCHIVE)"; \
-		kernel_release_file="$(ARM64_AWS_BUILD_DIR)/include/config/kernel.release"; \
-		[[ -f "$$kernel_release_file" ]] || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
-		kernel_release="$$(tr -d '\''\n'\'' < "$$kernel_release_file")"; \
-		source_modules_root="$(AWS_ARM64_CANONICAL_MODULES_ROOT)/$$kernel_release"; \
-		[[ -d "$$source_modules_root" ]] || { echo "missing canonical arm64 modules root: $$source_modules_root" >&2; exit 1; }; \
-		mkdir -p "$$artifact_root"; \
-		mkdir -p "$$artifact_root/boot"; \
-		ln -f "$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi" "$$kernel_image"; \
-		printf "%s\n" "$$kernel_release" > "$$release_file"; \
-		tar -C "$(AWS_ARM64_CANONICAL_MODULES_ROOT)" \
-			--exclude="$$kernel_release/build" \
-			--exclude="$$kernel_release/source" \
-			--transform "s,^$$kernel_release,lib/modules/$$kernel_release," \
-			-czf "$$modules_archive" "$$kernel_release"; \
-		test -f "$$release_file"; \
-		test -f "$$kernel_image"; \
-		test -f "$$modules_archive"'
+	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
+		--user "$(HOST_UID):$(HOST_GID)" \
+		-e HOME=/tmp/bpf-benchmark-container \
+		-e MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" \
+		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		-w "$(ROOT_DIR)" \
+		"$(ARM64_RUNNER_BUILD_IMAGE)" \
+		make -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE= Image vmlinuz.efi -j"$(NPROC)"
 
 # ── AWS aliases ───────────────────────────────────────────────────────────────
 aws-arm64-test:
@@ -248,28 +212,25 @@ aws-x86-terminate:
 
 aws-x86: aws-x86-test aws-x86-benchmark
 
-# ── Clean ──────────────────────────────────────────────────────────────────────
-clean-aws-x86-setup:
-	rm -rf "$(ARTIFACT_ROOT)/aws-x86/setup-artifacts"
-
-clean-aws-arm64-setup:
-	rm -rf "$(ARTIFACT_ROOT)/aws-arm64/setup-artifacts"
-
 clean:
 	rm -rf "$(RUNNER_BUILD_DIR)"
 	rm -rf "$(RUNNER_DIR)/build-arm64"
 	$(MAKE) -C "$(MICRO_DIR)" clean
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
-	$(MAKE) -C "$(KERNEL_DIR)" clean
-	rm -rf "$(ARM64_BUILD_DIR)" "$(ROOT_DIR)/.state/runner-contracts"
+	rm -rf "$(X86_BUILD_DIR)" "$(ARM64_BUILD_DIR)" "$(ROOT_DIR)/.state/runner-contracts"
 	rm -rf \
+		"$(ARTIFACT_ROOT)/container-images" \
+		"$(ARTIFACT_ROOT)/libbpf-build" \
+		"$(ARTIFACT_ROOT)/micro-programs" \
+		"$(ARTIFACT_ROOT)/repo-artifacts" \
+		"$(ARTIFACT_ROOT)/repo-build" \
+		"$(ARTIFACT_ROOT)/workload-tools" \
+		"$(ARTIFACT_ROOT)/workload-tools-build" \
 		"$(ARTIFACT_ROOT)/aws-arm64/kernel-build" \
-		"$(ARTIFACT_ROOT)/aws-arm64/setup-artifacts" \
 		"$(ARTIFACT_ROOT)/aws-arm64/run-state" \
 		"$(ARTIFACT_ROOT)/aws-arm64/runs" \
 		"$(ARTIFACT_ROOT)/aws-arm64/state" \
 		"$(ARTIFACT_ROOT)/aws-x86/kernel-build" \
-		"$(ARTIFACT_ROOT)/aws-x86/setup-artifacts" \
 		"$(ARTIFACT_ROOT)/aws-x86/run-state" \
 		"$(ARTIFACT_ROOT)/aws-x86/runs" \
 		"$(ARTIFACT_ROOT)/aws-x86/state"

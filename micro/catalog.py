@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -230,7 +231,8 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
     build_data = dict(data.get("build", {}))
     benchmark_defaults = dict(data.get("benchmark_defaults", {}))
     default_io_mode = str(benchmark_defaults.get("io_mode", "map"))
-    program_dir = _resolve_path(data.get("paths", {}).get("program_dir"), root_dir)
+    program_dir_override = os.environ.get("BPFREJIT_MICRO_PROGRAM_DIR", "").strip()
+    program_dir = _resolve_path(program_dir_override or data.get("paths", {}).get("program_dir"), root_dir)
     if program_dir is None:
         raise ValueError("micro manifest missing paths.program_dir")
 

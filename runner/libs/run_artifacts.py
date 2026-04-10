@@ -4,8 +4,6 @@ from collections import Counter
 import json
 import os
 import re
-import shutil
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
@@ -28,7 +26,6 @@ class ArtifactSession:
         run_type: str,
         generated_at: str,
         metadata_builder: MetadataBuilder,
-        clear_existing: bool = False,
     ) -> None:
         self.output_path = output_path.resolve()
         self.run_type = sanitize_artifact_token(run_type)
@@ -38,7 +35,6 @@ class ArtifactSession:
             results_dir=result_root_for_output(self.output_path),
             run_type=self.run_type,
             generated_at=generated_at,
-            clear_existing=clear_existing,
         )
 
     def write(
@@ -76,12 +72,6 @@ class ArtifactSession:
             detail_payloads=merged_details or None,
             detail_texts=detail_texts,
         )
-        if str(status).startswith("completed"):
-            _prune_previous_run_details(
-                results_dir=result_root_for_output(self.output_path),
-                run_type=self.run_type,
-                preserve_run_dir=self.run_dir,
-            )
         return artifact_path
 
 
@@ -109,8 +99,6 @@ def result_root_for_output(output_path: Path) -> Path:
 
 def derive_run_type(output_path: Path, default_token: str) -> str:
     stem = output_path.stem
-    if stem.endswith(".latest"):
-        stem = stem[: -len(".latest")]
     stem = _STAMP_SUFFIX_RE.sub("", stem)
     return sanitize_artifact_token(stem or default_token)
 
@@ -158,50 +146,6 @@ def current_process_identity() -> dict[str, object]:
     if boot_id is not None:
         payload["launcher_boot_id"] = boot_id
     return payload
-
-
-def _managed_run_artifact_metadata(path: Path) -> dict[str, Any] | None:
-    metadata_path = path / "metadata.json"
-    if not metadata_path.is_file():
-        return None
-    try:
-        payload = json.loads(metadata_path.read_text())
-    except (OSError, json.JSONDecodeError) as exc:
-        raise RuntimeError(f"failed to read artifact metadata from {metadata_path}: {exc}") from exc
-    if not isinstance(payload, dict):
-        raise RuntimeError(f"artifact metadata is not a JSON object: {metadata_path}")
-    run_type = str(payload.get("run_type", "")).strip()
-    status = str(payload.get("status", "")).strip()
-    if not run_type or not status:
-        return None
-    return payload
-
-
-def _is_managed_run_artifact(path: Path) -> bool:
-    return _managed_run_artifact_metadata(path) is not None
-
-
-def _drop_corrupt_run_artifact(path: Path, exc: RuntimeError) -> None:
-    print(
-        f"warning: removing corrupt run artifact {path}: {exc}",
-        file=sys.stderr,
-    )
-    shutil.rmtree(path)
-
-
-def clear_previous_run_artifacts(results_dir: Path) -> None:
-    if not results_dir.is_dir():
-        return
-    for child in results_dir.iterdir():
-        if not child.is_dir():
-            continue
-        try:
-            managed = _is_managed_run_artifact(child)
-        except RuntimeError as exc:
-            _drop_corrupt_run_artifact(child, exc)
-            continue
-        if managed:
-            shutil.rmtree(child)
 
 
 def summarize_benchmark_results(payload: Mapping[str, Any]) -> dict[str, Any]:
@@ -296,123 +240,13 @@ def summarize_benchmark_results(payload: Mapping[str, Any]) -> dict[str, Any]:
     return summarized
 
 
-def _daemon_debug_detail_for_sample(
-    *,
-    benchmark_name: str,
-    runtime_name: str,
-    sample_index: int,
-    sample: Mapping[str, Any],
-) -> tuple[str, dict[str, Any], dict[str, Any]] | None:
-    rejit = sample.get("rejit")
-    if not isinstance(rejit, Mapping):
-        return None
-
-    daemon_response = rejit.get("daemon_response")
-    if not isinstance(daemon_response, Mapping):
-        return None
-
-    sample_slot = sample.get("sample_index")
-    effective_sample_index = int(sample_slot) if isinstance(sample_slot, int) else sample_index
-    sample_suffix = (
-        f"sample{effective_sample_index:02d}"
-    )
-    basename = (
-        f"{sanitize_artifact_token(benchmark_name)}__"
-        f"{sanitize_artifact_token(runtime_name)}__{sample_suffix}.json"
-    )
-    relative_path = f"daemon_debug/{basename}"
-    detail_payload = {
-        "benchmark": benchmark_name,
-        "sample_index": effective_sample_index,
-        "rejit_summary": {
-            key: value
-            for key, value in rejit.items()
-            if key != "daemon_response"
-        },
-        "result": sample.get("result"),
-        "runtime": runtime_name,
-        "daemon_response": daemon_response,
-    }
-    index_entry = {
-        "benchmark": benchmark_name,
-        "sample_index": effective_sample_index,
-        "path": f"details/{relative_path}",
-        "runtime": runtime_name,
-        "verifier_retries": int(rejit.get("verifier_retries", 0) or 0),
-    }
-    return relative_path, detail_payload, index_entry
-
-
-def externalize_sample_daemon_debug(
-    *,
-    benchmark_name: str,
-    runtime_name: str,
-    sample_index: int,
-    sample: dict[str, Any],
-) -> tuple[str, dict[str, Any], dict[str, Any]] | None:
-    detail = _daemon_debug_detail_for_sample(
-        benchmark_name=benchmark_name,
-        runtime_name=runtime_name,
-        sample_index=sample_index,
-        sample=sample,
-    )
-    if detail is None:
-        return None
-
-    relative_path, detail_payload, index_entry = detail
-    rejit = sample.get("rejit")
-    if isinstance(rejit, dict):
-        sanitized_rejit = dict(rejit)
-        sanitized_rejit.pop("daemon_response", None)
-        sanitized_rejit["daemon_debug_ref"] = f"details/{relative_path}"
-        sample["rejit"] = sanitized_rejit
-
-    return relative_path, detail_payload, index_entry
-
-
-def write_run_artifact(
-    *,
-    results_dir: Path,
-    run_type: str,
-    metadata: Mapping[str, Any],
-    detail_payloads: Mapping[str, Any] | None = None,
-    detail_texts: Mapping[str, str] | None = None,
-    clear_existing: bool = False,
-) -> Path:
-    run_dir = create_run_artifact_dir(
-        results_dir=results_dir,
-        run_type=run_type,
-        generated_at=str(metadata.get("generated_at", "")) or None,
-        clear_existing=clear_existing,
-    )
-    update_run_artifact(
-        run_dir=run_dir,
-        run_type=run_type,
-        metadata=metadata,
-        detail_payloads=detail_payloads,
-        detail_texts=detail_texts,
-    )
-    status = str(metadata.get("status") or "").strip().lower()
-    if not status or status.startswith("completed"):
-        _prune_previous_run_details(
-            results_dir=results_dir,
-            run_type=run_type,
-            preserve_run_dir=run_dir,
-        )
-    return run_dir
-
-
 def create_run_artifact_dir(
     *,
     results_dir: Path,
     run_type: str,
     generated_at: str | None = None,
-    clear_existing: bool = False,
 ) -> Path:
     results_dir = results_dir.resolve()
-    if clear_existing:
-        clear_previous_run_artifacts(results_dir)
-
     run_dir = results_dir / f"{sanitize_artifact_token(run_type)}_{artifact_timestamp(generated_at)}"
     run_dir.mkdir(parents=True, exist_ok=False)
     return run_dir
@@ -454,86 +288,3 @@ def update_run_artifact(
             detail_path.write_text(text)
 
     return run_dir
-
-
-def load_latest_result_for_output(output_path: Path, *, default_run_type: str) -> dict[str, Any]:
-    results_dir = result_root_for_output(output_path)
-    run_type = sanitize_artifact_token(derive_run_type(output_path, default_run_type))
-    if not results_dir.is_dir():
-        raise RuntimeError(f"run artifact directory does not exist: {results_dir}")
-
-    latest_dir: Path | None = None
-    latest_metadata: dict[str, Any] | None = None
-    latest_key: tuple[str, str, str] | None = None
-    for child in sorted(results_dir.iterdir()):
-        if not child.is_dir():
-            continue
-        metadata = _managed_run_artifact_metadata(child)
-        if metadata is None:
-            continue
-        if sanitize_artifact_token(str(metadata.get("run_type", ""))) != run_type:
-            continue
-        started_at = str(metadata.get("started_at", ""))
-        last_updated_at = str(metadata.get("last_updated_at", ""))
-        candidate_key = (
-            last_updated_at,
-            started_at,
-            child.name,
-        )
-        if latest_key is None or candidate_key > latest_key:
-            latest_dir = child
-            latest_metadata = metadata
-            latest_key = candidate_key
-
-    if latest_dir is None or latest_metadata is None:
-        raise RuntimeError(
-            f"no run artifact found for output {output_path} under {results_dir} (run_type={run_type})"
-        )
-
-    status = str(latest_metadata.get("status", "")).strip()
-    if status != "completed":
-        error_message = str(latest_metadata.get("error_message", "")).strip()
-        detail = f" status={status!r}"
-        if error_message:
-            detail += f" error={error_message!r}"
-        raise RuntimeError(f"latest run artifact did not complete:{detail} path={latest_dir}")
-
-    result_path = latest_dir / "details" / "result.json"
-    if not result_path.is_file():
-        raise RuntimeError(f"completed run artifact is missing result payload: {result_path}")
-    try:
-        payload = json.loads(result_path.read_text())
-    except (OSError, json.JSONDecodeError) as exc:
-        raise RuntimeError(f"failed to read result payload from {result_path}: {exc}") from exc
-    if not isinstance(payload, dict):
-        raise RuntimeError(f"result payload is not a JSON object: {result_path}")
-    return payload
-
-
-def _prune_previous_run_details(
-    *,
-    results_dir: Path,
-    run_type: str,
-    preserve_run_dir: Path | None = None,
-) -> None:
-    if not results_dir.is_dir():
-        return
-    run_type_token = sanitize_artifact_token(run_type)
-    preserved = preserve_run_dir.resolve() if preserve_run_dir is not None else None
-    for child in sorted(results_dir.iterdir()):
-        if not child.is_dir():
-            continue
-        if preserved is not None and child.resolve() == preserved:
-            continue
-        try:
-            metadata = _managed_run_artifact_metadata(child)
-        except RuntimeError as exc:
-            _drop_corrupt_run_artifact(child, exc)
-            continue
-        if metadata is None:
-            continue
-        if sanitize_artifact_token(str(metadata.get("run_type", ""))) != run_type_token:
-            continue
-        details_dir = child / "details"
-        if details_dir.is_dir():
-            shutil.rmtree(details_dir)

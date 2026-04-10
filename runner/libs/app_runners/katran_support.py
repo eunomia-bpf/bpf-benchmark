@@ -235,13 +235,8 @@ def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
 
 
 def katran_server_env(server_binary: Path) -> dict[str, str]:
-    lib_dir = server_binary.resolve().parent.parent / "lib"
-    if not lib_dir.is_dir():
-        raise RuntimeError(f"Katran server runtime library directory is missing: {lib_dir}")
-    env = os.environ.copy()
-    existing = env.get("LD_LIBRARY_PATH", "").strip()
-    env["LD_LIBRARY_PATH"] = str(lib_dir) if not existing else f"{lib_dir}:{existing}"
-    return env
+    del server_binary
+    return os.environ.copy()
 
 def ip_binary() -> str:
     for candidate in DEFAULT_IP_CANDIDATES:

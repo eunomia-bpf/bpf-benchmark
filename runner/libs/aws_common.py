@@ -222,16 +222,22 @@ def _scp_to(ctx: AwsExecutorContext, ip: str, src: Path, dest: str, *, recursive
         raise SystemExit(completed.returncode)
 
 
-def _rsync_to(ctx: AwsExecutorContext, ip: str, src: Path, dest: str) -> None:
+def _rsync_to(ctx: AwsExecutorContext, ip: str, src: Path, dest: str, *, excludes: tuple[str, ...] = ()) -> None:
     command = [
         "rsync",
         "-a",
         "--delete",
-        "-e",
-        shlex.join(["ssh", *_ssh_base_args(ctx, ip)]),
-        f"{src}/",
-        f"{ctx.remote_user}@{ip}:{dest}/",
     ]
+    for pattern in excludes:
+        command.extend(["--exclude", pattern])
+    command.extend(
+        [
+            "-e",
+            shlex.join(["ssh", *_ssh_base_args(ctx, ip)]),
+            f"{src}/",
+            f"{ctx.remote_user}@{ip}:{dest}/",
+        ]
+    )
     completed = subprocess.run(
         command,
         cwd=ROOT_DIR,

@@ -10,6 +10,10 @@ Three-layer benchmarking pipeline:
 
 The historical multi-runtime userspace benchmark layer has been removed; the active tree is `micro/`, `corpus/`, and `e2e/`.
 
+Execution architecture and the active migration plan for build containers,
+runtime containers, and host-kernel boundaries live in
+[`docs/benchmark-runtime-architecture.md`](docs/benchmark-runtime-architecture.md).
+
 ## Repository Layout
 
 ```text
@@ -32,8 +36,10 @@ bpf-benchmark/
 - Python 3 with PyYAML: `pip install pyyaml` (or use the workspace venv)
 - `sudo -n` (passwordless) required for kernel eBPF runtime
 - `vng` (virtme-ng) required for VM benchmark targets
-- `docker buildx` with runnable `linux/arm64` userspace support is still
-  required for the current canonical AWS ARM64 benchmark local-prep path
+- `docker` or `podman` with runnable `linux/arm64` userspace support is
+  currently required for the active ARM64 local-prep build path
+- `CONTAINER_RUNTIME` may be set to `docker` or `podman` for Make-driven
+  containerized build steps
 
 ## Quick Start
 
@@ -86,19 +92,20 @@ runner builds:
 - `LLVM_CONFIG` (the root `Makefile` defaults this to `llvm-config$(UPSTREAM_SELFTEST_LLVM_SUFFIX)`)
 
 Results are written to:
-- `micro/results/` — direct local smoke outputs from host-side micro driver runs
-- `.cache/x86-kvm/runs/<run_token>/workspace/.cache/suite-results/<target>_<suite>_<timestamp>/` — staged local-KVM suite artifacts written inside the staged workspace by the shared suite runtime
-- `.cache/aws-arm64/results/<suite>_<token>_<timestamp>/` — fetched AWS ARM64 suite outputs
-- `.cache/aws-x86/results/<suite>_<token>_<timestamp>/` — fetched AWS x86 suite outputs
+- `micro/results/` — authoritative micro benchmark results
+- `corpus/results/` — authoritative corpus benchmark results
+- `e2e/results/` — authoritative end-to-end benchmark results
 - `docs/tmp/` — analysis reports (.md only, never JSON results)
 
-`make clean` preserves fetched AWS result directories under `.cache/aws-*/results/`.
+Executor logs and transient staging state still live under `.cache/`, but those
+directories are not benchmark result roots.
 
 The root `Makefile` surface is reserved for canonical run/validation entrypoints,
 plus a small developer helper surface for direct kernel/module lifecycle work.
-Active local prep/build now flows through the Python runner libraries; there is
-no second public runner `Makefile` control plane, and the remaining helper
-targets delegate to the same Python implementations.
+Active local prep/build flows through real Make targets resolved by the Python
+runner libraries. The long-term direction is fixed build containers for
+artifact production plus host-kernel execution with privileged runtime
+containers where practical.
 
 ## Layer Notes
 

@@ -3,6 +3,10 @@
 > 本文档是 UEOS (Userspace eBPF Optimization Service) 阶段 1 的详细设计。
 > 目标：系统量化 kernel JIT vs LLVM JIT 的性能差距，验证 7 个假设，为后续优化策略提供数据驱动的决策依据。
 
+> 注：本文档主要描述 research questions、实验矩阵和测量方法。
+> 当前实际 benchmark 执行架构、KVM/AWS 边界、构建容器与运行容器迁移方案，见
+> [`docs/benchmark-runtime-architecture.md`](./benchmark-runtime-architecture.md)。
+
 ---
 
 ## 零、Research Questions (RQ)

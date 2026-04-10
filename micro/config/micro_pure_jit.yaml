@@ -2,7 +2,7 @@
 suite_name: micro_staged_codegen
 
 paths:
-  program_dir: micro/programs
+  program_dir: .cache/micro-programs/x86_64
 
 toolchains:
   llvmbpf:

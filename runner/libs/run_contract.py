@@ -375,7 +375,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     run_vm_timeout_seconds = suite.get("SUITE_DEFAULT_VM_TIMEOUT_SECONDS", "7200")
     run_remote_python_bin = target.get("TARGET_REMOTE_PYTHON_DEFAULT", suite.get("SUITE_DEFAULT_REMOTE_PYTHON_BIN", ""))
     run_remote_python_modules = "PyYAML"
-    run_guest_package_manager = target.get("TARGET_GUEST_PACKAGE_MANAGER", "")
     run_needs_runner_binary = suite.get("SUITE_NEEDS_RUNNER_BINARY", "0")
     run_needs_daemon_binary = suite.get("SUITE_NEEDS_DAEMON_BINARY", "0")
     run_needs_kinsn_modules = suite.get("SUITE_NEEDS_KINSN_MODULES", "0")
@@ -591,7 +590,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         "RUN_VM_TIMEOUT_SECONDS": run_vm_timeout_seconds,
         "RUN_REMOTE_PYTHON_BIN": run_remote_python_bin,
         "RUN_REMOTE_PYTHON_MODULES_CSV": run_remote_python_modules,
-        "RUN_GUEST_PACKAGE_MANAGER": run_guest_package_manager,
         "RUN_TEST_MODE": run_test_mode,
         "RUN_TEST_FUZZ_ROUNDS": run_test_fuzz_rounds,
         "RUN_TEST_SCX_PROG_SHOW_RACE_MODE": run_test_scx_prog_show_race_mode,
@@ -625,7 +623,6 @@ def build_target_manifest(target_name: str, *, env: dict[str, str] | None = None
     run_name_tag = ""
     run_aws_region = ""
     run_aws_profile = ""
-    run_guest_package_manager = target.get("TARGET_GUEST_PACKAGE_MANAGER", "")
     if target.get("TARGET_EXECUTOR", "") == "aws-ssh":
         aws_env_prefix = target.get("TARGET_AWS_ENV_PREFIX", "")
         if not aws_env_prefix:
@@ -645,7 +642,6 @@ def build_target_manifest(target_name: str, *, env: dict[str, str] | None = None
         "RUN_NAME_TAG": run_name_tag,
         "RUN_AWS_REGION": run_aws_region,
         "RUN_AWS_PROFILE": run_aws_profile,
-        "RUN_GUEST_PACKAGE_MANAGER": run_guest_package_manager,
     }
 
 

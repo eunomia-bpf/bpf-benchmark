@@ -27,9 +27,6 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from micro.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
-from runner.libs.run_artifacts import load_latest_result_for_output
-
-
 plt.rcParams.update(
     {
         "font.size": 9,
@@ -122,12 +119,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--pure-json",
         default=str(PURE_JIT_RESULTS),
-        help="Path to the pure-JIT results JSON. Defaults to the active suite output when present.",
+        help="Path to a concrete pure-JIT result JSON, usually <run-dir>/details/result.json.",
     )
     parser.add_argument(
         "--causal-json",
         default=str(CAUSAL_RESULTS),
-        help="Path to a causal-capable JSON result file. Defaults to the first existing causal results candidate.",
+        help="Path to a concrete causal-capable JSON result file.",
     )
     parser.add_argument("--figures-dir", default=str(FIGURES_DIR), help="Output directory for generated PDF figures.")
     parser.add_argument(
@@ -146,9 +143,11 @@ def parse_args() -> argparse.Namespace:
 
 
 def load_results(path: Path) -> dict[str, object]:
-    if path.is_file():
-        return json.loads(path.read_text())
-    return load_latest_result_for_output(path, default_run_type=path.stem)
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"result JSON does not exist: {path}. Pass a concrete run artifact details/result.json path."
+        )
+    return json.loads(path.read_text())
 
 
 def build_category_context(

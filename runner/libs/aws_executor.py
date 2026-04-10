@@ -149,9 +149,6 @@ def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
             _scp_from(ctx, ip, remote_artifact_dir, local_artifact_dir.parent, recursive=True)
     if remote_completed.returncode != 0:
         _die(f"remote {ctx.target_name}/{ctx.suite_name} suite failed; inspect {local_log}")
-    _run_remote_helper(ctx, ip, remote_python, "cleanup-path", remote_run_dir, check=False)
-    for remote_artifact_dir in remote_artifact_dirs:
-        _run_remote_helper(ctx, ip, remote_python, "cleanup-path", remote_artifact_dir, check=False)
     if len(local_artifact_dirs) == 1:
         shutil.copy2(local_log, local_artifact_dirs[0] / "aws-remote.log")
     print(
