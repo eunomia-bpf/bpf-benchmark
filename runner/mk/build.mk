@@ -7,13 +7,17 @@ REPO_TETRAGON_ROOT := $(REPO_ARTIFACT_ROOT)/tetragon
 REPO_KATRAN_ROOT := $(REPO_ARTIFACT_ROOT)/katran
 REPO_KERNEL_MODULES_ROOT := $(REPO_ARTIFACT_ROOT)/kernel-modules
 REPO_BUILD_ROOT := $(ARTIFACT_ROOT)/repo-build/$(RUN_TARGET_ARCH)
+BUILD_RULE_FILES := $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(RUNNER_DIR)/libs/workspace_layout.py
 SCX_BUILD_ROOT := $(REPO_BUILD_ROOT)/scx
 SCX_CARGO_TARGET_DIR := $(SCX_BUILD_ROOT)/target
 BCC_BUILD_ROOT := $(REPO_BUILD_ROOT)/bcc
 BCC_BUILD_REPO := $(BCC_BUILD_ROOT)/src
+BCC_BUILD_OUTPUT_ROOT := $(BCC_BUILD_REPO)/libbpf-tools/.output
+BCC_RUNTIME_LIB_ROOT := $(REPO_ARTIFACT_ROOT)/bcc/libbpf-tools/lib
 TRACEE_BUILD_ROOT := $(REPO_BUILD_ROOT)/tracee
 TRACEE_BUILD_REPO := $(TRACEE_BUILD_ROOT)/src
 TRACEE_BUILD_GOENV_MK := $(TRACEE_BUILD_ROOT)/goenv.mk
+TRACEE_BUILD_DIST_ROOT := $(TRACEE_BUILD_REPO)/dist
 TETRAGON_BUILD_ROOT := $(REPO_BUILD_ROOT)/tetragon
 TETRAGON_BUILD_REPO := $(TETRAGON_BUILD_ROOT)/src
 
@@ -51,7 +55,7 @@ TEST_NEGATIVE_SOURCE_FILES = $(shell find "$(ROOT_DIR)/tests/negative" \( -path 
 MICRO_PROGRAM_SOURCE_FILES = $(shell find "$(ROOT_DIR)/micro/programs" -type f \( -name '*.bpf.c' -o -name '*.h' -o -name 'Makefile' \) 2>/dev/null)
 KINSN_SOURCE_FILES = $(shell find "$(ACTIVE_KINSN_MODULE_DIR)" "$(ROOT_DIR)/module/include" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
 SCX_SOURCE_FILES = $(shell find "$(REPOS_DIR)/scx" \( -path '*/target' -o -path '*/.git' \) -prune -o -type f \( -name '*.rs' -o -name '*.c' -o -name '*.h' -o -name 'Cargo.toml' -o -name 'Cargo.lock' -o -name 'build.rs' \) -print 2>/dev/null)
-BCC_SOURCE_FILES = $(shell find "$(REPOS_DIR)/bcc/libbpf-tools" \( -path '*/.output' -o -path '*/.git' \) -prune -o -type f -print 2>/dev/null)
+BCC_SOURCE_FILES = $(shell find "$(REPOS_DIR)/bcc/libbpf-tools" \( -path '*/.output' -o -path '*/.git' \) -prune -o -type f \( -name '*.c' -o -name '*.h' -o -name '*.sh' -o -name '*.mk' -o -name '*.yaml' -o -name '*.json' -o -name '*.txt' -o -name 'Makefile' \) -print 2>/dev/null)
 TRACEE_SOURCE_FILES = $(shell find "$(REPOS_DIR)/tracee" \( -path '*/dist' -o -path '*/build' -o -path '*/.git' \) -prune -o -type f \( -name '*.go' -o -name '*.c' -o -name '*.h' -o -name '*.mk' -o -name 'Makefile' -o -name 'go.mod' -o -name 'go.sum' \) -print 2>/dev/null)
 TETRAGON_SOURCE_FILES = $(shell find "$(REPOS_DIR)/tetragon" \( -path '*/bpf/objs' -o -path '*/.git' \) -prune -o -type f \( -name '*.go' -o -name '*.c' -o -name '*.h' -o -name '*.yaml' -o -name '*.mk' -o -name 'Makefile' -o -name 'go.mod' -o -name 'go.sum' \) -print 2>/dev/null)
 KATRAN_SOURCE_FILES = $(shell find "$(REPOS_DIR)/katran" \( -path '*/build' -o -path '*/deps' -o -path '*/.git' \) -prune -o -type f \( -name '*.cc' -o -name '*.cpp' -o -name '*.c' -o -name '*.h' -o -name '*.hpp' -o -name '*.bpf.c' -o -name '*.sh' -o -name '*.cmake' -o -name 'CMakeLists.txt' \) -print 2>/dev/null)
@@ -155,7 +159,7 @@ $(REPO_KERNEL_MODULES_ROOT)/lib/modules: $(X86_BUILD_DIR)/arch/x86/boot/bzImage
 	test -f "$$release_root/kernel/drivers/block/null_blk/null_blk.ko"; \
 	test -f "$$release_root/kernel/net/sched/sch_netem.ko"
 
-$(ACTIVE_LIBBPF_RUNTIME_PRIMARY): $(LIBBPF_SOURCE_FILES)
+$(ACTIVE_LIBBPF_RUNTIME_PRIMARY): $(LIBBPF_SOURCE_FILES) $(BUILD_RULE_FILES)
 	@runtime_root="$(REPO_ARTIFACT_ROOT)/libbpf"; \
 	mkdir -p "$$runtime_root" "$(X86_LIBBPF_RUNTIME_BUILD_ROOT)"
 	@docker run --rm --platform linux/amd64 \
@@ -181,13 +185,13 @@ $(ACTIVE_LIBBPF_RUNTIME_PRIMARY): $(LIBBPF_SOURCE_FILES)
 			mv /out/lib.tmp /out/lib; \
 			chown -R $(shell id -u):$(shell id -g) /out /build'
 
-$(REPO_SCX_ROOT)/bin/%: $(SCX_SOURCE_FILES) $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF))
+$(REPO_SCX_ROOT)/bin/%: $(SCX_SOURCE_FILES) $(BUILD_RULE_FILES) $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF))
 	@package="$*"; \
 	repo_root="$(REPOS_DIR)/scx"; \
 	corpus_root="$(REPO_SCX_ROOT)"; \
 	bin_root="$$corpus_root/bin"; \
 	target_dir="$(SCX_CARGO_TARGET_DIR)"; \
-	mkdir -p "$$bin_root" "$$corpus_root" "$$target_dir"; \
+	mkdir -p "$$bin_root" "$$corpus_root" "$$corpus_root/lib" "$$target_dir"; \
 		if [ "$(RUN_TARGET_ARCH)" = "arm64" ]; then \
 			target_release_dir="$$target_dir/aarch64-unknown-linux-gnu/release"; \
 		PKG_CONFIG_ALLOW_CROSS=1 \
@@ -205,16 +209,15 @@ $(REPO_SCX_ROOT)/bin/%: $(SCX_SOURCE_FILES) $(if $(filter arm64,$(RUN_TARGET_ARC
 			CARGO_TARGET_DIR="$$target_dir" \
 			cargo build --release --target "aarch64-unknown-linux-gnu" --manifest-path "$$repo_root/Cargo.toml" --package "$$package"; \
 			test -x "$$target_release_dir/$$package"; \
-			ln -f "$$target_release_dir/$$package" "$@"; \
 			object_path="$$(find "$$target_release_dir/build" -path "*/$$package-*/out/main.bpf.o" | sort | tail -n1)"; \
 		else \
 			target_release_dir="$$target_dir/release"; \
 			CARGO_TARGET_DIR="$$target_dir" \
 			cargo build --release --manifest-path "$$repo_root/Cargo.toml" --package "$$package"; \
 			test -x "$$target_release_dir/$$package"; \
-			ln -f "$$target_release_dir/$$package" "$@"; \
 			object_path="$$(find "$$target_release_dir/build" -path "*/$$package-*/out/main.bpf.o" | sort | tail -n1)"; \
 		fi; \
+		$(call PORTABLE_WRAP_BINARY,$$target_release_dir/$$package,$@,$$corpus_root/lib); \
 		test -n "$$object_path"; \
 		obj_dst="$$corpus_root/$${package}_main.bpf.o"; \
 		ln -f "$$object_path" "$$obj_dst"
@@ -222,59 +225,98 @@ $(REPO_SCX_ROOT)/bin/%: $(SCX_SOURCE_FILES) $(if $(filter arm64,$(RUN_TARGET_ARC
 $(REPO_SCX_ROOT)/%_main.bpf.o: $(REPO_SCX_ROOT)/bin/%
 	@test -f "$@"
 
-$(ACTIVE_BCC_REQUIRED) &: $(BCC_SOURCE_FILES)
+$(ACTIVE_BCC_REQUIRED) &: $(BCC_SOURCE_FILES) $(BUILD_RULE_FILES)
 	@repo_src="$(REPOS_DIR)/bcc"; \
 	build_root="$(BCC_BUILD_ROOT)"; \
 	build_repo="$(BCC_BUILD_REPO)"; \
 	repo_root="$$build_repo/libbpf-tools"; \
 	artifact_root="$(REPO_BCC_ROOT)"; \
-	mkdir -p "$$build_root"; \
+	build_output_root="$(BCC_BUILD_OUTPUT_ROOT)"; \
+	runtime_lib_root="$(BCC_RUNTIME_LIB_ROOT)"; \
+	mkdir -p "$$build_root" "$$artifact_root" "$$runtime_lib_root"; \
 	rsync -a --delete --exclude '.git' --exclude 'libbpf-tools/.output' "$$repo_src/" "$$build_repo/"; \
-	mkdir -p "$$artifact_root"; \
-	rm -rf "$$repo_root/.output"; \
-	ln -sfn "$$artifact_root" "$$repo_root/.output"; \
-	for tool in $(ACTIVE_BCC_TOOLS); do \
-		rm -f "$$repo_root/$$tool"; \
-		ln -sfn "$$artifact_root/$$tool" "$$repo_root/$$tool"; \
-	done; \
+	rm -rf "$$build_output_root"; \
+	rm -f "$$artifact_root"/* "$$runtime_lib_root"/*; \
+	rm -f $$(printf '%s ' $(addprefix "$$repo_root"/,$(ACTIVE_BCC_TOOLS))); \
 	bpftool_cmd="$(ROOT_DIR)/vendor/linux-framework/tools/bpf/bpftool/bpftool"; \
 	test -x "$$bpftool_cmd" || { echo "missing vendored bpftool build output: $$bpftool_cmd" >&2; exit 1; }; \
-	make_args='LIBBPF_SRC="$(ROOT_DIR)/vendor/libbpf/src" BPFTOOL="'"$$bpftool_cmd"'" USE_BLAZESYM=0'; \
+	make_args='OUTPUT="'"$$build_output_root"'" LIBBPF_SRC="$(ROOT_DIR)/vendor/libbpf/src" BPFTOOL="'"$$bpftool_cmd"'" USE_BLAZESYM=0'; \
 	if [ "$(RUN_TARGET_ARCH)" = "arm64" ]; then \
 		make_args="$$make_args ARCH=arm64 CROSS_COMPILE=$(CROSS_COMPILE_ARM64) CC=\"$(ARM64_CC)\" LD=\"$(ARM64_HOST_CROSS_PREFIX)ld\""; \
 	fi; \
 	eval $(MAKE) -C "\"$$repo_root\"" -j"$(JOBS)" $$make_args $(ACTIVE_BCC_TOOLS); \
 	for tool in $(ACTIVE_BCC_TOOLS); do \
 		test -x "$$repo_root/$$tool" || { echo "missing bcc tool build output: $$repo_root/$$tool" >&2; exit 1; }; \
-		test -f "$$repo_root/.output/$$tool.bpf.o" || { echo "missing bcc BPF object: $$repo_root/.output/$$tool.bpf.o" >&2; exit 1; }; \
+		test -f "$$build_output_root/$$tool.bpf.o" || { echo "missing bcc BPF object: $$build_output_root/$$tool.bpf.o" >&2; exit 1; }; \
+		$(call PORTABLE_WRAP_BINARY,$$repo_root/$$tool,$$artifact_root/$$tool,$$runtime_lib_root); \
+		ln -f "$$build_output_root/$$tool.bpf.o" "$$artifact_root/$$tool.bpf.o"; \
 	done; \
 	for path in $(ACTIVE_BCC_REQUIRED); do \
 		test -e "$$path"; \
 	done
 
-$(ACTIVE_TRACEE_REQUIRED) &: $(TRACEE_SOURCE_FILES)
+$(ACTIVE_TRACEE_REQUIRED) &: $(TRACEE_SOURCE_FILES) $(BUILD_RULE_FILES)
 	@repo_src="$(REPOS_DIR)/tracee"; \
 	build_root="$(TRACEE_BUILD_ROOT)"; \
 	repo_root="$(TRACEE_BUILD_REPO)"; \
+	dist_root="$(TRACEE_BUILD_DIST_ROOT)"; \
 	output_root="$(REPO_TRACEE_ROOT)"; \
 	goenv_mk="$(TRACEE_BUILD_GOENV_MK)"; \
-	mkdir -p "$$build_root" "$$output_root/bin" "$$output_root/lsm_support"; \
+	mkdir -p "$$build_root" "$$output_root/bin" "$$output_root/lsm_support" "$$output_root/lib"; \
 	rsync -a --delete --exclude '.git' --exclude 'dist' --exclude 'build' "$$repo_src/" "$$repo_root/"; \
+	find "$$repo_root" -name .git -prune -exec rm -rf {} +; \
+	rm -rf "$$dist_root" "$$output_root/bin/tracee" "$$output_root/bin/tracee.real" "$$output_root/lib" "$$output_root/lsm_support" "$$output_root/tracee.bpf.o"; \
+	mkdir -p "$$dist_root" "$$output_root/bin" "$$output_root/lsm_support" "$$output_root/lib"; \
 		if [ "$(RUN_TARGET_ARCH)" = "arm64" ]; then \
-			docker build -t "$(ARM64_CROSSBUILD_IMAGE)" -f "$(RUNNER_DIR)/docker/arm64-crossbuild.Dockerfile" "$(ROOT_DIR)"; \
-			docker run --rm --platform linux/arm64 \
-				-v "$(ROOT_DIR):$(ROOT_DIR)" \
-				-w "$$repo_root" \
-				"$(ARM64_CROSSBUILD_IMAGE)" \
-				make -j"$(JOBS)" OUTPUT_DIR="$$output_root" GOENV_MK="$$goenv_mk" GOOS=linux GOARCH=arm64 GO_ARCH=arm64 bpf tracee; \
+			PKG_CONFIG_ALLOW_CROSS=1 \
+			PKG_CONFIG_SYSROOT_DIR="$(ARM64_TOOLCHAIN_ROOT)" \
+			PKG_CONFIG_LIBDIR="$(ARM64_TOOLCHAIN_PKGCONFIG_DIRS)" \
+			GOCACHE="$$build_root/go-build" \
+			$(MAKE) -C "$$repo_root" -j"$(JOBS)" \
+				OUTPUT_DIR="$$dist_root" \
+				GOENV_MK="$$goenv_mk" \
+				UNAME_M=aarch64 \
+				ARCH=arm64 \
+				LINUX_ARCH=arm64 \
+				GO_ARCH=arm64 \
+				CMD_GCC="$(ARM64_GCC)" \
+				bpf; \
+			cgo_ldflags="$$(PKG_CONFIG_ALLOW_CROSS=1 PKG_CONFIG_SYSROOT_DIR="$(ARM64_TOOLCHAIN_ROOT)" PKG_CONFIG_LIBDIR="$(ARM64_TOOLCHAIN_PKGCONFIG_DIRS)" pkg-config --libs libbpf)"; \
+			GOEXPERIMENT=norandomizedheapbase64 \
+			GOOS=linux GOARCH=arm64 CGO_ENABLED=1 \
+			CC="$(ARM64_GCC)" \
+			PKG_CONFIG_ALLOW_CROSS=1 \
+			PKG_CONFIG_SYSROOT_DIR="$(ARM64_TOOLCHAIN_ROOT)" \
+			PKG_CONFIG_LIBDIR="$(ARM64_TOOLCHAIN_PKGCONFIG_DIRS)" \
+			CGO_CFLAGS="$(foreach dir,$(subst :, ,$(ARM64_TOOLCHAIN_INCLUDE_DIRS)),-I$(dir))" \
+			CGO_LDFLAGS="$$cgo_ldflags" \
+			GOCACHE="$$build_root/go-build" \
+			$(MAKE) -C "$$repo_root" --no-print-directory OUTPUT_DIR="$$dist_root" GOENV_MK="$$goenv_mk" signatures; \
+			cd "$$repo_root" && \
+			GOEXPERIMENT=norandomizedheapbase64 \
+			GOOS=linux GOARCH=arm64 CGO_ENABLED=1 \
+			CC="$(ARM64_GCC)" \
+			PKG_CONFIG_ALLOW_CROSS=1 \
+			PKG_CONFIG_SYSROOT_DIR="$(ARM64_TOOLCHAIN_ROOT)" \
+			PKG_CONFIG_LIBDIR="$(ARM64_TOOLCHAIN_PKGCONFIG_DIRS)" \
+			CGO_CFLAGS="$(foreach dir,$(subst :, ,$(ARM64_TOOLCHAIN_INCLUDE_DIRS)),-I$(dir))" \
+			CGO_LDFLAGS="$$cgo_ldflags" \
+			GOCACHE="$$build_root/go-build" \
+			go build -tags core,ebpf,lsmsupport -ldflags="-w" -o "$$dist_root/tracee" ./cmd/tracee; \
 	else \
-		$(MAKE) -C "$$repo_root" -j"$(JOBS)" OUTPUT_DIR="$$output_root" GOENV_MK="$$goenv_mk" GOOS=linux GOARCH=amd64 GO_ARCH=amd64 bpf tracee; \
+		GOCACHE="$$build_root/go-build" \
+		$(MAKE) -C "$$repo_root" -j"$(JOBS)" OUTPUT_DIR="$$dist_root" GOENV_MK="$$goenv_mk" GOOS=linux GOARCH=amd64 GO_ARCH=amd64 bpf tracee; \
 	fi; \
+	test -x "$$dist_root/tracee" || { echo "missing tracee build output: $$dist_root/tracee" >&2; exit 1; }; \
+	$(call PORTABLE_WRAP_BINARY,$$dist_root/tracee,$$output_root/bin/tracee,$$output_root/lib); \
+	ln -f "$$dist_root/tracee.bpf.o" "$$output_root/tracee.bpf.o"; \
+	ln -f "$$dist_root/lsm_support/kprobe_check.bpf.o" "$$output_root/lsm_support/kprobe_check.bpf.o"; \
+	ln -f "$$dist_root/lsm_support/lsm_check.bpf.o" "$$output_root/lsm_support/lsm_check.bpf.o"; \
 	for path in $(ACTIVE_TRACEE_REQUIRED); do \
 		test -e "$$path"; \
 	done
 
-$(ACTIVE_TETRAGON_REQUIRED) &: $(TETRAGON_SOURCE_FILES)
+$(ACTIVE_TETRAGON_REQUIRED) &: $(TETRAGON_SOURCE_FILES) $(BUILD_RULE_FILES)
 	@repo_src="$(REPOS_DIR)/tetragon"; \
 	build_root="$(TETRAGON_BUILD_ROOT)"; \
 	repo_root="$(TETRAGON_BUILD_REPO)"; \
@@ -340,6 +382,92 @@ ARM64_RANLIB := $(ARM64_HOST_CROSS_PREFIX)ranlib
 ARM64_READELF := $(ARM64_HOST_CROSS_PREFIX)readelf
 ARM64_CC := $(ARM64_GCC) --sysroot=$(ARM64_TOOLCHAIN_ROOT)
 ARM64_CXX := $(ARM64_GXX) --sysroot=$(ARM64_TOOLCHAIN_ROOT)
+
+define PORTABLE_WRAP_BINARY
+	runtime_input="$(1)"; \
+	runtime_wrapper="$(2)"; \
+	runtime_lib_dir="$(3)"; \
+	mkdir -p "$$(dirname "$$runtime_wrapper")" "$$runtime_lib_dir"; \
+	cp -Lf "$$runtime_input" "$$runtime_wrapper.real"; \
+	chmod +x "$$runtime_wrapper.real"; \
+	readelf_bin="readelf"; \
+	if [ "$(RUN_TARGET_ARCH)" = "arm64" ]; then \
+		readelf_bin="$(ARM64_READELF)"; \
+	fi; \
+	loader_name=""; \
+	seen_paths=""; \
+	resolve_lib() { \
+		name="$$1"; \
+		if [ "$(RUN_TARGET_ARCH)" = "arm64" ]; then \
+			if [ "$${name#/}" != "$$name" ] && [ -e "$(ARM64_TOOLCHAIN_ROOT)/$${name#/}" ]; then \
+				printf '%s\n' "$(ARM64_TOOLCHAIN_ROOT)/$${name#/}"; \
+				return 0; \
+			fi; \
+			for root in "$(ARM64_TOOLCHAIN_ROOT)/usr/lib/aarch64-linux-gnu" "$(ARM64_TOOLCHAIN_ROOT)/usr/lib64" "$(ARM64_TOOLCHAIN_ROOT)/usr/lib" "$(ARM64_TOOLCHAIN_ROOT)/lib/aarch64-linux-gnu" "$(ARM64_TOOLCHAIN_ROOT)/lib64" "$(ARM64_TOOLCHAIN_ROOT)/lib"; do \
+				[ -e "$$root/$$name" ] || continue; \
+				printf '%s\n' "$$root/$$name"; \
+				return 0; \
+			done; \
+			return 1; \
+		fi; \
+		if [ "$${name#/}" != "$$name" ] && [ -e "$$name" ]; then \
+			printf '%s\n' "$$name"; \
+			return 0; \
+		fi; \
+		resolved="$$(ldconfig -p 2>/dev/null | awk -v so="$$name" '$$1==so {print $$NF; exit}')"; \
+		[ -n "$$resolved" ] || return 1; \
+		printf '%s\n' "$$resolved"; \
+	}; \
+	copy_binary_deps() { \
+		current="$$(readlink -f "$$1")"; \
+		[ -n "$$current" ] || return 0; \
+		case " $$seen_paths " in \
+			*" $$current "*) return 0 ;; \
+		esac; \
+		seen_paths="$$seen_paths $$current"; \
+		interpreter="$$( "$$readelf_bin" -l "$$current" | sed -n 's/.*Requesting program interpreter: \(.*\)]/\1/p' | tr -d '[]' | head -n1 )"; \
+		if [ -n "$$interpreter" ] && [ -z "$$loader_name" ]; then \
+			loader_path="$$(resolve_lib "$$interpreter")" || { echo "missing runtime loader: $$interpreter" >&2; exit 1; }; \
+			loader_real="$$(readlink -f "$$loader_path")"; \
+			loader_name="$$(basename "$$loader_real")"; \
+			cp -Lf "$$loader_real" "$$runtime_lib_dir/$$loader_name"; \
+		fi; \
+		deps_file="$$(mktemp)"; \
+		"$$readelf_bin" -d "$$current" | sed -n 's/.*Shared library: \[\(.*\)\].*/\1/p' > "$$deps_file"; \
+		while IFS= read -r soname; do \
+			[ -n "$$soname" ] || continue; \
+			resolved="$$(resolve_lib "$$soname")" || { echo "missing runtime dependency: $$soname" >&2; exit 1; }; \
+			resolved_real="$$(readlink -f "$$resolved")"; \
+			resolved_name="$$(basename "$$resolved_real")"; \
+			cp -Lf "$$resolved_real" "$$runtime_lib_dir/$$resolved_name"; \
+			if [ "$$soname" != "$$resolved_name" ]; then \
+				ln -sfn "$$resolved_name" "$$runtime_lib_dir/$$soname"; \
+			fi; \
+			soname_value="$$( "$$readelf_bin" -d "$$resolved_real" | sed -n 's/.*Library soname: \[\(.*\)\].*/\1/p' | head -n1 )"; \
+			if [ -n "$$soname_value" ] && [ "$$soname_value" != "$$resolved_name" ]; then \
+				ln -sfn "$$resolved_name" "$$runtime_lib_dir/$$soname_value"; \
+			fi; \
+			copy_binary_deps "$$resolved_real"; \
+		done < "$$deps_file"; \
+		rm -f "$$deps_file"; \
+	}; \
+	copy_binary_deps "$$runtime_wrapper.real"; \
+	[ -n "$$loader_name" ] || { echo "missing bundled loader for $$runtime_wrapper.real" >&2; exit 1; }; \
+	printf '%s\n' \
+		'#!/usr/bin/env bash' \
+		'set -euo pipefail' \
+		'script_path="$$(readlink -f "$$0")"' \
+		'script_dir="$$(cd "$$(dirname "$$script_path")" && pwd)"' \
+		'real_binary="$${script_path}.real"' \
+		'lib_dir="$${script_dir}/../lib"' \
+		'loader="$${lib_dir}/'"$$loader_name"'"' \
+		'[[ -x "$$loader" ]] || { echo "portable runtime loader not found: $$loader" >&2; exit 1; }' \
+		'[[ -f "$$real_binary" ]] || { echo "wrapped binary is missing: $$real_binary" >&2; exit 1; }' \
+		'exec "$$loader" --library-path "$$lib_dir" "$$real_binary" "$$@"' \
+		> "$$runtime_wrapper"; \
+	chmod +x "$$runtime_wrapper"
+endef
+
 WORKLOAD_TOOLS_SOURCE_ROOT := $(REPOS_DIR)/workload-tools
 WORKLOAD_TOOLS_BUILD_ROOT := $(ARTIFACT_ROOT)/workload-tools-build/$(RUN_TARGET_ARCH)
 WORKLOAD_TOOLS_HOST_LUAJIT_SOURCE_ROOT := $(WORKLOAD_TOOLS_BUILD_ROOT)/host-luajit-src

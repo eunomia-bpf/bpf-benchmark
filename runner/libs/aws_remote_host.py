@@ -53,12 +53,12 @@ def _write_root_file(destination: Path, content: str) -> None:
 
 def cmd_prepare_dir(args: argparse.Namespace) -> None:
     path = Path(args.path)
-    shutil.rmtree(path, ignore_errors=True)
-    path.mkdir(parents=True, exist_ok=True)
+    run_checked("mkdir", "-p", str(path), sudo=True)
+    run_checked("chown", f"{os.getuid()}:{os.getgid()}", str(path), sudo=True)
 
 
 def cmd_cleanup_path(args: argparse.Namespace) -> None:
-    shutil.rmtree(Path(args.path), ignore_errors=True)
+    run_checked("rm", "-rf", str(Path(args.path)), sudo=True)
 
 
 def cmd_path_exists(args: argparse.Namespace) -> None:
@@ -255,15 +255,23 @@ def cmd_run_workspace(args: argparse.Namespace) -> None:
     env = os.environ.copy()
     env["PYTHONPATH"] = args.workspace if not env.get("PYTHONPATH") else f"{args.workspace}:{env['PYTHONPATH']}"
     Path(args.log_path).parent.mkdir(parents=True, exist_ok=True)
+    command = [
+        args.remote_python,
+        "-m",
+        "runner.libs.execute_workspace",
+        args.workspace,
+        args.manifest_path,
+    ]
+    if os.geteuid() != 0:
+        preserved = []
+        for name in ("PATH", "PYTHONPATH", "HOME", "USER", "LOGNAME", "TERM", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE", "SHELL"):
+            value = env.get(name, "").strip()
+            if value:
+                preserved.append(f"{name}={value}")
+        command = ["sudo", "env", *preserved, *command]
     with Path(args.log_path).open("w", encoding="utf-8") as log_file:
         completed = subprocess.run(
-            [
-                args.remote_python,
-                "-m",
-                "runner.libs.execute_workspace",
-                args.workspace,
-                args.manifest_path,
-            ],
+            command,
             env=env,
             stdout=log_file,
             stderr=subprocess.STDOUT,

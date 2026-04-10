@@ -8,7 +8,7 @@ from runner.libs import ROOT_DIR
 _BASE_TRANSFER_ROOTS = {
     "test": ("runner/__init__.py", "runner/libs", "tests"),
     "micro": ("runner/__init__.py", "runner/libs", "micro"),
-    "corpus": ("runner/__init__.py", "runner/libs", "corpus/driver.py", "corpus/config"),
+    "corpus": ("runner/__init__.py", "runner/libs", "corpus/driver.py", "corpus/config", "e2e/cases"),
     "e2e": ("runner/__init__.py", "runner/libs", "corpus/config", "e2e/driver.py", "e2e/cases"),
 }
 
