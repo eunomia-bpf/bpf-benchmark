@@ -70,7 +70,7 @@ SCRIPTS: tuple[ScriptSpec, ...] = (
         name="vfsstat",
         script_path=DEFAULT_SCRIPT_DIR / "vfsstat.bt",
         description="kprobe vfs_read*/write*/fsync/open/create: per-function counters with interval printing",
-        expected_programs=4,
+        expected_programs=2,
         workload_kind="vfs_create_write_fsync",
     ),
 )

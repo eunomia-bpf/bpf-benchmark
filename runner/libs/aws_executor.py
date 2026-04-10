@@ -28,7 +28,7 @@ _run_remote_helper = aws_common._run_remote_helper
 _wait_for_ssh = aws_common._wait_for_ssh
 
 
-def _artifact_dirs_from_log(log_path: Path) -> list[str]:
+def _artifact_dirs_from_log(log_path: Path, *, required: bool = True) -> list[str]:
     artifact_dirs: list[str] = []
     seen: set[str] = set()
     for line in log_path.read_text(encoding="utf-8").splitlines():
@@ -38,7 +38,7 @@ def _artifact_dirs_from_log(log_path: Path) -> list[str]:
             if artifact_dir and artifact_dir not in seen:
                 seen.add(artifact_dir)
                 artifact_dirs.append(artifact_dir)
-    if not artifact_dirs:
+    if required and not artifact_dirs:
         _die(f"remote suite log is missing ARTIFACT_DIR marker: {log_path}")
     return artifact_dirs
 
@@ -131,21 +131,24 @@ def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
         remote_log,
         check=False,
     ).returncode == 0
+    remote_artifact_dirs: list[str] = []
+    local_artifact_dirs: list[Path] = []
     if log_exists:
         _scp_from(ctx, ip, remote_log, local_log)
+        artifact_dirs = _artifact_dirs_from_log(local_log, required=remote_completed.returncode == 0)
+        remote_artifact_dirs = [
+            f"{remote_workspace}/{artifact_dir}"
+            for artifact_dir in artifact_dirs
+        ]
+        local_artifact_dirs = [
+            ROOT_DIR / artifact_dir
+            for artifact_dir in artifact_dirs
+        ]
+        for remote_artifact_dir, local_artifact_dir in zip(remote_artifact_dirs, local_artifact_dirs):
+            local_artifact_dir.parent.mkdir(parents=True, exist_ok=True)
+            _scp_from(ctx, ip, remote_artifact_dir, local_artifact_dir.parent, recursive=True)
     if remote_completed.returncode != 0:
         _die(f"remote {ctx.target_name}/{ctx.suite_name} suite failed; inspect {local_log}")
-    remote_artifact_dirs = [
-        f"{remote_workspace}/{artifact_dir}"
-        for artifact_dir in _artifact_dirs_from_log(local_log)
-    ]
-    local_artifact_dirs = [
-        ROOT_DIR / artifact_dir
-        for artifact_dir in _artifact_dirs_from_log(local_log)
-    ]
-    for remote_artifact_dir, local_artifact_dir in zip(remote_artifact_dirs, local_artifact_dirs):
-        local_artifact_dir.parent.mkdir(parents=True, exist_ok=True)
-        _scp_from(ctx, ip, remote_artifact_dir, local_artifact_dir.parent, recursive=True)
     _run_remote_helper(ctx, ip, remote_python, "cleanup-path", remote_run_dir, check=False)
     for remote_artifact_dir in remote_artifact_dirs:
         _run_remote_helper(ctx, ip, remote_python, "cleanup-path", remote_artifact_dir, check=False)

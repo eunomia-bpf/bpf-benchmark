@@ -80,7 +80,7 @@ def apply_repo_required_config(worktree: Path, config_path: Path) -> None:
         "DEBUG_INFO_SPLIT",
         "-e",
         "DEBUG_INFO_BTF",
-        "-e",
+        "-d",
         "DEBUG_INFO_BTF_MODULES",
         "-e",
         "IPV6",

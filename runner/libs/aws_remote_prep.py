@@ -369,12 +369,15 @@ def _build_x86_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str
     kernel_release_file = build_dir / "kernel-release.txt"
     kernel_image = build_dir / "boot" / "bzImage"
     modules_tar = build_dir / "modules.tar.gz"
-    _run_local_make(
-        str(kernel_release_file),
-        str(kernel_image),
-        str(modules_tar),
-        f"JOBS={max(os.cpu_count() or 1, 1)}",
-    )
+    if os.environ.get("RUN_SKIP_AWS_SHARED_ARTIFACT_MAKE", "").strip() != "1":
+        _run_local_make(
+            str(kernel_release_file),
+            str(kernel_image),
+            str(modules_tar),
+            f"JOBS={max(os.cpu_count() or 1, 1)}",
+        )
+    if not kernel_release_file.is_file() or not kernel_image.is_file() or not modules_tar.is_file():
+        _die("missing prebuilt x86 AWS kernel artifacts")
     kernel_release = kernel_release_file.read_text(encoding="utf-8").strip()
     return kernel_release, kernel_image, modules_tar
 
@@ -384,14 +387,17 @@ def _build_arm64_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[s
     kernel_release_file = setup_root / "kernel-release.txt"
     kernel_image = setup_root / "boot" / "vmlinuz.efi"
     modules_tar = setup_root / "modules.tar.gz"
-    _run_local_make(
-        str(kernel_release_file),
-        str(kernel_image),
-        str(modules_tar),
-        f"ARM64_AWS_BUILD_DIR={ctx.target_root / 'kernel-build'}",
-        f"ARM64_AWS_BASE_CONFIG={ctx.target_root / 'config-al2023-arm64'}",
-        f"JOBS={max(os.cpu_count() or 1, 1)}",
-    )
+    if os.environ.get("RUN_SKIP_AWS_SHARED_ARTIFACT_MAKE", "").strip() != "1":
+        _run_local_make(
+            str(kernel_release_file),
+            str(kernel_image),
+            str(modules_tar),
+            f"ARM64_AWS_BUILD_DIR={ctx.target_root / 'kernel-build'}",
+            f"ARM64_AWS_BASE_CONFIG={ctx.target_root / 'config-al2023-arm64'}",
+            f"JOBS={max(os.cpu_count() or 1, 1)}",
+        )
+    if not kernel_release_file.is_file() or not kernel_image.is_file() or not modules_tar.is_file():
+        _die("missing prebuilt ARM64 AWS kernel artifacts")
     kernel_release = kernel_release_file.read_text(encoding="utf-8").strip()
     return kernel_release, kernel_image, modules_tar
 

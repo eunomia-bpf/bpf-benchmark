@@ -149,7 +149,21 @@ def measure_workload(
     target_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
     if not target_prog_ids:
         raise RuntimeError("scx workload measurement requires at least one live program id")
-    before_bpf = sample_bpf_stats(target_prog_ids, prog_fds=dict(prog_fds))
+    logical_programs = [
+        dict(program)
+        for program in getattr(runner, "programs", [])
+        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
+    ]
+    if isinstance(runner, ScxRunner):
+        before_bpf, before_live_prog_id_map, before_live_programs = _sample_scx_program_stats(
+            runner,
+            target_prog_ids,
+            previous_programs=logical_programs,
+        )
+    else:
+        before_bpf = sample_bpf_stats(target_prog_ids, prog_fds=dict(prog_fds))
+        before_live_prog_id_map = {}
+        before_live_programs = []
     before_proc = read_proc_stat_fields()
     cpu_holder: dict[int, dict[str, float]] = {}
     system_cpu_holder: dict[str, float] = {}
@@ -173,7 +187,16 @@ def measure_workload(
 
     workload_result = runner.run_workload_spec(workload_spec, duration_s)
     extra = dict(runner.last_workload_details)
-    after_bpf = sample_bpf_stats(target_prog_ids, prog_fds=dict(prog_fds))
+    if isinstance(runner, ScxRunner):
+        after_bpf, after_live_prog_id_map, after_live_programs = _sample_scx_program_stats(
+            runner,
+            target_prog_ids,
+            previous_programs=logical_programs,
+        )
+    else:
+        after_bpf = sample_bpf_stats(target_prog_ids, prog_fds=dict(prog_fds))
+        after_live_prog_id_map = {}
+        after_live_programs = []
 
     for thread in threads:
         thread.join()
@@ -216,7 +239,90 @@ def measure_workload(
         "system_cpu": system_cpu_holder,
         "stdout_tail": workload_result.stdout,
         "stderr_tail": workload_result.stderr,
+        "live_prog_id_maps": {
+            "before": {str(logical_id): int(live_id) for logical_id, live_id in before_live_prog_id_map.items()},
+            "after": {str(logical_id): int(live_id) for logical_id, live_id in after_live_prog_id_map.items()},
+        },
+        "live_programs": {
+            "before": before_live_programs,
+            "after": after_live_programs,
+        },
     }
+
+
+def _scx_logical_program_name_map(
+    logical_prog_ids: Sequence[int],
+    previous_programs: Sequence[Mapping[str, object]],
+) -> dict[int, str]:
+    wanted = {int(prog_id) for prog_id in logical_prog_ids if int(prog_id) > 0}
+    return {
+        int(program["id"]): str(program["name"]).strip()
+        for program in previous_programs
+        if int(program.get("id", 0) or 0) in wanted and str(program.get("name") or "").strip()
+    }
+
+
+def _scx_live_prog_id_map(
+    runner: ScxRunner,
+    logical_prog_ids: Sequence[int],
+    *,
+    previous_programs: Sequence[Mapping[str, object]],
+) -> tuple[dict[int, int], list[dict[str, object]]]:
+    logical_ids = [int(prog_id) for prog_id in logical_prog_ids if int(prog_id) > 0]
+    if not logical_ids:
+        return {}, []
+    logical_name_by_id = _scx_logical_program_name_map(logical_ids, previous_programs)
+    refreshed_programs = runner.refresh_live_programs()
+    live_id_by_name = {
+        str(program.get("name") or "").strip(): int(program.get("id", 0) or 0)
+        for program in refreshed_programs
+        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
+    }
+    live_ids = {int(program.get("id", 0) or 0) for program in refreshed_programs}
+    logical_to_live: dict[int, int] = {}
+    for logical_id in logical_ids:
+        program_name = logical_name_by_id.get(int(logical_id), "")
+        live_id = int(live_id_by_name.get(program_name, 0) or 0)
+        if live_id > 0:
+            logical_to_live[int(logical_id)] = live_id
+            continue
+        if int(logical_id) in live_ids:
+            logical_to_live[int(logical_id)] = int(logical_id)
+    return logical_to_live, [dict(program) for program in refreshed_programs]
+
+
+def _sample_scx_program_stats(
+    runner: ScxRunner,
+    logical_prog_ids: Sequence[int],
+    *,
+    previous_programs: Sequence[Mapping[str, object]],
+) -> tuple[dict[int, dict[str, object]], dict[int, int], list[dict[str, object]]]:
+    logical_to_live, refreshed_programs = _scx_live_prog_id_map(
+        runner,
+        logical_prog_ids,
+        previous_programs=previous_programs,
+    )
+    sampled_prog_ids = sorted({int(live_id) for live_id in logical_to_live.values() if int(live_id) > 0})
+    if not sampled_prog_ids:
+        raise RuntimeError("scx runner did not expose any live scheduler programs for BPF stats sampling")
+    raw_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=dict(runner.program_fds))
+    live_to_logical = {
+        int(live_id): int(logical_id)
+        for logical_id, live_id in logical_to_live.items()
+        if int(logical_id) > 0 and int(live_id) > 0
+    }
+    remapped: dict[int, dict[str, object]] = {}
+    for sampled_prog_id, record in raw_stats.items():
+        logical_prog_id = live_to_logical.get(int(sampled_prog_id))
+        if logical_prog_id is None:
+            continue
+        entry = dict(record)
+        entry["sampled_prog_id"] = int(sampled_prog_id)
+        entry["id"] = int(logical_prog_id)
+        remapped[int(logical_prog_id)] = entry
+    if not remapped:
+        raise RuntimeError("scx BPF stats sampling returned no logical program records")
+    return remapped, logical_to_live, refreshed_programs
 
 
 def _post_rejit_scx_prog_ids(lifecycle: CaseLifecycleState) -> list[int]:
@@ -256,6 +362,42 @@ def _post_rejit_scx_prog_ids(lifecycle: CaseLifecycleState) -> list[int]:
     if refreshed_ids:
         return refreshed_ids
     return [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
+
+
+def _baseline_scx_apply_prog_ids(lifecycle: CaseLifecycleState) -> list[int]:
+    runner = lifecycle.runtime
+    if not isinstance(runner, ScxRunner):
+        return [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
+    previous_programs = [
+        dict(program)
+        for program in (lifecycle.artifacts.get("scheduler_programs") or [])
+        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
+    ]
+    if not previous_programs:
+        previous_programs = [
+            dict(program)
+            for program in getattr(runner, "programs", [])
+            if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
+        ]
+    logical_to_live, refreshed_programs = _scx_live_prog_id_map(
+        runner,
+        lifecycle.target_prog_ids,
+        previous_programs=previous_programs,
+    )
+    live_prog_ids = [
+        int(logical_to_live.get(logical_prog_id, 0) or 0)
+        for logical_prog_id in [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
+        if int(logical_to_live.get(logical_prog_id, 0) or 0) > 0
+    ]
+    if not live_prog_ids:
+        raise RuntimeError("scx baseline could not resolve live scheduler program ids for daemon apply")
+    lifecycle.apply_prog_ids = list(live_prog_ids)
+    lifecycle.artifacts["baseline_live_program_id_map"] = {
+        str(logical_prog_id): int(live_prog_id)
+        for logical_prog_id, live_prog_id in logical_to_live.items()
+    }
+    lifecycle.artifacts["baseline_live_scheduler_programs"] = [dict(program) for program in refreshed_programs]
+    return list(live_prog_ids)
 
 
 def summarize_phase(workloads: Sequence[Mapping[str, object]]) -> dict[str, object]:
@@ -487,6 +629,14 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         )
         return run_phase(runner, workloads, duration_s, agent_pid=runner.pid, prog_ids=prog_ids)
 
+    def after_baseline(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> Mapping[str, object]:
+        del baseline
+        _baseline_scx_apply_prog_ids(lifecycle)
+        return {
+            "baseline_live_program_id_map": dict(lifecycle.artifacts.get("baseline_live_program_id_map") or {}),
+            "baseline_live_scheduler_programs": list(lifecycle.artifacts.get("baseline_live_scheduler_programs") or []),
+        }
+
     def stop(_: object, lifecycle: CaseLifecycleState) -> None:
         runner = lifecycle.runtime
         if not isinstance(runner, AppRunner):
@@ -503,6 +653,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         workload=workload,
         stop=stop,
         cleanup=cleanup,
+        after_baseline=after_baseline,
         should_run_post_rejit=lambda result: int(
             applied_site_totals_from_rejit_result(result if isinstance(result, Mapping) else None).get(
                 "total_sites",

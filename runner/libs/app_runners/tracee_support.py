@@ -8,6 +8,7 @@ import subprocess
 import threading
 import time
 from collections import Counter, deque
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 from urllib.error import URLError
@@ -41,11 +42,32 @@ TRACEE_HEALTH_PORT = 3366
 
 
 def _tracee_runtime_dir() -> Path:
+    explicit = os.environ.get("BPFREJIT_TRACEE_RUNTIME_DIR", "").strip()
+    if explicit:
+        candidate = Path(explicit).expanduser()
+        candidate.mkdir(parents=True, exist_ok=True)
+        if os.access(candidate, os.W_OK | os.X_OK):
+            return candidate
+    for candidate in (Path("/var/tmp/bpfrejit-tracee"), Path("/tmp/bpfrejit-tracee")):
+        try:
+            candidate.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            continue
+        if os.access(candidate, os.W_OK | os.X_OK):
+            return candidate
     for name in ("BPFREJIT_RUNTIME_TMPDIR", "TMPDIR", "TMP", "TEMP"):
         value = os.environ.get(name, "").strip()
         if value:
-            return Path(value) / "tracee"
-    return Path("/var/tmp/tracee")
+            candidate = Path(value).expanduser() / "tracee"
+            try:
+                candidate.mkdir(parents=True, exist_ok=True)
+            except OSError:
+                continue
+            if os.access(candidate, os.W_OK | os.X_OK):
+                return candidate
+    fallback = Path("/var/tmp/tracee")
+    fallback.mkdir(parents=True, exist_ok=True)
+    return fallback
 
 
 def _tracee_event_output_path() -> Path:
@@ -53,16 +75,31 @@ def _tracee_event_output_path() -> Path:
 
 
 class TraceeOutputCollector:
-    def __init__(self) -> None:
+    def __init__(self, event_output_path: Path | None = None) -> None:
         self._lock = threading.Lock()
         self._condition = threading.Condition(self._lock)
         self.stdout_tail: deque[str] = deque(maxlen=200)
         self.stderr_tail: deque[str] = deque(maxlen=200)
         self.event_tail: deque[str] = deque(maxlen=200)
         self.event_counts: Counter[str] = Counter()
-        self.events: deque[dict[str, object]] = deque(maxlen=4096)
+        self.events: deque[dict[str, object]] = deque(maxlen=16384)
         self.total_events = 0
         self.latest_stats: dict[str, int] = {}
+        self.event_output_path = None if event_output_path is None else Path(event_output_path)
+
+    @staticmethod
+    def _payload_timestamp_ns(payload: Mapping[str, object]) -> int | None:
+        raw_timestamp = str(payload.get("timestamp") or "").strip()
+        if not raw_timestamp:
+            return None
+        normalized = raw_timestamp.replace("Z", "+00:00")
+        try:
+            parsed = datetime.fromisoformat(normalized)
+        except ValueError:
+            return None
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return int(parsed.timestamp() * 1_000_000_000)
 
     def consume_stdout(self, pipe: Any) -> None:
         for raw_line in iter(pipe.readline, ""):
@@ -131,7 +168,9 @@ class TraceeOutputCollector:
                     "event_name": normalized_event_name,
                     "line": line,
                     "payload": dict(payload),
+                    "event_time_ns": self._payload_timestamp_ns(payload),
                     "observed_monotonic_ns": time.monotonic_ns(),
+                    "source": "collector",
                 }
             )
             self._condition.notify_all()
@@ -186,12 +225,44 @@ class TraceeOutputCollector:
                 return dict(record)
             return None
 
+        def scan_event_file() -> dict[str, object] | None:
+            path = self.event_output_path
+            if path is None or not path.exists():
+                return None
+            last_match: dict[str, object] | None = None
+            try:
+                with path.open("r", encoding="utf-8", errors="replace") as handle:
+                    for raw_line in handle:
+                        line = raw_line.rstrip()
+                        if tokens and not all(token in line for token in tokens):
+                            continue
+                        try:
+                            payload = json.loads(line)
+                        except json.JSONDecodeError:
+                            continue
+                        if not isinstance(payload, Mapping):
+                            continue
+                        event_name = str(payload.get("eventName") or payload.get("event_name") or payload.get("name") or "")
+                        if wanted_names and event_name not in wanted_names:
+                            continue
+                        last_match = {
+                            "event_name": event_name,
+                            "line": line,
+                            "payload": dict(payload),
+                            "event_time_ns": self._payload_timestamp_ns(payload),
+                            "observed_monotonic_ns": time.monotonic_ns(),
+                            "source": "event_file_fallback",
+                        }
+            except OSError:
+                return None
+            return last_match
+
         with self._condition:
             match = find_match()
             while match is None:
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
-                    return None
+                    return scan_event_file()
                 self._condition.wait(timeout=remaining)
                 match = find_match()
             return match
@@ -219,7 +290,7 @@ class TraceeAgentSession:
         tracee_tmpdir.mkdir(parents=True, exist_ok=True)
         event_output_path.unlink(missing_ok=True)
         for command in self.commands:
-            self.collector = TraceeOutputCollector()
+            self.collector = TraceeOutputCollector(event_output_path)
             self.event_stop = threading.Event()
             proc = start_agent(
                 command[0],

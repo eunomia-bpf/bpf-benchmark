@@ -630,8 +630,8 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
     # Short corpus smoke runs need a denser retransmit pattern than the default
     # loopback path naturally produces, otherwise the tracing program can stay
     # attached but never accumulate a measurable baseline delta.
-    effective_duration = max(5.0, float(duration_s))
-    transfer_target_bytes = 64 * 1024
+    effective_duration = max(8.0, float(duration_s))
+    transfer_target_bytes = 16 * 1024
 
     ready = threading.Event()
     stop = threading.Event()
@@ -691,9 +691,9 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
             "root",
             "netem",
             "delay",
-            "40ms",
+            "80ms",
             "loss",
-            "30%",
+            "12%",
         ],
         action="qdisc replace dev lo root netem",
     )
@@ -710,7 +710,7 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
             received = 0
             try:
                 with socket.create_connection(("127.0.0.1", port), timeout=1.0) as client:
-                    client.settimeout(0.25)
+                    client.settimeout(1.0)
                     while received < transfer_target_bytes and time.monotonic() < deadline:
                         try:
                             chunk = client.recv(65536)

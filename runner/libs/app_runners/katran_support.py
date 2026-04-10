@@ -343,12 +343,27 @@ class BpfTestRunOpts(ctypes.Structure):
 
 class LibbpfMapApi:
     def __init__(self) -> None:
-        path = os.environ.get("BPFREJIT_LIBBPF_PATH", "").strip()
-        if not path:
-            raise RuntimeError("BPFREJIT_LIBBPF_PATH is required for Katran map access")
-        if not Path(path).is_file():
-            raise RuntimeError(f"BPFREJIT_LIBBPF_PATH does not exist: {path}")
-        self.lib = ctypes.CDLL(path, use_errno=True)
+        candidates: list[str] = []
+        configured = os.environ.get("BPFREJIT_LIBBPF_PATH", "").strip()
+        if configured:
+            candidates.append(configured)
+        candidates.extend(["libbpf.so.1", "libbpf.so"])
+        errors: list[str] = []
+        self.lib = None
+        for candidate in candidates:
+            if candidate.startswith("/"):
+                path = Path(candidate)
+                if not path.is_file():
+                    errors.append(f"{candidate}: missing file")
+                    continue
+            try:
+                self.lib = ctypes.CDLL(candidate, use_errno=True)
+                break
+            except OSError as exc:
+                errors.append(f"{candidate}: {exc}")
+        if self.lib is None:
+            rendered = "; ".join(errors) if errors else "no candidates"
+            raise RuntimeError(f"failed to load libbpf for Katran map access: {rendered}")
         self.lib.bpf_obj_get.argtypes = [ctypes.c_char_p]
         self.lib.bpf_obj_get.restype = ctypes.c_int
         self.lib.bpf_map_get_fd_by_id.argtypes = [ctypes.c_uint32]

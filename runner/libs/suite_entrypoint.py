@@ -236,7 +236,7 @@ class SuiteEntrypoint:
             if value:
                 env[name] = value
         if not env.get("TMPDIR"):
-            runtime_tmpdir = self.workspace / "docs" / "tmp" / "runtime" / self._required_contract("RUN_TOKEN")
+            runtime_tmpdir = Path("/var/tmp/bpfrejit-runtime") / self._required_contract("RUN_TOKEN")
             runtime_tmpdir.mkdir(parents=True, exist_ok=True)
             runtime_tmpdir.chmod(0o1777)
             env["TMPDIR"] = str(runtime_tmpdir)
@@ -253,17 +253,9 @@ class SuiteEntrypoint:
             env["BPFREJIT_WORKLOAD_TOOL_BIN_DIR"] = str(bundled_tool_bin)
         env["BPFREJIT_REPO_ARTIFACT_ROOT"] = str(repo_build_root)
         env["BPFREJIT_REMOTE_PYTHON_BIN"] = self.python_bin
-        extra_ld_library_dirs: list[str] = []
         libbpf_runtime = self._libbpf_runtime_path()
         if libbpf_runtime is not None:
             env["BPFREJIT_LIBBPF_PATH"] = str(libbpf_runtime)
-            extra_ld_library_dirs.append(str(libbpf_runtime.parent))
-        for repo_name in self._csv_contract("RUN_NATIVE_REPOS_CSV"):
-            lib_dir = repo_build_root / repo_name / "lib"
-            if lib_dir.is_dir():
-                extra_ld_library_dirs.append(str(lib_dir))
-        if extra_ld_library_dirs:
-            env["LD_LIBRARY_PATH"] = ":".join(extra_ld_library_dirs)
         kernel_modules_dir = kernel_modules_root(self.workspace, self.target_arch, self.executor)
         if not kernel_modules_dir.is_dir():
             _die(f"bundled kernel modules root is missing: {kernel_modules_dir}")

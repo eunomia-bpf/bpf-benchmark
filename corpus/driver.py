@@ -233,6 +233,11 @@ def _measure_runner_phase(
     sampled_prog_id_map: Mapping[int, int] | None = None,
 ) -> dict[str, object]:
     target_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
+    logical_programs = [
+        dict(program)
+        for program in getattr(runner, "programs", [])
+        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
+    ]
     sampled_prog_ids = (
         [
             int(sampled_prog_id_map.get(prog_id, 0) or 0)
@@ -244,12 +249,28 @@ def _measure_runner_phase(
     )
     workloads: list[dict[str, object]] = []
     last_workload: dict[str, object] | None = None
-    initial_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=runner.program_fds)
+    live_prog_id_map: dict[int, int] = {}
+    live_programs: list[dict[str, object]] = []
+    if isinstance(runner, ScxRunner) and sampled_prog_id_map is None:
+        initial_stats, live_prog_id_map, live_programs = _sample_scx_measurement_stats(
+            runner,
+            target_prog_ids,
+            previous_programs=logical_programs,
+        )
+    else:
+        initial_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=runner.program_fds)
     for _ in range(samples):
         workload = runner.run_workload(workload_seconds).to_dict()
         last_workload = dict(workload)
         workloads.append(dict(workload))
-    final_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=runner.program_fds)
+    if isinstance(runner, ScxRunner) and sampled_prog_id_map is None:
+        final_stats, live_prog_id_map, live_programs = _sample_scx_measurement_stats(
+            runner,
+            target_prog_ids,
+            previous_programs=logical_programs,
+        )
+    else:
+        final_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=runner.program_fds)
     if sampled_prog_id_map is not None:
         sampled_to_target = {
             int(sampled_prog_id): int(target_prog_id)
@@ -276,6 +297,12 @@ def _measure_runner_phase(
         "workloads": workloads,
         "initial_stats": initial_stats,
         "final_stats": final_stats,
+        "live_prog_id_map": {
+            str(logical_prog_id): int(sampled_prog_id)
+            for logical_prog_id, sampled_prog_id in live_prog_id_map.items()
+            if int(logical_prog_id) > 0 and int(sampled_prog_id) > 0
+        },
+        "live_programs": [dict(program) for program in live_programs],
     }
 
 
@@ -360,6 +387,75 @@ def _scx_post_rejit_prog_id_map(lifecycle: CaseLifecycleState) -> dict[int, int]
             for logical_prog_id, sampled_prog_id in remapped.items()
         }
     return remapped
+
+
+def _scx_live_prog_id_map_for_runner(
+    runner: ScxRunner,
+    logical_prog_ids: Sequence[int],
+    *,
+    previous_programs: Sequence[Mapping[str, object]],
+) -> tuple[dict[int, int], list[dict[str, object]]]:
+    logical_ids = [int(prog_id) for prog_id in logical_prog_ids if int(prog_id) > 0]
+    if not logical_ids:
+        return {}, []
+    wanted = {int(prog_id) for prog_id in logical_ids}
+    previous_name_by_id = {
+        int(program["id"]): str(program["name"]).strip()
+        for program in previous_programs
+        if int(program.get("id", 0) or 0) in wanted and str(program.get("name") or "").strip()
+    }
+    refreshed_programs = runner.refresh_live_programs()
+    refreshed_id_by_name = {
+        str(program.get("name") or "").strip(): int(program.get("id", 0) or 0)
+        for program in refreshed_programs
+        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
+    }
+    live_ids = {int(program.get("id", 0) or 0) for program in refreshed_programs}
+    remapped = {
+        int(logical_prog_id): int(refreshed_id_by_name[program_name])
+        for logical_prog_id, program_name in previous_name_by_id.items()
+        if int(refreshed_id_by_name.get(program_name, 0) or 0) > 0
+    }
+    for logical_prog_id in logical_ids:
+        if int(logical_prog_id) in remapped:
+            continue
+        if int(logical_prog_id) in live_ids:
+            remapped[int(logical_prog_id)] = int(logical_prog_id)
+    return remapped, [dict(program) for program in refreshed_programs]
+
+
+def _sample_scx_measurement_stats(
+    runner: ScxRunner,
+    logical_prog_ids: Sequence[int],
+    *,
+    previous_programs: Sequence[Mapping[str, object]],
+) -> tuple[dict[int, dict[str, object]], dict[int, int], list[dict[str, object]]]:
+    live_prog_id_map, live_programs = _scx_live_prog_id_map_for_runner(
+        runner,
+        logical_prog_ids,
+        previous_programs=previous_programs,
+    )
+    sampled_prog_ids = sorted({int(sampled_prog_id) for sampled_prog_id in live_prog_id_map.values() if int(sampled_prog_id) > 0})
+    if not sampled_prog_ids:
+        raise RuntimeError(f"{type(runner).__name__}: did not expose any live scheduler programs for stats sampling")
+    raw_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=runner.program_fds)
+    sampled_to_target = {
+        int(sampled_prog_id): int(target_prog_id)
+        for target_prog_id, sampled_prog_id in live_prog_id_map.items()
+        if int(target_prog_id) > 0 and int(sampled_prog_id) > 0
+    }
+    remapped: dict[int, dict[str, object]] = {}
+    for sampled_prog_id, record in raw_stats.items():
+        target_prog_id = sampled_to_target.get(int(sampled_prog_id))
+        if target_prog_id is None:
+            continue
+        entry = dict(record)
+        entry["sampled_prog_id"] = int(sampled_prog_id)
+        entry["id"] = int(target_prog_id)
+        remapped[int(target_prog_id)] = entry
+    if not remapped:
+        raise RuntimeError(f"{type(runner).__name__}: stats sampling returned no logical program records")
+    return remapped, live_prog_id_map, live_programs
 
 
 def _phase_exec_ns(record: Mapping[str, object] | None) -> float | None:
@@ -818,8 +914,33 @@ def _configure_program_selection(
         raise RuntimeError(
             f"{app.name}: workload {app.workload_for('corpus')!r} did not execute any target programs during baseline"
         )
+    if isinstance(runner, ScxRunner):
+        live_prog_id_map = {
+            int(logical_prog_id): int(sampled_prog_id)
+            for logical_prog_id, sampled_prog_id in dict((baseline_measurement.get("live_prog_id_map") or {})).items()
+            if str(logical_prog_id).strip() and int(sampled_prog_id) > 0
+        }
+        selected_live_prog_ids = [
+            int(live_prog_id_map.get(prog_id, 0) or 0)
+            for prog_id in selected_prog_ids
+            if int(live_prog_id_map.get(prog_id, 0) or 0) > 0
+        ]
+        if selected_live_prog_ids:
+            lifecycle.apply_prog_ids = list(selected_live_prog_ids)
+            lifecycle.artifacts["baseline_live_program_id_map"] = {
+                str(logical_prog_id): int(sampled_prog_id)
+                for logical_prog_id, sampled_prog_id in live_prog_id_map.items()
+            }
+            live_programs = baseline_measurement.get("live_programs")
+            if isinstance(live_programs, list):
+                lifecycle.artifacts["baseline_live_programs"] = [
+                    dict(program)
+                    for program in live_programs
+                    if isinstance(program, Mapping)
+                ]
     lifecycle.target_prog_ids = list(selected_prog_ids)
-    lifecycle.apply_prog_ids = list(selected_prog_ids)
+    if not isinstance(runner, ScxRunner):
+        lifecycle.apply_prog_ids = list(selected_prog_ids)
     selected_programs = _selected_live_programs(
         lifecycle.artifacts.get("programs") or [],
         selected_prog_ids,

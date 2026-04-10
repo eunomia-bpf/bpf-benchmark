@@ -306,6 +306,7 @@ def _emit_exec_latency_probe() -> dict[str, object]:
         script_path = Path(tempdir) / marker
         script_path.write_text("#!/bin/sh\nexit 0\n")
         script_path.chmod(0o755)
+        started_wall_ns = time.time_ns()
         started_ns = time.monotonic_ns()
         completed = run_command([str(script_path)], check=False, timeout=5)
         probe_window_ns = time.monotonic_ns() - started_ns
@@ -316,6 +317,7 @@ def _emit_exec_latency_probe() -> dict[str, object]:
         "marker": marker,
         "marker_tokens": [marker],
         "started_ns": started_ns,
+        "started_wall_ns": started_wall_ns,
         "probe_window_ns": probe_window_ns,
     }
 
@@ -326,6 +328,7 @@ def _emit_file_open_latency_probe() -> dict[str, object]:
         probe_path = Path(handle.name)
         handle.write(b"tracee-probe\n")
     try:
+        started_wall_ns = time.time_ns()
         started_ns = time.monotonic_ns()
         with probe_path.open("rb") as handle:
             handle.read(1)
@@ -336,6 +339,7 @@ def _emit_file_open_latency_probe() -> dict[str, object]:
         "marker": marker,
         "marker_tokens": [marker],
         "started_ns": started_ns,
+        "started_wall_ns": started_wall_ns,
         "probe_window_ns": probe_window_ns,
     }
 
@@ -358,6 +362,7 @@ def _emit_tcp_connect_latency_probe() -> dict[str, object]:
     thread = threading.Thread(target=accept_once, daemon=True)
     thread.start()
     try:
+        started_wall_ns = time.time_ns()
         started_ns = time.monotonic_ns()
         with socket.create_connection(("127.0.0.1", port), timeout=2.0):
             pass
@@ -371,6 +376,7 @@ def _emit_tcp_connect_latency_probe() -> dict[str, object]:
         "marker": str(port),
         "marker_tokens": ["127.0.0.1", str(port)],
         "started_ns": started_ns,
+        "started_wall_ns": started_wall_ns,
         "probe_window_ns": probe_window_ns,
     }
 
@@ -393,6 +399,16 @@ def measure_latency_probes(
     ci_iterations: int,
     ci_seed: int,
 ) -> dict[str, object]:
+    def probe_latency_ms(emitted: Mapping[str, object], matched: Mapping[str, object]) -> float:
+        event_time_ns = int(matched.get("event_time_ns", 0) or 0)
+        started_wall_ns = int(emitted.get("started_wall_ns", 0) or 0)
+        if event_time_ns > 0 and started_wall_ns > 0:
+            return max(0.0, (event_time_ns - started_wall_ns) / 1_000_000.0)
+        return max(
+            0.0,
+            (int(matched.get("observed_monotonic_ns", 0) or 0) - int(emitted["started_ns"])) / 1_000_000.0,
+        )
+
     event_names = latency_probe_events(workload_spec)
     probe_rows: list[dict[str, object]] = []
     for probe_index in range(max(0, int(probe_count))):
@@ -408,7 +424,7 @@ def measure_latency_probes(
                 f"Tracee latency probe was not detected for workload {workload_spec.get('name')}: "
                 f"tokens={emitted['marker_tokens']}, events={event_names}"
             )
-        latency_ms = max(0.0, (int(matched["observed_monotonic_ns"]) - int(emitted["started_ns"])) / 1_000_000.0)
+        latency_ms = probe_latency_ms(emitted, matched)
         probe_rows.append(
             {
                 "index": probe_index,
@@ -416,6 +432,7 @@ def measure_latency_probes(
                 "marker": emitted["marker"],
                 "marker_tokens": emitted["marker_tokens"],
                 "latency_ms": latency_ms,
+                "match_source": str(matched.get("source") or "collector"),
                 "probe_window_ms": float(emitted["probe_window_ns"]) / 1_000_000.0,
             }
         )

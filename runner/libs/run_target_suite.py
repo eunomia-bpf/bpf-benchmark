@@ -52,6 +52,15 @@ def _base_env_from_contract(contract: dict[str, str | list[str]]) -> dict[str, s
 
 def _run_local_prep(manifest_path: Path) -> None:
     contract = parse_manifest(manifest_path)
+    env = _local_prep_env(contract=contract, manifest_path=manifest_path)
+    host_python_bin = env["HOST_PYTHON_BIN"]
+    targets = _local_prep_target_paths(contract)
+    if not targets:
+        return
+    _make_real_targets(targets=targets, host_python_bin=host_python_bin, env=env)
+
+
+def _local_prep_env(*, contract: dict[str, str | list[str]], manifest_path: Path) -> dict[str, str]:
     env = _base_env_from_contract(contract)
     host_python_bin = str(contract.get("RUN_HOST_PYTHON_BIN", "")).strip()
     if not host_python_bin:
@@ -65,6 +74,10 @@ def _run_local_prep(manifest_path: Path) -> None:
             "RUN_CONTRACT_PYTHON_BIN": host_python_bin,
         }
     )
+    return env
+
+
+def _local_prep_target_paths(contract: dict[str, str | list[str]]) -> list[str]:
     executor = str(contract.get("RUN_EXECUTOR", "")).strip()
     if executor not in {"aws-ssh", "kvm"}:
         _die(f"unsupported executor for local prep: {executor}")
@@ -77,7 +90,7 @@ def _run_local_prep(manifest_path: Path) -> None:
         _die("manifest RUN_SUITE_NAME is empty")
     if not target_arch:
         _die("manifest RUN_TARGET_ARCH is empty")
-    targets = [
+    return [
         str(path)
         for path in local_prep_targets(
             workspace=ROOT_DIR,
@@ -100,8 +113,9 @@ def _run_local_prep(manifest_path: Path) -> None:
             ],
         )
     ]
-    if not targets:
-        return
+
+
+def _make_real_targets(*, targets: list[str], host_python_bin: str, env: dict[str, str]) -> None:
     completed = subprocess.run(
         [
             "make",
@@ -117,6 +131,22 @@ def _run_local_prep(manifest_path: Path) -> None:
     )
     if completed.returncode != 0:
         raise SystemExit(completed.returncode)
+
+
+def _benchmark_shared_targets(target_name: str) -> list[str]:
+    if target_name == "aws-x86":
+        return [
+            str(ROOT_DIR / ".cache" / "aws-x86" / "setup-artifacts" / "x86" / "kernel-release.txt"),
+            str(ROOT_DIR / ".cache" / "aws-x86" / "setup-artifacts" / "x86" / "boot" / "bzImage"),
+            str(ROOT_DIR / ".cache" / "aws-x86" / "setup-artifacts" / "x86" / "modules.tar.gz"),
+        ]
+    if target_name == "aws-arm64":
+        return [
+            str(ROOT_DIR / ".cache" / "aws-arm64" / "setup-artifacts" / "arm64" / "kernel-release.txt"),
+            str(ROOT_DIR / ".cache" / "aws-arm64" / "setup-artifacts" / "arm64" / "boot" / "vmlinuz.efi"),
+            str(ROOT_DIR / ".cache" / "aws-arm64" / "setup-artifacts" / "arm64" / "modules.tar.gz"),
+        ]
+    return []
 
 def _write_manifest(target_name: str, suite_name: str, run_token: str, manifest_path: Path) -> None:
     env = os.environ.copy()
@@ -173,7 +203,8 @@ def _run_action(target_name: str, suite_name: str) -> None:
                     str(manifest_path),
                 ),
             )
-            _run_local_prep(manifest_path)
+            if os.environ.get("RUN_SKIP_LOCAL_PREP", "").strip() != "1":
+                _run_local_prep(manifest_path)
             prep_cleanup_armed = False
             _run_checked(
                 _python_module_command(
@@ -185,7 +216,8 @@ def _run_action(target_name: str, suite_name: str) -> None:
             success = True
             return
         if executor == "kvm":
-            _run_local_prep(manifest_path)
+            if os.environ.get("RUN_SKIP_LOCAL_PREP", "").strip() != "1":
+                _run_local_prep(manifest_path)
             _run_checked(
                 _python_module_command(
                     "runner.libs.kvm_executor",
@@ -206,10 +238,16 @@ def _run_action(target_name: str, suite_name: str) -> None:
 
 
 def _benchmark_action(target_name: str, mode: str) -> None:
-    if mode in {"micro", "corpus", "e2e"}:
-        _run_action(target_name, mode)
+    suites = [entry.strip() for entry in str(mode).split(",") if entry.strip()]
+    allowed_suites = {"micro", "corpus", "e2e"}
+    if not suites:
+        _die("benchmark mode is empty")
+    if len(suites) == 1 and suites[0] in allowed_suites:
+        _run_action(target_name, suites[0])
         return
-    if mode != "all":
+    if len(suites) == 1 and suites[0] == "all":
+        suites = ["micro", "corpus", "e2e"]
+    elif any(suite not in allowed_suites for suite in suites):
         _die(f"unsupported benchmark mode: {mode}")
     CONTROL_ROOT.mkdir(parents=True, exist_ok=True)
     target_manifest = CONTROL_ROOT / f"benchmark-target.{target_name}.env"
@@ -218,15 +256,47 @@ def _benchmark_action(target_name: str, mode: str) -> None:
         contract = parse_manifest(target_manifest)
         executor = str(contract.get("RUN_EXECUTOR", ""))
         if executor != "aws-ssh":
-            for suite_name in ("micro", "corpus", "e2e"):
+            for suite_name in suites:
                 _run_action(target_name, suite_name)
             return
+        prep_manifests: list[Path] = []
+        shared_targets = _benchmark_shared_targets(target_name)
+        shared_env: dict[str, str] | None = None
+        shared_host_python_bin = ""
+        try:
+            for suite_name in suites:
+                prep_manifest = CONTROL_ROOT / f"benchmark-prep.{target_name}.{suite_name}.env"
+                prep_manifests.append(prep_manifest)
+                _write_manifest(target_name, suite_name, f"benchmark-prep.{target_name}.{suite_name}", prep_manifest)
+                prep_contract = parse_manifest(prep_manifest)
+                prep_env = _local_prep_env(contract=prep_contract, manifest_path=prep_manifest)
+                _make_real_targets(
+                    targets=_local_prep_target_paths(prep_contract),
+                    host_python_bin=prep_env["HOST_PYTHON_BIN"],
+                    env=prep_env,
+                )
+                if shared_env is None:
+                    shared_env = prep_env
+                    shared_host_python_bin = prep_env["HOST_PYTHON_BIN"]
+            if shared_targets and shared_env is not None:
+                _make_real_targets(
+                    targets=shared_targets,
+                    host_python_bin=shared_host_python_bin,
+                    env=shared_env,
+                )
+        finally:
+            for prep_manifest in prep_manifests:
+                prep_manifest.unlink(missing_ok=True)
+        child_env = os.environ.copy()
+        child_env["RUN_SKIP_LOCAL_PREP"] = "1"
+        child_env["RUN_SKIP_AWS_SHARED_ARTIFACT_MAKE"] = "1"
         processes = [
             subprocess.Popen(
                 [sys.executable, "-m", "runner.libs.run_target_suite", "run", target_name, suite_name],
                 cwd=ROOT_DIR,
+                env=child_env,
             )
-            for suite_name in ("micro", "corpus", "e2e")
+            for suite_name in suites
         ]
         status = 0
         for process in processes:
@@ -274,7 +344,7 @@ def main(argv: list[str] | None = None) -> None:
         return
     if action == "benchmark":
         if not target_name or not suite_name:
-            _die("usage: run_target_suite.py benchmark <target> <micro|corpus|e2e|all>")
+            _die("usage: run_target_suite.py benchmark <target> <micro|corpus|e2e|all|suite1,suite2>")
         _benchmark_action(target_name, suite_name)
         return
     if action == "terminate":

@@ -1,0 +1,159 @@
+{
+  "case": "scx",
+  "details_dir": "details",
+  "error_message": "failed to read BPF stats for requested program ids: 1118, 1120, 1121, 1122, 1123, 1124, 1125, 1126, 1127, 1128, 1129, 1130, 1131",
+  "generated_at": "2026-04-10T02:39:25.345036+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-10T02:39:25.344949+00:00",
+  "launcher_boot_id": "fcfb45c5-4e43-4b97-a26e-9bb0071fe814",
+  "launcher_pid": 208,
+  "launcher_start_ticks": 236,
+  "optimization_summary": {
+    "case": "scx",
+    "error_message": "failed to read BPF stats for requested program ids: 1118, 1120, 1121, 1122, 1123, 1124, 1125, 1126, 1127, 1128, 1129, 1130, 1131",
+    "failed_at": "2026-04-10T02:39:25.344885+00:00",
+    "metadata": {
+      "kinsn_modules": {
+        "count": 1,
+        "lifecycle_runs": [
+          {
+            "captured_at": "2026-04-10T02:38:41.989179+00:00",
+            "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+            "daemon_kinsn_discovery": {
+              "captured_at": "2026-04-10T02:26:13.464945+00:00",
+              "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+              "status": "ok",
+              "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+              "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-9ovmj1_z/daemon.stderr.log",
+              "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-9ovmj1_z/daemon.sock",
+              "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-9ovmj1_z/daemon.stdout.log"
+            },
+            "error": "failed to read BPF stats for requested program ids: 1118, 1120, 1121, 1122, 1123, 1124, 1125, 1126, 1127, 1128, 1129, 1130, 1131",
+            "expected_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "lifecycle_index": 1,
+            "module_load": {
+              "expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "failed_modules": [],
+              "invoked_at": "2026-04-10T02:26:13.399378+00:00",
+              "loaded_count": 5,
+              "loaded_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "loader": "runner.libs.kinsn.load_kinsn_modules",
+              "module_dir": "module/x86",
+              "newly_loaded_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "snapshot_after": {
+                "captured_at": "2026-04-10T02:26:13.399365+00:00",
+                "expected_modules": [
+                  "bpf_bulk_memory",
+                  "bpf_endian",
+                  "bpf_extract",
+                  "bpf_rotate",
+                  "bpf_select"
+                ],
+                "loaded_bpf_modules": [
+                  "bpf_bulk_memory",
+                  "bpf_endian",
+                  "bpf_extract",
+                  "bpf_rotate",
+                  "bpf_select"
+                ],
+                "missing_expected_modules": [],
+                "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+                "resident_expected_modules": [
+                  "bpf_bulk_memory",
+                  "bpf_endian",
+                  "bpf_extract",
+                  "bpf_rotate",
+                  "bpf_select"
+                ],
+                "source": "lsmod"
+              },
+              "status": "ok",
+              "total_count": 5
+            },
+            "module_snapshot_before_daemon": {
+              "captured_at": "2026-04-10T02:26:13.238380+00:00",
+              "expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "loaded_bpf_modules": [],
+              "missing_expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "raw_output": "",
+              "resident_expected_modules": [],
+              "source": "lsmod"
+            },
+            "requested_prog_ids": [
+              1118,
+              1120,
+              1121,
+              1122,
+              1123,
+              1124,
+              1125,
+              1126,
+              1127,
+              1128,
+              1129,
+              1130,
+              1131
+            ],
+            "status": "error"
+          }
+        ]
+      }
+    },
+    "smoke": false,
+    "status": "error"
+  },
+  "run_type": "scx",
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "smoke": false,
+  "started_at": "2026-04-10T02:38:41.193472+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

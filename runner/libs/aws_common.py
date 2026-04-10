@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import shutil
 import shlex
 import subprocess
 from dataclasses import dataclass
@@ -295,7 +294,6 @@ def _terminate_instance(ctx: AwsExecutorContext, explicit_instance_id: str = "")
             completed = _aws_cmd(ctx, "ec2", "wait", "instance-terminated", "--instance-ids", *target_ids)
             if completed.returncode != 0:
                 raise SystemExit(completed.returncode)
-        shutil.rmtree(ctx.target_root / "run-state", ignore_errors=True)
         return
 
     _, state, _ = _describe_instance(ctx, instance_id)

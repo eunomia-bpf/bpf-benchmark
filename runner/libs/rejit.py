@@ -39,6 +39,22 @@ _DEFAULT_BENCHMARK_REPEAT = 200
 _DEFAULT_PROFILE_INTERVAL_MS = 1000
 
 
+def _daemon_runtime_root() -> Path:
+    explicit = os.environ.get("BPFREJIT_DAEMON_TMPDIR", "").strip()
+    candidates: list[Path] = []
+    if explicit:
+        candidates.append(Path(explicit).expanduser())
+    candidates.extend((Path("/var/tmp/bpfrejit-daemon"), Path("/tmp/bpfrejit-daemon")))
+    for candidate in candidates:
+        try:
+            candidate.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            continue
+        if os.access(candidate, os.W_OK | os.X_OK):
+            return candidate
+    return Path(tempfile.gettempdir())
+
+
 def _mapping_dict(value: Any, *, field_name: str) -> dict[str, Any]:
     if value is None:
         return {}
@@ -786,7 +802,7 @@ def _daemon_log_tail(stdout_path: Path | None, stderr_path: Path | None) -> str:
 def _start_daemon_server(
     daemon_binary: Path | str,
 ) -> tuple[subprocess.Popen[str], Path, str, Path, Path]:
-    socket_dir = tempfile.mkdtemp(prefix="bpfrejit-daemon-")
+    socket_dir = tempfile.mkdtemp(prefix="bd-", dir=str(_daemon_runtime_root()))
     socket_path = Path(socket_dir) / "daemon.sock"
     stdout_path = Path(socket_dir) / "daemon.stdout.log"
     stderr_path = Path(socket_dir) / "daemon.stderr.log"

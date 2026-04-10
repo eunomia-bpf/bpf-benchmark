@@ -22,6 +22,7 @@ AWS_ARM64_SETUP_ROOT := $(ARTIFACT_ROOT)/aws-arm64/setup-artifacts/arm64
 AWS_ARM64_SETUP_KERNEL_RELEASE_FILE := $(AWS_ARM64_SETUP_ROOT)/kernel-release.txt
 AWS_ARM64_SETUP_KERNEL_IMAGE := $(AWS_ARM64_SETUP_ROOT)/boot/vmlinuz.efi
 AWS_ARM64_SETUP_MODULES_ARCHIVE := $(AWS_ARM64_SETUP_ROOT)/modules.tar.gz
+AWS_ARM64_CANONICAL_MODULES_ROOT := $(ARTIFACT_ROOT)/repo-artifacts/arm64/kernel-modules/lib/modules
 
 include $(RUNNER_DIR)/mk/arm64_defaults.mk
 include $(RUNNER_DIR)/mk/build.mk
@@ -31,8 +32,6 @@ ARM64_BUILD_DIR     ?= $(KERNEL_DIR)/build-arm64
 ARM64_BUILD_CONFIG  := $(ARM64_BUILD_DIR)/.config
 ARM64_IMAGE         := $(ARM64_BUILD_DIR)/arch/arm64/boot/Image
 ARM64_EFI_IMAGE     := $(ARM64_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
-ARM64_IMAGE_LINK    := $(KERNEL_DIR)/arch/arm64/boot/Image
-ARM64_CONFIG_LINK   := $(KERNEL_DIR)/.config.arm64
 ARM64_AWS_BUILD_CONFIG := $(ARM64_AWS_BUILD_DIR)/.config
 ARM64_AWS_IMAGE     := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/Image
 ARM64_AWS_EFI_IMAGE := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
@@ -97,9 +96,9 @@ ROOT_VM_CORPUS_EXTRA_ARGS := $(if $(strip $(VM_CORPUS_ARGS)),VM_CORPUS_ARGS='$(V
 
 .PHONY: check validate \
 		vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
-		aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
-		aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86 \
-	help clean
+	aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
+	aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86 \
+	help clean clean-aws-x86-setup clean-aws-arm64-setup
 
 # ── Help ───────────────────────────────────────────────────────────────────────
 help:
@@ -128,15 +127,15 @@ $(AWS_X86_SETUP_KERNEL_RELEASE_FILE) $(AWS_X86_SETUP_KERNEL_IMAGE) $(AWS_X86_SET
 		kernel_release="$$(tr -d '\''\n'\'' < "$$kernel_release_file")"; \
 		source_modules_root="$(AWS_X86_CANONICAL_MODULES_ROOT)/$$kernel_release"; \
 		[[ -d "$$source_modules_root" ]] || { echo "missing canonical x86 modules root: $$source_modules_root" >&2; exit 1; }; \
-		install_root="$$(mktemp -d "$$artifact_root/modules.root.XXXXXX")"; \
-		trap '\''rm -rf "$$install_root"'\'' EXIT; \
+		mkdir -p "$$artifact_root"; \
 		mkdir -p "$$artifact_root/boot"; \
 		ln -f "$(X86_BUILD_DIR)/arch/x86/boot/bzImage" "$$kernel_image"; \
 		printf "%s\n" "$$kernel_release" > "$$release_file"; \
-		mkdir -p "$$install_root/lib/modules"; \
-		cp -a "$$source_modules_root" "$$install_root/lib/modules/"; \
-		rm -f "$$install_root/lib/modules/$$kernel_release/build" "$$install_root/lib/modules/$$kernel_release/source"; \
-		tar -C "$$install_root" -czf "$$modules_archive" lib; \
+		tar -C "$(AWS_X86_CANONICAL_MODULES_ROOT)" \
+			--exclude="$$kernel_release/build" \
+			--exclude="$$kernel_release/source" \
+			--transform "s,^$$kernel_release,lib/modules/$$kernel_release," \
+			-czf "$$modules_archive" "$$kernel_release"; \
 		test -f "$$release_file"; \
 		test -f "$$kernel_image"; \
 		test -f "$$modules_archive"'
@@ -183,12 +182,13 @@ vm-all:
 $(ARM64_BUILD_CONFIG): $(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF) $(ARM64_KERNEL_CONFIG_SCRIPT) $(KERNEL_BUILD_META_FILES)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" "$(PYTHON)" -m runner.libs.arm64_kernel_config local \
 		"$(KERNEL_DIR)" "$(ARM64_BUILD_DIR)" "$(ARM64_CROSS_PREFIX)"
-	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
 
 $(ARM64_IMAGE) $(ARM64_EFI_IMAGE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_BUILD_DIR)" \
-		ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" Image vmlinuz.efi -j"$(NPROC)"
-	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
+		ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" \
+		CC="$(ARM64_GCC)" LD="$(ARM64_LD)" AR="$(ARM64_AR)" RANLIB="$(ARM64_RANLIB)" \
+		NM="$(ARM64_NM)" OBJCOPY="$(ARM64_OBJCOPY)" OBJDUMP="$(ARM64_OBJDUMP)" STRIP="$(ARM64_STRIP)" \
+		Image vmlinuz.efi -j"$(NPROC)"
 
 $(ARM64_AWS_BUILD_CONFIG): $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF) $(ARM64_KERNEL_CONFIG_SCRIPT) $(ARM64_AWS_BASE_CONFIG) $(KERNEL_BUILD_META_FILES)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" ARM64_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)" "$(PYTHON)" -m runner.libs.arm64_kernel_config aws \
@@ -196,9 +196,12 @@ $(ARM64_AWS_BUILD_CONFIG): $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM6
 
 $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_AWS_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
-		ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" Image vmlinuz.efi -j"$(NPROC)"
+		ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" \
+		CC="$(ARM64_GCC)" LD="$(ARM64_LD)" AR="$(ARM64_AR)" RANLIB="$(ARM64_RANLIB)" \
+		NM="$(ARM64_NM)" OBJCOPY="$(ARM64_OBJCOPY)" OBJDUMP="$(ARM64_OBJDUMP)" STRIP="$(ARM64_STRIP)" \
+		Image vmlinuz.efi -j"$(NPROC)"
 
-$(AWS_ARM64_SETUP_KERNEL_RELEASE_FILE) $(AWS_ARM64_SETUP_KERNEL_IMAGE) $(AWS_ARM64_SETUP_MODULES_ARCHIVE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE)
+$(AWS_ARM64_SETUP_KERNEL_RELEASE_FILE) $(AWS_ARM64_SETUP_KERNEL_IMAGE) $(AWS_ARM64_SETUP_MODULES_ARCHIVE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE) $(AWS_ARM64_CANONICAL_MODULES_ROOT)
 	@bash -eu -o pipefail -c '\
 		artifact_root="$(AWS_ARM64_SETUP_ROOT)"; \
 		release_file="$(AWS_ARM64_SETUP_KERNEL_RELEASE_FILE)"; \
@@ -207,15 +210,17 @@ $(AWS_ARM64_SETUP_KERNEL_RELEASE_FILE) $(AWS_ARM64_SETUP_KERNEL_IMAGE) $(AWS_ARM
 		kernel_release_file="$(ARM64_AWS_BUILD_DIR)/include/config/kernel.release"; \
 		[[ -f "$$kernel_release_file" ]] || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
 		kernel_release="$$(tr -d '\''\n'\'' < "$$kernel_release_file")"; \
-		install_root="$$(mktemp -d "$$artifact_root/modules.root.XXXXXX")"; \
-		trap '\''rm -rf "$$install_root"'\'' EXIT; \
+		source_modules_root="$(AWS_ARM64_CANONICAL_MODULES_ROOT)/$$kernel_release"; \
+		[[ -d "$$source_modules_root" ]] || { echo "missing canonical arm64 modules root: $$source_modules_root" >&2; exit 1; }; \
+		mkdir -p "$$artifact_root"; \
 		mkdir -p "$$artifact_root/boot"; \
 		ln -f "$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi" "$$kernel_image"; \
 		printf "%s\n" "$$kernel_release" > "$$release_file"; \
-		$(MAKE) --no-print-directory -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" INSTALL_MOD_PATH="$$install_root" DEPMOD=true CONFIG_MODULE_SIG=n modules_install; \
-		depmod -b "$$install_root" "$$kernel_release"; \
-		rm -f "$$install_root/lib/modules/$$kernel_release/build" "$$install_root/lib/modules/$$kernel_release/source"; \
-		tar -C "$$install_root" -czf "$$modules_archive" lib; \
+		tar -C "$(AWS_ARM64_CANONICAL_MODULES_ROOT)" \
+			--exclude="$$kernel_release/build" \
+			--exclude="$$kernel_release/source" \
+			--transform "s,^$$kernel_release,lib/modules/$$kernel_release," \
+			-czf "$$modules_archive" "$$kernel_release"; \
 		test -f "$$release_file"; \
 		test -f "$$kernel_image"; \
 		test -f "$$modules_archive"'
@@ -244,13 +249,18 @@ aws-x86-terminate:
 aws-x86: aws-x86-test aws-x86-benchmark
 
 # ── Clean ──────────────────────────────────────────────────────────────────────
+clean-aws-x86-setup:
+	rm -rf "$(ARTIFACT_ROOT)/aws-x86/setup-artifacts"
+
+clean-aws-arm64-setup:
+	rm -rf "$(ARTIFACT_ROOT)/aws-arm64/setup-artifacts"
+
 clean:
 	rm -rf "$(RUNNER_BUILD_DIR)"
 	rm -rf "$(RUNNER_DIR)/build-arm64"
 	$(MAKE) -C "$(MICRO_DIR)" clean
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	$(MAKE) -C "$(KERNEL_DIR)" clean
-	rm -f "$(ARM64_CONFIG_LINK)" "$(ARM64_IMAGE_LINK)"
 	rm -rf "$(ARM64_BUILD_DIR)" "$(ROOT_DIR)/.state/runner-contracts"
 	rm -rf \
 		"$(ARTIFACT_ROOT)/aws-arm64/kernel-build" \
