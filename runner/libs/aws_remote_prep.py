@@ -41,7 +41,7 @@ def _run_local_make(*args: str, env: dict[str, str] | None = None) -> None:
 
 def _effective_name_tag(ctx: aws_common.AwsExecutorContext) -> str:
     base_tag = aws_common._require_scalar(ctx.contract, "RUN_NAME_TAG")
-    if ctx.action != "terminate" and ctx.instance_mode == "dedicated":
+    if ctx.action != "terminate":
         return f"{base_tag}-{ctx.run_token}"
     return base_tag
 
@@ -366,30 +366,33 @@ def _refresh_aws_arm64_base_config(ctx: aws_common.AwsExecutorContext, ip: str) 
 
 def _build_x86_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
     build_dir = ctx.target_root / "setup-artifacts" / "x86"
+    kernel_release_file = build_dir / "kernel-release.txt"
+    kernel_image = build_dir / "boot" / "bzImage"
+    modules_tar = build_dir / "modules.tar.gz"
     _run_local_make(
-        "__kernel-x86-artifacts",
-        f"OUTPUT_ROOT={build_dir}",
+        str(kernel_release_file),
+        str(kernel_image),
+        str(modules_tar),
         f"JOBS={max(os.cpu_count() or 1, 1)}",
     )
-    kernel_release = (build_dir / "kernel-release.txt").read_text(encoding="utf-8").strip()
-    kernel_image = build_dir / "boot" / f"bzImage-{kernel_release}"
-    modules_tar = build_dir / f"modules-{kernel_release}.tar.gz"
+    kernel_release = kernel_release_file.read_text(encoding="utf-8").strip()
     return kernel_release, kernel_image, modules_tar
 
 
 def _build_arm64_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
-    build_dir = ctx.target_root / "kernel-build"
-    base_config = ctx.target_root / "config-al2023-arm64"
     setup_root = ctx.target_root / "setup-artifacts" / "arm64"
+    kernel_release_file = setup_root / "kernel-release.txt"
+    kernel_image = setup_root / "boot" / "vmlinuz.efi"
+    modules_tar = setup_root / "modules.tar.gz"
     _run_local_make(
-        "__kernel-arm64-aws-artifacts",
-        f"OUTPUT_ROOT={setup_root}",
-        f"ARM64_AWS_BUILD_DIR={build_dir}",
-        f"ARM64_AWS_BASE_CONFIG={base_config}",
+        str(kernel_release_file),
+        str(kernel_image),
+        str(modules_tar),
+        f"ARM64_AWS_BUILD_DIR={ctx.target_root / 'kernel-build'}",
+        f"ARM64_AWS_BASE_CONFIG={ctx.target_root / 'config-al2023-arm64'}",
+        f"JOBS={max(os.cpu_count() or 1, 1)}",
     )
-    kernel_release = (setup_root / "kernel-release.txt").read_text(encoding="utf-8").strip()
-    kernel_image = setup_root / "boot" / f"vmlinuz-{kernel_release}.efi"
-    modules_tar = setup_root / f"modules-{kernel_release}.tar.gz"
+    kernel_release = kernel_release_file.read_text(encoding="utf-8").strip()
     return kernel_release, kernel_image, modules_tar
 
 
@@ -617,50 +620,45 @@ def _ensure_instance_for_suite(ctx: aws_common.AwsExecutorContext) -> dict[str, 
         _die("manifest RUN_REMOTE_STAGE_DIR is empty")
     if not ctx.key_path.is_file():
         _die(f"manifest RUN_AWS_KEY_PATH does not exist: {ctx.key_path}")
-    with aws_common._locked_file(ctx.state_lock):
+    state = aws_common._load_instance_state(ctx)
+    if not state.get("STATE_INSTANCE_IP", "").strip():
+        _launch_instance(ctx)
         state = aws_common._load_instance_state(ctx)
-        if not state.get("STATE_INSTANCE_IP", "").strip():
-            _launch_instance(ctx)
-            state = aws_common._load_instance_state(ctx)
+    instance_ip = state.get("STATE_INSTANCE_IP", "").strip()
+    if not instance_ip:
+        _die(f"failed to resolve {ctx.target_name} instance IP")
+    aws_common._wait_for_ssh(ctx, instance_ip)
+
+    root_volume_gb = _remote_root_volume_size_gb(ctx, instance_ip)
+    required_root_volume_gb = int(aws_common._require_scalar(ctx.contract, "RUN_ROOT_VOLUME_GB"))
+    if root_volume_gb is not None and root_volume_gb < required_root_volume_gb:
+        aws_common._terminate_instance(ctx, state.get("STATE_INSTANCE_ID", "").strip())
+        _launch_instance(ctx)
+        state = aws_common._load_instance_state(ctx)
         instance_ip = state.get("STATE_INSTANCE_IP", "").strip()
-        if not instance_ip:
-            _die(f"failed to resolve {ctx.target_name} instance IP")
         aws_common._wait_for_ssh(ctx, instance_ip)
 
-        root_volume_gb = _remote_root_volume_size_gb(ctx, instance_ip)
-        required_root_volume_gb = int(aws_common._require_scalar(ctx.contract, "RUN_ROOT_VOLUME_GB"))
-        if root_volume_gb is not None and root_volume_gb < required_root_volume_gb:
-            aws_common._terminate_instance(ctx, state.get("STATE_INSTANCE_ID", "").strip())
-            _launch_instance(ctx)
-            state = aws_common._load_instance_state(ctx)
-            instance_ip = state.get("STATE_INSTANCE_IP", "").strip()
-            aws_common._wait_for_ssh(ctx, instance_ip)
-
-        if not state.get("STATE_KERNEL_RELEASE", "").strip():
-            _setup_instance(ctx, instance_ip)
-            state = aws_common._load_instance_state(ctx)
-            return state
-
-        current_kernel = _remote_kernel_release(ctx, instance_ip)
-        if current_kernel != state.get("STATE_KERNEL_RELEASE", "").strip():
-            _setup_instance(ctx, instance_ip)
-            state = aws_common._load_instance_state(ctx)
-            return state
-
-        if not _verify_remote_base_prereqs(ctx, instance_ip):
-            _setup_remote_base_prereqs(ctx, instance_ip)
-
-        if aws_common._optional_scalar(ctx.contract, "RUN_SUITE_NEEDS_RUNTIME_BTF", "0") == "1" and not _remote_has_runtime_btf(ctx, instance_ip):
-            _setup_instance(ctx, instance_ip)
-            state = aws_common._load_instance_state(ctx)
-            return state
-
-        if aws_common._optional_scalar(ctx.contract, "RUN_SUITE_NEEDS_SCHED_EXT", "0") == "1" and not _remote_has_sched_ext(ctx, instance_ip):
-            _setup_instance(ctx, instance_ip)
-            state = aws_common._load_instance_state(ctx)
-            return state
-
+    if not state.get("STATE_KERNEL_RELEASE", "").strip():
+        _setup_instance(ctx, instance_ip)
         return aws_common._load_instance_state(ctx)
+
+    current_kernel = _remote_kernel_release(ctx, instance_ip)
+    if current_kernel != state.get("STATE_KERNEL_RELEASE", "").strip():
+        _setup_instance(ctx, instance_ip)
+        return aws_common._load_instance_state(ctx)
+
+    if not _verify_remote_base_prereqs(ctx, instance_ip):
+        _setup_remote_base_prereqs(ctx, instance_ip)
+
+    if aws_common._optional_scalar(ctx.contract, "RUN_SUITE_NEEDS_RUNTIME_BTF", "0") == "1" and not _remote_has_runtime_btf(ctx, instance_ip):
+        _setup_instance(ctx, instance_ip)
+        return aws_common._load_instance_state(ctx)
+
+    if aws_common._optional_scalar(ctx.contract, "RUN_SUITE_NEEDS_SCHED_EXT", "0") == "1" and not _remote_has_sched_ext(ctx, instance_ip):
+        _setup_instance(ctx, instance_ip)
+        return aws_common._load_instance_state(ctx)
+
+    return aws_common._load_instance_state(ctx)
 
 
 def main(argv: list[str] | None = None) -> None:

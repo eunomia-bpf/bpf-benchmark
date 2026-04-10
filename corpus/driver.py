@@ -38,6 +38,7 @@ from runner.libs.daemon_session import DaemonSession
 from runner.libs.rejit import benchmark_rejit_enabled_passes, collect_effective_enabled_passes
 from runner.libs.run_artifacts import (
     ArtifactSession,
+    artifact_dir_marker,
     current_process_identity,
     derive_run_type,
 )
@@ -1677,6 +1678,7 @@ def main(argv: list[str] | None = None) -> int:
                 indent=2,
             )
         )
+        print(f"ARTIFACT_DIR={artifact_dir_marker(session.run_dir)}")
         return 0 if payload_status == "ok" else 1
     except Exception as exc:
         metadata_payload = {

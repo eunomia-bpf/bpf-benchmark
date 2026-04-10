@@ -15,6 +15,7 @@ from runner.libs import aws_common
 from runner.libs.cli_support import fail
 from runner.libs.manifest_file import parse_manifest
 from runner.libs.run_contract import build_manifest, build_target_manifest, write_manifest_file
+from runner.libs.workspace_layout import local_prep_targets
 
 
 CONTROL_ROOT = ROOT_DIR / ".state" / "runner-contracts"
@@ -67,12 +68,46 @@ def _run_local_prep(manifest_path: Path) -> None:
     executor = str(contract.get("RUN_EXECUTOR", "")).strip()
     if executor not in {"aws-ssh", "kvm"}:
         _die(f"unsupported executor for local prep: {executor}")
+    target_name = str(contract.get("RUN_TARGET_NAME", "")).strip()
+    suite_name = str(contract.get("RUN_SUITE_NAME", "")).strip()
+    target_arch = str(contract.get("RUN_TARGET_ARCH", "")).strip()
+    if not target_name:
+        _die("manifest RUN_TARGET_NAME is empty")
+    if not suite_name:
+        _die("manifest RUN_SUITE_NAME is empty")
+    if not target_arch:
+        _die("manifest RUN_TARGET_ARCH is empty")
+    targets = [
+        str(path)
+        for path in local_prep_targets(
+            workspace=ROOT_DIR,
+            suite_name=suite_name,
+            target_arch=target_arch,
+            executor=executor,
+            needs_runner_binary=str(contract.get("RUN_NEEDS_RUNNER_BINARY", "0")).strip() == "1",
+            needs_daemon_binary=str(contract.get("RUN_NEEDS_DAEMON_BINARY", "0")).strip() == "1",
+            needs_kinsn_modules=str(contract.get("RUN_NEEDS_KINSN_MODULES", "0")).strip() == "1",
+            needs_workload_tools=str(contract.get("RUN_NEEDS_WORKLOAD_TOOLS", "0")).strip() == "1",
+            native_repos=[
+                entry.strip()
+                for entry in str(contract.get("RUN_NATIVE_REPOS_CSV", "")).split(",")
+                if entry.strip()
+            ],
+            scx_packages=[
+                entry.strip()
+                for entry in str(contract.get("RUN_SCX_PACKAGES_CSV", "")).split(",")
+                if entry.strip()
+            ],
+        )
+    ]
+    if not targets:
+        return
     completed = subprocess.run(
         [
             "make",
             "-C",
             str(ROOT_DIR),
-            "__prepare-local",
+            *targets,
             f"PYTHON={host_python_bin}",
         ],
         cwd=ROOT_DIR,
@@ -93,12 +128,10 @@ def _write_target_manifest(target_name: str, manifest_path: Path) -> None:
     write_manifest_file(manifest_path, build_target_manifest(target_name, env=os.environ.copy()))
 
 
-def _cleanup_failed_dedicated_aws_prep(manifest_path: Path) -> None:
+def _cleanup_failed_aws_prep(manifest_path: Path) -> None:
     if not manifest_path.is_file():
         return
     ctx = aws_common._build_context("run", manifest_path)
-    if ctx.instance_mode != "dedicated":
-        return
     state: dict[str, str] = {}
     if ctx.state_file.is_file():
         state = aws_common._load_instance_state(ctx)
@@ -133,8 +166,7 @@ def _run_action(target_name: str, suite_name: str) -> None:
         contract = parse_manifest(manifest_path)
         executor = str(contract.get("RUN_EXECUTOR", ""))
         if executor == "aws-ssh":
-            if str(contract.get("RUN_AWS_INSTANCE_MODE", "shared")) == "dedicated":
-                prep_cleanup_armed = True
+            prep_cleanup_armed = True
             _run_checked(
                 _python_module_command(
                     "runner.libs.aws_remote_prep",
@@ -165,7 +197,7 @@ def _run_action(target_name: str, suite_name: str) -> None:
         _die(f"unsupported executor: {executor}")
     finally:
         if prep_cleanup_armed:
-            _cleanup_failed_dedicated_aws_prep(manifest_path)
+            _cleanup_failed_aws_prep(manifest_path)
         if success:
             shutil.rmtree(control_dir, ignore_errors=True)
         else:

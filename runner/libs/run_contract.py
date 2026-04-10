@@ -166,8 +166,7 @@ def _apply_corpus_filter_selection(
     run_native_repos: str,
     run_scx_packages: str,
     run_needs_sched_ext: str,
-    run_needs_katran_bundle: str,
-) -> tuple[str, str, str, str, str, str]:
+) -> tuple[str, str, str, str, str]:
     filters = _csv_tokens(run_corpus_filters)
     app_suite, _summary = load_app_suite_from_yaml(DEFAULT_CORPUS_APP_SUITE, filters=filters)
     selected_runners = {app.runner for app in app_suite.apps}
@@ -179,14 +178,12 @@ def _apply_corpus_filter_selection(
     )
     filtered_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "") if "scx" in selected_runners else ""
     filtered_needs_sched_ext = "1" if "scx" in selected_runners else "0"
-    filtered_needs_katran_bundle = "1" if "katran" in selected_runners else "0"
     filtered_remote_commands = _corpus_workload_requirements_for_selection(app_suite)
     return (
         filtered_benchmark_repos,
         filtered_native_repos,
         filtered_scx_packages,
         filtered_needs_sched_ext,
-        filtered_needs_katran_bundle,
         filtered_remote_commands,
     )
 
@@ -195,14 +192,13 @@ def _apply_e2e_case_selection(
     *,
     run_e2e_cases: str,
     suite: dict[str, str],
-) -> tuple[str, str, str, str, str, str]:
+) -> tuple[str, str, str, str, str]:
     selected_cases = set(_csv_tokens(run_e2e_cases))
     include_all = "all" in selected_cases
     run_benchmark_repos = _suite_repos_for_e2e_cases(run_e2e_cases)
     run_native_repos = _native_repos_for_e2e_cases(run_e2e_cases)
     run_scx_packages = ""
     run_needs_sched_ext = "0"
-    run_needs_katran_bundle = "0"
     remote_commands: set[str] = set()
     for case_name, commands in E2E_CASE_REMOTE_COMMANDS.items():
         if include_all or case_name in selected_cases:
@@ -210,14 +206,11 @@ def _apply_e2e_case_selection(
     if include_all or "scx" in selected_cases:
         run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")
         run_needs_sched_ext = "1"
-    if include_all or "katran" in selected_cases:
-        run_needs_katran_bundle = "1"
     return (
         run_benchmark_repos,
         run_native_repos,
         run_scx_packages,
         run_needs_sched_ext,
-        run_needs_katran_bundle,
         _ordered_csv_from_tokens(remote_commands, order=REMOTE_COMMAND_ORDER),
     )
 _COMMON_MANIFEST_INPUTS = {
@@ -357,7 +350,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     run_needs_llvmbpf = suite.get("SUITE_NEEDS_LLVMBPF", "0")
     run_llvm_dir = ""
     run_remote_commands = suite.get("SUITE_DEFAULT_REMOTE_COMMANDS", "")
-    run_needs_katran_bundle = suite.get("SUITE_NEEDS_KATRAN_BUNDLE", "0")
     run_bpftool_bin = "bpftool"
     run_aws_key_name = ""
     run_aws_key_path = ""
@@ -366,7 +358,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     run_aws_region = ""
     run_aws_profile = ""
     run_remote_swap_size_gb = ""
-    run_aws_instance_mode = ""
     run_bench_samples = ""
     run_bench_warmups = ""
     run_bench_inner_repeat = ""
@@ -377,9 +368,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     run_e2e_smoke = ""
     run_vm_backend = ""
     run_vm_executable = ""
-    run_vm_lock_scope = ""
-    run_vm_machine_name = ""
-    run_vm_machine_arch = ""
     run_vm_cpus = ""
     run_vm_mem = ""
     run_host_python_bin = _env_or_default(values, "PYTHON", "python3")
@@ -402,7 +390,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         aws_env_prefix = target.get("TARGET_AWS_ENV_PREFIX", "")
         if not aws_env_prefix:
             _die(f"AWS target {target_name} is missing TARGET_AWS_ENV_PREFIX")
-        run_aws_instance_mode = _prefixed_env_or_default(values, aws_env_prefix, "INSTANCE_MODE", "shared")
         run_name_tag = _prefixed_env_or_default(values, aws_env_prefix, "NAME_TAG", target.get("TARGET_NAME_TAG_DEFAULT", ""))
         default_instance_type = target.get("TARGET_INSTANCE_TYPE_DEFAULT", "")
         if suite.get("SUITE_VM_CLASS", "") == "benchmark":
@@ -415,6 +402,7 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         run_remote_stage_dir = remote_stage_root.rstrip("/")
         if suite_name:
             run_remote_stage_dir = f"{run_remote_stage_dir}/{suite_name}"
+        run_remote_stage_dir = f"{run_remote_stage_dir}/{run_token}"
         run_remote_kernel_stage_dir = _prefixed_env_or_default(values, aws_env_prefix, "REMOTE_KERNEL_STAGE_DIR", target.get("TARGET_REMOTE_KERNEL_STAGE_DIR_DEFAULT", ""))
         run_ami_param = _prefixed_env_or_default(values, aws_env_prefix, "AMI_PARAM", target.get("TARGET_AMI_PARAM_DEFAULT", ""))
         run_ami_id = _prefixed_env_or_default(values, aws_env_prefix, "AMI_ID")
@@ -453,17 +441,12 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     elif target_name == "x86-kvm":
         run_vm_backend = target.get("TARGET_KVM_BACKEND", "")
         run_vm_executable = target.get("TARGET_KVM_EXECUTABLE", "")
-        run_vm_lock_scope = target.get("TARGET_KVM_LOCK_SCOPE", "")
-        run_vm_machine_name = target.get("TARGET_NAME", target_name)
-        run_vm_machine_arch = target.get("TARGET_ARCH", "")
         run_host_python_bin = _env_or_default(values, "PYTHON", target.get("TARGET_KVM_HOST_PYTHON_DEFAULT", "python3"))
         run_vm_kernel_image = _resolve_repo_path(_env_or_default(values, "BZIMAGE", target.get("TARGET_KVM_KERNEL_IMAGE_DEFAULT", "vendor/linux-framework/arch/x86/boot/bzImage")))
         if not run_vm_backend:
             _die("x86-kvm target is missing TARGET_KVM_BACKEND")
         if not run_vm_executable:
             _die("x86-kvm target is missing TARGET_KVM_EXECUTABLE")
-        if not run_vm_lock_scope:
-            _die("x86-kvm target is missing TARGET_KVM_LOCK_SCOPE")
         if not Path(run_vm_executable).is_absolute():
             run_vm_executable = str((ROOT_DIR / run_vm_executable).resolve())
         run_test_mode = _env_or_default(values, "TEST_MODE", "test")
@@ -533,7 +516,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
             run_native_repos,
             run_scx_packages,
             run_needs_sched_ext,
-            run_needs_katran_bundle,
             corpus_remote_commands,
         ) = _apply_corpus_filter_selection(
             run_corpus_filters=run_corpus_filters,
@@ -542,7 +524,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
             run_native_repos=run_native_repos,
             run_scx_packages=run_scx_packages,
             run_needs_sched_ext=run_needs_sched_ext,
-            run_needs_katran_bundle=run_needs_katran_bundle,
         )
         run_remote_commands = _append_csv_list(run_remote_commands, corpus_remote_commands)
     elif suite_name == "e2e":
@@ -554,7 +535,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
             run_native_repos,
             run_scx_packages,
             run_needs_sched_ext,
-            run_needs_katran_bundle,
             run_remote_commands,
         ) = _apply_e2e_case_selection(
             run_e2e_cases=run_e2e_cases,
@@ -602,12 +582,8 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         "RUN_AWS_SUBNET_ID": run_aws_subnet_id,
         "RUN_AWS_REGION": run_aws_region,
         "RUN_AWS_PROFILE": run_aws_profile,
-        "RUN_AWS_INSTANCE_MODE": run_aws_instance_mode,
         "RUN_VM_BACKEND": run_vm_backend,
         "RUN_VM_EXECUTABLE": run_vm_executable,
-        "RUN_VM_LOCK_SCOPE": run_vm_lock_scope,
-        "RUN_VM_MACHINE_NAME": run_vm_machine_name,
-        "RUN_VM_MACHINE_ARCH": run_vm_machine_arch,
         "RUN_VM_CPUS": run_vm_cpus,
         "RUN_VM_MEM": run_vm_mem,
         "RUN_HOST_PYTHON_BIN": run_host_python_bin,
@@ -632,7 +608,6 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         "RUN_NATIVE_REPOS_CSV": run_native_repos,
         "RUN_SCX_PACKAGES_CSV": run_scx_packages,
         "RUN_REMOTE_COMMANDS_CSV": run_remote_commands,
-        "RUN_NEEDS_KATRAN_BUNDLE": run_needs_katran_bundle,
         "RUN_BPFTOOL_BIN": run_bpftool_bin,
         "RUN_CORPUS_ARGV": run_corpus_argv,
         "RUN_E2E_ARGV": run_e2e_argv,

@@ -94,10 +94,10 @@ def artifact_timestamp(generated_at: str | None = None) -> str:
     if generated_at:
         try:
             parsed = datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
-            return parsed.astimezone(timezone.utc).strftime("%Y%m%d_%H%M%S")
+            return parsed.astimezone(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
         except ValueError:
             pass
-    return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
 
 
 def result_root_for_output(output_path: Path) -> Path:
@@ -121,6 +121,10 @@ def repo_relative_path(path: Path) -> str:
         return str(resolved.relative_to(ROOT_DIR))
     except ValueError:
         return str(resolved)
+
+
+def artifact_dir_marker(path: Path) -> str:
+    return repo_relative_path(path)
 
 
 def _read_proc_start_ticks(pid: int) -> int | None:

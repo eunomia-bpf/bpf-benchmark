@@ -18,7 +18,6 @@ _die = partial(fail, "aws-executor")
 AwsExecutorContext = aws_common.AwsExecutorContext
 _build_context = aws_common._build_context
 _load_instance_state = aws_common._load_instance_state
-_locked_file = aws_common._locked_file
 _require_scalar = aws_common._require_scalar
 _rsync_to = aws_common._rsync_to
 _scp_from = aws_common._scp_from
@@ -29,22 +28,25 @@ _run_remote_helper = aws_common._run_remote_helper
 _wait_for_ssh = aws_common._wait_for_ssh
 
 
-def _artifact_dir_from_log(log_path: Path) -> str:
-    artifact_dir = ""
+def _artifact_dirs_from_log(log_path: Path) -> list[str]:
+    artifact_dirs: list[str] = []
+    seen: set[str] = set()
     for line in log_path.read_text(encoding="utf-8").splitlines():
         match = re.match(r"^ARTIFACT_DIR=(.+)$", line.strip())
         if match:
             artifact_dir = match.group(1).strip()
-    if not artifact_dir:
+            if artifact_dir and artifact_dir not in seen:
+                seen.add(artifact_dir)
+                artifact_dirs.append(artifact_dir)
+    if not artifact_dirs:
         _die(f"remote suite log is missing ARTIFACT_DIR marker: {log_path}")
-    return artifact_dir
+    return artifact_dirs
 
 
-def _cleanup_failed_dedicated_run(ctx: AwsExecutorContext, state: dict[str, str] | None = None) -> None:
+def _cleanup_failed_run(ctx: AwsExecutorContext, state: dict[str, str] | None = None) -> None:
     current_state = dict(state or {})
     if not current_state:
-        with _locked_file(ctx.state_lock):
-            current_state = _load_instance_state(ctx)
+        current_state = _load_instance_state(ctx)
     instance_id = current_state.get("STATE_INSTANCE_ID", "").strip()
     if instance_id:
         try:
@@ -73,7 +75,6 @@ def _sync_remote_roots(ctx: AwsExecutorContext, ip: str) -> None:
             for entry in str(ctx.contract.get("RUN_SCX_PACKAGES_CSV", "")).split(",")
             if entry.strip()
         ],
-        needs_katran_bundle=str(ctx.contract.get("RUN_NEEDS_KATRAN_BUNDLE", "0")).strip() == "1",
     )
     if not selected_roots:
         _die("derived remote transfer roots selected no existing roots")
@@ -134,44 +135,38 @@ def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
         _scp_from(ctx, ip, remote_log, local_log)
     if remote_completed.returncode != 0:
         _die(f"remote {ctx.target_name}/{ctx.suite_name} suite failed; inspect {local_log}")
-    remote_artifact_dir = f"{remote_workspace}/{_artifact_dir_from_log(local_log)}"
-    _scp_from(ctx, ip, remote_artifact_dir, local_result_dir, recursive=True)
+    remote_artifact_dirs = [
+        f"{remote_workspace}/{artifact_dir}"
+        for artifact_dir in _artifact_dirs_from_log(local_log)
+    ]
+    for remote_artifact_dir in remote_artifact_dirs:
+        _scp_from(ctx, ip, remote_artifact_dir, local_result_dir, recursive=True)
     _run_remote_helper(ctx, ip, remote_python, "cleanup-path", remote_run_dir, check=False)
-    _run_remote_helper(ctx, ip, remote_python, "cleanup-path", remote_artifact_dir, check=False)
+    for remote_artifact_dir in remote_artifact_dirs:
+        _run_remote_helper(ctx, ip, remote_python, "cleanup-path", remote_artifact_dir, check=False)
     print(
         f"[aws-executor] Fetched {ctx.target_name}/{ctx.suite_name} results to {local_result_dir}",
         file=sys.stderr,
     )
 
 
-def _run_shared(ctx: AwsExecutorContext) -> None:
-    with _locked_file(ctx.remote_execution_lock):
-        with _locked_file(ctx.state_lock):
-            state = _load_instance_state(ctx)
-        instance_ip = state.get("STATE_INSTANCE_IP", "").strip()
-        if not instance_ip:
-            _die("shared AWS run is missing STATE_INSTANCE_IP before remote execution")
-        _run_remote_suite(ctx, instance_ip)
-
-
-def _run_dedicated(ctx: AwsExecutorContext) -> None:
+def _run_aws(ctx: AwsExecutorContext) -> None:
     state = {}
     try:
-        with _locked_file(ctx.state_lock):
-            state = _load_instance_state(ctx)
+        state = _load_instance_state(ctx)
         instance_ip = state.get("STATE_INSTANCE_IP", "").strip()
         if not instance_ip:
-            _die("dedicated AWS run is missing STATE_INSTANCE_IP before remote execution")
+            _die("AWS run is missing STATE_INSTANCE_IP before remote execution")
         _run_remote_suite(ctx, instance_ip)
     except BaseException:
-        _cleanup_failed_dedicated_run(ctx, state)
+        _cleanup_failed_run(ctx, state)
         raise
     _terminate_instance(ctx, state.get("STATE_INSTANCE_ID", "").strip())
     shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
 
 
 def _run_action(ctx: AwsExecutorContext) -> None:
-    dedicated_execute_started = False
+    execute_started = False
     try:
         if not ctx.remote_user:
             _die("manifest RUN_REMOTE_USER is empty")
@@ -179,14 +174,11 @@ def _run_action(ctx: AwsExecutorContext) -> None:
             _die("manifest RUN_REMOTE_STAGE_DIR is empty")
         if not ctx.key_path.is_file():
             _die(f"manifest RUN_AWS_KEY_PATH does not exist: {ctx.key_path}")
-        if ctx.instance_mode == "shared":
-            _run_shared(ctx)
-            return
-        dedicated_execute_started = True
-        _run_dedicated(ctx)
+        execute_started = True
+        _run_aws(ctx)
     except BaseException:
-        if ctx.instance_mode == "dedicated" and not dedicated_execute_started:
-            _cleanup_failed_dedicated_run(ctx)
+        if not execute_started:
+            _cleanup_failed_run(ctx)
         raise
 
 

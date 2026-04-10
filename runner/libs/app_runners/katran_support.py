@@ -75,7 +75,7 @@ def _bpftool_binary() -> str:
 
 
 def default_katran_balancer_prog_path() -> Path:
-    return repo_artifact_root() / "katran" / "balancer.bpf.o"
+    return repo_artifact_root() / "katran" / "bpf" / "balancer.bpf.o"
 
 
 def default_katran_server_binary_path() -> Path:

@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import os
-import re
 import shlex
 import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
 from typing import Sequence
@@ -21,8 +19,10 @@ from runner.libs.workspace_layout import (
     kernel_modules_root,
     kinsn_module_dir,
     libbpf_runtime_path,
+    native_repo_targets,
     repo_artifact_root,
     runner_binary_path,
+    scx_targets,
     test_negative_build_dir,
     test_unittest_build_dir,
 )
@@ -52,32 +52,6 @@ def _resolve_workspace_contract_path(workspace: Path, path: str) -> Path:
     if candidate.is_absolute():
         return candidate
     return workspace / candidate
-
-
-def _latest_result_dir(parent: Path, prefix: str) -> Path:
-    matches = sorted(
-        path
-        for path in parent.iterdir()
-        if path.is_dir() and path.name.startswith(f"{prefix}_")
-    )
-    if not matches:
-        _die(f"result directory is missing for prefix {prefix}: {parent}")
-    return matches[-1]
-
-
-def _sanitize_artifact_token(value: str) -> str:
-    token = re.sub(r"[^0-9A-Za-z]+", "_", value).strip("_")
-    return token or "run"
-
-
-def _copy_result_dir(source_dir: Path, destination_dir: Path) -> None:
-    if not source_dir.is_dir():
-        _die(f"result directory is missing: {source_dir}")
-    destination_dir.mkdir(parents=True, exist_ok=True)
-    target_dir = destination_dir / source_dir.name
-    if target_dir.exists():
-        shutil.rmtree(target_dir)
-    shutil.copytree(source_dir, target_dir)
 
 
 def _cross_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
@@ -173,7 +147,7 @@ class SuiteEntrypoint:
     executor: str
     python_bin: str
     bpftool_bin: str
-    artifact_dir: Path
+    artifact_dir: Path | None
     corpus_argv: list[str]
     e2e_argv: list[str]
 
@@ -197,6 +171,11 @@ class SuiteEntrypoint:
 
     def _bool_contract(self, name: str, *, default: str = "0") -> bool:
         return self._optional_contract(name, default) == "1"
+
+    def _artifact_dir_required(self) -> Path:
+        if self.artifact_dir is None:
+            _die(f"suite {self.suite_name} does not define a local artifact directory")
+        return self.artifact_dir
 
     @classmethod
     def from_contract(
@@ -229,12 +208,12 @@ class SuiteEntrypoint:
         suite_name = required_scalar("RUN_SUITE_NAME")
         target_arch = required_scalar("RUN_TARGET_ARCH")
         executor = required_scalar("RUN_EXECUTOR")
+        run_token = required_scalar("RUN_TOKEN")
         python_bin = required_scalar("RUN_REMOTE_PYTHON_BIN")
         bpftool_bin = required_scalar("RUN_BPFTOOL_BIN")
-        result_root = workspace / ".cache" / "suite-results"
-        run_token = _sanitize_artifact_token(f"{target_name}_{suite_name}")
-        stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-        artifact_dir = result_root / f"{run_token}_{stamp}"
+        artifact_dir = None
+        if suite_name == "test":
+            artifact_dir = workspace / ".cache" / "suite-results" / run_token
         return cls(
             contract=contract,
             workspace=workspace,
@@ -345,30 +324,27 @@ class SuiteEntrypoint:
         packages = self._csv_contract("RUN_SCX_PACKAGES_CSV")
         if not packages:
             return
-        scx_root = self._repo_build_root() / "scx"
-        for package in packages:
-            _require_executable(
-                scx_root / "bin" / package,
-                "bundled scx binary",
-            )
-            object_path = scx_root / f"{package}_main.bpf.o"
-            if not object_path.is_file():
-                _die(f"bundled scx object is missing: {object_path}")
+        for target in scx_targets(self.workspace, self.target_arch, packages):
+            if target.name.endswith(".bpf.o"):
+                if not target.is_file():
+                    _die(f"bundled scx object is missing: {target}")
+                continue
+            _require_executable(target, "bundled scx binary")
 
     def _ensure_katran_bundle(self) -> None:
-        if not self._bool_contract("RUN_NEEDS_KATRAN_BUNDLE"):
+        if "katran" not in self._csv_contract("RUN_NATIVE_REPOS_CSV"):
             return
+        katran_targets = native_repo_targets(self.workspace, self.target_arch, ["katran"])
+        for target in katran_targets:
+            if target.name == "katran_server_grpc":
+                _require_executable(target, "bundled Katran server")
+                continue
+            if not target.is_file():
+                _die(f"bundled Katran artifact is missing: {target}")
         katran_root = self._repo_build_root() / "katran"
-        _require_executable(
-            katran_root / "bin" / "katran_server_grpc",
-            "bundled Katran server",
-        )
         katran_lib_root = katran_root / "lib"
         if not katran_lib_root.is_dir():
             _die(f"bundled Katran runtime library directory is missing: {katran_lib_root}")
-        balancer_prog = katran_root / "balancer.bpf.o"
-        if not balancer_prog.is_file():
-            _die(f"bundled Katran balancer program is missing: {balancer_prog}")
 
     def _ensure_bpf_stats_enabled(self) -> None:
         if not self._bool_contract("RUN_NEEDS_DAEMON_BINARY"):
@@ -511,7 +487,7 @@ class SuiteEntrypoint:
         print("========================================", file=sys.stderr)
 
     def _run_selftest_mode(self, env: dict[str, str]) -> None:
-        log_path = self.artifact_dir / "selftest.log"
+        log_path = self._artifact_dir_required() / "selftest.log"
         self._log_test_section("Loading kinsn modules")
         self._load_kinsn_modules()
         passed_a, failed_a = self._run_unittest_suite(env, log_path=log_path)
@@ -523,7 +499,7 @@ class SuiteEntrypoint:
             _die("vm-selftest failed")
 
     def _run_negative_mode(self, env: dict[str, str]) -> None:
-        log_path = self.artifact_dir / "negative.log"
+        log_path = self._artifact_dir_required() / "negative.log"
         passed, failed = self._run_negative_suite(env, include_scx_race=True, log_path=log_path)
         self._print_test_summary(passed, failed, prefix="vm-negative-test")
         if failed:
@@ -585,10 +561,6 @@ class SuiteEntrypoint:
             str(output_json),
         ]
         _run_checked(command, cwd=self.workspace, env=runtime_env)
-        _copy_result_dir(
-            _latest_result_dir(self.workspace / "micro" / "results", _sanitize_artifact_token(f"{self.target_name}_micro")),
-            self.artifact_dir,
-        )
 
     def _run_corpus_suite(self, env: dict[str, str]) -> None:
         self._ensure_scx_artifacts()
@@ -618,10 +590,6 @@ class SuiteEntrypoint:
             command += ["--filter", filter_name]
         command.extend(self.corpus_argv)
         _run_checked(command, cwd=self.workspace, env=runtime_env)
-        _copy_result_dir(
-            _latest_result_dir(self.workspace / "corpus" / "results", _sanitize_artifact_token(f"{self.target_name}_corpus")),
-            self.artifact_dir,
-        )
 
     def _run_e2e_case(self, case_name: str, env: dict[str, str]) -> None:
         runtime_env = env.copy()
@@ -647,21 +615,20 @@ class SuiteEntrypoint:
             all_env = env.copy()
             self._ensure_katran_bundle()
             self._run_e2e_case("all", all_env)
-            for case_name in ("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran"):
-                _copy_result_dir(_latest_result_dir(self.workspace / "e2e" / "results", case_name), self.artifact_dir)
             return
         for case_name in [token for token in cases.split(",") if token]:
             case_env = env.copy()
             if case_name == "katran":
                 self._ensure_katran_bundle()
             self._run_e2e_case(case_name, case_env)
-            _copy_result_dir(_latest_result_dir(self.workspace / "e2e" / "results", case_name), self.artifact_dir)
 
     def run(self) -> None:
         env = self._runtime_env()
-        self.artifact_dir.mkdir(parents=True, exist_ok=True)
         os.chdir(self.workspace)
-        shutil.copy2(self.manifest_path, self.artifact_dir / "run-contract.env")
+        if self.suite_name == "test":
+            artifact_dir = self._artifact_dir_required()
+            artifact_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(self.manifest_path, artifact_dir / "run-contract.env")
         self._ensure_bpf_stats_enabled()
         if self.suite_name == "test":
             self._run_test_suite(env)
@@ -673,7 +640,8 @@ class SuiteEntrypoint:
             self._run_e2e_suite(env)
         else:
             _die(f"unsupported suite: {self.suite_name}")
-        print(f"ARTIFACT_DIR={self.artifact_dir.relative_to(self.workspace)}")
+        if self.suite_name == "test":
+            print(f"ARTIFACT_DIR={self._artifact_dir_required().relative_to(self.workspace)}")
 
 
 def main(argv: list[str] | None = None) -> None:

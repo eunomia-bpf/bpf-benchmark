@@ -129,7 +129,7 @@ def cmd_print_kernel_config(args: argparse.Namespace) -> None:
 
 
 def _extract_modules_archive(stage_dir: Path, version: str) -> Path:
-    modules_archive = stage_dir / f"modules-{version}.tar.gz"
+    modules_archive = stage_dir / "modules.tar.gz"
     temp_root = Path(tempfile.mkdtemp(prefix=f"modules-{version}.", dir=str(stage_dir)))
     with tarfile.open(modules_archive, "r:gz") as archive:
         archive.extractall(temp_root, filter="data")
@@ -150,7 +150,7 @@ def cmd_setup_kernel_x86(args: argparse.Namespace) -> None:
     finally:
         shutil.rmtree(temp_root, ignore_errors=True)
 
-    kernel_image = stage_dir / "boot" / f"bzImage-{version}"
+    kernel_image = stage_dir / "boot" / "bzImage"
     run_checked("install", "-o", "root", "-g", "root", "-m", "0755", str(kernel_image), f"/boot/vmlinuz-{version}", sudo=True)
     run_checked("depmod", "-a", version, sudo=True)
     run_checked(
@@ -212,7 +212,7 @@ def cmd_setup_kernel_arm64(args: argparse.Namespace) -> None:
     finally:
         shutil.rmtree(temp_root, ignore_errors=True)
 
-    kernel_image = stage_dir / "boot" / f"vmlinuz-{version}.efi"
+    kernel_image = stage_dir / "boot" / "vmlinuz.efi"
     run_checked("install", "-o", "root", "-g", "root", "-m", "0755", str(kernel_image), f"/boot/vmlinuz-{version}", sudo=True)
     run_checked("depmod", "-a", version, sudo=True)
     run_checked("dracut", "--force", f"/boot/initramfs-{version}.img", version, sudo=True)

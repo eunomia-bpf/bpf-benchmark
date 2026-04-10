@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import fcntl
 import os
 import shutil
 import shlex
 import subprocess
-from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -40,43 +38,23 @@ class AwsExecutorContext:
     target_name: str
     suite_name: str
     run_token: str
-    instance_mode: str
     remote_user: str
     remote_stage_dir: str
     key_path: Path
     aws_region: str
     aws_profile: str
     target_root: Path
-    shared_state_dir: Path
     run_state_dir: Path
-    state_dir: Path
     state_file: Path
     results_dir: Path
-
-    @property
-    def remote_execution_lock(self) -> Path:
-        suffix = self.remote_stage_dir.strip("/").replace("/", "_") or "root"
-        return self.shared_state_dir / f"remote-exec.{suffix}.lock"
-
-    @property
-    def state_lock(self) -> Path:
-        return self.state_dir / "instance.lock"
 
 
 def _build_context(action: str, manifest_path: Path) -> AwsExecutorContext:
     contract = parse_manifest(manifest_path)
     target_name = _require_scalar(contract, "RUN_TARGET_NAME")
     run_token = _require_scalar(contract, "RUN_TOKEN")
-    instance_mode = _optional_scalar(contract, "RUN_AWS_INSTANCE_MODE", "shared")
-    if instance_mode not in {"shared", "dedicated"}:
-        fail("aws-common", f"unsupported RUN_AWS_INSTANCE_MODE: {instance_mode}")
     target_root = ROOT_DIR / ".cache" / target_name
-    shared_state_dir = target_root / "state"
     run_state_dir = target_root / "run-state" / run_token
-    if action != "terminate" and instance_mode == "dedicated":
-        state_dir = run_state_dir
-    else:
-        state_dir = shared_state_dir
     return AwsExecutorContext(
         action=action,
         manifest_path=manifest_path,
@@ -84,30 +62,16 @@ def _build_context(action: str, manifest_path: Path) -> AwsExecutorContext:
         target_name=target_name,
         suite_name=_optional_scalar(contract, "RUN_SUITE_NAME"),
         run_token=run_token,
-        instance_mode=instance_mode,
         remote_user=_optional_scalar(contract, "RUN_REMOTE_USER"),
         remote_stage_dir=_optional_scalar(contract, "RUN_REMOTE_STAGE_DIR"),
         key_path=Path(_optional_scalar(contract, "RUN_AWS_KEY_PATH")).resolve(),
         aws_region=_require_scalar(contract, "RUN_AWS_REGION"),
         aws_profile=_require_scalar(contract, "RUN_AWS_PROFILE"),
         target_root=target_root,
-        shared_state_dir=shared_state_dir,
         run_state_dir=run_state_dir,
-        state_dir=state_dir,
-        state_file=state_dir / "instance.json",
+        state_file=run_state_dir / "instance.json",
         results_dir=target_root / "results",
     )
-
-
-@contextmanager
-def _locked_file(path: Path):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
-        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-        try:
-            yield
-        finally:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 def _aws_cmd(ctx: AwsExecutorContext, *args: str, capture_output: bool = False) -> subprocess.CompletedProcess[str]:
@@ -331,7 +295,6 @@ def _terminate_instance(ctx: AwsExecutorContext, explicit_instance_id: str = "")
             completed = _aws_cmd(ctx, "ec2", "wait", "instance-terminated", "--instance-ids", *target_ids)
             if completed.returncode != 0:
                 raise SystemExit(completed.returncode)
-        shutil.rmtree(ctx.shared_state_dir, ignore_errors=True)
         shutil.rmtree(ctx.target_root / "run-state", ignore_errors=True)
         return
 

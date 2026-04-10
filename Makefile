@@ -24,7 +24,6 @@ AWS_ARM64_SETUP_MODULES_ARCHIVE := $(AWS_ARM64_SETUP_ROOT)/modules.tar.gz
 
 include $(RUNNER_DIR)/mk/arm64_defaults.mk
 include $(RUNNER_DIR)/mk/build.mk
-include $(RUNNER_DIR)/mk/local_prep.mk
 
 # ARM64 / AWS
 ARM64_BUILD_DIR     ?= $(KERNEL_DIR)/build-arm64
@@ -69,11 +68,11 @@ SCX_PROG_SHOW_RACE_SKIP_PROBE ?= 0
 KALLSYMS_EXTRA_PASS ?= 1
 
 # Derived
-BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
 KERNEL_CONFIG_PATH := $(X86_BUILD_DIR)/.config
 NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
 JOBS         ?= $(NPROC)
 DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_defconfig
+ARM64_KERNEL_CONFIG_SCRIPT := $(RUNNER_DIR)/libs/arm64_kernel_config.py
 # Results
 MICRO_RESULTS_DIR      := $(ROOT_DIR)/micro/results
 
@@ -116,19 +115,6 @@ help:
 	@echo "        aws-x86-test AWS_X86_REGION=<region> AWS_X86_PROFILE=<profile> AWS_X86_TEST_MODE=<selftest|negative|test>"
 	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=$(AWS_X86_BENCH_MODE) AWS_X86_E2E_CASES=<all|tracee,tetragon,...>"
 	@echo "        AWS benchmark mode 'all' fans out micro/corpus/e2e in parallel on dedicated remote instances"
-	@echo "Developer-only raw build helpers still exist internally but are intentionally omitted here."
-
-__kernel: $(X86_BUILD_DIR)/arch/x86/boot/bzImage
-	@if [ "$(BZIMAGE_PATH)" != "$(X86_BUILD_DIR)/arch/x86/boot/bzImage" ]; then \
-		mkdir -p "$$(dirname "$(BZIMAGE_PATH)")"; \
-		cp "$(X86_BUILD_DIR)/arch/x86/boot/bzImage" "$(BZIMAGE_PATH)"; \
-	fi
-
-__kernel-clean:
-	rm -rf "$(X86_BUILD_DIR)"
-
-__kernel-rebuild: __kernel-clean
-	$(MAKE) __kernel BZIMAGE="$(BZIMAGE)"
 
 $(AWS_X86_SETUP_KERNEL_RELEASE_FILE) $(AWS_X86_SETUP_KERNEL_IMAGE) $(AWS_X86_SETUP_MODULES_ARCHIVE) &: $(X86_BUILD_DIR)/arch/x86/boot/bzImage
 	@bash -eu -o pipefail -c '\
@@ -140,10 +126,9 @@ $(AWS_X86_SETUP_KERNEL_RELEASE_FILE) $(AWS_X86_SETUP_KERNEL_IMAGE) $(AWS_X86_SET
 		kernel_release_file="$(X86_BUILD_DIR)/include/config/kernel.release"; \
 		[[ -f "$$kernel_release_file" ]] || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
 		kernel_release="$$(tr -d '\''\n'\'' < "$$kernel_release_file")"; \
-		rm -rf "$$artifact_root"; \
-		mkdir -p "$$artifact_root/boot"; \
-		mkdir -p "$$install_root"; \
-		cp "$(X86_BUILD_DIR)/arch/x86/boot/bzImage" "$$kernel_image"; \
+		rm -rf "$$install_root"; \
+		mkdir -p "$$artifact_root/boot" "$$install_root"; \
+		ln -f "$(X86_BUILD_DIR)/arch/x86/boot/bzImage" "$$kernel_image"; \
 		printf "%s\n" "$$kernel_release" > "$$release_file"; \
 		$(MAKE) --no-print-directory -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" INSTALL_MOD_PATH="$$install_root" DEPMOD=true CONFIG_MODULE_SIG=n modules_install; \
 		rm -f "$$install_root/lib/modules/$$kernel_release/build" "$$install_root/lib/modules/$$kernel_release/source"; \
@@ -152,7 +137,7 @@ $(AWS_X86_SETUP_KERNEL_RELEASE_FILE) $(AWS_X86_SETUP_KERNEL_IMAGE) $(AWS_X86_SET
 		test -f "$$kernel_image"; \
 		test -f "$$modules_archive"'
 
-$(KERNEL_CONFIG_PATH):
+$(KERNEL_CONFIG_PATH): $(DEFCONFIG_SRC)
 	cp "$(DEFCONFIG_SRC)" "$@"
 
 check:
@@ -191,33 +176,29 @@ vm-all:
 	$(MAKE) vm-e2e
 
 # ── ARM64 kernel ───────────────────────────────────────────────────────────────
-$(ARM64_BUILD_CONFIG): $(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF)
+$(ARM64_BUILD_CONFIG): $(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF) $(ARM64_KERNEL_CONFIG_SCRIPT) $(KERNEL_BUILD_META_FILES)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" "$(PYTHON)" -m runner.libs.arm64_kernel_config local \
 		"$(KERNEL_DIR)" "$(ARM64_BUILD_DIR)" "$(ARM64_CROSS_PREFIX)"
 	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
 
-$(ARM64_IMAGE): $(ARM64_BUILD_CONFIG)
+$(ARM64_IMAGE): $(ARM64_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" Image -j"$(NPROC)"
 	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
 
-$(ARM64_EFI_IMAGE): $(ARM64_BUILD_CONFIG)
+$(ARM64_EFI_IMAGE): $(ARM64_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" vmlinuz.efi -j"$(NPROC)"
 
-__kernel-arm64: $(ARM64_IMAGE) $(ARM64_EFI_IMAGE)
-	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
-	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
-
-$(ARM64_AWS_BUILD_CONFIG): $(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF)
+$(ARM64_AWS_BUILD_CONFIG): $(ARM64_GCC) $(ARM64_GXX) $(ARM64_READELF) $(ARM64_KERNEL_CONFIG_SCRIPT) $(ARM64_AWS_BASE_CONFIG) $(KERNEL_BUILD_META_FILES)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" ARM64_BASE_CONFIG="$(ARM64_AWS_BASE_CONFIG)" "$(PYTHON)" -m runner.libs.arm64_kernel_config aws \
 		"$(KERNEL_DIR)" "$(ARM64_AWS_BUILD_DIR)" "$(ARM64_CROSS_PREFIX)"
 
-$(ARM64_AWS_IMAGE): $(ARM64_AWS_BUILD_CONFIG)
+$(ARM64_AWS_IMAGE): $(ARM64_AWS_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" Image -j"$(NPROC)"
 
-$(ARM64_AWS_EFI_IMAGE): $(ARM64_AWS_BUILD_CONFIG)
+$(ARM64_AWS_EFI_IMAGE): $(ARM64_AWS_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
 	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" vmlinuz.efi -j"$(NPROC)"
 
@@ -231,10 +212,9 @@ $(AWS_ARM64_SETUP_KERNEL_RELEASE_FILE) $(AWS_ARM64_SETUP_KERNEL_IMAGE) $(AWS_ARM
 		kernel_release_file="$(ARM64_AWS_BUILD_DIR)/include/config/kernel.release"; \
 		[[ -f "$$kernel_release_file" ]] || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
 		kernel_release="$$(tr -d '\''\n'\'' < "$$kernel_release_file")"; \
-		rm -rf "$$artifact_root"; \
-		mkdir -p "$$artifact_root/boot"; \
-		mkdir -p "$$install_root"; \
-		cp "$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi" "$$kernel_image"; \
+		rm -rf "$$install_root"; \
+		mkdir -p "$$artifact_root/boot" "$$install_root"; \
+		ln -f "$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi" "$$kernel_image"; \
 		printf "%s\n" "$$kernel_release" > "$$release_file"; \
 		$(MAKE) --no-print-directory -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE="$(ARM64_CROSS_PREFIX)" INSTALL_MOD_PATH="$$install_root" DEPMOD=true CONFIG_MODULE_SIG=n modules_install; \
 		rm -f "$$install_root/lib/modules/$$kernel_release/build" "$$install_root/lib/modules/$$kernel_release/source"; \
