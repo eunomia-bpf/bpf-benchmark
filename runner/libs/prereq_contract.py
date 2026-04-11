@@ -32,20 +32,35 @@ def python_import_name(package_name: str) -> str:
         raise RuntimeError(f"unsupported python package contract: {package_name}") from exc
 
 
+def _active_python_bin(contract: Mapping[str, str | list[str]] | None = None) -> str:
+    if os.environ.get("BPFREJIT_INSIDE_RUNTIME_CONTAINER", "") == "1":
+        return _contract_scalar(contract, "RUN_RUNTIME_PYTHON_BIN") or _contract_scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+    return _contract_scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+
+
 def required_commands(*, contract: Mapping[str, str | list[str]] | None = None) -> list[str]:
     commands: list[str] = []
-    for token in (
-        _contract_scalar(contract, "RUN_BPFTOOL_BIN"),
-        _contract_scalar(contract, "RUN_REMOTE_PYTHON_BIN"),
-        *env_csv("RUN_REMOTE_COMMANDS_CSV", contract=contract),
-        *bundled_commands(contract=contract),
-    ):
+    if _contract_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE") and os.environ.get("BPFREJIT_INSIDE_RUNTIME_CONTAINER", "") != "1":
+        tokens = (
+            _contract_scalar(contract, "RUN_REMOTE_PYTHON_BIN"),
+            _contract_scalar(contract, "RUN_CONTAINER_RUNTIME") or "docker",
+        )
+    else:
+        tokens = (
+            _contract_scalar(contract, "RUN_BPFTOOL_BIN"),
+            _active_python_bin(contract),
+            *env_csv("RUN_REMOTE_COMMANDS_CSV", contract=contract),
+            *bundled_commands(contract=contract),
+        )
+    for token in tokens:
         if token and token not in commands:
             commands.append(token)
     return commands
 
 
 def bundled_commands(*, contract: Mapping[str, str | list[str]] | None = None) -> list[str]:
+    if _contract_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE") and os.environ.get("BPFREJIT_INSIDE_RUNTIME_CONTAINER", "") != "1":
+        return []
     if _contract_scalar(contract, "RUN_NEEDS_WORKLOAD_TOOLS") != "1":
         return []
     return ["hackbench", "sysbench", "wrk"]

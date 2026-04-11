@@ -103,18 +103,6 @@ def derive_run_type(output_path: Path, default_token: str) -> str:
     return sanitize_artifact_token(stem or default_token)
 
 
-def repo_relative_path(path: Path) -> str:
-    resolved = path.resolve()
-    try:
-        return str(resolved.relative_to(ROOT_DIR))
-    except ValueError:
-        return str(resolved)
-
-
-def artifact_dir_marker(path: Path) -> str:
-    return repo_relative_path(path)
-
-
 def _read_proc_start_ticks(pid: int) -> int | None:
     try:
         fields = Path(f"/proc/{int(pid)}/stat").read_text().split()

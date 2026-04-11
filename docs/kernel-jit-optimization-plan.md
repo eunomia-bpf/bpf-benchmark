@@ -978,7 +978,7 @@ make clean
 | 602 | Pass 覆盖率调查 | ✅ | **595/1241 = 47.9%**。报告：`pass_coverage_investigation_20260328.md`。 |
 | 603 | E2E 6/6 正面数据 | ✅ | Tracee **+3.09%**，Katran **+1.78%/p99 -1.57%**，BCC **1.015x**，bpftrace **1.140x**，scx **+54.6%**。 |
 | 604 | BCC 0.883x 回归修复 | ✅ | DCE fixed-point 死寄存器删除。**520 tests**。 |
-| 605 | Build toolchain 并发安全 | ✅ | flock(.cache/kernel-build.lock)。 |
+| 605 | Build toolchain 并发安全 | ✅ | 旧串行化方案已废弃；当前走 per-arch build roots + Make 真实文件 target。 |
 | 606 | Tracee 回归 + Tetragon 超时 | ✅ | branch-target fallback + 错误传播修复。**517 tests**。 |
 | 607 | OSDI benchmark review | ✅ | **Reject**。P0：paired trials、K2 对比、完整 run。报告：`benchmark_framework_osdi_review_20260328.md`。 |
 | 608 | Corpus 469 objects 跑 | ✅ 旧架构 | Round 1：431/469，applied-only geomean **1.0156**。旧架构数据，新架构需重跑（#637）。 |

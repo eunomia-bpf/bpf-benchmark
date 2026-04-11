@@ -72,7 +72,7 @@ _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
 _VENV_FOUND := $(firstword $(foreach v,$(_VENV_CANDIDATES),$(if $(wildcard $(v)/bin/activate),$(v),)))
 VENV ?= $(_VENV_FOUND)
 PYTHON := $(if $(VENV),$(VENV)/bin/python3,python3)
-export BZIMAGE PYTHON LLVM_CONFIG
+export BZIMAGE PYTHON LLVM_CONFIG LLVM_DIR RUN_LLVM_DIR
 export VM_TEST_TIMEOUT VM_MICRO_TIMEOUT VM_CORPUS_TIMEOUT VM_E2E_TIMEOUT
 export FUZZ_ROUNDS SCX_PROG_SHOW_RACE_MODE SCX_PROG_SHOW_RACE_ITERATIONS SCX_PROG_SHOW_RACE_LOAD_TIMEOUT SCX_PROG_SHOW_RACE_SKIP_PROBE
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
@@ -113,7 +113,13 @@ $(KERNEL_CONFIG_PATH): $(DEFCONFIG_SRC)
 	cp "$(DEFCONFIG_SRC)" "$@"
 
 check:
-	@true
+	$(PYTHON) -m py_compile \
+		micro/catalog.py \
+		runner/libs/run_contract.py \
+		runner/libs/run_target_suite.py \
+		runner/libs/suite_entrypoint.py \
+		runner/scripts/check_contracts.py
+	$(PYTHON) runner/scripts/check_contracts.py
 
 validate:
 	$(MAKE) check
@@ -148,7 +154,8 @@ vm-all:
 	$(MAKE) vm-e2e
 
 # ── ARM64 kernel ───────────────────────────────────────────────────────────────
-$(ARM64_BUILD_CONFIG): $(ARM64_RUNNER_BUILD_IMAGE_STATE) $(ARM64_KERNEL_CONFIG_SCRIPT) $(KERNEL_BUILD_META_FILES)
+$(ARM64_BUILD_CONFIG): $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_KERNEL_CONFIG_SCRIPT) $(KERNEL_BUILD_META_FILES)
+	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
 	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
 		--user "$(HOST_UID):$(HOST_GID)" \
 		-e HOME=/tmp/bpf-benchmark-container \
@@ -158,7 +165,8 @@ $(ARM64_BUILD_CONFIG): $(ARM64_RUNNER_BUILD_IMAGE_STATE) $(ARM64_KERNEL_CONFIG_S
 		"$(ARM64_RUNNER_BUILD_IMAGE)" \
 		python3 -m runner.libs.arm64_kernel_config local "$(KERNEL_DIR)" "$(ARM64_BUILD_DIR)" ""
 
-$(ARM64_IMAGE) $(ARM64_EFI_IMAGE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
+$(ARM64_IMAGE) $(ARM64_EFI_IMAGE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
+	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
 	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
 		--user "$(HOST_UID):$(HOST_GID)" \
 		-e HOME=/tmp/bpf-benchmark-container \
@@ -168,7 +176,8 @@ $(ARM64_IMAGE) $(ARM64_EFI_IMAGE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build
 		"$(ARM64_RUNNER_BUILD_IMAGE)" \
 		make -C "$(KERNEL_DIR)" O="$(ARM64_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE= Image vmlinuz.efi -j"$(NPROC)"
 
-$(ARM64_AWS_BUILD_CONFIG): $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_RUNNER_BUILD_IMAGE_STATE) $(ARM64_KERNEL_CONFIG_SCRIPT) $(ARM64_AWS_BASE_CONFIG) $(KERNEL_BUILD_META_FILES)
+$(ARM64_AWS_BUILD_CONFIG): $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_KERNEL_CONFIG_SCRIPT) $(ARM64_AWS_BASE_CONFIG) $(KERNEL_BUILD_META_FILES)
+	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
 	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
 		--user "$(HOST_UID):$(HOST_GID)" \
 		-e HOME=/tmp/bpf-benchmark-container \
@@ -179,7 +188,8 @@ $(ARM64_AWS_BUILD_CONFIG): $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM6
 		"$(ARM64_RUNNER_BUILD_IMAGE)" \
 		python3 -m runner.libs.arm64_kernel_config aws "$(KERNEL_DIR)" "$(ARM64_AWS_BUILD_DIR)" ""
 
-$(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_AWS_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
+$(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_AWS_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
+	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
 	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
 		--user "$(HOST_UID):$(HOST_GID)" \
 		-e HOME=/tmp/bpf-benchmark-container \

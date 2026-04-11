@@ -338,11 +338,7 @@ class BpfTestRunOpts(ctypes.Structure):
 
 class LibbpfMapApi:
     def __init__(self) -> None:
-        candidates: list[str] = []
-        configured = os.environ.get("BPFREJIT_LIBBPF_PATH", "").strip()
-        if configured:
-            candidates.append(configured)
-        candidates.extend(["libbpf.so.1", "libbpf.so"])
+        candidates = ["libbpf.so.1", "libbpf.so"]
         errors: list[str] = []
         self.lib = None
         for candidate in candidates:

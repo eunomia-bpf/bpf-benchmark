@@ -11,7 +11,6 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs import aws_common
 from runner.libs.cli_support import fail
-from runner.libs.prereq_contract import bundled_commands, required_commands
 from runner.libs.state_file import write_state
 
 _die = partial(fail, "aws-remote-prep")
@@ -238,10 +237,9 @@ def _ordered_unique(tokens: list[str]) -> list[str]:
 
 def _remote_required_commands(contract: dict[str, str | list[str]]) -> list[str]:
     python_bin = aws_common._require_scalar(contract, "RUN_REMOTE_PYTHON_BIN")
-    bpftool_bin = aws_common._require_scalar(contract, "RUN_BPFTOOL_BIN")
-    bundled = set(bundled_commands(contract=contract))
+    container_runtime = aws_common._require_scalar(contract, "RUN_CONTAINER_RUNTIME")
     commands = [
-        bpftool_bin,
+        container_runtime,
         "curl",
         "dracut",
         "file",
@@ -253,11 +251,6 @@ def _remote_required_commands(contract: dict[str, str | list[str]]) -> list[str]
         "taskset",
         "tar",
     ]
-    commands.extend(
-        command
-        for command in required_commands(contract=contract)
-        if command not in bundled
-    )
     return _ordered_unique(commands)
 
 

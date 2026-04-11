@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import shutil
 import os
-import re
 import sys
 from datetime import datetime, timezone
 from functools import partial
@@ -19,6 +18,7 @@ AwsExecutorContext = aws_common.AwsExecutorContext
 _build_context = aws_common._build_context
 _load_instance_state = aws_common._load_instance_state
 _require_scalar = aws_common._require_scalar
+_rsync_from = aws_common._rsync_from
 _rsync_to = aws_common._rsync_to
 _scp_from = aws_common._scp_from
 _scp_to = aws_common._scp_to
@@ -28,19 +28,13 @@ _run_remote_helper = aws_common._run_remote_helper
 _wait_for_ssh = aws_common._wait_for_ssh
 
 
-def _artifact_dirs_from_log(log_path: Path, *, required: bool = True) -> list[str]:
-    artifact_dirs: list[str] = []
-    seen: set[str] = set()
-    for line in log_path.read_text(encoding="utf-8").splitlines():
-        match = re.match(r"^ARTIFACT_DIR=(.+)$", line.strip())
-        if match:
-            artifact_dir = match.group(1).strip()
-            if artifact_dir and artifact_dir not in seen:
-                seen.add(artifact_dir)
-                artifact_dirs.append(artifact_dir)
-    if required and not artifact_dirs:
-        _die(f"remote suite log is missing ARTIFACT_DIR marker: {log_path}")
-    return artifact_dirs
+def _suite_results_relative_path(suite_name: str) -> str:
+    suite = suite_name.strip()
+    if suite in {"micro", "corpus", "e2e"}:
+        return f"{suite}/results"
+    if suite == "test":
+        return "tests/results"
+    _die(f"unsupported suite for result sync: {suite_name}")
 
 
 def _cleanup_failed_run(ctx: AwsExecutorContext, state: dict[str, str] | None = None) -> None:
@@ -92,9 +86,27 @@ def _sync_remote_roots(ctx: AwsExecutorContext, ip: str) -> None:
         _ssh_exec(ctx, ip, "mkdir", "-p", remote_parent)
         if source_path.is_dir():
             _ssh_exec(ctx, ip, "mkdir", "-p", remote_path)
-            _rsync_to(ctx, ip, source_path, remote_path)
+            _rsync_to(ctx, ip, source_path, remote_path, excludes=("results/", "__pycache__/"))
         else:
             _scp_to(ctx, ip, source_path, remote_path)
+
+
+def _sync_remote_results(ctx: AwsExecutorContext, ip: str, remote_workspace: str) -> Path | None:
+    relative_results = _suite_results_relative_path(ctx.suite_name)
+    remote_results = f"{remote_workspace}/{relative_results}"
+    local_results = ROOT_DIR / relative_results
+    exists = _run_remote_helper(
+        ctx,
+        ip,
+        _require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN"),
+        "path-exists",
+        remote_results,
+        check=False,
+    ).returncode == 0
+    if not exists:
+        return None
+    _rsync_from(ctx, ip, remote_results, local_results)
+    return local_results
 
 
 def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
@@ -131,30 +143,15 @@ def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
         remote_log,
         check=False,
     ).returncode == 0
-    remote_artifact_dirs: list[str] = []
-    local_artifact_dirs: list[Path] = []
     if log_exists:
         _scp_from(ctx, ip, remote_log, local_log)
-        artifact_dirs = _artifact_dirs_from_log(local_log, required=remote_completed.returncode == 0)
-        remote_artifact_dirs = [
-            f"{remote_workspace}/{artifact_dir}"
-            for artifact_dir in artifact_dirs
-        ]
-        local_artifact_dirs = [
-            ROOT_DIR / artifact_dir
-            for artifact_dir in artifact_dirs
-        ]
-        for remote_artifact_dir, local_artifact_dir in zip(remote_artifact_dirs, local_artifact_dirs):
-            local_artifact_dir.parent.mkdir(parents=True, exist_ok=True)
-            _scp_from(ctx, ip, remote_artifact_dir, local_artifact_dir.parent, recursive=True)
+    local_results = _sync_remote_results(ctx, ip, remote_workspace)
     if remote_completed.returncode != 0:
         _die(f"remote {ctx.target_name}/{ctx.suite_name} suite failed; inspect {local_log}")
-    if len(local_artifact_dirs) == 1:
-        shutil.copy2(local_log, local_artifact_dirs[0] / "aws-remote.log")
     print(
-        "[aws-executor] Fetched "
+        "[aws-executor] Synced "
         f"{ctx.target_name}/{ctx.suite_name} results to "
-        + ", ".join(str(path) for path in local_artifact_dirs),
+        + (str(local_results) if local_results is not None else "no result directory"),
         file=sys.stderr,
     )
 

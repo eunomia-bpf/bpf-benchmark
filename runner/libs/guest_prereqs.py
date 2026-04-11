@@ -20,6 +20,65 @@ def _scalar(contract: dict[str, str | list[str]], name: str) -> str:
     return value.strip()
 
 
+def _inside_runtime_container() -> bool:
+    return os.environ.get("BPFREJIT_INSIDE_RUNTIME_CONTAINER", "").strip() == "1"
+
+
+def _runtime_container_enabled(contract: dict[str, str | list[str]]) -> bool:
+    return bool(_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE"))
+
+
+def _container_runtime(contract: dict[str, str | list[str]]) -> str:
+    return _scalar(contract, "RUN_CONTAINER_RUNTIME") or "docker"
+
+
+def _active_python_bin(contract: dict[str, str | list[str]]) -> str:
+    if _inside_runtime_container():
+        return _scalar(contract, "RUN_RUNTIME_PYTHON_BIN") or _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+    return _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+
+
+def _runtime_image_tar_path(workspace: Path, contract: dict[str, str | list[str]]) -> Path:
+    configured = _scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE_TAR")
+    if not configured:
+        die("manifest RUN_RUNTIME_CONTAINER_IMAGE_TAR is empty")
+    candidate = Path(configured)
+    if not candidate.is_absolute():
+        candidate = workspace / candidate
+    return candidate
+
+
+def _container_image_available(runtime: str, image: str, *, path_value: str) -> bool:
+    env = dict(os.environ)
+    env["PATH"] = path_value
+    return subprocess.run(
+        [runtime, "image", "inspect", image],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        env=env,
+        check=False,
+    ).returncode == 0
+
+
+def _ensure_runtime_container_image(workspace: Path, contract: dict[str, str | list[str]], *, path_value: str) -> None:
+    runtime = _container_runtime(contract)
+    image = _scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE")
+    if not runtime:
+        die("manifest RUN_CONTAINER_RUNTIME is empty")
+    if not image:
+        die("manifest RUN_RUNTIME_CONTAINER_IMAGE is empty")
+    if not have_cmd(runtime, path_value=path_value):
+        die(f"required container runtime is missing on guest host: {runtime}")
+    if _container_image_available(runtime, image, path_value=path_value):
+        return
+    image_tar = _runtime_image_tar_path(workspace, contract)
+    if not image_tar.is_file():
+        die(f"runtime container image tar is missing: {image_tar}")
+    run_command([runtime, "load", "-i", str(image_tar)], path_value=path_value)
+    if not _container_image_available(runtime, image, path_value=path_value):
+        die(f"runtime container image did not load: {image}")
+
+
 def runtime_path_value(workspace: Path, contract: dict[str, str | list[str]]) -> str:
     path_entries: list[str] = []
     target_arch = _scalar(contract, "RUN_TARGET_ARCH")
@@ -99,8 +158,12 @@ def ensure_loopback_up(*, path_value: str) -> None:
 
 def ensure_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
     path_value = runtime_path_value(workspace, contract)
+    if _runtime_container_enabled(contract) and not _inside_runtime_container():
+        _ensure_runtime_container_image(workspace, contract, path_value=path_value)
+        return
+
     missing_commands: list[str] = []
-    python_bin = _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+    python_bin = _active_python_bin(contract)
     bundled = set(bundled_commands(contract=contract))
     for command_name in required_commands(contract=contract):
         if command_name in bundled:
@@ -142,6 +205,10 @@ def ensure_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) 
 
 def validate_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
     path_value = runtime_path_value(workspace, contract)
+    if _runtime_container_enabled(contract) and not _inside_runtime_container():
+        _ensure_runtime_container_image(workspace, contract, path_value=path_value)
+        return
+
     bundled = set(bundled_commands(contract=contract))
 
     for command_name in required_commands(contract=contract):
@@ -155,14 +222,14 @@ def validate_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]
         if shutil.which(command_name, path=path_value) is None:
             die(f"required guest command is missing: {command_name}")
 
-    python_bin = _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+    python_bin = _active_python_bin(contract)
     if python_bin and shutil.which(python_bin, path=path_value) is None:
         die(f"required guest command is missing: {python_bin}")
 
     for package_name in env_csv("RUN_REMOTE_PYTHON_MODULES_CSV", contract=contract):
         import_name = python_import_name(package_name)
         if not python_bin:
-            die("RUN_REMOTE_PYTHON_BIN is required when guest Python modules are requested")
+            die("active Python binary is required when guest Python modules are requested")
         if not python_module_available(python_bin, import_name, path_value=path_value):
             die(f"required guest Python module is missing for {python_bin}: {package_name}")
 

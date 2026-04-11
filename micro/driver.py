@@ -42,7 +42,6 @@ from runner.libs.results import (
 )
 from runner.libs.run_artifacts import (
     ArtifactSession,
-    artifact_dir_marker,
     derive_run_type,
     sanitize_artifact_token,
     summarize_benchmark_results,
@@ -686,7 +685,6 @@ def main(argv: list[str] | None = None) -> int:
         raise
 
     print(f"[done] wrote {artifact_dir / 'metadata.json'}")
-    print(f"ARTIFACT_DIR={artifact_dir_marker(artifact_dir)}")
     return 0
 
 

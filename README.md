@@ -10,8 +10,8 @@ Three-layer benchmarking pipeline:
 
 The historical multi-runtime userspace benchmark layer has been removed; the active tree is `micro/`, `corpus/`, and `e2e/`.
 
-Execution architecture and the active migration plan for build containers,
-runtime containers, and host-kernel boundaries live in
+Execution architecture for build containers, runtime containers, and
+host-kernel boundaries lives in
 [`docs/benchmark-runtime-architecture.md`](docs/benchmark-runtime-architecture.md).
 
 ## Repository Layout
@@ -31,13 +31,12 @@ bpf-benchmark/
 
 ## Prerequisites
 
-- clang/llvm (BPF programs compiled with `clang -target bpf`)
-- cmake, pkg-config, libelf-dev, zlib1g-dev, libzstd-dev
 - Python 3 with PyYAML: `pip install pyyaml` (or use the workspace venv)
+- `docker` or `podman` for Make-driven build and runtime containers
+- runnable `linux/amd64` and `linux/arm64` container userspace support when
+  building both target architectures
 - `sudo -n` (passwordless) required for kernel eBPF runtime
 - `vng` (virtme-ng) required for VM benchmark targets
-- `docker` or `podman` with runnable `linux/arm64` userspace support is
-  currently required for the active ARM64 local-prep build path
 - `CONTAINER_RUNTIME` may be set to `docker` or `podman` for Make-driven
   containerized build steps
 
@@ -103,13 +102,13 @@ directories are not benchmark result roots.
 The root `Makefile` surface is reserved for canonical run/validation entrypoints,
 plus a small developer helper surface for direct kernel/module lifecycle work.
 Active local prep/build flows through real Make targets resolved by the Python
-runner libraries. The long-term direction is fixed build containers for
+runner libraries. Active benchmark execution uses fixed build containers for
 artifact production plus host-kernel execution with privileged runtime
-containers where practical.
+containers for suite userspace.
 
 ## Layer Notes
 
-`runner/` owns target/suite contracts under `runner/targets/` and `runner/suites/`, the shared `micro_exec` C++ runner, Python executors/orchestrators under `runner/libs/`, and lower-level build/packaging helpers under `runner/scripts/`.
+`runner/` owns target/suite contracts under `runner/targets/` and `runner/suites/`, the shared `micro_exec` C++ runner, Python executors/orchestrators under `runner/libs/`, and small validation/VM helpers under `runner/scripts/`.
 
 `micro/` owns the isolated benchmark manifests (`micro/config/micro_pure_jit.yaml`), input generators, and the Python suite driver (`micro/driver.py`).
 

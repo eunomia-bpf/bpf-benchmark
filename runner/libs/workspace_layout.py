@@ -7,7 +7,7 @@ from runner.libs import ROOT_DIR
 
 _BASE_TRANSFER_ROOTS = {
     "test": ("runner/__init__.py", "runner/libs", "tests"),
-    "micro": ("runner/__init__.py", "runner/libs", "micro"),
+    "micro": ("runner/__init__.py", "runner/libs", "micro/driver.py", "micro/catalog.py", "micro/config", "micro/generated-inputs"),
     "corpus": ("runner/__init__.py", "runner/libs", "corpus/driver.py", "corpus/config", "e2e/cases"),
     "e2e": ("runner/__init__.py", "runner/libs", "corpus/config", "e2e/driver.py", "e2e/cases"),
 }
@@ -26,6 +26,10 @@ def workload_tools_root(workspace: Path, target_arch: str) -> Path:
 
 def micro_program_root(workspace: Path, target_arch: str) -> Path:
     return workspace / ".cache" / "micro-programs" / str(target_arch).strip()
+
+
+def runtime_container_image_tar_path(workspace: Path, target_arch: str) -> Path:
+    return workspace / ".cache" / "container-images" / f"{str(target_arch).strip()}-runner-runtime.image.tar"
 
 
 def daemon_binary_path(workspace: Path, target_arch: str) -> Path:
@@ -54,16 +58,6 @@ def test_negative_build_dir(workspace: Path, target_arch: str) -> Path:
 
 def kinsn_module_dir(workspace: Path, target_arch: str) -> Path:
     return workspace / "module" / ("arm64" if str(target_arch).strip() == "arm64" else "x86")
-
-
-def suite_uses_libbpf_runtime(suite_name: str, target_arch: str) -> bool:
-    return str(target_arch).strip() != "arm64" and str(suite_name).strip() in {"test", "corpus", "e2e"}
-
-
-def libbpf_runtime_path(workspace: Path, target_arch: str, suite_name: str) -> Path | None:
-    if not suite_uses_libbpf_runtime(suite_name, target_arch):
-        return None
-    return repo_artifact_root(workspace, target_arch) / "libbpf" / "lib" / "libbpf.so"
 
 
 def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Path:
@@ -165,8 +159,8 @@ def _artifact_bundle_paths(
     arch = str(target_arch).strip()
     paths: list[Path] = []
     artifact_root = repo_artifact_root(workspace, arch)
-    if libbpf_runtime_path(workspace, arch, suite_name) is not None:
-        paths.append(artifact_root / "libbpf")
+    if str(suite_name).strip() in _BASE_TRANSFER_ROOTS:
+        paths.append(runtime_container_image_tar_path(workspace, arch))
     if needs_daemon_binary:
         paths.append(daemon_binary_path(workspace, arch).parent)
     if needs_runner_binary:
@@ -203,12 +197,11 @@ def local_prep_targets(
     targets: list[Path] = []
     arch = str(target_arch).strip()
     suite = str(suite_name).strip()
+    if suite in _BASE_TRANSFER_ROOTS:
+        targets.append(runtime_container_image_tar_path(workspace, arch))
     if str(executor).strip() == "kvm":
         targets.append(kvm_kernel_image_path(workspace))
         targets.append(kernel_modules_root(workspace, arch, executor) / "lib" / "modules")
-    libbpf_target = libbpf_runtime_path(workspace, arch, suite)
-    if libbpf_target is not None:
-        targets.append(libbpf_target)
     if needs_daemon_binary:
         targets.append(daemon_binary_path(workspace, arch))
     if needs_runner_binary:

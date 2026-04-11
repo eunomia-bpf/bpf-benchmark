@@ -9,9 +9,9 @@ and `e2e`.
 It replaces the old direction where the runner tried to synthesize build
 toolchains, runtime loaders, and host setup from the middle layer.
 
-## Problem
+## Historical Problem
 
-The current tree is too complex because one runner layer is doing all of the
+The old tree was too complex because one runner layer was doing all of the
 following at once:
 
 1. Building application artifacts.
@@ -20,7 +20,7 @@ following at once:
 4. Preparing AWS or KVM hosts.
 5. Launching the actual benchmark workload.
 
-That leads to avoidable complexity:
+That led to avoidable complexity:
 
 - `runner/mk/build.mk` grows into a custom sysroot and runtime packager.
 - `runner/libs` grows host-setup and transfer logic that should belong to image
@@ -28,9 +28,9 @@ That leads to avoidable complexity:
 - artifact roots, scratch roots, runtime lib roots, and transfer roots all
   become different concepts.
 
-## Target Architecture
+## Active Architecture
 
-The target architecture has a hard boundary:
+The active architecture has a hard boundary:
 
 1. Host image owns the kernel and host capabilities.
 2. Build container owns compilation.
@@ -57,7 +57,7 @@ The host layer is not responsible for:
 
 ### Build Layer
 
-Every app should be built inside a fixed build container for its target
+Every app is built inside a fixed build container for its target
 `arch + distro`.
 
 The build container is responsible for:
@@ -74,13 +74,14 @@ The build container is not responsible for:
 
 ### Run Layer
 
-After the host boots into the correct kernel, benchmark apps should run inside
-privileged runtime containers wherever practical.
+After the host boots into the correct kernel, benchmark suites run inside one
+privileged runtime container for the target architecture.
 
 That means:
 
 - the kernel stays on the VM or AWS host
-- userspace loader and benchmark process run in a container
+- `suite_entrypoint.py`, daemon processes, app loaders, attach logic, workload
+  tools, and benchmark processes run in that container
 - the container mounts host resources that the app actually needs
 
 For eBPF-heavy apps, that usually means:
@@ -88,7 +89,8 @@ For eBPF-heavy apps, that usually means:
 - `--privileged`
 - `--pid=host`
 - `--network=host`
-- bind mounts for `/sys`, `/proc`, `/sys/fs/bpf`, `/lib/modules`
+- bind mounts for `/sys`, `/sys/fs/bpf`, `/sys/kernel/debug`, `/lib/modules`,
+  and the benchmark workspace
 - bind mounts for `corpus/results`, `e2e/results`, or `micro/results`
 
 This is still "running on the host kernel". The container only isolates
@@ -130,15 +132,15 @@ These patterns are not allowed on the main path:
 - shared mutable output roots guarded by locks
 - run-time package installation on KVM or AWS hosts
 
-## What Gets Simpler
+## Current Simplification
 
-When the migration is complete:
+The active implementation keeps these boundaries:
 
 - `build.mk` mostly dispatches into app-native `make`, `cmake`, `cargo`, or
   containerized equivalents
 - `workspace_layout.py` describes final artifacts, not guessed bundle roots
-- `suite_entrypoint.py` launches work and records result paths, but does not
-  stage benchmark outputs
+- `suite_entrypoint.py` enters the runtime container once, then launches work
+  and records result paths without staging benchmark outputs
 - `aws_remote_prep.py` prepares the host, but does not synthesize a userspace
   runtime bundle
 
@@ -164,8 +166,6 @@ When the migration is complete:
 - [x] Convert test and micro helper builds to canonical build containers.
 - [x] Keep generated micro BPF objects out of `micro/programs` and build them
   under `.cache/micro-programs/<arch>` via Make.
-- [x] Convert x86_64 `libbpf` runtime production to the canonical x86_64 build
-  container.
 - [x] Convert `scx`, `bcc`, `tracee`, `tetragon`, `katran`, and
   `workload-tools` to fixed distro build containers.
 - [x] Build native repo artifacts from per-arch scratch source/build roots
@@ -174,54 +174,55 @@ When the migration is complete:
   the canonical kernel image and `.cache/repo-artifacts/<arch>/kernel-modules`
   Make targets, then syncs that modules tree to the host staging directory.
 
-### Runtime Packaging
+### Runtime Container
 
-- [~] Replace portable wrapper generation with runtime container images wherever
-  possible.
-  Current state: ELF wrapper generation is container-only and no longer has a
-  host/sysroot fallback, but the long-term runtime-container replacement is not
-  complete.
+- [x] Replace portable wrapper generation with runtime container execution.
+  Current state: Make builds `runner-runtime.Dockerfile` for the target arch,
+  saves it as `.cache/container-images/<arch>-runner-runtime.image.tar`, and
+  the host entrypoint loads that image before executing the suite inside it.
 - [x] Stop resolving glibc and loader paths from the host runner layer.
-- [ ] Treat final Make targets as app artifacts or OCI image tags, not handmade
+- [x] Treat final Make targets as app artifacts or OCI image tars, not handmade
   runtime bundles.
 
 ### Run in Host-Privileged Containers
 
-- [ ] Define per-app run container contracts for `bcc`, `tracee`, `tetragon`,
-  `katran`, `scx`, and `bpftrace`.
-- [ ] Mount only the host paths each app actually needs.
-- [ ] Keep attach and topology logic as close to the app-native launcher as
-  possible.
+- [x] Use one suite-level runtime container contract for `bcc`, `tracee`,
+  `tetragon`, `katran`, `scx`, `bpftrace`, daemon, workload, and attach
+  orchestration.
+- [x] Keep app processes in the host PID namespace so BPF FD/PID discovery uses
+  real loader PIDs.
+- [x] Keep attach and topology logic in the existing app runner modules; the
+  container is packaging/execution boundary, not a new app abstraction layer.
 
 ### Thin Orchestration
 
-- [ ] Make `run_target_suite.py` resolve final artifacts and host/run contracts
+- [x] Make `run_target_suite.py` resolve final artifacts and host/run contracts
   only.
 - [x] Keep AWS/KVM prep from installing userspace packages at run time.
-- [ ] Remove remaining bundle-root assumptions from transfer and consumption
+- [x] Remove remaining bundle-root assumptions from transfer and consumption
   paths.
 
 ## Explicit Non-Goals
 
-This migration does not mean:
+This architecture does not mean:
 
 - replacing the host kernel with a container kernel
 - hiding all eBPF attach semantics behind generic abstractions
-- forcing every app into the exact same launcher
+- forcing every app into a separate launcher
 
 The goal is narrower:
 
 - compile in fixed containers
-- run userspace in fixed containers when practical
+- run suite userspace in fixed containers
 - keep kernel ownership with the host
 - keep build ownership with Make
 
-## Current Direction
+## Current Invariants
 
-The repository should keep moving in one direction:
+The repository keeps these invariants:
 
 - away from hand-built runtime packaging
 - away from host-synthesized sysroots
 - away from copy-back result handling
-- toward app-native build logic inside fixed containers
-- toward host kernel + privileged run container execution
+- app-native build logic inside fixed containers
+- host kernel + privileged run container execution

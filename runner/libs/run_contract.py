@@ -218,6 +218,8 @@ _COMMON_MANIFEST_INPUTS = {
     "RUN_TOKEN",
     "LLVM_CONFIG",
     "LLVM_DIR",
+    "CONTAINER_RUNTIME",
+    "RUNTIME_PYTHON",
 }
 
 _KVM_MANIFEST_INPUTS = {
@@ -374,7 +376,9 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
     run_vm_kernel_image = ""
     run_vm_timeout_seconds = suite.get("SUITE_DEFAULT_VM_TIMEOUT_SECONDS", "7200")
     run_remote_python_bin = target.get("TARGET_REMOTE_PYTHON_DEFAULT", suite.get("SUITE_DEFAULT_REMOTE_PYTHON_BIN", ""))
+    run_runtime_python_bin = _env_or_default(values, "RUNTIME_PYTHON", "python3")
     run_remote_python_modules = "PyYAML"
+    run_container_runtime = _env_or_default(values, "CONTAINER_RUNTIME", "docker")
     run_needs_runner_binary = suite.get("SUITE_NEEDS_RUNNER_BINARY", "0")
     run_needs_daemon_binary = suite.get("SUITE_NEEDS_DAEMON_BINARY", "0")
     run_needs_kinsn_modules = suite.get("SUITE_NEEDS_KINSN_MODULES", "0")
@@ -589,7 +593,11 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
         "RUN_VM_KERNEL_IMAGE": run_vm_kernel_image,
         "RUN_VM_TIMEOUT_SECONDS": run_vm_timeout_seconds,
         "RUN_REMOTE_PYTHON_BIN": run_remote_python_bin,
+        "RUN_RUNTIME_PYTHON_BIN": run_runtime_python_bin,
         "RUN_REMOTE_PYTHON_MODULES_CSV": run_remote_python_modules,
+        "RUN_CONTAINER_RUNTIME": run_container_runtime,
+        "RUN_RUNTIME_CONTAINER_IMAGE": f"bpf-benchmark/runner-runtime:{target.get('TARGET_ARCH', '').strip()}",
+        "RUN_RUNTIME_CONTAINER_IMAGE_TAR": f".cache/container-images/{target.get('TARGET_ARCH', '').strip()}-runner-runtime.image.tar",
         "RUN_TEST_MODE": run_test_mode,
         "RUN_TEST_FUZZ_ROUNDS": run_test_fuzz_rounds,
         "RUN_TEST_SCX_PROG_SHOW_RACE_MODE": run_test_scx_prog_show_race_mode,

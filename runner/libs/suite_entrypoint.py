@@ -18,7 +18,6 @@ from runner.libs.workspace_layout import (
     daemon_binary_path,
     kernel_modules_root,
     kinsn_module_dir,
-    libbpf_runtime_path,
     micro_program_root,
     native_repo_targets,
     repo_artifact_root,
@@ -26,9 +25,79 @@ from runner.libs.workspace_layout import (
     scx_targets,
     test_negative_build_dir,
     test_unittest_build_dir,
+    workload_tools_root,
 )
 
 _die = partial(fail, "suite-entrypoint")
+
+
+def _manifest_scalar(contract: dict[str, str | list[str]], name: str, default: str = "") -> str:
+    value = contract.get(name, default)
+    if isinstance(value, list):
+        _die(f"manifest {name} must be scalar")
+    return str(value).strip()
+
+
+def _inside_runtime_container() -> bool:
+    return os.environ.get("BPFREJIT_INSIDE_RUNTIME_CONTAINER", "").strip() == "1"
+
+
+def _runtime_container_enabled(contract: dict[str, str | list[str]]) -> bool:
+    return bool(_manifest_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE"))
+
+
+def _append_bind_mount(command: list[str], source: Path, target: Path | None = None, *, readonly: bool = False) -> None:
+    if not source.exists():
+        return
+    destination = target or source
+    suffix = ":ro" if readonly else ""
+    command.extend(["-v", f"{source}:{destination}{suffix}"])
+
+
+def _run_in_runtime_container(workspace: Path, manifest_path: Path, contract: dict[str, str | list[str]]) -> None:
+    runtime = _manifest_scalar(contract, "RUN_CONTAINER_RUNTIME", "docker") or "docker"
+    image = _manifest_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE")
+    python_bin = _manifest_scalar(contract, "RUN_RUNTIME_PYTHON_BIN", "python3") or "python3"
+    if not image:
+        _die("manifest RUN_RUNTIME_CONTAINER_IMAGE is empty")
+    command = [
+        runtime,
+        "run",
+        "--rm",
+        "--privileged",
+        "--pid=host",
+        "--network=host",
+        "--ipc=host",
+        "-e",
+        "BPFREJIT_INSIDE_RUNTIME_CONTAINER=1",
+        "-e",
+        f"PYTHONPATH={workspace}",
+        "-e",
+        "HOME=/root",
+        "-v",
+        f"{workspace}:{workspace}",
+        "-w",
+        str(workspace),
+    ]
+    _append_bind_mount(command, Path("/sys"))
+    _append_bind_mount(command, Path("/sys/fs/bpf"))
+    _append_bind_mount(command, Path("/sys/kernel/debug"))
+    _append_bind_mount(command, Path("/lib/modules"), readonly=True)
+    _append_bind_mount(command, Path("/boot"), readonly=True)
+    command.extend(
+        [
+            image,
+            python_bin,
+            "-m",
+            "runner.libs.suite_entrypoint",
+            str(workspace),
+            str(manifest_path),
+        ]
+    )
+    completed = subprocess.run(command, cwd=workspace, text=True, check=False)
+    if completed.returncode != 0:
+        raise SystemExit(completed.returncode)
+
 
 def _parse_shell_argv(serialized: str) -> list[str]:
     text = serialized.strip()
@@ -63,6 +132,31 @@ def _cross_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
         if path.is_dir():
             entries.append(str(path))
     return ":".join(entries)
+
+
+def _suite_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
+    repo_root = repo_artifact_root(workspace, target_arch)
+    workload_root = workload_tools_root(workspace, target_arch)
+    candidates = [
+        repo_root / "katran" / "lib64",
+        repo_root / "katran" / "lib",
+        repo_root / "tracee" / "lib",
+        repo_root / "bcc" / "libbpf-tools" / "lib",
+        workload_root / "lib",
+        workload_root / "lib" / "luajit",
+    ]
+    cross_runtime = _cross_runtime_ld_library_path(workspace, target_arch)
+    entries = [str(path) for path in candidates if path.is_dir()]
+    if cross_runtime:
+        entries.extend(entry for entry in cross_runtime.split(":") if entry)
+    inherited = os.environ.get("LD_LIBRARY_PATH", "").strip()
+    if inherited:
+        entries.extend(entry for entry in inherited.split(":") if entry)
+    ordered: list[str] = []
+    for entry in entries:
+        if entry and entry not in ordered:
+            ordered.append(entry)
+    return ":".join(ordered)
 
 
 def _run_and_tee(command: list[str], *, cwd: Path, env: dict[str, str], log_path: Path) -> None:
@@ -191,6 +285,12 @@ class SuiteEntrypoint:
                 _die(f"manifest {name} is empty")
             return str(value)
 
+        def optional_scalar(name: str, default: str = "") -> str:
+            value = contract.get(name, default)
+            if isinstance(value, list):
+                _die(f"manifest {name} must be scalar")
+            return str(value).strip()
+
         def csv_value(name: str) -> list[str]:
             value = contract.get(name, "")
             if isinstance(value, list):
@@ -211,6 +311,8 @@ class SuiteEntrypoint:
         executor = required_scalar("RUN_EXECUTOR")
         run_token = required_scalar("RUN_TOKEN")
         python_bin = required_scalar("RUN_REMOTE_PYTHON_BIN")
+        if _inside_runtime_container():
+            python_bin = optional_scalar("RUN_RUNTIME_PYTHON_BIN", python_bin) or python_bin
         bpftool_bin = required_scalar("RUN_BPFTOOL_BIN")
         artifact_dir = None
         if suite_name == "test":
@@ -249,14 +351,14 @@ class SuiteEntrypoint:
         env["BPFREJIT_RUNTIME_TMPDIR"] = env["TMPDIR"]
         repo_build_root = self._repo_build_root()
         env["PATH"] = runtime_path_value(self.workspace, self.contract)
+        runtime_ld = _suite_runtime_ld_library_path(self.workspace, self.target_arch)
+        if runtime_ld:
+            env["LD_LIBRARY_PATH"] = runtime_ld
         bundled_tool_bin = self.workspace / ".cache" / "workload-tools" / self.target_arch / "bin"
         if bundled_tool_bin.is_dir():
             env["BPFREJIT_WORKLOAD_TOOL_BIN_DIR"] = str(bundled_tool_bin)
         env["BPFREJIT_REPO_ARTIFACT_ROOT"] = str(repo_build_root)
         env["BPFREJIT_REMOTE_PYTHON_BIN"] = self.python_bin
-        libbpf_runtime = self._libbpf_runtime_path()
-        if libbpf_runtime is not None:
-            env["BPFREJIT_LIBBPF_PATH"] = str(libbpf_runtime)
         kernel_modules_dir = kernel_modules_root(self.workspace, self.target_arch, self.executor)
         if not kernel_modules_dir.is_dir():
             _die(f"bundled kernel modules root is missing: {kernel_modules_dir}")
@@ -278,14 +380,6 @@ class SuiteEntrypoint:
 
     def _repo_build_root(self) -> Path:
         return repo_artifact_root(self.workspace, self.target_arch)
-
-    def _libbpf_runtime_path(self) -> Path | None:
-        candidate = libbpf_runtime_path(self.workspace, self.target_arch, self.suite_name)
-        if candidate is None:
-            return None
-        if not candidate.is_file():
-            _die(f"bundled libbpf runtime is missing: {candidate}")
-        return candidate
 
     def _test_unittest_build_dir(self) -> Path:
         return test_unittest_build_dir(self.workspace, self.target_arch)
@@ -545,6 +639,7 @@ class SuiteEntrypoint:
         self._ensure_runner_binary()
         runtime_env = env.copy()
         runtime_env["BPFREJIT_MICRO_PROGRAM_DIR"] = str(micro_program_root(self.workspace, self.target_arch))
+        runtime_env["BPFREJIT_MICRO_RUNNER_BINARY"] = str(runner_binary_path(self.workspace, self.target_arch))
         runtime_ld = _cross_runtime_ld_library_path(self.workspace, self.target_arch)
         if runtime_ld:
             runtime_env["LD_LIBRARY_PATH"] = runtime_ld
@@ -628,8 +723,13 @@ class SuiteEntrypoint:
             self._run_e2e_case(case_name, case_env)
 
     def run(self) -> None:
+        if _runtime_container_enabled(self.contract) and not _inside_runtime_container():
+            _run_in_runtime_container(self.workspace, self.manifest_path, self.contract)
+            return
         env = self._runtime_env()
         os.chdir(self.workspace)
+        if _inside_runtime_container() and shutil.which("ip", path=env["PATH"]) is not None:
+            _run_checked(["ip", "link", "set", "lo", "up"], cwd=self.workspace, env=env)
         if self.suite_name == "test":
             artifact_dir = self._artifact_dir_required()
             artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -645,9 +745,6 @@ class SuiteEntrypoint:
             self._run_e2e_suite(env)
         else:
             _die(f"unsupported suite: {self.suite_name}")
-        if self.suite_name == "test":
-            print(f"ARTIFACT_DIR={self._artifact_dir_required().relative_to(self.workspace)}")
-
 
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)

@@ -25,7 +25,6 @@ from runner.libs.daemon_session import DaemonSession  # noqa: E402
 from runner.libs.rejit import benchmark_rejit_enabled_passes, collect_effective_enabled_passes  # noqa: E402
 from runner.libs.run_artifacts import (  # noqa: E402
     ArtifactSession,
-    artifact_dir_marker,
     current_process_identity,
     derive_run_type,
 )
@@ -578,7 +577,6 @@ def _run_single_case(
                 result_payload=payload,
                 detail_texts=detail_texts,
             )
-            print(f"ARTIFACT_DIR={artifact_dir_marker(artifact_dir)}")
             return payload
 
         error_message = (

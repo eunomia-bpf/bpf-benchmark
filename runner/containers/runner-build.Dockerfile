@@ -1,4 +1,4 @@
-FROM rockylinux:9
+FROM docker.io/library/rockylinux:9@sha256:d7be1c094cc5845ee815d4632fe377514ee6ebcf8efaed6892889657e5ddaaa6
 
 RUN dnf -y install --setopt=install_weak_deps=False --nodocs \
         dnf-plugins-core \
@@ -52,6 +52,7 @@ RUN dnf -y install --setopt=install_weak_deps=False --nodocs \
         rsync \
         rust \
         snappy-devel \
+        spdlog-devel \
         tar \
         unzip \
         which \

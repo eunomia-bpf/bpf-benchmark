@@ -8,8 +8,8 @@ Current policy:
 1. Build containers are the canonical place for userspace compilation
    dependencies.
 2. VM or AWS hosts own the kernel and host privileges.
-3. Runtime containers should own userspace runtime dependencies whenever an app
-   can run that way.
+3. Runtime containers own suite orchestration, daemon/app loaders, workload
+   tools, eBPF object consumption, and userspace runtime dependencies.
 4. Make remains the only build entrypoint; containers are implementation
    details used by Make targets.
 
@@ -20,8 +20,11 @@ Image families:
   native repo artifacts. Make builds the same Dockerfile for `linux/amd64` and
   `linux/arm64`; ARM64 runs as a native ARM64 container rather than relying on
   a host-installed ARM64 sysroot.
-- future `*-runtime.Dockerfile`
-  Will carry app userspace dependencies for privileged host-kernel execution.
+- `runner-runtime.Dockerfile`
+  Canonical runtime image for privileged host-kernel execution. The host entry
+  point loads this image and runs `suite_entrypoint.py` inside it with host PID
+  and network namespaces, so attach logic sees the real loader PIDs.
 
-The long-term goal is to shrink `runner/mk/build.mk` until it mostly dispatches
-into app-native build commands inside these fixed images.
+`runner/mk/build.mk` is intentionally thin: it dispatches into app-native build
+commands inside these fixed images and installs the resulting artifacts into
+the cache paths consumed by target/suite contracts.

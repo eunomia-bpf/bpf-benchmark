@@ -24,7 +24,6 @@ clean:
 		"$(OUTPUT_DIR)"/*.bpf.d \
 		"$(OUTPUT_DIR)"/*.bpf.bin \
 		"$(OUTPUT_DIR)"/*.directive.bin \
-		"$(OUTPUT_DIR)"/*.policy.bin \
-		"$(OUTPUT_DIR)"/.build.stamp
+		"$(OUTPUT_DIR)"/*.policy.bin
 
 -include $(BPF_DEPS)
