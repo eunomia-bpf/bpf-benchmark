@@ -39,6 +39,55 @@ class ProcessOutputCollector:
             }
 
 
+class AgentSession:
+    """Base class for agent sessions that start a process and consume its output."""
+
+    def __init__(self, load_timeout: int) -> None:
+        self.load_timeout = int(load_timeout)
+        self.process: Any | None = None
+        self.collector = ProcessOutputCollector()
+        self.stdout_thread: threading.Thread | None = None
+        self.stderr_thread: threading.Thread | None = None
+        self.programs: list[dict[str, object]] = []
+
+    def _start_io_threads(self) -> None:
+        assert self.process is not None
+        assert self.process.stdout is not None
+        assert self.process.stderr is not None
+        self.stdout_thread = threading.Thread(
+            target=self.collector.consume_stdout, args=(self.process.stdout,), daemon=True
+        )
+        self.stderr_thread = threading.Thread(
+            target=self.collector.consume_stderr, args=(self.process.stderr,), daemon=True
+        )
+        self.stdout_thread.start()
+        self.stderr_thread.start()
+
+    def _join_io_threads(self) -> None:
+        if self.stdout_thread is not None:
+            self.stdout_thread.join(timeout=2.0)
+            self.stdout_thread = None
+        if self.stderr_thread is not None:
+            self.stderr_thread.join(timeout=2.0)
+            self.stderr_thread = None
+
+    def collector_snapshot(self) -> dict[str, object]:
+        return self.collector.snapshot()
+
+    @property
+    def pid(self) -> int | None:
+        return None if self.process is None else self.process.pid
+
+    def __enter__(self) -> "AgentSession":
+        raise NotImplementedError
+
+    def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
+        self.close()
+
+    def close(self) -> None:
+        raise NotImplementedError
+
+
 class ManagedProcessSession:
     def __init__(
         self,

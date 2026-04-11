@@ -42,8 +42,18 @@ class AppRunner(ABC):
         initial_stats: Mapping[int, Mapping[str, object]],
         final_stats: Mapping[int, Mapping[str, object]],
     ) -> list[int] | None:
-        del initial_stats, final_stats
-        return None
+        selected: list[int] = []
+        for program in self.programs:
+            prog_id = int(program.get("id", 0) or 0)
+            if prog_id <= 0:
+                continue
+            before = initial_stats.get(prog_id) or {}
+            after = final_stats.get(prog_id) or {}
+            run_cnt_delta = int(after.get("run_cnt", 0) or 0) - int(before.get("run_cnt", 0) or 0)
+            run_time_delta = int(after.get("run_time_ns", 0) or 0) - int(before.get("run_time_ns", 0) or 0)
+            if run_cnt_delta > 0 or run_time_delta > 0:
+                selected.append(prog_id)
+        return selected
 
     def corpus_measurement_mode(self) -> str:
         return "program"

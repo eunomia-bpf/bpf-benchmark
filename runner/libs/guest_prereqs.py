@@ -146,15 +146,53 @@ def ensure_loopback_up(*, path_value: str) -> None:
     run_command(["ip", "link", "set", "lo", "up"], path_value=path_value, sudo=os.geteuid() != 0, quiet=True)
 
 
-def ensure_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
+def main(argv: list[str] | None = None) -> None:
+    args = list(sys.argv[1:] if argv is None else argv)
+    if len(args) != 3 or args[0] not in {"ensure", "validate"}:
+        die("usage: guest_prereqs.py <ensure|validate> <workspace> <manifest_path>")
+    workspace = Path(args[1]).resolve()
+    manifest_path = Path(args[2]).resolve()
+    if not workspace.is_dir():
+        die(f"workspace is missing: {workspace}")
+    if not manifest_path.is_file():
+        die(f"manifest is missing: {manifest_path}")
+    contract = parse_manifest(manifest_path)
+    _run_prereqs(args[0], workspace, contract)
+
+
+def _run_prereqs(mode: str, workspace: Path, contract: dict[str, str | list[str]]) -> None:
     path_value = runtime_path_value(workspace, contract)
     if runtime_container_enabled(contract) and not inside_runtime_container():
         _ensure_runtime_container_image(workspace, contract, path_value=path_value)
         return
 
-    missing_commands: list[str] = []
-    python_bin = active_python_bin(contract)
     workload_tool_names = set(workload_tool_commands(contract=contract))
+
+    if mode == "validate":
+        for command_name in required_commands(contract=contract):
+            if command_name in workload_tool_names:
+                if workload_tool_command_available(workspace, contract, command_name):
+                    continue
+                die(
+                    "required workload tool command is missing from workspace/.cache/workload-tools/<arch>/bin: "
+                    f"{command_name}"
+                )
+            if shutil.which(command_name, path=path_value) is None:
+                die(f"required guest command is missing: {command_name}")
+        python_bin = active_python_bin(contract)
+        if python_bin and shutil.which(python_bin, path=path_value) is None:
+            die(f"required guest command is missing: {python_bin}")
+        for package_name in env_csv("RUN_REMOTE_PYTHON_MODULES_CSV", contract=contract):
+            import_name = python_import_name(package_name)
+            if not python_bin:
+                die("active Python binary is required when guest Python modules are requested")
+            if not python_module_available(python_bin, import_name, path_value=path_value):
+                die(f"required guest Python module is missing for {python_bin}: {package_name}")
+        return
+
+    # mode == "ensure"
+    python_bin = active_python_bin(contract)
+    missing_commands: list[str] = []
     for command_name in required_commands(contract=contract):
         if command_name in workload_tool_names:
             if workload_tool_command_available(workspace, contract, command_name):
@@ -174,7 +212,7 @@ def ensure_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) 
             if package_name not in missing_python_packages:
                 missing_python_packages.append(package_name)
 
-    missing_workload_tool_commands = [command_name for command_name in missing_commands if command_name in workload_tool_names]
+    missing_workload_tool_commands = [c for c in missing_commands if c in workload_tool_names]
     if missing_workload_tool_commands:
         die(
             "required workload tool commands are missing from workspace/.cache/workload-tools/<arch>/bin: "
@@ -191,54 +229,6 @@ def ensure_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) 
         "guest image is missing required prerequisites; bake them into the VM/AMI or transfer them as artifacts: "
         + " ".join(missing)
     )
-
-
-def validate_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
-    path_value = runtime_path_value(workspace, contract)
-    if runtime_container_enabled(contract) and not inside_runtime_container():
-        _ensure_runtime_container_image(workspace, contract, path_value=path_value)
-        return
-
-    workload_tool_names = set(workload_tool_commands(contract=contract))
-
-    for command_name in required_commands(contract=contract):
-        if command_name in workload_tool_names:
-            if workload_tool_command_available(workspace, contract, command_name):
-                continue
-            die(
-                "required workload tool command is missing from workspace/.cache/workload-tools/<arch>/bin: "
-                f"{command_name}"
-            )
-        if shutil.which(command_name, path=path_value) is None:
-            die(f"required guest command is missing: {command_name}")
-
-    python_bin = active_python_bin(contract)
-    if python_bin and shutil.which(python_bin, path=path_value) is None:
-        die(f"required guest command is missing: {python_bin}")
-
-    for package_name in env_csv("RUN_REMOTE_PYTHON_MODULES_CSV", contract=contract):
-        import_name = python_import_name(package_name)
-        if not python_bin:
-            die("active Python binary is required when guest Python modules are requested")
-        if not python_module_available(python_bin, import_name, path_value=path_value):
-            die(f"required guest Python module is missing for {python_bin}: {package_name}")
-
-
-def main(argv: list[str] | None = None) -> None:
-    args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) != 3 or args[0] not in {"ensure", "validate"}:
-        die("usage: guest_prereqs.py <ensure|validate> <workspace> <manifest_path>")
-    workspace = Path(args[1]).resolve()
-    manifest_path = Path(args[2]).resolve()
-    if not workspace.is_dir():
-        die(f"workspace is missing: {workspace}")
-    if not manifest_path.is_file():
-        die(f"manifest is missing: {manifest_path}")
-    contract = parse_manifest(manifest_path)
-    if args[0] == "ensure":
-        ensure_guest_prereqs(workspace, contract)
-        return
-    validate_guest_prereqs(workspace, contract)
 
 
 if __name__ == "__main__":

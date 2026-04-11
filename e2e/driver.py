@@ -21,8 +21,7 @@ from runner.libs import (  # noqa: E402
     write_text,
 )
 from runner.libs.app_suite_schema import AppSpec, load_app_suite_from_yaml  # noqa: E402
-from runner.libs.daemon_session import DaemonSession  # noqa: E402
-from runner.libs.rejit import benchmark_rejit_enabled_passes, collect_effective_enabled_passes  # noqa: E402
+from runner.libs.rejit import DaemonSession, benchmark_rejit_enabled_passes, collect_effective_enabled_passes  # noqa: E402
 from runner.libs.run_artifacts import (  # noqa: E402
     ArtifactSession,
     current_process_identity,

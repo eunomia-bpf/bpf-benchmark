@@ -26,7 +26,7 @@ from runner.libs import (
 )
 from runner.libs.app_runners.base import AppRunner
 from runner.libs.bpf_stats import sample_bpf_stats
-from runner.libs.daemon_session import DaemonSession
+from runner.libs.rejit import DaemonSession
 from runner.libs.kinsn import (
     capture_daemon_kinsn_discovery as _capture_daemon_kinsn_discovery,
     relpath,

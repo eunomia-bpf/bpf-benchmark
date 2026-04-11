@@ -34,8 +34,7 @@ from runner.libs.case_common import (
     run_app_runner_lifecycle,
     wait_for_suite_quiescence,
 )
-from runner.libs.daemon_session import DaemonSession
-from runner.libs.rejit import benchmark_rejit_enabled_passes, collect_effective_enabled_passes
+from runner.libs.rejit import DaemonSession, benchmark_rejit_enabled_passes, collect_effective_enabled_passes
 from runner.libs.run_artifacts import (
     ArtifactSession,
     current_process_identity,

@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import shlex
 import tempfile
-import threading
 import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -14,7 +13,7 @@ from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, 
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
 from ..workload import WorkloadResult, run_connect_storm, run_exec_storm, run_file_io, run_open_storm
 from .base import AppRunner
-from .process_support import ProcessOutputCollector
+from .process_support import AgentSession
 from .setup_support import missing_required_commands, pick_host_executable, repo_artifact_root
 
 
@@ -29,25 +28,15 @@ def current_prog_ids() -> list[int]:
     return [int(record["id"]) for record in current_programs()]
 
 
-class TetragonAgentSession:
+class TetragonAgentSession(AgentSession):
     def __init__(self, command: Sequence[str], load_timeout: int) -> None:
+        super().__init__(load_timeout)
         self.command = list(command)
-        self.load_timeout = load_timeout
-        self.process: Any | None = None
-        self.collector = ProcessOutputCollector()
-        self.stdout_thread: threading.Thread | None = None
-        self.stderr_thread: threading.Thread | None = None
-        self.programs: list[dict[str, object]] = []
 
     def __enter__(self) -> "TetragonAgentSession":
         before_ids = set(current_prog_ids())
         self.process = start_agent(self.command[0], self.command[1:], env={"HOME": os.environ.get("HOME", str(ROOT_DIR))})
-        assert self.process.stdout is not None
-        assert self.process.stderr is not None
-        self.stdout_thread = threading.Thread(target=self.collector.consume_stdout, args=(self.process.stdout,), daemon=True)
-        self.stderr_thread = threading.Thread(target=self.collector.consume_stderr, args=(self.process.stderr,), daemon=True)
-        self.stdout_thread.start()
-        self.stderr_thread.start()
+        self._start_io_threads()
 
         try:
             healthy = wait_healthy(
@@ -69,7 +58,7 @@ class TetragonAgentSession:
         if not healthy:
             snapshot = self.collector.snapshot()
             details = tail_text("\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or [])), max_lines=40, max_chars=8000)
-            cleanup_error: Exception | None = None
+            cleanup_error = None
             try:
                 self.close()
             except Exception as exc:
@@ -81,7 +70,7 @@ class TetragonAgentSession:
 
         self.programs = [item for item in current_programs() if int(item.get("id", -1)) not in before_ids]
         if not self.programs:
-            cleanup_error: Exception | None = None
+            cleanup_error = None
             try:
                 self.close()
             except Exception as exc:
@@ -92,13 +81,6 @@ class TetragonAgentSession:
             raise RuntimeError(message)
         return self
 
-    @property
-    def pid(self) -> int | None:
-        return None if self.process is None else self.process.pid
-
-    def collector_snapshot(self) -> dict[str, object]:
-        return self.collector.snapshot()
-
     def close(self) -> None:
         stop_error: Exception | None = None
         if self.process is not None:
@@ -108,17 +90,9 @@ class TetragonAgentSession:
                 stop_error = exc
             finally:
                 self.process = None
-        if self.stdout_thread is not None:
-            self.stdout_thread.join(timeout=2.0)
-            self.stdout_thread = None
-        if self.stderr_thread is not None:
-            self.stderr_thread.join(timeout=2.0)
-            self.stderr_thread = None
+        self._join_io_threads()
         if stop_error is not None:
             raise RuntimeError(f"failed to stop Tetragon process cleanly: {stop_error}") from stop_error
-
-    def __exit__(self, exc_type, exc, tb) -> None:
-        self.close()
 
 
 def describe_agent_exit(agent_name: str, process: Any | None, snapshot: Mapping[str, object]) -> str | None:

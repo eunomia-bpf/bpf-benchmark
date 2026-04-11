@@ -138,17 +138,6 @@ def resolve_perf_binary(*, required: bool = False) -> str | None:
     return None
 
 
-def prepare_bpftool_environment() -> str:
-    resolved = resolve_bpftool_binary()
-    os.environ["BPFTOOL_BIN"] = resolved
-    bpftool_dir = str(Path(resolved).resolve().parent)
-    current_path = os.environ.get("PATH", "")
-    path_entries = [entry for entry in current_path.split(os.pathsep) if entry]
-    if bpftool_dir not in path_entries:
-        os.environ["PATH"] = bpftool_dir if not current_path else f"{bpftool_dir}{os.pathsep}{current_path}"
-    return resolved
-
-
 def run_command(
     command: Sequence[str],
     *,
@@ -206,7 +195,6 @@ __all__ = [
     "ROOT_DIR",
     "docs_tmp_dir",
     "ensure_parent",
-    "prepare_bpftool_environment",
     "resolve_binary",
     "resolve_bpftool_binary",
     "result_date_stamp",

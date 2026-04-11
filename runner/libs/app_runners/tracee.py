@@ -33,6 +33,7 @@ from ..workload import (
     run_user_exec_loop,
 )
 from .base import AppRunner
+from .process_support import AgentSession
 from .setup_support import pick_host_executable, repo_artifact_root
 
 
@@ -225,18 +226,14 @@ class TraceeOutputCollector:
             return match
 
 
-class TraceeAgentSession:
+class TraceeAgentSession(AgentSession):
     def __init__(self, commands: Sequence[Sequence[str]], load_timeout: int) -> None:
+        super().__init__(load_timeout)
         self.commands = [list(command) for command in commands]
-        self.load_timeout = load_timeout
-        self.process: subprocess.Popen[str] | None = None
         self.collector = TraceeOutputCollector()
-        self.stdout_thread: threading.Thread | None = None
-        self.stderr_thread: threading.Thread | None = None
         self.event_thread: threading.Thread | None = None
         self.event_stop = threading.Event()
         self.command_used: list[str] | None = None
-        self.programs: list[dict[str, object]] = []
         self.program_fds: dict[int, int] = {}
 
     def __enter__(self) -> "TraceeAgentSession":
@@ -261,17 +258,12 @@ class TraceeAgentSession:
             )
             self.process = proc
             self.command_used = command
-            assert proc.stdout is not None
-            assert proc.stderr is not None
-            self.stdout_thread = threading.Thread(target=self.collector.consume_stdout, args=(proc.stdout,), daemon=True)
-            self.stderr_thread = threading.Thread(target=self.collector.consume_stderr, args=(proc.stderr,), daemon=True)
+            self._start_io_threads()
             self.event_thread = threading.Thread(
                 target=self.collector.consume_event_file,
                 args=(event_output_path, self.event_stop),
                 daemon=True,
             )
-            self.stdout_thread.start()
-            self.stderr_thread.start()
             self.event_thread.start()
 
             try:
@@ -341,20 +333,12 @@ class TraceeAgentSession:
             stop_agent(self.process, timeout=8)
             self.process = None
         self.event_stop.set()
-        if self.stdout_thread is not None:
-            self.stdout_thread.join(timeout=2.0)
-            self.stdout_thread = None
-        if self.stderr_thread is not None:
-            self.stderr_thread.join(timeout=2.0)
-            self.stderr_thread = None
+        self._join_io_threads()
         if self.event_thread is not None:
             self.event_thread.join(timeout=2.0)
             self.event_thread = None
         if close_errors:
             raise RuntimeError("; ".join(close_errors))
-
-    def __exit__(self, exc_type, exc, tb) -> None:
-        self.close()
 
 
 def _current_prog_ids() -> list[int]:
@@ -597,24 +581,6 @@ class TraceeRunner(AppRunner):
         if self.session is None:
             raise RuntimeError("TraceeRunner is not running")
         return run_tracee_workload(workload_spec, max(1, int(round(seconds))))
-
-    def select_corpus_program_ids(
-        self,
-        initial_stats: Mapping[int, Mapping[str, object]],
-        final_stats: Mapping[int, Mapping[str, object]],
-    ) -> list[int] | None:
-        selected: list[int] = []
-        for program in self.programs:
-            prog_id = int(program.get("id", 0) or 0)
-            if prog_id <= 0:
-                continue
-            before = initial_stats.get(prog_id) or {}
-            after = final_stats.get(prog_id) or {}
-            run_cnt_delta = int(after.get("run_cnt", 0) or 0) - int(before.get("run_cnt", 0) or 0)
-            run_time_delta = int(after.get("run_time_ns", 0) or 0) - int(before.get("run_time_ns", 0) or 0)
-            if run_cnt_delta > 0 or run_time_delta > 0:
-                selected.append(prog_id)
-        return selected
 
     def stop(self) -> None:
         if self.session is None:

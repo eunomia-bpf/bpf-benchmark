@@ -4,7 +4,6 @@ import os
 import re
 import shlex
 import statistics
-import subprocess
 import threading
 import time
 from pathlib import Path
@@ -15,7 +14,7 @@ from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
 from ..process_fd import dup_fd_from_process
 from ..workload import WorkloadResult, resolve_workload_tool
 from .base import AppRunner
-from .process_support import ProcessOutputCollector
+from .process_support import AgentSession
 from .setup_support import repo_artifact_root
 
 
@@ -74,16 +73,11 @@ def read_scx_ops() -> list[str]:
     return values
 
 
-class ScxSchedulerSession:
+class ScxSchedulerSession(AgentSession):
     def __init__(self, binary: Path, extra_args: Sequence[str], load_timeout: int) -> None:
+        super().__init__(load_timeout)
         self.binary = binary
         self.extra_args = list(extra_args)
-        self.load_timeout = int(load_timeout)
-        self.process: subprocess.Popen[str] | None = None
-        self.collector = ProcessOutputCollector()
-        self.stdout_thread: threading.Thread | None = None
-        self.stderr_thread: threading.Thread | None = None
-        self.programs: list[dict[str, object]] = []
         self.program_fds: dict[int, int] = {}
         self.command_used: list[str] | None = None
 
@@ -101,12 +95,7 @@ class ScxSchedulerSession:
         )
         self.command_used = ["bash", "-lc", command_text]
         self.process = start_agent("bash", ["-lc", command_text], env={"PATH": preferred_path()})
-        assert self.process.stdout is not None
-        assert self.process.stderr is not None
-        self.stdout_thread = threading.Thread(target=self.collector.consume_stdout, args=(self.process.stdout,), daemon=True)
-        self.stderr_thread = threading.Thread(target=self.collector.consume_stderr, args=(self.process.stderr,), daemon=True)
-        self.stdout_thread.start()
-        self.stderr_thread.start()
+        self._start_io_threads()
 
         try:
             healthy = wait_healthy(
@@ -130,10 +119,6 @@ class ScxSchedulerSession:
         self.programs = self._discover_programs()
         self.program_fds = self._dup_program_fds(self.programs)
         return self
-
-    @property
-    def pid(self) -> int | None:
-        return None if self.process is None else self.process.pid
 
     def _discover_programs(self) -> list[dict[str, object]]:
         if self.pid is None:
@@ -194,17 +179,9 @@ class ScxSchedulerSession:
         if self.process is not None:
             stop_agent(self.process, timeout=8)
             self.process = None
-        if self.stdout_thread is not None:
-            self.stdout_thread.join(timeout=2.0)
-            self.stdout_thread = None
-        if self.stderr_thread is not None:
-            self.stderr_thread.join(timeout=2.0)
-            self.stderr_thread = None
+        self._join_io_threads()
         if close_errors:
             raise RuntimeError("; ".join(close_errors))
-
-    def __exit__(self, exc_type, exc, tb) -> None:
-        self.close()
 
 
 def _percentile(values: Sequence[float], percentile: float) -> float:
@@ -372,24 +349,6 @@ class ScxRunner(AppRunner):
 
     def collector_snapshot(self) -> dict[str, object]:
         return {} if self.session is None else self.session.collector_snapshot()
-
-    def select_corpus_program_ids(
-        self,
-        initial_stats: Mapping[int, Mapping[str, object]],
-        final_stats: Mapping[int, Mapping[str, object]],
-    ) -> list[int] | None:
-        selected: list[int] = []
-        for program in self.programs:
-            prog_id = int(program.get("id", 0) or 0)
-            if prog_id <= 0:
-                continue
-            before = initial_stats.get(prog_id) or {}
-            after = final_stats.get(prog_id) or {}
-            run_cnt_delta = int(after.get("run_cnt", 0) or 0) - int(before.get("run_cnt", 0) or 0)
-            run_time_delta = int(after.get("run_time_ns", 0) or 0) - int(before.get("run_time_ns", 0) or 0)
-            if run_cnt_delta > 0 or run_time_delta > 0:
-                selected.append(prog_id)
-        return selected
 
     @property
     def program_fds(self) -> dict[int, int]:
