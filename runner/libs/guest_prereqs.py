@@ -7,7 +7,6 @@ from functools import partial
 from pathlib import Path
 
 from runner.libs.cli_support import fail
-from runner.libs.manifest_file import manifest_scalar, parse_manifest
 from runner.libs.prereq_contract import (
     active_python_bin,
     env_csv,
@@ -17,18 +16,19 @@ from runner.libs.prereq_contract import (
     runtime_container_enabled,
     workload_tool_commands,
 )
+from runner.libs.run_contract import RunConfig, read_run_config_file
 
 die = partial(fail, "guest-prereqs")
 
 
-def _container_runtime(contract: dict[str, str | list[str]]) -> str:
-    return manifest_scalar(contract, "RUN_CONTAINER_RUNTIME", die=die) or "docker"
+def _container_runtime(contract: RunConfig) -> str:
+    return contract.remote.container_runtime or "docker"
 
 
-def _runtime_image_tar_path(workspace: Path, contract: dict[str, str | list[str]]) -> Path:
-    configured = manifest_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE_TAR", die=die)
+def _runtime_image_tar_path(workspace: Path, contract: RunConfig) -> Path:
+    configured = contract.remote.runtime_container_image_tar
     if not configured:
-        die("manifest RUN_RUNTIME_CONTAINER_IMAGE_TAR is empty")
+        die("run config RUN_RUNTIME_CONTAINER_IMAGE_TAR is empty")
     candidate = Path(configured)
     if not candidate.is_absolute():
         candidate = workspace / candidate
@@ -47,13 +47,13 @@ def _container_image_available(runtime: str, image: str, *, path_value: str) -> 
     ).returncode == 0
 
 
-def _ensure_runtime_container_image(workspace: Path, contract: dict[str, str | list[str]], *, path_value: str) -> None:
+def _ensure_runtime_container_image(workspace: Path, contract: RunConfig, *, path_value: str) -> None:
     runtime = _container_runtime(contract)
-    image = manifest_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE", die=die)
+    image = contract.remote.runtime_container_image
     if not runtime:
-        die("manifest RUN_CONTAINER_RUNTIME is empty")
+        die("run config RUN_CONTAINER_RUNTIME is empty")
     if not image:
-        die("manifest RUN_RUNTIME_CONTAINER_IMAGE is empty")
+        die("run config RUN_RUNTIME_CONTAINER_IMAGE is empty")
     if not have_cmd(runtime, path_value=path_value):
         die(f"required container runtime is missing on guest host: {runtime}")
     if _container_image_available(runtime, image, path_value=path_value):
@@ -66,9 +66,9 @@ def _ensure_runtime_container_image(workspace: Path, contract: dict[str, str | l
         die(f"runtime container image did not load: {image}")
 
 
-def runtime_path_value(workspace: Path, contract: dict[str, str | list[str]]) -> str:
+def runtime_path_value(workspace: Path, contract: RunConfig) -> str:
     path_entries: list[str] = []
-    target_arch = manifest_scalar(contract, "RUN_TARGET_ARCH", die=die)
+    target_arch = contract.identity.target_arch
     if target_arch:
         repo_bin_dir = workspace / ".cache" / "repo-artifacts" / target_arch / "bpftrace" / "bin"
         if repo_bin_dir.is_dir():
@@ -82,8 +82,8 @@ def runtime_path_value(workspace: Path, contract: dict[str, str | list[str]]) ->
     return ":".join(path_entries)
 
 
-def workload_tool_dir(workspace: Path, contract: dict[str, str | list[str]]) -> Path | None:
-    target_arch = manifest_scalar(contract, "RUN_TARGET_ARCH", die=die)
+def workload_tool_dir(workspace: Path, contract: RunConfig) -> Path | None:
+    target_arch = contract.identity.target_arch
     if not target_arch:
         return None
     candidate = workspace / ".cache" / "workload-tools" / target_arch / "bin"
@@ -94,7 +94,7 @@ def workload_tool_dir(workspace: Path, contract: dict[str, str | list[str]]) -> 
 
 def workload_tool_command_available(
     workspace: Path,
-    contract: dict[str, str | list[str]],
+    contract: RunConfig,
     command_name: str,
 ) -> bool:
     tool_dir = workload_tool_dir(workspace, contract)
@@ -149,18 +149,18 @@ def ensure_loopback_up(*, path_value: str) -> None:
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
     if len(args) != 3 or args[0] not in {"ensure", "validate"}:
-        die("usage: guest_prereqs.py <ensure|validate> <workspace> <manifest_path>")
+        die("usage: guest_prereqs.py <ensure|validate> <workspace> <config_path>")
     workspace = Path(args[1]).resolve()
-    manifest_path = Path(args[2]).resolve()
+    config_path = Path(args[2]).resolve()
     if not workspace.is_dir():
         die(f"workspace is missing: {workspace}")
-    if not manifest_path.is_file():
-        die(f"manifest is missing: {manifest_path}")
-    contract = parse_manifest(manifest_path)
+    if not config_path.is_file():
+        die(f"run config is missing: {config_path}")
+    contract = read_run_config_file(config_path)
     _run_prereqs(args[0], workspace, contract)
 
 
-def _run_prereqs(mode: str, workspace: Path, contract: dict[str, str | list[str]]) -> None:
+def _run_prereqs(mode: str, workspace: Path, contract: RunConfig) -> None:
     path_value = runtime_path_value(workspace, contract)
     if runtime_container_enabled(contract) and not inside_runtime_container():
         _ensure_runtime_container_image(workspace, contract, path_value=path_value)

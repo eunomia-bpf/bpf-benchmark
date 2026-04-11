@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import json
 import shlex
 import shutil
 import subprocess
@@ -13,14 +14,8 @@ from typing import Sequence
 from runner.libs.cli_support import fail
 from runner.libs.guest_prereqs import runtime_path_value
 from runner.libs.kinsn import load_kinsn_modules
-from runner.libs.manifest_file import (
-    manifest_argv,
-    manifest_csv,
-    manifest_scalar,
-    parse_manifest,
-    required_manifest_scalar,
-)
 from runner.libs.prereq_contract import active_python_bin, inside_runtime_container, runtime_container_enabled
+from runner.libs.run_contract import RunConfig, read_run_config_file
 from runner.libs.workspace_layout import (
     daemon_binary_path,
     kernel_modules_root,
@@ -46,46 +41,22 @@ def _append_bind_mount(command: list[str], source: Path, target: Path | None = N
     command.extend(["-v", f"{source}:{destination}{suffix}"])
 
 
-def _run_in_runtime_container(workspace: Path, manifest_path: Path, contract: dict[str, str | list[str]]) -> None:
-    runtime = manifest_scalar(contract, "RUN_CONTAINER_RUNTIME", "docker", die=_die) or "docker"
-    image = manifest_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE", die=_die)
-    python_bin = manifest_scalar(contract, "RUN_RUNTIME_PYTHON_BIN", "python3", die=_die) or "python3"
+def _run_in_runtime_container(workspace: Path, config: RunConfig) -> None:
+    runtime = config.remote.container_runtime or "docker"
+    image = config.remote.runtime_container_image
+    python_bin = config.remote.runtime_python_bin or "python3"
     if not image:
-        _die("manifest RUN_RUNTIME_CONTAINER_IMAGE is empty")
-    command = [
-        runtime,
-        "run",
-        "--rm",
-        "--privileged",
-        "--pid=host",
-        "--network=host",
-        "--ipc=host",
-        "-e",
-        "BPFREJIT_INSIDE_RUNTIME_CONTAINER=1",
-        "-e",
-        f"PYTHONPATH={workspace}",
-        "-e",
-        "HOME=/root",
-        "-v",
-        f"{workspace}:{workspace}",
-        "-w",
-        str(workspace),
-    ]
+        _die("run config RUN_RUNTIME_CONTAINER_IMAGE is empty")
+    command = [runtime, "run", "--rm", "--privileged", "--pid=host", "--network=host", "--ipc=host",
+               "-e", "BPFREJIT_INSIDE_RUNTIME_CONTAINER=1", "-e", f"PYTHONPATH={workspace}",
+               "-e", "HOME=/root", "-v", f"{workspace}:{workspace}", "-w", str(workspace)]
     _append_bind_mount(command, Path("/sys"))
     _append_bind_mount(command, Path("/sys/fs/bpf"))
     _append_bind_mount(command, Path("/sys/kernel/debug"))
     _append_bind_mount(command, Path("/lib/modules"), readonly=True)
     _append_bind_mount(command, Path("/boot"), readonly=True)
-    command.extend(
-        [
-            image,
-            python_bin,
-            "-m",
-            "runner.libs.suite_entrypoint",
-            str(workspace),
-            str(manifest_path),
-        ]
-    )
+    command.extend([image, python_bin, "-m", "runner.libs.suite_entrypoint",
+                    str(workspace), "--config-json", config.to_json_text()])
     completed = subprocess.run(command, cwd=workspace, text=True, check=False)
     if completed.returncode != 0:
         raise SystemExit(completed.returncode)
@@ -102,13 +73,6 @@ def _argv_option_value(argv: Sequence[str], option: str) -> str:
     return ""
 
 
-def _resolve_workspace_contract_path(workspace: Path, path: str) -> Path:
-    candidate = Path(path)
-    if candidate.is_absolute():
-        return candidate
-    return workspace / candidate
-
-
 def _cross_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
     if target_arch != "arm64":
         return ""
@@ -122,25 +86,15 @@ def _cross_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
 def _suite_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
     repo_root = repo_artifact_root(workspace, target_arch)
     workload_root = workload_tools_root(workspace, target_arch)
-    candidates = [
-        repo_root / "katran" / "lib64",
-        repo_root / "katran" / "lib",
-        repo_root / "tracee" / "lib",
-        repo_root / "bcc" / "libbpf-tools" / "lib",
-        workload_root / "lib",
-        workload_root / "lib" / "luajit",
-    ]
-    cross_runtime = _cross_runtime_ld_library_path(workspace, target_arch)
-    entries = [str(path) for path in candidates if path.is_dir()]
-    if cross_runtime:
-        entries.extend(entry for entry in cross_runtime.split(":") if entry)
-    inherited = os.environ.get("LD_LIBRARY_PATH", "").strip()
-    if inherited:
-        entries.extend(entry for entry in inherited.split(":") if entry)
+    candidates = [repo_root / "katran" / "lib64", repo_root / "katran" / "lib",
+                  repo_root / "tracee" / "lib", repo_root / "bcc" / "libbpf-tools" / "lib",
+                  workload_root / "lib", workload_root / "lib" / "luajit"]
+    entries = [str(p) for p in candidates if p.is_dir()]
+    for extra in (_cross_runtime_ld_library_path(workspace, target_arch), os.environ.get("LD_LIBRARY_PATH", "").strip()):
+        if extra: entries.extend(e for e in extra.split(":") if e)
     ordered: list[str] = []
     for entry in entries:
-        if entry and entry not in ordered:
-            ordered.append(entry)
+        if entry and entry not in ordered: ordered.append(entry)
     return ":".join(ordered)
 
 
@@ -197,9 +151,9 @@ def _require_executable(path: Path, description: str) -> Path:
 
 @dataclass
 class SuiteEntrypoint:
-    contract: dict[str, str | list[str]]
+    config: RunConfig
     workspace: Path
-    manifest_path: Path
+    config_path: Path | None
     target_name: str
     suite_name: str
     target_arch: str
@@ -211,16 +165,13 @@ class SuiteEntrypoint:
     e2e_argv: list[str]
 
     def _required_contract(self, name: str) -> str:
-        return required_manifest_scalar(self.contract, name, die=_die)
-
-    def _optional_contract(self, name: str, default: str = "") -> str:
-        return manifest_scalar(self.contract, name, default, die=_die)
-
-    def _csv_contract(self, name: str) -> list[str]:
-        return manifest_csv(self.contract, name)
+        try:
+            return self.config.required(name)
+        except RuntimeError as exc:
+            _die(str(exc))
 
     def _bool_contract(self, name: str, *, default: str = "0") -> bool:
-        return self._optional_contract(name, default) == "1"
+        return self.config.scalar(name, default) == "1"
 
     def _artifact_dir_required(self) -> Path:
         if self.artifact_dir is None:
@@ -228,28 +179,30 @@ class SuiteEntrypoint:
         return self.artifact_dir
 
     @classmethod
-    def from_contract(
+    def from_config(
         cls,
         workspace: Path,
-        manifest_path: Path,
-        contract: dict[str, str | list[str]],
+        config: RunConfig,
+        config_path: Path | None = None,
     ) -> "SuiteEntrypoint":
-        target_name = required_manifest_scalar(contract, "RUN_TARGET_NAME", die=_die)
-        suite_name = required_manifest_scalar(contract, "RUN_SUITE_NAME", die=_die)
-        target_arch = required_manifest_scalar(contract, "RUN_TARGET_ARCH", die=_die)
-        executor = required_manifest_scalar(contract, "RUN_EXECUTOR", die=_die)
-        run_token = required_manifest_scalar(contract, "RUN_TOKEN", die=_die)
-        python_bin = active_python_bin(contract)
+        target_name = config.identity.target_name
+        suite_name = config.identity.suite_name
+        target_arch = config.identity.target_arch
+        executor = config.identity.executor
+        run_token = config.identity.token
+        python_bin = active_python_bin(config)
         if not python_bin:
-            _die("manifest RUN_REMOTE_PYTHON_BIN is empty")
-        bpftool_bin = required_manifest_scalar(contract, "RUN_BPFTOOL_BIN", die=_die)
+            _die("run config RUN_REMOTE_PYTHON_BIN is empty")
+        bpftool_bin = config.remote.bpftool_bin
+        if not bpftool_bin:
+            _die("run config RUN_BPFTOOL_BIN is empty")
         artifact_dir = None
         if suite_name == "test":
             artifact_dir = workspace / "tests" / "results" / run_token
         return cls(
-            contract=contract,
+            config=config,
             workspace=workspace,
-            manifest_path=manifest_path,
+            config_path=config_path,
             target_name=target_name,
             suite_name=suite_name,
             target_arch=target_arch,
@@ -257,16 +210,13 @@ class SuiteEntrypoint:
             python_bin=python_bin,
             bpftool_bin=bpftool_bin,
             artifact_dir=artifact_dir,
-            corpus_argv=manifest_argv(contract, "RUN_CORPUS_ARGV"),
-            e2e_argv=manifest_argv(contract, "RUN_E2E_ARGV"),
+            corpus_argv=config.argv("RUN_CORPUS_ARGV"),
+            e2e_argv=config.argv("RUN_E2E_ARGV"),
         )
 
     def _runtime_env(self) -> dict[str, str]:
-        env: dict[str, str] = {}
-        for name in ("HOME", "USER", "LOGNAME", "TERM", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE", "SHELL"):
-            value = os.environ.get(name, "").strip()
-            if value:
-                env[name] = value
+        env: dict[str, str] = {name: v for name in ("HOME", "USER", "LOGNAME", "TERM", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE", "SHELL")
+                               if (v := os.environ.get(name, "").strip())}
         if not env.get("TMPDIR"):
             runtime_tmpdir = Path("/var/tmp/bpfrejit-runtime") / self._required_contract("RUN_TOKEN")
             runtime_tmpdir.mkdir(parents=True, exist_ok=True)
@@ -278,25 +228,20 @@ class SuiteEntrypoint:
         env.setdefault("TMP", env["TMPDIR"])
         env.setdefault("TEMP", env["TMPDIR"])
         env["BPFREJIT_RUNTIME_TMPDIR"] = env["TMPDIR"]
-        repo_build_root = self._repo_build_root()
-        env["PATH"] = runtime_path_value(self.workspace, self.contract)
-        runtime_ld = _suite_runtime_ld_library_path(self.workspace, self.target_arch)
-        if runtime_ld:
+        env["PATH"] = runtime_path_value(self.workspace, self.config)
+        if runtime_ld := _suite_runtime_ld_library_path(self.workspace, self.target_arch):
             env["LD_LIBRARY_PATH"] = runtime_ld
         workload_tool_bin = self.workspace / ".cache" / "workload-tools" / self.target_arch / "bin"
         if workload_tool_bin.is_dir():
             env["BPFREJIT_WORKLOAD_TOOL_BIN_DIR"] = str(workload_tool_bin)
-        env["BPFREJIT_REPO_ARTIFACT_ROOT"] = str(repo_build_root)
+        env["BPFREJIT_REPO_ARTIFACT_ROOT"] = str(repo_artifact_root(self.workspace, self.target_arch))
         env["BPFREJIT_REMOTE_PYTHON_BIN"] = self.python_bin
         kernel_modules_dir = kernel_modules_root(self.workspace, self.target_arch, self.executor)
         if not kernel_modules_dir.is_dir():
             _die(f"kernel module artifact root is missing: {kernel_modules_dir}")
         env["BPFREJIT_KERNEL_MODULES_ROOT"] = str(kernel_modules_dir)
-        rejit_passes = ""
-        if self.suite_name == "corpus":
-            rejit_passes = _argv_option_value(self.corpus_argv, "--rejit-passes")
-        elif self.suite_name == "e2e":
-            rejit_passes = _argv_option_value(self.e2e_argv, "--rejit-passes")
+        rejit_passes = (_argv_option_value(self.corpus_argv, "--rejit-passes") if self.suite_name == "corpus"
+                        else _argv_option_value(self.e2e_argv, "--rejit-passes") if self.suite_name == "e2e" else "")
         if rejit_passes:
             env["BPFREJIT_BENCH_PASSES"] = rejit_passes
         env["PYTHONPATH"] = str(self.workspace)
@@ -314,20 +259,8 @@ class SuiteEntrypoint:
             runtime_env["LD_LIBRARY_PATH"] = runtime_ld
         return runtime_env, runtime_ld
 
-    def _repo_build_root(self) -> Path:
-        return repo_artifact_root(self.workspace, self.target_arch)
-
-    def _test_unittest_build_dir(self) -> Path:
-        return test_unittest_build_dir(self.workspace, self.target_arch)
-
-    def _test_negative_build_dir(self) -> Path:
-        return test_negative_build_dir(self.workspace, self.target_arch)
-
-    def _test_kinsn_module_dir(self) -> Path:
-        return kinsn_module_dir(self.workspace, self.target_arch)
-
     def _expected_kinsn_modules(self) -> list[str]:
-        module_dir = self._test_kinsn_module_dir()
+        module_dir = kinsn_module_dir(self.workspace, self.target_arch)
         modules = sorted(
             path.stem
             for path in module_dir.glob("bpf_*.ko")
@@ -336,9 +269,6 @@ class SuiteEntrypoint:
         if not modules:
             _die(f"no kinsn modules found under {module_dir}")
         return modules
-
-    def _resolve_test_daemon(self) -> Path:
-        return self._resolve_daemon_binary()
 
     def _resolve_daemon_binary(self) -> Path:
         candidate = daemon_binary_path(self.workspace, self.target_arch)
@@ -355,7 +285,7 @@ class SuiteEntrypoint:
         )
 
     def _ensure_scx_artifacts(self) -> None:
-        packages = self._csv_contract("RUN_SCX_PACKAGES_CSV")
+        packages = self.config.csv("RUN_SCX_PACKAGES_CSV")
         if not packages:
             return
         for target in scx_targets(self.workspace, self.target_arch, packages):
@@ -366,7 +296,7 @@ class SuiteEntrypoint:
             _require_executable(target, "scx artifact")
 
     def _ensure_katran_artifacts(self) -> None:
-        if "katran" not in self._csv_contract("RUN_NATIVE_REPOS_CSV"):
+        if "katran" not in self.config.csv("RUN_NATIVE_REPOS_CSV"):
             return
         katran_targets = native_repo_targets(self.workspace, self.target_arch, ["katran"])
         for target in katran_targets:
@@ -375,55 +305,45 @@ class SuiteEntrypoint:
                 continue
             if not target.is_file():
                 _die(f"Katran artifact is missing: {target}")
-        katran_root = self._repo_build_root() / "katran"
+        katran_root = repo_artifact_root(self.workspace, self.target_arch) / "katran"
         katran_lib_root = katran_root / "lib"
         if not katran_lib_root.is_dir():
             _die(f"Katran runtime library artifact directory is missing: {katran_lib_root}")
 
     def _ensure_bpf_stats_enabled(self) -> None:
-        if not self._bool_contract("RUN_NEEDS_DAEMON_BINARY"):
-            return
+        if not self._bool_contract("RUN_NEEDS_DAEMON_BINARY"): return
         bpf_stats_path = Path("/proc/sys/kernel/bpf_stats_enabled")
         sysctl_bin = shutil.which("sysctl")
         command_prefix: list[str] = []
         if os.geteuid() != 0:
             sudo_bin = shutil.which("sudo")
-            if sudo_bin is None:
-                _die("kernel bpf_stats_enabled requires root or sudo")
+            if sudo_bin is None: _die("kernel bpf_stats_enabled requires root or sudo")
             command_prefix = [sudo_bin]
         if sysctl_bin:
-            env = {"PATH": os.environ.get("PATH", "") or "/usr/sbin:/usr/bin:/sbin:/bin"}
-            _run_checked([*command_prefix, sysctl_bin, "-q", "-w", "kernel.bpf_stats_enabled=1"], cwd=self.workspace, env=env)
+            _run_checked([*command_prefix, sysctl_bin, "-q", "-w", "kernel.bpf_stats_enabled=1"],
+                         cwd=self.workspace, env={"PATH": os.environ.get("PATH", "") or "/usr/sbin:/usr/bin:/sbin:/bin"})
         else:
-            command = [*command_prefix, "sh", "-c", "printf '1\\n' > /proc/sys/kernel/bpf_stats_enabled"]
-            _run_checked(command, cwd=self.workspace, env=os.environ.copy())
-        if bpf_stats_path.read_text(encoding="utf-8").strip() != "1":
-            _die("failed to enable kernel.bpf_stats_enabled=1")
+            _run_checked([*command_prefix, "sh", "-c", "printf '1\\n' > /proc/sys/kernel/bpf_stats_enabled"],
+                         cwd=self.workspace, env=os.environ.copy())
+        if bpf_stats_path.read_text(encoding="utf-8").strip() != "1": _die("failed to enable kernel.bpf_stats_enabled=1")
 
     def _validate_test_contract(self) -> None:
-        for name in (
-            "RUN_TEST_FUZZ_ROUNDS",
-            "RUN_TEST_SCX_PROG_SHOW_RACE_MODE",
-            "RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS",
-            "RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT",
-            "RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE",
-        ):
+        for name in ("RUN_TEST_FUZZ_ROUNDS", "RUN_TEST_SCX_PROG_SHOW_RACE_MODE",
+                     "RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS", "RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT",
+                     "RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE"):
             self._required_contract(name)
 
     def _log_test_section(self, title: str) -> None:
-        print("", file=sys.stderr)
-        print("========================================", file=sys.stderr)
-        print(f"  {title}", file=sys.stderr)
-        print("========================================", file=sys.stderr)
+        print(f"\n========================================\n  {title}\n========================================", file=sys.stderr)
 
     def _load_kinsn_modules(self) -> None:
         load_kinsn_modules(
             self._expected_kinsn_modules(),
-            module_dir=self._test_kinsn_module_dir(),
+            module_dir=kinsn_module_dir(self.workspace, self.target_arch),
         )
 
     def _discover_unittest_binaries(self) -> list[Path]:
-        build_dir = self._test_unittest_build_dir()
+        build_dir = test_unittest_build_dir(self.workspace, self.target_arch)
         return sorted(
             path
             for path in build_dir.glob("rejit_*")
@@ -432,23 +352,21 @@ class SuiteEntrypoint:
 
     def _run_unittest_suite(self, env: dict[str, str], *, log_path: Path | None = None) -> tuple[int, int]:
         self._log_test_section("Running tests/unittest/ suite (pre-built)")
-        build_dir = self._test_unittest_build_dir()
+        build_dir = test_unittest_build_dir(self.workspace, self.target_arch)
         tests = self._discover_unittest_binaries()
-        passed = 0
-        failed = 0
         if not tests:
             print(f"ERROR: no rejit_* test binaries found in {build_dir}", file=sys.stderr)
             return 0, 1
         runtime_env, _ = self._env_with_cross_runtime_ld(env)
         runtime_env["BPFREJIT_PROGS_DIR"] = str(build_dir / "progs")
-        runtime_env["BPFREJIT_DAEMON_PATH"] = str(self._resolve_test_daemon())
+        runtime_env["BPFREJIT_DAEMON_PATH"] = str(self._resolve_daemon_binary())
+        passed = failed = 0
         for test_binary in tests:
             print(f"--- {test_binary.name} ---", file=sys.stderr)
             if _run_with_status([str(test_binary), str(build_dir / "progs")], cwd=self.workspace, env=runtime_env, log_path=log_path):
                 passed += 1
             else:
-                failed += 1
-                print(f"FAIL: {test_binary.name}", file=sys.stderr)
+                failed += 1; print(f"FAIL: {test_binary.name}", file=sys.stderr)
         return passed, failed
 
     def _run_negative_suite(
@@ -459,7 +377,7 @@ class SuiteEntrypoint:
         log_path: Path | None = None,
     ) -> tuple[int, int]:
         self._log_test_section("Running tests/negative/ adversarial suite")
-        negative_build = self._test_negative_build_dir()
+        negative_build = test_negative_build_dir(self.workspace, self.target_arch)
         runtime_env, runtime_ld = self._env_with_cross_runtime_ld(env)
         passed = 0
         failed = 0
@@ -472,18 +390,11 @@ class SuiteEntrypoint:
             ),
         ]
         if include_scx_race:
-            scx_env = runtime_env.copy()
-            scx_env["SCX_RUNTIME_LD_LIBRARY_PATH"] = runtime_ld
-            scx_command = [
-                str(negative_build / "scx_prog_show_race"),
-                str(self.workspace),
-                "--mode",
-                self._required_contract("RUN_TEST_SCX_PROG_SHOW_RACE_MODE"),
-                "--iterations",
-                self._required_contract("RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS"),
-                "--load-timeout",
-                self._required_contract("RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT"),
-            ]
+            scx_env = {**runtime_env, "SCX_RUNTIME_LD_LIBRARY_PATH": runtime_ld}
+            scx_command = [str(negative_build / "scx_prog_show_race"), str(self.workspace),
+                           "--mode", self._required_contract("RUN_TEST_SCX_PROG_SHOW_RACE_MODE"),
+                           "--iterations", self._required_contract("RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS"),
+                           "--load-timeout", self._required_contract("RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT")]
             if self._bool_contract("RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE"):
                 scx_command.append("--skip-probe")
             tests.append((f"scx_prog_show_race ({self._required_contract('RUN_TEST_SCX_PROG_SHOW_RACE_MODE')})", scx_command, scx_env))
@@ -499,57 +410,36 @@ class SuiteEntrypoint:
     def _run_kernel_selftest(self) -> tuple[int, int]:
         kernel_selftest = self.workspace / "tests" / "kernel" / "build" / "test_recompile"
         if not kernel_selftest.is_file():
-            print(f"SKIP: test_recompile not found at {kernel_selftest}", file=sys.stderr)
-            return 0, 0
+            print(f"SKIP: test_recompile not found at {kernel_selftest}", file=sys.stderr); return 0, 0
         self._log_test_section("Kernel selftest (test_recompile)")
-        env = self._runtime_env()
-        if _run_with_status([str(kernel_selftest)], cwd=self.workspace, env=env):
-            return 1, 0
-        print("FAIL: test_recompile", file=sys.stderr)
-        return 0, 1
+        if _run_with_status([str(kernel_selftest)], cwd=self.workspace, env=self._runtime_env()): return 1, 0
+        print("FAIL: test_recompile", file=sys.stderr); return 0, 1
 
     def _print_test_summary(self, passed: int, failed: int, *, prefix: str = "RESULTS") -> None:
-        print("", file=sys.stderr)
-        print("========================================", file=sys.stderr)
-        print(f"  {prefix}: {passed} passed, {failed} failed", file=sys.stderr)
-        print("========================================", file=sys.stderr)
+        print(f"\n========================================\n  {prefix}: {passed} passed, {failed} failed\n========================================", file=sys.stderr)
 
     def _run_selftest_mode(self, env: dict[str, str]) -> None:
         log_path = self._artifact_dir_required() / "selftest.log"
-        self._log_test_section("Loading kinsn modules")
-        self._load_kinsn_modules()
-        passed_a, failed_a = self._run_unittest_suite(env, log_path=log_path)
-        passed_b, failed_b = self._run_negative_suite(env, include_scx_race=False, log_path=log_path)
-        total_pass = passed_a + passed_b
-        total_fail = failed_a + failed_b
-        self._print_test_summary(total_pass, total_fail, prefix="vm-selftest")
-        if total_fail:
-            _die("vm-selftest failed")
+        self._log_test_section("Loading kinsn modules"); self._load_kinsn_modules()
+        pa, fa = self._run_unittest_suite(env, log_path=log_path)
+        pb, fb = self._run_negative_suite(env, include_scx_race=False, log_path=log_path)
+        self._print_test_summary(pa + pb, fa + fb, prefix="vm-selftest")
+        if fa + fb: _die("vm-selftest failed")
 
     def _run_negative_mode(self, env: dict[str, str]) -> None:
         log_path = self._artifact_dir_required() / "negative.log"
         passed, failed = self._run_negative_suite(env, include_scx_race=True, log_path=log_path)
         self._print_test_summary(passed, failed, prefix="vm-negative-test")
-        if failed:
-            _die("vm-negative-test failed")
+        if failed: _die("vm-negative-test failed")
 
     def _run_full_test_mode(self, env: dict[str, str]) -> None:
-        total_pass = 0
-        total_fail = 0
-        passed, failed = self._run_kernel_selftest()
-        total_pass += passed
-        total_fail += failed
-        self._log_test_section("Loading kinsn modules")
-        self._load_kinsn_modules()
-        passed, failed = self._run_unittest_suite(env)
-        total_pass += passed
-        total_fail += failed
-        passed, failed = self._run_negative_suite(env, include_scx_race=True)
-        total_pass += passed
-        total_fail += failed
+        total_pass = total_fail = 0
+        p, f = self._run_kernel_selftest(); total_pass += p; total_fail += f
+        self._log_test_section("Loading kinsn modules"); self._load_kinsn_modules()
+        p, f = self._run_unittest_suite(env); total_pass += p; total_fail += f
+        p, f = self._run_negative_suite(env, include_scx_race=True); total_pass += p; total_fail += f
         self._print_test_summary(total_pass, total_fail)
-        if total_fail:
-            _die("vm-test failed")
+        if total_fail: _die("vm-test failed")
         print("vm-test: ALL PASSED", file=sys.stderr)
 
     def _run_test_suite(self, env: dict[str, str]) -> None:
@@ -571,22 +461,12 @@ class SuiteEntrypoint:
         runtime_env["BPFREJIT_MICRO_PROGRAM_DIR"] = str(micro_program_root(self.workspace, self.target_arch))
         runtime_env["BPFREJIT_MICRO_RUNNER_BINARY"] = str(runner_binary_path(self.workspace, self.target_arch))
         output_json = self.workspace / "micro" / "results" / f"{self.target_name}_micro.json"
-        command = [
-            self.python_bin,
-            str(self.workspace / "micro" / "driver.py"),
-            "--runtime",
-            "llvmbpf",
-            "--runtime",
-            "kernel",
-            "--samples",
-            self._required_contract("RUN_BENCH_SAMPLES"),
-            "--warmups",
-            self._required_contract("RUN_BENCH_WARMUPS"),
-            "--inner-repeat",
-            self._required_contract("RUN_BENCH_INNER_REPEAT"),
-            "--output",
-            str(output_json),
-        ]
+        command = [self.python_bin, str(self.workspace / "micro" / "driver.py"),
+                   "--runtime", "llvmbpf", "--runtime", "kernel",
+                   "--samples", self._required_contract("RUN_BENCH_SAMPLES"),
+                   "--warmups", self._required_contract("RUN_BENCH_WARMUPS"),
+                   "--inner-repeat", self._required_contract("RUN_BENCH_INNER_REPEAT"),
+                   "--output", str(output_json)]
         _run_checked(command, cwd=self.workspace, env=runtime_env)
 
     def _run_corpus_suite(self, env: dict[str, str]) -> None:
@@ -595,35 +475,21 @@ class SuiteEntrypoint:
         self._ensure_katran_artifacts()
         output_json = self.workspace / "corpus" / "results" / f"{self.target_name}_corpus.json"
         output_md = self.workspace / "corpus" / "results" / f"{self.target_name}_corpus.md"
-        command = [
-            self.python_bin,
-            str(self.workspace / "corpus" / "driver.py"),
-            "--daemon",
-            str(self._resolve_daemon_binary()),
-            "--samples",
-            self._required_contract("RUN_BENCH_SAMPLES"),
-            "--output-json",
-            str(output_json),
-            "--output-md",
-            str(output_md),
-        ]
-        workload_seconds = self._optional_contract("RUN_CORPUS_WORKLOAD_SECONDS")
-        if workload_seconds:
+        command = [self.python_bin, str(self.workspace / "corpus" / "driver.py"),
+                   "--daemon", str(self._resolve_daemon_binary()),
+                   "--samples", self._required_contract("RUN_BENCH_SAMPLES"),
+                   "--output-json", str(output_json), "--output-md", str(output_md)]
+        if workload_seconds := self.config.scalar("RUN_CORPUS_WORKLOAD_SECONDS"):
             command += ["--workload-seconds", workload_seconds]
-        for filter_name in self._csv_contract("RUN_CORPUS_FILTERS"):
+        for filter_name in self.config.csv("RUN_CORPUS_FILTERS"):
             command += ["--filter", filter_name]
         command.extend(self.corpus_argv)
         _run_checked(command, cwd=self.workspace, env=runtime_env)
 
     def _run_e2e_case(self, case_name: str, env: dict[str, str]) -> None:
         runtime_env, _ = self._env_with_cross_runtime_ld(env)
-        command = [
-            self.python_bin,
-            str(self.workspace / "e2e" / "driver.py"),
-            case_name,
-            "--daemon",
-            str(self._resolve_daemon_binary()),
-        ]
+        command = [self.python_bin, str(self.workspace / "e2e" / "driver.py"),
+                   case_name, "--daemon", str(self._resolve_daemon_binary())]
         if self._bool_contract("RUN_E2E_SMOKE"):
             command.append("--smoke")
         command.extend(self.e2e_argv)
@@ -644,8 +510,8 @@ class SuiteEntrypoint:
             self._run_e2e_case(case_name, case_env)
 
     def run(self) -> None:
-        if runtime_container_enabled(self.contract) and not inside_runtime_container():
-            _run_in_runtime_container(self.workspace, self.manifest_path, self.contract)
+        if runtime_container_enabled(self.config) and not inside_runtime_container():
+            _run_in_runtime_container(self.workspace, self.config)
             return
         env = self._runtime_env()
         os.chdir(self.workspace)
@@ -654,7 +520,13 @@ class SuiteEntrypoint:
         if self.suite_name == "test":
             artifact_dir = self._artifact_dir_required()
             artifact_dir.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(self.manifest_path, artifact_dir / "run-contract.env")
+            if self.config_path is not None:
+                shutil.copy2(self.config_path, artifact_dir / "run-contract.json")
+            else:
+                (artifact_dir / "run-contract.json").write_text(
+                    json.dumps(self.config.to_mapping(), indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
         self._ensure_bpf_stats_enabled()
         if self.suite_name == "test":
             self._run_test_suite(env)
@@ -667,18 +539,24 @@ class SuiteEntrypoint:
         else:
             _die(f"unsupported suite: {self.suite_name}")
 
+
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) != 2:
-        _die("usage: suite_entrypoint.py <workspace> <manifest_path>")
+    if len(args) not in {2, 3}:
+        _die("usage: suite_entrypoint.py <workspace> <config_path>|--config-json <json>")
     workspace = Path(args[0]).resolve()
-    manifest_path = Path(args[1]).resolve()
-    if not manifest_path.is_file():
-        _die(f"manifest is missing: {manifest_path}")
     if not workspace.is_dir():
         _die(f"workspace is missing: {workspace}")
-    contract = parse_manifest(manifest_path)
-    SuiteEntrypoint.from_contract(workspace, manifest_path, contract).run()
+    if len(args) == 3:
+        if args[1] != "--config-json":
+            _die("usage: suite_entrypoint.py <workspace> <config_path>|--config-json <json>")
+        config = RunConfig.from_json_text(args[2])
+        SuiteEntrypoint.from_config(workspace, config).run()
+        return
+    config_path = Path(args[1]).resolve()
+    if not config_path.is_file():
+        _die(f"run config is missing: {config_path}")
+    SuiteEntrypoint.from_config(workspace, read_run_config_file(config_path), config_path).run()
 
 
 if __name__ == "__main__":

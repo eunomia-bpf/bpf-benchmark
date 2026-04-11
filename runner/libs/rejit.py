@@ -1,4 +1,3 @@
-"""BpfReJIT v2 helpers for daemon-backed scan and optimize flows."""
 from __future__ import annotations
 
 import json
@@ -32,7 +31,6 @@ _PASS_TO_SITE_FIELD = {
     "skb_load_bytes_spec": "skb_load_bytes_spec_sites",
     "wide_mem": "wide_sites",
 }
-# Fields summed to produce total_sites (superset of _PASS_TO_SITE_FIELD values)
 _TOTAL_SITE_FIELDS = (
     "map_inline_sites",
     "const_prop_sites",
@@ -51,7 +49,6 @@ _TOTAL_SITE_FIELDS = (
 )
 _DEFAULT_REJIT_ENABLED_PASSES = ("map_inline", "const_prop", "dce")
 
-# Match-key → context field aliases used by _policy_rule_matches
 _POLICY_MATCH_TEXT_FIELDS: dict[str, tuple[str, ...]] = {
     "repo": ("repo",),
     "object": ("object", "object_basename"),
@@ -168,13 +165,10 @@ def _normalize_pass_list(raw: Any) -> list[str]:
 
 
 def collect_effective_enabled_passes(payload: object) -> list[str]:
-    """Recursively collect all pass names from effective_enabled_passes_by_program fields."""
     raw: list[object] = []
-
     def visit(node: object) -> None:
         if isinstance(node, Mapping):
-            by_prog = node.get("effective_enabled_passes_by_program")
-            if isinstance(by_prog, Mapping):
+            if isinstance(by_prog := node.get("effective_enabled_passes_by_program"), Mapping):
                 for passes in by_prog.values():
                     if isinstance(passes, Sequence) and not isinstance(passes, (str, bytes, bytearray)):
                         raw.extend(passes)
@@ -183,7 +177,6 @@ def collect_effective_enabled_passes(payload: object) -> list[str]:
         elif isinstance(node, Sequence) and not isinstance(node, (str, bytes, bytearray)):
             for item in node:
                 visit(item)
-
     visit(payload)
     return _ordered_unique_passes(raw)
 
@@ -273,30 +266,10 @@ def benchmark_config_enabled_passes(benchmark_config: Mapping[str, Any] | None) 
 
 def _policy_rules_list(policy_config: Mapping[str, Any]) -> list[Any]:
     raw_rules = policy_config.get("rules")
-    if raw_rules is None:
-        return []
+    if raw_rules is None: return []
     if not isinstance(raw_rules, list):
         raise SystemExit("invalid benchmark config field: policy.rules must be a sequence")
     return raw_rules
-
-
-def benchmark_policy_required_site_passes(
-    benchmark_config: Mapping[str, Any] | None,
-) -> list[str]:
-    policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
-    raw_rules = _policy_rules_list(policy_config)
-    if not raw_rules:
-        return []
-
-    all_passes: list[str] = []
-    for index, raw_rule in enumerate(raw_rules, start=1):
-        if not isinstance(raw_rule, Mapping):
-            raise SystemExit(f"invalid benchmark config field: policy.rules[{index}] must be a mapping")
-        match_config = _mapping_dict(raw_rule.get("match"), field_name=f"policy.rules[{index}].match")
-        all_passes.extend(
-            _policy_pass_list(match_config.get("has_sites"), field_name=f"policy.rules[{index}].match.has_sites") or []
-        )
-    return _ordered_unique_passes(all_passes)
 
 
 def benchmark_policy_candidate_passes(
@@ -306,7 +279,13 @@ def benchmark_policy_candidate_passes(
     raw_rules = _policy_rules_list(policy_config)
 
     candidates = benchmark_config_enabled_passes(benchmark_config)
-    candidates.extend(benchmark_policy_required_site_passes(benchmark_config))
+    for index, raw_rule in enumerate(raw_rules, start=1):
+        if not isinstance(raw_rule, Mapping):
+            raise SystemExit(f"invalid benchmark config field: policy.rules[{index}] must be a mapping")
+        match_config = _mapping_dict(raw_rule.get("match"), field_name=f"policy.rules[{index}].match")
+        candidates.extend(
+            _policy_pass_list(match_config.get("has_sites"), field_name=f"policy.rules[{index}].match.has_sites") or []
+        )
     for index, raw_rule in enumerate(raw_rules, start=1):
         if not isinstance(raw_rule, Mapping):
             raise SystemExit(f"invalid benchmark config field: policy.rules[{index}] must be a mapping")
@@ -373,10 +352,8 @@ def _benchmark_int(
 def benchmark_config_iterations(benchmark_config: Mapping[str, Any] | None) -> int:
     return _benchmark_int(benchmark_config, "iterations", default=3, minimum=1)
 
-
 def benchmark_config_warmups(benchmark_config: Mapping[str, Any] | None) -> int:
     return _benchmark_int(benchmark_config, "warmups", default=0, minimum=0)
-
 
 def benchmark_config_repeat(benchmark_config: Mapping[str, Any] | None) -> int:
     return _benchmark_int(benchmark_config, "repeat", default=_DEFAULT_BENCHMARK_REPEAT, minimum=1)
@@ -389,7 +366,6 @@ def _cached_benchmark_config_enabled_passes() -> tuple[str, ...]:
 
 def _zero_site_counts() -> dict[str, int]:
     return dict.fromkeys(("total_sites", *_TOTAL_SITE_FIELDS, "bitfield_sites"), 0)
-
 
 def benchmark_rejit_enabled_passes() -> list[str]:
     raw = os.environ.get(_BENCH_PASSES_ENV)
@@ -410,7 +386,6 @@ def _accumulate_pass_site_counts(
     *,
     also_found: bool = False,
 ) -> None:
-    """Add per-pass site counts from a raw passes list into *counts* in place."""
     if not isinstance(raw_passes, list):
         return
     for item in raw_passes:
@@ -445,7 +420,6 @@ def _applied_site_totals_from_passes(raw_passes: object) -> dict[str, int]:
 
 
 def _adjust_counts_from_raw(counts: dict[str, int], raw_counts: Mapping[str, Any] | None, *, also_total: bool = False) -> None:
-    """Bump other_sites/total_sites if the raw counts record reports more applied_sites."""
     rc = raw_counts or {}
     try:
         reported = max(0, int((rc.get("applied_sites") or (rc.get("total_sites") if also_total else None) or 0)))
@@ -482,7 +456,6 @@ def applied_site_totals_from_rejit_result(result: Mapping[str, Any] | None) -> d
 
 def scan_programs(
     prog_ids: list[int],
-    daemon: Path | str,  # noqa: ARG001 – kept for backwards-compatible signature
     *,
     prog_fds: dict[int, int] | None = None,
     enabled_passes: Sequence[str] | None = None,
@@ -492,29 +465,18 @@ def scan_programs(
     daemon_stdout_path: Path | None = None,
     daemon_stderr_path: Path | None = None,
 ) -> dict[int, dict[str, Any]]:
-    """Collect dry-run optimize summaries for the requested live prog_ids."""
-    requested_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
+    requested_ids = [int(p) for p in prog_ids if int(p) > 0]
     if not requested_ids:
         return {}
-    if prog_fds is not None and (missing := [pid for pid in requested_ids if int(prog_fds.get(pid, 0) or 0) <= 0]):
-        raise RuntimeError(
-            "scan_programs requires loader-owned prog_fds for all requested programs: "
-            + ", ".join(str(pid) for pid in missing)
-        )
+    if prog_fds is not None and (missing := [p for p in requested_ids if int(prog_fds.get(p, 0) or 0) <= 0]):
+        raise RuntimeError("scan_programs requires loader-owned prog_fds for all requested programs: " + ", ".join(str(p) for p in missing))
     if daemon_socket_path is None:
         raise ValueError("scan_programs requires daemon_socket_path")
     results: dict[int, dict[str, Any]] = {}
     for prog_id in requested_ids:
-        response = _optimize_request(
-            daemon_socket_path,
-            prog_id,
-            enabled_passes=enabled_passes,
-            dry_run=True,
-            daemon_proc=daemon_proc,
-            stdout_path=daemon_stdout_path,
-            stderr_path=daemon_stderr_path,
-            timeout_seconds=float(timeout_seconds),
-        )
+        response = _optimize_request(daemon_socket_path, prog_id, enabled_passes=enabled_passes, dry_run=True,
+                                      daemon_proc=daemon_proc, stdout_path=daemon_stdout_path,
+                                      stderr_path=daemon_stderr_path, timeout_seconds=float(timeout_seconds))
         if str(response.get("status") or "") != "ok":
             message = str(response.get("message") or response.get("error") or "scan failed").strip()
             raise RuntimeError(f"daemon scan failed for prog_id={prog_id}: {message}")
@@ -556,44 +518,28 @@ def _daemon_log_tail(stdout_path: Path | None, stderr_path: Path | None) -> str:
     return tail_text(text, max_lines=80, max_chars=8000)
 
 
-def _start_daemon_server(
-    daemon_binary: Path | str,
-) -> tuple[subprocess.Popen[str], Path, str, Path, Path]:
+def _start_daemon_server(daemon_binary: Path | str) -> tuple[subprocess.Popen[str], Path, str, Path, Path]:
     socket_dir = tempfile.mkdtemp(prefix="bd-", dir=str(_daemon_runtime_root()))
     socket_path = Path(socket_dir) / "daemon.sock"
     stdout_path = Path(socket_dir) / "daemon.stdout.log"
     stderr_path = Path(socket_dir) / "daemon.stderr.log"
     with stdout_path.open("w", encoding="utf-8") as out, stderr_path.open("w", encoding="utf-8") as err:
-        proc = subprocess.Popen(
-            [str(daemon_binary), "serve", "--socket", str(socket_path)],
-            stdout=out,
-            stderr=err,
-            text=True,
-        )
-
+        proc = subprocess.Popen([str(daemon_binary), "serve", "--socket", str(socket_path)], stdout=out, stderr=err, text=True)
     deadline = time.monotonic() + 5.0
     while time.monotonic() < deadline:
         if socket_path.exists():
             return proc, socket_path, socket_dir, stdout_path, stderr_path
         if proc.poll() is not None:
-            raise RuntimeError(
-                f"daemon serve exited early (rc={proc.returncode}): "
-                f"{_daemon_log_tail(stdout_path, stderr_path)}"
-            )
+            raise RuntimeError(f"daemon serve exited early (rc={proc.returncode}): {_daemon_log_tail(stdout_path, stderr_path)}")
         time.sleep(0.05)
     _kill_proc(proc, timeout=1)
-    raise RuntimeError(
-        f"timed out waiting for daemon socket: {_daemon_log_tail(stdout_path, stderr_path)}"
-    )
+    raise RuntimeError(f"timed out waiting for daemon socket: {_daemon_log_tail(stdout_path, stderr_path)}")
 
 
 def _kill_proc(proc: subprocess.Popen[str], *, timeout: int) -> None:
     proc.terminate()
-    try:
-        proc.wait(timeout=timeout)
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        proc.wait(timeout=timeout)
+    try: proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired: proc.kill(); proc.wait(timeout=timeout)
 
 
 def _stop_daemon_server(proc: subprocess.Popen[str], socket_path: Path, socket_dir: str) -> None:
@@ -602,13 +548,7 @@ def _stop_daemon_server(proc: subprocess.Popen[str], socket_path: Path, socket_d
     shutil.rmtree(socket_dir, ignore_errors=True)
 
 
-def _daemon_error_detail(
-    lead: str,
-    *,
-    daemon_proc: subprocess.Popen[str] | None,
-    stdout_path: Path | None,
-    stderr_path: Path | None,
-) -> str:
+def _daemon_error_detail(lead: str, *, daemon_proc: subprocess.Popen[str] | None, stdout_path: Path | None, stderr_path: Path | None) -> str:
     parts = [lead]
     if daemon_proc is not None:
         rc = daemon_proc.poll()
@@ -619,13 +559,9 @@ def _daemon_error_detail(
 
 
 def _daemon_request(
-    socket_path: Path,
-    payload: Mapping[str, object],
-    *,
-    timeout_seconds: float,
-    daemon_proc: subprocess.Popen[str] | None = None,
-    stdout_path: Path | None = None,
-    stderr_path: Path | None = None,
+    socket_path: Path, payload: Mapping[str, object], *,
+    timeout_seconds: float, daemon_proc: subprocess.Popen[str] | None = None,
+    stdout_path: Path | None = None, stderr_path: Path | None = None,
 ) -> dict[str, Any]:
     request = json.dumps(dict(payload)) + "\n"
     kw = {"daemon_proc": daemon_proc, "stdout_path": stdout_path, "stderr_path": stderr_path}
@@ -637,23 +573,15 @@ def _daemon_request(
             chunks: list[bytes] = []
             while True:
                 chunk = client.recv(4096)
-                if not chunk:
-                    break
+                if not chunk: break
                 chunks.append(chunk)
-                if b"\n" in chunk:
-                    break
+                if b"\n" in chunk: break
         except socket.timeout:
-            raise RuntimeError(
-                _daemon_error_detail(f"daemon socket request timed out after {timeout_seconds:.0f}s", **kw)
-            )
+            raise RuntimeError(_daemon_error_detail(f"daemon socket request timed out after {timeout_seconds:.0f}s", **kw))
         except OSError as exc:
-            raise RuntimeError(
-                _daemon_error_detail(f"daemon socket request failed: {exc}", **kw)
-            ) from exc
-
+            raise RuntimeError(_daemon_error_detail(f"daemon socket request failed: {exc}", **kw)) from exc
     line = b"".join(chunks).decode(errors="replace").strip()
-    log_tail = _daemon_log_tail(stdout_path, stderr_path)
-    suffix = f"\ndaemon log tail:\n{log_tail}" if log_tail else ""
+    suffix = (f"\ndaemon log tail:\n{lt}" if (lt := _daemon_log_tail(stdout_path, stderr_path)) else "")
     if not line:
         raise RuntimeError("daemon socket returned an empty response" + suffix)
     try:
@@ -666,29 +594,17 @@ def _daemon_request(
 
 
 def _optimize_request(
-    socket_path: Path,
-    prog_id: int,
-    *,
-    enabled_passes: Sequence[str] | None,
-    dry_run: bool,
-    daemon_proc: subprocess.Popen[str] | None = None,
-    stdout_path: Path | None = None,
-    stderr_path: Path | None = None,
-    timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
+    socket_path: Path, prog_id: int, *, enabled_passes: Sequence[str] | None, dry_run: bool,
+    daemon_proc: subprocess.Popen[str] | None = None, stdout_path: Path | None = None,
+    stderr_path: Path | None = None, timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
     payload: dict[str, object] = {"cmd": "optimize", "prog_id": int(prog_id)}
     if dry_run:
         payload["dry_run"] = True
     if enabled_passes is not None:
-        payload["enabled_passes"] = [str(name).strip() for name in enabled_passes if str(name).strip()]
-    return _daemon_request(
-        socket_path,
-        payload,
-        timeout_seconds=timeout_seconds,
-        daemon_proc=daemon_proc,
-        stdout_path=stdout_path,
-        stderr_path=stderr_path,
-    )
+        payload["enabled_passes"] = [str(n).strip() for n in enabled_passes if str(n).strip()]
+    return _daemon_request(socket_path, payload, timeout_seconds=timeout_seconds,
+                           daemon_proc=daemon_proc, stdout_path=stdout_path, stderr_path=stderr_path)
 
 
 def _prepare_branch_flip_profile(
@@ -700,7 +616,6 @@ def _prepare_branch_flip_profile(
     interval_ms: int = _DEFAULT_PROFILE_INTERVAL_MS,
     timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
 ) -> dict[str, object] | None:
-    """Run profile-start / sleep / profile-stop; return error dict on failure, None on success."""
     kw: dict[str, Any] = {"timeout_seconds": timeout_seconds, "daemon_proc": daemon_proc,
                           "stdout_path": stdout_path, "stderr_path": stderr_path}
 
@@ -728,28 +643,19 @@ def apply_daemon_rejit(
     daemon_stdout_path: Path | None = None,
     daemon_stderr_path: Path | None = None,
 ) -> dict[str, object]:
-    """Apply serve-mode optimize requests over an existing daemon socket."""
-    requested_prog_ids = [int(value) for value in (prog_ids or []) if int(value) > 0]
+    requested_prog_ids = [int(v) for v in (prog_ids or []) if int(v) > 0]
     if not requested_prog_ids:
         raise ValueError("apply_daemon_rejit requires at least one prog_id")
     if daemon_socket_path is None:
         raise ValueError("apply_daemon_rejit requires daemon_socket_path")
     per_program: dict[int, dict[str, object]] = {}
     outputs: list[str] = []
-    exit_code = 0
-    applied_any = False
-    all_applied = True
-    total_sites = 0
-    applied_sites = 0
+    exit_code, total_sites, applied_sites = 0, 0, 0
+    applied_any, all_applied = False, True
     errors: list[str] = []
-
     if enabled_passes and any(str(n).strip() == "branch_flip" for n in enabled_passes):
-        profile_error = _prepare_branch_flip_profile(
-            daemon_socket_path,
-            daemon_proc=daemon_proc,
-            stdout_path=daemon_stdout_path,
-            stderr_path=daemon_stderr_path,
-        )
+        profile_error = _prepare_branch_flip_profile(daemon_socket_path, daemon_proc=daemon_proc,
+                                                      stdout_path=daemon_stdout_path, stderr_path=daemon_stderr_path)
         if profile_error is not None:
             ec = int(profile_error.get("exit_code", 1) or 1)
             out = str(profile_error.get("output") or "")
@@ -758,29 +664,16 @@ def apply_daemon_rejit(
             return {
                 "applied": False, "applied_any": False, "all_applied": False,
                 "output": out, "exit_code": ec, "error": msg, "counts": zc,
-                "per_program": {
-                    int(pid): {"prog_id": int(pid), "applied": False, "changed": False,
-                                "output": out, "exit_code": ec, "counts": zc, "error": msg}
-                    for pid in requested_prog_ids
-                },
-                "program_counts": {"requested": len(requested_prog_ids), "applied": 0,
-                                   "not_applied": len(requested_prog_ids)},
+                "per_program": {int(pid): {"prog_id": int(pid), "applied": False, "changed": False,
+                                           "output": out, "exit_code": ec, "counts": zc, "error": msg}
+                                for pid in requested_prog_ids},
+                "program_counts": {"requested": len(requested_prog_ids), "applied": 0, "not_applied": len(requested_prog_ids)},
             }
     for prog_id in requested_prog_ids:
-        _resp = _optimize_request(
-            daemon_socket_path,
-            prog_id,
-            enabled_passes=enabled_passes,
-            dry_run=False,
-            daemon_proc=daemon_proc,
-            stdout_path=daemon_stdout_path,
-            stderr_path=daemon_stderr_path,
-        )
-        result = _apply_result_from_response(
-            _resp,
-            output=json.dumps(_resp, sort_keys=True),
-            exit_code=0 if str(_resp.get("status") or "") == "ok" else 1,
-        )
+        _resp = _optimize_request(daemon_socket_path, prog_id, enabled_passes=enabled_passes, dry_run=False,
+                                   daemon_proc=daemon_proc, stdout_path=daemon_stdout_path, stderr_path=daemon_stderr_path)
+        result = _apply_result_from_response(_resp, output=json.dumps(_resp, sort_keys=True),
+                                              exit_code=0 if str(_resp.get("status") or "") == "ok" else 1)
         per_program[prog_id] = result
         outputs.append(str(result.get("output") or ""))
         exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
@@ -791,16 +684,12 @@ def apply_daemon_rejit(
         applied_sites += int(rc.get("applied_sites", 0) or 0)
         if error := str(result.get("error") or "").strip():
             errors.append(f"prog {prog_id}: {error}")
-
     n_applied = sum(1 for r in per_program.values() if r.get("applied", False))
     return {
         "applied": applied_any, "applied_any": applied_any, "all_applied": all_applied,
-        "output": "\n".join(o for o in outputs if o),
-        "exit_code": exit_code,
-        "per_program": per_program,
+        "output": "\n".join(o for o in outputs if o), "exit_code": exit_code, "per_program": per_program,
         "counts": {"total_sites": total_sites, "applied_sites": applied_sites},
-        "program_counts": {"requested": len(requested_prog_ids), "applied": n_applied,
-                           "not_applied": len(requested_prog_ids) - n_applied},
+        "program_counts": {"requested": len(requested_prog_ids), "applied": n_applied, "not_applied": len(requested_prog_ids) - n_applied},
         "error": "; ".join(errors),
     }
 
@@ -820,25 +709,20 @@ class DaemonSession:
     @classmethod
     def start(cls, daemon_binary: Path | str, *, load_kinsn: bool = False) -> "DaemonSession":
         from .kinsn import capture_daemon_kinsn_discovery, prepare_kinsn_modules  # noqa: PLC0415
-
         binary = Path(daemon_binary).resolve()
         kinsn_metadata: dict[str, object] = dict(prepare_kinsn_modules()) if load_kinsn else {}
         proc, socket_path, socket_dir, stdout_path, stderr_path = _start_daemon_server(binary)
         try:
             if load_kinsn:
-                kinsn_metadata.update(
-                    daemon_binary=str(binary),
-                    daemon_kinsn_discovery=capture_daemon_kinsn_discovery(stdout_path, stderr_path),
-                    status="ready",
-                )
+                kinsn_metadata.update(daemon_binary=str(binary),
+                                       daemon_kinsn_discovery=capture_daemon_kinsn_discovery(stdout_path, stderr_path),
+                                       status="ready")
         except Exception:
             _stop_daemon_server(proc, socket_path, socket_dir)
             raise
-        return cls(
-            daemon_binary=binary, proc=proc, socket_path=socket_path, socket_dir=socket_dir,
-            stdout_path=stdout_path, stderr_path=stderr_path,
-            kinsn_metadata=kinsn_metadata, load_kinsn=bool(load_kinsn),
-        )
+        return cls(daemon_binary=binary, proc=proc, socket_path=socket_path, socket_dir=socket_dir,
+                   stdout_path=stdout_path, stderr_path=stderr_path,
+                   kinsn_metadata=kinsn_metadata, load_kinsn=bool(load_kinsn))
 
     def __enter__(self) -> "DaemonSession":
         return self
@@ -853,47 +737,16 @@ class DaemonSession:
         self._closed = True
         _stop_daemon_server(self.proc, self.socket_path, self.socket_dir)
 
-    def scan_programs(
-        self,
-        prog_ids: Sequence[int],
-        *,
-        prog_fds: dict[int, int] | None = None,
-        enabled_passes: Sequence[str] | None = None,
-        timeout_seconds: int = 60,
-    ) -> dict[int, dict[str, object]]:
-        return scan_programs(
-            [int(p) for p in prog_ids if int(p) > 0], self.daemon_binary,
-            prog_fds=prog_fds, enabled_passes=enabled_passes, timeout_seconds=timeout_seconds,
-            daemon_socket_path=self.socket_path, daemon_proc=self.proc,
-            daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path,
-        )
+    def scan_programs(self, prog_ids: Sequence[int], *, prog_fds: dict[int, int] | None = None,
+                      enabled_passes: Sequence[str] | None = None, timeout_seconds: int = 60) -> dict[int, dict[str, object]]:
+        return scan_programs([int(p) for p in prog_ids if int(p) > 0], prog_fds=prog_fds,
+                             enabled_passes=enabled_passes, timeout_seconds=timeout_seconds,
+                             daemon_socket_path=self.socket_path, daemon_proc=self.proc,
+                             daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path)
 
-    def apply_rejit(
-        self,
-        prog_ids: Sequence[int],
-        *,
-        enabled_passes: Sequence[str] | None = None,
-    ) -> dict[str, object]:
-        return apply_daemon_rejit(
-            [int(p) for p in prog_ids if int(p) > 0], enabled_passes=enabled_passes,
-            daemon_socket_path=self.socket_path, daemon_proc=self.proc,
-            daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path,
-        )
+    def apply_rejit(self, prog_ids: Sequence[int], *, enabled_passes: Sequence[str] | None = None) -> dict[str, object]:
+        return apply_daemon_rejit([int(p) for p in prog_ids if int(p) > 0], enabled_passes=enabled_passes,
+                                   daemon_socket_path=self.socket_path, daemon_proc=self.proc,
+                                   daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path)
 
 
-__all__ = [
-    "DaemonSession",
-    "applied_site_totals_from_rejit_result",
-    "apply_daemon_rejit",
-    "benchmark_config_enabled_passes",
-    "benchmark_config_iterations",
-    "benchmark_policy_candidate_passes",
-    "benchmark_policy_required_site_passes",
-    "benchmark_config_repeat",
-    "benchmark_config_warmups",
-    "benchmark_rejit_enabled_passes",
-    "collect_effective_enabled_passes",
-    "load_benchmark_config",
-    "resolve_program_enabled_passes",
-    "scan_programs",
-]

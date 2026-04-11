@@ -82,37 +82,22 @@ class ScxSchedulerSession(AgentSession):
         self.command_used: list[str] | None = None
 
     def __enter__(self) -> "ScxSchedulerSession":
-        command_text = " ".join(
-            [
-                "set -euo pipefail;",
-                "ulimit -l unlimited;",
-                "exec",
-                shlex.quote(str(self.binary)),
-                "--stats",
-                "1",
-                *[shlex.quote(str(arg)) for arg in self.extra_args],
-            ]
-        )
+        command_text = " ".join(["set -euo pipefail;", "ulimit -l unlimited;", "exec",
+                                  shlex.quote(str(self.binary)), "--stats", "1",
+                                  *[shlex.quote(str(arg)) for arg in self.extra_args]])
         self.command_used = ["bash", "-lc", command_text]
         self.process = start_agent("bash", ["-lc", command_text], env={"PATH": preferred_path()})
         self._start_io_threads()
-
         try:
-            healthy = wait_healthy(
-                self.process,
-                self.load_timeout,
-                lambda: read_scx_state() == "enabled" and bool(self._discover_programs()),
-            )
+            healthy = wait_healthy(self.process, self.load_timeout,
+                                   lambda: read_scx_state() == "enabled" and bool(self._discover_programs()))
         except Exception:
             self.close()
             raise
         if not healthy:
             snapshot = self.collector.snapshot()
-            details = tail_text(
-                "\n".join(list(snapshot.get("stderr_tail") or []) + list(snapshot.get("stdout_tail") or [])),
-                max_lines=40,
-                max_chars=8000,
-            )
+            details = tail_text("\n".join(list(snapshot.get("stderr_tail") or []) + list(snapshot.get("stdout_tail") or [])),
+                                max_lines=40, max_chars=8000)
             self.close()
             raise RuntimeError(f"scx_rusty did not become healthy: {details}")
 
@@ -156,15 +141,9 @@ class ScxSchedulerSession(AgentSession):
         for program in programs:
             prog_id = int(program.get("id", -1))
             program_name = str(program.get("name") or prog_id)
-            owner_refs = [
-                ref
-                for ref in (program.get("owner_fds") or [])
-                if int(ref.get("pid", -1)) == int(self.pid)
-            ]
+            owner_refs = [ref for ref in (program.get("owner_fds") or []) if int(ref.get("pid", -1)) == int(self.pid)]
             if not owner_refs:
-                raise RuntimeError(
-                    f"SCX program {program_name!r} (id={prog_id}) did not expose a scheduler-owned FD"
-                )
+                raise RuntimeError(f"SCX program {program_name!r} (id={prog_id}) did not expose a scheduler-owned FD")
             duplicated[prog_id] = dup_fd_from_process(int(self.pid), int(owner_refs[0]["fd"]))
         return duplicated
 
@@ -337,10 +316,7 @@ class ScxRunner(AppRunner):
         self.scheduler_extra_args = tuple(str(arg) for arg in scheduler_extra_args)
         self.load_timeout_s = int(load_timeout_s)
         self.session: Any | None = None
-        self.workload_spec: Mapping[str, object] = dict(
-            workload_spec
-            or {"name": "hackbench", "kind": "hackbench", "metric": "runs/s"}
-        )
+        self.workload_spec: Mapping[str, object] = dict(workload_spec or {"name": "hackbench", "kind": "hackbench", "metric": "runs/s"})
         self.last_workload_extra: dict[str, object] = {}
 
     @property
@@ -397,6 +373,3 @@ class ScxRunner(AppRunner):
         self.session = None
         self.process_output = session.collector_snapshot()
         session.close()
-
-
-__all__ = ["ScxRunner", "ScxSchedulerSession", "preferred_path", "read_scx_ops", "read_scx_state", "run_workload"]

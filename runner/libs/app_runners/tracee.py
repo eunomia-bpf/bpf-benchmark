@@ -45,13 +45,11 @@ TRACEE_HEALTH_PORT = 3366
 
 
 def _tracee_runtime_dir() -> Path:
-    explicit = os.environ.get("BPFREJIT_TRACEE_RUNTIME_DIR", "").strip()
-    if explicit:
+    if explicit := os.environ.get("BPFREJIT_TRACEE_RUNTIME_DIR", "").strip():
         candidate = Path(explicit).expanduser()
     else:
         runtime_tmpdir = os.environ.get("BPFREJIT_RUNTIME_TMPDIR", "").strip()
-        if not runtime_tmpdir:
-            raise RuntimeError("BPFREJIT_RUNTIME_TMPDIR is required for the Tracee runner")
+        if not runtime_tmpdir: raise RuntimeError("BPFREJIT_RUNTIME_TMPDIR is required for the Tracee runner")
         candidate = Path(runtime_tmpdir).expanduser() / "tracee"
     candidate.mkdir(parents=True, exist_ok=True)
     if not os.access(candidate, os.W_OK | os.X_OK):
@@ -79,31 +77,24 @@ class TraceeOutputCollector:
     @staticmethod
     def _payload_timestamp_ns(payload: Mapping[str, object]) -> int | None:
         raw_timestamp = str(payload.get("timestamp") or "").strip()
-        if not raw_timestamp:
-            return None
-        normalized = raw_timestamp.replace("Z", "+00:00")
+        if not raw_timestamp: return None
         try:
-            parsed = datetime.fromisoformat(normalized)
-        except ValueError:
-            return None
-        if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=timezone.utc)
+            parsed = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
+        except ValueError: return None
+        if parsed.tzinfo is None: parsed = parsed.replace(tzinfo=timezone.utc)
         return int(parsed.timestamp() * 1_000_000_000)
 
     def consume_stdout(self, pipe: Any) -> None:
         for raw_line in iter(pipe.readline, ""):
             line = raw_line.rstrip()
-            with self._lock:
-                self.stdout_tail.append(line)
-            self._parse_event_line(line)
-            self._parse_stats_line(line)
+            with self._lock: self.stdout_tail.append(line)
+            self._parse_event_line(line); self._parse_stats_line(line)
         pipe.close()
 
     def consume_stderr(self, pipe: Any) -> None:
         for raw_line in iter(pipe.readline, ""):
             line = raw_line.rstrip()
-            with self._lock:
-                self.stderr_tail.append(line)
+            with self._lock: self.stderr_tail.append(line)
             self._parse_stats_line(line)
         pipe.close()
 
@@ -149,44 +140,28 @@ class TraceeOutputCollector:
         if not event_name:
             return
         with self._lock:
-            normalized_event_name = str(event_name)
-            self.event_counts[normalized_event_name] += 1
+            n = str(event_name)
+            self.event_counts[n] += 1
             self.total_events += 1
-            self.events.append(
-                {
-                    "event_name": normalized_event_name,
-                    "line": line,
-                    "payload": dict(payload),
-                    "event_time_ns": self._payload_timestamp_ns(payload),
-                    "observed_monotonic_ns": time.monotonic_ns(),
-                    "source": "collector",
-                }
-            )
+            self.events.append({"event_name": n, "line": line, "payload": dict(payload),
+                                 "event_time_ns": self._payload_timestamp_ns(payload),
+                                 "observed_monotonic_ns": time.monotonic_ns(), "source": "collector"})
             self._condition.notify_all()
 
     def _parse_stats_line(self, line: str) -> None:
         match = TRACEE_STATS_PATTERN.search(line)
-        if not match:
-            return
-        stats = {
-            "event_count": int(match.group("events")),
-            "lost_event_count": int(match.group("lost")),
-            "lost_write_count": int(match.group("lost_writes") or 0),
-        }
+        if not match: return
         with self._lock:
-            self.latest_stats = stats
+            self.latest_stats = {"event_count": int(match.group("events")),
+                                  "lost_event_count": int(match.group("lost")),
+                                  "lost_write_count": int(match.group("lost_writes") or 0)}
 
     def snapshot(self) -> dict[str, object]:
         with self._lock:
-            return {
-                "event_counts": dict(self.event_counts),
-                "recent_events": list(self.events),
-                "total_events": self.total_events,
-                "latest_stats": dict(self.latest_stats),
-                "stdout_tail": list(self.stdout_tail),
-                "stderr_tail": list(self.stderr_tail),
-                "event_tail": list(self.event_tail),
-            }
+            return {"event_counts": dict(self.event_counts), "recent_events": list(self.events),
+                    "total_events": self.total_events, "latest_stats": dict(self.latest_stats),
+                    "stdout_tail": list(self.stdout_tail), "stderr_tail": list(self.stderr_tail),
+                    "event_tail": list(self.event_tail)}
 
     def wait_for_event(
         self,
@@ -289,19 +264,11 @@ class TraceeAgentSession(AgentSession):
                         for program in programs:
                             prog_id = int(program.get("id", -1))
                             program_name = str(program.get("name") or prog_id)
-                            owner_refs = [
-                                ref
-                                for ref in (program.get("owner_fds") or [])
-                                if int(ref.get("pid", -1)) == (proc.pid or -1)
-                            ]
+                            owner_refs = [ref for ref in (program.get("owner_fds") or [])
+                                          if int(ref.get("pid", -1)) == (proc.pid or -1)]
                             if not owner_refs:
-                                raise RuntimeError(
-                                    f"Tracee program {program_name!r} (id={prog_id}) did not expose a loader-owned FD"
-                                )
-                            self.program_fds[prog_id] = dup_fd_from_process(
-                                int(proc.pid or -1),
-                                int(owner_refs[0]["fd"]),
-                            )
+                                raise RuntimeError(f"Tracee program {program_name!r} (id={prog_id}) did not expose a loader-owned FD")
+                            self.program_fds[prog_id] = dup_fd_from_process(int(proc.pid or -1), int(owner_refs[0]["fd"]))
                     except Exception:
                         self.close()
                         raise
@@ -323,28 +290,20 @@ class TraceeAgentSession(AgentSession):
     def close(self) -> None:
         close_errors: list[str] = []
         for fd in self.program_fds.values():
-            try:
-                os.close(fd)
-            except OSError as exc:
-                close_errors.append(f"failed to close Tracee program fd {fd}: {exc}")
+            try: os.close(fd)
+            except OSError as exc: close_errors.append(f"failed to close Tracee program fd {fd}: {exc}")
         self.program_fds.clear()
         if self.process is not None:
-            stop_agent(self.process, timeout=8)
-            self.process = None
-        self.event_stop.set()
-        self._join_io_threads()
+            stop_agent(self.process, timeout=8); self.process = None
+        self.event_stop.set(); self._join_io_threads()
         if self.event_thread is not None:
-            self.event_thread.join(timeout=2.0)
-            self.event_thread = None
-        if close_errors:
-            raise RuntimeError("; ".join(close_errors))
+            self.event_thread.join(timeout=2.0); self.event_thread = None
+        if close_errors: raise RuntimeError("; ".join(close_errors))
 
 
 def _current_prog_ids() -> list[int]:
-    payload = run_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30).stdout
-    parsed = json.loads(payload)
-    if not isinstance(parsed, list):
-        return []
+    parsed = json.loads(run_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30).stdout)
+    if not isinstance(parsed, list): return []
     return [int(record["id"]) for record in parsed if isinstance(record, dict) and "id" in record]
 
 
@@ -352,28 +311,17 @@ def inspect_tracee_setup() -> dict[str, object]:
     corpus_binary = repo_artifact_root() / "tracee" / "bin" / "tracee"
     tracee_binary = pick_host_executable(corpus_binary)
     if tracee_binary is None:
-        return {
-            "returncode": 1,
-            "tracee_binary": None,
-            "stdout_tail": "",
-            "stderr_tail": f"missing repo-managed Tracee binary under {corpus_binary}",
-        }
-    version_probe = run_command([str(tracee_binary), "--version"], check=False, timeout=30)
-    if version_probe.returncode != 0:
-        version_probe = run_command([str(tracee_binary), "version"], check=False, timeout=30)
-    if version_probe.returncode != 0:
-        return {
-            "returncode": version_probe.returncode,
-            "tracee_binary": str(tracee_binary),
-            "stdout_tail": tail_text(version_probe.stdout or "", max_lines=40, max_chars=8000),
-            "stderr_tail": tail_text(version_probe.stderr or "", max_lines=40, max_chars=8000),
-        }
-    return {
-        "returncode": 0,
-        "tracee_binary": str(tracee_binary),
-        "stdout_tail": f"TRACEE_BINARY={tracee_binary}",
-        "stderr_tail": "",
-    }
+        return {"returncode": 1, "tracee_binary": None, "stdout_tail": "",
+                "stderr_tail": f"missing repo-managed Tracee binary under {corpus_binary}"}
+    vp = run_command([str(tracee_binary), "--version"], check=False, timeout=30)
+    if vp.returncode != 0:
+        vp = run_command([str(tracee_binary), "version"], check=False, timeout=30)
+    if vp.returncode != 0:
+        return {"returncode": vp.returncode, "tracee_binary": str(tracee_binary),
+                "stdout_tail": tail_text(vp.stdout or "", max_lines=40, max_chars=8000),
+                "stderr_tail": tail_text(vp.stderr or "", max_lines=40, max_chars=8000)}
+    return {"returncode": 0, "tracee_binary": str(tracee_binary),
+            "stdout_tail": f"TRACEE_BINARY={tracee_binary}", "stderr_tail": ""}
 
 
 def resolve_tracee_binary(explicit: str | None, setup_result: Mapping[str, object]) -> str | None:
@@ -415,22 +363,10 @@ def _tracee_output_args(event_output_path: Path) -> list[str]:
 
 
 def build_tracee_commands(binary: str, events: Sequence[str], extra_args: Sequence[str] = ()) -> list[list[str]]:
-    event_text = ",".join(str(event) for event in events)
-    sig_dir = _tracee_signatures_dir()
-    output_args = _tracee_output_args(_tracee_event_output_path())
-    return [[
-        binary,
-        "--events",
-        event_text,
-        *output_args,
-        "--server",
-        "healthz",
-        "--server",
-        f"http-address=:{TRACEE_HEALTH_PORT}",
-        "--signatures-dir",
-        str(sig_dir),
-        *extra_args,
-    ]]
+    return [[binary, "--events", ",".join(str(e) for e in events),
+             *_tracee_output_args(_tracee_event_output_path()),
+             "--server", "healthz", "--server", f"http-address=:{TRACEE_HEALTH_PORT}",
+             "--signatures-dir", str(_tracee_signatures_dir()), *extra_args]]
 
 
 def _format_launch_failure(command: Sequence[str], proc: subprocess.Popen[str] | None, snapshot: Mapping[str, object]) -> str:
@@ -564,9 +500,6 @@ class TraceeRunner(AppRunner):
             )
         self.tracee_binary = Path(tracee_binary).resolve()
         self.programs = programs
-        # Tracee can expose loader-owned program FDs before the probes begin
-        # processing events on slow single-vCPU TCG guests. Settle startup here
-        # so corpus/e2e measurements begin only after the native loader is ready.
         if self.startup_settle_s > 0.0:
             time.sleep(self.startup_settle_s)
         return [int(program["id"]) for program in programs if int(program.get("id", 0) or 0) > 0]
@@ -582,27 +515,13 @@ class TraceeRunner(AppRunner):
         return run_tracee_workload(workload_spec, max(1, int(round(seconds))))
 
     def stop(self) -> None:
-        if self.session is None:
-            return
-        session = self.session
-        self.session = None
+        if self.session is None: return
+        session, self.session = self.session, None
         snapshot = session.collector_snapshot()
         process = session.process
         session.close()
-        self.process_output = {
-            "returncode": None if process is None else process.returncode,
-            "stdout_tail": "\n".join(snapshot.get("stdout_tail") or []),
-            "stderr_tail": "\n".join(snapshot.get("stderr_tail") or []),
-            "latest_stats": snapshot.get("latest_stats") or {},
-        }
+        self.process_output = {"returncode": None if process is None else process.returncode,
+                               "stdout_tail": "\n".join(snapshot.get("stdout_tail") or []),
+                               "stderr_tail": "\n".join(snapshot.get("stderr_tail") or []),
+                               "latest_stats": snapshot.get("latest_stats") or {}}
 
-
-__all__ = [
-    "TraceeAgentSession",
-    "TraceeOutputCollector",
-    "TraceeRunner",
-    "build_tracee_commands",
-    "inspect_tracee_setup",
-    "resolve_tracee_binary",
-    "run_tracee_workload",
-]

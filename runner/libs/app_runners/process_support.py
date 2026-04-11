@@ -20,7 +20,6 @@ def wait_for_attached_programs(
     expected_count: int,
     timeout_s: int,
 ) -> list[dict[str, object]]:
-    """Poll bpftool until at least `expected_count` BPF programs are stably attached."""
     deadline = time.monotonic() + timeout_s
     last_nonempty: list[dict[str, object]] = []
     stable_ids: tuple[int, ...] | None = None
@@ -70,8 +69,6 @@ class ProcessOutputCollector:
 
 
 class AgentSession:
-    """Base class for agent sessions that start a process and consume its output."""
-
     def __init__(self, load_timeout: int) -> None:
         self.load_timeout = int(load_timeout)
         self.process: Any | None = None

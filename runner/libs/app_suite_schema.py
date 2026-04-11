@@ -172,11 +172,3 @@ def load_app_suite_from_yaml(
         "selected_apps": len(selected_apps),
     }
     return suite, summary
-
-
-__all__ = [
-    "AppSpec",
-    "AppSuite",
-    "AppWorkload",
-    "load_app_suite_from_yaml",
-]

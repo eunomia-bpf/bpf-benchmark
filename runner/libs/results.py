@@ -33,7 +33,6 @@ class PerfCounterMeta(TypedDict, total=False):
 
 
 class RejitSummary(TypedDict, total=False):
-    """Canonical rejit summary — output by C++ runner, consumed by all drivers."""
     requested: bool
     mode: str
     syscall_attempted: bool
@@ -76,8 +75,6 @@ class RunnerSample(TypedDict, total=False):
 
 @dataclass(frozen=True)
 class UnifiedResultRecord:
-    """Core schema shared by micro suite, corpus rejit, and rigorous drivers."""
-
     suite: str
     target: Mapping[str, object]
     backend: str
@@ -160,7 +157,6 @@ def _normalize_phase_name(phase: object) -> object:
 
 
 def _default_rejit() -> dict:
-    """Default rejit summary with all canonical fields."""
     return {
         "requested": False,
         "mode": "none",
@@ -210,29 +206,3 @@ def parse_runner_sample(stdout: str) -> RunnerSample:
     if not samples:
         raise RuntimeError("runner sample payload was not a JSON object")
     return samples[-1]
-
-
-__all__ = [
-    "CodeSizeSummary",
-    "PerfCounterMeta",
-    "RejitSummary",
-    "RunnerSample",
-    "collapse_command_samples",
-    "SummaryStats",
-    "UnifiedResultRecord",
-    "derive_perf_metrics",
-    "float_summary",
-    "geometric_mean",
-    "load_json",
-    "normalize_runner_sample",
-    "ns_summary",
-    "parse_json_lines",
-    "parse_last_json_line",
-    "parse_command_samples",
-    "parse_runner_sample",
-    "parse_runner_samples",
-    "summarize_named_counters",
-    "summarize_optional_ns",
-    "summarize_perf_counter_meta",
-    "summarize_phase_timings",
-]

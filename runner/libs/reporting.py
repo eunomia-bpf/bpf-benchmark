@@ -131,25 +131,16 @@ def percentile(sorted_values: list[float], probability: float) -> float:
     return sorted_values[lower] * (1.0 - weight) + sorted_values[upper] * weight
 
 
-def bootstrap_geometric_mean_ci(
-    values: list[float],
-    iterations: int,
-    seed: int,
-) -> tuple[float, float] | None:
+def bootstrap_geometric_mean_ci(values: list[float], iterations: int, seed: int) -> tuple[float, float] | None:
     filtered = [value for value in values if value > 0.0]
-    if not filtered:
-        return None
-    if len(filtered) == 1:
-        return (filtered[0], filtered[0])
-
+    if not filtered: return None
+    if len(filtered) == 1: return (filtered[0], filtered[0])
     rng = random.Random(seed)
     bootstraps: list[float] = []
     for _ in range(iterations):
         sample = [filtered[rng.randrange(len(filtered))] for _ in range(len(filtered))]
-        estimate = geometric_mean(sample)
-        if estimate is not None:
+        if (estimate := geometric_mean(sample)) is not None:
             bootstraps.append(estimate)
-
     bootstraps.sort()
     return percentile(bootstraps, 0.025), percentile(bootstraps, 0.975)
 
@@ -164,35 +155,19 @@ def bootstrap_ratio_ci(
 ) -> tuple[float, float] | None:
     if not numerator_samples or not denominator_samples:
         return None
-
     rng = random.Random(seed)
     bootstraps: list[float] = []
     for _ in range(iterations):
-        numerator_resample = [numerator_samples[rng.randrange(len(numerator_samples))] for _ in range(len(numerator_samples))]
-        denominator_resample = [
-            denominator_samples[rng.randrange(len(denominator_samples))] for _ in range(len(denominator_samples))
-        ]
-        numerator = float(statistics.median(numerator_resample))
-        denominator = float(statistics.median(denominator_resample))
-
+        resample = lambda s: [s[rng.randrange(len(s))] for _ in range(len(s))]  # noqa: E731
+        numerator = float(statistics.median(resample(numerator_samples)))
+        denominator = float(statistics.median(resample(denominator_samples)))
         if baseline_numerator_samples is not None and baseline_denominator_samples is not None:
-            baseline_num_resample = [
-                baseline_numerator_samples[rng.randrange(len(baseline_numerator_samples))]
-                for _ in range(len(baseline_numerator_samples))
-            ]
-            baseline_den_resample = [
-                baseline_denominator_samples[rng.randrange(len(baseline_denominator_samples))]
-                for _ in range(len(baseline_denominator_samples))
-            ]
-            numerator = max(numerator - float(statistics.median(baseline_num_resample)), 0.0)
-            denominator = max(denominator - float(statistics.median(baseline_den_resample)), 0.0)
-
+            numerator = max(numerator - float(statistics.median(resample(baseline_numerator_samples))), 0.0)
+            denominator = max(denominator - float(statistics.median(resample(baseline_denominator_samples))), 0.0)
         if numerator > 0.0 and denominator > 0.0:
             bootstraps.append(numerator / denominator)
-
     if not bootstraps:
         return None
-
     bootstraps.sort()
     return percentile(bootstraps, 0.025), percentile(bootstraps, 0.975)
 
@@ -270,16 +245,9 @@ def _detect_baseline_name(results: Mapping[str, object], manifest: ManifestSpec 
 
 
 def win_counts(ratios: list[float], tie_epsilon: float = 0.02) -> tuple[int, int, int]:
-    llvmbpf_wins = 0
-    kernel_wins = 0
-    ties = 0
-    for ratio in ratios:
-        if abs(ratio - 1.0) <= tie_epsilon:
-            ties += 1
-        elif ratio < 1.0:
-            llvmbpf_wins += 1
-        else:
-            kernel_wins += 1
+    llvmbpf_wins = sum(1 for r in ratios if r < 1.0 and abs(r - 1.0) > tie_epsilon)
+    kernel_wins = sum(1 for r in ratios if r > 1.0 and abs(r - 1.0) > tie_epsilon)
+    ties = len(ratios) - llvmbpf_wins - kernel_wins
     return llvmbpf_wins, kernel_wins, ties
 
 
@@ -330,53 +298,31 @@ def compute_per_benchmark_statistics(
     for index, raw_benchmark in enumerate(_sequence(results.get("benchmarks"))):
         benchmark = _mapping(raw_benchmark)
         name = str(benchmark.get("name", ""))
-        manifest_target = manifest_targets.get(name)
+        mt = manifest_targets.get(name)
         runs = _run_lookup(benchmark)
         llvmbpf_run = runs.get(PRIMARY_RUNTIME, {})
         kernel_run = runs.get(BASELINE_RUNTIME, {})
-
         llvmbpf_exec_ns = _metric_median(llvmbpf_run, "exec_ns")
         kernel_exec_ns = _metric_median(kernel_run, "exec_ns")
-        llvmbpf_compile_ns = _metric_median(llvmbpf_run, "compile_ns")
-        kernel_compile_ns = _metric_median(kernel_run, "compile_ns")
-        raw_ratio = _benchmark_raw_ratio(benchmark, llvmbpf_exec_ns, kernel_exec_ns)
         adjusted_ratio = _benchmark_adjusted_ratio(benchmark, llvmbpf_run, kernel_run)
-
         ci = None
-        if (
-            adjusted_ratio is not None
-            and baseline_name is not None
-            and name != baseline_name
-            and baseline_llvmbpf_samples
-            and baseline_kernel_samples
-        ):
-            ci = bootstrap_ratio_ci(
-                _exec_samples(llvmbpf_run),
-                _exec_samples(kernel_run),
-                bootstrap_iterations,
-                bootstrap_seed + 101 + index,
-                baseline_llvmbpf_samples,
-                baseline_kernel_samples,
-            )
-
-        statistics_rows.append(
-            BenchmarkStatistics(
-                name=name,
-                category=str(benchmark.get("category", manifest_target.category if manifest_target is not None else "")) or None,
-                family=str(benchmark.get("family", manifest_target.family if manifest_target is not None else "")) or None,
-                level=str(benchmark.get("level", manifest_target.level if manifest_target is not None else "")) or None,
-                llvmbpf_exec_ns=llvmbpf_exec_ns,
-                kernel_exec_ns=kernel_exec_ns,
-                llvmbpf_compile_ns=llvmbpf_compile_ns,
-                kernel_compile_ns=kernel_compile_ns,
-                raw_exec_ratio=raw_ratio,
-                adjusted_exec_ratio=adjusted_ratio,
-                adjusted_exec_ci=ci,
-                is_baseline=(name == baseline_name),
-            )
-        )
-
+        if adjusted_ratio is not None and baseline_name is not None and name != baseline_name and baseline_llvmbpf_samples and baseline_kernel_samples:
+            ci = bootstrap_ratio_ci(_exec_samples(llvmbpf_run), _exec_samples(kernel_run),
+                                    bootstrap_iterations, bootstrap_seed + 101 + index,
+                                    baseline_llvmbpf_samples, baseline_kernel_samples)
+        statistics_rows.append(BenchmarkStatistics(
+            name=name,
+            category=str(benchmark.get("category", mt.category if mt is not None else "")) or None,
+            family=str(benchmark.get("family", mt.family if mt is not None else "")) or None,
+            level=str(benchmark.get("level", mt.level if mt is not None else "")) or None,
+            llvmbpf_exec_ns=llvmbpf_exec_ns, kernel_exec_ns=kernel_exec_ns,
+            llvmbpf_compile_ns=_metric_median(llvmbpf_run, "compile_ns"),
+            kernel_compile_ns=_metric_median(kernel_run, "compile_ns"),
+            raw_exec_ratio=_benchmark_raw_ratio(benchmark, llvmbpf_exec_ns, kernel_exec_ns),
+            adjusted_exec_ratio=adjusted_ratio, adjusted_exec_ci=ci, is_baseline=(name == baseline_name),
+        ))
     return tuple(statistics_rows)
+
 
 def _comparison_summary(
     ratios: list[float],
@@ -427,42 +373,26 @@ def _group_statistics(
 def _perf_runtime_statistics(results: Mapping[str, object]) -> tuple[PerfRuntimeStatistics, ...]:
     runtime_metrics: dict[str, dict[str, list[float]]] = {}
     for raw_benchmark in _sequence(results.get("benchmarks")):
-        benchmark = _mapping(raw_benchmark)
-        for raw_run in _sequence(benchmark.get("runs")):
+        for raw_run in _sequence(_mapping(raw_benchmark).get("runs")):
             run = _mapping(raw_run)
             runtime = str(run.get("runtime", ""))
-            if not runtime:
-                continue
-            bucket = runtime_metrics.setdefault(
-                runtime,
-                {"ipc": [], "branch_miss": [], "cache_miss": [], "hw_counter": []},
-            )
+            if not runtime: continue
+            bucket = runtime_metrics.setdefault(runtime, {"ipc": [], "branch_miss": [], "cache_miss": [], "hw_counter": []})
             derived = _mapping(run.get("derived_metrics"))
             meta = _mapping(run.get("perf_counters_meta"))
-            if derived.get("ipc_median") is not None:
-                bucket["ipc"].append(float(derived["ipc_median"]))
-            if derived.get("branch_miss_rate_median") is not None:
-                bucket["branch_miss"].append(float(derived["branch_miss_rate_median"]))
-            if derived.get("cache_miss_rate_median") is not None:
-                bucket["cache_miss"].append(float(derived["cache_miss_rate_median"]))
+            for key, field in (("ipc", "ipc_median"), ("branch_miss", "branch_miss_rate_median"), ("cache_miss", "cache_miss_rate_median")):
+                if derived.get(field) is not None: bucket[key].append(float(derived[field]))
             bucket["hw_counter"].append(1.0 if meta.get("hardware_counters_observed") else 0.0)
-
     rows: list[PerfRuntimeStatistics] = []
     for runtime in sorted(runtime_metrics):
-        metrics = runtime_metrics[runtime]
-        hardware_counters_observed = sum(1 for value in metrics["hw_counter"] if value > 0.0)
-        total_runtime_records = len(metrics["hw_counter"])
-        rows.append(
-            PerfRuntimeStatistics(
-                runtime=runtime,
-                benchmark_count=total_runtime_records,
-                hardware_counters_observed=hardware_counters_observed,
-                total_runtime_records=total_runtime_records,
-                ipc_median=statistics.median(metrics["ipc"]) if metrics["ipc"] else None,
-                branch_miss_rate_median=statistics.median(metrics["branch_miss"]) if metrics["branch_miss"] else None,
-                cache_miss_rate_median=statistics.median(metrics["cache_miss"]) if metrics["cache_miss"] else None,
-            )
-        )
+        m = runtime_metrics[runtime]
+        n = len(m["hw_counter"])
+        rows.append(PerfRuntimeStatistics(
+            runtime=runtime, benchmark_count=n, hardware_counters_observed=sum(1 for v in m["hw_counter"] if v > 0.0),
+            total_runtime_records=n, ipc_median=statistics.median(m["ipc"]) if m["ipc"] else None,
+            branch_miss_rate_median=statistics.median(m["branch_miss"]) if m["branch_miss"] else None,
+            cache_miss_rate_median=statistics.median(m["cache_miss"]) if m["cache_miss"] else None,
+        ))
     return tuple(rows)
 
 
@@ -553,137 +483,83 @@ def render_rq_summary_markdown(
     defaults = _mapping(results.get("defaults"))
     manifest_targets = report.manifest.target_count if report.manifest is not None else None
 
-    lines: list[str] = []
-    lines.append("# Characterization Summary")
-    lines.append("")
-    lines.append("## Environment")
-    lines.append("")
-    lines.append(f"- Suite: `{report.suite_name}`")
+    lines: list[str] = ["# Characterization Summary", "", "## Environment", "",
+                        f"- Suite: `{report.suite_name}`"]
     if report.manifest is not None:
         lines.append(f"- Manifest: `{report.manifest.manifest_path}`")
-    lines.append(f"- Host: `{host.get('hostname', 'unknown')}` on `{host.get('platform', 'unknown')}`")
-    lines.append(
-        f"- Requested defaults: samples={defaults.get('samples')}, "
-        f"warmups={defaults.get('warmups')}, inner_repeat={defaults.get('inner_repeat')}, "
-        f"perf_counters={defaults.get('perf_counters')}"
-    )
-    lines.append(f"- Shuffle seed: `{defaults.get('shuffle_seed')}`")
+    lines += [
+        f"- Host: `{host.get('hostname', 'unknown')}` on `{host.get('platform', 'unknown')}`",
+        f"- Requested defaults: samples={defaults.get('samples')}, warmups={defaults.get('warmups')}, "
+        f"inner_repeat={defaults.get('inner_repeat')}, perf_counters={defaults.get('perf_counters')}",
+        f"- Shuffle seed: `{defaults.get('shuffle_seed')}`",
+    ]
     if manifest_targets is not None:
         lines.append(f"- Results cover `{report.result_benchmark_count}` of `{manifest_targets}` manifest targets")
-    lines.append(
-        f"- Bootstrap summary statistics: iterations={report.bootstrap_iterations}, seed={report.bootstrap_seed}"
-    )
-
-    lines.append("")
-    lines.append("## Suite-Level Comparison")
-    lines.append("")
-    lines.append("| Metric | Value | 95% bootstrap CI |")
-    lines.append("| --- | ---: | ---: |")
-    lines.append(
+    lines += [
+        f"- Bootstrap summary statistics: iterations={report.bootstrap_iterations}, seed={report.bootstrap_seed}",
+        "", "## Suite-Level Comparison", "", "| Metric | Value | 95% bootstrap CI |", "| --- | ---: | ---: |",
         f"| Raw exec `llvmbpf/kernel` geometric mean | {format_ratio_value(report.raw_exec_summary.geomean)} | "
-        f"{format_ci(report.raw_exec_summary.ci)} |"
-    )
+        f"{format_ci(report.raw_exec_summary.ci)} |",
+    ]
     if report.adjusted_exec_summary is not None:
-        lines.append(
-            f"| Baseline-adjusted exec `llvmbpf/kernel` geometric mean | "
-            f"{format_ratio_value(report.adjusted_exec_summary.geomean)} | "
-            f"{format_ci(report.adjusted_exec_summary.ci)} |"
-        )
-
+        lines.append(f"| Baseline-adjusted exec `llvmbpf/kernel` geometric mean | "
+                     f"{format_ratio_value(report.adjusted_exec_summary.geomean)} | "
+                     f"{format_ci(report.adjusted_exec_summary.ci)} |")
     raw_wins = report.raw_exec_summary.wins
     lines.append(f"| Raw wins (`llvmbpf / kernel / tie`) | `{raw_wins[0]} / {raw_wins[1]} / {raw_wins[2]}` | n/a |")
     if report.adjusted_exec_summary is not None:
         adjusted_wins = report.adjusted_exec_summary.wins
-        lines.append(
-            f"| Adjusted wins (`llvmbpf / kernel / tie`) | "
-            f"`{adjusted_wins[0]} / {adjusted_wins[1]} / {adjusted_wins[2]}` | n/a |"
-        )
+        lines.append(f"| Adjusted wins (`llvmbpf / kernel / tie`) | "
+                     f"`{adjusted_wins[0]} / {adjusted_wins[1]} / {adjusted_wins[2]}` | n/a |")
 
-    lines.append("")
-    lines.append("## Benchmark-Level Comparison")
-    lines.append("")
+    lines += ["", "## Benchmark-Level Comparison", ""]
     if report.adjusted_exec_summary is not None:
-        lines.append(
-            "The adjusted ratio subtracts each runtime's own baseline median before forming the "
-            "`llvmbpf/kernel` ratio. This is the primary pure-jit view."
-        )
+        lines.append("The adjusted ratio subtracts each runtime's own baseline median before forming the "
+                     "`llvmbpf/kernel` ratio. This is the primary pure-jit view.")
         if report.baseline_name is not None:
-            lines.append(
-                f"Calibration-oriented baseline rows such as `{report.baseline_name}` stay in the table, "
-                "but are excluded from directional rankings."
-            )
-        lines.append("")
-        lines.append(
-            "| Benchmark | Category | Family | Level | llvmbpf exec | kernel exec | Raw ratio | Adjusted ratio | Adjusted ratio 95% CI |"
-        )
-        lines.append("| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |")
-        for benchmark in report.benchmarks:
-            lines.append(
-                f"| `{benchmark.name}` | `{benchmark.category or '-'}` | `{benchmark.family or '-'}` | "
-                f"`{benchmark.level or '-'}` | {format_ns(benchmark.llvmbpf_exec_ns)} | "
-                f"{format_ns(benchmark.kernel_exec_ns)} | {format_ratio(benchmark.llvmbpf_exec_ns, benchmark.kernel_exec_ns)} | "
-                f"{format_ratio_value(benchmark.adjusted_exec_ratio)} | {format_ci(benchmark.adjusted_exec_ci)} |"
-            )
+            lines.append(f"Calibration-oriented baseline rows such as `{report.baseline_name}` stay in the table, "
+                         "but are excluded from directional rankings.")
+        lines += ["", "| Benchmark | Category | Family | Level | llvmbpf exec | kernel exec | Raw ratio | Adjusted ratio | Adjusted ratio 95% CI |",
+                  "| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |"]
+        for b in report.benchmarks:
+            lines.append(f"| `{b.name}` | `{b.category or '-'}` | `{b.family or '-'}` | `{b.level or '-'}` | "
+                         f"{format_ns(b.llvmbpf_exec_ns)} | {format_ns(b.kernel_exec_ns)} | "
+                         f"{format_ratio(b.llvmbpf_exec_ns, b.kernel_exec_ns)} | "
+                         f"{format_ratio_value(b.adjusted_exec_ratio)} | {format_ci(b.adjusted_exec_ci)} |")
     else:
-        lines.append("| Benchmark | Category | Family | Level | llvmbpf exec | kernel exec | Raw ratio |")
-        lines.append("| --- | --- | --- | --- | ---: | ---: | ---: |")
-        for benchmark in report.benchmarks:
-            lines.append(
-                f"| `{benchmark.name}` | `{benchmark.category or '-'}` | `{benchmark.family or '-'}` | "
-                f"`{benchmark.level or '-'}` | {format_ns(benchmark.llvmbpf_exec_ns)} | "
-                f"{format_ns(benchmark.kernel_exec_ns)} | {format_ratio(benchmark.llvmbpf_exec_ns, benchmark.kernel_exec_ns)} |"
-            )
+        lines += ["| Benchmark | Category | Family | Level | llvmbpf exec | kernel exec | Raw ratio |",
+                  "| --- | --- | --- | --- | ---: | ---: | ---: |"]
+        for b in report.benchmarks:
+            lines.append(f"| `{b.name}` | `{b.category or '-'}` | `{b.family or '-'}` | `{b.level or '-'}` | "
+                         f"{format_ns(b.llvmbpf_exec_ns)} | {format_ns(b.kernel_exec_ns)} | "
+                         f"{format_ratio(b.llvmbpf_exec_ns, b.kernel_exec_ns)} |")
 
     if report.adjusted_exec_summary is not None:
         for heading, groups in (("Category-Level", report.category_groups), ("Family-Level", report.family_groups)):
-            lines.append("")
-            lines.append(f"## {heading} Adjusted Summary")
-            lines.append("")
-            lines.append("| Group | Benchmarks | Adjusted gmean | 95% bootstrap CI | Wins (`llvmbpf/kernel/tie`) |")
-            lines.append("| --- | ---: | ---: | ---: | --- |")
-            for group in groups:
-                wins = group.wins
-                lines.append(
-                    f"| `{group.group_name}` | {group.benchmark_count} | "
-                    f"{format_ratio_value(group.adjusted_geomean)} | {format_ci(group.adjusted_ci)} | "
-                    f"`{wins[0]}/{wins[1]}/{wins[2]}` |"
-                )
-
-        lines.append("")
-        lines.append("## Directional Findings")
-        lines.append("")
-        lines.append("### Strongest llvmbpf advantages")
-        lines.append("")
-        for benchmark in report.directional_advantages:
-            lines.append(
-                f"- `{benchmark.name}` (`{benchmark.family or '-'}`, `{benchmark.level or '-'}`): "
-                f"adjusted `llvmbpf/kernel = {benchmark.adjusted_exec_ratio:.2f}x`"
-            )
-
-        lines.append("")
-        lines.append("### Kernel-leading or parity cases")
-        lines.append("")
-        for benchmark in report.directional_disadvantages:
-            lines.append(
-                f"- `{benchmark.name}` (`{benchmark.family or '-'}`, `{benchmark.level or '-'}`): "
-                f"adjusted `llvmbpf/kernel = {benchmark.adjusted_exec_ratio:.2f}x`"
-            )
-
+            lines += ["", f"## {heading} Adjusted Summary", "",
+                      "| Group | Benchmarks | Adjusted gmean | 95% bootstrap CI | Wins (`llvmbpf/kernel/tie`) |",
+                      "| --- | ---: | ---: | ---: | --- |"]
+            for g in groups:
+                lines.append(f"| `{g.group_name}` | {g.benchmark_count} | "
+                              f"{format_ratio_value(g.adjusted_geomean)} | {format_ci(g.adjusted_ci)} | "
+                              f"`{g.wins[0]}/{g.wins[1]}/{g.wins[2]}` |")
+        lines += ["", "## Directional Findings", "", "### Strongest llvmbpf advantages", ""]
+        for b in report.directional_advantages:
+            lines.append(f"- `{b.name}` (`{b.family or '-'}`, `{b.level or '-'}`): "
+                         f"adjusted `llvmbpf/kernel = {b.adjusted_exec_ratio:.2f}x`")
+        lines += ["", "### Kernel-leading or parity cases", ""]
+        for b in report.directional_disadvantages:
+            lines.append(f"- `{b.name}` (`{b.family or '-'}`, `{b.level or '-'}`): "
+                         f"adjusted `llvmbpf/kernel = {b.adjusted_exec_ratio:.2f}x`")
     if report.perf_runtimes:
-        lines.append("")
-        lines.append("## Perf-Counter Signal")
-        lines.append("")
-        lines.append("| Runtime | Benchmarks | HW counters observed | Median IPC across suite | Median branch-miss rate | Median cache-miss rate |")
-        lines.append("| --- | ---: | --- | ---: | ---: | ---: |")
-        for runtime in report.perf_runtimes:
-            lines.append(
-                f"| `{runtime.runtime}` | {runtime.benchmark_count} | "
-                f"{runtime.hardware_counters_observed}/{runtime.total_runtime_records} | "
-                f"{runtime.ipc_median if runtime.ipc_median is not None else 'n/a'} | "
-                f"{runtime.branch_miss_rate_median if runtime.branch_miss_rate_median is not None else 'n/a'} | "
-                f"{runtime.cache_miss_rate_median if runtime.cache_miss_rate_median is not None else 'n/a'} |"
-            )
-
+        lines += ["", "## Perf-Counter Signal", "",
+                  "| Runtime | Benchmarks | HW counters observed | Median IPC across suite | Median branch-miss rate | Median cache-miss rate |",
+                  "| --- | ---: | --- | ---: | ---: | ---: |"]
+        for r in report.perf_runtimes:
+            lines.append(f"| `{r.runtime}` | {r.benchmark_count} | {r.hardware_counters_observed}/{r.total_runtime_records} | "
+                         f"{r.ipc_median if r.ipc_median is not None else 'n/a'} | "
+                         f"{r.branch_miss_rate_median if r.branch_miss_rate_median is not None else 'n/a'} | "
+                         f"{r.cache_miss_rate_median if r.cache_miss_rate_median is not None else 'n/a'} |")
     return "\n".join(lines)
 
 
@@ -693,63 +569,25 @@ def _format_dimension_counts(counts: Mapping[str, int]) -> str:
     return ", ".join(f"`{name}` ({count})" for name, count in counts.items())
 
 
-def render_corpus_summary_markdown(
-    corpus: Mapping[str, object],
-    *,
-    manifest: ManifestSpec | None = None,
-) -> str:
-    lines = [
-        "",
-        "## Corpus Snapshot",
-        "",
-    ]
-
+def render_corpus_summary_markdown(corpus: Mapping[str, object], *, manifest: ManifestSpec | None = None) -> str:
+    lines: list[str] = ["", "## Corpus Snapshot", ""]
     if manifest is not None and manifest.manifest_kind == "macro":
-        lines.append(f"- Macro suite targets: `{manifest.target_count}`")
-        lines.append(f"- Macro categories: {_format_dimension_counts(manifest.dimensions['category'].counts)}")
-        lines.append(f"- Macro test methods: {_format_dimension_counts(manifest.dimensions['test_method'].counts)}")
-        lines.append(f"- Macro program types: {_format_dimension_counts(manifest.dimensions['prog_type'].counts)}")
-        lines.append("")
-
+        lines += [f"- Macro suite targets: `{manifest.target_count}`",
+                  f"- Macro categories: {_format_dimension_counts(manifest.dimensions['category'].counts)}",
+                  f"- Macro test methods: {_format_dimension_counts(manifest.dimensions['test_method'].counts)}",
+                  f"- Macro program types: {_format_dimension_counts(manifest.dimensions['prog_type'].counts)}", ""]
     repos = corpus.get("repos")
     if isinstance(repos, Sequence) and not isinstance(repos, (str, bytes, bytearray)):
-        lines.append("| Repo | Program sources | .bpf.c files |")
-        lines.append("| --- | ---: | ---: |")
+        lines += ["| Repo | Program sources | .bpf.c files |", "| --- | ---: | ---: |"]
         for repo in repos:
-            if not isinstance(repo, Mapping):
-                continue
-            lines.append(
-                f"| `{repo.get('name', 'unknown')}` | {repo.get('num_program_sources', 0)} | {repo.get('num_bpf_c', 0)} |"
-            )
-        lines.append(
-            f"| **Total** | **{corpus.get('total_program_sources', 0)}** | **{corpus.get('total_bpf_c', 0)}** |"
-        )
+            if isinstance(repo, Mapping):
+                lines.append(f"| `{repo.get('name', 'unknown')}` | {repo.get('num_program_sources', 0)} | {repo.get('num_bpf_c', 0)} |")
+        lines.append(f"| **Total** | **{corpus.get('total_program_sources', 0)}** | **{corpus.get('total_bpf_c', 0)}** |")
         return "\n".join(lines)
-
     summary = corpus.get("summary")
     if isinstance(summary, Mapping):
-        lines.append("| Metric | Value |")
-        lines.append("| --- | ---: |")
+        lines += ["| Metric | Value |", "| --- | ---: |"]
         for key in ("projects", "object_files", "measured_objects", "programs_found", "loadable_programs", "true_runnable_programs"):
-            if key in summary:
-                lines.append(f"| `{key}` | {summary[key]} |")
+            if key in summary: lines.append(f"| `{key}` | {summary[key]} |")
     return "\n".join(lines)
 
-
-__all__ = [
-    "BASELINE_RUNTIME",
-    "BenchmarkStatistics",
-    "ComparisonSummary",
-    "GroupStatistics",
-    "PRIMARY_RUNTIME",
-    "PerfRuntimeStatistics",
-    "RQReport",
-    "build_rq_report",
-    "compute_per_benchmark_statistics",
-    "format_ci",
-    "format_ns",
-    "format_ratio",
-    "format_ratio_value",
-    "render_corpus_summary_markdown",
-    "render_rq_summary_markdown",
-]

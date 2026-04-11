@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from typing import Mapping, NoReturn, Sequence
 
 from ..workload import WorkloadResult
 
 
-class AppRunner(ABC):
+class AppRunner:
     # Declare which system commands this runner requires on the remote host.
     # Used by run_contract.py to populate RUN_REMOTE_COMMANDS_CSV.
     required_remote_commands: tuple[str, ...] = ()
@@ -17,15 +16,12 @@ class AppRunner(ABC):
         self.process_output: dict[str, object] = {}
         self.command_used: list[str] = []
 
-    @abstractmethod
     def start(self) -> list[int]:
         raise NotImplementedError
 
-    @abstractmethod
     def run_workload(self, seconds: float) -> WorkloadResult:
         raise NotImplementedError
 
-    @abstractmethod
     def run_workload_spec(
         self,
         workload_spec: Mapping[str, object],
@@ -33,7 +29,6 @@ class AppRunner(ABC):
     ) -> WorkloadResult:
         raise NotImplementedError
 
-    @abstractmethod
     def stop(self) -> None:
         raise NotImplementedError
 
@@ -59,7 +54,6 @@ class AppRunner(ABC):
         return "program"
 
     @property
-    @abstractmethod
     def pid(self) -> int | None:
         raise NotImplementedError
 

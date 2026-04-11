@@ -6,7 +6,7 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 
-from .bpf_stats import enable_bpf_stats, sample_bpf_stats
+from .bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats
 
 
 def _read_pid_ticks(pid: int) -> tuple[int, int]:
@@ -84,41 +84,6 @@ def start_sampler_thread(
     thread = threading.Thread(target=run, daemon=True)
     thread.start()
     return thread
-
-
-def compute_delta(
-    before: dict[int, dict[str, object]],
-    after: dict[int, dict[str, object]],
-) -> dict[str, object]:
-    program_deltas: dict[int, dict[str, object]] = {}
-    total_run_cnt = 0
-    total_run_time_ns = 0
-    for prog_id in sorted(set(before) | set(after)):
-        previous = before.get(prog_id, {})
-        current = after.get(prog_id, {})
-        run_cnt_delta = int(current.get("run_cnt", 0) or 0) - int(previous.get("run_cnt", 0) or 0)
-        run_time_delta = int(current.get("run_time_ns", 0) or 0) - int(previous.get("run_time_ns", 0) or 0)
-        total_run_cnt += max(0, run_cnt_delta)
-        total_run_time_ns += max(0, run_time_delta)
-        program_deltas[prog_id] = {
-            "id": prog_id,
-            "name": str(current.get("name") or previous.get("name") or f"id-{prog_id}"),
-            "type": str(current.get("type") or previous.get("type") or ""),
-            "run_cnt_delta": run_cnt_delta,
-            "run_time_ns_delta": run_time_delta,
-            "avg_ns_per_run": (run_time_delta / run_cnt_delta) if run_cnt_delta > 0 else None,
-            "bytes_jited": int(current.get("bytes_jited", 0) or previous.get("bytes_jited", 0) or 0),
-            "bytes_xlated": int(current.get("bytes_xlated", 0) or previous.get("bytes_xlated", 0) or 0),
-        }
-    return {
-        "programs": program_deltas,
-        "summary": {
-            "total_events": total_run_cnt,
-            "total_run_time_ns": total_run_time_ns,
-            "avg_ns_per_run": (total_run_time_ns / total_run_cnt) if total_run_cnt > 0 else None,
-            "active_programs": sum(1 for record in program_deltas.values() if int(record["run_cnt_delta"]) > 0),
-        },
-    }
 
 
 __all__ = [

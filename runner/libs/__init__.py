@@ -189,21 +189,3 @@ def write_text(path: Path, text: str) -> None:
     ensure_parent(path)
     path.write_text(text)
 
-
-__all__ = [
-    "RESULTS_DIR",
-    "ROOT_DIR",
-    "docs_tmp_dir",
-    "ensure_parent",
-    "resolve_binary",
-    "resolve_bpftool_binary",
-    "result_date_stamp",
-    "run_command",
-    "run_json_command",
-    "scratch_date_stamp",
-    "smoke_output_path",
-    "tail_text",
-    "which",
-    "write_json",
-    "write_text",
-]

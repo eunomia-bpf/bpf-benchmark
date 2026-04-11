@@ -180,16 +180,3 @@ def derive_perf_metrics(counter_summary: Mapping[str, Mapping[str, float | int |
         derived["cache_miss_rate_median"] = cache_misses / cache_refs
 
     return derived
-
-
-__all__ = [
-    "SummaryStats",
-    "derive_perf_metrics",
-    "float_summary",
-    "geometric_mean",
-    "ns_summary",
-    "summarize_named_counters",
-    "summarize_optional_ns",
-    "summarize_perf_counter_meta",
-    "summarize_phase_timings",
-]

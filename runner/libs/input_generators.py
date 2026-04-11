@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import struct
+import sys as _sys
 from pathlib import Path
 
 import yaml
@@ -22,178 +23,111 @@ def _load_specs() -> dict:
         return yaml.safe_load(f)
 
 
-# ---------------------------------------------------------------------------
-# Generic builders (driven by input_specs.yaml)
-# ---------------------------------------------------------------------------
-
 def _build_dep_chain(output: Path, spec: dict) -> dict:
     count, seed, salt = spec["count"], spec["seed"], spec["salt"]
-    state = salt & MASK64
-    blob = bytearray(struct.pack("<II", count, seed))
+    state = salt & MASK64; blob = bytearray(struct.pack("<II", count, seed))
     for index in range(count):
-        state = _lcg(state)
-        value = state ^ ((index + 1) * 0x9E3779B97F4A7C15) ^ seed
-        blob.extend(struct.pack("<Q", value & MASK64))
-    output.write_bytes(blob)
-    return {"count": count, "seed": seed}
+        state = _lcg(state); blob.extend(struct.pack("<Q", (state ^ ((index + 1) * 0x9E3779B97F4A7C15) ^ seed) & MASK64))
+    output.write_bytes(blob); return {"count": count, "seed": seed}
 
 
 def _build_multi_acc(output: Path, spec: dict) -> dict:
     count, seed, salt = spec["count"], spec["seed"], spec["salt"]
-    state = salt & MASK64
-    blob = bytearray(struct.pack("<II", count, seed))
+    state = salt & MASK64; blob = bytearray(struct.pack("<II", count, seed))
     for index in range(count):
-        state = _lcg(state)
-        value = state ^ ((index + 5) * 0xD1342543DE82EF95)
-        blob.extend(struct.pack("<Q", value & MASK64))
-    output.write_bytes(blob)
-    return {"count": count, "seed": seed}
+        state = _lcg(state); blob.extend(struct.pack("<Q", (state ^ ((index + 5) * 0xD1342543DE82EF95)) & MASK64))
+    output.write_bytes(blob); return {"count": count, "seed": seed}
 
 
 def _build_stride_load(output: Path, spec: dict) -> dict:
     count, stride, salt = spec["count"], spec["stride"], spec["salt"]
-    state = salt & MASK64
-    blob = bytearray(struct.pack("<II", count, stride))
+    state = salt & MASK64; blob = bytearray(struct.pack("<II", count, stride))
     for index in range(count):
-        state = _lcg(state)
-        value = state ^ ((index + 7) * 0xA0761D6478BD642F)
-        blob.extend(struct.pack("<Q", value & MASK64))
-    output.write_bytes(blob)
-    return {"count": count, "stride": stride}
+        state = _lcg(state); blob.extend(struct.pack("<Q", (state ^ ((index + 7) * 0xA0761D6478BD642F)) & MASK64))
+    output.write_bytes(blob); return {"count": count, "stride": stride}
 
 
 def _build_code_clone(output: Path, spec: dict) -> dict:
     count, seed, salt = spec["count"], spec["seed"], spec["salt"]
-    state = salt & MASK64
-    blob = bytearray(struct.pack("<II", count, seed))
+    state = salt & MASK64; blob = bytearray(struct.pack("<II", count, seed))
     for index in range(count):
-        state = _lcg(state)
-        value = state ^ ((index + 13) * 0x94D049BB133111EB) ^ (seed << (index & 3))
-        blob.extend(struct.pack("<Q", value & MASK64))
-    output.write_bytes(blob)
-    return {"count": count, "seed": seed}
+        state = _lcg(state); blob.extend(struct.pack("<Q", (state ^ ((index + 13) * 0x94D049BB133111EB) ^ (seed << (index & 3))) & MASK64))
+    output.write_bytes(blob); return {"count": count, "seed": seed}
 
 
 def _build_large_mixed(output: Path, spec: dict) -> dict:
     count, seed, salt = spec["count"], spec["seed"], spec["salt"]
-    state = salt & MASK64
-    blob = bytearray(struct.pack("<II", count, seed))
+    state = salt & MASK64; blob = bytearray(struct.pack("<II", count, seed))
     for index in range(count):
-        state = _lcg(state)
-        value = state ^ ((index + 1) * 0xD1342543DE82EF95) ^ seed
-        blob.extend(struct.pack("<Q", value & MASK64))
-    output.write_bytes(blob)
-    return {"count": count, "seed": seed}
+        state = _lcg(state); blob.extend(struct.pack("<Q", (state ^ ((index + 1) * 0xD1342543DE82EF95) ^ seed) & MASK64))
+    output.write_bytes(blob); return {"count": count, "seed": seed}
 
 
 def _build_load_isolation(output: Path, spec: dict) -> dict:
     count, seed = spec["count"], spec["seed"]
-    state = seed & MASK64
-    blob = bytearray(struct.pack("<II", count, 0))
+    state = seed & MASK64; blob = bytearray(struct.pack("<II", count, 0))
     for _ in range(count):
-        state = _lcg(state)
-        blob.extend(struct.pack("<Q", state & MASK64))
-    output.write_bytes(blob)
-    return {"count": count, "seed": seed}
+        state = _lcg(state); blob.extend(struct.pack("<Q", state & MASK64))
+    output.write_bytes(blob); return {"count": count, "seed": seed}
 
 
 def _build_fixed_loop(output: Path, spec: dict) -> dict:
     rounds, mix, seed = spec["rounds"], spec["mix"], spec["seed"]
-    output.write_bytes(struct.pack("<IIQ", rounds, mix, seed))
-    return {"rounds": rounds, "mix": mix}
+    output.write_bytes(struct.pack("<IIQ", rounds, mix, seed)); return {"rounds": rounds, "mix": mix}
 
 
 def _build_lcg_words_q(output: Path, spec: dict) -> dict:
-    """Generate word_count raw u64 words packed with no header."""
-    n = spec["word_count"]
-    state = spec["initial_state"] & MASK64
-    salt1 = spec["salt1"]
-    salt2 = spec["salt2"]
-    offset2 = spec.get("index_offset_salt2", 1)
+    n = spec["word_count"]; state = spec["initial_state"] & MASK64
+    salt1, salt2, offset2 = spec["salt1"], spec["salt2"], spec.get("index_offset_salt2", 1)
     words: list[int] = []
     for index in range(n):
-        state = _lcg(state ^ ((index + 1) * salt1))
-        words.append((state ^ ((index + offset2) * salt2)) & MASK64)
-    fmt = "<" + "Q" * n
-    output.write_bytes(struct.pack(fmt, *words))
+        state = _lcg(state ^ ((index + 1) * salt1)); words.append((state ^ ((index + offset2) * salt2)) & MASK64)
+    output.write_bytes(struct.pack("<" + "Q" * n, *words))
     return {spec.get("metadata_count_key", "words"): n, "bytes": n * 8}
 
 
 def _build_addr_calc_stride(output: Path, spec: dict) -> dict:
-    n = spec["value_count"]
-    state = spec["initial_state"] & MASK64
-    salt1 = spec["salt1"]
-    salt2 = spec["salt2"]
-    blob = bytearray()
+    n = spec["value_count"]; state = spec["initial_state"] & MASK64; salt1, salt2 = spec["salt1"], spec["salt2"]; blob = bytearray()
     for index in range(n):
-        state = _lcg(state ^ ((index + 1) * salt1))
-        value = (state ^ ((index + 11) * salt2)) & MASK64
-        blob.extend(struct.pack("<Q", value))
-    output.write_bytes(blob)
-    return {"value_count": n, "bytes": n * 8}
+        state = _lcg(state ^ ((index + 1) * salt1)); blob.extend(struct.pack("<Q", (state ^ ((index + 11) * salt2)) & MASK64))
+    output.write_bytes(blob); return {"value_count": n, "bytes": n * 8}
 
 
 def _build_endian_swap_dense(output: Path, spec: dict) -> dict:
-    groups, lanes = spec["groups"], spec["lanes"]
-    count = groups * lanes
-    state = spec["initial_state"] & MASK64
-    blob = bytearray()
+    groups, lanes = spec["groups"], spec["lanes"]; count = groups * lanes
+    state = spec["initial_state"] & MASK64; blob = bytearray()
     for index in range(count):
         state = _lcg(state ^ ((index + 1) * 0xE7037ED1A0B428DB))
-        value = ((state >> 16) ^ ((index + 1) * 0x9E3779B9)) & 0xFFFFFFFF
-        blob.extend(struct.pack("<I", value))
-    output.write_bytes(blob)
-    return {"groups": groups, "lanes": lanes, "count": count}
+        blob.extend(struct.pack("<I", ((state >> 16) ^ ((index + 1) * 0x9E3779B9)) & 0xFFFFFFFF))
+    output.write_bytes(blob); return {"groups": groups, "lanes": lanes, "count": count}
 
 
 def _build_branch_flip_dense(output: Path, spec: dict) -> dict:
-    groups, lanes = spec["groups"], spec["lanes"]
-    count = groups * lanes
-    state = spec["initial_state"] & MASK64
-    salt1, salt2 = spec["salt1"], spec["salt2"]
-    blob = bytearray()
+    groups, lanes = spec["groups"], spec["lanes"]; count = groups * lanes
+    state = spec["initial_state"] & MASK64; salt1, salt2 = spec["salt1"], spec["salt2"]; blob = bytearray()
     for index in range(count):
-        state = _lcg(state ^ ((index + 1) * salt1))
-        value = (state ^ ((index + 1) * salt2)) & MASK64
-        blob.extend(struct.pack("<Q", value))
-    output.write_bytes(blob)
-    return {"groups": groups, "lanes": lanes, "count": count}
+        state = _lcg(state ^ ((index + 1) * salt1)); blob.extend(struct.pack("<Q", (state ^ ((index + 1) * salt2)) & MASK64))
+    output.write_bytes(blob); return {"groups": groups, "lanes": lanes, "count": count}
 
 
 def _build_extract_dense(output: Path, spec: dict) -> dict:
-    groups, lanes = spec["groups"], spec["lanes"]
-    count = groups * lanes
-    state = spec["initial_state"] & MASK64
-    salt1, salt2 = spec["salt1"], spec["salt2"]
-    blob = bytearray()
+    groups, lanes = spec["groups"], spec["lanes"]; count = groups * lanes
+    state = spec["initial_state"] & MASK64; salt1, salt2 = spec["salt1"], spec["salt2"]; blob = bytearray()
     for index in range(count):
-        state = _lcg(state ^ ((index + 1) * salt1))
-        value = (state ^ ((index + 3) * salt2)) & MASK64
-        blob.extend(struct.pack("<Q", value))
-    output.write_bytes(blob)
-    return {"groups": groups, "lanes": lanes, "count": count}
+        state = _lcg(state ^ ((index + 1) * salt1)); blob.extend(struct.pack("<Q", (state ^ ((index + 3) * salt2)) & MASK64))
+    output.write_bytes(blob); return {"groups": groups, "lanes": lanes, "count": count}
 
-
-# ---------------------------------------------------------------------------
-# New generic builders for formerly hand-written generators
-# ---------------------------------------------------------------------------
 
 def _build_plain_bytes(output: Path, spec: dict) -> dict:
-    """Writes bytes(range(n)), optionally repeated."""
-    n = spec["count"]
-    output.write_bytes(bytes(range(n)))
-    return {"bytes": n}
+    n = spec["count"]; output.write_bytes(bytes(range(n))); return {"bytes": n}
 
 
 def _build_plain_u64_pair(output: Path, spec: dict) -> dict:
-    """Writes exactly two u64 constants."""
     left, right = spec["left"], spec["right"]
-    output.write_bytes(struct.pack("<QQ", left, right))
-    return {"left": left, "right": right}
+    output.write_bytes(struct.pack("<QQ", left, right)); return {"left": left, "right": right}
 
 
 def _build_lcg_u64_ii(output: Path, spec: dict) -> dict:
-    """<II header> + N u64 values.  formula: state = lcg(state ^ (i+1)*salt1); value = state ^ (i+offset)*salt2 ^ xor_seed"""
     count = spec["count"]
     seed = spec.get("seed", 0)
     state = spec["initial_state"] & MASK64
@@ -221,67 +155,41 @@ def _build_lcg_u64_ii(output: Path, spec: dict) -> dict:
 
 
 def _build_lcg_u32_ii(output: Path, spec: dict) -> dict:
-    """<II header> + N u32 values."""
-    count = spec["count"]
-    header_b = spec.get("header_b", 0)
-    state = spec["initial_state"] & MASK64
-    salt1 = spec.get("salt1", 0x9E3779B97F4A7C15)
-    salt2 = spec.get("salt2", 0)
-    shift = spec.get("shift", 24)
-    xor_index_mul = spec.get("xor_index_mul", 0)
-    xor_seed = spec.get("xor_seed", 0)
+    count = spec["count"]; header_b = spec.get("header_b", 0); state = spec["initial_state"] & MASK64
+    salt1 = spec.get("salt1", 0x9E3779B97F4A7C15); salt2 = spec.get("salt2", 0)
+    shift = spec.get("shift", 24); xor_index_mul = spec.get("xor_index_mul", 0); xor_seed = spec.get("xor_seed", 0)
     blob = bytearray(struct.pack("<II", count, header_b))
     for index in range(count):
         state = _lcg(state ^ ((index + 1) * salt1))
-        value = ((state >> shift) ^ ((index + 1) * xor_index_mul) ^ xor_seed) & 0xFFFFFFFF
-        blob.extend(struct.pack("<I", value))
-    output.write_bytes(blob)
-    return {"count": count, "header_b": header_b}
+        blob.extend(struct.pack("<I", ((state >> shift) ^ ((index + 1) * xor_index_mul) ^ xor_seed) & 0xFFFFFFFF))
+    output.write_bytes(blob); return {"count": count, "header_b": header_b}
 
 
 def _build_lcg_u16_ii(output: Path, spec: dict) -> dict:
-    """<II header> + N u16 values."""
-    rounds = spec["rounds"]
-    word_count = spec["word_count"]
-    state = spec["initial_state"] & MASK64
-    index_mul = spec.get("index_mul", 257)
+    rounds, word_count = spec["rounds"], spec["word_count"]
+    state = spec["initial_state"] & MASK64; index_mul = spec.get("index_mul", 257)
     blob = bytearray(struct.pack("<II", rounds, word_count))
     for index in range(word_count):
-        state = _lcg(state)
-        word = ((state >> 16) ^ (index * index_mul)) & 0xFFFF
-        blob.extend(struct.pack("<H", word))
-    output.write_bytes(blob)
-    return {"rounds": rounds, "word_count": word_count}
+        state = _lcg(state); blob.extend(struct.pack("<H", ((state >> 16) ^ (index * index_mul)) & 0xFFFF))
+    output.write_bytes(blob); return {"rounds": rounds, "word_count": word_count}
 
 
 def _build_lcg_u64_no_header(output: Path, spec: dict) -> dict:
-    """No header, just N u64 raw LCG values."""
-    n = spec["count"]
-    state = spec["initial_state"] & MASK64
-    blob = bytearray()
+    n = spec["count"]; state = spec["initial_state"] & MASK64; blob = bytearray()
     for _ in range(n):
-        state = _lcg(state)
-        blob.extend(struct.pack("<Q", state & MASK64))
-    output.write_bytes(blob)
-    return {"bytes": n * 8}
+        state = _lcg(state); blob.extend(struct.pack("<Q", state & MASK64))
+    output.write_bytes(blob); return {"bytes": n * 8}
 
 
 def _build_switch_dispatch(output: Path, spec: dict) -> dict:
-    """<I count> + N u32 values where value = ((state>>32)^index)&mask."""
-    count = spec["count"]
-    state = spec["initial_state"] & MASK64
-    mask = spec.get("mask", 0x3F)
+    count = spec["count"]; state = spec["initial_state"] & MASK64; mask = spec.get("mask", 0x3F)
     blob = bytearray(struct.pack("<I", count))
     for index in range(count):
-        state = _lcg(state)
-        value = ((state >> 32) ^ index) & mask
-        blob.extend(struct.pack("<I", value))
-    output.write_bytes(blob)
-    return {"count": count}
+        state = _lcg(state); blob.extend(struct.pack("<I", ((state >> 32) ^ index) & mask))
+    output.write_bytes(blob); return {"count": count}
 
 
 def _build_branch_layout(output: Path, spec: dict) -> dict:
-    """<II count hot_threshold> + N u64s, distribution: linear|predictable|random."""
     count = spec["count"]
     hot_threshold = spec["hot_threshold"]
     distribution = spec.get("distribution", "linear")
@@ -311,7 +219,6 @@ def _build_branch_layout(output: Path, spec: dict) -> dict:
 
 
 def _build_nested_loop(output: Path, spec: dict) -> dict:
-    """nested_loop_2 or nested_loop_3 depending on presence of 'middle' key."""
     outer = spec["outer"]
     inner = spec["inner"]
     seed = spec["seed"]
@@ -337,43 +244,27 @@ def _build_nested_loop(output: Path, spec: dict) -> dict:
 
 
 def _build_hash_chain(output: Path, spec: dict) -> dict:
-    """<II rounds word_count> + N u64 via lcg ^ salt."""
-    rounds = spec["rounds"]
-    word_count = spec["word_count"]
+    rounds, word_count = spec["rounds"], spec["word_count"]
     state = spec["initial_state"] & MASK64
-    salt1 = spec.get("salt1", 0x9E3779B97F4A7C15)
-    salt2 = spec.get("salt2", 0xD1342543DE82EF95)
+    salt1, salt2 = spec.get("salt1", 0x9E3779B97F4A7C15), spec.get("salt2", 0xD1342543DE82EF95)
     blob = bytearray(struct.pack("<II", rounds, word_count))
     for index in range(word_count):
-        state = _lcg(state ^ ((index + 1) * salt1))
-        word = state ^ ((index + 1) * salt2)
-        blob.extend(struct.pack("<Q", word & MASK64))
-    output.write_bytes(blob)
-    return {"rounds": rounds, "word_count": word_count}
+        state = _lcg(state ^ ((index + 1) * salt1)); blob.extend(struct.pack("<Q", (state ^ ((index + 1) * salt2)) & MASK64))
+    output.write_bytes(blob); return {"rounds": rounds, "word_count": word_count}
 
 
 def _build_branch_dense(output: Path, spec: dict) -> dict:
-    """<II count hot_threshold> + N u32, every hot_every-th element is above threshold."""
-    count = spec["count"]
-    hot_threshold = spec["hot_threshold"]
-    state = spec["initial_state"] & MASK64
-    hot_every = spec.get("hot_every", 5)
+    count = spec["count"]; hot_threshold = spec["hot_threshold"]
+    state = spec["initial_state"] & MASK64; hot_every = spec.get("hot_every", 5)
     blob = bytearray(struct.pack("<II", count, hot_threshold))
     for index in range(count):
         state = _lcg(state)
-        if index % hot_every == 0:
-            value = hot_threshold + ((state >> 12) & 0x7FF)
-        else:
-            value = ((state >> 20) ^ (index * 73)) & 0x3FF
+        value = hot_threshold + ((state >> 12) & 0x7FF) if index % hot_every == 0 else ((state >> 20) ^ (index * 73)) & 0x3FF
         blob.extend(struct.pack("<I", value))
-    output.write_bytes(blob)
-    return {"count": count, "hot_threshold": hot_threshold}
+    output.write_bytes(blob); return {"count": count, "hot_threshold": hot_threshold}
 
 
 def _build_branch_fanout(output: Path, spec: dict) -> dict:
-    """<I count> + N u32s with tag bits from a fixed tag list.
-    distribution: cyclic (round-robin by index) | predictable (single fixed tag) | random (LCG-picked tag)
-    """
     tags = spec["tags"]
     count = spec["count"]
     distribution = spec.get("distribution", "cyclic")
@@ -415,7 +306,6 @@ _KIND_BUILDERS = {
     "endian_swap_dense": _build_endian_swap_dense,
     "branch_flip_dense": _build_branch_flip_dense,
     "extract_dense":     _build_extract_dense,
-    # new generic builders
     "plain_bytes":        _build_plain_bytes,
     "plain_u64_pair":     _build_plain_u64_pair,
     "lcg_u64_ii":         _build_lcg_u64_ii,
@@ -430,10 +320,6 @@ _KIND_BUILDERS = {
     "branch_fanout":      _build_branch_fanout,
 }
 
-
-# ---------------------------------------------------------------------------
-# Special-logic generators (genuinely non-parameterisable)
-# ---------------------------------------------------------------------------
 
 def _write_be16(packet: bytearray, offset: int, value: int) -> None:
     packet[offset] = (value >> 8) & 0xFF
@@ -452,22 +338,13 @@ def _memcmp_prefix_pattern_byte(index: int) -> int:
 
 
 def generate_binary_search(output: Path) -> dict[str, int]:
-    data_len = 32
-    query_len = 16
+    data_len, query_len = 32, 16
     data = [index * 3 + 7 for index in range(data_len)]
-    queries = []
-    for index in range(query_len):
-        if index % 3 == 0:
-            queries.append(data[(index * 17) % data_len])
-        else:
-            queries.append((index * 19) + 5)
+    queries = [data[(index * 17) % data_len] if index % 3 == 0 else (index * 19) + 5 for index in range(query_len)]
     blob = bytearray(struct.pack("<II", data_len, query_len))
-    for value in data:
-        blob.extend(struct.pack("<Q", value))
-    for value in queries:
-        blob.extend(struct.pack("<Q", value))
-    output.write_bytes(blob)
-    return {"data_len": data_len, "query_len": query_len}
+    for value in data: blob.extend(struct.pack("<Q", value))
+    for value in queries: blob.extend(struct.pack("<Q", value))
+    output.write_bytes(blob); return {"data_len": data_len, "query_len": query_len}
 
 
 def generate_packet_parse(output: Path) -> dict[str, int]:
@@ -494,28 +371,16 @@ def generate_packet_parse(output: Path) -> dict[str, int]:
 
 
 def generate_bounds_ladder(output: Path) -> dict[str, int]:
-    record_count = 32
-    record_size = 32
-    state = 0x55AA55AA12349876
-    blob = bytearray(struct.pack("<II", record_count, record_size))
+    record_count, record_size = 32, 32
+    state = 0x55AA55AA12349876; blob = bytearray(struct.pack("<II", record_count, record_size))
     for index in range(record_count):
-        state = _lcg(state)
-        tag = (state ^ index) & 0xFFFFFFFF
-        state = _lcg(state)
-        left = state & MASK64
-        state = _lcg(state)
-        span = ((state >> 16) ^ (index * 13)) & 0xFFFFFFFF
-        state = _lcg(state)
-        right = state & MASK64
-        state = _lcg(state)
-        tail = (state ^ (index * 0xA5A5A5A5A5A5A5A5)) & MASK64
-        blob.extend(struct.pack("<I", tag))
-        blob.extend(struct.pack("<Q", left))
-        blob.extend(struct.pack("<I", span))
-        blob.extend(struct.pack("<Q", right))
-        blob.extend(struct.pack("<Q", tail))
-    output.write_bytes(blob)
-    return {"record_count": record_count, "record_size": record_size}
+        state = _lcg(state); tag = (state ^ index) & 0xFFFFFFFF
+        state = _lcg(state); left = state & MASK64
+        state = _lcg(state); span = ((state >> 16) ^ (index * 13)) & 0xFFFFFFFF
+        state = _lcg(state); right = state & MASK64
+        state = _lcg(state); tail = (state ^ (index * 0xA5A5A5A5A5A5A5A5)) & MASK64
+        blob.extend(struct.pack("<IQIQQ", tag, left, span, right, tail))
+    output.write_bytes(blob); return {"record_count": record_count, "record_size": record_size}
 
 
 def generate_bounds_check_heavy(output: Path) -> dict[str, int]:
@@ -574,53 +439,32 @@ def generate_packet_redundant_bounds(output: Path) -> dict[str, int]:
 
 
 def generate_cmov_select(output: Path) -> dict[str, int]:
-    groups = 27
-    lanes = 4
-    count = groups * lanes
-    compare_mask = (1 << 63) - 1
+    groups, lanes = 27, 4; count = groups * lanes; compare_mask = (1 << 63) - 1
     state = 0x123456789ABCDEF0
-    compare_lhs: list[int] = []
-    compare_rhs: list[int] = []
-    select_true: list[int] = []
-    select_false: list[int] = []
+    compare_lhs: list[int] = []; compare_rhs: list[int] = []
+    select_true: list[int] = []; select_false: list[int] = []
     for index in range(count):
-        state = _lcg(state ^ ((index + 1) * 0x9E3779B97F4A7C15))
-        raw_lhs = state & compare_mask
-        state = _lcg(state ^ ((index + 1) * 0xD1342543DE82EF95))
-        raw_rhs = state & compare_mask
-        hi = raw_lhs if raw_lhs >= raw_rhs else raw_rhs
-        lo = raw_rhs if raw_lhs >= raw_rhs else raw_lhs
-        if hi == lo:
-            if hi < compare_mask:
-                hi += 1
-            elif lo > 0:
-                lo -= 1
-        if index & 1:
-            compare_lhs.append(hi)
-            compare_rhs.append(lo)
-        else:
-            compare_lhs.append(lo)
-            compare_rhs.append(hi)
+        state = _lcg(state ^ ((index + 1) * 0x9E3779B97F4A7C15)); raw_lhs = state & compare_mask
+        state = _lcg(state ^ ((index + 1) * 0xD1342543DE82EF95)); raw_rhs = state & compare_mask
+        hi, lo = (raw_lhs, raw_rhs) if raw_lhs >= raw_rhs else (raw_rhs, raw_lhs)
+        if hi == lo: hi += 1 if hi < compare_mask else 0; lo -= 1 if lo > 0 else 0
+        if index & 1: compare_lhs.append(hi); compare_rhs.append(lo)
+        else: compare_lhs.append(lo); compare_rhs.append(hi)
         state = _lcg(state ^ ((index + 1) * 0xA0761D6478BD642F))
         select_true.append((state ^ ((index + 5) * 0xE7037ED1A0B428DB)) & MASK64)
         state = _lcg(state ^ ((index + 1) * 0x8EBC6AF09C88C6E3))
         select_false.append((state ^ ((index + 9) * 0x589965CC75374CC3)) & MASK64)
     blob = bytearray(struct.pack("<II", count, groups))
     for values in (compare_lhs, compare_rhs, select_true, select_false):
-        for value in values:
-            blob.extend(struct.pack("<Q", value))
-    output.write_bytes(blob)
-    return {"count": count, "groups": groups, "lanes": lanes}
+        for value in values: blob.extend(struct.pack("<Q", value))
+    output.write_bytes(blob); return {"count": count, "groups": groups, "lanes": lanes}
 
 
 def generate_cmov_dense(output: Path) -> dict[str, int]:
-    count = 32
-    state = 0xC001D00DF00DBAAD
-    arrays: list[list[int]] = [[], [], [], []]
+    count = 32; state = 0xC001D00DF00DBAAD; arrays: list[list[int]] = [[], [], [], []]
     for index in range(count):
         for array_index, values in enumerate(arrays):
-            state = _lcg(state ^ ((index + 1) * (array_index + 3) * 0x9E3779B97F4A7C15))
-            values.append(state & MASK64)
+            state = _lcg(state ^ ((index + 1) * (array_index + 3) * 0x9E3779B97F4A7C15)); values.append(state & MASK64)
     blob = bytearray()
     for values in arrays:
         for value in values:
@@ -715,21 +559,14 @@ def generate_packet_parse_vlans_tcpopts(output: Path) -> dict[str, int]:
 
 
 def generate_local_call_fanout(output: Path) -> dict[str, int]:
-    record_count = 16
-    record_size = 24
-    state = 0x0123456789ABCDEF
-    blob = bytearray(struct.pack("<II", record_count, record_size))
+    record_count, record_size = 16, 24
+    state = 0x0123456789ABCDEF; blob = bytearray(struct.pack("<II", record_count, record_size))
     for index in range(record_count):
-        selector = index % 4
-        state = _lcg(state)
-        tag = ((state >> 24) ^ (index * 17)) & 0xFFFFFFFF
-        state = _lcg(state)
-        left = (state ^ ((index + 1) * 0x9E3779B97F4A7C15)) & MASK64
-        state = _lcg(state)
-        right = (state ^ ((index + 7) * 0xD1342543DE82EF95)) & MASK64
-        blob.extend(struct.pack("<IIQQ", selector, tag, left, right))
-    output.write_bytes(blob)
-    return {"record_count": record_count, "record_size": record_size}
+        state = _lcg(state); tag = ((state >> 24) ^ (index * 17)) & 0xFFFFFFFF
+        state = _lcg(state); left = (state ^ ((index + 1) * 0x9E3779B97F4A7C15)) & MASK64
+        state = _lcg(state); right = (state ^ ((index + 7) * 0xD1342543DE82EF95)) & MASK64
+        blob.extend(struct.pack("<IIQQ", index % 4, tag, left, right))
+    output.write_bytes(blob); return {"record_count": record_count, "record_size": record_size}
 
 
 def generate_packet_rss_hash(output: Path) -> dict[str, int]:
@@ -763,28 +600,18 @@ def generate_packet_rss_hash(output: Path) -> dict[str, int]:
 
 
 def generate_struct_field_cluster(output: Path) -> dict[str, int]:
-    record_count = 32
-    record_size = 32
-    state = 0x2468ACE113579BDF
-    blob = bytearray(struct.pack("<II", record_count, record_size))
+    record_count, record_size = 32, 32
+    state = 0x2468ACE113579BDF; blob = bytearray(struct.pack("<II", record_count, record_size))
     for index in range(record_count):
-        state = _lcg(state)
-        tag = ((state >> 24) ^ (index * 19)) & 0xFFFFFFFF
-        state = _lcg(state)
-        flags = ((state >> 20) ^ (index * 7)) & 0xFFFF
-        state = _lcg(state)
-        length = 64 + (((state >> 18) ^ (index * 5)) & 0x1FF)
-        state = _lcg(state)
-        src = (state ^ ((index + 1) * 0x9E3779B97F4A7C15)) & MASK64
-        state = _lcg(state)
-        dst = (state ^ ((index + 11) * 0xD1342543DE82EF95)) & MASK64
-        state = _lcg(state)
-        sport = 10000 + (((state >> 16) ^ (index * 17)) & 0xFFFF)
-        state = _lcg(state)
-        dport = 20000 + (((state >> 24) ^ (index * 29)) & 0xFFFF)
+        state = _lcg(state); tag = ((state >> 24) ^ (index * 19)) & 0xFFFFFFFF
+        state = _lcg(state); flags = ((state >> 20) ^ (index * 7)) & 0xFFFF
+        state = _lcg(state); length = 64 + (((state >> 18) ^ (index * 5)) & 0x1FF)
+        state = _lcg(state); src = (state ^ ((index + 1) * 0x9E3779B97F4A7C15)) & MASK64
+        state = _lcg(state); dst = (state ^ ((index + 11) * 0xD1342543DE82EF95)) & MASK64
+        state = _lcg(state); sport = 10000 + (((state >> 16) ^ (index * 17)) & 0xFFFF)
+        state = _lcg(state); dport = 20000 + (((state >> 24) ^ (index * 29)) & 0xFFFF)
         blob.extend(struct.pack("<IHHQQII", tag, flags, length, src, dst, sport, dport))
-    output.write_bytes(blob)
-    return {"record_count": record_count, "record_size": record_size}
+    output.write_bytes(blob); return {"record_count": record_count, "record_size": record_size}
 
 
 def generate_bitfield_extract(output: Path) -> dict[str, int]:
@@ -811,94 +638,47 @@ def generate_bitfield_extract(output: Path) -> dict[str, int]:
         for salt, shift, mask in params:
             state = _lcg(state ^ ((index + 1) * salt))
             fields.append((state >> shift) & mask)
-        word0 = (
-            fields[0]
-            | (fields[1] << 6)
-            | (fields[2] << 11)
-            | (fields[3] << 22)
-            | (fields[4] << 30)
-            | (fields[5] << 44)
-            | (fields[6] << 54)
-        ) & MASK64
-        word1 = (
-            fields[7]
-            | (fields[8] << 4)
-            | (fields[9] << 12)
-            | (fields[10] << 24)
-            | (fields[11] << 40)
-        ) & MASK64
+        word0 = (fields[0] | (fields[1] << 6) | (fields[2] << 11) | (fields[3] << 22)
+                 | (fields[4] << 30) | (fields[5] << 44) | (fields[6] << 54)) & MASK64
+        word1 = (fields[7] | (fields[8] << 4) | (fields[9] << 12)
+                 | (fields[10] << 24) | (fields[11] << 40)) & MASK64
         blob.extend(struct.pack("<QQ", word0, word1))
     output.write_bytes(blob)
     return {"record_count": record_count, "record_words": record_words}
 
 
 def generate_deep_guard_tree_8(output: Path) -> dict[str, int]:
-    record_count = 32
-    record_size = 16
-    state = 0x0F1E2D3C4B5A6978
-    blob = bytearray(struct.pack("<I", record_count))
-    leaf_table = [
-        (0x10, 0x00, 0x40, 0x80, 0x08, 0x00, 0x33, 0x00),
-        (0x31, 0x02, 0x40, 0x80, 0x08, 0x00, 0x33, 0x00),
-        (0x32, 0x01, 0x90, 0x80, 0x08, 0x00, 0x33, 0x00),
-        None,  # leaf 3 uses index-dependent field
-        (0x40, 0x01, 0x40, 0x80, 0x90, 0x10, 0x33, 0x00),
-        (0x34, 0x01, 0x40, 0x80, 0x08, 0x08, 0x33, 0x00),
-        (0x35, 0x01, 0x40, 0x80, 0x08, 0x10, 0xAA, 0x00),
-        (0x36, 0x01, 0x40, 0x80, 0x08, 0x10, 0x44, 0x01),
-        (0x37, 0x01, 0x40, 0x80, 0x08, 0x10, 0x55, 0x02),
-    ]
+    record_count, record_size = 32, 16
+    state = 0x0F1E2D3C4B5A6978; blob = bytearray(struct.pack("<I", record_count))
+    leaf_table = [(0x10, 0x00, 0x40, 0x80, 0x08, 0x00, 0x33, 0x00), (0x31, 0x02, 0x40, 0x80, 0x08, 0x00, 0x33, 0x00),
+                  (0x32, 0x01, 0x90, 0x80, 0x08, 0x00, 0x33, 0x00), None,  # leaf 3 uses index-dependent field
+                  (0x40, 0x01, 0x40, 0x80, 0x90, 0x10, 0x33, 0x00), (0x34, 0x01, 0x40, 0x80, 0x08, 0x08, 0x33, 0x00),
+                  (0x35, 0x01, 0x40, 0x80, 0x08, 0x10, 0xAA, 0x00), (0x36, 0x01, 0x40, 0x80, 0x08, 0x10, 0x44, 0x01),
+                  (0x37, 0x01, 0x40, 0x80, 0x08, 0x10, 0x55, 0x02)]
     for index in range(record_count):
         state = _lcg(state ^ ((index + 1) * 0xD1342543DE82EF95))
         payload = (state ^ ((index + 1) * 0xA0761D6478BD642F)) & MASK64
         leaf = index % 9
-        if leaf == 3:
-            fields = (0x33, 0x01, 0x40, index & 0xFF, 0x08, 0x10, 0x33, 0x00)
-        else:
-            fields = leaf_table[leaf]
-        blob.extend(bytes(fields))
-        blob.extend(struct.pack("<Q", payload))
-    output.write_bytes(blob)
-    return {"record_count": record_count, "record_size": record_size}
+        fields = (0x33, 0x01, 0x40, index & 0xFF, 0x08, 0x10, 0x33, 0x00) if leaf == 3 else leaf_table[leaf]
+        blob.extend(bytes(fields)); blob.extend(struct.pack("<Q", payload))
+    output.write_bytes(blob); return {"record_count": record_count, "record_size": record_size}
 
-
-# ---------------------------------------------------------------------------
-# Spec-driven dispatch table (from input_specs.yaml)
-# ---------------------------------------------------------------------------
 
 def _make_spec_generator(name: str, spec: dict):
-    """Return a generate_*(output) function driven by a YAML spec entry."""
-    kind = spec["kind"]
-    builder = _KIND_BUILDERS[kind]
-
-    def _gen(output: Path) -> dict[str, int]:
-        return builder(output, spec)
-
+    builder = _KIND_BUILDERS[spec["kind"]]
+    def _gen(output: Path) -> dict[str, int]: return builder(output, spec)
     _gen.__name__ = f"generate_{name}"
     return _gen
 
 
-import sys as _sys
-
 def _build_generators() -> dict[str, object]:
-    """Combine hand-written generate_* functions with spec-driven ones.
-    Any module-level function named generate_<X> is auto-registered as generator 'X'.
-    YAML spec-driven generators are also registered; hand-written takes precedence.
-    """
     _mod = _sys.modules[__name__]
-    hand_written = {
-        name[len("generate_"):]: fn
-        for name, fn in vars(_mod).items()
-        if name.startswith("generate_") and callable(fn)
-    }
-    specs = _load_specs()
-    spec_driven = {name: _make_spec_generator(name, spec) for name, spec in specs.items()}
-    # Hand-written takes precedence; spec entries that have no hand-written override land in table
+    hand_written = {name[len("generate_"):]: fn for name, fn in vars(_mod).items()
+                    if name.startswith("generate_") and callable(fn)}
+    spec_driven = {name: _make_spec_generator(name, spec) for name, spec in _load_specs().items()}
     merged = {**spec_driven, **hand_written}
-    # Also expose spec-driven generators as module-level names for direct import
     for _name, _fn in spec_driven.items():
-        if _name not in hand_written:
-            setattr(_mod, f"generate_{_name}", _fn)
+        if _name not in hand_written: setattr(_mod, f"generate_{_name}", _fn)
     return merged
 
 

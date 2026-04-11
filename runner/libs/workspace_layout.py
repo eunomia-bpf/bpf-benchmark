@@ -35,8 +35,6 @@ def _cache(workspace: Path, target_arch: str, subdir: str) -> Path:
     return workspace / ".cache" / subdir / str(target_arch).strip()
 
 
-# --- Public path functions ---
-
 def repo_artifact_root(workspace: Path, target_arch: str) -> Path:       return _cache(workspace, target_arch, "repo-artifacts")
 def workload_tools_root(workspace: Path, target_arch: str) -> Path:      return _cache(workspace, target_arch, "workload-tools")
 def micro_program_root(workspace: Path, target_arch: str) -> Path:       return _cache(workspace, target_arch, "micro-programs")
@@ -58,8 +56,6 @@ def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Pat
 def kvm_kernel_image_path(workspace: Path) -> Path:
     return workspace / ".cache" / "x86-kernel-build" / "arch" / "x86" / "boot" / "bzImage"
 
-
-# --- Multi-path target helpers ---
 
 def scx_targets(workspace: Path, target_arch: str, packages: list[str]) -> list[Path]:
     root = repo_artifact_root(workspace, target_arch) / "scx"
@@ -101,8 +97,6 @@ def workload_tool_targets(workspace: Path, target_arch: str) -> list[Path]:
 def micro_program_targets(workspace: Path, target_arch: str) -> list[Path]:
     return [micro_program_root(workspace, target_arch) / "simple.bpf.o"]
 
-
-# --- Transfer / prep aggregators ---
 
 def _base_transfer_paths(workspace: Path, suite_name: str) -> list[Path]:
     return [workspace / e for e in _BASE_TRANSFER_ROOTS.get(str(suite_name).strip(), ())]

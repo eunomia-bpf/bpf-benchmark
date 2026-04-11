@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import shlex
 import sys
 from functools import partial
 from pathlib import Path
@@ -10,18 +9,28 @@ from runner.libs.cli_support import fail
 _die = partial(fail, "state-file")
 
 
-def read_state(path: Path) -> dict[str, str]:
+def read_json_object(path: Path) -> dict[str, object]:
     if not path.is_file():
-        _die(f"state file is missing: {path}")
+        _die(f"JSON file is missing: {path}")
     text = path.read_text(encoding="utf-8")
     if not text.strip():
-        _die(f"state file is empty: {path}")
+        _die(f"JSON file is empty: {path}")
     try:
         raw = json.loads(text)
     except json.JSONDecodeError as exc:
-        _die(f"state file is not valid JSON: {path} ({exc})")
+        _die(f"file is not valid JSON: {path} ({exc})")
     if not isinstance(raw, dict):
-        _die(f"state file must contain a JSON object: {path}")
+        _die(f"JSON file must contain an object: {path}")
+    return dict(raw)
+
+
+def write_json_object(path: Path, values: dict[str, object]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(values, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def read_state(path: Path) -> dict[str, str]:
+    raw = read_json_object(path)
     state: dict[str, str] = {}
     for key, value in raw.items():
         if not isinstance(key, str) or not isinstance(value, str):
@@ -31,8 +40,7 @@ def read_state(path: Path) -> dict[str, str]:
 
 
 def write_state(path: Path, values: dict[str, str]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(values, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    write_json_object(path, values)
 
 
 def merge_state(path: Path, values: dict[str, str]) -> None:
@@ -43,29 +51,11 @@ def merge_state(path: Path, values: dict[str, str]) -> None:
     write_state(path, current)
 
 
-def render_shell_assignments(path: Path) -> str:
-    return "\n".join(f"{name}={shlex.quote(value)}" for name, value in read_state(path).items())
-
-
-def render_null_assignments(path: Path) -> bytes:
-    return b"".join(f"{name}={value}".encode("utf-8") + b"\0" for name, value in read_state(path).items())
-
-
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args:
-        _die("usage: state_file.py <export|export0|write|merge> ...")
+        _die("usage: state_file.py <write|merge> ...")
     action = args[0]
-    if action == "export":
-        if len(args) != 2:
-            _die("usage: state_file.py export <path>")
-        print(render_shell_assignments(Path(args[1]).resolve()))
-        return
-    if action == "export0":
-        if len(args) != 2:
-            _die("usage: state_file.py export0 <path>")
-        sys.stdout.buffer.write(render_null_assignments(Path(args[1]).resolve()))
-        return
     if action == "write":
         if len(args) < 2:
             _die("usage: state_file.py write <path> [KEY=VALUE ...]")

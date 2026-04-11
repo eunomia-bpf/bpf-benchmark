@@ -91,12 +91,6 @@ _RUNNERS: dict[str, tuple[str, str, RunnerAdapter]] = {
 }
 
 
-def _load_runner_class(runner: str) -> type[AppRunner]:
-    module_name, class_name, _adapter = _RUNNERS[runner]
-    module = importlib.import_module(module_name)
-    return getattr(module, class_name)
-
-
 def get_app_runner(
     runner: str,
     *,
@@ -109,13 +103,10 @@ def get_app_runner(
     if spec is None:
         raise NotImplementedError(f"no shared app runner is implemented for runner {runner!r}")
     module_name, class_name, adapter = spec
-    del module_name, class_name
     constructor_kwargs = adapter(workload, app_name, dict(kwargs))
-    runner_class = _load_runner_class(normalized)
-    runner_instance = runner_class(**constructor_kwargs)
-    if not isinstance(runner_instance, AppRunner):
-        raise TypeError(f"{runner_class.__module__}.{runner_class.__name__} must inherit AppRunner")
-    return runner_instance
+    module = importlib.import_module(module_name)
+    runner_class = getattr(module, class_name)
+    return runner_class(**constructor_kwargs)
 
 
 __all__ = [
