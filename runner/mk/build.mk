@@ -540,9 +540,8 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE
 	container_platform="$(ACTIVE_CONTAINER_PLATFORM)"; \
 	container_image="$(ACTIVE_RUNNER_BUILD_IMAGE)"; \
 	mkdir -p "$$repo_root" "$$install_root/bin" "$$install_root/lib" "$$install_root/lib64" "$$bpf_root" "$$build_root"; \
-	rsync -a --delete --delete-excluded \
+		rsync -a --delete --delete-excluded \
 		--exclude '.git' \
-		--exclude 'build' \
 		--exclude '_build' \
 		--exclude 'deps' \
 		"$$repo_src/" "$$repo_root/"; \

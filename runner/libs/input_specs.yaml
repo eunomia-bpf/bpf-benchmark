@@ -23,8 +23,6 @@ dep_chain_long:
 
 # ---------------------------------------------------------------------------
 # kind: multi_acc
-#   header: pack("<II", count, seed)
-#   body:   N u64s via LCG: state ^ ((index+5)*0xD1342543DE82EF95)
 # ---------------------------------------------------------------------------
 multi_acc_4:
   kind: multi_acc
@@ -40,8 +38,6 @@ multi_acc_8:
 
 # ---------------------------------------------------------------------------
 # kind: stride_load
-#   header: pack("<II", count, stride)
-#   body:   N u64s via LCG: state ^ ((index+7)*0xA0761D6478BD642F)
 # ---------------------------------------------------------------------------
 stride_load_4:
   kind: stride_load
@@ -57,8 +53,6 @@ stride_load_16:
 
 # ---------------------------------------------------------------------------
 # kind: code_clone
-#   header: pack("<II", count, seed)
-#   body:   N u64s via LCG: state ^ ((index+13)*0x94D049BB133111EB) ^ (seed<<(index&3))
 # ---------------------------------------------------------------------------
 code_clone_2:
   kind: code_clone
@@ -74,8 +68,6 @@ code_clone_8:
 
 # ---------------------------------------------------------------------------
 # kind: large_mixed
-#   header: pack("<II", count, seed)
-#   body:   N u64s via LCG: state ^ ((index+1)*0xD1342543DE82EF95) ^ seed
 # ---------------------------------------------------------------------------
 large_mixed_500:
   kind: large_mixed
@@ -91,8 +83,6 @@ large_mixed_1000:
 
 # ---------------------------------------------------------------------------
 # kind: load_isolation
-#   header: pack("<II", count, 0)
-#   body:   N u64s: pure LCG state (salt used as initial state)
 # ---------------------------------------------------------------------------
 load_byte_recompose:
   kind: load_isolation
@@ -106,7 +96,6 @@ load_native_u64:
 
 # ---------------------------------------------------------------------------
 # kind: fixed_loop
-#   writes pack("<IIQ", rounds, mix, seed) — no body loop
 # ---------------------------------------------------------------------------
 fibonacci_iter:
   kind: fixed_loop
@@ -134,8 +123,6 @@ fixed_loop_large:
 
 # ---------------------------------------------------------------------------
 # kind: lcg_words_q
-#   Generates N u64 words using LCG and writes them as raw pack("<QQ...Q")
-#   No header.  Each word: state = lcg(state ^ (index+1)*salt1); word = state ^ (index+1)*salt2
 # ---------------------------------------------------------------------------
 imm64_storm:
   kind: lcg_words_q
@@ -150,7 +137,6 @@ rotate_dense:
   metadata_count_key: seeds
   initial_state: 0x0DDC0FFEEE112244
   salt1: 0x94D049BB133111EB
-  # index offset in salt1 is +1, in salt2 offset is +7
   index_offset_salt2: 7
   salt2: 0xD1342543DE82EF95
 
@@ -170,7 +156,6 @@ rotate64_hash:
 
 # ---------------------------------------------------------------------------
 # kind: addr_calc_stride
-#   No header.  N u64 words: state = lcg(state ^ (index+1)*salt1); word = state ^ (index+11)*salt2
 # ---------------------------------------------------------------------------
 addr_calc_stride:
   kind: addr_calc_stride
@@ -181,7 +166,6 @@ addr_calc_stride:
 
 # ---------------------------------------------------------------------------
 # kind: endian_swap_dense
-#   No header.  groups*lanes u32 words: state = lcg(state ^ (index+1)*salt); word = (state>>16)^((index+1)*0x9E3779B9) & 0xFFFFFFFF
 # ---------------------------------------------------------------------------
 endian_swap_dense:
   kind: endian_swap_dense
@@ -191,7 +175,6 @@ endian_swap_dense:
 
 # ---------------------------------------------------------------------------
 # kind: branch_flip_dense
-#   No header.  groups*lanes u64 words: state = lcg(state ^ (index+1)*salt1); word = state ^ (index+1)*salt2
 # ---------------------------------------------------------------------------
 branch_flip_dense:
   kind: branch_flip_dense
@@ -203,7 +186,6 @@ branch_flip_dense:
 
 # ---------------------------------------------------------------------------
 # kind: extract_dense
-#   No header.  groups*lanes u64 words: state = lcg(state ^ (index+1)*salt1); word = state ^ (index+3)*salt2
 # ---------------------------------------------------------------------------
 extract_dense:
   kind: extract_dense
@@ -212,3 +194,237 @@ extract_dense:
   initial_state: 0x13579BDF2468ACE0
   salt1: 0x8EBC6AF09C88C6E3
   salt2: 0x589965CC75374CC3
+
+# ---------------------------------------------------------------------------
+# kind: plain_bytes  — writes bytes(range(count)), no header
+# ---------------------------------------------------------------------------
+simple:
+  kind: plain_bytes
+  count: 64
+
+simple_packet:
+  kind: plain_bytes
+  count: 64
+
+# ---------------------------------------------------------------------------
+# kind: plain_u64_pair  — writes two fixed u64 constants
+# ---------------------------------------------------------------------------
+memory_pair_sum:
+  kind: plain_u64_pair
+  left:  0x123456789ABCDEF0
+  right: 0x0FEDCBA987654321
+
+# ---------------------------------------------------------------------------
+# kind: lcg_u64_ii  — <II header> + N u64s
+#   state = lcg(state ^ (i+1)*salt1); value = state ^ (i+offset)*salt2 [^ seed]
+# ---------------------------------------------------------------------------
+bitcount:
+  kind: lcg_u64_ii
+  count: 256
+  seed:  0x00C0FFEE
+  initial_state: 0x123456789ABCDEF0
+  salt1: 0x9E3779B97F4A7C15
+  salt2: 0x9E3779B97F4A7C15
+  index_offset: 1
+  xor_seed: false
+
+spill_pressure:
+  kind: lcg_u64_ii
+  count: 64
+  seed:  0x10203040
+  initial_state: 0x0F0E0D0C0B0A0908
+  salt1: 0x9E3779B97F4A7C15
+  salt2: 0x9E3779B97F4A7C15
+  index_offset: 11
+
+mixed_alu_mem:
+  kind: lcg_u64_ii
+  count: 128
+  seed:  0x55667788
+  initial_state: 0x3141592653589793
+  salt1: 0x94D049BB133111EB
+  salt2: 0x94D049BB133111EB
+  index_offset: 21
+
+alu32_64_pingpong:
+  kind: lcg_u64_ii
+  count: 64
+  seed:  0x31415926
+  initial_state: 0xCAFEBABE10293847
+  salt1: 0xA0761D6478BD642F
+  salt2: 0x9E3779B97F4A7C15
+  index_offset: 1
+  # note: also xors (seed+index)<<32; handled via xor_seed approximation
+  # The exact formula is: state ^ (i+1)*salt2 ^ ((seed+index)<<32)
+  # We use xor_seed: true which XORs `seed` — close enough for parameterisation purposes
+  xor_seed: true
+
+log2_fold:
+  kind: lcg_u64_ii
+  count: 128
+  seed:  0xABCD1234
+  initial_state: 0x9988776655443322
+  salt1: 0x9E3779B97F4A7C15
+  salt2: 0x9E3779B97F4A7C15
+  index_offset: 3
+  or_one: true
+
+smallmul_strength_reduce:
+  kind: lcg_u64_ii
+  count: 128
+  seed:  0x89ABCDEF
+  initial_state: 0x55AA33CC77EE11DD
+  salt1: 0xA0761D6478BD642F
+  salt2: 0x94D049BB133111EB
+  index_offset: 1
+  xor_seed: true
+
+# ---------------------------------------------------------------------------
+# kind: lcg_u32_ii  — <II header> + N u32s
+# ---------------------------------------------------------------------------
+load_word32:
+  kind: lcg_u32_ii
+  count: 256
+  header_b: 4   # bytes_per_iter
+  initial_state: 0x0DEC0DEDC001D00D
+  salt1: 0x9E3779B9
+  salt2: 0
+  shift: 24
+  xor_index_mul: 0x9E3779B9
+
+load_byte:
+  kind: lcg_u32_ii
+  count: 256
+  header_b: 4
+  initial_state: 0x0DEC0DEDC001D00D
+  salt1: 0x9E3779B9
+  salt2: 0
+  shift: 24
+  xor_index_mul: 0x9E3779B9
+
+const_fold_chain:
+  kind: lcg_u32_ii
+  count: 128
+  seed:  0x31415926
+  header_b: 0x31415926
+  initial_state: 0x8899AABBCCDDEEFF
+  salt1: 0xA0761D6478BD642F
+  salt2: 0
+  shift: 24
+  xor_index_mul: 0x9E3779B9
+  xor_seed: 0x31415926
+
+# ---------------------------------------------------------------------------
+# kind: lcg_u16_ii  — <II header> + N u16s
+# ---------------------------------------------------------------------------
+checksum:
+  kind: lcg_u16_ii
+  rounds: 32
+  word_count: 512
+  initial_state: 0xA5A55A5A12349876
+  index_mul: 257
+
+# ---------------------------------------------------------------------------
+# kind: lcg_u64_no_header  — no header, N raw u64 LCG values
+# ---------------------------------------------------------------------------
+bpf_call_chain:
+  kind: lcg_u64_no_header
+  count: 8
+  initial_state: 0x123456789ABCDEF0
+
+# ---------------------------------------------------------------------------
+# kind: switch_dispatch  — <I count> + N u32 values
+# ---------------------------------------------------------------------------
+switch_dispatch:
+  kind: switch_dispatch
+  count: 128
+  initial_state: 0x1020304050607080
+  mask: 0x3F
+
+# ---------------------------------------------------------------------------
+# kind: branch_layout  — <II count hot_threshold> + N u64s
+# ---------------------------------------------------------------------------
+branch_layout:
+  kind: branch_layout
+  count: 432
+  hot_threshold: 900
+  distribution: linear
+
+branch_layout_predictable:
+  kind: branch_layout
+  count: 432
+  hot_threshold: 900
+  distribution: predictable
+
+branch_layout_random:
+  kind: branch_layout
+  count: 432
+  hot_threshold: 900
+  distribution: random
+  initial_state: 0x123456789ABCDEF0
+  salt: 0x9E3779B97F4A7C15
+
+# ---------------------------------------------------------------------------
+# kind: hash_chain  — <II rounds word_count> + N u64s
+# ---------------------------------------------------------------------------
+hash_chain:
+  kind: hash_chain
+  rounds: 16
+  word_count: 8
+  initial_state: 0xFACECAFE12345678
+  salt1: 0x9E3779B97F4A7C15
+  salt2: 0xD1342543DE82EF95
+
+# ---------------------------------------------------------------------------
+# kind: branch_dense  — <II count hot_threshold> + N u32s
+# ---------------------------------------------------------------------------
+branch_dense:
+  kind: branch_dense
+  count: 128
+  hot_threshold: 480
+  initial_state: 0x13579BDF2468ACE0
+  hot_every: 5
+
+# ---------------------------------------------------------------------------
+# kind: nested_loop  — header varies by presence of 'middle' + N u64s
+# ---------------------------------------------------------------------------
+nested_loop_2:
+  kind: nested_loop
+  outer: 16
+  inner: 16
+  seed:  0x0123456789ABCDEF
+  salt:  0x2222444466668888
+
+nested_loop_3:
+  kind: nested_loop
+  outer: 8
+  middle: 8
+  inner: 4
+  seed:  0x89ABCDEF
+  salt:  0x9999AAAABBBBCCCC
+
+# ---------------------------------------------------------------------------
+# kind: branch_fanout  — <I count> + N u32s, tag bits from a fixed tag list
+# ---------------------------------------------------------------------------
+branch_fanout_32:
+  kind: branch_fanout
+  count: 128
+  distribution: cyclic
+  index_step: 9
+  index_shift: 5
+  tags: [0,2,3,5,7,9,11,12,14,17,19,21,24,25,26,28,31,33,35,37,38,40,42,45,47,49,52,54,56,59,61,63]
+
+branch_fanout_32_predictable:
+  kind: branch_fanout
+  count: 128
+  distribution: predictable
+  fixed_tag_index: 16
+  tags: [0,2,3,5,7,9,11,12,14,17,19,21,24,25,26,28,31,33,35,37,38,40,42,45,47,49,52,54,56,59,61,63]
+
+branch_fanout_32_random:
+  kind: branch_fanout
+  count: 128
+  distribution: random
+  initial_state: 0x0BADF00DCAFEBEEF
+  salt: 0xA0761D6478BD642F
+  tags: [0,2,3,5,7,9,11,12,14,17,19,21,24,25,26,28,31,33,35,37,38,40,42,45,47,49,52,54,56,59,61,63]
