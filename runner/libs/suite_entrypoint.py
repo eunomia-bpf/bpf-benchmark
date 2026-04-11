@@ -144,27 +144,6 @@ def _suite_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
     return ":".join(ordered)
 
 
-def _run_and_tee(command: list[str], *, cwd: Path, env: dict[str, str], log_path: Path) -> None:
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-    with log_path.open("a", encoding="utf-8") as log_file:
-        process = subprocess.Popen(
-            command,
-            cwd=cwd,
-            env=env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-        )
-        assert process.stdout is not None
-        for line in process.stdout:
-            log_file.write(line)
-            sys.stderr.write(line)
-        returncode = process.wait()
-    if returncode != 0:
-        rendered = " ".join(shlex.quote(part) for part in command)
-        _die(f"command failed ({returncode}): {rendered}")
-
-
 def _run_with_status(
     command: list[str],
     *,

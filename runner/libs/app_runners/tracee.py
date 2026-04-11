@@ -18,7 +18,6 @@ import yaml
 
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, tail_text, which
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
-from ..bpf_stats import sample_bpf_stats
 from ..process_fd import dup_fd_from_process
 from ..workload import (
     WorkloadResult,
@@ -237,7 +236,7 @@ class TraceeAgentSession(AgentSession):
         self.program_fds: dict[int, int] = {}
 
     def __enter__(self) -> "TraceeAgentSession":
-        preexisting_ids = set(sample_bpf_stats(_current_prog_ids()))
+        preexisting_ids = set(_current_prog_ids())
         failures: list[str] = []
         tracee_tmpdir = _tracee_runtime_dir()
         event_output_path = _tracee_event_output_path()

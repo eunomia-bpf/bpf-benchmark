@@ -4,7 +4,6 @@ import io
 import os
 import subprocess
 import threading
-import time
 from collections import deque
 from dataclasses import dataclass
 from functools import lru_cache
@@ -14,9 +13,10 @@ from typing import Mapping, Sequence
 import yaml
 
 from .. import ROOT_DIR, tail_text
-from ..agent import find_bpf_programs, stop_agent
+from ..agent import stop_agent
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
+from .process_support import wait_for_attached_programs
 from .setup_support import binary_matches_host_arch, first_existing_dir, repo_artifact_root
 
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml"
@@ -160,34 +160,6 @@ def find_tool_binary(tools_dir: Path, tool_name: str) -> Path | None:
         if candidate.is_file() and os.access(candidate, os.X_OK):
             return candidate.resolve()
     return None
-
-
-def wait_for_attached_programs(
-    process: subprocess.Popen[str],
-    *,
-    expected_count: int,
-    timeout_s: int,
-) -> list[dict[str, object]]:
-    deadline = time.monotonic() + timeout_s
-    last_nonempty: list[dict[str, object]] = []
-    stable_ids: tuple[int, ...] | None = None
-    stable_rounds = 0
-    while time.monotonic() < deadline:
-        matches = find_bpf_programs(int(process.pid or 0))
-        if matches:
-            last_nonempty = matches
-            ids = tuple(int(item.get("id", 0)) for item in matches)
-            if ids == stable_ids:
-                stable_rounds += 1
-            else:
-                stable_ids = ids
-                stable_rounds = 1
-            if len(matches) >= expected_count and stable_rounds >= 2:
-                return matches
-        elif process.poll() is not None and not last_nonempty:
-            break
-        time.sleep(0.5)
-    return last_nonempty
 
 
 class BCCRunner(AppRunner):

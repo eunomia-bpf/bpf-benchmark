@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, tail_text, which
-from ..agent import find_bpf_programs, start_agent, stop_agent
+from ..agent import start_agent, stop_agent
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
+from .process_support import wait_for_attached_programs
 
 DEFAULT_SCRIPT_DIR = ROOT_DIR / "e2e" / "cases" / "bpftrace" / "scripts"
 
@@ -66,34 +66,6 @@ SCRIPTS: tuple[ScriptSpec, ...] = (
         workload_kind="vfs_create_write_fsync",
     ),
 )
-
-
-def wait_for_attached_programs(
-    process: Any,
-    *,
-    expected_count: int,
-    timeout_s: int,
-) -> list[dict[str, object]]:
-    deadline = time.monotonic() + timeout_s
-    last_nonempty: list[dict[str, object]] = []
-    stable_ids: tuple[int, ...] | None = None
-    stable_rounds = 0
-    while time.monotonic() < deadline:
-        matches = find_bpf_programs(int(process.pid or 0))
-        if matches:
-            last_nonempty = matches
-            ids = tuple(int(item.get("id", 0)) for item in matches)
-            if ids == stable_ids:
-                stable_rounds += 1
-            else:
-                stable_ids = ids
-                stable_rounds = 1
-            if len(matches) >= expected_count and stable_rounds >= 2:
-                return matches
-        elif process.poll() is not None and not last_nonempty:
-            break
-        time.sleep(0.5)
-    return last_nonempty
 
 
 def finalize_process_output(process: Any) -> dict[str, object]:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import subprocess
 import threading
+import time
 from collections import deque
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -11,6 +12,35 @@ from .. import ROOT_DIR, tail_text
 from ..agent import find_bpf_programs, stop_agent, wait_healthy
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
+
+
+def wait_for_attached_programs(
+    process: Any,
+    *,
+    expected_count: int,
+    timeout_s: int,
+) -> list[dict[str, object]]:
+    """Poll bpftool until at least `expected_count` BPF programs are stably attached."""
+    deadline = time.monotonic() + timeout_s
+    last_nonempty: list[dict[str, object]] = []
+    stable_ids: tuple[int, ...] | None = None
+    stable_rounds = 0
+    while time.monotonic() < deadline:
+        matches = find_bpf_programs(int(process.pid or 0))
+        if matches:
+            last_nonempty = matches
+            ids = tuple(int(item.get("id", 0)) for item in matches)
+            if ids == stable_ids:
+                stable_rounds += 1
+            else:
+                stable_ids = ids
+                stable_rounds = 1
+            if len(matches) >= expected_count and stable_rounds >= 2:
+                return matches
+        elif process.poll() is not None and not last_nonempty:
+            break
+        time.sleep(0.5)
+    return last_nonempty
 
 
 class ProcessOutputCollector:
@@ -227,11 +257,6 @@ class NativeProcessRunner(AppRunner):
     def _command_env(self) -> Mapping[str, str] | None:
         return None
 
-    def _run_workload(self, seconds: float) -> WorkloadResult:
-        if not self.workload_kind:
-            raise RuntimeError(f"{type(self).__name__} requires an explicit workload_kind")
-        return run_named_workload(self.workload_kind, seconds)
-
     def start(self) -> list[int]:
         if self.session is not None:
             raise RuntimeError(f"{type(self).__name__} is already running")
@@ -262,9 +287,9 @@ class NativeProcessRunner(AppRunner):
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None:
             raise RuntimeError(f"{type(self).__name__} is not running")
-        if self.workload_kind:
-            return run_named_workload(self.workload_kind, seconds)
-        return self._run_workload(seconds)
+        if not self.workload_kind:
+            raise RuntimeError(f"{type(self).__name__} requires an explicit workload_kind")
+        return run_named_workload(self.workload_kind, seconds)
 
     def run_workload_spec(
         self,

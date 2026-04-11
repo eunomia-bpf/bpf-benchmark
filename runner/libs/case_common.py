@@ -380,8 +380,8 @@ def _resolve_scan_pass_selection(
     enabled_passes: Sequence[str] | None,
 ) -> tuple[list[str], object | None, str]:
     from runner.libs.rejit import (
+        benchmark_policy_candidate_passes,
         benchmark_rejit_enabled_passes,
-        benchmark_scan_enabled_passes,
         load_benchmark_config,
     )
 
@@ -392,7 +392,7 @@ def _resolve_scan_pass_selection(
         return benchmark_rejit_enabled_passes(), None, "env_override"
 
     benchmark_config = load_benchmark_config()
-    return benchmark_scan_enabled_passes(benchmark_config), benchmark_config, "benchmark_config"
+    return benchmark_policy_candidate_passes(benchmark_config), benchmark_config, "benchmark_config"
 
 
 def _resolve_apply_passes_by_program(

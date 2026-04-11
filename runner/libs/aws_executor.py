@@ -678,10 +678,6 @@ def _run_aws(ctx: aws_common.AwsExecutorContext) -> None:
     shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
 
 
-def _run_action(ctx: aws_common.AwsExecutorContext) -> None:
-    _run_aws(ctx)
-
-
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
     if len(args) < 2:
@@ -692,7 +688,7 @@ def main(argv: list[str] | None = None) -> None:
         _die(f"manifest is missing: {manifest_path}")
     ctx = aws_common._build_context(action, manifest_path)
     if action == "run":
-        _run_action(ctx)
+        _run_aws(ctx)
         return
     if action == "terminate":
         aws_common._terminate_instance(ctx)

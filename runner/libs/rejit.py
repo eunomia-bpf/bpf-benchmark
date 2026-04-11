@@ -351,12 +351,6 @@ def benchmark_policy_candidate_passes(
     return _ordered_unique_passes(candidates)
 
 
-def benchmark_scan_enabled_passes(
-    benchmark_config: Mapping[str, Any] | None,
-) -> list[str]:
-    return benchmark_policy_candidate_passes(benchmark_config)
-
-
 def resolve_program_enabled_passes(
     benchmark_config: Mapping[str, Any] | None,
     *,
@@ -1294,7 +1288,6 @@ __all__ = [
     "benchmark_policy_candidate_passes",
     "benchmark_policy_required_site_passes",
     "benchmark_config_repeat",
-    "benchmark_scan_enabled_passes",
     "benchmark_config_warmups",
     "benchmark_rejit_enabled_passes",
     "collect_effective_enabled_passes",
