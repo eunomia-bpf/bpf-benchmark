@@ -27,7 +27,7 @@ def resolve_workload_tool(name: str) -> str:
         candidate = Path(tool_dir) / name
         if candidate.is_file() and os.access(candidate, os.X_OK):
             return str(candidate)
-        raise RuntimeError(f"{name} is required in bundled workload tool dir: {candidate}")
+        raise RuntimeError(f"{name} is required in workload tool artifact dir: {candidate}")
     resolved = which(name)
     if resolved is not None:
         return resolved

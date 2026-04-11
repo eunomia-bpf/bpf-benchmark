@@ -147,7 +147,7 @@ def _base_transfer_paths(workspace: Path, suite_name: str) -> list[Path]:
     return [workspace / entry for entry in _BASE_TRANSFER_ROOTS.get(str(suite_name).strip(), ())]
 
 
-def _artifact_bundle_paths(
+def _artifact_transfer_paths(
     *,
     workspace: Path,
     suite_name: str,
@@ -234,7 +234,6 @@ def remote_transfer_roots(
     *,
     suite_name: str,
     target_arch: str,
-    executor: str,
     needs_runner_binary: bool,
     needs_daemon_binary: bool,
     needs_kinsn_modules: bool,
@@ -242,12 +241,11 @@ def remote_transfer_roots(
     native_repos: list[str],
     scx_packages: list[str],
 ) -> list[str]:
-    del executor
     roots: list[str] = []
     seen: set[str] = set()
     for path in [
         *_base_transfer_paths(ROOT_DIR, suite_name),
-        *_artifact_bundle_paths(
+        *_artifact_transfer_paths(
             workspace=ROOT_DIR,
             suite_name=suite_name,
             target_arch=target_arch,

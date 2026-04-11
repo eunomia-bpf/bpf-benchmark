@@ -125,9 +125,9 @@ workspace state, but they are not benchmark results.
 These patterns are not allowed on the main path:
 
 - hand-written `.ready` or stamp files for build reuse
-- phony bundle readiness rules in the main path
+- phony packaging readiness rules in the main path
 - host-owned runtime dependency discovery for ELF trees
-- runner-owned x86 sysroot wrappers as a permanent architecture
+- runner-owned x86 sysroot adapter layers as a permanent architecture
 - result copy-back logic
 - shared mutable output roots guarded by locks
 - run-time package installation on KVM or AWS hosts
@@ -138,11 +138,11 @@ The active implementation keeps these boundaries:
 
 - `build.mk` mostly dispatches into app-native `make`, `cmake`, `cargo`, or
   containerized equivalents
-- `workspace_layout.py` describes final artifacts, not guessed bundle roots
+- `workspace_layout.py` describes final artifacts, not guessed artifact roots
 - `suite_entrypoint.py` enters the runtime container once, then launches work
   and records result paths without staging benchmark outputs
 - `aws_remote_prep.py` prepares the host, but does not synthesize a userspace
-  runtime bundle
+  runtime artifact tree
 
 ## Current Implementation State
 
@@ -183,13 +183,13 @@ The active implementation keeps these boundaries:
 
 ### Runtime Container
 
-- [x] Replace host-side wrapper generation with runtime container execution.
+- [x] Replace host-side launcher generation with runtime container execution.
   Current state: Make builds `runner-runtime.Dockerfile` for the target arch,
   saves it as `.cache/container-images/<arch>-runner-runtime.image.tar`, and
   the host entrypoint loads that image before executing the suite inside it.
 - [x] Stop resolving glibc and loader paths from the host runner layer.
 - [x] Treat final Make targets as app artifacts or OCI image tars, not handmade
-  runtime bundles.
+  runtime archives.
 
 ### Run in Host-Privileged Containers
 
@@ -207,7 +207,7 @@ The active implementation keeps these boundaries:
   manifest, asks `workspace_layout.py` for final Make targets, dispatches
   AWS/KVM execution, and delegates AWS failure cleanup to `aws_executor.py`.
 - [x] Keep AWS/KVM prep from installing userspace packages at run time.
-- [x] Remove remaining bundle-root assumptions from transfer and consumption
+- [x] Remove remaining artifact-root assumptions from transfer and consumption
   paths.
 
 ## Explicit Non-Goals

@@ -237,7 +237,7 @@ def cmd_run_workspace(args: argparse.Namespace) -> None:
     command = [
         args.remote_python,
         "-m",
-        "runner.libs.execute_workspace",
+        "runner.libs.suite_entrypoint",
         args.workspace,
         args.manifest_path,
     ]

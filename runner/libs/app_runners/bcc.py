@@ -100,14 +100,14 @@ def _bcc_tool_specs() -> dict[str, BCCWorkloadSpec]:
 
 
 def inspect_bcc_setup() -> dict[str, object]:
-    bundled_build_output = _default_tools_dir() / ".output"
-    build_output = first_existing_dir(bundled_build_output)
+    artifact_build_output = _default_tools_dir() / ".output"
+    build_output = first_existing_dir(artifact_build_output)
     if build_output is None:
         return {
             "returncode": 1,
             "tools_dir": None,
             "stdout_tail": "",
-            "stderr_tail": f"missing bundled BCC libbpf-tools output under {bundled_build_output}",
+            "stderr_tail": f"missing BCC libbpf-tools artifact output under {artifact_build_output}",
         }
 
     for tool_name in _bcc_tool_specs():
@@ -124,7 +124,7 @@ def inspect_bcc_setup() -> dict[str, object]:
                 "returncode": 1,
                 "tools_dir": str(build_output),
                 "stdout_tail": "",
-                "stderr_tail": f"bundled BCC tool has the wrong architecture: {candidate}",
+                "stderr_tail": f"BCC tool artifact has the wrong architecture: {candidate}",
             }
 
     return {
@@ -191,6 +191,8 @@ def wait_for_attached_programs(
 
 
 class BCCRunner(AppRunner):
+    required_remote_commands = ("ip", "taskset", "setpriv", "curl", "stress-ng", "fio", "dd", "hackbench", "wrk")
+
     def __init__(
         self,
         *,
@@ -230,28 +232,9 @@ class BCCRunner(AppRunner):
         self.tool_binary = Path(tool_binary).resolve() if tool_binary is not None else None
         self.session: ToolProcessSession | None = None
 
-    def select_corpus_program_ids(
-        self,
-        initial_stats: Mapping[int, Mapping[str, object]],
-        final_stats: Mapping[int, Mapping[str, object]],
-    ) -> list[int] | None:
-        del initial_stats, final_stats
-        return None
-
-    def corpus_measurement_mode(self) -> str:
-        return "program"
-
     @property
     def pid(self) -> int | None:
         return None if self.session is None else int(self.session.process.pid or 0)
-
-    @property
-    def program_fds(self) -> Mapping[int, int]:
-        return {}
-
-    @property
-    def last_workload_details(self) -> Mapping[str, object]:
-        return {}
 
     def _resolve_tool_binary(self) -> Path:
         if self.tool_binary is not None:

@@ -7,6 +7,10 @@ from ..workload import WorkloadResult
 
 
 class AppRunner(ABC):
+    # Declare which system commands this runner requires on the remote host.
+    # Used by run_contract.py to populate RUN_REMOTE_COMMANDS_CSV.
+    required_remote_commands: tuple[str, ...] = ()
+
     def __init__(self) -> None:
         self.programs: list[dict[str, object]] = []
         self.artifacts: dict[str, object] = {}
@@ -33,17 +37,16 @@ class AppRunner(ABC):
     def stop(self) -> None:
         raise NotImplementedError
 
-    @abstractmethod
     def select_corpus_program_ids(
         self,
         initial_stats: Mapping[int, Mapping[str, object]],
         final_stats: Mapping[int, Mapping[str, object]],
     ) -> list[int] | None:
-        raise NotImplementedError
+        del initial_stats, final_stats
+        return None
 
-    @abstractmethod
     def corpus_measurement_mode(self) -> str:
-        raise NotImplementedError
+        return "program"
 
     @property
     @abstractmethod
@@ -51,14 +54,12 @@ class AppRunner(ABC):
         raise NotImplementedError
 
     @property
-    @abstractmethod
     def program_fds(self) -> Mapping[int, int]:
-        raise NotImplementedError
+        return {}
 
     @property
-    @abstractmethod
     def last_workload_details(self) -> Mapping[str, object]:
-        raise NotImplementedError
+        return {}
 
     def _fail_start(self, message: str) -> NoReturn:
         try:

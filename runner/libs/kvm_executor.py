@@ -17,7 +17,7 @@ def suite_command(workspace_root: Path, manifest_path: Path, contract: dict[str,
     return (
         f'cd "{workspace_root}" && '
         f'PYTHONPATH="{workspace_root}${{PYTHONPATH:+:${{PYTHONPATH}}}}" '
-        f'"{remote_python}" -m runner.libs.execute_workspace '
+        f'"{remote_python}" -m runner.libs.suite_entrypoint '
         f'"{workspace_root}" "{manifest_path}"'
     )
 

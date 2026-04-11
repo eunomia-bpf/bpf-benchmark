@@ -10,12 +10,12 @@ from runner.libs.cli_support import fail
 from runner.libs.manifest_file import manifest_scalar, parse_manifest
 from runner.libs.prereq_contract import (
     active_python_bin,
-    bundled_commands,
     env_csv,
     inside_runtime_container,
     python_import_name,
     required_commands,
     runtime_container_enabled,
+    workload_tool_commands,
 )
 
 die = partial(fail, "guest-prereqs")
@@ -73,16 +73,16 @@ def runtime_path_value(workspace: Path, contract: dict[str, str | list[str]]) ->
         repo_bin_dir = workspace / ".cache" / "repo-artifacts" / target_arch / "bpftrace" / "bin"
         if repo_bin_dir.is_dir():
             path_entries.append(str(repo_bin_dir))
-        bundled_tool_dir = workspace / ".cache" / "workload-tools" / target_arch / "bin"
-        if bundled_tool_dir.is_dir():
-            path_entries.append(str(bundled_tool_dir))
+        workload_bin_dir = workspace / ".cache" / "workload-tools" / target_arch / "bin"
+        if workload_bin_dir.is_dir():
+            path_entries.append(str(workload_bin_dir))
     for standard_dir in ("/usr/local/sbin", "/usr/local/bin", "/usr/sbin", "/usr/bin", "/sbin", "/bin"):
         if standard_dir not in path_entries:
             path_entries.append(standard_dir)
     return ":".join(path_entries)
 
 
-def bundled_tool_dir(workspace: Path, contract: dict[str, str | list[str]]) -> Path | None:
+def workload_tool_dir(workspace: Path, contract: dict[str, str | list[str]]) -> Path | None:
     target_arch = manifest_scalar(contract, "RUN_TARGET_ARCH", die=die)
     if not target_arch:
         return None
@@ -92,12 +92,12 @@ def bundled_tool_dir(workspace: Path, contract: dict[str, str | list[str]]) -> P
     return candidate
 
 
-def bundled_command_available(
+def workload_tool_command_available(
     workspace: Path,
     contract: dict[str, str | list[str]],
     command_name: str,
 ) -> bool:
-    tool_dir = bundled_tool_dir(workspace, contract)
+    tool_dir = workload_tool_dir(workspace, contract)
     if tool_dir is None:
         return False
     candidate = tool_dir / command_name
@@ -154,10 +154,10 @@ def ensure_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) 
 
     missing_commands: list[str] = []
     python_bin = active_python_bin(contract)
-    bundled = set(bundled_commands(contract=contract))
+    workload_tool_names = set(workload_tool_commands(contract=contract))
     for command_name in required_commands(contract=contract):
-        if command_name in bundled:
-            if bundled_command_available(workspace, contract, command_name):
+        if command_name in workload_tool_names:
+            if workload_tool_command_available(workspace, contract, command_name):
                 continue
             if command_name not in missing_commands:
                 missing_commands.append(command_name)
@@ -174,18 +174,18 @@ def ensure_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) 
             if package_name not in missing_python_packages:
                 missing_python_packages.append(package_name)
 
-    missing_bundled_commands = [command_name for command_name in missing_commands if command_name in bundled]
-    if missing_bundled_commands:
+    missing_workload_tool_commands = [command_name for command_name in missing_commands if command_name in workload_tool_names]
+    if missing_workload_tool_commands:
         die(
-            "required bundled guest commands are missing from workspace/.cache/workload-tools/<arch>/bin: "
-            + " ".join(missing_bundled_commands)
+            "required workload tool commands are missing from workspace/.cache/workload-tools/<arch>/bin: "
+            + " ".join(missing_workload_tool_commands)
         )
 
     if not missing_commands and not missing_python_packages:
         ensure_loopback_up(path_value=path_value)
         return
 
-    missing = [f"command:{name}" for name in missing_commands if name not in bundled]
+    missing = [f"command:{name}" for name in missing_commands if name not in workload_tool_names]
     missing.extend(f"python:{name}" for name in missing_python_packages)
     die(
         "guest image is missing required prerequisites; bake them into the VM/AMI or transfer them as artifacts: "
@@ -199,14 +199,14 @@ def validate_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]
         _ensure_runtime_container_image(workspace, contract, path_value=path_value)
         return
 
-    bundled = set(bundled_commands(contract=contract))
+    workload_tool_names = set(workload_tool_commands(contract=contract))
 
     for command_name in required_commands(contract=contract):
-        if command_name in bundled:
-            if bundled_command_available(workspace, contract, command_name):
+        if command_name in workload_tool_names:
+            if workload_tool_command_available(workspace, contract, command_name):
                 continue
             die(
-                "required bundled guest command is missing from workspace/.cache/workload-tools/<arch>/bin: "
+                "required workload tool command is missing from workspace/.cache/workload-tools/<arch>/bin: "
                 f"{command_name}"
             )
         if shutil.which(command_name, path=path_value) is None:

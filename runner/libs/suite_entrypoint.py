@@ -304,14 +304,14 @@ class SuiteEntrypoint:
         runtime_ld = _suite_runtime_ld_library_path(self.workspace, self.target_arch)
         if runtime_ld:
             env["LD_LIBRARY_PATH"] = runtime_ld
-        bundled_tool_bin = self.workspace / ".cache" / "workload-tools" / self.target_arch / "bin"
-        if bundled_tool_bin.is_dir():
-            env["BPFREJIT_WORKLOAD_TOOL_BIN_DIR"] = str(bundled_tool_bin)
+        workload_tool_bin = self.workspace / ".cache" / "workload-tools" / self.target_arch / "bin"
+        if workload_tool_bin.is_dir():
+            env["BPFREJIT_WORKLOAD_TOOL_BIN_DIR"] = str(workload_tool_bin)
         env["BPFREJIT_REPO_ARTIFACT_ROOT"] = str(repo_build_root)
         env["BPFREJIT_REMOTE_PYTHON_BIN"] = self.python_bin
         kernel_modules_dir = kernel_modules_root(self.workspace, self.target_arch, self.executor)
         if not kernel_modules_dir.is_dir():
-            _die(f"bundled kernel modules root is missing: {kernel_modules_dir}")
+            _die(f"kernel module artifact root is missing: {kernel_modules_dir}")
         env["BPFREJIT_KERNEL_MODULES_ROOT"] = str(kernel_modules_dir)
         rejit_passes = ""
         if self.suite_name == "corpus":
@@ -365,14 +365,14 @@ class SuiteEntrypoint:
         candidate = daemon_binary_path(self.workspace, self.target_arch)
         if candidate.is_file() and os.access(candidate, os.X_OK):
             return candidate
-        _die(f"bundled daemon is missing or not executable: {candidate}")
+        _die(f"daemon artifact is missing or not executable: {candidate}")
 
     def _ensure_runner_binary(self) -> None:
         if not self._bool_contract("RUN_NEEDS_RUNNER_BINARY"):
             return
         _require_executable(
             runner_binary_path(self.workspace, self.target_arch),
-            "bundled runner binary",
+            "runner artifact",
         )
 
     def _ensure_scx_artifacts(self) -> None:
@@ -382,24 +382,24 @@ class SuiteEntrypoint:
         for target in scx_targets(self.workspace, self.target_arch, packages):
             if target.name.endswith(".bpf.o"):
                 if not target.is_file():
-                    _die(f"bundled scx object is missing: {target}")
+                    _die(f"scx artifact object is missing: {target}")
                 continue
-            _require_executable(target, "bundled scx binary")
+            _require_executable(target, "scx artifact")
 
-    def _ensure_katran_bundle(self) -> None:
+    def _ensure_katran_artifacts(self) -> None:
         if "katran" not in self._csv_contract("RUN_NATIVE_REPOS_CSV"):
             return
         katran_targets = native_repo_targets(self.workspace, self.target_arch, ["katran"])
         for target in katran_targets:
             if target.name == "katran_server_grpc":
-                _require_executable(target, "bundled Katran server")
+                _require_executable(target, "Katran server artifact")
                 continue
             if not target.is_file():
-                _die(f"bundled Katran artifact is missing: {target}")
+                _die(f"Katran artifact is missing: {target}")
         katran_root = self._repo_build_root() / "katran"
         katran_lib_root = katran_root / "lib"
         if not katran_lib_root.is_dir():
-            _die(f"bundled Katran runtime library directory is missing: {katran_lib_root}")
+            _die(f"Katran runtime library artifact directory is missing: {katran_lib_root}")
 
     def _ensure_bpf_stats_enabled(self) -> None:
         if not self._bool_contract("RUN_NEEDS_DAEMON_BINARY"):
@@ -613,7 +613,7 @@ class SuiteEntrypoint:
     def _run_corpus_suite(self, env: dict[str, str]) -> None:
         self._ensure_scx_artifacts()
         runtime_env, _ = self._env_with_cross_runtime_ld(env)
-        self._ensure_katran_bundle()
+        self._ensure_katran_artifacts()
         output_json = self.workspace / "corpus" / "results" / f"{self.target_name}_corpus.json"
         output_md = self.workspace / "corpus" / "results" / f"{self.target_name}_corpus.md"
         command = [
@@ -655,13 +655,13 @@ class SuiteEntrypoint:
         cases = self._required_contract("RUN_E2E_CASES")
         if cases == "all":
             all_env = env.copy()
-            self._ensure_katran_bundle()
+            self._ensure_katran_artifacts()
             self._run_e2e_case("all", all_env)
             return
         for case_name in [token for token in cases.split(",") if token]:
             case_env = env.copy()
             if case_name == "katran":
-                self._ensure_katran_bundle()
+                self._ensure_katran_artifacts()
             self._run_e2e_case(case_name, case_env)
 
     def run(self) -> None:

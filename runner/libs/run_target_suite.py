@@ -137,8 +137,8 @@ def _write_target_manifest(target_name: str, manifest_path: Path) -> None:
 def _cleanup_failed_aws_prep(manifest_path: Path) -> None:
     try:
         aws_executor.cleanup_failed_run_for_manifest(manifest_path)
-    except Exception:
-        pass
+    except Exception as exc:
+        print(f"[run-target-suite][WARN] failed to cleanup AWS prep state: {exc}", file=sys.stderr)
 
 
 def _run_token(target_name: str, suite_name: str) -> str:
@@ -163,16 +163,9 @@ def _run_action(target_name: str, suite_name: str) -> None:
         contract = parse_manifest(manifest_path)
         executor = str(contract.get("RUN_EXECUTOR", ""))
         if executor == "aws-ssh":
-            prep_cleanup_armed = True
-            _run_checked(
-                _python_module_command(
-                    "runner.libs.aws_remote_prep",
-                    str(manifest_path),
-                ),
-            )
             if os.environ.get("RUN_SKIP_LOCAL_PREP", "").strip() != "1":
                 _run_local_prep(manifest_path)
-            prep_cleanup_armed = False
+            prep_cleanup_armed = True
             _run_checked(
                 _python_module_command(
                     "runner.libs.aws_executor",
@@ -195,7 +188,7 @@ def _run_action(target_name: str, suite_name: str) -> None:
             return
         _die(f"unsupported executor: {executor}")
     finally:
-        if prep_cleanup_armed:
+        if prep_cleanup_armed and not success:
             _cleanup_failed_aws_prep(manifest_path)
         if success:
             shutil.rmtree(control_dir, ignore_errors=True)

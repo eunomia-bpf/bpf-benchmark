@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import shlex
 import subprocess
+import time
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
@@ -13,14 +14,6 @@ from runner.libs.manifest_file import manifest_scalar, parse_manifest, required_
 from runner.libs.state_file import read_state
 
 _die = partial(fail, "aws-common")
-
-
-def _require_scalar(contract: dict[str, str | list[str]], name: str) -> str:
-    return required_manifest_scalar(contract, name, die=_die)
-
-
-def _optional_scalar(contract: dict[str, str | list[str]], name: str, default: str = "") -> str:
-    return manifest_scalar(contract, name, default, die=_die)
 
 
 @dataclass(frozen=True)
@@ -44,8 +37,8 @@ class AwsExecutorContext:
 
 def _build_context(action: str, manifest_path: Path) -> AwsExecutorContext:
     contract = parse_manifest(manifest_path)
-    target_name = _require_scalar(contract, "RUN_TARGET_NAME")
-    run_token = _require_scalar(contract, "RUN_TOKEN")
+    target_name = required_manifest_scalar(contract, "RUN_TARGET_NAME", die=_die)
+    run_token = required_manifest_scalar(contract, "RUN_TOKEN", die=_die)
     target_root = ROOT_DIR / ".cache" / target_name
     run_state_dir = target_root / "run-state" / run_token
     return AwsExecutorContext(
@@ -53,13 +46,13 @@ def _build_context(action: str, manifest_path: Path) -> AwsExecutorContext:
         manifest_path=manifest_path,
         contract=contract,
         target_name=target_name,
-        suite_name=_optional_scalar(contract, "RUN_SUITE_NAME"),
+        suite_name=manifest_scalar(contract, "RUN_SUITE_NAME", die=_die),
         run_token=run_token,
-        remote_user=_optional_scalar(contract, "RUN_REMOTE_USER"),
-        remote_stage_dir=_optional_scalar(contract, "RUN_REMOTE_STAGE_DIR"),
-        key_path=Path(_optional_scalar(contract, "RUN_AWS_KEY_PATH")).resolve(),
-        aws_region=_require_scalar(contract, "RUN_AWS_REGION"),
-        aws_profile=_require_scalar(contract, "RUN_AWS_PROFILE"),
+        remote_user=manifest_scalar(contract, "RUN_REMOTE_USER", die=_die),
+        remote_stage_dir=manifest_scalar(contract, "RUN_REMOTE_STAGE_DIR", die=_die),
+        key_path=Path(manifest_scalar(contract, "RUN_AWS_KEY_PATH", die=_die)).resolve(),
+        aws_region=required_manifest_scalar(contract, "RUN_AWS_REGION", die=_die),
+        aws_profile=required_manifest_scalar(contract, "RUN_AWS_PROFILE", die=_die),
         target_root=target_root,
         run_state_dir=run_state_dir,
         state_file=run_state_dir / "instance.json",
@@ -288,8 +281,6 @@ def _scp_from(ctx: AwsExecutorContext, ip: str, src: str, dest: Path, *, recursi
 
 
 def _wait_for_ssh(ctx: AwsExecutorContext, ip: str) -> None:
-    import time
-
     for _ in range(60):
         completed = subprocess.run(
             ["ssh", *_ssh_base_args(ctx, ip), f"{ctx.remote_user}@{ip}", "true"],

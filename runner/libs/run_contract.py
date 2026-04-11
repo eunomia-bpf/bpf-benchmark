@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 import os
 import shlex
 import subprocess
@@ -34,22 +35,30 @@ CORPUS_WORKLOAD_KIND_COMMANDS = {
     "tcp_retransmit": ("tc",),
 }
 
-CORPUS_RUNNER_EXTRA_COMMANDS = {
-    "bcc": ("fio",),
-    "bpftrace": ("bpftrace",),
-    "tetragon": ("fio",),
-}
-
-E2E_CASE_REMOTE_COMMANDS = {
-    "bcc": ("ip", "taskset", "setpriv", "curl", "stress-ng", "fio", "dd", "hackbench", "wrk"),
-    "bpftrace": ("ip", "taskset", "setpriv", "stress-ng", "fio", "dd", "bpftrace", "tc", "hackbench", "wrk"),
-    "katran": ("ip", "taskset", "wrk"),
-    "scx": ("ip", "taskset", "stress-ng", "hackbench", "sysbench"),
-    "tetragon": ("ip", "taskset", "setpriv", "curl", "tar", "stress-ng", "fio"),
-    "tracee": ("ip", "taskset", "setpriv", "curl", "wrk"),
-}
-
 _die = partial(fail, "run-contract")
+
+_RUNNER_CLASS_PATHS: dict[str, str] = {
+    "bcc": "runner.libs.app_runners.bcc.BCCRunner",
+    "bpftrace": "runner.libs.app_runners.bpftrace.BpftraceRunner",
+    "katran": "runner.libs.app_runners.katran.KatranRunner",
+    "scx": "runner.libs.app_runners.scx.ScxRunner",
+    "tetragon": "runner.libs.app_runners.tetragon.TetragonRunner",
+    "tracee": "runner.libs.app_runners.tracee.TraceeRunner",
+}
+
+
+def _runner_remote_commands(runner_name: str) -> tuple[str, ...]:
+    name = str(runner_name).strip()
+    dotted = _RUNNER_CLASS_PATHS.get(name)
+    if dotted is None:
+        _die(f"unsupported app runner in suite: {runner_name!r}")
+    module_path, class_name = dotted.rsplit(".", 1)
+    try:
+        module = importlib.import_module(module_path)
+        cls = getattr(module, class_name)
+        return tuple(cls.required_remote_commands)
+    except (AttributeError, ImportError) as exc:
+        _die(f"failed to resolve remote command contract for runner {name!r}: {exc}")
 
 
 def _load_assignment_file(path: Path) -> dict[str, str]:
@@ -157,7 +166,7 @@ def _corpus_workload_requirements_for_selection(app_suite: object) -> str:
     for app in getattr(app_suite, "apps", ()):
         runner = str(getattr(app, "runner", "") or "").strip()
         workload_kind = str(app.workload_for("corpus") or "").strip()
-        remote_commands.update(CORPUS_RUNNER_EXTRA_COMMANDS.get(runner, ()))
+        remote_commands.update(_runner_remote_commands(runner))
         remote_commands.update(CORPUS_WORKLOAD_KIND_COMMANDS.get(workload_kind, ()))
     return _ordered_csv_from_tokens(remote_commands, order=REMOTE_COMMAND_ORDER)
 
@@ -204,9 +213,9 @@ def _apply_e2e_case_selection(
     run_scx_packages = ""
     run_needs_sched_ext = "0"
     remote_commands: set[str] = set()
-    for case_name, commands in E2E_CASE_REMOTE_COMMANDS.items():
+    for case_name in _RUNNER_CLASS_PATHS:
         if include_all or case_name in selected_cases:
-            remote_commands.update(commands)
+            remote_commands.update(_runner_remote_commands(case_name))
     if include_all or "scx" in selected_cases:
         run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")
         run_needs_sched_ext = "1"

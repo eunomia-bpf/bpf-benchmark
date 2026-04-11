@@ -500,7 +500,7 @@ $(ACTIVE_TETRAGON_REQUIRED) &: $(TETRAGON_SOURCE_FILES) $(BUILD_RULE_FILES) $(AC
 	if [ -L "$$repo_root/bpf/objs" ] || [ ! -e "$$repo_root/bpf/objs" ]; then \
 		ln -sfn "$$bpf_output_root" "$$repo_root/bpf/objs"; \
 	else \
-		echo "legacy tetragon bpf/objs directory exists: $$repo_root/bpf/objs; clean it explicitly once" >&2; \
+		echo "unexpected tetragon bpf/objs directory exists: $$repo_root/bpf/objs" >&2; \
 		exit 1; \
 	fi; \
 	container_platform="$(ACTIVE_CONTAINER_PLATFORM)"; \

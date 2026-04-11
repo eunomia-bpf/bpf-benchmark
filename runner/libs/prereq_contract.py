@@ -57,7 +57,7 @@ def required_commands(*, contract: Mapping[str, str | list[str]] | None = None) 
             _contract_scalar(contract, "RUN_BPFTOOL_BIN"),
             active_python_bin(contract),
             *env_csv("RUN_REMOTE_COMMANDS_CSV", contract=contract),
-            *bundled_commands(contract=contract),
+            *workload_tool_commands(contract=contract),
         )
     for token in tokens:
         if token and token not in commands:
@@ -65,7 +65,7 @@ def required_commands(*, contract: Mapping[str, str | list[str]] | None = None) 
     return commands
 
 
-def bundled_commands(*, contract: Mapping[str, str | list[str]] | None = None) -> list[str]:
+def workload_tool_commands(*, contract: Mapping[str, str | list[str]] | None = None) -> list[str]:
     if runtime_container_enabled(contract) and not inside_runtime_container():
         return []
     if _contract_scalar(contract, "RUN_NEEDS_WORKLOAD_TOOLS") != "1":
