@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import ctypes
-import errno
 import os
 import socket
 import struct
 import subprocess
+import tempfile
 import time
 from pathlib import Path
 from typing import Any, Mapping
@@ -310,131 +309,6 @@ def set_link_mac(namespace: str | None, iface: str, mac: str) -> None:
     ns_ip_command(namespace, ["link", "set", "dev", iface, "address", mac], timeout=15)
 
 
-class BpfTestRunOpts(ctypes.Structure):
-    _fields_ = [
-        ("sz", ctypes.c_size_t),
-        ("data_in", ctypes.c_void_p),
-        ("data_out", ctypes.c_void_p),
-        ("data_size_in", ctypes.c_uint32),
-        ("data_size_out", ctypes.c_uint32),
-        ("ctx_in", ctypes.c_void_p),
-        ("ctx_out", ctypes.c_void_p),
-        ("ctx_size_in", ctypes.c_uint32),
-        ("ctx_size_out", ctypes.c_uint32),
-        ("retval", ctypes.c_uint32),
-        ("repeat", ctypes.c_int),
-        ("duration", ctypes.c_uint32),
-        ("flags", ctypes.c_uint32),
-        ("cpu", ctypes.c_uint32),
-        ("batch_size", ctypes.c_uint32),
-    ]
-
-
-class LibbpfMapApi:
-    def __init__(self) -> None:
-        candidates = ["libbpf.so.1", "libbpf.so"]
-        errors: list[str] = []
-        self.lib = None
-        for candidate in candidates:
-            if candidate.startswith("/"):
-                path = Path(candidate)
-                if not path.is_file():
-                    errors.append(f"{candidate}: missing file")
-                    continue
-            try:
-                self.lib = ctypes.CDLL(candidate, use_errno=True)
-                break
-            except OSError as exc:
-                errors.append(f"{candidate}: {exc}")
-        if self.lib is None:
-            rendered = "; ".join(errors) if errors else "no candidates"
-            raise RuntimeError(f"failed to load libbpf for Katran map access: {rendered}")
-        self.lib.bpf_obj_get.argtypes = [ctypes.c_char_p]
-        self.lib.bpf_obj_get.restype = ctypes.c_int
-        self.lib.bpf_map_get_fd_by_id.argtypes = [ctypes.c_uint32]
-        self.lib.bpf_map_get_fd_by_id.restype = ctypes.c_int
-        self.lib.bpf_map_get_next_id.argtypes = [ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32)]
-        self.lib.bpf_map_get_next_id.restype = ctypes.c_int
-        self.lib.bpf_prog_get_fd_by_id.argtypes = [ctypes.c_uint32]
-        self.lib.bpf_prog_get_fd_by_id.restype = ctypes.c_int
-        self.lib.bpf_map_update_elem.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint64]
-        self.lib.bpf_map_update_elem.restype = ctypes.c_int
-        self.lib.bpf_prog_test_run_opts.argtypes = [ctypes.c_int, ctypes.POINTER(BpfTestRunOpts)]
-        self.lib.bpf_prog_test_run_opts.restype = ctypes.c_int
-
-    def obj_get(self, path: Path) -> int:
-        fd = int(self.lib.bpf_obj_get(os.fsencode(str(path))))
-        if fd >= 0:
-            return fd
-        err = ctypes.get_errno()
-        raise RuntimeError(f"bpf_obj_get failed for {path}: {os.strerror(err)} (errno={err})")
-
-    def map_get_fd_by_id(self, map_id: int) -> int:
-        fd = int(self.lib.bpf_map_get_fd_by_id(int(map_id)))
-        if fd >= 0:
-            return fd
-        err = ctypes.get_errno()
-        raise RuntimeError(f"bpf_map_get_fd_by_id failed for map_id={map_id}: {os.strerror(err)} (errno={err})")
-
-    def prog_get_fd_by_id(self, prog_id: int) -> int:
-        fd = int(self.lib.bpf_prog_get_fd_by_id(int(prog_id)))
-        if fd >= 0:
-            return fd
-        err = ctypes.get_errno()
-        raise RuntimeError(f"bpf_prog_get_fd_by_id failed for prog_id={prog_id}: {os.strerror(err)} (errno={err})")
-
-    def list_map_ids(self) -> list[int]:
-        current_id = 0
-        map_ids: list[int] = []
-        while True:
-            next_id = ctypes.c_uint32(0)
-            rc = int(self.lib.bpf_map_get_next_id(int(current_id), ctypes.byref(next_id)))
-            if rc == 0:
-                current_id = int(next_id.value)
-                map_ids.append(current_id)
-                continue
-            err = ctypes.get_errno()
-            if err == errno.ENOENT:
-                return map_ids
-            raise RuntimeError(
-                f"bpf_map_get_next_id failed after map_id={current_id}: {os.strerror(err)} (errno={err})"
-            )
-
-    def update(self, fd: int, key: bytes, value: bytes, flags: int = 0) -> None:
-        key_buf = (ctypes.c_ubyte * len(key)).from_buffer_copy(key)
-        value_buf = (ctypes.c_ubyte * len(value)).from_buffer_copy(value)
-        rc = int(self.lib.bpf_map_update_elem(int(fd), ctypes.byref(key_buf), ctypes.byref(value_buf), int(flags)))
-        if rc == 0:
-            return
-        err = ctypes.get_errno()
-        raise RuntimeError(f"bpf_map_update_elem failed: {os.strerror(err)} (errno={err})")
-
-    def prog_test_run(self, prog_fd: int, packet: bytes, *, repeat: int = 1, data_out_size: int | None = None) -> dict[str, object]:
-        in_buf = (ctypes.c_ubyte * len(packet)).from_buffer_copy(packet)
-        out_size = max(1, int(data_out_size or len(packet)))
-        out_buf = (ctypes.c_ubyte * out_size)()
-        opts = BpfTestRunOpts()
-        opts.sz = ctypes.sizeof(BpfTestRunOpts)
-        opts.data_in = ctypes.cast(in_buf, ctypes.c_void_p)
-        opts.data_size_in = len(packet)
-        opts.data_out = ctypes.cast(out_buf, ctypes.c_void_p)
-        opts.data_size_out = out_size
-        opts.repeat = max(1, int(repeat))
-        rc = int(self.lib.bpf_prog_test_run_opts(int(prog_fd), ctypes.byref(opts)))
-        if rc != 0:
-            err = ctypes.get_errno()
-            raise RuntimeError(f"bpf_prog_test_run_opts failed: {os.strerror(err)} (errno={err})")
-        output_size = max(0, int(opts.data_size_out))
-        return {
-            "retval": int(opts.retval),
-            "duration_ns": int(opts.duration),
-            "repeat": int(opts.repeat),
-            "data_size_in": len(packet),
-            "data_size_out": output_size,
-            "data_out_preview_hex": bytes(out_buf[: min(output_size, 32)]).hex(),
-        }
-
-
 def pack_u32(value: int) -> bytes:
     return struct.pack("=I", int(value))
 
@@ -461,6 +335,79 @@ def pack_real_definition(address: str, flags: int = 0) -> bytes:
 
 def xdp_action_name(retval: int) -> str:
     return {0: "XDP_ABORTED", 1: "XDP_DROP", XDP_PASS: "XDP_PASS", XDP_TX: "XDP_TX", 4: "XDP_REDIRECT"}.get(int(retval), f"UNKNOWN({int(retval)})")
+
+
+def _bytes_to_hex_args(data: bytes) -> list[str]:
+    """Convert raw bytes to space-separated hex octets for bpftool key/value args."""
+    return [f"{b:02x}" for b in data]
+
+
+def _bpftool_map_update_args(map_id: int, key: bytes, value: bytes) -> list[str]:
+    return [
+        "map", "update", "id", str(map_id),
+        "key", "hex", *_bytes_to_hex_args(key),
+        "value", "hex", *_bytes_to_hex_args(value),
+    ]
+
+
+def _bpftool_map_update_batch(updates: list[tuple[int, bytes, bytes]]) -> None:
+    if not updates:
+        return
+    with tempfile.NamedTemporaryFile("w", prefix="katran_maps_", suffix=".bpftool", delete=False) as batch:
+        for map_id, key, value in updates:
+            batch.write(" ".join(_bpftool_map_update_args(map_id, key, value)))
+            batch.write("\n")
+        batch_path = batch.name
+    try:
+        run_command(
+            [resolve_bpftool_binary(), "batch", "file", batch_path],
+            timeout=max(60, (len(updates) // 500) + 30),
+        )
+    finally:
+        try:
+            os.unlink(batch_path)
+        except FileNotFoundError:
+            pass
+
+
+def _bpftool_prog_test_run(prog_id: int, packet: bytes, *, repeat: int = 1) -> dict[str, object]:
+    """Run a BPF program via bpftool prog run, returning retval and timing info."""
+    with tempfile.NamedTemporaryFile(prefix="katran_in_", suffix=".bin", delete=False) as fin:
+        fin.write(packet)
+        in_path = fin.name
+    out_path = in_path.replace("_in_", "_out_")
+    try:
+        result = run_json_command(
+            [
+                resolve_bpftool_binary(), "-j", "prog", "run", "id", str(prog_id),
+                "data_in", in_path,
+                "data_out", out_path,
+                "repeat", str(max(1, int(repeat))),
+            ],
+            timeout=max(30, repeat // 100 + 30),
+        )
+        if not isinstance(result, dict):
+            raise RuntimeError(f"bpftool prog run returned unexpected payload: {result!r}")
+        retval = int(result.get("retval", -1))
+        duration_ns = int(result.get("duration", 0))
+        try:
+            out_data = Path(out_path).read_bytes()
+        except FileNotFoundError:
+            out_data = b""
+        return {
+            "retval": retval,
+            "duration_ns": duration_ns,
+            "repeat": max(1, int(repeat)),
+            "data_size_in": len(packet),
+            "data_size_out": len(out_data),
+            "data_out_preview_hex": out_data[:32].hex(),
+        }
+    finally:
+        for path in (in_path, out_path):
+            try:
+                os.unlink(path)
+            except FileNotFoundError:
+                pass
 
 
 class KatranDsrTopology:
@@ -702,7 +649,7 @@ class KatranServerSession:
             "-logtostderr",
             "-alsologtostderr",
         ]
-        before_map_ids = set(LibbpfMapApi().list_map_ids())
+        before_map_ids = {int(r.get("id", -1)) for r in _map_show_records() if "id" in r}
         session = ManagedProcessSession(
             command,
             load_timeout_s=self.load_timeout_s,
@@ -762,14 +709,11 @@ class KatranServerSession:
     def _discover_maps(self, before_map_ids: set[int]) -> dict[str, dict[str, object]]:
         deadline = time.monotonic() + float(self.load_timeout_s)
         last_names: list[str] = []
-        api = LibbpfMapApi()
         while time.monotonic() < deadline:
-            current_ids = set(api.list_map_ids())
-            new_ids = current_ids - before_map_ids
             new_records = [
                 record
                 for record in _map_show_records()
-                if int(record.get("id", -1)) in new_ids
+                if int(record.get("id", -1)) not in before_map_ids
             ]
             maps_by_name = {
                 str(record.get("name") or ""): dict(record)
@@ -821,22 +765,22 @@ class KatranServerSession:
 
 
 def configure_katran_maps(session: KatranServerSession) -> dict[str, object]:
-    api = LibbpfMapApi()
-    vip_fd = api.map_get_fd_by_id(session.map_id("vip_map"))
-    reals_fd = api.map_get_fd_by_id(session.map_id("reals"))
-    rings_fd = api.map_get_fd_by_id(session.map_id("ch_rings"))
-    ctl_fd = api.map_get_fd_by_id(session.map_id("ctl_array"))
-    try:
-        api.update(ctl_fd, pack_u32(0), pack_ctl_mac(ROUTER_LB_MAC))
-        api.update(vip_fd, pack_vip_definition(VIP_IP, VIP_PORT, TCP_PROTO), pack_vip_meta(F_LRU_BYPASS, VIP_NUM))
-        api.update(reals_fd, pack_u32(REAL_NUM), pack_real_definition(REAL_IP))
-        for ring_pos in range(CH_RING_SIZE):
-            api.update(rings_fd, pack_u32((VIP_NUM * CH_RING_SIZE) + ring_pos), pack_u32(REAL_NUM))
-    finally:
-        os.close(vip_fd)
-        os.close(reals_fd)
-        os.close(rings_fd)
-        os.close(ctl_fd)
+    vip_id = session.map_id("vip_map")
+    reals_id = session.map_id("reals")
+    rings_id = session.map_id("ch_rings")
+    ctl_id = session.map_id("ctl_array")
+    real_num_bytes = pack_u32(REAL_NUM)
+    _bpftool_map_update_batch(
+        [
+            (ctl_id, pack_u32(0), pack_ctl_mac(ROUTER_LB_MAC)),
+            (vip_id, pack_vip_definition(VIP_IP, VIP_PORT, TCP_PROTO), pack_vip_meta(F_LRU_BYPASS, VIP_NUM)),
+            (reals_id, real_num_bytes, pack_real_definition(REAL_IP)),
+            *[
+                (rings_id, pack_u32((VIP_NUM * CH_RING_SIZE) + ring_pos), real_num_bytes)
+                for ring_pos in range(CH_RING_SIZE)
+            ],
+        ]
+    )
     return {
         "map_ids": {name: session.map_id(name) for name in KATRAN_REQUIRED_MAP_NAMES},
         "vip": {"address": VIP_IP, "port": VIP_PORT, "proto": TCP_PROTO, "vip_num": VIP_NUM, "flags": F_LRU_BYPASS},
@@ -854,13 +798,8 @@ def run_katran_prog_test_run(
 ) -> dict[str, object]:
     if not DEFAULT_KATRAN_TEST_PACKET.exists():
         raise RuntimeError(f"Katran test packet is missing: {DEFAULT_KATRAN_TEST_PACKET}")
-    api = LibbpfMapApi()
     packet = DEFAULT_KATRAN_TEST_PACKET.read_bytes()
-    prog_fd = api.prog_get_fd_by_id(session.prog_id)
-    try:
-        result = api.prog_test_run(prog_fd, packet, repeat=max(1, int(repeat)), data_out_size=max(256, len(packet) + 64))
-    finally:
-        os.close(prog_fd)
+    result = _bpftool_prog_test_run(session.prog_id, packet, repeat=max(1, int(repeat)))
     result.update(
         {
             "packet_path": str(DEFAULT_KATRAN_TEST_PACKET),

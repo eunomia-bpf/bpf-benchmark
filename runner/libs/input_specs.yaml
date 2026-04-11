@@ -1,0 +1,214 @@
+# Input generator specifications.
+# Each entry drives a parameterised generator in input_generators.py.
+# Keys:
+#   kind          – which generic builder to use (see input_generators.py)
+#   count / seed / salt / stride / ... – parameters forwarded to the builder
+
+# ---------------------------------------------------------------------------
+# kind: dep_chain
+#   header: pack("<II", count, seed)
+#   body:   N u64s via LCG: state ^ ((index+1)*LCG_SALT1) ^ seed
+# ---------------------------------------------------------------------------
+dep_chain_short:
+  kind: dep_chain
+  count: 64
+  seed:  0x13572468
+  salt:  0xDEADBEEFCAFE0123
+
+dep_chain_long:
+  kind: dep_chain
+  count: 256
+  seed:  0x24681357
+  salt:  0x0123456789ABCDEF
+
+# ---------------------------------------------------------------------------
+# kind: multi_acc
+#   header: pack("<II", count, seed)
+#   body:   N u64s via LCG: state ^ ((index+5)*0xD1342543DE82EF95)
+# ---------------------------------------------------------------------------
+multi_acc_4:
+  kind: multi_acc
+  count: 128
+  seed:  0x31415926
+  salt:  0x1111222233334444
+
+multi_acc_8:
+  kind: multi_acc
+  count: 128
+  seed:  0x27182818
+  salt:  0x5555666677778888
+
+# ---------------------------------------------------------------------------
+# kind: stride_load
+#   header: pack("<II", count, stride)
+#   body:   N u64s via LCG: state ^ ((index+7)*0xA0761D6478BD642F)
+# ---------------------------------------------------------------------------
+stride_load_4:
+  kind: stride_load
+  count: 128
+  stride: 4
+  salt:  0xAAAABBBBCCCCDDDD
+
+stride_load_16:
+  kind: stride_load
+  count: 128
+  stride: 16
+  salt:  0x13579BDF2468ACE0
+
+# ---------------------------------------------------------------------------
+# kind: code_clone
+#   header: pack("<II", count, seed)
+#   body:   N u64s via LCG: state ^ ((index+13)*0x94D049BB133111EB) ^ (seed<<(index&3))
+# ---------------------------------------------------------------------------
+code_clone_2:
+  kind: code_clone
+  count: 128
+  seed:  0x10293847
+  salt:  0xCAFEBABE10293847
+
+code_clone_8:
+  kind: code_clone
+  count: 128
+  seed:  0x56473829
+  salt:  0x0BADF00D56473829
+
+# ---------------------------------------------------------------------------
+# kind: large_mixed
+#   header: pack("<II", count, seed)
+#   body:   N u64s via LCG: state ^ ((index+1)*0xD1342543DE82EF95) ^ seed
+# ---------------------------------------------------------------------------
+large_mixed_500:
+  kind: large_mixed
+  count: 32
+  seed:  0x13572468
+  salt:  0x1111333355557777
+
+large_mixed_1000:
+  kind: large_mixed
+  count: 32
+  seed:  0x24681357
+  salt:  0x8888666644442222
+
+# ---------------------------------------------------------------------------
+# kind: load_isolation
+#   header: pack("<II", count, 0)
+#   body:   N u64s: pure LCG state (salt used as initial state)
+# ---------------------------------------------------------------------------
+load_byte_recompose:
+  kind: load_isolation
+  count: 128
+  seed:  0xBEEFCAFE12345678
+
+load_native_u64:
+  kind: load_isolation
+  count: 128
+  seed:  0xBEEFCAFE12345678
+
+# ---------------------------------------------------------------------------
+# kind: fixed_loop
+#   writes pack("<IIQ", rounds, mix, seed) — no body loop
+# ---------------------------------------------------------------------------
+fibonacci_iter:
+  kind: fixed_loop
+  rounds: 1024
+  mix:    0x13579BDF
+  seed:   0x1122334455667788
+
+fibonacci_iter_packet:
+  kind: fixed_loop
+  rounds: 1024
+  mix:    0x13579BDF
+  seed:   0x1122334455667788
+
+fixed_loop_small:
+  kind: fixed_loop
+  rounds: 64
+  mix:    0x89ABCDEF
+  seed:   0x0F1E2D3C4B5A6978
+
+fixed_loop_large:
+  kind: fixed_loop
+  rounds: 1024
+  mix:    0x10203040
+  seed:   0x8877665544332211
+
+# ---------------------------------------------------------------------------
+# kind: lcg_words_q
+#   Generates N u64 words using LCG and writes them as raw pack("<QQ...Q")
+#   No header.  Each word: state = lcg(state ^ (index+1)*salt1); word = state ^ (index+1)*salt2
+# ---------------------------------------------------------------------------
+imm64_storm:
+  kind: lcg_words_q
+  word_count: 4
+  initial_state: 0x0123456789ABCDEF
+  salt1: 0x9E3779B97F4A7C15
+  salt2: 0xD1342543DE82EF95
+
+rotate_dense:
+  kind: lcg_words_q
+  word_count: 8
+  metadata_count_key: seeds
+  initial_state: 0x0DDC0FFEEE112244
+  salt1: 0x94D049BB133111EB
+  # index offset in salt1 is +1, in salt2 offset is +7
+  index_offset_salt2: 7
+  salt2: 0xD1342543DE82EF95
+
+mega_basic_block_2048:
+  kind: lcg_words_q
+  word_count: 8
+  initial_state: 0x13572468ACE0BDF1
+  salt1: 0x9E3779B97F4A7C15
+  salt2: 0xA0761D6478BD642F
+
+rotate64_hash:
+  kind: lcg_words_q
+  word_count: 8
+  initial_state: 0x123456789ABCDEF0
+  salt1: 0x9E3779B97F4A7C15
+  salt2: 0xD1342543DE82EF95
+
+# ---------------------------------------------------------------------------
+# kind: addr_calc_stride
+#   No header.  N u64 words: state = lcg(state ^ (index+1)*salt1); word = state ^ (index+11)*salt2
+# ---------------------------------------------------------------------------
+addr_calc_stride:
+  kind: addr_calc_stride
+  value_count: 256
+  initial_state: 0x0123456789ABCDEF
+  salt1: 0xA0761D6478BD642F
+  salt2: 0x9E3779B97F4A7C15
+
+# ---------------------------------------------------------------------------
+# kind: endian_swap_dense
+#   No header.  groups*lanes u32 words: state = lcg(state ^ (index+1)*salt); word = (state>>16)^((index+1)*0x9E3779B9) & 0xFFFFFFFF
+# ---------------------------------------------------------------------------
+endian_swap_dense:
+  kind: endian_swap_dense
+  groups: 32
+  lanes:  8
+  initial_state: 0x55AA33CC77EE11FF
+
+# ---------------------------------------------------------------------------
+# kind: branch_flip_dense
+#   No header.  groups*lanes u64 words: state = lcg(state ^ (index+1)*salt1); word = state ^ (index+1)*salt2
+# ---------------------------------------------------------------------------
+branch_flip_dense:
+  kind: branch_flip_dense
+  groups: 32
+  lanes:  8
+  initial_state: 0x4242A5A5C3C35A5A
+  salt1: 0xBF58476D1CE4E5B9
+  salt2: 0x369DEA0F31A53F85
+
+# ---------------------------------------------------------------------------
+# kind: extract_dense
+#   No header.  groups*lanes u64 words: state = lcg(state ^ (index+1)*salt1); word = state ^ (index+3)*salt2
+# ---------------------------------------------------------------------------
+extract_dense:
+  kind: extract_dense
+  groups: 32
+  lanes:  8
+  initial_state: 0x13579BDF2468ACE0
+  salt1: 0x8EBC6AF09C88C6E3
+  salt2: 0x589965CC75374CC3

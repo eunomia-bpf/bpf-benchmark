@@ -32,7 +32,37 @@ _PASS_TO_SITE_FIELD = {
     "skb_load_bytes_spec": "skb_load_bytes_spec_sites",
     "wide_mem": "wide_sites",
 }
+# Fields summed to produce total_sites (superset of _PASS_TO_SITE_FIELD values)
+_TOTAL_SITE_FIELDS = (
+    "map_inline_sites",
+    "const_prop_sites",
+    "dce_sites",
+    "bounds_check_merge_sites",
+    "bulk_memory_sites",
+    "cmov_sites",
+    "wide_sites",
+    "rotate_sites",
+    "lea_sites",
+    "extract_sites",
+    "endian_sites",
+    "skb_load_bytes_spec_sites",
+    "branch_flip_sites",
+    "other_sites",
+)
 _DEFAULT_REJIT_ENABLED_PASSES = ("map_inline", "const_prop", "dce")
+
+# Match-key → context field aliases used by _policy_rule_matches
+_POLICY_MATCH_TEXT_FIELDS: dict[str, tuple[str, ...]] = {
+    "repo": ("repo",),
+    "object": ("object", "object_basename"),
+    "object_relpath": ("object_relpath",),
+    "program": ("program", "program_name"),
+    "section": ("section", "section_name"),
+    "prog_type": ("prog_type", "prog_type_name"),
+    "family": ("family",),
+    "category": ("category",),
+    "level": ("level",),
+}
 _BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
 _BENCHMARK_CONFIG_PATH = ROOT_DIR / "corpus" / "config" / "benchmark_config.yaml"
 _DEFAULT_APPLY_TIMEOUT_SECONDS = 120.0
@@ -42,10 +72,9 @@ _DEFAULT_PROFILE_INTERVAL_MS = 1000
 
 def _daemon_runtime_root() -> Path:
     explicit = os.environ.get("BPFREJIT_DAEMON_TMPDIR", "").strip()
-    candidates: list[Path] = []
-    if explicit:
-        candidates.append(Path(explicit).expanduser())
-    candidates.extend((Path("/var/tmp/bpfrejit-daemon"), Path("/tmp/bpfrejit-daemon")))
+    candidates = ([Path(explicit).expanduser()] if explicit else []) + [
+        Path("/var/tmp/bpfrejit-daemon"), Path("/tmp/bpfrejit-daemon")
+    ]
     for candidate in candidates:
         try:
             candidate.mkdir(parents=True, exist_ok=True)
@@ -67,77 +96,59 @@ def _mapping_dict(value: Any, *, field_name: str) -> dict[str, Any]:
 def _deep_merge(base: Mapping[str, Any], override: Mapping[str, Any]) -> dict[str, Any]:
     merged = dict(base)
     for key, value in override.items():
-        if isinstance(value, Mapping) and isinstance(merged.get(key), Mapping):
-            merged[key] = _deep_merge(
-                _mapping_dict(merged[key], field_name=str(key)),
-                value,
-            )
-            continue
-        merged[key] = value
+        existing = merged.get(key)
+        if isinstance(value, Mapping) and isinstance(existing, Mapping):
+            merged[key] = _deep_merge(existing, value)
+        else:
+            merged[key] = value
     return merged
 
 
-def _benchmark_config_skeleton() -> dict[str, Any]:
-    return {
-        "defaults": {
-            "iterations": 3,
-            "warmups": 1,
-            "repeat": _DEFAULT_BENCHMARK_REPEAT,
-        },
-        "passes": {},
-        "policy": {
-            "rules": [],
-        },
-        "profiles": {},
-    }
+_CONFIG_SKELETON: dict[str, Any] = {
+    "defaults": {
+        "iterations": 3,
+        "warmups": 1,
+        "repeat": _DEFAULT_BENCHMARK_REPEAT,
+    },
+    "passes": {},
+    "policy": {"rules": []},
+    "profiles": {},
+}
 
 
 @lru_cache(maxsize=1)
-def _load_benchmark_root_config() -> tuple[dict[str, Any], bool]:
-    root_config = _benchmark_config_skeleton()
+def _load_benchmark_root_config() -> dict[str, Any]:
     try:
         payload = yaml.safe_load(_BENCHMARK_CONFIG_PATH.read_text(encoding="utf-8"))
     except OSError as exc:
         raise SystemExit(f"benchmark config file not found: {_BENCHMARK_CONFIG_PATH}") from exc
     if payload is None:
-        return root_config, True
+        return dict(_CONFIG_SKELETON)
     if not isinstance(payload, Mapping):
         raise SystemExit(f"benchmark config must be a YAML mapping: {_BENCHMARK_CONFIG_PATH}")
-    return _deep_merge(root_config, payload), True
+    return _deep_merge(_CONFIG_SKELETON, payload)
 
 
 def load_benchmark_config(profile: str | None = None) -> dict[str, Any]:
-    root_config, config_loaded = _load_benchmark_root_config()
-    defaults = _mapping_dict(root_config.get("defaults"), field_name="defaults")
-    passes = _mapping_dict(root_config.get("passes"), field_name="passes")
-    policy = _mapping_dict(root_config.get("policy"), field_name="policy")
-    profiles = _mapping_dict(root_config.get("profiles"), field_name="profiles")
+    rc = _load_benchmark_root_config()
+    defaults = _mapping_dict(rc.get("defaults"), field_name="defaults")
+    passes = _mapping_dict(rc.get("passes"), field_name="passes")
+    policy = _mapping_dict(rc.get("policy"), field_name="policy")
+    profiles = _mapping_dict(rc.get("profiles"), field_name="profiles")
 
     profile_overrides: dict[str, Any] = {}
     if profile:
-        available = ", ".join(sorted(profiles))
-        raw_profile = profiles.get(profile)
-        if raw_profile is None:
-            message = f"unknown benchmark profile: {profile}"
-            if available:
-                message += f" (available: {available})"
-            raise SystemExit(message)
+        if (raw_profile := profiles.get(profile)) is None:
+            available = ", ".join(sorted(profiles))
+            raise SystemExit(f"unknown benchmark profile: {profile}" + (f" (available: {available})" if available else ""))
         profile_overrides = _mapping_dict(raw_profile, field_name=f"profiles.{profile}")
 
     effective = _deep_merge({**defaults, "passes": passes, "policy": policy}, profile_overrides)
     effective["passes"] = _mapping_dict(effective.get("passes"), field_name="passes")
     effective["policy"] = _mapping_dict(effective.get("policy"), field_name="policy")
-    effective["profile"] = profile
-    effective["config_path"] = _BENCHMARK_CONFIG_PATH if config_loaded else None
-    effective["config_loaded"] = config_loaded
-    effective["available_profiles"] = sorted(profiles)
+    effective.update(profile=profile, config_path=_BENCHMARK_CONFIG_PATH,
+                     config_loaded=True, available_profiles=sorted(profiles))
     return effective
-
-
-def _normalize_pass_list(raw: Any) -> list[str]:
-    if not isinstance(raw, list):
-        return []
-    return _ordered_unique_passes(str(value).strip() for value in raw if str(value).strip())
 
 
 def _ordered_unique_passes(raw: Sequence[str] | Sequence[object]) -> list[str]:
@@ -152,34 +163,29 @@ def _ordered_unique_passes(raw: Sequence[str] | Sequence[object]) -> list[str]:
     return ordered
 
 
-def collect_effective_enabled_passes(payload: object) -> list[str]:
-    ordered: list[str] = []
-    seen: set[str] = set()
+def _normalize_pass_list(raw: Any) -> list[str]:
+    return _ordered_unique_passes(raw) if isinstance(raw, list) else []
 
-    def add_pass(pass_name: object) -> None:
-        name = str(pass_name).strip()
-        if not name or name in seen:
-            return
-        seen.add(name)
-        ordered.append(name)
+
+def collect_effective_enabled_passes(payload: object) -> list[str]:
+    """Recursively collect all pass names from effective_enabled_passes_by_program fields."""
+    raw: list[object] = []
 
     def visit(node: object) -> None:
         if isinstance(node, Mapping):
-            effective_by_program = node.get("effective_enabled_passes_by_program")
-            if isinstance(effective_by_program, Mapping):
-                for raw_passes in effective_by_program.values():
-                    if isinstance(raw_passes, Sequence) and not isinstance(raw_passes, (str, bytes, bytearray)):
-                        for pass_name in raw_passes:
-                            add_pass(pass_name)
+            by_prog = node.get("effective_enabled_passes_by_program")
+            if isinstance(by_prog, Mapping):
+                for passes in by_prog.values():
+                    if isinstance(passes, Sequence) and not isinstance(passes, (str, bytes, bytearray)):
+                        raw.extend(passes)
             for value in node.values():
                 visit(value)
-            return
-        if isinstance(node, Sequence) and not isinstance(node, (str, bytes, bytearray)):
+        elif isinstance(node, Sequence) and not isinstance(node, (str, bytes, bytearray)):
             for item in node:
                 visit(item)
 
     visit(payload)
-    return ordered
+    return _ordered_unique_passes(raw)
 
 
 def _policy_pass_list(raw: Any, *, field_name: str) -> list[str] | None:
@@ -203,23 +209,17 @@ def _policy_match_values(raw: Any, *, field_name: str) -> list[str]:
 
 def _policy_context_text(context: Mapping[str, Any] | None, *field_names: str) -> str:
     payload = context or {}
-    for field_name in field_names:
-        text = str(payload.get(field_name) or "").strip()
-        if text:
-            return text
-    return ""
+    return next(
+        (text for fn in field_names if (text := str(payload.get(fn) or "").strip())),
+        "",
+    )
 
 
 def _site_count_for_pass(site_counts: Mapping[str, Any] | None, pass_name: str) -> int:
     if not site_counts:
         return 0
-    candidates = [pass_name]
     field_name = _PASS_TO_SITE_FIELD.get(pass_name)
-    if field_name:
-        candidates.append(field_name)
-    for key in candidates:
-        if key not in site_counts:
-            continue
+    for key in (k for k in (pass_name, field_name) if k and k in site_counts):
         try:
             return max(0, int(site_counts.get(key, 0) or 0))
         except (TypeError, ValueError):
@@ -234,18 +234,6 @@ def _policy_rule_matches(
     site_counts: Mapping[str, Any] | None,
     field_name: str,
 ) -> bool:
-    text_fields = {
-        "repo": ("repo",),
-        "object": ("object", "object_basename"),
-        "object_relpath": ("object_relpath",),
-        "program": ("program", "program_name"),
-        "section": ("section", "section_name"),
-        "prog_type": ("prog_type", "prog_type_name"),
-        "family": ("family",),
-        "category": ("category",),
-        "level": ("level",),
-    }
-
     for key, raw_value in match_config.items():
         current_field = f"{field_name}.{key}"
         if key == "has_sites":
@@ -253,7 +241,7 @@ def _policy_rule_matches(
             if any(_site_count_for_pass(site_counts, pass_name) <= 0 for pass_name in required_sites):
                 return False
             continue
-        aliases = text_fields.get(key)
+        aliases = _POLICY_MATCH_TEXT_FIELDS.get(key)
         if aliases is None:
             raise SystemExit(f"invalid benchmark config field: {current_field} is unsupported")
         expected_values = {value.lower() for value in _policy_match_values(raw_value, field_name=current_field)}
@@ -268,86 +256,62 @@ def _policy_rule_matches(
 def benchmark_config_enabled_passes(benchmark_config: Mapping[str, Any] | None) -> list[str]:
     policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
     policy_default = _mapping_dict(policy_config.get("default"), field_name="policy.default")
-    policy_default_passes = _policy_pass_list(
-        policy_default.get("passes"),
-        field_name="policy.default.passes",
-    )
+    policy_default_passes = _policy_pass_list(policy_default.get("passes"), field_name="policy.default.passes")
     if policy_default_passes is not None:
         return _ordered_unique_passes(policy_default_passes)
 
     passes_config = _mapping_dict((benchmark_config or {}).get("passes"), field_name="passes")
-
-    active_list = _normalize_pass_list(passes_config.get("active_list"))
-    if active_list:
-        return _ordered_unique_passes(active_list)
-
+    if active_list := _normalize_pass_list(passes_config.get("active_list")):
+        return active_list
     active_name = str(passes_config.get("active") or "").strip()
-    if active_name:
-        named_list = _normalize_pass_list(passes_config.get(active_name))
-        if named_list:
-            return _ordered_unique_passes(named_list)
+    if active_name and (named_list := _normalize_pass_list(passes_config.get(active_name))):
+        return named_list
+    if performance_list := _normalize_pass_list(passes_config.get("performance")):
+        return performance_list
+    return list(_DEFAULT_REJIT_ENABLED_PASSES)
 
-    performance_list = _normalize_pass_list(passes_config.get("performance"))
-    if performance_list:
-        return _ordered_unique_passes(performance_list)
 
-    return _ordered_unique_passes(_DEFAULT_REJIT_ENABLED_PASSES)
+def _policy_rules_list(policy_config: Mapping[str, Any]) -> list[Any]:
+    raw_rules = policy_config.get("rules")
+    if raw_rules is None:
+        return []
+    if not isinstance(raw_rules, list):
+        raise SystemExit("invalid benchmark config field: policy.rules must be a sequence")
+    return raw_rules
 
 
 def benchmark_policy_required_site_passes(
     benchmark_config: Mapping[str, Any] | None,
 ) -> list[str]:
     policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
-    raw_rules = policy_config.get("rules")
-    if raw_rules is None:
+    raw_rules = _policy_rules_list(policy_config)
+    if not raw_rules:
         return []
-    if not isinstance(raw_rules, list):
-        raise SystemExit("invalid benchmark config field: policy.rules must be a sequence")
 
-    required: list[str] = []
-    seen: set[str] = set()
+    all_passes: list[str] = []
     for index, raw_rule in enumerate(raw_rules, start=1):
         if not isinstance(raw_rule, Mapping):
             raise SystemExit(f"invalid benchmark config field: policy.rules[{index}] must be a mapping")
         match_config = _mapping_dict(raw_rule.get("match"), field_name=f"policy.rules[{index}].match")
-        for pass_name in _policy_pass_list(
-            match_config.get("has_sites"),
-            field_name=f"policy.rules[{index}].match.has_sites",
-        ) or []:
-            if pass_name in seen:
-                continue
-            seen.add(pass_name)
-            required.append(pass_name)
-    return required
+        all_passes.extend(
+            _policy_pass_list(match_config.get("has_sites"), field_name=f"policy.rules[{index}].match.has_sites") or []
+        )
+    return _ordered_unique_passes(all_passes)
 
 
 def benchmark_policy_candidate_passes(
     benchmark_config: Mapping[str, Any] | None,
 ) -> list[str]:
     policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
-    raw_rules = policy_config.get("rules")
-    if raw_rules is None:
-        raw_rules = []
-    if not isinstance(raw_rules, list):
-        raise SystemExit("invalid benchmark config field: policy.rules must be a sequence")
+    raw_rules = _policy_rules_list(policy_config)
 
     candidates = benchmark_config_enabled_passes(benchmark_config)
     candidates.extend(benchmark_policy_required_site_passes(benchmark_config))
     for index, raw_rule in enumerate(raw_rules, start=1):
         if not isinstance(raw_rule, Mapping):
             raise SystemExit(f"invalid benchmark config field: policy.rules[{index}] must be a mapping")
-        candidates.extend(
-            _policy_pass_list(
-                raw_rule.get("passes"),
-                field_name=f"policy.rules[{index}].passes",
-            ) or []
-        )
-        candidates.extend(
-            _policy_pass_list(
-                raw_rule.get("enable"),
-                field_name=f"policy.rules[{index}].enable",
-            ) or []
-        )
+        candidates.extend(_policy_pass_list(raw_rule.get("passes"), field_name=f"policy.rules[{index}].passes") or [])
+        candidates.extend(_policy_pass_list(raw_rule.get("enable"), field_name=f"policy.rules[{index}].enable") or [])
     return _ordered_unique_passes(candidates)
 
 
@@ -359,57 +323,30 @@ def resolve_program_enabled_passes(
 ) -> list[str]:
     policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
     default_config = _mapping_dict(policy_config.get("default"), field_name="policy.default")
-    raw_rules = policy_config.get("rules")
-    if raw_rules is None:
-        raw_rules = []
-    if not isinstance(raw_rules, list):
-        raise SystemExit("invalid benchmark config field: policy.rules must be a sequence")
+    raw_rules = _policy_rules_list(policy_config)
 
-    default_passes = _policy_pass_list(
-        default_config.get("passes"),
-        field_name="policy.default.passes",
-    )
-    active_passes = list(
-        default_passes
-        if default_passes is not None
-        else benchmark_config_enabled_passes(benchmark_config)
-    )
+    default_passes = _policy_pass_list(default_config.get("passes"), field_name="policy.default.passes")
+    active_passes = list(default_passes if default_passes is not None else benchmark_config_enabled_passes(benchmark_config))
 
     for index, raw_rule in enumerate(raw_rules, start=1):
         if not isinstance(raw_rule, Mapping):
             raise SystemExit(f"invalid benchmark config field: policy.rules[{index}] must be a mapping")
-        rule = dict(raw_rule)
-        match_config = _mapping_dict(rule.get("match"), field_name=f"policy.rules[{index}].match")
-        if not _policy_rule_matches(
-            match_config,
-            context=context,
-            site_counts=site_counts,
-            field_name=f"policy.rules[{index}].match",
-        ):
+        match_config = _mapping_dict(raw_rule.get("match"), field_name=f"policy.rules[{index}].match")
+        if not _policy_rule_matches(match_config, context=context, site_counts=site_counts,
+                                     field_name=f"policy.rules[{index}].match"):
             continue
 
-        replacement_passes = _policy_pass_list(
-            rule.get("passes"),
-            field_name=f"policy.rules[{index}].passes",
-        )
+        replacement_passes = _policy_pass_list(raw_rule.get("passes"), field_name=f"policy.rules[{index}].passes")
         if replacement_passes is not None:
             active_passes = list(replacement_passes)
 
-        for pass_name in _policy_pass_list(
-            rule.get("enable"),
-            field_name=f"policy.rules[{index}].enable",
-        ) or []:
+        for pass_name in _policy_pass_list(raw_rule.get("enable"), field_name=f"policy.rules[{index}].enable") or []:
             if pass_name not in active_passes:
                 active_passes.append(pass_name)
 
-        disabled = set(
-            _policy_pass_list(
-                rule.get("disable"),
-                field_name=f"policy.rules[{index}].disable",
-            ) or []
-        )
+        disabled = set(_policy_pass_list(raw_rule.get("disable"), field_name=f"policy.rules[{index}].disable") or [])
         if disabled:
-            active_passes = [pass_name for pass_name in active_passes if pass_name not in disabled]
+            active_passes = [p for p in active_passes if p not in disabled]
 
     return _ordered_unique_passes(active_passes)
 
@@ -442,110 +379,40 @@ def benchmark_config_warmups(benchmark_config: Mapping[str, Any] | None) -> int:
 
 
 def benchmark_config_repeat(benchmark_config: Mapping[str, Any] | None) -> int:
-    return _benchmark_int(
-        benchmark_config,
-        "repeat",
-        default=_DEFAULT_BENCHMARK_REPEAT,
-        minimum=1,
-    )
-
-
-def _parse_enabled_passes(raw: str | None) -> list[str]:
-    text = str(raw or "").strip()
-    if not text:
-        return []
-    if text.lower() in {"default", "benchmark-default"}:
-        return list(_DEFAULT_REJIT_ENABLED_PASSES)
-    return [token.strip() for token in text.split(",") if token.strip()]
+    return _benchmark_int(benchmark_config, "repeat", default=_DEFAULT_BENCHMARK_REPEAT, minimum=1)
 
 
 @lru_cache(maxsize=1)
-def _benchmark_config_enabled_passes() -> list[str]:
-    return benchmark_config_enabled_passes(load_benchmark_config())
+def _cached_benchmark_config_enabled_passes() -> tuple[str, ...]:
+    return tuple(benchmark_config_enabled_passes(load_benchmark_config()))
 
 
 def _zero_site_counts() -> dict[str, int]:
-    return {
-        "total_sites": 0,
-        "map_inline_sites": 0,
-        "const_prop_sites": 0,
-        "dce_sites": 0,
-        "bounds_check_merge_sites": 0,
-        "bulk_memory_sites": 0,
-        "cmov_sites": 0,
-        "wide_sites": 0,
-        "rotate_sites": 0,
-        "lea_sites": 0,
-        "extract_sites": 0,
-        "bitfield_sites": 0,
-        "endian_sites": 0,
-        "skb_load_bytes_spec_sites": 0,
-        "branch_flip_sites": 0,
-        "other_sites": 0,
-    }
+    return dict.fromkeys(("total_sites", *_TOTAL_SITE_FIELDS, "bitfield_sites"), 0)
 
 
 def benchmark_rejit_enabled_passes() -> list[str]:
-    if _BENCH_PASSES_ENV in os.environ:
-        raw = os.environ.get(_BENCH_PASSES_ENV)
-        text = str(raw or "").strip().lower()
-        if text in {"default", "benchmark-default"}:
-            return list(_benchmark_config_enabled_passes())
-        return _parse_enabled_passes(raw)
-    return list(_benchmark_config_enabled_passes())
+    raw = os.environ.get(_BENCH_PASSES_ENV)
+    if raw is not None:
+        text = raw.strip()
+        if text.lower() in {"default", "benchmark-default"}:
+            return list(_cached_benchmark_config_enabled_passes())
+        return [token.strip() for token in text.split(",") if token.strip()]
+    return list(_cached_benchmark_config_enabled_passes())
 
 
-def _site_summary_from_counts(counts: Mapping[str, Any]) -> str:
-    parts: list[str] = []
-    for pass_name, field_name in _PASS_TO_SITE_FIELD.items():
-        value = int(counts.get(field_name, 0) or 0)
-        if value > 0:
-            parts.append(f"{pass_name}={value}")
-    return " ".join(parts) if parts else "-"
+_SKIP_IN_PASS_TOTAL = frozenset(("lea_sites", "other_sites"))
 
 
-def _site_counts_from_optimize_response(response: Mapping[str, Any]) -> dict[str, int]:
-    counts = _zero_site_counts()
-    passes = response.get("passes")
-    if isinstance(passes, list):
-        for item in passes:
-            if not isinstance(item, Mapping):
-                continue
-            pass_name = str(item.get("pass_name") or "").strip()
-            field_name = _PASS_TO_SITE_FIELD.get(pass_name)
-            if field_name is None:
-                continue
-            try:
-                counts[field_name] += int(item.get("sites_found") or item.get("sites_applied") or 0)
-            except (TypeError, ValueError):
-                continue
-    counts["bitfield_sites"] = counts["extract_sites"]
-    counts["total_sites"] = sum(
-        counts[field_name]
-        for field_name in (
-            "map_inline_sites",
-            "const_prop_sites",
-            "dce_sites",
-            "bounds_check_merge_sites",
-            "bulk_memory_sites",
-            "cmov_sites",
-            "wide_sites",
-            "rotate_sites",
-            "lea_sites",
-            "extract_sites",
-            "endian_sites",
-            "skb_load_bytes_spec_sites",
-            "branch_flip_sites",
-            "other_sites",
-        )
-    )
-    return counts
-
-
-def _applied_site_totals_from_passes(raw_passes: object) -> dict[str, int]:
-    counts = _zero_site_counts()
+def _accumulate_pass_site_counts(
+    raw_passes: object,
+    counts: dict[str, int],
+    *,
+    also_found: bool = False,
+) -> None:
+    """Add per-pass site counts from a raw passes list into *counts* in place."""
     if not isinstance(raw_passes, list):
-        return counts
+        return
     for item in raw_passes:
         if not isinstance(item, Mapping):
             continue
@@ -554,28 +421,40 @@ def _applied_site_totals_from_passes(raw_passes: object) -> dict[str, int]:
         if field_name is None:
             continue
         try:
-            counts[field_name] += max(0, int(item.get("sites_applied", 0) or 0))
+            value = int((item.get("sites_found") or item.get("sites_applied") or 0) if also_found
+                        else max(0, int(item.get("sites_applied", 0) or 0)))
+            counts[field_name] += value
         except (TypeError, ValueError):
             continue
+
+
+def _site_counts_from_optimize_response(response: Mapping[str, Any]) -> dict[str, int]:
+    counts = _zero_site_counts()
+    _accumulate_pass_site_counts(response.get("passes"), counts, also_found=True)
     counts["bitfield_sites"] = counts["extract_sites"]
-    counts["total_sites"] = sum(
-        counts[field_name]
-        for field_name in (
-            "map_inline_sites",
-            "const_prop_sites",
-            "dce_sites",
-            "bounds_check_merge_sites",
-            "bulk_memory_sites",
-            "cmov_sites",
-            "wide_sites",
-            "rotate_sites",
-            "extract_sites",
-            "endian_sites",
-            "skb_load_bytes_spec_sites",
-            "branch_flip_sites",
-        )
-    )
+    counts["total_sites"] = sum(counts[f] for f in _TOTAL_SITE_FIELDS)
     return counts
+
+
+def _applied_site_totals_from_passes(raw_passes: object) -> dict[str, int]:
+    counts = _zero_site_counts()
+    _accumulate_pass_site_counts(raw_passes, counts)
+    counts["bitfield_sites"] = counts["extract_sites"]
+    counts["total_sites"] = sum(counts[f] for f in _TOTAL_SITE_FIELDS if f not in _SKIP_IN_PASS_TOTAL)
+    return counts
+
+
+def _adjust_counts_from_raw(counts: dict[str, int], raw_counts: Mapping[str, Any] | None, *, also_total: bool = False) -> None:
+    """Bump other_sites/total_sites if the raw counts record reports more applied_sites."""
+    rc = raw_counts or {}
+    try:
+        reported = max(0, int((rc.get("applied_sites") or (rc.get("total_sites") if also_total else None) or 0)))
+    except (TypeError, ValueError):
+        reported = 0
+    if reported > counts["total_sites"]:
+        counts["other_sites"] = reported - counts["total_sites"]
+        counts["total_sites"] = reported
+    counts["bitfield_sites"] = counts["extract_sites"]
 
 
 def applied_site_totals_from_rejit_result(result: Mapping[str, Any] | None) -> dict[str, int]:
@@ -584,62 +463,26 @@ def applied_site_totals_from_rejit_result(result: Mapping[str, Any] | None) -> d
         return counts
 
     per_program = result.get("per_program")
+    raw_val = result.get("counts")
+    raw_counts: Mapping[str, Any] = raw_val if isinstance(raw_val, Mapping) else {}
     if isinstance(per_program, Mapping):
         for record in per_program.values():
-            program_counts = applied_site_totals_from_rejit_result(record if isinstance(record, Mapping) else None)
-            for field_name in counts:
-                counts[field_name] += int(program_counts.get(field_name, 0) or 0)
-        raw_counts = result.get("counts") if isinstance(result.get("counts"), Mapping) else {}
-        try:
-            applied_sites = max(0, int((raw_counts or {}).get("applied_sites", 0) or 0))
-        except (TypeError, ValueError):
-            applied_sites = 0
-        if applied_sites > counts["total_sites"]:
-            counts["other_sites"] += applied_sites - counts["total_sites"]
-            counts["total_sites"] = applied_sites
-        counts["bitfield_sites"] = counts["extract_sites"]
+            pc = applied_site_totals_from_rejit_result(record if isinstance(record, Mapping) else None)
+            for f in counts:
+                counts[f] += int(pc.get(f, 0) or 0)
+        _adjust_counts_from_raw(counts, raw_counts)
         return counts
 
-    debug_result = result.get("debug_result") if isinstance(result.get("debug_result"), Mapping) else {}
-    raw_passes = debug_result.get("passes")
-    if raw_passes is None:
-        raw_passes = result.get("passes")
-    counts = _applied_site_totals_from_passes(raw_passes)
-
-    raw_counts = result.get("counts") if isinstance(result.get("counts"), Mapping) else {}
-    try:
-        applied_sites = max(
-            0,
-            int(
-                (raw_counts or {}).get(
-                    "applied_sites",
-                    (raw_counts or {}).get("total_sites", 0),
-                )
-                or 0
-            ),
-        )
-    except (TypeError, ValueError):
-        applied_sites = 0
-    if applied_sites > counts["total_sites"]:
-        counts["other_sites"] = applied_sites - counts["total_sites"]
-        counts["total_sites"] = applied_sites
-    counts["bitfield_sites"] = counts["extract_sites"]
+    dbg_val = result.get("debug_result")
+    debug_result: Mapping[str, Any] = dbg_val if isinstance(dbg_val, Mapping) else {}
+    counts = _applied_site_totals_from_passes(debug_result.get("passes") or result.get("passes"))
+    _adjust_counts_from_raw(counts, raw_counts, also_total=True)
     return counts
-
-
-def _scan_record_from_optimize_response(prog_id: int, response: Mapping[str, Any]) -> dict[str, Any]:
-    counts = _site_counts_from_optimize_response(response)
-    return {
-        "prog_id": int(prog_id),
-        "sites": dict(counts),
-        "counts": dict(counts),
-        "error": "",
-    }
 
 
 def scan_programs(
     prog_ids: list[int],
-    daemon: Path | str,
+    daemon: Path | str,  # noqa: ARG001 – kept for backwards-compatible signature
     *,
     prog_fds: dict[int, int] | None = None,
     enabled_passes: Sequence[str] | None = None,
@@ -653,145 +496,64 @@ def scan_programs(
     requested_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
     if not requested_ids:
         return {}
-    if prog_fds is not None:
-        missing_prog_fds = [
-            prog_id
-            for prog_id in requested_ids
-            if int(prog_fds.get(prog_id, 0) or 0) <= 0
-        ]
-        if missing_prog_fds:
-            raise RuntimeError(
-                "scan_programs requires loader-owned prog_fds for all requested programs: "
-                + ", ".join(str(prog_id) for prog_id in missing_prog_fds)
-            )
+    if prog_fds is not None and (missing := [pid for pid in requested_ids if int(prog_fds.get(pid, 0) or 0) <= 0]):
+        raise RuntimeError(
+            "scan_programs requires loader-owned prog_fds for all requested programs: "
+            + ", ".join(str(pid) for pid in missing)
+        )
     if daemon_socket_path is None:
         raise ValueError("scan_programs requires daemon_socket_path")
-    return _scan_programs_via_socket(
-        requested_ids,
-        daemon_socket_path,
-        enabled_passes=enabled_passes,
-        daemon_proc=daemon_proc,
-        stdout_path=daemon_stdout_path,
-        stderr_path=daemon_stderr_path,
-        timeout_seconds=timeout_seconds,
-    )
-
-
-def _scan_programs_via_socket(
-    requested_ids: list[int],
-    socket_path: Path,
-    *,
-    enabled_passes: Sequence[str] | None = None,
-    daemon_proc: subprocess.Popen[str] | None = None,
-    stdout_path: Path | None = None,
-    stderr_path: Path | None = None,
-    timeout_seconds: int = 60,
-) -> dict[int, dict[str, Any]]:
     results: dict[int, dict[str, Any]] = {}
     for prog_id in requested_ids:
         response = _optimize_request(
-            socket_path,
+            daemon_socket_path,
             prog_id,
             enabled_passes=enabled_passes,
             dry_run=True,
             daemon_proc=daemon_proc,
-            stdout_path=stdout_path,
-            stderr_path=stderr_path,
+            stdout_path=daemon_stdout_path,
+            stderr_path=daemon_stderr_path,
             timeout_seconds=float(timeout_seconds),
         )
         if str(response.get("status") or "") != "ok":
             message = str(response.get("message") or response.get("error") or "scan failed").strip()
             raise RuntimeError(f"daemon scan failed for prog_id={prog_id}: {message}")
-        results[prog_id] = _scan_record_from_optimize_response(prog_id, response)
+        counts = _site_counts_from_optimize_response(response)
+        results[prog_id] = {"prog_id": int(prog_id), "sites": dict(counts), "counts": dict(counts), "error": ""}
     return results
 
 
 def _apply_result_from_response(
-    response: Mapping[str, Any],
+    response: dict[str, Any],
     *,
     output: str,
     exit_code: int,
 ) -> dict[str, object]:
-    summary = response.get("summary") if isinstance(response, Mapping) else {}
-    program = response.get("program") if isinstance(response, Mapping) else {}
-    raw_inlined_entries = response.get("inlined_map_entries") if isinstance(response, Mapping) else []
-    if not isinstance(raw_inlined_entries, list):
-        raw_inlined_entries = []
-    inlined_map_entries = [
-        dict(entry) for entry in raw_inlined_entries if isinstance(entry, Mapping)
-    ]
-    applied_sites = int((summary or {}).get("total_sites_applied", 0) or 0)
-    error_message = str(
-        response.get("error_message")
-        or response.get("message")
-        or response.get("error")
-        or ""
-    ).strip()
+    summary = response.get("summary") or {}
+    applied_sites = int(summary.get("total_sites_applied", 0) or 0)
     return {
-        "applied": exit_code == 0 and bool((summary or {}).get("applied", True)),
+        "applied": exit_code == 0 and bool(summary.get("applied", True)),
         "output": output,
         "exit_code": exit_code,
         "debug_result": dict(response),
-        "kernel_prog_name": str((program or {}).get("prog_name") or ""),
-        "inlined_map_entries": inlined_map_entries,
+        "kernel_prog_name": str((response.get("program") or {}).get("prog_name") or ""),
+        "inlined_map_entries": [dict(e) for e in (response.get("inlined_map_entries") or []) if isinstance(e, Mapping)],
         "summary": dict(summary) if isinstance(summary, Mapping) else {},
-        "counts": {
-            "total_sites": applied_sites,
-            "applied_sites": applied_sites,
-        },
-        "error": error_message,
-    }
-
-
-def _socket_error_result(
-    prog_id: int,
-    detail: str,
-    *,
-    exit_code: int = 1,
-    daemon_proc: subprocess.Popen[str] | None = None,
-    stdout_path: Path | None = None,
-    stderr_path: Path | None = None,
-) -> dict[str, object]:
-    notes: list[str] = [detail]
-    if daemon_proc is not None:
-        returncode = daemon_proc.poll()
-        notes.append(
-            f"daemon serve rc={returncode}" if returncode is not None else "daemon serve still running"
-        )
-
-    log_tail = _daemon_log_tail(stdout_path, stderr_path)
-    if log_tail:
-        notes.append(f"daemon log tail:\n{log_tail}")
-
-    message = "\n".join(notes)
-    return {
-        "applied": False,
-        "output": log_tail,
-        "exit_code": exit_code,
-        "debug_result": {},
-        "kernel_prog_name": "",
-        "inlined_map_entries": [],
-        "summary": {},
-        "counts": {
-            "total_sites": 0,
-            "applied_sites": 0,
-        },
-        "error": message,
+        "counts": {"total_sites": applied_sites, "applied_sites": applied_sites},
+        "error": str(response.get("error_message") or response.get("message") or response.get("error") or "").strip(),
     }
 
 
 def _daemon_log_tail(stdout_path: Path | None, stderr_path: Path | None) -> str:
-    fragments: list[str] = []
-    for path in (stderr_path, stdout_path):
-        if path is None:
-            continue
+    def _read(p: Path | None) -> str:
+        if p is None:
+            return ""
         try:
-            text = path.read_text(encoding="utf-8", errors="replace")
+            return p.read_text(encoding="utf-8", errors="replace")
         except OSError:
-            continue
-        if text.strip():
-            fragments.append(text)
-    return tail_text("\n".join(fragments), max_lines=80, max_chars=8000)
+            return ""
+    text = "\n".join(t for p in (stderr_path, stdout_path) if (t := _read(p)).strip())
+    return tail_text(text, max_lines=80, max_chars=8000)
 
 
 def _start_daemon_server(
@@ -801,19 +563,13 @@ def _start_daemon_server(
     socket_path = Path(socket_dir) / "daemon.sock"
     stdout_path = Path(socket_dir) / "daemon.stdout.log"
     stderr_path = Path(socket_dir) / "daemon.stderr.log"
-    stdout_handle = stdout_path.open("w", encoding="utf-8")
-    stderr_handle = stderr_path.open("w", encoding="utf-8")
-    try:
-        command = [str(daemon_binary), "serve", "--socket", str(socket_path)]
+    with stdout_path.open("w", encoding="utf-8") as out, stderr_path.open("w", encoding="utf-8") as err:
         proc = subprocess.Popen(
-            command,
-            stdout=stdout_handle,
-            stderr=stderr_handle,
+            [str(daemon_binary), "serve", "--socket", str(socket_path)],
+            stdout=out,
+            stderr=err,
             text=True,
         )
-    finally:
-        stdout_handle.close()
-        stderr_handle.close()
 
     deadline = time.monotonic() + 5.0
     while time.monotonic() < deadline:
@@ -825,26 +581,41 @@ def _start_daemon_server(
                 f"{_daemon_log_tail(stdout_path, stderr_path)}"
             )
         time.sleep(0.05)
-    proc.terminate()
-    try:
-        proc.wait(timeout=1)
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        proc.wait(timeout=1)
+    _kill_proc(proc, timeout=1)
     raise RuntimeError(
         f"timed out waiting for daemon socket: {_daemon_log_tail(stdout_path, stderr_path)}"
     )
 
 
-def _stop_daemon_server(proc: subprocess.Popen[str], socket_path: Path, socket_dir: str) -> None:
+def _kill_proc(proc: subprocess.Popen[str], *, timeout: int) -> None:
     proc.terminate()
     try:
-        proc.wait(timeout=5)
+        proc.wait(timeout=timeout)
     except subprocess.TimeoutExpired:
         proc.kill()
-        proc.wait(timeout=5)
+        proc.wait(timeout=timeout)
+
+
+def _stop_daemon_server(proc: subprocess.Popen[str], socket_path: Path, socket_dir: str) -> None:
+    _kill_proc(proc, timeout=5)
     socket_path.unlink(missing_ok=True)
     shutil.rmtree(socket_dir, ignore_errors=True)
+
+
+def _daemon_error_detail(
+    lead: str,
+    *,
+    daemon_proc: subprocess.Popen[str] | None,
+    stdout_path: Path | None,
+    stderr_path: Path | None,
+) -> str:
+    parts = [lead]
+    if daemon_proc is not None:
+        rc = daemon_proc.poll()
+        parts.append(f"daemon serve rc={rc}" if rc is not None else "daemon serve still running")
+    if log_tail := _daemon_log_tail(stdout_path, stderr_path):
+        parts.append(f"daemon log tail:\n{log_tail}")
+    return "\n".join(parts)
 
 
 def _daemon_request(
@@ -857,6 +628,7 @@ def _daemon_request(
     stderr_path: Path | None = None,
 ) -> dict[str, Any]:
     request = json.dumps(dict(payload)) + "\n"
+    kw = {"daemon_proc": daemon_proc, "stdout_path": stdout_path, "stderr_path": stderr_path}
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
         client.settimeout(timeout_seconds)
         try:
@@ -871,50 +643,26 @@ def _daemon_request(
                 if b"\n" in chunk:
                     break
         except socket.timeout:
-            log_tail = _daemon_log_tail(stdout_path, stderr_path)
-            details = [f"daemon socket request timed out after {timeout_seconds:.0f}s"]
-            if daemon_proc is not None:
-                returncode = daemon_proc.poll()
-                details.append(
-                    f"daemon serve rc={returncode}" if returncode is not None else "daemon serve still running"
-                )
-            if log_tail:
-                details.append(f"daemon log tail:\n{log_tail}")
-            raise RuntimeError("\n".join(details))
+            raise RuntimeError(
+                _daemon_error_detail(f"daemon socket request timed out after {timeout_seconds:.0f}s", **kw)
+            )
         except OSError as exc:
-            log_tail = _daemon_log_tail(stdout_path, stderr_path)
-            details = [f"daemon socket request failed: {exc}"]
-            if daemon_proc is not None:
-                returncode = daemon_proc.poll()
-                details.append(
-                    f"daemon serve rc={returncode}" if returncode is not None else "daemon serve still running"
-                )
-            if log_tail:
-                details.append(f"daemon log tail:\n{log_tail}")
-            raise RuntimeError("\n".join(details)) from exc
+            raise RuntimeError(
+                _daemon_error_detail(f"daemon socket request failed: {exc}", **kw)
+            ) from exc
 
     line = b"".join(chunks).decode(errors="replace").strip()
+    log_tail = _daemon_log_tail(stdout_path, stderr_path)
+    suffix = f"\ndaemon log tail:\n{log_tail}" if log_tail else ""
     if not line:
-        log_tail = _daemon_log_tail(stdout_path, stderr_path)
-        detail = "daemon socket returned an empty response"
-        if log_tail:
-            detail += f"\ndaemon log tail:\n{log_tail}"
-        raise RuntimeError(detail)
+        raise RuntimeError("daemon socket returned an empty response" + suffix)
     try:
         response = json.loads(line)
     except json.JSONDecodeError as exc:
-        log_tail = _daemon_log_tail(stdout_path, stderr_path)
-        detail = f"daemon socket returned invalid JSON: {exc}: {line[:400]}"
-        if log_tail:
-            detail += f"\ndaemon log tail:\n{log_tail}"
-        raise RuntimeError(detail) from exc
+        raise RuntimeError(f"daemon socket returned invalid JSON: {exc}: {line[:400]}{suffix}") from exc
     if not isinstance(response, Mapping):
-        log_tail = _daemon_log_tail(stdout_path, stderr_path)
-        detail = f"daemon socket returned non-object JSON: {line[:400]}"
-        if log_tail:
-            detail += f"\ndaemon log tail:\n{log_tail}"
-        raise RuntimeError(detail)
-    return dict(response)
+        raise RuntimeError(f"daemon socket returned non-object JSON: {line[:400]}{suffix}")
+    return dict(response)  # type: ignore[arg-type]
 
 
 def _optimize_request(
@@ -928,40 +676,11 @@ def _optimize_request(
     stderr_path: Path | None = None,
     timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
-    payload: dict[str, object] = {
-        "cmd": "optimize",
-        "prog_id": int(prog_id),
-    }
+    payload: dict[str, object] = {"cmd": "optimize", "prog_id": int(prog_id)}
     if dry_run:
         payload["dry_run"] = True
     if enabled_passes is not None:
         payload["enabled_passes"] = [str(name).strip() for name in enabled_passes if str(name).strip()]
-    response = _daemon_request(
-        socket_path,
-        payload,
-        timeout_seconds=timeout_seconds,
-        daemon_proc=daemon_proc,
-        stdout_path=stdout_path,
-        stderr_path=stderr_path,
-    )
-    return response
-
-
-def _branch_flip_requested(enabled_passes: Sequence[str] | None) -> bool:
-    if enabled_passes is None:
-        return False
-    return any(str(name).strip() == "branch_flip" for name in enabled_passes)
-
-
-def _profile_request(
-    socket_path: Path,
-    payload: Mapping[str, object],
-    *,
-    daemon_proc: subprocess.Popen[str] | None = None,
-    stdout_path: Path | None = None,
-    stderr_path: Path | None = None,
-    timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
-) -> dict[str, Any]:
     return _daemon_request(
         socket_path,
         payload,
@@ -981,79 +700,23 @@ def _prepare_branch_flip_profile(
     interval_ms: int = _DEFAULT_PROFILE_INTERVAL_MS,
     timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
 ) -> dict[str, object] | None:
-    start_response = _profile_request(
-        socket_path,
-        {
-            "cmd": "profile-start",
-            "interval_ms": int(interval_ms),
-        },
-        daemon_proc=daemon_proc,
-        stdout_path=stdout_path,
-        stderr_path=stderr_path,
-        timeout_seconds=timeout_seconds,
-    )
-    if str(start_response.get("status") or "") != "ok":
-        message = str(
-            start_response.get("message")
-            or start_response.get("error")
-            or "profile-start failed"
-        )
-        return {
-            "exit_code": 124 if "timed out" in message.lower() else 1,
-            "output": json.dumps(start_response, sort_keys=True),
-            "error": message,
-        }
+    """Run profile-start / sleep / profile-stop; return error dict on failure, None on success."""
+    kw: dict[str, Any] = {"timeout_seconds": timeout_seconds, "daemon_proc": daemon_proc,
+                          "stdout_path": stdout_path, "stderr_path": stderr_path}
 
+    def _profile_cmd(payload: dict[str, object], default_msg: str) -> dict[str, object] | None:
+        resp = _daemon_request(socket_path, payload, **kw)
+        if str(resp.get("status") or "") != "ok":
+            msg = str(resp.get("message") or resp.get("error") or default_msg)
+            return {"exit_code": 124 if "timed out" in msg.lower() else 1,
+                    "output": json.dumps(resp, sort_keys=True), "error": msg}
+        return None
+
+    err = _profile_cmd({"cmd": "profile-start", "interval_ms": int(interval_ms)}, "profile-start failed")
+    if err is not None:
+        return err
     time.sleep(interval_ms / 1000.0)
-
-    stop_response = _profile_request(
-        socket_path,
-        {"cmd": "profile-stop"},
-        daemon_proc=daemon_proc,
-        stdout_path=stdout_path,
-        stderr_path=stderr_path,
-        timeout_seconds=timeout_seconds,
-    )
-    if str(stop_response.get("status") or "") != "ok":
-        message = str(
-            stop_response.get("message")
-            or stop_response.get("error")
-            or "profile-stop failed"
-        )
-        return {
-            "exit_code": 124 if "timed out" in message.lower() else 1,
-            "output": json.dumps(stop_response, sort_keys=True),
-            "error": message,
-        }
-
-    return None
-
-
-def _apply_one_via_socket(
-    socket_path: Path,
-    prog_id: int,
-    enabled_passes: Sequence[str] | None,
-    *,
-    dry_run: bool = False,
-    daemon_proc: subprocess.Popen[str] | None = None,
-    stdout_path: Path | None = None,
-    stderr_path: Path | None = None,
-    timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
-) -> dict[str, object]:
-    response = _optimize_request(
-        socket_path,
-        prog_id,
-        enabled_passes=enabled_passes,
-        dry_run=dry_run,
-        daemon_proc=daemon_proc,
-        stdout_path=stdout_path,
-        stderr_path=stderr_path,
-        timeout_seconds=timeout_seconds,
-    )
-    output = json.dumps(response, sort_keys=True)
-    if str(response.get("status") or "") != "ok":
-        return _apply_result_from_response(response, output=output, exit_code=1)
-    return _apply_result_from_response(response, output=output, exit_code=0)
+    return _profile_cmd({"cmd": "profile-stop"}, "profile-stop failed")
 
 
 def apply_daemon_rejit(
@@ -1071,25 +734,6 @@ def apply_daemon_rejit(
         raise ValueError("apply_daemon_rejit requires at least one prog_id")
     if daemon_socket_path is None:
         raise ValueError("apply_daemon_rejit requires daemon_socket_path")
-    return _apply_daemon_rejit_via_socket(
-        requested_prog_ids,
-        daemon_socket_path,
-        enabled_passes=enabled_passes,
-        daemon_proc=daemon_proc,
-        stdout_path=daemon_stdout_path,
-        stderr_path=daemon_stderr_path,
-    )
-
-
-def _apply_daemon_rejit_via_socket(
-    requested_prog_ids: list[int],
-    socket_path: Path,
-    *,
-    enabled_passes: Sequence[str] | None = None,
-    daemon_proc: subprocess.Popen[str] | None = None,
-    stdout_path: Path | None = None,
-    stderr_path: Path | None = None,
-) -> dict[str, object]:
     per_program: dict[int, dict[str, object]] = {}
     outputs: list[str] = []
     exit_code = 0
@@ -1099,89 +743,64 @@ def _apply_daemon_rejit_via_socket(
     applied_sites = 0
     errors: list[str] = []
 
-    if _branch_flip_requested(enabled_passes):
+    if enabled_passes and any(str(n).strip() == "branch_flip" for n in enabled_passes):
         profile_error = _prepare_branch_flip_profile(
-            socket_path,
+            daemon_socket_path,
             daemon_proc=daemon_proc,
-            stdout_path=stdout_path,
-            stderr_path=stderr_path,
+            stdout_path=daemon_stdout_path,
+            stderr_path=daemon_stderr_path,
         )
         if profile_error is not None:
-            profile_exit_code = int(profile_error.get("exit_code", 1) or 1)
-            profile_output = str(profile_error.get("output") or "")
-            profile_message = str(profile_error.get("error") or "profile collection failed")
-            per_program = {
-                int(prog_id): {
-                    "prog_id": int(prog_id),
-                    "applied": False,
-                    "changed": False,
-                    "output": profile_output,
-                    "exit_code": profile_exit_code,
-                    "counts": {
-                        "total_sites": 0,
-                        "applied_sites": 0,
-                    },
-                    "error": profile_message,
-                }
-                for prog_id in requested_prog_ids
-            }
+            ec = int(profile_error.get("exit_code", 1) or 1)
+            out = str(profile_error.get("output") or "")
+            msg = str(profile_error.get("error") or "profile collection failed")
+            zc: dict[str, int] = {"total_sites": 0, "applied_sites": 0}
             return {
-                "applied": False,
-                "applied_any": False,
-                "all_applied": False,
-                "output": profile_output,
-                "exit_code": profile_exit_code,
-                "per_program": per_program,
-                "counts": {
-                    "total_sites": 0,
-                    "applied_sites": 0,
+                "applied": False, "applied_any": False, "all_applied": False,
+                "output": out, "exit_code": ec, "error": msg, "counts": zc,
+                "per_program": {
+                    int(pid): {"prog_id": int(pid), "applied": False, "changed": False,
+                                "output": out, "exit_code": ec, "counts": zc, "error": msg}
+                    for pid in requested_prog_ids
                 },
-                "program_counts": {
-                    "requested": len(requested_prog_ids),
-                    "applied": 0,
-                    "not_applied": len(requested_prog_ids),
-                },
-                "error": str(profile_error.get("error") or "profile collection failed"),
+                "program_counts": {"requested": len(requested_prog_ids), "applied": 0,
+                                   "not_applied": len(requested_prog_ids)},
             }
     for prog_id in requested_prog_ids:
-        result = _apply_one_via_socket(
-            socket_path,
+        _resp = _optimize_request(
+            daemon_socket_path,
             prog_id,
-            enabled_passes,
+            enabled_passes=enabled_passes,
+            dry_run=False,
             daemon_proc=daemon_proc,
-            stdout_path=stdout_path,
-            stderr_path=stderr_path,
+            stdout_path=daemon_stdout_path,
+            stderr_path=daemon_stderr_path,
+        )
+        result = _apply_result_from_response(
+            _resp,
+            output=json.dumps(_resp, sort_keys=True),
+            exit_code=0 if str(_resp.get("status") or "") == "ok" else 1,
         )
         per_program[prog_id] = result
         outputs.append(str(result.get("output") or ""))
         exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
         applied_any = applied_any or bool(result.get("applied", False))
         all_applied = all_applied and bool(result.get("applied", False))
-
-        counts = result.get("counts") if isinstance(result.get("counts"), Mapping) else {}
-        total_sites += int((counts or {}).get("total_sites", 0) or 0)
-        applied_sites += int((counts or {}).get("applied_sites", 0) or 0)
-
-        error = str(result.get("error") or "").strip()
-        if error:
+        rc = result.get("counts") or {}
+        total_sites += int(rc.get("total_sites", 0) or 0)
+        applied_sites += int(rc.get("applied_sites", 0) or 0)
+        if error := str(result.get("error") or "").strip():
             errors.append(f"prog {prog_id}: {error}")
 
+    n_applied = sum(1 for r in per_program.values() if r.get("applied", False))
     return {
-        "applied": applied_any,
-        "applied_any": applied_any,
-        "all_applied": all_applied,
-        "output": "\n".join(output for output in outputs if output),
+        "applied": applied_any, "applied_any": applied_any, "all_applied": all_applied,
+        "output": "\n".join(o for o in outputs if o),
         "exit_code": exit_code,
         "per_program": per_program,
-        "counts": {
-            "total_sites": total_sites,
-            "applied_sites": applied_sites,
-        },
-        "program_counts": {
-            "requested": len(requested_prog_ids),
-            "applied": sum(1 for record in per_program.values() if bool(record.get("applied", False))),
-            "not_applied": sum(1 for record in per_program.values() if not bool(record.get("applied", False))),
-        },
+        "counts": {"total_sites": total_sites, "applied_sites": applied_sites},
+        "program_counts": {"requested": len(requested_prog_ids), "applied": n_applied,
+                           "not_applied": len(requested_prog_ids) - n_applied},
         "error": "; ".join(errors),
     }
 
@@ -1203,31 +822,22 @@ class DaemonSession:
         from .kinsn import capture_daemon_kinsn_discovery, prepare_kinsn_modules  # noqa: PLC0415
 
         binary = Path(daemon_binary).resolve()
-        kinsn_metadata: dict[str, object] = {}
-        if load_kinsn:
-            kinsn_metadata = prepare_kinsn_modules()
+        kinsn_metadata: dict[str, object] = dict(prepare_kinsn_modules()) if load_kinsn else {}
         proc, socket_path, socket_dir, stdout_path, stderr_path = _start_daemon_server(binary)
         try:
             if load_kinsn:
-                kinsn_metadata = dict(kinsn_metadata)
-                kinsn_metadata["daemon_binary"] = str(binary)
-                kinsn_metadata["daemon_kinsn_discovery"] = capture_daemon_kinsn_discovery(
-                    stdout_path,
-                    stderr_path,
+                kinsn_metadata.update(
+                    daemon_binary=str(binary),
+                    daemon_kinsn_discovery=capture_daemon_kinsn_discovery(stdout_path, stderr_path),
+                    status="ready",
                 )
-                kinsn_metadata["status"] = "ready"
         except Exception:
             _stop_daemon_server(proc, socket_path, socket_dir)
             raise
         return cls(
-            daemon_binary=binary,
-            proc=proc,
-            socket_path=socket_path,
-            socket_dir=socket_dir,
-            stdout_path=stdout_path,
-            stderr_path=stderr_path,
-            kinsn_metadata=kinsn_metadata,
-            load_kinsn=bool(load_kinsn),
+            daemon_binary=binary, proc=proc, socket_path=socket_path, socket_dir=socket_dir,
+            stdout_path=stdout_path, stderr_path=stderr_path,
+            kinsn_metadata=kinsn_metadata, load_kinsn=bool(load_kinsn),
         )
 
     def __enter__(self) -> "DaemonSession":
@@ -1252,15 +862,10 @@ class DaemonSession:
         timeout_seconds: int = 60,
     ) -> dict[int, dict[str, object]]:
         return scan_programs(
-            [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0],
-            self.daemon_binary,
-            prog_fds=prog_fds,
-            enabled_passes=enabled_passes,
-            timeout_seconds=timeout_seconds,
-            daemon_socket_path=self.socket_path,
-            daemon_proc=self.proc,
-            daemon_stdout_path=self.stdout_path,
-            daemon_stderr_path=self.stderr_path,
+            [int(p) for p in prog_ids if int(p) > 0], self.daemon_binary,
+            prog_fds=prog_fds, enabled_passes=enabled_passes, timeout_seconds=timeout_seconds,
+            daemon_socket_path=self.socket_path, daemon_proc=self.proc,
+            daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path,
         )
 
     def apply_rejit(
@@ -1270,12 +875,9 @@ class DaemonSession:
         enabled_passes: Sequence[str] | None = None,
     ) -> dict[str, object]:
         return apply_daemon_rejit(
-            [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0],
-            enabled_passes=enabled_passes,
-            daemon_socket_path=self.socket_path,
-            daemon_proc=self.proc,
-            daemon_stdout_path=self.stdout_path,
-            daemon_stderr_path=self.stderr_path,
+            [int(p) for p in prog_ids if int(p) > 0], enabled_passes=enabled_passes,
+            daemon_socket_path=self.socket_path, daemon_proc=self.proc,
+            daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path,
         )
 
 

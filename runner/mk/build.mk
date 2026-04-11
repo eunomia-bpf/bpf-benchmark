@@ -55,6 +55,7 @@ ACTIVE_WORKLOAD_TOOLS_BIN_ROOT := $(ACTIVE_WORKLOAD_TOOLS_INSTALL_ROOT)/bin
 ACTIVE_DAEMON_BINARY := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(DAEMON_DIR)/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon,$(DAEMON_DIR)/target/release/bpfrejit-daemon)
 ACTIVE_DAEMON_TARGET_TRIPLE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),aarch64-unknown-linux-gnu,)
 ACTIVE_DAEMON_TARGET_ARG := $(if $(strip $(ACTIVE_DAEMON_TARGET_TRIPLE)),TARGET_TRIPLE="$(ACTIVE_DAEMON_TARGET_TRIPLE)",)
+ACTIVE_CARGO_TARGET_LINKER_ENV := $(if $(filter arm64,$(RUN_TARGET_ARCH)),-e CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=gcc,)
 ACTIVE_RUNNER_BINARY := $(RUNNER_BUILD_DIR_ACTIVE)/micro_exec
 ACTIVE_TEST_UNITTEST_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/tests/unittest/build-arm64,$(ROOT_DIR)/tests/unittest/build)
 ACTIVE_TEST_NEGATIVE_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/tests/negative/build-arm64,$(ROOT_DIR)/tests/negative/build)
@@ -220,7 +221,7 @@ $(ACTIVE_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
 	@$(ENSURE_ACTIVE_RUNNER_BUILD_IMAGE)
 	$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
 		--user "$(HOST_UID):$(HOST_GID)" \
-		-e HOME=/tmp/bpf-benchmark-container \
+		$(ACTIVE_CARGO_TARGET_LINKER_ENV) -e HOME=/tmp/bpf-benchmark-container \
 		-v "$(ROOT_DIR):$(ROOT_DIR)" \
 		-w "$(ROOT_DIR)" \
 		"$(ACTIVE_RUNNER_BUILD_IMAGE)" \
@@ -347,7 +348,7 @@ $(REPO_SCX_ROOT)/bin/%: $(SCX_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_RUNNER_
 	target_release_dir="$$target_dir/$$target_triple/release"; \
 	$(CONTAINER_RUNTIME) run --rm --platform "$$container_platform" \
 		--user "$(HOST_UID):$(HOST_GID)" \
-		-e HOME=/tmp/bpf-benchmark-container \
+		$(ACTIVE_CARGO_TARGET_LINKER_ENV) -e HOME=/tmp/bpf-benchmark-container \
 		-e BPF_CLANG=clang \
 		-e CARGO_TARGET_DIR="$$target_dir" \
 		-v "$(ROOT_DIR):$(ROOT_DIR)" \

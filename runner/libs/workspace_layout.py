@@ -15,50 +15,76 @@ _BASE_TRANSFER_ROOTS = {
 _TRANSFER_ROOT_ORDER = ("runner", "daemon", "module", "tests", "micro", "corpus", "e2e")
 _BCC_TOOLS = ("capable", "execsnoop", "bindsnoop", "biosnoop", "vfsstat", "opensnoop", "syscount", "tcpconnect", "tcplife", "runqlat")
 
+# Simple arch-suffixed cache directories: function_name -> subdirectory under .cache/
+_ARCH_CACHE_DIRS: dict[str, str] = {
+    "repo_artifact_root": "repo-artifacts",
+    "workload_tools_root": "workload-tools",
+    "micro_program_root": "micro-programs",
+}
+
+# Arch-branching paths: function_name -> (arm64_path_parts, x86_path_parts)
+_ARCH_BRANCH_PATHS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
+    "daemon_binary_path": (
+        ("daemon", "target", "aarch64-unknown-linux-gnu", "release", "bpfrejit-daemon"),
+        ("daemon", "target", "release", "bpfrejit-daemon"),
+    ),
+    "runner_binary_path": (
+        ("runner", "build-arm64", "micro_exec"),
+        ("runner", "build", "micro_exec"),
+    ),
+    "test_unittest_build_dir": (
+        ("tests", "unittest", "build-arm64"),
+        ("tests", "unittest", "build"),
+    ),
+    "test_negative_build_dir": (
+        ("tests", "negative", "build-arm64"),
+        ("tests", "negative", "build"),
+    ),
+}
+
+
+def _is_arm64(target_arch: str) -> bool:
+    return str(target_arch).strip() == "arm64"
+
+
+def _arch_cache(workspace: Path, target_arch: str, subdir: str) -> Path:
+    return workspace / ".cache" / subdir / str(target_arch).strip()
+
+
+def _arch_branch(workspace: Path, target_arch: str, key: str) -> Path:
+    arm64_parts, x86_parts = _ARCH_BRANCH_PATHS[key]
+    parts = arm64_parts if _is_arm64(target_arch) else x86_parts
+    return workspace.joinpath(*parts)
+
+
+# --- Public path functions (signatures preserved for external callers) ---
 
 def repo_artifact_root(workspace: Path, target_arch: str) -> Path:
-    return workspace / ".cache" / "repo-artifacts" / str(target_arch).strip()
-
+    return _arch_cache(workspace, target_arch, "repo-artifacts")
 
 def workload_tools_root(workspace: Path, target_arch: str) -> Path:
-    return workspace / ".cache" / "workload-tools" / str(target_arch).strip()
-
+    return _arch_cache(workspace, target_arch, "workload-tools")
 
 def micro_program_root(workspace: Path, target_arch: str) -> Path:
-    return workspace / ".cache" / "micro-programs" / str(target_arch).strip()
-
+    return _arch_cache(workspace, target_arch, "micro-programs")
 
 def runtime_container_image_tar_path(workspace: Path, target_arch: str) -> Path:
     return workspace / ".cache" / "container-images" / f"{str(target_arch).strip()}-runner-runtime.image.tar"
 
-
 def daemon_binary_path(workspace: Path, target_arch: str) -> Path:
-    if str(target_arch).strip() == "arm64":
-        return workspace / "daemon" / "target" / "aarch64-unknown-linux-gnu" / "release" / "bpfrejit-daemon"
-    return workspace / "daemon" / "target" / "release" / "bpfrejit-daemon"
-
+    return _arch_branch(workspace, target_arch, "daemon_binary_path")
 
 def runner_binary_path(workspace: Path, target_arch: str) -> Path:
-    if str(target_arch).strip() == "arm64":
-        return workspace / "runner" / "build-arm64" / "micro_exec"
-    return workspace / "runner" / "build" / "micro_exec"
-
+    return _arch_branch(workspace, target_arch, "runner_binary_path")
 
 def test_unittest_build_dir(workspace: Path, target_arch: str) -> Path:
-    if str(target_arch).strip() == "arm64":
-        return workspace / "tests" / "unittest" / "build-arm64"
-    return workspace / "tests" / "unittest" / "build"
-
+    return _arch_branch(workspace, target_arch, "test_unittest_build_dir")
 
 def test_negative_build_dir(workspace: Path, target_arch: str) -> Path:
-    if str(target_arch).strip() == "arm64":
-        return workspace / "tests" / "negative" / "build-arm64"
-    return workspace / "tests" / "negative" / "build"
-
+    return _arch_branch(workspace, target_arch, "test_negative_build_dir")
 
 def kinsn_module_dir(workspace: Path, target_arch: str) -> Path:
-    return workspace / "module" / ("arm64" if str(target_arch).strip() == "arm64" else "x86")
-
+    return workspace / "module" / ("arm64" if _is_arm64(target_arch) else "x86")
 
 def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Path:
     del target_arch
@@ -66,18 +92,15 @@ def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Pat
         return repo_artifact_root(workspace, "x86_64") / "kernel-modules"
     return Path("/")
 
-
 def kvm_kernel_image_path(workspace: Path) -> Path:
     return workspace / ".cache" / "x86-kernel-build" / "arch" / "x86" / "boot" / "bzImage"
 
 
+# --- Multi-path target helpers ---
+
 def scx_targets(workspace: Path, target_arch: str, packages: list[str]) -> list[Path]:
     root = repo_artifact_root(workspace, target_arch) / "scx"
-    targets: list[Path] = []
-    for package in packages:
-        targets.append(root / "bin" / package)
-        targets.append(root / f"{package}_main.bpf.o")
-    return targets
+    return [p for pkg in packages for p in (root / "bin" / pkg, root / f"{pkg}_main.bpf.o")]
 
 
 def native_repo_targets(workspace: Path, target_arch: str, native_repos: list[str]) -> list[Path]:
@@ -87,49 +110,30 @@ def native_repo_targets(workspace: Path, target_arch: str, native_repos: list[st
         if repo_name == "bcc":
             bcc_root = root / "bcc" / "libbpf-tools" / ".output"
             for tool in _BCC_TOOLS:
-                targets.append(bcc_root / tool)
-                targets.append(bcc_root / f"{tool}.bpf.o")
-            continue
-        if repo_name == "tracee":
+                targets += [bcc_root / tool, bcc_root / f"{tool}.bpf.o"]
+        elif repo_name == "tracee":
             tracee_root = root / "tracee"
-            targets.extend(
-                (
-                    tracee_root / "bin" / "tracee",
-                    tracee_root / "tracee.bpf.o",
-                    tracee_root / "lsm_support" / "kprobe_check.bpf.o",
-                    tracee_root / "lsm_support" / "lsm_check.bpf.o",
-                )
-            )
-            continue
-        if repo_name == "bpftrace":
+            targets += [tracee_root / "bin" / "tracee", tracee_root / "tracee.bpf.o",
+                        tracee_root / "lsm_support" / "kprobe_check.bpf.o",
+                        tracee_root / "lsm_support" / "lsm_check.bpf.o"]
+        elif repo_name == "bpftrace":
             targets.append(root / "bpftrace" / "bin" / "bpftrace")
-            continue
-        if repo_name == "tetragon":
+        elif repo_name == "tetragon":
             tetragon_root = root / "tetragon"
-            targets.extend(
-                (
-                    tetragon_root / "bin" / "tetragon",
-                    tetragon_root / "bpf_execve_event.o",
-                    tetragon_root / "bpf_generic_kprobe.o",
-                )
-            )
-            continue
-        if repo_name == "katran":
+            targets += [tetragon_root / "bin" / "tetragon", tetragon_root / "bpf_execve_event.o",
+                        tetragon_root / "bpf_generic_kprobe.o"]
+        elif repo_name == "katran":
             katran_root = root / "katran"
-            targets.extend(
-                (
-                    katran_root / "bin" / "katran_server_grpc",
-                    katran_root / "bpf" / "balancer.bpf.o",
-                    katran_root / "bpf" / "healthchecking_ipip.bpf.o",
-                )
-            )
+            targets += [katran_root / "bin" / "katran_server_grpc",
+                        katran_root / "bpf" / "balancer.bpf.o",
+                        katran_root / "bpf" / "healthchecking_ipip.bpf.o"]
     return targets
 
 
 def kinsn_targets(workspace: Path, target_arch: str) -> list[Path]:
     root = kinsn_module_dir(workspace, target_arch)
     names = ["bpf_rotate.ko", "bpf_select.ko", "bpf_extract.ko", "bpf_endian.ko", "bpf_bulk_memory.ko"]
-    if str(target_arch).strip() == "arm64":
+    if _is_arm64(target_arch):
         names.insert(4, "bpf_ldp.ko")
     return [root / name for name in names]
 
@@ -142,6 +146,8 @@ def workload_tool_targets(workspace: Path, target_arch: str) -> list[Path]:
 def micro_program_targets(workspace: Path, target_arch: str) -> list[Path]:
     return [micro_program_root(workspace, target_arch) / "simple.bpf.o"]
 
+
+# --- Transfer / prep aggregators ---
 
 def _base_transfer_paths(workspace: Path, suite_name: str) -> list[Path]:
     return [workspace / entry for entry in _BASE_TRANSFER_ROOTS.get(str(suite_name).strip(), ())]
@@ -160,9 +166,10 @@ def _artifact_transfer_paths(
     scx_packages: list[str],
 ) -> list[Path]:
     arch = str(target_arch).strip()
-    paths: list[Path] = []
+    suite = str(suite_name).strip()
     artifact_root = repo_artifact_root(workspace, arch)
-    if str(suite_name).strip() in _BASE_TRANSFER_ROOTS:
+    paths: list[Path] = []
+    if suite in _BASE_TRANSFER_ROOTS:
         paths.append(runtime_container_image_tar_path(workspace, arch))
     if needs_daemon_binary:
         paths.append(daemon_binary_path(workspace, arch).parent)
@@ -172,15 +179,14 @@ def _artifact_transfer_paths(
         paths.append(workspace / "module")
     if needs_workload_tools:
         paths.append(workload_tools_root(workspace, arch))
-    if str(suite_name).strip() == "micro":
+    if suite == "micro":
         paths.append(micro_program_root(workspace, arch))
     if scx_packages:
         paths.append(artifact_root / "scx")
     for repo_name in native_repos:
         paths.append(artifact_root / str(repo_name).strip())
-    if str(suite_name).strip() == "test":
-        paths.append(test_unittest_build_dir(workspace, arch))
-        paths.append(test_negative_build_dir(workspace, arch))
+    if suite == "test":
+        paths += [test_unittest_build_dir(workspace, arch), test_negative_build_dir(workspace, arch)]
     return paths
 
 
@@ -197,9 +203,9 @@ def local_prep_targets(
     native_repos: list[str],
     scx_packages: list[str],
 ) -> list[Path]:
-    targets: list[Path] = []
     arch = str(target_arch).strip()
     suite = str(suite_name).strip()
+    targets: list[Path] = []
     if suite in _BASE_TRANSFER_ROOTS:
         targets.append(runtime_container_image_tar_path(workspace, arch))
     if str(executor).strip() == "kvm":
@@ -210,8 +216,8 @@ def local_prep_targets(
     if needs_runner_binary:
         targets.append(runner_binary_path(workspace, arch))
     if suite == "test":
-        targets.append(test_unittest_build_dir(workspace, arch) / "rejit_regression")
-        targets.append(test_negative_build_dir(workspace, arch) / "scx_prog_show_race")
+        targets += [test_unittest_build_dir(workspace, arch) / "rejit_regression",
+                    test_negative_build_dir(workspace, arch) / "scx_prog_show_race"]
     if needs_kinsn_modules:
         targets.extend(kinsn_targets(workspace, arch))
     targets.extend(scx_targets(workspace, arch, scx_packages))
@@ -220,13 +226,12 @@ def local_prep_targets(
         targets.extend(workload_tool_targets(workspace, arch))
     if suite == "micro":
         targets.extend(micro_program_targets(workspace, arch))
-    ordered: list[Path] = []
     seen: set[Path] = set()
-    for target in targets:
-        if target in seen:
-            continue
-        seen.add(target)
-        ordered.append(target)
+    ordered: list[Path] = []
+    for t in targets:
+        if t not in seen:
+            seen.add(t)
+            ordered.append(t)
     return ordered
 
 

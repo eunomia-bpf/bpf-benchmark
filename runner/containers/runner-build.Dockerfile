@@ -59,10 +59,12 @@ RUN dnf -y install --setopt=install_weak_deps=False --nodocs \
         tar \
         unzip \
         which \
+        xz \
         xz-devel \
         yaml-cpp-devel \
         zlib-devel \
         zlib-static \
+        zstd \
     && dnf clean all
 
 WORKDIR /workspace
