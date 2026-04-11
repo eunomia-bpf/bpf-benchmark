@@ -22,25 +22,28 @@ RUN dnf -y install --setopt=install_weak_deps=False --nodocs \
         double-conversion-devel \
         dwarves \
         elfutils-devel \
-        elfutils-devel-static \
         elfutils-libelf-devel \
         file \
         findutils \
         flex \
         fmt-devel \
         gcc-c++ \
+        gcc-toolset-14-gcc-c++ \
+        gcc-toolset-14-libstdc++-devel \
         git \
         glog-devel \
         golang \
         kmod \
         libaio-devel \
-        libatomic-static \
+        libbpf-devel \
         libdwarf-devel \
         libmnl-devel \
+        libpcap-devel \
         libsodium-static \
         libtool \
         libunwind-devel \
         llvm \
+        llvm-devel \
         lz4-devel \
         make \
         openssl-devel \

@@ -7,14 +7,14 @@ import statistics
 import subprocess
 import threading
 import time
-from collections import deque
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Mapping, Sequence
 
 from .. import run_command, tail_text, which
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
 from ..process_fd import dup_fd_from_process
 from ..workload import WorkloadResult, resolve_workload_tool
+from .process_support import ProcessOutputCollector
 
 
 HACKBENCH_TIME_RE = re.compile(r"Time:\s*([0-9.]+)")
@@ -25,32 +25,6 @@ SYSBENCH_EVENTS_RE = re.compile(r"events per second:\s*([0-9.]+)", re.IGNORECASE
 SYSBENCH_TOTAL_EVENTS_RE = re.compile(r"total number of events:\s*([0-9.]+)", re.IGNORECASE)
 SYSBENCH_LATENCY_AVG_RE = re.compile(r"avg:\s*([0-9.]+)", re.IGNORECASE)
 SYSBENCH_LATENCY_P95_RE = re.compile(r"95th percentile:\s*([0-9.]+)", re.IGNORECASE)
-
-
-class LineCollector:
-    def __init__(self) -> None:
-        self._lock = threading.Lock()
-        self.stdout_tail: deque[str] = deque(maxlen=200)
-        self.stderr_tail: deque[str] = deque(maxlen=200)
-
-    def consume_stdout(self, pipe: Any) -> None:
-        for raw_line in iter(pipe.readline, ""):
-            with self._lock:
-                self.stdout_tail.append(raw_line.rstrip())
-        pipe.close()
-
-    def consume_stderr(self, pipe: Any) -> None:
-        for raw_line in iter(pipe.readline, ""):
-            with self._lock:
-                self.stderr_tail.append(raw_line.rstrip())
-        pipe.close()
-
-    def snapshot(self) -> dict[str, object]:
-        with self._lock:
-            return {
-                "stdout_tail": list(self.stdout_tail),
-                "stderr_tail": list(self.stderr_tail),
-            }
 
 
 def preferred_path() -> str:
@@ -104,7 +78,7 @@ class ScxSchedulerSession:
         self.extra_args = list(extra_args)
         self.load_timeout = int(load_timeout)
         self.process: subprocess.Popen[str] | None = None
-        self.collector = LineCollector()
+        self.collector = ProcessOutputCollector()
         self.stdout_thread: threading.Thread | None = None
         self.stderr_thread: threading.Thread | None = None
         self.programs: list[dict[str, object]] = []

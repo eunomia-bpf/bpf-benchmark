@@ -13,7 +13,14 @@ from typing import Sequence
 from runner.libs.cli_support import fail
 from runner.libs.guest_prereqs import runtime_path_value
 from runner.libs.kinsn import load_kinsn_modules
-from runner.libs.manifest_file import parse_manifest
+from runner.libs.manifest_file import (
+    manifest_argv,
+    manifest_csv,
+    manifest_scalar,
+    parse_manifest,
+    required_manifest_scalar,
+)
+from runner.libs.prereq_contract import active_python_bin, inside_runtime_container, runtime_container_enabled
 from runner.libs.workspace_layout import (
     daemon_binary_path,
     kernel_modules_root,
@@ -31,21 +38,6 @@ from runner.libs.workspace_layout import (
 _die = partial(fail, "suite-entrypoint")
 
 
-def _manifest_scalar(contract: dict[str, str | list[str]], name: str, default: str = "") -> str:
-    value = contract.get(name, default)
-    if isinstance(value, list):
-        _die(f"manifest {name} must be scalar")
-    return str(value).strip()
-
-
-def _inside_runtime_container() -> bool:
-    return os.environ.get("BPFREJIT_INSIDE_RUNTIME_CONTAINER", "").strip() == "1"
-
-
-def _runtime_container_enabled(contract: dict[str, str | list[str]]) -> bool:
-    return bool(_manifest_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE"))
-
-
 def _append_bind_mount(command: list[str], source: Path, target: Path | None = None, *, readonly: bool = False) -> None:
     if not source.exists():
         return
@@ -55,9 +47,9 @@ def _append_bind_mount(command: list[str], source: Path, target: Path | None = N
 
 
 def _run_in_runtime_container(workspace: Path, manifest_path: Path, contract: dict[str, str | list[str]]) -> None:
-    runtime = _manifest_scalar(contract, "RUN_CONTAINER_RUNTIME", "docker") or "docker"
-    image = _manifest_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE")
-    python_bin = _manifest_scalar(contract, "RUN_RUNTIME_PYTHON_BIN", "python3") or "python3"
+    runtime = manifest_scalar(contract, "RUN_CONTAINER_RUNTIME", "docker", die=_die) or "docker"
+    image = manifest_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE", die=_die)
+    python_bin = manifest_scalar(contract, "RUN_RUNTIME_PYTHON_BIN", "python3", die=_die) or "python3"
     if not image:
         _die("manifest RUN_RUNTIME_CONTAINER_IMAGE is empty")
     command = [
@@ -97,13 +89,6 @@ def _run_in_runtime_container(workspace: Path, manifest_path: Path, contract: di
     completed = subprocess.run(command, cwd=workspace, text=True, check=False)
     if completed.returncode != 0:
         raise SystemExit(completed.returncode)
-
-
-def _parse_shell_argv(serialized: str) -> list[str]:
-    text = serialized.strip()
-    if not text:
-        return []
-    return shlex.split(text)
 
 
 def _argv_option_value(argv: Sequence[str], option: str) -> str:
@@ -247,22 +232,13 @@ class SuiteEntrypoint:
     e2e_argv: list[str]
 
     def _required_contract(self, name: str) -> str:
-        value = self.contract.get(name, "")
-        if isinstance(value, list) or not str(value).strip():
-            _die(f"manifest {name} is empty")
-        return str(value).strip()
+        return required_manifest_scalar(self.contract, name, die=_die)
 
     def _optional_contract(self, name: str, default: str = "") -> str:
-        value = self.contract.get(name, default)
-        if isinstance(value, list):
-            _die(f"manifest {name} must be scalar")
-        return str(value).strip()
+        return manifest_scalar(self.contract, name, default, die=_die)
 
     def _csv_contract(self, name: str) -> list[str]:
-        value = self.contract.get(name, "")
-        if isinstance(value, list):
-            return [token for token in value if token]
-        return [token for token in str(value).split(",") if token]
+        return manifest_csv(self.contract, name)
 
     def _bool_contract(self, name: str, *, default: str = "0") -> bool:
         return self._optional_contract(name, default) == "1"
@@ -279,41 +255,15 @@ class SuiteEntrypoint:
         manifest_path: Path,
         contract: dict[str, str | list[str]],
     ) -> "SuiteEntrypoint":
-        def required_scalar(name: str) -> str:
-            value = contract.get(name, "")
-            if isinstance(value, list) or not str(value).strip():
-                _die(f"manifest {name} is empty")
-            return str(value)
-
-        def optional_scalar(name: str, default: str = "") -> str:
-            value = contract.get(name, default)
-            if isinstance(value, list):
-                _die(f"manifest {name} must be scalar")
-            return str(value).strip()
-
-        def csv_value(name: str) -> list[str]:
-            value = contract.get(name, "")
-            if isinstance(value, list):
-                tokens = value
-            else:
-                tokens = [token for token in str(value).split(",") if token]
-            return [token for token in tokens if token]
-
-        def argv_value(name: str) -> list[str]:
-            value = contract.get(name, [])
-            if isinstance(value, list):
-                return list(value)
-            return _parse_shell_argv(str(value))
-
-        target_name = required_scalar("RUN_TARGET_NAME")
-        suite_name = required_scalar("RUN_SUITE_NAME")
-        target_arch = required_scalar("RUN_TARGET_ARCH")
-        executor = required_scalar("RUN_EXECUTOR")
-        run_token = required_scalar("RUN_TOKEN")
-        python_bin = required_scalar("RUN_REMOTE_PYTHON_BIN")
-        if _inside_runtime_container():
-            python_bin = optional_scalar("RUN_RUNTIME_PYTHON_BIN", python_bin) or python_bin
-        bpftool_bin = required_scalar("RUN_BPFTOOL_BIN")
+        target_name = required_manifest_scalar(contract, "RUN_TARGET_NAME", die=_die)
+        suite_name = required_manifest_scalar(contract, "RUN_SUITE_NAME", die=_die)
+        target_arch = required_manifest_scalar(contract, "RUN_TARGET_ARCH", die=_die)
+        executor = required_manifest_scalar(contract, "RUN_EXECUTOR", die=_die)
+        run_token = required_manifest_scalar(contract, "RUN_TOKEN", die=_die)
+        python_bin = active_python_bin(contract)
+        if not python_bin:
+            _die("manifest RUN_REMOTE_PYTHON_BIN is empty")
+        bpftool_bin = required_manifest_scalar(contract, "RUN_BPFTOOL_BIN", die=_die)
         artifact_dir = None
         if suite_name == "test":
             artifact_dir = workspace / "tests" / "results" / run_token
@@ -328,8 +278,8 @@ class SuiteEntrypoint:
             python_bin=python_bin,
             bpftool_bin=bpftool_bin,
             artifact_dir=artifact_dir,
-            corpus_argv=argv_value("RUN_CORPUS_ARGV"),
-            e2e_argv=argv_value("RUN_E2E_ARGV"),
+            corpus_argv=manifest_argv(contract, "RUN_CORPUS_ARGV"),
+            e2e_argv=manifest_argv(contract, "RUN_E2E_ARGV"),
         )
 
     def _runtime_env(self) -> dict[str, str]:
@@ -377,6 +327,13 @@ class SuiteEntrypoint:
         if shutil.which(self.python_bin, path=env["PATH"]) is None:
             _die(f"required command is missing: {self.python_bin}")
         return env
+
+    def _env_with_cross_runtime_ld(self, env: dict[str, str]) -> tuple[dict[str, str], str]:
+        runtime_env = env.copy()
+        runtime_ld = _cross_runtime_ld_library_path(self.workspace, self.target_arch)
+        if runtime_ld:
+            runtime_env["LD_LIBRARY_PATH"] = runtime_ld
+        return runtime_env, runtime_ld
 
     def _repo_build_root(self) -> Path:
         return repo_artifact_root(self.workspace, self.target_arch)
@@ -503,12 +460,9 @@ class SuiteEntrypoint:
         if not tests:
             print(f"ERROR: no rejit_* test binaries found in {build_dir}", file=sys.stderr)
             return 0, 1
-        runtime_env = env.copy()
+        runtime_env, _ = self._env_with_cross_runtime_ld(env)
         runtime_env["BPFREJIT_PROGS_DIR"] = str(build_dir / "progs")
         runtime_env["BPFREJIT_DAEMON_PATH"] = str(self._resolve_test_daemon())
-        runtime_ld = _cross_runtime_ld_library_path(self.workspace, self.target_arch)
-        if runtime_ld:
-            runtime_env["LD_LIBRARY_PATH"] = runtime_ld
         for test_binary in tests:
             print(f"--- {test_binary.name} ---", file=sys.stderr)
             if _run_with_status([str(test_binary), str(build_dir / "progs")], cwd=self.workspace, env=runtime_env, log_path=log_path):
@@ -527,10 +481,7 @@ class SuiteEntrypoint:
     ) -> tuple[int, int]:
         self._log_test_section("Running tests/negative/ adversarial suite")
         negative_build = self._test_negative_build_dir()
-        runtime_env = env.copy()
-        runtime_ld = _cross_runtime_ld_library_path(self.workspace, self.target_arch)
-        if runtime_ld:
-            runtime_env["LD_LIBRARY_PATH"] = runtime_ld
+        runtime_env, runtime_ld = self._env_with_cross_runtime_ld(env)
         passed = 0
         failed = 0
         tests: list[tuple[str, list[str], dict[str, str]]] = [
@@ -637,12 +588,9 @@ class SuiteEntrypoint:
 
     def _run_micro_suite(self, env: dict[str, str]) -> None:
         self._ensure_runner_binary()
-        runtime_env = env.copy()
+        runtime_env, _ = self._env_with_cross_runtime_ld(env)
         runtime_env["BPFREJIT_MICRO_PROGRAM_DIR"] = str(micro_program_root(self.workspace, self.target_arch))
         runtime_env["BPFREJIT_MICRO_RUNNER_BINARY"] = str(runner_binary_path(self.workspace, self.target_arch))
-        runtime_ld = _cross_runtime_ld_library_path(self.workspace, self.target_arch)
-        if runtime_ld:
-            runtime_env["LD_LIBRARY_PATH"] = runtime_ld
         output_json = self.workspace / "micro" / "results" / f"{self.target_name}_micro.json"
         command = [
             self.python_bin,
@@ -664,10 +612,7 @@ class SuiteEntrypoint:
 
     def _run_corpus_suite(self, env: dict[str, str]) -> None:
         self._ensure_scx_artifacts()
-        runtime_env = env.copy()
-        runtime_ld = _cross_runtime_ld_library_path(self.workspace, self.target_arch)
-        if runtime_ld:
-            runtime_env["LD_LIBRARY_PATH"] = runtime_ld
+        runtime_env, _ = self._env_with_cross_runtime_ld(env)
         self._ensure_katran_bundle()
         output_json = self.workspace / "corpus" / "results" / f"{self.target_name}_corpus.json"
         output_md = self.workspace / "corpus" / "results" / f"{self.target_name}_corpus.md"
@@ -692,10 +637,7 @@ class SuiteEntrypoint:
         _run_checked(command, cwd=self.workspace, env=runtime_env)
 
     def _run_e2e_case(self, case_name: str, env: dict[str, str]) -> None:
-        runtime_env = env.copy()
-        runtime_ld = _cross_runtime_ld_library_path(self.workspace, self.target_arch)
-        if runtime_ld:
-            runtime_env["LD_LIBRARY_PATH"] = runtime_ld
+        runtime_env, _ = self._env_with_cross_runtime_ld(env)
         command = [
             self.python_bin,
             str(self.workspace / "e2e" / "driver.py"),
@@ -723,12 +665,12 @@ class SuiteEntrypoint:
             self._run_e2e_case(case_name, case_env)
 
     def run(self) -> None:
-        if _runtime_container_enabled(self.contract) and not _inside_runtime_container():
+        if runtime_container_enabled(self.contract) and not inside_runtime_container():
             _run_in_runtime_container(self.workspace, self.manifest_path, self.contract)
             return
         env = self._runtime_env()
         os.chdir(self.workspace)
-        if _inside_runtime_container() and shutil.which("ip", path=env["PATH"]) is not None:
+        if inside_runtime_container() and shutil.which("ip", path=env["PATH"]) is not None:
             _run_checked(["ip", "link", "set", "lo", "up"], cwd=self.workspace, env=env)
         if self.suite_name == "test":
             artifact_dir = self._artifact_dir_required()

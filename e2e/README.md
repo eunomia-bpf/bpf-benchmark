@@ -50,7 +50,7 @@ Results live under `e2e/results/<run_type>_<timestamp>/`. `metadata.json` is the
 
 ### bpftrace
 
-- No separate setup script; the case requires `bpftrace >= 0.16`, `bpftool`, and workload tools already in `PATH`
+- Uses the repo-managed, fully static `.cache/repo-artifacts/<arch>/bpftrace/bin/bpftrace` artifact plus `bpftool` and workload tools in `PATH`
 - Scripts live under `e2e/cases/bpftrace/scripts/`
 - The case expects the canonical runner and daemon artifacts to already exist at their prepared paths
 - `--vm` is not supported in `e2e/driver.py`

@@ -154,8 +154,10 @@ The active implementation keeps these boundaries:
 - [x] Create fixed build container definitions for every active target
   combination we build locally.
   Current state: `runner/containers/runner-build.Dockerfile` is the canonical
-  build image definition. Make builds it for both `linux/amd64` and
-  `linux/arm64`.
+  build image definition for runner, kernel, tests, workload tools, and most
+  native repos. bpftrace uses its upstream `docker/Dockerfile.static` as a
+  dedicated static build image. Make builds both image families for the target
+  platform, including `linux/amd64` and `linux/arm64`.
 
 ### Build in Containers
 
@@ -168,6 +170,11 @@ The active implementation keeps these boundaries:
   under `.cache/micro-programs/<arch>` via Make.
 - [x] Convert `scx`, `bcc`, `tracee`, `tetragon`, `katran`, and
   `workload-tools` to fixed distro build containers.
+- [x] Convert bpftrace to its upstream static build container and CMake install
+  target. The runtime artifact is `.cache/repo-artifacts/<arch>/bpftrace/bin/bpftrace`
+  and is fully static; the build disables optional BFD/opcodes discovery so the
+  runtime container does not need `bcc`, `clang`, `libpcap`, musl, or hand-copied
+  shared libraries.
 - [x] Build native repo artifacts from per-arch scratch source/build roots
   instead of writing into shared checkouts.
 - [x] Stop producing shared AWS kernel transport packages. AWS prep now calls
@@ -176,7 +183,7 @@ The active implementation keeps these boundaries:
 
 ### Runtime Container
 
-- [x] Replace portable wrapper generation with runtime container execution.
+- [x] Replace host-side wrapper generation with runtime container execution.
   Current state: Make builds `runner-runtime.Dockerfile` for the target arch,
   saves it as `.cache/container-images/<arch>-runner-runtime.image.tar`, and
   the host entrypoint loads that image before executing the suite inside it.
@@ -196,8 +203,9 @@ The active implementation keeps these boundaries:
 
 ### Thin Orchestration
 
-- [x] Make `run_target_suite.py` resolve final artifacts and host/run contracts
-  only.
+- [x] Keep `run_target_suite.py` as a thin contract/dispatch layer: it writes the
+  manifest, asks `workspace_layout.py` for final Make targets, dispatches
+  AWS/KVM execution, and delegates AWS failure cleanup to `aws_executor.py`.
 - [x] Keep AWS/KVM prep from installing userspace packages at run time.
 - [x] Remove remaining bundle-root assumptions from transfer and consumption
   paths.

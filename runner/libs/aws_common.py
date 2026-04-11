@@ -4,29 +4,23 @@ import os
 import shlex
 import subprocess
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
-from runner.libs.manifest_file import parse_manifest
+from runner.libs.manifest_file import manifest_scalar, parse_manifest, required_manifest_scalar
 from runner.libs.state_file import read_state
+
+_die = partial(fail, "aws-common")
 
 
 def _require_scalar(contract: dict[str, str | list[str]], name: str) -> str:
-    value = contract.get(name, "")
-    if isinstance(value, list):
-        fail("aws-common", f"manifest {name} must be a scalar")
-    scalar = value.strip()
-    if not scalar:
-        fail("aws-common", f"manifest {name} is empty")
-    return scalar
+    return required_manifest_scalar(contract, name, die=_die)
 
 
 def _optional_scalar(contract: dict[str, str | list[str]], name: str, default: str = "") -> str:
-    value = contract.get(name, default)
-    if isinstance(value, list):
-        fail("aws-common", f"manifest {name} must be a scalar")
-    return value.strip()
+    return manifest_scalar(contract, name, default, die=_die)
 
 
 @dataclass(frozen=True)

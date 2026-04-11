@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import re
 import secrets
-import shlex
 import shutil
 import subprocess
 import sys
@@ -11,9 +10,9 @@ from functools import partial
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
-from runner.libs import aws_common
+from runner.libs import aws_executor
 from runner.libs.cli_support import fail
-from runner.libs.manifest_file import parse_manifest
+from runner.libs.manifest_file import base_env_from_manifest, parse_manifest
 from runner.libs.run_contract import build_manifest, build_target_manifest, write_manifest_file
 from runner.libs.workspace_layout import local_prep_targets
 
@@ -39,17 +38,6 @@ def _python_module_command(module: str, *args: str) -> list[str]:
     return [sys.executable, "-m", module, *args]
 
 
-def _base_env_from_contract(contract: dict[str, str | list[str]]) -> dict[str, str]:
-    env: dict[str, str] = {}
-    for name in ("PATH", "HOME", "USER", "LOGNAME", "TERM", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE", "SHELL"):
-        value = os.environ.get(name, "").strip()
-        if value:
-            env[name] = value
-    for name, value in contract.items():
-        env[name] = shlex.join(value) if isinstance(value, list) else value
-    return env
-
-
 def _run_local_prep(manifest_path: Path) -> None:
     contract = parse_manifest(manifest_path)
     env = _local_prep_env(contract=contract, manifest_path=manifest_path)
@@ -61,10 +49,13 @@ def _run_local_prep(manifest_path: Path) -> None:
 
 
 def _local_prep_env(*, contract: dict[str, str | list[str]], manifest_path: Path) -> dict[str, str]:
-    env = _base_env_from_contract(contract)
+    env = base_env_from_manifest(contract)
     host_python_bin = str(contract.get("RUN_HOST_PYTHON_BIN", "")).strip()
     if not host_python_bin:
         _die("manifest host python is missing")
+    run_llvm_dir = str(contract.get("RUN_LLVM_DIR", "")).strip()
+    if run_llvm_dir and not env.get("LLVM_DIR", "").strip():
+        env["LLVM_DIR"] = run_llvm_dir
     env.update(
         {
             "ROOT_DIR": str(ROOT_DIR),
@@ -144,19 +135,10 @@ def _write_target_manifest(target_name: str, manifest_path: Path) -> None:
 
 
 def _cleanup_failed_aws_prep(manifest_path: Path) -> None:
-    if not manifest_path.is_file():
-        return
-    ctx = aws_common._build_context("run", manifest_path)
-    state: dict[str, str] = {}
-    if ctx.state_file.is_file():
-        state = aws_common._load_instance_state(ctx)
-    instance_id = state.get("STATE_INSTANCE_ID", "").strip()
-    if instance_id:
-        try:
-            aws_common._terminate_instance(ctx, instance_id)
-        except Exception:
-            pass
-    shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
+    try:
+        aws_executor.cleanup_failed_run_for_manifest(manifest_path)
+    except Exception:
+        pass
 
 
 def _run_token(target_name: str, suite_name: str) -> str:

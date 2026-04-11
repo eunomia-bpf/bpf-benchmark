@@ -871,16 +871,31 @@ def run_mixed_workload(duration_s: float) -> WorkloadResult:
     return _merge_workload_results(results)
 
 
-def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadResult:
+def run_named_workload(
+    workload_kind: str,
+    duration_s: int | float,
+    *,
+    network_as_tcp_connect: bool = False,
+) -> WorkloadResult:
     seconds = max(1, int(round(float(duration_s))))
     kind = str(workload_kind or "").strip()
+    if kind == "mixed":
+        return run_mixed_workload(float(duration_s))
+    if kind == "tcp_connect":
+        return run_tcp_connect_load(seconds)
+    if kind == "scheduler":
+        return run_scheduler_load(seconds)
     if kind == "exec_storm":
         return run_exec_storm(seconds, rate=2)
-    if kind == "file_open_storm":
+    if kind in {"exec_loop", "minimal_syscall"}:
+        return run_user_exec_loop(seconds)
+    if kind in {"file_open", "file_open_storm"}:
         return run_file_open_load(seconds)
     if kind in {"network", "tracee_default"}:
         if kind == "tracee_default":
             return run_tracee_default_load(float(duration_s))
+        if network_as_tcp_connect:
+            return run_tcp_connect_load(seconds)
         return run_network_load(seconds)
     if kind == "block_io":
         return run_block_io_load(float(duration_s))
@@ -892,8 +907,6 @@ def run_named_workload(workload_kind: str, duration_s: int | float) -> WorkloadR
         return run_scheduler_load(seconds)
     if kind == "bind_storm":
         return run_bind_storm(seconds)
-    if kind == "minimal_syscall":
-        return run_user_exec_loop(seconds)
     if kind == "vfs_create_write_fsync":
         return run_vfs_create_write_fsync_load(seconds)
     if kind == "iterator_poll":

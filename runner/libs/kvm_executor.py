@@ -1,29 +1,19 @@
 from __future__ import annotations
 
-import subprocess
 import sys
 from functools import partial
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
-from runner.libs.manifest_file import parse_manifest
+from runner.libs.manifest_file import manifest_scalar, parse_manifest, required_manifest_scalar
+from runner.libs.vm import run_in_vm, write_guest_script
 
 _die = partial(fail, "kvm-executor")
 
 
-def _require_scalar(mapping: dict[str, str | list[str]], name: str) -> str:
-    value = mapping.get(name, "")
-    if isinstance(value, list):
-        _die(f"manifest {name} must be scalar")
-    value = value.strip()
-    if not value:
-        _die(f"manifest {name} is empty")
-    return value
-
-
 def suite_command(workspace_root: Path, manifest_path: Path, contract: dict[str, str | list[str]]) -> str:
-    remote_python = _require_scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+    remote_python = required_manifest_scalar(contract, "RUN_REMOTE_PYTHON_BIN", die=_die)
     return (
         f'cd "{workspace_root}" && '
         f'PYTHONPATH="{workspace_root}${{PYTHONPATH:+:${{PYTHONPATH}}}}" '
@@ -32,38 +22,34 @@ def suite_command(workspace_root: Path, manifest_path: Path, contract: dict[str,
     )
 
 
-def build_vm_command(workspace_root: Path, manifest_path: Path, contract: dict[str, str | list[str]]) -> list[str]:
-    runner_dir = ROOT_DIR / "runner"
-    command = [
-        _require_scalar(contract, "RUN_HOST_PYTHON_BIN"),
-        str(runner_dir / "scripts" / "run_vm_shell.py"),
-        "--vm-backend",
-        _require_scalar(contract, "RUN_VM_BACKEND"),
-        "--vm-executable",
-        _require_scalar(contract, "RUN_VM_EXECUTABLE"),
-        "--kernel-image",
-        _require_scalar(contract, "RUN_VM_KERNEL_IMAGE"),
-        "--timeout",
-        _require_scalar(contract, "RUN_VM_TIMEOUT_SECONDS"),
-        "--cwd",
-        str(ROOT_DIR),
-        "--rwdir",
-        str(ROOT_DIR),
-        "--command",
-        suite_command(workspace_root, manifest_path, contract),
-    ]
-    if cpus := _require_optional_scalar(contract, "RUN_VM_CPUS"):
-        command.extend(["--cpus", cpus])
-    if mem := _require_optional_scalar(contract, "RUN_VM_MEM"):
-        command.extend(["--mem", mem])
-    return command
+def _optional_int(mapping: dict[str, str | list[str]], name: str) -> int | None:
+    value = manifest_scalar(mapping, name, die=_die)
+    if not value:
+        return None
+    return int(value)
 
 
-def _require_optional_scalar(mapping: dict[str, str | list[str]], name: str) -> str:
-    value = mapping.get(name, "")
-    if isinstance(value, list):
-        _die(f"manifest {name} must be scalar")
-    return value.strip()
+def run_vm_suite(workspace_root: Path, manifest_path: Path, contract: dict[str, str | list[str]]) -> int:
+    guest_script = write_guest_script(
+        [suite_command(workspace_root, manifest_path, contract)],
+        initial_cwd=ROOT_DIR,
+    )
+    completed = run_in_vm(
+        required_manifest_scalar(contract, "RUN_VM_KERNEL_IMAGE", die=_die),
+        guest_script,
+        _optional_int(contract, "RUN_VM_CPUS"),
+        manifest_scalar(contract, "RUN_VM_MEM", die=_die) or None,
+        int(required_manifest_scalar(contract, "RUN_VM_TIMEOUT_SECONDS", die=_die)),
+        cwd=ROOT_DIR,
+        rwdirs=(ROOT_DIR,),
+        vm_executable=required_manifest_scalar(contract, "RUN_VM_EXECUTABLE", die=_die),
+        machine_backend=required_manifest_scalar(contract, "RUN_VM_BACKEND", die=_die),
+    )
+    if completed.stdout:
+        sys.stdout.write(completed.stdout)
+    if completed.stderr:
+        sys.stderr.write(completed.stderr)
+    return completed.returncode
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -76,18 +62,11 @@ def main(argv: list[str] | None = None) -> None:
 
     contract = parse_manifest(manifest_path)
 
-    executor = _require_scalar(contract, "RUN_EXECUTOR")
+    executor = required_manifest_scalar(contract, "RUN_EXECUTOR", die=_die)
     if executor != "kvm":
         _die(f"manifest executor is not kvm: {executor}")
     workspace_root = ROOT_DIR
-    completed = subprocess.run(
-        build_vm_command(workspace_root, manifest_path, contract),
-        cwd=ROOT_DIR,
-        text=True,
-        capture_output=False,
-        check=False,
-    )
-    raise SystemExit(completed.returncode)
+    raise SystemExit(run_vm_suite(workspace_root, manifest_path, contract))
 
 
 if __name__ == "__main__":

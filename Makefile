@@ -115,11 +115,11 @@ $(KERNEL_CONFIG_PATH): $(DEFCONFIG_SRC)
 check:
 	$(PYTHON) -m py_compile \
 		micro/catalog.py \
+		runner/libs/kvm_executor.py \
 		runner/libs/run_contract.py \
 		runner/libs/run_target_suite.py \
 		runner/libs/suite_entrypoint.py \
-		runner/scripts/check_contracts.py
-	$(PYTHON) runner/scripts/check_contracts.py
+		runner/libs/vm.py
 
 validate:
 	$(MAKE) check

@@ -85,8 +85,8 @@ AWS targets require explicit local configuration for:
 The canonical lookup source is:
 - process environment only
 
-Micro suite runs also require an explicit LLVM contract for llvmbpf-enabled
-runner builds:
+Micro suite runner builds use the LLVM CMake package in the build container by
+default. Override it only for host-side debugging with:
 - `LLVM_DIR`, or
 - `LLVM_CONFIG` (the root `Makefile` defaults this to `llvm-config$(UPSTREAM_SELFTEST_LLVM_SUFFIX)`)
 
@@ -104,11 +104,13 @@ plus a small developer helper surface for direct kernel/module lifecycle work.
 Active local prep/build flows through real Make targets resolved by the Python
 runner libraries. Active benchmark execution uses fixed build containers for
 artifact production plus host-kernel execution with privileged runtime
-containers for suite userspace.
+containers for suite userspace. bpftrace is built as a repo artifact through
+its upstream static Dockerfile and CMake install target, so the runtime image
+does not need bpftrace, BCC, or Clang packages.
 
 ## Layer Notes
 
-`runner/` owns target/suite contracts under `runner/targets/` and `runner/suites/`, the shared `micro_exec` C++ runner, Python executors/orchestrators under `runner/libs/`, and small validation/VM helpers under `runner/scripts/`.
+`runner/` owns target/suite contracts under `runner/targets/` and `runner/suites/`, the shared `micro_exec` C++ runner, and Python executors/orchestrators under `runner/libs/`.
 
 `micro/` owns the isolated benchmark manifests (`micro/config/micro_pure_jit.yaml`), input generators, and the Python suite driver (`micro/driver.py`).
 

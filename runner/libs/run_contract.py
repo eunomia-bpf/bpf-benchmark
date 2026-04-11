@@ -21,6 +21,7 @@ from runner.libs.manifest_file import (
 TARGETS_DIR = ROOT_DIR / "runner" / "targets"
 SUITES_DIR = ROOT_DIR / "runner" / "suites"
 DEFAULT_CORPUS_APP_SUITE = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
+DEFAULT_BUILD_CONTAINER_LLVM_DIR = "/usr/lib64/llvm20/lib64/cmake/llvm"
 REMOTE_COMMAND_ORDER = ("ip", "taskset", "setpriv", "curl", "tar", "dd", "tc", "stress-ng", "fio", "bpftrace", "hackbench", "sysbench", "wrk")
 
 CORPUS_WORKLOAD_KIND_COMMANDS = {
@@ -85,6 +86,9 @@ def _resolve_repo_path(path: str) -> str:
 
 
 def _resolve_manifest_llvm_dir(values: dict[str, str]) -> str:
+    explicit_run_dir = _env_or_default(values, "RUN_LLVM_DIR")
+    if explicit_run_dir:
+        return _resolve_repo_path(explicit_run_dir)
     explicit_dir = _env_or_default(values, "LLVM_DIR")
     if explicit_dir:
         return _resolve_repo_path(explicit_dir)
@@ -321,10 +325,10 @@ def _suite_repos_for_e2e_cases(cases_csv: str) -> str:
 
 def _native_repos_for_e2e_cases(cases_csv: str) -> str:
     if cases_csv == "all":
-        return "bcc,katran,tracee,tetragon"
+        return "bcc,bpftrace,katran,tracee,tetragon"
     repos = ""
     for token in _csv_tokens(cases_csv):
-        if token in {"bcc", "katran", "tracee", "tetragon"}:
+        if token in {"bcc", "bpftrace", "katran", "tracee", "tetragon"}:
             repos = _append_csv(repos, token)
     return repos
 
@@ -450,7 +454,7 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
             _die("x86-kvm target is missing TARGET_KVM_BACKEND")
         if not run_vm_executable:
             _die("x86-kvm target is missing TARGET_KVM_EXECUTABLE")
-        if not Path(run_vm_executable).is_absolute():
+        if not Path(run_vm_executable).is_absolute() and "/" in run_vm_executable:
             run_vm_executable = str((ROOT_DIR / run_vm_executable).resolve())
         run_test_mode = _env_or_default(values, "TEST_MODE", "test")
         run_bench_samples = _env_or_default(values, "SAMPLES", "1")
@@ -552,9 +556,7 @@ def _build_manifest_mapping(target_name: str, suite_name: str, *, env: dict[str,
 
     run_needs_workload_tools = suite.get("SUITE_NEEDS_WORKLOAD_TOOLS", "0")
     if run_needs_llvmbpf == "1":
-        run_llvm_dir = _resolve_manifest_llvm_dir(values)
-        if not run_llvm_dir:
-            _die(f"suite {suite_name} requires explicit LLVM_DIR or LLVM_CONFIG")
+        run_llvm_dir = _resolve_manifest_llvm_dir(values) or DEFAULT_BUILD_CONTAINER_LLVM_DIR
 
     return {
         "RUN_TARGET_NAME": target_name,

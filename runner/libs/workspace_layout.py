@@ -101,6 +101,9 @@ def native_repo_targets(workspace: Path, target_arch: str, native_repos: list[st
                 )
             )
             continue
+        if repo_name == "bpftrace":
+            targets.append(root / "bpftrace" / "bin" / "bpftrace")
+            continue
         if repo_name == "tetragon":
             tetragon_root = root / "tetragon"
             targets.extend(

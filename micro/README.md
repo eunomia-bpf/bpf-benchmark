@@ -23,7 +23,9 @@ Canonical preparation goes through the root `Makefile` (`make vm-micro`) and
 the Python local-prep pipeline. Direct `python3 micro/driver.py ...` execution
 assumes `runner/build/micro_exec` plus the staged `.bpf.o` inputs under
 `.cache/micro-programs/<arch>/` already exist. For direct driver debugging, set
-`BPFREJIT_MICRO_PROGRAM_DIR` to the prepared program directory.
+`BPFREJIT_MICRO_PROGRAM_DIR` to the prepared program directory and
+`BPFREJIT_MICRO_RUNNER_BINARY` when using a non-default runner build such as
+`runner/build-arm64/micro_exec`.
 
 ## Usage
 

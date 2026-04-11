@@ -7,39 +7,26 @@ from functools import partial
 from pathlib import Path
 
 from runner.libs.cli_support import fail
-from runner.libs.manifest_file import parse_manifest
-from runner.libs.prereq_contract import bundled_commands, env_csv, python_import_name, required_commands
+from runner.libs.manifest_file import manifest_scalar, parse_manifest
+from runner.libs.prereq_contract import (
+    active_python_bin,
+    bundled_commands,
+    env_csv,
+    inside_runtime_container,
+    python_import_name,
+    required_commands,
+    runtime_container_enabled,
+)
 
 die = partial(fail, "guest-prereqs")
 
 
-def _scalar(contract: dict[str, str | list[str]], name: str) -> str:
-    value = contract.get(name, "")
-    if isinstance(value, list):
-        die(f"manifest {name} must be scalar")
-    return value.strip()
-
-
-def _inside_runtime_container() -> bool:
-    return os.environ.get("BPFREJIT_INSIDE_RUNTIME_CONTAINER", "").strip() == "1"
-
-
-def _runtime_container_enabled(contract: dict[str, str | list[str]]) -> bool:
-    return bool(_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE"))
-
-
 def _container_runtime(contract: dict[str, str | list[str]]) -> str:
-    return _scalar(contract, "RUN_CONTAINER_RUNTIME") or "docker"
-
-
-def _active_python_bin(contract: dict[str, str | list[str]]) -> str:
-    if _inside_runtime_container():
-        return _scalar(contract, "RUN_RUNTIME_PYTHON_BIN") or _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
-    return _scalar(contract, "RUN_REMOTE_PYTHON_BIN")
+    return manifest_scalar(contract, "RUN_CONTAINER_RUNTIME", die=die) or "docker"
 
 
 def _runtime_image_tar_path(workspace: Path, contract: dict[str, str | list[str]]) -> Path:
-    configured = _scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE_TAR")
+    configured = manifest_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE_TAR", die=die)
     if not configured:
         die("manifest RUN_RUNTIME_CONTAINER_IMAGE_TAR is empty")
     candidate = Path(configured)
@@ -62,7 +49,7 @@ def _container_image_available(runtime: str, image: str, *, path_value: str) -> 
 
 def _ensure_runtime_container_image(workspace: Path, contract: dict[str, str | list[str]], *, path_value: str) -> None:
     runtime = _container_runtime(contract)
-    image = _scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE")
+    image = manifest_scalar(contract, "RUN_RUNTIME_CONTAINER_IMAGE", die=die)
     if not runtime:
         die("manifest RUN_CONTAINER_RUNTIME is empty")
     if not image:
@@ -81,8 +68,11 @@ def _ensure_runtime_container_image(workspace: Path, contract: dict[str, str | l
 
 def runtime_path_value(workspace: Path, contract: dict[str, str | list[str]]) -> str:
     path_entries: list[str] = []
-    target_arch = _scalar(contract, "RUN_TARGET_ARCH")
+    target_arch = manifest_scalar(contract, "RUN_TARGET_ARCH", die=die)
     if target_arch:
+        repo_bin_dir = workspace / ".cache" / "repo-artifacts" / target_arch / "bpftrace" / "bin"
+        if repo_bin_dir.is_dir():
+            path_entries.append(str(repo_bin_dir))
         bundled_tool_dir = workspace / ".cache" / "workload-tools" / target_arch / "bin"
         if bundled_tool_dir.is_dir():
             path_entries.append(str(bundled_tool_dir))
@@ -93,7 +83,7 @@ def runtime_path_value(workspace: Path, contract: dict[str, str | list[str]]) ->
 
 
 def bundled_tool_dir(workspace: Path, contract: dict[str, str | list[str]]) -> Path | None:
-    target_arch = _scalar(contract, "RUN_TARGET_ARCH")
+    target_arch = manifest_scalar(contract, "RUN_TARGET_ARCH", die=die)
     if not target_arch:
         return None
     candidate = workspace / ".cache" / "workload-tools" / target_arch / "bin"
@@ -158,12 +148,12 @@ def ensure_loopback_up(*, path_value: str) -> None:
 
 def ensure_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
     path_value = runtime_path_value(workspace, contract)
-    if _runtime_container_enabled(contract) and not _inside_runtime_container():
+    if runtime_container_enabled(contract) and not inside_runtime_container():
         _ensure_runtime_container_image(workspace, contract, path_value=path_value)
         return
 
     missing_commands: list[str] = []
-    python_bin = _active_python_bin(contract)
+    python_bin = active_python_bin(contract)
     bundled = set(bundled_commands(contract=contract))
     for command_name in required_commands(contract=contract):
         if command_name in bundled:
@@ -205,7 +195,7 @@ def ensure_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) 
 
 def validate_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]) -> None:
     path_value = runtime_path_value(workspace, contract)
-    if _runtime_container_enabled(contract) and not _inside_runtime_container():
+    if runtime_container_enabled(contract) and not inside_runtime_container():
         _ensure_runtime_container_image(workspace, contract, path_value=path_value)
         return
 
@@ -222,7 +212,7 @@ def validate_guest_prereqs(workspace: Path, contract: dict[str, str | list[str]]
         if shutil.which(command_name, path=path_value) is None:
             die(f"required guest command is missing: {command_name}")
 
-    python_bin = _active_python_bin(contract)
+    python_bin = active_python_bin(contract)
     if python_bin and shutil.which(python_bin, path=path_value) is None:
         die(f"required guest command is missing: {python_bin}")
 

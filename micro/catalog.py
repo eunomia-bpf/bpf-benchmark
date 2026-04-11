@@ -232,6 +232,7 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
     benchmark_defaults = dict(data.get("benchmark_defaults", {}))
     default_io_mode = str(benchmark_defaults.get("io_mode", "map"))
     program_dir_override = os.environ.get("BPFREJIT_MICRO_PROGRAM_DIR", "").strip()
+    runner_binary_override = os.environ.get("BPFREJIT_MICRO_RUNNER_BINARY", "").strip()
     program_dir = _resolve_path(program_dir_override or data.get("paths", {}).get("program_dir"), root_dir)
     if program_dir is None:
         raise ValueError("micro manifest missing paths.program_dir")
@@ -285,7 +286,7 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
             raw=defaults_raw,
         ),
         build=CatalogBuild(
-            runner_binary=_resolve_path(build_data.get("runner_binary"), root_dir),
+            runner_binary=_resolve_path(runner_binary_override or build_data.get("runner_binary"), root_dir),
         ),
         runtimes=runtimes,
         targets=_validate_target_names(targets),

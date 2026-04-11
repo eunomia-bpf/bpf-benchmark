@@ -44,22 +44,12 @@ set(MICRO_EXEC_SOURCES
 )
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)
-    if(NOT DEFINED MICRO_LLVMBPF_LIBRARY OR "${MICRO_LLVMBPF_LIBRARY}" STREQUAL "")
-        message(FATAL_ERROR "MICRO_EXEC_ENABLE_LLVMBPF=ON requires explicit MICRO_LLVMBPF_LIBRARY")
-    endif()
-    if(NOT EXISTS "${MICRO_LLVMBPF_LIBRARY}")
-        message(FATAL_ERROR "MICRO_EXEC_ENABLE_LLVMBPF=ON requires ${MICRO_LLVMBPF_LIBRARY}")
-    endif()
     if(NOT DEFINED LLVM_DIR OR "${LLVM_DIR}" STREQUAL "")
         message(FATAL_ERROR "MICRO_EXEC_ENABLE_LLVMBPF=ON requires explicit LLVM_DIR")
     endif()
 
-    add_library(vendor_llvmbpf STATIC IMPORTED GLOBAL)
-    set_target_properties(vendor_llvmbpf PROPERTIES
-        IMPORTED_LOCATION "${MICRO_LLVMBPF_LIBRARY}"
-        INTERFACE_INCLUDE_DIRECTORIES "${MICRO_REPO_ROOT}/vendor/llvmbpf/include;${MICRO_REPO_ROOT}/vendor/llvmbpf/src"
-    )
     find_package(LLVM REQUIRED CONFIG PATHS "${LLVM_DIR}" NO_DEFAULT_PATH)
+    pkg_check_modules(SPDLOG REQUIRED IMPORTED_TARGET spdlog)
 
     # Keep this list aligned with vendor/llvmbpf/CMakeLists.txt so host-cross
     # builds can link against target LLVM libraries without executing a target
@@ -97,37 +87,18 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
     )
     llvm_map_components_to_libnames(MICRO_EXEC_LLVM_LIBS ${MICRO_EXEC_LLVM_COMPONENTS})
 
-    set(MICRO_LLVMBPF_SPDLOG_LIBRARY "")
-    if(DEFINED MICRO_LLVMBPF_SPDLOG_LIBRARY AND NOT "${MICRO_LLVMBPF_SPDLOG_LIBRARY}" STREQUAL "")
-        if(NOT EXISTS "${MICRO_LLVMBPF_SPDLOG_LIBRARY}")
-            message(FATAL_ERROR "MICRO_LLVMBPF_SPDLOG_LIBRARY is missing: ${MICRO_LLVMBPF_SPDLOG_LIBRARY}")
-        endif()
-    elseif(DEFINED MICRO_LLVMBPF_BUILD_CACHE AND NOT "${MICRO_LLVMBPF_BUILD_CACHE}" STREQUAL "")
-        get_filename_component(MICRO_LLVMBPF_BUILD_DIR "${MICRO_LLVMBPF_BUILD_CACHE}" DIRECTORY)
-        foreach(
-            SPDLOG_CANDIDATE
-            "${MICRO_LLVMBPF_BUILD_DIR}/_deps/spdlog-build/libspdlogd.a"
-            "${MICRO_LLVMBPF_BUILD_DIR}/_deps/spdlog-build/libspdlog.a"
-        )
-            if(EXISTS "${SPDLOG_CANDIDATE}")
-                set(MICRO_LLVMBPF_SPDLOG_LIBRARY "${SPDLOG_CANDIDATE}")
-                break()
-            endif()
-        endforeach()
-    endif()
-    if(MICRO_LLVMBPF_SPDLOG_LIBRARY)
-        add_library(vendor_llvmbpf_spdlog STATIC IMPORTED GLOBAL)
-        set_target_properties(vendor_llvmbpf_spdlog PROPERTIES
-            IMPORTED_LOCATION "${MICRO_LLVMBPF_SPDLOG_LIBRARY}"
-        )
-    else()
-        pkg_check_modules(SPDLOG REQUIRED IMPORTED_TARGET spdlog)
-    endif()
-
-    list(APPEND MICRO_EXEC_SOURCES src/llvmbpf_runner.cpp)
+    list(APPEND MICRO_EXEC_SOURCES
+        src/llvmbpf_runner.cpp
+        "${MICRO_REPO_ROOT}/vendor/llvmbpf/src/llvm_jit_context.cpp"
+        "${MICRO_REPO_ROOT}/vendor/llvmbpf/src/compiler.cpp"
+        "${MICRO_REPO_ROOT}/vendor/llvmbpf/src/compiler_utils.cpp"
+        "${MICRO_REPO_ROOT}/vendor/llvmbpf/src/vm.cpp"
+    )
 endif()
 
 add_executable(micro_exec ${MICRO_EXEC_SOURCES})
+
+target_link_options(micro_exec PRIVATE -static-libstdc++)
 
 target_include_directories(micro_exec
     PRIVATE
@@ -138,12 +109,18 @@ target_include_directories(micro_exec
 )
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)
-    target_compile_definitions(micro_exec PRIVATE MICRO_EXEC_ENABLE_LLVMBPF=1)
+    target_compile_definitions(
+        micro_exec
+        PRIVATE
+            MICRO_EXEC_ENABLE_LLVMBPF=1
+            SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
+    )
     target_include_directories(
         micro_exec
         PRIVATE
             "${MICRO_REPO_ROOT}/vendor/llvmbpf/include"
             "${MICRO_REPO_ROOT}/vendor/llvmbpf/src"
+            "${LLVM_INCLUDE_DIRS}"
     )
 endif()
 
@@ -158,12 +135,7 @@ target_link_libraries(micro_exec
 if(MICRO_EXEC_ENABLE_LLVMBPF)
     target_link_libraries(micro_exec
         PRIVATE
-            vendor_llvmbpf
             ${MICRO_EXEC_LLVM_LIBS}
+            PkgConfig::SPDLOG
     )
-    if(TARGET vendor_llvmbpf_spdlog)
-        target_link_libraries(micro_exec PRIVATE vendor_llvmbpf_spdlog)
-    else()
-        target_link_libraries(micro_exec PRIVATE PkgConfig::SPDLOG)
-    endif()
 endif()

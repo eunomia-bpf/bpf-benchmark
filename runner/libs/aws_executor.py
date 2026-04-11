@@ -14,19 +14,6 @@ from runner.libs.workspace_layout import remote_transfer_roots
 
 _die = partial(fail, "aws-executor")
 
-AwsExecutorContext = aws_common.AwsExecutorContext
-_build_context = aws_common._build_context
-_load_instance_state = aws_common._load_instance_state
-_require_scalar = aws_common._require_scalar
-_rsync_from = aws_common._rsync_from
-_rsync_to = aws_common._rsync_to
-_scp_from = aws_common._scp_from
-_scp_to = aws_common._scp_to
-_ssh_exec = aws_common._ssh_exec
-_terminate_instance = aws_common._terminate_instance
-_run_remote_helper = aws_common._run_remote_helper
-_wait_for_ssh = aws_common._wait_for_ssh
-
 
 def _suite_results_relative_path(suite_name: str) -> str:
     suite = suite_name.strip()
@@ -37,20 +24,27 @@ def _suite_results_relative_path(suite_name: str) -> str:
     _die(f"unsupported suite for result sync: {suite_name}")
 
 
-def _cleanup_failed_run(ctx: AwsExecutorContext, state: dict[str, str] | None = None) -> None:
+def _cleanup_failed_run(ctx: aws_common.AwsExecutorContext, state: dict[str, str] | None = None) -> None:
     current_state = dict(state or {})
     if not current_state:
-        current_state = _load_instance_state(ctx)
+        current_state = aws_common._load_instance_state(ctx)
     instance_id = current_state.get("STATE_INSTANCE_ID", "").strip()
     if instance_id:
         try:
-            _terminate_instance(ctx, instance_id)
+            aws_common._terminate_instance(ctx, instance_id)
         except Exception:
             pass
     shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
 
 
-def _sync_remote_roots(ctx: AwsExecutorContext, ip: str) -> None:
+def cleanup_failed_run_for_manifest(manifest_path: Path) -> None:
+    if not manifest_path.is_file():
+        return
+    ctx = aws_common._build_context("run", manifest_path)
+    _cleanup_failed_run(ctx)
+
+
+def _sync_remote_roots(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     selected_roots = remote_transfer_roots(
         suite_name=str(ctx.contract.get("RUN_SUITE_NAME", "")).strip(),
         target_arch=str(ctx.contract.get("RUN_TARGET_ARCH", "")).strip(),
@@ -78,53 +72,53 @@ def _sync_remote_roots(ctx: AwsExecutorContext, ip: str) -> None:
             "derived remote transfer roots list missing local roots: "
             + ", ".join(missing_roots)
         )
-    _ssh_exec(ctx, ip, "mkdir", "-p", ctx.remote_stage_dir)
+    aws_common._ssh_exec(ctx, ip, "mkdir", "-p", ctx.remote_stage_dir)
     for entry in selected_roots:
         source_path = ROOT_DIR / entry
         remote_path = f"{ctx.remote_stage_dir}/{entry}"
         remote_parent = os.path.dirname(remote_path)
-        _ssh_exec(ctx, ip, "mkdir", "-p", remote_parent)
+        aws_common._ssh_exec(ctx, ip, "mkdir", "-p", remote_parent)
         if source_path.is_dir():
-            _ssh_exec(ctx, ip, "mkdir", "-p", remote_path)
-            _rsync_to(ctx, ip, source_path, remote_path, excludes=("results/", "__pycache__/"))
+            aws_common._ssh_exec(ctx, ip, "mkdir", "-p", remote_path)
+            aws_common._rsync_to(ctx, ip, source_path, remote_path, excludes=("results/", "__pycache__/"))
         else:
-            _scp_to(ctx, ip, source_path, remote_path)
+            aws_common._scp_to(ctx, ip, source_path, remote_path)
 
 
-def _sync_remote_results(ctx: AwsExecutorContext, ip: str, remote_workspace: str) -> Path | None:
+def _sync_remote_results(ctx: aws_common.AwsExecutorContext, ip: str, remote_workspace: str) -> Path | None:
     relative_results = _suite_results_relative_path(ctx.suite_name)
     remote_results = f"{remote_workspace}/{relative_results}"
     local_results = ROOT_DIR / relative_results
-    exists = _run_remote_helper(
+    exists = aws_common._run_remote_helper(
         ctx,
         ip,
-        _require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN"),
+        aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN"),
         "path-exists",
         remote_results,
         check=False,
     ).returncode == 0
     if not exists:
         return None
-    _rsync_from(ctx, ip, remote_results, local_results)
+    aws_common._rsync_from(ctx, ip, remote_results, local_results)
     return local_results
 
 
-def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
-    _wait_for_ssh(ctx, ip)
+def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
+    aws_common._wait_for_ssh(ctx, ip)
     stamp = f"{ctx.suite_name}_{ctx.run_token}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     local_log_dir = ctx.results_dir / "logs"
     local_log = local_log_dir / f"{stamp}.remote.log"
     remote_run_dir = f"{ctx.remote_stage_dir}/runs/{stamp}"
     remote_log = f"{remote_run_dir}/remote.log"
-    remote_python = _require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
+    remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
     remote_workspace = ctx.remote_stage_dir
     local_log_dir.mkdir(parents=True, exist_ok=True)
     ctx.run_state_dir.mkdir(parents=True, exist_ok=True)
 
-    _run_remote_helper(ctx, ip, remote_python, "prepare-dir", remote_run_dir)
+    aws_common._run_remote_helper(ctx, ip, remote_python, "prepare-dir", remote_run_dir)
     _sync_remote_roots(ctx, ip)
-    _scp_to(ctx, ip, ctx.manifest_path, f"{remote_run_dir}/run-contract.env")
-    remote_completed = _run_remote_helper(
+    aws_common._scp_to(ctx, ip, ctx.manifest_path, f"{remote_run_dir}/run-contract.env")
+    remote_completed = aws_common._run_remote_helper(
         ctx,
         ip,
         remote_python,
@@ -135,7 +129,7 @@ def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
         remote_python,
         check=False,
     )
-    log_exists = _run_remote_helper(
+    log_exists = aws_common._run_remote_helper(
         ctx,
         ip,
         remote_python,
@@ -144,7 +138,7 @@ def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
         check=False,
     ).returncode == 0
     if log_exists:
-        _scp_from(ctx, ip, remote_log, local_log)
+        aws_common._scp_from(ctx, ip, remote_log, local_log)
     local_results = _sync_remote_results(ctx, ip, remote_workspace)
     if remote_completed.returncode != 0:
         _die(f"remote {ctx.target_name}/{ctx.suite_name} suite failed; inspect {local_log}")
@@ -156,10 +150,10 @@ def _run_remote_suite(ctx: AwsExecutorContext, ip: str) -> None:
     )
 
 
-def _run_aws(ctx: AwsExecutorContext) -> None:
+def _run_aws(ctx: aws_common.AwsExecutorContext) -> None:
     state = {}
     try:
-        state = _load_instance_state(ctx)
+        state = aws_common._load_instance_state(ctx)
         instance_ip = state.get("STATE_INSTANCE_IP", "").strip()
         if not instance_ip:
             _die("AWS run is missing STATE_INSTANCE_IP before remote execution")
@@ -167,11 +161,11 @@ def _run_aws(ctx: AwsExecutorContext) -> None:
     except BaseException:
         _cleanup_failed_run(ctx, state)
         raise
-    _terminate_instance(ctx, state.get("STATE_INSTANCE_ID", "").strip())
+    aws_common._terminate_instance(ctx, state.get("STATE_INSTANCE_ID", "").strip())
     shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
 
 
-def _run_action(ctx: AwsExecutorContext) -> None:
+def _run_action(ctx: aws_common.AwsExecutorContext) -> None:
     execute_started = False
     try:
         if not ctx.remote_user:
@@ -196,12 +190,12 @@ def main(argv: list[str] | None = None) -> None:
     manifest_path = Path(args[1]).resolve()
     if not manifest_path.is_file():
         _die(f"manifest is missing: {manifest_path}")
-    ctx = _build_context(action, manifest_path)
+    ctx = aws_common._build_context(action, manifest_path)
     if action == "run":
         _run_action(ctx)
         return
     if action == "terminate":
-        _terminate_instance(ctx)
+        aws_common._terminate_instance(ctx)
         return
     _die(f"unsupported aws executor action: {action}")
 

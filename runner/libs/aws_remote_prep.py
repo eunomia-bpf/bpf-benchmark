@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import os
-import shlex
 import subprocess
 import sys
+from collections.abc import Callable
 from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
@@ -14,17 +14,6 @@ from runner.libs.cli_support import fail
 from runner.libs.state_file import write_state
 
 _die = partial(fail, "aws-remote-prep")
-
-def _base_env_from_contract(contract: dict[str, str | list[str]]) -> dict[str, str]:
-    env: dict[str, str] = {}
-    for name in ("PATH", "HOME", "USER", "LOGNAME", "TERM", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE", "SHELL"):
-        value = os.environ.get(name, "").strip()
-        if value:
-            env[name] = value
-    for name, value in contract.items():
-        env[name] = shlex.join(value) if isinstance(value, list) else value
-    return env
-
 
 def _run_local_make(*args: str, env: dict[str, str] | None = None) -> None:
     completed = subprocess.run(
@@ -378,14 +367,24 @@ def _sync_kernel_stage(
     )
 
 
-def _setup_x86_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
+def _setup_kernel_instance(
+    ctx: aws_common.AwsExecutorContext,
+    ip: str,
+    *,
+    arch_label: str,
+    setup_helper: str,
+    build_kernel_artifacts: Callable[[aws_common.AwsExecutorContext], tuple[str, Path, Path]],
+    refresh_arm64_base_config: bool = False,
+) -> None:
     state = aws_common._load_instance_state(ctx)
     instance_id = state.get("STATE_INSTANCE_ID", "").strip()
     if not instance_id:
-        _die("x86 setup requires a cached instance ID")
+        _die(f"{arch_label} setup requires a cached instance ID")
     aws_common._wait_for_ssh(ctx, ip)
+    if refresh_arm64_base_config:
+        _refresh_aws_arm64_base_config(ctx, ip)
     _require_remote_base_prereqs(ctx, ip)
-    kernel_release, kernel_image, modules_root = _build_x86_kernel_artifacts(ctx)
+    kernel_release, kernel_image, modules_root = build_kernel_artifacts(ctx)
     setup_stamp = f"setup_{kernel_release}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     setup_result_dir = ctx.results_dir / setup_stamp
     verify_log = setup_result_dir / "setup_verify.log"
@@ -404,7 +403,7 @@ def _setup_x86_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
         ctx,
         ip,
         remote_python,
-        "setup-kernel-x86",
+        setup_helper,
         kernel_release,
         remote_kernel_stage_dir,
     )
@@ -416,61 +415,7 @@ def _setup_x86_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
         raise SystemExit(completed.returncode)
     _, _, updated_ip = aws_common._describe_instance(ctx, instance_id)
     if not updated_ip or updated_ip == "None":
-        _die(f"instance {instance_id} has no public IP after x86 reboot")
-    aws_common._wait_for_ssh(ctx, updated_ip)
-    verify = aws_common._run_remote_helper(
-        ctx,
-        updated_ip,
-        remote_python,
-        "verify-kernel",
-        kernel_release,
-        "1",
-        capture_output=True,
-    )
-    verify_log.write_text(verify.stdout, encoding="utf-8")
-    _save_state(ctx, instance_id=instance_id, instance_ip=updated_ip, kernel_release=kernel_release)
-
-
-def _setup_arm64_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
-    state = aws_common._load_instance_state(ctx)
-    instance_id = state.get("STATE_INSTANCE_ID", "").strip()
-    if not instance_id:
-        _die("ARM64 setup requires a cached instance ID")
-    aws_common._wait_for_ssh(ctx, ip)
-    _refresh_aws_arm64_base_config(ctx, ip)
-    _require_remote_base_prereqs(ctx, ip)
-    kernel_release, kernel_image, modules_root = _build_arm64_kernel_artifacts(ctx)
-    setup_stamp = f"setup_{kernel_release}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
-    setup_result_dir = ctx.results_dir / setup_stamp
-    verify_log = setup_result_dir / "setup_verify.log"
-    setup_result_dir.mkdir(parents=True, exist_ok=True)
-    remote_kernel_stage_dir = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_KERNEL_STAGE_DIR")
-    remote_python = aws_common._require_scalar(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    _sync_kernel_stage(
-        ctx,
-        ip,
-        kernel_release=kernel_release,
-        kernel_image=kernel_image,
-        modules_root=modules_root,
-        remote_kernel_stage_dir=remote_kernel_stage_dir,
-    )
-    aws_common._run_remote_helper(
-        ctx,
-        ip,
-        remote_python,
-        "setup-kernel-arm64",
-        kernel_release,
-        remote_kernel_stage_dir,
-    )
-    completed = aws_common._aws_cmd(ctx, "ec2", "reboot-instances", "--instance-ids", instance_id)
-    if completed.returncode != 0:
-        raise SystemExit(completed.returncode)
-    completed = aws_common._aws_cmd(ctx, "ec2", "wait", "instance-status-ok", "--instance-ids", instance_id)
-    if completed.returncode != 0:
-        raise SystemExit(completed.returncode)
-    _, _, updated_ip = aws_common._describe_instance(ctx, instance_id)
-    if not updated_ip or updated_ip == "None":
-        _die(f"instance {instance_id} has no public IP after ARM64 reboot")
+        _die(f"instance {instance_id} has no public IP after {arch_label} reboot")
     aws_common._wait_for_ssh(ctx, updated_ip)
     verify = aws_common._run_remote_helper(
         ctx,
@@ -487,10 +432,23 @@ def _setup_arm64_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
 
 def _setup_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     if ctx.target_name == "aws-arm64":
-        _setup_arm64_instance(ctx, ip)
+        _setup_kernel_instance(
+            ctx,
+            ip,
+            arch_label="ARM64",
+            setup_helper="setup-kernel-arm64",
+            build_kernel_artifacts=_build_arm64_kernel_artifacts,
+            refresh_arm64_base_config=True,
+        )
         return
     if ctx.target_name == "aws-x86":
-        _setup_x86_instance(ctx, ip)
+        _setup_kernel_instance(
+            ctx,
+            ip,
+            arch_label="x86",
+            setup_helper="setup-kernel-x86",
+            build_kernel_artifacts=_build_x86_kernel_artifacts,
+        )
         return
     _die(f"unsupported AWS target for setup: {ctx.target_name}")
 

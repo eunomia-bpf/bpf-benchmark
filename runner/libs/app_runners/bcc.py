@@ -15,19 +15,7 @@ import yaml
 
 from .. import ROOT_DIR, tail_text
 from ..agent import find_bpf_programs, stop_agent
-from ..workload import (
-    WorkloadResult,
-    run_bind_storm,
-    run_block_io_load,
-    run_exec_storm,
-    run_file_io,
-    run_file_open_load,
-    run_mixed_workload,
-    run_named_workload as run_shared_workload,
-    run_scheduler_load,
-    run_tcp_connect_load,
-    run_user_exec_loop,
-)
+from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
 from .setup_support import binary_matches_host_arch, first_existing_dir, repo_artifact_root
 
@@ -202,40 +190,6 @@ def wait_for_attached_programs(
     return last_nonempty
 
 
-def _run_named_workload(kind: str, duration_s: float) -> WorkloadResult:
-    whole_seconds = max(1, int(round(duration_s)))
-    normalized = str(kind or "").strip()
-    if normalized == "mixed":
-        return run_mixed_workload(duration_s)
-    if kind == "tcp_connect":
-        return run_tcp_connect_load(whole_seconds)
-    if kind == "block_io":
-        return run_block_io_load(whole_seconds)
-    if kind == "scheduler":
-        return run_scheduler_load(whole_seconds)
-    if kind == "exec_storm":
-        return run_exec_storm(whole_seconds, rate=2)
-    if kind == "exec_loop":
-        return run_user_exec_loop(whole_seconds)
-    if kind == "file_open":
-        return run_file_open_load(whole_seconds)
-    if kind == "bind_storm":
-        return run_bind_storm(whole_seconds)
-    if normalized == "fio":
-        return run_file_io(whole_seconds)
-    if normalized == "file_open_storm":
-        return run_file_open_load(whole_seconds)
-    if normalized == "hackbench":
-        return run_scheduler_load(whole_seconds)
-    if normalized == "network":
-        # BCC's network tools are mostly connect-oriented; a TCP connect loop is
-        # the lightest workload that still fires these probes reliably in VM.
-        return run_tcp_connect_load(whole_seconds)
-    if normalized == "mixed_system":
-        return run_mixed_workload(duration_s)
-    return run_shared_workload(normalized, whole_seconds)
-
-
 class BCCRunner(AppRunner):
     def __init__(
         self,
@@ -388,7 +342,7 @@ class BCCRunner(AppRunner):
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None:
             raise RuntimeError(f"BCC tool {self.tool_name} is not running")
-        return _run_named_workload(self.workload_kind, seconds)
+        return run_named_workload(self.workload_kind, seconds, network_as_tcp_connect=True)
 
     def run_workload_spec(
         self,
@@ -400,7 +354,7 @@ class BCCRunner(AppRunner):
         requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or "").strip()
         if not requested_kind:
             raise RuntimeError(f"BCC tool {self.tool_name} workload spec is missing a workload kind")
-        return _run_named_workload(requested_kind, seconds)
+        return run_named_workload(requested_kind, seconds, network_as_tcp_connect=True)
 
     def stop(self) -> None:
         if self.session is None:

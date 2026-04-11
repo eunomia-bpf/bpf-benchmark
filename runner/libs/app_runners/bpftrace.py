@@ -5,9 +5,9 @@ from typing import Any, Mapping, Sequence
 
 from .. import which
 from ..agent import start_agent, stop_agent
-from ..workload import WorkloadResult
+from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
-from .bpftrace_support import SCRIPTS, ScriptSpec, finalize_process_output, run_named_workload, wait_for_attached_programs
+from .bpftrace_support import SCRIPTS, ScriptSpec, finalize_process_output, wait_for_attached_programs
 
 
 DEFAULT_ATTACH_TIMEOUT_S = 20
@@ -110,7 +110,11 @@ class BpftraceRunner(AppRunner):
             raise RuntimeError("BpftraceRunner is not running")
         if not self.workload_kind:
             raise RuntimeError("bpftrace workload kind is not resolved")
-        return run_named_workload(self.workload_kind, max(1, int(round(seconds))))
+        return run_named_workload(
+            self.workload_kind,
+            max(1, int(round(seconds))),
+            network_as_tcp_connect=True,
+        )
 
     def run_workload_spec(
         self,
@@ -122,7 +126,11 @@ class BpftraceRunner(AppRunner):
         requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or "").strip()
         if not requested_kind:
             raise RuntimeError("bpftrace workload spec is missing a workload kind")
-        return run_named_workload(requested_kind, max(1, int(round(seconds))))
+        return run_named_workload(
+            requested_kind,
+            max(1, int(round(seconds))),
+            network_as_tcp_connect=True,
+        )
 
     def stop(self) -> None:
         if self.process is None:
@@ -133,4 +141,4 @@ class BpftraceRunner(AppRunner):
         self.process_output = finalize_process_output(process)
 
 
-__all__ = ["BpftraceRunner", "SCRIPTS", "ScriptSpec", "finalize_process_output", "run_named_workload", "wait_for_attached_programs"]
+__all__ = ["BpftraceRunner", "SCRIPTS", "ScriptSpec", "finalize_process_output", "wait_for_attached_programs"]

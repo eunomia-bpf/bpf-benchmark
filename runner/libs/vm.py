@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import shlex
+import shutil
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 from typing import Sequence
@@ -70,19 +70,20 @@ def build_vng_command(
             f"explicit machine backend {resolved_backend!r} is unsupported; "
             "runner.libs.vm.build_vng_command only supports vng"
         )
-    resolved_vm_executable = Path(vm_executable).resolve()
-    launch_prefix: list[str]
-    if resolved_vm_executable.suffix == ".py":
-        launch_prefix = [sys.executable, str(resolved_vm_executable)]
+    vm_executable_text = str(vm_executable).strip()
+    if not vm_executable_text:
+        raise ValueError("vm_executable must be explicit")
+    if Path(vm_executable_text).is_absolute() or "/" in vm_executable_text:
+        launch_executable = str(Path(vm_executable_text).resolve())
     else:
-        launch_prefix = [str(resolved_vm_executable)]
+        launch_executable = vm_executable_text
     resolved_cpus = max(1, int(cpus if cpus is not None else 1))
     resolved_mem = str(mem if mem is not None else "4G")
     kernel = Path(kernel_path).resolve()
     resolved_cwd = Path(cwd).resolve() if cwd is not None else ROOT_DIR
 
     command = [
-        *launch_prefix,
+        launch_executable,
         "--run",
         str(kernel),
         "--cwd",
@@ -134,16 +135,34 @@ def run_in_vm(
         rwdirs=rwdirs,
     )
     try:
-        return subprocess.run(
+        return _run_command_with_script_pty(command, timeout)
+    finally:
+        script.unlink(missing_ok=True)
+
+
+def _run_command_with_script_pty(command: list[str], timeout: int) -> subprocess.CompletedProcess[str]:
+    if shutil.which("script") is None:
+        return subprocess.CompletedProcess(
             command,
+            127,
+            "",
+            "[kvm-executor][ERROR] missing required host command: script\n",
+        )
+    with tempfile.NamedTemporaryFile(prefix="vng-pty-log.", delete=False) as handle:
+        log_path = Path(handle.name)
+    try:
+        completed = subprocess.run(
+            ["script", "-qfec", shlex.join(command), str(log_path)],
             cwd=ROOT_DIR,
             capture_output=True,
             text=True,
             timeout=timeout,
             check=False,
         )
+        stdout = log_path.read_text(encoding="utf-8", errors="replace") if log_path.exists() else completed.stdout
+        return subprocess.CompletedProcess(command, completed.returncode, stdout, completed.stderr)
     finally:
-        script.unlink(missing_ok=True)
+        log_path.unlink(missing_ok=True)
 
 
 __all__ = [

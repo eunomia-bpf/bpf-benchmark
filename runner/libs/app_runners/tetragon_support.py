@@ -4,47 +4,18 @@ import os
 import shlex
 import threading
 import time
-from collections import deque
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
 from ..workload import WorkloadResult, run_connect_storm, run_exec_storm, run_file_io, run_open_storm
+from .process_support import ProcessOutputCollector
 from .setup_support import missing_required_commands, pick_host_executable, repo_artifact_root
-
-def _bpftool_binary() -> str:
-    return resolve_bpftool_binary()
-
-
-class ProcessOutputCollector:
-    def __init__(self) -> None:
-        self._lock = threading.Lock()
-        self.stdout_tail: deque[str] = deque(maxlen=200)
-        self.stderr_tail: deque[str] = deque(maxlen=200)
-
-    def consume_stdout(self, pipe: Any) -> None:
-        for raw_line in iter(pipe.readline, ""):
-            with self._lock:
-                self.stdout_tail.append(raw_line.rstrip())
-        pipe.close()
-
-    def consume_stderr(self, pipe: Any) -> None:
-        for raw_line in iter(pipe.readline, ""):
-            with self._lock:
-                self.stderr_tail.append(raw_line.rstrip())
-        pipe.close()
-
-    def snapshot(self) -> dict[str, object]:
-        with self._lock:
-            return {
-                "stdout_tail": list(self.stdout_tail),
-                "stderr_tail": list(self.stderr_tail),
-            }
 
 
 def current_programs() -> list[dict[str, object]]:
-    payload = run_json_command([_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
     if not isinstance(payload, list):
         raise RuntimeError("bpftool prog show returned a non-list payload")
     return [dict(record) for record in payload if isinstance(record, dict) and "id" in record]

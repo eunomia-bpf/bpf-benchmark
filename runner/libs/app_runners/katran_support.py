@@ -70,10 +70,6 @@ SERVER_START_TIMEOUT_S = 15.0
 TOPOLOGY_SETTLE_S = 2.0
 
 
-def _bpftool_binary() -> str:
-    return resolve_bpftool_binary()
-
-
 def default_katran_balancer_prog_path() -> Path:
     return repo_artifact_root() / "katran" / "bpf" / "balancer.bpf.o"
 
@@ -83,14 +79,14 @@ def default_katran_server_binary_path() -> Path:
 
 
 def _map_show_records() -> list[dict[str, object]]:
-    payload = run_json_command([_bpftool_binary(), "-j", "-p", "map", "show"], timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "map", "show"], timeout=30)
     if not isinstance(payload, list):
         raise RuntimeError("bpftool map show returned unexpected payload")
     return [dict(record) for record in payload if isinstance(record, dict)]
 
 
 def _net_show_records(iface: str) -> list[dict[str, object]]:
-    payload = run_json_command([_bpftool_binary(), "-j", "net", "show", "dev", str(iface)], timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "net", "show", "dev", str(iface)], timeout=30)
     if not isinstance(payload, list):
         raise RuntimeError(f"bpftool net show returned unexpected payload for {iface}")
     return [dict(record) for record in payload if isinstance(record, dict)]
@@ -150,12 +146,12 @@ def reattach_xdp_program(iface: str, prog_id: int, *, target_mode: str) -> dict[
         return current_attach
     if current_mode is not None:
         run_command(
-            [_bpftool_binary(), "net", "detach", _bpftool_attach_token(current_mode), "dev", str(iface)],
+            [resolve_bpftool_binary(), "net", "detach", _bpftool_attach_token(current_mode), "dev", str(iface)],
             check=False,
             timeout=15,
         )
     run_command(
-        [_bpftool_binary(), "net", "attach", target_token, "id", str(prog_id), "dev", str(iface), "overwrite"],
+        [resolve_bpftool_binary(), "net", "attach", target_token, "id", str(prog_id), "dev", str(iface), "overwrite"],
         timeout=30,
     )
     attach_info = _attached_xdp_info(iface)
@@ -168,7 +164,7 @@ def reattach_xdp_program(iface: str, prog_id: int, *, target_mode: str) -> dict[
 
 
 def _current_prog_ids() -> set[int]:
-    payload = run_json_command([_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
     if not isinstance(payload, list):
         raise RuntimeError("bpftool prog show returned unexpected payload")
     return {
@@ -233,10 +229,6 @@ def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
     rendered = ", ".join(str(candidate) for candidate in candidates)
     raise RuntimeError(f"Katran server binary not found or not executable; tried: {rendered}")
 
-
-def katran_server_env(server_binary: Path) -> dict[str, str]:
-    del server_binary
-    return os.environ.copy()
 
 def ip_binary() -> str:
     for candidate in DEFAULT_IP_CANDIDATES:
@@ -713,7 +705,7 @@ class KatranServerSession:
             command,
             load_timeout_s=self.load_timeout_s,
             cwd=ROOT_DIR,
-            env=katran_server_env(self.server_binary),
+            env=os.environ.copy(),
         )
         try:
             session.__enter__()

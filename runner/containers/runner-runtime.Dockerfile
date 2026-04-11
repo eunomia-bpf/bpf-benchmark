@@ -6,19 +6,15 @@ RUN dnf -y install --setopt=install_weak_deps=False --nodocs \
     && dnf config-manager --set-enabled crb \
     && dnf -y install --setopt=install_weak_deps=False --nodocs \
         bash \
-        bpftrace \
         bpftool \
         boost \
         bzip2-libs \
-        coreutils \
-        curl \
         double-conversion \
         elfutils-libelf \
         file \
         findutils \
         fio \
         fmt \
-        glog \
         iproute \
         iproute-tc \
         kmod \

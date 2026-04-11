@@ -7,16 +7,6 @@ from typing import Any
 
 from .. import ROOT_DIR, tail_text
 from ..agent import find_bpf_programs
-from ..workload import (
-    WorkloadResult,
-    run_block_io_load,
-    run_exec_storm,
-    run_file_io,
-    run_named_workload as run_shared_workload,
-    run_scheduler_load,
-    run_tcp_connect_load,
-)
-
 
 DEFAULT_SCRIPT_DIR = ROOT_DIR / "e2e" / "cases" / "bpftrace" / "scripts"
 
@@ -102,23 +92,6 @@ def wait_for_attached_programs(
             break
         time.sleep(0.5)
     return last_nonempty
-
-
-def run_named_workload(kind: str, duration_s: int) -> WorkloadResult:
-    normalized = str(kind or "").strip()
-    if normalized == "tcp_connect":
-        return run_tcp_connect_load(duration_s)
-    if normalized == "block_io":
-        return run_block_io_load(duration_s)
-    if normalized == "scheduler":
-        return run_scheduler_load(duration_s)
-    if normalized == "exec_storm":
-        return run_exec_storm(duration_s, rate=2)
-    if normalized == "fio":
-        return run_file_io(duration_s)
-    if normalized == "network":
-        return run_tcp_connect_load(duration_s)
-    return run_shared_workload(normalized, duration_s)
 
 
 def finalize_process_output(process: Any) -> dict[str, object]:

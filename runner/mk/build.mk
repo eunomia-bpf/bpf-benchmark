@@ -7,6 +7,7 @@ DOCKERIGNORE_FILE := $(ROOT_DIR)/.dockerignore
 REPO_ARTIFACT_ROOT := $(ROOT_DIR)/.cache/repo-artifacts/$(RUN_TARGET_ARCH)
 REPO_SCX_ROOT := $(REPO_ARTIFACT_ROOT)/scx
 REPO_BCC_ROOT := $(REPO_ARTIFACT_ROOT)/bcc/libbpf-tools/.output
+REPO_BPFTRACE_ROOT := $(REPO_ARTIFACT_ROOT)/bpftrace
 REPO_TRACEE_ROOT := $(REPO_ARTIFACT_ROOT)/tracee
 REPO_TETRAGON_ROOT := $(REPO_ARTIFACT_ROOT)/tetragon
 REPO_KATRAN_ROOT := $(REPO_ARTIFACT_ROOT)/katran
@@ -24,6 +25,7 @@ SCX_CARGO_TARGET_DIR := $(SCX_BUILD_ROOT)/target
 BCC_BUILD_ROOT := $(REPO_BUILD_ROOT)/bcc
 BCC_BUILD_REPO := $(BCC_BUILD_ROOT)/src
 BCC_BUILD_OUTPUT_ROOT := $(BCC_BUILD_REPO)/libbpf-tools/.output
+BPFTRACE_BUILD_ROOT := $(REPO_BUILD_ROOT)/bpftrace-static
 TRACEE_BUILD_ROOT := $(REPO_BUILD_ROOT)/tracee
 TRACEE_BUILD_REPO := $(TRACEE_BUILD_ROOT)/src
 TRACEE_BUILD_GOENV_MK := $(TRACEE_BUILD_ROOT)/goenv.mk
@@ -39,7 +41,10 @@ RUNNER_LIBBPF_BUILD_DIR := $(RUNNER_BUILD_DIR_ACTIVE)/vendor/libbpf
 RUNNER_LIBBPF_OBJDIR := $(RUNNER_LIBBPF_BUILD_DIR)/obj
 RUNNER_LIBBPF_PREFIX := $(RUNNER_LIBBPF_BUILD_DIR)/prefix
 RUNNER_LIBBPF_A := $(RUNNER_LIBBPF_OBJDIR)/libbpf.a
-RUNNER_LLVM_DIR := $(if $(strip $(LLVM_DIR)),$(LLVM_DIR),$(RUN_LLVM_DIR))
+DEFAULT_RUNNER_LLVM_DIR := /usr/lib64/llvm20/lib64/cmake/llvm
+RUNNER_LLVM_DIR := $(if $(strip $(LLVM_DIR)),$(LLVM_DIR),$(if $(strip $(RUN_LLVM_DIR)),$(RUN_LLVM_DIR),$(DEFAULT_RUNNER_LLVM_DIR)))
+RUNNER_CONTAINER_CC := /opt/rh/gcc-toolset-14/root/usr/bin/gcc
+RUNNER_CONTAINER_CXX := /opt/rh/gcc-toolset-14/root/usr/bin/g++
 CONTAINER_IMAGE_ARTIFACT_ROOT := $(ARTIFACT_ROOT)/container-images
 KATRAN_BUILD_ROOT := $(REPO_BUILD_ROOT)/katran
 KATRAN_BUILD_REPO := $(KATRAN_BUILD_ROOT)/src
@@ -58,6 +63,7 @@ ACTIVE_TEST_NEGATIVE_PRIMARY := $(ACTIVE_TEST_NEGATIVE_BUILD_DIR)/scx_prog_show_
 ACTIVE_MICRO_PROGRAM_PRIMARY := $(MICRO_PROGRAM_OUTPUT_ROOT)/simple.bpf.o
 RUNNER_BUILD_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/runner-build.Dockerfile
 RUNNER_RUNTIME_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/runner-runtime.Dockerfile
+BPFTRACE_STATIC_CONTAINERFILE := $(REPOS_DIR)/bpftrace/docker/Dockerfile.static
 X86_RUNNER_BUILD_CONTAINERFILE := $(RUNNER_BUILD_CONTAINERFILE)
 ARM64_RUNNER_BUILD_CONTAINERFILE := $(RUNNER_BUILD_CONTAINERFILE)
 X86_RUNNER_RUNTIME_CONTAINERFILE := $(RUNNER_RUNTIME_CONTAINERFILE)
@@ -66,16 +72,25 @@ X86_RUNNER_BUILD_IMAGE := bpf-benchmark/runner-build:x86_64
 ARM64_RUNNER_BUILD_IMAGE := bpf-benchmark/runner-build:arm64
 X86_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:x86_64
 ARM64_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:arm64
+X86_BPFTRACE_STATIC_BUILD_IMAGE := bpf-benchmark/bpftrace-static-build:x86_64
+ARM64_BPFTRACE_STATIC_BUILD_IMAGE := bpf-benchmark/bpftrace-static-build:arm64
 X86_RUNNER_BUILD_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-runner-build.image.tar
 ARM64_RUNNER_BUILD_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-runner-build.image.tar
 X86_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-runner-runtime.image.tar
 ARM64_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-runner-runtime.image.tar
+X86_BPFTRACE_STATIC_BUILD_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-bpftrace-static-build.image.tar
+ARM64_BPFTRACE_STATIC_BUILD_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-bpftrace-static-build.image.tar
 ACTIVE_CONTAINER_PLATFORM := $(if $(filter arm64,$(RUN_TARGET_ARCH)),linux/arm64,linux/amd64)
 ACTIVE_RUNNER_BUILD_IMAGE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_RUNNER_BUILD_IMAGE),$(X86_RUNNER_BUILD_IMAGE))
 ACTIVE_RUNNER_BUILD_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_RUNNER_BUILD_IMAGE_TAR),$(X86_RUNNER_BUILD_IMAGE_TAR))
+ACTIVE_BPFTRACE_STATIC_BUILD_IMAGE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_BPFTRACE_STATIC_BUILD_IMAGE),$(X86_BPFTRACE_STATIC_BUILD_IMAGE))
+ACTIVE_BPFTRACE_STATIC_BUILD_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_BPFTRACE_STATIC_BUILD_IMAGE_TAR),$(X86_BPFTRACE_STATIC_BUILD_IMAGE_TAR))
 ENSURE_X86_RUNNER_BUILD_IMAGE = $(CONTAINER_RUNTIME) image inspect "$(X86_RUNNER_BUILD_IMAGE)" >/dev/null 2>&1 || $(CONTAINER_RUNTIME) load -i "$(X86_RUNNER_BUILD_IMAGE_TAR)"
 ENSURE_ARM64_RUNNER_BUILD_IMAGE = $(CONTAINER_RUNTIME) image inspect "$(ARM64_RUNNER_BUILD_IMAGE)" >/dev/null 2>&1 || $(CONTAINER_RUNTIME) load -i "$(ARM64_RUNNER_BUILD_IMAGE_TAR)"
 ENSURE_ACTIVE_RUNNER_BUILD_IMAGE = $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ENSURE_ARM64_RUNNER_BUILD_IMAGE),$(ENSURE_X86_RUNNER_BUILD_IMAGE))
+ENSURE_X86_BPFTRACE_STATIC_BUILD_IMAGE = $(CONTAINER_RUNTIME) image inspect "$(X86_BPFTRACE_STATIC_BUILD_IMAGE)" >/dev/null 2>&1 || $(CONTAINER_RUNTIME) load -i "$(X86_BPFTRACE_STATIC_BUILD_IMAGE_TAR)"
+ENSURE_ARM64_BPFTRACE_STATIC_BUILD_IMAGE = $(CONTAINER_RUNTIME) image inspect "$(ARM64_BPFTRACE_STATIC_BUILD_IMAGE)" >/dev/null 2>&1 || $(CONTAINER_RUNTIME) load -i "$(ARM64_BPFTRACE_STATIC_BUILD_IMAGE_TAR)"
+ENSURE_ACTIVE_BPFTRACE_STATIC_BUILD_IMAGE = $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ENSURE_ARM64_BPFTRACE_STATIC_BUILD_IMAGE),$(ENSURE_X86_BPFTRACE_STATIC_BUILD_IMAGE))
 ACTIVE_KINSN_MODULE_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/module/arm64,$(ROOT_DIR)/module/x86)
 ACTIVE_KERNEL_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_AWS_BUILD_DIR),$(X86_BUILD_DIR))
 ACTIVE_KERNEL_ARCH_ARG := $(if $(filter arm64,$(RUN_TARGET_ARCH)),ARCH=arm64,)
@@ -90,6 +105,7 @@ ACTIVE_KINSN_PRIMARY := $(ACTIVE_KINSN_MODULE_DIR)/bpf_rotate.ko
 ACTIVE_KINSN_SECONDARIES := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ACTIVE_KINSN_MODULE_DIR)/bpf_select.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_extract.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_endian.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_ldp.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_bulk_memory.ko,$(ACTIVE_KINSN_MODULE_DIR)/bpf_select.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_extract.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_endian.ko $(ACTIVE_KINSN_MODULE_DIR)/bpf_bulk_memory.ko)
 ACTIVE_BCC_TOOLS := capable execsnoop bindsnoop biosnoop vfsstat opensnoop syscount tcpconnect tcplife runqlat
 ACTIVE_BCC_REQUIRED := $(addprefix $(REPO_BCC_ROOT)/,$(ACTIVE_BCC_TOOLS)) $(addsuffix .bpf.o,$(addprefix $(REPO_BCC_ROOT)/,$(ACTIVE_BCC_TOOLS)))
+ACTIVE_BPFTRACE_REQUIRED := $(REPO_BPFTRACE_ROOT)/bin/bpftrace
 ACTIVE_TRACEE_REQUIRED := $(REPO_TRACEE_ROOT)/bin/tracee $(REPO_TRACEE_ROOT)/tracee.bpf.o $(REPO_TRACEE_ROOT)/lsm_support/kprobe_check.bpf.o $(REPO_TRACEE_ROOT)/lsm_support/lsm_check.bpf.o
 ACTIVE_TETRAGON_REQUIRED := $(REPO_TETRAGON_ROOT)/bin/tetragon $(REPO_TETRAGON_ROOT)/bpf_execve_event.o $(REPO_TETRAGON_ROOT)/bpf_generic_kprobe.o
 ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATRAN_ROOT)/bpf/balancer.bpf.o $(REPO_KATRAN_ROOT)/bpf/healthchecking_ipip.bpf.o
@@ -102,6 +118,7 @@ MICRO_PROGRAM_SOURCE_FILES = $(MICRO_PROGRAM_SRCS) $(shell find "$(MICRO_PROGRAM
 KINSN_SOURCE_FILES = $(shell find "$(ACTIVE_KINSN_MODULE_DIR)" "$(ROOT_DIR)/module/include" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
 SCX_SOURCE_FILES = $(shell find "$(REPOS_DIR)/scx" \( -path '*/target' -o -path '*/.git' \) -prune -o -type f \( -name '*.rs' -o -name '*.c' -o -name '*.h' -o -name 'Cargo.toml' -o -name 'Cargo.lock' -o -name 'build.rs' \) -print 2>/dev/null)
 BCC_SOURCE_FILES = $(shell find "$(REPOS_DIR)/bcc/libbpf-tools" \( -path '*/.output' -o -path '*/.git' \) -prune -o -type f \( -name '*.c' -o -name '*.h' -o -name '*.sh' -o -name '*.mk' -o -name '*.yaml' -o -name '*.json' -o -name '*.txt' -o -name 'Makefile' \) -print 2>/dev/null)
+BPFTRACE_SOURCE_FILES = $(shell find "$(REPOS_DIR)/bpftrace" \( -path '*/build' -o -path '*/.git' \) -prune -o -type f -print 2>/dev/null)
 TRACEE_SOURCE_FILES = $(shell find "$(REPOS_DIR)/tracee" \( -path '*/dist' -o -path '*/build' -o -path '*/.git' \) -prune -o -type f \( -name '*.go' -o -name '*.c' -o -name '*.h' -o -name '*.mk' -o -name 'Makefile' -o -name 'go.mod' -o -name 'go.sum' \) -print 2>/dev/null)
 TETRAGON_SOURCE_FILES = $(shell find "$(REPOS_DIR)/tetragon" \( -path '*/bpf/objs' -o -path '*/.git' \) -prune -o -type f \( -name '*.go' -o -name '*.c' -o -name '*.h' -o -name '*.yaml' -o -name '*.mk' -o -name 'Makefile' -o -name 'go.mod' -o -name 'go.sum' \) -print 2>/dev/null)
 KATRAN_SOURCE_FILES = $(shell find "$(REPOS_DIR)/katran" \( -path '*/build' -o -path '*/_build' -o -path '*/deps' -o -path '*/.git' \) -prune -o -type f \( -name '*.cc' -o -name '*.cpp' -o -name '*.c' -o -name '*.h' -o -name '*.hpp' -o -name '*.bpf.c' -o -name '*.sh' -o -name '*.cmake' -o -name 'CMakeLists.txt' \) -print 2>/dev/null)
@@ -118,6 +135,7 @@ $(MICRO_PROGRAM_SOURCE_FILES) \
 $(KINSN_SOURCE_FILES) \
 $(SCX_SOURCE_FILES) \
 $(BCC_SOURCE_FILES) \
+$(BPFTRACE_SOURCE_FILES) \
 $(TRACEE_SOURCE_FILES) \
 $(TETRAGON_SOURCE_FILES) \
 $(KATRAN_SOURCE_FILES) \
@@ -126,9 +144,14 @@ $(LIBBPF_SOURCE_FILES) \
 $(KERNEL_BUILD_META_FILES) \
 $(KERNEL_SOURCE_FILES): ;
 
-$(RUNNER_LIBBPF_A): $(LIBBPF_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
-	@mkdir -p "$(RUNNER_LIBBPF_OBJDIR)" "$(RUNNER_LIBBPF_PREFIX)/include"
+$(RUNNER_LIBBPF_A): $(LIBBPF_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
 	@$(ENSURE_ACTIVE_RUNNER_BUILD_IMAGE)
+	@$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
+		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		-w "$(ROOT_DIR)" \
+		"$(ACTIVE_RUNNER_BUILD_IMAGE)" \
+		rm -rf "$(RUNNER_LIBBPF_OBJDIR)" "$(RUNNER_LIBBPF_PREFIX)"
+	@mkdir -p "$(RUNNER_LIBBPF_OBJDIR)" "$(RUNNER_LIBBPF_PREFIX)/include"
 	$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
 		--user "$(HOST_UID):$(HOST_GID)" \
 		-e HOME=/tmp/bpf-benchmark-container \
@@ -148,6 +171,16 @@ $(ARM64_RUNNER_BUILD_IMAGE_TAR): $(ARM64_RUNNER_BUILD_CONTAINERFILE) $(DOCKERIGN
 	@mkdir -p "$(dir $@)"
 	$(CONTAINER_RUNTIME) build --platform linux/arm64 -t "$(ARM64_RUNNER_BUILD_IMAGE)" -f "$(ARM64_RUNNER_BUILD_CONTAINERFILE)" "$(ROOT_DIR)"
 	$(CONTAINER_RUNTIME) save -o "$@" "$(ARM64_RUNNER_BUILD_IMAGE)"
+
+$(X86_BPFTRACE_STATIC_BUILD_IMAGE_TAR): $(BPFTRACE_STATIC_CONTAINERFILE)
+	@mkdir -p "$(dir $@)"
+	$(CONTAINER_RUNTIME) build --platform linux/amd64 -t "$(X86_BPFTRACE_STATIC_BUILD_IMAGE)" -f "$(BPFTRACE_STATIC_CONTAINERFILE)" "$(REPOS_DIR)/bpftrace"
+	$(CONTAINER_RUNTIME) save -o "$@" "$(X86_BPFTRACE_STATIC_BUILD_IMAGE)"
+
+$(ARM64_BPFTRACE_STATIC_BUILD_IMAGE_TAR): $(BPFTRACE_STATIC_CONTAINERFILE)
+	@mkdir -p "$(dir $@)"
+	$(CONTAINER_RUNTIME) build --platform linux/arm64 -t "$(ARM64_BPFTRACE_STATIC_BUILD_IMAGE)" -f "$(BPFTRACE_STATIC_CONTAINERFILE)" "$(REPOS_DIR)/bpftrace"
+	$(CONTAINER_RUNTIME) save -o "$@" "$(ARM64_BPFTRACE_STATIC_BUILD_IMAGE)"
 
 $(X86_RUNNER_RUNTIME_IMAGE_TAR): $(X86_RUNNER_RUNTIME_CONTAINERFILE) $(DOCKERIGNORE_FILE)
 	@mkdir -p "$(dir $@)"
@@ -197,6 +230,11 @@ $(ACTIVE_RUNNER_BINARY): $(RUNNER_LIBBPF_A) $(RUNNER_SOURCE_FILES) $(ACTIVE_RUNN
 	@mkdir -p "$(dir $@)"
 	@$(ENSURE_ACTIVE_RUNNER_BUILD_IMAGE)
 	@$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
+		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		-w "$(ROOT_DIR)" \
+		"$(ACTIVE_RUNNER_BUILD_IMAGE)" \
+		rm -rf "$(RUNNER_BUILD_DIR_ACTIVE)/CMakeCache.txt" "$(RUNNER_BUILD_DIR_ACTIVE)/CMakeFiles"
+	@$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
 		--user "$(HOST_UID):$(HOST_GID)" \
 		-e HOME=/tmp/bpf-benchmark-container \
 		-v "$(ROOT_DIR):$(ROOT_DIR)" \
@@ -204,6 +242,8 @@ $(ACTIVE_RUNNER_BINARY): $(RUNNER_LIBBPF_A) $(RUNNER_SOURCE_FILES) $(ACTIVE_RUNN
 		"$(ACTIVE_RUNNER_BUILD_IMAGE)" \
 		cmake -S "$(RUNNER_DIR)" -B "$(RUNNER_BUILD_DIR_ACTIVE)" \
 			-DCMAKE_BUILD_TYPE=Release \
+			-DCMAKE_C_COMPILER="$(RUNNER_CONTAINER_CC)" \
+			-DCMAKE_CXX_COMPILER="$(RUNNER_CONTAINER_CXX)" \
 			-DMICRO_REPO_ROOT="$(ROOT_DIR)" \
 			-DMICRO_LIBBPF_PREFIX="$(RUNNER_LIBBPF_PREFIX)" \
 			-DMICRO_LIBBPF_LIBRARY="$(RUNNER_LIBBPF_A)" \
@@ -363,6 +403,42 @@ $(ACTIVE_BCC_REQUIRED) &: $(BCC_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_RUNNE
 	for path in $(ACTIVE_BCC_REQUIRED); do \
 		test -e "$$path"; \
 	done
+
+$(ACTIVE_BPFTRACE_REQUIRED): $(BPFTRACE_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_BPFTRACE_STATIC_BUILD_IMAGE_TAR)
+	@$(ENSURE_ACTIVE_BPFTRACE_STATIC_BUILD_IMAGE); \
+	build_root="$(BPFTRACE_BUILD_ROOT)"; \
+	repo_root="$(REPOS_DIR)/bpftrace"; \
+	artifact_root="$(REPO_BPFTRACE_ROOT)"; \
+	mkdir -p "$$build_root" "$$artifact_root"; \
+	container_platform="$(ACTIVE_CONTAINER_PLATFORM)"; \
+	container_image="$(ACTIVE_BPFTRACE_STATIC_BUILD_IMAGE)"; \
+	$(CONTAINER_RUNTIME) run --rm --platform "$$container_platform" \
+		--user "$(HOST_UID):$(HOST_GID)" \
+		-e HOME=/tmp/bpf-benchmark-container \
+		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		-w "$(ROOT_DIR)" \
+		"$$container_image" \
+		cmake -S "$$repo_root" -B "$$build_root/build" \
+			-DCMAKE_BUILD_TYPE=Release \
+			-DCMAKE_INSTALL_PREFIX="$$artifact_root" \
+			-DSTATIC_LINKING=ON \
+			-DBUILD_TESTING=OFF \
+			-DENABLE_MAN=OFF \
+			-DENABLE_SKB_OUTPUT=OFF \
+			-DUSE_SYSTEM_LIBBPF=ON \
+			-DLLVM_DIR=/usr/lib/cmake/llvm18 \
+			-DClang_DIR=/usr/lib/cmake/clang18 \
+			-DCMAKE_EXE_LINKER_FLAGS=-static \
+			-DCMAKE_DISABLE_FIND_PACKAGE_LibBfd=TRUE \
+			-DCMAKE_DISABLE_FIND_PACKAGE_LibOpcodes=TRUE; \
+	$(CONTAINER_RUNTIME) run --rm --platform "$$container_platform" \
+		--user "$(HOST_UID):$(HOST_GID)" \
+		-e HOME=/tmp/bpf-benchmark-container \
+		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		-w "$(ROOT_DIR)" \
+		"$$container_image" \
+		cmake --build "$$build_root/build" --target install -j"$(JOBS)"; \
+	test -x "$@"
 
 $(ACTIVE_TRACEE_REQUIRED) &: $(TRACEE_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
 	@repo_src="$(REPOS_DIR)/tracee"; \
