@@ -27,8 +27,9 @@ Image families:
   `bcc`/`clang`/`libpcap` packages and hand-copied shared libraries.
 - `runner-runtime.Dockerfile`
   Canonical runtime image for privileged host-kernel execution. The host entry
-  point loads this image and runs `suite_entrypoint.py` inside it with host PID
-  and network namespaces, so attach logic sees the real loader PIDs.
+  point loads this image and runs the active `runner.suites.*` entrypoint inside
+  it with host PID and network namespaces, so attach logic sees the real loader
+  PIDs.
 
 `runner/mk/build.mk` is intentionally thin: it dispatches into app-native build
 commands inside these fixed images and installs the resulting artifacts into

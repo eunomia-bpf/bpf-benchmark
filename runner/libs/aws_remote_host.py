@@ -151,11 +151,42 @@ def cmd_verify_kernel(args: argparse.Namespace) -> None:
         raise SystemExit(1)
 
 
+def _load_run_config(workspace: Path, config_path: Path):
+    workspace_text = str(workspace)
+    if workspace_text not in sys.path:
+        sys.path.insert(0, workspace_text)
+    from runner.libs.run_contract import read_run_config_file
+
+    return read_run_config_file(config_path)
+
+
+def _load_suite_args(workspace: Path, suite_args_path: Path | None) -> list[str]:
+    if suite_args_path is None:
+        return []
+    workspace_text = str(workspace)
+    if workspace_text not in sys.path:
+        sys.path.insert(0, workspace_text)
+    from runner.libs.suite_args import read_suite_args_file
+
+    return read_suite_args_file(suite_args_path)
+
+
+def _remote_suite_command(workspace: Path, config_path: Path, suite_args_path: Path | None) -> list[str]:
+    from runner.libs.suite_commands import build_suite_argv
+
+    config = _load_run_config(workspace, config_path)
+    suite_args = _load_suite_args(workspace, suite_args_path)
+    return build_suite_argv(workspace, config, suite_args, die=die, config_path=config_path)
+
+
 def cmd_run_workspace(args: argparse.Namespace) -> None:
+    workspace = Path(args.workspace).resolve()
+    config_path = Path(args.config_path).resolve()
     env = os.environ.copy()
-    env["PYTHONPATH"] = args.workspace if not env.get("PYTHONPATH") else f"{args.workspace}:{env['PYTHONPATH']}"
+    env["PYTHONPATH"] = str(workspace) if not env.get("PYTHONPATH") else f"{workspace}:{env['PYTHONPATH']}"
     Path(args.log_path).parent.mkdir(parents=True, exist_ok=True)
-    command = [args.remote_python, "-m", "runner.libs.suite_entrypoint", args.workspace, args.config_path]
+    suite_args_path = Path(args.suite_args_path).resolve() if args.suite_args_path else None
+    command = _remote_suite_command(workspace, config_path, suite_args_path)
     if os.geteuid() != 0:
         preserved = [f"{n}={v}" for n in ("PATH", "PYTHONPATH", "HOME", "USER", "LOGNAME", "TERM", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE", "SHELL")
                      if (v := env.get(n, "").strip())]
@@ -184,7 +215,13 @@ def build_parser() -> argparse.ArgumentParser:
     _cmd("setup-kernel-x86", cmd_setup_kernel_x86, "version", "stage_dir")
     _cmd("setup-kernel-arm64", cmd_setup_kernel_arm64, "version", "stage_dir")
     _cmd("verify-kernel", cmd_verify_kernel, "version", "require_sched_ext")
-    _cmd("run-workspace", cmd_run_workspace, "workspace", "config_path", "log_path", "remote_python")
+    sub = sp.add_parser("run-workspace")
+    sub.add_argument("workspace")
+    sub.add_argument("config_path")
+    sub.add_argument("log_path")
+    sub.add_argument("remote_python")
+    sub.add_argument("suite_args_path", nargs="?")
+    sub.set_defaults(func=cmd_run_workspace)
     return parser
 
 

@@ -163,8 +163,6 @@ def find_tool_binary(tools_dir: Path, tool_name: str) -> Path | None:
 
 
 class BCCRunner(AppRunner):
-    required_remote_commands = ("ip", "taskset", "setpriv", "curl", "stress-ng", "fio", "dd", "hackbench", "wrk")
-
     def __init__(
         self,
         *,
@@ -339,5 +337,4 @@ class BCCRunner(AppRunner):
         failures.extend(io_errors)
         if failures:
             raise RuntimeError("; ".join(failures))
-
 

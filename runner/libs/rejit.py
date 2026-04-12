@@ -330,35 +330,6 @@ def resolve_program_enabled_passes(
     return _ordered_unique_passes(active_passes)
 
 
-def _benchmark_int(
-    benchmark_config: Mapping[str, Any] | None,
-    key: str,
-    *,
-    default: int,
-    minimum: int,
-) -> int:
-    value = (benchmark_config or {}).get(key)
-    if value is None:
-        return default
-    try:
-        parsed = int(value)
-    except (TypeError, ValueError) as exc:
-        raise SystemExit(f"invalid benchmark config field: {key} must be an integer") from exc
-    if parsed < minimum:
-        raise SystemExit(f"invalid benchmark config field: {key} must be >= {minimum}")
-    return parsed
-
-
-def benchmark_config_iterations(benchmark_config: Mapping[str, Any] | None) -> int:
-    return _benchmark_int(benchmark_config, "iterations", default=3, minimum=1)
-
-def benchmark_config_warmups(benchmark_config: Mapping[str, Any] | None) -> int:
-    return _benchmark_int(benchmark_config, "warmups", default=0, minimum=0)
-
-def benchmark_config_repeat(benchmark_config: Mapping[str, Any] | None) -> int:
-    return _benchmark_int(benchmark_config, "repeat", default=_DEFAULT_BENCHMARK_REPEAT, minimum=1)
-
-
 @lru_cache(maxsize=1)
 def _cached_benchmark_config_enabled_passes() -> tuple[str, ...]:
     return tuple(benchmark_config_enabled_passes(load_benchmark_config()))

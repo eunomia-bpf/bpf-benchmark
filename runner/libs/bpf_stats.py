@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from contextlib import contextmanager
 from typing import Any
 
@@ -8,10 +7,7 @@ from . import resolve_bpftool_binary, run_json_command
 
 
 def _bpftool_command() -> list[str]:
-    command = [resolve_bpftool_binary(), "-j", "-p", "prog", "show"]
-    if os.geteuid() != 0:
-        command = ["sudo", *command]
-    return command
+    return [resolve_bpftool_binary(), "-j", "-p", "prog", "show"]
 
 
 @contextmanager

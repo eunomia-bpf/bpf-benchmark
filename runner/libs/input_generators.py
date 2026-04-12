@@ -23,28 +23,20 @@ def _load_specs() -> dict:
         return yaml.safe_load(f)
 
 
-def _build_dep_chain(output: Path, spec: dict) -> dict:
-    count, seed, salt = spec["count"], spec["seed"], spec["salt"]
-    state = salt & MASK64; blob = bytearray(struct.pack("<II", count, seed))
+def _build_simple_lcg_u64_ii(output: Path, spec: dict) -> dict:
+    """header=pack('<II',count,header_b); body=N u64s via plain _lcg(state)+XOR mix."""
+    count = spec["count"]; seed = spec.get("seed", 0); salt = spec.get("salt", 0) & MASK64
+    mixing_salt = spec.get("mixing_salt", 0); index_offset = spec.get("index_offset", 1)
+    xor_seed = spec.get("xor_seed", False); header_b = spec.get("header_b", seed)
+    state = salt; blob = bytearray(struct.pack("<II", count, header_b))
     for index in range(count):
-        state = _lcg(state); blob.extend(struct.pack("<Q", (state ^ ((index + 1) * 0x9E3779B97F4A7C15) ^ seed) & MASK64))
-    output.write_bytes(blob); return {"count": count, "seed": seed}
-
-
-def _build_multi_acc(output: Path, spec: dict) -> dict:
-    count, seed, salt = spec["count"], spec["seed"], spec["salt"]
-    state = salt & MASK64; blob = bytearray(struct.pack("<II", count, seed))
-    for index in range(count):
-        state = _lcg(state); blob.extend(struct.pack("<Q", (state ^ ((index + 5) * 0xD1342543DE82EF95)) & MASK64))
-    output.write_bytes(blob); return {"count": count, "seed": seed}
-
-
-def _build_stride_load(output: Path, spec: dict) -> dict:
-    count, stride, salt = spec["count"], spec["stride"], spec["salt"]
-    state = salt & MASK64; blob = bytearray(struct.pack("<II", count, stride))
-    for index in range(count):
-        state = _lcg(state); blob.extend(struct.pack("<Q", (state ^ ((index + 7) * 0xA0761D6478BD642F)) & MASK64))
-    output.write_bytes(blob); return {"count": count, "stride": stride}
+        state = _lcg(state)
+        value = (state ^ ((index + index_offset) * mixing_salt)) & MASK64 if mixing_salt else state & MASK64
+        if xor_seed: value = (value ^ seed) & MASK64
+        blob.extend(struct.pack("<Q", value))
+    output.write_bytes(blob)
+    meta_b_key = spec.get("header_b_key", "seed")
+    return {"count": count, meta_b_key: header_b}
 
 
 def _build_code_clone(output: Path, spec: dict) -> dict:
@@ -52,22 +44,6 @@ def _build_code_clone(output: Path, spec: dict) -> dict:
     state = salt & MASK64; blob = bytearray(struct.pack("<II", count, seed))
     for index in range(count):
         state = _lcg(state); blob.extend(struct.pack("<Q", (state ^ ((index + 13) * 0x94D049BB133111EB) ^ (seed << (index & 3))) & MASK64))
-    output.write_bytes(blob); return {"count": count, "seed": seed}
-
-
-def _build_large_mixed(output: Path, spec: dict) -> dict:
-    count, seed, salt = spec["count"], spec["seed"], spec["salt"]
-    state = salt & MASK64; blob = bytearray(struct.pack("<II", count, seed))
-    for index in range(count):
-        state = _lcg(state); blob.extend(struct.pack("<Q", (state ^ ((index + 1) * 0xD1342543DE82EF95) ^ seed) & MASK64))
-    output.write_bytes(blob); return {"count": count, "seed": seed}
-
-
-def _build_load_isolation(output: Path, spec: dict) -> dict:
-    count, seed = spec["count"], spec["seed"]
-    state = seed & MASK64; blob = bytearray(struct.pack("<II", count, 0))
-    for _ in range(count):
-        state = _lcg(state); blob.extend(struct.pack("<Q", state & MASK64))
     output.write_bytes(blob); return {"count": count, "seed": seed}
 
 
@@ -102,20 +78,22 @@ def _build_endian_swap_dense(output: Path, spec: dict) -> dict:
     output.write_bytes(blob); return {"groups": groups, "lanes": lanes, "count": count}
 
 
-def _build_branch_flip_dense(output: Path, spec: dict) -> dict:
+def _build_groups_lanes_u64(output: Path, spec: dict) -> dict:
+    """header=none; body=(groups*lanes) u64s via lcg(state^(i+1)*salt1) ^ (i+offset)*salt2."""
     groups, lanes = spec["groups"], spec["lanes"]; count = groups * lanes
-    state = spec["initial_state"] & MASK64; salt1, salt2 = spec["salt1"], spec["salt2"]; blob = bytearray()
+    state = spec["initial_state"] & MASK64; salt1, salt2 = spec["salt1"], spec["salt2"]
+    offset = spec.get("index_offset_salt2", 1); blob = bytearray()
     for index in range(count):
-        state = _lcg(state ^ ((index + 1) * salt1)); blob.extend(struct.pack("<Q", (state ^ ((index + 1) * salt2)) & MASK64))
+        state = _lcg(state ^ ((index + 1) * salt1)); blob.extend(struct.pack("<Q", (state ^ ((index + offset) * salt2)) & MASK64))
     output.write_bytes(blob); return {"groups": groups, "lanes": lanes, "count": count}
+
+
+def _build_branch_flip_dense(output: Path, spec: dict) -> dict:
+    return _build_groups_lanes_u64(output, spec)
 
 
 def _build_extract_dense(output: Path, spec: dict) -> dict:
-    groups, lanes = spec["groups"], spec["lanes"]; count = groups * lanes
-    state = spec["initial_state"] & MASK64; salt1, salt2 = spec["salt1"], spec["salt2"]; blob = bytearray()
-    for index in range(count):
-        state = _lcg(state ^ ((index + 1) * salt1)); blob.extend(struct.pack("<Q", (state ^ ((index + 3) * salt2)) & MASK64))
-    output.write_bytes(blob); return {"groups": groups, "lanes": lanes, "count": count}
+    return _build_groups_lanes_u64(output, {**spec, "index_offset_salt2": spec.get("index_offset_salt2", 3)})
 
 
 def _build_plain_bytes(output: Path, spec: dict) -> dict:
@@ -294,30 +272,32 @@ def _build_branch_fanout(output: Path, spec: dict) -> dict:
 
 
 _KIND_BUILDERS = {
-    "dep_chain":         _build_dep_chain,
-    "multi_acc":         _build_multi_acc,
-    "stride_load":       _build_stride_load,
-    "code_clone":        _build_code_clone,
-    "large_mixed":       _build_large_mixed,
-    "load_isolation":    _build_load_isolation,
-    "fixed_loop":        _build_fixed_loop,
-    "lcg_words_q":       _build_lcg_words_q,
-    "addr_calc_stride":  _build_addr_calc_stride,
-    "endian_swap_dense": _build_endian_swap_dense,
-    "branch_flip_dense": _build_branch_flip_dense,
-    "extract_dense":     _build_extract_dense,
-    "plain_bytes":        _build_plain_bytes,
-    "plain_u64_pair":     _build_plain_u64_pair,
-    "lcg_u64_ii":         _build_lcg_u64_ii,
-    "lcg_u32_ii":         _build_lcg_u32_ii,
-    "lcg_u16_ii":         _build_lcg_u16_ii,
-    "lcg_u64_no_header":  _build_lcg_u64_no_header,
-    "switch_dispatch":    _build_switch_dispatch,
-    "branch_layout":      _build_branch_layout,
-    "nested_loop":        _build_nested_loop,
-    "hash_chain":         _build_hash_chain,
-    "branch_dense":       _build_branch_dense,
-    "branch_fanout":      _build_branch_fanout,
+    "simple_lcg_u64_ii":  _build_simple_lcg_u64_ii,
+    "dep_chain":           _build_simple_lcg_u64_ii,  # alias; YAML provides mixing_salt/index_offset/xor_seed
+    "multi_acc":           _build_simple_lcg_u64_ii,  # alias
+    "stride_load":         _build_simple_lcg_u64_ii,  # alias
+    "large_mixed":         _build_simple_lcg_u64_ii,  # alias
+    "load_isolation":      _build_simple_lcg_u64_ii,  # alias; mixing_salt=0
+    "code_clone":          _build_code_clone,
+    "fixed_loop":          _build_fixed_loop,
+    "lcg_words_q":         _build_lcg_words_q,
+    "addr_calc_stride":    _build_addr_calc_stride,
+    "endian_swap_dense":   _build_endian_swap_dense,
+    "groups_lanes_u64":    _build_groups_lanes_u64,
+    "branch_flip_dense":   _build_branch_flip_dense,  # alias
+    "extract_dense":       _build_extract_dense,       # alias
+    "plain_bytes":         _build_plain_bytes,
+    "plain_u64_pair":      _build_plain_u64_pair,
+    "lcg_u64_ii":          _build_lcg_u64_ii,
+    "lcg_u32_ii":          _build_lcg_u32_ii,
+    "lcg_u16_ii":          _build_lcg_u16_ii,
+    "lcg_u64_no_header":   _build_lcg_u64_no_header,
+    "switch_dispatch":     _build_switch_dispatch,
+    "branch_layout":       _build_branch_layout,
+    "nested_loop":         _build_nested_loop,
+    "hash_chain":          _build_hash_chain,
+    "branch_dense":        _build_branch_dense,
+    "branch_fanout":       _build_branch_fanout,
 }
 
 

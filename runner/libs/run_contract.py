@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import importlib
 import os
 import shlex
 import subprocess
@@ -13,6 +12,7 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs.app_suite_schema import load_app_suite_from_yaml
 from runner.libs.cli_support import fail
+from runner.libs.suite_args import csv_tokens, join_csv, suite_args_from_env, suite_selection_from_args
 from runner.libs.state_file import write_json_object
 
 
@@ -20,28 +20,9 @@ TARGETS_DIR = ROOT_DIR / "runner" / "targets"
 SUITES_DIR = ROOT_DIR / "runner" / "suites"
 DEFAULT_CORPUS_APP_SUITE = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
 DEFAULT_BUILD_CONTAINER_LLVM_DIR = "/usr/lib64/llvm20/lib64/cmake/llvm"
-REMOTE_COMMAND_ORDER = ("ip", "taskset", "setpriv", "curl", "tar", "dd", "tc", "stress-ng", "fio", "bpftrace", "hackbench", "sysbench", "wrk")
-
-CORPUS_WORKLOAD_KIND_COMMANDS = {
-    "exec_storm": ("stress-ng", "setpriv"),
-    "hackbench": ("hackbench",),
-    "network": ("wrk",),
-    "tracee_default": ("setpriv", "wrk"),
-    "block_io": ("dd",),
-    "oom_stress": ("stress-ng",),
-    "tcp_retransmit": ("tc",),
-}
+E2E_CASES = ("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran")
 
 _die = partial(fail, "run-contract")
-
-_RUNNER_CLASS_PATHS: dict[str, str] = {
-    "bcc": "runner.libs.app_runners.bcc.BCCRunner",
-    "bpftrace": "runner.libs.app_runners.bpftrace.BpftraceRunner",
-    "katran": "runner.libs.app_runners.katran.KatranRunner",
-    "scx": "runner.libs.app_runners.scx.ScxRunner",
-    "tetragon": "runner.libs.app_runners.tetragon.TetragonRunner",
-    "tracee": "runner.libs.app_runners.tracee.TraceeRunner",
-}
 
 
 @dataclass(frozen=True)
@@ -78,11 +59,9 @@ class RemoteConfig:
     kernel_stage_dir: str = ""
     python_bin: str = ""
     runtime_python_bin: str = "python3"
-    python_modules: tuple[str, ...] = ("PyYAML",)
     container_runtime: str = "docker"
     runtime_container_image: str = ""
     runtime_container_image_tar: str = ""
-    commands: tuple[str, ...] = ()
     bpftool_bin: str = "bpftool"
     swap_size_gb: str = ""
 
@@ -114,29 +93,6 @@ class KvmConfig:
 
 
 @dataclass(frozen=True)
-class TestConfig:
-    mode: str = "test"
-    fuzz_rounds: str = ""
-    scx_prog_show_race_mode: str = ""
-    scx_prog_show_race_iterations: str = ""
-    scx_prog_show_race_load_timeout: str = ""
-    scx_prog_show_race_skip_probe: str = ""
-
-
-@dataclass(frozen=True)
-class BenchmarkConfig:
-    samples: str = ""
-    warmups: str = ""
-    inner_repeat: str = ""
-    corpus_filters: tuple[str, ...] = ()
-    corpus_workload_seconds: str = ""
-    e2e_cases: tuple[str, ...] = ("all",)
-    e2e_smoke: str = ""
-    corpus_argv: tuple[str, ...] = ()
-    e2e_argv: tuple[str, ...] = ()
-
-
-@dataclass(frozen=True)
 class RunConfig:
     identity: RunIdentity
     suite: SuiteRequirements
@@ -144,12 +100,10 @@ class RunConfig:
     remote: RemoteConfig
     aws: AwsConfig
     kvm: KvmConfig
-    test: TestConfig
-    benchmark: BenchmarkConfig
 
     def to_mapping(self) -> dict[str, str | list[str]]:
         arch = self.identity.target_arch.strip()
-        i, s, a, r, aw, kv, t, b = self.identity, self.suite, self.artifacts, self.remote, self.aws, self.kvm, self.test, self.benchmark
+        i, s, a, r, aw, kv = self.identity, self.suite, self.artifacts, self.remote, self.aws, self.kvm
         return {
             "RUN_TARGET_NAME": i.target_name, "RUN_TARGET_ARCH": arch,
             "RUN_EXECUTOR": i.executor, "RUN_SUITE_NAME": i.suite_name, "RUN_TOKEN": i.token,
@@ -170,25 +124,12 @@ class RunConfig:
             "RUN_HOST_PYTHON_BIN": kv.host_python_bin, "RUN_VM_KERNEL_IMAGE": kv.kernel_image,
             "RUN_VM_TIMEOUT_SECONDS": kv.timeout_seconds,
             "RUN_REMOTE_PYTHON_BIN": r.python_bin, "RUN_RUNTIME_PYTHON_BIN": r.runtime_python_bin,
-            "RUN_REMOTE_PYTHON_MODULES_CSV": _join_csv(list(r.python_modules)),
             "RUN_CONTAINER_RUNTIME": r.container_runtime,
             "RUN_RUNTIME_CONTAINER_IMAGE": r.runtime_container_image,
             "RUN_RUNTIME_CONTAINER_IMAGE_TAR": r.runtime_container_image_tar,
-            "RUN_TEST_MODE": t.mode, "RUN_TEST_FUZZ_ROUNDS": t.fuzz_rounds,
-            "RUN_TEST_SCX_PROG_SHOW_RACE_MODE": t.scx_prog_show_race_mode,
-            "RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS": t.scx_prog_show_race_iterations,
-            "RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT": t.scx_prog_show_race_load_timeout,
-            "RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE": t.scx_prog_show_race_skip_probe,
-            "RUN_BENCH_SAMPLES": b.samples, "RUN_BENCH_WARMUPS": b.warmups,
-            "RUN_BENCH_INNER_REPEAT": b.inner_repeat,
-            "RUN_CORPUS_FILTERS": _join_csv(list(b.corpus_filters)),
-            "RUN_CORPUS_WORKLOAD_SECONDS": b.corpus_workload_seconds,
-            "RUN_E2E_CASES": _join_csv(list(b.e2e_cases)), "RUN_E2E_SMOKE": b.e2e_smoke,
-            "RUN_NATIVE_REPOS_CSV": _join_csv(list(a.native_repos)),
-            "RUN_SCX_PACKAGES_CSV": _join_csv(list(a.scx_packages)),
-            "RUN_REMOTE_COMMANDS_CSV": _join_csv(list(r.commands)),
+            "RUN_NATIVE_REPOS_CSV": join_csv(list(a.native_repos)),
+            "RUN_SCX_PACKAGES_CSV": join_csv(list(a.scx_packages)),
             "RUN_BPFTOOL_BIN": r.bpftool_bin,
-            "RUN_CORPUS_ARGV": list(b.corpus_argv), "RUN_E2E_ARGV": list(b.e2e_argv),
         }
 
     def scalar(self, name: str, default: str = "") -> str:
@@ -202,17 +143,6 @@ class RunConfig:
         if not value:
             raise RuntimeError(f"run config {name} is empty")
         return value
-
-    def csv(self, name: str) -> list[str]:
-        value = self.to_mapping().get(name, "")
-        tokens = value if isinstance(value, list) else str(value).split(",")
-        return [str(token).strip() for token in tokens if str(token).strip()]
-
-    def argv(self, name: str) -> list[str]:
-        value = self.to_mapping().get(name, [])
-        if isinstance(value, list):
-            return [str(token) for token in value]
-        return shlex.split(str(value))
 
     def env(self) -> dict[str, str]:
         env: dict[str, str] = {}
@@ -240,12 +170,6 @@ class RunConfig:
             tokens = value if isinstance(value, list) else str(value).split(",")
             return tuple(str(token).strip() for token in tokens if str(token).strip())
 
-        def argv(name: str) -> tuple[str, ...]:
-            value = values.get(name, ())
-            if isinstance(value, list):
-                return tuple(str(token) for token in value)
-            return tuple(shlex.split(str(value)))
-
         return cls(
             identity=RunIdentity(target_name=scalar("RUN_TARGET_NAME"), target_arch=scalar("RUN_TARGET_ARCH"),
                                  executor=scalar("RUN_EXECUTOR"), suite_name=scalar("RUN_SUITE_NAME"), token=scalar("RUN_TOKEN")),
@@ -260,11 +184,10 @@ class RunConfig:
             remote=RemoteConfig(user=scalar("RUN_REMOTE_USER"), stage_dir=scalar("RUN_REMOTE_STAGE_DIR"),
                                 kernel_stage_dir=scalar("RUN_REMOTE_KERNEL_STAGE_DIR"), python_bin=scalar("RUN_REMOTE_PYTHON_BIN"),
                                 runtime_python_bin=scalar("RUN_RUNTIME_PYTHON_BIN", "python3"),
-                                python_modules=csv("RUN_REMOTE_PYTHON_MODULES_CSV") or ("PyYAML",),
                                 container_runtime=scalar("RUN_CONTAINER_RUNTIME", "docker"),
                                 runtime_container_image=scalar("RUN_RUNTIME_CONTAINER_IMAGE"),
                                 runtime_container_image_tar=scalar("RUN_RUNTIME_CONTAINER_IMAGE_TAR"),
-                                commands=csv("RUN_REMOTE_COMMANDS_CSV"), bpftool_bin=scalar("RUN_BPFTOOL_BIN", "bpftool"),
+                                bpftool_bin=scalar("RUN_BPFTOOL_BIN", "bpftool"),
                                 swap_size_gb=scalar("RUN_REMOTE_SWAP_SIZE_GB")),
             aws=AwsConfig(name_tag=scalar("RUN_NAME_TAG"), instance_type=scalar("RUN_INSTANCE_TYPE"),
                           ami_param=scalar("RUN_AMI_PARAM"), ami_id=scalar("RUN_AMI_ID"),
@@ -275,16 +198,6 @@ class RunConfig:
                           cpus=scalar("RUN_VM_CPUS"), mem=scalar("RUN_VM_MEM"),
                           host_python_bin=scalar("RUN_HOST_PYTHON_BIN", "python3"),
                           kernel_image=scalar("RUN_VM_KERNEL_IMAGE"), timeout_seconds=scalar("RUN_VM_TIMEOUT_SECONDS")),
-            test=TestConfig(mode=scalar("RUN_TEST_MODE", "test"), fuzz_rounds=scalar("RUN_TEST_FUZZ_ROUNDS"),
-                            scx_prog_show_race_mode=scalar("RUN_TEST_SCX_PROG_SHOW_RACE_MODE"),
-                            scx_prog_show_race_iterations=scalar("RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS"),
-                            scx_prog_show_race_load_timeout=scalar("RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT"),
-                            scx_prog_show_race_skip_probe=scalar("RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE")),
-            benchmark=BenchmarkConfig(samples=scalar("RUN_BENCH_SAMPLES"), warmups=scalar("RUN_BENCH_WARMUPS"),
-                                      inner_repeat=scalar("RUN_BENCH_INNER_REPEAT"), corpus_filters=csv("RUN_CORPUS_FILTERS"),
-                                      corpus_workload_seconds=scalar("RUN_CORPUS_WORKLOAD_SECONDS"),
-                                      e2e_cases=csv("RUN_E2E_CASES") or ("all",), e2e_smoke=scalar("RUN_E2E_SMOKE"),
-                                      corpus_argv=argv("RUN_CORPUS_ARGV"), e2e_argv=argv("RUN_E2E_ARGV")),
         )
 
     @classmethod
@@ -296,17 +209,6 @@ class RunConfig:
             if not isinstance(key, str): raise RuntimeError("run config JSON keys must be strings")
             values[key] = [str(item) for item in value] if isinstance(value, list) else ("" if value is None else str(value))
         return cls.from_mapping(values)
-
-
-def _runner_remote_commands(runner_name: str) -> tuple[str, ...]:
-    name = str(runner_name).strip()
-    dotted = _RUNNER_CLASS_PATHS.get(name)
-    if dotted is None: _die(f"unsupported app runner in suite: {runner_name!r}")
-    module_path, class_name = dotted.rsplit(".", 1)
-    try:
-        return tuple(getattr(importlib.import_module(module_path), class_name).required_remote_commands)
-    except (AttributeError, ImportError) as exc:
-        _die(f"failed to resolve remote command contract for runner {name!r}: {exc}")
 
 
 def _load_assignment_file(path: Path) -> dict[str, str]:
@@ -329,10 +231,6 @@ def _env_or_default(env: dict[str, str], name: str, default: str = "") -> str:
 
 def _prefixed_env_or_default(env: dict[str, str], prefix: str, suffix: str, default: str = "") -> str:
     return _env_or_default(env, f"{prefix}_{suffix}", default)
-
-
-def _normalize_csv(raw: str) -> str:
-    return "".join(raw.split())
 
 
 def _resolve_repo_path(path: str) -> str:
@@ -365,66 +263,32 @@ def _resolve_cpu_spec(spec: str) -> str:
     return spec
 
 
-def _csv_tokens(csv: str) -> list[str]: return [token for token in csv.split(",") if token]
-
-
 def _append_csv(csv: str, token: str) -> str:
-    if not token or token in _csv_tokens(csv): return csv
+    if not token or token in csv_tokens(csv): return csv
     return token if not csv else f"{csv},{token}"
-
-
-def _append_csv_list(csv: str, extra_csv: str) -> str:
-    merged = csv
-    for token in _csv_tokens(extra_csv): merged = _append_csv(merged, token)
-    return merged
-
-
-def _join_csv(tokens: list[str]) -> str: return ",".join(token for token in tokens if token)
-
-
-def _ordered_csv_from_tokens(tokens: set[str], *, order: tuple[str, ...]) -> str:
-    return ",".join(token for token in order if token in tokens)
-
-
-def _corpus_workload_requirements_for_selection(app_suite: object) -> str:
-    remote_commands: set[str] = set()
-    for app in getattr(app_suite, "apps", ()):
-        remote_commands.update(_runner_remote_commands(str(getattr(app, "runner", "") or "").strip()))
-        remote_commands.update(CORPUS_WORKLOAD_KIND_COMMANDS.get(str(app.workload_for("corpus") or "").strip(), ()))
-    return _ordered_csv_from_tokens(remote_commands, order=REMOTE_COMMAND_ORDER)
 
 
 def _apply_corpus_filter_selection(
     *,
     run_corpus_filters: str,
     suite: dict[str, str],
-    run_benchmark_repos: str,
     run_native_repos: str,
-    run_scx_packages: str,
-    run_needs_sched_ext: str,
-) -> tuple[str, str, str, str, str]:
-    app_suite, _summary = load_app_suite_from_yaml(DEFAULT_CORPUS_APP_SUITE, filters=_csv_tokens(run_corpus_filters))
+) -> tuple[str, str, str]:
+    app_suite, _summary = load_app_suite_from_yaml(DEFAULT_CORPUS_APP_SUITE, filters=csv_tokens(run_corpus_filters))
     selected_runners = {app.runner for app in app_suite.apps}
-    filtered_benchmark_repos = _join_csv([t for t in _csv_tokens(run_benchmark_repos) if t in selected_runners])
-    filtered_native_repos = _join_csv([t for t in _csv_tokens(run_native_repos) if t in selected_runners])
-    return (filtered_benchmark_repos, filtered_native_repos,
+    filtered_native_repos = join_csv([t for t in csv_tokens(run_native_repos) if t in selected_runners])
+    return (filtered_native_repos,
             suite.get("SUITE_DEFAULT_SCX_PACKAGES", "") if "scx" in selected_runners else "",
-            "1" if "scx" in selected_runners else "0",
-            _corpus_workload_requirements_for_selection(app_suite))
+            "1" if "scx" in selected_runners else "0")
 
 
-def _apply_e2e_case_selection(*, run_e2e_cases: str, suite: dict[str, str]) -> tuple[str, str, str, str, str]:
-    selected_cases = set(_csv_tokens(run_e2e_cases))
+def _apply_e2e_case_selection(*, run_e2e_cases: str, suite: dict[str, str]) -> tuple[str, str, str]:
+    selected_cases = set(csv_tokens(run_e2e_cases))
     include_all = "all" in selected_cases
-    remote_commands: set[str] = set()
-    for case_name in _RUNNER_CLASS_PATHS:
-        if include_all or case_name in selected_cases:
-            remote_commands.update(_runner_remote_commands(case_name))
     run_scx_packages, run_needs_sched_ext = ("", "0")
     if include_all or "scx" in selected_cases:
         run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", ""); run_needs_sched_ext = "1"
-    return (_suite_repos_for_e2e_cases(run_e2e_cases), _native_repos_for_e2e_cases(run_e2e_cases),
-            run_scx_packages, run_needs_sched_ext, _ordered_csv_from_tokens(remote_commands, order=REMOTE_COMMAND_ORDER))
+    return (_native_repos_for_e2e_cases(run_e2e_cases), run_scx_packages, run_needs_sched_ext)
 
 
 _COMMON_MANIFEST_INPUTS = {
@@ -438,28 +302,12 @@ _COMMON_MANIFEST_INPUTS = {
 
 _KVM_MANIFEST_INPUTS = {
     "BZIMAGE",
-    "TEST_MODE",
-    "SAMPLES",
-    "WARMUPS",
-    "INNER_REPEAT",
-    "FILTERS",
-    "VM_CORPUS_ARGS",
-    "VM_CORPUS_SAMPLES",
-    "VM_CORPUS_WORKLOAD_SECONDS",
-    "E2E_CASE",
-    "E2E_ARGS",
-    "E2E_SMOKE",
     "VM_CPUS",
     "VM_MEM",
     "VM_TEST_TIMEOUT",
     "VM_MICRO_TIMEOUT",
     "VM_CORPUS_TIMEOUT",
     "VM_E2E_TIMEOUT",
-    "FUZZ_ROUNDS",
-    "SCX_PROG_SHOW_RACE_MODE",
-    "SCX_PROG_SHOW_RACE_ITERATIONS",
-    "SCX_PROG_SHOW_RACE_LOAD_TIMEOUT",
-    "SCX_PROG_SHOW_RACE_SKIP_PROBE",
 }
 
 _AWS_MANIFEST_SUFFIXES = {
@@ -472,16 +320,6 @@ _AWS_MANIFEST_SUFFIXES = {
     "AMI_ID",
     "ROOT_VOLUME_GB",
     "REMOTE_SWAP_SIZE_GB",
-    "TEST_MODE",
-    "BENCH_SAMPLES",
-    "BENCH_WARMUPS",
-    "BENCH_INNER_REPEAT",
-    "CORPUS_FILTERS",
-    "CORPUS_ARGS",
-    "CORPUS_WORKLOAD_SECONDS",
-    "E2E_CASES",
-    "E2E_ARGS",
-    "E2E_SMOKE",
     "KEY_NAME",
     "KEY_PATH",
     "SECURITY_GROUP_ID",
@@ -504,59 +342,56 @@ def _filtered_run_inputs(target_name: str, env: dict[str, str] | None) -> dict[s
 
 
 def _validate_test_mode(mode: str) -> None:
-    if mode not in {"selftest", "negative", "test"}: _die(f"unsupported test mode: {mode}")
+    if mode not in {"selftest", "negative", "test", "fuzz"}: _die(f"unsupported test mode: {mode}")
 
 
 def _validate_e2e_cases(cases_csv: str) -> None:
     if not cases_csv: _die("e2e cases must not be empty")
     if cases_csv == "all": return
-    for token in _csv_tokens(cases_csv):
-        if token not in {"tracee", "tetragon", "bpftrace", "scx", "bcc", "katran"}:
+    for token in csv_tokens(cases_csv):
+        if token not in E2E_CASES:
             _die(f"unsupported e2e case: {token}")
-
-
-def _suite_repos_for_e2e_cases(cases_csv: str) -> str:
-    if cases_csv == "all": return "tracee,tetragon,bpftrace,scx,bcc,katran"
-    repos = ""
-    for token in _csv_tokens(cases_csv): repos = _append_csv(repos, token)
-    return repos
 
 
 def _native_repos_for_e2e_cases(cases_csv: str) -> str:
     if cases_csv == "all": return "bcc,bpftrace,katran,tracee,tetragon"
     repos = ""
-    for token in _csv_tokens(cases_csv):
+    for token in csv_tokens(cases_csv):
         if token in {"bcc", "bpftrace", "katran", "tracee", "tetragon"}: repos = _append_csv(repos, token)
     return repos
 
 
-def _build_run_config_mapping(target_name: str, suite_name: str, *, env: dict[str, str] | None = None) -> dict[str, str | list[str]]:
+def _build_run_config_mapping(
+    target_name: str,
+    suite_name: str,
+    *,
+    env: dict[str, str] | None = None,
+    suite_args: list[str] | None = None,
+) -> dict[str, str | list[str]]:
+    source_env = os.environ if env is None else env
     values = _filtered_run_inputs(target_name, env)
     target = _load_assignment_file(TARGETS_DIR / f"{target_name}.env")
     suite = _load_assignment_file(SUITES_DIR / f"{suite_name}.env")
+    selection = suite_selection_from_args(
+        suite_name,
+        list(suite_args) if suite_args is not None else suite_args_from_env(target_name, suite_name, env=source_env),
+    )
 
     run_token = values.get("RUN_TOKEN", "").strip() or f"{target_name}_{suite_name}"
     (run_name_tag, run_instance_type, run_remote_user, run_remote_stage_dir,
      run_remote_kernel_stage_dir, run_ami_param, run_ami_id, run_root_volume_gb,
      run_aws_key_name, run_aws_key_path, run_aws_security_group_id,
      run_aws_subnet_id, run_aws_region, run_aws_profile, run_remote_swap_size_gb,
-     run_bench_samples, run_bench_warmups, run_bench_inner_repeat,
-     run_corpus_filters, run_corpus_args, run_corpus_workload_seconds,
-     run_e2e_args, run_e2e_smoke, run_llvm_dir,
-     run_vm_backend, run_vm_executable, run_vm_cpus, run_vm_mem, run_vm_kernel_image,
-     run_test_fuzz_rounds, run_test_scx_prog_show_race_mode,
-     run_test_scx_prog_show_race_iterations, run_test_scx_prog_show_race_load_timeout,
-     run_test_scx_prog_show_race_skip_probe) = ("",) * 34
-    run_corpus_argv: list[str] = []
-    run_e2e_argv: list[str] = []
-    run_test_mode = "test"; run_e2e_cases = "all"; run_bpftool_bin = "bpftool"
-    run_remote_python_modules = "PyYAML"
-    run_benchmark_repos = suite.get("SUITE_DEFAULT_REPOS", "")
+     run_llvm_dir, run_vm_backend, run_vm_executable, run_vm_cpus, run_vm_mem, run_vm_kernel_image,
+    ) = ("",) * 21
+    run_corpus_filters = selection.corpus_filters
+    run_test_mode = selection.test_mode
+    run_e2e_cases = selection.e2e_cases
+    run_bpftool_bin = "bpftool"
     run_native_repos = suite.get("SUITE_DEFAULT_NATIVE_REPOS", "")
     run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")
     run_needs_sched_ext = suite.get("SUITE_NEEDS_SCHED_EXT", "0")
     run_needs_llvmbpf = suite.get("SUITE_NEEDS_LLVMBPF", "0")
-    run_remote_commands = suite.get("SUITE_DEFAULT_REMOTE_COMMANDS", "")
     run_needs_runner_binary = suite.get("SUITE_NEEDS_RUNNER_BINARY", "0")
     run_needs_daemon_binary = suite.get("SUITE_NEEDS_DAEMON_BINARY", "0")
     run_needs_kinsn_modules = suite.get("SUITE_NEEDS_KINSN_MODULES", "0")
@@ -586,15 +421,6 @@ def _build_run_config_mapping(target_name: str, suite_name: str, *, env: dict[st
         run_ami_id = _penv("AMI_ID")
         run_root_volume_gb = _penv("ROOT_VOLUME_GB", target.get("TARGET_ROOT_VOLUME_GB_DEFAULT", ""))
         run_remote_swap_size_gb = _penv("REMOTE_SWAP_SIZE_GB", target.get("TARGET_REMOTE_SWAP_SIZE_GB_DEFAULT", "8"))
-        run_test_mode = _penv("TEST_MODE", "test").lower()
-        run_bench_samples = _penv("BENCH_SAMPLES", "1")
-        run_bench_warmups = _penv("BENCH_WARMUPS", "0")
-        run_bench_inner_repeat = _penv("BENCH_INNER_REPEAT", "10")
-        run_corpus_filters = _normalize_csv(_penv("CORPUS_FILTERS", ""))
-        run_corpus_args = _penv("CORPUS_ARGS", "")
-        run_corpus_workload_seconds = _penv("CORPUS_WORKLOAD_SECONDS", "")
-        run_e2e_cases = _normalize_csv(_penv("E2E_CASES", suite.get("SUITE_DEFAULT_E2E_CASES", "all")))
-        run_e2e_args = _penv("E2E_ARGS", ""); run_e2e_smoke = _penv("E2E_SMOKE", "0")
         run_aws_key_path = _penv("KEY_PATH")
         if not run_aws_key_path: _treq("KEY_PATH")
         run_aws_key_name = _penv("KEY_NAME") or Path(run_aws_key_path).stem
@@ -617,11 +443,6 @@ def _build_run_config_mapping(target_name: str, suite_name: str, *, env: dict[st
         if not Path(run_vm_executable).is_absolute() and "/" in run_vm_executable:
             run_vm_executable = str((ROOT_DIR / run_vm_executable).resolve())
         _kenv = lambda k, dflt="": _env_or_default(values, k, dflt)
-        run_test_mode = _kenv("TEST_MODE", "test")
-        run_bench_samples = _kenv("SAMPLES", "1"); run_bench_warmups = _kenv("WARMUPS", "0"); run_bench_inner_repeat = _kenv("INNER_REPEAT", "10")
-        run_corpus_filters = _normalize_csv(_kenv("FILTERS", ""))
-        run_corpus_args = _kenv("VM_CORPUS_ARGS", ""); run_corpus_workload_seconds = _kenv("VM_CORPUS_WORKLOAD_SECONDS", "")
-        run_e2e_cases = _normalize_csv(_kenv("E2E_CASE", "all")); run_e2e_args = _kenv("E2E_ARGS", ""); run_e2e_smoke = _kenv("E2E_SMOKE", "0")
         suite_vm_class = suite.get("SUITE_VM_CLASS", "")
         if suite_vm_class == "test":
             run_vm_cpus = _kenv("VM_CPUS", _resolve_cpu_spec(target.get("TARGET_KVM_TEST_CPUS_SPEC", "auto:0.8")))
@@ -636,12 +457,6 @@ def _build_run_config_mapping(target_name: str, suite_name: str, *, env: dict[st
 
     if suite_name == "test":
         run_vm_timeout_seconds = _env_or_default(values, "VM_TEST_TIMEOUT", run_vm_timeout_seconds)
-        _senv = lambda k, skey, dflt: _env_or_default(values, k, suite.get(skey, dflt))
-        run_test_fuzz_rounds = _senv("FUZZ_ROUNDS", "SUITE_DEFAULT_FUZZ_ROUNDS", "1000")
-        run_test_scx_prog_show_race_mode = _senv("SCX_PROG_SHOW_RACE_MODE", "SUITE_DEFAULT_SCX_PROG_SHOW_RACE_MODE", "bpftool-loop")
-        run_test_scx_prog_show_race_iterations = _senv("SCX_PROG_SHOW_RACE_ITERATIONS", "SUITE_DEFAULT_SCX_PROG_SHOW_RACE_ITERATIONS", "20")
-        run_test_scx_prog_show_race_load_timeout = _senv("SCX_PROG_SHOW_RACE_LOAD_TIMEOUT", "SUITE_DEFAULT_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT", "20")
-        run_test_scx_prog_show_race_skip_probe = _senv("SCX_PROG_SHOW_RACE_SKIP_PROBE", "SUITE_DEFAULT_SCX_PROG_SHOW_RACE_SKIP_PROBE", "0")
     elif suite_name == "micro":
         run_vm_timeout_seconds = _env_or_default(values, "VM_MICRO_TIMEOUT", run_vm_timeout_seconds)
     elif suite_name == "corpus":
@@ -654,11 +469,8 @@ def _build_run_config_mapping(target_name: str, suite_name: str, *, env: dict[st
         _die(f"suite {suite_name} is missing remote python contract")
     if not run_bpftool_bin:
         _die(f"suite {suite_name} is missing RUN_BPFTOOL_BIN")
-    run_corpus_argv = shlex.split(run_corpus_args)
-    run_e2e_argv = shlex.split(run_e2e_args)
 
     if suite_name == "test":
-        run_benchmark_repos = ""
         run_native_repos = ""
         if run_test_mode == "selftest":
             run_scx_packages = ""
@@ -666,45 +478,38 @@ def _build_run_config_mapping(target_name: str, suite_name: str, *, env: dict[st
         elif run_test_mode == "negative":
             run_needs_daemon_binary = "0"
             run_needs_kinsn_modules = "0"
+        elif run_test_mode == "fuzz":
+            run_scx_packages = ""
+            run_needs_sched_ext = "0"
+            run_needs_daemon_binary = "0"
+            run_needs_kinsn_modules = "0"
         elif run_test_mode != "test":
             _die(f"unsupported test mode: {run_test_mode}")
     elif suite_name == "micro":
-        run_benchmark_repos = ""
         run_native_repos = ""
         run_scx_packages = ""
     elif suite_name == "corpus":
-        if target_name == "x86-kvm" and not values.get("SAMPLES", "").strip():
-            run_bench_samples = _env_or_default(values, "VM_CORPUS_SAMPLES", "30")
         (
-            run_benchmark_repos,
             run_native_repos,
             run_scx_packages,
             run_needs_sched_ext,
-            corpus_remote_commands,
         ) = _apply_corpus_filter_selection(
             run_corpus_filters=run_corpus_filters,
             suite=suite,
-            run_benchmark_repos=run_benchmark_repos,
             run_native_repos=run_native_repos,
-            run_scx_packages=run_scx_packages,
-            run_needs_sched_ext=run_needs_sched_ext,
         )
-        run_remote_commands = _append_csv_list(run_remote_commands, corpus_remote_commands)
     elif suite_name == "e2e":
         if not run_e2e_cases:
             run_e2e_cases = suite.get("SUITE_DEFAULT_E2E_CASES", "all")
         _validate_e2e_cases(run_e2e_cases)
         (
-            run_benchmark_repos,
             run_native_repos,
             run_scx_packages,
             run_needs_sched_ext,
-            run_remote_commands,
         ) = _apply_e2e_case_selection(
             run_e2e_cases=run_e2e_cases,
             suite=suite,
         )
-        run_remote_commands = _append_csv_list(suite.get("SUITE_DEFAULT_REMOTE_COMMANDS", ""), run_remote_commands)
     else:
         _die(f"unsupported suite: {suite_name}")
 
@@ -739,24 +544,20 @@ def _build_run_config_mapping(target_name: str, suite_name: str, *, env: dict[st
         "RUN_HOST_PYTHON_BIN": run_host_python_bin, "RUN_VM_KERNEL_IMAGE": run_vm_kernel_image,
         "RUN_VM_TIMEOUT_SECONDS": run_vm_timeout_seconds,
         "RUN_REMOTE_PYTHON_BIN": run_remote_python_bin, "RUN_RUNTIME_PYTHON_BIN": run_runtime_python_bin,
-        "RUN_REMOTE_PYTHON_MODULES_CSV": run_remote_python_modules, "RUN_CONTAINER_RUNTIME": run_container_runtime,
-        "RUN_TEST_MODE": run_test_mode, "RUN_TEST_FUZZ_ROUNDS": run_test_fuzz_rounds,
-        "RUN_TEST_SCX_PROG_SHOW_RACE_MODE": run_test_scx_prog_show_race_mode,
-        "RUN_TEST_SCX_PROG_SHOW_RACE_ITERATIONS": run_test_scx_prog_show_race_iterations,
-        "RUN_TEST_SCX_PROG_SHOW_RACE_LOAD_TIMEOUT": run_test_scx_prog_show_race_load_timeout,
-        "RUN_TEST_SCX_PROG_SHOW_RACE_SKIP_PROBE": run_test_scx_prog_show_race_skip_probe,
-        "RUN_BENCH_SAMPLES": run_bench_samples, "RUN_BENCH_WARMUPS": run_bench_warmups,
-        "RUN_BENCH_INNER_REPEAT": run_bench_inner_repeat, "RUN_CORPUS_FILTERS": run_corpus_filters,
-        "RUN_CORPUS_WORKLOAD_SECONDS": run_corpus_workload_seconds,
-        "RUN_E2E_CASES": run_e2e_cases, "RUN_E2E_SMOKE": run_e2e_smoke,
+        "RUN_CONTAINER_RUNTIME": run_container_runtime,
         "RUN_NATIVE_REPOS_CSV": run_native_repos, "RUN_SCX_PACKAGES_CSV": run_scx_packages,
-        "RUN_REMOTE_COMMANDS_CSV": run_remote_commands, "RUN_BPFTOOL_BIN": run_bpftool_bin,
-        "RUN_CORPUS_ARGV": run_corpus_argv, "RUN_E2E_ARGV": run_e2e_argv,
+        "RUN_BPFTOOL_BIN": run_bpftool_bin,
     }
 
 
-def build_run_config(target_name: str, suite_name: str, *, env: dict[str, str] | None = None) -> RunConfig:
-    return RunConfig.from_mapping(_build_run_config_mapping(target_name, suite_name, env=env))
+def build_run_config(
+    target_name: str,
+    suite_name: str,
+    *,
+    env: dict[str, str] | None = None,
+    suite_args: list[str] | None = None,
+) -> RunConfig:
+    return RunConfig.from_mapping(_build_run_config_mapping(target_name, suite_name, env=env, suite_args=suite_args))
 
 
 def build_target_config(target_name: str, *, env: dict[str, str] | None = None) -> RunConfig:

@@ -678,8 +678,6 @@ DEFAULT_LOAD_TIMEOUT_S = DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S
 
 
 class KatranRunner(AppRunner):
-    required_remote_commands = ("ip", "taskset", "wrk")
-
     def __init__(self, *, loader_binary: Path | str | None = None, iface: str = DEFAULT_INTERFACE,
                  router_peer_iface: str | None = None, load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
                  concurrency: int = DEFAULT_CONCURRENCY, workload_kind: str = DEFAULT_WORKLOAD_KIND,
@@ -784,4 +782,3 @@ class KatranRunner(AppRunner):
             try: wait_for_katran_teardown(prog_id, settle_s=DEFAULT_KATRAN_STOP_SETTLE_S)
             except Exception as exc: errors.append(str(exc))
         if errors: raise RuntimeError("; ".join(errors))
-

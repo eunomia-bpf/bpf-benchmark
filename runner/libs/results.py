@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Mapping, Sequence, TypedDict
+from typing import Any, Mapping, TypedDict
 
 from .statistics import (
     SummaryStats,
@@ -73,26 +72,6 @@ class RunnerSample(TypedDict, total=False):
     rejit: RejitSummary
 
 
-@dataclass(frozen=True)
-class UnifiedResultRecord:
-    suite: str
-    target: Mapping[str, object]
-    backend: str
-    policy_mode: str
-    transport: str = "local"
-    manifest: str | None = None
-    host: Mapping[str, object] | None = None
-    artifacts: Mapping[str, object] | None = None
-    compile: Mapping[str, object] | None = None
-    execution: Mapping[str, object] | None = None
-    rejit: Mapping[str, object] | None = None
-    perf_counters: Mapping[str, object] | None = None
-    samples: Sequence[RunnerSample] = field(default_factory=tuple)
-    statistics: Mapping[str, object] | None = None
-    correctness: Mapping[str, object] | None = None
-    metadata: Mapping[str, object] | None = None
-
-
 def load_json(path: str | Path) -> Any:
     return json.loads(Path(path).read_text())
 
@@ -126,28 +105,6 @@ def parse_runner_samples(stdout: str) -> list[RunnerSample]:
         if isinstance(payload, dict):
             samples.append(normalize_runner_sample(payload))
     return samples
-
-
-def collapse_command_samples(samples: Sequence[RunnerSample]) -> list[RunnerSample]:
-    collapsed: list[RunnerSample] = []
-    index = 0
-    while index < len(samples):
-        sample = samples[index]
-        if (
-            sample.get("phase") == "stock"
-            and index + 1 < len(samples)
-            and samples[index + 1].get("phase") == "rejit"
-        ):
-            collapsed.append(samples[index + 1])
-            index += 2
-            continue
-        collapsed.append(sample)
-        index += 1
-    return collapsed
-
-
-def parse_command_samples(stdout: str) -> list[RunnerSample]:
-    return collapse_command_samples(parse_runner_samples(stdout))
 
 
 def _normalize_phase_name(phase: object) -> object:
@@ -201,8 +158,3 @@ def normalize_runner_sample(sample: Mapping[str, object]) -> RunnerSample:
     return normalized
 
 
-def parse_runner_sample(stdout: str) -> RunnerSample:
-    samples = parse_runner_samples(stdout)
-    if not samples:
-        raise RuntimeError("runner sample payload was not a JSON object")
-    return samples[-1]

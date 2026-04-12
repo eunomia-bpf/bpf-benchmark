@@ -196,8 +196,6 @@ def _default_extra_args() -> tuple[str, ...]:
 
 
 class TetragonRunner(AppRunner):
-    required_remote_commands = ("ip", "taskset", "setpriv", "curl", "tar", "stress-ng", "fio")
-
     def __init__(self, *, tetragon_binary: Path | str | None = None, tetragon_extra_args: Sequence[str] = (),
                  expected_program_names: Sequence[str] = (), load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
                  workload_spec: Mapping[str, object] | None = None) -> None:
@@ -269,4 +267,3 @@ class TetragonRunner(AppRunner):
             except Exception as exc: errors.append(str(exc))
             self.tempdir = None
         if errors: raise RuntimeError("; ".join(errors))
-

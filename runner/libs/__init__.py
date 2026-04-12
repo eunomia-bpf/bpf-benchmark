@@ -16,11 +16,7 @@ DEFAULT_BPFTOOL_CANDIDATES = (
     ROOT_DIR / "runner" / "build" / "vendor" / "bpftool" / "bpftool",
     Path("/usr/local/sbin/bpftool"),
 )
-DEFAULT_PERF_CANDIDATES = (
-    ROOT_DIR / "vendor" / "linux-framework" / "tools" / "perf" / "perf",
-)
 BPFTOOL_ENV_VARS = ("BPFTOOL_BIN", "BPFTOOL")
-PERF_ENV_VARS = ("PERF_BIN", "PERF")
 
 
 def ensure_parent(path: Path) -> None:
@@ -115,27 +111,6 @@ def resolve_bpftool_binary() -> str:
         if resolved is not None:
             return resolved
     return resolve_binary("bpftool")
-
-
-def resolve_perf_binary(*, required: bool = False) -> str | None:
-    for env_var in PERF_ENV_VARS:
-        candidate = os.environ.get(env_var, "")
-        resolved = _resolve_explicit_binary(candidate)
-        if resolved is None and candidate.strip():
-            raise RuntimeError(f"{env_var} is set to {candidate!r}, but no executable was found")
-        if resolved is not None:
-            return resolved
-    for candidate in DEFAULT_PERF_CANDIDATES:
-        resolved = _resolve_explicit_binary(candidate)
-        if resolved is not None:
-            return resolved
-    resolved = _resolve_explicit_binary("perf")
-    if resolved is not None:
-        return resolved
-    if required:
-        hints = ", ".join(PERF_ENV_VARS)
-        raise RuntimeError(f"perf is required; run `make kernel-perf` or set {hints} to an explicit binary")
-    return None
 
 
 def run_command(

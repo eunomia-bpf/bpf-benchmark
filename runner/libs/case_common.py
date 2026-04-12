@@ -105,15 +105,6 @@ def rejit_result_has_any_apply(rejit_result: Mapping[str, object] | None) -> boo
     return bool(rejit_result.get("applied")) or applied_sites > 0
 
 
-def rejit_result_all_applied(rejit_result: Mapping[str, object] | None) -> bool:
-    if not isinstance(rejit_result, Mapping):
-        return False
-    per_program = rejit_result.get("per_program")
-    if isinstance(per_program, Mapping) and per_program:
-        return all(bool(r.get("applied")) for r in per_program.values() if isinstance(r, Mapping))
-    return bool(rejit_result.get("applied"))
-
-
 def rejit_program_result(
     rejit_result: Mapping[str, object] | None,
     prog_id: int,

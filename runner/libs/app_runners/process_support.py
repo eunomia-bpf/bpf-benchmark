@@ -10,8 +10,7 @@ from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, tail_text
 from ..agent import find_bpf_programs, stop_agent, wait_healthy
-from ..workload import WorkloadResult, run_named_workload
-from .base import AppRunner
+
 
 
 def wait_for_attached_programs(
@@ -209,107 +208,3 @@ class ManagedProcessSession:
         self.close()
 
 
-class NativeProcessRunner(AppRunner):
-    def __init__(
-        self,
-        *,
-        loader_binary: Path | str | None = None,
-        loader_args: Sequence[str] = (),
-        expected_program_names: Sequence[str] = (),
-        load_timeout_s: int = 20,
-        workload_kind: str | None = None,
-    ) -> None:
-        super().__init__()
-        self.loader_binary = None if loader_binary is None else Path(loader_binary).resolve()
-        self.loader_args = tuple(str(arg) for arg in loader_args if str(arg).strip())
-        self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
-        self.load_timeout_s = int(load_timeout_s)
-        self.workload_kind = str(workload_kind or "").strip()
-        self.session: ManagedProcessSession | None = None
-
-    @property
-    def pid(self) -> int | None:
-        return None if self.session is None else self.session.pid
-
-    def _default_binary_candidates(self) -> tuple[Path, ...]:
-        return ()
-
-    def _resolve_binary(self) -> Path:
-        candidates: list[Path] = []
-        if self.loader_binary is not None:
-            candidates.append(self.loader_binary)
-        candidates.extend(candidate.resolve() for candidate in self._default_binary_candidates())
-        for candidate in candidates:
-            if candidate.is_file() and os.access(candidate, os.X_OK):
-                return candidate
-        rendered = ", ".join(str(candidate) for candidate in candidates) or "<none>"
-        raise RuntimeError(f"native app binary not found or not executable; tried: {rendered}")
-
-    def _command(self, binary: Path) -> list[str]:
-        return [str(binary), *self.loader_args]
-
-    def _command_cwd(self) -> Path | None:
-        return ROOT_DIR
-
-    def _command_env(self) -> Mapping[str, str] | None:
-        return None
-
-    def start(self) -> list[int]:
-        if self.session is not None:
-            raise RuntimeError(f"{type(self).__name__} is already running")
-        binary = self._resolve_binary()
-        command = self._command(binary)
-        session = ManagedProcessSession(
-            command,
-            load_timeout_s=self.load_timeout_s,
-            cwd=self._command_cwd(),
-            env=self._command_env(),
-        )
-        session.__enter__()
-        self.session = session
-        self.command_used = list(command)
-        programs = [dict(program) for program in session.programs]
-        if not programs:
-            self._fail_start("native app did not attach any BPF programs")
-        if self.expected_program_names:
-            programs = self._filter_expected_programs(
-                programs,
-                self.expected_program_names,
-                owner_label="native app",
-            )
-        self.loader_binary = binary
-        self.programs = programs
-        return [int(program["id"]) for program in programs if int(program.get("id", 0) or 0) > 0]
-
-    def run_workload(self, seconds: float) -> WorkloadResult:
-        if self.session is None:
-            raise RuntimeError(f"{type(self).__name__} is not running")
-        if not self.workload_kind:
-            raise RuntimeError(f"{type(self).__name__} requires an explicit workload_kind")
-        return run_named_workload(self.workload_kind, seconds)
-
-    def run_workload_spec(
-        self,
-        workload_spec: Mapping[str, object],
-        seconds: float,
-    ) -> WorkloadResult:
-        if self.session is None:
-            raise RuntimeError(f"{type(self).__name__} is not running")
-        requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or "").strip()
-        if not requested_kind:
-            raise RuntimeError(f"{type(self).__name__} workload spec is missing a workload kind")
-        return run_named_workload(requested_kind, seconds)
-
-    def stop(self) -> None:
-        if self.session is None:
-            return
-        session = self.session
-        process = session.process
-        self.session = None
-        snapshot = session.collector_snapshot()
-        session.close()
-        self.process_output = {
-            "returncode": None if process is None else process.returncode,
-            "stdout_tail": "\n".join(snapshot.get("stdout_tail") or []),
-            "stderr_tail": "\n".join(snapshot.get("stderr_tail") or []),
-        }

@@ -408,7 +408,7 @@ def _sync_remote_results(ctx: aws_common.AwsExecutorContext, ip: str, remote_wor
     return local_results
 
 
-def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
+def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_path: Path | None) -> None:
     aws_common._wait_for_ssh(ctx, ip)
     stamp = f"{ctx.suite_name}_{ctx.run_token}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     local_log_dir = ctx.results_dir / "logs"
@@ -423,6 +423,10 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     aws_common._run_remote_helper(ctx, ip, remote_python, "prepare-dir", remote_run_dir)
     _sync_remote_roots(ctx, ip)
     aws_common._scp_to(ctx, ip, ctx.config_path, f"{remote_run_dir}/run-contract.json")
+    remote_suite_args_path = ""
+    if suite_args_path is not None:
+        remote_suite_args_path = f"{remote_run_dir}/suite-args.json"
+        aws_common._scp_to(ctx, ip, suite_args_path, remote_suite_args_path)
     remote_completed = aws_common._run_remote_helper(
         ctx, ip, remote_python,
         "run-workspace",
@@ -430,6 +434,7 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
         f"{remote_run_dir}/run-contract.json",
         remote_log,
         remote_python,
+        *([remote_suite_args_path] if remote_suite_args_path else []),
         check=False,
     )
     if aws_common._run_remote_helper(ctx, ip, remote_python, "path-exists", remote_log, check=False).returncode == 0:
@@ -461,12 +466,12 @@ def cleanup_failed_run_for_config(config_path: Path) -> None:
     _cleanup_failed_run(ctx)
 
 
-def _run_aws(ctx: aws_common.AwsExecutorContext) -> None:
+def _run_aws(ctx: aws_common.AwsExecutorContext, suite_args_path: Path | None) -> None:
     state = {}
     try:
         instance_ip = _ensure_instance_for_suite(ctx)
         state = aws_common._load_instance_state(ctx)
-        _run_remote_suite(ctx, instance_ip)
+        _run_remote_suite(ctx, instance_ip, suite_args_path)
     except BaseException:
         _cleanup_failed_run(ctx, state or None)
         raise
@@ -477,16 +482,25 @@ def _run_aws(ctx: aws_common.AwsExecutorContext) -> None:
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
     if len(args) < 2:
-        _die("usage: aws_executor.py <run|terminate> <config_path>")
+        _die("usage: aws_executor.py <run|terminate> <config_path> [suite_args_path]")
     action = args[0]
     config_path = Path(args[1]).resolve()
     if not config_path.is_file():
         _die(f"run config is missing: {config_path}")
     ctx = aws_common._build_context(action, config_path)
     if action == "run":
-        _run_aws(ctx)
+        if len(args) < 3:
+            _die("usage: aws_executor.py run <config_path> <suite_args_path>")
+        if len(args) > 3:
+            _die("usage: aws_executor.py run <config_path> <suite_args_path>")
+        suite_args_path = Path(args[2]).resolve()
+        if not suite_args_path.is_file():
+            _die(f"suite args file is missing: {suite_args_path}")
+        _run_aws(ctx, suite_args_path)
         return
     if action == "terminate":
+        if len(args) != 2:
+            _die("usage: aws_executor.py terminate <config_path>")
         aws_common._terminate_instance(ctx)
         return
     _die(f"unsupported aws executor action: {action}")

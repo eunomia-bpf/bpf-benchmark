@@ -95,8 +95,6 @@ DEFAULT_ATTACH_TIMEOUT_S = 20
 
 
 class BpftraceRunner(AppRunner):
-    required_remote_commands = ("ip", "taskset", "setpriv", "stress-ng", "fio", "dd", "bpftrace", "tc", "hackbench", "wrk")
-
     def __init__(
         self,
         *,

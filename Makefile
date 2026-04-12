@@ -37,10 +37,12 @@ AWS_X86_BENCH_MODE        ?= all
 BZIMAGE ?= $(X86_BUILD_DIR)/arch/x86/boot/bzImage
 E2E_ARGS ?=
 E2E_CASE ?= all
+E2E_SMOKE ?= 0
 VM_CORPUS_ARGS ?=
 REPOS ?=
 PROFILE ?=
 FILTERS ?=
+TEST_MODE ?= test
 SAMPLES    ?= 3
 WARMUPS    ?= 1
 INNER_REPEAT ?= 100
@@ -80,10 +82,12 @@ VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 # Benchmark args
 ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT := $(or $(findstring command line,$(origin SAMPLES)),$(findstring environment,$(origin SAMPLES)),$(findstring override,$(origin SAMPLES)))
 ROOT_VM_CORPUS_SAMPLES_VALUE := $(if $(strip $(ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT)),$(SAMPLES),$(VM_CORPUS_SAMPLES))
-ROOT_VM_CORPUS_SAMPLES_ARG := SAMPLES="$(ROOT_VM_CORPUS_SAMPLES_VALUE)"
-ROOT_VM_CORPUS_FILTERS_ARG := $(if $(strip $(FILTERS)),FILTERS="$(FILTERS)",)
-ROOT_VM_CORPUS_WORKLOAD_SECONDS_ARG := $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),VM_CORPUS_WORKLOAD_SECONDS="$(VM_CORPUS_WORKLOAD_SECONDS)",)
-ROOT_VM_CORPUS_EXTRA_ARGS := $(if $(strip $(VM_CORPUS_ARGS)),VM_CORPUS_ARGS='$(VM_CORPUS_ARGS)',)
+VM_MICRO_SUITE_ARGS = --samples "$(SAMPLES)" --warmups "$(WARMUPS)" --inner-repeat "$(INNER_REPEAT)" $(if $(strip $(BENCH)),--bench "$(BENCH)",)
+VM_MICRO_SMOKE_SUITE_ARGS = --samples "1" --warmups "0" --inner-repeat "50"
+VM_CORPUS_SUITE_ARGS = --samples "$(ROOT_VM_CORPUS_SAMPLES_VALUE)" --warmups "0" $(if $(strip $(FILTERS)),--corpus-filters "$(FILTERS)",) $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),--corpus-workload-seconds "$(VM_CORPUS_WORKLOAD_SECONDS)",) $(if $(strip $(VM_CORPUS_ARGS)),-- $(VM_CORPUS_ARGS),)
+VM_E2E_SUITE_ARGS = --e2e-cases "$(E2E_CASE)" $(if $(filter 1,$(E2E_SMOKE)),--e2e-smoke,) $(if $(strip $(E2E_ARGS)),-- $(E2E_ARGS),)
+VM_TEST_COMMON_SUITE_ARGS = --fuzz-rounds "$(FUZZ_ROUNDS)" --scx-prog-show-race-mode "$(SCX_PROG_SHOW_RACE_MODE)" --scx-prog-show-race-iterations "$(SCX_PROG_SHOW_RACE_ITERATIONS)" --scx-prog-show-race-load-timeout "$(SCX_PROG_SHOW_RACE_LOAD_TIMEOUT)" $(if $(filter 1,$(SCX_PROG_SHOW_RACE_SKIP_PROBE)),--scx-prog-show-race-skip-probe,)
+VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 
 .PHONY: check validate \
 		vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
@@ -115,10 +119,16 @@ $(KERNEL_CONFIG_PATH): $(DEFCONFIG_SRC)
 check:
 	$(PYTHON) -m py_compile \
 		micro/catalog.py \
+		runner/libs/aws_executor.py \
+		runner/libs/aws_remote_host.py \
 		runner/libs/kvm_executor.py \
 		runner/libs/run_contract.py \
 		runner/libs/run_target_suite.py \
-		runner/libs/suite_entrypoint.py \
+		runner/libs/suite_args.py \
+		runner/suites/corpus.py \
+		runner/suites/e2e.py \
+		runner/suites/micro.py \
+		runner/suites/test.py \
 		runner/libs/vm.py
 
 validate:
@@ -127,25 +137,25 @@ validate:
 
 # ── VM (x86) ──────────────────────────────────────────────────────────────────
 vm-selftest:
-	TEST_MODE=selftest $(RUN_TARGET_SUITE_CMD) run x86-kvm test
+	$(RUN_TARGET_SUITE_CMD) run x86-kvm test -- --test-mode "selftest" $(VM_TEST_COMMON_SUITE_ARGS)
 
 vm-negative-test:
-	TEST_MODE=negative $(RUN_TARGET_SUITE_CMD) run x86-kvm test
+	$(RUN_TARGET_SUITE_CMD) run x86-kvm test -- --test-mode "negative" $(VM_TEST_COMMON_SUITE_ARGS)
 
 vm-test:
-	$(RUN_TARGET_SUITE_CMD) run x86-kvm test
+	$(RUN_TARGET_SUITE_CMD) run x86-kvm test -- $(VM_TEST_SUITE_ARGS)
 
 vm-micro-smoke:
-	SAMPLES=1 WARMUPS=0 INNER_REPEAT=50 $(RUN_TARGET_SUITE_CMD) run x86-kvm micro
+	$(RUN_TARGET_SUITE_CMD) run x86-kvm micro -- $(VM_MICRO_SMOKE_SUITE_ARGS)
 
 vm-micro:
-	$(RUN_TARGET_SUITE_CMD) run x86-kvm micro
+	$(RUN_TARGET_SUITE_CMD) run x86-kvm micro -- $(VM_MICRO_SUITE_ARGS)
 
 vm-corpus:
-	$(RUN_TARGET_SUITE_CMD) run x86-kvm corpus
+	$(RUN_TARGET_SUITE_CMD) run x86-kvm corpus -- $(VM_CORPUS_SUITE_ARGS)
 
 vm-e2e:
-	$(RUN_TARGET_SUITE_CMD) run x86-kvm e2e
+	$(RUN_TARGET_SUITE_CMD) run x86-kvm e2e -- $(VM_E2E_SUITE_ARGS)
 
 vm-all:
 	$(MAKE) vm-test

@@ -80,7 +80,7 @@ privileged runtime container for the target architecture.
 That means:
 
 - the kernel stays on the VM or AWS host
-- `suite_entrypoint.py`, daemon processes, app loaders, attach logic, workload
+- `runner.suites.*` entrypoints, daemon processes, app loaders, attach logic, workload
   tools, and benchmark processes run in that container
 - the container mounts host resources that the app actually needs
 
@@ -139,8 +139,8 @@ The active implementation keeps these boundaries:
 - `build.mk` mostly dispatches into app-native `make`, `cmake`, `cargo`, or
   containerized equivalents
 - `workspace_layout.py` describes final artifacts, not guessed artifact roots
-- `suite_entrypoint.py` enters the runtime container once, then launches work
-  and records result paths without staging benchmark outputs
+- each `runner.suites.*` entrypoint enters the runtime container once, then
+  launches work and records result paths without staging benchmark outputs
 - `aws_remote_prep.py` prepares the host, but does not synthesize a userspace
   runtime artifact tree
 

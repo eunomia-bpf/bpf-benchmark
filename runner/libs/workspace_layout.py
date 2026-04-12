@@ -6,10 +6,10 @@ from runner.libs import ROOT_DIR
 
 
 _BASE_TRANSFER_ROOTS = {
-    "test":   ("runner/__init__.py", "runner/libs", "tests"),
-    "micro":  ("runner/__init__.py", "runner/libs", "micro/driver.py", "micro/catalog.py", "micro/config", "micro/generated-inputs"),
-    "corpus": ("runner/__init__.py", "runner/libs", "corpus/driver.py", "corpus/config", "e2e/cases"),
-    "e2e":    ("runner/__init__.py", "runner/libs", "corpus/config", "e2e/driver.py", "e2e/cases"),
+    "test":   ("runner/__init__.py", "runner/libs", "runner/suites", "tests"),
+    "micro":  ("runner/__init__.py", "runner/libs", "runner/suites", "micro/driver.py", "micro/catalog.py", "micro/config", "micro/generated-inputs"),
+    "corpus": ("runner/__init__.py", "runner/libs", "runner/suites", "corpus/driver.py", "corpus/config", "e2e/cases"),
+    "e2e":    ("runner/__init__.py", "runner/libs", "runner/suites", "corpus/config", "e2e/driver.py", "e2e/cases"),
 }
 
 _TRANSFER_ROOT_ORDER = ("runner", "daemon", "module", "tests", "micro", "corpus", "e2e")
@@ -55,6 +55,21 @@ def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Pat
 
 def kvm_kernel_image_path(workspace: Path) -> Path:
     return workspace / ".cache" / "x86-kernel-build" / "arch" / "x86" / "boot" / "bzImage"
+
+
+def runtime_path_value(workspace: Path, target_arch: str) -> str:
+    path_entries: list[str] = []
+    arch = str(target_arch).strip()
+    if arch:
+        candidates = (
+            repo_artifact_root(workspace, arch) / "bpftrace" / "bin",
+            workload_tools_root(workspace, arch) / "bin",
+        )
+        path_entries.extend(str(path) for path in candidates if path.is_dir())
+    for standard_dir in ("/usr/local/sbin", "/usr/local/bin", "/usr/sbin", "/usr/bin", "/sbin", "/bin"):
+        if standard_dir not in path_entries:
+            path_entries.append(standard_dir)
+    return ":".join(path_entries)
 
 
 def scx_targets(workspace: Path, target_arch: str, packages: list[str]) -> list[Path]:

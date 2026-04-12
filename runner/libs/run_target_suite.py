@@ -18,6 +18,7 @@ from runner.libs.run_contract import (
     build_target_config,
     write_run_config_file,
 )
+from runner.libs.suite_args import suite_args_from_env, write_suite_args_file
 from runner.libs.workspace_layout import local_prep_targets
 
 
@@ -118,10 +119,10 @@ def _make_real_targets(*, targets: list[str], host_python_bin: str, env: dict[st
         raise SystemExit(completed.returncode)
 
 
-def _build_config(target_name: str, suite_name: str, run_token: str) -> RunConfig:
+def _build_config(target_name: str, suite_name: str, run_token: str, suite_args: list[str]) -> RunConfig:
     env = os.environ.copy()
     env["RUN_TOKEN"] = run_token
-    return build_run_config(target_name, suite_name, env=env)
+    return build_run_config(target_name, suite_name, env=env, suite_args=suite_args)
 
 
 def _cleanup_failed_aws_prep(config_path: Path) -> None:
@@ -142,17 +143,26 @@ def _control_dir(run_token: str) -> Path:
     return control_dir
 
 
-def _run_action(target_name: str, suite_name: str) -> None:
+def _effective_suite_args(target_name: str, suite_name: str, suite_args: list[str] | None) -> list[str]:
+    if suite_args is not None:
+        return list(suite_args)
+    return suite_args_from_env(target_name, suite_name, env=os.environ.copy())
+
+
+def _run_action(target_name: str, suite_name: str, suite_args: list[str] | None = None) -> None:
+    effective_suite_args = _effective_suite_args(target_name, suite_name, suite_args)
     run_token = _run_token(target_name, suite_name)
     control_dir = _control_dir(run_token)
     config_path = control_dir / "run-config.json"
+    suite_args_path = control_dir / "suite-args.json"
     prep_cleanup_armed = False
     success = False
     try:
-        config = _build_config(target_name, suite_name, run_token)
+        config = _build_config(target_name, suite_name, run_token, effective_suite_args)
         executor = config.identity.executor
         if executor == "aws-ssh":
             write_run_config_file(config_path, config)
+            write_suite_args_file(suite_args_path, effective_suite_args)
             if os.environ.get("RUN_SKIP_LOCAL_PREP", "").strip() != "1":
                 _run_local_prep(config)
             prep_cleanup_armed = True
@@ -161,6 +171,7 @@ def _run_action(target_name: str, suite_name: str) -> None:
                     "runner.libs.aws_executor",
                     "run",
                     str(config_path),
+                    str(suite_args_path),
                 )
             )
             success = True
@@ -170,7 +181,7 @@ def _run_action(target_name: str, suite_name: str) -> None:
                 _run_local_prep(config)
             from runner.libs.kvm_executor import run_vm_suite
 
-            return_code = run_vm_suite(ROOT_DIR, config)
+            return_code = run_vm_suite(ROOT_DIR, config, effective_suite_args)
             success = return_code == 0
             if return_code != 0:
                 raise SystemExit(return_code)
@@ -200,10 +211,20 @@ def _parse_benchmark_suites(mode: str) -> list[str]:
     return suites
 
 
-def _benchmark_action(target_name: str, mode: str) -> None:
+def _benchmark_action(target_name: str, mode: str, suite_args: list[str] | None = None) -> None:
     suites = _parse_benchmark_suites(mode)
+    if suite_args is not None and len(suites) != 1:
+        _die("explicit suite arguments are only supported for a single benchmark suite")
     for suite_name in suites:
-        _run_action(target_name, suite_name)
+        _run_action(target_name, suite_name, suite_args)
+
+
+def _suite_args_from_cli(args: list[str], start_index: int) -> list[str] | None:
+    if len(args) <= start_index:
+        return None
+    if args[start_index] != "--":
+        _die("suite arguments must follow --")
+    return args[start_index + 1:]
 
 
 def _terminate_action(target_name: str) -> None:
@@ -235,16 +256,16 @@ def main(argv: list[str] | None = None) -> None:
     suite_name = args[2] if len(args) > 2 else ""
     if action == "run":
         if not target_name or not suite_name:
-            _die("usage: run_target_suite.py run <target> <suite>")
-        _run_action(target_name, suite_name)
+            _die("usage: run_target_suite.py run <target> <suite> [-- suite-args...]")
+        _run_action(target_name, suite_name, _suite_args_from_cli(args, 3))
         return
     if action == "benchmark":
         if not target_name or not suite_name:
-            _die("usage: run_target_suite.py benchmark <target> <micro|corpus|e2e|all|suite1,suite2>")
-        _benchmark_action(target_name, suite_name)
+            _die("usage: run_target_suite.py benchmark <target> <micro|corpus|e2e|all|suite1,suite2> [-- suite-args...]")
+        _benchmark_action(target_name, suite_name, _suite_args_from_cli(args, 3))
         return
     if action == "terminate":
-        if not target_name:
+        if not target_name or len(args) != 2:
             _die("usage: run_target_suite.py terminate <target>")
         _terminate_action(target_name)
         return

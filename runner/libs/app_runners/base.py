@@ -6,10 +6,6 @@ from ..workload import WorkloadResult
 
 
 class AppRunner:
-    # Declare which system commands this runner requires on the remote host.
-    # Used by run_contract.py to populate RUN_REMOTE_COMMANDS_CSV.
-    required_remote_commands: tuple[str, ...] = ()
-
     def __init__(self) -> None:
         self.programs: list[dict[str, object]] = []
         self.artifacts: dict[str, object] = {}

@@ -296,8 +296,6 @@ def _scheduler_binary_for_name(scheduler: str | None) -> Path:
 
 
 class ScxRunner(AppRunner):
-    required_remote_commands = ("ip", "taskset", "stress-ng", "hackbench", "sysbench")
-
     def __init__(
         self,
         *,

@@ -426,8 +426,6 @@ def _default_events() -> tuple[str, ...]:
 
 
 class TraceeRunner(AppRunner):
-    required_remote_commands = ("ip", "taskset", "setpriv", "curl", "wrk")
-
     def __init__(
         self,
         *,
@@ -524,4 +522,3 @@ class TraceeRunner(AppRunner):
                                "stdout_tail": "\n".join(snapshot.get("stdout_tail") or []),
                                "stderr_tail": "\n".join(snapshot.get("stderr_tail") or []),
                                "latest_stats": snapshot.get("latest_stats") or {}}
-

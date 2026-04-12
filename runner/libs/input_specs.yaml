@@ -5,51 +5,74 @@
 #   count / seed / salt / stride / ... – parameters forwarded to the builder
 
 # ---------------------------------------------------------------------------
-# kind: dep_chain
-#   header: pack("<II", count, seed)
-#   body:   N u64s via LCG: state ^ ((index+1)*LCG_SALT1) ^ seed
+# kind: simple_lcg_u64_ii  (also aliased as dep_chain / multi_acc / stride_load /
+#                            large_mixed / load_isolation for backward-compat)
+#   header: pack("<II", count, header_b)   [header_b defaults to seed]
+#   body:   N u64s: _lcg(state) then  value = state ^ ((i+index_offset)*mixing_salt)
+#                   optionally ^ seed  (xor_seed: true)
+#   For load_isolation (no mixing), set mixing_salt: 0  and  header_b: 0
 # ---------------------------------------------------------------------------
 dep_chain_short:
   kind: dep_chain
   count: 64
   seed:  0x13572468
   salt:  0xDEADBEEFCAFE0123
+  mixing_salt: 0x9E3779B97F4A7C15
+  index_offset: 1
+  xor_seed: true
 
 dep_chain_long:
   kind: dep_chain
   count: 256
   seed:  0x24681357
   salt:  0x0123456789ABCDEF
+  mixing_salt: 0x9E3779B97F4A7C15
+  index_offset: 1
+  xor_seed: true
 
 # ---------------------------------------------------------------------------
-# kind: multi_acc
+# kind: multi_acc  (alias of simple_lcg_u64_ii)
 # ---------------------------------------------------------------------------
 multi_acc_4:
   kind: multi_acc
   count: 128
   seed:  0x31415926
   salt:  0x1111222233334444
+  mixing_salt: 0xD1342543DE82EF95
+  index_offset: 5
+  xor_seed: false
 
 multi_acc_8:
   kind: multi_acc
   count: 128
   seed:  0x27182818
   salt:  0x5555666677778888
+  mixing_salt: 0xD1342543DE82EF95
+  index_offset: 5
+  xor_seed: false
 
 # ---------------------------------------------------------------------------
-# kind: stride_load
+# kind: stride_load  (alias of simple_lcg_u64_ii, header_b = stride)
 # ---------------------------------------------------------------------------
 stride_load_4:
   kind: stride_load
   count: 128
   stride: 4
   salt:  0xAAAABBBBCCCCDDDD
+  mixing_salt: 0xA0761D6478BD642F
+  index_offset: 7
+  header_b: 4
+  header_b_key: stride
 
 stride_load_16:
   kind: stride_load
   count: 128
   stride: 16
   salt:  0x13579BDF2468ACE0
+  mixing_salt: 0xA0761D6478BD642F
+  index_offset: 7
+  header_b: 16
+  header_b_key: stride
 
 # ---------------------------------------------------------------------------
 # kind: code_clone
@@ -67,32 +90,44 @@ code_clone_8:
   salt:  0x0BADF00D56473829
 
 # ---------------------------------------------------------------------------
-# kind: large_mixed
+# kind: large_mixed  (alias of simple_lcg_u64_ii)
 # ---------------------------------------------------------------------------
 large_mixed_500:
   kind: large_mixed
   count: 32
   seed:  0x13572468
   salt:  0x1111333355557777
+  mixing_salt: 0xD1342543DE82EF95
+  index_offset: 1
+  xor_seed: true
 
 large_mixed_1000:
   kind: large_mixed
   count: 32
   seed:  0x24681357
   salt:  0x8888666644442222
+  mixing_salt: 0xD1342543DE82EF95
+  index_offset: 1
+  xor_seed: true
 
 # ---------------------------------------------------------------------------
-# kind: load_isolation
+# kind: load_isolation  (alias of simple_lcg_u64_ii, mixing_salt=0, header_b=0)
 # ---------------------------------------------------------------------------
 load_byte_recompose:
   kind: load_isolation
   count: 128
   seed:  0xBEEFCAFE12345678
+  salt:  0xBEEFCAFE12345678
+  mixing_salt: 0
+  header_b: 0
 
 load_native_u64:
   kind: load_isolation
   count: 128
   seed:  0xBEEFCAFE12345678
+  salt:  0xBEEFCAFE12345678
+  mixing_salt: 0
+  header_b: 0
 
 # ---------------------------------------------------------------------------
 # kind: fixed_loop
