@@ -56,14 +56,12 @@ class ArtifactRequirements:
 class RemoteConfig:
     user: str = ""
     stage_dir: str = ""
-    kernel_stage_dir: str = ""
     python_bin: str = ""
     runtime_python_bin: str = "python3"
     container_runtime: str = "docker"
     runtime_container_image: str = ""
     runtime_container_image_tar: str = ""
     bpftool_bin: str = "bpftool"
-    swap_size_gb: str = ""
 
 
 @dataclass(frozen=True)
@@ -113,9 +111,8 @@ class RunConfig:
             "RUN_NEEDS_KINSN_MODULES": a.needs_kinsn_modules, "RUN_NEEDS_WORKLOAD_TOOLS": a.needs_workload_tools,
             "RUN_NAME_TAG": aw.name_tag, "RUN_INSTANCE_TYPE": aw.instance_type,
             "RUN_REMOTE_USER": r.user, "RUN_REMOTE_STAGE_DIR": r.stage_dir,
-            "RUN_REMOTE_KERNEL_STAGE_DIR": r.kernel_stage_dir,
             "RUN_AMI_PARAM": aw.ami_param, "RUN_AMI_ID": aw.ami_id,
-            "RUN_ROOT_VOLUME_GB": aw.root_volume_gb, "RUN_REMOTE_SWAP_SIZE_GB": r.swap_size_gb,
+            "RUN_ROOT_VOLUME_GB": aw.root_volume_gb,
             "RUN_AWS_KEY_NAME": aw.key_name, "RUN_AWS_KEY_PATH": aw.key_path,
             "RUN_AWS_SECURITY_GROUP_ID": aw.security_group_id, "RUN_AWS_SUBNET_ID": aw.subnet_id,
             "RUN_AWS_REGION": aw.region, "RUN_AWS_PROFILE": aw.profile,
@@ -182,13 +179,12 @@ class RunConfig:
                                            needs_workload_tools=scalar("RUN_NEEDS_WORKLOAD_TOOLS", "0"),
                                            native_repos=csv("RUN_NATIVE_REPOS_CSV"), scx_packages=csv("RUN_SCX_PACKAGES_CSV")),
             remote=RemoteConfig(user=scalar("RUN_REMOTE_USER"), stage_dir=scalar("RUN_REMOTE_STAGE_DIR"),
-                                kernel_stage_dir=scalar("RUN_REMOTE_KERNEL_STAGE_DIR"), python_bin=scalar("RUN_REMOTE_PYTHON_BIN"),
+                                python_bin=scalar("RUN_REMOTE_PYTHON_BIN"),
                                 runtime_python_bin=scalar("RUN_RUNTIME_PYTHON_BIN", "python3"),
                                 container_runtime=scalar("RUN_CONTAINER_RUNTIME", "docker"),
                                 runtime_container_image=scalar("RUN_RUNTIME_CONTAINER_IMAGE"),
                                 runtime_container_image_tar=scalar("RUN_RUNTIME_CONTAINER_IMAGE_TAR"),
-                                bpftool_bin=scalar("RUN_BPFTOOL_BIN", "bpftool"),
-                                swap_size_gb=scalar("RUN_REMOTE_SWAP_SIZE_GB")),
+                                bpftool_bin=scalar("RUN_BPFTOOL_BIN", "bpftool")),
             aws=AwsConfig(name_tag=scalar("RUN_NAME_TAG"), instance_type=scalar("RUN_INSTANCE_TYPE"),
                           ami_param=scalar("RUN_AMI_PARAM"), ami_id=scalar("RUN_AMI_ID"),
                           root_volume_gb=scalar("RUN_ROOT_VOLUME_GB"), key_name=scalar("RUN_AWS_KEY_NAME"),
@@ -315,11 +311,9 @@ _AWS_MANIFEST_SUFFIXES = {
     "INSTANCE_TYPE",
     "REMOTE_USER",
     "REMOTE_STAGE_DIR",
-    "REMOTE_KERNEL_STAGE_DIR",
     "AMI_PARAM",
     "AMI_ID",
     "ROOT_VOLUME_GB",
-    "REMOTE_SWAP_SIZE_GB",
     "KEY_NAME",
     "KEY_PATH",
     "SECURITY_GROUP_ID",
@@ -379,11 +373,11 @@ def _build_run_config_mapping(
 
     run_token = values.get("RUN_TOKEN", "").strip() or f"{target_name}_{suite_name}"
     (run_name_tag, run_instance_type, run_remote_user, run_remote_stage_dir,
-     run_remote_kernel_stage_dir, run_ami_param, run_ami_id, run_root_volume_gb,
+     run_ami_param, run_ami_id, run_root_volume_gb,
      run_aws_key_name, run_aws_key_path, run_aws_security_group_id,
-     run_aws_subnet_id, run_aws_region, run_aws_profile, run_remote_swap_size_gb,
+     run_aws_subnet_id, run_aws_region, run_aws_profile,
      run_llvm_dir, run_vm_backend, run_vm_executable, run_vm_cpus, run_vm_mem, run_vm_kernel_image,
-    ) = ("",) * 21
+    ) = ("",) * 19
     run_corpus_filters = selection.corpus_filters
     run_test_mode = selection.test_mode
     run_e2e_cases = selection.e2e_cases
@@ -416,11 +410,9 @@ def _build_run_config_mapping(
         run_remote_user = _penv("REMOTE_USER", target.get("TARGET_REMOTE_USER_DEFAULT", ""))
         remote_stage_root = _penv("REMOTE_STAGE_DIR", target.get("TARGET_REMOTE_STAGE_DIR_DEFAULT", "")).rstrip("/")
         run_remote_stage_dir = f"{remote_stage_root}/{suite_name}/{run_token}" if suite_name else f"{remote_stage_root}/{run_token}"
-        run_remote_kernel_stage_dir = _penv("REMOTE_KERNEL_STAGE_DIR", target.get("TARGET_REMOTE_KERNEL_STAGE_DIR_DEFAULT", ""))
         run_ami_param = _penv("AMI_PARAM", target.get("TARGET_AMI_PARAM_DEFAULT", ""))
         run_ami_id = _penv("AMI_ID")
         run_root_volume_gb = _penv("ROOT_VOLUME_GB", target.get("TARGET_ROOT_VOLUME_GB_DEFAULT", ""))
-        run_remote_swap_size_gb = _penv("REMOTE_SWAP_SIZE_GB", target.get("TARGET_REMOTE_SWAP_SIZE_GB_DEFAULT", "8"))
         run_aws_key_path = _penv("KEY_PATH")
         if not run_aws_key_path: _treq("KEY_PATH")
         run_aws_key_name = _penv("KEY_NAME") or Path(run_aws_key_path).stem
@@ -533,9 +525,8 @@ def _build_run_config_mapping(
         "RUN_NEEDS_KINSN_MODULES": run_needs_kinsn_modules, "RUN_NEEDS_WORKLOAD_TOOLS": run_needs_workload_tools,
         "RUN_NAME_TAG": run_name_tag, "RUN_INSTANCE_TYPE": run_instance_type,
         "RUN_REMOTE_USER": run_remote_user, "RUN_REMOTE_STAGE_DIR": run_remote_stage_dir,
-        "RUN_REMOTE_KERNEL_STAGE_DIR": run_remote_kernel_stage_dir,
         "RUN_AMI_PARAM": run_ami_param, "RUN_AMI_ID": run_ami_id,
-        "RUN_ROOT_VOLUME_GB": run_root_volume_gb, "RUN_REMOTE_SWAP_SIZE_GB": run_remote_swap_size_gb,
+        "RUN_ROOT_VOLUME_GB": run_root_volume_gb,
         "RUN_AWS_KEY_NAME": run_aws_key_name, "RUN_AWS_KEY_PATH": run_aws_key_path,
         "RUN_AWS_SECURITY_GROUP_ID": run_aws_security_group_id, "RUN_AWS_SUBNET_ID": run_aws_subnet_id,
         "RUN_AWS_REGION": run_aws_region, "RUN_AWS_PROFILE": run_aws_profile,

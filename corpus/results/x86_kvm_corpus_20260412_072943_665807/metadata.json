@@ -1,0 +1,199 @@
+{
+  "completed_at": "2026-04-12T07:30:46.436652+00:00",
+  "details_dir": "details",
+  "filters": [
+    "katran",
+    "bcc/biosnoop",
+    "bpftrace/biosnoop",
+    "bcc/opensnoop",
+    "bcc/syscount"
+  ],
+  "generated_at": "2026-04-12T07:30:46.440701+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-12T07:30:46.436652+00:00",
+  "launcher_boot_id": "1c7bb0ac-1f71-40ab-a841-e27e1c903776",
+  "launcher_pid": 534,
+  "launcher_start_ticks": 1541,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "optimization_summary": {
+    "all_comparable_geomean": 1.1608236732115558,
+    "applied_only_geomean": 1.1608236732115558,
+    "applied_sample_count": 6,
+    "comparison_exclusion_reason_counts": {
+      "no_programs_changed_in_loader": 4
+    },
+    "comparison_exclusion_reasons": [
+      {
+        "app": "bcc/biosnoop",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/biosnoop:block_io_start#10",
+        "program": "block_io_start",
+        "program_id": 10,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/biosnoop",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/biosnoop:block_rq_issue#13",
+        "program": "block_rq_issue",
+        "program_id": 13,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/biosnoop",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/biosnoop:block_rq_complete#14",
+        "program": "block_rq_complete",
+        "program_id": 14,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "katran",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "katran:balancer_ingress#109",
+        "program": "balancer_ingress",
+        "program_id": 109,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      }
+    ],
+    "discovered_programs": 10,
+    "per_app": [
+      {
+        "all_comparable_geomean": null,
+        "app": "bcc/biosnoop",
+        "applied_only_geomean": null,
+        "applied_program_count": 3,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/biosnoop:block_io_start#10",
+            "program": "block_io_start",
+            "program_id": 10,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/biosnoop:block_rq_issue#13",
+            "program": "block_rq_issue",
+            "program_id": 13,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/biosnoop:block_rq_complete#14",
+            "program": "block_rq_complete",
+            "program_id": 14,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 3,
+        "runner": "bcc",
+        "sample_count": 0,
+        "status": "ok",
+        "workload": "block_io"
+      },
+      {
+        "all_comparable_geomean": 1.425292698651446,
+        "app": "bcc/opensnoop",
+        "applied_only_geomean": 1.425292698651446,
+        "applied_program_count": 2,
+        "comparable_program_count": 2,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 2,
+        "runner": "bcc",
+        "sample_count": 2,
+        "status": "ok",
+        "workload": "file_open_storm"
+      },
+      {
+        "all_comparable_geomean": 1.0765073204036215,
+        "app": "bcc/syscount",
+        "applied_only_geomean": 1.0765073204036215,
+        "applied_program_count": 2,
+        "comparable_program_count": 2,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 2,
+        "runner": "bcc",
+        "sample_count": 2,
+        "status": "ok",
+        "workload": "file_open_storm"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "katran",
+        "applied_only_geomean": null,
+        "applied_program_count": 1,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [
+          {
+            "label": "katran:balancer_ingress#109",
+            "program": "balancer_ingress",
+            "program_id": 109,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "katran",
+        "sample_count": 0,
+        "status": "ok",
+        "workload": "test_run"
+      },
+      {
+        "all_comparable_geomean": 1.0194776778401688,
+        "app": "bpftrace/biosnoop",
+        "applied_only_geomean": 1.0194776778401688,
+        "applied_program_count": 2,
+        "comparable_program_count": 2,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 2,
+        "runner": "bpftrace",
+        "sample_count": 2,
+        "status": "ok",
+        "workload": "block_io"
+      }
+    ],
+    "sample_count": 6,
+    "selected_apps": 5,
+    "statuses": {
+      "ok": 5
+    }
+  },
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "started_at": "2026-04-12T07:29:43.665807+00:00",
+  "status": "completed",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

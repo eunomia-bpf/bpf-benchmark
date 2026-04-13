@@ -113,6 +113,9 @@ def run_in_runtime_container(workspace: str, args_module: str, module_argv: list
         "-w",
         workspace,
     ]
+    for name in ("TMPDIR", "TMP", "TEMP", "BPFREJIT_RUNTIME_TMPDIR"):
+        if value := os.environ.get(name, "").strip():
+            command.extend(["-e", f"{name}={value}"])
     append_bind_mount(command, Path("/sys"))
     append_bind_mount(command, Path("/sys/fs/bpf"))
     append_bind_mount(command, Path("/sys/kernel/debug"))
@@ -139,18 +142,16 @@ def cross_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
 
 
 def suite_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
-    repo_root = repo_artifact_root(workspace, target_arch)
     workload_root = workload_tools_root(workspace, target_arch)
+    # Keep broad artifact lib directories out of the suite process environment:
+    # Tracee, BCC, Katran, and workload-tools roots can contain libraries from
+    # the build container. Only add narrow runtime library roots that are
+    # needed by app-managed binaries and do not shadow system libraries.
     candidates = [
-        repo_root / "katran" / "lib64",
-        repo_root / "katran" / "lib",
-        repo_root / "tracee" / "lib",
-        repo_root / "bcc" / "libbpf-tools" / "lib",
-        workload_root / "lib",
         workload_root / "lib" / "luajit",
     ]
     entries = [str(path) for path in candidates if path.is_dir()]
-    for extra in (cross_runtime_ld_library_path(workspace, target_arch), os.environ.get("LD_LIBRARY_PATH", "").strip()):
+    for extra in (cross_runtime_ld_library_path(workspace, target_arch),):
         if extra:
             entries.extend(entry for entry in extra.split(":") if entry)
     ordered: list[str] = []
@@ -160,9 +161,9 @@ def suite_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
     return ":".join(ordered)
 
 
-def env_with_cross_runtime_ld(workspace: Path, target_arch: str, env: dict[str, str]) -> tuple[dict[str, str], str]:
+def env_with_suite_runtime_ld(workspace: Path, target_arch: str, env: dict[str, str]) -> tuple[dict[str, str], str]:
     runtime_env = env.copy()
-    runtime_ld = cross_runtime_ld_library_path(workspace, target_arch)
+    runtime_ld = suite_runtime_ld_library_path(workspace, target_arch)
     if runtime_ld:
         runtime_env["LD_LIBRARY_PATH"] = runtime_ld
     return runtime_env, runtime_ld
@@ -383,15 +384,13 @@ def base_suite_runtime_env(
 ) -> dict[str, str]:
     """Build the common portion of the runtime env for corpus/e2e/test suites.
 
-    Sets: TMPDIR, PATH (suite LD), BPFREJIT_WORKLOAD_TOOL_BIN_DIR (if present),
+    Sets: TMPDIR, PATH, BPFREJIT_WORKLOAD_TOOL_BIN_DIR (if present),
     BPFREJIT_REPO_ARTIFACT_ROOT, BPFREJIT_REMOTE_PYTHON_BIN,
     BPFREJIT_KERNEL_MODULES_ROOT, PYTHONPATH, BPFTOOL_BIN.
     """
     env = base_runtime_env()
     setup_tmpdir(env, args.run_token or f"{args.target_name}_{scratch_suffix}")
     env["PATH"] = runtime_path_value(workspace, args.target_arch)
-    if runtime_ld := suite_runtime_ld_library_path(workspace, args.target_arch):
-        env["LD_LIBRARY_PATH"] = runtime_ld
     workload_tool_bin = workspace / ".cache" / "workload-tools" / args.target_arch / "bin"
     if workload_tool_bin.is_dir():
         env["BPFREJIT_WORKLOAD_TOOL_BIN_DIR"] = str(workload_tool_bin)

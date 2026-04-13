@@ -4,12 +4,11 @@ import os
 import re
 import shlex
 import statistics
-import threading
 import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from .. import run_command, tail_text, which
+from .. import resolve_bpftool_binary, run_command, run_json_command, tail_text, which
 from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
 from ..process_fd import dup_fd_from_process
 from ..workload import WorkloadResult, resolve_workload_tool
@@ -73,6 +72,27 @@ def read_scx_ops() -> list[str]:
     return values
 
 
+def _program_id(program: Mapping[str, object]) -> int:
+    return int(program.get("id", 0) or 0)
+
+
+def _program_name(program: Mapping[str, object]) -> str:
+    return str(program.get("name") or "").strip()
+
+
+def _bpftool_struct_ops_programs() -> list[dict[str, object]]:
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
+    if not isinstance(payload, list):
+        raise RuntimeError("bpftool prog show returned unexpected payload")
+    programs = [
+        dict(record)
+        for record in payload
+        if isinstance(record, Mapping) and str(record.get("type", "")) == "struct_ops"
+    ]
+    programs.sort(key=_program_id)
+    return programs
+
+
 class ScxSchedulerSession(AgentSession):
     def __init__(self, binary: Path, extra_args: Sequence[str], load_timeout: int) -> None:
         super().__init__(load_timeout)
@@ -80,6 +100,7 @@ class ScxSchedulerSession(AgentSession):
         self.extra_args = list(extra_args)
         self.program_fds: dict[int, int] = {}
         self.command_used: list[str] | None = None
+        self.scheduler_program_names: set[str] = set()
 
     def __enter__(self) -> "ScxSchedulerSession":
         command_text = " ".join(["set -euo pipefail;", "ulimit -l unlimited;", "exec",
@@ -90,7 +111,7 @@ class ScxSchedulerSession(AgentSession):
         self._start_io_threads()
         try:
             healthy = wait_healthy(self.process, self.load_timeout,
-                                   lambda: read_scx_state() == "enabled" and bool(self._discover_programs()))
+                                   lambda: read_scx_state() == "enabled" and bool(self._discover_owned_programs()))
         except Exception:
             self.close()
             raise
@@ -101,11 +122,12 @@ class ScxSchedulerSession(AgentSession):
             self.close()
             raise RuntimeError(f"scx_rusty did not become healthy: {details}")
 
-        self.programs = self._discover_programs()
-        self.program_fds = self._dup_program_fds(self.programs)
+        self.programs = self._discover_owned_programs()
+        self._remember_scheduler_programs(self.programs)
+        self.program_fds = self._dup_program_fds(self.programs, require_owner=True)
         return self
 
-    def _discover_programs(self) -> list[dict[str, object]]:
+    def _discover_owned_programs(self) -> list[dict[str, object]]:
         if self.pid is None:
             return []
         programs = [
@@ -113,15 +135,44 @@ class ScxSchedulerSession(AgentSession):
             for item in find_bpf_programs(self.pid)
             if str(item.get("type", "")) == "struct_ops"
         ]
-        programs.sort(key=lambda item: int(item.get("id", 0)))
+        programs.sort(key=_program_id)
         return programs
+
+    def _remember_scheduler_programs(self, programs: Sequence[Mapping[str, object]]) -> None:
+        self.scheduler_program_names.update(
+            name
+            for program in programs
+            if (name := _program_name(program))
+        )
+
+    def _discover_live_scheduler_programs(self) -> list[dict[str, object]]:
+        owned_programs = self._discover_owned_programs()
+        self._remember_scheduler_programs(owned_programs)
+        if not self.scheduler_program_names:
+            return owned_programs
+
+        owned_by_id = {_program_id(program): dict(program) for program in owned_programs}
+        all_struct_ops = _bpftool_struct_ops_programs()
+        live_programs: list[dict[str, object]] = []
+        for program in all_struct_ops:
+            if _program_name(program) not in self.scheduler_program_names:
+                continue
+            enriched = dict(program)
+            owned = owned_by_id.get(_program_id(enriched))
+            if owned is not None:
+                if "owner_pids" in owned:
+                    enriched["owner_pids"] = owned["owner_pids"]
+                if "owner_fds" in owned:
+                    enriched["owner_fds"] = owned["owner_fds"]
+            live_programs.append(enriched)
+        return live_programs
 
     def collector_snapshot(self) -> dict[str, object]:
         return self.collector.snapshot()
 
     def refresh_programs(self) -> list[dict[str, object]]:
-        refreshed = self._discover_programs()
-        refreshed_fds = self._dup_program_fds(refreshed)
+        refreshed = self._discover_live_scheduler_programs()
+        refreshed_fds = self._dup_program_fds(refreshed, require_owner=False)
         close_errors: list[str] = []
         for fd in self.program_fds.values():
             try:
@@ -134,7 +185,7 @@ class ScxSchedulerSession(AgentSession):
             raise RuntimeError("; ".join(close_errors))
         return [dict(program) for program in self.programs]
 
-    def _dup_program_fds(self, programs: Sequence[Mapping[str, object]]) -> dict[int, int]:
+    def _dup_program_fds(self, programs: Sequence[Mapping[str, object]], *, require_owner: bool) -> dict[int, int]:
         if self.pid is None:
             raise RuntimeError("cannot duplicate scx program FDs without a live scheduler pid")
         duplicated: dict[int, int] = {}
@@ -143,6 +194,8 @@ class ScxSchedulerSession(AgentSession):
             program_name = str(program.get("name") or prog_id)
             owner_refs = [ref for ref in (program.get("owner_fds") or []) if int(ref.get("pid", -1)) == int(self.pid)]
             if not owner_refs:
+                if not require_owner:
+                    continue
                 raise RuntimeError(f"SCX program {program_name!r} (id={prog_id}) did not expose a scheduler-owned FD")
             duplicated[prog_id] = dup_fd_from_process(int(self.pid), int(owner_refs[0]["fd"]))
         return duplicated

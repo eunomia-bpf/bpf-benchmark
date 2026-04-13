@@ -23,7 +23,7 @@ from runner.suites._common import (
     base_suite_runtime_env,
     ensure_bpf_stats_enabled,
     ensure_scx_artifacts,
-    env_with_cross_runtime_ld,
+    env_with_suite_runtime_ld,
     inside_runtime_container,
     merge_csv_and_repeated,
     positive_int,
@@ -175,7 +175,7 @@ def _run_unittest_suite(workspace: Path, args: argparse.Namespace, env: dict[str
     if not tests:
         print(f"ERROR: no rejit_* test binaries found in {build_dir}", file=sys.stderr)
         return 0, 1
-    runtime_env, _ = env_with_cross_runtime_ld(workspace, args.target_arch, env)
+    runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
     runtime_env["BPFREJIT_PROGS_DIR"] = str(build_dir / "progs")
     runtime_env["BPFREJIT_DAEMON_PATH"] = str(resolve_daemon_binary(workspace, args.target_arch, args.daemon_binary, _die))
     passed = failed = 0
@@ -205,7 +205,7 @@ def _run_negative_suite(
 ) -> tuple[int, int]:
     _log_test_section("Running tests/negative/ adversarial suite")
     negative_build = test_negative_build_dir(workspace, args.target_arch)
-    runtime_env, runtime_ld = env_with_cross_runtime_ld(workspace, args.target_arch, env)
+    runtime_env, runtime_ld = env_with_suite_runtime_ld(workspace, args.target_arch, env)
     passed = 0
     failed = 0
     tests: list[tuple[str, list[str], dict[str, str]]] = []

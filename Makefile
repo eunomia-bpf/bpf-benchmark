@@ -80,9 +80,13 @@ export FUZZ_ROUNDS SCX_PROG_SHOW_RACE_MODE SCX_PROG_SHOW_RACE_ITERATIONS SCX_PRO
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 
 # Benchmark args
+empty :=
+space := $(empty) $(empty)
+comma := ,
 ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT := $(or $(findstring command line,$(origin SAMPLES)),$(findstring environment,$(origin SAMPLES)),$(findstring override,$(origin SAMPLES)))
 ROOT_VM_CORPUS_SAMPLES_VALUE := $(if $(strip $(ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT)),$(SAMPLES),$(VM_CORPUS_SAMPLES))
-VM_MICRO_SUITE_ARGS = --samples "$(SAMPLES)" --warmups "$(WARMUPS)" --inner-repeat "$(INNER_REPEAT)" $(if $(strip $(BENCH)),--bench "$(BENCH)",)
+VM_MICRO_BENCH_ARGS = $(foreach bench,$(subst $(comma),$(space),$(strip $(BENCH))),--bench "$(bench)")
+VM_MICRO_SUITE_ARGS = --samples "$(SAMPLES)" --warmups "$(WARMUPS)" --inner-repeat "$(INNER_REPEAT)" $(VM_MICRO_BENCH_ARGS)
 VM_MICRO_SMOKE_SUITE_ARGS = --samples "1" --warmups "0" --inner-repeat "50"
 VM_CORPUS_SUITE_ARGS = --samples "$(ROOT_VM_CORPUS_SAMPLES_VALUE)" --warmups "0" $(if $(strip $(FILTERS)),--corpus-filters "$(FILTERS)",) $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),--corpus-workload-seconds "$(VM_CORPUS_WORKLOAD_SECONDS)",) $(if $(strip $(VM_CORPUS_ARGS)),-- $(VM_CORPUS_ARGS),)
 VM_E2E_SUITE_ARGS = --e2e-cases "$(E2E_CASE)" $(if $(filter 1,$(E2E_SMOKE)),--e2e-smoke,) $(if $(strip $(E2E_ARGS)),-- $(E2E_ARGS),)
@@ -119,12 +123,29 @@ $(KERNEL_CONFIG_PATH): $(DEFCONFIG_SRC)
 check:
 	$(PYTHON) -m py_compile \
 		micro/catalog.py \
+		runner/libs/app_runners/base.py \
+		runner/libs/app_runners/bcc.py \
+		runner/libs/app_runners/bpftrace.py \
+		runner/libs/app_runners/katran.py \
+		runner/libs/app_runners/process_support.py \
+		runner/libs/app_runners/scx.py \
+		runner/libs/app_runners/tetragon.py \
+		runner/libs/app_runners/tracee.py \
 		runner/libs/aws_executor.py \
-		runner/libs/aws_remote_host.py \
+		runner/libs/bpf_stats.py \
+		runner/libs/case_common.py \
+		runner/libs/input_generators.py \
+		runner/libs/kinsn.py \
 		runner/libs/kvm_executor.py \
+		runner/libs/rejit.py \
+		runner/libs/results.py \
 		runner/libs/run_contract.py \
 		runner/libs/run_target_suite.py \
 		runner/libs/suite_args.py \
+		runner/libs/suite_commands.py \
+		runner/libs/workspace_layout.py \
+		runner/suites/__init__.py \
+		runner/suites/_common.py \
 		runner/suites/corpus.py \
 		runner/suites/e2e.py \
 		runner/suites/micro.py \
@@ -188,7 +209,10 @@ $(ARM64_IMAGE) $(ARM64_EFI_IMAGE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build
 		-v "$(ROOT_DIR):$(ROOT_DIR)" \
 		-w "$(ROOT_DIR)" \
 		"$(ARM64_RUNNER_BUILD_IMAGE)" \
-		make -C "$(KERNEL_DIR)" O="$(ARM64_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE= Image vmlinuz.efi -j"$(NPROC)"
+		bash -c "mkdir -p /tmp/bpf-benchmark-container '$(ARM64_BUILD_DIR)' && \
+		  find '$(ARM64_BUILD_DIR)' -type f -name '*.o' -size 0 -delete && \
+		  rm -f '$(ARM64_BUILD_DIR)/vmlinux.a' '$(ARM64_BUILD_DIR)/vmlinux.o' '$(ARM64_BUILD_DIR)/drivers/of/built-in.a' && \
+		  make -C '$(KERNEL_DIR)' O='$(ARM64_BUILD_DIR)' ARCH=arm64 CROSS_COMPILE= Image vmlinuz.efi -j'$(NPROC)'"
 
 $(ARM64_AWS_BUILD_CONFIG): $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_KERNEL_CONFIG_FRAGMENT) $(ARM64_AWS_BASE_CONFIG) $(KERNEL_BUILD_META_FILES)
 	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
@@ -219,7 +243,10 @@ $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE) &: $(ROOT_DIR)/Makefile $(RUNNER_DIR)/
 		-v "$(ROOT_DIR):$(ROOT_DIR)" \
 		-w "$(ROOT_DIR)" \
 		"$(ARM64_RUNNER_BUILD_IMAGE)" \
-		make -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE= Image vmlinuz.efi -j"$(NPROC)"
+		bash -c "mkdir -p /tmp/bpf-benchmark-container '$(ARM64_AWS_BUILD_DIR)' && \
+		  find '$(ARM64_AWS_BUILD_DIR)' -type f -name '*.o' -size 0 -delete && \
+		  rm -f '$(ARM64_AWS_BUILD_DIR)/vmlinux.a' '$(ARM64_AWS_BUILD_DIR)/vmlinux.o' '$(ARM64_AWS_BUILD_DIR)/drivers/of/built-in.a' && \
+		  make -C '$(KERNEL_DIR)' O='$(ARM64_AWS_BUILD_DIR)' ARCH=arm64 CROSS_COMPILE= Image vmlinuz.efi -j'$(NPROC)'"
 
 # ── AWS aliases ───────────────────────────────────────────────────────────────
 aws-arm64-test:

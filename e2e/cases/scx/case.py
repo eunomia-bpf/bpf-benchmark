@@ -610,6 +610,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
             runtime=runner,
             target_prog_ids=[int(program["id"]) for program in runner.programs],
             artifacts={
+                "programs": runner.programs,
                 "scheduler_programs": runner.programs,
                 "rejit_policy_context": {
                     "repo": "scx",

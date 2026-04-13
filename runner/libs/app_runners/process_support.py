@@ -206,5 +206,3 @@ class ManagedProcessSession:
     def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
         del exc_type, exc, tb
         self.close()
-
-

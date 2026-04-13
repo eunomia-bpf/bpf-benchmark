@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import errno
 import json
 import os
 import re
@@ -110,7 +111,15 @@ class TraceeOutputCollector:
                     except FileNotFoundError:
                         time.sleep(0.05)
                         continue
-                raw_line = handle.readline()
+                try:
+                    raw_line = handle.readline()
+                except OSError as exc:
+                    if exc.errno != errno.ENODATA:
+                        raise
+                    if stop_event.is_set():
+                        break
+                    time.sleep(0.05)
+                    continue
                 if raw_line:
                     line = raw_line.rstrip()
                     with self._lock:
@@ -122,12 +131,17 @@ class TraceeOutputCollector:
                 time.sleep(0.05)
         finally:
             if handle is not None:
-                for raw_line in handle:
-                    line = raw_line.rstrip()
-                    with self._lock:
-                        self.event_tail.append(line)
-                    self._parse_event_line(line)
-                handle.close()
+                try:
+                    for raw_line in handle:
+                        line = raw_line.rstrip()
+                        with self._lock:
+                            self.event_tail.append(line)
+                        self._parse_event_line(line)
+                except OSError as exc:
+                    if exc.errno != errno.ENODATA:
+                        raise
+                finally:
+                    handle.close()
 
     def _parse_event_line(self, line: str) -> None:
         try:

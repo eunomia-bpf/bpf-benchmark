@@ -77,8 +77,7 @@ def _lookup_target_instance_ids(ctx: AwsExecutorContext) -> list[str]:
     return [token for token in completed.stdout.split() if token and token != "None"]
 
 
-def _ssh_base_args(ctx: AwsExecutorContext, ip: str) -> list[str]:
-    del ip
+def _ssh_base_args(ctx: AwsExecutorContext) -> list[str]:
     return [
         "-o", "BatchMode=yes",
         "-o", "StrictHostKeyChecking=no",
@@ -89,52 +88,14 @@ def _ssh_base_args(ctx: AwsExecutorContext, ip: str) -> list[str]:
 
 
 def _ssh_exec(ctx: AwsExecutorContext, ip: str, *remote_command: str, check: bool = True, capture_output: bool = False) -> subprocess.CompletedProcess[str]:
-    completed = subprocess.run(["ssh", *_ssh_base_args(ctx, ip), f"{ctx.remote_user}@{ip}", shlex.join(remote_command)],
+    completed = subprocess.run(["ssh", *_ssh_base_args(ctx), f"{ctx.remote_user}@{ip}", shlex.join(remote_command)],
                                cwd=ROOT_DIR, text=True, capture_output=capture_output, check=False)
     if check and completed.returncode != 0: raise SystemExit(completed.returncode)
     return completed
 
 
-def _remote_helper_local_path() -> Path:
-    return ROOT_DIR / "runner" / "libs" / "aws_remote_host.py"
-
-
-def _remote_helper_remote_path(ctx: AwsExecutorContext) -> str:
-    return f"{ctx.remote_stage_dir}/.runner-tools/aws_remote_host.py"
-
-
-def _ensure_remote_helper(ctx: AwsExecutorContext, ip: str) -> str:
-    remote_helper_path = _remote_helper_remote_path(ctx)
-    remote_helper_dir = str(Path(remote_helper_path).parent)
-    _ssh_exec(ctx, ip, "mkdir", "-p", remote_helper_dir)
-    _scp_to(ctx, ip, _remote_helper_local_path(), remote_helper_path)
-    return remote_helper_path
-
-
-def _run_remote_helper(
-    ctx: AwsExecutorContext,
-    ip: str,
-    remote_python: str,
-    *helper_args: str,
-    check: bool = True,
-    capture_output: bool = False,
-) -> subprocess.CompletedProcess[str]:
-    remote_helper_path = _ensure_remote_helper(ctx, ip)
-    return _ssh_exec(
-        ctx,
-        ip,
-        remote_python,
-        remote_helper_path,
-        *helper_args,
-        check=check,
-        capture_output=capture_output,
-    )
-
-
-def _scp_to(ctx: AwsExecutorContext, ip: str, src: Path, dest: str, *, recursive: bool = False) -> None:
-    command = ["scp", *_ssh_base_args(ctx, ip)]
-    if recursive: command.append("-r")
-    command.extend([str(src), f"{ctx.remote_user}@{ip}:{dest}"])
+def _scp_to(ctx: AwsExecutorContext, ip: str, src: Path, dest: str) -> None:
+    command = ["scp", *_ssh_base_args(ctx), str(src), f"{ctx.remote_user}@{ip}:{dest}"]
     completed = subprocess.run(command, cwd=ROOT_DIR, text=True, capture_output=False, check=False)
     if completed.returncode != 0: raise SystemExit(completed.returncode)
 
@@ -142,7 +103,7 @@ def _scp_to(ctx: AwsExecutorContext, ip: str, src: Path, dest: str, *, recursive
 def _rsync_to(ctx: AwsExecutorContext, ip: str, src: Path, dest: str, *, excludes: tuple[str, ...] = ()) -> None:
     command = ["rsync", "-a", "--delete"]
     for pattern in excludes: command.extend(["--exclude", pattern])
-    command.extend(["-e", shlex.join(["ssh", *_ssh_base_args(ctx, ip)]), f"{src}/", f"{ctx.remote_user}@{ip}:{dest}/"])
+    command.extend(["-e", shlex.join(["ssh", *_ssh_base_args(ctx)]), f"{src}/", f"{ctx.remote_user}@{ip}:{dest}/"])
     completed = subprocess.run(command, cwd=ROOT_DIR, text=True, capture_output=False, check=False)
     if completed.returncode != 0: raise SystemExit(completed.returncode)
 
@@ -151,23 +112,21 @@ def _rsync_from(ctx: AwsExecutorContext, ip: str, src: str, dest: Path, *, exclu
     dest.mkdir(parents=True, exist_ok=True)
     command = ["rsync", "-a"]
     for pattern in excludes: command.extend(["--exclude", pattern])
-    command.extend(["-e", shlex.join(["ssh", *_ssh_base_args(ctx, ip)]), f"{ctx.remote_user}@{ip}:{src}/", f"{dest}/"])
+    command.extend(["-e", shlex.join(["ssh", *_ssh_base_args(ctx)]), f"{ctx.remote_user}@{ip}:{src}/", f"{dest}/"])
     completed = subprocess.run(command, cwd=ROOT_DIR, text=True, capture_output=False, check=False)
     if completed.returncode != 0: raise SystemExit(completed.returncode)
 
 
-def _scp_from(ctx: AwsExecutorContext, ip: str, src: str, dest: Path, *, recursive: bool = False) -> None:
+def _scp_from(ctx: AwsExecutorContext, ip: str, src: str, dest: Path) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
-    command = ["scp", *_ssh_base_args(ctx, ip)]
-    if recursive: command.append("-r")
-    command.extend([f"{ctx.remote_user}@{ip}:{src}", str(dest)])
+    command = ["scp", *_ssh_base_args(ctx), f"{ctx.remote_user}@{ip}:{src}", str(dest)]
     completed = subprocess.run(command, cwd=ROOT_DIR, text=True, capture_output=False, check=False)
     if completed.returncode != 0: raise SystemExit(completed.returncode)
 
 
 def _wait_for_ssh(ctx: AwsExecutorContext, ip: str) -> None:
     for _ in range(60):
-        completed = subprocess.run(["ssh", *_ssh_base_args(ctx, ip), f"{ctx.remote_user}@{ip}", "true"],
+        completed = subprocess.run(["ssh", *_ssh_base_args(ctx), f"{ctx.remote_user}@{ip}", "true"],
                                    cwd=ROOT_DIR, text=True, capture_output=True, check=False)
         if completed.returncode == 0: return
         time.sleep(5)

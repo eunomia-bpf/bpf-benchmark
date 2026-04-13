@@ -17,7 +17,7 @@ from runner.suites._common import (
     ensure_bpf_stats_enabled,
     ensure_katran_artifacts,
     ensure_scx_artifacts,
-    env_with_cross_runtime_ld,
+    env_with_suite_runtime_ld,
     inside_runtime_container,
     merge_csv_and_repeated,
     nonnegative_int,
@@ -161,7 +161,7 @@ def _run_corpus_suite(workspace: Path, args: argparse.Namespace) -> None:
         run_checked(["ip", "link", "set", "lo", "up"], cwd=workspace, env=env, die=_die)
     ensure_bpf_stats_enabled(workspace, _die)
     ensure_scx_artifacts(workspace, args.target_arch, args.scx_packages, _die)
-    runtime_env, _ = env_with_cross_runtime_ld(workspace, args.target_arch, env)
+    runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
     ensure_katran_artifacts(workspace, args.target_arch, args.native_repos, _die)
     daemon_binary = resolve_daemon_binary(workspace, args.target_arch, args.daemon_binary, _die)
     command = [python_bin, str(workspace / "corpus" / "driver.py"), *_corpus_driver_argv(workspace, args, daemon_binary)]

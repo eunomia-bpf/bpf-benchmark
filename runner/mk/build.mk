@@ -498,14 +498,14 @@ $(ACTIVE_TETRAGON_REQUIRED) &: $(TETRAGON_SOURCE_FILES) $(BUILD_RULE_FILES) $(AC
 	version="$$(git -C "$$repo_src" describe --tags --always --exclude '*/*' 2>/dev/null || printf '%s' unknown)"; \
 	mkdir -p "$$build_root" "$$artifact_root/bin" "$$bpf_output_root"; \
 	rsync -a --delete --exclude '.git' --exclude 'build' --exclude 'bpf/objs' "$$repo_src/" "$$repo_root/"; \
+	container_platform="$(ACTIVE_CONTAINER_PLATFORM)"; \
+	container_image="$(ACTIVE_RUNNER_BUILD_IMAGE)"; \
 	if [ -L "$$repo_root/bpf/objs" ] || [ ! -e "$$repo_root/bpf/objs" ]; then \
 		ln -sfn "$$bpf_output_root" "$$repo_root/bpf/objs"; \
 	else \
 		echo "unexpected tetragon bpf/objs directory exists: $$repo_root/bpf/objs" >&2; \
 		exit 1; \
 	fi; \
-	container_platform="$(ACTIVE_CONTAINER_PLATFORM)"; \
-	container_image="$(ACTIVE_RUNNER_BUILD_IMAGE)"; \
 	$(CONTAINER_RUNTIME) run --rm --platform "$$container_platform" \
 		--user "$(HOST_UID):$(HOST_GID)" \
 		-e HOME=/tmp/bpf-benchmark-container \
@@ -536,11 +536,10 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE
 	artifact_root="$(REPO_KATRAN_ROOT)"; \
 	override_file="$(KATRAN_CMAKE_OVERRIDE)"; \
 	bpf_root="$$artifact_root/bpf"; \
-	folly_xlog_prefixes="-DFOLLY_XLOG_STRIP_PREFIXES=\\\\\\\"$$build_root/deps/folly:$$build_root/deps/folly/build\\\\\\\""; \
 	container_platform="$(ACTIVE_CONTAINER_PLATFORM)"; \
 	container_image="$(ACTIVE_RUNNER_BUILD_IMAGE)"; \
 	mkdir -p "$$repo_root" "$$install_root/bin" "$$install_root/lib" "$$install_root/lib64" "$$bpf_root" "$$build_root"; \
-		rsync -a --delete --delete-excluded \
+	rsync -a --delete --delete-excluded \
 		--exclude '.git' \
 		--exclude '_build' \
 		--exclude 'deps' \
@@ -554,10 +553,17 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE
 		"$$container_image" \
 		env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR \
 			CC=gcc CXX=g++ AR=ar RANLIB=ranlib \
-			CXXFLAGS="$$folly_xlog_prefixes" \
 			KATRAN_SKIP_SYSTEM_PACKAGES=1 BUILD_EXAMPLE_GRPC=1 BUILD_DIR="$$build_root" INSTALL_DIR="$$install_root" INSTALL_DEPS_ONLY=1 ./build_katran.sh; \
+	for cmake_file in "$$install_root"/lib/cmake/folly/folly-targets*.cmake "$$install_root"/lib64/cmake/folly/folly-targets*.cmake; do \
+		[ -f "$$cmake_file" ] || continue; \
+		sed -i \
+			-e 's#gflags_nothreads_static#/usr/lib64/libgflags.so#g' \
+			-e 's#gflags_static#/usr/lib64/libgflags.so#g' \
+			"$$cmake_file"; \
+	done; \
 	mkdir -p "$$install_root/grpc/_build"; \
 	ln -sfn "$$install_root/bin/grpc_cpp_plugin" "$$install_root/grpc/_build/grpc_cpp_plugin"; \
+	rm -rf "$$build_root/build"; \
 	$(CONTAINER_RUNTIME) run --rm --platform "$$container_platform" \
 		--user "$(HOST_UID):$(HOST_GID)" \
 		-e HOME=/tmp/bpf-benchmark-container \
@@ -572,11 +578,18 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE
 				-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 				-DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
 				-DLIB_BPF_PREFIX="$$install_root" \
+				-DLIBELF=/usr/lib64/libelf.so \
+				-DGLOG_LIBRARY=/usr/lib64/libglog.so \
+				-DGLOG_INCLUDE_DIR=/usr/include \
+				-Dgflags_DIR=/usr/lib64/cmake/gflags \
+				-DGFLAGS_SHARED=ON \
+				-DGFLAGS_NOTHREADS=OFF \
 				-DCMAKE_CXX_STANDARD=20 \
+				-DCMAKE_CXX_FLAGS="-fpermissive" \
 				-DCMAKE_C_COMPILER=gcc \
 				-DCMAKE_CXX_COMPILER=g++ \
-				-DCMAKE_AR=ar \
-				-DCMAKE_RANLIB=ranlib \
+				-DCMAKE_AR=/usr/bin/ar \
+				-DCMAKE_RANLIB=/usr/bin/ranlib \
 				-DCMAKE_USER_MAKE_RULES_OVERRIDE_CXX="$$override_file" \
 				-DBUILD_TESTS=OFF; \
 	$(CONTAINER_RUNTIME) run --rm --platform "$$container_platform" \
@@ -660,6 +673,9 @@ $(ACTIVE_WORKLOAD_TOOLS_REQUIRED) &: $(WORKLOAD_TOOLS_SOURCE_FILES) $(ACTIVE_RUN
 	ln -sfn "$$sysbench_src/third_party/luajit/inc" "$$wrk_luajit_root/include"; \
 	ln -sfn "$$sysbench_src/third_party/luajit/lib" "$$wrk_luajit_root/lib"; \
 	ln -sfn "$$sysbench_src/third_party/luajit/lib" "$$lib_root/luajit"; \
+	luajit_bin="$$(find "$$sysbench_src/third_party/luajit/bin" -maxdepth 1 -type f -perm -111 -name 'luajit-*' | sort | head -n 1)"; \
+	test -n "$$luajit_bin" || { echo "missing $(RUN_TARGET_ARCH) LuaJIT build output for wrk" >&2; exit 1; }; \
+	ln -sfn "$$(basename "$$luajit_bin")" "$$sysbench_src/third_party/luajit/bin/luajit"; \
 	mkdir -p "$$wrk_src/obj"; \
 	$(CONTAINER_RUNTIME) run --rm --platform "$$container_platform" \
 		--user "$(HOST_UID):$(HOST_GID)" \

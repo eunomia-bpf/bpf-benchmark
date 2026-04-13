@@ -36,7 +36,7 @@ def _build_simple_lcg_u64_ii(output: Path, spec: dict) -> dict:
         blob.extend(struct.pack("<Q", value))
     output.write_bytes(blob)
     meta_b_key = spec.get("header_b_key", "seed")
-    return {"count": count, meta_b_key: header_b}
+    return {"count": count, meta_b_key: seed if meta_b_key == "seed" else header_b}
 
 
 def _build_code_clone(output: Path, spec: dict) -> dict:

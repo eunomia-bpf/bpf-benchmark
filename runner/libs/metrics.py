@@ -6,7 +6,7 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 
-from .bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats
+from .bpf_stats import compute_delta, sample_bpf_stats
 
 
 def _read_pid_ticks(pid: int) -> tuple[int, int]:
@@ -88,7 +88,6 @@ def start_sampler_thread(
 
 __all__ = [
     "compute_delta",
-    "enable_bpf_stats",
     "sample_bpf_stats",
     "sample_cpu_usage",
     "sample_total_cpu_usage",

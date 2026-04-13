@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import os
+import shlex
 import shutil
 import subprocess
 import sys
-from collections.abc import Callable
+import tempfile
 from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
@@ -12,8 +13,10 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs import aws_common
 from runner.libs.cli_support import fail
-from runner.libs.run_contract import RunConfig
+from runner.libs.run_contract import RunConfig, read_run_config_file
 from runner.libs.state_file import write_state
+from runner.libs.suite_commands import build_suite_argv
+from runner.libs.suite_args import read_suite_args_file
 from runner.libs.workspace_layout import remote_transfer_roots
 
 _die = partial(fail, "aws-executor")
@@ -48,13 +51,9 @@ def _effective_name_tag(ctx: aws_common.AwsExecutorContext) -> str:
 
 
 def _describe_instance_type(ctx: aws_common.AwsExecutorContext, instance_id: str) -> str:
-    completed = aws_common._aws_cmd(
-        ctx, "ec2", "describe-instances",
-        "--instance-ids", instance_id,
-        "--query", "Reservations[0].Instances[0].InstanceType",
-        "--output", "text",
-        capture_output=True,
-    )
+    completed = aws_common._aws_cmd(ctx, "ec2", "describe-instances",
+        "--instance-ids", instance_id, "--query", "Reservations[0].Instances[0].InstanceType",
+        "--output", "text", capture_output=True)
     return completed.stdout.strip() if completed.returncode == 0 else ""
 
 
@@ -96,13 +95,8 @@ def _instance_state_is_reusable(state: str) -> bool:
 
 
 def _run_local_make(*args: str, env: dict[str, str] | None = None) -> None:
-    completed = subprocess.run(
-        ["make", "-C", str(ROOT_DIR), *args],
-        cwd=ROOT_DIR,
-        env=env,
-        text=True,
-        check=False,
-    )
+    completed = subprocess.run(["make", "-C", str(ROOT_DIR), *args],
+                               cwd=ROOT_DIR, env=env, text=True, check=False)
     if completed.returncode != 0:
         raise SystemExit(completed.returncode)
 
@@ -148,125 +142,175 @@ def _build_arm64_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[s
 
 
 def _remote_kernel_release(ctx: aws_common.AwsExecutorContext, ip: str) -> str:
-    remote_python = _require(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    completed = aws_common._run_remote_helper(ctx, ip, remote_python, "uname-r", capture_output=True)
+    completed = aws_common._ssh_exec(ctx, ip, "uname", "-r", capture_output=True)
     return completed.stdout.strip()
 
 
 def _remote_root_volume_size_gb(ctx: aws_common.AwsExecutorContext, ip: str) -> int | None:
-    remote_python = _require(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    completed = aws_common._run_remote_helper(ctx, ip, remote_python, "root-volume-size-gb", check=False, capture_output=True)
+    script = (
+        "root_source=$(findmnt -n -o SOURCE / 2>/dev/null) || exit 1; "
+        "root_device=\"$root_source\"; "
+        "parent=$(lsblk -no PKNAME \"$root_source\" 2>/dev/null | head -1) && "
+        "[ -n \"$parent\" ] && root_device=\"/dev/$parent\"; "
+        "size=$(lsblk -nb -o SIZE \"$root_device\" 2>/dev/null | head -1) || exit 1; "
+        "[ -n \"$size\" ] && echo $(( (size + 1073741824 - 1) / 1073741824 ))"
+    )
+    completed = aws_common._ssh_exec(ctx, ip, "bash", "-c", script, check=False, capture_output=True)
     if completed.returncode != 0:
         return None
     value = completed.stdout.strip()
-    if not value.isdigit():
-        return None
-    return int(value)
+    return int(value) if value.isdigit() else None
 
 
 def _remote_has_runtime_btf(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
-    remote_python = _require(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    return aws_common._run_remote_helper(ctx, ip, remote_python, "has-runtime-btf", check=False).returncode == 0
-
-
-def _remote_has_sched_ext(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
-    remote_python = _require(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    return aws_common._run_remote_helper(ctx, ip, remote_python, "has-sched-ext", check=False).returncode == 0
-
-
-def _ordered_unique(tokens: list[str]) -> list[str]:
-    ordered: list[str] = []
-    for token in tokens:
-        if token and token not in ordered:
-            ordered.append(token)
-    return ordered
-
-
-def _remote_required_commands(contract: RunConfig) -> list[str]:
-    python_bin = _require(contract, "RUN_REMOTE_PYTHON_BIN")
-    container_runtime = _require(contract, "RUN_CONTAINER_RUNTIME")
-    commands = [
-        container_runtime, "curl", "dracut", "file", "grubby", "insmod",
-        "ip", python_bin, "rsync", "taskset", "tar",
-    ]
-    return _ordered_unique(commands)
-
-
-def _verify_remote_base_prereqs(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
-    commands = _remote_required_commands(ctx.contract)
-    remote_python = _require(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    return aws_common._run_remote_helper(
-        ctx, ip, remote_python, "verify-base-prereqs", ",".join(commands), check=False,
+    return aws_common._ssh_exec(
+        ctx, ip, "bash", "-c",
+        "test -f /sys/kernel/btf/vmlinux && test -s /sys/kernel/btf/vmlinux",
+        check=False,
     ).returncode == 0
 
 
-def _require_remote_base_prereqs(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
-    if not _verify_remote_base_prereqs(ctx, ip):
-        _die("AWS instance image is missing required base prerequisites; bake them into the AMI")
+def _remote_has_sched_ext(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
+    return aws_common._ssh_exec(
+        ctx, ip, "test", "-e", "/sys/kernel/sched_ext/state",
+        check=False,
+    ).returncode == 0
 
 
 def _refresh_aws_arm64_base_config(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
-    remote_python = _require(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    completed = aws_common._run_remote_helper(ctx, ip, remote_python, "print-kernel-config", check=False, capture_output=True)
+    script = (
+        "release=$(uname -r); "
+        "boot_config=\"/boot/config-$release\"; "
+        "if [ -f \"$boot_config\" ]; then cat \"$boot_config\"; "
+        "elif [ -f /proc/config.gz ]; then zcat /proc/config.gz; "
+        "else exit 1; fi"
+    )
+    completed = aws_common._ssh_exec(ctx, ip, "bash", "-c", script, check=False, capture_output=True)
     if completed.returncode != 0:
         _die(f"failed to capture AWS ARM64 base kernel config from {ip}")
     base_config = ctx.target_root / "config-al2023-arm64"
     base_config.parent.mkdir(parents=True, exist_ok=True)
     base_config.write_text(completed.stdout, encoding="utf-8")
-    remote_release = _remote_kernel_release(ctx, ip)
-    base_config.with_suffix(".release").write_text(remote_release + "\n", encoding="utf-8")
+    base_config.with_suffix(".release").write_text(_remote_kernel_release(ctx, ip) + "\n", encoding="utf-8")
 
 
-def _sync_kernel_stage(ctx: aws_common.AwsExecutorContext, ip: str, *, kernel_release: str,
-                        kernel_image: Path, modules_root: Path, remote_kernel_stage_dir: str) -> None:
-    aws_common._ssh_exec(ctx, ip, "mkdir", "-p", f"{remote_kernel_stage_dir}/boot",
-                          f"{remote_kernel_stage_dir}/lib/modules/{kernel_release}")
-    aws_common._scp_to(ctx, ip, kernel_image, f"{remote_kernel_stage_dir}/boot/")
-    aws_common._rsync_to(ctx, ip, modules_root, f"{remote_kernel_stage_dir}/lib/modules/{kernel_release}",
-                          excludes=("build", "source"))
+# ---------------------------------------------------------------------------
+# Docker deployment image: build locally, push to remote, run install inline
+# ---------------------------------------------------------------------------
+
+def _build_and_push_kernel_image(ctx: aws_common.AwsExecutorContext, ip: str,
+                                  kernel_release: str, kernel_image: Path,
+                                  modules_root: Path, arch: str) -> None:
+    """Build a minimal Docker image containing the kernel artifacts, push it to the remote host,
+    then run the install commands inside the container with /:/host bind-mount."""
+    tag = f"bpf-benchmark-kernel/{ctx.target_name}:{ctx.run_token}"
+
+    with tempfile.TemporaryDirectory(prefix="bpf-kernel-deploy-") as tmpdir:
+        tmp = Path(tmpdir)
+        ctx_dir = tmp / "ctx"
+        ctx_dir.mkdir()
+
+        # Stage kernel image
+        boot_dir = ctx_dir / "kernel" / "boot"
+        boot_dir.mkdir(parents=True)
+        shutil.copy2(kernel_image, boot_dir / kernel_image.name)
+
+        # Symlink modules root (avoid copying gigabytes)
+        mod_dst = ctx_dir / "kernel" / "lib" / "modules" / kernel_release
+        mod_dst.parent.mkdir(parents=True)
+        mod_dst.symlink_to(modules_root)
+
+        dockerfile = (
+            "FROM scratch\n"
+            "COPY kernel /kernel\n"
+        )
+        (tmp / "Dockerfile").write_text(dockerfile, encoding="utf-8")
+
+        completed = subprocess.run(
+            ["docker", "build", "--no-cache", "-t", tag, "-f", str(tmp / "Dockerfile"), str(ctx_dir)],
+            cwd=ROOT_DIR, text=True, check=False,
+        )
+        if completed.returncode != 0:
+            _die(f"docker build for kernel deploy image failed (tag={tag})")
+
+    # Push via docker save | ssh docker load
+    ssh_args = aws_common._ssh_base_args(ctx)
+    save_cmd = ["docker", "save", tag]
+    load_cmd = ["ssh", *ssh_args, f"{ctx.remote_user}@{ip}", "docker load"]
+    with subprocess.Popen(save_cmd, stdout=subprocess.PIPE, cwd=ROOT_DIR) as save_proc:
+        rc = subprocess.run(load_cmd, stdin=save_proc.stdout, cwd=ROOT_DIR, text=False, check=False).returncode
+        save_proc.stdout.close()  # type: ignore[union-attr]
+        save_proc.wait()
+        if save_proc.returncode != 0:
+            _die(f"docker save failed for {tag}")
+    if rc != 0:
+        _die(f"docker load failed on {ip} for {tag}")
+
+    # Build the inline install script based on arch
+    kernel_dest = f"/host/boot/vmlinuz-{kernel_release}"
+    if arch == "x86":
+        install_image_cmd = f"cp /kernel/boot/bzImage {kernel_dest}"
+    else:
+        install_image_cmd = f"cp /kernel/boot/vmlinuz.efi {kernel_dest}"
+
+    install_script = (
+        f"set -eux; "
+        f"cp -a /kernel/lib/modules/{kernel_release} /host/lib/modules/; "
+        f"{install_image_cmd}; "
+        f"depmod -b /host {kernel_release}; "
+        f"chroot /host dracut --force /boot/initramfs-{kernel_release}.img {kernel_release}; "
+        f"chroot /host grubby --set-default /boot/vmlinuz-{kernel_release}"
+    )
+
+    # Run inline install on remote
+    aws_common._ssh_exec(
+        ctx, ip,
+        "docker", "run", "--rm", "--privileged", "-v", "/:/host",
+        tag, "bash", "-c", install_script,
+    )
 
 
-def _setup_kernel_instance(ctx: aws_common.AwsExecutorContext, ip: str, *, arch_label: str, setup_helper: str,
-                            build_kernel_artifacts: Callable[[aws_common.AwsExecutorContext], tuple[str, Path, Path]],
-                            refresh_arm64_base_config: bool = False) -> None:
+def _setup_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     state = aws_common._load_instance_state(ctx)
     if not (instance_id := state.get("STATE_INSTANCE_ID", "").strip()):
-        _die(f"{arch_label} setup requires a cached instance ID")
+        _die("setup requires a cached instance ID")
     aws_common._wait_for_ssh(ctx, ip)
-    if refresh_arm64_base_config:
+
+    if ctx.target_name == "aws-arm64":
         _refresh_aws_arm64_base_config(ctx, ip)
-    _require_remote_base_prereqs(ctx, ip)
-    kernel_release, kernel_image, modules_root = build_kernel_artifacts(ctx)
-    setup_stamp = f"setup_{kernel_release}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
-    setup_result_dir = ctx.results_dir / setup_stamp
+        kernel_release, kernel_image, modules_root = _build_arm64_kernel_artifacts(ctx)
+        arch = "arm64"
+    elif ctx.target_name == "aws-x86":
+        kernel_release, kernel_image, modules_root = _build_x86_kernel_artifacts()
+        arch = "x86"
+    else:
+        _die(f"unsupported AWS target for setup: {ctx.target_name}")
+
+    setup_result_dir = ctx.results_dir / f"setup_{kernel_release}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     setup_result_dir.mkdir(parents=True, exist_ok=True)
-    remote_kernel_stage_dir = _require(ctx.contract, "RUN_REMOTE_KERNEL_STAGE_DIR")
-    remote_python = _require(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    _sync_kernel_stage(ctx, ip, kernel_release=kernel_release, kernel_image=kernel_image,
-                       modules_root=modules_root, remote_kernel_stage_dir=remote_kernel_stage_dir)
-    aws_common._run_remote_helper(ctx, ip, remote_python, setup_helper, kernel_release, remote_kernel_stage_dir)
+
+    _build_and_push_kernel_image(ctx, ip, kernel_release, kernel_image, modules_root, arch)
+
     for sub_cmd in (("reboot-instances", "--instance-ids", instance_id), ("wait", "instance-status-ok", "--instance-ids", instance_id)):
         if (c := aws_common._aws_cmd(ctx, "ec2", *sub_cmd)).returncode != 0:
             raise SystemExit(c.returncode)
     _, _, updated_ip = aws_common._describe_instance(ctx, instance_id)
     if not updated_ip or updated_ip == "None":
-        _die(f"instance {instance_id} has no public IP after {arch_label} reboot")
+        _die(f"instance {instance_id} has no public IP after reboot")
     aws_common._wait_for_ssh(ctx, updated_ip)
-    verify = aws_common._run_remote_helper(ctx, updated_ip, remote_python, "verify-kernel", kernel_release, "1", capture_output=True)
+
+    verify_script = (
+        f"set -e; "
+        f"uname -r; "
+        f"ip -brief addr show ens5 2>/dev/null || ip -brief addr; "
+        f"grubby --default-kernel; "
+        f"[ \"$(uname -r)\" = \"{kernel_release}\" ] || {{ echo 'kernel mismatch' >&2; exit 1; }}; "
+        f"[ \"$(grubby --default-kernel)\" = \"/boot/vmlinuz-{kernel_release}\" ] || {{ echo 'grubby default mismatch' >&2; exit 1; }}; "
+        f"test -s /sys/kernel/btf/vmlinux || {{ echo 'BTF not available' >&2; exit 1; }}"
+    )
+    verify = aws_common._ssh_exec(ctx, updated_ip, "bash", "-c", verify_script, capture_output=True)
     (setup_result_dir / "setup_verify.log").write_text(verify.stdout, encoding="utf-8")
     _save_state(ctx, instance_id=instance_id, instance_ip=updated_ip, kernel_release=kernel_release)
-
-
-def _setup_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
-    if ctx.target_name == "aws-arm64":
-        _setup_kernel_instance(ctx, ip, arch_label="ARM64", setup_helper="setup-kernel-arm64",
-                                build_kernel_artifacts=_build_arm64_kernel_artifacts, refresh_arm64_base_config=True)
-        return
-    if ctx.target_name == "aws-x86":
-        _setup_kernel_instance(ctx, ip, arch_label="x86", setup_helper="setup-kernel-x86",
-                                build_kernel_artifacts=lambda _ctx: _build_x86_kernel_artifacts())
-        return
-    _die(f"unsupported AWS target for setup: {ctx.target_name}")
 
 
 def _launch_instance(ctx: aws_common.AwsExecutorContext) -> None:
@@ -353,7 +397,6 @@ def _ensure_instance_for_suite(ctx: aws_common.AwsExecutorContext) -> str:
 
     if result := _maybe_setup(not state.get("STATE_KERNEL_RELEASE", "").strip()): return result
     if result := _maybe_setup(_remote_kernel_release(ctx, instance_ip) != state.get("STATE_KERNEL_RELEASE", "").strip()): return result
-    _require_remote_base_prereqs(ctx, instance_ip)
     if result := _maybe_setup(ctx.contract.scalar("RUN_SUITE_NEEDS_RUNTIME_BTF", "0") == "1" and not _remote_has_runtime_btf(ctx, instance_ip)): return result
     if result := _maybe_setup(ctx.contract.scalar("RUN_SUITE_NEEDS_SCHED_EXT", "0") == "1" and not _remote_has_sched_ext(ctx, instance_ip)): return result
     return instance_ip
@@ -389,7 +432,7 @@ def _sync_remote_roots(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     for entry in selected_roots:
         source_path = ROOT_DIR / entry
         remote_path = f"{ctx.remote_stage_dir}/{entry}"
-        aws_common._ssh_exec(ctx, ip, "mkdir", "-p", os.path.dirname(remote_path))
+        aws_common._ssh_exec(ctx, ip, "mkdir", "-p", str(Path(remote_path).parent))
         if source_path.is_dir():
             aws_common._ssh_exec(ctx, ip, "mkdir", "-p", remote_path)
             aws_common._rsync_to(ctx, ip, source_path, remote_path, excludes=("results/", "__pycache__/"))
@@ -401,11 +444,20 @@ def _sync_remote_results(ctx: aws_common.AwsExecutorContext, ip: str, remote_wor
     relative_results = _suite_results_relative_path(ctx.suite_name)
     remote_results = f"{remote_workspace}/{relative_results}"
     local_results = ROOT_DIR / relative_results
-    remote_python = _require(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
-    if aws_common._run_remote_helper(ctx, ip, remote_python, "path-exists", remote_results, check=False).returncode != 0:
+    if aws_common._ssh_exec(ctx, ip, "test", "-e", remote_results, check=False).returncode != 0:
         return None
     aws_common._rsync_from(ctx, ip, remote_results, local_results)
     return local_results
+
+
+def _build_remote_suite_command(ctx: aws_common.AwsExecutorContext, remote_workspace: str,
+                                 remote_config_path: str, suite_args_path: Path | None) -> list[str]:
+    """Build the suite command argv to run on the remote host."""
+    suite_args = read_suite_args_file(suite_args_path) if suite_args_path is not None else []
+    remote_workspace_path = Path(remote_workspace)
+    config = read_run_config_file(ctx.config_path)
+    return build_suite_argv(remote_workspace_path, config, suite_args, die=_die,
+                            config_path=Path(remote_config_path))
 
 
 def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_path: Path | None) -> None:
@@ -420,24 +472,34 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_pa
     local_log_dir.mkdir(parents=True, exist_ok=True)
     ctx.run_state_dir.mkdir(parents=True, exist_ok=True)
 
-    aws_common._run_remote_helper(ctx, ip, remote_python, "prepare-dir", remote_run_dir)
+    # prepare-dir: mkdir with correct ownership
+    aws_common._ssh_exec(ctx, ip, "bash", "-c",
+        f"mkdir -p {shlex.quote(remote_run_dir)} && "
+        f"chown $(id -u):$(id -g) {shlex.quote(remote_run_dir)} 2>/dev/null || true"
+    )
     _sync_remote_roots(ctx, ip)
-    aws_common._scp_to(ctx, ip, ctx.config_path, f"{remote_run_dir}/run-contract.json")
-    remote_suite_args_path = ""
+    remote_config_path = f"{remote_run_dir}/run-contract.json"
+    aws_common._scp_to(ctx, ip, ctx.config_path, remote_config_path)
+    remote_suite_args_path: str | None = None
     if suite_args_path is not None:
         remote_suite_args_path = f"{remote_run_dir}/suite-args.json"
         aws_common._scp_to(ctx, ip, suite_args_path, remote_suite_args_path)
-    remote_completed = aws_common._run_remote_helper(
-        ctx, ip, remote_python,
-        "run-workspace",
-        remote_workspace,
-        f"{remote_run_dir}/run-contract.json",
-        remote_log,
-        remote_python,
-        *([remote_suite_args_path] if remote_suite_args_path else []),
-        check=False,
+
+    # Build suite command locally (same code/config) then run on remote via ssh
+    suite_argv = _build_remote_suite_command(ctx, remote_workspace, remote_config_path,
+                                              Path(remote_suite_args_path) if remote_suite_args_path else None)
+    # Replace the local python bin with the remote one in the command
+    if suite_argv and suite_argv[0] != remote_python:
+        suite_argv = [remote_python] + suite_argv[1:]
+    preserved_env = f"PYTHONPATH={shlex.quote(remote_workspace)}"
+    log_dir_cmd = f"mkdir -p {shlex.quote(str(Path(remote_log).parent))}"
+    suite_cmd = shlex.join(suite_argv)
+    run_cmd = (
+        f"{log_dir_cmd} && "
+        f"sudo env {preserved_env} {suite_cmd} >{shlex.quote(remote_log)} 2>&1"
     )
-    if aws_common._run_remote_helper(ctx, ip, remote_python, "path-exists", remote_log, check=False).returncode == 0:
+    remote_completed = aws_common._ssh_exec(ctx, ip, "bash", "-c", run_cmd, check=False)
+    if aws_common._ssh_exec(ctx, ip, "test", "-e", remote_log, check=False).returncode == 0:
         aws_common._scp_from(ctx, ip, remote_log, local_log)
     local_results = _sync_remote_results(ctx, ip, remote_workspace)
     if remote_completed.returncode != 0:

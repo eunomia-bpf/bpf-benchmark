@@ -279,6 +279,27 @@ def _wait_for_block_device(path: Path, *, timeout_s: float = 2.0) -> Path:
     raise RuntimeError(f"block device did not appear: {path}")
 
 
+def _ensure_null_blk_device_node(path: Path) -> Path:
+    sysfs_dev = Path("/sys/block/nullb0/dev")
+    deadline = time.monotonic() + 2.0
+    while time.monotonic() < deadline:
+        if sysfs_dev.is_file():
+            break
+        time.sleep(0.1)
+    if not sysfs_dev.is_file():
+        return _wait_for_block_device(path)
+    try:
+        mode = path.stat().st_mode
+        if stat.S_ISBLK(mode):
+            return path
+        path.unlink()
+    except FileNotFoundError:
+        pass
+    major_text, minor_text = sysfs_dev.read_text(encoding="utf-8").strip().split(":", 1)
+    os.mknod(path, stat.S_IFBLK | 0o660, os.makedev(int(major_text), int(minor_text)))
+    return _wait_for_block_device(path)
+
+
 def _normalize_workload_limits(duration_s: int | float | None, iterations: int | None) -> tuple[float | None, int | None]:
     duration_limit = None if duration_s is None else max(0.0, float(duration_s))
     iteration_limit = None if iterations is None else max(1, int(iterations))
@@ -406,7 +427,7 @@ def run_block_io_load(duration_s: int | float) -> WorkloadResult:
         raise RuntimeError("dd is required for the block_io workload")
     block_size, block_count = "4k", 4096
     _load_kernel_module("null_blk", "nr_devices=1", "queue_mode=2")
-    device_path = _wait_for_block_device(Path("/dev/nullb0"))
+    device_path = _ensure_null_blk_device_node(Path("/dev/nullb0"))
     start = time.monotonic()
     deadline = start + float(duration_s)
     stderr_lines: list[str] = []
@@ -701,5 +722,4 @@ def run_named_workload(
             raise RuntimeError("unshare is required for the userns_unshare workload")
         return _simple_poll_loop([unshare_binary, "-Ur", "/bin/true"], "userns_unshare workload failed")
     raise RuntimeError(f"unsupported workload kind: {kind}")
-
 

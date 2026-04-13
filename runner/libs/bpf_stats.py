@@ -114,6 +114,5 @@ __all__ = [
     "compute_delta",
     "enable_bpf_stats",
     "list_program_ids",
-    "read_program_stats",
     "sample_bpf_stats",
 ]

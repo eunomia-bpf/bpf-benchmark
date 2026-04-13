@@ -9,18 +9,21 @@ RUN dnf -y install --setopt=install_weak_deps=False --nodocs \
         bpftool \
         boost \
         bzip2-libs \
+        curl-minimal \
         double-conversion \
         elfutils-libelf \
         file \
         findutils \
         fio \
         fmt \
+        glog \
         iproute \
         iproute-tc \
         kmod \
         libaio \
         libbpf \
         libdwarf \
+        libevent \
         libmnl \
         libsodium \
         libtool-ltdl \

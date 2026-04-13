@@ -18,7 +18,7 @@ from runner.suites._common import (
     ensure_bpf_stats_enabled,
     ensure_katran_artifacts,
     ensure_scx_artifacts,
-    env_with_cross_runtime_ld,
+    env_with_suite_runtime_ld,
     inside_runtime_container,
     merge_csv_and_repeated,
     resolve_daemon_binary,
@@ -133,7 +133,7 @@ def _e2e_driver_argv(workspace: Path, args: argparse.Namespace, case_name: str, 
 
 
 def _run_e2e_case(workspace: Path, args: argparse.Namespace, env: dict[str, str], case_name: str, daemon_binary: Path, python_bin: str) -> None:
-    runtime_env, _ = env_with_cross_runtime_ld(workspace, args.target_arch, env)
+    runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
     command = [python_bin, str(workspace / "e2e" / "driver.py"), *_e2e_driver_argv(workspace, args, case_name, daemon_binary)]
     run_checked(command, cwd=workspace, env=runtime_env, die=_die)
 

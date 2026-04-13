@@ -23,11 +23,6 @@ def ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
 
-def result_date_stamp(now: datetime | None = None) -> str:
-    current = now or datetime.now(timezone.utc)
-    return current.astimezone(timezone.utc).strftime("%Y%m%d")
-
-
 def scratch_date_stamp(now: datetime | None = None) -> str:
     current = now or datetime.now().astimezone()
     return current.astimezone().strftime("%Y%m%d")
@@ -40,10 +35,6 @@ def docs_tmp_dir(*parts: str | Path, stamp: str | None = None, ensure: bool = Tr
     if ensure:
         path.mkdir(parents=True, exist_ok=True)
     return path
-
-
-def smoke_output_path(results_dir: Path, suite: str, *, stamp: str | None = None) -> Path:
-    return results_dir / f"{suite}_smoke_{stamp or result_date_stamp()}.json"
 
 def tail_text(text: str, *, max_lines: int = 12, max_chars: int = 4000) -> str:
     lines = [line.rstrip() for line in text.splitlines() if line.strip()]
@@ -153,6 +144,15 @@ def run_json_command(
     if not payload:
         raise RuntimeError(f"command returned no JSON: {' '.join(command)}")
     return json.loads(payload)
+
+
+def result_date_stamp(now: datetime | None = None) -> str:
+    current = now or datetime.now(timezone.utc)
+    return current.astimezone(timezone.utc).strftime("%Y%m%d")
+
+
+def smoke_output_path(results_dir: Path, suite: str, *, stamp: str | None = None) -> Path:
+    return results_dir / f"{suite}_smoke_{stamp or result_date_stamp()}.json"
 
 
 def write_json(path: Path, payload: Any) -> None:

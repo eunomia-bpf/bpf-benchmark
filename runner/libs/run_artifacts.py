@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
 
-from . import ROOT_DIR, ensure_parent
+from . import ensure_parent
 
 _NON_ALNUM_RE = re.compile(r"[^A-Za-z0-9]+")
 _STAMP_SUFFIX_RE = re.compile(

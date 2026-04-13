@@ -1,8 +1,8 @@
 """Shared suite command-line builder.
 
-Both kvm_executor (which shell-quotes the result) and aws_remote_host
-(which passes the list directly to subprocess) use this to construct the
-argv for ``python -m runner.suites.<name>``.
+Both kvm_executor (which shell-quotes the result) and aws_executor
+(which builds the argv locally then runs it on the remote via ssh) use
+this to construct the argv for ``python -m runner.suites.<name>``.
 """
 from __future__ import annotations
 
