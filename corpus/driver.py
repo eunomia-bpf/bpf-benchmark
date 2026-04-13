@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -428,15 +429,31 @@ def _sample_scx_measurement_stats(
     *,
     previous_programs: Sequence[Mapping[str, object]],
 ) -> tuple[dict[int, dict[str, object]], dict[int, int], list[dict[str, object]]]:
-    live_prog_id_map, live_programs = _scx_live_prog_id_map_for_runner(
-        runner,
-        logical_prog_ids,
-        previous_programs=previous_programs,
-    )
-    sampled_prog_ids = sorted({int(sampled_prog_id) for sampled_prog_id in live_prog_id_map.values() if int(sampled_prog_id) > 0})
-    if not sampled_prog_ids:
-        raise RuntimeError(f"{type(runner).__name__}: did not expose any live scheduler programs for stats sampling")
-    raw_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=runner.program_fds)
+    live_prog_id_map: dict[int, int] = {}
+    live_programs: list[dict[str, object]] = []
+    raw_stats: dict[int, dict[str, object]] | None = None
+    last_error: RuntimeError | None = None
+    candidates = list(previous_programs)
+    for attempt in range(4):
+        live_prog_id_map, live_programs = _scx_live_prog_id_map_for_runner(
+            runner,
+            logical_prog_ids,
+            previous_programs=candidates,
+        )
+        sampled_prog_ids = sorted({int(sampled_prog_id) for sampled_prog_id in live_prog_id_map.values() if int(sampled_prog_id) > 0})
+        if not sampled_prog_ids:
+            last_error = RuntimeError(f"{type(runner).__name__}: did not expose any live scheduler programs for stats sampling")
+        else:
+            try:
+                raw_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=runner.program_fds)
+                break
+            except RuntimeError as exc:
+                last_error = exc
+        candidates = live_programs or candidates
+        if attempt < 3:
+            time.sleep(0.25)
+    if raw_stats is None:
+        raise last_error or RuntimeError(f"{type(runner).__name__}: stats sampling returned no records")
     sampled_to_target = {
         int(sampled_prog_id): int(target_prog_id)
         for target_prog_id, sampled_prog_id in live_prog_id_map.items()

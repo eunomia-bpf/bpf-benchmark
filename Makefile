@@ -131,9 +131,11 @@ check:
 		runner/libs/app_runners/scx.py \
 		runner/libs/app_runners/tetragon.py \
 		runner/libs/app_runners/tracee.py \
+		runner/libs/agent.py \
 		runner/libs/aws_executor.py \
 		runner/libs/bpf_stats.py \
 		runner/libs/case_common.py \
+		runner/libs/file_lock.py \
 		runner/libs/input_generators.py \
 		runner/libs/kinsn.py \
 		runner/libs/kvm_executor.py \

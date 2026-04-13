@@ -52,10 +52,10 @@ def stop_agent(proc: subprocess.Popen[str], timeout: int | float = 10) -> int:
         except subprocess.TimeoutExpired:
             proc.terminate()
             try:
-                return proc.wait(timeout=3)
+                return proc.wait(timeout=timeout)
             except subprocess.TimeoutExpired:
                 proc.kill()
-                return proc.wait(timeout=3)
+                return proc.wait(timeout=max(float(timeout), 10.0))
     return int(proc.returncode or 0)
 
 

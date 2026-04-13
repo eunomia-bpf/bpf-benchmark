@@ -12,6 +12,7 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs import aws_executor
 from runner.libs.cli_support import fail
+from runner.libs.file_lock import runner_lock
 from runner.libs.run_contract import (
     RunConfig,
     build_run_config,
@@ -49,7 +50,9 @@ def _run_local_prep(config: RunConfig) -> None:
     targets = _local_prep_target_paths(config)
     if not targets:
         return
-    _make_real_targets(targets=targets, host_python_bin=host_python_bin, env=env)
+    target_arch = config.identity.target_arch.strip() or config.identity.target_name.strip()
+    with runner_lock(f"artifact-build.{target_arch}"):
+        _make_real_targets(targets=targets, host_python_bin=host_python_bin, env=env)
 
 
 def _local_prep_env(*, config: RunConfig) -> dict[str, str]:

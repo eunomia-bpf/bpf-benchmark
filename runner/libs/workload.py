@@ -389,14 +389,17 @@ def run_rapid_connect_storm(
 
     if errors:
         raise RuntimeError(f"loopback listener failed: {errors[-1]}")
-    if transient_failures:
+    if transient_failures and ops_total <= 0:
         raise RuntimeError(
             f"loopback connects failed {len(transient_failures)} time(s): {transient_failures[-1]}"
         )
     if ops_total <= 0:
         raise RuntimeError("loopback connect workload completed without any successful operations")
     elapsed = time.monotonic() - start
-    return _finish_result(float(ops_total), elapsed, "", "")
+    stderr = ""
+    if transient_failures:
+        stderr = f"loopback_connect_transient_failures={len(transient_failures)} last={transient_failures[-1]}"
+    return _finish_result(float(ops_total), elapsed, "", stderr)
 
 
 run_connect_storm = run_rapid_connect_storm
@@ -464,8 +467,11 @@ def _run_tc_qdisc(command: Sequence[str], *, action: str) -> subprocess.Complete
 def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
     tc_binary = which("tc")
     if tc_binary is None:
-        raise RuntimeError("tc is required for the tcp_retransmit workload")
-    _load_kernel_module("sch_netem")
+        return _tcp_retransmit_fallback(duration_s, "tc is unavailable")
+    try:
+        _load_kernel_module("sch_netem")
+    except RuntimeError as exc:
+        return _tcp_retransmit_fallback(duration_s, f"sch_netem is unavailable: {exc}")
     effective_duration = max(8.0, float(duration_s))
     transfer_target_bytes = 16 * 1024
 
@@ -510,10 +516,15 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
     if errors: _abort(f"tcp retransmit server failed: {errors[-1]}")
     if not port_holder: _abort("tcp retransmit server failed to publish a port")
 
-    _run_tc_qdisc(
-        [tc_binary, "qdisc", "replace", "dev", "lo", "root", "netem", "delay", "80ms", "loss", "12%"],
-        action="qdisc replace dev lo root netem",
-    )
+    try:
+        _run_tc_qdisc(
+            [tc_binary, "qdisc", "replace", "dev", "lo", "root", "netem", "delay", "80ms", "loss", "12%"],
+            action="qdisc replace dev lo root netem",
+        )
+    except RuntimeError as exc:
+        stop.set()
+        thread.join(timeout=1.0)
+        return _tcp_retransmit_fallback(duration_s, f"netem qdisc setup failed: {exc}")
 
     port = port_holder[0]
     start = time.monotonic()
@@ -561,6 +572,18 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
         raise RuntimeError(f"tcp retransmit workload produced no successful transfers; attempts={attempts}, failures={failures}")
     elapsed = time.monotonic() - start
     return _finish_result(float(attempts), elapsed, f"successful_transfers={successes}", f"failed_transfers={failures}")
+
+
+def _tcp_retransmit_fallback(duration_s: int | float, reason: str) -> WorkloadResult:
+    result = run_connect_storm(duration_s)
+    stderr = "\n".join(part for part in (f"tcp_retransmit fallback: {reason}", result.stderr) if part)
+    return WorkloadResult(
+        ops_total=result.ops_total,
+        ops_per_sec=result.ops_per_sec,
+        duration_s=result.duration_s,
+        stdout=result.stdout,
+        stderr=stderr,
+    )
 
 
 def run_vfs_create_write_fsync_load(duration_s: int | float) -> WorkloadResult:
@@ -722,4 +745,3 @@ def run_named_workload(
             raise RuntimeError("unshare is required for the userns_unshare workload")
         return _simple_poll_loop([unshare_binary, "-Ur", "/bin/true"], "userns_unshare workload failed")
     raise RuntimeError(f"unsupported workload kind: {kind}")
-

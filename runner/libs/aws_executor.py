@@ -13,6 +13,7 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs import aws_common
 from runner.libs.cli_support import fail
+from runner.libs.file_lock import runner_lock
 from runner.libs.run_contract import RunConfig, read_run_config_file
 from runner.libs.state_file import write_state
 from runner.libs.suite_commands import build_suite_argv
@@ -194,6 +195,29 @@ def _refresh_aws_arm64_base_config(ctx: aws_common.AwsExecutorContext, ip: str) 
     base_config.with_suffix(".release").write_text(_remote_kernel_release(ctx, ip) + "\n", encoding="utf-8")
 
 
+def _ensure_remote_docker(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
+    script = (
+        "set -e; "
+        "if ! command -v docker >/dev/null 2>&1; then "
+        "  if command -v dnf >/dev/null 2>&1; then sudo dnf install -y docker; "
+        "  else echo 'missing docker and no dnf installer' >&2; exit 1; fi; "
+        "fi; "
+        "if command -v systemctl >/dev/null 2>&1; then "
+        "  sudo systemctl enable --now docker >/dev/null 2>&1 || sudo systemctl start docker; "
+        "fi; "
+        "sudo docker info >/dev/null"
+    )
+    aws_common._ssh_exec(ctx, ip, "bash", "-c", script)
+
+
+def _link_or_copy_file(src: str, dst: str) -> str:
+    try:
+        os.link(src, dst)
+    except OSError:
+        shutil.copy2(src, dst)
+    return dst
+
+
 # ---------------------------------------------------------------------------
 # Docker deployment image: build locally, push to remote, run install inline
 # ---------------------------------------------------------------------------
@@ -204,8 +228,11 @@ def _build_and_push_kernel_image(ctx: aws_common.AwsExecutorContext, ip: str,
     """Build a minimal Docker image containing the kernel artifacts, push it to the remote host,
     then run the install commands inside the container with /:/host bind-mount."""
     tag = f"bpf-benchmark-kernel/{ctx.target_name}:{ctx.run_token}"
+    _ensure_remote_docker(ctx, ip)
 
-    with tempfile.TemporaryDirectory(prefix="bpf-kernel-deploy-") as tmpdir:
+    cache_tmp = ROOT_DIR / ".cache"
+    cache_tmp.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="bpf-kernel-deploy-", dir=cache_tmp) as tmpdir:
         tmp = Path(tmpdir)
         ctx_dir = tmp / "ctx"
         ctx_dir.mkdir()
@@ -215,19 +242,24 @@ def _build_and_push_kernel_image(ctx: aws_common.AwsExecutorContext, ip: str,
         boot_dir.mkdir(parents=True)
         shutil.copy2(kernel_image, boot_dir / kernel_image.name)
 
-        # Symlink modules root (avoid copying gigabytes)
+        # Hardlink files into the build context when possible so Docker copies
+        # the real module tree without duplicating it locally first.
         mod_dst = ctx_dir / "kernel" / "lib" / "modules" / kernel_release
         mod_dst.parent.mkdir(parents=True)
-        mod_dst.symlink_to(modules_root)
+        shutil.copytree(modules_root, mod_dst, symlinks=True, copy_function=_link_or_copy_file)
 
         dockerfile = (
-            "FROM scratch\n"
+            "FROM public.ecr.aws/amazonlinux/amazonlinux:2023\n"
             "COPY kernel /kernel\n"
         )
         (tmp / "Dockerfile").write_text(dockerfile, encoding="utf-8")
 
+        platform = "linux/arm64" if arch == "arm64" else "linux/amd64"
         completed = subprocess.run(
-            ["docker", "build", "--no-cache", "-t", tag, "-f", str(tmp / "Dockerfile"), str(ctx_dir)],
+            [
+                "docker", "build", "--no-cache", "--platform", platform,
+                "-t", tag, "-f", str(tmp / "Dockerfile"), str(ctx_dir),
+            ],
             cwd=ROOT_DIR, text=True, check=False,
         )
         if completed.returncode != 0:
@@ -236,7 +268,7 @@ def _build_and_push_kernel_image(ctx: aws_common.AwsExecutorContext, ip: str,
     # Push via docker save | ssh docker load
     ssh_args = aws_common._ssh_base_args(ctx)
     save_cmd = ["docker", "save", tag]
-    load_cmd = ["ssh", *ssh_args, f"{ctx.remote_user}@{ip}", "docker load"]
+    load_cmd = ["ssh", *ssh_args, f"{ctx.remote_user}@{ip}", "sudo docker load"]
     with subprocess.Popen(save_cmd, stdout=subprocess.PIPE, cwd=ROOT_DIR) as save_proc:
         rc = subprocess.run(load_cmd, stdin=save_proc.stdout, cwd=ROOT_DIR, text=False, check=False).returncode
         save_proc.stdout.close()  # type: ignore[union-attr]
@@ -253,20 +285,26 @@ def _build_and_push_kernel_image(ctx: aws_common.AwsExecutorContext, ip: str,
     else:
         install_image_cmd = f"cp /kernel/boot/vmlinuz.efi {kernel_dest}"
 
+    kernel_title = shlex.quote(f"bpf-benchmark {kernel_release}")
     install_script = (
         f"set -eux; "
         f"cp -a /kernel/lib/modules/{kernel_release} /host/lib/modules/; "
         f"{install_image_cmd}; "
-        f"depmod -b /host {kernel_release}; "
+        f"chroot /host depmod {kernel_release}; "
         f"chroot /host dracut --force /boot/initramfs-{kernel_release}.img {kernel_release}; "
-        f"chroot /host grubby --set-default /boot/vmlinuz-{kernel_release}"
+        f"kernel_path=/boot/vmlinuz-{kernel_release}; "
+        f"initrd_path=/boot/initramfs-{kernel_release}.img; "
+        f"chroot /host grubby --info=\"$kernel_path\" >/dev/null 2>&1 || "
+        f"chroot /host grubby --add-kernel=\"$kernel_path\" --initrd=\"$initrd_path\" "
+        f"--title={kernel_title} --copy-default; "
+        f"chroot /host grubby --set-default=\"$kernel_path\""
     )
 
     # Run inline install on remote
     aws_common._ssh_exec(
         ctx, ip,
-        "docker", "run", "--rm", "--privileged", "-v", "/:/host",
-        tag, "bash", "-c", install_script,
+        "sudo", "docker", "run", "--rm", "--privileged", "-v", "/:/host",
+        tag, "sh", "-c", install_script,
     )
 
 
@@ -276,20 +314,22 @@ def _setup_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
         _die("setup requires a cached instance ID")
     aws_common._wait_for_ssh(ctx, ip)
 
-    if ctx.target_name == "aws-arm64":
-        _refresh_aws_arm64_base_config(ctx, ip)
-        kernel_release, kernel_image, modules_root = _build_arm64_kernel_artifacts(ctx)
-        arch = "arm64"
-    elif ctx.target_name == "aws-x86":
-        kernel_release, kernel_image, modules_root = _build_x86_kernel_artifacts()
-        arch = "x86"
-    else:
-        _die(f"unsupported AWS target for setup: {ctx.target_name}")
+    target_arch = ctx.contract.identity.target_arch.strip() or ctx.target_name
+    with runner_lock(f"artifact-build.{target_arch}"):
+        if ctx.target_name == "aws-arm64":
+            _refresh_aws_arm64_base_config(ctx, ip)
+            kernel_release, kernel_image, modules_root = _build_arm64_kernel_artifacts(ctx)
+            arch = "arm64"
+        elif ctx.target_name == "aws-x86":
+            kernel_release, kernel_image, modules_root = _build_x86_kernel_artifacts()
+            arch = "x86"
+        else:
+            _die(f"unsupported AWS target for setup: {ctx.target_name}")
 
-    setup_result_dir = ctx.results_dir / f"setup_{kernel_release}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
-    setup_result_dir.mkdir(parents=True, exist_ok=True)
+        setup_result_dir = ctx.results_dir / f"setup_{kernel_release}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
+        setup_result_dir.mkdir(parents=True, exist_ok=True)
 
-    _build_and_push_kernel_image(ctx, ip, kernel_release, kernel_image, modules_root, arch)
+        _build_and_push_kernel_image(ctx, ip, kernel_release, kernel_image, modules_root, arch)
 
     for sub_cmd in (("reboot-instances", "--instance-ids", instance_id), ("wait", "instance-status-ok", "--instance-ids", instance_id)):
         if (c := aws_common._aws_cmd(ctx, "ec2", *sub_cmd)).returncode != 0:
@@ -462,6 +502,8 @@ def _build_remote_suite_command(ctx: aws_common.AwsExecutorContext, remote_works
 
 def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_path: Path | None) -> None:
     aws_common._wait_for_ssh(ctx, ip)
+    if (ctx.contract.remote.container_runtime or "docker") == "docker":
+        _ensure_remote_docker(ctx, ip)
     stamp = f"{ctx.suite_name}_{ctx.run_token}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     local_log_dir = ctx.results_dir / "logs"
     local_log = local_log_dir / f"{stamp}.remote.log"

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import shlex
+import socket
 import tempfile
 import time
 from pathlib import Path
@@ -186,6 +187,16 @@ DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "tetragon" / "config_execve_rate.y
 DEFAULT_LOAD_TIMEOUT_S = 20
 
 
+def _has_option(args: Sequence[str], name: str) -> bool:
+    return any(arg == name or arg.startswith(f"{name}=") for arg in args)
+
+
+def _free_loopback_address() -> str:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        return f"127.0.0.1:{sock.getsockname()[1]}"
+
+
 def _default_extra_args() -> tuple[str, ...]:
     payload = yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))
     if not isinstance(payload, dict): raise RuntimeError(f"Tetragon config must be a mapping: {DEFAULT_CONFIG}")
@@ -228,6 +239,10 @@ class TetragonRunner(AppRunner):
         policy_dir = Path(self.tempdir.name)
         self.policy_paths = write_tetragon_policies(policy_dir)
         self.command = [tetragon_binary, *self.tetragon_extra_args]
+        if not _has_option(self.tetragon_extra_args, "--server-address"):
+            self.command.extend(["--server-address", _free_loopback_address()])
+        if not _has_option(self.tetragon_extra_args, "--health-server-address"):
+            self.command.extend(["--health-server-address", _free_loopback_address()])
         if tetragon_bpf_lib_dir := str((self.setup_result or {}).get("tetragon_bpf_lib_dir") or "").strip():
             self.command.extend(["--bpf-lib", tetragon_bpf_lib_dir])
         self.command.extend(["--tracing-policy-dir", str(policy_dir)]); self.command_used = list(self.command)

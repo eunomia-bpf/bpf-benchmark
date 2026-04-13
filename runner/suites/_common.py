@@ -7,6 +7,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Sequence
 
@@ -64,9 +65,79 @@ def append_bind_mount(command: list[str], source: Path, target: Path | None = No
     command.extend(["-v", f"{source}:{destination}{suffix}"])
 
 
+def _command_summary(command: Sequence[str], result: subprocess.CompletedProcess[str]) -> str:
+    output = (result.stderr.strip() or result.stdout.strip())[-1000:]
+    suffix = f": {output}" if output else ""
+    return f"{shlex.join(command)} exited {result.returncode}{suffix}"
+
+
+def _try_start_container_runtime(runtime: str) -> str:
+    if Path(runtime).name != "docker":
+        return ""
+    attempts: list[str] = []
+    for command in (["systemctl", "start", "docker"], ["service", "docker", "start"]):
+        if shutil.which(command[0]) is None:
+            attempts.append(f"{command[0]} not found")
+            continue
+        try:
+            result = subprocess.run(command, capture_output=True, text=True, check=False, timeout=20)
+        except subprocess.TimeoutExpired:
+            attempts.append(f"{shlex.join(command)} timed out")
+            continue
+        attempts.append(_command_summary(command, result))
+        if result.returncode == 0:
+            return "\n".join(attempts)
+    if shutil.which("dockerd") is None:
+        attempts.append("dockerd not found")
+        return "\n".join(attempts)
+    Path("/var/run").mkdir(parents=True, exist_ok=True)
+    dockerd_log = Path("/tmp/bpf-benchmark-dockerd.log")
+    log_file = dockerd_log.open("ab")
+    subprocess.Popen(
+        [
+            "dockerd",
+            "--host=unix:///var/run/docker.sock",
+            "--data-root=/tmp/bpf-benchmark-docker",
+            "--exec-root=/tmp/bpf-benchmark-docker-exec",
+            "--pidfile=/tmp/bpf-benchmark-docker.pid",
+        ],
+        stdout=log_file,
+        stderr=log_file,
+        start_new_session=True,
+    )
+    attempts.append(f"started dockerd, log={dockerd_log}")
+    return "\n".join(attempts)
+
+
+def _dockerd_log_tail() -> str:
+    path = Path("/tmp/bpf-benchmark-dockerd.log")
+    if not path.is_file():
+        return ""
+    return path.read_text(encoding="utf-8", errors="replace")[-2000:]
+
+
 def _ensure_runtime_container_image(workspace: str, container_runtime: str, image: str, target_arch: str) -> None:
     """Load the container image from the cached tar if it is not already present."""
     runtime = container_runtime or "docker"
+    last_error = ""
+    start_detail = ""
+    start_attempted = False
+    for _ in range(120):
+        info_result = subprocess.run(
+            [runtime, "info"],
+            capture_output=True, text=True, check=False,
+        )
+        if info_result.returncode == 0:
+            break
+        last_error = (info_result.stderr.strip() or info_result.stdout.strip())[-1000:]
+        if not start_attempted:
+            start_detail = _try_start_container_runtime(runtime)
+            start_attempted = True
+        time.sleep(1)
+    else:
+        details = [part for part in (last_error, start_detail, _dockerd_log_tail()) if part]
+        detail = ":\n" + "\n".join(details) if details else ""
+        raise SystemExit(f"container runtime '{runtime}' is unavailable{detail}")
     inspect_result = subprocess.run(
         [runtime, "image", "inspect", image],
         capture_output=True, text=True, check=False,

@@ -1,0 +1,92 @@
+{
+  "case": "tetragon",
+  "details_dir": "details",
+  "error_message": "Tetragon case could not run: Tetragon failed to become healthy within 20s: level=info msg=\"Starting tetragon\" version=34e9c4a\nlevel=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/home/yunwei37/workspace/bpf-benchmark/.cache/repo-artifacts/x86_64/tetragon btf: cgroup-rate:1000,1s cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address::6789 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:localhost:54321 tracing-policy: tracing-policy-dir:/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260413/vm-tmp/tetragon-policy-3ftft2wa use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"\nlevel=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=none\nlevel=info msg=\"Tetragon pid file creation succeeded\" pid=1882 pidfile=/var/run/tetragon/tetragon.pid\nlevel=warn msg=\"Unable to mount BPF filesystem\" error=\"multiple mount points detected at /sys/fs/bpf\"\nlevel=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/sys/fs/bpf/tetragon\nlevel=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux\nlevel=info msg=\"BPF detected features: override_return: true, buildid: true, kprobe_multi: true, uprobe_multi: true, fmodret: true, fmodret_syscall: true, signal: true, large: true, link_pin: true, lsm: true, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: true, probe_write_user: true, uprobe_regs_change: true, mix_bpf_and_tail_calls: true, fentry: true, get_func_ret: true\"\nlevel=info msg=\"Cgroup mode detection succeeded\" cgroup.fs=/sys/fs/cgroup cgroup.mode=\"Unified mode (Cgroupv2)\"\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/proc/1/root/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids rdma misc dmem]\" cgroup.hierarchyID=0\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids rdma misc dmem]\" cgroup.hierarchyID=0\nlevel=warn msg=\"Failed to detect deployment mode from Cgroupv2 path\" cgroup.fs=/sys/fs/cgroup error=\"cgroup path is empty\"\nlevel=warn msg=\"Unable to find Cgroup migration path for pid=1882\" cgroup.fs=/sys/fs/cgroup error=\"could not validate Cgroupv2 hierarchy\"\nlevel=warn msg=\"Detection of deployment mode failed\" cgroup.fs=/sys/fs/cgroup error=\"could not detect Cgroup migration path for pid=1882\"\nlevel=warn msg=\"Deployment mode detection failed\" cgroup.fs=/sys/fs/cgroup deployment.mode=unknown\nlevel=warn msg=\"Deployment mode is unknown, advanced Cgroups tracking will be disabled\" confmap-update=tg_conf_map\nlevel=info msg=\"Updated TetragonConf map successfully\" confmap-update=tg_conf_map deployment.mode=unknown log.level=0 cgroup.fs.magic=Cgroupv2 cgroup.hierarchyID=0 NSPID=1882\nlevel=info msg=\"Disabling Kubernetes API\"\nlevel=info msg=\"Configured redaction filters\" redactionFilters=\"\"\nlevel=info msg=\"Exit probe on acct_process\"\nlevel=info msg=\"Set execve_map entries 32768\" size=28M\nlevel=info msg=\"BPF ring buffer size (bytes)\" total=256K\nlevel=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux\nlevel=info msg=\"Loading sensor\" name=__base__\nlevel=info msg=\"Loading kernel version 7.0.0\"\nlevel=info msg=\"Loaded sensor successfully\" sensor=__base__\nlevel=info msg=\"Available sensors\" sensors=__base__\nlevel=info msg=\"Registered sensors (policy-handlers)\" policy-handlers=\"loader sensor, tracing, enforcer\"\nlevel=info msg=\"Registered probe types\" types=\"generic_tracepoint, generic_uprobe, generic_usdt, loader, execve, enforcer, generic_kprobe, generic_fentry, generic_lsm\"\nlevel=info msg=\"Creating new EventCache\" retries=15 delay=2s\nlevel=info msg=\"Starting process manager\" enableK8s=false enableProcessCred=false enableProcessNs=false\nlevel=info msg=\"Exporter configuration\" enabled=false fileName=\"\"\nlevel=info msg=\"Successfully detected bpftool path\" bpftool=/usr/sbin/bpftool\nlevel=warn msg=\"failed to locate gops binary, on bugtool debugging ensure you have gops installed\"\nlevel=info msg=\"Starting gRPC health server\" address=:6789 interval=10\nlevel=info msg=\"BPF: found active BPF resources\" bpf-dir=/sys/fs/bpf/tetragon pinned-bpf=\"[__base__ cgroup_rate_map cgroup_rate_options_map execve_map execve_map_stats execve_map_update_data tcpmon_map tg_conf_map tg_errmetrics_map tg_execve_joined_info_map tg_execve_joined_info_map_stats tg_mbset_gen tg_mbset_map tg_rb_events tg_stats_map]\"\nlevel=error msg=\"Failed to start gRPC server\" protocol=tcp address=localhost:54321 error=\"listen tcp 127.0.0.1:54321: bind: address already in use\"",
+  "generated_at": "2026-04-13T08:18:57.496816+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-13T08:18:57.496729+00:00",
+  "launcher_boot_id": "54201512-4e4c-430b-9696-b6ca20304eb5",
+  "launcher_pid": 531,
+  "launcher_start_ticks": 2593,
+  "optimization_summary": {
+    "baseline": null,
+    "comparison": {
+      "comparable": false,
+      "reason": "Tetragon case could not run: Tetragon failed to become healthy within 20s: level=info msg=\"Starting tetragon\" version=34e9c4a\nlevel=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/home/yunwei37/workspace/bpf-benchmark/.cache/repo-artifacts/x86_64/tetragon btf: cgroup-rate:1000,1s cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address::6789 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:localhost:54321 tracing-policy: tracing-policy-dir:/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260413/vm-tmp/tetragon-policy-3ftft2wa use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"\nlevel=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=none\nlevel=info msg=\"Tetragon pid file creation succeeded\" pid=1882 pidfile=/var/run/tetragon/tetragon.pid\nlevel=warn msg=\"Unable to mount BPF filesystem\" error=\"multiple mount points detected at /sys/fs/bpf\"\nlevel=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/sys/fs/bpf/tetragon\nlevel=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux\nlevel=info msg=\"BPF detected features: override_return: true, buildid: true, kprobe_multi: true, uprobe_multi: true, fmodret: true, fmodret_syscall: true, signal: true, large: true, link_pin: true, lsm: true, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: true, probe_write_user: true, uprobe_regs_change: true, mix_bpf_and_tail_calls: true, fentry: true, get_func_ret: true\"\nlevel=info msg=\"Cgroup mode detection succeeded\" cgroup.fs=/sys/fs/cgroup cgroup.mode=\"Unified mode (Cgroupv2)\"\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/proc/1/root/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids rdma misc dmem]\" cgroup.hierarchyID=0\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids rdma misc dmem]\" cgroup.hierarchyID=0\nlevel=warn msg=\"Failed to detect deployment mode from Cgroupv2 path\" cgroup.fs=/sys/fs/cgroup error=\"cgroup path is empty\"\nlevel=warn msg=\"Unable to find Cgroup migration path for pid=1882\" cgroup.fs=/sys/fs/cgroup error=\"could not validate Cgroupv2 hierarchy\"\nlevel=warn msg=\"Detection of deployment mode failed\" \n...[truncated]"
+    },
+    "config": {
+      "apply_programs": [
+        "execve_rate",
+        "event_execve"
+      ],
+      "measurement_duration_s": 30,
+      "preflight_duration_s": 5,
+      "require_program_activity": true,
+      "smoke_duration_s": 8,
+      "target_programs": [
+        "execve_rate",
+        "event_execve"
+      ],
+      "tetragon_extra_args": [
+        "--cgroup-rate",
+        "1000,1s"
+      ],
+      "workloads": [
+        {
+          "description": "stress-ng execve workload",
+          "kind": "exec_storm",
+          "metric": "bogo-ops/s",
+          "name": "exec_storm",
+          "value": 2
+        }
+      ]
+    },
+    "duration_s": 30,
+    "error_message": "Tetragon case could not run: Tetragon failed to become healthy within 20s: level=info msg=\"Starting tetragon\" version=34e9c4a\nlevel=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/home/yunwei37/workspace/bpf-benchmark/.cache/repo-artifacts/x86_64/tetragon btf: cgroup-rate:1000,1s cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address::6789 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:localhost:54321 tracing-policy: tracing-policy-dir:/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260413/vm-tmp/tetragon-policy-3ftft2wa use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"\nlevel=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=none\nlevel=info msg=\"Tetragon pid file creation succeeded\" pid=1882 pidfile=/var/run/tetragon/tetragon.pid\nlevel=warn msg=\"Unable to mount BPF filesystem\" error=\"multiple mount points detected at /sys/fs/bpf\"\nlevel=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/sys/fs/bpf/tetragon\nlevel=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux\nlevel=info msg=\"BPF detected features: override_return: true, buildid: true, kprobe_multi: true, uprobe_multi: true, fmodret: true, fmodret_syscall: true, signal: true, large: true, link_pin: true, lsm: true, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: true, probe_write_user: true, uprobe_regs_change: true, mix_bpf_and_tail_calls: true, fentry: true, get_func_ret: true\"\nlevel=info msg=\"Cgroup mode detection succeeded\" cgroup.fs=/sys/fs/cgroup cgroup.mode=\"Unified mode (Cgroupv2)\"\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/proc/1/root/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids rdma misc dmem]\" cgroup.hierarchyID=0\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids rdma misc dmem]\" cgroup.hierarchyID=0\nlevel=warn msg=\"Failed to detect deployment mode from Cgroupv2 path\" cgroup.fs=/sys/fs/cgroup error=\"cgroup path is empty\"\nlevel=warn msg=\"Unable to find Cgroup migration path for pid=1882\" cgroup.fs=/sys/fs/cgroup error=\"could not validate Cgroupv2 hierarchy\"\nlevel=warn msg=\"Detection of deployment mode failed\" \n...[truncated]",
+    "generated_at": "2026-04-13T08:18:57.481675+00:00",
+    "host": {
+      "git_sha": null,
+      "git_sha_error": "[Errno 2] No such file or directory: 'git'",
+      "hostname": "virtme-ng",
+      "kernel": "7.0.0-rc2+",
+      "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.34",
+      "python": "3.9.25"
+    },
+    "limitations": [],
+    "mode": "error",
+    "post_rejit": null,
+    "preflight": null,
+    "programs": [],
+    "rejit_result": null,
+    "scan_results": {},
+    "setup": {
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "TETRAGON_BINARY=/home/yunwei37/workspace/bpf-benchmark/.cache/repo-artifacts/x86_64/tetragon/bin/tetragon\nTETRAGON_BPF_LIB_DIR=/home/yunwei37/workspace/bpf-benchmark/.cache/repo-artifacts/x86_64/tetragon\nSTRESS_NG_BINARY=/usr/bin/stress-ng",
+      "tetragon_binary": "/home/yunwei37/workspace/bpf-benchmark/.cache/repo-artifacts/x86_64/tetragon/bin/tetragon",
+      "tetragon_bpf_lib_dir": "/home/yunwei37/workspace/bpf-benchmark/.cache/repo-artifacts/x86_64/tetragon"
+    },
+    "smoke": false,
+    "status": "error",
+    "tetragon_binary": "/home/yunwei37/workspace/bpf-benchmark/.cache/repo-artifacts/x86_64/tetragon/bin/tetragon",
+    "tetragon_programs": []
+  },
+  "run_type": "tetragon",
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "smoke": false,
+  "started_at": "2026-04-13T08:18:53.576516+00:00",
+  "status": "error",
+  "suite": "e2e"
+}
