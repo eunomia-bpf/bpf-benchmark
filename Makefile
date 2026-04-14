@@ -25,6 +25,11 @@ ARM64_AWS_BUILD_CONFIG := $(ARM64_AWS_BUILD_DIR)/.config
 ARM64_AWS_IMAGE     := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/Image
 ARM64_AWS_EFI_IMAGE := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
 ARM64_KERNEL_MAKEFLAGS      := $(filter-out B,$(MAKEFLAGS))
+X86_KERNEL_CONFIG_FRAGMENT := $(ROOT_DIR)/vendor/bpfrejit.config
+X86_AWS_BUILD_DIR ?= $(ARTIFACT_ROOT)/aws-x86/kernel-build
+X86_AWS_BASE_CONFIG ?= $(ARTIFACT_ROOT)/aws-x86/config-al2023-x86_64
+X86_AWS_BUILD_CONFIG := $(X86_AWS_BUILD_DIR)/.config
+X86_AWS_IMAGE := $(X86_AWS_BUILD_DIR)/arch/x86/boot/bzImage
 RUN_TARGET_SUITE_CMD  = "$(PYTHON)" -m runner.libs.run_target_suite
 AWS_ARM64_BENCH_MODE ?= all
 
@@ -120,6 +125,41 @@ $(KERNEL_CONFIG_PATH): $(DEFCONFIG_SRC)
 	mkdir -p "$(dir $@)"
 	cp "$(DEFCONFIG_SRC)" "$@"
 
+$(X86_AWS_BUILD_CONFIG): $(X86_RUNNER_BUILD_IMAGE_TAR) $(X86_KERNEL_CONFIG_FRAGMENT) $(X86_AWS_BASE_CONFIG) $(KERNEL_BUILD_META_FILES)
+	@$(ENSURE_X86_RUNNER_BUILD_IMAGE)
+	$(CONTAINER_RUNTIME) run --rm --platform linux/amd64 \
+		--user "$(HOST_UID):$(HOST_GID)" \
+		-e HOME=/tmp/bpf-benchmark-container \
+		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		-w "$(ROOT_DIR)" \
+		"$(X86_RUNNER_BUILD_IMAGE)" \
+		bash -c "mkdir -p '$(X86_AWS_BUILD_DIR)' && \
+		  cp '$(X86_AWS_BASE_CONFIG)' '$(X86_AWS_BUILD_DIR)/.config' && \
+		  ena_mode=\$$(grep -o 'CONFIG_ENA_ETHERNET=[ym]' '$(X86_AWS_BASE_CONFIG)' | cut -d= -f2 || true) && \
+		  '$(KERNEL_DIR)/scripts/kconfig/merge_config.sh' -m -O '$(X86_AWS_BUILD_DIR)' '$(X86_AWS_BUILD_DIR)/.config' '$(X86_KERNEL_CONFIG_FRAGMENT)' && \
+		  '$(KERNEL_DIR)/scripts/config' --file '$(X86_AWS_BUILD_DIR)/.config' -d LOCALVERSION_AUTO -e NET_VENDOR_AMAZON -e NVME_CORE -e BLK_DEV_NVME -e XFS_FS && \
+		  if [ \"\$$ena_mode\" = m ]; then '$(KERNEL_DIR)/scripts/config' --file '$(X86_AWS_BUILD_DIR)/.config' -m ENA_ETHERNET; \
+		  else '$(KERNEL_DIR)/scripts/config' --file '$(X86_AWS_BUILD_DIR)/.config' -e ENA_ETHERNET; fi && \
+		  make -C '$(KERNEL_DIR)' O='$(X86_AWS_BUILD_DIR)' olddefconfig"
+
+$(X86_AWS_IMAGE): $(X86_RUNNER_BUILD_IMAGE_TAR) $(X86_AWS_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
+	@mkdir -p "$(X86_AWS_BUILD_DIR)"
+	@$(ENSURE_X86_RUNNER_BUILD_IMAGE)
+	@$(CONTAINER_RUNTIME) run --rm --platform linux/amd64 \
+		--user "$(HOST_UID):$(HOST_GID)" \
+		-e HOME=/tmp/bpf-benchmark-container \
+		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		-w "$(ROOT_DIR)" \
+		"$(X86_RUNNER_BUILD_IMAGE)" \
+		make -C "$(KERNEL_DIR)" O="$(X86_AWS_BUILD_DIR)" olddefconfig
+	@$(CONTAINER_RUNTIME) run --rm --platform linux/amd64 \
+		--user "$(HOST_UID):$(HOST_GID)" \
+		-e HOME=/tmp/bpf-benchmark-container \
+		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		-w "$(ROOT_DIR)" \
+		"$(X86_RUNNER_BUILD_IMAGE)" \
+		make -C "$(KERNEL_DIR)" O="$(X86_AWS_BUILD_DIR)" -j"$(JOBS)" bzImage modules
+
 check:
 	$(PYTHON) -m py_compile \
 		micro/catalog.py \
@@ -132,6 +172,7 @@ check:
 		runner/libs/app_runners/tetragon.py \
 		runner/libs/app_runners/tracee.py \
 		runner/libs/agent.py \
+		runner/libs/aws_common.py \
 		runner/libs/aws_executor.py \
 		runner/libs/bpf_stats.py \
 		runner/libs/case_common.py \
@@ -276,6 +317,8 @@ aws-x86: aws-x86-test aws-x86-benchmark
 clean:
 	rm -rf "$(RUNNER_BUILD_DIR)"
 	rm -rf "$(RUNNER_DIR)/build-arm64"
+	rm -rf "$(RUNNER_DIR)/build-llvmbpf"
+	rm -rf "$(RUNNER_DIR)/build-arm64-llvmbpf"
 	$(MAKE) -C "$(MICRO_DIR)" clean
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	rm -rf "$(X86_BUILD_DIR)" "$(ARM64_BUILD_DIR)" "$(ROOT_DIR)/.state/runner-contracts"

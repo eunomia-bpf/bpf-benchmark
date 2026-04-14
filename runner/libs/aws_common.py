@@ -82,7 +82,7 @@ def _ssh_base_args(ctx: AwsExecutorContext) -> list[str]:
         "-o", "BatchMode=yes",
         "-o", "StrictHostKeyChecking=no",
         "-o", "UserKnownHostsFile=/dev/null",
-        "-o", "ConnectTimeout=15",
+        "-o", "ConnectTimeout=5",
         "-i", str(ctx.key_path),
     ]
 
@@ -125,12 +125,22 @@ def _scp_from(ctx: AwsExecutorContext, ip: str, src: str, dest: Path) -> None:
 
 
 def _wait_for_ssh(ctx: AwsExecutorContext, ip: str) -> None:
-    for _ in range(60):
+    attempts: list[str] = []
+    for attempt in range(1, 61):
         completed = subprocess.run(["ssh", *_ssh_base_args(ctx), f"{ctx.remote_user}@{ip}", "true"],
                                    cwd=ROOT_DIR, text=True, capture_output=True, check=False)
         if completed.returncode == 0: return
+        attempts.append(
+            f"attempt={attempt} rc={completed.returncode}\n"
+            f"stdout={completed.stdout.strip()}\n"
+            f"stderr={completed.stderr.strip()}\n"
+        )
         time.sleep(5)
-    fail("aws-common", f"timed out waiting for SSH on {ip}")
+    ctx.run_state_dir.mkdir(parents=True, exist_ok=True)
+    log_path = ctx.run_state_dir / f"wait-for-ssh-{ip}.log"
+    log_path.write_text("\n".join(attempts), encoding="utf-8")
+    last = attempts[-1].strip() if attempts else "no ssh attempts recorded"
+    fail("aws-common", f"timed out waiting for SSH on {ip}; last error: {last}; full log: {log_path}")
 
 
 def _load_instance_state(ctx: AwsExecutorContext) -> dict[str, str]:

@@ -36,8 +36,10 @@ TRACEE_LIBBPF_A := $(TRACEE_LIBBPF_OBJDIR)/libbpf.a
 TETRAGON_BUILD_ROOT := $(REPO_BUILD_ROOT)/tetragon
 TETRAGON_BUILD_REPO := $(TETRAGON_BUILD_ROOT)/src
 TETRAGON_BUILD_BPF_ROOT := $(TETRAGON_BUILD_ROOT)/bpf-objs
-RUNNER_BUILD_DIR_ACTIVE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(RUNNER_DIR)/build-arm64,$(RUNNER_DIR)/build)
-RUNNER_LIBBPF_BUILD_DIR := $(RUNNER_BUILD_DIR_ACTIVE)/vendor/libbpf
+RUNNER_BASE_BUILD_DIR_ACTIVE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(RUNNER_DIR)/build-arm64,$(RUNNER_DIR)/build)
+RUNNER_BUILD_FEATURE_SUFFIX := $(if $(filter 1,$(RUN_SUITE_NEEDS_LLVMBPF)),-llvmbpf,)
+RUNNER_BUILD_DIR_ACTIVE := $(RUNNER_BASE_BUILD_DIR_ACTIVE)$(RUNNER_BUILD_FEATURE_SUFFIX)
+RUNNER_LIBBPF_BUILD_DIR := $(RUNNER_BASE_BUILD_DIR_ACTIVE)/vendor/libbpf
 RUNNER_LIBBPF_OBJDIR := $(RUNNER_LIBBPF_BUILD_DIR)/obj
 RUNNER_LIBBPF_PREFIX := $(RUNNER_LIBBPF_BUILD_DIR)/prefix
 RUNNER_LIBBPF_A := $(RUNNER_LIBBPF_OBJDIR)/libbpf.a
@@ -93,7 +95,10 @@ ENSURE_X86_BPFTRACE_STATIC_BUILD_IMAGE = $(CONTAINER_RUNTIME) image inspect "$(X
 ENSURE_ARM64_BPFTRACE_STATIC_BUILD_IMAGE = $(CONTAINER_RUNTIME) image inspect "$(ARM64_BPFTRACE_STATIC_BUILD_IMAGE)" >/dev/null 2>&1 || $(CONTAINER_RUNTIME) load -i "$(ARM64_BPFTRACE_STATIC_BUILD_IMAGE_TAR)"
 ENSURE_ACTIVE_BPFTRACE_STATIC_BUILD_IMAGE = $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ENSURE_ARM64_BPFTRACE_STATIC_BUILD_IMAGE),$(ENSURE_X86_BPFTRACE_STATIC_BUILD_IMAGE))
 ACTIVE_KINSN_MODULE_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/module/arm64,$(ROOT_DIR)/module/x86)
-ACTIVE_KERNEL_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_AWS_BUILD_DIR),$(X86_BUILD_DIR))
+ACTIVE_X86_KERNEL_BUILD_DIR := $(if $(filter 1,$(RUN_AWS_KERNEL)),$(X86_AWS_BUILD_DIR),$(X86_BUILD_DIR))
+ACTIVE_X86_KERNEL_IMAGE := $(if $(filter 1,$(RUN_AWS_KERNEL)),$(X86_AWS_IMAGE),$(X86_BUILD_DIR)/arch/x86/boot/bzImage)
+ACTIVE_X86_KERNEL_CONFIG_DEP := $(if $(filter 1,$(RUN_AWS_KERNEL)),$(X86_AWS_BUILD_CONFIG),$(X86_BUILD_DIR)/include/linux/kconfig.h)
+ACTIVE_KERNEL_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_AWS_BUILD_DIR),$(ACTIVE_X86_KERNEL_BUILD_DIR))
 ACTIVE_KERNEL_ARCH_ARG := $(if $(filter arm64,$(RUN_TARGET_ARCH)),ARCH=arm64,)
 ACTIVE_SCX_TARGET_TRIPLE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),aarch64-unknown-linux-gnu,x86_64-unknown-linux-gnu)
 ACTIVE_BCC_ARCH_ARG := $(if $(filter arm64,$(RUN_TARGET_ARCH)),ARCH=arm64,)
@@ -108,11 +113,13 @@ ACTIVE_BCC_TOOLS := capable execsnoop bindsnoop biosnoop vfsstat opensnoop sysco
 ACTIVE_BCC_REQUIRED := $(addprefix $(REPO_BCC_ROOT)/,$(ACTIVE_BCC_TOOLS)) $(addsuffix .bpf.o,$(addprefix $(REPO_BCC_ROOT)/,$(ACTIVE_BCC_TOOLS)))
 ACTIVE_BPFTRACE_REQUIRED := $(REPO_BPFTRACE_ROOT)/bin/bpftrace
 ACTIVE_TRACEE_REQUIRED := $(REPO_TRACEE_ROOT)/bin/tracee $(REPO_TRACEE_ROOT)/tracee.bpf.o $(REPO_TRACEE_ROOT)/lsm_support/kprobe_check.bpf.o $(REPO_TRACEE_ROOT)/lsm_support/lsm_check.bpf.o
-ACTIVE_TETRAGON_REQUIRED := $(REPO_TETRAGON_ROOT)/bin/tetragon $(REPO_TETRAGON_ROOT)/bpf_execve_event.o $(REPO_TETRAGON_ROOT)/bpf_generic_kprobe.o
+ACTIVE_TETRAGON_REQUIRED := $(REPO_TETRAGON_ROOT)/bin/tetragon $(REPO_TETRAGON_ROOT)/bpf_execve_event.o $(REPO_TETRAGON_ROOT)/bpf_generic_kprobe.o $(REPO_TETRAGON_ROOT)/bpf_alignchecker.o
 ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATRAN_ROOT)/bpf/balancer.bpf.o $(REPO_KATRAN_ROOT)/bpf/healthchecking_ipip.bpf.o
 ACTIVE_WORKLOAD_TOOLS_REQUIRED := $(ACTIVE_WORKLOAD_TOOLS_BIN_ROOT)/hackbench $(ACTIVE_WORKLOAD_TOOLS_BIN_ROOT)/sysbench $(ACTIVE_WORKLOAD_TOOLS_BIN_ROOT)/wrk
 DAEMON_SOURCE_FILES = $(shell find "$(ROOT_DIR)/daemon/src" -type f 2>/dev/null) $(ROOT_DIR)/daemon/Cargo.toml $(ROOT_DIR)/daemon/Cargo.lock $(ROOT_DIR)/daemon/Makefile
-RUNNER_SOURCE_FILES = $(shell find "$(RUNNER_DIR)/src" "$(RUNNER_DIR)/include" "$(ROOT_DIR)/vendor/llvmbpf/include" "$(ROOT_DIR)/vendor/llvmbpf/src" -type f 2>/dev/null) $(RUNNER_DIR)/CMakeLists.txt
+RUNNER_CORE_SOURCE_FILES = $(shell find "$(RUNNER_DIR)/src" "$(RUNNER_DIR)/include" -type f ! -name 'llvmbpf_runner.cpp' 2>/dev/null) $(RUNNER_DIR)/CMakeLists.txt
+RUNNER_LLVMBPF_SOURCE_FILES = $(RUNNER_DIR)/src/llvmbpf_runner.cpp $(shell find "$(ROOT_DIR)/vendor/llvmbpf/include" "$(ROOT_DIR)/vendor/llvmbpf/src" -type f 2>/dev/null)
+RUNNER_SOURCE_FILES = $(RUNNER_CORE_SOURCE_FILES) $(if $(filter 1,$(RUN_SUITE_NEEDS_LLVMBPF)),$(RUNNER_LLVMBPF_SOURCE_FILES),)
 TEST_UNITTEST_SOURCE_FILES = $(shell find "$(ROOT_DIR)/tests/unittest" \( -path '*/build' -o -path '*/build-arm64' \) -prune -o -type f -print 2>/dev/null)
 TEST_NEGATIVE_SOURCE_FILES = $(shell find "$(ROOT_DIR)/tests/negative" \( -path '*/build' -o -path '*/build-arm64' \) -prune -o -type f -print 2>/dev/null)
 MICRO_PROGRAM_SOURCE_FILES = $(MICRO_PROGRAM_SRCS) $(shell find "$(MICRO_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -type f \( -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
@@ -294,7 +301,7 @@ $(MICRO_PROGRAM_OBJECTS) &: $(MICRO_PROGRAM_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_
 		test -f "$$path"; \
 	done
 
-$(ACTIVE_KINSN_PRIMARY): $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/Image,$(X86_BUILD_DIR)/arch/x86/boot/bzImage) $(KINSN_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
+$(ACTIVE_KINSN_PRIMARY): $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/Image,$(ACTIVE_X86_KERNEL_IMAGE)) $(KINSN_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
 	@$(ENSURE_ACTIVE_RUNNER_BUILD_IMAGE)
 	$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
 		--user "$(HOST_UID):$(HOST_GID)" \
@@ -307,7 +314,7 @@ $(ACTIVE_KINSN_PRIMARY): $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_AWS_BUI
 $(ACTIVE_KINSN_SECONDARIES): $(ACTIVE_KINSN_PRIMARY)
 	@test -f "$@"
 
-$(REPO_KERNEL_MODULES_ROOT)/lib/modules: $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_AWS_IMAGE) $(ARM64_AWS_BUILD_CONFIG),$(X86_BUILD_DIR)/arch/x86/boot/bzImage $(X86_BUILD_DIR)/include/linux/kconfig.h) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
+$(REPO_KERNEL_MODULES_ROOT)/lib/modules: $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_AWS_IMAGE) $(ARM64_AWS_BUILD_CONFIG),$(ACTIVE_X86_KERNEL_IMAGE) $(ACTIVE_X86_KERNEL_CONFIG_DEP)) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
 	@stage_root="$(REPO_KERNEL_MODULES_ROOT)"; \
 	$(ENSURE_ACTIVE_RUNNER_BUILD_IMAGE); \
 	kernel_release_file="$(ACTIVE_KERNEL_BUILD_DIR)/include/config/kernel.release"; \
@@ -342,7 +349,7 @@ $(REPO_KERNEL_MODULES_ROOT)/lib/modules: $(if $(filter arm64,$(RUN_TARGET_ARCH))
 	test -f "$$release_root/kernel/drivers/block/null_blk/null_blk.ko"; \
 	test -f "$$release_root/kernel/net/sched/sch_netem.ko"
 
-$(REPO_SCX_ROOT)/bin/%: $(SCX_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
+$(REPO_SCX_ROOT)/bin/%: $(SCX_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
 	@package="$*"; \
 	$(ENSURE_ACTIVE_RUNNER_BUILD_IMAGE); \
 	repo_root="$(REPOS_DIR)/scx"; \
@@ -373,7 +380,7 @@ $(REPO_SCX_ROOT)/bin/%: $(SCX_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_RUNNER_
 $(REPO_SCX_ROOT)/%_main.bpf.o: $(REPO_SCX_ROOT)/bin/%
 	@test -f "$@"
 
-$(ACTIVE_BCC_REQUIRED) &: $(BCC_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
+$(ACTIVE_BCC_REQUIRED) &: $(BCC_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
 	@repo_src="$(REPOS_DIR)/bcc"; \
 	$(ENSURE_ACTIVE_RUNNER_BUILD_IMAGE); \
 	build_root="$(BCC_BUILD_ROOT)"; \
@@ -411,9 +418,10 @@ $(ACTIVE_BCC_REQUIRED) &: $(BCC_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_RUNNE
 	done; \
 	for path in $(ACTIVE_BCC_REQUIRED); do \
 		test -e "$$path"; \
-	done
+	done; \
+	touch $(ACTIVE_BCC_REQUIRED)
 
-$(ACTIVE_BPFTRACE_REQUIRED): $(BPFTRACE_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_BPFTRACE_STATIC_BUILD_IMAGE_TAR)
+$(ACTIVE_BPFTRACE_REQUIRED): $(BPFTRACE_SOURCE_FILES) $(ACTIVE_BPFTRACE_STATIC_BUILD_IMAGE_TAR)
 	@$(ENSURE_ACTIVE_BPFTRACE_STATIC_BUILD_IMAGE); \
 	build_root="$(BPFTRACE_BUILD_ROOT)"; \
 	repo_root="$(REPOS_DIR)/bpftrace"; \
@@ -447,9 +455,10 @@ $(ACTIVE_BPFTRACE_REQUIRED): $(BPFTRACE_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTI
 		-w "$(ROOT_DIR)" \
 		"$$container_image" \
 		cmake --build "$$build_root/build" --target install -j"$(JOBS)"; \
-	test -x "$@"
+	test -x "$@"; \
+	touch "$@"
 
-$(ACTIVE_TRACEE_REQUIRED) &: $(TRACEE_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
+$(ACTIVE_TRACEE_REQUIRED) &: $(TRACEE_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
 	@repo_src="$(REPOS_DIR)/tracee"; \
 	$(ENSURE_ACTIVE_RUNNER_BUILD_IMAGE); \
 	build_root="$(TRACEE_BUILD_ROOT)"; \
@@ -484,6 +493,7 @@ $(ACTIVE_TRACEE_REQUIRED) &: $(TRACEE_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE
 			CMD_GO=go \
 			CMD_STRIP=llvm-strip \
 			CMD_OBJCOPY=llvm-objcopy \
+			STATIC=1 \
 			tracee; \
 	test -x "$$dist_root/tracee" || { echo "missing tracee build output: $$dist_root/tracee" >&2; exit 1; }; \
 	install -m 0755 "$$dist_root/tracee" "$$output_root/bin/tracee"; \
@@ -492,9 +502,10 @@ $(ACTIVE_TRACEE_REQUIRED) &: $(TRACEE_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE
 	ln -f "$$dist_root/lsm_support/lsm_check.bpf.o" "$$output_root/lsm_support/lsm_check.bpf.o"; \
 	for path in $(ACTIVE_TRACEE_REQUIRED); do \
 		test -e "$$path"; \
-	done
+	done; \
+	touch $(ACTIVE_TRACEE_REQUIRED)
 
-$(ACTIVE_TETRAGON_REQUIRED) &: $(TETRAGON_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
+$(ACTIVE_TETRAGON_REQUIRED) &: $(TETRAGON_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
 	@repo_src="$(REPOS_DIR)/tetragon"; \
 	$(ENSURE_ACTIVE_RUNNER_BUILD_IMAGE); \
 	build_root="$(TETRAGON_BUILD_ROOT)"; \
@@ -531,11 +542,13 @@ $(ACTIVE_TETRAGON_REQUIRED) &: $(TETRAGON_SOURCE_FILES) $(BUILD_RULE_FILES) $(AC
 	ln -f "$$repo_root/tetragon" "$$artifact_root/bin/tetragon"; \
 	ln -f "$$bpf_output_root/bpf_execve_event.o" "$$artifact_root/bpf_execve_event.o"; \
 	ln -f "$$bpf_output_root/bpf_generic_kprobe.o" "$$artifact_root/bpf_generic_kprobe.o"; \
+	ln -f "$$bpf_output_root/bpf_alignchecker.o" "$$artifact_root/bpf_alignchecker.o"; \
 	for path in $(ACTIVE_TETRAGON_REQUIRED); do \
 		test -e "$$path"; \
-	done
+	done; \
+	touch $(ACTIVE_TETRAGON_REQUIRED)
 
-$(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
+$(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
 	@repo_src="$(REPOS_DIR)/katran"; \
 	$(ENSURE_ACTIVE_RUNNER_BUILD_IMAGE); \
 	build_root="$(KATRAN_BUILD_ROOT)"; \
@@ -618,7 +631,8 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES) $(ACTIVE
 	[ -f "$$bpf_root/healthchecking_ipip.o" ] && mv -f "$$bpf_root/healthchecking_ipip.o" "$$bpf_root/healthchecking_ipip.bpf.o" || true; \
 	for path in $(ACTIVE_KATRAN_REQUIRED); do \
 		test -e "$$path"; \
-	done
+	done; \
+	touch $(ACTIVE_KATRAN_REQUIRED)
 
 WORKLOAD_TOOLS_SOURCE_ROOT := $(REPOS_DIR)/workload-tools
 WORKLOAD_TOOLS_BUILD_ROOT := $(ARTIFACT_ROOT)/workload-tools-build/$(RUN_TARGET_ARCH)$(BUILD_ARCH_VARIANT)

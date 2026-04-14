@@ -8,8 +8,8 @@ from runner.libs import ROOT_DIR
 _BASE_TRANSFER_ROOTS = {
     "test":   ("runner/__init__.py", "runner/libs", "runner/suites", "tests"),
     "micro":  ("runner/__init__.py", "runner/libs", "runner/suites", "micro/driver.py", "micro/catalog.py", "micro/config", "micro/generated-inputs"),
-    "corpus": ("runner/__init__.py", "runner/libs", "runner/suites", "corpus/driver.py", "corpus/config", "e2e/cases"),
-    "e2e":    ("runner/__init__.py", "runner/libs", "runner/suites", "corpus/config", "e2e/driver.py", "e2e/cases"),
+    "corpus": ("runner/__init__.py", "runner/libs", "runner/suites", "corpus/driver.py", "corpus/config", "corpus/inputs", "e2e/cases"),
+    "e2e":    ("runner/__init__.py", "runner/libs", "runner/suites", "corpus/config", "corpus/inputs", "e2e/driver.py", "e2e/cases"),
 }
 
 _TRANSFER_ROOT_ORDER = ("runner", "daemon", "module", "tests", "micro", "corpus", "e2e")
@@ -92,7 +92,7 @@ def native_repo_targets(workspace: Path, target_arch: str, native_repos: list[st
             targets.append(root / "bpftrace" / "bin" / "bpftrace")
         elif repo_name == "tetragon":
             tg = root / "tetragon"
-            targets += [tg / "bin" / "tetragon", tg / "bpf_execve_event.o", tg / "bpf_generic_kprobe.o"]
+            targets += [tg / "bin" / "tetragon", tg / "bpf_execve_event.o", tg / "bpf_generic_kprobe.o", tg / "bpf_alignchecker.o"]
         elif repo_name == "katran":
             kt = root / "katran"
             targets += [kt / "bin" / "katran_server_grpc", kt / "bpf" / "balancer.bpf.o", kt / "bpf" / "healthchecking_ipip.bpf.o"]
