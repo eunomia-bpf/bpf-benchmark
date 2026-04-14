@@ -211,7 +211,7 @@ $(X86_BUILD_DIR)/arch/x86/boot/bzImage: $(KERNEL_CONFIG_PATH) $(KERNEL_BUILD_MET
 		"$(X86_RUNNER_BUILD_IMAGE)" \
 		make -C "$(KERNEL_DIR)" O="$(X86_BUILD_DIR)" -j"$(JOBS)" bzImage modules
 
-$(X86_BUILD_DIR)/include/linux/kconfig.h: $(X86_BUILD_DIR)/arch/x86/boot/bzImage $(KERNEL_DIR)/include/linux/kconfig.h
+$(X86_BUILD_DIR)/include/linux/kconfig.h:
 	@mkdir -p "$(X86_BUILD_DIR)/include"
 	@ln -sfn "$(KERNEL_DIR)/include/linux" "$(X86_BUILD_DIR)/include/linux"
 	@test -f "$@"
@@ -315,13 +315,21 @@ $(REPO_KERNEL_MODULES_ROOT)/lib/modules: $(if $(filter arm64,$(RUN_TARGET_ARCH))
 	kernel_release="$$(tr -d '\n' < "$$kernel_release_file")"; \
 	release_root="$$stage_root/lib/modules/$$kernel_release"; \
 	mkdir -p "$$stage_root"; \
+	rm -rf "$$release_root"; \
 	$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
 		--user "$(HOST_UID):$(HOST_GID)" \
 		-e HOME=/tmp/bpf-benchmark-container \
 		-v "$(ROOT_DIR):$(ROOT_DIR)" \
 		-w "$(ROOT_DIR)" \
 		"$(ACTIVE_RUNNER_BUILD_IMAGE)" \
-		make $(ACTIVE_KERNEL_ARCH_ARG) --no-print-directory -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" INSTALL_MOD_PATH="$$stage_root" DEPMOD=true CONFIG_MODULE_SIG=n modules_install >/dev/null; \
+		make $(ACTIVE_KERNEL_ARCH_ARG) --no-print-directory -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" -j"$(JOBS)" modules; \
+	$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
+		--user "$(HOST_UID):$(HOST_GID)" \
+		-e HOME=/tmp/bpf-benchmark-container \
+		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		-w "$(ROOT_DIR)" \
+		"$(ACTIVE_RUNNER_BUILD_IMAGE)" \
+		make $(ACTIVE_KERNEL_ARCH_ARG) --no-print-directory -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" INSTALL_MOD_PATH="$$stage_root" DEPMOD=true modules_install >/dev/null; \
 	$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
 		--user "$(HOST_UID):$(HOST_GID)" \
 		-e HOME=/tmp/bpf-benchmark-container \

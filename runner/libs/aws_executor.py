@@ -191,8 +191,14 @@ def _refresh_aws_arm64_base_config(ctx: aws_common.AwsExecutorContext, ip: str) 
         _die(f"failed to capture AWS ARM64 base kernel config from {ip}")
     base_config = ctx.target_root / "config-al2023-arm64"
     base_config.parent.mkdir(parents=True, exist_ok=True)
-    base_config.write_text(completed.stdout, encoding="utf-8")
-    base_config.with_suffix(".release").write_text(_remote_kernel_release(ctx, ip) + "\n", encoding="utf-8")
+    _write_text_if_changed(base_config, completed.stdout)
+    _write_text_if_changed(base_config.with_suffix(".release"), _remote_kernel_release(ctx, ip) + "\n")
+
+
+def _write_text_if_changed(path: Path, text: str) -> None:
+    if path.is_file() and path.read_text(encoding="utf-8") == text:
+        return
+    path.write_text(text, encoding="utf-8")
 
 
 def _ensure_remote_docker(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
@@ -218,6 +224,12 @@ def _link_or_copy_file(src: str, dst: str) -> str:
     return dst
 
 
+def _local_image_save_command(runtime: str, tag: str) -> list[str]:
+    if Path(runtime).name == "podman":
+        return [runtime, "save", "--format", "docker-archive", tag]
+    return [runtime, "save", tag]
+
+
 # ---------------------------------------------------------------------------
 # Docker deployment image: build locally, push to remote, run install inline
 # ---------------------------------------------------------------------------
@@ -229,6 +241,7 @@ def _build_and_push_kernel_image(ctx: aws_common.AwsExecutorContext, ip: str,
     then run the install commands inside the container with /:/host bind-mount."""
     tag = f"bpf-benchmark-kernel/{ctx.target_name}:{ctx.run_token}"
     _ensure_remote_docker(ctx, ip)
+    local_container_runtime = ctx.contract.remote.container_runtime.strip() or "docker"
 
     cache_tmp = ROOT_DIR / ".cache"
     cache_tmp.mkdir(parents=True, exist_ok=True)
@@ -257,17 +270,17 @@ def _build_and_push_kernel_image(ctx: aws_common.AwsExecutorContext, ip: str,
         platform = "linux/arm64" if arch == "arm64" else "linux/amd64"
         completed = subprocess.run(
             [
-                "docker", "build", "--no-cache", "--platform", platform,
+                local_container_runtime, "build", "--platform", platform,
                 "-t", tag, "-f", str(tmp / "Dockerfile"), str(ctx_dir),
             ],
             cwd=ROOT_DIR, text=True, check=False,
         )
         if completed.returncode != 0:
-            _die(f"docker build for kernel deploy image failed (tag={tag})")
+            _die(f"{local_container_runtime} build for kernel deploy image failed (tag={tag})")
 
     # Push via docker save | ssh docker load
     ssh_args = aws_common._ssh_base_args(ctx)
-    save_cmd = ["docker", "save", tag]
+    save_cmd = _local_image_save_command(local_container_runtime, tag)
     load_cmd = ["ssh", *ssh_args, f"{ctx.remote_user}@{ip}", "sudo docker load"]
     with subprocess.Popen(save_cmd, stdout=subprocess.PIPE, cwd=ROOT_DIR) as save_proc:
         rc = subprocess.run(load_cmd, stdin=save_proc.stdout, cwd=ROOT_DIR, text=False, check=False).returncode
