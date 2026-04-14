@@ -11,7 +11,6 @@ from runner.libs.run_contract import RunConfig, read_run_config_file
 from runner.libs.suite_args import read_suite_args_file, suite_args_from_env
 from runner.libs.suite_commands import (
     build_runtime_container_command,
-    build_suite_argv,
     runtime_container_result_dirs,
 )
 from runner.libs.workspace_layout import runtime_container_image_tar_path
@@ -24,24 +23,19 @@ def _shell_join(command: list[str]) -> str:
     return " ".join(shlex.quote(str(part)) for part in command)
 
 
-def _workspace_python_prefix(workspace_root: Path) -> str:
-    return f'cd {shlex.quote(str(workspace_root))} && PYTHONPATH="{workspace_root}${{PYTHONPATH:+:${{PYTHONPATH}}}}" '
-
-
 def _ensure_docker_shell() -> str:
     return "docker info >/dev/null"
 
 
 def suite_command(workspace_root: Path, config: RunConfig, suite_args: list[str]) -> str:
-    if config.remote.runtime_container_image.strip():
-        image_tar = runtime_container_image_tar_path(workspace_root, config.identity.target_arch)
-        load_cmd = shlex.join(["docker", "load", "-i", str(image_tar)])
-        result_dirs = [str(path) for path in runtime_container_result_dirs(workspace_root)]
-        mkdir_cmd = shlex.join(["mkdir", "-p", *result_dirs])
-        container_cmd = _shell_join(build_runtime_container_command(workspace_root, config, suite_args, die=_die))
-        return f"{mkdir_cmd} && {_ensure_docker_shell()} && {load_cmd} >/dev/null && {container_cmd}"
-    command = build_suite_argv(workspace_root, config, suite_args, die=_die)
-    return _workspace_python_prefix(workspace_root) + _shell_join(command)
+    if not config.remote.runtime_container_image.strip():
+        _die("run config RUN_RUNTIME_CONTAINER_IMAGE is empty")
+    image_tar = runtime_container_image_tar_path(workspace_root, config.identity.target_arch)
+    load_cmd = shlex.join(["docker", "load", "-i", str(image_tar)])
+    result_dirs = [str(path) for path in runtime_container_result_dirs(workspace_root)]
+    mkdir_cmd = shlex.join(["mkdir", "-p", *result_dirs])
+    container_cmd = _shell_join(build_runtime_container_command(workspace_root, config, suite_args, die=_die))
+    return f"{mkdir_cmd} && {_ensure_docker_shell()} && {load_cmd} >/dev/null && {container_cmd}"
 
 
 def _optional_int(value: str) -> int | None:

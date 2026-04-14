@@ -189,26 +189,18 @@ def _run_action(target_name: str, suite_name: str, suite_args: list[str] | None 
                 print(f"[run-target-suite][ERROR] preserved debug artifact: {control_dir}", file=sys.stderr)
 
 
-def _parse_benchmark_suites(mode: str) -> list[str]:
-    suites = [entry.strip() for entry in str(mode).split(",") if entry.strip()]
+def _parse_benchmark_suite(mode: str) -> str:
+    suite = str(mode).strip()
     allowed_suites = {"micro", "corpus", "e2e"}
-    if not suites:
+    if not suite:
         _die("benchmark mode is empty")
-    if len(suites) == 1 and suites[0] in allowed_suites:
-        return suites
-    if len(suites) == 1 and suites[0] == "all":
-        return ["micro", "corpus", "e2e"]
-    if any(suite not in allowed_suites for suite in suites):
-        _die(f"unsupported benchmark mode: {mode}")
-    return suites
+    if "," in suite or suite == "all" or suite not in allowed_suites:
+        _die(f"unsupported benchmark mode: {mode}; use one of micro, corpus, e2e")
+    return suite
 
 
 def _benchmark_action(target_name: str, mode: str, suite_args: list[str] | None = None) -> None:
-    suites = _parse_benchmark_suites(mode)
-    if suite_args is not None and len(suites) != 1:
-        _die("explicit suite arguments are only supported for a single benchmark suite")
-    for suite_name in suites:
-        _run_action(target_name, suite_name, suite_args)
+    _run_action(target_name, _parse_benchmark_suite(mode), suite_args)
 
 
 def _suite_args_from_cli(args: list[str], start_index: int) -> list[str] | None:
@@ -253,7 +245,7 @@ def main(argv: list[str] | None = None) -> None:
         return
     if action == "benchmark":
         if not target_name or not suite_name:
-            _die("usage: run_target_suite.py benchmark <target> <micro|corpus|e2e|all|suite1,suite2> [-- suite-args...]")
+            _die("usage: run_target_suite.py benchmark <target> <micro|corpus|e2e> [-- suite-args...]")
         _benchmark_action(target_name, suite_name, _suite_args_from_cli(args, 3))
         return
     if action == "terminate":

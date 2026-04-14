@@ -23,7 +23,7 @@ ARM64_EFI_IMAGE     := $(ARM64_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
 ARM64_AWS_IMAGE     := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/Image
 ARM64_AWS_EFI_IMAGE := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
 RUN_TARGET_SUITE_CMD  = "$(PYTHON)" -m runner.libs.run_target_suite
-AWS_ARM64_BENCH_MODE ?= all
+AWS_ARM64_BENCH_MODE ?=
 
 # Build inputs consumed by included runner make rules.
 NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
@@ -34,7 +34,7 @@ ARM64_DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_arm64_defconfig
 include $(RUNNER_DIR)/mk/build.mk
 
 export ARM64_BUILD_DIR
-AWS_X86_BENCH_MODE        ?= all
+AWS_X86_BENCH_MODE        ?=
 
 # Tunables
 BZIMAGE ?= $(X86_BUILD_DIR)/arch/x86/boot/bzImage
@@ -107,10 +107,9 @@ help:
 	@echo "        vm-e2e E2E_CASE=\"all|tracee|...\" E2E_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\" PROFILE=$(PROFILE)"
 	@echo "        aws-arm64-test/aws-arm64-benchmark AWS_ARM64_REGION=<region> AWS_ARM64_PROFILE=<profile> AWS_ARM64_ROOT_VOLUME_GB=<override>"
 	@echo "        aws-arm64-test AWS_ARM64_TEST_MODE=<selftest|negative|test>"
-	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=$(AWS_ARM64_BENCH_MODE) AWS_ARM64_E2E_CASES=<all|tracee,tetragon,...>"
+	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=<micro|corpus|e2e> AWS_ARM64_E2E_CASES=<all|tracee,tetragon,...>"
 	@echo "        aws-x86-test AWS_X86_REGION=<region> AWS_X86_PROFILE=<profile> AWS_X86_TEST_MODE=<selftest|negative|test>"
-	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=$(AWS_X86_BENCH_MODE) AWS_X86_E2E_CASES=<all|tracee,tetragon,...>"
-	@echo "        AWS benchmark mode 'all' runs micro/corpus/e2e through the target runner"
+	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=<micro|corpus|e2e> AWS_X86_E2E_CASES=<all|tracee,tetragon,...>"
 
 check:
 	$(PYTHON) -m py_compile \

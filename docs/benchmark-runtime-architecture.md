@@ -60,7 +60,8 @@ User-space artifacts are built in place inside the final runtime image:
 ```
 
 The `/opt/bpf-benchmark` prefix is not a builder-to-runtime copy boundary. It is
-the final in-image artifact prefix written by `make image-userspace-artifacts`.
+the final in-image artifact prefix written by the image-side `image-*` artifact
+targets.
 The root `Makefile` and `runner/mk` are build-only inputs and are removed before
 the final runtime Python/config layer is copied.
 

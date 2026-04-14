@@ -32,12 +32,11 @@ bpf-benchmark/
 ## Prerequisites
 
 - Python 3 with PyYAML: `pip install pyyaml` (or use the workspace venv)
-- `docker` or `podman` for runner image builds and runtime containers
+- `docker` for runner image builds and runtime containers
 - runnable `linux/amd64` and `linux/arm64` container userspace support when
   building both target architectures
 - `sudo -n` (passwordless) required for kernel eBPF runtime
 - `vng` (virtme-ng) required for VM benchmark targets
-- `CONTAINER_RUNTIME` may be set to `docker` or `podman`
 
 ## Quick Start
 
@@ -87,7 +86,7 @@ The canonical lookup source is:
 Micro suite runner builds use the LLVM CMake package in the runner image by
 default. Override it for targeted debugging with:
 - `LLVM_DIR`, or
-- `LLVM_CONFIG` (the root `Makefile` defaults this to `llvm-config$(UPSTREAM_SELFTEST_LLVM_SUFFIX)`)
+- `RUN_LLVM_DIR`
 
 Results are written to:
 - `micro/results/` — authoritative micro benchmark results
