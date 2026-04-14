@@ -457,12 +457,7 @@ def _sync_remote_roots(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     selected_roots = remote_transfer_roots(
         suite_name=ctx.contract.identity.suite_name,
         target_arch=ctx.contract.identity.target_arch,
-        needs_runner_binary=a.needs_runner_binary == "1",
-        needs_daemon_binary=a.needs_daemon_binary == "1",
         needs_kinsn_modules=a.needs_kinsn_modules == "1",
-        needs_workload_tools=a.needs_workload_tools == "1",
-        native_repos=list(a.native_repos),
-        scx_packages=list(a.scx_packages),
     )
     if not selected_roots:
         _die("derived remote transfer roots selected no existing roots")

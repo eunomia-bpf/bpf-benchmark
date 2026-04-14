@@ -33,8 +33,6 @@ def build_micro_suite_argv(
     *,
     die: Any,
 ) -> list[str]:
-    from runner.libs.workspace_layout import micro_program_root, runner_binary_path
-
     remote_python = _required(config.remote.python_bin, "RUN_REMOTE_PYTHON_BIN", die)
     target_name = _required(config.identity.target_name, "RUN_TARGET_NAME", die)
     target_arch = _required(config.identity.target_arch, "RUN_TARGET_ARCH", die)
@@ -49,8 +47,6 @@ def build_micro_suite_argv(
         "--run-token", _required(config.identity.token, "RUN_TOKEN", die),
         "--python-bin", remote_python,
         "--bpftool-bin", _required(config.remote.bpftool_bin, "RUN_BPFTOOL_BIN", die),
-        "--runner-binary", str(runner_binary_path(workspace, target_arch)),
-        "--program-dir", str(micro_program_root(workspace, target_arch)),
         "--output", str(workspace / "micro" / "results" / f"{target_name}_micro.json"),
     ]
     _append_runtime_container_args(command, config)
@@ -65,8 +61,6 @@ def build_corpus_suite_argv(
     *,
     die: Any,
 ) -> list[str]:
-    from runner.libs.workspace_layout import daemon_binary_path
-
     remote_python = _required(config.remote.python_bin, "RUN_REMOTE_PYTHON_BIN", die)
     target_name = _required(config.identity.target_name, "RUN_TARGET_NAME", die)
     target_arch = _required(config.identity.target_arch, "RUN_TARGET_ARCH", die)
@@ -81,7 +75,6 @@ def build_corpus_suite_argv(
         "--run-token", _required(config.identity.token, "RUN_TOKEN", die),
         "--python-bin", remote_python,
         "--bpftool-bin", _required(config.remote.bpftool_bin, "RUN_BPFTOOL_BIN", die),
-        "--daemon-binary", str(daemon_binary_path(workspace, target_arch)),
         "--output-json", str(workspace / "corpus" / "results" / f"{target_name}_corpus.json"),
         "--output-md", str(workspace / "corpus" / "results" / f"{target_name}_corpus.md"),
     ]
@@ -101,8 +94,6 @@ def build_e2e_suite_argv(
     *,
     die: Any,
 ) -> list[str]:
-    from runner.libs.workspace_layout import daemon_binary_path
-
     remote_python = _required(config.remote.python_bin, "RUN_REMOTE_PYTHON_BIN", die)
     target_name = _required(config.identity.target_name, "RUN_TARGET_NAME", die)
     target_arch = _required(config.identity.target_arch, "RUN_TARGET_ARCH", die)
@@ -117,7 +108,6 @@ def build_e2e_suite_argv(
         "--run-token", _required(config.identity.token, "RUN_TOKEN", die),
         "--python-bin", remote_python,
         "--bpftool-bin", _required(config.remote.bpftool_bin, "RUN_BPFTOOL_BIN", die),
-        "--daemon-binary", str(daemon_binary_path(workspace, target_arch)),
     ]
     for repo_name in config.artifacts.native_repos:
         command.extend(["--native-repo", repo_name])
@@ -136,8 +126,6 @@ def build_test_suite_argv(
     die: Any,
     config_path: Path | None = None,
 ) -> list[str]:
-    from runner.libs.workspace_layout import daemon_binary_path
-
     remote_python = _required(config.remote.python_bin, "RUN_REMOTE_PYTHON_BIN", die)
     target_name = _required(config.identity.target_name, "RUN_TARGET_NAME", die)
     target_arch = _required(config.identity.target_arch, "RUN_TARGET_ARCH", die)
@@ -153,7 +141,6 @@ def build_test_suite_argv(
         "--run-token", run_token,
         "--python-bin", remote_python,
         "--bpftool-bin", _required(config.remote.bpftool_bin, "RUN_BPFTOOL_BIN", die),
-        "--daemon-binary", str(daemon_binary_path(workspace, target_arch)),
         "--artifact-dir", str(workspace / "tests" / "results" / run_token),
     ]
     if config_path is not None:

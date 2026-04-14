@@ -11,9 +11,9 @@ from runner.libs.cli_support import fail
 from runner.libs.workspace_layout import (
     kernel_modules_root,
     micro_program_root,
-    repo_artifact_root,
     runner_binary_path,
     runtime_path_value,
+    runtime_repo_artifact_root,
 )
 from runner.suites._common import (
     add_common_args,
@@ -122,7 +122,7 @@ def _runtime_env(workspace: Path, args: argparse.Namespace) -> dict[str, str]:
     env["PATH"] = runtime_path_value(workspace, args.target_arch)
     if runtime_ld := cross_runtime_ld_library_path(workspace, args.target_arch):
         env["LD_LIBRARY_PATH"] = runtime_ld
-    env["BPFREJIT_REPO_ARTIFACT_ROOT"] = str(repo_artifact_root(workspace, args.target_arch))
+    env["BPFREJIT_REPO_ARTIFACT_ROOT"] = str(runtime_repo_artifact_root(workspace, args.target_arch))
     env["BPFREJIT_REMOTE_PYTHON_BIN"] = args.python_bin or sys.executable
     kernel_modules_dir = kernel_modules_root(workspace, args.target_arch, args.executor)
     if not kernel_modules_dir.is_dir():
@@ -177,8 +177,14 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
     python_bin = resolve_executable(python_bin, path_value=env["PATH"], description="Python binary", die=_die)
     resolve_executable(args.bpftool_bin, path_value=env["PATH"], description="bpftool binary", die=_die)
 
-    program_dir = resolve_workspace_path(workspace, args.program_dir) if args.program_dir else micro_program_root(workspace, args.target_arch)
-    runner_binary = resolve_workspace_path(workspace, args.runner_binary) if args.runner_binary else runner_binary_path(workspace, args.target_arch)
+    if args.program_dir:
+        program_dir = resolve_workspace_path(workspace, args.program_dir)
+    else:
+        program_dir = micro_program_root(workspace, args.target_arch)
+    if args.runner_binary:
+        runner_binary = resolve_workspace_path(workspace, args.runner_binary)
+    else:
+        runner_binary = runner_binary_path(workspace, args.target_arch)
     if not runner_binary.is_file() or not os.access(runner_binary, os.X_OK):
         _die(f"runner artifact is missing or not executable: {runner_binary}")
     if not program_dir.is_dir():

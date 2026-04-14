@@ -13,13 +13,12 @@ from typing import Sequence
 
 from runner.libs.workspace_layout import (
     daemon_binary_path,
+    inside_runtime_image as inside_runtime_container,
     kernel_modules_root,
-    native_repo_targets,
-    repo_artifact_root,
     runtime_container_image_tar_path,
     runtime_path_value,
-    scx_targets,
-    workload_tools_root,
+    runtime_repo_artifact_root,
+    runtime_workload_tools_root,
 )
 
 
@@ -52,10 +51,6 @@ def merge_csv_and_repeated(csv_value: str, repeated_values: Sequence[str] | None
 # ---------------------------------------------------------------------------
 # container helpers
 # ---------------------------------------------------------------------------
-
-def inside_runtime_container() -> bool:
-    return os.environ.get("BPFREJIT_INSIDE_RUNTIME_CONTAINER", "").strip() == "1"
-
 
 def append_bind_mount(command: list[str], source: Path, target: Path | None = None, *, readonly: bool = False) -> None:
     if not source.exists():
@@ -213,7 +208,7 @@ def cross_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
 
 
 def suite_runtime_ld_library_path(workspace: Path, target_arch: str) -> str:
-    workload_root = workload_tools_root(workspace, target_arch)
+    workload_root = runtime_workload_tools_root(workspace, target_arch)
     # Keep broad artifact lib directories out of the suite process environment:
     # Tracee, BCC, Katran, and workload-tools roots can contain libraries from
     # the build container. Only add narrow runtime library roots that are
@@ -272,7 +267,10 @@ def resolve_workspace_path(workspace: Path, value: str) -> Path:
 
 
 def resolve_daemon_binary(workspace: Path, target_arch: str, override: str, die: object) -> Path:
-    candidate = resolve_workspace_path(workspace, override) if override else daemon_binary_path(workspace, target_arch)
+    if override:
+        candidate = resolve_workspace_path(workspace, override)
+    else:
+        candidate = daemon_binary_path(workspace, target_arch)
     return require_executable(candidate, "daemon artifact", die)
 
 
@@ -304,25 +302,31 @@ def argv_option_value(argv: Sequence[str], option: str, die: object) -> str:
 # ---------------------------------------------------------------------------
 
 def ensure_scx_artifacts(workspace: Path, target_arch: str, packages: Sequence[str], die: object) -> None:
-    for target in scx_targets(workspace, target_arch, list(packages)):
-        if target.name.endswith(".bpf.o"):
-            if not target.is_file():
-                die(f"scx artifact object is missing: {target}")  # type: ignore[operator]
-            continue
-        require_executable(target, "scx artifact", die)
+    scx_root = runtime_repo_artifact_root(workspace, target_arch) / "scx"
+    for package in packages:
+        for target in (scx_root / "bin" / package, scx_root / f"{package}_main.bpf.o"):
+            if target.name.endswith(".bpf.o"):
+                if not target.is_file():
+                    die(f"scx artifact object is missing: {target}")  # type: ignore[operator]
+                continue
+            require_executable(target, "scx artifact", die)
 
 
 def ensure_katran_artifacts(workspace: Path, target_arch: str, native_repos: Sequence[str], die: object) -> None:
     if "katran" not in native_repos:
         return
-    katran_targets = native_repo_targets(workspace, target_arch, ["katran"])
+    katran_root = runtime_repo_artifact_root(workspace, target_arch) / "katran"
+    katran_targets = [
+        katran_root / "bin" / "katran_server_grpc",
+        katran_root / "bpf" / "balancer.bpf.o",
+        katran_root / "bpf" / "healthchecking_ipip.bpf.o",
+    ]
     for target in katran_targets:
         if target.name == "katran_server_grpc":
             require_executable(target, "Katran server artifact", die)
             continue
         if not target.is_file():
             die(f"Katran artifact is missing: {target}")  # type: ignore[operator]
-    katran_root = repo_artifact_root(workspace, target_arch) / "katran"
     katran_lib_root = katran_root / "lib"
     if not katran_lib_root.is_dir():
         die(f"Katran runtime library artifact directory is missing: {katran_lib_root}")  # type: ignore[operator]
@@ -462,10 +466,10 @@ def base_suite_runtime_env(
     env = base_runtime_env()
     setup_tmpdir(env, args.run_token or f"{args.target_name}_{scratch_suffix}")
     env["PATH"] = runtime_path_value(workspace, args.target_arch)
-    workload_tool_bin = workspace / ".cache" / "workload-tools" / args.target_arch / "bin"
+    workload_tool_bin = runtime_workload_tools_root(workspace, args.target_arch) / "bin"
     if workload_tool_bin.is_dir():
         env["BPFREJIT_WORKLOAD_TOOL_BIN_DIR"] = str(workload_tool_bin)
-    env["BPFREJIT_REPO_ARTIFACT_ROOT"] = str(repo_artifact_root(workspace, args.target_arch))
+    env["BPFREJIT_REPO_ARTIFACT_ROOT"] = str(runtime_repo_artifact_root(workspace, args.target_arch))
     env["BPFREJIT_REMOTE_PYTHON_BIN"] = args.python_bin or sys.executable
     kernel_modules_dir = kernel_modules_root(workspace, args.target_arch, args.executor)
     if not kernel_modules_dir.is_dir():

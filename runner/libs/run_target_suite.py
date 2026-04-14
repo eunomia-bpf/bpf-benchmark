@@ -57,6 +57,9 @@ def _run_local_prep(config: RunConfig) -> None:
 
 def _local_prep_env(*, config: RunConfig) -> dict[str, str]:
     env = config.env()
+    # The runtime image is the pinned user-space tool bundle for all suites.
+    # Build the image runner with llvmbpf even when the current suite is not micro.
+    env["RUN_SUITE_NEEDS_LLVMBPF"] = "1"
     host_python_bin = config.kvm.host_python_bin.strip()
     if not host_python_bin:
         _die("run config host python is missing")
@@ -97,12 +100,7 @@ def _local_prep_target_paths(config: RunConfig) -> list[str]:
             target_arch=target_arch,
             executor=executor,
             target_name=target_name,
-            needs_runner_binary=config.artifacts.needs_runner_binary == "1",
-            needs_daemon_binary=config.artifacts.needs_daemon_binary == "1",
             needs_kinsn_modules=config.artifacts.needs_kinsn_modules == "1",
-            needs_workload_tools=config.artifacts.needs_workload_tools == "1",
-            native_repos=list(config.artifacts.native_repos),
-            scx_packages=list(config.artifacts.scx_packages),
         )
     ]
 

@@ -44,10 +44,7 @@ class SuiteRequirements:
 
 @dataclass(frozen=True)
 class ArtifactRequirements:
-    needs_runner_binary: str = "0"
-    needs_daemon_binary: str = "0"
     needs_kinsn_modules: str = "0"
-    needs_workload_tools: str = "0"
     native_repos: tuple[str, ...] = ()
     scx_packages: tuple[str, ...] = ()
 
@@ -60,7 +57,6 @@ class RemoteConfig:
     runtime_python_bin: str = "python3"
     container_runtime: str = "docker"
     runtime_container_image: str = ""
-    runtime_container_image_tar: str = ""
     bpftool_bin: str = "bpftool"
 
 
@@ -107,8 +103,7 @@ class RunConfig:
             "RUN_EXECUTOR": i.executor, "RUN_SUITE_NAME": i.suite_name, "RUN_TOKEN": i.token,
             "RUN_SUITE_NEEDS_RUNTIME_BTF": s.needs_runtime_btf, "RUN_SUITE_NEEDS_SCHED_EXT": s.needs_sched_ext,
             "RUN_SUITE_NEEDS_LLVMBPF": s.needs_llvmbpf, "RUN_LLVM_DIR": s.llvm_dir,
-            "RUN_NEEDS_RUNNER_BINARY": a.needs_runner_binary, "RUN_NEEDS_DAEMON_BINARY": a.needs_daemon_binary,
-            "RUN_NEEDS_KINSN_MODULES": a.needs_kinsn_modules, "RUN_NEEDS_WORKLOAD_TOOLS": a.needs_workload_tools,
+            "RUN_NEEDS_KINSN_MODULES": a.needs_kinsn_modules,
             "RUN_NAME_TAG": aw.name_tag, "RUN_INSTANCE_TYPE": aw.instance_type,
             "RUN_REMOTE_USER": r.user, "RUN_REMOTE_STAGE_DIR": r.stage_dir,
             "RUN_AMI_PARAM": aw.ami_param, "RUN_AMI_ID": aw.ami_id,
@@ -123,7 +118,6 @@ class RunConfig:
             "RUN_REMOTE_PYTHON_BIN": r.python_bin, "RUN_RUNTIME_PYTHON_BIN": r.runtime_python_bin,
             "RUN_CONTAINER_RUNTIME": r.container_runtime,
             "RUN_RUNTIME_CONTAINER_IMAGE": r.runtime_container_image,
-            "RUN_RUNTIME_CONTAINER_IMAGE_TAR": r.runtime_container_image_tar,
             "RUN_NATIVE_REPOS_CSV": join_csv(list(a.native_repos)),
             "RUN_SCX_PACKAGES_CSV": join_csv(list(a.scx_packages)),
             "RUN_BPFTOOL_BIN": r.bpftool_bin,
@@ -173,17 +167,13 @@ class RunConfig:
             suite=SuiteRequirements(needs_runtime_btf=scalar("RUN_SUITE_NEEDS_RUNTIME_BTF", "0"),
                                     needs_sched_ext=scalar("RUN_SUITE_NEEDS_SCHED_EXT", "0"),
                                     needs_llvmbpf=scalar("RUN_SUITE_NEEDS_LLVMBPF", "0"), llvm_dir=scalar("RUN_LLVM_DIR")),
-            artifacts=ArtifactRequirements(needs_runner_binary=scalar("RUN_NEEDS_RUNNER_BINARY", "0"),
-                                           needs_daemon_binary=scalar("RUN_NEEDS_DAEMON_BINARY", "0"),
-                                           needs_kinsn_modules=scalar("RUN_NEEDS_KINSN_MODULES", "0"),
-                                           needs_workload_tools=scalar("RUN_NEEDS_WORKLOAD_TOOLS", "0"),
+            artifacts=ArtifactRequirements(needs_kinsn_modules=scalar("RUN_NEEDS_KINSN_MODULES", "0"),
                                            native_repos=csv("RUN_NATIVE_REPOS_CSV"), scx_packages=csv("RUN_SCX_PACKAGES_CSV")),
             remote=RemoteConfig(user=scalar("RUN_REMOTE_USER"), stage_dir=scalar("RUN_REMOTE_STAGE_DIR"),
                                 python_bin=scalar("RUN_REMOTE_PYTHON_BIN"),
                                 runtime_python_bin=scalar("RUN_RUNTIME_PYTHON_BIN", "python3"),
                                 container_runtime=scalar("RUN_CONTAINER_RUNTIME", "docker"),
                                 runtime_container_image=scalar("RUN_RUNTIME_CONTAINER_IMAGE"),
-                                runtime_container_image_tar=scalar("RUN_RUNTIME_CONTAINER_IMAGE_TAR"),
                                 bpftool_bin=scalar("RUN_BPFTOOL_BIN", "bpftool")),
             aws=AwsConfig(name_tag=scalar("RUN_NAME_TAG"), instance_type=scalar("RUN_INSTANCE_TYPE"),
                           ami_param=scalar("RUN_AMI_PARAM"), ami_id=scalar("RUN_AMI_ID"),
@@ -386,8 +376,6 @@ def _build_run_config_mapping(
     run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")
     run_needs_sched_ext = suite.get("SUITE_NEEDS_SCHED_EXT", "0")
     run_needs_llvmbpf = suite.get("SUITE_NEEDS_LLVMBPF", "0")
-    run_needs_runner_binary = suite.get("SUITE_NEEDS_RUNNER_BINARY", "0")
-    run_needs_daemon_binary = suite.get("SUITE_NEEDS_DAEMON_BINARY", "0")
     run_needs_kinsn_modules = suite.get("SUITE_NEEDS_KINSN_MODULES", "0")
     run_vm_timeout_seconds = suite.get("SUITE_DEFAULT_VM_TIMEOUT_SECONDS", "7200")
     run_host_python_bin = _env_or_default(values, "PYTHON", "python3")
@@ -468,12 +456,10 @@ def _build_run_config_mapping(
             run_scx_packages = ""
             run_needs_sched_ext = "0"
         elif run_test_mode == "negative":
-            run_needs_daemon_binary = "0"
             run_needs_kinsn_modules = "0"
         elif run_test_mode == "fuzz":
             run_scx_packages = ""
             run_needs_sched_ext = "0"
-            run_needs_daemon_binary = "0"
             run_needs_kinsn_modules = "0"
         elif run_test_mode != "test":
             _die(f"unsupported test mode: {run_test_mode}")
@@ -508,7 +494,6 @@ def _build_run_config_mapping(
     if run_needs_sched_ext == "1" and target.get("TARGET_SUPPORTS_SCHED_EXT", "0") != "1":
         _die(f"target {target_name} does not support required sched_ext for suite {suite_name}")
 
-    run_needs_workload_tools = suite.get("SUITE_NEEDS_WORKLOAD_TOOLS", "0")
     if run_needs_llvmbpf == "1":
         run_llvm_dir = _resolve_run_llvm_dir(values) or DEFAULT_BUILD_CONTAINER_LLVM_DIR
 
@@ -518,11 +503,9 @@ def _build_run_config_mapping(
         "RUN_EXECUTOR": target.get("TARGET_EXECUTOR", ""), "RUN_SUITE_NAME": suite_name,
         "RUN_SUITE_NEEDS_RUNTIME_BTF": suite.get("SUITE_NEEDS_RUNTIME_BTF", "0"),
         "RUN_RUNTIME_CONTAINER_IMAGE": f"bpf-benchmark/runner-runtime:{arch}",
-        "RUN_RUNTIME_CONTAINER_IMAGE_TAR": f".cache/container-images/{arch}-runner-runtime.image.tar",
         "RUN_TOKEN": run_token, "RUN_SUITE_NEEDS_SCHED_EXT": run_needs_sched_ext,
         "RUN_SUITE_NEEDS_LLVMBPF": run_needs_llvmbpf, "RUN_LLVM_DIR": run_llvm_dir,
-        "RUN_NEEDS_RUNNER_BINARY": run_needs_runner_binary, "RUN_NEEDS_DAEMON_BINARY": run_needs_daemon_binary,
-        "RUN_NEEDS_KINSN_MODULES": run_needs_kinsn_modules, "RUN_NEEDS_WORKLOAD_TOOLS": run_needs_workload_tools,
+        "RUN_NEEDS_KINSN_MODULES": run_needs_kinsn_modules,
         "RUN_NAME_TAG": run_name_tag, "RUN_INSTANCE_TYPE": run_instance_type,
         "RUN_REMOTE_USER": run_remote_user, "RUN_REMOTE_STAGE_DIR": run_remote_stage_dir,
         "RUN_AMI_PARAM": run_ami_param, "RUN_AMI_ID": run_ami_id,
