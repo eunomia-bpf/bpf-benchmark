@@ -57,15 +57,9 @@ def _run_local_prep(config: RunConfig) -> None:
 
 def _local_prep_env(*, config: RunConfig) -> dict[str, str]:
     env = config.env()
-    # The runtime image is the pinned user-space tool bundle for all suites.
-    # Build the image runner with llvmbpf even when the current suite is not micro.
-    env["RUN_SUITE_NEEDS_LLVMBPF"] = "1"
     host_python_bin = config.kvm.host_python_bin.strip()
     if not host_python_bin:
         _die("run config host python is missing")
-    run_llvm_dir = config.suite.llvm_dir.strip()
-    if run_llvm_dir and not env.get("LLVM_DIR", "").strip():
-        env["LLVM_DIR"] = run_llvm_dir
     env.update(
         {
             "ROOT_DIR": str(ROOT_DIR),
@@ -74,8 +68,6 @@ def _local_prep_env(*, config: RunConfig) -> dict[str, str]:
             "RUN_CONTRACT_PYTHON_BIN": host_python_bin,
         }
     )
-    if config.identity.target_name.strip() == "aws-x86":
-        env["RUN_AWS_KERNEL"] = "1"
     return env
 
 
@@ -99,8 +91,6 @@ def _local_prep_target_paths(config: RunConfig) -> list[str]:
             suite_name=suite_name,
             target_arch=target_arch,
             executor=executor,
-            target_name=target_name,
-            needs_kinsn_modules=config.artifacts.needs_kinsn_modules == "1",
         )
     ]
 
@@ -167,8 +157,7 @@ def _run_action(target_name: str, suite_name: str, suite_args: list[str] | None 
         if executor == "aws-ssh":
             write_run_config_file(config_path, config)
             write_suite_args_file(suite_args_path, effective_suite_args)
-            if os.environ.get("RUN_SKIP_LOCAL_PREP", "").strip() != "1":
-                _run_local_prep(config)
+            _run_local_prep(config)
             prep_cleanup_armed = True
             _run_checked(
                 _python_module_command(
@@ -181,8 +170,7 @@ def _run_action(target_name: str, suite_name: str, suite_args: list[str] | None 
             success = True
             return
         if executor == "kvm":
-            if os.environ.get("RUN_SKIP_LOCAL_PREP", "").strip() != "1":
-                _run_local_prep(config)
+            _run_local_prep(config)
             from runner.libs.kvm_executor import run_vm_suite
 
             return_code = run_vm_suite(ROOT_DIR, config, effective_suite_args)

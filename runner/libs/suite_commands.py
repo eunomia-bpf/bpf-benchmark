@@ -28,7 +28,6 @@ def _container_suite_config(config: Any, python_bin: str) -> Any:
         remote=replace(
             config.remote,
             python_bin=python_bin,
-            container_runtime="",
             runtime_container_image="",
             runtime_python_bin="",
         ),
@@ -42,7 +41,6 @@ def build_runtime_container_command(
     *,
     die: Any,
 ) -> list[str]:
-    runtime = config.remote.container_runtime.strip() or "docker"
     image = _required(config.remote.runtime_container_image, "RUN_RUNTIME_CONTAINER_IMAGE", die)
     runtime_python = config.remote.runtime_python_bin.strip() or "python3"
     image_workspace = RUNTIME_IMAGE_WORKSPACE
@@ -55,7 +53,7 @@ def build_runtime_container_command(
     if len(suite_argv) < 3 or suite_argv[1] != "-m":
         die(f"unexpected suite argv shape: {suite_argv}")
     command = [
-        runtime,
+        "docker",
         "run",
         "--rm",
         "--privileged",
@@ -75,8 +73,6 @@ def build_runtime_container_command(
     ]
     for relative in _CONTAINER_RESULT_DIRS:
         command.extend(["-v", f"{host_workspace / relative}:{image_workspace / relative}"])
-    if config.artifacts.needs_kinsn_modules.strip() == "1":
-        command.extend(["-v", f"{host_workspace / 'module'}:{image_workspace / 'module'}:ro"])
     for source, target, readonly in (
         ("/sys", "/sys", False),
         ("/sys/fs/bpf", "/sys/fs/bpf", False),

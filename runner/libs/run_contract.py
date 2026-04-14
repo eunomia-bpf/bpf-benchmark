@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 import shlex
-import subprocess
 import sys
 from dataclasses import dataclass
 from functools import partial
@@ -19,7 +18,6 @@ from runner.libs.state_file import write_json_object
 TARGETS_DIR = ROOT_DIR / "runner" / "targets"
 SUITES_DIR = ROOT_DIR / "runner" / "suites"
 DEFAULT_CORPUS_APP_SUITE = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
-DEFAULT_RUNNER_IMAGE_LLVM_DIR = "/usr/lib/llvm-18/lib/cmake/llvm"
 E2E_CASES = ("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran")
 
 _die = partial(fail, "run-contract")
@@ -38,13 +36,10 @@ class RunIdentity:
 class SuiteRequirements:
     needs_runtime_btf: str = "0"
     needs_sched_ext: str = "0"
-    needs_llvmbpf: str = "0"
-    llvm_dir: str = ""
 
 
 @dataclass(frozen=True)
 class ArtifactRequirements:
-    needs_kinsn_modules: str = "0"
     native_repos: tuple[str, ...] = ()
     scx_packages: tuple[str, ...] = ()
 
@@ -55,7 +50,6 @@ class RemoteConfig:
     stage_dir: str = ""
     python_bin: str = ""
     runtime_python_bin: str = "python3"
-    container_runtime: str = "docker"
     runtime_container_image: str = ""
     bpftool_bin: str = "bpftool"
 
@@ -102,8 +96,6 @@ class RunConfig:
             "RUN_TARGET_NAME": i.target_name, "RUN_TARGET_ARCH": arch,
             "RUN_EXECUTOR": i.executor, "RUN_SUITE_NAME": i.suite_name, "RUN_TOKEN": i.token,
             "RUN_SUITE_NEEDS_RUNTIME_BTF": s.needs_runtime_btf, "RUN_SUITE_NEEDS_SCHED_EXT": s.needs_sched_ext,
-            "RUN_SUITE_NEEDS_LLVMBPF": s.needs_llvmbpf, "RUN_LLVM_DIR": s.llvm_dir,
-            "RUN_NEEDS_KINSN_MODULES": a.needs_kinsn_modules,
             "RUN_NAME_TAG": aw.name_tag, "RUN_INSTANCE_TYPE": aw.instance_type,
             "RUN_REMOTE_USER": r.user, "RUN_REMOTE_STAGE_DIR": r.stage_dir,
             "RUN_AMI_PARAM": aw.ami_param, "RUN_AMI_ID": aw.ami_id,
@@ -116,7 +108,6 @@ class RunConfig:
             "RUN_HOST_PYTHON_BIN": kv.host_python_bin, "RUN_VM_KERNEL_IMAGE": kv.kernel_image,
             "RUN_VM_TIMEOUT_SECONDS": kv.timeout_seconds,
             "RUN_REMOTE_PYTHON_BIN": r.python_bin, "RUN_RUNTIME_PYTHON_BIN": r.runtime_python_bin,
-            "RUN_CONTAINER_RUNTIME": r.container_runtime,
             "RUN_RUNTIME_CONTAINER_IMAGE": r.runtime_container_image,
             "RUN_NATIVE_REPOS_CSV": join_csv(list(a.native_repos)),
             "RUN_SCX_PACKAGES_CSV": join_csv(list(a.scx_packages)),
@@ -165,14 +156,11 @@ class RunConfig:
             identity=RunIdentity(target_name=scalar("RUN_TARGET_NAME"), target_arch=scalar("RUN_TARGET_ARCH"),
                                  executor=scalar("RUN_EXECUTOR"), suite_name=scalar("RUN_SUITE_NAME"), token=scalar("RUN_TOKEN")),
             suite=SuiteRequirements(needs_runtime_btf=scalar("RUN_SUITE_NEEDS_RUNTIME_BTF", "0"),
-                                    needs_sched_ext=scalar("RUN_SUITE_NEEDS_SCHED_EXT", "0"),
-                                    needs_llvmbpf=scalar("RUN_SUITE_NEEDS_LLVMBPF", "0"), llvm_dir=scalar("RUN_LLVM_DIR")),
-            artifacts=ArtifactRequirements(needs_kinsn_modules=scalar("RUN_NEEDS_KINSN_MODULES", "0"),
-                                           native_repos=csv("RUN_NATIVE_REPOS_CSV"), scx_packages=csv("RUN_SCX_PACKAGES_CSV")),
+                                    needs_sched_ext=scalar("RUN_SUITE_NEEDS_SCHED_EXT", "0")),
+            artifacts=ArtifactRequirements(native_repos=csv("RUN_NATIVE_REPOS_CSV"), scx_packages=csv("RUN_SCX_PACKAGES_CSV")),
             remote=RemoteConfig(user=scalar("RUN_REMOTE_USER"), stage_dir=scalar("RUN_REMOTE_STAGE_DIR"),
                                 python_bin=scalar("RUN_REMOTE_PYTHON_BIN"),
                                 runtime_python_bin=scalar("RUN_RUNTIME_PYTHON_BIN", "python3"),
-                                container_runtime=scalar("RUN_CONTAINER_RUNTIME", "docker"),
                                 runtime_container_image=scalar("RUN_RUNTIME_CONTAINER_IMAGE"),
                                 bpftool_bin=scalar("RUN_BPFTOOL_BIN", "bpftool")),
             aws=AwsConfig(name_tag=scalar("RUN_NAME_TAG"), instance_type=scalar("RUN_INSTANCE_TYPE"),
@@ -225,20 +213,6 @@ def _resolve_repo_path(path: str) -> str:
     return str(candidate) if candidate.is_absolute() else str((ROOT_DIR / candidate).resolve())
 
 
-def _resolve_run_llvm_dir(values: dict[str, str]) -> str:
-    if explicit_run_dir := _env_or_default(values, "RUN_LLVM_DIR"):
-        return _resolve_repo_path(explicit_run_dir)
-    if explicit_dir := _env_or_default(values, "LLVM_DIR"):
-        return _resolve_repo_path(explicit_dir)
-    llvm_config = _env_or_default(values, "LLVM_CONFIG")
-    if not llvm_config: return ""
-    completed = subprocess.run([llvm_config, "--cmakedir"], check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if completed.returncode != 0: _die(f"LLVM_CONFIG failed to resolve cmake dir: {llvm_config}")
-    cmake_dir = completed.stdout.strip()
-    if not cmake_dir: _die(f"LLVM_CONFIG returned an empty cmake dir: {llvm_config}")
-    return cmake_dir
-
-
 def _host_cpu_count() -> int: return max(os.cpu_count() or 1, 1)
 
 
@@ -280,9 +254,6 @@ def _apply_e2e_case_selection(*, run_e2e_cases: str, suite: dict[str, str]) -> t
 _COMMON_MANIFEST_INPUTS = {
     "PYTHON",
     "RUN_TOKEN",
-    "LLVM_CONFIG",
-    "LLVM_DIR",
-    "CONTAINER_RUNTIME",
     "RUNTIME_PYTHON",
 }
 
@@ -366,8 +337,8 @@ def _build_run_config_mapping(
      run_ami_param, run_ami_id, run_root_volume_gb,
      run_aws_key_name, run_aws_key_path, run_aws_security_group_id,
      run_aws_subnet_id, run_aws_region, run_aws_profile,
-     run_llvm_dir, run_vm_backend, run_vm_executable, run_vm_cpus, run_vm_mem, run_vm_kernel_image,
-    ) = ("",) * 19
+     run_vm_backend, run_vm_executable, run_vm_cpus, run_vm_mem, run_vm_kernel_image,
+    ) = ("",) * 18
     run_corpus_filters = selection.corpus_filters
     run_test_mode = selection.test_mode
     run_e2e_cases = selection.e2e_cases
@@ -375,12 +346,9 @@ def _build_run_config_mapping(
     run_native_repos = suite.get("SUITE_DEFAULT_NATIVE_REPOS", "")
     run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")
     run_needs_sched_ext = suite.get("SUITE_NEEDS_SCHED_EXT", "0")
-    run_needs_llvmbpf = suite.get("SUITE_NEEDS_LLVMBPF", "0")
-    run_needs_kinsn_modules = suite.get("SUITE_NEEDS_KINSN_MODULES", "0")
     run_vm_timeout_seconds = suite.get("SUITE_DEFAULT_VM_TIMEOUT_SECONDS", "7200")
     run_host_python_bin = _env_or_default(values, "PYTHON", "python3")
     run_runtime_python_bin = _env_or_default(values, "RUNTIME_PYTHON", "python3")
-    run_container_runtime = _env_or_default(values, "CONTAINER_RUNTIME", "docker")
     run_remote_python_bin = target.get("TARGET_REMOTE_PYTHON_DEFAULT", suite.get("SUITE_DEFAULT_REMOTE_PYTHON_BIN", ""))
     if target.get("TARGET_EXECUTOR", "") == "aws-ssh":
         aws_env_prefix = target.get("TARGET_AWS_ENV_PREFIX", "")
@@ -455,12 +423,9 @@ def _build_run_config_mapping(
         if run_test_mode == "selftest":
             run_scx_packages = ""
             run_needs_sched_ext = "0"
-        elif run_test_mode == "negative":
-            run_needs_kinsn_modules = "0"
         elif run_test_mode == "fuzz":
             run_scx_packages = ""
             run_needs_sched_ext = "0"
-            run_needs_kinsn_modules = "0"
         elif run_test_mode != "test":
             _die(f"unsupported test mode: {run_test_mode}")
     elif suite_name == "micro":
@@ -494,9 +459,6 @@ def _build_run_config_mapping(
     if run_needs_sched_ext == "1" and target.get("TARGET_SUPPORTS_SCHED_EXT", "0") != "1":
         _die(f"target {target_name} does not support required sched_ext for suite {suite_name}")
 
-    if run_needs_llvmbpf == "1":
-        run_llvm_dir = _resolve_run_llvm_dir(values) or DEFAULT_RUNNER_IMAGE_LLVM_DIR
-
     arch = target.get("TARGET_ARCH", "").strip()
     return {
         "RUN_TARGET_NAME": target_name, "RUN_TARGET_ARCH": arch,
@@ -504,8 +466,6 @@ def _build_run_config_mapping(
         "RUN_SUITE_NEEDS_RUNTIME_BTF": suite.get("SUITE_NEEDS_RUNTIME_BTF", "0"),
         "RUN_RUNTIME_CONTAINER_IMAGE": f"bpf-benchmark/runner-runtime:{arch}",
         "RUN_TOKEN": run_token, "RUN_SUITE_NEEDS_SCHED_EXT": run_needs_sched_ext,
-        "RUN_SUITE_NEEDS_LLVMBPF": run_needs_llvmbpf, "RUN_LLVM_DIR": run_llvm_dir,
-        "RUN_NEEDS_KINSN_MODULES": run_needs_kinsn_modules,
         "RUN_NAME_TAG": run_name_tag, "RUN_INSTANCE_TYPE": run_instance_type,
         "RUN_REMOTE_USER": run_remote_user, "RUN_REMOTE_STAGE_DIR": run_remote_stage_dir,
         "RUN_AMI_PARAM": run_ami_param, "RUN_AMI_ID": run_ami_id,
@@ -518,7 +478,6 @@ def _build_run_config_mapping(
         "RUN_HOST_PYTHON_BIN": run_host_python_bin, "RUN_VM_KERNEL_IMAGE": run_vm_kernel_image,
         "RUN_VM_TIMEOUT_SECONDS": run_vm_timeout_seconds,
         "RUN_REMOTE_PYTHON_BIN": run_remote_python_bin, "RUN_RUNTIME_PYTHON_BIN": run_runtime_python_bin,
-        "RUN_CONTAINER_RUNTIME": run_container_runtime,
         "RUN_NATIVE_REPOS_CSV": run_native_repos, "RUN_SCX_PACKAGES_CSV": run_scx_packages,
         "RUN_BPFTOOL_BIN": run_bpftool_bin,
     }

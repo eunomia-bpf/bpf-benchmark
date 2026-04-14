@@ -6,7 +6,7 @@
 
 # ---------------------------------------------------------------------------
 # kind: simple_lcg_u64_ii  (also aliased as dep_chain / multi_acc / stride_load /
-#                            large_mixed / load_isolation for backward-compat)
+#                            large_mixed / load_isolation as historical aliases)
 #   header: pack("<II", count, header_b)   [header_b defaults to seed]
 #   body:   N u64s: _lcg(state) then  value = state ^ ((i+index_offset)*mixing_salt)
 #                   optionally ^ seed  (xor_seed: true)

@@ -7,7 +7,6 @@ from runner.libs import ROOT_DIR
 
 
 _RUNTIME_IMAGE_SUITES = {"test", "micro", "corpus", "e2e"}
-_TRANSFER_ROOT_ORDER = ("module",)
 RUNTIME_IMAGE_WORKSPACE = ROOT_DIR
 RUNTIME_IMAGE_ARTIFACT_ROOT = Path("/opt/bpf-benchmark")
 
@@ -72,11 +71,9 @@ def runtime_workload_tools_root(workspace: Path, target_arch: str) -> Path:
 def runtime_container_image_tar_path(workspace: Path, target_arch: str) -> Path:
     return workspace / ".cache" / "container-images" / f"{str(target_arch).strip()}-runner-runtime.image.tar"
 
-def kinsn_module_dir(workspace: Path, target_arch: str, target_name: str = "") -> Path:
+def kinsn_module_dir(workspace: Path, target_arch: str) -> Path:
     if inside_runtime_image():
         return runtime_workspace(workspace) / "module" / ("arm64" if _is_arm64(target_arch) else "x86")
-    if str(target_name).strip() == "aws-x86":
-        return workspace / ".cache" / "aws-x86" / "module" / "x86"
     return workspace / "module" / ("arm64" if _is_arm64(target_arch) else "x86")
 
 def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Path:
@@ -107,36 +104,25 @@ def runtime_path_value(workspace: Path, target_arch: str) -> str:
     return ":".join(path_entries)
 
 
-def kinsn_targets(workspace: Path, target_arch: str, target_name: str = "") -> list[Path]:
-    root = kinsn_module_dir(workspace, target_arch, target_name)
-    names = ["bpf_rotate.ko", "bpf_select.ko", "bpf_extract.ko", "bpf_endian.ko", "bpf_bulk_memory.ko"]
-    if _is_arm64(target_arch):
-        names.insert(4, "bpf_ldp.ko")
-    return [root / n for n in names]
-
-def _artifact_transfer_paths(*, workspace, suite_name, target_arch, needs_kinsn_modules) -> list[Path]:
+def _artifact_transfer_paths(*, workspace, suite_name, target_arch) -> list[Path]:
     arch, suite = str(target_arch).strip(), str(suite_name).strip()
     paths: list[Path] = []
     if suite in _RUNTIME_IMAGE_SUITES:      paths.append(runtime_container_image_tar_path(workspace, arch))
-    if needs_kinsn_modules:                 paths.append(workspace / "module")
     return paths
 
-def local_prep_targets(*, workspace, suite_name, target_arch, executor, target_name="",
-                        needs_kinsn_modules) -> list[Path]:
+def local_prep_targets(*, workspace, suite_name, target_arch, executor) -> list[Path]:
     arch, suite = str(target_arch).strip(), str(suite_name).strip()
     targets: list[Path] = []
     if suite in _RUNTIME_IMAGE_SUITES:      targets.append(runtime_container_image_tar_path(workspace, arch))
     if str(executor).strip() == "kvm":
         targets += [kvm_kernel_image_path(workspace), kernel_modules_root(workspace, arch, executor) / "lib" / "modules"]
-    if needs_kinsn_modules:                 targets.extend(kinsn_targets(workspace, arch, target_name))
     seen: set[Path] = set()
     return [t for t in targets if not (t in seen or seen.add(t))]  # type: ignore[func-returns-value]
 
-def remote_transfer_roots(*, suite_name, target_arch, needs_kinsn_modules) -> list[str]:
+def remote_transfer_roots(*, suite_name, target_arch) -> list[str]:
     roots: list[str] = []
     seen: set[str] = set()
-    for path in _artifact_transfer_paths(workspace=ROOT_DIR, suite_name=suite_name, target_arch=target_arch,
-                                         needs_kinsn_modules=needs_kinsn_modules):
+    for path in _artifact_transfer_paths(workspace=ROOT_DIR, suite_name=suite_name, target_arch=target_arch):
         try:
             relative = str(path.relative_to(ROOT_DIR))
         except ValueError:
@@ -144,6 +130,4 @@ def remote_transfer_roots(*, suite_name, target_arch, needs_kinsn_modules) -> li
         if relative not in seen:
             seen.add(relative)
             roots.append(relative)
-    ordered = [e for e in _TRANSFER_ROOT_ORDER if e in seen]
-    ordered.extend(e for e in roots if e not in _TRANSFER_ROOT_ORDER)
-    return ordered
+    return roots

@@ -5,7 +5,6 @@ import shlex
 import shutil
 import subprocess
 import sys
-import tempfile
 import time
 from datetime import datetime, timezone
 from functools import partial
@@ -119,14 +118,15 @@ def _require_modules_root(modules_root: Path, *, arch: str) -> Path:
 
 
 def _build_x86_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
-    build_dir = ctx.target_root / "kernel-build"
+    del ctx
+    build_dir = ROOT_DIR / ".cache" / "x86-kernel-build"
     kernel_image = build_dir / "arch" / "x86" / "boot" / "bzImage"
     modules_target = ROOT_DIR / ".cache" / "repo-artifacts" / "x86_64" / "kernel-modules" / "lib" / "modules"
     _run_local_make(str(kernel_image), str(modules_target), "RUN_TARGET_ARCH=x86_64",
-                    "RUN_AWS_KERNEL=1", f"X86_AWS_BUILD_DIR={build_dir}",
+                    f"X86_BUILD_DIR={build_dir}",
                     f"JOBS={max(os.cpu_count() or 1, 1)}")
     if not kernel_image.is_file():
-        _die(f"missing x86 AWS kernel image: {kernel_image}")
+        _die(f"missing x86 kernel image: {kernel_image}")
     kernel_release = _require_kernel_release(build_dir / "include" / "config" / "kernel.release", arch="x86")
     return kernel_release, kernel_image, _require_modules_root(modules_target / kernel_release, arch="x86")
 
@@ -219,85 +219,97 @@ def _remote_has_sched_ext(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
 def _ensure_remote_docker(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     script = (
         "set -e; "
-        "if ! command -v docker >/dev/null 2>&1; then "
-        "  if command -v dnf >/dev/null 2>&1; then sudo dnf install -y docker; "
-        "  else echo 'missing docker and no dnf installer' >&2; exit 1; fi; "
-        "fi; "
-        "if command -v systemctl >/dev/null 2>&1; then "
-        "  sudo systemctl enable --now docker >/dev/null 2>&1 || sudo systemctl start docker; "
-        "fi; "
-        "sudo docker info >/dev/null"
+        "command -v docker >/dev/null 2>&1 || { echo 'docker is required on the AWS target image' >&2; exit 1; }; "
+        "sudo docker info >/dev/null || { echo 'docker daemon is required on the AWS target image' >&2; exit 1; }"
     )
     aws_common._ssh_exec(ctx, ip, "bash", "-c", script)
 
 
-def _ensure_remote_rsync(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
-    script = (
-        "set -e; "
-        "if ! command -v rsync >/dev/null 2>&1; then "
-        "  if command -v dnf >/dev/null 2>&1; then sudo dnf install -y rsync; "
-        "  else echo 'missing rsync and no dnf installer' >&2; exit 1; fi; "
-        "fi; "
-        "command -v rsync >/dev/null"
-    )
-    aws_common._ssh_exec(ctx, ip, "bash", "-c", script)
+def _runtime_container_image(ctx: aws_common.AwsExecutorContext) -> str:
+    image = ctx.contract.remote.runtime_container_image.strip()
+    if not image:
+        _die("run config RUN_RUNTIME_CONTAINER_IMAGE is empty")
+    return image
 
 
-def _link_or_copy_file(src: str, dst: str) -> str:
-    try:
-        os.link(src, dst)
-    except OSError:
-        shutil.copy2(src, dst)
-    return dst
+def _remote_runtime_image_tar(ctx: aws_common.AwsExecutorContext) -> Path:
+    return runtime_container_image_tar_path(Path(ctx.remote_stage_dir), ctx.contract.identity.target_arch)
+
+
+def _ensure_remote_runtime_image_loaded(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
+    _ensure_remote_docker(ctx, ip)
+    _sync_remote_roots(ctx, ip)
+    aws_common._ssh_exec(ctx, ip, "sudo", "docker", "load", "-i", str(_remote_runtime_image_tar(ctx)))
+
+
+def _tar_transform_pattern(value: str) -> str:
+    return "".join(f"\\{char}" if char in "\\.^$*[]" else char for char in value).replace("#", "\\#")
+
+
+def _tar_transform_replacement(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("&", "\\&").replace("#", "\\#")
 
 
 def _deploy_kernel_artifacts(ctx: aws_common.AwsExecutorContext, ip: str,
                              kernel_release: str, kernel_image: Path,
-                             modules_root: Path, arch: str) -> None:
-    del arch
-    cache_tmp = ROOT_DIR / ".cache"
-    cache_tmp.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="bpf-kernel-deploy-", dir=cache_tmp) as tmpdir:
-        tmp = Path(tmpdir)
-        boot_dir = tmp / "boot"
-        boot_dir.mkdir(parents=True)
-        remote_kernel_path = f"/boot/vmlinuz-{kernel_release}"
-        shutil.copy2(kernel_image, boot_dir / Path(remote_kernel_path).name)
-
-        mod_dst = tmp / "lib" / "modules" / kernel_release
-        mod_dst.parent.mkdir(parents=True)
-        shutil.copytree(modules_root, mod_dst, symlinks=True, copy_function=_link_or_copy_file)
-
-        aws_common._ssh_exec(ctx, ip, "sudo", "rm", "-rf", "--",
-                             f"/lib/modules/{kernel_release}", remote_kernel_path)
-        tar_cmd = [
-            "tar", "--owner=0", "--group=0", "--numeric-owner", "-C", str(tmp), "-cpf", "-",
-            "--", f"boot/{Path(remote_kernel_path).name}", f"lib/modules/{kernel_release}",
-        ]
-        extract_cmd = ["ssh", *aws_common._ssh_base_args(ctx), f"{ctx.remote_user}@{ip}", "sudo tar -C / -xpf -"]
-        with subprocess.Popen(tar_cmd, stdout=subprocess.PIPE, cwd=ROOT_DIR) as tar_proc:
-            rc = subprocess.run(extract_cmd, stdin=tar_proc.stdout, cwd=ROOT_DIR, text=False, check=False).returncode
-            tar_proc.stdout.close()  # type: ignore[union-attr]
-            tar_proc.wait()
-            if tar_proc.returncode != 0:
-                _die(f"tar failed while streaming kernel artifacts for {kernel_release}")
-        if rc != 0:
-            _die(f"remote tar extract failed on {ip} for {kernel_release}")
-
-    kernel_title = shlex.quote(f"bpf-benchmark {kernel_release}")
-    kernel_path = shlex.quote(remote_kernel_path)
-    initrd_path = shlex.quote(f"/boot/initramfs-{kernel_release}.img")
-    release_arg = shlex.quote(kernel_release)
-    install_script = (
-        f"set -eux; "
-        f"depmod {release_arg}; "
-        f"dracut --force {initrd_path} {release_arg}; "
-        f"grubby --info={kernel_path} >/dev/null 2>&1 || "
-        f"grubby --add-kernel={kernel_path} --initrd={initrd_path} --title={kernel_title} --copy-default; "
-        f"grubby --set-default={kernel_path} || true; "
-        f"[ \"$(grubby --default-kernel)\" = {kernel_path} ]"
-    )
-    aws_common._ssh_exec(ctx, ip, "sudo", "sh", "-c", install_script)
+                             modules_root: Path) -> None:
+    tar_cmd = [
+        "tar", "--owner=0", "--group=0", "--numeric-owner", "-cpf", "-",
+        "-C", str(kernel_image.parent),
+        "--transform",
+        f"s#^{_tar_transform_pattern(kernel_image.name)}$#"
+        f"boot/{_tar_transform_replacement(f'vmlinuz-{kernel_release}')}#",
+        kernel_image.name,
+        "-C", str(modules_root.parent),
+        "--transform",
+        f"s#^{_tar_transform_pattern(kernel_release)}#"
+        f"lib/modules/{_tar_transform_replacement(kernel_release)}#",
+        kernel_release,
+    ]
+    install_script = r"""
+set -eu
+release=$1
+kernel_path="/boot/vmlinuz-${release}"
+initrd_path="/boot/initramfs-${release}.img"
+kernel_title="bpf-benchmark ${release}"
+rm -rf -- "/host/lib/modules/${release}" "/host${kernel_path}"
+tar -C /host -xpf -
+chroot /host /bin/sh -c '
+set -eux
+release=$1
+kernel_path=$2
+initrd_path=$3
+kernel_title=$4
+depmod "${release}"
+dracut --force "${initrd_path}" "${release}"
+grubby --info="${kernel_path}" >/dev/null 2>&1 || grubby --add-kernel="${kernel_path}" --initrd="${initrd_path}" --title="${kernel_title}" --copy-default
+grubby --set-default="${kernel_path}" || true
+[ "$(grubby --default-kernel)" = "${kernel_path}" ]
+' sh "${release}" "${kernel_path}" "${initrd_path}" "${kernel_title}"
+""".strip()
+    install_container_cmd = [
+        "sudo", "docker", "run", "--rm", "-i",
+        "--privileged", "--pid=host",
+        "-v", "/:/host",
+        "-v", "/dev:/host/dev",
+        "-v", "/proc:/host/proc",
+        "-v", "/sys:/host/sys",
+        "-v", "/run:/host/run",
+        _runtime_container_image(ctx),
+        "/bin/sh", "-c", install_script, "kernel-install", kernel_release,
+    ]
+    extract_cmd = [
+        "ssh", *aws_common._ssh_base_args(ctx), f"{ctx.remote_user}@{ip}",
+        shlex.join(install_container_cmd),
+    ]
+    with subprocess.Popen(tar_cmd, stdout=subprocess.PIPE, cwd=ROOT_DIR) as tar_proc:
+        rc = subprocess.run(extract_cmd, stdin=tar_proc.stdout, cwd=ROOT_DIR, text=False, check=False).returncode
+        tar_proc.stdout.close()  # type: ignore[union-attr]
+        tar_proc.wait()
+        if tar_proc.returncode != 0:
+            _die(f"tar failed while streaming kernel artifacts for {kernel_release}")
+    if rc != 0:
+        _die(f"remote kernel installer container failed on {ip} for {kernel_release}")
 
 
 def _setup_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
@@ -313,17 +325,15 @@ def _setup_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     with runner_lock(f"artifact-build.{target_arch}"):
         if ctx.target_name == "aws-arm64":
             kernel_release, kernel_image, modules_root = _build_arm64_kernel_artifacts(ctx)
-            arch = "arm64"
         elif ctx.target_name == "aws-x86":
             kernel_release, kernel_image, modules_root = _build_x86_kernel_artifacts(ctx)
-            arch = "x86"
         else:
             _die(f"unsupported AWS target for setup: {ctx.target_name}")
 
         setup_result_dir = ctx.results_dir / f"setup_{kernel_release}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
         setup_result_dir.mkdir(parents=True, exist_ok=True)
 
-        _deploy_kernel_artifacts(ctx, ip, kernel_release, kernel_image, modules_root, arch)
+        _deploy_kernel_artifacts(ctx, ip, kernel_release, kernel_image, modules_root)
 
     updated_ip = _reboot_and_wait_for_new_boot(ctx, instance_id, previous_boot_id)
     if not updated_ip or updated_ip == "None":
@@ -424,6 +434,8 @@ def _ensure_instance_for_suite(ctx: aws_common.AwsExecutorContext) -> str:
         instance_ip = state.get("STATE_INSTANCE_IP", "").strip()
         aws_common._wait_for_ssh(ctx, instance_ip)
 
+    _ensure_remote_runtime_image_loaded(ctx, instance_ip)
+
     def _maybe_setup(reason: bool) -> str | None:
         if not reason: return None
         _setup_instance(ctx, instance_ip)
@@ -446,34 +458,22 @@ def _suite_results_relative_path(suite_name: str) -> str:
     _die(f"unsupported suite for result sync: {suite_name}")
 
 
-def _remote_transfer_source(ctx: aws_common.AwsExecutorContext, entry: str) -> Path:
-    if ctx.target_name == "aws-x86" and entry == "module":
-        return ROOT_DIR / ".cache" / "aws-x86" / "module"
-    return ROOT_DIR / entry
-
-
 def _sync_remote_roots(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
-    a = ctx.contract.artifacts
     selected_roots = remote_transfer_roots(
         suite_name=ctx.contract.identity.suite_name,
         target_arch=ctx.contract.identity.target_arch,
-        needs_kinsn_modules=a.needs_kinsn_modules == "1",
     )
     if not selected_roots:
         _die("derived remote transfer roots selected no existing roots")
-    missing_roots = [str(_remote_transfer_source(ctx, e)) for e in selected_roots if not _remote_transfer_source(ctx, e).exists()]
+    missing_roots = [str(ROOT_DIR / e) for e in selected_roots if not (ROOT_DIR / e).is_file()]
     if missing_roots:
-        _die("derived remote transfer roots list missing local roots: " + ", ".join(missing_roots))
+        _die("derived remote transfer roots list missing local files: " + ", ".join(missing_roots))
     aws_common._ssh_exec(ctx, ip, "mkdir", "-p", ctx.remote_stage_dir)
     for entry in selected_roots:
-        source_path = _remote_transfer_source(ctx, entry)
+        source_path = ROOT_DIR / entry
         remote_path = f"{ctx.remote_stage_dir}/{entry}"
         aws_common._ssh_exec(ctx, ip, "mkdir", "-p", str(Path(remote_path).parent))
-        if source_path.is_dir():
-            aws_common._ssh_exec(ctx, ip, "mkdir", "-p", remote_path)
-            aws_common._rsync_to(ctx, ip, source_path, remote_path, excludes=("results/", "__pycache__/"))
-        else:
-            aws_common._scp_to(ctx, ip, source_path, remote_path)
+        aws_common._scp_to(ctx, ip, source_path, remote_path)
 
 
 def _sync_remote_results(ctx: aws_common.AwsExecutorContext, ip: str, remote_workspace: str) -> Path | None:
@@ -482,8 +482,23 @@ def _sync_remote_results(ctx: aws_common.AwsExecutorContext, ip: str, remote_wor
     local_results = ROOT_DIR / relative_results
     if aws_common._ssh_exec(ctx, ip, "test", "-e", remote_results, check=False).returncode != 0:
         return None
-    aws_common._rsync_from(ctx, ip, remote_results, local_results)
+    _pull_remote_dir(ctx, ip, remote_results, local_results)
     return local_results
+
+
+def _pull_remote_dir(ctx: aws_common.AwsExecutorContext, ip: str, remote_path: str, local_path: Path) -> None:
+    local_path.mkdir(parents=True, exist_ok=True)
+    remote_cmd = f"tar -C {shlex.quote(remote_path)} -cpf - ."
+    extract_cmd = ["tar", "-C", str(local_path), "-xpf", "-"]
+    with subprocess.Popen(["ssh", *aws_common._ssh_base_args(ctx), f"{ctx.remote_user}@{ip}", remote_cmd],
+                          stdout=subprocess.PIPE, cwd=ROOT_DIR) as ssh_proc:
+        rc = subprocess.run(extract_cmd, stdin=ssh_proc.stdout, cwd=ROOT_DIR, text=False, check=False).returncode
+        ssh_proc.stdout.close()  # type: ignore[union-attr]
+        ssh_proc.wait()
+    if ssh_proc.returncode != 0:
+        _die(f"remote tar failed while streaming {ip}:{remote_path}")
+    if rc != 0:
+        _die(f"local tar extract failed for {ip}:{remote_path} into {local_path}")
 
 
 def _remote_runtime_container_command(
@@ -507,9 +522,7 @@ def _remote_result_dir_command(remote_workspace: str) -> str:
 
 def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_path: Path | None) -> None:
     aws_common._wait_for_ssh(ctx, ip)
-    if (ctx.contract.remote.container_runtime or "docker") == "docker":
-        _ensure_remote_docker(ctx, ip)
-    _ensure_remote_rsync(ctx, ip)
+    _ensure_remote_docker(ctx, ip)
     stamp = f"{ctx.suite_name}_{ctx.run_token}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     local_log_dir = ctx.results_dir / "logs"
     local_log = local_log_dir / f"{stamp}.remote.log"
@@ -524,15 +537,11 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_pa
         f"mkdir -p {shlex.quote(remote_run_dir)} && "
         f"chown $(id -u):$(id -g) {shlex.quote(remote_run_dir)} 2>/dev/null || true"
     )
-    _sync_remote_roots(ctx, ip)
-    image_tar = runtime_container_image_tar_path(Path(remote_workspace), ctx.contract.identity.target_arch)
-    load_cmd = shlex.join([ctx.contract.remote.container_runtime or "docker", "load", "-i", str(image_tar)])
     suite_cmd = shlex.join(_remote_runtime_container_command(ctx, remote_workspace, suite_args_path))
     log_dir_cmd = f"mkdir -p {shlex.quote(str(Path(remote_log).parent))}"
     run_cmd = (
         f"{log_dir_cmd} && "
         f"{_remote_result_dir_command(remote_workspace)} && "
-        f"sudo {load_cmd} >/dev/null && "
         f"sudo {suite_cmd} >{shlex.quote(remote_log)} 2>&1"
     )
     remote_completed = aws_common._ssh_exec(ctx, ip, "bash", "-c", run_cmd, check=False)

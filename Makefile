@@ -14,20 +14,22 @@ ARTIFACT_ROOT := $(ROOT_DIR)/.cache
 X86_BUILD_DIR ?= $(ARTIFACT_ROOT)/x86-kernel-build
 RUNNER_BUILD_DIR ?= $(RUNNER_DIR)/build
 
-include $(RUNNER_DIR)/mk/arm64_defaults.mk
-
 # ARM64 / AWS
 ARM64_BUILD_DIR     ?= $(ARTIFACT_ROOT)/arm64-kernel-build
+ARM64_AWS_CACHE_ROOT ?= $(ARTIFACT_ROOT)/aws-arm64
+ARM64_AWS_BUILD_DIR ?= $(ARM64_AWS_CACHE_ROOT)/kernel-build
 ARM64_IMAGE         := $(ARM64_BUILD_DIR)/arch/arm64/boot/Image
 ARM64_EFI_IMAGE     := $(ARM64_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
 ARM64_AWS_IMAGE     := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/Image
 ARM64_AWS_EFI_IMAGE := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
-X86_AWS_BUILD_DIR ?= $(ARTIFACT_ROOT)/aws-x86/kernel-build
-X86_AWS_IMAGE := $(X86_AWS_BUILD_DIR)/arch/x86/boot/bzImage
-X86_AWS_KINSN_MODULE_ROOT ?= $(ARTIFACT_ROOT)/aws-x86/module
-X86_AWS_KINSN_MODULE_DIR ?= $(X86_AWS_KINSN_MODULE_ROOT)/x86
 RUN_TARGET_SUITE_CMD  = "$(PYTHON)" -m runner.libs.run_target_suite
 AWS_ARM64_BENCH_MODE ?= all
+
+# Build inputs consumed by included runner make rules.
+NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
+JOBS         ?= $(NPROC)
+DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_x86_defconfig
+ARM64_DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_arm64_defconfig
 
 include $(RUNNER_DIR)/mk/build.mk
 
@@ -61,12 +63,6 @@ SCX_PROG_SHOW_RACE_LOAD_TIMEOUT ?= 20
 SCX_PROG_SHOW_RACE_SKIP_PROBE ?= 0
 KALLSYMS_EXTRA_PASS ?= 1
 
-# Derived
-NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
-JOBS         ?= $(NPROC)
-DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_defconfig
-X86_AWS_DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_x86_aws_defconfig
-ARM64_DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_arm64_defconfig
 # Results
 MICRO_RESULTS_DIR      := $(ROOT_DIR)/micro/results
 
@@ -75,7 +71,7 @@ _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
 _VENV_FOUND := $(firstword $(foreach v,$(_VENV_CANDIDATES),$(if $(wildcard $(v)/bin/activate),$(v),)))
 VENV ?= $(_VENV_FOUND)
 PYTHON := $(if $(VENV),$(VENV)/bin/python3,python3)
-export BZIMAGE PYTHON LLVM_CONFIG LLVM_DIR RUN_LLVM_DIR
+export BZIMAGE PYTHON LLVM_DIR RUN_LLVM_DIR
 export VM_TEST_TIMEOUT VM_MICRO_TIMEOUT VM_CORPUS_TIMEOUT VM_E2E_TIMEOUT
 export FUZZ_ROUNDS SCX_PROG_SHOW_RACE_MODE SCX_PROG_SHOW_RACE_ITERATIONS SCX_PROG_SHOW_RACE_LOAD_TIMEOUT SCX_PROG_SHOW_RACE_SKIP_PROBE
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
@@ -114,12 +110,7 @@ help:
 	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=$(AWS_ARM64_BENCH_MODE) AWS_ARM64_E2E_CASES=<all|tracee,tetragon,...>"
 	@echo "        aws-x86-test AWS_X86_REGION=<region> AWS_X86_PROFILE=<profile> AWS_X86_TEST_MODE=<selftest|negative|test>"
 	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=$(AWS_X86_BENCH_MODE) AWS_X86_E2E_CASES=<all|tracee,tetragon,...>"
-	@echo "        containerized local builds: CONTAINER_RUNTIME=<docker|podman>"
 	@echo "        AWS benchmark mode 'all' runs micro/corpus/e2e through the target runner"
-
-$(X86_AWS_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(X86_AWS_DEFCONFIG_SRC) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
-	@mkdir -p "$(X86_AWS_BUILD_DIR)"
-	$(call RUNNER_HOST_ARTIFACT_BUILD,linux/amd64,x86_64,x86-aws-kernel)
 
 check:
 	$(PYTHON) -m py_compile \
@@ -147,6 +138,7 @@ check:
 		runner/libs/run_target_suite.py \
 		runner/libs/suite_args.py \
 		runner/libs/suite_commands.py \
+		runner/libs/workload.py \
 		runner/libs/workspace_layout.py \
 		runner/suites/__init__.py \
 		runner/suites/_common.py \
@@ -192,9 +184,6 @@ vm-all:
 $(ARM64_IMAGE) $(ARM64_EFI_IMAGE) &: $(ARM64_RUNNER_RUNTIME_IMAGE_TAR) $(ARM64_DEFCONFIG_SRC) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
 	$(call RUNNER_HOST_ARTIFACT_BUILD,linux/arm64,arm64,arm64-kernel)
 
-$(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE) &: $(ARM64_RUNNER_RUNTIME_IMAGE_TAR) $(ARM64_DEFCONFIG_SRC) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
-	$(call RUNNER_HOST_ARTIFACT_BUILD,linux/arm64,arm64,arm64-aws-kernel)
-
 # ── AWS aliases ───────────────────────────────────────────────────────────────
 aws-arm64-test:
 	$(RUN_TARGET_SUITE_CMD) run aws-arm64 test
@@ -238,8 +227,6 @@ clean:
 		"$(ARTIFACT_ROOT)/aws-arm64/run-state" \
 		"$(ARTIFACT_ROOT)/aws-arm64/runs" \
 		"$(ARTIFACT_ROOT)/aws-arm64/state" \
-			"$(ARTIFACT_ROOT)/aws-x86/kernel-build" \
-			"$(ARTIFACT_ROOT)/aws-x86/module" \
-			"$(ARTIFACT_ROOT)/aws-x86/run-state" \
+		"$(ARTIFACT_ROOT)/aws-x86/run-state" \
 		"$(ARTIFACT_ROOT)/aws-x86/runs" \
 		"$(ARTIFACT_ROOT)/aws-x86/state"

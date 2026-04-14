@@ -467,11 +467,11 @@ def _run_tc_qdisc(command: Sequence[str], *, action: str) -> subprocess.Complete
 def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
     tc_binary = which("tc")
     if tc_binary is None:
-        return _tcp_retransmit_fallback(duration_s, "tc is unavailable")
+        raise RuntimeError("tc is required for the tcp_retransmit workload")
     try:
         _load_kernel_module("sch_netem")
     except RuntimeError as exc:
-        return _tcp_retransmit_fallback(duration_s, f"sch_netem is unavailable: {exc}")
+        raise RuntimeError(f"sch_netem is required for the tcp_retransmit workload: {exc}") from exc
     effective_duration = max(8.0, float(duration_s))
     transfer_target_bytes = 16 * 1024
 
@@ -524,7 +524,7 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
     except RuntimeError as exc:
         stop.set()
         thread.join(timeout=1.0)
-        return _tcp_retransmit_fallback(duration_s, f"netem qdisc setup failed: {exc}")
+        raise RuntimeError(f"netem qdisc setup failed: {exc}") from exc
 
     port = port_holder[0]
     start = time.monotonic()
@@ -572,18 +572,6 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
         raise RuntimeError(f"tcp retransmit workload produced no successful transfers; attempts={attempts}, failures={failures}")
     elapsed = time.monotonic() - start
     return _finish_result(float(attempts), elapsed, f"successful_transfers={successes}", f"failed_transfers={failures}")
-
-
-def _tcp_retransmit_fallback(duration_s: int | float, reason: str) -> WorkloadResult:
-    result = run_connect_storm(duration_s)
-    stderr = "\n".join(part for part in (f"tcp_retransmit fallback: {reason}", result.stderr) if part)
-    return WorkloadResult(
-        ops_total=result.ops_total,
-        ops_per_sec=result.ops_per_sec,
-        duration_s=result.duration_s,
-        stdout=result.stdout,
-        stderr=stderr,
-    )
 
 
 def run_vfs_create_write_fsync_load(duration_s: int | float) -> WorkloadResult:
