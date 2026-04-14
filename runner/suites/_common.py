@@ -7,15 +7,13 @@ import shlex
 import shutil
 import subprocess
 import sys
-import time
 from pathlib import Path
 from typing import Sequence
 
 from runner.libs.workspace_layout import (
     daemon_binary_path,
-    inside_runtime_image as inside_runtime_container,
+    inside_runtime_image,
     kernel_modules_root,
-    runtime_container_image_tar_path,
     runtime_path_value,
     runtime_repo_artifact_root,
     runtime_workload_tools_root,
@@ -46,151 +44,6 @@ def merge_csv_and_repeated(csv_value: str, repeated_values: Sequence[str] | None
         if normalized and normalized not in merged:
             merged.append(normalized)
     return merged
-
-
-# ---------------------------------------------------------------------------
-# container helpers
-# ---------------------------------------------------------------------------
-
-def append_bind_mount(command: list[str], source: Path, target: Path | None = None, *, readonly: bool = False) -> None:
-    if not source.exists():
-        return
-    destination = target or source
-    suffix = ":ro" if readonly else ""
-    command.extend(["-v", f"{source}:{destination}{suffix}"])
-
-
-def _command_summary(command: Sequence[str], result: subprocess.CompletedProcess[str]) -> str:
-    output = (result.stderr.strip() or result.stdout.strip())[-1000:]
-    suffix = f": {output}" if output else ""
-    return f"{shlex.join(command)} exited {result.returncode}{suffix}"
-
-
-def _try_start_container_runtime(runtime: str) -> str:
-    if Path(runtime).name != "docker":
-        return ""
-    attempts: list[str] = []
-    for command in (["systemctl", "start", "docker"], ["service", "docker", "start"]):
-        if shutil.which(command[0]) is None:
-            attempts.append(f"{command[0]} not found")
-            continue
-        try:
-            result = subprocess.run(command, capture_output=True, text=True, check=False, timeout=20)
-        except subprocess.TimeoutExpired:
-            attempts.append(f"{shlex.join(command)} timed out")
-            continue
-        attempts.append(_command_summary(command, result))
-        if result.returncode == 0:
-            return "\n".join(attempts)
-    if shutil.which("dockerd") is None:
-        attempts.append("dockerd not found")
-        return "\n".join(attempts)
-    Path("/var/run").mkdir(parents=True, exist_ok=True)
-    dockerd_log = Path("/tmp/bpf-benchmark-dockerd.log")
-    log_file = dockerd_log.open("ab")
-    subprocess.Popen(
-        [
-            "dockerd",
-            "--host=unix:///var/run/docker.sock",
-            "--data-root=/tmp/bpf-benchmark-docker",
-            "--exec-root=/tmp/bpf-benchmark-docker-exec",
-            "--pidfile=/tmp/bpf-benchmark-docker.pid",
-        ],
-        stdout=log_file,
-        stderr=log_file,
-        start_new_session=True,
-    )
-    attempts.append(f"started dockerd, log={dockerd_log}")
-    return "\n".join(attempts)
-
-
-def _dockerd_log_tail() -> str:
-    path = Path("/tmp/bpf-benchmark-dockerd.log")
-    if not path.is_file():
-        return ""
-    return path.read_text(encoding="utf-8", errors="replace")[-2000:]
-
-
-def _ensure_runtime_container_image(workspace: str, container_runtime: str, image: str, target_arch: str) -> None:
-    """Load the container image from the cached tar if it is not already present."""
-    runtime = container_runtime or "docker"
-    last_error = ""
-    start_detail = ""
-    start_attempted = False
-    for _ in range(120):
-        info_result = subprocess.run(
-            [runtime, "info"],
-            capture_output=True, text=True, check=False,
-        )
-        if info_result.returncode == 0:
-            break
-        last_error = (info_result.stderr.strip() or info_result.stdout.strip())[-1000:]
-        if not start_attempted:
-            start_detail = _try_start_container_runtime(runtime)
-            start_attempted = True
-        time.sleep(1)
-    else:
-        details = [part for part in (last_error, start_detail, _dockerd_log_tail()) if part]
-        detail = ":\n" + "\n".join(details) if details else ""
-        raise SystemExit(f"container runtime '{runtime}' is unavailable{detail}")
-    inspect_result = subprocess.run(
-        [runtime, "image", "inspect", image],
-        capture_output=True, text=True, check=False,
-    )
-    if inspect_result.returncode == 0:
-        return
-    tar_path = runtime_container_image_tar_path(Path(workspace), target_arch)
-    if not tar_path.is_file():
-        raise SystemExit(
-            f"runtime container image '{image}' not found locally and tar is missing: {tar_path}"
-        )
-    load_result = subprocess.run(
-        [runtime, "load", "-i", str(tar_path)],
-        text=True, check=False,
-    )
-    if load_result.returncode != 0:
-        raise SystemExit(
-            f"failed to load runtime container image from {tar_path} (exit {load_result.returncode})"
-        )
-
-
-def run_in_runtime_container(workspace: str, args_module: str, module_argv: list[str],
-                              container_runtime: str, image: str, runtime_python_bin: str,
-                              target_arch: str = "") -> None:
-    if not image:
-        raise SystemExit("runtime container image is empty")
-    _ensure_runtime_container_image(workspace, container_runtime, image, target_arch)
-    command = [
-        container_runtime or "docker",
-        "run",
-        "--rm",
-        "--privileged",
-        "--pid=host",
-        "--network=host",
-        "--ipc=host",
-        "-e",
-        "BPFREJIT_INSIDE_RUNTIME_CONTAINER=1",
-        "-e",
-        f"PYTHONPATH={workspace}",
-        "-e",
-        "HOME=/root",
-        "-v",
-        f"{workspace}:{workspace}",
-        "-w",
-        workspace,
-    ]
-    for name in ("TMPDIR", "TMP", "TEMP", "BPFREJIT_RUNTIME_TMPDIR"):
-        if value := os.environ.get(name, "").strip():
-            command.extend(["-e", f"{name}={value}"])
-    append_bind_mount(command, Path("/sys"))
-    append_bind_mount(command, Path("/sys/fs/bpf"))
-    append_bind_mount(command, Path("/sys/kernel/debug"))
-    append_bind_mount(command, Path("/lib/modules"), readonly=True)
-    append_bind_mount(command, Path("/boot"), readonly=True)
-    command.extend([image, runtime_python_bin or "python3", "-m", args_module, *module_argv])
-    completed = subprocess.run(command, cwd=workspace, text=True, check=False)
-    if completed.returncode != 0:
-        raise SystemExit(completed.returncode)
 
 
 # ---------------------------------------------------------------------------
@@ -408,9 +261,6 @@ def add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--run-token", default="", help="Run token used for runtime scratch directories.")
     parser.add_argument("--python-bin", default="", help="Python binary used to run the suite driver.")
     parser.add_argument("--bpftool-bin", default="bpftool", help="bpftool binary name or path.")
-    parser.add_argument("--container-runtime", default="docker", help="Container runtime for runtime-container mode.")
-    parser.add_argument("--runtime-container-image", default="", help="Runtime container image. Empty disables container mode.")
-    parser.add_argument("--runtime-python-bin", default="python3", help="Python binary used inside the runtime container.")
 
 
 def positive_int(value: str) -> int:

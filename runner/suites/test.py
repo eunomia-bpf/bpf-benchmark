@@ -24,14 +24,13 @@ from runner.suites._common import (
     ensure_bpf_stats_enabled,
     ensure_scx_artifacts,
     env_with_suite_runtime_ld,
-    inside_runtime_container,
+    inside_runtime_image,
     merge_csv_and_repeated,
     positive_int,
     resolve_daemon_binary,
     resolve_executable,
     resolve_workspace_path,
     run_checked,
-    run_in_runtime_container,
     suite_main_setup,
 )
 
@@ -66,39 +65,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     args.test_mode = "test" if args.test_mode == "full" else args.test_mode
     args.scx_packages = merge_csv_and_repeated(args.scx_packages, args.scx_package_values)
     return args
-
-
-def _module_argv(args: argparse.Namespace) -> list[str]:
-    argv = [
-        "--workspace", str(args.workspace),
-        "--target-arch", str(args.target_arch),
-        "--target-name", str(args.target_name),
-        "--executor", str(args.executor),
-        "--bpftool-bin", str(args.bpftool_bin),
-        "--test-mode", str(args.test_mode),
-        "--fuzz-rounds", str(args.fuzz_rounds),
-        "--scx-prog-show-race-mode", str(args.scx_prog_show_race_mode),
-        "--scx-prog-show-race-iterations", str(args.scx_prog_show_race_iterations),
-        "--scx-prog-show-race-load-timeout", str(args.scx_prog_show_race_load_timeout),
-        "--container-runtime", str(args.container_runtime),
-        "--runtime-python-bin", str(args.runtime_python_bin),
-    ]
-    for option, value in (
-        ("--run-token", args.run_token),
-        ("--python-bin", args.python_bin),
-        ("--daemon-binary", args.daemon_binary),
-        ("--artifact-dir", args.artifact_dir),
-        ("--run-contract-json", args.run_contract_json),
-        ("--run-contract-path", args.run_contract_path),
-        ("--runtime-container-image", args.runtime_container_image),
-    ):
-        if value:
-            argv.extend([option, str(value)])
-    for package_name in args.scx_packages or []:
-        argv.extend(["--scx-package", str(package_name)])
-    if args.scx_prog_show_race_skip_probe:
-        argv.append("--scx-prog-show-race-skip-probe")
-    return argv
 
 
 def _runtime_env(workspace: Path, args: argparse.Namespace) -> dict[str, str]:
@@ -342,7 +308,7 @@ def _run_test_suite(workspace: Path, args: argparse.Namespace) -> None:
 
     artifact_dir = _prepare_test_artifacts(workspace, args)
     os.chdir(workspace)
-    if inside_runtime_container() and shutil.which("ip", path=env["PATH"]) is not None:
+    if inside_runtime_image() and shutil.which("ip", path=env["PATH"]) is not None:
         run_checked(["ip", "link", "set", "lo", "up"], cwd=workspace, env=env, die=_die)
     if _mode_needs_bpf_stats(args.test_mode):
         ensure_bpf_stats_enabled(workspace, _die)
@@ -363,17 +329,6 @@ def _run_test_suite(workspace: Path, args: argparse.Namespace) -> None:
 def main(argv: list[str] | None = None) -> None:
     args = _parse_args(argv)
     workspace = suite_main_setup(args, str(ROOT_DIR), _die)
-    if args.runtime_container_image and not inside_runtime_container():
-        run_in_runtime_container(
-            args.workspace,
-            args_module="runner.suites.test",
-            module_argv=_module_argv(args),
-            container_runtime=args.container_runtime,
-            image=args.runtime_container_image,
-            runtime_python_bin=args.runtime_python_bin,
-            target_arch=args.target_arch,
-        )
-        return
     _run_test_suite(workspace, args)
 
 

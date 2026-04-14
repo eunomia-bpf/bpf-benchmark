@@ -19,7 +19,7 @@ from runner.libs.state_file import write_json_object
 TARGETS_DIR = ROOT_DIR / "runner" / "targets"
 SUITES_DIR = ROOT_DIR / "runner" / "suites"
 DEFAULT_CORPUS_APP_SUITE = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
-DEFAULT_BUILD_CONTAINER_LLVM_DIR = "/usr/lib64/llvm20/lib64/cmake/llvm"
+DEFAULT_RUNNER_IMAGE_LLVM_DIR = "/usr/lib/llvm-18/lib/cmake/llvm"
 E2E_CASES = ("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran")
 
 _die = partial(fail, "run-contract")
@@ -495,7 +495,7 @@ def _build_run_config_mapping(
         _die(f"target {target_name} does not support required sched_ext for suite {suite_name}")
 
     if run_needs_llvmbpf == "1":
-        run_llvm_dir = _resolve_run_llvm_dir(values) or DEFAULT_BUILD_CONTAINER_LLVM_DIR
+        run_llvm_dir = _resolve_run_llvm_dir(values) or DEFAULT_RUNNER_IMAGE_LLVM_DIR
 
     arch = target.get("TARGET_ARCH", "").strip()
     return {

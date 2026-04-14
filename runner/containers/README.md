@@ -1,36 +1,25 @@
-# Runner Container Images
+# Runner Container Image
 
-This directory holds repository-owned container definitions for benchmark build
-and run images.
+This directory holds the repository-owned runner image definition.
 
 Current policy:
 
-1. Build containers are the canonical place for userspace compilation
-   dependencies.
-2. VM or AWS hosts own the kernel and host privileges.
-3. Runtime containers own suite orchestration, daemon/app loaders, workload
-   tools, eBPF object consumption, and userspace runtime dependencies.
-4. Make remains the only build entrypoint; containers are implementation
-   details used by Make targets.
+1. `runner-runtime.Dockerfile` is the only first-class runner image.
+2. The Dockerfile owns the user-space build graph.
+3. The Dockerfile copies the repository into the host checkout path inside the
+   image and calls `make image-userspace-artifacts BPFREJIT_IMAGE_BUILD=1`.
+4. `runner/mk/build.mk` keeps the outer host entrypoints for `docker build`,
+   `docker save`, and host-coupled kernel/module export.
+5. The image-side Make rules in `runner/mk/build.mk` use normal local build
+   commands. They must not call Docker or Podman.
+6. Host-coupled kernel/module artifacts are exported through
+   `docker build --target runner-host-artifacts --output`, not built by
+   `docker run`.
+7. Runtime containers use the image workspace directly. They must not
+   bind-mount the host repository over that path.
+8. Remote runners load and run this image directly; they do not rsync suite
+   source trees as a container launcher.
 
-Image families:
-
-- `runner-build.Dockerfile`
-  Canonical build image for runner, daemon, kernel/modules, workload tools, and
-  native repo artifacts other than bpftrace. Make builds the same Dockerfile
-  for `linux/amd64` and `linux/arm64`; ARM64 runs as a native ARM64 container
-  rather than relying on a host-installed ARM64 sysroot.
-- `runner/repos/bpftrace/docker/Dockerfile.static`
-  Upstream bpftrace static build image. Make builds it per target architecture
-  and runs bpftrace's own CMake install target to produce a fully static
-  `.cache/repo-artifacts/<arch>/bpftrace/bin/bpftrace`, avoiding runtime
-  `bcc`/`clang`/`libpcap` packages and hand-copied shared libraries.
-- `runner-runtime.Dockerfile`
-  Canonical runtime image for privileged host-kernel execution. The host entry
-  point loads this image and runs the active `runner.suites.*` entrypoint inside
-  it with host PID and network namespaces, so attach logic sees the real loader
-  PIDs.
-
-`runner/mk/build.mk` is intentionally thin: it dispatches into app-native build
-commands inside these fixed images and installs the resulting artifacts into
-the cache paths consumed by target/suite contracts.
+The old split between a standalone build image and a runtime image is removed.
+There is no separate `runner-build.Dockerfile`, and bpftrace no longer has a
+separate first-class static build image in this pipeline.

@@ -17,9 +17,9 @@ from runner.libs.cli_support import fail
 from runner.libs.file_lock import runner_lock
 from runner.libs.run_contract import RunConfig, read_run_config_file
 from runner.libs.state_file import write_state
-from runner.libs.suite_commands import build_suite_argv
+from runner.libs.suite_commands import build_runtime_container_command, runtime_container_result_dirs
 from runner.libs.suite_args import read_suite_args_file
-from runner.libs.workspace_layout import remote_transfer_roots
+from runner.libs.workspace_layout import remote_transfer_roots, runtime_container_image_tar_path
 
 _die = partial(fail, "aws-executor")
 
@@ -486,14 +486,23 @@ def _sync_remote_results(ctx: aws_common.AwsExecutorContext, ip: str, remote_wor
     return local_results
 
 
-def _build_remote_suite_command(ctx: aws_common.AwsExecutorContext, remote_workspace: str,
-                                 remote_config_path: str, suite_args_path: Path | None) -> list[str]:
-    """Build the suite command argv to run on the remote host."""
+def _remote_runtime_container_command(
+    ctx: aws_common.AwsExecutorContext,
+    remote_workspace: str,
+    suite_args_path: Path | None,
+) -> list[str]:
     suite_args = read_suite_args_file(suite_args_path) if suite_args_path is not None else []
-    remote_workspace_path = Path(remote_workspace)
-    config = read_run_config_file(ctx.config_path)
-    return build_suite_argv(remote_workspace_path, config, suite_args, die=_die,
-                            config_path=Path(remote_config_path))
+    return build_runtime_container_command(
+        Path(remote_workspace),
+        read_run_config_file(ctx.config_path),
+        suite_args,
+        die=_die,
+    )
+
+
+def _remote_result_dir_command(remote_workspace: str) -> str:
+    dirs = [str(path) for path in runtime_container_result_dirs(Path(remote_workspace))]
+    return shlex.join(["mkdir", "-p", *dirs])
 
 
 def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_path: Path | None) -> None:
@@ -506,7 +515,6 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_pa
     local_log = local_log_dir / f"{stamp}.remote.log"
     remote_run_dir = f"{ctx.remote_stage_dir}/runs/{stamp}"
     remote_log = f"{remote_run_dir}/remote.log"
-    remote_python = _require(ctx.contract, "RUN_REMOTE_PYTHON_BIN")
     remote_workspace = ctx.remote_stage_dir
     local_log_dir.mkdir(parents=True, exist_ok=True)
     ctx.run_state_dir.mkdir(parents=True, exist_ok=True)
@@ -517,24 +525,15 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_pa
         f"chown $(id -u):$(id -g) {shlex.quote(remote_run_dir)} 2>/dev/null || true"
     )
     _sync_remote_roots(ctx, ip)
-    remote_config_path = f"{remote_run_dir}/run-contract.json"
-    aws_common._scp_to(ctx, ip, ctx.config_path, remote_config_path)
-    remote_suite_args_path: str | None = None
-    if suite_args_path is not None:
-        remote_suite_args_path = f"{remote_run_dir}/suite-args.json"
-        aws_common._scp_to(ctx, ip, suite_args_path, remote_suite_args_path)
-
-    # Build suite command locally (same code/config) then run on remote via ssh
-    suite_argv = _build_remote_suite_command(ctx, remote_workspace, remote_config_path, suite_args_path)
-    # Replace the local python bin with the remote one in the command
-    if suite_argv and suite_argv[0] != remote_python:
-        suite_argv = [remote_python] + suite_argv[1:]
-    preserved_env = f"PYTHONPATH={shlex.quote(remote_workspace)}"
+    image_tar = runtime_container_image_tar_path(Path(remote_workspace), ctx.contract.identity.target_arch)
+    load_cmd = shlex.join([ctx.contract.remote.container_runtime or "docker", "load", "-i", str(image_tar)])
+    suite_cmd = shlex.join(_remote_runtime_container_command(ctx, remote_workspace, suite_args_path))
     log_dir_cmd = f"mkdir -p {shlex.quote(str(Path(remote_log).parent))}"
-    suite_cmd = shlex.join(suite_argv)
     run_cmd = (
         f"{log_dir_cmd} && "
-        f"sudo env {preserved_env} {suite_cmd} >{shlex.quote(remote_log)} 2>&1"
+        f"{_remote_result_dir_command(remote_workspace)} && "
+        f"sudo {load_cmd} >/dev/null && "
+        f"sudo {suite_cmd} >{shlex.quote(remote_log)} 2>&1"
     )
     remote_completed = aws_common._ssh_exec(ctx, ip, "bash", "-c", run_cmd, check=False)
     if aws_common._ssh_exec(ctx, ip, "test", "-e", remote_log, check=False).returncode == 0:

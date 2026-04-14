@@ -1,236 +1,150 @@
 # Benchmark Runtime Architecture
 
-Date: 2026-04-10
-Status: Active architecture
+Date: 2026-04-14
+Status: Active hard-cut architecture
 
 This document defines the active execution architecture for `micro`, `corpus`,
 and `e2e`.
 
-It replaces the old direction where the runner tried to synthesize build
-toolchains, runtime loaders, and host setup from the middle layer.
+## Boundaries
 
-## Historical Problem
+The active architecture has four boundaries:
 
-The old tree was too complex because one runner layer was doing all of the
-following at once:
+1. Host owns the kernel, boot state, privileges, `/lib/modules`, `/sys`, bpffs,
+   cgroups, and network namespaces.
+2. `runner-runtime.Dockerfile` owns user-space artifact builds and user-space
+   runtime dependencies.
+3. `runner-host-artifacts` owns host-coupled kernel/module export through
+   `docker build --output`.
+4. Suite drivers own result directory creation and benchmark process
+   orchestration.
 
-1. Building application artifacts.
-2. Cross-building for `x86_64` and `arm64`.
-3. Bundling runtime loaders and shared libraries by hand.
-4. Preparing AWS or KVM hosts.
-5. Launching the actual benchmark workload.
+There is one runner image lineage. There is no separate `runner-build`
+Dockerfile, no bpftrace static build image in this pipeline, and no
+builder-stage artifact handoff into the runtime stage.
 
-That led to avoidable complexity:
+## Runner Image
 
-- `runner/mk/build.mk` grows into a custom sysroot and runtime packager.
-- `runner/libs` grows host-setup and transfer logic that should belong to image
-  preparation or app-native launchers.
-- artifact roots, scratch roots, runtime lib roots, and transfer roots all
-  become different concepts.
+The normal image path is:
 
-## Active Architecture
+```text
+host make
+  -> docker build --target runner-runtime
+       -> COPY repo into the host checkout path inside the image
+       -> RUN make image-userspace-artifacts
+  -> docker save .cache/container-images/<arch>-runner-runtime.image.tar
+```
 
-The active architecture has a hard boundary:
+User-space artifacts are built in place inside the final runtime image:
 
-1. Host image owns the kernel and host capabilities.
-2. Build container owns compilation.
-3. Run container owns userspace runtime dependencies.
-4. Make owns artifact production.
-5. Suite drivers own result directory creation.
+```text
+<host-checkout>/daemon/target/...
+<host-checkout>/runner/build-...
+<host-checkout>/tests/unittest/build...
+<host-checkout>/tests/negative/build...
+/opt/bpf-benchmark/repo-artifacts/<arch>
+/opt/bpf-benchmark/workload-tools/<arch>
+/opt/bpf-benchmark/micro-programs/<arch>
+```
 
-### Host Layer
+The `/opt/bpf-benchmark` prefix is not a builder-to-runtime copy boundary. It is
+the final in-image artifact prefix written by `make image-userspace-artifacts`.
 
-The KVM guest or AWS instance is the real kernel host.
+## Host-Coupled Exports
 
-The host layer is responsible for:
+Kernel and kinsn module outputs must exist outside the runtime image because the
+host or guest boots and loads them. They use the same Dockerfile lineage:
 
-- booting the exact target kernel
-- exposing `/lib/modules`, `/sys`, `/proc`, `/sys/fs/bpf`, `bpffs`, cgroups,
-  netns, and required privileges
-- carrying small, stable base prerequisites only
+```text
+host make
+  -> docker build --target runner-host-artifacts --output type=local,dest=<repo>
+       -> FROM runner-runtime
+       -> RUN make image-host-artifacts
+       -> write outputs under /image-output
+```
 
-The host layer is not responsible for:
+BuildKit exports `/image-output` back to repository paths:
 
-- compiling benchmark applications
-- discovering per-app runtime `.so` dependencies at run time
-- acting as a second artifact cache
+```text
+.cache/x86-kernel-build/...
+.cache/arm64-kernel-build/...
+.cache/aws-x86/kernel-build/...
+.cache/aws-arm64/kernel-build/...
+.cache/repo-artifacts/<arch>/kernel-modules/...
+module/<arch>/*.ko
+.cache/aws-x86/module/x86/*.ko
+```
 
-### Build Layer
+The kinsn module export uses kernel `MO=` support:
 
-Every app is built inside a fixed build container for its target
-`arch + distro`.
+```text
+make -C <kernel> O=<kernel-build> M=<module-source> MO=<export-dir> modules
+```
 
-The build container is responsible for:
+Module source is not rsynced or staged into the output directory.
 
-- compiler toolchain
-- headers and pkg-config environment
-- app-native build commands
+## Runtime Execution
 
-The build container is not responsible for:
+After the host boots the target kernel, suites run in the saved runner image:
 
-- kernel installation
-- result collection
-- host network namespace policy
+```text
+docker load -i .cache/container-images/<arch>-runner-runtime.image.tar
+docker run ... bpf-benchmark/runner-runtime:<arch> \
+  python3 -m runner.suites.<suite> --workspace <host-checkout> ...
+```
 
-### Run Layer
+The runtime container is privileged because eBPF programs attach to the host
+kernel. It mounts only explicit host resources such as:
 
-After the host boots into the correct kernel, benchmark suites run inside one
-privileged runtime container for the target architecture.
+```text
+/sys
+/sys/fs/bpf
+/sys/kernel/debug
+/lib/modules:ro
+/boot:ro
+module
+micro/results
+corpus/results
+e2e/results
+tests/results
+```
 
-That means:
+The whole host repository is not mounted over the image workspace.
 
-- the kernel stays on the VM or AWS host
-- `runner.suites.*` entrypoints, daemon processes, app loaders, attach logic, workload
-  tools, and benchmark processes run in that container
-- the container mounts host resources that the app actually needs
+## Results
 
-For eBPF-heavy apps, that usually means:
+Benchmark results are written directly into shared suite roots:
 
-- `--privileged`
-- `--pid=host`
-- `--network=host`
-- bind mounts for `/sys`, `/sys/fs/bpf`, `/sys/kernel/debug`, `/lib/modules`,
-  and the benchmark workspace
-- bind mounts for `corpus/results`, `e2e/results`, or `micro/results`
+```text
+micro/results
+corpus/results
+e2e/results
+tests/results
+```
 
-This is still "running on the host kernel". The container only isolates
-userspace.
+There is no second benchmark artifact directory, copy-back result path, or
+"find newest directory" result handling.
 
-### Results Layer
-
-Benchmark results must be written directly into shared suite roots:
-
-- `micro/results`
-- `corpus/results`
-- `e2e/results`
-
-There is no second benchmark artifact directory, no "copy back latest result",
-and no "find newest directory" logic.
-
-Executor-specific cache directories may still exist for logs or transient
-workspace state, but they are not benchmark results.
-
-## Build and Packaging Rules
-
-### Required Rules
-
-1. All build and packaging steps are real Make targets.
-2. Every run calls the final targets directly.
-3. Cache behavior comes from Make and the downstream build system.
-4. Normal runs do not `rm -rf` outputs.
-5. Cleanup is explicit via `make clean` or narrowly scoped clean targets.
-
-### Forbidden Patterns
+## Forbidden Patterns
 
 These patterns are not allowed on the main path:
 
-- hand-written `.ready` or stamp files for build reuse
-- phony packaging readiness rules in the main path
-- host-owned runtime dependency discovery for ELF trees
-- runner-owned x86 sysroot adapter layers as a permanent architecture
-- result copy-back logic
-- shared mutable output roots guarded by locks
-- run-time package installation on KVM or AWS hosts
+- standalone `runner-build.Dockerfile`
+- `COPY --from` builder-to-runtime artifact handoff
+- bpftrace static build image as a first-class pipeline image
+- host-side `docker run ... make/cmake/cargo` build recipes
+- suite self-container fallback arguments
+- host `.cache` user-space artifact roots inside the runtime image
+- runtime bind mount of the whole host workspace over the image workspace
+- run-time package installation on KVM or AWS hosts for benchmark userspace
 
-## Current Simplification
-
-The active implementation keeps these boundaries:
-
-- `build.mk` mostly dispatches into app-native `make`, `cmake`, `cargo`, or
-  containerized equivalents
-- `workspace_layout.py` describes final artifacts, not guessed artifact roots
-- each `runner.suites.*` entrypoint enters the runtime container once, then
-  launches work and records result paths without staging benchmark outputs
-- `aws_remote_prep.py` prepares the host, but does not synthesize a userspace
-  runtime artifact tree
-
-## Current Implementation State
-
-### Canonical Container Layout
-
-- [x] Put the architecture decision in a stable design document.
-- [x] Make the repository reference a canonical container location instead of an
-  ad-hoc or missing Dockerfile path.
-- [x] Create fixed build container definitions for every active target
-  combination we build locally.
-  Current state: `runner/containers/runner-build.Dockerfile` is the canonical
-  build image definition for runner, kernel, tests, workload tools, and most
-  native repos. bpftrace uses its upstream `docker/Dockerfile.static` as a
-  dedicated static build image. Make builds both image families for the target
-  platform, including `linux/amd64` and `linux/arm64`.
-
-### Build in Containers
-
-- [x] Convert `runner` ARM64 build to the canonical build container path.
-- [x] Convert x86_64 runner build away from the host toolchain path.
-- [x] Convert `daemon` x86_64/ARM64 builds to canonical build containers.
-- [x] Convert kernel and module builds to canonical build containers.
-- [x] Convert test and micro helper builds to canonical build containers.
-- [x] Keep generated micro BPF objects out of `micro/programs` and build them
-  under `.cache/micro-programs/<arch>` via Make.
-- [x] Convert `scx`, `bcc`, `tracee`, `tetragon`, `katran`, and
-  `workload-tools` to fixed distro build containers.
-- [x] Convert bpftrace to its upstream static build container and CMake install
-  target. The runtime artifact is `.cache/repo-artifacts/<arch>/bpftrace/bin/bpftrace`
-  and is fully static; the build disables optional BFD/opcodes discovery so the
-  runtime container does not need `bcc`, `clang`, `libpcap`, musl, or hand-copied
-  shared libraries.
-- [x] Build native repo artifacts from per-arch scratch source/build roots
-  instead of writing into shared checkouts.
-- [x] Stop producing shared AWS kernel transport packages. AWS prep now calls
-  the canonical kernel image and `.cache/repo-artifacts/<arch>/kernel-modules`
-  Make targets, then syncs that modules tree to the host staging directory.
-
-### Runtime Container
-
-- [x] Replace host-side launcher generation with runtime container execution.
-  Current state: Make builds `runner-runtime.Dockerfile` for the target arch,
-  saves it as `.cache/container-images/<arch>-runner-runtime.image.tar`, and
-  the host entrypoint loads that image before executing the suite inside it.
-- [x] Stop resolving glibc and loader paths from the host runner layer.
-- [x] Treat final Make targets as app artifacts or OCI image tars, not handmade
-  runtime archives.
-
-### Run in Host-Privileged Containers
-
-- [x] Use one suite-level runtime container contract for `bcc`, `tracee`,
-  `tetragon`, `katran`, `scx`, `bpftrace`, daemon, workload, and attach
-  orchestration.
-- [x] Keep app processes in the host PID namespace so BPF FD/PID discovery uses
-  real loader PIDs.
-- [x] Keep attach and topology logic in the existing app runner modules; the
-  container is packaging/execution boundary, not a new app abstraction layer.
-
-### Thin Orchestration
-
-- [x] Keep `run_target_suite.py` as a thin contract/dispatch layer: it writes the
-  manifest, asks `workspace_layout.py` for final Make targets, dispatches
-  AWS/KVM execution, and delegates AWS failure cleanup to `aws_executor.py`.
-- [x] Keep AWS/KVM prep from installing userspace packages at run time.
-- [x] Remove remaining artifact-root assumptions from transfer and consumption
-  paths.
-
-## Explicit Non-Goals
-
-This architecture does not mean:
-
-- replacing the host kernel with a container kernel
-- hiding all eBPF attach semantics behind generic abstractions
-- forcing every app into a separate launcher
-
-The goal is narrower:
-
-- compile in fixed containers
-- run suite userspace in fixed containers
-- keep kernel ownership with the host
-- keep build ownership with Make
-
-## Current Invariants
+## Invariants
 
 The repository keeps these invariants:
 
-- away from hand-built runtime packaging
-- away from host-synthesized sysroots
-- away from copy-back result handling
-- app-native build logic inside fixed containers
-- host kernel + privileged run container execution
+- Dockerfile owns the runner image build boundary.
+- Make owns the image-side artifact graph.
+- Host `.cache` remains only for exported host-coupled artifacts, image tars,
+  logs, and transient executor state.
+- Suite drivers run from the host checkout path baked into `runner-runtime`.
+- Host kernel ownership stays outside the container.

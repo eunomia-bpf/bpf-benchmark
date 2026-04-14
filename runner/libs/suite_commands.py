@@ -1,13 +1,14 @@
-"""Shared suite command-line builder.
-
-Both kvm_executor (which shell-quotes the result) and aws_executor
-(which builds the argv locally then runs it on the remote via ssh) use
-this to construct the argv for ``python -m runner.suites.<name>``.
-"""
+"""Shared suite and runtime image command-line builders."""
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
+
+from runner.libs.workspace_layout import RUNTIME_IMAGE_WORKSPACE
+
+
+_CONTAINER_RESULT_DIRS = ("micro/results", "corpus/results", "e2e/results", "tests/results")
 
 
 def _required(value: str, name: str, die: Any) -> str:
@@ -17,13 +18,76 @@ def _required(value: str, name: str, die: Any) -> str:
     return normalized
 
 
-def _append_runtime_container_args(command: list[str], config: Any) -> None:
-    if config.remote.container_runtime:
-        command.extend(["--container-runtime", config.remote.container_runtime])
-    if config.remote.runtime_container_image:
-        command.extend(["--runtime-container-image", config.remote.runtime_container_image])
-    if config.remote.runtime_python_bin:
-        command.extend(["--runtime-python-bin", config.remote.runtime_python_bin])
+def runtime_container_result_dirs(host_workspace: Path) -> list[Path]:
+    return [host_workspace / relative for relative in _CONTAINER_RESULT_DIRS]
+
+
+def _container_suite_config(config: Any, python_bin: str) -> Any:
+    return replace(
+        config,
+        remote=replace(
+            config.remote,
+            python_bin=python_bin,
+            container_runtime="",
+            runtime_container_image="",
+            runtime_python_bin="",
+        ),
+    )
+
+
+def build_runtime_container_command(
+    host_workspace: Path,
+    config: Any,
+    suite_args: list[str],
+    *,
+    die: Any,
+) -> list[str]:
+    runtime = config.remote.container_runtime.strip() or "docker"
+    image = _required(config.remote.runtime_container_image, "RUN_RUNTIME_CONTAINER_IMAGE", die)
+    runtime_python = config.remote.runtime_python_bin.strip() or "python3"
+    image_workspace = RUNTIME_IMAGE_WORKSPACE
+    suite_argv = build_suite_argv(
+        image_workspace,
+        _container_suite_config(config, runtime_python),
+        suite_args,
+        die=die,
+    )
+    if len(suite_argv) < 3 or suite_argv[1] != "-m":
+        die(f"unexpected suite argv shape: {suite_argv}")
+    command = [
+        runtime,
+        "run",
+        "--rm",
+        "--privileged",
+        "--pid=host",
+        "--network=host",
+        "--ipc=host",
+        "-e",
+        "BPFREJIT_INSIDE_RUNTIME_CONTAINER=1",
+        "-e",
+        f"BPFREJIT_IMAGE_WORKSPACE={image_workspace}",
+        "-e",
+        f"PYTHONPATH={image_workspace}",
+        "-e",
+        "HOME=/root",
+        "-w",
+        str(image_workspace),
+    ]
+    for relative in _CONTAINER_RESULT_DIRS:
+        command.extend(["-v", f"{host_workspace / relative}:{image_workspace / relative}"])
+    if config.artifacts.needs_kinsn_modules.strip() == "1":
+        command.extend(["-v", f"{host_workspace / 'module'}:{image_workspace / 'module'}:ro"])
+    for source, target, readonly in (
+        ("/sys", "/sys", False),
+        ("/sys/fs/bpf", "/sys/fs/bpf", False),
+        ("/sys/kernel/debug", "/sys/kernel/debug", False),
+        ("/lib/modules", "/lib/modules", True),
+        ("/boot", "/boot", True),
+    ):
+        suffix = ":ro" if readonly else ""
+        command.extend(["-v", f"{source}:{target}{suffix}"])
+    command.extend([image, runtime_python, *suite_argv[1:]])
+    return command
 
 
 def build_micro_suite_argv(
@@ -49,7 +113,6 @@ def build_micro_suite_argv(
         "--bpftool-bin", _required(config.remote.bpftool_bin, "RUN_BPFTOOL_BIN", die),
         "--output", str(workspace / "micro" / "results" / f"{target_name}_micro.json"),
     ]
-    _append_runtime_container_args(command, config)
     command.extend(suite_args)
     return command
 
@@ -82,7 +145,6 @@ def build_corpus_suite_argv(
         command.extend(["--native-repo", repo_name])
     for package_name in config.artifacts.scx_packages:
         command.extend(["--scx-package", package_name])
-    _append_runtime_container_args(command, config)
     command.extend(suite_args)
     return command
 
@@ -113,7 +175,6 @@ def build_e2e_suite_argv(
         command.extend(["--native-repo", repo_name])
     for package_name in config.artifacts.scx_packages:
         command.extend(["--scx-package", package_name])
-    _append_runtime_container_args(command, config)
     command.extend(suite_args)
     return command
 
@@ -149,7 +210,6 @@ def build_test_suite_argv(
         command.extend(["--run-contract-json", config.to_json_text()])
     for package_name in config.artifacts.scx_packages:
         command.extend(["--scx-package", package_name])
-    _append_runtime_container_args(command, config)
     command.extend(suite_args)
     return command
 

@@ -19,13 +19,12 @@ from runner.suites._common import (
     ensure_katran_artifacts,
     ensure_scx_artifacts,
     env_with_suite_runtime_ld,
-    inside_runtime_container,
+    inside_runtime_image,
     merge_csv_and_repeated,
     resolve_daemon_binary,
     resolve_executable,
     resolve_workspace_path,
     run_checked,
-    run_in_runtime_container,
     suite_main_setup,
 )
 
@@ -83,38 +82,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
-def _module_argv(args: argparse.Namespace) -> list[str]:
-    argv = [
-        "--workspace", str(args.workspace),
-        "--target-arch", str(args.target_arch),
-        "--target-name", str(args.target_name),
-        "--executor", str(args.executor),
-        "--bpftool-bin", str(args.bpftool_bin),
-        "--e2e-cases", ",".join(args.e2e_cases),
-        "--container-runtime", str(args.container_runtime),
-        "--runtime-python-bin", str(args.runtime_python_bin),
-    ]
-    for option, value in (
-        ("--run-token", args.run_token),
-        ("--python-bin", args.python_bin),
-        ("--daemon-binary", args.daemon_binary),
-        ("--suite", args.suite),
-        ("--runtime-container-image", args.runtime_container_image),
-    ):
-        if value:
-            argv.extend([option, str(value)])
-    for repo_name in args.native_repos or []:
-        argv.extend(["--native-repo", str(repo_name)])
-    for package_name in args.scx_packages or []:
-        argv.extend(["--scx-package", str(package_name)])
-    if args.e2e_smoke:
-        argv.append("--e2e-smoke")
-    if args.e2e_argv:
-        argv.append("--")
-        argv.extend(str(value) for value in args.e2e_argv)
-    return argv
-
-
 def _runtime_env(workspace: Path, args: argparse.Namespace) -> dict[str, str]:
     env = base_suite_runtime_env(workspace, args, "e2e", _die)
     if rejit_passes := argv_option_value(args.e2e_argv, "--rejit-passes", _die):
@@ -145,7 +112,7 @@ def _run_e2e_suite(workspace: Path, args: argparse.Namespace) -> None:
     resolve_executable(args.bpftool_bin, path_value=env["PATH"], description="bpftool binary", die=_die)
 
     os.chdir(workspace)
-    if inside_runtime_container() and shutil.which("ip", path=env["PATH"]) is not None:
+    if inside_runtime_image() and shutil.which("ip", path=env["PATH"]) is not None:
         run_checked(["ip", "link", "set", "lo", "up"], cwd=workspace, env=env, die=_die)
     ensure_bpf_stats_enabled(workspace, _die)
     ensure_scx_artifacts(workspace, args.target_arch, args.scx_packages, _die)
@@ -165,17 +132,6 @@ def _run_e2e_suite(workspace: Path, args: argparse.Namespace) -> None:
 def main(argv: list[str] | None = None) -> None:
     args = _parse_args(argv)
     workspace = suite_main_setup(args, str(ROOT_DIR), _die)
-    if args.runtime_container_image and not inside_runtime_container():
-        run_in_runtime_container(
-            args.workspace,
-            args_module="runner.suites.e2e",
-            module_argv=_module_argv(args),
-            container_runtime=args.container_runtime,
-            image=args.runtime_container_image,
-            runtime_python_bin=args.runtime_python_bin,
-            target_arch=args.target_arch,
-        )
-        return
     _run_e2e_suite(workspace, args)
 
 

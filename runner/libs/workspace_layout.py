@@ -6,15 +6,10 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 
 
-_BASE_TRANSFER_ROOTS = {
-    "test":   ("runner/__init__.py", "runner/libs", "runner/suites", "tests"),
-    "micro":  ("runner/__init__.py", "runner/libs", "runner/suites", "micro/driver.py", "micro/catalog.py", "micro/config", "micro/generated-inputs"),
-    "corpus": ("runner/__init__.py", "runner/libs", "runner/suites", "corpus/driver.py", "corpus/config", "corpus/inputs", "e2e/cases"),
-    "e2e":    ("runner/__init__.py", "runner/libs", "runner/suites", "corpus/config", "corpus/inputs", "e2e/driver.py", "e2e/cases"),
-}
-
-_TRANSFER_ROOT_ORDER = ("runner", "module", "tests", "micro", "corpus", "e2e")
-RUNTIME_IMAGE_ROOT = Path("/opt/bpf-benchmark")
+_RUNTIME_IMAGE_SUITES = {"test", "micro", "corpus", "e2e"}
+_TRANSFER_ROOT_ORDER = ("module",)
+RUNTIME_IMAGE_WORKSPACE = ROOT_DIR
+RUNTIME_IMAGE_ARTIFACT_ROOT = Path("/opt/bpf-benchmark")
 
 # (arm64_parts, x86_parts)
 _ARCH_PATHS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
@@ -41,34 +36,53 @@ def workload_tools_root(workspace: Path, target_arch: str) -> Path:      return 
 def test_unittest_build_dir(workspace: Path, target_arch: str) -> Path:  return _p(workspace, target_arch, "test_unittest_build_dir")
 def test_negative_build_dir(workspace: Path, target_arch: str) -> Path:  return _p(workspace, target_arch, "test_negative_build_dir")
 
+def image_artifact_root(target_arch: str, subdir: str) -> Path:
+    return RUNTIME_IMAGE_ARTIFACT_ROOT / subdir / str(target_arch).strip()
+
 def inside_runtime_image() -> bool:
     return os.environ.get("BPFREJIT_INSIDE_RUNTIME_CONTAINER", "").strip() == "1"
 
+def runtime_workspace(workspace: Path) -> Path:
+    if not inside_runtime_image():
+        return workspace
+    configured = os.environ.get("BPFREJIT_IMAGE_WORKSPACE", "").strip()
+    return Path(configured) if configured else RUNTIME_IMAGE_WORKSPACE
+
 def micro_program_root(workspace: Path, target_arch: str) -> Path:
-    return RUNTIME_IMAGE_ROOT / "micro-programs" if inside_runtime_image() else _cache(workspace, target_arch, "micro-programs")
+    if inside_runtime_image():
+        return image_artifact_root(target_arch, "micro-programs")
+    return _cache(runtime_workspace(workspace), target_arch, "micro-programs")
 
 def daemon_binary_path(workspace: Path, target_arch: str) -> Path:
-    return RUNTIME_IMAGE_ROOT / "bin" / "bpfrejit-daemon" if inside_runtime_image() else _p(workspace, target_arch, "daemon_binary_path")
+    return _p(runtime_workspace(workspace), target_arch, "daemon_binary_path")
 
 def runner_binary_path(workspace: Path, target_arch: str) -> Path:
-    return RUNTIME_IMAGE_ROOT / "bin" / "micro_exec" if inside_runtime_image() else _p(workspace, target_arch, "runner_binary_path")
+    return _p(runtime_workspace(workspace), target_arch, "runner_binary_path")
 
 def runtime_repo_artifact_root(workspace: Path, target_arch: str) -> Path:
-    return RUNTIME_IMAGE_ROOT / "repo-artifacts" if inside_runtime_image() else repo_artifact_root(workspace, target_arch)
+    if inside_runtime_image():
+        return image_artifact_root(target_arch, "repo-artifacts")
+    return repo_artifact_root(runtime_workspace(workspace), target_arch)
 
 def runtime_workload_tools_root(workspace: Path, target_arch: str) -> Path:
-    return RUNTIME_IMAGE_ROOT / "workload-tools" if inside_runtime_image() else workload_tools_root(workspace, target_arch)
+    if inside_runtime_image():
+        return image_artifact_root(target_arch, "workload-tools")
+    return workload_tools_root(runtime_workspace(workspace), target_arch)
 
 def runtime_container_image_tar_path(workspace: Path, target_arch: str) -> Path:
     return workspace / ".cache" / "container-images" / f"{str(target_arch).strip()}-runner-runtime.image.tar"
 
 def kinsn_module_dir(workspace: Path, target_arch: str, target_name: str = "") -> Path:
+    if inside_runtime_image():
+        return runtime_workspace(workspace) / "module" / ("arm64" if _is_arm64(target_arch) else "x86")
     if str(target_name).strip() == "aws-x86":
         return workspace / ".cache" / "aws-x86" / "module" / "x86"
     return workspace / "module" / ("arm64" if _is_arm64(target_arch) else "x86")
 
 def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Path:
     del target_arch
+    if inside_runtime_image():
+        return Path("/")
     return repo_artifact_root(workspace, "x86_64") / "kernel-modules" if str(executor).strip() == "kvm" else Path("/")
 
 def kvm_kernel_image_path(workspace: Path) -> Path:
@@ -81,7 +95,7 @@ def runtime_path_value(workspace: Path, target_arch: str) -> str:
     if arch:
         candidates: list[Path] = []
         if inside_runtime_image():
-            candidates.append(RUNTIME_IMAGE_ROOT / "bin")
+            candidates.append(runner_binary_path(workspace, arch).parent)
         candidates.extend([
             runtime_repo_artifact_root(workspace, arch) / "bpftrace" / "bin",
             runtime_workload_tools_root(workspace, arch) / "bin",
@@ -100,27 +114,20 @@ def kinsn_targets(workspace: Path, target_arch: str, target_name: str = "") -> l
         names.insert(4, "bpf_ldp.ko")
     return [root / n for n in names]
 
-def _base_transfer_paths(workspace: Path, suite_name: str) -> list[Path]:
-    return [workspace / e for e in _BASE_TRANSFER_ROOTS.get(str(suite_name).strip(), ())]
-
 def _artifact_transfer_paths(*, workspace, suite_name, target_arch, needs_kinsn_modules) -> list[Path]:
     arch, suite = str(target_arch).strip(), str(suite_name).strip()
     paths: list[Path] = []
-    if suite in _BASE_TRANSFER_ROOTS:       paths.append(runtime_container_image_tar_path(workspace, arch))
+    if suite in _RUNTIME_IMAGE_SUITES:      paths.append(runtime_container_image_tar_path(workspace, arch))
     if needs_kinsn_modules:                 paths.append(workspace / "module")
-    if suite == "test":                     paths += [test_unittest_build_dir(workspace, arch), test_negative_build_dir(workspace, arch)]
     return paths
 
 def local_prep_targets(*, workspace, suite_name, target_arch, executor, target_name="",
                         needs_kinsn_modules) -> list[Path]:
     arch, suite = str(target_arch).strip(), str(suite_name).strip()
     targets: list[Path] = []
-    if suite in _BASE_TRANSFER_ROOTS:       targets.append(runtime_container_image_tar_path(workspace, arch))
+    if suite in _RUNTIME_IMAGE_SUITES:      targets.append(runtime_container_image_tar_path(workspace, arch))
     if str(executor).strip() == "kvm":
         targets += [kvm_kernel_image_path(workspace), kernel_modules_root(workspace, arch, executor) / "lib" / "modules"]
-    if suite == "test":
-        targets += [test_unittest_build_dir(workspace, arch) / "rejit_regression",
-                    test_negative_build_dir(workspace, arch) / "scx_prog_show_race"]
     if needs_kinsn_modules:                 targets.extend(kinsn_targets(workspace, arch, target_name))
     seen: set[Path] = set()
     return [t for t in targets if not (t in seen or seen.add(t))]  # type: ignore[func-returns-value]
@@ -128,9 +135,8 @@ def local_prep_targets(*, workspace, suite_name, target_arch, executor, target_n
 def remote_transfer_roots(*, suite_name, target_arch, needs_kinsn_modules) -> list[str]:
     roots: list[str] = []
     seen: set[str] = set()
-    for path in [*_base_transfer_paths(ROOT_DIR, suite_name),
-                 *_artifact_transfer_paths(workspace=ROOT_DIR, suite_name=suite_name, target_arch=target_arch,
-                                           needs_kinsn_modules=needs_kinsn_modules)]:
+    for path in _artifact_transfer_paths(workspace=ROOT_DIR, suite_name=suite_name, target_arch=target_arch,
+                                         needs_kinsn_modules=needs_kinsn_modules):
         try:
             relative = str(path.relative_to(ROOT_DIR))
         except ValueError:

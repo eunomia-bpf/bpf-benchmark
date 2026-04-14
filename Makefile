@@ -18,15 +18,11 @@ include $(RUNNER_DIR)/mk/arm64_defaults.mk
 
 # ARM64 / AWS
 ARM64_BUILD_DIR     ?= $(ARTIFACT_ROOT)/arm64-kernel-build
-ARM64_BUILD_CONFIG  := $(ARM64_BUILD_DIR)/.config
 ARM64_IMAGE         := $(ARM64_BUILD_DIR)/arch/arm64/boot/Image
 ARM64_EFI_IMAGE     := $(ARM64_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
-ARM64_AWS_BUILD_CONFIG := $(ARM64_AWS_BUILD_DIR)/.config
 ARM64_AWS_IMAGE     := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/Image
 ARM64_AWS_EFI_IMAGE := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
-ARM64_KERNEL_MAKEFLAGS      := $(filter-out B,$(MAKEFLAGS))
 X86_AWS_BUILD_DIR ?= $(ARTIFACT_ROOT)/aws-x86/kernel-build
-X86_AWS_BUILD_CONFIG := $(X86_AWS_BUILD_DIR)/.config
 X86_AWS_IMAGE := $(X86_AWS_BUILD_DIR)/arch/x86/boot/bzImage
 X86_AWS_KINSN_MODULE_ROOT ?= $(ARTIFACT_ROOT)/aws-x86/module
 X86_AWS_KINSN_MODULE_DIR ?= $(X86_AWS_KINSN_MODULE_ROOT)/x86
@@ -66,7 +62,6 @@ SCX_PROG_SHOW_RACE_SKIP_PROBE ?= 0
 KALLSYMS_EXTRA_PASS ?= 1
 
 # Derived
-KERNEL_CONFIG_PATH := $(X86_BUILD_DIR)/.config
 NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
 JOBS         ?= $(NPROC)
 DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_defconfig
@@ -122,39 +117,9 @@ help:
 	@echo "        containerized local builds: CONTAINER_RUNTIME=<docker|podman>"
 	@echo "        AWS benchmark mode 'all' runs micro/corpus/e2e through the target runner"
 
-$(KERNEL_CONFIG_PATH): $(DEFCONFIG_SRC)
-	mkdir -p "$(dir $@)"
-	cp "$(DEFCONFIG_SRC)" "$@"
-
-$(X86_AWS_BUILD_CONFIG): $(X86_AWS_DEFCONFIG_SRC) $(X86_RUNNER_BUILD_IMAGE_TAR)
-	mkdir -p "$(dir $@)"
-	cp "$(X86_AWS_DEFCONFIG_SRC)" "$@"
-	@$(ENSURE_X86_RUNNER_BUILD_IMAGE)
-	$(CONTAINER_RUNTIME) run --rm --platform linux/amd64 \
-		--user "$(HOST_UID):$(HOST_GID)" \
-		-e HOME=/tmp/bpf-benchmark-container \
-		-v "$(ROOT_DIR):$(ROOT_DIR)" \
-		-w "$(ROOT_DIR)" \
-		"$(X86_RUNNER_BUILD_IMAGE)" \
-		make -C "$(KERNEL_DIR)" O="$(X86_AWS_BUILD_DIR)" olddefconfig
-
-$(X86_AWS_IMAGE): $(X86_RUNNER_BUILD_IMAGE_TAR) $(X86_AWS_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
+$(X86_AWS_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(X86_AWS_DEFCONFIG_SRC) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
 	@mkdir -p "$(X86_AWS_BUILD_DIR)"
-	@$(ENSURE_X86_RUNNER_BUILD_IMAGE)
-	@$(CONTAINER_RUNTIME) run --rm --platform linux/amd64 \
-		--user "$(HOST_UID):$(HOST_GID)" \
-		-e HOME=/tmp/bpf-benchmark-container \
-		-v "$(ROOT_DIR):$(ROOT_DIR)" \
-		-w "$(ROOT_DIR)" \
-		"$(X86_RUNNER_BUILD_IMAGE)" \
-		make -C "$(KERNEL_DIR)" O="$(X86_AWS_BUILD_DIR)" olddefconfig
-	@$(CONTAINER_RUNTIME) run --rm --platform linux/amd64 \
-		--user "$(HOST_UID):$(HOST_GID)" \
-		-e HOME=/tmp/bpf-benchmark-container \
-		-v "$(ROOT_DIR):$(ROOT_DIR)" \
-		-w "$(ROOT_DIR)" \
-		"$(X86_RUNNER_BUILD_IMAGE)" \
-		make -C "$(KERNEL_DIR)" O="$(X86_AWS_BUILD_DIR)" -j"$(JOBS)" bzImage modules
+	$(call RUNNER_HOST_ARTIFACT_BUILD,linux/amd64,x86_64,x86-aws-kernel)
 
 check:
 	$(PYTHON) -m py_compile \
@@ -224,59 +189,11 @@ vm-all:
 	$(MAKE) vm-e2e
 
 # ── ARM64 kernel ───────────────────────────────────────────────────────────────
-$(ARM64_BUILD_CONFIG): $(ARM64_DEFCONFIG_SRC) $(ARM64_RUNNER_BUILD_IMAGE_TAR)
-	mkdir -p "$(dir $@)"
-	cp "$(ARM64_DEFCONFIG_SRC)" "$@"
-	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
-	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
-		--user "$(HOST_UID):$(HOST_GID)" \
-		-e HOME=/tmp/bpf-benchmark-container \
-		-e MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" \
-		-v "$(ROOT_DIR):$(ROOT_DIR)" \
-		-w "$(ROOT_DIR)" \
-		"$(ARM64_RUNNER_BUILD_IMAGE)" \
-		make -C "$(KERNEL_DIR)" O="$(ARM64_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE= olddefconfig
+$(ARM64_IMAGE) $(ARM64_EFI_IMAGE) &: $(ARM64_RUNNER_RUNTIME_IMAGE_TAR) $(ARM64_DEFCONFIG_SRC) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
+	$(call RUNNER_HOST_ARTIFACT_BUILD,linux/arm64,arm64,arm64-kernel)
 
-$(ARM64_IMAGE) $(ARM64_EFI_IMAGE) &: $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
-	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
-	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
-		--user "$(HOST_UID):$(HOST_GID)" \
-		-e HOME=/tmp/bpf-benchmark-container \
-		-e MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" \
-		-v "$(ROOT_DIR):$(ROOT_DIR)" \
-		-w "$(ROOT_DIR)" \
-		"$(ARM64_RUNNER_BUILD_IMAGE)" \
-		bash -c "mkdir -p /tmp/bpf-benchmark-container '$(ARM64_BUILD_DIR)' && \
-		  find '$(ARM64_BUILD_DIR)' -type f -name '*.o' -size 0 -delete && \
-		  rm -f '$(ARM64_BUILD_DIR)/vmlinux.a' '$(ARM64_BUILD_DIR)/vmlinux.o' '$(ARM64_BUILD_DIR)/drivers/of/built-in.a' && \
-		  make -C '$(KERNEL_DIR)' O='$(ARM64_BUILD_DIR)' ARCH=arm64 CROSS_COMPILE= Image vmlinuz.efi -j'$(NPROC)'"
-
-$(ARM64_AWS_BUILD_CONFIG): $(ARM64_DEFCONFIG_SRC) $(ARM64_RUNNER_BUILD_IMAGE_TAR)
-	mkdir -p "$(dir $@)"
-	cp "$(ARM64_DEFCONFIG_SRC)" "$@"
-	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
-	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
-		--user "$(HOST_UID):$(HOST_GID)" \
-		-e HOME=/tmp/bpf-benchmark-container \
-		-e MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" \
-		-v "$(ROOT_DIR):$(ROOT_DIR)" \
-		-w "$(ROOT_DIR)" \
-		"$(ARM64_RUNNER_BUILD_IMAGE)" \
-		make -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE= olddefconfig
-
-$(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE) &: $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_AWS_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
-	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
-	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
-		--user "$(HOST_UID):$(HOST_GID)" \
-		-e HOME=/tmp/bpf-benchmark-container \
-		-e MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" \
-		-v "$(ROOT_DIR):$(ROOT_DIR)" \
-		-w "$(ROOT_DIR)" \
-		"$(ARM64_RUNNER_BUILD_IMAGE)" \
-		bash -c "mkdir -p /tmp/bpf-benchmark-container '$(ARM64_AWS_BUILD_DIR)' && \
-		  find '$(ARM64_AWS_BUILD_DIR)' -type f -name '*.o' -size 0 -delete && \
-		  rm -f '$(ARM64_AWS_BUILD_DIR)/vmlinux.a' '$(ARM64_AWS_BUILD_DIR)/vmlinux.o' '$(ARM64_AWS_BUILD_DIR)/drivers/of/built-in.a' && \
-		  make -C '$(KERNEL_DIR)' O='$(ARM64_AWS_BUILD_DIR)' ARCH=arm64 CROSS_COMPILE= Image vmlinuz.efi -j'$(NPROC)'"
+$(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE) &: $(ARM64_RUNNER_RUNTIME_IMAGE_TAR) $(ARM64_DEFCONFIG_SRC) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
+	$(call RUNNER_HOST_ARTIFACT_BUILD,linux/arm64,arm64,arm64-aws-kernel)
 
 # ── AWS aliases ───────────────────────────────────────────────────────────────
 aws-arm64-test:

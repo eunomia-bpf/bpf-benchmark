@@ -19,13 +19,11 @@ from runner.suites._common import (
     add_common_args,
     base_runtime_env,
     cross_runtime_ld_library_path,
-    inside_runtime_container,
     nonnegative_int,
     positive_int,
     resolve_executable,
     resolve_workspace_path,
     run_checked,
-    run_in_runtime_container,
     setup_tmpdir,
     suite_main_setup,
 )
@@ -68,52 +66,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--write-details", action="store_true", help="Write per-sample live_samples detail artifacts.")
     parser.add_argument("--list", action="store_true", help="List benchmarks and runtimes.")
     return parser.parse_args(sys.argv[1:] if argv is None else argv)
-
-
-def _module_argv(args: argparse.Namespace) -> list[str]:
-    argv = [
-        "--workspace", str(args.workspace),
-        "--target-arch", str(args.target_arch),
-        "--target-name", str(args.target_name),
-        "--executor", str(args.executor),
-        "--samples", str(args.samples),
-        "--warmups", str(args.warmups),
-        "--inner-repeat", str(args.inner_repeat),
-        "--bpftool-bin", str(args.bpftool_bin),
-        "--container-runtime", str(args.container_runtime),
-        "--runtime-python-bin", str(args.runtime_python_bin),
-    ]
-    for option, value in (
-        ("--run-token", args.run_token),
-        ("--python-bin", args.python_bin),
-        ("--runner-binary", args.runner_binary),
-        ("--program-dir", args.program_dir),
-        ("--suite", args.suite),
-        ("--output", args.output),
-        ("--cpu", args.cpu),
-        ("--runtime-container-image", args.runtime_container_image),
-    ):
-        if value:
-            argv.extend([option, str(value)])
-    for bench in args.benches or []:
-        argv.extend(["--bench", str(bench)])
-    for runtime in args.runtimes or []:
-        argv.extend(["--runtime", str(runtime)])
-    if args.strict_env:
-        argv.append("--strict-env")
-    if args.shuffle_seed is not None:
-        argv.extend(["--shuffle-seed", str(args.shuffle_seed)])
-    if args.perf_counters:
-        argv.append("--perf-counters")
-    if args.perf_scope:
-        argv.extend(["--perf-scope", str(args.perf_scope)])
-    if args.regenerate_inputs:
-        argv.append("--regenerate-inputs")
-    if args.write_details:
-        argv.append("--write-details")
-    if args.list:
-        argv.append("--list")
-    return argv
 
 
 def _runtime_env(workspace: Path, args: argparse.Namespace) -> dict[str, str]:
@@ -199,17 +151,6 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
 def main(argv: list[str] | None = None) -> None:
     args = _parse_args(argv)
     workspace = suite_main_setup(args, str(ROOT_DIR), _die)
-    if args.runtime_container_image and not inside_runtime_container():
-        run_in_runtime_container(
-            args.workspace,
-            args_module="runner.suites.micro",
-            module_argv=_module_argv(args),
-            container_runtime=args.container_runtime,
-            image=args.runtime_container_image,
-            runtime_python_bin=args.runtime_python_bin,
-            target_arch=args.target_arch,
-        )
-        return
     _run_micro_suite(workspace, args)
 
 

@@ -10,7 +10,7 @@ Three-layer benchmarking pipeline:
 
 The historical multi-runtime userspace benchmark layer has been removed; the active tree is `micro/`, `corpus/`, and `e2e/`.
 
-Execution architecture for build containers, runtime containers, and
+Execution architecture for the runner image, runtime containers, and
 host-kernel boundaries lives in
 [`docs/benchmark-runtime-architecture.md`](docs/benchmark-runtime-architecture.md).
 
@@ -32,13 +32,12 @@ bpf-benchmark/
 ## Prerequisites
 
 - Python 3 with PyYAML: `pip install pyyaml` (or use the workspace venv)
-- `docker` or `podman` for Make-driven build and runtime containers
+- `docker` or `podman` for runner image builds and runtime containers
 - runnable `linux/amd64` and `linux/arm64` container userspace support when
   building both target architectures
 - `sudo -n` (passwordless) required for kernel eBPF runtime
 - `vng` (virtme-ng) required for VM benchmark targets
-- `CONTAINER_RUNTIME` may be set to `docker` or `podman` for Make-driven
-  containerized build steps
+- `CONTAINER_RUNTIME` may be set to `docker` or `podman`
 
 ## Quick Start
 
@@ -85,8 +84,8 @@ AWS targets require explicit local configuration for:
 The canonical lookup source is:
 - process environment only
 
-Micro suite runner builds use the LLVM CMake package in the build container by
-default. Override it only for host-side debugging with:
+Micro suite runner builds use the LLVM CMake package in the runner image by
+default. Override it for targeted debugging with:
 - `LLVM_DIR`, or
 - `LLVM_CONFIG` (the root `Makefile` defaults this to `llvm-config$(UPSTREAM_SELFTEST_LLVM_SUFFIX)`)
 
@@ -102,11 +101,10 @@ directories are not benchmark result roots.
 The root `Makefile` surface is reserved for canonical run/validation entrypoints,
 plus a small developer helper surface for direct kernel/module lifecycle work.
 Active local prep/build flows through real Make targets resolved by the Python
-runner libraries. Active benchmark execution uses fixed build containers for
-artifact production plus host-kernel execution with privileged runtime
-containers for suite userspace. bpftrace is built as a repo artifact through
-its upstream static Dockerfile and CMake install target, so the runtime image
-does not need bpftrace, BCC, or Clang packages.
+runner libraries. User-space artifacts are built inside `runner-runtime` during
+Dockerfile build. Host-coupled kernel/module artifacts are exported through
+`docker build --target runner-host-artifacts --output`. Benchmark execution
+loads and runs the same `runner-runtime` image with privileged suite containers.
 
 ## Layer Notes
 
