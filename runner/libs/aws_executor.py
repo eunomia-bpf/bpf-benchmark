@@ -120,11 +120,10 @@ def _require_modules_root(modules_root: Path, *, arch: str) -> Path:
 
 def _build_x86_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
     build_dir = ctx.target_root / "kernel-build"
-    base_config = ctx.target_root / "config-al2023-x86_64"
     kernel_image = build_dir / "arch" / "x86" / "boot" / "bzImage"
     modules_target = ROOT_DIR / ".cache" / "repo-artifacts" / "x86_64" / "kernel-modules" / "lib" / "modules"
     _run_local_make(str(kernel_image), str(modules_target), "RUN_TARGET_ARCH=x86_64",
-                    "RUN_AWS_KERNEL=1", f"X86_AWS_BUILD_DIR={build_dir}", f"X86_AWS_BASE_CONFIG={base_config}",
+                    "RUN_AWS_KERNEL=1", f"X86_AWS_BUILD_DIR={build_dir}",
                     f"JOBS={max(os.cpu_count() or 1, 1)}")
     if not kernel_image.is_file():
         _die(f"missing x86 AWS kernel image: {kernel_image}")
@@ -134,12 +133,10 @@ def _build_x86_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str
 
 def _build_arm64_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
     build_dir = ctx.target_root / "kernel-build"
-    base_config = ctx.target_root / "config-al2023-arm64"
     kernel_image = build_dir / "arch" / "arm64" / "boot" / "vmlinuz.efi"
     modules_target = ROOT_DIR / ".cache" / "repo-artifacts" / "arm64" / "kernel-modules" / "lib" / "modules"
     _run_local_make(str(kernel_image), str(modules_target), "RUN_TARGET_ARCH=arm64",
-                    f"ARM64_AWS_BUILD_DIR={build_dir}", f"ARM64_AWS_BASE_CONFIG={base_config}",
-                    f"JOBS={max(os.cpu_count() or 1, 1)}")
+                    f"ARM64_AWS_BUILD_DIR={build_dir}", f"JOBS={max(os.cpu_count() or 1, 1)}")
     if not kernel_image.is_file():
         _die(f"missing ARM64 AWS kernel image: {kernel_image}")
     kernel_release = _require_kernel_release(build_dir / "include" / "config" / "kernel.release", arch="ARM64")
@@ -217,36 +214,6 @@ def _remote_has_sched_ext(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
         ctx, ip, "test", "-e", "/sys/kernel/sched_ext/state",
         check=False,
     ).returncode == 0
-
-
-def _refresh_aws_base_config(ctx: aws_common.AwsExecutorContext, ip: str, base_config: Path, *, arch: str) -> None:
-    script = (
-        "release=$(uname -r); "
-        "boot_config=\"/boot/config-$release\"; "
-        "if [ -f \"$boot_config\" ]; then cat \"$boot_config\"; "
-        "elif [ -f /proc/config.gz ]; then zcat /proc/config.gz; "
-        "else exit 1; fi"
-    )
-    completed = aws_common._ssh_exec(ctx, ip, "bash", "-c", script, check=False, capture_output=True)
-    if completed.returncode != 0:
-        _die(f"failed to capture AWS {arch} base kernel config from {ip}")
-    base_config.parent.mkdir(parents=True, exist_ok=True)
-    _write_text_if_changed(base_config, completed.stdout)
-    _write_text_if_changed(base_config.with_suffix(".release"), _remote_kernel_release(ctx, ip) + "\n")
-
-
-def _refresh_aws_arm64_base_config(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
-    _refresh_aws_base_config(ctx, ip, ctx.target_root / "config-al2023-arm64", arch="ARM64")
-
-
-def _refresh_aws_x86_base_config(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
-    _refresh_aws_base_config(ctx, ip, ctx.target_root / "config-al2023-x86_64", arch="x86")
-
-
-def _write_text_if_changed(path: Path, text: str) -> None:
-    if path.is_file() and path.read_text(encoding="utf-8") == text:
-        return
-    path.write_text(text, encoding="utf-8")
 
 
 def _ensure_remote_docker(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
@@ -345,11 +312,9 @@ def _setup_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     target_arch = ctx.contract.identity.target_arch.strip() or ctx.target_name
     with runner_lock(f"artifact-build.{target_arch}"):
         if ctx.target_name == "aws-arm64":
-            _refresh_aws_arm64_base_config(ctx, ip)
             kernel_release, kernel_image, modules_root = _build_arm64_kernel_artifacts(ctx)
             arch = "arm64"
         elif ctx.target_name == "aws-x86":
-            _refresh_aws_x86_base_config(ctx, ip)
             kernel_release, kernel_image, modules_root = _build_x86_kernel_artifacts(ctx)
             arch = "x86"
         else:
@@ -481,6 +446,12 @@ def _suite_results_relative_path(suite_name: str) -> str:
     _die(f"unsupported suite for result sync: {suite_name}")
 
 
+def _remote_transfer_source(ctx: aws_common.AwsExecutorContext, entry: str) -> Path:
+    if ctx.target_name == "aws-x86" and entry == "module":
+        return ROOT_DIR / ".cache" / "aws-x86" / "module"
+    return ROOT_DIR / entry
+
+
 def _sync_remote_roots(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     a = ctx.contract.artifacts
     selected_roots = remote_transfer_roots(
@@ -495,12 +466,12 @@ def _sync_remote_roots(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     )
     if not selected_roots:
         _die("derived remote transfer roots selected no existing roots")
-    missing_roots = [e for e in selected_roots if not (ROOT_DIR / e).exists()]
+    missing_roots = [str(_remote_transfer_source(ctx, e)) for e in selected_roots if not _remote_transfer_source(ctx, e).exists()]
     if missing_roots:
         _die("derived remote transfer roots list missing local roots: " + ", ".join(missing_roots))
     aws_common._ssh_exec(ctx, ip, "mkdir", "-p", ctx.remote_stage_dir)
     for entry in selected_roots:
-        source_path = ROOT_DIR / entry
+        source_path = _remote_transfer_source(ctx, entry)
         remote_path = f"{ctx.remote_stage_dir}/{entry}"
         aws_common._ssh_exec(ctx, ip, "mkdir", "-p", str(Path(remote_path).parent))
         if source_path.is_dir():

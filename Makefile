@@ -25,11 +25,11 @@ ARM64_AWS_BUILD_CONFIG := $(ARM64_AWS_BUILD_DIR)/.config
 ARM64_AWS_IMAGE     := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/Image
 ARM64_AWS_EFI_IMAGE := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
 ARM64_KERNEL_MAKEFLAGS      := $(filter-out B,$(MAKEFLAGS))
-X86_KERNEL_CONFIG_FRAGMENT := $(ROOT_DIR)/vendor/bpfrejit.config
 X86_AWS_BUILD_DIR ?= $(ARTIFACT_ROOT)/aws-x86/kernel-build
-X86_AWS_BASE_CONFIG ?= $(ARTIFACT_ROOT)/aws-x86/config-al2023-x86_64
 X86_AWS_BUILD_CONFIG := $(X86_AWS_BUILD_DIR)/.config
 X86_AWS_IMAGE := $(X86_AWS_BUILD_DIR)/arch/x86/boot/bzImage
+X86_AWS_KINSN_MODULE_ROOT ?= $(ARTIFACT_ROOT)/aws-x86/module
+X86_AWS_KINSN_MODULE_DIR ?= $(X86_AWS_KINSN_MODULE_ROOT)/x86
 RUN_TARGET_SUITE_CMD  = "$(PYTHON)" -m runner.libs.run_target_suite
 AWS_ARM64_BENCH_MODE ?= all
 
@@ -70,7 +70,8 @@ KERNEL_CONFIG_PATH := $(X86_BUILD_DIR)/.config
 NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
 JOBS         ?= $(NPROC)
 DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_defconfig
-ARM64_KERNEL_CONFIG_FRAGMENT := $(ROOT_DIR)/vendor/bpfrejit_arm64.config
+X86_AWS_DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_x86_aws_defconfig
+ARM64_DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_arm64_defconfig
 # Results
 MICRO_RESULTS_DIR      := $(ROOT_DIR)/micro/results
 
@@ -125,7 +126,9 @@ $(KERNEL_CONFIG_PATH): $(DEFCONFIG_SRC)
 	mkdir -p "$(dir $@)"
 	cp "$(DEFCONFIG_SRC)" "$@"
 
-$(X86_AWS_BUILD_CONFIG): $(X86_RUNNER_BUILD_IMAGE_TAR) $(X86_KERNEL_CONFIG_FRAGMENT) $(X86_AWS_BASE_CONFIG) $(KERNEL_BUILD_META_FILES)
+$(X86_AWS_BUILD_CONFIG): $(X86_AWS_DEFCONFIG_SRC) $(X86_RUNNER_BUILD_IMAGE_TAR)
+	mkdir -p "$(dir $@)"
+	cp "$(X86_AWS_DEFCONFIG_SRC)" "$@"
 	@$(ENSURE_X86_RUNNER_BUILD_IMAGE)
 	$(CONTAINER_RUNTIME) run --rm --platform linux/amd64 \
 		--user "$(HOST_UID):$(HOST_GID)" \
@@ -133,14 +136,7 @@ $(X86_AWS_BUILD_CONFIG): $(X86_RUNNER_BUILD_IMAGE_TAR) $(X86_KERNEL_CONFIG_FRAGM
 		-v "$(ROOT_DIR):$(ROOT_DIR)" \
 		-w "$(ROOT_DIR)" \
 		"$(X86_RUNNER_BUILD_IMAGE)" \
-		bash -c "mkdir -p '$(X86_AWS_BUILD_DIR)' && \
-		  cp '$(X86_AWS_BASE_CONFIG)' '$(X86_AWS_BUILD_DIR)/.config' && \
-		  ena_mode=\$$(grep -o 'CONFIG_ENA_ETHERNET=[ym]' '$(X86_AWS_BASE_CONFIG)' | cut -d= -f2 || true) && \
-		  '$(KERNEL_DIR)/scripts/kconfig/merge_config.sh' -m -O '$(X86_AWS_BUILD_DIR)' '$(X86_AWS_BUILD_DIR)/.config' '$(X86_KERNEL_CONFIG_FRAGMENT)' && \
-		  '$(KERNEL_DIR)/scripts/config' --file '$(X86_AWS_BUILD_DIR)/.config' -d LOCALVERSION_AUTO -e NET_VENDOR_AMAZON -e NVME_CORE -e BLK_DEV_NVME -e XFS_FS && \
-		  if [ \"\$$ena_mode\" = m ]; then '$(KERNEL_DIR)/scripts/config' --file '$(X86_AWS_BUILD_DIR)/.config' -m ENA_ETHERNET; \
-		  else '$(KERNEL_DIR)/scripts/config' --file '$(X86_AWS_BUILD_DIR)/.config' -e ENA_ETHERNET; fi && \
-		  make -C '$(KERNEL_DIR)' O='$(X86_AWS_BUILD_DIR)' olddefconfig"
+		make -C "$(KERNEL_DIR)" O="$(X86_AWS_BUILD_DIR)" olddefconfig
 
 $(X86_AWS_IMAGE): $(X86_RUNNER_BUILD_IMAGE_TAR) $(X86_AWS_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
 	@mkdir -p "$(X86_AWS_BUILD_DIR)"
@@ -228,7 +224,9 @@ vm-all:
 	$(MAKE) vm-e2e
 
 # ── ARM64 kernel ───────────────────────────────────────────────────────────────
-$(ARM64_BUILD_CONFIG): $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_KERNEL_CONFIG_FRAGMENT) $(KERNEL_BUILD_META_FILES)
+$(ARM64_BUILD_CONFIG): $(ARM64_DEFCONFIG_SRC) $(ARM64_RUNNER_BUILD_IMAGE_TAR)
+	mkdir -p "$(dir $@)"
+	cp "$(ARM64_DEFCONFIG_SRC)" "$@"
 	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
 	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
 		--user "$(HOST_UID):$(HOST_GID)" \
@@ -237,11 +235,7 @@ $(ARM64_BUILD_CONFIG): $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_KERNEL_CONFIG_FRA
 		-v "$(ROOT_DIR):$(ROOT_DIR)" \
 		-w "$(ROOT_DIR)" \
 		"$(ARM64_RUNNER_BUILD_IMAGE)" \
-		bash -c "mkdir -p '$(ARM64_BUILD_DIR)' && \
-		  rm -rf '$(ARM64_BUILD_DIR)/scripts' '$(ARM64_BUILD_DIR)/tools' '$(ARM64_BUILD_DIR)/arch/arm64/kernel/pi' '$(ARM64_BUILD_DIR)/arch/arm64/kvm/hyp/nvhe' && \
-		  make -C '$(KERNEL_DIR)' O='$(ARM64_BUILD_DIR)' ARCH=arm64 CROSS_COMPILE= defconfig && \
-		  '$(KERNEL_DIR)/scripts/kconfig/merge_config.sh' -m -O '$(ARM64_BUILD_DIR)' '$(ARM64_BUILD_DIR)/.config' '$(ARM64_KERNEL_CONFIG_FRAGMENT)' && \
-		  make -C '$(KERNEL_DIR)' O='$(ARM64_BUILD_DIR)' ARCH=arm64 CROSS_COMPILE= olddefconfig"
+		make -C "$(KERNEL_DIR)" O="$(ARM64_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE= olddefconfig
 
 $(ARM64_IMAGE) $(ARM64_EFI_IMAGE) &: $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
 	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
@@ -257,7 +251,9 @@ $(ARM64_IMAGE) $(ARM64_EFI_IMAGE) &: $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_BUI
 		  rm -f '$(ARM64_BUILD_DIR)/vmlinux.a' '$(ARM64_BUILD_DIR)/vmlinux.o' '$(ARM64_BUILD_DIR)/drivers/of/built-in.a' && \
 		  make -C '$(KERNEL_DIR)' O='$(ARM64_BUILD_DIR)' ARCH=arm64 CROSS_COMPILE= Image vmlinuz.efi -j'$(NPROC)'"
 
-$(ARM64_AWS_BUILD_CONFIG): $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_KERNEL_CONFIG_FRAGMENT) $(ARM64_AWS_BASE_CONFIG) $(KERNEL_BUILD_META_FILES)
+$(ARM64_AWS_BUILD_CONFIG): $(ARM64_DEFCONFIG_SRC) $(ARM64_RUNNER_BUILD_IMAGE_TAR)
+	mkdir -p "$(dir $@)"
+	cp "$(ARM64_DEFCONFIG_SRC)" "$@"
 	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
 	$(CONTAINER_RUNTIME) run --rm --platform linux/arm64 \
 		--user "$(HOST_UID):$(HOST_GID)" \
@@ -266,16 +262,7 @@ $(ARM64_AWS_BUILD_CONFIG): $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_KERNEL_CONFIG
 		-v "$(ROOT_DIR):$(ROOT_DIR)" \
 		-w "$(ROOT_DIR)" \
 		"$(ARM64_RUNNER_BUILD_IMAGE)" \
-		bash -c "mkdir -p '$(ARM64_AWS_BUILD_DIR)' && \
-		  rm -rf '$(ARM64_AWS_BUILD_DIR)/scripts' '$(ARM64_AWS_BUILD_DIR)/tools' '$(ARM64_AWS_BUILD_DIR)/arch/arm64/kernel/pi' '$(ARM64_AWS_BUILD_DIR)/arch/arm64/kvm/hyp/nvhe' && \
-		  cp '$(ARM64_AWS_BASE_CONFIG)' '$(ARM64_AWS_BUILD_DIR)/.config' && \
-		  ena_mode=\$$(grep -o 'CONFIG_ENA_ETHERNET=[ym]' '$(ARM64_AWS_BASE_CONFIG)' | cut -d= -f2 || true) && \
-		  '$(KERNEL_DIR)/scripts/kconfig/merge_config.sh' -m -O '$(ARM64_AWS_BUILD_DIR)' '$(ARM64_AWS_BUILD_DIR)/.config' '$(ARM64_KERNEL_CONFIG_FRAGMENT)' && \
-		  '$(KERNEL_DIR)/scripts/config' --file '$(ARM64_AWS_BUILD_DIR)/.config' -d LOCALVERSION_AUTO -e NET_VENDOR_AMAZON && \
-		  if [ \"\$$ena_mode\" = y ]; then '$(KERNEL_DIR)/scripts/config' --file '$(ARM64_AWS_BUILD_DIR)/.config' -e ENA_ETHERNET; \
-		  elif [ \"\$$ena_mode\" = m ]; then '$(KERNEL_DIR)/scripts/config' --file '$(ARM64_AWS_BUILD_DIR)/.config' -m ENA_ETHERNET; \
-		  else '$(KERNEL_DIR)/scripts/config' --file '$(ARM64_AWS_BUILD_DIR)/.config' -m ENA_ETHERNET; fi && \
-		  make -C '$(KERNEL_DIR)' O='$(ARM64_AWS_BUILD_DIR)' ARCH=arm64 CROSS_COMPILE= olddefconfig"
+		make -C "$(KERNEL_DIR)" O="$(ARM64_AWS_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE= olddefconfig
 
 $(ARM64_AWS_IMAGE) $(ARM64_AWS_EFI_IMAGE) &: $(ARM64_RUNNER_BUILD_IMAGE_TAR) $(ARM64_AWS_BUILD_CONFIG) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
 	@$(ENSURE_ARM64_RUNNER_BUILD_IMAGE)
@@ -334,7 +321,8 @@ clean:
 		"$(ARTIFACT_ROOT)/aws-arm64/run-state" \
 		"$(ARTIFACT_ROOT)/aws-arm64/runs" \
 		"$(ARTIFACT_ROOT)/aws-arm64/state" \
-		"$(ARTIFACT_ROOT)/aws-x86/kernel-build" \
-		"$(ARTIFACT_ROOT)/aws-x86/run-state" \
+			"$(ARTIFACT_ROOT)/aws-x86/kernel-build" \
+			"$(ARTIFACT_ROOT)/aws-x86/module" \
+			"$(ARTIFACT_ROOT)/aws-x86/run-state" \
 		"$(ARTIFACT_ROOT)/aws-x86/runs" \
 		"$(ARTIFACT_ROOT)/aws-x86/state"

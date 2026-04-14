@@ -46,7 +46,9 @@ def test_negative_build_dir(workspace: Path, target_arch: str) -> Path:  return 
 def runtime_container_image_tar_path(workspace: Path, target_arch: str) -> Path:
     return workspace / ".cache" / "container-images" / f"{str(target_arch).strip()}-runner-runtime.image.tar"
 
-def kinsn_module_dir(workspace: Path, target_arch: str) -> Path:
+def kinsn_module_dir(workspace: Path, target_arch: str, target_name: str = "") -> Path:
+    if str(target_name).strip() == "aws-x86":
+        return workspace / ".cache" / "aws-x86" / "module" / "x86"
     return workspace / "module" / ("arm64" if _is_arm64(target_arch) else "x86")
 
 def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Path:
@@ -98,8 +100,8 @@ def native_repo_targets(workspace: Path, target_arch: str, native_repos: list[st
             targets += [kt / "bin" / "katran_server_grpc", kt / "bpf" / "balancer.bpf.o", kt / "bpf" / "healthchecking_ipip.bpf.o"]
     return targets
 
-def kinsn_targets(workspace: Path, target_arch: str) -> list[Path]:
-    root = kinsn_module_dir(workspace, target_arch)
+def kinsn_targets(workspace: Path, target_arch: str, target_name: str = "") -> list[Path]:
+    root = kinsn_module_dir(workspace, target_arch, target_name)
     names = ["bpf_rotate.ko", "bpf_select.ko", "bpf_extract.ko", "bpf_endian.ko", "bpf_bulk_memory.ko"]
     if _is_arm64(target_arch):
         names.insert(4, "bpf_ldp.ko")
@@ -132,8 +134,8 @@ def _artifact_transfer_paths(*, workspace, suite_name, target_arch, needs_runner
     if suite == "test":                     paths += [test_unittest_build_dir(workspace, arch), test_negative_build_dir(workspace, arch)]
     return paths
 
-def local_prep_targets(*, workspace, suite_name, target_arch, executor, needs_runner_binary,
-                        needs_daemon_binary, needs_kinsn_modules, needs_workload_tools,
+def local_prep_targets(*, workspace, suite_name, target_arch, executor, target_name="",
+                        needs_runner_binary, needs_daemon_binary, needs_kinsn_modules, needs_workload_tools,
                         native_repos, scx_packages) -> list[Path]:
     arch, suite = str(target_arch).strip(), str(suite_name).strip()
     targets: list[Path] = []
@@ -145,7 +147,7 @@ def local_prep_targets(*, workspace, suite_name, target_arch, executor, needs_ru
     if suite == "test":
         targets += [test_unittest_build_dir(workspace, arch) / "rejit_regression",
                     test_negative_build_dir(workspace, arch) / "scx_prog_show_race"]
-    if needs_kinsn_modules:                 targets.extend(kinsn_targets(workspace, arch))
+    if needs_kinsn_modules:                 targets.extend(kinsn_targets(workspace, arch, target_name))
     targets.extend(scx_targets(workspace, arch, scx_packages))
     targets.extend(native_repo_targets(workspace, arch, native_repos))
     if needs_workload_tools:                targets.extend(workload_tool_targets(workspace, arch))

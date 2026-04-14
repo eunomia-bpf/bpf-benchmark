@@ -71,6 +71,8 @@ def _local_prep_env(*, config: RunConfig) -> dict[str, str]:
             "RUN_CONTRACT_PYTHON_BIN": host_python_bin,
         }
     )
+    if config.identity.target_name.strip() == "aws-x86":
+        env["RUN_AWS_KERNEL"] = "1"
     return env
 
 
@@ -94,6 +96,7 @@ def _local_prep_target_paths(config: RunConfig) -> list[str]:
             suite_name=suite_name,
             target_arch=target_arch,
             executor=executor,
+            target_name=target_name,
             needs_runner_binary=config.artifacts.needs_runner_binary == "1",
             needs_daemon_binary=config.artifacts.needs_daemon_binary == "1",
             needs_kinsn_modules=config.artifacts.needs_kinsn_modules == "1",

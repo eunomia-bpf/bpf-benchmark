@@ -94,7 +94,10 @@ ENSURE_ACTIVE_RUNNER_BUILD_IMAGE = $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ENS
 ENSURE_X86_BPFTRACE_STATIC_BUILD_IMAGE = $(CONTAINER_RUNTIME) image inspect "$(X86_BPFTRACE_STATIC_BUILD_IMAGE)" >/dev/null 2>&1 || $(CONTAINER_RUNTIME) load -i "$(X86_BPFTRACE_STATIC_BUILD_IMAGE_TAR)"
 ENSURE_ARM64_BPFTRACE_STATIC_BUILD_IMAGE = $(CONTAINER_RUNTIME) image inspect "$(ARM64_BPFTRACE_STATIC_BUILD_IMAGE)" >/dev/null 2>&1 || $(CONTAINER_RUNTIME) load -i "$(ARM64_BPFTRACE_STATIC_BUILD_IMAGE_TAR)"
 ENSURE_ACTIVE_BPFTRACE_STATIC_BUILD_IMAGE = $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ENSURE_ARM64_BPFTRACE_STATIC_BUILD_IMAGE),$(ENSURE_X86_BPFTRACE_STATIC_BUILD_IMAGE))
-ACTIVE_KINSN_MODULE_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/module/arm64,$(ROOT_DIR)/module/x86)
+ACTIVE_X86_KINSN_SOURCE_DIR := $(ROOT_DIR)/module/x86
+ACTIVE_X86_KINSN_OUTPUT_DIR := $(if $(filter 1,$(RUN_AWS_KERNEL)),$(X86_AWS_KINSN_MODULE_DIR),$(ACTIVE_X86_KINSN_SOURCE_DIR))
+ACTIVE_KINSN_SOURCE_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/module/arm64,$(ACTIVE_X86_KINSN_SOURCE_DIR))
+ACTIVE_KINSN_MODULE_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/module/arm64,$(ACTIVE_X86_KINSN_OUTPUT_DIR))
 ACTIVE_X86_KERNEL_BUILD_DIR := $(if $(filter 1,$(RUN_AWS_KERNEL)),$(X86_AWS_BUILD_DIR),$(X86_BUILD_DIR))
 ACTIVE_X86_KERNEL_IMAGE := $(if $(filter 1,$(RUN_AWS_KERNEL)),$(X86_AWS_IMAGE),$(X86_BUILD_DIR)/arch/x86/boot/bzImage)
 ACTIVE_X86_KERNEL_CONFIG_DEP := $(if $(filter 1,$(RUN_AWS_KERNEL)),$(X86_AWS_BUILD_CONFIG),$(X86_BUILD_DIR)/include/linux/kconfig.h)
@@ -123,7 +126,7 @@ RUNNER_SOURCE_FILES = $(RUNNER_CORE_SOURCE_FILES) $(if $(filter 1,$(RUN_SUITE_NE
 TEST_UNITTEST_SOURCE_FILES = $(shell find "$(ROOT_DIR)/tests/unittest" \( -path '*/build' -o -path '*/build-arm64' \) -prune -o -type f -print 2>/dev/null)
 TEST_NEGATIVE_SOURCE_FILES = $(shell find "$(ROOT_DIR)/tests/negative" \( -path '*/build' -o -path '*/build-arm64' \) -prune -o -type f -print 2>/dev/null)
 MICRO_PROGRAM_SOURCE_FILES = $(MICRO_PROGRAM_SRCS) $(shell find "$(MICRO_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -type f \( -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
-KINSN_SOURCE_FILES = $(shell find "$(ACTIVE_KINSN_MODULE_DIR)" "$(ROOT_DIR)/module/include" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
+KINSN_SOURCE_FILES = $(shell find "$(ACTIVE_KINSN_SOURCE_DIR)" "$(ROOT_DIR)/module/include" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
 SCX_SOURCE_FILES = $(shell find "$(REPOS_DIR)/scx" \( -path '*/target' -o -path '*/.git' \) -prune -o -type f \( -name '*.rs' -o -name '*.c' -o -name '*.h' -o -name 'Cargo.toml' -o -name 'Cargo.lock' -o -name 'build.rs' \) -print 2>/dev/null)
 BCC_SOURCE_FILES = $(shell find "$(REPOS_DIR)/bcc/libbpf-tools" \( -path '*/.output' -o -path '*/.git' \) -prune -o -type f \( -name '*.c' -o -name '*.h' -o -name '*.sh' -o -name '*.mk' -o -name '*.yaml' -o -name '*.json' -o -name '*.txt' -o -name 'Makefile' \) -print 2>/dev/null)
 BPFTRACE_SOURCE_FILES = $(shell find "$(REPOS_DIR)/bpftrace" \( -path '*/build' -o -path '*/.git' \) -prune -o -type f -print 2>/dev/null)
@@ -302,6 +305,12 @@ $(MICRO_PROGRAM_OBJECTS) &: $(MICRO_PROGRAM_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_
 	done
 
 $(ACTIVE_KINSN_PRIMARY): $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/Image,$(ACTIVE_X86_KERNEL_IMAGE)) $(KINSN_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
+	@mkdir -p "$(ACTIVE_KINSN_MODULE_DIR)"
+	@if [ "$(filter 1,$(RUN_AWS_KERNEL))" = "1" ]; then \
+		mkdir -p "$(X86_AWS_KINSN_MODULE_ROOT)/include"; \
+		rsync -a --delete --delete-excluded --include='*/' --include='*.c' --include='*.h' --include='Makefile' --exclude='*' "$(ACTIVE_KINSN_SOURCE_DIR)/" "$(ACTIVE_KINSN_MODULE_DIR)/"; \
+		rsync -a --delete --delete-excluded --include='*/' --include='*.h' --exclude='*' "$(ROOT_DIR)/module/include/" "$(X86_AWS_KINSN_MODULE_ROOT)/include/"; \
+	fi
 	@$(ENSURE_ACTIVE_RUNNER_BUILD_IMAGE)
 	$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
 		--user "$(HOST_UID):$(HOST_GID)" \
@@ -319,21 +328,23 @@ $(REPO_KERNEL_MODULES_ROOT)/lib/modules: $(if $(filter arm64,$(RUN_TARGET_ARCH))
 	$(ENSURE_ACTIVE_RUNNER_BUILD_IMAGE); \
 	kernel_release_file="$(ACTIVE_KERNEL_BUILD_DIR)/include/config/kernel.release"; \
 	test -f "$$kernel_release_file" || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
-	kernel_release="$$(tr -d '\n' < "$$kernel_release_file")"; \
-	release_root="$$stage_root/lib/modules/$$kernel_release"; \
-	mkdir -p "$$stage_root"; \
-	rm -rf "$$release_root"; \
-	$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
-		--user "$(HOST_UID):$(HOST_GID)" \
-		-e HOME=/tmp/bpf-benchmark-container \
-		-v "$(ROOT_DIR):$(ROOT_DIR)" \
-		-w "$(ROOT_DIR)" \
-		"$(ACTIVE_RUNNER_BUILD_IMAGE)" \
-		make $(ACTIVE_KERNEL_ARCH_ARG) --no-print-directory -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" -j"$(JOBS)" modules; \
-	$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
-		--user "$(HOST_UID):$(HOST_GID)" \
-		-e HOME=/tmp/bpf-benchmark-container \
-		-v "$(ROOT_DIR):$(ROOT_DIR)" \
+		kernel_release="$$(tr -d '\n' < "$$kernel_release_file")"; \
+		release_root="$$stage_root/lib/modules/$$kernel_release"; \
+		mkdir -p "$$stage_root"; \
+		rm -rf "$$release_root"; \
+		if [ "$(filter arm64,$(RUN_TARGET_ARCH))" = "arm64" ]; then \
+			$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
+				--user "$(HOST_UID):$(HOST_GID)" \
+				-e HOME=/tmp/bpf-benchmark-container \
+				-v "$(ROOT_DIR):$(ROOT_DIR)" \
+				-w "$(ROOT_DIR)" \
+				"$(ACTIVE_RUNNER_BUILD_IMAGE)" \
+				make $(ACTIVE_KERNEL_ARCH_ARG) --no-print-directory -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" -j"$(JOBS)" modules; \
+		fi; \
+		$(CONTAINER_RUNTIME) run --rm --platform "$(ACTIVE_CONTAINER_PLATFORM)" \
+			--user "$(HOST_UID):$(HOST_GID)" \
+			-e HOME=/tmp/bpf-benchmark-container \
+			-v "$(ROOT_DIR):$(ROOT_DIR)" \
 		-w "$(ROOT_DIR)" \
 		"$(ACTIVE_RUNNER_BUILD_IMAGE)" \
 		make $(ACTIVE_KERNEL_ARCH_ARG) --no-print-directory -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" INSTALL_MOD_PATH="$$stage_root" DEPMOD=true modules_install >/dev/null; \
@@ -345,9 +356,10 @@ $(REPO_KERNEL_MODULES_ROOT)/lib/modules: $(if $(filter arm64,$(RUN_TARGET_ARCH))
 		"$(ACTIVE_RUNNER_BUILD_IMAGE)" \
 		depmod -b "$$stage_root" "$$kernel_release" >/dev/null; \
 	ln -sfn "$(ACTIVE_KERNEL_BUILD_DIR)" "$$release_root/build"; \
-	ln -sfn "$(KERNEL_DIR)" "$$release_root/source"; \
-	test -f "$$release_root/kernel/drivers/block/null_blk/null_blk.ko"; \
-	test -f "$$release_root/kernel/net/sched/sch_netem.ko"
+		ln -sfn "$(KERNEL_DIR)" "$$release_root/source"; \
+		test -f "$$release_root/kernel/drivers/block/null_blk/null_blk.ko"; \
+		test -f "$$release_root/kernel/net/sched/sch_netem.ko"; \
+		touch "$@"
 
 $(REPO_SCX_ROOT)/bin/%: $(SCX_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_TAR)
 	@package="$*"; \
@@ -466,15 +478,17 @@ $(ACTIVE_TRACEE_REQUIRED) &: $(TRACEE_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_
 	dist_root="$(TRACEE_BUILD_DIST_ROOT)"; \
 	output_root="$(REPO_TRACEE_ROOT)"; \
 	mkdir -p "$$build_root" "$$output_root/bin" "$$output_root/lsm_support"; \
-	rsync -a --delete --delete-excluded \
-		--filter='P dist/' \
-		--filter='P build/' \
-		--exclude '.git' \
-		--exclude 'dist/' \
-		--exclude 'build/' \
-		"$$repo_src/" "$$repo_root/"; \
-	container_platform="$(ACTIVE_CONTAINER_PLATFORM)"; \
-	container_image="$(ACTIVE_RUNNER_BUILD_IMAGE)"; \
+		rsync -a --delete --delete-excluded \
+			--filter='P dist/' \
+			--filter='P build/' \
+			--exclude '.git' \
+			--exclude 'dist/' \
+			--exclude 'build/' \
+			"$$repo_src/" "$$repo_root/"; \
+		rm -rf "$$dist_root/libbpf"; \
+		rm -f "$$repo_root/.build_libbpf" "$$repo_root/.build_libbpf_fix" "$$repo_root/.eval_goenv" "$$repo_root/.checklib_libbpf" "$$repo_root/goenv.mk"; \
+		container_platform="$(ACTIVE_CONTAINER_PLATFORM)"; \
+		container_image="$(ACTIVE_RUNNER_BUILD_IMAGE)"; \
 	$(CONTAINER_RUNTIME) run --rm --platform "$$container_platform" \
 		--user "$(HOST_UID):$(HOST_GID)" \
 		-e HOME=/tmp/bpf-benchmark-container \
@@ -488,13 +502,12 @@ $(ACTIVE_TRACEE_REQUIRED) &: $(TRACEE_SOURCE_FILES) $(ACTIVE_RUNNER_BUILD_IMAGE_
 			ARCH="$(ACTIVE_TRACEE_ARCH)" \
 			LINUX_ARCH="$(ACTIVE_TRACEE_LINUX_ARCH)" \
 			GO_ARCH="$(ACTIVE_TRACEE_GOARCH)" \
-			CMD_GCC=gcc \
-			CMD_CLANG=clang \
-			CMD_GO=go \
-			CMD_STRIP=llvm-strip \
-			CMD_OBJCOPY=llvm-objcopy \
-			STATIC=1 \
-			tracee; \
+				CMD_GCC=gcc \
+				CMD_CLANG=clang \
+				CMD_GO=go \
+				CMD_STRIP=llvm-strip \
+				CMD_OBJCOPY=llvm-objcopy \
+				tracee; \
 	test -x "$$dist_root/tracee" || { echo "missing tracee build output: $$dist_root/tracee" >&2; exit 1; }; \
 	install -m 0755 "$$dist_root/tracee" "$$output_root/bin/tracee"; \
 	ln -f "$$dist_root/tracee.bpf.o" "$$output_root/tracee.bpf.o"; \
