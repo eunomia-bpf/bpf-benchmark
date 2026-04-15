@@ -8,6 +8,9 @@ wasm-wasmtime.exe
 *.directive.bin
 *.policy.bin
 .cache/
+.state/
+CMakeFiles/
+CMakeCache.txt
 check_katran2
 check_katran2/
 # Python
@@ -101,6 +104,7 @@ corpus/repos/
 corpus/inventory.json
 runner/repos/
 runner/inventory.json
+runner/corpus/results/
 docs/reference/papers/*.pdf
 
 # Keep generated per-run detail payloads ignored, but track metadata directories.

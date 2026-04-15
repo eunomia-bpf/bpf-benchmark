@@ -91,17 +91,17 @@ VM_TEST_COMMON_SUITE_ARGS = --fuzz-rounds "$(FUZZ_ROUNDS)" --scx-prog-show-race-
 VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 
 .PHONY: check validate \
-		vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
-	aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
-	aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86 \
+	vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	aws-arm64-test aws-arm64-benchmark aws-arm64-terminate \
+	aws-x86-test aws-x86-benchmark aws-x86-terminate \
 	help clean
 
 # ── Help ───────────────────────────────────────────────────────────────────────
 help:
 	@echo "Canonical run targets:"
 	@echo "  VM x86:   vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
-	@echo "  AWS ARM:  aws-arm64-test aws-arm64-benchmark aws-arm64-terminate aws-arm64"
-	@echo "  AWS x86:  aws-x86-test aws-x86-benchmark aws-x86-terminate aws-x86"
+	@echo "  AWS ARM:  aws-arm64-test aws-arm64-benchmark aws-arm64-terminate"
+	@echo "  AWS x86:  aws-x86-test aws-x86-benchmark aws-x86-terminate"
 	@echo "Params: vm-micro SAMPLES=$(SAMPLES) WARMUPS=$(WARMUPS) INNER_REPEAT=$(INNER_REPEAT) BENCH=\"...\""
 	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) FILTERS=\"...\" VM_CORPUS_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
 	@echo "        vm-e2e E2E_CASE=\"all|tracee|...\" E2E_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\" PROFILE=$(PROFILE)"
@@ -193,8 +193,6 @@ aws-arm64-benchmark:
 aws-arm64-terminate:
 	$(RUN_TARGET_SUITE_CMD) terminate aws-arm64
 
-aws-arm64: aws-arm64-test aws-arm64-benchmark
-
 aws-x86-test:
 	$(RUN_TARGET_SUITE_CMD) run aws-x86 test
 
@@ -204,10 +202,9 @@ aws-x86-benchmark:
 aws-x86-terminate:
 	$(RUN_TARGET_SUITE_CMD) terminate aws-x86
 
-aws-x86: aws-x86-test aws-x86-benchmark
-
 clean:
 	rm -rf "$(RUNNER_BUILD_DIR)"
+	rm -rf "$(RUNNER_DIR)/build-x86"
 	rm -rf "$(RUNNER_DIR)/build-arm64"
 	rm -rf "$(RUNNER_DIR)/build-llvmbpf"
 	rm -rf "$(RUNNER_DIR)/build-arm64-llvmbpf"
@@ -223,9 +220,11 @@ clean:
 		"$(ARTIFACT_ROOT)/workload-tools" \
 		"$(ARTIFACT_ROOT)/workload-tools-build" \
 		"$(ARTIFACT_ROOT)/aws-arm64/kernel-build" \
+		"$(ARTIFACT_ROOT)/aws-arm64/results" \
 		"$(ARTIFACT_ROOT)/aws-arm64/run-state" \
 		"$(ARTIFACT_ROOT)/aws-arm64/runs" \
 		"$(ARTIFACT_ROOT)/aws-arm64/state" \
+		"$(ARTIFACT_ROOT)/aws-x86/results" \
 		"$(ARTIFACT_ROOT)/aws-x86/run-state" \
 		"$(ARTIFACT_ROOT)/aws-x86/runs" \
 		"$(ARTIFACT_ROOT)/aws-x86/state"

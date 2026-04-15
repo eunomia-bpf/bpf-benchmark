@@ -18,7 +18,7 @@ from runner.libs.run_contract import RunConfig, read_run_config_file
 from runner.libs.state_file import write_state
 from runner.libs.suite_commands import build_runtime_container_command, runtime_container_result_dirs
 from runner.libs.suite_args import read_suite_args_file
-from runner.libs.workspace_layout import remote_transfer_roots, runtime_container_image_tar_path
+from runner.libs.workspace_layout import runtime_container_image_tar_path
 
 _die = partial(fail, "aws-executor")
 
@@ -459,21 +459,17 @@ def _suite_results_relative_path(suite_name: str) -> str:
 
 
 def _sync_remote_roots(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
-    selected_roots = remote_transfer_roots(
-        suite_name=ctx.contract.identity.suite_name,
-        target_arch=ctx.contract.identity.target_arch,
-    )
-    if not selected_roots:
-        _die("derived remote transfer roots selected no existing roots")
-    missing_roots = [str(ROOT_DIR / e) for e in selected_roots if not (ROOT_DIR / e).is_file()]
-    if missing_roots:
-        _die("derived remote transfer roots list missing local files: " + ", ".join(missing_roots))
+    image_tar = runtime_container_image_tar_path(ROOT_DIR, ctx.contract.identity.target_arch)
+    try:
+        relative_image_tar = image_tar.relative_to(ROOT_DIR).as_posix()
+    except ValueError:
+        _die(f"runtime image tar is outside repository root: {image_tar}")
+    if not image_tar.is_file():
+        _die(f"runtime image tar does not exist: {image_tar}")
     aws_common._ssh_exec(ctx, ip, "mkdir", "-p", ctx.remote_stage_dir)
-    for entry in selected_roots:
-        source_path = ROOT_DIR / entry
-        remote_path = f"{ctx.remote_stage_dir}/{entry}"
-        aws_common._ssh_exec(ctx, ip, "mkdir", "-p", str(Path(remote_path).parent))
-        aws_common._scp_to(ctx, ip, source_path, remote_path)
+    remote_path = f"{ctx.remote_stage_dir}/{relative_image_tar}"
+    aws_common._ssh_exec(ctx, ip, "mkdir", "-p", str(Path(remote_path).parent))
+    aws_common._scp_to(ctx, ip, image_tar, remote_path)
 
 
 def _sync_remote_results(ctx: aws_common.AwsExecutorContext, ip: str, remote_workspace: str) -> Path | None:

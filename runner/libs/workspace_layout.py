@@ -104,12 +104,6 @@ def runtime_path_value(workspace: Path, target_arch: str) -> str:
     return ":".join(path_entries)
 
 
-def _artifact_transfer_paths(*, workspace, suite_name, target_arch) -> list[Path]:
-    arch, suite = str(target_arch).strip(), str(suite_name).strip()
-    paths: list[Path] = []
-    if suite in _RUNTIME_IMAGE_SUITES:      paths.append(runtime_container_image_tar_path(workspace, arch))
-    return paths
-
 def local_prep_targets(*, workspace, suite_name, target_arch, executor) -> list[Path]:
     arch, suite = str(target_arch).strip(), str(suite_name).strip()
     targets: list[Path] = []
@@ -118,16 +112,3 @@ def local_prep_targets(*, workspace, suite_name, target_arch, executor) -> list[
         targets += [kvm_kernel_image_path(workspace), kernel_modules_root(workspace, arch, executor) / "lib" / "modules"]
     seen: set[Path] = set()
     return [t for t in targets if not (t in seen or seen.add(t))]  # type: ignore[func-returns-value]
-
-def remote_transfer_roots(*, suite_name, target_arch) -> list[str]:
-    roots: list[str] = []
-    seen: set[str] = set()
-    for path in _artifact_transfer_paths(workspace=ROOT_DIR, suite_name=suite_name, target_arch=target_arch):
-        try:
-            relative = str(path.relative_to(ROOT_DIR))
-        except ValueError:
-            continue
-        if relative not in seen:
-            seen.add(relative)
-            roots.append(relative)
-    return roots
