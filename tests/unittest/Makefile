@@ -46,7 +46,9 @@ LIBBPF_INCLUDES := \
 	-I$(ROOT_DIR)/vendor/libbpf/include/uapi \
 	-I$(ROOT_DIR)/vendor/libbpf/src
 
-BPF_CFLAGS := -O2 -g --target=bpf -D__wsum=__u32
+BPF_TARGET_ARCH ?= $(shell uname -m)
+BPF_ARCH_CFLAGS := $(if $(filter x86_64 amd64,$(BPF_TARGET_ARCH)),-D__TARGET_ARCH_x86 -D__x86_64__,$(if $(filter arm64 aarch64,$(BPF_TARGET_ARCH)),-D__TARGET_ARCH_arm64 -D__aarch64__,))
+BPF_CFLAGS := -O2 -g --target=bpf -D__wsum=__u32 $(BPF_ARCH_CFLAGS)
 BPF_INCLUDES := \
 	-I$(VMLINUX_INCLUDE_DIR) \
 	-I$(LIBBPF_PREFIX)/include \

@@ -65,6 +65,14 @@ runner/repos/*/target
 runner/repos/*/autom4te.cache
 runner/repos/bcc/build
 runner/repos/bpftrace/build
+runner/repos/bpftrace/libbpf/src/libbpf.a
+runner/repos/bpftrace/libbpf/src/libbpf.so*
+runner/repos/bpftrace/libbpf/src/libbpf.pc
+runner/repos/bpftrace/libbpf/src/*.o
+runner/repos/bpftrace/libbpf/src/*.cmd
+runner/repos/bpftrace/libbpf/src/.*.cmd
+runner/repos/bpftrace/libbpf/src/staticobjs
+runner/repos/bpftrace/libbpf/src/sharedobjs
 runner/repos/scx/build
 runner/repos/tetragon/build
 runner/repos/tracee/build
@@ -83,6 +91,8 @@ runner/repos/bcc/libbpf-tools/runqlat
 runner/repos/tetragon/tetragon
 runner/repos/workload-tools/rt-tests/hackbench
 runner/repos/workload-tools/sysbench/**/Makefile
+!runner/repos/workload-tools/sysbench/third_party/concurrency_kit/ck/**/Makefile
+!runner/repos/workload-tools/sysbench/third_party/luajit/luajit/**/Makefile
 runner/repos/workload-tools/sysbench/config.status
 runner/repos/workload-tools/sysbench/config.log
 runner/repos/workload-tools/sysbench/libtool
@@ -90,6 +100,14 @@ runner/repos/workload-tools/sysbench/**/*.la
 runner/repos/workload-tools/sysbench/**/*.lo
 runner/repos/workload-tools/sysbench/src/sysbench
 runner/repos/workload-tools/sysbench/**/*.o
+runner/repos/workload-tools/sysbench/third_party/concurrency_kit/include
+runner/repos/workload-tools/sysbench/third_party/concurrency_kit/lib
+runner/repos/workload-tools/sysbench/third_party/concurrency_kit/share
+runner/repos/workload-tools/sysbench/third_party/concurrency_kit/tmp
+runner/repos/workload-tools/sysbench/third_party/luajit/bin
+runner/repos/workload-tools/sysbench/third_party/luajit/lib
+runner/repos/workload-tools/sysbench/third_party/luajit/share
+runner/repos/workload-tools/sysbench/third_party/luajit/tmp
 runner/repos/workload-tools/wrk/obj
 runner/repos/workload-tools/wrk/wrk
 

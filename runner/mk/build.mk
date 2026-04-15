@@ -1,6 +1,7 @@
 REPOS_DIR := $(RUNNER_DIR)/repos
 RUNNER_CONTAINER_DIR := $(RUNNER_DIR)/containers
 RUN_TARGET_ARCH ?= x86_64
+vARM64_IMAGE_BUILD_JOBS ?= 4
 WORKLOAD_TOOLS_SOURCE_ROOT := $(REPOS_DIR)/workload-tools
 DOCKERIGNORE_FILE := $(ROOT_DIR)/.dockerignore
 X86_BUILD_DISTRO_VARIANT := ubuntu24.04
@@ -112,7 +113,10 @@ MICRO_PROGRAM_SOURCE_FILES = $(MICRO_PROGRAM_SRCS) $(shell find "$(MICRO_PROGRAM
 KINSN_SOURCE_FILES = $(shell find "$(ACTIVE_KINSN_SOURCE_DIR)" "$(ROOT_DIR)/module/include" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
 SCX_SOURCE_FILES = $(shell find "$(REPOS_DIR)/scx" \( -path '*/target' -o -path '*/.git' \) -prune -o -type f \( -name '*.rs' -o -name '*.c' -o -name '*.h' -o -name 'Cargo.toml' -o -name 'Cargo.lock' -o -name 'build.rs' \) -print 2>/dev/null)
 BCC_SOURCE_FILES = $(shell find "$(REPOS_DIR)/bcc/libbpf-tools" \( -path '*/.output' -o -path '*/.git' \) -prune -o -type f \( -name '*.c' -o -name '*.h' -o -name '*.sh' -o -name '*.mk' -o -name '*.yaml' -o -name '*.json' -o -name '*.txt' -o -name 'Makefile' \) -print 2>/dev/null)
-BPFTRACE_SOURCE_FILES = $(shell find "$(REPOS_DIR)/bpftrace" \( -path '*/build' -o -path '*/.git' \) -prune -o -type f -print 2>/dev/null)
+BPFTRACE_SOURCE_FILES = $(shell find "$(REPOS_DIR)/bpftrace" \
+	\( -path '*/build' -o -path '*/.git' -o -path '*/libbpf/src/staticobjs' -o -path '*/libbpf/src/sharedobjs' \) -prune -o -type f \
+	! -name '*.a' ! -name '*.o' ! -name '*.so' ! -name '*.so.*' ! -name '*.cmd' ! -name 'libbpf.pc' \
+	-print 2>/dev/null)
 TRACEE_SOURCE_FILES = $(shell find "$(REPOS_DIR)/tracee" \( -path '*/dist' -o -path '*/build' -o -path '*/.git' \) -prune -o -type f \( -name '*.go' -o -name '*.c' -o -name '*.h' -o -name '*.mk' -o -name 'Makefile' -o -name 'go.mod' -o -name 'go.sum' \) -print 2>/dev/null)
 TETRAGON_SOURCE_FILES = $(shell find "$(REPOS_DIR)/tetragon" \( -path '*/bpf/objs' -o -path '*/.git' \) -prune -o -type f \( -name '*.go' -o -name '*.c' -o -name '*.h' -o -name '*.yaml' -o -name '*.mk' -o -name 'Makefile' -o -name 'go.mod' -o -name 'go.sum' \) -print 2>/dev/null)
 KATRAN_SOURCE_FILES = $(shell find "$(REPOS_DIR)/katran" \( -path '*/_build' -o -path '*/deps' -o -path '*/.git' \) -prune -o -type f -print 2>/dev/null)
@@ -123,8 +127,11 @@ WORKLOAD_TOOLS_SOURCE_FILES = $(shell find "$(WORKLOAD_TOOLS_SOURCE_ROOT)" \
 	! -path '*/rt-tests/hackbench' ! -path '*/sysbench/src/sysbench' ! -path '*/wrk/wrk' ! -name '*.o' -print 2>/dev/null)
 LIBBPF_SOURCE_FILES = $(shell find "$(ROOT_DIR)/vendor/libbpf" \( -path '*/.git' -o -path '*/build' -o -path '*/obj' -o -path '*/prefix' \) -prune -o -type f -print 2>/dev/null)
 VENDOR_LINUX_RUNTIME_SOURCE_FILES = $(ROOT_DIR)/vendor/linux-framework/Makefile $(shell find \
+	"$(ROOT_DIR)/vendor/linux-framework/arch/arm64/include/uapi/asm" \
 	"$(ROOT_DIR)/vendor/linux-framework/include" \
+	"$(ROOT_DIR)/vendor/linux-framework/kernel/bpf" \
 	"$(ROOT_DIR)/vendor/linux-framework/scripts" \
+	"$(ROOT_DIR)/vendor/linux-framework/tools/arch" \
 	"$(ROOT_DIR)/vendor/linux-framework/tools/bpf/bpftool" \
 	"$(ROOT_DIR)/vendor/linux-framework/tools/build" \
 	"$(ROOT_DIR)/vendor/linux-framework/tools/include" \
@@ -169,6 +176,7 @@ $(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_SOURCE_FILES)
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
+		--build-arg IMAGE_BUILD_JOBS="$(JOBS)" \
 		--build-arg RUN_TARGET_ARCH=x86_64 \
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$@" "$(X86_RUNNER_RUNTIME_IMAGE)"
@@ -178,6 +186,7 @@ $(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_SOURCE_FILES)
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
+		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=arm64 \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$@" "$(ARM64_RUNNER_RUNTIME_IMAGE)"
@@ -322,7 +331,7 @@ $(ACTIVE_RUNNER_BINARY): $(RUNNER_LIBBPF_A) $(RUNNER_SOURCE_FILES) $(BUILD_RULE_
 
 $(ACTIVE_TEST_UNITTEST_PRIMARY): $(TEST_UNITTEST_SOURCE_FILES) $(BUILD_RULE_FILES)
 	mkdir -p "$(ACTIVE_TEST_UNITTEST_BUILD_DIR)" "$(ACTIVE_TEST_UNITTEST_BUILD_DIR)/vendor/bpftool"
-	make -C "$(ROOT_DIR)/tests/unittest" BUILD_DIR="$(ACTIVE_TEST_UNITTEST_BUILD_DIR)" CC=gcc CLANG=clang
+	make -C "$(ROOT_DIR)/tests/unittest" BUILD_DIR="$(ACTIVE_TEST_UNITTEST_BUILD_DIR)" CC=gcc CLANG=clang BPF_TARGET_ARCH="$(RUN_TARGET_ARCH)"
 
 $(ACTIVE_TEST_NEGATIVE_PRIMARY): $(TEST_NEGATIVE_SOURCE_FILES) $(BUILD_RULE_FILES)
 	mkdir -p "$(ACTIVE_TEST_NEGATIVE_BUILD_DIR)"
@@ -377,6 +386,8 @@ $(ACTIVE_BPFTRACE_REQUIRED): $(BPFTRACE_SOURCE_FILES) $(BUILD_RULE_FILES)
 	repo_root="$(REPOS_DIR)/bpftrace"; \
 	artifact_root="$(REPO_BPFTRACE_ROOT)"; \
 	mkdir -p "$$build_root" "$$artifact_root"; \
+	rm -rf "$$repo_root/libbpf/src/staticobjs" "$$repo_root/libbpf/src/sharedobjs"; \
+	find "$$repo_root/libbpf/src" -maxdepth 1 -type f \( -name '*.a' -o -name '*.o' -o -name '*.so' -o -name '*.so.*' -o -name '*.cmd' -o -name 'libbpf.pc' \) -delete; \
 	cmake -S "$$repo_root" -B "$$build_root/build" \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX="$$artifact_root" \
@@ -384,7 +395,7 @@ $(ACTIVE_BPFTRACE_REQUIRED): $(BPFTRACE_SOURCE_FILES) $(BUILD_RULE_FILES)
 		-DBUILD_TESTING=OFF \
 		-DENABLE_MAN=OFF \
 		-DENABLE_SKB_OUTPUT=OFF \
-		-DUSE_SYSTEM_LIBBPF=ON \
+		-DUSE_SYSTEM_LIBBPF=OFF \
 		-DLLVM_DIR="$(RUNNER_LLVM_DIR)" \
 		-DClang_DIR="$(RUNNER_CLANG_DIR)" \
 		-DCMAKE_DISABLE_FIND_PACKAGE_LibBfd=TRUE \
@@ -395,7 +406,7 @@ $(ACTIVE_BPFTRACE_REQUIRED): $(BPFTRACE_SOURCE_FILES) $(BUILD_RULE_FILES)
 
 $(ACTIVE_TRACEE_REQUIRED) &: $(TRACEE_SOURCE_FILES) $(BUILD_RULE_FILES)
 	repo_root="$(REPOS_DIR)/tracee"; \
-	dist_root="$(TRACEE_BUILD_DIST_ROOT)"; \
+	dist_root="$(REPOS_DIR)/tracee/dist"; \
 	output_root="$(REPO_TRACEE_ROOT)"; \
 	mkdir -p "$$dist_root" "$$output_root/bin" "$$output_root/lsm_support"; \
 	rm -rf "$$dist_root/libbpf"; \

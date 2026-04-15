@@ -2,6 +2,7 @@
 FROM docker.io/library/ubuntu:24.04 AS runner-runtime-userspace
 
 ARG GO_VERSION=1.26.0
+ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 ARG TARGETARCH
@@ -42,6 +43,7 @@ RUN apt-get update \
         libbpf-dev \
         libbpfcc-dev \
         libbz2-dev \
+        libcap-dev \
         libcereal-dev \
         libclang-dev \
         libcurl4-openssl-dev \
@@ -56,12 +58,14 @@ RUN apt-get update \
         libfmt-dev \
         libgflags-dev \
         libgoogle-glog-dev \
+        libiberty-dev \
         liblz4-dev \
         libmnl-dev \
         libpcap-dev \
         libre2-dev \
         libsodium-dev \
         libsnappy-dev \
+        libspdlog-dev \
         libssl-dev \
         libtool \
         libtool-bin \
@@ -69,8 +73,6 @@ RUN apt-get update \
         libunwind-dev \
         libyaml-cpp-dev \
         libzstd-dev \
-        linux-tools-common \
-        linux-tools-generic \
         llvm \
         llvm-dev \
         lz4 \
@@ -81,6 +83,7 @@ RUN apt-get update \
         procps \
         python3 \
         python3-yaml \
+        rsync \
         rustc \
         scons \
         stress-ng \
@@ -88,11 +91,9 @@ RUN apt-get update \
         unzip \
         util-linux \
         xz-utils \
+        xxd \
         zlib1g-dev \
         zstd \
-    && bpftool_bin="$(find /usr/lib/linux-tools -type f -name bpftool | sort -V | tail -n 1)" \
-    && test -n "$bpftool_bin" \
-    && ln -sf "$bpftool_bin" /usr/local/bin/bpftool \
     && rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
@@ -112,6 +113,20 @@ RUN set -eux; \
 ENV PATH="/usr/local/go/bin:${PATH}" \
     GOTOOLCHAIN=local
 
+ARG RUST_VERSION=1.90.0
+
+ENV RUSTUP_HOME=/opt/rustup \
+    CARGO_HOME=/opt/cargo \
+    PATH="/opt/cargo/bin:${PATH}"
+
+RUN set -eux; \
+    curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs -o /tmp/rustup-init.sh; \
+    sh /tmp/rustup-init.sh -y --no-modify-path --profile minimal --default-toolchain "${RUST_VERSION}"; \
+    rm -f /tmp/rustup-init.sh; \
+    chmod -R a+rX /opt/rustup /opt/cargo; \
+    rustc --version; \
+    cargo --version
+
 RUN mkdir -p "${IMAGE_WORKSPACE}"
 WORKDIR ${IMAGE_WORKSPACE}
 
@@ -119,7 +134,10 @@ COPY vendor/libbpf ./vendor/libbpf
 COPY vendor/llvmbpf ./vendor/llvmbpf
 COPY vendor/linux-framework/Makefile ./vendor/linux-framework/
 COPY vendor/linux-framework/include ./vendor/linux-framework/include
+COPY vendor/linux-framework/arch/arm64/include/uapi/asm ./vendor/linux-framework/arch/arm64/include/uapi/asm
 COPY vendor/linux-framework/scripts ./vendor/linux-framework/scripts
+COPY vendor/linux-framework/kernel/bpf ./vendor/linux-framework/kernel/bpf
+COPY vendor/linux-framework/tools/arch ./vendor/linux-framework/tools/arch
 COPY vendor/linux-framework/tools/bpf/bpftool ./vendor/linux-framework/tools/bpf/bpftool
 COPY vendor/linux-framework/tools/build ./vendor/linux-framework/tools/build
 COPY vendor/linux-framework/tools/include ./vendor/linux-framework/tools/include
@@ -127,41 +145,63 @@ COPY vendor/linux-framework/tools/lib ./vendor/linux-framework/tools/lib
 COPY vendor/linux-framework/tools/sched_ext/include ./vendor/linux-framework/tools/sched_ext/include
 COPY vendor/linux-framework/tools/scripts ./vendor/linux-framework/tools/scripts
 
+RUN make -C vendor/linux-framework/tools/bpf/bpftool \
+        VMLINUX_BTF= \
+        feature-llvm=0 \
+        feature-libbfd=0 \
+        feature-libbfd-liberty=0 \
+        feature-libbfd-liberty-z=0 \
+        -j"${IMAGE_BUILD_JOBS}" \
+    && install -m 0755 vendor/linux-framework/tools/bpf/bpftool/bpftool /usr/local/bin/bpftool \
+    && bpftool version
+
 COPY Makefile ./
 COPY runner/mk ./runner/mk
 
 COPY runner/repos/bcc ./runner/repos/bcc
-RUN make image-bcc-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1
+RUN make image-bcc-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
 
 COPY runner/repos/bpftrace ./runner/repos/bpftrace
-RUN make image-bpftrace-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1
+RUN make image-bpftrace-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
 
 COPY runner/repos/katran ./runner/repos/katran
-RUN make image-katran-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1
+RUN make image-katran-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
 
 COPY runner/repos/tracee ./runner/repos/tracee
-RUN make image-tracee-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1
+RUN make image-tracee-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
 
 COPY runner/repos/tetragon ./runner/repos/tetragon
-RUN make image-tetragon-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1
+RUN make image-tetragon-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
 
 COPY runner/repos/scx ./runner/repos/scx
-RUN make image-scx-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1
+RUN make image-scx-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
 
 COPY runner/repos/workload-tools ./runner/repos/workload-tools
-RUN make image-workload-tools-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1
+RUN rm -rf \
+        ./runner/repos/workload-tools/sysbench/third_party/concurrency_kit/include \
+        ./runner/repos/workload-tools/sysbench/third_party/concurrency_kit/lib \
+        ./runner/repos/workload-tools/sysbench/third_party/concurrency_kit/share \
+        ./runner/repos/workload-tools/sysbench/third_party/concurrency_kit/tmp \
+        ./runner/repos/workload-tools/sysbench/third_party/luajit/bin \
+        ./runner/repos/workload-tools/sysbench/third_party/luajit/lib \
+        ./runner/repos/workload-tools/sysbench/third_party/luajit/share \
+        ./runner/repos/workload-tools/sysbench/third_party/luajit/tmp \
+        ./runner/repos/workload-tools/wrk/obj \
+        ./runner/repos/workload-tools/wrk/wrk \
+    && find ./runner/repos/workload-tools/sysbench -type f \( -name '*.a' -o -name '*.la' -o -name '*.lo' -o -name '*.o' \) -delete
+RUN make image-workload-tools-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
 
 COPY runner/CMakeLists.txt ./runner/
 COPY runner/include ./runner/include
 COPY runner/src ./runner/src
-RUN make image-runner-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1
+RUN make image-runner-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
 
 COPY micro/programs ./micro/programs
-RUN make image-micro-program-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1
+RUN make image-micro-program-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
 
 COPY tests/unittest ./tests/unittest
 COPY tests/negative ./tests/negative
-RUN make image-test-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1
+RUN make image-test-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
 
 RUN rm -rf \
         /tmp/bpf-benchmark-build \
@@ -187,7 +227,7 @@ COPY corpus/bcf ./corpus/bcf
 COPY corpus/inputs ./corpus/inputs
 
 COPY daemon ./daemon
-RUN make image-daemon-artifact RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 \
+RUN make image-daemon-artifact RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}" \
     && find ./daemon/target -type d \( -name build -o -name deps -o -name incremental -o -name .fingerprint \) -prune -exec rm -rf {} + \
     && rm -rf \
         ./Makefile \
@@ -242,6 +282,8 @@ RUN make image-runtime-kinsn-artifacts \
         /root/.cache/go-build \
         /root/go \
         /usr/local/go \
+        /opt/cargo \
+        /opt/rustup \
         ./.cache \
         ./Makefile \
         ./runner/mk \
@@ -265,6 +307,7 @@ RUN make image-runtime-kinsn-artifacts \
         libbpf-dev \
         libbpfcc-dev \
         libbz2-dev \
+        libcap-dev \
         libcereal-dev \
         libclang-dev \
         libcurl4-openssl-dev \
@@ -279,12 +322,14 @@ RUN make image-runtime-kinsn-artifacts \
         libfmt-dev \
         libgflags-dev \
         libgoogle-glog-dev \
+        libiberty-dev \
         liblz4-dev \
         libmnl-dev \
         libpcap-dev \
         libre2-dev \
         libsodium-dev \
         libsnappy-dev \
+        libspdlog-dev \
         libssl-dev \
         libtool \
         libtool-bin \
@@ -297,8 +342,10 @@ RUN make image-runtime-kinsn-artifacts \
         make \
         pkg-config \
         rustc \
+        rsync \
         scons \
         unzip \
+        xxd \
         zlib1g-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
