@@ -12,20 +12,24 @@ from typing import Mapping, Sequence
 
 import yaml
 
-from .. import ROOT_DIR, tail_text
+from .. import ROOT_DIR, tail_text, which
 from ..agent import stop_agent
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
 from .process_support import wait_for_attached_programs
-from .setup_support import binary_matches_host_arch, first_existing_dir, repo_artifact_root
 
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml"
 DEFAULT_ATTACH_TIMEOUT_SECONDS = 20
 DEFAULT_MIN_BIOSNOOP_CORPUS_RUNS = 100
 
 
-def _default_tools_dir() -> Path:
-    return repo_artifact_root() / "bcc" / "libbpf-tools"
+def _tool_binary_names(tool_name: str) -> tuple[str, ...]:
+    normalized = str(tool_name).strip()
+    if not normalized:
+        return ()
+    if normalized.endswith("-bpfcc"):
+        return (normalized,)
+    return (f"{normalized}-bpfcc", normalized)
 
 
 @dataclass(frozen=True)
@@ -101,37 +105,24 @@ def _bcc_tool_specs() -> dict[str, BCCWorkloadSpec]:
 
 
 def inspect_bcc_setup() -> dict[str, object]:
-    artifact_build_output = _default_tools_dir() / ".output"
-    build_output = first_existing_dir(artifact_build_output)
-    if build_output is None:
-        return {
-            "returncode": 1,
-            "tools_dir": None,
-            "stdout_tail": "",
-            "stderr_tail": f"missing BCC libbpf-tools artifact output under {artifact_build_output}",
-        }
-
+    resolved_tools: dict[str, str] = {}
     for tool_name in _bcc_tool_specs():
-        candidate = build_output / tool_name
-        if not candidate.is_file() or not os.access(candidate, os.X_OK):
+        resolved = next((path for name in _tool_binary_names(tool_name) if (path := which(name)) is not None), None)
+        if resolved is None:
             return {
                 "returncode": 1,
-                "tools_dir": str(build_output),
+                "tools_dir": None,
                 "stdout_tail": "",
-                "stderr_tail": f"missing repo-managed BCC libbpf-tools under {build_output}; missing {tool_name}",
+                "stderr_tail": f"missing distro BCC tool for {tool_name}; install bpfcc-tools and python3-bpfcc",
             }
-        if not binary_matches_host_arch(candidate):
-            return {
-                "returncode": 1,
-                "tools_dir": str(build_output),
-                "stdout_tail": "",
-                "stderr_tail": f"BCC tool artifact has the wrong architecture: {candidate}",
-            }
+        resolved_tools[tool_name] = resolved
+
+    tool_dirs = sorted({str(Path(path).parent) for path in resolved_tools.values()})
 
     return {
         "returncode": 0,
-        "tools_dir": str(build_output),
-        "stdout_tail": f"BCC_TOOLS_DIR={build_output}",
+        "tools_dir": os.pathsep.join(tool_dirs),
+        "stdout_tail": "\n".join(f"BCC_TOOL_{name}={path}" for name, path in sorted(resolved_tools.items())),
         "stderr_tail": "",
     }
 
@@ -147,19 +138,21 @@ def resolve_tools_dir(
             return candidate.resolve()
     setup_dir = str((setup_result or {}).get("tools_dir") or "").strip()
     if setup_dir:
-        candidate = Path(setup_dir)
-        if candidate.is_dir():
-            return candidate.resolve()
-    output_subdir = _default_tools_dir() / ".output"
-    if output_subdir.is_dir():
-        return output_subdir.resolve()
-    return _default_tools_dir().resolve()
+        for item in setup_dir.split(os.pathsep):
+            candidate = Path(item)
+            if candidate.is_dir():
+                return candidate.resolve()
+    return Path("/usr/sbin")
 
 
 def find_tool_binary(tools_dir: Path, tool_name: str) -> Path | None:
-    for candidate in (tools_dir / tool_name, tools_dir.parent / tool_name):
-        if candidate.is_file() and os.access(candidate, os.X_OK):
-            return candidate.resolve()
+    for binary_name in _tool_binary_names(tool_name):
+        resolved = which(binary_name)
+        if resolved is not None:
+            return Path(resolved).resolve()
+        for candidate in (tools_dir / binary_name, tools_dir.parent / binary_name):
+            if candidate.is_file() and os.access(candidate, os.X_OK):
+                return candidate.resolve()
     return None
 
 

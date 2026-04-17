@@ -322,11 +322,11 @@ def _current_prog_ids() -> list[int]:
 
 
 def inspect_tracee_setup() -> dict[str, object]:
-    corpus_binary = repo_artifact_root() / "tracee" / "bin" / "tracee"
-    tracee_binary = pick_host_executable(corpus_binary)
+    artifact_binary = repo_artifact_root() / "tracee" / "bin" / "tracee"
+    tracee_binary = pick_host_executable(artifact_binary)
     if tracee_binary is None:
         return {"returncode": 1, "tracee_binary": None, "stdout_tail": "",
-                "stderr_tail": f"missing repo-managed Tracee binary under {corpus_binary}"}
+                "stderr_tail": f"missing upstream Tracee container artifact under {artifact_binary}"}
     vp = run_command([str(tracee_binary), "--version"], check=False, timeout=30)
     if vp.returncode != 0:
         vp = run_command([str(tracee_binary), "version"], check=False, timeout=30)
@@ -334,8 +334,12 @@ def inspect_tracee_setup() -> dict[str, object]:
         return {"returncode": vp.returncode, "tracee_binary": str(tracee_binary),
                 "stdout_tail": tail_text(vp.stdout or "", max_lines=40, max_chars=8000),
                 "stderr_tail": tail_text(vp.stderr or "", max_lines=40, max_chars=8000)}
+    tracee_ebpf = tracee_binary.parent / "tracee-ebpf"
+    stdout_tail = f"TRACEE_BINARY={tracee_binary}"
+    if tracee_ebpf.is_file():
+        stdout_tail += f"\nTRACEE_EBPF_BINARY={tracee_ebpf}"
     return {"returncode": 0, "tracee_binary": str(tracee_binary),
-            "stdout_tail": f"TRACEE_BINARY={tracee_binary}", "stderr_tail": ""}
+            "stdout_tail": stdout_tail, "stderr_tail": ""}
 
 
 def resolve_tracee_binary(explicit: str | None, setup_result: Mapping[str, object]) -> str | None:
@@ -486,7 +490,7 @@ class TraceeRunner(AppRunner):
                 self.setup_result,
             )
         if resolved is None:
-            raise RuntimeError("Tracee binary not found; provide --tracee-binary or prepare the repo-managed Tracee binary")
+            raise RuntimeError("Tracee binary not found; provide --tracee-binary or prepare the upstream Tracee container artifact")
         return resolved
 
     def start(self) -> list[int]:

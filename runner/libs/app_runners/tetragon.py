@@ -101,7 +101,7 @@ def inspect_tetragon_setup() -> dict[str, object]:
         return {**_fail, "stderr_tail": f"missing required Tetragon workload tools: {' '.join(missing_tools)}"}
     tetragon_binary = pick_host_executable(tetragon_artifact_binary)
     if tetragon_binary is None:
-        return {**_fail, "stderr_tail": f"missing repo-managed Tetragon binary under {tetragon_artifact_binary}"}
+        return {**_fail, "stderr_tail": f"missing upstream Tetragon container artifact under {tetragon_artifact_binary}"}
     bpf_lib_dir = artifact_root if artifact_root.is_dir() else None
     if bpf_lib_dir is None or not any(bpf_lib_dir.glob("*.o")) and not any(bpf_lib_dir.glob("*.bpf.o")):
         return {"returncode": 1, "tetragon_binary": str(tetragon_binary), "tetragon_bpf_lib_dir": None,
@@ -263,7 +263,7 @@ class TetragonRunner(AppRunner):
             details = str(self.setup_result.get("stderr_tail") or self.setup_result.get("stdout_tail") or self.setup_result)
             raise RuntimeError(f"Tetragon setup failed: {details}")
         resolved = resolve_tetragon_binary(None if self.tetragon_binary is None else str(self.tetragon_binary), self.setup_result)
-        if resolved is None: raise RuntimeError("Tetragon binary not found; provide --tetragon-binary or prepare the repo-managed Tetragon binary")
+        if resolved is None: raise RuntimeError("Tetragon binary not found; provide --tetragon-binary or prepare the upstream Tetragon container artifact")
         return resolved
 
     def start(self) -> list[int]:

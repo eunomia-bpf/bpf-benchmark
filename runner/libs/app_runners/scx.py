@@ -14,7 +14,6 @@ from ..process_fd import dup_fd_from_process
 from ..workload import WorkloadResult, resolve_workload_tool
 from .base import AppRunner
 from .process_support import AgentSession
-from .setup_support import repo_artifact_root
 
 
 HACKBENCH_TIME_RE = re.compile(r"Time:\s*([0-9.]+)")
@@ -333,19 +332,29 @@ def run_workload(spec: Mapping[str, object], duration_s: int) -> tuple[WorkloadR
 DEFAULT_LOAD_TIMEOUT_S = 20
 
 
-def _default_scx_binary_dir() -> Path:
-    return repo_artifact_root() / "scx" / "bin"
-
-
-def _default_scx_binary() -> Path:
-    return _default_scx_binary_dir() / "scx_rusty"
-
-
-def _scheduler_binary_for_name(scheduler: str | None) -> Path:
+def _scheduler_binary_name(scheduler: str | None) -> str:
     normalized = str(scheduler or "").strip()
     if not normalized:
-        return _default_scx_binary()
-    return _default_scx_binary_dir() / f"scx_{normalized}"
+        return "scx_rusty"
+    if normalized.startswith("scx_"):
+        return normalized
+    return f"scx_{normalized}"
+
+
+def _resolve_scheduler_binary(scheduler: str, explicit: Path | str | None) -> Path:
+    if explicit is not None:
+        candidate = Path(explicit).expanduser()
+        if not candidate.is_file() or not os.access(candidate, os.X_OK):
+            raise RuntimeError(f"scx scheduler binary not found or not executable: {candidate}")
+        return candidate.resolve()
+
+    binary_name = _scheduler_binary_name(scheduler)
+    resolved = which(binary_name)
+    if resolved is None:
+        raise RuntimeError(
+            f"{binary_name} is required in PATH; install a distro scx/scx-tools package or provide scheduler_binary"
+        )
+    return Path(resolved).resolve()
 
 
 class ScxRunner(AppRunner):
@@ -362,8 +371,7 @@ class ScxRunner(AppRunner):
         self.scheduler = str(scheduler).strip()
         if not self.scheduler:
             raise RuntimeError("ScxRunner requires a scheduler name")
-        inferred = _scheduler_binary_for_name(self.scheduler)
-        self.scheduler_binary = Path(scheduler_binary).resolve() if scheduler_binary is not None else inferred.resolve()
+        self.scheduler_binary = _resolve_scheduler_binary(self.scheduler, scheduler_binary)
         self.scheduler_extra_args = tuple(str(arg) for arg in scheduler_extra_args)
         self.load_timeout_s = int(load_timeout_s)
         self.session: Any | None = None

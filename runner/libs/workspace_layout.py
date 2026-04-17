@@ -93,10 +93,6 @@ def runtime_path_value(workspace: Path, target_arch: str) -> str:
         candidates: list[Path] = []
         if inside_runtime_image():
             candidates.append(runner_binary_path(workspace, arch).parent)
-        candidates.extend([
-            runtime_repo_artifact_root(workspace, arch) / "bpftrace" / "bin",
-            runtime_workload_tools_root(workspace, arch) / "bin",
-        ])
         path_entries.extend(str(path) for path in candidates if path.is_dir())
     for standard_dir in ("/usr/local/sbin", "/usr/local/bin", "/usr/sbin", "/usr/bin", "/sbin", "/bin"):
         if standard_dir not in path_entries:
