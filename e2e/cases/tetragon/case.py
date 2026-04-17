@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import sys
 import threading
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -166,6 +167,60 @@ def select_tetragon_programs(
             f"configured {config_key} not found in live Tetragon programs: {', '.join(missing)}"
         )
     return selected
+
+
+def select_tetragon_program_sets(
+    live_programs: Sequence[Mapping[str, object]],
+    config: Mapping[str, object],
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    selected_programs = select_tetragon_programs(live_programs, config)
+    if config.get("apply_programs"):
+        apply_programs = select_tetragon_programs(
+            live_programs,
+            config,
+            config_key="apply_programs",
+            allow_all_when_unset=False,
+        )
+    else:
+        apply_programs = [dict(program) for program in selected_programs]
+    return selected_programs, apply_programs
+
+
+def wait_for_configured_tetragon_programs(
+    runner: TetragonRunner,
+    config: Mapping[str, object],
+    *,
+    timeout_s: int,
+) -> list[dict[str, object]]:
+    deadline = time.monotonic() + max(0.0, float(timeout_s))
+    last_programs = [dict(program) for program in runner.programs]
+    last_error: RuntimeError | None = None
+
+    while True:
+        last_programs = runner.refresh_programs()
+        try:
+            select_tetragon_program_sets(last_programs, config)
+            return last_programs
+        except RuntimeError as exc:
+            last_error = exc
+
+        session = runner.session
+        exit_reason = describe_agent_exit(
+            "Tetragon",
+            None if session is None else session.process,
+            {} if session is None else session.collector_snapshot(),
+        )
+        if exit_reason is not None:
+            message = str(last_error) if last_error is not None else "Tetragon configured programs were not discovered"
+            raise RuntimeError(f"{message}; {exit_reason}") from last_error
+        if time.monotonic() >= deadline:
+            break
+        time.sleep(0.5)
+
+    attached = sorted(str(program.get("name") or "") for program in last_programs if str(program.get("name") or "").strip())
+    message = str(last_error) if last_error is not None else "Tetragon configured programs were not discovered"
+    attached_text = ", ".join(attached) if attached else "<none>"
+    raise RuntimeError(f"{message}; attached Tetragon programs after waiting {timeout_s}s: {attached_text}") from last_error
 
 
 def run_workload(spec: WorkloadSpec, duration_s: int) -> WorkloadResult:
@@ -656,19 +711,10 @@ def daemon_payload(
             load_timeout_s=load_timeout,
         )
         runner.start()
-        selected_programs = select_tetragon_programs(runner.programs, config)
+        tetragon_programs = wait_for_configured_tetragon_programs(runner, config, timeout_s=load_timeout)
+        selected_programs, apply_programs = select_tetragon_program_sets(tetragon_programs, config)
         prog_ids = [int(program["id"]) for program in selected_programs]
-        if config.get("apply_programs"):
-            apply_programs = select_tetragon_programs(
-                runner.programs,
-                config,
-                config_key="apply_programs",
-                allow_all_when_unset=False,
-            )
-            apply_prog_ids = [int(program["id"]) for program in apply_programs]
-        else:
-            apply_programs = [dict(program) for program in selected_programs]
-            apply_prog_ids = list(prog_ids)
+        apply_prog_ids = [int(program["id"]) for program in apply_programs]
         return CaseLifecycleState(
             runtime=runner,
             target_prog_ids=prog_ids,
@@ -677,7 +723,7 @@ def daemon_payload(
                 "tetragon_launch_command": list(runner.command),
                 "policy_dir": None if runner.tempdir is None else runner.tempdir.name,
                 "policy_paths": [str(path) for path in runner.policy_paths],
-                "tetragon_programs": runner.programs,
+                "tetragon_programs": tetragon_programs,
                 "selected_tetragon_programs": selected_programs,
                 "apply_tetragon_programs": apply_programs,
                 "rejit_policy_context": {

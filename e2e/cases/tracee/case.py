@@ -64,6 +64,7 @@ DEFAULT_SMOKE_WARMUP_DURATION_S = 2
 DEFAULT_LATENCY_PROBE_COUNT = 8
 DEFAULT_SMOKE_LATENCY_PROBE_COUNT = 3
 DEFAULT_LATENCY_PROBE_TIMEOUT_S = 5.0
+DEFAULT_LATENCY_PROBE_ATTEMPTS = 3
 DEFAULT_BOOTSTRAP_ITERATIONS = 2000
 DEFAULT_BOOTSTRAP_SEED = 20260328
 def ensure_artifacts(daemon_binary: Path) -> None:
@@ -412,27 +413,47 @@ def measure_latency_probes(
     event_names = latency_probe_events(workload_spec)
     probe_rows: list[dict[str, object]] = []
     for probe_index in range(max(0, int(probe_count))):
-        emitted = emit_latency_probe(workload_spec)
-        matched = collector.wait_for_event(
-            event_names=event_names,
-            marker_tokens=emitted["marker_tokens"],
-            min_observed_ns=int(emitted["started_ns"]),
-            timeout_s=timeout_s,
-        )
+        missed_attempts: list[dict[str, object]] = []
+        emitted: dict[str, object] | None = None
+        matched: dict[str, object] | None = None
+        matched_attempt = 0
+        for attempt in range(DEFAULT_LATENCY_PROBE_ATTEMPTS):
+            emitted = emit_latency_probe(workload_spec)
+            matched = collector.wait_for_event(
+                event_names=event_names,
+                marker_tokens=emitted["marker_tokens"],
+                min_observed_ns=int(emitted["started_ns"]),
+                timeout_s=timeout_s,
+            )
+            if matched is not None:
+                matched_attempt = attempt
+                break
+            missed_attempts.append(
+                {
+                    "attempt": attempt,
+                    "marker": emitted["marker"],
+                    "marker_tokens": emitted["marker_tokens"],
+                }
+            )
+            time.sleep(0.1)
         if matched is None:
             raise RuntimeError(
                 f"Tracee latency probe was not detected for workload {workload_spec.get('name')}: "
-                f"tokens={emitted['marker_tokens']}, events={event_names}"
+                f"tokens={emitted['marker_tokens'] if emitted is not None else []}, "
+                f"events={event_names}, attempts={missed_attempts}"
             )
+        assert emitted is not None
         latency_ms = probe_latency_ms(emitted, matched)
         probe_rows.append(
             {
                 "index": probe_index,
+                "attempt": matched_attempt,
                 "event_name": matched["event_name"],
                 "marker": emitted["marker"],
                 "marker_tokens": emitted["marker_tokens"],
                 "latency_ms": latency_ms,
                 "match_source": str(matched.get("source") or "collector"),
+                "missed_attempts": missed_attempts,
                 "probe_window_ms": float(emitted["probe_window_ns"]) / 1_000_000.0,
             }
         )

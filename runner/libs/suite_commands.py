@@ -9,6 +9,7 @@ from runner.libs.workspace_layout import RUNTIME_IMAGE_WORKSPACE
 
 
 _CONTAINER_RESULT_DIRS = ("micro/results", "corpus/results", "e2e/results", "tests/results")
+_CONTAINER_RUNTIME_TMP_DIR = "docs/tmp/runtime-container-tmp"
 
 
 def _required(value: str, name: str, die: Any) -> str:
@@ -20,6 +21,10 @@ def _required(value: str, name: str, die: Any) -> str:
 
 def runtime_container_result_dirs(host_workspace: Path) -> list[Path]:
     return [host_workspace / relative for relative in _CONTAINER_RESULT_DIRS]
+
+
+def runtime_container_host_dirs(host_workspace: Path) -> list[Path]:
+    return [*runtime_container_result_dirs(host_workspace), host_workspace / _CONTAINER_RUNTIME_TMP_DIR]
 
 
 def _container_suite_config(config: Any, python_bin: str) -> Any:
@@ -73,6 +78,10 @@ def build_runtime_container_command(
     ]
     for relative in _CONTAINER_RESULT_DIRS:
         command.extend(["-v", f"{host_workspace / relative}:{image_workspace / relative}"])
+    command.extend([
+        "-v",
+        f"{host_workspace / _CONTAINER_RUNTIME_TMP_DIR}:/var/tmp/bpfrejit-runtime",
+    ])
     for source, target, readonly in (
         ("/sys", "/sys", False),
         ("/sys/fs/bpf", "/sys/fs/bpf", False),

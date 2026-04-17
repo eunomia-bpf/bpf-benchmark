@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
-from ..kernel_modules import load_kernel_module
+from ..kernel_modules import kernel_module_is_builtin, load_kernel_module
 from ..workload import WorkloadResult
 from .base import AppRunner
 from .process_support import ManagedProcessSession
@@ -211,8 +211,10 @@ def module_loaded(name: str) -> bool:
 
 def ensure_kernel_module_loaded(name: str) -> None:
     if module_loaded(name): return
+    if kernel_module_is_builtin(name): return
     load_kernel_module(name, timeout=15)
     if module_loaded(name): return
+    if kernel_module_is_builtin(name): return
     raise RuntimeError(f"kernel module {name} still is not resident after modprobe")
 
 

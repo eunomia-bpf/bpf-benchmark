@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-FROM docker.io/library/ubuntu:24.04 AS runner-runtime-userspace
+FROM docker.io/library/ubuntu:24.04 AS runner-runtime-build-base
 
 ARG GO_VERSION=1.26.0
 ARG IMAGE_BUILD_JOBS=4
@@ -130,54 +130,99 @@ RUN set -eux; \
 RUN mkdir -p "${IMAGE_WORKSPACE}"
 WORKDIR ${IMAGE_WORKSPACE}
 
-COPY vendor/libbpf ./vendor/libbpf
-COPY vendor/llvmbpf ./vendor/llvmbpf
-COPY vendor/linux-framework/Makefile ./vendor/linux-framework/
-COPY vendor/linux-framework/include ./vendor/linux-framework/include
-COPY vendor/linux-framework/arch/arm64/include/uapi/asm ./vendor/linux-framework/arch/arm64/include/uapi/asm
-COPY vendor/linux-framework/scripts ./vendor/linux-framework/scripts
-COPY vendor/linux-framework/kernel/bpf ./vendor/linux-framework/kernel/bpf
-COPY vendor/linux-framework/tools/arch ./vendor/linux-framework/tools/arch
-COPY vendor/linux-framework/tools/bpf/bpftool ./vendor/linux-framework/tools/bpf/bpftool
-COPY vendor/linux-framework/tools/build ./vendor/linux-framework/tools/build
-COPY vendor/linux-framework/tools/include ./vendor/linux-framework/tools/include
-COPY vendor/linux-framework/tools/lib ./vendor/linux-framework/tools/lib
-COPY vendor/linux-framework/tools/sched_ext/include ./vendor/linux-framework/tools/sched_ext/include
-COPY vendor/linux-framework/tools/scripts ./vendor/linux-framework/tools/scripts
+FROM --platform=$BUILDPLATFORM docker.io/library/ubuntu:24.04 AS runner-runtime-tracee-bpf
 
-RUN make -C vendor/linux-framework/tools/bpf/bpftool \
+ARG IMAGE_BUILD_JOBS=4
+ARG RUN_TARGET_ARCH=x86_64
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        bash \
+        ca-certificates \
+        clang \
+        gcc \
+        libelf-dev \
+        make \
+        pkg-config \
+        zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN --mount=type=bind,source=.,target=/src,readonly \
+    set -eux; \
+    repo_root="/work/tracee"; \
+    dist_root="${repo_root}/dist"; \
+    output_root="/tracee-bpf-artifacts"; \
+    case "${RUN_TARGET_ARCH}" in \
+        arm64) uname_m=aarch64; tracee_arch=arm64; linux_arch=arm64; go_arch=arm64 ;; \
+        x86_64) uname_m=x86_64; tracee_arch=x86_64; linux_arch=x86; go_arch=amd64 ;; \
+        *) echo "unsupported Tracee BPF target arch: ${RUN_TARGET_ARCH}" >&2; exit 1 ;; \
+    esac; \
+    mkdir -p /work "${output_root}/lsm_support"; \
+    cp -a /src/runner/repos/tracee "${repo_root}"; \
+    rm -rf "${dist_root}" \
+        "${repo_root}/.build_libbpf" \
+        "${repo_root}/.build_libbpf_fix" \
+        "${repo_root}/.eval_goenv" \
+        "${repo_root}/.checklib_libbpf" \
+        "${repo_root}/goenv.mk"; \
+    make -C "${repo_root}" -j"${IMAGE_BUILD_JOBS}" \
+        OUTPUT_DIR="${dist_root}" \
+        UNAME_M="${uname_m}" \
+        ARCH="${tracee_arch}" \
+        LINUX_ARCH="${linux_arch}" \
+        GO_ARCH="${go_arch}" \
+        CMD_GCC=gcc \
+        CMD_CLANG=clang \
+        CMD_GO=/bin/false \
+        bpf; \
+    install -m 0644 "${dist_root}/tracee.bpf.o" "${output_root}/tracee.bpf.o"; \
+    install -m 0644 "${dist_root}/lsm_support/kprobe_check.bpf.o" "${output_root}/lsm_support/kprobe_check.bpf.o"; \
+    install -m 0644 "${dist_root}/lsm_support/lsm_check.bpf.o" "${output_root}/lsm_support/lsm_check.bpf.o"
+
+FROM runner-runtime-build-base AS runner-runtime-userspace
+
+ARG IMAGE_BUILD_JOBS=4
+ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
+ARG RUN_TARGET_ARCH=x86_64
+
+RUN --mount=type=bind,source=.,target=/src,readonly \
+    --mount=type=bind,from=runner-runtime-tracee-bpf,source=/tracee-bpf-artifacts,target=/prebuilt-tracee-bpf,readonly \
+    set -eux; \
+    cp -a /src/Makefile ./Makefile; \
+    mkdir -p ./runner ./vendor ./vendor/linux-framework; \
+    rsync -a /src/runner/mk ./runner/; \
+    rsync -a /src/runner/repos ./runner/; \
+    rsync -a /src/vendor/libbpf ./vendor/; \
+    rsync -a /src/vendor/llvmbpf ./vendor/; \
+    cp -a /src/vendor/linux-framework/Makefile ./vendor/linux-framework/; \
+    for path in \
+        include \
+        arch/arm64/include/uapi/asm \
+        scripts \
+        kernel/bpf \
+        tools/arch \
+        tools/bpf/bpftool \
+        tools/build \
+        tools/include \
+        tools/lib \
+        tools/sched_ext/include \
+        tools/scripts; \
+    do \
+        mkdir -p "./vendor/linux-framework/$(dirname "$path")"; \
+        rsync -a "/src/vendor/linux-framework/$path" "./vendor/linux-framework/$(dirname "$path")/"; \
+    done; \
+    make -C vendor/linux-framework/tools/bpf/bpftool \
         VMLINUX_BTF= \
         feature-llvm=0 \
         feature-libbfd=0 \
         feature-libbfd-liberty=0 \
         feature-libbfd-liberty-z=0 \
-        -j"${IMAGE_BUILD_JOBS}" \
-    && install -m 0755 vendor/linux-framework/tools/bpf/bpftool/bpftool /usr/local/bin/bpftool \
-    && bpftool version
-
-COPY Makefile ./
-COPY runner/mk ./runner/mk
-
-COPY runner/repos/bcc ./runner/repos/bcc
-RUN make image-bcc-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
-
-COPY runner/repos/bpftrace ./runner/repos/bpftrace
-RUN make image-bpftrace-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
-
-COPY runner/repos/katran ./runner/repos/katran
-RUN make image-katran-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
-
-COPY runner/repos/tracee ./runner/repos/tracee
-RUN make image-tracee-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
-
-COPY runner/repos/tetragon ./runner/repos/tetragon
-RUN make image-tetragon-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
-
-COPY runner/repos/scx ./runner/repos/scx
-RUN make image-scx-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
-
-COPY runner/repos/workload-tools ./runner/repos/workload-tools
-RUN rm -rf \
+        -j"${IMAGE_BUILD_JOBS}"; \
+    install -m 0755 vendor/linux-framework/tools/bpf/bpftool/bpftool /usr/local/bin/bpftool; \
+    bpftool version; \
+    rm -rf \
         ./runner/repos/workload-tools/sysbench/third_party/concurrency_kit/include \
         ./runner/repos/workload-tools/sysbench/third_party/concurrency_kit/lib \
         ./runner/repos/workload-tools/sysbench/third_party/concurrency_kit/share \
@@ -187,24 +232,114 @@ RUN rm -rf \
         ./runner/repos/workload-tools/sysbench/third_party/luajit/share \
         ./runner/repos/workload-tools/sysbench/third_party/luajit/tmp \
         ./runner/repos/workload-tools/wrk/obj \
-        ./runner/repos/workload-tools/wrk/wrk \
-    && find ./runner/repos/workload-tools/sysbench -type f \( -name '*.a' -o -name '*.la' -o -name '*.lo' -o -name '*.o' \) -delete
-RUN make image-workload-tools-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
-
-COPY runner/CMakeLists.txt ./runner/
-COPY runner/include ./runner/include
-COPY runner/src ./runner/src
-RUN make image-runner-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
-
-COPY micro/programs ./micro/programs
-RUN make image-micro-program-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
-
-COPY tests/unittest ./tests/unittest
-COPY tests/negative ./tests/negative
-RUN make image-test-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"
-
-RUN rm -rf \
+        ./runner/repos/workload-tools/wrk/wrk; \
+    find ./runner/repos/workload-tools/sysbench -type f \( -name '*.a' -o -name '*.la' -o -name '*.lo' -o -name '*.o' \) -delete; \
+    make image-bcc-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    make image-bpftrace-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    make image-katran-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    make image-tracee-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}" PREBUILT_TRACEE_BPF_ROOT=/prebuilt-tracee-bpf; \
+    make image-tetragon-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    make image-scx-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    make image-workload-tools-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    rm -rf \
         /tmp/bpf-benchmark-build \
+        /root/.cache/go-build \
+        /root/go \
+        ./Makefile \
+        ./runner/mk \
+        ./vendor \
+        ./runner/repos
+
+FROM runner-runtime-build-base AS runner-runtime-kernel-artifacts
+
+ARG IMAGE_BUILD_JOBS=4
+ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
+ARG RUN_TARGET_ARCH=x86_64
+
+RUN --mount=type=bind,source=.,target=/src,readonly \
+    set -eux; \
+    cp -a /src/Makefile ./Makefile; \
+    mkdir -p ./runner ./vendor /artifacts; \
+    rsync -a /src/runner/mk ./runner/; \
+    ln -sfn /src/vendor/linux-framework ./vendor/linux-framework; \
+    cp -a /src/vendor/bpfrejit_x86_defconfig /src/vendor/bpfrejit_arm64_defconfig ./vendor/; \
+    rsync -a /src/module ./; \
+    make image-kernel-artifacts \
+        RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" \
+        BPFREJIT_IMAGE_BUILD=1 \
+        JOBS="${IMAGE_BUILD_JOBS}"; \
+    rm -rf \
+        /tmp/bpf-benchmark-build \
+        ./Makefile \
+        ./runner/mk \
+        ./vendor \
+        ./module
+
+FROM runner-runtime-userspace AS runner-runtime
+
+ARG IMAGE_BUILD_JOBS=4
+ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
+ARG RUN_TARGET_ARCH=x86_64
+
+RUN --mount=type=bind,source=.,target=/src,readonly \
+    set -eux; \
+    cp -a /src/Makefile ./Makefile; \
+    mkdir -p ./runner ./vendor ./vendor/linux-framework ./micro ./corpus ./e2e ./tests; \
+    rsync -a /src/runner/mk ./runner/; \
+    rsync -a /src/vendor/libbpf ./vendor/; \
+    rsync -a /src/vendor/llvmbpf ./vendor/; \
+    cp -a /src/vendor/linux-framework/Makefile ./vendor/linux-framework/; \
+    for path in \
+        include \
+        arch/arm64/include/uapi/asm \
+        scripts \
+        kernel/bpf \
+        tools/arch \
+        tools/bpf/bpftool \
+        tools/build \
+        tools/include \
+        tools/lib \
+        tools/sched_ext/include \
+        tools/scripts; \
+    do \
+        mkdir -p "./vendor/linux-framework/$(dirname "$path")"; \
+        rsync -a "/src/vendor/linux-framework/$path" "./vendor/linux-framework/$(dirname "$path")/"; \
+    done; \
+    cp -a /src/runner/CMakeLists.txt ./runner/; \
+    rsync -a /src/runner/include ./runner/; \
+    rsync -a /src/runner/src ./runner/; \
+    rsync -a /src/micro/programs ./micro/; \
+    rsync -a /src/tests/unittest ./tests/; \
+    rsync -a /src/tests/negative ./tests/; \
+    rsync -a /src/daemon ./; \
+    rsync -a /src/micro/generated-inputs ./micro/; \
+    rsync -a /src/corpus/bcf ./corpus/; \
+    rsync -a /src/corpus/inputs ./corpus/; \
+    rsync -a /src/micro/config ./micro/; \
+    find /src/micro -maxdepth 1 -type f -name '*.py' -exec cp -a {} ./micro/ \;; \
+    rsync -a /src/corpus/config ./corpus/; \
+    find /src/corpus -maxdepth 1 -type f -name '*.py' -exec cp -a {} ./corpus/ \;; \
+    rsync -a /src/e2e/cases ./e2e/; \
+    find /src/e2e -maxdepth 1 -type f -name '*.py' -exec cp -a {} ./e2e/ \;; \
+    cp -a /src/runner/__init__.py /src/runner/repos.yaml ./runner/; \
+    rsync -a /src/runner/libs ./runner/; \
+    rsync -a /src/runner/suites ./runner/; \
+    rsync -a /src/runner/targets ./runner/; \
+    make image-runner-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    make image-micro-program-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    make image-test-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    make image-daemon-artifact RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    find ./daemon/target -type d \( -name build -o -name deps -o -name incremental -o -name .fingerprint \) -prune -exec rm -rf {} +; \
+    rm -rf \
+        /tmp/bpf-benchmark-build \
+        /root/.cache/go-build \
+        /root/go \
+        /usr/local/go \
+        /opt/cargo \
+        /opt/rustup \
+        ./Makefile \
+        ./runner/mk \
+        ./vendor \
         ./runner/repos \
         ./runner/src \
         ./runner/include \
@@ -218,77 +353,17 @@ RUN rm -rf \
         ./tests/negative/Makefile \
         ./tests/negative/*.c \
         ./tests/negative/*.h \
-    && find ./runner -maxdepth 3 -type d \( -name CMakeFiles -o -name vendor \) -prune -exec rm -rf {} + \
-    && find ./runner -maxdepth 3 -type f \( -name CMakeCache.txt -o -name cmake_install.cmake -o -name Makefile \) -delete \
-    && find ./tests -type f \( -name '*.o' -o -name '*.d' -o -name '*.cmd' \) -delete
-
-COPY micro/generated-inputs ./micro/generated-inputs
-COPY corpus/bcf ./corpus/bcf
-COPY corpus/inputs ./corpus/inputs
-
-COPY daemon ./daemon
-RUN make image-daemon-artifact RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}" \
-    && find ./daemon/target -type d \( -name build -o -name deps -o -name incremental -o -name .fingerprint \) -prune -exec rm -rf {} + \
-    && rm -rf \
-        ./Makefile \
-        ./runner/mk \
-        ./vendor \
         ./daemon/src \
         ./daemon/tests \
         ./daemon/Cargo.toml \
         ./daemon/Cargo.lock \
         ./daemon/Makefile \
-        ./daemon/README.md
-
-COPY micro/config ./micro/config
-COPY micro/*.py ./micro/
-COPY corpus/config ./corpus/config
-COPY corpus/*.py ./corpus/
-COPY e2e/cases ./e2e/cases
-COPY e2e/*.py ./e2e/
-COPY runner/__init__.py runner/repos.yaml ./runner/
-COPY runner/libs ./runner/libs
-COPY runner/suites ./runner/suites
-COPY runner/targets ./runner/targets
-
-RUN mkdir -p micro/results corpus/results e2e/results tests/results
-
-ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
-    BPFREJIT_REPO_ARTIFACT_ROOT=/opt/bpf-benchmark/repo-artifacts/${RUN_TARGET_ARCH} \
-    BPFREJIT_WORKLOAD_TOOL_BIN_DIR=/opt/bpf-benchmark/workload-tools/${RUN_TARGET_ARCH}/bin \
-    PYTHONPATH=${IMAGE_WORKSPACE} \
-    RUN_TARGET_ARCH=${RUN_TARGET_ARCH} \
-    PATH=${IMAGE_WORKSPACE}/runner/build-llvmbpf:${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf:/opt/bpf-benchmark/repo-artifacts/${RUN_TARGET_ARCH}/bpftrace/bin:/opt/bpf-benchmark/workload-tools/${RUN_TARGET_ARCH}/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
-FROM runner-runtime-userspace AS runner-runtime
-
-ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
-ARG RUN_TARGET_ARCH=x86_64
-
-COPY Makefile ./
-COPY runner/mk ./runner/mk
-COPY vendor/linux-framework ./vendor/linux-framework
-COPY vendor/bpfrejit_x86_defconfig vendor/bpfrejit_arm64_defconfig ./vendor/
-COPY module ./module
-
-RUN make image-runtime-kinsn-artifacts \
-        RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" \
-        HOST_ARTIFACT_OUTPUT_ROOT="${IMAGE_WORKSPACE}" \
-        BPFREJIT_IMAGE_BUILD=1 \
-    && find ./module -mindepth 2 -type f ! -name '*.ko' -delete \
-    && find ./module -mindepth 1 -type d -empty -delete \
-    && rm -rf \
-        /tmp/bpf-benchmark-build \
-        /root/.cache/go-build \
-        /root/go \
-        /usr/local/go \
-        /opt/cargo \
-        /opt/rustup \
-        ./.cache \
-        ./Makefile \
-        ./runner/mk \
-        ./vendor \
-    && apt-get purge -y \
+        ./daemon/README.md; \
+    find ./runner -maxdepth 3 -type d \( -name CMakeFiles -o -name vendor \) -prune -exec rm -rf {} +; \
+    find ./runner -maxdepth 3 -type f \( -name CMakeCache.txt -o -name cmake_install.cmake -o -name Makefile \) -delete; \
+    find ./tests -type f \( -name '*.o' -o -name '*.d' -o -name '*.cmd' \) -delete; \
+    mkdir -p micro/results corpus/results e2e/results tests/results; \
+    apt-get purge -y \
         autoconf \
         automake \
         bc \
@@ -350,29 +425,17 @@ RUN make image-runtime-kinsn-artifacts \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-ENV PATH=${IMAGE_WORKSPACE}/runner/build-llvmbpf:${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf:/opt/bpf-benchmark/repo-artifacts/${RUN_TARGET_ARCH}/bpftrace/bin:/opt/bpf-benchmark/workload-tools/${RUN_TARGET_ARCH}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+COPY --from=runner-runtime-kernel-artifacts /artifacts/kernel /artifacts/kernel
+COPY --from=runner-runtime-kernel-artifacts /artifacts/modules /artifacts/modules
+COPY --from=runner-runtime-kernel-artifacts /artifacts/kinsn /artifacts/kinsn
+COPY --from=runner-runtime-kernel-artifacts /artifacts/manifest.json /artifacts/manifest.json
+COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
 
-FROM runner-runtime-userspace AS runner-host-artifacts-build
-
-ARG RUN_HOST_ARTIFACT_TARGET
-ARG HOST_WORKSPACE_ROOT
-
-COPY Makefile ./
-COPY runner/mk ./runner/mk
-COPY vendor/linux-framework ./vendor/linux-framework
-COPY vendor/bpfrejit_x86_defconfig vendor/bpfrejit_arm64_defconfig ./vendor/
-COPY module ./module
-
-RUN mkdir -p /image-output \
-    && make image-host-artifacts \
-        RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" \
-        RUN_HOST_ARTIFACT_TARGET="${RUN_HOST_ARTIFACT_TARGET}" \
-        HOST_ARTIFACT_OUTPUT_ROOT=/image-output \
-        HOST_WORKSPACE_ROOT="${HOST_WORKSPACE_ROOT}" \
-        BPFREJIT_IMAGE_BUILD=1 \
-    && rm -rf /tmp/bpf-benchmark-build
-
-FROM scratch AS runner-host-artifacts
-COPY --from=runner-host-artifacts-build /image-output/ /
+ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
+    BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH} \
+    BPFREJIT_WORKLOAD_TOOL_BIN_DIR=/artifacts/user/workload-tools/${RUN_TARGET_ARCH}/bin \
+    PYTHONPATH=${IMAGE_WORKSPACE} \
+    RUN_TARGET_ARCH=${RUN_TARGET_ARCH} \
+    PATH=${IMAGE_WORKSPACE}/runner/build-llvmbpf:${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf:/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/bpftrace/bin:/artifacts/user/workload-tools/${RUN_TARGET_ARCH}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 FROM runner-runtime AS runner-default

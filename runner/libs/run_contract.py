@@ -128,7 +128,10 @@ class RunConfig:
 
     def env(self) -> dict[str, str]:
         env: dict[str, str] = {}
-        for name in ("PATH", "HOME", "USER", "LOGNAME", "TERM", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE", "SHELL"):
+        for name in (
+            "PATH", "HOME", "USER", "LOGNAME", "TERM", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE", "SHELL",
+            "BUILDKIT_PROGRESS", "JOBS", "NPROC", "IMAGE_BUILD_JOBS", "ARM64_IMAGE_BUILD_JOBS",
+        ):
             value = os.environ.get(name, "").strip()
             if value:
                 env[name] = value

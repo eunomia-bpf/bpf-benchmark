@@ -473,105 +473,152 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
     except RuntimeError as exc:
         raise RuntimeError(f"sch_netem is required for the tcp_retransmit workload: {exc}") from exc
     effective_duration = max(8.0, float(duration_s))
-    transfer_target_bytes = 16 * 1024
+    cycle_duration = 2.0
 
-    ready = threading.Event()
-    stop = threading.Event()
-    errors: list[str] = []
-    port_holder: list[int] = []
+    def clear_qdisc() -> str:
+        completed = run_command([tc_binary, "qdisc", "del", "dev", "lo", "root"], check=False, timeout=10)
+        details = tail_text(completed.stderr or completed.stdout)
+        if completed.returncode == 0:
+            return ""
+        if "No such file" in details or "Cannot delete qdisc" in details:
+            return ""
+        return details
 
-    def server() -> None:
-        payload = b"x" * 65536
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
-                listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                listener.bind(("127.0.0.1", 0))
-                listener.listen(LOOPBACK_LISTEN_BACKLOG)
-                listener.settimeout(0.25)
-                port_holder.append(int(listener.getsockname()[1]))
-                ready.set()
-                while not stop.is_set():
-                    try:
-                        conn, _ = listener.accept()
-                    except (socket.timeout, TimeoutError):
-                        continue
+    def forced_retransmit_cycle(seconds: float) -> tuple[bool, str]:
+        ready = threading.Event()
+        accepted = threading.Event()
+        send_gate = threading.Event()
+        errors: list[str] = []
+        port_holder: list[int] = []
+
+        def server() -> None:
+            payload = b"x" * 65536
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
+                    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    listener.bind(("127.0.0.1", 0))
+                    listener.listen(1)
+                    listener.settimeout(1.0)
+                    port_holder.append(int(listener.getsockname()[1]))
+                    ready.set()
+                    conn, _ = listener.accept()
                     with conn:
-                        conn.settimeout(1.0)
-                        try:
-                            for _ in range(128):
-                                if stop.is_set():
-                                    break
+                        conn.settimeout(0.25)
+                        accepted.set()
+                        if not send_gate.wait(timeout=2.0):
+                            return
+                        deadline = time.monotonic() + max(0.5, float(seconds))
+                        while time.monotonic() < deadline:
+                            try:
                                 conn.sendall(payload)
-                        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, socket.timeout, OSError):
+                            except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, socket.timeout, OSError):
+                                break
+            except Exception as exc:
+                errors.append(str(exc))
+                ready.set()
+                accepted.set()
+
+        thread = threading.Thread(target=server, daemon=True)
+        thread.start()
+        client: socket.socket | None = None
+        received = 0
+        try:
+            if not ready.wait(timeout=2.0):
+                return False, "tcp retransmit server did not become ready"
+            if errors:
+                return False, f"tcp retransmit server failed: {errors[-1]}"
+            if not port_holder:
+                return False, "tcp retransmit server failed to publish a port"
+            client = socket.create_connection(("127.0.0.1", port_holder[0]), timeout=LOOPBACK_CONNECT_TIMEOUT_S)
+            client.settimeout(0.1)
+            if not accepted.wait(timeout=2.0):
+                return False, "tcp retransmit server did not accept the client"
+            _run_tc_qdisc(
+                [
+                    tc_binary,
+                    "qdisc",
+                    "replace",
+                    "dev",
+                    "lo",
+                    "root",
+                    "netem",
+                    "delay",
+                    "100ms",
+                    "loss",
+                    "100%",
+                    "limit",
+                    "10000",
+                ],
+                action="qdisc replace dev lo root netem",
+            )
+            send_gate.set()
+            drop_deadline = time.monotonic() + max(0.5, float(seconds))
+            while time.monotonic() < drop_deadline:
+                try:
+                    chunk = client.recv(65536)
+                except socket.timeout:
+                    continue
+                except OSError as exc:
+                    errors.append(str(exc))
+                    break
+                if not chunk:
+                    break
+                received += len(chunk)
+        finally:
+            cleanup_error = clear_qdisc()
+            if cleanup_error:
+                errors.append(f"qdisc cleanup failed: {cleanup_error}")
+            if client is not None:
+                try:
+                    client.settimeout(0.1)
+                    recovery_deadline = time.monotonic() + 0.5
+                    while time.monotonic() < recovery_deadline:
+                        try:
+                            chunk = client.recv(65536)
+                        except socket.timeout:
                             continue
-        except Exception as exc:
-            errors.append(str(exc))
-            ready.set()
+                        except OSError:
+                            break
+                        if not chunk:
+                            break
+                        received += len(chunk)
+                finally:
+                    client.close()
+            send_gate.set()
+            thread.join(timeout=1.0)
+        return received > 0, errors[-1] if errors else ""
 
-    thread = threading.Thread(target=server, daemon=True)
-    thread.start()
-    def _abort(msg: str) -> None:
-        stop.set(); thread.join(timeout=1.0); raise RuntimeError(msg)
-    if not ready.wait(timeout=2.0): _abort("tcp retransmit server did not become ready")
-    if errors: _abort(f"tcp retransmit server failed: {errors[-1]}")
-    if not port_holder: _abort("tcp retransmit server failed to publish a port")
+    clear_error = clear_qdisc()
+    if clear_error:
+        raise RuntimeError(f"netem qdisc cleanup before tcp retransmit workload failed: {clear_error}")
 
-    try:
-        _run_tc_qdisc(
-            [tc_binary, "qdisc", "replace", "dev", "lo", "root", "netem", "delay", "80ms", "loss", "12%"],
-            action="qdisc replace dev lo root netem",
-        )
-    except RuntimeError as exc:
-        stop.set()
-        thread.join(timeout=1.0)
-        raise RuntimeError(f"netem qdisc setup failed: {exc}") from exc
-
-    port = port_holder[0]
     start = time.monotonic()
     deadline = start + effective_duration
     attempts = 0
     successes = 0
     failures = 0
-    try:
-        while time.monotonic() < deadline:
-            attempts += 1
-            received = 0
-            try:
-                with socket.create_connection(("127.0.0.1", port), timeout=1.0) as client:
-                    client.settimeout(1.0)
-                    while received < transfer_target_bytes and time.monotonic() < deadline:
-                        try:
-                            chunk = client.recv(65536)
-                        except socket.timeout:
-                            if received > 0:
-                                break
-                            raise
-                        if not chunk:
-                            break
-                        received += len(chunk)
-                if received > 0:
-                    successes += 1
-                else:
-                    failures += 1
-            except (TimeoutError, OSError):
-                failures += 1
-    finally:
-        cleanup_error: RuntimeError | None = None
-        try:
-            _run_tc_qdisc([tc_binary, "qdisc", "del", "dev", "lo", "root"], action="qdisc del dev lo root")
-        except RuntimeError as exc:
-            cleanup_error = exc
-        stop.set()
-        thread.join(timeout=1.0)
-        if cleanup_error is not None:
-            raise cleanup_error
+    cycle_errors: list[str] = []
+    while time.monotonic() < deadline:
+        attempts += 1
+        remaining = max(0.5, deadline - time.monotonic())
+        success, error = forced_retransmit_cycle(min(cycle_duration, remaining))
+        if success:
+            successes += 1
+        else:
+            failures += 1
+        if error:
+            cycle_errors.append(error)
+    cleanup_error = clear_qdisc()
+    if cleanup_error:
+        raise RuntimeError(f"netem qdisc cleanup after tcp retransmit workload failed: {cleanup_error}")
 
-    if errors:
-        raise RuntimeError(f"tcp retransmit server failed: {errors[-1]}")
-    if successes <= 0:
-        raise RuntimeError(f"tcp retransmit workload produced no successful transfers; attempts={attempts}, failures={failures}")
+    if attempts <= 0:
+        raise RuntimeError("tcp retransmit workload did not run any retransmit cycles")
     elapsed = time.monotonic() - start
-    return _finish_result(float(attempts), elapsed, f"successful_transfers={successes}", f"failed_transfers={failures}")
+    stderr = f"failed_cycles={failures}"
+    if cycle_errors:
+        stderr += f"\nlast_cycle_error={cycle_errors[-1]}"
+    return _finish_result(float(attempts), elapsed, f"successful_cycles={successes}", stderr)
 
 
 def run_vfs_create_write_fsync_load(duration_s: int | float) -> WorkloadResult:

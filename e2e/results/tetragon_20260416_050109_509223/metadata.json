@@ -1,0 +1,2370 @@
+{
+  "case": "tetragon",
+  "completed_at": "2026-04-16T05:02:19.736752+00:00",
+  "details_dir": "details",
+  "generated_at": "2026-04-16T05:02:19.737478+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-16T05:02:19.736752+00:00",
+  "launcher_boot_id": "a180ba1b-9c91-4e04-9688-4d4c9737f8b7",
+  "launcher_pid": 1729,
+  "launcher_start_ticks": 17494,
+  "optimization_summary": {
+    "agent_logs": {
+      "stderr_tail": [],
+      "stdout_tail": [
+        "level=info msg=\"Starting tetragon\" version=unknown",
+        "level=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon btf: cgroup-rate:1000,1s cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address:127.0.0.1:56879 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:127.0.0.1:39327 tracing-policy: tracing-policy-dir:/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.full-after-tracee-retry/tetragon-policy-avjtw638 use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"",
+        "level=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=none",
+        "level=info msg=\"Tetragon pid file creation succeeded\" pid=29136 pidfile=/var/run/tetragon/tetragon.pid",
+        "level=warn msg=\"Unable to mount BPF filesystem\" error=\"multiple mount points detected at /sys/fs/bpf\"",
+        "level=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/sys/fs/bpf/tetragon",
+        "level=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"BPF detected features: override_return: true, buildid: true, kprobe_multi: false, uprobe_multi: true, fmodret: true, fmodret_syscall: true, signal: true, large: true, link_pin: true, lsm: true, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: true, probe_write_user: true, uprobe_regs_change: true, mix_bpf_and_tail_calls: true, fentry: true, get_func_ret: true\"",
+        "level=info msg=\"Cgroup mode detection succeeded\" cgroup.fs=/sys/fs/cgroup cgroup.mode=\"Unified mode (Cgroupv2)\"",
+        "level=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/proc/1/root/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids misc]\" cgroup.hierarchyID=0",
+        "level=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids misc]\" cgroup.hierarchyID=0",
+        "level=warn msg=\"Failed to detect deployment mode from Cgroupv2 path\" cgroup.fs=/sys/fs/cgroup error=\"cgroup path is empty\"",
+        "level=warn msg=\"Unable to find Cgroup migration path for pid=29136\" cgroup.fs=/sys/fs/cgroup error=\"could not validate Cgroupv2 hierarchy\"",
+        "level=warn msg=\"Detection of deployment mode failed\" cgroup.fs=/sys/fs/cgroup error=\"could not detect Cgroup migration path for pid=29136\"",
+        "level=warn msg=\"Deployment mode detection failed\" cgroup.fs=/sys/fs/cgroup deployment.mode=unknown",
+        "level=warn msg=\"Deployment mode is unknown, advanced Cgroups tracking will be disabled\" confmap-update=tg_conf_map",
+        "level=info msg=\"Updated TetragonConf map successfully\" confmap-update=tg_conf_map deployment.mode=unknown log.level=0 cgroup.fs.magic=Cgroupv2 cgroup.hierarchyID=0 NSPID=29136",
+        "level=info msg=\"Disabling Kubernetes API\"",
+        "level=info msg=\"Configured redaction filters\" redactionFilters=\"\"",
+        "level=info msg=\"Exit probe on acct_process\"",
+        "level=info msg=\"Set execve_map entries 32768\" size=28M",
+        "level=info msg=\"BPF ring buffer size (bytes)\" total=256K",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=__base__",
+        "level=info msg=\"Loading kernel version 7.0.0\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=__base__",
+        "level=info msg=\"Available sensors\" sensors=__base__",
+        "level=info msg=\"Registered sensors (policy-handlers)\" policy-handlers=\"enforcer, loader sensor, tracing\"",
+        "level=info msg=\"Registered probe types\" types=\"generic_lsm, generic_uprobe, execve, enforcer, generic_fentry, generic_kprobe, generic_tracepoint, generic_usdt, loader\"",
+        "level=info msg=\"Creating new EventCache\" retries=15 delay=2s",
+        "level=info msg=\"Starting process manager\" enableK8s=false enableProcessCred=false enableProcessNs=false",
+        "level=info msg=\"Exporter configuration\" enabled=false fileName=\"\"",
+        "level=info msg=\"Successfully detected bpftool path\" bpftool=/usr/local/bin/bpftool",
+        "level=warn msg=\"failed to locate gops binary, on bugtool debugging ensure you have gops installed\"",
+        "level=info msg=\"BPF: found active BPF resources\" bpf-dir=/sys/fs/bpf/tetragon pinned-bpf=\"[__base__ cgroup_rate_map cgroup_rate_options_map execve_map execve_map_stats execve_map_update_data tcpmon_map tg_conf_map tg_errmetrics_map tg_execve_joined_info_map tg_execve_joined_info_map_stats tg_mbset_gen tg_mbset_map tg_rb_events tg_stats_map]\"",
+        "level=info msg=\"Starting gRPC server\" protocol=tcp address=127.0.0.1:39327",
+        "level=info msg=\"Starting gRPC health server\" address=127.0.0.1:56879 interval=10",
+        "level=info msg=\"Read ProcFS /proc/ appended 103/162 entries\"",
+        "level=info msg=\"Cgroup rate started (1000/1s)\"",
+        "level=info msg=\"Added kprobe\" return=false function=security_bprm_check override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=security_file_open override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=tcp_connect override=false enforcer=false",
+        "level=info msg=\"Added generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_generic_kprobe_v61.o -> security_bprm_check\" override=false",
+        "level=info msg=\"Added generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_generic_kprobe_v61.o -> security_file_open\" override=false",
+        "level=info msg=\"Added generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_generic_kprobe_v61.o -> tcp_connect\" override=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 7.0.0\"",
+        "level=info msg=\"Loaded generic kprobe program: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_generic_kprobe_v61.o -> security_bprm_check\"",
+        "level=info msg=\"Loaded generic kprobe program: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_generic_kprobe_v61.o -> security_file_open\"",
+        "level=info msg=\"Loaded generic kprobe program: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_generic_kprobe_v61.o -> tcp_connect\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.full-after-tracee-retry/tetragon-policy-avjtw638/tetragon-e2e-kprobes.yaml metadata.namespace=\"\" metadata.name=bpf-benchmark-tetragon-e2e-kprobes",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_tracepoint",
+        "level=info msg=\"Loading kernel version 7.0.0\"",
+        "level=info msg=\"Loaded generic tracepoint program: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_generic_tracepoint_v61.o -> syscalls/sys_enter_execve\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_tracepoint",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.full-after-tracee-retry/tetragon-policy-avjtw638/tetragon-e2e-tracepoint.yaml metadata.namespace=\"\" metadata.name=bpf-benchmark-tetragon-e2e-tracepoint",
+        "level=info msg=\"Perf ring buffer size (bytes)\" percpu=68K total=272K",
+        "level=info msg=\"Events queue size (events)\" size=63K",
+        "level=info msg=\"Listening for events...\""
+      ]
+    },
+    "apply_tetragon_programs": [
+      {
+        "btf_id": 268,
+        "bytes_jited": 1381,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 2352,
+        "gpl_compatible": true,
+        "id": 371,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1329,
+          1205,
+          1204,
+          1326,
+          1191,
+          1198,
+          1199,
+          1203,
+          1196
+        ],
+        "name": "execve_rate",
+        "orphaned": false,
+        "tag": "ced0e930cd488737",
+        "type": "tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 270,
+        "bytes_jited": 11836,
+        "bytes_memlock": 24576,
+        "bytes_xlated": 20512,
+        "gpl_compatible": true,
+        "id": 373,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1329,
+          1192,
+          1201,
+          1305,
+          1200,
+          1193,
+          1195,
+          1202,
+          1332,
+          1333,
+          1191,
+          1307,
+          1196,
+          1322,
+          1199,
+          1198,
+          1203
+        ],
+        "name": "event_execve",
+        "orphaned": false,
+        "run_cnt": 3,
+        "run_time_ns": 10348,
+        "tag": "14440eb54551238f",
+        "type": "tracepoint",
+        "uid": 0
+      }
+    ],
+    "baseline": {
+      "summary": {
+        "agent_cpu_total_pct": {
+          "count": 1,
+          "max": 95.89978851858973,
+          "mean": 95.89978851858973,
+          "median": 95.89978851858973,
+          "min": 95.89978851858973
+        },
+        "app_throughput": {
+          "count": 1,
+          "max": 1857.868235438786,
+          "mean": 1857.868235438786,
+          "median": 1857.868235438786,
+          "min": 1857.868235438786
+        },
+        "bpf_avg_ns_per_run": {
+          "count": 1,
+          "max": 1925.3911858143883,
+          "mean": 1925.3911858143883,
+          "median": 1925.3911858143883,
+          "min": 1925.3911858143883
+        },
+        "events_per_sec": {
+          "count": 1,
+          "max": 1474.487525588392,
+          "mean": 1474.487525588392,
+          "median": 1474.487525588392,
+          "min": 1474.487525588392
+        },
+        "system_cpu_busy_pct": {
+          "count": 1,
+          "max": 99.54116960040044,
+          "mean": 99.54116960040044,
+          "median": 99.54116960040044,
+          "min": 99.54116960040044
+        }
+      },
+      "workloads": [
+        {
+          "agent_cpu": {
+            "sys_pct": 20.633287832119237,
+            "total_pct": 95.89978851858973,
+            "user_pct": 75.2665006864705
+          },
+          "app_throughput": 1857.868235438786,
+          "bpf": {
+            "programs": {
+              "371": {
+                "avg_ns_per_run": null,
+                "bytes_jited": 1381,
+                "bytes_xlated": 2352,
+                "id": 371,
+                "name": "execve_rate",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "tracepoint"
+              },
+              "373": {
+                "avg_ns_per_run": 1925.3911858143883,
+                "bytes_jited": 11836,
+                "bytes_xlated": 20512,
+                "id": 373,
+                "name": "event_execve",
+                "run_cnt_delta": 44383,
+                "run_time_ns_delta": 85454637,
+                "type": "tracepoint"
+              }
+            },
+            "summary": {
+              "active_programs": 1,
+              "avg_ns_per_run": 1925.3911858143883,
+              "total_events": 44383,
+              "total_run_time_ns": 85454637
+            }
+          },
+          "description": "stress-ng execve workload",
+          "duration_s": 30.10062766200008,
+          "events_per_sec": 1474.487525588392,
+          "events_total": 44383,
+          "kind": "exec_storm",
+          "metric": "bogo-ops/s",
+          "name": "exec_storm",
+          "ops_per_sec": 1857.868235438786,
+          "ops_total": 55923.0,
+          "stderr_tail": "",
+          "stdout_tail": "stress-ng: info:  [12711] setting to a 30 secs run per stressor\nstress-ng: info:  [12711] dispatching hogs: 2 exec\nstress-ng: info:  [12711] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [12711] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12711]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12711] exec              55923     30.05     75.86     14.22      1860.78         620.81\nstress-ng: info:  [12711] skipped: 0\nstress-ng: info:  [12711] passed: 2: exec (2)\nstress-ng: info:  [12711] failed: 0\nstress-ng: info:  [12711] metrics untrustworthy: 0\nstress-ng: info:  [12711] successful run completed in 30.06 secs",
+          "system_cpu": {
+            "busy_pct": 99.54116960040044
+          }
+        }
+      ]
+    },
+    "comparison": {
+      "comparable": true,
+      "workloads": [
+        {
+          "agent_cpu_delta_pct": 3.3367163008336482,
+          "app_throughput_delta_pct": -2.282366956432684,
+          "baseline_agent_cpu_pct": 95.89978851858973,
+          "baseline_events_per_sec": 1474.487525588392,
+          "baseline_ops_per_sec": 1857.868235438786,
+          "bpf_avg_ns_delta_pct": -0.27021748316213084,
+          "events_per_sec_delta_pct": -1.8210197460764834,
+          "name": "exec_storm",
+          "post_agent_cpu_pct": 99.09969239455451,
+          "post_events_per_sec": 1447.6368165939928,
+          "post_ops_per_sec": 1815.4648647390723
+        }
+      ]
+    },
+    "config": {
+      "apply_programs": [
+        "execve_rate",
+        "event_execve"
+      ],
+      "measurement_duration_s": 30,
+      "preflight_duration_s": 5,
+      "require_program_activity": true,
+      "smoke_duration_s": 8,
+      "target_programs": [
+        "execve_rate",
+        "event_execve"
+      ],
+      "tetragon_extra_args": [
+        "--cgroup-rate",
+        "1000,1s"
+      ],
+      "workloads": [
+        {
+          "description": "stress-ng execve workload",
+          "kind": "exec_storm",
+          "metric": "bogo-ops/s",
+          "name": "exec_storm",
+          "value": 2
+        }
+      ]
+    },
+    "duration_s": 30,
+    "generated_at": "2026-04-16T05:02:19.729859+00:00",
+    "host": {
+      "git_sha": null,
+      "git_sha_error": "[Errno 2] No such file or directory: 'git'",
+      "hostname": "virtme-ng",
+      "kernel": "7.0.0-rc2",
+      "platform": "Linux-7.0.0-rc2-x86_64-with-glibc2.39",
+      "python": "3.12.3"
+    },
+    "limitations": [
+      "events_total and events_per_sec are derived from aggregate BPF run_cnt deltas, so a single application operation can increment multiple program counters."
+    ],
+    "metadata": {
+      "kinsn_modules": {
+        "count": 1,
+        "lifecycle_runs": [
+          {
+            "captured_at": "2026-04-16T05:01:10.653423+00:00",
+            "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+            "daemon_kinsn_discovery": {
+              "captured_at": "2026-04-16T04:53:04.463284+00:00",
+              "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2310889 type_cnt=125732 type_id_bias=125731\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=125753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=125755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=125753 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=125758 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=125759 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=125757 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=125758 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=125759 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+              "status": "ok",
+              "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2310889 type_cnt=125732 type_id_bias=125731\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=125753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=125755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=125753 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=125758 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=125759 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=125757 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=125758 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=125759 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+              "stderr_path": "/var/tmp/bpfrejit-daemon/bd-rl44bscc/daemon.stderr.log",
+              "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-rl44bscc/daemon.sock",
+              "stdout_path": "/var/tmp/bpfrejit-daemon/bd-rl44bscc/daemon.stdout.log"
+            },
+            "expected_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "lifecycle_index": 1,
+            "module_load": {
+              "expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "failed_modules": [],
+              "invoked_at": "2026-04-16T04:53:04.412469+00:00",
+              "loaded_count": 5,
+              "loaded_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "loader": "runner.libs.kinsn.load_kinsn_modules",
+              "module_dir": "module/x86",
+              "newly_loaded_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "snapshot_after": {
+                "captured_at": "2026-04-16T04:53:04.412460+00:00",
+                "expected_modules": [
+                  "bpf_bulk_memory",
+                  "bpf_endian",
+                  "bpf_extract",
+                  "bpf_rotate",
+                  "bpf_select"
+                ],
+                "loaded_bpf_modules": [
+                  "bpf_bulk_memory",
+                  "bpf_endian",
+                  "bpf_extract",
+                  "bpf_preload",
+                  "bpf_rotate",
+                  "bpf_select"
+                ],
+                "missing_expected_modules": [],
+                "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0\nbpf_preload            20480  0",
+                "resident_expected_modules": [
+                  "bpf_bulk_memory",
+                  "bpf_endian",
+                  "bpf_extract",
+                  "bpf_rotate",
+                  "bpf_select"
+                ],
+                "source": "lsmod"
+              },
+              "status": "ok",
+              "total_count": 5
+            },
+            "module_snapshot_before_daemon": {
+              "captured_at": "2026-04-16T04:53:04.378541+00:00",
+              "expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "loaded_bpf_modules": [
+                "bpf_preload"
+              ],
+              "missing_expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "raw_output": "bpf_preload            20480  0",
+              "resident_expected_modules": [],
+              "source": "lsmod"
+            },
+            "requested_prog_ids": [
+              371,
+              373
+            ],
+            "status": "completed"
+          }
+        ]
+      }
+    },
+    "mode": "tetragon_daemon",
+    "policy_dir": "/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.full-after-tracee-retry/tetragon-policy-avjtw638",
+    "policy_paths": [
+      "/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.full-after-tracee-retry/tetragon-policy-avjtw638/tetragon-e2e-tracepoint.yaml",
+      "/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.full-after-tracee-retry/tetragon-policy-avjtw638/tetragon-e2e-kprobes.yaml"
+    ],
+    "post_rejit": {
+      "summary": {
+        "agent_cpu_total_pct": {
+          "count": 1,
+          "max": 99.09969239455451,
+          "mean": 99.09969239455451,
+          "median": 99.09969239455451,
+          "min": 99.09969239455451
+        },
+        "app_throughput": {
+          "count": 1,
+          "max": 1815.4648647390723,
+          "mean": 1815.4648647390723,
+          "median": 1815.4648647390723,
+          "min": 1815.4648647390723
+        },
+        "bpf_avg_ns_per_run": {
+          "count": 1,
+          "max": 1920.1884422110552,
+          "mean": 1920.1884422110552,
+          "median": 1920.1884422110552,
+          "min": 1920.1884422110552
+        },
+        "events_per_sec": {
+          "count": 1,
+          "max": 1447.6368165939928,
+          "mean": 1447.6368165939928,
+          "median": 1447.6368165939928,
+          "min": 1447.6368165939928
+        },
+        "system_cpu_busy_pct": {
+          "count": 1,
+          "max": 99.22383575363044,
+          "mean": 99.22383575363044,
+          "median": 99.22383575363044,
+          "min": 99.22383575363044
+        }
+      },
+      "workloads": [
+        {
+          "agent_cpu": {
+            "sys_pct": 11.199965235307877,
+            "total_pct": 99.09969239455451,
+            "user_pct": 87.89972715924664
+          },
+          "app_throughput": 1815.4648647390723,
+          "bpf": {
+            "programs": {
+              "371": {
+                "avg_ns_per_run": null,
+                "bytes_jited": 1143,
+                "bytes_xlated": 1920,
+                "id": 371,
+                "name": "execve_rate",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "tracepoint"
+              },
+              "373": {
+                "avg_ns_per_run": 1920.1884422110552,
+                "bytes_jited": 11836,
+                "bytes_xlated": 20512,
+                "id": 373,
+                "name": "event_execve",
+                "run_cnt_delta": 43780,
+                "run_time_ns_delta": 84065850,
+                "type": "tracepoint"
+              }
+            },
+            "summary": {
+              "active_programs": 1,
+              "avg_ns_per_run": 1920.1884422110552,
+              "total_events": 43780,
+              "total_run_time_ns": 84065850
+            }
+          },
+          "description": "stress-ng execve workload",
+          "duration_s": 30.24239194400002,
+          "events_per_sec": 1447.6368165939928,
+          "events_total": 43780,
+          "kind": "exec_storm",
+          "metric": "bogo-ops/s",
+          "name": "exec_storm",
+          "ops_per_sec": 1815.4648647390723,
+          "ops_total": 54904.0,
+          "stderr_tail": "",
+          "stdout_tail": "stress-ng: info:  [31860] setting to a 30 secs run per stressor\nstress-ng: info:  [31860] dispatching hogs: 2 exec\nstress-ng: info:  [31860] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [31860] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [31860]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [31860] exec              54904     30.12     74.89     14.26      1823.09         615.85\nstress-ng: info:  [31860] skipped: 0\nstress-ng: info:  [31860] passed: 2: exec (2)\nstress-ng: info:  [31860] failed: 0\nstress-ng: info:  [31860] metrics untrustworthy: 0\nstress-ng: info:  [31860] successful run completed in 30.14 secs",
+          "system_cpu": {
+            "busy_pct": 99.22383575363044
+          }
+        }
+      ]
+    },
+    "preflight": {
+      "program_activity": {
+        "apply_programs": {
+          "avg_ns_per_run": 2226.1058555861573,
+          "programs": [
+            {
+              "avg_ns_per_run": null,
+              "id": 371,
+              "name": "execve_rate",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0
+            },
+            {
+              "avg_ns_per_run": 2226.1058555861573,
+              "id": 373,
+              "name": "event_execve",
+              "run_cnt_delta": 8351,
+              "run_time_ns_delta": 18590210
+            }
+          ],
+          "total_run_cnt": 8351,
+          "total_run_time_ns": 18590210
+        },
+        "target_programs": {
+          "avg_ns_per_run": 2226.1058555861573,
+          "programs": [
+            {
+              "avg_ns_per_run": null,
+              "id": 371,
+              "name": "execve_rate",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0
+            },
+            {
+              "avg_ns_per_run": 2226.1058555861573,
+              "id": 373,
+              "name": "event_execve",
+              "run_cnt_delta": 8351,
+              "run_time_ns_delta": 18590210
+            }
+          ],
+          "total_run_cnt": 8351,
+          "total_run_time_ns": 18590210
+        }
+      },
+      "summary": {
+        "agent_cpu_total_pct": {
+          "count": 1,
+          "max": 68.799047752381,
+          "mean": 68.799047752381,
+          "median": 68.799047752381,
+          "min": 68.799047752381
+        },
+        "app_throughput": {
+          "count": 1,
+          "max": 2081.572353516118,
+          "mean": 2081.572353516118,
+          "median": 2081.572353516118,
+          "min": 2081.572353516118
+        },
+        "bpf_avg_ns_per_run": {
+          "count": 1,
+          "max": 2226.1058555861573,
+          "mean": 2226.1058555861573,
+          "median": 2226.1058555861573,
+          "min": 2226.1058555861573
+        },
+        "events_per_sec": {
+          "count": 1,
+          "max": 1639.3069336300548,
+          "mean": 1639.3069336300548,
+          "median": 1639.3069336300548,
+          "min": 1639.3069336300548
+        },
+        "system_cpu_busy_pct": {
+          "count": 1,
+          "max": 98.55000000000001,
+          "mean": 98.55000000000001,
+          "median": 98.55000000000001,
+          "min": 98.55000000000001
+        }
+      },
+      "workloads": [
+        {
+          "agent_cpu": {
+            "sys_pct": 28.999598616555947,
+            "total_pct": 68.799047752381,
+            "user_pct": 39.79944913582506
+          },
+          "app_throughput": 2081.572353516118,
+          "bpf": {
+            "programs": {
+              "371": {
+                "avg_ns_per_run": null,
+                "bytes_jited": 1381,
+                "bytes_xlated": 2352,
+                "id": 371,
+                "name": "execve_rate",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "tracepoint"
+              },
+              "373": {
+                "avg_ns_per_run": 2226.1058555861573,
+                "bytes_jited": 11836,
+                "bytes_xlated": 20512,
+                "id": 373,
+                "name": "event_execve",
+                "run_cnt_delta": 8351,
+                "run_time_ns_delta": 18590210,
+                "type": "tracepoint"
+              }
+            },
+            "summary": {
+              "active_programs": 1,
+              "avg_ns_per_run": 2226.1058555861573,
+              "total_events": 8351,
+              "total_run_time_ns": 18590210
+            }
+          },
+          "description": "stress-ng execve workload",
+          "duration_s": 5.09422599800007,
+          "events_per_sec": 1639.3069336300548,
+          "events_total": 8351,
+          "kind": "exec_storm",
+          "metric": "bogo-ops/s",
+          "name": "exec_storm",
+          "ops_per_sec": 2081.572353516118,
+          "ops_total": 10604.0,
+          "stderr_tail": "",
+          "stdout_tail": "stress-ng: info:  [29158] setting to a 5 secs run per stressor\nstress-ng: info:  [29158] dispatching hogs: 2 exec\nstress-ng: info:  [29158] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [29158] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [29158]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [29158] exec              10604      5.02     13.80      2.51      2112.51         650.39\nstress-ng: info:  [29158] skipped: 0\nstress-ng: info:  [29158] passed: 2: exec (2)\nstress-ng: info:  [29158] failed: 0\nstress-ng: info:  [29158] metrics untrustworthy: 0\nstress-ng: info:  [29158] successful run completed in 5.02 secs",
+          "system_cpu": {
+            "busy_pct": 98.55000000000001
+          }
+        }
+      ]
+    },
+    "programs": [
+      {
+        "id": 371,
+        "name": "execve_rate",
+        "rejit_avg_ns": null,
+        "rejit_events": 0,
+        "sites": 7,
+        "speedup": null,
+        "stock_avg_ns": null,
+        "stock_events": 0,
+        "type": "tracepoint"
+      },
+      {
+        "id": 373,
+        "name": "event_execve",
+        "rejit_avg_ns": 1920.1884422110552,
+        "rejit_events": 43780,
+        "sites": 11,
+        "speedup": 1.0027094963645038,
+        "stock_avg_ns": 1925.3911858143883,
+        "stock_events": 44383,
+        "type": "tracepoint"
+      }
+    ],
+    "rejit_result": {
+      "all_applied": true,
+      "applied": true,
+      "applied_any": true,
+      "counts": {
+        "applied_sites": 5,
+        "total_sites": 5
+      },
+      "effective_enabled_passes_by_program": {
+        "371": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "373": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ]
+      },
+      "error": "",
+      "exit_code": 0,
+      "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"applied\"}], \"changed\": true, \"inlined_map_entries\": [{\"key_hex\": \"00000000\", \"map_id\": 1191, \"value_hex\": \"0000000000000000d0710000000000000000000000000000000000000000000070726763000000000000000000000000\"}, {\"key_hex\": \"00000000\", \"map_id\": 1205, \"value_hex\": \"e80300000000000000ca9a3b00000000\"}], \"passes\": [{\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"site at PC=7: skip reason: PERCPU_ARRAY value differs across CPUs for 4 slot(s)\", \"site at PC=28: skip reason: map type 5 not inlineable in v1\", \"site at PC=28: map_type=5, skip reason: unsupported map type\", \"site at PC=94: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"site at PC=166: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"site at PC=196: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"site at PC=19: inlined successfully, value=0x3b9aca00\", \"site at PC=144: inlined successfully, value=0x0\", \"round 2: site at PC=7: skip reason: PERCPU_ARRAY value differs across CPUs for 4 slot(s)\", \"round 2: site at PC=19: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"round 2: site at PC=28: skip reason: map type 5 not inlineable in v1\", \"round 2: site at PC=28: map_type=5, skip reason: unsupported map type\", \"round 2: site at PC=94: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"round 2: site at PC=144: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"round 2: site at PC=166: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"round 2: site at PC=196: skip reason: lookup result is not consumed by fixed-offset scalar loads\"], \"insn_delta\": 0, \"insns_after\": 241, \"insns_before\": 241, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 2, \"sites_skipped\": 7, \"skip_reasons\": {\"PERCPU_ARRAY value differs across CPUs for 4 slot(s)\": 1, \"lookup result is not consumed by fixed-offset scalar loads\": 5, \"map type 5 not inlineable in v1\": 1}, \"skipped_sites\": [{\"pc\": 7, \"reason\": \"PERCPU_ARRAY value differs across CPUs for 4 slot(s)\"}, {\"pc\": 19, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}, {\"pc\": 28, \"reason\": \"map type 5 not inlineable in v1\"}, {\"pc\": 94, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}, {\"pc\": 144, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}, {\"pc\": 166, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}, {\"pc\": 196, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}], \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 241, \"insns_before\": 241, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 3, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"neutralized 1 dead-def insns to preserve tail-call poke indices\"], \"insn_delta\": 0, \"insns_after\": 241, \"insns_before\": 241, \"pass\": \"dce\", \"pass_name\": \"dce\", \"rollback\": {\"action\": \"restored_pre_pass_snapshot\", \"restored_insn_count\": 241}, \"sites_applied\": 1, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"error_message\": \"BPF_PROG_LOAD: Permission denied (os error 13)\", \"status\": \"rejected\"}, \"verify_error\": \"BPF_PROG_LOAD: Permission denied (os error 13)\", \"verify_result\": \"rejected\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 241, \"insns_before\": 241, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"neutralized 1 dead-def insns to preserve tail-call poke indices\"], \"insn_delta\": 0, \"insns_after\": 241, \"insns_befo\n...[truncated]",
+      "per_program": {
+        "371": {
+          "applied": true,
+          "counts": {
+            "applied_sites": 5,
+            "total_sites": 5
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "disabled_passes": [],
+                "result": "applied"
+              }
+            ],
+            "changed": true,
+            "inlined_map_entries": [
+              {
+                "key_hex": "00000000",
+                "map_id": 1191,
+                "value_hex": "0000000000000000d0710000000000000000000000000000000000000000000070726763000000000000000000000000"
+              },
+              {
+                "key_hex": "00000000",
+                "map_id": 1205,
+                "value_hex": "e80300000000000000ca9a3b00000000"
+              }
+            ],
+            "passes": [
+              {
+                "action": "kept",
+                "changed": true,
+                "diagnostics": [
+                  "site at PC=7: skip reason: PERCPU_ARRAY value differs across CPUs for 4 slot(s)",
+                  "site at PC=28: skip reason: map type 5 not inlineable in v1",
+                  "site at PC=28: map_type=5, skip reason: unsupported map type",
+                  "site at PC=94: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "site at PC=166: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "site at PC=196: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "site at PC=19: inlined successfully, value=0x3b9aca00",
+                  "site at PC=144: inlined successfully, value=0x0",
+                  "round 2: site at PC=7: skip reason: PERCPU_ARRAY value differs across CPUs for 4 slot(s)",
+                  "round 2: site at PC=19: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=28: skip reason: map type 5 not inlineable in v1",
+                  "round 2: site at PC=28: map_type=5, skip reason: unsupported map type",
+                  "round 2: site at PC=94: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=144: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=166: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=196: skip reason: lookup result is not consumed by fixed-offset scalar loads"
+                ],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "map_inline",
+                "pass_name": "map_inline",
+                "sites_applied": 2,
+                "sites_skipped": 7,
+                "skip_reasons": {
+                  "PERCPU_ARRAY value differs across CPUs for 4 slot(s)": 1,
+                  "lookup result is not consumed by fixed-offset scalar loads": 5,
+                  "map type 5 not inlineable in v1": 1
+                },
+                "skipped_sites": [
+                  {
+                    "pc": 7,
+                    "reason": "PERCPU_ARRAY value differs across CPUs for 4 slot(s)"
+                  },
+                  {
+                    "pc": 19,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 28,
+                    "reason": "map type 5 not inlineable in v1"
+                  },
+                  {
+                    "pc": 94,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 144,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 166,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 196,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  }
+                ],
+                "verify": {
+                  "status": "accepted"
+                },
+                "verify_error": null,
+                "verify_result": "accepted"
+              },
+              {
+                "action": "kept",
+                "changed": true,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "const_prop",
+                "pass_name": "const_prop",
+                "sites_applied": 3,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "accepted"
+                },
+                "verify_error": null,
+                "verify_result": "accepted"
+              },
+              {
+                "action": "rolled_back",
+                "changed": false,
+                "diagnostics": [
+                  "neutralized 1 dead-def insns to preserve tail-call poke indices"
+                ],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "dce",
+                "pass_name": "dce",
+                "rollback": {
+                  "action": "restored_pre_pass_snapshot",
+                  "restored_insn_count": 241
+                },
+                "sites_applied": 1,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "error_message": "BPF_PROG_LOAD: Permission denied (os error 13)",
+                  "status": "rejected"
+                },
+                "verify_error": "BPF_PROG_LOAD: Permission denied (os error 13)",
+                "verify_result": "rejected"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "const_prop",
+                "pass_name": "const_prop",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "rolled_back",
+                "changed": false,
+                "diagnostics": [
+                  "neutralized 1 dead-def insns to preserve tail-call poke indices"
+                ],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "dce",
+                "pass_name": "dce",
+                "rollback": {
+                  "action": "restored_pre_pass_snapshot",
+                  "restored_insn_count": 241
+                },
+                "sites_applied": 1,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "error_message": "BPF_PROG_LOAD: Permission denied (os error 13)",
+                  "status": "rejected"
+                },
+                "verify_error": "BPF_PROG_LOAD: Permission denied (os error 13)",
+                "verify_result": "rejected"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "skb_load_bytes_spec",
+                "pass_name": "skb_load_bytes_spec",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "bounds_check_merge",
+                "pass_name": "bounds_check_merge",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "wide_mem",
+                "pass_name": "wide_mem",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "bulk_memory",
+                "pass_name": "bulk_memory",
+                "sites_applied": 0,
+                "sites_skipped": 1,
+                "skip_reasons": {
+                  "different-base memcpy alias not provably safe (src r8, dst r7)": 1
+                },
+                "skipped_sites": [
+                  {
+                    "pc": 103,
+                    "reason": "different-base memcpy alias not provably safe (src r8, dst r7)"
+                  }
+                ],
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "rotate",
+                "pass_name": "rotate",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "cond_select",
+                "pass_name": "cond_select",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "extract",
+                "pass_name": "extract",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 241,
+                "insns_before": 241,
+                "pass": "endian_fusion",
+                "pass_name": "endian_fusion",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              }
+            ],
+            "passes_applied": [
+              "map_inline",
+              "const_prop"
+            ],
+            "prog_id": 371,
+            "program": {
+              "final_insn_count": 241,
+              "insn_delta": 0,
+              "orig_insn_count": 241,
+              "prog_id": 371,
+              "prog_name": "execve_rate",
+              "prog_type": 5
+            },
+            "status": "ok",
+            "summary": {
+              "applied": true,
+              "passes_changed": 2,
+              "passes_executed": 13,
+              "program_changed": true,
+              "total_sites_applied": 5,
+              "verifier_rejections": 2
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 12842746,
+              "rejit_syscall_ns": 47541726,
+              "total_ns": 64448920
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [
+            {
+              "key_hex": "00000000",
+              "map_id": 1191,
+              "value_hex": "0000000000000000d0710000000000000000000000000000000000000000000070726763000000000000000000000000"
+            },
+            {
+              "key_hex": "00000000",
+              "map_id": 1205,
+              "value_hex": "e80300000000000000ca9a3b00000000"
+            }
+          ],
+          "kernel_prog_name": "execve_rate",
+          "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"applied\"}], \"changed\": true, \"inlined_map_entries\": [{\"key_hex\": \"00000000\", \"map_id\": 1191, \"value_hex\": \"0000000000000000d0710000000000000000000000000000000000000000000070726763000000000000000000000000\"}, {\"key_hex\": \"00000000\", \"map_id\": 1205, \"value_hex\": \"e80300000000000000ca9a3b00000000\"}], \"passes\": [{\"action\": \"kept\", \"changed\": true, \"diagnostics\": [\"site at PC=7: skip reason: PERCPU_ARRAY value differs across CPUs for 4 slot(s)\", \"site at PC=28: skip reason: map type 5 not inlineable in v1\", \"site at PC=28: map_type=5, skip reason: unsupported map type\", \"site at PC=94: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"site at PC=166: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"site at PC=196: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"site at PC=19: inlined successfully, value=0x3b9aca00\", \"site at PC=144: inlined successfully, value=0x0\", \"round 2: site at PC=7: skip reason: PERCPU_ARRAY value differs across CPUs for 4 slot(s)\", \"round 2: site at PC=19: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"round 2: site at PC=28: skip reason: map type 5 not inlineable in v1\", \"round 2: site at PC=28: map_type=5, skip reason: unsupported map type\", \"round 2: site at PC=94: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"round 2: site at PC=144: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"round 2: site at PC=166: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"round 2: site at PC=196: skip reason: lookup result is not consumed by fixed-offset scalar loads\"], \"insn_delta\": 0, \"insns_after\": 241, \"insns_before\": 241, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 2, \"sites_skipped\": 7, \"skip_reasons\": {\"PERCPU_ARRAY value differs across CPUs for 4 slot(s)\": 1, \"lookup result is not consumed by fixed-offset scalar loads\": 5, \"map type 5 not inlineable in v1\": 1}, \"skipped_sites\": [{\"pc\": 7, \"reason\": \"PERCPU_ARRAY value differs across CPUs for 4 slot(s)\"}, {\"pc\": 19, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}, {\"pc\": 28, \"reason\": \"map type 5 not inlineable in v1\"}, {\"pc\": 94, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}, {\"pc\": 144, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}, {\"pc\": 166, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}, {\"pc\": 196, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}], \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 241, \"insns_before\": 241, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 3, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"neutralized 1 dead-def insns to preserve tail-call poke indices\"], \"insn_delta\": 0, \"insns_after\": 241, \"insns_before\": 241, \"pass\": \"dce\", \"pass_name\": \"dce\", \"rollback\": {\"action\": \"restored_pre_pass_snapshot\", \"restored_insn_count\": 241}, \"sites_applied\": 1, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"error_message\": \"BPF_PROG_LOAD: Permission denied (os error 13)\", \"status\": \"rejected\"}, \"verify_error\": \"BPF_PROG_LOAD: Permission denied (os error 13)\", \"verify_result\": \"rejected\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 241, \"insns_before\": 241, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"neutralized 1 dead-def insns to preserve tail-call poke indices\"], \"insn_delta\": 0, \"insns_after\": 241, \"insns_befo\n...[truncated]",
+          "summary": {
+            "applied": true,
+            "passes_changed": 2,
+            "passes_executed": 13,
+            "program_changed": true,
+            "total_sites_applied": 5,
+            "verifier_rejections": 2
+          }
+        },
+        "373": {
+          "applied": true,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "action": "rolled_back",
+                "changed": false,
+                "diagnostics": [
+                  "site at PC=144: constantized pseudo-map-value load from map_id=1305 off=0 value=0x0",
+                  "site at PC=1218: constantized pseudo-map-value load from map_id=1305 off=0 value=0x0",
+                  "site at PC=1421: constantized pseudo-map-value load from map_id=1305 off=2 value=0x0",
+                  "site at PC=10: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "site at PC=43: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "site at PC=43: verifier-guided key extraction failed: no verifier states available; fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "site at PC=69: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "site at PC=69: verifier-guided key extraction failed: no verifier states available; fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "site at PC=95: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "site at PC=95: verifier-guided key extraction failed: no verifier states available; fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "site at PC=121: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "site at PC=121: verifier-guided key extraction failed: no verifier states available; fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "site at PC=194: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "site at PC=194: verifier-guided key extraction failed: no verifier states available; fallback scan failed: register r1 definition at pc 188 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "site at PC=201: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "site at PC=201: verifier-guided key extraction failed: no verifier states available; fallback scan failed: register r0 definition at pc 194 does not resolve to fp-relative stack memory; pseudo-map-value fallback failed: map key size 256 does not fit in u8",
+                  "site at PC=228: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "site at PC=228: verifier-guided key extraction failed: no verifier states available; fallback scan failed: register r1 definition at pc 222 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "site at PC=235: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "site at PC=235: verifier-guided key extraction failed: no verifier states available; fallback scan failed: register r0 definition at pc 228 does not resolve to fp-relative stack memory; pseudo-map-value fallback failed: map key size 256 does not fit in u8",
+                  "site at PC=328: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "site at PC=328: verifier-guided key extraction failed: no verifier states available; fallback scan failed: no constant stack store sequence found for fp-184 width 8; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "site at PC=367: skip reason: mutable lookup result has non-load uses",
+                  "site at PC=367: mutable map lookup value escapes beyond fixed loads at pcs [371]",
+                  "site at PC=459: skip reason: map type 10 not inlineable in v1",
+                  "site at PC=459: map_type=10, skip reason: unsupported map type",
+                  "site at PC=505: skip reason: map type 10 not inlineable in v1",
+                  "site at PC=505: map_type=10, skip reason: unsupported map type",
+                  "site at PC=547: skip reason: map type 10 not inlineable in v1",
+                  "site at PC=547: map_type=10, skip reason: unsupported map type",
+                  "site at PC=571: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "site at PC=629: skip reason: map type 10 not inlineable in v1",
+                  "site at PC=629: map_type=10, skip reason: unsupported map type",
+                  "site at PC=1103: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "site at PC=1461: skip reason: map type 10 not inlineable in v1",
+                  "site at PC=1461: map_type=10, skip reason: unsupported map type",
+                  "site at PC=1503: skip reason: map type 10 not inlineable in v1",
+                  "site at PC=1503: map_type=10, skip reason: unsupported map type",
+                  "site at PC=1981: skip reason: map lookup failed: map 1307 missing key [0, 0, 0, 0, 0, 0, 0, 0]",
+                  "site at PC=1981: value read failed: map 1307 missing key [0, 0, 0, 0, 0, 0, 0, 0]",
+                  "site at PC=2160: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "site at PC=2350: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "site at PC=2553: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "site at PC=2737: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "site at PC=2768: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "site at PC=136: inlined successfully, value=0x0",
+                  "site at PC=356: inlined successfully, value=0x0",
+                  "site at PC=1876: inlined successfully, value=0x63677270",
+                  "site at PC=2639: inlined successfully, value=0x0",
+                  "site at PC=2715: inlined successfully, value=0x0",
+                  "round 2: site at PC=10: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=43: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 2: site at PC=43: fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 2: site at PC=69: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 2: site at PC=69: fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 2: site at PC=95: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 2: site at PC=95: fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 2: site at PC=121: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 2: site at PC=121: fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 2: site at PC=194: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 2: site at PC=194: fallback scan failed: register r1 definition at pc 188 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 2: site at PC=201: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 2: site at PC=201: fallback scan failed: register r0 definition at pc 194 does not resolve to fp-relative stack memory; pseudo-map-value fallback failed: map key size 256 does not fit in u8",
+                  "round 2: site at PC=228: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 2: site at PC=228: fallback scan failed: register r1 definition at pc 222 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 2: site at PC=235: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 2: site at PC=235: fallback scan failed: register r0 definition at pc 228 does not resolve to fp-relative stack memory; pseudo-map-value fallback failed: map key size 256 does not fit in u8",
+                  "round 2: site at PC=328: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 2: site at PC=328: fallback scan failed: no constant stack store sequence found for fp-184 width 8; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 2: site at PC=356: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=367: skip reason: mutable lookup result has non-load uses",
+                  "round 2: site at PC=367: mutable map lookup value escapes beyond fixed loads at pcs [371]",
+                  "round 2: site at PC=459: skip reason: map type 10 not inlineable in v1",
+                  "round 2: site at PC=459: map_type=10, skip reason: unsupported map type",
+                  "round 2: site at PC=505: skip reason: map type 10 not inlineable in v1",
+                  "round 2: site at PC=505: map_type=10, skip reason: unsupported map type",
+                  "round 2: site at PC=547: skip reason: map type 10 not inlineable in v1",
+                  "round 2: site at PC=547: map_type=10, skip reason: unsupported map type",
+                  "round 2: site at PC=571: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=629: skip reason: map type 10 not inlineable in v1",
+                  "round 2: site at PC=629: map_type=10, skip reason: unsupported map type",
+                  "round 2: site at PC=1103: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=1461: skip reason: map type 10 not inlineable in v1",
+                  "round 2: site at PC=1461: map_type=10, skip reason: unsupported map type",
+                  "round 2: site at PC=1503: skip reason: map type 10 not inlineable in v1",
+                  "round 2: site at PC=1503: map_type=10, skip reason: unsupported map type",
+                  "round 2: site at PC=1981: skip reason: map lookup failed: map 1307 missing key [0, 0, 0, 0, 0, 0, 0, 0]",
+                  "round 2: site at PC=1981: value read failed: map 1307 missing key [0, 0, 0, 0, 0, 0, 0, 0]",
+                  "round 2: site at PC=2160: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=2350: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=2553: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=2639: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=2715: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=2737: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=2768: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 2: site at PC=136: inlined successfully, value=0x0",
+                  "round 2: site at PC=1876: inlined successfully, value=0x0",
+                  "round 3: site at PC=10: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 3: site at PC=43: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 3: site at PC=43: fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 3: site at PC=69: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 3: site at PC=69: fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 3: site at PC=95: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 3: site at PC=95: fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 3: site at PC=121: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 3: site at PC=121: fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 3: site at PC=136: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 3: site at PC=194: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 3: site at PC=194: fallback scan failed: register r1 definition at pc 188 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 3: site at PC=201: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 3: site at PC=201: fallback scan failed: register r0 definition at pc 194 does not resolve to fp-relative stack memory; pseudo-map-value fallback failed: map key size 256 does not fit in u8",
+                  "round 3: site at PC=228: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 3: site at PC=228: fallback scan failed: register r1 definition at pc 222 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 3: site at PC=235: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 3: site at PC=235: fallback scan failed: register r0 definition at pc 228 does not resolve to fp-relative stack memory; pseudo-map-value fallback failed: map key size 256 does not fit in u8",
+                  "round 3: site at PC=328: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                  "round 3: site at PC=328: fallback scan failed: no constant stack store sequence found for fp-184 width 8; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                  "round 3: site at PC=356: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 3: site at PC=367: skip reason: mutable lookup result has non-load uses",
+                  "round 3: site at PC=367: mutable map lookup value escapes beyond fixed loads at pcs [371]",
+                  "round 3: site at PC=459: skip reason: map type 10 not inlineable in v1",
+                  "round 3: site at PC=459: map_type=10, skip reason: unsupported map type",
+                  "round 3: site at PC=505: skip reason: map type 10 not inlineable in v1",
+                  "round 3: site at PC=505: map_type=10, skip reason: unsupported map type",
+                  "round 3: site at PC=547: skip reason: map type 10 not inlineable in v1",
+                  "round 3: site at PC=547: map_type=10, skip reason: unsupported map type",
+                  "round 3: site at PC=571: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 3: site at PC=629: skip reason: map type 10 not inlineable in v1",
+                  "round 3: site at PC=629: map_type=10, skip reason: unsupported map type",
+                  "round 3: site at PC=1103: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 3: site at PC=1461: skip reason: map type 10 not inlineable in v1",
+                  "round 3: site at PC=1461: map_type=10, skip reason: unsupported map type",
+                  "round 3: site at PC=1503: skip reason: map type 10 not inlineable in v1",
+                  "round 3: site at PC=1503: map_type=10, skip reason: unsupported map type",
+                  "round 3: site at PC=1876: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 3: site at PC=1981: skip reason: map lookup failed: map 1307 missing key [0, 0, 0, 0, 0, 0, 0, 0]",
+                  "round 3: site at PC=1981: value read failed: map 1307 missing key [0, 0, 0, 0, 0, 0, 0, 0]",
+                  "round 3: site at PC=2160: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 3: site at PC=2350: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 3: site at PC=2553: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 3: site at PC=2639: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 3: site at PC=2715: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 3: site at PC=2737: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                  "round 3: site at PC=2768: skip reason: lookup result is not consumed by fixed-offset scalar loads"
+                ],
+                "insn_delta": 0,
+                "insns_after": 2806,
+                "insns_before": 2806,
+                "pass": "map_inline",
+                "pass_name": "map_inline",
+                "rollback": {
+                  "action": "restored_pre_pass_snapshot",
+                  "restored_insn_count": 2806
+                },
+                "sites_applied": 10,
+                "sites_skipped": 30,
+                "skip_reasons": {
+                  "lookup key is not a constant stack or pseudo-map-value materialization": 9,
+                  "lookup result is not consumed by fixed-offset scalar loads": 13,
+                  "map lookup failed: map 1307 missing key [0, 0, 0, 0, 0, 0, 0, 0]": 1,
+                  "map type 10 not inlineable in v1": 6,
+                  "mutable lookup result has non-load uses": 1
+                },
+                "skipped_sites": [
+                  {
+                    "pc": 10,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 43,
+                    "reason": "lookup key is not a constant stack or pseudo-map-value materialization"
+                  },
+                  {
+                    "pc": 69,
+                    "reason": "lookup key is not a constant stack or pseudo-map-value materialization"
+                  },
+                  {
+                    "pc": 95,
+                    "reason": "lookup key is not a constant stack or pseudo-map-value materialization"
+                  },
+                  {
+                    "pc": 121,
+                    "reason": "lookup key is not a constant stack or pseudo-map-value materialization"
+                  },
+                  {
+                    "pc": 136,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 194,
+                    "reason": "lookup key is not a constant stack or pseudo-map-value materialization"
+                  },
+                  {
+                    "pc": 201,
+                    "reason": "lookup key is not a constant stack or pseudo-map-value materialization"
+                  },
+                  {
+                    "pc": 228,
+                    "reason": "lookup key is not a constant stack or pseudo-map-value materialization"
+                  },
+                  {
+                    "pc": 235,
+                    "reason": "lookup key is not a constant stack or pseudo-map-value materialization"
+                  },
+                  {
+                    "pc": 328,
+                    "reason": "lookup key is not a constant stack or pseudo-map-value materialization"
+                  },
+                  {
+                    "pc": 356,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 367,
+                    "reason": "mutable lookup result has non-load uses"
+                  },
+                  {
+                    "pc": 459,
+                    "reason": "map type 10 not inlineable in v1"
+                  },
+                  {
+                    "pc": 505,
+                    "reason": "map type 10 not inlineable in v1"
+                  },
+                  {
+                    "pc": 547,
+                    "reason": "map type 10 not inlineable in v1"
+                  },
+                  {
+                    "pc": 571,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 629,
+                    "reason": "map type 10 not inlineable in v1"
+                  },
+                  {
+                    "pc": 1103,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 1461,
+                    "reason": "map type 10 not inlineable in v1"
+                  },
+                  {
+                    "pc": 1503,
+                    "reason": "map type 10 not inlineable in v1"
+                  },
+                  {
+                    "pc": 1876,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 1981,
+                    "reason": "map lookup failed: map 1307 missing key [0, 0, 0, 0, 0, 0, 0, 0]"
+                  },
+                  {
+                    "pc": 2160,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 2350,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 2553,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 2639,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 2715,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 2737,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  },
+                  {
+                    "pc": 2768,
+                    "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                  }
+                ],
+                "verify": {
+                  "error_message": "BPF_PROG_LOAD: Invalid argument (os error 22)",
+                  "status": "rejected"
+                },
+                "verify_error": "BPF_PROG_LOAD: Invalid argument (os error 22)",
+                "verify_result": "rejected"
+              },
+              {
+                "action": "rolled_back",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2806,
+                "insns_before": 2806,
+                "pass": "const_prop",
+                "pass_name": "const_prop",
+                "rollback": {
+                  "action": "restored_pre_pass_snapshot",
+                  "restored_insn_count": 2806
+                },
+                "sites_applied": 1,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "error_message": "BPF_PROG_LOAD: Invalid argument (os error 22)",
+                  "status": "rejected"
+                },
+                "verify_error": "BPF_PROG_LOAD: Invalid argument (os error 22)",
+                "verify_result": "rejected"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2806,
+                "insns_before": 2806,
+                "pass": "dce",
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2806,
+                "insns_before": 2806,
+                "pass": "skb_load_bytes_spec",
+                "pass_name": "skb_load_bytes_spec",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2806,
+                "insns_before": 2806,
+                "pass": "bounds_check_merge",
+                "pass_name": "bounds_check_merge",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2806,
+                "insns_before": 2806,
+                "pass": "wide_mem",
+                "pass_name": "wide_mem",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2806,
+                "insns_before": 2806,
+                "pass": "bulk_memory",
+                "pass_name": "bulk_memory",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2806,
+                "insns_before": 2806,
+                "pass": "rotate",
+                "pass_name": "rotate",
+                "sites_applied": 0,
+                "sites_skipped": 1,
+                "skip_reasons": {
+                  "subprog pseudo-calls not yet supported": 1
+                },
+                "skipped_sites": [
+                  {
+                    "pc": 0,
+                    "reason": "subprog pseudo-calls not yet supported"
+                  }
+                ],
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2806,
+                "insns_before": 2806,
+                "pass": "cond_select",
+                "pass_name": "cond_select",
+                "sites_applied": 0,
+                "sites_skipped": 11,
+                "skip_reasons": {
+                  "JCC condition not a simple zero test (op=0x10 imm=1667723888 src=0x0)": 1,
+                  "JCC condition not a simple zero test (op=0x20 imm=0 src=0x8)": 3,
+                  "JCC condition not a simple zero test (op=0x50 imm=0 src=0x8)": 1,
+                  "JCC condition not a simple zero test (op=0x60 imm=0 src=0x0)": 1,
+                  "JCC condition not a simple zero test (op=0xa0 imm=0 src=0x8)": 2,
+                  "packed ABI requires register true/false operands": 3
+                },
+                "skipped_sites": [
+                  {
+                    "pc": 1301,
+                    "reason": "JCC condition not a simple zero test (op=0x20 imm=0 src=0x8)"
+                  },
+                  {
+                    "pc": 1304,
+                    "reason": "packed ABI requires register true/false operands"
+                  },
+                  {
+                    "pc": 1309,
+                    "reason": "JCC condition not a simple zero test (op=0xa0 imm=0 src=0x8)"
+                  },
+                  {
+                    "pc": 1881,
+                    "reason": "JCC condition not a simple zero test (op=0x10 imm=1667723888 src=0x0)"
+                  },
+                  {
+                    "pc": 1909,
+                    "reason": "packed ABI requires register true/false operands"
+                  },
+                  {
+                    "pc": 2104,
+                    "reason": "JCC condition not a simple zero test (op=0x20 imm=0 src=0x8)"
+                  },
+                  {
+                    "pc": 2107,
+                    "reason": "packed ABI requires register true/false operands"
+                  },
+                  {
+                    "pc": 2110,
+                    "reason": "JCC condition not a simple zero test (op=0x20 imm=0 src=0x8)"
+                  },
+                  {
+                    "pc": 2113,
+                    "reason": "JCC condition not a simple zero test (op=0xa0 imm=0 src=0x8)"
+                  },
+                  {
+                    "pc": 2480,
+                    "reason": "JCC condition not a simple zero test (op=0x60 imm=0 src=0x0)"
+                  },
+                  {
+                    "pc": 2691,
+                    "reason": "JCC condition not a simple zero test (op=0x50 imm=0 src=0x8)"
+                  }
+                ],
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2806,
+                "insns_before": 2806,
+                "pass": "extract",
+                "pass_name": "extract",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              },
+              {
+                "action": "kept",
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2806,
+                "insns_before": 2806,
+                "pass": "endian_fusion",
+                "pass_name": "endian_fusion",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "verify": {
+                  "status": "not_needed"
+                },
+                "verify_error": null,
+                "verify_result": "not_needed"
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 373,
+            "program": {
+              "final_insn_count": 2806,
+              "insn_delta": 0,
+              "orig_insn_count": 2806,
+              "prog_id": 373,
+              "prog_name": "event_execve",
+              "prog_type": 5
+            },
+            "status": "ok",
+            "summary": {
+              "applied": true,
+              "passes_changed": 0,
+              "passes_executed": 11,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_rejections": 2
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 28900911,
+              "rejit_syscall_ns": 6161491,
+              "total_ns": 103396105
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "event_execve",
+          "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"no_change\"}], \"changed\": false, \"passes\": [{\"action\": \"rolled_back\", \"changed\": false, \"diagnostics\": [\"site at PC=144: constantized pseudo-map-value load from map_id=1305 off=0 value=0x0\", \"site at PC=1218: constantized pseudo-map-value load from map_id=1305 off=0 value=0x0\", \"site at PC=1421: constantized pseudo-map-value load from map_id=1305 off=2 value=0x0\", \"site at PC=10: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"site at PC=43: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=43: verifier-guided key extraction failed: no verifier states available; fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"site at PC=69: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=69: verifier-guided key extraction failed: no verifier states available; fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"site at PC=95: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=95: verifier-guided key extraction failed: no verifier states available; fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"site at PC=121: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=121: verifier-guided key extraction failed: no verifier states available; fallback scan failed: no constant stack store sequence found for fp-8 width 4; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"site at PC=194: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=194: verifier-guided key extraction failed: no verifier states available; fallback scan failed: register r1 definition at pc 188 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"site at PC=201: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=201: verifier-guided key extraction failed: no verifier states available; fallback scan failed: register r0 definition at pc 194 does not resolve to fp-relative stack memory; pseudo-map-value fallback failed: map key size 256 does not fit in u8\", \"site at PC=228: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=228: verifier-guided key extraction failed: no verifier states available; fallback scan failed: register r1 definition at pc 222 is not a supported constant materialization; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"site at PC=235: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=235: verifier-guided key extraction failed: no verifier states available; fallback scan failed: register r0 definition at pc 228 does not resolve to fp-relative stack memory; pseudo-map-value fallback failed: map key size 256 does not fit in u8\", \"site at PC=328: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=328: verifier-guided key extraction failed: no verifier states available; fallback scan failed: no constant stack store sequence found for fp-184 width 8; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"site at PC=367: skip reason: mutable lookup result has non-load uses\", \"site at PC=367: mutable map lookup value escapes beyond fixed loads at pcs [371]\", \"site at PC=459: skip reason: map type 10 not inlineable in v1\", \"site at PC=459: map_type=10, skip reason: uns\n...[truncated]",
+          "summary": {
+            "applied": true,
+            "passes_changed": 0,
+            "passes_executed": 11,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_rejections": 2
+          }
+        }
+      },
+      "program_counts": {
+        "applied": 2,
+        "not_applied": 0,
+        "requested": 2
+      },
+      "scan_enabled_passes": [
+        "wide_mem",
+        "rotate",
+        "cond_select",
+        "extract",
+        "endian_fusion",
+        "map_inline",
+        "const_prop",
+        "dce",
+        "bounds_check_merge",
+        "skb_load_bytes_spec",
+        "bulk_memory"
+      ],
+      "selection_source": "benchmark_config"
+    },
+    "scan_results": {
+      "371": {
+        "counts": {
+          "bitfield_sites": 0,
+          "bounds_check_merge_sites": 0,
+          "branch_flip_sites": 0,
+          "bulk_memory_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 3,
+          "dce_sites": 1,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 2,
+          "other_sites": 0,
+          "rotate_sites": 0,
+          "skb_load_bytes_spec_sites": 0,
+          "total_sites": 6,
+          "wide_sites": 0
+        },
+        "error": "",
+        "prog_id": 371,
+        "sites": {
+          "bitfield_sites": 0,
+          "bounds_check_merge_sites": 0,
+          "branch_flip_sites": 0,
+          "bulk_memory_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 3,
+          "dce_sites": 1,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 2,
+          "other_sites": 0,
+          "rotate_sites": 0,
+          "skb_load_bytes_spec_sites": 0,
+          "total_sites": 6,
+          "wide_sites": 0
+        }
+      },
+      "373": {
+        "counts": {
+          "bitfield_sites": 0,
+          "bounds_check_merge_sites": 0,
+          "branch_flip_sites": 0,
+          "bulk_memory_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 3,
+          "dce_sites": 9,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 10,
+          "other_sites": 0,
+          "rotate_sites": 0,
+          "skb_load_bytes_spec_sites": 0,
+          "total_sites": 22,
+          "wide_sites": 0
+        },
+        "error": "",
+        "prog_id": 373,
+        "sites": {
+          "bitfield_sites": 0,
+          "bounds_check_merge_sites": 0,
+          "branch_flip_sites": 0,
+          "bulk_memory_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 3,
+          "dce_sites": 9,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 10,
+          "other_sites": 0,
+          "rotate_sites": 0,
+          "skb_load_bytes_spec_sites": 0,
+          "total_sites": 22,
+          "wide_sites": 0
+        }
+      }
+    },
+    "selected_tetragon_programs": [
+      {
+        "btf_id": 268,
+        "bytes_jited": 1381,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 2352,
+        "gpl_compatible": true,
+        "id": 371,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1329,
+          1205,
+          1204,
+          1326,
+          1191,
+          1198,
+          1199,
+          1203,
+          1196
+        ],
+        "name": "execve_rate",
+        "orphaned": false,
+        "tag": "ced0e930cd488737",
+        "type": "tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 270,
+        "bytes_jited": 11836,
+        "bytes_memlock": 24576,
+        "bytes_xlated": 20512,
+        "gpl_compatible": true,
+        "id": 373,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1329,
+          1192,
+          1201,
+          1305,
+          1200,
+          1193,
+          1195,
+          1202,
+          1332,
+          1333,
+          1191,
+          1307,
+          1196,
+          1322,
+          1199,
+          1198,
+          1203
+        ],
+        "name": "event_execve",
+        "orphaned": false,
+        "run_cnt": 3,
+        "run_time_ns": 10348,
+        "tag": "14440eb54551238f",
+        "type": "tracepoint",
+        "uid": 0
+      }
+    ],
+    "setup": {
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "TETRAGON_BINARY=/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bin/tetragon\nTETRAGON_BPF_LIB_DIR=/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon\nSTRESS_NG_BINARY=/usr/bin/stress-ng",
+      "tetragon_binary": "/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bin/tetragon",
+      "tetragon_bpf_lib_dir": "/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon"
+    },
+    "site_summary": {
+      "site_totals": {
+        "bitfield_sites": 0,
+        "bounds_check_merge_sites": 0,
+        "branch_flip_sites": 0,
+        "bulk_memory_sites": 0,
+        "cmov_sites": 0,
+        "const_prop_sites": 4,
+        "dce_sites": 2,
+        "endian_sites": 0,
+        "extract_sites": 0,
+        "lea_sites": 0,
+        "map_inline_sites": 12,
+        "other_sites": 0,
+        "rotate_sites": 0,
+        "skb_load_bytes_spec_sites": 0,
+        "total_sites": 18,
+        "wide_sites": 0
+      }
+    },
+    "smoke": false,
+    "status": "ok",
+    "tetragon_binary": "/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bin/tetragon",
+    "tetragon_launch_command": [
+      "/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bin/tetragon",
+      "--cgroup-rate",
+      "1000,1s",
+      "--server-address",
+      "127.0.0.1:39327",
+      "--health-server-address",
+      "127.0.0.1:56879",
+      "--bpf-lib",
+      "/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon",
+      "--tracing-policy-dir",
+      "/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.full-after-tracee-retry/tetragon-policy-avjtw638"
+    ],
+    "tetragon_programs": [
+      {
+        "btf_id": 174,
+        "bytes_jited": 1038,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 1840,
+        "gpl_compatible": true,
+        "id": 368,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1192,
+          1248,
+          1191,
+          1198,
+          1199,
+          1203,
+          1194,
+          1220
+        ],
+        "name": "event_exit_acct_process",
+        "orphaned": false,
+        "run_cnt": 2,
+        "run_time_ns": 1660,
+        "tag": "4dfbb31db5fbfce9",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 222,
+        "bytes_jited": 7335,
+        "bytes_memlock": 12288,
+        "bytes_xlated": 11312,
+        "gpl_compatible": true,
+        "id": 370,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1192,
+          1261,
+          1194,
+          1191,
+          1256,
+          1205,
+          1204,
+          1292,
+          1198,
+          1199,
+          1203
+        ],
+        "name": "event_wake_up_new_task",
+        "orphaned": false,
+        "run_cnt": 4,
+        "run_time_ns": 12149,
+        "tag": "edddb22551cf50f2",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 268,
+        "bytes_jited": 1381,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 2352,
+        "gpl_compatible": true,
+        "id": 371,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1329,
+          1205,
+          1204,
+          1326,
+          1191,
+          1198,
+          1199,
+          1203,
+          1196
+        ],
+        "name": "execve_rate",
+        "orphaned": false,
+        "tag": "ced0e930cd488737",
+        "type": "tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 269,
+        "bytes_jited": 5111,
+        "bytes_memlock": 12288,
+        "bytes_xlated": 8136,
+        "gpl_compatible": true,
+        "id": 372,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1329,
+          1333,
+          1305,
+          1202,
+          1192,
+          1318,
+          1340,
+          1200,
+          1191,
+          1198,
+          1199,
+          1203
+        ],
+        "name": "execve_send",
+        "orphaned": false,
+        "tag": "0ba60ca69d5932ff",
+        "type": "tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 270,
+        "bytes_jited": 11836,
+        "bytes_memlock": 24576,
+        "bytes_xlated": 20512,
+        "gpl_compatible": true,
+        "id": 373,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1329,
+          1192,
+          1201,
+          1305,
+          1200,
+          1193,
+          1195,
+          1202,
+          1332,
+          1333,
+          1191,
+          1307,
+          1196,
+          1322,
+          1199,
+          1198,
+          1203
+        ],
+        "name": "event_execve",
+        "orphaned": false,
+        "run_cnt": 3,
+        "run_time_ns": 10348,
+        "tag": "14440eb54551238f",
+        "type": "tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 307,
+        "bytes_jited": 1533,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 2560,
+        "gpl_compatible": true,
+        "id": 374,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1192,
+          1369,
+          1193,
+          1195
+        ],
+        "name": "tg_kp_bprm_committing_creds",
+        "orphaned": false,
+        "run_cnt": 3,
+        "run_time_ns": 788,
+        "tag": "baccda55c3fe363a",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 353,
+        "bytes_jited": 270,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 472,
+        "gpl_compatible": true,
+        "id": 375,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1197,
+          1420,
+          1192
+        ],
+        "name": "execve_map_update",
+        "orphaned": false,
+        "tag": "bd3d8fd203262461",
+        "type": "socket_filter",
+        "uid": 0
+      },
+      {
+        "btf_id": 398,
+        "bytes_jited": 137,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 240,
+        "gpl_compatible": true,
+        "id": 376,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1204
+        ],
+        "name": "tg_cgroup_rmdir",
+        "orphaned": false,
+        "tag": "7d1e2d547c21c413",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 482,
+        "bytes_jited": 11058,
+        "bytes_memlock": 24576,
+        "bytes_xlated": 18312,
+        "gpl_compatible": true,
+        "id": 379,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1476,
+          1192,
+          1501,
+          1530,
+          1202,
+          1475,
+          1473,
+          1512,
+          1514,
+          1506,
+          1517,
+          1526,
+          1201,
+          1200,
+          1499,
+          1519
+        ],
+        "name": "generic_kprobe_process_filter",
+        "orphaned": false,
+        "tag": "50e362053ea66c54",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 483,
+        "bytes_jited": 1722,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 3056,
+        "gpl_compatible": true,
+        "id": 380,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1476,
+          1474,
+          1509,
+          1191,
+          1515,
+          1473
+        ],
+        "name": "generic_kprobe_event",
+        "orphaned": false,
+        "run_cnt": 3,
+        "run_time_ns": 6621,
+        "tag": "3fd60e1c2f0d8967",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 484,
+        "bytes_jited": 5664,
+        "bytes_memlock": 12288,
+        "bytes_xlated": 10136,
+        "gpl_compatible": true,
+        "id": 381,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1476,
+          1475,
+          1479,
+          1473,
+          1523,
+          1518,
+          1477,
+          1531,
+          1202,
+          1522,
+          1491,
+          1529,
+          1551,
+          1480,
+          1192,
+          1478,
+          1474,
+          1537
+        ],
+        "name": "generic_kprobe_actions",
+        "orphaned": false,
+        "tag": "52a821bb0766c9cc",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 485,
+        "bytes_jited": 1877,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 3160,
+        "gpl_compatible": true,
+        "id": 382,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1476,
+          1192,
+          1191,
+          1198,
+          1199,
+          1203,
+          1480
+        ],
+        "name": "generic_kprobe_output",
+        "orphaned": false,
+        "tag": "bbd2a8e0a0e331b7",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 486,
+        "bytes_jited": 1313,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 2240,
+        "gpl_compatible": true,
+        "id": 383,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1476,
+          1474,
+          1510,
+          1202,
+          1473
+        ],
+        "name": "generic_kprobe_setup_event",
+        "orphaned": false,
+        "tag": "e8f60cb14876452b",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 487,
+        "bytes_jited": 18342,
+        "bytes_memlock": 32768,
+        "bytes_xlated": 31152,
+        "gpl_compatible": true,
+        "id": 384,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1476,
+          1474,
+          1473,
+          1530,
+          1501,
+          1523,
+          1503,
+          1477,
+          1510,
+          1202,
+          1538,
+          1199,
+          1191,
+          1198,
+          1203
+        ],
+        "name": "generic_kprobe_process_event",
+        "orphaned": false,
+        "tag": "db31a9de3434636e",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 488,
+        "bytes_jited": 17835,
+        "bytes_memlock": 32768,
+        "bytes_xlated": 29296,
+        "gpl_compatible": true,
+        "id": 385,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1476,
+          1475,
+          1473,
+          1510,
+          1488,
+          1547,
+          1495,
+          1526,
+          1551,
+          1525,
+          1553,
+          1528,
+          1521,
+          1493,
+          1535,
+          1505,
+          1550,
+          1542,
+          1490,
+          1533,
+          1514,
+          1506,
+          1517,
+          1555,
+          1539
+        ],
+        "name": "generic_kprobe_filter_arg",
+        "orphaned": false,
+        "tag": "cfd6d269991b23e3",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 558,
+        "bytes_jited": 1313,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 2240,
+        "gpl_compatible": true,
+        "id": 386,
+        "jited": true,
+        "loaded_at": 1776315670,
+        "map_ids": [
+          1476,
+          1482,
+          1588,
+          1202,
+          1481
+        ],
+        "name": "generic_kprobe_setup_event",
+        "orphaned": false,
+        "tag": "e8f60cb14876452b",
+        "type": "kprobe",
+        "uid": 0
+      }
+    ]
+  },
+  "run_type": "tetragon",
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "smoke": false,
+  "started_at": "2026-04-16T05:01:09.509223+00:00",
+  "status": "completed",
+  "suite": "e2e"
+}

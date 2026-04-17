@@ -37,7 +37,7 @@ export ARM64_BUILD_DIR
 AWS_X86_BENCH_MODE        ?=
 
 # Tunables
-BZIMAGE ?= $(X86_BUILD_DIR)/arch/x86/boot/bzImage
+BZIMAGE ?= $(X86_RUNTIME_KERNEL_IMAGE)
 E2E_ARGS ?=
 E2E_CASE ?= all
 E2E_SMOKE ?= 0
@@ -179,10 +179,6 @@ vm-all:
 	$(MAKE) vm-corpus
 	$(MAKE) vm-e2e
 
-# ── ARM64 kernel ───────────────────────────────────────────────────────────────
-$(ARM64_IMAGE) $(ARM64_EFI_IMAGE) &: $(ARM64_RUNNER_RUNTIME_IMAGE_TAR) $(ARM64_DEFCONFIG_SRC) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES)
-	$(call RUNNER_HOST_ARTIFACT_BUILD,linux/arm64,arm64,arm64-kernel)
-
 # ── AWS aliases ───────────────────────────────────────────────────────────────
 aws-arm64-test:
 	$(RUN_TARGET_SUITE_CMD) run aws-arm64 test
@@ -210,7 +206,7 @@ clean:
 	rm -rf "$(RUNNER_DIR)/build-arm64-llvmbpf"
 	$(MAKE) -C "$(MICRO_DIR)" clean
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
-	rm -rf "$(X86_BUILD_DIR)" "$(ARM64_BUILD_DIR)" "$(ROOT_DIR)/.state/runner-contracts"
+	rm -rf "$(X86_BUILD_DIR)" "$(ARM64_BUILD_DIR)" "$(ARTIFACT_ROOT)/runtime-kernel" "$(ROOT_DIR)/.state/runner-contracts"
 	rm -rf \
 		"$(ARTIFACT_ROOT)/container-images" \
 		"$(ARTIFACT_ROOT)/libbpf-build" \

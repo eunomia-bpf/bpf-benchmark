@@ -189,18 +189,26 @@ def _run_action(target_name: str, suite_name: str, suite_args: list[str] | None 
                 print(f"[run-target-suite][ERROR] preserved debug artifact: {control_dir}", file=sys.stderr)
 
 
-def _parse_benchmark_suite(mode: str) -> str:
-    suite = str(mode).strip()
+def _parse_benchmark_suites(mode: str) -> list[str]:
+    mode_text = str(mode).strip()
     allowed_suites = {"micro", "corpus", "e2e"}
-    if not suite:
+    ordered_suites = ["micro", "corpus", "e2e"]
+    if not mode_text:
         _die("benchmark mode is empty")
-    if "," in suite or suite == "all" or suite not in allowed_suites:
-        _die(f"unsupported benchmark mode: {mode}; use one of micro, corpus, e2e")
-    return suite
+    if mode_text == "all":
+        return ordered_suites
+    suites = [suite.strip() for suite in mode_text.split(",")]
+    if any(not suite for suite in suites):
+        _die(f"unsupported benchmark mode: {mode}; use one of micro, corpus, e2e, all")
+    invalid = [suite for suite in suites if suite not in allowed_suites]
+    if invalid:
+        _die(f"unsupported benchmark mode: {mode}; use one of micro, corpus, e2e, all")
+    return suites
 
 
 def _benchmark_action(target_name: str, mode: str, suite_args: list[str] | None = None) -> None:
-    _run_action(target_name, _parse_benchmark_suite(mode), suite_args)
+    for suite in _parse_benchmark_suites(mode):
+        _run_action(target_name, suite, suite_args)
 
 
 def _suite_args_from_cli(args: list[str], start_index: int) -> list[str] | None:

@@ -21,6 +21,7 @@ from .setup_support import binary_matches_host_arch, first_existing_dir, repo_ar
 
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml"
 DEFAULT_ATTACH_TIMEOUT_SECONDS = 20
+DEFAULT_MIN_BIOSNOOP_CORPUS_RUNS = 100
 
 
 def _default_tools_dir() -> Path:
@@ -309,6 +310,24 @@ class BCCRunner(AppRunner):
             raise RuntimeError(f"BCC tool {self.tool_name} workload spec is missing a workload kind")
         return run_named_workload(requested_kind, seconds, network_as_tcp_connect=True)
 
+    def select_corpus_program_ids(
+        self,
+        initial_stats: Mapping[int, Mapping[str, object]],
+        final_stats: Mapping[int, Mapping[str, object]],
+    ) -> list[int] | None:
+        selected = super().select_corpus_program_ids(initial_stats, final_stats)
+        if self.tool_name != "biosnoop" or not selected:
+            return selected
+        min_runs = int(os.environ.get("BPFREJIT_BCC_BIOSNOOP_MIN_CORPUS_RUNS", DEFAULT_MIN_BIOSNOOP_CORPUS_RUNS))
+        stable: list[int] = []
+        for prog_id in selected:
+            before = initial_stats.get(int(prog_id)) or {}
+            after = final_stats.get(int(prog_id)) or {}
+            run_cnt_delta = int(after.get("run_cnt", 0) or 0) - int(before.get("run_cnt", 0) or 0)
+            if run_cnt_delta >= max(1, min_runs):
+                stable.append(int(prog_id))
+        return stable or selected
+
     def stop(self) -> None:
         if self.session is None:
             return
@@ -337,4 +356,3 @@ class BCCRunner(AppRunner):
         failures.extend(io_errors)
         if failures:
             raise RuntimeError("; ".join(failures))
-

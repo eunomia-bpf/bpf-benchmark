@@ -16,7 +16,7 @@ from runner.libs.cli_support import fail
 from runner.libs.file_lock import runner_lock
 from runner.libs.run_contract import RunConfig, read_run_config_file
 from runner.libs.state_file import write_state
-from runner.libs.suite_commands import build_runtime_container_command, runtime_container_result_dirs
+from runner.libs.suite_commands import build_runtime_container_command, runtime_container_host_dirs
 from runner.libs.suite_args import read_suite_args_file
 from runner.libs.workspace_layout import runtime_container_image_tar_path
 
@@ -102,6 +102,14 @@ def _run_local_make(*args: str, env: dict[str, str] | None = None) -> None:
         raise SystemExit(completed.returncode)
 
 
+def _local_build_jobs() -> int:
+    for name in ("IMAGE_BUILD_JOBS", "JOBS"):
+        value = os.environ.get(name, "").strip()
+        if value.isdigit() and int(value) > 0:
+            return int(value)
+    return max(os.cpu_count() or 1, 1)
+
+
 def _require_kernel_release(release_file: Path, *, arch: str) -> str:
     if not release_file.is_file():
         _die(f"missing {arch} kernel release file: {release_file}")
@@ -124,7 +132,7 @@ def _build_x86_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str
     modules_target = ROOT_DIR / ".cache" / "repo-artifacts" / "x86_64" / "kernel-modules" / "lib" / "modules"
     _run_local_make(str(kernel_image), str(modules_target), "RUN_TARGET_ARCH=x86_64",
                     f"X86_BUILD_DIR={build_dir}",
-                    f"JOBS={max(os.cpu_count() or 1, 1)}")
+                    f"JOBS={_local_build_jobs()}")
     if not kernel_image.is_file():
         _die(f"missing x86 kernel image: {kernel_image}")
     kernel_release = _require_kernel_release(build_dir / "include" / "config" / "kernel.release", arch="x86")
@@ -136,7 +144,7 @@ def _build_arm64_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[s
     kernel_image = build_dir / "arch" / "arm64" / "boot" / "vmlinuz.efi"
     modules_target = ROOT_DIR / ".cache" / "repo-artifacts" / "arm64" / "kernel-modules" / "lib" / "modules"
     _run_local_make(str(kernel_image), str(modules_target), "RUN_TARGET_ARCH=arm64",
-                    f"ARM64_AWS_BUILD_DIR={build_dir}", f"JOBS={max(os.cpu_count() or 1, 1)}")
+                    f"ARM64_AWS_BUILD_DIR={build_dir}", f"JOBS={_local_build_jobs()}")
     if not kernel_image.is_file():
         _die(f"missing ARM64 AWS kernel image: {kernel_image}")
     kernel_release = _require_kernel_release(build_dir / "include" / "config" / "kernel.release", arch="ARM64")
@@ -217,11 +225,28 @@ def _remote_has_sched_ext(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
 
 
 def _ensure_remote_docker(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
-    script = (
-        "set -e; "
-        "command -v docker >/dev/null 2>&1 || { echo 'docker is required on the AWS target image' >&2; exit 1; }; "
-        "sudo docker info >/dev/null || { echo 'docker daemon is required on the AWS target image' >&2; exit 1; }"
-    )
+    script = r"""
+set -eu
+if ! command -v docker >/dev/null 2>&1; then
+    if command -v dnf >/dev/null 2>&1; then
+        sudo dnf install -y docker
+    elif command -v yum >/dev/null 2>&1; then
+        sudo yum install -y docker
+    elif command -v apt-get >/dev/null 2>&1; then
+        sudo apt-get update
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker.io
+    else
+        echo 'cannot install docker: no dnf, yum, or apt-get found' >&2
+        exit 1
+    fi
+fi
+if command -v systemctl >/dev/null 2>&1; then
+    sudo systemctl enable --now docker
+else
+    sudo service docker start
+fi
+sudo docker info >/dev/null
+""".strip()
     aws_common._ssh_exec(ctx, ip, "bash", "-c", script)
 
 
@@ -512,7 +537,7 @@ def _remote_runtime_container_command(
 
 
 def _remote_result_dir_command(remote_workspace: str) -> str:
-    dirs = [str(path) for path in runtime_container_result_dirs(Path(remote_workspace))]
+    dirs = [str(path) for path in runtime_container_host_dirs(Path(remote_workspace))]
     return shlex.join(["mkdir", "-p", *dirs])
 
 

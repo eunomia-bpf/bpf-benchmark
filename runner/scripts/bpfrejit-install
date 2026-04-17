@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    cat >&2 <<'EOF'
+usage: bpfrejit-install [--extract-kernel] [--extract-kernel-only]
+                         [--kernel-out-dir DIR] [--skip-kinsn]
+                         [--image IMAGE] <runner-runtime.image.tar>
+
+Environment:
+  BPFREJIT_INSTALL_EXTRACT_KERNEL=1
+  BPFREJIT_INSTALL_KERNEL_OUT_DIR=DIR
+  BPFREJIT_INSTALL_SKIP_KINSN=1
+  BPFREJIT_RUNTIME_IMAGE=IMAGE
+EOF
+}
+
+extract_kernel="${BPFREJIT_INSTALL_EXTRACT_KERNEL:-0}"
+kernel_only=0
+kernel_out_dir="${BPFREJIT_INSTALL_KERNEL_OUT_DIR:-}"
+skip_kinsn="${BPFREJIT_INSTALL_SKIP_KINSN:-0}"
+image_ref="${BPFREJIT_RUNTIME_IMAGE:-}"
+image_tar=""
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --extract-kernel)
+            extract_kernel=1
+            ;;
+        --extract-kernel-only)
+            extract_kernel=1
+            kernel_only=1
+            skip_kinsn=1
+            ;;
+        --kernel-out-dir)
+            [ "$#" -ge 2 ] || { usage; exit 2; }
+            kernel_out_dir="$2"
+            shift
+            ;;
+        --skip-kinsn)
+            skip_kinsn=1
+            ;;
+        --image)
+            [ "$#" -ge 2 ] || { usage; exit 2; }
+            image_ref="$2"
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        -*)
+            usage
+            exit 2
+            ;;
+        *)
+            [ -z "$image_tar" ] || { usage; exit 2; }
+            image_tar="$1"
+            ;;
+    esac
+    shift
+done
+
+[ -n "$image_tar" ] || { usage; exit 2; }
+[ -f "$image_tar" ] || { echo "image tar does not exist: $image_tar" >&2; exit 1; }
+
+command -v docker >/dev/null 2>&1 || { echo "docker is required" >&2; exit 1; }
+command -v python3 >/dev/null 2>&1 || { echo "python3 is required" >&2; exit 1; }
+
+tmpdir="$(mktemp -d /tmp/bpfrejit-install.XXXXXX)"
+cid=""
+cleanup() {
+    if [ -n "$cid" ]; then
+        docker rm -f "$cid" >/dev/null 2>&1 || true
+    fi
+    rm -rf "$tmpdir"
+}
+trap cleanup EXIT
+
+load_output="$(docker load -i "$image_tar")"
+printf '%s\n' "$load_output" >&2
+if [ -z "$image_ref" ]; then
+    image_ref="$(printf '%s\n' "$load_output" | awk '/Loaded image: / { ref=$3 } END { print ref }')"
+fi
+[ -n "$image_ref" ] || { echo "could not determine loaded image reference; pass --image" >&2; exit 1; }
+
+cid="$(docker create "$image_ref" /bin/true)"
+docker cp "$cid:/artifacts/manifest.json" "$tmpdir/manifest.json"
+
+read -r kernel_release target_arch kernel_image <<EOF
+$(python3 - "$tmpdir/manifest.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as f:
+    manifest = json.load(f)
+for key in ("kernel_release", "target_arch", "kernel_image"):
+    value = str(manifest.get(key) or "").strip()
+    if not value:
+        raise SystemExit(f"manifest is missing {key}")
+print(manifest["kernel_release"], manifest["target_arch"], manifest["kernel_image"])
+PY
+)
+EOF
+
+if [ "$extract_kernel" = 1 ]; then
+    [ -n "$kernel_out_dir" ] || { echo "--extract-kernel requires --kernel-out-dir or BPFREJIT_INSTALL_KERNEL_OUT_DIR" >&2; exit 1; }
+    mkdir -p "$kernel_out_dir"
+    docker cp "$cid:/artifacts/kernel/$kernel_image" "$kernel_out_dir/$kernel_image"
+    cp "$tmpdir/manifest.json" "$kernel_out_dir/manifest.json"
+    printf '%s\n' "$kernel_release" >"$kernel_out_dir/kernel.release"
+    printf '%s\n' "$target_arch" >"$kernel_out_dir/target_arch"
+fi
+
+if [ "$kernel_only" = 1 ]; then
+    exit 0
+fi
+
+running_release="$(uname -r)"
+if [ "$skip_kinsn" != 1 ] && [ "$kernel_release" != "$running_release" ]; then
+    echo "image kernel release $kernel_release does not match running kernel $running_release" >&2
+    echo "use --skip-kinsn only for pre-reboot kernel installation" >&2
+    exit 1
+fi
+
+modules_tmp="$tmpdir/modules"
+docker cp "$cid:/artifacts/modules/$kernel_release" "$modules_tmp"
+mkdir -p /lib/modules
+rm -rf "/lib/modules/$kernel_release"
+cp -a "$modules_tmp" "/lib/modules/$kernel_release"
+rm -f "/lib/modules/$kernel_release/build" "/lib/modules/$kernel_release/source"
+depmod "$kernel_release"
+
+if [ "$skip_kinsn" = 1 ]; then
+    exit 0
+fi
+
+kinsn_tmp="$tmpdir/kinsn"
+docker cp "$cid:/artifacts/kinsn" "$kinsn_tmp"
+found=0
+while IFS= read -r -d '' ko_path; do
+    found=1
+    module_name="$(basename "$ko_path" .ko | tr '-' '_')"
+    if awk -v name="$module_name" '$1 == name { found=1 } END { exit(found ? 0 : 1) }' /proc/modules; then
+        continue
+    fi
+    insmod "$ko_path"
+done < <(find "$kinsn_tmp" -type f -name '*.ko' -print0 | sort -z)
+
+[ "$found" = 1 ] || { echo "no kinsn .ko files found in image" >&2; exit 1; }

@@ -29,7 +29,7 @@ def current_prog_ids() -> list[int]: return [int(r["id"]) for r in current_progr
 
 class TetragonAgentSession(AgentSession):
     def __init__(self, command: Sequence[str], load_timeout: int) -> None:
-        super().__init__(load_timeout); self.command = list(command)
+        super().__init__(load_timeout); self.command = list(command); self.before_ids: set[int] = set()
 
     def _cleanup_err(self) -> Exception | None:
         try: self.close(); return None
@@ -37,6 +37,7 @@ class TetragonAgentSession(AgentSession):
 
     def __enter__(self) -> "TetragonAgentSession":
         before_ids = set(current_prog_ids())
+        self.before_ids = before_ids
         self.process = start_agent(self.command[0], self.command[1:], env={"HOME": os.environ.get("HOME", str(ROOT_DIR))})
         self._start_io_threads()
         try:
@@ -52,12 +53,18 @@ class TetragonAgentSession(AgentSession):
             ce = self._cleanup_err()
             msg = f"Tetragon failed to become healthy within {self.load_timeout}s: {details}"
             raise RuntimeError(msg if ce is None else f"{msg}\nCleanup error while stopping Tetragon: {ce}")
-        self.programs = [item for item in current_programs() if int(item.get("id", -1)) not in before_ids]
+        self.programs = self.refresh_programs()
         if not self.programs:
             ce = self._cleanup_err()
             msg = "Tetragon became healthy but no new BPF programs were found"
             raise RuntimeError(msg if ce is None else f"{msg}\nCleanup error while stopping Tetragon: {ce}")
         return self
+
+    def refresh_programs(self) -> list[dict[str, object]]:
+        programs = [dict(item) for item in current_programs() if int(item.get("id", -1)) not in self.before_ids]
+        programs.sort(key=lambda item: int(item.get("id", 0) or 0))
+        self.programs = programs
+        return [dict(item) for item in self.programs]
 
     def close(self) -> None:
         stop_error: Exception | None = None
@@ -139,12 +146,18 @@ ROOT_CGROUP="/sys/fs/cgroup"
 CGROUP_PATH="$1"
 shift
 mkdir -p "$CGROUP_PATH"
-echo $$ > "$CGROUP_PATH/cgroup.procs"
+if ! echo $$ > "$CGROUP_PATH/cgroup.procs"; then
+  echo "failed to join cgroup.procs at $CGROUP_PATH" >&2
+  rmdir "$CGROUP_PATH" 2>/dev/null || true
+  exit 77
+fi
 set +e
 "$@"
 status=$?
 set -e
-echo $$ > "$ROOT_CGROUP/cgroup.procs"
+if ! echo $$ > "$ROOT_CGROUP/cgroup.procs"; then
+  echo "failed to return to root cgroup.procs at $ROOT_CGROUP" >&2
+fi
 for _ in $(seq 1 20); do
   if [[ ! -s "$CGROUP_PATH/cgroup.procs" ]]; then
     break
@@ -161,6 +174,27 @@ exit "$status"
     elapsed = time.monotonic() - start
     if completed.returncode != 0:
         details = tail_text(completed.stderr or completed.stdout or "", max_lines=60, max_chars=12000)
+        try:
+            cgroup_path.rmdir()
+        except OSError:
+            pass
+        cgroup_join_error = "cgroup.procs" in details or "echo: write error:" in details
+        cgroup_unavailable = (
+            "No such file or directory" in details
+            or "No such file" in details
+            or "Permission denied" in details
+            or "Read-only file system" in details
+        )
+        if cgroup_join_error and cgroup_unavailable:
+            fallback = run_exec_storm(duration_s, rate)
+            note = f"cgroup exec workload unavailable, fell back to exec_storm: {details}"
+            return WorkloadResult(
+                ops_total=fallback.ops_total,
+                ops_per_sec=fallback.ops_per_sec,
+                duration_s=fallback.duration_s,
+                stdout=fallback.stdout,
+                stderr=tail_text("\n".join(item for item in (note, fallback.stderr) if item), max_lines=60, max_chars=12000),
+            )
         rendered = shlex.join(command)
         raise RuntimeError(f"tetragon cgroup-rate exec workload failed ({completed.returncode}) for {rendered}: {details}")
 
@@ -268,6 +302,11 @@ class TetragonRunner(AppRunner):
         elif isinstance(exec_workload_cgroup, bool): use_exec_workload_cgroup = exec_workload_cgroup
         else: raise RuntimeError("Tetragon workload spec field 'exec_workload_cgroup' must be a boolean when provided")
         return run_tetragon_workload(workload_spec, max(1, int(round(seconds))), exec_workload_cgroup=use_exec_workload_cgroup)
+
+    def refresh_programs(self) -> list[dict[str, object]]:
+        if self.session is None: raise RuntimeError("TetragonRunner is not running")
+        self.programs = [dict(program) for program in self.session.refresh_programs()]
+        return [dict(program) for program in self.programs]
 
     def stop(self) -> None:
         if self.session is None and self.tempdir is None: return

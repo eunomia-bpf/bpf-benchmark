@@ -20,6 +20,25 @@ def repo_kernel_modules_root() -> Path:
     return root
 
 
+def kernel_module_is_builtin(module_name: str) -> bool:
+    release_dir = repo_kernel_modules_root() / "lib" / "modules" / os.uname().release
+    builtin_path = release_dir / "modules.builtin"
+    if not builtin_path.is_file():
+        return False
+    normalized_name = module_name.replace("-", "_")
+    with builtin_path.open("r", encoding="utf-8", errors="replace") as builtin_file:
+        for raw_line in builtin_file:
+            module_path = raw_line.strip()
+            if not module_path:
+                continue
+            basename = Path(module_path).name
+            if basename.endswith(".ko"):
+                basename = basename[:-3]
+            if basename.replace("-", "_") == normalized_name:
+                return True
+    return False
+
+
 def load_kernel_module(module_name: str, *module_args: str, timeout: int | float = 10) -> None:
     modprobe_binary = which("modprobe")
     if modprobe_binary is None:
