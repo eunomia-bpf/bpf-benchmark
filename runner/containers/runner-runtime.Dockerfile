@@ -143,6 +143,7 @@ RUN apt-get update \
         ca-certificates \
         clang \
         gcc \
+        git \
         libelf-dev \
         make \
         pkg-config \
@@ -160,7 +161,11 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
         *) echo "unsupported Tracee BPF target arch: ${RUN_TARGET_ARCH}" >&2; exit 1 ;; \
     esac; \
     mkdir -p /work "${output_root}/lsm_support"; \
-    cp -a /src/runner/repos/tracee "${repo_root}"; \
+    if [ -n "$(find /src/runner/repos/tracee -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then \
+        cp -a /src/runner/repos/tracee "${repo_root}"; \
+    else \
+        git clone --depth 1 --filter=blob:none --branch main https://github.com/aquasecurity/tracee.git "${repo_root}"; \
+    fi; \
     rm -rf "${dist_root}" \
         "${repo_root}/.build_libbpf" \
         "${repo_root}/.build_libbpf_fix" \
@@ -194,6 +199,31 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     mkdir -p ./runner ./vendor ./vendor/linux-framework; \
     rsync -a /src/runner/mk ./runner/; \
     rsync -a /src/runner/repos ./runner/; \
+    has_repo_content() { [ -n "$(find "./runner/repos/$1" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; }; \
+    clone_sparse_repo() { \
+        repo_name="$1"; repo_url="$2"; repo_branch="$3"; shift 3; \
+        repo_dest="./runner/repos/${repo_name}"; \
+        rm -rf "${repo_dest}"; \
+        git clone --depth 1 --filter=blob:none --sparse --branch "${repo_branch}" "${repo_url}" "${repo_dest}"; \
+        (cd "${repo_dest}" && git sparse-checkout set "$@"); \
+    }; \
+    clone_repo() { \
+        repo_name="$1"; repo_url="$2"; repo_branch="$3"; submodules="$4"; \
+        repo_dest="./runner/repos/${repo_name}"; \
+        rm -rf "${repo_dest}"; \
+        if [ "${submodules}" = "submodules" ]; then \
+            git clone --depth 1 --branch "${repo_branch}" --recurse-submodules --shallow-submodules "${repo_url}" "${repo_dest}"; \
+        else \
+            git clone --depth 1 --filter=blob:none --branch "${repo_branch}" "${repo_url}" "${repo_dest}"; \
+        fi; \
+    }; \
+    has_repo_content bcc || clone_sparse_repo bcc https://github.com/iovisor/bcc.git master libbpf-tools; \
+    has_repo_content bpftrace || clone_repo bpftrace https://github.com/bpftrace/bpftrace.git master submodules; \
+    has_repo_content katran || clone_sparse_repo katran https://github.com/facebookincubator/katran.git main \
+        CMakeLists.txt build build_bpf_modules_opensource.sh build_katran.sh cmake example_grpc katran/decap katran/lib; \
+    has_repo_content tracee || clone_repo tracee https://github.com/aquasecurity/tracee.git main no-submodules; \
+    has_repo_content tetragon || clone_repo tetragon https://github.com/cilium/tetragon.git main no-submodules; \
+    has_repo_content scx || clone_repo scx https://github.com/sched-ext/scx.git main no-submodules; \
     rsync -a /src/vendor/libbpf ./vendor/; \
     rsync -a /src/vendor/llvmbpf ./vendor/; \
     cp -a /src/vendor/linux-framework/Makefile ./vendor/linux-framework/; \
@@ -233,7 +263,24 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
         ./runner/repos/workload-tools/sysbench/third_party/luajit/tmp \
         ./runner/repos/workload-tools/wrk/obj \
         ./runner/repos/workload-tools/wrk/wrk; \
-    find ./runner/repos/workload-tools/sysbench -type f \( -name '*.a' -o -name '*.la' -o -name '*.lo' -o -name '*.o' \) -delete; \
+    if [ -d ./runner/repos/workload-tools/sysbench ]; then \
+        find ./runner/repos/workload-tools/sysbench -type f \( -name '*.a' -o -name '*.la' -o -name '*.lo' -o -name '*.o' \) -delete; \
+    fi; \
+    if [ ! -d ./runner/repos/workload-tools/rt-tests ] || [ ! -d ./runner/repos/workload-tools/sysbench ] || [ ! -d ./runner/repos/workload-tools/wrk ]; then \
+        workload_bin_root="/artifacts/user/workload-tools/${RUN_TARGET_ARCH}/bin"; \
+        mkdir -p "${workload_bin_root}"; \
+        for tool in hackbench sysbench wrk; do \
+            if command -v "$tool" >/dev/null; then \
+                install -m 0755 "$(command -v "$tool")" "${workload_bin_root}/$tool"; \
+            else \
+                printf '%s\n' \
+                    '#!/bin/sh' \
+                    "echo '$tool is unavailable: runner/repos/workload-tools was not present when the runtime image was built' >&2" \
+                    'exit 127' >"${workload_bin_root}/$tool"; \
+                chmod 0755 "${workload_bin_root}/$tool"; \
+            fi; \
+        done; \
+    fi; \
     make image-bcc-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     make image-bpftrace-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     make image-katran-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
@@ -263,7 +310,18 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     rsync -a /src/runner/mk ./runner/; \
     ln -sfn /src/vendor/linux-framework ./vendor/linux-framework; \
     cp -a /src/vendor/bpfrejit_x86_defconfig /src/vendor/bpfrejit_arm64_defconfig ./vendor/; \
-    rsync -a /src/module ./; \
+    rsync -a \
+        --exclude='*.ko' \
+        --exclude='*.mod.c' \
+        --exclude='*.mod' \
+        --exclude='Module.symvers' \
+        --exclude='modules.order' \
+        --exclude='*.o' \
+        --exclude='.*.o' \
+        --exclude='*.cmd' \
+        --exclude='.*.cmd' \
+        --exclude='.tmp_versions/' \
+        /src/module ./; \
     make image-kernel-artifacts \
         RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" \
         BPFREJIT_IMAGE_BUILD=1 \
@@ -312,7 +370,7 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     rsync -a /src/tests/unittest ./tests/; \
     rsync -a /src/tests/negative ./tests/; \
     rsync -a /src/daemon ./; \
-    rsync -a /src/micro/generated-inputs ./micro/; \
+    if [ -d /src/micro/generated-inputs ]; then rsync -a /src/micro/generated-inputs ./micro/; fi; \
     rsync -a /src/corpus/bcf ./corpus/; \
     rsync -a /src/corpus/inputs ./corpus/; \
     rsync -a /src/micro/config ./micro/; \
@@ -362,7 +420,8 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     find ./runner -maxdepth 3 -type d \( -name CMakeFiles -o -name vendor \) -prune -exec rm -rf {} +; \
     find ./runner -maxdepth 3 -type f \( -name CMakeCache.txt -o -name cmake_install.cmake -o -name Makefile \) -delete; \
     find ./tests -type f \( -name '*.o' -o -name '*.d' -o -name '*.cmd' \) -delete; \
-    mkdir -p micro/results corpus/results e2e/results tests/results; \
+    mkdir -p micro/results corpus/results e2e/results tests/results /opt; \
+    ln -sfn /artifacts/user /opt/bpf-benchmark; \
     apt-get purge -y \
         autoconf \
         automake \

@@ -83,7 +83,7 @@ def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Pat
     return repo_artifact_root(workspace, "x86_64") / "kernel-modules" if str(executor).strip() == "kvm" else Path("/")
 
 def kvm_kernel_image_path(workspace: Path) -> Path:
-    return workspace / ".cache" / "x86-kernel-build" / "arch" / "x86" / "boot" / "bzImage"
+    return workspace / ".cache" / "runtime-kernel" / "x86_64" / "bzImage"
 
 
 def runtime_path_value(workspace: Path, target_arch: str) -> str:
@@ -105,6 +105,6 @@ def local_prep_targets(*, workspace, suite_name, target_arch, executor) -> list[
     targets: list[Path] = []
     if suite in _RUNTIME_IMAGE_SUITES:      targets.append(runtime_container_image_tar_path(workspace, arch))
     if str(executor).strip() == "kvm":
-        targets += [kvm_kernel_image_path(workspace), kernel_modules_root(workspace, arch, executor) / "lib" / "modules"]
+        targets.append(kvm_kernel_image_path(workspace))
     seen: set[Path] = set()
     return [t for t in targets if not (t in seen or seen.add(t))]  # type: ignore[func-returns-value]

@@ -1,0 +1,5 @@
+# Ignore timestamped session run output. Keep curated reports explicit.
+*_20[0-9][0-9][0-9][0-9][0-9][0-9]_*
+!README.md
+!.gitkeep
+!.gitignore

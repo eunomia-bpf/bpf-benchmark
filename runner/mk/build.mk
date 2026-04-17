@@ -184,6 +184,9 @@ $(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_SOURCE_FILES)
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$@" "$(ARM64_RUNNER_RUNTIME_IMAGE)"
 
+.PHONY: image-runner-runtime-image-tar
+image-runner-runtime-image-tar: $(ACTIVE_RUNNER_RUNTIME_IMAGE_TAR)
+
 $(X86_RUNTIME_KERNEL_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(BPFREJIT_INSTALL_SCRIPT)
 	@mkdir -p "$(X86_RUNTIME_KERNEL_DIR)"
 	BPFREJIT_INSTALL_KERNEL_OUT_DIR="$(X86_RUNTIME_KERNEL_DIR)" \
@@ -211,6 +214,11 @@ image-kernel-build:
 	$(REQUIRE_IMAGE_BUILD)
 	mkdir -p "$(ACTIVE_KERNEL_BUILD_DIR)"
 	cp "$(ACTIVE_KERNEL_DEFCONFIG)" "$(ACTIVE_KERNEL_BUILD_DIR)/.config"
+	"$(KERNEL_DIR)/scripts/config" --file "$(ACTIVE_KERNEL_BUILD_DIR)/.config" --enable BLK_DEV_LOOP
+	"$(KERNEL_DIR)/scripts/config" --file "$(ACTIVE_KERNEL_BUILD_DIR)/.config" --enable VIRTIO_CONSOLE
+	"$(KERNEL_DIR)/scripts/config" --file "$(ACTIVE_KERNEL_BUILD_DIR)/.config" --enable EXT4_FS
+	"$(KERNEL_DIR)/scripts/config" --file "$(ACTIVE_KERNEL_BUILD_DIR)/.config" --enable JBD2
+	"$(KERNEL_DIR)/scripts/config" --file "$(ACTIVE_KERNEL_BUILD_DIR)/.config" --enable FS_MBCACHE
 	if [ "$(RUN_TARGET_ARCH)" = "arm64" ]; then \
 		make -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE= olddefconfig; \
 		find "$(ACTIVE_KERNEL_BUILD_DIR)" -type f -name '*.o' -size 0 -delete; \

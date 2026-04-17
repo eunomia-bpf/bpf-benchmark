@@ -27,7 +27,11 @@ def _docker_prelude_shell() -> str:
     return """
 docker_started=0
 docker_root="${BPFREJIT_VM_DOCKER_ROOT:-/run/bpf-benchmark-docker}"
-docker_disk="${BPFREJIT_VM_DOCKER_DISK:-}"
+docker_disk="${BPFREJIT_VM_DOCKER_DISK:-${TMPDIR:-/tmp}/bpf-benchmark-docker.img}"
+docker_disk_size="${BPFREJIT_VM_DOCKER_DISK_SIZE:-64G}"
+if [ "$docker_disk" = "none" ]; then
+    docker_disk=""
+fi
 cleanup_bpf_benchmark_docker() {
     if [ "$docker_started" = 1 ]; then
         if [ -f "$docker_root/docker.pid" ]; then
@@ -52,7 +56,7 @@ if ! docker info >/dev/null 2>&1; then
     if [ -n "$docker_disk" ]; then
         mkdir -p "$(dirname "$docker_disk")"
         rm -f "$docker_disk"
-        truncate -s "${BPFREJIT_VM_DOCKER_DISK_SIZE:-32G}" "$docker_disk"
+        truncate -s "$docker_disk_size" "$docker_disk"
         mkfs.ext4 -F -q "$docker_disk"
         mount -o loop "$docker_disk" "$docker_root"
     fi
@@ -82,41 +86,20 @@ fi
 """
 
 
-def _kernel_modules_prelude_shell(workspace_root: Path, target_arch: str) -> str:
-    modules_root = workspace_root / ".cache" / "repo-artifacts" / target_arch / "kernel-modules" / "lib" / "modules"
-    quoted_modules_root = shlex.quote(str(modules_root))
-    return f"""
-kernel_release="$(uname -r)"
-kernel_modules_source={quoted_modules_root}
-kernel_modules_tree="$kernel_modules_source/$kernel_release"
-kernel_modules_target="/lib/modules/$kernel_release"
-if [ -d "$kernel_modules_tree" ] && {{ [ -L "$kernel_modules_target" ] || [ ! -e "$kernel_modules_target/modules.order" ]; }}; then
-    mkdir -p /lib/modules
-    rm -rf "$kernel_modules_target"
-    mkdir -p "$kernel_modules_target"
-    mount --bind "$kernel_modules_tree" "$kernel_modules_target" || {{
-        rm -rf "$kernel_modules_target"
-        cp -a "$kernel_modules_tree" "$kernel_modules_target"
-    }}
-fi
-if [ ! -e "$kernel_modules_target/modules.order" ]; then
-    echo "repo kernel module tree is missing for the running kernel: $kernel_modules_target" >&2
-    exit 1
-fi
-"""
-
-
 def suite_command(workspace_root: Path, config: RunConfig, suite_args: list[str]) -> str:
     if not config.remote.runtime_container_image.strip():
         _die("run config RUN_RUNTIME_CONTAINER_IMAGE is empty")
     image_tar = runtime_container_image_tar_path(workspace_root, config.identity.target_arch)
-    load_cmd = shlex.join(["docker", "load", "-i", str(image_tar)])
     result_dirs = [str(path) for path in runtime_container_host_dirs(workspace_root)]
     mkdir_cmd = shlex.join(["mkdir", "-p", *result_dirs])
     container_cmd = _shell_join(build_runtime_container_command(workspace_root, config, suite_args, die=_die))
+    install_cmd = _shell_join([
+        workspace_root / "runner" / "scripts" / "bpfrejit-install",
+        "--image", config.remote.runtime_container_image,
+        str(image_tar),
+    ])
     docker_prelude = _docker_prelude_shell()
-    module_prelude = _kernel_modules_prelude_shell(workspace_root, config.identity.target_arch)
-    return f"{mkdir_cmd} && (\n{module_prelude}\n{docker_prelude}\n{load_cmd} >/dev/null && {container_cmd}\n)"
+    return f"{mkdir_cmd} && (\n{docker_prelude}\n{install_cmd} && {container_cmd}\n)"
 
 
 def _optional_int(value: str) -> int | None:
