@@ -31,10 +31,10 @@ from runner.libs.environment import (
     read_required_text,
     validate_publication_environment,
 )
-from runner.libs.results import (
+from runner.libs.results import parse_last_json_line
+from runner.libs.statistics import (
     derive_perf_metrics,
     ns_summary,
-    parse_last_json_line,
     summarize_named_counters,
     summarize_optional_ns,
     summarize_perf_counter_meta,

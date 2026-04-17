@@ -9,8 +9,6 @@ toolchains:
     root: vendor/llvmbpf
   libbpf:
     root: vendor/libbpf
-  bpftool:
-    root: vendor/bpftool
 
 build:
   runner_binary: runner/build/micro_exec

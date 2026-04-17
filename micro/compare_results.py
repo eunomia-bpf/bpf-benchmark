@@ -16,10 +16,15 @@ Also reports overall geomean of ratios (old, new) and the geomean delta.
 from __future__ import annotations
 
 import json
-import math
 import sys
 from pathlib import Path
 from typing import NamedTuple
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from runner.libs.statistics import geometric_mean
 
 
 SIGNIFICANT_DELTA = 0.05  # 5% threshold for flagging
@@ -81,16 +86,6 @@ def _infer_comparison_pair(benchmarks: list[dict]) -> tuple[str, str]:
     if len(names) == 1:
         return names[0], ""
     return "", ""
-
-
-def _geomean(values: list[float]) -> float | None:
-    if not values:
-        return None
-    try:
-        log_sum = sum(math.log(v) for v in values if v > 0)
-        return math.exp(log_sum / len(values))
-    except (ValueError, ZeroDivisionError):
-        return None
 
 
 def _load_benchmarks(path: Path) -> list[dict]:
@@ -208,8 +203,8 @@ def compare(old_path: Path, new_path: Path) -> int:
     print(sep)
 
     # Overall geomean (ratios) or geomean of absolute values
-    old_geomean = _geomean(old_vals_shared)
-    new_geomean = _geomean(new_vals_shared)
+    old_geomean = geometric_mean(old_vals_shared)
+    new_geomean = geometric_mean(new_vals_shared)
     old_geo_str = f"{old_geomean:.4f}" if old_geomean is not None else "    n/a   "
     new_geo_str = f"{new_geomean:.4f}" if new_geomean is not None else "    n/a   "
     geo_delta_str = "    n/a   "

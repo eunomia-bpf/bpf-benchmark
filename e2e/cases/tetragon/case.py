@@ -26,9 +26,8 @@ from runner.libs.app_runners.tetragon import (  # noqa: E402
     run_exec_storm_in_cgroup as runner_run_exec_storm_in_cgroup,
     run_tetragon_workload,
 )
-from runner.libs.bpf_stats import enable_bpf_stats, sample_bpf_stats  # noqa: E402
+from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
-    compute_delta,
     sample_cpu_usage,
     sample_total_cpu_usage,
     start_sampler_thread,
