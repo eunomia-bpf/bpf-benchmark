@@ -23,6 +23,3 @@ def dup_fd_from_process(pid: int, target_fd: int) -> int:
         return result
     finally:
         os.close(pidfd)
-
-
-__all__ = ["dup_fd_from_process"]

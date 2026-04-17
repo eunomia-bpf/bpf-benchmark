@@ -146,13 +146,9 @@ def run_json_command(
     return json.loads(payload)
 
 
-def result_date_stamp(now: datetime | None = None) -> str:
-    current = now or datetime.now(timezone.utc)
-    return current.astimezone(timezone.utc).strftime("%Y%m%d")
-
-
 def smoke_output_path(results_dir: Path, suite: str, *, stamp: str | None = None) -> Path:
-    return results_dir / f"{suite}_smoke_{stamp or result_date_stamp()}.json"
+    date_stamp = stamp or datetime.now(timezone.utc).astimezone(timezone.utc).strftime("%Y%m%d")
+    return results_dir / f"{suite}_smoke_{date_stamp}.json"
 
 
 def write_json(path: Path, payload: Any) -> None:
@@ -163,4 +159,3 @@ def write_json(path: Path, payload: Any) -> None:
 def write_text(path: Path, text: str) -> None:
     ensure_parent(path)
     path.write_text(text)
-

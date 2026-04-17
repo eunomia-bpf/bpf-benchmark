@@ -31,11 +31,9 @@ class ArtifactSession:
         self.run_type = sanitize_artifact_token(run_type)
         self.started_at = generated_at
         self.metadata_builder = metadata_builder
-        self.run_dir = create_run_artifact_dir(
-            results_dir=result_root_for_output(self.output_path),
-            run_type=self.run_type,
-            generated_at=generated_at,
-        )
+        results_dir = self.output_path.parent.parent if self.output_path.parent.name == "dev" else self.output_path.parent
+        self.run_dir = results_dir.resolve() / f"{self.run_type}_{artifact_timestamp(generated_at)}"
+        self.run_dir.mkdir(parents=True, exist_ok=False)
 
     def write(
         self,
@@ -65,14 +63,22 @@ class ArtifactSession:
         if detail_payloads:
             merged_details.update(detail_payloads)
 
-        artifact_path = update_run_artifact(
-            run_dir=self.run_dir,
-            run_type=self.run_type,
-            metadata=metadata,
-            detail_payloads=merged_details or None,
-            detail_texts=detail_texts,
-        )
-        return artifact_path
+        metadata_payload = {"run_type": self.run_type, **metadata}
+        if merged_details or detail_texts:
+            metadata_payload["details_dir"] = "details"
+        (self.run_dir / "metadata.json").write_text(json.dumps(metadata_payload, indent=2, sort_keys=True) + "\n")
+        if merged_details or detail_texts:
+            details_dir = self.run_dir / "details"
+            details_dir.mkdir(parents=True, exist_ok=True)
+            for relative_path, payload in merged_details.items():
+                detail_path = details_dir / relative_path
+                ensure_parent(detail_path)
+                detail_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+            for relative_path, text in (detail_texts or {}).items():
+                detail_path = details_dir / relative_path
+                ensure_parent(detail_path)
+                detail_path.write_text(text)
+        return self.run_dir
 
 
 def sanitize_artifact_token(value: str) -> str:
@@ -90,48 +96,26 @@ def artifact_timestamp(generated_at: str | None = None) -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
 
 
-def result_root_for_output(output_path: Path) -> Path:
-    parent = output_path.resolve().parent
-    if parent.name == "dev":
-        return parent.parent
-    return parent
-
-
 def derive_run_type(output_path: Path, default_token: str) -> str:
     stem = output_path.stem
     stem = _STAMP_SUFFIX_RE.sub("", stem)
     return sanitize_artifact_token(stem or default_token)
 
 
-def _read_proc_start_ticks(pid: int) -> int | None:
-    try:
-        fields = Path(f"/proc/{int(pid)}/stat").read_text().split()
-    except OSError:
-        return None
-    if len(fields) < 22:
-        return None
-    try:
-        return int(fields[21])
-    except ValueError:
-        return None
-
-
-def _read_boot_id() -> str | None:
-    try:
-        boot_id = Path("/proc/sys/kernel/random/boot_id").read_text().strip()
-    except OSError:
-        return None
-    return boot_id or None
-
-
 def current_process_identity() -> dict[str, object]:
     pid = os.getpid()
     payload = {"launcher_pid": int(pid)}
-    start_ticks = _read_proc_start_ticks(pid)
-    if start_ticks is not None:
-        payload["launcher_start_ticks"] = int(start_ticks)
-    boot_id = _read_boot_id()
-    if boot_id is not None:
+    try:
+        fields = Path(f"/proc/{int(pid)}/stat").read_text().split()
+        if len(fields) >= 22:
+            payload["launcher_start_ticks"] = int(fields[21])
+    except (OSError, ValueError):
+        pass
+    try:
+        boot_id = Path("/proc/sys/kernel/random/boot_id").read_text().strip()
+    except OSError:
+        boot_id = ""
+    if boot_id:
         payload["launcher_boot_id"] = boot_id
     return payload
 
@@ -226,53 +210,3 @@ def summarize_benchmark_results(payload: Mapping[str, Any]) -> dict[str, Any]:
         "total_verifier_retries": total_verifier_retries,
     }
     return summarized
-
-
-def create_run_artifact_dir(
-    *,
-    results_dir: Path,
-    run_type: str,
-    generated_at: str | None = None,
-) -> Path:
-    results_dir = results_dir.resolve()
-    run_dir = results_dir / f"{sanitize_artifact_token(run_type)}_{artifact_timestamp(generated_at)}"
-    run_dir.mkdir(parents=True, exist_ok=False)
-    return run_dir
-
-
-def update_run_artifact(
-    *,
-    run_dir: Path,
-    run_type: str,
-    metadata: Mapping[str, Any],
-    detail_payloads: Mapping[str, Any] | None = None,
-    detail_texts: Mapping[str, str] | None = None,
-) -> Path:
-    run_dir = run_dir.resolve()
-
-    metadata_payload = {
-        "run_type": sanitize_artifact_token(run_type),
-        **dict(metadata),
-    }
-
-    if detail_payloads or detail_texts:
-        metadata_payload["details_dir"] = "details"
-
-    metadata_path = run_dir / "metadata.json"
-    metadata_path.write_text(json.dumps(metadata_payload, indent=2, sort_keys=True) + "\n")
-
-    if detail_payloads or detail_texts:
-        details_dir = run_dir / "details"
-        details_dir.mkdir(parents=True, exist_ok=True)
-
-        for relative_path, payload in (detail_payloads or {}).items():
-            detail_path = details_dir / relative_path
-            ensure_parent(detail_path)
-            detail_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
-
-        for relative_path, text in (detail_texts or {}).items():
-            detail_path = details_dir / relative_path
-            ensure_parent(detail_path)
-            detail_path.write_text(text)
-
-    return run_dir

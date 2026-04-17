@@ -6,9 +6,6 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 
-from .bpf_stats import compute_delta, sample_bpf_stats
-
-
 def _read_pid_ticks(pid: int) -> tuple[int, int]:
     try:
         fields = Path(f"/proc/{pid}/stat").read_text().split()
@@ -84,12 +81,3 @@ def start_sampler_thread(
     thread = threading.Thread(target=run, daemon=True)
     thread.start()
     return thread
-
-
-__all__ = [
-    "compute_delta",
-    "sample_bpf_stats",
-    "sample_cpu_usage",
-    "sample_total_cpu_usage",
-    "start_sampler_thread",
-]

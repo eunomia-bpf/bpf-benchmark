@@ -14,18 +14,13 @@ from typing import Callable, Mapping, Sequence
 
 from runner.libs import run_command
 from runner.libs.app_runners.base import AppRunner
-from runner.libs.bpf_stats import list_program_ids, sample_bpf_stats
+from runner.libs.bpf_stats import compute_delta, list_program_ids, sample_bpf_stats
 from runner.libs.rejit import DaemonSession
 from runner.libs.kinsn import (
     capture_daemon_kinsn_discovery as _capture_daemon_kinsn_discovery,
     relpath,
 )
-from runner.libs.metrics import (
-    compute_delta,
-    sample_cpu_usage,
-    sample_total_cpu_usage,
-    start_sampler_thread,
-)
+from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage, start_sampler_thread
 
 _PENDING_KINSN_METADATA: list[dict[str, object]] = []
 DEFAULT_SUITE_QUIESCE_TIMEOUT_S = 20.0
@@ -55,10 +50,6 @@ def attach_pending_result_metadata(payload: dict[str, object]) -> dict[str, obje
     return payload
 
 
-def _current_program_ids() -> tuple[int, ...]:
-    return tuple(sorted(list_program_ids()))
-
-
 def wait_for_suite_quiescence(
     *,
     stable_s: float = DEFAULT_SUITE_QUIESCE_STABLE_S,
@@ -71,7 +62,7 @@ def wait_for_suite_quiescence(
     stable_since: float | None = None
     while True:
         now = time.monotonic()
-        current_ids = _current_program_ids()
+        current_ids = tuple(sorted(list_program_ids()))
         if current_ids == previous_ids:
             if stable_since is None:
                 stable_since = now
@@ -118,12 +109,6 @@ def rejit_program_result(
     if record is None:
         record = per_program.get(str(int(prog_id)))
     return dict(record) if isinstance(record, Mapping) else {}
-
-
-def _lifecycle_metadata_payload(kinsn_metadata: Mapping[str, object] | None) -> dict[str, object]:
-    if kinsn_metadata is None:
-        return {}
-    return {"kinsn_modules": copy.deepcopy(dict(kinsn_metadata))}
 
 
 @dataclass
@@ -421,7 +406,7 @@ def run_case_lifecycle(
         return LifecycleRunResult(
             setup_state=setup_state, state=lifecycle_state, baseline=bl,
             scan_results={}, rejit_result=None, post_rejit=None, artifacts=artifacts,
-            metadata=_lifecycle_metadata_payload(kinsn_metadata), abort=abort,
+            metadata={} if kinsn_metadata is None else {"kinsn_modules": copy.deepcopy(dict(kinsn_metadata))}, abort=abort,
         )
 
     try:
@@ -509,7 +494,9 @@ def run_case_lifecycle(
         return LifecycleRunResult(
             setup_state=setup_state, state=lifecycle_state, baseline=baseline,
             scan_results=scan_results, rejit_result=rejit_result, post_rejit=post_rejit,
-            artifacts=artifacts, metadata=_lifecycle_metadata_payload(kinsn_metadata), abort=abort,
+            artifacts=artifacts,
+            metadata={} if kinsn_metadata is None else {"kinsn_modules": copy.deepcopy(dict(kinsn_metadata))},
+            abort=abort,
         )
     except Exception as exc:
         if kinsn_metadata is not None:
@@ -621,19 +608,6 @@ def zero_site_totals(fields: Sequence[str]) -> dict[str, int]:
     return {str(field): 0 for field in fields if str(field).strip()}
 
 
-def aggregate_scan_site_totals(
-    records: Mapping[int, Mapping[str, object]],
-    *,
-    fields: Sequence[str],
-) -> dict[str, int]:
-    totals = zero_site_totals(fields)
-    for record in records.values():
-        counts = record.get("sites") or record.get("counts") or {}
-        for site_field in totals:
-            totals[site_field] += int(counts.get(site_field, 0) or 0)
-    return totals
-
-
 def run_app_runner_phase_records(
     *,
     runner: AppRunner,
@@ -677,7 +651,11 @@ def run_app_runner_phase_records(
     except Exception as exc:
         baseline_reason = str(exc)
     process_output = dict(runner.process_output)
-    site_totals = aggregate_scan_site_totals(scan_results, fields=site_totals_fields) if scan_results else zero_site_totals(site_totals_fields)
+    site_totals = zero_site_totals(site_totals_fields)
+    for record in scan_results.values():
+        counts = record.get("sites") or record.get("counts") or {}
+        for site_field in site_totals:
+            site_totals[site_field] += int(counts.get(site_field, 0) or 0)
     scan_results_str = {str(key): value for key, value in scan_results.items()}
     baseline: dict[str, object] = {
         "phase": "baseline", "status": baseline_status, "reason": baseline_reason,

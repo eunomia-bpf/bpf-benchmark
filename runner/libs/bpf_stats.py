@@ -6,17 +6,13 @@ from typing import Any
 from . import resolve_bpftool_binary, run_json_command
 
 
-def _bpftool_command() -> list[str]:
-    return [resolve_bpftool_binary(), "-j", "-p", "prog", "show"]
-
-
 @contextmanager
 def enable_bpf_stats() -> Any:
     yield {"mode": "bpftool"}
 
 
 def _prog_show_payload() -> list[dict[str, object]]:
-    payload = run_json_command(_bpftool_command(), timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
     if not isinstance(payload, list):
         raise RuntimeError("bpftool prog show returned unexpected payload")
     return [dict(record) for record in payload if isinstance(record, dict)]
@@ -45,7 +41,12 @@ def _record_to_stats(record: dict[str, object]) -> dict[str, object]:
     }
 
 
-def read_program_stats(prog_ids: list[int] | tuple[int, ...]) -> dict[int, dict[str, object]]:
+def sample_bpf_stats(
+    prog_ids: list[int] | tuple[int, ...],
+    *,
+    prog_fds: dict[int, int] | None = None,
+) -> dict[int, dict[str, object]]:
+    del prog_fds
     wanted = {int(prog_id) for prog_id in prog_ids if int(prog_id) > 0}
     if not wanted:
         return {}
@@ -64,15 +65,6 @@ def read_program_stats(prog_ids: list[int] | tuple[int, ...]) -> dict[int, dict[
             + ", ".join(str(prog_id) for prog_id in missing)
         )
     return stats
-
-
-def sample_bpf_stats(
-    prog_ids: list[int] | tuple[int, ...],
-    *,
-    prog_fds: dict[int, int] | None = None,
-) -> dict[int, dict[str, object]]:
-    del prog_fds
-    return read_program_stats(prog_ids)
 
 
 def compute_delta(
@@ -108,11 +100,3 @@ def compute_delta(
             "active_programs": sum(1 for record in program_deltas.values() if int(record["run_cnt_delta"]) > 0),
         },
     }
-
-
-__all__ = [
-    "compute_delta",
-    "enable_bpf_stats",
-    "list_program_ids",
-    "sample_bpf_stats",
-]

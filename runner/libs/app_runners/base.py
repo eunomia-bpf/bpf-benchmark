@@ -94,6 +94,3 @@ class AppRunner:
             attached = sorted(str(program.get("name") or "") for program in selected if str(program.get("name") or "").strip())
             self._fail_start(f"{owner_label} did not attach expected programs {missing}; attached {attached}")
         return matched
-
-
-__all__ = ["AppRunner"]

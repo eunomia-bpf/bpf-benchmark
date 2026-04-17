@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import struct
-import sys as _sys
 from pathlib import Path
 
 import yaml
@@ -21,22 +20,6 @@ def _lcg(state: int) -> int:
 def _load_specs() -> dict:
     with open(_SPECS_PATH) as f:
         return yaml.safe_load(f)
-
-
-def _build_simple_lcg_u64_ii(output: Path, spec: dict) -> dict:
-    """header=pack('<II',count,header_b); body=N u64s via plain _lcg(state)+XOR mix."""
-    count = spec["count"]; seed = spec.get("seed", 0); salt = spec.get("salt", 0) & MASK64
-    mixing_salt = spec.get("mixing_salt", 0); index_offset = spec.get("index_offset", 1)
-    xor_seed = spec.get("xor_seed", False); header_b = spec.get("header_b", seed)
-    state = salt; blob = bytearray(struct.pack("<II", count, header_b))
-    for index in range(count):
-        state = _lcg(state)
-        value = (state ^ ((index + index_offset) * mixing_salt)) & MASK64 if mixing_salt else state & MASK64
-        if xor_seed: value = (value ^ seed) & MASK64
-        blob.extend(struct.pack("<Q", value))
-    output.write_bytes(blob)
-    meta_b_key = spec.get("header_b_key", "seed")
-    return {"count": count, meta_b_key: seed if meta_b_key == "seed" else header_b}
 
 
 def _build_code_clone(output: Path, spec: dict) -> dict:
@@ -88,14 +71,6 @@ def _build_groups_lanes_u64(output: Path, spec: dict) -> dict:
     output.write_bytes(blob); return {"groups": groups, "lanes": lanes, "count": count}
 
 
-def _build_branch_flip_dense(output: Path, spec: dict) -> dict:
-    return _build_groups_lanes_u64(output, spec)
-
-
-def _build_extract_dense(output: Path, spec: dict) -> dict:
-    return _build_groups_lanes_u64(output, {**spec, "index_offset_salt2": spec.get("index_offset_salt2", 3)})
-
-
 def _build_plain_bytes(output: Path, spec: dict) -> dict:
     n = spec["count"]; output.write_bytes(bytes(range(n))); return {"bytes": n}
 
@@ -108,9 +83,10 @@ def _build_plain_u64_pair(output: Path, spec: dict) -> dict:
 def _build_lcg_u64_ii(output: Path, spec: dict) -> dict:
     count = spec["count"]
     seed = spec.get("seed", 0)
-    state = spec["initial_state"] & MASK64
-    salt1 = spec.get("salt1", 0x9E3779B97F4A7C15)
-    salt2 = spec.get("salt2", 0)
+    simple_mode = "salt" in spec or "mixing_salt" in spec
+    state = spec.get("initial_state", spec.get("salt", 0)) & MASK64
+    salt1 = spec.get("salt1", 0 if simple_mode else 0x9E3779B97F4A7C15)
+    salt2 = spec.get("salt2", spec.get("mixing_salt", 0))
     offset = spec.get("index_offset", 1)
     xor_seed = spec.get("xor_seed", False)
     header_b = spec.get("header_b", seed)  # second u32 in header (default = seed)
@@ -129,12 +105,13 @@ def _build_lcg_u64_ii(output: Path, spec: dict) -> dict:
             value &= MASK64
         blob.extend(struct.pack("<Q", value))
     output.write_bytes(blob)
-    return {"count": count, "seed": seed}
+    meta_b_key = spec.get("header_b_key", "seed")
+    return {"count": count, meta_b_key: seed if meta_b_key == "seed" else header_b}
 
 
 def _build_lcg_u32_ii(output: Path, spec: dict) -> dict:
     count = spec["count"]; header_b = spec.get("header_b", 0); state = spec["initial_state"] & MASK64
-    salt1 = spec.get("salt1", 0x9E3779B97F4A7C15); salt2 = spec.get("salt2", 0)
+    salt1 = spec.get("salt1", 0x9E3779B97F4A7C15)
     shift = spec.get("shift", 24); xor_index_mul = spec.get("xor_index_mul", 0); xor_seed = spec.get("xor_seed", 0)
     blob = bytearray(struct.pack("<II", count, header_b))
     for index in range(count):
@@ -272,20 +249,20 @@ def _build_branch_fanout(output: Path, spec: dict) -> dict:
 
 
 _KIND_BUILDERS = {
-    "simple_lcg_u64_ii":  _build_simple_lcg_u64_ii,
-    "dep_chain":           _build_simple_lcg_u64_ii,  # alias; YAML provides mixing_salt/index_offset/xor_seed
-    "multi_acc":           _build_simple_lcg_u64_ii,  # alias
-    "stride_load":         _build_simple_lcg_u64_ii,  # alias
-    "large_mixed":         _build_simple_lcg_u64_ii,  # alias
-    "load_isolation":      _build_simple_lcg_u64_ii,  # alias; mixing_salt=0
+    "simple_lcg_u64_ii":  _build_lcg_u64_ii,
+    "dep_chain":           _build_lcg_u64_ii,
+    "multi_acc":           _build_lcg_u64_ii,
+    "stride_load":         _build_lcg_u64_ii,
+    "large_mixed":         _build_lcg_u64_ii,
+    "load_isolation":      _build_lcg_u64_ii,
     "code_clone":          _build_code_clone,
     "fixed_loop":          _build_fixed_loop,
     "lcg_words_q":         _build_lcg_words_q,
     "addr_calc_stride":    _build_addr_calc_stride,
     "endian_swap_dense":   _build_endian_swap_dense,
     "groups_lanes_u64":    _build_groups_lanes_u64,
-    "branch_flip_dense":   _build_branch_flip_dense,  # alias
-    "extract_dense":       _build_extract_dense,       # alias
+    "branch_flip_dense":   _build_groups_lanes_u64,    # alias
+    "extract_dense":       lambda output, spec: _build_groups_lanes_u64(output, {**spec, "index_offset_salt2": spec.get("index_offset_salt2", 3)}),
     "plain_bytes":         _build_plain_bytes,
     "plain_u64_pair":      _build_plain_u64_pair,
     "lcg_u64_ii":          _build_lcg_u64_ii,
@@ -652,14 +629,10 @@ def _make_spec_generator(name: str, spec: dict):
 
 
 def _build_generators() -> dict[str, object]:
-    _mod = _sys.modules[__name__]
-    hand_written = {name[len("generate_"):]: fn for name, fn in vars(_mod).items()
+    hand_written = {name[len("generate_"):]: fn for name, fn in globals().items()
                     if name.startswith("generate_") and callable(fn)}
     spec_driven = {name: _make_spec_generator(name, spec) for name, spec in _load_specs().items()}
-    merged = {**spec_driven, **hand_written}
-    for _name, _fn in spec_driven.items():
-        if _name not in hand_written: setattr(_mod, f"generate_{_name}", _fn)
-    return merged
+    return {**spec_driven, **hand_written}
 
 
 GENERATORS = _build_generators()

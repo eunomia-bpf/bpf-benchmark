@@ -71,14 +71,6 @@ SERVER_START_TIMEOUT_S = 15.0
 TOPOLOGY_SETTLE_S = 2.0
 
 
-def default_katran_balancer_prog_path() -> Path:
-    return repo_artifact_root() / "katran" / "bpf" / "balancer.bpf.o"
-
-
-def default_katran_server_binary_path() -> Path:
-    return repo_artifact_root() / "katran" / "bin" / "katran_server_grpc"
-
-
 def _map_show_records() -> list[dict[str, object]]:
     payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "map", "show"], timeout=30)
     if not isinstance(payload, list): raise RuntimeError("bpftool map show returned unexpected payload")
@@ -89,11 +81,6 @@ def _net_show_records(iface: str) -> list[dict[str, object]]:
     payload = run_json_command([resolve_bpftool_binary(), "-j", "net", "show", "dev", str(iface)], timeout=30)
     if not isinstance(payload, list): raise RuntimeError(f"bpftool net show returned unexpected payload for {iface}")
     return [dict(record) for record in payload if isinstance(record, dict)]
-
-
-def _program_name_variants(name: str) -> set[str]:
-    normalized = str(name or "").strip()
-    return set() if not normalized else {normalized, normalized[:BPF_OBJECT_NAME_LIMIT]}
 
 
 def _attached_xdp_info(iface: str) -> dict[str, object]:
@@ -164,7 +151,7 @@ def wait_for_katran_teardown(
 
 
 def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
-    candidate = Path(explicit).expanduser().resolve() if (explicit is not None and str(explicit).strip()) else default_katran_server_binary_path().resolve()
+    candidate = Path(explicit).expanduser().resolve() if (explicit is not None and str(explicit).strip()) else (repo_artifact_root() / "katran" / "bin" / "katran_server_grpc").resolve()
     if candidate.is_file() and os.access(candidate, os.X_OK): return candidate
     raise RuntimeError(f"Katran server binary not found or not executable; tried: {candidate}")
 
@@ -228,19 +215,15 @@ def set_link_mac(namespace: str | None, iface: str, mac: str) -> None:
 
 
 def pack_u32(value: int) -> bytes: return struct.pack("=I", int(value))
-def pack_mac(mac: str) -> bytes: return bytes(int(p, 16) for p in mac.split(":"))
-def pack_ctl_mac(mac: str) -> bytes: return pack_mac(mac) + b"\x00\x00"
+def pack_ctl_mac(mac: str) -> bytes: return bytes(int(p, 16) for p in mac.split(":")) + b"\x00\x00"
 def pack_vip_definition(address: str, port: int, proto: int) -> bytes: return socket.inet_aton(address) + (b"\x00" * 12) + struct.pack("!HBB", int(port), int(proto), 0)
 def pack_vip_meta(flags: int, vip_num: int) -> bytes: return struct.pack("=II", int(flags), int(vip_num))
 def pack_real_definition(address: str, flags: int = 0) -> bytes: return socket.inet_aton(address) + (b"\x00" * 12) + bytes([int(flags) & 0xFF]) + (b"\x00" * 3)
 def xdp_action_name(retval: int) -> str: return {0: "XDP_ABORTED", 1: "XDP_DROP", XDP_PASS: "XDP_PASS", XDP_TX: "XDP_TX", 4: "XDP_REDIRECT"}.get(int(retval), f"UNKNOWN({int(retval)})")
 
 
-def _bytes_to_hex_args(data: bytes) -> list[str]: return [f"{b:02x}" for b in data]
-
-
 def _bpftool_map_update_args(map_id: int, key: bytes, value: bytes) -> list[str]:
-    return ["map", "update", "id", str(map_id), "key", "hex", *_bytes_to_hex_args(key), "value", "hex", *_bytes_to_hex_args(value)]
+    return ["map", "update", "id", str(map_id), "key", "hex", *[f"{b:02x}" for b in key], "value", "hex", *[f"{b:02x}" for b in value]]
 
 
 def _bpftool_map_update_batch(updates: list[tuple[int, bytes, bytes]]) -> None:
@@ -482,7 +465,7 @@ class KatranServerSession:
 
     def _select_program(self, programs: list[dict[str, object]]) -> dict[str, object]:
         if not programs: raise RuntimeError("Katran server did not expose any BPF programs")
-        expected_names = _program_name_variants(DEFAULT_KATRAN_PROGRAM_NAME)
+        expected_names = {DEFAULT_KATRAN_PROGRAM_NAME, DEFAULT_KATRAN_PROGRAM_NAME[:BPF_OBJECT_NAME_LIMIT]}
         matching = [dict(p) for p in programs if str(p.get("name") or "") in expected_names]
         if len(matching) == 1: return matching[0]
         xdp_programs = [dict(p) for p in programs if str(p.get("type") or "") == "xdp"]
@@ -686,7 +669,7 @@ class KatranRunner(AppRunner):
                  test_run_batch_repeat: int = DEFAULT_TEST_RUN_BATCH_REPEAT, default_router_mac: str = ROUTER_LB_MAC) -> None:
         super().__init__()
         self.loader_binary = None if loader_binary is None else Path(loader_binary).resolve()
-        self.balancer_prog_path = default_katran_balancer_prog_path().resolve()
+        self.balancer_prog_path = (repo_artifact_root() / "katran" / "bpf" / "balancer.bpf.o").resolve()
         self.iface = str(iface); self.router_peer_iface = None if router_peer_iface is None else str(router_peer_iface)
         self.load_timeout_s = int(load_timeout_s); self.concurrency = max(1, int(concurrency))
         self.workload_kind = str(workload_kind or DEFAULT_WORKLOAD_KIND).strip().lower()

@@ -3,12 +3,8 @@
 from __future__ import annotations
 
 import importlib
-from typing import Callable, Optional
 
 from .base import AppRunner
-
-RunnerAdapter = Callable[[Optional[str], Optional[str], dict[str, object]], dict[str, object]]
-
 
 def _leaf_name(app_name: str | None) -> str:
     text = str(app_name or "").strip()
@@ -81,7 +77,7 @@ def _adapt_katran(workload: str | None, app_name: str | None, kwargs: dict[str, 
     return mapped
 
 
-_RUNNERS: dict[str, tuple[str, str, RunnerAdapter]] = {
+_RUNNERS = {
     "bcc": ("runner.libs.app_runners.bcc", "BCCRunner", _adapt_bcc),
     "bpftrace": ("runner.libs.app_runners.bpftrace", "BpftraceRunner", _adapt_bpftrace),
     "katran": ("runner.libs.app_runners.katran", "KatranRunner", _adapt_katran),
@@ -107,9 +103,3 @@ def get_app_runner(
     module = importlib.import_module(module_name)
     runner_class = getattr(module, class_name)
     return runner_class(**constructor_kwargs)
-
-
-__all__ = [
-    "AppRunner",
-    "get_app_runner",
-]

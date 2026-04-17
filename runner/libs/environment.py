@@ -66,11 +66,3 @@ def validate_publication_environment(
         for failure in strict_failures:
             print(f"[ERROR] {failure}", file=sys.stderr)
         raise SystemExit(1)
-
-
-__all__ = [
-    "read_optional_text",
-    "read_required_text",
-    "require_existing_paths",
-    "validate_publication_environment",
-]

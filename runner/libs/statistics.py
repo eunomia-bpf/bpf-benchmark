@@ -47,31 +47,6 @@ def ns_summary(values: Sequence[int]) -> SummaryStats:
     }
 
 
-def float_summary(values: Sequence[float | int]) -> SummaryStats:
-    if not values:
-        return {
-            "count": 0,
-            "mean": None,
-            "median": None,
-            "min": None,
-            "max": None,
-            "p95": None,
-            "stdev": None,
-        }
-
-    sorted_values = sorted(float(value) for value in values)
-    p95_index = min(len(sorted_values) - 1, math.ceil(len(sorted_values) * 0.95) - 1)
-    return {
-        "count": len(sorted_values),
-        "mean": statistics.mean(sorted_values),
-        "median": statistics.median(sorted_values),
-        "min": sorted_values[0],
-        "max": sorted_values[-1],
-        "p95": sorted_values[p95_index],
-        "stdev": statistics.stdev(sorted_values) if len(sorted_values) > 1 else 0,
-    }
-
-
 def summarize_phase_timings(samples: Sequence[Mapping[str, object]]) -> dict[str, SummaryStats]:
     buckets: dict[str, list[int]] = {}
     for sample in samples:
