@@ -225,7 +225,20 @@ def base_runtime_env() -> dict[str, str]:
     """Copy standard env vars from the host environment."""
     return {
         name: value
-        for name in ("HOME", "USER", "LOGNAME", "TERM", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE", "SHELL")
+        for name in (
+            "HOME",
+            "USER",
+            "LOGNAME",
+            "TERM",
+            "TMPDIR",
+            "LANG",
+            "LC_ALL",
+            "LC_CTYPE",
+            "SHELL",
+            "BPFREJIT_INSIDE_RUNTIME_CONTAINER",
+            "BPFREJIT_IMAGE_WORKSPACE",
+            "RUN_TARGET_ARCH",
+        )
         if (value := os.environ.get(name, "").strip())
     }
 
