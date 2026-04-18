@@ -74,8 +74,8 @@ tools:
     spawn_timeout_s: 15
 
   - name: bindsnoop
-    description: "Socket bind tracing via inet_bind/inet6_bind kprobes"
-    expected_programs: 4
+    description: "Socket bind tracing via bind entry plus IPv4/IPv6 return probes"
+    expected_programs: 3
     workload_kind: bind_storm
     spawn_timeout_s: 15
 
