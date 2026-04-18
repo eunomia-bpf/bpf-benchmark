@@ -81,6 +81,7 @@ RUN apt-get update \
         llvm-dev \
         lz4 \
         make \
+        musl \
         openssl \
         perl \
         pkg-config \
