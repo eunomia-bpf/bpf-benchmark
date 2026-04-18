@@ -41,6 +41,13 @@ BCC_COMPAT_HEADER = r"""
 #ifndef BPF_STORE_REL
 #define BPF_STORE_REL 0x110
 #endif
+#ifndef BPF_PSEUDO_KINSN_SIDECAR
+#define BPF_PSEUDO_KINSN_SIDECAR 3
+#define BPFREJIT_BCC_NEEDS_KINSN_UAPI_COMPAT 1
+#endif
+#ifndef BPF_PSEUDO_KINSN_CALL
+#define BPF_PSEUDO_KINSN_CALL 4
+#endif
 #ifndef BPF_F_CPU
 #define BPF_F_CPU 8
 #endif
@@ -49,6 +56,14 @@ BCC_COMPAT_HEADER = r"""
 #endif
 #ifndef BPF_TRACE_FSESSION
 #define BPF_TRACE_FSESSION (__MAX_BPF_ATTACH_TYPE + 14)
+#endif
+#ifdef BPFREJIT_BCC_NEEDS_KINSN_UAPI_COMPAT
+struct bpf_task_work {
+	__u64 __opaque;
+} __attribute__((aligned(8)));
+struct bpf_wq {
+	__u64 __opaque[2];
+} __attribute__((aligned(8)));
 #endif
 
 /*
