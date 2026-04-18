@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import os
+import shutil
 import subprocess
 import threading
 from collections import deque
@@ -21,6 +22,7 @@ from .process_support import wait_for_attached_programs
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml"
 DEFAULT_ATTACH_TIMEOUT_SECONDS = 20
 DEFAULT_MIN_BIOSNOOP_CORPUS_RUNS = 100
+KHEADERS_READY_MARKER = ".bpfrejit-kheaders-ready"
 
 
 def _tool_binary_names(tool_name: str) -> tuple[str, ...]:
@@ -156,6 +158,49 @@ def find_tool_binary(tools_dir: Path, tool_name: str) -> Path | None:
     return None
 
 
+def _prepare_bcc_kernel_source(env: dict[str, str]) -> str | None:
+    explicit = env.get("BCC_KERNEL_SOURCE", "").strip()
+    if explicit:
+        candidate = Path(explicit)
+        if candidate.is_dir():
+            return str(candidate)
+
+    release = os.uname().release
+    kernel_build_dir = Path("/lib/modules") / release / "build"
+    if kernel_build_dir.exists():
+        return None
+
+    kheaders_tar = Path("/sys/kernel/kheaders.tar.xz")
+    if not kheaders_tar.exists():
+        subprocess.run(["modprobe", "kheaders"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+    if not kheaders_tar.exists():
+        return None
+
+    tmp_root = Path(env.get("BPFREJIT_RUNTIME_TMPDIR") or env.get("TMPDIR") or "/tmp")
+    target = tmp_root / "bcc-kheaders" / release
+    marker = target / KHEADERS_READY_MARKER
+    if not marker.exists():
+        staging = target.parent / f".{target.name}.tmp"
+        shutil.rmtree(staging, ignore_errors=True)
+        staging.mkdir(parents=True, exist_ok=True)
+        completed = subprocess.run(
+            ["tar", "--no-same-owner", "--no-same-permissions", "-C", str(staging), "-xf", str(kheaders_tar)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+        if completed.returncode != 0:
+            details = tail_text(completed.stderr or completed.stdout or "")
+            raise RuntimeError(f"failed to extract BCC kernel headers from {kheaders_tar}: {details}")
+        shutil.rmtree(target, ignore_errors=True)
+        staging.rename(target)
+        marker.write_text("ok\n", encoding="utf-8")
+
+    env["BCC_KERNEL_SOURCE"] = str(target)
+    return str(target)
+
+
 class BCCRunner(AppRunner):
     def __init__(
         self,
@@ -225,12 +270,16 @@ class BCCRunner(AppRunner):
             raise RuntimeError(f"BCC tool {self.tool_name} is already running")
 
         tool_binary = self._resolve_tool_binary()
+        tool_env = os.environ.copy()
+        kernel_source = _prepare_bcc_kernel_source(tool_env)
+        if kernel_source:
+            self.artifacts["bcc_kernel_source"] = kernel_source
         command = [str(tool_binary), *self.tool_args]
         self.command_used = list(command)
         process = subprocess.Popen(
             command,
             cwd=ROOT_DIR,
-            env=os.environ.copy(),
+            env=tool_env,
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
