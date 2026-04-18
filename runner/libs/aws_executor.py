@@ -571,6 +571,8 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_pa
     local_results = _sync_remote_results(ctx, ip, remote_workspace)
     if remote_completed.returncode != 0:
         _die(f"remote {ctx.target_name}/{ctx.suite_name} suite failed; inspect {local_log}")
+    remote_scratch = str(Path(remote_workspace) / "docs" / "tmp" / "runtime-container-tmp" / ctx.run_token)
+    aws_common._ssh_exec(ctx, ip, "sudo", "rm", "-rf", "--", remote_scratch, check=False)
     print(f"[aws-executor] Synced {ctx.target_name}/{ctx.suite_name} results to "
           + (str(local_results) if local_results is not None else "no result directory"), file=sys.stderr)
 

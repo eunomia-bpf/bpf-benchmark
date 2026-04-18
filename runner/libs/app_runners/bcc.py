@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fcntl
 import io
 import os
 import shutil
@@ -306,26 +307,46 @@ def _prepare_bcc_kernel_source(env: dict[str, str]) -> str | None:
     if not kheaders_tar.exists():
         return None
 
-    tmp_root = Path(env.get("BPFREJIT_RUNTIME_TMPDIR") or env.get("TMPDIR") or "/tmp")
-    target = tmp_root / "bcc-kheaders" / release
+    runtime_tmpdir = env.get("BPFREJIT_RUNTIME_TMPDIR", "").strip()
+    if runtime_tmpdir:
+        runtime_root = Path(runtime_tmpdir).parent
+        if str(runtime_root) == ".":
+            runtime_root = Path("/var/tmp/bpfrejit-runtime")
+    else:
+        runtime_root = Path(env.get("TMPDIR") or "/tmp")
+    target = runtime_root / "bcc-kheaders" / release
     marker = target / KHEADERS_READY_MARKER
-    if not marker.exists():
-        staging = target.parent / f".{target.name}.tmp"
-        shutil.rmtree(staging, ignore_errors=True)
-        staging.mkdir(parents=True, exist_ok=True)
-        completed = subprocess.run(
-            ["tar", "--no-same-owner", "--no-same-permissions", "-C", str(staging), "-xf", str(kheaders_tar)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            check=False,
-        )
-        if completed.returncode != 0:
-            details = tail_text(completed.stderr or completed.stdout or "")
-            raise RuntimeError(f"failed to extract BCC kernel headers from {kheaders_tar}: {details}")
-        shutil.rmtree(target, ignore_errors=True)
-        staging.rename(target)
-        marker.write_text("ok\n", encoding="utf-8")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = target.parent / f".{release}.lock"
+    with lock_path.open("w", encoding="utf-8") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        if not marker.exists():
+            staging = Path(tempfile.mkdtemp(prefix=f".{target.name}.", dir=str(target.parent)))
+            try:
+                tar_cmd = [
+                    "tar",
+                    "--no-same-owner",
+                    "--no-same-permissions",
+                    "-C",
+                    str(staging),
+                    "-xf",
+                    str(kheaders_tar),
+                ]
+                completed = subprocess.run(
+                    tar_cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    check=False,
+                )
+                if completed.returncode != 0:
+                    details = tail_text(completed.stderr or completed.stdout or "")
+                    raise RuntimeError(f"failed to extract BCC kernel headers from {kheaders_tar}: {details}")
+                shutil.rmtree(target, ignore_errors=True)
+                staging.rename(target)
+                marker.write_text("ok\n", encoding="utf-8")
+            finally:
+                shutil.rmtree(staging, ignore_errors=True)
 
     env["BCC_KERNEL_SOURCE"] = str(target)
     return str(target)

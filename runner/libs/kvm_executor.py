@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 import shlex
+import shutil
 from functools import partial
 from pathlib import Path
 
@@ -132,6 +133,9 @@ def run_vm_suite(workspace_root: Path, config: RunConfig, suite_args: list[str] 
         sys.stdout.write(completed.stdout)
     if completed.stderr:
         sys.stderr.write(completed.stderr)
+    if completed.returncode == 0:
+        scratch_dir = workspace_root / "docs" / "tmp" / "runtime-container-tmp" / config.identity.token
+        shutil.rmtree(scratch_dir, ignore_errors=True)
     return completed.returncode
 
 
