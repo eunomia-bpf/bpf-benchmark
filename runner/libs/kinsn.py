@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import platform
 import time
 from datetime import datetime, timezone
@@ -7,6 +8,7 @@ from pathlib import Path
 from typing import Mapping, Sequence
 
 from . import ROOT_DIR, run_command
+from .workspace_layout import image_artifact_root, inside_runtime_image
 
 
 _KINSN_MODULE_ARCH_DIRS = {
@@ -44,6 +46,11 @@ def resolve_kinsn_module_dir(module_dir: Path | None = None) -> Path:
         if not resolved.is_dir():
             raise RuntimeError(f"kinsn module directory is missing: {resolved}")
         return resolved
+    if inside_runtime_image():
+        target_arch = os.environ.get("RUN_TARGET_ARCH", "").strip() or platform.machine()
+        if target_arch == "aarch64":
+            target_arch = "arm64"
+        return image_artifact_root(target_arch, "kinsn")
     arch_dir = _KINSN_MODULE_ARCH_DIRS.get(platform.machine())
     if arch_dir is None:
         raise RuntimeError(f"unsupported architecture for kinsn modules: {platform.machine()}")
