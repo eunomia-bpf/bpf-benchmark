@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -8,7 +9,7 @@ from .. import ROOT_DIR, tail_text, which
 from ..agent import start_agent, stop_agent
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
-from .process_support import wait_for_attached_programs
+from .process_support import ProcessOutputCollector, wait_for_attached_programs
 
 DEFAULT_SCRIPT_DIR = ROOT_DIR / "e2e" / "cases" / "bpftrace" / "scripts"
 
@@ -68,7 +69,17 @@ SCRIPTS: tuple[ScriptSpec, ...] = (
 )
 
 
-def finalize_process_output(process: Any) -> dict[str, object]:
+def finalize_process_output(process: Any, collector: ProcessOutputCollector | None = None) -> dict[str, object]:
+    if collector is not None:
+        snapshot = collector.snapshot()
+        stdout_tail = "\n".join(str(line) for line in (snapshot.get("stdout_tail") or []))
+        stderr_tail = "\n".join(str(line) for line in (snapshot.get("stderr_tail") or []))
+        return {
+            "returncode": process.returncode,
+            "stdout_tail": tail_text(stdout_tail, max_lines=40, max_chars=8000),
+            "stderr_tail": tail_text(stderr_tail, max_lines=40, max_chars=8000),
+        }
+
     stdout = ""
     stderr = ""
     try:
@@ -113,6 +124,9 @@ class BpftraceRunner(AppRunner):
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.attach_timeout_s = int(attach_timeout_s)
         self.process: Any | None = None
+        self.collector = ProcessOutputCollector()
+        self.stdout_thread: threading.Thread | None = None
+        self.stderr_thread: threading.Thread | None = None
 
     @property
     def pid(self) -> int | None:
@@ -146,6 +160,21 @@ class BpftraceRunner(AppRunner):
         self.expected_programs = int(self.expected_programs or expected_programs or 1)
         self.process = start_agent(bpftrace_binary, ["-q", str(script_path)])
         self.command_used = [bpftrace_binary, "-q", str(script_path)]
+        if self.process.stdout is None or self.process.stderr is None:
+            self.process.kill()
+            raise RuntimeError("bpftrace did not expose stdout/stderr pipes")
+        self.stdout_thread = threading.Thread(
+            target=self.collector.consume_stdout,
+            args=(self.process.stdout,),
+            daemon=True,
+        )
+        self.stderr_thread = threading.Thread(
+            target=self.collector.consume_stderr,
+            args=(self.process.stderr,),
+            daemon=True,
+        )
+        self.stdout_thread.start()
+        self.stderr_thread.start()
         programs = wait_for_attached_programs(
             self.process,
             expected_count=self.expected_programs,
@@ -200,8 +229,20 @@ class BpftraceRunner(AppRunner):
             return
         process = self.process
         self.process = None
-        stop_agent(process, timeout=8)
-        self.process_output = finalize_process_output(process)
+        stop_error: Exception | None = None
+        try:
+            stop_agent(process, timeout=8)
+        except Exception as exc:
+            stop_error = exc
+        if self.stdout_thread is not None:
+            self.stdout_thread.join(timeout=2.0)
+            self.stdout_thread = None
+        if self.stderr_thread is not None:
+            self.stderr_thread.join(timeout=2.0)
+            self.stderr_thread = None
+        self.process_output = finalize_process_output(process, self.collector)
+        if stop_error is not None:
+            raise RuntimeError(str(stop_error)) from stop_error
 
 
 __all__ = ["BpftraceRunner", "SCRIPTS", "ScriptSpec", "finalize_process_output", "wait_for_attached_programs"]
