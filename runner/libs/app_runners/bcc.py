@@ -25,6 +25,7 @@ DEFAULT_ATTACH_TIMEOUT_SECONDS = 20
 DEFAULT_MIN_BIOSNOOP_CORPUS_RUNS = 100
 KHEADERS_READY_MARKER = ".bpfrejit-kheaders-ready"
 BCC_COMPAT_CFLAGS_ENV = "BPFREJIT_BCC_EXTRA_CFLAGS"
+BCC_COMPAT_HEADER_ENV = "BPFREJIT_BCC_COMPAT_HEADER"
 BCC_PYTHON_COMPAT_DIR_PREFIX = "bcc-python-"
 
 BCC_COMPAT_HEADER = r"""
@@ -121,12 +122,32 @@ except Exception:
 if _bcc is not None and not getattr(_bcc.BPF, "_bpfrejit_cflags_patched", False):
     _bpfrejit_original_init = _bcc.BPF.__init__
 
+    def _bpfrejit_include_line(path):
+        escaped = path.replace("\\", "\\\\").replace('"', '\\"')
+        return '#include "' + escaped + '"\n'
+
+    def _bpfrejit_patch_text(kwargs):
+        header = os.environ.get("BPFREJIT_BCC_COMPAT_HEADER", "")
+        text = kwargs.get("text")
+        if not header or text in (None, b"", ""):
+            return
+        include_line = _bpfrejit_include_line(header)
+        if isinstance(text, bytes):
+            encoded = include_line.encode("utf-8")
+            if encoded not in text[:4096]:
+                kwargs["text"] = encoded + text
+        else:
+            text_value = str(text)
+            if include_line not in text_value[:4096]:
+                kwargs["text"] = include_line + text_value
+
     def _bpfrejit_init(self, *args, **kwargs):
         cflags = list(kwargs.get("cflags") or [])
         for flag in os.environ.get("BPFREJIT_BCC_EXTRA_CFLAGS", "").splitlines():
             if flag and flag not in cflags:
                 cflags.append(flag)
         kwargs["cflags"] = cflags
+        _bpfrejit_patch_text(kwargs)
         return _bpfrejit_original_init(self, *args, **kwargs)
 
     _bcc.BPF.__init__ = _bpfrejit_init
@@ -319,6 +340,7 @@ def _prepare_bcc_python_compat(env: dict[str, str]) -> Path:
     header.write_text(BCC_COMPAT_HEADER, encoding="utf-8")
     sitecustomize.write_text(BCC_SITE_CUSTOMIZE, encoding="utf-8")
 
+    env[BCC_COMPAT_HEADER_ENV] = str(header)
     env[BCC_COMPAT_CFLAGS_ENV] = "\n".join(("-include", str(header)))
     pythonpath = env.get("PYTHONPATH", "")
     env["PYTHONPATH"] = str(compat_dir) if not pythonpath else str(compat_dir) + os.pathsep + pythonpath
