@@ -1,4 +1,7 @@
 # syntax=docker/dockerfile:1.4
+ARG TRACEE_IMAGE=docker.io/aquasec/tracee:0.24.1@sha256:cfbbfee972e64a644f6b1bac74ee26998e6e12442697be4c797ae563553a2a5b
+ARG TETRAGON_IMAGE=quay.io/cilium/tetragon:v1.6.1@sha256:ff96ace3e6a0166ba04ff3eecfaeee19b7e6deee2b7cdbe3245feda57df5015f
+ARG SCX_RELEASE_TAG=v1.1.0
 FROM docker.io/library/ubuntu:24.04 AS runner-runtime-build-base
 
 ARG GO_VERSION=1.26.0
@@ -18,6 +21,7 @@ RUN apt-get update \
         binutils-dev \
         bison \
         bpfcc-tools \
+        bpftrace \
         bzip2 \
         ca-certificates \
         cargo \
@@ -82,14 +86,18 @@ RUN apt-get update \
         pkg-config \
         procps \
         python3 \
+        python3-bpfcc \
         python3-yaml \
         rsync \
+        rt-tests \
         rustc \
         scons \
         stress-ng \
+        sysbench \
         tar \
         unzip \
         util-linux \
+        wrk \
         xz-utils \
         xxd \
         zlib1g-dev \
@@ -130,61 +138,9 @@ RUN set -eux; \
 RUN mkdir -p "${IMAGE_WORKSPACE}"
 WORKDIR ${IMAGE_WORKSPACE}
 
-FROM --platform=$BUILDPLATFORM docker.io/library/ubuntu:24.04 AS runner-runtime-tracee-bpf
+FROM --platform=$TARGETPLATFORM ${TRACEE_IMAGE} AS runner-runtime-tracee-upstream
 
-ARG IMAGE_BUILD_JOBS=4
-ARG RUN_TARGET_ARCH=x86_64
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        bash \
-        ca-certificates \
-        clang \
-        gcc \
-        git \
-        libelf-dev \
-        make \
-        pkg-config \
-        zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN --mount=type=bind,source=.,target=/src,readonly \
-    set -eux; \
-    repo_root="/work/tracee"; \
-    dist_root="${repo_root}/dist"; \
-    output_root="/tracee-bpf-artifacts"; \
-    case "${RUN_TARGET_ARCH}" in \
-        arm64) uname_m=aarch64; tracee_arch=arm64; linux_arch=arm64; go_arch=arm64 ;; \
-        x86_64) uname_m=x86_64; tracee_arch=x86_64; linux_arch=x86; go_arch=amd64 ;; \
-        *) echo "unsupported Tracee BPF target arch: ${RUN_TARGET_ARCH}" >&2; exit 1 ;; \
-    esac; \
-    mkdir -p /work "${output_root}/lsm_support"; \
-    if [ -n "$(find /src/runner/repos/tracee -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then \
-        cp -a /src/runner/repos/tracee "${repo_root}"; \
-    else \
-        git clone --depth 1 --filter=blob:none --branch main https://github.com/aquasecurity/tracee.git "${repo_root}"; \
-    fi; \
-    rm -rf "${dist_root}" \
-        "${repo_root}/.build_libbpf" \
-        "${repo_root}/.build_libbpf_fix" \
-        "${repo_root}/.eval_goenv" \
-        "${repo_root}/.checklib_libbpf" \
-        "${repo_root}/goenv.mk"; \
-    make -C "${repo_root}" -j"${IMAGE_BUILD_JOBS}" \
-        OUTPUT_DIR="${dist_root}" \
-        UNAME_M="${uname_m}" \
-        ARCH="${tracee_arch}" \
-        LINUX_ARCH="${linux_arch}" \
-        GO_ARCH="${go_arch}" \
-        CMD_GCC=gcc \
-        CMD_CLANG=clang \
-        CMD_GO=/bin/false \
-        bpf; \
-    install -m 0644 "${dist_root}/tracee.bpf.o" "${output_root}/tracee.bpf.o"; \
-    install -m 0644 "${dist_root}/lsm_support/kprobe_check.bpf.o" "${output_root}/lsm_support/kprobe_check.bpf.o"; \
-    install -m 0644 "${dist_root}/lsm_support/lsm_check.bpf.o" "${output_root}/lsm_support/lsm_check.bpf.o"
+FROM --platform=$TARGETPLATFORM ${TETRAGON_IMAGE} AS runner-runtime-tetragon-upstream
 
 FROM runner-runtime-build-base AS runner-runtime-userspace
 
@@ -193,12 +149,12 @@ ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 
 RUN --mount=type=bind,source=.,target=/src,readonly \
-    --mount=type=bind,from=runner-runtime-tracee-bpf,source=/tracee-bpf-artifacts,target=/prebuilt-tracee-bpf,readonly \
     set -eux; \
     cp -a /src/Makefile ./Makefile; \
     mkdir -p ./runner ./vendor ./vendor/linux-framework; \
     rsync -a /src/runner/mk ./runner/; \
-    rsync -a /src/runner/repos ./runner/; \
+    mkdir -p ./runner/repos; \
+    rsync -a /src/runner/repos/katran ./runner/repos/; \
     has_repo_content() { [ -n "$(find "./runner/repos/$1" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; }; \
     clone_sparse_repo() { \
         repo_name="$1"; repo_url="$2"; repo_branch="$3"; shift 3; \
@@ -207,23 +163,8 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
         git clone --depth 1 --filter=blob:none --sparse --branch "${repo_branch}" "${repo_url}" "${repo_dest}"; \
         (cd "${repo_dest}" && git sparse-checkout set "$@"); \
     }; \
-    clone_repo() { \
-        repo_name="$1"; repo_url="$2"; repo_branch="$3"; submodules="$4"; \
-        repo_dest="./runner/repos/${repo_name}"; \
-        rm -rf "${repo_dest}"; \
-        if [ "${submodules}" = "submodules" ]; then \
-            git clone --depth 1 --branch "${repo_branch}" --recurse-submodules --shallow-submodules "${repo_url}" "${repo_dest}"; \
-        else \
-            git clone --depth 1 --filter=blob:none --branch "${repo_branch}" "${repo_url}" "${repo_dest}"; \
-        fi; \
-    }; \
-    has_repo_content bcc || clone_sparse_repo bcc https://github.com/iovisor/bcc.git master libbpf-tools; \
-    has_repo_content bpftrace || clone_repo bpftrace https://github.com/bpftrace/bpftrace.git master submodules; \
     has_repo_content katran || clone_sparse_repo katran https://github.com/facebookincubator/katran.git main \
         CMakeLists.txt build build_bpf_modules_opensource.sh build_katran.sh cmake example_grpc katran/decap katran/lib; \
-    has_repo_content tracee || clone_repo tracee https://github.com/aquasecurity/tracee.git main no-submodules; \
-    has_repo_content tetragon || clone_repo tetragon https://github.com/cilium/tetragon.git main no-submodules; \
-    has_repo_content scx || clone_repo scx https://github.com/sched-ext/scx.git main no-submodules; \
     rsync -a /src/vendor/libbpf ./vendor/; \
     rsync -a /src/vendor/llvmbpf ./vendor/; \
     cp -a /src/vendor/linux-framework/Makefile ./vendor/linux-framework/; \
@@ -252,42 +193,7 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
         -j"${IMAGE_BUILD_JOBS}"; \
     install -m 0755 vendor/linux-framework/tools/bpf/bpftool/bpftool /usr/local/bin/bpftool; \
     bpftool version; \
-    rm -rf \
-        ./runner/repos/workload-tools/sysbench/third_party/concurrency_kit/include \
-        ./runner/repos/workload-tools/sysbench/third_party/concurrency_kit/lib \
-        ./runner/repos/workload-tools/sysbench/third_party/concurrency_kit/share \
-        ./runner/repos/workload-tools/sysbench/third_party/concurrency_kit/tmp \
-        ./runner/repos/workload-tools/sysbench/third_party/luajit/bin \
-        ./runner/repos/workload-tools/sysbench/third_party/luajit/lib \
-        ./runner/repos/workload-tools/sysbench/third_party/luajit/share \
-        ./runner/repos/workload-tools/sysbench/third_party/luajit/tmp \
-        ./runner/repos/workload-tools/wrk/obj \
-        ./runner/repos/workload-tools/wrk/wrk; \
-    if [ -d ./runner/repos/workload-tools/sysbench ]; then \
-        find ./runner/repos/workload-tools/sysbench -type f \( -name '*.a' -o -name '*.la' -o -name '*.lo' -o -name '*.o' \) -delete; \
-    fi; \
-    if [ ! -d ./runner/repos/workload-tools/rt-tests ] || [ ! -d ./runner/repos/workload-tools/sysbench ] || [ ! -d ./runner/repos/workload-tools/wrk ]; then \
-        workload_bin_root="/artifacts/user/workload-tools/${RUN_TARGET_ARCH}/bin"; \
-        mkdir -p "${workload_bin_root}"; \
-        for tool in hackbench sysbench wrk; do \
-            if command -v "$tool" >/dev/null; then \
-                install -m 0755 "$(command -v "$tool")" "${workload_bin_root}/$tool"; \
-            else \
-                printf '%s\n' \
-                    '#!/bin/sh' \
-                    "echo '$tool is unavailable: runner/repos/workload-tools was not present when the runtime image was built' >&2" \
-                    'exit 127' >"${workload_bin_root}/$tool"; \
-                chmod 0755 "${workload_bin_root}/$tool"; \
-            fi; \
-        done; \
-    fi; \
-    make image-bcc-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
-    make image-bpftrace-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     make image-katran-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
-    make image-tracee-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}" PREBUILT_TRACEE_BPF_ROOT=/prebuilt-tracee-bpf; \
-    make image-tetragon-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
-    make image-scx-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
-    make image-workload-tools-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     rm -rf \
         /tmp/bpf-benchmark-build \
         /root/.cache/go-build \
@@ -296,6 +202,37 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
         ./runner/mk \
         ./vendor \
         ./runner/repos
+
+COPY --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee /artifacts/tracee/bin/tracee
+COPY --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee-ebpf /artifacts/tracee/bin/tracee-ebpf
+COPY --from=runner-runtime-tetragon-upstream --chmod=0755 /usr/bin/tetragon /artifacts/tetragon/bin/tetragon
+COPY --from=runner-runtime-tetragon-upstream /var/lib/tetragon/ /artifacts/tetragon/
+
+FROM runner-runtime-userspace AS runner-runtime-scx-artifacts
+
+ARG IMAGE_BUILD_JOBS=4
+ARG RUN_TARGET_ARCH=x86_64
+ARG SCX_RELEASE_TAG=v1.1.0
+
+RUN set -eux; \
+    case "${RUN_TARGET_ARCH}" in \
+        arm64) target_triple=aarch64-unknown-linux-gnu ;; \
+        x86_64) target_triple=x86_64-unknown-linux-gnu ;; \
+        *) echo "unsupported SCX target arch: ${RUN_TARGET_ARCH}" >&2; exit 1 ;; \
+    esac; \
+    repo_root="/tmp/scx"; \
+    target_dir="/tmp/scx-target"; \
+    git clone --depth 1 --filter=blob:none --branch "${SCX_RELEASE_TAG}" https://github.com/sched-ext/scx.git "${repo_root}"; \
+    BPF_CLANG=clang CARGO_TARGET_DIR="${target_dir}" \
+        cargo build --release --target "${target_triple}" --manifest-path "${repo_root}/Cargo.toml" --package scx_rusty -j"${IMAGE_BUILD_JOBS}"; \
+    target_release_dir="${target_dir}/${target_triple}/release"; \
+    object_path="$(find "${target_dir}" -path '*/scx_rusty-*/out/main.bpf.o' -type f | sort | tail -n 1)"; \
+    test -x "${target_release_dir}/scx_rusty"; \
+    test -n "${object_path}"; \
+    mkdir -p /artifacts/scx/bin; \
+    install -m 0755 "${target_release_dir}/scx_rusty" /artifacts/scx/bin/scx_rusty; \
+    install -m 0644 "${object_path}" /artifacts/scx/scx_rusty_main.bpf.o; \
+    rm -rf "${repo_root}" "${target_dir}"
 
 FROM runner-runtime-build-base AS runner-runtime-kernel-artifacts
 
@@ -338,6 +275,8 @@ FROM runner-runtime-userspace AS runner-runtime
 ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
+
+COPY --from=runner-runtime-scx-artifacts /artifacts/scx /artifacts/scx
 
 RUN --mount=type=bind,source=.,target=/src,readonly \
     set -eux; \
@@ -422,6 +361,14 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     find ./tests -type f \( -name '*.o' -o -name '*.d' -o -name '*.cmd' \) -delete; \
     mkdir -p micro/results corpus/results e2e/results tests/results /opt; \
     ln -sfn /artifacts/user /opt/bpf-benchmark; \
+    repo_artifact_root="/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}"; \
+    mkdir -p "${repo_artifact_root}"; \
+    ln -sfn /artifacts/tracee "${repo_artifact_root}/tracee"; \
+    ln -sfn /artifacts/tetragon "${repo_artifact_root}/tetragon"; \
+    ln -sfn /artifacts/scx "${repo_artifact_root}/scx"; \
+    ln -sfn /artifacts/tracee/bin/tracee /usr/local/bin/tracee; \
+    ln -sfn /artifacts/tetragon/bin/tetragon /usr/local/bin/tetragon; \
+    ln -sfn /artifacts/scx/bin/scx_rusty /usr/local/bin/scx_rusty; \
     apt-get purge -y \
         autoconf \
         automake \
@@ -492,9 +439,8 @@ COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-instal
 
 ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
     BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH} \
-    BPFREJIT_WORKLOAD_TOOL_BIN_DIR=/artifacts/user/workload-tools/${RUN_TARGET_ARCH}/bin \
     PYTHONPATH=${IMAGE_WORKSPACE} \
     RUN_TARGET_ARCH=${RUN_TARGET_ARCH} \
-    PATH=${IMAGE_WORKSPACE}/runner/build-llvmbpf:${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf:/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/bpftrace/bin:/artifacts/user/workload-tools/${RUN_TARGET_ARCH}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    PATH=${IMAGE_WORKSPACE}/runner/build-llvmbpf:${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 FROM runner-runtime AS runner-default
