@@ -206,6 +206,11 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
 
 COPY --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee /artifacts/tracee/bin/tracee
 COPY --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee-ebpf /artifacts/tracee/bin/tracee-ebpf
+COPY --from=runner-runtime-tracee-upstream --chmod=0755 /lib/ld-musl-*.so.1 /lib/
+COPY --from=runner-runtime-tracee-upstream /lib/libc.musl-*.so.1 /lib/
+COPY --from=runner-runtime-tracee-upstream /usr/lib/libelf*.so* /usr/lib/
+COPY --from=runner-runtime-tracee-upstream /usr/lib/libz.so* /usr/lib/
+COPY --from=runner-runtime-tracee-upstream /usr/lib/libzstd.so* /usr/lib/
 COPY --from=runner-runtime-tetragon-upstream --chmod=0755 /usr/bin/tetragon /artifacts/tetragon/bin/tetragon
 COPY --from=runner-runtime-tetragon-upstream /var/lib/tetragon/ /artifacts/tetragon/
 
