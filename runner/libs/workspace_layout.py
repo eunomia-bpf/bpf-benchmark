@@ -103,7 +103,10 @@ def runtime_path_value(workspace: Path, target_arch: str) -> str:
 def local_prep_targets(*, workspace, suite_name, target_arch, executor) -> list[Path]:
     arch, suite = str(target_arch).strip(), str(suite_name).strip()
     targets: list[Path] = []
-    if suite in _RUNTIME_IMAGE_SUITES:      targets.append(runtime_container_image_tar_path(workspace, arch))
+    if suite in _RUNTIME_IMAGE_SUITES:
+        image_tar = runtime_container_image_tar_path(workspace, arch)
+        if not (str(executor).strip() == "aws-ssh" and image_tar.is_file()):
+            targets.append(image_tar)
     if str(executor).strip() == "kvm":
         targets.append(kvm_kernel_image_path(workspace))
     seen: set[Path] = set()
