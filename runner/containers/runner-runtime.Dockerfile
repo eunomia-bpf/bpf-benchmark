@@ -211,6 +211,12 @@ COPY --from=runner-runtime-tracee-upstream /lib/libc.musl-*.so.1 /lib/
 COPY --from=runner-runtime-tracee-upstream /usr/lib/libelf*.so* /usr/lib/
 COPY --from=runner-runtime-tracee-upstream /usr/lib/libz.so* /usr/lib/
 COPY --from=runner-runtime-tracee-upstream /usr/lib/libzstd.so* /usr/lib/
+RUN set -eux; \
+    musl_loader="$(find /lib /usr/lib -maxdepth 1 -name 'ld-musl-*.so.1' -print -quit)"; \
+    musl_arch="$(basename "${musl_loader}" | sed -e 's/^ld-musl-//' -e 's/\.so\.1$//')"; \
+    musl_lib_dir="/usr/lib/${musl_arch}-linux-musl"; \
+    mkdir -p "${musl_lib_dir}"; \
+    cp -a /usr/lib/libelf*.so* /usr/lib/libz.so* /usr/lib/libzstd.so* /usr/lib/libc.musl-*.so.1 "${musl_lib_dir}/"
 COPY --from=runner-runtime-tetragon-upstream --chmod=0755 /usr/bin/tetragon /artifacts/tetragon/bin/tetragon
 COPY --from=runner-runtime-tetragon-upstream /var/lib/tetragon/ /artifacts/tetragon/
 
