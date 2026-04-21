@@ -92,6 +92,7 @@ VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 
 .PHONY: check validate \
 	vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	aws-e2e aws-corpus \
 	aws-arm64-test aws-arm64-benchmark aws-arm64-terminate \
 	aws-x86-test aws-x86-benchmark aws-x86-terminate \
 	help clean
@@ -197,6 +198,20 @@ aws-x86-benchmark:
 
 aws-x86-terminate:
 	$(RUN_TARGET_SUITE_CMD) terminate aws-x86
+
+aws-e2e:
+	case "$(RUN_TARGET_ARCH)" in \
+		arm64) AWS_ARM64_E2E_CASES="$(if $(strip $(SUITES)),$(SUITES),$(AWS_ARM64_E2E_CASES))" $(RUN_TARGET_SUITE_CMD) run aws-arm64 e2e ;; \
+		x86_64) AWS_X86_E2E_CASES="$(if $(strip $(SUITES)),$(SUITES),$(AWS_X86_E2E_CASES))" $(RUN_TARGET_SUITE_CMD) run aws-x86 e2e ;; \
+		*) echo "unsupported RUN_TARGET_ARCH for aws-e2e: $(RUN_TARGET_ARCH)" >&2; exit 2 ;; \
+	esac
+
+aws-corpus:
+	case "$(RUN_TARGET_ARCH)" in \
+		arm64) $(RUN_TARGET_SUITE_CMD) run aws-arm64 corpus ;; \
+		x86_64) $(RUN_TARGET_SUITE_CMD) run aws-x86 corpus ;; \
+		*) echo "unsupported RUN_TARGET_ARCH for aws-corpus: $(RUN_TARGET_ARCH)" >&2; exit 2 ;; \
+	esac
 
 clean:
 	rm -rf "$(RUNNER_BUILD_DIR)"

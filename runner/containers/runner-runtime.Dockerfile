@@ -234,6 +234,9 @@ RUN set -eux; \
     esac; \
     repo_root="/tmp/scx"; \
     target_dir="/tmp/scx-target"; \
+    rustup component add rustfmt; \
+    printf '#!/bin/sh\ncat\n' >/usr/local/bin/disable_rustfmt; \
+    chmod 0755 /usr/local/bin/disable_rustfmt; \
     git clone --depth 1 --filter=blob:none --branch "${SCX_RELEASE_TAG}" https://github.com/sched-ext/scx.git "${repo_root}"; \
     BPF_CLANG=clang CARGO_TARGET_DIR="${target_dir}" \
         cargo build --release --target "${target_triple}" --manifest-path "${repo_root}/Cargo.toml" --package scx_rusty -j"${IMAGE_BUILD_JOBS}"; \
@@ -251,6 +254,10 @@ FROM runner-runtime-build-base AS runner-runtime-kernel-artifacts
 ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends bsdextrautils \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=bind,source=.,target=/src,readonly \
     set -eux; \
@@ -448,6 +455,13 @@ COPY --from=runner-runtime-kernel-artifacts /artifacts/modules /artifacts/module
 COPY --from=runner-runtime-kernel-artifacts /artifacts/kinsn /artifacts/kinsn
 COPY --from=runner-runtime-kernel-artifacts /artifacts/manifest.json /artifacts/manifest.json
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends auditd \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && command -v ausyscall >/dev/null \
+    && ausyscall --dump >/dev/null
 
 ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
     BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH} \
