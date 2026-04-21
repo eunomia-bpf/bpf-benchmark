@@ -233,20 +233,53 @@ def _free_loopback_address() -> str:
 
 def _default_extra_args() -> tuple[str, ...]:
     payload = yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict): raise RuntimeError(f"Tetragon config must be a mapping: {DEFAULT_CONFIG}")
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"Tetragon config must be a mapping: {DEFAULT_CONFIG}")
     raw_args = payload.get("tetragon_extra_args") or []
     if not isinstance(raw_args, Sequence) or isinstance(raw_args, (str, bytes, bytearray)):
         raise RuntimeError(f"Tetragon config field 'tetragon_extra_args' must be a sequence: {DEFAULT_CONFIG}")
     return tuple(str(arg) for arg in raw_args if str(arg).strip())
 
 
+def _default_expected_program_names() -> tuple[str, ...]:
+    payload = yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"Tetragon config must be a mapping: {DEFAULT_CONFIG}")
+    raw_names = payload.get("target_programs") or []
+    if not isinstance(raw_names, Sequence) or isinstance(raw_names, (str, bytes, bytearray)):
+        raise RuntimeError(f"Tetragon config field 'target_programs' must be a sequence: {DEFAULT_CONFIG}")
+    return tuple(str(name) for name in raw_names if str(name).strip())
+
+
+def _select_programs_by_name(
+    programs: Sequence[Mapping[str, object]],
+    expected_names: Sequence[str],
+) -> tuple[list[dict[str, object]], list[str]]:
+    selected: list[dict[str, object]] = []
+    missing: list[str] = []
+    for expected_name in expected_names:
+        matched = False
+        for program in programs:
+            if str(program.get("name") or "") != expected_name:
+                continue
+            entry = dict(program)
+            if entry not in selected:
+                selected.append(entry)
+            matched = True
+        if not matched:
+            missing.append(str(expected_name))
+    return selected, missing
+
+
 class TetragonRunner(AppRunner):
     def __init__(self, *, tetragon_binary: Path | str | None = None, tetragon_extra_args: Sequence[str] = (),
-                 expected_program_names: Sequence[str] = (), load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
+                 expected_program_names: Sequence[str] | None = None, load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
                  workload_spec: Mapping[str, object] | None = None) -> None:
         super().__init__()
         self.tetragon_binary = None if tetragon_binary is None else Path(tetragon_binary).resolve()
         self.tetragon_extra_args = tuple(str(arg) for arg in (tetragon_extra_args or _default_extra_args()) if str(arg).strip())
+        if expected_program_names is None:
+            expected_program_names = _default_expected_program_names()
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.load_timeout_s = int(load_timeout_s); self.setup_result: dict[str, object] | None = None
         self.tempdir: tempfile.TemporaryDirectory[str] | None = None; self.policy_paths: list[Path] = []
@@ -266,6 +299,32 @@ class TetragonRunner(AppRunner):
         if resolved is None: raise RuntimeError("Tetragon binary not found; provide --tetragon-binary or prepare the upstream Tetragon container artifact")
         return resolved
 
+    def _wait_for_expected_programs(self, session: TetragonAgentSession) -> list[dict[str, object]]:
+        deadline = time.monotonic() + max(0.0, float(self.load_timeout_s))
+        last_programs = [dict(program) for program in session.programs]
+        last_missing = list(self.expected_program_names)
+        while True:
+            programs = session.refresh_programs()
+            selected, missing = _select_programs_by_name(programs, self.expected_program_names)
+            last_programs, last_missing = programs, missing
+            if not missing:
+                session.programs = [dict(program) for program in selected]
+                return [dict(program) for program in selected]
+            exit_reason = describe_agent_exit("Tetragon", session.process, session.collector_snapshot())
+            if exit_reason is not None:
+                raise RuntimeError(
+                    f"Tetragon expected programs were not discovered: {', '.join(last_missing)}; {exit_reason}"
+                )
+            if time.monotonic() >= deadline:
+                break
+            time.sleep(0.25)
+        attached = sorted(str(program.get("name") or "") for program in last_programs if str(program.get("name") or "").strip())
+        attached_text = ", ".join(attached) if attached else "<none>"
+        raise RuntimeError(
+            f"Tetragon expected programs were not discovered after {self.load_timeout_s}s: "
+            f"{', '.join(last_missing)}; attached programs: {attached_text}"
+        )
+
     def start(self) -> list[int]:
         if self.session is not None: raise RuntimeError("TetragonRunner is already running")
         tetragon_binary = self._resolve_binary()
@@ -284,7 +343,7 @@ class TetragonRunner(AppRunner):
         try: session.__enter__()
         except Exception: self.tempdir.cleanup(); self.tempdir = None; raise
         self.session = session; self.tetragon_binary = Path(tetragon_binary).resolve()
-        programs = [dict(p) for p in session.programs]
+        programs = self._wait_for_expected_programs(session) if self.expected_program_names else [dict(p) for p in session.programs]
         if not programs: self._fail_start("Tetragon did not attach any BPF programs")
         if self.expected_program_names:
             programs = self._filter_expected_programs(programs, self.expected_program_names, owner_label="Tetragon")
