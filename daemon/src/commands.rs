@@ -370,7 +370,7 @@ fn build_rejit_fd_array(required_btf_fds: &[RawFd]) -> Vec<RawFd> {
 }
 
 fn build_prog_load_fd_array(required_btf_fds: &[RawFd]) -> Vec<RawFd> {
-    required_btf_fds.to_vec()
+    build_rejit_fd_array(required_btf_fds)
 }
 
 fn new_attempt_debug(pass_traces: Vec<pass::PassDebugTrace>) -> Option<AttemptDebug> {

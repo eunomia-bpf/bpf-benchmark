@@ -213,14 +213,7 @@ def _extract_arm64_kernel_artifacts_from_image(ctx: aws_common.AwsExecutorContex
 
 def _build_arm64_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
     build_dir = ctx.target_root / "kernel-build"
-    kernel_image = build_dir / "arch" / "arm64" / "boot" / "vmlinuz.efi"
     modules_target = ROOT_DIR / ".cache" / "repo-artifacts" / "arm64" / "kernel-modules" / "lib" / "modules"
-    release_file = build_dir / "include" / "config" / "kernel.release"
-    if kernel_image.is_file() and release_file.is_file():
-        kernel_release = _require_kernel_release(release_file, arch="ARM64")
-        modules_root = modules_target / kernel_release
-        if modules_root.is_dir():
-            return kernel_release, kernel_image, _require_modules_root(modules_root, arch="ARM64")
     return _extract_arm64_kernel_artifacts_from_image(ctx, build_dir, modules_target)
 
 

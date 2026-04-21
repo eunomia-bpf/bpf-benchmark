@@ -38,6 +38,16 @@ impl MapValueReader for MockTrackerReader {
 }
 
 #[test]
+fn test_kinsn_fd_arrays_reserve_slot_zero() {
+    assert!(build_prog_load_fd_array(&[]).is_empty());
+    assert!(build_rejit_fd_array(&[]).is_empty());
+
+    let required = [11, 22];
+    assert_eq!(build_prog_load_fd_array(&required), vec![11, 11, 22]);
+    assert_eq!(build_rejit_fd_array(&required), vec![11, 11, 22]);
+}
+
+#[test]
 fn test_optimize_one_result_serialization() {
     let result = OptimizeOneResult {
         status: "ok".to_string(),
