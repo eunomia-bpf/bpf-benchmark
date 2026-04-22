@@ -142,15 +142,6 @@ def _mean_exec_ns(records: Mapping[str, Mapping[str, object]]) -> float | None:
     return sum(values) / len(values)
 
 
-def _workload_ops_per_sec(workload: Mapping[str, object] | None) -> float | None:
-    if not isinstance(workload, Mapping):
-        return None
-    value = workload.get("ops_per_sec")
-    if not isinstance(value, (int, float)):
-        return None
-    return float(value)
-
-
 def _infer_prog_type_name(program: Any) -> str:
     prog_type = str(getattr(program, "prog_type_name", "") or "").strip().lower()
     if prog_type and prog_type != "unspec":
@@ -623,64 +614,8 @@ def _result_program_rows(result: Mapping[str, object]) -> list[dict[str, object]
     ]
 
 
-def _app_measurement_row(result: Mapping[str, object]) -> dict[str, object] | None:
-    measurement = result.get("app_measurement")
-    if not isinstance(measurement, Mapping):
-        return None
-    app_name = str(result.get("app") or "")
-    apply_result = result.get("rejit_apply")
-    apply_record = dict(apply_result) if isinstance(apply_result, Mapping) else {}
-    applied = bool(apply_record.get("applied"))
-    changed = _apply_record_changed(apply_record)
-    baseline = measurement.get("baseline")
-    post_rejit = measurement.get("post_rejit")
-    speedup = measurement.get("speedup")
-    comparable = changed and isinstance(speedup, (int, float)) and float(speedup) > 0.0
-    exclusion_reason = ""
-    apply_error = str(apply_record.get("error") or "").strip()
-    if not comparable:
-        if not isinstance(baseline, (int, float)):
-            exclusion_reason = "missing_baseline_app_metric"
-        elif float(baseline) <= 0.0:
-            exclusion_reason = "non_positive_baseline_app_metric"
-        elif not changed:
-            exclusion_reason = f"apply_error: {apply_error}" if apply_error else "no_programs_changed_in_loader"
-        elif not bool(result.get("had_post_rejit_measurement")):
-            if apply_error:
-                exclusion_reason = f"apply_error: {apply_error}"
-            else:
-                exclusion_reason = "missing_post_rejit_measurement"
-        elif not isinstance(post_rejit, (int, float)):
-            exclusion_reason = f"apply_error: {apply_error}" if apply_error else "missing_rejit_app_metric"
-        elif float(post_rejit) <= 0.0:
-            exclusion_reason = "non_positive_rejit_app_metric"
-        else:
-            exclusion_reason = "missing_app_speedup"
-    return {
-        "id": 0,
-        "label": f"{app_name}:app",
-        "name": "__app__",
-        "type": "app",
-        "unit": "app",
-        "metric": str(measurement.get("metric") or ""),
-        "applied": applied,
-        "changed": changed,
-        "comparable": comparable,
-        "speedup": float(speedup) if comparable else None,
-        "comparison_exclusion_reason": exclusion_reason,
-        "baseline": {"value": baseline},
-        "rejit": {"value": post_rejit} if bool(result.get("had_post_rejit_measurement")) else {},
-        "apply": apply_record,
-    }
-
-
 def _result_comparison_rows(result: Mapping[str, object]) -> list[dict[str, object]]:
-    rows = _result_program_rows(result)
-    if str(result.get("measurement_mode") or "").strip() == "app":
-        app_row = _app_measurement_row(result)
-        if app_row is not None:
-            rows.append(app_row)
-    return rows
+    return _result_program_rows(result)
 
 
 def _comparison_rows(
@@ -910,13 +845,12 @@ def _configure_program_selection(
     runner: AppRunner,
     lifecycle: CaseLifecycleState,
     *,
-    measurement_mode: str,
     baseline_measurement: Mapping[str, object],
 ) -> None:
     initial_stats = _normalized_stats_snapshot(baseline_measurement.get("initial_stats"))
     final_stats = _normalized_stats_snapshot(baseline_measurement.get("final_stats"))
     selected = runner.select_corpus_program_ids(initial_stats, final_stats)
-    if selected is None and measurement_mode == "program":
+    if selected is None:
         selected = _active_program_ids(initial_stats, final_stats, lifecycle.target_prog_ids)
     if selected is None:
         return
@@ -1032,7 +966,6 @@ def _build_app_error_result(
         "prog_ids": prog_ids,
         "programs": live_programs,
         "program_measurements": program_measurements,
-        "app_measurement": None,
         "baseline": {
             "programs": baseline_programs,
             "exec_ns_mean": _mean_exec_ns(baseline_programs),
@@ -1177,11 +1110,11 @@ def _finalize_app_result(
 
     normalized_apply_result = dict(apply_result or {})
     error = str(normalized_apply_result.get("error") or "").strip()
-    if measurement_mode == "program" and not _has_phase_measurement(programs_by_id):
+    if not _has_phase_measurement(programs_by_id):
         raise RuntimeError(
             f"{app.name}: workload {app.workload_for('corpus')!r} did not execute any target programs during baseline"
         )
-    if measurement_mode == "program" and had_post_rejit and not error and not _has_phase_measurement(rejit_programs_by_id):
+    if had_post_rejit and not error and not _has_phase_measurement(rejit_programs_by_id):
         raise RuntimeError(
             f"{app.name}: workload {app.workload_for('corpus')!r} did not execute any target programs after rejit"
         )
@@ -1194,23 +1127,7 @@ def _finalize_app_result(
         normalized_apply_result,
         had_post_rejit=had_post_rejit,
     )
-    app_measurement: dict[str, object] | None = None
-    if measurement_mode == "app":
-        baseline_ops_per_sec = _workload_ops_per_sec(baseline_workload)
-        rejit_ops_per_sec = _workload_ops_per_sec(rejit_workload)
-        if baseline_ops_per_sec is None or baseline_ops_per_sec <= 0.0:
-            raise RuntimeError(f"{app.name}: workload {app.workload_for('corpus')!r} did not produce a baseline throughput measurement")
-        if had_post_rejit and not error and (rejit_ops_per_sec is None or rejit_ops_per_sec <= 0.0):
-            raise RuntimeError(f"{app.name}: workload {app.workload_for('corpus')!r} did not produce a post-rejit throughput measurement")
-        app_measurement = {
-            "metric": "ops_per_sec",
-            "baseline": baseline_ops_per_sec,
-            "post_rejit": rejit_ops_per_sec,
-            "speedup": None
-            if rejit_ops_per_sec is None
-            else (rejit_ops_per_sec / baseline_ops_per_sec),
-        }
-    elif not error and _rejit_result_has_any_change(normalized_apply_result) and not _has_comparable_measurement(program_measurements):
+    if not error and _rejit_result_has_any_change(normalized_apply_result) and not _has_comparable_measurement(program_measurements):
         raise RuntimeError(
             f"{app.name}: workload {app.workload_for('corpus')!r} produced no comparable target program measurements"
         )
@@ -1228,7 +1145,6 @@ def _finalize_app_result(
         "prog_ids": prog_ids,
         "programs": live_programs,
         "program_measurements": program_measurements,
-        "app_measurement": app_measurement,
         "baseline": {
             "programs": programs_by_id,
             "exec_ns_mean": _mean_exec_ns(programs_by_id),
@@ -1284,7 +1200,7 @@ def _run_app(
         **app.args,
     )
     measurement_mode = runner.corpus_measurement_mode().strip()
-    if measurement_mode not in {"program", "app"}:
+    if measurement_mode != "program":
         raise RuntimeError(f"{app.name}: runner returned unsupported corpus measurement mode {measurement_mode!r}")
 
     def before_rejit(_setup_state: object, lifecycle: object, baseline: Mapping[str, object]) -> object | None:
@@ -1293,7 +1209,6 @@ def _run_app(
             app,
             runner,
             lifecycle,
-            measurement_mode=measurement_mode,
             baseline_measurement=measurement,
         )
         return None
@@ -1388,7 +1303,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                             **app.args,
                         )
                         measurement_mode = runner.corpus_measurement_mode().strip()
-                        if measurement_mode not in {"program", "app"}:
+                        if measurement_mode != "program":
                             raise RuntimeError(
                                 f"{app.name}: runner returned unsupported corpus measurement mode {measurement_mode!r}"
                             )
