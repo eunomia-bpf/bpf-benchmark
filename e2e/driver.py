@@ -21,7 +21,7 @@ from runner.libs import (  # noqa: E402
     write_text,
 )
 from runner.libs.app_suite_schema import AppSpec, load_app_suite_from_yaml  # noqa: E402
-from runner.libs.rejit import DaemonSession, benchmark_rejit_enabled_passes, collect_effective_enabled_passes  # noqa: E402
+from runner.libs.rejit import DaemonSession, benchmark_run_provenance  # noqa: E402
 from runner.libs.run_artifacts import (  # noqa: E402
     ArtifactSession,
     current_process_identity,
@@ -457,43 +457,15 @@ def build_run_metadata(
     args: argparse.Namespace,
     payload: dict[str, object],
 ) -> dict[str, object]:
-    requested_rejit_passes = benchmark_rejit_enabled_passes()
-    selected_rejit_passes_provenance = "effective_enabled_passes_by_program"
-    selected_rejit_passes_warning = ""
-    payload_selected_passes: list[str] | None = None
-    if isinstance(payload, dict) and isinstance(payload.get("selected_rejit_passes"), list):
-        payload_selected_passes = [
-            str(pass_name).strip()
-            for pass_name in payload.get("selected_rejit_passes", [])
-            if str(pass_name).strip()
-        ]
-        selected_rejit_passes_provenance = (
-            str(payload.get("selected_rejit_passes_provenance") or "").strip() or "payload"
-        )
-        selected_rejit_passes_warning = str(
-            payload.get("selected_rejit_passes_warning") or ""
-        ).strip()
-    if payload_selected_passes is not None:
-        selected_rejit_passes = payload_selected_passes
-    else:
-        selected_rejit_passes = collect_effective_enabled_passes(payload)
-        if not selected_rejit_passes:
-            selected_rejit_passes = list(requested_rejit_passes)
-            selected_rejit_passes_provenance = "requested_fallback"
     metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite": "e2e",
         "case": args.case,
         "smoke": bool(args.smoke),
         "kinsn_enabled": not _args_no_kinsn(args),
-        "selected_rejit_passes": selected_rejit_passes,
-        "selected_rejit_passes_provenance": selected_rejit_passes_provenance,
         "optimization_summary": _trim_e2e_value(payload),
     }
-    if selected_rejit_passes_warning:
-        metadata["selected_rejit_passes_warning"] = selected_rejit_passes_warning
-    if selected_rejit_passes != requested_rejit_passes:
-        metadata["requested_rejit_passes"] = list(requested_rejit_passes)
+    metadata.update(benchmark_run_provenance())
     metadata.update(current_process_identity())
     return metadata
 

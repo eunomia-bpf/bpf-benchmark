@@ -35,7 +35,7 @@ from runner.libs.case_common import (
     run_app_runner_lifecycle,
     wait_for_suite_quiescence,
 )
-from runner.libs.rejit import DaemonSession, benchmark_rejit_enabled_passes, collect_effective_enabled_passes
+from runner.libs.rejit import DaemonSession, benchmark_run_provenance
 from runner.libs.run_artifacts import (
     ArtifactSession,
     current_process_identity,
@@ -1007,8 +1007,6 @@ def _slice_rejit_result(
     total_sites = 0
     applied_sites = 0
     exit_code = 0
-    effective_enabled_passes_by_program: dict[str, list[str]] = {}
-    raw_effective_enabled = rejit_result.get("effective_enabled_passes_by_program")
     for prog_id in requested_prog_ids:
         record = rejit_program_result(rejit_result, prog_id)
         if not record:
@@ -1025,16 +1023,6 @@ def _slice_rejit_result(
         error = str(record.get("error") or "").strip()
         if error:
             errors.append(error)
-        if isinstance(raw_effective_enabled, Mapping):
-            raw_passes = raw_effective_enabled.get(str(int(prog_id)))
-            if raw_passes is None:
-                raw_passes = raw_effective_enabled.get(int(prog_id))
-            if isinstance(raw_passes, Sequence) and not isinstance(raw_passes, (str, bytes, bytearray)):
-                effective_enabled_passes_by_program[str(int(prog_id))] = [
-                    str(pass_name)
-                    for pass_name in raw_passes
-                    if str(pass_name).strip()
-                ]
 
     applied_any = any(bool(record.get("applied")) for record in per_program.values())
     all_applied = bool(per_program) and all(bool(record.get("applied")) for record in per_program.values())
@@ -1060,7 +1048,6 @@ def _slice_rejit_result(
         "error": error_message,
         "selection_source": str(rejit_result.get("selection_source") or ""),
         "scan_enabled_passes": list(rejit_result.get("scan_enabled_passes") or []),
-        "effective_enabled_passes_by_program": effective_enabled_passes_by_program,
     }
     benchmark_profile = str(rejit_result.get("benchmark_profile") or "").strip()
     if benchmark_profile:
@@ -1456,7 +1443,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                     merged_rejit_result = _merge_group_rejit_results(
                         requested_prog_ids=requested_prog_ids,
                         group_results=group_rejit_results,
-                        enabled_passes_by_prog=apply_enabled_passes_by_prog,
                         scan_enabled_passes=scan_enabled_passes,
                         selection_source=selection_source,
                         benchmark_config=benchmark_config,
@@ -1613,16 +1599,6 @@ def build_run_metadata(
     resolved_samples: int,
     resolved_workload_seconds: float,
 ) -> dict[str, object]:
-    requested_rejit_passes = benchmark_rejit_enabled_passes()
-    selected_rejit_passes = collect_effective_enabled_passes(payload)
-    selected_rejit_passes_provenance = "effective_enabled_passes_by_program"
-    selected_rejit_passes_warning = ""
-    if not selected_rejit_passes:
-        selected_rejit_passes = []
-        selected_rejit_passes_provenance = "missing"
-        selected_rejit_passes_warning = (
-            "effective_enabled_passes_by_program provenance missing from corpus payload"
-        )
     metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite": "corpus",
@@ -1631,14 +1607,9 @@ def build_run_metadata(
         "samples": int(resolved_samples),
         "workload_seconds": float(resolved_workload_seconds),
         "kinsn_enabled": not bool(args.no_kinsn),
-        "selected_rejit_passes": selected_rejit_passes,
-        "selected_rejit_passes_provenance": selected_rejit_passes_provenance,
         "optimization_summary": payload.get("summary") if isinstance(payload, Mapping) else {},
     }
-    if selected_rejit_passes_warning:
-        metadata["selected_rejit_passes_warning"] = selected_rejit_passes_warning
-    if selected_rejit_passes_warning or selected_rejit_passes != requested_rejit_passes:
-        metadata["requested_rejit_passes"] = list(requested_rejit_passes)
+    metadata.update(benchmark_run_provenance())
     metadata.update(current_process_identity())
     return metadata
 

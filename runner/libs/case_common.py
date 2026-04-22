@@ -301,7 +301,6 @@ def _merge_group_rejit_results(
     *,
     requested_prog_ids: Sequence[int],
     group_results: Sequence[tuple[list[int], Mapping[str, object]]],
-    enabled_passes_by_prog: Mapping[int, Sequence[str]],
     scan_enabled_passes: Sequence[str],
     selection_source: str,
     benchmark_config: object | None,
@@ -363,10 +362,6 @@ def _merge_group_rejit_results(
         "program_counts": {"requested": n_req, "applied": n_applied, "not_applied": n_req - n_applied},
         "error": "; ".join(errors), "selection_source": selection_source,
         "scan_enabled_passes": list(scan_enabled_passes),
-        "effective_enabled_passes_by_program": {
-            str(int(prog_id)): [str(p) for p in enabled_passes_by_prog.get(int(prog_id), ())]
-            for prog_id in requested_prog_ids if int(prog_id) > 0
-        },
     }
     if isinstance(benchmark_config, Mapping) and (pn := str(benchmark_config.get("profile") or "").strip()):
         merged["benchmark_profile"] = pn
@@ -479,7 +474,6 @@ def run_case_lifecycle(
         rejit_result = _merge_group_rejit_results(
             requested_prog_ids=requested_prog_ids,
             group_results=group_rejit_results,
-            enabled_passes_by_prog=apply_enabled_passes_by_prog,
             scan_enabled_passes=scan_enabled_passes,
             selection_source=selection_source,
             benchmark_config=benchmark_config,

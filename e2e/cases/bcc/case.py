@@ -29,8 +29,6 @@ from runner.libs.bpf_stats import (  # noqa: E402
 )
 from runner.libs.rejit import (  # noqa: E402
     applied_site_totals_from_rejit_result,
-    benchmark_rejit_enabled_passes,
-    collect_effective_enabled_passes,
 )
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
@@ -483,7 +481,6 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
         raise RuntimeError("no tools selected")
 
     records: list[dict[str, object]] = []
-    default_requested_passes = [str(pass_name) for pass_name in benchmark_rejit_enabled_passes()]
     with enable_bpf_stats():
         for spec in selected:
             tool_binary = find_tool_binary(tools_dir, spec.name)
@@ -577,23 +574,12 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             speedups.append(float(speedup))
 
     errors = collect_record_errors(records)
-    selected_rejit_passes = collect_effective_enabled_passes(records)
-    selected_rejit_passes_provenance = "effective_enabled_passes_by_program"
-    selected_rejit_passes_warning = ""
-    if not selected_rejit_passes:
-        selected_rejit_passes = []
-        selected_rejit_passes_provenance = "missing"
-        selected_rejit_passes_warning = (
-            "effective_enabled_passes_by_program provenance missing from BCC records"
-        )
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": "error" if errors else "ok",
         "smoke": smoke,
         "duration_s": duration_s,
-        "selected_rejit_passes": selected_rejit_passes,
-        "selected_rejit_passes_provenance": selected_rejit_passes_provenance,
         "selected_tools": [spec.name for spec in selected],
         "tools_dir": str(tools_dir),
         "daemon": str(daemon_binary),
@@ -608,10 +594,6 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             "speedup_geomean": geomean(speedups),
         },
     }
-    if selected_rejit_passes_warning:
-        payload["selected_rejit_passes_warning"] = selected_rejit_passes_warning
-    if selected_rejit_passes_warning or selected_rejit_passes != default_requested_passes:
-        payload["requested_rejit_passes"] = list(default_requested_passes)
     if errors:
         payload["error_message"] = "; ".join(errors)
     return payload

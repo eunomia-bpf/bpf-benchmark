@@ -189,24 +189,6 @@ def _ordered_unique_passes(raw: Sequence[str] | Sequence[object]) -> list[str]:
 def _normalize_pass_list(raw: Any) -> list[str]:
     return _ordered_unique_passes(raw) if isinstance(raw, list) else []
 
-
-def collect_effective_enabled_passes(payload: object) -> list[str]:
-    raw: list[object] = []
-    def visit(node: object) -> None:
-        if isinstance(node, Mapping):
-            if isinstance(by_prog := node.get("effective_enabled_passes_by_program"), Mapping):
-                for passes in by_prog.values():
-                    if isinstance(passes, Sequence) and not isinstance(passes, (str, bytes, bytearray)):
-                        raw.extend(passes)
-            for value in node.values():
-                visit(value)
-        elif isinstance(node, Sequence) and not isinstance(node, (str, bytes, bytearray)):
-            for item in node:
-                visit(item)
-    visit(payload)
-    return _ordered_unique_passes(raw)
-
-
 def _policy_pass_list(raw: Any, *, field_name: str) -> list[str] | None:
     if raw is None:
         return None
@@ -325,6 +307,54 @@ def benchmark_config_enabled_passes(benchmark_config: Mapping[str, Any] | None) 
     )
 
 
+def _policy_exclusion_label(match_config: Mapping[str, Any], *, field_name: str) -> str:
+    prog_types = _policy_match_values(
+        match_config.get("prog_type"),
+        field_name=f"{field_name}.prog_type",
+    )
+    other_keys = [key for key in match_config if key != "prog_type"]
+    if len(prog_types) == 1 and not other_keys:
+        return prog_types[0]
+
+    parts: list[str] = []
+    for key, raw_value in match_config.items():
+        current_field = f"{field_name}.{key}"
+        if key == "has_sites":
+            values = _policy_pass_list(raw_value, field_name=current_field) or []
+        else:
+            values = _policy_match_values(raw_value, field_name=current_field)
+        if values:
+            parts.append(f"{key}=" + ",".join(values))
+    return " & ".join(parts) if parts else "default"
+
+
+def benchmark_policy_exclusions(benchmark_config: Mapping[str, Any] | None) -> dict[str, list[str]]:
+    policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
+    exclusions: dict[str, list[str]] = {}
+    for index, raw_rule in enumerate(_policy_rules_list(policy_config), start=1):
+        if not isinstance(raw_rule, Mapping):
+            raise SystemExit(f"invalid benchmark config field: policy.rules[{index}] must be a mapping")
+        disabled = _policy_pass_list(
+            raw_rule.get("disable"),
+            field_name=f"policy.rules[{index}].disable",
+        ) or []
+        if not disabled:
+            continue
+        match_config = _mapping_dict(
+            raw_rule.get("match"),
+            field_name=f"policy.rules[{index}].match",
+        )
+        label = _policy_exclusion_label(
+            match_config,
+            field_name=f"policy.rules[{index}].match",
+        )
+        current = exclusions.setdefault(label, [])
+        for pass_name in disabled:
+            if pass_name not in current:
+                current.append(pass_name)
+    return exclusions
+
+
 def _policy_rules_list(policy_config: Mapping[str, Any]) -> list[Any]:
     raw_rules = policy_config.get("rules")
     if raw_rules is None: return []
@@ -407,6 +437,14 @@ def benchmark_rejit_enabled_passes() -> list[str]:
             return list(_cached_benchmark_config_enabled_passes())
         return [token.strip() for token in text.split(",") if token.strip()]
     return list(_cached_benchmark_config_enabled_passes())
+
+
+def benchmark_run_provenance() -> dict[str, object]:
+    benchmark_config = load_benchmark_config()
+    return {
+        "config": {"enabled_passes": benchmark_rejit_enabled_passes()},
+        "policy": {"exclusions": benchmark_policy_exclusions(benchmark_config)},
+    }
 
 
 _SKIP_IN_PASS_TOTAL = frozenset(("lea_sites", "other_sites"))
@@ -847,4 +885,3 @@ class DaemonSession:
         return apply_daemon_rejit([int(p) for p in prog_ids if int(p) > 0], enabled_passes=enabled_passes,
                                    daemon_socket_path=self.socket_path, daemon_proc=self.proc,
                                    daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path)
-
