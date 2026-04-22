@@ -109,7 +109,19 @@ def _corpus_driver_argv(workspace: Path, args: argparse.Namespace, daemon_binary
         argv.extend(["--workload-seconds", str(args.corpus_workload_seconds)])
     for filter_name in args.corpus_filters or []:
         argv.extend(["--filter", str(filter_name)])
-    argv.extend(args.corpus_argv)
+    passthrough_argv: list[str] = []
+    skip_value = False
+    for token in args.corpus_argv:
+        if skip_value:
+            skip_value = False
+            continue
+        if token == "--rejit-passes":
+            skip_value = True
+            continue
+        if token.startswith("--rejit-passes="):
+            continue
+        passthrough_argv.append(token)
+    argv.extend(passthrough_argv)
     return argv
 
 

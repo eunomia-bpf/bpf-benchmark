@@ -95,7 +95,19 @@ def _e2e_driver_argv(workspace: Path, args: argparse.Namespace, case_name: str, 
         argv.extend(["--suite", str(resolve_workspace_path(workspace, args.suite))])
     if args.e2e_smoke:
         argv.append("--smoke")
-    argv.extend(args.e2e_argv)
+    passthrough_argv: list[str] = []
+    skip_value = False
+    for token in args.e2e_argv:
+        if skip_value:
+            skip_value = False
+            continue
+        if token == "--rejit-passes":
+            skip_value = True
+            continue
+        if token.startswith("--rejit-passes="):
+            continue
+        passthrough_argv.append(token)
+    argv.extend(passthrough_argv)
     return argv
 
 

@@ -191,11 +191,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--daemon", default=str(ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"))
     parser.add_argument(
-        "--rejit-passes",
-        default=None,
-        help="Comma-separated ReJIT passes to enable for e2e apply. Pass an empty string to run zero passes.",
-    )
-    parser.add_argument(
         "--no-kinsn",
         action="store_true",
         help="Disable loading kinsn modules for this e2e run.",

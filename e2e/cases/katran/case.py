@@ -89,11 +89,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="Katran workload profile to execute.",
     )
     parser.add_argument(
-        "--rejit-passes",
-        default=None,
-        help="Comma-separated ReJIT passes to enable. Pass an empty string to run zero passes.",
-    )
-    parser.add_argument(
         "--no-kinsn",
         action="store_true",
         help="Disable loading kinsn modules for this Katran run.",

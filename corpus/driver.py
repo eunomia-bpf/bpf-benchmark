@@ -67,11 +67,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--filter", action="append", dest="filters")
     parser.add_argument(
-        "--rejit-passes",
-        default=None,
-        help="Comma-separated ReJIT passes to enable for corpus apply. Pass an empty string to run zero passes.",
-    )
-    parser.add_argument(
         "--no-kinsn",
         action="store_true",
         help="Disable loading kinsn modules for this corpus run.",
