@@ -37,9 +37,10 @@ def _save_state(ctx: aws_common.AwsExecutorContext, *, instance_id: str, instanc
 
 
 def _require_aws_success(completed: subprocess.CompletedProcess[str], *, operation: str) -> None:
-    if completed.returncode == 0:
+    stderr = completed.stderr.strip()
+    if completed.returncode == 0 and not stderr:
         return
-    detail = completed.stderr.strip() or completed.stdout.strip()
+    detail = stderr or completed.stdout.strip()
     if detail:
         _die(f"{operation} failed: {detail}")
     raise SystemExit(completed.returncode)
@@ -56,17 +57,31 @@ def _describe_instance_type(ctx: aws_common.AwsExecutorContext, instance_id: str
     completed = aws_common._aws_cmd(ctx, "ec2", "describe-instances",
         "--instance-ids", instance_id, "--query", "Reservations[0].Instances[0].InstanceType",
         "--output", "text", capture_output=True)
-    return completed.stdout.strip() if completed.returncode == 0 else ""
+    aws_common._require_aws_query_success(
+        completed,
+        operation=f"describe instance type for {instance_id}",
+    )
+    value = completed.stdout.strip()
+    return "" if value == "None" else value
 
 
 def _describe_instance_launch_contract(ctx: aws_common.AwsExecutorContext, instance_id: str) -> tuple[str, str, str, str]:
     completed = aws_common._aws_cmd(ctx, "ec2", "describe-instances", "--instance-ids", instance_id, "--query",
         "Reservations[0].Instances[0].[ImageId,KeyName,SubnetId,join(',', sort_by(SecurityGroups,&GroupId)[].GroupId)]",
         "--output", "text", capture_output=True)
-    if completed.returncode != 0:
-        return "", "", "", ""
+    aws_common._require_aws_query_success(
+        completed,
+        operation=f"describe launch contract for {instance_id}",
+    )
     parts = completed.stdout.strip().split()
-    return (parts[0], parts[1], parts[2], parts[3]) if len(parts) >= 4 else ("", "", "", "")
+    if not parts or parts[0] == "None":
+        return "", "", "", ""
+    if len(parts) < 4:
+        _die(
+            f"describe launch contract for {instance_id} returned unexpected output: "
+            f"{completed.stdout.strip() or '<empty>'}"
+        )
+    return tuple("" if part == "None" else part for part in parts[:4])  # type: ignore[return-value]
 
 
 def _lookup_existing_instance(ctx: aws_common.AwsExecutorContext, *, ami_id: str, key_name: str,
@@ -78,10 +93,23 @@ def _lookup_existing_instance(ctx: aws_common.AwsExecutorContext, *, ami_id: str
         f"Name=subnet-id,Values={subnet_id}", "Name=instance-state-name,Values=pending,running",
         "--query", "Reservations[].Instances[0].[InstanceId,State.Name,PublicIpAddress]",
         "--output", "text", capture_output=True)
-    if completed.returncode != 0:
-        return "", "", ""
+    aws_common._require_aws_query_success(
+        completed,
+        operation=f"lookup reusable instance for {_effective_name_tag(ctx)}",
+    )
     tokens = completed.stdout.strip().split()
-    return (tokens[0], tokens[1], tokens[2]) if len(tokens) >= 3 else ("", "", "")
+    if not tokens or tokens[0] == "None":
+        return "", "", ""
+    if len(tokens) < 3:
+        _die(
+            "lookup reusable instance returned unexpected output: "
+            + (completed.stdout.strip() or "<empty>")
+        )
+    return (
+        "" if tokens[0] == "None" else tokens[0],
+        "" if tokens[1] == "None" else tokens[1],
+        "" if tokens[2] == "None" else tokens[2],
+    )
 
 
 def _resolve_root_device_name(ctx: aws_common.AwsExecutorContext, ami_id: str) -> str:
@@ -260,7 +288,7 @@ def _reboot_and_wait_for_new_boot(ctx: aws_common.AwsExecutorContext,
     _die(f"timed out waiting for {instance_id} to reboot; last probe: {last}; full log: {log_path}")
 
 
-def _remote_root_volume_size_gb(ctx: aws_common.AwsExecutorContext, ip: str) -> int | None:
+def _remote_root_volume_size_gb(ctx: aws_common.AwsExecutorContext, ip: str) -> int:
     script = (
         "root_source=$(findmnt -n -o SOURCE / 2>/dev/null) || exit 1; "
         "root_device=\"$root_source\"; "
@@ -271,9 +299,15 @@ def _remote_root_volume_size_gb(ctx: aws_common.AwsExecutorContext, ip: str) -> 
     )
     completed = aws_common._ssh_exec(ctx, ip, "bash", "-c", script, check=False, capture_output=True)
     if completed.returncode != 0:
-        return None
+        detail = completed.stderr.strip() or completed.stdout.strip() or "unknown error"
+        _die(f"failed to probe root volume size on {ip}: {detail}")
     value = completed.stdout.strip()
-    return int(value) if value.isdigit() else None
+    if not value.isdigit():
+        _die(
+            f"failed to parse root volume size on {ip}: "
+            f"{value or '<empty>'}"
+        )
+    return int(value)
 
 
 def _remote_has_runtime_btf(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
@@ -519,7 +553,7 @@ def _ensure_instance_for_suite(ctx: aws_common.AwsExecutorContext) -> str:
     aws_common._wait_for_ssh(ctx, instance_ip)
 
     root_volume_gb = _remote_root_volume_size_gb(ctx, instance_ip)
-    if root_volume_gb is not None and root_volume_gb < int(_require(ctx.contract, "RUN_ROOT_VOLUME_GB")):
+    if root_volume_gb < int(_require(ctx.contract, "RUN_ROOT_VOLUME_GB")):
         aws_common._terminate_instance(ctx, state.get("STATE_INSTANCE_ID", "").strip())
         _launch_instance(ctx)
         state = aws_common._load_instance_state(ctx)
@@ -564,11 +598,22 @@ def _sync_remote_roots(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     aws_common._scp_to(ctx, ip, image_tar, remote_path)
 
 
-def _sync_remote_results(ctx: aws_common.AwsExecutorContext, ip: str, remote_workspace: str) -> Path | None:
+def _sync_remote_results(
+    ctx: aws_common.AwsExecutorContext,
+    ip: str,
+    remote_workspace: str,
+    *,
+    require_present: bool,
+) -> Path | None:
     relative_results = _suite_results_relative_path(ctx.suite_name)
     remote_results = f"{remote_workspace}/{relative_results}"
     local_results = ROOT_DIR / relative_results
     if aws_common._ssh_exec(ctx, ip, "test", "-e", remote_results, check=False).returncode != 0:
+        if require_present:
+            _die(
+                f"remote {ctx.target_name}/{ctx.suite_name} suite completed without results: "
+                f"{remote_results}"
+            )
         return None
     _pull_remote_dir(ctx, ip, remote_results, local_results)
     return local_results
@@ -635,7 +680,12 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_pa
     remote_completed = aws_common._ssh_exec(ctx, ip, "bash", "-c", run_cmd, check=False)
     if aws_common._ssh_exec(ctx, ip, "test", "-e", remote_log, check=False).returncode == 0:
         aws_common._scp_from(ctx, ip, remote_log, local_log)
-    local_results = _sync_remote_results(ctx, ip, remote_workspace)
+    local_results = _sync_remote_results(
+        ctx,
+        ip,
+        remote_workspace,
+        require_present=remote_completed.returncode == 0,
+    )
     if remote_completed.returncode != 0:
         _die(f"remote {ctx.target_name}/{ctx.suite_name} suite failed; inspect {local_log}")
     remote_scratch = str(Path(remote_workspace) / "docs" / "tmp" / "runtime-container-tmp" / ctx.run_token)
@@ -644,17 +694,21 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_pa
           + (str(local_results) if local_results is not None else "no result directory"), file=sys.stderr)
 
 
-def _cleanup_failed_run(ctx: aws_common.AwsExecutorContext, state: dict[str, str] | None = None) -> None:
+def _cleanup_failed_run(ctx: aws_common.AwsExecutorContext, state: dict[str, str] | None = None) -> str | None:
     current_state = dict(state or {})
     if not current_state:
         current_state = aws_common._load_instance_state(ctx)
     instance_id = current_state.get("STATE_INSTANCE_ID", "").strip()
+    cleanup_error = ""
     if instance_id:
         try:
             aws_common._terminate_instance(ctx, instance_id)
-        except Exception as exc:
-            print(f"[aws-executor][WARN] failed to terminate failed-run instance {instance_id}: {exc}", file=sys.stderr)
+        except BaseException as exc:
+            detail = str(exc).strip() or f"instance termination failed for {instance_id}"
+            cleanup_error = f"failed to terminate failed-run instance {instance_id}: {detail}"
+            print(f"[aws-executor][ERROR] {cleanup_error}", file=sys.stderr)
     print(f"[aws-executor][WARN] preserved failed-run state: {ctx.run_state_dir}", file=sys.stderr)
+    return cleanup_error or None
 
 
 def cleanup_failed_run_for_config(config_path: Path) -> None:
@@ -670,8 +724,10 @@ def _run_aws(ctx: aws_common.AwsExecutorContext, suite_args_path: Path | None) -
         instance_ip = _ensure_instance_for_suite(ctx)
         state = aws_common._load_instance_state(ctx)
         _run_remote_suite(ctx, instance_ip, suite_args_path)
-    except BaseException:
-        _cleanup_failed_run(ctx, state or None)
+    except BaseException as exc:
+        cleanup_error = _cleanup_failed_run(ctx, state or None)
+        if cleanup_error and hasattr(exc, "add_note"):
+            exc.add_note(cleanup_error)
         raise
     aws_common._terminate_instance(ctx, state.get("STATE_INSTANCE_ID", "").strip())
     shutil.rmtree(ctx.run_state_dir, ignore_errors=True)

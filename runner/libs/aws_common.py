@@ -58,13 +58,32 @@ def _aws_cmd(ctx: AwsExecutorContext, *args: str, capture_output: bool = False) 
                           cwd=ROOT_DIR, env=env, text=True, capture_output=capture_output, check=False)
 
 
+def _require_aws_query_success(completed: subprocess.CompletedProcess[str], *, operation: str) -> None:
+    stderr = completed.stderr.strip()
+    if completed.returncode == 0 and not stderr:
+        return
+    detail = stderr or completed.stdout.strip() or f"exit code {completed.returncode}"
+    _die(f"{operation} failed: {detail}")
+
+
 def _describe_instance(ctx: AwsExecutorContext, instance_id: str) -> tuple[str, str, str]:
     completed = _aws_cmd(ctx, "ec2", "describe-instances", "--instance-ids", instance_id,
                          "--query", "Reservations[0].Instances[0].[InstanceId,State.Name,PublicIpAddress]",
                          "--output", "text", capture_output=True)
-    if completed.returncode != 0: return "", "", ""
+    _require_aws_query_success(completed, operation=f"describe instance {instance_id}")
     tokens = completed.stdout.strip().split()
-    return (tokens[0], tokens[1], tokens[2]) if len(tokens) >= 3 else ("", "", "")
+    if not tokens or tokens[0] == "None":
+        return "", "", ""
+    if len(tokens) < 3:
+        _die(
+            f"describe instance {instance_id} returned unexpected output: "
+            f"{completed.stdout.strip() or '<empty>'}"
+        )
+    return (
+        "" if tokens[0] == "None" else tokens[0],
+        "" if tokens[1] == "None" else tokens[1],
+        "" if tokens[2] == "None" else tokens[2],
+    )
 
 
 def _lookup_target_instance_ids(ctx: AwsExecutorContext) -> list[str]:
@@ -73,7 +92,10 @@ def _lookup_target_instance_ids(ctx: AwsExecutorContext) -> list[str]:
                          f"Name=tag:Role,Values={ctx.target_name}",
                          "Name=instance-state-name,Values=pending,running,stopping,stopped",
                          "--query", "Reservations[].Instances[].InstanceId", "--output", "text", capture_output=True)
-    if completed.returncode != 0: return []
+    _require_aws_query_success(
+        completed,
+        operation=f"lookup target instances for {ctx.target_name}",
+    )
     return [token for token in completed.stdout.split() if token and token != "None"]
 
 
