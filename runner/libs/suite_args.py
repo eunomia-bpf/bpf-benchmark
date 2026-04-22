@@ -105,11 +105,10 @@ def suite_args_from_env(
             extra_args = _prefixed_env(values, prefix, "CORPUS_ARGS")
         else:
             samples = _env(values, "SAMPLES") or _env(values, "VM_CORPUS_SAMPLES", "30")
-            warmups = _env(values, "WARMUPS", "0")
             filters = _env(values, "FILTERS")
             workload_seconds = _env(values, "VM_CORPUS_WORKLOAD_SECONDS")
             extra_args = _env(values, "VM_CORPUS_ARGS")
-        args.extend(["--samples", samples, "--warmups", warmups])
+        args.extend(["--samples", samples])
         _append_value(args, "--corpus-filters", filters)
         _append_value(args, "--corpus-workload-seconds", workload_seconds)
         _append_shell_args(args, extra_args)

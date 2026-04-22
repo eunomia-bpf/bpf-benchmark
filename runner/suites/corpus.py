@@ -40,7 +40,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--daemon-binary", default="", help="Override the bpfrejit-daemon binary path.")
     parser.add_argument("--suite", default="", help="Path to the corpus app suite YAML manifest.")
     parser.add_argument("--samples", type=nonnegative_int, required=True, help="Measured samples per corpus app; 0 uses suite defaults.")
-    parser.add_argument("--warmups", type=nonnegative_int, default=0, help="Accepted for run-contract parity; corpus ignores warmups.")
     parser.add_argument("--output-json", default="", help="JSON output path.")
     parser.add_argument("--output-md", default="", help="Markdown output path.")
     parser.add_argument(
