@@ -1409,15 +1409,20 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         sessions.append(session)
                         active_sessions.append(session)
                     except Exception as exc:
+                        stop_error = ""
                         if runner is not None:
                             try:
                                 runner.stop()
-                            except Exception:
-                                pass
+                            except Exception as stop_exc:
+                                stop_error = str(stop_exc)
+                        error_message = str(exc)
+                        if stop_error:
+                            error_message = f"{error_message}; stop failed: {stop_error}"
                         result = _build_app_error_result(
                             app,
                             workload_seconds=app_workload_seconds,
-                            error=str(exc),
+                            error=error_message,
+                            runner=runner,
                         )
                         results_by_name[app.name] = result
                         completed_apps.add(app.name)
@@ -1700,8 +1705,14 @@ def build_run_metadata(
 ) -> dict[str, object]:
     requested_rejit_passes = benchmark_rejit_enabled_passes()
     selected_rejit_passes = collect_effective_enabled_passes(payload)
+    selected_rejit_passes_provenance = "effective_enabled_passes_by_program"
+    selected_rejit_passes_warning = ""
     if not selected_rejit_passes:
-        selected_rejit_passes = list(requested_rejit_passes)
+        selected_rejit_passes = []
+        selected_rejit_passes_provenance = "missing"
+        selected_rejit_passes_warning = (
+            "effective_enabled_passes_by_program provenance missing from corpus payload"
+        )
     metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite": "corpus",
@@ -1711,9 +1722,12 @@ def build_run_metadata(
         "workload_seconds": float(resolved_workload_seconds),
         "kinsn_enabled": not bool(args.no_kinsn),
         "selected_rejit_passes": selected_rejit_passes,
+        "selected_rejit_passes_provenance": selected_rejit_passes_provenance,
         "optimization_summary": payload.get("summary") if isinstance(payload, Mapping) else {},
     }
-    if selected_rejit_passes != requested_rejit_passes:
+    if selected_rejit_passes_warning:
+        metadata["selected_rejit_passes_warning"] = selected_rejit_passes_warning
+    if selected_rejit_passes_warning or selected_rejit_passes != requested_rejit_passes:
         metadata["requested_rejit_passes"] = list(requested_rejit_passes)
     metadata.update(current_process_identity())
     return metadata

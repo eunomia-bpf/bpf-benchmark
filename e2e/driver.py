@@ -463,13 +463,28 @@ def build_run_metadata(
     payload: dict[str, object],
 ) -> dict[str, object]:
     requested_rejit_passes = benchmark_rejit_enabled_passes()
-    selected_rejit_passes = collect_effective_enabled_passes(payload)
-    if not selected_rejit_passes:
-        selected_rejit_passes = list(requested_rejit_passes)
-    if isinstance(payload, dict):
-        payload_selected_passes = payload.get("selected_rejit_passes")
-        if not selected_rejit_passes and isinstance(payload_selected_passes, list):
-            selected_rejit_passes = [str(pass_name) for pass_name in payload_selected_passes]
+    selected_rejit_passes_provenance = "effective_enabled_passes_by_program"
+    selected_rejit_passes_warning = ""
+    payload_selected_passes: list[str] | None = None
+    if isinstance(payload, dict) and isinstance(payload.get("selected_rejit_passes"), list):
+        payload_selected_passes = [
+            str(pass_name).strip()
+            for pass_name in payload.get("selected_rejit_passes", [])
+            if str(pass_name).strip()
+        ]
+        selected_rejit_passes_provenance = (
+            str(payload.get("selected_rejit_passes_provenance") or "").strip() or "payload"
+        )
+        selected_rejit_passes_warning = str(
+            payload.get("selected_rejit_passes_warning") or ""
+        ).strip()
+    if payload_selected_passes is not None:
+        selected_rejit_passes = payload_selected_passes
+    else:
+        selected_rejit_passes = collect_effective_enabled_passes(payload)
+        if not selected_rejit_passes:
+            selected_rejit_passes = list(requested_rejit_passes)
+            selected_rejit_passes_provenance = "requested_fallback"
     metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite": "e2e",
@@ -477,8 +492,11 @@ def build_run_metadata(
         "smoke": bool(args.smoke),
         "kinsn_enabled": not _args_no_kinsn(args),
         "selected_rejit_passes": selected_rejit_passes,
+        "selected_rejit_passes_provenance": selected_rejit_passes_provenance,
         "optimization_summary": _trim_e2e_value(payload),
     }
+    if selected_rejit_passes_warning:
+        metadata["selected_rejit_passes_warning"] = selected_rejit_passes_warning
     if selected_rejit_passes != requested_rejit_passes:
         metadata["requested_rejit_passes"] = list(requested_rejit_passes)
     metadata.update(current_process_identity())
@@ -544,14 +562,16 @@ def _run_single_case(
             if report_md is None:
                 raise RuntimeError(f"{args.case} requires a report output path")
             detail_texts["report.md"] = spec.build_report(payload) + "\n"
+        raw_payload_status = payload.get("status") if isinstance(payload, dict) else None
         payload_status = _payload_status(payload)
         if payload_status not in {"ok", "error"}:
+            invalid_payload_status = raw_payload_status
             payload_status = "error"
             if isinstance(payload, dict):
-                payload.setdefault("status", "error")
+                payload["status"] = "error"
                 payload.setdefault(
                     "error_message",
-                    f"{args.case} returned an invalid status: {payload.get('status')!r}",
+                    f"{args.case} returned an invalid status: {invalid_payload_status!r}",
                 )
 
         completed_at = datetime.now(timezone.utc).isoformat()
@@ -642,10 +662,8 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"\n{'='*60}")
                 print(f"  e2e: running {case_name}")
                 print(f"{'='*60}")
-                case_argv = [case_name] + [
-                    a for a in (argv or sys.argv[1:]) if a != "all"
-                ]
-                case_args = parser.parse_args(case_argv)
+                case_args = argparse.Namespace(**vars(args))
+                case_args.case = case_name
                 apply_case_defaults(case_args)
                 apply_suite_case_config(case_args, suite_case_apps)
                 try:

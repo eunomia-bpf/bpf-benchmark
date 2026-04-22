@@ -541,9 +541,6 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
                 },
                 prepared_daemon_session=prepared_daemon_session,
             )
-            selected_passes = collect_effective_enabled_passes({"rejit": rejit})
-            if not selected_passes:
-                selected_passes = list(default_requested_passes)
             summary = summarize_tool(spec, baseline, rejit)
             record = {
                 "name": spec.name,
@@ -581,8 +578,14 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
 
     errors = collect_record_errors(records)
     selected_rejit_passes = collect_effective_enabled_passes(records)
+    selected_rejit_passes_provenance = "effective_enabled_passes_by_program"
+    selected_rejit_passes_warning = ""
     if not selected_rejit_passes:
-        selected_rejit_passes = list(default_requested_passes)
+        selected_rejit_passes = []
+        selected_rejit_passes_provenance = "missing"
+        selected_rejit_passes_warning = (
+            "effective_enabled_passes_by_program provenance missing from BCC records"
+        )
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -590,6 +593,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
         "smoke": smoke,
         "duration_s": duration_s,
         "selected_rejit_passes": selected_rejit_passes,
+        "selected_rejit_passes_provenance": selected_rejit_passes_provenance,
         "selected_tools": [spec.name for spec in selected],
         "tools_dir": str(tools_dir),
         "daemon": str(daemon_binary),
@@ -604,7 +608,9 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             "speedup_geomean": geomean(speedups),
         },
     }
-    if selected_rejit_passes != default_requested_passes:
+    if selected_rejit_passes_warning:
+        payload["selected_rejit_passes_warning"] = selected_rejit_passes_warning
+    if selected_rejit_passes_warning or selected_rejit_passes != default_requested_passes:
         payload["requested_rejit_passes"] = list(default_requested_passes)
     if errors:
         payload["error_message"] = "; ".join(errors)
