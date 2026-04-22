@@ -43,7 +43,6 @@ E2E_CASE ?= all
 E2E_SMOKE ?= 0
 VM_CORPUS_ARGS ?=
 REPOS ?=
-PROFILE ?=
 FILTERS ?=
 TEST_MODE ?= test
 SAMPLES    ?= 3
@@ -61,7 +60,6 @@ SCX_PROG_SHOW_RACE_MODE ?= bpftool-loop
 SCX_PROG_SHOW_RACE_ITERATIONS ?= 20
 SCX_PROG_SHOW_RACE_LOAD_TIMEOUT ?= 20
 SCX_PROG_SHOW_RACE_SKIP_PROBE ?= 0
-KALLSYMS_EXTRA_PASS ?= 1
 
 # Results
 MICRO_RESULTS_DIR      := $(ROOT_DIR)/micro/results
@@ -105,7 +103,7 @@ help:
 	@echo "  AWS x86:  aws-x86-test aws-x86-benchmark aws-x86-terminate"
 	@echo "Params: vm-micro SAMPLES=$(SAMPLES) WARMUPS=$(WARMUPS) INNER_REPEAT=$(INNER_REPEAT) BENCH=\"...\""
 	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) FILTERS=\"...\" VM_CORPUS_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
-	@echo "        vm-e2e E2E_CASE=\"all|tracee|...\" E2E_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\" PROFILE=$(PROFILE)"
+	@echo "        vm-e2e E2E_CASE=\"all|tracee|...\" E2E_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
 	@echo "        aws-arm64-test/aws-arm64-benchmark AWS_ARM64_REGION=<region> AWS_ARM64_PROFILE=<profile> AWS_ARM64_ROOT_VOLUME_GB=<override>"
 	@echo "        aws-arm64-test AWS_ARM64_TEST_MODE=<selftest|negative|test>"
 	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=<micro|corpus|e2e> AWS_ARM64_E2E_CASES=<all|tracee,tetragon,...>"
