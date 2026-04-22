@@ -4,6 +4,9 @@
 [submodule "vendor/libbpf"]
 	path = vendor/libbpf
 	url = https://github.com/libbpf/libbpf.git
+[submodule "vendor/linux-framework"]
+	path = vendor/linux-framework
+	url = https://github.com/eunomia-bpf/linux.git
 [submodule "docs/paper"]
 	path = docs/paper
 	url = https://github.com/yunwei37/bpfrejit-paper
