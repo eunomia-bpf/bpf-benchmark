@@ -234,8 +234,9 @@ def _bpftool_map_update_batch(updates: list[tuple[int, bytes, bytes]]) -> None:
     try:
         run_command([resolve_bpftool_binary(), "batch", "file", batch_path], timeout=max(60, (len(updates) // 500) + 30))
     finally:
-        try: os.unlink(batch_path)
-        except FileNotFoundError: pass
+        batch_file = Path(batch_path)
+        if batch_file.exists():
+            batch_file.unlink()
 
 
 def _bpftool_prog_test_run(prog_id: int, packet: bytes, *, repeat: int = 1) -> dict[str, object]:
@@ -246,15 +247,15 @@ def _bpftool_prog_test_run(prog_id: int, packet: bytes, *, repeat: int = 1) -> d
         result = run_json_command([resolve_bpftool_binary(), "-j", "prog", "run", "id", str(prog_id),
              "data_in", in_path, "data_out", out_path, "repeat", str(max(1, int(repeat)))], timeout=max(30, repeat // 100 + 30))
         if not isinstance(result, dict): raise RuntimeError(f"bpftool prog run returned unexpected payload: {result!r}")
-        try: out_data = Path(out_path).read_bytes()
-        except FileNotFoundError: out_data = b""
+        out_data = Path(out_path).read_bytes()
         return {"retval": int(result.get("retval", -1)), "duration_ns": int(result.get("duration", 0)),
                 "repeat": max(1, int(repeat)), "data_size_in": len(packet),
                 "data_size_out": len(out_data), "data_out_preview_hex": out_data[:32].hex()}
     finally:
-        for path in (in_path, out_path):
-            try: os.unlink(path)
-            except FileNotFoundError: pass
+        Path(in_path).unlink()
+        out_file = Path(out_path)
+        if out_file.exists():
+            out_file.unlink()
 
 
 class KatranDsrTopology:
