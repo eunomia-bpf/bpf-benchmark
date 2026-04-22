@@ -1349,7 +1349,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                                 session.app,
                                 session.runner,
                                 session.state,
-                                measurement_mode=session.measurement_mode,
                                 baseline_measurement=session.baseline_measurement,
                             )
                             surviving_sessions.append(session)
