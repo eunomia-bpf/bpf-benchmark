@@ -241,16 +241,6 @@ def _default_extra_args() -> tuple[str, ...]:
     return tuple(str(arg) for arg in raw_args if str(arg).strip())
 
 
-def _default_expected_program_names() -> tuple[str, ...]:
-    payload = yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict):
-        raise RuntimeError(f"Tetragon config must be a mapping: {DEFAULT_CONFIG}")
-    raw_names = payload.get("target_programs") or []
-    if not isinstance(raw_names, Sequence) or isinstance(raw_names, (str, bytes, bytearray)):
-        raise RuntimeError(f"Tetragon config field 'target_programs' must be a sequence: {DEFAULT_CONFIG}")
-    return tuple(str(name) for name in raw_names if str(name).strip())
-
-
 def _select_programs_by_name(
     programs: Sequence[Mapping[str, object]],
     expected_names: Sequence[str],
@@ -278,8 +268,7 @@ class TetragonRunner(AppRunner):
         super().__init__()
         self.tetragon_binary = None if tetragon_binary is None else Path(tetragon_binary).resolve()
         self.tetragon_extra_args = tuple(str(arg) for arg in (tetragon_extra_args or _default_extra_args()) if str(arg).strip())
-        if expected_program_names is None:
-            expected_program_names = _default_expected_program_names()
+        expected_program_names = () if expected_program_names is None else expected_program_names
         self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.load_timeout_s = int(load_timeout_s); self.setup_result: dict[str, object] | None = None
         self.tempdir: tempfile.TemporaryDirectory[str] | None = None; self.policy_paths: list[Path] = []
