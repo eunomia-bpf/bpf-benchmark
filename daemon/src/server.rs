@@ -10,7 +10,7 @@ use serde::Serialize;
 
 use crate::commands::{self, OptimizeMode};
 use crate::invalidation::{MapInvalidationTracker, MapValueReader};
-use crate::{bpf, insn, pass, profiler};
+use crate::{bpf, pass, profiler};
 
 const DEFAULT_HOTNESS_WINDOW_MS: u64 = 250;
 
@@ -43,13 +43,18 @@ where
         tracker.check_for_invalidations()?
     };
 
+    let mut failures = Vec::new();
     for prog_id in &invalidated {
         if let Err(err) = reoptimize(*prog_id) {
-            eprintln!(
-                "  invalidation: prog {} reoptimization failed: {:#}",
-                prog_id, err
-            );
+            failures.push(format!("prog {}: {:#}", prog_id, err));
         }
+    }
+
+    if !failures.is_empty() {
+        anyhow::bail!(
+            "invalidation reoptimization failed for {}",
+            failures.join("; ")
+        );
     }
 
     Ok(invalidated)
@@ -59,13 +64,14 @@ fn run_invalidation_tick_logged<A, F>(
     context: &str,
     tracker: &std::sync::Arc<std::sync::Mutex<MapInvalidationTracker<A>>>,
     reoptimize: F,
-) where
+) -> Result<()>
+where
     A: MapValueReader,
     F: FnMut(u32) -> Result<()>,
 {
-    if let Err(err) = process_invalidation_tick(tracker, reoptimize) {
-        eprintln!("{context}: invalidation tick failed: {:#}", err);
-    }
+    process_invalidation_tick(tracker, reoptimize)
+        .with_context(|| format!("{context}: invalidation tick failed"))?;
+    Ok(())
 }
 
 enum ProfilingState {
@@ -114,15 +120,17 @@ fn collect_live_program_candidates() -> Result<Vec<LiveProgramCandidate>> {
         let prog_id = prog_id.context("enumerate program IDs for optimize-all")?;
         let (info, orig_insns) = bpf::get_orig_insns_by_id(prog_id)
             .with_context(|| format!("collect optimize-all metadata for prog {}", prog_id))?;
-        let orig_insn_count = if !orig_insns.is_empty() {
-            orig_insns.len()
-        } else {
-            info.orig_prog_len as usize / std::mem::size_of::<insn::BpfInsn>()
-        };
+        if orig_insns.is_empty() {
+            anyhow::bail!(
+                "prog {} ({}) is missing original bytecode from BPF_PROG_GET_ORIGINAL",
+                prog_id,
+                info.name_str()
+            );
+        }
         candidates.push(LiveProgramCandidate {
             prog_id,
             prog_name: info.name_str().to_string(),
-            orig_insn_count,
+            orig_insn_count: orig_insns.len(),
         });
     }
     Ok(candidates)
@@ -189,6 +197,14 @@ fn optimize_all_order_from_ranking(
     ordered
 }
 
+fn remove_socket_file_if_present(socket_path: &str) -> Result<()> {
+    match std::fs::remove_file(socket_path) {
+        Ok(()) => Ok(()),
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(err) => Err(err).with_context(|| format!("remove stale socket file {}", socket_path)),
+    }
+}
+
 // ── Serve (Unix socket server) ──────────────────────────────────────
 
 pub(crate) fn cmd_serve(socket_path: &str, ctx: &pass::PassContext) -> Result<()> {
@@ -200,7 +216,7 @@ pub(crate) fn cmd_serve(socket_path: &str, ctx: &pass::PassContext) -> Result<()
     let mut profiling_state: Option<ProfilingState> = None;
 
     // Remove stale socket file if it exists.
-    let _ = std::fs::remove_file(socket_path);
+    remove_socket_file_if_present(socket_path)?;
 
     let listener = UnixListener::bind(socket_path)
         .with_context(|| format!("bind unix socket at {}", socket_path))?;
@@ -234,7 +250,7 @@ pub(crate) fn cmd_serve(socket_path: &str, ctx: &pass::PassContext) -> Result<()
                     );
                 }
                 Ok(())
-            });
+            })?;
             last_invalidation_check = Instant::now();
         }
 
@@ -263,7 +279,7 @@ pub(crate) fn cmd_serve(socket_path: &str, ctx: &pass::PassContext) -> Result<()
             );
         }
     }
-    let _ = std::fs::remove_file(socket_path);
+    remove_socket_file_if_present(socket_path)?;
     Ok(())
 }
 
@@ -846,6 +862,31 @@ mod tests {
             *seen.lock().expect("seen lock should not be poisoned"),
             vec![101]
         );
+    }
+
+    #[test]
+    fn process_invalidation_tick_propagates_reoptimization_failures() {
+        let reader = MockMapValueReader::default();
+        reader.set_value(7, 1u32.to_le_bytes().to_vec(), 99u32.to_le_bytes().to_vec());
+
+        let mut tracker = MapInvalidationTracker::new(reader);
+        tracker.record_inline_site(
+            101,
+            7,
+            1u32.to_le_bytes().to_vec(),
+            11u32.to_le_bytes().to_vec(),
+        );
+        let tracker = Arc::new(Mutex::new(tracker));
+
+        let err = process_invalidation_tick(&tracker, |_prog_id| {
+            anyhow::bail!("reoptimization failed")
+        })
+        .expect_err("process_invalidation_tick should fail when reoptimization fails");
+
+        let message = format!("{err:#}");
+        assert!(message.contains("invalidation reoptimization failed"));
+        assert!(message.contains("prog 101"));
+        assert!(message.contains("reoptimization failed"));
     }
 
     #[test]
