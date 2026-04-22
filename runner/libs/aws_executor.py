@@ -187,7 +187,7 @@ def _create_runtime_image_container(image_ref: str, image_tar: Path) -> str:
                                 cwd=ROOT_DIR, text=True, check=False, capture_output=True)
     if create.returncode != 0:
         detail = create.stderr.strip() or create.stdout.strip()
-        _die(f"create runtime image container failed" + (f": {detail}" if detail else ""))
+        _die("create runtime image container failed" + (f": {detail}" if detail else ""))
     cid = create.stdout.strip()
     if not cid:
         _die("docker create returned an empty container id")

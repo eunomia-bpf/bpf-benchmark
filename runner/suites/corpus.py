@@ -10,22 +10,22 @@ from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
+from runner.libs.workspace_layout import inside_runtime_image
 from runner.suites._common import (
     add_common_args,
-    argv_option_value,
-    base_suite_runtime_env,
     ensure_bpf_stats_enabled,
     ensure_katran_artifacts,
     ensure_scx_artifacts,
     env_with_suite_runtime_ld,
-    inside_runtime_image,
     merge_csv_and_repeated,
     nonnegative_int,
     resolve_daemon_binary,
     resolve_executable,
     resolve_workspace_path,
     run_checked,
+    strip_option_with_value,
     suite_main_setup,
+    suite_runtime_env_with_rejit_passes,
 )
 
 _die = partial(fail, "corpus-suite")
@@ -81,10 +81,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def _runtime_env(workspace: Path, args: argparse.Namespace) -> dict[str, str]:
-    env = base_suite_runtime_env(workspace, args, "corpus", _die)
-    if rejit_passes := argv_option_value(args.corpus_argv, "--rejit-passes", _die):
-        env["BPFREJIT_BENCH_PASSES"] = rejit_passes
-    return env
+    return suite_runtime_env_with_rejit_passes(workspace, args, "corpus", args.corpus_argv, _die)
 
 
 def _corpus_driver_argv(workspace: Path, args: argparse.Namespace, daemon_binary: Path) -> list[str]:
@@ -108,19 +105,7 @@ def _corpus_driver_argv(workspace: Path, args: argparse.Namespace, daemon_binary
         argv.extend(["--workload-seconds", str(args.corpus_workload_seconds)])
     for filter_name in args.corpus_filters or []:
         argv.extend(["--filter", str(filter_name)])
-    passthrough_argv: list[str] = []
-    skip_value = False
-    for token in args.corpus_argv:
-        if skip_value:
-            skip_value = False
-            continue
-        if token == "--rejit-passes":
-            skip_value = True
-            continue
-        if token.startswith("--rejit-passes="):
-            continue
-        passthrough_argv.append(token)
-    argv.extend(passthrough_argv)
+    argv.extend(strip_option_with_value(args.corpus_argv, "--rejit-passes"))
     return argv
 
 

@@ -14,6 +14,7 @@ from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
 from runner.libs.kinsn import load_kinsn_modules
 from runner.libs.workspace_layout import (
+    inside_runtime_image,
     kinsn_module_dir,
     test_negative_build_dir,
     test_unittest_build_dir,
@@ -24,7 +25,6 @@ from runner.suites._common import (
     ensure_bpf_stats_enabled,
     ensure_scx_artifacts,
     env_with_suite_runtime_ld,
-    inside_runtime_image,
     merge_csv_and_repeated,
     positive_int,
     resolve_daemon_binary,

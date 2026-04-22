@@ -39,6 +39,47 @@ def _container_suite_config(config: Any, python_bin: str) -> Any:
     )
 
 
+def _build_base_suite_argv(
+    workspace: Path,
+    suite_module: str,
+    config: Any,
+    *,
+    die: Any,
+) -> list[str]:
+    remote_python = _required(config.remote.python_bin, "RUN_REMOTE_PYTHON_BIN", die)
+    return [
+        remote_python,
+        "-m",
+        suite_module,
+        "--workspace",
+        str(workspace),
+        "--target-arch",
+        _required(config.identity.target_arch, "RUN_TARGET_ARCH", die),
+        "--target-name",
+        _required(config.identity.target_name, "RUN_TARGET_NAME", die),
+        "--executor",
+        _required(config.identity.executor, "RUN_EXECUTOR", die),
+        "--run-token",
+        _required(config.identity.token, "RUN_TOKEN", die),
+        "--python-bin",
+        remote_python,
+        "--bpftool-bin",
+        _required(config.remote.bpftool_bin, "RUN_BPFTOOL_BIN", die),
+    ]
+
+
+def _append_artifact_args(
+    argv: list[str],
+    *,
+    native_repos: tuple[str, ...] | list[str] = (),
+    scx_packages: tuple[str, ...] | list[str] = (),
+) -> None:
+    for repo_name in native_repos:
+        argv.extend(["--native-repo", str(repo_name)])
+    for package_name in scx_packages:
+        argv.extend(["--scx-package", str(package_name)])
+
+
 def build_runtime_container_command(
     host_workspace: Path,
     config: Any,
@@ -102,22 +143,12 @@ def build_micro_suite_argv(
     *,
     die: Any,
 ) -> list[str]:
-    remote_python = _required(config.remote.python_bin, "RUN_REMOTE_PYTHON_BIN", die)
     target_name = _required(config.identity.target_name, "RUN_TARGET_NAME", die)
-    target_arch = _required(config.identity.target_arch, "RUN_TARGET_ARCH", die)
-    command = [
-        remote_python,
-        "-m",
-        "runner.suites.micro",
-        "--workspace", str(workspace),
-        "--target-arch", target_arch,
-        "--target-name", target_name,
-        "--executor", _required(config.identity.executor, "RUN_EXECUTOR", die),
-        "--run-token", _required(config.identity.token, "RUN_TOKEN", die),
-        "--python-bin", remote_python,
-        "--bpftool-bin", _required(config.remote.bpftool_bin, "RUN_BPFTOOL_BIN", die),
-        "--output", str(workspace / "micro" / "results" / f"{target_name}_micro.json"),
-    ]
+    command = _build_base_suite_argv(workspace, "runner.suites.micro", config, die=die)
+    command.extend([
+        "--output",
+        str(workspace / "micro" / "results" / f"{target_name}_micro.json"),
+    ])
     command.extend(suite_args)
     return command
 
@@ -129,27 +160,19 @@ def build_corpus_suite_argv(
     *,
     die: Any,
 ) -> list[str]:
-    remote_python = _required(config.remote.python_bin, "RUN_REMOTE_PYTHON_BIN", die)
     target_name = _required(config.identity.target_name, "RUN_TARGET_NAME", die)
-    target_arch = _required(config.identity.target_arch, "RUN_TARGET_ARCH", die)
-    command = [
-        remote_python,
-        "-m",
-        "runner.suites.corpus",
-        "--workspace", str(workspace),
-        "--target-arch", target_arch,
-        "--target-name", target_name,
-        "--executor", _required(config.identity.executor, "RUN_EXECUTOR", die),
-        "--run-token", _required(config.identity.token, "RUN_TOKEN", die),
-        "--python-bin", remote_python,
-        "--bpftool-bin", _required(config.remote.bpftool_bin, "RUN_BPFTOOL_BIN", die),
-        "--output-json", str(workspace / "corpus" / "results" / f"{target_name}_corpus.json"),
-        "--output-md", str(workspace / "corpus" / "results" / f"{target_name}_corpus.md"),
-    ]
-    for repo_name in config.artifacts.native_repos:
-        command.extend(["--native-repo", repo_name])
-    for package_name in config.artifacts.scx_packages:
-        command.extend(["--scx-package", package_name])
+    command = _build_base_suite_argv(workspace, "runner.suites.corpus", config, die=die)
+    command.extend([
+        "--output-json",
+        str(workspace / "corpus" / "results" / f"{target_name}_corpus.json"),
+        "--output-md",
+        str(workspace / "corpus" / "results" / f"{target_name}_corpus.md"),
+    ])
+    _append_artifact_args(
+        command,
+        native_repos=config.artifacts.native_repos,
+        scx_packages=config.artifacts.scx_packages,
+    )
     command.extend(suite_args)
     return command
 
@@ -161,25 +184,12 @@ def build_e2e_suite_argv(
     *,
     die: Any,
 ) -> list[str]:
-    remote_python = _required(config.remote.python_bin, "RUN_REMOTE_PYTHON_BIN", die)
-    target_name = _required(config.identity.target_name, "RUN_TARGET_NAME", die)
-    target_arch = _required(config.identity.target_arch, "RUN_TARGET_ARCH", die)
-    command = [
-        remote_python,
-        "-m",
-        "runner.suites.e2e",
-        "--workspace", str(workspace),
-        "--target-arch", target_arch,
-        "--target-name", target_name,
-        "--executor", _required(config.identity.executor, "RUN_EXECUTOR", die),
-        "--run-token", _required(config.identity.token, "RUN_TOKEN", die),
-        "--python-bin", remote_python,
-        "--bpftool-bin", _required(config.remote.bpftool_bin, "RUN_BPFTOOL_BIN", die),
-    ]
-    for repo_name in config.artifacts.native_repos:
-        command.extend(["--native-repo", repo_name])
-    for package_name in config.artifacts.scx_packages:
-        command.extend(["--scx-package", package_name])
+    command = _build_base_suite_argv(workspace, "runner.suites.e2e", config, die=die)
+    _append_artifact_args(
+        command,
+        native_repos=config.artifacts.native_repos,
+        scx_packages=config.artifacts.scx_packages,
+    )
     command.extend(suite_args)
     return command
 
@@ -192,29 +202,14 @@ def build_test_suite_argv(
     die: Any,
     config_path: Path | None = None,
 ) -> list[str]:
-    remote_python = _required(config.remote.python_bin, "RUN_REMOTE_PYTHON_BIN", die)
-    target_name = _required(config.identity.target_name, "RUN_TARGET_NAME", die)
-    target_arch = _required(config.identity.target_arch, "RUN_TARGET_ARCH", die)
     run_token = _required(config.identity.token, "RUN_TOKEN", die)
-    command = [
-        remote_python,
-        "-m",
-        "runner.suites.test",
-        "--workspace", str(workspace),
-        "--target-arch", target_arch,
-        "--target-name", target_name,
-        "--executor", _required(config.identity.executor, "RUN_EXECUTOR", die),
-        "--run-token", run_token,
-        "--python-bin", remote_python,
-        "--bpftool-bin", _required(config.remote.bpftool_bin, "RUN_BPFTOOL_BIN", die),
-        "--artifact-dir", str(workspace / "tests" / "results" / run_token),
-    ]
+    command = _build_base_suite_argv(workspace, "runner.suites.test", config, die=die)
+    command.extend(["--artifact-dir", str(workspace / "tests" / "results" / run_token)])
     if config_path is not None:
         command.extend(["--run-contract-path", str(config_path)])
     else:
         command.extend(["--run-contract-json", config.to_json_text()])
-    for package_name in config.artifacts.scx_packages:
-        command.extend(["--scx-package", package_name])
+    _append_artifact_args(command, scx_packages=config.artifacts.scx_packages)
     command.extend(suite_args)
     return command
 

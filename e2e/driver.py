@@ -294,16 +294,21 @@ def _named_suite_apps(
     return named
 
 
-def _configure_tracee_case_from_suite(args: argparse.Namespace, suite_apps: list[AppSpec]) -> None:
+def _filter_suite_workloads_config(
+    case_label: str,
+    temp_prefix: str,
+    args: argparse.Namespace,
+    suite_apps: list[AppSpec],
+) -> None:
     if not suite_apps:
         return
     payload = yaml.safe_load(Path(args.config).resolve().read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
-        raise RuntimeError(f"invalid Tracee config payload: {args.config}")
+        raise RuntimeError(f"invalid {case_label} config payload: {args.config}")
     wanted = [app.workload_for("e2e") for app in suite_apps]
     raw_workloads = payload.get("workloads")
     if not isinstance(raw_workloads, list):
-        raise RuntimeError(f"invalid Tracee workloads in config: {args.config}")
+        raise RuntimeError(f"invalid {case_label} workloads in config: {args.config}")
     filtered = [
         dict(entry)
         for entry in raw_workloads
@@ -313,37 +318,19 @@ def _configure_tracee_case_from_suite(args: argparse.Namespace, suite_apps: list
     found = {str(entry.get("name") or entry.get("kind") or "").strip() for entry in filtered}
     missing = [name for name in wanted if name not in found]
     if missing:
-        raise RuntimeError("Tracee suite workloads are missing from config: " + ", ".join(missing))
+        raise RuntimeError(f"{case_label} suite workloads are missing from config: " + ", ".join(missing))
     payload["workloads"] = filtered
-    temp_path = _write_suite_temp_yaml("tracee-suite-", payload)
+    temp_path = _write_suite_temp_yaml(temp_prefix, payload)
     args.config = str(temp_path)
     _append_suite_temp_path(args, temp_path)
+
+
+def _configure_tracee_case_from_suite(args: argparse.Namespace, suite_apps: list[AppSpec]) -> None:
+    _filter_suite_workloads_config("Tracee", "tracee-suite-", args, suite_apps)
 
 
 def _configure_tetragon_case_from_suite(args: argparse.Namespace, suite_apps: list[AppSpec]) -> None:
-    if not suite_apps:
-        return
-    payload = yaml.safe_load(Path(args.config).resolve().read_text(encoding="utf-8"))
-    if not isinstance(payload, dict):
-        raise RuntimeError(f"invalid Tetragon config payload: {args.config}")
-    wanted = [app.workload_for("e2e") for app in suite_apps]
-    raw_workloads = payload.get("workloads")
-    if not isinstance(raw_workloads, list):
-        raise RuntimeError(f"invalid Tetragon workloads in config: {args.config}")
-    filtered = [
-        dict(entry)
-        for entry in raw_workloads
-        if isinstance(entry, dict)
-        and str(entry.get("name") or entry.get("kind") or "").strip() in wanted
-    ]
-    found = {str(entry.get("name") or entry.get("kind") or "").strip() for entry in filtered}
-    missing = [name for name in wanted if name not in found]
-    if missing:
-        raise RuntimeError("Tetragon suite workloads are missing from config: " + ", ".join(missing))
-    payload["workloads"] = filtered
-    temp_path = _write_suite_temp_yaml("tetragon-suite-", payload)
-    args.config = str(temp_path)
-    _append_suite_temp_path(args, temp_path)
+    _filter_suite_workloads_config("Tetragon", "tetragon-suite-", args, suite_apps)
 
 
 def _configure_bcc_case_from_suite(args: argparse.Namespace, suite_apps: list[AppSpec]) -> None:

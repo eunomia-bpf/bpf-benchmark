@@ -32,6 +32,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_total_cpu_usage,
     start_sampler_thread,
 )
+from e2e.case_common import select_configured_programs  # noqa: E402
 from runner.libs.rejit import applied_site_totals_from_rejit_result  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
@@ -49,7 +50,6 @@ from runner.libs.case_common import (  # noqa: E402
 DEFAULT_CONFIG = Path(__file__).with_name("config_execve_rate.yaml")
 DEFAULT_OUTPUT_JSON = RESULTS_DIR / "tetragon.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tetragon-real-e2e.md"
-DEFAULT_BPFTOOL = "bpftool"
 DEFAULT_DURATION_S = 30
 DEFAULT_SMOKE_DURATION_S = 8
 DEFAULT_LOAD_TIMEOUT_S = 20
@@ -139,33 +139,13 @@ def select_tetragon_programs(
     config_key: str = "target_programs",
     allow_all_when_unset: bool = True,
 ) -> list[dict[str, object]]:
-    available_programs = [dict(program) for program in live_programs if isinstance(program, Mapping)]
-    requested_names = [
-        str(name).strip()
-        for name in (config.get(config_key) or [])
-        if str(name).strip()
-    ]
-    if not requested_names:
-        return available_programs if allow_all_when_unset else []
-
-    selected: list[dict[str, object]] = []
-    missing: list[str] = []
-    for requested_name in requested_names:
-        matched = False
-        for program in live_programs:
-            if not isinstance(program, Mapping):
-                continue
-            live_name = str(program.get("name") or "")
-            if live_name == requested_name and dict(program) not in selected:
-                selected.append(dict(program))
-                matched = True
-        if not matched:
-            missing.append(requested_name)
-    if missing:
-        raise RuntimeError(
-            f"configured {config_key} not found in live Tetragon programs: {', '.join(missing)}"
-        )
-    return selected
+    return select_configured_programs(
+        live_programs,
+        config,
+        case_label="Tetragon",
+        config_key=config_key,
+        allow_all_when_unset=allow_all_when_unset,
+    )
 
 
 def select_tetragon_program_sets(

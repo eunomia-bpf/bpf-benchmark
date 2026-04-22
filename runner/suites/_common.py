@@ -12,7 +12,6 @@ from typing import Sequence
 
 from runner.libs.workspace_layout import (
     daemon_binary_path,
-    inside_runtime_image,
     kernel_modules_root,
     runtime_path_value,
     runtime_repo_artifact_root,
@@ -148,6 +147,22 @@ def argv_option_value(argv: Sequence[str], option: str, die: object) -> str:
         if token.startswith(option + "="):
             return token.split("=", 1)[1].strip()
     return ""
+
+
+def strip_option_with_value(argv: Sequence[str], option_name: str) -> list[str]:
+    stripped: list[str] = []
+    skip_value = False
+    for token in argv:
+        if skip_value:
+            skip_value = False
+            continue
+        if token == option_name:
+            skip_value = True
+            continue
+        if token.startswith(option_name + "="):
+            continue
+        stripped.append(str(token))
+    return stripped
 
 
 # ---------------------------------------------------------------------------
@@ -340,4 +355,17 @@ def base_suite_runtime_env(
     env["BPFREJIT_KERNEL_MODULES_ROOT"] = str(kernel_modules_dir)
     env["PYTHONPATH"] = str(workspace)
     env["BPFTOOL_BIN"] = args.bpftool_bin
+    return env
+
+
+def suite_runtime_env_with_rejit_passes(
+    workspace: Path,
+    args: argparse.Namespace,
+    scratch_suffix: str,
+    argv: Sequence[str],
+    die: object,
+) -> dict[str, str]:
+    env = base_suite_runtime_env(workspace, args, scratch_suffix, die)
+    if rejit_passes := argv_option_value(argv, "--rejit-passes", die):
+        env["BPFREJIT_BENCH_PASSES"] = rejit_passes
     return env

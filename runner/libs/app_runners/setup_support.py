@@ -73,13 +73,3 @@ def missing_required_commands(commands: Sequence[str]) -> list[str]:
         if which(str(command).strip()) is None:
             missing.append(str(command))
     return missing
-
-
-def first_existing_dir(*candidates: str | Path | None) -> Path | None:
-    for candidate in candidates:
-        if candidate is None:
-            continue
-        path = Path(candidate).expanduser()
-        if path.is_dir():
-            return path.resolve()
-    return None
