@@ -73,15 +73,19 @@ def runtime_container_image_tar_path(workspace: Path, target_arch: str) -> Path:
     return workspace / ".cache" / "container-images" / f"{str(target_arch).strip()}-runner-runtime.image.tar"
 
 def kinsn_module_dir(workspace: Path, target_arch: str) -> Path:
-    if inside_runtime_image() or RUNTIME_KINSN_MODULE_DIR.is_dir():
+    if inside_runtime_image():
         return RUNTIME_KINSN_MODULE_DIR
     return workspace / "module" / ("arm64" if _is_arm64(target_arch) else "x86")
 
 def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Path:
-    del target_arch
     if inside_runtime_image():
         return Path("/")
-    return repo_artifact_root(workspace, "x86_64") / "kernel-modules" if str(executor).strip() == "kvm" else Path("/")
+    arch = str(target_arch).strip()
+    if str(executor).strip() == "kvm":
+        if arch != "x86_64":
+            raise AssertionError(f"kvm executor only supports x86_64 kernel modules, got {arch!r}")
+        return repo_artifact_root(workspace, arch) / "kernel-modules"
+    return Path("/")
 
 def kvm_kernel_image_path(workspace: Path) -> Path:
     return workspace / ".cache" / "runtime-kernel" / "x86_64" / "bzImage"
