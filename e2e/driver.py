@@ -477,6 +477,9 @@ def build_run_metadata(
         selected_rejit_passes = payload_selected_passes
     else:
         selected_rejit_passes = collect_effective_enabled_passes(payload)
+        if not selected_rejit_passes:
+            selected_rejit_passes = list(requested_rejit_passes)
+            selected_rejit_passes_provenance = "requested_fallback"
     metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite": "e2e",
