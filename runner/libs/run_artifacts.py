@@ -66,7 +66,10 @@ class ArtifactSession:
         metadata_payload = {"run_type": self.run_type, **metadata}
         if merged_details or detail_texts:
             metadata_payload["details_dir"] = "details"
-        (self.run_dir / "metadata.json").write_text(json.dumps(metadata_payload, indent=2, sort_keys=True) + "\n")
+        metadata_path = self.run_dir / "metadata.json"
+        # VM artifact mounts can briefly lose just-created directories during sync.
+        ensure_parent(metadata_path)
+        metadata_path.write_text(json.dumps(metadata_payload, indent=2, sort_keys=True) + "\n")
         if merged_details or detail_texts:
             details_dir = self.run_dir / "details"
             details_dir.mkdir(parents=True, exist_ok=True)

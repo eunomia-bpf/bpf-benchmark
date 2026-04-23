@@ -509,6 +509,7 @@ def _accumulate_pass_site_counts(
     counts: dict[str, int],
     *,
     also_found: bool = False,
+    include_rolled_back: bool = True,
     field_name: str = "passes",
 ) -> None:
     if not isinstance(raw_passes, list):
@@ -527,6 +528,13 @@ def _accumulate_pass_site_counts(
                 f"daemon response field {field_name}[{index}].pass_name contains unknown pass "
                 f"{pass_name!r}"
             )
+        action = str(item.get("action") or "kept").strip()
+        if action not in {"kept", "rolled_back"}:
+            raise RuntimeError(
+                f"daemon response field {field_name}[{index}].action must be 'kept' or 'rolled_back'"
+            )
+        if not include_rolled_back and action == "rolled_back":
+            continue
         count_key = "sites_applied"
         if also_found and "sites_found" in item:
             count_key = "sites_found"
@@ -560,7 +568,7 @@ def _site_counts_from_optimize_response(response: Mapping[str, Any]) -> dict[str
 
 def _applied_site_totals_from_passes(raw_passes: object) -> dict[str, int]:
     counts = _zero_site_counts()
-    _accumulate_pass_site_counts(raw_passes, counts, field_name="passes")
+    _accumulate_pass_site_counts(raw_passes, counts, include_rolled_back=False, field_name="passes")
     counts["bitfield_sites"] = counts["extract_sites"]
     counts["total_sites"] = sum(counts[f] for f in _TOTAL_SITE_FIELDS if f not in _SKIP_IN_PASS_TOTAL)
     return counts
@@ -659,13 +667,28 @@ def _apply_result_from_response(
             if not isinstance(changed, bool):
                 raise RuntimeError("daemon response field 'changed' must be a boolean")
             total_sites_applied = summary.get("total_sites_applied")
-            if isinstance(total_sites_applied, bool) or not isinstance(total_sites_applied, int):
+            total_sites_applied = _strict_non_negative_int(
+                total_sites_applied,
+                field_name="summary.total_sites_applied",
+            )
+            passes_executed = _strict_non_negative_int(
+                summary.get("passes_executed"),
+                field_name="summary.passes_executed",
+            )
+            passes = _normalize_apply_passes(response.get("passes"), field_name="passes")
+            if passes_executed != len(passes):
                 raise RuntimeError(
-                    "daemon response field 'summary.total_sites_applied' must be a non-negative integer"
+                    "daemon response fields 'summary.passes_executed' and 'passes' length disagree"
                 )
-            if total_sites_applied < 0:
+            pass_sites_applied = sum(
+                int(item["sites_applied"])
+                for item in passes
+                if str(item.get("action") or "kept") != "rolled_back"
+            )
+            if total_sites_applied != pass_sites_applied:
                 raise RuntimeError(
-                    "daemon response field 'summary.total_sites_applied' must be a non-negative integer"
+                    "daemon response fields 'summary.total_sites_applied' and "
+                    "'passes[].sites_applied' disagree"
                 )
             applied = exit_code == 0 and summary_applied
             changed = exit_code == 0 and changed

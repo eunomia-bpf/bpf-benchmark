@@ -42,7 +42,12 @@ def wait_until_program_set_stable(
         elif programs and last_change_at is not None and (now - last_change_at) >= stable_window:
             return [dict(program) for program in programs]
         if now >= deadline:
-            return [dict(program) for program in last_programs]
+            preview = ",".join(str(pid) for pid in (last_ids or ())[:12]) or "<none>"
+            raise RuntimeError(
+                "BPF program set did not stabilize before timeout "
+                f"(timeout_s={timeout_s}, last_program_count={len(last_programs)}, "
+                f"last_program_ids={preview})"
+            )
         time.sleep(min(poll_interval, max(0.0, deadline - now)))
 
 
