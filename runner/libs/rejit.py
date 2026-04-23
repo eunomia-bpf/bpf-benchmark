@@ -189,6 +189,54 @@ def _ordered_unique_passes(raw: Sequence[str] | Sequence[object]) -> list[str]:
 def _normalize_pass_list(raw: Any) -> list[str]:
     return _ordered_unique_passes(raw) if isinstance(raw, list) else []
 
+
+def _strict_non_negative_int(value: object, *, field_name: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise RuntimeError(f"daemon response field {field_name!r} must be a non-negative integer")
+    if value < 0:
+        raise RuntimeError(f"daemon response field {field_name!r} must be a non-negative integer")
+    return value
+
+
+def _normalize_apply_passes(
+    raw_passes: object,
+    *,
+    field_name: str = "passes",
+) -> list[dict[str, object]]:
+    if not isinstance(raw_passes, list):
+        raise RuntimeError(f"daemon response field {field_name!r} must be a list")
+
+    normalized: list[dict[str, object]] = []
+    for index, item in enumerate(raw_passes):
+        if not isinstance(item, Mapping):
+            raise RuntimeError(f"daemon response field {field_name}[{index}] must be an object")
+        pass_name = str(item.get("pass_name") or "").strip()
+        if not pass_name:
+            raise RuntimeError(
+                f"daemon response field {field_name}[{index}].pass_name must be a non-empty string"
+            )
+        if pass_name not in _PASS_TO_SITE_FIELD:
+            raise RuntimeError(
+                f"daemon response field {field_name}[{index}].pass_name contains unknown pass "
+                f"{pass_name!r}"
+            )
+        action = str(item.get("action") or "kept").strip()
+        if action not in {"kept", "rolled_back"}:
+            raise RuntimeError(
+                f"daemon response field {field_name}[{index}].action must be 'kept' or 'rolled_back'"
+            )
+        normalized.append(
+            {
+                "pass_name": pass_name,
+                "action": action,
+                "sites_applied": _strict_non_negative_int(
+                    item.get("sites_applied"),
+                    field_name=f"{field_name}[{index}].sites_applied",
+                ),
+            }
+        )
+    return normalized
+
 def _policy_pass_list(raw: Any, *, field_name: str) -> list[str] | None:
     if raw is None:
         return None
@@ -224,20 +272,28 @@ def _site_count_for_pass(site_counts: Mapping[str, Any] | None, pass_name: str) 
         raise RuntimeError(f"daemon scan result is missing site counter field {field_name!r}")
     if field_name in site_counts:
         value = site_counts.get(field_name)
-        if isinstance(value, bool) or not isinstance(value, int):
-            raise RuntimeError(
-                f"daemon scan result field {field_name!r} for pass {pass_name!r} "
-                "must be a non-negative integer"
-            )
-        if value < 0:
-            raise RuntimeError(
-                f"daemon scan result field {field_name!r} for pass {pass_name!r} "
-                "must be a non-negative integer"
-            )
-        return value
+        return _strict_non_negative_int(
+            value,
+            field_name=f"scan result {field_name!r} for pass {pass_name!r}",
+        )
     raise RuntimeError(
         f"daemon scan result is missing site counter field {field_name!r} for pass {pass_name!r}"
     )
+
+
+def scan_site_totals_for_passes(
+    scan_counts: Mapping[str, Any] | None,
+    pass_names: Sequence[str],
+) -> dict[str, int]:
+    selected_passes = _ordered_unique_passes(pass_names)
+    if not selected_passes:
+        return {}
+    if not isinstance(scan_counts, Mapping):
+        raise RuntimeError("scan counts are required to summarize requested pass site totals")
+    return {
+        pass_name: _site_count_for_pass(scan_counts, pass_name)
+        for pass_name in selected_passes
+    }
 
 
 def _policy_rule_matches(
@@ -577,11 +633,18 @@ def _apply_result_from_response(
     *,
     output: str,
     exit_code: int,
+    enabled_passes: Sequence[str] | None,
 ) -> dict[str, object]:
     status = str(response.get("status") or "").strip()
     summary_value = response.get("summary")
     summary: dict[str, Any] = dict(summary_value) if isinstance(summary_value, Mapping) else {}
     error = str(response.get("error_message") or "").strip()
+    normalized_enabled_passes = (
+        _normalize_pass_list(list(enabled_passes))
+        if enabled_passes is not None
+        else None
+    )
+    passes: list[dict[str, object]] = []
 
     applied = False
     changed = False
@@ -610,12 +673,15 @@ def _apply_result_from_response(
             exit_code = 1
             error = str(exc)
             changed = False
+            passes = []
 
     return {
         "applied": applied,
         "changed": changed,
         "output": output,
         "exit_code": exit_code,
+        "enabled_passes": normalized_enabled_passes,
+        "passes": passes,
         "debug_result": dict(response),
         "inlined_map_entries": [dict(e) for e in (response.get("inlined_map_entries") or []) if isinstance(e, Mapping)],
         "summary": dict(summary),
@@ -765,13 +831,18 @@ def apply_daemon_rejit(
         raise ValueError("apply_daemon_rejit requires at least one prog_id")
     if daemon_socket_path is None:
         raise ValueError("apply_daemon_rejit requires daemon_socket_path")
+    normalized_enabled_passes = (
+        _normalize_pass_list(list(enabled_passes))
+        if enabled_passes is not None
+        else None
+    )
     per_program: dict[int, dict[str, object]] = {}
     outputs: list[str] = []
     exit_code = 0
     applied = False
     changed = False
     errors: list[str] = []
-    if enabled_passes and any(str(n).strip() == "branch_flip" for n in enabled_passes):
+    if normalized_enabled_passes and "branch_flip" in normalized_enabled_passes:
         profile_error = _prepare_branch_flip_profile(daemon_socket_path, daemon_proc=daemon_proc,
                                                       stdout_path=daemon_stdout_path, stderr_path=daemon_stderr_path)
         if profile_error is not None:
@@ -782,16 +853,20 @@ def apply_daemon_rejit(
                 "applied": False,
                 "changed": False,
                 "output": out, "exit_code": ec, "error": msg,
+                "enabled_passes": normalized_enabled_passes,
+                "passes": [],
                 "per_program": {int(pid): {"prog_id": int(pid), "applied": False, "changed": False,
-                                           "output": out, "exit_code": ec, "error": msg}
+                                           "output": out, "exit_code": ec, "error": msg,
+                                           "enabled_passes": normalized_enabled_passes, "passes": []}
                                 for pid in prog_ids},
                 "program_counts": {"requested": len(prog_ids), "applied": 0, "not_applied": len(prog_ids)},
             }
     for prog_id in prog_ids:
-        _resp = _optimize_request(daemon_socket_path, prog_id, enabled_passes=enabled_passes, dry_run=False,
+        _resp = _optimize_request(daemon_socket_path, prog_id, enabled_passes=normalized_enabled_passes, dry_run=False,
                                    daemon_proc=daemon_proc, stdout_path=daemon_stdout_path, stderr_path=daemon_stderr_path)
         result = _apply_result_from_response(_resp, output=json.dumps(_resp, sort_keys=True),
-                                              exit_code=0 if str(_resp.get("status") or "") == "ok" else 1)
+                                              exit_code=0 if str(_resp.get("status") or "") == "ok" else 1,
+                                              enabled_passes=normalized_enabled_passes)
         per_program[prog_id] = result
         outputs.append(str(result.get("output") or ""))
         exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
@@ -804,6 +879,7 @@ def apply_daemon_rejit(
         "applied": applied,
         "changed": changed,
         "output": "\n".join(o for o in outputs if o), "exit_code": exit_code, "per_program": per_program,
+        "enabled_passes": normalized_enabled_passes,
         "program_counts": {"requested": len(prog_ids), "applied": n_applied, "not_applied": len(prog_ids) - n_applied},
         "error": "; ".join(errors),
     }

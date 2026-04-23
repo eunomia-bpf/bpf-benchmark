@@ -30,7 +30,11 @@ from runner.libs.case_common import (
     rejit_program_result,
     wait_for_suite_quiescence,
 )
-from runner.libs.rejit import DaemonSession, benchmark_run_provenance
+from runner.libs.rejit import (
+    DaemonSession,
+    benchmark_run_provenance,
+    scan_site_totals_for_passes,
+)
 from runner.libs.run_artifacts import (
     ArtifactSession,
     current_process_identity,
@@ -50,6 +54,11 @@ SECTION_TYPE_PREFIXES = {
     "cgroup_skb": "cgroup_skb",
     "socket": "socket_filter",
 }
+ZERO_SITES_FOUND_REASON = "zero_sites_found"
+ALL_SITES_ROLLED_BACK_REASON = "all_sites_rolled_back"
+APPLIED_BUT_IDENTICAL_REASON = "applied_but_identical"
+NO_PASSES_REQUESTED_REASON = "no_passes_requested"
+NO_PROGRAMS_CHANGED_IN_LOADER_REASON = "no_programs_changed_in_loader"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -451,25 +460,92 @@ def _phase_exec_ns(record: Mapping[str, object] | None) -> float | None:
     return float(value)
 
 
-def _apply_record_changed(apply_record: Mapping[str, object] | None) -> bool:
+def _ordered_enabled_passes(raw: object) -> list[str]:
+    if not isinstance(raw, Sequence) or isinstance(raw, (str, bytes, bytearray)):
+        return []
+    ordered: list[str] = []
+    seen: set[str] = set()
+    for value in raw:
+        pass_name = str(value).strip()
+        if not pass_name or pass_name in seen:
+            continue
+        seen.add(pass_name)
+        ordered.append(pass_name)
+    return ordered
+
+
+def _non_negative_int(value: object) -> int | None:
+    if isinstance(value, bool) or not isinstance(value, int):
+        return None
+    return value if value >= 0 else None
+
+
+def _apply_record_total_sites_applied(apply_record: Mapping[str, object] | None) -> int:
     if not isinstance(apply_record, Mapping):
-        return False
+        return 0
     summary = apply_record.get("summary")
     if isinstance(summary, Mapping):
-        if int(summary.get("total_sites_applied", 0) or 0) > 0:
-            return True
-    debug_result = apply_record.get("debug_result")
-    if isinstance(debug_result, Mapping):
-        if bool(debug_result.get("changed")):
-            return True
-        debug_summary = debug_result.get("summary")
-        if isinstance(debug_summary, Mapping):
-            if int(debug_summary.get("total_sites_applied", 0) or 0) > 0:
-                return True
-        raw_passes_applied = debug_result.get("passes_applied")
-        if isinstance(raw_passes_applied, Sequence) and not isinstance(raw_passes_applied, (str, bytes, bytearray)):
-            return any(str(pass_name).strip() for pass_name in raw_passes_applied)
-    return False
+        if (total_sites_applied := _non_negative_int(summary.get("total_sites_applied"))) is not None:
+            return total_sites_applied
+    raw_passes = apply_record.get("passes")
+    if isinstance(raw_passes, Sequence) and not isinstance(raw_passes, (str, bytes, bytearray)):
+        total_sites_applied = 0
+        for item in raw_passes:
+            if not isinstance(item, Mapping):
+                continue
+            total_sites_applied += int(item.get("sites_applied", 0) or 0)
+        return total_sites_applied
+    return 0
+
+
+def _apply_record_requested_passes(apply_record: Mapping[str, object] | None) -> list[str]:
+    if not isinstance(apply_record, Mapping):
+        return []
+    requested_passes = _ordered_enabled_passes(apply_record.get("enabled_passes"))
+    if requested_passes:
+        return requested_passes
+    raw_passes = apply_record.get("passes")
+    if not isinstance(raw_passes, Sequence) or isinstance(raw_passes, (str, bytes, bytearray)):
+        return []
+    return _ordered_enabled_passes(
+        [
+            item.get("pass_name")
+            for item in raw_passes
+            if isinstance(item, Mapping)
+        ]
+    )
+
+
+def _apply_record_requested_site_totals(apply_record: Mapping[str, object] | None) -> tuple[int, int]:
+    requested_passes = _apply_record_requested_passes(apply_record)
+    if not requested_passes:
+        return 0, _apply_record_total_sites_applied(apply_record)
+    scan = apply_record.get("scan") if isinstance(apply_record, Mapping) else None
+    scan_counts = scan.get("counts") if isinstance(scan, Mapping) else None
+    sites_found_by_pass = scan_site_totals_for_passes(scan_counts, requested_passes)
+    return sum(sites_found_by_pass.values()), _apply_record_total_sites_applied(apply_record)
+
+
+def _apply_record_no_change_reason(apply_record: Mapping[str, object] | None) -> str:
+    if not isinstance(apply_record, Mapping):
+        return NO_PROGRAMS_CHANGED_IN_LOADER_REASON
+    requested_passes = _apply_record_requested_passes(apply_record)
+    if not requested_passes:
+        return NO_PASSES_REQUESTED_REASON
+    total_sites_found, total_sites_applied = _apply_record_requested_site_totals(apply_record)
+    if total_sites_found == 0:
+        return ZERO_SITES_FOUND_REASON
+    if total_sites_applied == 0:
+        return ALL_SITES_ROLLED_BACK_REASON
+    if not bool(apply_record.get("changed")):
+        return APPLIED_BUT_IDENTICAL_REASON
+    return NO_PROGRAMS_CHANGED_IN_LOADER_REASON
+
+
+def _apply_record_program_changed(apply_record: Mapping[str, object] | None) -> bool:
+    if not isinstance(apply_record, Mapping):
+        return False
+    return bool(apply_record.get("changed"))
 
 
 def _rejit_result_has_any_change(rejit_result: Mapping[str, object] | None) -> bool:
@@ -478,10 +554,10 @@ def _rejit_result_has_any_change(rejit_result: Mapping[str, object] | None) -> b
     per_program = rejit_result.get("per_program")
     if isinstance(per_program, Mapping) and per_program:
         return any(
-            _apply_record_changed(record if isinstance(record, Mapping) else None)
+            _apply_record_program_changed(record if isinstance(record, Mapping) else None)
             for record in per_program.values()
         )
-    return _apply_record_changed(rejit_result)
+    return _apply_record_program_changed(rejit_result)
 
 
 def _comparison_exclusion_reason(
@@ -497,15 +573,15 @@ def _comparison_exclusion_reason(
         return "missing_baseline_exec_ns"
     if baseline_exec_ns <= 0.0:
         return "non_positive_baseline_exec_ns"
-    if not _apply_record_changed(apply_record):
+    if not _apply_record_program_changed(apply_record):
         if apply_error:
             return f"apply_error: {apply_error}"
-        return "no_programs_changed_in_loader"
+        return _apply_record_no_change_reason(apply_record)
     if not had_post_rejit:
         if apply_error:
             return f"apply_error: {apply_error}"
         if not any_changed:
-            return "no_programs_changed_in_loader"
+            return _apply_record_no_change_reason(apply_record)
         return "missing_post_rejit_measurement"
     if rejit_exec_ns is None:
         if apply_error:
@@ -540,7 +616,7 @@ def _build_program_measurements(
                 f"{app_name}: REJIT result is missing per-program apply record for prog {prog_id}"
             )
         applied = bool(apply_record.get("applied"))
-        changed = _apply_record_changed(apply_record)
+        changed = _apply_record_program_changed(apply_record)
         baseline_exec_ns = _phase_exec_ns(baseline_record)
         rejit_exec_ns = _phase_exec_ns(rejit_record)
         comparable = (
@@ -889,6 +965,9 @@ def _slice_scan_results(
 def _slice_rejit_result(
     rejit_result: Mapping[str, object],
     prog_ids: Sequence[int],
+    *,
+    scan_results: Mapping[int, Mapping[str, object]] | None = None,
+    enabled_passes_by_prog: Mapping[int, Sequence[str]] | None = None,
 ) -> dict[str, object]:
     prog_ids = [int(value) for value in prog_ids if int(value) > 0]
     if not prog_ids:
@@ -902,6 +981,12 @@ def _slice_rejit_result(
         record = rejit_program_result(rejit_result, prog_id)
         if not record:
             continue
+        if isinstance(scan_results, Mapping) and int(prog_id) in scan_results:
+            record["scan"] = dict(scan_results[int(prog_id)])
+        if isinstance(enabled_passes_by_prog, Mapping):
+            raw_enabled_passes = enabled_passes_by_prog.get(int(prog_id))
+            if raw_enabled_passes is not None:
+                record["enabled_passes"] = _ordered_enabled_passes(raw_enabled_passes)
         per_program[int(prog_id)] = dict(record)
         output = str(record.get("output") or "")
         if output:
@@ -1230,6 +1315,8 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         session.apply_result = _slice_rejit_result(
                             merged_rejit_result,
                             session.state.prog_ids,
+                            scan_results=session.scan_results,
+                            enabled_passes_by_prog=apply_enabled_passes_by_prog,
                         )
 
                     daemon_error = _daemon_exit_error(daemon_session)
