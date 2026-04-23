@@ -8,6 +8,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 use anyhow::{Context, Result};
+use serde::ser::{SerializeSeq, Serializer};
 use serde::Serialize;
 
 use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
@@ -16,7 +17,9 @@ use crate::{bpf, insn, pass, passes, verifier_log};
 // ── OptimizeOneResult — structured return from try_apply_one ────────
 
 /// Structured result from a single optimize operation.
-/// Serialized as JSON by the serve endpoint.
+///
+/// The daemon keeps attempt-level debug payloads in memory, but JSON output
+/// omits them so the socket protocol stays compact.
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct OptimizeOneResult {
     pub status: String,
@@ -26,6 +29,11 @@ pub(crate) struct OptimizeOneResult {
     pub program: ProgramInfo,
     pub summary: OptimizeSummary,
     pub passes: Vec<PassDetail>,
+    #[serde(
+        skip_serializing_if = "Vec::is_empty",
+        default,
+        serialize_with = "serialize_attempts_without_debug"
+    )]
     pub attempts: Vec<AttemptRecord>,
     pub timings_ns: TimingsNs,
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -34,52 +42,38 @@ pub(crate) struct OptimizeOneResult {
     pub error_message: Option<String>,
 }
 
-/// Compact optimize response exposed by `serve`.
-///
-/// The daemon keeps richer attempt/debug state internally, but the socket
-/// protocol only needs stable structured fields that the runner consumes.
-#[derive(Clone, Debug, Serialize)]
-pub(crate) struct ServeOptimizeResponse {
-    pub status: String,
-    pub prog_id: u32,
-    pub changed: bool,
-    pub passes_applied: Vec<String>,
-    pub program: ProgramInfo,
-    pub summary: OptimizeSummary,
-    pub passes: Vec<PassDetail>,
-    #[serde(skip_serializing_if = "Vec::is_empty", default)]
-    pub attempts: Vec<AttemptRecord>,
-    pub timings_ns: TimingsNs,
-    #[serde(skip_serializing_if = "Vec::is_empty", default)]
-    pub inlined_map_entries: Vec<InlinedMapEntry>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub error_message: Option<String>,
-}
+#[cfg(test)]
+pub(crate) type ServeOptimizeResponse = OptimizeOneResult;
 
-impl From<OptimizeOneResult> for ServeOptimizeResponse {
-    fn from(value: OptimizeOneResult) -> Self {
-        let attempts = value
-            .attempts
-            .into_iter()
-            .map(|attempt| AttemptRecord {
-                debug: None,
-                ..attempt
-            })
-            .collect();
-        Self {
-            status: value.status,
-            prog_id: value.prog_id,
-            changed: value.changed,
-            passes_applied: value.passes_applied,
-            program: value.program,
-            summary: value.summary,
-            passes: value.passes,
-            attempts,
-            timings_ns: value.timings_ns,
-            inlined_map_entries: value.inlined_map_entries,
-            error_message: value.error_message,
-        }
+fn serialize_attempts_without_debug<S>(
+    attempts: &[AttemptRecord],
+    serializer: S,
+) -> std::result::Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    #[derive(Serialize)]
+    struct AttemptRecordForServe<'a> {
+        attempt: usize,
+        disabled_passes: &'a [String],
+        result: &'a str,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        failure_pc: Option<usize>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        attributed_pass: Option<&'a str>,
     }
+
+    let mut seq = serializer.serialize_seq(Some(attempts.len()))?;
+    for attempt in attempts {
+        seq.serialize_element(&AttemptRecordForServe {
+            attempt: attempt.attempt,
+            disabled_passes: &attempt.disabled_passes,
+            result: &attempt.result,
+            failure_pc: attempt.failure_pc,
+            attributed_pass: attempt.attributed_pass.as_deref(),
+        })?;
+    }
+    seq.end()
 }
 
 /// One deduplicated map entry that `map_inline` specialized for this program.
@@ -105,7 +99,6 @@ pub(crate) struct ProgramInfo {
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct OptimizeSummary {
     pub applied: bool,
-    pub program_changed: bool,
     pub total_sites_applied: usize,
     pub passes_executed: usize,
     pub passes_changed: usize,
@@ -122,7 +115,6 @@ pub(crate) struct SkippedSiteDetail {
 /// Per-pass detail record.
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct PassDetail {
-    pub pass: String,
     pub pass_name: String,
     pub changed: bool,
     pub verify_result: pass::PassVerifyStatus,
@@ -145,7 +137,6 @@ pub(crate) struct PassDetail {
 impl From<&pass::PassResult> for PassDetail {
     fn from(pr: &pass::PassResult) -> Self {
         Self {
-            pass: pr.pass_name.clone(),
             pass_name: pr.pass_name.clone(),
             changed: pr.changed,
             verify_result: pr.verify.status.clone(),
@@ -495,7 +486,7 @@ pub(crate) fn try_apply_one(
 
     let make_result = |status: &str,
                        applied: bool,
-                       program_changed: bool,
+                       changed: bool,
                        total_sites_applied: usize,
                        final_count: usize,
                        passes: Vec<PassDetail>,
@@ -510,7 +501,7 @@ pub(crate) fn try_apply_one(
         OptimizeOneResult {
             status: status.to_string(),
             prog_id,
-            changed: program_changed,
+            changed,
             passes_applied: changed_pass_names(&passes),
             program: ProgramInfo {
                 prog_id,
@@ -522,7 +513,6 @@ pub(crate) fn try_apply_one(
             },
             summary: OptimizeSummary {
                 applied,
-                program_changed,
                 total_sites_applied,
                 passes_executed: passes.len(),
                 passes_changed: passes.iter().filter(|pass| pass.changed).count(),

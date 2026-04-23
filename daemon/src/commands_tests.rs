@@ -64,7 +64,6 @@ fn test_optimize_one_result_serialization() {
         },
         summary: OptimizeSummary {
             applied: true,
-            program_changed: true,
             total_sites_applied: 3,
             passes_executed: 2,
             passes_changed: 1,
@@ -72,7 +71,6 @@ fn test_optimize_one_result_serialization() {
         },
         passes: vec![
             PassDetail {
-                pass: "wide_mem".to_string(),
                 pass_name: "wide_mem".to_string(),
                 changed: true,
                 verify_result: pass::PassVerifyStatus::Accepted,
@@ -90,7 +88,6 @@ fn test_optimize_one_result_serialization() {
                 diagnostics: vec![],
             },
             PassDetail {
-                pass: "rotate".to_string(),
                 pass_name: "rotate".to_string(),
                 changed: false,
                 verify_result: pass::PassVerifyStatus::NotNeeded,
@@ -142,7 +139,6 @@ fn test_optimize_one_result_serialization() {
     assert_eq!(parsed["summary"]["total_sites_applied"], 3);
     assert_eq!(parsed["summary"]["verifier_rejections"], 0);
     assert_eq!(parsed["passes"].as_array().unwrap().len(), 2);
-    assert_eq!(parsed["passes"][0]["pass"], "wide_mem");
     assert_eq!(parsed["passes"][0]["pass_name"], "wide_mem");
     assert_eq!(parsed["passes"][0]["changed"], true);
     assert_eq!(parsed["passes"][0]["verify_result"], "accepted");
@@ -188,14 +184,12 @@ fn test_serve_optimize_response_omits_attempt_debug_payloads() {
         },
         summary: OptimizeSummary {
             applied: false,
-            program_changed: false,
             total_sites_applied: 0,
             passes_executed: 1,
             passes_changed: 0,
             verifier_rejections: 1,
         },
         passes: vec![PassDetail {
-            pass: "map_inline".to_string(),
             pass_name: "map_inline".to_string(),
             changed: false,
             verify_result: pass::PassVerifyStatus::Rejected,
@@ -272,7 +266,6 @@ fn test_optimize_one_result_records_rejected_pass_verify_status() {
         },
         summary: OptimizeSummary {
             applied: true,
-            program_changed: true,
             total_sites_applied: 2,
             passes_executed: 3,
             passes_changed: 1,
@@ -280,7 +273,6 @@ fn test_optimize_one_result_records_rejected_pass_verify_status() {
         },
         passes: vec![
             PassDetail {
-                pass: "branch_flip".to_string(),
                 pass_name: "branch_flip".to_string(),
                 changed: false,
                 verify_result: pass::PassVerifyStatus::Rejected,
@@ -300,7 +292,6 @@ fn test_optimize_one_result_records_rejected_pass_verify_status() {
                 diagnostics: vec![],
             },
             PassDetail {
-                pass: "extract".to_string(),
                 pass_name: "extract".to_string(),
                 changed: true,
                 verify_result: pass::PassVerifyStatus::Accepted,
@@ -389,7 +380,6 @@ fn test_pass_detail_from_pass_result() {
 
     let detail = PassDetail::from(&pr);
 
-    assert_eq!(detail.pass, "wide_mem");
     assert_eq!(detail.pass_name, "wide_mem");
     assert_eq!(detail.changed, true);
     assert_eq!(detail.verify_result, pass::PassVerifyStatus::Accepted);
@@ -550,7 +540,6 @@ fn test_record_map_inline_records_preserves_existing_entries_on_open_failure() {
 fn test_verifier_rejection_count_counts_rejected_passes() {
     let passes = vec![
         PassDetail {
-            pass: "wide_mem".to_string(),
             pass_name: "wide_mem".to_string(),
             changed: false,
             verify_result: pass::PassVerifyStatus::Rejected,
@@ -568,7 +557,6 @@ fn test_verifier_rejection_count_counts_rejected_passes() {
             diagnostics: vec![],
         },
         PassDetail {
-            pass: "extract".to_string(),
             pass_name: "extract".to_string(),
             changed: true,
             verify_result: pass::PassVerifyStatus::Accepted,

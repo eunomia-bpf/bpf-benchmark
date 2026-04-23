@@ -298,7 +298,7 @@ fn panic_response(payload: Box<dyn std::any::Any + Send>) -> serde_json::Value {
     eprintln!("serve: request panicked: {}", message);
     serde_json::json!({
         "status": "error",
-        "message": format!("request handler panicked: {}", message),
+        "error_message": format!("request handler panicked: {}", message),
     })
 }
 
@@ -327,7 +327,7 @@ fn handle_client(
                 Err(payload) => panic_response(payload),
             },
             Err(e) => {
-                serde_json::json!({"status": "error", "message": format!("invalid JSON: {}", e)})
+                serde_json::json!({"status": "error", "error_message": format!("invalid JSON: {}", e)})
             }
         };
 
@@ -455,24 +455,24 @@ fn process_request(
     let cmd = req.get("cmd").and_then(|v| v.as_str()).unwrap_or("");
     let local_ctx = match request_context(req, ctx) {
         Ok(value) => value,
-        Err(message) => return serde_json::json!({"status": "error", "message": message}),
+        Err(message) => return serde_json::json!({"status": "error", "error_message": message}),
     };
     match cmd {
         "optimize" => {
             let prog_id = match req.get("prog_id").and_then(|v| v.as_u64()) {
                 Some(id) => id as u32,
-                None => return serde_json::json!({"status": "error", "message": "missing prog_id"}),
+                None => return serde_json::json!({"status": "error", "error_message": "missing prog_id"}),
             };
             let mode = match request_mode(req) {
                 Ok(mode) => mode,
                 Err(message) => {
-                    return serde_json::json!({"status": "error", "message": message});
+                    return serde_json::json!({"status": "error", "error_message": message});
                 }
             };
             let profile_snapshot = match request_profile_snapshot(profiling_state) {
                 Ok(snapshot) => snapshot,
                 Err(message) => {
-                    return serde_json::json!({"status": "error", "message": message});
+                    return serde_json::json!({"status": "error", "error_message": message});
                 }
             };
             let profiling = profile_snapshot
@@ -485,18 +485,16 @@ fn process_request(
                 Some(tracker),
                 mode,
             ) {
-                Ok(result) => {
-                    match serde_json::to_value(commands::ServeOptimizeResponse::from(result)) {
-                        Ok(v) => v,
-                        Err(e) => serde_json::json!({
-                            "status": "error",
-                            "message": format!("failed to serialize result: {}", e)
-                        }),
-                    }
-                }
+                Ok(result) => match serde_json::to_value(result) {
+                    Ok(v) => v,
+                    Err(e) => serde_json::json!({
+                        "status": "error",
+                        "error_message": format!("failed to serialize result: {}", e)
+                    }),
+                },
                 Err(e) => serde_json::json!({
                     "status": "error",
-                    "message": commands::summarize_error(&e),
+                    "error_message": commands::summarize_error(&e),
                 }),
             }
         }
@@ -508,13 +506,13 @@ fn process_request(
             ) {
                 Ok(interval) => interval,
                 Err(message) => {
-                    return serde_json::json!({"status": "error", "message": message});
+                    return serde_json::json!({"status": "error", "error_message": message});
                 }
             };
             let profile_snapshot = match request_profile_snapshot(profiling_state) {
                 Ok(snapshot) => snapshot,
                 Err(message) => {
-                    return serde_json::json!({"status": "error", "message": message});
+                    return serde_json::json!({"status": "error", "error_message": message});
                 }
             };
             let candidates = match collect_live_program_candidates() {
@@ -522,7 +520,7 @@ fn process_request(
                 Err(err) => {
                     return serde_json::json!({
                         "status": "error",
-                        "message": format!("failed to collect optimize-all candidates: {err:#}"),
+                        "error_message": format!("failed to collect optimize-all candidates: {err:#}"),
                     });
                 }
             };
@@ -538,7 +536,7 @@ fn process_request(
                     Err(err) => {
                         return serde_json::json!({
                             "status": "error",
-                            "message": format!(
+                            "error_message": format!(
                                 "failed to rank loaded profile snapshot by hotness: {err:#}"
                             ),
                         });
@@ -566,7 +564,7 @@ fn process_request(
                     Err(err) => {
                         return serde_json::json!({
                             "status": "error",
-                            "message": format!(
+                            "error_message": format!(
                                 "failed to rank optimize-all programs by hotness: {err:#}"
                             ),
                         });
@@ -594,7 +592,7 @@ fn process_request(
                             Err(err) => {
                                 return serde_json::json!({
                                     "status": "error",
-                                    "message": format!(
+                                    "error_message": format!(
                                         "failed to collect one-shot profiling for prog {}: {err:#}",
                                         candidate.prog_id
                                     ),
@@ -606,7 +604,7 @@ fn process_request(
                     Err(err) => {
                         return serde_json::json!({
                             "status": "error",
-                            "message": format!("failed to query bpf stats state: {err:#}"),
+                            "error_message": format!("failed to query bpf stats state: {err:#}"),
                         });
                     }
                 }
@@ -653,13 +651,13 @@ fn process_request(
             let interval = match request_interval(req) {
                 Ok(interval) => interval,
                 Err(message) => {
-                    return serde_json::json!({"status": "error", "message": message});
+                    return serde_json::json!({"status": "error", "error_message": message});
                 }
             };
             if matches!(profiling_state.as_ref(), Some(ProfilingState::Active(_))) {
                 return serde_json::json!({
                     "status": "error",
-                    "message": "profiling is already active",
+                    "error_message": "profiling is already active",
                 });
             }
             match profiler::ProfilerSession::start(interval) {
@@ -668,7 +666,7 @@ fn process_request(
                     serde_json::json!({"status": "ok"})
                 }
                 Err(err) => {
-                    serde_json::json!({"status": "error", "message": format!("{err:#}")})
+                    serde_json::json!({"status": "error", "error_message": format!("{err:#}")})
                 }
             }
         }
@@ -678,7 +676,7 @@ fn process_request(
                 None => {
                     return serde_json::json!({
                         "status": "error",
-                        "message": "no profiling session is active",
+                        "error_message": "no profiling session is active",
                     });
                 }
             };
@@ -695,14 +693,14 @@ fn process_request(
                         })
                     }
                     Err(err) => {
-                        serde_json::json!({"status": "error", "message": format!("{err:#}")})
+                        serde_json::json!({"status": "error", "error_message": format!("{err:#}")})
                     }
                 },
                 ProfilingState::Frozen(snapshot) => {
                     *profiling_state = Some(ProfilingState::Frozen(snapshot));
                     serde_json::json!({
                         "status": "error",
-                        "message": "profiling is not active",
+                        "error_message": "profiling is not active",
                     })
                 }
             }
@@ -711,7 +709,7 @@ fn process_request(
             let path = match request_path(req, "path") {
                 Ok(path) => path,
                 Err(message) => {
-                    return serde_json::json!({"status": "error", "message": message});
+                    return serde_json::json!({"status": "error", "error_message": message});
                 }
             };
             let snapshot = match request_profile_snapshot(profiling_state) {
@@ -719,11 +717,11 @@ fn process_request(
                 Ok(None) => {
                     return serde_json::json!({
                         "status": "error",
-                        "message": "no profile data available",
+                        "error_message": "no profile data available",
                     });
                 }
                 Err(message) => {
-                    return serde_json::json!({"status": "error", "message": message});
+                    return serde_json::json!({"status": "error", "error_message": message});
                 }
             };
             match snapshot.save_to_path(std::path::Path::new(path)) {
@@ -733,7 +731,7 @@ fn process_request(
                     "programs": snapshot.programs_profiled(),
                 }),
                 Err(err) => {
-                    serde_json::json!({"status": "error", "message": format!("{err:#}")})
+                    serde_json::json!({"status": "error", "error_message": format!("{err:#}")})
                 }
             }
         }
@@ -741,13 +739,13 @@ fn process_request(
             let path = match request_path(req, "path") {
                 Ok(path) => path,
                 Err(message) => {
-                    return serde_json::json!({"status": "error", "message": message});
+                    return serde_json::json!({"status": "error", "error_message": message});
                 }
             };
             if matches!(profiling_state.as_ref(), Some(ProfilingState::Active(_))) {
                 return serde_json::json!({
                     "status": "error",
-                    "message": "profiling is active; stop it before loading a snapshot",
+                    "error_message": "profiling is active; stop it before loading a snapshot",
                 });
             }
             match profiler::ProfileSnapshot::load_from_path(std::path::Path::new(path)) {
@@ -760,7 +758,7 @@ fn process_request(
                     })
                 }
                 Err(err) => {
-                    serde_json::json!({"status": "error", "message": format!("{err:#}")})
+                    serde_json::json!({"status": "error", "error_message": format!("{err:#}")})
                 }
             }
         }
@@ -778,7 +776,7 @@ fn process_request(
             })
         }
         _ => {
-            serde_json::json!({"status": "error", "message": format!("unknown command: {}", cmd)})
+            serde_json::json!({"status": "error", "error_message": format!("unknown command: {}", cmd)})
         }
     }
 }
@@ -945,7 +943,7 @@ mod tests {
 
         assert_eq!(response["status"], "error");
         assert_eq!(
-            response["message"],
+            response["error_message"],
             "invalid enabled_passes: unknown pass name(s): skb_load_bytes"
         );
     }
@@ -967,7 +965,7 @@ mod tests {
 
         assert_eq!(response["status"], "error");
         assert_eq!(
-            response["message"],
+            response["error_message"],
             "invalid disabled_passes: unknown pass name(s): bulk_mem"
         );
     }
@@ -989,7 +987,7 @@ mod tests {
 
         assert_eq!(response["status"], "error");
         assert_eq!(
-            response["message"],
+            response["error_message"],
             "enabled_passes entries must not be blank"
         );
     }
@@ -1011,7 +1009,7 @@ mod tests {
 
         assert_eq!(response["status"], "error");
         assert_eq!(
-            response["message"],
+            response["error_message"],
             "disabled_passes entries must not be blank"
         );
     }
@@ -1033,7 +1031,7 @@ mod tests {
         );
 
         assert_eq!(response["status"], "error");
-        assert_eq!(response["message"], "dry_run must be a JSON boolean");
+        assert_eq!(response["error_message"], "dry_run must be a JSON boolean");
     }
 
     #[test]
@@ -1052,7 +1050,7 @@ mod tests {
         );
 
         assert_eq!(response["status"], "error");
-        assert_eq!(response["message"], "interval_ms must be greater than zero");
+        assert_eq!(response["error_message"], "interval_ms must be greater than zero");
     }
 
     #[test]
