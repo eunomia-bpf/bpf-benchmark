@@ -80,18 +80,14 @@ def _optional_positive_float(value: Any, *, field_name: str) -> float | None:
     return parsed
 
 
-def _app_args(value: Any, *, field_name: str, raw_app: Mapping[str, object]) -> dict[str, object]:
-    args = _mapping(value, field_name=field_name)
-    for key, item in raw_app.items():
-        normalized_key = str(key)
-        if normalized_key in {"name", "runner", "workload", "duration_s", "args"}:
-            continue
-        if normalized_key in args:
-            raise SystemExit(
-                f"invalid app suite field: duplicate app arg {normalized_key!r} in {field_name}"
-            )
-        args[normalized_key] = item
-    return args
+def _app_args(raw_app: Mapping[str, object], *, field_name: str) -> dict[str, object]:
+    if raw_app.get("args") is not None:
+        raise SystemExit(f"invalid app suite field: {field_name}.args is not supported; use flat app keys")
+    return {
+        str(key): item
+        for key, item in raw_app.items()
+        if str(key) not in {"name", "runner", "workload", "duration_s", "args"}
+    }
 
 
 def _matches_filter(app: AppSpec, lowered_filters: list[str]) -> bool:
@@ -111,7 +107,6 @@ def load_app_suite_from_yaml(
     yaml_path: Path,
     *,
     filters: list[str] | None = None,
-    max_apps: int | None = None,
 ) -> tuple[AppSuite, dict[str, object]]:
     manifest = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
     if not isinstance(manifest, Mapping):
@@ -141,11 +136,7 @@ def load_app_suite_from_yaml(
                 raw_app.get("duration_s"),
                 field_name=f"apps[{index}].duration_s",
             ),
-            args=_app_args(
-                raw_app.get("args"),
-                field_name=f"apps[{index}].args",
-                raw_app={str(key): item for key, item in raw_app.items()},
-            ),
+            args=_app_args({str(key): item for key, item in raw_app.items()}, field_name=f"apps[{index}]"),
         )
         if app.name in seen_names:
             raise SystemExit(f"invalid app suite field: duplicate app name {app.name!r}")
@@ -154,8 +145,6 @@ def load_app_suite_from_yaml(
 
     lowered_filters = [item.lower() for item in filters or []]
     selected_apps = [app for app in apps if _matches_filter(app, lowered_filters)]
-    if max_apps is not None:
-        selected_apps = selected_apps[: max(0, int(max_apps))]
 
     suite = AppSuite(
         manifest_path=yaml_path,

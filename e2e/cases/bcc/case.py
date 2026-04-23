@@ -53,9 +53,7 @@ DEFAULT_REPORT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e-report.md"
 @dataclass(frozen=True)
 class ToolSpec:
     name: str
-    description: str
-    workload_kind: str
-    spawn_timeout_s: int
+    workload_spec: Mapping[str, object]
     tool_args: tuple[str, ...]
 
 
@@ -72,9 +70,7 @@ def load_config(path: Path) -> SuiteConfig:
     tools = tuple(
         ToolSpec(
             name=entry["name"],
-            description=entry.get("description", ""),
-            workload_kind=entry["workload_kind"],
-            spawn_timeout_s=int(entry.get("spawn_timeout_s", 20)),
+            workload_spec=dict(entry["workload_spec"]),
             tool_args=tuple(str(arg) for arg in entry.get("tool_args", [])),
         )
         for entry in raw.get("tools", [])
@@ -142,11 +138,11 @@ def run_phase(
         tool_binary=tool_binary,
         tool_name=spec.name,
         tool_args=spec.tool_args,
-        workload_kind=spec.workload_kind,
+        workload_spec=spec.workload_spec,
         attach_timeout_s=attach_timeout,
     )
     def workload(lifecycle: object, _phase_name: str) -> dict[str, object]:
-        prog_ids = [int(value) for value in (getattr(lifecycle, "target_prog_ids", []) or []) if int(value) > 0]
+        prog_ids = [int(value) for value in (getattr(lifecycle, "prog_ids", []) or []) if int(value) > 0]
         if not prog_ids:
             return {"status": "error", "reason": "no BPF programs are attached", "measurement": None}
         process = bcc_runner.session.process if bcc_runner.session is not None else None
@@ -174,9 +170,7 @@ def run_phase(
         if not programs:
             raise RuntimeError(f"BCC tool {spec.name} did not expose any live programs")
         artifacts: dict[str, object] = {
-            "runner_artifacts": dict(runner.artifacts),
             "programs": programs,
-            "command_used": [str(item) for item in runner.command_used],
         }
         if isinstance(policy_context, Mapping):
             artifacts["rejit_policy_context"] = {
@@ -186,8 +180,7 @@ def run_phase(
             }
         return CaseLifecycleState(
             runtime=runner,
-            target_prog_ids=list(prog_ids),
-            apply_prog_ids=list(prog_ids),
+            prog_ids=list(prog_ids),
             artifacts=artifacts,
         )
 
@@ -233,8 +226,7 @@ def summarize_tool(
 
     return {
         "name": spec.name,
-        "description": spec.description,
-        "workload_kind": spec.workload_kind,
+        "workload_spec": dict(spec.workload_spec),
         "sites": sites,
         "site_totals": site_totals,
         "stock_avg_ns": stock_avg_ns,
@@ -404,7 +396,7 @@ def build_report(payload: Mapping[str, object]) -> str:
     for record in payload["records"]:
         summary = record["summary"]
         lines.append(
-            f"- `{summary['name']}` ({summary['workload_kind']}): "
+            f"- `{summary['name']}` ({(summary['workload_spec'] or {}).get('kind', 'unknown')}): "
             f"sites={summary['sites']}, stock_ns={_fmt(summary['stock_avg_ns'])}, "
             f"rejit_ns={_fmt(summary['rejit_avg_ns'])}, speedup={_fmt_ratio(summary['speedup'])}, "
             f"ops_stock={_fmt(summary['workload_ops_baseline'])}, ops_rejit={_fmt(summary['workload_ops_rejit'])}, "
@@ -435,32 +427,23 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")
 
-    setup_result = {
-        "returncode": 0,
-        "tools_dir": None,
-        "stdout_tail": "",
-        "stderr_tail": "",
-    }
     setup_result = inspect_bcc_setup()
 
     config_path = Path(getattr(args, "config", DEFAULT_CONFIG)).resolve()
     suite = load_config(config_path)
-    tools_dir = resolve_tools_dir(getattr(args, "tools_dir", None) or "", setup_result=setup_result)
+    tools_dir = resolve_tools_dir("", setup_result=setup_result)
 
-    # Duration resolution: CLI > smoke flag > config
+    # Duration resolution: CLI duration > smoke flag > config
     smoke = bool(args.smoke)
-    smoke_duration_s = int(getattr(args, "smoke_duration", 0) or 0)
     duration_override = int(getattr(args, "duration", 0) or 0)
-    if smoke_duration_s and smoke:
-        duration_s = smoke_duration_s
-    elif duration_override:
+    if duration_override:
         duration_s = duration_override
     elif smoke:
         duration_s = suite.smoke_duration_s
     else:
         duration_s = suite.measurement_duration_s
 
-    attach_timeout = int(getattr(args, "attach_timeout", 0) or suite.attach_timeout_s)
+    attach_timeout = suite.attach_timeout_s
 
     # Filter tools if --tool was provided
     selected: list[ToolSpec]
@@ -484,7 +467,6 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             if tool_binary is None:
                 record: dict[str, object] = {
                     "name": spec.name,
-                    "description": spec.description,
                     "tool_args": list(spec.tool_args),
                     "tool_binary": None,
                     "baseline": {
@@ -501,8 +483,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
                     "rejit": None,
                     "summary": {
                         "name": spec.name,
-                        "description": spec.description,
-                        "workload_kind": spec.workload_kind,
+                        "workload_spec": dict(spec.workload_spec),
                         "sites": 0,
                         "stock_avg_ns": None,
                         "rejit_avg_ns": None,
@@ -538,7 +519,6 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             summary = summarize_tool(spec, baseline, rejit)
             record = {
                 "name": spec.name,
-                "description": spec.description,
                 "tool_args": list(spec.tool_args),
                 "tool_binary": str(tool_binary),
                 "baseline": baseline,

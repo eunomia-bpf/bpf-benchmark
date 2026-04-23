@@ -22,17 +22,12 @@ from runner.libs.app_runners.scx import ScxRunner
 from runner.libs.app_suite_schema import AppSpec, AppWorkload, load_app_suite_from_yaml
 from runner.libs.bpf_stats import enable_bpf_stats, sample_bpf_stats
 from runner.libs.case_common import (
-    _append_pending_kinsn_metadata,
-    _clone_daemon_metadata,
     _merge_group_rejit_results,
     _resolve_apply_passes_by_program,
     _resolve_scan_pass_selection,
     CaseLifecycleState,
-    attach_pending_result_metadata,
     prepare_daemon_session,
     rejit_program_result,
-    reset_pending_result_metadata,
-    run_app_runner_lifecycle,
     wait_for_suite_quiescence,
 )
 from runner.libs.rejit import DaemonSession, benchmark_run_provenance
@@ -217,7 +212,7 @@ def _measure_runner_phase(
     samples: int,
     sampled_prog_id_map: Mapping[int, int] | None = None,
 ) -> dict[str, object]:
-    target_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
+    logical_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
     logical_programs = [
         dict(program)
         for program in getattr(runner, "programs", [])
@@ -226,11 +221,11 @@ def _measure_runner_phase(
     sampled_prog_ids = (
         [
             int(sampled_prog_id_map.get(prog_id, 0) or 0)
-            for prog_id in target_prog_ids
+            for prog_id in logical_prog_ids
             if int(sampled_prog_id_map.get(prog_id, 0) or 0) > 0
         ]
         if sampled_prog_id_map is not None
-        else list(target_prog_ids)
+        else list(logical_prog_ids)
     )
     workloads: list[dict[str, object]] = []
     last_workload: dict[str, object] | None = None
@@ -239,7 +234,7 @@ def _measure_runner_phase(
     if isinstance(runner, ScxRunner) and sampled_prog_id_map is None:
         initial_stats, live_prog_id_map, live_programs = _sample_scx_measurement_stats(
             runner,
-            target_prog_ids,
+            logical_prog_ids,
             previous_programs=logical_programs,
         )
     else:
@@ -251,7 +246,7 @@ def _measure_runner_phase(
     if isinstance(runner, ScxRunner) and sampled_prog_id_map is None:
         final_stats, live_prog_id_map, live_programs = _sample_scx_measurement_stats(
             runner,
-            target_prog_ids,
+            logical_prog_ids,
             previous_programs=logical_programs,
         )
     else:
@@ -351,7 +346,7 @@ def _scx_post_rejit_prog_id_map(lifecycle: CaseLifecycleState) -> dict[int, int]
     remapped = {
         int(logical_prog_id): int(refreshed_id_by_name[program_name])
         for logical_prog_id, program_name in previous_name_by_id.items()
-        if int(logical_prog_id) in {int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0}
+        if int(logical_prog_id) in {int(prog_id) for prog_id in lifecycle.prog_ids if int(prog_id) > 0}
         and int(refreshed_id_by_name.get(program_name, 0) or 0) > 0
     }
     if remapped:
@@ -459,13 +454,8 @@ def _phase_exec_ns(record: Mapping[str, object] | None) -> float | None:
 def _apply_record_changed(apply_record: Mapping[str, object] | None) -> bool:
     if not isinstance(apply_record, Mapping):
         return False
-    counts = apply_record.get("counts")
-    if isinstance(counts, Mapping) and int(counts.get("applied_sites", 0) or 0) > 0:
-        return True
     summary = apply_record.get("summary")
     if isinstance(summary, Mapping):
-        if bool(summary.get("program_changed")):
-            return True
         if int(summary.get("total_sites_applied", 0) or 0) > 0:
             return True
     debug_result = apply_record.get("debug_result")
@@ -474,8 +464,6 @@ def _apply_record_changed(apply_record: Mapping[str, object] | None) -> bool:
             return True
         debug_summary = debug_result.get("summary")
         if isinstance(debug_summary, Mapping):
-            if bool(debug_summary.get("program_changed")):
-                return True
             if int(debug_summary.get("total_sites_applied", 0) or 0) > 0:
                 return True
         raw_passes_applied = debug_result.get("passes_applied")
@@ -789,12 +777,9 @@ def _build_runner_state(
         raise RuntimeError(f"{app.name}: runner did not expose any live programs")
     return CaseLifecycleState(
         runtime=runner,
-        target_prog_ids=list(prog_ids),
-        apply_prog_ids=list(prog_ids),
+        prog_ids=list(prog_ids),
         artifacts={
-            "runner_artifacts": dict(runner.artifacts),
             "programs": programs,
-            "command_used": [str(item) for item in runner.command_used],
             "rejit_policy_context": {
                 "repo": str(app.name).strip(),
                 "category": str(app.runner).strip(),
@@ -827,7 +812,7 @@ def _build_app_error_result(
             for workload in (baseline_measurement.get("workloads") or [])
             if isinstance(workload, Mapping)
         ]
-    prog_ids = [] if state is None else [int(value) for value in state.target_prog_ids if int(value) > 0]
+    prog_ids = [] if state is None else [int(value) for value in state.prog_ids if int(value) > 0]
     live_programs = [] if state is None else [dict(program) for program in (state.artifacts.get("programs") or [])]
     baseline_programs = _measurement_program_stats(baseline_measurement, prog_ids)
     had_post_rejit = isinstance(rejit_measurement, Mapping)
@@ -887,9 +872,6 @@ def _build_app_error_result(
         "rejit_workload": rejit_workload,
         "rejit_workloads": rejit_workloads,
         "process": {} if runner is None else dict(runner.process_output),
-        "command_used": []
-        if state is None
-        else [str(item) for item in (state.artifacts.get("command_used") or [])],
     }
 
 
@@ -908,17 +890,15 @@ def _slice_rejit_result(
     rejit_result: Mapping[str, object],
     prog_ids: Sequence[int],
 ) -> dict[str, object]:
-    requested_prog_ids = [int(value) for value in prog_ids if int(value) > 0]
-    if not requested_prog_ids:
+    prog_ids = [int(value) for value in prog_ids if int(value) > 0]
+    if not prog_ids:
         return {}
 
     per_program: dict[int, dict[str, object]] = {}
     outputs: list[str] = []
     errors: list[str] = []
-    total_sites = 0
-    applied_sites = 0
     exit_code = 0
-    for prog_id in requested_prog_ids:
+    for prog_id in prog_ids:
         record = rejit_program_result(rejit_result, prog_id)
         if not record:
             continue
@@ -927,42 +907,28 @@ def _slice_rejit_result(
         if output:
             outputs.append(output)
         exit_code = max(exit_code, int(record.get("exit_code", 0) or 0))
-        counts = record.get("counts")
-        if isinstance(counts, Mapping):
-            total_sites += int(counts.get("total_sites", 0) or 0)
-            applied_sites += int(counts.get("applied_sites", 0) or 0)
         error = str(record.get("error") or "").strip()
         if error:
             errors.append(error)
 
-    applied_any = any(bool(record.get("applied")) for record in per_program.values())
-    all_applied = bool(per_program) and all(bool(record.get("applied")) for record in per_program.values())
+    applied = any(bool(record.get("applied")) for record in per_program.values())
+    changed = any(bool(record.get("changed")) for record in per_program.values())
     error_message = "; ".join(errors)
     if not error_message and not per_program:
         error_message = str(rejit_result.get("error") or "").strip()
     sliced = {
-        "applied": applied_any,
-        "applied_any": applied_any,
-        "all_applied": all_applied,
+        "applied": applied,
+        "changed": changed,
         "output": "\n".join(fragment for fragment in outputs if fragment),
         "exit_code": exit_code,
         "per_program": per_program,
-        "counts": {
-            "total_sites": total_sites,
-            "applied_sites": applied_sites,
-        },
         "program_counts": {
-            "requested": len(requested_prog_ids),
+            "requested": len(prog_ids),
             "applied": sum(1 for record in per_program.values() if bool(record.get("applied"))),
             "not_applied": sum(1 for record in per_program.values() if not bool(record.get("applied"))),
         },
         "error": error_message,
-        "selection_source": str(rejit_result.get("selection_source") or ""),
-        "scan_enabled_passes": list(rejit_result.get("scan_enabled_passes") or []),
     }
-    benchmark_profile = str(rejit_result.get("benchmark_profile") or "").strip()
-    if benchmark_profile:
-        sliced["benchmark_profile"] = benchmark_profile
     return sliced
 
 
@@ -977,7 +943,7 @@ def _finalize_app_result(
     apply_result: Mapping[str, object] | None,
     rejit_measurement: Mapping[str, object] | None,
 ) -> dict[str, object]:
-    prog_ids = [int(value) for value in state.target_prog_ids if int(value) > 0]
+    prog_ids = [int(value) for value in state.prog_ids if int(value) > 0]
     live_programs = [dict(program) for program in (state.artifacts.get("programs") or [])]
     if not live_programs:
         raise RuntimeError(f"{app.name}: runner lifecycle did not expose any live programs")
@@ -1024,6 +990,8 @@ def _finalize_app_result(
         raise RuntimeError(
             f"{app.name}: workload {app.workload_for('corpus')!r} produced no comparable target program measurements"
         )
+    # A single apply failure should not fail the whole app if other programs
+    # in the same loader instance still produced comparable measurements.
     fatal_apply_error = bool(apply_error) and not has_comparable_measurement
     status = "error" if fatal_apply_error else "ok"
     error = apply_error if fatal_apply_error else ""
@@ -1056,7 +1024,6 @@ def _finalize_app_result(
         "rejit_workload": rejit_workload,
         "rejit_workloads": rejit_workloads,
         "process": dict(runner.process_output),
-        "command_used": [str(item) for item in (state.artifacts.get("command_used") or [])],
     }
 
 
@@ -1067,7 +1034,6 @@ class CorpusAppSession:
     state: CaseLifecycleState
     measurement_mode: str
     workload_seconds: float
-    kinsn_metadata: dict[str, object] | None = None
     baseline_measurement: dict[str, object] | None = None
     scan_results: dict[int, dict[str, object]] = field(default_factory=dict)
     apply_result: dict[str, object] = field(default_factory=dict)
@@ -1075,73 +1041,6 @@ class CorpusAppSession:
     error: str = ""
     stop_error: str = ""
     stopped: bool = False
-    kinsn_recorded: bool = False
-
-    def requested_prog_ids(self) -> list[int]:
-        return [int(value) for value in self.state.apply_prog_ids if int(value) > 0]
-
-
-def _run_app(
-    app: AppSpec,
-    *,
-    daemon_session: object,
-    workload_seconds: float,
-    samples: int,
-) -> dict[str, object]:
-    selected_workload = app.workload_for("corpus")
-    runner = get_app_runner(
-        app.runner,
-        app_name=app.name,
-        workload=selected_workload,
-        **app.args,
-    )
-    measurement_mode = runner.corpus_measurement_mode().strip()
-    if measurement_mode != "program":
-        raise RuntimeError(f"{app.name}: runner returned unsupported corpus measurement mode {measurement_mode!r}")
-
-    with enable_bpf_stats():
-        lifecycle_result = run_app_runner_lifecycle(
-            daemon_session=daemon_session,
-            runner=runner,
-            build_state=lambda current_runner, started_prog_ids: _build_runner_state(
-                app,
-                current_runner,
-                started_prog_ids,
-            ),
-            measure=lambda lifecycle, phase_name: {
-                "measurement": _measure_runner_phase(
-                    lifecycle.runtime,
-                    lifecycle.target_prog_ids,
-                    workload_seconds=workload_seconds,
-                    samples=samples,
-                    sampled_prog_id_map=(
-                        _scx_post_rejit_prog_id_map(lifecycle)
-                        if phase_name == "post_rejit"
-                        else None
-                    ),
-                )
-            },
-        )
-
-    if lifecycle_result.state is None or lifecycle_result.baseline is None:
-        raise RuntimeError(f"{app.name}: runner lifecycle did not produce a baseline measurement")
-
-    baseline_measurement = dict((lifecycle_result.baseline.get("measurement") or {}))
-    rejit_measurement = (
-        dict((lifecycle_result.post_rejit or {}).get("measurement") or {})
-        if lifecycle_result.post_rejit is not None
-        else None
-    )
-    return _finalize_app_result(
-        app,
-        runner=runner,
-        state=lifecycle_result.state,
-        workload_seconds=workload_seconds,
-        measurement_mode=measurement_mode,
-        baseline_measurement=baseline_measurement,
-        apply_result=lifecycle_result.rejit_result,
-        rejit_measurement=rejit_measurement,
-    )
 
 
 def run_suite(args: argparse.Namespace) -> dict[str, object]:
@@ -1159,13 +1058,9 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
     results_by_name: dict[str, dict[str, object]] = {}
     completed_apps: set[str] = set()
     fatal_error = ""
-    reset_pending_result_metadata()
 
     with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
-        prepared_daemon_session = prepare_daemon_session(
-            daemon_session,
-            daemon_binary=daemon_binary,
-        )
+        prepared_daemon_session = prepare_daemon_session(daemon_session)
         sessions: list[CorpusAppSession] = []
         active_sessions: list[CorpusAppSession] = []
 
@@ -1183,7 +1078,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                     try:
                         runner = get_app_runner(
                             app.runner,
-                            app_name=app.name,
                             workload=app.workload_for("corpus"),
                             **app.args,
                         )
@@ -1200,11 +1094,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                             state=state,
                             measurement_mode=measurement_mode,
                             workload_seconds=app_workload_seconds,
-                            kinsn_metadata=(
-                                _clone_daemon_metadata(prepared_daemon_session, state.requested_prog_ids())
-                                if bool(getattr(daemon_session, "load_kinsn", False))
-                                else None
-                            ),
                         )
                         sessions.append(session)
                         active_sessions.append(session)
@@ -1244,16 +1133,13 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         try:
                             session.baseline_measurement = _measure_runner_phase(
                                 session.runner,
-                                session.state.target_prog_ids,
+                                session.state.prog_ids,
                                 workload_seconds=session.workload_seconds,
                                 samples=samples,
                             )
                             surviving_sessions.append(session)
                         except Exception as exc:
                             session.error = str(exc)
-                            if session.kinsn_metadata is not None:
-                                session.kinsn_metadata["status"] = "error"
-                                session.kinsn_metadata["error"] = session.error
                             try:
                                 session.runner.stop()
                                 session.stopped = True
@@ -1293,21 +1179,21 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                     active_sessions = surviving_sessions
 
                 if not fatal_error and active_sessions:
-                    requested_prog_ids = [
+                    prog_ids = [
                         prog_id
                         for session in active_sessions
-                        for prog_id in session.requested_prog_ids()
+                        for prog_id in session.state.prog_ids
                     ]
-                    scan_enabled_passes, benchmark_config, selection_source = _resolve_scan_pass_selection(None)
+                    scan_enabled_passes, benchmark_config = _resolve_scan_pass_selection(None)
                     scan_results = prepared_daemon_session.session.scan_programs(
-                        requested_prog_ids,
+                        prog_ids,
                         enabled_passes=scan_enabled_passes,
                     )
                     apply_enabled_passes_by_prog: dict[int, list[str]] = {}
                     for session in active_sessions:
                         apply_enabled_passes_by_prog.update(
                             _resolve_apply_passes_by_program(
-                                requested_prog_ids=session.requested_prog_ids(),
+                                prog_ids=session.state.prog_ids,
                                 lifecycle_state=session.state,
                                 scan_results=scan_results,
                                 enabled_passes=None,
@@ -1316,11 +1202,11 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         )
                         session.scan_results = _slice_scan_results(
                             scan_results,
-                            session.requested_prog_ids(),
+                            session.state.prog_ids,
                         )
 
                     grouped_prog_ids: dict[tuple[str, ...], list[int]] = {}
-                    for prog_id in requested_prog_ids:
+                    for prog_id in prog_ids:
                         pass_tuple = tuple(apply_enabled_passes_by_prog.get(int(prog_id), ()))
                         grouped_prog_ids.setdefault(pass_tuple, []).append(int(prog_id))
 
@@ -1337,19 +1223,14 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         )
 
                     merged_rejit_result = _merge_group_rejit_results(
-                        requested_prog_ids=requested_prog_ids,
+                        prog_ids=prog_ids,
                         group_results=group_rejit_results,
-                        scan_enabled_passes=scan_enabled_passes,
-                        selection_source=selection_source,
-                        benchmark_config=benchmark_config,
                     )
                     for session in active_sessions:
                         session.apply_result = _slice_rejit_result(
                             merged_rejit_result,
-                            session.requested_prog_ids(),
+                            session.state.prog_ids,
                         )
-                        if session.kinsn_metadata is not None:
-                            session.kinsn_metadata["status"] = "completed"
 
                     daemon_error = _daemon_exit_error(daemon_session)
                     if daemon_error is not None:
@@ -1362,15 +1243,12 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         try:
                             session.rejit_measurement = _measure_runner_phase(
                                 session.runner,
-                                session.state.target_prog_ids,
+                                session.state.prog_ids,
                                 workload_seconds=session.workload_seconds,
                                 samples=samples,
                             )
                         except Exception as exc:
                             session.error = str(exc)
-                            if session.kinsn_metadata is not None:
-                                session.kinsn_metadata["status"] = "error"
-                                session.kinsn_metadata["error"] = session.error
                         daemon_error = _daemon_exit_error(daemon_session)
                         if daemon_error is not None:
                             fatal_error = daemon_error
@@ -1384,15 +1262,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         session.stop_error = str(exc)
                     finally:
                         session.stopped = True
-                if session.kinsn_metadata is not None and not session.kinsn_recorded:
-                    if str(session.kinsn_metadata.get("status") or "").strip() == "":
-                        session.kinsn_metadata["status"] = "error" if fatal_error or session.error else "completed"
-                    if session.error and str(session.kinsn_metadata.get("error") or "").strip() == "":
-                        session.kinsn_metadata["error"] = session.error
-                    if fatal_error and str(session.kinsn_metadata.get("error") or "").strip() == "":
-                        session.kinsn_metadata["error"] = fatal_error
-                    _append_pending_kinsn_metadata(session.kinsn_metadata)
-                    session.kinsn_recorded = True
 
         for session in sessions:
             if session.app.name in completed_apps:
@@ -1485,7 +1354,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
     }
     if fatal_error:
         payload["fatal_error"] = fatal_error
-    return attach_pending_result_metadata(payload)
+    return payload
 
 
 def build_run_metadata(

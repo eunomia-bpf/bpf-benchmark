@@ -144,8 +144,8 @@ def measure_workload(
     agent_pid: int | None,
     prog_ids: Sequence[int],
 ) -> dict[str, object]:
-    target_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
-    if not target_prog_ids:
+    logical_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
+    if not logical_prog_ids:
         raise RuntimeError("scx workload measurement requires at least one live program id")
     logical_programs = [
         dict(program)
@@ -155,11 +155,11 @@ def measure_workload(
     if isinstance(runner, ScxRunner):
         before_bpf, before_live_prog_id_map, before_live_programs = _sample_scx_program_stats(
             runner,
-            target_prog_ids,
+            logical_prog_ids,
             previous_programs=logical_programs,
         )
     else:
-        before_bpf = sample_bpf_stats(target_prog_ids)
+        before_bpf = sample_bpf_stats(logical_prog_ids)
         before_live_prog_id_map = {}
         before_live_programs = []
     before_proc = read_proc_stat_fields()
@@ -188,11 +188,11 @@ def measure_workload(
     if isinstance(runner, ScxRunner):
         after_bpf, after_live_prog_id_map, after_live_programs = _sample_scx_program_stats(
             runner,
-            target_prog_ids,
+            logical_prog_ids,
             previous_programs=logical_programs,
         )
     else:
-        after_bpf = sample_bpf_stats(target_prog_ids)
+        after_bpf = sample_bpf_stats(logical_prog_ids)
         after_live_prog_id_map = {}
         after_live_programs = []
 
@@ -323,79 +323,40 @@ def _sample_scx_program_stats(
     return remapped, logical_to_live, refreshed_programs
 
 
-def _post_rejit_scx_prog_ids(lifecycle: CaseLifecycleState) -> list[int]:
-    runner = lifecycle.runtime
-    if not isinstance(runner, ScxRunner):
-        return [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
-    previous_programs = [
-        dict(program)
-        for program in (lifecycle.artifacts.get("scheduler_programs") or [])
-        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
-    ]
-    refreshed_programs = runner.refresh_live_programs()
-    lifecycle.artifacts["post_rejit_scheduler_programs"] = [dict(program) for program in refreshed_programs]
-    previous_name_by_id = {
-        int(program["id"]): str(program["name"]).strip()
-        for program in previous_programs
-    }
-    target_prog_ids = {int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0}
-    refreshed_id_by_name = {
-        str(program.get("name") or "").strip(): int(program.get("id", 0) or 0)
-        for program in refreshed_programs
-        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
-    }
-    remapped = [
-        int(refreshed_id_by_name[program_name])
-        for logical_prog_id, program_name in previous_name_by_id.items()
-        if int(logical_prog_id) in target_prog_ids
-        and int(refreshed_id_by_name.get(program_name, 0) or 0) > 0
-    ]
-    if remapped:
-        return remapped
-    refreshed_ids = [
-        int(program.get("id", 0) or 0)
-        for program in refreshed_programs
-        if int(program.get("id", 0) or 0) > 0
-    ]
-    if refreshed_ids:
-        return refreshed_ids
-    return [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
-
-
-def _baseline_scx_apply_prog_ids(lifecycle: CaseLifecycleState) -> list[int]:
-    runner = lifecycle.runtime
-    if not isinstance(runner, ScxRunner):
-        return [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
-    previous_programs = [
-        dict(program)
-        for program in (lifecycle.artifacts.get("scheduler_programs") or [])
-        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
-    ]
-    if not previous_programs:
-        previous_programs = [
-            dict(program)
-            for program in getattr(runner, "programs", [])
-            if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
-        ]
+def _resolve_scx_scheduler_prog_ids(
+    runner: ScxRunner,
+    logical_prog_ids: Sequence[int],
+    *,
+    previous_programs: Sequence[Mapping[str, object]],
+    fallback_to_all_live: bool = False,
+    fallback_to_logical: bool = False,
+) -> tuple[list[int], dict[int, int], list[dict[str, object]]]:
+    logical_ids = [int(prog_id) for prog_id in logical_prog_ids if int(prog_id) > 0]
+    if not logical_ids:
+        return [], {}, []
     logical_to_live, refreshed_programs = _scx_live_prog_id_map(
         runner,
-        lifecycle.target_prog_ids,
+        logical_ids,
         previous_programs=previous_programs,
     )
-    live_prog_ids = [
+    scheduler_prog_ids = [
         int(logical_to_live.get(logical_prog_id, 0) or 0)
-        for logical_prog_id in [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
+        for logical_prog_id in logical_ids
         if int(logical_to_live.get(logical_prog_id, 0) or 0) > 0
     ]
-    if not live_prog_ids:
-        raise RuntimeError("scx baseline could not resolve live scheduler program ids for daemon apply")
-    lifecycle.apply_prog_ids = list(live_prog_ids)
-    lifecycle.artifacts["baseline_live_program_id_map"] = {
-        str(logical_prog_id): int(live_prog_id)
-        for logical_prog_id, live_prog_id in logical_to_live.items()
-    }
-    lifecycle.artifacts["baseline_live_scheduler_programs"] = [dict(program) for program in refreshed_programs]
-    return list(live_prog_ids)
+    if scheduler_prog_ids:
+        return scheduler_prog_ids, logical_to_live, refreshed_programs
+    if fallback_to_all_live:
+        scheduler_prog_ids = [
+            int(program.get("id", 0) or 0)
+            for program in refreshed_programs
+            if int(program.get("id", 0) or 0) > 0
+        ]
+        if scheduler_prog_ids:
+            return scheduler_prog_ids, logical_to_live, refreshed_programs
+    if fallback_to_logical:
+        return list(logical_ids), logical_to_live, refreshed_programs
+    return [], logical_to_live, refreshed_programs
 
 
 def summarize_phase(workloads: Sequence[Mapping[str, object]]) -> dict[str, object]:
@@ -433,14 +394,14 @@ def run_phase(
     agent_pid: int | None,
     prog_ids: Sequence[int] | None = None,
 ) -> dict[str, object]:
-    target_prog_ids = [int(prog_id) for prog_id in (prog_ids or []) if int(prog_id) > 0]
-    if not target_prog_ids:
-        target_prog_ids = [
+    active_prog_ids = [int(prog_id) for prog_id in (prog_ids or []) if int(prog_id) > 0]
+    if not active_prog_ids:
+        active_prog_ids = [
             int(program.get("id", 0) or 0)
             for program in getattr(runner, "programs", [])
             if int(program.get("id", 0) or 0) > 0
         ]
-    if not target_prog_ids:
+    if not active_prog_ids:
         raise RuntimeError("scx runner did not expose any live scheduler programs")
     records = [
         measure_workload(
@@ -448,7 +409,7 @@ def run_phase(
             workload_spec,
             duration_s,
             agent_pid=agent_pid,
-            prog_ids=target_prog_ids,
+            prog_ids=active_prog_ids,
         )
         for workload_spec in workloads
     ]
@@ -578,8 +539,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
 
 def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
-    scheduler_binary_arg = getattr(args, "scheduler_binary", None)
-    scheduler_binary = Path(scheduler_binary_arg).resolve() if scheduler_binary_arg else default_scx_binary().resolve()
+    scheduler_binary = default_scx_binary().resolve()
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary, scheduler_binary)
 
@@ -590,21 +550,30 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     prepared_daemon_session = getattr(args, "_prepared_daemon_session", None)
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")
+    scheduler_program_ids: list[int] = []
+    scheduler_programs: list[dict[str, object]] = []
 
     def setup() -> dict[str, object]:
         return {}
 
     def start(_: object) -> CaseLifecycleState:
+        nonlocal scheduler_program_ids, scheduler_programs
         runner = ScxRunner(
             scheduler_binary=scheduler_binary,
-            scheduler_extra_args=getattr(args, "scheduler_extra_arg", None) or [],
-            load_timeout_s=int(getattr(args, "load_timeout", DEFAULT_LOAD_TIMEOUT) or DEFAULT_LOAD_TIMEOUT),
+            scheduler_extra_args=[],
+            load_timeout_s=DEFAULT_LOAD_TIMEOUT,
             workload_spec={"name": "hackbench", "kind": "hackbench", "metric": "runs/s"},
         )
         runner.start()
+        scheduler_programs = [dict(program) for program in runner.programs]
+        scheduler_program_ids = [
+            int(program.get("id", 0) or 0)
+            for program in scheduler_programs
+            if int(program.get("id", 0) or 0) > 0
+        ]
         return CaseLifecycleState(
             runtime=runner,
-            target_prog_ids=[int(program["id"]) for program in runner.programs],
+            prog_ids=list(scheduler_program_ids),
             artifacts={
                 "programs": runner.programs,
                 "scheduler_programs": runner.programs,
@@ -616,23 +585,67 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         )
 
     def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
+        nonlocal scheduler_program_ids, scheduler_programs
         runner = lifecycle.runtime
         if not isinstance(runner, AppRunner):
             raise RuntimeError(f"scx lifecycle returned a non-runner runtime: {type(runner).__name__}")
-        prog_ids = (
-            _post_rejit_scx_prog_ids(lifecycle)
-            if phase_name == "post_rejit"
-            else [int(prog_id) for prog_id in lifecycle.target_prog_ids if int(prog_id) > 0]
-        )
+        prog_ids = [int(prog_id) for prog_id in lifecycle.prog_ids if int(prog_id) > 0]
+        if phase_name == "post_rejit":
+            if not isinstance(runner, ScxRunner):
+                raise RuntimeError(f"scx lifecycle returned a non-runner runtime: {type(runner).__name__}")
+            scheduler_program_ids, _, scheduler_programs = _resolve_scx_scheduler_prog_ids(
+                runner,
+                lifecycle.prog_ids,
+                previous_programs=scheduler_programs or list(lifecycle.artifacts.get("scheduler_programs") or []),
+                fallback_to_all_live=True,
+                fallback_to_logical=True,
+            )
+            if scheduler_programs:
+                lifecycle.artifacts["post_rejit_scheduler_programs"] = [dict(program) for program in scheduler_programs]
+            prog_ids = list(scheduler_program_ids)
         return run_phase(runner, workloads, duration_s, agent_pid=runner.pid, prog_ids=prog_ids)
 
     def after_baseline(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> Mapping[str, object]:
+        nonlocal scheduler_program_ids, scheduler_programs
         del baseline
-        _baseline_scx_apply_prog_ids(lifecycle)
+        runner = lifecycle.runtime
+        if not isinstance(runner, ScxRunner):
+            raise RuntimeError(f"scx lifecycle returned a non-runner runtime: {type(runner).__name__}")
+        previous_programs = [
+            dict(program)
+            for program in (lifecycle.artifacts.get("scheduler_programs") or [])
+            if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
+        ]
+        if not previous_programs:
+            previous_programs = [
+                dict(program)
+                for program in getattr(runner, "programs", [])
+                if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
+            ]
+        scheduler_program_ids, logical_to_live, scheduler_programs = _resolve_scx_scheduler_prog_ids(
+            runner,
+            lifecycle.prog_ids,
+            previous_programs=previous_programs,
+        )
+        if not scheduler_program_ids:
+            raise RuntimeError("scx baseline could not resolve live scheduler program ids for daemon apply")
+        lifecycle.artifacts["baseline_live_program_id_map"] = {
+            str(logical_prog_id): int(live_prog_id)
+            for logical_prog_id, live_prog_id in logical_to_live.items()
+        }
+        lifecycle.artifacts["baseline_live_scheduler_programs"] = [dict(program) for program in scheduler_programs]
         return {
             "baseline_live_program_id_map": dict(lifecycle.artifacts.get("baseline_live_program_id_map") or {}),
             "baseline_live_scheduler_programs": list(lifecycle.artifacts.get("baseline_live_scheduler_programs") or []),
         }
+
+    def resolve_rejit_prog_ids(
+        _: object,
+        lifecycle: CaseLifecycleState,
+        baseline: Mapping[str, object],
+    ) -> Sequence[int]:
+        del lifecycle, baseline
+        return list(scheduler_program_ids)
 
     def stop(_: object, lifecycle: CaseLifecycleState) -> None:
         runner = lifecycle.runtime
@@ -651,6 +664,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         stop=stop,
         cleanup=cleanup,
         after_baseline=after_baseline,
+        resolve_rejit_prog_ids=resolve_rejit_prog_ids,
         should_run_post_rejit=lambda result: int(
             applied_site_totals_from_rejit_result(result if isinstance(result, Mapping) else None).get(
                 "total_sites",

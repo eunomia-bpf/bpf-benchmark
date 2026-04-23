@@ -229,7 +229,8 @@ def _free_loopback_address() -> str:
 
 class TetragonRunner(AppRunner):
     def __init__(self, *, tetragon_binary: Path | str | None = None, tetragon_extra_args: Sequence[str] | None = None,
-                 load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S, workload_spec: Mapping[str, object] | None = None) -> None:
+                 load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S, workload_spec: Mapping[str, object] | None = None,
+                 setup_result: Mapping[str, object] | None = None) -> None:
         super().__init__()
         self.tetragon_binary = None if tetragon_binary is None else Path(tetragon_binary).resolve()
         resolved_extra_args = (
@@ -238,7 +239,8 @@ class TetragonRunner(AppRunner):
             else tuple(str(arg).strip() for arg in tetragon_extra_args if str(arg).strip())
         )
         self.tetragon_extra_args = tuple(str(arg) for arg in resolved_extra_args if str(arg).strip())
-        self.load_timeout_s = int(load_timeout_s); self.setup_result: dict[str, object] | None = None
+        self.load_timeout_s = int(load_timeout_s)
+        self.setup_result = None if setup_result is None else dict(setup_result)
         self.tempdir: tempfile.TemporaryDirectory[str] | None = None; self.policy_paths: list[Path] = []
         self.command: list[str] = []; self.session: Any | None = None
         self.workload_spec: Mapping[str, object] = dict(workload_spec or {"kind": "exec_storm", "value": 2})
@@ -248,7 +250,8 @@ class TetragonRunner(AppRunner):
     def pid(self) -> int | None: return None if self.session is None else self.session.pid
 
     def _resolve_binary(self) -> str:
-        if self.setup_result is None: self.setup_result = inspect_tetragon_setup()
+        if self.setup_result is None:
+            raise RuntimeError("TetragonRunner requires setup_result from the caller")
         if int(self.setup_result.get("returncode", 0) or 0) != 0:
             details = str(self.setup_result.get("stderr_tail") or self.setup_result.get("stdout_tail") or self.setup_result)
             raise RuntimeError(f"Tetragon setup failed: {details}")

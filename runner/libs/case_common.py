@@ -8,46 +8,19 @@ import sys
 import threading
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from pathlib import Path
 from typing import Callable, Mapping, Sequence
 
 from runner.libs import run_command
 from runner.libs.app_runners.base import AppRunner
 from runner.libs.bpf_stats import compute_delta, list_program_ids, sample_bpf_stats
 from runner.libs.rejit import DaemonSession
-from runner.libs.kinsn import (
-    capture_daemon_kinsn_discovery as _capture_daemon_kinsn_discovery,
-    relpath,
-)
+from runner.libs.kinsn import relpath
 from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage, start_sampler_thread
 
-_PENDING_KINSN_METADATA: list[dict[str, object]] = []
 DEFAULT_SUITE_QUIESCE_TIMEOUT_S = 20.0
 DEFAULT_SUITE_QUIESCE_STABLE_S = 2.0
 DEFAULT_SUITE_QUIESCE_POLL_S = 0.2
 _BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
-
-
-def reset_pending_result_metadata() -> None:
-    _PENDING_KINSN_METADATA.clear()
-
-
-def attach_pending_result_metadata(payload: dict[str, object]) -> dict[str, object]:
-    if not _PENDING_KINSN_METADATA:
-        return payload
-    metadata_payload = dict(payload.get("metadata") if isinstance(payload.get("metadata"), Mapping) else {})
-    existing_kinsn = metadata_payload.get("kinsn_modules")
-    kinsn_payload = dict(existing_kinsn) if isinstance(existing_kinsn, Mapping) else {}
-    existing_runs = kinsn_payload.get("lifecycle_runs")
-    lifecycle_runs: list[object] = list(copy.deepcopy(existing_runs)) if isinstance(existing_runs, list) else []
-    lifecycle_runs.extend(copy.deepcopy(_PENDING_KINSN_METADATA))
-    kinsn_payload["count"] = len(lifecycle_runs)
-    kinsn_payload["lifecycle_runs"] = lifecycle_runs
-    metadata_payload["kinsn_modules"] = kinsn_payload
-    payload["metadata"] = metadata_payload
-    _PENDING_KINSN_METADATA.clear()
-    return payload
 
 
 def wait_for_suite_quiescence(
@@ -77,14 +50,6 @@ def wait_for_suite_quiescence(
     rendered = ", ".join(str(pid) for pid in (previous_ids or ()))
     raise RuntimeError(f"kernel program table did not quiesce between suite entries within "
                        f"{float(timeout_s):.1f}s; last visible prog_ids=[{rendered}]")
-
-
-def _append_pending_kinsn_metadata(record: Mapping[str, object]) -> None:
-    payload = copy.deepcopy(dict(record))
-    payload["lifecycle_index"] = len(_PENDING_KINSN_METADATA) + 1
-    _PENDING_KINSN_METADATA.append(payload)
-
-
 def rejit_result_has_any_apply(rejit_result: Mapping[str, object] | None) -> bool:
     def _non_negative_int(value: object) -> int | None:
         if isinstance(value, bool) or not isinstance(value, int):
@@ -99,8 +64,6 @@ def rejit_result_has_any_apply(rejit_result: Mapping[str, object] | None) -> boo
             return True
         summary = record.get("summary")
         if isinstance(summary, Mapping):
-            if isinstance(summary.get("program_changed"), bool) and bool(summary.get("program_changed")):
-                return True
             if (_non_negative_int(summary.get("total_sites_applied")) or 0) > 0:
                 return True
         debug_result = record.get("debug_result")
@@ -109,10 +72,6 @@ def rejit_result_has_any_apply(rejit_result: Mapping[str, object] | None) -> boo
                 return True
             debug_summary = debug_result.get("summary")
             if isinstance(debug_summary, Mapping):
-                if isinstance(debug_summary.get("program_changed"), bool) and bool(
-                    debug_summary.get("program_changed")
-                ):
-                    return True
                 if (_non_negative_int(debug_summary.get("total_sites_applied")) or 0) > 0:
                     return True
         return False
@@ -143,14 +102,8 @@ def rejit_program_result(
 @dataclass
 class CaseLifecycleState:
     runtime: AppRunner
-    target_prog_ids: list[int] = field(default_factory=list)
-    apply_prog_ids: list[int] = field(default_factory=list)
-    scan_kwargs: dict[str, object] = field(default_factory=dict)
+    prog_ids: list[int] = field(default_factory=list)
     artifacts: dict[str, object] = field(default_factory=dict)
-
-    def requested_prog_ids(self) -> list[int]:
-        raw_prog_ids = self.apply_prog_ids or self.target_prog_ids
-        return [int(value) for value in raw_prog_ids if int(value) > 0]
 
 
 @dataclass
@@ -168,39 +121,25 @@ class LifecycleAbort:
 
 @dataclass
 class LifecycleRunResult:
-    setup_state: object
     state: CaseLifecycleState | None
     baseline: Mapping[str, object] | None
     scan_results: dict[int, dict[str, object]]
     rejit_result: dict[str, object] | None
     post_rejit: Mapping[str, object] | None
     artifacts: dict[str, object] = field(default_factory=dict)
-    metadata: dict[str, object] = field(default_factory=dict)
     abort: LifecycleAbort | None = None
 
 
 def prepare_daemon_session(
     daemon_session: DaemonSession,
-    *,
-    daemon_binary: Path | None = None,
 ) -> PreparedDaemonSession:
-    binary = (daemon_binary or daemon_session.daemon_binary).resolve()
     metadata = copy.deepcopy(getattr(daemon_session, "kinsn_metadata", {}) or {})
     if not bool(getattr(daemon_session, "load_kinsn", False)):
         return PreparedDaemonSession(session=daemon_session, metadata={})
     if not metadata:
         raise RuntimeError("daemon session requested kinsn loading but did not capture kinsn metadata")
-    metadata.update(captured_at=datetime.now(timezone.utc).isoformat(), daemon_binary=relpath(binary),
-                    daemon_kinsn_discovery=_capture_daemon_kinsn_discovery(daemon_session.stdout_path, daemon_session.stderr_path),
-                    status="ready")
+    metadata["daemon_binary"] = relpath(daemon_session.daemon_binary.resolve())
     return PreparedDaemonSession(session=daemon_session, metadata=metadata)
-
-
-def _clone_daemon_metadata(daemon_session: PreparedDaemonSession, requested_prog_ids: Sequence[int]) -> dict[str, object]:
-    metadata = copy.deepcopy(daemon_session.metadata)
-    metadata.update(captured_at=datetime.now(timezone.utc).isoformat(), status="pending")
-    return metadata
-
 
 def _daemon_exit_error(daemon_session: DaemonSession) -> str | None:
     returncode = daemon_session.proc.poll()
@@ -269,15 +208,12 @@ def _scan_record_counts(scan_results: Mapping[int, Mapping[str, object]], prog_i
     counts = record.get("counts")
     if isinstance(counts, Mapping):
         return dict(counts)
-    sites = record.get("sites")
-    if isinstance(sites, Mapping):
-        return dict(sites)
     return {}
 
 
 def _resolve_scan_pass_selection(
     enabled_passes: Sequence[str] | None,
-) -> tuple[list[str], object | None, str]:
+) -> tuple[list[str], object | None]:
     from runner.libs.rejit import (
         benchmark_policy_candidate_passes,
         benchmark_rejit_enabled_passes,
@@ -286,17 +222,17 @@ def _resolve_scan_pass_selection(
 
     explicit_passes = _normalize_enabled_passes(enabled_passes)
     if enabled_passes is not None:
-        return explicit_passes, None, "explicit"
+        return explicit_passes, None
     if _BENCH_PASSES_ENV in os.environ:
-        return benchmark_rejit_enabled_passes(), None, "env_override"
+        return benchmark_rejit_enabled_passes(), None
 
     benchmark_config = load_benchmark_config()
-    return benchmark_policy_candidate_passes(benchmark_config), benchmark_config, "benchmark_config"
+    return benchmark_policy_candidate_passes(benchmark_config), benchmark_config
 
 
 def _resolve_apply_passes_by_program(
     *,
-    requested_prog_ids: Sequence[int],
+    prog_ids: Sequence[int],
     lifecycle_state: CaseLifecycleState,
     scan_results: Mapping[int, Mapping[str, object]],
     enabled_passes: Sequence[str] | None,
@@ -306,10 +242,10 @@ def _resolve_apply_passes_by_program(
 
     explicit_passes = _normalize_enabled_passes(enabled_passes)
     if enabled_passes is not None:
-        return {int(prog_id): list(explicit_passes) for prog_id in requested_prog_ids}
+        return {int(prog_id): list(explicit_passes) for prog_id in prog_ids}
     if _BENCH_PASSES_ENV in os.environ:
         selected = benchmark_rejit_enabled_passes()
-        return {int(prog_id): list(selected) for prog_id in requested_prog_ids}
+        return {int(prog_id): list(selected) for prog_id in prog_ids}
     if not isinstance(benchmark_config, Mapping):
         raise RuntimeError("benchmark pass plan expected a loaded benchmark config")
     programs_by_id = _program_records_by_id(lifecycle_state.artifacts.get("programs"))
@@ -320,50 +256,47 @@ def _resolve_apply_passes_by_program(
                                              artifacts=lifecycle_state.artifacts),
             site_counts=_scan_record_counts(scan_results, int(prog_id)),
         )
-        for prog_id in requested_prog_ids
+        for prog_id in prog_ids
     }
 
 
 def _merge_group_rejit_results(
     *,
-    requested_prog_ids: Sequence[int],
+    prog_ids: Sequence[int],
     group_results: Sequence[tuple[list[int], Mapping[str, object]]],
-    scan_enabled_passes: Sequence[str],
-    selection_source: str,
-    benchmark_config: object | None,
 ) -> dict[str, object]:
     per_program: dict[int, dict[str, object]] = {}
     outputs: list[str] = []
-    total_sites = 0
-    applied_sites = 0
     exit_code = 0
     errors: list[str] = []
 
-    def _fail_rec(pid: int, ec: int, err: str, gc: Mapping[str, object] | None) -> dict[str, object]:
-        cm = gc if isinstance(gc, Mapping) else {}
-        return {"prog_id": int(pid), "applied": False, "changed": False, "output": "", "exit_code": ec,
-                "counts": {"total_sites": int(cm.get("total_sites", 0) or 0), "applied_sites": int(cm.get("applied_sites", 0) or 0)},
-                "error": err}
+    def _fail_rec(pid: int, ec: int, err: str) -> dict[str, object]:
+        return {
+            "prog_id": int(pid),
+            "applied": False,
+            "changed": False,
+            "output": "",
+            "exit_code": ec,
+            "error": err,
+        }
 
     for group_prog_ids, result in group_results:
         if (output := str(result.get("output") or "")):
             outputs.append(output)
         group_exit_code = int(result.get("exit_code", 0) or 0)
         exit_code = max(exit_code, group_exit_code)
-        counts = result.get("counts")
-        if isinstance(counts, Mapping):
-            total_sites += int(counts.get("total_sites", 0) or 0)
-            applied_sites += int(counts.get("applied_sites", 0) or 0)
         error = str(result.get("error") or "").strip()
         if error:
             errors.append(error)
         raw_per_program = result.get("per_program")
-        gc = counts if isinstance(counts, Mapping) else None
         if not isinstance(raw_per_program, Mapping):
             if group_exit_code != 0 or error:
                 for prog_id in group_prog_ids:
-                    per_program[int(prog_id)] = _fail_rec(int(prog_id), group_exit_code,
-                        error or "group REJIT apply failed before per-program records were available", gc)
+                    per_program[int(prog_id)] = _fail_rec(
+                        int(prog_id),
+                        group_exit_code,
+                        error or "group REJIT apply failed before per-program records were available",
+                    )
                 continue
             raise RuntimeError("group REJIT result is missing per_program records")
         for prog_id in group_prog_ids:
@@ -372,26 +305,26 @@ def _merge_group_rejit_results(
                 per_program[int(prog_id)] = dict(raw_record)
                 continue
             if group_exit_code != 0 or error:
-                per_program[int(prog_id)] = _fail_rec(int(prog_id), group_exit_code,
-                    error or f"group REJIT apply failed for prog {prog_id}", gc)
+                per_program[int(prog_id)] = _fail_rec(
+                    int(prog_id),
+                    group_exit_code,
+                    error or f"group REJIT apply failed for prog {prog_id}",
+                )
                 continue
             raise RuntimeError(f"group REJIT result is missing per_program record for prog {prog_id}")
 
-    applied_any = any(bool(record.get("applied")) for record in per_program.values())
-    all_applied = bool(per_program) and all(bool(record.get("applied")) for record in per_program.values())
-    n_req = len([p for p in requested_prog_ids if int(p) > 0])
+    applied = any(bool(record.get("applied")) for record in per_program.values())
+    changed = any(bool(record.get("changed")) for record in per_program.values())
+    n_req = len([p for p in prog_ids if int(p) > 0])
     n_applied = sum(1 for r in per_program.values() if bool(r.get("applied")))
     merged: dict[str, object] = {
-        "applied": applied_any, "applied_any": applied_any, "all_applied": all_applied,
+        "applied": applied,
+        "changed": changed,
         "output": "\n".join(f for f in outputs if f),
         "exit_code": exit_code, "per_program": per_program,
-        "counts": {"total_sites": total_sites, "applied_sites": applied_sites},
         "program_counts": {"requested": n_req, "applied": n_applied, "not_applied": n_req - n_applied},
-        "error": "; ".join(errors), "selection_source": selection_source,
-        "scan_enabled_passes": list(scan_enabled_passes),
+        "error": "; ".join(errors),
     }
-    if isinstance(benchmark_config, Mapping) and (pn := str(benchmark_config.get("profile") or "").strip()):
-        merged["benchmark_profile"] = pn
     return merged
 
 
@@ -407,6 +340,7 @@ def run_case_lifecycle(
     before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
     after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
     before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
+    resolve_rejit_prog_ids: Callable[[object, CaseLifecycleState, Mapping[str, object]], Sequence[int] | None] | None = None,
     should_run_post_rejit: Callable[[Mapping[str, object]], bool] | None = None,
 ) -> LifecycleRunResult:
     setup_state = setup()
@@ -417,33 +351,32 @@ def run_case_lifecycle(
     post_rejit: Mapping[str, object] | None = None
     artifacts: dict[str, object] = {}
     abort: LifecycleAbort | None = None
-    kinsn_metadata: dict[str, object] | None = None
     active_daemon_session = daemon_session.session
 
-    def _abort_result(bl: Mapping[str, object] | None, phase: str) -> LifecycleRunResult:
+    def _abort_result(bl: Mapping[str, object] | None) -> LifecycleRunResult:
         assert abort is not None
-        if kinsn_metadata is not None:
-            kinsn_metadata.update(status="aborted", reason=abort.reason, abort_phase=phase)
         artifacts.update(dict(abort.artifacts) if abort.artifacts else {})
         return LifecycleRunResult(
-            setup_state=setup_state, state=lifecycle_state, baseline=bl,
-            scan_results={}, rejit_result=None, post_rejit=None, artifacts=artifacts,
-            metadata={} if kinsn_metadata is None else {"kinsn_modules": copy.deepcopy(dict(kinsn_metadata))}, abort=abort,
+            state=lifecycle_state,
+            baseline=bl,
+            scan_results={},
+            rejit_result=None,
+            post_rejit=None,
+            artifacts=artifacts,
+            abort=abort,
         )
 
     try:
         lifecycle_state = start(setup_state)
         artifacts.update(dict(lifecycle_state.artifacts))
-        requested_prog_ids = lifecycle_state.requested_prog_ids()
-        if not requested_prog_ids:
-            raise RuntimeError("lifecycle did not provide any requested program ids")
-        if bool(getattr(active_daemon_session, "load_kinsn", False)):
-            kinsn_metadata = _clone_daemon_metadata(daemon_session, requested_prog_ids)
+        prog_ids = [int(v) for v in lifecycle_state.prog_ids if int(v) > 0]
+        if not prog_ids:
+            raise RuntimeError("lifecycle did not provide any program ids")
 
         if before_baseline is not None:
             abort = before_baseline(setup_state, lifecycle_state)
             if abort is not None:
-                return _abort_result(None, "before_baseline")
+                return _abort_result(None)
 
         baseline = workload(setup_state, lifecycle_state, "baseline")
         if baseline is None:
@@ -458,39 +391,41 @@ def run_case_lifecycle(
         if before_rejit is not None:
             abort = before_rejit(setup_state, lifecycle_state, baseline)
             if abort is not None:
-                return _abort_result(baseline, "before_rejit")
+                return _abort_result(baseline)
 
-        requested_prog_ids = lifecycle_state.requested_prog_ids()
-        if not requested_prog_ids:
-            raise RuntimeError("lifecycle did not provide any requested program ids after baseline")
-        if kinsn_metadata is not None:
-            kinsn_metadata["requested_prog_ids"] = list(requested_prog_ids)
+        prog_ids = [int(v) for v in lifecycle_state.prog_ids if int(v) > 0]
+        if resolve_rejit_prog_ids is not None:
+            prog_ids = [
+                int(v)
+                for v in (resolve_rejit_prog_ids(setup_state, lifecycle_state, baseline) or [])
+                if int(v) > 0
+            ]
+        if not prog_ids:
+            raise RuntimeError("lifecycle did not provide any program ids after baseline")
 
-        scan_enabled_passes, benchmark_config, selection_source = _resolve_scan_pass_selection(
+        scan_enabled_passes, benchmark_config = _resolve_scan_pass_selection(
             enabled_passes,
         )
 
         daemon_error = _daemon_exit_error(active_daemon_session)
         if daemon_error is not None:
             raise RuntimeError(daemon_error)
-        scan_kwargs = dict(lifecycle_state.scan_kwargs)
-        scan_kwargs["enabled_passes"] = list(scan_enabled_passes)
         scan_results = active_daemon_session.scan_programs(
-            requested_prog_ids,
-            **scan_kwargs,
+            prog_ids,
+            enabled_passes=scan_enabled_passes,
         )
         daemon_error = _daemon_exit_error(active_daemon_session)
         if daemon_error is not None:
             raise RuntimeError(daemon_error)
         apply_enabled_passes_by_prog = _resolve_apply_passes_by_program(
-            requested_prog_ids=requested_prog_ids,
+            prog_ids=prog_ids,
             lifecycle_state=lifecycle_state,
             scan_results=scan_results,
             enabled_passes=enabled_passes,
             benchmark_config=benchmark_config,
         )
         grouped_prog_ids: dict[tuple[str, ...], list[int]] = {}
-        for prog_id in requested_prog_ids:
+        for prog_id in prog_ids:
             pass_tuple = tuple(apply_enabled_passes_by_prog.get(int(prog_id), ()))
             grouped_prog_ids.setdefault(pass_tuple, []).append(int(prog_id))
 
@@ -499,37 +434,24 @@ def run_case_lifecycle(
             for pt, gids in grouped_prog_ids.items()
         ]
         rejit_result = _merge_group_rejit_results(
-            requested_prog_ids=requested_prog_ids,
+            prog_ids=prog_ids,
             group_results=group_rejit_results,
-            scan_enabled_passes=scan_enabled_passes,
-            selection_source=selection_source,
-            benchmark_config=benchmark_config,
         )
-        if kinsn_metadata is not None:
-            kinsn_metadata["status"] = "completed"
         run_post_rejit = rejit_result_has_any_apply(rejit_result)
         if should_run_post_rejit is not None:
             run_post_rejit = bool(should_run_post_rejit(rejit_result))
         if run_post_rejit:
             post_rejit = workload(setup_state, lifecycle_state, "post_rejit")
         return LifecycleRunResult(
-            setup_state=setup_state, state=lifecycle_state, baseline=baseline,
-            scan_results=scan_results, rejit_result=rejit_result, post_rejit=post_rejit,
+            state=lifecycle_state,
+            baseline=baseline,
+            scan_results=scan_results,
+            rejit_result=rejit_result,
+            post_rejit=post_rejit,
             artifacts=artifacts,
-            metadata={} if kinsn_metadata is None else {"kinsn_modules": copy.deepcopy(dict(kinsn_metadata))},
             abort=abort,
         )
-    except Exception as exc:
-        if kinsn_metadata is not None:
-            status = str(kinsn_metadata.get("status") or "").strip().lower()
-            if status != "aborted":
-                kinsn_metadata["status"] = "error"
-            kinsn_metadata.setdefault("error", str(exc))
-        raise
     finally:
-        if kinsn_metadata is not None:
-            artifacts["kinsn_modules"] = copy.deepcopy(kinsn_metadata)
-            _append_pending_kinsn_metadata(kinsn_metadata)
         try:
             if lifecycle_state is not None:
                 stop(setup_state, lifecycle_state)
@@ -545,9 +467,8 @@ def _default_runner_lifecycle_state(runner: AppRunner, started_prog_ids: Sequenc
     if not programs:
         raise RuntimeError("app runner did not expose any live programs")
     return CaseLifecycleState(
-        runtime=runner, target_prog_ids=list(prog_ids), apply_prog_ids=list(prog_ids),
-        artifacts={"runner_artifacts": dict(runner.artifacts), "programs": programs,
-                   "command_used": [str(item) for item in runner.command_used]},
+        runtime=runner, prog_ids=list(prog_ids),
+        artifacts={"programs": programs},
     )
 
 
@@ -561,6 +482,7 @@ def run_app_runner_lifecycle(
     before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
     after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
     before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
+    resolve_rejit_prog_ids: Callable[[object, CaseLifecycleState, Mapping[str, object]], Sequence[int] | None] | None = None,
     should_run_post_rejit: Callable[[Mapping[str, object]], bool] | None = None,
 ) -> LifecycleRunResult:
     def _start(_: object) -> CaseLifecycleState:
@@ -578,6 +500,7 @@ def run_app_runner_lifecycle(
         before_baseline=before_baseline,
         after_baseline=after_baseline,
         before_rejit=before_rejit,
+        resolve_rejit_prog_ids=resolve_rejit_prog_ids,
         should_run_post_rejit=should_run_post_rejit,
     )
 
@@ -658,7 +581,7 @@ def run_app_runner_phase_records(
         )
         programs = [dict(p) for p in (lifecycle_result.artifacts.get("programs") or [])]
         if lifecycle_result.state is not None:
-            prog_ids = [int(v) for v in lifecycle_result.state.target_prog_ids if int(v) > 0]
+            prog_ids = [int(v) for v in lifecycle_result.state.prog_ids if int(v) > 0]
         if lifecycle_result.baseline is not None:
             baseline_status = str(lifecycle_result.baseline.get("status") or "error")
             baseline_reason = str(lifecycle_result.baseline.get("reason") or "")
@@ -674,7 +597,7 @@ def run_app_runner_phase_records(
     process_output = dict(runner.process_output)
     site_totals = zero_site_totals(site_totals_fields)
     for record in scan_results.values():
-        counts = record.get("sites") or record.get("counts") or {}
+        counts = record.get("counts") or {}
         for site_field in site_totals:
             site_totals[site_field] += int(counts.get(site_field, 0) or 0)
     scan_results_str = {str(key): value for key, value in scan_results.items()}

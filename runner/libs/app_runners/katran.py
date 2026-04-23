@@ -16,13 +16,11 @@ from .base import AppRunner
 from .process_support import ManagedProcessSession
 from .setup_support import repo_artifact_root
 
-DEFAULT_KATRAN_PROGRAM_NAME = "balancer_ingress"
 DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
 DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 30
 DEFAULT_KATRAN_STOP_TIMEOUT_S = 10.0
 DEFAULT_KATRAN_STOP_SETTLE_S = 2.0
 KATRAN_REQUIRED_MAP_NAMES = ("vip_map", "reals", "ch_rings", "ctl_array")
-BPF_OBJECT_NAME_LIMIT = 15
 DEFAULT_IP_CANDIDATES = (
     "/usr/local/sbin/ip",
     "/usr/local/bin/ip",
@@ -427,7 +425,7 @@ class KatranServerSession:
         self.server_binary = server_binary.resolve(); self.balancer_prog_path = balancer_prog_path.resolve()
         self.iface = iface; self.default_router_mac = default_router_mac; self.load_timeout_s = int(load_timeout_s)
         self.session: ManagedProcessSession | None = None; self.command_used: list[str] = []
-        self.programs: list[dict[str, object]] = []; self.program: dict[str, object] = {}
+        self.programs: list[dict[str, object]] = []
         self.maps_by_name: dict[str, dict[str, object]] = {}; self.attach_info: dict[str, object] = {}
         self.attach_mode_before_rebind: str | None = None; self.attach_info_before_rebind: dict[str, object] = {}
         self.ifindex = 0
@@ -442,7 +440,7 @@ class KatranServerSession:
         session = ManagedProcessSession(command, load_timeout_s=self.load_timeout_s, cwd=ROOT_DIR, env=os.environ.copy())
         try:
             session.__enter__(); self.session = session; self.command_used = list(command)
-            self.programs = [dict(p) for p in session.programs]; self.program = self._select_program(self.programs)
+            self.programs = [dict(p) for p in session.programs]
             self.maps_by_name = self._discover_maps(before_map_ids); self.attach_info = _attached_xdp_info(self.iface)
         except Exception:
             session.close(); self.session = None; raise
@@ -451,7 +449,19 @@ class KatranServerSession:
         return self
 
     @property
-    def prog_id(self) -> int: return int(self.program.get("id", 0) or 0)
+    def prog_id(self) -> int:
+        if isinstance(xdp_records := self.attach_info.get("xdp"), list):
+            for entry in xdp_records:
+                if not isinstance(entry, Mapping):
+                    continue
+                prog_id = int(entry.get("id", entry.get("prog_id", 0)) or 0)
+                if prog_id > 0:
+                    return prog_id
+        for key in ("id", "prog_id"):
+            prog_id = int(self.attach_info.get(key, 0) or 0)
+            if prog_id > 0:
+                return prog_id
+        raise RuntimeError(f"Katran attached XDP program id is unavailable on {self.iface}: {self.attach_info}")
 
     @property
     def pid(self) -> int | None: return None if self.session is None else self.session.pid
@@ -463,16 +473,6 @@ class KatranServerSession:
 
     def collector_snapshot(self) -> dict[str, object]:
         return {} if self.session is None else self.session.collector_snapshot()
-
-    def _select_program(self, programs: list[dict[str, object]]) -> dict[str, object]:
-        if not programs: raise RuntimeError("Katran server did not expose any BPF programs")
-        expected_names = {DEFAULT_KATRAN_PROGRAM_NAME, DEFAULT_KATRAN_PROGRAM_NAME[:BPF_OBJECT_NAME_LIMIT]}
-        matching = [dict(p) for p in programs if str(p.get("name") or "") in expected_names]
-        if len(matching) == 1: return matching[0]
-        xdp_programs = [dict(p) for p in programs if str(p.get("type") or "") == "xdp"]
-        if len(xdp_programs) == 1: return xdp_programs[0]
-        attached = sorted(f"{p.get('name') or '<unnamed>'}:{p.get('type') or '<unknown>'}" for p in programs)
-        raise RuntimeError(f"could not determine Katran balancer program from attached set: {attached}")
 
     def _discover_maps(self, before_map_ids: set[int]) -> dict[str, dict[str, object]]:
         deadline = time.monotonic() + float(self.load_timeout_s); last_names: list[str] = []
@@ -490,7 +490,7 @@ class KatranServerSession:
     def metadata(self) -> dict[str, object]:
         return {
             "server_binary": str(self.server_binary), "balancer_prog_path": str(self.balancer_prog_path),
-            "program": dict(self.program), "programs": [dict(p) for p in self.programs],
+            "programs": [dict(p) for p in self.programs],
             "maps": {n: dict(r) for n, r in self.maps_by_name.items()},
             "iface": self.iface, "ifindex": self.ifindex,
             "attached": bool(self.attach_info), "attach_info": self.attach_info,
@@ -659,21 +659,21 @@ def run_parallel_http_load(*, duration_s: int | float, concurrency: int) -> dict
 DEFAULT_INTERFACE = "katran0"
 DEFAULT_CONCURRENCY = 4
 DEFAULT_TEST_RUN_BATCH_REPEAT = 128
-DEFAULT_WORKLOAD_KIND = "network"
+DEFAULT_WORKLOAD_SPEC = {"kind": "network"}
 DEFAULT_LOAD_TIMEOUT_S = DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S
 
 
 class KatranRunner(AppRunner):
     def __init__(self, *, loader_binary: Path | str | None = None, iface: str = DEFAULT_INTERFACE,
                  router_peer_iface: str | None = None, load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
-                 concurrency: int = DEFAULT_CONCURRENCY, workload_kind: str = DEFAULT_WORKLOAD_KIND,
+                 concurrency: int = DEFAULT_CONCURRENCY, workload_spec: Mapping[str, object] | None = None,
                  test_run_batch_repeat: int = DEFAULT_TEST_RUN_BATCH_REPEAT, default_router_mac: str = ROUTER_LB_MAC) -> None:
         super().__init__()
         self.loader_binary = None if loader_binary is None else Path(loader_binary).resolve()
         self.balancer_prog_path = (repo_artifact_root() / "katran" / "bpf" / "balancer.bpf.o").resolve()
         self.iface = str(iface); self.router_peer_iface = None if router_peer_iface is None else str(router_peer_iface)
         self.load_timeout_s = int(load_timeout_s); self.concurrency = max(1, int(concurrency))
-        self.workload_kind = str(workload_kind or DEFAULT_WORKLOAD_KIND).strip().lower()
+        self.workload_spec = dict(workload_spec or DEFAULT_WORKLOAD_SPEC)
         self.test_run_batch_repeat = max(1, int(test_run_batch_repeat)); self.default_router_mac = str(default_router_mac)
         self.topology: Any | None = None; self.http_server: Any | None = None; self.session: KatranServerSession | None = None
         self.artifacts: dict[str, object] = {}; self.last_request_summary: dict[str, object] = {}
@@ -689,8 +689,9 @@ class KatranRunner(AppRunner):
 
     def start(self) -> list[int]:
         if self.session is not None: raise RuntimeError("KatranRunner is already running")
+        kind = str(self.workload_spec.get("kind") or DEFAULT_WORKLOAD_SPEC["kind"]).strip().lower()
         topology = KatranDsrTopology(self.iface, router_peer_iface=self.router_peer_iface)
-        http_server = None if self.workload_kind == "test_run" else NamespaceHttpServer(REAL_NS, VIP_IP, VIP_PORT)
+        http_server = None if kind == "test_run" else NamespaceHttpServer(REAL_NS, VIP_IP, VIP_PORT)
         server_binary = resolve_katran_server_binary(self.loader_binary)
         session = KatranServerSession(server_binary=server_binary, balancer_prog_path=self.balancer_prog_path,
                                       iface=self.iface, default_router_mac=self.default_router_mac, load_timeout_s=self.load_timeout_s)
@@ -698,7 +699,7 @@ class KatranRunner(AppRunner):
             topology.__enter__()
             if http_server is not None: http_server.__enter__()
             session.__enter__()
-            if self.workload_kind == "network": session.reattach_xdpgeneric()
+            if kind == "network": session.reattach_xdpgeneric()
             self.artifacts = {"topology": topology.metadata(), "http_server": {} if http_server is None else http_server.metadata(),
                                "live_program": session.metadata(), "map_configuration": configure_katran_maps(session),
                                "test_run_validation": run_katran_prog_test_run(session, repeat=1, require_xdp_tx=False)}
@@ -739,14 +740,16 @@ class KatranRunner(AppRunner):
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("KatranRunner is not running")
-        if self.workload_kind == "test_run": return self._run_test_run_workload(seconds)
-        if self.workload_kind != "network": raise RuntimeError(f"unsupported Katran workload kind: {self.workload_kind}")
+        kind = str(self.workload_spec.get("kind") or DEFAULT_WORKLOAD_SPEC["kind"]).strip().lower()
+        if kind == "test_run": return self._run_test_run_workload(seconds)
+        if kind != "network": raise RuntimeError(f"unsupported Katran workload kind: {kind}")
         return self._run_network_workload(seconds)
 
     def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:
-        requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or self.workload_kind).strip().lower()
-        if requested_kind != self.workload_kind:
-            raise RuntimeError(f"KatranRunner workload kind is fixed at start ({self.workload_kind}); requested {requested_kind}")
+        current_kind = str(self.workload_spec.get("kind") or DEFAULT_WORKLOAD_SPEC["kind"]).strip().lower()
+        requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or current_kind).strip().lower()
+        if requested_kind != current_kind:
+            raise RuntimeError(f"KatranRunner workload kind is fixed at start ({current_kind}); requested {requested_kind}")
         return self.run_workload(seconds)
 
     def stop(self) -> None:

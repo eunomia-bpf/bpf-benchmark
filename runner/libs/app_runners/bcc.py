@@ -22,7 +22,7 @@ from .base import AppRunner
 from .process_support import wait_until_program_set_stable
 
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml"
-DEFAULT_ATTACH_TIMEOUT_SECONDS = 20
+DEFAULT_ATTACH_TIMEOUT_SECONDS = 15
 KHEADERS_READY_MARKER = ".bpfrejit-kheaders-ready"
 BCC_COMPAT_CFLAGS_ENV = "BPFREJIT_BCC_EXTRA_CFLAGS"
 BCC_COMPAT_HEADER_ENV = "BPFREJIT_BCC_COMPAT_HEADER"
@@ -166,9 +166,7 @@ def _tool_binary_names(tool_name: str) -> tuple[str, ...]:
 
 @dataclass(frozen=True)
 class BCCWorkloadSpec:
-    name: str
-    workload_kind: str
-    spawn_timeout_s: int
+    workload_spec: Mapping[str, object]
     tool_args: tuple[str, ...]
 
 
@@ -225,10 +223,11 @@ def _bcc_tool_specs() -> dict[str, BCCWorkloadSpec]:
         name = str(entry.get("name") or "").strip()
         if not name:
             raise RuntimeError(f"BCC config field 'tools' contains an entry without a name: {DEFAULT_CONFIG}")
+        workload_spec = entry.get("workload_spec")
+        if not isinstance(workload_spec, Mapping):
+            raise RuntimeError(f"BCC config field 'tools[{name}].workload_spec' must be a mapping: {DEFAULT_CONFIG}")
         specs[name] = BCCWorkloadSpec(
-            name=name,
-            workload_kind=str(entry.get("workload_kind") or "mixed"),
-            spawn_timeout_s=int(entry.get("spawn_timeout_s", DEFAULT_ATTACH_TIMEOUT_SECONDS) or DEFAULT_ATTACH_TIMEOUT_SECONDS),
+            workload_spec={str(key): value for key, value in workload_spec.items()},
             tool_args=tuple(str(arg) for arg in entry.get("tool_args", []) if str(arg).strip()),
         )
     return specs
@@ -372,7 +371,7 @@ class BCCRunner(AppRunner):
         tool_binary: Path | str | None = None,
         tool_name: str | None = None,
         tool_args: Sequence[str] | None = None,
-        workload_kind: str | None = None,
+        workload_spec: Mapping[str, object] | None = None,
         attach_timeout_s: int | None = None,
         tools_dir: Path | str | None = None,
     ) -> None:
@@ -388,8 +387,8 @@ class BCCRunner(AppRunner):
             if tool_args is not None
             else (spec.tool_args if spec else ())
         )
-        self.workload_kind = workload_kind or (spec.workload_kind if spec else "mixed")
-        self.attach_timeout_s = int(attach_timeout_s or (spec.spawn_timeout_s if spec else DEFAULT_ATTACH_TIMEOUT_SECONDS))
+        self.workload_spec = dict(workload_spec) if workload_spec is not None else dict(spec.workload_spec if spec else {"kind": "mixed"})
+        self.attach_timeout_s = int(attach_timeout_s or DEFAULT_ATTACH_TIMEOUT_SECONDS)
         self.setup_result: dict[str, object] = {
             "returncode": 0,
             "tools_dir": None,
@@ -489,7 +488,11 @@ class BCCRunner(AppRunner):
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None:
             raise RuntimeError(f"BCC tool {self.tool_name} is not running")
-        return run_named_workload(self.workload_kind, seconds, network_as_tcp_connect=True)
+        return run_named_workload(
+            str(self.workload_spec.get("kind") or self.workload_spec.get("name") or ""),
+            seconds,
+            network_as_tcp_connect=True,
+        )
 
     def run_workload_spec(
         self,

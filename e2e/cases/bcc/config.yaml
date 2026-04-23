@@ -2,7 +2,7 @@
 # Each tool is compiled from runner/repos/bcc/libbpf-tools/ and run as a real
 # userspace binary that loads BPF programs into the kernel.
 #
-# workload_kind must be one of:
+# workload_spec.kind must be one of:
 #   tcp_connect  -- curl-based HTTP loopback connects
 #   block_io     -- explicit block read/write loop on a guest RAM disk
 #   scheduler    -- scheduler-stress context-switch storm
@@ -14,58 +14,46 @@
 
 tools:
   - name: tcplife
-    description: "TCP session lifespan tracking (IPv4/IPv6), struct field access, bswap, ntop, 3 maps"
-    workload_kind: tcp_connect
-    # tcplife needs at least one TCP session to fire; spawn_timeout_s covers
-    # the time to see the first kernel attach acknowledgement in output.
-    spawn_timeout_s: 15
+    workload_spec:
+      kind: tcp_connect
 
   - name: biosnoop
-    description: "Block I/O per-request latency tracing with disk/sector maps"
-    workload_kind: block_io
-    spawn_timeout_s: 15
+    workload_spec:
+      kind: block_io
 
   - name: runqlat
-    description: "Run-queue latency histogram via sched tracepoints (3 programs)"
-    workload_kind: scheduler
-    spawn_timeout_s: 15
+    workload_spec:
+      kind: scheduler
 
   - name: syscount
-    description: "Syscall count/latency summary via raw_syscalls tracepoints"
-    workload_kind: file_open
-    spawn_timeout_s: 15
+    workload_spec:
+      kind: file_open
     tool_args: ["-L", "-i", "1"]
 
   - name: execsnoop
-    description: "Process exec tracing via tracepoints, argv map lookups"
-    workload_kind: exec_loop
-    spawn_timeout_s: 15
+    workload_spec:
+      kind: exec_loop
     tool_args: ["-T", "-U", "-u", "65534"]
 
   - name: opensnoop
-    description: "File open syscall tracing via tracepoints"
-    workload_kind: file_open
-    spawn_timeout_s: 15
+    workload_spec:
+      kind: file_open
 
   - name: capable
-    description: "Capability call tracing via kprobe cap_capable, 41-entry string map"
-    workload_kind: exec_storm
-    spawn_timeout_s: 15
+    workload_spec:
+      kind: exec_storm
 
   - name: vfsstat
-    description: "VFS operation counters (read/write/open/create/fsync) via kprobes"
-    workload_kind: vfs_create_write_fsync
-    spawn_timeout_s: 15
+    workload_spec:
+      kind: vfs_create_write_fsync
 
   - name: tcpconnect
-    description: "TCP connect tracing via tracepoints, IPv4/IPv6 support"
-    workload_kind: tcp_connect
-    spawn_timeout_s: 15
+    workload_spec:
+      kind: tcp_connect
 
   - name: bindsnoop
-    description: "Socket bind tracing via bind entry plus IPv4/IPv6 return probes"
-    workload_kind: bind_storm
-    spawn_timeout_s: 15
+    workload_spec:
+      kind: bind_storm
 
 measurement_duration_s: 30
 smoke_duration_s: 10

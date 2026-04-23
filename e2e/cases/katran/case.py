@@ -87,7 +87,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         "",
         f"- Generated: {payload.get('generated_at')}",
         f"- Status: `{payload.get('status')}`",
-        f"- Workload: `{payload.get('workload_kind')}`",
+        f"- Workload: `{((payload.get('workload_spec') or {}).get('kind') if isinstance(payload.get('workload_spec'), Mapping) else 'unknown')}`",
         f"- Duration: `{payload.get('duration_s')}s`",
         f"- Smoke: `{payload.get('smoke')}`",
         f"- BPF speedup (baseline/rejit): `{comparison.get('bpf_speedup') if comparison.get('bpf_speedup') is not None else 'n/a'}`",
@@ -107,16 +107,16 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     smoke_duration_s = DEFAULT_SMOKE_DURATION_S
     duration_override = int(args.duration or 0)
     duration_s = int(duration_override or (smoke_duration_s if args.smoke else DEFAULT_DURATION_S))
-    workload_kind = "network"
+    workload_spec = {"kind": "network"}
     runner = KatranRunner(
         iface=DEFAULT_INTERFACE,
         router_peer_iface=None,
         concurrency=DEFAULT_CONCURRENCY,
-        workload_kind=workload_kind,
+        workload_spec=workload_spec,
     )
 
     def workload(lifecycle: object, _phase_name: str) -> dict[str, object]:
-        prog_ids = list(getattr(lifecycle, "target_prog_ids", []) or [])
+        prog_ids = list(getattr(lifecycle, "prog_ids", []) or [])
         return {
             "status": "ok",
             "measurement": measure_workload(runner, duration_s, prog_ids),
@@ -167,10 +167,9 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "status": status,
         "smoke": bool(args.smoke),
         "duration_s": duration_s,
-        "workload_kind": workload_kind,
+        "workload_spec": dict(workload_spec),
         "daemon": str(Path(args.daemon).resolve()),
         "host": host_metadata(),
-        "runner_artifacts": dict(lifecycle_result.artifacts.get("runner_artifacts") or {}),
         "programs": list(lifecycle_result.artifacts.get("programs") or []),
         "baseline": baseline,
         "scan_results": dict(lifecycle_result.scan_results),

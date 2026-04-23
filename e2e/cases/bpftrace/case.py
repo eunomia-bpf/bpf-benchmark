@@ -97,7 +97,7 @@ def selected_scripts(args: argparse.Namespace) -> list[ScriptSpec]:
         wanted = {name.strip() for name in getattr(args, "scripts", []) if name and name.strip()}
         selected = [spec for spec in SCRIPTS if spec.name in wanted]
     return [
-        replace(spec, workload_kind=str(workload_overrides.get(spec.name) or spec.workload_kind))
+        replace(spec, workload_spec={"kind": str(workload_overrides.get(spec.name) or (spec.workload_spec or {}).get("kind") or "")})
         for spec in selected
     ]
 
@@ -150,11 +150,11 @@ def run_phase(
     bpftrace_runner = BpftraceRunner(
         script_path=spec.script_path,
         script_name=spec.name,
-        workload_kind=spec.workload_kind,
+        workload_spec=spec.workload_spec,
         attach_timeout_s=attach_timeout,
     )
     def workload(lifecycle: object, _phase_name: str) -> dict[str, object]:
-        prog_ids = [int(value) for value in (getattr(lifecycle, "target_prog_ids", []) or []) if int(value) > 0]
+        prog_ids = [int(value) for value in (getattr(lifecycle, "prog_ids", []) or []) if int(value) > 0]
         if not prog_ids:
             return {"status": "error", "reason": "no BPF programs are attached", "measurement": None}
         return {
@@ -427,10 +427,9 @@ def run_bpftrace_case(args: argparse.Namespace) -> dict[str, object]:
     if not scripts:
         raise RuntimeError("no scripts selected")
 
-    smoke_duration_s = int(getattr(args, "smoke_duration", 5) or 5)
     duration_override = int(getattr(args, "duration", 0) or 0)
-    duration_s = int(smoke_duration_s if args.smoke else (duration_override or DEFAULT_DURATION_S))
-    attach_timeout_s = int(getattr(args, "attach_timeout", 20) or 20)
+    duration_s = int(5 if args.smoke else (duration_override or DEFAULT_DURATION_S))
+    attach_timeout_s = 20
     records: list[dict[str, object]] = []
     with enable_bpf_stats():
         for spec in scripts:
@@ -444,7 +443,6 @@ def run_bpftrace_case(args: argparse.Namespace) -> dict[str, object]:
             records.append(
                 {
                     "name": spec.name,
-                    "description": spec.description,
                     "script_path": str(spec.script_path),
                     "script_text": spec.script_path.read_text(),
                     "baseline": baseline,

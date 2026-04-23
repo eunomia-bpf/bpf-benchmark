@@ -63,6 +63,7 @@ DEFAULT_SMOKE_WARMUP_DURATION_S = 2
 DEFAULT_LATENCY_PROBE_COUNT = 8
 DEFAULT_SMOKE_LATENCY_PROBE_COUNT = 3
 DEFAULT_LATENCY_PROBE_TIMEOUT_S = 5.0
+DEFAULT_LOAD_TIMEOUT_S = 20
 DEFAULT_LATENCY_PROBE_ATTEMPTS = 3
 DEFAULT_BOOTSTRAP_ITERATIONS = 2000
 DEFAULT_BOOTSTRAP_SEED = 20260328
@@ -464,8 +465,6 @@ def measure_workload(
     collector: TraceeOutputCollector | None,
 ) -> dict[str, object]:
     before_bpf = sample_bpf_stats(prog_ids)
-    if collector is not None:
-        collector.raise_event_file_error()
     before_tracee = collector.snapshot() if collector is not None else None
     cpu_holder: dict[int, dict[str, float]] = {}
     system_cpu_holder: dict[str, float] = {}
@@ -502,8 +501,6 @@ def measure_workload(
         raise RuntimeError(f"agent cpu sampler produced no data for pid={agent_pid}")
 
     after_bpf = sample_bpf_stats(prog_ids)
-    if collector is not None:
-        collector.raise_event_file_error()
     after_tracee = collector.snapshot() if collector is not None else None
     bpf_delta = compute_delta(before_bpf, after_bpf)
 
@@ -1209,19 +1206,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary)
 
-    setup_result = {
-        "returncode": 0,
-        "tracee_binary": None,
-        "stdout_tail": "",
-        "stderr_tail": "",
-    }
-    tracee_binary = resolve_tracee_binary(getattr(args, "tracee_binary", None), setup_result)
-    if tracee_binary is None:
-        setup_result = inspect_tracee_setup()
-        tracee_binary = resolve_tracee_binary(getattr(args, "tracee_binary", None), setup_result)
-    elif tracee_binary is not None:
-        setup_result["tracee_binary"] = tracee_binary
-        setup_result["stdout_tail"] = "Using an already available Tracee binary."
+    setup_result = inspect_tracee_setup()
+    tracee_binary = resolve_tracee_binary(None, setup_result)
 
     limitations: list[str] = []
     if setup_result["returncode"] != 0:
@@ -1260,7 +1246,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             limitations=limitations,
         )
     events = list(config.get("events") or [])
-    tracee_extra_args = getattr(args, "tracee_extra_arg", None) or []
+    tracee_extra_args: list[str] = []
     commands = build_tracee_commands(tracee_binary, events, tracee_extra_args)
     preflight: dict[str, object] | None = None
     try:
@@ -1298,7 +1284,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                         tracee_binary=tracee_binary,
                         events=events,
                         extra_args=tracee_extra_args,
-                        load_timeout_s=int(getattr(args, "load_timeout", 20) or 20),
+                        load_timeout_s=DEFAULT_LOAD_TIMEOUT_S,
                     )
                     runner.start()
                     prog_ids = [
@@ -1308,8 +1294,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     ]
                     return CaseLifecycleState(
                         runtime=runner,
-                        target_prog_ids=prog_ids,
-                        apply_prog_ids=list(prog_ids),
+                        prog_ids=prog_ids,
                         artifacts={
                             "tracee_programs": runner.programs,
                             "rejit_policy_context": {
@@ -1328,7 +1313,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     preflight = run_phase(
                         list(workloads),
                         preflight_duration_s,
-                        lifecycle.target_prog_ids,
+                        lifecycle.prog_ids,
                         cycle_index=cycle_index,
                         phase_name="preflight",
                         warmup_duration_s=0,
@@ -1341,7 +1326,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                         runner=runner,
                     )
                     preflight["program_activity"] = {
-                        "programs": summarize_program_activity(preflight, lifecycle.target_prog_ids),
+                        "programs": summarize_program_activity(preflight, lifecycle.prog_ids),
                     }
                     lifecycle.artifacts["preflight"] = preflight
                     if not require_program_activity:
@@ -1368,7 +1353,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     phase_result = run_phase(
                         workloads,
                         duration_s,
-                        lifecycle.target_prog_ids,
+                        lifecycle.prog_ids,
                         cycle_index=cycle_index,
                         phase_name=phase_name,
                         warmup_duration_s=warmup_duration_s,

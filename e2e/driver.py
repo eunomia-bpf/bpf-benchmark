@@ -71,9 +71,7 @@ from e2e.cases.katran.case import (  # noqa: E402
     run_katran_case,
 )
 from runner.libs.case_common import (  # noqa: E402
-    attach_pending_result_metadata,
     prepare_daemon_session,
-    reset_pending_result_metadata,
     wait_for_suite_quiescence,
 )
 
@@ -254,19 +252,11 @@ def _append_suite_temp_path(args: argparse.Namespace, path: Path) -> None:
 
 
 def _cleanup_suite_temp_paths(args: argparse.Namespace) -> None:
-    cleanup_errors = getattr(args, "_suite_cleanup_errors", None)
-    if not isinstance(cleanup_errors, list):
-        cleanup_errors = []
-        setattr(args, "_suite_cleanup_errors", cleanup_errors)
     for raw_path in getattr(args, "_suite_temp_paths", []) or []:
         try:
-            Path(raw_path).unlink(missing_ok=True)
+            Path(raw_path).unlink()
         except FileNotFoundError:
             continue
-        except OSError as exc:
-            message = f"failed to remove suite temp file {raw_path}: {exc}"
-            cleanup_errors.append(message)
-            print(message, file=sys.stderr)
 
 
 def _load_suite_case_apps(suite_path: Path) -> dict[str, list[AppSpec]]:
@@ -365,7 +355,7 @@ def _configure_bcc_case_from_suite(args: argparse.Namespace, suite_apps: list[Ap
         if app is None or name not in selected_names:
             continue
         updated = dict(entry)
-        updated["workload_kind"] = app.workload_for("e2e")
+        updated["workload_spec"] = {"kind": app.workload_for("e2e")}
         filtered.append(updated)
     found = {str(entry.get("name") or "").strip() for entry in filtered}
     missing = [name for name in selected_names if name not in found]
@@ -406,7 +396,6 @@ def _configure_katran_case_from_suite(args: argparse.Namespace, suite_apps: list
         return
     if len(suite_apps) > 1:
         raise RuntimeError("katran suite currently supports a single loader instance")
-    args.workload = suite_apps[0].workload_for("e2e")
 
 
 def apply_suite_case_config(args: argparse.Namespace, suite_case_apps: dict[str, list[AppSpec]]) -> None:
@@ -511,14 +500,12 @@ def _run_single_case(
     artifact_result_md = artifact_dir / "result.md"
     artifact_report_md = None if report_md is None else artifact_dir / "report.md"
     session.write(status="running", progress_payload=progress_payload)
-    reset_pending_result_metadata()
     artifact_error_written = False
 
     try:
         if prepared_daemon_session is not None:
             setattr(args, "_prepared_daemon_session", prepared_daemon_session)
         payload = spec.run_case(args)
-        attach_pending_result_metadata(payload)
         detail_texts = {"result.md": spec.build_markdown(payload) + "\n"}
         if spec.build_report is not None:
             if report_md is None:
@@ -573,7 +560,6 @@ def _run_single_case(
             "error_message": error_message,
             "failed_at": completed_at,
         }
-        attach_pending_result_metadata(error_payload)
         metadata_payload = payload if isinstance(payload, dict) else error_payload
         session.write(
             status="error",
@@ -595,7 +581,6 @@ def _run_single_case(
             "error_message": str(exc),
             "failed_at": failed_at,
         }
-        attach_pending_result_metadata(error_payload)
         metadata_payload = error_payload
         session.write(
             status="error",
@@ -619,7 +604,7 @@ def main(argv: list[str] | None = None) -> int:
         failed: list[str] = []
         daemon_binary = Path(args.daemon).resolve()
         with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
-            prepared = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
+            prepared = prepare_daemon_session(daemon_session)
             for index, case_name in enumerate(cases_to_run):
                 print(f"\n{'='*60}")
                 print(f"  e2e: running {case_name}")
@@ -646,7 +631,7 @@ def main(argv: list[str] | None = None) -> int:
     apply_suite_case_config(args, suite_case_apps)
     daemon_binary = Path(args.daemon).resolve()
     with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
-        prepared = prepare_daemon_session(daemon_session, daemon_binary=daemon_binary)
+        prepared = prepare_daemon_session(daemon_session)
         _run_single_case(args, prepared_daemon_session=prepared)
     return 0
 

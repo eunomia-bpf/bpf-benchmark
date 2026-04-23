@@ -18,46 +18,39 @@ DEFAULT_SCRIPT_DIR = ROOT_DIR / "e2e" / "cases" / "bpftrace" / "scripts"
 class ScriptSpec:
     name: str
     script_path: Path
-    description: str
-    workload_kind: str
+    workload_spec: Mapping[str, object]
 
 
 SCRIPTS: tuple[ScriptSpec, ...] = (
     ScriptSpec(
         name="tcplife",
         script_path=DEFAULT_SCRIPT_DIR / "tcplife.bt",
-        description="kprobe tcp_set_state: TCP session lifespan with IPv4/IPv6 struct field access, bswap, ntop, 3 maps",
-        workload_kind="tcp_connect",
+        workload_spec={"kind": "tcp_connect"},
     ),
     ScriptSpec(
         name="biosnoop",
         script_path=DEFAULT_SCRIPT_DIR / "biosnoop.bt",
-        description="tracepoint block_io_start/done: per-I/O latency with tuple-keyed maps and bitwise ops (dev >> 20)",
-        workload_kind="block_io",
+        workload_spec={"kind": "block_io"},
     ),
     ScriptSpec(
         name="runqlat",
         script_path=DEFAULT_SCRIPT_DIR / "runqlat.bt",
-        description="tracepoint sched_wakeup/wakeup_new/switch: run queue latency histogram, 3 probes",
-        workload_kind="scheduler",
+        workload_spec={"kind": "scheduler"},
     ),
     ScriptSpec(
         name="tcpretrans",
         script_path=DEFAULT_SCRIPT_DIR / "tcpretrans.bt",
-        description="kprobe tcp_retransmit_skb: TCP retransmit tracing with 12-entry state string map, ntop/bswap",
-        workload_kind="tcp_retransmit",
+        workload_spec={"kind": "tcp_retransmit"},
     ),
     ScriptSpec(
         name="capable",
         script_path=DEFAULT_SCRIPT_DIR / "capable.bt",
-        description="kprobe cap_capable: security capability checks with 41-entry string map lookup",
-        workload_kind="exec_storm",
+        workload_spec={"kind": "exec_storm"},
     ),
     ScriptSpec(
         name="vfsstat",
         script_path=DEFAULT_SCRIPT_DIR / "vfsstat.bt",
-        description="kprobe vfs_read*/write*/fsync/open/create: per-function counters with interval printing",
-        workload_kind="vfs_create_write_fsync",
+        workload_spec={"kind": "vfs_create_write_fsync"},
     ),
 )
 
@@ -104,13 +97,13 @@ class BpftraceRunner(AppRunner):
         *,
         script_path: Path | str | None = None,
         script_name: str | None = None,
-        workload_kind: str | None = None,
+        workload_spec: Mapping[str, object] | None = None,
         attach_timeout_s: int = DEFAULT_ATTACH_TIMEOUT_S,
     ) -> None:
         super().__init__()
         self.script_path = None if script_path is None else Path(script_path).resolve()
         self.script_name = str(script_name or "").strip()
-        self.workload_kind = workload_kind
+        self.workload_spec = dict(workload_spec or {})
         self.attach_timeout_s = int(attach_timeout_s)
         self.process: Any | None = None
         self.collector = ProcessOutputCollector()
@@ -121,19 +114,19 @@ class BpftraceRunner(AppRunner):
     def pid(self) -> int | None:
         return None if self.process is None else int(self.process.pid or 0)
 
-    def _resolve_script(self) -> tuple[Path, str]:
+    def _resolve_script(self) -> tuple[Path, dict[str, object]]:
         specs = {spec.name: spec for spec in SCRIPTS}
         if self.script_name:
             spec = specs.get(self.script_name)
             if spec is None:
                 raise RuntimeError(f"unknown bpftrace script: {self.script_name}")
-            return spec.script_path.resolve(), spec.workload_kind
+            return spec.script_path.resolve(), dict(spec.workload_spec)
         if self.script_path is not None:
             if not self.script_path.exists():
                 raise RuntimeError(f"bpftrace script not found: {self.script_path}")
             stem = self.script_path.name.removesuffix(".bt")
             spec = specs.get(stem)
-            return self.script_path, self.workload_kind or (spec.workload_kind if spec else "")
+            return self.script_path, dict(self.workload_spec or (spec.workload_spec if spec else {}))
         raise RuntimeError("BpftraceRunner requires script_name or script_path")
 
 
@@ -144,8 +137,9 @@ class BpftraceRunner(AppRunner):
         bpftrace_binary = which("bpftrace")
         if bpftrace_binary is None:
             raise RuntimeError("bpftrace is required but not present in PATH")
-        script_path, workload_kind = self._resolve_script()
-        self.workload_kind = self.workload_kind or workload_kind
+        script_path, workload_spec = self._resolve_script()
+        if not self.workload_spec:
+            self.workload_spec = dict(workload_spec)
         before_ids = {
             int(record.get("id", 0) or 0)
             for record in bpftool_prog_show_records()
@@ -178,10 +172,11 @@ class BpftraceRunner(AppRunner):
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.process is None:
             raise RuntimeError("BpftraceRunner is not running")
-        if not self.workload_kind:
+        kind = str(self.workload_spec.get("kind") or self.workload_spec.get("name") or "").strip()
+        if not kind:
             raise RuntimeError("bpftrace workload kind is not resolved")
         return run_named_workload(
-            self.workload_kind,
+            kind,
             max(1, int(round(seconds))),
             network_as_tcp_connect=True,
         )

@@ -704,13 +704,13 @@ def run_mixed_workload(duration_s: float) -> WorkloadResult:
 
 
 def run_named_workload(
-    workload_kind: str,
+    kind: str,
     duration_s: int | float,
     *,
     network_as_tcp_connect: bool = False,
 ) -> WorkloadResult:
     seconds = max(1, int(round(float(duration_s))))
-    kind = str(workload_kind or "").strip()
+    kind = str(kind or "").strip()
     if kind == "mixed":
         return run_mixed_workload(float(duration_s))
     if kind == "tcp_connect":

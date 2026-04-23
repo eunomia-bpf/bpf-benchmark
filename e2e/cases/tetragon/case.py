@@ -22,8 +22,6 @@ from runner.libs.app_runners.tetragon import (  # noqa: E402
     describe_agent_exit,
     inspect_tetragon_setup,
     resolve_tetragon_binary,
-    run_exec_storm_in_cgroup as runner_run_exec_storm_in_cgroup,
-    run_tetragon_workload,
 )
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
@@ -32,7 +30,6 @@ from runner.libs.metrics import (  # noqa: E402
     start_sampler_thread,
 )
 from runner.libs.rejit import applied_site_totals_from_rejit_result  # noqa: E402
-from runner.libs.workload import WorkloadResult  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     LifecycleAbort,
@@ -59,7 +56,6 @@ class WorkloadSpec:
     name: str
     kind: str
     metric: str
-    description: str
     value: int = 0
 
 
@@ -68,27 +64,23 @@ DEFAULT_WORKLOADS = (
         name="exec_storm",
         kind="exec_storm",
         metric="bogo-ops/s",
-        description="stress-ng execve workload",
         value=2,
     ),
     WorkloadSpec(
         name="file_io",
         kind="file_io",
         metric="ops/s",
-        description="fio or dd file workload",
     ),
     WorkloadSpec(
         name="open_storm",
         kind="open_storm",
         metric="bogo-ops/s",
-        description="stress-ng open workload",
         value=2,
     ),
     WorkloadSpec(
         name="connect_storm",
         kind="connect_storm",
         metric="ops/s",
-        description="rapid loopback TCP connect storm",
     ),
 )
 
@@ -116,42 +108,16 @@ def workload_specs_from_config(config: Mapping[str, object]) -> tuple[WorkloadSp
         name = str(raw_workload.get("name") or raw_workload.get("kind") or f"workload_{index}")
         kind = str(raw_workload.get("kind") or name)
         metric = str(raw_workload.get("metric") or "ops/s")
-        description = str(raw_workload.get("description") or "")
         value = int(raw_workload.get("value", 0) or 0)
         workloads.append(
             WorkloadSpec(
                 name=name,
                 kind=kind,
                 metric=metric,
-                description=description,
                 value=value,
             )
         )
     return tuple(workloads) or DEFAULT_WORKLOADS
-
-
-def run_workload(spec: WorkloadSpec, duration_s: int) -> WorkloadResult:
-    return run_workload_with_options(spec, duration_s, exec_workload_cgroup=False)
-
-
-def run_exec_storm_in_cgroup(duration_s: int | float, rate: int) -> WorkloadResult:
-    return runner_run_exec_storm_in_cgroup(duration_s, rate)
-
-
-def run_workload_with_options(
-    spec: WorkloadSpec,
-    duration_s: int,
-    *,
-    exec_workload_cgroup: bool,
-) -> WorkloadResult:
-    if spec.kind == "exec_storm" and exec_workload_cgroup:
-        return run_exec_storm_in_cgroup(duration_s, spec.value or 2)
-    return run_tetragon_workload(
-        {"kind": spec.kind, "value": spec.value},
-        duration_s,
-        exec_workload_cgroup=False,
-    )
-
 
 def measure_workload(
     runner: TetragonRunner,
@@ -213,7 +179,6 @@ def measure_workload(
         "name": workload_spec.name,
         "kind": workload_spec.kind,
         "metric": workload_spec.metric,
-        "description": workload_spec.description,
         "app_throughput": workload_result.ops_per_sec,
         "ops_total": workload_result.ops_total,
         "ops_per_sec": workload_result.ops_per_sec,
@@ -614,14 +579,14 @@ def daemon_payload(
             tetragon_binary=tetragon_binary,
             tetragon_extra_args=tetragon_extra_args,
             load_timeout_s=load_timeout,
+            setup_result=setup_result,
         )
         runner.start()
         tetragon_programs = [dict(program) for program in runner.programs]
         prog_ids = [int(program["id"]) for program in tetragon_programs if int(program.get("id", 0) or 0) > 0]
         return CaseLifecycleState(
             runtime=runner,
-            target_prog_ids=prog_ids,
-            apply_prog_ids=list(prog_ids),
+            prog_ids=prog_ids,
             artifacts={
                 "tetragon_launch_command": list(runner.command),
                 "policy_dir": None if runner.tempdir is None else runner.tempdir.name,
@@ -644,12 +609,12 @@ def daemon_payload(
             runner,
             list(workloads),
             preflight_duration_s,
-            lifecycle.target_prog_ids,
+            lifecycle.prog_ids,
             agent_pid=runner.pid,
             exec_workload_cgroup=exec_workload_cgroup,
         )
         preflight["program_activity"] = {
-            "programs": summarize_program_activity(preflight, lifecycle.target_prog_ids),
+            "programs": summarize_program_activity(preflight, lifecycle.prog_ids),
         }
         lifecycle.artifacts["preflight"] = preflight
         if not require_program_activity:
@@ -677,7 +642,7 @@ def daemon_payload(
             runner,
             workloads,
             duration_s,
-            lifecycle.target_prog_ids,
+            lifecycle.prog_ids,
             agent_pid=runner.pid,
             exec_workload_cgroup=exec_workload_cgroup,
         )
@@ -815,22 +780,13 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary)
 
-    setup_result = {
-        "returncode": 0,
-        "tetragon_binary": None,
-        "tetra_binary": None,
-        "stdout_tail": "",
-        "stderr_tail": "",
-    }
-    tetragon_binary = resolve_tetragon_binary(getattr(args, "tetragon_binary", None), setup_result)
-    if tetragon_binary is None:
-        setup_result = inspect_tetragon_setup()
+    setup_result = inspect_tetragon_setup()
 
     limitations: list[str] = []
     if setup_result["returncode"] != 0:
         limitations.append("Tetragon setup inspection failed before execution.")
 
-    tetragon_binary = resolve_tetragon_binary(getattr(args, "tetragon_binary", None), setup_result)
+    tetragon_binary = resolve_tetragon_binary(None, setup_result)
     if tetragon_binary is None:
         return error_payload(
             config=config,
@@ -867,7 +823,7 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
                 preflight_duration_s=preflight_duration_s,
                 require_program_activity=require_program_activity,
                 smoke=bool(args.smoke),
-                load_timeout=int(getattr(args, "load_timeout", DEFAULT_LOAD_TIMEOUT_S) or DEFAULT_LOAD_TIMEOUT_S),
+                load_timeout=DEFAULT_LOAD_TIMEOUT_S,
                 setup_result=setup_result,
                 limitations=limitations,
             )
