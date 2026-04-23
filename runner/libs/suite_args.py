@@ -16,8 +16,6 @@ _die = partial(fail, "suite-args")
 
 @dataclass(frozen=True)
 class SuiteSelection:
-    corpus_filters: str = ""
-    e2e_cases: str = "all"
     test_mode: str = "test"
 
 
@@ -100,30 +98,24 @@ def suite_args_from_env(
 
     if suite_name == "corpus":
         if prefix:
-            filters = _prefixed_env(values, prefix, "CORPUS_FILTERS")
             workload_seconds = _prefixed_env(values, prefix, "CORPUS_WORKLOAD_SECONDS")
             extra_args = _prefixed_env(values, prefix, "CORPUS_ARGS")
         else:
             samples = _env(values, "SAMPLES") or _env(values, "VM_CORPUS_SAMPLES", "30")
-            filters = _env(values, "FILTERS")
             workload_seconds = _env(values, "VM_CORPUS_WORKLOAD_SECONDS")
             extra_args = _env(values, "VM_CORPUS_ARGS")
         args.extend(["--samples", samples])
-        _append_value(args, "--corpus-filters", filters)
         _append_value(args, "--corpus-workload-seconds", workload_seconds)
         _append_shell_args(args, extra_args)
         return args
 
     if suite_name == "e2e":
         if prefix:
-            cases = _prefixed_env(values, prefix, "E2E_CASES", "all")
             smoke = _prefixed_env(values, prefix, "E2E_SMOKE", "0")
             extra_args = _prefixed_env(values, prefix, "E2E_ARGS")
         else:
-            cases = _env(values, "E2E_CASE", "all")
             smoke = _env(values, "E2E_SMOKE", "0")
             extra_args = _env(values, "E2E_ARGS")
-        args.extend(["--e2e-cases", "".join(cases.split()) or "all"])
         if smoke == "1":
             args.append("--e2e-smoke")
         _append_shell_args(args, extra_args)
@@ -156,15 +148,9 @@ def suite_args_from_env(
 def suite_selection_from_args(suite_name: str, suite_args: list[str]) -> SuiteSelection:
     parser = argparse.ArgumentParser(add_help=False)
     if suite_name == "corpus":
-        parser.add_argument("--corpus-filter", "--filter", action="append", dest="corpus_filter_values", default=None)
-        parser.add_argument("--corpus-filters", default="")
-        ns, _unknown = parser.parse_known_args(suite_args)
-        return SuiteSelection(corpus_filters=_merge_csv_and_repeated(ns.corpus_filters, ns.corpus_filter_values))
+        return SuiteSelection()
     if suite_name == "e2e":
-        parser.add_argument("--e2e-cases", default="")
-        parser.add_argument("--e2e-case", action="append", dest="e2e_case_values", default=None)
-        ns, _unknown = parser.parse_known_args(suite_args)
-        return SuiteSelection(e2e_cases=_merge_csv_and_repeated(ns.e2e_cases, ns.e2e_case_values) or "all")
+        return SuiteSelection()
     if suite_name == "test":
         parser.add_argument("--test-mode", default="test")
         ns, _unknown = parser.parse_known_args(suite_args)

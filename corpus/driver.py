@@ -30,6 +30,7 @@ from runner.libs.case_common import (
     rejit_program_result,
     wait_for_suite_quiescence,
 )
+from runner.libs.app_runners.process_support import programs_after
 from runner.libs.rejit import (
     DaemonSession,
     benchmark_run_provenance,
@@ -46,7 +47,6 @@ from runner.libs.statistics import geometric_mean
 DEFAULT_MACRO_APPS_YAML = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_OUTPUT_JSON = ROOT_DIR / "corpus" / "results" / "vm_corpus.json"
-DEFAULT_OUTPUT_MD = ROOT_DIR / "corpus" / "results" / "vm_corpus.md"
 SECTION_TYPE_PREFIXES = {
     "xdp": "xdp",
     "tc": "sched_cls",
@@ -68,8 +68,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--samples", type=int, default=0)
     parser.add_argument("--workload-seconds", type=float, default=0.0)
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
-    parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
-    parser.add_argument("--filter", action="append", dest="filters")
     parser.add_argument(
         "--no-kinsn",
         action="store_true",
@@ -548,24 +546,11 @@ def _apply_record_program_changed(apply_record: Mapping[str, object] | None) -> 
     return bool(apply_record.get("changed"))
 
 
-def _rejit_result_has_any_change(rejit_result: Mapping[str, object] | None) -> bool:
-    if not isinstance(rejit_result, Mapping):
-        return False
-    per_program = rejit_result.get("per_program")
-    if isinstance(per_program, Mapping) and per_program:
-        return any(
-            _apply_record_program_changed(record if isinstance(record, Mapping) else None)
-            for record in per_program.values()
-        )
-    return _apply_record_program_changed(rejit_result)
-
-
 def _comparison_exclusion_reason(
     baseline_exec_ns: float | None,
     rejit_exec_ns: float | None,
     *,
     had_post_rejit: bool,
-    any_changed: bool,
     apply_record: Mapping[str, object],
 ) -> str:
     apply_error = str(apply_record.get("error") or "").strip()
@@ -580,8 +565,6 @@ def _comparison_exclusion_reason(
     if not had_post_rejit:
         if apply_error:
             return f"apply_error: {apply_error}"
-        if not any_changed:
-            return _apply_record_no_change_reason(apply_record)
         return "missing_post_rejit_measurement"
     if rejit_exec_ns is None:
         if apply_error:
@@ -602,7 +585,6 @@ def _build_program_measurements(
     had_post_rejit: bool,
 ) -> dict[str, dict[str, object]]:
     rows: dict[str, dict[str, object]] = {}
-    any_changed = _rejit_result_has_any_change(apply_result)
     for live_program in live_programs:
         prog_id = int(live_program.get("id", 0) or 0)
         if prog_id <= 0:
@@ -633,7 +615,6 @@ def _build_program_measurements(
                 baseline_exec_ns,
                 rejit_exec_ns,
                 had_post_rejit=had_post_rejit,
-                any_changed=any_changed,
                 apply_record=apply_record,
             )
         rows[str(prog_id)] = {
@@ -865,6 +846,19 @@ def _build_runner_state(
     )
 
 
+def _refresh_active_session_programs(sessions: Sequence["CorpusAppSession"]) -> None:
+    current_programs = programs_after(())
+    claimed_ids: set[int] = set()
+    for session in reversed(sessions):
+        live_programs = [dict(program) for program in programs_after(session.before_prog_ids, records=current_programs)
+                         if int(program.get("id", 0) or 0) > 0 and int(program.get("id", 0) or 0) not in claimed_ids]
+        if not live_programs:
+            raise RuntimeError(f"{session.app.name}: failed to refresh live BPF programs before measurement/apply")
+        session.state.prog_ids = [int(program["id"]) for program in live_programs]
+        session.state.artifacts["programs"] = live_programs; session.runner.programs = [dict(program) for program in live_programs]
+        claimed_ids.update(session.state.prog_ids)
+
+
 def _build_app_error_result(
     app: AppSpec,
     *,
@@ -944,7 +938,6 @@ def _build_app_error_result(
             "programs": rejit_programs,
             "exec_ns_mean": _mean_exec_ns(rejit_programs),
         } if had_post_rejit else None,
-        "had_post_rejit_measurement": had_post_rejit,
         "rejit_workload": rejit_workload,
         "rejit_workloads": rejit_workloads,
         "process": {} if runner is None else dict(runner.process_output),
@@ -1071,7 +1064,7 @@ def _finalize_app_result(
         had_post_rejit=had_post_rejit,
     )
     has_comparable_measurement = _has_comparable_measurement(program_measurements)
-    if not apply_error and _rejit_result_has_any_change(normalized_apply_result) and not has_comparable_measurement:
+    if not apply_error and any(bool(row.get("changed")) for row in program_measurements.values()) and not has_comparable_measurement:
         raise RuntimeError(
             f"{app.name}: workload {app.workload_for('corpus')!r} produced no comparable target program measurements"
         )
@@ -1105,7 +1098,6 @@ def _finalize_app_result(
             "programs": rejit_programs_by_id,
             "exec_ns_mean": _mean_exec_ns(rejit_programs_by_id),
         } if had_post_rejit else None,
-        "had_post_rejit_measurement": had_post_rejit,
         "rejit_workload": rejit_workload,
         "rejit_workloads": rejit_workloads,
         "process": dict(runner.process_output),
@@ -1117,6 +1109,7 @@ class CorpusAppSession:
     app: AppSpec
     runner: AppRunner
     state: CaseLifecycleState
+    before_prog_ids: list[int]
     measurement_mode: str
     workload_seconds: float
     baseline_measurement: dict[str, object] | None = None
@@ -1130,10 +1123,7 @@ class CorpusAppSession:
 
 def run_suite(args: argparse.Namespace) -> dict[str, object]:
     suite_path = Path(args.suite).resolve()
-    suite, suite_summary = load_app_suite_from_yaml(
-        suite_path,
-        filters=list(args.filters or []),
-    )
+    suite, suite_summary = load_app_suite_from_yaml(suite_path)
     daemon_binary = Path(args.daemon).resolve()
     if not daemon_binary.exists():
         raise RuntimeError(f"daemon binary not found: {daemon_binary}")
@@ -1161,6 +1151,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                     app_workload_seconds = _app_workload_seconds(args, suite.defaults, app)
                     runner: AppRunner | None = None
                     try:
+                        before_prog_ids = [int(program.get("id", 0) or 0) for program in programs_after(())]
                         runner = get_app_runner(
                             app.runner,
                             workload=app.workload_for("corpus"),
@@ -1177,6 +1168,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                             app=app,
                             runner=runner,
                             state=state,
+                            before_prog_ids=before_prog_ids,
                             measurement_mode=measurement_mode,
                             workload_seconds=app_workload_seconds,
                         )
@@ -1213,6 +1205,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         break
 
                 if not fatal_error:
+                    _refresh_active_session_programs(active_sessions)
                     surviving_sessions: list[CorpusAppSession] = []
                     for session in active_sessions:
                         try:
@@ -1264,6 +1257,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                     active_sessions = surviving_sessions
 
                 if not fatal_error and active_sessions:
+                    _refresh_active_session_programs(active_sessions)
                     prog_ids = [
                         prog_id
                         for session in active_sessions
@@ -1325,8 +1319,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
 
                 if not fatal_error:
                     for session in active_sessions:
-                        if not _rejit_result_has_any_change(session.apply_result):
-                            continue
                         try:
                             session.rejit_measurement = _measure_runner_phase(
                                 session.runner,
@@ -1426,7 +1418,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
         "suite_name": suite.suite_name,
         "daemon": str(daemon_binary),
         "daemon_socket": daemon_socket,
-        "filters": list(args.filters or []),
         "samples": samples,
         "workload_seconds": workload_seconds,
         "suite_summary": suite_summary,
@@ -1455,7 +1446,6 @@ def build_run_metadata(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite": "corpus",
         "manifest": str(Path(args.suite).resolve()),
-        "filters": list(args.filters or []),
         "samples": int(resolved_samples),
         "workload_seconds": float(resolved_workload_seconds),
         "kinsn_enabled": not bool(args.no_kinsn),
@@ -1470,10 +1460,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     output_json = Path(args.output_json).resolve()
     metadata_suite_path = Path(args.suite).resolve()
-    metadata_suite, _metadata_suite_summary = load_app_suite_from_yaml(
-        metadata_suite_path,
-        filters=list(args.filters or []),
-    )
+    metadata_suite, _metadata_suite_summary = load_app_suite_from_yaml(metadata_suite_path)
     resolved_workload_seconds = _workload_seconds(args, metadata_suite.defaults)
     resolved_samples = _sample_count(args, metadata_suite.defaults)
     run_type = derive_run_type(output_json, "vm_corpus")
@@ -1481,7 +1468,6 @@ def main(argv: list[str] | None = None) -> int:
     progress_payload: dict[str, object] = {
         "suite": "corpus",
         "status": "running",
-        "filters": list(args.filters or []),
         "samples": int(resolved_samples),
         "workload_seconds": float(resolved_workload_seconds),
         "kinsn_enabled": not bool(args.no_kinsn),

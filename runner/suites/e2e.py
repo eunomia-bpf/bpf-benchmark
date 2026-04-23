@@ -7,7 +7,6 @@ import shutil
 import sys
 from functools import partial
 from pathlib import Path
-from typing import Sequence
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
@@ -21,7 +20,6 @@ from runner.suites._common import (
     merge_csv_and_repeated,
     resolve_daemon_binary,
     resolve_executable,
-    resolve_workspace_path,
     run_checked,
     strip_option_with_value,
     suite_main_setup,
@@ -29,17 +27,6 @@ from runner.suites._common import (
 )
 
 _die = partial(fail, "e2e-suite")
-_E2E_CASES = {"tracee", "tetragon", "bpftrace", "scx", "bcc", "katran"}
-
-
-def _validate_e2e_cases(cases: Sequence[str]) -> None:
-    if not cases:
-        _die("e2e cases must not be empty")
-    if list(cases) == ["all"]:
-        return
-    for case_name in cases:
-        if case_name not in _E2E_CASES:
-            _die(f"unsupported e2e case: {case_name}")
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -49,9 +36,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     add_common_args(parser)
     parser.set_defaults(workspace=str(ROOT_DIR), target_name="local")
     parser.add_argument("--daemon-binary", default="", help="Override the bpfrejit-daemon binary path.")
-    parser.add_argument("--suite", default="", help="Path to the shared app suite YAML manifest.")
-    parser.add_argument("--e2e-cases", default="", help="Comma-separated e2e cases. Defaults to all.")
-    parser.add_argument("--e2e-case", action="append", dest="e2e_case_values", default=None, help="E2E case to run; repeatable.")
     parser.add_argument("--e2e-smoke", action="store_true", help="Run e2e cases in smoke mode.")
     parser.add_argument("--native-repo", action="append", dest="native_repo_values", default=None, help="Native repo artifact to validate; repeatable.")
     parser.add_argument("--native-repos", default="", help="Comma-separated native repo artifacts to validate.")
@@ -67,8 +51,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("e2e_argv_remainder", nargs=argparse.REMAINDER, help=argparse.SUPPRESS)
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
-    args.e2e_cases = merge_csv_and_repeated(args.e2e_cases, args.e2e_case_values) or ["all"]
-    _validate_e2e_cases(args.e2e_cases)
     args.native_repos = merge_csv_and_repeated(args.native_repos, args.native_repo_values)
     args.scx_packages = merge_csv_and_repeated(args.scx_packages, args.scx_package_values)
     e2e_argv: list[str] = []
@@ -86,19 +68,17 @@ def _runtime_env(workspace: Path, args: argparse.Namespace) -> dict[str, str]:
     return suite_runtime_env_with_rejit_passes(workspace, args, "e2e", args.e2e_argv, _die)
 
 
-def _e2e_driver_argv(workspace: Path, args: argparse.Namespace, case_name: str, daemon_binary: Path) -> list[str]:
-    argv = [case_name, "--daemon", str(daemon_binary)]
-    if args.suite:
-        argv.extend(["--suite", str(resolve_workspace_path(workspace, args.suite))])
+def _e2e_driver_argv(args: argparse.Namespace, daemon_binary: Path) -> list[str]:
+    argv = ["all", "--daemon", str(daemon_binary)]
     if args.e2e_smoke:
         argv.append("--smoke")
     argv.extend(strip_option_with_value(args.e2e_argv, "--rejit-passes"))
     return argv
 
 
-def _run_e2e_case(workspace: Path, args: argparse.Namespace, env: dict[str, str], case_name: str, daemon_binary: Path, python_bin: str) -> None:
+def _run_e2e_case(workspace: Path, args: argparse.Namespace, env: dict[str, str], daemon_binary: Path, python_bin: str) -> None:
     runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
-    command = [python_bin, str(workspace / "e2e" / "driver.py"), *_e2e_driver_argv(workspace, args, case_name, daemon_binary)]
+    command = [python_bin, str(workspace / "e2e" / "driver.py"), *_e2e_driver_argv(args, daemon_binary)]
     run_checked(command, cwd=workspace, env=runtime_env, die=_die)
 
 
@@ -114,16 +94,8 @@ def _run_e2e_suite(workspace: Path, args: argparse.Namespace) -> None:
     ensure_bpf_stats_enabled(workspace, _die)
     ensure_scx_artifacts(workspace, args.target_arch, args.scx_packages, _die)
     daemon_binary = resolve_daemon_binary(workspace, args.target_arch, args.daemon_binary, _die)
-    if args.e2e_cases == ["all"]:
-        all_env = env.copy()
-        ensure_katran_artifacts(workspace, args.target_arch, args.native_repos, _die)
-        _run_e2e_case(workspace, args, all_env, "all", daemon_binary, python_bin)
-        return
-    for case_name in args.e2e_cases:
-        case_env = env.copy()
-        if case_name == "katran":
-            ensure_katran_artifacts(workspace, args.target_arch, args.native_repos, _die)
-        _run_e2e_case(workspace, args, case_env, case_name, daemon_binary, python_bin)
+    ensure_katran_artifacts(workspace, args.target_arch, args.native_repos, _die)
+    _run_e2e_case(workspace, args, env, daemon_binary, python_bin)
 
 
 def main(argv: list[str] | None = None) -> None:

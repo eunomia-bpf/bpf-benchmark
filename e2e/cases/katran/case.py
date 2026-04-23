@@ -22,7 +22,6 @@ from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_st
 from runner.libs.case_common import (  # noqa: E402
     host_metadata,
     percent_delta,
-    rejit_result_has_any_apply,
     run_app_runner_lifecycle,
     speedup_ratio,
 )
@@ -142,11 +141,9 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     if error_message:
         status = "error"
         comparison_reason = error_message
-    elif rejit_result_has_any_apply(rejit_result) and post_rejit is None:
+    elif post_rejit is None:
         status = "error"
         comparison_reason = "post-ReJIT measurement is missing"
-    elif post_rejit is None:
-        comparison_reason = "no Katran program was applied; post-ReJIT measurement skipped"
 
     comparison = {
         "comparable": post_rejit is not None,

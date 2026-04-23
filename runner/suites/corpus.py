@@ -17,7 +17,6 @@ from runner.suites._common import (
     ensure_katran_artifacts,
     ensure_scx_artifacts,
     env_with_suite_runtime_ld,
-    merge_csv_and_repeated,
     nonnegative_int,
     resolve_daemon_binary,
     resolve_executable,
@@ -41,16 +40,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--suite", default="", help="Path to the corpus app suite YAML manifest.")
     parser.add_argument("--samples", type=nonnegative_int, required=True, help="Measured samples per corpus app; 0 uses suite defaults.")
     parser.add_argument("--output-json", default="", help="JSON output path.")
-    parser.add_argument("--output-md", default="", help="Markdown output path.")
-    parser.add_argument(
-        "--corpus-filter",
-        "--filter",
-        action="append",
-        dest="corpus_filter_values",
-        default=None,
-        help="Corpus app filter to run; repeatable.",
-    )
-    parser.add_argument("--corpus-filters", default="", help="Comma-separated corpus app filters.")
     parser.add_argument("--corpus-workload-seconds", "--workload-seconds", default="", help="Override corpus workload duration.")
     parser.add_argument("--native-repo", action="append", dest="native_repo_values", default=None, help="Native repo artifact to validate; repeatable.")
     parser.add_argument("--native-repos", default="", help="Comma-separated native repo artifacts to validate.")
@@ -66,7 +55,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("corpus_argv_remainder", nargs=argparse.REMAINDER, help=argparse.SUPPRESS)
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
-    args.corpus_filters = merge_csv_and_repeated(args.corpus_filters, args.corpus_filter_values)
     args.native_repos = merge_csv_and_repeated(args.native_repos, args.native_repo_values)
     args.scx_packages = merge_csv_and_repeated(args.scx_packages, args.scx_package_values)
     corpus_argv: list[str] = []
@@ -89,22 +77,15 @@ def _corpus_driver_argv(workspace: Path, args: argparse.Namespace, daemon_binary
         workspace,
         args.output_json or str(workspace / "corpus" / "results" / f"{args.target_name}_corpus.json"),
     )
-    output_md = resolve_workspace_path(
-        workspace,
-        args.output_md or str(workspace / "corpus" / "results" / f"{args.target_name}_corpus.md"),
-    )
     argv = [
         "--daemon", str(daemon_binary),
         "--samples", str(args.samples),
         "--output-json", str(output_json),
-        "--output-md", str(output_md),
     ]
     if args.suite:
         argv.extend(["--suite", str(resolve_workspace_path(workspace, args.suite))])
     if args.corpus_workload_seconds:
         argv.extend(["--workload-seconds", str(args.corpus_workload_seconds)])
-    for filter_name in args.corpus_filters or []:
-        argv.extend(["--filter", str(filter_name)])
     argv.extend(strip_option_with_value(args.corpus_argv, "--rejit-passes"))
     return argv
 

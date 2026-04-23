@@ -50,38 +50,6 @@ def wait_for_suite_quiescence(
     rendered = ", ".join(str(pid) for pid in (previous_ids or ()))
     raise RuntimeError(f"kernel program table did not quiesce between suite entries within "
                        f"{float(timeout_s):.1f}s; last visible prog_ids=[{rendered}]")
-def rejit_result_has_any_apply(rejit_result: Mapping[str, object] | None) -> bool:
-    def _non_negative_int(value: object) -> int | None:
-        if isinstance(value, bool) or not isinstance(value, int):
-            return None
-        return value if value >= 0 else None
-
-    def _record_changed(record: Mapping[str, object] | None) -> bool:
-        if not isinstance(record, Mapping):
-            return False
-        changed = record.get("changed")
-        if isinstance(changed, bool) and changed:
-            return True
-        summary = record.get("summary")
-        if isinstance(summary, Mapping):
-            if (_non_negative_int(summary.get("total_sites_applied")) or 0) > 0:
-                return True
-        debug_result = record.get("debug_result")
-        if isinstance(debug_result, Mapping):
-            if isinstance(debug_result.get("changed"), bool) and bool(debug_result.get("changed")):
-                return True
-            debug_summary = debug_result.get("summary")
-            if isinstance(debug_summary, Mapping):
-                if (_non_negative_int(debug_summary.get("total_sites_applied")) or 0) > 0:
-                    return True
-        return False
-
-    if not isinstance(rejit_result, Mapping):
-        return False
-    per_program = rejit_result.get("per_program")
-    if isinstance(per_program, Mapping) and per_program:
-        return any(_record_changed(r if isinstance(r, Mapping) else None) for r in per_program.values())
-    return _record_changed(rejit_result)
 
 
 def rejit_program_result(
@@ -341,7 +309,6 @@ def run_case_lifecycle(
     after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
     before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
     resolve_rejit_prog_ids: Callable[[object, CaseLifecycleState, Mapping[str, object]], Sequence[int] | None] | None = None,
-    should_run_post_rejit: Callable[[Mapping[str, object]], bool] | None = None,
 ) -> LifecycleRunResult:
     setup_state = setup()
     lifecycle_state: CaseLifecycleState | None = None
@@ -437,11 +404,7 @@ def run_case_lifecycle(
             prog_ids=prog_ids,
             group_results=group_rejit_results,
         )
-        run_post_rejit = rejit_result_has_any_apply(rejit_result)
-        if should_run_post_rejit is not None:
-            run_post_rejit = bool(should_run_post_rejit(rejit_result))
-        if run_post_rejit:
-            post_rejit = workload(setup_state, lifecycle_state, "post_rejit")
+        post_rejit = workload(setup_state, lifecycle_state, "post_rejit")
         return LifecycleRunResult(
             state=lifecycle_state,
             baseline=baseline,
@@ -483,7 +446,6 @@ def run_app_runner_lifecycle(
     after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
     before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
     resolve_rejit_prog_ids: Callable[[object, CaseLifecycleState, Mapping[str, object]], Sequence[int] | None] | None = None,
-    should_run_post_rejit: Callable[[Mapping[str, object]], bool] | None = None,
 ) -> LifecycleRunResult:
     def _start(_: object) -> CaseLifecycleState:
         ids = [int(v) for v in runner.start() if int(v) > 0]
@@ -501,7 +463,6 @@ def run_app_runner_lifecycle(
         after_baseline=after_baseline,
         before_rejit=before_rejit,
         resolve_rejit_prog_ids=resolve_rejit_prog_ids,
-        should_run_post_rejit=should_run_post_rejit,
     )
 
 
@@ -563,7 +524,6 @@ def run_app_runner_phase_records(
     before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
     after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
     before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
-    should_run_post_rejit: Callable[[Mapping[str, object]], bool] | None = None,
 ) -> tuple[dict[str, object], dict[str, object] | None]:
     baseline_measurement: dict[str, object] | None = None
     scan_results: dict[int, dict[str, object]] = {}
@@ -577,7 +537,7 @@ def run_app_runner_phase_records(
             daemon_session=prepared_daemon_session, runner=runner, measure=measure,
             enabled_passes=enabled_passes, build_state=build_state,
             before_baseline=before_baseline, after_baseline=after_baseline,
-            before_rejit=before_rejit, should_run_post_rejit=should_run_post_rejit,
+            before_rejit=before_rejit,
         )
         programs = [dict(p) for p in (lifecycle_result.artifacts.get("programs") or [])]
         if lifecycle_result.state is not None:
@@ -614,12 +574,9 @@ def run_app_runner_phase_records(
     if baseline["status"] == "ok" and rejit_apply is not None:
         _shared = {"programs": programs, "prog_ids": prog_ids, "scan_results": scan_results_str,
                    "site_totals": site_totals, "rejit_result": rejit_apply, "process": process_output}
-        if rejit_result_has_any_apply(rejit_apply):
-            rr = "" if post_measurement is not None else "post-ReJIT measurement is missing"
-            rejit = {"phase": "post_rejit", "status": "ok" if not rr else "error", "reason": rr,
-                     "measurement": post_measurement, **_shared}
-        elif (rejit_error := str(rejit_apply.get("error") or "").strip()):
-            rejit = {"phase": "post_rejit", "status": "error", "reason": rejit_error, "measurement": None, **_shared}
+        rr = str(rejit_apply.get("error") or "").strip() or ("" if post_measurement is not None else "post-ReJIT measurement is missing")
+        rejit = {"phase": "post_rejit", "status": "ok" if not rr else "error", "reason": rr,
+                 "measurement": post_measurement, **_shared}
     return baseline, rejit
 
 

@@ -9,16 +9,13 @@ from functools import partial
 from pathlib import Path
 
 from runner.libs import ROOT_DIR
-from runner.libs.app_suite_schema import load_app_suite_from_yaml
 from runner.libs.cli_support import fail
-from runner.libs.suite_args import csv_tokens, join_csv, suite_args_from_env, suite_selection_from_args
+from runner.libs.suite_args import join_csv, suite_args_from_env, suite_selection_from_args
 from runner.libs.state_file import write_json_object
 
 
 TARGETS_DIR = ROOT_DIR / "runner" / "targets"
 SUITES_DIR = ROOT_DIR / "runner" / "suites"
-DEFAULT_CORPUS_APP_SUITE = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
-E2E_CASES = ("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran")
 
 _die = partial(fail, "run-contract")
 
@@ -224,36 +221,6 @@ def _resolve_cpu_spec(spec: str) -> str:
     if spec.startswith("auto:"):
         return str(max(int(_host_cpu_count() * float(spec.split(":", 1)[1] or "1")), 1))
     return spec
-
-
-def _append_csv(csv: str, token: str) -> str:
-    if not token or token in csv_tokens(csv): return csv
-    return token if not csv else f"{csv},{token}"
-
-
-def _apply_corpus_filter_selection(
-    *,
-    run_corpus_filters: str,
-    suite: dict[str, str],
-    run_native_repos: str,
-) -> tuple[str, str, str]:
-    app_suite, _summary = load_app_suite_from_yaml(DEFAULT_CORPUS_APP_SUITE, filters=csv_tokens(run_corpus_filters))
-    selected_runners = {app.runner for app in app_suite.apps}
-    filtered_native_repos = join_csv([t for t in csv_tokens(run_native_repos) if t in selected_runners])
-    return (filtered_native_repos,
-            suite.get("SUITE_DEFAULT_SCX_PACKAGES", "") if "scx" in selected_runners else "",
-            "1" if "scx" in selected_runners else "0")
-
-
-def _apply_e2e_case_selection(*, run_e2e_cases: str, suite: dict[str, str]) -> tuple[str, str, str]:
-    selected_cases = set(csv_tokens(run_e2e_cases))
-    include_all = "all" in selected_cases
-    run_scx_packages, run_needs_sched_ext = ("", "0")
-    if include_all or "scx" in selected_cases:
-        run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", ""); run_needs_sched_ext = "1"
-    return (_native_repos_for_e2e_cases(run_e2e_cases), run_scx_packages, run_needs_sched_ext)
-
-
 _COMMON_MANIFEST_INPUTS = {
     "PYTHON",
     "RUN_TOKEN",
@@ -301,24 +268,6 @@ def _filtered_run_inputs(target_name: str, env: dict[str, str] | None) -> dict[s
 
 def _validate_test_mode(mode: str) -> None:
     if mode not in {"selftest", "negative", "test", "fuzz"}: _die(f"unsupported test mode: {mode}")
-
-
-def _validate_e2e_cases(cases_csv: str) -> None:
-    if not cases_csv: _die("e2e cases must not be empty")
-    if cases_csv == "all": return
-    for token in csv_tokens(cases_csv):
-        if token not in E2E_CASES:
-            _die(f"unsupported e2e case: {token}")
-
-
-def _native_repos_for_e2e_cases(cases_csv: str) -> str:
-    if cases_csv == "all": return "bcc,bpftrace,katran,tracee,tetragon"
-    repos = ""
-    for token in csv_tokens(cases_csv):
-        if token in {"bcc", "bpftrace", "katran", "tracee", "tetragon"}: repos = _append_csv(repos, token)
-    return repos
-
-
 def _build_run_config_mapping(
     target_name: str,
     suite_name: str,
@@ -342,9 +291,7 @@ def _build_run_config_mapping(
      run_aws_subnet_id, run_aws_region, run_aws_profile,
      run_vm_backend, run_vm_executable, run_vm_cpus, run_vm_mem, run_vm_kernel_image,
     ) = ("",) * 18
-    run_corpus_filters = selection.corpus_filters
     run_test_mode = selection.test_mode
-    run_e2e_cases = selection.e2e_cases
     run_bpftool_bin = "bpftool"
     run_native_repos = suite.get("SUITE_DEFAULT_NATIVE_REPOS", "")
     run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")
@@ -434,29 +381,7 @@ def _build_run_config_mapping(
     elif suite_name == "micro":
         run_native_repos = ""
         run_scx_packages = ""
-    elif suite_name == "corpus":
-        (
-            run_native_repos,
-            run_scx_packages,
-            run_needs_sched_ext,
-        ) = _apply_corpus_filter_selection(
-            run_corpus_filters=run_corpus_filters,
-            suite=suite,
-            run_native_repos=run_native_repos,
-        )
-    elif suite_name == "e2e":
-        if not run_e2e_cases:
-            run_e2e_cases = suite.get("SUITE_DEFAULT_E2E_CASES", "all")
-        _validate_e2e_cases(run_e2e_cases)
-        (
-            run_native_repos,
-            run_scx_packages,
-            run_needs_sched_ext,
-        ) = _apply_e2e_case_selection(
-            run_e2e_cases=run_e2e_cases,
-            suite=suite,
-        )
-    else:
+    elif suite_name not in ("corpus", "e2e"):
         _die(f"unsupported suite: {suite_name}")
 
     if run_needs_sched_ext == "1" and target.get("TARGET_SUPPORTS_SCHED_EXT", "0") != "1":

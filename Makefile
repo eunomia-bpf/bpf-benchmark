@@ -14,12 +14,6 @@ RUNNER_BUILD_DIR ?= $(RUNNER_DIR)/build
 
 # ARM64 / AWS
 ARM64_BUILD_DIR     ?= $(ARTIFACT_ROOT)/arm64-kernel-build
-ARM64_AWS_CACHE_ROOT ?= $(ARTIFACT_ROOT)/aws-arm64
-ARM64_AWS_BUILD_DIR ?= $(ARM64_AWS_CACHE_ROOT)/kernel-build
-ARM64_IMAGE         := $(ARM64_BUILD_DIR)/arch/arm64/boot/Image
-ARM64_EFI_IMAGE     := $(ARM64_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
-ARM64_AWS_IMAGE     := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/Image
-ARM64_AWS_EFI_IMAGE := $(ARM64_AWS_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi
 RUN_TARGET_SUITE_CMD  = "$(PYTHON)" -m runner.libs.run_target_suite
 AWS_ARM64_BENCH_MODE ?=
 
@@ -37,10 +31,8 @@ AWS_X86_BENCH_MODE        ?=
 # Tunables
 BZIMAGE ?= $(X86_RUNTIME_KERNEL_IMAGE)
 E2E_ARGS ?=
-E2E_CASE ?= all
 E2E_SMOKE ?= 0
 VM_CORPUS_ARGS ?=
-FILTERS ?=
 TEST_MODE ?= test
 SAMPLES    ?= 3
 WARMUPS    ?= 1
@@ -79,8 +71,8 @@ ROOT_VM_CORPUS_SAMPLES_VALUE := $(if $(strip $(ROOT_VM_CORPUS_SAMPLES_IS_EXPLICI
 VM_MICRO_BENCH_ARGS = $(foreach bench,$(subst $(comma),$(space),$(strip $(BENCH))),--bench "$(bench)")
 VM_MICRO_SUITE_ARGS = --samples "$(SAMPLES)" --warmups "$(WARMUPS)" --inner-repeat "$(INNER_REPEAT)" $(VM_MICRO_BENCH_ARGS)
 VM_MICRO_SMOKE_SUITE_ARGS = --samples "1" --warmups "0" --inner-repeat "50"
-VM_CORPUS_SUITE_ARGS = --samples "$(ROOT_VM_CORPUS_SAMPLES_VALUE)" $(if $(strip $(FILTERS)),--corpus-filters "$(FILTERS)",) $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),--corpus-workload-seconds "$(VM_CORPUS_WORKLOAD_SECONDS)",) $(if $(strip $(VM_CORPUS_ARGS)),-- $(VM_CORPUS_ARGS),)
-VM_E2E_SUITE_ARGS = --e2e-cases "$(E2E_CASE)" $(if $(filter 1,$(E2E_SMOKE)),--e2e-smoke,) $(if $(strip $(E2E_ARGS)),-- $(E2E_ARGS),)
+VM_CORPUS_SUITE_ARGS = --samples "$(ROOT_VM_CORPUS_SAMPLES_VALUE)" $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),--corpus-workload-seconds "$(VM_CORPUS_WORKLOAD_SECONDS)",) $(if $(strip $(VM_CORPUS_ARGS)),-- $(VM_CORPUS_ARGS),)
+VM_E2E_SUITE_ARGS = $(if $(filter 1,$(E2E_SMOKE)),--e2e-smoke,) $(if $(strip $(E2E_ARGS)),-- $(E2E_ARGS),)
 VM_TEST_COMMON_SUITE_ARGS = --fuzz-rounds "$(FUZZ_ROUNDS)" --scx-prog-show-race-mode "$(SCX_PROG_SHOW_RACE_MODE)" --scx-prog-show-race-iterations "$(SCX_PROG_SHOW_RACE_ITERATIONS)" --scx-prog-show-race-load-timeout "$(SCX_PROG_SHOW_RACE_LOAD_TIMEOUT)" $(if $(filter 1,$(SCX_PROG_SHOW_RACE_SKIP_PROBE)),--scx-prog-show-race-skip-probe,)
 VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 
@@ -98,13 +90,13 @@ help:
 	@echo "  AWS ARM:  aws-arm64-test aws-arm64-benchmark aws-arm64-terminate"
 	@echo "  AWS x86:  aws-x86-test aws-x86-benchmark aws-x86-terminate"
 	@echo "Params: vm-micro SAMPLES=$(SAMPLES) WARMUPS=$(WARMUPS) INNER_REPEAT=$(INNER_REPEAT) BENCH=\"...\""
-	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) FILTERS=\"...\" VM_CORPUS_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
-	@echo "        vm-e2e E2E_CASE=\"all|tracee|...\" E2E_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
+	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) VM_CORPUS_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
+	@echo "        vm-e2e E2E_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
 	@echo "        aws-arm64-test/aws-arm64-benchmark AWS_ARM64_REGION=<region> AWS_ARM64_PROFILE=<profile> AWS_ARM64_ROOT_VOLUME_GB=<override>"
 	@echo "        aws-arm64-test AWS_ARM64_TEST_MODE=<selftest|negative|test>"
-	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=<micro|corpus|e2e> AWS_ARM64_E2E_CASES=<all|tracee,tetragon,...>"
+	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=<micro|corpus|e2e>"
 	@echo "        aws-x86-test AWS_X86_REGION=<region> AWS_X86_PROFILE=<profile> AWS_X86_TEST_MODE=<selftest|negative|test>"
-	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=<micro|corpus|e2e> AWS_X86_E2E_CASES=<all|tracee,tetragon,...>"
+	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=<micro|corpus|e2e>"
 
 check:
 	$(PYTHON) -m py_compile \
@@ -195,8 +187,8 @@ aws-x86-terminate:
 
 aws-e2e:
 	case "$(RUN_TARGET_ARCH)" in \
-		arm64) AWS_ARM64_E2E_CASES="$(if $(strip $(SUITES)),$(SUITES),$(AWS_ARM64_E2E_CASES))" $(RUN_TARGET_SUITE_CMD) run aws-arm64 e2e ;; \
-		x86_64) AWS_X86_E2E_CASES="$(if $(strip $(SUITES)),$(SUITES),$(AWS_X86_E2E_CASES))" $(RUN_TARGET_SUITE_CMD) run aws-x86 e2e ;; \
+		arm64) $(RUN_TARGET_SUITE_CMD) run aws-arm64 e2e ;; \
+		x86_64) $(RUN_TARGET_SUITE_CMD) run aws-x86 e2e ;; \
 		*) echo "unsupported RUN_TARGET_ARCH for aws-e2e: $(RUN_TARGET_ARCH)" >&2; exit 2 ;; \
 	esac
 

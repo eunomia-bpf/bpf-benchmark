@@ -12,6 +12,18 @@ from .. import ROOT_DIR, tail_text
 from ..agent import bpftool_prog_show_records, stop_agent, wait_healthy
 
 
+def programs_after(
+    before_ids: Sequence[int] = (),
+    *,
+    records: Sequence[Mapping[str, object]] | None = None,
+) -> list[dict[str, object]]:
+    baseline_ids = {int(prog_id) for prog_id in before_ids if int(prog_id) > 0}
+    programs = [dict(record) for record in (bpftool_prog_show_records() if records is None else records)
+                if int(record.get("id", -1) or -1) not in baseline_ids]
+    programs.sort(key=lambda item: int(item.get("id", 0) or 0))
+    return programs
+
+
 def wait_until_program_set_stable(
     *,
     before_ids: Sequence[int] = (),
@@ -19,30 +31,23 @@ def wait_until_program_set_stable(
     stable_window_s: float = 2.0,
     poll_interval_s: float = 0.2,
 ) -> list[dict[str, object]]:
-    baseline_ids = {int(prog_id) for prog_id in before_ids if int(prog_id) > 0}
     deadline = time.monotonic() + max(0.0, float(timeout_s))
     stable_window = max(0.0, float(stable_window_s))
     poll_interval = max(0.05, float(poll_interval_s))
-    last_ids: tuple[int, ...] | None = None
+    last_count = -1
     last_change_at: float | None = None
     last_programs: list[dict[str, object]] = []
     while True:
         now = time.monotonic()
-        programs = [
-            dict(record)
-            for record in bpftool_prog_show_records()
-            if int(record.get("id", -1) or -1) not in baseline_ids
-        ]
-        programs.sort(key=lambda item: int(item.get("id", 0) or 0))
-        program_ids = tuple(int(program.get("id", 0) or 0) for program in programs)
-        if program_ids != last_ids:
-            last_ids = program_ids
+        programs = programs_after(before_ids)
+        last_programs = [dict(program) for program in programs]
+        if len(programs) != last_count:
+            last_count = len(programs)
             last_change_at = now
-            last_programs = [dict(program) for program in programs]
         elif programs and last_change_at is not None and (now - last_change_at) >= stable_window:
-            return [dict(program) for program in programs]
+            return last_programs
         if now >= deadline:
-            preview = ",".join(str(pid) for pid in (last_ids or ())[:12]) or "<none>"
+            preview = ",".join(str(int(program.get("id", 0) or 0)) for program in last_programs[:12]) or "<none>"
             raise RuntimeError(
                 "BPF program set did not stabilize before timeout "
                 f"(timeout_s={timeout_s}, last_program_count={len(last_programs)}, "
@@ -199,13 +204,7 @@ class ManagedProcessSession:
         return None if self.process is None else int(self.process.pid or 0)
 
     def _discover_programs(self) -> list[dict[str, object]]:
-        programs = [
-            dict(record)
-            for record in bpftool_prog_show_records()
-            if int(record.get("id", -1) or -1) not in self.before_ids
-        ]
-        programs.sort(key=lambda item: int(item.get("id", 0) or 0))
-        return programs
+        return programs_after(self.before_ids)
 
     def collector_snapshot(self) -> dict[str, object]:
         return self.collector.snapshot()

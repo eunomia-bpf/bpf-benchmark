@@ -90,24 +90,7 @@ def _app_args(raw_app: Mapping[str, object], *, field_name: str) -> dict[str, ob
     }
 
 
-def _matches_filter(app: AppSpec, lowered_filters: list[str]) -> bool:
-    if not lowered_filters:
-        return True
-    haystacks = [
-        app.name.lower(),
-        app.runner.lower(),
-        app.workload.corpus.lower(),
-        app.workload.e2e.lower(),
-        " ".join(f"{key}={value}" for key, value in sorted(app.args.items())).lower(),
-    ]
-    return any(any(needle in haystack for haystack in haystacks) for needle in lowered_filters)
-
-
-def load_app_suite_from_yaml(
-    yaml_path: Path,
-    *,
-    filters: list[str] | None = None,
-) -> tuple[AppSuite, dict[str, object]]:
+def load_app_suite_from_yaml(yaml_path: Path) -> tuple[AppSuite, dict[str, object]]:
     manifest = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
     if not isinstance(manifest, Mapping):
         raise SystemExit(f"app suite YAML root must be a mapping: {yaml_path}")
@@ -143,21 +126,17 @@ def load_app_suite_from_yaml(
         seen_names.add(app.name)
         apps.append(app)
 
-    lowered_filters = [item.lower() for item in filters or []]
-    selected_apps = [app for app in apps if _matches_filter(app, lowered_filters)]
-
     suite = AppSuite(
         manifest_path=yaml_path,
         suite_name=suite_name,
         schema_version=schema_version,
         defaults=defaults,
-        apps=tuple(selected_apps),
+        apps=tuple(apps),
     )
     summary = {
         "manifest": str(yaml_path),
         "schema_version": schema_version,
         "suite_name": suite_name,
-        "total_apps": len(apps),
-        "selected_apps": len(selected_apps),
+        "selected_apps": len(apps),
     }
     return suite, summary
