@@ -1,0 +1,46 @@
+{
+  "case": "katran",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "name 'wait_until_program_set_stable' is not defined",
+  "generated_at": "2026-04-23T10:10:20.744191+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-23T10:10:20.744189+00:00",
+  "launcher_boot_id": "6f5729f9-e628-434c-baf1-918c63569fcc",
+  "launcher_pid": 1722,
+  "launcher_start_ticks": 41946,
+  "optimization_summary": {
+    "case": "katran",
+    "error_message": "name 'wait_until_program_set_stable' is not defined",
+    "failed_at": "2026-04-23T10:10:20.744172+00:00",
+    "smoke": true,
+    "status": "error"
+  },
+  "policy": {
+    "exclusions": {
+      "struct_ops": [
+        "map_inline",
+        "dce"
+      ]
+    }
+  },
+  "run_type": "katran",
+  "smoke": true,
+  "started_at": "2026-04-23T10:10:07.222114+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

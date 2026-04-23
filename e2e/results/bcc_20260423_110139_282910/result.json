@@ -1,0 +1,666 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "duration_s": 10,
+  "generated_at": "2026-04-23T11:02:04.624404+00:00",
+  "host": {
+    "git_sha": null,
+    "git_sha_error": "[Errno 2] No such file or directory: 'git'",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2",
+    "platform": "Linux-7.0.0-rc2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "records": [
+    {
+      "baseline": {
+        "measurement": {
+          "agent_cpu": {
+            "sys_pct": 0.39968999724061877,
+            "total_pct": 2.4980624827538676,
+            "user_pct": 2.0983724855132486
+          },
+          "bpf": {
+            "programs": {
+              "333": {
+                "avg_ns_per_run": 43.20988119674528,
+                "bytes_jited": 203,
+                "bytes_xlated": 344,
+                "id": 333,
+                "name": "cap_capable",
+                "run_cnt_delta": 2708680,
+                "run_time_ns_delta": 117041741,
+                "type": "kprobe"
+              }
+            },
+            "summary": {
+              "active_programs": 1,
+              "avg_ns_per_run": 43.20988119674528,
+              "total_events": 2708680,
+              "total_run_time_ns": 117041741
+            }
+          },
+          "final_stats": {
+            "333": {
+              "bytes_jited": 203,
+              "bytes_xlated": 344,
+              "exec_ns": 43.38439711861623,
+              "id": 333,
+              "name": "cap_capable",
+              "run_cnt": 2709115,
+              "run_time_ns": 117533321,
+              "type": "kprobe"
+            }
+          },
+          "initial_stats": {
+            "333": {
+              "bytes_jited": 203,
+              "bytes_xlated": 344,
+              "exec_ns": 1130.0689655172414,
+              "id": 333,
+              "name": "cap_capable",
+              "run_cnt": 435,
+              "run_time_ns": 491580,
+              "type": "kprobe"
+            }
+          },
+          "system_cpu": {
+            "busy_pct": 99.62537462537463
+          },
+          "workload": {
+            "duration_s": 10.02702916699991,
+            "ops_per_sec": 2376.4765817600232,
+            "ops_total": 23829.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [5250] setting to a 10 secs run per stressor\nstress-ng: info:  [5250] dispatching hogs: 2 exec\nstress-ng: info:  [5250] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [5250] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [5250]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [5250] exec              23829     10.02     32.27      6.01      2379.02         622.56\nstress-ng: info:  [5250] skipped: 0\nstress-ng: info:  [5250] passed: 2: exec (2)\nstress-ng: info:  [5250] failed: 0\nstress-ng: info:  [5250] metrics untrustworthy: 0\nstress-ng: info:  [5250] successful run completed in 10.02 secs"
+          }
+        },
+        "phase": "baseline",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.a32ea3ed/bcc-python-t_vv3g76/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.a32ea3ed/bcc-python-t_vv3g76/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:17:\nIn file included from include/linux/security.h:9:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+          "stdout_tail": "11:02:04  65534  12007  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12008  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12009  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12010  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12011  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12012  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12013  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12014  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12015  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12016  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12017  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12018  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12019  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12020  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12022  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12023  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12021  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12024  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12027  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12029  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1"
+        },
+        "prog_ids": [
+          333
+        ],
+        "programs": [
+          {
+            "btf_id": 627,
+            "bytes_jited": 203,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 344,
+            "gpl_compatible": true,
+            "id": 333,
+            "jited": true,
+            "loaded_at": 1776942101,
+            "map_ids": [
+              1044
+            ],
+            "name": "cap_capable",
+            "orphaned": false,
+            "run_cnt": 399,
+            "run_time_ns": 453877,
+            "tag": "f0b345ebd36ee65b",
+            "type": "kprobe",
+            "uid": 0
+          }
+        ],
+        "reason": "",
+        "scan_results": {
+          "333": {
+            "counts": {
+              "bitfield_sites": 1,
+              "bounds_check_merge_sites": 0,
+              "branch_flip_sites": 0,
+              "bulk_memory_sites": 0,
+              "cmov_sites": 0,
+              "const_prop_sites": 0,
+              "dce_sites": 0,
+              "endian_sites": 0,
+              "extract_sites": 1,
+              "lea_sites": 0,
+              "map_inline_sites": 0,
+              "other_sites": 0,
+              "rotate_sites": 0,
+              "skb_load_bytes_spec_sites": 0,
+              "total_sites": 1,
+              "wide_sites": 0
+            },
+            "error": "",
+            "prog_id": 333
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 0,
+          "const_prop_sites": 0,
+          "dce_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 1,
+          "wide_sites": 0
+        },
+        "status": "ok"
+      },
+      "name": "capable",
+      "rejit": {
+        "measurement": {
+          "agent_cpu": {
+            "sys_pct": 0.19992252202581473,
+            "total_pct": 2.4990315253226836,
+            "user_pct": 2.299109003296869
+          },
+          "bpf": {
+            "programs": {
+              "333": {
+                "avg_ns_per_run": 43.2400835166125,
+                "bytes_jited": 206,
+                "bytes_xlated": 344,
+                "id": 333,
+                "name": "cap_capable",
+                "run_cnt_delta": 2692159,
+                "run_time_ns_delta": 116409180,
+                "type": "kprobe"
+              }
+            },
+            "summary": {
+              "active_programs": 1,
+              "avg_ns_per_run": 43.2400835166125,
+              "total_events": 2692159,
+              "total_run_time_ns": 116409180
+            }
+          },
+          "final_stats": {
+            "333": {
+              "bytes_jited": 206,
+              "bytes_xlated": 344,
+              "exec_ns": 43.33157817661551,
+              "id": 333,
+              "name": "cap_capable",
+              "run_cnt": 5401417,
+              "run_time_ns": 234051923,
+              "type": "kprobe"
+            }
+          },
+          "initial_stats": {
+            "333": {
+              "bytes_jited": 206,
+              "bytes_xlated": 344,
+              "exec_ns": 43.42249538434508,
+              "id": 333,
+              "name": "cap_capable",
+              "run_cnt": 2709258,
+              "run_time_ns": 117642743,
+              "type": "kprobe"
+            }
+          },
+          "system_cpu": {
+            "busy_pct": 99.60129578868677
+          },
+          "workload": {
+            "duration_s": 10.021547847999955,
+            "ops_per_sec": 2358.817256429878,
+            "ops_total": 23639.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [8697] setting to a 10 secs run per stressor\nstress-ng: info:  [8697] dispatching hogs: 2 exec\nstress-ng: info:  [8697] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8697] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8697]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8697] exec              23639     10.01     32.07      6.10      2361.51         619.32\nstress-ng: info:  [8697] skipped: 0\nstress-ng: info:  [8697] passed: 2: exec (2)\nstress-ng: info:  [8697] failed: 0\nstress-ng: info:  [8697] metrics untrustworthy: 0\nstress-ng: info:  [8697] successful run completed in 10.01 secs"
+          }
+        },
+        "phase": "post_rejit",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.a32ea3ed/bcc-python-t_vv3g76/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.a32ea3ed/bcc-python-t_vv3g76/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:17:\nIn file included from include/linux/security.h:9:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+          "stdout_tail": "11:02:04  65534  12007  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12008  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12009  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12010  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12011  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12012  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12013  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12014  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12015  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12016  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12017  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12018  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12019  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12020  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12022  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12023  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12021  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12024  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12027  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  65534  12029  stress-ng-exec   8    CAP_SETPCAP          1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          39   CAP_BPF              1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1\n11:02:04  0      12044  bpftool          21   CAP_SYS_ADMIN        1"
+        },
+        "prog_ids": [
+          333
+        ],
+        "programs": [
+          {
+            "btf_id": 627,
+            "bytes_jited": 203,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 344,
+            "gpl_compatible": true,
+            "id": 333,
+            "jited": true,
+            "loaded_at": 1776942101,
+            "map_ids": [
+              1044
+            ],
+            "name": "cap_capable",
+            "orphaned": false,
+            "run_cnt": 399,
+            "run_time_ns": 453877,
+            "tag": "f0b345ebd36ee65b",
+            "type": "kprobe",
+            "uid": 0
+          }
+        ],
+        "reason": "",
+        "rejit_result": {
+          "applied": true,
+          "changed": true,
+          "error": "",
+          "exit_code": 0,
+          "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"applied\"}], \"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"map_inline\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"extract\", \"sites_applied\": 1, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"extract\"], \"prog_id\": 333, \"program\": {\"final_insn_count\": 43, \"insn_delta\": 0, \"orig_insn_count\": 43, \"prog_id\": 333, \"prog_name\": \"cap_capable\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 11, \"total_sites_applied\": 1, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 985217, \"rejit_syscall_ns\": 752883, \"total_ns\": 2745284}}",
+          "per_program": {
+            "333": {
+              "applied": true,
+              "changed": true,
+              "debug_result": {
+                "attempts": [
+                  {
+                    "attempt": 0,
+                    "disabled_passes": [],
+                    "result": "applied"
+                  }
+                ],
+                "changed": true,
+                "passes": [
+                  {
+                    "action": "kept",
+                    "changed": false,
+                    "diagnostics": [],
+                    "insn_delta": 0,
+                    "insns_after": 43,
+                    "insns_before": 43,
+                    "pass_name": "map_inline",
+                    "sites_applied": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "verify": {
+                      "status": "not_needed"
+                    },
+                    "verify_error": null,
+                    "verify_result": "not_needed"
+                  },
+                  {
+                    "action": "kept",
+                    "changed": false,
+                    "diagnostics": [],
+                    "insn_delta": 0,
+                    "insns_after": 43,
+                    "insns_before": 43,
+                    "pass_name": "const_prop",
+                    "sites_applied": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "verify": {
+                      "status": "not_needed"
+                    },
+                    "verify_error": null,
+                    "verify_result": "not_needed"
+                  },
+                  {
+                    "action": "kept",
+                    "changed": false,
+                    "diagnostics": [],
+                    "insn_delta": 0,
+                    "insns_after": 43,
+                    "insns_before": 43,
+                    "pass_name": "dce",
+                    "sites_applied": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "verify": {
+                      "status": "not_needed"
+                    },
+                    "verify_error": null,
+                    "verify_result": "not_needed"
+                  },
+                  {
+                    "action": "kept",
+                    "changed": false,
+                    "diagnostics": [],
+                    "insn_delta": 0,
+                    "insns_after": 43,
+                    "insns_before": 43,
+                    "pass_name": "skb_load_bytes_spec",
+                    "sites_applied": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "verify": {
+                      "status": "not_needed"
+                    },
+                    "verify_error": null,
+                    "verify_result": "not_needed"
+                  },
+                  {
+                    "action": "kept",
+                    "changed": false,
+                    "diagnostics": [],
+                    "insn_delta": 0,
+                    "insns_after": 43,
+                    "insns_before": 43,
+                    "pass_name": "bounds_check_merge",
+                    "sites_applied": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "verify": {
+                      "status": "not_needed"
+                    },
+                    "verify_error": null,
+                    "verify_result": "not_needed"
+                  },
+                  {
+                    "action": "kept",
+                    "changed": false,
+                    "diagnostics": [],
+                    "insn_delta": 0,
+                    "insns_after": 43,
+                    "insns_before": 43,
+                    "pass_name": "wide_mem",
+                    "sites_applied": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "verify": {
+                      "status": "not_needed"
+                    },
+                    "verify_error": null,
+                    "verify_result": "not_needed"
+                  },
+                  {
+                    "action": "kept",
+                    "changed": false,
+                    "diagnostics": [],
+                    "insn_delta": 0,
+                    "insns_after": 43,
+                    "insns_before": 43,
+                    "pass_name": "bulk_memory",
+                    "sites_applied": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "verify": {
+                      "status": "not_needed"
+                    },
+                    "verify_error": null,
+                    "verify_result": "not_needed"
+                  },
+                  {
+                    "action": "kept",
+                    "changed": false,
+                    "diagnostics": [],
+                    "insn_delta": 0,
+                    "insns_after": 43,
+                    "insns_before": 43,
+                    "pass_name": "rotate",
+                    "sites_applied": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "verify": {
+                      "status": "not_needed"
+                    },
+                    "verify_error": null,
+                    "verify_result": "not_needed"
+                  },
+                  {
+                    "action": "kept",
+                    "changed": false,
+                    "diagnostics": [],
+                    "insn_delta": 0,
+                    "insns_after": 43,
+                    "insns_before": 43,
+                    "pass_name": "cond_select",
+                    "sites_applied": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "verify": {
+                      "status": "not_needed"
+                    },
+                    "verify_error": null,
+                    "verify_result": "not_needed"
+                  },
+                  {
+                    "action": "kept",
+                    "changed": true,
+                    "diagnostics": [],
+                    "insn_delta": 0,
+                    "insns_after": 43,
+                    "insns_before": 43,
+                    "pass_name": "extract",
+                    "sites_applied": 1,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "verify": {
+                      "status": "accepted"
+                    },
+                    "verify_error": null,
+                    "verify_result": "accepted"
+                  },
+                  {
+                    "action": "kept",
+                    "changed": false,
+                    "diagnostics": [],
+                    "insn_delta": 0,
+                    "insns_after": 43,
+                    "insns_before": 43,
+                    "pass_name": "endian_fusion",
+                    "sites_applied": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "verify": {
+                      "status": "not_needed"
+                    },
+                    "verify_error": null,
+                    "verify_result": "not_needed"
+                  }
+                ],
+                "passes_applied": [
+                  "extract"
+                ],
+                "prog_id": 333,
+                "program": {
+                  "final_insn_count": 43,
+                  "insn_delta": 0,
+                  "orig_insn_count": 43,
+                  "prog_id": 333,
+                  "prog_name": "cap_capable",
+                  "prog_type": 2
+                },
+                "status": "ok",
+                "summary": {
+                  "applied": true,
+                  "passes_changed": 1,
+                  "passes_executed": 11,
+                  "total_sites_applied": 1,
+                  "verifier_rejections": 0
+                },
+                "timings_ns": {
+                  "pipeline_run_ns": 985217,
+                  "rejit_syscall_ns": 752883,
+                  "total_ns": 2745284
+                }
+              },
+              "enabled_passes": [
+                "wide_mem",
+                "rotate",
+                "cond_select",
+                "extract",
+                "endian_fusion",
+                "map_inline",
+                "const_prop",
+                "dce",
+                "bounds_check_merge",
+                "skb_load_bytes_spec",
+                "bulk_memory"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "inlined_map_entries": [],
+              "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"applied\"}], \"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"map_inline\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"wide_mem\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"extract\", \"sites_applied\": 1, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"extract\"], \"prog_id\": 333, \"program\": {\"final_insn_count\": 43, \"insn_delta\": 0, \"orig_insn_count\": 43, \"prog_id\": 333, \"prog_name\": \"cap_capable\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 11, \"total_sites_applied\": 1, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 985217, \"rejit_syscall_ns\": 752883, \"total_ns\": 2745284}}",
+              "passes": [
+                {
+                  "pass_name": "map_inline",
+                  "sites_applied": 0
+                },
+                {
+                  "pass_name": "const_prop",
+                  "sites_applied": 0
+                },
+                {
+                  "pass_name": "dce",
+                  "sites_applied": 0
+                },
+                {
+                  "pass_name": "skb_load_bytes_spec",
+                  "sites_applied": 0
+                },
+                {
+                  "pass_name": "bounds_check_merge",
+                  "sites_applied": 0
+                },
+                {
+                  "pass_name": "wide_mem",
+                  "sites_applied": 0
+                },
+                {
+                  "pass_name": "bulk_memory",
+                  "sites_applied": 0
+                },
+                {
+                  "pass_name": "rotate",
+                  "sites_applied": 0
+                },
+                {
+                  "pass_name": "cond_select",
+                  "sites_applied": 0
+                },
+                {
+                  "pass_name": "extract",
+                  "sites_applied": 1
+                },
+                {
+                  "pass_name": "endian_fusion",
+                  "sites_applied": 0
+                }
+              ],
+              "summary": {
+                "applied": true,
+                "passes_changed": 1,
+                "passes_executed": 11,
+                "total_sites_applied": 1,
+                "verifier_rejections": 0
+              }
+            }
+          },
+          "program_counts": {
+            "applied": 1,
+            "not_applied": 0,
+            "requested": 1
+          }
+        },
+        "scan_results": {
+          "333": {
+            "counts": {
+              "bitfield_sites": 1,
+              "bounds_check_merge_sites": 0,
+              "branch_flip_sites": 0,
+              "bulk_memory_sites": 0,
+              "cmov_sites": 0,
+              "const_prop_sites": 0,
+              "dce_sites": 0,
+              "endian_sites": 0,
+              "extract_sites": 1,
+              "lea_sites": 0,
+              "map_inline_sites": 0,
+              "other_sites": 0,
+              "rotate_sites": 0,
+              "skb_load_bytes_spec_sites": 0,
+              "total_sites": 1,
+              "wide_sites": 0
+            },
+            "error": "",
+            "prog_id": 333
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 0,
+          "const_prop_sites": 0,
+          "dce_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 1,
+          "wide_sites": 0
+        },
+        "status": "ok"
+      },
+      "summary": {
+        "avg_ns_delta_pct": 0.06989678987938668,
+        "baseline_status": "ok",
+        "cpu_baseline": 2.4980624827538676,
+        "cpu_delta_pct": 0.03879176663938972,
+        "cpu_rejit": 2.4990315253226836,
+        "name": "capable",
+        "note": "",
+        "rejit_avg_ns": 43.2400835166125,
+        "rejit_status": "ok",
+        "site_totals": {
+          "bitfield_sites": 1,
+          "bounds_check_merge_sites": 0,
+          "branch_flip_sites": 0,
+          "bulk_memory_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 0,
+          "dce_sites": 0,
+          "endian_sites": 0,
+          "extract_sites": 1,
+          "lea_sites": 0,
+          "map_inline_sites": 0,
+          "other_sites": 0,
+          "rotate_sites": 0,
+          "skb_load_bytes_spec_sites": 0,
+          "total_sites": 1,
+          "wide_sites": 0
+        },
+        "sites": 1,
+        "speedup": 0.9993015203160831,
+        "stock_avg_ns": 43.20988119674528,
+        "workload_ops_baseline": 2376.4765817600232,
+        "workload_ops_delta_pct": -0.7430885482181676,
+        "workload_ops_rejit": 2358.817256429878,
+        "workload_spec": {
+          "kind": "exec_storm"
+        }
+      },
+      "tool_args": [],
+      "tool_binary": "/usr/sbin/capable-bpfcc"
+    }
+  ],
+  "selected_tools": [
+    "capable"
+  ],
+  "setup": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "BCC_TOOL_bindsnoop=/usr/sbin/bindsnoop-bpfcc\nBCC_TOOL_biosnoop=/usr/sbin/biosnoop-bpfcc\nBCC_TOOL_capable=/usr/sbin/capable-bpfcc\nBCC_TOOL_execsnoop=/usr/sbin/execsnoop-bpfcc\nBCC_TOOL_opensnoop=/usr/sbin/opensnoop-bpfcc\nBCC_TOOL_runqlat=/usr/sbin/runqlat-bpfcc\nBCC_TOOL_syscount=/usr/sbin/syscount-bpfcc\nBCC_TOOL_tcpconnect=/usr/sbin/tcpconnect-bpfcc\nBCC_TOOL_tcplife=/usr/sbin/tcplife-bpfcc\nBCC_TOOL_vfsstat=/usr/sbin/vfsstat-bpfcc",
+    "tools_dir": "/usr/sbin"
+  },
+  "smoke": true,
+  "status": "ok",
+  "summary": {
+    "baseline_successes": 1,
+    "rejit_successes": 1,
+    "site_totals": {
+      "bitfield_sites": 1,
+      "bounds_check_merge_sites": 0,
+      "branch_flip_sites": 0,
+      "bulk_memory_sites": 0,
+      "cmov_sites": 0,
+      "const_prop_sites": 0,
+      "dce_sites": 0,
+      "endian_sites": 0,
+      "extract_sites": 1,
+      "lea_sites": 0,
+      "map_inline_sites": 0,
+      "other_sites": 0,
+      "rotate_sites": 0,
+      "skb_load_bytes_spec_sites": 0,
+      "total_sites": 1,
+      "wide_sites": 0
+    },
+    "speedup_geomean": 0.9993015203160831,
+    "tools_with_sites": 1
+  },
+  "tools_dir": "/usr/sbin"
+}
