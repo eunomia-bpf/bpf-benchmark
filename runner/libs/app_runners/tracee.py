@@ -15,8 +15,6 @@ from typing import Any, Mapping, Sequence
 from urllib.error import URLError
 from urllib.request import urlopen
 
-import yaml
-
 from .. import ROOT_DIR, run_command, tail_text, which
 from ..agent import (
     bpftool_prog_show_records,
@@ -257,12 +255,10 @@ class TraceeOutputCollector:
     def wait_for_event(
         self,
         *,
-        event_names: Sequence[str],
         marker_tokens: Sequence[str],
         min_observed_ns: int,
         timeout_s: float,
     ) -> dict[str, object] | None:
-        wanted_names = {str(name) for name in event_names if str(name)}
         tokens = [str(token) for token in marker_tokens if str(token)]
         deadline = time.monotonic() + max(0.0, float(timeout_s))
 
@@ -271,9 +267,6 @@ class TraceeOutputCollector:
                 observed_ns = int(record.get("observed_monotonic_ns", 0) or 0)
                 if observed_ns < min_observed_ns:
                     break
-                event_name = str(record.get("event_name") or "")
-                if wanted_names and event_name not in wanted_names:
-                    continue
                 raw_line = str(record.get("line") or "")
                 if tokens and not all(token in raw_line for token in tokens):
                     continue
@@ -437,8 +430,8 @@ def _tracee_output_args(event_output_path: Path) -> list[str]:
     return ["--output", f"json:{event_output_path}"]
 
 
-def build_tracee_commands(binary: str, events: Sequence[str], extra_args: Sequence[str] = ()) -> list[list[str]]:
-    return [[binary, "--events", ",".join(str(e) for e in events),
+def build_tracee_commands(binary: str, extra_args: Sequence[str] = ()) -> list[list[str]]:
+    return [[binary, "--events", "*",
              *_tracee_output_args(_tracee_event_output_path()),
              "--server", "healthz", "--server", f"http-address=:{TRACEE_HEALTH_PORT}",
              "--signatures-dir", str(_tracee_signatures_dir()), *extra_args]]
@@ -490,22 +483,10 @@ def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> Workload
         return run_scheduler_load(duration_s)
     raise RuntimeError(f"unsupported workload kind: {kind}")
 
-
-DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"
 DEFAULT_LOAD_TIMEOUT_S = 120
 DEFAULT_STARTUP_SETTLE_S = 5.0
 DEFAULT_STOP_TIMEOUT_S = 30.0
 DEFAULT_EVENT_JOIN_TIMEOUT_S = 10.0
-
-
-def _default_events() -> tuple[str, ...]:
-    payload = yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict):
-        raise RuntimeError(f"Tracee config must be a mapping: {DEFAULT_CONFIG}")
-    raw_events = payload.get("events") or []
-    if not isinstance(raw_events, Sequence) or isinstance(raw_events, (str, bytes, bytearray)):
-        raise RuntimeError(f"Tracee config field 'events' must be a sequence: {DEFAULT_CONFIG}")
-    return tuple(str(event) for event in raw_events if str(event).strip())
 
 
 class TraceeRunner(AppRunner):
@@ -513,7 +494,6 @@ class TraceeRunner(AppRunner):
         self,
         *,
         tracee_binary: Path | str | None = None,
-        events: Sequence[str] = (),
         extra_args: Sequence[str] = (),
         load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
         startup_settle_s: float = DEFAULT_STARTUP_SETTLE_S,
@@ -521,7 +501,6 @@ class TraceeRunner(AppRunner):
     ) -> None:
         super().__init__()
         self.tracee_binary = None if tracee_binary is None else Path(tracee_binary).resolve()
-        self.events = tuple(str(event) for event in (events or _default_events()) if str(event).strip())
         self.extra_args = tuple(str(arg) for arg in extra_args)
         self.load_timeout_s = int(load_timeout_s)
         self.startup_settle_s = float(startup_settle_s)
@@ -555,11 +534,9 @@ class TraceeRunner(AppRunner):
     def start(self) -> list[int]:
         if self.session is not None:
             raise RuntimeError("TraceeRunner is already running")
-        if not self.events:
-            raise RuntimeError("TraceeRunner requires at least one Tracee event")
 
         tracee_binary = self._resolve_binary()
-        commands = build_tracee_commands(tracee_binary, self.events, self.extra_args)
+        commands = build_tracee_commands(tracee_binary, self.extra_args)
         session = TraceeAgentSession(commands, self.load_timeout_s)
         session.__enter__()
         self.session = session

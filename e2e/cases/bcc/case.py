@@ -132,7 +132,7 @@ def run_phase(
 ) -> tuple[dict[str, object], dict[str, object] | None]:
     """Run baseline then daemon-apply then post-rejit measurement for one tool.
 
-    Returns (baseline, rejit) where rejit is None only when ReJIT was not applicable.
+    Returns `(baseline, rejit)` with `rejit` present whenever the post-ReJIT phase completed or failed loudly.
     """
     bcc_runner = BCCRunner(
         tool_binary=tool_binary,
@@ -308,7 +308,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         "",
         "## Summary",
         "",
-        f"- Tools selected: `{len(payload['selected_tools'])}`",
+        f"- Tools in suite: `{len(payload['records'])}`",
         f"- Baseline successes: `{payload['summary']['baseline_successes']}`",
         f"- ReJIT successes: `{payload['summary']['rejit_successes']}`",
         f"- Tools with applied sites: `{payload['summary']['tools_with_sites']}`",
@@ -445,24 +445,13 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
 
     attach_timeout = suite.attach_timeout_s
 
-    # Filter tools if --tool was provided
-    selected: list[ToolSpec]
-    if smoke:
-        # Smoke: run only the fastest attaching tool (capable)
-        smoke_candidate = next((t for t in suite.tools if t.name == "capable"), None)
-        selected = [smoke_candidate] if smoke_candidate else [suite.tools[0]]
-    elif getattr(args, "tools", None):
-        wanted = {name.strip() for name in getattr(args, "tools", []) if name and name.strip()}
-        selected = [t for t in suite.tools if t.name in wanted]
-    else:
-        selected = list(suite.tools)
-
-    if not selected:
+    tools = list(suite.tools)
+    if not tools:
         raise RuntimeError("no tools selected")
 
     records: list[dict[str, object]] = []
     with enable_bpf_stats():
-        for spec in selected:
+        for spec in tools:
             tool_binary = find_tool_binary(tools_dir, spec.name)
             if tool_binary is None:
                 record: dict[str, object] = {
@@ -557,7 +546,6 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
         "status": "error" if errors else "ok",
         "smoke": smoke,
         "duration_s": duration_s,
-        "selected_tools": [spec.name for spec in selected],
         "tools_dir": str(tools_dir),
         "daemon": str(daemon_binary),
         "setup": dict(setup_result),

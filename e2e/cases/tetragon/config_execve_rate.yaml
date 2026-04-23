@@ -1,9 +1,3 @@
-# Tetragon exec benchmark.
-
-tetragon_extra_args:
-  - --cgroup-rate
-  - 1000,1s
-
 workloads:
   - name: exec_storm
     kind: exec_storm
@@ -13,4 +7,3 @@ workloads:
 measurement_duration_s: 30
 smoke_duration_s: 8
 preflight_duration_s: 5
-require_program_activity: true

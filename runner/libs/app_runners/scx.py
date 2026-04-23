@@ -90,7 +90,6 @@ class ScxSchedulerSession(AgentSession):
         self.binary = binary
         self.extra_args = list(extra_args)
         self.command_used: list[str] | None = None
-        self.scheduler_program_names: set[str] = set()
         self.before_ids: set[int] = set()
 
     def __enter__(self) -> "ScxSchedulerSession":
@@ -122,7 +121,6 @@ class ScxSchedulerSession(AgentSession):
         if not self.programs:
             self.close()
             raise RuntimeError("scx_rusty became healthy but no BPF programs were discovered")
-        self._remember_scheduler_programs(self.programs)
         return self
 
     def _discover_loaded_programs(self) -> list[dict[str, object]]:
@@ -134,30 +132,11 @@ class ScxSchedulerSession(AgentSession):
         programs.sort(key=_program_id)
         return programs
 
-    def _remember_scheduler_programs(self, programs: Sequence[Mapping[str, object]]) -> None:
-        self.scheduler_program_names.update(
-            name
-            for program in programs
-            if (name := _program_name(program))
-        )
-
-    def _discover_live_scheduler_programs(self) -> list[dict[str, object]]:
-        if not self.scheduler_program_names:
-            return self._discover_loaded_programs()
-
-        live_programs: list[dict[str, object]] = []
-        for program in _bpftool_programs():
-            if _program_name(program) not in self.scheduler_program_names:
-                continue
-            live_programs.append(dict(program))
-        live_programs.sort(key=_program_id)
-        return live_programs
-
     def collector_snapshot(self) -> dict[str, object]:
         return self.collector.snapshot()
 
     def refresh_programs(self) -> list[dict[str, object]]:
-        refreshed = self._discover_live_scheduler_programs()
+        refreshed = self._discover_loaded_programs()
         self.programs = refreshed
         return [dict(program) for program in self.programs]
 

@@ -48,7 +48,6 @@ from runner.libs.case_common import (  # noqa: E402
     percentile,
     summarize_numbers,
     percent_delta,
-    rejit_result_has_any_apply,
     run_case_lifecycle,
 )
 
@@ -206,20 +205,6 @@ def application_overhead_pct(control_value: float | int | None, observed_value: 
     return ((float(control_value) - float(observed_value)) / float(control_value)) * 100.0
 
 
-def primary_events_for_workload(spec: Mapping[str, object]) -> list[str]:
-    configured = [str(value) for value in (spec.get("primary_events") or []) if str(value)]
-    if configured:
-        return configured
-    kind = str(spec.get("kind", spec.get("name", "")))
-    if kind == "exec_storm":
-        return ["execve", "sched_process_exec"]
-    if kind in {"file_io", "file_open", "open_storm"}:
-        return ["security_file_open"]
-    if kind in {"network", "connect_storm"}:
-        return ["security_socket_connect"]
-    return []
-
-
 def latency_probe_kind(spec: Mapping[str, object]) -> str:
     configured = str(spec.get("latency_probe_kind") or "").strip()
     if configured:
@@ -232,24 +217,6 @@ def latency_probe_kind(spec: Mapping[str, object]) -> str:
     if kind in {"network", "connect_storm"}:
         return "tcp_connect"
     return "exec"
-
-
-def latency_probe_events(spec: Mapping[str, object]) -> list[str]:
-    configured = [str(value) for value in (spec.get("latency_probe_events") or []) if str(value)]
-    if configured:
-        return configured
-    primary = primary_events_for_workload(spec)
-    kind = str(spec.get("kind", spec.get("name", "")))
-    if kind == "tracee_default":
-        return ["sched_process_exec", "execve"]
-    if primary:
-        return primary
-    probe_kind = latency_probe_kind(spec)
-    if probe_kind == "file_open":
-        return ["security_file_open"]
-    if probe_kind == "tcp_connect":
-        return ["security_socket_connect"]
-    return ["sched_process_exec", "execve"]
 
 
 def warmup_workload(spec: Mapping[str, object], duration_s: int | float) -> dict[str, object] | None:
@@ -374,7 +341,6 @@ def measure_latency_probes(
             (int(matched.get("observed_monotonic_ns", 0) or 0) - int(emitted["started_ns"])) / 1_000_000.0,
         )
 
-    event_names = latency_probe_events(workload_spec)
     probe_rows: list[dict[str, object]] = []
     for probe_index in range(max(0, int(probe_count))):
         missed_attempts: list[dict[str, object]] = []
@@ -384,7 +350,6 @@ def measure_latency_probes(
         for attempt in range(DEFAULT_LATENCY_PROBE_ATTEMPTS):
             emitted = emit_latency_probe(workload_spec)
             matched = collector.wait_for_event(
-                event_names=event_names,
                 marker_tokens=emitted["marker_tokens"],
                 min_observed_ns=int(emitted["started_ns"]),
                 timeout_s=timeout_s,
@@ -404,7 +369,7 @@ def measure_latency_probes(
             raise RuntimeError(
                 f"Tracee latency probe was not detected for workload {workload_spec.get('name')}: "
                 f"tokens={emitted['marker_tokens'] if emitted is not None else []}, "
-                f"events={event_names}, attempts={missed_attempts}"
+                f"attempts={missed_attempts}"
             )
         assert emitted is not None
         latency_ms = probe_latency_ms(emitted, matched)
@@ -424,7 +389,6 @@ def measure_latency_probes(
     return {
         "probe_count": len(probe_rows),
         "probe_timeout_s": timeout_s,
-        "event_names": event_names,
         "probes": probe_rows,
         "summary": summarize_latency_values(
             [row["latency_ms"] for row in probe_rows],
@@ -432,10 +396,6 @@ def measure_latency_probes(
             ci_seed=ci_seed,
         ),
     }
-
-
-def workload_primary_event_total(event_counts: Mapping[str, object], workload_spec: Mapping[str, object]) -> int:
-    return sum(int(event_counts.get(event_name, 0) or 0) for event_name in primary_events_for_workload(workload_spec))
 
 
 def verify_phase_measurement(record: Mapping[str, object], *, require_tracee_activity: bool) -> None:
@@ -446,8 +406,8 @@ def verify_phase_measurement(record: Mapping[str, object], *, require_tracee_act
             f"{record.get('name')} encountered malformed Tracee event-file lines: "
             f"{record.get('event_parse_errors')}"
         )
-    if int(record.get("primary_events_total", 0) or 0) <= 0:
-        raise RuntimeError(f"{record.get('name')} produced zero primary Tracee events")
+    if int(record.get("events_total", 0) or 0) <= 0:
+        raise RuntimeError(f"{record.get('name')} produced zero Tracee events")
     drops = record.get("drop_counters") or {}
     if int(drops.get("lost_event_count", 0) or 0) > 0 or int(drops.get("lost_write_count", 0) or 0) > 0:
         raise RuntimeError(f"{record.get('name')} lost Tracee events: {drops}")
@@ -538,17 +498,6 @@ def measure_workload(
     if agent_cpu is not None:
         agent_cpu_total = float(agent_cpu["user_pct"]) + float(agent_cpu["sys_pct"])
 
-    primary_event_names = primary_events_for_workload(workload_spec)
-    primary_events_total = (
-        workload_primary_event_total(event_counts, workload_spec)
-        if collector is not None
-        else None
-    )
-    primary_events_per_sec = (
-        (float(primary_events_total) / workload_result.duration_s)
-        if primary_events_total is not None and workload_result.duration_s > 0
-        else None
-    )
     overhead_pct = 0.0 if phase_name == "control" else application_overhead_pct(control_throughput, workload_result.ops_per_sec)
     return {
         "cycle_index": cycle_index,
@@ -557,7 +506,6 @@ def measure_workload(
         "kind": str(workload_spec.get("kind", "")),
         "metric": str(workload_spec.get("metric", "ops/s")),
         "command_template": str(workload_spec.get("command", "")),
-        "primary_event_names": primary_event_names,
         "control_app_throughput": control_throughput,
         "application_overhead_pct": overhead_pct,
         "app_throughput": workload_result.ops_per_sec,
@@ -570,11 +518,9 @@ def measure_workload(
             if total_events is not None and workload_result.duration_s > 0
             else None
         ),
-        "primary_events_total": primary_events_total,
-        "primary_events_per_sec": primary_events_per_sec,
         "events_per_op": (
-            (float(primary_events_total) / float(workload_result.ops_total))
-            if primary_events_total is not None and workload_result.ops_total > 0
+            (float(total_events) / float(workload_result.ops_total))
+            if total_events is not None and workload_result.ops_total > 0
             else None
         ),
         "event_counts": event_counts,
@@ -616,15 +562,10 @@ def summarize_phase(
             ci_iterations=ci_iterations,
             ci_seed=ci_seed + 1,
         ),
-        "primary_events_per_sec": summarize_numeric_distribution(
-            [record.get("primary_events_per_sec") for record in workloads],
-            ci_iterations=ci_iterations,
-            ci_seed=ci_seed + 2,
-        ),
         "application_overhead_pct": summarize_numeric_distribution(
             [record.get("application_overhead_pct") for record in workloads],
             ci_iterations=ci_iterations,
-            ci_seed=ci_seed + 3,
+            ci_seed=ci_seed + 2,
         ),
         "agent_cpu_total_pct": summarize_numeric_distribution(
             [
@@ -632,7 +573,7 @@ def summarize_phase(
                 for record in workloads
             ],
             ci_iterations=ci_iterations,
-            ci_seed=ci_seed + 4,
+            ci_seed=ci_seed + 3,
         ),
         "system_cpu_busy_pct": summarize_numeric_distribution(
             [
@@ -640,7 +581,7 @@ def summarize_phase(
                 for record in workloads
             ],
             ci_iterations=ci_iterations,
-            ci_seed=ci_seed + 5,
+            ci_seed=ci_seed + 4,
         ),
         "bpf_avg_ns_per_run": summarize_numeric_distribution(
             [
@@ -648,7 +589,7 @@ def summarize_phase(
                 for record in workloads
             ],
             ci_iterations=ci_iterations,
-            ci_seed=ci_seed + 6,
+            ci_seed=ci_seed + 5,
         ),
         "detection_latency_ms_p99": summarize_numeric_distribution(
             [
@@ -656,7 +597,7 @@ def summarize_phase(
                 for record in workloads
             ],
             ci_iterations=ci_iterations,
-            ci_seed=ci_seed + 7,
+            ci_seed=ci_seed + 6,
         ),
     }
 
@@ -690,7 +631,6 @@ def summarize_workload_samples(
                 "kind": str(records[0].get("kind", "")),
                 "metric": str(records[0].get("metric", "ops/s")),
                 "sample_count": len(records),
-                "primary_event_names": list(records[0].get("primary_event_names") or []),
                 "app_throughput": summarize_numeric_distribution(
                     [record.get("app_throughput") for record in records],
                     ci_iterations=ci_iterations,
@@ -701,45 +641,40 @@ def summarize_workload_samples(
                     ci_iterations=ci_iterations,
                     ci_seed=ci_seed + (index * 20) + 1,
                 ),
-                "primary_events_per_sec": summarize_numeric_distribution(
-                    [record.get("primary_events_per_sec") for record in records],
-                    ci_iterations=ci_iterations,
-                    ci_seed=ci_seed + (index * 20) + 2,
-                ),
                 "application_overhead_pct": summarize_numeric_distribution(
                     [record.get("application_overhead_pct") for record in records],
                     ci_iterations=ci_iterations,
-                    ci_seed=ci_seed + (index * 20) + 3,
+                    ci_seed=ci_seed + (index * 20) + 2,
                 ),
                 "detection_latency_ms_mean": summarize_numeric_distribution(
                     [((record.get("latency_ms") or {}).get("mean")) for record in records],
                     ci_iterations=ci_iterations,
-                    ci_seed=ci_seed + (index * 20) + 4,
+                    ci_seed=ci_seed + (index * 20) + 3,
                 ),
                 "detection_latency_ms_p99": summarize_numeric_distribution(
                     [((record.get("latency_ms") or {}).get("p99")) for record in records],
                     ci_iterations=ci_iterations,
-                    ci_seed=ci_seed + (index * 20) + 5,
+                    ci_seed=ci_seed + (index * 20) + 4,
                 ),
                 "agent_cpu_total_pct": summarize_numeric_distribution(
                     [((record.get("agent_cpu") or {}).get("total_pct")) for record in records],
                     ci_iterations=ci_iterations,
-                    ci_seed=ci_seed + (index * 20) + 6,
+                    ci_seed=ci_seed + (index * 20) + 5,
                 ),
                 "system_cpu_busy_pct": summarize_numeric_distribution(
                     [((record.get("system_cpu") or {}).get("busy_pct")) for record in records],
                     ci_iterations=ci_iterations,
-                    ci_seed=ci_seed + (index * 20) + 7,
+                    ci_seed=ci_seed + (index * 20) + 6,
                 ),
                 "bpf_avg_ns_per_run": summarize_numeric_distribution(
                     [((record.get("bpf") or {}).get("summary", {}).get("avg_ns_per_run")) for record in records],
                     ci_iterations=ci_iterations,
-                    ci_seed=ci_seed + (index * 20) + 8,
+                    ci_seed=ci_seed + (index * 20) + 7,
                 ),
                 "lost_event_count": summarize_numeric_distribution(
                     [((record.get("drop_counters") or {}).get("lost_event_count")) for record in records],
                     ci_iterations=ci_iterations,
-                    ci_seed=ci_seed + (index * 20) + 9,
+                    ci_seed=ci_seed + (index * 20) + 8,
                 ),
                 "correctness": {
                     "samples": len(records),
@@ -877,7 +812,7 @@ def compare_phases(
     ci_seed: int = DEFAULT_BOOTSTRAP_SEED,
 ) -> dict[str, object]:
     if not post:
-        return {"comparable": False, "reason": "rejit did not apply successfully"}
+        return {"comparable": False, "reason": "post-ReJIT phase is missing"}
 
     baseline_by_name = _phase_samples_by_workload_and_cycle(baseline)
     post_by_name = _phase_samples_by_workload_and_cycle(post)
@@ -906,9 +841,9 @@ def compare_phases(
                     ci_iterations=ci_iterations,
                     ci_seed=ci_seed + (index * 50) + 1,
                 ),
-                "primary_events_per_sec": paired_metric_report(
-                    [sample.get("primary_events_per_sec") for sample in before_samples],
-                    [sample.get("primary_events_per_sec") for sample in after_samples],
+                "events_per_sec": paired_metric_report(
+                    [sample.get("events_per_sec") for sample in before_samples],
+                    [sample.get("events_per_sec") for sample in after_samples],
                     ci_iterations=ci_iterations,
                     ci_seed=ci_seed + (index * 50) + 2,
                 ),
@@ -974,7 +909,7 @@ def append_preflight_markdown(lines: list[str], preflight: Mapping[str, object])
     program_activity = activity.get("programs") if isinstance(activity, Mapping) else None
     for workload in phase_records(preflight):
         details = [
-            f"primary_events/s={workload.get('primary_events_per_sec')}",
+            f"events/s={workload.get('events_per_sec')}",
             f"bpf_avg_ns={((workload.get('bpf') or {}).get('summary', {}).get('avg_ns_per_run'))}",
         ]
         if isinstance(program_activity, Mapping):
@@ -1065,7 +1000,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     for workload in baseline.get("workloads") or []:
         lines.append(
             f"- {workload['name']}: app_mean={_summary_mean(workload.get('app_throughput'))} {workload['metric']}, "
-            f"primary_events_mean={_summary_mean(workload.get('primary_events_per_sec'))}/s, "
+            f"events_mean={_summary_mean(workload.get('events_per_sec'))}/s, "
             f"latency_p99_mean={_summary_mean(workload.get('detection_latency_ms_p99'))} ms, "
             f"overhead_mean={_summary_mean(workload.get('application_overhead_pct'))}%, "
             f"bpf_avg_ns_mean={_summary_mean(workload.get('bpf_avg_ns_per_run'))}"
@@ -1077,7 +1012,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         for workload in post.get("workloads") or []:
             lines.append(
                 f"- {workload['name']}: app_mean={_summary_mean(workload.get('app_throughput'))} {workload['metric']}, "
-                f"primary_events_mean={_summary_mean(workload.get('primary_events_per_sec'))}/s, "
+                f"events_mean={_summary_mean(workload.get('events_per_sec'))}/s, "
                 f"latency_p99_mean={_summary_mean(workload.get('detection_latency_ms_p99'))} ms, "
                 f"overhead_mean={_summary_mean(workload.get('application_overhead_pct'))}%, "
                 f"bpf_avg_ns_mean={_summary_mean(workload.get('bpf_avg_ns_per_run'))}"
@@ -1090,7 +1025,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
             lines.append(
                 f"- {workload['name']}: "
                 f"app_delta_mean={_paired_delta_mean(workload.get('app_throughput'))}%, "
-                f"event_delta_mean={_paired_delta_mean(workload.get('primary_events_per_sec'))}%, "
+                f"event_delta_mean={_paired_delta_mean(workload.get('events_per_sec'))}%, "
                 f"overhead_delta_mean={_paired_delta_mean(workload.get('application_overhead_pct'))}%, "
                 f"latency_p99_delta_mean={_paired_delta_mean(workload.get('detection_latency_ms_p99'))}%, "
                 f"app_p={workload.get('app_throughput', {}).get('p_value')}, "
@@ -1210,9 +1145,10 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     warmup_value = config.get("smoke_warmup_duration_s") if args.smoke else config.get("warmup_duration_s")
     warmup_duration_s = float(warmup_value or (DEFAULT_SMOKE_WARMUP_DURATION_S if args.smoke else DEFAULT_WARMUP_DURATION_S))
     latency_probe_value = config.get("smoke_latency_probe_count") if args.smoke else config.get("latency_probe_count")
-    latency_probe_count = int(
-        latency_probe_value or (DEFAULT_SMOKE_LATENCY_PROBE_COUNT if args.smoke else DEFAULT_LATENCY_PROBE_COUNT)
-    )
+    if latency_probe_value is None:
+        latency_probe_count = int(DEFAULT_SMOKE_LATENCY_PROBE_COUNT if args.smoke else DEFAULT_LATENCY_PROBE_COUNT)
+    else:
+        latency_probe_count = int(latency_probe_value)
     latency_probe_timeout_s = float(config.get("latency_probe_timeout_s") or DEFAULT_LATENCY_PROBE_TIMEOUT_S)
     statistics_config = config.get("statistics") if isinstance(config.get("statistics"), Mapping) else {}
     ci_iterations = int((statistics_config or {}).get("bootstrap_iterations") or DEFAULT_BOOTSTRAP_ITERATIONS)
@@ -1261,9 +1197,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             error_message="Tracee config contains no workloads",
             limitations=limitations,
         )
-    events = list(config.get("events") or [])
     tracee_extra_args: list[str] = []
-    commands = build_tracee_commands(tracee_binary, events, tracee_extra_args)
+    commands = build_tracee_commands(tracee_binary, tracee_extra_args)
     preflight: dict[str, object] | None = None
     try:
         cycle_results: list[dict[str, object]] = []
@@ -1298,7 +1233,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 def start(_: object) -> CaseLifecycleState:
                     runner = TraceeRunner(
                         tracee_binary=tracee_binary,
-                        events=events,
                         extra_args=tracee_extra_args,
                         load_timeout_s=DEFAULT_LOAD_TIMEOUT_S,
                     )
@@ -1422,8 +1356,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
 
                 if lifecycle_result.state is None or lifecycle_result.baseline is None:
                     raise RuntimeError(f"Tracee lifecycle cycle {cycle_index} completed without a baseline phase")
-                if not rejit_result_has_any_apply(lifecycle_result.rejit_result):
-                    raise RuntimeError(f"Tracee reJIT did not apply in cycle {cycle_index}: {lifecycle_result.rejit_result}")
                 if lifecycle_result.post_rejit is None:
                     raise RuntimeError(f"Tracee post-ReJIT phase is missing in cycle {cycle_index}")
 

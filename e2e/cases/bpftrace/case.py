@@ -87,18 +87,10 @@ def ensure_required_tools() -> dict[str, object]:
     }
 
 
-def selected_scripts(args: argparse.Namespace) -> list[ScriptSpec]:
-    workload_overrides = getattr(args, "_suite_workload_overrides", {}) or {}
-    if args.smoke:
-        selected = [next(spec for spec in SCRIPTS if spec.name == "capable")]
-    elif not getattr(args, "scripts", None):
-        selected = list(SCRIPTS)
-    else:
-        wanted = {name.strip() for name in getattr(args, "scripts", []) if name and name.strip()}
-        selected = [spec for spec in SCRIPTS if spec.name in wanted]
+def suite_scripts() -> list[ScriptSpec]:
     return [
-        replace(spec, workload_spec={"kind": str(workload_overrides.get(spec.name) or (spec.workload_spec or {}).get("kind") or "")})
-        for spec in selected
+        replace(spec, workload_spec={"kind": str((spec.workload_spec or {}).get("kind") or "")})
+        for spec in SCRIPTS
     ]
 
 
@@ -145,7 +137,7 @@ def run_phase(
 ) -> tuple[dict[str, object], dict[str, object] | None]:
     """Run baseline then daemon-apply then rejit measurement for one bpftrace script.
 
-    Returns (baseline, rejit) where rejit is None only when ReJIT was not applicable.
+    Returns `(baseline, rejit)` with `rejit` present whenever the post-ReJIT phase completed or failed loudly.
     """
     bpftrace_runner = BpftraceRunner(
         script_path=spec.script_path,
@@ -277,7 +269,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         "",
         "## Summary",
         "",
-        f"- Scripts selected: `{len(payload['selected_scripts'])}`",
+        f"- Scripts in suite: `{len(payload['records'])}`",
         f"- Baseline successes: `{payload['summary']['baseline_successes']}`",
         f"- ReJIT successes: `{payload['summary']['rejit_successes']}`",
         f"- Scripts with applied sites: `{payload['summary']['scripts_with_sites']}`",
@@ -423,7 +415,7 @@ def run_bpftrace_case(args: argparse.Namespace) -> dict[str, object]:
     ensure_artifacts(daemon_binary)
     tool_versions = ensure_required_tools()
 
-    scripts = selected_scripts(args)
+    scripts = suite_scripts()
     if not scripts:
         raise RuntimeError("no scripts selected")
 
@@ -480,7 +472,6 @@ def run_bpftrace_case(args: argparse.Namespace) -> dict[str, object]:
         "status": "error" if errors else "ok",
         "smoke": bool(args.smoke),
         "duration_s": duration_s,
-        "selected_scripts": [spec.name for spec in scripts],
         "daemon": str(daemon_binary),
         "host": host_metadata(),
         "tool_versions": tool_versions,

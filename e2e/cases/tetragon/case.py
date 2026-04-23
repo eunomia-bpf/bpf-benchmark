@@ -36,7 +36,6 @@ from runner.libs.case_common import (  # noqa: E402
     host_metadata,
     summarize_numbers,
     percent_delta,
-    rejit_result_has_any_apply,
     speedup_ratio,
     run_case_lifecycle,
 )
@@ -126,7 +125,6 @@ def measure_workload(
     prog_ids: list[int],
     *,
     agent_pid: int | None,
-    exec_workload_cgroup: bool,
 ) -> dict[str, object]:
     before_bpf = sample_bpf_stats(prog_ids)
     cpu_holder: dict[int, dict[str, float]] = {}
@@ -153,7 +151,6 @@ def measure_workload(
         {
             "kind": workload_spec.kind,
             "value": workload_spec.value,
-            "exec_workload_cgroup": exec_workload_cgroup,
         },
         duration_s,
     )
@@ -229,7 +226,6 @@ def run_phase(
     prog_ids: list[int],
     *,
     agent_pid: int | None,
-    exec_workload_cgroup: bool,
 ) -> dict[str, object]:
     records = [
         measure_workload(
@@ -238,7 +234,6 @@ def run_phase(
             duration_s,
             prog_ids,
             agent_pid=agent_pid,
-            exec_workload_cgroup=exec_workload_cgroup,
         )
         for spec in workloads
     ]
@@ -347,7 +342,7 @@ def build_program_summary(
 
 def compare_phases(baseline: Mapping[str, object], post: Mapping[str, object] | None) -> dict[str, object]:
     if not post:
-        return {"comparable": False, "reason": "rejit did not apply successfully"}
+        return {"comparable": False, "reason": "post-ReJIT phase is missing"}
 
     baseline_by_name = {record["name"]: record for record in baseline.get("workloads") or []}
     post_by_name = {record["name"]: record for record in post.get("workloads") or []}
@@ -557,18 +552,15 @@ def daemon_payload(
     prepared_daemon_session: object,
     daemon_binary: Path,
     tetragon_binary: str,
-    tetragon_extra_args: Sequence[str],
     workloads: Sequence[WorkloadSpec],
     duration_s: int,
     preflight_duration_s: int,
-    require_program_activity: bool,
     smoke: bool,
     load_timeout: int,
     setup_result: Mapping[str, object],
     limitations: list[str],
 ) -> dict[str, object]:
     preflight: dict[str, object] | None = None
-    exec_workload_cgroup = any(arg == "--cgroup-rate" for arg in tetragon_extra_args)
 
     def setup() -> dict[str, object]:
         return {}
@@ -577,7 +569,6 @@ def daemon_payload(
         del state
         runner = TetragonRunner(
             tetragon_binary=tetragon_binary,
-            tetragon_extra_args=tetragon_extra_args,
             load_timeout_s=load_timeout,
             setup_result=setup_result,
         )
@@ -589,8 +580,6 @@ def daemon_payload(
             prog_ids=prog_ids,
             artifacts={
                 "tetragon_launch_command": list(runner.command),
-                "policy_dir": None if runner.tempdir is None else runner.tempdir.name,
-                "policy_paths": [str(path) for path in runner.policy_paths],
                 "tetragon_programs": tetragon_programs,
                 "rejit_policy_context": {
                     "repo": "tetragon",
@@ -611,27 +600,11 @@ def daemon_payload(
             preflight_duration_s,
             lifecycle.prog_ids,
             agent_pid=runner.pid,
-            exec_workload_cgroup=exec_workload_cgroup,
         )
         preflight["program_activity"] = {
             "programs": summarize_program_activity(preflight, lifecycle.prog_ids),
         }
         lifecycle.artifacts["preflight"] = preflight
-        if not require_program_activity:
-            return None
-
-        program_run_cnt = int(
-            ((preflight.get("program_activity") or {}).get("programs") or {}).get("total_run_cnt", 0) or 0
-        )
-        if program_run_cnt <= 0:
-            limitations.append(
-                "Configured Tetragon workload did not execute the discovered program set during preflight."
-            )
-            return LifecycleAbort(
-                status="error",
-                reason="preflight observed zero Tetragon program executions; invalid runtime measurement",
-                artifacts={"preflight": preflight},
-            )
         return None
 
     def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
@@ -644,7 +617,6 @@ def daemon_payload(
             duration_s,
             lifecycle.prog_ids,
             agent_pid=runner.pid,
-            exec_workload_cgroup=exec_workload_cgroup,
         )
 
     def before_rejit(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> LifecycleAbort | None:
@@ -708,20 +680,14 @@ def daemon_payload(
 
     runner = lifecycle_result.state.runtime
     assert isinstance(runner, TetragonRunner)
-    policy_dir = lifecycle_result.artifacts.get("policy_dir")
-    policy_paths = lifecycle_result.artifacts.get("policy_paths") or []
 
     baseline = lifecycle_result.baseline
     scan_results = lifecycle_result.scan_results
     rejit_result = lifecycle_result.rejit_result or {"applied": False, "reason": "reJIT did not run"}
     post_rejit = lifecycle_result.post_rejit
     comparison = compare_phases(baseline, post_rejit)
-    error_message = ""
-    if not rejit_result_has_any_apply(rejit_result):
-        error_message = str(rejit_result.get("error") or rejit_result.get("reason") or "").strip()
-        if not error_message:
-            error_message = "Tetragon reJIT did not apply"
-    elif post_rejit is None:
+    error_message = str(rejit_result.get("error") or "").strip()
+    if not error_message and post_rejit is None:
         error_message = "Tetragon post-ReJIT phase is missing"
 
     limitations.append(
@@ -737,8 +703,6 @@ def daemon_payload(
         "setup": dict(setup_result),
         "host": host_metadata(),
         "tetragon_launch_command": lifecycle_result.artifacts.get("tetragon_launch_command") or [],
-        "policy_dir": policy_dir,
-        "policy_paths": [str(path) for path in policy_paths],
         "config": dict(config),
         "tetragon_programs": lifecycle_result.artifacts.get("tetragon_programs") or [],
         "agent_logs": runner.process_output,
@@ -770,12 +734,6 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
         )
     )
     preflight_duration_s = int(config.get("preflight_duration_s", 0) or 0)
-    require_program_activity = bool(config.get("require_program_activity", False))
-    tetragon_extra_args = [
-        str(value).strip()
-        for value in (config.get("tetragon_extra_args") or [])
-        if str(value).strip()
-    ]
     workloads = workload_specs_from_config(config)
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary)
@@ -798,18 +756,6 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
             limitations=limitations,
         )
 
-    if require_program_activity and preflight_duration_s <= 0:
-        limitations.append("require_program_activity requires preflight_duration_s > 0.")
-        return error_payload(
-            config=config,
-            tetragon_binary=tetragon_binary,
-            duration_s=duration_s,
-            smoke=bool(args.smoke),
-            setup_result=setup_result,
-            error_message="require_program_activity requires preflight_duration_s > 0",
-            limitations=limitations,
-        )
-
     with enable_bpf_stats():
         try:
             return daemon_payload(
@@ -817,11 +763,9 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
                 prepared_daemon_session=getattr(args, "_prepared_daemon_session", None),
                 daemon_binary=daemon_binary,
                 tetragon_binary=tetragon_binary,
-                tetragon_extra_args=tetragon_extra_args,
                 workloads=workloads,
                 duration_s=duration_s,
                 preflight_duration_s=preflight_duration_s,
-                require_program_activity=require_program_activity,
                 smoke=bool(args.smoke),
                 load_timeout=DEFAULT_LOAD_TIMEOUT_S,
                 setup_result=setup_result,

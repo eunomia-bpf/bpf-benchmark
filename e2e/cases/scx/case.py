@@ -111,31 +111,6 @@ def workload_specs() -> list[dict[str, str]]:
     return [dict(spec) for _binary, spec in required]
 
 
-def select_workloads(
-    workloads: Sequence[Mapping[str, object]],
-    requested: Sequence[str] | None,
-) -> list[dict[str, object]]:
-    wanted = {str(value).strip() for value in (requested or []) if str(value).strip()}
-    if not wanted:
-        return [dict(spec) for spec in workloads]
-    selected = [
-        dict(spec)
-        for spec in workloads
-        if str(spec.get("name") or "").strip() in wanted or str(spec.get("kind") or "").strip() in wanted
-    ]
-    found = {
-        str(spec.get("name") or "").strip()
-        for spec in selected
-    } | {
-        str(spec.get("kind") or "").strip()
-        for spec in selected
-    }
-    missing = sorted(wanted - found)
-    if missing:
-        raise RuntimeError("unknown scx workloads selected: " + ", ".join(missing))
-    return selected
-
-
 def measure_workload(
     runner: AppRunner,
     workload_spec: Mapping[str, object],
@@ -328,8 +303,6 @@ def _resolve_scx_scheduler_prog_ids(
     logical_prog_ids: Sequence[int],
     *,
     previous_programs: Sequence[Mapping[str, object]],
-    fallback_to_all_live: bool = False,
-    fallback_to_logical: bool = False,
 ) -> tuple[list[int], dict[int, int], list[dict[str, object]]]:
     logical_ids = [int(prog_id) for prog_id in logical_prog_ids if int(prog_id) > 0]
     if not logical_ids:
@@ -346,16 +319,6 @@ def _resolve_scx_scheduler_prog_ids(
     ]
     if scheduler_prog_ids:
         return scheduler_prog_ids, logical_to_live, refreshed_programs
-    if fallback_to_all_live:
-        scheduler_prog_ids = [
-            int(program.get("id", 0) or 0)
-            for program in refreshed_programs
-            if int(program.get("id", 0) or 0) > 0
-        ]
-        if scheduler_prog_ids:
-            return scheduler_prog_ids, logical_to_live, refreshed_programs
-    if fallback_to_logical:
-        return list(logical_ids), logical_to_live, refreshed_programs
     return [], logical_to_live, refreshed_programs
 
 
@@ -543,7 +506,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary, scheduler_binary)
 
-    workloads = select_workloads(workload_specs(), getattr(args, "workloads", None))
+    workloads = workload_specs()
 
     state_before = read_scx_state()
 
@@ -597,8 +560,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
                 runner,
                 lifecycle.prog_ids,
                 previous_programs=scheduler_programs or list(lifecycle.artifacts.get("scheduler_programs") or []),
-                fallback_to_all_live=True,
-                fallback_to_logical=True,
             )
             prog_ids = list(scheduler_program_ids)
         return run_phase(runner, workloads, duration_s, agent_pid=runner.pid, prog_ids=prog_ids)
@@ -655,13 +616,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         cleanup=cleanup,
         after_baseline=after_baseline,
         resolve_rejit_prog_ids=resolve_rejit_prog_ids,
-        should_run_post_rejit=lambda result: int(
-            applied_site_totals_from_rejit_result(result if isinstance(result, Mapping) else None).get(
-                "total_sites",
-                0,
-            )
-            or 0
-        ) > 0,
     )
     if lifecycle_result.state is None:
         raise RuntimeError("scx lifecycle completed without a live session")
@@ -730,7 +684,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         rejit_error = str(rejit_result.get("error") or "").strip()
     if rejit_error:
         limitations.append(f"Partial ReJIT/apply errors were reported: {rejit_error}")
-    if applied_site_total > 0 and post_rejit is None:
+    if post_rejit is None:
         error_message = "scx post-ReJIT phase is missing"
 
     mode = "scx_rusty_loader"
