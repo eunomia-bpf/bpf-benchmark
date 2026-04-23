@@ -17,7 +17,7 @@ from urllib.request import urlopen
 
 import yaml
 
-from .. import ROOT_DIR, resolve_bpftool_binary, run_command, tail_text, which
+from .. import ROOT_DIR, run_command, tail_text, which
 from ..agent import (
     bpftool_prog_show_records,
     start_agent,
@@ -67,7 +67,7 @@ def _tracee_event_output_path() -> Path:
 
 
 class TraceeOutputCollector:
-    def __init__(self, event_output_path: Path | None = None) -> None:
+    def __init__(self) -> None:
         self._lock = threading.Lock()
         self._condition = threading.Condition(self._lock)
         self.stdout_tail: deque[str] = deque(maxlen=200)
@@ -77,8 +77,6 @@ class TraceeOutputCollector:
         self.events: deque[dict[str, object]] = deque(maxlen=16384)
         self.total_events = 0
         self.latest_stats: dict[str, int] = {}
-        self.event_output_path = None if event_output_path is None else Path(event_output_path)
-        self.event_file_parse_errors: deque[str] = deque(maxlen=20)
 
     @staticmethod
     def _payload_timestamp_ns(payload: Mapping[str, object]) -> int | None:
@@ -105,32 +103,6 @@ class TraceeOutputCollector:
         pipe.close()
 
     def consume_event_file(self, path: Path, stop_event: threading.Event) -> None:
-        def _consume_event_line(line: str) -> bool:
-            try:
-                self._parse_event_line(line, strict=True)
-            except RuntimeError as exc:
-                self._record_event_file_parse_error(str(exc))
-                return False
-            return True
-
-        pending_fragment = ""
-
-        def _consume_buffered_line(raw_line: str, *, force: bool = False) -> bool:
-            nonlocal pending_fragment
-            if raw_line:
-                pending_fragment += raw_line
-            if not pending_fragment:
-                return True
-            if not force and not pending_fragment.endswith("\n"):
-                return True
-            line = pending_fragment.rstrip("\r\n")
-            pending_fragment = ""
-            if not line:
-                return True
-            with self._lock:
-                self.event_tail.append(line)
-            return _consume_event_line(line)
-
         handle = None
         try:
             while True:
@@ -152,72 +124,41 @@ class TraceeOutputCollector:
                     time.sleep(0.05)
                     continue
                 if raw_line:
-                    if not _consume_buffered_line(raw_line, force=stop_event.is_set()):
-                        return
+                    line = raw_line.rstrip("\r\n")
+                    if not line:
+                        continue
+                    with self._lock:
+                        self.event_tail.append(line)
+                    self._parse_event_line(line)
                     continue
                 if stop_event.is_set():
-                    if not _consume_buffered_line("", force=True):
-                        return
                     break
                 time.sleep(0.05)
         finally:
             if handle is not None:
                 try:
                     for raw_line in handle:
-                        if not _consume_buffered_line(raw_line, force=False):
-                            return
+                        line = raw_line.rstrip("\r\n")
+                        if not line:
+                            continue
+                        with self._lock:
+                            self.event_tail.append(line)
+                        self._parse_event_line(line)
                 except OSError as exc:
                     if exc.errno != errno.ENODATA:
                         raise
                 finally:
-                    if not _consume_buffered_line("", force=True):
-                        return
                     handle.close()
 
-    def _event_line_preview(self, line: str, *, limit: int = 240) -> str:
-        return line if len(line) <= limit else f"{line[:limit]}..."
-
-    def _strict_event_file_error(self, line: str, reason: str) -> RuntimeError:
-        path = str(self.event_output_path) if self.event_output_path is not None else "<unknown>"
-        return RuntimeError(
-            f"Tracee event file parse failed for {path}: {reason}: {self._event_line_preview(line)!r}"
-        )
-
-    def _record_event_file_parse_error(self, message: str) -> None:
-        with self._condition:
-            self.event_file_parse_errors.append(message)
-            self._condition.notify_all()
-
-    def _event_file_error_unlocked(self) -> str:
-        return self.event_file_parse_errors[0] if self.event_file_parse_errors else ""
-
-    def raise_event_file_error(self) -> None:
-        with self._lock:
-            message = self._event_file_error_unlocked()
-        if message:
-            raise RuntimeError(message)
-
-    def _parse_event_line(self, line: str, *, strict: bool = False) -> None:
+    def _parse_event_line(self, line: str) -> None:
         try:
             payload = json.loads(line)
-        except json.JSONDecodeError as exc:
-            if strict:
-                raise self._strict_event_file_error(line, f"invalid JSON ({exc.msg})") from exc
+        except json.JSONDecodeError:
             return
         if not isinstance(payload, Mapping):
-            if strict:
-                raise self._strict_event_file_error(
-                    line,
-                    f"expected JSON object, got {type(payload).__name__}",
-                )
             return
         event_name = payload.get("eventName") or payload.get("event_name") or payload.get("name")
         if not event_name:
-            if strict:
-                raise self._strict_event_file_error(
-                    line,
-                    "missing event_name/eventName/name field",
-                )
             return
         with self._lock:
             n = str(event_name)
@@ -241,8 +182,7 @@ class TraceeOutputCollector:
             return {"event_counts": dict(self.event_counts), "recent_events": list(self.events),
                     "total_events": self.total_events, "latest_stats": dict(self.latest_stats),
                     "stdout_tail": list(self.stdout_tail), "stderr_tail": list(self.stderr_tail),
-                    "event_tail": list(self.event_tail),
-                    "event_file_parse_errors": list(self.event_file_parse_errors)}
+                    "event_tail": list(self.event_tail)}
 
     def wait_for_event(
         self,
@@ -255,7 +195,6 @@ class TraceeOutputCollector:
         wanted_names = {str(name) for name in event_names if str(name)}
         tokens = [str(token) for token in marker_tokens if str(token)]
         deadline = time.monotonic() + max(0.0, float(timeout_s))
-        self.raise_event_file_error()
 
         def find_match() -> dict[str, object] | None:
             for record in reversed(self.events):
@@ -278,8 +217,6 @@ class TraceeOutputCollector:
                 if remaining <= 0:
                     return None
                 self._condition.wait(timeout=remaining)
-                if message := self._event_file_error_unlocked():
-                    raise RuntimeError(message)
                 match = find_match()
             return match
 
@@ -301,7 +238,7 @@ class TraceeAgentSession(AgentSession):
         tracee_tmpdir.mkdir(parents=True, exist_ok=True)
         event_output_path.unlink(missing_ok=True)
         for command in self.commands:
-            self.collector = TraceeOutputCollector(event_output_path)
+            self.collector = TraceeOutputCollector()
             self.event_stop = threading.Event()
             proc = start_agent(
                 command[0],
@@ -324,7 +261,6 @@ class TraceeAgentSession(AgentSession):
             self.event_thread.start()
 
             def _health_check() -> bool:
-                self.collector.raise_event_file_error()
                 return (
                     _tracee_healthz_ready(TRACEE_HEALTH_HOST, TRACEE_HEALTH_PORT)
                     or _tracee_collector_has_activity(self.collector)
@@ -342,7 +278,6 @@ class TraceeAgentSession(AgentSession):
                 self.close()
                 raise
             if healthy:
-                self.collector.raise_event_file_error()
                 programs = wait_until_program_set_stable(before_ids=preexisting_ids, timeout_s=self.load_timeout)
                 if programs:
                     self.programs = [dict(program) for program in programs]

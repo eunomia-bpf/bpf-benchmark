@@ -4,12 +4,10 @@ SHELL := /bin/bash
 $(if $(wildcard vendor/linux-framework/Makefile),,$(error vendor/linux-framework not found. Run: git submodule update --init --recursive))
 
 ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-REPO_ROOT := $(ROOT_DIR)
 MICRO_DIR := $(ROOT_DIR)/micro
 RUNNER_DIR := $(ROOT_DIR)/runner
 DAEMON_DIR := $(ROOT_DIR)/daemon
 KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
-KERNEL_TEST_DIR := $(ROOT_DIR)/tests/kernel
 ARTIFACT_ROOT := $(ROOT_DIR)/.cache
 X86_BUILD_DIR ?= $(ARTIFACT_ROOT)/x86-kernel-build
 RUNNER_BUILD_DIR ?= $(RUNNER_DIR)/build
@@ -42,7 +40,6 @@ E2E_ARGS ?=
 E2E_CASE ?= all
 E2E_SMOKE ?= 0
 VM_CORPUS_ARGS ?=
-REPOS ?=
 FILTERS ?=
 TEST_MODE ?= test
 SAMPLES    ?= 3
@@ -72,7 +69,6 @@ PYTHON := $(if $(VENV),$(VENV)/bin/python3,python3)
 export BZIMAGE PYTHON LLVM_DIR RUN_LLVM_DIR
 export VM_TEST_TIMEOUT VM_MICRO_TIMEOUT VM_CORPUS_TIMEOUT VM_E2E_TIMEOUT
 export FUZZ_ROUNDS SCX_PROG_SHOW_RACE_MODE SCX_PROG_SHOW_RACE_ITERATIONS SCX_PROG_SHOW_RACE_LOAD_TIMEOUT SCX_PROG_SHOW_RACE_SKIP_PROBE
-VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 
 # Benchmark args
 empty :=

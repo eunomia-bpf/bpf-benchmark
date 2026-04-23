@@ -4,7 +4,6 @@ import os
 import signal
 import subprocess
 import time
-from pathlib import Path
 from typing import Callable, Sequence
 
 from . import ROOT_DIR, resolve_bpftool_binary, run_json_command
@@ -57,56 +56,6 @@ def stop_agent(proc: subprocess.Popen[str], timeout: int | float = 10) -> int:
                 proc.kill()
                 return proc.wait(timeout=max(float(timeout), 10.0))
     return int(proc.returncode or 0)
-
-
-def _resolve_pids(agent_name_or_pid: str | int) -> list[int]:
-    if isinstance(agent_name_or_pid, int):
-        return [agent_name_or_pid]
-    text = str(agent_name_or_pid).strip()
-    if text.isdigit():
-        return [int(text)]
-
-    matches: list[int] = []
-    for proc_dir in Path("/proc").iterdir():
-        if not proc_dir.name.isdigit():
-            continue
-        pid = int(proc_dir.name)
-        try:
-            comm = (proc_dir / "comm").read_text().strip()
-        except OSError:
-            continue
-        if comm == text or Path(comm).name == text:
-            matches.append(pid)
-            continue
-        try:
-            raw_cmdline = (proc_dir / "cmdline").read_bytes().replace(b"\0", b" ").decode("utf-8", "ignore")
-        except OSError:
-            continue
-        if text in raw_cmdline:
-            matches.append(pid)
-    return sorted(set(matches))
-
-
-def _program_refs_from_pid(pid: int) -> dict[int, list[dict[str, int]]]:
-    refs: dict[int, list[dict[str, int]]] = {}
-    fdinfo_dir = Path(f"/proc/{pid}/fdinfo")
-    if not fdinfo_dir.exists():
-        return refs
-    for entry in fdinfo_dir.iterdir():
-        try:
-            text = entry.read_text()
-        except OSError:
-            continue
-        for line in text.splitlines():
-            if not line.startswith("prog_id:"):
-                continue
-            _, value = line.split(":", 1)
-            value = value.strip()
-            if value.isdigit():
-                refs.setdefault(int(value), []).append({"pid": pid, "fd": int(entry.name)})
-    return refs
-
-
 def _payload_preview(payload: object, *, limit: int = 240) -> str:
     text = repr(payload)
     return text if len(text) <= limit else f"{text[:limit]}..."
@@ -130,37 +79,8 @@ def bpftool_prog_show_records() -> list[dict[str, object]]:
     return records
 
 
-def find_bpf_programs(agent_name_or_pid: str | int) -> list[dict]:
-    pids = _resolve_pids(agent_name_or_pid)
-    if not pids:
-        return []
-
-    owner_map: dict[int, list[int]] = {}
-    owner_fd_map: dict[int, list[dict[str, int]]] = {}
-    for pid in pids:
-        for prog_id, refs in _program_refs_from_pid(pid).items():
-            owner_map.setdefault(prog_id, []).append(pid)
-            owner_fd_map.setdefault(prog_id, []).extend(refs)
-
-    if not owner_map:
-        return []
-
-    matches: list[dict] = []
-    for record in bpftool_prog_show_records():
-        prog_id = int(record.get("id", -1))
-        if prog_id not in owner_map:
-            continue
-        enriched = dict(record)
-        enriched["owner_pids"] = sorted(owner_map[prog_id])
-        enriched["owner_fds"] = sorted(owner_fd_map.get(prog_id, []), key=lambda item: (item["pid"], item["fd"]))
-        matches.append(enriched)
-    matches.sort(key=lambda item: int(item.get("id", 0)))
-    return matches
-
-
 __all__ = [
     "bpftool_prog_show_records",
-    "find_bpf_programs",
     "start_agent",
     "stop_agent",
     "wait_healthy",
