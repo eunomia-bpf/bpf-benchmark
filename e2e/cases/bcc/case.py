@@ -54,7 +54,6 @@ DEFAULT_REPORT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e-report.md"
 class ToolSpec:
     name: str
     description: str
-    expected_programs: int
     workload_kind: str
     spawn_timeout_s: int
     tool_args: tuple[str, ...]
@@ -74,7 +73,6 @@ def load_config(path: Path) -> SuiteConfig:
         ToolSpec(
             name=entry["name"],
             description=entry.get("description", ""),
-            expected_programs=int(entry.get("expected_programs", 1)),
             workload_kind=entry["workload_kind"],
             spawn_timeout_s=int(entry.get("spawn_timeout_s", 20)),
             tool_args=tuple(str(arg) for arg in entry.get("tool_args", [])),
@@ -145,7 +143,6 @@ def run_phase(
         tool_name=spec.name,
         tool_args=spec.tool_args,
         workload_kind=spec.workload_kind,
-        expected_programs=spec.expected_programs,
         attach_timeout_s=attach_timeout,
     )
     def workload(lifecycle: object, _phase_name: str) -> dict[str, object]:

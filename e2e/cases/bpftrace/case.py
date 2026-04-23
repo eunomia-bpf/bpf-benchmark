@@ -151,7 +151,6 @@ def run_phase(
         script_path=spec.script_path,
         script_name=spec.name,
         workload_kind=spec.workload_kind,
-        expected_programs=spec.expected_programs,
         attach_timeout_s=attach_timeout,
     )
     def workload(lifecycle: object, _phase_name: str) -> dict[str, object]:

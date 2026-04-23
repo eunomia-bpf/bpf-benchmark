@@ -243,7 +243,7 @@ def _measure_runner_phase(
             previous_programs=logical_programs,
         )
     else:
-        initial_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=runner.program_fds)
+        initial_stats = sample_bpf_stats(sampled_prog_ids)
     for _ in range(samples):
         workload = runner.run_workload(workload_seconds).to_dict()
         last_workload = dict(workload)
@@ -255,7 +255,7 @@ def _measure_runner_phase(
             previous_programs=logical_programs,
         )
     else:
-        final_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=runner.program_fds)
+        final_stats = sample_bpf_stats(sampled_prog_ids)
     if sampled_prog_id_map is not None:
         sampled_to_target = {
             int(sampled_prog_id): int(target_prog_id)
@@ -320,18 +320,6 @@ def _measurement_program_stats(
         _program_phase_stats(final_snapshot, initial_snapshot),
         prog_ids,
     )
-
-
-def _selected_live_programs(
-    live_programs: Sequence[Mapping[str, object]],
-    prog_ids: Sequence[int],
-) -> list[dict[str, object]]:
-    wanted = {int(prog_id) for prog_id in prog_ids if int(prog_id) > 0}
-    return [
-        dict(program)
-        for program in live_programs
-        if int(program.get("id", 0) or 0) in wanted
-    ]
 
 
 def _program_label(app_name: str, program_name: str, prog_id: int) -> str:
@@ -431,7 +419,7 @@ def _sample_scx_measurement_stats(
             last_error = RuntimeError(f"{type(runner).__name__}: did not expose any live scheduler programs for stats sampling")
         else:
             try:
-                raw_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=runner.program_fds)
+                raw_stats = sample_bpf_stats(sampled_prog_ids)
                 break
             except RuntimeError as exc:
                 last_error = exc
@@ -788,25 +776,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     return "\n".join(lines)
 
 
-def _active_program_ids(
-    initial_stats: Mapping[int, Mapping[str, object]],
-    final_stats: Mapping[int, Mapping[str, object]],
-    candidate_prog_ids: Sequence[int],
-) -> list[int]:
-    selected: list[int] = []
-    for prog_id in candidate_prog_ids:
-        normalized_prog_id = int(prog_id)
-        if normalized_prog_id <= 0:
-            continue
-        before = initial_stats.get(normalized_prog_id) or {}
-        after = final_stats.get(normalized_prog_id) or {}
-        run_cnt_delta = int(after.get("run_cnt", 0) or 0) - int(before.get("run_cnt", 0) or 0)
-        run_time_delta = int(after.get("run_time_ns", 0) or 0) - int(before.get("run_time_ns", 0) or 0)
-        if run_cnt_delta > 0 or run_time_delta > 0:
-            selected.append(normalized_prog_id)
-    return selected
-
-
 def _build_runner_state(
     app: AppSpec,
     runner: AppRunner,
@@ -833,64 +802,6 @@ def _build_runner_state(
             },
         },
     )
-
-
-def _configure_program_selection(
-    app: AppSpec,
-    runner: AppRunner,
-    lifecycle: CaseLifecycleState,
-    *,
-    baseline_measurement: Mapping[str, object],
-) -> None:
-    initial_stats = _normalized_stats_snapshot(baseline_measurement.get("initial_stats"))
-    final_stats = _normalized_stats_snapshot(baseline_measurement.get("final_stats"))
-    selected = runner.select_corpus_program_ids(initial_stats, final_stats)
-    if selected is None:
-        selected = _active_program_ids(initial_stats, final_stats, lifecycle.target_prog_ids)
-    if selected is None:
-        return
-    selected_prog_ids = [
-        int(prog_id)
-        for prog_id in selected
-        if int(prog_id) > 0
-    ]
-    if not selected_prog_ids:
-        raise RuntimeError(
-            f"{app.name}: workload {app.workload_for('corpus')!r} did not execute any target programs during baseline"
-        )
-    if isinstance(runner, ScxRunner):
-        live_prog_id_map = {
-            int(logical_prog_id): int(sampled_prog_id)
-            for logical_prog_id, sampled_prog_id in dict((baseline_measurement.get("live_prog_id_map") or {})).items()
-            if str(logical_prog_id).strip() and int(sampled_prog_id) > 0
-        }
-        selected_live_prog_ids = [
-            int(live_prog_id_map.get(prog_id, 0) or 0)
-            for prog_id in selected_prog_ids
-            if int(live_prog_id_map.get(prog_id, 0) or 0) > 0
-        ]
-        if selected_live_prog_ids:
-            lifecycle.apply_prog_ids = list(selected_live_prog_ids)
-            lifecycle.artifacts["baseline_live_program_id_map"] = {
-                str(logical_prog_id): int(sampled_prog_id)
-                for logical_prog_id, sampled_prog_id in live_prog_id_map.items()
-            }
-            live_programs = baseline_measurement.get("live_programs")
-            if isinstance(live_programs, list):
-                lifecycle.artifacts["baseline_live_programs"] = [
-                    dict(program)
-                    for program in live_programs
-                    if isinstance(program, Mapping)
-                ]
-    lifecycle.target_prog_ids = list(selected_prog_ids)
-    if not isinstance(runner, ScxRunner):
-        lifecycle.apply_prog_ids = list(selected_prog_ids)
-    selected_programs = _selected_live_programs(
-        lifecycle.artifacts.get("programs") or [],
-        selected_prog_ids,
-    )
-    if selected_programs:
-        lifecycle.artifacts["programs"] = selected_programs
 
 
 def _build_app_error_result(
@@ -1091,16 +1002,15 @@ def _finalize_app_result(
         rejit_programs_by_id = _program_stats_by_prog_id(rejit_phase, prog_ids)
 
     normalized_apply_result = dict(apply_result or {})
-    error = str(normalized_apply_result.get("error") or "").strip()
+    apply_error = str(normalized_apply_result.get("error") or "").strip()
     if not _has_phase_measurement(programs_by_id):
         raise RuntimeError(
             f"{app.name}: workload {app.workload_for('corpus')!r} did not execute any target programs during baseline"
         )
-    if had_post_rejit and not error and not _has_phase_measurement(rejit_programs_by_id):
+    if had_post_rejit and not apply_error and not _has_phase_measurement(rejit_programs_by_id):
         raise RuntimeError(
             f"{app.name}: workload {app.workload_for('corpus')!r} did not execute any target programs after rejit"
         )
-    status = "error" if error else "ok"
     program_measurements = _build_program_measurements(
         app.name,
         live_programs,
@@ -1109,10 +1019,14 @@ def _finalize_app_result(
         normalized_apply_result,
         had_post_rejit=had_post_rejit,
     )
-    if not error and _rejit_result_has_any_change(normalized_apply_result) and not _has_comparable_measurement(program_measurements):
+    has_comparable_measurement = _has_comparable_measurement(program_measurements)
+    if not apply_error and _rejit_result_has_any_change(normalized_apply_result) and not has_comparable_measurement:
         raise RuntimeError(
             f"{app.name}: workload {app.workload_for('corpus')!r} produced no comparable target program measurements"
         )
+    fatal_apply_error = bool(apply_error) and not has_comparable_measurement
+    status = "error" if fatal_apply_error else "ok"
+    error = apply_error if fatal_apply_error else ""
 
     return {
         "app": app.name,
@@ -1185,16 +1099,6 @@ def _run_app(
     if measurement_mode != "program":
         raise RuntimeError(f"{app.name}: runner returned unsupported corpus measurement mode {measurement_mode!r}")
 
-    def before_rejit(_setup_state: object, lifecycle: object, baseline: Mapping[str, object]) -> object | None:
-        measurement = dict((baseline.get("measurement") or {}))
-        _configure_program_selection(
-            app,
-            runner,
-            lifecycle,
-            baseline_measurement=measurement,
-        )
-        return None
-
     with enable_bpf_stats():
         lifecycle_result = run_app_runner_lifecycle(
             daemon_session=daemon_session,
@@ -1217,7 +1121,6 @@ def _run_app(
                     ),
                 )
             },
-            before_rejit=before_rejit,
         )
 
     if lifecycle_result.state is None or lifecycle_result.baseline is None:
@@ -1344,12 +1247,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                                 session.state.target_prog_ids,
                                 workload_seconds=session.workload_seconds,
                                 samples=samples,
-                            )
-                            _configure_program_selection(
-                                session.app,
-                                session.runner,
-                                session.state,
-                                baseline_measurement=session.baseline_measurement,
                             )
                             surviving_sessions.append(session)
                         except Exception as exc:

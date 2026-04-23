@@ -16,14 +16,13 @@ from typing import Mapping, Sequence
 import yaml
 
 from .. import ROOT_DIR, tail_text, which
-from ..agent import stop_agent
+from ..agent import bpftool_prog_show_records, stop_agent
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
-from .process_support import wait_for_attached_programs
+from .process_support import wait_until_program_set_stable
 
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml"
 DEFAULT_ATTACH_TIMEOUT_SECONDS = 20
-DEFAULT_MIN_BIOSNOOP_CORPUS_RUNS = 100
 KHEADERS_READY_MARKER = ".bpfrejit-kheaders-ready"
 BCC_COMPAT_CFLAGS_ENV = "BPFREJIT_BCC_EXTRA_CFLAGS"
 BCC_COMPAT_HEADER_ENV = "BPFREJIT_BCC_COMPAT_HEADER"
@@ -169,7 +168,6 @@ def _tool_binary_names(tool_name: str) -> tuple[str, ...]:
 class BCCWorkloadSpec:
     name: str
     workload_kind: str
-    expected_programs: int
     spawn_timeout_s: int
     tool_args: tuple[str, ...]
 
@@ -230,7 +228,6 @@ def _bcc_tool_specs() -> dict[str, BCCWorkloadSpec]:
         specs[name] = BCCWorkloadSpec(
             name=name,
             workload_kind=str(entry.get("workload_kind") or "mixed"),
-            expected_programs=int(entry.get("expected_programs", 1) or 1),
             spawn_timeout_s=int(entry.get("spawn_timeout_s", DEFAULT_ATTACH_TIMEOUT_SECONDS) or DEFAULT_ATTACH_TIMEOUT_SECONDS),
             tool_args=tuple(str(arg) for arg in entry.get("tool_args", []) if str(arg).strip()),
         )
@@ -376,8 +373,6 @@ class BCCRunner(AppRunner):
         tool_name: str | None = None,
         tool_args: Sequence[str] | None = None,
         workload_kind: str | None = None,
-        expected_programs: int | None = None,
-        expected_program_names: Sequence[str] = (),
         attach_timeout_s: int | None = None,
         tools_dir: Path | str | None = None,
     ) -> None:
@@ -394,9 +389,7 @@ class BCCRunner(AppRunner):
             else (spec.tool_args if spec else ())
         )
         self.workload_kind = workload_kind or (spec.workload_kind if spec else "mixed")
-        self.expected_programs = int(expected_programs or (spec.expected_programs if spec else max(1, len(tuple(expected_program_names)) or 1)))
         self.attach_timeout_s = int(attach_timeout_s or (spec.spawn_timeout_s if spec else DEFAULT_ATTACH_TIMEOUT_SECONDS))
-        self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.setup_result: dict[str, object] = {
             "returncode": 0,
             "tools_dir": None,
@@ -446,6 +439,11 @@ class BCCRunner(AppRunner):
         self.artifacts["bcc_python_compat_dir"] = str(self._compat_dir)
         command = [str(tool_binary), *self.tool_args]
         self.command_used = list(command)
+        before_ids = {
+            int(record.get("id", 0) or 0)
+            for record in bpftool_prog_show_records()
+            if int(record.get("id", 0) or 0) > 0
+        }
         process = subprocess.Popen(
             command,
             cwd=ROOT_DIR,
@@ -480,28 +478,11 @@ class BCCRunner(AppRunner):
             stdout_thread=stdout_thread,
             stderr_thread=stderr_thread,
         )
-        programs = wait_for_attached_programs(
-            process,
-            expected_count=self.expected_programs,
-            timeout_s=self.attach_timeout_s,
-        )
+        programs = wait_until_program_set_stable(before_ids=before_ids, timeout_s=self.attach_timeout_s)
         if not programs:
             return self._fail_start(
                 f"BCC tool {self.tool_name} did not attach any BPF programs within {self.attach_timeout_s}s"
             )
-        if len(programs) < self.expected_programs:
-            attached_names = sorted(str(program.get("name") or "") for program in programs if str(program.get("name") or "").strip())
-            return self._fail_start(
-                f"BCC tool {self.tool_name} attached {len(programs)} programs, expected at least {self.expected_programs}: {attached_names}"
-            )
-
-        if self.expected_program_names:
-            programs = self._filter_expected_programs(
-                programs,
-                self.expected_program_names,
-                owner_label=f"BCC tool {self.tool_name}",
-            )
-
         self.programs = [dict(program) for program in programs]
         return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
 
@@ -521,24 +502,6 @@ class BCCRunner(AppRunner):
         if not requested_kind:
             raise RuntimeError(f"BCC tool {self.tool_name} workload spec is missing a workload kind")
         return run_named_workload(requested_kind, seconds, network_as_tcp_connect=True)
-
-    def select_corpus_program_ids(
-        self,
-        initial_stats: Mapping[int, Mapping[str, object]],
-        final_stats: Mapping[int, Mapping[str, object]],
-    ) -> list[int] | None:
-        selected = super().select_corpus_program_ids(initial_stats, final_stats)
-        if self.tool_name != "biosnoop" or not selected:
-            return selected
-        min_runs = int(os.environ.get("BPFREJIT_BCC_BIOSNOOP_MIN_CORPUS_RUNS", DEFAULT_MIN_BIOSNOOP_CORPUS_RUNS))
-        stable: list[int] = []
-        for prog_id in selected:
-            before = initial_stats.get(int(prog_id)) or {}
-            after = final_stats.get(int(prog_id)) or {}
-            run_cnt_delta = int(after.get("run_cnt", 0) or 0) - int(before.get("run_cnt", 0) or 0)
-            if run_cnt_delta >= max(1, min_runs):
-                stable.append(int(prog_id))
-        return stable or selected
 
     def stop(self) -> None:
         if self.session is None:

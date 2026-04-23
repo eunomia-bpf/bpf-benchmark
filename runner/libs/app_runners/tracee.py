@@ -18,8 +18,12 @@ from urllib.request import urlopen
 import yaml
 
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, tail_text, which
-from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
-from ..process_fd import dup_fd_from_process
+from ..agent import (
+    bpftool_prog_show_records,
+    start_agent,
+    stop_agent,
+    wait_healthy,
+)
 from ..workload import (
     WorkloadResult,
     resolve_workload_tool,
@@ -33,7 +37,7 @@ from ..workload import (
     run_user_exec_loop,
 )
 from .base import AppRunner
-from .process_support import AgentSession
+from .process_support import AgentSession, wait_until_program_set_stable
 from .setup_support import pick_host_executable, repo_artifact_root
 
 
@@ -74,6 +78,7 @@ class TraceeOutputCollector:
         self.total_events = 0
         self.latest_stats: dict[str, int] = {}
         self.event_output_path = None if event_output_path is None else Path(event_output_path)
+        self.event_file_parse_errors: deque[str] = deque(maxlen=20)
 
     @staticmethod
     def _payload_timestamp_ns(payload: Mapping[str, object]) -> int | None:
@@ -100,6 +105,32 @@ class TraceeOutputCollector:
         pipe.close()
 
     def consume_event_file(self, path: Path, stop_event: threading.Event) -> None:
+        def _consume_event_line(line: str) -> bool:
+            try:
+                self._parse_event_line(line, strict=True)
+            except RuntimeError as exc:
+                self._record_event_file_parse_error(str(exc))
+                return False
+            return True
+
+        pending_fragment = ""
+
+        def _consume_buffered_line(raw_line: str, *, force: bool = False) -> bool:
+            nonlocal pending_fragment
+            if raw_line:
+                pending_fragment += raw_line
+            if not pending_fragment:
+                return True
+            if not force and not pending_fragment.endswith("\n"):
+                return True
+            line = pending_fragment.rstrip("\r\n")
+            pending_fragment = ""
+            if not line:
+                return True
+            with self._lock:
+                self.event_tail.append(line)
+            return _consume_event_line(line)
+
         handle = None
         try:
             while True:
@@ -121,37 +152,72 @@ class TraceeOutputCollector:
                     time.sleep(0.05)
                     continue
                 if raw_line:
-                    line = raw_line.rstrip()
-                    with self._lock:
-                        self.event_tail.append(line)
-                    self._parse_event_line(line)
+                    if not _consume_buffered_line(raw_line, force=stop_event.is_set()):
+                        return
                     continue
                 if stop_event.is_set():
+                    if not _consume_buffered_line("", force=True):
+                        return
                     break
                 time.sleep(0.05)
         finally:
             if handle is not None:
                 try:
                     for raw_line in handle:
-                        line = raw_line.rstrip()
-                        with self._lock:
-                            self.event_tail.append(line)
-                        self._parse_event_line(line)
+                        if not _consume_buffered_line(raw_line, force=False):
+                            return
                 except OSError as exc:
                     if exc.errno != errno.ENODATA:
                         raise
                 finally:
+                    if not _consume_buffered_line("", force=True):
+                        return
                     handle.close()
 
-    def _parse_event_line(self, line: str) -> None:
+    def _event_line_preview(self, line: str, *, limit: int = 240) -> str:
+        return line if len(line) <= limit else f"{line[:limit]}..."
+
+    def _strict_event_file_error(self, line: str, reason: str) -> RuntimeError:
+        path = str(self.event_output_path) if self.event_output_path is not None else "<unknown>"
+        return RuntimeError(
+            f"Tracee event file parse failed for {path}: {reason}: {self._event_line_preview(line)!r}"
+        )
+
+    def _record_event_file_parse_error(self, message: str) -> None:
+        with self._condition:
+            self.event_file_parse_errors.append(message)
+            self._condition.notify_all()
+
+    def _event_file_error_unlocked(self) -> str:
+        return self.event_file_parse_errors[0] if self.event_file_parse_errors else ""
+
+    def raise_event_file_error(self) -> None:
+        with self._lock:
+            message = self._event_file_error_unlocked()
+        if message:
+            raise RuntimeError(message)
+
+    def _parse_event_line(self, line: str, *, strict: bool = False) -> None:
         try:
             payload = json.loads(line)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as exc:
+            if strict:
+                raise self._strict_event_file_error(line, f"invalid JSON ({exc.msg})") from exc
             return
         if not isinstance(payload, Mapping):
+            if strict:
+                raise self._strict_event_file_error(
+                    line,
+                    f"expected JSON object, got {type(payload).__name__}",
+                )
             return
         event_name = payload.get("eventName") or payload.get("event_name") or payload.get("name")
         if not event_name:
+            if strict:
+                raise self._strict_event_file_error(
+                    line,
+                    "missing event_name/eventName/name field",
+                )
             return
         with self._lock:
             n = str(event_name)
@@ -175,7 +241,8 @@ class TraceeOutputCollector:
             return {"event_counts": dict(self.event_counts), "recent_events": list(self.events),
                     "total_events": self.total_events, "latest_stats": dict(self.latest_stats),
                     "stdout_tail": list(self.stdout_tail), "stderr_tail": list(self.stderr_tail),
-                    "event_tail": list(self.event_tail)}
+                    "event_tail": list(self.event_tail),
+                    "event_file_parse_errors": list(self.event_file_parse_errors)}
 
     def wait_for_event(
         self,
@@ -188,6 +255,7 @@ class TraceeOutputCollector:
         wanted_names = {str(name) for name in event_names if str(name)}
         tokens = [str(token) for token in marker_tokens if str(token)]
         deadline = time.monotonic() + max(0.0, float(timeout_s))
+        self.raise_event_file_error()
 
         def find_match() -> dict[str, object] | None:
             for record in reversed(self.events):
@@ -210,6 +278,8 @@ class TraceeOutputCollector:
                 if remaining <= 0:
                     return None
                 self._condition.wait(timeout=remaining)
+                if message := self._event_file_error_unlocked():
+                    raise RuntimeError(message)
                 match = find_match()
             return match
 
@@ -222,7 +292,6 @@ class TraceeAgentSession(AgentSession):
         self.event_thread: threading.Thread | None = None
         self.event_stop = threading.Event()
         self.command_used: list[str] | None = None
-        self.program_fds: dict[int, int] = {}
 
     def __enter__(self) -> "TraceeAgentSession":
         preexisting_ids = set(_current_prog_ids())
@@ -254,38 +323,29 @@ class TraceeAgentSession(AgentSession):
             )
             self.event_thread.start()
 
-            try:
-                healthy = wait_healthy(
-                    proc,
-                    self.load_timeout,
-                    lambda: (
-                        _tracee_healthz_ready(TRACEE_HEALTH_HOST, TRACEE_HEALTH_PORT)
-                        or _tracee_collector_has_activity(self.collector)
-                    )
-                    and bool(
-                        [item for item in find_bpf_programs(proc.pid or 0) if int(item.get("id", -1)) not in preexisting_ids]
-                    ),
+            def _health_check() -> bool:
+                self.collector.raise_event_file_error()
+                return (
+                    _tracee_healthz_ready(TRACEE_HEALTH_HOST, TRACEE_HEALTH_PORT)
+                    or _tracee_collector_has_activity(self.collector)
+                ) and bool(
+                    [
+                        record
+                        for record in bpftool_prog_show_records()
+                        if int(record.get("id", -1) or -1) not in preexisting_ids
+                    ]
                 )
+
+            try:
+                healthy = wait_healthy(proc, self.load_timeout, _health_check)
             except Exception:
                 self.close()
                 raise
             if healthy:
-                programs = [item for item in find_bpf_programs(proc.pid or 0) if int(item.get("id", -1)) not in preexisting_ids]
+                self.collector.raise_event_file_error()
+                programs = wait_until_program_set_stable(before_ids=preexisting_ids, timeout_s=self.load_timeout)
                 if programs:
-                    try:
-                        self.programs = programs
-                        self.program_fds = {}
-                        for program in programs:
-                            prog_id = int(program.get("id", -1))
-                            program_name = str(program.get("name") or prog_id)
-                            owner_refs = [ref for ref in (program.get("owner_fds") or [])
-                                          if int(ref.get("pid", -1)) == (proc.pid or -1)]
-                            if not owner_refs:
-                                raise RuntimeError(f"Tracee program {program_name!r} (id={prog_id}) did not expose a loader-owned FD")
-                            self.program_fds[prog_id] = dup_fd_from_process(int(proc.pid or -1), int(owner_refs[0]["fd"]))
-                    except Exception:
-                        self.close()
-                        raise
+                    self.programs = [dict(program) for program in programs]
                     return self
             snapshot = self.collector.snapshot()
             failures.append(_format_launch_failure(command, proc, snapshot))
@@ -302,23 +362,15 @@ class TraceeAgentSession(AgentSession):
         return self.collector.snapshot()
 
     def close(self) -> None:
-        close_errors: list[str] = []
-        for fd in self.program_fds.values():
-            try: os.close(fd)
-            except OSError as exc: close_errors.append(f"failed to close Tracee program fd {fd}: {exc}")
-        self.program_fds.clear()
         if self.process is not None:
             stop_agent(self.process, timeout=8); self.process = None
         self.event_stop.set(); self._join_io_threads()
         if self.event_thread is not None:
             self.event_thread.join(timeout=2.0); self.event_thread = None
-        if close_errors: raise RuntimeError("; ".join(close_errors))
 
 
 def _current_prog_ids() -> list[int]:
-    parsed = json.loads(run_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30).stdout)
-    if not isinstance(parsed, list): return []
-    return [int(record["id"]) for record in parsed if isinstance(record, dict) and "id" in record]
+    return [int(record["id"]) for record in bpftool_prog_show_records() if "id" in record]
 
 
 def inspect_tracee_setup() -> dict[str, object]:
@@ -450,7 +502,6 @@ class TraceeRunner(AppRunner):
         tracee_binary: Path | str | None = None,
         events: Sequence[str] = (),
         extra_args: Sequence[str] = (),
-        expected_program_names: Sequence[str] = (),
         load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
         startup_settle_s: float = DEFAULT_STARTUP_SETTLE_S,
         workload_spec: Mapping[str, object] | None = None,
@@ -459,7 +510,6 @@ class TraceeRunner(AppRunner):
         self.tracee_binary = None if tracee_binary is None else Path(tracee_binary).resolve()
         self.events = tuple(str(event) for event in (events or _default_events()) if str(event).strip())
         self.extra_args = tuple(str(arg) for arg in extra_args)
-        self.expected_program_names = tuple(str(name) for name in expected_program_names if str(name).strip())
         self.load_timeout_s = int(load_timeout_s)
         self.startup_settle_s = float(startup_settle_s)
         self.session: Any | None = None
@@ -473,10 +523,6 @@ class TraceeRunner(AppRunner):
     @property
     def collector(self) -> TraceeOutputCollector | None:
         return None if self.session is None else self.session.collector
-
-    @property
-    def program_fds(self) -> dict[int, int]:
-        return {} if self.session is None else dict(self.session.program_fds)
 
     def _resolve_binary(self) -> str:
         resolved = resolve_tracee_binary(None if self.tracee_binary is None else str(self.tracee_binary), self.setup_result)
@@ -508,12 +554,6 @@ class TraceeRunner(AppRunner):
         programs = [dict(program) for program in session.programs]
         if not programs:
             self._fail_start("Tracee did not attach any BPF programs")
-        if self.expected_program_names:
-            programs = self._filter_expected_programs(
-                programs,
-                self.expected_program_names,
-                owner_label="Tracee",
-            )
         self.tracee_binary = Path(tracee_binary).resolve()
         self.programs = programs
         if self.startup_settle_s > 0.0:

@@ -39,7 +39,7 @@ pub struct BpfMapValueReader;
 impl MapValueReader for BpfMapValueReader {
     fn lookup_values_batch(&self, map_fd: u32, keys: &[Vec<u8>]) -> Result<Vec<BatchLookupValue>> {
         let info = bpf::bpf_map_get_info(map_fd as i32)?;
-        let value_size = bpf::bpf_map_lookup_value_size(&info);
+        let value_size = bpf::bpf_map_lookup_value_size(&info)?;
 
         keys.iter()
             .cloned()

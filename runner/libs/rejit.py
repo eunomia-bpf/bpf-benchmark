@@ -513,13 +513,43 @@ def _applied_site_totals_from_passes(raw_passes: object) -> dict[str, int]:
     return counts
 
 
-def _adjust_counts_from_raw(counts: dict[str, int], raw_counts: Mapping[str, Any] | None, *, also_total: bool = False) -> None:
+def _strict_non_negative_int_field(
+    raw_counts: Mapping[str, Any] | None,
+    field_name: str,
+) -> int | None:
+    if not isinstance(raw_counts, Mapping) or field_name not in raw_counts:
+        return None
+    value = raw_counts.get(field_name)
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise RuntimeError(
+            f"daemon response field 'counts.{field_name}' must be a non-negative integer"
+        )
+    if value < 0:
+        raise RuntimeError(
+            f"daemon response field 'counts.{field_name}' must be a non-negative integer"
+        )
+    return value
+
+
+def _adjust_counts_from_raw(
+    counts: dict[str, int],
+    raw_counts: Mapping[str, Any] | None,
+    *,
+    legacy_total_sites_contract: bool = False,
+) -> None:
     rc = raw_counts or {}
-    try:
-        reported = max(0, int((rc.get("applied_sites") or (rc.get("total_sites") if also_total else None) or 0)))
-    except (TypeError, ValueError):
-        reported = 0
-    if reported > counts["total_sites"]:
+    reported = _strict_non_negative_int_field(rc, "applied_sites")
+    legacy_total = _strict_non_negative_int_field(rc, "total_sites")
+    if reported is None and legacy_total is not None:
+        if not legacy_total_sites_contract:
+            raise RuntimeError(
+                "daemon response field 'counts.applied_sites' is required when "
+                "'counts.total_sites' is present"
+            )
+        reported = legacy_total
+    if reported is not None and reported > counts["total_sites"]:
         counts["other_sites"] = reported - counts["total_sites"]
         counts["total_sites"] = reported
     counts["bitfield_sites"] = counts["extract_sites"]
@@ -548,14 +578,17 @@ def applied_site_totals_from_rejit_result(result: Mapping[str, Any] | None) -> d
         raw_passes = result.get("passes")
     if raw_passes is not None:
         counts = _applied_site_totals_from_passes(raw_passes)
-    _adjust_counts_from_raw(counts, raw_counts, also_total=True)
+    _adjust_counts_from_raw(
+        counts,
+        raw_counts,
+        legacy_total_sites_contract=raw_passes is None,
+    )
     return counts
 
 
 def scan_programs(
     prog_ids: list[int],
     *,
-    prog_fds: dict[int, int] | None = None,
     enabled_passes: Sequence[str] | None = None,
     timeout_seconds: int = 60,
     daemon_socket_path: Path | None = None,
@@ -566,8 +599,6 @@ def scan_programs(
     requested_ids = [int(p) for p in prog_ids if int(p) > 0]
     if not requested_ids:
         return {}
-    if prog_fds is not None and (missing := [p for p in requested_ids if int(prog_fds.get(p, 0) or 0) <= 0]):
-        raise RuntimeError("scan_programs requires loader-owned prog_fds for all requested programs: " + ", ".join(str(p) for p in missing))
     if daemon_socket_path is None:
         raise ValueError("scan_programs requires daemon_socket_path")
     results: dict[int, dict[str, Any]] = {}
@@ -595,6 +626,7 @@ def _apply_result_from_response(
     error = str(response.get("error_message") or response.get("message") or response.get("error") or "").strip()
 
     applied = False
+    changed = False
     applied_sites = 0
     if status == "ok":
         try:
@@ -625,13 +657,16 @@ def _apply_result_from_response(
                     "daemon response field 'summary.total_sites_applied' must be a non-negative integer"
                 )
             applied = exit_code == 0 and summary_applied
+            changed = exit_code == 0 and changed
             applied_sites = total_sites_applied
         except RuntimeError as exc:
             exit_code = 1
             error = str(exc)
+            changed = False
 
     return {
         "applied": applied,
+        "changed": changed,
         "output": output,
         "exit_code": exit_code,
         "debug_result": dict(response),
@@ -789,6 +824,7 @@ def apply_daemon_rejit(
     outputs: list[str] = []
     exit_code, total_sites, applied_sites = 0, 0, 0
     applied_any, all_applied = False, True
+    changed_any, all_changed = False, True
     errors: list[str] = []
     if enabled_passes and any(str(n).strip() == "branch_flip" for n in enabled_passes):
         profile_error = _prepare_branch_flip_profile(daemon_socket_path, daemon_proc=daemon_proc,
@@ -816,6 +852,8 @@ def apply_daemon_rejit(
         exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
         applied_any = applied_any or bool(result.get("applied", False))
         all_applied = all_applied and bool(result.get("applied", False))
+        changed_any = changed_any or bool(result.get("changed", False))
+        all_changed = all_changed and bool(result.get("changed", False))
         rc = result.get("counts") or {}
         total_sites += int(rc.get("total_sites", 0) or 0)
         applied_sites += int(rc.get("applied_sites", 0) or 0)
@@ -824,6 +862,8 @@ def apply_daemon_rejit(
     n_applied = sum(1 for r in per_program.values() if r.get("applied", False))
     return {
         "applied": applied_any, "applied_any": applied_any, "all_applied": all_applied,
+        "changed": changed_any, "changed_any": changed_any,
+        "all_changed": bool(per_program) and all_changed,
         "output": "\n".join(o for o in outputs if o), "exit_code": exit_code, "per_program": per_program,
         "counts": {"total_sites": total_sites, "applied_sites": applied_sites},
         "program_counts": {"requested": len(requested_prog_ids), "applied": n_applied, "not_applied": len(requested_prog_ids) - n_applied},
@@ -874,9 +914,9 @@ class DaemonSession:
         self._closed = True
         _stop_daemon_server(self.proc, self.socket_path, self.socket_dir)
 
-    def scan_programs(self, prog_ids: Sequence[int], *, prog_fds: dict[int, int] | None = None,
+    def scan_programs(self, prog_ids: Sequence[int], *,
                       enabled_passes: Sequence[str] | None = None, timeout_seconds: int = 60) -> dict[int, dict[str, object]]:
-        return scan_programs([int(p) for p in prog_ids if int(p) > 0], prog_fds=prog_fds,
+        return scan_programs([int(p) for p in prog_ids if int(p) > 0],
                              enabled_passes=enabled_passes, timeout_seconds=timeout_seconds,
                              daemon_socket_path=self.socket_path, daemon_proc=self.proc,
                              daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path)

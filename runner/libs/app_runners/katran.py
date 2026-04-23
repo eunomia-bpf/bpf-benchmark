@@ -708,8 +708,10 @@ class KatranRunner(AppRunner):
             if http_server is not None: http_server.close()
             topology.close(); raise
         self.topology = topology; self.http_server = http_server; self.session = session
-        self.loader_binary = server_binary; self.command_used = list(session.command_used); self.programs = [dict(session.program)]
-        return [int(session.prog_id)]
+        self.loader_binary = server_binary
+        self.command_used = list(session.command_used)
+        self.programs = [dict(program) for program in session.programs]
+        return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
 
     def _run_test_run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("KatranRunner is not running")

@@ -143,7 +143,6 @@ def measure_workload(
     *,
     agent_pid: int | None,
     prog_ids: Sequence[int],
-    prog_fds: Mapping[int, int],
 ) -> dict[str, object]:
     target_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
     if not target_prog_ids:
@@ -160,7 +159,7 @@ def measure_workload(
             previous_programs=logical_programs,
         )
     else:
-        before_bpf = sample_bpf_stats(target_prog_ids, prog_fds=dict(prog_fds))
+        before_bpf = sample_bpf_stats(target_prog_ids)
         before_live_prog_id_map = {}
         before_live_programs = []
     before_proc = read_proc_stat_fields()
@@ -193,7 +192,7 @@ def measure_workload(
             previous_programs=logical_programs,
         )
     else:
-        after_bpf = sample_bpf_stats(target_prog_ids, prog_fds=dict(prog_fds))
+        after_bpf = sample_bpf_stats(target_prog_ids)
         after_live_prog_id_map = {}
         after_live_programs = []
 
@@ -304,7 +303,7 @@ def _sample_scx_program_stats(
     sampled_prog_ids = sorted({int(live_id) for live_id in logical_to_live.values() if int(live_id) > 0})
     if not sampled_prog_ids:
         raise RuntimeError("scx runner did not expose any live scheduler programs for BPF stats sampling")
-    raw_stats = sample_bpf_stats(sampled_prog_ids, prog_fds=dict(runner.program_fds))
+    raw_stats = sample_bpf_stats(sampled_prog_ids)
     live_to_logical = {
         int(live_id): int(logical_id)
         for logical_id, live_id in logical_to_live.items()
@@ -443,7 +442,6 @@ def run_phase(
         ]
     if not target_prog_ids:
         raise RuntimeError("scx runner did not expose any live scheduler programs")
-    prog_fds = getattr(runner, "program_fds", {})
     records = [
         measure_workload(
             runner,
@@ -451,7 +449,6 @@ def run_phase(
             duration_s,
             agent_pid=agent_pid,
             prog_ids=target_prog_ids,
-            prog_fds=prog_fds,
         )
         for workload_spec in workloads
     ]
@@ -708,7 +705,15 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         ),
         "site_totals": applied_site_totals_from_rejit_result(rejit_result if isinstance(rejit_result, Mapping) else None),
     }
-    applied_site_total = int(((site_summary.get("site_totals") or {}).get("total_sites", 0)) or 0)
+    site_totals = site_summary.get("site_totals")
+    if not isinstance(site_totals, Mapping):
+        raise RuntimeError("scx REJIT site summary is missing site_totals")
+    applied_site_total_value = site_totals.get("total_sites")
+    if isinstance(applied_site_total_value, bool) or not isinstance(applied_site_total_value, int):
+        raise RuntimeError("scx REJIT site_totals.total_sites must be a non-negative integer")
+    if applied_site_total_value < 0:
+        raise RuntimeError("scx REJIT site_totals.total_sites must be a non-negative integer")
+    applied_site_total = applied_site_total_value
     comparison = (
         compare_phases(baseline, post_rejit)
         if applied_site_total > 0

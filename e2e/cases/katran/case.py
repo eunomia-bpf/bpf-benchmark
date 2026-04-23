@@ -35,67 +35,6 @@ DEFAULT_DURATION_S = 20
 DEFAULT_SMOKE_DURATION_S = 5
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run the Katran end-to-end benchmark case.")
-    parser.add_argument(
-        "--daemon",
-        default=str(ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"),
-        help="Path to the bpfrejit-daemon binary.",
-    )
-    parser.add_argument(
-        "--output-json",
-        default=str(DEFAULT_OUTPUT_JSON),
-        help="Path to write the JSON result payload.",
-    )
-    parser.add_argument(
-        "--output-md",
-        default=str(DEFAULT_OUTPUT_MD),
-        help="Path to write the Markdown summary.",
-    )
-    parser.add_argument(
-        "--smoke",
-        action="store_true",
-        help="Run the smoke-sized Katran workload duration.",
-    )
-    parser.add_argument(
-        "--duration",
-        type=int,
-        help="Override the Katran workload duration in seconds.",
-    )
-    parser.add_argument(
-        "--smoke-duration",
-        type=int,
-        default=DEFAULT_SMOKE_DURATION_S,
-        help="Smoke-mode workload duration in seconds.",
-    )
-    parser.add_argument(
-        "--iface",
-        default=DEFAULT_INTERFACE,
-        help="Interface used by the Katran runner.",
-    )
-    parser.add_argument(
-        "--router-peer-iface",
-        help="Optional peer interface used by the Katran router helper.",
-    )
-    parser.add_argument(
-        "--concurrency",
-        type=int,
-        default=DEFAULT_CONCURRENCY,
-        help="Katran request generator concurrency.",
-    )
-    parser.add_argument(
-        "--workload",
-        default="network",
-        help="Katran workload profile to execute.",
-    )
-    parser.add_argument(
-        "--no-kinsn",
-        action="store_true",
-        help="Disable loading kinsn modules for this Katran run.",
-    )
-    return parser
-
-
 def _measurement_bpf_avg_ns(phase: Mapping[str, object] | None) -> float | None:
     measurement = phase.get("measurement") if isinstance(phase, Mapping) else {}
     bpf = measurement.get("bpf") if isinstance(measurement, Mapping) else {}
@@ -165,14 +104,14 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")
 
-    smoke_duration_s = int(getattr(args, "smoke_duration", DEFAULT_SMOKE_DURATION_S) or DEFAULT_SMOKE_DURATION_S)
-    duration_override = int(getattr(args, "duration", 0) or 0)
+    smoke_duration_s = DEFAULT_SMOKE_DURATION_S
+    duration_override = int(args.duration or 0)
     duration_s = int(duration_override or (smoke_duration_s if args.smoke else DEFAULT_DURATION_S))
-    workload_kind = str(getattr(args, "workload", "") or "network")
+    workload_kind = "network"
     runner = KatranRunner(
-        iface=str(getattr(args, "iface", DEFAULT_INTERFACE)),
-        router_peer_iface=getattr(args, "router_peer_iface", None),
-        concurrency=int(getattr(args, "concurrency", DEFAULT_CONCURRENCY)),
+        iface=DEFAULT_INTERFACE,
+        router_peer_iface=None,
+        concurrency=DEFAULT_CONCURRENCY,
         workload_kind=workload_kind,
     )
 

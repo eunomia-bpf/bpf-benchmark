@@ -86,14 +86,43 @@ def _append_pending_kinsn_metadata(record: Mapping[str, object]) -> None:
 
 
 def rejit_result_has_any_apply(rejit_result: Mapping[str, object] | None) -> bool:
+    def _non_negative_int(value: object) -> int | None:
+        if isinstance(value, bool) or not isinstance(value, int):
+            return None
+        return value if value >= 0 else None
+
+    def _record_changed(record: Mapping[str, object] | None) -> bool:
+        if not isinstance(record, Mapping):
+            return False
+        changed = record.get("changed")
+        if isinstance(changed, bool) and changed:
+            return True
+        summary = record.get("summary")
+        if isinstance(summary, Mapping):
+            if isinstance(summary.get("program_changed"), bool) and bool(summary.get("program_changed")):
+                return True
+            if (_non_negative_int(summary.get("total_sites_applied")) or 0) > 0:
+                return True
+        debug_result = record.get("debug_result")
+        if isinstance(debug_result, Mapping):
+            if isinstance(debug_result.get("changed"), bool) and bool(debug_result.get("changed")):
+                return True
+            debug_summary = debug_result.get("summary")
+            if isinstance(debug_summary, Mapping):
+                if isinstance(debug_summary.get("program_changed"), bool) and bool(
+                    debug_summary.get("program_changed")
+                ):
+                    return True
+                if (_non_negative_int(debug_summary.get("total_sites_applied")) or 0) > 0:
+                    return True
+        return False
+
     if not isinstance(rejit_result, Mapping):
         return False
     per_program = rejit_result.get("per_program")
     if isinstance(per_program, Mapping) and per_program:
-        return any(bool(r.get("applied")) for r in per_program.values() if isinstance(r, Mapping))
-    counts = rejit_result.get("counts")
-    applied_sites = int(((counts or {}).get("applied_sites", 0)) or 0) if isinstance(counts, Mapping) else 0
-    return bool(rejit_result.get("applied")) or applied_sites > 0
+        return any(_record_changed(r if isinstance(r, Mapping) else None) for r in per_program.values())
+    return _record_changed(rejit_result)
 
 
 def rejit_program_result(
@@ -169,9 +198,7 @@ def prepare_daemon_session(
 
 def _clone_daemon_metadata(daemon_session: PreparedDaemonSession, requested_prog_ids: Sequence[int]) -> dict[str, object]:
     metadata = copy.deepcopy(daemon_session.metadata)
-    metadata.update(captured_at=datetime.now(timezone.utc).isoformat(),
-                    requested_prog_ids=[int(v) for v in requested_prog_ids if int(v) > 0],
-                    status="pending")
+    metadata.update(captured_at=datetime.now(timezone.utc).isoformat(), status="pending")
     return metadata
 
 
@@ -563,7 +590,7 @@ def measure_app_runner_workload(
     agent_pid: int | None = None,
     initial_stats: Mapping[int, Mapping[str, object]] | None = None,
 ) -> dict[str, object]:
-    stats_source = sample_bpf_stats(list(prog_ids), prog_fds=runner.program_fds) if initial_stats is None else initial_stats
+    stats_source = sample_bpf_stats(list(prog_ids)) if initial_stats is None else initial_stats
     before_bpf = {int(key): dict(value) for key, value in stats_source.items()}
     cpu_holder: dict[int, dict[str, float]] = {}
     system_cpu_holder: dict[str, float] = {}
@@ -585,7 +612,7 @@ def measure_app_runner_workload(
         raise RuntimeError("system cpu sampler produced no data")
     if agent_pid is not None and int(agent_pid) > 0 and int(agent_pid) not in cpu_holder:
         raise RuntimeError(f"agent cpu sampler produced no data for pid={int(agent_pid)}")
-    after_bpf = sample_bpf_stats(list(prog_ids), prog_fds=runner.program_fds)
+    after_bpf = sample_bpf_stats(list(prog_ids))
     measurement: dict[str, object] = {
         "workload": workload_result.to_dict(), "initial_stats": {int(k): dict(v) for k, v in before_bpf.items()},
         "final_stats": {int(k): dict(v) for k, v in after_bpf.items()},

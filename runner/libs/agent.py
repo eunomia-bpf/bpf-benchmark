@@ -107,6 +107,29 @@ def _program_refs_from_pid(pid: int) -> dict[int, list[dict[str, int]]]:
     return refs
 
 
+def _payload_preview(payload: object, *, limit: int = 240) -> str:
+    text = repr(payload)
+    return text if len(text) <= limit else f"{text[:limit]}..."
+
+
+def bpftool_prog_show_records() -> list[dict[str, object]]:
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
+    if not isinstance(payload, list):
+        raise RuntimeError(
+            "bpftool prog show returned unexpected payload type "
+            f"{type(payload).__name__}: {_payload_preview(payload)}"
+        )
+    records: list[dict[str, object]] = []
+    for index, record in enumerate(payload):
+        if not isinstance(record, dict):
+            raise RuntimeError(
+                "bpftool prog show returned unexpected record type "
+                f"at index {index}: {type(record).__name__}: {_payload_preview(record)}"
+            )
+        records.append(dict(record))
+    return records
+
+
 def find_bpf_programs(agent_name_or_pid: str | int) -> list[dict]:
     pids = _resolve_pids(agent_name_or_pid)
     if not pids:
@@ -122,14 +145,8 @@ def find_bpf_programs(agent_name_or_pid: str | int) -> list[dict]:
     if not owner_map:
         return []
 
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
-    if not isinstance(payload, list):
-        return []
-
     matches: list[dict] = []
-    for record in payload:
-        if not isinstance(record, dict):
-            continue
+    for record in bpftool_prog_show_records():
         prog_id = int(record.get("id", -1))
         if prog_id not in owner_map:
             continue
@@ -142,6 +159,7 @@ def find_bpf_programs(agent_name_or_pid: str | int) -> list[dict]:
 
 
 __all__ = [
+    "bpftool_prog_show_records",
     "find_bpf_programs",
     "start_agent",
     "stop_agent",

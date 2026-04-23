@@ -1,20 +1,8 @@
 # Tetragon exec benchmark.
-# `execve_rate` remains a useful scan/apply target when the cgroup-rate
-# sensor is enabled, but the workload's measurable hot path is still
-# `event_execve`, so keep both programs in scope for activity gating and
-# end-to-end comparison.
 
 tetragon_extra_args:
   - --cgroup-rate
   - 1000,1s
-
-target_programs:
-  - execve_rate
-  - event_execve
-
-apply_programs:
-  - execve_rate
-  - event_execve
 
 workloads:
   - name: exec_storm

@@ -8,12 +8,11 @@ import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from .. import resolve_bpftool_binary, run_command, run_json_command, tail_text, which
-from ..agent import find_bpf_programs, start_agent, stop_agent, wait_healthy
-from ..process_fd import dup_fd_from_process
+from .. import run_command, tail_text, which
+from ..agent import bpftool_prog_show_records, start_agent, stop_agent, wait_healthy
 from ..workload import WorkloadResult, resolve_workload_tool
 from .base import AppRunner
-from .process_support import AgentSession
+from .process_support import AgentSession, wait_until_program_set_stable
 
 
 HACKBENCH_TIME_RE = re.compile(r"Time:\s*([0-9.]+)")
@@ -79,15 +78,8 @@ def _program_name(program: Mapping[str, object]) -> str:
     return str(program.get("name") or "").strip()
 
 
-def _bpftool_struct_ops_programs() -> list[dict[str, object]]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
-    if not isinstance(payload, list):
-        raise RuntimeError("bpftool prog show returned unexpected payload")
-    programs = [
-        dict(record)
-        for record in payload
-        if isinstance(record, Mapping) and str(record.get("type", "")) == "struct_ops"
-    ]
+def _bpftool_programs() -> list[dict[str, object]]:
+    programs = [dict(record) for record in bpftool_prog_show_records()]
     programs.sort(key=_program_id)
     return programs
 
@@ -97,20 +89,25 @@ class ScxSchedulerSession(AgentSession):
         super().__init__(load_timeout)
         self.binary = binary
         self.extra_args = list(extra_args)
-        self.program_fds: dict[int, int] = {}
         self.command_used: list[str] | None = None
         self.scheduler_program_names: set[str] = set()
+        self.before_ids: set[int] = set()
 
     def __enter__(self) -> "ScxSchedulerSession":
         command_text = " ".join(["set -euo pipefail;", "ulimit -l unlimited;", "exec",
                                   shlex.quote(str(self.binary)), "--stats", "1",
                                   *[shlex.quote(str(arg)) for arg in self.extra_args]])
         self.command_used = ["bash", "-lc", command_text]
+        self.before_ids = {
+            int(program.get("id", 0) or 0)
+            for program in _bpftool_programs()
+            if int(program.get("id", 0) or 0) > 0
+        }
         self.process = start_agent("bash", ["-lc", command_text], env={"PATH": preferred_path()})
         self._start_io_threads()
         try:
             healthy = wait_healthy(self.process, self.load_timeout,
-                                   lambda: read_scx_state() == "enabled" and bool(self._discover_owned_programs()))
+                                   lambda: read_scx_state() == "enabled" and bool(self._discover_loaded_programs()))
         except Exception:
             self.close()
             raise
@@ -121,18 +118,18 @@ class ScxSchedulerSession(AgentSession):
             self.close()
             raise RuntimeError(f"scx_rusty did not become healthy: {details}")
 
-        self.programs = self._discover_owned_programs()
+        self.programs = wait_until_program_set_stable(before_ids=self.before_ids, timeout_s=self.load_timeout)
+        if not self.programs:
+            self.close()
+            raise RuntimeError("scx_rusty became healthy but no BPF programs were discovered")
         self._remember_scheduler_programs(self.programs)
-        self.program_fds = self._dup_program_fds(self.programs, require_owner=True)
         return self
 
-    def _discover_owned_programs(self) -> list[dict[str, object]]:
-        if self.pid is None:
-            return []
+    def _discover_loaded_programs(self) -> list[dict[str, object]]:
         programs = [
-            item
-            for item in find_bpf_programs(self.pid)
-            if str(item.get("type", "")) == "struct_ops"
+            dict(program)
+            for program in _bpftool_programs()
+            if int(program.get("id", -1) or -1) not in self.before_ids
         ]
         programs.sort(key=_program_id)
         return programs
@@ -145,25 +142,15 @@ class ScxSchedulerSession(AgentSession):
         )
 
     def _discover_live_scheduler_programs(self) -> list[dict[str, object]]:
-        owned_programs = self._discover_owned_programs()
-        self._remember_scheduler_programs(owned_programs)
         if not self.scheduler_program_names:
-            return owned_programs
+            return self._discover_loaded_programs()
 
-        owned_by_id = {_program_id(program): dict(program) for program in owned_programs}
-        all_struct_ops = _bpftool_struct_ops_programs()
         live_programs: list[dict[str, object]] = []
-        for program in all_struct_ops:
+        for program in _bpftool_programs():
             if _program_name(program) not in self.scheduler_program_names:
                 continue
-            enriched = dict(program)
-            owned = owned_by_id.get(_program_id(enriched))
-            if owned is not None:
-                if "owner_pids" in owned:
-                    enriched["owner_pids"] = owned["owner_pids"]
-                if "owner_fds" in owned:
-                    enriched["owner_fds"] = owned["owner_fds"]
-            live_programs.append(enriched)
+            live_programs.append(dict(program))
+        live_programs.sort(key=_program_id)
         return live_programs
 
     def collector_snapshot(self) -> dict[str, object]:
@@ -171,48 +158,14 @@ class ScxSchedulerSession(AgentSession):
 
     def refresh_programs(self) -> list[dict[str, object]]:
         refreshed = self._discover_live_scheduler_programs()
-        refreshed_fds = self._dup_program_fds(refreshed, require_owner=False)
-        close_errors: list[str] = []
-        for fd in self.program_fds.values():
-            try:
-                os.close(fd)
-            except OSError as exc:
-                close_errors.append(f"failed to close stale SCX program fd {fd}: {exc}")
         self.programs = refreshed
-        self.program_fds = refreshed_fds
-        if close_errors:
-            raise RuntimeError("; ".join(close_errors))
         return [dict(program) for program in self.programs]
 
-    def _dup_program_fds(self, programs: Sequence[Mapping[str, object]], *, require_owner: bool) -> dict[int, int]:
-        if self.pid is None:
-            raise RuntimeError("cannot duplicate scx program FDs without a live scheduler pid")
-        duplicated: dict[int, int] = {}
-        for program in programs:
-            prog_id = int(program.get("id", -1))
-            program_name = str(program.get("name") or prog_id)
-            owner_refs = [ref for ref in (program.get("owner_fds") or []) if int(ref.get("pid", -1)) == int(self.pid)]
-            if not owner_refs:
-                if not require_owner:
-                    continue
-                raise RuntimeError(f"SCX program {program_name!r} (id={prog_id}) did not expose a scheduler-owned FD")
-            duplicated[prog_id] = dup_fd_from_process(int(self.pid), int(owner_refs[0]["fd"]))
-        return duplicated
-
     def close(self) -> None:
-        close_errors: list[str] = []
-        for fd in self.program_fds.values():
-            try:
-                os.close(fd)
-            except OSError as exc:
-                close_errors.append(f"failed to close SCX program fd {fd}: {exc}")
-        self.program_fds.clear()
         if self.process is not None:
             stop_agent(self.process, timeout=8)
             self.process = None
         self._join_io_threads()
-        if close_errors:
-            raise RuntimeError("; ".join(close_errors))
 
 
 def _percentile(values: Sequence[float], percentile: float) -> float:
@@ -387,7 +340,7 @@ class ScxRunner(AppRunner):
 
     @property
     def program_fds(self) -> dict[int, int]:
-        return {} if self.session is None else dict(self.session.program_fds)
+        return {}
 
     @property
     def last_workload_details(self) -> Mapping[str, object]:

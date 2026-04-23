@@ -248,7 +248,12 @@ fn try_extract_constant_key_from_map_value(
     }
 
     let source_key = vec![0u8; source_info.key_size as usize];
-    let source_value_size = bpf::bpf_map_lookup_value_size(&source_info);
+    let source_value_size = bpf::bpf_map_lookup_value_size(&source_info).map_err(|err| {
+        format!(
+            "failed to determine pseudo-map-value source map {} lookup size: {err:#}",
+            source_map_id
+        )
+    })?;
     let source_value =
         bpf::bpf_map_lookup_elem_by_id(source_map_id, &source_key, source_value_size).map_err(
             |err| {
@@ -1493,7 +1498,7 @@ fn resolve_frozen_map_value(
         }
 
         let key = vec![0u8; info.key_size as usize];
-        let value_size = bpf::bpf_map_lookup_value_size(&info);
+        let value_size = bpf::bpf_map_lookup_value_size(&info)?;
         let value = bpf::bpf_map_lookup_elem_by_id(map_id, &key, value_size)?;
         Ok(Some(FrozenMapValue { map_id, value }))
     })();

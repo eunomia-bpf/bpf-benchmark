@@ -821,7 +821,7 @@ pub fn bpf_map_lookup_elem_by_id(map_id: u32, key: &[u8], value_size: usize) -> 
     if let Some(state) = mock_map_state(map_id) {
         let value = match state.values.get(key).cloned() {
             Some(value) => value,
-            None => mock_zero_filled_lookup_value(&state, key, value_size)
+            None => mock_zero_filled_lookup_value(&state, key, value_size)?
                 .ok_or_else(|| anyhow::anyhow!("mock map {} missing key {:?}", map_id, key))?,
         };
         if value.len() != value_size {
@@ -840,28 +840,28 @@ pub fn bpf_map_lookup_elem_by_id(map_id: u32, key: &[u8], value_size: usize) -> 
         Some(value) => Ok(value),
         None => {
             let info = bpf_map_get_info(fd.as_raw_fd())?;
-            zero_filled_lookup_value(&info, key, value_size)
+            zero_filled_lookup_value(&info, key, value_size)?
                 .ok_or_else(|| anyhow::anyhow!("map {} missing key {:?}", map_id, key))
         }
     }
 }
 
-pub fn bpf_map_lookup_value_size(info: &BpfMapInfo) -> usize {
+pub fn bpf_map_lookup_value_size(info: &BpfMapInfo) -> Result<usize> {
     if is_percpu_map_type(info.map_type) {
-        round_up_8(info.value_size as usize).saturating_mul(possible_cpu_count())
+        Ok(round_up_8(info.value_size as usize).saturating_mul(possible_cpu_count()?))
     } else {
-        info.value_size as usize
+        Ok(info.value_size as usize)
     }
 }
 
 pub fn bpf_map_lookup_value_size_by_id(map_id: u32) -> Result<usize> {
     #[cfg(test)]
     if let Some(state) = mock_map_state(map_id) {
-        return Ok(mock_lookup_value_size(&state));
+        return mock_lookup_value_size(&state);
     }
 
     let (info, _) = bpf_map_get_info_by_id(map_id)?;
-    Ok(bpf_map_lookup_value_size(&info))
+    bpf_map_lookup_value_size(&info)
 }
 
 fn is_percpu_map_type(map_type: u32) -> bool {
@@ -875,31 +875,61 @@ fn round_up_8(value: usize) -> usize {
     (value + 7) & !7
 }
 
-fn possible_cpu_count() -> usize {
-    static POSSIBLE_CPU_COUNT: OnceLock<usize> = OnceLock::new();
-    *POSSIBLE_CPU_COUNT.get_or_init(|| read_possible_cpu_count().unwrap_or(1))
+fn possible_cpu_count() -> Result<usize> {
+    static POSSIBLE_CPU_COUNT: OnceLock<Result<usize, String>> = OnceLock::new();
+    match POSSIBLE_CPU_COUNT
+        .get_or_init(|| read_possible_cpu_count().map_err(|err| format!("{err:#}")))
+    {
+        Ok(count) => Ok(*count),
+        Err(message) => bail!("{message}"),
+    }
 }
 
-fn read_possible_cpu_count() -> Option<usize> {
-    let text = std::fs::read_to_string("/sys/devices/system/cpu/possible").ok()?;
+fn read_possible_cpu_count() -> Result<usize> {
+    const POSSIBLE_CPU_PATH: &str = "/sys/devices/system/cpu/possible";
+    let text = std::fs::read_to_string(POSSIBLE_CPU_PATH)
+        .with_context(|| format!("read {POSSIBLE_CPU_PATH}"))?;
     parse_possible_cpu_list(&text)
-        .or_else(|| std::thread::available_parallelism().ok().map(usize::from))
+        .with_context(|| format!("parse {POSSIBLE_CPU_PATH} contents {:?}", text.trim()))
 }
 
-fn parse_possible_cpu_list(text: &str) -> Option<usize> {
+fn parse_possible_cpu_list(text: &str) -> Result<usize> {
+    let trimmed = text.trim();
+    if trimmed.is_empty() {
+        bail!("possible CPU list is empty");
+    }
     let mut count = 0usize;
-    for segment in text.trim().split(',').filter(|segment| !segment.is_empty()) {
+    for segment in trimmed.split(',').filter(|segment| !segment.is_empty()) {
         let parsed = if let Some((start, end)) = segment.split_once('-') {
-            let start = start.trim().parse::<usize>().ok()?;
-            let end = end.trim().parse::<usize>().ok()?;
-            end.checked_sub(start)?.checked_add(1)?
+            let start = start
+                .trim()
+                .parse::<usize>()
+                .with_context(|| format!("invalid CPU range start in segment {:?}", segment))?;
+            let end = end
+                .trim()
+                .parse::<usize>()
+                .with_context(|| format!("invalid CPU range end in segment {:?}", segment))?;
+            if end < start {
+                bail!("descending CPU range segment {:?}", segment);
+            }
+            end.checked_sub(start)
+                .and_then(|span| span.checked_add(1))
+                .with_context(|| format!("CPU range overflow in segment {:?}", segment))?
         } else {
-            segment.trim().parse::<usize>().ok()?;
+            segment
+                .trim()
+                .parse::<usize>()
+                .with_context(|| format!("invalid CPU id segment {:?}", segment))?;
             1
         };
-        count = count.checked_add(parsed)?;
+        count = count
+            .checked_add(parsed)
+            .with_context(|| format!("CPU count overflow while parsing segment {:?}", segment))?;
     }
-    (count > 0).then_some(count)
+    if count == 0 {
+        bail!("possible CPU list resolved to zero CPUs");
+    }
+    Ok(count)
 }
 
 #[cfg(test)]
@@ -907,40 +937,42 @@ fn mock_zero_filled_lookup_value(
     state: &MockMapState,
     key: &[u8],
     value_size: usize,
-) -> Option<Vec<u8>> {
+) -> Result<Option<Vec<u8>>> {
     zero_filled_lookup_value(&state.info, key, value_size)
 }
 
 #[cfg(test)]
-fn mock_lookup_value_size(state: &MockMapState) -> usize {
-    state
-        .values
-        .values()
-        .next()
-        .map(|value| value.len())
-        .unwrap_or_else(|| bpf_map_lookup_value_size(&state.info))
+fn mock_lookup_value_size(state: &MockMapState) -> Result<usize> {
+    match state.values.values().next() {
+        Some(value) => Ok(value.len()),
+        None => bpf_map_lookup_value_size(&state.info),
+    }
 }
 
-fn zero_filled_lookup_value(info: &BpfMapInfo, key: &[u8], value_size: usize) -> Option<Vec<u8>> {
+fn zero_filled_lookup_value(
+    info: &BpfMapInfo,
+    key: &[u8],
+    value_size: usize,
+) -> Result<Option<Vec<u8>>> {
     if !matches!(
         info.map_type,
         BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY
     ) {
-        return None;
+        return Ok(None);
     }
     if info.key_size as usize != key.len() || key.len() > 8 {
-        return None;
+        return Ok(None);
     }
 
-    let expected_size = bpf_map_lookup_value_size(info);
+    let expected_size = bpf_map_lookup_value_size(info)?;
     if value_size != expected_size {
-        return None;
+        return Ok(None);
     }
 
     let mut raw = [0u8; 8];
     raw[..key.len()].copy_from_slice(key);
     let index = u64::from_le_bytes(raw);
-    (index < info.max_entries as u64).then_some(vec![0u8; value_size])
+    Ok((index < info.max_entries as u64).then_some(vec![0u8; value_size]))
 }
 
 /// Open a file descriptor for the BPF BTF object with the given ID.

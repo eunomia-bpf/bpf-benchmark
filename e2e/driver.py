@@ -254,11 +254,19 @@ def _append_suite_temp_path(args: argparse.Namespace, path: Path) -> None:
 
 
 def _cleanup_suite_temp_paths(args: argparse.Namespace) -> None:
+    cleanup_errors = getattr(args, "_suite_cleanup_errors", None)
+    if not isinstance(cleanup_errors, list):
+        cleanup_errors = []
+        setattr(args, "_suite_cleanup_errors", cleanup_errors)
     for raw_path in getattr(args, "_suite_temp_paths", []) or []:
         try:
             Path(raw_path).unlink(missing_ok=True)
-        except OSError:
+        except FileNotFoundError:
             continue
+        except OSError as exc:
+            message = f"failed to remove suite temp file {raw_path}: {exc}"
+            cleanup_errors.append(message)
+            print(message, file=sys.stderr)
 
 
 def _load_suite_case_apps(suite_path: Path) -> dict[str, list[AppSpec]]:

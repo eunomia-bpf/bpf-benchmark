@@ -3,7 +3,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import Any
 
-from . import resolve_bpftool_binary, run_json_command
+from .agent import bpftool_prog_show_records
 
 
 @contextmanager
@@ -12,10 +12,7 @@ def enable_bpf_stats() -> Any:
 
 
 def _prog_show_payload() -> list[dict[str, object]]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
-    if not isinstance(payload, list):
-        raise RuntimeError("bpftool prog show returned unexpected payload")
-    return [dict(record) for record in payload if isinstance(record, dict)]
+    return [dict(record) for record in bpftool_prog_show_records()]
 
 
 def list_program_ids() -> list[int]:
@@ -43,10 +40,7 @@ def _record_to_stats(record: dict[str, object]) -> dict[str, object]:
 
 def sample_bpf_stats(
     prog_ids: list[int] | tuple[int, ...],
-    *,
-    prog_fds: dict[int, int] | None = None,
 ) -> dict[int, dict[str, object]]:
-    del prog_fds
     wanted = {int(prog_id) for prog_id in prog_ids if int(prog_id) > 0}
     if not wanted:
         return {}

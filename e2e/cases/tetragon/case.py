@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import sys
 import threading
-import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -32,7 +31,6 @@ from runner.libs.metrics import (  # noqa: E402
     sample_total_cpu_usage,
     start_sampler_thread,
 )
-from e2e.case_common import select_configured_programs  # noqa: E402
 from runner.libs.rejit import applied_site_totals_from_rejit_result  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
@@ -130,76 +128,6 @@ def workload_specs_from_config(config: Mapping[str, object]) -> tuple[WorkloadSp
             )
         )
     return tuple(workloads) or DEFAULT_WORKLOADS
-
-
-def select_tetragon_programs(
-    live_programs: Sequence[Mapping[str, object]],
-    config: Mapping[str, object],
-    *,
-    config_key: str = "target_programs",
-    allow_all_when_unset: bool = True,
-) -> list[dict[str, object]]:
-    return select_configured_programs(
-        live_programs,
-        config,
-        case_label="Tetragon",
-        config_key=config_key,
-        allow_all_when_unset=allow_all_when_unset,
-    )
-
-
-def select_tetragon_program_sets(
-    live_programs: Sequence[Mapping[str, object]],
-    config: Mapping[str, object],
-) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
-    selected_programs = select_tetragon_programs(live_programs, config)
-    if config.get("apply_programs"):
-        apply_programs = select_tetragon_programs(
-            live_programs,
-            config,
-            config_key="apply_programs",
-            allow_all_when_unset=False,
-        )
-    else:
-        apply_programs = [dict(program) for program in selected_programs]
-    return selected_programs, apply_programs
-
-
-def wait_for_configured_tetragon_programs(
-    runner: TetragonRunner,
-    config: Mapping[str, object],
-    *,
-    timeout_s: int,
-) -> list[dict[str, object]]:
-    deadline = time.monotonic() + max(0.0, float(timeout_s))
-    last_programs = [dict(program) for program in runner.programs]
-    last_error: RuntimeError | None = None
-
-    while True:
-        last_programs = runner.refresh_programs()
-        try:
-            select_tetragon_program_sets(last_programs, config)
-            return last_programs
-        except RuntimeError as exc:
-            last_error = exc
-
-        session = runner.session
-        exit_reason = describe_agent_exit(
-            "Tetragon",
-            None if session is None else session.process,
-            {} if session is None else session.collector_snapshot(),
-        )
-        if exit_reason is not None:
-            message = str(last_error) if last_error is not None else "Tetragon configured programs were not discovered"
-            raise RuntimeError(f"{message}; {exit_reason}") from last_error
-        if time.monotonic() >= deadline:
-            break
-        time.sleep(0.5)
-
-    attached = sorted(str(program.get("name") or "") for program in last_programs if str(program.get("name") or "").strip())
-    message = str(last_error) if last_error is not None else "Tetragon configured programs were not discovered"
-    attached_text = ", ".join(attached) if attached else "<none>"
-    raise RuntimeError(f"{message}; attached Tetragon programs after waiting {timeout_s}s: {attached_text}") from last_error
 
 
 def run_workload(spec: WorkloadSpec, duration_s: int) -> WorkloadResult:
@@ -492,8 +420,7 @@ def append_preflight_markdown(lines: list[str], payload: Mapping[str, object]) -
         return
 
     activity = preflight.get("program_activity") if isinstance(preflight.get("program_activity"), Mapping) else {}
-    target_activity = activity.get("target_programs") if isinstance(activity, Mapping) else {}
-    apply_activity = activity.get("apply_programs") if isinstance(activity, Mapping) else {}
+    program_activity = activity.get("programs") if isinstance(activity, Mapping) else {}
 
     lines.extend(["", "## Preflight", ""])
     for workload in preflight.get("workloads") or []:
@@ -503,8 +430,7 @@ def append_preflight_markdown(lines: list[str], payload: Mapping[str, object]) -
             f"- {workload.get('name', 'unknown')}: "
             f"events/s={workload.get('events_per_sec')}, "
             f"bpf_avg_ns={((workload.get('bpf') or {}).get('summary', {}).get('avg_ns_per_run'))}, "
-            f"target_runs={((target_activity or {}).get('total_run_cnt'))}, "
-            f"apply_runs={((apply_activity or {}).get('total_run_cnt'))}"
+            f"program_runs={((program_activity or {}).get('total_run_cnt'))}"
         )
 
 
@@ -690,21 +616,17 @@ def daemon_payload(
             load_timeout_s=load_timeout,
         )
         runner.start()
-        tetragon_programs = wait_for_configured_tetragon_programs(runner, config, timeout_s=load_timeout)
-        selected_programs, apply_programs = select_tetragon_program_sets(tetragon_programs, config)
-        prog_ids = [int(program["id"]) for program in selected_programs]
-        apply_prog_ids = [int(program["id"]) for program in apply_programs]
+        tetragon_programs = [dict(program) for program in runner.programs]
+        prog_ids = [int(program["id"]) for program in tetragon_programs if int(program.get("id", 0) or 0) > 0]
         return CaseLifecycleState(
             runtime=runner,
             target_prog_ids=prog_ids,
-            apply_prog_ids=apply_prog_ids,
+            apply_prog_ids=list(prog_ids),
             artifacts={
                 "tetragon_launch_command": list(runner.command),
                 "policy_dir": None if runner.tempdir is None else runner.tempdir.name,
                 "policy_paths": [str(path) for path in runner.policy_paths],
                 "tetragon_programs": tetragon_programs,
-                "selected_tetragon_programs": selected_programs,
-                "apply_tetragon_programs": apply_programs,
                 "rejit_policy_context": {
                     "repo": "tetragon",
                     "level": "e2e",
@@ -718,45 +640,31 @@ def daemon_payload(
             return None
         runner = lifecycle.runtime
         assert isinstance(runner, TetragonRunner)
-        preflight_prog_ids = sorted(set(lifecycle.target_prog_ids) | set(lifecycle.apply_prog_ids))
         preflight = run_phase(
             runner,
             list(workloads),
             preflight_duration_s,
-            preflight_prog_ids,
+            lifecycle.target_prog_ids,
             agent_pid=runner.pid,
             exec_workload_cgroup=exec_workload_cgroup,
         )
         preflight["program_activity"] = {
-            "target_programs": summarize_program_activity(preflight, lifecycle.target_prog_ids),
-            "apply_programs": summarize_program_activity(preflight, lifecycle.apply_prog_ids),
+            "programs": summarize_program_activity(preflight, lifecycle.target_prog_ids),
         }
         lifecycle.artifacts["preflight"] = preflight
         if not require_program_activity:
             return None
 
-        target_run_cnt = int(
-            ((preflight.get("program_activity") or {}).get("target_programs") or {}).get("total_run_cnt", 0) or 0
+        program_run_cnt = int(
+            ((preflight.get("program_activity") or {}).get("programs") or {}).get("total_run_cnt", 0) or 0
         )
-        apply_run_cnt = int(
-            ((preflight.get("program_activity") or {}).get("apply_programs") or {}).get("total_run_cnt", 0) or 0
-        )
-        if target_run_cnt <= 0:
+        if program_run_cnt <= 0:
             limitations.append(
-                "Configured Tetragon workload did not execute the selected target programs during preflight."
+                "Configured Tetragon workload did not execute the discovered program set during preflight."
             )
             return LifecycleAbort(
                 status="error",
-                reason="preflight observed zero target-program executions; invalid runtime measurement",
-                artifacts={"preflight": preflight},
-            )
-        if config.get("apply_programs") and apply_run_cnt <= 0:
-            limitations.append(
-                "Configured Tetragon workload did not execute the configured apply programs during preflight."
-            )
-            return LifecycleAbort(
-                status="error",
-                reason="preflight observed zero apply-program executions; invalid optimization benchmark",
+                reason="preflight observed zero Tetragon program executions; invalid runtime measurement",
                 artifacts={"preflight": preflight},
             )
         return None
@@ -868,8 +776,6 @@ def daemon_payload(
         "policy_paths": [str(path) for path in policy_paths],
         "config": dict(config),
         "tetragon_programs": lifecycle_result.artifacts.get("tetragon_programs") or [],
-        "selected_tetragon_programs": lifecycle_result.artifacts.get("selected_tetragon_programs") or [],
-        "apply_tetragon_programs": lifecycle_result.artifacts.get("apply_tetragon_programs") or [],
         "agent_logs": runner.process_output,
         "preflight": preflight,
         "baseline": baseline,

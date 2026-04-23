@@ -9,36 +9,41 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, tail_text
-from ..agent import find_bpf_programs, stop_agent, wait_healthy
+from ..agent import bpftool_prog_show_records, stop_agent, wait_healthy
 
 
-
-def wait_for_attached_programs(
-    process: Any,
+def wait_until_program_set_stable(
     *,
-    expected_count: int,
-    timeout_s: int,
+    before_ids: Sequence[int] = (),
+    timeout_s: float,
+    stable_window_s: float = 2.0,
+    poll_interval_s: float = 0.2,
 ) -> list[dict[str, object]]:
-    deadline = time.monotonic() + timeout_s
-    last_nonempty: list[dict[str, object]] = []
-    stable_ids: tuple[int, ...] | None = None
-    stable_rounds = 0
-    while time.monotonic() < deadline:
-        matches = find_bpf_programs(int(process.pid or 0))
-        if matches:
-            last_nonempty = matches
-            ids = tuple(int(item.get("id", 0)) for item in matches)
-            if ids == stable_ids:
-                stable_rounds += 1
-            else:
-                stable_ids = ids
-                stable_rounds = 1
-            if len(matches) >= expected_count and stable_rounds >= 2:
-                return matches
-        elif process.poll() is not None and not last_nonempty:
-            break
-        time.sleep(0.5)
-    return last_nonempty
+    baseline_ids = {int(prog_id) for prog_id in before_ids if int(prog_id) > 0}
+    deadline = time.monotonic() + max(0.0, float(timeout_s))
+    stable_window = max(0.0, float(stable_window_s))
+    poll_interval = max(0.05, float(poll_interval_s))
+    last_ids: tuple[int, ...] | None = None
+    last_change_at: float | None = None
+    last_programs: list[dict[str, object]] = []
+    while True:
+        now = time.monotonic()
+        programs = [
+            dict(record)
+            for record in bpftool_prog_show_records()
+            if int(record.get("id", -1) or -1) not in baseline_ids
+        ]
+        programs.sort(key=lambda item: int(item.get("id", 0) or 0))
+        program_ids = tuple(int(program.get("id", 0) or 0) for program in programs)
+        if program_ids != last_ids:
+            last_ids = program_ids
+            last_change_at = now
+            last_programs = [dict(program) for program in programs]
+        elif programs and last_change_at is not None and (now - last_change_at) >= stable_window:
+            return [dict(program) for program in programs]
+        if now >= deadline:
+            return [dict(program) for program in last_programs]
+        time.sleep(min(poll_interval, max(0.0, deadline - now)))
 
 
 class ProcessOutputCollector:
@@ -132,11 +137,17 @@ class ManagedProcessSession:
         self.stdout_thread: threading.Thread | None = None
         self.stderr_thread: threading.Thread | None = None
         self.programs: list[dict[str, object]] = []
+        self.before_ids: set[int] = set()
 
     def __enter__(self) -> "ManagedProcessSession":
         merged_env = dict(os.environ)
         if self.env is not None:
             merged_env.update(self.env)
+        self.before_ids = {
+            int(record.get("id", 0) or 0)
+            for record in bpftool_prog_show_records()
+            if int(record.get("id", 0) or 0) > 0
+        }
         self.process = subprocess.Popen(
             self.command,
             cwd=self.cwd or ROOT_DIR,
@@ -172,7 +183,7 @@ class ManagedProcessSession:
             )
             self.close()
             raise RuntimeError(f"native app did not attach BPF programs within {self.load_timeout_s}s: {details}")
-        self.programs = self._discover_programs()
+        self.programs = wait_until_program_set_stable(before_ids=self.before_ids, timeout_s=self.load_timeout_s)
         if not self.programs:
             self.close()
             raise RuntimeError("native app became healthy but no BPF programs were discovered")
@@ -183,9 +194,11 @@ class ManagedProcessSession:
         return None if self.process is None else int(self.process.pid or 0)
 
     def _discover_programs(self) -> list[dict[str, object]]:
-        if self.pid is None or self.pid <= 0:
-            return []
-        programs = [dict(item) for item in find_bpf_programs(self.pid)]
+        programs = [
+            dict(record)
+            for record in bpftool_prog_show_records()
+            if int(record.get("id", -1) or -1) not in self.before_ids
+        ]
         programs.sort(key=lambda item: int(item.get("id", 0) or 0))
         return programs
 
