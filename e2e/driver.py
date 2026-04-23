@@ -257,6 +257,8 @@ def _cleanup_suite_temp_paths(args: argparse.Namespace) -> None:
             Path(raw_path).unlink()
         except FileNotFoundError:
             continue
+        except OSError as exc:
+            print(f"warning: failed to remove suite temp file {raw_path}: {exc}", file=sys.stderr)
 
 
 def _load_suite_case_apps(suite_path: Path) -> dict[str, list[AppSpec]]:

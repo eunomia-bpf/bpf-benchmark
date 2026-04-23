@@ -49,11 +49,10 @@ def _adapt_tracee(workload: str | None, kwargs: dict[str, object]) -> dict[str, 
 
 
 def _adapt_tetragon(workload: str | None, kwargs: dict[str, object]) -> dict[str, object]:
-    mapped = dict(kwargs)
-    if "setup_result" not in mapped:
-        from .tetragon import inspect_tetragon_setup
+    from .tetragon import inspect_tetragon_setup
 
-        mapped["setup_result"] = inspect_tetragon_setup()
+    mapped = dict(kwargs)
+    mapped["setup_result"] = inspect_tetragon_setup()
     if workload:
         kind = str(workload).strip()
         mapped.setdefault("workload_spec", {"kind": kind, "value": 2})

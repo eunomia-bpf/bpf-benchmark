@@ -600,8 +600,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
                 fallback_to_all_live=True,
                 fallback_to_logical=True,
             )
-            if scheduler_programs:
-                lifecycle.artifacts["post_rejit_scheduler_programs"] = [dict(program) for program in scheduler_programs]
             prog_ids = list(scheduler_program_ids)
         return run_phase(runner, workloads, duration_s, agent_pid=runner.pid, prog_ids=prog_ids)
 
@@ -622,22 +620,14 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
                 for program in getattr(runner, "programs", [])
                 if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
             ]
-        scheduler_program_ids, logical_to_live, scheduler_programs = _resolve_scx_scheduler_prog_ids(
+        scheduler_program_ids, _, scheduler_programs = _resolve_scx_scheduler_prog_ids(
             runner,
             lifecycle.prog_ids,
             previous_programs=previous_programs,
         )
         if not scheduler_program_ids:
             raise RuntimeError("scx baseline could not resolve live scheduler program ids for daemon apply")
-        lifecycle.artifacts["baseline_live_program_id_map"] = {
-            str(logical_prog_id): int(live_prog_id)
-            for logical_prog_id, live_prog_id in logical_to_live.items()
-        }
-        lifecycle.artifacts["baseline_live_scheduler_programs"] = [dict(program) for program in scheduler_programs]
-        return {
-            "baseline_live_program_id_map": dict(lifecycle.artifacts.get("baseline_live_program_id_map") or {}),
-            "baseline_live_scheduler_programs": list(lifecycle.artifacts.get("baseline_live_scheduler_programs") or []),
-        }
+        return {}
 
     def resolve_rejit_prog_ids(
         _: object,

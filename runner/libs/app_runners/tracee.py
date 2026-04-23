@@ -77,6 +77,15 @@ class TraceeOutputCollector:
         self.events: deque[dict[str, object]] = deque(maxlen=16384)
         self.total_events = 0
         self.latest_stats: dict[str, int] = {}
+        self.event_parse_error_count = 0
+        self.event_parse_error_samples: deque[str] = deque(maxlen=8)
+
+    def _record_event_parse_error(self, reason: str, line: str) -> None:
+        sample = f"{reason}: {tail_text(line, max_lines=1, max_chars=200)}"
+        with self._lock:
+            self.event_parse_error_count += 1
+            self.event_parse_error_samples.append(sample)
+            self._condition.notify_all()
 
     @staticmethod
     def _payload_timestamp_ns(payload: Mapping[str, object]) -> int | None:
@@ -104,10 +113,25 @@ class TraceeOutputCollector:
 
     def consume_event_file(self, path: Path, stop_event: threading.Event) -> None:
         handle = None
+        partial_line = ""
+
+        def flush_partial_line() -> None:
+            nonlocal partial_line
+            if not partial_line:
+                return
+            line = partial_line.rstrip("\r\n")
+            partial_line = ""
+            if not line:
+                return
+            with self._lock:
+                self.event_tail.append(line)
+            self._parse_event_line(line)
+
         try:
             while True:
                 if handle is None:
                     if stop_event.is_set():
+                        flush_partial_line()
                         return
                     try:
                         handle = path.open("r", encoding="utf-8", errors="replace")
@@ -124,6 +148,12 @@ class TraceeOutputCollector:
                     time.sleep(0.05)
                     continue
                 if raw_line:
+                    if partial_line:
+                        raw_line = partial_line + raw_line
+                        partial_line = ""
+                    if not raw_line.endswith(("\n", "\r")):
+                        partial_line = raw_line
+                        continue
                     line = raw_line.rstrip("\r\n")
                     if not line:
                         continue
@@ -132,18 +162,46 @@ class TraceeOutputCollector:
                     self._parse_event_line(line)
                     continue
                 if stop_event.is_set():
+                    flush_partial_line()
                     break
+                try:
+                    current_stat = path.stat()
+                    handle_stat = os.fstat(handle.fileno())
+                    if (
+                        (current_stat.st_dev, current_stat.st_ino)
+                        != (handle_stat.st_dev, handle_stat.st_ino)
+                        or current_stat.st_size < handle.tell()
+                    ):
+                        flush_partial_line()
+                        handle.close()
+                        handle = None
+                        time.sleep(0.05)
+                        continue
+                except FileNotFoundError:
+                    flush_partial_line()
+                    handle.close()
+                    handle = None
+                    time.sleep(0.05)
+                    continue
                 time.sleep(0.05)
         finally:
             if handle is not None:
                 try:
+                    flush_partial_line()
                     for raw_line in handle:
+                        if partial_line:
+                            raw_line = partial_line + raw_line
+                            partial_line = ""
+                        if not raw_line.endswith(("\n", "\r")):
+                            partial_line = raw_line
+                            continue
                         line = raw_line.rstrip("\r\n")
                         if not line:
                             continue
                         with self._lock:
                             self.event_tail.append(line)
                         self._parse_event_line(line)
+                    flush_partial_line()
                 except OSError as exc:
                     if exc.errno != errno.ENODATA:
                         raise
@@ -153,12 +211,15 @@ class TraceeOutputCollector:
     def _parse_event_line(self, line: str) -> None:
         try:
             payload = json.loads(line)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as exc:
+            self._record_event_parse_error(f"invalid JSON ({exc.msg})", line)
             return
         if not isinstance(payload, Mapping):
+            self._record_event_parse_error("event payload is not an object", line)
             return
         event_name = payload.get("eventName") or payload.get("event_name") or payload.get("name")
         if not event_name:
+            self._record_event_parse_error("event payload is missing event name", line)
             return
         with self._lock:
             n = str(event_name)
@@ -179,10 +240,16 @@ class TraceeOutputCollector:
 
     def snapshot(self) -> dict[str, object]:
         with self._lock:
-            return {"event_counts": dict(self.event_counts), "recent_events": list(self.events),
-                    "total_events": self.total_events, "latest_stats": dict(self.latest_stats),
-                    "stdout_tail": list(self.stdout_tail), "stderr_tail": list(self.stderr_tail),
-                    "event_tail": list(self.event_tail)}
+            return {
+                "event_counts": dict(self.event_counts),
+                "total_events": self.total_events,
+                "latest_stats": dict(self.latest_stats),
+                "stdout_tail": list(self.stdout_tail),
+                "stderr_tail": list(self.stderr_tail),
+                "event_tail": list(self.event_tail),
+                "event_parse_error_count": self.event_parse_error_count,
+                "event_parse_error_samples": list(self.event_parse_error_samples),
+            }
 
     def wait_for_event(
         self,

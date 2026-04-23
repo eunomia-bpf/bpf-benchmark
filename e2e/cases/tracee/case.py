@@ -441,6 +441,11 @@ def workload_primary_event_total(event_counts: Mapping[str, object], workload_sp
 def verify_phase_measurement(record: Mapping[str, object], *, require_tracee_activity: bool) -> None:
     if not require_tracee_activity:
         return
+    if int(record.get("event_parse_errors", 0) or 0) > 0:
+        raise RuntimeError(
+            f"{record.get('name')} encountered malformed Tracee event-file lines: "
+            f"{record.get('event_parse_errors')}"
+        )
     if int(record.get("primary_events_total", 0) or 0) <= 0:
         raise RuntimeError(f"{record.get('name')} produced zero primary Tracee events")
     drops = record.get("drop_counters") or {}
@@ -517,10 +522,15 @@ def measure_workload(
             field: int(after_stats.get(field, 0)) - int(before_stats.get(field, 0))
             for field in ("event_count", "lost_event_count", "lost_write_count")
         }
+        event_parse_errors = (
+            int(after_tracee.get("event_parse_error_count", 0) or 0)
+            - int(before_tracee.get("event_parse_error_count", 0) or 0)
+        )
         total_events = int(after_tracee.get("total_events", 0)) - int(before_tracee.get("total_events", 0))
     else:
         event_counts = {}
         drop_counters = {}
+        event_parse_errors = 0
         total_events = None
 
     agent_cpu = cpu_holder.get(agent_pid or -1) if agent_pid is not None else None
@@ -569,6 +579,12 @@ def measure_workload(
         ),
         "event_counts": event_counts,
         "drop_counters": drop_counters,
+        "event_parse_errors": event_parse_errors,
+        "event_parse_error_samples": (
+            list(after_tracee.get("event_parse_error_samples") or [])
+            if after_tracee is not None
+            else []
+        ),
         "latency_probe": None if latency_probe is None else dict(latency_probe),
         "latency_ms": None if latency_probe is None else dict(latency_probe.get("summary") or {}),
         "agent_cpu": {
