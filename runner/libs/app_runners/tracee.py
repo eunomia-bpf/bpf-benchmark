@@ -368,10 +368,10 @@ class TraceeAgentSession(AgentSession):
 
     def close(self) -> None:
         if self.process is not None:
-            stop_agent(self.process, timeout=8); self.process = None
+            stop_agent(self.process, timeout=DEFAULT_STOP_TIMEOUT_S); self.process = None
         self.event_stop.set(); self._join_io_threads()
         if self.event_thread is not None:
-            self.event_thread.join(timeout=2.0); self.event_thread = None
+            self.event_thread.join(timeout=DEFAULT_EVENT_JOIN_TIMEOUT_S); self.event_thread = None
 
 
 def _current_prog_ids() -> list[int]:
@@ -492,8 +492,10 @@ def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> Workload
 
 
 DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"
-DEFAULT_LOAD_TIMEOUT_S = 20
+DEFAULT_LOAD_TIMEOUT_S = 120
 DEFAULT_STARTUP_SETTLE_S = 5.0
+DEFAULT_STOP_TIMEOUT_S = 30.0
+DEFAULT_EVENT_JOIN_TIMEOUT_S = 10.0
 
 
 def _default_events() -> tuple[str, ...]:

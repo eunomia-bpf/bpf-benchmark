@@ -88,7 +88,7 @@ def finalize_process_output(process: Any, collector: ProcessOutputCollector | No
     }
 
 
-DEFAULT_ATTACH_TIMEOUT_S = 20
+DEFAULT_ATTACH_TIMEOUT_S = 60
 
 
 class BpftraceRunner(AppRunner):
