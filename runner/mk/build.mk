@@ -59,7 +59,7 @@ ACTIVE_KERNEL_DEFCONFIG := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_DEFCO
 ACTIVE_KERNEL_IMAGE_PATH := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ACTIVE_KERNEL_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi,$(ACTIVE_KERNEL_BUILD_DIR)/arch/x86/boot/bzImage)
 ACTIVE_KERNEL_IMAGE_NAME := $(if $(filter arm64,$(RUN_TARGET_ARCH)),vmlinuz.efi,bzImage)
 ACTIVE_KERNEL_BUILD_TARGETS := $(if $(filter arm64,$(RUN_TARGET_ARCH)),Image vmlinuz.efi modules,bzImage modules)
-ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATRAN_ROOT)/bpf/balancer.bpf.o $(REPO_KATRAN_ROOT)/bpf/healthchecking_ipip.bpf.o
+ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATRAN_ROOT)/bpf/balancer.bpf.o $(REPO_KATRAN_ROOT)/bpf/healthchecking_ipip.bpf.o $(REPO_KATRAN_ROOT)/bpf/xdp_root.bpf.o
 
 REQUIRE_IMAGE_BUILD = @if [ "$(BPFREJIT_IMAGE_BUILD)" != "1" ]; then echo "$@ must be run from the runner Dockerfile with BPFREJIT_IMAGE_BUILD=1" >&2; exit 1; fi
 
@@ -308,6 +308,7 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES)
 	cd "$$repo_root" && ./build_bpf_modules_opensource.sh -s "$$repo_root" -b "$$build_root" -o "$$bpf_root"; \
 	test -x "$$install_root/bin/katran_server_grpc" || { echo "missing Katran install output: $$install_root/bin/katran_server_grpc" >&2; exit 1; }; \
 	[ -f "$$bpf_root/healthchecking_ipip.o" ] && mv -f "$$bpf_root/healthchecking_ipip.o" "$$bpf_root/healthchecking_ipip.bpf.o" || true; \
+	[ -f "$$bpf_root/xdp_root.o" ] && mv -f "$$bpf_root/xdp_root.o" "$$bpf_root/xdp_root.bpf.o" || true; \
 	for path in $(ACTIVE_KATRAN_REQUIRED); do test -e "$$path"; done; \
 	touch $(ACTIVE_KATRAN_REQUIRED)
 

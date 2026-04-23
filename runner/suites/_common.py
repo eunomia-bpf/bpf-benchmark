@@ -188,6 +188,7 @@ def ensure_katran_artifacts(workspace: Path, target_arch: str, native_repos: Seq
         katran_root / "bin" / "katran_server_grpc",
         katran_root / "bpf" / "balancer.bpf.o",
         katran_root / "bpf" / "healthchecking_ipip.bpf.o",
+        katran_root / "bpf" / "xdp_root.bpf.o",
     ]
     for target in katran_targets:
         if target.name == "katran_server_grpc":
