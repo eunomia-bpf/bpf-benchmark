@@ -34,6 +34,9 @@ from ..workload import (
     run_open_storm,
     run_scheduler_load,
     run_tracee_default_load,
+    run_tracee_io_vector_mix_workload,
+    run_tracee_module_load_loop_workload,
+    run_tracee_system_edge_mix_workload,
     run_user_exec_loop,
 )
 from .base import AppRunner
@@ -462,6 +465,12 @@ def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> Workload
     kind = str(spec.get("kind", spec.get("name", "")))
     if kind == "tracee_default":
         return run_tracee_default_load(duration_s)
+    if kind == "tracee_system_edge_mix":
+        return run_tracee_system_edge_mix_workload(duration_s)
+    if kind == "tracee_module_load_loop":
+        return run_tracee_module_load_loop_workload(duration_s)
+    if kind == "tracee_io_vector_mix":
+        return run_tracee_io_vector_mix_workload(duration_s)
     if kind == "block_io":
         return run_block_io_load(duration_s)
     if kind == "exec_storm":

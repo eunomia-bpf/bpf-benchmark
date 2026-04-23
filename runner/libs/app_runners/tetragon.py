@@ -10,7 +10,14 @@ from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, run_command, tail_text, which
 from ..agent import bpftool_prog_show_records, start_agent, stop_agent, wait_healthy
-from ..workload import WorkloadResult, run_connect_storm, run_exec_storm, run_file_io, run_open_storm
+from ..workload import (
+    WorkloadResult,
+    run_connect_storm,
+    run_exec_storm,
+    run_file_io,
+    run_open_storm,
+    run_tetragon_exec_connect_mix_workload,
+)
 from .base import AppRunner
 from .process_support import AgentSession, wait_until_program_set_stable
 from .setup_support import missing_required_commands, pick_host_executable, repo_artifact_root
@@ -207,6 +214,16 @@ exit "$status"
 def run_tetragon_workload(spec: Mapping[str, object], duration_s: int, *, exec_workload_cgroup: bool) -> WorkloadResult:
     kind = str(spec.get("kind", "")); value = int(spec.get("value", 0) or 0)
     if kind == "exec_storm": return run_exec_storm_in_cgroup(duration_s, value or 2) if exec_workload_cgroup else run_exec_storm(duration_s, value or 2)
+    if kind == "tetragon_exec_connect_mix":
+        if exec_workload_cgroup:
+            return run_tetragon_exec_connect_mix_workload(
+                duration_s,
+                exec_runner=lambda seconds: run_exec_storm_in_cgroup(seconds, value or 2),
+            )
+        return run_tetragon_exec_connect_mix_workload(
+            duration_s,
+            exec_runner=lambda seconds: run_exec_storm(seconds, value or 2),
+        )
     if kind == "file_io": return run_file_io(duration_s)
     if kind == "open_storm": return run_open_storm(duration_s)
     if kind == "connect_storm": return run_connect_storm(duration_s)

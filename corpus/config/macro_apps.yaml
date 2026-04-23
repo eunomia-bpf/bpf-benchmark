@@ -37,15 +37,15 @@ apps:
   - name: bcc/vfsstat
     runner: bcc
     workload:
-      corpus: vfs_create_write_fsync
-      e2e: vfs_create_write_fsync
+      corpus: vfs_create_fsync_exact
+      e2e: vfs_create_fsync_exact
     tool: vfsstat
 
   - name: bcc/opensnoop
     runner: bcc
     workload:
-      corpus: file_open_storm
-      e2e: file_open_storm
+      corpus: open_family_storm
+      e2e: open_family_storm
     tool: opensnoop
 
   - name: bcc/syscount
@@ -86,7 +86,7 @@ apps:
   - name: tetragon/default
     runner: tetragon
     workload:
-      corpus: exec_storm
+      corpus: tetragon_exec_connect_mix
       e2e: exec_storm
 
   - name: katran
@@ -98,7 +98,7 @@ apps:
   - name: tracee/default
     runner: tracee
     workload:
-      corpus: tracee_default
+      corpus: tracee_system_edge_mix
       e2e: tracee_default
     duration_s: 5
 

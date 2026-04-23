@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import ctypes
+import ctypes.util
+import errno
 import json
 import os
 import re
@@ -12,13 +15,299 @@ import time
 from dataclasses import asdict, dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Sequence
+from typing import Callable, Sequence
 
 from . import run_command, tail_text, which
-from .kernel_modules import load_kernel_module
+from .kernel_modules import kernel_module_is_builtin, load_kernel_module, repo_kernel_modules_root
 
 LOOPBACK_LISTEN_BACKLOG = 128
 LOOPBACK_CONNECT_TIMEOUT_S = 2.0
+AT_FDCWD = -100
+AT_EMPTY_PATH = 0x1000
+_OPENAT2_SYSCALL_NR = {
+    "x86_64": 437,
+    "aarch64": 437,
+    "arm64": 437,
+}
+_TRACEE_MODULE_LOAD_CANDIDATES = (
+    "vcan",
+    "dummy",
+    "binfmt_misc",
+    "configfs",
+)
+_CGROUP_ROOT = Path("/sys/fs/cgroup")
+
+
+class _OpenHow(ctypes.Structure):
+    _fields_ = [
+        ("flags", ctypes.c_uint64),
+        ("mode", ctypes.c_uint64),
+        ("resolve", ctypes.c_uint64),
+    ]
+
+
+_LIBC = ctypes.CDLL(ctypes.util.find_library("c") or None, use_errno=True)
+_LIBC.open.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_int]
+_LIBC.open.restype = ctypes.c_int
+_LIBC.openat.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_int]
+_LIBC.openat.restype = ctypes.c_int
+_LIBC.execveat.argtypes = [
+    ctypes.c_int,
+    ctypes.c_char_p,
+    ctypes.POINTER(ctypes.c_char_p),
+    ctypes.POINTER(ctypes.c_char_p),
+    ctypes.c_int,
+]
+_LIBC.execveat.restype = ctypes.c_int
+_LIBC.accept4.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int]
+_LIBC.accept4.restype = ctypes.c_int
+_LIBC.syscall.restype = ctypes.c_long
+
+
+def _raise_ctypes_oserror(prefix: str) -> None:
+    err = ctypes.get_errno()
+    if err <= 0:
+        err = errno.EIO
+    raise OSError(err, f"{prefix}: {os.strerror(err)}")
+
+
+def _notes_text(notes: Sequence[str]) -> str:
+    return "\n".join(str(note) for note in notes if str(note).strip())
+
+
+def _close_quietly(fd: int | None) -> None:
+    if fd is None or int(fd) < 0:
+        return
+    try:
+        os.close(int(fd))
+    except OSError:
+        return
+
+
+def _libc_open(path: Path | str, flags: int, mode: int = 0) -> int:
+    fd = _LIBC.open(os.fsencode(os.fspath(path)), int(flags), int(mode))
+    if fd < 0:
+        _raise_ctypes_oserror(f"open({path})")
+    return int(fd)
+
+
+def _libc_openat(dirfd: int, path: str, flags: int, mode: int = 0) -> int:
+    fd = _LIBC.openat(int(dirfd), os.fsencode(path), int(flags), int(mode))
+    if fd < 0:
+        _raise_ctypes_oserror(f"openat({path})")
+    return int(fd)
+
+
+def _libc_openat2(dirfd: int, path: str, flags: int, mode: int = 0, resolve: int = 0) -> int:
+    syscall_nr = _OPENAT2_SYSCALL_NR.get(os.uname().machine.lower())
+    if syscall_nr is None:
+        raise RuntimeError(f"openat2 is unsupported on architecture {os.uname().machine!r}")
+    how = _OpenHow(flags=int(flags), mode=int(mode), resolve=int(resolve))
+    fd = _LIBC.syscall(
+        int(syscall_nr),
+        int(dirfd),
+        os.fsencode(path),
+        ctypes.byref(how),
+        ctypes.sizeof(how),
+    )
+    if fd < 0:
+        _raise_ctypes_oserror(f"openat2({path})")
+    return int(fd)
+
+
+def _build_exec_argv(program: str) -> ctypes.Array[ctypes.c_char_p]:
+    argv = (ctypes.c_char_p * 2)()
+    argv[0] = os.fsencode(program)
+    argv[1] = None
+    return argv
+
+
+def _build_envp() -> ctypes.Array[ctypes.c_char_p]:
+    if hasattr(os, "environb"):
+        entries = [key + b"=" + value for key, value in os.environb.items()]
+    else:
+        entries = [f"{key}={value}".encode() for key, value in os.environ.items()]
+    envp = (ctypes.c_char_p * (len(entries) + 1))()
+    for index, entry in enumerate(entries):
+        envp[index] = entry
+    envp[len(entries)] = None
+    return envp
+
+
+def _wait_successful_child(pid: int, description: str) -> None:
+    _, status = os.waitpid(int(pid), 0)
+    exit_code = os.waitstatus_to_exitcode(status)
+    if exit_code != 0:
+        raise RuntimeError(f"{description} failed with exit code {exit_code}")
+
+
+def _run_execveat_once(path: str) -> None:
+    pid = os.fork()
+    if pid == 0:
+        argv = _build_exec_argv(path)
+        envp = _build_envp()
+        _LIBC.execveat(AT_FDCWD, os.fsencode(path), argv, envp, 0)
+        err = ctypes.get_errno()
+        os._exit(err if 0 < err < 256 else 127)
+    _wait_successful_child(pid, f"execveat({path})")
+
+
+def _run_failed_execveat_once(path: str) -> None:
+    pid = os.fork()
+    if pid == 0:
+        argv = _build_exec_argv(path)
+        envp = _build_envp()
+        _LIBC.execveat(AT_FDCWD, os.fsencode(path), argv, envp, 0)
+        err = ctypes.get_errno()
+        os._exit(0 if err == errno.ENOENT else (err if 0 < err < 256 else 127))
+    _wait_successful_child(pid, f"failed execveat({path})")
+
+
+def _accept4_roundtrip() -> None:
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(1)
+    port = int(listener.getsockname()[1])
+    accepted_fd = -1
+    thread_error: list[str] = []
+    deadline = time.monotonic() + LOOPBACK_CONNECT_TIMEOUT_S
+
+    def client() -> None:
+        try:
+            with socket.create_connection(("127.0.0.1", port), timeout=LOOPBACK_CONNECT_TIMEOUT_S):
+                pass
+        except OSError as exc:
+            thread_error.append(str(exc))
+
+    thread = threading.Thread(target=client, daemon=True)
+    thread.start()
+    try:
+        # listener.settimeout() flips the fd to nonblocking, so explicit retry
+        # here keeps the accept4 syscall while avoiding transient EAGAIN races.
+        listener.setblocking(False)
+        while True:
+            accepted_fd = _LIBC.accept4(listener.fileno(), None, None, int(getattr(socket, "SOCK_CLOEXEC", 0)))
+            if accepted_fd >= 0:
+                break
+            err = ctypes.get_errno()
+            if err == errno.EINTR:
+                continue
+            if err in (errno.EAGAIN, errno.EWOULDBLOCK):
+                if thread_error:
+                    raise RuntimeError(f"accept4 client failed: {thread_error[-1]}")
+                if time.monotonic() >= deadline:
+                    raise RuntimeError("accept4 timed out waiting for loopback client")
+                time.sleep(0.01)
+                continue
+            raise OSError(err, f"accept4: {os.strerror(err)}")
+    finally:
+        _close_quietly(accepted_fd)
+        listener.close()
+        thread.join(timeout=2.0)
+    if thread_error:
+        raise RuntimeError(f"accept4 client failed: {thread_error[-1]}")
+
+
+def _exercise_dup_family(path: Path) -> None:
+    source_fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600)
+    duplicated_fd = -1
+    try:
+        os.write(source_fd, b"dup-test")
+        duplicated_fd = os.dup2(source_fd, source_fd + 64)
+    finally:
+        _close_quietly(duplicated_fd)
+        _close_quietly(source_fd)
+
+
+def _exercise_socketpair_once() -> None:
+    left, right = socket.socketpair()
+    try:
+        left.sendall(b"edge")
+        right.recv(4)
+    finally:
+        left.close()
+        right.close()
+
+
+def _exercise_cgroup_mkdir_rmdir_once() -> str | None:
+    if not _CGROUP_ROOT.is_dir():
+        return f"cgroup root is unavailable: {_CGROUP_ROOT}"
+    path = _CGROUP_ROOT / f"bpf-benchmark-tracee-edge-{os.getpid()}-{time.monotonic_ns()}"
+    try:
+        path.mkdir()
+        path.rmdir()
+    except OSError as exc:
+        return f"cgroup mkdir/rmdir failed: {exc}"
+    return None
+
+
+def _ensure_tracee_module_load_prereqs() -> tuple[str, Path]:
+    modprobe_binary = which("modprobe")
+    if modprobe_binary is None:
+        raise RuntimeError("modprobe is required for tracee_module_load_loop")
+    repo_root = repo_kernel_modules_root()
+    release_dir = repo_root / "lib" / "modules" / os.uname().release
+    if not release_dir.is_dir():
+        raise RuntimeError(
+            "tracee_module_load_loop requires repo kernel modules for this release: "
+            f"{release_dir}"
+        )
+    return modprobe_binary, repo_root
+
+
+def _module_candidate_exists(module_name: str) -> bool:
+    release_dir = repo_kernel_modules_root() / "lib" / "modules" / os.uname().release
+    return any(release_dir.rglob(f"{module_name}.ko"))
+
+
+def _module_is_loaded(module_name: str) -> bool:
+    return Path("/sys/module").joinpath(str(module_name)).is_dir()
+
+
+def _wait_for_module_state(module_name: str, *, present: bool, timeout_s: float = 5.0) -> None:
+    deadline = time.monotonic() + max(0.1, float(timeout_s))
+    while time.monotonic() < deadline:
+        if _module_is_loaded(module_name) == bool(present):
+            return
+        time.sleep(0.05)
+    state = "present" if present else "absent"
+    raise RuntimeError(f"module {module_name} did not become {state}")
+
+
+def _run_module_load_cycle() -> str:
+    modprobe_binary, repo_root = _ensure_tracee_module_load_prereqs()
+    errors: list[str] = []
+    for module_name in _TRACEE_MODULE_LOAD_CANDIDATES:
+        try:
+            if kernel_module_is_builtin(module_name):
+                continue
+        except RuntimeError as exc:
+            errors.append(str(exc))
+            break
+        if not _module_candidate_exists(module_name):
+            continue
+        if _module_is_loaded(module_name):
+            continue
+        load_kernel_module(module_name, timeout=20)
+        try:
+            _wait_for_module_state(module_name, present=True, timeout_s=5.0)
+            unload = run_command(
+                [modprobe_binary, "-d", str(repo_root), "-r", module_name],
+                check=False,
+                timeout=20,
+            )
+            if unload.returncode != 0:
+                raise RuntimeError(tail_text(unload.stderr or unload.stdout))
+            _wait_for_module_state(module_name, present=False, timeout_s=5.0)
+            return module_name
+        except Exception as exc:
+            errors.append(f"{module_name}: {exc}")
+            if _module_is_loaded(module_name):
+                run_command([modprobe_binary, "-d", str(repo_root), "-r", module_name], check=False, timeout=20)
+    if errors:
+        raise RuntimeError("no module load cycle succeeded: " + "; ".join(errors))
+    raise RuntimeError("no eligible module candidates were found for tracee_module_load_loop")
 
 
 def resolve_workload_tool(name: str) -> str:
@@ -456,6 +745,88 @@ def run_tracee_default_load(duration_s: int | float) -> WorkloadResult:
                                     run_connect_storm(max(0.1, t - exec_s - open_s))])
 
 
+def run_tetragon_exec_connect_mix_workload(
+    duration_s: int | float,
+    *,
+    exec_runner: Callable[[int | float], WorkloadResult] | None = None,
+) -> WorkloadResult:
+    total = max(0.3, float(duration_s))
+    exec_s = max(0.1, total * 0.6)
+    connect_s = max(0.1, total - exec_s)
+    chosen_exec_runner = run_exec_storm if exec_runner is None else exec_runner
+    return _merge_workload_results(
+        [
+            chosen_exec_runner(exec_s),
+            run_connect_storm(connect_s),
+        ]
+    )
+
+
+def run_tracee_system_edge_mix_workload(duration_s: int | float) -> WorkloadResult:
+    with tempfile.TemporaryDirectory(prefix="tracee-edge-", dir=str(_disk_backed_tmp_root())) as tempdir:
+        root = Path(tempdir)
+        dup_path = root / "dup-edge.bin"
+        notes: list[str] = []
+        start = time.monotonic()
+        deadline = start + max(0.2, float(duration_s))
+        ops_total = 0.0
+        cgroup_exercised = False
+        missing_path = str(root / "definitely-missing-execveat")
+        while time.monotonic() < deadline:
+            _run_execveat_once("/bin/true")
+            _run_failed_execveat_once(missing_path)
+            _exercise_dup_family(dup_path)
+            _exercise_socketpair_once()
+            _accept4_roundtrip()
+            if not cgroup_exercised:
+                cgroup_result = _exercise_cgroup_mkdir_rmdir_once()
+                if cgroup_result:
+                    raise RuntimeError(cgroup_result)
+                cgroup_exercised = True
+            ops_total += 1.0
+        return _finish_result(ops_total, time.monotonic() - start, "", _notes_text(notes))
+
+
+def run_tracee_module_load_loop_workload(duration_s: int | float) -> WorkloadResult:
+    _ensure_tracee_module_load_prereqs()
+    start = time.monotonic()
+    deadline = start + max(0.2, float(duration_s))
+    ops_total = 0.0
+    notes: list[str] = []
+    selected_module = ""
+    while time.monotonic() < deadline:
+        module_name = _run_module_load_cycle()
+        if module_name and not selected_module:
+            selected_module = module_name
+            notes.append(f"module_load_candidate={module_name}")
+        ops_total += 1.0
+    return _finish_result(ops_total, time.monotonic() - start, "", _notes_text(notes))
+
+
+def run_tracee_io_vector_mix_workload(duration_s: int | float) -> WorkloadResult:
+    with tempfile.TemporaryDirectory(prefix="tracee-iov-", dir=str(_disk_backed_tmp_root())) as tempdir:
+        path = Path(tempdir) / "iov.dat"
+        fd = os.open(path, os.O_CREAT | os.O_RDWR | os.O_TRUNC, 0o600)
+        start = time.monotonic()
+        deadline = start + max(0.2, float(duration_s))
+        ops_total = 0.0
+        try:
+            while time.monotonic() < deadline:
+                os.ftruncate(fd, 0)
+                os.lseek(fd, 0, os.SEEK_SET)
+                os.write(fd, b"tracee-write")
+                os.writev(fd, [b"-", b"writev"])
+                os.pwritev(fd, [b"pread", b"v2"], 0)
+                os.lseek(fd, 0, os.SEEK_SET)
+                os.read(fd, 6)
+                os.readv(fd, [bytearray(8), bytearray(8)])
+                os.preadv(fd, [bytearray(4), bytearray(4)], 0)
+                ops_total += 1.0
+        finally:
+            os.close(fd)
+        return _finish_result(ops_total, time.monotonic() - start, "", "")
+
+
 def _run_tc_qdisc(command: Sequence[str], *, action: str) -> subprocess.CompletedProcess[str]:
     completed = run_command(list(command), check=False, timeout=10)
     if completed.returncode != 0:
@@ -621,6 +992,36 @@ def run_tcp_retransmit_load(duration_s: int | float) -> WorkloadResult:
     return _finish_result(float(attempts), elapsed, f"successful_cycles={successes}", stderr)
 
 
+def run_open_family_storm_workload(duration_s: int | float) -> WorkloadResult:
+    with tempfile.TemporaryDirectory(prefix="open-family-", dir=str(_disk_backed_tmp_root())) as tempdir:
+        root = Path(tempdir)
+        target = root / "storm.dat"
+        target.write_bytes(b"open-family\n")
+        dirfd = os.open(root, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        start = time.monotonic()
+        deadline = start + max(0.2, float(duration_s))
+        ops_total = 0.0
+        notes: list[str] = []
+        try:
+            while time.monotonic() < deadline:
+                fd_open = _libc_open(target, os.O_RDONLY | os.O_CLOEXEC)
+                fd_openat = _libc_openat(dirfd, target.name, os.O_RDONLY | os.O_CLOEXEC)
+                fd_openat2 = -1
+                try:
+                    try:
+                        fd_openat2 = _libc_openat2(dirfd, target.name, os.O_RDONLY | os.O_CLOEXEC)
+                    except OSError as exc:
+                        raise RuntimeError(f"open_family_storm requires openat2: {exc}") from exc
+                    ops_total += 1.0
+                finally:
+                    _close_quietly(fd_open)
+                    _close_quietly(fd_openat)
+                    _close_quietly(fd_openat2)
+        finally:
+            os.close(dirfd)
+        return _finish_result(ops_total, time.monotonic() - start, "", _notes_text(notes))
+
+
 def run_vfs_create_write_fsync_load(duration_s: int | float) -> WorkloadResult:
     with tempfile.TemporaryDirectory(prefix="tracee-vfs-", dir=str(_disk_backed_tmp_root())) as tempdir:
         root = Path(tempdir); payload = b"x" * (64 * 1024)
@@ -631,6 +1032,29 @@ def run_vfs_create_write_fsync_load(duration_s: int | float) -> WorkloadResult:
             with path.open("rb") as h:
                 while h.read(len(payload)): pass
             path.unlink(); ops_total += 1.0
+        return _finish_result(ops_total, time.monotonic() - start, "", "")
+
+
+def run_vfs_create_fsync_exact_workload(duration_s: int | float) -> WorkloadResult:
+    with tempfile.TemporaryDirectory(prefix="tracee-vfs-exact-", dir=str(_disk_backed_tmp_root())) as tempdir:
+        root = Path(tempdir)
+        payload = b"x" * (64 * 1024)
+        start = time.monotonic()
+        deadline = start + max(0.2, float(duration_s))
+        ops_total = 0.0
+        while time.monotonic() < deadline:
+            path = root / f"exact-{int(ops_total)}.dat"
+            fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_RDWR, 0o600)
+            try:
+                os.write(fd, payload)
+                os.fsync(fd)
+                os.lseek(fd, 0, os.SEEK_SET)
+                while os.read(fd, len(payload)):
+                    pass
+            finally:
+                os.close(fd)
+            path.unlink()
+            ops_total += 1.0
         return _finish_result(ops_total, time.monotonic() - start, "", "")
 
 
@@ -715,6 +1139,8 @@ def run_named_workload(
         return run_mixed_workload(float(duration_s))
     if kind == "tcp_connect":
         return run_tcp_connect_load(seconds)
+    if kind == "tetragon_exec_connect_mix":
+        return run_tetragon_exec_connect_mix_workload(float(duration_s))
     if kind == "scheduler":
         return run_scheduler_load(seconds)
     if kind == "exec_storm":
@@ -723,12 +1149,20 @@ def run_named_workload(
         return run_user_exec_loop(seconds)
     if kind in {"file_open", "file_open_storm"}:
         return run_file_open_load(seconds)
+    if kind == "open_family_storm":
+        return run_open_family_storm_workload(float(duration_s))
     if kind in {"network", "tracee_default"}:
         if kind == "tracee_default":
             return run_tracee_default_load(float(duration_s))
         if network_as_tcp_connect:
             return run_tcp_connect_load(seconds)
         return run_network_load(seconds)
+    if kind == "tracee_system_edge_mix":
+        return run_tracee_system_edge_mix_workload(float(duration_s))
+    if kind == "tracee_module_load_loop":
+        return run_tracee_module_load_loop_workload(float(duration_s))
+    if kind == "tracee_io_vector_mix":
+        return run_tracee_io_vector_mix_workload(float(duration_s))
     if kind == "block_io":
         return run_block_io_load(float(duration_s))
     if kind == "tcp_retransmit":
@@ -741,6 +1175,8 @@ def run_named_workload(
         return run_bind_storm(seconds)
     if kind == "vfs_create_write_fsync":
         return run_vfs_create_write_fsync_load(seconds)
+    if kind == "vfs_create_fsync_exact":
+        return run_vfs_create_fsync_exact_workload(float(duration_s))
     if kind == "iterator_poll":
         start = time.monotonic(); deadline = start + float(seconds); ops_total = 0.0
         while time.monotonic() < deadline:
