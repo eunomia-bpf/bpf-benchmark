@@ -984,12 +984,9 @@ fn run_map_inline_round(
     if rewrites.is_empty() && direct_replacements.is_empty() {
         log_map_inline_debug("no map_inline rewrites prepared");
         return Ok(PassResult {
-            pass_name: "map_inline".into(),
-            changed: false,
-            sites_applied: 0,
             sites_skipped: skipped,
             diagnostics,
-            ..Default::default()
+            ..PassResult::unchanged("map_inline")
         });
     }
 
@@ -1041,13 +1038,10 @@ fn run_map_inline_round(
     if applied == 0 {
         log_map_inline_debug("all prepared rewrites were discarded");
         return Ok(PassResult {
-            pass_name: "map_inline".into(),
-            changed: false,
-            sites_applied: 0,
             sites_skipped: skipped,
             diagnostics,
             map_inline_records,
-            ..Default::default()
+            ..PassResult::unchanged("map_inline")
         });
     }
 

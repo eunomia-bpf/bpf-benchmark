@@ -127,17 +127,13 @@ impl BpfPass for CondSelectPass {
     ) -> anyhow::Result<PassResult> {
         // Check if platform has CMOV support.
         if !ctx.platform.has_cmov {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
+            return Ok(PassResult::skipped(
+                self.name(),
+                SkipReason {
                     pc: 0,
                     reason: "platform lacks CMOV support".into(),
-                }],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+                },
+            ));
         }
 
         // Check if bpf_select64 kfunc is available.
@@ -153,35 +149,30 @@ impl BpfPass for CondSelectPass {
                     )
                 })
                 .collect();
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: if !sites.is_empty() {
-                    vec![SkipReason {
-                        pc: 0,
-                        reason: "bpf_select64 kfunc not available".into(),
-                    }]
-                } else {
-                    vec![]
+            if sites.is_empty() {
+                return Ok(PassResult {
+                    diagnostics,
+                    ..PassResult::unchanged(self.name())
+                });
+            }
+            return Ok(PassResult::skipped_with_diagnostics(
+                self.name(),
+                SkipReason {
+                    pc: 0,
+                    reason: "bpf_select64 kfunc not available".into(),
                 },
                 diagnostics,
-                ..Default::default()
-            });
+            ));
         }
 
         if !ctx.kinsn_registry.packed_supported_for_pass(self.name()) {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
+            return Ok(PassResult::skipped(
+                self.name(),
+                SkipReason {
                     pc: 0,
                     reason: "bpf_select64 packed ABI not available".into(),
-                }],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+                },
+            ));
         }
 
         let bt_analysis = BranchTargetAnalysis;
@@ -237,12 +228,8 @@ impl BpfPass for CondSelectPass {
 
         if safe_sites.is_empty() {
             return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![],
-                ..Default::default()
+                ..PassResult::unchanged(self.name())
             });
         }
 

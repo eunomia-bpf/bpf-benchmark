@@ -298,6 +298,34 @@ pub struct PassResult {
 }
 
 impl PassResult {
+    pub fn unchanged(pass_name: impl Into<String>) -> Self {
+        Self {
+            pass_name: pass_name.into(),
+            changed: false,
+            sites_applied: 0,
+            diagnostics: Vec::new(),
+            ..Default::default()
+        }
+    }
+
+    pub fn skipped(pass_name: impl Into<String>, reason: SkipReason) -> Self {
+        Self {
+            sites_skipped: vec![reason],
+            ..Self::unchanged(pass_name)
+        }
+    }
+
+    pub fn skipped_with_diagnostics(
+        pass_name: impl Into<String>,
+        reason: SkipReason,
+        diagnostics: Vec<String>,
+    ) -> Self {
+        Self {
+            diagnostics,
+            ..Self::skipped(pass_name, reason)
+        }
+    }
+
     /// Aggregate skip reasons into a reason -> count map.
     pub fn skip_reason_counts(&self) -> HashMap<String, usize> {
         let mut counts: HashMap<String, usize> = HashMap::new();

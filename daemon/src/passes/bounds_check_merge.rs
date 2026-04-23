@@ -92,14 +92,7 @@ impl BpfPass for BoundsCheckMergePass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         if program.insns.is_empty() || !is_packet_prog_type(ctx.prog_type) {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+            return Ok(PassResult::unchanged(self.name()));
         }
 
         let bt = analyses.get(&BranchTargetAnalysis, program);
@@ -108,12 +101,8 @@ impl BpfPass for BoundsCheckMergePass {
         let mut scan = scan_guard_sites(&program.insns, &bt, &liveness);
         if scan.guards.is_empty() {
             return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
                 sites_skipped: scan.skips,
-                diagnostics: vec![],
-                ..Default::default()
+                ..PassResult::unchanged(self.name())
             });
         }
 
@@ -163,12 +152,8 @@ impl BpfPass for BoundsCheckMergePass {
 
         if rewrites.is_empty() {
             return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
                 sites_skipped: scan.skips,
-                diagnostics: vec![],
-                ..Default::default()
+                ..PassResult::unchanged(self.name())
             });
         }
 

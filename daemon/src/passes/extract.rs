@@ -110,31 +110,23 @@ impl BpfPass for ExtractPass {
     ) -> anyhow::Result<PassResult> {
         // Check if bpf_extract64 kfunc is available.
         if ctx.kinsn_registry.extract64_btf_id < 0 {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
+            return Ok(PassResult::skipped(
+                self.name(),
+                SkipReason {
                     pc: 0,
                     reason: "bpf_extract64 kfunc not available".into(),
-                }],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+                },
+            ));
         }
 
         if !ctx.kinsn_registry.packed_supported_for_pass(self.name()) {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
+            return Ok(PassResult::skipped(
+                self.name(),
+                SkipReason {
                     pc: 0,
                     reason: "bpf_extract64 packed ABI not available".into(),
-                }],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+                },
+            ));
         }
 
         let bt_analysis = BranchTargetAnalysis;
@@ -162,12 +154,8 @@ impl BpfPass for ExtractPass {
 
         if safe_sites.is_empty() {
             return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![],
-                ..Default::default()
+                ..PassResult::unchanged(self.name())
             });
         }
 

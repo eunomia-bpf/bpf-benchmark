@@ -28,31 +28,23 @@ impl BpfPass for RotatePass {
     ) -> anyhow::Result<PassResult> {
         // Prerequisite: check if bpf_rotate64 kfunc is available.
         if ctx.kinsn_registry.rotate64_btf_id < 0 {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
+            return Ok(PassResult::skipped(
+                self.name(),
+                SkipReason {
                     pc: 0,
                     reason: "bpf_rotate64 kfunc not available".into(),
-                }],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+                },
+            ));
         }
 
         if !ctx.kinsn_registry.packed_supported_for_pass(self.name()) {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
+            return Ok(PassResult::skipped(
+                self.name(),
+                SkipReason {
                     pc: 0,
                     reason: "bpf_rotate64 packed ABI not available".into(),
-                }],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+                },
+            ));
         }
 
         // Current rotate safety checks are intraprocedural. Until the daemon
@@ -63,17 +55,13 @@ impl BpfPass for RotatePass {
             .iter()
             .any(|insn| insn.is_call() && insn.src_reg() == BPF_PSEUDO_CALL)
         {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
+            return Ok(PassResult::skipped(
+                self.name(),
+                SkipReason {
                     pc: 0,
                     reason: "subprog pseudo-calls not yet supported".into(),
-                }],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+                },
+            ));
         }
 
         let bt_analysis = BranchTargetAnalysis;
@@ -122,12 +110,8 @@ impl BpfPass for RotatePass {
 
         if safe_sites.is_empty() {
             return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![],
-                ..Default::default()
+                ..PassResult::unchanged(self.name())
             });
         }
 

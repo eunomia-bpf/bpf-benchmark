@@ -66,37 +66,19 @@ impl BpfPass for SkbLoadBytesSpecPass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         if program.insns.is_empty() {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+            return Ok(PassResult::unchanged(self.name()));
         }
 
         let Some(layout) = packet_ctx_layout(ctx.prog_type) else {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+            return Ok(PassResult::unchanged(self.name()));
         };
 
         let bt = analyses.get(&BranchTargetAnalysis, program);
         let scan = scan_sites(&program.insns, &bt);
         if scan.sites.is_empty() {
             return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
                 sites_skipped: scan.skips,
-                diagnostics: vec![],
-                ..Default::default()
+                ..PassResult::unchanged(self.name())
             });
         }
 

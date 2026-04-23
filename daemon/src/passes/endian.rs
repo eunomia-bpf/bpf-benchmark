@@ -227,17 +227,13 @@ impl BpfPass for EndianFusionPass {
     ) -> anyhow::Result<PassResult> {
         // Check if any endian_load kfunc is available.
         if !any_endian_kfunc_available(ctx) {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
+            return Ok(PassResult::skipped(
+                self.name(),
+                SkipReason {
                     pc: 0,
                     reason: "bpf_endian_loadXX kfuncs not available".into(),
-                }],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+                },
+            ));
         }
 
         let bt_analysis = BranchTargetAnalysis;
@@ -253,17 +249,13 @@ impl BpfPass for EndianFusionPass {
                 .kinsn_registry
                 .packed_supported_for_target_name("bpf_endian_load64")
         {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
+            return Ok(PassResult::skipped(
+                self.name(),
+                SkipReason {
                     pc: 0,
                     reason: "bpf_endian_loadXX packed ABI not available".into(),
-                }],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+                },
+            ));
         }
 
         let sites = scan_endian_fusion_sites(&program.insns);
@@ -324,12 +316,8 @@ impl BpfPass for EndianFusionPass {
 
         if safe_sites.is_empty() {
             return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![],
-                ..Default::default()
+                ..PassResult::unchanged(self.name())
             });
         }
 

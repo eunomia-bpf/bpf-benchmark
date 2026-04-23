@@ -108,14 +108,7 @@ impl BpfPass for BulkMemoryPass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         if program.insns.is_empty() {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+            return Ok(PassResult::unchanged(self.name()));
         }
 
         let bt = analyses.get(&BranchTargetAnalysis, program);
@@ -176,12 +169,8 @@ impl BpfPass for BulkMemoryPass {
 
         if safe_sites.is_empty() {
             return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![],
-                ..Default::default()
+                ..PassResult::unchanged(self.name())
             });
         }
 

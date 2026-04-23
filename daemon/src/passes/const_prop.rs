@@ -192,14 +192,7 @@ impl BpfPass for ConstPropPass {
     ) -> anyhow::Result<PassResult> {
         let cfg = analyses.get(&CFGAnalysis, program);
         if cfg.blocks.is_empty() {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+            return Ok(PassResult::unchanged(self.name()));
         }
 
         let oracle = VerifierExactConstOracle::from_states(program.verifier_states.as_ref());
@@ -232,14 +225,7 @@ impl BpfPass for ConstPropPass {
         }
 
         if replacements.is_empty() {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+            return Ok(PassResult::unchanged(self.name()));
         }
 
         let orig_len = program.insns.len();

@@ -87,14 +87,7 @@ impl BpfPass for DcePass {
         }
 
         let Some(final_addr_map) = final_addr_map else {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![],
-                diagnostics: vec![],
-                ..Default::default()
-            });
+            return Ok(PassResult::unchanged(self.name()));
         };
 
         let sites_applied =

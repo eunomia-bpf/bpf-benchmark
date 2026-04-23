@@ -91,28 +91,22 @@ impl BpfPass for BranchFlipPass {
         match program.branch_miss_rate {
             None => {
                 return Ok(PassResult {
-                    pass_name: self.name().into(),
-                    changed: false,
-                    sites_applied: 0,
-                    sites_skipped: vec![],
                     diagnostics: vec!["no PMU data available, skipping branch_flip".into()],
-                    ..Default::default()
+                    ..PassResult::unchanged(self.name())
                 });
             }
             Some(miss_rate) if miss_rate > self.max_branch_miss_rate => {
-                return Ok(PassResult {
-                    pass_name: self.name().into(),
-                    changed: false,
-                    sites_applied: 0,
-                    sites_skipped: vec![SkipReason {
+                return Ok(PassResult::skipped(
+                    self.name(),
+                    SkipReason {
                         pc: 0,
                         reason: format!(
                             "program branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branches)",
                             miss_rate * 100.0,
                             self.max_branch_miss_rate * 100.0,
                         ),
-                    }],
-                    diagnostics: vec![], ..Default::default() });
+                    },
+                ));
             }
             Some(_) => { /* miss rate within threshold, proceed */ }
         }
@@ -204,12 +198,9 @@ impl BpfPass for BranchFlipPass {
                 vec![]
             };
             return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
                 sites_skipped: skipped,
                 diagnostics,
-                ..Default::default()
+                ..PassResult::unchanged(self.name())
             });
         }
 
