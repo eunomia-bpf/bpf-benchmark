@@ -500,6 +500,58 @@ fn extract_constant_key_from_r2_add_reg_constant() {
 }
 
 #[test]
+fn extract_constant_key_from_fp_alias_store_base() {
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let insns = vec![
+        BpfInsn::mov64_reg(6, 10),
+        add64_imm(6, -8),
+        st_mem(BPF_W, 6, 4, 7),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        map[0],
+        map[1],
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+    ];
+
+    let key = extract_constant_key(&insns, 7).unwrap();
+    assert_eq!(key.stack_off, -4);
+    assert_eq!(key.value, 7);
+}
+
+#[test]
+fn verifier_guided_key_extracts_store_via_fp_alias_base() {
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let insns = vec![
+        BpfInsn::mov64_reg(6, 10),
+        add64_imm(6, -8),
+        st_mem(BPF_W, 6, 4, 7),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        map[0],
+        map[1],
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+    ];
+
+    let states = parse_verifier_log(
+        r#"
+0: R1=ctx() R10=fp0
+0: (bf) r6 = r10                      ; R6=fp0 R10=fp0
+1: (07) r6 += -8                      ; R6=fp-8
+2: (62) *(u32 *)(r6 +4) = 7           ; R6=fp-8 R10=fp0 fp-4=7
+3: (bf) r2 = r10                      ; R2=fp0 R10=fp0
+4: (07) r2 += -4                      ; R2=fp-4
+5: (18) r1 = 0xffff8f09c3e45000       ; R1=map_ptr(map=test_array,ks=4,vs=4)
+7: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=test_array,ks=4,vs=4)
+"#,
+    );
+
+    let key = try_extract_constant_key_verifier_guided(&insns, &states, 7, 4).unwrap();
+    assert_eq!(key.stack_off, -4);
+    assert_eq!(key.value, 7);
+    assert_eq!(key.store_pc, 2);
+}
+
+#[test]
 fn extract_constant_key_from_ldimm64_stack_store() {
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let key_imm = emit_ldimm64(3, 0x1_0000_0001);
@@ -567,6 +619,53 @@ fn classify_r0_uses_tracks_alias_copies_and_guarded_loads() {
     assert_eq!(uses.alias_copy_pcs, vec![1]);
     assert_eq!(uses.null_check_pc, Some(2));
     assert!(uses.all_fixed_loads());
+}
+
+#[test]
+fn classify_r0_uses_tracks_alias_offset_loads() {
+    let insns = vec![
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::mov64_reg(6, 0),
+        add64_imm(6, 4),
+        BpfInsn::ldx_mem(BPF_W, 3, 6, 0),
+    ];
+
+    let uses = classify_r0_uses(&insns, 0);
+    assert_eq!(uses.alias_copy_pcs, vec![1, 2]);
+    assert_eq!(
+        uses.fixed_loads,
+        vec![FixedLoadUse {
+            pc: 3,
+            dst_reg: 3,
+            size: BPF_W,
+            offset: 4,
+        }]
+    );
+    assert!(uses.other_uses.is_empty());
+}
+
+#[test]
+fn classify_r0_uses_does_not_treat_non_zero_alias_offset_as_null_check() {
+    let insns = vec![
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::mov64_reg(6, 0),
+        add64_imm(6, 4),
+        jeq_imm(6, 0, 1),
+        BpfInsn::ldx_mem(BPF_W, 3, 6, 0),
+    ];
+
+    let uses = classify_r0_uses(&insns, 0);
+    assert_eq!(uses.null_check_pc, None);
+    assert_eq!(uses.other_uses, vec![3]);
+    assert_eq!(
+        uses.fixed_loads,
+        vec![FixedLoadUse {
+            pc: 4,
+            dst_reg: 3,
+            size: BPF_W,
+            offset: 4,
+        }]
+    );
 }
 
 #[test]
@@ -754,6 +853,48 @@ fn map_inline_pass_rewrites_loads_from_alias_register() {
         program.insns,
         vec![
             BpfInsn::mov32_imm(7, 7),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]
+    );
+}
+
+#[test]
+fn map_inline_pass_rewrites_lookup_with_fp_alias_store_key_and_offset_load() {
+    install_array_map_entry(9251, 16, 7, vec![0, 0, 0, 0, 42, 0, 0, 0], true);
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let mut program = BpfProgram::new(vec![
+        BpfInsn::mov64_reg(6, 10),
+        add64_imm(6, -8),
+        st_mem(BPF_W, 6, 4, 7),
+        map[0],
+        map[1],
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::mov64_reg(6, 0),
+        add64_imm(6, 4),
+        BpfInsn::ldx_mem(BPF_W, 7, 6, 0),
+        BpfInsn::mov64_imm(0, 0),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![9251]);
+
+    let result = run_map_inline_pass(&mut program);
+
+    assert!(
+        result.program_changed,
+        "skip reasons: {:?}",
+        result.pass_results[0].sites_skipped
+    );
+    assert_eq!(result.total_sites_applied, 1);
+    assert_eq!(
+        program.insns,
+        vec![
+            BpfInsn::mov64_reg(6, 10),
+            add64_imm(6, -8),
+            BpfInsn::mov32_imm(7, 42),
             BpfInsn::mov64_imm(0, 0),
             exit_insn(),
         ]

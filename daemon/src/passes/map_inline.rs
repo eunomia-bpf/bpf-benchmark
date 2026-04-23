@@ -374,17 +374,24 @@ fn try_extract_constant_key_for_occurrence(
                 call_pc
             )
         })?;
-
-    let (store_pc, source_imm_pc, value) =
-        find_verifier_guided_stack_store(insns, verifier_states, occurrence_idx, frame, key_off, key_width)
-            .ok_or_else(|| {
-                format!(
-                    "verifier log did not expose a constant stack store covering fp{} width {} before pc {}",
-                    key_off, key_width, call_pc
-                )
-            })?;
-
     let bounds = subprog_bounds(insns, call_pc);
+
+    let (store_pc, source_imm_pc, value) = find_verifier_guided_stack_store(
+        insns,
+        verifier_states,
+        occurrence_idx,
+        frame,
+        key_off,
+        key_width,
+        bounds,
+    )
+    .ok_or_else(|| {
+        format!(
+            "verifier log did not expose a constant stack store covering fp{} width {} before pc {}",
+            key_off, key_width, call_pc
+        )
+    })?;
+
     let removable_setup = find_r2_stack_pointer_setup_simple(insns, call_pc, bounds)
         .filter(|(_, _, off)| *off == key_off);
 
@@ -473,21 +480,11 @@ fn find_constant_stack_bytes_with_limit(
         }
 
         let insn = &insns[pc];
-        if !matches!(bpf_class(insn.code), BPF_ST | BPF_STX)
-            || bpf_mode(insn.code) != BPF_MEM
-            || insn.dst_reg() != 10
-        {
+        let Some((store_off, width)) = resolve_stack_store_slot(insns, pc, insn, bounds) else {
             cursor = pc;
             continue;
-        }
-
-        let width = size_in_bytes(bpf_size(insn.code)).ok_or_else(|| {
-            format!(
-                "stack store at pc {} uses unsupported width opcode {:#x}",
-                pc, insn.code
-            )
-        })?;
-        let store_start = i32::from(insn.off);
+        };
+        let store_start = i32::from(store_off);
         let store_end = store_start + i32::from(width);
         let overlap_start = target_start.max(store_start);
         let overlap_end = target_end.min(store_end);
@@ -603,6 +600,7 @@ fn find_verifier_guided_stack_store(
     frame: usize,
     key_off: i16,
     key_width: u8,
+    bounds: (usize, usize),
 ) -> Option<(usize, Option<usize>, u64)> {
     for idx in (0..before_idx).rev() {
         let state = &verifier_states[idx];
@@ -614,7 +612,7 @@ fn find_verifier_guided_stack_store(
             continue;
         };
         let Some((store_pc, source_imm_pc, value)) =
-            verifier_guided_stack_store_value(insn, state, key_off, key_width)
+            verifier_guided_stack_store_value(insns, pc, insn, state, key_off, key_width, bounds)
         else {
             continue;
         };
@@ -624,20 +622,16 @@ fn find_verifier_guided_stack_store(
 }
 
 fn verifier_guided_stack_store_value(
+    insns: &[BpfInsn],
+    pc: usize,
     insn: &BpfInsn,
     state: &VerifierInsn,
     key_off: i16,
     key_width: u8,
+    bounds: (usize, usize),
 ) -> Option<(usize, Option<usize>, u64)> {
-    if !matches!(bpf_class(insn.code), BPF_ST | BPF_STX)
-        || bpf_mode(insn.code) != BPF_MEM
-        || insn.dst_reg() != 10
-    {
-        return None;
-    }
-
-    let store_width = size_in_bytes(bpf_size(insn.code))?;
-    let store_start = i32::from(insn.off);
+    let (store_off, store_width) = resolve_stack_store_slot(insns, pc, insn, bounds)?;
+    let store_start = i32::from(store_off);
     let store_end = store_start + i32::from(store_width);
     let key_start = i32::from(key_off);
     let key_end = key_start + i32::from(key_width);
@@ -660,7 +654,9 @@ fn verifier_guided_stack_store_value(
     let mut key_bytes = [0u8; 8];
     key_bytes[..key_width as usize].copy_from_slice(&full_bytes[subrange_start..subrange_end]);
 
-    Some((state.pc, None, u64::from_le_bytes(key_bytes)))
+    let source_imm_pc = constant_stack_store_source_pc(insns, pc, bounds).ok().flatten();
+
+    Some((state.pc, source_imm_pc, u64::from_le_bytes(key_bytes)))
 }
 
 fn verifier_known_scalar_value(reg: &crate::verifier_log::RegState) -> Option<u64> {
@@ -2283,21 +2279,29 @@ fn classify_r0_uses_with_options(
     allow_readonly_helper_calls: bool,
 ) -> R0UseClassification {
     let mut classification = R0UseClassification::default();
-    let mut alias_regs = HashSet::from([0u8]);
-    let mut alias_stack_slots = HashSet::new();
+    let mut alias_regs = HashMap::from([(0u8, 0i16)]);
+    let mut alias_stack_slots = HashMap::new();
     let bounds = subprog_bounds(insns, start_pc);
     let mut pc = start_pc + 1;
 
     while pc < insns.len() && (!alias_regs.is_empty() || !alias_stack_slots.is_empty()) {
         let insn = &insns[pc];
-        let alias_copy_dst = alias_copy_dst(insn, &alias_regs);
+        let alias_copy = alias_copy(insn, &alias_regs);
         let allow_null_check =
             classification.fixed_loads.is_empty() && classification.other_uses.is_empty();
 
-        if let Some(dst_reg) = alias_copy_dst {
+        if let Some((dst_reg, alias_off)) = alias_copy {
             classification.alias_copy_pcs.push(pc);
             kill_defined_alias_regs(&mut alias_regs, insn);
-            alias_regs.insert(dst_reg);
+            alias_regs.insert(dst_reg, alias_off);
+            pc += insn_width(insn);
+            continue;
+        }
+
+        if let Some(alias_off) = alias_adjustment(insns, pc, insn, &alias_regs, bounds) {
+            classification.alias_copy_pcs.push(pc);
+            kill_defined_alias_regs(&mut alias_regs, insn);
+            alias_regs.insert(insn.dst_reg(), alias_off);
             pc += insn_width(insn);
             continue;
         }
@@ -2326,21 +2330,21 @@ fn classify_r0_uses_with_options(
             if insn.class() == BPF_STX
                 && bpf_mode(insn.code) == BPF_MEM
                 && width == 8
-                && alias_regs.contains(&insn.src_reg())
+                && alias_regs.contains_key(&insn.src_reg())
             {
                 classification.alias_copy_pcs.push(pc);
-                alias_stack_slots.insert(stack_off);
+                alias_stack_slots.insert(stack_off, alias_regs[&insn.src_reg()]);
                 pc += insn_width(insn);
                 continue;
             }
         }
 
         if let Some(stack_off) = resolve_stack_load_slot(insns, pc, insn, bounds) {
-            if alias_stack_slots.contains(&stack_off) {
+            if let Some(&alias_off) = alias_stack_slots.get(&stack_off) {
                 classification.alias_copy_pcs.push(pc);
                 alias_stack_slots.remove(&stack_off);
                 kill_defined_alias_regs(&mut alias_regs, insn);
-                alias_regs.insert(insn.dst_reg());
+                alias_regs.insert(insn.dst_reg(), alias_off);
                 pc += insn_width(insn);
                 continue;
             }
@@ -2375,12 +2379,19 @@ fn classify_r0_uses_with_options(
             break;
         }
 
-        if insn.is_ldx_mem() && alias_regs.contains(&insn.src_reg()) {
+        if insn.is_ldx_mem() && alias_regs.contains_key(&insn.src_reg()) {
+            let total_off = i32::from(alias_regs[&insn.src_reg()]) + i32::from(insn.off);
+            let Ok(total_off) = i16::try_from(total_off) else {
+                classification.other_uses.push(pc);
+                kill_defined_alias_regs(&mut alias_regs, insn);
+                pc += insn_width(insn);
+                continue;
+            };
             classification.fixed_loads.push(FixedLoadUse {
                 pc,
                 dst_reg: insn.dst_reg(),
                 size: bpf_size(insn.code),
-                offset: insn.off,
+                offset: total_off,
             });
         } else if insn_uses_any_alias(insn, &alias_regs) {
             classification.other_uses.push(pc);
@@ -2442,24 +2453,24 @@ fn resolve_stack_load_slot(
 }
 
 fn kill_overlapping_alias_stack_slots(
-    alias_stack_slots: &mut HashSet<i16>,
+    alias_stack_slots: &mut HashMap<i16, i16>,
     stack_off: i16,
     width: u8,
 ) {
     let store_start = i32::from(stack_off);
     let store_end = store_start + i32::from(width);
-    alias_stack_slots.retain(|slot| {
+    alias_stack_slots.retain(|slot, _| {
         let alias_start = i32::from(*slot);
         let alias_end = alias_start + 8;
         store_end <= alias_start || store_start >= alias_end
     });
 }
 
-fn surviving_alias_regs_after_helper_call(alias_regs: &HashSet<u8>) -> HashSet<u8> {
+fn surviving_alias_regs_after_helper_call(alias_regs: &HashMap<u8, i16>) -> HashMap<u8, i16> {
     alias_regs
         .iter()
-        .copied()
-        .filter(|reg| (6..=9).contains(reg))
+        .filter(|(reg, _)| (6u8..=9u8).contains(reg))
+        .map(|(&reg, &off)| (reg, off))
         .collect()
 }
 
@@ -2483,7 +2494,7 @@ fn jump_target_pc(pc: usize, insn: &BpfInsn, insn_count: usize) -> Option<usize>
         .then_some(target as usize)
 }
 
-fn ends_current_use_region(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> bool {
+fn ends_current_use_region(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> bool {
     (insn.is_jmp_class()
         && !insn.is_call()
         && !insn.is_exit()
@@ -2495,12 +2506,51 @@ fn starts_next_lookup_setup(insn: &BpfInsn) -> bool {
     insn.is_ldimm64() && insn.src_reg() == BPF_PSEUDO_MAP_FD
 }
 
-fn alias_copy_dst(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> Option<u8> {
-    (insn.code == (BPF_ALU64 | BPF_MOV | BPF_X) && alias_regs.contains(&insn.src_reg()))
-        .then_some(insn.dst_reg())
+fn alias_copy(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> Option<(u8, i16)> {
+    (insn.code == (BPF_ALU64 | BPF_MOV | BPF_X))
+        .then(|| alias_regs.get(&insn.src_reg()).copied().map(|off| (insn.dst_reg(), off)))
+        .flatten()
 }
 
-fn is_null_check_on_alias(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> bool {
+fn alias_adjustment(
+    insns: &[BpfInsn],
+    pc: usize,
+    insn: &BpfInsn,
+    alias_regs: &HashMap<u8, i16>,
+    bounds: (usize, usize),
+) -> Option<i16> {
+    if insn.class() != BPF_ALU64 {
+        return None;
+    }
+
+    let base_off = i32::from(*alias_regs.get(&insn.dst_reg())?);
+    let delta = match (bpf_op(insn.code), bpf_src(insn.code)) {
+        (BPF_ADD, BPF_K) => insn.imm as i64,
+        (BPF_SUB, BPF_K) => -(insn.imm as i64),
+        (BPF_ADD, BPF_X) => resolve_constant_reg_value_inner(
+            insns,
+            pc,
+            insn.src_reg(),
+            bounds,
+            REG_RESOLUTION_LIMIT,
+        )
+        .ok()
+        .map(|value| value.value as i64)?,
+        (BPF_SUB, BPF_X) => -resolve_constant_reg_value_inner(
+            insns,
+            pc,
+            insn.src_reg(),
+            bounds,
+            REG_RESOLUTION_LIMIT,
+        )
+        .ok()
+        .map(|value| value.value as i64)?,
+        _ => return None,
+    };
+    i16::try_from(base_off as i64 + delta).ok()
+}
+
+fn is_null_check_on_alias(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> bool {
     let op = bpf_op(insn.code);
     insn.class() == BPF_JMP
         && matches!(op, BPF_JEQ | BPF_JNE)
@@ -2508,7 +2558,7 @@ fn is_null_check_on_alias(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> bool {
         && insn.src_reg() == 0
         && insn.imm == 0
         && (op == BPF_JEQ || insn.off >= 0)
-        && alias_regs.contains(&insn.dst_reg())
+        && alias_regs.get(&insn.dst_reg()).copied() == Some(0)
 }
 
 fn null_check_is_fallthrough_non_null(insn: &BpfInsn) -> bool {
@@ -2654,19 +2704,12 @@ fn mark_safe_scalar_reg(
     killed_arg_regs.remove(&reg);
 }
 
-fn insn_uses_any_alias(insn: &BpfInsn, alias_regs: &HashSet<u8>) -> bool {
-    alias_regs
-        .iter()
-        .copied()
-        .any(|reg| insn_uses_reg(insn, reg))
+fn insn_uses_any_alias(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> bool {
+    alias_regs.keys().copied().any(|reg| insn_uses_reg(insn, reg))
 }
 
-fn kill_defined_alias_regs(alias_regs: &mut HashSet<u8>, insn: &BpfInsn) {
-    for reg in 0..=10 {
-        if insn_defines_reg(insn, reg) {
-            alias_regs.remove(&reg);
-        }
-    }
+fn kill_defined_alias_regs(alias_regs: &mut HashMap<u8, i16>, insn: &BpfInsn) {
+    alias_regs.retain(|&reg, _| !insn_defines_reg(insn, reg));
 }
 
 fn insn_uses_reg(insn: &BpfInsn, reg: u8) -> bool {
