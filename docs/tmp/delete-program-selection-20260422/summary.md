@@ -177,8 +177,14 @@ Deleted / simplified:
 - `runner/libs/case_common.py:143-153`
   - `CaseLifecycleState` still keeps `target_prog_ids` / `apply_prog_ids`, but `requested_prog_ids()` now just resolves whichever same-source list is present
   - there is no remaining program-selection meaning behind the split
+- `runner/libs/case_common.py:199-202`
+  - `_clone_daemon_metadata(...)` no longer accepts a program-ID list
+- `runner/libs/case_common.py:437-467`
+  - lifecycle metadata no longer writes `requested_prog_ids` into `kinsn_modules.lifecycle_runs[*]`
 - `corpus/driver.py:790-804`
   - corpus runner lifecycle now seeds both target/apply IDs from the same full discovered program list
+- `corpus/driver.py:1197-1207`
+  - corpus-side kinsn metadata clone path no longer passes or stores requested/apply subsets
 
 Related truth-source cleanups needed to make this consistent across runners:
 
@@ -207,17 +213,30 @@ Completed:
 
 - `python3 -m py_compile` on all modified Python files: PASS
 - `make check`: PASS
+- `make vm-e2e E2E_SMOKE=1`: PASS
+- `make vm-corpus SAMPLES=1`: PASS
 
-Pending update:
+Artifacts:
 
-- `make vm-e2e E2E_SMOKE=1`
-- `make vm-corpus SAMPLES=1`
+- smoke:
+  - `e2e/results/tracee_20260422_233334_731547` (`tracee_programs=37`)
+  - `e2e/results/tetragon_20260422_233636_399091` (`tetragon_programs=35`)
+  - `e2e/results/bpftrace_20260422_233734_912238` (smoke-selected script exposed `1` program)
+  - `e2e/results/scx_20260422_233806_791337` (`scheduler_programs=13`)
+  - `e2e/results/bcc_20260422_233843_715838` (smoke-selected tool exposed `1` program)
+  - `e2e/results/katran_20260422_233911_124208` (`programs=1`)
+- corpus:
+  - `corpus/results/x86_kvm_corpus_20260422_234543_434541`
 
-Current validation note:
+Artifact-grep check:
 
-- first `make vm-e2e E2E_SMOKE=1` run reached the smoke cases and failed only in `scx` with `name 'os' is not defined`
-- fix: restored `import os` in `runner/libs/app_runners/scx.py:3`
-- smoke rerun is in progress in the current turn
+- repo code grep is clean for active-source `target_programs` / `apply_programs` / `expected_program_names`
+- final smoke + corpus artifacts are also grep-clean for:
+  - `requested_prog_ids`
+  - `apply_programs`
+  - `apply_program_names`
+  - `selected_tracee_programs`
+  - `selected_tetragon_programs`
 
 ## Before / After Program Counts
 
@@ -237,33 +256,85 @@ Known pre-change signals:
 - `bcc/tcpconnect`: authoritative E2E had `requested=4`, but config still expected `2`
 - `bcc/bindsnoop`: authoritative E2E had `requested=4`, but config still expected `3`
 
-Pending update after reruns:
+Corpus app counts, pre-delete macro corpus vs final full-set corpus:
 
-- per-app program count before/after table
-- especially:
-  - `tetragon/default`
-  - `tracee/default`
-  - `bcc/vfsstat`
-  - `bpftrace/vfsstat`
+Source `before`: `corpus/results/x86_kvm_corpus_20260421_232916_947372/result.json`
+Source `after`: `corpus/results/x86_kvm_corpus_20260422_234543_434541/result.json`
+
+| app | before | after | delta |
+| --- | ---: | ---: | ---: |
+| `bcc/capable` | 1 | 1 | 0 |
+| `bcc/execsnoop` | 2 | 2 | 0 |
+| `bcc/bindsnoop` | 3 | 3 | 0 |
+| `bcc/biosnoop` | 3 | 3 | 0 |
+| `bcc/vfsstat` | 3 | 5 | +2 |
+| `bcc/opensnoop` | 1 | 3 | +2 |
+| `bcc/syscount` | 2 | 2 | 0 |
+| `bcc/tcpconnect` | 3 | 3 | 0 |
+| `bcc/tcplife` | 1 | 1 | 0 |
+| `bcc/runqlat` | 3 | 3 | 0 |
+| `scx/rusty` | 11 | 13 | +2 |
+| `tetragon/default` | 1 | 35 | +34 |
+| `katran` | 1 | 1 | 0 |
+| `tracee/default` | 3 | 37 | +34 |
+| `bpftrace/capable` | 1 | 1 | 0 |
+| `bpftrace/biosnoop` | 2 | 2 | 0 |
+| `bpftrace/vfsstat` | 2 | 2 | 0 |
+| `bpftrace/runqlat` | 3 | 3 | 0 |
+| `bpftrace/tcplife` | 1 | 1 | 0 |
+| `bpftrace/tcpretrans` | 1 | 1 | 0 |
+
+Most important restorations:
+
+- `tetragon/default`: `1 -> 35`
+- `tracee/default`: `3 -> 37`
+- `bcc/vfsstat`: `3 -> 5`
+- `bcc/opensnoop`: `1 -> 3`
+- `scx/rusty`: `11 -> 13`
+
+The threshold-refresh numbers that were explicitly rolled back were the static expectations, not the new authoritative counts. After deleting the thresholds, the suite simply accepts what the kernel actually loaded.
 
 ## Result Metrics To Update
 
-Pending update after `vm-corpus SAMPLES=1`:
+Comparing pre-delete macro corpus (`20260421_232916_947372`) vs final full-set corpus (`20260422_234543_434541`):
 
-- `applied_sample_count`
-- `comparison_exclusion_reason_counts.no_programs_changed_in_loader`
-- the list/status of the previously failing apps
-- artifact paths for both `vm-e2e` smoke and `vm-corpus`
+- `summary.applied_sample_count`: `12 -> 23`
+- `summary.comparison_exclusion_reason_counts.no_programs_changed_in_loader`: `36 -> 38`
+- corpus top-level statuses: `{'ok': 20}` in the final run
+
+Comparing the first full-set rerun that still failed top-level (`20260422_224118_343109`) vs the final full-set rerun:
+
+- `summary.applied_sample_count`: `23 -> 23` (unchanged)
+- `summary.comparison_exclusion_reason_counts.no_programs_changed_in_loader`: `38 -> 38` (unchanged)
+- corpus top-level statuses: `{'error': 1, 'ok': 19} -> {'ok': 20}`
+- the only top-level recovery was `tracee/default`
+
+Minimal-sample corpus final statuses:
+
+- all 20 apps finished `ok`
+- `tracee/default` no longer fails the entire app on the single-program `EINVAL`
 
 ## Breakage / Fixes During This Turn
 
-Observed so far:
+Observed and fixed:
 
 - `runner/libs/app_runners/scx.py`
   - deletion/refactor fallout removed the `os` import used by `preferred_path()`
   - first smoke rerun failed with `name 'os' is not defined`
-  - fixed by restoring `import os`
+  - fixed by restoring `import os` at `runner/libs/app_runners/scx.py:3`
+- `runner/libs/case_common.py:199-202,437-467` and `corpus/driver.py:1203-1205`
+  - first post-cleanup smoke rerun still leaked `requested_prog_ids` through `kinsn_modules.lifecycle_runs[*]`
+  - fixed by removing the metadata write entirely and cloning only daemon metadata, not requested/apply subsets
+- `corpus/driver.py:1004-1029`
+  - the first full-set corpus rerun surfaced a genuine per-program apply failure in `tracee/default`:
+    - program `167`
+    - `syscall__init_module`
+    - `raw_tracepoint`
+    - daemon error `BPF_PROG_REJIT: Invalid argument (os error 22)`
+  - that failure should not mark the entire app `error` when other programs in the same app still produce comparable measurements
+  - fix: treat apply errors as app-fatal only when they leave the app with zero comparable program measurements
 
-Pending update after reruns:
+No additional breakage appeared after those fixes:
 
-- whether `vm-e2e` smoke and `vm-corpus SAMPLES=1` expose any additional breakage caused by removing selection / thresholds
+- final `make vm-e2e E2E_SMOKE=1`: PASS
+- final `make vm-corpus SAMPLES=1`: PASS
