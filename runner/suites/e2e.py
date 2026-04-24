@@ -34,11 +34,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     add_common_args(parser)
     parser.set_defaults(workspace=str(ROOT_DIR), target_name="local")
-    parser.add_argument(
-        "--e2e-smoke",
-        action="store_true",
-        help="Run e2e/driver.py in smoke mode.",
-    )
     parser.add_argument("--daemon-binary", default="", help="Override the bpfrejit-daemon binary path.")
     parser.add_argument("--native-repos", default="", help="Comma-separated native repo artifacts to validate.")
     parser.add_argument("--scx-packages", default="", help="Comma-separated SCX package artifacts to validate.")
@@ -71,8 +66,6 @@ def _runtime_env(workspace: Path, args: argparse.Namespace) -> dict[str, str]:
 
 def _e2e_driver_argv(args: argparse.Namespace, daemon_binary: Path) -> list[str]:
     argv = ["all", "--daemon", str(daemon_binary)]
-    if args.e2e_smoke and "--smoke" not in args.e2e_argv:
-        argv.append("--smoke")
     argv.extend(args.e2e_argv)
     return argv
 
