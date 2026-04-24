@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-#![cfg_attr(not(test), allow(dead_code))]
 //! ELF/BTF parsing helpers for real `.bpf.o` test fixtures.
 
 use std::collections::{HashMap, HashSet, VecDeque};

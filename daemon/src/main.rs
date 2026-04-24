@@ -7,6 +7,7 @@
 mod analysis;
 mod bpf;
 mod commands;
+#[cfg(test)]
 mod elf_parser;
 mod insn;
 mod invalidation;
