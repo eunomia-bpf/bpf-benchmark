@@ -370,10 +370,17 @@ impl ProfilerSession {
 impl Drop for ProfilerSession {
     fn drop(&mut self) {
         if let Some(stop_tx) = self.stop_tx.take() {
-            let _ = stop_tx.send(());
+            if let Err(err) = stop_tx.send(()) {
+                eprintln!("profiling stop signal failed during drop: {err}");
+            }
         }
         if let Some(handle) = self.handle.take() {
-            let _ = handle.join();
+            if let Err(payload) = handle.join() {
+                eprintln!(
+                    "profiling thread panicked during drop: {}",
+                    panic_payload_message(payload.as_ref())
+                );
+            }
         }
     }
 }

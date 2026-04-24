@@ -326,7 +326,8 @@ pub fn parse_bpf_object<P: AsRef<Path>>(path: P) -> Result<ElfBpfObject> {
             )
         })
         .collect::<HashMap<_, _>>();
-    let global_data_maps = collect_global_data_maps(&elf, maps.len());
+    let global_data_maps = collect_global_data_maps(&elf, maps.len())
+        .with_context(|| format!("failed to collect global data maps for {}", path.display()))?;
     for global_data_map in global_data_maps {
         let map_index = maps.len();
         maps.push(global_data_map.map);
@@ -510,7 +511,7 @@ struct GlobalDataMap {
     symbol_indices: Vec<usize>,
 }
 
-fn collect_global_data_maps(elf: &Elf<'_>, base_index: usize) -> Vec<GlobalDataMap> {
+fn collect_global_data_maps(elf: &Elf<'_>, base_index: usize) -> Result<Vec<GlobalDataMap>> {
     let mut global_data_maps = Vec::new();
 
     for (section_index, section) in elf.section_headers.iter().enumerate() {
@@ -539,7 +540,12 @@ fn collect_global_data_maps(elf: &Elf<'_>, base_index: usize) -> Vec<GlobalDataM
             continue;
         }
 
-        let value_size = u32::try_from(section.sh_size).ok().unwrap_or(u32::MAX);
+        let value_size = u32::try_from(section.sh_size).with_context(|| {
+            format!(
+                "global data section {} is too large for BPF map metadata: {} bytes",
+                section_name, section.sh_size
+            )
+        })?;
         global_data_maps.push(GlobalDataMap {
             map: ElfMapMetadata {
                 index: base_index + global_data_maps.len(),
@@ -554,7 +560,7 @@ fn collect_global_data_maps(elf: &Elf<'_>, base_index: usize) -> Vec<GlobalDataM
         });
     }
 
-    global_data_maps
+    Ok(global_data_maps)
 }
 
 fn is_global_data_section_name(name: &str) -> bool {
