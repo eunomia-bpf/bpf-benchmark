@@ -23,7 +23,7 @@ from micro.catalog import (
     CatalogTarget,
     load_manifest as load_suite,
 )
-from runner.libs import run_command, smoke_output_path, tail_text
+from runner.libs import run_command, tail_text
 from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
 from runner.libs.environment import (
     require_existing_paths,
@@ -417,12 +417,6 @@ def main(argv: list[str] | None = None) -> int:
         output_path = Path(args.output).resolve()
     else:
         output_path = suite.defaults.output
-        default_runtime_names = set(suite.defaults.runtimes)
-        selected_runtime_names = {runtime.name for runtime in runtimes}
-        full_benchmark_selection = len(benchmarks) == len(suite.benchmarks)
-        authoritative_run = full_benchmark_selection and default_runtime_names.issubset(selected_runtime_names)
-        if not authoritative_run:
-            output_path = smoke_output_path(output_path.parent, "pure_jit")
 
     require_suite_artifacts(suite)
     runner_binary = Path(suite.build.runner_binary).resolve()

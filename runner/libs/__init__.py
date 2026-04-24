@@ -145,12 +145,6 @@ def run_json_command(
         raise RuntimeError(f"command returned no JSON: {' '.join(command)}")
     return json.loads(payload)
 
-
-def smoke_output_path(results_dir: Path, suite: str, *, stamp: str | None = None) -> Path:
-    date_stamp = stamp or datetime.now(timezone.utc).astimezone(timezone.utc).strftime("%Y%m%d")
-    return results_dir / f"{suite}_smoke_{date_stamp}.json"
-
-
 def write_json(path: Path, payload: Any) -> None:
     ensure_parent(path)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")

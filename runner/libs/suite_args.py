@@ -88,7 +88,7 @@ def suite_args_from_env(
             workload_seconds = _prefixed_env(values, prefix, "CORPUS_WORKLOAD_SECONDS")
             extra_args = _prefixed_env(values, prefix, "CORPUS_ARGS")
         else:
-            samples = _env(values, "SAMPLES") or _env(values, "VM_CORPUS_SAMPLES", "30")
+            samples = _env(values, "SAMPLES") or _env(values, "VM_CORPUS_SAMPLES", MICRO_BENCHMARK_DEFAULT_SAMPLES)
             workload_seconds = _env(values, "VM_CORPUS_WORKLOAD_SECONDS")
             extra_args = _env(values, "VM_CORPUS_ARGS")
         args.extend(["--samples", samples])
@@ -98,13 +98,9 @@ def suite_args_from_env(
 
     if suite_name == "e2e":
         if prefix:
-            smoke = _prefixed_env(values, prefix, "E2E_SMOKE", "0")
             extra_args = _prefixed_env(values, prefix, "E2E_ARGS")
         else:
-            smoke = _env(values, "E2E_SMOKE", "0")
             extra_args = _env(values, "E2E_ARGS")
-        if smoke == "1":
-            args.append("--e2e-smoke")
         _append_shell_args(args, extra_args)
         return args
 

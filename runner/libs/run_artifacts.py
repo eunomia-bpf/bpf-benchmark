@@ -11,9 +11,7 @@ from typing import Any, Callable, Mapping, Optional
 from . import ensure_parent
 
 _NON_ALNUM_RE = re.compile(r"[^A-Za-z0-9]+")
-_STAMP_SUFFIX_RE = re.compile(
-    r"_(?:authoritative|smoke)_\d{8}(?:_\d{6})?$|_\d{8}(?:_\d{6})?$"
-)
+_STAMP_SUFFIX_RE = re.compile(r"_(?:authoritative_)?\d{8}(?:_\d{6})?$")
 
 MetadataBuilder = Callable[[str, str, str, Optional[str]], Mapping[str, Any]]
 
