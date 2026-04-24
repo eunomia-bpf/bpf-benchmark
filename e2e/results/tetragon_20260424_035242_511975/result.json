@@ -1,0 +1,21 @@
+{
+  "comparison": {
+    "comparable": false,
+    "reason": "Tetragon case could not run: BPF program set did not stabilize before timeout (timeout_s=20, last_program_count=0, last_program_ids=<none>)"
+  },
+  "duration_s": 8,
+  "error_message": "Tetragon case could not run: BPF program set did not stabilize before timeout (timeout_s=20, last_program_count=0, last_program_ids=<none>)",
+  "generated_at": "2026-04-24T03:53:03.584033+00:00",
+  "limitations": [],
+  "mode": "error",
+  "setup": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "TETRAGON_BINARY=/artifacts/tetragon/bin/tetragon\nTETRAGON_BPF_LIB_DIR=/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon\nSTRESS_NG_BINARY=/usr/bin/stress-ng",
+    "tetragon_binary": "/artifacts/tetragon/bin/tetragon",
+    "tetragon_bpf_lib_dir": "/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon"
+  },
+  "smoke": true,
+  "status": "error",
+  "tetragon_binary": "/artifacts/tetragon/bin/tetragon"
+}

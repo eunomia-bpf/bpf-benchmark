@@ -1,0 +1,44 @@
+{
+  "case": "scx",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "generated_at": "2026-04-24T02:53:42.295676+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-24T02:53:42.295673+00:00",
+  "launcher_boot_id": "d3597057-c294-4e91-93ab-ee3908dfc0d2",
+  "launcher_pid": 1722,
+  "launcher_start_ticks": 36796,
+  "optimization_summary": {
+    "case": "scx",
+    "kinsn_enabled": true,
+    "smoke": true,
+    "status": "running"
+  },
+  "policy": {
+    "exclusions": {
+      "struct_ops": [
+        "map_inline",
+        "dce"
+      ]
+    }
+  },
+  "run_type": "scx",
+  "smoke": true,
+  "started_at": "2026-04-24T02:53:42.294051+00:00",
+  "status": "running",
+  "suite": "e2e"
+}
