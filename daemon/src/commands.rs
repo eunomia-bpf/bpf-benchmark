@@ -426,10 +426,6 @@ fn maybe_attach_original_verifier_states(
     map_ids: &[u32],
     program: &mut pass::BpfProgram,
 ) {
-    if orig_insns.is_empty() {
-        return;
-    }
-
     let mut probe_insns = orig_insns.to_vec();
     let map_fd_bindings = pass::build_map_fd_bindings(orig_insns, map_ids);
     let capture = (|| -> Result<Vec<verifier_log::VerifierInsn>> {
@@ -478,11 +474,14 @@ pub(crate) fn try_apply_one(
     let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
 
     let prog_name = info.name_str().to_string();
-    let orig_insn_count = if !orig_insns.is_empty() {
-        orig_insns.len()
-    } else {
-        info.orig_prog_len as usize / 8
-    };
+    if orig_insns.is_empty() {
+        anyhow::bail!(
+            "prog {} ({}) is missing original bytecode from BPF_PROG_GET_ORIGINAL",
+            prog_id,
+            prog_name
+        );
+    }
+    let orig_insn_count = orig_insns.len();
 
     let make_result = |status: &str,
                        applied: bool,
@@ -529,22 +528,6 @@ pub(crate) fn try_apply_one(
             error_message,
         }
     };
-
-    if orig_insns.is_empty() {
-        return Ok(make_result(
-            "ok",
-            false,
-            false,
-            0,
-            orig_insn_count,
-            vec![],
-            vec![],
-            0,
-            0,
-            vec![],
-            None,
-        ));
-    }
 
     // Fetch map IDs for FD relocation before REJIT.
     let map_ids =
@@ -611,52 +594,55 @@ pub(crate) fn try_apply_one(
             let fd_array = build_prog_load_fd_array(&program.required_btf_fds);
 
             let rejit_start = Instant::now();
-            let verify_result =
-                match bpf::bpf_prog_load_verify(prog_load_meta, &verify_insns, &fd_array) {
-                    Ok(result) => {
-                        let states = if result.verifier_log.is_empty() {
-                            if result.log_true_size > 0 {
-                                eprintln!(
+            let verify_result = match bpf::bpf_prog_load_verify(
+                prog_load_meta,
+                &verify_insns,
+                &fd_array,
+            ) {
+                Ok(result) => {
+                    let states = if result.verifier_log.is_empty() {
+                        if result.log_true_size > 0 {
+                            eprintln!(
                                     "    WARN: accepted pass '{}' for prog {} ({}) exceeded the verifier log buffer (true size {} bytes); verifier-guided states are unavailable for subsequent passes",
                                     pass_name,
                                     prog_id,
                                     info.name_str(),
                                     result.log_true_size
                                 );
-                            }
-                            Vec::new()
-                        } else {
-                            match parse_verifier_states_from_log(
-                                &result.verifier_log,
-                                "BPF_PROG_LOAD(log_level=2) per-pass verify",
-                            ) {
-                                Ok(states) => states,
-                                Err(err) => {
-                                    eprintln!(
+                        }
+                        Vec::new()
+                    } else {
+                        match parse_verifier_states_from_log(
+                            &result.verifier_log,
+                            "BPF_PROG_LOAD(log_level=2) per-pass verify",
+                        ) {
+                            Ok(states) => states,
+                            Err(err) => {
+                                eprintln!(
                                         "    WARN: accepted pass '{}' for prog {} ({}) produced an unusable verifier log: {:#}; verifier-guided states are unavailable for subsequent passes",
                                         pass_name,
                                         prog_id,
                                         info.name_str(),
                                         err
                                     );
-                                    Vec::new()
-                                }
+                                Vec::new()
                             }
-                        };
-                        pass::PassVerifyResult::accepted_with_verifier_states(states)
-                    }
-                    Err(err) => {
-                        let headline = error_headline(&err);
-                        eprintln!(
-                            "    WARN: skipping pass '{}' for prog {} ({}): {}",
-                            pass_name,
-                            prog_id,
-                            info.name_str(),
-                            headline,
-                        );
-                        pass::PassVerifyResult::rejected(headline)
-                    }
-                };
+                        }
+                    };
+                    pass::PassVerifyResult::accepted_with_verifier_states(states)
+                }
+                Err(err) => {
+                    let headline = error_headline(&err);
+                    eprintln!(
+                        "    WARN: skipping pass '{}' for prog {} ({}): {}",
+                        pass_name,
+                        prog_id,
+                        info.name_str(),
+                        headline,
+                    );
+                    pass::PassVerifyResult::rejected(headline)
+                }
+            };
             total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
             Ok(verify_result)
         };
@@ -731,9 +717,9 @@ pub(crate) fn try_apply_one(
             "no_change"
         };
         if let Some(debug) = attempt_debug.as_mut() {
-            debug.warnings.push(
-                "final optimized program was unchanged; skipping final REJIT".to_string(),
-            );
+            debug
+                .warnings
+                .push("final optimized program was unchanged; skipping final REJIT".to_string());
         }
         return Ok(make_result(
             "ok",
