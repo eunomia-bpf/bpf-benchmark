@@ -89,14 +89,12 @@ class ScxSchedulerSession(AgentSession):
         super().__init__(load_timeout)
         self.binary = binary
         self.extra_args = list(extra_args)
-        self.command_used: list[str] | None = None
         self.before_ids: set[int] = set()
 
     def __enter__(self) -> "ScxSchedulerSession":
         command_text = " ".join(["set -euo pipefail;", "ulimit -l unlimited;", "exec",
                                   shlex.quote(str(self.binary)), "--stats", "1",
                                   *[shlex.quote(str(arg)) for arg in self.extra_args]])
-        self.command_used = ["bash", "-lc", command_text]
         self.before_ids = {
             int(program.get("id", 0) or 0)
             for program in _bpftool_programs()
@@ -335,7 +333,6 @@ class ScxRunner(AppRunner):
         session = ScxSchedulerSession(self.scheduler_binary, self.scheduler_extra_args, self.load_timeout_s)
         session.__enter__()
         self.session = session
-        self.command_used = list(session.command_used or [])
         self.programs = [dict(program) for program in session.programs]
         return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
 

@@ -13,7 +13,7 @@ if __package__ in {None, ""}:
 from runner.libs import which  # noqa: E402
 from runner.libs.app_runners.setup_support import repo_artifact_root  # noqa: E402
 from runner.libs.app_runners.base import AppRunner  # noqa: E402
-from runner.libs.app_runners.scx import ScxRunner, read_scx_ops, read_scx_state  # noqa: E402
+from runner.libs.app_runners.scx import ScxRunner, read_scx_ops  # noqa: E402
 from runner.libs.bpf_stats import compute_delta, sample_bpf_stats  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
     sample_cpu_usage,
@@ -407,10 +407,9 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         "# scx_rusty End-to-End Benchmark",
         "",
         f"- Generated: {payload['generated_at']}",
-        f"- Mode: `{payload['mode']}`",
         f"- Duration per workload: `{payload['duration_s']}s`",
         f"- Kernel: `{payload['host']['kernel']}`",
-        f"- Scheduler binary: `{payload.get('scheduler_binary') or 'missing'}`",
+        f"- Scheduler binary: `{payload['scheduler_binary']}`",
     ]
     if status != "ok":
         lines.extend(
@@ -485,8 +484,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
 
     workloads = workload_specs()
 
-    state_before = read_scx_state()
-
     prepared_daemon_session = getattr(args, "_prepared_daemon_session", None)
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")
@@ -500,7 +497,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         nonlocal scheduler_program_ids, scheduler_programs
         runner = ScxRunner(
             scheduler_binary=scheduler_binary,
-            scheduler_extra_args=[],
             load_timeout_s=DEFAULT_LOAD_TIMEOUT,
             workload_spec={"name": "hackbench", "kind": "hackbench", "metric": "runs/s"},
         )
@@ -664,14 +660,11 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     if post_rejit is None:
         error_message = "scx post-ReJIT phase is missing"
 
-    mode = "scx_rusty_loader"
-
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": "error" if error_message else "ok",
-        "mode": mode,
         "duration_s": duration_s,
-        "scheduler_binary": str(scheduler_binary) if scheduler_binary.exists() else None,
+        "scheduler_binary": str(scheduler_binary),
         "scheduler_programs": scheduler_programs,
         "scheduler_ops": scheduler_ops,
         "scheduler_output": scheduler_snapshot,
