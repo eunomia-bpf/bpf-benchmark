@@ -1145,7 +1145,7 @@ def run_named_workload(
         return run_scheduler_load(seconds)
     if kind == "exec_storm":
         return run_exec_storm(seconds, rate=2)
-    if kind in {"exec_loop", "minimal_syscall"}:
+    if kind == "exec_loop":
         return run_user_exec_loop(seconds)
     if kind in {"file_open", "file_open_storm"}:
         return run_file_open_load(seconds)
@@ -1182,8 +1182,6 @@ def run_named_workload(
         while time.monotonic() < deadline:
             list(Path("/proc/self/task").iterdir()); ops_total += 1.0
         return _finish_result(ops_total, time.monotonic() - start, "", "")
-    if kind in {"mixed_system", "system_telemetry_mix"}:
-        return run_mixed_workload(float(seconds))
     if kind == "security_policy_mix":
         return run_open_storm(seconds)
     if kind == "oom_stress":
