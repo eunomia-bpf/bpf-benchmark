@@ -53,10 +53,10 @@ Run inside the framework-kernel VM:
 make vm-micro
 ```
 
-Run a specific pass profile through the daemon-backed VM path:
+Run a targeted VM benchmark with current knobs:
 
 ```bash
-make vm-micro PROFILE=ablation_wide_mem
+make vm-micro BENCH=simple SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
 ```
 
 Run a targeted smoke test directly:
