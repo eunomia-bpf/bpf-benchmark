@@ -15,6 +15,7 @@
 - Deleted Python compat/shim paths:
   - `runner/libs/rejit.py`: removed policy-context aliases (`object_basename`, `program_name`, `section_name`, `prog_type_name`), env alias `benchmark-default`, and `passes.active` fallback.
   - `runner/libs/case_common.py`: removed `object_basename`, `prog_name`, and `prog_type_name` fallback reads.
+  - `corpus/driver.py`: removed the last live `prog_type_name` consumer; corpus program-type inference now uses section-name inference only.
   - `runner/suites/{corpus,e2e,test}.py`, `runner/libs/suite_commands.py`, `runner/suites/_common.py`: removed singular repeated CLI shims (`--native-repo`, `--scx-package`) and dead merge helper; kept only canonical plural CSV form.
   - `runner/suites/corpus.py`: removed suite-level `--workload-seconds` alias; canonical input is `--corpus-workload-seconds`.
   - `micro/driver.py`: removed silent missing-baseline fallback; now hard-fails when configured baseline is absent.
@@ -40,10 +41,10 @@
   - `object_basename`
   - `passes.active`
   - `active: performance`
+  - `prog_type_name`
   - activity patterns B/C
-- Remaining `prog_type_name` hit is only `corpus/driver.py`, skipped because the file was already dirty from another Codex run.
 
 ## Diff Proof / Self Review
-- Code-only diff shortstat: `11 files changed, 51 insertions(+), 63 deletions(-)`.
-- Removed fields/options were checked for live source-tree consumers before deletion; no remaining source-tree producer/consumer pair was found for `benchmark-default`, `object_basename`, singular repo/package flags, or `passes.active`.
+- Code-only diff shortstat: `12 files changed, 69 insertions(+), 74 deletions(-)`.
+- Removed fields/options were checked for live source-tree consumers before deletion; no remaining source-tree producer/consumer pair was found for `benchmark-default`, `object_basename`, `prog_type_name`, singular repo/package flags, or `passes.active`.
 - Residual compat-looking hits are either algorithmic necessities, required runtime integration, or blocked by the explicit conflict-avoidance rules above.

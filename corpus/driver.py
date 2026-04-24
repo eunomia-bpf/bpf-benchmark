@@ -138,9 +138,6 @@ def _mean_exec_ns(records: Mapping[str, Mapping[str, object]]) -> float | None:
 
 
 def _infer_prog_type_name(program: Any) -> str:
-    prog_type = str(getattr(program, "prog_type_name", "") or "").strip().lower()
-    if prog_type and prog_type != "unspec":
-        return prog_type
     section_name = str(getattr(program, "section_name", "") or "").strip().lower()
     section_root = section_name.split("/", 1)[0]
     if section_root in SECTION_TYPE_PREFIXES:
@@ -148,7 +145,7 @@ def _infer_prog_type_name(program: Any) -> str:
     for prefix, inferred_type in SECTION_TYPE_PREFIXES.items():
         if section_name.startswith(prefix):
             return inferred_type
-    return prog_type or "unspec"
+    return "unspec"
 
 
 def _has_phase_measurement(records: Mapping[str, Mapping[str, object]]) -> bool:
