@@ -39,11 +39,9 @@ impl MapValueReader for MockTrackerReader {
 
 #[test]
 fn test_kinsn_fd_arrays_reserve_slot_zero() {
-    assert!(build_prog_load_fd_array(&[]).is_empty());
     assert!(build_rejit_fd_array(&[]).is_empty());
 
     let required = [11, 22];
-    assert_eq!(build_prog_load_fd_array(&required), vec![11, 11, 22]);
     assert_eq!(build_rejit_fd_array(&required), vec![11, 11, 22]);
 }
 
@@ -240,8 +238,14 @@ fn test_serve_optimize_response_omits_attempt_debug_payloads() {
 
     assert_eq!(parsed["status"], "error");
     assert_eq!(parsed["program"]["prog_name"], "demo_prog");
-    assert_eq!(parsed["passes"][0]["verify_error"], "BPF_PROG_REJIT: Operation not permitted");
-    assert_eq!(parsed["error_message"], "BPF_PROG_REJIT: Operation not permitted");
+    assert_eq!(
+        parsed["passes"][0]["verify_error"],
+        "BPF_PROG_REJIT: Operation not permitted"
+    );
+    assert_eq!(
+        parsed["error_message"],
+        "BPF_PROG_REJIT: Operation not permitted"
+    );
     assert_eq!(parsed["attempts"].as_array().unwrap().len(), 1);
     assert_eq!(parsed["attempts"][0]["result"], "rejit_failed");
     assert_eq!(parsed["attempts"][0]["failure_pc"], 42);
@@ -581,7 +585,7 @@ fn test_verifier_rejection_count_counts_rejected_passes() {
 #[test]
 fn test_build_pipeline_default() {
     let ctx = pass::PassContext::test_default();
-    let pm = build_pipeline();
+    let pm = crate::passes::build_full_pipeline();
     let exit_insn = crate::insn::BpfInsn {
         code: crate::insn::BPF_JMP | crate::insn::BPF_EXIT,
         regs: 0,
@@ -617,7 +621,5 @@ fn test_parse_verifier_states_from_log_rejects_nonempty_log_without_states() {
     )
     .expect_err("non-empty logs without parseable states should be rejected");
 
-    assert!(err
-        .to_string()
-        .contains("parser found no state snapshots"));
+    assert!(err.to_string().contains("parser found no state snapshots"));
 }

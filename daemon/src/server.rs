@@ -242,11 +242,12 @@ pub(crate) fn cmd_serve(socket_path: &str, ctx: &pass::PassContext) -> Result<()
                 if result.status != "ok" {
                     anyhow::bail!(
                         "{}",
-                        result
-                            .error_message
-                            .unwrap_or_else(|| {
-                                format!("optimize prog {} returned status {}", prog_id, result.status)
-                            })
+                        result.error_message.unwrap_or_else(|| {
+                            format!(
+                                "optimize prog {} returned status {}",
+                                prog_id, result.status
+                            )
+                        })
                     );
                 }
                 Ok(())
@@ -461,7 +462,9 @@ fn process_request(
         "optimize" => {
             let prog_id = match req.get("prog_id").and_then(|v| v.as_u64()) {
                 Some(id) => id as u32,
-                None => return serde_json::json!({"status": "error", "error_message": "missing prog_id"}),
+                None => {
+                    return serde_json::json!({"status": "error", "error_message": "missing prog_id"})
+                }
             };
             let mode = match request_mode(req) {
                 Ok(mode) => mode,
@@ -492,10 +495,17 @@ fn process_request(
                         "error_message": format!("failed to serialize result: {}", e)
                     }),
                 },
-                Err(e) => serde_json::json!({
-                    "status": "error",
-                    "error_message": commands::summarize_error(&e),
-                }),
+                Err(e) => {
+                    let error_message = format!("{e:#}")
+                        .lines()
+                        .next()
+                        .unwrap_or("<empty error message>")
+                        .to_string();
+                    serde_json::json!({
+                        "status": "error",
+                        "error_message": error_message,
+                    })
+                }
             }
         }
         "optimize-all" => {
@@ -876,10 +886,9 @@ mod tests {
         );
         let tracker = Arc::new(Mutex::new(tracker));
 
-        let err = process_invalidation_tick(&tracker, |_prog_id| {
-            anyhow::bail!("reoptimization failed")
-        })
-        .expect_err("process_invalidation_tick should fail when reoptimization fails");
+        let err =
+            process_invalidation_tick(&tracker, |_prog_id| anyhow::bail!("reoptimization failed"))
+                .expect_err("process_invalidation_tick should fail when reoptimization fails");
 
         let message = format!("{err:#}");
         assert!(message.contains("invalidation reoptimization failed"));
@@ -1050,7 +1059,10 @@ mod tests {
         );
 
         assert_eq!(response["status"], "error");
-        assert_eq!(response["error_message"], "interval_ms must be greater than zero");
+        assert_eq!(
+            response["error_message"],
+            "interval_ms must be greater than zero"
+        );
     }
 
     #[test]

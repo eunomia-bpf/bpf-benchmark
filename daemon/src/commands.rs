@@ -232,19 +232,6 @@ pub(crate) enum OptimizeMode {
     DryRun,
 }
 
-impl OptimizeMode {
-    fn should_apply(self) -> bool {
-        matches!(self, Self::Apply)
-    }
-}
-
-// ── Pipeline helpers ────────────────────────────────────────────────
-
-/// Build the daemon's default optimization pipeline.
-pub(crate) fn build_pipeline() -> pass::PassManager {
-    passes::build_full_pipeline()
-}
-
 pub(crate) type SharedInvalidationTracker = Arc<Mutex<MapInvalidationTracker<BpfMapValueReader>>>;
 
 pub(crate) fn new_invalidation_tracker() -> SharedInvalidationTracker {
@@ -360,10 +347,6 @@ fn build_rejit_fd_array(required_btf_fds: &[RawFd]) -> Vec<RawFd> {
     fd_array
 }
 
-fn build_prog_load_fd_array(required_btf_fds: &[RawFd]) -> Vec<RawFd> {
-    build_rejit_fd_array(required_btf_fds)
-}
-
 fn new_attempt_debug(pass_traces: Vec<pass::PassDebugTrace>) -> Option<AttemptDebug> {
     Some(AttemptDebug {
         pass_traces,
@@ -381,10 +364,6 @@ fn error_headline(err: &anyhow::Error) -> String {
         .next()
         .unwrap_or("<empty error message>")
         .to_string()
-}
-
-pub(crate) fn summarize_error(err: &anyhow::Error) -> String {
-    error_headline(err)
 }
 
 fn parse_verifier_states_from_log(
@@ -547,12 +526,12 @@ pub(crate) fn try_apply_one(
     program.set_map_ids(map_ids.clone());
     program.verifier_states = original_verifier_states.clone();
 
-    let pm = build_pipeline();
+    let pm = passes::build_full_pipeline();
     let mut local_ctx = ctx.clone();
     local_ctx.prog_type = info.prog_type;
 
     let pipeline_start = Instant::now();
-    let pipeline_result = if mode.should_apply() {
+    let pipeline_result = if matches!(mode, OptimizeMode::Apply) {
         let prog_load_meta = bpf::bpf_prog_load_meta_from_prog_info(prog_id, fd.as_raw_fd(), &info)
             .context("prepare live-program metadata for per-pass BPF_PROG_LOAD verify");
         let mut verifier = |pass_name: &str,
@@ -591,7 +570,7 @@ pub(crate) fn try_apply_one(
                 &local_ctx,
                 &format!("per-pass verify for '{}'", pass_name),
             )?;
-            let fd_array = build_prog_load_fd_array(&program.required_btf_fds);
+            let fd_array = build_rejit_fd_array(&program.required_btf_fds);
 
             let rejit_start = Instant::now();
             let verify_result = match bpf::bpf_prog_load_verify(
@@ -676,7 +655,7 @@ pub(crate) fn try_apply_one(
     let final_insn_count = program.insns.len();
     let mut attempt_debug = new_attempt_debug(pipeline_result.debug_traces.clone());
 
-    if !mode.should_apply() {
+    if !matches!(mode, OptimizeMode::Apply) {
         return Ok(make_result(
             "ok",
             false,
