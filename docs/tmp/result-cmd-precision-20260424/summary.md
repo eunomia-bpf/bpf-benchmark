@@ -1,7 +1,6 @@
 # Result / Cmd Precision Audit 2026-04-24
 
 ## Scope
-
 - Guardrails respected: no edits to `runner/libs/app_runners/tracee.py`, `e2e/cases/tracee/case.py`, `runner/containers/runner-runtime.Dockerfile`, or `runner/mk/build.mk`; no `make vm-*`.
 - This round produced code commits `d3988906`, `68d837a9`, `7e5ff83d`, `8ef8a196`.
 
