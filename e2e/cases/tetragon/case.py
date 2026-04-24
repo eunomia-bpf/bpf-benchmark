@@ -259,37 +259,6 @@ def aggregate_programs(phase: Mapping[str, object]) -> dict[str, dict[str, objec
     return aggregated
 
 
-def summarize_program_activity(
-    phase: Mapping[str, object],
-    prog_ids: Sequence[int],
-) -> dict[str, object]:
-    aggregated = aggregate_programs(phase)
-    rows: list[dict[str, object]] = []
-    total_run_cnt = 0
-    total_run_time_ns = 0
-    for prog_id in [int(value) for value in prog_ids if int(value) > 0]:
-        record = aggregated.get(str(prog_id), {})
-        run_cnt = int(record.get("run_cnt_delta", 0) or 0)
-        run_time_ns = int(record.get("run_time_ns_delta", 0) or 0)
-        total_run_cnt += run_cnt
-        total_run_time_ns += run_time_ns
-        rows.append(
-            {
-                "id": prog_id,
-                "name": str(record.get("name") or f"id-{prog_id}"),
-                "run_cnt_delta": run_cnt,
-                "run_time_ns_delta": run_time_ns,
-                "avg_ns_per_run": (run_time_ns / run_cnt) if run_cnt > 0 else None,
-            }
-        )
-    return {
-        "programs": rows,
-        "total_run_cnt": total_run_cnt,
-        "total_run_time_ns": total_run_time_ns,
-        "avg_ns_per_run": (total_run_time_ns / total_run_cnt) if total_run_cnt > 0 else None,
-    }
-
-
 def build_program_summary(
     rejit_result: Mapping[str, object] | None,
     baseline: Mapping[str, object],
@@ -368,26 +337,6 @@ def compare_phases(baseline: Mapping[str, object], post: Mapping[str, object] | 
     return {"comparable": True, "workloads": workload_rows}
 
 
-def append_preflight_markdown(lines: list[str], payload: Mapping[str, object]) -> None:
-    preflight = payload.get("preflight")
-    if not isinstance(preflight, Mapping):
-        return
-
-    activity = preflight.get("program_activity") if isinstance(preflight.get("program_activity"), Mapping) else {}
-    program_activity = activity.get("programs") if isinstance(activity, Mapping) else {}
-
-    lines.extend(["", "## Preflight", ""])
-    for workload in preflight.get("workloads") or []:
-        if not isinstance(workload, Mapping):
-            continue
-        lines.append(
-            f"- {workload.get('name', 'unknown')}: "
-            f"events/s={workload.get('events_per_sec')}, "
-            f"bpf_avg_ns={((workload.get('bpf') or {}).get('summary', {}).get('avg_ns_per_run'))}, "
-            f"program_runs={((program_activity or {}).get('total_run_cnt'))}"
-        )
-
-
 def build_markdown(payload: Mapping[str, object]) -> str:
     lines = [
         "# Tetragon Real End-to-End Benchmark",
@@ -415,7 +364,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
                 f"- Reason: `{result_reason}`",
             ]
         )
-        append_preflight_markdown(lines, payload)
         limitations = payload.get("limitations") or []
         if limitations:
             lines.extend(["", "## Limitations", ""])
@@ -515,7 +463,6 @@ def error_payload(
     setup_result: Mapping[str, object],
     error_message: str,
     limitations: Sequence[str],
-    preflight: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -536,7 +483,6 @@ def error_payload(
         "programs": [],
         "comparison": {"comparable": False, "reason": error_message},
         "limitations": list(limitations),
-        "preflight": dict(preflight or {}) if preflight else None,
     }
 
 
@@ -548,14 +494,11 @@ def daemon_payload(
     tetragon_binary: str,
     workloads: Sequence[WorkloadSpec],
     duration_s: int,
-    preflight_duration_s: int,
     smoke: bool,
     load_timeout: int,
     setup_result: Mapping[str, object],
     limitations: list[str],
 ) -> dict[str, object]:
-    preflight: dict[str, object] | None = None
-
     def setup() -> dict[str, object]:
         return {}
 
@@ -581,25 +524,6 @@ def daemon_payload(
                 },
             },
         )
-
-    def before_baseline(_: object, lifecycle: CaseLifecycleState) -> LifecycleAbort | None:
-        nonlocal preflight
-        if preflight_duration_s <= 0 or not workloads:
-            return None
-        runner = lifecycle.runtime
-        assert isinstance(runner, TetragonRunner)
-        preflight = run_phase(
-            runner,
-            list(workloads),
-            preflight_duration_s,
-            lifecycle.prog_ids,
-            agent_pid=runner.pid,
-        )
-        preflight["program_activity"] = {
-            "programs": summarize_program_activity(preflight, lifecycle.prog_ids),
-        }
-        lifecycle.artifacts["preflight"] = preflight
-        return None
 
     def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
         del phase_name
@@ -646,7 +570,6 @@ def daemon_payload(
         workload=workload,
         stop=stop,
         cleanup=cleanup,
-        before_baseline=before_baseline,
         before_rejit=before_rejit,
     )
     if lifecycle_result.abort is not None:
@@ -658,7 +581,6 @@ def daemon_payload(
             setup_result=setup_result,
             error_message=lifecycle_result.abort.reason,
             limitations=limitations,
-            preflight=preflight,
         )
     if lifecycle_result.state is None or lifecycle_result.baseline is None:
         return error_payload(
@@ -669,7 +591,6 @@ def daemon_payload(
             setup_result=setup_result,
             error_message="Tetragon lifecycle completed without a baseline phase",
             limitations=limitations,
-            preflight=preflight,
         )
 
     runner = lifecycle_result.state.runtime
@@ -700,7 +621,6 @@ def daemon_payload(
         "config": dict(config),
         "tetragon_programs": lifecycle_result.artifacts.get("tetragon_programs") or [],
         "agent_logs": runner.process_output,
-        "preflight": preflight,
         "baseline": baseline,
         "scan_results": {str(key): value for key, value in scan_results.items()},
         "rejit_result": rejit_result,
@@ -727,7 +647,6 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
             else int(config.get("measurement_duration_s", DEFAULT_DURATION_S) or DEFAULT_DURATION_S)
         )
     )
-    preflight_duration_s = int(config.get("preflight_duration_s", 0) or 0)
     workloads = workload_specs_from_config(config)
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary)
@@ -759,7 +678,6 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
                 tetragon_binary=tetragon_binary,
                 workloads=workloads,
                 duration_s=duration_s,
-                preflight_duration_s=preflight_duration_s,
                 smoke=bool(args.smoke),
                 load_timeout=DEFAULT_LOAD_TIMEOUT_S,
                 setup_result=setup_result,
