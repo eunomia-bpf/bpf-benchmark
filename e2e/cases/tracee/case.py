@@ -391,9 +391,7 @@ def measure_latency_probes(
     }
 
 
-def verify_phase_measurement(record: Mapping[str, object], *, require_tracee_activity: bool) -> None:
-    if not require_tracee_activity:
-        return
+def verify_phase_measurement(record: Mapping[str, object]) -> None:
     if int(record.get("event_parse_errors", 0) or 0) > 0:
         raise RuntimeError(
             f"{record.get('name')} encountered malformed Tracee event-file lines: "
@@ -1052,7 +1050,6 @@ def run_phase(
     collector: TraceeOutputCollector | None,
     runner: TraceeRunner | None = None,
     control_records: Sequence[Mapping[str, object]] | None = None,
-    require_tracee_activity: bool = False,
 ) -> dict[str, object]:
     del control_records
     records: list[dict[str, object]] = []
@@ -1081,7 +1078,8 @@ def run_phase(
             collector=collector,
         )
         record["warmup"] = warmup
-        verify_phase_measurement(record, require_tracee_activity=require_tracee_activity and phase_name != "control")
+        if phase_name != "control":
+            verify_phase_measurement(record)
         records.append(record)
     return {
         "phase": phase_name,
@@ -1146,7 +1144,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     statistics_config = config.get("statistics") if isinstance(config.get("statistics"), Mapping) else {}
     ci_iterations = int((statistics_config or {}).get("bootstrap_iterations") or DEFAULT_BOOTSTRAP_ITERATIONS)
     ci_seed = int((statistics_config or {}).get("bootstrap_seed") or DEFAULT_BOOTSTRAP_SEED)
-    require_program_activity = bool(config.get("require_program_activity", False))
 
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary)
@@ -1165,17 +1162,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             setup_result=setup_result,
             smoke=bool(args.smoke),
             error_message="Tracee binary is unavailable in this environment; manual .bpf.o path is forbidden.",
-            limitations=limitations,
-        )
-    if require_program_activity and preflight_duration_s <= 0:
-        limitations.append("require_program_activity requires preflight_duration_s > 0.")
-        return error_payload(
-            config=config,
-            duration_s=duration_s,
-            tracee_binary=tracee_binary,
-            setup_result=setup_result,
-            smoke=bool(args.smoke),
-            error_message="require_program_activity requires preflight_duration_s > 0",
             limitations=limitations,
         )
 
@@ -1272,21 +1258,14 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                         "programs": summarize_program_activity(preflight, lifecycle.prog_ids),
                     }
                     lifecycle.artifacts["preflight"] = preflight
-                    if not require_program_activity:
-                        return None
-
                     program_run_cnt = int(
                         ((preflight.get("program_activity") or {}).get("programs") or {}).get("total_run_cnt", 0)
                         or 0
                     )
                     if program_run_cnt <= 0:
-                        limitations.append(
-                            "Configured Tracee events/workload did not execute the discovered program set during preflight."
-                        )
-                        return LifecycleAbort(
-                            status="error",
-                            reason="preflight observed zero Tracee program executions; workload did not exercise the discovered program set",
-                            artifacts={"preflight": preflight},
+                        raise RuntimeError(
+                            "preflight observed zero Tracee program executions; "
+                            "workload did not exercise the discovered program set"
                         )
                     return None
 
@@ -1308,7 +1287,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                         collector=runner.collector,
                         runner=runner,
                         control_records=control_records,
-                        require_tracee_activity=True,
                     )
                     return attach_control_phase_metrics(
                         phase_result,
