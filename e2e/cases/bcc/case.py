@@ -117,7 +117,6 @@ def run_phase(
     *,
     duration_s: int,
     attach_timeout: int,
-    policy_context: Mapping[str, object],
     prepared_daemon_session: object,
 ) -> tuple[dict[str, object], dict[str, object] | None]:
     """Run baseline then daemon-apply then post-rejit measurement for one tool.
@@ -126,7 +125,6 @@ def run_phase(
     """
     bcc_runner = BCCRunner(
         tool_binary=tool_binary,
-        tool_name=spec.name,
         tool_args=spec.tool_args,
         workload_spec=spec.workload_spec,
         attach_timeout_s=attach_timeout,
@@ -159,9 +157,9 @@ def run_phase(
         artifacts: dict[str, object] = {
             "programs": programs,
             "rejit_policy_context": {
-                str(key): value
-                for key, value in policy_context.items()
-                if str(key).strip() and str(value).strip()
+                "repo": "bcc",
+                "category": "bcc",
+                "level": "e2e",
             },
         }
         return CaseLifecycleState(
@@ -471,11 +469,6 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
                 tool_binary,
                 duration_s=duration_s,
                 attach_timeout=suite.attach_timeout_s,
-                policy_context={
-                    "repo": "bcc",
-                    "category": "bcc",
-                    "level": "e2e",
-                },
                 prepared_daemon_session=prepared_daemon_session,
             )
             summary = summarize_tool(spec, baseline, rejit)

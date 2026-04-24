@@ -368,36 +368,17 @@ class BCCRunner(AppRunner):
     def __init__(
         self,
         *,
-        tool_binary: Path | str | None = None,
-        tool_name: str | None = None,
-        tool_args: Sequence[str] | None = None,
+        tool_binary: Path | str,
+        tool_args: Sequence[str],
         workload_spec: Mapping[str, object],
-        attach_timeout_s: int | None = None,
-        tools_dir: Path | str | None = None,
+        attach_timeout_s: int = DEFAULT_ATTACH_TIMEOUT_SECONDS,
     ) -> None:
         super().__init__()
-        resolved_tool_name = str(tool_name or "").strip()
-        if not resolved_tool_name and tool_binary is None:
-            raise RuntimeError("BCCRunner requires tool_binary or tool_name")
-
-        spec = _bcc_tool_specs().get(resolved_tool_name)
-        self.tool_name = resolved_tool_name or Path(str(tool_binary)).name
-        self.tool_args = (
-            tuple(str(arg) for arg in tool_args if str(arg).strip())
-            if tool_args is not None
-            else (spec.tool_args if spec else ())
-        )
+        self.tool_binary = Path(tool_binary).resolve()
+        self.tool_name = self.tool_binary.name
+        self.tool_args = tuple(str(arg) for arg in tool_args if str(arg).strip())
         self.workload_spec = dict(workload_spec)
-        self.attach_timeout_s = int(attach_timeout_s or DEFAULT_ATTACH_TIMEOUT_SECONDS)
-        self.setup_result: dict[str, object] = {
-            "returncode": 0,
-            "tools_dir": None,
-            "stdout_tail": "",
-            "stderr_tail": "",
-        }
-        self.explicit_tools_dir = Path(tools_dir).resolve() if tools_dir is not None else None
-        self.tools_dir = resolve_tools_dir(self.explicit_tools_dir)
-        self.tool_binary = Path(tool_binary).resolve() if tool_binary is not None else None
+        self.attach_timeout_s = int(attach_timeout_s)
         self.session: ToolProcessSession | None = None
         self._compat_dir: Path | None = None
 
@@ -406,24 +387,11 @@ class BCCRunner(AppRunner):
         return None if self.session is None else int(self.session.process.pid or 0)
 
     def _resolve_tool_binary(self) -> Path:
-        if self.tool_binary is not None:
-            if not self.tool_binary.exists():
-                raise RuntimeError(f"BCC tool binary not found: {self.tool_binary}")
-            if not os.access(self.tool_binary, os.X_OK):
-                raise RuntimeError(f"BCC tool binary is not executable: {self.tool_binary}")
-            return self.tool_binary
-
-        self.setup_result = inspect_bcc_setup()
-        if int(self.setup_result.get("returncode", 0) or 0) != 0:
-            stderr_tail = str(self.setup_result.get("stderr_tail") or "")
-            raise RuntimeError(f"BCC setup failed: {stderr_tail or self.setup_result}")
-        self.tools_dir = resolve_tools_dir(self.explicit_tools_dir, setup_result=self.setup_result)
-
-        tool_binary = find_tool_binary(self.tools_dir, self.tool_name)
-        if tool_binary is None:
-            raise RuntimeError(f"BCC tool '{self.tool_name}' not found in {self.tools_dir}")
-        self.tool_binary = tool_binary
-        return tool_binary
+        if not self.tool_binary.exists():
+            raise RuntimeError(f"BCC tool binary not found: {self.tool_binary}")
+        if not os.access(self.tool_binary, os.X_OK):
+            raise RuntimeError(f"BCC tool binary is not executable: {self.tool_binary}")
+        return self.tool_binary
 
     def start(self) -> list[int]:
         if self.session is not None:
@@ -437,7 +405,6 @@ class BCCRunner(AppRunner):
         self._compat_dir = _prepare_bcc_python_compat(tool_env)
         self.artifacts["bcc_python_compat_dir"] = str(self._compat_dir)
         command = [str(tool_binary), *self.tool_args]
-        self.command_used = list(command)
         before_ids = {
             int(record.get("id", 0) or 0)
             for record in bpftool_prog_show_records()
