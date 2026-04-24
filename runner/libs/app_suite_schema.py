@@ -90,7 +90,7 @@ def _app_args(raw_app: Mapping[str, object], *, field_name: str) -> dict[str, ob
     }
 
 
-def load_app_suite_from_yaml(yaml_path: Path) -> tuple[AppSuite, dict[str, object]]:
+def load_app_suite_from_yaml(yaml_path: Path) -> AppSuite:
     manifest = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
     if not isinstance(manifest, Mapping):
         raise SystemExit(f"app suite YAML root must be a mapping: {yaml_path}")
@@ -133,10 +133,4 @@ def load_app_suite_from_yaml(yaml_path: Path) -> tuple[AppSuite, dict[str, objec
         defaults=defaults,
         apps=tuple(apps),
     )
-    summary = {
-        "manifest": str(yaml_path),
-        "schema_version": schema_version,
-        "suite_name": suite_name,
-        "app_count": len(apps),
-    }
-    return suite, summary
+    return suite

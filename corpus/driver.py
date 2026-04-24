@@ -717,10 +717,8 @@ def _per_app_breakdown(results: Sequence[Mapping[str, object]]) -> list[dict[str
 
 def _build_summary(
     results: Sequence[Mapping[str, object]],
-    *,
-    app_count: int,
-    status_counts: Mapping[str, int],
 ) -> dict[str, object]:
+    status_counts = Counter(str(result.get("status") or "error") for result in results)
     comparable_rows, applied_rows, excluded_rows = _comparison_rows(results)
     comparable_speedups = [
         float(row["speedup"])
@@ -739,7 +737,7 @@ def _build_summary(
         if isinstance(result, Mapping)
     )
     return {
-        "app_count": app_count,
+        "app_count": len(results),
         "discovered_programs": discovered_programs,
         "statuses": dict(sorted(status_counts.items())),
         "sample_count": len(comparable_speedups),
@@ -1022,9 +1020,8 @@ class CorpusAppSession:
     workload_seconds: float
 
 
-def run_suite(args: argparse.Namespace) -> dict[str, object]:
-    suite_path = Path(args.suite).resolve()
-    suite, suite_summary = load_app_suite_from_yaml(suite_path)
+def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
+    suite_path = suite.manifest_path.resolve()
     daemon_binary = Path(args.daemon).resolve()
     if not daemon_binary.exists():
         raise RuntimeError(f"daemon binary not found: {daemon_binary}")
@@ -1172,7 +1169,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
         )
         for app in suite.apps
     ]
-    status_counts = Counter(str(result.get("status") or "error") for result in results)
+    summary = _build_summary(results)
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "manifest": str(suite_path),
@@ -1181,15 +1178,10 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
         "daemon_socket": daemon_socket,
         "samples": samples,
         "workload_seconds": workload_seconds,
-        "suite_summary": suite_summary,
         "results": results,
         "kinsn_modules": kinsn_metadata,
-        "summary": _build_summary(
-            results,
-            app_count=len(suite.apps),
-            status_counts=status_counts,
-        ),
-        "status": "ok" if status_counts.get("error", 0) == 0 else "error",
+        "summary": summary,
+        "status": "ok" if int((summary.get("statuses") or {}).get("error", 0)) == 0 else "error",
     }
     if fatal_error:
         payload["fatal_error"] = fatal_error
@@ -1220,10 +1212,9 @@ def build_run_metadata(
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     output_json = Path(args.output_json).resolve()
-    metadata_suite_path = Path(args.suite).resolve()
-    metadata_suite, _metadata_suite_summary = load_app_suite_from_yaml(metadata_suite_path)
-    resolved_workload_seconds = _workload_seconds(args, metadata_suite.defaults)
-    resolved_samples = _sample_count(args, metadata_suite.defaults)
+    suite = load_app_suite_from_yaml(Path(args.suite).resolve())
+    resolved_workload_seconds = _workload_seconds(args, suite.defaults)
+    resolved_samples = _sample_count(args, suite.defaults)
     run_type = derive_run_type(output_json, "vm_corpus")
     started_at = datetime.now(timezone.utc).isoformat()
     progress_payload: dict[str, object] = {
@@ -1265,7 +1256,7 @@ def main(argv: list[str] | None = None) -> int:
     session.write(status="running", progress_payload=progress_payload)
 
     try:
-        payload = run_suite(args)
+        payload = run_suite(args, suite)
         markdown = build_markdown(payload) + "\n"
         metadata_payload = payload
         ensure_parent(artifact_result_json)
