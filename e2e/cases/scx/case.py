@@ -642,12 +642,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         raise RuntimeError("scx REJIT site_totals.total_sites must be a non-negative integer")
     if applied_site_total_value < 0:
         raise RuntimeError("scx REJIT site_totals.total_sites must be a non-negative integer")
-    applied_site_total = applied_site_total_value
-    comparison = (
-        compare_phases(baseline, post_rejit)
-        if applied_site_total > 0
-        else {"comparable": False, "reason": "no scheduler programs changed during ReJIT apply"}
-    )
+    comparison = compare_phases(baseline, post_rejit)
 
     error_message = ""
     rejit_error = ""
