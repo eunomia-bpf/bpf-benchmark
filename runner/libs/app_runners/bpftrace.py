@@ -55,36 +55,14 @@ SCRIPTS: tuple[ScriptSpec, ...] = (
 )
 
 
-def finalize_process_output(process: Any, collector: ProcessOutputCollector | None = None) -> dict[str, object]:
-    if collector is not None:
-        snapshot = collector.snapshot()
-        stdout_tail = "\n".join(str(line) for line in (snapshot.get("stdout_tail") or []))
-        stderr_tail = "\n".join(str(line) for line in (snapshot.get("stderr_tail") or []))
-        return {
-            "returncode": process.returncode,
-            "stdout_tail": tail_text(stdout_tail, max_lines=40, max_chars=8000),
-            "stderr_tail": tail_text(stderr_tail, max_lines=40, max_chars=8000),
-        }
-
-    stdout = ""
-    stderr = ""
-    try:
-        stdout, stderr = process.communicate(timeout=1)
-    except Exception:
-        if process.stdout is not None:
-            try:
-                stdout = process.stdout.read()
-            except Exception:
-                stdout = ""
-        if process.stderr is not None:
-            try:
-                stderr = process.stderr.read()
-            except Exception:
-                stderr = ""
+def finalize_process_output(process: Any, collector: ProcessOutputCollector) -> dict[str, object]:
+    snapshot = collector.snapshot()
+    stdout_tail = "\n".join(str(line) for line in (snapshot.get("stdout_tail") or []))
+    stderr_tail = "\n".join(str(line) for line in (snapshot.get("stderr_tail") or []))
     return {
         "returncode": process.returncode,
-        "stdout_tail": tail_text(stdout, max_lines=40, max_chars=8000),
-        "stderr_tail": tail_text(stderr, max_lines=40, max_chars=8000),
+        "stdout_tail": tail_text(stdout_tail, max_lines=40, max_chars=8000),
+        "stderr_tail": tail_text(stderr_tail, max_lines=40, max_chars=8000),
     }
 
 
@@ -100,7 +78,6 @@ class BpftraceRunner(AppRunner):
         attach_timeout_s: int = DEFAULT_ATTACH_TIMEOUT_S,
     ) -> None:
         super().__init__()
-        self.script_path: Path | None = None
         self.script_name = str(script_name).strip()
         if not self.script_name:
             raise RuntimeError("BpftraceRunner requires script_name")
@@ -115,13 +92,6 @@ class BpftraceRunner(AppRunner):
     def pid(self) -> int | None:
         return None if self.process is None else int(self.process.pid or 0)
 
-    def _resolve_script(self) -> Path:
-        specs = {spec.name: spec for spec in SCRIPTS}
-        spec = specs.get(self.script_name)
-        if spec is None:
-            raise RuntimeError(f"unknown bpftrace script: {self.script_name}")
-        return spec.script_path.resolve()
-
     def start(self) -> list[int]:
         if self.process is not None:
             raise RuntimeError("BpftraceRunner is already running")
@@ -129,14 +99,18 @@ class BpftraceRunner(AppRunner):
         bpftrace_binary = which("bpftrace")
         if bpftrace_binary is None:
             raise RuntimeError("bpftrace is required but not present in PATH")
-        script_path = self._resolve_script()
+        script_path = next(
+            (spec.script_path.resolve() for spec in SCRIPTS if spec.name == self.script_name),
+            None,
+        )
+        if script_path is None:
+            raise RuntimeError(f"unknown bpftrace script: {self.script_name}")
         before_ids = {
             int(record.get("id", 0) or 0)
             for record in bpftool_prog_show_records()
             if int(record.get("id", 0) or 0) > 0
         }
         self.process = start_agent(bpftrace_binary, ["-q", str(script_path)])
-        self.command_used = [bpftrace_binary, "-q", str(script_path)]
         if self.process.stdout is None or self.process.stderr is None:
             self.process.kill()
             raise RuntimeError("bpftrace did not expose stdout/stderr pipes")
@@ -155,7 +129,6 @@ class BpftraceRunner(AppRunner):
         programs = wait_until_program_set_stable(before_ids=before_ids, timeout_s=self.attach_timeout_s)
         if not programs:
             self._fail_start(f"bpftrace did not attach any BPF programs for {script_path.name}")
-        self.script_path = script_path
         self.programs = [dict(program) for program in programs]
         return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
 
