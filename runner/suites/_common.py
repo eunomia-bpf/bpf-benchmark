@@ -137,34 +137,6 @@ def run_checked(command: Sequence[str], *, cwd: Path, env: dict[str, str], die: 
         die(f"command failed ({completed.returncode}): {rendered}")  # type: ignore[operator]
 
 
-def argv_option_value(argv: Sequence[str], option: str, die: object) -> str:
-    for index, token in enumerate(argv):
-        if token == option:
-            if index + 1 >= len(argv):
-                die(f"missing value for {option}")  # type: ignore[operator]
-                raise AssertionError("unreachable")
-            return str(argv[index + 1]).strip()
-        if token.startswith(option + "="):
-            return token.split("=", 1)[1].strip()
-    return ""
-
-
-def strip_option_with_value(argv: Sequence[str], option_name: str) -> list[str]:
-    stripped: list[str] = []
-    skip_value = False
-    for token in argv:
-        if skip_value:
-            skip_value = False
-            continue
-        if token == option_name:
-            skip_value = True
-            continue
-        if token.startswith(option_name + "="):
-            continue
-        stripped.append(str(token))
-    return stripped
-
-
 # ---------------------------------------------------------------------------
 # artifact validation
 # ---------------------------------------------------------------------------
@@ -356,17 +328,4 @@ def base_suite_runtime_env(
     env["BPFREJIT_KERNEL_MODULES_ROOT"] = str(kernel_modules_dir)
     env["PYTHONPATH"] = str(workspace)
     env["BPFTOOL_BIN"] = args.bpftool_bin
-    return env
-
-
-def suite_runtime_env_with_rejit_passes(
-    workspace: Path,
-    args: argparse.Namespace,
-    scratch_suffix: str,
-    argv: Sequence[str],
-    die: object,
-) -> dict[str, str]:
-    env = base_suite_runtime_env(workspace, args, scratch_suffix, die)
-    if rejit_passes := argv_option_value(argv, "--rejit-passes", die):
-        env["BPFREJIT_BENCH_PASSES"] = rejit_passes
     return env

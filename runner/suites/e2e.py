@@ -13,6 +13,7 @@ from runner.libs.cli_support import fail
 from runner.libs.workspace_layout import inside_runtime_image
 from runner.suites._common import (
     add_common_args,
+    base_suite_runtime_env,
     ensure_bpf_stats_enabled,
     ensure_katran_artifacts,
     ensure_scx_artifacts,
@@ -21,9 +22,7 @@ from runner.suites._common import (
     resolve_daemon_binary,
     resolve_executable,
     run_checked,
-    strip_option_with_value,
     suite_main_setup,
-    suite_runtime_env_with_rejit_passes,
 )
 
 _die = partial(fail, "e2e-suite")
@@ -65,14 +64,14 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def _runtime_env(workspace: Path, args: argparse.Namespace) -> dict[str, str]:
-    return suite_runtime_env_with_rejit_passes(workspace, args, "e2e", args.e2e_argv, _die)
+    return base_suite_runtime_env(workspace, args, "e2e", _die)
 
 
 def _e2e_driver_argv(args: argparse.Namespace, daemon_binary: Path) -> list[str]:
     argv = ["all", "--daemon", str(daemon_binary)]
     if args.e2e_smoke:
         argv.append("--smoke")
-    argv.extend(strip_option_with_value(args.e2e_argv, "--rejit-passes"))
+    argv.extend(args.e2e_argv)
     return argv
 
 
