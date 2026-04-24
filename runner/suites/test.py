@@ -57,7 +57,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--scx-prog-show-race-mode", default="bpftool-loop", help="scx_prog_show_race mode.")
     parser.add_argument("--scx-prog-show-race-iterations", type=positive_int, default=20, help="scx_prog_show_race iterations.")
     parser.add_argument("--scx-prog-show-race-load-timeout", type=positive_int, default=20, help="scx_prog_show_race load timeout.")
-    parser.add_argument("--scx-prog-show-race-skip-probe", action="store_true", help="Skip the sched_ext probe for scx_prog_show_race.")
     parser.add_argument("--scx-packages", default="", help="Comma-separated SCX package artifacts to validate.")
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
@@ -186,14 +185,11 @@ def _run_negative_suite(
     if include_scx_race:
         scx_env = {**runtime_env, "SCX_RUNTIME_LD_LIBRARY_PATH": runtime_ld}
         scx_command = [
-            str(negative_build / "scx_prog_show_race"),
-            str(workspace),
+            str(negative_build / "scx_prog_show_race"), str(workspace),
             "--mode", str(args.scx_prog_show_race_mode),
             "--iterations", str(args.scx_prog_show_race_iterations),
             "--load-timeout", str(args.scx_prog_show_race_load_timeout),
         ]
-        if args.scx_prog_show_race_skip_probe:
-            scx_command.append("--skip-probe")
         tests.append((f"scx_prog_show_race ({args.scx_prog_show_race_mode})", scx_command, scx_env))
     for label, command, command_env in tests:
         print(f"--- {label} ---", file=sys.stderr)

@@ -1,0 +1,5 @@
+D1 `tests/negative/scx_prog_show_race.c`: removed `skip_probe` state, `--skip-probe` usage/CLI parsing, the `skip_probe` marker, and the skip branch; probe is unconditional and `probe_rc != 0` returns 1.
+D2 `runner/suites/test.py`: removed `--scx-prog-show-race-skip-probe` from argparse and stopped appending `--skip-probe` to the SCX negative-test command.
+D3 `runner/libs/suite_args.py`: removed `SCX_PROG_SHOW_RACE_SKIP_PROBE` to `--scx-prog-show-race-skip-probe` forwarding.
+D4 `Makefile`: removed `SCX_PROG_SHOW_RACE_SKIP_PROBE` definition/export and its `VM_TEST_COMMON_SUITE_ARGS` injection.
+Evidence: `rg -n 'skip_probe|skip-probe|SCX_PROG_SHOW_RACE_SKIP_PROBE' Makefile runner/libs runner/suites tests/negative e2e corpus micro daemon module --glob '!tests/negative/build/**' --glob '!tests/negative/build-arm64/**'` -> 0 hits; `python3 -m py_compile runner/libs/suite_args.py runner/suites/test.py`, `make check`, and `make -B -C tests/negative BUILD_DIR=/home/yunwei37/workspace/bpf-benchmark/tests/negative/build all` passed; shortstat `5 files changed, 19 insertions(+), 44 deletions(-)`.

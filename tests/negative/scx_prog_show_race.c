@@ -13,7 +13,7 @@
  * exits 0.
  *
  * Usage:
- *   scx_prog_show_race <repo-root> [--skip-probe] [--mode bpftool-loop|owner-id-loop]
+ *   scx_prog_show_race <repo-root> [--mode bpftool-loop|owner-id-loop]
  *                      [--iterations N] [--load-timeout S]
  */
 #include "common.h"
@@ -39,8 +39,6 @@ enum loop_mode {
 };
 
 struct options {
-	const char *repo_root;
-	bool skip_probe;
 	enum loop_mode mode;
 	int only_id;
 	int owner_start_ordinal;
@@ -72,8 +70,7 @@ static const char *resolve_bpftool_path(void)
 static void usage(const char *prog)
 {
 	fprintf(stderr,
-		"usage: %s <repo-root> [--skip-probe] "
-		"[--mode bpftool-loop|owner-id-loop] "
+		"usage: %s <repo-root> [--mode bpftool-loop|owner-id-loop] "
 		"[--only-id N] "
 		"[--owner-start-ordinal N] "
 		"[--owner-ordinal N] "
@@ -114,12 +111,7 @@ static int parse_args(int argc, char **argv, struct options *opts)
 		return -1;
 	}
 
-	opts->repo_root = argv[1];
 	for (i = 2; i < argc; i++) {
-		if (!strcmp(argv[i], "--skip-probe")) {
-			opts->skip_probe = true;
-			continue;
-		}
 		if (!strcmp(argv[i], "--mode")) {
 			if (i + 1 >= argc)
 				return -1;
@@ -167,12 +159,6 @@ static int parse_args(int argc, char **argv, struct options *opts)
 	}
 
 	return 0;
-}
-
-static void print_marker(const char *key, const char *value)
-{
-	printf("MARK %s %s\n", key, value);
-	fflush(stdout);
 }
 
 static int make_temp_path(const char *prefix, char *path, size_t path_sz)
@@ -653,17 +639,15 @@ int main(int argc, char **argv)
 	       resolve_bpftool_path());
 	fflush(stdout);
 
-	if (!opts.skip_probe) {
+	{
 		int probe_rc;
 
-		print_marker("before_probe", "1");
+		printf("MARK before_probe 1\n");
 		probe_rc = probe_struct_ops_register(scx_object);
 		printf("MARK after_probe %d\n", probe_rc);
 		fflush(stdout);
 		if (probe_rc != 0)
 			return 1;
-	} else {
-		print_marker("skip_probe", "1");
 	}
 
 	if (spawn_scx(scx_binary, &child) < 0) {
