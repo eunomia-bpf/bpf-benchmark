@@ -13,10 +13,6 @@ import yaml
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from runner.libs import (  # noqa: E402
-    RESULTS_DIR,
-    ROOT_DIR,
-)
 from runner.libs.app_runners.tetragon import (  # noqa: E402
     TetragonRunner,
     describe_agent_exit,
@@ -41,9 +37,7 @@ from runner.libs.case_common import (  # noqa: E402
 )
 
 
-DEFAULT_CONFIG = Path(__file__).with_name("config_execve_rate.yaml")
-DEFAULT_OUTPUT_JSON = RESULTS_DIR / "tetragon.json"
-DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tetragon-real-e2e.md"
+DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")
 DEFAULT_DURATION_S = 30
 DEFAULT_SMOKE_DURATION_S = 8
 DEFAULT_LOAD_TIMEOUT_S = 20
