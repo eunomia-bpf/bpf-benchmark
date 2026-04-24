@@ -28,9 +28,6 @@ class AppRunner:
     def stop(self) -> None:
         raise NotImplementedError
 
-    def corpus_measurement_mode(self) -> str:
-        return "program"
-
     @property
     def pid(self) -> int | None:
         raise NotImplementedError

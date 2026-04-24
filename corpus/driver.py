@@ -709,7 +709,6 @@ def _per_app_breakdown(results: Sequence[Mapping[str, object]]) -> list[dict[str
                 "app": str(result.get("app") or ""),
                 "runner": str(result.get("runner") or ""),
                 "workload": str(result.get("selected_workload") or ""),
-                "measurement_mode": str(result.get("measurement_mode") or ""),
                 "status": str(result.get("status") or ""),
                 "program_count": len(program_rows),
                 "applied_program_count": sum(1 for row in program_rows if bool(row.get("applied"))),
@@ -726,7 +725,7 @@ def _per_app_breakdown(results: Sequence[Mapping[str, object]]) -> list[dict[str
 def _build_summary(
     results: Sequence[Mapping[str, object]],
     *,
-    selected_apps: int,
+    app_count: int,
     status_counts: Mapping[str, int],
 ) -> dict[str, object]:
     comparable_rows, applied_rows, excluded_rows = _comparison_rows(results)
@@ -747,7 +746,7 @@ def _build_summary(
         if isinstance(result, Mapping)
     )
     return {
-        "selected_apps": selected_apps,
+        "app_count": app_count,
         "discovered_programs": discovered_programs,
         "statuses": dict(sorted(status_counts.items())),
         "sample_count": len(comparable_speedups),
@@ -864,7 +863,6 @@ def _build_app_error_result(
     *,
     workload_seconds: float,
     error: str,
-    measurement_mode: str | None = None,
     runner: AppRunner | None = None,
     state: CaseLifecycleState | None = None,
     baseline_measurement: Mapping[str, object] | None = None,
@@ -901,11 +899,7 @@ def _build_app_error_result(
     normalized_apply_result = dict(apply_result or {})
     program_measurements = {}
     raw_apply_per_program = normalized_apply_result.get("per_program")
-    if (
-        str(measurement_mode or "").strip() == "program"
-        and live_programs
-        and isinstance(raw_apply_per_program, Mapping)
-    ):
+    if live_programs and isinstance(raw_apply_per_program, Mapping):
         program_measurements = _build_program_measurements(
             app.name,
             live_programs,
@@ -919,7 +913,6 @@ def _build_app_error_result(
         "runner": app.runner,
         "workload": _workload_payload(app.workload),
         "selected_workload": app.workload_for("corpus"),
-        "measurement_mode": str(measurement_mode or ""),
         "configured_workload_seconds": float(workload_seconds),
         "args": dict(app.args),
         "status": "error",
@@ -1016,7 +1009,6 @@ def _finalize_app_result(
     runner: AppRunner,
     state: CaseLifecycleState,
     workload_seconds: float,
-    measurement_mode: str,
     baseline_measurement: Mapping[str, object],
     apply_result: Mapping[str, object] | None,
     rejit_measurement: Mapping[str, object] | None,
@@ -1079,7 +1071,6 @@ def _finalize_app_result(
         "runner": app.runner,
         "workload": _workload_payload(app.workload),
         "selected_workload": app.workload_for("corpus"),
-        "measurement_mode": measurement_mode,
         "configured_workload_seconds": float(workload_seconds),
         "args": dict(app.args),
         "status": status,
@@ -1110,7 +1101,6 @@ class CorpusAppSession:
     runner: AppRunner
     state: CaseLifecycleState
     before_prog_ids: list[int]
-    measurement_mode: str
     workload_seconds: float
     baseline_measurement: dict[str, object] | None = None
     scan_results: dict[int, dict[str, object]] = field(default_factory=dict)
@@ -1157,11 +1147,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                             workload=app.workload_for("corpus"),
                             **app.args,
                         )
-                        measurement_mode = runner.corpus_measurement_mode().strip()
-                        if measurement_mode != "program":
-                            raise RuntimeError(
-                                f"{app.name}: runner returned unsupported corpus measurement mode {measurement_mode!r}"
-                            )
                         started_prog_ids = [int(value) for value in runner.start() if int(value) > 0]
                         state = _build_runner_state(app, runner, started_prog_ids)
                         session = CorpusAppSession(
@@ -1169,7 +1154,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                             runner=runner,
                             state=state,
                             before_prog_ids=before_prog_ids,
-                            measurement_mode=measurement_mode,
                             workload_seconds=app_workload_seconds,
                         )
                         sessions.append(session)
@@ -1234,7 +1218,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                                 session.app,
                                 workload_seconds=session.workload_seconds,
                                 error=error_message,
-                                measurement_mode=session.measurement_mode,
                                 runner=session.runner,
                                 state=session.state,
                                 baseline_measurement=session.baseline_measurement,
@@ -1355,7 +1338,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                     session.app,
                     workload_seconds=session.workload_seconds,
                     error=error_message,
-                    measurement_mode=session.measurement_mode,
                     runner=session.runner,
                     state=session.state,
                     baseline_measurement=session.baseline_measurement,
@@ -1369,7 +1351,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         runner=session.runner,
                         state=session.state,
                         workload_seconds=session.workload_seconds,
-                        measurement_mode=session.measurement_mode,
                         baseline_measurement=session.baseline_measurement or {},
                         apply_result=session.apply_result,
                         rejit_measurement=session.rejit_measurement,
@@ -1382,7 +1363,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         session.app,
                         workload_seconds=session.workload_seconds,
                         error=str(exc),
-                        measurement_mode=session.measurement_mode,
                         runner=session.runner,
                         state=session.state,
                         baseline_measurement=session.baseline_measurement,
@@ -1425,7 +1405,7 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
         "kinsn_modules": kinsn_metadata,
         "summary": _build_summary(
             results,
-            selected_apps=len(suite.apps),
+            app_count=len(suite.apps),
             status_counts=status_counts,
         ),
         "status": "ok" if status_counts.get("error", 0) == 0 else "error",
