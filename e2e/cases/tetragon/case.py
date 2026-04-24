@@ -29,7 +29,6 @@ from runner.libs.rejit import applied_site_totals_from_rejit_result  # noqa: E40
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     LifecycleAbort,
-    host_metadata,
     summarize_numbers,
     percent_delta,
     speedup_ratio,
@@ -456,7 +455,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
 
 def error_payload(
     *,
-    config: Mapping[str, object] | None,
     tetragon_binary: str | None,
     duration_s: int,
     smoke: bool,
@@ -469,18 +467,10 @@ def error_payload(
         "status": "error",
         "mode": "error",
         "error_message": error_message,
-        "config": dict(config or {}),
         "smoke": smoke,
         "duration_s": duration_s,
         "tetragon_binary": tetragon_binary,
         "setup": dict(setup_result),
-        "host": host_metadata(),
-        "tetragon_programs": [],
-        "baseline": None,
-        "scan_results": {},
-        "rejit_result": None,
-        "post_rejit": None,
-        "programs": [],
         "comparison": {"comparable": False, "reason": error_message},
         "limitations": list(limitations),
     }
@@ -488,9 +478,7 @@ def error_payload(
 
 def daemon_payload(
     *,
-    config: Mapping[str, object],
     prepared_daemon_session: object,
-    daemon_binary: Path,
     tetragon_binary: str,
     workloads: Sequence[WorkloadSpec],
     duration_s: int,
@@ -516,8 +504,6 @@ def daemon_payload(
             runtime=runner,
             prog_ids=prog_ids,
             artifacts={
-                "tetragon_launch_command": list(runner.command),
-                "tetragon_programs": tetragon_programs,
                 "rejit_policy_context": {
                     "repo": "tetragon",
                     "level": "e2e",
@@ -574,7 +560,6 @@ def daemon_payload(
     )
     if lifecycle_result.abort is not None:
         return error_payload(
-            config=config,
             tetragon_binary=tetragon_binary,
             duration_s=duration_s,
             smoke=smoke,
@@ -584,7 +569,6 @@ def daemon_payload(
         )
     if lifecycle_result.state is None or lifecycle_result.baseline is None:
         return error_payload(
-            config=config,
             tetragon_binary=tetragon_binary,
             duration_s=duration_s,
             smoke=smoke,
@@ -597,7 +581,6 @@ def daemon_payload(
     assert isinstance(runner, TetragonRunner)
 
     baseline = lifecycle_result.baseline
-    scan_results = lifecycle_result.scan_results
     rejit_result = lifecycle_result.rejit_result or {"applied": False, "reason": "reJIT did not run"}
     post_rejit = lifecycle_result.post_rejit
     comparison = compare_phases(baseline, post_rejit)
@@ -616,18 +599,8 @@ def daemon_payload(
         "duration_s": duration_s,
         "tetragon_binary": tetragon_binary,
         "setup": dict(setup_result),
-        "host": host_metadata(),
-        "tetragon_launch_command": lifecycle_result.artifacts.get("tetragon_launch_command") or [],
-        "config": dict(config),
-        "tetragon_programs": lifecycle_result.artifacts.get("tetragon_programs") or [],
-        "agent_logs": runner.process_output,
         "baseline": baseline,
-        "scan_results": {str(key): value for key, value in scan_results.items()},
-        "rejit_result": rejit_result,
         "post_rejit": post_rejit,
-        "site_summary": {
-            "site_totals": applied_site_totals_from_rejit_result(rejit_result if isinstance(rejit_result, Mapping) else None),
-        },
         "programs": build_program_summary(rejit_result if isinstance(rejit_result, Mapping) else None, baseline, post_rejit),
         "comparison": comparison,
         "limitations": limitations,
@@ -660,7 +633,6 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
     tetragon_binary = resolve_tetragon_binary(None, setup_result)
     if tetragon_binary is None:
         return error_payload(
-            config=config,
             tetragon_binary=None,
             duration_s=duration_s,
             smoke=bool(args.smoke),
@@ -672,9 +644,7 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
     with enable_bpf_stats():
         try:
             return daemon_payload(
-                config=config,
                 prepared_daemon_session=getattr(args, "_prepared_daemon_session", None),
-                daemon_binary=daemon_binary,
                 tetragon_binary=tetragon_binary,
                 workloads=workloads,
                 duration_s=duration_s,
@@ -685,7 +655,6 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
             )
         except Exception as exc:
             return error_payload(
-                config=config,
                 tetragon_binary=tetragon_binary,
                 duration_s=duration_s,
                 smoke=bool(args.smoke),

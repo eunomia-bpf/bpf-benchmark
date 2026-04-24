@@ -597,9 +597,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         raise RuntimeError(f"scx lifecycle returned a non-runner runtime: {type(runner).__name__}")
     scheduler_programs = list(lifecycle_result.artifacts.get("scheduler_programs") or [])
     scheduler_ops = read_scx_ops()
-    scheduler_snapshot = dict(runner.process_output)
     baseline = lifecycle_result.baseline
-    scan_results = lifecycle_result.scan_results
     rejit_result = lifecycle_result.rejit_result
     post_rejit = lifecycle_result.post_rejit
     runtime_counters_available = any(
@@ -667,12 +665,9 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         "scheduler_binary": str(scheduler_binary),
         "scheduler_programs": scheduler_programs,
         "scheduler_ops": scheduler_ops,
-        "scheduler_output": scheduler_snapshot,
         "host": host_metadata(),
         "baseline": baseline,
-        "scan_results": {str(key): value for key, value in scan_results.items()},
         "site_summary": site_summary,
-        "rejit_result": rejit_result,
         "post_rejit": post_rejit,
         "comparison": comparison,
         "limitations": limitations,

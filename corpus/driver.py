@@ -843,41 +843,17 @@ def _refresh_active_session_programs(sessions: Sequence["CorpusAppSession"]) -> 
 def _build_app_error_result(
     app: AppSpec,
     *,
-    workload_seconds: float,
     error: str,
-    runner: AppRunner | None = None,
     state: CaseLifecycleState | None = None,
     baseline_measurement: Mapping[str, object] | None = None,
     apply_result: Mapping[str, object] | None = None,
     rejit_measurement: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
-    baseline_workload = None
-    baseline_workloads: list[dict[str, object]] = []
-    if isinstance(baseline_measurement, Mapping):
-        raw_baseline_workload = baseline_measurement.get("workload")
-        if isinstance(raw_baseline_workload, Mapping):
-            baseline_workload = dict(raw_baseline_workload)
-        baseline_workloads = [
-            dict(workload)
-            for workload in (baseline_measurement.get("workloads") or [])
-            if isinstance(workload, Mapping)
-        ]
     prog_ids = [] if state is None else [int(value) for value in state.prog_ids if int(value) > 0]
     live_programs = [] if state is None else [dict(program) for program in (state.artifacts.get("programs") or [])]
     baseline_programs = _measurement_program_stats(baseline_measurement, prog_ids)
     had_post_rejit = isinstance(rejit_measurement, Mapping)
     rejit_programs = _measurement_program_stats(rejit_measurement, prog_ids)
-    rejit_workload = None
-    rejit_workloads: list[dict[str, object]] = []
-    if isinstance(rejit_measurement, Mapping):
-        raw_rejit_workload = rejit_measurement.get("workload")
-        if isinstance(raw_rejit_workload, Mapping):
-            rejit_workload = dict(raw_rejit_workload)
-        rejit_workloads = [
-            dict(workload)
-            for workload in (rejit_measurement.get("workloads") or [])
-            if isinstance(workload, Mapping)
-        ]
     normalized_apply_result = dict(apply_result or {})
     program_measurements = {}
     raw_apply_per_program = normalized_apply_result.get("per_program")
@@ -893,38 +869,18 @@ def _build_app_error_result(
     return {
         "app": app.name,
         "runner": app.runner,
-        "workload": _workload_payload(app.workload),
         "selected_workload": app.workload_for("corpus"),
-        "configured_workload_seconds": float(workload_seconds),
-        "args": dict(app.args),
         "status": "error",
         "error": str(error),
-        "prog_ids": prog_ids,
-        "programs": live_programs,
         "program_measurements": program_measurements,
-        "baseline": {
-            "programs": baseline_programs,
-            "exec_ns_mean": _mean_exec_ns(baseline_programs),
-        },
-        "baseline_workload": baseline_workload,
-        "baseline_workloads": baseline_workloads,
-        "rejit_apply": normalized_apply_result,
-        "rejit": {
-            "programs": rejit_programs,
-            "exec_ns_mean": _mean_exec_ns(rejit_programs),
-        } if had_post_rejit else None,
-        "rejit_workload": rejit_workload,
-        "rejit_workloads": rejit_workloads,
-        "process": {} if runner is None else dict(runner.process_output),
+        "rejit_applied": bool(normalized_apply_result.get("applied")),
     }
 
 
 def _finalize_app_result(
     app: AppSpec,
     *,
-    runner: AppRunner,
     state: CaseLifecycleState,
-    workload_seconds: float,
     baseline_measurement: Mapping[str, object],
     apply_result: Mapping[str, object] | None,
     rejit_measurement: Mapping[str, object] | None,
@@ -936,20 +892,14 @@ def _finalize_app_result(
 
     baseline_initial_snapshot = _normalized_stats_snapshot(baseline_measurement.get("initial_stats"))
     baseline_final_snapshot = _normalized_stats_snapshot(baseline_measurement.get("final_stats"))
-    baseline_workload = dict(baseline_measurement.get("workload") or {}) if baseline_measurement.get("workload") else None
-    baseline_workloads = [dict(workload) for workload in (baseline_measurement.get("workloads") or [])]
     baseline_phase = _program_phase_stats(baseline_final_snapshot, baseline_initial_snapshot)
     programs_by_id = _program_stats_by_prog_id(baseline_phase, prog_ids)
 
     had_post_rejit = rejit_measurement is not None
     rejit_programs_by_id: dict[str, dict[str, object]] = {}
-    rejit_workload: dict[str, object] | None = None
-    rejit_workloads: list[dict[str, object]] = []
     if had_post_rejit:
         rejit_initial_snapshot = _normalized_stats_snapshot(rejit_measurement.get("initial_stats"))
         rejit_final_snapshot = _normalized_stats_snapshot(rejit_measurement.get("final_stats"))
-        rejit_workload = dict(rejit_measurement.get("workload") or {}) if rejit_measurement.get("workload") else None
-        rejit_workloads = [dict(workload) for workload in (rejit_measurement.get("workloads") or [])]
         rejit_phase = _program_phase_stats(rejit_final_snapshot, rejit_initial_snapshot)
         rejit_programs_by_id = _program_stats_by_prog_id(rejit_phase, prog_ids)
 
@@ -985,29 +935,11 @@ def _finalize_app_result(
     return {
         "app": app.name,
         "runner": app.runner,
-        "workload": _workload_payload(app.workload),
         "selected_workload": app.workload_for("corpus"),
-        "configured_workload_seconds": float(workload_seconds),
-        "args": dict(app.args),
         "status": status,
         "error": error,
-        "prog_ids": prog_ids,
-        "programs": live_programs,
         "program_measurements": program_measurements,
-        "baseline": {
-            "programs": programs_by_id,
-            "exec_ns_mean": _mean_exec_ns(programs_by_id),
-        },
-        "baseline_workload": baseline_workload,
-        "baseline_workloads": baseline_workloads,
-        "rejit_apply": normalized_apply_result,
-        "rejit": {
-            "programs": rejit_programs_by_id,
-            "exec_ns_mean": _mean_exec_ns(rejit_programs_by_id),
-        } if had_post_rejit else None,
-        "rejit_workload": rejit_workload,
-        "rejit_workloads": rejit_workloads,
-        "process": dict(runner.process_output),
+        "rejit_applied": bool(normalized_apply_result.get("applied")),
     }
 
 
@@ -1073,7 +1005,7 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                         error_message = str(exc)
                         if stop_error:
                             error_message = f"{error_message}; stop failed: {stop_error}"
-                        result = _build_app_error_result(app, workload_seconds=app_workload_seconds, error=error_message, runner=runner)
+                        result = _build_app_error_result(app, error=error_message)
                         results_by_name[app.name] = result
                         completed_apps.add(app.name)
                         _print_progress("app_done", app=app.name, status=result.get("status"),
@@ -1123,9 +1055,7 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
             if error_message:
                 result = _build_app_error_result(
                     session.app,
-                    workload_seconds=session.workload_seconds,
                     error=error_message,
-                    runner=session.runner,
                     state=session.state,
                     baseline_measurement=baseline_measurement,
                     apply_result=apply_result,
@@ -1135,9 +1065,7 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                 try:
                     result = _finalize_app_result(
                         session.app,
-                        runner=session.runner,
                         state=session.state,
-                        workload_seconds=session.workload_seconds,
                         baseline_measurement=baseline_measurement or {},
                         apply_result=apply_result,
                         rejit_measurement=rejit_measurement,
@@ -1145,26 +1073,22 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                 except Exception as exc:
                     result = _build_app_error_result(
                         session.app,
-                        workload_seconds=session.workload_seconds,
                         error=str(exc),
-                        runner=session.runner,
                         state=session.state,
                         baseline_measurement=baseline_measurement,
-                    apply_result=apply_result,
-                    rejit_measurement=rejit_measurement,
-                )
+                        apply_result=apply_result,
+                        rejit_measurement=rejit_measurement,
+                    )
             results_by_name[session.app.name] = result; completed_apps.add(session.app.name)
             _print_progress("app_done", app=session.app.name, status=result.get("status"),
                             error=result.get("error"), program_count=len(result.get("program_measurements") or {}))
 
-        daemon_socket = str(prepared_daemon_session.session.socket_path)
         kinsn_metadata = dict(prepared_daemon_session.metadata)
 
     results = [
         results_by_name.get(app.name)
         or _build_app_error_result(
             app,
-            workload_seconds=_app_workload_seconds(args, suite.defaults, app),
             error=fatal_error or "corpus suite did not produce a result",
         )
         for app in suite.apps
@@ -1175,7 +1099,6 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
         "manifest": str(suite_path),
         "suite_name": suite.suite_name,
         "daemon": str(daemon_binary),
-        "daemon_socket": daemon_socket,
         "samples": samples,
         "workload_seconds": workload_seconds,
         "results": results,

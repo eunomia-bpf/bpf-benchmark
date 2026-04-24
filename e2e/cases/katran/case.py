@@ -155,13 +155,6 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "status": status,
         "duration_s": duration_s,
         "workload_spec": dict(workload_spec),
-        "daemon": str(Path(args.daemon).resolve()),
-        "host": host_metadata(),
-        "programs": list(lifecycle_result.artifacts.get("programs") or []),
-        "baseline": baseline,
-        "scan_results": dict(lifecycle_result.scan_results),
-        "rejit_result": rejit_result,
-        "post_rejit": post_rejit,
         "comparison": comparison,
     }
     if status == "error" and comparison_reason:
