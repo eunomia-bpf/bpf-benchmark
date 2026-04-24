@@ -40,15 +40,6 @@ def join_csv(tokens: list[str]) -> str:
     return ",".join(token for token in tokens if token)
 
 
-def _merge_csv_and_repeated(csv_value: str, repeated_values: list[str] | None) -> str:
-    merged: list[str] = []
-    for token in [*csv_tokens(csv_value), *(repeated_values or [])]:
-        normalized = str(token).strip()
-        if normalized and normalized not in merged:
-            merged.append(normalized)
-    return join_csv(merged)
-
-
 def _append_value(args: list[str], option: str, value: str) -> None:
     if str(value).strip():
         args.extend([option, str(value).strip()])
