@@ -165,8 +165,6 @@ def build_corpus_suite_argv(
     command.extend([
         "--output-json",
         str(workspace / "corpus" / "results" / f"{target_name}_corpus.json"),
-        "--output-md",
-        str(workspace / "corpus" / "results" / f"{target_name}_corpus.md"),
     ])
     _append_artifact_args(
         command,
