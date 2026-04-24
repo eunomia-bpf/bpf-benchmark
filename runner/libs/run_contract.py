@@ -10,7 +10,7 @@ from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
-from runner.libs.suite_args import join_csv, suite_args_from_env, suite_selection_from_args
+from runner.libs.suite_args import join_csv, suite_args_from_env, suite_test_mode_from_args
 from runner.libs.state_file import write_json_object
 
 
@@ -279,7 +279,7 @@ def _build_run_config_mapping(
     values = _filtered_run_inputs(target_name, env)
     target = _load_assignment_file(TARGETS_DIR / f"{target_name}.env")
     suite = _load_assignment_file(SUITES_DIR / f"{suite_name}.env")
-    selection = suite_selection_from_args(
+    run_test_mode = suite_test_mode_from_args(
         suite_name,
         list(suite_args) if suite_args is not None else suite_args_from_env(target_name, suite_name, env=source_env),
     )
@@ -291,7 +291,6 @@ def _build_run_config_mapping(
      run_aws_subnet_id, run_aws_region, run_aws_profile,
      run_vm_backend, run_vm_executable, run_vm_cpus, run_vm_mem, run_vm_kernel_image,
     ) = ("",) * 18
-    run_test_mode = selection.test_mode
     run_bpftool_bin = "bpftool"
     run_native_repos = suite.get("SUITE_DEFAULT_NATIVE_REPOS", "")
     run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")

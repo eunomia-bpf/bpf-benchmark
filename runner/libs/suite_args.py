@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import os
 import shlex
-from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 
@@ -15,11 +14,6 @@ _die = partial(fail, "suite-args")
 MICRO_BENCHMARK_DEFAULT_SAMPLES = "1"
 MICRO_BENCHMARK_DEFAULT_WARMUPS = "0"
 MICRO_BENCHMARK_DEFAULT_INNER_REPEAT = "10"
-
-
-@dataclass(frozen=True)
-class SuiteSelection:
-    test_mode: str = "test"
 
 
 def _env(env: dict[str, str], name: str, default: str = "") -> str:
@@ -53,11 +47,6 @@ def _merge_csv_and_repeated(csv_value: str, repeated_values: list[str] | None) -
         if normalized and normalized not in merged:
             merged.append(normalized)
     return join_csv(merged)
-
-
-def _normalize_test_mode(mode: str) -> str:
-    normalized = str(mode).strip().lower()
-    return "test" if normalized == "full" else normalized
 
 
 def _append_value(args: list[str], option: str, value: str) -> None:
@@ -133,7 +122,7 @@ def suite_args_from_env(
         args.extend(
             [
                 "--test-mode",
-                _normalize_test_mode(mode),
+                str(mode).strip().lower(),
                 "--fuzz-rounds",
                 _env(values, "FUZZ_ROUNDS", "1000"),
                 "--scx-prog-show-race-mode",
@@ -152,17 +141,13 @@ def suite_args_from_env(
     raise AssertionError("unreachable")
 
 
-def suite_selection_from_args(suite_name: str, suite_args: list[str]) -> SuiteSelection:
+def suite_test_mode_from_args(suite_name: str, suite_args: list[str]) -> str:
+    if suite_name != "test":
+        return "test"
     parser = argparse.ArgumentParser(add_help=False)
-    if suite_name == "corpus":
-        return SuiteSelection()
-    if suite_name == "e2e":
-        return SuiteSelection()
-    if suite_name == "test":
-        parser.add_argument("--test-mode", default="test")
-        ns, _unknown = parser.parse_known_args(suite_args)
-        return SuiteSelection(test_mode=_normalize_test_mode(ns.test_mode))
-    return SuiteSelection()
+    parser.add_argument("--test-mode", default="test")
+    ns, _unknown = parser.parse_known_args(suite_args)
+    return str(ns.test_mode).strip().lower()
 
 
 def write_suite_args_file(path: Path, suite_args: list[str]) -> None:
