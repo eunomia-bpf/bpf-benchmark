@@ -74,10 +74,10 @@ def _append_artifact_args(
     native_repos: tuple[str, ...] | list[str] = (),
     scx_packages: tuple[str, ...] | list[str] = (),
 ) -> None:
-    for repo_name in native_repos:
-        argv.extend(["--native-repo", str(repo_name)])
-    for package_name in scx_packages:
-        argv.extend(["--scx-package", str(package_name)])
+    if native_repos:
+        argv.extend(["--native-repos", ",".join(str(repo_name) for repo_name in native_repos)])
+    if scx_packages:
+        argv.extend(["--scx-packages", ",".join(str(package_name) for package_name in scx_packages)])
 
 
 def build_runtime_container_command(
