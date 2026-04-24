@@ -6,7 +6,7 @@ import json
 import sys
 import time
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -32,7 +32,6 @@ from runner.libs.app_runners.process_support import programs_after
 from runner.libs.rejit import (
     DaemonSession,
     benchmark_run_provenance,
-    scan_site_totals_for_passes,
 )
 from runner.libs.run_artifacts import (
     ArtifactSession,
@@ -52,13 +51,6 @@ SECTION_TYPE_PREFIXES = {
     "cgroup_skb": "cgroup_skb",
     "socket": "socket_filter",
 }
-ZERO_SITES_FOUND_REASON = "zero_sites_found"
-ALL_SITES_ROLLED_BACK_REASON = "all_sites_rolled_back"
-APPLIED_BUT_IDENTICAL_REASON = "applied_but_identical"
-NO_PASSES_REQUESTED_REASON = "no_passes_requested"
-NO_PROGRAMS_CHANGED_IN_LOADER_REASON = "no_programs_changed_in_loader"
-
-
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the app-native corpus suite driver.")
     parser.add_argument("--suite", default=str(DEFAULT_MACRO_APPS_YAML))
@@ -158,13 +150,6 @@ def _has_phase_measurement(records: Mapping[str, Mapping[str, object]]) -> bool:
             return True
         exec_ns = record.get("exec_ns")
         if isinstance(exec_ns, (int, float)) and float(exec_ns) > 0.0:
-            return True
-    return False
-
-
-def _has_comparable_measurement(program_measurements: Mapping[str, Mapping[str, object]]) -> bool:
-    for record in program_measurements.values():
-        if bool(record.get("comparable")):
             return True
     return False
 
@@ -448,121 +433,15 @@ def _phase_exec_ns(record: Mapping[str, object] | None) -> float | None:
     return float(value)
 
 
-def _ordered_enabled_passes(raw: object) -> list[str]:
-    if not isinstance(raw, Sequence) or isinstance(raw, (str, bytes, bytearray)):
-        return []
-    ordered: list[str] = []
-    seen: set[str] = set()
-    for value in raw:
-        pass_name = str(value).strip()
-        if not pass_name or pass_name in seen:
-            continue
-        seen.add(pass_name)
-        ordered.append(pass_name)
-    return ordered
-
-
-def _non_negative_int(value: object) -> int | None:
-    if isinstance(value, bool) or not isinstance(value, int):
-        return None
-    return value if value >= 0 else None
-
-
-def _apply_record_total_sites_applied(apply_record: Mapping[str, object] | None) -> int:
-    if not isinstance(apply_record, Mapping):
-        return 0
-    summary = apply_record.get("summary")
-    if isinstance(summary, Mapping):
-        if (total_sites_applied := _non_negative_int(summary.get("total_sites_applied"))) is not None:
-            return total_sites_applied
-    raw_passes = apply_record.get("passes")
-    if isinstance(raw_passes, Sequence) and not isinstance(raw_passes, (str, bytes, bytearray)):
-        total_sites_applied = 0
-        for item in raw_passes:
-            if not isinstance(item, Mapping):
-                continue
-            total_sites_applied += int(item.get("sites_applied", 0) or 0)
-        return total_sites_applied
-    return 0
-
-
-def _apply_record_requested_passes(apply_record: Mapping[str, object] | None) -> list[str]:
-    if not isinstance(apply_record, Mapping):
-        return []
-    requested_passes = _ordered_enabled_passes(apply_record.get("enabled_passes"))
-    if requested_passes:
-        return requested_passes
-    raw_passes = apply_record.get("passes")
-    if not isinstance(raw_passes, Sequence) or isinstance(raw_passes, (str, bytes, bytearray)):
-        return []
-    return _ordered_enabled_passes(
-        [
-            item.get("pass_name")
-            for item in raw_passes
-            if isinstance(item, Mapping)
-        ]
-    )
-
-
-def _apply_record_requested_site_totals(apply_record: Mapping[str, object] | None) -> tuple[int, int]:
-    requested_passes = _apply_record_requested_passes(apply_record)
-    if not requested_passes:
-        return 0, _apply_record_total_sites_applied(apply_record)
-    scan = apply_record.get("scan") if isinstance(apply_record, Mapping) else None
-    scan_counts = scan.get("counts") if isinstance(scan, Mapping) else None
-    sites_found_by_pass = scan_site_totals_for_passes(scan_counts, requested_passes)
-    return sum(sites_found_by_pass.values()), _apply_record_total_sites_applied(apply_record)
-
-
-def _apply_record_no_change_reason(apply_record: Mapping[str, object] | None) -> str:
-    if not isinstance(apply_record, Mapping):
-        return NO_PROGRAMS_CHANGED_IN_LOADER_REASON
-    requested_passes = _apply_record_requested_passes(apply_record)
-    if not requested_passes:
-        return NO_PASSES_REQUESTED_REASON
-    total_sites_found, total_sites_applied = _apply_record_requested_site_totals(apply_record)
-    if total_sites_found == 0:
-        return ZERO_SITES_FOUND_REASON
-    if total_sites_applied == 0:
-        return ALL_SITES_ROLLED_BACK_REASON
-    if not bool(apply_record.get("changed")):
-        return APPLIED_BUT_IDENTICAL_REASON
-    return NO_PROGRAMS_CHANGED_IN_LOADER_REASON
-
-
-def _apply_record_program_changed(apply_record: Mapping[str, object] | None) -> bool:
-    if not isinstance(apply_record, Mapping):
-        return False
-    return bool(apply_record.get("changed"))
-
-
-def _comparison_exclusion_reason(
+def _speedup(
     baseline_exec_ns: float | None,
-    rejit_exec_ns: float | None,
-    *,
-    had_post_rejit: bool,
-    apply_record: Mapping[str, object],
-) -> str:
-    apply_error = str(apply_record.get("error") or "").strip()
-    if baseline_exec_ns is None:
-        return "missing_baseline_exec_ns"
-    if baseline_exec_ns <= 0.0:
-        return "non_positive_baseline_exec_ns"
-    if not _apply_record_program_changed(apply_record):
-        if apply_error:
-            return f"apply_error: {apply_error}"
-        return _apply_record_no_change_reason(apply_record)
-    if not had_post_rejit:
-        if apply_error:
-            return f"apply_error: {apply_error}"
-        return "missing_post_rejit_measurement"
-    if rejit_exec_ns is None:
-        if apply_error:
-            return f"apply_error: {apply_error}"
-        return "missing_rejit_exec_ns"
-    if rejit_exec_ns <= 0.0:
-        return "non_positive_rejit_exec_ns"
-    return ""
+    post_rejit_exec_ns: float | None,
+) -> float | None:
+    if baseline_exec_ns is None or baseline_exec_ns <= 0.0:
+        return None
+    if post_rejit_exec_ns is None or post_rejit_exec_ns <= 0.0:
+        return None
+    return baseline_exec_ns / post_rejit_exec_ns
 
 
 def _build_program_measurements(
@@ -588,25 +467,9 @@ def _build_program_measurements(
                 f"{app_name}: REJIT result is missing per-program apply record for prog {prog_id}"
             )
         applied = bool(apply_record.get("applied"))
-        changed = _apply_record_program_changed(apply_record)
+        changed = bool(apply_record.get("changed"))
         baseline_exec_ns = _phase_exec_ns(baseline_record)
-        rejit_exec_ns = _phase_exec_ns(rejit_record)
-        comparable = (
-            changed
-            and baseline_exec_ns is not None
-            and baseline_exec_ns > 0.0
-            and rejit_exec_ns is not None
-            and rejit_exec_ns > 0.0
-        )
-        speedup = (baseline_exec_ns / rejit_exec_ns) if comparable else None
-        exclusion_reason = ""
-        if not comparable:
-            exclusion_reason = _comparison_exclusion_reason(
-                baseline_exec_ns,
-                rejit_exec_ns,
-                had_post_rejit=had_post_rejit,
-                apply_record=apply_record,
-            )
+        post_rejit_exec_ns = _phase_exec_ns(rejit_record) if had_post_rejit else None
         rows[str(prog_id)] = {
             "id": prog_id,
             "label": _program_label(app_name, program_name, prog_id),
@@ -614,9 +477,9 @@ def _build_program_measurements(
             "type": str(live_program.get("type") or _infer_prog_type_name(live_program)),
             "applied": applied,
             "changed": changed,
-            "comparable": comparable,
-            "speedup": speedup,
-            "comparison_exclusion_reason": exclusion_reason,
+            "baseline_ns": baseline_exec_ns,
+            "post_rejit_ns": post_rejit_exec_ns,
+            "speedup": _speedup(baseline_exec_ns, post_rejit_exec_ns),
             "baseline": baseline_record,
             "rejit": rejit_record if had_post_rejit else {},
             "apply": apply_record,
@@ -632,68 +495,33 @@ def _result_program_rows(result: Mapping[str, object]) -> list[dict[str, object]
     ]
 
 
-def _result_comparison_rows(result: Mapping[str, object]) -> list[dict[str, object]]:
-    return _result_program_rows(result)
-
-
-def _comparison_rows(
-    results: Sequence[Mapping[str, object]],
-) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]]]:
-    comparable_rows: list[dict[str, object]] = []
-    applied_rows: list[dict[str, object]] = []
-    excluded_rows: list[dict[str, object]] = []
+def _comparison_rows(results: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
+    comparison_rows: list[dict[str, object]] = []
     for result in results:
-        app_name = str(result.get("app") or "")
-        for row in _result_comparison_rows(result):
-            row_payload = dict(row)
-            row_payload["app"] = app_name
-            if bool(row.get("comparable")):
-                comparable_rows.append(row_payload)
-                if bool(row.get("applied")):
-                    applied_rows.append(row_payload)
-                continue
-            excluded_rows.append(
-                {
-                    "app": app_name,
-                    "unit": str(row.get("unit") or "program"),
-                    "program_id": int(row.get("id", 0) or 0),
-                    "program": str(row.get("name") or ""),
-                    "label": str(row.get("label") or ""),
-                    "applied": bool(row.get("applied")),
-                    "changed": bool(row.get("changed")),
-                    "reason": str(row.get("comparison_exclusion_reason") or "unknown"),
-                    "apply_error": str(((row.get("apply") or {}).get("error")) or ""),
-                }
-            )
-    return comparable_rows, applied_rows, excluded_rows
+        baseline_ns = result.get("baseline_ns")
+        post_rejit_ns = result.get("post_rejit_ns")
+        if not isinstance(baseline_ns, (int, float)):
+            continue
+        if not isinstance(post_rejit_ns, (int, float)):
+            continue
+        comparison_rows.append(
+            {
+                "app": str(result.get("app") or ""),
+                "runner": str(result.get("runner") or ""),
+                "workload": str(result.get("selected_workload") or ""),
+                "status": str(result.get("status") or ""),
+                "baseline_ns": float(baseline_ns),
+                "post_rejit_ns": float(post_rejit_ns),
+                "speedup": _speedup(float(baseline_ns), float(post_rejit_ns)),
+            }
+        )
+    return comparison_rows
 
 
 def _per_app_breakdown(results: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
     breakdown: list[dict[str, object]] = []
     for result in results:
         program_rows = _result_program_rows(result)
-        comparison_rows = _result_comparison_rows(result)
-        comparable_speedups = [
-            float(row["speedup"])
-            for row in comparison_rows
-            if bool(row.get("comparable")) and isinstance(row.get("speedup"), (int, float))
-        ]
-        applied_speedups = [
-            float(row["speedup"])
-            for row in comparison_rows
-            if bool(row.get("applied")) and bool(row.get("comparable")) and isinstance(row.get("speedup"), (int, float))
-        ]
-        exclusions = [
-            {
-                "program_id": int(row.get("id", 0) or 0),
-                "program": str(row.get("name") or ""),
-                "label": str(row.get("label") or ""),
-                "unit": str(row.get("unit") or "program"),
-                "reason": str(row.get("comparison_exclusion_reason") or "unknown"),
-            }
-            for row in comparison_rows
-            if not bool(row.get("comparable"))
-        ]
         breakdown.append(
             {
                 "app": str(result.get("app") or ""),
@@ -702,11 +530,9 @@ def _per_app_breakdown(results: Sequence[Mapping[str, object]]) -> list[dict[str
                 "status": str(result.get("status") or ""),
                 "program_count": len(program_rows),
                 "applied_program_count": sum(1 for row in program_rows if bool(row.get("applied"))),
-                "comparable_program_count": len(comparable_speedups),
-                "sample_count": len(comparable_speedups),
-                "applied_only_geomean": geometric_mean(applied_speedups),
-                "all_comparable_geomean": geometric_mean(comparable_speedups),
-                "comparison_exclusions": exclusions,
+                "baseline_ns": result.get("baseline_ns"),
+                "post_rejit_ns": result.get("post_rejit_ns"),
+                "speedup": result.get("speedup"),
             }
         )
     return breakdown
@@ -716,18 +542,12 @@ def _build_summary(
     results: Sequence[Mapping[str, object]],
 ) -> dict[str, object]:
     status_counts = Counter(str(result.get("status") or "error") for result in results)
-    comparable_rows, applied_rows, excluded_rows = _comparison_rows(results)
-    comparable_speedups = [
+    comparison_rows = _comparison_rows(results)
+    speedups = [
         float(row["speedup"])
-        for row in comparable_rows
+        for row in comparison_rows
         if isinstance(row.get("speedup"), (int, float))
     ]
-    applied_speedups = [
-        float(row["speedup"])
-        for row in applied_rows
-        if isinstance(row.get("speedup"), (int, float))
-    ]
-    exclusion_reason_counts = Counter(str(row.get("reason") or "unknown") for row in excluded_rows)
     discovered_programs = sum(
         len(_result_program_rows(result))
         for result in results
@@ -737,12 +557,8 @@ def _build_summary(
         "app_count": len(results),
         "discovered_programs": discovered_programs,
         "statuses": dict(sorted(status_counts.items())),
-        "sample_count": len(comparable_speedups),
-        "applied_sample_count": len(applied_speedups),
-        "applied_only_geomean": geometric_mean(applied_speedups),
-        "all_comparable_geomean": geometric_mean(comparable_speedups),
-        "comparison_exclusion_reasons": excluded_rows,
-        "comparison_exclusion_reason_counts": dict(sorted(exclusion_reason_counts.items())),
+        "sample_count": len(comparison_rows),
+        "geomean": geometric_mean(speedups),
         "per_app": _per_app_breakdown(results),
     }
 
@@ -764,14 +580,13 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Samples: `{payload.get('samples')}`",
         f"- Workload seconds: `{payload.get('workload_seconds')}`",
         f"- Status: `{payload.get('status')}`",
-        f"- Applied-only geomean (baseline/rejit): `{_format_ratio(summary.get('applied_only_geomean'))}`",
-        f"- All-comparable geomean (baseline/rejit): `{_format_ratio(summary.get('all_comparable_geomean'))}`",
+        f"- Geomean (baseline/post_rejit): `{_format_ratio(summary.get('geomean'))}`",
         f"- Sample count: `{summary.get('sample_count')}`",
         "",
         "## Per-App Breakdown",
         "",
-        "| App | Runner | Workload | Programs | Applied | Comparable | Applied-only | All-comparable |",
-        "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |",
+        "| App | Runner | Workload | Status | Programs | Applied | Baseline ns | Post-ReJIT ns | Speedup |",
+        "| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in summary.get("per_app") or []:
         if not isinstance(row, Mapping):
@@ -783,28 +598,16 @@ def build_markdown(payload: Mapping[str, object]) -> str:
                     str(row.get("app") or ""),
                     str(row.get("runner") or ""),
                     str(row.get("workload") or ""),
+                    str(row.get("status") or ""),
                     str(int(row.get("program_count", 0) or 0)),
                     str(int(row.get("applied_program_count", 0) or 0)),
-                    str(int(row.get("comparable_program_count", 0) or 0)),
-                    _format_ratio(row.get("applied_only_geomean")),
-                    _format_ratio(row.get("all_comparable_geomean")),
+                    str(row.get("baseline_ns") if row.get("baseline_ns") is not None else "n/a"),
+                    str(row.get("post_rejit_ns") if row.get("post_rejit_ns") is not None else "n/a"),
+                    _format_ratio(row.get("speedup")),
                 ]
             )
             + " |"
         )
-    lines.extend(
-        [
-            "",
-            "## Comparison Exclusion Reasons",
-            "",
-        ]
-    )
-    exclusion_counts = summary.get("comparison_exclusion_reason_counts") or {}
-    if not exclusion_counts:
-        lines.append("- none")
-    else:
-        for reason, count in sorted(exclusion_counts.items()):
-            lines.append(f"- `{reason}`: `{count}`")
     return "\n".join(lines)
 
 
@@ -863,12 +666,17 @@ def _build_app_error_result(
             normalized_apply_result,
             had_post_rejit=had_post_rejit,
         )
+    baseline_ns = _mean_exec_ns(baseline_programs)
+    post_rejit_ns = _mean_exec_ns(rejit_programs) if had_post_rejit else None
     return {
         "app": app.name,
         "runner": app.runner,
         "selected_workload": app.workload_for("corpus"),
         "status": "error",
         "error": str(error),
+        "baseline_ns": baseline_ns,
+        "post_rejit_ns": post_rejit_ns,
+        "speedup": _speedup(baseline_ns, post_rejit_ns),
         "program_measurements": program_measurements,
         "rejit_applied": bool(normalized_apply_result.get("applied")),
     }
@@ -918,14 +726,9 @@ def _finalize_app_result(
         normalized_apply_result,
         had_post_rejit=had_post_rejit,
     )
-    has_comparable_measurement = _has_comparable_measurement(program_measurements)
-    if not apply_error and any(bool(row.get("changed")) for row in program_measurements.values()) and not has_comparable_measurement:
-        raise RuntimeError(
-            f"{app.name}: workload {app.workload_for('corpus')!r} produced no comparable target program measurements"
-        )
-    # A single apply failure should not fail the whole app if other programs
-    # in the same loader instance still produced comparable measurements.
-    fatal_apply_error = bool(apply_error) and not has_comparable_measurement
+    baseline_ns = _mean_exec_ns(programs_by_id)
+    post_rejit_ns = _mean_exec_ns(rejit_programs_by_id) if had_post_rejit else None
+    fatal_apply_error = bool(apply_error)
     status = "error" if fatal_apply_error else "ok"
     error = apply_error if fatal_apply_error else ""
 
@@ -935,6 +738,9 @@ def _finalize_app_result(
         "selected_workload": app.workload_for("corpus"),
         "status": status,
         "error": error,
+        "baseline_ns": baseline_ns,
+        "post_rejit_ns": post_rejit_ns,
+        "speedup": _speedup(baseline_ns, post_rejit_ns),
         "program_measurements": program_measurements,
         "rejit_applied": bool(normalized_apply_result.get("applied")),
     }
