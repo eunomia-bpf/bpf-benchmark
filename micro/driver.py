@@ -249,7 +249,7 @@ def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: 
     benchmarks = results.get("benchmarks", [])
     baseline_record = next((record for record in benchmarks if record.get("name") == baseline_benchmark), None)
     if baseline_record is None:
-        return
+        raise RuntimeError(f"baseline benchmark not found in results: {baseline_benchmark}")
 
     baseline_io_mode = baseline_record.get("io_mode")
     runtime_baselines: dict[str, float] = {}

@@ -36,15 +36,6 @@ def csv_tokens(value: str) -> list[str]:
     return [token.strip() for token in str(value or "").split(",") if token.strip()]
 
 
-def merge_csv_and_repeated(csv_value: str, repeated_values: Sequence[str] | None) -> list[str]:
-    merged: list[str] = []
-    for token in [*csv_tokens(csv_value), *(repeated_values or [])]:
-        normalized = str(token).strip()
-        if normalized and normalized not in merged:
-            merged.append(normalized)
-    return merged
-
-
 # ---------------------------------------------------------------------------
 # runtime env / PATH helpers
 # ---------------------------------------------------------------------------

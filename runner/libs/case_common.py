@@ -158,14 +158,14 @@ def _program_policy_context(
             context.update({str(k): v for k, v in raw.items() if str(k).strip() and str(v).strip()})
     if isinstance(program, Mapping):
         for key, value in (
-            ("object", program.get("object") or program.get("object_basename") or program.get("object_relpath")),
-            ("program", program.get("program") or program.get("prog_name") or program.get("name")),
+            ("object", program.get("object")),
+            ("program", program.get("program") or program.get("name")),
             ("section", program.get("section") or program.get("section_name")),
-            ("prog_type", program.get("prog_type") or program.get("prog_type_name") or program.get("type")),
+            ("prog_type", program.get("prog_type") or program.get("type")),
         ):
             if str(value or "").strip() and key not in context:
                 context[key] = str(value).strip()
-        for key in ("object_relpath", "object_basename", "family", "category", "level", "repo"):
+        for key in ("object_relpath", "family", "category", "level", "repo"):
             if str(v := program.get(key) or "").strip() and key not in context:
                 context[key] = str(v).strip()
     return context

@@ -8,7 +8,12 @@ from typing import Any
 from runner.libs.workspace_layout import RUNTIME_IMAGE_WORKSPACE
 
 
-_CONTAINER_RESULT_DIRS = ("micro/results", "corpus/results", "e2e/results", "tests/results")
+_CONTAINER_RESULT_DIR_BY_SUITE = {
+    "micro": "micro/results",
+    "corpus": "corpus/results",
+    "e2e": "e2e/results",
+    "test": "tests/results",
+}
 _CONTAINER_RUNTIME_TMP_DIR = "docs/tmp/runtime-container-tmp"
 
 
@@ -19,12 +24,20 @@ def _required(value: str, name: str, die: Any) -> str:
     return normalized
 
 
-def runtime_container_result_dirs(host_workspace: Path) -> list[Path]:
-    return [host_workspace / relative for relative in _CONTAINER_RESULT_DIRS]
+def _container_result_dir(suite_name: str, die: Any) -> str:
+    normalized = str(suite_name).strip()
+    relative = _CONTAINER_RESULT_DIR_BY_SUITE.get(normalized)
+    if relative is None:
+        die(f"unsupported suite for runtime container result mount: {suite_name!r}")
+    return relative
 
 
-def runtime_container_host_dirs(host_workspace: Path) -> list[Path]:
-    return [*runtime_container_result_dirs(host_workspace), host_workspace / _CONTAINER_RUNTIME_TMP_DIR]
+def runtime_container_result_dirs(host_workspace: Path, suite_name: str, *, die: Any) -> list[Path]:
+    return [host_workspace / _container_result_dir(suite_name, die)]
+
+
+def runtime_container_host_dirs(host_workspace: Path, suite_name: str, *, die: Any) -> list[Path]:
+    return [*runtime_container_result_dirs(host_workspace, suite_name, die=die), host_workspace / _CONTAINER_RUNTIME_TMP_DIR]
 
 
 def _container_suite_config(config: Any, python_bin: str) -> Any:
@@ -90,6 +103,7 @@ def build_runtime_container_command(
     image = _required(config.remote.runtime_container_image, "RUN_RUNTIME_CONTAINER_IMAGE", die)
     runtime_python = config.remote.runtime_python_bin.strip() or "python3"
     image_workspace = RUNTIME_IMAGE_WORKSPACE
+    suite_name = _required(config.identity.suite_name, "RUN_SUITE_NAME", die)
     suite_argv = build_suite_argv(
         image_workspace,
         _container_suite_config(config, runtime_python),
@@ -109,16 +123,12 @@ def build_runtime_container_command(
         "-e",
         "BPFREJIT_INSIDE_RUNTIME_CONTAINER=1",
         "-e",
-        f"BPFREJIT_IMAGE_WORKSPACE={image_workspace}",
-        "-e",
-        f"PYTHONPATH={image_workspace}",
-        "-e",
         "HOME=/root",
         "-w",
         str(image_workspace),
     ]
-    for relative in _CONTAINER_RESULT_DIRS:
-        command.extend(["-v", f"{host_workspace / relative}:{image_workspace / relative}"])
+    for result_dir in runtime_container_result_dirs(host_workspace, suite_name, die=die):
+        command.extend(["-v", f"{result_dir}:{image_workspace / result_dir.relative_to(host_workspace)}"])
     command.extend([
         "-v",
         f"{host_workspace / _CONTAINER_RUNTIME_TMP_DIR}:/var/tmp/bpfrejit-runtime",

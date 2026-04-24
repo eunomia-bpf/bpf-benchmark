@@ -22,10 +22,10 @@ from runner.libs.workspace_layout import (
 from runner.suites._common import (
     add_common_args,
     base_suite_runtime_env,
+    csv_tokens,
     ensure_bpf_stats_enabled,
     ensure_scx_artifacts,
     env_with_suite_runtime_ld,
-    merge_csv_and_repeated,
     positive_int,
     resolve_daemon_binary,
     resolve_executable,
@@ -58,11 +58,10 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--scx-prog-show-race-iterations", type=positive_int, default=20, help="scx_prog_show_race iterations.")
     parser.add_argument("--scx-prog-show-race-load-timeout", type=positive_int, default=20, help="scx_prog_show_race load timeout.")
     parser.add_argument("--scx-prog-show-race-skip-probe", action="store_true", help="Skip the sched_ext probe for scx_prog_show_race.")
-    parser.add_argument("--scx-package", action="append", dest="scx_package_values", default=None, help="SCX package artifact to validate; repeatable.")
     parser.add_argument("--scx-packages", default="", help="Comma-separated SCX package artifacts to validate.")
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
-    args.scx_packages = merge_csv_and_repeated(args.scx_packages, args.scx_package_values)
+    args.scx_packages = csv_tokens(args.scx_packages)
     return args
 
 

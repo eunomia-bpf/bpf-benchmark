@@ -50,11 +50,11 @@ _TOTAL_SITE_FIELDS = (
 
 _POLICY_MATCH_TEXT_FIELDS: dict[str, tuple[str, ...]] = {
     "repo": ("repo",),
-    "object": ("object", "object_basename"),
+    "object": ("object",),
     "object_relpath": ("object_relpath",),
-    "program": ("program", "program_name"),
-    "section": ("section", "section_name"),
-    "prog_type": ("prog_type", "prog_type_name"),
+    "program": ("program",),
+    "section": ("section",),
+    "prog_type": ("prog_type",),
     "family": ("family",),
     "category": ("category",),
     "level": ("level",),
@@ -338,26 +338,9 @@ def benchmark_config_enabled_passes(benchmark_config: Mapping[str, Any] | None) 
     passes_config = _mapping_dict((benchmark_config or {}).get("passes"), field_name="passes")
     if active_list := _normalize_pass_list(passes_config.get("active_list")):
         return active_list
-
-    active_name = str(passes_config.get("active") or "").strip()
-    if not active_name:
-        raise SystemExit(
-            "benchmark config must define policy.default.passes, passes.active_list, "
-            "or passes.active when no explicit pass override is supplied"
-        )
-    named_list = _normalize_pass_list(passes_config.get(active_name))
-    if named_list:
-        return named_list
-    available = ", ".join(
-        sorted(
-            key
-            for key, value in passes_config.items()
-            if isinstance(value, list) and _normalize_pass_list(value)
-        )
-    )
     raise SystemExit(
-        f"benchmark config passes.active={active_name!r} must reference a non-empty pass list"
-        + (f" (available: {available})" if available else "")
+        "benchmark config must define policy.default.passes or passes.active_list "
+        "when no explicit pass override is supplied"
     )
 
 
@@ -487,7 +470,7 @@ def benchmark_rejit_enabled_passes() -> list[str]:
     raw = os.environ.get(_BENCH_PASSES_ENV)
     if raw is not None:
         text = raw.strip()
-        if text.lower() in {"default", "benchmark-default"}:
+        if text.lower() == "default":
             return list(_cached_benchmark_config_enabled_passes())
         return [token.strip() for token in text.split(",") if token.strip()]
     return list(_cached_benchmark_config_enabled_passes())

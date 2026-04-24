@@ -14,11 +14,11 @@ from runner.libs.workspace_layout import inside_runtime_image
 from runner.suites._common import (
     add_common_args,
     base_suite_runtime_env,
+    csv_tokens,
     ensure_bpf_stats_enabled,
     ensure_katran_artifacts,
     ensure_scx_artifacts,
     env_with_suite_runtime_ld,
-    merge_csv_and_repeated,
     resolve_daemon_binary,
     resolve_executable,
     run_checked,
@@ -34,10 +34,13 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     add_common_args(parser)
     parser.set_defaults(workspace=str(ROOT_DIR), target_name="local")
+    parser.add_argument(
+        "--e2e-smoke",
+        action="store_true",
+        help="Run e2e/driver.py in smoke mode.",
+    )
     parser.add_argument("--daemon-binary", default="", help="Override the bpfrejit-daemon binary path.")
-    parser.add_argument("--native-repo", action="append", dest="native_repo_values", default=None, help="Native repo artifact to validate; repeatable.")
     parser.add_argument("--native-repos", default="", help="Comma-separated native repo artifacts to validate.")
-    parser.add_argument("--scx-package", action="append", dest="scx_package_values", default=None, help="SCX package artifact to validate; repeatable.")
     parser.add_argument("--scx-packages", default="", help="Comma-separated SCX package artifacts to validate.")
     parser.add_argument(
         "--e2e-argv",
@@ -49,8 +52,8 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("e2e_argv_remainder", nargs=argparse.REMAINDER, help=argparse.SUPPRESS)
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
-    args.native_repos = merge_csv_and_repeated(args.native_repos, args.native_repo_values)
-    args.scx_packages = merge_csv_and_repeated(args.scx_packages, args.scx_package_values)
+    args.native_repos = csv_tokens(args.native_repos)
+    args.scx_packages = csv_tokens(args.scx_packages)
     e2e_argv: list[str] = []
     for value in args.e2e_argv_values or []:
         e2e_argv.extend(shlex.split(str(value)))
@@ -68,6 +71,8 @@ def _runtime_env(workspace: Path, args: argparse.Namespace) -> dict[str, str]:
 
 def _e2e_driver_argv(args: argparse.Namespace, daemon_binary: Path) -> list[str]:
     argv = ["all", "--daemon", str(daemon_binary)]
+    if args.e2e_smoke and "--smoke" not in args.e2e_argv:
+        argv.append("--smoke")
     argv.extend(args.e2e_argv)
     return argv
 
