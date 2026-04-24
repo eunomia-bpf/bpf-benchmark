@@ -37,8 +37,7 @@ from runner.libs.case_common import (  # noqa: E402
 
 
 DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")
-DEFAULT_DURATION_S = 30
-DEFAULT_SMOKE_DURATION_S = 8
+DEFAULT_DURATION_S = 8
 DEFAULT_LOAD_TIMEOUT_S = 20
 DEFAULT_TIMEOUT_S = 180
 
@@ -342,7 +341,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         "",
         f"- Generated: {payload['generated_at']}",
         f"- Mode: `{payload['mode']}`",
-        f"- Smoke: `{payload['smoke']}`",
         f"- Duration per workload: `{payload['duration_s']}s`",
         f"- Tetragon binary: `{payload.get('tetragon_binary') or 'unavailable'}`",
         "",
@@ -457,7 +455,6 @@ def error_payload(
     *,
     tetragon_binary: str | None,
     duration_s: int,
-    smoke: bool,
     setup_result: Mapping[str, object],
     error_message: str,
     limitations: Sequence[str],
@@ -467,7 +464,6 @@ def error_payload(
         "status": "error",
         "mode": "error",
         "error_message": error_message,
-        "smoke": smoke,
         "duration_s": duration_s,
         "tetragon_binary": tetragon_binary,
         "setup": dict(setup_result),
@@ -482,7 +478,6 @@ def daemon_payload(
     tetragon_binary: str,
     workloads: Sequence[WorkloadSpec],
     duration_s: int,
-    smoke: bool,
     load_timeout: int,
     setup_result: Mapping[str, object],
     limitations: list[str],
@@ -562,7 +557,6 @@ def daemon_payload(
         return error_payload(
             tetragon_binary=tetragon_binary,
             duration_s=duration_s,
-            smoke=smoke,
             setup_result=setup_result,
             error_message=lifecycle_result.abort.reason,
             limitations=limitations,
@@ -571,7 +565,6 @@ def daemon_payload(
         return error_payload(
             tetragon_binary=tetragon_binary,
             duration_s=duration_s,
-            smoke=smoke,
             setup_result=setup_result,
             error_message="Tetragon lifecycle completed without a baseline phase",
             limitations=limitations,
@@ -595,7 +588,6 @@ def daemon_payload(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": "error" if error_message else "ok",
         "mode": "tetragon_daemon",
-        "smoke": smoke,
         "duration_s": duration_s,
         "tetragon_binary": tetragon_binary,
         "setup": dict(setup_result),
@@ -612,14 +604,7 @@ def daemon_payload(
 
 def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
     config = load_config(Path(getattr(args, "config", DEFAULT_CONFIG)).resolve())
-    duration_s = int(
-        args.duration
-        or (
-            int(config.get("smoke_duration_s", DEFAULT_SMOKE_DURATION_S) or DEFAULT_SMOKE_DURATION_S)
-            if args.smoke
-            else int(config.get("measurement_duration_s", DEFAULT_DURATION_S) or DEFAULT_DURATION_S)
-        )
-    )
+    duration_s = int(args.duration or int(config.get("measurement_duration_s", DEFAULT_DURATION_S) or DEFAULT_DURATION_S))
     workloads = workload_specs_from_config(config)
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary)
@@ -635,7 +620,6 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
         return error_payload(
             tetragon_binary=None,
             duration_s=duration_s,
-            smoke=bool(args.smoke),
             setup_result=setup_result,
             error_message="Tetragon binary is unavailable in this environment; manual .bpf.o path is forbidden.",
             limitations=limitations,
@@ -648,7 +632,6 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
                 tetragon_binary=tetragon_binary,
                 workloads=workloads,
                 duration_s=duration_s,
-                smoke=bool(args.smoke),
                 load_timeout=DEFAULT_LOAD_TIMEOUT_S,
                 setup_result=setup_result,
                 limitations=limitations,
@@ -657,7 +640,6 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
             return error_payload(
                 tetragon_binary=tetragon_binary,
                 duration_s=duration_s,
-                smoke=bool(args.smoke),
                 setup_result=setup_result,
                 error_message=f"Tetragon case could not run: {exc}",
                 limitations=limitations,

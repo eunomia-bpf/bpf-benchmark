@@ -1,11 +1,7 @@
-measurement_duration_s: 20
-smoke_duration_s: 6
-sample_count: 5
-smoke_sample_count: 2
-warmup_duration_s: 4
-smoke_warmup_duration_s: 2
+measurement_duration_s: 6
+sample_count: 2
+warmup_duration_s: 2
 latency_probe_count: 0
-smoke_latency_probe_count: 0
 latency_probe_timeout_s: 20
 statistics:
   bootstrap_iterations: 2000

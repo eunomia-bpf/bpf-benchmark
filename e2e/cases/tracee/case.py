@@ -48,12 +48,10 @@ from runner.libs.case_common import (  # noqa: E402
 
 
 DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")
-DEFAULT_SAMPLE_COUNT = 5
-DEFAULT_SMOKE_SAMPLE_COUNT = 2
-DEFAULT_WARMUP_DURATION_S = 5
-DEFAULT_SMOKE_WARMUP_DURATION_S = 2
-DEFAULT_LATENCY_PROBE_COUNT = 8
-DEFAULT_SMOKE_LATENCY_PROBE_COUNT = 3
+DEFAULT_DURATION_S = 6
+DEFAULT_SAMPLE_COUNT = 2
+DEFAULT_WARMUP_DURATION_S = 2
+DEFAULT_LATENCY_PROBE_COUNT = 0
 DEFAULT_LATENCY_PROBE_TIMEOUT_S = 5.0
 DEFAULT_LOAD_TIMEOUT_S = 120
 DEFAULT_LATENCY_PROBE_ATTEMPTS = 3
@@ -814,7 +812,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Warmup per workload: `{payload.get('warmup_duration_s')}s`",
         f"- Paired cycles: `{payload.get('sample_count')}`",
         f"- Latency probes per phase: `{payload.get('latency_probe_count')}`",
-        f"- Smoke: `{payload['smoke']}`",
         f"- Tracee binary: `{payload.get('tracee_binary') or 'unavailable'}`",
         "",
         "## Setup",
@@ -943,7 +940,6 @@ def error_payload(
     duration_s: int,
     tracee_binary: str | None,
     setup_result: Mapping[str, object],
-    smoke: bool,
     error_message: str,
     limitations: Sequence[str],
 ) -> dict[str, object]:
@@ -952,7 +948,6 @@ def error_payload(
         "status": "error",
         "mode": "error",
         "error_message": error_message,
-        "smoke": smoke,
         "duration_s": duration_s,
         "tracee_binary": tracee_binary,
         "tracee_programs": [],
@@ -972,16 +967,12 @@ def error_payload(
 def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     config = load_config(Path(getattr(args, "config", DEFAULT_CONFIG)).resolve())
     duration_override = int(getattr(args, "duration", 0) or 0)
-    duration_s = int(duration_override or config.get("measurement_duration_s") or 20)
-    if args.smoke and not duration_override:
-        duration_s = int(config.get("smoke_duration_s") or 8)
-    sample_count_value = config.get("smoke_sample_count") if args.smoke else config.get("sample_count")
-    sample_count = int(sample_count_value or (DEFAULT_SMOKE_SAMPLE_COUNT if args.smoke else DEFAULT_SAMPLE_COUNT))
-    warmup_value = config.get("smoke_warmup_duration_s") if args.smoke else config.get("warmup_duration_s")
-    warmup_duration_s = float(warmup_value or (DEFAULT_SMOKE_WARMUP_DURATION_S if args.smoke else DEFAULT_WARMUP_DURATION_S))
-    latency_probe_value = config.get("smoke_latency_probe_count") if args.smoke else config.get("latency_probe_count")
+    duration_s = int(duration_override or config.get("measurement_duration_s") or DEFAULT_DURATION_S)
+    sample_count = int(config.get("sample_count") or DEFAULT_SAMPLE_COUNT)
+    warmup_duration_s = float(config.get("warmup_duration_s") or DEFAULT_WARMUP_DURATION_S)
+    latency_probe_value = config.get("latency_probe_count")
     if latency_probe_value is None:
-        latency_probe_count = int(DEFAULT_SMOKE_LATENCY_PROBE_COUNT if args.smoke else DEFAULT_LATENCY_PROBE_COUNT)
+        latency_probe_count = int(DEFAULT_LATENCY_PROBE_COUNT)
     else:
         latency_probe_count = int(latency_probe_value)
     latency_probe_timeout_s = float(config.get("latency_probe_timeout_s") or DEFAULT_LATENCY_PROBE_TIMEOUT_S)
@@ -1004,7 +995,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             duration_s=duration_s,
             tracee_binary=None,
             setup_result=setup_result,
-            smoke=bool(args.smoke),
             error_message="Tracee binary is unavailable in this environment; manual .bpf.o path is forbidden.",
             limitations=limitations,
         )
@@ -1016,7 +1006,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             duration_s=duration_s,
             tracee_binary=tracee_binary,
             setup_result=setup_result,
-            smoke=bool(args.smoke),
             error_message="Tracee config contains no workloads",
             limitations=limitations,
         )
@@ -1101,7 +1090,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                         duration_s=duration_s,
                         tracee_binary=tracee_binary,
                         setup_result=setup_result,
-                        smoke=bool(args.smoke),
                         error_message=lifecycle_result.abort.reason,
                         limitations=limitations,
                     )
@@ -1139,7 +1127,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             duration_s=duration_s,
             tracee_binary=tracee_binary,
             setup_result=setup_result,
-            smoke=bool(args.smoke),
             error_message=f"Tracee case could not run: {exc}",
             limitations=limitations,
         )
@@ -1167,7 +1154,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": "ok",
         "mode": "tracee_daemon_same_image_paired",
-        "smoke": bool(args.smoke),
         "duration_s": duration_s,
         "sample_count": sample_count,
         "warmup_duration_s": warmup_duration_s,
