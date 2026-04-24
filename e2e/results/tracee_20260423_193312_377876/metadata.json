@@ -1,0 +1,101 @@
+{
+  "case": "tracee",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "Tracee case could not run: failed to launch Tracee: /artifacts/tracee/bin/tracee --events all --output json:/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.5ab0c0b5/tracee/events.json --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.5ab0c0b5/tracee/signatures: command exited with code 1: Error: invalid event to trace: all",
+  "generated_at": "2026-04-23T19:33:37.522441+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-23T19:33:37.522436+00:00",
+  "launcher_boot_id": "26643a09-cf57-4f3e-a132-81cea6645f37",
+  "launcher_pid": 1721,
+  "launcher_start_ticks": 37083,
+  "optimization_summary": {
+    "baseline": null,
+    "comparison": {
+      "comparable": false,
+      "reason": "Tracee case could not run: failed to launch Tracee: /artifacts/tracee/bin/tracee --events all --output json:/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.5ab0c0b5/tracee/events.json --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.5ab0c0b5/tracee/signatures: command exited with code 1: Error: invalid event to trace: all"
+    },
+    "config": {
+      "latency_probe_count": 8,
+      "latency_probe_timeout_s": 5,
+      "measurement_duration_s": 20,
+      "preflight_duration_s": 5,
+      "require_program_activity": true,
+      "sample_count": 5,
+      "smoke_duration_s": 6,
+      "smoke_latency_probe_count": 3,
+      "smoke_sample_count": 2,
+      "smoke_warmup_duration_s": 2,
+      "statistics": {
+        "bootstrap_iterations": 2000,
+        "bootstrap_seed": 20260328
+      },
+      "warmup_duration_s": 4,
+      "workloads": [
+        {
+          "command": "mixed exec/open/connect workload over {duration}s",
+          "kind": "tracee_default",
+          "latency_probe_kind": "exec",
+          "metric": "ops/s",
+          "name": "tracee_default"
+        }
+      ]
+    },
+    "control": null,
+    "duration_s": 20,
+    "error_message": "Tracee case could not run: failed to launch Tracee: /artifacts/tracee/bin/tracee --events all --output json:/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.5ab0c0b5/tracee/events.json --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.5ab0c0b5/tracee/signatures: command exited with code 1: Error: invalid event to trace: all",
+    "generated_at": "2026-04-23T19:33:37.505665+00:00",
+    "host": {
+      "git_sha": null,
+      "git_sha_error": "[Errno 2] No such file or directory: 'git'",
+      "hostname": "virtme-ng",
+      "kernel": "7.0.0-rc2",
+      "platform": "Linux-7.0.0-rc2-x86_64-with-glibc2.39",
+      "python": "3.12.3"
+    },
+    "limitations": [],
+    "mode": "error",
+    "paired_cycles": [],
+    "post_rejit": null,
+    "preflight": null,
+    "rejit_result": null,
+    "scan_results": {},
+    "setup": {
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "TRACEE_BINARY=/artifacts/tracee/bin/tracee\nTRACEE_EBPF_BINARY=/artifacts/tracee/bin/tracee-ebpf",
+      "tracee_binary": "/artifacts/tracee/bin/tracee"
+    },
+    "smoke": false,
+    "status": "error",
+    "tracee_binary": "/artifacts/tracee/bin/tracee",
+    "tracee_programs": []
+  },
+  "policy": {
+    "exclusions": {
+      "struct_ops": [
+        "map_inline",
+        "dce"
+      ]
+    }
+  },
+  "run_type": "tracee",
+  "smoke": false,
+  "started_at": "2026-04-23T19:33:12.377876+00:00",
+  "status": "error",
+  "suite": "e2e"
+}
