@@ -12,6 +12,9 @@ from runner.libs.state_file import read_json_object, write_json_object
 
 
 _die = partial(fail, "suite-args")
+MICRO_BENCHMARK_DEFAULT_SAMPLES = "1"
+MICRO_BENCHMARK_DEFAULT_WARMUPS = "0"
+MICRO_BENCHMARK_DEFAULT_INNER_REPEAT = "10"
 
 
 @dataclass(frozen=True)
@@ -72,11 +75,15 @@ def _benchmark_defaults(target_name: str, env: dict[str, str]) -> tuple[str, str
     prefix = _aws_prefix(target_name)
     if prefix:
         return (
-            _prefixed_env(env, prefix, "BENCH_SAMPLES", "1"),
-            _prefixed_env(env, prefix, "BENCH_WARMUPS", "0"),
-            _prefixed_env(env, prefix, "BENCH_INNER_REPEAT", "10"),
+            _prefixed_env(env, prefix, "BENCH_SAMPLES", MICRO_BENCHMARK_DEFAULT_SAMPLES),
+            _prefixed_env(env, prefix, "BENCH_WARMUPS", MICRO_BENCHMARK_DEFAULT_WARMUPS),
+            _prefixed_env(env, prefix, "BENCH_INNER_REPEAT", MICRO_BENCHMARK_DEFAULT_INNER_REPEAT),
         )
-    return (_env(env, "SAMPLES", "1"), _env(env, "WARMUPS", "0"), _env(env, "INNER_REPEAT", "10"))
+    return (
+        _env(env, "SAMPLES", MICRO_BENCHMARK_DEFAULT_SAMPLES),
+        _env(env, "WARMUPS", MICRO_BENCHMARK_DEFAULT_WARMUPS),
+        _env(env, "INNER_REPEAT", MICRO_BENCHMARK_DEFAULT_INNER_REPEAT),
+    )
 
 
 def suite_args_from_env(

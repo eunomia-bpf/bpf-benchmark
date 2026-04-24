@@ -34,9 +34,6 @@ E2E_ARGS ?=
 E2E_SMOKE ?= 0
 VM_CORPUS_ARGS ?=
 TEST_MODE ?= test
-SAMPLES    ?= 3
-WARMUPS    ?= 1
-INNER_REPEAT ?= 100
 VM_CORPUS_SAMPLES ?= 30
 VM_CORPUS_WORKLOAD_SECONDS ?=
 VM_TEST_TIMEOUT ?= 3600
@@ -68,8 +65,6 @@ space := $(empty) $(empty)
 comma := ,
 ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT := $(or $(findstring command line,$(origin SAMPLES)),$(findstring environment,$(origin SAMPLES)),$(findstring override,$(origin SAMPLES)))
 ROOT_VM_CORPUS_SAMPLES_VALUE := $(if $(strip $(ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT)),$(SAMPLES),$(VM_CORPUS_SAMPLES))
-VM_MICRO_BENCH_ARGS = $(foreach bench,$(subst $(comma),$(space),$(strip $(BENCH))),--bench "$(bench)")
-VM_MICRO_SUITE_ARGS = --samples "$(SAMPLES)" --warmups "$(WARMUPS)" --inner-repeat "$(INNER_REPEAT)" $(VM_MICRO_BENCH_ARGS)
 VM_MICRO_SMOKE_SUITE_ARGS = --samples "1" --warmups "0" --inner-repeat "50"
 VM_CORPUS_SUITE_ARGS = --samples "$(ROOT_VM_CORPUS_SAMPLES_VALUE)" $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),--corpus-workload-seconds "$(VM_CORPUS_WORKLOAD_SECONDS)",) $(if $(strip $(VM_CORPUS_ARGS)),-- $(VM_CORPUS_ARGS),)
 VM_E2E_SUITE_ARGS = $(if $(filter 1,$(E2E_SMOKE)),--e2e-smoke,) $(if $(strip $(E2E_ARGS)),-- $(E2E_ARGS),)
@@ -89,7 +84,7 @@ help:
 	@echo "  VM x86:   vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "  AWS ARM:  aws-arm64-test aws-arm64-benchmark aws-arm64-terminate"
 	@echo "  AWS x86:  aws-x86-test aws-x86-benchmark aws-x86-terminate"
-	@echo "Params: vm-micro SAMPLES=$(SAMPLES) WARMUPS=$(WARMUPS) INNER_REPEAT=$(INNER_REPEAT) BENCH=\"...\""
+	@echo "Params: vm-micro overrides use SAMPLES/WARMUPS/INNER_REPEAT/BENCH; defaults come from runner.libs.suite_args"
 	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) VM_CORPUS_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
 	@echo "        vm-e2e E2E_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
 	@echo "        aws-arm64-test/aws-arm64-benchmark AWS_ARM64_REGION=<region> AWS_ARM64_PROFILE=<profile> AWS_ARM64_ROOT_VOLUME_GB=<override>"
@@ -125,7 +120,7 @@ vm-micro-smoke:
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm micro -- $(VM_MICRO_SMOKE_SUITE_ARGS)
 
 vm-micro:
-	$(RUN_TARGET_SUITE_CMD) run x86-kvm micro -- $(VM_MICRO_SUITE_ARGS)
+	$(RUN_TARGET_SUITE_CMD) run x86-kvm micro
 
 vm-corpus:
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm corpus -- $(VM_CORPUS_SUITE_ARGS)
