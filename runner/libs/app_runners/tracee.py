@@ -102,7 +102,9 @@ class TraceeOutputCollector:
         for raw_line in iter(pipe.readline, ""):
             line = raw_line.rstrip()
             with self._lock: self.stdout_tail.append(line)
-            self._parse_event_line(line); self._parse_stats_line(line)
+            # Tracee can print control/stats lines on stdout even when the
+            # event stream itself is redirected to the JSON event file.
+            self._parse_stats_line(line)
         pipe.close()
 
     def consume_stderr(self, pipe: Any) -> None:
@@ -163,7 +165,7 @@ class TraceeOutputCollector:
                     self._parse_event_line(line)
                     continue
                 if stop_event.is_set():
-                    flush_partial_line()
+                    flush_partial_line(allow_parse=False)
                     break
                 try:
                     current_stat = path.stat()
@@ -191,7 +193,7 @@ class TraceeOutputCollector:
         finally:
             if handle is not None:
                 try:
-                    flush_partial_line()
+                    flush_partial_line(allow_parse=False)
                     for raw_line in handle:
                         if partial_line:
                             raw_line = partial_line + raw_line
@@ -205,7 +207,7 @@ class TraceeOutputCollector:
                         with self._lock:
                             self.event_tail.append(line)
                         self._parse_event_line(line)
-                    flush_partial_line()
+                    flush_partial_line(allow_parse=False)
                 except OSError as exc:
                     if exc.errno != errno.ENODATA:
                         raise
