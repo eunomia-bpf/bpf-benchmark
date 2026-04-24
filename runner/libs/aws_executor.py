@@ -648,8 +648,8 @@ def _remote_runtime_container_command(
     )
 
 
-def _remote_result_dir_command(remote_workspace: str) -> str:
-    dirs = [str(path) for path in runtime_container_host_dirs(Path(remote_workspace))]
+def _remote_result_dir_command(remote_workspace: str, suite_name: str) -> str:
+    dirs = [str(path) for path in runtime_container_host_dirs(Path(remote_workspace), suite_name, die=_die)]
     return shlex.join(["mkdir", "-p", *dirs])
 
 
@@ -674,7 +674,7 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_pa
     log_dir_cmd = f"mkdir -p {shlex.quote(str(Path(remote_log).parent))}"
     run_cmd = (
         f"{log_dir_cmd} && "
-        f"{_remote_result_dir_command(remote_workspace)} && "
+        f"{_remote_result_dir_command(remote_workspace, ctx.suite_name)} && "
         f"sudo {suite_cmd} >{shlex.quote(remote_log)} 2>&1"
     )
     remote_completed = aws_common._ssh_exec(ctx, ip, "bash", "-c", run_cmd, check=False)

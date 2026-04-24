@@ -134,17 +134,14 @@ kernel. It mounts only explicit host resources such as:
 /sys/kernel/debug
 /lib/modules:ro
 /boot:ro
-micro/results
-corpus/results
-e2e/results
-tests/results
+<active-suite>/results
 ```
 
 The whole host repository is not mounted over the image workspace.
 
 ## Results
 
-Benchmark results are written directly into shared suite roots:
+Benchmark results are written directly into the selected suite root:
 
 ```text
 micro/results
