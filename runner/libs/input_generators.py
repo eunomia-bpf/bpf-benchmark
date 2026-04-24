@@ -5,8 +5,8 @@ from pathlib import Path
 
 import yaml
 
+from runner.libs import ROOT_DIR
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
 GENERATED_INPUT_DIR = ROOT_DIR / "micro" / "generated-inputs"
 MASK64 = (1 << 64) - 1
 

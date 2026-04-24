@@ -33,10 +33,6 @@ class AppRunner:
         raise NotImplementedError
 
     @property
-    def program_fds(self) -> Mapping[int, int]:
-        return {}
-
-    @property
     def last_workload_details(self) -> Mapping[str, object]:
         return {}
 

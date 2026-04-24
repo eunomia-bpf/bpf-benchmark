@@ -78,15 +78,14 @@ VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 	aws-x86-test aws-x86-benchmark aws-x86-terminate \
 	help clean
 
-# ── Help ───────────────────────────────────────────────────────────────────────
 help:
 	@echo "Canonical run targets:"
 	@echo "  VM x86:   vm-selftest vm-negative-test vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "  AWS ARM:  aws-arm64-test aws-arm64-benchmark aws-arm64-terminate"
 	@echo "  AWS x86:  aws-x86-test aws-x86-benchmark aws-x86-terminate"
 	@echo "Params: vm-micro overrides use SAMPLES/WARMUPS/INNER_REPEAT/BENCH; defaults come from runner.libs.suite_args"
-	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) VM_CORPUS_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
-	@echo "        vm-e2e E2E_ARGS=\"--rejit-passes map_inline,const_prop,dce --no-kinsn\""
+	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) VM_CORPUS_ARGS=\"--no-kinsn\""
+	@echo "        vm-e2e E2E_ARGS=\"--no-kinsn\""
 	@echo "        aws-arm64-test/aws-arm64-benchmark AWS_ARM64_REGION=<region> AWS_ARM64_PROFILE=<profile> AWS_ARM64_ROOT_VOLUME_GB=<override>"
 	@echo "        aws-arm64-test AWS_ARM64_TEST_MODE=<selftest|negative|test>"
 	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=<micro|corpus|e2e>"
@@ -106,7 +105,6 @@ validate:
 	$(MAKE) check
 	$(MAKE) vm-test
 
-# ── VM (x86) ──────────────────────────────────────────────────────────────────
 vm-selftest:
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm test -- --test-mode "selftest" $(VM_TEST_COMMON_SUITE_ARGS)
 
@@ -134,7 +132,6 @@ vm-all:
 	$(MAKE) vm-corpus
 	$(MAKE) vm-e2e
 
-# ── AWS aliases ───────────────────────────────────────────────────────────────
 aws-arm64-test:
 	$(RUN_TARGET_SUITE_CMD) run aws-arm64 test
 

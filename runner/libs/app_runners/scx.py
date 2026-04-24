@@ -318,10 +318,6 @@ class ScxRunner(AppRunner):
         return {} if self.session is None else self.session.collector_snapshot()
 
     @property
-    def program_fds(self) -> dict[int, int]:
-        return {}
-
-    @property
     def last_workload_details(self) -> Mapping[str, object]:
         return dict(self.last_workload_extra)
 
