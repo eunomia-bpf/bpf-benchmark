@@ -22,12 +22,10 @@ from runner.libs.app_runners.scx import ScxRunner
 from runner.libs.app_suite_schema import AppSpec, AppWorkload, load_app_suite_from_yaml
 from runner.libs.bpf_stats import enable_bpf_stats, sample_bpf_stats
 from runner.libs.case_common import (
-    _merge_group_rejit_results,
-    _resolve_apply_passes_by_program,
-    _resolve_scan_pass_selection,
     CaseLifecycleState,
     prepare_daemon_session,
     rejit_program_result,
+    run_lifecycle_sessions,
     wait_for_suite_quiescence,
 )
 from runner.libs.app_runners.process_support import programs_after
@@ -183,11 +181,9 @@ def _daemon_exit_error(daemon_session: DaemonSession) -> str | None:
 
 def _workload_seconds(args: argparse.Namespace, suite_defaults: Mapping[str, object]) -> float:
     explicit = float(args.workload_seconds or 0.0)
-    if explicit > 0:
-        return explicit
+    if explicit > 0: return explicit
     default_value = float(suite_defaults.get("duration_s", 10.0) or 10.0)
-    if default_value <= 0:
-        raise RuntimeError(f"invalid app suite default duration_s: {default_value}")
+    if default_value <= 0: raise RuntimeError(f"invalid app suite default duration_s: {default_value}")
     return default_value
 
 
@@ -197,17 +193,14 @@ def _app_workload_seconds(
     app: AppSpec,
 ) -> float:
     explicit = float(args.workload_seconds or 0.0)
-    if explicit > 0:
-        return explicit
-    if app.duration_s is not None:
-        return float(app.duration_s)
+    if explicit > 0: return explicit
+    if app.duration_s is not None: return float(app.duration_s)
     return _workload_seconds(args, suite_defaults)
 
 
 def _sample_count(args: argparse.Namespace, suite_defaults: Mapping[str, object]) -> int:
     explicit = int(args.samples or 0)
-    if explicit > 0:
-        return explicit
+    if explicit > 0: return explicit
     return max(1, int(suite_defaults.get("samples", 1) or 1))
 
 
@@ -826,22 +819,13 @@ def _build_runner_state(
     started_prog_ids: Sequence[int],
 ) -> CaseLifecycleState:
     prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
-    if not prog_ids:
-        raise RuntimeError(f"{app.name}: runner did not return any live prog_ids")
+    if not prog_ids: raise RuntimeError(f"{app.name}: runner did not return any live prog_ids")
     programs = [dict(program) for program in runner.programs]
-    if not programs:
-        raise RuntimeError(f"{app.name}: runner did not expose any live programs")
+    if not programs: raise RuntimeError(f"{app.name}: runner did not expose any live programs")
     return CaseLifecycleState(
-        runtime=runner,
-        prog_ids=list(prog_ids),
-        artifacts={
-            "programs": programs,
-            "rejit_policy_context": {
-                "repo": str(app.name).strip(),
-                "category": str(app.runner).strip(),
-                "level": "corpus",
-            },
-        },
+        runtime=runner, prog_ids=list(prog_ids),
+        artifacts={"programs": programs, "rejit_policy_context": {
+            "repo": str(app.name).strip(), "category": str(app.runner).strip(), "level": "corpus"}},
     )
 
 
@@ -935,72 +919,6 @@ def _build_app_error_result(
         "rejit_workloads": rejit_workloads,
         "process": {} if runner is None else dict(runner.process_output),
     }
-
-
-def _slice_scan_results(
-    scan_results: Mapping[int, Mapping[str, object]],
-    prog_ids: Sequence[int],
-) -> dict[int, dict[str, object]]:
-    return {
-        int(prog_id): dict(scan_results[int(prog_id)])
-        for prog_id in prog_ids
-        if int(prog_id) in scan_results
-    }
-
-
-def _slice_rejit_result(
-    rejit_result: Mapping[str, object],
-    prog_ids: Sequence[int],
-    *,
-    scan_results: Mapping[int, Mapping[str, object]] | None = None,
-    enabled_passes_by_prog: Mapping[int, Sequence[str]] | None = None,
-) -> dict[str, object]:
-    prog_ids = [int(value) for value in prog_ids if int(value) > 0]
-    if not prog_ids:
-        return {}
-
-    per_program: dict[int, dict[str, object]] = {}
-    outputs: list[str] = []
-    errors: list[str] = []
-    exit_code = 0
-    for prog_id in prog_ids:
-        record = rejit_program_result(rejit_result, prog_id)
-        if not record:
-            continue
-        if isinstance(scan_results, Mapping) and int(prog_id) in scan_results:
-            record["scan"] = dict(scan_results[int(prog_id)])
-        if isinstance(enabled_passes_by_prog, Mapping):
-            raw_enabled_passes = enabled_passes_by_prog.get(int(prog_id))
-            if raw_enabled_passes is not None:
-                record["enabled_passes"] = _ordered_enabled_passes(raw_enabled_passes)
-        per_program[int(prog_id)] = dict(record)
-        output = str(record.get("output") or "")
-        if output:
-            outputs.append(output)
-        exit_code = max(exit_code, int(record.get("exit_code", 0) or 0))
-        error = str(record.get("error") or "").strip()
-        if error:
-            errors.append(error)
-
-    applied = any(bool(record.get("applied")) for record in per_program.values())
-    changed = any(bool(record.get("changed")) for record in per_program.values())
-    error_message = "; ".join(errors)
-    if not error_message and not per_program:
-        error_message = str(rejit_result.get("error") or "").strip()
-    sliced = {
-        "applied": applied,
-        "changed": changed,
-        "output": "\n".join(fragment for fragment in outputs if fragment),
-        "exit_code": exit_code,
-        "per_program": per_program,
-        "program_counts": {
-            "requested": len(prog_ids),
-            "applied": sum(1 for record in per_program.values() if bool(record.get("applied"))),
-            "not_applied": sum(1 for record in per_program.values() if not bool(record.get("applied"))),
-        },
-        "error": error_message,
-    }
-    return sliced
 
 
 def _finalize_app_result(
@@ -1102,13 +1020,6 @@ class CorpusAppSession:
     state: CaseLifecycleState
     before_prog_ids: list[int]
     workload_seconds: float
-    baseline_measurement: dict[str, object] | None = None
-    scan_results: dict[int, dict[str, object]] = field(default_factory=dict)
-    apply_result: dict[str, object] = field(default_factory=dict)
-    rejit_measurement: dict[str, object] | None = None
-    error: str = ""
-    stop_error: str = ""
-    stopped: bool = False
 
 
 def run_suite(args: argparse.Namespace) -> dict[str, object]:
@@ -1121,32 +1032,30 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
     workload_seconds = _workload_seconds(args, suite.defaults)
     samples = _sample_count(args, suite.defaults)
     results_by_name: dict[str, dict[str, object]] = {}
+    lifecycle_by_app: dict[str, Any] = {}
     completed_apps: set[str] = set()
     fatal_error = ""
 
     with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
         prepared_daemon_session = prepare_daemon_session(daemon_session)
         sessions: list[CorpusAppSession] = []
-        active_sessions: list[CorpusAppSession] = []
 
         try:
             with enable_bpf_stats():
+                def _on_session_failure(_: object, result: Any, phase: str) -> None:
+                    if phase != "baseline": return
+                    try:
+                        wait_for_suite_quiescence()
+                    except Exception as quiesce_exc:
+                        result.error = f"{result.error}; {quiesce_exc}" if result.error else str(quiesce_exc)
+
                 for app in suite.apps:
-                    _print_progress(
-                        "app_start",
-                        app=app.name,
-                        runner=app.runner,
-                        workload=app.workload_for("corpus"),
-                    )
+                    _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
                     app_workload_seconds = _app_workload_seconds(args, suite.defaults, app)
                     runner: AppRunner | None = None
                     try:
                         before_prog_ids = [int(program.get("id", 0) or 0) for program in programs_after(())]
-                        runner = get_app_runner(
-                            app.runner,
-                            workload=app.workload_for("corpus"),
-                            **app.args,
-                        )
+                        runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
                         started_prog_ids = [int(value) for value in runner.start() if int(value) > 0]
                         state = _build_runner_state(app, runner, started_prog_ids)
                         session = CorpusAppSession(
@@ -1157,7 +1066,6 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                             workload_seconds=app_workload_seconds,
                         )
                         sessions.append(session)
-                        active_sessions.append(session)
                     except Exception as exc:
                         stop_error = ""
                         if runner is not None:
@@ -1168,171 +1076,53 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         error_message = str(exc)
                         if stop_error:
                             error_message = f"{error_message}; stop failed: {stop_error}"
-                        result = _build_app_error_result(
-                            app,
-                            workload_seconds=app_workload_seconds,
-                            error=error_message,
-                            runner=runner,
-                        )
+                        result = _build_app_error_result(app, workload_seconds=app_workload_seconds, error=error_message, runner=runner)
                         results_by_name[app.name] = result
                         completed_apps.add(app.name)
-                        _print_progress(
-                            "app_done",
-                            app=app.name,
-                            status=result.get("status"),
-                            error=result.get("error"),
-                            program_count=0,
-                        )
+                        _print_progress("app_done", app=app.name, status=result.get("status"),
+                                        error=result.get("error"), program_count=0)
                     daemon_error = _daemon_exit_error(daemon_session)
-                    if daemon_error is not None:
-                        fatal_error = daemon_error
-                        break
+                    if daemon_error is not None: fatal_error = daemon_error; break
 
-                if not fatal_error:
-                    _refresh_active_session_programs(active_sessions)
-                    surviving_sessions: list[CorpusAppSession] = []
-                    for session in active_sessions:
-                        try:
-                            session.baseline_measurement = _measure_runner_phase(
-                                session.runner,
-                                session.state.prog_ids,
-                                workload_seconds=session.workload_seconds,
-                                samples=samples,
-                            )
-                            surviving_sessions.append(session)
-                        except Exception as exc:
-                            session.error = str(exc)
-                            try:
-                                session.runner.stop()
-                                session.stopped = True
-                            except Exception as stop_exc:
-                                session.stop_error = str(stop_exc)
-                            try:
-                                wait_for_suite_quiescence()
-                            except Exception as quiesce_exc:
-                                session.error = f"{session.error}; {quiesce_exc}"
-                            error_message = session.error
-                            if session.stop_error:
-                                error_message = f"{error_message}; stop failed: {session.stop_error}"
-                            result = _build_app_error_result(
-                                session.app,
-                                workload_seconds=session.workload_seconds,
-                                error=error_message,
-                                runner=session.runner,
-                                state=session.state,
-                                baseline_measurement=session.baseline_measurement,
-                                apply_result=session.apply_result,
-                                rejit_measurement=session.rejit_measurement,
-                            )
-                            results_by_name[session.app.name] = result
-                            completed_apps.add(session.app.name)
-                            _print_progress(
-                                "app_done",
-                                app=session.app.name,
-                                status=result.get("status"),
-                                error=result.get("error"),
-                                program_count=0,
-                            )
-                        daemon_error = _daemon_exit_error(daemon_session)
-                        if daemon_error is not None:
-                            fatal_error = daemon_error
-                            break
-                    active_sessions = surviving_sessions
-
-                if not fatal_error and active_sessions:
-                    _refresh_active_session_programs(active_sessions)
-                    prog_ids = [
-                        prog_id
-                        for session in active_sessions
-                        for prog_id in session.state.prog_ids
-                    ]
-                    scan_enabled_passes, benchmark_config = _resolve_scan_pass_selection(None)
-                    scan_results = prepared_daemon_session.session.scan_programs(
-                        prog_ids,
-                        enabled_passes=scan_enabled_passes,
+                if not fatal_error and sessions:
+                    lifecycle_results, fatal_error = run_lifecycle_sessions(
+                        daemon_session=prepared_daemon_session,
+                        sessions=sessions,
+                        get_state=lambda session: session.state,
+                        measure=lambda session, state, _phase: _measure_runner_phase(
+                            session.runner,
+                            state.prog_ids,
+                            workload_seconds=session.workload_seconds,
+                            samples=samples,
+                        ),
+                        stop=lambda session, _: session.runner.stop(),
+                        refresh_sessions=lambda lifecycle_sessions, _phase: _refresh_active_session_programs(lifecycle_sessions),
+                        on_session_failure=_on_session_failure,
                     )
-                    apply_enabled_passes_by_prog: dict[int, list[str]] = {}
-                    for session in active_sessions:
-                        apply_enabled_passes_by_prog.update(
-                            _resolve_apply_passes_by_program(
-                                prog_ids=session.state.prog_ids,
-                                lifecycle_state=session.state,
-                                scan_results=scan_results,
-                                enabled_passes=None,
-                                benchmark_config=benchmark_config,
-                            )
-                        )
-                        session.scan_results = _slice_scan_results(
-                            scan_results,
-                            session.state.prog_ids,
-                        )
-
-                    grouped_prog_ids: dict[tuple[str, ...], list[int]] = {}
-                    for prog_id in prog_ids:
-                        pass_tuple = tuple(apply_enabled_passes_by_prog.get(int(prog_id), ()))
-                        grouped_prog_ids.setdefault(pass_tuple, []).append(int(prog_id))
-
-                    group_rejit_results: list[tuple[list[int], Mapping[str, object]]] = []
-                    for pass_tuple, group_prog_ids in grouped_prog_ids.items():
-                        group_rejit_results.append(
-                            (
-                                list(group_prog_ids),
-                                prepared_daemon_session.session.apply_rejit(
-                                    group_prog_ids,
-                                    enabled_passes=list(pass_tuple),
-                                ),
-                            )
-                        )
-
-                    merged_rejit_result = _merge_group_rejit_results(
-                        prog_ids=prog_ids,
-                        group_results=group_rejit_results,
-                    )
-                    for session in active_sessions:
-                        session.apply_result = _slice_rejit_result(
-                            merged_rejit_result,
-                            session.state.prog_ids,
-                            scan_results=session.scan_results,
-                            enabled_passes_by_prog=apply_enabled_passes_by_prog,
-                        )
-
-                    daemon_error = _daemon_exit_error(daemon_session)
-                    if daemon_error is not None:
-                        fatal_error = daemon_error
-
-                if not fatal_error:
-                    for session in active_sessions:
-                        try:
-                            session.rejit_measurement = _measure_runner_phase(
-                                session.runner,
-                                session.state.prog_ids,
-                                workload_seconds=session.workload_seconds,
-                                samples=samples,
-                            )
-                        except Exception as exc:
-                            session.error = str(exc)
-                        daemon_error = _daemon_exit_error(daemon_session)
-                        if daemon_error is not None:
-                            fatal_error = daemon_error
-                            break
+                    lifecycle_by_app = {session.app.name: lifecycle for session, lifecycle in zip(sessions, lifecycle_results)}
         finally:
             for session in sessions:
-                if not session.stopped:
-                    try:
-                        session.runner.stop()
-                    except Exception as exc:
-                        session.stop_error = str(exc)
-                    finally:
-                        session.stopped = True
-
+                lifecycle = lifecycle_by_app.get(session.app.name)
+                if lifecycle is not None and bool(lifecycle.stopped): continue
+                try:
+                    session.runner.stop()
+                except Exception as exc:
+                    if lifecycle is not None:
+                        lifecycle.stop_error = str(exc)
+                        lifecycle.stopped = True
+                else:
+                    if lifecycle is not None:
+                        lifecycle.stopped = True
         for session in sessions:
-            if session.app.name in completed_apps:
-                continue
-            error_message = session.error
-            if fatal_error:
-                error_message = fatal_error if not error_message else f"{error_message}; {fatal_error}"
-            if session.stop_error:
-                error_message = session.stop_error if not error_message else f"{error_message}; stop failed: {session.stop_error}"
+            if session.app.name in completed_apps: continue
+            lifecycle = lifecycle_by_app.get(session.app.name)
+            baseline_measurement = dict(lifecycle.baseline) if lifecycle is not None and isinstance(lifecycle.baseline, Mapping) else None
+            apply_result = dict(lifecycle.rejit_result or {}) if lifecycle is not None else {}
+            rejit_measurement = dict(lifecycle.post_rejit) if lifecycle is not None and isinstance(lifecycle.post_rejit, Mapping) else None
+            error_message = str(lifecycle.error or "") if lifecycle is not None else ""
+            stop_error = str(lifecycle.stop_error or "") if lifecycle is not None else ""
+            if fatal_error: error_message = fatal_error if not error_message else f"{error_message}; {fatal_error}"
+            if stop_error: error_message = stop_error if not error_message else f"{error_message}; stop failed: {stop_error}"
             if error_message:
                 result = _build_app_error_result(
                     session.app,
@@ -1340,9 +1130,9 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                     error=error_message,
                     runner=session.runner,
                     state=session.state,
-                    baseline_measurement=session.baseline_measurement,
-                    apply_result=session.apply_result,
-                    rejit_measurement=session.rejit_measurement,
+                    baseline_measurement=baseline_measurement,
+                    apply_result=apply_result,
+                    rejit_measurement=rejit_measurement,
                 )
             else:
                 try:
@@ -1351,13 +1141,10 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         runner=session.runner,
                         state=session.state,
                         workload_seconds=session.workload_seconds,
-                        baseline_measurement=session.baseline_measurement or {},
-                        apply_result=session.apply_result,
-                        rejit_measurement=session.rejit_measurement,
+                        baseline_measurement=baseline_measurement or {},
+                        apply_result=apply_result,
+                        rejit_measurement=rejit_measurement,
                     )
-                    if session.stop_error:
-                        result["status"] = "error"
-                        result["error"] = session.stop_error
                 except Exception as exc:
                     result = _build_app_error_result(
                         session.app,
@@ -1365,19 +1152,13 @@ def run_suite(args: argparse.Namespace) -> dict[str, object]:
                         error=str(exc),
                         runner=session.runner,
                         state=session.state,
-                        baseline_measurement=session.baseline_measurement,
-                        apply_result=session.apply_result,
-                        rejit_measurement=session.rejit_measurement,
-                    )
-            results_by_name[session.app.name] = result
-            completed_apps.add(session.app.name)
-            _print_progress(
-                "app_done",
-                app=session.app.name,
-                status=result.get("status"),
-                error=result.get("error"),
-                program_count=len(result.get("program_measurements") or {}),
-            )
+                        baseline_measurement=baseline_measurement,
+                    apply_result=apply_result,
+                    rejit_measurement=rejit_measurement,
+                )
+            results_by_name[session.app.name] = result; completed_apps.add(session.app.name)
+            _print_progress("app_done", app=session.app.name, status=result.get("status"),
+                            error=result.get("error"), program_count=len(result.get("program_measurements") or {}))
 
         daemon_socket = str(prepared_daemon_session.session.socket_path)
         kinsn_metadata = dict(prepared_daemon_session.metadata)
