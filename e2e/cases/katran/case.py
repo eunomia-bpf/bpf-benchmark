@@ -24,8 +24,7 @@ from runner.libs.case_common import (  # noqa: E402
 from runner.libs.metrics import sample_total_cpu_usage, start_sampler_thread  # noqa: E402
 
 
-DEFAULT_DURATION_S = 20
-DEFAULT_SMOKE_DURATION_S = 5
+DEFAULT_DURATION_S = 5
 
 
 def _measurement_bpf_avg_ns(phase: Mapping[str, object] | None) -> float | None:
@@ -82,7 +81,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Status: `{payload.get('status')}`",
         f"- Workload: `{((payload.get('workload_spec') or {}).get('kind') if isinstance(payload.get('workload_spec'), Mapping) else 'unknown')}`",
         f"- Duration: `{payload.get('duration_s')}s`",
-        f"- Smoke: `{payload.get('smoke')}`",
         f"- BPF speedup (baseline/rejit): `{comparison.get('bpf_speedup') if comparison.get('bpf_speedup') is not None else 'n/a'}`",
         f"- Workload throughput ratio (rejit/baseline): `{comparison.get('workload_ratio_rejit_over_baseline') if comparison.get('workload_ratio_rejit_over_baseline') is not None else 'n/a'}`",
     ]
@@ -97,9 +95,8 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")
 
-    smoke_duration_s = DEFAULT_SMOKE_DURATION_S
     duration_override = int(args.duration or 0)
-    duration_s = int(duration_override or (smoke_duration_s if args.smoke else DEFAULT_DURATION_S))
+    duration_s = int(duration_override or DEFAULT_DURATION_S)
     workload_spec = {"kind": "network"}
     runner = KatranRunner(
         iface=DEFAULT_INTERFACE,
@@ -156,7 +153,6 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": status,
-        "smoke": bool(args.smoke),
         "duration_s": duration_s,
         "workload_spec": dict(workload_spec),
         "daemon": str(Path(args.daemon).resolve()),

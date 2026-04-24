@@ -4,7 +4,6 @@ import argparse
 import re
 import statistics
 import sys
-from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Mapping, Sequence
@@ -13,7 +12,12 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from runner.libs import run_command, tail_text, which  # noqa: E402
-from runner.libs.app_runners.bpftrace import BpftraceRunner, SCRIPTS, ScriptSpec  # noqa: E402
+from runner.libs.app_runners.bpftrace import (  # noqa: E402
+    DEFAULT_ATTACH_TIMEOUT_S as DEFAULT_BPFTRACE_ATTACH_TIMEOUT_S,
+    BpftraceRunner,
+    SCRIPTS,
+    ScriptSpec,
+)
 from runner.libs.bpf_stats import (  # noqa: E402
     enable_bpf_stats,
 )
@@ -26,7 +30,7 @@ from runner.libs.case_common import (  # noqa: E402
 )
 
 
-DEFAULT_DURATION_S = 30
+DEFAULT_DURATION_S = 5
 MIN_BPFTRACE_VERSION = (0, 16, 0)
 
 
@@ -142,8 +146,6 @@ def run_phase(
             ),
         }
 
-    if prepared_daemon_session is None:
-        raise RuntimeError("prepared daemon session is required")
     return run_app_runner_phase_records(
         runner=bpftrace_runner,
         prepared_daemon_session=prepared_daemon_session,
@@ -242,7 +244,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         "# bpftrace Real End-to-End Benchmark",
         "",
         f"- Generated: `{payload['generated_at']}`",
-        f"- Mode: `{'smoke' if payload['smoke'] else 'full'}`",
         f"- Duration per phase: `{payload['duration_s']}s`",
         f"- Host kernel: `{payload['host']['kernel']}`",
         f"- bpftrace: `{payload['tool_versions']['bpftrace_version_text']}`",
@@ -336,7 +337,6 @@ def build_report(payload: Mapping[str, object]) -> str:
         "# bpftrace Real E2E Report",
         "",
         f"- Generated: `{payload['generated_at']}`",
-        f"- Run mode: `{'smoke' if payload['smoke'] else 'full'}`",
         f"- Duration per phase: `{payload['duration_s']}s`",
         f"- Guest kernel: `{payload['host']['kernel']}`",
         f"- bpftrace version: `{payload['tool_versions']['bpftrace_version_text']}`",
@@ -397,31 +397,21 @@ def run_bpftrace_case(args: argparse.Namespace) -> dict[str, object]:
     ensure_artifacts(daemon_binary)
     tool_versions = ensure_required_tools()
 
-    scripts = [
-        replace(spec, workload_spec={"kind": str(spec.workload_spec.get("kind") or "")})
-        for spec in SCRIPTS
-    ]
-    if not scripts:
-        raise RuntimeError("no scripts selected")
-
     duration_override = int(getattr(args, "duration", 0) or 0)
-    duration_s = int(5 if args.smoke else (duration_override or DEFAULT_DURATION_S))
-    attach_timeout_s = 20
+    duration_s = int(duration_override or DEFAULT_DURATION_S)
     records: list[dict[str, object]] = []
     with enable_bpf_stats():
-        for spec in scripts:
+        for spec in SCRIPTS:
             baseline, rejit = run_phase(
                 spec,
                 duration_s=duration_s,
-                attach_timeout=attach_timeout_s,
+                attach_timeout=DEFAULT_BPFTRACE_ATTACH_TIMEOUT_S,
                 prepared_daemon_session=prepared_daemon_session,
             )
             summary = summarize_script(spec, baseline, rejit)
             records.append(
                 {
                     "name": spec.name,
-                    "script_path": str(spec.script_path),
-                    "script_text": spec.script_path.read_text(),
                     "baseline": baseline,
                     "rejit": rejit,
                     "summary": summary,
@@ -455,7 +445,6 @@ def run_bpftrace_case(args: argparse.Namespace) -> dict[str, object]:
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": "error" if errors else "ok",
-        "smoke": bool(args.smoke),
         "duration_s": duration_s,
         "daemon": str(daemon_binary),
         "host": host_metadata(),

@@ -12,8 +12,8 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from runner.libs import (  # noqa: E402
+    RESULTS_DIR,
     ROOT_DIR,
-    smoke_output_path,
     write_json,
     write_text,
 )
@@ -24,39 +24,31 @@ from runner.libs.run_artifacts import (  # noqa: E402
     derive_run_type,
 )
 from e2e.cases.bpftrace.case import (  # noqa: E402
-    DEFAULT_OUTPUT_JSON as DEFAULT_BPFTRACE_OUTPUT_JSON,
-    DEFAULT_REPORT_MD as DEFAULT_BPFTRACE_REPORT_MD,
     build_markdown as build_bpftrace_markdown,
     build_report as build_bpftrace_report,
     run_bpftrace_case,
 )
 from e2e.cases.scx.case import (  # noqa: E402
-    DEFAULT_OUTPUT_JSON as DEFAULT_SCX_OUTPUT_JSON,
     build_markdown as build_scx_markdown,
     run_scx_case,
 )
 from e2e.cases.tetragon.case import (  # noqa: E402
     DEFAULT_CONFIG as DEFAULT_TETRAGON_CONFIG,
-    DEFAULT_OUTPUT_JSON as DEFAULT_TETRAGON_OUTPUT_JSON,
     build_markdown as build_tetragon_markdown,
     run_tetragon_case,
 )
 from e2e.cases.bcc.case import (  # noqa: E402
     DEFAULT_CONFIG as DEFAULT_BCC_CONFIG,
-    DEFAULT_OUTPUT_JSON as DEFAULT_BCC_OUTPUT_JSON,
-    DEFAULT_REPORT_MD as DEFAULT_BCC_REPORT_MD,
     build_markdown as build_bcc_markdown,
     build_report as build_bcc_report,
     run_bcc_case,
 )
 from e2e.cases.tracee.case import (  # noqa: E402
     DEFAULT_CONFIG as DEFAULT_TRACEE_CONFIG,
-    DEFAULT_OUTPUT_JSON,
     build_markdown as build_tracee_markdown,
     run_tracee_case,
 )
 from e2e.cases.katran.case import (  # noqa: E402
-    DEFAULT_OUTPUT_JSON as DEFAULT_KATRAN_OUTPUT_JSON,
     build_markdown as build_katran_markdown,
     run_katran_case,
 )
@@ -64,6 +56,15 @@ from runner.libs.case_common import (  # noqa: E402
     prepare_daemon_session,
     wait_for_suite_quiescence,
 )
+
+DEFAULT_OUTPUT_JSON = RESULTS_DIR / "tracee.json"
+DEFAULT_TETRAGON_OUTPUT_JSON = RESULTS_DIR / "tetragon.json"
+DEFAULT_BPFTRACE_OUTPUT_JSON = RESULTS_DIR / "bpftrace.json"
+DEFAULT_BPFTRACE_REPORT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e-report.md"
+DEFAULT_SCX_OUTPUT_JSON = RESULTS_DIR / "scx.json"
+DEFAULT_BCC_OUTPUT_JSON = RESULTS_DIR / "bcc.json"
+DEFAULT_BCC_REPORT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e-report.md"
+DEFAULT_KATRAN_OUTPUT_JSON = RESULTS_DIR / "katran.json"
 
 @dataclass(frozen=True)
 class CaseSpec:
@@ -155,7 +156,6 @@ def _args_no_kinsn(args: argparse.Namespace) -> bool:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the repository end-to-end benchmark suite driver.")
     parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran", "all"))
-    parser.add_argument("--smoke", action="store_true", help="Run the smoke-sized configuration.")
     parser.add_argument("--duration", type=int, help="Override the per-workload duration in seconds.")
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--daemon", default=str(ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"))
@@ -179,12 +179,8 @@ def apply_case_defaults(args: argparse.Namespace) -> None:
         args.config = str(spec.default_config)
 
 
-def resolve_primary_output_json(args: argparse.Namespace, spec: CaseSpec) -> Path:
-    output_json = Path(args.output_json).resolve()
-    default_output_json = spec.default_output_json.resolve()
-    if bool(args.smoke) and output_json == default_output_json:
-        return smoke_output_path(default_output_json.parent, args.case).resolve()
-    return output_json
+def resolve_primary_output_json(args: argparse.Namespace) -> Path:
+    return Path(args.output_json).resolve()
 
 
 ALL_CASES = ("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran")
@@ -212,7 +208,6 @@ def build_run_metadata(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite": "e2e",
         "case": args.case,
-        "smoke": bool(args.smoke),
         "kinsn_enabled": not _args_no_kinsn(args),
         "optimization_summary": _trim_e2e_value(payload),
     }
@@ -228,7 +223,7 @@ def _run_single_case(
 ) -> dict[str, object]:
     """Run a single e2e case and persist its outputs progressively."""
     spec = CASE_SPECS[args.case]
-    output_json = resolve_primary_output_json(args, spec)
+    output_json = resolve_primary_output_json(args)
     report_md_raw = getattr(args, "report_md", None)
     report_md = Path(report_md_raw).resolve() if report_md_raw else None
     run_type = derive_run_type(output_json, args.case)
@@ -237,7 +232,6 @@ def _run_single_case(
     progress_payload: dict[str, object] = {
         "case": args.case,
         "status": "running",
-        "smoke": bool(args.smoke),
         "kinsn_enabled": not _args_no_kinsn(args),
     }
     metadata_payload: dict[str, object] = progress_payload
@@ -303,7 +297,6 @@ def _run_single_case(
                 "case": args.case,
                 "status": "completed",
                 "case_status": payload_status,
-                "smoke": bool(args.smoke),
                 "completed_at": completed_at,
             }
             session.write(
@@ -323,7 +316,6 @@ def _run_single_case(
             "case": args.case,
             "status": "error",
             "case_status": payload_status or "missing",
-            "smoke": bool(args.smoke),
             "error_message": error_message,
             "failed_at": completed_at,
         }
@@ -344,7 +336,6 @@ def _run_single_case(
         error_payload = {
             "case": args.case,
             "status": "error",
-            "smoke": bool(args.smoke),
             "error_message": str(exc),
             "failed_at": failed_at,
         }

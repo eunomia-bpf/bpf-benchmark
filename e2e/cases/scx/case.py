@@ -31,8 +31,7 @@ from runner.libs.case_common import (  # noqa: E402
 
 
 DEFAULT_LOAD_TIMEOUT = 20
-DEFAULT_DURATION_S = 30
-DEFAULT_SMOKE_DURATION_S = 10
+DEFAULT_DURATION_S = 10
 
 
 def default_scx_binary() -> Path:
@@ -349,15 +348,9 @@ def run_phase(
     duration_s: int,
     *,
     agent_pid: int | None,
-    prog_ids: Sequence[int] | None = None,
+    prog_ids: Sequence[int],
 ) -> dict[str, object]:
-    active_prog_ids = [int(prog_id) for prog_id in (prog_ids or []) if int(prog_id) > 0]
-    if not active_prog_ids:
-        active_prog_ids = [
-            int(program.get("id", 0) or 0)
-            for program in getattr(runner, "programs", [])
-            if int(program.get("id", 0) or 0) > 0
-        ]
+    active_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
     if not active_prog_ids:
         raise RuntimeError("scx runner did not expose any live scheduler programs")
     records = [
@@ -416,7 +409,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Generated: {payload['generated_at']}",
         f"- Mode: `{payload['mode']}`",
         f"- Duration per workload: `{payload['duration_s']}s`",
-        f"- Smoke: `{payload['smoke']}`",
         f"- Kernel: `{payload['host']['kernel']}`",
         f"- Scheduler binary: `{payload.get('scheduler_binary') or 'missing'}`",
         "",
@@ -495,7 +487,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
 
 
 def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
-    duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
+    duration_s = int(args.duration or DEFAULT_DURATION_S)
     scheduler_binary = default_scx_binary().resolve()
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary, scheduler_binary)
@@ -687,7 +679,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": "error" if error_message else "ok",
         "mode": mode,
-        "smoke": bool(args.smoke),
         "duration_s": duration_s,
         "scheduler_binary": str(scheduler_binary) if scheduler_binary.exists() else None,
         "scheduler_programs": scheduler_programs,

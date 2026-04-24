@@ -54,7 +54,6 @@ class ToolSpec:
 class SuiteConfig:
     tools: tuple[ToolSpec, ...]
     measurement_duration_s: int
-    smoke_duration_s: int
     attach_timeout_s: int
 
 
@@ -71,7 +70,6 @@ def load_config(path: Path) -> SuiteConfig:
     return SuiteConfig(
         tools=tools,
         measurement_duration_s=int(raw.get("measurement_duration_s", 30)),
-        smoke_duration_s=int(raw.get("smoke_duration_s", 10)),
         attach_timeout_s=int(raw.get("attach_timeout_s", 20)),
     )
 
@@ -119,8 +117,7 @@ def run_phase(
     *,
     duration_s: int,
     attach_timeout: int,
-    enabled_passes: Sequence[str] | None,
-    policy_context: Mapping[str, object] | None = None,
+    policy_context: Mapping[str, object],
     prepared_daemon_session: object,
 ) -> tuple[dict[str, object], dict[str, object] | None]:
     """Run baseline then daemon-apply then post-rejit measurement for one tool.
@@ -152,9 +149,6 @@ def run_phase(
             ),
         }
 
-    if prepared_daemon_session is None:
-        raise RuntimeError("prepared daemon session is required")
-
     def build_state(runner: BCCRunner, started_prog_ids: list[int]) -> CaseLifecycleState:
         prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
         if not prog_ids:
@@ -164,13 +158,12 @@ def run_phase(
             raise RuntimeError(f"BCC tool {spec.name} did not expose any live programs")
         artifacts: dict[str, object] = {
             "programs": programs,
-        }
-        if isinstance(policy_context, Mapping):
-            artifacts["rejit_policy_context"] = {
+            "rejit_policy_context": {
                 str(key): value
                 for key, value in policy_context.items()
                 if str(key).strip() and str(value).strip()
-            }
+            },
+        }
         return CaseLifecycleState(
             runtime=runner,
             prog_ids=list(prog_ids),
@@ -182,7 +175,6 @@ def run_phase(
         prepared_daemon_session=prepared_daemon_session,
         measure=workload,
         site_totals_fields=BCC_SITE_TOTAL_FIELDS,
-        enabled_passes=(list(enabled_passes) if enabled_passes is not None else None),
         build_state=build_state,
     )
 
@@ -292,7 +284,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         "# BCC libbpf-tools Real End-to-End Benchmark",
         "",
         f"- Generated: `{payload['generated_at']}`",
-        f"- Mode: `{'smoke' if payload['smoke'] else 'full'}`",
         f"- Duration per phase: `{payload['duration_s']}s`",
         f"- Host kernel: `{payload['host']['kernel']}`",
         f"- Tools dir: `{payload['tools_dir']}`",
@@ -371,7 +362,6 @@ def build_report(payload: Mapping[str, object]) -> str:
         "# BCC libbpf-tools E2E Report",
         "",
         f"- Generated: `{payload['generated_at']}`",
-        f"- Run mode: `{'smoke' if payload['smoke'] else 'full'}`",
         f"- Duration per phase: `{payload['duration_s']}s`",
         f"- Guest kernel: `{payload['host']['kernel']}`",
         f"- Tools dir: `{payload['tools_dir']}`",
@@ -426,31 +416,22 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
     suite = load_config(config_path)
     tools_dir = resolve_tools_dir("", setup_result=setup_result)
 
-    # Duration resolution: CLI duration > smoke flag > config
-    smoke = bool(args.smoke)
     duration_override = int(getattr(args, "duration", 0) or 0)
     if duration_override:
         duration_s = duration_override
-    elif smoke:
-        duration_s = suite.smoke_duration_s
     else:
         duration_s = suite.measurement_duration_s
 
-    attach_timeout = suite.attach_timeout_s
-
-    tools = list(suite.tools)
-    if not tools:
+    if not suite.tools:
         raise RuntimeError("no tools selected")
 
     records: list[dict[str, object]] = []
     with enable_bpf_stats():
-        for spec in tools:
+        for spec in suite.tools:
             tool_binary = find_tool_binary(tools_dir, spec.name)
             if tool_binary is None:
                 record: dict[str, object] = {
                     "name": spec.name,
-                    "tool_args": list(spec.tool_args),
-                    "tool_binary": None,
                     "baseline": {
                         "phase": "baseline",
                         "status": "error",
@@ -489,8 +470,7 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
                 spec,
                 tool_binary,
                 duration_s=duration_s,
-                attach_timeout=attach_timeout,
-                enabled_passes=None,
+                attach_timeout=suite.attach_timeout_s,
                 policy_context={
                     "repo": "bcc",
                     "category": "bcc",
@@ -501,8 +481,6 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
             summary = summarize_tool(spec, baseline, rejit)
             record = {
                 "name": spec.name,
-                "tool_args": list(spec.tool_args),
-                "tool_binary": str(tool_binary),
                 "baseline": baseline,
                 "rejit": rejit,
                 "summary": summary,
@@ -537,7 +515,6 @@ def run_bcc_case(args: argparse.Namespace) -> dict[str, object]:
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": "error" if errors else "ok",
-        "smoke": smoke,
         "duration_s": duration_s,
         "tools_dir": str(tools_dir),
         "daemon": str(daemon_binary),
