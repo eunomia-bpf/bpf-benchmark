@@ -99,40 +99,13 @@ help:
 	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=<micro|corpus|e2e>"
 
 check:
-	$(PYTHON) -m py_compile \
-		micro/catalog.py \
-		runner/libs/app_runners/base.py \
-		runner/libs/app_runners/bcc.py \
-		runner/libs/app_runners/bpftrace.py \
-		runner/libs/app_runners/katran.py \
-		runner/libs/app_runners/process_support.py \
-		runner/libs/app_runners/scx.py \
-		runner/libs/app_runners/tetragon.py \
-		runner/libs/app_runners/tracee.py \
-		runner/libs/agent.py \
-		runner/libs/aws_common.py \
-		runner/libs/aws_executor.py \
-		runner/libs/bpf_stats.py \
-		runner/libs/case_common.py \
-		runner/libs/file_lock.py \
-		runner/libs/input_generators.py \
-		runner/libs/kinsn.py \
-		runner/libs/kvm_executor.py \
-		runner/libs/rejit.py \
-		runner/libs/results.py \
-		runner/libs/run_contract.py \
-		runner/libs/run_target_suite.py \
-		runner/libs/suite_args.py \
-		runner/libs/suite_commands.py \
-		runner/libs/workload.py \
-		runner/libs/workspace_layout.py \
-		runner/suites/__init__.py \
-		runner/suites/_common.py \
-		runner/suites/corpus.py \
-		runner/suites/e2e.py \
-		runner/suites/micro.py \
-		runner/suites/test.py \
-		runner/libs/vm.py
+	find corpus runner e2e -type f -name '*.py' \
+		-not -path 'runner/repos/*' \
+		-not -path 'runner/build-*/*' \
+		-not -path 'corpus/results/*' \
+		-not -path 'e2e/results/*' \
+		-not -path '*/__pycache__/*' \
+		-exec $(PYTHON) -m py_compile {} +
 
 validate:
 	$(MAKE) check
