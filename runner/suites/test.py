@@ -49,9 +49,9 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--run-contract-path", default="", help="Run contract JSON path to copy beside test logs.")
     parser.add_argument(
         "--test-mode",
-        choices=["selftest", "negative", "test", "full", "fuzz"],
+        choices=["selftest", "negative", "test", "fuzz"],
         default="test",
-        help="Test mode to run. 'full' is an alias for 'test'.",
+        help="Test mode to run.",
     )
     parser.add_argument("--fuzz-rounds", type=positive_int, default=1000, help="Number of fuzz_rejit rounds.")
     parser.add_argument("--scx-prog-show-race-mode", default="bpftool-loop", help="scx_prog_show_race mode.")
@@ -62,7 +62,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--scx-packages", default="", help="Comma-separated SCX package artifacts to validate.")
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
-    args.test_mode = "test" if args.test_mode == "full" else args.test_mode
     args.scx_packages = merge_csv_and_repeated(args.scx_packages, args.scx_package_values)
     return args
 
@@ -277,7 +276,7 @@ def _run_fuzz_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str
         _die("vm-fuzz-test failed")
 
 
-def _run_full_test_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str]) -> None:
+def _run_test_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str]) -> None:
     total_pass = total_fail = 0
     p, f = _run_kernel_selftest(workspace, env)
     total_pass += p
@@ -321,7 +320,7 @@ def _run_test_suite(workspace: Path, args: argparse.Namespace) -> None:
     elif args.test_mode == "fuzz":
         _run_fuzz_mode(workspace, args, env, artifact_dir)
     elif args.test_mode == "test":
-        _run_full_test_mode(workspace, args, env)
+        _run_test_mode(workspace, args, env)
     else:
         _die(f"unsupported test mode: {args.test_mode}")
 
