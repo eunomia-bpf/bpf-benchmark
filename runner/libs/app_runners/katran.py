@@ -75,7 +75,7 @@ DEFAULT_HC_V6_TUN_IFACE = "ipip60"
 
 
 def _map_show_records() -> list[dict[str, object]]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "map", "show"], timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "map", "show"], timeout=30)
     if not isinstance(payload, list): raise RuntimeError("bpftool map show returned unexpected payload")
     return [dict(record) for record in payload if isinstance(record, dict)]
 
@@ -122,7 +122,7 @@ def reattach_xdp_program(iface: str, prog_id: int, *, target_mode: str) -> dict[
 
 
 def _current_prog_ids() -> set[int]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "prog", "show"], timeout=30)
     if not isinstance(payload, list): raise RuntimeError("bpftool prog show returned unexpected payload")
     return {int(r["id"]) for r in payload if isinstance(r, dict) and "id" in r}
 

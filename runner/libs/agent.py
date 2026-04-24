@@ -62,7 +62,7 @@ def _payload_preview(payload: object, *, limit: int = 240) -> str:
 
 
 def bpftool_prog_show_records() -> list[dict[str, object]]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "prog", "show"], timeout=30)
     if not isinstance(payload, list):
         raise RuntimeError(
             "bpftool prog show returned unexpected payload type "
