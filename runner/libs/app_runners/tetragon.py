@@ -131,12 +131,22 @@ def run_tetragon_workload(spec: Mapping[str, object], duration_s: int) -> Worklo
 
 
 DEFAULT_LOAD_TIMEOUT_S = 20
+DEFAULT_POLICY_DIR = ROOT_DIR / "e2e" / "cases" / "tetragon" / "policies"
 
 
 def _free_loopback_address() -> str:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind(("127.0.0.1", 0))
         return f"127.0.0.1:{sock.getsockname()[1]}"
+
+
+def resolve_tetragon_policy_dir() -> str:
+    policy_dir = DEFAULT_POLICY_DIR.resolve()
+    if not policy_dir.is_dir():
+        raise RuntimeError(f"missing upstream Tetragon policy dir: {policy_dir}")
+    if not any(policy_dir.rglob("*.yaml")) and not any(policy_dir.rglob("*.yml")):
+        raise RuntimeError(f"no upstream Tetragon policies found under {policy_dir}")
+    return str(policy_dir)
 
 
 class TetragonRunner(AppRunner):
@@ -172,6 +182,8 @@ class TetragonRunner(AppRunner):
             _free_loopback_address(),
             "--health-server-address",
             _free_loopback_address(),
+            "--tracing-policy-dir",
+            resolve_tetragon_policy_dir(),
         ]
         if tetragon_bpf_lib_dir := str((self.setup_result or {}).get("tetragon_bpf_lib_dir") or "").strip():
             self.command.extend(["--bpf-lib", tetragon_bpf_lib_dir])

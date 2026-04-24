@@ -300,7 +300,7 @@ COPY --from=runner-runtime-scx-artifacts /artifacts/scx /artifacts/scx
 RUN --mount=type=bind,source=.,target=/src,readonly \
     set -eux; \
     cp -a /src/Makefile ./Makefile; \
-    mkdir -p ./runner ./vendor ./vendor/linux-framework ./micro ./corpus ./e2e ./tests; \
+    mkdir -p ./runner ./vendor ./vendor/linux-framework ./micro ./corpus ./e2e ./e2e/cases/tetragon ./tests; \
     rsync -a /src/runner/mk ./runner/; \
     rsync -a /src/vendor/libbpf ./vendor/; \
     rsync -a /src/vendor/llvmbpf ./vendor/; \
@@ -335,6 +335,7 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     find /src/micro -maxdepth 1 -type f -name '*.py' -exec cp -a {} ./micro/ \;; \
     rsync -a /src/corpus/config ./corpus/; \
     find /src/corpus -maxdepth 1 -type f -name '*.py' -exec cp -a {} ./corpus/ \;; \
+    rsync -a /src/e2e/cases/tetragon/policies ./e2e/cases/tetragon/; \
     rsync -a /src/e2e/cases ./e2e/; \
     find /src/e2e -maxdepth 1 -type f -name '*.py' -exec cp -a {} ./e2e/ \;; \
     cp -a /src/runner/__init__.py /src/runner/repos.yaml ./runner/; \
@@ -345,6 +346,7 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     make image-micro-program-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     make image-test-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     make image-daemon-artifact RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    find ./e2e/cases/tetragon/policies -type f \( -name '*.yaml' -o -name '*.yml' \) | grep -q .; \
     find ./daemon/target -type d \( -name build -o -name deps -o -name incremental -o -name .fingerprint \) -prune -exec rm -rf {} +; \
     rm -rf \
         /tmp/bpf-benchmark-build \
