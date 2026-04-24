@@ -19,10 +19,6 @@ import yaml
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from runner.libs import (  # noqa: E402
-    RESULTS_DIR,
-    ROOT_DIR,
-)
 from runner.libs.app_runners.bcc import BCCRunner, find_tool_binary, inspect_bcc_setup, resolve_tools_dir  # noqa: E402
 from runner.libs.bpf_stats import (  # noqa: E402
     enable_bpf_stats,
@@ -41,9 +37,6 @@ from runner.libs.case_common import (  # noqa: E402
 
 
 DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")
-DEFAULT_OUTPUT_JSON = RESULTS_DIR / "bcc.json"
-DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e.md"
-DEFAULT_REPORT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e-report.md"
 
 
 # ---------------------------------------------------------------------------

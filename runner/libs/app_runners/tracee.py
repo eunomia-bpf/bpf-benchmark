@@ -116,13 +116,13 @@ class TraceeOutputCollector:
         handle = None
         partial_line = ""
 
-        def flush_partial_line() -> None:
+        def flush_partial_line(*, allow_parse: bool = True) -> None:
             nonlocal partial_line
             if not partial_line:
                 return
             line = partial_line.rstrip("\r\n")
             partial_line = ""
-            if not line:
+            if not line or not allow_parse:
                 return
             with self._lock:
                 self.event_tail.append(line)
@@ -173,13 +173,16 @@ class TraceeOutputCollector:
                         != (handle_stat.st_dev, handle_stat.st_ino)
                         or current_stat.st_size < handle.tell()
                     ):
-                        flush_partial_line()
+                        # A replaced/truncated event file invalidates the old
+                        # tail fragment; parsing it as JSON creates false
+                        # malformed-line errors under heavy Tracee output.
+                        flush_partial_line(allow_parse=False)
                         handle.close()
                         handle = None
                         time.sleep(0.05)
                         continue
                 except FileNotFoundError:
-                    flush_partial_line()
+                    flush_partial_line(allow_parse=False)
                     handle.close()
                     handle = None
                     time.sleep(0.05)
@@ -496,17 +499,15 @@ class TraceeRunner(AppRunner):
         tracee_binary: Path | str | None = None,
         extra_args: Sequence[str] = (),
         load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
-        startup_settle_s: float = DEFAULT_STARTUP_SETTLE_S,
         workload_spec: Mapping[str, object] | None = None,
     ) -> None:
         super().__init__()
         self.tracee_binary = None if tracee_binary is None else Path(tracee_binary).resolve()
         self.extra_args = tuple(str(arg) for arg in extra_args)
         self.load_timeout_s = int(load_timeout_s)
-        self.startup_settle_s = float(startup_settle_s)
         self.session: Any | None = None
         self.setup_result: dict[str, object] = {"returncode": 0, "tracee_binary": None, "stdout_tail": "", "stderr_tail": ""}
-        self.workload_spec: Mapping[str, object] = dict(workload_spec or {"kind": "exec_storm"})
+        self.workload_spec: Mapping[str, object] = {} if workload_spec is None else dict(workload_spec)
 
     @property
     def pid(self) -> int | None:
@@ -546,13 +547,15 @@ class TraceeRunner(AppRunner):
             self._fail_start("Tracee did not attach any BPF programs")
         self.tracee_binary = Path(tracee_binary).resolve()
         self.programs = programs
-        if self.startup_settle_s > 0.0:
-            time.sleep(self.startup_settle_s)
+        if DEFAULT_STARTUP_SETTLE_S > 0.0:
+            time.sleep(DEFAULT_STARTUP_SETTLE_S)
         return [int(program["id"]) for program in programs if int(program.get("id", 0) or 0) > 0]
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None:
             raise RuntimeError("TraceeRunner is not running")
+        if not self.workload_spec:
+            raise RuntimeError("TraceeRunner run_workload() requires workload_spec")
         return run_tracee_workload(self.workload_spec, max(1, int(round(seconds))))
 
     def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:

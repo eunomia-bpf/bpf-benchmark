@@ -9,10 +9,6 @@ from typing import Mapping
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from runner.libs import (  # noqa: E402
-    RESULTS_DIR,
-    ROOT_DIR,
-)
 from runner.libs.app_runners.katran import (  # noqa: E402
     DEFAULT_CONCURRENCY,
     DEFAULT_INTERFACE,
@@ -28,8 +24,6 @@ from runner.libs.case_common import (  # noqa: E402
 from runner.libs.metrics import sample_total_cpu_usage, start_sampler_thread  # noqa: E402
 
 
-DEFAULT_OUTPUT_JSON = RESULTS_DIR / "katran.json"
-DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "katran-e2e.md"
 DEFAULT_DURATION_S = 20
 DEFAULT_SMOKE_DURATION_S = 5
 

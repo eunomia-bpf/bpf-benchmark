@@ -137,6 +137,6 @@ def load_app_suite_from_yaml(yaml_path: Path) -> tuple[AppSuite, dict[str, objec
         "manifest": str(yaml_path),
         "schema_version": schema_version,
         "suite_name": suite_name,
-        "selected_apps": len(apps),
+        "app_count": len(apps),
     }
     return suite, summary

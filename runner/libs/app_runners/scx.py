@@ -297,7 +297,7 @@ class ScxRunner(AppRunner):
         scheduler_binary: Path | str | None = None,
         scheduler_extra_args: Sequence[str] = (),
         load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
-        workload_spec: Mapping[str, object] | None = None,
+        workload_spec: Mapping[str, object],
     ) -> None:
         super().__init__()
         self.scheduler = str(scheduler).strip()
@@ -307,7 +307,7 @@ class ScxRunner(AppRunner):
         self.scheduler_extra_args = tuple(str(arg) for arg in scheduler_extra_args)
         self.load_timeout_s = int(load_timeout_s)
         self.session: Any | None = None
-        self.workload_spec: Mapping[str, object] = dict(workload_spec or {"name": "hackbench", "kind": "hackbench", "metric": "runs/s"})
+        self.workload_spec: Mapping[str, object] = dict(workload_spec)
         self.last_workload_extra: dict[str, object] = {}
 
     @property

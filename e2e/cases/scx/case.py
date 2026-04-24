@@ -10,11 +10,7 @@ from typing import Mapping, Sequence
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from runner.libs import (  # noqa: E402
-    RESULTS_DIR,
-    ROOT_DIR,
-    which,
-)
+from runner.libs import which  # noqa: E402
 from runner.libs.app_runners.setup_support import repo_artifact_root  # noqa: E402
 from runner.libs.app_runners.base import AppRunner  # noqa: E402
 from runner.libs.app_runners.scx import ScxRunner, read_scx_ops, read_scx_state  # noqa: E402
@@ -34,8 +30,6 @@ from runner.libs.case_common import (  # noqa: E402
 )
 
 
-DEFAULT_OUTPUT_JSON = RESULTS_DIR / "scx.json"
-DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "scx-e2e.md"
 DEFAULT_LOAD_TIMEOUT = 20
 DEFAULT_DURATION_S = 30
 DEFAULT_SMOKE_DURATION_S = 10

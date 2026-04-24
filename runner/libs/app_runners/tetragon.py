@@ -148,7 +148,7 @@ class TetragonRunner(AppRunner):
         self.load_timeout_s = int(load_timeout_s)
         self.setup_result = None if setup_result is None else dict(setup_result)
         self.command: list[str] = []; self.session: Any | None = None
-        self.workload_spec: Mapping[str, object] = dict(workload_spec or {"kind": "exec_storm", "value": 2})
+        self.workload_spec: Mapping[str, object] = {} if workload_spec is None else dict(workload_spec)
 
     @property
     def pid(self) -> int | None: return None if self.session is None else self.session.pid
@@ -186,6 +186,8 @@ class TetragonRunner(AppRunner):
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("TetragonRunner is not running")
+        if not self.workload_spec:
+            raise RuntimeError("TetragonRunner run_workload() requires workload_spec")
         return run_tetragon_workload(self.workload_spec, max(1, int(round(seconds))))
 
     def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:

@@ -95,15 +95,16 @@ class BpftraceRunner(AppRunner):
     def __init__(
         self,
         *,
-        script_path: Path | str | None = None,
-        script_name: str | None = None,
-        workload_spec: Mapping[str, object] | None = None,
+        script_name: str,
+        workload_spec: Mapping[str, object],
         attach_timeout_s: int = DEFAULT_ATTACH_TIMEOUT_S,
     ) -> None:
         super().__init__()
-        self.script_path = None if script_path is None else Path(script_path).resolve()
-        self.script_name = str(script_name or "").strip()
-        self.workload_spec = dict(workload_spec or {})
+        self.script_path: Path | None = None
+        self.script_name = str(script_name).strip()
+        if not self.script_name:
+            raise RuntimeError("BpftraceRunner requires script_name")
+        self.workload_spec = dict(workload_spec)
         self.attach_timeout_s = int(attach_timeout_s)
         self.process: Any | None = None
         self.collector = ProcessOutputCollector()
@@ -114,21 +115,12 @@ class BpftraceRunner(AppRunner):
     def pid(self) -> int | None:
         return None if self.process is None else int(self.process.pid or 0)
 
-    def _resolve_script(self) -> tuple[Path, dict[str, object]]:
+    def _resolve_script(self) -> Path:
         specs = {spec.name: spec for spec in SCRIPTS}
-        if self.script_name:
-            spec = specs.get(self.script_name)
-            if spec is None:
-                raise RuntimeError(f"unknown bpftrace script: {self.script_name}")
-            return spec.script_path.resolve(), dict(spec.workload_spec)
-        if self.script_path is not None:
-            if not self.script_path.exists():
-                raise RuntimeError(f"bpftrace script not found: {self.script_path}")
-            stem = self.script_path.name.removesuffix(".bt")
-            spec = specs.get(stem)
-            return self.script_path, dict(self.workload_spec or (spec.workload_spec if spec else {}))
-        raise RuntimeError("BpftraceRunner requires script_name or script_path")
-
+        spec = specs.get(self.script_name)
+        if spec is None:
+            raise RuntimeError(f"unknown bpftrace script: {self.script_name}")
+        return spec.script_path.resolve()
 
     def start(self) -> list[int]:
         if self.process is not None:
@@ -137,9 +129,7 @@ class BpftraceRunner(AppRunner):
         bpftrace_binary = which("bpftrace")
         if bpftrace_binary is None:
             raise RuntimeError("bpftrace is required but not present in PATH")
-        script_path, workload_spec = self._resolve_script()
-        if not self.workload_spec:
-            self.workload_spec = dict(workload_spec)
+        script_path = self._resolve_script()
         before_ids = {
             int(record.get("id", 0) or 0)
             for record in bpftool_prog_show_records()

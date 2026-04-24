@@ -773,7 +773,6 @@ def run_parallel_http_load(*, duration_s: int | float, concurrency: int) -> dict
 DEFAULT_INTERFACE = "katran0"
 DEFAULT_CONCURRENCY = 4
 DEFAULT_TEST_RUN_BATCH_REPEAT = 128
-DEFAULT_WORKLOAD_SPEC = {"kind": "network"}
 DEFAULT_LOAD_TIMEOUT_S = DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S
 
 
@@ -887,7 +886,7 @@ def _cleanup_root_xdp_install(iface: str, root_install: Mapping[str, object] | N
 class KatranRunner(AppRunner):
     def __init__(self, *, loader_binary: Path | str | None = None, iface: str = DEFAULT_INTERFACE,
                  router_peer_iface: str | None = None, load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
-                 concurrency: int = DEFAULT_CONCURRENCY, workload_spec: Mapping[str, object] | None = None,
+                 concurrency: int = DEFAULT_CONCURRENCY, workload_spec: Mapping[str, object],
                  test_run_batch_repeat: int = DEFAULT_TEST_RUN_BATCH_REPEAT, default_router_mac: str = ROUTER_LB_MAC) -> None:
         super().__init__()
         self.loader_binary = None if loader_binary is None else Path(loader_binary).resolve()
@@ -901,7 +900,10 @@ class KatranRunner(AppRunner):
         self.xdp_root_prog_path = _resolve_katran_bpf_artifact("bpf/xdp_root.bpf.o", "xdp_root.bpf.o")
         self.iface = str(iface); self.router_peer_iface = None if router_peer_iface is None else str(router_peer_iface)
         self.load_timeout_s = int(load_timeout_s); self.concurrency = max(1, int(concurrency))
-        self.workload_spec = dict(workload_spec or DEFAULT_WORKLOAD_SPEC)
+        self.workload_spec = dict(workload_spec)
+        self.workload_kind = str(self.workload_spec.get("kind") or self.workload_spec.get("name") or "").strip().lower()
+        if not self.workload_kind:
+            raise RuntimeError("KatranRunner requires workload_spec.kind")
         self.test_run_batch_repeat = max(1, int(test_run_batch_repeat)); self.default_router_mac = str(default_router_mac)
         self.topology: Any | None = None; self.http_server: Any | None = None; self.session: KatranServerSession | None = None
         self.artifacts: dict[str, object] = {}; self.last_request_summary: dict[str, object] = {}
@@ -917,9 +919,8 @@ class KatranRunner(AppRunner):
 
     def start(self) -> list[int]:
         if self.session is not None: raise RuntimeError("KatranRunner is already running")
-        kind = str(self.workload_spec.get("kind") or DEFAULT_WORKLOAD_SPEC["kind"]).strip().lower()
         topology = KatranDsrTopology(self.iface, router_peer_iface=self.router_peer_iface)
-        http_server = None if kind == "test_run" else NamespaceHttpServer(REAL_NS, VIP_IP, VIP_PORT)
+        http_server = None if self.workload_kind == "test_run" else NamespaceHttpServer(REAL_NS, VIP_IP, VIP_PORT)
         server_binary = resolve_katran_server_binary(self.loader_binary)
         session = KatranServerSession(
             server_binary=server_binary,
@@ -935,7 +936,7 @@ class KatranRunner(AppRunner):
             if http_server is not None:
                 http_server.__enter__()
             session.__enter__()
-            if kind == "network":
+            if self.workload_kind == "network":
                 session.reattach_xdpgeneric()
             self.artifacts = {
                 "topology": topology.metadata(),
@@ -995,16 +996,14 @@ class KatranRunner(AppRunner):
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("KatranRunner is not running")
-        kind = str(self.workload_spec.get("kind") or DEFAULT_WORKLOAD_SPEC["kind"]).strip().lower()
-        if kind == "test_run": return self._run_test_run_workload(seconds)
-        if kind != "network": raise RuntimeError(f"unsupported Katran workload kind: {kind}")
+        if self.workload_kind == "test_run": return self._run_test_run_workload(seconds)
+        if self.workload_kind != "network": raise RuntimeError(f"unsupported Katran workload kind: {self.workload_kind}")
         return self._run_network_workload(seconds)
 
     def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:
-        current_kind = str(self.workload_spec.get("kind") or DEFAULT_WORKLOAD_SPEC["kind"]).strip().lower()
-        requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or current_kind).strip().lower()
-        if requested_kind != current_kind:
-            raise RuntimeError(f"KatranRunner workload kind is fixed at start ({current_kind}); requested {requested_kind}")
+        requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or self.workload_kind).strip().lower()
+        if requested_kind != self.workload_kind:
+            raise RuntimeError(f"KatranRunner workload kind is fixed at start ({self.workload_kind}); requested {requested_kind}")
         return self.run_workload(seconds)
 
     def stop(self) -> None:

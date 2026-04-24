@@ -21,12 +21,7 @@ import yaml
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from runner.libs import (  # noqa: E402
-    RESULTS_DIR,
-    ROOT_DIR,
-    run_command,
-    tail_text,
-)
+from runner.libs import run_command, tail_text  # noqa: E402
 from runner.libs.app_runners.tracee import (  # noqa: E402
     TraceeOutputCollector,
     TraceeRunner,
@@ -53,8 +48,6 @@ from runner.libs.case_common import (  # noqa: E402
 
 
 DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")
-DEFAULT_OUTPUT_JSON = RESULTS_DIR / "tracee.json"
-DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tracee-e2e-real.md"
 DEFAULT_SAMPLE_COUNT = 5
 DEFAULT_SMOKE_SAMPLE_COUNT = 2
 DEFAULT_WARMUP_DURATION_S = 5

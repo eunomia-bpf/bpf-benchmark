@@ -12,13 +12,7 @@ from typing import Mapping, Sequence
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from runner.libs import (  # noqa: E402
-    RESULTS_DIR,
-    ROOT_DIR,
-    run_command,
-    tail_text,
-    which,
-)
+from runner.libs import run_command, tail_text, which  # noqa: E402
 from runner.libs.app_runners.bpftrace import BpftraceRunner, SCRIPTS, ScriptSpec  # noqa: E402
 from runner.libs.bpf_stats import (  # noqa: E402
     enable_bpf_stats,
@@ -32,10 +26,6 @@ from runner.libs.case_common import (  # noqa: E402
 )
 
 
-DEFAULT_SCRIPT_DIR = Path(__file__).with_name("scripts")
-DEFAULT_OUTPUT_JSON = RESULTS_DIR / "bpftrace.json"
-DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.md"
-DEFAULT_REPORT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e-report.md"
 DEFAULT_DURATION_S = 30
 MIN_BPFTRACE_VERSION = (0, 16, 0)
 
@@ -87,13 +77,6 @@ def ensure_required_tools() -> dict[str, object]:
     }
 
 
-def suite_scripts() -> list[ScriptSpec]:
-    return [
-        replace(spec, workload_spec={"kind": str((spec.workload_spec or {}).get("kind") or "")})
-        for spec in SCRIPTS
-    ]
-
-
 BPFTRACE_SITE_TOTAL_FIELDS = (
     "total_sites",
     "cmov_sites",
@@ -140,7 +123,6 @@ def run_phase(
     Returns `(baseline, rejit)` with `rejit` present whenever the post-ReJIT phase completed or failed loudly.
     """
     bpftrace_runner = BpftraceRunner(
-        script_path=spec.script_path,
         script_name=spec.name,
         workload_spec=spec.workload_spec,
         attach_timeout_s=attach_timeout,
@@ -415,7 +397,10 @@ def run_bpftrace_case(args: argparse.Namespace) -> dict[str, object]:
     ensure_artifacts(daemon_binary)
     tool_versions = ensure_required_tools()
 
-    scripts = suite_scripts()
+    scripts = [
+        replace(spec, workload_spec={"kind": str(spec.workload_spec.get("kind") or "")})
+        for spec in SCRIPTS
+    ]
     if not scripts:
         raise RuntimeError("no scripts selected")
 

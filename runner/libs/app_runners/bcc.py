@@ -371,7 +371,7 @@ class BCCRunner(AppRunner):
         tool_binary: Path | str | None = None,
         tool_name: str | None = None,
         tool_args: Sequence[str] | None = None,
-        workload_spec: Mapping[str, object] | None = None,
+        workload_spec: Mapping[str, object],
         attach_timeout_s: int | None = None,
         tools_dir: Path | str | None = None,
     ) -> None:
@@ -387,7 +387,7 @@ class BCCRunner(AppRunner):
             if tool_args is not None
             else (spec.tool_args if spec else ())
         )
-        self.workload_spec = dict(workload_spec) if workload_spec is not None else dict(spec.workload_spec if spec else {"kind": "mixed"})
+        self.workload_spec = dict(workload_spec)
         self.attach_timeout_s = int(attach_timeout_s or DEFAULT_ATTACH_TIMEOUT_SECONDS)
         self.setup_result: dict[str, object] = {
             "returncode": 0,
