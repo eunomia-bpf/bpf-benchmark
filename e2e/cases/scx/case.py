@@ -411,16 +411,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Duration per workload: `{payload['duration_s']}s`",
         f"- Kernel: `{payload['host']['kernel']}`",
         f"- Scheduler binary: `{payload.get('scheduler_binary') or 'missing'}`",
-        "",
-        "## Preflight",
-        "",
     ]
-    preflight = payload.get("preflight") or {}
-    lines.append(f"- sched_ext state before load: `{preflight.get('state_before')}`")
-    lines.append(f"- workloads selected: `{preflight.get('available_workloads')}`")
-    lines.append(
-        f"- runtime counters available for live scheduler programs: `{preflight.get('runtime_counters_available')}`"
-    )
     if status != "ok":
         lines.extend(
             [
@@ -685,11 +676,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         "scheduler_ops": scheduler_ops,
         "scheduler_output": scheduler_snapshot,
         "host": host_metadata(),
-        "preflight": {
-            "state_before": state_before,
-            "runtime_counters_available": runtime_counters_available,
-            "available_workloads": [spec["name"] for spec in workloads],
-        },
         "baseline": baseline,
         "scan_results": {str(key): value for key, value in scan_results.items()},
         "site_summary": site_summary,
