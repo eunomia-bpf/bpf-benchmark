@@ -1,15 +1,11 @@
 from __future__ import annotations
 
-import errno
-import json
 import os
-import re
 import shlex
 import subprocess
 import threading
 import time
-from collections import Counter, deque
-from datetime import datetime, timezone
+from collections import deque
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 from urllib.error import URLError
@@ -42,12 +38,9 @@ from .process_support import AgentSession, wait_until_program_set_stable
 from .setup_support import pick_host_executable, repo_artifact_root
 
 
-TRACEE_STATS_PATTERN = re.compile(
-    r"EventCount[:=]\s*(?P<events>\d+).*?LostEvCount[:=]\s*(?P<lost>\d+)(?:.*?LostWrCount[:=]\s*(?P<lost_writes>\d+))?",
-    re.IGNORECASE,
-)
 TRACEE_HEALTH_HOST = "127.0.0.1"
 TRACEE_HEALTH_PORT = 3366
+TRACEE_OUTPUT_MODE = "none"
 
 
 def _tracee_runtime_dir() -> Path:
@@ -63,230 +56,30 @@ def _tracee_runtime_dir() -> Path:
     return candidate
 
 
-def _tracee_event_output_path() -> Path:
-    return _tracee_runtime_dir() / "events.json"
-
-
 class TraceeOutputCollector:
     def __init__(self) -> None:
         self._lock = threading.Lock()
-        self._condition = threading.Condition(self._lock)
         self.stdout_tail: deque[str] = deque(maxlen=200)
         self.stderr_tail: deque[str] = deque(maxlen=200)
-        self.event_tail: deque[str] = deque(maxlen=200)
-        self.event_counts: Counter[str] = Counter()
-        self.events: deque[dict[str, object]] = deque(maxlen=16384)
-        self.total_events = 0
-        self.latest_stats: dict[str, int] = {}
-        self.event_parse_error_count = 0
-        self.event_parse_error_samples: deque[str] = deque(maxlen=8)
-
-    def _record_event_parse_error(self, reason: str, line: str) -> None:
-        sample = f"{reason}: {tail_text(line, max_lines=1, max_chars=200)}"
-        with self._lock:
-            self.event_parse_error_count += 1
-            self.event_parse_error_samples.append(sample)
-            self._condition.notify_all()
-
-    @staticmethod
-    def _payload_timestamp_ns(payload: Mapping[str, object]) -> int | None:
-        raw_timestamp = str(payload.get("timestamp") or "").strip()
-        if not raw_timestamp: return None
-        try:
-            parsed = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
-        except ValueError: return None
-        if parsed.tzinfo is None: parsed = parsed.replace(tzinfo=timezone.utc)
-        return int(parsed.timestamp() * 1_000_000_000)
 
     def consume_stdout(self, pipe: Any) -> None:
         for raw_line in iter(pipe.readline, ""):
             line = raw_line.rstrip()
             with self._lock: self.stdout_tail.append(line)
-            # Tracee can print control/stats lines on stdout even when the
-            # event stream itself is redirected to the JSON event file.
-            self._parse_stats_line(line)
         pipe.close()
 
     def consume_stderr(self, pipe: Any) -> None:
         for raw_line in iter(pipe.readline, ""):
             line = raw_line.rstrip()
             with self._lock: self.stderr_tail.append(line)
-            self._parse_stats_line(line)
         pipe.close()
-
-    def consume_event_file(self, path: Path, stop_event: threading.Event) -> None:
-        handle = None
-        partial_line = ""
-
-        def flush_partial_line(*, allow_parse: bool = True) -> None:
-            nonlocal partial_line
-            if not partial_line:
-                return
-            line = partial_line.rstrip("\r\n")
-            partial_line = ""
-            if not line or not allow_parse:
-                return
-            with self._lock:
-                self.event_tail.append(line)
-            self._parse_event_line(line)
-
-        try:
-            while True:
-                if handle is None:
-                    if stop_event.is_set():
-                        flush_partial_line()
-                        return
-                    try:
-                        handle = path.open("r", encoding="utf-8", errors="replace")
-                    except FileNotFoundError:
-                        time.sleep(0.05)
-                        continue
-                try:
-                    raw_line = handle.readline()
-                except OSError as exc:
-                    if exc.errno != errno.ENODATA:
-                        raise
-                    if stop_event.is_set():
-                        break
-                    time.sleep(0.05)
-                    continue
-                if raw_line:
-                    if partial_line:
-                        raw_line = partial_line + raw_line
-                        partial_line = ""
-                    if not raw_line.endswith(("\n", "\r")):
-                        partial_line = raw_line
-                        continue
-                    line = raw_line.rstrip("\r\n")
-                    if not line:
-                        continue
-                    with self._lock:
-                        self.event_tail.append(line)
-                    self._parse_event_line(line)
-                    continue
-                if stop_event.is_set():
-                    flush_partial_line(allow_parse=False)
-                    break
-                try:
-                    current_stat = path.stat()
-                    handle_stat = os.fstat(handle.fileno())
-                    if (
-                        (current_stat.st_dev, current_stat.st_ino)
-                        != (handle_stat.st_dev, handle_stat.st_ino)
-                        or current_stat.st_size < handle.tell()
-                    ):
-                        # A replaced/truncated event file invalidates the old
-                        # tail fragment; parsing it as JSON creates false
-                        # malformed-line errors under heavy Tracee output.
-                        flush_partial_line(allow_parse=False)
-                        handle.close()
-                        handle = None
-                        time.sleep(0.05)
-                        continue
-                except FileNotFoundError:
-                    flush_partial_line(allow_parse=False)
-                    handle.close()
-                    handle = None
-                    time.sleep(0.05)
-                    continue
-                time.sleep(0.05)
-        finally:
-            if handle is not None:
-                try:
-                    flush_partial_line(allow_parse=False)
-                    for raw_line in handle:
-                        if partial_line:
-                            raw_line = partial_line + raw_line
-                            partial_line = ""
-                        if not raw_line.endswith(("\n", "\r")):
-                            partial_line = raw_line
-                            continue
-                        line = raw_line.rstrip("\r\n")
-                        if not line:
-                            continue
-                        with self._lock:
-                            self.event_tail.append(line)
-                        self._parse_event_line(line)
-                    flush_partial_line(allow_parse=False)
-                except OSError as exc:
-                    if exc.errno != errno.ENODATA:
-                        raise
-                finally:
-                    handle.close()
-
-    def _parse_event_line(self, line: str) -> None:
-        try:
-            payload = json.loads(line)
-        except json.JSONDecodeError as exc:
-            self._record_event_parse_error(f"invalid JSON ({exc.msg})", line)
-            return
-        if not isinstance(payload, Mapping):
-            self._record_event_parse_error("event payload is not an object", line)
-            return
-        event_name = payload.get("eventName") or payload.get("event_name") or payload.get("name")
-        if not event_name:
-            self._record_event_parse_error("event payload is missing event name", line)
-            return
-        with self._lock:
-            n = str(event_name)
-            self.event_counts[n] += 1
-            self.total_events += 1
-            self.events.append({"event_name": n, "line": line, "payload": dict(payload),
-                                 "event_time_ns": self._payload_timestamp_ns(payload),
-                                 "observed_monotonic_ns": time.monotonic_ns(), "source": "collector"})
-            self._condition.notify_all()
-
-    def _parse_stats_line(self, line: str) -> None:
-        match = TRACEE_STATS_PATTERN.search(line)
-        if not match: return
-        with self._lock:
-            self.latest_stats = {"event_count": int(match.group("events")),
-                                  "lost_event_count": int(match.group("lost")),
-                                  "lost_write_count": int(match.group("lost_writes") or 0)}
 
     def snapshot(self) -> dict[str, object]:
         with self._lock:
             return {
-                "event_counts": dict(self.event_counts),
-                "total_events": self.total_events,
-                "latest_stats": dict(self.latest_stats),
                 "stdout_tail": list(self.stdout_tail),
                 "stderr_tail": list(self.stderr_tail),
-                "event_tail": list(self.event_tail),
-                "event_parse_error_count": self.event_parse_error_count,
-                "event_parse_error_samples": list(self.event_parse_error_samples),
             }
-
-    def wait_for_event(
-        self,
-        *,
-        marker_tokens: Sequence[str],
-        min_observed_ns: int,
-        timeout_s: float,
-    ) -> dict[str, object] | None:
-        tokens = [str(token) for token in marker_tokens if str(token)]
-        deadline = time.monotonic() + max(0.0, float(timeout_s))
-
-        def find_match() -> dict[str, object] | None:
-            for record in reversed(self.events):
-                observed_ns = int(record.get("observed_monotonic_ns", 0) or 0)
-                if observed_ns < min_observed_ns:
-                    break
-                raw_line = str(record.get("line") or "")
-                if tokens and not all(token in raw_line for token in tokens):
-                    continue
-                return dict(record)
-            return None
-
-        with self._condition:
-            match = find_match()
-            while match is None:
-                remaining = deadline - time.monotonic()
-                if remaining <= 0:
-                    return None
-                self._condition.wait(timeout=remaining)
-                match = find_match()
-            return match
 
 
 class TraceeAgentSession(AgentSession):
@@ -294,20 +87,15 @@ class TraceeAgentSession(AgentSession):
         super().__init__(load_timeout)
         self.commands = [list(command) for command in commands]
         self.collector = TraceeOutputCollector()
-        self.event_thread: threading.Thread | None = None
-        self.event_stop = threading.Event()
         self.command_used: list[str] | None = None
 
     def __enter__(self) -> "TraceeAgentSession":
         preexisting_ids = set(_current_prog_ids())
         failures: list[str] = []
         tracee_tmpdir = _tracee_runtime_dir()
-        event_output_path = _tracee_event_output_path()
         tracee_tmpdir.mkdir(parents=True, exist_ok=True)
-        event_output_path.unlink(missing_ok=True)
         for command in self.commands:
             self.collector = TraceeOutputCollector()
-            self.event_stop = threading.Event()
             proc = start_agent(
                 command[0],
                 command[1:],
@@ -321,12 +109,6 @@ class TraceeAgentSession(AgentSession):
             self.process = proc
             self.command_used = command
             self._start_io_threads()
-            self.event_thread = threading.Thread(
-                target=self.collector.consume_event_file,
-                args=(event_output_path, self.event_stop),
-                daemon=True,
-            )
-            self.event_thread.start()
 
             def _health_check() -> bool:
                 return (
@@ -367,9 +149,7 @@ class TraceeAgentSession(AgentSession):
     def close(self) -> None:
         if self.process is not None:
             stop_agent(self.process, timeout=DEFAULT_STOP_TIMEOUT_S); self.process = None
-        self.event_stop.set(); self._join_io_threads()
-        if self.event_thread is not None:
-            self.event_thread.join(timeout=DEFAULT_EVENT_JOIN_TIMEOUT_S); self.event_thread = None
+        self._join_io_threads()
 
 
 def _current_prog_ids() -> list[int]:
@@ -428,16 +208,16 @@ def _tracee_healthz_ready(host: str, port: int) -> bool:
 
 def _tracee_collector_has_activity(collector: TraceeOutputCollector) -> bool:
     snapshot = collector.snapshot()
-    return bool(snapshot.get("event_tail") or snapshot.get("stdout_tail") or snapshot.get("stderr_tail"))
+    return bool(snapshot.get("stdout_tail") or snapshot.get("stderr_tail"))
 
 
-def _tracee_output_args(event_output_path: Path) -> list[str]:
-    return ["--output", f"json:{event_output_path}"]
+def _tracee_output_args() -> list[str]:
+    return ["--output", TRACEE_OUTPUT_MODE]
 
 
 def build_tracee_commands(binary: str, extra_args: Sequence[str] = ()) -> list[list[str]]:
     return [[binary, "--events", "*",
-             *_tracee_output_args(_tracee_event_output_path()),
+             *_tracee_output_args(),
              "--server", "healthz", "--server", f"http-address=:{TRACEE_HEALTH_PORT}",
              "--signatures-dir", str(_tracee_signatures_dir()), *extra_args]]
 
@@ -447,7 +227,6 @@ def _format_launch_failure(command: Sequence[str], proc: subprocess.Popen[str] |
     combined = "\n".join(
         (snapshot.get("stderr_tail") or [])
         + (snapshot.get("stdout_tail") or [])
-        + (snapshot.get("event_tail") or [])
     )
     details = tail_text(combined, max_lines=40, max_chars=8000)
     if proc is not None and proc.poll() is not None:
@@ -573,5 +352,4 @@ class TraceeRunner(AppRunner):
         session.close()
         self.process_output = {"returncode": None if process is None else process.returncode,
                                "stdout_tail": "\n".join(snapshot.get("stdout_tail") or []),
-                               "stderr_tail": "\n".join(snapshot.get("stderr_tail") or []),
-                               "latest_stats": snapshot.get("latest_stats") or {}}
+                               "stderr_tail": "\n".join(snapshot.get("stderr_tail") or [])}

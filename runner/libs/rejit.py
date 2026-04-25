@@ -591,32 +591,110 @@ def applied_site_totals_from_rejit_result(result: Mapping[str, Any] | None) -> d
     return counts
 
 
-def scan_programs(
-    prog_ids: list[int],
-    *,
-    enabled_passes: Sequence[str] | None = None,
-    timeout_seconds: int = 60,
-    daemon_socket_path: Path | None = None,
-    daemon_proc: subprocess.Popen[str] | None = None,
-    daemon_stdout_path: Path | None = None,
-    daemon_stderr_path: Path | None = None,
-) -> dict[int, dict[str, Any]]:
-    requested_ids = [int(p) for p in prog_ids if int(p) > 0]
-    if not requested_ids:
-        return {}
-    if daemon_socket_path is None:
-        raise ValueError("scan_programs requires daemon_socket_path")
-    results: dict[int, dict[str, Any]] = {}
-    for prog_id in requested_ids:
-        response = _optimize_request(daemon_socket_path, prog_id, enabled_passes=enabled_passes, dry_run=True,
-                                      daemon_proc=daemon_proc, stdout_path=daemon_stdout_path,
-                                      stderr_path=daemon_stderr_path, timeout_seconds=float(timeout_seconds))
-        if str(response.get("status") or "") != "ok":
-            message = str(response.get("error_message") or "scan failed").strip()
-            raise RuntimeError(f"daemon scan failed for prog_id={prog_id}: {message}")
-        counts = _site_counts_from_optimize_response(response)
-        results[prog_id] = {"prog_id": int(prog_id), "counts": dict(counts), "error": ""}
-    return results
+_ARTIFACT_REJIT_RESULT_KEYS = frozenset(
+    {
+        "applied",
+        "changed",
+        "debug_result",
+        "enabled_passes",
+        "error",
+        "exit_code",
+        "inlined_map_entries",
+        "output",
+        "passes",
+        "per_program",
+        "prog_id",
+        "program_counts",
+        "summary",
+    }
+)
+
+
+def _compact_single_rejit_result_for_artifact(result: Mapping[str, Any]) -> dict[str, object]:
+    compact: dict[str, object] = {}
+
+    for field in ("prog_id", "applied", "changed", "exit_code"):
+        if field in result:
+            compact[field] = result.get(field)
+
+    if "error" in result:
+        compact["error"] = str(result.get("error") or "")
+
+    enabled_passes = result.get("enabled_passes")
+    if isinstance(enabled_passes, Sequence) and not isinstance(enabled_passes, (str, bytes, bytearray)):
+        compact["enabled_passes"] = [str(name).strip() for name in enabled_passes if str(name).strip()]
+
+    for field in ("summary", "program_counts"):
+        value = result.get(field)
+        if isinstance(value, Mapping):
+            compact[field] = dict(value)
+
+    site_totals = applied_site_totals_from_rejit_result(result)
+    if any(int(value or 0) > 0 for value in site_totals.values()):
+        compact["applied_site_totals"] = site_totals
+
+    raw_per_program = result.get("per_program")
+    if isinstance(raw_per_program, Mapping):
+        error_programs: list[dict[str, object]] = []
+        for prog_id, record in raw_per_program.items():
+            if not isinstance(record, Mapping):
+                continue
+            error = str(record.get("error") or "")
+            exit_code = int(record.get("exit_code", 0) or 0)
+            applied = bool(record.get("applied", False))
+            if not error and exit_code == 0 and applied:
+                continue
+            error_programs.append(
+                {
+                    "prog_id": int(record.get("prog_id", prog_id) or prog_id),
+                    "applied": applied,
+                    "changed": bool(record.get("changed", False)),
+                    "exit_code": exit_code,
+                    "error": error,
+                }
+            )
+        if error_programs:
+            compact["error_programs"] = error_programs
+
+    raw_output = result.get("output")
+    if raw_output not in (None, ""):
+        compact["output_chars"] = len(str(raw_output))
+        compact["output_stripped"] = True
+
+    if isinstance(result.get("debug_result"), Mapping):
+        compact["debug_result_stripped"] = True
+
+    if isinstance(result.get("inlined_map_entries"), list):
+        compact["inlined_map_entries_stripped"] = True
+
+    return compact
+
+
+def compact_rejit_result_for_artifact(result: Mapping[str, Any] | None) -> dict[str, object] | None:
+    if not isinstance(result, Mapping):
+        return None
+    if any(str(key) in _ARTIFACT_REJIT_RESULT_KEYS for key in result.keys()):
+        return _compact_single_rejit_result_for_artifact(result)
+    return {
+        key: compact_rejit_result_for_artifact(value if isinstance(value, Mapping) else None) if isinstance(value, Mapping) else value
+        for key, value in result.items()
+    }
+
+
+def compact_rejit_results_for_artifact(payload: Any) -> Any:
+    if isinstance(payload, Mapping):
+        compacted: dict[str, Any] = {}
+        for key, value in payload.items():
+            if str(key) == "rejit_result":
+                compacted[key] = compact_rejit_result_for_artifact(
+                    value if isinstance(value, Mapping) else None
+                )
+            else:
+                compacted[key] = compact_rejit_results_for_artifact(value)
+        return compacted
+    if isinstance(payload, list):
+        return [compact_rejit_results_for_artifact(item) for item in payload]
+    return payload
 
 
 def _apply_result_from_response(
@@ -927,13 +1005,6 @@ class DaemonSession:
             return
         self._closed = True
         _stop_daemon_server(self.proc, self.socket_path, self.socket_dir)
-
-    def scan_programs(self, prog_ids: Sequence[int], *,
-                      enabled_passes: Sequence[str] | None = None, timeout_seconds: int = 60) -> dict[int, dict[str, object]]:
-        return scan_programs([int(p) for p in prog_ids if int(p) > 0],
-                             enabled_passes=enabled_passes, timeout_seconds=timeout_seconds,
-                             daemon_socket_path=self.socket_path, daemon_proc=self.proc,
-                             daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path)
 
     def apply_rejit(self, prog_ids: Sequence[int], *, enabled_passes: Sequence[str] | None = None) -> dict[str, object]:
         return apply_daemon_rejit([int(p) for p in prog_ids if int(p) > 0], enabled_passes=enabled_passes,

@@ -126,6 +126,8 @@ def build_runtime_container_command(
         "HOME=/root",
         "-w",
         str(image_workspace),
+        "-v",
+        f"{host_workspace}:{image_workspace}",
     ]
     for result_dir in runtime_container_result_dirs(host_workspace, suite_name, die=die):
         command.extend(["-v", f"{result_dir}:{image_workspace / result_dir.relative_to(host_workspace)}"])

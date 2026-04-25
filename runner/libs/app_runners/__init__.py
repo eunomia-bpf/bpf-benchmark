@@ -4,15 +4,32 @@ from __future__ import annotations
 
 import importlib
 
+from runner.libs.benchmark_catalog import BCC_TOOL_SPEC_BY_NAME
+
 from .base import AppRunner
 
 def _adapt_bcc(workload: str, kwargs: dict[str, object]) -> dict[str, object]:
+    from .bcc import find_tool_binary, inspect_bcc_setup, resolve_tools_dir
+
     tool_name = str(kwargs.pop("tool", "") or "").strip()
     if not tool_name:
         raise TypeError("bcc runner requires args.tool")
+    tool_spec = BCC_TOOL_SPEC_BY_NAME.get(tool_name)
+    if tool_spec is None:
+        raise TypeError(f"bcc runner received unknown tool {tool_name!r}")
+    setup_result = inspect_bcc_setup()
+    tools_dir = resolve_tools_dir("", setup_result=setup_result)
+    tool_binary = find_tool_binary(tools_dir, tool_name)
+    if tool_binary is None:
+        details = str(setup_result.get("stderr_tail") or "").strip()
+        raise RuntimeError(
+            details or f"bcc runner could not resolve tool binary for {tool_name!r} under {tools_dir}"
+        )
     mapped = dict(kwargs)
-    mapped["tool_name"] = tool_name
-    mapped.setdefault("workload_spec", {"kind": str(workload).strip()})
+    mapped["tool_binary"] = tool_binary
+    mapped["tool_args"] = tuple(str(arg) for arg in tool_spec.tool_args)
+    workload_kind = str(workload).strip() or str(tool_spec.workload_spec.get("kind") or "").strip()
+    mapped.setdefault("workload_spec", {"kind": workload_kind})
     return mapped
 
 

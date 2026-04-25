@@ -5,7 +5,6 @@ import argparse
 import json
 import sys
 import time
-from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,16 +14,20 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from runner.libs import ROOT_DIR, ensure_parent, write_json, write_text
+from runner.libs import ROOT_DIR
+from runner.libs.benchmark_catalog import (
+    DEFAULT_CORPUS_SAMPLES,
+    DEFAULT_CORPUS_WORKLOAD_DURATION_S,
+)
 from runner.libs.app_runners import get_app_runner
 from runner.libs.app_runners.base import AppRunner
 from runner.libs.app_runners.scx import ScxRunner
-from runner.libs.app_suite_schema import AppSpec, AppWorkload, load_app_suite_from_yaml
-from runner.libs.bpf_stats import enable_bpf_stats, sample_bpf_stats
+from runner.libs.app_suite_schema import AppSpec, AppSuite, load_app_suite_from_yaml
+from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats
 from runner.libs.case_common import (
     CaseLifecycleState,
+    LifecycleAbort,
     prepare_daemon_session,
-    rejit_program_result,
     run_lifecycle_sessions,
     wait_for_suite_quiescence,
 )
@@ -32,31 +35,23 @@ from runner.libs.app_runners.process_support import programs_after
 from runner.libs.rejit import (
     DaemonSession,
     benchmark_run_provenance,
+    compact_rejit_results_for_artifact,
 )
 from runner.libs.run_artifacts import (
     ArtifactSession,
     current_process_identity,
     derive_run_type,
 )
-from runner.libs.statistics import geometric_mean
 
 
 DEFAULT_MACRO_APPS_YAML = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_OUTPUT_JSON = ROOT_DIR / "corpus" / "results" / "vm_corpus.json"
-SECTION_TYPE_PREFIXES = {
-    "xdp": "xdp",
-    "tc": "sched_cls",
-    "classifier": "sched_cls",
-    "cgroup_skb": "cgroup_skb",
-    "socket": "socket_filter",
-}
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the app-native corpus suite driver.")
     parser.add_argument("--suite", default=str(DEFAULT_MACRO_APPS_YAML))
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--samples", type=int, default=0)
-    parser.add_argument("--workload-seconds", type=float, default=0.0)
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument(
         "--no-kinsn",
@@ -66,92 +61,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     args = parser.parse_args(argv)
     if args.samples is not None and int(args.samples) < 0:
         raise SystemExit("--samples must be >= 0")
-    if float(args.workload_seconds) < 0:
-        raise SystemExit("--workload-seconds must be >= 0")
     return args
-
-
-def _workload_payload(workload: AppWorkload) -> dict[str, str]:
-    return {
-        "corpus": workload.corpus,
-        "e2e": workload.e2e,
-    }
-
 
 def _print_progress(event: str, **fields: object) -> None:
     payload = {"event": event}
     payload.update(fields)
     print(json.dumps(payload, sort_keys=True), flush=True)
-
-
-def _program_phase_stats(
-    current: Mapping[int, Mapping[str, object]],
-    previous: Mapping[int, Mapping[str, object]] | None = None,
-) -> dict[int, dict[str, object]]:
-    results: dict[int, dict[str, object]] = {}
-    for prog_id, current_stats in current.items():
-        base = previous.get(prog_id, {}) if previous else {}
-        run_cnt = int(current_stats.get("run_cnt", 0) or 0) - int(base.get("run_cnt", 0) or 0)
-        run_time_ns = int(current_stats.get("run_time_ns", 0) or 0) - int(base.get("run_time_ns", 0) or 0)
-        exec_ns = (run_time_ns / run_cnt) if run_cnt > 0 else None
-        results[int(prog_id)] = {
-            "id": int(current_stats.get("id", prog_id) or prog_id),
-            "name": str(current_stats.get("name", "")),
-            "type": str(current_stats.get("type", "")),
-            "run_cnt": run_cnt,
-            "run_time_ns": run_time_ns,
-            "exec_ns": exec_ns,
-            "bytes_jited": int(current_stats.get("bytes_jited", 0) or 0),
-            "bytes_xlated": int(current_stats.get("bytes_xlated", 0) or 0),
-        }
-    return results
-
-
-def _program_stats_by_prog_id(
-    phase_stats: Mapping[int, Mapping[str, object]],
-    prog_ids: Sequence[int],
-) -> dict[str, dict[str, object]]:
-    return {
-        str(prog_id): dict(phase_stats[prog_id])
-        for prog_id in prog_ids
-        if int(prog_id) in phase_stats
-    }
-
-
-def _mean_exec_ns(records: Mapping[str, Mapping[str, object]]) -> float | None:
-    values = [
-        float(record["exec_ns"])
-        for record in records.values()
-        if isinstance(record.get("exec_ns"), (int, float))
-    ]
-    if not values:
-        return None
-    return sum(values) / len(values)
-
-
-def _infer_prog_type_name(program: Any) -> str:
-    section_name = str(getattr(program, "section_name", "") or "").strip().lower()
-    section_root = section_name.split("/", 1)[0]
-    if section_root in SECTION_TYPE_PREFIXES:
-        return SECTION_TYPE_PREFIXES[section_root]
-    for prefix, inferred_type in SECTION_TYPE_PREFIXES.items():
-        if section_name.startswith(prefix):
-            return inferred_type
-    return "unspec"
-
-
-def _has_phase_measurement(records: Mapping[str, Mapping[str, object]]) -> bool:
-    for record in records.values():
-        run_cnt = record.get("run_cnt")
-        if isinstance(run_cnt, (int, float)) and float(run_cnt) > 0.0:
-            return True
-        run_time_ns = record.get("run_time_ns")
-        if isinstance(run_time_ns, (int, float)) and float(run_time_ns) > 0.0:
-            return True
-        exec_ns = record.get("exec_ns")
-        if isinstance(exec_ns, (int, float)) and float(exec_ns) > 0.0:
-            return True
-    return False
 
 
 def _daemon_exit_error(daemon_session: DaemonSession) -> str | None:
@@ -161,29 +76,23 @@ def _daemon_exit_error(daemon_session: DaemonSession) -> str | None:
     return f"daemon session exited early (rc={returncode})"
 
 
-def _workload_seconds(args: argparse.Namespace, suite_defaults: Mapping[str, object]) -> float:
-    explicit = float(args.workload_seconds or 0.0)
-    if explicit > 0: return explicit
-    default_value = float(suite_defaults.get("duration_s", 10.0) or 10.0)
-    if default_value <= 0: raise RuntimeError(f"invalid app suite default duration_s: {default_value}")
-    return default_value
+def _workload_seconds() -> float:
+    return float(DEFAULT_CORPUS_WORKLOAD_DURATION_S)
 
 
 def _app_workload_seconds(
     args: argparse.Namespace,
-    suite_defaults: Mapping[str, object],
     app: AppSpec,
 ) -> float:
-    explicit = float(args.workload_seconds or 0.0)
-    if explicit > 0: return explicit
-    if app.duration_s is not None: return float(app.duration_s)
-    return _workload_seconds(args, suite_defaults)
+    if app.duration_s is not None:
+        return float(app.duration_s)
+    return _workload_seconds()
 
 
-def _sample_count(args: argparse.Namespace, suite_defaults: Mapping[str, object]) -> int:
+def _sample_count(args: argparse.Namespace) -> int:
     explicit = int(args.samples or 0)
     if explicit > 0: return explicit
-    return max(1, int(suite_defaults.get("samples", 1) or 1))
+    return int(DEFAULT_CORPUS_SAMPLES)
 
 
 def _measure_runner_phase(
@@ -210,7 +119,6 @@ def _measure_runner_phase(
         else list(logical_prog_ids)
     )
     workloads: list[dict[str, object]] = []
-    last_workload: dict[str, object] | None = None
     live_prog_id_map: dict[int, int] = {}
     live_programs: list[dict[str, object]] = []
     if isinstance(runner, ScxRunner) and sampled_prog_id_map is None:
@@ -222,9 +130,7 @@ def _measure_runner_phase(
     else:
         initial_stats = sample_bpf_stats(sampled_prog_ids)
     for _ in range(samples):
-        workload = runner.run_workload(workload_seconds).to_dict()
-        last_workload = dict(workload)
-        workloads.append(dict(workload))
+        workloads.append(runner.run_workload(workload_seconds).to_dict())
     if isinstance(runner, ScxRunner) and sampled_prog_id_map is None:
         final_stats, live_prog_id_map, live_programs = _sample_scx_measurement_stats(
             runner,
@@ -255,89 +161,9 @@ def _measure_runner_phase(
         initial_stats = remap_stats(initial_stats)
         final_stats = remap_stats(final_stats)
     return {
-        "workload": last_workload,
         "workloads": workloads,
-        "initial_stats": initial_stats,
-        "final_stats": final_stats,
-        "live_prog_id_map": {
-            str(logical_prog_id): int(sampled_prog_id)
-            for logical_prog_id, sampled_prog_id in live_prog_id_map.items()
-            if int(logical_prog_id) > 0 and int(sampled_prog_id) > 0
-        },
-        "live_programs": [dict(program) for program in live_programs],
+        "bpf": compute_delta(initial_stats, final_stats),
     }
-
-
-def _normalized_stats_snapshot(raw_stats: Mapping[object, object] | None) -> dict[int, dict[str, object]]:
-    normalized: dict[int, dict[str, object]] = {}
-    if raw_stats is None:
-        return normalized
-    if not isinstance(raw_stats, Mapping):
-        raise RuntimeError(f"stats snapshot must be a mapping, got {type(raw_stats)!r}")
-    for raw_key, raw_value in raw_stats.items():
-        try:
-            prog_id = int(raw_key)
-        except (TypeError, ValueError) as exc:
-            raise RuntimeError(f"stats snapshot contains invalid program id: {raw_key!r}") from exc
-        if not isinstance(raw_value, Mapping):
-            raise RuntimeError(f"stats snapshot for program {prog_id} is not a mapping")
-        normalized[prog_id] = {str(field): value for field, value in raw_value.items()}
-    return normalized
-
-
-def _measurement_program_stats(
-    measurement: Mapping[str, object] | None,
-    prog_ids: Sequence[int],
-) -> dict[str, dict[str, object]]:
-    if not isinstance(measurement, Mapping):
-        return {}
-    initial_snapshot = _normalized_stats_snapshot(measurement.get("initial_stats"))
-    final_snapshot = _normalized_stats_snapshot(measurement.get("final_stats"))
-    return _program_stats_by_prog_id(
-        _program_phase_stats(final_snapshot, initial_snapshot),
-        prog_ids,
-    )
-
-
-def _program_label(app_name: str, program_name: str, prog_id: int) -> str:
-    return f"{app_name}:{program_name or f'prog_{prog_id}'}#{prog_id}"
-
-
-def _scx_post_rejit_prog_id_map(lifecycle: CaseLifecycleState) -> dict[int, int]:
-    runner = lifecycle.runtime
-    if not isinstance(runner, ScxRunner):
-        return {}
-    previous_programs = [
-        dict(program)
-        for program in (lifecycle.artifacts.get("programs") or [])
-        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
-    ]
-    if not previous_programs:
-        return {}
-    previous_name_by_id = {
-        int(program["id"]): str(program["name"]).strip()
-        for program in previous_programs
-    }
-    refreshed_programs = runner.refresh_live_programs()
-    lifecycle.artifacts["post_rejit_programs"] = [dict(program) for program in refreshed_programs]
-    refreshed_id_by_name = {
-        str(program.get("name") or "").strip(): int(program.get("id", 0) or 0)
-        for program in refreshed_programs
-        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
-    }
-    remapped = {
-        int(logical_prog_id): int(refreshed_id_by_name[program_name])
-        for logical_prog_id, program_name in previous_name_by_id.items()
-        if int(logical_prog_id) in {int(prog_id) for prog_id in lifecycle.prog_ids if int(prog_id) > 0}
-        and int(refreshed_id_by_name.get(program_name, 0) or 0) > 0
-    }
-    if remapped:
-        lifecycle.artifacts["post_rejit_program_id_map"] = {
-            str(logical_prog_id): int(sampled_prog_id)
-            for logical_prog_id, sampled_prog_id in remapped.items()
-        }
-    return remapped
-
 
 def _scx_live_prog_id_map_for_runner(
     runner: ScxRunner,
@@ -423,192 +249,16 @@ def _sample_scx_measurement_stats(
         raise RuntimeError(f"{type(runner).__name__}: stats sampling returned no logical program records")
     return remapped, live_prog_id_map, live_programs
 
-
-def _phase_exec_ns(record: Mapping[str, object] | None) -> float | None:
-    if not isinstance(record, Mapping):
-        return None
-    value = record.get("exec_ns")
-    if not isinstance(value, (int, float)):
-        return None
-    return float(value)
-
-
-def _speedup(
-    baseline_exec_ns: float | None,
-    post_rejit_exec_ns: float | None,
-) -> float | None:
-    if baseline_exec_ns is None or baseline_exec_ns <= 0.0:
-        return None
-    if post_rejit_exec_ns is None or post_rejit_exec_ns <= 0.0:
-        return None
-    return baseline_exec_ns / post_rejit_exec_ns
-
-
-def _build_program_measurements(
-    app_name: str,
-    live_programs: Sequence[Mapping[str, object]],
-    baseline_programs: Mapping[str, Mapping[str, object]],
-    rejit_programs: Mapping[str, Mapping[str, object]],
-    apply_result: Mapping[str, object],
-    *,
-    had_post_rejit: bool,
-) -> dict[str, dict[str, object]]:
-    rows: dict[str, dict[str, object]] = {}
-    for live_program in live_programs:
-        prog_id = int(live_program.get("id", 0) or 0)
-        if prog_id <= 0:
-            continue
-        program_name = str(live_program.get("name") or f"prog_{prog_id}")
-        baseline_record = dict(baseline_programs.get(str(prog_id), {}))
-        rejit_record = dict(rejit_programs.get(str(prog_id), {}))
-        apply_record = rejit_program_result(apply_result, prog_id)
-        if not apply_record:
-            raise RuntimeError(
-                f"{app_name}: REJIT result is missing per-program apply record for prog {prog_id}"
-            )
-        applied = bool(apply_record.get("applied"))
-        changed = bool(apply_record.get("changed"))
-        baseline_exec_ns = _phase_exec_ns(baseline_record)
-        post_rejit_exec_ns = _phase_exec_ns(rejit_record) if had_post_rejit else None
-        rows[str(prog_id)] = {
-            "id": prog_id,
-            "label": _program_label(app_name, program_name, prog_id),
-            "name": program_name,
-            "type": str(live_program.get("type") or _infer_prog_type_name(live_program)),
-            "applied": applied,
-            "changed": changed,
-            "baseline_ns": baseline_exec_ns,
-            "post_rejit_ns": post_rejit_exec_ns,
-            "speedup": _speedup(baseline_exec_ns, post_rejit_exec_ns),
-            "baseline": baseline_record,
-            "rejit": rejit_record if had_post_rejit else {},
-            "apply": apply_record,
-        }
-    return rows
-
-
-def _result_program_rows(result: Mapping[str, object]) -> list[dict[str, object]]:
-    return [
-        dict(row)
-        for row in (result.get("program_measurements") or {}).values()
-        if isinstance(row, Mapping)
-    ]
-
-
-def _comparison_rows(results: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
-    comparison_rows: list[dict[str, object]] = []
-    for result in results:
-        baseline_ns = result.get("baseline_ns")
-        post_rejit_ns = result.get("post_rejit_ns")
-        if not isinstance(baseline_ns, (int, float)):
-            continue
-        if not isinstance(post_rejit_ns, (int, float)):
-            continue
-        comparison_rows.append(
-            {
-                "app": str(result.get("app") or ""),
-                "runner": str(result.get("runner") or ""),
-                "workload": str(result.get("selected_workload") or ""),
-                "status": str(result.get("status") or ""),
-                "baseline_ns": float(baseline_ns),
-                "post_rejit_ns": float(post_rejit_ns),
-                "speedup": _speedup(float(baseline_ns), float(post_rejit_ns)),
-            }
-        )
-    return comparison_rows
-
-
-def _per_app_breakdown(results: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
-    breakdown: list[dict[str, object]] = []
-    for result in results:
-        program_rows = _result_program_rows(result)
-        breakdown.append(
-            {
-                "app": str(result.get("app") or ""),
-                "runner": str(result.get("runner") or ""),
-                "workload": str(result.get("selected_workload") or ""),
-                "status": str(result.get("status") or ""),
-                "program_count": len(program_rows),
-                "applied_program_count": sum(1 for row in program_rows if bool(row.get("applied"))),
-                "baseline_ns": result.get("baseline_ns"),
-                "post_rejit_ns": result.get("post_rejit_ns"),
-                "speedup": result.get("speedup"),
-            }
-        )
-    return breakdown
-
-
-def _build_summary(
-    results: Sequence[Mapping[str, object]],
-) -> dict[str, object]:
-    status_counts = Counter(str(result.get("status") or "error") for result in results)
-    comparison_rows = _comparison_rows(results)
-    speedups = [
-        float(row["speedup"])
-        for row in comparison_rows
-        if isinstance(row.get("speedup"), (int, float))
-    ]
-    discovered_programs = sum(
-        len(_result_program_rows(result))
-        for result in results
-        if isinstance(result, Mapping)
-    )
-    return {
-        "app_count": len(results),
-        "discovered_programs": discovered_programs,
-        "statuses": dict(sorted(status_counts.items())),
-        "sample_count": len(comparison_rows),
-        "geomean": geometric_mean(speedups),
-        "per_app": _per_app_breakdown(results),
-    }
-
-
-def _format_ratio(value: object) -> str:
-    if not isinstance(value, (int, float)) or float(value) <= 0.0:
-        return "n/a"
-    return f"{float(value):.3f}x"
-
-
 def build_markdown(payload: Mapping[str, object]) -> str:
-    summary = payload.get("summary") if isinstance(payload.get("summary"), Mapping) else {}
-    lines = [
-        "# Corpus Authoritative Summary",
-        "",
-        f"- Generated: {payload.get('generated_at')}",
-        f"- Manifest: `{payload.get('manifest')}`",
-        f"- Daemon: `{payload.get('daemon')}`",
-        f"- Samples: `{payload.get('samples')}`",
-        f"- Workload seconds: `{payload.get('workload_seconds')}`",
-        f"- Status: `{payload.get('status')}`",
-        f"- Geomean (baseline/post_rejit): `{_format_ratio(summary.get('geomean'))}`",
-        f"- Sample count: `{summary.get('sample_count')}`",
-        "",
-        "## Per-App Breakdown",
-        "",
-        "| App | Runner | Workload | Status | Programs | Applied | Baseline ns | Post-ReJIT ns | Speedup |",
-        "| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |",
-    ]
-    for row in summary.get("per_app") or []:
-        if not isinstance(row, Mapping):
-            continue
-        lines.append(
-            "| "
-            + " | ".join(
-                [
-                    str(row.get("app") or ""),
-                    str(row.get("runner") or ""),
-                    str(row.get("workload") or ""),
-                    str(row.get("status") or ""),
-                    str(int(row.get("program_count", 0) or 0)),
-                    str(int(row.get("applied_program_count", 0) or 0)),
-                    str(row.get("baseline_ns") if row.get("baseline_ns") is not None else "n/a"),
-                    str(row.get("post_rejit_ns") if row.get("post_rejit_ns") is not None else "n/a"),
-                    _format_ratio(row.get("speedup")),
-                ]
-            )
-            + " |"
-        )
-    return "\n".join(lines)
+    return "\n".join(
+        [
+            "# Corpus Benchmark",
+            "",
+            "```json",
+            json.dumps(payload, indent=2, sort_keys=True, default=str),
+            "```",
+        ]
+    )
 
 
 def _build_runner_state(
@@ -644,105 +294,38 @@ def _build_app_error_result(
     app: AppSpec,
     *,
     error: str,
-    state: CaseLifecycleState | None = None,
     baseline_measurement: Mapping[str, object] | None = None,
     apply_result: Mapping[str, object] | None = None,
     rejit_measurement: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
-    prog_ids = [] if state is None else [int(value) for value in state.prog_ids if int(value) > 0]
-    live_programs = [] if state is None else [dict(program) for program in (state.artifacts.get("programs") or [])]
-    baseline_programs = _measurement_program_stats(baseline_measurement, prog_ids)
-    had_post_rejit = isinstance(rejit_measurement, Mapping)
-    rejit_programs = _measurement_program_stats(rejit_measurement, prog_ids)
-    normalized_apply_result = dict(apply_result or {})
-    program_measurements = {}
-    raw_apply_per_program = normalized_apply_result.get("per_program")
-    if live_programs and isinstance(raw_apply_per_program, Mapping):
-        program_measurements = _build_program_measurements(
-            app.name,
-            live_programs,
-            baseline_programs,
-            rejit_programs,
-            normalized_apply_result,
-            had_post_rejit=had_post_rejit,
-        )
-    baseline_ns = _mean_exec_ns(baseline_programs)
-    post_rejit_ns = _mean_exec_ns(rejit_programs) if had_post_rejit else None
     return {
         "app": app.name,
         "runner": app.runner,
         "selected_workload": app.workload_for("corpus"),
         "status": "error",
         "error": str(error),
-        "baseline_ns": baseline_ns,
-        "post_rejit_ns": post_rejit_ns,
-        "speedup": _speedup(baseline_ns, post_rejit_ns),
-        "program_measurements": program_measurements,
-        "rejit_applied": bool(normalized_apply_result.get("applied")),
+        "baseline": dict(baseline_measurement) if isinstance(baseline_measurement, Mapping) else None,
+        "post_rejit": dict(rejit_measurement) if isinstance(rejit_measurement, Mapping) else None,
+        "rejit_result": dict(apply_result) if isinstance(apply_result, Mapping) else None,
     }
 
 
-def _finalize_app_result(
+def _build_app_ok_result(
     app: AppSpec,
     *,
-    state: CaseLifecycleState,
     baseline_measurement: Mapping[str, object],
     apply_result: Mapping[str, object] | None,
     rejit_measurement: Mapping[str, object] | None,
 ) -> dict[str, object]:
-    prog_ids = [int(value) for value in state.prog_ids if int(value) > 0]
-    live_programs = [dict(program) for program in (state.artifacts.get("programs") or [])]
-    if not live_programs:
-        raise RuntimeError(f"{app.name}: runner lifecycle did not expose any live programs")
-
-    baseline_initial_snapshot = _normalized_stats_snapshot(baseline_measurement.get("initial_stats"))
-    baseline_final_snapshot = _normalized_stats_snapshot(baseline_measurement.get("final_stats"))
-    baseline_phase = _program_phase_stats(baseline_final_snapshot, baseline_initial_snapshot)
-    programs_by_id = _program_stats_by_prog_id(baseline_phase, prog_ids)
-
-    had_post_rejit = rejit_measurement is not None
-    rejit_programs_by_id: dict[str, dict[str, object]] = {}
-    if had_post_rejit:
-        rejit_initial_snapshot = _normalized_stats_snapshot(rejit_measurement.get("initial_stats"))
-        rejit_final_snapshot = _normalized_stats_snapshot(rejit_measurement.get("final_stats"))
-        rejit_phase = _program_phase_stats(rejit_final_snapshot, rejit_initial_snapshot)
-        rejit_programs_by_id = _program_stats_by_prog_id(rejit_phase, prog_ids)
-
-    normalized_apply_result = dict(apply_result or {})
-    apply_error = str(normalized_apply_result.get("error") or "").strip()
-    if not _has_phase_measurement(programs_by_id):
-        raise RuntimeError(
-            f"{app.name}: workload {app.workload_for('corpus')!r} did not execute any target programs during baseline"
-        )
-    if had_post_rejit and not apply_error and not _has_phase_measurement(rejit_programs_by_id):
-        raise RuntimeError(
-            f"{app.name}: workload {app.workload_for('corpus')!r} did not execute any target programs after rejit"
-        )
-    program_measurements = _build_program_measurements(
-        app.name,
-        live_programs,
-        programs_by_id,
-        rejit_programs_by_id,
-        normalized_apply_result,
-        had_post_rejit=had_post_rejit,
-    )
-    baseline_ns = _mean_exec_ns(programs_by_id)
-    post_rejit_ns = _mean_exec_ns(rejit_programs_by_id) if had_post_rejit else None
-    fatal_apply_error = bool(apply_error)
-    status = "error" if fatal_apply_error else "ok"
-    error = apply_error if fatal_apply_error else ""
-
     return {
         "app": app.name,
         "runner": app.runner,
         "selected_workload": app.workload_for("corpus"),
-        "status": status,
-        "error": error,
-        "baseline_ns": baseline_ns,
-        "post_rejit_ns": post_rejit_ns,
-        "speedup": _speedup(baseline_ns, post_rejit_ns),
-        "program_measurements": program_measurements,
-        "rejit_applied": bool(normalized_apply_result.get("applied")),
+        "status": "ok",
+        "error": "",
+        "baseline": dict(baseline_measurement),
+        "post_rejit": dict(rejit_measurement) if isinstance(rejit_measurement, Mapping) else None,
+        "rejit_result": dict(apply_result) if isinstance(apply_result, Mapping) else None,
     }
 
 
@@ -761,8 +344,8 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
     if not daemon_binary.exists():
         raise RuntimeError(f"daemon binary not found: {daemon_binary}")
 
-    workload_seconds = _workload_seconds(args, suite.defaults)
-    samples = _sample_count(args, suite.defaults)
+    workload_seconds = _workload_seconds()
+    samples = _sample_count(args)
     results_by_name: dict[str, dict[str, object]] = {}
     lifecycle_by_app: dict[str, Any] = {}
     completed_apps: set[str] = set()
@@ -781,9 +364,18 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                     except Exception as quiesce_exc:
                         result.error = f"{result.error}; {quiesce_exc}" if result.error else str(quiesce_exc)
 
+                def _before_rejit(session: CorpusAppSession, _: CaseLifecycleState, baseline: Mapping[str, object]) -> LifecycleAbort | None:
+                    del baseline
+                    if not isinstance(session.runner, ScxRunner):
+                        return None
+                    reason = session.runner.live_rejit_skip_reason()
+                    if not reason:
+                        return None
+                    return LifecycleAbort(status="skipped", reason=reason)
+
                 for app in suite.apps:
                     _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
-                    app_workload_seconds = _app_workload_seconds(args, suite.defaults, app)
+                    app_workload_seconds = _app_workload_seconds(args, app)
                     runner: AppRunner | None = None
                     try:
                         before_prog_ids = [int(program.get("id", 0) or 0) for program in programs_after(())]
@@ -800,19 +392,26 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                         sessions.append(session)
                     except Exception as exc:
                         stop_error = ""
+                        quiesce_error = ""
                         if runner is not None:
                             try:
                                 runner.stop()
                             except Exception as stop_exc:
                                 stop_error = str(stop_exc)
+                            try:
+                                wait_for_suite_quiescence()
+                            except Exception as quiesce_exc:
+                                quiesce_error = str(quiesce_exc)
                         error_message = str(exc)
                         if stop_error:
                             error_message = f"{error_message}; stop failed: {stop_error}"
+                        if quiesce_error:
+                            error_message = f"{error_message}; quiesce failed: {quiesce_error}"
                         result = _build_app_error_result(app, error=error_message)
                         results_by_name[app.name] = result
                         completed_apps.add(app.name)
                         _print_progress("app_done", app=app.name, status=result.get("status"),
-                                        error=result.get("error"), program_count=0)
+                                        error=result.get("error"))
                     daemon_error = _daemon_exit_error(daemon_session)
                     if daemon_error is not None: fatal_error = daemon_error; break
 
@@ -828,6 +427,7 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                             samples=samples,
                         ),
                         stop=lambda session, _: session.runner.stop(),
+                        before_rejit=_before_rejit,
                         refresh_sessions=lambda lifecycle_sessions, _phase: _refresh_active_session_programs(lifecycle_sessions),
                         on_session_failure=_on_session_failure,
                     )
@@ -859,32 +459,38 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                 result = _build_app_error_result(
                     session.app,
                     error=error_message,
-                    state=session.state,
                     baseline_measurement=baseline_measurement,
                     apply_result=apply_result,
                     rejit_measurement=rejit_measurement,
                 )
             else:
-                try:
-                    result = _finalize_app_result(
+                apply_error = str(apply_result.get("error") or "").strip() if isinstance(apply_result, Mapping) else ""
+                if apply_error:
+                    result = _build_app_error_result(
                         session.app,
-                        state=session.state,
-                        baseline_measurement=baseline_measurement or {},
+                        error=apply_error,
+                        baseline_measurement=baseline_measurement,
                         apply_result=apply_result,
                         rejit_measurement=rejit_measurement,
                     )
-                except Exception as exc:
+                elif baseline_measurement is None:
                     result = _build_app_error_result(
                         session.app,
-                        error=str(exc),
-                        state=session.state,
+                        error="baseline measurement is missing",
+                        baseline_measurement=baseline_measurement,
+                        apply_result=apply_result,
+                        rejit_measurement=rejit_measurement,
+                    )
+                else:
+                    result = _build_app_ok_result(
+                        session.app,
                         baseline_measurement=baseline_measurement,
                         apply_result=apply_result,
                         rejit_measurement=rejit_measurement,
                     )
             results_by_name[session.app.name] = result; completed_apps.add(session.app.name)
             _print_progress("app_done", app=session.app.name, status=result.get("status"),
-                            error=result.get("error"), program_count=len(result.get("program_measurements") or {}))
+                            error=result.get("error"))
 
         kinsn_metadata = dict(prepared_daemon_session.metadata)
 
@@ -896,7 +502,6 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
         )
         for app in suite.apps
     ]
-    summary = _build_summary(results)
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "manifest": str(suite_path),
@@ -906,8 +511,7 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
         "workload_seconds": workload_seconds,
         "results": results,
         "kinsn_modules": kinsn_metadata,
-        "summary": summary,
-        "status": "ok" if int((summary.get("statuses") or {}).get("error", 0)) == 0 else "error",
+        "status": "error" if any(str(result.get("status") or "error") != "ok" for result in results) else "ok",
     }
     if fatal_error:
         payload["fatal_error"] = fatal_error
@@ -916,7 +520,6 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
 
 def build_run_metadata(
     args: argparse.Namespace,
-    payload: dict[str, object],
     *,
     resolved_samples: int,
     resolved_workload_seconds: float,
@@ -928,7 +531,6 @@ def build_run_metadata(
         "samples": int(resolved_samples),
         "workload_seconds": float(resolved_workload_seconds),
         "kinsn_enabled": not bool(args.no_kinsn),
-        "optimization_summary": payload.get("summary") if isinstance(payload, Mapping) else {},
     }
     metadata.update(benchmark_run_provenance())
     metadata.update(current_process_identity())
@@ -939,8 +541,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     output_json = Path(args.output_json).resolve()
     suite = load_app_suite_from_yaml(Path(args.suite).resolve())
-    resolved_workload_seconds = _workload_seconds(args, suite.defaults)
-    resolved_samples = _sample_count(args, suite.defaults)
+    resolved_workload_seconds = _workload_seconds()
+    resolved_samples = _sample_count(args)
     run_type = derive_run_type(output_json, "vm_corpus")
     started_at = datetime.now(timezone.utc).isoformat()
     progress_payload: dict[str, object] = {
@@ -950,7 +552,6 @@ def main(argv: list[str] | None = None) -> int:
         "workload_seconds": float(resolved_workload_seconds),
         "kinsn_enabled": not bool(args.no_kinsn),
     }
-    metadata_payload: dict[str, object] = progress_payload
 
     def build_artifact_metadata(
         status: str,
@@ -960,7 +561,6 @@ def main(argv: list[str] | None = None) -> int:
     ) -> dict[str, object]:
         metadata = build_run_metadata(
             args,
-            metadata_payload,
             resolved_samples=resolved_samples,
             resolved_workload_seconds=resolved_workload_seconds,
         )
@@ -977,18 +577,12 @@ def main(argv: list[str] | None = None) -> int:
         generated_at=started_at,
         metadata_builder=build_artifact_metadata,
     )
-    artifact_result_json = session.run_dir / "result.json"
-    artifact_result_md = session.run_dir / "result.md"
     session.write(status="running", progress_payload=progress_payload)
 
     try:
         payload = run_suite(args, suite)
+        payload = compact_rejit_results_for_artifact(payload)
         markdown = build_markdown(payload) + "\n"
-        metadata_payload = payload
-        ensure_parent(artifact_result_json)
-        ensure_parent(artifact_result_md)
-        write_json(artifact_result_json, payload)
-        write_text(artifact_result_md, markdown)
         payload_status = str(payload.get("status") or "error").lower()
         error_message = str(payload.get("fatal_error") or "").strip()
         if payload_status == "ok":
@@ -1027,10 +621,6 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0 if payload_status == "ok" else 1
     except Exception as exc:
-        metadata_payload = {
-            "status": "error",
-            "error_message": str(exc),
-        }
         session.write(
             status="error",
             progress_payload={

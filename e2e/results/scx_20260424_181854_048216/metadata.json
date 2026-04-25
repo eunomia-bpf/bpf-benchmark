@@ -1,0 +1,38 @@
+{
+  "case": "scx",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "scx case could not run: scx runner did not expose any live scheduler programs for BPF stats sampling",
+  "generated_at": "2026-04-24T18:19:28.313824+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-24T18:19:28.313822+00:00",
+  "launcher_boot_id": "e97159d8-9372-4a36-b388-f8da2f8c2a26",
+  "launcher_pid": 1719,
+  "launcher_start_ticks": 37772,
+  "policy": {
+    "exclusions": {
+      "struct_ops": [
+        "map_inline",
+        "dce"
+      ]
+    }
+  },
+  "run_type": "scx",
+  "started_at": "2026-04-24T18:18:54.048216+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

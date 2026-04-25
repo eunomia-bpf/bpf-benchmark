@@ -1,0 +1,10 @@
+schema_version: 2
+suite_name: bpftrace_only
+
+apps:
+  - bpftrace/capable
+  - bpftrace/biosnoop
+  - bpftrace/vfsstat
+  - bpftrace/runqlat
+  - bpftrace/tcplife
+  - bpftrace/tcpretrans

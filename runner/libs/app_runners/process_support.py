@@ -6,7 +6,7 @@ import threading
 import time
 from collections import deque
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 from .. import ROOT_DIR, tail_text
 from ..agent import bpftool_prog_show_records, stop_agent, wait_healthy
@@ -24,12 +24,32 @@ def programs_after(
     return programs
 
 
+def _program_id_preview(programs: Sequence[Mapping[str, object]], *, limit: int = 12) -> str:
+    preview = ",".join(str(int(program.get("id", 0) or 0)) for program in programs[:limit])
+    return preview or "<none>"
+
+
+def describe_process_exit(process_name: str, process: Any | None, snapshot: Mapping[str, object]) -> str | None:
+    if process is None:
+        return f"{process_name} process handle is unavailable"
+    returncode = process.poll()
+    if returncode is None:
+        return None
+    combined = "\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or []))
+    details = tail_text(combined, max_lines=40, max_chars=8000)
+    return f"{process_name} exited with code {returncode}" + (f": {details}" if details else "")
+
+
 def wait_until_program_set_stable(
     *,
     before_ids: Sequence[int] = (),
     timeout_s: float,
     stable_window_s: float = 2.0,
     poll_interval_s: float = 0.2,
+    discover_programs: Callable[[], Sequence[Mapping[str, object]]] | None = None,
+    process: Any | None = None,
+    collector_snapshot: Callable[[], Mapping[str, object]] | None = None,
+    process_name: str = "process",
 ) -> list[dict[str, object]]:
     deadline = time.monotonic() + max(0.0, float(timeout_s))
     stable_window = max(0.0, float(stable_window_s))
@@ -37,21 +57,36 @@ def wait_until_program_set_stable(
     last_count = -1
     last_change_at: float | None = None
     last_programs: list[dict[str, object]] = []
+    peak_programs: list[dict[str, object]] = []
     while True:
         now = time.monotonic()
-        programs = programs_after(before_ids)
+        raw_programs = programs_after(before_ids) if discover_programs is None else discover_programs()
+        programs = [dict(program) for program in raw_programs]
         last_programs = [dict(program) for program in programs]
+        if len(programs) > len(peak_programs):
+            peak_programs = [dict(program) for program in programs]
         if len(programs) != last_count:
             last_count = len(programs)
             last_change_at = now
-        elif programs and last_change_at is not None and (now - last_change_at) >= stable_window:
+        if process is not None:
+            snapshot = {} if collector_snapshot is None else dict(collector_snapshot())
+            if exit_reason := describe_process_exit(process_name, process, snapshot):
+                raise RuntimeError(
+                    f"{exit_reason} before BPF program set stabilized "
+                    f"(timeout_s={timeout_s}, last_program_count={len(last_programs)}, "
+                    f"last_program_ids={_program_id_preview(last_programs)}, "
+                    f"peak_program_count={len(peak_programs)}, "
+                    f"peak_program_ids={_program_id_preview(peak_programs)})"
+                )
+        if programs and last_change_at is not None and (now - last_change_at) >= stable_window:
             return last_programs
         if now >= deadline:
-            preview = ",".join(str(int(program.get("id", 0) or 0)) for program in last_programs[:12]) or "<none>"
             raise RuntimeError(
                 "BPF program set did not stabilize before timeout "
                 f"(timeout_s={timeout_s}, last_program_count={len(last_programs)}, "
-                f"last_program_ids={preview})"
+                f"last_program_ids={_program_id_preview(last_programs)}, "
+                f"peak_program_count={len(peak_programs)}, "
+                f"peak_program_ids={_program_id_preview(peak_programs)})"
             )
         time.sleep(min(poll_interval, max(0.0, deadline - now)))
 
@@ -193,7 +228,17 @@ class ManagedProcessSession:
             )
             self.close()
             raise RuntimeError(f"native app did not attach BPF programs within {self.load_timeout_s}s: {details}")
-        self.programs = wait_until_program_set_stable(before_ids=self.before_ids, timeout_s=self.load_timeout_s)
+        try:
+            self.programs = wait_until_program_set_stable(
+                before_ids=self.before_ids,
+                timeout_s=self.load_timeout_s,
+                process=self.process,
+                collector_snapshot=self.collector_snapshot,
+                process_name="native app",
+            )
+        except Exception:
+            self.close()
+            raise
         if not self.programs:
             self.close()
             raise RuntimeError("native app became healthy but no BPF programs were discovered")

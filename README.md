@@ -64,9 +64,8 @@ make vm-micro                        # full micro suite in VM
 make vm-micro BENCH="simple bitcount"  # subset of benchmarks
 make vm-micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
 make vm-corpus                       # corpus benchmark in VM
-make vm-corpus FILTERS=scx VM_CORPUS_WORKLOAD_SECONDS=10
+make vm-corpus SAMPLES=5
 make vm-e2e                          # E2E benchmarks in VM
-make vm-e2e E2E_CASE=scx E2E_SMOKE=1
 make aws-arm64-test                  # AWS ARM64 correctness path
 make aws-arm64-benchmark AWS_ARM64_BENCH_MODE=micro
 make aws-x86-test                    # AWS x86 correctness path

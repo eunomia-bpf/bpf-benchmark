@@ -10,6 +10,10 @@ rm -rf "${POLICY_DIR}"
 mkdir -p "${POLICY_DIR}"
 
 count=0
+# Excluded from the startup bulk-load pack after VM verification on kernel 7.0-rc2:
+# - list-syscalls-tracepoint.yaml: "list 'dups' argument type is not syscall64"
+# - process-credentials/process-creds-changed.yaml: "call \"override_creds\": not found"
+# - stack_traces.yaml: "call \"kfree_skb_reason\": not found"
 while IFS= read -r relpath; do
     [ -n "${relpath}" ] || continue
     target="${POLICY_DIR}/${relpath#examples/tracingpolicy/}"
@@ -23,14 +27,11 @@ examples/tracingpolicy/datagram_518.yaml
 examples/tracingpolicy/fd_install_cap_changes.yaml
 examples/tracingpolicy/filename_monitoring.yaml
 examples/tracingpolicy/host-changes/monitor-kernel-modules.yaml
-examples/tracingpolicy/list-syscalls-tracepoint.yaml
-examples/tracingpolicy/process-credentials/process-creds-changed.yaml
 examples/tracingpolicy/process-exec/process-exec-elf-begin.yaml
 examples/tracingpolicy/raw_syscalls.yaml
 examples/tracingpolicy/rawtp.yaml
 examples/tracingpolicy/security-socket-connect.yaml
 examples/tracingpolicy/security_inode_follow_link.yaml
-examples/tracingpolicy/stack_traces.yaml
 examples/tracingpolicy/sys_mount.yaml
 examples/tracingpolicy/tcp-accept.yaml
 examples/tracingpolicy/tcp-connect-with-selectors.yaml

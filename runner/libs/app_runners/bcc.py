@@ -13,15 +13,13 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Mapping, Sequence
 
-import yaml
-
 from .. import ROOT_DIR, tail_text, which
+from ..benchmark_catalog import BCC_TOOL_SPECS
 from ..agent import bpftool_prog_show_records, stop_agent
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
 from .process_support import wait_until_program_set_stable
 
-DEFAULT_CONFIG = ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml"
 DEFAULT_ATTACH_TIMEOUT_SECONDS = 15
 KHEADERS_READY_MARKER = ".bpfrejit-kheaders-ready"
 BCC_COMPAT_CFLAGS_ENV = "BPFREJIT_BCC_EXTRA_CFLAGS"
@@ -164,12 +162,6 @@ def _tool_binary_names(tool_name: str) -> tuple[str, ...]:
     return (f"{normalized}-bpfcc", normalized)
 
 
-@dataclass(frozen=True)
-class BCCWorkloadSpec:
-    workload_spec: Mapping[str, object]
-    tool_args: tuple[str, ...]
-
-
 @dataclass
 class ToolProcessSession:
     process: subprocess.Popen[str]
@@ -209,28 +201,11 @@ def _drain_stream(stream: io.TextIOBase, capture: _TailCapture) -> None:
 
 
 @lru_cache(maxsize=1)
-def _bcc_tool_specs() -> dict[str, BCCWorkloadSpec]:
-    payload = yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping):
-        raise RuntimeError(f"BCC config must be a mapping: {DEFAULT_CONFIG}")
-    tools = payload.get("tools")
-    if not isinstance(tools, list):
-        raise RuntimeError(f"BCC config field 'tools' must be a sequence: {DEFAULT_CONFIG}")
-    specs: dict[str, BCCWorkloadSpec] = {}
-    for entry in tools:
-        if not isinstance(entry, Mapping):
-            raise RuntimeError(f"BCC config field 'tools' contains a non-mapping entry: {DEFAULT_CONFIG}")
-        name = str(entry.get("name") or "").strip()
-        if not name:
-            raise RuntimeError(f"BCC config field 'tools' contains an entry without a name: {DEFAULT_CONFIG}")
-        workload_spec = entry.get("workload_spec")
-        if not isinstance(workload_spec, Mapping):
-            raise RuntimeError(f"BCC config field 'tools[{name}].workload_spec' must be a mapping: {DEFAULT_CONFIG}")
-        specs[name] = BCCWorkloadSpec(
-            workload_spec={str(key): value for key, value in workload_spec.items()},
-            tool_args=tuple(str(arg) for arg in entry.get("tool_args", []) if str(arg).strip()),
-        )
-    return specs
+def _bcc_tool_specs() -> dict[str, tuple[dict[str, object], tuple[str, ...]]]:
+    return {
+        spec.name: (dict(spec.workload_spec), tuple(str(arg) for arg in spec.tool_args))
+        for spec in BCC_TOOL_SPECS
+    }
 
 
 def inspect_bcc_setup() -> dict[str, object]:

@@ -1,0 +1,38 @@
+{
+  "case": "scx",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "scx case could not run: scx runner did not expose any live scheduler programs for BPF stats sampling; state='disabled'; ops=[]; bpftool_preview=3:cgroup_device:<unnamed>; runner_output=   DOM[00] load=  7.34 imbal=  +0.00 delta=  +0.00 | ###### Fri, 24 Apr 2026 22:45:00 +0000, load balance @   -70.0ms ###### | cpu= 100.00 load=    7.37 mig=0 task_err=0 time_used= 0.1ms | tot=    277 sync_prev_idle= 0.00 wsync= 0.00 | prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00 | dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00 | dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00 | kick_greedy= 0.00 rep= 0.00 | dl_clamp=66.79 dl_preset=33.21 | slice=1000us | direct_greedy_cpus=0 |   kick_greedy_cpus=f |   NODE[00] load=  7.37 imbal=  +0.00 delta=  +0.00 |    DOM[00] load=  7.37 imbal=  +0.00 delta=  +0.00 | ###### Fri, 24 Apr 2026 22:45:01 +0000, load balance @ -1080.0ms ###### | cpu= 100.00 load=    7.37 mig=0 task_err=0 time_used= 0.1ms | tot=    256 sync_prev_idle= 0.00 wsync= 0.00 | prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00 | dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00 | dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00 | kick_greedy= 0.00 rep= 0.00 | dl_clamp=64.84 dl_preset=35.16 | slice=1000us | direct_greedy_cpus=0 |   kick_greedy_cpus=f |   NODE[00] load=  7.37 imbal=  +0.00 delta=  +0.00 |    DOM[00] load=  7.37 imbal=  +0.00 delta=  +0.00 | ###### Fri, 24 Apr 2026 22:45:02 +0000, load balance @   -70.0ms ###### | cpu=  98.76 load=    7.39 mig=0 task_err=0 time_used= 0.1ms | tot=    261 sync_prev_idle= 0.00 wsync= 0.00 | prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00 | dir= 0.38 dir_greedy= 0.00 dir_greedy_far= 0.00 | dsq=99.62 greedy_local= 0.00 greedy_xnuma= 0.00 | kick_greedy= 0.00 rep= 0.00 | dl_clamp=72.03 dl_preset=27.59 | slice=1000us | direct_greedy_cpus=0 |   kick_greedy_cpus=f |   NODE[00] load=  7.39 imbal=  +0.00 delta=  +0.00 |    DOM[00] load=  7.39 imbal=  +0.00 delta=  +0.00",
+  "generated_at": "2026-04-24T22:45:06.512085+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-24T22:45:06.512083+00:00",
+  "launcher_boot_id": "f07b5702-6761-43b6-b2d6-0a4a4f684408",
+  "launcher_pid": 1718,
+  "launcher_start_ticks": 40292,
+  "policy": {
+    "exclusions": {
+      "struct_ops": [
+        "map_inline",
+        "dce"
+      ]
+    }
+  },
+  "run_type": "scx",
+  "started_at": "2026-04-24T22:44:32.606677+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

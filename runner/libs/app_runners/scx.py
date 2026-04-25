@@ -84,12 +84,21 @@ def _bpftool_programs() -> list[dict[str, object]]:
     return programs
 
 
+def _scheduler_program_prefix(binary: Path) -> str:
+    name = binary.stem.strip()
+    if name.startswith("scx_"):
+        name = name[4:]
+    return f"{name}_" if name else ""
+
+
 class ScxSchedulerSession(AgentSession):
     def __init__(self, binary: Path, extra_args: Sequence[str], load_timeout: int) -> None:
         super().__init__(load_timeout)
         self.binary = binary
         self.extra_args = list(extra_args)
         self.before_ids: set[int] = set()
+        self.scheduler_program_names: set[str] = set()
+        self.program_prefix = _scheduler_program_prefix(binary)
 
     def __enter__(self) -> "ScxSchedulerSession":
         command_text = " ".join(["set -euo pipefail;", "ulimit -l unlimited;", "exec",
@@ -115,13 +124,34 @@ class ScxSchedulerSession(AgentSession):
             self.close()
             raise RuntimeError(f"scx_rusty did not become healthy: {details}")
 
-        self.programs = wait_until_program_set_stable(before_ids=self.before_ids, timeout_s=self.load_timeout)
+        try:
+            self.programs = wait_until_program_set_stable(
+                before_ids=self.before_ids,
+                timeout_s=self.load_timeout,
+                process=self.process,
+                collector_snapshot=self.collector_snapshot,
+                process_name="scx_rusty",
+            )
+        except Exception:
+            self.close()
+            raise
         if not self.programs:
             self.close()
             raise RuntimeError("scx_rusty became healthy but no BPF programs were discovered")
+        self._remember_scheduler_programs(self.programs)
         return self
 
     def _discover_loaded_programs(self) -> list[dict[str, object]]:
+        if self.program_prefix:
+            programs = [
+                dict(program)
+                for program in _bpftool_programs()
+                if str(program.get("type") or "").strip() == "struct_ops"
+                and _program_name(program).startswith(self.program_prefix)
+            ]
+            programs.sort(key=_program_id)
+            if programs:
+                return programs
         programs = [
             dict(program)
             for program in _bpftool_programs()
@@ -130,11 +160,30 @@ class ScxSchedulerSession(AgentSession):
         programs.sort(key=_program_id)
         return programs
 
+    def _remember_scheduler_programs(self, programs: Sequence[Mapping[str, object]]) -> None:
+        self.scheduler_program_names.update(
+            name
+            for program in programs
+            if (name := _program_name(program))
+        )
+
+    def _discover_live_scheduler_programs(self) -> list[dict[str, object]]:
+        if not self.scheduler_program_names:
+            return self._discover_loaded_programs()
+
+        live_programs: list[dict[str, object]] = []
+        for program in _bpftool_programs():
+            if _program_name(program) not in self.scheduler_program_names:
+                continue
+            live_programs.append(dict(program))
+        live_programs.sort(key=_program_id)
+        return live_programs
+
     def collector_snapshot(self) -> dict[str, object]:
         return self.collector.snapshot()
 
     def refresh_programs(self) -> list[dict[str, object]]:
-        refreshed = self._discover_loaded_programs()
+        refreshed = self._discover_live_scheduler_programs()
         self.programs = refreshed
         return [dict(program) for program in self.programs]
 
@@ -322,8 +371,18 @@ class ScxRunner(AppRunner):
     def refresh_live_programs(self) -> list[dict[str, object]]:
         if self.session is None:
             raise RuntimeError("ScxRunner is not running")
-        self.programs = self.session.refresh_programs()
+        refreshed = self.session.refresh_programs()
+        if refreshed:
+            self.programs = refreshed
         return [dict(program) for program in self.programs]
+
+    def live_rejit_skip_reason(self) -> str | None:
+        if any(str(program.get("type") or "").strip() == "struct_ops" for program in self.programs):
+            return (
+                "live ReJIT for sched_ext struct_ops callbacks is currently unsupported on "
+                "the benchmark runtime; skipping post-ReJIT phase"
+            )
+        return None
 
     def start(self) -> list[int]:
         if self.session is not None:

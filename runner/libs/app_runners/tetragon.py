@@ -17,7 +17,7 @@ from ..workload import (
     run_tetragon_exec_connect_mix_workload,
 )
 from .base import AppRunner
-from .process_support import AgentSession, wait_until_program_set_stable
+from .process_support import AgentSession, describe_process_exit, wait_until_program_set_stable
 from .setup_support import missing_required_commands, pick_host_executable, repo_artifact_root
 
 
@@ -54,7 +54,19 @@ class TetragonAgentSession(AgentSession):
             ce = self._cleanup_err()
             msg = f"Tetragon failed to become healthy within {self.load_timeout}s: {details}"
             raise RuntimeError(msg if ce is None else f"{msg}\nCleanup error while stopping Tetragon: {ce}")
-        self.programs = wait_until_program_set_stable(before_ids=self.before_ids, timeout_s=self.load_timeout)
+        try:
+            self.programs = wait_until_program_set_stable(
+                before_ids=self.before_ids,
+                timeout_s=self.load_timeout,
+                process=self.process,
+                collector_snapshot=self.collector_snapshot,
+                process_name="Tetragon",
+            )
+        except Exception as exc:
+            ce = self._cleanup_err()
+            if ce is None:
+                raise
+            raise RuntimeError(f"{exc}\nCleanup error while stopping Tetragon: {ce}") from exc
         if not self.programs:
             ce = self._cleanup_err()
             msg = "Tetragon became healthy but no new BPF programs were found"
@@ -78,12 +90,7 @@ class TetragonAgentSession(AgentSession):
 
 
 def describe_agent_exit(agent_name: str, process: Any | None, snapshot: Mapping[str, object]) -> str | None:
-    if process is None: return f"{agent_name} process handle is unavailable"
-    returncode = process.poll()
-    if returncode is None: return None
-    combined = "\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or []))
-    details = tail_text(combined, max_lines=40, max_chars=8000)
-    return f"{agent_name} exited with code {returncode}" + (f": {details}" if details else "")
+    return describe_process_exit(agent_name, process, snapshot)
 
 
 def inspect_tetragon_setup() -> dict[str, object]:
@@ -130,7 +137,7 @@ def run_tetragon_workload(spec: Mapping[str, object], duration_s: int) -> Worklo
     raise RuntimeError(f"unsupported workload kind: {kind}")
 
 
-DEFAULT_LOAD_TIMEOUT_S = 20
+DEFAULT_LOAD_TIMEOUT_S = 45
 DEFAULT_POLICY_DIR = ROOT_DIR / "e2e" / "cases" / "tetragon" / "policies"
 
 

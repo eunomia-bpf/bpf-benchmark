@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import shlex
 from functools import partial
 from pathlib import Path
 
@@ -40,17 +39,6 @@ def join_csv(tokens: list[str]) -> str:
     return ",".join(token for token in tokens if token)
 
 
-def _append_value(args: list[str], option: str, value: str) -> None:
-    if str(value).strip():
-        args.extend([option, str(value).strip()])
-
-
-def _append_shell_args(args: list[str], value: str) -> None:
-    if str(value).strip():
-        args.append("--")
-        args.extend(shlex.split(str(value)))
-
-
 def _benchmark_defaults(target_name: str, env: dict[str, str]) -> tuple[str, str, str]:
     prefix = _aws_prefix(target_name)
     if prefix:
@@ -84,24 +72,12 @@ def suite_args_from_env(
         return args
 
     if suite_name == "corpus":
-        if prefix:
-            workload_seconds = _prefixed_env(values, prefix, "CORPUS_WORKLOAD_SECONDS")
-            extra_args = _prefixed_env(values, prefix, "CORPUS_ARGS")
-        else:
+        if not prefix:
             samples = _env(values, "SAMPLES") or _env(values, "VM_CORPUS_SAMPLES", MICRO_BENCHMARK_DEFAULT_SAMPLES)
-            workload_seconds = _env(values, "VM_CORPUS_WORKLOAD_SECONDS")
-            extra_args = _env(values, "VM_CORPUS_ARGS")
         args.extend(["--samples", samples])
-        _append_value(args, "--corpus-workload-seconds", workload_seconds)
-        _append_shell_args(args, extra_args)
         return args
 
     if suite_name == "e2e":
-        if prefix:
-            extra_args = _prefixed_env(values, prefix, "E2E_ARGS")
-        else:
-            extra_args = _env(values, "E2E_ARGS")
-        _append_shell_args(args, extra_args)
         return args
 
     if suite_name == "test":

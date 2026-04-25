@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import shlex
 import shutil
 import sys
 from functools import partial
@@ -34,29 +33,19 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     add_common_args(parser)
     parser.set_defaults(workspace=str(ROOT_DIR), target_name="local")
+    parser.add_argument(
+        "--case",
+        choices=("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran", "all"),
+        default="all",
+        help="Run one e2e case instead of the full suite.",
+    )
     parser.add_argument("--daemon-binary", default="", help="Override the bpfrejit-daemon binary path.")
     parser.add_argument("--native-repos", default="", help="Comma-separated native repo artifacts to validate.")
     parser.add_argument("--scx-packages", default="", help="Comma-separated SCX package artifacts to validate.")
-    parser.add_argument(
-        "--e2e-argv",
-        action="append",
-        dest="e2e_argv_values",
-        default=None,
-        help="Extra argument token or shell-quoted argument string passed to e2e/driver.py; repeatable.",
-    )
-    parser.add_argument("e2e_argv_remainder", nargs=argparse.REMAINDER, help=argparse.SUPPRESS)
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
     args.native_repos = csv_tokens(args.native_repos)
     args.scx_packages = csv_tokens(args.scx_packages)
-    e2e_argv: list[str] = []
-    for value in args.e2e_argv_values or []:
-        e2e_argv.extend(shlex.split(str(value)))
-    remainder = list(args.e2e_argv_remainder or [])
-    if remainder and remainder[0] == "--":
-        remainder = remainder[1:]
-    e2e_argv.extend(remainder)
-    args.e2e_argv = e2e_argv
     return args
 
 
@@ -65,9 +54,7 @@ def _runtime_env(workspace: Path, args: argparse.Namespace) -> dict[str, str]:
 
 
 def _e2e_driver_argv(args: argparse.Namespace, daemon_binary: Path) -> list[str]:
-    argv = ["all", "--daemon", str(daemon_binary)]
-    argv.extend(args.e2e_argv)
-    return argv
+    return [args.case, "--daemon", str(daemon_binary)]
 
 
 def _run_e2e_case(workspace: Path, args: argparse.Namespace, env: dict[str, str], daemon_binary: Path, python_bin: str) -> None:

@@ -1,147 +1,24 @@
-schema_version: 1
+schema_version: 2
 suite_name: macro_apps
-defaults:
-  duration_s: 1
-  samples: 30
 
 apps:
-  - name: bcc/capable
-    runner: bcc
-    workload:
-      corpus: exec_storm
-      e2e: exec_storm
-    tool: capable
-
-  - name: bcc/execsnoop
-    runner: bcc
-    workload:
-      corpus: exec_storm
-      e2e: exec_storm
-    tool: execsnoop
-
-  - name: bcc/bindsnoop
-    runner: bcc
-    workload:
-      corpus: bind_storm
-      e2e: bind_storm
-    tool: bindsnoop
-
-  - name: bcc/biosnoop
-    runner: bcc
-    workload:
-      corpus: block_io
-      e2e: block_io
-    tool: biosnoop
-    duration_s: 5
-
-  - name: bcc/vfsstat
-    runner: bcc
-    workload:
-      corpus: vfs_create_fsync_exact
-      e2e: vfs_create_fsync_exact
-    tool: vfsstat
-
-  - name: bcc/opensnoop
-    runner: bcc
-    workload:
-      corpus: open_family_storm
-      e2e: open_family_storm
-    tool: opensnoop
-
-  - name: bcc/syscount
-    runner: bcc
-    workload:
-      corpus: file_open_storm
-      e2e: file_open_storm
-    tool: syscount
-
-  - name: bcc/tcpconnect
-    runner: bcc
-    workload:
-      corpus: network
-      e2e: network
-    tool: tcpconnect
-
-  - name: bcc/tcplife
-    runner: bcc
-    workload:
-      corpus: network
-      e2e: network
-    tool: tcplife
-
-  - name: bcc/runqlat
-    runner: bcc
-    workload:
-      corpus: hackbench
-      e2e: hackbench
-    tool: runqlat
-
-  - name: scx/rusty
-    runner: scx
-    workload:
-      corpus: hackbench
-      e2e: hackbench
-    scheduler: rusty
-
-  - name: tetragon/default
-    runner: tetragon
-    workload:
-      corpus: tetragon_exec_connect_mix
-      e2e: exec_storm
-
-  - name: katran
-    runner: katran
-    workload:
-      corpus: test_run
-      e2e: network
-
-  - name: tracee/default
-    runner: tracee
-    workload:
-      corpus: tracee_system_edge_mix
-      e2e: tracee_default
-    duration_s: 5
-
-  - name: bpftrace/capable
-    runner: bpftrace
-    workload:
-      corpus: exec_storm
-      e2e: exec_storm
-    script: capable
-
-  - name: bpftrace/biosnoop
-    runner: bpftrace
-    workload:
-      corpus: block_io
-      e2e: block_io
-    script: biosnoop
-    duration_s: 5
-
-  - name: bpftrace/vfsstat
-    runner: bpftrace
-    workload:
-      corpus: vfs_create_write_fsync
-      e2e: vfs_create_write_fsync
-    script: vfsstat
-
-  - name: bpftrace/runqlat
-    runner: bpftrace
-    workload:
-      corpus: hackbench
-      e2e: hackbench
-    script: runqlat
-
-  - name: bpftrace/tcplife
-    runner: bpftrace
-    workload:
-      corpus: network
-      e2e: network
-    script: tcplife
-
-  - name: bpftrace/tcpretrans
-    runner: bpftrace
-    workload:
-      corpus: tcp_retransmit
-      e2e: tcp_retransmit
-    script: tcpretrans
-    duration_s: 5
+  - bcc/capable
+  - bcc/execsnoop
+  - bcc/bindsnoop
+  - bcc/biosnoop
+  - bcc/vfsstat
+  - bcc/opensnoop
+  - bcc/syscount
+  - bcc/tcpconnect
+  - bcc/tcplife
+  - bcc/runqlat
+  - scx/rusty
+  - tetragon/default
+  - katran
+  - tracee/default
+  - bpftrace/capable
+  - bpftrace/biosnoop
+  - bpftrace/vfsstat
+  - bpftrace/runqlat
+  - bpftrace/tcplife
+  - bpftrace/tcpretrans

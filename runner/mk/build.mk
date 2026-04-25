@@ -256,6 +256,8 @@ $(MICRO_PROGRAM_OBJECTS) &: $(MICRO_PROGRAM_SOURCE_FILES) $(BUILD_RULE_FILES)
 	make -C "$(MICRO_PROGRAM_SOURCE_ROOT)" OUTPUT_DIR="$(MICRO_PROGRAM_OUTPUT_ROOT)" all
 	for path in $(MICRO_PROGRAM_OBJECTS); do test -f "$$path"; done
 
+# GCC 13 can ICE while compiling grpc's tcp_client_posix.cc on Ubuntu 24.04.
+# Build Katran's C/C++ userspace stack with clang instead.
 $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES)
 	repo_root="$(REPOS_DIR)/katran"; \
 	build_root="$(KATRAN_BUILD_ROOT)"; \
@@ -267,7 +269,7 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES)
 	mkdir -p "$$install_root/bin" "$$install_root/lib" "$$install_root/lib64" "$$bpf_root" "$$build_root"; \
 	printf '%s\n' 'set(CMAKE_CXX_COMPILE_OBJECT "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -std=gnu++20 -o <OBJECT> -c <SOURCE>")' > "$$override_file"; \
 	cd "$$repo_root" && env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR \
-		CC=gcc CXX=g++ AR=ar RANLIB=ranlib \
+		CC=clang CXX=clang++ AR=ar RANLIB=ranlib \
 		NCPUS="$(JOBS)" \
 		KATRAN_SKIP_SYSTEM_PACKAGES=1 BUILD_EXAMPLE_GRPC=1 BUILD_DIR="$$build_root" INSTALL_DIR="$$install_root" INSTALL_DEPS_ONLY=1 ./build_katran.sh; \
 	for cmake_file in "$$install_root"/lib/cmake/folly/folly-targets*.cmake "$$install_root"/lib64/cmake/folly/folly-targets*.cmake; do \
@@ -281,7 +283,7 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES)
 	ln -sfn "$$install_root/bin/grpc_cpp_plugin" "$$install_root/grpc/_build/grpc_cpp_plugin"; \
 	rm -rf "$$build_root/build"; \
 	env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR CMAKE_BUILD_EXAMPLE_GRPC=1 \
-		CC=gcc CXX=g++ AR=ar RANLIB=ranlib \
+		CC=clang CXX=clang++ AR=ar RANLIB=ranlib \
 		cmake -S "$$repo_root" -B "$$build_root/build" \
 			-DCMAKE_PREFIX_PATH="$$install_root" \
 			-DCMAKE_INSTALL_PREFIX="$$install_root" \
@@ -296,8 +298,8 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES)
 			-DGFLAGS_NOTHREADS=OFF \
 			-DCMAKE_CXX_STANDARD=20 \
 			-DCMAKE_CXX_FLAGS="-fpermissive" \
-			-DCMAKE_C_COMPILER=gcc \
-			-DCMAKE_CXX_COMPILER=g++ \
+			-DCMAKE_C_COMPILER=clang \
+			-DCMAKE_CXX_COMPILER=clang++ \
 			-DCMAKE_AR=/usr/bin/ar \
 			-DCMAKE_RANLIB=/usr/bin/ranlib \
 			-DCMAKE_USER_MAKE_RULES_OVERRIDE_CXX="$$override_file" \

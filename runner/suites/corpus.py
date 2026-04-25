@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import shlex
 import shutil
 import sys
 from functools import partial
@@ -40,29 +39,12 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--suite", default="", help="Path to the corpus app suite YAML manifest.")
     parser.add_argument("--samples", type=nonnegative_int, required=True, help="Measured samples per corpus app; 0 uses suite defaults.")
     parser.add_argument("--output-json", default="", help="JSON output path.")
-    parser.add_argument("--corpus-workload-seconds", default="", help="Override corpus workload duration.")
     parser.add_argument("--native-repos", default="", help="Comma-separated native repo artifacts to validate.")
     parser.add_argument("--scx-packages", default="", help="Comma-separated SCX package artifacts to validate.")
-    parser.add_argument(
-        "--corpus-argv",
-        action="append",
-        dest="corpus_argv_values",
-        default=None,
-        help="Extra argument token or shell-quoted argument string passed to corpus/driver.py; repeatable.",
-    )
-    parser.add_argument("corpus_argv_remainder", nargs=argparse.REMAINDER, help=argparse.SUPPRESS)
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
     args.native_repos = csv_tokens(args.native_repos)
     args.scx_packages = csv_tokens(args.scx_packages)
-    corpus_argv: list[str] = []
-    for value in args.corpus_argv_values or []:
-        corpus_argv.extend(shlex.split(str(value)))
-    remainder = list(args.corpus_argv_remainder or [])
-    if remainder and remainder[0] == "--":
-        remainder = remainder[1:]
-    corpus_argv.extend(remainder)
-    args.corpus_argv = corpus_argv
     return args
 
 
@@ -82,9 +64,6 @@ def _corpus_driver_argv(workspace: Path, args: argparse.Namespace, daemon_binary
     ]
     if args.suite:
         argv.extend(["--suite", str(resolve_workspace_path(workspace, args.suite))])
-    if args.corpus_workload_seconds:
-        argv.extend(["--workload-seconds", str(args.corpus_workload_seconds)])
-    argv.extend(args.corpus_argv)
     return argv
 
 

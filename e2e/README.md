@@ -9,8 +9,8 @@ Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `bcc`, `scx`, and 
 ## Layout
 
 - `driver.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, `scx`, `bcc`, and `katran`
-- `cases/`: per-system case logic, configs, and assets
-- `../runner/libs/`: shared helpers for agent lifecycle, workload generation, metrics, VM runs, and REJIT
+- `cases/`: per-system case logic and assets
+- `../runner/libs/`: shared helpers for agent lifecycle, workload generation, BPF stats sampling, VM runs, and REJIT
 - `results/`: timestamped run-artifact directories
 
 ## Shared Prerequisites
@@ -23,14 +23,14 @@ Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `bcc`, `scx`, and 
   `python3 e2e/driver.py ...` execution assumes the required runtime, daemon,
   and repo-artifact outputs already exist at their canonical paths.
 
-Results live under `e2e/results/<run_type>_<timestamp>/`. `metadata.json` is the canonical run summary; `details/` contains `result.json`, `result.md`, optional `report.md`, and any retained per-case payloads.
+Results live under `e2e/results/<run_type>_<timestamp>/`. `metadata.json` is the canonical run summary; `details/` contains `progress.json`, `result.json`, `result.md`, and any retained per-case payloads.
 
 ## Case Notes
 
 ### Tracee
 
 - Setup is Python-only and validates the bundled `tracee` binary plus required workload tools such as `stress-ng`, `fio`, `wrk`, and `hackbench`
-- Uses `e2e/cases/tracee/config.yaml` plus `.cache/repo-artifacts/<arch>/tracee/tracee.bpf.o`
+- Uses the fixed in-code Tracee benchmark plan plus `.cache/repo-artifacts/<arch>/tracee/tracee.bpf.o`
 - Supports `--vm` and `--kernel`
 - Smoke example: `python3 e2e/driver.py tracee --smoke`
 

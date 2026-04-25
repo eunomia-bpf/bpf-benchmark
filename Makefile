@@ -30,11 +30,8 @@ AWS_X86_BENCH_MODE        ?=
 
 # Tunables
 BZIMAGE ?= $(X86_RUNTIME_KERNEL_IMAGE)
-E2E_ARGS ?=
-VM_CORPUS_ARGS ?=
 TEST_MODE ?= test
 VM_CORPUS_SAMPLES ?= 1
-VM_CORPUS_WORKLOAD_SECONDS ?=
 VM_TEST_TIMEOUT ?= 3600
 VM_MICRO_TIMEOUT ?= 7200
 VM_CORPUS_TIMEOUT ?= 7200
@@ -60,12 +57,12 @@ export FUZZ_ROUNDS SCX_PROG_SHOW_RACE_MODE SCX_PROG_SHOW_RACE_ITERATIONS SCX_PRO
 # Benchmark args
 ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT := $(or $(findstring command line,$(origin SAMPLES)),$(findstring environment,$(origin SAMPLES)),$(findstring override,$(origin SAMPLES)))
 ROOT_VM_CORPUS_SAMPLES_VALUE := $(if $(strip $(ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT)),$(SAMPLES),$(VM_CORPUS_SAMPLES))
-VM_CORPUS_SUITE_ARGS = --samples "$(ROOT_VM_CORPUS_SAMPLES_VALUE)" $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),--corpus-workload-seconds "$(VM_CORPUS_WORKLOAD_SECONDS)",) $(if $(strip $(VM_CORPUS_ARGS)),-- $(VM_CORPUS_ARGS),)
-VM_E2E_SUITE_ARGS = $(if $(strip $(E2E_ARGS)),-- $(E2E_ARGS),)
+VM_CORPUS_SUITE_ARGS = --samples "$(ROOT_VM_CORPUS_SAMPLES_VALUE)"
+VM_E2E_SUITE_ARGS =
 VM_TEST_COMMON_SUITE_ARGS = --fuzz-rounds "$(FUZZ_ROUNDS)" --scx-prog-show-race-mode "$(SCX_PROG_SHOW_RACE_MODE)" --scx-prog-show-race-iterations "$(SCX_PROG_SHOW_RACE_ITERATIONS)" --scx-prog-show-race-load-timeout "$(SCX_PROG_SHOW_RACE_LOAD_TIMEOUT)"
 VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 
-.PHONY: check validate \
+.PHONY: validate \
 	vm-selftest vm-negative-test vm-test vm-micro vm-corpus vm-e2e vm-all \
 	aws-e2e aws-corpus \
 	aws-arm64-test aws-arm64-benchmark aws-arm64-terminate \
@@ -74,29 +71,19 @@ VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 
 help:
 	@echo "Canonical run targets:"
-	@echo "  VM x86:   vm-selftest vm-negative-test vm-test vm-micro vm-corpus vm-e2e vm-all validate"
+	@echo "  VM x86:   vm-selftest vm-negative-test vm-test vm-micro vm-corpus vm-e2e vm-all"
 	@echo "  AWS ARM:  aws-arm64-test aws-arm64-benchmark aws-arm64-terminate"
 	@echo "  AWS x86:  aws-x86-test aws-x86-benchmark aws-x86-terminate"
 	@echo "Params: vm-micro overrides use SAMPLES/WARMUPS/INNER_REPEAT/BENCH; defaults come from runner.libs.suite_args"
-	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES) VM_CORPUS_WORKLOAD_SECONDS=$(VM_CORPUS_WORKLOAD_SECONDS) VM_CORPUS_ARGS=\"--no-kinsn\""
-	@echo "        vm-e2e E2E_ARGS=\"--no-kinsn\""
+	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES)"
+	@echo "        vm-e2e"
 	@echo "        aws-arm64-test/aws-arm64-benchmark AWS_ARM64_REGION=<region> AWS_ARM64_PROFILE=<profile> AWS_ARM64_ROOT_VOLUME_GB=<override>"
 	@echo "        aws-arm64-test AWS_ARM64_TEST_MODE=<selftest|negative|test>"
 	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=<micro|corpus|e2e>"
 	@echo "        aws-x86-test AWS_X86_REGION=<region> AWS_X86_PROFILE=<profile> AWS_X86_TEST_MODE=<selftest|negative|test>"
 	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=<micro|corpus|e2e>"
 
-check:
-	find corpus runner e2e -type f -name '*.py' \
-		-not -path 'runner/repos/*' \
-		-not -path 'runner/build-*/*' \
-		-not -path 'corpus/results/*' \
-		-not -path 'e2e/results/*' \
-		-not -path '*/__pycache__/*' \
-		-exec $(PYTHON) -m py_compile {} +
-
 validate:
-	$(MAKE) check
 	$(MAKE) vm-test
 
 vm-selftest:

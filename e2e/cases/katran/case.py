@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,29 +18,11 @@ from runner.libs.app_runners.katran import (  # noqa: E402
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     host_metadata,
-    percent_delta,
     run_app_runner_lifecycle,
-    speedup_ratio,
 )
-from runner.libs.metrics import sample_total_cpu_usage, start_sampler_thread  # noqa: E402
 
 
 DEFAULT_DURATION_S = 5
-
-
-def _measurement_bpf_avg_ns(phase: Mapping[str, object] | None) -> float | None:
-    measurement = phase.get("measurement") if isinstance(phase, Mapping) else {}
-    bpf = measurement.get("bpf") if isinstance(measurement, Mapping) else {}
-    summary = bpf.get("summary") if isinstance(bpf, Mapping) else {}
-    value = summary.get("avg_ns_per_run") if isinstance(summary, Mapping) else None
-    return float(value) if isinstance(value, (int, float)) else None
-
-
-def _measurement_workload_ops(phase: Mapping[str, object] | None) -> float | None:
-    measurement = phase.get("measurement") if isinstance(phase, Mapping) else {}
-    workload = measurement.get("workload") if isinstance(measurement, Mapping) else {}
-    value = workload.get("ops_per_sec") if isinstance(workload, Mapping) else None
-    return float(value) if isinstance(value, (int, float)) else None
 
 
 def measure_workload(
@@ -48,46 +31,38 @@ def measure_workload(
     prog_ids: list[int],
 ) -> dict[str, object]:
     before_bpf = sample_bpf_stats(prog_ids)
-    system_cpu_holder: dict[str, float] = {}
-    sampler_errors: list[str] = []
-    system_thread = start_sampler_thread(
-        label="system cpu",
-        errors=sampler_errors,
-        target=lambda: system_cpu_holder.update(sample_total_cpu_usage(duration_s)),
-    )
-    try:
-        workload_result = runner.run_workload(duration_s)
-    finally:
-        system_thread.join()
-    if sampler_errors:
-        raise RuntimeError("; ".join(sampler_errors))
-    if not system_cpu_holder:
-        raise RuntimeError("system cpu sampler produced no data")
+    workload_result = runner.run_workload(duration_s)
     after_bpf = sample_bpf_stats(prog_ids)
     return {
-        "workload": workload_result.to_dict(),
+        "throughput": workload_result.ops_per_sec,
+        "metric": "ops/s",
+        "duration_s": duration_s,
         "bpf": compute_delta(before_bpf, after_bpf),
-        "system_cpu": system_cpu_holder,
-        "runner_summary": dict(runner.last_request_summary),
     }
 
 
 def build_markdown(payload: Mapping[str, object]) -> str:
-    comparison = payload.get("comparison") if isinstance(payload.get("comparison"), Mapping) else {}
-    lines = [
-        "# Katran End-to-End Benchmark",
-        "",
-        f"- Generated: {payload.get('generated_at')}",
-        f"- Status: `{payload.get('status')}`",
-        f"- Workload: `{((payload.get('workload_spec') or {}).get('kind') if isinstance(payload.get('workload_spec'), Mapping) else 'unknown')}`",
-        f"- Duration: `{payload.get('duration_s')}s`",
-        f"- BPF speedup (baseline/rejit): `{comparison.get('bpf_speedup') if comparison.get('bpf_speedup') is not None else 'n/a'}`",
-        f"- Workload throughput ratio (rejit/baseline): `{comparison.get('workload_ratio_rejit_over_baseline') if comparison.get('workload_ratio_rejit_over_baseline') is not None else 'n/a'}`",
-    ]
-    reason = str(comparison.get("reason") or "").strip()
-    if reason:
-        lines.append(f"- Comparison note: `{reason}`")
-    return "\n".join(lines)
+    return "\n".join(
+        [
+            "# Katran End-to-End Benchmark",
+            "",
+            "```json",
+            json.dumps(payload, indent=2, sort_keys=True, default=str),
+            "```",
+        ]
+    )
+
+
+def phase_payload(phase_name: str, phase_result: Mapping[str, object] | None) -> dict[str, object] | None:
+    if phase_result is None:
+        return None
+    measurement = phase_result.get("measurement")
+    return {
+        "phase": phase_name,
+        "status": str(phase_result.get("status") or "error"),
+        "reason": str(phase_result.get("reason") or ""),
+        "measurement": dict(measurement) if isinstance(measurement, Mapping) else None,
+    }
 
 
 def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
@@ -119,44 +94,52 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
             measure=workload,
         )
 
-    baseline = dict(lifecycle_result.baseline or {})
-    post_rejit = dict(lifecycle_result.post_rejit or {}) if lifecycle_result.post_rejit is not None else None
-    rejit_result = dict(lifecycle_result.rejit_result or {})
-    baseline_bpf_avg_ns = _measurement_bpf_avg_ns(baseline)
-    rejit_bpf_avg_ns = _measurement_bpf_avg_ns(post_rejit)
-    baseline_ops = _measurement_workload_ops(baseline)
-    rejit_ops = _measurement_workload_ops(post_rejit)
-    comparison_reason = ""
-    status = "ok"
-    error_message = str(rejit_result.get("error") or "").strip()
-    if error_message:
-        status = "error"
-        comparison_reason = error_message
-    elif post_rejit is None:
-        status = "error"
-        comparison_reason = "post-ReJIT measurement is missing"
+    baseline = phase_payload("baseline", lifecycle_result.baseline)
+    if baseline is None:
+        baseline = {
+            "phase": "baseline",
+            "status": "error",
+            "reason": "baseline measurement is missing",
+            "measurement": None,
+        }
+    post_rejit = phase_payload("post_rejit", lifecycle_result.post_rejit)
+    if lifecycle_result.rejit_result is not None and post_rejit is None:
+        post_rejit = {
+            "phase": "post_rejit",
+            "status": "error",
+            "reason": "post-ReJIT measurement is missing",
+            "measurement": None,
+        }
+    if post_rejit is not None and isinstance(lifecycle_result.rejit_result, Mapping):
+        apply_error = str(lifecycle_result.rejit_result.get("error") or "").strip()
+        if apply_error:
+            post_rejit["status"] = "error"
+            post_rejit["reason"] = apply_error
+    programs = [
+        dict(program)
+        for program in lifecycle_result.artifacts.get("programs") or []
+        if isinstance(program, Mapping)
+    ]
 
-    comparison = {
-        "comparable": post_rejit is not None,
-        "reason": comparison_reason,
-        "baseline_bpf_avg_ns": baseline_bpf_avg_ns,
-        "rejit_bpf_avg_ns": rejit_bpf_avg_ns,
-        "bpf_speedup": speedup_ratio(baseline_bpf_avg_ns, rejit_bpf_avg_ns),
-        "baseline_workload_ops_per_sec": baseline_ops,
-        "rejit_workload_ops_per_sec": rejit_ops,
-        "workload_ratio_rejit_over_baseline": (float(rejit_ops) / float(baseline_ops)) if baseline_ops not in (None, 0) and rejit_ops is not None else None,
-        "system_cpu_busy_delta_pct": percent_delta(
-            ((baseline.get("measurement") or {}).get("system_cpu") or {}).get("busy_pct") if isinstance(baseline.get("measurement"), Mapping) else None,
-            ((post_rejit.get("measurement") or {}).get("system_cpu") or {}).get("busy_pct") if isinstance((post_rejit or {}).get("measurement"), Mapping) else None,
-        ),
-    }
+    errors: list[str] = []
+    if str(baseline.get("status") or "") != "ok":
+        errors.append(str(baseline.get("reason") or "baseline failed"))
+    if isinstance(post_rejit, Mapping) and str(post_rejit.get("status") or "") != "ok":
+        errors.append(str(post_rejit.get("reason") or "post_rejit failed"))
+
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": status,
+        "status": "error" if errors else "ok",
+        "daemon": str(Path(args.daemon).resolve()),
         "duration_s": duration_s,
         "workload_spec": dict(workload_spec),
-        "comparison": comparison,
+        "host": host_metadata(),
+        "programs": programs,
+        "baseline": baseline,
+        "post_rejit": post_rejit,
+        "rejit_result": lifecycle_result.rejit_result,
+        "process": dict(runner.process_output),
     }
-    if status == "error" and comparison_reason:
-        payload["error_message"] = comparison_reason
+    if errors:
+        payload["error_message"] = "; ".join(errors)
     return payload
