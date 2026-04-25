@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import sys
 from datetime import datetime, timezone
@@ -19,7 +18,17 @@ from runner.libs.app_runners.bpftrace import (  # noqa: E402
     ScriptSpec,
 )
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
-from runner.libs.case_common import CaseLifecycleState, host_metadata, run_app_runner_lifecycle  # noqa: E402
+from runner.libs.case_common import (  # noqa: E402
+    CaseLifecycleState,
+    append_json,
+    ensure_daemon_binary,
+    host_metadata,
+    lifecycle_programs,
+    merge_programs,
+    phase_payload,
+    program_records,
+    run_app_runner_lifecycle,
+)
 
 DEFAULT_DURATION_S = 5
 MIN_BPFTRACE_VERSION = (0, 16, 0)
@@ -29,9 +38,6 @@ def parse_version(text: str) -> tuple[int, int, int] | None:
         return None
     major, minor, patch = match.groups()
     return int(major), int(minor), int(patch or 0)
-def ensure_artifacts(daemon_binary: Path) -> None:
-    if not daemon_binary.exists():
-        raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
 def ensure_required_tools() -> None:
     if which("bpftrace") is None:
         raise RuntimeError("bpftrace is required but not present in PATH")
@@ -50,34 +56,6 @@ def measure_workload(runner: BpftraceRunner, duration_s: int, prog_ids: list[int
     workload_result = runner.run_workload(float(duration_s))
     after_bpf = sample_bpf_stats(prog_ids)
     return {"throughput": workload_result.ops_per_sec, "metric": "ops/s", "duration_s": duration_s, "bpf": compute_delta(before_bpf, after_bpf)}
-def phase_payload(phase_name: str, phase_result: Mapping[str, object] | None) -> dict[str, object] | None:
-    if phase_result is None:
-        return None
-    measurement = phase_result.get("measurement")
-    return {
-        "phase": phase_name,
-        "status": str(phase_result.get("status") or "error"),
-        "reason": str(phase_result.get("reason") or ""),
-        "measurement": dict(measurement) if isinstance(measurement, Mapping) else None,
-    }
-def lifecycle_programs(lifecycle_result: object) -> list[dict[str, object]]:
-    artifacts = getattr(lifecycle_result, "artifacts", {})
-    raw_programs = artifacts.get("programs") if isinstance(artifacts, Mapping) else None
-    return [dict(program) for program in (raw_programs or []) if isinstance(program, Mapping)]
-def merge_programs(existing: list[dict[str, object]], incoming: object) -> None:
-    seen_ids = {
-        int(program.get("id", 0) or 0)
-        for program in existing
-        if int(program.get("id", 0) or 0) > 0
-    }
-    for program in incoming or []:
-        if not isinstance(program, Mapping):
-            continue
-        prog_id = int(program.get("id", 0) or 0)
-        if prog_id <= 0 or prog_id in seen_ids:
-            continue
-        existing.append(dict(program))
-        seen_ids.add(prog_id)
 def run_phase(
     spec: ScriptSpec,
     *,
@@ -94,7 +72,7 @@ def run_phase(
         prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
         if not prog_ids:
             raise RuntimeError(f"bpftrace script {spec.name} did not expose any live prog_ids")
-        programs = [dict(program) for program in active_runner.programs if isinstance(program, Mapping)]
+        programs = program_records(active_runner.programs)
         if not programs:
             raise RuntimeError(f"bpftrace script {spec.name} did not expose any live programs")
         return CaseLifecycleState(
@@ -105,11 +83,8 @@ def run_phase(
                 "rejit_policy_context": {"repo": "bpftrace", "category": "bpftrace", "level": "e2e"},
             },
         )
-    def workload(lifecycle: object, _phase_name: str) -> dict[str, object]:
-        prog_ids = [int(value) for value in (getattr(lifecycle, "prog_ids", []) or []) if int(value) > 0]
-        if not prog_ids:
-            return {"status": "error", "reason": "no BPF programs are attached", "measurement": None}
-        return {"status": "ok", "reason": "", "measurement": measure_workload(runner, duration_s, prog_ids)}
+    def workload(lifecycle: CaseLifecycleState, _phase_name: str) -> dict[str, object]:
+        return {"status": "ok", "reason": "", "measurement": measure_workload(runner, duration_s, lifecycle.prog_ids)}
     try:
         lifecycle_result = run_app_runner_lifecycle(
             daemon_session=prepared_daemon_session,
@@ -122,21 +97,12 @@ def run_phase(
             "baseline": {"phase": "baseline", "status": "error", "reason": str(exc), "measurement": None},
             "post_rejit": None,
             "rejit_result": None,
-            "programs": [dict(program) for program in runner.programs if isinstance(program, Mapping)],
+            "programs": program_records(runner.programs),
             "process": dict(runner.process_output),
         }
     programs = lifecycle_programs(lifecycle_result)
     baseline = phase_payload("baseline", lifecycle_result.baseline)
-    if baseline is None:
-        baseline = {"phase": "baseline", "status": "error", "reason": "baseline measurement is missing", "measurement": None}
     post_rejit = phase_payload("post_rejit", lifecycle_result.post_rejit)
-    if lifecycle_result.rejit_result is not None and post_rejit is None:
-        post_rejit = {
-            "phase": "post_rejit",
-            "status": "error",
-            "reason": "post-ReJIT measurement is missing",
-            "measurement": None,
-        }
     if post_rejit is not None and isinstance(lifecycle_result.rejit_result, Mapping):
         apply_error = str(lifecycle_result.rejit_result.get("error") or "").strip()
         if apply_error:
@@ -149,8 +115,6 @@ def run_phase(
         "programs": programs,
         "process": dict(runner.process_output),
     }
-def append_json(lines: list[str], title: str, payload: object) -> None:
-    lines.extend([f"### {title}", "", "```json", json.dumps(payload, indent=2, sort_keys=True, default=str), "```", ""])
 def build_markdown(payload: Mapping[str, object]) -> str:
     lines = [
         "# bpftrace Real End-to-End Benchmark",
@@ -176,7 +140,7 @@ def run_bpftrace_case(args: argparse.Namespace) -> dict[str, object]:
     if prepared_daemon_session is None:
         raise RuntimeError("prepared daemon session is required")
     daemon_binary = Path(args.daemon).resolve()
-    ensure_artifacts(daemon_binary)
+    ensure_daemon_binary(daemon_binary)
     ensure_required_tools()
     duration_override = int(getattr(args, "duration", 0) or 0)
     duration_s = int(duration_override or DEFAULT_DURATION_S)

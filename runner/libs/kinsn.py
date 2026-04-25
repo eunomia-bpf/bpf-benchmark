@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import platform
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Mapping, Sequence
@@ -177,40 +176,4 @@ def prepare_kinsn_modules() -> dict[str, object]:
         "expected_modules": expected_modules,
         "module_snapshot_before_daemon": before_snapshot,
         "module_load": module_load,
-    }
-
-
-def _read_text_file(path: Path | None) -> str:
-    if path is None or not path.exists():
-        return ""
-    return path.read_text(encoding="utf-8", errors="replace")
-
-
-def capture_daemon_kinsn_discovery(
-    stdout_path: Path | None,
-    stderr_path: Path | None,
-    *,
-    timeout_seconds: float = 5.0,
-) -> dict[str, object]:
-    deadline = time.monotonic() + max(0.0, float(timeout_seconds))
-    stdout_text = ""
-    stderr_text = ""
-    while True:
-        stdout_text = _read_text_file(stdout_path).strip()
-        stderr_text = _read_text_file(stderr_path).strip()
-        if "kinsn discovery:" in stderr_text:
-            break
-        if time.monotonic() >= deadline:
-            raise RuntimeError(
-                "daemon kinsn discovery log was not found in stderr output"
-            )
-        time.sleep(0.05)
-    return {
-        "captured_at": datetime.now(timezone.utc).isoformat(),
-        "status": "ok",
-        "stdout_path": relpath(stdout_path),
-        "stderr_path": relpath(stderr_path),
-        "stdout": stdout_text,
-        "stderr": stderr_text,
-        "discovery_log": stderr_text,
     }

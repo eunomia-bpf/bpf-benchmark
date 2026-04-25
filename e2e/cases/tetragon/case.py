@@ -18,7 +18,7 @@ from runner.libs.app_runners.tetragon import (  # noqa: E402
 )
 from runner.libs.benchmark_catalog import TETRAGON_E2E_DURATION_S, TETRAGON_E2E_WORKLOADS  # noqa: E402
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
-from runner.libs.case_common import CaseLifecycleState, host_metadata, run_case_lifecycle  # noqa: E402
+from runner.libs.case_common import CaseLifecycleState, ensure_daemon_binary, host_metadata, run_case_lifecycle  # noqa: E402
 
 
 DEFAULT_DURATION_S = TETRAGON_E2E_DURATION_S
@@ -42,13 +42,6 @@ DEFAULT_WORKLOADS = tuple(
     )
     for spec in TETRAGON_E2E_WORKLOADS
 )
-
-
-def ensure_artifacts(daemon_binary: Path) -> None:
-    if not daemon_binary.exists():
-        raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
-
-
 def case_config() -> dict[str, object]:
     return {
         "measurement_duration_s": DEFAULT_DURATION_S,
@@ -153,7 +146,7 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
     load_timeout_s = DEFAULT_LOAD_TIMEOUT_S
     workloads = DEFAULT_WORKLOADS
     daemon_binary = Path(args.daemon).resolve()
-    ensure_artifacts(daemon_binary)
+    ensure_daemon_binary(daemon_binary)
 
     setup_result = inspect_tetragon_setup()
     limitations: list[str] = []

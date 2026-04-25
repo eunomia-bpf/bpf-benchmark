@@ -4,7 +4,7 @@ import json
 import os
 import shlex
 import subprocess
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -144,10 +144,6 @@ def run_json_command(
     if not payload:
         raise RuntimeError(f"command returned no JSON: {' '.join(command)}")
     return json.loads(payload)
-
-def write_json(path: Path, payload: Any) -> None:
-    ensure_parent(path)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
 def write_text(path: Path, text: str) -> None:

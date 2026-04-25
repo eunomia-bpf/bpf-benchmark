@@ -5,7 +5,7 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import Mapping
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -19,6 +19,9 @@ from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_st
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
     host_metadata,
+    lifecycle_programs,
+    phase_payload,
+    program_records,
     run_app_runner_lifecycle,
 )
 
@@ -54,25 +57,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     )
 
 
-def phase_payload(phase_name: str, phase_result: Mapping[str, object] | None) -> dict[str, object] | None:
-    if phase_result is None:
-        return None
-    measurement = phase_result.get("measurement")
-    return {
-        "phase": phase_name,
-        "status": str(phase_result.get("status") or "error"),
-        "reason": str(phase_result.get("reason") or ""),
-        "measurement": dict(measurement) if isinstance(measurement, Mapping) else None,
-    }
-def _programs(value: object) -> list[dict[str, object]]:
-    if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
-        return []
-    return [dict(program) for program in value if isinstance(program, Mapping)]
-def lifecycle_programs(lifecycle_result: object) -> list[dict[str, object]]:
-    artifacts = getattr(lifecycle_result, "artifacts", {})
-    return _programs(artifacts.get("programs")) if isinstance(artifacts, Mapping) else []
-
-
 def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     prepared_daemon_session = getattr(args, "_prepared_daemon_session", None)
     if prepared_daemon_session is None:
@@ -88,17 +72,16 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         workload_spec=workload_spec,
     )
 
-    def workload(lifecycle: object, _phase_name: str) -> dict[str, object]:
-        prog_ids = list(getattr(lifecycle, "prog_ids", []) or [])
+    def workload(lifecycle: CaseLifecycleState, _phase_name: str) -> dict[str, object]:
         return {
             "status": "ok",
-            "measurement": measure_workload(runner, duration_s, prog_ids),
+            "measurement": measure_workload(runner, duration_s, lifecycle.prog_ids),
         }
     def build_state(active_runner: KatranRunner, started_prog_ids: list[int]) -> CaseLifecycleState:
         prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
         if not prog_ids:
             raise RuntimeError("Katran runner did not expose any live prog_ids")
-        programs = _programs(active_runner.programs)
+        programs = program_records(active_runner.programs)
         if not programs:
             raise RuntimeError("Katran runner did not expose any live programs")
         artifacts: dict[str, object] = {
@@ -116,21 +99,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         )
 
     baseline = phase_payload("baseline", lifecycle_result.baseline)
-    if baseline is None:
-        baseline = {
-            "phase": "baseline",
-            "status": "error",
-            "reason": "baseline measurement is missing",
-            "measurement": None,
-        }
     post_rejit = phase_payload("post_rejit", lifecycle_result.post_rejit)
-    if lifecycle_result.rejit_result is not None and post_rejit is None:
-        post_rejit = {
-            "phase": "post_rejit",
-            "status": "error",
-            "reason": "post-ReJIT measurement is missing",
-            "measurement": None,
-        }
     if post_rejit is not None and isinstance(lifecycle_result.rejit_result, Mapping):
         apply_error = str(lifecycle_result.rejit_result.get("error") or "").strip()
         if apply_error:

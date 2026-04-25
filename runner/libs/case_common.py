@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import copy
+import json
 import platform
 import sys
 import time
+from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Callable, Mapping, Sequence
 
@@ -16,6 +18,69 @@ from runner.libs.kinsn import relpath
 DEFAULT_SUITE_QUIESCE_TIMEOUT_S = 20.0
 DEFAULT_SUITE_QUIESCE_STABLE_S = 2.0
 DEFAULT_SUITE_QUIESCE_POLL_S = 0.2
+
+
+def ensure_daemon_binary(daemon_binary: Path) -> None:
+    if not daemon_binary.exists():
+        raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
+
+
+def phase_payload(
+    phase_name: str,
+    phase_result: Mapping[str, object] | None,
+) -> dict[str, object] | None:
+    if phase_result is None:
+        return None
+    measurement = phase_result.get("measurement")
+    return {
+        "phase": phase_name,
+        "status": str(phase_result.get("status") or "error"),
+        "reason": str(phase_result.get("reason") or ""),
+        "measurement": dict(measurement) if isinstance(measurement, Mapping) else None,
+    }
+
+
+def program_records(value: object) -> list[dict[str, object]]:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
+        return []
+    return [dict(program) for program in value if isinstance(program, Mapping)]
+
+
+def lifecycle_programs(
+    lifecycle_result: object,
+    *,
+    artifact_key: str = "programs",
+) -> list[dict[str, object]]:
+    artifacts = getattr(lifecycle_result, "artifacts", {})
+    raw_programs = artifacts.get(artifact_key) if isinstance(artifacts, Mapping) else None
+    return program_records(raw_programs)
+
+
+def merge_programs(existing: list[dict[str, object]], incoming: object) -> None:
+    seen_ids = {
+        int(program.get("id", 0) or 0)
+        for program in existing
+        if int(program.get("id", 0) or 0) > 0
+    }
+    for program in program_records(incoming):
+        prog_id = int(program.get("id", 0) or 0)
+        if prog_id <= 0 or prog_id in seen_ids:
+            continue
+        existing.append(program)
+        seen_ids.add(prog_id)
+
+
+def append_json(lines: list[str], title: str, payload: object) -> None:
+    lines.extend(
+        [
+            f"### {title}",
+            "",
+            "```json",
+            json.dumps(payload, indent=2, sort_keys=True, default=str),
+            "```",
+            "",
+        ]
+    )
 
 
 def wait_for_suite_quiescence(
@@ -259,7 +324,7 @@ def _default_runner_lifecycle_state(runner: AppRunner, started_prog_ids: Sequenc
     prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
     if not prog_ids:
         raise RuntimeError("app runner did not return any live prog_ids")
-    programs = [dict(program) for program in runner.programs]
+    programs = program_records(runner.programs)
     if not programs:
         raise RuntimeError("app runner did not expose any live programs")
     return CaseLifecycleState(

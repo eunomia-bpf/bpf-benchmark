@@ -23,7 +23,7 @@ from runner.libs.benchmark_catalog import (  # noqa: E402
     TRACEE_E2E_WORKLOADS,
 )
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
-from runner.libs.case_common import CaseLifecycleState, host_metadata, run_case_lifecycle  # noqa: E402
+from runner.libs.case_common import CaseLifecycleState, ensure_daemon_binary, host_metadata, run_case_lifecycle  # noqa: E402
 
 
 DEFAULT_DURATION_S = TRACEE_E2E_DURATION_S
@@ -31,13 +31,6 @@ DEFAULT_SAMPLE_COUNT = TRACEE_E2E_SAMPLE_COUNT
 DEFAULT_WARMUP_DURATION_S = TRACEE_E2E_WARMUP_DURATION_S
 DEFAULT_LOAD_TIMEOUT_S = 120
 TRACEE_MODE = "tracee_daemon_same_image_paired"
-
-
-def ensure_artifacts(daemon_binary: Path) -> None:
-    if not daemon_binary.exists():
-        raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
-
-
 def case_config() -> dict[str, object]:
     return {
         "measurement_duration_s": DEFAULT_DURATION_S,
@@ -223,7 +216,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     warmup_duration_s = float(DEFAULT_WARMUP_DURATION_S)
 
     daemon_binary = Path(args.daemon).resolve()
-    ensure_artifacts(daemon_binary)
+    ensure_daemon_binary(daemon_binary)
 
     setup_result = inspect_tracee_setup()
     tracee_binary = resolve_tracee_binary(None, setup_result)

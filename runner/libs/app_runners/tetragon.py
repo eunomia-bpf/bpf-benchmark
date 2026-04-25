@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import socket
-import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -17,7 +16,7 @@ from ..workload import (
     run_tetragon_exec_connect_mix_workload,
 )
 from .base import AppRunner
-from .process_support import AgentSession, describe_process_exit, wait_until_program_set_stable
+from .process_support import AgentSession, wait_until_program_set_stable
 from .setup_support import missing_required_commands, pick_host_executable, repo_artifact_root
 
 
@@ -87,12 +86,6 @@ class TetragonAgentSession(AgentSession):
             finally: self.process = None
         self._join_io_threads()
         if stop_error is not None: raise RuntimeError(f"failed to stop Tetragon process cleanly: {stop_error}") from stop_error
-
-
-def describe_agent_exit(agent_name: str, process: Any | None, snapshot: Mapping[str, object]) -> str | None:
-    return describe_process_exit(agent_name, process, snapshot)
-
-
 def inspect_tetragon_setup() -> dict[str, object]:
     artifact_root = repo_artifact_root() / "tetragon"; tetragon_artifact_binary = artifact_root / "bin" / "tetragon"
     _fail = {"returncode": 1, "tetragon_binary": None, "tetragon_bpf_lib_dir": None, "stdout_tail": ""}
