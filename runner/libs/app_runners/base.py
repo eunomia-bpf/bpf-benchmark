@@ -36,6 +36,9 @@ class AppRunner:
     def last_workload_details(self) -> Mapping[str, object]:
         return {}
 
+    def live_rejit_programs(self) -> list[dict[str, object]]:
+        return [dict(program) for program in self.programs]
+
     def _fail_start(self, message: str) -> NoReturn:
         try:
             self.stop()

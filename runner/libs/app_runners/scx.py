@@ -376,6 +376,14 @@ class ScxRunner(AppRunner):
             self.programs = refreshed
         return [dict(program) for program in self.programs]
 
+    def live_rejit_skip_reason(self) -> str | None:
+        if any(str(program.get("type") or "").strip() == "struct_ops" for program in self.programs):
+            return (
+                "live ReJIT for sched_ext struct_ops callbacks is currently unsupported on "
+                "the benchmark runtime; skipping post-ReJIT phase"
+            )
+        return None
+
     def start(self) -> list[int]:
         if self.session is not None:
             raise RuntimeError("ScxRunner is already running")

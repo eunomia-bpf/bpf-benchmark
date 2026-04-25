@@ -26,6 +26,7 @@ from runner.libs.app_suite_schema import AppSpec, AppSuite, load_app_suite_from_
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats
 from runner.libs.case_common import (
     CaseLifecycleState,
+    LifecycleAbort,
     prepare_daemon_session,
     run_lifecycle_sessions,
     wait_for_suite_quiescence,
@@ -363,6 +364,15 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                     except Exception as quiesce_exc:
                         result.error = f"{result.error}; {quiesce_exc}" if result.error else str(quiesce_exc)
 
+                def _before_rejit(session: CorpusAppSession, _: CaseLifecycleState, baseline: Mapping[str, object]) -> LifecycleAbort | None:
+                    del baseline
+                    if not isinstance(session.runner, ScxRunner):
+                        return None
+                    reason = session.runner.live_rejit_skip_reason()
+                    if not reason:
+                        return None
+                    return LifecycleAbort(status="skipped", reason=reason)
+
                 for app in suite.apps:
                     _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
                     app_workload_seconds = _app_workload_seconds(args, app)
@@ -417,6 +427,7 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                             samples=samples,
                         ),
                         stop=lambda session, _: session.runner.stop(),
+                        before_rejit=_before_rejit,
                         refresh_sessions=lambda lifecycle_sessions, _phase: _refresh_active_session_programs(lifecycle_sessions),
                         on_session_failure=_on_session_failure,
                     )

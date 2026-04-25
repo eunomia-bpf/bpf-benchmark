@@ -70,6 +70,20 @@ def merge_programs(existing: list[dict[str, object]], incoming: object) -> None:
         seen_ids.add(prog_id)
 
 
+def live_rejit_prog_ids(state: "CaseLifecycleState") -> list[int]:
+    runtime = state.runtime
+    programs = []
+    if hasattr(runtime, "live_rejit_programs"):
+        programs = program_records(runtime.live_rejit_programs())
+    if not programs:
+        programs = program_records(state.artifacts.get("programs"))
+    return [
+        int(program.get("id", 0) or 0)
+        for program in programs
+        if int(program.get("id", 0) or 0) > 0
+    ]
+
+
 def append_json(lines: list[str], title: str, payload: object) -> None:
     lines.extend(
         [
@@ -124,6 +138,13 @@ class PreparedDaemonSession:
     metadata: dict[str, object]
 
 
+@dataclass(frozen=True)
+class LifecycleAbort:
+    status: str
+    reason: str
+    artifacts: Mapping[str, object] | None = None
+
+
 @dataclass
 class LifecycleRunResult:
     state: CaseLifecycleState | None
@@ -131,6 +152,7 @@ class LifecycleRunResult:
     rejit_result: dict[str, object] | None
     post_rejit: Mapping[str, object] | None
     artifacts: dict[str, object] = field(default_factory=dict)
+    abort: LifecycleAbort | None = None
     rejit_prog_ids: list[int] = field(default_factory=list)
     error: str = ""
     stop_error: str = ""
@@ -167,7 +189,9 @@ def run_lifecycle_sessions(
     *, daemon_session: PreparedDaemonSession, sessions: Sequence[object], get_state: Callable[[object], CaseLifecycleState],
     measure: Callable[[object, CaseLifecycleState, str], Mapping[str, object] | None],
     stop: Callable[[object, CaseLifecycleState], None], enabled_passes: Sequence[str] | None = None,
+    before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
     after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
+    before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
     resolve_rejit_prog_ids: Callable[[object, CaseLifecycleState, Mapping[str, object]], Sequence[int] | None] | None = None,
     refresh_sessions: Callable[[Sequence[object], str], None] | None = None,
     on_session_failure: Callable[[object, LifecycleRunResult, str], None] | None = None,
@@ -208,6 +232,11 @@ def run_lifecycle_sessions(
         except Exception as callback_exc:
             extra = str(callback_exc)
             result.error = f"{result.error}; {extra}" if result.error else extra
+    def _record_abort(session: object, result: LifecycleRunResult, abort: LifecycleAbort) -> None:
+        result.abort = abort
+        if abort.artifacts:
+            result.state.artifacts.update(dict(abort.artifacts))
+        _stop_session(session, result)
     try:
         active_pairs = list(session_results)
         if active_pairs and refresh_sessions is not None: refresh_sessions([session for session, _ in active_pairs], "baseline")
@@ -217,6 +246,8 @@ def run_lifecycle_sessions(
             if not prog_ids:
                 _record_failure(session, result, "lifecycle did not provide any program ids", "baseline")
             else:
+                if before_baseline is not None and (abort := before_baseline(session, result.state)) is not None:
+                    _record_abort(session, result, abort); _check_daemon(); continue
                 try:
                     baseline = measure(session, result.state, "baseline")
                     if baseline is None: raise RuntimeError("baseline workload returned no result")
@@ -231,7 +262,9 @@ def run_lifecycle_sessions(
         if active_pairs and refresh_sessions is not None: refresh_sessions([session for session, _ in active_pairs], "rejit")
         surviving_pairs = []
         for session, result in active_pairs:
-            prog_ids = [int(value) for value in result.state.prog_ids if int(value) > 0]
+            if before_rejit is not None and (abort := before_rejit(session, result.state, result.baseline or {})) is not None:
+                _record_abort(session, result, abort); _check_daemon(); continue
+            prog_ids = live_rejit_prog_ids(result.state)
             if resolve_rejit_prog_ids is not None:
                 prog_ids = [
                     int(value)
@@ -275,7 +308,9 @@ def run_case_lifecycle(
     stop: Callable[[object, CaseLifecycleState], None],
     cleanup: Callable[[object], None],
     enabled_passes: Sequence[str] | None = None,
+    before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
     after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
+    before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
     resolve_rejit_prog_ids: Callable[[object, CaseLifecycleState, Mapping[str, object]], Sequence[int] | None] | None = None,
 ) -> LifecycleRunResult:
     setup_state = setup()
@@ -288,10 +323,20 @@ def run_case_lifecycle(
             measure=lambda _, state, phase: workload(setup_state, state, phase),
             stop=lambda _, state: stop(setup_state, state),
             enabled_passes=enabled_passes,
+            before_baseline=(
+                None
+                if before_baseline is None
+                else lambda _, state: before_baseline(setup_state, state)
+            ),
             after_baseline=(
                 None
                 if after_baseline is None
                 else lambda _, state, baseline: after_baseline(setup_state, state, baseline)
+            ),
+            before_rejit=(
+                None
+                if before_rejit is None
+                else lambda _, state, baseline: before_rejit(setup_state, state, baseline)
             ),
             resolve_rejit_prog_ids=(
                 None
@@ -315,6 +360,7 @@ def run_case_lifecycle(
             rejit_result=session_result.rejit_result,
             post_rejit=session_result.post_rejit,
             artifacts=dict(session_result.state.artifacts),
+            abort=session_result.abort,
         )
     finally:
         cleanup(setup_state)
@@ -340,6 +386,9 @@ def run_app_runner_lifecycle(
     measure: Callable[[CaseLifecycleState, str], Mapping[str, object] | None],
     enabled_passes: Sequence[str] | None = None,
     build_state: Callable[[AppRunner, list[int]], CaseLifecycleState] | None = None,
+    before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
+    after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
+    before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
     resolve_rejit_prog_ids: Callable[[object, CaseLifecycleState, Mapping[str, object]], Sequence[int] | None] | None = None,
 ) -> LifecycleRunResult:
     def _start(_: object) -> CaseLifecycleState:
@@ -354,6 +403,9 @@ def run_app_runner_lifecycle(
         stop=lambda _, lc: lc.runtime.stop(),
         cleanup=lambda _: None,
         enabled_passes=enabled_passes,
+        before_baseline=before_baseline,
+        after_baseline=after_baseline,
+        before_rejit=before_rejit,
         resolve_rejit_prog_ids=resolve_rejit_prog_ids,
     )
 
