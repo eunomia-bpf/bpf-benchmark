@@ -68,28 +68,9 @@ def _programs(value: object) -> list[dict[str, object]]:
     if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
         return []
     return [dict(program) for program in value if isinstance(program, Mapping)]
-def lifecycle_programs(lifecycle_result: object, *, runner: KatranRunner | None = None) -> list[dict[str, object]]:
+def lifecycle_programs(lifecycle_result: object) -> list[dict[str, object]]:
     artifacts = getattr(lifecycle_result, "artifacts", {})
-    if isinstance(artifacts, Mapping):
-        programs = _programs(artifacts.get("programs"))
-        if programs:
-            return programs
-        live_program = artifacts.get("live_program")
-        if isinstance(live_program, Mapping):
-            programs = _programs(live_program.get("programs"))
-            if programs:
-                return programs
-    if runner is not None:
-        programs = _programs(getattr(runner, "programs", None))
-        if programs:
-            return programs
-        if isinstance(getattr(runner, "artifacts", None), Mapping):
-            live_program = runner.artifacts.get("live_program")
-            if isinstance(live_program, Mapping):
-                programs = _programs(live_program.get("programs"))
-                if programs:
-                    return programs
-    return []
+    return _programs(artifacts.get("programs")) if isinstance(artifacts, Mapping) else []
 
 
 def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
@@ -124,10 +105,6 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
             "programs": programs,
             "rejit_policy_context": {"repo": "katran", "level": "e2e"},
         }
-        if isinstance(active_runner.artifacts, Mapping):
-            live_program = active_runner.artifacts.get("live_program")
-            if isinstance(live_program, Mapping):
-                artifacts["live_program"] = dict(live_program)
         return CaseLifecycleState(runtime=active_runner, prog_ids=prog_ids, artifacts=artifacts)
 
     with enable_bpf_stats():
@@ -159,7 +136,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         if apply_error:
             post_rejit["status"] = "error"
             post_rejit["reason"] = apply_error
-    programs = lifecycle_programs(lifecycle_result, runner=runner)
+    programs = lifecycle_programs(lifecycle_result)
 
     errors: list[str] = []
     if str(baseline.get("status") or "") != "ok":

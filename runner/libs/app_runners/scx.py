@@ -376,10 +376,6 @@ class ScxRunner(AppRunner):
             self.programs = refreshed
         return [dict(program) for program in self.programs]
 
-    def live_rejit_skip_reason(self) -> str | None:
-        # sched_ext safety is now enforced by daemon-side struct_ops pass exclusions.
-        return None
-
     def start(self) -> list[int]:
         if self.session is not None:
             raise RuntimeError("ScxRunner is already running")

@@ -327,18 +327,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     cleanup=cleanup,
                 )
 
-                if lifecycle_result.abort is not None:
-                    return error_payload(
-                        config=config,
-                        duration_s=duration_s,
-                        sample_count=sample_count,
-                        warmup_duration_s=warmup_duration_s,
-                        tracee_binary=tracee_binary,
-                        tracee_launch_command=tracee_launch_command,
-                        setup_result=setup_result,
-                        error_message=lifecycle_result.abort.reason,
-                        limitations=limitations,
-                    )
                 if lifecycle_result.state is None or lifecycle_result.baseline is None:
                     raise RuntimeError(f"Tracee lifecycle cycle {cycle_index} completed without a baseline phase")
                 if lifecycle_result.post_rejit is None:

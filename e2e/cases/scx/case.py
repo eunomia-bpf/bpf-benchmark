@@ -16,7 +16,7 @@ from runner.libs.agent import bpftool_prog_show_records  # noqa: E402
 from runner.libs.app_runners.scx import ScxRunner, read_scx_ops, read_scx_state  # noqa: E402
 from runner.libs.app_runners.setup_support import repo_artifact_root  # noqa: E402
 from runner.libs.bpf_stats import compute_delta, sample_bpf_stats_from_records  # noqa: E402
-from runner.libs.case_common import CaseLifecycleState, LifecycleAbort, host_metadata, run_case_lifecycle  # noqa: E402
+from runner.libs.case_common import CaseLifecycleState, host_metadata, run_case_lifecycle  # noqa: E402
 
 DEFAULT_LOAD_TIMEOUT = 20
 DEFAULT_DURATION_S = 10
@@ -380,8 +380,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         limitations.append(f"ReJIT/apply reported errors: {str(rejit_result.get('error') or '').strip()}")
     if lifecycle_result.post_rejit is None:
         limitations.append("Post-ReJIT phase is unavailable.")
-    if lifecycle_result.abort is not None and str(lifecycle_result.abort.reason).strip():
-        limitations.append(str(lifecycle_result.abort.reason).strip())
 
     return _payload(
         status="ok",
