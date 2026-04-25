@@ -155,17 +155,17 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     mkdir -p ./runner ./vendor ./vendor/linux-framework; \
     rsync -a /src/runner/mk ./runner/; \
     mkdir -p ./runner/repos; \
-    rsync -a /src/runner/repos/katran ./runner/repos/; \
+    if [ -d /src/runner/repos/katran ]; then rsync -a /src/runner/repos/katran ./runner/repos/; fi; \
     has_repo_content() { [ -n "$(find "./runner/repos/$1" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; }; \
     clone_sparse_repo() { \
         repo_name="$1"; repo_url="$2"; repo_branch="$3"; shift 3; \
         repo_dest="./runner/repos/${repo_name}"; \
         rm -rf "${repo_dest}"; \
         git clone --depth 1 --filter=blob:none --sparse --branch "${repo_branch}" "${repo_url}" "${repo_dest}"; \
-        (cd "${repo_dest}" && git sparse-checkout set "$@"); \
+        (cd "${repo_dest}" && git sparse-checkout set --no-cone "$@"); \
     }; \
     has_repo_content katran || clone_sparse_repo katran https://github.com/facebookincubator/katran.git main \
-        CMakeLists.txt build build_bpf_modules_opensource.sh build_katran.sh cmake example_grpc katran/decap katran/lib; \
+        /CMakeLists.txt build /build_bpf_modules_opensource.sh /build_katran.sh cmake example_grpc katran/decap katran/lib; \
     rsync -a /src/vendor/libbpf ./vendor/; \
     rsync -a /src/vendor/llvmbpf ./vendor/; \
     cp -a /src/vendor/linux-framework/Makefile ./vendor/linux-framework/; \
