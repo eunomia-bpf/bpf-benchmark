@@ -34,6 +34,7 @@ const BPF_PROG_TYPE_LWT_IN: u32 = 18;
 const BPF_PROG_TYPE_LWT_OUT: u32 = 19;
 const BPF_PROG_TYPE_LWT_XMIT: u32 = 20;
 const BPF_PROG_TYPE_TRACING: u32 = 26;
+const BPF_PROG_TYPE_STRUCT_OPS: u32 = 27;
 const BPF_PROG_TYPE_LSM: u32 = 29;
 const BPF_PROG_TYPE_SYSCALL: u32 = 31;
 const BPF_PROG_TYPE_NETFILTER: u32 = 32;
@@ -1082,9 +1083,11 @@ fn infer_prog_type_from_section(section_name: &str) -> u32 {
         || section_name.starts_with("fexit/")
         || section_name.starts_with("fmod_ret/")
         || section_name.starts_with("iter/")
-        || section_name.starts_with("struct_ops/")
     {
         return BPF_PROG_TYPE_TRACING;
+    }
+    if section_name == "struct_ops" || section_name.starts_with("struct_ops/") {
+        return BPF_PROG_TYPE_STRUCT_OPS;
     }
     if section_name.starts_with("lsm/") {
         return BPF_PROG_TYPE_LSM;
@@ -1184,5 +1187,17 @@ mod tests {
         assert!(rodata_relocs
             .iter()
             .all(|reloc| reloc.pseudo_src == BPF_PSEUDO_MAP_VALUE));
+    }
+
+    #[test]
+    fn infer_struct_ops_section_type_correctly() {
+        assert_eq!(
+            infer_prog_type_from_section("struct_ops"),
+            BPF_PROG_TYPE_STRUCT_OPS
+        );
+        assert_eq!(
+            infer_prog_type_from_section("struct_ops/test_sched"),
+            BPF_PROG_TYPE_STRUCT_OPS
+        );
     }
 }

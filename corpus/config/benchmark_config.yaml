@@ -25,13 +25,6 @@ policy:
       - bounds_check_merge
       - skb_load_bytes_spec
       - bulk_memory
-  rules:
-    # struct_ops workloads currently rely on live scheduler-owned kptr state.
-    # map_inline can freeze those lookups and the follow-on dce cleanup can
-    # then remove state maintenance that sched_ext still requires at runtime.
-    - match:
-        prog_type: struct_ops
-      disable: [map_inline, dce]
 
 profiles:
   dev: {}

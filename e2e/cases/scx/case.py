@@ -16,7 +16,7 @@ from runner.libs.agent import bpftool_prog_show_records  # noqa: E402
 from runner.libs.app_runners.scx import ScxRunner, read_scx_ops, read_scx_state  # noqa: E402
 from runner.libs.app_runners.setup_support import repo_artifact_root  # noqa: E402
 from runner.libs.bpf_stats import compute_delta, sample_bpf_stats_from_records  # noqa: E402
-from runner.libs.case_common import CaseLifecycleState, LifecycleAbort, host_metadata, run_case_lifecycle  # noqa: E402
+from runner.libs.case_common import CaseLifecycleState, host_metadata, run_case_lifecycle  # noqa: E402
 
 DEFAULT_LOAD_TIMEOUT = 20
 DEFAULT_DURATION_S = 10
@@ -338,16 +338,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
                 raise RuntimeError("scx baseline could not resolve live scheduler program ids for daemon apply")
             return {"programs": list(programs)}
 
-        def before_rejit(_: object, lifecycle: CaseLifecycleState, baseline: Mapping[str, object]) -> LifecycleAbort | None:
-            del baseline
-            runner = lifecycle.runtime
-            if not isinstance(runner, ScxRunner):
-                raise RuntimeError(f"scx lifecycle returned a non-runner runtime: {type(runner).__name__}")
-            reason = runner.live_rejit_skip_reason()
-            if not reason:
-                return None
-            return LifecycleAbort(status="skipped", reason=reason)
-
         lifecycle_result = run_case_lifecycle(
             daemon_session=prepared_daemon_session,
             setup=lambda: {},
@@ -356,7 +346,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
             stop=lambda _, lifecycle: lifecycle.runtime.stop(),
             cleanup=lambda _: None,
             after_baseline=after_baseline,
-            before_rejit=before_rejit,
             resolve_rejit_prog_ids=lambda *_args: list(live_prog_ids),
         )
     except Exception as exc:

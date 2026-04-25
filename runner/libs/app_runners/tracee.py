@@ -41,7 +41,6 @@ from .setup_support import pick_host_executable, repo_artifact_root
 TRACEE_HEALTH_HOST = "127.0.0.1"
 TRACEE_HEALTH_PORT = 3366
 TRACEE_OUTPUT_MODE = "none"
-_TRACEE_LIVE_REJIT_EXCLUDED_PROGRAM_NAMES = frozenset({"syscall__init_module"})
 
 
 def _tracee_runtime_dir() -> Path:
@@ -344,17 +343,6 @@ class TraceeRunner(AppRunner):
         if self.session is None:
             raise RuntimeError("TraceeRunner is not running")
         return run_tracee_workload(workload_spec, max(1, int(round(seconds))))
-
-    def live_rejit_programs(self) -> list[dict[str, object]]:
-        # Live ReJIT currently returns EINVAL for Tracee's init_module raw
-        # tracepoint program on the benchmark kernel, while the remaining
-        # Tracee programs apply cleanly.
-        return [
-            dict(program)
-            for program in self.programs
-            if str(program.get("name") or "").strip()
-            not in _TRACEE_LIVE_REJIT_EXCLUDED_PROGRAM_NAMES
-        ]
 
     def stop(self) -> None:
         if self.session is None: return
