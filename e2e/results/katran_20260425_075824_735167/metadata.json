@@ -1,0 +1,38 @@
+{
+  "case": "katran",
+  "completed_at": "2026-04-25T07:58:55.681650+00:00",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "generated_at": "2026-04-25T07:58:55.681652+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-25T07:58:55.681650+00:00",
+  "launcher_boot_id": "2f8a15d7-7d71-4685-9a14-4f6e2977b91e",
+  "launcher_pid": 1721,
+  "launcher_start_ticks": 33628,
+  "policy": {
+    "exclusions": {
+      "struct_ops": [
+        "map_inline",
+        "dce"
+      ]
+    }
+  },
+  "run_type": "katran",
+  "started_at": "2026-04-25T07:58:24.735167+00:00",
+  "status": "completed",
+  "suite": "e2e"
+}
