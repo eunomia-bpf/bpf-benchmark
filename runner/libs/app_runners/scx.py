@@ -377,11 +377,7 @@ class ScxRunner(AppRunner):
         return [dict(program) for program in self.programs]
 
     def live_rejit_skip_reason(self) -> str | None:
-        if any(str(program.get("type") or "").strip() == "struct_ops" for program in self.programs):
-            return (
-                "live ReJIT for sched_ext struct_ops callbacks is currently unsupported on "
-                "the benchmark runtime; skipping post-ReJIT phase"
-            )
+        # sched_ext safety is now enforced by daemon-side struct_ops pass exclusions.
         return None
 
     def start(self) -> list[int]:

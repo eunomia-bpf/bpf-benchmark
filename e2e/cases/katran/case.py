@@ -5,7 +5,7 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Mapping
+from typing import Mapping, Sequence
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -17,6 +17,7 @@ from runner.libs.app_runners.katran import (  # noqa: E402
 )
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
+    CaseLifecycleState,
     host_metadata,
     run_app_runner_lifecycle,
 )
@@ -63,6 +64,32 @@ def phase_payload(phase_name: str, phase_result: Mapping[str, object] | None) ->
         "reason": str(phase_result.get("reason") or ""),
         "measurement": dict(measurement) if isinstance(measurement, Mapping) else None,
     }
+def _programs(value: object) -> list[dict[str, object]]:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
+        return []
+    return [dict(program) for program in value if isinstance(program, Mapping)]
+def lifecycle_programs(lifecycle_result: object, *, runner: KatranRunner | None = None) -> list[dict[str, object]]:
+    artifacts = getattr(lifecycle_result, "artifacts", {})
+    if isinstance(artifacts, Mapping):
+        programs = _programs(artifacts.get("programs"))
+        if programs:
+            return programs
+        live_program = artifacts.get("live_program")
+        if isinstance(live_program, Mapping):
+            programs = _programs(live_program.get("programs"))
+            if programs:
+                return programs
+    if runner is not None:
+        programs = _programs(getattr(runner, "programs", None))
+        if programs:
+            return programs
+        if isinstance(getattr(runner, "artifacts", None), Mapping):
+            live_program = runner.artifacts.get("live_program")
+            if isinstance(live_program, Mapping):
+                programs = _programs(live_program.get("programs"))
+                if programs:
+                    return programs
+    return []
 
 
 def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
@@ -86,12 +113,29 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
             "status": "ok",
             "measurement": measure_workload(runner, duration_s, prog_ids),
         }
+    def build_state(active_runner: KatranRunner, started_prog_ids: list[int]) -> CaseLifecycleState:
+        prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
+        if not prog_ids:
+            raise RuntimeError("Katran runner did not expose any live prog_ids")
+        programs = _programs(active_runner.programs)
+        if not programs:
+            raise RuntimeError("Katran runner did not expose any live programs")
+        artifacts: dict[str, object] = {
+            "programs": programs,
+            "rejit_policy_context": {"repo": "katran", "level": "e2e"},
+        }
+        if isinstance(active_runner.artifacts, Mapping):
+            live_program = active_runner.artifacts.get("live_program")
+            if isinstance(live_program, Mapping):
+                artifacts["live_program"] = dict(live_program)
+        return CaseLifecycleState(runtime=active_runner, prog_ids=prog_ids, artifacts=artifacts)
 
     with enable_bpf_stats():
         lifecycle_result = run_app_runner_lifecycle(
             daemon_session=prepared_daemon_session,
             runner=runner,
             measure=workload,
+            build_state=build_state,
         )
 
     baseline = phase_payload("baseline", lifecycle_result.baseline)
@@ -115,11 +159,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         if apply_error:
             post_rejit["status"] = "error"
             post_rejit["reason"] = apply_error
-    programs = [
-        dict(program)
-        for program in lifecycle_result.artifacts.get("programs") or []
-        if isinstance(program, Mapping)
-    ]
+    programs = lifecycle_programs(lifecycle_result, runner=runner)
 
     errors: list[str] = []
     if str(baseline.get("status") or "") != "ok":

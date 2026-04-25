@@ -5,7 +5,7 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Mapping
+from typing import Mapping, Sequence
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -40,10 +40,16 @@ def phase_payload(phase_name: str, phase_result: Mapping[str, object] | None) ->
         "reason": str(phase_result.get("reason") or ""),
         "measurement": dict(measurement) if isinstance(measurement, Mapping) else None,
     }
-def lifecycle_programs(lifecycle_result: object) -> list[dict[str, object]]:
+def runner_programs(runner: object) -> list[dict[str, object]]:
+    raw_programs = getattr(runner, "programs", None)
+    if not isinstance(raw_programs, Sequence) or isinstance(raw_programs, (str, bytes, bytearray)):
+        return []
+    return [dict(program) for program in raw_programs if isinstance(program, Mapping)]
+def lifecycle_programs(lifecycle_result: object, *, runner: object | None = None) -> list[dict[str, object]]:
     artifacts = getattr(lifecycle_result, "artifacts", {})
     raw_programs = artifacts.get("programs") if isinstance(artifacts, Mapping) else None
-    return [dict(program) for program in (raw_programs or []) if isinstance(program, Mapping)]
+    programs = [dict(program) for program in (raw_programs or []) if isinstance(program, Mapping)]
+    return programs or ([] if runner is None else runner_programs(runner))
 def merge_programs(existing: list[dict[str, object]], incoming: object) -> None:
     seen_ids = {
         int(program.get("id", 0) or 0)
@@ -81,7 +87,7 @@ def run_phase(
         prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
         if not prog_ids:
             raise RuntimeError(f"BCC tool {spec.name} did not expose any live prog_ids")
-        programs = [dict(program) for program in active_runner.programs]
+        programs = runner_programs(active_runner)
         if not programs:
             raise RuntimeError(f"BCC tool {spec.name} did not expose any live programs")
         return CaseLifecycleState(
@@ -104,10 +110,10 @@ def run_phase(
             "baseline": {"phase": "baseline", "status": "error", "reason": str(exc), "measurement": None},
             "post_rejit": None,
             "rejit_result": None,
-            "programs": [],
+            "programs": runner_programs(runner),
             "process": dict(runner.process_output),
         }
-    programs = lifecycle_programs(lifecycle_result)
+    programs = lifecycle_programs(lifecycle_result, runner=runner)
     baseline = phase_payload("baseline", lifecycle_result.baseline)
     if baseline is None:
         baseline = {"phase": "baseline", "status": "error", "reason": "baseline measurement is missing", "measurement": None}
