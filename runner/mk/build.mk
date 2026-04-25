@@ -38,7 +38,7 @@ ACTIVE_RUNNER_BINARY := $(RUNNER_BUILD_DIR_ACTIVE)/micro_exec
 ACTIVE_TEST_UNITTEST_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/tests/unittest/build-arm64,$(ROOT_DIR)/tests/unittest/build)
 ACTIVE_TEST_NEGATIVE_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/tests/negative/build-arm64,$(ROOT_DIR)/tests/negative/build)
 ACTIVE_TEST_UNITTEST_PRIMARY := $(ACTIVE_TEST_UNITTEST_BUILD_DIR)/rejit_regression
-ACTIVE_TEST_NEGATIVE_PRIMARY := $(ACTIVE_TEST_NEGATIVE_BUILD_DIR)/scx_prog_show_race
+ACTIVE_TEST_NEGATIVE_PRIMARY := $(ACTIVE_TEST_NEGATIVE_BUILD_DIR)/adversarial_rejit
 RUNNER_RUNTIME_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/runner-runtime.Dockerfile
 BPFREJIT_INSTALL_SCRIPT := $(RUNNER_DIR)/scripts/bpfrejit-install
 X86_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:x86_64
@@ -81,7 +81,6 @@ VENDOR_LINUX_RUNTIME_SOURCE_FILES = $(ROOT_DIR)/vendor/linux-framework/Makefile 
 	"$(ROOT_DIR)/vendor/linux-framework/tools/build" \
 	"$(ROOT_DIR)/vendor/linux-framework/tools/include" \
 	"$(ROOT_DIR)/vendor/linux-framework/tools/lib" \
-	"$(ROOT_DIR)/vendor/linux-framework/tools/sched_ext/include" \
 	"$(ROOT_DIR)/vendor/linux-framework/tools/scripts" \
 	\( -path '*/.git' -o -path '*/build-*' -o -path '*/.cache' \
 		-o -path '*/tools/bpf/bpftool/bootstrap' \

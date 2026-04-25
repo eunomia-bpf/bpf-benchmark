@@ -128,21 +128,6 @@ def run_checked(command: Sequence[str], *, cwd: Path, env: dict[str, str], die: 
         die(f"command failed ({completed.returncode}): {rendered}")  # type: ignore[operator]
 
 
-# ---------------------------------------------------------------------------
-# artifact validation
-# ---------------------------------------------------------------------------
-
-def ensure_scx_artifacts(workspace: Path, target_arch: str, packages: Sequence[str], die: object) -> None:
-    scx_root = runtime_repo_artifact_root(workspace, target_arch) / "scx"
-    for package in packages:
-        for target in (scx_root / "bin" / package, scx_root / f"{package}_main.bpf.o"):
-            if target.name.endswith(".bpf.o"):
-                if not target.is_file():
-                    die(f"scx artifact object is missing: {target}")  # type: ignore[operator]
-                continue
-            require_executable(target, "scx artifact", die)
-
-
 def ensure_katran_artifacts(workspace: Path, target_arch: str, native_repos: Sequence[str], die: object) -> None:
     if "katran" not in native_repos:
         return

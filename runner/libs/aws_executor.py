@@ -318,13 +318,6 @@ def _remote_has_runtime_btf(ctx: aws_common.AwsExecutorContext, ip: str) -> bool
     ).returncode == 0
 
 
-def _remote_has_sched_ext(ctx: aws_common.AwsExecutorContext, ip: str) -> bool:
-    return aws_common._ssh_exec(
-        ctx, ip, "test", "-e", "/sys/kernel/sched_ext/state",
-        check=False,
-    ).returncode == 0
-
-
 def _ensure_remote_docker(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     script = r"""
 set -eu
@@ -571,7 +564,6 @@ def _ensure_instance_for_suite(ctx: aws_common.AwsExecutorContext) -> str:
     if result := _maybe_setup(not state.get("STATE_KERNEL_RELEASE", "").strip()): return result
     if result := _maybe_setup(_remote_kernel_release(ctx, instance_ip) != state.get("STATE_KERNEL_RELEASE", "").strip()): return result
     if result := _maybe_setup(ctx.contract.scalar("RUN_SUITE_NEEDS_RUNTIME_BTF", "0") == "1" and not _remote_has_runtime_btf(ctx, instance_ip)): return result
-    if result := _maybe_setup(ctx.contract.scalar("RUN_SUITE_NEEDS_SCHED_EXT", "0") == "1" and not _remote_has_sched_ext(ctx, instance_ip)): return result
     return instance_ip
 
 

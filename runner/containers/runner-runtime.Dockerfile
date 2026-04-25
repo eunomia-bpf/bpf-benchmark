@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1.4
 ARG TRACEE_IMAGE=docker.io/aquasec/tracee:0.24.1@sha256:cfbbfee972e64a644f6b1bac74ee26998e6e12442697be4c797ae563553a2a5b
 ARG TETRAGON_IMAGE=quay.io/cilium/tetragon:v1.6.1@sha256:ff96ace3e6a0166ba04ff3eecfaeee19b7e6deee2b7cdbe3245feda57df5015f
-ARG SCX_RELEASE_TAG=v1.1.0
 FROM docker.io/library/ubuntu:24.04 AS runner-runtime-build-base
 
 ARG GO_VERSION=1.26.0
@@ -179,7 +178,6 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
         tools/build \
         tools/include \
         tools/lib \
-        tools/sched_ext/include \
         tools/scripts; \
     do \
         mkdir -p "./vendor/linux-framework/$(dirname "$path")"; \
@@ -219,35 +217,6 @@ RUN set -eux; \
     cp -a /usr/lib/libelf*.so* /usr/lib/libz.so* /usr/lib/libzstd.so* /usr/lib/libc.musl-*.so.1 "${musl_lib_dir}/"
 COPY --from=runner-runtime-tetragon-upstream --chmod=0755 /usr/bin/tetragon /artifacts/tetragon/bin/tetragon
 COPY --from=runner-runtime-tetragon-upstream /var/lib/tetragon/ /artifacts/tetragon/
-
-FROM runner-runtime-userspace AS runner-runtime-scx-artifacts
-
-ARG IMAGE_BUILD_JOBS=4
-ARG RUN_TARGET_ARCH=x86_64
-ARG SCX_RELEASE_TAG=v1.1.0
-
-RUN set -eux; \
-    case "${RUN_TARGET_ARCH}" in \
-        arm64) target_triple=aarch64-unknown-linux-gnu ;; \
-        x86_64) target_triple=x86_64-unknown-linux-gnu ;; \
-        *) echo "unsupported SCX target arch: ${RUN_TARGET_ARCH}" >&2; exit 1 ;; \
-    esac; \
-    repo_root="/tmp/scx"; \
-    target_dir="/tmp/scx-target"; \
-    rustup component add rustfmt; \
-    printf '#!/bin/sh\ncat\n' >/usr/local/bin/disable_rustfmt; \
-    chmod 0755 /usr/local/bin/disable_rustfmt; \
-    git clone --depth 1 --filter=blob:none --branch "${SCX_RELEASE_TAG}" https://github.com/sched-ext/scx.git "${repo_root}"; \
-    BPF_CLANG=clang CARGO_TARGET_DIR="${target_dir}" \
-        cargo build --release --target "${target_triple}" --manifest-path "${repo_root}/Cargo.toml" --package scx_rusty -j"${IMAGE_BUILD_JOBS}"; \
-    target_release_dir="${target_dir}/${target_triple}/release"; \
-    object_path="$(find "${target_dir}" -path '*/scx_rusty-*/out/main.bpf.o' -type f | sort | tail -n 1)"; \
-    test -x "${target_release_dir}/scx_rusty"; \
-    test -n "${object_path}"; \
-    mkdir -p /artifacts/scx/bin; \
-    install -m 0755 "${target_release_dir}/scx_rusty" /artifacts/scx/bin/scx_rusty; \
-    install -m 0644 "${object_path}" /artifacts/scx/scx_rusty_main.bpf.o; \
-    rm -rf "${repo_root}" "${target_dir}"
 
 FROM runner-runtime-build-base AS runner-runtime-kernel-artifacts
 
@@ -295,8 +264,6 @@ ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 
-COPY --from=runner-runtime-scx-artifacts /artifacts/scx /artifacts/scx
-
 RUN --mount=type=bind,source=.,target=/src,readonly \
     set -eux; \
     cp -a /src/Makefile ./Makefile; \
@@ -315,7 +282,6 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
         tools/build \
         tools/include \
         tools/lib \
-        tools/sched_ext/include \
         tools/scripts; \
     do \
         mkdir -p "./vendor/linux-framework/$(dirname "$path")"; \
@@ -386,10 +352,8 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     mkdir -p "${repo_artifact_root}"; \
     ln -sfn /artifacts/tracee "${repo_artifact_root}/tracee"; \
     ln -sfn /artifacts/tetragon "${repo_artifact_root}/tetragon"; \
-    ln -sfn /artifacts/scx "${repo_artifact_root}/scx"; \
     ln -sfn /artifacts/tracee/bin/tracee /usr/local/bin/tracee; \
     ln -sfn /artifacts/tetragon/bin/tetragon /usr/local/bin/tetragon; \
-    ln -sfn /artifacts/scx/bin/scx_rusty /usr/local/bin/scx_rusty; \
     apt-get purge -y \
         autoconf \
         automake \

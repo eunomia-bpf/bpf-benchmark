@@ -4,11 +4,11 @@
 benchmark aliases are the canonical entrypoints; `python3 e2e/driver.py <case>`
 is a developer/debug entrypoint only.
 
-Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `bcc`, `scx`, and `katran`.
+Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `bcc`, and `katran`.
 
 ## Layout
 
-- `driver.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, `scx`, `bcc`, and `katran`
+- `driver.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, `bcc`, and `katran`
 - `cases/`: per-system case logic and assets
 - `../runner/libs/`: shared helpers for agent lifecycle, workload generation, BPF stats sampling, VM runs, and REJIT
 - `results/`: timestamped run-artifact directories
@@ -55,11 +55,3 @@ Results live under `e2e/results/<run_type>_<timestamp>/`. `metadata.json` is the
 - The case expects the canonical runner and daemon artifacts to already exist at their prepared paths
 - `--vm` is not supported in `e2e/driver.py`
 - Smoke example: `python3 e2e/driver.py bpftrace --smoke`
-
-### scx
-
-- `make vm-e2e` now prepares `.cache/repo-artifacts/<arch>/scx/bin/scx_rusty` before entering the VM
-- Uses `.cache/repo-artifacts/<arch>/scx/scx_rusty_main.bpf.o`
-- Requires `hackbench`, `stress-ng`, and `sysbench` in `PATH`
-- Supports `--vm` and requires `--kernel` when enabled
-- Smoke example: `python3 e2e/driver.py scx --smoke`

@@ -87,8 +87,6 @@ runner/repos/*
 !runner/repos/bpftrace/**
 !runner/repos/katran
 !runner/repos/katran/**
-!runner/repos/scx
-!runner/repos/scx/**
 !runner/repos/tetragon
 !runner/repos/tetragon/**
 !runner/repos/tracee
@@ -123,12 +121,6 @@ runner/repos/bpftrace/libbpf/src/staticobjs
 runner/repos/bpftrace/libbpf/src/staticobjs/**
 runner/repos/bpftrace/libbpf/src/sharedobjs
 runner/repos/bpftrace/libbpf/src/sharedobjs/**
-runner/repos/scx/build
-runner/repos/scx/build/**
-runner/repos/scx/target
-runner/repos/scx/target/**
-runner/repos/scx/target-*
-runner/repos/scx/target-*/**
 runner/repos/tetragon/build
 runner/repos/tetragon/build/**
 runner/repos/tracee/build

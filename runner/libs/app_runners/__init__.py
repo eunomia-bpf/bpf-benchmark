@@ -43,17 +43,6 @@ def _adapt_bpftrace(workload: str, kwargs: dict[str, object]) -> dict[str, objec
     return mapped
 
 
-def _adapt_scx(workload: str, kwargs: dict[str, object]) -> dict[str, object]:
-    scheduler = str(kwargs.pop("scheduler", "") or "").strip()
-    if not scheduler:
-        raise TypeError("scx runner requires args.scheduler")
-    mapped = dict(kwargs)
-    mapped["scheduler"] = scheduler
-    kind = str(workload).strip()
-    mapped.setdefault("workload_spec", {"name": kind, "kind": kind, "metric": "runs/s"})
-    return mapped
-
-
 def _adapt_tracee(workload: str, kwargs: dict[str, object]) -> dict[str, object]:
     mapped = dict(kwargs)
     kind = str(workload).strip()
@@ -81,7 +70,6 @@ _RUNNERS = {
     "bcc": ("runner.libs.app_runners.bcc", "BCCRunner", _adapt_bcc),
     "bpftrace": ("runner.libs.app_runners.bpftrace", "BpftraceRunner", _adapt_bpftrace),
     "katran": ("runner.libs.app_runners.katran", "KatranRunner", _adapt_katran),
-    "scx": ("runner.libs.app_runners.scx", "ScxRunner", _adapt_scx),
     "tetragon": ("runner.libs.app_runners.tetragon", "TetragonRunner", _adapt_tetragon),
     "tracee": ("runner.libs.app_runners.tracee", "TraceeRunner", _adapt_tracee),
 }

@@ -56,18 +56,6 @@ repos:
       - libbpf-tools
       - libbpf-tools/compat
 
-  - name: scx
-    url: https://github.com/sched-ext/scx.git
-    branch: main
-    harvest_globs: []
-    compile_include_dirs:
-      - .
-    cargo_packages:
-      - scx_bpfland
-      - scx_rusty
-      - scx_lavd
-      - scx_flash
-
   - name: katran
     url: https://github.com/facebookincubator/katran.git
     branch: main

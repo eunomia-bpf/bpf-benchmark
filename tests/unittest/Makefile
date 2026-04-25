@@ -54,8 +54,7 @@ BPF_INCLUDES := \
 	-I$(LIBBPF_PREFIX)/include \
 	-I$(ROOT_DIR)/vendor/libbpf/src \
 	-I$(ROOT_DIR)/vendor/libbpf/include/uapi \
-	-I$(ROOT_DIR)/vendor/libbpf/include \
-	-I$(ROOT_DIR)/vendor/linux-framework/tools/sched_ext/include
+	-I$(ROOT_DIR)/vendor/libbpf/include
 
 define get_sys_includes
 $(shell $(1) -v -E - </dev/null 2>&1 \

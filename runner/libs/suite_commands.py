@@ -85,12 +85,9 @@ def _append_artifact_args(
     argv: list[str],
     *,
     native_repos: tuple[str, ...] | list[str] = (),
-    scx_packages: tuple[str, ...] | list[str] = (),
 ) -> None:
     if native_repos:
         argv.extend(["--native-repos", ",".join(str(repo_name) for repo_name in native_repos)])
-    if scx_packages:
-        argv.extend(["--scx-packages", ",".join(str(package_name) for package_name in scx_packages)])
 
 
 def build_runtime_container_command(
@@ -181,7 +178,6 @@ def build_corpus_suite_argv(
     _append_artifact_args(
         command,
         native_repos=config.artifacts.native_repos,
-        scx_packages=config.artifacts.scx_packages,
     )
     command.extend(suite_args)
     return command
@@ -198,7 +194,6 @@ def build_e2e_suite_argv(
     _append_artifact_args(
         command,
         native_repos=config.artifacts.native_repos,
-        scx_packages=config.artifacts.scx_packages,
     )
     command.extend(suite_args)
     return command
@@ -219,7 +214,6 @@ def build_test_suite_argv(
         command.extend(["--run-contract-path", str(config_path)])
     else:
         command.extend(["--run-contract-json", config.to_json_text()])
-    _append_artifact_args(command, scx_packages=config.artifacts.scx_packages)
     command.extend(suite_args)
     return command
 

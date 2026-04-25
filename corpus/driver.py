@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,7 +20,6 @@ from runner.libs.benchmark_catalog import (
 )
 from runner.libs.app_runners import get_app_runner
 from runner.libs.app_runners.base import AppRunner
-from runner.libs.app_runners.scx import ScxRunner
 from runner.libs.app_suite_schema import AppSpec, AppSuite, load_app_suite_from_yaml
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats
 from runner.libs.case_common import (
@@ -100,153 +98,17 @@ def _measure_runner_phase(
     *,
     workload_seconds: float,
     samples: int,
-    sampled_prog_id_map: Mapping[int, int] | None = None,
 ) -> dict[str, object]:
     logical_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
-    logical_programs = [
-        dict(program)
-        for program in getattr(runner, "programs", [])
-        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
-    ]
-    sampled_prog_ids = (
-        [
-            int(sampled_prog_id_map.get(prog_id, 0) or 0)
-            for prog_id in logical_prog_ids
-            if int(sampled_prog_id_map.get(prog_id, 0) or 0) > 0
-        ]
-        if sampled_prog_id_map is not None
-        else list(logical_prog_ids)
-    )
     workloads: list[dict[str, object]] = []
-    live_prog_id_map: dict[int, int] = {}
-    live_programs: list[dict[str, object]] = []
-    if isinstance(runner, ScxRunner) and sampled_prog_id_map is None:
-        initial_stats, live_prog_id_map, live_programs = _sample_scx_measurement_stats(
-            runner,
-            logical_prog_ids,
-            previous_programs=logical_programs,
-        )
-    else:
-        initial_stats = sample_bpf_stats(sampled_prog_ids)
+    initial_stats = sample_bpf_stats(logical_prog_ids)
     for _ in range(samples):
         workloads.append(runner.run_workload(workload_seconds).to_dict())
-    if isinstance(runner, ScxRunner) and sampled_prog_id_map is None:
-        final_stats, live_prog_id_map, live_programs = _sample_scx_measurement_stats(
-            runner,
-            logical_prog_ids,
-            previous_programs=logical_programs,
-        )
-    else:
-        final_stats = sample_bpf_stats(sampled_prog_ids)
-    if sampled_prog_id_map is not None:
-        sampled_to_target = {
-            int(sampled_prog_id): int(target_prog_id)
-            for target_prog_id, sampled_prog_id in sampled_prog_id_map.items()
-            if int(target_prog_id) > 0 and int(sampled_prog_id) > 0
-        }
-
-        def remap_stats(raw_stats: Mapping[int, Mapping[str, object]]) -> dict[int, dict[str, object]]:
-            remapped: dict[int, dict[str, object]] = {}
-            for sampled_prog_id, record in raw_stats.items():
-                target_prog_id = sampled_to_target.get(int(sampled_prog_id))
-                if target_prog_id is None:
-                    continue
-                entry = dict(record)
-                entry["sampled_prog_id"] = int(sampled_prog_id)
-                entry["id"] = int(target_prog_id)
-                remapped[int(target_prog_id)] = entry
-            return remapped
-
-        initial_stats = remap_stats(initial_stats)
-        final_stats = remap_stats(final_stats)
+    final_stats = sample_bpf_stats(logical_prog_ids)
     return {
         "workloads": workloads,
         "bpf": compute_delta(initial_stats, final_stats),
     }
-
-def _scx_live_prog_id_map_for_runner(
-    runner: ScxRunner,
-    logical_prog_ids: Sequence[int],
-    *,
-    previous_programs: Sequence[Mapping[str, object]],
-) -> tuple[dict[int, int], list[dict[str, object]]]:
-    logical_ids = [int(prog_id) for prog_id in logical_prog_ids if int(prog_id) > 0]
-    if not logical_ids:
-        return {}, []
-    wanted = {int(prog_id) for prog_id in logical_ids}
-    previous_name_by_id = {
-        int(program["id"]): str(program["name"]).strip()
-        for program in previous_programs
-        if int(program.get("id", 0) or 0) in wanted and str(program.get("name") or "").strip()
-    }
-    refreshed_programs = runner.refresh_live_programs()
-    refreshed_id_by_name = {
-        str(program.get("name") or "").strip(): int(program.get("id", 0) or 0)
-        for program in refreshed_programs
-        if int(program.get("id", 0) or 0) > 0 and str(program.get("name") or "").strip()
-    }
-    live_ids = {int(program.get("id", 0) or 0) for program in refreshed_programs}
-    remapped = {
-        int(logical_prog_id): int(refreshed_id_by_name[program_name])
-        for logical_prog_id, program_name in previous_name_by_id.items()
-        if int(refreshed_id_by_name.get(program_name, 0) or 0) > 0
-    }
-    for logical_prog_id in logical_ids:
-        if int(logical_prog_id) in remapped:
-            continue
-        if int(logical_prog_id) in live_ids:
-            remapped[int(logical_prog_id)] = int(logical_prog_id)
-    return remapped, [dict(program) for program in refreshed_programs]
-
-
-def _sample_scx_measurement_stats(
-    runner: ScxRunner,
-    logical_prog_ids: Sequence[int],
-    *,
-    previous_programs: Sequence[Mapping[str, object]],
-) -> tuple[dict[int, dict[str, object]], dict[int, int], list[dict[str, object]]]:
-    live_prog_id_map: dict[int, int] = {}
-    live_programs: list[dict[str, object]] = []
-    raw_stats: dict[int, dict[str, object]] | None = None
-    last_error: RuntimeError | None = None
-    candidates = list(previous_programs)
-    for attempt in range(4):
-        live_prog_id_map, live_programs = _scx_live_prog_id_map_for_runner(
-            runner,
-            logical_prog_ids,
-            previous_programs=candidates,
-        )
-        sampled_prog_ids = sorted({int(sampled_prog_id) for sampled_prog_id in live_prog_id_map.values() if int(sampled_prog_id) > 0})
-        if not sampled_prog_ids:
-            last_error = RuntimeError(f"{type(runner).__name__}: did not expose any live scheduler programs for stats sampling")
-        else:
-            try:
-                raw_stats = sample_bpf_stats(sampled_prog_ids)
-                break
-            except RuntimeError as exc:
-                last_error = exc
-        candidates = live_programs or candidates
-        if attempt < 3:
-            time.sleep(0.25)
-    if raw_stats is None:
-        raise last_error or RuntimeError(f"{type(runner).__name__}: stats sampling returned no records")
-    sampled_to_target = {
-        int(sampled_prog_id): int(target_prog_id)
-        for target_prog_id, sampled_prog_id in live_prog_id_map.items()
-        if int(target_prog_id) > 0 and int(sampled_prog_id) > 0
-    }
-    remapped: dict[int, dict[str, object]] = {}
-    for sampled_prog_id, record in raw_stats.items():
-        target_prog_id = sampled_to_target.get(int(sampled_prog_id))
-        if target_prog_id is None:
-            continue
-        entry = dict(record)
-        entry["sampled_prog_id"] = int(sampled_prog_id)
-        entry["id"] = int(target_prog_id)
-        remapped[int(target_prog_id)] = entry
-    if not remapped:
-        raise RuntimeError(f"{type(runner).__name__}: stats sampling returned no logical program records")
-    return remapped, live_prog_id_map, live_programs
 
 def build_markdown(payload: Mapping[str, object]) -> str:
     return "\n".join(

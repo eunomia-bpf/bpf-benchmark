@@ -7,7 +7,7 @@ CFLAGS ?= -O2 -g -Wall -Wno-cpp
 # Use -I (not -isystem) so vendor REJIT headers override system linux/bpf.h
 INCLUDES := -I$(ROOT_DIR)/vendor/linux-framework/include/uapi
 
-TESTS := fuzz_rejit adversarial_rejit scx_bad_rejit_replay scx_prog_show_race
+TESTS := fuzz_rejit adversarial_rejit
 
 .PHONY: all clean run
 
@@ -23,9 +23,6 @@ run: all
 	@echo ""
 	@echo "=== Running adversarial_rejit ==="
 	$(BUILD_DIR)/adversarial_rejit
-	@echo ""
-	@echo "=== Running scx_bad_rejit_replay ==="
-	$(BUILD_DIR)/scx_bad_rejit_replay
 	@echo ""
 	@echo "=== Running fuzz_rejit (1000 rounds) ==="
 	$(BUILD_DIR)/fuzz_rejit 1000

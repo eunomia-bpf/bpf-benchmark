@@ -16,7 +16,6 @@ from runner.suites._common import (
     csv_tokens,
     ensure_bpf_stats_enabled,
     ensure_katran_artifacts,
-    ensure_scx_artifacts,
     env_with_suite_runtime_ld,
     resolve_daemon_binary,
     resolve_executable,
@@ -35,17 +34,15 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.set_defaults(workspace=str(ROOT_DIR), target_name="local")
     parser.add_argument(
         "--case",
-        choices=("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran", "all"),
+        choices=("tracee", "tetragon", "bpftrace", "bcc", "katran", "all"),
         default="all",
         help="Run one e2e case instead of the full suite.",
     )
     parser.add_argument("--daemon-binary", default="", help="Override the bpfrejit-daemon binary path.")
     parser.add_argument("--native-repos", default="", help="Comma-separated native repo artifacts to validate.")
-    parser.add_argument("--scx-packages", default="", help="Comma-separated SCX package artifacts to validate.")
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
     args.native_repos = csv_tokens(args.native_repos)
-    args.scx_packages = csv_tokens(args.scx_packages)
     return args
 
 
@@ -73,7 +70,6 @@ def _run_e2e_suite(workspace: Path, args: argparse.Namespace) -> None:
     if inside_runtime_image() and shutil.which("ip", path=env["PATH"]) is not None:
         run_checked(["ip", "link", "set", "lo", "up"], cwd=workspace, env=env, die=_die)
     ensure_bpf_stats_enabled(workspace, _die)
-    ensure_scx_artifacts(workspace, args.target_arch, args.scx_packages, _die)
     daemon_binary = resolve_daemon_binary(workspace, args.target_arch, args.daemon_binary, _die)
     ensure_katran_artifacts(workspace, args.target_arch, args.native_repos, _die)
     _run_e2e_case(workspace, args, env, daemon_binary, python_bin)

@@ -22,9 +22,7 @@ from runner.libs.workspace_layout import (
 from runner.suites._common import (
     add_common_args,
     base_suite_runtime_env,
-    csv_tokens,
     ensure_bpf_stats_enabled,
-    ensure_scx_artifacts,
     env_with_suite_runtime_ld,
     positive_int,
     resolve_daemon_binary,
@@ -54,13 +52,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Test mode to run.",
     )
     parser.add_argument("--fuzz-rounds", type=positive_int, default=1000, help="Number of fuzz_rejit rounds.")
-    parser.add_argument("--scx-prog-show-race-mode", default="bpftool-loop", help="scx_prog_show_race mode.")
-    parser.add_argument("--scx-prog-show-race-iterations", type=positive_int, default=20, help="scx_prog_show_race iterations.")
-    parser.add_argument("--scx-prog-show-race-load-timeout", type=positive_int, default=20, help="scx_prog_show_race load timeout.")
-    parser.add_argument("--scx-packages", default="", help="Comma-separated SCX package artifacts to validate.")
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
-
-    args.scx_packages = csv_tokens(args.scx_packages)
     return args
 
 
@@ -161,14 +153,13 @@ def _run_negative_suite(
     args: argparse.Namespace,
     env: dict[str, str],
     *,
-    include_scx_race: bool,
     include_adversarial: bool = True,
     include_fuzz: bool = True,
     log_path: Path | None = None,
 ) -> tuple[int, int]:
     _log_test_section("Running tests/negative/ adversarial suite")
     negative_build = test_negative_build_dir(workspace, args.target_arch)
-    runtime_env, runtime_ld = env_with_suite_runtime_ld(workspace, args.target_arch, env)
+    runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
     passed = 0
     failed = 0
     tests: list[tuple[str, list[str], dict[str, str]]] = []
@@ -182,15 +173,6 @@ def _run_negative_suite(
                 runtime_env.copy(),
             )
         )
-    if include_scx_race:
-        scx_env = {**runtime_env, "SCX_RUNTIME_LD_LIBRARY_PATH": runtime_ld}
-        scx_command = [
-            str(negative_build / "scx_prog_show_race"), str(workspace),
-            "--mode", str(args.scx_prog_show_race_mode),
-            "--iterations", str(args.scx_prog_show_race_iterations),
-            "--load-timeout", str(args.scx_prog_show_race_load_timeout),
-        ]
-        tests.append((f"scx_prog_show_race ({args.scx_prog_show_race_mode})", scx_command, scx_env))
     for label, command, command_env in tests:
         print(f"--- {label} ---", file=sys.stderr)
         if _run_with_status(command, cwd=workspace, env=command_env, log_path=log_path):
@@ -245,7 +227,7 @@ def _run_selftest_mode(workspace: Path, args: argparse.Namespace, env: dict[str,
     _log_test_section("Loading kinsn modules")
     _load_kinsn_modules(workspace, args.target_arch)
     pa, fa = _run_unittest_suite(workspace, args, env, log_path=log_path)
-    pb, fb = _run_negative_suite(workspace, args, env, include_scx_race=False, log_path=log_path)
+    pb, fb = _run_negative_suite(workspace, args, env, log_path=log_path)
     _print_test_summary(pa + pb, fa + fb, prefix="vm-selftest")
     if fa + fb:
         _die("vm-selftest failed")
@@ -253,7 +235,7 @@ def _run_selftest_mode(workspace: Path, args: argparse.Namespace, env: dict[str,
 
 def _run_negative_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str], artifact_dir: Path) -> None:
     log_path = artifact_dir / "negative.log"
-    passed, failed = _run_negative_suite(workspace, args, env, include_scx_race=True, log_path=log_path)
+    passed, failed = _run_negative_suite(workspace, args, env, log_path=log_path)
     _print_test_summary(passed, failed, prefix="vm-negative-test")
     if failed:
         _die("vm-negative-test failed")
@@ -263,7 +245,7 @@ def _run_fuzz_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str
     log_path = artifact_dir / "fuzz.log"
     passed, failed = _run_negative_suite(
         workspace, args, env,
-        include_scx_race=False, include_adversarial=False, include_fuzz=True,
+        include_adversarial=False, include_fuzz=True,
         log_path=log_path,
     )
     _print_test_summary(passed, failed, prefix="vm-fuzz-test")
@@ -281,7 +263,7 @@ def _run_test_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str
     p, f = _run_unittest_suite(workspace, args, env)
     total_pass += p
     total_fail += f
-    p, f = _run_negative_suite(workspace, args, env, include_scx_race=True)
+    p, f = _run_negative_suite(workspace, args, env)
     total_pass += p
     total_fail += f
     _print_test_summary(total_pass, total_fail)
@@ -306,7 +288,6 @@ def _run_test_suite(workspace: Path, args: argparse.Namespace) -> None:
         run_checked(["ip", "link", "set", "lo", "up"], cwd=workspace, env=env, die=_die)
     if _mode_needs_bpf_stats(args.test_mode):
         ensure_bpf_stats_enabled(workspace, _die)
-    ensure_scx_artifacts(workspace, args.target_arch, args.scx_packages, _die)
 
     if args.test_mode == "selftest":
         _run_selftest_mode(workspace, args, env, artifact_dir)

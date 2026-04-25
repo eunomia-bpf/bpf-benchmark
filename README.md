@@ -6,7 +6,7 @@ Three-layer benchmarking pipeline:
 
 - `micro/`: isolated micro-benchmarks driven by `bpf_prog_test_run_opts`
 - `corpus/`: real-world program collection, measurement, and analysis
-- `e2e/`: end-to-end deployment benchmarks (Tracee, Tetragon, bpftrace, scx, katran)
+- `e2e/`: end-to-end deployment benchmarks (Tracee, Tetragon, bpftrace, BCC, Katran)
 
 The historical multi-runtime userspace benchmark layer has been removed; the active tree is `micro/`, `corpus/`, and `e2e/`.
 
@@ -20,8 +20,8 @@ host-kernel boundaries lives in
 bpf-benchmark/
 ├── runner/                # Target/suite contracts, executors, shared libs, and micro_exec
 ├── micro/                 # Isolated micro-benchmark suites, drivers, and inputs
-├── corpus/                # 23-project real-world corpus, fetch/build, and measurement
-├── e2e/                   # End-to-end workloads (tracee, tetragon, bpftrace, scx, katran)
+├── corpus/                # Real-world corpus, fetch/build, and measurement
+├── e2e/                   # End-to-end workloads (tracee, tetragon, bpftrace, bcc, katran)
 ├── daemon/                # Userspace BPF daemon (bpfrejit-daemon CLI)
 ├── config/                # YAML benchmark suite manifests (micro_pure_jit.yaml etc.)
 ├── tests/                 # Userspace/kernel self-tests
@@ -110,7 +110,7 @@ loads and runs the same `runner-runtime` image with privileged suite containers.
 
 `micro/` owns the isolated benchmark manifests (`micro/config/micro_pure_jit.yaml`), input generators, and the Python suite driver (`micro/driver.py`).
 
-`corpus/` owns the 23-project real-world corpus, fetch/build tooling, declarative app suites in `corpus/config/`, and the measurement entrypoint in `corpus/driver.py`.
+`corpus/` owns the real-world corpus, fetch/build tooling, declarative app suites in `corpus/config/`, and the measurement entrypoint in `corpus/driver.py`.
 
 `e2e/` owns full deployment-style evaluation via `e2e/driver.py` plus per-case assets under `e2e/cases/`.
 

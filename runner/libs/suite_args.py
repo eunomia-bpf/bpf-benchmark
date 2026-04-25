@@ -85,9 +85,6 @@ def suite_args_from_env(
         args.extend([
             "--test-mode", str(mode).strip().lower(),
             "--fuzz-rounds", _env(values, "FUZZ_ROUNDS", "1000"),
-            "--scx-prog-show-race-mode", _env(values, "SCX_PROG_SHOW_RACE_MODE", "bpftool-loop"),
-            "--scx-prog-show-race-iterations", _env(values, "SCX_PROG_SHOW_RACE_ITERATIONS", "20"),
-            "--scx-prog-show-race-load-timeout", _env(values, "SCX_PROG_SHOW_RACE_LOAD_TIMEOUT", "20"),
         ])
         return args
 

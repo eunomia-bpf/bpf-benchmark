@@ -29,10 +29,6 @@ from e2e.cases.bpftrace.case import (  # noqa: E402
     build_markdown as build_bpftrace_markdown,
     run_bpftrace_case,
 )
-from e2e.cases.scx.case import (  # noqa: E402
-    build_markdown as build_scx_markdown,
-    run_scx_case,
-)
 from e2e.cases.tetragon.case import (  # noqa: E402
     build_markdown as build_tetragon_markdown,
     run_tetragon_case,
@@ -57,7 +53,6 @@ from runner.libs.case_common import (  # noqa: E402
 DEFAULT_OUTPUT_JSON = RESULTS_DIR / "tracee.json"
 DEFAULT_TETRAGON_OUTPUT_JSON = RESULTS_DIR / "tetragon.json"
 DEFAULT_BPFTRACE_OUTPUT_JSON = RESULTS_DIR / "bpftrace.json"
-DEFAULT_SCX_OUTPUT_JSON = RESULTS_DIR / "scx.json"
 DEFAULT_BCC_OUTPUT_JSON = RESULTS_DIR / "bcc.json"
 DEFAULT_KATRAN_OUTPUT_JSON = RESULTS_DIR / "katran.json"
 
@@ -84,11 +79,6 @@ CASE_SPECS: dict[str, CaseSpec] = {
         build_markdown=build_bpftrace_markdown,
         default_output_json=DEFAULT_BPFTRACE_OUTPUT_JSON,
     ),
-    "scx": CaseSpec(
-        run_case=run_scx_case,
-        build_markdown=build_scx_markdown,
-        default_output_json=DEFAULT_SCX_OUTPUT_JSON,
-    ),
     "bcc": CaseSpec(
         run_case=run_bcc_case,
         build_markdown=build_bcc_markdown,
@@ -107,7 +97,7 @@ def _args_no_kinsn(args: argparse.Namespace) -> bool:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the repository end-to-end benchmark suite driver.")
-    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran", "all"))
+    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "bcc", "katran", "all"))
     parser.add_argument("--duration", type=int, help="Override the per-workload duration in seconds.")
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--daemon", default=str(ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"))
@@ -131,7 +121,7 @@ def resolve_primary_output_json(args: argparse.Namespace) -> Path:
     return Path(args.output_json).resolve()
 
 
-ALL_CASES = ("tracee", "tetragon", "bpftrace", "scx", "bcc", "katran")
+ALL_CASES = ("tracee", "tetragon", "bpftrace", "bcc", "katran")
 def _payload_status(payload: object) -> str:
     if not isinstance(payload, dict):
         return ""

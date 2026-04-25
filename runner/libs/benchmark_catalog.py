@@ -76,7 +76,6 @@ MACRO_APP_DEFINITIONS: tuple[MacroAppDefinition, ...] = (
     MacroAppDefinition(name="bcc/tcpconnect", runner="bcc", workload="network", runner_args={"tool": "tcpconnect"}),
     MacroAppDefinition(name="bcc/tcplife", runner="bcc", workload="network", runner_args={"tool": "tcplife"}),
     MacroAppDefinition(name="bcc/runqlat", runner="bcc", workload="hackbench", runner_args={"tool": "runqlat"}),
-    MacroAppDefinition(name="scx/rusty", runner="scx", workload="hackbench", runner_args={"scheduler": "rusty"}),
     MacroAppDefinition(name="tetragon/default", runner="tetragon", workload="tetragon_exec_connect_mix"),
     MacroAppDefinition(name="katran", runner="katran", workload="test_run"),
     MacroAppDefinition(name="tracee/default", runner="tracee", workload="tracee_system_edge_mix", duration_s=5.0),

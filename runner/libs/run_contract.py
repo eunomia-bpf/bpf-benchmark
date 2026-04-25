@@ -32,13 +32,11 @@ class RunIdentity:
 @dataclass(frozen=True)
 class SuiteRequirements:
     needs_runtime_btf: str = "0"
-    needs_sched_ext: str = "0"
 
 
 @dataclass(frozen=True)
 class ArtifactRequirements:
     native_repos: tuple[str, ...] = ()
-    scx_packages: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -92,7 +90,7 @@ class RunConfig:
         return {
             "RUN_TARGET_NAME": i.target_name, "RUN_TARGET_ARCH": arch,
             "RUN_EXECUTOR": i.executor, "RUN_SUITE_NAME": i.suite_name, "RUN_TOKEN": i.token,
-            "RUN_SUITE_NEEDS_RUNTIME_BTF": s.needs_runtime_btf, "RUN_SUITE_NEEDS_SCHED_EXT": s.needs_sched_ext,
+            "RUN_SUITE_NEEDS_RUNTIME_BTF": s.needs_runtime_btf,
             "RUN_NAME_TAG": aw.name_tag, "RUN_INSTANCE_TYPE": aw.instance_type,
             "RUN_REMOTE_USER": r.user, "RUN_REMOTE_STAGE_DIR": r.stage_dir,
             "RUN_AMI_PARAM": aw.ami_param, "RUN_AMI_ID": aw.ami_id,
@@ -107,7 +105,6 @@ class RunConfig:
             "RUN_REMOTE_PYTHON_BIN": r.python_bin, "RUN_RUNTIME_PYTHON_BIN": r.runtime_python_bin,
             "RUN_RUNTIME_CONTAINER_IMAGE": r.runtime_container_image,
             "RUN_NATIVE_REPOS_CSV": join_csv(list(a.native_repos)),
-            "RUN_SCX_PACKAGES_CSV": join_csv(list(a.scx_packages)),
             "RUN_BPFTOOL_BIN": r.bpftool_bin,
         }
 
@@ -155,9 +152,8 @@ class RunConfig:
         return cls(
             identity=RunIdentity(target_name=scalar("RUN_TARGET_NAME"), target_arch=scalar("RUN_TARGET_ARCH"),
                                  executor=scalar("RUN_EXECUTOR"), suite_name=scalar("RUN_SUITE_NAME"), token=scalar("RUN_TOKEN")),
-            suite=SuiteRequirements(needs_runtime_btf=scalar("RUN_SUITE_NEEDS_RUNTIME_BTF", "0"),
-                                    needs_sched_ext=scalar("RUN_SUITE_NEEDS_SCHED_EXT", "0")),
-            artifacts=ArtifactRequirements(native_repos=csv("RUN_NATIVE_REPOS_CSV"), scx_packages=csv("RUN_SCX_PACKAGES_CSV")),
+            suite=SuiteRequirements(needs_runtime_btf=scalar("RUN_SUITE_NEEDS_RUNTIME_BTF", "0")),
+            artifacts=ArtifactRequirements(native_repos=csv("RUN_NATIVE_REPOS_CSV")),
             remote=RemoteConfig(user=scalar("RUN_REMOTE_USER"), stage_dir=scalar("RUN_REMOTE_STAGE_DIR"),
                                 python_bin=scalar("RUN_REMOTE_PYTHON_BIN"),
                                 runtime_python_bin=scalar("RUN_RUNTIME_PYTHON_BIN", "python3"),
@@ -293,8 +289,6 @@ def _build_run_config_mapping(
     ) = ("",) * 18
     run_bpftool_bin = "bpftool"
     run_native_repos = suite.get("SUITE_DEFAULT_NATIVE_REPOS", "")
-    run_scx_packages = suite.get("SUITE_DEFAULT_SCX_PACKAGES", "")
-    run_needs_sched_ext = suite.get("SUITE_NEEDS_SCHED_EXT", "0")
     run_vm_timeout_seconds = suite.get("SUITE_DEFAULT_VM_TIMEOUT_SECONDS", "7200")
     run_host_python_bin = _env_or_default(values, "PYTHON", "python3")
     run_runtime_python_bin = _env_or_default(values, "RUNTIME_PYTHON", "python3")
@@ -370,21 +364,15 @@ def _build_run_config_mapping(
     if suite_name == "test":
         run_native_repos = ""
         if run_test_mode == "selftest":
-            run_scx_packages = ""
-            run_needs_sched_ext = "0"
+            pass
         elif run_test_mode == "fuzz":
-            run_scx_packages = ""
-            run_needs_sched_ext = "0"
+            pass
         elif run_test_mode != "test":
             _die(f"unsupported test mode: {run_test_mode}")
     elif suite_name == "micro":
         run_native_repos = ""
-        run_scx_packages = ""
     elif suite_name not in ("corpus", "e2e"):
         _die(f"unsupported suite: {suite_name}")
-
-    if run_needs_sched_ext == "1" and target.get("TARGET_SUPPORTS_SCHED_EXT", "0") != "1":
-        _die(f"target {target_name} does not support required sched_ext for suite {suite_name}")
 
     arch = target.get("TARGET_ARCH", "").strip()
     return {
@@ -392,7 +380,7 @@ def _build_run_config_mapping(
         "RUN_EXECUTOR": target.get("TARGET_EXECUTOR", ""), "RUN_SUITE_NAME": suite_name,
         "RUN_SUITE_NEEDS_RUNTIME_BTF": suite.get("SUITE_NEEDS_RUNTIME_BTF", "0"),
         "RUN_RUNTIME_CONTAINER_IMAGE": f"bpf-benchmark/runner-runtime:{arch}",
-        "RUN_TOKEN": run_token, "RUN_SUITE_NEEDS_SCHED_EXT": run_needs_sched_ext,
+        "RUN_TOKEN": run_token,
         "RUN_NAME_TAG": run_name_tag, "RUN_INSTANCE_TYPE": run_instance_type,
         "RUN_REMOTE_USER": run_remote_user, "RUN_REMOTE_STAGE_DIR": run_remote_stage_dir,
         "RUN_AMI_PARAM": run_ami_param, "RUN_AMI_ID": run_ami_id,
@@ -405,7 +393,7 @@ def _build_run_config_mapping(
         "RUN_HOST_PYTHON_BIN": run_host_python_bin, "RUN_VM_KERNEL_IMAGE": run_vm_kernel_image,
         "RUN_VM_TIMEOUT_SECONDS": run_vm_timeout_seconds,
         "RUN_REMOTE_PYTHON_BIN": run_remote_python_bin, "RUN_RUNTIME_PYTHON_BIN": run_runtime_python_bin,
-        "RUN_NATIVE_REPOS_CSV": run_native_repos, "RUN_SCX_PACKAGES_CSV": run_scx_packages,
+        "RUN_NATIVE_REPOS_CSV": run_native_repos,
         "RUN_BPFTOOL_BIN": run_bpftool_bin,
     }
 
