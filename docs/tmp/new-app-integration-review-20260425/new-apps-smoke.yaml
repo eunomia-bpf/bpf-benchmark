@@ -1,0 +1,10 @@
+schema_version: 2
+suite_name: new_apps_smoke
+
+apps:
+  - calico/felix
+  - suricata/xdp-filter
+  - suricata/xdp-lb
+  - loxilb/default
+  - otelcol-ebpf-profiler/default
+  - cilium/default
