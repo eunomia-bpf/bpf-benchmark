@@ -121,10 +121,19 @@ def reattach_xdp_program(iface: str, prog_id: int, *, target_mode: str) -> dict[
     return attach_info
 
 
+_BPFTOOL_INTERNAL_PROG_NAMES = frozenset({"dump_bpf_map", "dump_bpf_prog", "probe_bpf_kprob"})
+
+
 def _current_prog_ids() -> set[int]:
     payload = run_json_command([resolve_bpftool_binary(), "-j", "prog", "show"], timeout=30)
     if not isinstance(payload, list): raise RuntimeError("bpftool prog show returned unexpected payload")
-    return {int(r["id"]) for r in payload if isinstance(r, dict) and "id" in r}
+    return {
+        int(r["id"])
+        for r in payload
+        if isinstance(r, dict)
+        and "id" in r
+        and str(r.get("name", "")) not in _BPFTOOL_INTERNAL_PROG_NAMES
+    }
 
 
 def _namespace_exists(namespace: str) -> bool:
