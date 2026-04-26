@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -142,15 +143,108 @@ def _tracked_prog_id_set(prog_ids: Sequence[int]) -> frozenset[int]:
     return frozenset(int(prog_id) for prog_id in prog_ids if int(prog_id) > 0)
 
 
+def _normalize_live_programs(programs: object) -> list[dict[str, object]]:
+    if not isinstance(programs, Sequence) or isinstance(programs, (str, bytes, bytearray)):
+        return []
+    deduped: dict[int, dict[str, object]] = {}
+    for program in programs:
+        if not isinstance(program, Mapping):
+            continue
+        prog_id = int(program.get("id", 0) or 0)
+        if prog_id <= 0:
+            continue
+        deduped[prog_id] = dict(program)
+    return [deduped[prog_id] for prog_id in sorted(deduped)]
+
+
+def _session_program_records(session: "CorpusAppSession") -> list[dict[str, object]]:
+    programs = _normalize_live_programs(session.runner.live_rejit_programs())
+    if programs:
+        return programs
+    return _normalize_live_programs(session.state.artifacts.get("programs"))
+
+
+def _program_identity(program: Mapping[str, object]) -> tuple[str, str, str, str, int]:
+    return (
+        str(program.get("name") or ""),
+        str(program.get("type") or ""),
+        str(program.get("attach_type") or program.get("expected_attach_type") or ""),
+        str(program.get("attach_to") or program.get("attach_target") or program.get("attach_btf_name") or ""),
+        int(program.get("attach_btf_id", 0) or 0),
+    )
+
+
+def _match_programs_by_identity(
+    candidates: Sequence[Mapping[str, object]],
+    expected_programs: Sequence[Mapping[str, object]],
+    *,
+    claimed_ids: Sequence[int] = (),
+) -> tuple[list[dict[str, object]], list[int]]:
+    remaining = Counter(_program_identity(program) for program in expected_programs)
+    claimed = {int(prog_id) for prog_id in claimed_ids if int(prog_id) > 0}
+    matched: list[dict[str, object]] = []
+    overlapping_claimed: set[int] = set()
+    for program in _normalize_live_programs(candidates):
+        identity = _program_identity(program)
+        if remaining[identity] <= 0:
+            continue
+        prog_id = int(program["id"])
+        if prog_id in claimed:
+            overlapping_claimed.add(prog_id)
+            continue
+        matched.append(dict(program))
+        remaining[identity] -= 1
+    return matched, sorted(overlapping_claimed)
+
+
+def _runner_rediscovered_programs(session: "CorpusAppSession") -> tuple[list[dict[str, object]], str]:
+    refresh = getattr(session.runner, "refresh_programs", None)
+    if callable(refresh):
+        return _normalize_live_programs(refresh()), "runner.refresh_programs"
+    runtime_session = getattr(session.runner, "session", None)
+    refresh = getattr(runtime_session, "refresh_programs", None)
+    if callable(refresh):
+        return _normalize_live_programs(refresh()), "runner.session.refresh_programs"
+    discover = getattr(runtime_session, "_discover_programs", None)
+    if callable(discover):
+        return _normalize_live_programs(discover()), "runner.session._discover_programs"
+    return [], ""
+
+
+def _rediscover_session_programs(
+    session: "CorpusAppSession",
+    *,
+    current_programs: Sequence[Mapping[str, object]],
+    claimed_ids: Sequence[int],
+) -> tuple[list[dict[str, object]], str, list[int]]:
+    expected_programs = _session_program_records(session)
+    if not expected_programs:
+        return [], "", []
+    overlapping_claimed: set[int] = set()
+    runner_programs, source = _runner_rediscovered_programs(session)
+    if runner_programs:
+        matched_programs, claimed_overlap = _match_programs_by_identity(
+            runner_programs,
+            expected_programs,
+            claimed_ids=claimed_ids,
+        )
+        overlapping_claimed.update(claimed_overlap)
+        if matched_programs:
+            return matched_programs, source, sorted(overlapping_claimed)
+    matched_programs, claimed_overlap = _match_programs_by_identity(
+        current_programs,
+        expected_programs,
+        claimed_ids=claimed_ids,
+    )
+    overlapping_claimed.update(claimed_overlap)
+    return matched_programs, source or "bpftool prog show", sorted(overlapping_claimed)
+
+
 def _refresh_active_session_programs(
     sessions: Sequence["CorpusAppSession"],
     phase: str,
 ) -> None:
-    current_programs = [
-        dict(program)
-        for program in programs_after(())
-        if int(program.get("id", 0) or 0) > 0
-    ]
+    current_programs = _normalize_live_programs(programs_after(()))
     current_programs_by_id = {
         int(program["id"]): dict(program)
         for program in current_programs
@@ -161,17 +255,51 @@ def _refresh_active_session_programs(
         tracked_prog_ids = _tracked_prog_id_set(session.state.prog_ids)
         if not tracked_prog_ids:
             raise RuntimeError(f"{session.app.name}: no tracked BPF program ids remain before {phase}")
-        if overlapping_ids := sorted(tracked_prog_ids & claimed_ids):
+        live_programs: list[dict[str, object]]
+        if missing_ids := sorted(tracked_prog_ids - current_prog_ids):
+            live_programs, discover_source, claimed_overlap = _rediscover_session_programs(
+                session,
+                current_programs=current_programs,
+                claimed_ids=sorted(claimed_ids),
+            )
+            if not live_programs:
+                if claimed_overlap:
+                    raise RuntimeError(
+                        f"{session.app.name}: tracked BPF program ids disappeared before {phase}; "
+                        f"rediscovered replacements overlap another session's claimed ids: "
+                        f"missing_ids={missing_ids}, tracked_ids={sorted(tracked_prog_ids)}, "
+                        f"claimed_overlap={claimed_overlap}"
+                    )
+                raise RuntimeError(
+                    f"{session.app.name}: tracked BPF program ids disappeared before {phase}; "
+                    f"rediscovery found no live replacement programs: "
+                    f"missing_ids={missing_ids}, tracked_ids={sorted(tracked_prog_ids)}"
+                )
+            _print_progress(
+                "session_warning",
+                app=session.app.name,
+                runner=session.app.runner,
+                phase=phase,
+                warning="tracked BPF program ids changed; refreshed live session programs",
+                previous_ids=sorted(tracked_prog_ids),
+                missing_ids=missing_ids,
+                refreshed_ids=[int(program["id"]) for program in live_programs],
+                discover_source=discover_source,
+            )
+        else:
+            if overlapping_ids := sorted(tracked_prog_ids & claimed_ids):
+                raise RuntimeError(
+                    f"{session.app.name}: BPF program ids are already claimed by another session before {phase}: "
+                    f"{overlapping_ids}"
+                )
+            live_programs = [dict(current_programs_by_id[prog_id]) for prog_id in sorted(tracked_prog_ids)]
+        if overlapping_ids := sorted(
+            int(program["id"]) for program in live_programs if int(program["id"]) in claimed_ids
+        ):
             raise RuntimeError(
                 f"{session.app.name}: BPF program ids are already claimed by another session before {phase}: "
                 f"{overlapping_ids}"
             )
-        if missing_ids := sorted(tracked_prog_ids - current_prog_ids):
-            raise RuntimeError(
-                f"{session.app.name}: tracked BPF program ids disappeared before {phase}: "
-                f"missing_ids={missing_ids}, tracked_ids={sorted(tracked_prog_ids)}"
-            )
-        live_programs = [dict(current_programs_by_id[prog_id]) for prog_id in sorted(tracked_prog_ids)]
         session.state.prog_ids = [int(program["id"]) for program in live_programs]
         session.state.artifacts["programs"] = live_programs
         session.runner.programs = [dict(program) for program in live_programs]
