@@ -13,11 +13,11 @@ apps:
   - bcc/tcplife
   - bcc/runqlat
   - calico/felix
-  - otelcol-ebpf-profiler/default
-  - cilium/default
-  - tetragon/default
+  - otelcol-ebpf-profiler/profiling
+  - cilium/agent
+  - tetragon/observer
   - katran
-  - tracee/default
+  - tracee/monitor
   - bpftrace/capable
   - bpftrace/biosnoop
   - bpftrace/vfsstat
