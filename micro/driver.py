@@ -247,6 +247,8 @@ def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: 
         return
 
     benchmarks = results.get("benchmarks", [])
+    if not benchmarks:
+        return
     baseline_record = next((record for record in benchmarks if record.get("name") == baseline_benchmark), None)
     if baseline_record is None:
         raise RuntimeError(f"baseline benchmark not found in results: {baseline_benchmark}")
