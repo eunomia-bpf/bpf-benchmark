@@ -318,6 +318,19 @@ def _remote_has_runtime_btf(ctx: aws_common.AwsExecutorContext, ip: str) -> bool
     ).returncode == 0
 
 
+def _ensure_remote_swap(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
+    script = r"""
+set -eu
+if swapon --show | grep -q /swapfile; then exit 0; fi
+sudo fallocate -l 2G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+swapon --show
+""".strip()
+    aws_common._ssh_exec(ctx, ip, "bash", "-c", script)
+
+
 def _ensure_remote_docker(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     script = r"""
 set -eu
@@ -553,6 +566,7 @@ def _ensure_instance_for_suite(ctx: aws_common.AwsExecutorContext) -> str:
         instance_ip = state.get("STATE_INSTANCE_IP", "").strip()
         aws_common._wait_for_ssh(ctx, instance_ip)
 
+    _ensure_remote_swap(ctx, instance_ip)
     _ensure_remote_runtime_image_loaded(ctx, instance_ip)
 
     def _maybe_setup(reason: bool) -> str | None:

@@ -261,17 +261,30 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
             limitations=limitations,
         )
 
+    post_rejit = lifecycle_result.post_rejit
     rejit_result = lifecycle_result.rejit_result
+    if post_rejit is not None and isinstance(rejit_result, Mapping):
+        rejit_error = str(rejit_result.get("error") or "").strip()
+        if rejit_error:
+            post_rejit["status"] = "error"
+            post_rejit["reason"] = rejit_error
+
+    errors: list[str] = []
     if isinstance(rejit_result, Mapping):
         rejit_error = str(rejit_result.get("error") or "").strip()
         if rejit_error:
             limitations.append(f"ReJIT/apply reported errors: {rejit_error}")
-    if lifecycle_result.post_rejit is None:
-        limitations.append("Post-ReJIT phase is unavailable.")
+            errors.append(rejit_error)
+    if post_rejit is None:
+        missing_post_rejit = "Post-ReJIT phase is unavailable."
+        limitations.append(missing_post_rejit)
+        errors.append(missing_post_rejit)
+    elif str(post_rejit.get("status") or "") != "ok":
+        errors.append(str(post_rejit.get("reason") or "post_rejit failed"))
 
-    return {
+    payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "ok",
+        "status": "error" if errors else "ok",
         "mode": "tetragon_daemon",
         "duration_s": duration_s,
         "tetragon_binary": tetragon_binary,
@@ -280,7 +293,10 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
         "config": dict(config),
         "programs": [dict(program) for program in lifecycle_result.artifacts.get("programs") or []],
         "baseline": lifecycle_result.baseline,
-        "post_rejit": lifecycle_result.post_rejit,
-        "rejit_result": lifecycle_result.rejit_result,
+        "post_rejit": post_rejit,
+        "rejit_result": rejit_result,
         "limitations": limitations,
     }
+    if errors:
+        payload["error_message"] = "; ".join(errors)
+    return payload

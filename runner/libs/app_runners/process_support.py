@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import os
 import subprocess
 import threading
@@ -31,6 +32,14 @@ def _program_id_preview(programs: Sequence[Mapping[str, object]], *, limit: int 
     return preview or "<none>"
 
 
+def _program_id_set(programs: Sequence[Mapping[str, object]]) -> frozenset[int]:
+    return frozenset(
+        int(program.get("id", 0) or 0)
+        for program in programs
+        if int(program.get("id", 0) or 0) > 0
+    )
+
+
 def describe_process_exit(process_name: str, process: Any | None, snapshot: Mapping[str, object]) -> str | None:
     if process is None:
         return f"{process_name} process handle is unavailable"
@@ -56,20 +65,24 @@ def wait_until_program_set_stable(
     deadline = time.monotonic() + max(0.0, float(timeout_s))
     stable_window = max(0.0, float(stable_window_s))
     poll_interval = max(0.05, float(poll_interval_s))
-    last_count = -1
-    last_change_at: float | None = None
+    required_stable_observations = max(1, int(math.ceil(stable_window / poll_interval)) + 1)
+    last_program_ids: frozenset[int] = frozenset()
+    stable_observations = 0
     last_programs: list[dict[str, object]] = []
     peak_programs: list[dict[str, object]] = []
     while True:
         now = time.monotonic()
         raw_programs = programs_after(before_ids) if discover_programs is None else discover_programs()
         programs = [dict(program) for program in raw_programs]
+        current_program_ids = _program_id_set(programs)
         last_programs = [dict(program) for program in programs]
         if len(programs) > len(peak_programs):
             peak_programs = [dict(program) for program in programs]
-        if len(programs) != last_count:
-            last_count = len(programs)
-            last_change_at = now
+        if current_program_ids == last_program_ids:
+            stable_observations += 1
+        else:
+            last_program_ids = current_program_ids
+            stable_observations = 1
         if process is not None:
             snapshot = {} if collector_snapshot is None else dict(collector_snapshot())
             if exit_reason := describe_process_exit(process_name, process, snapshot):
@@ -80,7 +93,7 @@ def wait_until_program_set_stable(
                     f"peak_program_count={len(peak_programs)}, "
                     f"peak_program_ids={_program_id_preview(peak_programs)})"
                 )
-        if programs and last_change_at is not None and (now - last_change_at) >= stable_window:
+        if programs and stable_observations >= required_stable_observations:
             return last_programs
         if now >= deadline:
             raise RuntimeError(

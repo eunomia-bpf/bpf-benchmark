@@ -263,6 +263,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         post_rejit_records: list[dict[str, object]] = []
         rejit_result: dict[str, dict[str, object] | None] = {}
         tracee_programs: list[dict[str, object]] = []
+        errors: list[str] = []
 
         with enable_bpf_stats():
             for cycle_index in range(sample_count):
@@ -336,7 +337,13 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     for record in (lifecycle_result.post_rejit.get("records") or [])
                     if isinstance(record, Mapping)
                 )
-                rejit_result[str(cycle_index)] = lifecycle_result.rejit_result
+                cycle_rejit_result = lifecycle_result.rejit_result
+                rejit_result[str(cycle_index)] = cycle_rejit_result
+                if isinstance(cycle_rejit_result, Mapping):
+                    cycle_error = str(cycle_rejit_result.get("error") or "").strip()
+                    if cycle_error:
+                        limitations.append(f"Cycle {cycle_index} ReJIT/apply reported errors: {cycle_error}")
+                        errors.append(f"cycle {cycle_index}: {cycle_error}")
                 if not tracee_programs:
                     tracee_programs = [dict(program) for program in lifecycle_result.artifacts.get("tracee_programs") or []]
     except Exception as exc:
@@ -352,9 +359,9 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             limitations=limitations,
         )
 
-    return {
+    payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "ok",
+        "status": "error" if errors else "ok",
         "mode": TRACEE_MODE,
         "duration_s": duration_s,
         "sample_count": sample_count,
@@ -370,3 +377,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "rejit_result": rejit_result,
         "limitations": limitations,
     }
+    if errors:
+        payload["error_message"] = "; ".join(errors)
+    return payload

@@ -138,16 +138,43 @@ def _build_runner_state(
     )
 
 
-def _refresh_active_session_programs(sessions: Sequence["CorpusAppSession"]) -> None:
-    current_programs = programs_after(())
+def _tracked_prog_id_set(prog_ids: Sequence[int]) -> frozenset[int]:
+    return frozenset(int(prog_id) for prog_id in prog_ids if int(prog_id) > 0)
+
+
+def _refresh_active_session_programs(
+    sessions: Sequence["CorpusAppSession"],
+    phase: str,
+) -> None:
+    current_programs = [
+        dict(program)
+        for program in programs_after(())
+        if int(program.get("id", 0) or 0) > 0
+    ]
+    current_programs_by_id = {
+        int(program["id"]): dict(program)
+        for program in current_programs
+    }
+    current_prog_ids = frozenset(current_programs_by_id)
     claimed_ids: set[int] = set()
-    for session in reversed(sessions):
-        live_programs = [dict(program) for program in programs_after(session.before_prog_ids, records=current_programs)
-                         if int(program.get("id", 0) or 0) > 0 and int(program.get("id", 0) or 0) not in claimed_ids]
-        if not live_programs:
-            raise RuntimeError(f"{session.app.name}: failed to refresh live BPF programs before measurement/apply")
+    for session in sessions:
+        tracked_prog_ids = _tracked_prog_id_set(session.state.prog_ids)
+        if not tracked_prog_ids:
+            raise RuntimeError(f"{session.app.name}: no tracked BPF program ids remain before {phase}")
+        if overlapping_ids := sorted(tracked_prog_ids & claimed_ids):
+            raise RuntimeError(
+                f"{session.app.name}: BPF program ids are already claimed by another session before {phase}: "
+                f"{overlapping_ids}"
+            )
+        if missing_ids := sorted(tracked_prog_ids - current_prog_ids):
+            raise RuntimeError(
+                f"{session.app.name}: tracked BPF program ids disappeared before {phase}: "
+                f"missing_ids={missing_ids}, tracked_ids={sorted(tracked_prog_ids)}"
+            )
+        live_programs = [dict(current_programs_by_id[prog_id]) for prog_id in sorted(tracked_prog_ids)]
         session.state.prog_ids = [int(program["id"]) for program in live_programs]
-        session.state.artifacts["programs"] = live_programs; session.runner.programs = [dict(program) for program in live_programs]
+        session.state.artifacts["programs"] = live_programs
+        session.runner.programs = [dict(program) for program in live_programs]
         claimed_ids.update(session.state.prog_ids)
 
 
@@ -195,7 +222,6 @@ class CorpusAppSession:
     app: AppSpec
     runner: AppRunner
     state: CaseLifecycleState
-    before_prog_ids: list[int]
     workload_seconds: float
 
 
@@ -230,7 +256,6 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                     app_workload_seconds = _app_workload_seconds(args, app)
                     runner: AppRunner | None = None
                     try:
-                        before_prog_ids = [int(program.get("id", 0) or 0) for program in programs_after(())]
                         runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
                         started_prog_ids = [int(value) for value in runner.start() if int(value) > 0]
                         state = _build_runner_state(app, runner, started_prog_ids)
@@ -238,7 +263,6 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                             app=app,
                             runner=runner,
                             state=state,
-                            before_prog_ids=before_prog_ids,
                             workload_seconds=app_workload_seconds,
                         )
                         sessions.append(session)
@@ -279,7 +303,7 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                             samples=samples,
                         ),
                         stop=lambda session, _: session.runner.stop(),
-                        refresh_sessions=lambda lifecycle_sessions, _phase: _refresh_active_session_programs(lifecycle_sessions),
+                        refresh_sessions=_refresh_active_session_programs,
                         on_session_failure=_on_session_failure,
                     )
                     lifecycle_by_app = {session.app.name: lifecycle for session, lifecycle in zip(sessions, lifecycle_results)}
