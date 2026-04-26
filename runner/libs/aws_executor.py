@@ -19,7 +19,7 @@ from runner.libs.run_contract import RunConfig, read_run_config_file
 from runner.libs.state_file import write_state
 from runner.libs.suite_commands import build_runtime_container_command, runtime_container_host_dirs
 from runner.libs.suite_args import read_suite_args_file
-from runner.libs.workspace_layout import runtime_container_image_tar_path
+from runner.libs.workspace_layout import daemon_binary_path, runtime_container_image_tar_path
 
 _die = partial(fail, "aws-executor")
 
@@ -374,6 +374,64 @@ def _ensure_remote_runtime_image_loaded(ctx: aws_common.AwsExecutorContext, ip: 
     aws_common._ssh_exec(ctx, ip, "sudo", "docker", "load", "-i", str(_remote_runtime_image_tar(ctx)))
 
 
+def _relative_repo_path(path: Path) -> str:
+    try:
+        return path.relative_to(ROOT_DIR).as_posix()
+    except ValueError:
+        _die(f"path is outside repository root: {path}")
+
+
+def _remote_workspace_sync_members(ctx: aws_common.AwsExecutorContext) -> list[str]:
+    members = [
+        "runner/__init__.py",
+        "runner/libs",
+        "runner/suites",
+    ]
+    if ctx.suite_name == "corpus":
+        members.extend(
+            [
+                "corpus/config",
+                "corpus/driver.py",
+                "corpus/inputs",
+                "e2e/cases/bpftrace/scripts",
+                "e2e/cases/tetragon/policies",
+                _relative_repo_path(daemon_binary_path(ROOT_DIR, ctx.contract.identity.target_arch)),
+            ]
+        )
+    normalized: list[str] = []
+    for member in members:
+        candidate = (ROOT_DIR / member).resolve()
+        if not candidate.exists():
+            _die(f"remote workspace sync source is missing: {candidate}")
+        normalized.append(member)
+    return normalized
+
+
+def _sync_remote_workspace_members(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
+    members = _remote_workspace_sync_members(ctx)
+    if not members:
+        return
+    remote_cmd = (
+        f"mkdir -p {shlex.quote(ctx.remote_stage_dir)} && "
+        f"tar -C {shlex.quote(ctx.remote_stage_dir)} -xpf -"
+    )
+    tar_cmd = ["tar", "-C", str(ROOT_DIR), "-cpf", "-", *members]
+    with subprocess.Popen(tar_cmd, stdout=subprocess.PIPE, cwd=ROOT_DIR) as tar_proc:
+        rc = subprocess.run(
+            ["ssh", *aws_common._ssh_base_args(ctx), f"{ctx.remote_user}@{ip}", remote_cmd],
+            stdin=tar_proc.stdout,
+            cwd=ROOT_DIR,
+            text=False,
+            check=False,
+        ).returncode
+        tar_proc.stdout.close()  # type: ignore[union-attr]
+        tar_proc.wait()
+    if tar_proc.returncode != 0:
+        _die("local tar failed while streaming remote workspace members")
+    if rc != 0:
+        _die(f"remote tar extract failed for workspace sync on {ip}")
+
+
 def _tar_transform_pattern(value: str) -> str:
     return "".join(f"\\{char}" if char in "\\.^$*[]" else char for char in value).replace("#", "\\#")
 
@@ -604,6 +662,7 @@ def _sync_remote_roots(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     remote_path = f"{ctx.remote_stage_dir}/{relative_image_tar}"
     aws_common._ssh_exec(ctx, ip, "mkdir", "-p", str(Path(remote_path).parent))
     aws_common._scp_to(ctx, ip, image_tar, remote_path)
+    _sync_remote_workspace_members(ctx, ip)
 
 
 def _sync_remote_results(
