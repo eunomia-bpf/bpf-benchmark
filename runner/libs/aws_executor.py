@@ -566,18 +566,20 @@ def _ensure_instance_for_suite(ctx: aws_common.AwsExecutorContext) -> str:
         instance_ip = state.get("STATE_INSTANCE_IP", "").strip()
         aws_common._wait_for_ssh(ctx, instance_ip)
 
-    _ensure_remote_swap(ctx, instance_ip)
     _ensure_remote_runtime_image_loaded(ctx, instance_ip)
 
     def _maybe_setup(reason: bool) -> str | None:
         if not reason: return None
         _setup_instance(ctx, instance_ip)
         s2 = aws_common._load_instance_state(ctx)
-        return s2.get("STATE_INSTANCE_IP", instance_ip).strip() or instance_ip
+        new_ip = s2.get("STATE_INSTANCE_IP", instance_ip).strip() or instance_ip
+        _ensure_remote_swap(ctx, new_ip)
+        return new_ip
 
     if result := _maybe_setup(not state.get("STATE_KERNEL_RELEASE", "").strip()): return result
     if result := _maybe_setup(_remote_kernel_release(ctx, instance_ip) != state.get("STATE_KERNEL_RELEASE", "").strip()): return result
     if result := _maybe_setup(ctx.contract.scalar("RUN_SUITE_NEEDS_RUNTIME_BTF", "0") == "1" and not _remote_has_runtime_btf(ctx, instance_ip)): return result
+    _ensure_remote_swap(ctx, instance_ip)
     return instance_ip
 
 

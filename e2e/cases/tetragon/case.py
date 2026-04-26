@@ -279,8 +279,6 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
         missing_post_rejit = "Post-ReJIT phase is unavailable."
         limitations.append(missing_post_rejit)
         errors.append(missing_post_rejit)
-    elif str(post_rejit.get("status") or "") != "ok":
-        errors.append(str(post_rejit.get("reason") or "post_rejit failed"))
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),

@@ -275,6 +275,8 @@ def _refresh_active_session_programs(
                     f"rediscovery found no live replacement programs: "
                     f"missing_ids={missing_ids}, tracked_ids={sorted(tracked_prog_ids)}"
                 )
+            expected_count = len(tracked_prog_ids)
+            refreshed_count = len(live_programs)
             _print_progress(
                 "session_warning",
                 app=session.app.name,
@@ -284,8 +286,20 @@ def _refresh_active_session_programs(
                 previous_ids=sorted(tracked_prog_ids),
                 missing_ids=missing_ids,
                 refreshed_ids=[int(program["id"]) for program in live_programs],
+                expected_count=expected_count,
+                refreshed_count=refreshed_count,
                 discover_source=discover_source,
             )
+            if refreshed_count < expected_count:
+                _print_progress(
+                    "session_warning",
+                    app=session.app.name,
+                    phase=phase,
+                    warning=(
+                        f"rediscovery returned fewer programs than expected: "
+                        f"{refreshed_count}/{expected_count}"
+                    ),
+                )
         else:
             if overlapping_ids := sorted(tracked_prog_ids & claimed_ids):
                 raise RuntimeError(
