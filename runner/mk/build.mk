@@ -305,7 +305,17 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES)
 			-DCMAKE_USER_MAKE_RULES_OVERRIDE_CXX="$$override_file" \
 			-DBUILD_TESTS=OFF; \
 	cmake --build "$$build_root/build" --target install -j"$(JOBS)"; \
+	if [ -x "$$install_root/example/katran_server_grpc" ]; then \
+		mkdir -p "$$install_root/bin"; \
+		cp -f "$$install_root/example/katran_server_grpc" "$$install_root/bin/katran_server_grpc"; \
+		chmod 0755 "$$install_root/bin/katran_server_grpc"; \
+	fi; \
 	cd "$$repo_root" && ./build_bpf_modules_opensource.sh -s "$$repo_root" -b "$$build_root" -o "$$bpf_root"; \
+	bpfprog_bpf="$$build_root/deps/bpfprog/bpf"; \
+	if [ -d "$$bpfprog_bpf" ]; then \
+		mkdir -p "$$bpf_root"; \
+		cp -f "$$bpfprog_bpf"/*.o "$$bpf_root"/; \
+	fi; \
 	test -x "$$install_root/bin/katran_server_grpc" || { echo "missing Katran install output: $$install_root/bin/katran_server_grpc" >&2; exit 1; }; \
 	[ -f "$$bpf_root/healthchecking_ipip.o" ] && mv -f "$$bpf_root/healthchecking_ipip.o" "$$bpf_root/healthchecking_ipip.bpf.o" || true; \
 	[ -f "$$bpf_root/xdp_root.o" ] && mv -f "$$bpf_root/xdp_root.o" "$$bpf_root/xdp_root.bpf.o" || true; \
