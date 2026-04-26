@@ -94,10 +94,12 @@ RUN apt-get update \
         rustc \
         scons \
         stress-ng \
+        sudo \
         sysbench \
         tar \
         unzip \
         util-linux \
+        wget \
         wrk \
         xz-utils \
         xxd \
@@ -155,14 +157,14 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     mkdir -p ./runner ./vendor ./vendor/linux-framework; \
     rsync -a /src/runner/mk ./runner/; \
     mkdir -p ./runner/repos; \
-    rsync -a /src/runner/repos/katran ./runner/repos/; \
+    if [ -d /src/runner/repos/katran ]; then rsync -a /src/runner/repos/katran ./runner/repos/; fi; \
     has_repo_content() { [ -n "$(find "./runner/repos/$1" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; }; \
     clone_sparse_repo() { \
         repo_name="$1"; repo_url="$2"; repo_branch="$3"; shift 3; \
         repo_dest="./runner/repos/${repo_name}"; \
         rm -rf "${repo_dest}"; \
         git clone --depth 1 --filter=blob:none --sparse --branch "${repo_branch}" "${repo_url}" "${repo_dest}"; \
-        (cd "${repo_dest}" && git sparse-checkout set "$@"); \
+        (cd "${repo_dest}" && git sparse-checkout set --no-cone "$@"); \
     }; \
     has_repo_content katran || clone_sparse_repo katran https://github.com/facebookincubator/katran.git main \
         CMakeLists.txt build build_bpf_modules_opensource.sh build_katran.sh cmake example_grpc katran/decap katran/lib; \
@@ -329,7 +331,7 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     rsync -a /src/tests/negative ./tests/; \
     rsync -a /src/daemon ./; \
     if [ -d /src/micro/generated-inputs ]; then rsync -a /src/micro/generated-inputs ./micro/; fi; \
-    rsync -a /src/corpus/bcf ./corpus/; \
+    if [ -d /src/corpus/bcf ]; then rsync -a /src/corpus/bcf ./corpus/; fi; \
     rsync -a /src/corpus/inputs ./corpus/; \
     rsync -a /src/micro/config ./micro/; \
     find /src/micro -maxdepth 1 -type f -name '*.py' -exec cp -a {} ./micro/ \;; \
