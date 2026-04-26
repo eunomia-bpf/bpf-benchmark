@@ -55,6 +55,14 @@ def repo_artifact_root() -> Path:
     return candidate
 
 
+def optional_repo_artifact_path(*parts: str | Path) -> Path | None:
+    try:
+        root = repo_artifact_root()
+    except RuntimeError:
+        return None
+    return root.joinpath(*(str(part) for part in parts))
+
+
 def pick_host_executable(*candidates: str | Path | None) -> Path | None:
     for candidate in candidates:
         if candidate is None:

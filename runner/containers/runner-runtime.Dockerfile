@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1.4
 ARG TRACEE_IMAGE=docker.io/aquasec/tracee:0.24.1@sha256:cfbbfee972e64a644f6b1bac74ee26998e6e12442697be4c797ae563553a2a5b
 ARG TETRAGON_IMAGE=quay.io/cilium/tetragon:v1.6.1@sha256:ff96ace3e6a0166ba04ff3eecfaeee19b7e6deee2b7cdbe3245feda57df5015f
+ARG CILIUM_IMAGE=quay.io/cilium/cilium:v1.19.3@sha256:2e61680593cddca8b6c055f6d4c849d87a26a1c91c7e3b8b56c7fb76ab7b7b10
+ARG CALICO_NODE_IMAGE=quay.io/calico/node:v3.31.3@sha256:f2339c4ff3a57228cbc39a1f67ab81abded1997d843e0e0b1e86664c7c4eb6c0
 FROM docker.io/library/ubuntu:24.04 AS runner-runtime-build-base
 
 ARG GO_VERSION=1.26.0
@@ -39,6 +41,8 @@ RUN apt-get update \
         g++ \
         gcc \
         git \
+        ipset \
+        iptables \
         iproute2 \
         kmod \
         libaio-dev \
@@ -141,6 +145,10 @@ WORKDIR ${IMAGE_WORKSPACE}
 FROM --platform=$TARGETPLATFORM ${TRACEE_IMAGE} AS runner-runtime-tracee-upstream
 
 FROM --platform=$TARGETPLATFORM ${TETRAGON_IMAGE} AS runner-runtime-tetragon-upstream
+
+FROM --platform=$TARGETPLATFORM ${CILIUM_IMAGE} AS runner-runtime-cilium-upstream
+
+FROM --platform=$TARGETPLATFORM ${CALICO_NODE_IMAGE} AS runner-runtime-calico-upstream
 
 FROM runner-runtime-build-base AS runner-runtime-userspace
 
@@ -263,6 +271,10 @@ FROM runner-runtime-userspace AS runner-runtime
 ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
+ARG TARGETARCH
+# The requested v0.120.0 asset is not published upstream; use the earliest
+# verified official otelcol-ebpf-profiler release instead.
+ARG OTELCOL_EBPF_PROFILER_VERSION=0.140.0
 
 RUN --mount=type=bind,source=.,target=/src,readonly \
     set -eux; \
@@ -420,14 +432,74 @@ COPY --from=runner-runtime-kernel-artifacts /artifacts/kernel /artifacts/kernel
 COPY --from=runner-runtime-kernel-artifacts /artifacts/modules /artifacts/modules
 COPY --from=runner-runtime-kernel-artifacts /artifacts/kinsn /artifacts/kinsn
 COPY --from=runner-runtime-kernel-artifacts /artifacts/manifest.json /artifacts/manifest.json
+COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-agent /usr/local/bin/cilium-agent
+COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-dbg /usr/local/bin/cilium-dbg
+COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-bugtool /usr/local/bin/cilium-bugtool
+COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-health /usr/local/bin/cilium-health
+COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-health-responder /usr/local/bin/cilium-health-responder
+COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-mount /usr/local/bin/cilium-mount
+COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-sysctlfix /usr/local/bin/cilium-sysctlfix
+COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/local/bin/clang /usr/local/bin/clang
+COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/local/bin/llc /usr/local/bin/llc
+COPY --from=runner-runtime-cilium-upstream /var/lib/cilium/ /var/lib/cilium/
+COPY --from=runner-runtime-calico-upstream --chmod=0755 /usr/bin/calico-node /usr/local/bin/calico-node
+COPY --from=runner-runtime-calico-upstream /etc/calico/ /etc/calico/
+COPY --from=runner-runtime-calico-upstream /usr/lib/calico/bpf/ /usr/lib/calico/bpf/
+COPY --from=runner-runtime-calico-upstream /included-source/ /included-source/
+COPY --from=runner-runtime-calico-upstream /usr/lib64/libpcap.so.1 /usr/local/lib/libpcap.so.1
+COPY --from=runner-runtime-calico-upstream /usr/lib64/libpcap.so.1.9.1 /usr/local/lib/libpcap.so.1.9.1
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends auditd \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && command -v ausyscall >/dev/null \
-    && ausyscall --dump >/dev/null
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        auditd \
+        etcd-server \
+        nftables \
+        ipset \
+        iptables; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*; \
+    ldconfig; \
+    command -v etcd >/dev/null; \
+    etcd --version >/dev/null; \
+    command -v iptables >/dev/null; \
+    command -v iptables-save >/dev/null; \
+    command -v ip6tables-save >/dev/null; \
+    command -v ipset >/dev/null; \
+    command -v nft >/dev/null; \
+    test -x /usr/local/bin/cilium-agent; \
+    test -x /usr/local/bin/calico-node; \
+    test -x /usr/local/bin/clang; \
+    test -x /usr/local/bin/llc; \
+    test -d /var/lib/cilium/bpf; \
+    test -d /usr/lib/calico/bpf; \
+    test -f /usr/lib/calico/bpf/common_map_stub.o; \
+    test -f /usr/lib/calico/bpf/xdp_preamble.o; \
+    test -f /usr/local/lib/libpcap.so.1; \
+    command -v ausyscall >/dev/null; \
+    ausyscall --dump >/dev/null; \
+    image_arch="${TARGETARCH}"; \
+    if [ -z "${image_arch}" ]; then image_arch="$(dpkg --print-architecture)"; fi; \
+    case "${image_arch}" in \
+        amd64|x86_64) otel_arch=amd64 ;; \
+        arm64|aarch64) otel_arch=arm64 ;; \
+        *) echo "unsupported runtime arch for otelcol-ebpf-profiler: ${image_arch}" >&2; exit 1 ;; \
+    esac; \
+    otel_tar="/tmp/otelcol-ebpf-profiler_${OTELCOL_EBPF_PROFILER_VERSION}_linux_${otel_arch}.tar.gz"; \
+    curl -fsSL "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v${OTELCOL_EBPF_PROFILER_VERSION}/otelcol-ebpf-profiler_${OTELCOL_EBPF_PROFILER_VERSION}_linux_${otel_arch}.tar.gz" -o "${otel_tar}"; \
+    tar -C /usr/local/bin -xzf "${otel_tar}" otelcol-ebpf-profiler; \
+    rm -f "${otel_tar}"; \
+    test -x /usr/local/bin/otelcol-ebpf-profiler; \
+    repo_artifact_root="/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}"; \
+    mkdir -p \
+        "${repo_artifact_root}/calico/bin" \
+        "${repo_artifact_root}/cilium/bin" \
+        "${repo_artifact_root}/otelcol-ebpf-profiler/bin"; \
+    ln -sfn /usr/local/bin/calico-node "${repo_artifact_root}/calico/bin/calico-node"; \
+    ln -sfn /usr/local/bin/cilium-agent "${repo_artifact_root}/cilium/bin/cilium-agent"; \
+    ln -sfn /usr/local/bin/cilium-dbg "${repo_artifact_root}/cilium/bin/cilium-dbg"; \
+    ln -sfn /usr/local/bin/otelcol-ebpf-profiler "${repo_artifact_root}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
 ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
     BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH} \

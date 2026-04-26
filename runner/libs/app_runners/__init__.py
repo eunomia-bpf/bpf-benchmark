@@ -66,10 +66,19 @@ def _adapt_katran(workload: str, kwargs: dict[str, object]) -> dict[str, object]
     return mapped
 
 
+def _adapt_native_process(workload: str, kwargs: dict[str, object]) -> dict[str, object]:
+    mapped = dict(kwargs)
+    mapped.setdefault("workload_kind", str(workload).strip())
+    return mapped
+
+
 _RUNNERS = {
     "bcc": ("runner.libs.app_runners.bcc", "BCCRunner", _adapt_bcc),
     "bpftrace": ("runner.libs.app_runners.bpftrace", "BpftraceRunner", _adapt_bpftrace),
+    "calico": ("runner.libs.app_runners.calico", "CalicoRunner", _adapt_native_process),
+    "cilium": ("runner.libs.app_runners.cilium", "CiliumRunner", _adapt_native_process),
     "katran": ("runner.libs.app_runners.katran", "KatranRunner", _adapt_katran),
+    "otelcol-ebpf-profiler": ("runner.libs.app_runners.otel_profiler", "OtelProfilerRunner", _adapt_native_process),
     "tetragon": ("runner.libs.app_runners.tetragon", "TetragonRunner", _adapt_tetragon),
     "tracee": ("runner.libs.app_runners.tracee", "TraceeRunner", _adapt_tracee),
 }

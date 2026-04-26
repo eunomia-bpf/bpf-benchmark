@@ -12,6 +12,9 @@ apps:
   - bcc/tcpconnect
   - bcc/tcplife
   - bcc/runqlat
+  - calico/felix
+  - otelcol-ebpf-profiler/default
+  - cilium/default
   - tetragon/default
   - katran
   - tracee/default
