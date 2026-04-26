@@ -6,6 +6,7 @@
 //! Zero kernel dependency — pure bytecode in, bytecode out.
 
 pub mod analysis;
+#[cfg(test)]
 pub mod elf_parser;
 pub mod insn;
 #[cfg(test)]

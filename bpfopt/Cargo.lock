@@ -59,17 +59,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
-name = "bpfget"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "kernel-sys",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "bpfopt"
 version = "0.1.0"
 dependencies = [
@@ -86,51 +75,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "goblin",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "bpfprof"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "kernel-sys",
- "libc",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "bpfrejit"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "kernel-sys",
-]
-
-[[package]]
-name = "bpfrejit-daemon"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "kernel-sys",
- "libc",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "bpfverify"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bpfopt-core",
- "clap",
- "kernel-sys",
  "serde",
  "serde_json",
 ]
@@ -209,22 +153,6 @@ name = "itoa"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
-
-[[package]]
-name = "kernel-sys"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "libc",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "libc"
-version = "0.2.184"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48f5d2a454e16a5ea0f4ced81bd44e4cfc7bd3a507b61887c99fd3538b28e4af"
 
 [[package]]
 name = "log"

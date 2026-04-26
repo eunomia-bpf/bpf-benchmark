@@ -504,17 +504,6 @@ pub fn emit_packed_kinsn_call_with_off(
         BpfInsn::call_kinsn_with_off(kinsn_btf_id, kinsn_off),
     ]
 }
-
-/// Ensure `btf_fd` is present in the program's REJIT `fd_array` list and
-/// return the 1-based slot number to encode in `CALL.off`.
-pub fn ensure_btf_fd_slot(program: &mut BpfProgram, btf_fd: i32) -> i16 {
-    if let Some(idx) = program.required_btf_fds.iter().position(|&fd| fd == btf_fd) {
-        return idx as i16 + 1;
-    }
-
-    program.required_btf_fds.push(btf_fd);
-    program.required_btf_fds.len() as i16
-}
 // ── Tests ──────────────────────────────────────────────────────────
 
 #[cfg(test)]

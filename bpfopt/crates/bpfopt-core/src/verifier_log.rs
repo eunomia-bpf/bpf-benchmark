@@ -9,8 +9,8 @@
 //! This module extracts per-PC register state summaries that can feed later
 //! optimization analyses (constant propagation, range checks, liveness, etc.).
 //!
-//! Used by `bpf_prog_rejit()` to parse verifier diagnostics on REJIT failure,
-//! providing structured error output in the serve optimize flow.
+//! The parsed verifier states are consumed directly by optimization passes such
+//! as const-prop and map-inline when they need verifier-derived facts.
 
 use std::collections::HashMap;
 

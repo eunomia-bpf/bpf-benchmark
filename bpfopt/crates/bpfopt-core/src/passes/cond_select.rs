@@ -5,7 +5,7 @@ use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_packed_kinsn_call_with_off, ensure_btf_fd_slot, fixup_all_branches};
+use super::utils::{emit_packed_kinsn_call_with_off, fixup_all_branches};
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
 /// bpf_select64() kfunc calls (lowered to CMOV by the JIT).
@@ -246,11 +246,7 @@ impl BpfPass for CondSelectPass {
             });
         }
 
-        let kfunc_off = ctx
-            .kinsn_registry
-            .btf_fd_for_pass(self.name())
-            .map(|fd| ensure_btf_fd_slot(program, fd))
-            .unwrap_or(0);
+        let kfunc_off = ctx.kinsn_registry.call_off_for_pass(self.name());
 
         // Build replacement instruction stream.
         let orig_len = program.insns.len();

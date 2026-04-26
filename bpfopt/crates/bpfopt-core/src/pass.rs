@@ -51,9 +51,6 @@ pub struct BpfProgram {
     pub annotations: Vec<InsnAnnotation>,
     /// Transform log: records what each pass did.
     pub transform_log: Vec<TransformEntry>,
-    /// BTF FDs required by kinsn function calls introduced during rewrite.
-    /// Used by the serve optimize path to construct the REJIT transport fd_array.
-    pub required_btf_fds: Vec<i32>,
     /// Map IDs referenced by this program, in the kernel's `used_maps` order.
     /// This metadata lets analyses resolve `BPF_PSEUDO_MAP_FD` references
     /// found in the original bytecode back to live kernel map objects.
@@ -102,7 +99,6 @@ impl BpfProgram {
             insns,
             annotations: vec![InsnAnnotation::default(); len],
             transform_log: Vec::new(),
-            required_btf_fds: Vec::new(),
             map_ids: Vec::new(),
             map_fd_bindings: HashMap::new(),
             branch_miss_rate: None,
@@ -312,10 +308,6 @@ pub struct PassResult {
     pub insns_before: usize,
     /// Instruction count after this pass ran.
     pub insns_after: usize,
-    /// Per-pass verifier outcome.
-    pub verify: PassVerifyResult,
-    /// Rollback outcome when a rejected pass is reverted to its pre-pass snapshot.
-    pub rollback: Option<PassRollbackResult>,
 }
 
 impl PassResult {
@@ -326,92 +318,6 @@ impl PassResult {
             *counts.entry(skip.reason.clone()).or_insert(0) += 1;
         }
         counts
-    }
-}
-
-#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "snake_case")]
-pub enum PassVerifyStatus {
-    NotNeeded,
-    Skipped,
-    Accepted,
-    Rejected,
-}
-
-#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
-pub struct PassVerifyResult {
-    pub status: PassVerifyStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub error_message: Option<String>,
-    #[serde(skip)]
-    pub verifier_states: Arc<[VerifierInsn]>,
-}
-
-#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
-pub struct PassRollbackResult {
-    pub action: String,
-    pub restored_insn_count: usize,
-}
-
-impl Default for PassVerifyResult {
-    fn default() -> Self {
-        Self::not_needed()
-    }
-}
-
-impl PassVerifyResult {
-    pub fn not_needed() -> Self {
-        Self {
-            status: PassVerifyStatus::NotNeeded,
-            error_message: None,
-            verifier_states: Arc::from([]),
-        }
-    }
-
-    pub fn skipped() -> Self {
-        Self {
-            status: PassVerifyStatus::Skipped,
-            error_message: None,
-            verifier_states: Arc::from([]),
-        }
-    }
-
-    #[cfg_attr(not(test), allow(dead_code))]
-    pub fn accepted() -> Self {
-        Self {
-            status: PassVerifyStatus::Accepted,
-            error_message: None,
-            verifier_states: Arc::from([]),
-        }
-    }
-
-    pub fn accepted_with_verifier_states(states: Vec<VerifierInsn>) -> Self {
-        Self {
-            status: PassVerifyStatus::Accepted,
-            error_message: None,
-            verifier_states: Arc::from(states),
-        }
-    }
-
-    pub fn rejected(error_message: impl Into<String>) -> Self {
-        Self {
-            status: PassVerifyStatus::Rejected,
-            error_message: Some(error_message.into()),
-            verifier_states: Arc::from([]),
-        }
-    }
-
-    fn rejected_change(&self) -> bool {
-        matches!(self.status, PassVerifyStatus::Rejected)
-    }
-}
-
-impl PassRollbackResult {
-    pub fn restored_pre_pass_snapshot(restored_insn_count: usize) -> Self {
-        Self {
-            action: "restored_pre_pass_snapshot".to_string(),
-            restored_insn_count,
-        }
     }
 }
 
@@ -476,7 +382,7 @@ pub trait BpfPass: Send + Sync {
 /// These values are invariant for the duration of a pipeline execution.
 #[derive(Clone, Debug)]
 pub struct PassContext {
-    /// Available kinsn targets and their descriptor/BTF transport metadata.
+    /// Available kinsn targets and their descriptor metadata.
     pub kinsn_registry: KinsnRegistry,
     /// CPU capabilities (detected at startup, checked by kinsn passes).
     pub platform: PlatformCapabilities,
@@ -488,7 +394,7 @@ pub struct PassContext {
     pub prog_type: u32,
 }
 
-/// Available kinsn targets and their descriptor/BTF transport metadata.
+/// Available kinsn targets and their descriptor metadata.
 /// BTF ID = -1 means the target is not available.
 #[derive(Clone, Debug, Default)]
 pub struct KinsnRegistry {
@@ -500,9 +406,9 @@ pub struct KinsnRegistry {
     pub endian_load16_btf_id: i32,
     pub endian_load32_btf_id: i32,
     pub endian_load64_btf_id: i32,
-    /// Per-target BTF FDs: maps target name (e.g., "bpf_rotate64") to the
-    /// owning BTF FD that must be present in the REJIT fd_array.
-    pub target_btf_fds: HashMap<String, i32>,
+    /// Per-target call offsets used when emitting kinsn calls.
+    /// `0` means no extra offset metadata is required.
+    pub target_call_offsets: HashMap<String, i16>,
     /// Per-target supported kinsn encodings.
     /// Tests that only seed BTF IDs rely on the packed-only fallback below.
     pub target_supported_encodings: HashMap<String, u32>,
@@ -533,14 +439,18 @@ impl KinsnRegistry {
         }
     }
 
-    pub fn btf_fd_for_target_name(&self, target_name: &str) -> Option<i32> {
-        self.target_btf_fds.get(target_name).copied()
+    pub fn call_off_for_target_name(&self, target_name: &str) -> i16 {
+        self.target_call_offsets
+            .get(target_name)
+            .copied()
+            .unwrap_or(0)
     }
 
-    /// Return the BTF FD required by a given pass's kinsn target.
-    pub fn btf_fd_for_pass(&self, pass_name: &str) -> Option<i32> {
-        let target_name = Self::target_name_for_pass(pass_name)?;
-        self.btf_fd_for_target_name(target_name)
+    /// Return the encoded call offset for a given pass's kinsn target.
+    pub fn call_off_for_pass(&self, pass_name: &str) -> i16 {
+        Self::target_name_for_pass(pass_name)
+            .map(|target_name| self.call_off_for_target_name(target_name))
+            .unwrap_or(0)
     }
 
     pub fn supported_encodings_for_target_name(&self, target_name: &str) -> u32 {
@@ -569,15 +479,6 @@ impl KinsnRegistry {
 
     pub fn packed_supported_for_target_name(&self, target_name: &str) -> bool {
         (self.supported_encodings_for_target_name(target_name) & BPF_KINSN_ENC_PACKED_CALL) != 0
-    }
-
-    /// Return all unique BTF FDs in the registry.
-    /// Used by the serve optimize path to validate that required_btf_fds are a subset.
-    pub fn all_btf_fds(&self) -> Vec<i32> {
-        let mut fds: Vec<i32> = self.target_btf_fds.values().copied().collect();
-        fds.sort();
-        fds.dedup();
-        fds
     }
 }
 
@@ -707,7 +608,6 @@ impl AnalysisRegistry {
 pub struct PassDebugTrace {
     pub pass_name: String,
     pub changed: bool,
-    pub verify: PassVerifyResult,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bytecode_before: Option<BpfBytecodeDump>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -787,18 +687,6 @@ impl PassManager {
         program: &mut BpfProgram,
         ctx: &PassContext,
     ) -> anyhow::Result<PipelineResult> {
-        self.run_with_verifier(program, ctx, &mut |_, _| Ok(PassVerifyResult::skipped()))
-    }
-
-    pub fn run_with_verifier<V>(
-        &self,
-        program: &mut BpfProgram,
-        ctx: &PassContext,
-        verifier: &mut V,
-    ) -> anyhow::Result<PipelineResult>
-    where
-        V: FnMut(&str, &BpfProgram) -> anyhow::Result<PassVerifyResult>,
-    {
         let available_passes = self
             .passes
             .iter()
@@ -831,7 +719,6 @@ impl PassManager {
                         program,
                         &mut cache,
                         ctx,
-                        verifier,
                         &mut debug_traces,
                     )?;
                     if const_result.changed {
@@ -844,7 +731,6 @@ impl PassManager {
                         program,
                         &mut cache,
                         ctx,
-                        verifier,
                         &mut debug_traces,
                     )?;
                     if dce_result.changed {
@@ -865,8 +751,7 @@ impl PassManager {
                 continue;
             }
 
-            let result =
-                self.run_single_pass(pass, program, &mut cache, ctx, verifier, &mut debug_traces)?;
+            let result = self.run_single_pass(pass, program, &mut cache, ctx, &mut debug_traces)?;
             if result.changed {
                 total_sites += result.sites_applied;
             }
@@ -894,81 +779,45 @@ impl PassManager {
         ctx: &PassContext,
         profiling: Option<&ProfilingData>,
     ) -> anyhow::Result<PipelineResult> {
-        self.run_with_profiling_and_verifier(program, ctx, profiling, &mut |_, _| {
-            Ok(PassVerifyResult::skipped())
-        })
-    }
-
-    pub fn run_with_profiling_and_verifier<V>(
-        &self,
-        program: &mut BpfProgram,
-        ctx: &PassContext,
-        profiling: Option<&ProfilingData>,
-        verifier: &mut V,
-    ) -> anyhow::Result<PipelineResult>
-    where
-        V: FnMut(&str, &BpfProgram) -> anyhow::Result<PassVerifyResult>,
-    {
         if let Some(data) = profiling {
             program.inject_profiling(data);
         }
-        self.run_with_verifier(program, ctx, verifier)
+        self.run(program, ctx)
     }
 
-    fn run_single_pass<V>(
+    fn run_single_pass(
         &self,
         pass: &dyn BpfPass,
         program: &mut BpfProgram,
         cache: &mut AnalysisCache,
         ctx: &PassContext,
-        verifier: &mut V,
         debug_traces: &mut Vec<PassDebugTrace>,
-    ) -> anyhow::Result<PassResult>
-    where
-        V: FnMut(&str, &BpfProgram) -> anyhow::Result<PassVerifyResult>,
-    {
+    ) -> anyhow::Result<PassResult> {
         for analysis_name in pass.required_analyses() {
             if let Some(analysis) = self.analyses.registry.get(analysis_name) {
                 analysis.run_and_cache(program, cache);
             }
         }
 
-        let before_program = program.clone();
-        let before_insns = before_program.insns.clone();
+        let before_insns = program.insns.clone();
         let insns_before = before_insns.len();
         let mut result = pass.run(program, cache, ctx)?;
         result.insns_before = insns_before;
         result.insns_after = program.insns.len();
 
         if result.changed {
-            let tentative_after = dump_bytecode_compact(&program.insns);
-            let verify = verifier(result.pass_name.as_str(), program)?;
-            let keep_change = !verify.rejected_change();
-            result.verify = verify.clone();
             debug_traces.push(PassDebugTrace {
                 pass_name: result.pass_name.clone(),
-                changed: keep_change,
-                verify: verify.clone(),
+                changed: true,
                 bytecode_before: Some(dump_bytecode_compact(&before_insns)),
-                bytecode_after: Some(tentative_after),
+                bytecode_after: Some(dump_bytecode_compact(&program.insns)),
             });
-            if keep_change {
-                program.verifier_states = verify.verifier_states.clone();
-                cache.invalidate_all();
-                program.sync_annotations();
-            } else {
-                *program = before_program;
-                result.changed = false;
-                result.insns_after = program.insns.len();
-                result.rollback = Some(PassRollbackResult::restored_pre_pass_snapshot(
-                    result.insns_after,
-                ));
-            }
+            cache.invalidate_all();
+            program.sync_annotations();
         } else {
             debug_traces.push(PassDebugTrace {
                 pass_name: result.pass_name.clone(),
                 changed: false,
-                verify: PassVerifyResult::not_needed(),
                 bytecode_before: None,
                 bytecode_after: None,
             });
@@ -1062,7 +911,7 @@ impl PassContext {
                 endian_load16_btf_id: -1,
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,
-                target_btf_fds: HashMap::new(),
+                target_call_offsets: HashMap::new(),
                 target_supported_encodings: HashMap::new(),
             },
             platform: PlatformCapabilities::default(),

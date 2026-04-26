@@ -153,6 +153,10 @@ struct TargetJson {
 #[derive(Deserialize)]
 struct KinsnDesc {
     btf_func_id: i32,
+    #[serde(default)]
+    call_off: Option<i16>,
+    #[serde(default)]
+    supported_encodings: Option<u32>,
 }
 
 #[derive(Deserialize)]
@@ -268,6 +272,14 @@ fn apply_target(ctx: &mut PassContext, io_args: &IoArgs) -> Result<()> {
     let target: TargetJson = serde_json::from_str(&data)
         .with_context(|| format!("failed to parse target {}", path.display()))?;
 
+    if let Some(arch) = target.arch.as_deref() {
+        match arch {
+            "x86_64" | "x86-64" => ctx.platform.arch = bpfopt_core::pass::Arch::X86_64,
+            "aarch64" | "arm64" => ctx.platform.arch = bpfopt_core::pass::Arch::Aarch64,
+            _ => {}
+        }
+    }
+
     // CPU features
     for feat in &target.features {
         match feat.as_str() {
@@ -282,12 +294,26 @@ fn apply_target(ctx: &mut PassContext, io_args: &IoArgs) -> Result<()> {
 
     // kinsn BTF IDs
     for (name, desc) in &target.kinsns {
+        if let Some(call_off) = desc.call_off {
+            ctx.kinsn_registry
+                .target_call_offsets
+                .insert(name.clone(), call_off);
+        }
+        if let Some(supported_encodings) = desc.supported_encodings {
+            ctx.kinsn_registry
+                .target_supported_encodings
+                .insert(name.clone(), supported_encodings);
+        }
         match name.as_str() {
             "bpf_rotate64" => ctx.kinsn_registry.rotate64_btf_id = desc.btf_func_id,
             "bpf_select64" => ctx.kinsn_registry.select64_btf_id = desc.btf_func_id,
             "bpf_extract64" => ctx.kinsn_registry.extract64_btf_id = desc.btf_func_id,
-            "bpf_bulk_memcpy" => ctx.kinsn_registry.memcpy_bulk_btf_id = desc.btf_func_id,
-            "bpf_bulk_memset" => ctx.kinsn_registry.memset_bulk_btf_id = desc.btf_func_id,
+            "bpf_memcpy_bulk" | "bpf_bulk_memcpy" => {
+                ctx.kinsn_registry.memcpy_bulk_btf_id = desc.btf_func_id
+            }
+            "bpf_memset_bulk" | "bpf_bulk_memset" => {
+                ctx.kinsn_registry.memset_bulk_btf_id = desc.btf_func_id
+            }
             "bpf_endian_load16" => ctx.kinsn_registry.endian_load16_btf_id = desc.btf_func_id,
             "bpf_endian_load32" => ctx.kinsn_registry.endian_load32_btf_id = desc.btf_func_id,
             "bpf_endian_load64" => ctx.kinsn_registry.endian_load64_btf_id = desc.btf_func_id,

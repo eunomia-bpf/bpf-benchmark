@@ -230,8 +230,8 @@ impl BpfInsn {
 
     /// `call kfunc` (src_reg = BPF_PSEUDO_KFUNC_CALL = 2)
     ///
-    /// `off = 0` means vmlinux BTF. For module kfuncs, `off` is the 1-based
-    /// slot in the load/REJIT `fd_array`.
+    /// `off = 0` means vmlinux BTF. Non-zero offsets are target-provided
+    /// metadata for non-vmlinux call targets.
     #[cfg(test)]
     pub const fn call_kfunc_with_off(btf_id: i32, off: i16) -> Self {
         Self {
@@ -251,8 +251,7 @@ impl BpfInsn {
     /// `call kinsn` (src_reg = BPF_PSEUDO_KINSN_CALL = 4)
     ///
     /// `imm` is the BTF FUNC id of the exported kinsn stub.
-    /// `off` is the 1-based slot in the load/REJIT `fd_array` when module BTF
-    /// is used, or 0 for vmlinux.
+    /// `off` is target-provided call metadata, or 0 for vmlinux.
     pub const fn call_kinsn_with_off(btf_id: i32, off: i16) -> Self {
         Self {
             code: BPF_JMP | BPF_CALL,

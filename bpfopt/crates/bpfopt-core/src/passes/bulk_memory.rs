@@ -7,7 +7,7 @@ use crate::analysis::{BranchTargetAnalysis, BranchTargetResult, LivenessAnalysis
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_packed_kinsn_call_with_off, ensure_btf_fd_slot, fixup_all_branches};
+use super::utils::{emit_packed_kinsn_call_with_off, fixup_all_branches};
 
 const MEMCPY_TARGET: &str = "bpf_memcpy_bulk";
 const MEMSET_TARGET: &str = "bpf_memset_bulk";
@@ -186,18 +186,12 @@ impl BpfPass for BulkMemoryPass {
         }
 
         let memcpy_off = if memcpy_btf_id >= 0 {
-            ctx.kinsn_registry
-                .btf_fd_for_target_name(MEMCPY_TARGET)
-                .map(|fd| ensure_btf_fd_slot(program, fd))
-                .unwrap_or(0)
+            ctx.kinsn_registry.call_off_for_target_name(MEMCPY_TARGET)
         } else {
             0
         };
         let memset_off = if memset_btf_id >= 0 {
-            ctx.kinsn_registry
-                .btf_fd_for_target_name(MEMSET_TARGET)
-                .map(|fd| ensure_btf_fd_slot(program, fd))
-                .unwrap_or(0)
+            ctx.kinsn_registry.call_off_for_target_name(MEMSET_TARGET)
         } else {
             0
         };
