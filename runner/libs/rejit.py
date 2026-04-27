@@ -591,6 +591,94 @@ def applied_site_totals_from_rejit_result(result: Mapping[str, Any] | None) -> d
     return counts
 
 
+# ---------------------------------------------------------------------------
+# Skipped sites + skip reasons aggregation.
+#
+# Daemon's per-pass output includes `sites_skipped` (count) and `skip_reasons`
+# (reason string -> count). Without surfacing them, "0 applied sites" and
+# "N candidate sites all rejected by filter" are indistinguishable. Surface
+# both so corpus result.json carries the full scan diagnostic.
+# ---------------------------------------------------------------------------
+
+
+def _accumulate_pass_skipped(
+    raw_passes: object,
+    skipped_by_pass: dict[str, int],
+    reasons_by_pass: dict[str, dict[str, int]],
+    *,
+    include_rolled_back: bool = True,
+    field_name: str = "passes",
+) -> None:
+    if not isinstance(raw_passes, list):
+        return
+    for index, item in enumerate(raw_passes):
+        if not isinstance(item, Mapping):
+            continue
+        pass_name = str(item.get("pass_name") or "").strip()
+        if not pass_name or pass_name not in _PASS_TO_SITE_FIELD:
+            continue
+        action = str(item.get("action") or "kept").strip()
+        if not include_rolled_back and action == "rolled_back":
+            continue
+        skipped_value = item.get("sites_skipped")
+        if isinstance(skipped_value, int) and not isinstance(skipped_value, bool) and skipped_value >= 0:
+            skipped_by_pass[pass_name] = skipped_by_pass.get(pass_name, 0) + skipped_value
+        skip_reasons = item.get("skip_reasons")
+        if isinstance(skip_reasons, Mapping):
+            pass_reasons = reasons_by_pass.setdefault(pass_name, {})
+            for reason, count in skip_reasons.items():
+                if not isinstance(count, int) or isinstance(count, bool) or count < 0:
+                    continue
+                key = str(reason).strip()
+                if not key:
+                    continue
+                pass_reasons[key] = pass_reasons.get(key, 0) + count
+
+
+def skipped_site_totals_from_rejit_result(
+    result: Mapping[str, Any] | None,
+) -> tuple[dict[str, int], dict[str, dict[str, int]]]:
+    """Return (skipped_by_pass, skip_reasons_by_pass) aggregated across all programs.
+
+    Mirrors `applied_site_totals_from_rejit_result` but for the daemon's skip
+    path, surfacing scan candidates that were rejected by filters instead of
+    being applied.
+    """
+    skipped_by_pass: dict[str, int] = {}
+    reasons_by_pass: dict[str, dict[str, int]] = {}
+    if not isinstance(result, Mapping):
+        return skipped_by_pass, reasons_by_pass
+
+    per_program = result.get("per_program")
+    if isinstance(per_program, Mapping):
+        for record in per_program.values():
+            sub_skip, sub_reasons = skipped_site_totals_from_rejit_result(
+                record if isinstance(record, Mapping) else None
+            )
+            for pass_name, count in sub_skip.items():
+                skipped_by_pass[pass_name] = skipped_by_pass.get(pass_name, 0) + int(count)
+            for pass_name, reasons in sub_reasons.items():
+                pass_reasons = reasons_by_pass.setdefault(pass_name, {})
+                for reason, count in reasons.items():
+                    pass_reasons[reason] = pass_reasons.get(reason, 0) + int(count)
+        return skipped_by_pass, reasons_by_pass
+
+    dbg_val = result.get("debug_result")
+    debug_result: Mapping[str, Any] = dbg_val if isinstance(dbg_val, Mapping) else {}
+    raw_passes = debug_result.get("passes")
+    if raw_passes is None:
+        raw_passes = result.get("passes")
+    if raw_passes is not None:
+        _accumulate_pass_skipped(
+            raw_passes,
+            skipped_by_pass,
+            reasons_by_pass,
+            include_rolled_back=False,
+            field_name="passes",
+        )
+    return skipped_by_pass, reasons_by_pass
+
+
 _ARTIFACT_REJIT_RESULT_KEYS = frozenset(
     {
         "applied",
@@ -632,6 +720,15 @@ def _compact_single_rejit_result_for_artifact(result: Mapping[str, Any]) -> dict
     site_totals = applied_site_totals_from_rejit_result(result)
     if any(int(value or 0) > 0 for value in site_totals.values()):
         compact["applied_site_totals"] = site_totals
+
+    skipped_by_pass, skip_reasons_by_pass = skipped_site_totals_from_rejit_result(result)
+    if any(count > 0 for count in skipped_by_pass.values()):
+        compact["skipped_site_totals"] = {
+            **skipped_by_pass,
+            "total_skipped": sum(skipped_by_pass.values()),
+        }
+    if skip_reasons_by_pass:
+        compact["skip_reasons_by_pass"] = skip_reasons_by_pass
 
     raw_per_program = result.get("per_program")
     if isinstance(raw_per_program, Mapping):
