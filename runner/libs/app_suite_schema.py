@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 import yaml
 
@@ -93,7 +93,18 @@ def _app_spec_from_v2_name(name: str) -> AppSpec:
     )
 
 
-def load_app_suite_from_yaml(yaml_path: Path) -> AppSuite:
+def _app_matches_filters(app: AppSpec, lowered_filters: list[str]) -> bool:
+    if not lowered_filters:
+        return True
+    haystacks = [app.name.lower(), app.runner.lower(), app.workload.lower()]
+    return any(any(needle in haystack for haystack in haystacks) for needle in lowered_filters)
+
+
+def load_app_suite_from_yaml(
+    yaml_path: Path,
+    *,
+    filters: Sequence[str] | None = None,
+) -> AppSuite:
     manifest = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
     if not isinstance(manifest, Mapping):
         raise SystemExit(f"app suite YAML root must be a mapping: {yaml_path}")
@@ -143,6 +154,14 @@ def load_app_suite_from_yaml(yaml_path: Path) -> AppSuite:
             raise SystemExit(f"invalid app suite field: duplicate app name {app.name!r}")
         seen_names.add(app.name)
         apps.append(app)
+
+    lowered_filters = [str(token).strip().lower() for token in (filters or []) if str(token).strip()]
+    if lowered_filters:
+        apps = [app for app in apps if _app_matches_filters(app, lowered_filters)]
+        if not apps:
+            raise SystemExit(
+                f"app suite filter matched no apps in {yaml_path}: {lowered_filters!r}"
+            )
 
     suite = AppSuite(
         manifest_path=yaml_path,

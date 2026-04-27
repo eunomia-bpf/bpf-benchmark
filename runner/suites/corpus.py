@@ -41,6 +41,24 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output-json", default="", help="JSON output path.")
     parser.add_argument("--native-repos", default="", help="Comma-separated native repo artifacts to validate.")
     parser.add_argument("--scx-packages", default="", help="Comma-separated SCX package artifacts to validate.")
+    parser.add_argument(
+        "--filter",
+        action="append",
+        dest="filters",
+        default=[],
+        help="Substring filter on app name/runner/workload. Repeat for OR. Forwarded to corpus/driver.py.",
+    )
+    parser.add_argument(
+        "--workload-seconds",
+        type=float,
+        default=None,
+        help="Override per-app workload duration in seconds. Forwarded to corpus/driver.py.",
+    )
+    parser.add_argument(
+        "--no-kinsn",
+        action="store_true",
+        help="Disable loading kinsn modules. Forwarded to corpus/driver.py.",
+    )
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
     args.native_repos = csv_tokens(args.native_repos)
@@ -64,6 +82,12 @@ def _corpus_driver_argv(workspace: Path, args: argparse.Namespace, daemon_binary
     ]
     if args.suite:
         argv.extend(["--suite", str(resolve_workspace_path(workspace, args.suite))])
+    for f in (args.filters or []):
+        argv.extend(["--filter", str(f)])
+    if args.workload_seconds is not None:
+        argv.extend(["--workload-seconds", str(args.workload_seconds)])
+    if args.no_kinsn:
+        argv.append("--no-kinsn")
     return argv
 
 

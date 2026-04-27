@@ -57,7 +57,8 @@ export FUZZ_ROUNDS SCX_PROG_SHOW_RACE_MODE SCX_PROG_SHOW_RACE_ITERATIONS SCX_PRO
 # Benchmark args
 ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT := $(or $(findstring command line,$(origin SAMPLES)),$(findstring environment,$(origin SAMPLES)),$(findstring override,$(origin SAMPLES)))
 ROOT_VM_CORPUS_SAMPLES_VALUE := $(if $(strip $(ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT)),$(SAMPLES),$(VM_CORPUS_SAMPLES))
-VM_CORPUS_SUITE_ARGS = --samples "$(ROOT_VM_CORPUS_SAMPLES_VALUE)"
+comma := ,
+VM_CORPUS_SUITE_ARGS = --samples "$(ROOT_VM_CORPUS_SAMPLES_VALUE)" $(foreach f,$(subst $(comma), ,$(FILTERS)),--filter "$(f)") $(if $(strip $(VM_CORPUS_WORKLOAD_SECONDS)),--workload-seconds "$(VM_CORPUS_WORKLOAD_SECONDS)") $(VM_CORPUS_ARGS)
 VM_E2E_SUITE_ARGS =
 VM_TEST_COMMON_SUITE_ARGS = --fuzz-rounds "$(FUZZ_ROUNDS)" --scx-prog-show-race-mode "$(SCX_PROG_SHOW_RACE_MODE)" --scx-prog-show-race-iterations "$(SCX_PROG_SHOW_RACE_ITERATIONS)" --scx-prog-show-race-load-timeout "$(SCX_PROG_SHOW_RACE_LOAD_TIMEOUT)"
 VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)

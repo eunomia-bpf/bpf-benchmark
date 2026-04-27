@@ -57,9 +57,23 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Disable loading kinsn modules for this corpus run.",
     )
+    parser.add_argument(
+        "--filter",
+        action="append",
+        dest="filters",
+        help="Substring filter on app name/runner/workload. Repeat for OR. Selects a subset of apps to run.",
+    )
+    parser.add_argument(
+        "--workload-seconds",
+        type=float,
+        default=None,
+        help=f"Override per-app workload duration in seconds (default: {DEFAULT_CORPUS_WORKLOAD_DURATION_S}).",
+    )
     args = parser.parse_args(argv)
     if args.samples is not None and int(args.samples) < 0:
         raise SystemExit("--samples must be >= 0")
+    if args.workload_seconds is not None and args.workload_seconds <= 0:
+        raise SystemExit("--workload-seconds must be > 0")
     return args
 
 def _print_progress(event: str, **fields: object) -> None:
@@ -75,7 +89,10 @@ def _daemon_exit_error(daemon_session: DaemonSession) -> str | None:
     return f"daemon session exited early (rc={returncode})"
 
 
-def _workload_seconds() -> float:
+def _workload_seconds(args: argparse.Namespace | None = None) -> float:
+    override = getattr(args, "workload_seconds", None) if args is not None else None
+    if override is not None:
+        return float(override)
     return float(DEFAULT_CORPUS_WORKLOAD_DURATION_S)
 
 
@@ -85,7 +102,7 @@ def _app_workload_seconds(
 ) -> float:
     if app.duration_s is not None:
         return float(app.duration_s)
-    return _workload_seconds()
+    return _workload_seconds(args)
 
 
 def _sample_count(args: argparse.Namespace) -> int:
@@ -343,7 +360,7 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
     if not daemon_binary.exists():
         raise RuntimeError(f"daemon binary not found: {daemon_binary}")
 
-    workload_seconds = _workload_seconds()
+    workload_seconds = _workload_seconds(args)
     samples = _sample_count(args)
     results_by_name: dict[str, dict[str, object]] = {}
     lifecycle_by_app: dict[str, Any] = {}
@@ -529,8 +546,8 @@ def build_run_metadata(
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     output_json = Path(args.output_json).resolve()
-    suite = load_app_suite_from_yaml(Path(args.suite).resolve())
-    resolved_workload_seconds = _workload_seconds()
+    suite = load_app_suite_from_yaml(Path(args.suite).resolve(), filters=list(args.filters or []))
+    resolved_workload_seconds = _workload_seconds(args)
     resolved_samples = _sample_count(args)
     run_type = derive_run_type(output_json, "vm_corpus")
     started_at = datetime.now(timezone.utc).isoformat()
