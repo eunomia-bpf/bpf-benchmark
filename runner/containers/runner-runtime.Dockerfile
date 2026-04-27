@@ -137,6 +137,8 @@ RUN set -eux; \
 RUN mkdir -p "${IMAGE_WORKSPACE}"
 WORKDIR ${IMAGE_WORKSPACE}
 
+ARG TARGETPLATFORM
+
 FROM --platform=$TARGETPLATFORM ${TRACEE_IMAGE} AS runner-runtime-tracee-upstream
 
 FROM --platform=$TARGETPLATFORM ${TETRAGON_IMAGE} AS runner-runtime-tetragon-upstream

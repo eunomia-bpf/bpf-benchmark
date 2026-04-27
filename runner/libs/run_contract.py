@@ -203,6 +203,10 @@ def _prefixed_env_or_default(env: dict[str, str], prefix: str, suffix: str, defa
     return _env_or_default(env, f"{prefix}_{suffix}", default)
 
 
+def _target_default(target: dict[str, str], name: str) -> str:
+    return target.get(f"TARGET_{name}_DEFAULT", "")
+
+
 def _resolve_repo_path(path: str) -> str:
     if not path: return ""
     candidate = Path(path)
@@ -299,30 +303,32 @@ def _build_run_config_mapping(
             _die(f"AWS target {target_name} is missing TARGET_AWS_ENV_PREFIX")
         _penv = lambda suf, dflt="": _prefixed_env_or_default(values, aws_env_prefix, suf, dflt)
         _treq = lambda suf: _die(f"{aws_env_prefix}_{suf} is required for AWS targets")
-        run_name_tag = _penv("NAME_TAG", target.get("TARGET_NAME_TAG_DEFAULT", ""))
-        default_instance_type = target.get("TARGET_INSTANCE_TYPE_DEFAULT", "")
+        run_name_tag = _penv("NAME_TAG", _target_default(target, "NAME_TAG"))
+        default_instance_type = _target_default(target, "INSTANCE_TYPE")
         if suite.get("SUITE_VM_CLASS", "") == "benchmark":
-            default_instance_type = target.get("TARGET_BENCH_INSTANCE_TYPE_DEFAULT", default_instance_type)
+            default_instance_type = _target_default(target, "BENCH_INSTANCE_TYPE") or default_instance_type
         else:
-            default_instance_type = target.get("TARGET_TEST_INSTANCE_TYPE_DEFAULT", default_instance_type)
+            default_instance_type = _target_default(target, "TEST_INSTANCE_TYPE") or default_instance_type
         run_instance_type = _penv("INSTANCE_TYPE", default_instance_type)
-        run_remote_user = _penv("REMOTE_USER", target.get("TARGET_REMOTE_USER_DEFAULT", ""))
-        remote_stage_root = _penv("REMOTE_STAGE_DIR", target.get("TARGET_REMOTE_STAGE_DIR_DEFAULT", "")).rstrip("/")
+        run_remote_user = _penv("REMOTE_USER", _target_default(target, "REMOTE_USER"))
+        remote_stage_root = _penv("REMOTE_STAGE_DIR", _target_default(target, "REMOTE_STAGE_DIR")).rstrip("/")
+        if not remote_stage_root:
+            _die(f"AWS target {target_name} is missing TARGET_REMOTE_STAGE_DIR_DEFAULT")
         run_remote_stage_dir = f"{remote_stage_root}/{suite_name}/{run_token}" if suite_name else f"{remote_stage_root}/{run_token}"
-        run_ami_param = _penv("AMI_PARAM", target.get("TARGET_AMI_PARAM_DEFAULT", ""))
+        run_ami_param = _penv("AMI_PARAM", _target_default(target, "AMI_PARAM"))
         run_ami_id = _penv("AMI_ID")
-        run_root_volume_gb = _penv("ROOT_VOLUME_GB", target.get("TARGET_ROOT_VOLUME_GB_DEFAULT", ""))
-        run_aws_key_path = _penv("KEY_PATH")
+        run_root_volume_gb = _penv("ROOT_VOLUME_GB", _target_default(target, "ROOT_VOLUME_GB"))
+        run_aws_key_path = _penv("KEY_PATH", _target_default(target, "KEY_PATH"))
         if not run_aws_key_path: _treq("KEY_PATH")
-        run_aws_key_name = _penv("KEY_NAME") or Path(run_aws_key_path).stem
+        run_aws_key_name = _penv("KEY_NAME", _target_default(target, "KEY_NAME")) or Path(run_aws_key_path).stem
         if not run_aws_key_name: _die(f"{aws_env_prefix}_KEY_NAME could not be derived from {aws_env_prefix}_KEY_PATH")
-        run_aws_security_group_id = _penv("SECURITY_GROUP_ID")
+        run_aws_security_group_id = _penv("SECURITY_GROUP_ID", _target_default(target, "SECURITY_GROUP_ID"))
         if not run_aws_security_group_id: _treq("SECURITY_GROUP_ID")
-        run_aws_subnet_id = _penv("SUBNET_ID")
+        run_aws_subnet_id = _penv("SUBNET_ID", _target_default(target, "SUBNET_ID"))
         if not run_aws_subnet_id: _treq("SUBNET_ID")
-        run_aws_region = _penv("REGION", target.get("TARGET_AWS_REGION_DEFAULT", ""))
+        run_aws_region = _penv("REGION", _target_default(target, "AWS_REGION"))
         if not run_aws_region: _treq("REGION")
-        run_aws_profile = _penv("PROFILE")
+        run_aws_profile = _penv("PROFILE", _target_default(target, "AWS_PROFILE"))
         if not run_aws_profile: _treq("PROFILE")
     elif target_name == "x86-kvm":
         run_vm_backend = target.get("TARGET_KVM_BACKEND", "")
@@ -417,10 +423,10 @@ def build_target_config(target_name: str, *, env: dict[str, str] | None = None) 
         aws_env_prefix = target.get("TARGET_AWS_ENV_PREFIX", "")
         if not aws_env_prefix: _die(f"AWS target {target_name} is missing TARGET_AWS_ENV_PREFIX")
         _penv = lambda suf, dflt="": _prefixed_env_or_default(values, aws_env_prefix, suf, dflt)
-        run_name_tag = _penv("NAME_TAG", target.get("TARGET_NAME_TAG_DEFAULT", ""))
-        run_aws_region = _penv("REGION", target.get("TARGET_AWS_REGION_DEFAULT", ""))
+        run_name_tag = _penv("NAME_TAG", _target_default(target, "NAME_TAG"))
+        run_aws_region = _penv("REGION", _target_default(target, "AWS_REGION"))
         if not run_aws_region: _die(f"{aws_env_prefix}_REGION is required for AWS targets")
-        run_aws_profile = _penv("PROFILE")
+        run_aws_profile = _penv("PROFILE", _target_default(target, "AWS_PROFILE"))
         if not run_aws_profile: _die(f"{aws_env_prefix}_PROFILE is required for AWS targets")
     return RunConfig.from_mapping({"RUN_TARGET_NAME": target_name, "RUN_TARGET_ARCH": target.get("TARGET_ARCH", ""),
                                    "RUN_EXECUTOR": target.get("TARGET_EXECUTOR", ""), "RUN_SUITE_NAME": "",
