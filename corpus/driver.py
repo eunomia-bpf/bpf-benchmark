@@ -8,7 +8,7 @@ from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -153,112 +153,104 @@ def _tracked_prog_id_set(prog_ids: Sequence[int]) -> frozenset[int]:
     return frozenset(int(prog_id) for prog_id in prog_ids if int(prog_id) > 0)
 
 
-def _normalize_live_programs(programs: object) -> list[dict[str, object]]:
-    if not isinstance(programs, Sequence) or isinstance(programs, (str, bytes, bytearray)):
-        return []
-    deduped: dict[int, dict[str, object]] = {}
-    for program in programs:
-        if not isinstance(program, Mapping):
-            continue
-        prog_id = int(program.get("id", 0) or 0)
-        if prog_id <= 0:
-            continue
-        deduped[prog_id] = dict(program)
-    return [deduped[prog_id] for prog_id in sorted(deduped)]
-
-
-def _session_program_records(session: "CorpusAppSession") -> list[dict[str, object]]:
-    programs = _normalize_live_programs(session.runner.live_rejit_programs())
-    if programs:
-        return programs
-    return _normalize_live_programs(session.state.artifacts.get("programs"))
-
-
-def _program_identity(program: Mapping[str, object]) -> tuple[str, str, str, str, int]:
-    return (
-        str(program.get("name") or ""),
-        str(program.get("type") or ""),
-        str(program.get("attach_type") or program.get("expected_attach_type") or ""),
-        str(program.get("attach_to") or program.get("attach_target") or program.get("attach_btf_name") or ""),
-        int(program.get("attach_btf_id", 0) or 0),
-    )
-
-
-def _match_programs_by_identity(
-    candidates: Sequence[Mapping[str, object]],
-    expected_programs: Sequence[Mapping[str, object]],
-    *,
-    claimed_ids: Sequence[int] = (),
-) -> tuple[list[dict[str, object]], list[int]]:
-    remaining = Counter(_program_identity(program) for program in expected_programs)
-    claimed = {int(prog_id) for prog_id in claimed_ids if int(prog_id) > 0}
-    matched: list[dict[str, object]] = []
-    overlapping_claimed: set[int] = set()
-    for program in _normalize_live_programs(candidates):
-        identity = _program_identity(program)
-        if remaining[identity] <= 0:
-            continue
-        prog_id = int(program["id"])
-        if prog_id in claimed:
-            overlapping_claimed.add(prog_id)
-            continue
-        matched.append(dict(program))
-        remaining[identity] -= 1
-    return matched, sorted(overlapping_claimed)
-
-
-def _runner_rediscovered_programs(session: "CorpusAppSession") -> tuple[list[dict[str, object]], str]:
-    refresh = getattr(session.runner, "refresh_programs", None)
-    if callable(refresh):
-        return _normalize_live_programs(refresh()), "runner.refresh_programs"
-    runtime_session = getattr(session.runner, "session", None)
-    refresh = getattr(runtime_session, "refresh_programs", None)
-    if callable(refresh):
-        return _normalize_live_programs(refresh()), "runner.session.refresh_programs"
-    discover = getattr(runtime_session, "_discover_programs", None)
-    if callable(discover):
-        return _normalize_live_programs(discover()), "runner.session._discover_programs"
-    return [], ""
+@dataclass(frozen=True)
+class RediscoveredPrograms:
+    programs: list[dict[str, object]]
+    source: str
 
 
 def _rediscover_session_programs(
     session: "CorpusAppSession",
     *,
-    current_programs: Sequence[Mapping[str, object]],
+    phase: str,
+    missing_ids: Sequence[int],
+    tracked_prog_ids: Sequence[int],
     claimed_ids: Sequence[int],
-) -> tuple[list[dict[str, object]], str, list[int]]:
-    expected_programs = _session_program_records(session)
-    if not expected_programs:
-        return [], "", []
-    overlapping_claimed: set[int] = set()
-    runner_programs, source = _runner_rediscovered_programs(session)
-    if runner_programs:
-        matched_programs, claimed_overlap = _match_programs_by_identity(
-            runner_programs,
-            expected_programs,
-            claimed_ids=claimed_ids,
+    candidate_sources: Sequence[tuple[str, Callable[[], object]]],
+) -> RediscoveredPrograms:
+    def normalize_programs(programs: object) -> list[dict[str, object]]:
+        if not isinstance(programs, Sequence) or isinstance(programs, (str, bytes, bytearray)):
+            return []
+        deduped: dict[int, dict[str, object]] = {}
+        for program in programs:
+            if not isinstance(program, Mapping):
+                continue
+            prog_id = int(program.get("id", 0) or 0)
+            if prog_id <= 0:
+                continue
+            deduped[prog_id] = dict(program)
+        return [deduped[prog_id] for prog_id in sorted(deduped)]
+
+    def program_identity(program: Mapping[str, object]) -> tuple[str, str, str, str, int]:
+        return (
+            str(program.get("name") or ""),
+            str(program.get("type") or ""),
+            str(program.get("attach_type") or program.get("expected_attach_type") or ""),
+            str(program.get("attach_to") or program.get("attach_target") or program.get("attach_btf_name") or ""),
+            int(program.get("attach_btf_id", 0) or 0),
         )
-        overlapping_claimed.update(claimed_overlap)
+
+    expected_programs = normalize_programs(session.runner.live_rejit_programs())
+    if not expected_programs:
+        expected_programs = normalize_programs(session.state.artifacts.get("programs"))
+    tracked_ids = [int(prog_id) for prog_id in tracked_prog_ids if int(prog_id) > 0]
+    if not expected_programs:
+        raise RuntimeError(
+            f"{session.app.name}: tracked BPF program ids disappeared before {phase}; "
+            f"rediscovery found no live replacement programs: "
+            f"missing_ids={list(missing_ids)}, tracked_ids={tracked_ids}"
+        )
+
+    claimed = {int(prog_id) for prog_id in claimed_ids if int(prog_id) > 0}
+    overlapping_claimed: set[int] = set()
+    for source, load_programs in candidate_sources:
+        remaining = Counter(program_identity(program) for program in expected_programs)
+        matched_programs: list[dict[str, object]] = []
+        for program in normalize_programs(load_programs()):
+            identity = program_identity(program)
+            if remaining[identity] <= 0:
+                continue
+            prog_id = int(program["id"])
+            if prog_id in claimed:
+                overlapping_claimed.add(prog_id)
+                continue
+            matched_programs.append(dict(program))
+            remaining[identity] -= 1
         if matched_programs:
-            return matched_programs, source, sorted(overlapping_claimed)
-    matched_programs, claimed_overlap = _match_programs_by_identity(
-        current_programs,
-        expected_programs,
-        claimed_ids=claimed_ids,
+            return RediscoveredPrograms(programs=matched_programs, source=source)
+
+    if claimed_overlap := sorted(overlapping_claimed):
+        raise RuntimeError(
+            f"{session.app.name}: tracked BPF program ids disappeared before {phase}; "
+            f"rediscovered replacements overlap another session's claimed ids: "
+            f"missing_ids={list(missing_ids)}, tracked_ids={tracked_ids}, "
+            f"claimed_overlap={claimed_overlap}"
+        )
+    raise RuntimeError(
+        f"{session.app.name}: tracked BPF program ids disappeared before {phase}; "
+        f"rediscovery found no live replacement programs: "
+        f"missing_ids={list(missing_ids)}, tracked_ids={tracked_ids}"
     )
-    overlapping_claimed.update(claimed_overlap)
-    return matched_programs, source or "bpftool prog show", sorted(overlapping_claimed)
 
 
 def _refresh_active_session_programs(
     sessions: Sequence["CorpusAppSession"],
     phase: str,
 ) -> None:
-    current_programs = _normalize_live_programs(programs_after(()))
-    current_programs_by_id = {
-        int(program["id"]): dict(program)
-        for program in current_programs
-    }
+    current_programs_by_id: dict[int, dict[str, object]] = {}
+    current_programs_raw = programs_after(())
+    if isinstance(current_programs_raw, Sequence) and not isinstance(
+        current_programs_raw,
+        (str, bytes, bytearray),
+    ):
+        for program in current_programs_raw:
+            if not isinstance(program, Mapping):
+                continue
+            prog_id = int(program.get("id", 0) or 0)
+            if prog_id <= 0:
+                continue
+            current_programs_by_id[prog_id] = dict(program)
+    current_programs = [current_programs_by_id[prog_id] for prog_id in sorted(current_programs_by_id)]
     current_prog_ids = frozenset(current_programs_by_id)
     claimed_ids: set[int] = set()
     for session in sessions:
@@ -267,24 +259,34 @@ def _refresh_active_session_programs(
             raise RuntimeError(f"{session.app.name}: no tracked BPF program ids remain before {phase}")
         live_programs: list[dict[str, object]]
         if missing_ids := sorted(tracked_prog_ids - current_prog_ids):
-            live_programs, discover_source, claimed_overlap = _rediscover_session_programs(
+            discover_source = ""
+            candidate_sources: list[tuple[str, Callable[[], object]]] = []
+            refresh = getattr(session.runner, "refresh_programs", None)
+            if callable(refresh):
+                discover_source = "runner.refresh_programs"
+                candidate_sources.append((discover_source, refresh))
+            else:
+                runtime_session = getattr(session.runner, "session", None)
+                refresh = getattr(runtime_session, "refresh_programs", None)
+                if callable(refresh):
+                    discover_source = "runner.session.refresh_programs"
+                    candidate_sources.append((discover_source, refresh))
+                else:
+                    discover = getattr(runtime_session, "_discover_programs", None)
+                    if callable(discover):
+                        discover_source = "runner.session._discover_programs"
+                        candidate_sources.append((discover_source, discover))
+            candidate_sources.append(("bpftool prog show", lambda: current_programs))
+            rediscovered = _rediscover_session_programs(
                 session,
-                current_programs=current_programs,
+                phase=phase,
+                missing_ids=missing_ids,
+                tracked_prog_ids=sorted(tracked_prog_ids),
                 claimed_ids=sorted(claimed_ids),
+                candidate_sources=candidate_sources,
             )
-            if not live_programs:
-                if claimed_overlap:
-                    raise RuntimeError(
-                        f"{session.app.name}: tracked BPF program ids disappeared before {phase}; "
-                        f"rediscovered replacements overlap another session's claimed ids: "
-                        f"missing_ids={missing_ids}, tracked_ids={sorted(tracked_prog_ids)}, "
-                        f"claimed_overlap={claimed_overlap}"
-                    )
-                raise RuntimeError(
-                    f"{session.app.name}: tracked BPF program ids disappeared before {phase}; "
-                    f"rediscovery found no live replacement programs: "
-                    f"missing_ids={missing_ids}, tracked_ids={sorted(tracked_prog_ids)}"
-                )
+            live_programs = rediscovered.programs
+            discover_source = discover_source or rediscovered.source
             expected_count = len(tracked_prog_ids)
             refreshed_count = len(live_programs)
             if refreshed_count < expected_count:

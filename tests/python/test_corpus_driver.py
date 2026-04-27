@@ -72,16 +72,45 @@ class CorpusDriverTests(unittest.TestCase):
         )
 
         rediscovered = [{"id": 201, "name": "prog-a", "type": "tracepoint"}]
+        runner.refresh_programs = mock.Mock(return_value=rediscovered)
         with (
             mock.patch.object(corpus_driver, "programs_after", return_value=[]),
-            mock.patch.object(
-                corpus_driver,
-                "_runner_rediscovered_programs",
-                return_value=(rediscovered, "runner.refresh_programs"),
-            ),
+            mock.patch.object(corpus_driver, "_print_progress") as print_progress,
         ):
             corpus_driver._refresh_active_session_programs([session], "baseline")
-            self.assertEqual([201], session.state.prog_ids)
+
+        runner.refresh_programs.assert_called_once_with()
+        self.assertEqual([201], session.state.prog_ids)
+        self.assertEqual(rediscovered, session.state.artifacts["programs"])
+        self.assertEqual(rediscovered, runner.programs)
+        self.assertEqual(
+            [
+                mock.call(
+                    "session_warning",
+                    app="demo",
+                    runner="fake",
+                    phase="baseline",
+                    warning="rediscovery returned fewer programs than expected: 1/2; accepting partial set",
+                    missing_ids=[101, 102],
+                    refreshed_ids=[201],
+                    discover_source="runner.refresh_programs",
+                ),
+                mock.call(
+                    "session_warning",
+                    app="demo",
+                    runner="fake",
+                    phase="baseline",
+                    warning="tracked BPF program ids changed; refreshed live session programs",
+                    previous_ids=[101, 102],
+                    missing_ids=[101, 102],
+                    refreshed_ids=[201],
+                    expected_count=2,
+                    refreshed_count=1,
+                    discover_source="runner.refresh_programs",
+                ),
+            ],
+            print_progress.mock_calls,
+        )
 
     def test_build_app_result_surfaces_workload_miss_at_top_level(self) -> None:
         app = SimpleNamespace(
