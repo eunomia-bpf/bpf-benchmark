@@ -64,7 +64,7 @@ VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 	aws-e2e aws-corpus \
 	aws-arm64-test aws-arm64-benchmark aws-arm64-terminate \
 	aws-x86-test aws-x86-benchmark aws-x86-terminate \
-	help clean
+	lint help clean
 
 help:
 	@echo "Canonical run targets:"
@@ -85,6 +85,11 @@ validate:
 
 check:
 	$(MAKE) validate
+
+lint:
+	find "$(ROOT_DIR)" \
+		\( -path "$(ROOT_DIR)/vendor" -o -path "$(ROOT_DIR)/docs/tmp" -o -path "$(ROOT_DIR)/runner/repos" -o -path "$(ROOT_DIR)/.cache" -o -path "$(ROOT_DIR)/tests/results" -o -path "$(ROOT_DIR)/tests/unittest/build" -o -path "$(ROOT_DIR)/tests/unittest/build-arm64" -o -path "*/__pycache__" \) -prune -o \
+		-type f -name '*.py' -exec "$(PYTHON)" -m py_compile {} +
 
 vm-selftest:
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm test -- --test-mode "selftest" $(VM_TEST_COMMON_SUITE_ARGS)
