@@ -397,6 +397,16 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                             workload_seconds=app_workload_seconds,
                         )
                         sessions.append(session)
+                        # Wait for the app's BPF prog table to settle before starting
+                        # the next app. Without this, when later apps (notably bpftrace)
+                        # call BPF_PROG_LOAD they may race with prior apps still
+                        # attaching/registering progs, causing bpftrace's prog set to
+                        # never stabilize. Quiescence between starts isolates each
+                        # runner's startup BPF activity.
+                        try:
+                            wait_for_suite_quiescence()
+                        except Exception:
+                            pass  # quiesce timeout is non-fatal here; let later phase report
                     except Exception as exc:
                         stop_error = ""
                         quiesce_error = ""
