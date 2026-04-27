@@ -19,7 +19,12 @@ from runner.libs.run_contract import RunConfig, read_run_config_file
 from runner.libs.state_file import write_state
 from runner.libs.suite_commands import build_runtime_container_command, runtime_container_host_dirs
 from runner.libs.suite_args import read_suite_args_file
-from runner.libs.workspace_layout import daemon_binary_path, runtime_container_image_tar_path
+from runner.libs.workspace_layout import (
+    daemon_binary_path,
+    runtime_container_image_tar_path,
+    test_negative_build_dir,
+    test_unittest_build_dir,
+)
 
 _die = partial(fail, "aws-executor")
 
@@ -381,12 +386,20 @@ def _relative_repo_path(path: Path) -> str:
         _die(f"path is outside repository root: {path}")
 
 
+def _maybe_add_existing_sync_member(members: list[str], path: Path) -> None:
+    if path.exists():
+        members.append(_relative_repo_path(path))
+
+
 def _remote_workspace_sync_members(ctx: aws_common.AwsExecutorContext) -> list[str]:
+    target_arch = ctx.contract.identity.target_arch
     members = [
         "runner/__init__.py",
         "runner/libs",
         "runner/suites",
     ]
+    if ctx.suite_name in {"corpus", "e2e", "test"}:
+        members.append(_relative_repo_path(daemon_binary_path(ROOT_DIR, target_arch)))
     if ctx.suite_name == "corpus":
         members.extend(
             [
@@ -395,9 +408,25 @@ def _remote_workspace_sync_members(ctx: aws_common.AwsExecutorContext) -> list[s
                 "corpus/inputs",
                 "e2e/cases/bpftrace/scripts",
                 "e2e/cases/tetragon/policies",
-                _relative_repo_path(daemon_binary_path(ROOT_DIR, ctx.contract.identity.target_arch)),
             ]
         )
+    if ctx.suite_name == "e2e":
+        members.extend(
+            [
+                "e2e/driver.py",
+                "e2e/cases/__init__.py",
+                "e2e/cases/bcc",
+                "e2e/cases/bpftrace",
+                "e2e/cases/katran",
+                "e2e/cases/tetragon",
+                "e2e/cases/tracee/__init__.py",
+                "e2e/cases/tracee/case.py",
+            ]
+        )
+    if ctx.suite_name == "test":
+        _maybe_add_existing_sync_member(members, test_unittest_build_dir(ROOT_DIR, target_arch))
+        _maybe_add_existing_sync_member(members, test_negative_build_dir(ROOT_DIR, target_arch))
+        _maybe_add_existing_sync_member(members, ROOT_DIR / "tests" / "kernel" / "build")
     normalized: list[str] = []
     for member in members:
         candidate = (ROOT_DIR / member).resolve()

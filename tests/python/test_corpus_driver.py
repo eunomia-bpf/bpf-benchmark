@@ -53,7 +53,7 @@ class CorpusDriverTests(unittest.TestCase):
         self.assertTrue(measurement["workload_miss"])
         self.assertEqual([WORKLOAD_MISS_LIMITATION], measurement["limitations"])
 
-    def test_refresh_active_session_programs_rejects_partial_rediscovery(self) -> None:
+    def test_refresh_active_session_programs_accepts_partial_rediscovery(self) -> None:
         runner = _FakeRunner()
         expected_programs = [
             {"id": 101, "name": "prog-a", "type": "tracepoint"},
@@ -80,11 +80,8 @@ class CorpusDriverTests(unittest.TestCase):
                 return_value=(rediscovered, "runner.refresh_programs"),
             ),
         ):
-            with self.assertRaisesRegex(
-                RuntimeError,
-                r"rediscovery returned fewer programs than expected: 1/2",
-            ):
-                corpus_driver._refresh_active_session_programs([session], "baseline")
+            corpus_driver._refresh_active_session_programs([session], "baseline")
+            self.assertEqual([201], session.state.prog_ids)
 
     def test_build_app_result_surfaces_workload_miss_at_top_level(self) -> None:
         app = SimpleNamespace(
