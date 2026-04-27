@@ -1,15 +1,111 @@
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 from typing import Mapping
 
-from .. import ROOT_DIR
+from .. import ROOT_DIR, run_command
+from ..benchmark_net import (
+    BENCHMARK_IFACE,
+    BENCHMARK_IFACE_CIDR,
+    BENCHMARK_NETNS,
+    BENCHMARK_PEER_IFACE,
+    BENCHMARK_PEER_IFACE_CIDR,
+)
 from ..workload import WorkloadResult, run_named_workload
-from .etcd_support import EtcdBackedNativeRunner, detect_primary_interface
+from .etcd_support import LocalEtcdSession
+from .process_support import NativeProcessRunner
 from .setup_support import optional_repo_artifact_path
 
 
-class CiliumRunner(EtcdBackedNativeRunner):
+def _link_exists(name: str) -> bool:
+    try:
+        run_command(["ip", "-o", "link", "show", "dev", name], timeout=10)
+    except Exception:
+        return False
+    return True
+
+
+def _delete_link_if_exists(name: str) -> None:
+    if not _link_exists(name):
+        return
+    try:
+        run_command(["ip", "link", "delete", "dev", name], timeout=10)
+    except Exception:
+        pass
+
+
+def _netns_exists(name: str) -> bool:
+    try:
+        completed = run_command(["ip", "netns", "list"], timeout=10)
+    except Exception:
+        return False
+    return any(line.split(maxsplit=1)[0].strip() == name for line in completed.stdout.splitlines())
+
+
+def _link_exists_in_netns(namespace: str, name: str) -> bool:
+    if not _netns_exists(namespace):
+        return False
+    try:
+        run_command(["ip", "-n", namespace, "-o", "link", "show", "dev", name], timeout=10)
+    except Exception:
+        return False
+    return True
+
+
+def _ensure_benchmark_interface() -> str:
+    iface_exists = _link_exists(BENCHMARK_IFACE)
+    peer_exists_in_root = _link_exists(BENCHMARK_PEER_IFACE)
+    peer_exists_in_netns = _link_exists_in_netns(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE)
+    if not iface_exists and peer_exists_in_netns:
+        run_command(
+            ["ip", "-n", BENCHMARK_NETNS, "link", "delete", "dev", BENCHMARK_PEER_IFACE],
+            check=False,
+            timeout=10,
+        )
+        peer_exists_in_netns = False
+    if iface_exists and not peer_exists_in_netns:
+        _delete_link_if_exists(BENCHMARK_IFACE)
+        iface_exists = False
+        peer_exists_in_root = False
+        peer_exists_in_netns = False
+    if not _netns_exists(BENCHMARK_NETNS):
+        run_command(["ip", "netns", "add", BENCHMARK_NETNS], timeout=10)
+    if not iface_exists:
+        run_command(
+            [
+                "ip",
+                "link",
+                "add",
+                "dev",
+                BENCHMARK_IFACE,
+                "type",
+                "veth",
+                "peer",
+                "name",
+                BENCHMARK_PEER_IFACE,
+            ],
+            timeout=10,
+        )
+        peer_exists_in_root = True
+    if peer_exists_in_root:
+        run_command(["ip", "link", "set", "dev", BENCHMARK_PEER_IFACE, "netns", BENCHMARK_NETNS], timeout=10)
+    if not _link_exists_in_netns(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE):
+        raise RuntimeError(
+            f"benchmark peer interface {BENCHMARK_PEER_IFACE} is unavailable in namespace {BENCHMARK_NETNS}"
+        )
+    run_command(["ip", "addr", "replace", BENCHMARK_IFACE_CIDR, "dev", BENCHMARK_IFACE], timeout=10)
+    run_command(["ip", "link", "set", "dev", BENCHMARK_IFACE, "up"], timeout=10)
+    run_command(
+        ["ip", "-n", BENCHMARK_NETNS, "addr", "replace", BENCHMARK_PEER_IFACE_CIDR, "dev", BENCHMARK_PEER_IFACE],
+        timeout=10,
+    )
+    run_command(["ip", "-n", BENCHMARK_NETNS, "link", "set", "dev", "lo", "up"], timeout=10)
+    run_command(["ip", "-n", BENCHMARK_NETNS, "link", "set", "dev", BENCHMARK_PEER_IFACE, "up"], timeout=10)
+    return BENCHMARK_IFACE
+
+
+class CiliumRunner(NativeProcessRunner):
     def __init__(
         self,
         *,
@@ -17,6 +113,7 @@ class CiliumRunner(EtcdBackedNativeRunner):
         cluster_name: str = "default",
         cluster_id: int = 0,
         ipv4_range: str = "10.244.0.0/24",
+        etcd_startup_timeout_s: int = 20,
         **kwargs: object,
     ) -> None:
         kwargs.setdefault("load_timeout_s", 120)
@@ -25,6 +122,9 @@ class CiliumRunner(EtcdBackedNativeRunner):
         self.cluster_name = str(cluster_name or "").strip() or "default"
         self.cluster_id = int(cluster_id)
         self.ipv4_range = str(ipv4_range or "").strip() or "10.244.0.0/24"
+        self.etcd_startup_timeout_s = int(etcd_startup_timeout_s)
+        self.etcd_session: LocalEtcdSession | None = None
+        self.runtime_dir: Path | None = None
         self._bpf_root: Path | None = None
         self._state_dir: Path | None = None
 
@@ -40,16 +140,6 @@ class CiliumRunner(EtcdBackedNativeRunner):
             )
             if candidate is not None
         )
-
-    def _after_runtime_prepared(self) -> None:
-        if self.runtime_dir is None:
-            raise RuntimeError("CiliumRunner runtime directory is not prepared")
-        self._bpf_root = self.runtime_dir / "bpffs"
-        self._state_dir = self.runtime_dir / "state"
-        self._bpf_root.mkdir(parents=True, exist_ok=True)
-        self._state_dir.mkdir(parents=True, exist_ok=True)
-        if self.device is None:
-            self.device = detect_primary_interface(prefer_benchmark=True)
 
     def _run_workload(self, seconds: float) -> WorkloadResult:
         if not self.workload_kind:
@@ -95,6 +185,39 @@ class CiliumRunner(EtcdBackedNativeRunner):
             f"--direct-routing-device={self.device}",
             *self.loader_args,
         ]
+
+    def start(self) -> list[int]:
+        if self.etcd_session is not None:
+            raise RuntimeError(f"{type(self).__name__} is already running")
+        try:
+            self.runtime_dir = LocalEtcdSession.create_runtime_dir(f"{type(self).__name__.lower()}_")
+            assert self.runtime_dir is not None
+            self._bpf_root = self.runtime_dir / "bpffs"
+            self._state_dir = self.runtime_dir / "state"
+            self._bpf_root.mkdir(parents=True, exist_ok=True)
+            self._state_dir.mkdir(parents=True, exist_ok=True)
+            if self.device is None:
+                self.device = _ensure_benchmark_interface()
+            self.etcd_session = LocalEtcdSession(
+                work_dir=self.runtime_dir / "etcd",
+                name=type(self).__name__.replace("Runner", "").lower() or "runner",
+                startup_timeout_s=self.etcd_startup_timeout_s,
+            ).start()
+            return super().start()
+        except Exception:
+            self.stop()
+            raise
+
+    def stop(self) -> None:
+        super().stop()
+        if self.etcd_session is not None:
+            self.etcd_session.close()
+            self.etcd_session = None
+        if self.runtime_dir is not None:
+            shutil.rmtree(self.runtime_dir, ignore_errors=True)
+            self.runtime_dir = None
+        self._bpf_root = None
+        self._state_dir = None
 
 
 __all__ = ["CiliumRunner"]
