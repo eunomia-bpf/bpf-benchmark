@@ -1,0 +1,33 @@
+{
+  "case": "tracee",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "cycle 0: prog 113: BPF_PROG_REJIT: Invalid argument (os error 22); cycle 1: prog 630: BPF_PROG_REJIT: Invalid argument (os error 22)",
+  "generated_at": "2026-04-27T02:04:42.184604+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-27T02:04:42.184600+00:00",
+  "launcher_boot_id": "4c1d8391-efa1-45c3-9edd-96b7602d0cd6",
+  "launcher_pid": 1732,
+  "launcher_start_ticks": 38131,
+  "policy": {
+    "exclusions": {}
+  },
+  "run_type": "tracee",
+  "started_at": "2026-04-27T01:58:50.801684+00:00",
+  "status": "error",
+  "suite": "e2e"
+}
