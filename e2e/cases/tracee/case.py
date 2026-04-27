@@ -31,6 +31,7 @@ from runner.libs.case_common import (  # noqa: E402
     host_metadata,
     measurement_workload_miss,
     merge_measurement_limitations,
+    phase_payload,
     run_case_lifecycle,
 )
 
@@ -103,11 +104,29 @@ def run_phase(
                 cycle_index=cycle_index,
             )
         )
-    return {"phase": phase_name, "records": records}
+    return {"status": "ok", "reason": "", "measurement": {"records": records}}
 
 
-def _append_phase_markdown(lines: list[str], title: str, records: Sequence[Mapping[str, object]]) -> None:
+def _phase_measurements(phase: object) -> list[dict[str, object]]:
+    if not isinstance(phase, Mapping):
+        return []
+    measurement = phase.get("measurement")
+    if not isinstance(measurement, Mapping):
+        return []
+    records = measurement.get("records")
+    if not isinstance(records, Sequence) or isinstance(records, (str, bytes, bytearray)):
+        return []
+    return [dict(record) for record in records if isinstance(record, Mapping)]
+
+
+def _append_phase_markdown(lines: list[str], title: str, phase: object) -> None:
+    records = _phase_measurements(phase)
     lines.extend([f"## {title}", ""])
+    if isinstance(phase, Mapping):
+        lines.append(f"- Status: `{phase.get('status') or 'error'}`")
+        reason = str(phase.get("reason") or "").strip()
+        if reason:
+            lines.append(f"- Reason: `{reason}`")
     if not records:
         lines.append("- No records")
         lines.append("")
@@ -156,10 +175,8 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         lines.append("")
         return "\n".join(lines)
 
-    baseline = [record for record in (payload.get("baseline") or []) if isinstance(record, Mapping)]
-    post_rejit = [record for record in (payload.get("post_rejit") or []) if isinstance(record, Mapping)]
-    _append_phase_markdown(lines, "Baseline", baseline)
-    _append_phase_markdown(lines, "Post-ReJIT", post_rejit)
+    _append_phase_markdown(lines, "Baseline", payload.get("baseline"))
+    _append_phase_markdown(lines, "Post-ReJIT", payload.get("post_rejit"))
 
     lines.extend(["## ReJIT Result", ""])
     rejit_result = payload.get("rejit_result") or {}
@@ -213,9 +230,9 @@ def error_payload(
         "setup": dict(setup_result),
         "host": host_metadata(),
         "config": dict(config),
-        "baseline": [],
-        "post_rejit": [],
-        "rejit_result": {},
+        "baseline": None,
+        "post_rejit": None,
+        "rejit_result": None,
         "limitations": list(limitations),
     }
 
@@ -338,11 +355,9 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 if lifecycle_result.post_rejit is None:
                     raise RuntimeError(f"Tracee post-ReJIT phase is missing in cycle {cycle_index}")
 
-                baseline_records.extend(
-                    dict(record)
-                    for record in (lifecycle_result.baseline.get("records") or [])
-                    if isinstance(record, Mapping)
-                )
+                baseline = phase_payload("baseline", lifecycle_result.baseline)
+                post_rejit = phase_payload("post_rejit", lifecycle_result.post_rejit)
+                baseline_records.extend(_phase_measurements(baseline))
                 cycle_rejit_result = lifecycle_result.rejit_result
                 rejit_result[str(cycle_index)] = cycle_rejit_result
                 if isinstance(cycle_rejit_result, Mapping):
@@ -350,11 +365,10 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     if cycle_error:
                         limitations.append(f"Cycle {cycle_index} ReJIT/apply reported errors: {cycle_error}")
                         errors.append(f"cycle {cycle_index}: {cycle_error}")
-                post_rejit_records.extend(
-                    dict(record)
-                    for record in (lifecycle_result.post_rejit.get("records") or [])
-                    if isinstance(record, Mapping)
-                )
+                        if post_rejit is not None:
+                            post_rejit["status"] = "error"
+                            post_rejit["reason"] = cycle_error
+                post_rejit_records.extend(_phase_measurements(post_rejit))
                 if not tracee_programs:
                     tracee_programs = [dict(program) for program in lifecycle_result.artifacts.get("tracee_programs") or []]
     except Exception as exc:
@@ -386,8 +400,18 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "setup": setup_result,
         "host": host_metadata(),
         "config": dict(config),
-        "baseline": baseline_records,
-        "post_rejit": post_rejit_records,
+        "baseline": phase_payload(
+            "baseline",
+            {"status": "ok", "reason": "", "measurement": {"records": baseline_records}},
+        ),
+        "post_rejit": phase_payload(
+            "post_rejit",
+            {
+                "status": "error" if errors else "ok",
+                "reason": "; ".join(errors),
+                "measurement": {"records": post_rejit_records},
+            },
+        ),
         "rejit_result": rejit_result,
         "workload_miss": any(
             measurement_workload_miss(record)
