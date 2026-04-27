@@ -5,7 +5,6 @@ ARG CILIUM_IMAGE=quay.io/cilium/cilium:v1.19.3@sha256:2e61680593cddca8b6c055f6d4
 ARG CALICO_NODE_IMAGE=quay.io/calico/node:v3.31.3@sha256:f2339c4ff3a57228cbc39a1f67ab81abded1997d843e0e0b1e86664c7c4eb6c0
 FROM docker.io/library/ubuntu:24.04 AS runner-runtime-build-base
 
-ARG GO_VERSION=1.26.0
 ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
@@ -25,7 +24,6 @@ RUN apt-get update \
         bpftrace \
         bzip2 \
         ca-certificates \
-        cargo \
         clang \
         cmake \
         cpio \
@@ -84,7 +82,6 @@ RUN apt-get update \
         llvm-dev \
         lz4 \
         make \
-        musl \
         openssl \
         perl \
         pkg-config \
@@ -94,10 +91,8 @@ RUN apt-get update \
         python3-yaml \
         rsync \
         rt-tests \
-        rustc \
         scons \
         stress-ng \
-        sysbench \
         tar \
         unzip \
         util-linux \
@@ -107,23 +102,6 @@ RUN apt-get update \
         zlib1g-dev \
         zstd \
     && rm -rf /var/lib/apt/lists/*
-
-RUN set -eux; \
-    go_arch="${TARGETARCH}"; \
-    if [ -z "$go_arch" ]; then go_arch="$(uname -m)"; fi; \
-    case "$go_arch" in \
-        amd64|x86_64) go_arch=amd64 ;; \
-        arm64|aarch64) go_arch=arm64 ;; \
-        *) echo "unsupported Go arch: $go_arch" >&2; exit 1 ;; \
-    esac; \
-    curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${go_arch}.tar.gz" -o /tmp/go.tgz; \
-    rm -rf /usr/local/go; \
-    tar -C /usr/local -xzf /tmp/go.tgz; \
-    rm -f /tmp/go.tgz; \
-    /usr/local/go/bin/go version
-
-ENV PATH="/usr/local/go/bin:${PATH}" \
-    GOTOOLCHAIN=local
 
 ARG RUST_VERSION=1.90.0
 
@@ -203,8 +181,6 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     make image-katran-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     rm -rf \
         /tmp/bpf-benchmark-build \
-        /root/.cache/go-build \
-        /root/go \
         ./Makefile \
         ./runner/mk \
         ./vendor \
@@ -328,9 +304,6 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
     find ./daemon/target -type d \( -name build -o -name deps -o -name incremental -o -name .fingerprint \) -prune -exec rm -rf {} +; \
     rm -rf \
         /tmp/bpf-benchmark-build \
-        /root/.cache/go-build \
-        /root/go \
-        /usr/local/go \
         /opt/cargo \
         /opt/rustup \
         ./Makefile \
@@ -372,7 +345,6 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
         bc \
         binutils-dev \
         bison \
-        cargo \
         clang \
         cmake \
         dwarves \
@@ -419,7 +391,6 @@ RUN --mount=type=bind,source=.,target=/src,readonly \
         llvm-dev \
         make \
         pkg-config \
-        rustc \
         rsync \
         scons \
         unzip \
@@ -453,11 +424,8 @@ COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-instal
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-        auditd \
         etcd-server \
-        nftables \
-        ipset \
-        iptables; \
+        nftables; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*; \
     ldconfig; \
@@ -477,8 +445,6 @@ RUN set -eux; \
     test -f /usr/lib/calico/bpf/common_map_stub.o; \
     test -f /usr/lib/calico/bpf/xdp_preamble.o; \
     test -f /usr/local/lib/libpcap.so.1; \
-    command -v ausyscall >/dev/null; \
-    ausyscall --dump >/dev/null; \
     image_arch="${TARGETARCH}"; \
     if [ -z "${image_arch}" ]; then image_arch="$(dpkg --print-architecture)"; fi; \
     case "${image_arch}" in \
