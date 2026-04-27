@@ -1,19 +1,67 @@
 from __future__ import annotations
 
 import os
+import time
 from pathlib import Path
 from typing import Mapping
 
-from .. import ROOT_DIR, run_command, which
+from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
+from .process_support import describe_process_exit, programs_after, wait_until_program_set_stable
 from ..workload import WorkloadResult, run_named_workload
 from .etcd_support import (
     EtcdBackedNativeRunner,
     anchored_iface_regex,
     detect_primary_interface,
+    ensure_benchmark_interface,
     is_synthetic_benchmark_interface,
     runner_hostname,
 )
 from .setup_support import optional_repo_artifact_path
+
+
+def _attached_program_ids_from_payload(payload: object) -> set[int]:
+    attached: set[int] = set()
+    pending: list[object] = [payload]
+    while pending:
+        current = pending.pop()
+        if isinstance(current, dict):
+            prog_id = int(current.get("id", 0) or 0)
+            if prog_id > 0:
+                attached.add(prog_id)
+            pending.extend(current.values())
+            continue
+        if isinstance(current, list):
+            pending.extend(current)
+    return attached
+
+
+def _attached_sched_cls_program_ids(iface: str) -> set[int]:
+    payload = run_json_command(
+        [resolve_bpftool_binary(), "-j", "net", "show", "dev", str(iface)],
+        timeout=30,
+    )
+    if not isinstance(payload, list):
+        raise RuntimeError(f"bpftool net show returned unexpected payload for {iface}")
+    attached: set[int] = set()
+    for record in payload:
+        if not isinstance(record, dict):
+            continue
+        for key in ("tc", "tcx"):
+            if key in record:
+                attached.update(_attached_program_ids_from_payload(record[key]))
+    if not attached:
+        return set()
+
+    current_types = {
+        int(record.get("id", 0) or 0): str(record.get("type") or "")
+        for record in programs_after(())
+        if int(record.get("id", 0) or 0) > 0
+    }
+    return {
+        prog_id
+        for prog_id in attached
+        if current_types.get(prog_id) == "sched_cls"
+    }
 
 
 class CalicoRunner(EtcdBackedNativeRunner):
@@ -56,6 +104,8 @@ class CalicoRunner(EtcdBackedNativeRunner):
     def _after_runtime_prepared(self) -> None:
         if self.device is None:
             self.device = detect_primary_interface(prefer_benchmark=True)
+        elif is_synthetic_benchmark_interface(self.device):
+            self.device = ensure_benchmark_interface()
 
     def _run_workload(self, seconds: float) -> WorkloadResult:
         if not self.workload_kind:
@@ -78,6 +128,55 @@ class CalicoRunner(EtcdBackedNativeRunner):
             env=self._merged_env(self._startup_env()),
             timeout=60,
         )
+
+    def _wait_for_device_sched_cls_programs(self) -> set[int]:
+        if self.session is None or self.session.process is None:
+            raise RuntimeError("CalicoRunner is not running")
+        if not self.device:
+            raise RuntimeError("CalicoRunner could not determine a network device")
+
+        deadline = time.monotonic() + max(1.0, float(self.load_timeout_s))
+        last_error = ""
+        while time.monotonic() < deadline:
+            snapshot = self.session.collector_snapshot()
+            if exit_reason := describe_process_exit("calico felix", self.session.process, snapshot):
+                raise RuntimeError(exit_reason)
+
+            try:
+                current_program_ids = {
+                    int(program.get("id", 0) or 0)
+                    for program in programs_after(self.session.before_ids)
+                    if int(program.get("id", 0) or 0) > 0
+                }
+                attached_ids = _attached_sched_cls_program_ids(self.device)
+                fresh_attached_ids = {
+                    prog_id
+                    for prog_id in attached_ids
+                    if prog_id in current_program_ids
+                }
+                if fresh_attached_ids:
+                    return fresh_attached_ids
+                last_error = ""
+            except Exception as exc:
+                last_error = str(exc)
+            time.sleep(0.5)
+
+        details = tail_text(
+            "\n".join(
+                list(self.session.collector_snapshot().get("stderr_tail") or [])
+                + list(self.session.collector_snapshot().get("stdout_tail") or [])
+            ),
+            max_lines=40,
+            max_chars=8000,
+        )
+        message = (
+            f"Felix did not attach any sched_cls programs to {self.device} within {self.load_timeout_s}s"
+        )
+        if last_error:
+            message += f": {last_error}"
+        if details:
+            message += f"\n{details}"
+        raise RuntimeError(message)
 
     def _command(self, binary: Path) -> list[str]:
         return [str(binary), "-felix", *self.loader_args]
@@ -160,6 +259,28 @@ class CalicoRunner(EtcdBackedNativeRunner):
             if binary is None:
                 continue
             run_command([binary, *command[1:]], check=False, timeout=20)
+
+    def start(self) -> list[int]:
+        super().start()
+        try:
+            attached_ids = self._wait_for_device_sched_cls_programs()
+            if self.session is None:
+                raise RuntimeError("CalicoRunner lost its session after startup")
+            refreshed_programs = wait_until_program_set_stable(
+                before_ids=self.session.before_ids,
+                timeout_s=self.load_timeout_s,
+                process=self.session.process,
+                collector_snapshot=self.session.collector_snapshot,
+                process_name="calico felix",
+            )
+        except Exception as exc:
+            self._fail_start(f"Calico felix did not finish attaching to {self.device}: {exc}")
+
+        self.session.programs = [dict(program) for program in refreshed_programs]
+        self.programs = [dict(program) for program in refreshed_programs]
+        self.artifacts["benchmark_device"] = str(self.device or "")
+        self.artifacts["benchmark_sched_cls_program_ids"] = sorted(int(prog_id) for prog_id in attached_ids)
+        return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
 
 
 __all__ = ["CalicoRunner"]
