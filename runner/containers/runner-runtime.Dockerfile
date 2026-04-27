@@ -5,6 +5,7 @@ ARG CILIUM_IMAGE=quay.io/cilium/cilium:v1.19.3@sha256:2e61680593cddca8b6c055f6d4
 ARG CALICO_NODE_IMAGE=quay.io/calico/node:v3.31.3@sha256:f2339c4ff3a57228cbc39a1f67ab81abded1997d843e0e0b1e86664c7c4eb6c0
 FROM docker.io/library/ubuntu:24.04 AS runner-runtime-build-base
 
+ARG GO_VERSION=1.26.0
 ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
@@ -102,6 +103,22 @@ RUN apt-get update \
         zlib1g-dev \
         zstd \
     && rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+    go_arch="$(dpkg --print-architecture)"; \
+    case "$go_arch" in \
+        amd64|x86_64) go_arch=amd64 ;; \
+        arm64|aarch64) go_arch=arm64 ;; \
+        *) echo "unsupported Go arch: $go_arch" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${go_arch}.tar.gz" -o /tmp/go.tgz; \
+    rm -rf /usr/local/go; \
+    tar -C /usr/local -xzf /tmp/go.tgz; \
+    rm -f /tmp/go.tgz; \
+    /usr/local/go/bin/go version
+
+ENV PATH="/usr/local/go/bin:${PATH}" \
+    GOTOOLCHAIN=local
 
 ARG RUST_VERSION=1.90.0
 
