@@ -63,27 +63,24 @@ def measurement_workload_miss(measurement: Mapping[str, object] | None) -> bool:
     raw_bpf = measurement.get("bpf")
     if not isinstance(raw_bpf, Mapping):
         return False
-    deltas = [
-        int(record.get("run_cnt_delta", 0) or 0)
-        for record in raw_bpf.values()
-        if isinstance(record, Mapping)
-    ]
-    return bool(deltas) and all(delta == 0 for delta in deltas)
-
-
-def measurement_limitations(measurement: Mapping[str, object] | None) -> list[str]:
-    if not isinstance(measurement, Mapping):
-        return []
-    limitations = _normalize_limitations(measurement.get("limitations"))
-    if measurement_workload_miss(measurement) and WORKLOAD_MISS_LIMITATION not in limitations:
-        limitations.append(WORKLOAD_MISS_LIMITATION)
-    return limitations
+    saw_record = False
+    for record in raw_bpf.values():
+        if not isinstance(record, Mapping):
+            continue
+        saw_record = True
+        if int(record.get("run_cnt_delta", 0) or 0) > 0:
+            return False
+    return saw_record
 
 
 def annotate_workload_measurement(measurement: Mapping[str, object]) -> dict[str, object]:
     annotated = dict(measurement)
-    annotated["workload_miss"] = measurement_workload_miss(annotated)
-    annotated["limitations"] = measurement_limitations(annotated)
+    limitations = _normalize_limitations(annotated.get("limitations"))
+    workload_miss = measurement_workload_miss(annotated)
+    if workload_miss and WORKLOAD_MISS_LIMITATION not in limitations:
+        limitations.append(WORKLOAD_MISS_LIMITATION)
+    annotated["workload_miss"] = workload_miss
+    annotated["limitations"] = limitations
     return annotated
 
 
@@ -91,7 +88,12 @@ def merge_measurement_limitations(*measurements: Mapping[str, object] | None) ->
     merged: list[str] = []
     seen: set[str] = set()
     for measurement in measurements:
-        for limitation in measurement_limitations(measurement):
+        if not isinstance(measurement, Mapping):
+            continue
+        limitations = _normalize_limitations(measurement.get("limitations"))
+        if measurement_workload_miss(measurement) and WORKLOAD_MISS_LIMITATION not in limitations:
+            limitations.append(WORKLOAD_MISS_LIMITATION)
+        for limitation in limitations:
             if limitation in seen:
                 continue
             seen.add(limitation)
