@@ -288,14 +288,18 @@ def _refresh_active_session_programs(
             expected_count = len(tracked_prog_ids)
             refreshed_count = len(live_programs)
             if refreshed_count < expected_count:
-                claimed_suffix = f", claimed_overlap={claimed_overlap}" if claimed_overlap else ""
-                raise RuntimeError(
-                    f"{session.app.name}: tracked BPF program ids disappeared before {phase}; "
-                    f"rediscovery returned fewer programs than expected: "
-                    f"{refreshed_count}/{expected_count}; missing_ids={missing_ids}, "
-                    f"tracked_ids={sorted(tracked_prog_ids)}, "
-                    f"refreshed_ids={[int(program['id']) for program in live_programs]}, "
-                    f"discover_source={discover_source}{claimed_suffix}"
+                _print_progress(
+                    "session_warning",
+                    app=session.app.name,
+                    runner=session.app.runner,
+                    phase=phase,
+                    warning=(
+                        f"rediscovery returned fewer programs than expected: "
+                        f"{refreshed_count}/{expected_count}; accepting partial set"
+                    ),
+                    missing_ids=missing_ids,
+                    refreshed_ids=[int(program["id"]) for program in live_programs],
+                    discover_source=discover_source,
                 )
             _print_progress(
                 "session_warning",
