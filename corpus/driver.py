@@ -25,16 +25,18 @@ from runner.libs.app_suite_schema import AppSpec, AppSuite, load_app_suite_from_
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats
 from runner.libs.case_common import (
     CaseLifecycleState,
+    LifecycleRunResult,
     annotate_workload_measurement,
+    live_rejit_prog_ids,
     measurement_workload_miss,
     merge_measurement_limitations,
     prepare_daemon_session,
-    run_lifecycle_sessions,
     wait_for_suite_quiescence,
 )
 from runner.libs.app_runners.process_support import programs_after
 from runner.libs.rejit import (
     DaemonSession,
+    benchmark_rejit_enabled_passes,
     benchmark_run_provenance,
     compact_rejit_results_for_artifact,
 )
@@ -393,6 +395,117 @@ class CorpusAppSession:
     workload_seconds: float
 
 
+def _run_suite_lifecycle_sessions(
+    prepared_daemon_session: object,
+    sessions: Sequence[CorpusAppSession],
+    *,
+    samples: int,
+) -> tuple[list[LifecycleRunResult], str]:
+    if not hasattr(prepared_daemon_session, "session"):
+        raise RuntimeError("prepared daemon session is required")
+    active_daemon_session = prepared_daemon_session.session
+    session_list = list(sessions)
+    lifecycle_results = [
+        LifecycleRunResult(state=session.state, baseline=None, rejit_result=None, post_rejit=None)
+        for session in session_list
+    ]
+    session_results = list(zip(session_list, lifecycle_results))
+    fatal_error = ""
+    apply_enabled_passes = benchmark_rejit_enabled_passes()
+
+    def stop_session(session: CorpusAppSession, result: LifecycleRunResult) -> None:
+        if result.stopped:
+            return
+        try:
+            session.runner.stop()
+        except Exception as exc:
+            result.stop_error = str(exc)
+        finally:
+            result.stopped = True
+
+    def record_baseline_failure(
+        session: CorpusAppSession,
+        result: LifecycleRunResult,
+        error: str,
+    ) -> None:
+        result.error = str(error)
+        stop_session(session, result)
+        try:
+            wait_for_suite_quiescence()
+        except Exception as quiesce_exc:
+            extra = str(quiesce_exc)
+            result.error = f"{result.error}; {extra}" if result.error else extra
+
+    def check_daemon() -> None:
+        if daemon_error := _daemon_exit_error(active_daemon_session):
+            raise RuntimeError(daemon_error)
+
+    try:
+        active_pairs = list(session_results)
+        if active_pairs:
+            _refresh_active_session_programs([session for session, _ in active_pairs], "baseline")
+
+        surviving_pairs: list[tuple[CorpusAppSession, LifecycleRunResult]] = []
+        for session, result in active_pairs:
+            prog_ids = [int(value) for value in result.state.prog_ids if int(value) > 0]
+            if not prog_ids:
+                record_baseline_failure(session, result, "lifecycle did not provide any program ids")
+            else:
+                try:
+                    result.baseline = _measure_runner_phase(
+                        session.runner,
+                        result.state.prog_ids,
+                        workload_seconds=session.workload_seconds,
+                        samples=samples,
+                        warmup=True,
+                    )
+                    surviving_pairs.append((session, result))
+                except Exception as exc:
+                    record_baseline_failure(session, result, str(exc))
+            check_daemon()
+
+        active_pairs = surviving_pairs
+        if active_pairs:
+            _refresh_active_session_programs([session for session, _ in active_pairs], "rejit")
+
+        surviving_pairs = []
+        for session, result in active_pairs:
+            prog_ids = live_rejit_prog_ids(result.state)
+            if not prog_ids:
+                raise RuntimeError("lifecycle did not provide any program ids after baseline")
+            result.rejit_prog_ids = prog_ids
+            surviving_pairs.append((session, result))
+
+        active_pairs = surviving_pairs
+        for _, result in active_pairs:
+            result.rejit_result = active_daemon_session.apply_rejit(
+                result.rejit_prog_ids,
+                enabled_passes=apply_enabled_passes,
+            )
+            check_daemon()
+
+        for session, result in active_pairs:
+            try:
+                result.post_rejit = _measure_runner_phase(
+                    session.runner,
+                    result.state.prog_ids,
+                    workload_seconds=session.workload_seconds,
+                    samples=samples,
+                    warmup=False,
+                )
+            except Exception as exc:
+                result.error = str(exc)
+            check_daemon()
+    except Exception as exc:
+        fatal_error = str(exc)
+    finally:
+        for session, result in session_results:
+            if not result.stopped:
+                stop_session(session, result)
+
+    return lifecycle_results, fatal_error
+
+
 def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
     suite_path = suite.manifest_path.resolve()
     daemon_binary = Path(args.daemon).resolve()
@@ -412,13 +525,6 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
 
         try:
             with enable_bpf_stats():
-                def _on_session_failure(_: object, result: Any, phase: str) -> None:
-                    if phase != "baseline": return
-                    try:
-                        wait_for_suite_quiescence()
-                    except Exception as quiesce_exc:
-                        result.error = f"{result.error}; {quiesce_exc}" if result.error else str(quiesce_exc)
-
                 for app in suite.apps:
                     _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
                     app_workload_seconds = _app_workload_seconds(args, app)
@@ -460,20 +566,10 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                     if daemon_error is not None: fatal_error = daemon_error; break
 
                 if not fatal_error and sessions:
-                    lifecycle_results, fatal_error = run_lifecycle_sessions(
-                        daemon_session=prepared_daemon_session,
-                        sessions=sessions,
-                        get_state=lambda session: session.state,
-                        measure=lambda session, state, _phase: _measure_runner_phase(
-                            session.runner,
-                            state.prog_ids,
-                            workload_seconds=session.workload_seconds,
-                            samples=samples,
-                            warmup=(_phase == "baseline"),
-                        ),
-                        stop=lambda session, _: session.runner.stop(),
-                        refresh_sessions=_refresh_active_session_programs,
-                        on_session_failure=_on_session_failure,
+                    lifecycle_results, fatal_error = _run_suite_lifecycle_sessions(
+                        prepared_daemon_session,
+                        sessions,
+                        samples=samples,
                     )
                     lifecycle_by_app = {session.app.name: lifecycle for session, lifecycle in zip(sessions, lifecycle_results)}
         finally:

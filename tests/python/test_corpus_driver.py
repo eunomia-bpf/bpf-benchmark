@@ -129,6 +129,44 @@ class CorpusDriverTests(unittest.TestCase):
         self.assertTrue(result["workload_miss"])
         self.assertEqual([WORKLOAD_MISS_LIMITATION], result["limitations"])
 
+    def test_run_suite_lifecycle_sessions_waits_for_quiescence_after_baseline_failure(self) -> None:
+        runner = mock.Mock()
+        state = CaseLifecycleState(
+            runtime=runner,
+            prog_ids=[101],
+            artifacts={"programs": [{"id": 101}]},
+        )
+        session = corpus_driver.CorpusAppSession(
+            app=SimpleNamespace(name="demo", runner="fake"),
+            runner=runner,
+            state=state,
+            workload_seconds=1.0,
+        )
+        prepared_daemon_session = SimpleNamespace(
+            session=SimpleNamespace(
+                proc=SimpleNamespace(poll=mock.Mock(return_value=None)),
+                apply_rejit=mock.Mock(),
+            )
+        )
+
+        with (
+            mock.patch.object(corpus_driver, "_refresh_active_session_programs"),
+            mock.patch.object(corpus_driver, "_measure_runner_phase", side_effect=RuntimeError("baseline boom")),
+            mock.patch.object(corpus_driver, "wait_for_suite_quiescence") as wait_for_suite_quiescence,
+        ):
+            results, fatal_error = corpus_driver._run_suite_lifecycle_sessions(
+                prepared_daemon_session,
+                [session],
+                samples=1,
+            )
+
+        self.assertEqual("", fatal_error)
+        self.assertEqual("baseline boom", results[0].error)
+        self.assertTrue(results[0].stopped)
+        runner.stop.assert_called_once_with()
+        wait_for_suite_quiescence.assert_called_once_with()
+        prepared_daemon_session.session.apply_rejit.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

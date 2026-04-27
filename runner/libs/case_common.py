@@ -197,13 +197,6 @@ class PreparedDaemonSession:
     metadata: dict[str, object]
 
 
-@dataclass(frozen=True)
-class LifecycleAbort:
-    status: str
-    reason: str
-    artifacts: Mapping[str, object] | None = None
-
-
 @dataclass
 class LifecycleRunResult:
     state: CaseLifecycleState | None
@@ -211,7 +204,6 @@ class LifecycleRunResult:
     rejit_result: dict[str, object] | None
     post_rejit: Mapping[str, object] | None
     artifacts: dict[str, object] = field(default_factory=dict)
-    abort: LifecycleAbort | None = None
     rejit_prog_ids: list[int] = field(default_factory=list)
     error: str = ""
     stop_error: str = ""
@@ -244,116 +236,100 @@ def _normalize_enabled_passes(enabled_passes: Sequence[str] | None) -> list[str]
             seen.add(n); result.append(n)
     return result
 
+
+def _effective_enabled_passes(enabled_passes: Sequence[str] | None) -> list[str]:
+    if enabled_passes is not None:
+        return _normalize_enabled_passes(enabled_passes)
+    from runner.libs.rejit import benchmark_rejit_enabled_passes
+
+    return benchmark_rejit_enabled_passes()
+
+
+def _check_daemon(daemon_session: DaemonSession) -> None:
+    if daemon_error := _daemon_exit_error(daemon_session):
+        raise RuntimeError(daemon_error)
+
+
+def _stop_session(
+    *,
+    session: object,
+    result: LifecycleRunResult,
+    stop: Callable[[object, CaseLifecycleState], None],
+) -> None:
+    if result.stopped:
+        return
+    try:
+        stop(session, result.state)
+    except Exception as exc:
+        result.stop_error = str(exc)
+    finally:
+        result.stopped = True
+
+
 def run_lifecycle_sessions(
     *, daemon_session: PreparedDaemonSession, sessions: Sequence[object], get_state: Callable[[object], CaseLifecycleState],
     measure: Callable[[object, CaseLifecycleState, str], Mapping[str, object] | None],
     stop: Callable[[object, CaseLifecycleState], None], enabled_passes: Sequence[str] | None = None,
-    before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
-    after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
-    before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
-    resolve_rejit_prog_ids: Callable[[object, CaseLifecycleState, Mapping[str, object]], Sequence[int] | None] | None = None,
-    refresh_sessions: Callable[[Sequence[object], str], None] | None = None,
-    on_session_failure: Callable[[object, LifecycleRunResult, str], None] | None = None,
 ) -> tuple[list[LifecycleRunResult], str]:
     active_daemon_session = daemon_session.session
     session_list = list(sessions)
-    lifecycle_results = [LifecycleRunResult(state=get_state(session), baseline=None, rejit_result=None, post_rejit=None)
-                         for session in session_list]
+    lifecycle_results = [
+        LifecycleRunResult(state=get_state(session), baseline=None, rejit_result=None, post_rejit=None)
+        for session in session_list
+    ]
     session_results = list(zip(session_list, lifecycle_results))
     fatal_error = ""
 
-    def _effective_enabled_passes() -> list[str]:
-        if enabled_passes is not None:
-            return _normalize_enabled_passes(enabled_passes)
-        from runner.libs.rejit import benchmark_rejit_enabled_passes
-
-        return benchmark_rejit_enabled_passes()
-
-    def _check_daemon() -> None:
-        if daemon_error := _daemon_exit_error(active_daemon_session):
-            raise RuntimeError(daemon_error)
-    def _stop_session(session: object, result: LifecycleRunResult) -> None:
-        if result.stopped:
-            return
-        try:
-            stop(session, result.state)
-        except Exception as exc:
-            result.stop_error = str(exc)
-        finally:
-            result.stopped = True
-    def _record_failure(session: object, result: LifecycleRunResult, error: str, phase: str) -> None:
+    def _record_failure(session: object, result: LifecycleRunResult, error: str) -> None:
         result.error = str(error)
-        _stop_session(session, result)
-        if on_session_failure is None:
-            return
-        try:
-            on_session_failure(session, result, phase)
-        except Exception as callback_exc:
-            extra = str(callback_exc)
-            result.error = f"{result.error}; {extra}" if result.error else extra
-    def _record_abort(session: object, result: LifecycleRunResult, abort: LifecycleAbort) -> None:
-        result.abort = abort
-        if abort.artifacts:
-            result.state.artifacts.update(dict(abort.artifacts))
-        _stop_session(session, result)
+        _stop_session(session=session, result=result, stop=stop)
+
     try:
         active_pairs = list(session_results)
-        if active_pairs and refresh_sessions is not None: refresh_sessions([session for session, _ in active_pairs], "baseline")
         surviving_pairs: list[tuple[object, LifecycleRunResult]] = []
         for session, result in active_pairs:
             prog_ids = [int(value) for value in result.state.prog_ids if int(value) > 0]
             if not prog_ids:
-                _record_failure(session, result, "lifecycle did not provide any program ids", "baseline")
+                _record_failure(session, result, "lifecycle did not provide any program ids")
             else:
-                if before_baseline is not None and (abort := before_baseline(session, result.state)) is not None:
-                    _record_abort(session, result, abort); _check_daemon(); continue
                 try:
                     baseline = measure(session, result.state, "baseline")
-                    if baseline is None: raise RuntimeError("baseline workload returned no result")
+                    if baseline is None:
+                        raise RuntimeError("baseline workload returned no result")
                     result.baseline = baseline
-                    if after_baseline is not None and (artifacts := after_baseline(session, result.state, baseline)):
-                        result.state.artifacts.update(dict(artifacts))
                     surviving_pairs.append((session, result))
                 except Exception as exc:
-                    _record_failure(session, result, str(exc), "baseline")
-            _check_daemon()
+                    _record_failure(session, result, str(exc))
+            _check_daemon(active_daemon_session)
         active_pairs = surviving_pairs
-        if active_pairs and refresh_sessions is not None: refresh_sessions([session for session, _ in active_pairs], "rejit")
         surviving_pairs = []
         for session, result in active_pairs:
-            if before_rejit is not None and (abort := before_rejit(session, result.state, result.baseline or {})) is not None:
-                _record_abort(session, result, abort); _check_daemon(); continue
             prog_ids = live_rejit_prog_ids(result.state)
-            if resolve_rejit_prog_ids is not None:
-                prog_ids = [
-                    int(value)
-                    for value in (resolve_rejit_prog_ids(session, result.state, result.baseline or {}) or [])
-                    if int(value) > 0
-                ]
-            if not prog_ids: raise RuntimeError("lifecycle did not provide any program ids after baseline")
+            if not prog_ids:
+                raise RuntimeError("lifecycle did not provide any program ids after baseline")
             result.rejit_prog_ids = prog_ids
             surviving_pairs.append((session, result))
         active_pairs = surviving_pairs
         if active_pairs:
-            apply_enabled_passes = _effective_enabled_passes()
+            apply_enabled_passes = _effective_enabled_passes(enabled_passes)
             for _, result in active_pairs:
                 result.rejit_result = active_daemon_session.apply_rejit(
                     result.rejit_prog_ids,
                     enabled_passes=apply_enabled_passes,
                 )
-                _check_daemon()
+                _check_daemon(active_daemon_session)
         for session, result in active_pairs:
             try:
                 result.post_rejit = measure(session, result.state, "post_rejit")
             except Exception as exc:
                 result.error = str(exc)
-            _check_daemon()
+            _check_daemon(active_daemon_session)
     except Exception as exc:
         fatal_error = str(exc)
     finally:
         for session, result in session_results:
             if not result.stopped:
-                _stop_session(session, result)
+                _stop_session(session=session, result=result, stop=stop)
 
     return lifecycle_results, fatal_error
 
@@ -367,10 +343,6 @@ def run_case_lifecycle(
     stop: Callable[[object, CaseLifecycleState], None],
     cleanup: Callable[[object], None],
     enabled_passes: Sequence[str] | None = None,
-    before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
-    after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
-    before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
-    resolve_rejit_prog_ids: Callable[[object, CaseLifecycleState, Mapping[str, object]], Sequence[int] | None] | None = None,
 ) -> LifecycleRunResult:
     setup_state = setup()
     try:
@@ -382,28 +354,9 @@ def run_case_lifecycle(
             measure=lambda _, state, phase: workload(setup_state, state, phase),
             stop=lambda _, state: stop(setup_state, state),
             enabled_passes=enabled_passes,
-            before_baseline=(
-                None
-                if before_baseline is None
-                else lambda _, state: before_baseline(setup_state, state)
-            ),
-            after_baseline=(
-                None
-                if after_baseline is None
-                else lambda _, state, baseline: after_baseline(setup_state, state, baseline)
-            ),
-            before_rejit=(
-                None
-                if before_rejit is None
-                else lambda _, state, baseline: before_rejit(setup_state, state, baseline)
-            ),
-            resolve_rejit_prog_ids=(
-                None
-                if resolve_rejit_prog_ids is None
-                else lambda _, state, baseline: resolve_rejit_prog_ids(setup_state, state, baseline)
-            ),
         )
         session_result = session_results[0]
+        session_result.artifacts = dict(session_result.state.artifacts)
         error_message = fatal_error or session_result.error
         if session_result.stop_error:
             error_message = (
@@ -412,15 +365,8 @@ def run_case_lifecycle(
                 else session_result.stop_error
             )
         if error_message:
-                raise RuntimeError(error_message)
-        return LifecycleRunResult(
-            state=session_result.state,
-            baseline=session_result.baseline,
-            rejit_result=session_result.rejit_result,
-            post_rejit=session_result.post_rejit,
-            artifacts=dict(session_result.state.artifacts),
-            abort=session_result.abort,
-        )
+            raise RuntimeError(error_message)
+        return session_result
     finally:
         cleanup(setup_state)
 
@@ -445,10 +391,6 @@ def run_app_runner_lifecycle(
     measure: Callable[[CaseLifecycleState, str], Mapping[str, object] | None],
     enabled_passes: Sequence[str] | None = None,
     build_state: Callable[[AppRunner, list[int]], CaseLifecycleState] | None = None,
-    before_baseline: Callable[[object, CaseLifecycleState], LifecycleAbort | None] | None = None,
-    after_baseline: Callable[[object, CaseLifecycleState, Mapping[str, object]], Mapping[str, object] | None] | None = None,
-    before_rejit: Callable[[object, CaseLifecycleState, Mapping[str, object]], LifecycleAbort | None] | None = None,
-    resolve_rejit_prog_ids: Callable[[object, CaseLifecycleState, Mapping[str, object]], Sequence[int] | None] | None = None,
 ) -> LifecycleRunResult:
     def _start(_: object) -> CaseLifecycleState:
         ids = [int(v) for v in runner.start() if int(v) > 0]
@@ -462,10 +404,6 @@ def run_app_runner_lifecycle(
         stop=lambda _, lc: lc.runtime.stop(),
         cleanup=lambda _: None,
         enabled_passes=enabled_passes,
-        before_baseline=before_baseline,
-        after_baseline=after_baseline,
-        before_rejit=before_rejit,
-        resolve_rejit_prog_ids=resolve_rejit_prog_ids,
     )
 
 def git_sha() -> str:
