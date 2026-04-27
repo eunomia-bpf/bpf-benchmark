@@ -90,7 +90,11 @@ class TraceeAgentSession(AgentSession):
         self.command_used: list[str] | None = None
 
     def __enter__(self) -> "TraceeAgentSession":
-        preexisting_ids = set(_current_prog_ids())
+        preexisting_ids = {
+            int(record["id"])
+            for record in bpftool_prog_show_records()
+            if "id" in record
+        }
         failures: list[str] = []
         tracee_tmpdir = _tracee_runtime_dir()
         tracee_tmpdir.mkdir(parents=True, exist_ok=True)
@@ -152,10 +156,6 @@ class TraceeAgentSession(AgentSession):
         self._join_io_threads()
 
 
-def _current_prog_ids() -> list[int]:
-    return [int(record["id"]) for record in bpftool_prog_show_records() if "id" in record]
-
-
 def inspect_tracee_setup() -> dict[str, object]:
     artifact_binary = repo_artifact_root() / "tracee" / "bin" / "tracee"
     tracee_binary = pick_host_executable(artifact_binary)
@@ -211,13 +211,9 @@ def _tracee_collector_has_activity(collector: TraceeOutputCollector) -> bool:
     return bool(snapshot.get("stdout_tail") or snapshot.get("stderr_tail"))
 
 
-def _tracee_output_args() -> list[str]:
-    return ["--output", TRACEE_OUTPUT_MODE]
-
-
 def build_tracee_commands(binary: str, extra_args: Sequence[str] = ()) -> list[list[str]]:
     return [[binary, "--events", "*",
-             *_tracee_output_args(),
+             "--output", TRACEE_OUTPUT_MODE,
              "--server", "healthz", "--server", f"http-address=:{TRACEE_HEALTH_PORT}",
              "--signatures-dir", str(_tracee_signatures_dir()), *extra_args]]
 

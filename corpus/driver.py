@@ -27,7 +27,6 @@ from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_st
 from runner.libs.case_common import (
     CaseLifecycleState,
     LifecycleRunResult,
-    annotate_workload_measurement,
     live_rejit_prog_ids,
     prepare_daemon_session,
     wait_for_suite_quiescence,
@@ -115,12 +114,10 @@ def _measure_runner_phase(
     for _ in range(samples):
         workloads.append(runner.run_workload(workload_seconds).to_dict())
     final_stats = sample_bpf_stats(logical_prog_ids)
-    return annotate_workload_measurement(
-        {
-            "workloads": workloads,
-            "bpf": compute_delta(initial_stats, final_stats),
-        }
-    )
+    return {
+        "workloads": workloads,
+        "bpf": compute_delta(initial_stats, final_stats),
+    }
 
 
 def _measurement_bpf_records(measurement: Mapping[str, object] | None) -> dict[int, Mapping[str, object]]:

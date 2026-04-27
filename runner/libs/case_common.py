@@ -18,7 +18,6 @@ from runner.libs.kinsn import relpath
 DEFAULT_SUITE_QUIESCE_TIMEOUT_S = 20.0
 DEFAULT_SUITE_QUIESCE_STABLE_S = 2.0
 DEFAULT_SUITE_QUIESCE_POLL_S = 0.2
-WORKLOAD_MISS_LIMITATION = "workload did not trigger any tracked BPF programs"
 
 
 def ensure_daemon_binary(daemon_binary: Path) -> None:
@@ -41,64 +40,8 @@ def phase_payload(
     }
 
 
-def _normalize_limitations(value: object) -> list[str]:
-    if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
-        return []
-    limitations: list[str] = []
-    seen: set[str] = set()
-    for item in value:
-        rendered = str(item or "").strip()
-        if not rendered or rendered in seen:
-            continue
-        seen.add(rendered)
-        limitations.append(rendered)
-    return limitations
-
-
-def measurement_workload_miss(measurement: Mapping[str, object] | None) -> bool:
-    if not isinstance(measurement, Mapping):
-        return False
-    if bool(measurement.get("workload_miss", False)):
-        return True
-    raw_bpf = measurement.get("bpf")
-    if not isinstance(raw_bpf, Mapping):
-        return False
-    saw_record = False
-    for record in raw_bpf.values():
-        if not isinstance(record, Mapping):
-            continue
-        saw_record = True
-        if int(record.get("run_cnt_delta", 0) or 0) > 0:
-            return False
-    return saw_record
-
-
 def annotate_workload_measurement(measurement: Mapping[str, object]) -> dict[str, object]:
-    annotated = dict(measurement)
-    limitations = _normalize_limitations(annotated.get("limitations"))
-    workload_miss = measurement_workload_miss(annotated)
-    if workload_miss and WORKLOAD_MISS_LIMITATION not in limitations:
-        limitations.append(WORKLOAD_MISS_LIMITATION)
-    annotated["workload_miss"] = workload_miss
-    annotated["limitations"] = limitations
-    return annotated
-
-
-def merge_measurement_limitations(*measurements: Mapping[str, object] | None) -> list[str]:
-    merged: list[str] = []
-    seen: set[str] = set()
-    for measurement in measurements:
-        if not isinstance(measurement, Mapping):
-            continue
-        limitations = _normalize_limitations(measurement.get("limitations"))
-        if measurement_workload_miss(measurement) and WORKLOAD_MISS_LIMITATION not in limitations:
-            limitations.append(WORKLOAD_MISS_LIMITATION)
-        for limitation in limitations:
-            if limitation in seen:
-                continue
-            seen.add(limitation)
-            merged.append(limitation)
-    return merged
+    return dict(measurement)
 
 
 def program_records(value: object) -> list[dict[str, object]]:

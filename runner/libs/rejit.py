@@ -245,23 +245,6 @@ def _policy_match_values(raw: Any, *, field_name: str) -> list[str]:
     return [text] if text else []
 
 
-def _site_count_for_pass(site_counts: Mapping[str, Any] | None, pass_name: str) -> int:
-    field_name = _PASS_TO_SITE_FIELD.get(pass_name)
-    if field_name is None:
-        raise SystemExit(f"invalid benchmark config field: unknown pass name {pass_name!r}")
-    if not site_counts:
-        raise RuntimeError(f"daemon scan result is missing site counter field {field_name!r}")
-    if field_name in site_counts:
-        value = site_counts.get(field_name)
-        return _strict_non_negative_int(
-            value,
-            field_name=f"scan result {field_name!r} for pass {pass_name!r}",
-        )
-    raise RuntimeError(
-        f"daemon scan result is missing site counter field {field_name!r} for pass {pass_name!r}"
-    )
-
-
 def benchmark_config_enabled_passes(benchmark_config: Mapping[str, Any] | None) -> list[str]:
     policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
     policy_default = _mapping_dict(policy_config.get("default"), field_name="policy.default")

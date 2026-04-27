@@ -120,6 +120,3 @@ class OtelProfilerRunner(NativeProcessRunner):
         if runtime_dir is None:
             return
         shutil.rmtree(runtime_dir, ignore_errors=True)
-
-
-__all__ = ["OtelProfilerRunner"]

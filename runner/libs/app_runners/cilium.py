@@ -218,6 +218,3 @@ class CiliumRunner(NativeProcessRunner):
             self.runtime_dir = None
         self._bpf_root = None
         self._state_dir = None
-
-
-__all__ = ["CiliumRunner"]

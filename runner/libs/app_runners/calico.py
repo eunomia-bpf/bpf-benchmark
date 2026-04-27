@@ -301,6 +301,3 @@ class CalicoRunner(NativeProcessRunner):
         if self.runtime_dir is not None:
             shutil.rmtree(self.runtime_dir, ignore_errors=True)
             self.runtime_dir = None
-
-
-__all__ = ["CalicoRunner"]

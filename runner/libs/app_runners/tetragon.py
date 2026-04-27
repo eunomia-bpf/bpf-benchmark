@@ -24,9 +24,6 @@ def current_programs() -> list[dict[str, object]]:
     return [dict(record) for record in bpftool_prog_show_records() if "id" in record]
 
 
-def current_prog_ids() -> list[int]: return [int(r["id"]) for r in current_programs()]
-
-
 class TetragonAgentSession(AgentSession):
     def __init__(self, command: Sequence[str], load_timeout: int) -> None:
         super().__init__(load_timeout); self.command = list(command); self.before_ids: set[int] = set()
@@ -36,7 +33,7 @@ class TetragonAgentSession(AgentSession):
         except Exception as exc: return exc
 
     def __enter__(self) -> "TetragonAgentSession":
-        before_ids = set(current_prog_ids())
+        before_ids = {int(program["id"]) for program in current_programs()}
         self.before_ids = before_ids
         self.process = start_agent(self.command[0], self.command[1:], env={"HOME": os.environ.get("HOME", str(ROOT_DIR))})
         self._start_io_threads()

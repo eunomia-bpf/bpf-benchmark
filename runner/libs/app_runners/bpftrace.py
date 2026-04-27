@@ -64,17 +64,6 @@ SCRIPTS: tuple[ScriptSpec, ...] = (
 SCRIPT_BY_NAME: dict[str, ScriptSpec] = {spec.name: spec for spec in SCRIPTS}
 
 
-def finalize_process_output(process: Any, collector: ProcessOutputCollector) -> dict[str, object]:
-    snapshot = collector.snapshot()
-    stdout_tail = "\n".join(str(line) for line in (snapshot.get("stdout_tail") or []))
-    stderr_tail = "\n".join(str(line) for line in (snapshot.get("stderr_tail") or []))
-    return {
-        "returncode": process.returncode,
-        "stdout_tail": tail_text(stdout_tail, max_lines=40, max_chars=8000),
-        "stderr_tail": tail_text(stderr_tail, max_lines=40, max_chars=8000),
-    }
-
-
 DEFAULT_ATTACH_TIMEOUT_S = 60
 
 
@@ -222,9 +211,19 @@ class BpftraceRunner(AppRunner):
         if self.stderr_thread is not None:
             self.stderr_thread.join(timeout=2.0)
             self.stderr_thread = None
-        self.process_output = finalize_process_output(process, self.collector)
+        snapshot = self.collector.snapshot()
+        self.process_output = {
+            "returncode": process.returncode,
+            "stdout_tail": tail_text(
+                "\n".join(str(line) for line in (snapshot.get("stdout_tail") or [])),
+                max_lines=40,
+                max_chars=8000,
+            ),
+            "stderr_tail": tail_text(
+                "\n".join(str(line) for line in (snapshot.get("stderr_tail") or [])),
+                max_lines=40,
+                max_chars=8000,
+            ),
+        }
         if stop_error is not None:
             raise RuntimeError(str(stop_error)) from stop_error
-
-
-__all__ = ["BpftraceRunner", "SCRIPTS", "ScriptSpec", "finalize_process_output"]

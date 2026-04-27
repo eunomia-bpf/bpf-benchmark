@@ -77,11 +77,3 @@ def bpftool_prog_show_records() -> list[dict[str, object]]:
             )
         records.append(dict(record))
     return records
-
-
-__all__ = [
-    "bpftool_prog_show_records",
-    "start_agent",
-    "stop_agent",
-    "wait_healthy",
-]

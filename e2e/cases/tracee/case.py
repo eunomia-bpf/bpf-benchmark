@@ -26,11 +26,8 @@ from runner.libs.benchmark_catalog import (  # noqa: E402
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
-    annotate_workload_measurement,
     ensure_daemon_binary,
     host_metadata,
-    measurement_workload_miss,
-    merge_measurement_limitations,
     phase_payload,
     run_case_lifecycle,
 )
@@ -70,16 +67,14 @@ def measure_workload(
     else:
         workload_result = runner.run_workload_spec(workload_spec, duration_s)
     after_bpf = sample_bpf_stats(prog_ids)
-    return annotate_workload_measurement(
-        {
-            "cycle_index": cycle_index,
-            "name": str(workload_spec.get("name", workload_spec.get("kind", "unknown"))),
-            "kind": str(workload_spec.get("kind", "")),
-            "metric": str(workload_spec.get("metric", "ops/s")),
-            "app_throughput": workload_result.ops_per_sec,
-            "bpf": compute_delta(before_bpf, after_bpf),
-        }
-    )
+    return {
+        "cycle_index": cycle_index,
+        "name": str(workload_spec.get("name", workload_spec.get("kind", "unknown"))),
+        "kind": str(workload_spec.get("kind", "")),
+        "metric": str(workload_spec.get("metric", "ops/s")),
+        "app_throughput": workload_result.ops_per_sec,
+        "bpf": compute_delta(before_bpf, after_bpf),
+    }
 
 
 def run_phase(
@@ -88,7 +83,6 @@ def run_phase(
     prog_ids: list[int],
     *,
     cycle_index: int,
-    phase_name: str,
     warmup_duration_s: int | float,
     runner: TraceeRunner | None = None,
 ) -> dict[str, object]:
@@ -167,11 +161,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
                 f"- Reason: `{payload.get('error_message') or 'unknown'}`",
             ]
         )
-        limitations = payload.get("limitations") or []
-        if limitations:
-            lines.extend(["", "## Limitations", ""])
-            for limitation in limitations:
-                lines.append(f"- {limitation}")
         lines.append("")
         return "\n".join(lines)
 
@@ -195,11 +184,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     else:
         lines.append("- No ReJIT result")
 
-    limitations = payload.get("limitations") or []
-    if limitations:
-        lines.extend(["", "## Limitations", ""])
-        for limitation in limitations:
-            lines.append(f"- {limitation}")
     lines.append("")
     return "\n".join(lines)
 
@@ -214,7 +198,6 @@ def error_payload(
     tracee_launch_command: Mapping[str, object],
     setup_result: Mapping[str, object],
     error_message: str,
-    limitations: Sequence[str],
 ) -> dict[str, object]:
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -233,7 +216,6 @@ def error_payload(
         "baseline": None,
         "post_rejit": None,
         "rejit_result": None,
-        "limitations": list(limitations),
     }
 
 
@@ -252,9 +234,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     tracee_extra_args: list[str] = []
     tracee_launch_command = build_tracee_commands(tracee_binary, tracee_extra_args) if tracee_binary else {}
 
-    limitations: list[str] = []
-    if setup_result["returncode"] != 0:
-        limitations.append("Tracee setup inspection failed before execution.")
     if tracee_binary is None:
         return error_payload(
             config=config,
@@ -265,7 +244,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             tracee_launch_command=tracee_launch_command,
             setup_result=setup_result,
             error_message="Tracee binary is unavailable in this environment; manual .bpf.o path is forbidden.",
-            limitations=limitations,
         )
 
     workloads = [dict(workload) for workload in TRACEE_E2E_WORKLOADS]
@@ -279,7 +257,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             tracee_launch_command=tracee_launch_command,
             setup_result=setup_result,
             error_message="Tracee config contains no workloads",
-            limitations=limitations,
         )
 
     try:
@@ -295,10 +272,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
 
         with enable_bpf_stats():
             for cycle_index in range(sample_count):
-
-                def setup() -> dict[str, object]:
-                    return {}
-
                 def start(_: object) -> CaseLifecycleState:
                     runner = TraceeRunner(
                         tracee_binary=tracee_binary,
@@ -320,7 +293,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                         },
                     )
 
-                def workload(_: object, lifecycle: CaseLifecycleState, phase_name: str) -> dict[str, object]:
+                def workload(_: object, lifecycle: CaseLifecycleState, _phase_name: str) -> dict[str, object]:
                     runner = lifecycle.runtime
                     assert isinstance(runner, TraceeRunner)
                     return run_phase(
@@ -328,7 +301,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                         duration_s,
                         lifecycle.prog_ids,
                         cycle_index=cycle_index,
-                        phase_name=phase_name,
                         warmup_duration_s=warmup_duration_s,
                         runner=runner,
                     )
@@ -338,16 +310,13 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     assert isinstance(runner, TraceeRunner)
                     runner.stop()
 
-                def cleanup(_: object) -> None:
-                    return None
-
                 lifecycle_result = run_case_lifecycle(
                     daemon_session=prepared_daemon_session,
-                    setup=setup,
+                    setup=lambda: {},
                     start=start,
                     workload=workload,
                     stop=stop,
-                    cleanup=cleanup,
+                    cleanup=lambda _: None,
                 )
 
                 if lifecycle_result.state is None or lifecycle_result.baseline is None:
@@ -363,7 +332,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 if isinstance(cycle_rejit_result, Mapping):
                     cycle_error = str(cycle_rejit_result.get("error") or "").strip()
                     if cycle_error:
-                        limitations.append(f"Cycle {cycle_index} ReJIT/apply reported errors: {cycle_error}")
                         errors.append(f"cycle {cycle_index}: {cycle_error}")
                         if post_rejit is not None:
                             post_rejit["status"] = "error"
@@ -381,11 +349,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             tracee_launch_command=tracee_launch_command,
             setup_result=setup_result,
             error_message=f"Tracee case could not run: {exc}",
-            limitations=limitations,
         )
-    for limitation in merge_measurement_limitations(*baseline_records, *post_rejit_records):
-        if limitation not in limitations:
-            limitations.append(limitation)
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -413,11 +377,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             },
         ),
         "rejit_result": rejit_result,
-        "workload_miss": any(
-            measurement_workload_miss(record)
-            for record in baseline_records + post_rejit_records
-        ),
-        "limitations": limitations,
     }
     if errors:
         payload["error_message"] = "; ".join(errors)

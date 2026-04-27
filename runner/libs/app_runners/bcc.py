@@ -9,7 +9,6 @@ import tempfile
 import threading
 from collections import deque
 from dataclasses import dataclass
-from functools import lru_cache
 from pathlib import Path
 from typing import Mapping, Sequence
 
@@ -200,17 +199,10 @@ def _drain_stream(stream: io.TextIOBase, capture: _TailCapture) -> None:
             capture.append(chunk)
 
 
-@lru_cache(maxsize=1)
-def _bcc_tool_specs() -> dict[str, tuple[dict[str, object], tuple[str, ...]]]:
-    return {
-        spec.name: (dict(spec.workload_spec), tuple(str(arg) for arg in spec.tool_args))
-        for spec in BCC_TOOL_SPECS
-    }
-
-
 def inspect_bcc_setup() -> dict[str, object]:
     resolved_tools: dict[str, str] = {}
-    for tool_name in _bcc_tool_specs():
+    for spec in BCC_TOOL_SPECS:
+        tool_name = spec.name
         resolved = next((path for name in _tool_binary_names(tool_name) if (path := which(name)) is not None), None)
         if resolved is None:
             return {

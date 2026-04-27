@@ -19,7 +19,6 @@ from runner.libs.benchmark_catalog import (  # noqa: E402
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
 from runner.libs.case_common import (  # noqa: E402
     CaseLifecycleState,
-    annotate_workload_measurement,
     append_json,
     ensure_daemon_binary,
     host_metadata,
@@ -35,14 +34,12 @@ def measure_workload(runner: BCCRunner, duration_s: int, prog_ids: list[int]) ->
     before_bpf = sample_bpf_stats(prog_ids)
     workload_result = runner.run_workload(float(duration_s))
     after_bpf = sample_bpf_stats(prog_ids)
-    return annotate_workload_measurement(
-        {
-            "throughput": workload_result.ops_per_sec,
-            "metric": "ops/s",
-            "duration_s": duration_s,
-            "bpf": compute_delta(before_bpf, after_bpf),
-        }
-    )
+    return {
+        "throughput": workload_result.ops_per_sec,
+        "metric": "ops/s",
+        "duration_s": duration_s,
+        "bpf": compute_delta(before_bpf, after_bpf),
+    }
 def run_phase(
     spec: BCCToolSpec,
     tool_binary: Path,

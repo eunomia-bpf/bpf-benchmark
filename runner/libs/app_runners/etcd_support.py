@@ -163,6 +163,3 @@ class LocalEtcdSession:
             list(snapshot.get("stderr_tail") or []) + list(snapshot.get("stdout_tail") or [])
         )
         return tail_text(combined, max_lines=40, max_chars=8000)
-
-
-__all__ = ["LocalEtcdSession"]
