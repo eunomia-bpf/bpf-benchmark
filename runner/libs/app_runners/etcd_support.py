@@ -13,13 +13,16 @@ import urllib.request
 from pathlib import Path
 
 from .. import ROOT_DIR, run_command, tail_text, which
+from ..benchmark_net import (
+    BENCHMARK_IFACE,
+    BENCHMARK_IFACE_CIDR,
+    BENCHMARK_NETNS,
+    BENCHMARK_PEER_IFACE,
+    BENCHMARK_PEER_IFACE_CIDR,
+    is_benchmark_interface,
+)
 from ..agent import stop_agent
 from .process_support import NativeProcessRunner, ProcessOutputCollector
-
-_BENCHMARK_IFACE = "bpfbench0"
-_BENCHMARK_PEER_IFACE = "bpfbench1"
-_BENCHMARK_IFACE_CIDR = "198.18.0.1/30"
-_BENCHMARK_PEER_IFACE_CIDR = "198.18.0.2/30"
 
 
 def _runtime_tmp_root() -> Path:
@@ -55,8 +58,7 @@ def anchored_iface_regex(interface: str) -> str:
 
 
 def is_synthetic_benchmark_interface(interface: str | None) -> bool:
-    normalized = str(interface or "").strip()
-    return normalized in {_BENCHMARK_IFACE, _BENCHMARK_PEER_IFACE}
+    return is_benchmark_interface(interface)
 
 
 def _link_exists(name: str) -> bool:
@@ -76,13 +78,42 @@ def _delete_link_if_exists(name: str) -> None:
         pass
 
 
+def _netns_exists(name: str) -> bool:
+    try:
+        completed = run_command(["ip", "netns", "list"], timeout=10)
+    except Exception:
+        return False
+    return any(line.split(maxsplit=1)[0].strip() == name for line in completed.stdout.splitlines())
+
+
+def _link_exists_in_netns(namespace: str, name: str) -> bool:
+    if not _netns_exists(namespace):
+        return False
+    try:
+        run_command(["ip", "-n", namespace, "-o", "link", "show", "dev", name], timeout=10)
+    except Exception:
+        return False
+    return True
+
+
 def ensure_benchmark_interface() -> str:
-    iface_exists = _link_exists(_BENCHMARK_IFACE)
-    peer_exists = _link_exists(_BENCHMARK_PEER_IFACE)
-    if iface_exists != peer_exists:
-        _delete_link_if_exists(_BENCHMARK_IFACE)
-        _delete_link_if_exists(_BENCHMARK_PEER_IFACE)
+    iface_exists = _link_exists(BENCHMARK_IFACE)
+    peer_exists_in_root = _link_exists(BENCHMARK_PEER_IFACE)
+    peer_exists_in_netns = _link_exists_in_netns(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE)
+    if not iface_exists and peer_exists_in_netns:
+        run_command(
+            ["ip", "-n", BENCHMARK_NETNS, "link", "delete", "dev", BENCHMARK_PEER_IFACE],
+            check=False,
+            timeout=10,
+        )
+        peer_exists_in_netns = False
+    if iface_exists and not peer_exists_in_netns:
+        _delete_link_if_exists(BENCHMARK_IFACE)
         iface_exists = False
+        peer_exists_in_root = False
+        peer_exists_in_netns = False
+    if not _netns_exists(BENCHMARK_NETNS):
+        run_command(["ip", "netns", "add", BENCHMARK_NETNS], timeout=10)
     if not iface_exists:
         run_command(
             [
@@ -90,26 +121,36 @@ def ensure_benchmark_interface() -> str:
                 "link",
                 "add",
                 "dev",
-                _BENCHMARK_IFACE,
+                BENCHMARK_IFACE,
                 "type",
                 "veth",
                 "peer",
                 "name",
-                _BENCHMARK_PEER_IFACE,
+                BENCHMARK_PEER_IFACE,
             ],
             timeout=10,
         )
-    run_command(["ip", "addr", "replace", _BENCHMARK_IFACE_CIDR, "dev", _BENCHMARK_IFACE], timeout=10)
+        peer_exists_in_root = True
+    if peer_exists_in_root:
+        run_command(["ip", "link", "set", "dev", BENCHMARK_PEER_IFACE, "netns", BENCHMARK_NETNS], timeout=10)
+    if not _link_exists_in_netns(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE):
+        raise RuntimeError(
+            f"benchmark peer interface {BENCHMARK_PEER_IFACE} is unavailable in namespace {BENCHMARK_NETNS}"
+        )
+    run_command(["ip", "addr", "replace", BENCHMARK_IFACE_CIDR, "dev", BENCHMARK_IFACE], timeout=10)
+    run_command(["ip", "link", "set", "dev", BENCHMARK_IFACE, "up"], timeout=10)
     run_command(
-        ["ip", "addr", "replace", _BENCHMARK_PEER_IFACE_CIDR, "dev", _BENCHMARK_PEER_IFACE],
+        ["ip", "-n", BENCHMARK_NETNS, "addr", "replace", BENCHMARK_PEER_IFACE_CIDR, "dev", BENCHMARK_PEER_IFACE],
         timeout=10,
     )
-    run_command(["ip", "link", "set", "dev", _BENCHMARK_IFACE, "up"], timeout=10)
-    run_command(["ip", "link", "set", "dev", _BENCHMARK_PEER_IFACE, "up"], timeout=10)
-    return _BENCHMARK_IFACE
+    run_command(["ip", "-n", BENCHMARK_NETNS, "link", "set", "dev", "lo", "up"], timeout=10)
+    run_command(["ip", "-n", BENCHMARK_NETNS, "link", "set", "dev", BENCHMARK_PEER_IFACE, "up"], timeout=10)
+    return BENCHMARK_IFACE
 
 
-def detect_primary_interface() -> str:
+def detect_primary_interface(*, prefer_benchmark: bool = False) -> str:
+    if prefer_benchmark:
+        return ensure_benchmark_interface()
     try:
         completed = run_command(["ip", "-o", "route", "show", "default"], timeout=10)
         for line in completed.stdout.splitlines():

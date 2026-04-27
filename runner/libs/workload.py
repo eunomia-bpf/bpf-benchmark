@@ -9,15 +9,18 @@ import re
 import socket
 import stat
 import subprocess
+import sys
 import tempfile
 import threading
 import time
+import urllib.request
 from dataclasses import asdict, dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Callable, Sequence
 
 from . import run_command, tail_text, which
+from .benchmark_net import BENCHMARK_IFACE, BENCHMARK_NETNS, BENCHMARK_PEER_IFACE_IP
 from .kernel_modules import kernel_module_is_builtin, load_kernel_module, repo_kernel_modules_root
 
 LOOPBACK_LISTEN_BACKLOG = 128
@@ -380,6 +383,118 @@ class LocalHttpServer:
         self.server.shutdown()
         self.thread.join(timeout=2.0)
         self.server.server_close()
+
+
+_NAMESPACED_HTTP_SERVER_SCRIPT = """
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import socket
+import sys
+
+class SilentHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        payload = b"tracee-benchmark\\n"
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers()
+        try:
+            self.wfile.write(payload)
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, socket.timeout):
+            return
+
+    def log_message(self, format, *args):
+        del format, args
+
+host = sys.argv[1]
+port = int(sys.argv[2])
+if ":" in host:
+    class Server(ThreadingHTTPServer):
+        address_family = socket.AF_INET6
+    bind_address = (host, port, 0, 0)
+else:
+    Server = ThreadingHTTPServer
+    bind_address = (host, port)
+server = Server(bind_address, SilentHandler)
+server.serve_forever()
+"""
+
+
+class NamespacedHttpServer:
+    def __init__(self, namespace: str, host: str, port: int = 18080) -> None:
+        self.namespace = str(namespace).strip()
+        self.host = str(host).strip()
+        self.port = int(port)
+        self.process: subprocess.Popen[str] | None = None
+
+    @property
+    def url(self) -> str:
+        if ":" in self.host:
+            return f"http://[{self.host}]:{self.port}/"
+        return f"http://{self.host}:{self.port}/"
+
+    def __enter__(self) -> "NamespacedHttpServer":
+        ip_binary = which("ip")
+        if ip_binary is None:
+            raise RuntimeError("ip is required for interface-bound network workloads")
+        python_binary = sys.executable or which("python3")
+        if not python_binary:
+            raise RuntimeError("python3 is required for interface-bound network workloads")
+        self.process = subprocess.Popen(
+            [
+                ip_binary,
+                "netns",
+                "exec",
+                self.namespace,
+                python_binary,
+                "-u",
+                "-c",
+                _NAMESPACED_HTTP_SERVER_SCRIPT,
+                self.host,
+                str(self.port),
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+        )
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        deadline = time.monotonic() + 5.0
+        while time.monotonic() < deadline:
+            if self.process.poll() is not None:
+                stdout = "" if self.process.stdout is None else self.process.stdout.read()
+                stderr = "" if self.process.stderr is None else self.process.stderr.read()
+                raise RuntimeError(
+                    "interface-bound HTTP server exited before becoming ready: "
+                    f"{tail_text(stderr or stdout, max_lines=20, max_chars=4000)}"
+                )
+            try:
+                with opener.open(self.url, timeout=0.5) as response:
+                    if int(getattr(response, "status", 0) or 0) == 200:
+                        return self
+            except Exception:
+                time.sleep(0.1)
+        self.__exit__(None, None, None)
+        raise RuntimeError(
+            f"interface-bound HTTP server in namespace {self.namespace} did not become ready at {self.url}"
+        )
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        del exc_type, exc, tb
+        if self.process is None:
+            return
+        process = self.process
+        self.process = None
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=5)
+        if process.stdout is not None:
+            process.stdout.close()
+        if process.stderr is not None:
+            process.stderr.close()
 
 
 def _finish_result(ops_total: float, duration_s: float, stdout: str, stderr: str) -> WorkloadResult:
@@ -1058,9 +1173,21 @@ def run_vfs_create_fsync_exact_workload(duration_s: int | float) -> WorkloadResu
         return _finish_result(ops_total, time.monotonic() - start, "", "")
 
 
-def run_network_load(duration_s: int | float) -> WorkloadResult:
+def _network_http_server(network_device: str | None = None) -> LocalHttpServer | NamespacedHttpServer:
+    normalized_device = str(network_device or "").strip()
+    if not normalized_device:
+        return LocalHttpServer()
+    if normalized_device != BENCHMARK_IFACE:
+        raise RuntimeError(
+            f"interface-bound network workload only supports benchmark interface {BENCHMARK_IFACE}; "
+            f"got {normalized_device}"
+        )
+    return NamespacedHttpServer(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE_IP)
+
+
+def run_network_load(duration_s: int | float, *, network_device: str | None = None) -> WorkloadResult:
     wrk_binary = resolve_workload_tool("wrk")
-    with LocalHttpServer() as server:
+    with _network_http_server(network_device) as server:
         start = time.monotonic()
         c = run_command([wrk_binary, "-t2", "-c10", f"-d{max(1, int(duration_s))}s", server.url], check=False, timeout=float(duration_s) + 30)
         elapsed = time.monotonic() - start
@@ -1072,10 +1199,22 @@ def run_network_load(duration_s: int | float) -> WorkloadResult:
         return _finish_result(total_requests, elapsed, c.stdout or "", c.stderr or "")
 
 
-def run_tcp_connect_load(duration_s: int | float) -> WorkloadResult:
+def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None = None) -> WorkloadResult:
     curl_binary = which("curl")
     if curl_binary is None:
         raise RuntimeError("curl is required for TCP connect load")
+    normalized_device = str(network_device or "").strip()
+    if normalized_device:
+        with _network_http_server(normalized_device) as server:
+            start = time.monotonic(); deadline = start + float(duration_s)
+            ops_total = 0.0; stderr_lines: list[str] = []
+            while time.monotonic() < deadline:
+                c = run_command([curl_binary, "-fsS", "-g", "-o", "/dev/null", "--http1.1", "--max-time", "2", server.url], check=False, timeout=5)
+                if c.returncode != 0:
+                    raise RuntimeError(f"tcp connect load failed: {tail_text(c.stderr or c.stdout)}")
+                stderr_lines.append(c.stderr or ""); ops_total += 1.0
+            elapsed = time.monotonic() - start
+            return _finish_result(ops_total, elapsed, "", "\n".join(stderr_lines))
     with LocalHttpServer("127.0.0.1") as server_v4, LocalHttpServer("::1") as server_v6:
         urls = (server_v4.url, server_v6.url)
         start = time.monotonic(); deadline = start + float(duration_s)
@@ -1132,13 +1271,14 @@ def run_named_workload(
     duration_s: int | float,
     *,
     network_as_tcp_connect: bool = False,
+    network_device: str | None = None,
 ) -> WorkloadResult:
     seconds = max(1, int(round(float(duration_s))))
     kind = str(kind or "").strip()
     if kind == "mixed":
         return run_mixed_workload(float(duration_s))
     if kind == "tcp_connect":
-        return run_tcp_connect_load(seconds)
+        return run_tcp_connect_load(seconds, network_device=network_device)
     if kind == "tetragon_exec_connect_mix":
         return run_tetragon_exec_connect_mix_workload(float(duration_s))
     if kind == "scheduler":
@@ -1155,8 +1295,8 @@ def run_named_workload(
         if kind == "tracee_default":
             return run_tracee_default_load(float(duration_s))
         if network_as_tcp_connect:
-            return run_tcp_connect_load(seconds)
-        return run_network_load(seconds)
+            return run_tcp_connect_load(seconds, network_device=network_device)
+        return run_network_load(seconds, network_device=network_device)
     if kind == "tracee_system_edge_mix":
         return run_tracee_system_edge_mix_workload(float(duration_s))
     if kind == "tracee_module_load_loop":

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Mapping
 
 from .. import ROOT_DIR
+from ..workload import WorkloadResult, run_named_workload
 from .etcd_support import EtcdBackedNativeRunner, detect_primary_interface
 from .setup_support import optional_repo_artifact_path
 
@@ -47,7 +49,20 @@ class CiliumRunner(EtcdBackedNativeRunner):
         self._bpf_root.mkdir(parents=True, exist_ok=True)
         self._state_dir.mkdir(parents=True, exist_ok=True)
         if self.device is None:
-            self.device = detect_primary_interface()
+            self.device = detect_primary_interface(prefer_benchmark=True)
+
+    def _run_workload(self, seconds: float) -> WorkloadResult:
+        if not self.workload_kind:
+            raise RuntimeError("CiliumRunner requires an explicit workload_kind")
+        return run_named_workload(self.workload_kind, seconds, network_device=self.device)
+
+    def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:
+        if self.session is None:
+            raise RuntimeError(f"{type(self).__name__} is not running")
+        requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or "").strip()
+        if not requested_kind:
+            raise RuntimeError(f"{type(self).__name__} workload spec is missing a workload kind")
+        return run_named_workload(requested_kind, seconds, network_device=self.device)
 
     def _command(self, binary: Path) -> list[str]:
         if self.etcd_session is None:
