@@ -18,7 +18,16 @@ from runner.libs.app_runners.tetragon import (  # noqa: E402
 )
 from runner.libs.benchmark_catalog import TETRAGON_E2E_DURATION_S, TETRAGON_E2E_WORKLOADS  # noqa: E402
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
-from runner.libs.case_common import CaseLifecycleState, ensure_daemon_binary, host_metadata, run_case_lifecycle  # noqa: E402
+from runner.libs.case_common import (  # noqa: E402
+    CaseLifecycleState,
+    annotate_workload_measurement,
+    ensure_daemon_binary,
+    host_metadata,
+    measurement_workload_miss,
+    merge_measurement_limitations,
+    phase_payload,
+    run_case_lifecycle,
+)
 
 
 DEFAULT_DURATION_S = TETRAGON_E2E_DURATION_S
@@ -75,13 +84,15 @@ def measure_workload(
         duration_s,
     )
     after_bpf = sample_bpf_stats(active_prog_ids)
-    return {
-        "name": workload_spec.name,
-        "kind": workload_spec.kind,
-        "metric": workload_spec.metric,
-        "throughput": workload_result.ops_per_sec,
-        "bpf": compute_delta(before_bpf, after_bpf),
-    }
+    return annotate_workload_measurement(
+        {
+            "name": workload_spec.name,
+            "kind": workload_spec.kind,
+            "metric": workload_spec.metric,
+            "throughput": workload_result.ops_per_sec,
+            "bpf": compute_delta(before_bpf, after_bpf),
+        }
+    )
 
 
 def run_phase(
@@ -93,12 +104,24 @@ def run_phase(
     phase_name: str,
 ) -> dict[str, object]:
     return {
-        "phase": phase_name,
-        "records": [
-            measure_workload(runner, spec, duration_s, prog_ids)
-            for spec in workloads
-        ],
+        "status": "ok",
+        "reason": "",
+        "measurement": {
+            "records": [
+                measure_workload(runner, spec, duration_s, prog_ids)
+                for spec in workloads
+            ],
+        },
     }
+
+
+def _phase_measurements(phase: Mapping[str, object] | None) -> list[Mapping[str, object]]:
+    if not isinstance(phase, Mapping):
+        return []
+    measurement = phase.get("measurement")
+    if not isinstance(measurement, Mapping):
+        return []
+    return [record for record in (measurement.get("records") or []) if isinstance(record, Mapping)]
 
 
 def build_markdown(payload: Mapping[str, object]) -> str:
@@ -261,7 +284,8 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
             limitations=limitations,
         )
 
-    post_rejit = lifecycle_result.post_rejit
+    baseline = phase_payload("baseline", lifecycle_result.baseline)
+    post_rejit = phase_payload("post_rejit", lifecycle_result.post_rejit)
     rejit_result = lifecycle_result.rejit_result
     if post_rejit is not None and isinstance(rejit_result, Mapping):
         rejit_error = str(rejit_result.get("error") or "").strip()
@@ -279,6 +303,10 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
         missing_post_rejit = "Post-ReJIT phase is unavailable."
         limitations.append(missing_post_rejit)
         errors.append(missing_post_rejit)
+    measurement_records = _phase_measurements(baseline) + _phase_measurements(post_rejit)
+    for limitation in merge_measurement_limitations(*measurement_records):
+        if limitation not in limitations:
+            limitations.append(limitation)
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -290,9 +318,10 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
         "host": host_metadata(),
         "config": dict(config),
         "programs": [dict(program) for program in lifecycle_result.artifacts.get("programs") or []],
-        "baseline": lifecycle_result.baseline,
+        "baseline": baseline,
         "post_rejit": post_rejit,
         "rejit_result": rejit_result,
+        "workload_miss": any(measurement_workload_miss(record) for record in measurement_records),
         "limitations": limitations,
     }
     if errors:

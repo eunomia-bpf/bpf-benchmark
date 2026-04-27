@@ -25,6 +25,9 @@ from runner.libs.app_suite_schema import AppSpec, AppSuite, load_app_suite_from_
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats
 from runner.libs.case_common import (
     CaseLifecycleState,
+    annotate_workload_measurement,
+    measurement_workload_miss,
+    merge_measurement_limitations,
     prepare_daemon_session,
     run_lifecycle_sessions,
     wait_for_suite_quiescence,
@@ -99,17 +102,24 @@ def _measure_runner_phase(
     *,
     workload_seconds: float,
     samples: int,
+    warmup: bool = False,
 ) -> dict[str, object]:
     logical_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
+    if not logical_prog_ids:
+        raise RuntimeError("workload measurement requires at least one live BPF program id")
     workloads: list[dict[str, object]] = []
+    if warmup:
+        runner.run_workload(workload_seconds)
     initial_stats = sample_bpf_stats(logical_prog_ids)
     for _ in range(samples):
         workloads.append(runner.run_workload(workload_seconds).to_dict())
     final_stats = sample_bpf_stats(logical_prog_ids)
-    return {
-        "workloads": workloads,
-        "bpf": compute_delta(initial_stats, final_stats),
-    }
+    return annotate_workload_measurement(
+        {
+            "workloads": workloads,
+            "bpf": compute_delta(initial_stats, final_stats),
+        }
+    )
 
 def build_markdown(payload: Mapping[str, object]) -> str:
     return "\n".join(
@@ -277,6 +287,16 @@ def _refresh_active_session_programs(
                 )
             expected_count = len(tracked_prog_ids)
             refreshed_count = len(live_programs)
+            if refreshed_count < expected_count:
+                claimed_suffix = f", claimed_overlap={claimed_overlap}" if claimed_overlap else ""
+                raise RuntimeError(
+                    f"{session.app.name}: tracked BPF program ids disappeared before {phase}; "
+                    f"rediscovery returned fewer programs than expected: "
+                    f"{refreshed_count}/{expected_count}; missing_ids={missing_ids}, "
+                    f"tracked_ids={sorted(tracked_prog_ids)}, "
+                    f"refreshed_ids={[int(program['id']) for program in live_programs]}, "
+                    f"discover_source={discover_source}{claimed_suffix}"
+                )
             _print_progress(
                 "session_warning",
                 app=session.app.name,
@@ -290,16 +310,6 @@ def _refresh_active_session_programs(
                 refreshed_count=refreshed_count,
                 discover_source=discover_source,
             )
-            if refreshed_count < expected_count:
-                _print_progress(
-                    "session_warning",
-                    app=session.app.name,
-                    phase=phase,
-                    warning=(
-                        f"rediscovery returned fewer programs than expected: "
-                        f"{refreshed_count}/{expected_count}"
-                    ),
-                )
         else:
             if overlapping_ids := sorted(tracked_prog_ids & claimed_ids):
                 raise RuntimeError(
@@ -328,12 +338,17 @@ def _build_app_error_result(
     apply_result: Mapping[str, object] | None = None,
     rejit_measurement: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
+    workload_miss = measurement_workload_miss(baseline_measurement) or measurement_workload_miss(
+        rejit_measurement
+    )
     return {
         "app": app.name,
         "runner": app.runner,
         "selected_workload": app.workload_for("corpus"),
         "status": "error",
         "error": str(error),
+        "workload_miss": workload_miss,
+        "limitations": merge_measurement_limitations(baseline_measurement, rejit_measurement),
         "baseline": dict(baseline_measurement) if isinstance(baseline_measurement, Mapping) else None,
         "post_rejit": dict(rejit_measurement) if isinstance(rejit_measurement, Mapping) else None,
         "rejit_result": dict(apply_result) if isinstance(apply_result, Mapping) else None,
@@ -347,12 +362,17 @@ def _build_app_ok_result(
     apply_result: Mapping[str, object] | None,
     rejit_measurement: Mapping[str, object] | None,
 ) -> dict[str, object]:
+    workload_miss = measurement_workload_miss(baseline_measurement) or measurement_workload_miss(
+        rejit_measurement
+    )
     return {
         "app": app.name,
         "runner": app.runner,
         "selected_workload": app.workload_for("corpus"),
         "status": "ok",
         "error": "",
+        "workload_miss": workload_miss,
+        "limitations": merge_measurement_limitations(baseline_measurement, rejit_measurement),
         "baseline": dict(baseline_measurement),
         "post_rejit": dict(rejit_measurement) if isinstance(rejit_measurement, Mapping) else None,
         "rejit_result": dict(apply_result) if isinstance(apply_result, Mapping) else None,
@@ -443,6 +463,7 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                             state.prog_ids,
                             workload_seconds=session.workload_seconds,
                             samples=samples,
+                            warmup=(_phase == "baseline"),
                         ),
                         stop=lambda session, _: session.runner.stop(),
                         refresh_sessions=_refresh_active_session_programs,

@@ -18,6 +18,7 @@ from runner.libs.kinsn import relpath
 DEFAULT_SUITE_QUIESCE_TIMEOUT_S = 20.0
 DEFAULT_SUITE_QUIESCE_STABLE_S = 2.0
 DEFAULT_SUITE_QUIESCE_POLL_S = 0.2
+WORKLOAD_MISS_LIMITATION = "workload did not trigger any tracked BPF programs"
 
 
 def ensure_daemon_binary(daemon_binary: Path) -> None:
@@ -38,6 +39,64 @@ def phase_payload(
         "reason": str(phase_result.get("reason") or ""),
         "measurement": dict(measurement) if isinstance(measurement, Mapping) else None,
     }
+
+
+def _normalize_limitations(value: object) -> list[str]:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
+        return []
+    limitations: list[str] = []
+    seen: set[str] = set()
+    for item in value:
+        rendered = str(item or "").strip()
+        if not rendered or rendered in seen:
+            continue
+        seen.add(rendered)
+        limitations.append(rendered)
+    return limitations
+
+
+def measurement_workload_miss(measurement: Mapping[str, object] | None) -> bool:
+    if not isinstance(measurement, Mapping):
+        return False
+    if bool(measurement.get("workload_miss", False)):
+        return True
+    raw_bpf = measurement.get("bpf")
+    if not isinstance(raw_bpf, Mapping):
+        return False
+    deltas = [
+        int(record.get("run_cnt_delta", 0) or 0)
+        for record in raw_bpf.values()
+        if isinstance(record, Mapping)
+    ]
+    return bool(deltas) and all(delta == 0 for delta in deltas)
+
+
+def measurement_limitations(measurement: Mapping[str, object] | None) -> list[str]:
+    if not isinstance(measurement, Mapping):
+        return []
+    limitations = _normalize_limitations(measurement.get("limitations"))
+    if measurement_workload_miss(measurement) and WORKLOAD_MISS_LIMITATION not in limitations:
+        limitations.append(WORKLOAD_MISS_LIMITATION)
+    return limitations
+
+
+def annotate_workload_measurement(measurement: Mapping[str, object]) -> dict[str, object]:
+    annotated = dict(measurement)
+    annotated["workload_miss"] = measurement_workload_miss(annotated)
+    annotated["limitations"] = measurement_limitations(annotated)
+    return annotated
+
+
+def merge_measurement_limitations(*measurements: Mapping[str, object] | None) -> list[str]:
+    merged: list[str] = []
+    seen: set[str] = set()
+    for measurement in measurements:
+        for limitation in measurement_limitations(measurement):
+            if limitation in seen:
+                continue
+            seen.add(limitation)
+            merged.append(limitation)
+    return merged
 
 
 def program_records(value: object) -> list[dict[str, object]]:

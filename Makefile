@@ -59,7 +59,7 @@ VM_E2E_SUITE_ARGS =
 VM_TEST_COMMON_SUITE_ARGS = --fuzz-rounds "$(FUZZ_ROUNDS)"
 VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 
-.PHONY: validate \
+.PHONY: check validate \
 	vm-selftest vm-negative-test vm-test vm-micro vm-corpus vm-e2e vm-all \
 	aws-e2e aws-corpus \
 	aws-arm64-test aws-arm64-benchmark aws-arm64-terminate \
@@ -82,6 +82,9 @@ help:
 
 validate:
 	$(MAKE) vm-test
+
+check:
+	$(MAKE) validate
 
 vm-selftest:
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm test -- --test-mode "selftest" $(VM_TEST_COMMON_SUITE_ARGS)

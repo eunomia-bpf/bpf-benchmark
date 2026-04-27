@@ -24,7 +24,15 @@ from runner.libs.benchmark_catalog import (  # noqa: E402
     TRACEE_E2E_WORKLOADS,
 )
 from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
-from runner.libs.case_common import CaseLifecycleState, ensure_daemon_binary, host_metadata, run_case_lifecycle  # noqa: E402
+from runner.libs.case_common import (  # noqa: E402
+    CaseLifecycleState,
+    annotate_workload_measurement,
+    ensure_daemon_binary,
+    host_metadata,
+    measurement_workload_miss,
+    merge_measurement_limitations,
+    run_case_lifecycle,
+)
 
 
 DEFAULT_DURATION_S = TRACEE_E2E_DURATION_S
@@ -61,14 +69,16 @@ def measure_workload(
     else:
         workload_result = runner.run_workload_spec(workload_spec, duration_s)
     after_bpf = sample_bpf_stats(prog_ids)
-    return {
-        "cycle_index": cycle_index,
-        "name": str(workload_spec.get("name", workload_spec.get("kind", "unknown"))),
-        "kind": str(workload_spec.get("kind", "")),
-        "metric": str(workload_spec.get("metric", "ops/s")),
-        "app_throughput": workload_result.ops_per_sec,
-        "bpf": compute_delta(before_bpf, after_bpf),
-    }
+    return annotate_workload_measurement(
+        {
+            "cycle_index": cycle_index,
+            "name": str(workload_spec.get("name", workload_spec.get("kind", "unknown"))),
+            "kind": str(workload_spec.get("kind", "")),
+            "metric": str(workload_spec.get("metric", "ops/s")),
+            "app_throughput": workload_result.ops_per_sec,
+            "bpf": compute_delta(before_bpf, after_bpf),
+        }
+    )
 
 
 def run_phase(
@@ -94,6 +104,7 @@ def run_phase(
             )
         )
     return {"phase": phase_name, "records": records}
+
 
 def _append_phase_markdown(lines: list[str], title: str, records: Sequence[Mapping[str, object]]) -> None:
     lines.extend([f"## {title}", ""])
@@ -332,11 +343,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     for record in (lifecycle_result.baseline.get("records") or [])
                     if isinstance(record, Mapping)
                 )
-                post_rejit_records.extend(
-                    dict(record)
-                    for record in (lifecycle_result.post_rejit.get("records") or [])
-                    if isinstance(record, Mapping)
-                )
                 cycle_rejit_result = lifecycle_result.rejit_result
                 rejit_result[str(cycle_index)] = cycle_rejit_result
                 if isinstance(cycle_rejit_result, Mapping):
@@ -344,6 +350,11 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     if cycle_error:
                         limitations.append(f"Cycle {cycle_index} ReJIT/apply reported errors: {cycle_error}")
                         errors.append(f"cycle {cycle_index}: {cycle_error}")
+                post_rejit_records.extend(
+                    dict(record)
+                    for record in (lifecycle_result.post_rejit.get("records") or [])
+                    if isinstance(record, Mapping)
+                )
                 if not tracee_programs:
                     tracee_programs = [dict(program) for program in lifecycle_result.artifacts.get("tracee_programs") or []]
     except Exception as exc:
@@ -358,6 +369,9 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             error_message=f"Tracee case could not run: {exc}",
             limitations=limitations,
         )
+    for limitation in merge_measurement_limitations(*baseline_records, *post_rejit_records):
+        if limitation not in limitations:
+            limitations.append(limitation)
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -375,6 +389,10 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "baseline": baseline_records,
         "post_rejit": post_rejit_records,
         "rejit_result": rejit_result,
+        "workload_miss": any(
+            measurement_workload_miss(record)
+            for record in baseline_records + post_rejit_records
+        ),
         "limitations": limitations,
     }
     if errors:
