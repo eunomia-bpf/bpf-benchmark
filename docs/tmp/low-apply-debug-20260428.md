@@ -181,3 +181,37 @@ After this fix, `make vm-corpus SAMPLES=1` should produce app
 actual bytecode/JIT changes. If coverage remains low, run a diagnostic variant
 that preserves per-program `passes[]` summaries for clean no-op programs, then
 aggregate `skip_reasons` by app and pass.
+
+## Smoke Test
+
+Ran `make vm-corpus SAMPLES=1` after the fix. The daemon rebuilt successfully
+inside the runner image, and the new artifact is:
+
+`corpus/results/x86_kvm_corpus_20260428_180943_593548`
+
+The smoke command exited non-zero because the corpus suite reported unrelated
+runtime errors:
+
+- `tetragon/observer`: `stress_ng_os_io_network` io stressor timed out during
+  baseline, so this app did not reach ReJIT in the smoke artifact.
+- `bpftrace/biosnoop`: `fio` timed out during baseline.
+- `tracee/monitor`: existing ReJIT `EINVAL` on one program.
+
+The relevant accounting fix was still validated on apps that reached ReJIT:
+
+| app | requested | applied | not_applied | changed |
+|---|---:|---:|---:|---:|
+| `calico/felix` | 6 | 0 | 6 | false |
+| `otelcol-ebpf-profiler/profiling` | 13 | 0 | 13 | false |
+| `cilium/agent` | 16 | 0 | 16 | false |
+| `katran` | 3 | 0 | 3 | false |
+| `bpftrace/capable` | 1 | 0 | 1 | false |
+| `bpftrace/vfsstat` | 2 | 0 | 2 | false |
+| `bpftrace/runqlat` | 3 | 0 | 3 | false |
+| `bpftrace/tcplife` | 1 | 0 | 1 | false |
+| `bpftrace/tcpretrans` | 1 | 0 | 1 | false |
+
+BCC changed-app counts also became sane in the smoke:
+`execsnoop`, `vfsstat`, `opensnoop`, `syscount`, `tcpconnect`, and `tcplife`
+now report `applied=0`, while `capable`, `bindsnoop`, `biosnoop`, and
+`runqlat` report nonzero applied counts.
