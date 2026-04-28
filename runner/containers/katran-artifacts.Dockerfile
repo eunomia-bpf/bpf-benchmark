@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile:1.4
-ARG TARGETPLATFORM=linux/amd64
-FROM --platform=$TARGETPLATFORM docker.io/library/ubuntu:24.04 AS katran-artifacts-build
+FROM docker.io/library/ubuntu:24.04 AS katran-artifacts-build
 
 ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark

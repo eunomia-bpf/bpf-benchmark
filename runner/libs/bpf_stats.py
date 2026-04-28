@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import logging
 from contextlib import contextmanager
 from typing import Any
+
+_logger = logging.getLogger(__name__)
 
 from .agent import bpftool_prog_show_records
 
@@ -67,9 +70,9 @@ def sample_bpf_stats_from_records(
 
     missing = sorted(int(prog_id) for prog_id in wanted if int(prog_id) not in stats)
     if missing:
-        raise RuntimeError(
-            "failed to read BPF stats for requested program ids: "
-            + ", ".join(str(prog_id) for prog_id in missing)
+        _logger.warning(
+            "BPF programs no longer present (app may have reloaded): %s",
+            ", ".join(str(prog_id) for prog_id in missing),
         )
     return stats
 

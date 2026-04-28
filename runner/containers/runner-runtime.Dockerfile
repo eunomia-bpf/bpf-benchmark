@@ -3,10 +3,8 @@ ARG TRACEE_IMAGE=docker.io/aquasec/tracee:0.24.1@sha256:cfbbfee972e64a644f6b1bac
 ARG TETRAGON_IMAGE=quay.io/cilium/tetragon:v1.6.1@sha256:ff96ace3e6a0166ba04ff3eecfaeee19b7e6deee2b7cdbe3245feda57df5015f
 ARG CILIUM_IMAGE=quay.io/cilium/cilium:v1.19.3@sha256:2e61680593cddca8b6c055f6d4c849d87a26a1c91c7e3b8b56c7fb76ab7b7b10
 ARG CALICO_NODE_IMAGE=quay.io/calico/node:v3.31.3@sha256:f2339c4ff3a57228cbc39a1f67ab81abded1997d843e0e0b1e86664c7c4eb6c0
-ARG KATRAN_IMAGE=bpf-benchmark/katran-artifacts:x86_64
-ARG TARGETPLATFORM=linux/amd64
 
-FROM --platform=$TARGETPLATFORM docker.io/library/ubuntu:24.04 AS runner-runtime-build-base
+FROM docker.io/library/ubuntu:24.04 AS runner-runtime-build-base
 
 ARG GO_VERSION=1.26.0
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
@@ -143,15 +141,13 @@ RUN set -eux; \
 RUN mkdir -p "${IMAGE_WORKSPACE}"
 WORKDIR ${IMAGE_WORKSPACE}
 
-FROM --platform=$TARGETPLATFORM ${TRACEE_IMAGE} AS runner-runtime-tracee-upstream
+FROM ${TRACEE_IMAGE} AS runner-runtime-tracee-upstream
 
-FROM --platform=$TARGETPLATFORM ${TETRAGON_IMAGE} AS runner-runtime-tetragon-upstream
+FROM ${TETRAGON_IMAGE} AS runner-runtime-tetragon-upstream
 
-FROM --platform=$TARGETPLATFORM ${CILIUM_IMAGE} AS runner-runtime-cilium-upstream
+FROM ${CILIUM_IMAGE} AS runner-runtime-cilium-upstream
 
-FROM --platform=$TARGETPLATFORM ${CALICO_NODE_IMAGE} AS runner-runtime-calico-upstream
-
-FROM --platform=$TARGETPLATFORM ${KATRAN_IMAGE} AS runner-runtime-katran-upstream
+FROM ${CALICO_NODE_IMAGE} AS runner-runtime-calico-upstream
 
 FROM runner-runtime-build-base AS runner-runtime-app-artifacts
 
@@ -344,7 +340,7 @@ RUN set -eux; \
         ./tests/negative/*.h; \
     find ./runner -maxdepth 3 -type d \( -name CMakeFiles -o -name vendor \) -prune -exec rm -rf {} +; \
     find ./runner -maxdepth 3 -type f \( -name CMakeCache.txt -o -name cmake_install.cmake -o -name Makefile \) -delete; \
-    find ./tests -type f \( -name '*.o' -o -name '*.d' -o -name '*.cmd' \) -delete
+    find ./tests -type f \( \( -name '*.o' ! -name '*.bpf.o' \) -o -name '*.d' -o -name '*.cmd' \) -delete
 
 COPY daemon ./daemon
 

@@ -707,7 +707,6 @@ _STRESS_NG_IO_STRESSORS = (
     "sync-file",
 )
 _STRESS_NG_NETWORK_STRESSORS = (
-    "dccp",
     "epoll",
     "netdev",
     "sctp",
@@ -727,12 +726,10 @@ _STRESS_NG_OS_STRESSORS = (
 )
 _STRESS_NG_SCHEDULER_STRESSORS = (
     "clone",
-    "exec",
     "fork",
     "futex",
     "sem",
     "sem-sysv",
-    "spawn",
     "switch",
     "vfork",
     "yield",
@@ -754,10 +751,10 @@ _STRESS_NG_WORKLOAD_STRESSORS: Mapping[str, tuple[str, ...]] = {
 
 _STRESS_NG_STRESSOR_ARGS: Mapping[str, tuple[str, ...]] = {
     "fallocate": ("--fallocate-bytes", "128M"),
-    "fpunch": ("--fpunch-bytes", "128M"),
+    "fpunch": ("--fpunch-bytes", "32M"),
     "hdd": ("--hdd-bytes", "128M"),
     "iomix": ("--iomix-bytes", "128M"),
-    "open": ("--open-max", "4096"),
+    "open": ("--open-max", "1024"),
     "syscall": ("--syscall-method", "fast75"),
 }
 _STRESS_NG_STRESSOR_OPS: Mapping[str, int] = {
@@ -770,13 +767,11 @@ _STRESS_NG_STRESSOR_OPS: Mapping[str, int] = {
     "chown": 100,
     "clone": 100,
     "cpu": 2000,
-    "dccp": 200,
     "dentry": 1000,
     "dir": 1000,
     "dirmany": 1000,
     "epoll": 1000,
     "eventfd": 1000,
-    "exec": 50,
     "fallocate": 1,
     "file-ioctl": 1000,
     "filename": 200,
@@ -793,7 +788,7 @@ _STRESS_NG_STRESSOR_OPS: Mapping[str, int] = {
     "iomix": 128,
     "io-uring": 200,
     "netdev": 1000,
-    "open": 1000,
+    "open": 100,
     "prctl": 1000,
     "rename": 100,
     "sctp": 200,
@@ -804,7 +799,6 @@ _STRESS_NG_STRESSOR_OPS: Mapping[str, int] = {
     "sockdiag": 1000,
     "sockfd": 200,
     "sockpair": 500,
-    "spawn": 20,
     "switch": 1000,
     "sync-file": 20,
     "syscall": 64,
@@ -816,7 +810,6 @@ _STRESS_NG_STRESSOR_OPS: Mapping[str, int] = {
     "yield": 5000,
 }
 _STRESS_NG_NETWORK_PORT_STRESSORS = {
-    "dccp": 0,
     "epoll": 100,
     "sctp": 200,
     "sock": 300,

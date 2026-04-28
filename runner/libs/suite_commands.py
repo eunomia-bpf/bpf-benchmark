@@ -127,6 +127,7 @@ def build_runtime_container_command(
         "--pid=host",
         "--network=host",
         "--ipc=host",
+        "--cgroupns=host",
         "-e",
         "BPFREJIT_INSIDE_RUNTIME_CONTAINER=1",
         "-e",

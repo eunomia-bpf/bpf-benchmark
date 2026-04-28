@@ -155,10 +155,10 @@ $(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRA
 	docker load -i "$(X86_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
+		--build-context runner-runtime-katran-upstream=docker-image://$(X86_KATRAN_ARTIFACTS_IMAGE) \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=x86_64 \
-		--build-arg KATRAN_IMAGE="$(X86_KATRAN_ARTIFACTS_IMAGE)" \
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$@" "$(X86_RUNNER_RUNTIME_IMAGE)"
 
@@ -167,10 +167,10 @@ $(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_K
 	docker load -i "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
+		--build-context runner-runtime-katran-upstream=docker-image://$(ARM64_KATRAN_ARTIFACTS_IMAGE) \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=arm64 \
-		--build-arg KATRAN_IMAGE="$(ARM64_KATRAN_ARTIFACTS_IMAGE)" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$@" "$(ARM64_RUNNER_RUNTIME_IMAGE)"
 
