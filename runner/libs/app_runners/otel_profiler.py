@@ -4,8 +4,10 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+from typing import Mapping
 
 from .. import ROOT_DIR
+from ..workload import WorkloadResult, run_otel_profiler_cpu_mix_workload
 from .process_support import NativeProcessRunner
 from .setup_support import optional_repo_artifact_path
 
@@ -96,6 +98,24 @@ class OtelProfilerRunner(NativeProcessRunner):
 
     def _command_cwd(self) -> Path | None:
         return self._runtime_dir or ROOT_DIR
+
+    def _run_workload(self, seconds: float) -> WorkloadResult:
+        requested_kind = self.workload_kind or "exec_storm"
+        if requested_kind == "exec_storm":
+            return run_otel_profiler_cpu_mix_workload(seconds)
+        return super()._run_workload(seconds)
+
+    def run_workload_spec(
+        self,
+        workload_spec: Mapping[str, object],
+        seconds: float,
+    ) -> WorkloadResult:
+        if self.session is None:
+            raise RuntimeError(f"{type(self).__name__} is not running")
+        requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or self.workload_kind or "").strip()
+        if requested_kind == "exec_storm":
+            return run_otel_profiler_cpu_mix_workload(seconds)
+        return super().run_workload_spec(workload_spec, seconds)
 
     def start(self) -> list[int]:
         try:

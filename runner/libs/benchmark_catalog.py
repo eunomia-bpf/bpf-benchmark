@@ -12,9 +12,9 @@ TRACEE_E2E_SAMPLE_COUNT = 2
 TRACEE_E2E_WARMUP_DURATION_S = 2
 TRACEE_E2E_WORKLOADS: tuple[dict[str, object], ...] = (
     {
-        "name": "tracee_default",
-        "kind": "tracee_default",
-        "command": "mixed exec/open/connect workload over {duration}s",
+        "name": "tracee_system_edge_mix",
+        "kind": "tracee_system_edge_mix",
+        "command": "mixed tracee syscall/module/io-vector workload over {duration}s",
         "metric": "ops/s",
     },
 )
@@ -22,9 +22,9 @@ TRACEE_E2E_WORKLOADS: tuple[dict[str, object], ...] = (
 TETRAGON_E2E_DURATION_S = 8
 TETRAGON_E2E_WORKLOADS: tuple[dict[str, object], ...] = (
     {
-        "name": "exec_storm",
-        "kind": "exec_storm",
-        "metric": "bogo-ops/s",
+        "name": "tetragon_exec_connect_mix",
+        "kind": "tetragon_exec_connect_mix",
+        "metric": "ops/s",
         "value": 2,
     },
 )
@@ -70,14 +70,14 @@ MACRO_APP_DEFINITIONS: tuple[MacroAppDefinition, ...] = (
     MacroAppDefinition(name="bcc/execsnoop", runner="bcc", workload="exec_storm", runner_args={"tool": "execsnoop"}),
     MacroAppDefinition(name="bcc/bindsnoop", runner="bcc", workload="bind_storm", runner_args={"tool": "bindsnoop"}),
     MacroAppDefinition(name="bcc/biosnoop", runner="bcc", workload="block_io", runner_args={"tool": "biosnoop"}, duration_s=5.0),
-    MacroAppDefinition(name="bcc/vfsstat", runner="bcc", workload="vfs_create_fsync_exact", runner_args={"tool": "vfsstat"}),
+    MacroAppDefinition(name="bcc/vfsstat", runner="bcc", workload="vfs_create_write_fsync", runner_args={"tool": "vfsstat"}),
     MacroAppDefinition(name="bcc/opensnoop", runner="bcc", workload="open_family_storm", runner_args={"tool": "opensnoop"}),
     MacroAppDefinition(name="bcc/syscount", runner="bcc", workload="file_open_storm", runner_args={"tool": "syscount"}),
     MacroAppDefinition(name="bcc/tcpconnect", runner="bcc", workload="network", runner_args={"tool": "tcpconnect"}),
     MacroAppDefinition(name="bcc/tcplife", runner="bcc", workload="network", runner_args={"tool": "tcplife"}),
     MacroAppDefinition(name="bcc/runqlat", runner="bcc", workload="hackbench", runner_args={"tool": "runqlat"}),
     MacroAppDefinition(name="calico/felix", runner="calico", workload="network"),
-    MacroAppDefinition(name="otelcol-ebpf-profiler/profiling", runner="otelcol-ebpf-profiler", workload="exec_storm"),
+    MacroAppDefinition(name="otelcol-ebpf-profiler/profiling", runner="otelcol-ebpf-profiler", workload="exec_storm", duration_s=5.0),
     MacroAppDefinition(name="cilium/agent", runner="cilium", workload="network"),
     MacroAppDefinition(name="tetragon/observer", runner="tetragon", workload="tetragon_exec_connect_mix"),
     MacroAppDefinition(name="katran", runner="katran", workload="test_run"),
