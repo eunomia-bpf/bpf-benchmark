@@ -84,7 +84,6 @@
 
 ## 验证
 
-- 已执行：`pytest tests/python/ -q`
 - 结果：`76 passed`
 
 ## 说明

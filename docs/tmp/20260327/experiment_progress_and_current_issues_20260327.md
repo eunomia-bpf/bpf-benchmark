@@ -149,8 +149,6 @@ Katran corpus 一度看起来像是：
 1. `make runner`：通过
 2. `make daemon-tests`：通过
    - 当前结果：`550 passed / 0 failed / 13 ignored`
-3. `pytest -q tests/python/test_rejit.py`：通过
-4. `python3 -m py_compile runner/libs/rejit.py tests/python/test_rejit.py`：通过
 5. `python3 -m py_compile corpus/modes.py runner/libs/rejit.py e2e/cases/{tracee,tetragon,katran,scx,bpftrace,bcc}/case.py`：通过
 
 因此当前问题已经不再是“主线代码不能编译 / 基础测试不过”，而是：

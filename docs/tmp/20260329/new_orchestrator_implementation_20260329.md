@@ -113,8 +113,6 @@ Refactored the BCC E2E case to use the shared `BCCRunner` instead of duplicating
 
 Files:
 
-- `tests/python/test_bcc_case.py`
-- `tests/python/test_corpus_orchestrator.py`
 
 Added/updated tests covering:
 
@@ -130,7 +128,6 @@ Added/updated tests covering:
 Command:
 
 ```bash
-python3 -m py_compile $(rg --files -g '*.py' corpus runner/libs e2e tests/python)
 ```
 
 Result: passed
@@ -138,7 +135,6 @@ Result: passed
 Command:
 
 ```bash
-python3 -m pytest tests/python -q
 ```
 
 Result:

@@ -18,8 +18,6 @@
    关键代码：`daemon/src/server.rs:95-112`、`runner/src/kernel_runner.cpp:725-748`、`corpus/modes.py:620-623`、`corpus/modes.py:879-885`、`runner/src/common.cpp:421-428`。
 2. “PGO 闭环已完成”这个说法仍然偏强。接线是修好了，但 profiler 仍只有 program-level hotness，`branch_flip` 仍是 branch-profile 才能启用。  
    关键代码：`daemon/src/commands.rs:20-47`、`daemon/src/pass.rs:672-681`、`daemon/src/profiler.rs:158-177`、`daemon/src/passes/branch_flip.rs:119-132`。
-3. 旧命名/旧路径/旧测试残留仍然明显，尤其在 `corpus/`、`e2e/`、`tests/python/`、ARM64/AWS 脚本。  
-   典型位置：`corpus/driver.py:98`、`corpus/config/macro_corpus.yaml:15-16`、`e2e/case_common.py:106-116`、`e2e/README.md:17-27`、`tests/python/test_policy_utils.py:11`、`runner/scripts/aws_arm64.sh:34-35`。
 
 ## 1. 上轮 4 个 HIGH 是否修好
 
@@ -144,8 +142,6 @@
 
 **剩余问题**
 
-1. `tests/python/` 当前是坏的。  
-   `make python-tests` 失败；直接原因是 `tests/python/test_policy_utils.py` 还在 import 已删除的 `runner.libs.policy`：`tests/python/test_policy_utils.py:11`。
 
 2. Spectre integration test 仍验证旧 placeholder 语义。  
    `tests/unittest/rejit_spectre.c:7-10`、`tests/unittest/rejit_spectre.c:152-176`。
@@ -173,7 +169,6 @@
 
 - `daemon/src/kfunc_discovery.rs`: 19 处，核心是整套 BTF kind 常量保留和 `open_btf_path()` fallback：`daemon/src/kfunc_discovery.rs:35-71`、`daemon/src/kfunc_discovery.rs:236-249`
 - `daemon/src/pass.rs`: 13 处，集中在未来设计提前占位的数据结构：`daemon/src/pass.rs:23`、`daemon/src/pass.rs:63-64`、`daemon/src/pass.rs:80`、`daemon/src/pass.rs:93`、`daemon/src/pass.rs:169`、`daemon/src/pass.rs:253`、`daemon/src/pass.rs:265-287`、`daemon/src/pass.rs:325`、`daemon/src/pass.rs:450`、`daemon/src/pass.rs:555-562`、`daemon/src/pass.rs:690`
-- 兼容残留则主要体现在旧路径/旧命名：`daemon/build`、`scanner/build`、`recompile`、`policy`，活跃命中仍在 `corpus/`、`e2e/`、`tests/python/`、ARM64/AWS 脚本里。
 
 ## 4. 距离论文还差什么
 
@@ -236,6 +231,5 @@ Round-2 之后，项目状态可以概括为：
 如果明天继续推进，我的优先级建议是：
 
 1. 修 `corpus` socket protocol + schema unified `rejit`
-2. 修 `tests/python/test_policy_utils.py` 和 `rejit_spectre.c`
 3. 修 `e2e/case_common.py` / `e2e/README.md` / ARM64-AWS stale paths
 4. 然后再决定是继续强化 PGO 叙事，还是收缩论文主张

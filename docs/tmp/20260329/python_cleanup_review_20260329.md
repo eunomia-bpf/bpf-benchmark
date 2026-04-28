@@ -4,7 +4,6 @@
 
 Reviewed the remaining Python/config surface requested in this pass:
 
-- `tests/python/`
 - `runner/libs/`
 - `corpus/`
 - `e2e/`
@@ -15,7 +14,6 @@ The goal was to keep only code that still matches the orchestrator-only architec
 
 ## Removed
 
-- `tests/python/test_perf_attach.py`
   - Deleted. This was a host-kernel probing script, not a meaningful repo-owned pytest unit test, and it conflicts with the repo rule against host-side kernel/BPF actions.
 
 - `corpus/run_code_size_comparison.py`
@@ -71,7 +69,6 @@ The goal was to keep only code that still matches the orchestrator-only architec
 
 ## Kept
 
-- `tests/python/` remaining tests
   - Kept. The remaining tests still exercise active behavior: manifest parsing, result aggregation, daemon socket/lifecycle handling, run artifact writing, e2e payload validation, and VM helper command construction.
 
 - `runner/libs/results.py`
@@ -117,8 +114,6 @@ The goal was to keep only code that still matches the orchestrator-only architec
 ## Validation
 
 - `python3` compile check
-  - Compiled 73 repo-owned Python files across `corpus/`, `e2e/`, `runner/`, `tests/python/`, `micro/`, and `daemon/`, excluding third-party/cache/result trees.
 
-- `pytest tests/python/ -q`
   - Passed: `61 passed`
 

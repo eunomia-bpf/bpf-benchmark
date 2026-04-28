@@ -15,7 +15,6 @@ This report covers three corpus pipeline fixes:
 - `daemon/src/commands.rs`
 - `daemon/src/server.rs`
 - `daemon/src/commands_tests.rs`
-- `tests/python/test_corpus_modes.py`
 
 ## Fix Summary
 
@@ -49,7 +48,6 @@ Executed successfully:
 - `make daemon`
 - `make runner`
 - `make daemon-tests`
-- `pytest tests/python/test_corpus_modes.py -q`
 
 `make daemon-tests` passed with the new daemon response serialization test included.
 

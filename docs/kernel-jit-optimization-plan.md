@@ -640,7 +640,6 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 命令 | 作用 |
 |------|------|
 | `python3 micro/driver.py --bench simple --runtime llvmbpf --samples 1 --warmups 0 --inner-repeat 10` | 本地 llvmbpf smoke test (simple, 1 iter, 10 repeat) |
-| `python3 -m pytest -q tests/python` | 运行当前保留的静态 runner contract tests |
 | `make check` | 运行根入口定义的静态回归门禁（当前仅 Python contract tests） |
 
 #### VM 目标（需要 bzImage + vng）

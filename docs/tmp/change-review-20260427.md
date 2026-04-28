@@ -5,7 +5,6 @@ Scope: reviewed current uncommitted changes with `git diff HEAD`, focusing on th
 Verification run:
 - `docker build --platform linux/amd64 --target katran-artifacts --build-arg IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark --build-arg IMAGE_BUILD_JOBS=4 --build-arg RUN_TARGET_ARCH=x86_64 -t bpf-benchmark/katran-artifacts:review -f runner/containers/katran-artifacts.Dockerfile .`: OK.
 - `python3 -m py_compile runner/libs/suite_commands.py runner/libs/kvm_executor.py runner/libs/aws_executor.py runner/libs/workload.py runner/libs/app_runners/bpftrace.py`: OK.
-- `python3 -m unittest discover -s tests/python -p 'test_workload.py'`: OK.
 - `make -n -W corpus/driver.py -o /home/yunwei37/workspace/bpf-benchmark/.cache/container-images/x86_64-katran-artifacts.image.tar /home/yunwei37/workspace/bpf-benchmark/.cache/container-images/x86_64-runner-runtime.image.tar RUN_TARGET_ARCH=x86_64`: PROBLEM, still schedules a runtime `docker build`.
 
 ## 1. runner/containers/runner-runtime.Dockerfile: PROBLEM

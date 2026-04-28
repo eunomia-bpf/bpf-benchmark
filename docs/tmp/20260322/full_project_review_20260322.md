@@ -20,7 +20,6 @@
 
 - `cargo test --manifest-path daemon/Cargo.toml`：通过，196 tests passed
 - `cargo clippy --manifest-path daemon/Cargo.toml --all-targets -- -W dead_code -W unused_imports -W clippy::all`：通过，但仍有 11 个 bin warning / 15 个 test warning
-- `pytest -q tests/python`：通过，8 passed，10 subtests passed
 
 未在本轮重新执行完整 corpus/e2e/VM 实验，因此性能结论以 `docs/kernel-jit-optimization-plan.md` 中的权威数据行为准。
 
@@ -331,7 +330,6 @@
    `tests/unittest/rejit_spectre.c` 明确写着“Manually apply Spectre mitigation (insert NOP=JA+0 after each JCC)”（`tests/unittest/rejit_spectre.c:5-8`），并定义 `NOP = JA +0`（`tests/unittest/rejit_spectre.c:152-153`）。换言之，当前测试能证明“占位 pass 保持语义”，但不能证明“Spectre mitigation 生效”。
 
 3. **Python 测试覆盖较窄。**  
-   本轮 `pytest -q tests/python` 通过，但这些测试大多是 utility/policy 层检查，尚不足以为 corpus/e2e orchestration 提供强回归保护。
 
 4. **测试产物也留在树里。**  
    当前可见的 build 目录包括 `tests/kernel/build` 与 `tests/unittest/build`，不应长期留在源码树中。

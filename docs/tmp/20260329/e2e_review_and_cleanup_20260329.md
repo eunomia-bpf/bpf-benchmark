@@ -69,7 +69,6 @@
 ### 3.2 Skip disguised as success
 
 - `e2e/run.py` 只接受 `status in {"ok", "error"}`。
-- `tests/python/test_e2e_run.py::test_run_single_case_rejects_skipped_payload` 仍然覆盖这一点。
 - `tracee` / `tetragon` 的 markdown `skip_reason` 兼容 fallback 已在当前工作树中移除；这次确认无需再补额外兼容。
 
 ### 3.3 Old daemon CLI compatibility
@@ -95,7 +94,6 @@
 - `e2e/run.py`
   - 删除未消费的 `--katran-policy`。
   - 删除未消费的 `--katran-server-binary`。
-- `tests/python/test_case_common.py`
   - 更新为新的 scan result schema。
 
 ### 4.2 Removed files
@@ -139,7 +137,6 @@
   - `runner/libs/profiler.py`
     - 仍被 `runner/scripts/bpf_profiler.py` 使用，不能按死库删除。
 
-### `tests/python/`
 
 - 没有发现只服务于已删除功能、且可整体删掉的 test file。
 - 只需要把 `test_case_common.py` 的 mock schema 跟着新 scan result 结构更新。
@@ -182,10 +179,8 @@
 
 ## 8. Verification
 
-- `python3 -m py_compile $(rg --files e2e runner/libs tests/python runner/scripts -g '*.py')`
   - passed
 - `make python-tests`
   - passed, `61 passed`
-- `pytest tests/python/ -q`
   - passed, `61 passed`
 

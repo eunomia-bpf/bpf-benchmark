@@ -10,7 +10,6 @@
 
 - `make daemon-tests`: passed, `527/527`
 - `make runner`: passed
-- `python3 -m pytest tests/python/ -q`: passed, `72/72`
 - `cargo test` output was warning-free in this run, so the current `daemon` tree meets the "zero cargo warnings" bar for the exercised path
 
 ## Overall Status
@@ -25,7 +24,6 @@
 
 | Goal | Status | Evidence | Fix / Notes |
 | --- | --- | --- | --- |
-| 1. Session-level startup once | PASS | The callers now hold a single daemon session and reuse the same socket across work units instead of restarting per object: `runner/libs/corpus.py:2920-3090`, `e2e/case_common.py:580-612`, `tests/python/test_case_common.py:14-163`, `tests/python/test_corpus_modes.py:884-910` | No source change needed |
 | 2. Per-pass verify uses `BPF_PROG_LOAD` dry-run, not `REJIT` | PASS | Per-pass verifier callback in `daemon/src/commands.rs:520-560` calls `bpf::bpf_prog_load_verify(...)`; the implementation in `daemon/src/bpf.rs:1405-1527` issues `SYS_bpf(BPF_PROG_LOAD, ...)` and only final apply uses `BPF_PROG_REJIT` in `daemon/src/commands.rs:662-665` / `daemon/src/bpf.rs:1530-1642` | No source change needed |
 | 3. Structured per-pass record includes `pass/changed/sites_applied/insn_delta/verify_result/verify_error/action` | PASS | `PassDetail` in `daemon/src/commands.rs:77-97` contains the required fields, and `From<&PassResult>` in `daemon/src/commands.rs:99-129` fills them from pipeline results | No source change needed |
 | 4. Rollback only reverts rejected pass and preserves earlier accepted edits | PASS | `run_single_pass()` snapshots the whole pre-pass program, verifies the tentative result, and restores only that snapshot on rejection: `daemon/src/pass.rs:882-940`; fixed-point pass ordering still preserves accepted earlier passes: `daemon/src/pass.rs:791-826`; regression coverage exists in `daemon/src/pass_tests.rs` (`test_verify_rejection_rolls_back_and_continues_pipeline`, `test_verify_rejection_restores_last_accepted_snapshot_before_next_pass`) and passed in `make daemon-tests` | No source change needed |
@@ -38,21 +36,15 @@
 | Goal | Status | Evidence | Fix / Notes |
 | --- | --- | --- | --- |
 | 1. 6/6 cases all pass | PASS | Stored March 29, 2026 authoritative outputs all end in top-level `"status": "ok"`: `e2e/results/bcc_authoritative_20260329.json:28000`, `e2e/results/bpftrace_authoritative_20260329.json:9680`, `e2e/results/katran_authoritative_20260329.json:18024`, `e2e/results/scx_authoritative_20260329.json:4454`, `e2e/results/tetragon_authoritative_20260329.json:1433`, `e2e/results/tracee_authoritative_20260329.json:630640` | No source change needed |
-| 2. `kinsn` module-load evidence is present in artifact | FAIL | Current implementation captures and persists `kinsn` metadata via `e2e/case_common.py:38-60`, `e2e/case_common.py:101-202`, `e2e/case_common.py:507-643`, `e2e/case_common.py:730-744`, and this is covered by `tests/python/test_case_common.py:14-163` plus `tests/python/test_e2e_run.py:28-70`; however the checked March 29, 2026 outputs inspected in this review do not contain a `kinsn_modules` key in `e2e/results/tracee_authoritative_20260329.json`, `e2e/results/tetragon_authoritative_20260329.json`, or `e2e/results/tracee_20260329_081351/metadata.json` | No code fix was justified by current tests; the gap is in already-generated artifacts. A fresh E2E rerun is required to regenerate authoritative outputs with the new metadata |
-| 3. Daemon session reuse for `scan + apply` | PASS | `run_case_lifecycle()` starts one daemon, reuses its socket for `scan_programs()` and `apply_daemon_rejit()`, then stops it once: `e2e/case_common.py:580-612`; behavior is asserted in `tests/python/test_case_common.py:14-163` | No source change needed |
 | 4. Tracee methodology upgraded to 5 rounds + CI + significance | PASS | Tracee config sets `sample_count: 5` and bootstrap statistics in `e2e/cases/tracee/config.yaml:6-18`; runtime consumes those settings in `e2e/cases/tracee/case.py:1556-1574`, runs per-cycle paired control/baseline/post-rejit measurements in `e2e/cases/tracee/case.py:1641-1909`, and emits significance metadata in `e2e/cases/tracee/case.py:1911-1945`; the stored March 29, 2026 authoritative result shows `sample_count: 5` and `exact_paired_permutation_on_signed_deltas` at `e2e/results/tracee_authoritative_20260329.json:625576-630640` | No source change needed |
-| 5. Tetragon error propagation is preserved instead of being masked by cleanup failures | PASS | `TetragonAgentSession.__enter__()` now appends cleanup-stop failures to the original startup / empty-program failure in `e2e/cases/tetragon/case.py:171-207`, and `close()` re-raises stop failures in `e2e/cases/tetragon/case.py:217-233`; coverage exists in `tests/python/test_tetragon_case.py:122-166` and passed | No source change needed |
 
 ## Corpus Goals
 
 | Goal | Status | Evidence | Fix / Notes |
 | --- | --- | --- | --- |
-| 1. Bulk prepare groups by `batch_size`, not per-object restart | PASS | Batch planner now creates grouped baseline/rejit prepare jobs per prepared group in `runner/libs/corpus.py:2271-2475`; batch executor splits only on resource pressure and preserves grouped execution in `runner/libs/corpus.py:2739-2877`; coverage passed in `tests/python/test_corpus_modes.py:363-478` and `tests/python/test_corpus_modes.py:721-865` | No source change needed |
-| 2. Daemon is session-level in corpus; guest batching is no longer single-target-only | PASS | Guest VM path serializes the full `targets` list once and forwards `--batch-size` in `runner/libs/vm.py:220-294`; guest mode then calls one `run_objects_locally_batch(...)` over the whole object set in `corpus/modes.py:308-370`; local batch execution starts one daemon session and reuses it in `runner/libs/corpus.py:2900-3130`; reuse is covered in `tests/python/test_corpus_modes.py:884-910` | No source change needed |
 | 3. `RLIMIT_NOFILE >= 65536` | PASS | `runner/src/batch_runner.cpp:40` defines the minimum, and `ensure_batch_runner_nofile_limit()` enforces / raises to `65536` in `runner/src/batch_runner.cpp:284-305` | No source change needed |
 | 4. `linux-selftests` removed from default corpus | PASS | Default macro corpus only references `linux-selftests` under `optional_manifests` in `corpus/config/macro_corpus.yaml:19-22`; `repo: linux-selftests` entries live in the separate opt-in manifest `corpus/config/macro_corpus_linux_selftests.yaml` and are absent from the default manifest | No source change needed |
 | 5. `results.py` uses applied-only geomean as primary metric | PASS | `runner/libs/results.py:254-291` computes `exec_ratio_geomean` from `applied_comparable_pairs`, while `all_exec_ratio_geomean` is tracked separately; corpus markdown also presents applied-only first in `corpus/modes.py:408-419` | No source change needed |
-| 6. Per-program pass-selection YAML policy | PASS | Policy resolution exists in `runner/libs/rejit.py:242-330`; corpus code builds per-program context and site counts in `runner/libs/corpus.py:128-284`, then wires program-scoped `enabled_passes` into batch jobs in `runner/libs/corpus.py:2303-2465`; explicit tests passed in `tests/python/test_corpus_modes.py:381-478` | No source change needed |
 
 ## Review Outcome
 

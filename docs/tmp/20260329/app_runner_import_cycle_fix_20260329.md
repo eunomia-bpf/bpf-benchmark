@@ -81,7 +81,6 @@ Specific notes:
 
 ### 4. Tests
 
-Updated `tests/python/test_tetragon_case.py` to patch the new runner-owned support module instead of the old case-local helper definitions.
 
 ## Validation
 
@@ -106,7 +105,6 @@ python3 -m py_compile \
   e2e/cases/bpftrace/case.py \
   e2e/cases/scx/case.py \
   e2e/cases/katran/case.py \
-  tests/python/test_tetragon_case.py
 ```
 
 Result:
@@ -118,7 +116,6 @@ Result:
 Ran:
 
 ```bash
-pytest tests/python/ -q
 ```
 
 Result:

@@ -19,7 +19,6 @@
 | P2 | Makefile 未定义变量 | `Makefile:262` | `clean` 目标引用 `$(SMOKE_OUTPUT)` 但此变量从未定义 |
 | P3 | 私有 API 越界引用 | `runner/libs/app_runners/tetragon_support.py:342` | 运行时从 `workload.py` 导入私有函数 `_parse_stress_ng_bogo_ops` |
 | P3 | 导出冗余 | `runner/libs/workload.py.__all__` | 5 个函数在 `__all__` 中但从未被外部导入 |
-| Info | 测试代码异味 | `tests/python/test_prepare_local_inputs.py:148` | 用 `staticmethod` 包装 `@classmethod` 做 monkeypatch（功能正常但语义混淆） |
 
 ---
 
@@ -170,7 +169,6 @@ run_vfs_create_write_fsync_load
 
 ## Info：测试代码异味
 
-### `tests/python/test_prepare_local_inputs.py:148`
 
 ```python
 monkeypatch.setattr(execute_workspace.SuiteEntrypoint, "from_contract", staticmethod(fake_from_contract))
@@ -184,7 +182,6 @@ monkeypatch.setattr(execute_workspace.SuiteEntrypoint, "from_contract", staticme
 
 ## 验证结论
 
-- **所有 18 个 Python 静态测试全部通过** (`pytest tests/python/ -v`)
 - Opus 前次审查报告的问题（`_run_mixed_workload` 未定义、8 文件死导入、`setup_support.py` 未 git-add）**均已修复**
 - 本次发现的问题主要集中在：死函数（2 个）、Makefile 清理残留（3 个死变量 + 1 个未定义变量）、git staged/working-tree 不一致（需尽快 commit）、私有 API 越界引用（1 处）
 
@@ -199,4 +196,3 @@ monkeypatch.setattr(execute_workspace.SuiteEntrypoint, "from_contract", staticme
 | `runner/libs/arm64_container_build.py` | staged vs working tree 不一致 |
 | `runner/libs/app_runners/tetragon_support.py` | L342 私有 API 导入 |
 | `Makefile` | L48-50 (死变量), L262 (未定义 `SMOKE_OUTPUT`) |
-| `tests/python/test_prepare_local_inputs.py` | L148 staticmethod/classmethod 混用 |

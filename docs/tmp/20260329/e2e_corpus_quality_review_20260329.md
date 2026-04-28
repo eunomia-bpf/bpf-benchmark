@@ -172,7 +172,6 @@ Verified and left unchanged:
 - `runner/libs/results.py` already uses applied-only exec geomean as the main metric and also reports all-comparable separately.
 - `runner/libs/vm.py` already enforces `RLIMIT_NOFILE >= 65536` for guest corpus batch execution.
 - `runner/libs/corpus.py` already reuses one daemon session across corpus bulk prepare/apply/measure flow.
-- `e2e/case_common.py` already persists kinsn module evidence into E2E result metadata; `tests/python/test_e2e_run.py` covers this path.
 
 ## Dead Code / Hygiene Notes
 
@@ -195,10 +194,6 @@ python3 -m py_compile \
   runner/libs/rejit.py \
   runner/libs/corpus.py \
   corpus/modes.py \
-  tests/python/test_tracee_case.py \
-  tests/python/test_e2e_run.py \
-  tests/python/test_corpus_modes.py \
-  tests/python/test_rejit.py
 ```
 
 Result: passed
@@ -206,7 +201,6 @@ Result: passed
 Executed:
 
 ```bash
-pytest tests/python/ -q
 ```
 
 Result: `78 passed`

@@ -162,9 +162,6 @@ tests/
 
 | 测试文件 | 当前位置 | 目标位置 | 说明 |
 |---------|---------|---------|------|
-| test_profile_guided_policy.py | tests/ | tests/python/ | 使用 unittest，测试 runner.libs |
-| test_perf_attach.py | tests/ | tests/python/ | 使用 unittest，测试 perf_event_open |
-| corpus/tests/test_policy_utils.py | corpus/tests/ | tests/python/ | 放错位置，测试 runner.libs.policy |
 
 ```
 tests/
@@ -260,7 +257,6 @@ git rm --cached tests/unittest/rejit_poc tests/unittest/rejit_safety_tests \
 
 ```bash
 # 创建新目录
-mkdir -p tests/integration tests/helpers tests/python
 
 # 迁移集成测试
 mv tests/vm_test_daemon_live.sh tests/integration/vm_daemon_live.sh
@@ -270,9 +266,6 @@ mv tests/vm_test_comprehensive.sh tests/integration/vm_comprehensive.sh
 mv tests/hold_bpf_prog.c tests/helpers/hold_bpf_prog.c
 
 # 迁移 Python 单元测试
-mv tests/test_profile_guided_policy.py tests/python/
-mv tests/test_perf_attach.py tests/python/
-mv corpus/tests/test_policy_utils.py tests/python/
 rmdir corpus/tests  # 删空目录
 
 # 修复 test_policy_utils.py 中的路径引用
@@ -363,7 +356,6 @@ unittest-tests:
 ```makefile
 python-tests:
     @echo "=== Running Python unit tests ==="
-    $(VENV_ACTIVATE) python3 -m pytest tests/python/ -v
 ```
 
 3. 更新 `check` 目标以包含 `python-tests`：
@@ -444,7 +436,6 @@ tests/
 | unittest/ 无构建规则 | 新增 tests/unittest/Makefile |
 | rejit_spectre.c 从未被构建 | 加入 unittest/Makefile |
 | 编译产物提交到仓库 | .gitignore + git rm --cached |
-| corpus/tests/test_policy_utils.py 放错位置 | 迁移到 tests/python/ |
 | hold_bpf_prog.c 无构建规则 | 新增 tests/helpers/Makefile |
 | integration 脚本硬编码路径 | 改用 ROOT_DIR 相对路径 |
 | python tests 未接入 make check | 新增 python-tests 目标并接入 check |

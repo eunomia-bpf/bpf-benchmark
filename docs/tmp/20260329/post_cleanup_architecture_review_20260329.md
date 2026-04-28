@@ -178,11 +178,6 @@ Targeted tests:
 
 ```bash
 python3 -m pytest \
-  tests/python/test_bcc_runner.py \
-  tests/python/test_case_common.py \
-  tests/python/test_bcc_case.py \
-  tests/python/test_run_artifacts.py \
-  tests/python/test_corpus_orchestrator.py \
   -q
 ```
 

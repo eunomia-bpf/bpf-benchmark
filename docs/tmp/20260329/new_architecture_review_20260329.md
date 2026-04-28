@@ -14,7 +14,6 @@ Reviewed:
 
 Validation used only host-safe checks:
 
-- `pytest -q tests/python/test_corpus_orchestrator.py tests/python/test_bcc_case.py tests/python/test_bcc_runner.py tests/python/test_bpf_stats.py tests/python/test_case_common.py tests/python/test_corpus_manifest.py`
 - `python3 -m py_compile corpus/orchestrator.py runner/libs/app_runners/bcc.py runner/libs/bpf_stats.py`
 
 No host-kernel BPF loading or VM benchmark execution was performed in this review turn.

@@ -44,7 +44,6 @@ Result: PASS
 Evidence:
 
 - `runner/libs/app_runners/base.py:39` 定义唯一生产代码 implementation：返回 `list(self.programs)`。
-- `tests/python/test_corpus_driver.py:15` 是测试 fake runner stub，不影响 benchmark app 行为。
 - 未发现 app runner override `live_rejit_programs()` 来过滤程序。
 
 #### Lifecycle abort hooks

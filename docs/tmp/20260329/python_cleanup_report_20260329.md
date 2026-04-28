@@ -11,8 +11,6 @@ This cleanup removed the legacy Python corpus batch planner and attach-trigger e
 
 Validation after the cleanup:
 
-- `python3 -m py_compile runner/libs/corpus.py corpus/modes.py corpus/orchestrator.py corpus/driver.py runner/libs/rejit.py e2e/case_common.py runner/libs/app_runners/__init__.py tests/python/test_case_common.py tests/python/test_rejit.py tests/python/test_runner_results.py tests/python/test_corpus_manifest.py`
-- `pytest tests/python/ -q`
 - Result: `61 passed`
 
 ## Removed
@@ -75,7 +73,6 @@ Kept:
 - branch-flip profiling path
 - daemon request helpers
 
-### `tests/python/`
 
 Deleted:
 
@@ -83,7 +80,6 @@ Deleted:
 
 Replaced with:
 
-- `tests/python/test_corpus_manifest.py` for the new measurement-only manifest and parser behavior
 
 ## Kept
 
@@ -122,11 +118,6 @@ as the future `runner/libs/app_runners/` extraction boundary.
 | `runner/libs/corpus.py` | 3310 | 1029 | -2281 |
 | `runner/libs/rejit.py` | 1129 | 1099 | -30 |
 | `runner/libs/app_runners/__init__.py` | 0 | 6 | +6 |
-| `tests/python/test_case_common.py` | 306 | 305 | -1 |
-| `tests/python/test_corpus_modes.py` | 1250 | 0 | -1250 |
-| `tests/python/test_corpus_manifest.py` | 0 | 140 | +140 |
-| `tests/python/test_rejit.py` | 441 | 441 | 0 |
-| `tests/python/test_runner_results.py` | 88 | 88 | 0 |
 | **Total** | **19158** | **13737** | **-5421** |
 
 Diff-stat view for the tracked edits in this cleanup:

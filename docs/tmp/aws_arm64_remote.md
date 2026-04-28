@@ -423,7 +423,6 @@ Current static gate:
 
 Note:
 
-- `tests/python` is currently empty, so `pytest -q tests/python` returns `5` with `no tests ran`
 - that is documentation state, not the current runtime gate
 - whole-tree reviewer re-check is in progress
 - real `corpus/e2e` reruns are active in parallel; review is used to keep deleting architecture debt while runtime blockers are reduced

@@ -74,18 +74,14 @@ Result payload changes:
 
 ### 6. Updated tests
 
-- `tests/python/test_corpus_orchestrator.py` now checks:
   - program-level measurement splitting
   - loader-instance grouping
   - explicit failure for unsupported `test_run` execution units
-- `tests/python/test_run_artifacts.py` now compiles `corpus/orchestrator.py` instead of the deleted shim
 
 ## Validation
 
 Passed:
 
-- `python3 -m py_compile corpus/driver.py corpus/orchestrator.py runner/libs/app_runners/__init__.py runner/libs/app_runners/process_support.py runner/libs/app_runners/systemd.py runner/libs/app_runners/libbpf_bootstrap.py runner/libs/app_runners/real_world_code_size.py runner/libs/app_runners/xdp_tutorial.py runner/libs/app_runners/xdp_tools.py runner/libs/app_runners/kubearmor.py runner/libs/app_runners/coroot_node_agent.py runner/libs/app_runners/datadog_agent.py runner/libs/app_runners/tubular.py tests/python/test_corpus_orchestrator.py tests/python/test_run_artifacts.py`
-- `pytest tests/python/ -q`
   - result: `73 passed`
 - `grep -R "from e2e" runner/libs/app_runners/`
   - result: empty

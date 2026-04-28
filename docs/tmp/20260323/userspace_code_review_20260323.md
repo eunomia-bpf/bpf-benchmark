@@ -262,12 +262,10 @@ CLAUDE.md 明确规定 "Makefile is the ONLY build/test entry point"，直接调
 
 ### LOW
 
-#### L1：`tests/python/` 是否存在？
 ```
 ls tests/
 helpers/ hold_bpf_prog/ integration/ kernel/ negative/ python/ unittest/
 ```
-`tests/python/` 目录存在但未在 CLAUDE.md 中提及，需确认是否仍在维护。
 
 ---
 

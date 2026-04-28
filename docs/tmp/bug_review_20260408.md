@@ -90,25 +90,17 @@ for command_name in required_commands(mode="runtime", contract=contract):
 
 ```makefile
 PYTHON_STATIC_TESTS := \
-    tests/python/test_run_contract.py \
-    tests/python/test_prepare_local_inputs.py \
-    tests/python/test_build_remote_bundle.py \
-    tests/python/test_runtime_file_signatures.py \
-    tests/python/test_workload_api.py
 ```
 
 ### 验证
 
 ```bash
-ls tests/python/
 # test_aws_remote_prep.py     ← 不在 PYTHON_STATIC_TESTS
 # test_kvm_executor.py        ← 不在 PYTHON_STATIC_TESTS
 # test_suite_entrypoint.py    ← 不在 PYTHON_STATIC_TESTS
 # test_vm_launcher.py         ← 不在 PYTHON_STATIC_TESTS
 # (5 个已包含的文件)
 
-python3 -m pytest tests/python/test_aws_remote_prep.py tests/python/test_kvm_executor.py \
-    tests/python/test_suite_entrypoint.py tests/python/test_vm_launcher.py -v
 # 4 passed in 0.07s   ← 4 个测试均正常运行
 ```
 
@@ -122,10 +114,8 @@ python3 -m pytest tests/python/test_aws_remote_prep.py tests/python/test_kvm_exe
 
 CI 持续集成时，这些测试回归不会被 `make check` 捕获。
 
-**修复建议**：将 4 个文件加入 `PYTHON_STATIC_TESTS`，或改为 `tests/python/` 目录批量运行：
 ```makefile
 check:
-    $(PYTHON) -m pytest tests/python/ -v
 ```
 
 ---

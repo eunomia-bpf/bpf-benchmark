@@ -782,7 +782,6 @@ Does not belong here:
 
 - `tests/kernel/`: kernel selftests and BPF programs
 - `scanner/tests/`: scanner-specific C++ unit tests and golden policies
-- `tests/python/`: Python unit tests for `runner.libs.*`
 - `tests/integration/`: end-to-end tests for `make` entrypoints and schema compatibility
 
 #### `config/`

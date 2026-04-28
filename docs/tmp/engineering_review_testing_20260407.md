@@ -16,7 +16,6 @@ canonical runner contract 或当前 active findings。当前有效的设计、to
 
 范围：已逐个阅读以下范围内的文件内容，而不是只按文件名判断。
 
-- `tests/python/`
 - `tests/integration/`
 - `tests/unittest/`
 - `tests/negative/`
@@ -41,19 +40,16 @@ canonical runner contract 或当前 active findings。当前有效的设计、to
 
 ### 1. 删除 object/program 级 policy 层及其测试
 
-- 文件：`runner/libs/rejit.py:168-403`，`runner/libs/case_common.py:300-359`，`runner/libs/case_common.py:396-433`，`runner/libs/case_common.py:538-545`，`runner/libs/case_common.py:672-694`，`corpus/driver.py:722-727`，`corpus/driver.py:880-933`，`e2e/cases/bcc/case.py:184-195`，`e2e/cases/scx/case.py:430-436`，`e2e/cases/tetragon/case.py:684-695`，`e2e/cases/tracee/case.py:1368-1375`，`tests/python/test_rejit.py:218-260`，`tests/python/test_rejit.py:282-322`，`tests/python/test_case_common.py:409-533`，`tests/python/test_e2e_driver.py:217-239`
 - 问题：这里仍然按 `object/program/section/prog_type/has_sites` 做匹配，按 program 计算 pass，再按 pass tuple 拆分 `apply_rejit()`；结果里还回写 `effective_enabled_passes_by_program`。这与 `§5.6` 的“生命周期单元是 loader instance，不是 object/program”直接冲突，也与 `#306/#640` 已声明删除 v1 scanner/policy/directive/object-centric 代码不一致。
 - 建议操作：删除整层 `policy`/`rejit_policy_context`/`effective_enabled_passes_by_program` 逻辑和对应 Python 测试；只保留 loader-instance 级 pass 选择与结果。
 
 ### 2. 删除 BCC per-tool `rejit_passes` 覆盖和对应测试
 
-- 文件：`e2e/cases/bcc/case.py:56-65`，`e2e/cases/bcc/case.py:75-86`，`e2e/cases/bcc/case.py:490-632`，`tests/python/test_bcc_case.py:13-39`，`tests/python/test_bcc_case.py:41-63`，`tests/python/test_bcc_case.py:154-242`
 - 问题：BCC case 仍支持 tool 级 `rejit_passes`、`tool_rejit_passes`、`tool_requested_rejit_passes`。`#644` 已明确写明 “BCC `execsnoop` 的单独 `rejit_passes` 缩窄配置已删除”。
 - 建议操作：删除 `ToolSpec.rejit_passes`、config 解析、payload 中的 per-tool pass provenance，以及对应测试；BCC 跟其他 benchmark 一样走统一的 benchmark pass 入口。
 
 ### 3. 删除重复的 BPF stats 实现和重复测试
 
-- 文件：`runner/libs/metrics.py:16-206`，`runner/libs/bpf_stats.py:11-187`，`tests/python/test_metrics.py:13-62`，`tests/python/test_bpf_stats.py:11-41`
 - 问题：两套代码都在做 `libbpf` 加载、`bpf_enable_stats()`、`bpf_prog_get_fd_by_id()`、`bpf_prog_get_info_by_fd()` 和 stats 读取。测试也在重复覆盖 “FD 解析失败 / info 读取失败 / 关闭 FD / libbpf symbol 缺失” 这一类分支。
 - 建议操作：保留一个 canonical stats 模块；删除 `metrics.py` 中重复的 stats 半段，或删除 `bpf_stats.py`，不要两套都留。测试也收敛成一份。
 
@@ -83,7 +79,6 @@ canonical runner contract 或当前 active findings。当前有效的设计、to
 
 ### 8. 删除纯 contract/signature 测试
 
-- 文件：`tests/python/test_katran_runner_contract.py:13-28`，`tests/python/test_app_runners_contract.py:16-84`
 - 问题：这两份测试主要在断言 constructor 参数列表、parser flag 是否不存在、类是否继承 `AppRunner`。它们不验证真实运行行为，回归价值极低，却增加维护成本。
 - 建议操作：删除整文件；真正重要的回归应该由 case/runner 行为测试覆盖。
 
@@ -91,7 +86,6 @@ canonical runner contract 或当前 active findings。当前有效的设计、to
 
 ### 9. 大量 Python orchestration 测试过度 mock，只在测元数据拼接
 
-- 文件：`tests/python/test_bcc_case.py:65-152`，`tests/python/test_e2e_driver.py:32-145`，`tests/python/test_e2e_driver.py:168-239`，`tests/python/test_corpus_driver.py:454-721`，`tests/python/test_case_common.py:536-615`
 - 问题：这些测试把 daemon、runner、stats、CPU sampler、workload 全部 monkeypatch 成假的，只断言 payload 某个键存在或某个列表被拼出来。结果是测不到真实逻辑边界，只在重复测“字典长什么样”。
 - 建议操作：每层 abstraction 保留 1 个最小 plumbing test 即可，其余删掉或合并；不要在 `driver`、`case_common`、`case` 三层重复验证同一份 metadata 拼接。
 
@@ -110,14 +104,12 @@ canonical runner contract 或当前 active findings。当前有效的设计、to
 ### 12. 根 `Makefile` 的 test target 面与 `§6.4` 不一致
 
 - 文件：`Makefile:146-147`，`Makefile:159-160`，`Makefile:370-382`，`Makefile:385-401`，对照 `docs/kernel-jit-optimization-plan.md:641-655`，以及 `runner/scripts/vm-selftest.sh:87-88`，`tests/negative/Makefile:10`，`tests/negative/Makefile:22-28`，`runner/scripts/run_all_tests.sh:180-205`
-- 问题：文档要求 `vm-selftest`、`vm-micro-smoke`、`validate = check + vm-test + vm-micro-smoke`，但根 Makefile 只暴露 `vm-test/vm-micro/vm-corpus/vm-e2e/vm-all`。`python-tests` 只跑 `tests/python/`，直接把 `tests/integration/`、`tests/unittest/`、`tests/negative/` 排除在外；`validate` 还绕开 canonical target，直接调用脚本跑 micro。脚本里甚至提到不存在的 `make vm-negative-test`。
 - 建议操作：删掉误导性的 target/help 文案和裸脚本调用，收敛成 plan `§6.4` 的 canonical target surface；至少不要让文档、脚本注释和根 Makefile 各说各话。
 
 ## 低优先级
 
 ### 13. 低价值的 markdown/string-formatting 单文件测试可以并掉
 
-- 文件：`tests/python/test_scx_case.py:11-44`，`tests/python/test_tracee_case.py:28-58`，`tests/python/test_bpftrace_case.py:11-61`，`tests/python/test_tetragon_case.py:79-175`
 - 问题：这几份测试主要在断言 markdown 某一行字符串出现，或者 applied-site summary 的文本格式。它们与更高层 case 测试的收益重叠，而且通常一改输出文案就要跟着重写。
 - 建议操作：并入各 case 的主测试，或直接删掉只验证文案格式的部分。
 
@@ -145,7 +137,6 @@ canonical runner contract 或当前 active findings。当前有效的设计、to
 
 ## Round 2 深度 Review: runner/ 工程质量 (2026-04-07)
 
-本节是对 `runner/libs/*.py`、`runner/scripts/*.sh`、`runner/Makefile`、顶层 `Makefile`、`tests/python/*.py` 的第二轮检查，在两轮 cleanup（删 11 个 app runner、去重 geometric_mean、删 Makefile dead target）之后进行。
 
 ### R2-BUG-1: `prepare_kvm_inputs` 被调用但从未定义（严重 BUG）
 
@@ -214,9 +205,7 @@ stage_kvm_workspace() {
 
 ### R2-STALE-1: `test_aws_remote_prep_wrapper` 的残留 `.pyc` 文件
 
-**文件**: `tests/python/__pycache__/test_aws_remote_prep_wrapper.cpython-312-pytest-9.0.2.pyc`
 **证据**: 对应的 `.py` 源文件不存在。这是随 `aws_remote_prep.sh` 删除后遗留的孤立缓存文件。
-**修复**: 删除该 `.pyc`；将 `tests/python/__pycache__/` 加入 `.gitignore`（如未加）。
 
 ---
 
@@ -226,7 +215,6 @@ stage_kvm_workspace() {
 
 `main()` 的逻辑可测：(a) 错误参数数量应 exit(1)，(b) manifest 文件缺失应 exit(1)，(c) 正常流程应向 subprocess 传递正确环境变量。
 
-**修复**: 创建 `tests/python/test_aws_remote_prep.py` 覆盖以上三个场景。
 
 ---
 

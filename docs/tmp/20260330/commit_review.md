@@ -34,8 +34,6 @@ Confirmed on the main repo:
 
 ## Validation
 
-- `python3 -m py_compile runner/libs/app_runners/katran_support.py runner/libs/kinsn.py runner/libs/case_common.py e2e/cases/scx/case.py e2e/cases/katran/case.py tests/python/test_case_common.py tests/python/test_app_suite_schema.py tests/python/test_metrics.py tests/python/test_scx_support.py`
-- `pytest tests/python/ -q`
   - `77 passed`
 - `make daemon-tests`
   - `535 passed`

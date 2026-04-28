@@ -93,7 +93,6 @@ Ran successfully:
 
 - `make daemon-tests`
 - `make runner`
-- `pytest tests/python/test_corpus_modes.py tests/python/test_rejit.py tests/python/test_vm.py -q`
 
 Results:
 

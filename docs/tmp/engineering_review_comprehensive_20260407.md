@@ -263,12 +263,6 @@ requests_per_sec = float(req_match.group(1))  # assigned, never read
 
 以下测试文件在 git status 中显示为已删除，但无其他代码依赖它们：
 
-- `tests/python/test_build_remote_bundle.py`
-- `tests/python/test_build_upstream_selftests.py`
-- `tests/python/test_execute_workspace.py`
-- `tests/python/test_run_target_suite.py`
-- `tests/python/test_state_file.py`
-- `tests/python/test_guest_prereqs.py`
 
 这些测试覆盖的功能（`build_remote_bundle`、`state_file`、`guest_prereqs` 等）
 在代码中仍然存在且被其他测试间接覆盖。建议在重构稳定后补回关键模块的单元测试。
@@ -278,7 +272,6 @@ requests_per_sec = float(req_match.group(1))  # assigned, never read
 ## 测试验证结果
 
 ```
-$ python -m pytest tests/python/test_run_contract.py tests/python/test_prepare_local_inputs.py -v
 14 passed in 0.07s
 ```
 

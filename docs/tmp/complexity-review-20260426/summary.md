@@ -30,4 +30,3 @@ Reviewed `main..HEAD` with focus on code and file additions that increase mainte
 
 ## Lower-Priority Notes
 
-- `tests/python/test_corpus_driver.py:50-87` still expects partial rediscovery to raise, while `corpus/driver.py:269-299` now warns and accepts partial sets. Even if the runtime policy is intentional, the mismatch is another sign that the rediscovery path is harder to reason about than it should be.

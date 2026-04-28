@@ -9,13 +9,11 @@
 
 ## Step 1 Verification
 
-- `pytest tests/python/ -q`
   - First verification run: `70 passed`
   - After one second-pass fix described below: `71 passed`
 - `make daemon-tests`
   - Passed: `535 passed; 0 failed`
 - Import / dangling reference audit:
-  - Live-code `rg` over `corpus/`, `e2e/`, `micro/`, `runner/`, `tests/python/` found no remaining imports of deleted:
     - `runner/libs/catalog.py`
     - `runner/libs/commands.py`
     - `runner/libs/object_discovery.py`
@@ -32,7 +30,6 @@
   - `runner/scripts/aws_x86.sh` and `runner/scripts/aws_arm64.sh` now hard-fail with retirement messages instead of routing into the deleted loader flow.
 - `corpus/orchestrator.py` repeat bug: fixed.
   - `_run_app()` now executes baseline and post-ReJIT workloads inside `for _ in range(repeat)` loops and records `baseline_workloads` / `rejit_workloads`.
-  - `tests/python/test_corpus_orchestrator.py` now asserts real repeated execution counts, not just echoing config.
 - Loader-instance `prog_fds` identity: fixed.
   - `runner/libs/daemon_session.py` passes `prog_fds` through to live scan.
   - `runner/libs/rejit.py` now rejects scan requests that do not provide loader-owned FDs for all requested programs.
@@ -49,7 +46,6 @@
   - First-pass fixes correctly made unreadable sched_ext state / ops fatal.
   - Second pass found one incomplete shell path: `ulimit -l unlimited; exec ...` still continued after `ulimit` failure because of shell sequencing.
   - Fixed in this pass by switching to `set -euo pipefail; ulimit -l unlimited; exec ...`.
-  - Added regression test: `tests/python/test_scx_support.py`.
 - `e2e/cases/scx/case.py` degraded payload path: fixed.
   - Missing per-program runtime counters now abort with `RuntimeError` instead of being downgraded into a limitations payload.
 - Shared lifecycle / kinsn silent fallback: fixed.
@@ -96,7 +92,6 @@
 - `runner/libs/app_runners/scx_support.py`
   - Problem: memlock setup was still not truly fail-fast because `ulimit -l unlimited; exec ...` continues on shell failure.
   - Fix: prepend `set -euo pipefail;` so a failing `ulimit` aborts the scheduler launch immediately.
-  - Regression coverage added in `tests/python/test_scx_support.py`.
 
 ## Outcome
 
