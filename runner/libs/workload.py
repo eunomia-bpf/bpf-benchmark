@@ -674,17 +674,166 @@ def _merge_workload_results(results: Sequence[WorkloadResult]) -> WorkloadResult
 
 _FLOAT_PATTERN = r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
 _STRESS_NG_METRIC_RE = re.compile(rf"stress-ng:\s+metrc:\s+\[\d+\]\s+(\S+)\s+({_FLOAT_PATTERN})\b")
-_STRESS_NG_CLASS_WORKLOADS: Mapping[str, tuple[str, ...]] = {
-    "stress_ng_cpu": ("cpu",),
-    "stress_ng_filesystem": ("filesystem",),
-    "stress_ng_io": ("io",),
-    "stress_ng_network": ("network",),
-    "stress_ng_os": ("os",),
-    # stress-ng has no "process" class; scheduler includes exec/fork/spawn stressors.
-    "stress_ng_process": ("scheduler",),
-    "stress_ng_scheduler": ("scheduler",),
-    "stress_ng_os_io_network": ("os", "io", "network"),
+_STRESS_NG_CPU_STRESSORS = ("cpu",)
+_STRESS_NG_FILESYSTEM_STRESSORS = (
+    "access",
+    "chdir",
+    "chmod",
+    "chown",
+    "dentry",
+    "dir",
+    "dirmany",
+    "fallocate",
+    "file-ioctl",
+    "filename",
+    "flock",
+    "fpunch",
+    "fstat",
+    "getdent",
+    "hdd",
+    "inotify",
+    "open",
+    "rename",
+    "touch",
+    "utime",
+)
+_STRESS_NG_IO_STRESSORS = (
+    "aio",
+    "aiol",
+    "hdd",
+    "io",
+    "iomix",
+    "io-uring",
+    "sync-file",
+)
+_STRESS_NG_NETWORK_STRESSORS = (
+    "dccp",
+    "epoll",
+    "netdev",
+    "sctp",
+    "sock",
+    "sockdiag",
+    "sockfd",
+    "sockpair",
+    "udp-flood",
+)
+_STRESS_NG_OS_STRESSORS = (
+    "cap",
+    "eventfd",
+    "get",
+    "prctl",
+    "set",
+    "syscall",
+    "timerfd",
+)
+_STRESS_NG_SCHEDULER_STRESSORS = (
+    "clone",
+    "exec",
+    "fork",
+    "futex",
+    "sem",
+    "sem-sysv",
+    "spawn",
+    "switch",
+    "vfork",
+    "yield",
+)
+_STRESS_NG_WORKLOAD_STRESSORS: Mapping[str, tuple[str, ...]] = {
+    "stress_ng_cpu": _STRESS_NG_CPU_STRESSORS,
+    "stress_ng_filesystem": _STRESS_NG_FILESYSTEM_STRESSORS,
+    "stress_ng_io": _STRESS_NG_IO_STRESSORS,
+    "stress_ng_network": _STRESS_NG_NETWORK_STRESSORS,
+    "stress_ng_os": _STRESS_NG_OS_STRESSORS,
+    "stress_ng_process": _STRESS_NG_SCHEDULER_STRESSORS,
+    "stress_ng_scheduler": _STRESS_NG_SCHEDULER_STRESSORS,
+    "stress_ng_os_io_network": (
+        *_STRESS_NG_OS_STRESSORS,
+        *_STRESS_NG_IO_STRESSORS,
+        *_STRESS_NG_NETWORK_STRESSORS,
+    ),
 }
+
+_STRESS_NG_STRESSOR_ARGS: Mapping[str, tuple[str, ...]] = {
+    "fallocate": ("--fallocate-bytes", "128M"),
+    "fpunch": ("--fpunch-bytes", "128M"),
+    "hdd": ("--hdd-bytes", "128M"),
+    "iomix": ("--iomix-bytes", "128M"),
+    "open": ("--open-max", "4096"),
+}
+_STRESS_NG_STRESSOR_OPS: Mapping[str, int] = {
+    "access": 1000,
+    "aio": 200,
+    "aiol": 200,
+    "cap": 2000,
+    "chdir": 200,
+    "chmod": 200,
+    "chown": 200,
+    "clone": 100,
+    "cpu": 2000,
+    "dccp": 200,
+    "dentry": 1000,
+    "dir": 1000,
+    "dirmany": 1000,
+    "epoll": 1000,
+    "eventfd": 1000,
+    "exec": 50,
+    "fallocate": 100,
+    "file-ioctl": 1000,
+    "filename": 200,
+    "flock": 1000,
+    "fork": 200,
+    "fpunch": 100,
+    "fstat": 500,
+    "futex": 1000,
+    "get": 1000,
+    "getdent": 1000,
+    "hdd": 128,
+    "inotify": 50,
+    "io": 20,
+    "iomix": 128,
+    "io-uring": 200,
+    "netdev": 1000,
+    "open": 1000,
+    "prctl": 1000,
+    "rename": 100,
+    "sctp": 200,
+    "sem": 1000,
+    "sem-sysv": 1000,
+    "set": 1000,
+    "sock": 200,
+    "sockdiag": 1000,
+    "sockfd": 200,
+    "sockpair": 500,
+    "spawn": 20,
+    "switch": 1000,
+    "sync-file": 50,
+    "syscall": 64,
+    "timerfd": 1000,
+    "touch": 200,
+    "udp-flood": 1000,
+    "utime": 200,
+    "vfork": 200,
+    "yield": 5000,
+}
+_STRESS_NG_NETWORK_PORT_STRESSORS = {
+    "dccp": 0,
+    "epoll": 100,
+    "sctp": 200,
+    "sock": 300,
+    "sockfd": 400,
+}
+
+
+def _stress_ng_dynamic_stressor_args(stressors: Sequence[str]) -> list[str]:
+    selected = {str(stressor).strip() for stressor in stressors if str(stressor).strip()}
+    if not (selected & set(_STRESS_NG_NETWORK_PORT_STRESSORS)):
+        return []
+    base_port = 20000 + ((os.getpid() + int(time.monotonic() * 1000)) % 30000)
+    args: list[str] = []
+    for stressor, offset in _STRESS_NG_NETWORK_PORT_STRESSORS.items():
+        if stressor in selected:
+            args.extend([f"--{stressor}-port", str(base_port + offset)])
+    return args
 
 
 def _stress_ng_metric_rows(text: str) -> list[tuple[str, float]]:
@@ -718,27 +867,50 @@ def parse_stress_ng_total_bogo_ops(text: str) -> float | None:
     return sum(bogo_ops for _, bogo_ops in rows)
 
 
-def run_stress_ng_class_load(duration_s: int | float, classes: Sequence[str], *, workload_name: str) -> WorkloadResult:
+def _build_stress_ng_stressor_command(
+    stress_ng: str,
+    stressors: Sequence[str],
+    *,
+    seconds: int,
+    temp_root: Path,
+) -> list[str]:
+    normalized_stressors = tuple(str(stressor).strip() for stressor in stressors if str(stressor).strip())
+    command = [stress_ng]
+    for stressor in normalized_stressors:
+        command.extend([f"--{stressor}", "1"])
+    for stressor in normalized_stressors:
+        command.extend(_STRESS_NG_STRESSOR_ARGS.get(stressor, ()))
+    command.extend(_stress_ng_dynamic_stressor_args(normalized_stressors))
+    for stressor in normalized_stressors:
+        if ops_limit := _STRESS_NG_STRESSOR_OPS.get(stressor):
+            command.extend([f"--{stressor}-ops", str(int(ops_limit))])
+    command.extend(
+        [
+            "--timeout",
+            f"{seconds}s",
+            "--metrics-brief",
+            "--temp-path",
+            str(temp_root),
+        ]
+    )
+    return command
+
+
+def run_stress_ng_class_load(duration_s: int | float, stressors: Sequence[str], *, workload_name: str) -> WorkloadResult:
     stress_ng = which("stress-ng")
     if stress_ng is None:
         raise RuntimeError(f"stress-ng is required for the {workload_name} workload")
-    normalized_classes = tuple(str(cls).strip() for cls in classes if str(cls).strip())
-    if not normalized_classes:
-        raise RuntimeError(f"{workload_name} workload requires at least one stress-ng class")
+    normalized_stressors = tuple(str(stressor).strip() for stressor in stressors if str(stressor).strip())
+    if not normalized_stressors:
+        raise RuntimeError(f"{workload_name} workload requires at least one stress-ng stressor")
     seconds = max(1, int(round(float(duration_s))))
     temp_root = _disk_backed_tmp_root()
-    command = [
+    command = _build_stress_ng_stressor_command(
         stress_ng,
-        "--class",
-        ",".join(normalized_classes),
-        "--all",
-        "1",
-        "--timeout",
-        f"{seconds}s",
-        "--metrics-brief",
-        "--temp-path",
-        str(temp_root),
-    ]
+        normalized_stressors,
+        seconds=seconds,
+        temp_root=temp_root,
+    )
     start = time.monotonic()
     try:
         completed = run_command(
@@ -2300,10 +2472,10 @@ def run_named_workload(
     kind = str(kind or "").strip()
     if kind == "mixed":
         return run_mixed_workload(float(duration_s))
-    if kind in _STRESS_NG_CLASS_WORKLOADS:
+    if kind in _STRESS_NG_WORKLOAD_STRESSORS:
         return run_stress_ng_class_load(
             float(duration_s),
-            _STRESS_NG_CLASS_WORKLOADS[kind],
+            _STRESS_NG_WORKLOAD_STRESSORS[kind],
             workload_name=kind,
         )
     if kind == "tcp_connect":

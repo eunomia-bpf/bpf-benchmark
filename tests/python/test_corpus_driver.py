@@ -100,6 +100,7 @@ class CorpusDriverTests(unittest.TestCase):
             mock.patch.object(corpus_driver, "_refresh_active_session_programs"),
             mock.patch.object(corpus_driver, "_measure_runner_phase", side_effect=RuntimeError("baseline boom")),
             mock.patch.object(corpus_driver, "wait_for_suite_quiescence") as wait_for_suite_quiescence,
+            mock.patch.object(corpus_driver, "_print_progress"),
         ):
             results, fatal_error = corpus_driver._run_suite_lifecycle_sessions(
                 prepared_daemon_session,

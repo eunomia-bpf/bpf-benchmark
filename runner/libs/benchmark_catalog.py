@@ -14,7 +14,7 @@ TRACEE_E2E_WORKLOADS: tuple[dict[str, object], ...] = (
     {
         "name": "stress_ng_os",
         "kind": "stress_ng_os",
-        "command": "stress-ng --class os --all 1 --timeout {duration}s",
+        "command": "stress-ng --cap 1 --eventfd 1 --get 1 --prctl 1 --set 1 --syscall 1 --timerfd 1 --timeout {duration}s",
         "metric": "ops/s",
     },
 )

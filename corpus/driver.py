@@ -517,10 +517,18 @@ def _run_suite_lifecycle_sessions(
         if daemon_error := _daemon_exit_error(active_daemon_session):
             raise RuntimeError(daemon_error)
 
+    def session_workload(session: CorpusAppSession) -> str:
+        workload_for = getattr(session.app, "workload_for", None)
+        if callable(workload_for):
+            return str(workload_for("corpus"))
+        return str(getattr(session.app, "workload", ""))
+
     try:
         active_pairs = list(session_results)
         if active_pairs:
+            _print_progress("lifecycle_phase_start", phase="baseline_refresh", apps=len(active_pairs))
             _refresh_active_session_programs([session for session, _ in active_pairs], "baseline")
+            _print_progress("lifecycle_phase_done", phase="baseline_refresh", apps=len(active_pairs))
 
         surviving_pairs: list[tuple[CorpusAppSession, LifecycleRunResult]] = []
         for session, result in active_pairs:
@@ -529,6 +537,14 @@ def _run_suite_lifecycle_sessions(
                 record_baseline_failure(session, result, "lifecycle did not provide any program ids")
             else:
                 try:
+                    _print_progress(
+                        "measurement_start",
+                        app=session.app.name,
+                        runner=session.app.runner,
+                        phase="baseline",
+                        workload=session_workload(session),
+                        samples=samples,
+                    )
                     result.baseline = _measure_runner_phase(
                         session.runner,
                         result.state.prog_ids,
@@ -536,14 +552,31 @@ def _run_suite_lifecycle_sessions(
                         samples=samples,
                         warmup=True,
                     )
+                    _print_progress(
+                        "measurement_done",
+                        app=session.app.name,
+                        runner=session.app.runner,
+                        phase="baseline",
+                        status="ok",
+                    )
                     surviving_pairs.append((session, result))
                 except Exception as exc:
+                    _print_progress(
+                        "measurement_done",
+                        app=session.app.name,
+                        runner=session.app.runner,
+                        phase="baseline",
+                        status="error",
+                        error=str(exc),
+                    )
                     record_baseline_failure(session, result, str(exc))
             check_daemon()
 
         active_pairs = surviving_pairs
         if active_pairs:
+            _print_progress("lifecycle_phase_start", phase="rejit_refresh", apps=len(active_pairs))
             _refresh_active_session_programs([session for session, _ in active_pairs], "rejit")
+            _print_progress("lifecycle_phase_done", phase="rejit_refresh", apps=len(active_pairs))
 
         surviving_pairs = []
         for session, result in active_pairs:
@@ -554,15 +587,35 @@ def _run_suite_lifecycle_sessions(
             surviving_pairs.append((session, result))
 
         active_pairs = surviving_pairs
-        for _, result in active_pairs:
+        for session, result in active_pairs:
+            _print_progress(
+                "rejit_start",
+                app=session.app.name,
+                runner=session.app.runner,
+                program_count=len(result.rejit_prog_ids),
+            )
             result.rejit_result = active_daemon_session.apply_rejit(
                 result.rejit_prog_ids,
                 enabled_passes=apply_enabled_passes,
+            )
+            _print_progress(
+                "rejit_done",
+                app=session.app.name,
+                runner=session.app.runner,
+                status="ok" if not str(result.rejit_result.get("error") or "").strip() else "error",
             )
             check_daemon()
 
         for session, result in active_pairs:
             try:
+                _print_progress(
+                    "measurement_start",
+                    app=session.app.name,
+                    runner=session.app.runner,
+                    phase="post_rejit",
+                    workload=session_workload(session),
+                    samples=samples,
+                )
                 result.post_rejit = _measure_runner_phase(
                     session.runner,
                     result.state.prog_ids,
@@ -570,8 +623,23 @@ def _run_suite_lifecycle_sessions(
                     samples=samples,
                     warmup=False,
                 )
+                _print_progress(
+                    "measurement_done",
+                    app=session.app.name,
+                    runner=session.app.runner,
+                    phase="post_rejit",
+                    status="ok",
+                )
             except Exception as exc:
                 result.error = str(exc)
+                _print_progress(
+                    "measurement_done",
+                    app=session.app.name,
+                    runner=session.app.runner,
+                    phase="post_rejit",
+                    status="error",
+                    error=str(exc),
+                )
             check_daemon()
     except Exception as exc:
         fatal_error = str(exc)
