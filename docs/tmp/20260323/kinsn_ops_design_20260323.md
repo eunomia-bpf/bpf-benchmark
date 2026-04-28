@@ -11,7 +11,7 @@
 
 - kinsn 仍然首先是一个 kfunc：可见性、allowlist、BTF 原型、prog_type 绑定仍由 `btf_kfunc_id_set` 管。
 - kinsn 额外再绑定一份 `bpf_kinsn_ops`：JIT emit 和 verifier modeling 都挂在这里。
-- verifier 和 JIT 都只看 `bpf_kfunc_desc->kinsn_ops`，不再出现 `inline_kfunc` 命名。
+- verifier 和 JIT 都只看 `bpf_kfunc_desc->kinsn_ops`，不再出现旧命名。
 - 不推荐把 JIT/verifier 回调直接塞进 `btf_kfunc_id_set`；也不推荐伪造一个“base kfunc struct”再做嵌入，因为内核里根本没有一等公民的 `struct bpf_kfunc` 可供继承。
 
 ### 0.2 对当前提议的关键修正
@@ -58,13 +58,13 @@
 
 ### 1.1 当前内核路径
 
-当前内核里已经有一个最小的 “inline kfunc” 机制：
+当前内核里已经有一个最小的 “kinsn” 机制：
 
 - `struct bpf_kfunc_inline_ops` 定义在 `vendor/linux-framework/include/linux/bpf.h:968-977`
 - `bpf_register_kfunc_inline_ops()` / `bpf_unregister_kfunc_inline_ops()` 定义在 `vendor/linux-framework/kernel/bpf/verifier.c:3240-3290`
 - `bpf_kfunc_desc` 缓存 `inline_ops` 指针，见 `vendor/linux-framework/kernel/bpf/verifier.c:3173-3180`
 - `add_kfunc_call()` 在 verifier 早期把 `inline_ops` 填到 `desc`，见 `vendor/linux-framework/kernel/bpf/verifier.c:3522-3613`
-- x86 JIT 在 `emit_inline_kfunc_call()` 中按 `insn` 查 `inline_ops` 并调用 emit，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579-599`
+- x86 JIT 在 `emit_kinsn_call()` 中按 `insn` 查 `kinsn_ops` 并调用 emit，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579-599`
 
 但 verifier 侧完全按普通 kfunc 处理：
 
@@ -102,7 +102,7 @@
 ## 2. 设计目标
 
 1. kinsn 在语义上是 kfunc 的子集，而不是一条全新 BPF ISA 指令。
-2. 公开命名使用 `kinsn`，不再出现 `inline_kfunc`。
+2. 公开命名使用 `kinsn`，去掉旧命名。
 3. verifier 不暴露 `struct bpf_reg_state` 给 module。
 4. verifier 仍然是最终真相来源；module 只提供受限、可验证的 effect description。
 5. 标准 kfunc ABI 必须继续工作，保证旧 daemon 可用。
@@ -926,7 +926,7 @@ clobber 是对 BPF 可见寄存器的承诺，不是“emit 看着办”。
 
 4. `arch/x86/net/bpf_jit_comp.c`
 
-- `emit_inline_kfunc_call` -> `emit_kinsn_call`
+- JIT emit helper -> `emit_kinsn_call`
 - 消费标准化 `bpf_kinsn_call`
 - kinsn path must-inline 规则
 - 预计 `+40 ~ +70 LOC`
@@ -965,7 +965,7 @@ clobber 是对 BPF 可见寄存器的承诺，不是“emit 看着办”。
 
 最终推荐如下：
 
-1. 把 kinsn 正式定义为 `bpf_kinsn_ops`，不再沿用 `inline_kfunc` 命名。
+1. 把 kinsn 正式定义为 `bpf_kinsn_ops`，不再沿用旧命名。
 2. 采用独立 sidecar registry，而不是扩 `btf_kfunc_id_set`。
 3. verifier 侧不要做 “只 clobber r0” 特判；必须做 per-call effect model。
 4. 不暴露 `bpf_reg_state` 给 module；module 只返回声明式 `bpf_kinsn_effect`。

@@ -101,7 +101,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 **组件 2：kinsn —— 平台特定指令扩展机制**（内核源码改动，Patch 2 + 内核模块）
 - 允许注册 **kinsn**：一种为平台特定指令或扩展定义验证语义并让 JIT 发射它们的方式。
-- **实现**：kinsn 通过已有的 kfunc 基础设施实现——新的 `KF_INLINE_EMIT` flag 使 JIT 调用 module 提供的 emit 回调而非生成函数调用（inline kfunc）。复用了 kfunc 已有的 verifier 验证、BTF 类型系统和 module 生命周期管理。
+- **实现**：kinsn 复用已有的 kfunc 基础设施：新的 `KF_INLINE_EMIT` flag 使 JIT 调用 module 提供的 emit 回调，而不是生成普通函数调用。复用了 kfunc 已有的 verifier 验证、BTF 类型系统和 module 生命周期管理。
 - 最小内核模块为每个平台定义 kfunc 风格的 kinsn，包含验证函数和 JIT emit 函数（x86、arm64 等）。
 
 **组件 3：用户态 daemon**
@@ -290,7 +290,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 │                                                              │
 │  Component 2: kinsn — Platform-Specific Instruction Modules  │
 │  Defines "WHAT CAN be optimized" — per-platform capabilities │
-│    Implementation: inline kfunc (KF_INLINE_EMIT)             │
+│    Implementation: kinsn via KF_INLINE_EMIT                  │
 │    → verifier: check_kfunc_call()（零改动）                   │
 │    → JIT: emit 自定义 native 序列（而非 CALL）                 │
 │    → fallback: emit 普通 CALL（module 未加载时）               │

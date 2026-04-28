@@ -59,7 +59,7 @@ Total findings: 18 (3 HIGH, 6 MED, 5 LOW, 4 INFO)
 
 **File**: `kernel/bpf/verifier.c` line 3245
 **Description**: `!ops->emit_x86` is a hard requirement in the registration function. On ARM64, a module that only provides `emit_arm64` would fail to register.
-**Impact**: Inline kfunc is broken on ARM64-only systems.
+**Impact**: Kinsn is broken on ARM64-only systems.
 **Fix**: Change to `if (!ops->emit_x86 && !ops->emit_arm64)` or make the check architecture-conditional.
 
 ### M4. `prog->insns` and `prog->len` not swapped during REJIT
@@ -186,11 +186,11 @@ This creates a potential **lock inversion**: REJIT takes `rejit_mutex` then `tr-
 
 | Component | x86 | ARM64 | Notes |
 |-----------|-----|-------|-------|
-| Inline kfunc JIT | OK | OK | Both emitters present |
+| Kinsn JIT | OK | OK | Both emitters present |
 | REJIT syscall | OK | OK | Core path is arch-agnostic |
 | Trampoline refresh | OK | OK | Uses arch-agnostic bpf_arch_text_poke |
 | Struct_ops refresh | OK | **BROKEN** | find_call_site uses x86 opcode (M2) |
-| Inline kfunc registration | OK | **BROKEN** | Requires emit_x86 (M3) |
+| Kinsn registration | OK | **BROKEN** | Requires emit_x86 (M3) |
 | Dispatcher refresh | OK | OK | Arch-agnostic |
 | Poke/tail_call refresh | OK | OK | Uses arch-agnostic map_poke_run |
 

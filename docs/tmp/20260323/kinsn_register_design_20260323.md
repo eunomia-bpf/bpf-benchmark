@@ -66,7 +66,7 @@ For a standard kfunc CALL: `code=BPF_JMP|BPF_CALL`, `src_reg=BPF_PSEUDO_KFUNC_CA
 | `imm` | btf_id | btf_id (unchanged -- verifier needs this) |
 
 **Key insight**: For `KF_INLINE_EMIT` kfuncs, `dst_reg` and `off` are available because:
-- `dst_reg`: Normal kfunc calls never use dst_reg (result always goes to r0). For inline kfuncs, we encode the operand register here.
+- `dst_reg`: Normal kfunc calls never use dst_reg (result always goes to r0). For kinsn, we encode the operand register here.
 - `off`: When btf_fd_idx=0 (the common case for all our kinsn modules, which register into BPF_PROG_TYPE_UNSPEC), off is available for constant operands.
 
 **btf_fd_idx compatibility**: The `off` field currently encodes the BTF FD index for cross-module kfunc references. For `KF_INLINE_EMIT` kfuncs, we restrict: `off` carries operand data, and the kfunc must be resolvable via btf_id alone (btf_fd_idx=0). This is already the case for all BpfReJIT kinsn modules since they register globally via `BPF_PROG_TYPE_UNSPEC`. If a future kinsn needs btf_fd_idx != 0, the daemon can fall back to the old calling convention for that case.
@@ -308,7 +308,7 @@ if (is_kfunc_inline_emit(&meta)) {
     u8 dst = insn->dst_reg;
     mark_reg_unknown(env, regs, dst);
     /* Apply per-kfunc range narrowing if available */
-    err = narrow_inline_kfunc_result(env, &meta, insn, regs);
+    err = narrow_kinsn_result(env, &meta, insn, regs);
     if (err)
         return err;
 } else {
@@ -331,7 +331,7 @@ if (is_kfunc_inline_emit(&meta)) {
 2. **Signed** (if module signing is enabled) -- same chain of trust
 3. **Part of the JIT** -- the emit callback is literally a piece of the JIT compiler, not an eBPF program
 
-This is fundamentally different from "trusting a BPF program not to do bad things" (which the verifier prevents). The module is kernel code, period. The verifier trusts the JIT to correctly implement BPF instructions -- trusting a module's emit callback to correctly implement an inline kfunc is the exact same level of trust.
+This is fundamentally different from "trusting a BPF program not to do bad things" (which the verifier prevents). The module is kernel code, period. The verifier trusts the JIT to correctly implement BPF instructions -- trusting a module's emit callback to correctly implement an kinsn is the exact same level of trust.
 
 **Comparison with existing trusted JIT behaviors**:
 - The JIT translates `BPF_ALU64|BPF_ADD` to `add rax, rdi`. The verifier trusts this doesn't clobber random registers.
@@ -345,20 +345,20 @@ This is fundamentally different from "trusting a BPF program not to do bad thing
 The verifier must validate that the registers encoded in `dst_reg` and `off` are valid:
 
 ```c
-static int check_inline_kfunc_operands(struct bpf_verifier_env *env,
+static int check_kinsn_operands(struct bpf_verifier_env *env,
                                        struct bpf_insn *insn,
                                        struct bpf_kfunc_call_arg_meta *meta)
 {
     u8 dst = insn->dst_reg;
 
     if (dst >= MAX_BPF_REG || dst == BPF_REG_10) {
-        verbose(env, "invalid dst_reg %d for inline kfunc\n", dst);
+        verbose(env, "invalid dst_reg %d for kinsn\n", dst);
         return -EINVAL;
     }
 
     /* Validate that dst_reg holds a SCALAR_VALUE (not a pointer) */
     if (!register_is_scalar(&cur_regs(env)[dst])) {
-        verbose(env, "inline kfunc dst_reg R%d must be scalar\n", dst);
+        verbose(env, "kinsn dst_reg R%d must be scalar\n", dst);
         return -EINVAL;
     }
 
@@ -371,7 +371,7 @@ static int check_inline_kfunc_operands(struct bpf_verifier_env *env,
 
 ### 2.4 Result Type and Range Narrowing
 
-After the inline kfunc, the destination register becomes `SCALAR_VALUE` with unknown range (conservative). However, we can do better with per-kfunc range narrowing:
+After the kinsn, the destination register becomes `SCALAR_VALUE` with unknown range (conservative). However, we can do better with per-kfunc range narrowing:
 
 | kinsn | Destination range | Reasoning |
 |-------|------------------|-----------|
@@ -561,9 +561,9 @@ When the kinsn module is not loaded, `bpf_jit_find_kfunc_inline_ops()` returns N
 
 ```c
 /* In bpf_jit_comp.c, when inline_ops == NULL for a KF_INLINE_EMIT kfunc: */
-if (is_inline_kfunc && !inline_ops) {
+if (is_kinsn && !kinsn_ops) {
     /* Generate fallback: setup args from encoded operands, CALL, copy result */
-    err = emit_inline_kfunc_fallback(&prog, bpf_prog, insn);
+    err = emit_kinsn_fallback(&prog, bpf_prog, insn);
     if (!err)
         break;
     /* If fallback fails, this is a JIT error */
@@ -625,7 +625,7 @@ This fallback is **only at the native code level** -- the BPF instruction stream
 - **Verdict**: Over-engineered. The CALL instruction with operand encoding achieves the same result with far less disruption.
 
 ### Approach 6: BPF_FASTCALL-inspired dead spill/fill elimination
-- Leverage the existing `KF_FASTCALL` / `bpf_fastcall` mechanism to have clang emit spill/fill around inline kfunc calls, then let the verifier's fastcall optimization remove them.
+- Leverage the existing `KF_FASTCALL` / `bpf_fastcall` mechanism to have clang emit spill/fill around kinsn calls, then let the verifier's fastcall optimization remove them.
 - **Instruction count**: At BPF level, extra spill/fills are present but marked for removal. JIT generates compact code.
 - **Problem**: This only works for clang-compiled code with `bpf_fastcall` attribute. For daemon-generated bytecode (REJIT), there's no clang involvement. The daemon would need to generate the spill/fill pattern manually, and the verifier would need to recognize and remove it. Overly complex.
 - **Verdict**: Wrong tool for the job. Designed for pre-load compilation, not post-load rewriting.
@@ -641,7 +641,7 @@ This fallback is **only at the native code level** -- the BPF instruction stream
 | 5. New insn class | 1 insn | 0 | ~200+ | ~200/arch | Very high |
 | 6. Fastcall-style | Complex | Partial | ~50 | ~50 | Moderate |
 
-**Recommendation**: Approach 4 (operand-encoded inline kfunc) delivers the strongest performance result with manageable complexity.
+**Recommendation**: Approach 4 (operand-encoded kinsn) delivers the strongest performance result with manageable complexity.
 
 ---
 
@@ -650,26 +650,26 @@ This fallback is **only at the native code level** -- the BPF instruction stream
 ### Phase 0: Verifier -- ALU-like semantics for KF_INLINE_EMIT (Kernel)
 
 **Changes**:
-1. In `check_kfunc_call()`: detect `KF_INLINE_EMIT`, branch to new `check_inline_kfunc()` handler
-2. `check_inline_kfunc()`: validate `dst_reg`, skip r1-r5 clobber, apply `mark_reg_unknown` to dst_reg only
+1. In `check_kfunc_call()`: detect `KF_INLINE_EMIT`, branch to the `check_kinsn_call()` handler
+2. `check_kinsn_call()`: validate `dst_reg`, skip r1-r5 clobber, apply `mark_reg_unknown` to dst_reg only
 3. Add `narrow_result` callback to `bpf_kfunc_inline_ops`; call it if present
 
 **Estimated kernel LOC**: ~35 lines (verifier.c: 25, btf.h: 5, bpf.h: 5)
 
 **Deliverable**: `KF_INLINE_EMIT` kfuncs no longer clobber r1-r5. With the existing module emit callbacks (which still use the old r1/r2/r3 register conventions), this is already correct because the JIT emit callbacks only write to r0/RAX. The daemon can immediately benefit by dropping all `plan_caller_saved` logic and emitting kfunc calls at sites that were previously skipped.
 
-**Testing**: Existing 6 REJIT functionality tests + 20 safety tests. Add 3 new tests specifically for inline kfunc register preservation.
+**Testing**: Existing 6 REJIT functionality tests + 20 safety tests. Add 3 new tests specifically for kinsn register preservation.
 
 ### Phase 1: Operand encoding in daemon + JIT (Daemon + Kernel + Modules)
 
 **Changes**:
 1. **Daemon**: Update `emit_kfunc_call` to encode operands in `dst_reg`/`off` instead of generating MOV+CALL+MOV sequences. Remove `plan_caller_saved`, `emit_with_caller_save`, and all related logic.
-2. **Kernel JIT (x86)**: Update `emit_inline_kfunc_call()` and each x86 emit callback to read operands from `insn->dst_reg`/`insn->off` and generate register-flexible native code.
+2. **Kernel JIT (x86)**: Update `emit_kinsn_call()` and each x86 emit callback to read operands from `insn->dst_reg`/`insn->off` and generate register-flexible native code.
 3. **Kernel JIT (ARM64)**: Same for ARM64.
 4. **Kernel modules (x86)**: Rewrite 5 emit callbacks.
 5. **Kernel modules (ARM64)**: Rewrite 5 emit callbacks.
-6. **Kernel verifier**: Add operand validation (`check_inline_kfunc_operands`).
-7. **Kernel fallback**: Add `emit_inline_kfunc_fallback()` for when module is not loaded.
+6. **Kernel verifier**: Add operand validation (`check_kinsn_operands`).
+7. **Kernel fallback**: Add `emit_kinsn_fallback()` for when module is not loaded.
 
 **Estimated kernel LOC**:
 - Verifier: +15 lines (operand validation)
@@ -730,7 +730,7 @@ Current kernel LOC for BpfReJIT: ~600. After this change: ~760. Still reasonable
 ### 6.2 Arguments Against and Mitigations
 
 1. **"Overloading instruction fields is confusing"**
-   - Mitigation: Clear documentation. Add `BPF_INSN_INLINE_KFUNC()` macro for encoding. Verifier rejects invalid encodings.
+   - Mitigation: Clear documentation. Add `BPF_INSN_KINSN()` macro for encoding. Verifier rejects invalid encodings.
 
 2. **"The verifier should be the single source of truth for register state"**
    - Response: It still is. The verifier tracks what `KF_INLINE_EMIT` does to registers. The `narrow_result` callback is analogous to how the verifier handles helper return types -- it's module-provided metadata, verified by the verifier framework.
@@ -747,11 +747,11 @@ Current kernel LOC for BpfReJIT: ~600. After this change: ~760. Still reasonable
    - Self-contained, testable independently
    - Does not break any existing code (all existing KF_INLINE_EMIT kfuncs still work, they just don't benefit from the new semantics yet)
 
-2. **Patch 2/4**: Verifier: Operand validation for inline kfunc dst_reg/off (Phase 1 verifier part)
-   - Adds `check_inline_kfunc_operands()` and `narrow_result` infrastructure
+2. **Patch 2/4**: Verifier: Operand validation for kinsn dst_reg/off (Phase 1 verifier part)
+   - Adds `check_kinsn_operands()` and `narrow_result` infrastructure
 
 3. **Patch 3/4**: x86 JIT: Operand-aware emit dispatch for KF_INLINE_EMIT (Phase 1 JIT part)
-   - Updates `emit_inline_kfunc_call()` to pass operand info to callbacks
+   - Updates `emit_kinsn_call()` to pass operand info to callbacks
    - Adds fallback path
 
 4. **Patch 4/4**: Range narrowing callbacks (Phase 2)
@@ -837,9 +837,9 @@ let insn = BpfInsn {
 
 ## 8. Open Questions
 
-1. **btf_fd_idx conflict**: If a future kinsn module registers on a specific prog_type (requiring btf_fd_idx != 0 in `off`), the operand encoding in `off` conflicts. Mitigation: BpfReJIT kinsn modules always register as `BPF_PROG_TYPE_UNSPEC` (btf_fd_idx=0). Document this as a requirement for inline kfunc modules that want operand encoding.
+1. **btf_fd_idx conflict**: If a future kinsn module registers on a specific prog_type (requiring btf_fd_idx != 0 in `off`), the operand encoding in `off` conflicts. Mitigation: BpfReJIT kinsn modules always register as `BPF_PROG_TYPE_UNSPEC` (btf_fd_idx=0). Document this as a requirement for kinsn modules that want operand encoding.
 
-2. **Verifier logging**: The verifier log should clearly show the decoded operands for inline kfunc calls (e.g., `call bpf_extract64(R3, shift=8, width=8)` instead of just `call bpf_extract64`). This aids debugging.
+2. **Verifier logging**: The verifier log should clearly show the decoded operands for kinsn calls (e.g., `call bpf_extract64(R3, shift=8, width=8)` instead of just `call bpf_extract64`). This aids debugging.
 
 3. **select64 with immediates**: The current encoding for bpf_select64 only supports register operands. For `MOV dst, imm` patterns in the diamond, the daemon must materialize the immediate into a register first. This could be optimized with a variant encoding where one operand is an immediate, but adds complexity.
 
@@ -851,9 +851,9 @@ let insn = BpfInsn {
 
 ## 9. Conclusion
 
-The operand-encoded inline kfunc design solves both problems:
+The operand-encoded kinsn design solves both problems:
 
 - **Instruction inflation**: Every kinsn replacement is 1 BPF instruction, always fewer than the original pattern.
-- **Caller-saved conflict**: The verifier no longer clobbers r1-r5 for inline kfuncs, eliminating all 780+ skipped sites.
+- **Caller-saved conflict**: The verifier no longer clobbers r1-r5 for kinsn, eliminating all 780+ skipped sites.
 
 The total kernel change is ~160 lines added to the existing ~600 LOC, bringing BpfReJIT to ~760 LOC. The daemon shrinks by ~200 lines (removing caller-save infrastructure). The design is compatible with the existing upstream kfunc framework, builds on established precedents (bpf_fastcall, LDIMM64, pseudo-calls), and can be submitted as 4 independent, reviewable patches.

@@ -74,7 +74,7 @@ All kinsn modules loaded successfully into the ARM64 kernel.
 
 BpfReJIT's core functionality is fully operational on ARM64:
 - REJIT syscall: same-length and different-length rewriting works
-- Kinsn inline kfuncs: all 5 modules load and their kfuncs are discovered
+- Kinsn modules: all 5 modules load and their kfuncs are discovered
 - Verifier integration: kinsn instantiation and validation works
 - Safety: all negative tests reject invalid programs as expected
 - Concurrency: multi-threaded REJIT is safe

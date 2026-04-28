@@ -27,7 +27,7 @@
 | `check_kfunc_call()` 当前无条件 `mark_reg_not_init()` 掉 `r0-r5` | `vendor/linux-framework/kernel/bpf/verifier.c` L14432-L14437 | 这是你们想修改的核心点 |
 | helper 的返回值 refine 不是简单设 min/max，而是同时维护 64/32-bit bounds，再 `reg_bounds_sync()` | `vendor/linux-framework/kernel/bpf/verifier.c` L11418-L11454 | `narrow_result` 若要可靠，至少要遵守同样的不变量 |
 | `bpf_kfunc_inline_ops` 现在只有 `emit_x86`/`emit_arm64`/`max_emit_bytes` | `vendor/linux-framework/include/linux/bpf.h` L968-L977 | 目前 inline ops 完全不参与 verifier |
-| x86 JIT 的 inline 路径是“找到 `inline_ops` 就调用 emit；否则返回错误并回退到普通 CALL” | `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c` L579-L599, L2464-L2470 | 一旦 verifier 对 inline kfunc 采用非 CALL 语义，这个 fallback 就不再安全 |
+| x86 JIT 的 inline 路径是“找到 `inline_ops` 就调用 emit；否则返回错误并回退到普通 CALL” | `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c` L579-L599, L2464-L2470 | 一旦 verifier 对 kinsn 采用非 CALL 语义，这个 fallback 就不再安全 |
 | kfunc 解析和 JIT lookup 都把 `insn->off` 当成 kfunc descriptor key 的一部分 | `vendor/linux-framework/kernel/bpf/verifier.c` L3313-L3336, L3522-L3616, L3693-L3710, L23311-L23323 | `off` 不是“空闲字段”，直接复用会破坏 kfunc 查找 |
 | `find_kfunc_desc_btf(offset)` 中 `offset == 0` 明确表示 `btf_vmlinux`，非零才从 `fd_array` 取 module BTF fd | `vendor/linux-framework/kernel/bpf/verifier.c` L3415-L3429, L3349-L3400 | “注册到 `BPF_PROG_TYPE_UNSPEC` 所以 `btf_fd_idx=0`” 这个前提不成立 |
 | 当前 x86 JIT 中 `BPF_REG_4 -> RCX`，`BPF_REG_5 -> R8` | `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c` L181-L196 | 判断 native reg clobber 是否对应 BPF reg 时，必须按这张表来 |
@@ -283,7 +283,7 @@
 理由：
 
 - 当前 `KF_FASTCALL` 主要用于 clang spill/fill pattern 的识别和删除，verifier 的主 call 语义仍是 CALL 语义。
-- 你们要做的是“inline kfunc 不再遵循普通 CALL 的寄存器语义”，这比 fastcall 更激进。
+- 你们要做的是“kinsn 不再遵循普通 CALL 的寄存器语义”，这比 fastcall 更激进。
 - 如果 verifier 已按 inline ALU-like 语义处理，那么 JIT emit 失败时不能依赖 fastcall fallback，因为 fastcall 仍然是假设“本质上是 call，只是 clobber 少一些”。
 
 建议：
@@ -332,7 +332,7 @@
 
 建议：
 
-- 对 `KF_INLINE_EMIT` 单独走一个 `check_inline_kfunc_operands()`。
+- 对 `KF_INLINE_EMIT` 单独走一个 `check_kinsn_operands()`。
 - 但这个函数应尽量复用 core verifier 现有的 arg/type/memory 子逻辑，而不是让 module callback 自己碰 `env` 和 `regs`。
 
 ### 5.3 直接复用 `dst_reg/off` 还有哪些 verifier 级别冲突？

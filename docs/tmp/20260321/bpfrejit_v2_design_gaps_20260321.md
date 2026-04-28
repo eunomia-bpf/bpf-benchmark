@@ -11,7 +11,7 @@
   - `KF_INLINE_EMIT` 已定义在 `vendor/linux-framework/include/linux/btf.h:82`。
   - `struct bpf_kfunc_inline_ops` 已定义在 `vendor/linux-framework/include/linux/bpf.h:968-973`。
   - verifier 在 `add_kfunc_call()` 里会把 `KF_INLINE_EMIT` kfunc 解析成 `desc->inline_ops`，见 `vendor/linux-framework/kernel/bpf/verifier.c:3569-3618`。
-  - x86_64 JIT 已经在 CALL case 里尝试 `emit_inline_kfunc_call()`，失败时优雅回退到普通 CALL，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579-595` 和 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:2463-2471`。
+  - x86_64 JIT 已经在 CALL case 里尝试 `emit_kinsn_desc_call()`，失败时优雅回退到普通 CALL，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579-595` 和 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:2463-2471`。
 
 结论：
 
@@ -325,8 +325,8 @@ Inline Kfunc 不是纯设想，当前树已经具备：
 - flag：`KF_INLINE_EMIT`，见 `vendor/linux-framework/include/linux/btf.h:82`；
 - 注册接口：`bpf_register_kfunc_inline_ops()` / `bpf_unregister_kfunc_inline_ops()`，见 `vendor/linux-framework/include/linux/bpf.h:3043-3051` 和 `vendor/linux-framework/kernel/bpf/verifier.c:3240-3293`；
 - verifier side binding：`add_kfunc_call()` 会把 `KF_INLINE_EMIT` kfunc 解析成 `desc->inline_ops`，见 `vendor/linux-framework/kernel/bpf/verifier.c:3569-3618`；
-- x86_64 JIT side use：CALL case 里对 `BPF_PSEUDO_KFUNC_CALL` 先尝试 `emit_inline_kfunc_call()`，失败时回退成普通 CALL，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:2463-2471`；
-- fallback 语义已经很合理：`emit_inline_kfunc_call()` 找不到 emitter 时返回 `-ENOENT`，CALL case 继续走普通 CALL，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579-595`。
+- x86_64 JIT side use：CALL case 里对 `BPF_PSEUDO_KFUNC_CALL` 先尝试 `emit_kinsn_desc_call()`，失败时回退成普通 CALL，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:2463-2471`；
+- fallback 语义已经很合理：`emit_kinsn_desc_call()` 找不到 emitter 时返回 `-ENOENT`，CALL case 继续走普通 CALL，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579-595`。
 
 因此，论文里不应该把 Inline Kfunc 写成“完全新发明”，而应该写成“把现有 per-kfunc inline hook 补成完整 ISA-extension 机制”。
 
@@ -445,10 +445,10 @@ Inline emitter 应该照这个模式做一套 owner pinning：
 
 这意味着 v1 应该明确限制：
 
-- inline kfunc 不能再发出 tail call；
-- inline kfunc 不能引入新的 bpf-to-bpf edge；
-- inline kfunc 不能依赖 JIT 的 call-depth accounting；
-- inline kfunc 不能要求 verifier/JIT 重新计算 subprog call graph。
+- kinsn 不能再发出 tail call；
+- kinsn 不能引入新的 bpf-to-bpf edge；
+- kinsn 不能依赖 JIT 的 call-depth accounting；
+- kinsn 不能要求 verifier/JIT 重新计算 subprog call graph。
 
 换句话说，v1 的 Inline Kfunc 应该是“leaf machine-code expansion”，不是“任意自定义 mini-subprogram”。
 
@@ -524,7 +524,7 @@ struct bpf_prog_info {
 合理做法是：
 
 - daemon 为每一类 transformation 生成 transformation-specific certificate；
-- 例如 peephole algebraic rewrite、inline-kfunc substitution、constant folding，各自有不同证书格式；
+- 例如 peephole algebraic rewrite、kinsn substitution、constant folding，各自有不同证书格式；
 - 论文里把它定义为“optional correctness discipline”，不是 kernel-enforced safety mechanism。
 
 这类证书最适合做成：

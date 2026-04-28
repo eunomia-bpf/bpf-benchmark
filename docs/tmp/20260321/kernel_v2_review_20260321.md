@@ -6,7 +6,7 @@
 
 ## arch/x86/net/bpf_jit_comp.c
 
-- 行 591-595, 2468-2470 | Minor | `emit_inline_kfunc_call()` 在发现 emitter 返回长度不匹配或超过 `max_emit_bytes` 时返回 `-EFAULT`，但调用方把任何非零返回都当成“回退成普通 CALL”。这会把真正的 emitter bug 静默吞掉，最终生成的代码和作者预期不一致。建议修复: 仅对 `-ENOENT` / `-EOPNOTSUPP` 之类的“不可 inline”场景回退到普通 CALL；对 `-EFAULT` 这类 emitter 合约违例直接失败。
+- 行 591-595, 2468-2470 | Minor | `emit_kinsn_desc_call()` 在发现 emitter 返回长度不匹配或超过 `max_emit_bytes` 时返回 `-EFAULT`，但调用方把任何非零返回都当成“回退成普通 CALL”。这会把真正的 emitter bug 静默吞掉，最终生成的代码和作者预期不一致。建议修复: 仅对 `-ENOENT` / `-EOPNOTSUPP` 之类的“不可 inline”场景回退到普通 CALL；对 `-EFAULT` 这类 emitter 合约违例直接失败。
 
 ## include/linux/bpf.h
 
@@ -42,7 +42,7 @@
 
 ## kernel/bpf/verifier.c
 
-- 行 3212-3267, 3615-3616 | Major | inline kfunc registry 只用 `func_name` 作为 key，完全忽略模块 / BTF namespace / prog type。kfunc 解析本来是 `(btf, func_id, offset)` 级别的，这里退化成字符串后，同名 kfunc 在不同 BTF 里会冲突，最坏情况下会绑到错误的 inline emitter。建议修复: 用解析后的 `(btf, func_id)` 或直接把 inline emitter 挂到 `bpf_kfunc_desc` 可唯一定位的对象上，不要再做全局字符串注册表。
+- 行 3212-3267, 3615-3616 | Major | kinsn registry 只用 `func_name` 作为 key，完全忽略模块 / BTF namespace / prog type。kfunc 解析本来是 `(btf, func_id, offset)` 级别的，这里退化成字符串后，同名 kfunc 在不同 BTF 里会冲突，最坏情况下会绑到错误的 inline emitter。建议修复: 用解析后的 `(btf, func_id)` 或直接把 inline emitter 挂到 `bpf_kfunc_desc` 可唯一定位的对象上，不要再做全局字符串注册表。
 
 ## tools/include/uapi/linux/bpf.h
 
@@ -56,13 +56,13 @@
 
 - 行 1-103 | Minor | 这是一个独立 PoC，而不是 selftests 风格的回归测试。当前既不纳入构建也不纳入运行，实际没有持续验证价值。建议修复: 改写成 `prog_tests`/`test_progs` 用例，使用 `ASSERT_*` 风格，并接入 Makefile。
 
-## tools/testing/selftests/bpf/prog_tests/inline_kfunc.c
+## tools/testing/selftests/bpf/prog_tests/kinsn.c
 
 - 行 87-91 | Minor | 当前只是在 JIT image 里 grep 一段裸字节序列，这个 oracle 很弱，可能误命中，也不能证明普通 CALL 确实被去掉。建议修复: 更精确地验证对应 call site 的 opcode/长度，或者在可行时做反汇编比对。
 
-- 行 71-96 | Minor | 测试覆盖面不够，只覆盖了 happy path 加载和执行，没有覆盖 provider unregister / module reload / REJIT 场景，因此这轮改动里最危险的生命周期问题都测不到。建议修复: 至少补一个“含 inline kfunc 的程序做 REJIT”的回归测试；如果核心设计保留注册/注销接口，还应覆盖注销后的行为。
+- 行 71-96 | Minor | 测试覆盖面不够，只覆盖了 happy path 加载和执行，没有覆盖 provider unregister / module reload / REJIT 场景，因此这轮改动里最危险的生命周期问题都测不到。建议修复: 至少补一个“含 kinsn 的程序做 REJIT”的回归测试；如果核心设计保留注册/注销接口，还应覆盖注销后的行为。
 
-## tools/testing/selftests/bpf/progs/test_inline_kfunc.c
+## tools/testing/selftests/bpf/progs/test_kinsn.c
 
 - 未发现新增阻塞问题。
 
@@ -76,7 +76,7 @@
 
 - 未发现新增阻塞问题。
 
-## tools/testing/selftests/bpf/test_kmods/bpf_test_inline_kfunc.c
+## tools/testing/selftests/bpf/test_kmods/bpf_test_kinsn.c
 
 - 未发现该 selftest module 自身的新增阻塞问题；核心风险在 verifier/core 侧的 registry 和生命周期设计，不在这个模块的实现细节里。
 
@@ -84,20 +84,20 @@
 
 - 总体结论: 当前版本不建议合入，`kernel/bpf/syscall.c` 里至少有 3 个 blocker 级别问题: 旧 image 生命周期不安全、attachment/dispatcher 不会被同步更新、以及伪造 `KERNEL_BPFPTR` 导致 verifier 把用户 `fd_array` 当成内核指针。
 - REJIT swap 方案本身也不稳: 现在是手工维护一个“要 swap 的字段列表”，已经出现了 `prog->len/insnsi` 这类明显遗漏。继续沿这个方向补字段，后续大概率还会漏。
-- inline kfunc 方向里，selftest 想法本身可以保留，但 generic API 现在过于 x86-specific，registry 也只按字符串建模，设计上很难直接被上游接受。
+- kinsn 方向里，selftest 想法本身可以保留，但 generic API 现在过于 x86-specific，registry 也只按字符串建模，设计上很难直接被上游接受。
 
 ## 上游可接受性判断
 
 - 相对容易被上游接受的部分:
 - `orig_prog_insns` / `orig_prog_len` 这种“导出原始用户指令”的想法本身是合理的，但需要先把 tools 头同步好，并把语义说清楚到底是“首次 load 的原始指令”还是“当前版本的原始指令”。
 - `__bpf_ksym_del()` 里把 `lnode` 重新初始化，用于支持后续重新加入 kallsyms，这个小修补本身问题不大。
-- inline kfunc 的 selftest scaffolding 可以保留，但前提是 core 设计先收敛。
+- kinsn 的 selftest scaffolding 可以保留，但前提是 core 设计先收敛。
 
 - 很容易被 push back 的部分:
 - 新增 `BPF_PROG_REJIT` UAPI，但核心语义、并发模型和 attachment 安全性都还没定型。
 - 原地修改 `struct bpf_prog`，破坏“BPF program load 后基本 immutable”的现有假设。
 - 在 generic BPF/core/verifier 代码里引入 `emit_x86` 这种架构专有接口。
-- 用全局字符串注册表来描述 inline kfunc emitter，而不是绑定到唯一的 kfunc 标识。
+- 用全局字符串注册表来描述 kinsn emitter，而不是绑定到唯一的 kfunc 标识。
 
 ## 建议的后续改动
 

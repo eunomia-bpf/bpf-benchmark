@@ -6,7 +6,7 @@ All source references below are from this tree and use `path:line` ranges.
 
 ## Executive Summary
 
-- The core idea is feasible in this tree if "inline kfunc" means: keep existing kfunc verification and fixup semantics, keep the real kfunc body as the canonical fallback implementation, and teach x86/arm64 JITs to optionally replace a kfunc `CALL` with a straight-line native sequence. The verifier type/ownership checks in `check_kfunc_call()` do not need semantic changes for the base design. Relevant code: `kernel/bpf/verifier.c:14088-14480`.
+- The core idea is feasible in this tree if "kinsn" means: keep existing kfunc verification and fixup semantics, keep the real kfunc body as the canonical fallback implementation, and teach x86/arm64 JITs to optionally replace a kfunc `CALL` with a straight-line native sequence. The verifier type/ownership checks in `check_kfunc_call()` do not need semantic changes for the base design. Relevant code: `kernel/bpf/verifier.c:14088-14480`.
 - The current kernel already has two strong precedents:
   - verifier-side kfunc rewrites that fully replace some kfunc calls with plain BPF instructions in `fixup_kfunc_call()` (`bpf_cast_to_kern_ctx`, `bpf_rdonly_cast`, `bpf_session_is_return`, `bpf_session_cookie`), see `kernel/bpf/verifier.c:23215-23310`;
   - JIT-side native alternative emission in the current BpfReJIT path (`bpf_jit_try_emit_rule()` on x86/arm64), see `arch/x86/net/bpf_jit_comp.c:3041-3078` and `arch/arm64/net/bpf_jit_comp.c:844-886`.
@@ -221,7 +221,7 @@ So arm64 already proves that "call size can change across JIT passes" is support
 
 The natural insertion point is in `case BPF_JMP | BPF_CALL` at `arch/arm64/net/bpf_jit_comp.c:2131`, after the existing helper-inline special cases (`2139-2157`) and before the general `bpf_jit_get_func_addr()` path (`2160-2175`).
 
-That placement preserves existing helper special cases and lets inline kfuncs bypass the normal call/return-register shuffle.
+That placement preserves existing helper special cases and lets kinsn bypass the normal call/return-register shuffle.
 
 ## 4. JIT Multi-Pass and Variable-Length Emit
 
@@ -250,7 +250,7 @@ This means Inline Kfunc native emission can fit into the existing framework if:
 
 **Important x86 caveat**
 
-The rough initial estimate still uses 64 bytes per BPF insn (`5318-5325`), with the comment "each BPF instruction is translated to less than 64 bytes". Existing JIT code relies on that. So for a generic inline-kfunc facility there are two safe choices:
+The rough initial estimate still uses 64 bytes per BPF insn (`5318-5325`), with the comment "each BPF instruction is translated to less than 64 bytes". Existing JIT code relies on that. So for a generic kinsn facility there are two safe choices:
 
 - restrict inline sequences to significantly less than 64 bytes;
 - or change the rough-estimate constant to `BPF_MAX_INSN_SIZE` so third-party emitters cannot violate the convergence assumption.
@@ -282,7 +282,7 @@ Because arm64 native instructions are fixed-width 4-byte words, straight-line in
 - dry-run sizing already exists naturally through `emit()` incrementing `ctx->idx` even when `ctx->image == NULL` (`120-126`);
 - final writing is handled by the same `build_body()` pass 3.
 
-The existing call path already demonstrates size changes across passes (`221-259`, `2699-2780`), so a straight-line inline kfunc emitter fits cleanly.
+The existing call path already demonstrates size changes across passes (`221-259`, `2699-2780`), so a straight-line kinsn emitter fits cleanly.
 
 ### 4.4 Consequence for callback design
 

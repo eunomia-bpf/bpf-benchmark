@@ -217,9 +217,9 @@ Clean 3-line wrapper.
 
 `get_original_poc.c`: Correct basic POC. Manually defines struct fields to work around missing tools header (see CRITICAL issue #2).
 
-`inline_kfunc.c` (prog_test): Good integration test. Checks for specific x86 byte sequence in JIT output.
+`kinsn.c` (prog_test): Good integration test. Checks for specific x86 byte sequence in JIT output.
 
-`bpf_test_inline_kfunc.c` (module): Clean example of kinsn registration. Good reference implementation.
+`bpf_test_kinsn.c` (module): Clean example of kinsn registration. Good reference implementation.
 
 ---
 
@@ -280,7 +280,7 @@ Clean 3-line wrapper.
 
 ## Naming Consistency
 
-- **kinsn vs inline_kfunc**: `KF_KINSN` and `KF_INLINE_EMIT` are defined as aliases. The kernel code consistently uses `kinsn` in all struct/function names. The `KF_INLINE_EMIT` alias is only defined once (btf.h) and not used anywhere in the kernel diff. Module code uses `KF_KINSN` flag directly. **Recommendation**: Remove `KF_INLINE_EMIT` alias since it's unused and creates naming confusion.
+- **kinsn naming cleanup**: `KF_KINSN` and `KF_INLINE_EMIT` are defined as aliases. The kernel code consistently uses `kinsn` in all struct/function names. The `KF_INLINE_EMIT` alias is only defined once (btf.h) and not used anywhere in the kernel diff. Module code uses `KF_KINSN` flag directly. **Recommendation**: Remove `KF_INLINE_EMIT` alias since it's unused and creates naming confusion.
 
 - **bpf_ prefix**: All exported functions follow `bpf_` prefix convention. Internal statics follow `bpf_kinsn_` prefix consistently.
 

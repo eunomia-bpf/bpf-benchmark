@@ -7,7 +7,7 @@
 对 `git diff master..HEAD` 的每一处改动，严格判定是否直接服务于 BpfReJIT 三大功能：
 1. **GET_ORIGINAL** — 暴露原始 BPF insns
 2. **REJIT** — 运行时重新编译 BPF 程序
-3. **kinsn** — 内核指令描述符（inline kfunc 实现）
+3. **kinsn** — 内核指令描述符（kinsn 实现）
 
 判定类别：
 - **必要** — 直接服务于上述功能

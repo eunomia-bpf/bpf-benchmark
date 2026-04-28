@@ -56,7 +56,7 @@ docs/tmp/bpf_selftests_bin/       # Pre-built output directory
 ├── test_verifier                 # 20MB binary (built)
 ├── test_progs                    # 67MB binary (built)
 ├── bpf_testmod.ko                # Required kernel module
-├── bpf_test_inline_kfunc.ko      # Required kernel module
+├── bpf_test_kinsn.ko             # Required kernel module
 ├── bpf_smc.skel.h                # Stub (CONFIG_SMC not in kernel)
 ├── tools/include/vmlinux.h       # Modified vmlinux.h with compatibility stubs
 └── ...

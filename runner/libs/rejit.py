@@ -484,7 +484,7 @@ def _compact_single_rejit_result_for_artifact(result: Mapping[str, Any]) -> dict
             error = str(record.get("error") or "")
             exit_code = int(record.get("exit_code", 0) or 0)
             applied = bool(record.get("applied", False))
-            if not error and exit_code == 0 and applied:
+            if not error and exit_code == 0:
                 continue
             error_programs.append(
                 {

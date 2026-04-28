@@ -702,7 +702,7 @@ pub(crate) fn try_apply_one(
         }
         return Ok(make_result(
             "ok",
-            true,
+            false,
             false,
             pipeline_result.total_sites_applied,
             final_insn_count,

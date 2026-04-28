@@ -207,9 +207,9 @@
 | 文件 | 新增行 |
 |------|--------|
 | `get_original_poc.c` | 103 |
-| `prog_tests/inline_kfunc.c` | 97 |
-| `progs/test_inline_kfunc.c` | 13 |
-| `test_kmods/bpf_test_inline_kfunc.c` | 99 |
+| `prog_tests/kinsn.c` | 97 |
+| `progs/test_kinsn.c` | 13 |
+| `test_kmods/bpf_test_kinsn.c` | 99 |
 | `.gitignore` | 5 |
 | `Makefile` | 2 |
 | **合计** | ~319 |

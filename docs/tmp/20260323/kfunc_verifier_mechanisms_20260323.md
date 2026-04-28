@@ -370,7 +370,7 @@ verifier 提供了完整的 range 约束工具：
 
 ### 9.1 需要解决的两个问题
 
-1. **寄存器 clobber**: 当前无条件 clobber r0-r5，但 inline kfunc 只修改 r0（或 r0+某些临时寄存器）
+1. **寄存器 clobber**: 当前无条件 clobber r0-r5，但 kinsn 只修改 r0（或 r0+某些临时寄存器）
 2. **返回值 range**: 当前标量返回值为 unbounded，但 kinsn 的输出有明确范围（如 extract 的输出 ∈ [0, 2^len-1]）
 
 ### 9.2 方案分析
@@ -381,7 +381,7 @@ verifier 提供了完整的 range 约束工具：
 
 理由：
 1. KF_FASTCALL 已经有 `get_call_summary()` 中基于参数数量计算 clobber mask 的逻辑
-2. inline kfunc 实际上只写入 r0，不修改 r1-rN（因为它直接 emit 机器码操作 x86 寄存器）
+2. kinsn 实际上只写入 r0，不修改 r1-rN（因为它直接 emit 机器码操作 x86 寄存器）
 3. 但仅靠 KF_FASTCALL 不够——它只影响 spill/fill 消除，**不改变 verifier 的寄存器状态**
 
 **真正的最小改动**：在 `check_kfunc_call()` 的第 8 步中，对 KF_INLINE_EMIT 做条件处理：
@@ -404,8 +404,8 @@ if (is_kfunc_inline_emit(&meta)) {
 
 **安全性论证**：
 - KF_INLINE_EMIT 的 emit 回调只在 `dst_reg`(r0) 中写入结果
-- 参数寄存器 r1-rN 是输入，emit 回调不应该修改它们（这是 inline kfunc 的契约）
-- 如果某个 inline kfunc 违反这个契约（修改了 r1-r5），那是 module 的 bug，不是 verifier 的问题
+- 参数寄存器 r1-rN 是输入，emit 回调不应该修改它们（这是 kinsn 的契约）
+- 如果某个 kinsn 违反这个契约（修改了 r1-r5），那是 module 的 bug，不是 verifier 的问题
 
 **替代方案**：给 `bpf_kfunc_inline_ops` 加一个 `clobber_mask` 字段，让 module 声明自己 clobber 哪些寄存器。更灵活但改动更大。
 
@@ -483,7 +483,7 @@ if (meta->arg_constant.found) {
 }
 ```
 
-但这需要在 `check_kfunc_call` 中对每个具体 inline kfunc 做特殊处理，不够通用。
+但这需要在 `check_kfunc_call` 中对每个具体 kinsn 做特殊处理，不够通用。
 
 ### 9.3 推荐的最小改动集
 
@@ -589,6 +589,6 @@ if (meta->arg_constant.found) {
 
 ### 风险
 
-1. **契约违反**：如果 inline kfunc 的 emit 回调偷改了 r1-r5 对应的寄存器，verifier 不会检测到 → 可能导致 BPF 程序行为不正确。但这与 helper inline（`verifier_inlines_helper_call`）是同样的信任模型。
+1. **契约违反**：如果 kinsn 的 emit 回调偷改了 r1-r5 对应的寄存器，verifier 不会检测到 → 可能导致 BPF 程序行为不正确。但这与 helper inline（`verifier_inlines_helper_call`）是同样的信任模型。
 2. **向后兼容**：KF_INLINE_EMIT 是新 flag，没有向后兼容问题。
 3. **与 bpf_fastcall 交互**：KF_INLINE_EMIT + KF_FASTCALL 同时存在是合理的——fastcall 消除多余 spill/fill，inline_emit 的条件 clobber 让 verifier 知道不需要 spill/fill。两者互补。

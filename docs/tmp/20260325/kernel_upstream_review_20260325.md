@@ -835,7 +835,7 @@
 | 注册 | 扩展 `register_btf_kfunc_id_set`，增加 `BPF_KFUNC_FL_INLINE` flag |
 | Descriptor | 在 `bpf_kfunc_desc` 中增加 `const struct bpf_kinsn *inline_ops` 字段 |
 | Lookup/Add/Sort | 完全复用 kfunc 的 |
-| Verifier | 对 inline kfunc，在 `check_kfunc_call` 中检查 inline_ops->instantiate_insn 的结果 |
+| Verifier | 对 kinsn，在 `check_kfunc_call` 中检查 inline_ops->instantiate_insn 的结果 |
 | JIT | 在 kfunc call 的 JIT 路径中，如果 inline_ops 存在且有 native emit，使用它 |
 | UAPI | `BPF_PSEUDO_KFUNC_CALL` 即可，通过 kfunc_desc 的 flag 区分 |
 

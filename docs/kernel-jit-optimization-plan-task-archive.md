@@ -25,7 +25,7 @@
 | 320 | Commit push（2026-03-21） | ✅ | `698334f`/`56d6d19`/`c48cb43`。kernel submodule `4bcbc8e21`。 |
 | 321 | Daemon pass 框架设计 | ✅ | PassManager 框架。报告：`docs/tmp/20260321/daemon_pass_framework_design_20260321.md`。 |
 | 322 | Kernel code review | ✅ | 3 Critical + 4 Major。报告：`docs/tmp/20260321/kernel_v2_review_20260321.md`。 |
-| 323 | ARM64 inline kfunc + kinsn 模块 | ✅ | `module/arm64/` 3 模块。+613 行。交叉编译通过。 |
+| 323 | ARM64 kinsn 模块 | ✅ | `module/arm64/` 3 模块。+613 行。交叉编译通过。 |
 | 324 | e2e v2 daemon 集成 | ✅ | 5 case 接入 baseline→apply-all→post_rejit。 |
 | 325 | Attachment sync 调研+修复（2026-03-22） | ✅ | Trampoline/freplace UAF 是真问题。Phase 0-2 修复实现：+260 行 kernel。**VM 12/12 PASS**。报告：`docs/tmp/20260321/rejit_attachment_sync_research_20260321.md`。 |
 | 326 | Verifier log parser | ✅ | `verifier_log.rs` 433 行，33 tests。 |
