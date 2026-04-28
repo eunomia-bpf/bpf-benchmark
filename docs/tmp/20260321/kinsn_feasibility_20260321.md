@@ -1,12 +1,12 @@
-# Inline Kfunc Feasibility on `vendor/linux-framework/` (7.0-rc2)
+# Kinsn Feasibility on `vendor/linux-framework/` (7.0-rc2)
 
-Scope: analyze whether a new "Inline Kfunc" mechanism can reuse the existing kfunc verifier/interpreter model and only extend JIT `BPF_CALL` lowering on x86 and arm64.
+Scope: analyze whether a new kinsn mechanism can reuse the existing kfunc verifier/interpreter model and only extend JIT `BPF_CALL` lowering on x86 and arm64.
 
 All source references below are from this tree and use `path:line` ranges.
 
 ## Executive Summary
 
-- The core idea is feasible in this tree if "kinsn" means: keep existing kfunc verification and fixup semantics, keep the real kfunc body as the canonical fallback implementation, and teach x86/arm64 JITs to optionally replace a kfunc `CALL` with a straight-line native sequence. The verifier type/ownership checks in `check_kfunc_call()` do not need semantic changes for the base design. Relevant code: `kernel/bpf/verifier.c:14088-14480`.
+- The core idea is feasible in this tree: keep existing kfunc verification and fixup semantics, keep the real kfunc body as the canonical fallback implementation, and teach x86/arm64 JITs to optionally replace a kfunc `CALL` with a straight-line native sequence. The verifier type/ownership checks in `check_kfunc_call()` do not need semantic changes for the base design. Relevant code: `kernel/bpf/verifier.c:14088-14480`.
 - The current kernel already has two strong precedents:
   - verifier-side kfunc rewrites that fully replace some kfunc calls with plain BPF instructions in `fixup_kfunc_call()` (`bpf_cast_to_kern_ctx`, `bpf_rdonly_cast`, `bpf_session_is_return`, `bpf_session_cookie`), see `kernel/bpf/verifier.c:23215-23310`;
   - JIT-side native alternative emission in the current BpfReJIT path (`bpf_jit_try_emit_rule()` on x86/arm64), see `arch/x86/net/bpf_jit_comp.c:3041-3078` and `arch/arm64/net/bpf_jit_comp.c:844-886`.
@@ -49,7 +49,7 @@ This path is already independent from JIT lowering:
 - it marks caller-saved registers invalid after the call (`kernel/bpf/verifier.c:14320-14325`);
 - it sets up the return type/state in `R0` (`kernel/bpf/verifier.c:14327-14444`).
 
-For the base Inline Kfunc design, this verifier logic does not need to change.
+For the base kinsn design, this verifier logic does not need to change.
 
 ### 1.3 Fixup: `fixup_kfunc_call()`
 
@@ -96,7 +96,7 @@ So the correct statement is:
 - if a kfunc call survives fixup, `src_reg` remains `BPF_PSEUDO_KFUNC_CALL`;
 - if a kfunc is fully rewritten into plain BPF instructions, the call instruction disappears entirely.
 
-## 2. Existing "Inline Kfunc" Precedents
+## 2. Existing kfunc Lowering Precedents
 
 ### 2.1 Kfunc-specific verifier rewrites already exist
 
@@ -122,7 +122,7 @@ This is already an existence proof that:
 
 ### 2.2 Helper inline precedents also exist
 
-Two helper inline precedents matter because the proposed Inline Kfunc dispatch lives in the same JIT `CALL` lowering slot:
+Two helper inline precedents matter because the proposed kinsn dispatch lives in the same JIT `CALL` lowering slot:
 
 - verifier-side helper inlining on x86-friendly paths in `do_misc_fixups()`:
   - `bpf_get_smp_processor_id()` (`kernel/bpf/verifier.c:23996-24022`);
@@ -180,7 +180,7 @@ which emits opcode `0xE8` plus `disp32`, and `X86_PATCH_SIZE` is explicitly defi
 
 So on x86, the normal call instruction itself is always 5 bytes.
 
-**Precise insertion point for Inline Kfunc dispatch on x86**
+**Precise insertion point for kinsn dispatch on x86**
 
 The natural insertion point is inside `case BPF_JMP | BPF_CALL` at `arch/x86/net/bpf_jit_comp.c:4001`, immediately after `u8 *ip = image + addrs[i - 1];` and before `func = (u8 *)__bpf_call_base + imm32;`.
 
@@ -217,7 +217,7 @@ Important arm64 details:
 
 So arm64 already proves that "call size can change across JIT passes" is supported.
 
-**Precise insertion point for Inline Kfunc dispatch on arm64**
+**Precise insertion point for kinsn dispatch on arm64**
 
 The natural insertion point is in `case BPF_JMP | BPF_CALL` at `arch/arm64/net/bpf_jit_comp.c:2131`, after the existing helper-inline special cases (`2139-2157`) and before the general `bpf_jit_get_func_addr()` path (`2160-2175`).
 
@@ -240,7 +240,7 @@ The key mechanics are:
 - each pass re-runs `do_jit()`, updates `addrs[]`, and the image is expected to shrink until stable (`5329-5393`);
 - once image memory is allocated, the final emission pass validates that each instruction emits exactly the same length as recorded previously (`4272-4283`).
 
-This means Inline Kfunc native emission can fit into the existing framework if:
+This means kinsn native emission can fit into the existing framework if:
 
 1. emitted length is deterministic for a given pass state;
 2. emitted length is bounded by the per-insn temporary buffer/cap:
@@ -434,7 +434,7 @@ There is already a public JIT-side kfunc accessor pattern:
 - `bpf_jit_find_kfunc_model()` is declared in `include/linux/bpf.h:3099-3104`;
 - implemented in `kernel/bpf/verifier.c:3583-3599`.
 
-Inline Kfunc can follow the same pattern with a new helper such as:
+kinsn can follow the same pattern with a new helper such as:
 
 ```c
 const struct bpf_kfunc_inline_ops *
@@ -524,7 +524,7 @@ But this information is not persisted into a JIT-visible structure today. It is 
 
 So:
 
-- base Inline Kfunc needs no constant-propagation plumbing and can use register-form native instructions;
+- base kinsn needs no constant-propagation plumbing and can use register-form native instructions;
 - if you want `bpf_rotate64(val, 13)` to become immediate-form `RORX imm8` / `ROR imm` / `A64_ROR_I`, you need extra per-insn metadata that survives into JIT.
 
 That optional `v2` enhancement is not zero-verifier-change anymore.
@@ -712,7 +712,7 @@ If true interpreter fallback is desired, also change:
 - `kernel/bpf/verifier.c:3452-3460`;
 - `kernel/bpf/core.c:2609-2632`.
 
-That is outside the minimal JIT-only Inline Kfunc mechanism.
+That is outside the minimal JIT-only kinsn mechanism.
 
 ## 11. Rotate Example
 
@@ -899,7 +899,7 @@ These estimates are materially smaller than introducing a new ISA opcode plus ve
 
 Updated comparison:
 
-| | `kinsn` (new opcode) | Inline Kfunc (`v1`) | Current BpfReJIT |
+| | Dedicated kinsn opcode | KF_INLINE_EMIT-backed kinsn (`v1`) | Current BpfReJIT |
 | --- | --- | --- | --- |
 | Verifier type/ownership path | new logic needed | **reuse `check_kfunc_call()`** | separate validator/policy path |
 | Verifier instruction fixup | new opcode handling | **none required for base design** | separate canonical-form machinery |
@@ -911,7 +911,7 @@ Updated comparison:
 | Graceful fallback | hard | **yes, to normal kfunc CALL** | N/A |
 | Upstream narrative | "new BPF ISA" | **"another kfunc lowering mode"** | larger subsystem story |
 
-The strongest upstream argument for Inline Kfunc is not "we need a custom opcode", but rather:
+The strongest upstream argument for kinsn is not "we need a custom opcode", but rather:
 
 - kfuncs already have special verifier/fixup lowering;
 - JITs already inline helpers and canonical forms;
@@ -929,7 +929,7 @@ The strongest upstream argument for Inline Kfunc is not "we need a custom opcode
 
 ## Final Assessment
 
-`Inline Kfunc` is a credible and relatively low-intrusion way to add instruction-like BPF extensions on top of the existing kfunc ecosystem in this tree.
+`kinsn` is a credible and relatively low-intrusion way to add instruction-like BPF extensions on top of the existing kfunc ecosystem in this tree.
 
 The strongest form of the claim that is supported by the source is:
 

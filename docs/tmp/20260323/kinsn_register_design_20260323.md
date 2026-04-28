@@ -33,11 +33,11 @@ The daemon mitigates Problem 2 with `plan_caller_saved()` (save live r1-r5 to fr
 
 ---
 
-## 1. Recommended Solution: Operand-Encoded Inline Kfunc (ALU-style CALL)
+## 1. Recommended Solution: Operand-Encoded kinsn (ALU-style CALL)
 
 ### 1.1 Core Idea
 
-Repurpose the BPF CALL instruction's unused fields for `KF_INLINE_EMIT` kfuncs to encode operand information directly, eliminating argument-setup MOVs. The verifier treats `KF_INLINE_EMIT` calls as single-instruction ALU-like operations rather than function calls.
+Repurpose the BPF CALL instruction's unused fields for kinsn calls marked by `KF_INLINE_EMIT` to encode operand information directly, eliminating argument-setup MOVs. The verifier treats `KF_INLINE_EMIT` calls as single-instruction ALU-like operations rather than function calls.
 
 ### 1.2 Instruction Encoding
 
