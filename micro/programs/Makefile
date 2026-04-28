@@ -1,6 +1,7 @@
 DEB_HOST_MULTIARCH := $(shell gcc -print-multiarch 2>/dev/null || dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
 SYS_INCLUDE_FLAGS := $(if $(DEB_HOST_MULTIARCH),-I/usr/include/$(DEB_HOST_MULTIARCH))
 OUTPUT_DIR ?= $(CURDIR)
+CLANG ?= clang
 
 CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
 
@@ -13,7 +14,7 @@ BPF_DEPS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.bpf.d,$(BPF_SRCS))
 all: $(BPF_OBJS)
 
 $(OUTPUT_DIR)/%.bpf.o: %.bpf.c | $(OUTPUT_DIR)
-	clang $(CFLAGS) -MF "$(OUTPUT_DIR)/$*.bpf.d" -MT "$@" -c -o "$@" "$<"
+	$(CLANG) $(CFLAGS) -MF "$(OUTPUT_DIR)/$*.bpf.d" -MT "$@" -c -o "$@" "$<"
 
 $(OUTPUT_DIR):
 	mkdir -p "$@"

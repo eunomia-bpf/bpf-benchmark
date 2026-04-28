@@ -40,10 +40,6 @@ def phase_payload(
     }
 
 
-def annotate_workload_measurement(measurement: Mapping[str, object]) -> dict[str, object]:
-    return dict(measurement)
-
-
 def program_records(value: object) -> list[dict[str, object]]:
     if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
         return []

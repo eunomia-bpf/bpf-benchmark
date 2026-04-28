@@ -91,9 +91,25 @@ def suite_command(workspace_root: Path, config: RunConfig, suite_args: list[str]
     if not config.remote.runtime_container_image.strip():
         _die("run config RUN_RUNTIME_CONTAINER_IMAGE is empty")
     image_tar = runtime_container_image_tar_path(workspace_root, config.identity.target_arch)
-    result_dirs = [str(path) for path in runtime_container_host_dirs(workspace_root, config.identity.suite_name, die=_die)]
+    result_dirs = [
+        str(path)
+        for path in runtime_container_host_dirs(
+            workspace_root,
+            config.identity.suite_name,
+            die=_die,
+            include_runtime_tmp=False,
+        )
+    ]
     mkdir_cmd = shlex.join(["mkdir", "-p", *result_dirs])
-    container_cmd = _shell_join(build_runtime_container_command(workspace_root, config, suite_args, die=_die))
+    container_cmd = _shell_join(
+        build_runtime_container_command(
+            workspace_root,
+            config,
+            suite_args,
+            die=_die,
+            mount_runtime_tmp=False,
+        )
+    )
     install_cmd = _shell_join([
         workspace_root / "runner" / "scripts" / "bpfrejit-install",
         "--image", config.remote.runtime_container_image,

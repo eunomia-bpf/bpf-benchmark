@@ -10,7 +10,7 @@ Never filter, skip, or exclude any BPF program from ReJIT. If a program fails Re
 - Exclusion lists (e.g. `_EXCLUDED_PROGRAM_NAMES`)
 
 ### App-Level Loader Only
-All benchmark apps must load their own BPF programs via real application startup. The framework must not directly load `.bpf.o` files via bpftool or libbpf. Exception: katran's `xdp_root` bootstraps the XDP chain before the app starts.
+All benchmark apps must load their own BPF programs via real application startup. The framework must not directly load `.bpf.o` files via bpftool or libbpf. Never write custom loader binaries to replace upstream app binaries — always use the real upstream binary. If compilation is slow, use pre-built images or cached artifacts, not simplified replacements. Exception: katran's `xdp_root` bootstraps the XDP chain before the app starts.
 
 ### Corpus Metrics: Per-Program avg_ns_per_run
 Corpus performance is measured per-program, not per-app:
@@ -25,6 +25,20 @@ Do not add `workload_miss`, `limitations`, or similar informational-only fields 
 
 ### Default Config Must Work
 `make vm-corpus`, `make vm-e2e`, `make aws-x86-test`, `make aws-arm64-test` must work with zero manual environment variables. Defaults live in `runner/targets/*.env` files and are overridable via env vars.
+
+### No Host Bind Mount
+Container must NOT bind mount host workspace (`-v workspace:workspace`). All files are delivered via Docker image layers. Only bind mount system paths (/sys, /sys/fs/bpf, /lib/modules, /boot) and result output directories.
+
+### Docker Image Layering
+Docker image layers must be ordered by change frequency (bottom = stable, top = frequent):
+1. Base OS + apt packages (rarely changes)
+2. App artifacts — pre-built images via `FROM`/`COPY --from` (rarely changes)
+3. Kernel + kinsn modules (rarely changes)
+4. C++ runner + micro .bpf.o + test artifacts (moderate)
+5. Rust daemon (frequently changes)
+6. Python code + configs + corpus/e2e data (most frequently changes)
+
+Changing Python must NOT trigger recompilation of apps, kernel, or daemon. `RUNNER_RUNTIME_IMAGE_SOURCE_FILES` in build.mk must only include files that participate in compilation, not runtime Python/YAML/config files.
 
 ## Supported Apps (8)
 tracee, tetragon, bpftrace, bcc, katran, calico, cilium, otelcol-ebpf-profiler

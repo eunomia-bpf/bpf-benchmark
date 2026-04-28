@@ -459,9 +459,9 @@ _ARTIFACT_REJIT_RESULT_KEYS = frozenset(
 def _compact_single_rejit_result_for_artifact(result: Mapping[str, Any]) -> dict[str, object]:
     compact: dict[str, object] = {}
 
-    for field in ("prog_id", "applied", "changed", "exit_code"):
-        if field in result:
-            compact[field] = result.get(field)
+    for key in ("prog_id", "applied", "changed", "exit_code"):
+        if key in result:
+            compact[key] = result.get(key)
 
     if "error" in result:
         compact["error"] = str(result.get("error") or "")
@@ -470,14 +470,10 @@ def _compact_single_rejit_result_for_artifact(result: Mapping[str, Any]) -> dict
     if isinstance(enabled_passes, Sequence) and not isinstance(enabled_passes, (str, bytes, bytearray)):
         compact["enabled_passes"] = [str(name).strip() for name in enabled_passes if str(name).strip()]
 
-    for field in ("summary", "program_counts"):
-        value = result.get(field)
+    for key in ("summary", "program_counts"):
+        value = result.get(key)
         if isinstance(value, Mapping):
-            compact[field] = dict(value)
-
-    site_totals = applied_site_totals_from_rejit_result(result)
-    if any(int(value or 0) > 0 for value in site_totals.values()):
-        compact["applied_site_totals"] = site_totals
+            compact[key] = dict(value)
 
     raw_per_program = result.get("per_program")
     if isinstance(raw_per_program, Mapping):
@@ -501,17 +497,6 @@ def _compact_single_rejit_result_for_artifact(result: Mapping[str, Any]) -> dict
             )
         if error_programs:
             compact["error_programs"] = error_programs
-
-    raw_output = result.get("output")
-    if raw_output not in (None, ""):
-        compact["output_chars"] = len(str(raw_output))
-        compact["output_stripped"] = True
-
-    if isinstance(result.get("debug_result"), Mapping):
-        compact["debug_result_stripped"] = True
-
-    if isinstance(result.get("inlined_map_entries"), list):
-        compact["inlined_map_entries_stripped"] = True
 
     return compact
 

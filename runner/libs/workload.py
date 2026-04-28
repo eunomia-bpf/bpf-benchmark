@@ -723,7 +723,6 @@ _STRESS_NG_OS_STRESSORS = (
     "get",
     "prctl",
     "set",
-    "syscall",
     "timerfd",
 )
 _STRESS_NG_SCHEDULER_STRESSORS = (
@@ -759,15 +758,16 @@ _STRESS_NG_STRESSOR_ARGS: Mapping[str, tuple[str, ...]] = {
     "hdd": ("--hdd-bytes", "128M"),
     "iomix": ("--iomix-bytes", "128M"),
     "open": ("--open-max", "4096"),
+    "syscall": ("--syscall-method", "fast75"),
 }
 _STRESS_NG_STRESSOR_OPS: Mapping[str, int] = {
     "access": 1000,
     "aio": 200,
     "aiol": 200,
     "cap": 2000,
-    "chdir": 200,
-    "chmod": 200,
-    "chown": 200,
+    "chdir": 50,
+    "chmod": 100,
+    "chown": 100,
     "clone": 100,
     "cpu": 2000,
     "dccp": 200,
@@ -777,18 +777,18 @@ _STRESS_NG_STRESSOR_OPS: Mapping[str, int] = {
     "epoll": 1000,
     "eventfd": 1000,
     "exec": 50,
-    "fallocate": 100,
+    "fallocate": 1,
     "file-ioctl": 1000,
     "filename": 200,
     "flock": 1000,
     "fork": 200,
-    "fpunch": 100,
-    "fstat": 500,
+    "fpunch": 5,
+    "fstat": 200,
     "futex": 1000,
-    "get": 1000,
+    "get": 200,
     "getdent": 1000,
     "hdd": 128,
-    "inotify": 50,
+    "inotify": 10,
     "io": 20,
     "iomix": 128,
     "io-uring": 200,
@@ -806,7 +806,7 @@ _STRESS_NG_STRESSOR_OPS: Mapping[str, int] = {
     "sockpair": 500,
     "spawn": 20,
     "switch": 1000,
-    "sync-file": 50,
+    "sync-file": 20,
     "syscall": 64,
     "timerfd": 1000,
     "touch": 200,
@@ -828,7 +828,7 @@ def _stress_ng_dynamic_stressor_args(stressors: Sequence[str]) -> list[str]:
     selected = {str(stressor).strip() for stressor in stressors if str(stressor).strip()}
     if not (selected & set(_STRESS_NG_NETWORK_PORT_STRESSORS)):
         return []
-    base_port = 20000 + ((os.getpid() + int(time.monotonic() * 1000)) % 30000)
+    base_port = 20000 + (os.getpid() % 30000)
     args: list[str] = []
     for stressor, offset in _STRESS_NG_NETWORK_PORT_STRESSORS.items():
         if stressor in selected:
@@ -860,30 +860,21 @@ def parse_stress_ng_bogo_ops(text: str, *, stressor: str | None = None) -> float
     return None
 
 
-def parse_stress_ng_total_bogo_ops(text: str) -> float | None:
-    rows = _stress_ng_metric_rows(text)
-    if not rows:
-        return None
-    return sum(bogo_ops for _, bogo_ops in rows)
-
-
 def _build_stress_ng_stressor_command(
     stress_ng: str,
-    stressors: Sequence[str],
+    stressor: str,
     *,
     seconds: int,
     temp_root: Path,
 ) -> list[str]:
-    normalized_stressors = tuple(str(stressor).strip() for stressor in stressors if str(stressor).strip())
-    command = [stress_ng]
-    for stressor in normalized_stressors:
-        command.extend([f"--{stressor}", "1"])
-    for stressor in normalized_stressors:
-        command.extend(_STRESS_NG_STRESSOR_ARGS.get(stressor, ()))
-    command.extend(_stress_ng_dynamic_stressor_args(normalized_stressors))
-    for stressor in normalized_stressors:
-        if ops_limit := _STRESS_NG_STRESSOR_OPS.get(stressor):
-            command.extend([f"--{stressor}-ops", str(int(ops_limit))])
+    normalized_stressor = str(stressor).strip()
+    if not normalized_stressor:
+        raise RuntimeError("stress-ng stressor name must be non-empty")
+    command = [stress_ng, f"--{normalized_stressor}", "1"]
+    command.extend(_STRESS_NG_STRESSOR_ARGS.get(normalized_stressor, ()))
+    command.extend(_stress_ng_dynamic_stressor_args((normalized_stressor,)))
+    if ops_limit := _STRESS_NG_STRESSOR_OPS.get(normalized_stressor):
+        command.extend([f"--{normalized_stressor}-ops", str(int(ops_limit))])
     command.extend(
         [
             "--timeout",
@@ -905,30 +896,43 @@ def run_stress_ng_class_load(duration_s: int | float, stressors: Sequence[str], 
         raise RuntimeError(f"{workload_name} workload requires at least one stress-ng stressor")
     seconds = max(1, int(round(float(duration_s))))
     temp_root = _disk_backed_tmp_root()
-    command = _build_stress_ng_stressor_command(
-        stress_ng,
-        normalized_stressors,
-        seconds=seconds,
-        temp_root=temp_root,
-    )
+    stdout_chunks: list[str] = []
+    stderr_chunks: list[str] = []
+    ops_total = 0.0
     start = time.monotonic()
-    try:
-        completed = run_command(
-            command,
-            check=False,
-            cwd=temp_root,
-            timeout=max(float(seconds) + 60, float(seconds) * 4),
+    for stressor in normalized_stressors:
+        command = _build_stress_ng_stressor_command(
+            stress_ng,
+            stressor,
+            seconds=seconds,
+            temp_root=temp_root,
         )
-    except subprocess.TimeoutExpired as exc:
-        raise RuntimeError(f"{workload_name} workload timed out") from exc
+        try:
+            completed = run_command(
+                command,
+                check=False,
+                cwd=temp_root,
+                timeout=max(float(seconds) + 15, float(seconds) * 4),
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise RuntimeError(f"{workload_name} workload stressor {stressor} timed out") from exc
+        stdout_chunks.append(completed.stdout or "")
+        stderr_chunks.append(completed.stderr or "")
+        if completed.returncode != 0:
+            raise RuntimeError(
+                f"{workload_name} workload stressor {stressor} failed: "
+                f"{tail_text(completed.stderr or completed.stdout)}"
+            )
+        combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
+        stressor_ops = parse_stress_ng_bogo_ops(combined, stressor=stressor)
+        if stressor_ops is None:
+            raise RuntimeError(
+                f"{workload_name} workload stressor {stressor} did not report bogo-ops metrics: "
+                f"{tail_text(combined)}"
+            )
+        ops_total += float(stressor_ops)
     elapsed = time.monotonic() - start
-    if completed.returncode != 0:
-        raise RuntimeError(f"{workload_name} workload failed: {tail_text(completed.stderr or completed.stdout)}")
-    combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
-    ops_total = parse_stress_ng_total_bogo_ops(combined)
-    if ops_total is None:
-        raise RuntimeError(f"{workload_name} workload did not report bogo-ops metrics: {tail_text(combined)}")
-    return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
+    return _finish_result(ops_total, elapsed, "\n".join(stdout_chunks), "\n".join(stderr_chunks))
 
 
 def run_rapid_exec_storm(

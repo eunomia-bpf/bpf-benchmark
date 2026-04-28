@@ -4,15 +4,14 @@ This directory holds the repository-owned runner image definition.
 
 Current policy:
 
-1. `runner-runtime.Dockerfile` is the only first-class runner image.
-2. The Dockerfile owns the user-space build graph.
-3. The Dockerfile copies only the source groups needed by each layer: stable
-   vendor inputs first, build rules next, third-party repo artifacts one repo
-   at a time, local native artifacts after that, stable benchmark data before
-   daemon, runtime Python/config, and then the target-arch kinsn module build.
-   Build-only make rules, source trees, Go toolchain files, and common
-   CMake/Cargo/test intermediates are removed after the final runtime artifacts
-   are produced.
+1. `runner-runtime.Dockerfile` is the runtime image. `katran-artifacts.Dockerfile`
+   is a precompiled artifact image consumed by the runtime build.
+2. The Dockerfiles own the user-space build graph.
+3. The runtime Dockerfile copies only the source groups needed by each layer:
+   stable app artifacts, kernel/kinsn artifacts, bpftool and native C++/BPF/test
+   artifacts, Rust daemon artifacts, then runtime Python/config/corpus/e2e data.
+   Build-only make rules, source trees, Go/Rust toolchain files, and common
+   CMake/Cargo/test intermediates are removed after their artifacts are produced.
 4. `runner/mk/build.mk` keeps the outer host entrypoints for `docker build`,
    `docker save`, and host-coupled kernel/module export.
 5. The image-side Make rules in `runner/mk/build.mk` use normal local build

@@ -122,33 +122,6 @@ repos:
       - vendor/linux-framework/tools/include/linux/types.h
       - corpus/include/netbird_legacy_bpf_map_def.h
 
-  - name: systemd
-    url: https://github.com/systemd/systemd.git
-    branch: main
-    sparse_paths:
-      - src/core/bpf
-      - src/network/bpf
-      - src/nsresourced/bpf
-      - src/shared
-    harvest_globs:
-      - src/core/bpf/**/*.bpf.c
-      - src/network/bpf/**/*.bpf.c
-      - src/nsresourced/bpf/**/*.bpf.c
-    compile_include_dirs:
-      - .
-      - src
-      - src/core
-      - src/core/bpf
-      - src/shared
-      - src/network/bpf/sysctl-monitor
-      - src/nsresourced/bpf/userns-restrict
-      - src/core/bpf/bind-iface
-      - src/core/bpf/restrict-fs
-      - src/core/bpf/restrict-ifaces
-      - src/core/bpf/socket-bind
-    forced_includes:
-      - vendor/linux-framework/tools/include/linux/types.h
-
   - name: KubeArmor
     url: https://github.com/kubearmor/KubeArmor.git
     branch: main
@@ -177,22 +150,8 @@ repos:
     compile_include_dirs:
       - .
 
-  - name: loxilb
-    url: https://github.com/loxilb-io/loxilb-ebpf.git
-    branch: main
-    harvest_globs: []
-    compile_include_dirs:
-      - .
-
   - name: opentelemetry-ebpf-profiler
     url: https://github.com/open-telemetry/opentelemetry-ebpf-profiler.git
-    branch: main
-    harvest_globs: []
-    compile_include_dirs:
-      - .
-
-  - name: suricata
-    url: https://github.com/OISF/suricata.git
     branch: main
     harvest_globs: []
     compile_include_dirs:

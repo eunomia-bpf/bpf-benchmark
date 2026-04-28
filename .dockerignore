@@ -6,6 +6,11 @@
 .state/**
 docs/tmp
 docs/tmp/**
+docs/tmp/
+docs/tmp/runtime-container-tmp
+docs/tmp/runtime-container-tmp/**
+**/runtime-container-tmp
+**/runtime-container-tmp/**
 **/__pycache__
 **/*.pyc
 
@@ -63,6 +68,8 @@ vendor/linux/**
 vendor/linux-baseline
 vendor/linux-baseline/**
 vendor/linux-framework/.cache
+vendor/linux-framework/.bpfrejit_kernel_build.stamp
+vendor/linux-framework/.build.lock
 vendor/linux-framework/.virtme_mods*
 vendor/linux-framework/build
 vendor/linux-framework/build-*
@@ -81,6 +88,7 @@ vendor/linux-baseline/build
 vendor/linux-baseline/build-*
 
 runner/repos/*
+!runner/repos/.gitkeep
 !runner/repos/bcc
 !runner/repos/bcc/**
 !runner/repos/bpftrace
@@ -164,3 +172,8 @@ runner/repos/workload-tools/wrk/wrk
 
 module/**/*.ko
 module/**/*.o
+module/**/*.mod
+module/**/*.mod.c
+module/**/*.cmd
+module/**/Module.symvers
+module/**/modules.order

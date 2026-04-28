@@ -40,12 +40,18 @@ ACTIVE_TEST_NEGATIVE_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT
 ACTIVE_TEST_UNITTEST_PRIMARY := $(ACTIVE_TEST_UNITTEST_BUILD_DIR)/rejit_regression
 ACTIVE_TEST_NEGATIVE_PRIMARY := $(ACTIVE_TEST_NEGATIVE_BUILD_DIR)/adversarial_rejit
 RUNNER_RUNTIME_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/runner-runtime.Dockerfile
+KATRAN_ARTIFACTS_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/katran-artifacts.Dockerfile
 BPFREJIT_INSTALL_SCRIPT := $(RUNNER_DIR)/scripts/bpfrejit-install
 X86_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:x86_64
 ARM64_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:arm64
+X86_KATRAN_ARTIFACTS_IMAGE := bpf-benchmark/katran-artifacts:x86_64
+ARM64_KATRAN_ARTIFACTS_IMAGE := bpf-benchmark/katran-artifacts:arm64
 X86_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-runner-runtime.image.tar
 ARM64_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-runner-runtime.image.tar
+X86_KATRAN_ARTIFACTS_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-katran-artifacts.image.tar
+ARM64_KATRAN_ARTIFACTS_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-katran-artifacts.image.tar
 ACTIVE_RUNNER_RUNTIME_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_RUNNER_RUNTIME_IMAGE_TAR),$(X86_RUNNER_RUNTIME_IMAGE_TAR))
+ACTIVE_KATRAN_ARTIFACTS_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR),$(X86_KATRAN_ARTIFACTS_IMAGE_TAR))
 X86_RUNTIME_KERNEL_DIR := $(ARTIFACT_ROOT)/runtime-kernel/x86_64
 X86_RUNTIME_KERNEL_IMAGE := $(X86_RUNTIME_KERNEL_DIR)/bzImage
 ACTIVE_X86_KINSN_SOURCE_DIR := $(ROOT_DIR)/module/x86
@@ -70,7 +76,9 @@ TEST_NEGATIVE_SOURCE_FILES = $(shell find "$(ROOT_DIR)/tests/negative" \( -path 
 MICRO_PROGRAM_SOURCE_FILES = $(MICRO_PROGRAM_SRCS) $(shell find "$(MICRO_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -type f \( -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
 KINSN_SOURCE_FILES = $(shell find "$(ACTIVE_KINSN_SOURCE_DIR)" "$(ROOT_DIR)/module/include" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
 KATRAN_SOURCE_FILES = $(shell find "$(REPOS_DIR)/katran" \( -path '*/_build' -o -path '*/deps' -o -path '*/.git' \) -prune -o -type f -print 2>/dev/null)
-LIBBPF_SOURCE_FILES = $(shell find "$(ROOT_DIR)/vendor/libbpf" \( -path '*/.git' -o -path '*/build' -o -path '*/obj' -o -path '*/prefix' \) -prune -o -type f -print 2>/dev/null)
+LIBBPF_SOURCE_FILES = $(shell find "$(ROOT_DIR)/vendor/libbpf" \( -path '*/.git' -o -path '*/build' -o -path '*/obj' -o -path '*/prefix' \) -prune -o -type f \
+	\( -name '*.[ch]' -o -name '*.S' -o -name '*.lds' -o -name '*.map' -o -name '*.mk' -o -name '*.sh' \
+		-o -name '*.template' -o -name 'Build' -o -name 'Makefile' \) -print 2>/dev/null)
 VENDOR_LINUX_RUNTIME_SOURCE_FILES = $(ROOT_DIR)/vendor/linux-framework/Makefile $(shell find \
 	"$(ROOT_DIR)/vendor/linux-framework/arch/arm64/include/uapi/asm" \
 	"$(ROOT_DIR)/vendor/linux-framework/include" \
@@ -82,12 +90,15 @@ VENDOR_LINUX_RUNTIME_SOURCE_FILES = $(ROOT_DIR)/vendor/linux-framework/Makefile 
 	"$(ROOT_DIR)/vendor/linux-framework/tools/include" \
 	"$(ROOT_DIR)/vendor/linux-framework/tools/lib" \
 	"$(ROOT_DIR)/vendor/linux-framework/tools/scripts" \
-	\( -path '*/.git' -o -path '*/build-*' -o -path '*/.cache' \
-		-o -path '*/tools/bpf/bpftool/bootstrap' \
-		-o -path '*/tools/bpf/bpftool/libbpf' \) -prune -o -type f \
-	! -path '*/tools/bpf/bpftool/bpftool' \
-	! -path '*/tools/bpf/bpftool/FEATURE-DUMP.bpftool' \
-	! -path '*/tools/bpf/bpftool/vmlinux.h' \
+		\( -path '*/.git' -o -path '*/build-*' -o -path '*/.cache' \
+			-o -path '*/tools/bpf/bpftool/bootstrap' \
+			-o -path '*/tools/bpf/bpftool/libbpf' \) -prune -o -type f \
+		\( -name '*.[ch]' -o -name '*.S' -o -name '*.lds' -o -name '*.mk' -o -name '*.sh' \
+			-o -name '*.y' -o -name '*.l' -o -name '*.pl' -o -name '*.awk' \
+			-o -name 'Build' -o -name 'Kbuild' -o -name 'Makefile' \) \
+		! -path '*/tools/bpf/bpftool/bpftool' \
+		! -path '*/tools/bpf/bpftool/FEATURE-DUMP.bpftool' \
+		! -path '*/tools/bpf/bpftool/vmlinux.h' \
 	! -name '*.d' ! -name '*.o' ! -name '*.cmd' ! -name '*.skel.h' -print 2>/dev/null)
 RUNNER_RUNTIME_SOURCE_FILES = $(shell find "$(RUNNER_DIR)" \( -path "$(RUNNER_DIR)/repos" -o -path '*/__pycache__' -o -path '*/build' -o -path '*/build-*' \) -prune -o -type f \( -name '*.py' -o -name '*.yaml' -o -name '*.env' \) -print 2>/dev/null)
 RUNNER_SCRIPT_SOURCE_FILES = $(shell find "$(RUNNER_DIR)/scripts" -type f -print 2>/dev/null)
@@ -96,45 +107,75 @@ CORPUS_RUNTIME_SOURCE_FILES = $(shell find "$(ROOT_DIR)/corpus" \( -path '*/__py
 E2E_RUNTIME_SOURCE_FILES = $(shell find "$(ROOT_DIR)/e2e" \( -path '*/__pycache__' -o -path '*/results' \) -prune -o -type f -print 2>/dev/null)
 KERNEL_BUILD_META_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -path '*/build*' -o -path '*/.cache' \) -prune -o -type f \( -name 'Makefile' -o -name 'Kconfig*' -o -name '*.mk' -o -path '*/scripts/config' \) -print 2>/dev/null)
 KERNEL_SOURCE_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -path '*/build*' -o -path '*/.cache' \) -prune -o -type f \( -name '*.c' -o -name '*.h' -o -name '*.S' -o -name '*.lds' -o -name '*.dts' -o -name '*.dtsi' -o -name '*.sh' \) -print 2>/dev/null)
+KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES = $(BUILD_RULE_FILES) $(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
+	$(KATRAN_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_SOURCE_FILES = $(BUILD_RULE_FILES) $(RUNNER_RUNTIME_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
 	$(DAEMON_SOURCE_FILES) $(RUNNER_SOURCE_FILES) $(TEST_UNITTEST_SOURCE_FILES) $(TEST_NEGATIVE_SOURCE_FILES) \
-	$(MICRO_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) $(KATRAN_SOURCE_FILES) \
-	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) \
-	$(RUNNER_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES) $(MICRO_RUNTIME_SOURCE_FILES) $(CORPUS_RUNTIME_SOURCE_FILES) \
-	$(E2E_RUNTIME_SOURCE_FILES) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) $(DEFCONFIG_SRC) $(ARM64_DEFCONFIG_SRC)
+	$(MICRO_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) \
+	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES) \
+	$(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) $(DEFCONFIG_SRC) $(ARM64_DEFCONFIG_SRC)
+RUNNER_RUNTIME_IMAGE_LAYER_FILES = $(RUNNER_RUNTIME_SOURCE_FILES) $(MICRO_RUNTIME_SOURCE_FILES) \
+	$(CORPUS_RUNTIME_SOURCE_FILES) $(E2E_RUNTIME_SOURCE_FILES)
+RUNNER_RUNTIME_IMAGE_INPUT_FILES = $(RUNNER_RUNTIME_IMAGE_SOURCE_FILES) $(RUNNER_RUNTIME_IMAGE_LAYER_FILES)
 BUILD_INPUT_SOURCE_FILES = $(sort \
 	$(DAEMON_SOURCE_FILES) $(RUNNER_SOURCE_FILES) $(TEST_UNITTEST_SOURCE_FILES) $(TEST_NEGATIVE_SOURCE_FILES) \
 	$(MICRO_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) $(KATRAN_SOURCE_FILES) \
 	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) \
 	$(RUNNER_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES) $(MICRO_RUNTIME_SOURCE_FILES) $(CORPUS_RUNTIME_SOURCE_FILES) \
-	$(E2E_RUNTIME_SOURCE_FILES) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES))
+	$(E2E_RUNTIME_SOURCE_FILES) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) \
+	$(RUNNER_RUNTIME_CONTAINERFILE) $(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE))
 
 $(BUILD_INPUT_SOURCE_FILES): ;
 
 .PHONY: FORCE
 FORCE:
 
-$(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_SOURCE_FILES)
+$(X86_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 	@mkdir -p "$(dir $@)"
+	docker build --platform linux/amd64 \
+		--target katran-artifacts \
+		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
+		--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
+		--build-arg RUN_TARGET_ARCH=x86_64 \
+		-t "$(X86_KATRAN_ARTIFACTS_IMAGE)" -f "$(KATRAN_ARTIFACTS_CONTAINERFILE)" "$(ROOT_DIR)"
+	docker save -o "$@" "$(X86_KATRAN_ARTIFACTS_IMAGE)"
+
+$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
+	@mkdir -p "$(dir $@)"
+	docker build --platform linux/arm64 \
+		--target katran-artifacts \
+		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
+		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
+		--build-arg RUN_TARGET_ARCH=arm64 \
+		-t "$(ARM64_KATRAN_ARTIFACTS_IMAGE)" -f "$(KATRAN_ARTIFACTS_CONTAINERFILE)" "$(ROOT_DIR)"
+	docker save -o "$@" "$(ARM64_KATRAN_ARTIFACTS_IMAGE)"
+
+$(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRAN_ARTIFACTS_IMAGE_TAR)
+	@mkdir -p "$(dir $@)"
+	docker load -i "$(X86_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=x86_64 \
+		--build-arg KATRAN_IMAGE="$(X86_KATRAN_ARTIFACTS_IMAGE)" \
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$@" "$(X86_RUNNER_RUNTIME_IMAGE)"
 
-$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_SOURCE_FILES)
+$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)
 	@mkdir -p "$(dir $@)"
+	docker load -i "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=arm64 \
+		--build-arg KATRAN_IMAGE="$(ARM64_KATRAN_ARTIFACTS_IMAGE)" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$@" "$(ARM64_RUNNER_RUNTIME_IMAGE)"
 
-.PHONY: image-runner-runtime-image-tar
+.PHONY: image-katran-artifacts-image-tar image-runner-runtime-image-tar
+image-katran-artifacts-image-tar: $(ACTIVE_KATRAN_ARTIFACTS_IMAGE_TAR)
 image-runner-runtime-image-tar: $(ACTIVE_RUNNER_RUNTIME_IMAGE_TAR)
 
 $(X86_RUNTIME_KERNEL_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(BPFREJIT_INSTALL_SCRIPT)
@@ -142,6 +183,7 @@ $(X86_RUNTIME_KERNEL_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(BPFREJIT_INSTALL_
 	BPFREJIT_INSTALL_KERNEL_OUT_DIR="$(X86_RUNTIME_KERNEL_DIR)" \
 		"$(BPFREJIT_INSTALL_SCRIPT)" --extract-kernel-only "$<"
 	test -s "$@"
+	touch "$@"
 
 .PHONY: image-kernel-artifacts image-kernel-build image-kernel-modules-artifacts image-kinsn-artifacts
 
@@ -265,7 +307,9 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES)
 	override_file="$(KATRAN_BUILD_ROOT)/cxx-override.cmake"; \
 	bpf_root="$$artifact_root/bpf"; \
 	system_libdir="$$(pkg-config --variable=libdir libelf)"; \
-	mkdir -p "$$install_root/bin" "$$install_root/lib" "$$install_root/lib64" "$$bpf_root" "$$build_root"; \
+	mkdir -p "$$install_root/bin" "$$install_root/lib" "$$install_root/lib64" "$$bpf_root" "$$build_root/deps"; \
+	command -v grpc_cpp_plugin >/dev/null; \
+	touch "$$build_root/deps/grpc_installed"; \
 	printf '%s\n' 'set(CMAKE_CXX_COMPILE_OBJECT "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -std=gnu++20 -o <OBJECT> -c <SOURCE>")' > "$$override_file"; \
 	cd "$$repo_root" && env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR \
 		CC=clang CXX=clang++ AR=ar RANLIB=ranlib \
@@ -278,8 +322,6 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES)
 			-e "s#gflags_static#$$system_libdir/libgflags.so#g" \
 			"$$cmake_file"; \
 	done; \
-	mkdir -p "$$install_root/grpc/_build"; \
-	ln -sfn "$$install_root/bin/grpc_cpp_plugin" "$$install_root/grpc/_build/grpc_cpp_plugin"; \
 	rm -rf "$$build_root/build"; \
 	env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR CMAKE_BUILD_EXAMPLE_GRPC=1 \
 		CC=clang CXX=clang++ AR=ar RANLIB=ranlib \

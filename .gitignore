@@ -102,7 +102,8 @@ third-party/
 corpus/bcf/
 corpus/repos/
 corpus/inventory.json
-runner/repos/
+runner/repos/*
+!runner/repos/.gitkeep
 runner/inventory.json
 runner/corpus/results/
 docs/reference/papers/*.pdf

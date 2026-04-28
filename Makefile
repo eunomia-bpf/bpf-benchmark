@@ -39,9 +39,6 @@ VM_E2E_TIMEOUT ?= 7200
 BENCH      ?=
 FUZZ_ROUNDS ?= 1000
 
-# Results
-MICRO_RESULTS_DIR      := $(ROOT_DIR)/micro/results
-
 # Python / venv
 _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
 _VENV_FOUND := $(firstword $(foreach v,$(_VENV_CANDIDATES),$(if $(wildcard $(v)/bin/activate),$(v),)))

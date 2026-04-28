@@ -19,7 +19,6 @@ class ScriptSpec:
     name: str
     script_path: Path
     workload_spec: Mapping[str, object]
-    program_name_hints: tuple[str, ...]
 
 
 SCRIPTS: tuple[ScriptSpec, ...] = (
@@ -27,37 +26,31 @@ SCRIPTS: tuple[ScriptSpec, ...] = (
         name="tcplife",
         script_path=DEFAULT_SCRIPT_DIR / "tcplife.bt",
         workload_spec={"kind": "stress_ng_network"},
-        program_name_hints=("tcp_set_state",),
     ),
     ScriptSpec(
         name="biosnoop",
         script_path=DEFAULT_SCRIPT_DIR / "biosnoop.bt",
         workload_spec={"kind": "fio_randrw"},
-        program_name_hints=("block_io_start", "block_io_done"),
     ),
     ScriptSpec(
         name="runqlat",
         script_path=DEFAULT_SCRIPT_DIR / "runqlat.bt",
         workload_spec={"kind": "stress_ng_scheduler"},
-        program_name_hints=("sched_switch", "sched_wakeup"),
     ),
     ScriptSpec(
         name="tcpretrans",
         script_path=DEFAULT_SCRIPT_DIR / "tcpretrans.bt",
         workload_spec={"kind": "stress_ng_network"},
-        program_name_hints=("tcp_retransmit",),
     ),
     ScriptSpec(
         name="capable",
         script_path=DEFAULT_SCRIPT_DIR / "capable.bt",
         workload_spec={"kind": "stress_ng_os"},
-        program_name_hints=("cap_capable",),
     ),
     ScriptSpec(
         name="vfsstat",
         script_path=DEFAULT_SCRIPT_DIR / "vfsstat.bt",
         workload_spec={"kind": "stress_ng_filesystem"},
-        program_name_hints=("vfs_", "1"),
     ),
 )
 
@@ -96,32 +89,10 @@ class BpftraceRunner(AppRunner):
             raise RuntimeError(f"unknown bpftrace script: {self.script_name}")
         return script_spec
 
-    @staticmethod
-    def _program_name_matches(name: str, hints: Sequence[str]) -> bool:
-        normalized_name = str(name or "").strip().lower()
-        if not normalized_name:
-            return False
-        for raw_hint in hints:
-            hint = str(raw_hint or "").strip().lower()
-            if not hint:
-                continue
-            if len(hint) <= 2:
-                if normalized_name == hint:
-                    return True
-                continue
-            if normalized_name == hint or normalized_name.startswith(hint) or hint in normalized_name:
-                return True
-        return False
-
     def _discover_script_programs(self, before_ids: Sequence[int]) -> list[dict[str, object]]:
-        script_spec = self._resolve_script_spec()
-        matched = [
-            dict(program)
-            for program in programs_after(before_ids)
-            if self._program_name_matches(str(program.get("name") or ""), script_spec.program_name_hints)
-        ]
-        matched.sort(key=lambda item: int(item.get("id", 0) or 0))
-        return matched
+        programs = [dict(program) for program in programs_after(before_ids)]
+        programs.sort(key=lambda item: int(item.get("id", 0) or 0))
+        return programs
 
     def start(self) -> list[int]:
         if self.process is not None:

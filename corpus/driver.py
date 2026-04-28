@@ -621,7 +621,7 @@ def _run_suite_lifecycle_sessions(
                     result.state.prog_ids,
                     workload_seconds=session.workload_seconds,
                     samples=samples,
-                    warmup=False,
+                    warmup=True,
                 )
                 _print_progress(
                     "measurement_done",
