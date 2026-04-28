@@ -12,6 +12,7 @@ from ..workload import (
     run_connect_storm,
     run_exec_storm,
     run_file_io,
+    run_named_workload,
     run_open_storm,
     run_tetragon_exec_connect_mix_workload,
 )
@@ -86,7 +87,7 @@ class TetragonAgentSession(AgentSession):
 def inspect_tetragon_setup() -> dict[str, object]:
     artifact_root = repo_artifact_root() / "tetragon"; tetragon_artifact_binary = artifact_root / "bin" / "tetragon"
     _fail = {"returncode": 1, "tetragon_binary": None, "tetragon_bpf_lib_dir": None, "stdout_tail": ""}
-    if missing_tools := missing_required_commands(("stress-ng", "fio", "curl", "tar")):
+    if missing_tools := missing_required_commands(("stress-ng",)):
         return {**_fail, "stderr_tail": f"missing required Tetragon workload tools: {' '.join(missing_tools)}"}
     tetragon_binary = pick_host_executable(tetragon_artifact_binary)
     if tetragon_binary is None:
@@ -115,6 +116,8 @@ def resolve_tetragon_binary(explicit: str | None, setup_result: Mapping[str, obj
 
 def run_tetragon_workload(spec: Mapping[str, object], duration_s: int) -> WorkloadResult:
     kind = str(spec.get("kind", "")); value = int(spec.get("value", 0) or 0)
+    if kind.startswith("stress_ng_") or kind == "fio_randrw":
+        return run_named_workload(kind, duration_s)
     if kind == "exec_storm": return run_exec_storm(duration_s, value or 2)
     if kind == "tetragon_exec_connect_mix":
         return run_tetragon_exec_connect_mix_workload(

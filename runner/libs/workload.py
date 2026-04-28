@@ -19,7 +19,7 @@ import urllib.request
 from dataclasses import asdict, dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Callable, Sequence
+from typing import Callable, Mapping, Sequence
 
 from . import run_command, tail_text, which
 from .benchmark_net import BENCHMARK_IFACE, BENCHMARK_NETNS, BENCHMARK_PEER_IFACE_IP
@@ -672,21 +672,91 @@ def _merge_workload_results(results: Sequence[WorkloadResult]) -> WorkloadResult
                           stderr=tail_text(stderr, max_lines=80, max_chars=12000))
 
 
-def parse_stress_ng_bogo_ops(text: str, *, stressor: str | None = None) -> float | None:
+_FLOAT_PATTERN = r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
+_STRESS_NG_METRIC_RE = re.compile(rf"stress-ng:\s+metrc:\s+\[\d+\]\s+(\S+)\s+({_FLOAT_PATTERN})\b")
+_STRESS_NG_CLASS_WORKLOADS: Mapping[str, tuple[str, ...]] = {
+    "stress_ng_cpu": ("cpu",),
+    "stress_ng_filesystem": ("filesystem",),
+    "stress_ng_io": ("io",),
+    "stress_ng_network": ("network",),
+    "stress_ng_os": ("os",),
+    # stress-ng has no "process" class; scheduler includes exec/fork/spawn stressors.
+    "stress_ng_process": ("scheduler",),
+    "stress_ng_scheduler": ("scheduler",),
+    "stress_ng_os_io_network": ("os", "io", "network"),
+}
+
+
+def _stress_ng_metric_rows(text: str) -> list[tuple[str, float]]:
+    rows: list[tuple[str, float]] = []
     for line in text.splitlines():
         if "stress-ng: metrc:" not in line:
             continue
-        match = re.search(r"stress-ng:\s+metrc:\s+\[\d+\]\s+(\S+)\s+([-+]?\d+(?:\.\d+)?)", line)
+        match = _STRESS_NG_METRIC_RE.search(line)
         if not match:
             continue
         matched_stressor, bogo_ops = match.groups()
-        if stressor and matched_stressor != stressor:
-            continue
         try:
-            return float(bogo_ops)
+            rows.append((matched_stressor, float(bogo_ops)))
         except ValueError:
             continue
+    return rows
+
+
+def parse_stress_ng_bogo_ops(text: str, *, stressor: str | None = None) -> float | None:
+    for matched_stressor, bogo_ops in _stress_ng_metric_rows(text):
+        if stressor and matched_stressor != stressor:
+            continue
+        return bogo_ops
     return None
+
+
+def parse_stress_ng_total_bogo_ops(text: str) -> float | None:
+    rows = _stress_ng_metric_rows(text)
+    if not rows:
+        return None
+    return sum(bogo_ops for _, bogo_ops in rows)
+
+
+def run_stress_ng_class_load(duration_s: int | float, classes: Sequence[str], *, workload_name: str) -> WorkloadResult:
+    stress_ng = which("stress-ng")
+    if stress_ng is None:
+        raise RuntimeError(f"stress-ng is required for the {workload_name} workload")
+    normalized_classes = tuple(str(cls).strip() for cls in classes if str(cls).strip())
+    if not normalized_classes:
+        raise RuntimeError(f"{workload_name} workload requires at least one stress-ng class")
+    seconds = max(1, int(round(float(duration_s))))
+    temp_root = _disk_backed_tmp_root()
+    command = [
+        stress_ng,
+        "--class",
+        ",".join(normalized_classes),
+        "--all",
+        "1",
+        "--timeout",
+        f"{seconds}s",
+        "--metrics-brief",
+        "--temp-path",
+        str(temp_root),
+    ]
+    start = time.monotonic()
+    try:
+        completed = run_command(
+            command,
+            check=False,
+            cwd=temp_root,
+            timeout=max(float(seconds) + 60, float(seconds) * 4),
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f"{workload_name} workload timed out") from exc
+    elapsed = time.monotonic() - start
+    if completed.returncode != 0:
+        raise RuntimeError(f"{workload_name} workload failed: {tail_text(completed.stderr or completed.stdout)}")
+    combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
+    ops_total = parse_stress_ng_total_bogo_ops(combined)
+    if ops_total is None:
+        raise RuntimeError(f"{workload_name} workload did not report bogo-ops metrics: {tail_text(combined)}")
+    return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
 
 
 def run_rapid_exec_storm(
@@ -770,25 +840,37 @@ def run_file_io(duration_s: int | float) -> WorkloadResult:
     fio_binary = which("fio")
     if fio_binary is None:
         raise RuntimeError("fio is required for the file_io workload")
-    with tempfile.TemporaryDirectory(prefix="tracee-fio-", dir=str(_disk_backed_tmp_root())) as tempdir:
-        data_path = Path(tempdir) / "fio.bin"
-        cmd = [fio_binary, "--name=tracee-e2e", f"--filename={data_path}", "--rw=randwrite", "--bs=4k", "--size=64M",
-               f"--runtime={max(1, int(duration_s))}", "--time_based=1", "--ioengine=sync",
-               "--create_on_open=1", "--fsync=1", "--end_fsync=1", "--invalidate=1", "--output-format=json"]
+    seconds = max(1, int(round(float(duration_s))))
+    with tempfile.TemporaryDirectory(prefix="fio-randrw-", dir=str(_disk_backed_tmp_root())) as tempdir:
+        cmd = [
+            fio_binary,
+            "--name=bench",
+            "--rw=randrw",
+            "--bs=4k",
+            "--size=64M",
+            "--numjobs=4",
+            f"--runtime={seconds}",
+            "--time_based",
+            "--ioengine=sync",
+            "--output-format=json",
+        ]
         start = time.monotonic()
-        c = run_command(cmd, check=False, timeout=float(duration_s) + 60)
+        c = run_command(cmd, check=False, cwd=Path(tempdir), timeout=float(seconds) + 60)
         elapsed = time.monotonic() - start
         if c.returncode != 0:
             raise RuntimeError(f"fio file_io workload failed: {tail_text(c.stderr or c.stdout)}")
         payload = json.loads(c.stdout)
         jobs = payload.get("jobs")
-        if not isinstance(jobs, list) or not jobs or not isinstance(jobs[0], dict):
+        if not isinstance(jobs, list) or not jobs:
             raise RuntimeError(f"fio file_io workload returned no job stats: {tail_text(c.stdout or json.dumps(payload))}")
-        job = jobs[0]
-        read_stats, write_stats = job.get("read"), job.get("write")
-        if not isinstance(read_stats, dict) or not isinstance(write_stats, dict):
-            raise RuntimeError(f"fio file_io workload returned malformed read/write stats: {tail_text(c.stdout or json.dumps(payload))}")
-        ops_total = float(read_stats.get("total_ios", 0) or 0) + float(write_stats.get("total_ios", 0) or 0)
+        ops_total = 0.0
+        for job in jobs:
+            if not isinstance(job, dict):
+                raise RuntimeError(f"fio file_io workload returned malformed job stats: {tail_text(c.stdout or json.dumps(payload))}")
+            read_stats, write_stats = job.get("read"), job.get("write")
+            if not isinstance(read_stats, dict) or not isinstance(write_stats, dict):
+                raise RuntimeError(f"fio file_io workload returned malformed read/write stats: {tail_text(c.stdout or json.dumps(payload))}")
+            ops_total += float(read_stats.get("total_ios", 0) or 0) + float(write_stats.get("total_ios", 0) or 0)
         if ops_total <= 0:
             raise RuntimeError(f"fio file_io workload did not report total_ios metrics: {tail_text(c.stdout or json.dumps(payload))}")
         return _finish_result(ops_total, elapsed, c.stdout or "", c.stderr or "")
@@ -2218,6 +2300,12 @@ def run_named_workload(
     kind = str(kind or "").strip()
     if kind == "mixed":
         return run_mixed_workload(float(duration_s))
+    if kind in _STRESS_NG_CLASS_WORKLOADS:
+        return run_stress_ng_class_load(
+            float(duration_s),
+            _STRESS_NG_CLASS_WORKLOADS[kind],
+            workload_name=kind,
+        )
     if kind == "tcp_connect":
         return run_tcp_connect_load(seconds, network_device=network_device)
     if kind == "tetragon_exec_connect_mix":
@@ -2248,7 +2336,7 @@ def run_named_workload(
         return run_block_io_load(float(duration_s))
     if kind == "tcp_retransmit":
         return run_tcp_retransmit_load(float(duration_s))
-    if kind == "fio":
+    if kind in {"fio", "fio_randrw"}:
         return run_file_io(seconds)
     if kind == "hackbench":
         return run_scheduler_load(seconds)

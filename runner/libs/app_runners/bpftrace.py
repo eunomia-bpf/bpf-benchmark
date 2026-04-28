@@ -26,37 +26,37 @@ SCRIPTS: tuple[ScriptSpec, ...] = (
     ScriptSpec(
         name="tcplife",
         script_path=DEFAULT_SCRIPT_DIR / "tcplife.bt",
-        workload_spec={"kind": "tcp_connect"},
+        workload_spec={"kind": "stress_ng_network"},
         program_name_hints=("tcp_set_state",),
     ),
     ScriptSpec(
         name="biosnoop",
         script_path=DEFAULT_SCRIPT_DIR / "biosnoop.bt",
-        workload_spec={"kind": "block_io"},
+        workload_spec={"kind": "fio_randrw"},
         program_name_hints=("block_io_start", "block_io_done"),
     ),
     ScriptSpec(
         name="runqlat",
         script_path=DEFAULT_SCRIPT_DIR / "runqlat.bt",
-        workload_spec={"kind": "scheduler"},
+        workload_spec={"kind": "stress_ng_scheduler"},
         program_name_hints=("sched_switch", "sched_wakeup"),
     ),
     ScriptSpec(
         name="tcpretrans",
         script_path=DEFAULT_SCRIPT_DIR / "tcpretrans.bt",
-        workload_spec={"kind": "tcp_retransmit"},
+        workload_spec={"kind": "stress_ng_network"},
         program_name_hints=("tcp_retransmit",),
     ),
     ScriptSpec(
         name="capable",
         script_path=DEFAULT_SCRIPT_DIR / "capable.bt",
-        workload_spec={"kind": "exec_storm"},
+        workload_spec={"kind": "stress_ng_os"},
         program_name_hints=("cap_capable",),
     ),
     ScriptSpec(
         name="vfsstat",
         script_path=DEFAULT_SCRIPT_DIR / "vfsstat.bt",
-        workload_spec={"kind": "vfs_create_write_fsync"},
+        workload_spec={"kind": "stress_ng_filesystem"},
         program_name_hints=("vfs_", "1"),
     ),
 )

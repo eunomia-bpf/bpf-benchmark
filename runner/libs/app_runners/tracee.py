@@ -24,6 +24,7 @@ from ..workload import (
     run_block_io_load,
     run_connect_storm,
     run_file_open_load,
+    run_named_workload,
     run_network_load,
     run_open_storm,
     run_scheduler_load,
@@ -236,6 +237,8 @@ def _format_launch_failure(command: Sequence[str], proc: subprocess.Popen[str] |
 
 def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> WorkloadResult:
     kind = str(spec.get("kind", spec.get("name", "")))
+    if kind.startswith("stress_ng_") or kind == "fio_randrw":
+        return run_named_workload(kind, duration_s)
     if kind == "tracee_default":
         return run_tracee_default_load(duration_s)
     if kind == "tracee_system_edge_mix":
