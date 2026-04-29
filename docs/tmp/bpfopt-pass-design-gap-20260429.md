@@ -1,6 +1,6 @@
 # bpfopt / daemon pass design gap review (2026-04-29)
 
-Scope: compared `docs/kernel-jit-optimization-plan.md` and `CLAUDE.md` with the current working tree. The working tree already contains uncommitted bpfopt/daemon migration changes; this review treats those changes as the current implementation and does not modify them.
+Scope: compared `docs/kernel-jit-optimization-plan.md` and `CLAUDE.md` with the current checkout. Current `main` already has the daemon-to-`bpfopt-core` migration; this review treats that migrated tree as the implementation.
 
 I only reviewed bpfopt/daemon pass architecture and behavior. I did not run VM/corpus tests, and did not edit code or design docs.
 
@@ -32,7 +32,7 @@ From `CLAUDE.md`:
 
 - `daemon/Cargo.toml` now depends on `bpfopt-core` (`daemon/Cargo.toml:11-18`).
 - `daemon/src/main.rs` reexports `bpfopt_core::{analysis, insn, pass, passes, verifier_log}` and keeps daemon-only modules for `bpf`, `commands`, `invalidation`, `kfunc_discovery`, `profiler`, and `server` (`daemon/src/main.rs:7-32`).
-- The old tracked `daemon/src/pass.rs`, `daemon/src/analysis/*`, `daemon/src/passes/*`, and related daemon pass tests are deleted in the working tree. Active pass code is under `bpfopt/crates/bpfopt-core/src`.
+- `daemon/src/pass.rs`, `daemon/src/analysis/*`, `daemon/src/passes/*`, and related daemon pass tests no longer exist in the tracked daemon tree. Active pass code is under `bpfopt/crates/bpfopt-core/src`.
 - `bpfopt-core` declares itself "Zero kernel dependency - pure bytecode in, bytecode out" (`bpfopt/crates/bpfopt-core/src/lib.rs:1-7`).
 - `bpfopt-core` pass registry contains 12 passes: `map_inline`, `const_prop`, `dce`, `skb_load_bytes_spec`, `bounds_check_merge`, `wide_mem`, `bulk_memory`, `rotate`, `cond_select`, `extract`, `endian_fusion`, `branch_flip` (`bpfopt/crates/bpfopt-core/src/passes/mod.rs:52-118`).
 - Benchmark config default includes 11 passes and excludes `branch_flip` (`corpus/config/benchmark_config.yaml:1-27`), matching the design's "non-default benchmark pass" statement.
@@ -73,9 +73,9 @@ From `CLAUDE.md`:
 
    `BpfProgram` contains offline map snapshots (`map_values`, `map_metadata`) and live provider traits used by the daemon (`map_info_provider`, `map_value_provider`) (`pass.rs:70-81`). The provider abstraction is a reasonable extraction seam, but it currently lives alongside REJIT fd-array and per-pass verification machinery. That makes the crate neither a pure bytecode library nor a clean daemon adapter boundary.
 
-5. Active daemon pass source moved, but old tracked pass files are deleted only in the working tree.
+5. The migrated source-of-truth is not reflected everywhere outside Rust module imports.
 
-   In the current checkout, `daemon/src/passes/` no longer exists, while git still tracks those files as deleted. That is consistent with using `bpfopt-core` as the single pass implementation, but the migration is not complete until the build/image inputs and design boundary above are fixed.
+   In the current checkout, `daemon/src/passes/` no longer exists, which is consistent with using `bpfopt-core` as the single pass implementation. The migration is still incomplete at the architecture level because Docker/Makefile inputs do not include `bpfopt/`, and because `bpfopt-core` still owns daemon runtime concerns.
 
 ## Functional Gaps
 
