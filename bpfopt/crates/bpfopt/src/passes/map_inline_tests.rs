@@ -3,9 +3,11 @@ use std::collections::HashMap;
 
 use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, MapInfoAnalysis};
 use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
-use crate::pass::{MapInlineRecord, PassContext, PassManager};
+use crate::pass::{
+    MapInlineRecord, PassContext, PassManager, RegState, ScalarRange, Tnum, VerifierInsn,
+    VerifierInsnKind, VerifierValueWidth,
+};
 use crate::passes::{ConstPropPass, DcePass};
-use crate::verifier_log::parse_verifier_log;
 
 fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
     [
@@ -51,6 +53,53 @@ fn add64_imm(dst: u8, imm: i32) -> BpfInsn {
 
 fn call_helper(imm: i32) -> BpfInsn {
     BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, imm)
+}
+
+fn scalar_reg(value: u64) -> RegState {
+    RegState {
+        reg_type: "scalar".to_string(),
+        value_width: VerifierValueWidth::Bits64,
+        precise: true,
+        exact_value: Some(value),
+        tnum: Some(Tnum { value, mask: 0 }),
+        range: ScalarRange {
+            smin: Some(value as i64),
+            smax: Some(value as i64),
+            umin: Some(value),
+            umax: Some(value),
+            smin32: Some(value as u32 as i32),
+            smax32: Some(value as u32 as i32),
+            umin32: Some(value as u32),
+            umax32: Some(value as u32),
+        },
+        offset: None,
+        id: None,
+    }
+}
+
+fn fp_reg(offset: i32) -> RegState {
+    RegState {
+        reg_type: "fp".to_string(),
+        value_width: VerifierValueWidth::Bits64,
+        precise: false,
+        exact_value: None,
+        tnum: None,
+        range: ScalarRange::default(),
+        offset: Some(offset),
+        id: None,
+    }
+}
+
+fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
+    VerifierInsn {
+        pc,
+        frame: 0,
+        from_pc: None,
+        kind: VerifierInsnKind::InsnDeltaState,
+        speculative: false,
+        regs,
+        stack: HashMap::new(),
+    }
 }
 
 fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
@@ -442,17 +491,11 @@ fn verifier_guided_key_extracts_wide_zero_store_subrange() {
     assert_eq!(plain.value, 0);
     assert_eq!(plain.store_pc, 1);
 
-    let states = parse_verifier_log(
-        r#"
-0: R1=ctx() R10=fp0
-0: (b7) r3 = 0                        ; R3=0
-1: (7b) *(u64 *)(r10 -8) = r3         ; R3=0 R10=fp0 fp-8=0
-2: (bf) r2 = r10                      ; R2=fp0 R10=fp0
-3: (07) r2 += -4                      ; R2=fp-4
-4: (18) r1 = 0xffff8f09c3e45000       ; R1=map_ptr(map=test_array,ks=4,vs=4)
-6: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=test_array,ks=4,vs=4)
-"#,
-    );
+    let states = vec![
+        verifier_delta_state(1, HashMap::from([(3, scalar_reg(0))])),
+        verifier_delta_state(3, HashMap::from([(2, fp_reg(-4))])),
+        verifier_delta_state(6, HashMap::new()),
+    ];
 
     let key = try_extract_constant_key_verifier_guided(&insns, &states, 6, 4).unwrap();
     assert_eq!(key.stack_off, -4);
@@ -512,18 +555,11 @@ fn verifier_guided_key_extracts_store_via_fp_alias_base() {
         call_helper(HELPER_MAP_LOOKUP_ELEM),
     ];
 
-    let states = parse_verifier_log(
-        r#"
-0: R1=ctx() R10=fp0
-0: (bf) r6 = r10                      ; R6=fp0 R10=fp0
-1: (07) r6 += -8                      ; R6=fp-8
-2: (62) *(u32 *)(r6 +4) = 7           ; R6=fp-8 R10=fp0 fp-4=7
-3: (bf) r2 = r10                      ; R2=fp0 R10=fp0
-4: (07) r2 += -4                      ; R2=fp-4
-5: (18) r1 = 0xffff8f09c3e45000       ; R1=map_ptr(map=test_array,ks=4,vs=4)
-7: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=test_array,ks=4,vs=4)
-"#,
-    );
+    let states = vec![
+        verifier_delta_state(2, HashMap::new()),
+        verifier_delta_state(4, HashMap::from([(2, fp_reg(-4))])),
+        verifier_delta_state(7, HashMap::new()),
+    ];
 
     let key = try_extract_constant_key_verifier_guided(&insns, &states, 7, 4).unwrap();
     assert_eq!(key.stack_off, -4);
@@ -1437,19 +1473,12 @@ fn map_inline_pass_uses_verifier_guided_wide_zero_store_key() {
         exit_insn(),
     ]);
     program.set_map_ids(vec![7001]);
-    program.set_verifier_log(
-        r#"
-0: R1=ctx() R10=fp0
-0: (b7) r3 = 0                        ; R3=0
-1: (7b) *(u64 *)(r10 -8) = r3         ; R3=0 R10=fp0 fp-8=0
-2: (bf) r2 = r10                      ; R2=fp0 R10=fp0
-3: (07) r2 += -4                      ; R2=fp-4
-4: (18) r1 = 0xffff8f09c3e45000       ; R1=map_ptr(map=test_array,ks=4,vs=4)
-6: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=test_array,ks=4,vs=4)
-7: (15) if r0 == 0x0 goto pc+2        ; R0=map_value(map=test_array,ks=4,vs=4)
-8: (61) r6 = *(u32 *)(r0 +0)          ; R0=map_value(map=test_array,ks=4,vs=4) R6=42
-"#,
-    );
+    program.set_verifier_states(vec![
+        verifier_delta_state(1, HashMap::from([(3, scalar_reg(0))])),
+        verifier_delta_state(3, HashMap::from([(2, fp_reg(-4))])),
+        verifier_delta_state(6, HashMap::new()),
+        verifier_delta_state(8, HashMap::from([(6, scalar_reg(42))])),
+    ]);
 
     let result = run_map_inline_pass(&mut program);
 

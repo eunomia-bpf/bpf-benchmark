@@ -10,7 +10,7 @@ use std::os::unix::io::RawFd;
 use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
-use bpfopt::{insn, pass, verifier_log};
+use bpfopt::{insn, pass};
 use serde::Serialize;
 
 /// Live daemon resolver: descriptor BTF FDs are transported through fd_array
@@ -121,7 +121,7 @@ pub(crate) struct PassVerifyResult {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) error_message: Option<String>,
     #[serde(skip)]
-    pub(crate) verifier_states: Arc<[verifier_log::VerifierInsn]>,
+    pub(crate) verifier_states: Arc<[pass::VerifierInsn]>,
 }
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
@@ -154,7 +154,8 @@ impl PassVerifyResult {
         }
     }
 
-    pub(crate) fn accepted_with_verifier_states(states: Vec<verifier_log::VerifierInsn>) -> Self {
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub(crate) fn accepted_with_verifier_states(states: Vec<pass::VerifierInsn>) -> Self {
         Self {
             status: PassVerifyStatus::Accepted,
             error_message: None,
@@ -479,14 +480,10 @@ mod tests {
         let mut program = pass::BpfProgram::new(vec![exit_insn()]);
 
         let result = run_with_verifier(&pm, &mut program, &ctx, &resolver, &mut |_, _| {
-            Ok(PassVerifyResult::accepted_with_verifier_states(
-                verifier_log::parse_verifier_log(
-                    r#"
-0: R0=0 R10=fp0
-1: (95) exit ; R0=1
-"#,
-                ),
-            ))
+            Ok(PassVerifyResult::accepted_with_verifier_states(vec![
+                verifier_delta_state(0, 0),
+                verifier_delta_state(1, 1),
+            ]))
         })
         .unwrap();
 
@@ -497,6 +494,39 @@ mod tests {
             result.pass_results[0].verify.status,
             PassVerifyStatus::Accepted
         );
+    }
+
+    fn verifier_delta_state(pc: usize, r0: u64) -> pass::VerifierInsn {
+        pass::VerifierInsn {
+            pc,
+            frame: 0,
+            from_pc: None,
+            kind: pass::VerifierInsnKind::InsnDeltaState,
+            speculative: false,
+            regs: HashMap::from([(
+                0,
+                pass::RegState {
+                    reg_type: "scalar".to_string(),
+                    value_width: pass::VerifierValueWidth::Bits64,
+                    precise: true,
+                    exact_value: Some(r0),
+                    tnum: Some(pass::Tnum { value: r0, mask: 0 }),
+                    range: pass::ScalarRange {
+                        smin: Some(r0 as i64),
+                        smax: Some(r0 as i64),
+                        umin: Some(r0),
+                        umax: Some(r0),
+                        smin32: Some(r0 as u32 as i32),
+                        smax32: Some(r0 as u32 as i32),
+                        umin32: Some(r0 as u32),
+                        umax32: Some(r0 as u32),
+                    },
+                    offset: None,
+                    id: None,
+                },
+            )]),
+            stack: HashMap::new(),
+        }
     }
 
     #[test]

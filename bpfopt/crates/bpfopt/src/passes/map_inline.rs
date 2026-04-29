@@ -8,7 +8,6 @@ use std::sync::OnceLock;
 use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
 use crate::insn::*;
 use crate::pass::*;
-use crate::verifier_log::VerifierInsn;
 
 const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY as u32;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
@@ -662,7 +661,7 @@ fn verifier_guided_stack_store_value(
     Some((state.pc, source_imm_pc, u64::from_le_bytes(key_bytes)))
 }
 
-fn verifier_known_scalar_value(reg: &crate::verifier_log::RegState) -> Option<u64> {
+fn verifier_known_scalar_value(reg: &crate::pass::RegState) -> Option<u64> {
     if reg.reg_type != "scalar" {
         return None;
     }

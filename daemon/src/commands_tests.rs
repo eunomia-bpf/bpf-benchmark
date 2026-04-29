@@ -607,30 +607,3 @@ fn test_build_pipeline_default() {
     let result = pm.run(&mut prog, &ctx).unwrap();
     assert!(!result.program_changed);
 }
-
-#[test]
-fn test_parse_verifier_states_from_log_accepts_parseable_states() {
-    let states = parse_verifier_states_from_log(
-        r#"
-0: R1=ctx() R10=fp0
-0: (85) call bpf_get_prandom_u32#7   ; R0=1
-"#,
-        "test verifier log",
-    )
-    .expect("state snapshots should parse");
-
-    assert_eq!(states.len(), 2);
-    assert_eq!(states[1].pc, 0);
-    assert_eq!(states[1].regs.get(&0).unwrap().exact_u64(), Some(1));
-}
-
-#[test]
-fn test_parse_verifier_states_from_log_rejects_nonempty_log_without_states() {
-    let err = parse_verifier_states_from_log(
-        "processed 4 insns (limit 1000000)\nsafe\n",
-        "test verifier log",
-    )
-    .expect_err("non-empty logs without parseable states should be rejected");
-
-    assert!(err.to_string().contains("parser found no state snapshots"));
-}

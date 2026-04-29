@@ -1,0 +1,18 @@
+[package]
+name = "bpfprof"
+version = "0.1.0"
+edition = "2021"
+description = "Collect BPF program runtime profile data"
+
+[[bin]]
+name = "bpfprof"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+humantime.workspace = true
+perf-event-open-sys.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+kernel-sys = { path = "../kernel-sys" }

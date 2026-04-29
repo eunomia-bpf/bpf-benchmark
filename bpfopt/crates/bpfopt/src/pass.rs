@@ -14,7 +14,6 @@ use std::sync::Arc;
 use serde::Serialize;
 
 use crate::insn::{dump_bytecode_compact, BpfBytecodeDump, BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
-use crate::verifier_log::VerifierInsn;
 
 // ── Per-instruction annotation — populated by analysis passes, read by transform passes.
 #[derive(Clone, Debug, Default)]
@@ -35,6 +34,88 @@ pub struct BranchProfile {
 pub struct ProfilingData {
     pub branch_profiles: HashMap<usize, BranchProfile>,
     pub branch_miss_rate: Option<f64>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum VerifierInsnKind {
+    EdgeFullState,
+    PcFullState,
+    InsnDeltaState,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum VerifierValueWidth {
+    Unknown,
+    Bits32,
+    Bits64,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct Tnum {
+    pub value: u64,
+    pub mask: u64,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct ScalarRange {
+    pub smin: Option<i64>,
+    pub smax: Option<i64>,
+    pub umin: Option<u64>,
+    pub umax: Option<u64>,
+    pub smin32: Option<i32>,
+    pub smax32: Option<i32>,
+    pub umin32: Option<u32>,
+    pub umax32: Option<u32>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct VerifierInsn {
+    pub pc: usize,
+    pub frame: usize,
+    pub from_pc: Option<usize>,
+    pub kind: VerifierInsnKind,
+    pub speculative: bool,
+    pub regs: HashMap<u8, RegState>,
+    pub stack: HashMap<i16, StackState>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RegState {
+    pub reg_type: String,
+    pub value_width: VerifierValueWidth,
+    pub precise: bool,
+    pub exact_value: Option<u64>,
+    pub tnum: Option<Tnum>,
+    pub range: ScalarRange,
+    pub offset: Option<i32>,
+    pub id: Option<u32>,
+}
+
+impl RegState {
+    pub fn exact_u64(&self) -> Option<u64> {
+        if self.reg_type != "scalar" {
+            return None;
+        }
+
+        match self.value_width {
+            VerifierValueWidth::Bits32 => None,
+            VerifierValueWidth::Bits64 | VerifierValueWidth::Unknown => self.exact_value,
+        }
+    }
+
+    pub fn exact_u32(&self) -> Option<u32> {
+        if self.reg_type != "scalar" {
+            return None;
+        }
+
+        self.exact_value.map(|value| value as u32)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct StackState {
+    pub slot_types: Option<String>,
+    pub value: Option<RegState>,
 }
 
 // ── Program IR ──────────────────────────────────────────────────────
@@ -335,12 +416,6 @@ impl BpfProgram {
     /// Attach parsed verifier states to this program.
     pub fn set_verifier_states(&mut self, states: Vec<VerifierInsn>) {
         self.verifier_states = Arc::from(states);
-    }
-
-    /// Parse and attach a raw verifier log to this program.
-    #[cfg(test)]
-    pub fn set_verifier_log(&mut self, log: &str) {
-        self.set_verifier_states(crate::verifier_log::parse_verifier_log(log));
     }
 
     /// Record a transform operation.

@@ -88,7 +88,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "bpfprof"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "humantime",
+ "kernel-sys",
+ "perf-event-open-sys",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "bpfrejit"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "kernel-sys",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "bpfverify"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -190,6 +214,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
+name = "humantime"
+version = "2.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "135b12329e5e3ce057a9f972339ea52bc954fe1e9358ef27f95e89716fbc5424"
+
+[[package]]
 name = "is_terminal_polyfill"
 version = "1.70.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -269,6 +299,15 @@ name = "once_cell_polyfill"
 version = "1.70.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
+
+[[package]]
+name = "perf-event-open-sys"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5f8d1487a4ffa23c80a1c355dd27235f9b66fb71ba0f261eb417e4fe8451347"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "pkg-config"

@@ -5,7 +5,7 @@
 //! fork-only commands that upstream libbpf does not expose.
 
 use std::ffi::c_char;
-use std::os::fd::{AsRawFd, BorrowedFd, FromRawFd, OwnedFd};
+use std::os::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, OwnedFd};
 
 use anyhow::{anyhow, bail, Result};
 
@@ -86,6 +86,27 @@ pub struct BpfProgInfoFork {
     pub attach_btf_id: u32,
     pub orig_prog_len: u32,
     pub orig_prog_insns: u64,
+}
+
+/// Options for a typed verifier dry-run load.
+pub struct ProgLoadDryRunOptions<'a> {
+    pub prog_type: bpf_prog_type,
+    pub expected_attach_type: Option<bpf_attach_type>,
+    pub insns: &'a [bpf_insn],
+    pub fd_array: Option<&'a [i32]>,
+    pub log_level: u32,
+    pub log_buf: Option<&'a mut [u8]>,
+}
+
+/// Result of a verifier dry-run load. Kernel verifier rejection is represented
+/// as `accepted = false`, while malformed inputs still return `Err`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ProgLoadDryRunReport {
+    pub accepted: bool,
+    pub errno: Option<i32>,
+    pub verifier_log: String,
+    pub log_true_size: u32,
+    pub jited_size: Option<u32>,
 }
 
 impl Default for BpfProgInfoFork {
@@ -171,7 +192,38 @@ pub fn prog_load_dryrun_with_fd_array(
     fd_array: Option<&[i32]>,
     mut log_buf: Option<&mut [u8]>,
 ) -> Result<()> {
-    let insn_cnt: size_t = insns
+    let log_level = if log_buf.is_some() { 2 } else { 0 };
+    let report = prog_load_dryrun_report(ProgLoadDryRunOptions {
+        prog_type,
+        expected_attach_type: None,
+        insns,
+        fd_array,
+        log_level,
+        log_buf: log_buf.as_deref_mut(),
+    })?;
+    if report.accepted {
+        return Ok(());
+    }
+
+    if report.verifier_log.is_empty() {
+        let errno = report.errno.unwrap_or(libc::EIO);
+        return Err(anyhow!("BPF_PROG_LOAD dry-run: {}", os_error(errno)));
+    }
+    let errno = report.errno.unwrap_or(libc::EIO);
+    Err(anyhow!(
+        "BPF_PROG_LOAD dry-run: {}\nverifier log:\n{}",
+        os_error(errno),
+        report.verifier_log
+    ))
+}
+
+/// Load raw BPF instructions through libbpf and report verifier status without
+/// treating verifier rejection as an API error.
+pub fn prog_load_dryrun_report(
+    mut options: ProgLoadDryRunOptions<'_>,
+) -> Result<ProgLoadDryRunReport> {
+    let insn_cnt: size_t = options
+        .insns
         .len()
         .try_into()
         .map_err(|_| anyhow!("instruction count does not fit libbpf size_t"))?;
@@ -179,7 +231,11 @@ pub fn prog_load_dryrun_with_fd_array(
     opts.sz = std::mem::size_of::<bpf_prog_load_opts>() as size_t;
     opts.attempts = 1;
 
-    if let Some(fd_array) = fd_array.filter(|fds| !fds.is_empty()) {
+    if let Some(expected_attach_type) = options.expected_attach_type {
+        opts.expected_attach_type = expected_attach_type;
+    }
+
+    if let Some(fd_array) = options.fd_array.filter(|fds| !fds.is_empty()) {
         opts.fd_array_cnt = fd_array
             .len()
             .try_into()
@@ -187,43 +243,57 @@ pub fn prog_load_dryrun_with_fd_array(
         opts.fd_array = fd_array.as_ptr();
     }
 
-    if let Some(buf) = log_buf.as_deref_mut() {
+    if options.log_level > 0 {
+        let Some(buf) = options.log_buf.as_deref_mut() else {
+            bail!("BPF_PROG_LOAD dry-run log_level requires a log buffer");
+        };
         if buf.is_empty() {
             bail!("BPF_PROG_LOAD dry-run log buffer must not be empty");
         }
-        opts.log_level = 2;
+        buf.fill(0);
+        opts.log_level = options.log_level;
         opts.log_size = buf.len() as u32;
         opts.log_buf = buf.as_mut_ptr() as *mut c_char;
     }
 
     let fd = unsafe {
         bpf_prog_load(
-            prog_type,
+            options.prog_type,
             DEFAULT_PROG_NAME.as_ptr() as *const c_char,
             DEFAULT_LICENSE.as_ptr() as *const c_char,
-            insns.as_ptr(),
+            options.insns.as_ptr(),
             insn_cnt,
             &mut opts,
         )
     };
 
+    let log = options
+        .log_buf
+        .as_deref()
+        .map(extract_log_string)
+        .unwrap_or_default();
     if fd < 0 {
-        let log = log_buf
-            .as_deref()
-            .map(extract_log_string)
-            .unwrap_or_default();
-        if log.is_empty() {
-            return Err(libbpf_error("BPF_PROG_LOAD dry-run", fd));
-        }
-        return Err(anyhow!(
-            "BPF_PROG_LOAD dry-run: {}\nverifier log:\n{}",
-            os_error(errno_from_libbpf_ret(fd)),
-            log
-        ));
+        return Ok(ProgLoadDryRunReport {
+            accepted: false,
+            errno: Some(errno_from_libbpf_ret(fd)),
+            verifier_log: log,
+            log_true_size: opts.log_true_size,
+            jited_size: None,
+        });
     }
 
-    drop(unsafe { OwnedFd::from_raw_fd(fd) });
-    Ok(())
+    let fd = unsafe { OwnedFd::from_raw_fd(fd) };
+    let jited_size = obj_get_info_by_fd(fd.as_fd())
+        .ok()
+        .map(|info| info.jited_prog_len);
+    drop(fd);
+    Ok(ProgLoadDryRunReport {
+        accepted: true,
+        errno: None,
+        verifier_log: log,
+        log_true_size: opts.log_true_size,
+        jited_size,
+    })
 }
 
 /// Return the next live BPF program ID after `start_id`.

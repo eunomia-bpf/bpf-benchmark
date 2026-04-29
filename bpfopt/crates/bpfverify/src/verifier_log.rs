@@ -124,6 +124,7 @@ pub fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
 ///    reports the state just before the error).
 ///
 /// Returns `None` if no meaningful PC can be extracted.
+#[cfg_attr(not(test), allow(dead_code))]
 pub fn extract_failure_pc(verifier_log: &str) -> Option<usize> {
     let lines: Vec<&str> = verifier_log.lines().collect();
     if lines.is_empty() {

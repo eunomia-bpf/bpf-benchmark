@@ -1418,6 +1418,7 @@ pub struct RejitResult {
 
 /// Result of a dry-run BPF_PROG_LOAD verification, including any verifier log.
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct ProgLoadVerifyResult {
     pub verifier_log: String,
     pub log_true_size: u32,
@@ -1704,6 +1705,7 @@ pub fn bpf_prog_rejit(
 
 /// Submit BPF bytecode to the kernel via `BPF_PROG_REJIT(log_level=2)` and
 /// return the verifier log even on success.
+#[allow(dead_code)]
 pub fn bpf_prog_rejit_capture_verifier_log(
     prog_fd: RawFd,
     insns: &[BpfInsn],

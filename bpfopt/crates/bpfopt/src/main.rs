@@ -16,12 +16,10 @@ use bpfopt::insn::{
 };
 use bpfopt::pass::{
     Analysis, BpfProgram, BranchProfile, KinsnRegistry, MapMetadata, PassContext, PassManager,
-    PassResult, PlatformCapabilities, ProfilingData, StaticKinsnCallResolver,
+    PassResult, PlatformCapabilities, ProfilingData, RegState, ScalarRange, StackState,
+    StaticKinsnCallResolver, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
 use bpfopt::passes::PASS_REGISTRY;
-use bpfopt::verifier_log::{
-    RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
-};
 use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 

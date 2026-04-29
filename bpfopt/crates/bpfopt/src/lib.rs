@@ -19,4 +19,3 @@ pub mod pass;
 pub mod passes;
 #[cfg(test)]
 pub mod test_utils;
-pub mod verifier_log;

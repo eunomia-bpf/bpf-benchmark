@@ -8,7 +8,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 use anyhow::{Context, Result};
-use bpfopt::{analysis, insn, pass, passes, verifier_log};
+use bpfopt::{analysis, insn, pass, passes};
 use serde::ser::{SerializeSeq, Serializer};
 use serde::Serialize;
 
@@ -416,20 +416,6 @@ fn error_headline(err: &anyhow::Error) -> String {
         .to_string()
 }
 
-fn parse_verifier_states_from_log(
-    log: &str,
-    source: &str,
-) -> Result<Vec<verifier_log::VerifierInsn>> {
-    let states = verifier_log::parse_verifier_log(log);
-    if !log.trim().is_empty() && states.is_empty() {
-        anyhow::bail!(
-            "{} returned a non-empty verifier log, but parser found no state snapshots",
-            source
-        );
-    }
-    Ok(states)
-}
-
 fn validate_required_btf_fds(
     required_btf_fds: &[RawFd],
     resolver: &pipeline::FdArrayKinsnCallResolver,
@@ -447,44 +433,6 @@ fn validate_required_btf_fds(
         }
     }
     Ok(())
-}
-
-fn maybe_attach_original_verifier_states(
-    prog_fd: RawFd,
-    orig_insns: &[insn::BpfInsn],
-    map_ids: &[u32],
-    program: &mut pass::BpfProgram,
-) {
-    let mut probe_insns = orig_insns.to_vec();
-    let map_fd_bindings = pass::build_map_fd_bindings(orig_insns, map_ids);
-    let capture = (|| -> Result<Vec<verifier_log::VerifierInsn>> {
-        let _map_fds_guard =
-            bpf::relocate_map_fds_with_bindings(&mut probe_insns, map_ids, &map_fd_bindings)
-                .context("relocate map FDs for verifier-log capture")?;
-        let result = bpf::bpf_prog_rejit_capture_verifier_log(prog_fd, &probe_insns, &[])
-            .context("capture original-program verifier log via BPF_PROG_REJIT(log_level=2)")?;
-        if result.verifier_log.trim().is_empty() {
-            anyhow::bail!(
-                "BPF_PROG_REJIT(log_level=2) original-program capture returned an empty verifier log"
-            );
-        }
-        parse_verifier_states_from_log(
-            &result.verifier_log,
-            "BPF_PROG_REJIT(log_level=2) original-program capture",
-        )
-    })();
-
-    match capture {
-        Ok(states) if !states.is_empty() => program.set_verifier_states(states),
-        Ok(_) => {}
-        Err(err) => {
-            let headline = error_headline(&err);
-            eprintln!(
-                "    warning: failed to capture original-program verifier log for prog fd {}: {}",
-                prog_fd, headline
-            );
-        }
-    }
 }
 
 /// Try to apply rewrites to a single program via PassManager.
@@ -562,22 +510,11 @@ pub(crate) fn try_apply_one(
     // Fetch map IDs for FD relocation before REJIT.
     let map_ids =
         bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).context("fetch program map IDs for apply")?;
-    let original_verifier_states = {
-        let mut seed_program = pass::BpfProgram::new(orig_insns.clone());
-        maybe_attach_original_verifier_states(
-            fd.as_raw_fd(),
-            &orig_insns,
-            &map_ids,
-            &mut seed_program,
-        );
-        seed_program.verifier_states.clone()
-    };
     let mut total_rejit_ns: u64 = 0;
     let mut program = pass::BpfProgram::new(orig_insns.clone());
     let live_map_provider = Arc::new(LiveMapProvider);
     program.set_map_providers(live_map_provider.clone(), live_map_provider);
     program.set_map_ids(map_ids.clone());
-    program.verifier_states = original_verifier_states.clone();
 
     let pm = passes::build_full_pipeline();
     let mut local_ctx = ctx.pass_context.clone();
@@ -587,98 +524,63 @@ pub(crate) fn try_apply_one(
     let pipeline_result = if matches!(mode, OptimizeMode::Apply) {
         let prog_load_meta = bpf::bpf_prog_load_meta_from_prog_info(prog_id, fd.as_raw_fd(), &info)
             .context("prepare live-program metadata for per-pass BPF_PROG_LOAD verify");
-        let mut verifier = |pass_name: &str,
-                            program: &pass::BpfProgram|
-         -> Result<pipeline::PassVerifyResult> {
-            let prog_load_meta = match prog_load_meta.as_ref() {
-                Ok(meta) => meta,
-                Err(err) => {
-                    let headline = error_headline(err);
-                    eprintln!(
-                        "    WARN: skipping pass '{}' for prog {} ({}): {}",
-                        pass_name,
-                        prog_id,
-                        info.name_str(),
-                        headline,
-                    );
-                    return Ok(pipeline::PassVerifyResult::rejected(headline));
-                }
-            };
+        let mut verifier =
+            |pass_name: &str, program: &pass::BpfProgram| -> Result<pipeline::PassVerifyResult> {
+                let prog_load_meta = match prog_load_meta.as_ref() {
+                    Ok(meta) => meta,
+                    Err(err) => {
+                        let headline = error_headline(err);
+                        eprintln!(
+                            "    WARN: skipping pass '{}' for prog {} ({}): {}",
+                            pass_name,
+                            prog_id,
+                            info.name_str(),
+                            headline,
+                        );
+                        return Ok(pipeline::PassVerifyResult::rejected(headline));
+                    }
+                };
 
-            let mut verify_insns = program.insns.clone();
-            let _map_fds_guard = bpf::relocate_map_fds_with_bindings(
-                &mut verify_insns,
-                &map_ids,
-                &program.map_fd_bindings,
-            )
-            .with_context(|| {
-                format!(
-                    "relocate map FDs before per-pass verify for pass '{}'",
-                    pass_name
+                let mut verify_insns = program.insns.clone();
+                let _map_fds_guard = bpf::relocate_map_fds_with_bindings(
+                    &mut verify_insns,
+                    &map_ids,
+                    &program.map_fd_bindings,
                 )
-            })?;
+                .with_context(|| {
+                    format!(
+                        "relocate map FDs before per-pass verify for pass '{}'",
+                        pass_name
+                    )
+                })?;
 
-            let required_btf_fds = ctx.kinsn_resolver.required_btf_fds()?;
-            validate_required_btf_fds(
-                &required_btf_fds,
-                &ctx.kinsn_resolver,
-                &format!("per-pass verify for '{}'", pass_name),
-            )?;
-            let fd_array = build_rejit_fd_array(&required_btf_fds);
+                let required_btf_fds = ctx.kinsn_resolver.required_btf_fds()?;
+                validate_required_btf_fds(
+                    &required_btf_fds,
+                    &ctx.kinsn_resolver,
+                    &format!("per-pass verify for '{}'", pass_name),
+                )?;
+                let fd_array = build_rejit_fd_array(&required_btf_fds);
 
-            let rejit_start = Instant::now();
-            let verify_result = match bpf::bpf_prog_load_verify(
-                prog_load_meta,
-                &verify_insns,
-                &fd_array,
-            ) {
-                Ok(result) => {
-                    let states = if result.verifier_log.is_empty() {
-                        if result.log_true_size > 0 {
+                let rejit_start = Instant::now();
+                let verify_result =
+                    match bpf::bpf_prog_load_verify(prog_load_meta, &verify_insns, &fd_array) {
+                        Ok(_) => pipeline::PassVerifyResult::accepted(),
+                        Err(err) => {
+                            let headline = error_headline(&err);
                             eprintln!(
-                                    "    WARN: accepted pass '{}' for prog {} ({}) exceeded the verifier log buffer (true size {} bytes); verifier-guided states are unavailable for subsequent passes",
-                                    pass_name,
-                                    prog_id,
-                                    info.name_str(),
-                                    result.log_true_size
-                                );
-                        }
-                        Vec::new()
-                    } else {
-                        match parse_verifier_states_from_log(
-                            &result.verifier_log,
-                            "BPF_PROG_LOAD(log_level=2) per-pass verify",
-                        ) {
-                            Ok(states) => states,
-                            Err(err) => {
-                                eprintln!(
-                                        "    WARN: accepted pass '{}' for prog {} ({}) produced an unusable verifier log: {:#}; verifier-guided states are unavailable for subsequent passes",
-                                        pass_name,
-                                        prog_id,
-                                        info.name_str(),
-                                        err
-                                    );
-                                Vec::new()
-                            }
+                                "    WARN: skipping pass '{}' for prog {} ({}): {}",
+                                pass_name,
+                                prog_id,
+                                info.name_str(),
+                                headline,
+                            );
+                            pipeline::PassVerifyResult::rejected(headline)
                         }
                     };
-                    pipeline::PassVerifyResult::accepted_with_verifier_states(states)
-                }
-                Err(err) => {
-                    let headline = error_headline(&err);
-                    eprintln!(
-                        "    WARN: skipping pass '{}' for prog {} ({}): {}",
-                        pass_name,
-                        prog_id,
-                        info.name_str(),
-                        headline,
-                    );
-                    pipeline::PassVerifyResult::rejected(headline)
-                }
+                total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
+                Ok(verify_result)
             };
-            total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
-            Ok(verify_result)
-        };
 
         if let Some(profiling) = profiling {
             pipeline::run_with_profiling_and_verifier(
@@ -931,7 +833,7 @@ pub(crate) fn try_apply_one(
                     attempt: 0,
                     disabled_passes: vec![],
                     result: "rejit_failed".to_string(),
-                    failure_pc: verifier_log::extract_failure_pc(log_text),
+                    failure_pc: None,
                     attributed_pass: None,
                     debug: attempt_debug,
                 }],

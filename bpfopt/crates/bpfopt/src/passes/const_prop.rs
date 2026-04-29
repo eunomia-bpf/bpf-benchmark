@@ -6,7 +6,6 @@ use std::collections::{BTreeMap, HashSet};
 use crate::analysis::CFGAnalysis;
 use crate::insn::*;
 use crate::pass::*;
-use crate::verifier_log::{VerifierInsn, VerifierInsnKind};
 
 const REG_COUNT: usize = 11;
 
@@ -74,7 +73,7 @@ impl<T: Copy + Eq> Consensus<T> {
 }
 
 impl OracleExactAccumulator {
-    fn observe(&mut self, reg: &crate::verifier_log::RegState) {
+    fn observe(&mut self, reg: &crate::pass::RegState) {
         self.saw_observation = true;
 
         if reg.reg_type != "scalar" {
@@ -851,6 +850,40 @@ mod tests {
         BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, imm)
     }
 
+    fn scalar_reg(value: u64) -> RegState {
+        RegState {
+            reg_type: "scalar".to_string(),
+            value_width: VerifierValueWidth::Bits64,
+            precise: true,
+            exact_value: Some(value),
+            tnum: Some(Tnum { value, mask: 0 }),
+            range: ScalarRange {
+                smin: Some(value as i64),
+                smax: Some(value as i64),
+                umin: Some(value),
+                umax: Some(value),
+                smin32: Some(value as u32 as i32),
+                smax32: Some(value as u32 as i32),
+                umin32: Some(value as u32),
+                umax32: Some(value as u32),
+            },
+            offset: None,
+            id: None,
+        }
+    }
+
+    fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
+        VerifierInsn {
+            pc,
+            frame: 0,
+            from_pc: None,
+            kind: VerifierInsnKind::InsnDeltaState,
+            speculative: false,
+            regs,
+            stack: HashMap::new(),
+        }
+    }
+
     fn install_array_map(map_id: u32, value: Vec<u8>) {
         let mut values = HashMap::new();
         values.insert(1u32.to_le_bytes().to_vec(), value.clone());
@@ -1001,15 +1034,12 @@ mod tests {
             BpfInsn::mov64_imm(0, 1),
             exit_insn(),
         ]);
-        program.set_verifier_log(
-            r#"
-0: R1=ctx() R10=fp0
-0: (85) call bpf_get_prandom_u32#7   ; R0=1
-1: (15) if r0 == 0x1 goto pc+1       ; R0=1
-2: (b7) r0 = 0                       ; R0=0
-3: (b7) r0 = 1                       ; R0=1
-"#,
-        );
+        program.set_verifier_states(vec![
+            verifier_delta_state(0, HashMap::from([(0, scalar_reg(1))])),
+            verifier_delta_state(1, HashMap::from([(0, scalar_reg(1))])),
+            verifier_delta_state(2, HashMap::from([(0, scalar_reg(0))])),
+            verifier_delta_state(3, HashMap::from([(0, scalar_reg(1))])),
+        ]);
 
         let result = run_const_prop_pass(&mut program);
 
