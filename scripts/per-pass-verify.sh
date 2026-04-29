@@ -8,22 +8,32 @@
 #
 # Examples:
 #   scripts/per-pass-verify.sh 123 xdp
-#   BPFOPT_PASSES=map-inline,const-prop,dce scripts/per-pass-verify.sh 123 xdp
+#   BPFOPT_PASSES=const-prop BPFOPT_VERIFIER_STATES=states.json scripts/per-pass-verify.sh 123 xdp
 #   BPFOPT_DRY_RUN=1 scripts/per-pass-verify.sh 123 xdp
 #
 # Environment:
-#   BPFOPT_PASSES   Comma-separated pass list. Defaults to the v3 section 5 order.
-#   BPFOPT_DRY_RUN  Set to 1 to print commands without executing them.
+#   BPFOPT_PASSES           Comma-separated pass list. Defaults to the zero-side-input subset:
+#                           dce,skb-load-bytes,bounds-check-merge,wide-mem.
+#   BPFOPT_TARGET           target.json path passed to bpfopt --target.
+#   BPFOPT_VERIFIER_STATES  verifier-states.json path passed to bpfopt --verifier-states.
+#   BPFOPT_MAP_VALUES       map-values.json path passed to bpfopt --map-values.
+#   BPFOPT_MAP_IDS          Comma-separated map IDs passed to bpfopt --map-ids.
+#   BPFOPT_PROFILE          profile.json path passed to bpfopt --profile.
+#   BPFOPT_DRY_RUN          Set to 1 to print commands without executing them.
+#
+# To run passes that require side inputs, set BPFOPT_PASSES explicitly and provide the
+# corresponding BPFOPT_* environment variables above.
 #
 # Dependencies:
 #   bash, diff, mktemp, cp, rm, bpfget, bpfopt, bpfverify, bpfrejit
 
 set -euo pipefail
 
-DEFAULT_PASSES="map-inline,const-prop,dce,skb-load-bytes,bounds-check-merge,wide-mem,bulk-memory,rotate,cond-select,extract,endian,branch-flip"
+DEFAULT_PASSES="dce,skb-load-bytes,bounds-check-merge,wide-mem"
 CURRENT=""
 CANDIDATE=""
 PASSES=()
+BPFOPT_SIDE_INPUT_ARGS=()
 
 usage() {
   cat <<'USAGE'
@@ -32,7 +42,7 @@ Usage:
 
 Examples:
   scripts/per-pass-verify.sh 123 xdp
-  BPFOPT_PASSES=map-inline,const-prop,dce scripts/per-pass-verify.sh 123 xdp
+  BPFOPT_PASSES=const-prop BPFOPT_VERIFIER_STATES=states.json scripts/per-pass-verify.sh 123 xdp
   BPFOPT_DRY_RUN=1 scripts/per-pass-verify.sh 123 xdp
 USAGE
 }
@@ -72,10 +82,39 @@ parse_passes() {
   fi
 }
 
+append_bpfopt_arg_if_set() {
+  local env_name=$1
+  local flag=$2
+  local value=${!env_name:-}
+
+  if [[ -n $value ]]; then
+    BPFOPT_SIDE_INPUT_ARGS+=("$flag" "$value")
+  fi
+}
+
+build_bpfopt_side_input_args() {
+  BPFOPT_SIDE_INPUT_ARGS=()
+  append_bpfopt_arg_if_set BPFOPT_TARGET --target
+  append_bpfopt_arg_if_set BPFOPT_VERIFIER_STATES --verifier-states
+  append_bpfopt_arg_if_set BPFOPT_MAP_VALUES --map-values
+  append_bpfopt_arg_if_set BPFOPT_MAP_IDS --map-ids
+  append_bpfopt_arg_if_set BPFOPT_PROFILE --profile
+}
+
 print_cmd() {
   printf '+'
   printf ' %q' "$@"
   printf '\n'
+}
+
+print_bpfopt_cmd() {
+  local pass=$1
+  local input=$2
+  local output=$3
+
+  printf '+'
+  printf ' %q' bpfopt "$pass" "${BPFOPT_SIDE_INPUT_ARGS[@]}"
+  printf ' < %q > %q\n' "$input" "$output"
 }
 
 cleanup() {
@@ -97,7 +136,7 @@ run_dry_run() {
   printf '+ bpfget %q > %q\n' "$prog_id" "$current"
 
   for pass in "${PASSES[@]}"; do
-    printf '+ bpfopt %q < %q > %q 2>/dev/null\n' "$pass" "$current" "$candidate"
+    print_bpfopt_cmd "$pass" "$current" "$candidate"
     print_cmd diff -q "$current" "$candidate"
     printf '+ bpfverify --prog-type %q < %q >/dev/null\n' "$prog_type" "$candidate"
     print_cmd cp "$candidate" "$current"
@@ -123,6 +162,7 @@ main() {
   local pass diff_status
 
   parse_passes
+  build_bpfopt_side_input_args
 
   if [[ ${BPFOPT_DRY_RUN:-0} == "1" ]]; then
     run_dry_run "$prog_id" "$prog_type"
@@ -139,7 +179,7 @@ main() {
   fi
 
   for pass in "${PASSES[@]}"; do
-    if ! bpfopt "$pass" <"$CURRENT" >"$CANDIDATE" 2>/dev/null; then
+    if ! bpfopt "$pass" "${BPFOPT_SIDE_INPUT_ARGS[@]}" <"$CURRENT" >"$CANDIDATE"; then
       warn "pass $pass: bpfopt failed, rolled back"
       continue
     fi
