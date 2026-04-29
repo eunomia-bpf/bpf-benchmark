@@ -1,0 +1,33 @@
+{
+  "case": "tetragon",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "Tetragon case could not run: daemon session exited early (rc=1)",
+  "generated_at": "2026-04-29T10:41:36.802650+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-29T10:41:36.802648+00:00",
+  "launcher_boot_id": "85c09638-8049-47da-abc1-830fc973ce6e",
+  "launcher_pid": 1787,
+  "launcher_start_ticks": 40403,
+  "policy": {
+    "exclusions": {}
+  },
+  "run_type": "tetragon",
+  "started_at": "2026-04-29T10:41:08.368706+00:00",
+  "status": "error",
+  "suite": "e2e"
+}
