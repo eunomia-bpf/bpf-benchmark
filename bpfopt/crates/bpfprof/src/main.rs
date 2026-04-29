@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 //! bpfprof CLI entry point.
+//!
+//! Known limitation: branch PMU data requires `perf_event_paranoid <= 2` and
+//! container permission such as `SYS_ADMIN`. When PMU counters are unavailable,
+//! bpfprof still emits BPF run stats with `pmu_available: false` and nullable
+//! `branch_*` fields.
 
 use std::collections::BTreeMap;
 use std::fs::{self, File};
@@ -52,18 +57,13 @@ struct ProgStats {
     run_time_ns: u64,
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-struct BranchCounts {
-    branch_misses: u64,
-    branch_instructions: u64,
-}
-
 #[derive(Clone, Debug, Serialize, PartialEq)]
 struct ProfileJson {
     prog_id: u32,
     duration_ms: u64,
     run_cnt_delta: u64,
     run_time_ns_delta: u64,
+    pmu_available: bool,
     branch_miss_rate: Option<f64>,
     branch_misses: Option<u64>,
     branch_instructions: Option<u64>,
@@ -110,15 +110,11 @@ fn run() -> Result<()> {
     let _stats_fd = kernel_sys::enable_stats(kernel_sys::BPF_STATS_RUN_TIME)
         .context("BPF_ENABLE_STATS(BPF_STATS_RUN_TIME)")?;
     let before = read_snapshots(&targets)?;
-    let pmu = BranchCounters::open().context("open PMU branch counters")?;
-    pmu.reset_and_enable()?;
-    thread::sleep(cli.duration);
-    pmu.disable()?;
-    let branch = pmu.read_counts()?;
+    let pmu_available = collect_pmu_availability(cli.duration);
     let after = read_snapshots(&targets)?;
 
     let duration_ms = duration_ms(cli.duration);
-    let profiles = build_profiles(&targets, &before, &after, branch, duration_ms);
+    let profiles = build_profiles(&targets, &before, &after, pmu_available, duration_ms);
     write_profiles(&cli, &profiles)?;
     if cli.show {
         print_table(&profiles)?;
@@ -203,7 +199,7 @@ fn build_profiles(
     targets: &[Target],
     before: &BTreeMap<u32, ProgStats>,
     after: &BTreeMap<u32, ProgStats>,
-    _branch: BranchCounts,
+    pmu_available: bool,
     duration_ms: u64,
 ) -> Vec<ProfileRow> {
     let mut rows = targets
@@ -219,6 +215,7 @@ fn build_profiles(
                     duration_ms,
                     run_cnt_delta: after.run_cnt.saturating_sub(before.run_cnt),
                     run_time_ns_delta: after.run_time_ns.saturating_sub(before.run_time_ns),
+                    pmu_available,
                     branch_miss_rate: None,
                     branch_misses: None,
                     branch_instructions: None,
@@ -334,6 +331,59 @@ fn print_table(rows: &[ProfileRow]) -> Result<()> {
     Ok(())
 }
 
+fn collect_pmu_availability(duration: Duration) -> bool {
+    collect_pmu_availability_with(duration, try_open_pmu, thread::sleep)
+}
+
+fn collect_pmu_availability_with<OpenPmu, SleepFn>(
+    duration: Duration,
+    open_pmu: OpenPmu,
+    sleep: SleepFn,
+) -> bool
+where
+    OpenPmu: FnOnce() -> Result<BranchCounters>,
+    SleepFn: FnOnce(Duration),
+{
+    let pmu = match open_pmu() {
+        Ok(pmu) => pmu,
+        Err(err) => {
+            warn_pmu_unavailable(&err);
+            sleep(duration);
+            return false;
+        }
+    };
+
+    if let Err(err) = pmu.reset_and_enable() {
+        warn_pmu_unavailable(&err);
+        sleep(duration);
+        return false;
+    }
+
+    sleep(duration);
+
+    if let Err(err) = pmu.disable() {
+        warn_pmu_unavailable(&err);
+        return false;
+    }
+
+    if let Err(err) = pmu.read_counts() {
+        warn_pmu_unavailable(&err);
+        return false;
+    }
+
+    true
+}
+
+fn try_open_pmu() -> Result<BranchCounters> {
+    BranchCounters::open().context("open PMU branch counters")
+}
+
+fn warn_pmu_unavailable(err: &anyhow::Error) {
+    eprintln!(
+        "warning: PMU branch counters unavailable ({err:#}); continuing with branch_miss_rate, branch_misses, and branch_instructions set to null"
+    );
+}
+
 impl BranchCounters {
     fn open() -> Result<Self> {
         let instructions = open_perf_counter(perf::PERF_COUNT_HW_BRANCH_INSTRUCTIONS as u64)
@@ -355,13 +405,12 @@ impl BranchCounters {
         self.ioctl_all("disable", |fd| unsafe { ioctls::DISABLE(fd, 0) })
     }
 
-    fn read_counts(mut self) -> Result<BranchCounts> {
-        Ok(BranchCounts {
-            branch_instructions: read_counter(&mut self.instructions)
-                .context("read branch-instructions PMU counter")?,
-            branch_misses: read_counter(&mut self.misses)
-                .context("read branch-misses PMU counter")?,
-        })
+    fn read_counts(mut self) -> Result<()> {
+        let _branch_instructions =
+            read_counter(&mut self.instructions).context("read branch-instructions PMU counter")?;
+        let _branch_misses =
+            read_counter(&mut self.misses).context("read branch-misses PMU counter")?;
+        Ok(())
     }
 
     fn ioctl_all<F>(&self, action: &str, ioctl: F) -> Result<()>
@@ -446,6 +495,7 @@ fn error_is_enoent(err: &anyhow::Error) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::cell::Cell;
 
     #[test]
     fn profile_json_serializes_nullable_branch_metrics() {
@@ -454,6 +504,7 @@ mod tests {
             duration_ms: 500,
             run_cnt_delta: 10,
             run_time_ns_delta: 2_000,
+            pmu_available: false,
             branch_miss_rate: None,
             branch_misses: None,
             branch_instructions: None,
@@ -466,6 +517,7 @@ mod tests {
         assert_eq!(value["duration_ms"], 500);
         assert_eq!(value["run_cnt_delta"], 10);
         assert_eq!(value["run_time_ns_delta"], 2_000);
+        assert_eq!(value["pmu_available"], false);
         assert!(value["branch_miss_rate"].is_null());
         assert!(value["branch_misses"].is_null());
         assert!(value["branch_instructions"].is_null());
@@ -508,16 +560,7 @@ mod tests {
             ),
         ]);
 
-        let rows = build_profiles(
-            &targets,
-            &before,
-            &after,
-            BranchCounts {
-                branch_misses: 1,
-                branch_instructions: 4,
-            },
-            100,
-        );
+        let rows = build_profiles(&targets, &before, &after, true, 100);
 
         assert_eq!(rows[0].profile.prog_id, 1);
         assert_eq!(rows[0].profile.run_cnt_delta, 20);
@@ -541,23 +584,33 @@ mod tests {
             },
         )]);
 
-        let rows = build_profiles(
-            &targets,
-            &before,
-            &after,
-            BranchCounts {
-                branch_misses: 99,
-                branch_instructions: 100,
-            },
-            250,
-        );
+        let rows = build_profiles(&targets, &before, &after, true, 250);
 
         assert_eq!(rows.len(), 1);
         assert_eq!(rows[0].profile.run_cnt_delta, 4);
         assert_eq!(rows[0].profile.run_time_ns_delta, 80);
+        assert!(rows[0].profile.pmu_available);
         assert_eq!(rows[0].profile.branch_miss_rate, None);
         assert_eq!(rows[0].profile.branch_misses, None);
         assert_eq!(rows[0].profile.branch_instructions, None);
+    }
+
+    #[test]
+    fn pmu_open_failure_marks_unavailable_and_preserves_sampling_window() {
+        let slept = Cell::new(false);
+        let duration = Duration::from_millis(25);
+
+        let available = collect_pmu_availability_with(
+            duration,
+            || Err(anyhow!("perf_event_open: Operation not permitted")),
+            |slept_duration| {
+                assert_eq!(slept_duration, duration);
+                slept.set(true);
+            },
+        );
+
+        assert!(!available);
+        assert!(slept.get());
     }
 
     fn fake_target(prog_id: u32, name: &str, prog_type: u32) -> Target {

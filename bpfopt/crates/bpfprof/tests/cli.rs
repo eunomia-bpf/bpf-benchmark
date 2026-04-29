@@ -2,10 +2,13 @@ use std::process::Command;
 
 fn permission_or_kernel_unavailable(stderr: &[u8]) -> bool {
     let stderr = String::from_utf8_lossy(stderr);
+    if stderr.contains("perf_event_open") || stderr.contains("PMU branch counters") {
+        return false;
+    }
+
     stderr.contains("Operation not permitted")
         || stderr.contains("Permission denied")
         || stderr.contains("BPF_ENABLE_STATS")
-        || stderr.contains("perf_event_open")
 }
 
 #[test]
@@ -37,7 +40,21 @@ fn all_mode_writes_json_array_or_skips_without_kernel_access() {
         String::from_utf8_lossy(&output.stderr)
     );
     let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
-    assert!(json.is_array(), "json={json}");
+    let profiles = json.as_array().expect("json array");
+    for profile in profiles {
+        assert!(profile["pmu_available"].is_boolean(), "profile={profile}");
+        assert!(profile["branch_miss_rate"].is_null(), "profile={profile}");
+        assert!(profile["branch_misses"].is_null(), "profile={profile}");
+        assert!(
+            profile["branch_instructions"].is_null(),
+            "profile={profile}"
+        );
+    }
+    if String::from_utf8_lossy(&output.stderr).contains("PMU branch counters unavailable") {
+        for profile in profiles {
+            assert_eq!(profile["pmu_available"], false, "profile={profile}");
+        }
+    }
 }
 
 #[test]
