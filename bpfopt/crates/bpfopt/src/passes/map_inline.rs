@@ -9,7 +9,11 @@ use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
+const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH;
+const BPF_MAP_TYPE_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_HASH;
 const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
+const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH;
+const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
@@ -90,6 +94,8 @@ struct FrozenMapValue {
     map_id: u32,
     value: Vec<u8>,
 }
+
+type DirectMapValueLoadRewrites = (BTreeMap<usize, Vec<BpfInsn>>, usize, Vec<String>);
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum KeyPointerOrigin {
@@ -781,7 +787,7 @@ fn run_map_inline_round(
     let mut rewrites = Vec::new();
     let mut diagnostics = Vec::new();
     let (direct_replacements, direct_sites_applied, direct_diagnostics) =
-        build_direct_map_value_load_rewrites(program);
+        build_direct_map_value_load_rewrites(program)?;
     diagnostics.extend(direct_diagnostics);
     let sites = find_map_lookup_sites(&program.insns);
 
@@ -851,7 +857,7 @@ fn run_map_inline_round(
         ) {
             Ok(key) => key,
             Err(detail) => {
-                if crate::pass::is_missing_map_value_snapshot_error(&detail) {
+                if is_concrete_map_value_snapshot_error(&detail) {
                     return Err(anyhow::anyhow!(
                         "map_inline requires a concrete snapshot value while extracting lookup key at pc {}: {}",
                         site.call_pc,
@@ -937,7 +943,7 @@ fn run_map_inline_round(
             }
             Err(err) => {
                 let message = format!("{err:#}");
-                if crate::pass::is_missing_map_value_snapshot_error(&message) {
+                if is_concrete_map_value_snapshot_error(&message) {
                     return Err(err.context(format!(
                         "map_inline requires a concrete snapshot value for map {} key {} at lookup pc {}",
                         info.map_id,
@@ -1283,6 +1289,19 @@ fn build_site_rewrite(
         "site pc={} reading map_id={} key={:?} lookup_value_size={}",
         site.call_pc, info.map_id, encoded_key, lookup_value_size
     ));
+    if program.has_null_map_value_snapshot(info.map_id, &encoded_key) {
+        if is_hash_like_map_type(info.map_type) {
+            return Err(site_level_inline_veto(format!(
+                "hash-like map {} has no live entry for key {}",
+                info.map_id,
+                format_bytes_preview(&encoded_key)
+            )));
+        }
+        return Err(anyhow::anyhow!(null_map_value_snapshot_message(
+            info.map_id,
+            &encoded_key
+        )));
+    }
     let value = match program.map_value_provider.lookup_elem(
         program,
         info.map_id,
@@ -1406,7 +1425,7 @@ fn site_can_attempt_lookup_pattern_removal(
 
 fn build_direct_map_value_load_rewrites(
     program: &BpfProgram,
-) -> (BTreeMap<usize, Vec<BpfInsn>>, usize, Vec<String>) {
+) -> anyhow::Result<DirectMapValueLoadRewrites> {
     let mut replacements = BTreeMap::new();
     let mut sites_applied = 0usize;
     let mut diagnostics = Vec::new();
@@ -1455,12 +1474,14 @@ fn build_direct_map_value_load_rewrites(
             continue;
         }
 
-        let Some(map_value) =
-            resolve_frozen_map_value(program, old_fd, &mut map_cache, &mut diagnostics)
-        else {
-            pc += insn_width(insn);
-            continue;
-        };
+        let map_value =
+            match resolve_frozen_map_value(program, old_fd, &mut map_cache, &mut diagnostics)? {
+                Some(map_value) => map_value,
+                None => {
+                    pc += insn_width(insn);
+                    continue;
+                }
+            };
 
         let offset = total_off as usize;
         let Some(scalar) = read_scalar_from_value_at(&map_value.value, offset, bpf_size(insn.code))
@@ -1499,7 +1520,7 @@ fn build_direct_map_value_load_rewrites(
         pc += insn_width(insn);
     }
 
-    (replacements, sites_applied, diagnostics)
+    Ok((replacements, sites_applied, diagnostics))
 }
 
 fn resolve_frozen_map_value(
@@ -1507,9 +1528,9 @@ fn resolve_frozen_map_value(
     old_fd: i32,
     cache: &mut HashMap<i32, Option<FrozenMapValue>>,
     diagnostics: &mut Vec<String>,
-) -> Option<FrozenMapValue> {
+) -> anyhow::Result<Option<FrozenMapValue>> {
     if let Some(cached) = cache.get(&old_fd) {
-        return cached.clone();
+        return Ok(cached.clone());
     }
 
     let resolved = (|| -> anyhow::Result<Option<FrozenMapValue>> {
@@ -1532,16 +1553,28 @@ fn resolve_frozen_map_value(
             .map_value_provider
             .lookup_value_size(program, &info)
             .map_err(anyhow::Error::msg)?;
-        let value = program
+        let value = match program
             .map_value_provider
             .lookup_elem(program, map_id, &key, value_size)
-            .map_err(anyhow::Error::msg)?;
+        {
+            Ok(value) => value,
+            Err(err)
+                if is_null_map_value_snapshot_error(&err)
+                    && is_hash_like_map_type(info.map_type) =>
+            {
+                return Ok(None);
+            }
+            Err(err) => return Err(anyhow::Error::msg(err)),
+        };
         Ok(Some(FrozenMapValue { map_id, value }))
     })();
 
     let cached = match resolved {
         Ok(value) => value,
         Err(err) => {
+            if is_concrete_map_value_snapshot_error(&format!("{err:#}")) {
+                return Err(err);
+            }
             record_diagnostic(
                 diagnostics,
                 format!(
@@ -1553,7 +1586,7 @@ fn resolve_frozen_map_value(
         }
     };
     cache.insert(old_fd, cached.clone());
-    cached
+    Ok(cached)
 }
 
 fn encode_key_bytes(bytes: &[u8], key_size: usize) -> Vec<u8> {
@@ -1675,6 +1708,20 @@ fn site_level_inline_veto_reason(err: &anyhow::Error) -> Option<String> {
     err.to_string()
         .strip_prefix(SITE_LEVEL_INLINE_VETO_PREFIX)
         .map(str::to_string)
+}
+
+fn is_concrete_map_value_snapshot_error(message: &str) -> bool {
+    is_missing_map_value_snapshot_error(message) || is_null_map_value_snapshot_error(message)
+}
+
+fn is_hash_like_map_type(map_type: u32) -> bool {
+    matches!(
+        map_type,
+        BPF_MAP_TYPE_HASH
+            | BPF_MAP_TYPE_PERCPU_HASH
+            | BPF_MAP_TYPE_LRU_HASH
+            | BPF_MAP_TYPE_LRU_PERCPU_HASH
+    )
 }
 
 fn lookup_pattern_removal_is_safe(

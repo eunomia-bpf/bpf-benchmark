@@ -148,6 +148,8 @@ pub struct BpfProgram {
     /// Pre-loaded map value snapshot: (map_id, key_bytes) -> value_bytes.
     /// Used by offline snapshot callers and unit tests.
     pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
+    /// Explicit lookup misses from map-values.json: (map_id, key_bytes).
+    pub map_value_nulls: HashSet<(u32, Vec<u8>)>,
     /// Pre-loaded map metadata: map_id -> MapMetadata.
     /// Used by offline snapshot callers and unit tests.
     pub map_metadata: HashMap<u32, MapMetadata>,
@@ -276,6 +278,9 @@ impl MapValueProvider for SnapshotMapProvider {
             }
             return Ok(value.clone());
         }
+        if program.map_value_nulls.contains(&(map_id, key.to_vec())) {
+            return Err(null_map_value_snapshot_message(map_id, key));
+        }
 
         #[cfg(test)]
         if let Some(result) = crate::mock_maps::mock_lookup_elem(map_id, key, value_size) {
@@ -300,8 +305,20 @@ pub fn missing_map_value_snapshot_message(map_id: u32, key: &[u8]) -> String {
     )
 }
 
+pub fn null_map_value_snapshot_message(map_id: u32, key: &[u8]) -> String {
+    format!(
+        "map_values snapshot has explicit null for map {} key {}",
+        map_id,
+        hex_bytes(key)
+    )
+}
+
 pub fn is_missing_map_value_snapshot_error(message: &str) -> bool {
     message.contains("map_values snapshot missing map ")
+}
+
+pub fn is_null_map_value_snapshot_error(message: &str) -> bool {
+    message.contains("map_values snapshot has explicit null for map ")
 }
 
 fn hex_bytes(bytes: &[u8]) -> String {
@@ -333,10 +350,15 @@ impl BpfProgram {
             branch_miss_rate: None,
             verifier_states: Arc::from([]),
             map_values: HashMap::new(),
+            map_value_nulls: HashSet::new(),
             map_metadata: HashMap::new(),
             map_info_provider: Arc::new(SnapshotMapProvider),
             map_value_provider: Arc::new(SnapshotMapProvider),
         }
+    }
+
+    pub fn has_null_map_value_snapshot(&self, map_id: u32, key: &[u8]) -> bool {
+        self.map_value_nulls.contains(&(map_id, key.to_vec()))
     }
 
     /// Install map providers for live runtime or specialized test execution.

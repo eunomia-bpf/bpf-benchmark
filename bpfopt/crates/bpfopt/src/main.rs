@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! bpfopt CLI entry point.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
@@ -12,7 +12,7 @@ use anyhow::{anyhow, bail, Context, Result};
 use bpfopt::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis, MapInfoAnalysis};
 use bpfopt::insn::{
     bpf_op, BpfInsn, BPF_CALL, BPF_DW, BPF_EXIT, BPF_IMM, BPF_JA, BPF_LD, BPF_PSEUDO_KINSN_CALL,
-    BPF_PSEUDO_MAP_FD,
+    BPF_PSEUDO_MAP_FD, BPF_PSEUDO_MAP_VALUE,
 };
 use bpfopt::pass::{
     self, Analysis, BpfProgram, BranchProfile, KinsnRegistry, MapMetadata, MapValueProvider,
@@ -555,12 +555,49 @@ fn run_scan_map_keys(common: &CommonArgs) -> Result<()> {
             key_hex: hex_bytes(&key),
         })
         .collect::<Vec<_>>();
+    keys.extend(scan_pseudo_map_value_keys(&program)?);
     keys.sort();
     keys.dedup();
     write_json(
         common.output.as_deref(),
         &ScanMapKeysReport { complete, keys },
     )
+}
+
+fn scan_pseudo_map_value_keys(program: &BpfProgram) -> Result<Vec<ScannedMapKeyReport>> {
+    let mut keys = Vec::new();
+    let mut pc = 0usize;
+    while pc < program.insns.len() {
+        let insn = program.insns[pc];
+        if !insn.is_ldimm64() {
+            pc += 1;
+            continue;
+        }
+
+        if insn.src_reg() != BPF_PSEUDO_MAP_VALUE {
+            pc += 2;
+            continue;
+        }
+        if pc + 1 >= program.insns.len() {
+            bail!("scan-map-keys found truncated BPF_PSEUDO_MAP_VALUE at pc {pc}");
+        }
+        let old_fd = insn.imm;
+        let Some(&map_id) = program.map_fd_bindings.get(&old_fd) else {
+            bail!("scan-map-keys could not resolve BPF_PSEUDO_MAP_VALUE old_fd {old_fd}");
+        };
+        let info = program
+            .map_info_provider
+            .map_info(program, map_id)
+            .map_err(anyhow::Error::msg)?
+            .ok_or_else(|| anyhow!("scan-map-keys has no metadata for map {map_id}"))?;
+        let key = vec![0u8; info.key_size as usize];
+        keys.push(ScannedMapKeyReport {
+            map_id,
+            key_hex: hex_bytes(&key),
+        });
+        pc += 2;
+    }
+    Ok(keys)
 }
 
 fn run_single_pass(common: &CommonArgs, pass_name: &'static str) -> Result<()> {
@@ -957,6 +994,7 @@ fn attach_program_inputs(program: &mut BpfProgram, common: &CommonArgs) -> Resul
         let snapshot = read_map_values(path)?;
         program.map_metadata = snapshot.metadata;
         program.map_values = snapshot.values;
+        program.map_value_nulls = snapshot.nulls;
     }
     Ok(())
 }
@@ -1238,12 +1276,14 @@ fn parse_u64_auto_radix(input: &str) -> Result<u64> {
 struct MapSnapshot {
     metadata: HashMap<u32, MapMetadata>,
     values: HashMap<(u32, Vec<u8>), Vec<u8>>,
+    nulls: HashSet<(u32, Vec<u8>)>,
 }
 
 fn read_map_values(path: &Path) -> Result<MapSnapshot> {
     let raw: MapValuesJson = read_json_file(path, "map-values.json")?;
     let mut metadata = HashMap::new();
     let mut values = HashMap::new();
+    let mut nulls = HashSet::new();
 
     for map in raw.maps {
         let map_type = parse_map_type(&map.map_type)?;
@@ -1267,11 +1307,17 @@ fn read_map_values(path: &Path) -> Result<MapSnapshot> {
                     decode_hex(&value)
                         .with_context(|| format!("invalid value hex for map {}", map.map_id))?,
                 );
+            } else {
+                nulls.insert((map.map_id, key));
             }
         }
     }
 
-    Ok(MapSnapshot { metadata, values })
+    Ok(MapSnapshot {
+        metadata,
+        values,
+        nulls,
+    })
 }
 
 fn parse_map_type(map_type: &MapTypeJson) -> Result<u32> {

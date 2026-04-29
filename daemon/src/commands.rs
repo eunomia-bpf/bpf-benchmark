@@ -1904,6 +1904,97 @@ JSON
     }
 
     #[test]
+    fn reapply_map_inline_hash_lookup_miss_completes_rejit() {
+        let fake = FakeCliDir::new().unwrap();
+        fake.replace_command(
+            "bpfget",
+            r#"#!/usr/bin/env bash
+set -euo pipefail
+prog_id="$1"
+shift
+outdir=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --full) shift ;;
+    --outdir) outdir="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00' > "$outdir/prog.bin"
+cat > "$outdir/prog_info.json" <<JSON
+{"id":$prog_id,"name":"demo","type":{"name":"xdp","numeric":6},"insn_cnt":2,"map_ids":[111]}
+JSON
+cat > "$outdir/map_fds.json" <<JSON
+[{"map_id":111,"map_type":1,"key_size":4,"value_size":4,"max_entries":8,"name":"hash_map"}]
+JSON
+"#,
+        )
+        .unwrap();
+        fake.replace_command(
+            "bpfopt",
+            r#"#!/usr/bin/env bash
+set -euo pipefail
+if [[ "${1:-}" == "scan-map-keys" ]]; then
+  out=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --output) out="$2"; shift 2 ;;
+      *) shift ;;
+    esac
+  done
+  cat >/dev/null
+  cat > "$out" <<JSON
+{"complete":true,"keys":[{"map_id":111,"key_hex":"01000000"}]}
+JSON
+  exit 0
+fi
+report=""
+map_values=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --report) report="$2"; shift 2 ;;
+    --map-values) map_values="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+grep -q '"value": null' "$map_values"
+cat >/dev/null
+printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
+cat > "$report" <<JSON
+{"passes":[{"pass":"map_inline","skipped":false,"changed":false,"sites_applied":0,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
+JSON
+"#,
+        )
+        .unwrap();
+        let config = fake.config();
+        let enabled_passes = ["map_inline".to_string()];
+
+        let result = try_apply_one_with_map_access(
+            ApplyOneRequest {
+                prog_id: 42,
+                config: &config,
+                enabled_passes: Some(&enabled_passes),
+                profile_path: None,
+                invalidation_tracker: None,
+                mode: OptimizeMode::Apply,
+                force_rejit: true,
+            },
+            |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
+            |_map, _fd, key| {
+                assert_eq!(key, 1u32.to_le_bytes().as_slice());
+                Ok(None)
+            },
+        )
+        .unwrap();
+
+        assert!(!result.changed);
+        assert!(result.summary.applied);
+        assert_eq!(result.summary.total_sites_applied, 0);
+        assert_eq!(result.attempts[0].result, "reapplied");
+        assert!(result.inlined_map_entries.is_empty());
+    }
+
+    #[test]
     fn serve_optimize_response_omits_attempt_debug_payloads() {
         let result = OptimizeOneResult {
             status: "error".to_string(),

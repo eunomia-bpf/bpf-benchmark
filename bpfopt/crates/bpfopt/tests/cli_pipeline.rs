@@ -8,7 +8,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use bpfopt::insn::{
     BpfInsn, BPF_ADD, BPF_ALU64, BPF_CALL, BPF_DW, BPF_EXIT, BPF_IMM, BPF_JMP, BPF_K, BPF_LD,
-    BPF_LDX, BPF_MEM, BPF_MOV, BPF_PSEUDO_MAP_FD, BPF_ST, BPF_W,
+    BPF_LDX, BPF_MEM, BPF_MOV, BPF_PSEUDO_MAP_FD, BPF_PSEUDO_MAP_VALUE, BPF_ST, BPF_W,
 };
 
 static NEXT_TEMP_ID: AtomicUsize = AtomicUsize::new(0);
@@ -43,6 +43,72 @@ fn map_lookup_program_bytes() -> Vec<u8> {
         BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 1),
         BpfInsn::new(BPF_LDX | BPF_W | BPF_MEM, BpfInsn::make_regs(6, 0), 0, 0),
         BpfInsn::new(BPF_ALU64 | BPF_MOV | BPF_K, BpfInsn::make_regs(0, 0), 0, 0),
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0),
+    ]
+    .into_iter()
+    .flat_map(|insn| insn.raw_bytes())
+    .collect()
+}
+
+fn two_hash_lookup_program_bytes() -> Vec<u8> {
+    let map = [
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(1, BPF_PSEUDO_MAP_FD),
+            0,
+            42,
+        ),
+        BpfInsn::new(0, 0, 0, 0),
+    ];
+    [
+        map[0],
+        map[1],
+        BpfInsn::new(BPF_ST | BPF_W | BPF_MEM, BpfInsn::make_regs(10, 0), -4, 1),
+        BpfInsn::mov64_reg(2, 10),
+        BpfInsn::new(BPF_ALU64 | BPF_ADD | BPF_K, BpfInsn::make_regs(2, 0), 0, -4),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 1),
+        BpfInsn::new(
+            BPF_JMP | bpfopt::insn::BPF_JEQ | BPF_K,
+            BpfInsn::make_regs(0, 0),
+            3,
+            0,
+        ),
+        BpfInsn::new(BPF_LDX | BPF_W | BPF_MEM, BpfInsn::make_regs(6, 0), 0, 0),
+        BpfInsn::new(BPF_ALU64 | BPF_MOV | BPF_K, BpfInsn::make_regs(0, 0), 0, 0),
+        BpfInsn::new(BPF_JMP | bpfopt::insn::BPF_JA | BPF_K, 0, 1, 0),
+        BpfInsn::new(BPF_ALU64 | BPF_MOV | BPF_K, BpfInsn::make_regs(0, 0), 0, 1),
+        map[0],
+        map[1],
+        BpfInsn::new(BPF_ST | BPF_W | BPF_MEM, BpfInsn::make_regs(10, 0), -8, 2),
+        BpfInsn::mov64_reg(2, 10),
+        BpfInsn::new(BPF_ALU64 | BPF_ADD | BPF_K, BpfInsn::make_regs(2, 0), 0, -8),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 1),
+        BpfInsn::new(
+            BPF_JMP | bpfopt::insn::BPF_JEQ | BPF_K,
+            BpfInsn::make_regs(0, 0),
+            3,
+            0,
+        ),
+        BpfInsn::new(BPF_LDX | BPF_W | BPF_MEM, BpfInsn::make_regs(7, 0), 0, 0),
+        BpfInsn::new(BPF_ALU64 | BPF_MOV | BPF_K, BpfInsn::make_regs(0, 0), 0, 0),
+        BpfInsn::new(BPF_JMP | bpfopt::insn::BPF_JA | BPF_K, 0, 1, 0),
+        BpfInsn::new(BPF_ALU64 | BPF_MOV | BPF_K, BpfInsn::make_regs(0, 0), 0, 1),
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0),
+    ]
+    .into_iter()
+    .flat_map(|insn| insn.raw_bytes())
+    .collect()
+}
+
+fn pseudo_map_value_program_bytes() -> Vec<u8> {
+    [
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(1, BPF_PSEUDO_MAP_VALUE),
+            0,
+            42,
+        ),
+        BpfInsn::new(0, 0, 0, 0),
         BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0),
     ]
     .into_iter()
@@ -463,6 +529,120 @@ fn optimize_map_inline_errors_when_snapshot_key_is_absent() {
         stderr.contains("map_values snapshot missing map 111 key 01000000"),
         "stderr={stderr}"
     );
+}
+
+#[test]
+fn optimize_map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
+    let report_path = temp_path("map-inline-hash-null-report.json");
+    let map_values_path = write_temp_file(
+        "map-values-hash-null.json",
+        r#"{"maps":[{"map_id":111,"map_type":"hash","key_size":4,"value_size":4,"max_entries":8,"frozen":true,"entries":[{"key":"01000000","value":null},{"key":"02000000","value":"09000000"}]}]}"#,
+    );
+    let report_arg = report_path.to_string_lossy().to_string();
+    let map_values_arg = map_values_path.to_string_lossy().to_string();
+    let output = run_bpfopt(
+        &[
+            "optimize",
+            "--passes",
+            "map-inline",
+            "--report",
+            &report_arg,
+            "--map-values",
+            &map_values_arg,
+            "--map-ids",
+            "111",
+        ],
+        &two_hash_lookup_program_bytes(),
+    );
+    remove_file_if_exists(map_values_path);
+
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let report_text = fs::read_to_string(&report_path).expect("read report");
+    let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
+    remove_file_if_exists(report_path);
+
+    let pass = &report["passes"][0];
+    assert_eq!(pass["pass"], "map_inline");
+    assert_eq!(pass["skipped"], false);
+    assert_eq!(pass["changed"], true);
+    assert_eq!(pass["sites_applied"], 1);
+    assert_eq!(pass["map_inline_records"].as_array().unwrap().len(), 1);
+    assert_eq!(pass["map_inline_records"][0]["key_hex"], "02000000");
+}
+
+#[test]
+fn optimize_map_inline_errors_when_array_snapshot_value_is_null() {
+    let map_values_path = write_temp_file(
+        "map-values-array-null.json",
+        r#"{"maps":[{"map_id":111,"map_type":"array","key_size":4,"value_size":4,"max_entries":8,"frozen":true,"entries":[{"key":"01000000","value":null}]}]}"#,
+    );
+    let map_values_arg = map_values_path.to_string_lossy().to_string();
+    let output = run_bpfopt(
+        &[
+            "optimize",
+            "--passes",
+            "map-inline",
+            "--map-values",
+            &map_values_arg,
+            "--map-ids",
+            "111",
+        ],
+        &map_lookup_program_bytes(),
+    );
+    remove_file_if_exists(map_values_path);
+
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("map_inline requires a concrete snapshot value"),
+        "stderr={stderr}"
+    );
+    assert!(
+        stderr.contains("map_values snapshot has explicit null for map 111 key 01000000"),
+        "stderr={stderr}"
+    );
+}
+
+#[test]
+fn scan_map_keys_reports_pseudo_map_value_key() {
+    let report_path = temp_path("scan-pseudo-map-value.json");
+    let map_values_path = write_temp_file(
+        "map-values-pseudo-map-value.json",
+        r#"{"maps":[{"map_id":222,"map_type":"array","key_size":4,"value_size":4,"max_entries":1,"frozen":true,"entries":[]}]}"#,
+    );
+    let report_arg = report_path.to_string_lossy().to_string();
+    let map_values_arg = map_values_path.to_string_lossy().to_string();
+    let output = run_bpfopt(
+        &[
+            "scan-map-keys",
+            "--map-values",
+            &map_values_arg,
+            "--map-ids",
+            "222",
+            "--output",
+            &report_arg,
+        ],
+        &pseudo_map_value_program_bytes(),
+    );
+    remove_file_if_exists(map_values_path);
+
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let report_text = fs::read_to_string(&report_path).expect("read report");
+    let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
+    remove_file_if_exists(report_path);
+
+    assert_eq!(report["complete"], true);
+    assert_eq!(report["keys"].as_array().unwrap().len(), 1);
+    assert_eq!(report["keys"][0]["map_id"], 222);
+    assert_eq!(report["keys"][0]["key_hex"], "00000000");
 }
 
 #[test]
