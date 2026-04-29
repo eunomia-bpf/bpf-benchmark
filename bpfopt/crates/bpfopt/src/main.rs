@@ -25,7 +25,7 @@ use bpfopt::verifier_log::{
 use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 
-const DEFAULT_PASS_ORDER: &[&str] = &[
+const ALL_PASS_ORDER: &[&str] = &[
     "map_inline",
     "const_prop",
     "dce",
@@ -38,6 +38,13 @@ const DEFAULT_PASS_ORDER: &[&str] = &[
     "extract",
     "endian_fusion",
     "branch_flip",
+];
+
+const DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
+    "dce",
+    "skb_load_bytes_spec",
+    "bounds_check_merge",
+    "wide_mem",
 ];
 
 const PASS_ALIASES: &[(&str, &str)] = &[
@@ -178,7 +185,7 @@ enum Command {
 
 #[derive(Args)]
 struct OptimizeArgs {
-    /// Comma-separated pass list. Defaults to the v3 pass order.
+    /// Comma-separated pass list. Defaults to the zero-side-input pass order.
     #[arg(long, value_name = "LIST", value_delimiter = ',')]
     passes: Vec<String>,
 }
@@ -385,7 +392,7 @@ impl Command {
 
 fn list_passes(common: &CommonArgs, json: bool) -> Result<()> {
     if json {
-        let entries = DEFAULT_PASS_ORDER
+        let entries = ALL_PASS_ORDER
             .iter()
             .map(|&name| {
                 let entry = registry_entry(name)?;
@@ -399,7 +406,7 @@ fn list_passes(common: &CommonArgs, json: bool) -> Result<()> {
         write_json(common.output.as_deref(), &entries)
     } else {
         let mut out = open_text_output(common.output.as_deref())?;
-        for &name in DEFAULT_PASS_ORDER {
+        for &name in ALL_PASS_ORDER {
             writeln!(out, "{}", cli_name_for_pass(name))?;
         }
         Ok(())
@@ -435,6 +442,7 @@ fn run_single_pass(common: &CommonArgs, pass_name: &'static str) -> Result<()> {
     let mut program = BpfProgram::new(read_bytecode(common.input.as_deref())?);
     attach_program_inputs(&mut program, common)?;
     let mut ctx = build_pass_context(common)?;
+    validate_required_kinsns(&ctx, &[pass_name])?;
     ctx.policy.enabled_passes = vec![pass_name.to_string()];
     let pipeline = build_pipeline(&[pass_name])?;
     let profiling = read_profile(common.profile.as_deref())?;
@@ -455,20 +463,19 @@ fn run_single_pass(common: &CommonArgs, pass_name: &'static str) -> Result<()> {
 
 fn run_optimize(common: &CommonArgs, args: &OptimizeArgs) -> Result<()> {
     let pass_names = if args.passes.is_empty() {
-        DEFAULT_PASS_ORDER.to_vec()
+        DEFAULT_OPTIMIZE_PASS_ORDER.to_vec()
     } else {
-        let names = args
-            .passes
+        args.passes
             .iter()
             .map(|name| canonicalize_pass_name(name))
-            .collect::<Result<Vec<_>>>()?;
-        validate_required_side_inputs(common, &names)?;
-        names
+            .collect::<Result<Vec<_>>>()?
     };
+    validate_required_side_inputs(common, &pass_names)?;
 
     let mut program = BpfProgram::new(read_bytecode(common.input.as_deref())?);
     attach_program_inputs(&mut program, common)?;
     let mut ctx = build_pass_context(common)?;
+    validate_required_kinsns(&ctx, &pass_names)?;
     ctx.policy.enabled_passes = pass_names.iter().map(|name| (*name).to_string()).collect();
     let pipeline = build_pipeline(&pass_names)?;
     let profiling = read_profile(common.profile.as_deref())?;
@@ -574,6 +581,51 @@ fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Re
         }
     }
     Ok(())
+}
+
+fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()> {
+    for &pass_name in pass_names {
+        match pass_name {
+            "rotate" => require_kinsn(ctx, "bpf_rotate64")?,
+            "cond_select" => require_kinsn(ctx, "bpf_select64")?,
+            "extract" => require_kinsn(ctx, "bpf_extract64")?,
+            "endian_fusion" => require_any_kinsn(
+                ctx,
+                &[
+                    "bpf_endian_load16",
+                    "bpf_endian_load32",
+                    "bpf_endian_load64",
+                ],
+                "endian",
+            )?,
+            "bulk_memory" => {
+                require_kinsn(ctx, "bpf_memcpy_bulk")?;
+                require_kinsn(ctx, "bpf_memset_bulk")?;
+            }
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
+fn require_kinsn(ctx: &PassContext, target_name: &str) -> Result<()> {
+    if ctx.kinsn_registry.btf_id_for_target_name(target_name) < 0 {
+        bail!("kinsn '{target_name}' not in target");
+    }
+    Ok(())
+}
+
+fn require_any_kinsn(ctx: &PassContext, target_names: &[&str], pass_label: &str) -> Result<()> {
+    if target_names
+        .iter()
+        .any(|target_name| ctx.kinsn_registry.btf_id_for_target_name(target_name) >= 0)
+    {
+        return Ok(());
+    }
+    bail!(
+        "{pass_label} requires at least one target kinsn: {}",
+        target_names.join(", ")
+    );
 }
 
 fn read_bytecode(input: Option<&Path>) -> Result<Vec<BpfInsn>> {
