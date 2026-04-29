@@ -32,6 +32,20 @@ Do not add `workload_miss`, `limitations`, or similar informational-only fields 
 - Benchmark runner code should prefer calling CLI tools directly instead of using the daemon socket.
 - stdin/stdout carry raw binary bytecode (`struct bpf_insn[]`); side-inputs and side-outputs use files.
 
+### No CLI Cross-Dependencies
+The 6 bpfopt-suite CLI binary crates (`bpfopt`, `bpfverify`, `bpfprof`, `bpfget`, `bpfrejit`, `bpfrejit-daemon`) must not depend on each other:
+- Runtime composition happens through stdin/stdout pipelines and bash orchestration.
+- Compile-time dependencies between CLI binary crates are forbidden; do not add path-dependencies from one CLI crate to another.
+- Shared code belongs in library crates, not in the lib portion of one CLI crate for other CLI crates to import.
+
+### Use libbpf-rs/libbpf-sys, Don't Re-Wrap
+Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf exposes the needed API or type:
+- BPF syscall wrappers (`PROG_LOAD`, `GET_NEXT_ID`, `GET_INFO`, `bpf_enable_stats`, etc.) should use `libbpf-rs`/`libbpf-sys`.
+- `struct bpf_insn`, BPF opcode constants, and program type enums should use `libbpf-sys` re-exports.
+- Hand-written wrappers are error-prone because `bpf_attr` layouts and kernel ABI details can drift.
+- The only required custom wrappers are project-fork syscalls not supported upstream: `BPF_PROG_REJIT` and `BPF_PROG_GET_ORIGINAL`.
+- The v3 §11 "direct libbpf linking, future fork+exec" limit was an early conservative constraint and is superseded; implementation code may link `libbpf-rs` directly.
+
 ### Default Config Must Work
 `make vm-corpus`, `make vm-e2e`, `make aws-x86-test`, `make aws-arm64-test` must work with zero manual environment variables. Defaults live in `runner/targets/*.env` files and are overridable via env vars.
 
