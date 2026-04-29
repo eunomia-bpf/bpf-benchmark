@@ -235,7 +235,7 @@ impl BpfPass for CondSelectPass {
             });
         }
 
-        let kfunc_off = resolve_kinsn_call_off_for_pass(program, ctx, self.name());
+        let kfunc_off = resolve_kinsn_call_off_for_pass(ctx, self.name())?;
 
         // Build replacement instruction stream.
         let orig_len = program.insns.len();

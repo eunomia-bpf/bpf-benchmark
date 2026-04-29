@@ -161,7 +161,7 @@ impl BpfPass for ExtractPass {
             });
         }
 
-        let kfunc_off = resolve_kinsn_call_off_for_pass(program, ctx, self.name());
+        let kfunc_off = resolve_kinsn_call_off_for_pass(ctx, self.name())?;
 
         // Build replacement instruction stream.
         let orig_len = program.insns.len();
@@ -540,7 +540,7 @@ mod tests {
     }
 
     #[test]
-    fn test_extract_pass_records_btf_fd() {
+    fn test_extract_pass_uses_static_call_offset() {
         let mut prog = make_program(vec![
             BpfInsn::alu64_imm(BPF_RSH, 2, 8),
             BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
@@ -549,14 +549,17 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let mut ctx = ctx_with_extract_kfunc(7777);
         ctx.kinsn_registry
-            .target_btf_fds
+            .target_call_offsets
             .insert("bpf_extract64".to_string(), 42);
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
-        assert!(prog.required_btf_fds.contains(&42));
+        assert!(prog
+            .insns
+            .iter()
+            .any(|insn| insn.is_call() && insn.imm == 7777 && insn.off == 42));
     }
 
     #[test]

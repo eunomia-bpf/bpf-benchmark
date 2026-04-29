@@ -177,12 +177,12 @@ impl BpfPass for BulkMemoryPass {
         }
 
         let memcpy_off = if memcpy_btf_id >= 0 {
-            resolve_kinsn_call_off_for_target(program, ctx, MEMCPY_TARGET)
+            resolve_kinsn_call_off_for_target(ctx, MEMCPY_TARGET)?
         } else {
             0
         };
         let memset_off = if memset_btf_id >= 0 {
-            resolve_kinsn_call_off_for_target(program, ctx, MEMSET_TARGET)
+            resolve_kinsn_call_off_for_target(ctx, MEMSET_TARGET)?
         } else {
             0
         };

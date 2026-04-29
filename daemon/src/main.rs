@@ -8,6 +8,7 @@ mod bpf;
 mod commands;
 mod invalidation;
 mod kfunc_discovery;
+mod pipeline;
 mod profiler;
 mod server;
 
@@ -66,9 +67,9 @@ fn main() -> Result<()> {
         platform.has_movbe,
         platform.has_rorx,
     );
-    let ctx = pass::PassContext {
+    let pass_ctx = pass::PassContext {
         kinsn_registry: discovery.registry,
-        kinsn_call_resolver: std::sync::Arc::new(pass::FdArrayKinsnCallResolver),
+        kinsn_call_resolver: std::sync::Arc::new(pass::StaticKinsnCallResolver),
         platform,
         policy: pass::PolicyConfig {
             enabled_passes: pass::default_enabled_passes(),
@@ -76,6 +77,7 @@ fn main() -> Result<()> {
         },
         prog_type: 0,
     };
+    let ctx = pipeline::DaemonContext::new(pass_ctx, discovery.target_btf_fds);
     // Keep descriptor BTF FDs alive for the daemon's lifetime.
     let _btf_fds = discovery.btf_fds;
     match cli.command {

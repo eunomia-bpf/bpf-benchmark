@@ -6,6 +6,7 @@ use std::os::unix::io::AsRawFd;
 use std::rc::Rc;
 
 use crate::invalidation::{BatchLookupValue, MapInvalidationTracker, MapValueReader};
+use crate::pipeline;
 
 #[derive(Clone, Debug, Default)]
 struct MockTrackerReader {
@@ -71,10 +72,10 @@ fn test_optimize_one_result_serialization() {
             PassDetail {
                 pass_name: "wide_mem".to_string(),
                 changed: true,
-                verify_result: pass::PassVerifyStatus::Accepted,
+                verify_result: pipeline::PassVerifyStatus::Accepted,
                 verify_error: None,
                 action: "kept".to_string(),
-                verify: pass::PassVerifyResult::accepted(),
+                verify: pipeline::PassVerifyResult::accepted(),
                 rollback: None,
                 sites_applied: 3,
                 sites_skipped: 1,
@@ -88,10 +89,10 @@ fn test_optimize_one_result_serialization() {
             PassDetail {
                 pass_name: "rotate".to_string(),
                 changed: false,
-                verify_result: pass::PassVerifyStatus::NotNeeded,
+                verify_result: pipeline::PassVerifyStatus::NotNeeded,
                 verify_error: None,
                 action: "kept".to_string(),
-                verify: pass::PassVerifyResult::not_needed(),
+                verify: pipeline::PassVerifyResult::not_needed(),
                 rollback: None,
                 sites_applied: 0,
                 sites_skipped: 0,
@@ -137,7 +138,8 @@ fn test_optimize_one_result_serialization() {
     assert_eq!(parsed["summary"]["total_sites_applied"], 3);
     assert_eq!(parsed["summary"]["verifier_rejections"], 0);
     assert_eq!(parsed["passes"].as_array().unwrap().len(), 2);
-    assert_eq!(parsed["passes"][0]["pass_name"], "wide_mem");
+    assert_eq!(parsed["passes"][0]["pass"], "wide_mem");
+    assert!(parsed["passes"][0].get("pass_name").is_none());
     assert_eq!(parsed["passes"][0]["changed"], true);
     assert_eq!(parsed["passes"][0]["verify_result"], "accepted");
     assert!(parsed["passes"][0]["verify_error"].is_null());
@@ -190,10 +192,10 @@ fn test_serve_optimize_response_omits_attempt_debug_payloads() {
         passes: vec![PassDetail {
             pass_name: "map_inline".to_string(),
             changed: false,
-            verify_result: pass::PassVerifyStatus::Rejected,
+            verify_result: pipeline::PassVerifyStatus::Rejected,
             verify_error: Some("BPF_PROG_REJIT: Operation not permitted".to_string()),
             action: "rolled_back".to_string(),
-            verify: pass::PassVerifyResult::rejected("BPF_PROG_REJIT: Operation not permitted"),
+            verify: pipeline::PassVerifyResult::rejected("BPF_PROG_REJIT: Operation not permitted"),
             rollback: None,
             sites_applied: 0,
             sites_skipped: 1,
@@ -279,13 +281,15 @@ fn test_optimize_one_result_records_rejected_pass_verify_status() {
             PassDetail {
                 pass_name: "branch_flip".to_string(),
                 changed: false,
-                verify_result: pass::PassVerifyStatus::Rejected,
+                verify_result: pipeline::PassVerifyStatus::Rejected,
                 verify_error: Some("BPF_PROG_LOAD: Permission denied (os error 13)".to_string()),
                 action: "rolled_back".to_string(),
-                verify: pass::PassVerifyResult::rejected(
+                verify: pipeline::PassVerifyResult::rejected(
                     "BPF_PROG_LOAD: Permission denied (os error 13)",
                 ),
-                rollback: Some(pass::PassRollbackResult::restored_pre_pass_snapshot(110)),
+                rollback: Some(pipeline::PassRollbackResult::restored_pre_pass_snapshot(
+                    110,
+                )),
                 sites_applied: 4,
                 sites_skipped: 0,
                 skip_reasons: HashMap::new(),
@@ -298,10 +302,10 @@ fn test_optimize_one_result_records_rejected_pass_verify_status() {
             PassDetail {
                 pass_name: "extract".to_string(),
                 changed: true,
-                verify_result: pass::PassVerifyStatus::Accepted,
+                verify_result: pipeline::PassVerifyStatus::Accepted,
                 verify_error: None,
                 action: "kept".to_string(),
-                verify: pass::PassVerifyResult::accepted(),
+                verify: pipeline::PassVerifyResult::accepted(),
                 rollback: None,
                 sites_applied: 2,
                 sites_skipped: 0,
@@ -359,8 +363,6 @@ fn test_pass_detail_from_pass_result() {
     let pr = pass::PassResult {
         pass_name: "wide_mem".to_string(),
         changed: true,
-        verify: pass::PassVerifyResult::accepted(),
-        rollback: None,
         sites_applied: 5,
         sites_skipped: vec![
             pass::SkipReason {
@@ -382,14 +384,19 @@ fn test_pass_detail_from_pass_result() {
         insns_after: 95,
     };
 
-    let detail = PassDetail::from(&pr);
+    let verified = pipeline::VerifiedPassResult {
+        result: pr,
+        verify: pipeline::PassVerifyResult::accepted(),
+        rollback: None,
+    };
+    let detail = PassDetail::from(&verified);
 
     assert_eq!(detail.pass_name, "wide_mem");
     assert_eq!(detail.changed, true);
-    assert_eq!(detail.verify_result, pass::PassVerifyStatus::Accepted);
+    assert_eq!(detail.verify_result, pipeline::PassVerifyStatus::Accepted);
     assert_eq!(detail.verify_error, None);
     assert_eq!(detail.action, "kept");
-    assert_eq!(detail.verify.status, pass::PassVerifyStatus::Accepted);
+    assert_eq!(detail.verify.status, pipeline::PassVerifyStatus::Accepted);
     assert_eq!(detail.sites_applied, 5);
     assert_eq!(detail.sites_skipped, 3);
     assert_eq!(detail.skip_reasons["subprog_unsupported"], 2);
@@ -443,29 +450,35 @@ fn test_collect_inlined_map_entries_deduplicates_map_key_pairs() {
 
 #[test]
 fn test_collect_map_inline_records_ignores_rejected_passes() {
-    let rejected = pass::PassResult {
-        pass_name: "map_inline".to_string(),
-        changed: false,
-        verify: pass::PassVerifyResult::rejected("synthetic verifier rejection"),
-        rollback: Some(pass::PassRollbackResult::restored_pre_pass_snapshot(100)),
-        map_inline_records: vec![pass::MapInlineRecord {
-            map_id: 17,
-            key: 0u32.to_le_bytes().to_vec(),
-            expected_value: 11u32.to_le_bytes().to_vec(),
-        }],
-        ..Default::default()
+    let rejected = pipeline::VerifiedPassResult {
+        result: pass::PassResult {
+            pass_name: "map_inline".to_string(),
+            changed: false,
+            map_inline_records: vec![pass::MapInlineRecord {
+                map_id: 17,
+                key: 0u32.to_le_bytes().to_vec(),
+                expected_value: 11u32.to_le_bytes().to_vec(),
+            }],
+            ..Default::default()
+        },
+        verify: pipeline::PassVerifyResult::rejected("synthetic verifier rejection"),
+        rollback: Some(pipeline::PassRollbackResult::restored_pre_pass_snapshot(
+            100,
+        )),
     };
-    let accepted = pass::PassResult {
-        pass_name: "map_inline".to_string(),
-        changed: true,
-        verify: pass::PassVerifyResult::accepted(),
+    let accepted = pipeline::VerifiedPassResult {
+        result: pass::PassResult {
+            pass_name: "map_inline".to_string(),
+            changed: true,
+            map_inline_records: vec![pass::MapInlineRecord {
+                map_id: 18,
+                key: 1u32.to_le_bytes().to_vec(),
+                expected_value: 22u32.to_le_bytes().to_vec(),
+            }],
+            ..Default::default()
+        },
+        verify: pipeline::PassVerifyResult::accepted(),
         rollback: None,
-        map_inline_records: vec![pass::MapInlineRecord {
-            map_id: 18,
-            key: 1u32.to_le_bytes().to_vec(),
-            expected_value: 22u32.to_le_bytes().to_vec(),
-        }],
-        ..Default::default()
     };
 
     let records = collect_map_inline_records(&[rejected, accepted]);
@@ -546,11 +559,13 @@ fn test_verifier_rejection_count_counts_rejected_passes() {
         PassDetail {
             pass_name: "wide_mem".to_string(),
             changed: false,
-            verify_result: pass::PassVerifyStatus::Rejected,
+            verify_result: pipeline::PassVerifyStatus::Rejected,
             verify_error: Some("synthetic verifier rejection".to_string()),
             action: "rolled_back".to_string(),
-            verify: pass::PassVerifyResult::rejected("synthetic verifier rejection"),
-            rollback: Some(pass::PassRollbackResult::restored_pre_pass_snapshot(100)),
+            verify: pipeline::PassVerifyResult::rejected("synthetic verifier rejection"),
+            rollback: Some(pipeline::PassRollbackResult::restored_pre_pass_snapshot(
+                100,
+            )),
             sites_applied: 0,
             sites_skipped: 0,
             skip_reasons: HashMap::new(),
@@ -563,10 +578,10 @@ fn test_verifier_rejection_count_counts_rejected_passes() {
         PassDetail {
             pass_name: "extract".to_string(),
             changed: true,
-            verify_result: pass::PassVerifyStatus::Accepted,
+            verify_result: pipeline::PassVerifyStatus::Accepted,
             verify_error: None,
             action: "kept".to_string(),
-            verify: pass::PassVerifyResult::accepted(),
+            verify: pipeline::PassVerifyResult::accepted(),
             rollback: None,
             sites_applied: 2,
             sites_skipped: 0,

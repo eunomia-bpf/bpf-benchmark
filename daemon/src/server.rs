@@ -10,7 +10,7 @@ use serde::Serialize;
 
 use crate::commands::{self, OptimizeMode};
 use crate::invalidation::{MapInvalidationTracker, MapValueReader};
-use crate::{bpf, pass, profiler};
+use crate::{bpf, pass, pipeline, profiler};
 
 const DEFAULT_HOTNESS_WINDOW_MS: u64 = 250;
 
@@ -207,7 +207,7 @@ fn remove_socket_file_if_present(socket_path: &str) -> Result<()> {
 
 // ── Serve (Unix socket server) ──────────────────────────────────────
 
-pub(crate) fn cmd_serve(socket_path: &str, ctx: &pass::PassContext) -> Result<()> {
+pub(crate) fn cmd_serve(socket_path: &str, ctx: &pipeline::DaemonContext) -> Result<()> {
     use std::os::unix::net::UnixListener;
 
     register_signal_handlers();
@@ -305,7 +305,7 @@ fn panic_response(payload: Box<dyn std::any::Any + Send>) -> serde_json::Value {
 
 fn handle_client(
     stream: std::os::unix::net::UnixStream,
-    ctx: &pass::PassContext,
+    ctx: &pipeline::DaemonContext,
     profiling_state: &mut Option<ProfilingState>,
     tracker: &commands::SharedInvalidationTracker,
 ) -> Result<()> {
@@ -343,7 +343,7 @@ fn handle_client(
 
 fn process_request(
     req: &serde_json::Value,
-    ctx: &pass::PassContext,
+    ctx: &pipeline::DaemonContext,
     profiling_state: &mut Option<ProfilingState>,
     tracker: &commands::SharedInvalidationTracker,
 ) -> serde_json::Value {
@@ -373,18 +373,18 @@ fn process_request(
 
     fn request_context(
         req: &serde_json::Value,
-        base_ctx: &pass::PassContext,
-    ) -> std::result::Result<pass::PassContext, String> {
+        base_ctx: &pipeline::DaemonContext,
+    ) -> std::result::Result<pipeline::DaemonContext, String> {
         let mut local_ctx = base_ctx.clone();
         if let Some(enabled_passes) = parse_request_pass_list(req, "enabled_passes")? {
             crate::passes::validate_pass_names(&enabled_passes)
                 .map_err(|err| format!("invalid enabled_passes: {err}"))?;
-            local_ctx.policy.enabled_passes = enabled_passes;
+            local_ctx.pass_context.policy.enabled_passes = enabled_passes;
         }
         if let Some(disabled_passes) = parse_request_pass_list(req, "disabled_passes")? {
             crate::passes::validate_pass_names(&disabled_passes)
                 .map_err(|err| format!("invalid disabled_passes: {err}"))?;
-            local_ctx.policy.disabled_passes = disabled_passes;
+            local_ctx.pass_context.policy.disabled_passes = disabled_passes;
         }
         Ok(local_ctx)
     }
@@ -621,6 +621,7 @@ fn process_request(
             }
             let mut applied = 0u32;
             let mut errors = 0u32;
+            let mut program_errors = Vec::new();
             let total = program_order.len() as u32;
             for entry in &program_order {
                 let prog_id = entry.prog_id;
@@ -642,9 +643,23 @@ fn process_request(
                             applied += 1;
                         } else if result.status != "ok" {
                             errors += 1;
+                            program_errors.push(serde_json::json!({
+                                "prog_id": prog_id,
+                                "prog_name": result.program.prog_name,
+                                "error_message": result.error_message.unwrap_or_else(|| {
+                                    format!("optimize prog {} returned status {}", prog_id, result.status)
+                                }),
+                            }));
                         }
                     }
-                    Err(_) => errors += 1,
+                    Err(err) => {
+                        errors += 1;
+                        program_errors.push(serde_json::json!({
+                            "prog_id": prog_id,
+                            "prog_name": entry.prog_name,
+                            "error_message": format!("{err:#}"),
+                        }));
+                    }
                 }
             }
             serde_json::json!({
@@ -655,6 +670,7 @@ fn process_request(
                 "profiling_source": profiling_source,
                 "hotness_window_ms": observation_window_ms,
                 "program_order": program_order,
+                "program_errors": program_errors,
             })
         }
         "profile-start" => {
@@ -801,6 +817,10 @@ mod tests {
 
     use crate::invalidation::{BatchLookupValue, MapInvalidationTracker};
 
+    fn test_daemon_context() -> pipeline::DaemonContext {
+        pipeline::DaemonContext::new(pass::PassContext::test_default(), HashMap::new())
+    }
+
     #[derive(Clone, Debug, Default)]
     struct MockMapValueReader {
         values: Arc<Mutex<HashMap<u32, HashMap<Vec<u8>, Vec<u8>>>>>,
@@ -925,12 +945,8 @@ mod tests {
         });
         let tracker = commands::new_invalidation_tracker();
         let mut profiling_state = None;
-        let response = process_request(
-            &req,
-            &pass::PassContext::test_default(),
-            &mut profiling_state,
-            &tracker,
-        );
+        let response =
+            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
 
         assert_eq!(response["status"], "ok");
     }
@@ -943,12 +959,8 @@ mod tests {
         });
         let tracker = commands::new_invalidation_tracker();
         let mut profiling_state = None;
-        let response = process_request(
-            &req,
-            &pass::PassContext::test_default(),
-            &mut profiling_state,
-            &tracker,
-        );
+        let response =
+            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
 
         assert_eq!(response["status"], "error");
         assert_eq!(
@@ -965,12 +977,8 @@ mod tests {
         });
         let tracker = commands::new_invalidation_tracker();
         let mut profiling_state = None;
-        let response = process_request(
-            &req,
-            &pass::PassContext::test_default(),
-            &mut profiling_state,
-            &tracker,
-        );
+        let response =
+            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
 
         assert_eq!(response["status"], "error");
         assert_eq!(
@@ -987,12 +995,8 @@ mod tests {
         });
         let tracker = commands::new_invalidation_tracker();
         let mut profiling_state = None;
-        let response = process_request(
-            &req,
-            &pass::PassContext::test_default(),
-            &mut profiling_state,
-            &tracker,
-        );
+        let response =
+            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
 
         assert_eq!(response["status"], "error");
         assert_eq!(
@@ -1009,12 +1013,8 @@ mod tests {
         });
         let tracker = commands::new_invalidation_tracker();
         let mut profiling_state = None;
-        let response = process_request(
-            &req,
-            &pass::PassContext::test_default(),
-            &mut profiling_state,
-            &tracker,
-        );
+        let response =
+            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
 
         assert_eq!(response["status"], "error");
         assert_eq!(
@@ -1032,12 +1032,8 @@ mod tests {
         });
         let tracker = commands::new_invalidation_tracker();
         let mut profiling_state = None;
-        let response = process_request(
-            &req,
-            &pass::PassContext::test_default(),
-            &mut profiling_state,
-            &tracker,
-        );
+        let response =
+            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
 
         assert_eq!(response["status"], "error");
         assert_eq!(response["error_message"], "dry_run must be a JSON boolean");
@@ -1051,12 +1047,8 @@ mod tests {
         });
         let tracker = commands::new_invalidation_tracker();
         let mut profiling_state = None;
-        let response = process_request(
-            &req,
-            &pass::PassContext::test_default(),
-            &mut profiling_state,
-            &tracker,
-        );
+        let response =
+            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
 
         assert_eq!(response["status"], "error");
         assert_eq!(
@@ -1094,7 +1086,7 @@ mod tests {
                 "cmd": "profile-save",
                 "path": path.display().to_string(),
             }),
-            &pass::PassContext::test_default(),
+            &test_daemon_context(),
             &mut profiling_state,
             &tracker,
         );
@@ -1108,7 +1100,7 @@ mod tests {
                 "cmd": "profile-load",
                 "path": path.display().to_string(),
             }),
-            &pass::PassContext::test_default(),
+            &test_daemon_context(),
             &mut loaded_state,
             &tracker,
         );

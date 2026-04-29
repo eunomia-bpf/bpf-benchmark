@@ -343,6 +343,7 @@ RUN set -eux; \
     find ./runner -maxdepth 3 -type f \( -name CMakeCache.txt -o -name cmake_install.cmake -o -name Makefile \) -delete; \
     find ./tests -type f \( \( -name '*.o' ! -name '*.bpf.o' \) -o -name '*.d' -o -name '*.cmd' \) -delete
 
+COPY bpfopt ./bpfopt
 COPY daemon ./daemon
 
 RUN set -eux; \
@@ -354,6 +355,7 @@ RUN set -eux; \
         /opt/cargo \
         /opt/rustup \
         ./vendor \
+        ./bpfopt \
         ./Makefile \
         ./runner/mk \
         ./daemon/src \

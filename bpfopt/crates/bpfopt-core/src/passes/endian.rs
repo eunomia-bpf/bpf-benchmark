@@ -6,7 +6,7 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, resolve_kinsn_call_off_for_pass,
+    emit_packed_kinsn_call_with_off, fixup_all_branches, resolve_kinsn_call_off_for_target,
 };
 
 /// BPF ALU endian operation code.
@@ -323,8 +323,6 @@ impl BpfPass for EndianFusionPass {
             });
         }
 
-        let kfunc_off = resolve_kinsn_call_off_for_pass(program, ctx, self.name());
-
         // Build replacement instruction stream.
         let orig_len = program.insns.len();
         let mut new_insns = Vec::with_capacity(orig_len);
@@ -341,6 +339,10 @@ impl BpfPass for EndianFusionPass {
                 let safe_site = &safe_sites[site_idx];
                 let site = &safe_site.site;
                 let btf_id = btf_id_for_size(ctx, site.size);
+                let kfunc_name = kfunc_name_for_size(site.size).ok_or_else(|| {
+                    anyhow::anyhow!("unsupported endian fusion size {}", site.size)
+                })?;
+                let kfunc_off = resolve_kinsn_call_off_for_target(ctx, kfunc_name)?;
 
                 let replacement = emit_endian_fusion_call(
                     site.dst_reg,
@@ -761,7 +763,7 @@ mod tests {
     }
 
     #[test]
-    fn test_endian_fusion_pass_records_btf_fd() {
+    fn test_endian_fusion_pass_uses_static_call_offset() {
         let mut prog = make_program(vec![
             BpfInsn::ldx_mem(BPF_W, 2, 6, 0),
             endian_to_be(2, 32),
@@ -770,14 +772,55 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let mut ctx = ctx_with_endian32_kfunc(8888);
         ctx.kinsn_registry
-            .target_btf_fds
+            .target_call_offsets
             .insert("bpf_endian_load32".to_string(), 42);
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
-        assert!(prog.required_btf_fds.contains(&42));
+        assert!(prog
+            .insns
+            .iter()
+            .any(|insn| insn.is_call() && insn.imm == 8888 && insn.off == 42));
+    }
+
+    #[test]
+    fn test_endian_fusion_pass_uses_per_size_call_offsets() {
+        let mut prog = make_program(vec![
+            BpfInsn::ldx_mem(BPF_H, 2, 6, 0),
+            endian_to_be(2, 16),
+            BpfInsn::ldx_mem(BPF_W, 3, 6, 4),
+            endian_to_be(3, 32),
+            BpfInsn::ldx_mem(BPF_DW, 4, 6, 8),
+            endian_to_be(4, 64),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let mut ctx = ctx_with_endian_kfuncs(111, 222, 333);
+        ctx.kinsn_registry.target_call_offsets.extend([
+            ("bpf_endian_load16".to_string(), 11),
+            ("bpf_endian_load32".to_string(), 22),
+            ("bpf_endian_load64".to_string(), 33),
+        ]);
+
+        let pass = EndianFusionPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 3);
+        assert!(prog
+            .insns
+            .iter()
+            .any(|insn| insn.is_call() && insn.imm == 111 && insn.off == 11));
+        assert!(prog
+            .insns
+            .iter()
+            .any(|insn| insn.is_call() && insn.imm == 222 && insn.off == 22));
+        assert!(prog
+            .insns
+            .iter()
+            .any(|insn| insn.is_call() && insn.imm == 333 && insn.off == 33));
     }
 
     #[test]

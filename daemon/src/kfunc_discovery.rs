@@ -301,6 +301,8 @@ fn read_module_btf(module_name: &str) -> Result<Vec<u8>> {
 #[derive(Debug)]
 pub struct DiscoveryResult {
     pub registry: KinsnRegistry,
+    /// Per-target descriptor BTF FDs used by daemon REJIT fd_array transport.
+    pub target_btf_fds: HashMap<String, i32>,
     /// Module BTF FDs to keep alive for the daemon's lifetime.
     /// When these are dropped, the FDs close and REJIT can no longer reference them.
     pub btf_fds: Vec<OwnedFd>,
@@ -319,10 +321,10 @@ pub fn discover_kinsns() -> DiscoveryResult {
         endian_load16_btf_id: -1,
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,
-        target_btf_fds: HashMap::new(),
         target_call_offsets: HashMap::new(),
         target_supported_encodings: HashMap::new(),
     };
+    let mut target_btf_fds: HashMap<String, i32> = HashMap::new();
     let mut btf_fds: Vec<OwnedFd> = Vec::new();
     let mut log: Vec<String> = Vec::new();
     // Cache of module_name -> raw FD to avoid opening the same BTF twice.
@@ -425,8 +427,8 @@ pub fn discover_kinsns() -> DiscoveryResult {
             _ => {}
         }
 
-        // Store per-target BTF FD for REJIT transport.
-        registry.target_btf_fds.insert(registry_key.to_string(), fd);
+        // Store per-target BTF FD for daemon-owned REJIT fd_array transport.
+        target_btf_fds.insert(registry_key.to_string(), fd);
         registry
             .target_supported_encodings
             .insert(registry_key.to_string(), BPF_KINSN_ENC_PACKED_CALL);
@@ -434,6 +436,7 @@ pub fn discover_kinsns() -> DiscoveryResult {
 
     DiscoveryResult {
         registry,
+        target_btf_fds,
         btf_fds,
         log,
     }

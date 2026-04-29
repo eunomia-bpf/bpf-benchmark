@@ -505,33 +505,17 @@ pub fn emit_packed_kinsn_call_with_off(
     ]
 }
 
-/// Ensure `btf_fd` is present in the program's REJIT `fd_array` list and
-/// return the 1-based slot number to encode in `CALL.off`.
-pub fn ensure_btf_fd_slot(program: &mut BpfProgram, btf_fd: i32) -> i16 {
-    if let Some(idx) = program.required_btf_fds.iter().position(|&fd| fd == btf_fd) {
-        return idx as i16 + 1;
-    }
-
-    program.required_btf_fds.push(btf_fd);
-    program.required_btf_fds.len() as i16
-}
-
-pub fn resolve_kinsn_call_off_for_pass(
-    program: &mut BpfProgram,
-    ctx: &PassContext,
-    pass_name: &str,
-) -> i16 {
+pub fn resolve_kinsn_call_off_for_pass(ctx: &PassContext, pass_name: &str) -> anyhow::Result<i16> {
     ctx.kinsn_call_resolver
-        .call_off_for_pass(program, &ctx.kinsn_registry, pass_name)
+        .call_off_for_pass(&ctx.kinsn_registry, pass_name)
 }
 
 pub fn resolve_kinsn_call_off_for_target(
-    program: &mut BpfProgram,
     ctx: &PassContext,
     target_name: &str,
-) -> i16 {
+) -> anyhow::Result<i16> {
     ctx.kinsn_call_resolver
-        .call_off_for_target_name(program, &ctx.kinsn_registry, target_name)
+        .call_off_for_target_name(&ctx.kinsn_registry, target_name)
 }
 // ── Tests ──────────────────────────────────────────────────────────
 

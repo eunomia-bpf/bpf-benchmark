@@ -100,36 +100,6 @@ impl BpfPass for PrependNopPass {
     }
 }
 
-/// A pass that appends a NOP with a caller-provided logical name.
-struct NamedAppendNopPass {
-    name: &'static str,
-}
-
-impl BpfPass for NamedAppendNopPass {
-    fn name(&self) -> &str {
-        self.name
-    }
-    fn category(&self) -> PassCategory {
-        PassCategory::Optimization
-    }
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        _analyses: &mut AnalysisCache,
-        _ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        program.insns.push(BpfInsn::nop());
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            changed: true,
-            sites_applied: 1,
-            sites_skipped: vec![],
-            diagnostics: vec![],
-            ..Default::default()
-        })
-    }
-}
-
 /// A pass that replaces all MOV64_IMM with a different immediate value.
 struct RewriteMovImmPass {
     new_imm: i32,
@@ -698,10 +668,6 @@ fn test_pass_manager_collects_debug_traces() {
     assert_eq!(result.debug_traces[0].pass_name, "append_nop");
     assert!(result.debug_traces[0].changed);
     assert_eq!(
-        result.debug_traces[0].verify.status,
-        PassVerifyStatus::Skipped
-    );
-    assert_eq!(
         result.debug_traces[0]
             .bytecode_before
             .as_ref()
@@ -743,18 +709,17 @@ fn test_kinsn_registry_with_available_targets() {
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
-            target_btf_fds: HashMap::from([("bpf_rotate64".to_string(), 42)]),
-            target_call_offsets: HashMap::new(),
+            target_call_offsets: HashMap::from([("bpf_rotate64".to_string(), 7)]),
             target_supported_encodings: HashMap::new(),
         },
-        kinsn_call_resolver: std::sync::Arc::new(FdArrayKinsnCallResolver),
+        kinsn_call_resolver: std::sync::Arc::new(StaticKinsnCallResolver),
         platform: PlatformCapabilities::default(),
         policy: PolicyConfig::default(),
         prog_type: 0,
     };
     assert!(ctx.kinsn_registry.rotate64_btf_id > 0);
     assert!(ctx.kinsn_registry.select64_btf_id < 0);
-    assert_eq!(ctx.kinsn_registry.btf_fd_for_pass("rotate"), Some(42));
+    assert_eq!(ctx.kinsn_registry.call_off_for_pass("rotate"), 7);
 }
 
 #[test]
@@ -767,11 +732,11 @@ fn test_pass_manager_pass_count() {
     assert_eq!(pm.pass_count(), 2);
 }
 
-// ── Issue 3: Per-target BTF FD tests ────────────────────────
+// ── Per-target static call offset tests ────────────────────────
 
 #[test]
-fn test_kinsn_registry_per_target_btf_fd() {
-    let mut reg = KinsnRegistry {
+fn test_kinsn_registry_per_target_call_offsets() {
+    let reg = KinsnRegistry {
         rotate64_btf_id: 10,
         select64_btf_id: 20,
         extract64_btf_id: 30,
@@ -780,74 +745,17 @@ fn test_kinsn_registry_per_target_btf_fd() {
         endian_load16_btf_id: -1,
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,
-        target_btf_fds: HashMap::new(),
-        target_call_offsets: HashMap::new(),
+        target_call_offsets: HashMap::from([
+            ("bpf_rotate64".to_string(), 100),
+            ("bpf_select64".to_string(), 200),
+            ("bpf_extract64".to_string(), 300),
+        ]),
         target_supported_encodings: HashMap::new(),
     };
-    reg.target_btf_fds.insert("bpf_rotate64".to_string(), 100);
-    reg.target_btf_fds.insert("bpf_select64".to_string(), 200);
-    reg.target_btf_fds.insert("bpf_extract64".to_string(), 300);
 
-    assert_eq!(reg.btf_fd_for_pass("rotate"), Some(100));
-    assert_eq!(reg.btf_fd_for_pass("cond_select"), Some(200));
-    assert_eq!(reg.btf_fd_for_pass("extract"), Some(300));
-}
-
-#[test]
-fn test_kinsn_registry_all_btf_fds() {
-    let mut reg = KinsnRegistry {
-        rotate64_btf_id: 10,
-        select64_btf_id: 20,
-        extract64_btf_id: -1,
-        memcpy_bulk_btf_id: -1,
-        memset_bulk_btf_id: -1,
-        endian_load16_btf_id: -1,
-        endian_load32_btf_id: -1,
-        endian_load64_btf_id: -1,
-        target_btf_fds: HashMap::new(),
-        target_call_offsets: HashMap::new(),
-        target_supported_encodings: HashMap::new(),
-    };
-    reg.target_btf_fds.insert("bpf_rotate64".to_string(), 100);
-    reg.target_btf_fds.insert("bpf_select64".to_string(), 200);
-
-    let fds = reg.all_btf_fds();
-    assert!(fds.contains(&100));
-    assert!(fds.contains(&200));
-    assert_eq!(fds.len(), 2);
-}
-
-#[test]
-fn test_required_btf_fds_subset_of_all_btf_fds() {
-    let mut reg = KinsnRegistry {
-        rotate64_btf_id: 10,
-        select64_btf_id: 20,
-        extract64_btf_id: -1,
-        memcpy_bulk_btf_id: -1,
-        memset_bulk_btf_id: -1,
-        endian_load16_btf_id: -1,
-        endian_load32_btf_id: -1,
-        endian_load64_btf_id: -1,
-        target_btf_fds: HashMap::new(),
-        target_call_offsets: HashMap::new(),
-        target_supported_encodings: HashMap::new(),
-    };
-    reg.target_btf_fds.insert("bpf_rotate64".to_string(), 100);
-    reg.target_btf_fds.insert("bpf_select64".to_string(), 200);
-
-    let all_fds = reg.all_btf_fds();
-
-    let required: Vec<i32> = vec![100, 200];
-    for fd in &required {
-        assert!(
-            all_fds.contains(fd),
-            "required fd {} not in all_btf_fds {:?}",
-            fd,
-            all_fds
-        );
-    }
-
-    assert!(!all_fds.contains(&999));
+    assert_eq!(reg.call_off_for_pass("rotate"), 100);
+    assert_eq!(reg.call_off_for_pass("cond_select"), 200);
+    assert_eq!(reg.call_off_for_pass("extract"), 300);
 }
 
 // ── Issue 5: Annotation remap tests ─────────────────────────
@@ -1063,223 +971,6 @@ fn test_pass_skips_without_platform_capability() {
         .sites_skipped
         .iter()
         .any(|s| s.reason.contains("CMOV")));
-}
-
-// ── Per-pass verification tests ─────────────────────────────
-
-#[test]
-fn test_verify_callback_not_run_for_unchanged_pass() {
-    let mut pm = PassManager::new();
-    pm.add_pass(NoOpPass);
-
-    let mut prog = make_program(vec![exit_insn()]);
-    let ctx = ctx_for_pass_manager(&pm);
-    let mut verifier_called = false;
-    let result = pm
-        .run_with_verifier(&mut prog, &ctx, &mut |_, _| {
-            verifier_called = true;
-            Ok(PassVerifyResult::accepted())
-        })
-        .unwrap();
-
-    assert!(!verifier_called);
-    assert!(!result.program_changed);
-    assert_eq!(
-        result.pass_results[0].verify.status,
-        PassVerifyStatus::NotNeeded
-    );
-}
-
-#[test]
-fn test_verify_callback_accepts_changed_pass() {
-    let mut pm = PassManager::new();
-    pm.add_pass(AppendNopPass);
-
-    let mut prog = make_program(vec![exit_insn()]);
-    let ctx = ctx_for_pass_manager(&pm);
-    let mut verified_passes = Vec::new();
-    let result = pm
-        .run_with_verifier(&mut prog, &ctx, &mut |pass_name, _| {
-            verified_passes.push(pass_name.to_string());
-            Ok(PassVerifyResult::accepted())
-        })
-        .unwrap();
-
-    assert_eq!(verified_passes, vec!["append_nop"]);
-    assert!(result.program_changed);
-    assert_eq!(result.total_sites_applied, 1);
-    assert_eq!(prog.insns.len(), 2);
-    assert_eq!(
-        result.pass_results[0].verify.status,
-        PassVerifyStatus::Accepted
-    );
-}
-
-#[test]
-fn test_verify_callback_refreshes_program_verifier_states_on_accept() {
-    let mut pm = PassManager::new();
-    pm.add_pass(AppendNopPass);
-
-    let mut prog = make_program(vec![exit_insn()]);
-    prog.set_verifier_log(
-        r#"
-0: R0=0 R10=fp0
-"#,
-    );
-    let ctx = ctx_for_pass_manager(&pm);
-    let result = pm
-        .run_with_verifier(&mut prog, &ctx, &mut |_, _| {
-            Ok(PassVerifyResult::accepted_with_verifier_states(
-                crate::verifier_log::parse_verifier_log(
-                    r#"
-0: R0=0 R10=fp0
-1: (95) exit ; R0=1
-"#,
-                ),
-            ))
-        })
-        .unwrap();
-
-    assert!(result.program_changed);
-    assert_eq!(prog.verifier_states.len(), 2);
-    assert_eq!(prog.verifier_states[1].pc, 1);
-    assert_eq!(
-        prog.verifier_states[1].regs.get(&0).unwrap().exact_u64(),
-        Some(1)
-    );
-}
-
-#[test]
-fn test_verify_rejection_rolls_back_and_continues_pipeline() {
-    let mut pm = PassManager::new();
-    pm.add_pass(RewriteMovImmPass { new_imm: 99 });
-    pm.add_pass(AppendNopPass);
-
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-    let ctx = ctx_for_pass_manager(&pm);
-    let mut verified_passes = Vec::new();
-    let result = pm
-        .run_with_verifier(&mut prog, &ctx, &mut |pass_name, _| {
-            verified_passes.push(pass_name.to_string());
-            if pass_name == "rewrite_mov_imm" {
-                return Ok(PassVerifyResult::rejected("synthetic verifier rejection"));
-            }
-            Ok(PassVerifyResult::accepted())
-        })
-        .unwrap();
-
-    assert_eq!(verified_passes, vec!["rewrite_mov_imm", "append_nop"]);
-    assert!(result.program_changed);
-    assert_eq!(result.total_sites_applied, 1);
-    assert_eq!(prog.insns[0].imm, 42);
-    assert_eq!(prog.insns.len(), 3);
-
-    assert!(!result.pass_results[0].changed);
-    assert_eq!(result.pass_results[0].sites_applied, 1);
-    assert_eq!(result.pass_results[0].insns_before, 2);
-    assert_eq!(result.pass_results[0].insns_after, 2);
-    assert_eq!(
-        result.pass_results[0].verify.status,
-        PassVerifyStatus::Rejected
-    );
-    assert_eq!(
-        result.pass_results[0].verify.error_message.as_deref(),
-        Some("synthetic verifier rejection")
-    );
-    assert_eq!(
-        result.pass_results[0].rollback,
-        Some(PassRollbackResult::restored_pre_pass_snapshot(2))
-    );
-
-    assert!(result.pass_results[1].changed);
-    assert_eq!(
-        result.pass_results[1].verify.status,
-        PassVerifyStatus::Accepted
-    );
-    assert_eq!(result.pass_results[1].rollback, None);
-}
-
-#[test]
-fn test_verify_rejection_restores_last_accepted_snapshot_before_next_pass() {
-    let mut pm = PassManager::new();
-    pm.add_pass(NamedAppendNopPass { name: "pass_a" });
-    pm.add_pass(RewriteMovImmPass { new_imm: 99 });
-    pm.add_pass(PrependNopPass);
-    pm.add_pass(NamedAppendNopPass { name: "pass_d" });
-
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-    let ctx = ctx_for_pass_manager(&pm);
-    let mut verifier_observations = Vec::new();
-    let result = pm
-        .run_with_verifier(&mut prog, &ctx, &mut |pass_name, program| {
-            verifier_observations.push((
-                pass_name.to_string(),
-                program.insns.len(),
-                program.insns[0].code,
-                program.insns[0].imm,
-            ));
-            if pass_name == "prepend_nop" {
-                return Ok(PassVerifyResult::rejected("synthetic verifier rejection"));
-            }
-            Ok(PassVerifyResult::accepted())
-        })
-        .unwrap();
-
-    assert_eq!(
-        verifier_observations
-            .iter()
-            .map(|(name, ..)| name.as_str())
-            .collect::<Vec<_>>(),
-        vec!["pass_a", "rewrite_mov_imm", "prepend_nop", "pass_d"]
-    );
-    assert_eq!(result.total_sites_applied, 3);
-    assert!(result.program_changed);
-
-    assert!(result.pass_results[0].changed);
-    assert_eq!(result.pass_results[0].rollback, None);
-    assert!(result.pass_results[1].changed);
-    assert_eq!(result.pass_results[1].rollback, None);
-    assert!(!result.pass_results[2].changed);
-    assert_eq!(
-        result.pass_results[2].rollback,
-        Some(PassRollbackResult::restored_pre_pass_snapshot(3))
-    );
-    assert!(result.pass_results[3].changed);
-    assert_eq!(result.pass_results[3].rollback, None);
-
-    assert_eq!(prog.insns[0].imm, 99);
-    assert_eq!(prog.insns.len(), 4);
-    assert_ne!(prog.insns[0].code, BpfInsn::nop().code);
-    assert_eq!(verifier_observations[2].1, 4);
-    assert_eq!(verifier_observations[2].2, BpfInsn::nop().code);
-    assert_eq!(verifier_observations[3].1, 4);
-    assert_eq!(verifier_observations[3].2, BpfInsn::mov64_imm(0, 0).code);
-    assert_eq!(verifier_observations[3].3, 99);
-}
-
-#[test]
-fn test_disabled_pass_not_verified() {
-    let mut pm = PassManager::new();
-    pm.add_pass(RewriteMovImmPass { new_imm: 99 });
-    pm.add_pass(AppendNopPass);
-
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-    let mut ctx = ctx_for_pass_manager(&pm);
-    ctx.policy.disabled_passes = vec!["rewrite_mov_imm".into()];
-    let mut verified_passes = Vec::new();
-    let result = pm
-        .run_with_verifier(&mut prog, &ctx, &mut |pass_name, _| {
-            verified_passes.push(pass_name.to_string());
-            Ok(PassVerifyResult::accepted())
-        })
-        .unwrap();
-
-    assert_eq!(verified_passes, vec!["append_nop"]);
-    assert!(result.program_changed);
-    assert_eq!(prog.insns[0].imm, 42);
-    assert_eq!(prog.insns.len(), 3);
-    assert_eq!(result.pass_results.len(), 1);
-    assert_eq!(result.pass_results[0].pass_name, "append_nop");
 }
 
 #[test]

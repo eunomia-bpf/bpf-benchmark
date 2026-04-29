@@ -12,7 +12,7 @@ use serde::ser::{SerializeSeq, Serializer};
 use serde::Serialize;
 
 use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
-use crate::{bpf, insn, pass, passes, verifier_log};
+use crate::{bpf, insn, pass, passes, pipeline, verifier_log};
 
 // ── OptimizeOneResult — structured return from try_apply_one ────────
 
@@ -115,14 +115,15 @@ pub(crate) struct SkippedSiteDetail {
 /// Per-pass detail record.
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct PassDetail {
+    #[serde(rename = "pass")]
     pub pass_name: String,
     pub changed: bool,
-    pub verify_result: pass::PassVerifyStatus,
+    pub verify_result: pipeline::PassVerifyStatus,
     pub verify_error: Option<String>,
     pub action: String,
-    pub verify: pass::PassVerifyResult,
+    pub verify: pipeline::PassVerifyResult,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub rollback: Option<pass::PassRollbackResult>,
+    pub rollback: Option<pipeline::PassRollbackResult>,
     pub sites_applied: usize,
     pub sites_skipped: usize,
     pub skip_reasons: HashMap<String, usize>,
@@ -134,11 +135,12 @@ pub(crate) struct PassDetail {
     pub diagnostics: Vec<String>,
 }
 
-impl From<&pass::PassResult> for PassDetail {
-    fn from(pr: &pass::PassResult) -> Self {
+impl From<&pipeline::VerifiedPassResult> for PassDetail {
+    fn from(pr: &pipeline::VerifiedPassResult) -> Self {
+        let result = &pr.result;
         Self {
-            pass_name: pr.pass_name.clone(),
-            changed: pr.changed,
+            pass_name: result.pass_name.clone(),
+            changed: result.changed,
             verify_result: pr.verify.status.clone(),
             verify_error: pr.verify.error_message.clone(),
             action: if pr.rollback.is_some() {
@@ -148,10 +150,11 @@ impl From<&pass::PassResult> for PassDetail {
             },
             verify: pr.verify.clone(),
             rollback: pr.rollback.clone(),
-            sites_applied: pr.sites_applied,
-            sites_skipped: pr.sites_skipped.len(),
-            skip_reasons: pr.skip_reason_counts(),
+            sites_applied: result.sites_applied,
+            sites_skipped: result.sites_skipped.len(),
+            skip_reasons: result.skip_reason_counts(),
             skipped_sites: pr
+                .result
                 .sites_skipped
                 .iter()
                 .map(|skip| SkippedSiteDetail {
@@ -159,10 +162,10 @@ impl From<&pass::PassResult> for PassDetail {
                     reason: skip.reason.clone(),
                 })
                 .collect(),
-            insns_before: pr.insns_before,
-            insns_after: pr.insns_after,
-            insn_delta: pr.insns_after as i64 - pr.insns_before as i64,
-            diagnostics: pr.diagnostics.clone(),
+            insns_before: result.insns_before,
+            insns_after: result.insns_after,
+            insn_delta: result.insns_after as i64 - result.insns_before as i64,
+            diagnostics: result.diagnostics.clone(),
         }
     }
 }
@@ -178,7 +181,7 @@ fn changed_pass_names(passes: &[PassDetail]) -> Vec<String> {
 fn verifier_rejection_count(passes: &[PassDetail]) -> usize {
     passes
         .iter()
-        .filter(|pass| matches!(pass.verify.status, pass::PassVerifyStatus::Rejected))
+        .filter(|pass| matches!(pass.verify.status, pipeline::PassVerifyStatus::Rejected))
         .count()
 }
 
@@ -198,7 +201,7 @@ pub(crate) struct AttemptRecord {
 
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct AttemptDebug {
-    pub pass_traces: Vec<pass::PassDebugTrace>,
+    pub pass_traces: Vec<pipeline::PassDebugTrace>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pre_rejit_bytecode: Option<insn::BpfBytecodeDump>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -282,11 +285,13 @@ pub(crate) fn new_invalidation_tracker() -> SharedInvalidationTracker {
     Arc::new(Mutex::new(MapInvalidationTracker::new(BpfMapValueReader)))
 }
 
-fn collect_map_inline_records(pass_results: &[pass::PassResult]) -> Vec<pass::MapInlineRecord> {
+fn collect_map_inline_records(
+    pass_results: &[pipeline::VerifiedPassResult],
+) -> Vec<pass::MapInlineRecord> {
     pass_results
         .iter()
-        .filter(|result| result.changed)
-        .flat_map(|result| result.map_inline_records.iter().cloned())
+        .filter(|result| result.result.changed)
+        .flat_map(|result| result.result.map_inline_records.iter().cloned())
         .collect()
 }
 
@@ -391,7 +396,7 @@ fn build_rejit_fd_array(required_btf_fds: &[RawFd]) -> Vec<RawFd> {
     fd_array
 }
 
-fn new_attempt_debug(pass_traces: Vec<pass::PassDebugTrace>) -> Option<AttemptDebug> {
+fn new_attempt_debug(pass_traces: Vec<pipeline::PassDebugTrace>) -> Option<AttemptDebug> {
     Some(AttemptDebug {
         pass_traces,
         pre_rejit_bytecode: None,
@@ -426,10 +431,10 @@ fn parse_verifier_states_from_log(
 
 fn validate_required_btf_fds(
     required_btf_fds: &[RawFd],
-    ctx: &pass::PassContext,
+    resolver: &pipeline::FdArrayKinsnCallResolver,
     stage: &str,
 ) -> Result<()> {
-    let all_fds = ctx.kinsn_registry.all_btf_fds();
+    let all_fds = resolver.all_btf_fds();
     for &fd_needed in required_btf_fds {
         if !all_fds.contains(&fd_needed) {
             anyhow::bail!(
@@ -487,11 +492,12 @@ fn maybe_attach_original_verifier_states(
 /// program info, per-pass details, rollback attempts, and timings.
 pub(crate) fn try_apply_one(
     prog_id: u32,
-    ctx: &pass::PassContext,
+    ctx: &pipeline::DaemonContext,
     profiling: Option<&pass::ProfilingData>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
     mode: OptimizeMode,
 ) -> Result<OptimizeOneResult> {
+    ctx.kinsn_resolver.reset_required_btf_fds()?;
     let total_start = Instant::now();
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
@@ -573,7 +579,7 @@ pub(crate) fn try_apply_one(
     program.verifier_states = original_verifier_states.clone();
 
     let pm = passes::build_full_pipeline();
-    let mut local_ctx = ctx.clone();
+    let mut local_ctx = ctx.pass_context.clone();
     local_ctx.prog_type = info.prog_type;
 
     let pipeline_start = Instant::now();
@@ -582,7 +588,7 @@ pub(crate) fn try_apply_one(
             .context("prepare live-program metadata for per-pass BPF_PROG_LOAD verify");
         let mut verifier = |pass_name: &str,
                             program: &pass::BpfProgram|
-         -> Result<pass::PassVerifyResult> {
+         -> Result<pipeline::PassVerifyResult> {
             let prog_load_meta = match prog_load_meta.as_ref() {
                 Ok(meta) => meta,
                 Err(err) => {
@@ -594,7 +600,7 @@ pub(crate) fn try_apply_one(
                         info.name_str(),
                         headline,
                     );
-                    return Ok(pass::PassVerifyResult::rejected(headline));
+                    return Ok(pipeline::PassVerifyResult::rejected(headline));
                 }
             };
 
@@ -611,12 +617,13 @@ pub(crate) fn try_apply_one(
                 )
             })?;
 
+            let required_btf_fds = ctx.kinsn_resolver.required_btf_fds()?;
             validate_required_btf_fds(
-                &program.required_btf_fds,
-                &local_ctx,
+                &required_btf_fds,
+                &ctx.kinsn_resolver,
                 &format!("per-pass verify for '{}'", pass_name),
             )?;
-            let fd_array = build_rejit_fd_array(&program.required_btf_fds);
+            let fd_array = build_rejit_fd_array(&required_btf_fds);
 
             let rejit_start = Instant::now();
             let verify_result = match bpf::bpf_prog_load_verify(
@@ -654,7 +661,7 @@ pub(crate) fn try_apply_one(
                             }
                         }
                     };
-                    pass::PassVerifyResult::accepted_with_verifier_states(states)
+                    pipeline::PassVerifyResult::accepted_with_verifier_states(states)
                 }
                 Err(err) => {
                     let headline = error_headline(&err);
@@ -665,7 +672,7 @@ pub(crate) fn try_apply_one(
                         info.name_str(),
                         headline,
                     );
-                    pass::PassVerifyResult::rejected(headline)
+                    pipeline::PassVerifyResult::rejected(headline)
                 }
             };
             total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
@@ -673,20 +680,52 @@ pub(crate) fn try_apply_one(
         };
 
         if let Some(profiling) = profiling {
-            pm.run_with_profiling_and_verifier(
+            pipeline::run_with_profiling_and_verifier(
+                &pm,
                 &mut program,
                 &local_ctx,
                 Some(profiling),
+                &ctx.kinsn_resolver,
                 &mut verifier,
             )?
         } else {
-            pm.run_with_verifier(&mut program, &local_ctx, &mut verifier)?
+            pipeline::run_with_verifier(
+                &pm,
+                &mut program,
+                &local_ctx,
+                &ctx.kinsn_resolver,
+                &mut verifier,
+            )?
         }
     } else {
-        if let Some(profiling) = profiling {
+        let core_result = if let Some(profiling) = profiling {
             pm.run_with_profiling(&mut program, &local_ctx, Some(profiling))?
         } else {
             pm.run(&mut program, &local_ctx)?
+        };
+        pipeline::VerifiedPipelineResult {
+            pass_results: core_result
+                .pass_results
+                .into_iter()
+                .map(|result| pipeline::VerifiedPassResult {
+                    result,
+                    verify: pipeline::PassVerifyResult::not_needed(),
+                    rollback: None,
+                })
+                .collect(),
+            total_sites_applied: core_result.total_sites_applied,
+            program_changed: core_result.program_changed,
+            debug_traces: core_result
+                .debug_traces
+                .into_iter()
+                .map(|trace| pipeline::PassDebugTrace {
+                    pass_name: trace.pass_name,
+                    changed: trace.changed,
+                    verify: pipeline::PassVerifyResult::not_needed(),
+                    bytecode_before: trace.bytecode_before,
+                    bytecode_after: trace.bytecode_after,
+                })
+                .collect(),
         }
     };
     let total_pipeline_ns = pipeline_start.elapsed().as_nanos() as u64;
@@ -780,8 +819,9 @@ pub(crate) fn try_apply_one(
         debug.pre_rejit_bytecode = Some(insn::dump_bytecode_compact(&final_rejit_insns));
     }
 
-    validate_required_btf_fds(&program.required_btf_fds, &local_ctx, "final REJIT")?;
-    let fd_array = build_rejit_fd_array(&program.required_btf_fds);
+    let required_btf_fds = ctx.kinsn_resolver.required_btf_fds()?;
+    validate_required_btf_fds(&required_btf_fds, &ctx.kinsn_resolver, "final REJIT")?;
+    let fd_array = build_rejit_fd_array(&required_btf_fds);
     let rejit_start = Instant::now();
     match bpf::bpf_prog_rejit(fd.as_raw_fd(), &final_rejit_insns, &fd_array) {
         Ok(rejit_result) => {
