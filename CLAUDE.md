@@ -32,12 +32,18 @@ Before adding a test, be able to answer: what specific bug would this failure id
 
 ### bpfopt-suite v3 Architecture
 `docs/tmp/bpfopt_design_v3.md` is the authoritative design document for bpfopt-suite. Keep implementation and documentation aligned with that design:
-- The daemon must not run a pass pipeline, maintain `PassManager`, call `bpfopt`, do profiling, or transform bytecode.
-- The daemon only watches for new BPF programs, detects map invalidation, and triggers external scripts/commands.
+- The daemon must not run a pass pipeline, maintain `PassManager`, do profiling internally, parse `verifier_log`, or transform bytecode in-process.
+- The daemon only watches for new BPF programs, detects map invalidation, preserves the socket + JSON protocol, and triggers external scripts/commands or CLI subprocesses.
 - `bpfopt` is a pure bytecode CLI tool with zero kernel dependency.
 - Per-pass verify loops belong in bash/scripts, not inside the daemon.
-- Benchmark runner code should prefer calling CLI tools directly instead of using the daemon socket.
+- Benchmark runner Python stays on the existing daemon socket boundary during the v3 migration.
 - stdin/stdout carry raw binary bytecode (`struct bpf_insn[]`); side-inputs and side-outputs use files.
+
+#### Daemon Adapts Socket-to-CLI; Runner Stays Untouched
+- v3 §8 option B: runner Python (`runner/libs/`, `corpus/`, `e2e/`, `micro/`) is the stable boundary; do not refactor it for v3 migration.
+- The daemon retains the socket + JSON protocol but delegates optimize/rejit/profile/discover to CLI subprocesses (`bpfopt`, `bpfget`, `bpfrejit`, `bpfverify`, `bpfprof`).
+- Daemon internal `PassManager`, pass code, profiler, and `verifier_log` parser are removed; the daemon body shrinks to socket server + watch + invalidation + CLI fork+exec.
+- The only allowed runner Python changes during v3 migration are bug fixes (for example, micro driver baseline regression) and stale test data updates.
 
 ### No CLI Cross-Dependencies
 The 6 bpfopt-suite CLI binary crates (`bpfopt`, `bpfverify`, `bpfprof`, `bpfget`, `bpfrejit`, `bpfrejit-daemon`) must not depend on each other:
