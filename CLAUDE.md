@@ -76,6 +76,9 @@ Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf
 ### Default Config Must Work
 `make vm-corpus`, `make vm-e2e`, `make aws-x86-test`, `make aws-arm64-test` must work with zero manual environment variables. Defaults live in `runner/targets/*.env` files and are overridable via env vars.
 
+### Cost-Conscious AWS Defaults
+AWS instance defaults must minimize cost. Smoke runs (SAMPLES=1) use the smallest instance that fits the workload; only authoritative runs (SAMPLES=30) escalate to non-burstable (c5/c6g) instances when CPU credit limiting would distort variance. Current defaults: `t3.small` (x86), `t4g.small` (arm64) for bench suites; `t3.micro`/`t4g.micro` for kernel test suite. Do not raise the default instance size without an explicit OOM or credit-throttling justification documented in commit message. When choosing an authoritative instance, pick the smallest non-burstable size that keeps benchmark variance below 5%, not the largest available. Spot instances are allowed for non-time-critical runs.
+
 ### No Host Bind Mount
 Container must NOT bind mount host workspace (`-v workspace:workspace`). All files are delivered via Docker image layers. Only bind mount system paths (/sys, /sys/fs/bpf, /lib/modules, /boot) and result output directories.
 
