@@ -103,6 +103,38 @@ struct TargetKinsnJson {
     btf_func_id: i32,
 }
 
+struct KinsnProbeTarget {
+    json_name: &'static str,
+    probe_names: &'static [&'static str],
+}
+
+const KINSN_PROBE_TARGETS: &[KinsnProbeTarget] = &[
+    KinsnProbeTarget {
+        json_name: "bpf_rotate64",
+        probe_names: &["bpf_rotate64"],
+    },
+    KinsnProbeTarget {
+        json_name: "bpf_select64",
+        probe_names: &["bpf_select64"],
+    },
+    KinsnProbeTarget {
+        json_name: "bpf_extract64",
+        probe_names: &["bpf_extract64"],
+    },
+    KinsnProbeTarget {
+        json_name: "bpf_endian_load64",
+        probe_names: &["bpf_endian_load64"],
+    },
+    KinsnProbeTarget {
+        json_name: "bpf_bulk_memcpy",
+        probe_names: &["bpf_bulk_memcpy", "bpf_memcpy_bulk"],
+    },
+    KinsnProbeTarget {
+        json_name: "bpf_bulk_memset",
+        probe_names: &["bpf_bulk_memset", "bpf_memset_bulk"],
+    },
+];
+
 fn main() -> ExitCode {
     match run() {
         Ok(()) => ExitCode::SUCCESS,
@@ -271,17 +303,132 @@ fn list_programs(json: bool, output: Option<&Path>) -> Result<()> {
 }
 
 fn write_target_json(output: Option<&Path>, kinsn_specs: &[String]) -> Result<()> {
+    let (mut kinsns, warnings) = probe_target_kinsns();
+    for (name, spec) in parse_kinsns(kinsn_specs)? {
+        kinsns.insert(name, spec);
+    }
+    for warning in warnings {
+        eprintln!("warning: {warning}");
+    }
+    if kinsns.is_empty() {
+        eprintln!("warning: no kinsn BTF functions found; target.json uses empty kinsns");
+    }
+
     let target = TargetJson {
         arch: detect_arch(),
         features: detect_features(),
-        kinsns: parse_kinsns(kinsn_specs)?,
+        kinsns,
     };
-    if target.kinsns.is_empty() {
-        eprintln!(
-            "warning: kinsn BTF probing is not implemented yet; target.json uses empty kinsns"
-        );
-    }
     write_json(output, &target)
+}
+
+fn probe_target_kinsns() -> (BTreeMap<String, TargetKinsnJson>, Vec<String>) {
+    let mut found = BTreeMap::new();
+    let mut warnings = Vec::new();
+    let mut start_id = 0u32;
+    let mut saw_btf = false;
+    let mut loaded_btf = false;
+    let mut first_load_error = None;
+    let vmlinux_btf = match kernel_sys::KernelBtf::load_vmlinux() {
+        Ok(btf) => Some(btf),
+        Err(err) => {
+            warnings.push(format!(
+                "vmlinux BTF unavailable for split module probing: {err:#}"
+            ));
+            None
+        }
+    };
+
+    loop {
+        let btf_id = match kernel_sys::btf_get_next_id(start_id) {
+            Ok(Some(id)) => id,
+            Ok(None) => break,
+            Err(err) => {
+                warnings.push(format!("kinsn BTF probing unavailable: {err:#}"));
+                return (found, warnings);
+            }
+        };
+        saw_btf = true;
+        start_id = btf_id;
+
+        match kernel_sys::KernelBtf::load_from_kernel_by_id(btf_id) {
+            Ok(btf) => {
+                loaded_btf = true;
+                probe_kinsns_in_btf(btf_id, &btf, &mut found, &mut warnings);
+            }
+            Err(err) => {
+                if first_load_error.is_none() {
+                    first_load_error = Some(format!("BTF id {btf_id}: {err:#}"));
+                }
+            }
+        }
+
+        if found.len() != KINSN_PROBE_TARGETS.len() {
+            if let Some(base) = &vmlinux_btf {
+                match kernel_sys::KernelBtf::load_from_kernel_by_id_split(btf_id, base) {
+                    Ok(btf) => {
+                        loaded_btf = true;
+                        probe_kinsns_in_btf(btf_id, &btf, &mut found, &mut warnings);
+                    }
+                    Err(err) => {
+                        if first_load_error.is_none() {
+                            first_load_error = Some(format!("split BTF id {btf_id}: {err:#}"));
+                        }
+                    }
+                }
+            }
+        }
+
+        if found.len() == KINSN_PROBE_TARGETS.len() {
+            break;
+        }
+    }
+
+    if !saw_btf {
+        warnings.push("no kernel BTF objects are visible".to_string());
+    } else if !loaded_btf {
+        let detail = first_load_error.unwrap_or_else(|| "unknown error".to_string());
+        warnings.push(format!("unable to load any kernel BTF object: {detail}"));
+    }
+
+    (found, warnings)
+}
+
+fn probe_kinsns_in_btf(
+    btf_id: u32,
+    btf: &kernel_sys::KernelBtf,
+    found: &mut BTreeMap<String, TargetKinsnJson>,
+    warnings: &mut Vec<String>,
+) {
+    for target in KINSN_PROBE_TARGETS {
+        if found.contains_key(target.json_name) {
+            continue;
+        }
+        for &probe_name in target.probe_names {
+            match btf.find_func_by_name(probe_name) {
+                Ok(Some(btf_func_id)) => {
+                    let Ok(btf_func_id) = i32::try_from(btf_func_id) else {
+                        warnings.push(format!(
+                            "BTF id {btf_id} function {probe_name} type id {btf_func_id} exceeds target.json i32 range"
+                        ));
+                        break;
+                    };
+                    found.insert(
+                        target.json_name.to_string(),
+                        TargetKinsnJson { btf_func_id },
+                    );
+                    break;
+                }
+                Ok(None) => {}
+                Err(err) => {
+                    warnings.push(format!(
+                        "failed to inspect BTF id {btf_id} for {probe_name}: {err:#}"
+                    ));
+                    break;
+                }
+            }
+        }
+    }
 }
 
 fn parse_kinsns(specs: &[String]) -> Result<BTreeMap<String, TargetKinsnJson>> {

@@ -4,8 +4,9 @@
 //! `libbpf-rs`/`libbpf-sys`. The only direct `bpf(2)` wrappers here are for
 //! fork-only commands that upstream libbpf does not expose.
 
-use std::ffi::c_char;
+use std::ffi::{c_char, CString};
 use std::os::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, OwnedFd};
+use std::ptr::NonNull;
 
 use anyhow::{anyhow, bail, Result};
 
@@ -135,6 +136,12 @@ fn os_error(errno: i32) -> std::io::Error {
 
 fn libbpf_error(context: &str, ret: libc::c_int) -> anyhow::Error {
     anyhow!("{context}: {}", os_error(errno_from_libbpf_ret(ret)))
+}
+
+fn libbpf_ptr_error(context: &str, ptr: *const libc::c_void) -> anyhow::Error {
+    let ret = unsafe { libbpf_get_error(ptr) };
+    let errno = if ret < 0 { -ret as i32 } else { ret as i32 };
+    anyhow!("{context}: {}", os_error(errno))
 }
 
 fn raw_syscall_error(context: &str) -> anyhow::Error {
@@ -317,6 +324,88 @@ pub fn prog_get_fd_by_id(id: u32) -> Result<OwnedFd> {
         return Err(libbpf_error("BPF_PROG_GET_FD_BY_ID", fd));
     }
     Ok(unsafe { OwnedFd::from_raw_fd(fd) })
+}
+
+/// Return the next live BTF object ID after `start_id`.
+pub fn btf_get_next_id(start_id: u32) -> Result<Option<u32>> {
+    let mut next_id = 0;
+    let ret = unsafe { bpf_btf_get_next_id(start_id, &mut next_id) };
+    if ret < 0 {
+        let errno = errno_from_libbpf_ret(ret);
+        if errno == libc::ENOENT {
+            return Ok(None);
+        }
+        return Err(libbpf_error("BPF_BTF_GET_NEXT_ID", ret));
+    }
+    Ok(Some(next_id))
+}
+
+/// Open a live BTF object by ID.
+pub fn btf_get_fd_by_id(id: u32) -> Result<OwnedFd> {
+    let fd = unsafe { bpf_btf_get_fd_by_id(id) };
+    if fd < 0 {
+        return Err(libbpf_error("BPF_BTF_GET_FD_BY_ID", fd));
+    }
+    Ok(unsafe { OwnedFd::from_raw_fd(fd) })
+}
+
+/// Parsed kernel BTF object loaded through libbpf.
+pub struct KernelBtf {
+    ptr: NonNull<btf>,
+}
+
+impl KernelBtf {
+    fn from_raw(context: &str, raw: *mut btf) -> Result<Self> {
+        let err = unsafe { libbpf_get_error(raw as *const libc::c_void) };
+        if err != 0 {
+            return Err(libbpf_ptr_error(context, raw as *const libc::c_void));
+        }
+        let ptr = NonNull::new(raw).ok_or_else(|| anyhow!("{context} returned NULL"))?;
+        Ok(Self { ptr })
+    }
+
+    /// Load vmlinux BTF through libbpf.
+    pub fn load_vmlinux() -> Result<Self> {
+        let raw = unsafe { btf__load_vmlinux_btf() };
+        Self::from_raw("btf__load_vmlinux_btf", raw)
+    }
+
+    /// Load a kernel or module BTF object by kernel BTF ID.
+    pub fn load_from_kernel_by_id(id: u32) -> Result<Self> {
+        let raw = unsafe { btf__load_from_kernel_by_id(id) };
+        Self::from_raw(&format!("btf__load_from_kernel_by_id({id})"), raw)
+    }
+
+    /// Load a split kernel/module BTF object by ID using `base` as vmlinux BTF.
+    pub fn load_from_kernel_by_id_split(id: u32, base: &KernelBtf) -> Result<Self> {
+        let raw = unsafe { btf__load_from_kernel_by_id_split(id, base.ptr.as_ptr()) };
+        Self::from_raw(&format!("btf__load_from_kernel_by_id_split({id})"), raw)
+    }
+
+    /// Find a BTF_KIND_FUNC type by name. Returns `None` if the function is absent.
+    pub fn find_func_by_name(&self, name: &str) -> Result<Option<u32>> {
+        let c_name =
+            CString::new(name).map_err(|_| anyhow!("BTF function name contains NUL: {name:?}"))?;
+        let ret = unsafe {
+            btf__find_by_name_kind(self.ptr.as_ptr(), c_name.as_ptr(), BTF_KIND_FUNC as u32)
+        };
+        if ret >= 0 {
+            return Ok(Some(ret as u32));
+        }
+        if errno_from_libbpf_ret(ret) == libc::ENOENT {
+            return Ok(None);
+        }
+        Err(libbpf_error(
+            &format!("btf__find_by_name_kind({name})"),
+            ret,
+        ))
+    }
+}
+
+impl Drop for KernelBtf {
+    fn drop(&mut self) {
+        unsafe { btf__free(self.ptr.as_ptr()) };
+    }
 }
 
 fn prog_obj_get_info_by_fd_into(fd: BorrowedFd<'_>, info: &mut BpfProgInfoFork) -> Result<()> {

@@ -131,11 +131,137 @@ fn optimize_default_pipeline_writes_json_report_array() {
     assert_eq!(
         pass_names,
         vec![
+            "map_inline",
+            "const_prop",
             "dce",
             "skb_load_bytes_spec",
             "bounds_check_merge",
-            "wide_mem"
+            "wide_mem",
+            "bulk_memory",
+            "rotate",
+            "cond_select",
+            "extract",
+            "endian_fusion",
+            "branch_flip"
         ]
+    );
+    assert_eq!(passes.len(), 12);
+    assert_eq!(passes[0]["skipped"], true);
+    assert_eq!(passes[1]["skipped"], true);
+    assert_eq!(passes[2]["skipped"], false);
+    assert_eq!(passes[6]["reason"], "missing --target kinsns");
+    assert_eq!(passes[11]["reason"], "missing --profile");
+}
+
+#[test]
+fn optimize_without_target_skips_kinsn_passes_with_warning() {
+    let report_path = temp_path("optimize-kinsn-skip-report.json");
+    let report_arg = report_path.to_string_lossy().to_string();
+    let input = minimal_program_bytes();
+    let output = run_bpfopt(
+        &[
+            "optimize",
+            "--passes",
+            "rotate,cond-select",
+            "--report",
+            &report_arg,
+        ],
+        &input,
+    );
+
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(output.stdout, input);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("warning: skipping rotate: missing --target kinsns"),
+        "stderr={stderr}"
+    );
+    assert!(
+        stderr.contains("warning: skipping cond-select: missing --target kinsns"),
+        "stderr={stderr}"
+    );
+
+    let report_text = fs::read_to_string(&report_path).expect("read report");
+    let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
+    fs::remove_file(report_path).ok();
+    let passes = report["passes"].as_array().expect("passes array");
+    assert_eq!(passes.len(), 2);
+    assert_eq!(passes[0]["pass"], "rotate");
+    assert_eq!(passes[0]["skipped"], true);
+    assert_eq!(passes[0]["reason"], "missing --target kinsns");
+    assert_eq!(passes[1]["pass"], "cond_select");
+    assert_eq!(passes[1]["skipped"], true);
+    assert_eq!(passes[1]["reason"], "missing --target kinsns");
+}
+
+#[test]
+fn optimize_default_pipeline_with_all_side_inputs_reports_12_entries() {
+    let report_path = temp_path("optimize-full-report.json");
+    let target_path = write_temp_file(
+        "target.json",
+        r#"{
+            "arch":"x86_64",
+            "features":["cmov","movbe","bmi1","bmi2","rorx"],
+            "kinsns":{
+                "bpf_rotate64":{"btf_func_id":1001},
+                "bpf_select64":{"btf_func_id":1002},
+                "bpf_extract64":{"btf_func_id":1003},
+                "bpf_endian_load64":{"btf_func_id":1004},
+                "bpf_bulk_memcpy":{"btf_func_id":1005},
+                "bpf_bulk_memset":{"btf_func_id":1006}
+            }
+        }"#,
+    );
+    let verifier_path = write_temp_file("verifier-states.json", r#"{"insns":[]}"#);
+    let profile_path = write_temp_file("profile.json", r#"{"per_insn":{}}"#);
+    let map_values_path = write_temp_file("map-values.json", r#"{"maps":[]}"#);
+    let report_arg = report_path.to_string_lossy().to_string();
+    let target_arg = target_path.to_string_lossy().to_string();
+    let verifier_arg = verifier_path.to_string_lossy().to_string();
+    let profile_arg = profile_path.to_string_lossy().to_string();
+    let map_values_arg = map_values_path.to_string_lossy().to_string();
+
+    let output = run_bpfopt(
+        &[
+            "optimize",
+            "--target",
+            &target_arg,
+            "--verifier-states",
+            &verifier_arg,
+            "--profile",
+            &profile_arg,
+            "--map-values",
+            &map_values_arg,
+            "--map-ids",
+            "1",
+            "--report",
+            &report_arg,
+        ],
+        &minimal_program_bytes(),
+    );
+    fs::remove_file(target_path).ok();
+    fs::remove_file(verifier_path).ok();
+    fs::remove_file(profile_path).ok();
+    fs::remove_file(map_values_path).ok();
+
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let report_text = fs::read_to_string(&report_path).expect("read report");
+    let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
+    fs::remove_file(report_path).ok();
+
+    let passes = report["passes"].as_array().expect("passes array");
+    assert_eq!(passes.len(), 12);
+    assert!(
+        passes.iter().all(|pass| pass["skipped"] == false),
+        "report={report}"
     );
 }
 
@@ -203,41 +329,78 @@ fn cond_select_with_empty_target_kinsns_exits_with_error() {
 }
 
 #[test]
-fn optimize_explicit_const_prop_fails_when_verifier_states_missing() {
+fn optimize_explicit_const_prop_skips_when_verifier_states_missing() {
+    let report_path = temp_path("const-prop-skip-report.json");
+    let report_arg = report_path.to_string_lossy().to_string();
     let output = run_bpfopt(
-        &["optimize", "--passes", "const-prop"],
+        &[
+            "optimize",
+            "--passes",
+            "const-prop",
+            "--report",
+            &report_arg,
+        ],
         &minimal_program_bytes(),
     );
 
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("--verifier-states"), "stderr={stderr}");
-    assert!(output.stdout.is_empty());
-}
-
-#[test]
-fn optimize_explicit_map_inline_fails_when_map_side_inputs_missing() {
-    let output = run_bpfopt(
-        &["optimize", "--passes", "map-inline"],
-        &minimal_program_bytes(),
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
     );
-
-    assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(
-        stderr.contains("--map-values and --map-ids"),
+        stderr.contains("warning: skipping const-prop: missing --verifier-states"),
         "stderr={stderr}"
     );
-    assert!(output.stdout.is_empty());
+    let report_text = fs::read_to_string(&report_path).expect("read report");
+    let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
+    fs::remove_file(report_path).ok();
+    assert_eq!(report["passes"][0]["pass"], "const_prop");
+    assert_eq!(report["passes"][0]["skipped"], true);
 }
 
 #[test]
-fn optimize_explicit_kinsn_pass_fails_when_target_lacks_kinsn() {
+fn optimize_explicit_map_inline_skips_when_map_side_inputs_missing() {
+    let report_path = temp_path("map-inline-skip-report.json");
+    let report_arg = report_path.to_string_lossy().to_string();
+    let output = run_bpfopt(
+        &[
+            "optimize",
+            "--passes",
+            "map-inline",
+            "--report",
+            &report_arg,
+        ],
+        &minimal_program_bytes(),
+    );
+
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("warning: skipping map-inline: missing --map-values and --map-ids"),
+        "stderr={stderr}"
+    );
+    let report_text = fs::read_to_string(&report_path).expect("read report");
+    let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
+    fs::remove_file(report_path).ok();
+    assert_eq!(report["passes"][0]["pass"], "map_inline");
+    assert_eq!(report["passes"][0]["skipped"], true);
+}
+
+#[test]
+fn optimize_explicit_kinsn_pass_skips_when_target_lacks_kinsn() {
     let target_path = write_temp_file(
         "empty-target.json",
         r#"{"arch":"x86_64","features":["cmov"],"kinsns":{}}"#,
     );
+    let report_path = temp_path("target-lacks-kinsn-report.json");
     let target_arg = target_path.to_string_lossy().to_string();
+    let report_arg = report_path.to_string_lossy().to_string();
     let output = run_bpfopt(
         &[
             "optimize",
@@ -245,16 +408,32 @@ fn optimize_explicit_kinsn_pass_fails_when_target_lacks_kinsn() {
             "wide-mem,rotate",
             "--target",
             &target_arg,
+            "--report",
+            &report_arg,
         ],
         &minimal_program_bytes(),
     );
     fs::remove_file(target_path).ok();
 
-    assert!(!output.status.success());
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(
-        stderr.contains("kinsn 'bpf_rotate64' not in target"),
+        stderr.contains("warning: skipping rotate: missing --target kinsns: bpf_rotate64"),
         "stderr={stderr}"
     );
-    assert!(output.stdout.is_empty());
+    let report_text = fs::read_to_string(&report_path).expect("read report");
+    let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
+    fs::remove_file(report_path).ok();
+    assert_eq!(report["passes"][0]["pass"], "wide_mem");
+    assert_eq!(report["passes"][0]["skipped"], false);
+    assert_eq!(report["passes"][1]["pass"], "rotate");
+    assert_eq!(report["passes"][1]["skipped"], true);
+    assert_eq!(
+        report["passes"][1]["reason"],
+        "missing --target kinsns: bpf_rotate64"
+    );
 }

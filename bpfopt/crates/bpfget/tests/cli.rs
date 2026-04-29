@@ -144,6 +144,12 @@ fn target_stdout_contains_arch_and_features() {
         value["kinsns"].is_object(),
         "target JSON missing kinsns: {value}"
     );
+    for (name, entry) in value["kinsns"].as_object().expect("kinsns object") {
+        assert!(
+            entry["btf_func_id"].is_i64() || entry["btf_func_id"].is_u64(),
+            "kinsn {name} missing numeric btf_func_id: {entry}"
+        );
+    }
 }
 
 #[test]
@@ -176,4 +182,21 @@ fn target_output_writes_json_file() {
         value["features"].is_array(),
         "target JSON missing features: {value}"
     );
+}
+
+#[test]
+fn target_manual_kinsn_spec_writes_numeric_btf_func_id() {
+    let output = Command::new(bpfget_bin())
+        .args(["--target", "--kinsns", "bpf_rotate64:77"])
+        .output()
+        .expect("run bpfget --target --kinsns");
+
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("json stdout from bpfget --target");
+    assert_eq!(value["kinsns"]["bpf_rotate64"]["btf_func_id"], 77);
 }
