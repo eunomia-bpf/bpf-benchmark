@@ -3,11 +3,12 @@
 
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
+use rayon::prelude::*;
 use serde::Serialize;
 
 use crate::bpf;
@@ -29,11 +30,11 @@ fn register_signal_handlers() {
 
 fn process_invalidation_tick<A, F>(
     tracker: &std::sync::Arc<std::sync::Mutex<MapInvalidationTracker<A>>>,
-    mut reoptimize: F,
+    reoptimize: F,
 ) -> Result<Vec<u32>>
 where
     A: MapValueReader,
-    F: FnMut(u32) -> Result<()>,
+    F: Fn(u32) -> Result<()> + Sync,
 {
     let invalidated = {
         let tracker = tracker
@@ -42,14 +43,40 @@ where
         tracker.check_for_invalidations()?
     };
 
-    let mut failures = Vec::new();
-    for prog_id in &invalidated {
-        if let Err(err) = reoptimize(*prog_id) {
-            failures.push(format!("prog {}: {:#}", prog_id, err));
-        }
-    }
+    let failures = Mutex::new(Vec::new());
+    let result = invalidated.par_iter().try_for_each(|prog_id| {
+        reoptimize(*prog_id).map_err(|err| {
+            let message = format!("{err:#}");
+            match failures.lock() {
+                Ok(mut failures) => failures.push((*prog_id, message.clone())),
+                Err(_) => {
+                    return anyhow::anyhow!(
+                        "invalidation reoptimization failure list lock poisoned"
+                    );
+                }
+            }
+            anyhow::anyhow!("prog {}: {}", prog_id, message)
+        })
+    });
 
-    if !failures.is_empty() {
+    if let Err(err) = result {
+        let mut failures = failures
+            .into_inner()
+            .map_err(|_| anyhow::anyhow!("invalidation failure list lock poisoned"))?;
+        if failures.is_empty() {
+            failures.push((0, format!("{err:#}")));
+        }
+        failures.sort_by_key(|(prog_id, _)| *prog_id);
+        let failures = failures
+            .into_iter()
+            .map(|(prog_id, err)| {
+                if prog_id == 0 {
+                    err
+                } else {
+                    format!("prog {prog_id}: {err}")
+                }
+            })
+            .collect::<Vec<_>>();
         anyhow::bail!(
             "invalidation reoptimization failed for {}",
             failures.join("; ")
@@ -66,7 +93,7 @@ fn run_invalidation_tick_logged<A, F>(
 ) -> Result<()>
 where
     A: MapValueReader,
-    F: FnMut(u32) -> Result<()>,
+    F: Fn(u32) -> Result<()> + Sync,
 {
     process_invalidation_tick(tracker, reoptimize)
         .with_context(|| format!("{context}: invalidation tick failed"))?;
@@ -550,62 +577,86 @@ fn process_request(
                     avg_ns: None,
                 })
                 .collect::<Vec<_>>();
-            let mut applied = 0u32;
-            for entry in &program_order {
+            let applied = AtomicU32::new(0);
+            let failures = Mutex::new(Vec::<(u32, String)>::new());
+            let optimize_result = program_order.par_iter().try_for_each(|entry| {
                 let profile_path = profiling_state
                     .as_ref()
                     .and_then(|state| state.profile_path_for(entry.prog_id));
-                match commands::try_apply_one(
-                    entry.prog_id,
-                    config,
-                    enabled_passes.as_deref(),
-                    profile_path.as_deref(),
-                    Some(tracker),
-                    OptimizeMode::Apply,
-                ) {
-                    Ok(result) if result.status == "ok" && result.summary.applied => {
-                        if let Err(err) = remember_reoptimization_result(
-                            reoptimization_state,
-                            entry.prog_id,
-                            enabled_passes.as_deref(),
-                            &result,
-                            OptimizeMode::Apply,
-                        ) {
-                            return error_json(format!("{err:#}"));
-                        }
-                        applied += 1;
-                    }
-                    Ok(result) if result.status == "ok" => {
-                        if let Err(err) = remember_reoptimization_result(
-                            reoptimization_state,
-                            entry.prog_id,
-                            enabled_passes.as_deref(),
-                            &result,
-                            OptimizeMode::Apply,
-                        ) {
-                            return error_json(format!("{err:#}"));
-                        }
-                    }
-                    Ok(result) => {
-                        return error_json(result.error_message.unwrap_or_else(|| {
-                            format!(
-                                "optimize prog {} returned status {}",
-                                entry.prog_id, result.status
-                            )
-                        }));
-                    }
-                    Err(err) => {
-                        return error_json(format!(
-                            "optimize-all failed for prog {} ({}): {err:#}",
+                let result = (|| -> Result<()> {
+                    let result = commands::try_apply_one(
+                        entry.prog_id,
+                        config,
+                        enabled_passes.as_deref(),
+                        profile_path.as_deref(),
+                        Some(tracker),
+                        OptimizeMode::Apply,
+                    )
+                    .with_context(|| {
+                        format!(
+                            "optimize-all failed for prog {} ({})",
                             entry.prog_id, entry.prog_name
-                        ));
+                        )
+                    })?;
+                    if result.status != "ok" {
+                        anyhow::bail!(
+                            "{}",
+                            result.error_message.unwrap_or_else(|| {
+                                format!(
+                                    "optimize prog {} returned status {}",
+                                    entry.prog_id, result.status
+                                )
+                            })
+                        );
                     }
+                    if result.summary.applied {
+                        applied.fetch_add(1, Ordering::Relaxed);
+                    }
+                    remember_reoptimization_result(
+                        reoptimization_state,
+                        entry.prog_id,
+                        enabled_passes.as_deref(),
+                        &result,
+                        OptimizeMode::Apply,
+                    )
+                })();
+                if let Err(err) = result {
+                    let message = format!("{err:#}");
+                    match failures.lock() {
+                        Ok(mut failures) => failures.push((entry.prog_id, message.clone())),
+                        Err(_) => {
+                            return Err(anyhow::anyhow!("optimize-all failure list lock poisoned"))
+                        }
+                    }
+                    return Err(anyhow::anyhow!(message));
                 }
+                Ok(())
+            });
+            if let Err(err) = optimize_result {
+                let mut failures = match failures.into_inner() {
+                    Ok(failures) => failures,
+                    Err(_) => return error_json("optimize-all failure list lock poisoned"),
+                };
+                if failures.is_empty() {
+                    failures.push((0, format!("{err:#}")));
+                }
+                failures.sort_by_key(|(prog_id, _)| *prog_id);
+                let failures = failures
+                    .into_iter()
+                    .map(|(prog_id, err)| {
+                        if prog_id == 0 {
+                            err
+                        } else {
+                            format!("prog {prog_id}: {err}")
+                        }
+                    })
+                    .collect::<Vec<_>>();
+                return error_json(format!("optimize-all failed for {}", failures.join("; ")));
             }
             serde_json::json!({
                 "status": "ok",
                 "total": program_order.len() as u32,
-                "applied": applied,
+                "applied": applied.load(Ordering::Relaxed),
                 "errors": 0u32,
                 "profiling_source": profiling_state.as_ref().map_or("none", ProfilingState::label),
                 "hotness_window_ms": serde_json::Value::Null,
