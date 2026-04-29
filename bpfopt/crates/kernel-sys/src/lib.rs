@@ -20,16 +20,10 @@ pub use libbpf_sys::*;
 /// `__MAX_BPF_CMD` in the forked UAPI.
 pub const BPF_PROG_REJIT: u32 = 39;
 
-/// Fork-only `enum bpf_cmd` value for retrieving original load-time bytecode.
-///
-/// Current bpfrejit-daemon sources retrieve original bytecode through forked
-/// `bpf_prog_info.orig_prog_*` fields. The v3 syscall API reserves the next
-/// fork command slot for `BPF_PROG_GET_ORIGINAL`.
-pub const BPF_PROG_GET_ORIGINAL: u32 = 40;
-
 const DEFAULT_PROG_NAME: &[u8] = b"kernel_sys_dryrun\0";
 const DEFAULT_LICENSE: &[u8] = b"GPL\0";
 
+/// `union bpf_attr.rejit` prefix used by the fork-only `BPF_PROG_REJIT` cmd.
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 struct AttrRejit {
@@ -42,16 +36,62 @@ struct AttrRejit {
     fd_array: u64,
     fd_array_cnt: u32,
     flags: u32,
-    _pad: [u8; 128 - 48],
 }
 
+/// Fork-extended `struct bpf_prog_info`.
+///
+/// Upstream libbpf 1.7.0 does not know the fork-only `orig_prog_len` and
+/// `orig_prog_insns` fields, so callers that need original bytecode must use
+/// this layout with `bpf_obj_get_info_by_fd`.
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-struct AttrGetOriginal {
-    prog_fd: u32,
-    insn_cnt: u32,
-    insns: u64,
-    _pad: [u8; 128 - 16],
+pub struct BpfProgInfoFork {
+    pub prog_type: u32,
+    pub id: u32,
+    pub tag: [u8; 8],
+    pub jited_prog_len: u32,
+    pub xlated_prog_len: u32,
+    pub jited_prog_insns: u64,
+    pub xlated_prog_insns: u64,
+    pub load_time: u64,
+    pub created_by_uid: u32,
+    pub nr_map_ids: u32,
+    pub map_ids: u64,
+    pub name: [u8; 16],
+    pub ifindex: u32,
+    pub gpl_compatible_pad: u32,
+    pub netns_dev: u64,
+    pub netns_ino: u64,
+    pub nr_jited_ksyms: u32,
+    pub nr_jited_func_lens: u32,
+    pub jited_ksyms: u64,
+    pub jited_func_lens: u64,
+    pub btf_id: u32,
+    pub func_info_rec_size: u32,
+    pub func_info: u64,
+    pub nr_func_info: u32,
+    pub nr_line_info: u32,
+    pub line_info: u64,
+    pub jited_line_info: u64,
+    pub nr_jited_line_info: u32,
+    pub line_info_rec_size: u32,
+    pub jited_line_info_rec_size: u32,
+    pub nr_prog_tags: u32,
+    pub prog_tags: u64,
+    pub run_time_ns: u64,
+    pub run_cnt: u64,
+    pub recursion_misses: u64,
+    pub verified_insns: u32,
+    pub attach_btf_obj_id: u32,
+    pub attach_btf_id: u32,
+    pub orig_prog_len: u32,
+    pub orig_prog_insns: u64,
+}
+
+impl Default for BpfProgInfoFork {
+    fn default() -> Self {
+        zeroed()
+    }
 }
 
 fn zeroed<T>() -> T {
@@ -83,6 +123,17 @@ fn raw_syscall_error(context: &str) -> anyhow::Error {
 fn extract_log_string(buf: &[u8]) -> String {
     let end = buf.iter().position(|&b| b == 0).unwrap_or(buf.len());
     String::from_utf8_lossy(&buf[..end]).trim_end().to_string()
+}
+
+fn verifier_log_summary(log: &str) -> String {
+    const MAX_SUMMARY_CHARS: usize = 4096;
+    let mut chars = log.chars();
+    let summary: String = chars.by_ref().take(MAX_SUMMARY_CHARS).collect();
+    if chars.next().is_some() {
+        format!("{summary}\n... verifier log truncated ...")
+    } else {
+        summary
+    }
 }
 
 unsafe fn sys_bpf<T>(cmd: u32, attr: *mut T, size: usize) -> libc::c_long {
@@ -176,19 +227,58 @@ pub fn prog_get_fd_by_id(id: u32) -> Result<OwnedFd> {
     Ok(unsafe { OwnedFd::from_raw_fd(fd) })
 }
 
-/// Retrieve `struct bpf_prog_info` for an open program fd.
-pub fn obj_get_info_by_fd(fd: BorrowedFd<'_>) -> Result<bpf_prog_info> {
-    let mut info = bpf_prog_info::default();
-    let mut info_len = std::mem::size_of::<bpf_prog_info>() as u32;
+fn prog_obj_get_info_by_fd_into(fd: BorrowedFd<'_>, info: &mut BpfProgInfoFork) -> Result<()> {
+    let mut info_len = std::mem::size_of::<BpfProgInfoFork>() as u32;
     let ret = unsafe {
         bpf_obj_get_info_by_fd(
             fd.as_raw_fd(),
-            &mut info as *mut _ as *mut libc::c_void,
+            info as *mut _ as *mut libc::c_void,
             &mut info_len,
         )
     };
     if ret < 0 {
         return Err(libbpf_error("BPF_OBJ_GET_INFO_BY_FD", ret));
+    }
+    Ok(())
+}
+
+/// Retrieve fork-extended `struct bpf_prog_info` for an open program fd.
+pub fn obj_get_info_by_fd(fd: BorrowedFd<'_>) -> Result<BpfProgInfoFork> {
+    let mut info = BpfProgInfoFork::default();
+    prog_obj_get_info_by_fd_into(fd, &mut info)?;
+    Ok(info)
+}
+
+/// Return the next live BPF map ID after `start_id`.
+pub fn map_get_next_id(start_id: u32) -> Result<Option<u32>> {
+    let mut next_id = 0;
+    let ret = unsafe { bpf_map_get_next_id(start_id, &mut next_id) };
+    if ret < 0 {
+        let errno = errno_from_libbpf_ret(ret);
+        if errno == libc::ENOENT {
+            return Ok(None);
+        }
+        return Err(libbpf_error("BPF_MAP_GET_NEXT_ID", ret));
+    }
+    Ok(Some(next_id))
+}
+
+/// Open a live BPF map by ID.
+pub fn map_get_fd_by_id(id: u32) -> Result<OwnedFd> {
+    let fd = unsafe { bpf_map_get_fd_by_id(id) };
+    if fd < 0 {
+        return Err(libbpf_error("BPF_MAP_GET_FD_BY_ID", fd));
+    }
+    Ok(unsafe { OwnedFd::from_raw_fd(fd) })
+}
+
+/// Retrieve `struct bpf_map_info` for an open map fd.
+pub fn map_obj_get_info_by_fd(fd: BorrowedFd<'_>) -> Result<bpf_map_info> {
+    let mut info = bpf_map_info::default();
+    let mut info_len = std::mem::size_of::<bpf_map_info>() as u32;
+    let ret = unsafe { bpf_map_get_info_by_fd(fd.as_raw_fd(), &mut info, &mut info_len) };
+    if ret < 0 {
+        return Err(libbpf_error("BPF_OBJ_GET_INFO_BY_FD (map)", ret));
     }
     Ok(info)
 }
@@ -203,11 +293,25 @@ pub fn enable_stats(stats_type: bpf_stats_type) -> Result<OwnedFd> {
 }
 
 /// Submit replacement bytecode through the fork-only `BPF_PROG_REJIT` command.
-pub fn prog_rejit(prog_fd: BorrowedFd<'_>, new_insns: &[bpf_insn], fd_array: &[i32]) -> Result<()> {
+pub fn prog_rejit(
+    prog_fd: BorrowedFd<'_>,
+    new_insns: &[bpf_insn],
+    fd_array: &[i32],
+    mut log_buf: Option<&mut [u8]>,
+) -> Result<()> {
     let mut attr: AttrRejit = zeroed();
     attr.prog_fd = prog_fd.as_raw_fd() as u32;
     attr.insn_cnt = new_insns.len() as u32;
     attr.insns = new_insns.as_ptr() as u64;
+    if let Some(buf) = log_buf.as_deref_mut() {
+        if buf.is_empty() {
+            bail!("BPF_PROG_REJIT log buffer must not be empty");
+        }
+        buf.fill(0);
+        attr.log_level = 2;
+        attr.log_size = buf.len() as u32;
+        attr.log_buf = buf.as_mut_ptr() as u64;
+    }
     if !fd_array.is_empty() {
         attr.fd_array = fd_array.as_ptr() as u64;
         attr.fd_array_cnt = fd_array.len() as u32;
@@ -215,58 +319,135 @@ pub fn prog_rejit(prog_fd: BorrowedFd<'_>, new_insns: &[bpf_insn], fd_array: &[i
 
     let ret = unsafe { sys_bpf(BPF_PROG_REJIT, &mut attr, std::mem::size_of::<AttrRejit>()) };
     if ret < 0 {
+        let log = log_buf
+            .as_deref()
+            .map(extract_log_string)
+            .unwrap_or_default();
+        if !log.is_empty() {
+            return Err(anyhow!(
+                "BPF_PROG_REJIT: {}\nverifier log summary:\n{}",
+                std::io::Error::last_os_error(),
+                verifier_log_summary(&log)
+            ));
+        }
         return Err(raw_syscall_error("BPF_PROG_REJIT"));
     }
     Ok(())
 }
 
-/// Retrieve original load-time bytecode through fork-only `BPF_PROG_GET_ORIGINAL`.
+/// Retrieve original load-time bytecode through fork `bpf_prog_info.orig_prog_*`.
 pub fn prog_get_original(prog_fd: BorrowedFd<'_>) -> Result<Vec<bpf_insn>> {
-    let mut attr: AttrGetOriginal = zeroed();
-    attr.prog_fd = prog_fd.as_raw_fd() as u32;
-
-    let ret = unsafe {
-        sys_bpf(
-            BPF_PROG_GET_ORIGINAL,
-            &mut attr,
-            std::mem::size_of::<AttrGetOriginal>(),
-        )
-    };
-    if ret < 0 {
-        return Err(raw_syscall_error("BPF_PROG_GET_ORIGINAL (count)"));
-    }
-
-    let insn_cnt = if attr.insn_cnt != 0 {
-        attr.insn_cnt as usize
-    } else {
-        ret as usize
-    };
-    if insn_cnt == 0 {
+    let info = obj_get_info_by_fd(prog_fd)?;
+    let byte_len = info.orig_prog_len as usize;
+    if byte_len == 0 {
         return Ok(Vec::new());
     }
 
-    let mut insns = vec![bpf_insn::default(); insn_cnt];
-    let mut attr: AttrGetOriginal = zeroed();
-    attr.prog_fd = prog_fd.as_raw_fd() as u32;
-    attr.insn_cnt = insns.len() as u32;
-    attr.insns = insns.as_mut_ptr() as u64;
-
-    let ret = unsafe {
-        sys_bpf(
-            BPF_PROG_GET_ORIGINAL,
-            &mut attr,
-            std::mem::size_of::<AttrGetOriginal>(),
-        )
-    };
-    if ret < 0 {
-        return Err(raw_syscall_error("BPF_PROG_GET_ORIGINAL (insns)"));
+    let insn_size = std::mem::size_of::<bpf_insn>();
+    if byte_len % insn_size != 0 {
+        bail!(
+            "orig_prog_len {} is not a multiple of struct bpf_insn size {}",
+            byte_len,
+            insn_size
+        );
     }
 
-    let returned_cnt = if attr.insn_cnt != 0 {
-        attr.insn_cnt as usize
-    } else {
-        ret as usize
+    let mut insns = vec![bpf_insn::default(); byte_len / insn_size];
+    let mut info = BpfProgInfoFork {
+        orig_prog_len: byte_len as u32,
+        orig_prog_insns: insns.as_mut_ptr() as u64,
+        ..Default::default()
     };
-    insns.truncate(returned_cnt.min(insns.len()));
+    prog_obj_get_info_by_fd_into(prog_fd, &mut info)?;
+
+    let returned_len = info.orig_prog_len as usize;
+    if returned_len > byte_len {
+        bail!(
+            "orig_prog_len grew while reading original bytecode: first pass {} bytes, second pass {} bytes",
+            byte_len,
+            returned_len
+        );
+    }
+    if returned_len % insn_size != 0 {
+        bail!(
+            "returned orig_prog_len {} is not a multiple of struct bpf_insn size {}",
+            returned_len,
+            insn_size
+        );
+    }
+    if returned_len != 0 && info.orig_prog_insns == 0 {
+        bail!("BPF_OBJ_GET_INFO_BY_FD did not return original bytecode");
+    }
+
+    insns.truncate(returned_len / insn_size);
     Ok(insns)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::mem::{offset_of, size_of};
+
+    #[test]
+    fn attr_rejit_field_offsets_match_fork_uapi() {
+        assert_eq!(offset_of!(AttrRejit, prog_fd), 0);
+        assert_eq!(offset_of!(AttrRejit, insn_cnt), 4);
+        assert_eq!(offset_of!(AttrRejit, insns), 8);
+        assert_eq!(offset_of!(AttrRejit, log_level), 16);
+        assert_eq!(offset_of!(AttrRejit, log_size), 20);
+        assert_eq!(offset_of!(AttrRejit, log_buf), 24);
+        assert_eq!(offset_of!(AttrRejit, fd_array), 32);
+        assert_eq!(offset_of!(AttrRejit, fd_array_cnt), 40);
+        assert_eq!(offset_of!(AttrRejit, flags), 44);
+        assert_eq!(
+            size_of::<AttrRejit>(),
+            48,
+            "AttrRejit should pass the minimal zero-extended rejit prefix"
+        );
+    }
+
+    #[test]
+    fn bpf_prog_info_fork_field_offsets_match_fork_uapi() {
+        assert_eq!(offset_of!(BpfProgInfoFork, prog_type), 0);
+        assert_eq!(offset_of!(BpfProgInfoFork, id), 4);
+        assert_eq!(offset_of!(BpfProgInfoFork, tag), 8);
+        assert_eq!(offset_of!(BpfProgInfoFork, jited_prog_len), 16);
+        assert_eq!(offset_of!(BpfProgInfoFork, xlated_prog_len), 20);
+        assert_eq!(offset_of!(BpfProgInfoFork, jited_prog_insns), 24);
+        assert_eq!(offset_of!(BpfProgInfoFork, xlated_prog_insns), 32);
+        assert_eq!(offset_of!(BpfProgInfoFork, load_time), 40);
+        assert_eq!(offset_of!(BpfProgInfoFork, created_by_uid), 48);
+        assert_eq!(offset_of!(BpfProgInfoFork, nr_map_ids), 52);
+        assert_eq!(offset_of!(BpfProgInfoFork, map_ids), 56);
+        assert_eq!(offset_of!(BpfProgInfoFork, name), 64);
+        assert_eq!(offset_of!(BpfProgInfoFork, ifindex), 80);
+        assert_eq!(offset_of!(BpfProgInfoFork, gpl_compatible_pad), 84);
+        assert_eq!(offset_of!(BpfProgInfoFork, netns_dev), 88);
+        assert_eq!(offset_of!(BpfProgInfoFork, netns_ino), 96);
+        assert_eq!(offset_of!(BpfProgInfoFork, nr_jited_ksyms), 104);
+        assert_eq!(offset_of!(BpfProgInfoFork, nr_jited_func_lens), 108);
+        assert_eq!(offset_of!(BpfProgInfoFork, jited_ksyms), 112);
+        assert_eq!(offset_of!(BpfProgInfoFork, jited_func_lens), 120);
+        assert_eq!(offset_of!(BpfProgInfoFork, btf_id), 128);
+        assert_eq!(offset_of!(BpfProgInfoFork, func_info_rec_size), 132);
+        assert_eq!(offset_of!(BpfProgInfoFork, func_info), 136);
+        assert_eq!(offset_of!(BpfProgInfoFork, nr_func_info), 144);
+        assert_eq!(offset_of!(BpfProgInfoFork, nr_line_info), 148);
+        assert_eq!(offset_of!(BpfProgInfoFork, line_info), 152);
+        assert_eq!(offset_of!(BpfProgInfoFork, jited_line_info), 160);
+        assert_eq!(offset_of!(BpfProgInfoFork, nr_jited_line_info), 168);
+        assert_eq!(offset_of!(BpfProgInfoFork, line_info_rec_size), 172);
+        assert_eq!(offset_of!(BpfProgInfoFork, jited_line_info_rec_size), 176);
+        assert_eq!(offset_of!(BpfProgInfoFork, nr_prog_tags), 180);
+        assert_eq!(offset_of!(BpfProgInfoFork, prog_tags), 184);
+        assert_eq!(offset_of!(BpfProgInfoFork, run_time_ns), 192);
+        assert_eq!(offset_of!(BpfProgInfoFork, run_cnt), 200);
+        assert_eq!(offset_of!(BpfProgInfoFork, recursion_misses), 208);
+        assert_eq!(offset_of!(BpfProgInfoFork, verified_insns), 216);
+        assert_eq!(offset_of!(BpfProgInfoFork, attach_btf_obj_id), 220);
+        assert_eq!(offset_of!(BpfProgInfoFork, attach_btf_id), 224);
+        assert_eq!(offset_of!(BpfProgInfoFork, orig_prog_len), 228);
+        assert_eq!(offset_of!(BpfProgInfoFork, orig_prog_insns), 232);
+        assert_eq!(size_of::<BpfProgInfoFork>(), 240);
+    }
 }
