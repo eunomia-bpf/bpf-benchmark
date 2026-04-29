@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.4
+# syntax=docker/dockerfile:1.6
 ARG TRACEE_IMAGE=docker.io/aquasec/tracee:0.24.1@sha256:cfbbfee972e64a644f6b1bac74ee26998e6e12442697be4c797ae563553a2a5b
 ARG TETRAGON_IMAGE=quay.io/cilium/tetragon:v1.6.1@sha256:ff96ace3e6a0166ba04ff3eecfaeee19b7e6deee2b7cdbe3245feda57df5015f
 ARG CILIUM_IMAGE=quay.io/cilium/cilium:v1.19.3@sha256:2e61680593cddca8b6c055f6d4c849d87a26a1c91c7e3b8b56c7fb76ab7b7b10
@@ -279,7 +279,7 @@ RUN set -eux; \
         ./vendor \
         ./module
 
-FROM runner-runtime-app-artifacts AS runner-runtime
+FROM runner-runtime-app-artifacts AS runner-runtime-artifacts
 
 ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
@@ -344,52 +344,7 @@ RUN set -eux; \
     find ./runner -maxdepth 3 -type f \( -name CMakeCache.txt -o -name cmake_install.cmake -o -name Makefile \) -delete; \
     find ./tests -type f \( \( -name '*.o' ! -name '*.bpf.o' \) -o -name '*.d' -o -name '*.cmd' \) -delete
 
-COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
-COPY bpfopt/crates/kernel-sys ./bpfopt/crates/kernel-sys
-COPY daemon ./daemon
-
-# Build the daemon against kernel-sys without copying the rest of bpfopt.
 RUN set -eux; \
-    mkdir -p ./vendor/linux-framework; \
-    touch ./vendor/linux-framework/Makefile; \
-    make image-daemon-artifact RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
-    find ./daemon/target -type d \( -name build -o -name deps -o -name incremental -o -name .fingerprint \) -prune -exec rm -rf {} +; \
-    rm -rf \
-        ./daemon/src \
-        ./daemon/tests \
-        ./daemon/Cargo.toml \
-        ./daemon/Cargo.lock \
-        ./daemon/Makefile \
-        ./daemon/README.md
-
-COPY bpfopt ./bpfopt
-
-# Build bpfopt-suite CLIs in this upper layer; kernel-sys is a library crate only.
-RUN set -eux; \
-    make image-bpfopt-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
-    bpfopt_bin_dir="./bpfopt/target/release"; \
-    if [ "${RUN_TARGET_ARCH}" = "arm64" ]; then bpfopt_bin_dir="./bpfopt/target/aarch64-unknown-linux-gnu/release"; fi; \
-    install -m 0755 \
-        "$bpfopt_bin_dir/bpfopt" \
-        "$bpfopt_bin_dir/bpfget" \
-        "$bpfopt_bin_dir/bpfrejit" \
-        "$bpfopt_bin_dir/bpfverify" \
-        "$bpfopt_bin_dir/bpfprof" \
-        /usr/local/bin/; \
-    find ./bpfopt/target -type d \( -name build -o -name deps -o -name incremental -o -name .fingerprint \) -prune -exec rm -rf {} +; \
-    rm -rf \
-        /opt/cargo \
-        /opt/rustup \
-        ./vendor \
-        ./bpfopt \
-        ./Makefile \
-        ./runner/mk \
-        ./daemon/src \
-        ./daemon/tests \
-        ./daemon/Cargo.toml \
-        ./daemon/Cargo.lock \
-        ./daemon/Makefile \
-        ./daemon/README.md; \
     apt-get purge -y \
         autoconf \
         automake \
@@ -401,11 +356,8 @@ RUN set -eux; \
         dwarves \
         flex \
         g++ \
-        gcc \
-        git \
         libaio-dev \
         libboost-all-dev \
-        libbpf-dev \
         libbpfcc-dev \
         libbz2-dev \
         libcap-dev \
@@ -413,10 +365,8 @@ RUN set -eux; \
         libclang-dev \
         libcurl4-openssl-dev \
         libdouble-conversion-dev \
-        libdw-dev \
         libdwarf-dev \
         libedit-dev \
-        libelf-dev \
         libevent-dev \
         libffi-dev \
         libfl-dev \
@@ -431,24 +381,102 @@ RUN set -eux; \
         libsodium-dev \
         libsnappy-dev \
         libspdlog-dev \
-        libssl-dev \
         libtool \
         libtool-bin \
         libltdl-dev \
         libunwind-dev \
         libyaml-cpp-dev \
-        libzstd-dev \
         llvm \
         llvm-dev \
-        make \
-        pkg-config \
         rsync \
         scons \
         unzip \
-        xxd \
+        xxd; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
+
+FROM runner-runtime-artifacts AS runner-runtime-daemon-artifact
+
+ARG IMAGE_BUILD_JOBS=4
+ARG RUN_TARGET_ARCH=x86_64
+
+COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
+COPY bpfopt/crates/kernel-sys ./bpfopt/crates/kernel-sys
+COPY daemon ./daemon
+
+# Build the daemon against kernel-sys without copying the rest of bpfopt.
+RUN --mount=type=cache,target=/bpfopt/target,id=bpfopt-cargo-target,sharing=locked \
+    --mount=type=cache,target=/opt/cargo/registry,id=opt-cargo-registry,sharing=locked \
+    --mount=type=cache,target=/opt/cargo/git,id=opt-cargo-git,sharing=locked \
+    set -eux; \
+    mkdir -p ./vendor/linux-framework; \
+    touch ./vendor/linux-framework/Makefile; \
+    ln -sfn /bpfopt/target ./daemon/target; \
+    make image-daemon-artifact RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    daemon_bin_dir="/bpfopt/target/release"; \
+    daemon_image_dir="/artifacts/rust/daemon/target/release"; \
+    if [ "${RUN_TARGET_ARCH}" = "arm64" ]; then \
+        daemon_bin_dir="/bpfopt/target/aarch64-unknown-linux-gnu/release"; \
+        daemon_image_dir="/artifacts/rust/daemon/target/aarch64-unknown-linux-gnu/release"; \
+    fi; \
+    install -d /artifacts/rust/usr-local-bin "${daemon_image_dir}"; \
+    install -m 0755 "${daemon_bin_dir}/bpfrejit-daemon" /artifacts/rust/usr-local-bin/bpfrejit-daemon; \
+    install -m 0755 "${daemon_bin_dir}/bpfrejit-daemon" "${daemon_image_dir}/bpfrejit-daemon"
+
+FROM runner-runtime-artifacts AS runner-runtime-bpfopt-artifacts
+
+ARG IMAGE_BUILD_JOBS=4
+ARG RUN_TARGET_ARCH=x86_64
+
+COPY bpfopt ./bpfopt
+
+# Build bpfopt-suite CLIs in this upper layer; kernel-sys is a library crate only.
+RUN --mount=type=cache,target=/bpfopt/target,id=bpfopt-cargo-target,sharing=locked \
+    --mount=type=cache,target=/opt/cargo/registry,id=opt-cargo-registry,sharing=locked \
+    --mount=type=cache,target=/opt/cargo/git,id=opt-cargo-git,sharing=locked \
+    set -eux; \
+    ln -sfn /bpfopt/target ./bpfopt/target; \
+    make image-bpfopt-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    bpfopt_bin_dir="./bpfopt/target/release"; \
+    if [ "${RUN_TARGET_ARCH}" = "arm64" ]; then bpfopt_bin_dir="./bpfopt/target/aarch64-unknown-linux-gnu/release"; fi; \
+    install -d /artifacts/rust/usr-local-bin; \
+    install -m 0755 \
+        "$bpfopt_bin_dir/bpfopt" \
+        "$bpfopt_bin_dir/bpfget" \
+        "$bpfopt_bin_dir/bpfrejit" \
+        "$bpfopt_bin_dir/bpfverify" \
+        "$bpfopt_bin_dir/bpfprof" \
+        /artifacts/rust/usr-local-bin/
+
+FROM runner-runtime-artifacts AS runner-runtime
+
+ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
+ARG RUN_TARGET_ARCH=x86_64
+
+RUN set -eux; \
+    rm -rf \
+        /opt/cargo \
+        /opt/rustup \
+        ./vendor \
+        ./Makefile \
+        ./runner/mk; \
+    apt-get purge -y \
+        gcc \
+        git \
+        libbpf-dev \
+        libdw-dev \
+        libelf-dev \
+        libssl-dev \
+        libzstd-dev \
+        make \
+        pkg-config \
         zlib1g-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+COPY --from=runner-runtime-daemon-artifact /artifacts/rust/usr-local-bin/bpfrejit-daemon /usr/local/bin/bpfrejit-daemon
+COPY --from=runner-runtime-daemon-artifact /artifacts/rust/daemon/target/ ./daemon/target/
+COPY --from=runner-runtime-bpfopt-artifacts /artifacts/rust/usr-local-bin/ /usr/local/bin/
 
 COPY runner/__init__.py runner/repos.yaml ./runner/
 COPY runner/libs ./runner/libs

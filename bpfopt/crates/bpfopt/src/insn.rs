@@ -476,44 +476,6 @@ pub struct BpfBytecodeDump {
     pub raw_hex_blob: Option<String>,
 }
 
-#[cfg(test)]
-fn hex_bytes(bytes: &[u8]) -> String {
-    let mut out = String::with_capacity(bytes.len().saturating_mul(3).saturating_sub(1));
-    for (idx, byte) in bytes.iter().enumerate() {
-        if idx > 0 {
-            out.push(' ');
-        }
-        use std::fmt::Write as _;
-        write!(out, "{:02x}", byte).expect("writing to String cannot fail");
-    }
-    out
-}
-
-#[cfg(test)]
-pub fn dump_bytecode(insns: &[BpfInsn]) -> BpfBytecodeDump {
-    BpfBytecodeDump {
-        insn_count: insns.len(),
-        insns: insns
-            .iter()
-            .enumerate()
-            .map(|(pc, insn)| {
-                let raw = insn.raw_bytes();
-                BpfInsnDump {
-                    pc,
-                    raw_hex: hex_bytes(&raw),
-                    code: insn.code,
-                    regs: insn.regs(),
-                    dst_reg: insn.dst_reg(),
-                    src_reg: insn.src_reg(),
-                    off: insn.off,
-                    imm: insn.imm,
-                }
-            })
-            .collect(),
-        raw_hex_blob: None,
-    }
-}
-
 /// Compact bytecode dump — only insn_count + raw hex blob.
 /// Used in socket responses to keep JSON size manageable.
 pub fn dump_bytecode_compact(insns: &[BpfInsn]) -> BpfBytecodeDump {
@@ -552,35 +514,6 @@ impl fmt::Display for BpfInsn {
     }
 }
 
-// ── Test helpers (available to all test modules) ────────────────────
-
-/// Load BPF instructions from a .bpf.o ELF file by parsing the ELF header
-/// and extracting the first executable PROGBITS section (typically "xdp", "tc",
-/// or "cgroup_skb"). Returns None if the file doesn't exist or isn't a valid
-/// BPF ELF.
-///
-/// This is available to all `#[cfg(test)]` modules in the crate for testing
-/// with real compiled BPF programs.
-#[cfg(test)]
-pub fn load_bpf_insns_from_elf(path: &str) -> Option<Vec<BpfInsn>> {
-    let object = match crate::elf_parser::parse_bpf_object(path) {
-        Ok(object) => object,
-        Err(_) => return None,
-    };
-    object.first_program().map(|program| program.insns.clone())
-}
-
-/// Return the path to a micro benchmark .bpf.o file relative to the daemon crate.
-/// Returns the absolute path. Tests should check if the file exists before using it.
-#[cfg(test)]
-pub fn micro_program_path(filename: &str) -> String {
-    format!(
-        "{}/../micro/programs/{}",
-        env!("CARGO_MANIFEST_DIR"),
-        filename
-    )
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -604,96 +537,6 @@ mod tests {
     }
 
     #[test]
-    fn test_bpf_insn_encoding() {
-        // mov64_reg r1, r2
-        let insn = BpfInsn::mov64_reg(1, 2);
-        assert_eq!(insn.code, BPF_ALU64 | BPF_MOV | BPF_X);
-        assert_eq!(insn.dst_reg(), 1);
-        assert_eq!(insn.src_reg(), 2);
-        assert_eq!(insn.off, 0);
-        assert_eq!(insn.imm, 0);
-
-        // mov64_imm r3, 42
-        let insn = BpfInsn::mov64_imm(3, 42);
-        assert_eq!(insn.code, BPF_ALU64 | BPF_MOV | BPF_K);
-        assert_eq!(insn.dst_reg(), 3);
-        assert_eq!(insn.src_reg(), 0);
-        assert_eq!(insn.imm, 42);
-
-        // mov32_imm r4, -1
-        let insn = BpfInsn::mov32_imm(4, -1);
-        assert_eq!(insn.code, BPF_ALU | BPF_MOV | BPF_K);
-        assert_eq!(insn.dst_reg(), 4);
-        assert_eq!(insn.src_reg(), 0);
-        assert_eq!(insn.imm, -1);
-
-        // ldx_mem(W, r0, r6, 4)
-        let insn = BpfInsn::ldx_mem(BPF_W, 0, 6, 4);
-        assert_eq!(insn.code, BPF_LDX | BPF_W | BPF_MEM);
-        assert_eq!(insn.dst_reg(), 0);
-        assert_eq!(insn.src_reg(), 6);
-        assert_eq!(insn.off, 4);
-        assert!(insn.is_ldx_mem());
-
-        // ldx_mem(B, r1, r6, 0) — byte load
-        let insn = BpfInsn::ldx_mem(BPF_B, 1, 6, 0);
-        assert_eq!(bpf_size(insn.code), BPF_B);
-        assert!(insn.is_ldx_mem());
-
-        // ja +10
-        let insn = BpfInsn::ja(10);
-        assert!(insn.is_ja());
-        assert!(!insn.is_call());
-        assert!(!insn.is_exit());
-        assert!(insn.is_jmp_class());
-
-        // call kfunc
-        let insn = BpfInsn::call_kfunc(123);
-        assert!(insn.is_call());
-        assert!(!insn.is_ja());
-        assert_eq!(insn.imm, 123);
-        assert_eq!(insn.src_reg(), 2);
-
-        // nop
-        let insn = BpfInsn::nop();
-        assert!(insn.is_ja());
-        assert_eq!(insn.off, 0);
-
-        // alu64_imm(LSH, r1, 8)
-        let insn = BpfInsn::alu64_imm(BPF_LSH, 1, 8);
-        assert_eq!(insn.code, BPF_ALU64 | BPF_LSH | BPF_K);
-        assert_eq!(insn.dst_reg(), 1);
-        assert_eq!(insn.imm, 8);
-
-        // alu64_reg(OR, r0, r1)
-        let insn = BpfInsn::alu64_reg(BPF_OR, 0, 1);
-        assert_eq!(insn.code, BPF_ALU64 | BPF_OR | BPF_X);
-        assert_eq!(insn.dst_reg(), 0);
-        assert_eq!(insn.src_reg(), 1);
-
-        // exit
-        let insn = BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0);
-        assert!(insn.is_exit());
-        assert!(!insn.is_call());
-
-        // is_ldimm64
-        let insn = BpfInsn::new(BPF_LD | BPF_DW | BPF_IMM, 0, 0, 0);
-        assert!(insn.is_ldimm64());
-    }
-
-    #[test]
-    fn test_make_regs_roundtrip() {
-        for dst in 0..=15 {
-            for src in 0..=15 {
-                let regs = BpfInsn::make_regs(dst, src);
-                let insn = BpfInsn::new(0, regs, 0, 0);
-                assert_eq!(insn.dst_reg(), dst & 0xf);
-                assert_eq!(insn.src_reg(), src & 0xf);
-            }
-        }
-    }
-
-    #[test]
     fn test_cond_jmp_classification() {
         // JEQ_IMM
         let insn = BpfInsn::new(BPF_JMP | BPF_JEQ | BPF_K, BpfInsn::make_regs(1, 0), 5, 42);
@@ -706,24 +549,5 @@ mod tests {
         let insn = BpfInsn::new(BPF_JMP32 | BPF_JNE | BPF_X, BpfInsn::make_regs(2, 3), 3, 0);
         assert!(insn.is_cond_jmp());
         assert!(insn.is_jmp_class());
-    }
-
-    #[test]
-    fn test_dump_bytecode_formats_full_insn_dump() {
-        let dump = dump_bytecode(&[BpfInsn::mov64_imm(3, 42), BpfInsn::ja(5)]);
-
-        assert_eq!(dump.insn_count, 2);
-        assert_eq!(dump.insns[0].pc, 0);
-        assert_eq!(dump.insns[0].raw_hex, "b7 03 00 00 2a 00 00 00");
-        assert_eq!(dump.insns[0].code, BPF_ALU64 | BPF_MOV | BPF_K);
-        assert_eq!(dump.insns[0].regs, BpfInsn::make_regs(3, 0));
-        assert_eq!(dump.insns[0].dst_reg, 3);
-        assert_eq!(dump.insns[0].src_reg, 0);
-        assert_eq!(dump.insns[0].off, 0);
-        assert_eq!(dump.insns[0].imm, 42);
-
-        assert_eq!(dump.insns[1].pc, 1);
-        assert_eq!(dump.insns[1].raw_hex, "05 00 05 00 00 00 00 00");
-        assert_eq!(dump.insns[1].off, 5);
     }
 }

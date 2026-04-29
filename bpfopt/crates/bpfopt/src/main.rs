@@ -200,9 +200,6 @@ struct ListPassesArgs {
 #[derive(Clone, Debug, Serialize)]
 struct PassReport {
     pass: String,
-    skipped: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    reason: Option<String>,
     changed: bool,
     sites_applied: usize,
     insn_count_before: usize,
@@ -251,11 +248,6 @@ struct ScanMapKeysReport {
 struct ScannedMapKeyReport {
     map_id: u32,
     key_hex: String,
-}
-
-struct OptimizePassPlan {
-    pass_name: &'static str,
-    skip_reason: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -638,139 +630,25 @@ fn run_optimize(common: &CommonArgs, args: &OptimizeArgs) -> Result<()> {
             .collect::<Result<Vec<_>>>()?
     };
 
+    validate_required_side_inputs(common, &pass_names)?;
     let mut program = BpfProgram::new(read_bytecode(common.input.as_deref())?);
     attach_program_inputs(&mut program, common)?;
     let mut ctx = build_pass_context(common)?;
-    let plan = optimize_pass_plan(common, &ctx, &pass_names);
-    for planned in plan.iter().filter(|planned| planned.skip_reason.is_some()) {
-        eprintln!(
-            "warning: skipping {}: {}",
-            cli_name_for_pass(planned.pass_name),
-            planned.skip_reason.as_deref().unwrap()
-        );
-    }
-
-    let runnable_passes = plan
-        .iter()
-        .filter_map(|planned| planned.skip_reason.is_none().then_some(planned.pass_name))
-        .collect::<Vec<_>>();
-    ctx.policy.enabled_passes = runnable_passes
-        .iter()
-        .map(|name| (*name).to_string())
-        .collect();
-    let pipeline = build_pipeline(&runnable_passes)?;
+    validate_required_kinsns(&ctx, &pass_names)?;
+    ctx.policy.enabled_passes = pass_names.iter().map(|name| (*name).to_string()).collect();
+    let pipeline = build_pipeline(&pass_names)?;
     let profiling = read_profile(common.profile.as_deref())?;
     let result = run_pipeline_catching_panics(&pipeline, &mut program, &ctx, profiling.as_ref())?;
     write_bytecode(common.output.as_deref(), &program.insns)?;
 
     if let Some(report_path) = common.report.as_deref() {
         let report = OptimizeReport {
-            passes: optimize_reports(&plan, &result.pass_results, &program),
+            passes: optimize_reports(&result.pass_results),
         };
         write_json(Some(report_path), &report)?;
     }
 
     Ok(())
-}
-
-fn optimize_pass_plan(
-    common: &CommonArgs,
-    ctx: &PassContext,
-    pass_names: &[&'static str],
-) -> Vec<OptimizePassPlan> {
-    pass_names
-        .iter()
-        .map(|&pass_name| OptimizePassPlan {
-            pass_name,
-            skip_reason: optimize_skip_reason(common, ctx, pass_name),
-        })
-        .collect()
-}
-
-fn optimize_skip_reason(
-    common: &CommonArgs,
-    ctx: &PassContext,
-    pass_name: &'static str,
-) -> Option<String> {
-    match pass_name {
-        "rotate" => missing_kinsn_reason(common, ctx, &["bpf_rotate64"]),
-        "cond_select" => missing_kinsn_reason(common, ctx, &["bpf_select64"]),
-        "extract" => missing_kinsn_reason(common, ctx, &["bpf_extract64"]),
-        "endian_fusion" => {
-            if has_any_kinsn(
-                ctx,
-                &[
-                    "bpf_endian_load16",
-                    "bpf_endian_load32",
-                    "bpf_endian_load64",
-                ],
-            ) {
-                None
-            } else {
-                missing_kinsn_reason(
-                    common,
-                    ctx,
-                    &[
-                        "bpf_endian_load16",
-                        "bpf_endian_load32",
-                        "bpf_endian_load64",
-                    ],
-                )
-            }
-        }
-        "bulk_memory" => missing_kinsn_reason(common, ctx, &["bpf_memcpy_bulk", "bpf_memset_bulk"]),
-        "branch_flip" => common
-            .profile
-            .is_none()
-            .then(|| "missing --profile".to_string()),
-        "const_prop" => common
-            .verifier_states
-            .is_none()
-            .then(|| "missing --verifier-states".to_string()),
-        "map_inline" => {
-            let missing_map_values = common.map_values.is_none();
-            let missing_map_ids = common.map_ids.is_empty();
-            match (missing_map_values, missing_map_ids) {
-                (true, true) => Some("missing --map-values and --map-ids".to_string()),
-                (true, false) => Some("missing --map-values".to_string()),
-                (false, true) => Some("missing --map-ids".to_string()),
-                (false, false) => None,
-            }
-        }
-        _ => None,
-    }
-}
-
-fn has_any_kinsn(ctx: &PassContext, target_names: &[&str]) -> bool {
-    target_names
-        .iter()
-        .any(|target_name| ctx.kinsn_registry.btf_id_for_target_name(target_name) >= 0)
-}
-
-fn missing_kinsn_reason(
-    common: &CommonArgs,
-    ctx: &PassContext,
-    target_names: &[&str],
-) -> Option<String> {
-    let mut missing = Vec::new();
-    for target_name in target_names {
-        if ctx.kinsn_registry.btf_id_for_target_name(target_name) >= 0 {
-            continue;
-        }
-        let public_name = public_kinsn_name(target_name);
-        if !missing.contains(&public_name) {
-            missing.push(public_name);
-        }
-    }
-    if missing.is_empty() {
-        return None;
-    }
-
-    if common.target.is_none() && common.kinsns.is_empty() {
-        Some("missing --target kinsns".to_string())
-    } else {
-        Some(format!("missing --target kinsns: {}", missing.join(", ")))
-    }
 }
 
 fn public_kinsn_name(target_name: &str) -> &str {
@@ -889,8 +767,7 @@ fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()
                 "endian",
             )?,
             "bulk_memory" => {
-                require_kinsn(ctx, "bpf_memcpy_bulk")?;
-                require_kinsn(ctx, "bpf_memset_bulk")?;
+                require_all_kinsns(ctx, &["bpf_memcpy_bulk", "bpf_memset_bulk"], "bulk-memory")?
             }
             _ => {}
         }
@@ -903,6 +780,26 @@ fn require_kinsn(ctx: &PassContext, target_name: &str) -> Result<()> {
         bail!("kinsn '{}' not in target", public_kinsn_name(target_name));
     }
     Ok(())
+}
+
+fn require_all_kinsns(ctx: &PassContext, target_names: &[&str], pass_label: &str) -> Result<()> {
+    let mut missing = Vec::new();
+    for target_name in target_names {
+        if ctx.kinsn_registry.btf_id_for_target_name(target_name) >= 0 {
+            continue;
+        }
+        let public_name = public_kinsn_name(target_name);
+        if !missing.contains(&public_name) {
+            missing.push(public_name);
+        }
+    }
+    if missing.is_empty() {
+        return Ok(());
+    }
+    bail!(
+        "{pass_label} requires target kinsns: {}",
+        missing.join(", ")
+    );
 }
 
 fn require_any_kinsn(ctx: &PassContext, target_names: &[&str], pass_label: &str) -> Result<()> {
@@ -1437,8 +1334,6 @@ fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Res
 fn pass_report(result: &PassResult) -> PassReport {
     PassReport {
         pass: result.pass_name.clone(),
-        skipped: false,
-        reason: None,
         changed: result.changed,
         sites_applied: result.sites_applied,
         insn_count_before: result.insns_before,
@@ -1455,22 +1350,6 @@ fn pass_report(result: &PassResult) -> PassReport {
 fn unchanged_report(pass_name: &str, insn_count: usize) -> PassReport {
     PassReport {
         pass: pass_name.to_string(),
-        skipped: false,
-        reason: None,
-        changed: false,
-        sites_applied: 0,
-        insn_count_before: insn_count,
-        insn_count_after: insn_count,
-        insn_delta: 0,
-        map_inline_records: Vec::new(),
-    }
-}
-
-fn skipped_report(pass_name: &str, reason: &str, insn_count: usize) -> PassReport {
-    PassReport {
-        pass: pass_name.to_string(),
-        skipped: true,
-        reason: Some(reason.to_string()),
         changed: false,
         sites_applied: 0,
         insn_count_before: insn_count,
@@ -1498,44 +1377,8 @@ fn hex_bytes(bytes: &[u8]) -> String {
     out
 }
 
-fn optimize_reports(
-    plan: &[OptimizePassPlan],
-    pass_results: &[PassResult],
-    program: &BpfProgram,
-) -> Vec<PassReport> {
-    let mut reports = Vec::with_capacity(plan.len().max(pass_results.len()));
-    let mut used_results = vec![false; pass_results.len()];
-
-    for planned in plan {
-        if let Some(reason) = planned.skip_reason.as_deref() {
-            reports.push(skipped_report(
-                planned.pass_name,
-                reason,
-                program.insns.len(),
-            ));
-            continue;
-        }
-
-        if let Some((idx, result)) = pass_results
-            .iter()
-            .enumerate()
-            .find(|(idx, result)| !used_results[*idx] && result.pass_name == planned.pass_name)
-        {
-            used_results[idx] = true;
-            reports.push(pass_report(result));
-        } else {
-            reports.push(unchanged_report(planned.pass_name, program.insns.len()));
-        }
-    }
-
-    reports.extend(
-        pass_results
-            .iter()
-            .enumerate()
-            .filter(|(idx, _)| !used_results[*idx])
-            .map(|(_, result)| pass_report(result)),
-    );
-    reports
+fn optimize_reports(pass_results: &[PassResult]) -> Vec<PassReport> {
+    pass_results.iter().map(pass_report).collect()
 }
 
 fn collect_map_lookups(

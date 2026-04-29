@@ -241,10 +241,6 @@ fn run() -> Result<ExitCode> {
         return Ok(ExitCode::SUCCESS);
     }
 
-    if cli.report.is_some() && cli.verifier_states_out.is_none() {
-        return Ok(ExitCode::SUCCESS);
-    }
-
     print_verifier_failure(&dryrun);
     Ok(ExitCode::FAILURE)
 }

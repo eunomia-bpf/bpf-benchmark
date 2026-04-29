@@ -104,11 +104,6 @@ fn report_mode_writes_json_for_bad_program() {
         &["--prog-type", "xdp", "--report", &report_arg],
         &bad_xdp_prog(),
     );
-    assert!(
-        output.status.success(),
-        "stderr={}",
-        String::from_utf8_lossy(&output.stderr)
-    );
 
     let json: serde_json::Value =
         serde_json::from_slice(&fs::read(&report).expect("read report")).unwrap();
@@ -124,6 +119,7 @@ fn report_mode_writes_json_for_bad_program() {
         return;
     }
 
+    assert!(!output.status.success());
     assert_eq!(json["status"], "fail");
     assert_eq!(json["insn_count"], 2);
     assert!(!json["verifier_log"].as_str().unwrap().is_empty());

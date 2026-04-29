@@ -171,10 +171,8 @@ fn run() -> Result<()> {
     if cli.info {
         let (info, map_ids) = get_prog_info_with_map_ids(prog_id)?;
         let expected_attach_type = expected_attach_type_json(info.id, info.prog_type)?;
-        return write_json(
-            cli.output.as_deref(),
-            &ProgInfoJson::from_info(info, map_ids, expected_attach_type),
-        );
+        let prog_info = ProgInfoJson::from_info(info, map_ids, expected_attach_type)?;
+        return write_json(cli.output.as_deref(), &prog_info);
     }
     if cli.full {
         return write_full(prog_id, cli.outdir.as_deref().expect("validated --outdir"));
@@ -229,7 +227,7 @@ impl ProgInfoJson {
         info: kernel_sys::BpfProgInfoFork,
         map_ids: Vec<u32>,
         expected_attach_type: Option<TypeJson>,
-    ) -> Self {
+    ) -> Result<Self> {
         let insn_size = std::mem::size_of::<kernel_sys::bpf_insn>() as u32;
         let insn_bytes = if info.orig_prog_len != 0 {
             info.orig_prog_len
@@ -237,7 +235,7 @@ impl ProgInfoJson {
             info.xlated_prog_len
         };
 
-        Self {
+        let json = Self {
             id: info.id,
             name: c_name_u8(&info.name),
             prog_type: TypeJson {
@@ -255,8 +253,63 @@ impl ProgInfoJson {
             attach_btf_obj_id: info.attach_btf_obj_id,
             attach_btf_id: info.attach_btf_id,
             expected_attach_type,
-        }
+        };
+        validate_required_load_metadata(&json)?;
+        Ok(json)
     }
+}
+
+fn validate_required_load_metadata(info: &ProgInfoJson) -> Result<()> {
+    let prog_type = info.prog_type.numeric;
+    if prog_type_requires_prog_btf(prog_type) && info.btf_id == 0 {
+        bail!(
+            "prog type {} requires non-zero btf_id metadata",
+            info.prog_type.name
+        );
+    }
+
+    if prog_type_requires_attach_btf(prog_type) && info.attach_btf_id == 0 {
+        bail!(
+            "prog type {} requires non-zero attach_btf_id metadata",
+            info.prog_type.name
+        );
+    }
+
+    if prog_type_requires_expected_attach_type(prog_type) && info.expected_attach_type.is_none() {
+        bail!(
+            "prog type {} requires expected_attach_type metadata",
+            info.prog_type.name
+        );
+    }
+
+    Ok(())
+}
+
+fn prog_type_requires_prog_btf(prog_type: kernel_sys::bpf_prog_type) -> bool {
+    matches!(
+        prog_type,
+        kernel_sys::BPF_PROG_TYPE_KPROBE
+            | kernel_sys::BPF_PROG_TYPE_TRACING
+            | kernel_sys::BPF_PROG_TYPE_LSM
+            | kernel_sys::BPF_PROG_TYPE_EXT
+    )
+}
+
+fn prog_type_requires_attach_btf(prog_type: kernel_sys::bpf_prog_type) -> bool {
+    matches!(
+        prog_type,
+        kernel_sys::BPF_PROG_TYPE_TRACING
+            | kernel_sys::BPF_PROG_TYPE_LSM
+            | kernel_sys::BPF_PROG_TYPE_STRUCT_OPS
+            | kernel_sys::BPF_PROG_TYPE_EXT
+    )
+}
+
+fn prog_type_requires_expected_attach_type(prog_type: kernel_sys::bpf_prog_type) -> bool {
+    matches!(
+        prog_type,
+        kernel_sys::BPF_PROG_TYPE_TRACING | kernel_sys::BPF_PROG_TYPE_LSM
+    )
 }
 
 fn expected_attach_type_json(
@@ -287,11 +340,8 @@ fn write_full(prog_id: u32, outdir: &Path) -> Result<()> {
     let map_infos = get_map_infos(&map_ids, &pseudo_map_old_fds)?;
 
     let prog_bin = encode_insns(&insns);
-    let prog_info_json = json_bytes(&ProgInfoJson::from_info(
-        info,
-        map_ids,
-        expected_attach_type,
-    ))?;
+    let prog_info = ProgInfoJson::from_info(info, map_ids, expected_attach_type)?;
+    let prog_info_json = json_bytes(&prog_info)?;
     let map_fds_json = json_bytes(&map_infos)?;
 
     write_full_files_atomic(
@@ -944,6 +994,51 @@ mod tests {
         .concat();
 
         assert_eq!(pseudo_map_old_fds(&insns), vec![11, 22]);
+    }
+
+    #[test]
+    fn required_load_metadata_rejects_missing_tracing_attach_context() {
+        let mut info = prog_info_for_type(kernel_sys::BPF_PROG_TYPE_TRACING);
+        info.btf_id = 10;
+        info.attach_btf_id = 20;
+
+        let err = validate_required_load_metadata(&info).unwrap_err();
+
+        assert!(
+            err.to_string().contains("expected_attach_type"),
+            "err={err:#}"
+        );
+    }
+
+    #[test]
+    fn required_load_metadata_rejects_missing_kprobe_prog_btf() {
+        let info = prog_info_for_type(kernel_sys::BPF_PROG_TYPE_KPROBE);
+
+        let err = validate_required_load_metadata(&info).unwrap_err();
+
+        assert!(err.to_string().contains("btf_id"), "err={err:#}");
+    }
+
+    fn prog_info_for_type(prog_type: kernel_sys::bpf_prog_type) -> ProgInfoJson {
+        ProgInfoJson {
+            id: 7,
+            name: "prog".to_string(),
+            prog_type: TypeJson {
+                name: prog_type_name(prog_type).to_string(),
+                numeric: prog_type,
+            },
+            insn_cnt: 2,
+            map_ids: Vec::new(),
+            load_time: 0,
+            created_by_uid: 0,
+            xlated_prog_len: 16,
+            orig_prog_len: 16,
+            jited_prog_len: 16,
+            btf_id: 0,
+            attach_btf_obj_id: 0,
+            attach_btf_id: 0,
+            expected_attach_type: None,
+        }
     }
 
     fn ldimm64(src_reg: u8, imm: i32) -> [kernel_sys::bpf_insn; 2] {

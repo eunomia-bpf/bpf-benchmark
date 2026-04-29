@@ -178,47 +178,6 @@ unsafe fn sys_bpf<T>(cmd: u32, attr: *mut T, size: usize) -> libc::c_long {
     }
 }
 
-/// Load raw BPF instructions through libbpf with optional fd_array side input.
-///
-/// This is useful as a verifier dry-run. If `log_buf` is provided, verifier
-/// logging is enabled with `log_level=2`; on failure the log text is included
-/// in the returned error. The `fd_array` slice is only borrowed for the
-/// duration of the load attempt, so callers must keep the backing fds alive
-/// until this function returns.
-pub fn prog_load_dryrun_with_fd_array(
-    prog_type: bpf_prog_type,
-    insns: &[bpf_insn],
-    fd_array: Option<&[i32]>,
-    log_buf: Option<&mut [u8]>,
-) -> Result<()> {
-    let log_level = if log_buf.is_some() { 2 } else { 0 };
-    let report = prog_load_dryrun_report(ProgLoadDryRunOptions {
-        prog_type,
-        expected_attach_type: None,
-        prog_btf_fd: None,
-        attach_btf_id: None,
-        attach_btf_obj_fd: None,
-        insns,
-        fd_array,
-        log_level,
-        log_buf,
-    })?;
-    if report.accepted {
-        return Ok(());
-    }
-
-    if report.verifier_log.is_empty() {
-        let errno = report.errno.unwrap_or(libc::EIO);
-        return Err(anyhow!("BPF_PROG_LOAD dry-run: {}", os_error(errno)));
-    }
-    let errno = report.errno.unwrap_or(libc::EIO);
-    Err(anyhow!(
-        "BPF_PROG_LOAD dry-run: {}\nverifier log:\n{}",
-        os_error(errno),
-        report.verifier_log
-    ))
-}
-
 /// Load raw BPF instructions through libbpf and report verifier status without
 /// treating verifier rejection as an API error.
 pub fn prog_load_dryrun_report(
@@ -419,6 +378,12 @@ pub fn expected_attach_type_for_prog(
         }
 
         let Some(link_attach_type) = expected_attach_type_from_link_info(&info, prog_type) else {
+            if prog_type_requires_expected_attach_type(prog_type) {
+                bail!(
+                    "program id {prog_id} is attached through unsupported BPF link type {} for required expected_attach_type recovery",
+                    info.type_
+                );
+            }
             continue;
         };
         match expected {
@@ -433,6 +398,10 @@ pub fn expected_attach_type_for_prog(
     }
 
     Ok(expected)
+}
+
+fn prog_type_requires_expected_attach_type(prog_type: bpf_prog_type) -> bool {
+    matches!(prog_type, BPF_PROG_TYPE_TRACING | BPF_PROG_TYPE_LSM)
 }
 
 fn expected_attach_type_from_link_info(

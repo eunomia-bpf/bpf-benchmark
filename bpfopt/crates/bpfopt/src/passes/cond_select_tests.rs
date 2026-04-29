@@ -648,35 +648,3 @@ fn test_cond_select_alias_all_overlap_combinations() {
         }
     }
 }
-
-/// Test cond_select pattern scanning against real compiled BPF bytecode
-/// from cond_select_dense.bpf.o.
-#[test]
-fn test_scan_cond_select_real_bytecode() {
-    let path = crate::insn::micro_program_path("cond_select_dense.bpf.o");
-    let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
-        Some(i) if !i.is_empty() => i,
-        _ => {
-            eprintln!("SKIP: cond_select_dense.bpf.o not found");
-            return;
-        }
-    };
-
-    let pass = CondSelectPass;
-    let sites = pass.analyze(&insns);
-
-    for site in &sites {
-        assert!(site.start_pc < insns.len());
-        assert!(site.old_len >= 2);
-    }
-
-    eprintln!(
-        "  cond_select_dense.bpf.o: {} insns, {} sites found",
-        insns.len(),
-        sites.len()
-    );
-    assert!(
-        !sites.is_empty(),
-        "cond_select_dense.bpf.o should contain cond_select patterns"
-    );
-}

@@ -119,6 +119,14 @@ fn run() -> Result<()> {
                     )
                 },
             )?;
+        let prog_btf_fd = if info.btf_id == 0 {
+            None
+        } else {
+            Some(
+                kernel_sys::btf_get_fd_by_id(info.btf_id)
+                    .with_context(|| format!("open program BTF id {}", info.btf_id))?,
+            )
+        };
         let attach_btf_obj_fd = if info.attach_btf_obj_id == 0 {
             None
         } else {
@@ -131,7 +139,7 @@ fn run() -> Result<()> {
         let report = kernel_sys::prog_load_dryrun_report(kernel_sys::ProgLoadDryRunOptions {
             prog_type: info.prog_type,
             expected_attach_type,
-            prog_btf_fd: None,
+            prog_btf_fd: prog_btf_fd.as_ref().map(|fd| fd.as_raw_fd()),
             attach_btf_id: (info.attach_btf_id != 0).then_some(info.attach_btf_id),
             attach_btf_obj_fd: attach_btf_obj_fd.as_ref().map(|fd| fd.as_raw_fd()),
             insns: &insns,

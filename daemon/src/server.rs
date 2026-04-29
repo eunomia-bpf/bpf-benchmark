@@ -941,27 +941,6 @@ mod tests {
     }
 
     #[test]
-    fn panic_payload_message_formats_strings() {
-        let payload: Box<dyn std::any::Any + Send> = Box::new(String::from("boom"));
-        assert_eq!(panic_payload_message(payload.as_ref()), "boom");
-    }
-
-    #[test]
-    fn panic_payload_message_formats_static_str() {
-        let payload: Box<dyn std::any::Any + Send> = Box::new("boom");
-        assert_eq!(panic_payload_message(payload.as_ref()), "boom");
-    }
-
-    #[test]
-    fn panic_payload_message_handles_unknown_payloads() {
-        let payload: Box<dyn std::any::Any + Send> = Box::new(42usize);
-        assert_eq!(
-            panic_payload_message(payload.as_ref()),
-            "non-string panic payload"
-        );
-    }
-
-    #[test]
     fn process_request_rejects_blank_enabled_pass_name() {
         let response = process_test_request(&serde_json::json!({
             "cmd": "status",

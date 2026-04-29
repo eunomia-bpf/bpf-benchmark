@@ -176,6 +176,7 @@ docs/tmp/*.sh
 # Keep checked-in reports and end-to-end results
 !docs/tmp/
 !e2e/results/
+e2e/results/*/metadata.json
 
 # Corpus run guest-inputs snapshots (build artifacts copied into VM, ~600MB+)
 corpus/results/*/guest-inputs/

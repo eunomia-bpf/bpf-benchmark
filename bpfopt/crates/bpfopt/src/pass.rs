@@ -223,7 +223,10 @@ impl MapInfoProvider for SnapshotMapProvider {
                 }));
             }
             #[cfg(not(test))]
-            return Ok(None);
+            return Err(format!(
+                "map_values snapshot has no metadata for map {}",
+                map_id
+            ));
         };
         Ok(Some(crate::analysis::MapInfo {
             map_type: metadata.map_type,

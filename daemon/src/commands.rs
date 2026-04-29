@@ -1593,13 +1593,14 @@ fn run_bpfverify_reported(
     report_json: &Path,
     verifier_log_path: &Path,
 ) -> Result<BpfverifyReport> {
-    run_stage_output(stage, command)?;
-    let report: BpfverifyReport = read_json_file(report_json, "bpfverify report")?;
+    let (output, report) =
+        run_bpfverify_report_command(stage, command, report_json, "bpfverify report")?;
     fs::write(verifier_log_path, &report.verifier_log)
         .with_context(|| format!("write {}", verifier_log_path.display()))?;
     if report.status != "pass" {
         let message = format!(
-            "{stage} rejected bytecode (returncode 0, verifier status {}, errno {}): verifier log summary:\n{}",
+            "{stage} rejected bytecode (returncode {}, verifier status {}, errno {}): verifier log summary:\n{}",
+            returncode_label(&output),
             report.status,
             report
                 .errno
@@ -1610,7 +1611,34 @@ fn run_bpfverify_reported(
         eprintln!("daemon: {message}");
         bail!("{message}");
     }
+    if !output.status.success() {
+        let program = format!("{command:?}");
+        let message = stage_failure_message(stage, &program, &output);
+        eprintln!("daemon: {message}");
+        bail!("{message}");
+    }
     Ok(report)
+}
+
+fn run_bpfverify_report_command(
+    stage: &str,
+    command: &mut Command,
+    report_json: &Path,
+    report_label: &str,
+) -> Result<(std::process::Output, BpfverifyReport)> {
+    let program = format!("{command:?}");
+    let output = command
+        .output()
+        .with_context(|| format!("spawn subprocess {program}"))?;
+    let report: BpfverifyReport = read_json_file(report_json, report_label).with_context(|| {
+        let failure = if output.status.success() {
+            format!("read {report_label}")
+        } else {
+            stage_failure_message(stage, &program, &output)
+        };
+        format!("{failure}; expected report at {}", report_json.display())
+    })?;
+    Ok((output, report))
 }
 
 fn capture_rejit_failure_verifier_log(
@@ -1638,11 +1666,24 @@ fn capture_rejit_failure_verifier_log(
     if use_fd_array {
         verify.arg("--fd-array").arg(fd_array_json);
     }
-    run_stage_output("bpfverify --report after bpfrejit failure", &mut verify)?;
-    let report: BpfverifyReport =
-        read_json_file(&report_json, "post-rejit-failure bpfverify report")?;
+    let (output, report) = run_bpfverify_report_command(
+        "bpfverify --report after bpfrejit failure",
+        &mut verify,
+        &report_json,
+        "post-rejit-failure bpfverify report",
+    )?;
     fs::write(&verifier_log_path, &report.verifier_log)
         .with_context(|| format!("write {}", verifier_log_path.display()))?;
+    if !output.status.success() && report.status == "pass" {
+        let program = format!("{verify:?}");
+        let message = stage_failure_message(
+            "bpfverify --report after bpfrejit failure",
+            &program,
+            &output,
+        );
+        eprintln!("daemon: {message}");
+        bail!("{message}");
+    }
     Ok(verifier_log_summary(&report.verifier_log))
 }
 
