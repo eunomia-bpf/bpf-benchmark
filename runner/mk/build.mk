@@ -34,6 +34,9 @@ KATRAN_BUILD_ROOT := $(REPO_BUILD_ROOT)/katran
 ACTIVE_DAEMON_BINARY := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(DAEMON_DIR)/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon,$(DAEMON_DIR)/target/release/bpfrejit-daemon)
 ACTIVE_DAEMON_TARGET_TRIPLE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),aarch64-unknown-linux-gnu,)
 ACTIVE_DAEMON_TARGET_ARG := $(if $(strip $(ACTIVE_DAEMON_TARGET_TRIPLE)),TARGET_TRIPLE="$(ACTIVE_DAEMON_TARGET_TRIPLE)",)
+ACTIVE_BPFOPT_TARGET_ARG := $(if $(strip $(ACTIVE_DAEMON_TARGET_TRIPLE)),--target "$(ACTIVE_DAEMON_TARGET_TRIPLE)",)
+ACTIVE_BPFOPT_BINARY_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/bpfopt/target/aarch64-unknown-linux-gnu/release,$(ROOT_DIR)/bpfopt/target/release)
+ACTIVE_BPFOPT_BINARIES := $(addprefix $(ACTIVE_BPFOPT_BINARY_DIR)/,bpfopt bpfget bpfrejit bpfverify bpfprof)
 ACTIVE_RUNNER_BINARY := $(RUNNER_BUILD_DIR_ACTIVE)/micro_exec
 ACTIVE_TEST_UNITTEST_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/tests/unittest/build-arm64,$(ROOT_DIR)/tests/unittest/build)
 ACTIVE_TEST_NEGATIVE_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/tests/negative/build-arm64,$(ROOT_DIR)/tests/negative/build)
@@ -67,8 +70,8 @@ ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATR
 
 REQUIRE_IMAGE_BUILD = @if [ "$(BPFREJIT_IMAGE_BUILD)" != "1" ]; then echo "$@ must be run from the runner Dockerfile with BPFREJIT_IMAGE_BUILD=1" >&2; exit 1; fi
 
-BPFOPT_SOURCE_FILES = $(shell find "$(ROOT_DIR)/bpfopt/crates/bpfopt/src" -type f 2>/dev/null) $(ROOT_DIR)/bpfopt/Cargo.toml $(ROOT_DIR)/bpfopt/crates/bpfopt/Cargo.toml
-DAEMON_SOURCE_FILES = $(shell find "$(ROOT_DIR)/daemon/src" -type f 2>/dev/null) $(BPFOPT_SOURCE_FILES) $(ROOT_DIR)/daemon/Cargo.toml $(ROOT_DIR)/daemon/Cargo.lock $(ROOT_DIR)/daemon/Makefile
+BPFOPT_SOURCE_FILES = $(shell find "$(ROOT_DIR)/bpfopt/crates" -type f \( -name '*.rs' -o -name 'Cargo.toml' \) -print 2>/dev/null) $(ROOT_DIR)/bpfopt/Cargo.toml $(ROOT_DIR)/bpfopt/Cargo.lock
+DAEMON_SOURCE_FILES = $(shell find "$(ROOT_DIR)/daemon/src" -type f 2>/dev/null) $(ROOT_DIR)/daemon/Cargo.toml $(ROOT_DIR)/daemon/Cargo.lock $(ROOT_DIR)/daemon/Makefile
 RUNNER_CORE_SOURCE_FILES = $(shell find "$(RUNNER_DIR)/src" "$(RUNNER_DIR)/include" -type f ! -name 'llvmbpf_runner.cpp' 2>/dev/null) $(RUNNER_DIR)/CMakeLists.txt
 RUNNER_LLVMBPF_SOURCE_FILES = $(RUNNER_DIR)/src/llvmbpf_runner.cpp $(shell find "$(ROOT_DIR)/vendor/llvmbpf/include" "$(ROOT_DIR)/vendor/llvmbpf/src" -type f 2>/dev/null)
 RUNNER_SOURCE_FILES = $(RUNNER_CORE_SOURCE_FILES) $(RUNNER_LLVMBPF_SOURCE_FILES)
@@ -111,7 +114,7 @@ KERNEL_SOURCE_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -path '*
 KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES = $(BUILD_RULE_FILES) $(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
 	$(KATRAN_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_SOURCE_FILES = $(BUILD_RULE_FILES) $(RUNNER_RUNTIME_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
-	$(DAEMON_SOURCE_FILES) $(RUNNER_SOURCE_FILES) $(TEST_UNITTEST_SOURCE_FILES) $(TEST_NEGATIVE_SOURCE_FILES) \
+	$(DAEMON_SOURCE_FILES) $(BPFOPT_SOURCE_FILES) $(RUNNER_SOURCE_FILES) $(TEST_UNITTEST_SOURCE_FILES) $(TEST_NEGATIVE_SOURCE_FILES) \
 	$(MICRO_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) \
 	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES) \
 	$(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) $(DEFCONFIG_SRC) $(ARM64_DEFCONFIG_SRC)
@@ -119,7 +122,7 @@ RUNNER_RUNTIME_IMAGE_LAYER_FILES = $(RUNNER_RUNTIME_SOURCE_FILES) $(MICRO_RUNTIM
 	$(CORPUS_RUNTIME_SOURCE_FILES) $(E2E_RUNTIME_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_INPUT_FILES = $(RUNNER_RUNTIME_IMAGE_SOURCE_FILES) $(RUNNER_RUNTIME_IMAGE_LAYER_FILES)
 BUILD_INPUT_SOURCE_FILES = $(sort \
-	$(DAEMON_SOURCE_FILES) $(RUNNER_SOURCE_FILES) $(TEST_UNITTEST_SOURCE_FILES) $(TEST_NEGATIVE_SOURCE_FILES) \
+	$(DAEMON_SOURCE_FILES) $(BPFOPT_SOURCE_FILES) $(RUNNER_SOURCE_FILES) $(TEST_UNITTEST_SOURCE_FILES) $(TEST_NEGATIVE_SOURCE_FILES) \
 	$(MICRO_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) $(KATRAN_SOURCE_FILES) \
 	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) \
 	$(RUNNER_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES) $(MICRO_RUNTIME_SOURCE_FILES) $(CORPUS_RUNTIME_SOURCE_FILES) \
@@ -247,16 +250,17 @@ image-kinsn-artifacts:
 	mkdir -p "$(ACTIVE_KINSN_MODULE_DIR)"
 	make $(ACTIVE_KERNEL_ARCH_ARG) -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" M="$(ACTIVE_KINSN_SOURCE_DIR)" MO="$(ACTIVE_KINSN_MODULE_DIR)" modules
 
-.PHONY: image-katran-artifacts image-runner-artifacts image-daemon-artifact \
+.PHONY: image-katran-artifacts image-runner-artifacts image-daemon-artifact image-bpfopt-artifacts \
 	image-micro-program-artifacts image-test-artifacts
 ifneq ($(BPFREJIT_IMAGE_BUILD),1)
-image-katran-artifacts image-runner-artifacts image-daemon-artifact image-micro-program-artifacts image-test-artifacts:
+image-katran-artifacts image-runner-artifacts image-daemon-artifact image-bpfopt-artifacts image-micro-program-artifacts image-test-artifacts:
 	@echo "$@ must be run from the runner Dockerfile with BPFREJIT_IMAGE_BUILD=1" >&2
 	@exit 1
 else
 image-katran-artifacts: $(ACTIVE_KATRAN_REQUIRED)
 image-runner-artifacts: $(ACTIVE_RUNNER_BINARY)
 image-daemon-artifact: $(ACTIVE_DAEMON_BINARY)
+image-bpfopt-artifacts: $(ACTIVE_BPFOPT_BINARIES)
 image-micro-program-artifacts: $(MICRO_PROGRAM_OBJECTS)
 image-test-artifacts: $(ACTIVE_TEST_UNITTEST_PRIMARY) $(ACTIVE_TEST_NEGATIVE_PRIMARY)
 
@@ -270,6 +274,10 @@ $(RUNNER_LIBBPF_A): $(LIBBPF_SOURCE_FILES) $(BUILD_RULE_FILES)
 $(ACTIVE_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES)
 	mkdir -p "$(dir $@)"
 	make -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target" $(ACTIVE_DAEMON_TARGET_ARG)
+
+$(ACTIVE_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES)
+	cargo build --release --workspace $(ACTIVE_BPFOPT_TARGET_ARG) --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
+		-p bpfopt -p bpfget -p bpfrejit -p bpfverify -p bpfprof
 
 $(ACTIVE_RUNNER_BINARY): $(RUNNER_LIBBPF_A) $(RUNNER_SOURCE_FILES) $(BUILD_RULE_FILES)
 	mkdir -p "$(dir $@)"

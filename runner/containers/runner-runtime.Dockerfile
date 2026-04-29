@@ -43,6 +43,7 @@ RUN apt-get update \
         ipset \
         iptables \
         iproute2 \
+        jq \
         kmod \
         libaio-dev \
         libboost-all-dev \
@@ -346,11 +347,23 @@ RUN set -eux; \
 COPY bpfopt ./bpfopt
 COPY daemon ./daemon
 
+# Build bpfopt-suite CLIs in this upper layer; kernel-sys is a library crate only.
 RUN set -eux; \
     mkdir -p ./vendor/linux-framework; \
     touch ./vendor/linux-framework/Makefile; \
     make image-daemon-artifact RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    make image-bpfopt-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    bpfopt_bin_dir="./bpfopt/target/release"; \
+    if [ "${RUN_TARGET_ARCH}" = "arm64" ]; then bpfopt_bin_dir="./bpfopt/target/aarch64-unknown-linux-gnu/release"; fi; \
+    install -m 0755 \
+        "$bpfopt_bin_dir/bpfopt" \
+        "$bpfopt_bin_dir/bpfget" \
+        "$bpfopt_bin_dir/bpfrejit" \
+        "$bpfopt_bin_dir/bpfverify" \
+        "$bpfopt_bin_dir/bpfprof" \
+        /usr/local/bin/; \
     find ./daemon/target -type d \( -name build -o -name deps -o -name incremental -o -name .fingerprint \) -prune -exec rm -rf {} +; \
+    find ./bpfopt/target -type d \( -name build -o -name deps -o -name incremental -o -name .fingerprint \) -prune -exec rm -rf {} +; \
     rm -rf \
         /opt/cargo \
         /opt/rustup \
