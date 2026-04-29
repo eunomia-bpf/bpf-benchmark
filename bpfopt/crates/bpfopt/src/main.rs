@@ -6,7 +6,7 @@ use std::fs;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use anyhow::{anyhow, bail, Context, Result};
 use bpfopt::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis, MapInfoAnalysis};
@@ -15,9 +15,10 @@ use bpfopt::insn::{
     BPF_PSEUDO_MAP_FD,
 };
 use bpfopt::pass::{
-    Analysis, BpfProgram, BranchProfile, KinsnRegistry, MapMetadata, PassContext, PassManager,
-    PassResult, PlatformCapabilities, ProfilingData, RegState, ScalarRange, StackState,
-    StaticKinsnCallResolver, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
+    self, Analysis, BpfProgram, BranchProfile, KinsnRegistry, MapMetadata, MapValueProvider,
+    PassContext, PassManager, PassResult, PlatformCapabilities, ProfilingData, RegState,
+    ScalarRange, SnapshotMapProvider, StackState, StaticKinsnCallResolver, Tnum, VerifierInsn,
+    VerifierInsnKind, VerifierValueWidth,
 };
 use bpfopt::passes::PASS_REGISTRY;
 use clap::{Args, Parser, Subcommand};
@@ -171,6 +172,9 @@ enum Command {
     Optimize(OptimizeArgs),
     /// Emit a JSON analysis summary.
     Analyze,
+    /// Discover map/key pairs that map-inline would need from --map-values.
+    #[command(name = "scan-map-keys")]
+    ScanMapKeys,
     /// List available optimization passes.
     #[command(name = "list-passes")]
     ListPasses(ListPassesArgs),
@@ -232,6 +236,18 @@ struct AnalyzeReport {
     kinsn_calls: Vec<KinsnCallReport>,
     ld_imm64_count: usize,
     branch_count: usize,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct ScanMapKeysReport {
+    complete: bool,
+    keys: Vec<ScannedMapKeyReport>,
+}
+
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd, Serialize)]
+struct ScannedMapKeyReport {
+    map_id: u32,
+    key_hex: String,
 }
 
 struct OptimizePassPlan {
@@ -375,6 +391,7 @@ fn run_main() -> Result<()> {
     match cli.command {
         Command::ListPasses(args) => list_passes(&cli.common, args.json),
         Command::Analyze => run_analyze(&cli.common),
+        Command::ScanMapKeys => run_scan_map_keys(&cli.common),
         Command::Optimize(args) => run_optimize(&cli.common, &args),
         command => run_single_pass(&cli.common, command.canonical_pass_name().unwrap()),
     }
@@ -395,7 +412,10 @@ impl Command {
             Command::BulkMemory => Some("bulk_memory"),
             Command::BoundsCheckMerge => Some("bounds_check_merge"),
             Command::SkbLoadBytes => Some("skb_load_bytes_spec"),
-            Command::Optimize(_) | Command::Analyze | Command::ListPasses(_) => None,
+            Command::Optimize(_)
+            | Command::Analyze
+            | Command::ScanMapKeys
+            | Command::ListPasses(_) => None,
         }
     }
 }
@@ -444,6 +464,103 @@ fn run_analyze(common: &CommonArgs) -> Result<()> {
         branch_count: count_branches(&program, branch_targets.is_target.len()),
     };
     write_json(common.output.as_deref(), &report)
+}
+
+type RecordedMapKeys = Arc<Mutex<Vec<(u32, Vec<u8>)>>>;
+
+#[derive(Clone, Debug, Default)]
+struct RecordingSnapshotMapValueProvider {
+    keys: RecordedMapKeys,
+}
+
+impl RecordingSnapshotMapValueProvider {
+    fn recorded_keys(&self) -> Result<Vec<(u32, Vec<u8>)>> {
+        Ok(self
+            .keys
+            .lock()
+            .map_err(|_| anyhow!("scan-map-keys recorder lock poisoned"))?
+            .clone())
+    }
+}
+
+impl MapValueProvider for RecordingSnapshotMapValueProvider {
+    fn lookup_value_size(
+        &self,
+        program: &BpfProgram,
+        info: &bpfopt::analysis::MapInfo,
+    ) -> std::result::Result<usize, String> {
+        Ok(program
+            .map_values
+            .iter()
+            .find_map(|((map_id, _), value)| (*map_id == info.map_id).then_some(value.len()))
+            .unwrap_or(info.value_size as usize))
+    }
+
+    fn lookup_elem(
+        &self,
+        program: &BpfProgram,
+        map_id: u32,
+        key: &[u8],
+        value_size: usize,
+    ) -> std::result::Result<Vec<u8>, String> {
+        self.keys
+            .lock()
+            .map_err(|_| "scan-map-keys recorder lock poisoned".to_string())?
+            .push((map_id, key.to_vec()));
+        let Some(value) = program.map_values.get(&(map_id, key.to_vec())) else {
+            return Err(pass::missing_map_value_snapshot_message(map_id, key));
+        };
+        if value.len() != value_size {
+            return Err(format!(
+                "snapshot map {} returned value size {}, expected {}",
+                map_id,
+                value.len(),
+                value_size
+            ));
+        }
+        Ok(value.clone())
+    }
+}
+
+fn run_scan_map_keys(common: &CommonArgs) -> Result<()> {
+    validate_required_side_inputs(common, &["map_inline"])?;
+
+    let mut program = BpfProgram::new(read_bytecode(common.input.as_deref())?);
+    attach_program_inputs(&mut program, common)?;
+    let recorder = RecordingSnapshotMapValueProvider::default();
+    program.set_map_providers(Arc::new(SnapshotMapProvider), Arc::new(recorder.clone()));
+
+    let mut ctx = build_pass_context(common)?;
+    ctx.policy.enabled_passes = vec!["map_inline".to_string()];
+    let pipeline = build_pipeline(&["map_inline"])?;
+    let profiling = read_profile(common.profile.as_deref())?;
+    let result = run_pipeline_catching_panics(&pipeline, &mut program, &ctx, profiling.as_ref());
+    let complete = match result {
+        Ok(_) => true,
+        Err(err) => {
+            let message = format!("{err:#}");
+            if pass::is_missing_map_value_snapshot_error(&message) {
+                false
+            } else {
+                return Err(err).context("scan-map-keys failed");
+            }
+        }
+    };
+
+    let mut keys = recorder
+        .recorded_keys()?
+        .into_iter()
+        .map(|(map_id, key)| ScannedMapKeyReport {
+            map_id,
+            key_hex: hex_bytes(&key),
+        })
+        .collect::<Vec<_>>();
+    keys.sort();
+    keys.dedup();
+    write_json(
+        common.output.as_deref(),
+        &ScanMapKeysReport { complete, keys },
+    )
 }
 
 fn run_single_pass(common: &CommonArgs, pass_name: &'static str) -> Result<()> {

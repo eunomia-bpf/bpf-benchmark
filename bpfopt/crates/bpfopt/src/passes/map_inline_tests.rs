@@ -250,26 +250,6 @@ fn install_array_map_entry(map_id: u32, max_entries: u32, key: u32, value: Vec<u
     );
 }
 
-fn install_empty_array_map(map_id: u32, value_size: u32, max_entries: u32) {
-    let info = BpfMapInfo {
-        map_type: 2,
-        id: map_id,
-        key_size: 4,
-        value_size,
-        max_entries,
-        ..Default::default()
-    };
-
-    install_mock_map(
-        map_id,
-        MockMapState {
-            info,
-            frozen: true,
-            values: HashMap::new(),
-        },
-    );
-}
-
 fn install_hash_map(map_id: u32, value: Vec<u8>) {
     let mut values = HashMap::new();
     values.insert(1u32.to_le_bytes().to_vec(), value);
@@ -283,11 +263,15 @@ fn install_mutable_array_map(map_id: u32, value: Vec<u8>) {
 }
 
 fn run_map_inline_pass(program: &mut BpfProgram) -> PipelineResult {
+    try_run_map_inline_pass(program).unwrap()
+}
+
+fn try_run_map_inline_pass(program: &mut BpfProgram) -> anyhow::Result<PipelineResult> {
     let mut pm = PassManager::new();
     pm.register_analysis(BranchTargetAnalysis);
     pm.register_analysis(MapInfoAnalysis);
     pm.add_pass(MapInlinePass);
-    pm.run(program, &PassContext::test_default()).unwrap()
+    pm.run(program, &PassContext::test_default())
 }
 
 fn run_map_inline_const_prop_dce(program: &mut BpfProgram) -> PipelineResult {
@@ -2388,7 +2372,7 @@ fn map_inline_pass_skips_mutable_array_across_side_effect_helper_call() {
 }
 
 #[test]
-fn map_inline_pass_inlines_zero_filled_array_maps() {
+fn map_inline_pass_errors_when_array_snapshot_key_is_absent() {
     install_empty_map(311, 2, 8, 8, true);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
@@ -2406,26 +2390,14 @@ fn map_inline_pass_inlines_zero_filled_array_maps() {
     ]);
     program.set_map_ids(vec![311]);
 
-    let result = run_map_inline_pass(&mut program);
-
-    assert!(
-        result.program_changed,
-        "skip reasons: {:?}",
-        result.pass_results[0].sites_skipped
-    );
-    assert_eq!(
-        program.insns,
-        vec![
-            BpfInsn::mov32_imm(6, 0),
-            BpfInsn::mov64_imm(7, 0),
-            BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
-        ]
-    );
+    let err = try_run_map_inline_pass(&mut program).unwrap_err();
+    let message = format!("{err:#}");
+    assert!(message.contains("map_inline requires a concrete snapshot value"));
+    assert!(message.contains("map_values snapshot missing map 311 key 02000000"));
 }
 
 #[test]
-fn map_inline_pass_inlines_zero_filled_percpu_array_maps() {
+fn map_inline_pass_errors_when_percpu_array_snapshot_key_is_absent() {
     install_empty_map(312, BPF_MAP_TYPE_PERCPU_ARRAY, 4, 8, true);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
@@ -2442,21 +2414,10 @@ fn map_inline_pass_inlines_zero_filled_percpu_array_maps() {
     ]);
     program.set_map_ids(vec![312]);
 
-    let result = run_map_inline_pass(&mut program);
-
-    assert!(
-        result.program_changed,
-        "skip reasons: {:?}",
-        result.pass_results[0].sites_skipped
-    );
-    assert_eq!(
-        program.insns,
-        vec![
-            BpfInsn::mov32_imm(6, 0),
-            BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
-        ]
-    );
+    let err = try_run_map_inline_pass(&mut program).unwrap_err();
+    let message = format!("{err:#}");
+    assert!(message.contains("map_inline requires a concrete snapshot value"));
+    assert!(message.contains("map_values snapshot missing map 312 key 03000000"));
 }
 
 #[test]
@@ -2491,8 +2452,8 @@ fn map_inline_pass_records_inlined_sites_for_tracker() {
 }
 
 #[test]
-fn map_inline_pass_inlines_zero_filled_array_defaults() {
-    install_empty_array_map(915, 4, 8);
+fn map_inline_pass_uses_nonzero_snapshot_value_for_array_maps() {
+    install_array_map_entry(915, 8, 1, vec![5, 0, 0, 0], true);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
@@ -2518,12 +2479,12 @@ fn map_inline_pass_inlines_zero_filled_array_defaults() {
         .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
     assert_eq!(
         result.pass_results[0].map_inline_records[0].expected_value,
-        vec![0u8; 4]
+        vec![5, 0, 0, 0]
     );
     assert!(program
         .insns
         .iter()
-        .any(|insn| insn == &BpfInsn::mov32_imm(6, 0)));
+        .any(|insn| insn == &BpfInsn::mov32_imm(6, 5)));
 }
 
 #[test]
@@ -2566,7 +2527,7 @@ fn map_inline_pass_inlines_uniform_percpu_array_maps() {
 }
 
 #[test]
-fn map_inline_pass_inlines_zero_filled_percpu_array_defaults() {
+fn map_inline_pass_errors_when_percpu_array_default_snapshot_is_absent() {
     install_percpu_array_map(916, 4, 8, true, HashMap::new());
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
@@ -2583,30 +2544,10 @@ fn map_inline_pass_inlines_zero_filled_percpu_array_defaults() {
     ]);
     program.set_map_ids(vec![916]);
 
-    let result = run_map_inline_pass(&mut program);
-
-    assert!(result.program_changed);
-    assert_eq!(result.total_sites_applied, 1);
-    assert!(!program
-        .insns
-        .iter()
-        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
-    assert!(
-        program
-            .insns
-            .iter()
-            .any(|insn| insn == &BpfInsn::mov32_imm(6, 0)),
-        "program should inline a zero constant: {:?}",
-        program.insns
-    );
-    assert!(
-        result.pass_results[0].map_inline_records[0]
-            .expected_value
-            .iter()
-            .all(|byte| *byte == 0),
-        "tracker should preserve the full zero-filled per-cpu blob: {:?}",
-        result.pass_results[0].map_inline_records
-    );
+    let err = try_run_map_inline_pass(&mut program).unwrap_err();
+    let message = format!("{err:#}");
+    assert!(message.contains("map_inline requires a concrete snapshot value"));
+    assert!(message.contains("map_values snapshot missing map 916 key 01000000"));
 }
 
 #[test]

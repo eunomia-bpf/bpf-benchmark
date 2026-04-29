@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 //! Unix socket server implementation.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
@@ -75,6 +76,75 @@ where
 enum ProfilingState {
     Active(commands::ProfileSession),
     Frozen(commands::FrozenProfile),
+}
+
+#[derive(Default)]
+struct ReoptimizationState {
+    enabled_passes_by_prog: HashMap<u32, Vec<String>>,
+}
+
+impl ReoptimizationState {
+    fn remember_result(
+        &mut self,
+        prog_id: u32,
+        requested_passes: Option<&[String]>,
+        result: &commands::OptimizeOneResult,
+        mode: OptimizeMode,
+    ) {
+        if !matches!(mode, OptimizeMode::Apply)
+            || result.status != "ok"
+            || result.inlined_map_entries.is_empty()
+        {
+            self.enabled_passes_by_prog.remove(&prog_id);
+            return;
+        }
+
+        let enabled_passes = requested_passes
+            .map(|passes| passes.to_vec())
+            .unwrap_or_else(|| {
+                result
+                    .passes
+                    .iter()
+                    .map(|pass| pass.pass_name.clone())
+                    .collect()
+            });
+        self.enabled_passes_by_prog.insert(prog_id, enabled_passes);
+    }
+
+    fn enabled_passes_for(&self, prog_id: u32) -> Option<Vec<String>> {
+        self.enabled_passes_by_prog.get(&prog_id).cloned()
+    }
+}
+
+type SharedReoptimizationState = Arc<Mutex<ReoptimizationState>>;
+
+fn new_reoptimization_state() -> SharedReoptimizationState {
+    Arc::new(Mutex::new(ReoptimizationState::default()))
+}
+
+fn remember_reoptimization_result(
+    state: &SharedReoptimizationState,
+    prog_id: u32,
+    enabled_passes: Option<&[String]>,
+    result: &commands::OptimizeOneResult,
+    mode: OptimizeMode,
+) -> Result<()> {
+    state
+        .lock()
+        .map_err(|_| anyhow::anyhow!("reoptimization state lock poisoned"))?
+        .remember_result(prog_id, enabled_passes, result, mode);
+    Ok(())
+}
+
+fn reoptimization_passes_for(
+    state: &SharedReoptimizationState,
+    prog_id: u32,
+) -> Result<Vec<String>> {
+    state
+        .lock()
+        .map_err(|_| anyhow::anyhow!("reoptimization state lock poisoned"))?
+        .enabled_passes_for(prog_id)
+        .ok_or_else(|| anyhow::anyhow!("missing original enabled_passes for prog {prog_id}"))
 }
 
 impl ProfilingState {
@@ -174,6 +244,7 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
     register_signal_handlers();
     let config = CliConfig::from_env();
     let tracker = commands::new_invalidation_tracker();
+    let reoptimization_state = new_reoptimization_state();
     let mut last_invalidation_check = Instant::now();
     let mut last_watch_check = Instant::now();
     let mut watcher = ProgramWatcher::from_live();
@@ -195,14 +266,17 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
 
         if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
             let tracker_for_apply = tracker.clone();
+            let reoptimization_state_for_apply = reoptimization_state.clone();
             run_invalidation_tick_logged("serve", &tracker, |prog_id| {
                 let profile_path = profiling_state
                     .as_ref()
                     .and_then(|state| state.profile_path_for(prog_id));
-                let result = commands::try_apply_one(
+                let enabled_passes =
+                    reoptimization_passes_for(&reoptimization_state_for_apply, prog_id)?;
+                let result = commands::try_reapply_one(
                     prog_id,
                     &config,
-                    None,
+                    Some(&enabled_passes),
                     profile_path.as_deref(),
                     Some(&tracker_for_apply),
                     OptimizeMode::Apply,
@@ -218,6 +292,13 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
                         })
                     );
                 }
+                remember_reoptimization_result(
+                    &reoptimization_state_for_apply,
+                    prog_id,
+                    Some(&enabled_passes),
+                    &result,
+                    OptimizeMode::Apply,
+                )?;
                 Ok(())
             })?;
             last_invalidation_check = Instant::now();
@@ -225,7 +306,13 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
 
         match listener.accept() {
             Ok((stream, _addr)) => {
-                if let Err(err) = handle_client(stream, &config, &mut profiling_state, &tracker) {
+                if let Err(err) = handle_client(
+                    stream,
+                    &config,
+                    &mut profiling_state,
+                    &tracker,
+                    &reoptimization_state,
+                ) {
                     eprintln!("serve: client error: {err:#}");
                 }
             }
@@ -272,6 +359,7 @@ fn handle_client(
     config: &CliConfig,
     profiling_state: &mut Option<ProfilingState>,
     tracker: &commands::SharedInvalidationTracker,
+    reoptimization_state: &SharedReoptimizationState,
 ) -> Result<()> {
     use std::io::{BufRead, BufReader, Write};
 
@@ -286,7 +374,7 @@ fn handle_client(
 
         let response = match serde_json::from_str::<serde_json::Value>(&line) {
             Ok(req) => match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                process_request(&req, config, profiling_state, tracker)
+                process_request(&req, config, profiling_state, tracker, reoptimization_state)
             })) {
                 Ok(response) => response,
                 Err(payload) => panic_response(payload),
@@ -400,6 +488,7 @@ fn process_request(
     config: &CliConfig,
     profiling_state: &mut Option<ProfilingState>,
     tracker: &commands::SharedInvalidationTracker,
+    reoptimization_state: &SharedReoptimizationState,
 ) -> serde_json::Value {
     let cmd = req.get("cmd").and_then(|v| v.as_str()).unwrap_or("");
     let enabled_passes = match request_enabled_passes(req) {
@@ -428,7 +517,16 @@ fn process_request(
                 Some(tracker),
                 mode,
             ) {
-                Ok(result) => serialize_or_error(result),
+                Ok(result) => match remember_reoptimization_result(
+                    reoptimization_state,
+                    prog_id,
+                    enabled_passes.as_deref(),
+                    &result,
+                    mode,
+                ) {
+                    Ok(()) => serialize_or_error(result),
+                    Err(err) => error_json(format!("{err:#}")),
+                },
                 Err(e) => error_json(format!("{e:#}")),
             }
         }
@@ -465,9 +563,28 @@ fn process_request(
                     OptimizeMode::Apply,
                 ) {
                     Ok(result) if result.status == "ok" && result.summary.applied => {
+                        if let Err(err) = remember_reoptimization_result(
+                            reoptimization_state,
+                            entry.prog_id,
+                            enabled_passes.as_deref(),
+                            &result,
+                            OptimizeMode::Apply,
+                        ) {
+                            return error_json(format!("{err:#}"));
+                        }
                         applied += 1;
                     }
-                    Ok(result) if result.status == "ok" => {}
+                    Ok(result) if result.status == "ok" => {
+                        if let Err(err) = remember_reoptimization_result(
+                            reoptimization_state,
+                            entry.prog_id,
+                            enabled_passes.as_deref(),
+                            &result,
+                            OptimizeMode::Apply,
+                        ) {
+                            return error_json(format!("{err:#}"));
+                        }
+                    }
                     Ok(result) => {
                         return error_json(result.error_message.unwrap_or_else(|| {
                             format!(
@@ -601,6 +718,9 @@ mod tests {
     use std::sync::{Arc, Mutex};
     use std::time::{SystemTime, UNIX_EPOCH};
 
+    use crate::commands::{
+        InlinedMapEntry, OptimizeOneResult, OptimizeSummary, ProgramInfo, TimingsNs,
+    };
     use crate::invalidation::{BatchLookupValue, MapInvalidationTracker};
 
     type MockMapValues = HashMap<u32, HashMap<Vec<u8>, Vec<u8>>>;
@@ -647,8 +767,15 @@ mod tests {
 
     fn process_test_request(req: &serde_json::Value) -> serde_json::Value {
         let tracker = commands::new_invalidation_tracker();
+        let reoptimization_state = new_reoptimization_state();
         let mut profiling_state = None;
-        process_request(req, &CliConfig::from_env(), &mut profiling_state, &tracker)
+        process_request(
+            req,
+            &CliConfig::from_env(),
+            &mut profiling_state,
+            &tracker,
+            &reoptimization_state,
+        )
     }
 
     #[test]
@@ -705,6 +832,60 @@ mod tests {
         assert!(message.contains("invalidation reoptimization failed"));
         assert!(message.contains("prog 101"));
         assert!(message.contains("reoptimization failed"));
+    }
+
+    #[test]
+    fn reoptimization_state_persists_pass_list_for_map_inline_results() {
+        let mut state = ReoptimizationState::default();
+        let mut result = OptimizeOneResult {
+            status: "ok".to_string(),
+            prog_id: 101,
+            changed: true,
+            passes_applied: vec!["map_inline".to_string()],
+            program: ProgramInfo {
+                prog_id: 101,
+                prog_name: "demo".to_string(),
+                prog_type: 6,
+                orig_insn_count: 2,
+                final_insn_count: 2,
+                insn_delta: 0,
+            },
+            summary: OptimizeSummary {
+                applied: true,
+                total_sites_applied: 1,
+                passes_executed: 1,
+                passes_changed: 1,
+                verifier_rejections: 0,
+            },
+            passes: Vec::new(),
+            attempts: Vec::new(),
+            timings_ns: TimingsNs {
+                pipeline_run_ns: 1,
+                rejit_syscall_ns: 1,
+                total_ns: 2,
+            },
+            inlined_map_entries: vec![InlinedMapEntry {
+                map_id: 7,
+                key_hex: "01000000".to_string(),
+                value_hex: "0b000000".to_string(),
+            }],
+            error_message: None,
+        };
+        let requested = vec!["const_prop".to_string(), "map_inline".to_string()];
+
+        state.remember_result(101, Some(&requested), &result, OptimizeMode::Apply);
+
+        assert_eq!(state.enabled_passes_for(101), Some(requested));
+
+        result.inlined_map_entries.clear();
+        state.remember_result(
+            101,
+            Some(&["map_inline".to_string()]),
+            &result,
+            OptimizeMode::Apply,
+        );
+
+        assert!(state.enabled_passes_for(101).is_none());
     }
 
     #[test]
@@ -811,6 +992,7 @@ mod tests {
         .expect("write source profile");
 
         let tracker = commands::new_invalidation_tracker();
+        let reoptimization_state = new_reoptimization_state();
         let mut profiling_state = None;
         let load_response = process_request(
             &serde_json::json!({
@@ -820,6 +1002,7 @@ mod tests {
             &CliConfig::from_env(),
             &mut profiling_state,
             &tracker,
+            &reoptimization_state,
         );
         assert_eq!(load_response["status"], "ok");
         assert_eq!(load_response["programs_loaded"], 1);
@@ -832,6 +1015,7 @@ mod tests {
             &CliConfig::from_env(),
             &mut profiling_state,
             &tracker,
+            &reoptimization_state,
         );
         assert_eq!(save_response["status"], "ok");
         assert_eq!(save_response["programs"], 1);

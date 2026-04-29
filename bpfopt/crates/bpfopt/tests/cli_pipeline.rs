@@ -6,6 +6,11 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Output, Stdio};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+use bpfopt::insn::{
+    BpfInsn, BPF_ADD, BPF_ALU64, BPF_CALL, BPF_DW, BPF_EXIT, BPF_IMM, BPF_JMP, BPF_K, BPF_LD,
+    BPF_LDX, BPF_MEM, BPF_MOV, BPF_PSEUDO_MAP_FD, BPF_ST, BPF_W,
+};
+
 static NEXT_TEMP_ID: AtomicUsize = AtomicUsize::new(0);
 
 fn bpfopt_bin() -> &'static str {
@@ -17,6 +22,32 @@ fn minimal_program_bytes() -> Vec<u8> {
         0xb7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x95, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00,
     ]
+}
+
+fn map_lookup_program_bytes() -> Vec<u8> {
+    let map = [
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(1, BPF_PSEUDO_MAP_FD),
+            0,
+            42,
+        ),
+        BpfInsn::new(0, 0, 0, 0),
+    ];
+    [
+        map[0],
+        map[1],
+        BpfInsn::new(BPF_ST | BPF_W | BPF_MEM, BpfInsn::make_regs(10, 0), -4, 1),
+        BpfInsn::mov64_reg(2, 10),
+        BpfInsn::new(BPF_ALU64 | BPF_ADD | BPF_K, BpfInsn::make_regs(2, 0), 0, -4),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 1),
+        BpfInsn::new(BPF_LDX | BPF_W | BPF_MEM, BpfInsn::make_regs(6, 0), 0, 0),
+        BpfInsn::new(BPF_ALU64 | BPF_MOV | BPF_K, BpfInsn::make_regs(0, 0), 0, 0),
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0),
+    ]
+    .into_iter()
+    .flat_map(|insn| insn.raw_bytes())
+    .collect()
 }
 
 fn temp_path(name: &str) -> PathBuf {
@@ -399,6 +430,39 @@ fn optimize_explicit_map_inline_skips_when_map_side_inputs_missing() {
     remove_file_if_exists(report_path);
     assert_eq!(report["passes"][0]["pass"], "map_inline");
     assert_eq!(report["passes"][0]["skipped"], true);
+}
+
+#[test]
+fn optimize_map_inline_errors_when_snapshot_key_is_absent() {
+    let map_values_path = write_temp_file(
+        "map-values-absent-key.json",
+        r#"{"maps":[{"map_id":111,"map_type":2,"key_size":4,"value_size":4,"max_entries":8,"frozen":true,"entries":[]}]}"#,
+    );
+    let map_values_arg = map_values_path.to_string_lossy().to_string();
+    let output = run_bpfopt(
+        &[
+            "optimize",
+            "--passes",
+            "map-inline",
+            "--map-values",
+            &map_values_arg,
+            "--map-ids",
+            "111",
+        ],
+        &map_lookup_program_bytes(),
+    );
+    remove_file_if_exists(map_values_path);
+
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("map_inline requires a concrete snapshot value"),
+        "stderr={stderr}"
+    );
+    assert!(
+        stderr.contains("map_values snapshot missing map 111 key 01000000"),
+        "stderr={stderr}"
+    );
 }
 
 #[test]

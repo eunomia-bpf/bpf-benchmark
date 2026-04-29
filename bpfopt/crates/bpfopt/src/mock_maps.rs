@@ -34,7 +34,6 @@ thread_local! {
     static MOCK_MAPS: RefCell<HashMap<u32, MockMapState>> = RefCell::new(HashMap::new());
 }
 
-const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
 const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
 
 /// Install a mock map into the thread-local store.
@@ -91,31 +90,10 @@ pub fn mock_lookup_elem(
             return Some(Ok(value.clone()));
         }
 
-        Some(
-            zero_filled_mock_lookup(&state.info, key, value_size)
-                .ok_or_else(|| format!("mock map {} missing key {:?}", map_id, key)),
-        )
+        Some(Err(crate::pass::missing_map_value_snapshot_message(
+            map_id, key,
+        )))
     })
-}
-
-fn zero_filled_mock_lookup(info: &BpfMapInfo, key: &[u8], value_size: usize) -> Option<Vec<u8>> {
-    if !matches!(
-        info.map_type,
-        BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY
-    ) {
-        return None;
-    }
-    if info.key_size as usize != key.len() || key.len() > 8 {
-        return None;
-    }
-    if value_size < info.value_size as usize {
-        return None;
-    }
-
-    let mut raw = [0u8; 8];
-    raw[..key.len()].copy_from_slice(key);
-    let index = u64::from_le_bytes(raw);
-    (index < info.max_entries as u64).then_some(vec![0u8; value_size])
 }
 
 fn round_up_8(value: usize) -> usize {

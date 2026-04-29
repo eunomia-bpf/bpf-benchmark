@@ -282,42 +282,36 @@ impl MapValueProvider for SnapshotMapProvider {
             return result;
         }
 
-        let Some(metadata) = program.map_metadata.get(&map_id) else {
+        if !program.map_metadata.contains_key(&map_id) {
             return Err(format!(
                 "map_values snapshot has no metadata for map {}",
                 map_id
             ));
-        };
-        zero_filled_snapshot_lookup(metadata, key, value_size)
-            .ok_or_else(|| format!("map_values snapshot missing map {} key {:?}", map_id, key))
+        }
+        Err(missing_map_value_snapshot_message(map_id, key))
     }
 }
 
-fn zero_filled_snapshot_lookup(
-    metadata: &MapMetadata,
-    key: &[u8],
-    value_size: usize,
-) -> Option<Vec<u8>> {
-    const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
-    const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
+pub fn missing_map_value_snapshot_message(map_id: u32, key: &[u8]) -> String {
+    format!(
+        "map_values snapshot missing map {} key {}",
+        map_id,
+        hex_bytes(key)
+    )
+}
 
-    if !matches!(
-        metadata.map_type,
-        BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY
-    ) {
-        return None;
-    }
-    if metadata.key_size as usize != key.len() || key.len() > 8 {
-        return None;
-    }
-    if value_size < metadata.value_size as usize {
-        return None;
-    }
+pub fn is_missing_map_value_snapshot_error(message: &str) -> bool {
+    message.contains("map_values snapshot missing map ")
+}
 
-    let mut raw = [0u8; 8];
-    raw[..key.len()].copy_from_slice(key);
-    let index = u64::from_le_bytes(raw);
-    (index < metadata.max_entries as u64).then_some(vec![0u8; value_size])
+fn hex_bytes(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut out = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        out.push(HEX[(byte >> 4) as usize] as char);
+        out.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    out
 }
 
 /// Transform log entry — records sites applied by each pass.

@@ -294,6 +294,16 @@ pub(crate) enum OptimizeMode {
     DryRun,
 }
 
+struct ApplyOneRequest<'a> {
+    prog_id: u32,
+    config: &'a CliConfig,
+    enabled_passes: Option<&'a [String]>,
+    profile_path: Option<&'a Path>,
+    invalidation_tracker: Option<&'a SharedInvalidationTracker>,
+    mode: OptimizeMode,
+    force_rejit: bool,
+}
+
 pub(crate) type SharedInvalidationTracker = Arc<Mutex<MapInvalidationTracker<BpfMapValueReader>>>;
 
 #[derive(Clone, Debug, Deserialize)]
@@ -394,6 +404,18 @@ struct MapValuesMapJson {
 struct MapValuesEntryJson {
     key: String,
     value: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ScanMapKeysReport {
+    complete: bool,
+    keys: Vec<ScannedMapKeyJson>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ScannedMapKeyJson {
+    map_id: u32,
+    key_hex: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -569,6 +591,12 @@ pub(crate) fn list_programs(config: &CliConfig) -> Result<Vec<ListProgJson>> {
     serde_json::from_slice(&output.stdout).context("parse bpfget --list --json output")
 }
 
+fn live_bpf_map_lookup(_map: &MapInfoJson, fd: i32, key: &[u8]) -> Result<Option<Vec<u8>>> {
+    let info = bpf::bpf_map_get_info(fd)?;
+    let value_size = bpf::bpf_map_lookup_value_size(&info)?;
+    bpf::bpf_map_lookup_elem_optional(fd, key, value_size)
+}
+
 pub(crate) fn start_profile(config: &CliConfig, duration_ms: u64) -> Result<ProfileSession> {
     let output_dir = WorkDir::new("bpfrejit-daemon-profile")?;
     let mut child = config
@@ -669,29 +697,62 @@ pub(crate) fn try_apply_one(
     invalidation_tracker: Option<&SharedInvalidationTracker>,
     mode: OptimizeMode,
 ) -> Result<OptimizeOneResult> {
-    try_apply_one_with_map_fd_opener(
-        prog_id,
-        config,
-        enabled_passes,
-        profile_path,
-        invalidation_tracker,
-        mode,
+    try_apply_one_with_map_access(
+        ApplyOneRequest {
+            prog_id,
+            config,
+            enabled_passes,
+            profile_path,
+            invalidation_tracker,
+            mode,
+            force_rejit: false,
+        },
         bpf::bpf_map_get_fd_by_id,
+        live_bpf_map_lookup,
     )
 }
 
-fn try_apply_one_with_map_fd_opener<F>(
+pub(crate) fn try_reapply_one(
     prog_id: u32,
     config: &CliConfig,
     enabled_passes: Option<&[String]>,
     profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
     mode: OptimizeMode,
+) -> Result<OptimizeOneResult> {
+    try_apply_one_with_map_access(
+        ApplyOneRequest {
+            prog_id,
+            config,
+            enabled_passes,
+            profile_path,
+            invalidation_tracker,
+            mode,
+            force_rejit: true,
+        },
+        bpf::bpf_map_get_fd_by_id,
+        live_bpf_map_lookup,
+    )
+}
+
+fn try_apply_one_with_map_access<F, G>(
+    request: ApplyOneRequest<'_>,
     mut open_map_fd: F,
+    mut lookup_map_value: G,
 ) -> Result<OptimizeOneResult>
 where
     F: FnMut(u32) -> Result<OwnedFd>,
+    G: FnMut(&MapInfoJson, i32, &[u8]) -> Result<Option<Vec<u8>>>,
 {
+    let ApplyOneRequest {
+        prog_id,
+        config,
+        enabled_passes,
+        profile_path,
+        invalidation_tracker,
+        mode,
+        force_rejit,
+    } = request;
     let total_start = Instant::now();
     let workdir = WorkDir::new("bpfrejit-daemon-optimize")?;
     let prog_bin = workdir.path().join("prog.bin");
@@ -792,7 +853,16 @@ where
         .iter()
         .any(|pass| canonical_pass(pass) == "map_inline")
     {
-        write_empty_map_values(&map_fds_json, &map_values_json)?;
+        write_live_map_values(
+            config,
+            &prog_bin,
+            &prog_info,
+            &map_fds_json,
+            &map_values_json,
+            &mut open_map_fd,
+            &mut lookup_map_value,
+        )
+        .with_context(|| format!("build map-inline live value snapshot for prog {prog_id}"))?;
         side_inputs.push(("--map-values".to_string(), map_values_json.clone()));
         let map_ids = if prog_info.map_ids.is_empty() {
             "0".to_string()
@@ -848,7 +918,8 @@ where
     let mut applied = false;
     let error_message = None;
 
-    if !changed {
+    let should_rejit = changed || (force_rejit && matches!(mode, OptimizeMode::Apply));
+    if !should_rejit {
         attempts.push(AttemptRecord {
             attempt: 0,
             disabled_passes: Vec::new(),
@@ -912,7 +983,11 @@ where
             attempts.push(AttemptRecord {
                 attempt: 0,
                 disabled_passes: Vec::new(),
-                result: "applied".to_string(),
+                result: if changed {
+                    "applied".to_string()
+                } else {
+                    "reapplied".to_string()
+                },
                 failure_pc: None,
                 attributed_pass: None,
                 debug: None,
@@ -1031,23 +1106,139 @@ fn reject_skipped_requested_passes(
     Ok(())
 }
 
-fn write_empty_map_values(map_fds_json: &Path, output: &Path) -> Result<()> {
+fn write_live_map_values<F, G>(
+    config: &CliConfig,
+    prog_bin: &Path,
+    prog_info: &ProgInfoJson,
+    map_fds_json: &Path,
+    output: &Path,
+    open_map_fd: &mut F,
+    lookup_map_value: &mut G,
+) -> Result<()>
+where
+    F: FnMut(u32) -> Result<OwnedFd>,
+    G: FnMut(&MapInfoJson, i32, &[u8]) -> Result<Option<Vec<u8>>>,
+{
     let maps: Vec<MapInfoJson> = read_json_file(map_fds_json, "map_fds.json")?;
+    let mut entries_by_map = BTreeMap::<u32, BTreeMap<Vec<u8>, Option<Vec<u8>>>>::new();
+    write_map_values_snapshot(&maps, &entries_by_map, output)?;
+
+    const MAX_SCAN_ROUNDS: usize = 8;
+    for _ in 0..MAX_SCAN_ROUNDS {
+        let scan = scan_map_inline_keys(config, prog_bin, prog_info, output)?;
+        let mut discovered_new_key = false;
+        for scanned in scan.keys {
+            let key = decode_hex(&scanned.key_hex)
+                .with_context(|| format!("decode scan-map-keys key for map {}", scanned.map_id))?;
+            let map = maps
+                .iter()
+                .find(|map| map.map_id == scanned.map_id)
+                .ok_or_else(|| anyhow!("scan-map-keys returned unknown map {}", scanned.map_id))?;
+            let map_entries = entries_by_map.entry(scanned.map_id).or_default();
+            if map_entries.contains_key(&key) {
+                continue;
+            }
+            let fd = open_map_fd(scanned.map_id).with_context(|| {
+                format!("open BPF map id {} for map-inline value", scanned.map_id)
+            })?;
+            let value = lookup_map_value(map, fd.as_raw_fd(), &key).with_context(|| {
+                format!(
+                    "lookup live value for map {} key {}",
+                    scanned.map_id,
+                    hex_bytes(&key)
+                )
+            })?;
+            if value.is_none() && is_array_like_map(map.map_type) {
+                bail!(
+                    "array-like map {} has no live value for key {}",
+                    scanned.map_id,
+                    hex_bytes(&key)
+                );
+            }
+            map_entries.insert(key, value);
+            discovered_new_key = true;
+        }
+        write_map_values_snapshot(&maps, &entries_by_map, output)?;
+        if scan.complete && !discovered_new_key {
+            return Ok(());
+        }
+        if !scan.complete && !discovered_new_key {
+            bail!("scan-map-keys did not complete and discovered no new map keys");
+        }
+    }
+
+    bail!("scan-map-keys did not converge after {MAX_SCAN_ROUNDS} rounds")
+}
+
+fn scan_map_inline_keys(
+    config: &CliConfig,
+    prog_bin: &Path,
+    prog_info: &ProgInfoJson,
+    map_values_json: &Path,
+) -> Result<ScanMapKeysReport> {
+    let scan_json = map_values_json.with_extension("scan_keys.json");
+    let map_ids = if prog_info.map_ids.is_empty() {
+        "0".to_string()
+    } else {
+        join_u32_csv(&prog_info.map_ids)
+    };
+    let mut scan = config.command("bpfopt");
+    scan.arg("scan-map-keys")
+        .arg("--map-values")
+        .arg(map_values_json)
+        .arg("--map-ids")
+        .arg(map_ids)
+        .arg("--output")
+        .arg(&scan_json);
+    run_with_file_io(
+        &mut scan,
+        prog_bin,
+        &map_values_json.with_extension("scan_keys.bin"),
+    )
+    .context("bpfopt scan-map-keys failed")?;
+    read_json_file(&scan_json, "bpfopt scan-map-keys report")
+}
+
+fn write_map_values_snapshot(
+    maps: &[MapInfoJson],
+    entries_by_map: &BTreeMap<u32, BTreeMap<Vec<u8>, Option<Vec<u8>>>>,
+    output: &Path,
+) -> Result<()> {
     let payload = MapValuesJson {
         maps: maps
-            .into_iter()
-            .map(|map| MapValuesMapJson {
-                map_id: map.map_id,
-                map_type: map.map_type,
-                key_size: map.key_size,
-                value_size: map.value_size,
-                max_entries: map.max_entries,
-                frozen: false,
-                entries: Vec::new(),
+            .iter()
+            .map(|map| {
+                let entries = match entries_by_map.get(&map.map_id) {
+                    Some(entries) => entries
+                        .iter()
+                        .map(|(key, value)| MapValuesEntryJson {
+                            key: hex_bytes(key),
+                            value: value.as_ref().map(|value| hex_bytes(value)),
+                        })
+                        .collect(),
+                    None => Vec::new(),
+                };
+
+                MapValuesMapJson {
+                    map_id: map.map_id,
+                    map_type: map.map_type,
+                    key_size: map.key_size,
+                    value_size: map.value_size,
+                    max_entries: map.max_entries,
+                    frozen: false,
+                    entries,
+                }
             })
             .collect(),
     };
     write_json_file(output, &payload)
+}
+
+fn is_array_like_map(map_type: u32) -> bool {
+    matches!(
+        map_type,
+        kernel_sys::BPF_MAP_TYPE_ARRAY | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
+    )
 }
 
 fn needs_target(passes: &[String]) -> bool {
@@ -1422,10 +1613,18 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"p
     }
 
     fn write_executable(path: &Path, text: &str) -> Result<()> {
-        fs::write(path, text)?;
-        let mut permissions = fs::metadata(path)?.permissions();
+        let tmp_path = path.with_file_name(format!(
+            "{}.tmp-{}",
+            path.file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("fake-cli"),
+            NEXT_WORKDIR_ID.fetch_add(1, Ordering::Relaxed)
+        ));
+        fs::write(&tmp_path, text)?;
+        let mut permissions = fs::metadata(&tmp_path)?.permissions();
         permissions.set_mode(0o755);
-        fs::set_permissions(path, permissions)?;
+        fs::set_permissions(&tmp_path, permissions)?;
+        fs::rename(&tmp_path, path)?;
         Ok(())
     }
 
@@ -1560,14 +1759,16 @@ exit 11
     }
 
     #[test]
-    fn map_inline_report_records_refresh_invalidation_tracker_after_rejit() {
+    fn reapply_force_rejit_reinstalls_candidate_even_when_unchanged() {
         let fake = FakeCliDir::new().unwrap();
+        let marker = fake.dir.path().join("rejit-called");
+        let marker_arg = marker.to_string_lossy().to_string();
         fake.replace_command(
             "bpfopt",
             r#"#!/usr/bin/env bash
 set -euo pipefail
 if [[ "${1:-}" == "list-passes" ]]; then
-  printf 'map-inline\n'
+  printf 'wide-mem\n'
   exit 0
 fi
 report=""
@@ -1578,6 +1779,88 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 cat >/dev/null
+printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
+cat > "$report" <<JSON
+{"passes":[{"pass":"wide_mem","changed":false,"sites_applied":0,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
+JSON
+"#,
+        )
+        .unwrap();
+        fake.replace_command(
+            "bpfrejit",
+            &format!(
+                r#"#!/usr/bin/env bash
+set -euo pipefail
+prog_id="$1"
+shift
+out=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --output) out="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+printf 'called\n' > {marker_arg:?}
+if [[ -n "$out" ]]; then
+  printf '{{"status":"ok","prog_id":%s,"insn_count_before":2,"insn_count_after":2,"dry_run":false}}\n' "$prog_id" > "$out"
+fi
+"#
+            ),
+        )
+        .unwrap();
+
+        let result = try_reapply_one(
+            42,
+            &fake.config(),
+            Some(&["wide_mem".to_string()]),
+            None,
+            None,
+            OptimizeMode::Apply,
+        )
+        .unwrap();
+
+        assert!(!result.changed);
+        assert!(result.summary.applied);
+        assert_eq!(result.attempts[0].result, "reapplied");
+        assert!(marker.exists());
+    }
+
+    #[test]
+    fn map_inline_report_records_refresh_invalidation_tracker_after_rejit() {
+        let fake = FakeCliDir::new().unwrap();
+        fake.replace_command(
+            "bpfopt",
+            r#"#!/usr/bin/env bash
+set -euo pipefail
+if [[ "${1:-}" == "list-passes" ]]; then
+  printf 'map-inline\n'
+  exit 0
+fi
+if [[ "${1:-}" == "scan-map-keys" ]]; then
+  out=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --output) out="$2"; shift 2 ;;
+      *) shift ;;
+    esac
+  done
+  cat >/dev/null
+  cat > "$out" <<JSON
+{"complete":true,"keys":[{"map_id":111,"key_hex":"01000000"}]}
+JSON
+  exit 0
+fi
+report=""
+map_values=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --report) report="$2"; shift 2 ;;
+    --map-values) map_values="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+grep -q '"value": "07000000"' "$map_values"
+cat >/dev/null
 printf '\xb7\x00\x00\x00\x01\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
 cat > "$report" <<JSON
 {"passes":[{"pass":"map_inline","skipped":false,"changed":true,"sites_applied":1,"insn_count_before":2,"insn_count_after":2,"insn_delta":0,"map_inline_records":[{"map_id":111,"key_hex":"01000000","value_hex":"07000000"}]}]}
@@ -1586,15 +1869,24 @@ JSON
         )
         .unwrap();
         let tracker = new_invalidation_tracker();
+        let config = fake.config();
+        let enabled_passes = ["map_inline".to_string()];
 
-        let result = try_apply_one_with_map_fd_opener(
-            42,
-            &fake.config(),
-            Some(&["map_inline".to_string()]),
-            None,
-            Some(&tracker),
-            OptimizeMode::Apply,
+        let result = try_apply_one_with_map_access(
+            ApplyOneRequest {
+                prog_id: 42,
+                config: &config,
+                enabled_passes: Some(&enabled_passes),
+                profile_path: None,
+                invalidation_tracker: Some(&tracker),
+                mode: OptimizeMode::Apply,
+                force_rejit: false,
+            },
             |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
+            |_map, _fd, key| {
+                assert_eq!(key, 1u32.to_le_bytes().as_slice());
+                Ok(Some(7u32.to_le_bytes().to_vec()))
+            },
         )
         .unwrap();
 

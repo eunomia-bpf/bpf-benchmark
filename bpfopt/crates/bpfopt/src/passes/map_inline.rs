@@ -851,6 +851,13 @@ fn run_map_inline_round(
         ) {
             Ok(key) => key,
             Err(detail) => {
+                if crate::pass::is_missing_map_value_snapshot_error(&detail) {
+                    return Err(anyhow::anyhow!(
+                        "map_inline requires a concrete snapshot value while extracting lookup key at pc {}: {}",
+                        site.call_pc,
+                        detail
+                    ));
+                }
                 record_skip(
                     &mut skipped,
                     &mut diagnostics,
@@ -929,6 +936,15 @@ fn run_map_inline_round(
                 continue;
             }
             Err(err) => {
+                let message = format!("{err:#}");
+                if crate::pass::is_missing_map_value_snapshot_error(&message) {
+                    return Err(err.context(format!(
+                        "map_inline requires a concrete snapshot value for map {} key {} at lookup pc {}",
+                        info.map_id,
+                        format_bytes_preview(&key.bytes),
+                        site.call_pc
+                    )));
+                }
                 if let Some(reason) = site_level_inline_veto_reason(&err) {
                     record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                     continue;
