@@ -67,9 +67,6 @@ fn run() -> Result<()> {
 
     let insns = read_bytecode(cli.file.as_deref())?;
     let fd_array = read_fd_array(cli.fd_array.as_deref())?;
-    if cli.dry_run && !fd_array.is_empty() {
-        bail!("--dry-run with --fd-array is not supported by current kernel-sys prog_load_dryrun");
-    }
 
     let prog_fd = kernel_sys::prog_get_fd_by_id(cli.prog_id)
         .with_context(|| format!("open BPF program id {}", cli.prog_id))?;
@@ -79,8 +76,13 @@ fn run() -> Result<()> {
 
     let mut log_buf = vec![0u8; LOG_BUF_SIZE];
     if cli.dry_run {
-        kernel_sys::prog_load_dryrun(info.prog_type, &insns, Some(&mut log_buf))
-            .context("dry-run verifier rejected bytecode")?;
+        kernel_sys::prog_load_dryrun_with_fd_array(
+            info.prog_type,
+            &insns,
+            Some(&fd_array),
+            Some(&mut log_buf),
+        )
+        .context("dry-run verifier rejected bytecode")?;
         return write_summary(
             cli.output.as_deref(),
             &Summary {

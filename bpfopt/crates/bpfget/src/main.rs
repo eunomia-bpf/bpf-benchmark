@@ -2,15 +2,18 @@
 //! bpfget CLI entry point.
 
 use std::collections::BTreeMap;
-use std::fs;
+use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
-use std::os::fd::{AsFd, AsRawFd, BorrowedFd};
+use std::os::fd::{AsFd, BorrowedFd};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use anyhow::{anyhow, bail, Context, Result};
 use clap::Parser;
 use serde::{Deserialize, Serialize};
+
+static NEXT_TMP_ID: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Parser, Debug)]
 #[command(
@@ -206,24 +209,27 @@ impl ProgInfoJson {
 }
 
 fn write_full(prog_id: u32, outdir: &Path) -> Result<()> {
-    fs::create_dir_all(outdir).with_context(|| format!("failed to create {}", outdir.display()))?;
+    ensure_existing_dir(outdir)?;
 
     let fd = open_prog_fd(prog_id)?;
     let insns = kernel_sys::prog_get_original(fd.as_fd())
         .with_context(|| format!("read original bytecode for BPF program id {prog_id}"))?;
     ensure_original_bytecode(&insns)?;
     let (info, map_ids) = get_prog_info_with_map_ids_from_fd(fd.as_fd(), prog_id)?;
+    let map_infos = get_map_infos(&map_ids)?;
 
-    write_insns(Some(&outdir.join("prog.bin")), &insns)?;
-    write_json(
-        Some(&outdir.join("prog_info.json")),
-        &ProgInfoJson::from_info(info, map_ids.clone()),
-    )?;
-    write_json(
-        Some(&outdir.join("map_fds.json")),
-        &get_map_infos(&map_ids)?,
-    )?;
-    Ok(())
+    let prog_bin = encode_insns(&insns);
+    let prog_info_json = json_bytes(&ProgInfoJson::from_info(info, map_ids))?;
+    let map_fds_json = json_bytes(&map_infos)?;
+
+    write_full_files_atomic(
+        outdir,
+        &[
+            ("prog.bin", prog_bin.as_slice()),
+            ("prog_info.json", prog_info_json.as_slice()),
+            ("map_fds.json", map_fds_json.as_slice()),
+        ],
+    )
 }
 
 fn list_programs(json: bool, output: Option<&Path>) -> Result<()> {
@@ -390,36 +396,7 @@ fn get_prog_info_with_map_ids_from_fd(
 }
 
 fn read_prog_map_ids(fd: BorrowedFd<'_>, nr_map_ids: u32) -> Result<Vec<u32>> {
-    if nr_map_ids == 0 {
-        return Ok(Vec::new());
-    }
-
-    let mut map_ids = vec![0u32; nr_map_ids as usize];
-    let mut info = kernel_sys::BpfProgInfoFork {
-        nr_map_ids,
-        map_ids: map_ids.as_mut_ptr() as u64,
-        ..Default::default()
-    };
-    let mut info_len = std::mem::size_of::<kernel_sys::BpfProgInfoFork>() as u32;
-    let ret = unsafe {
-        kernel_sys::libbpf_sys::bpf_obj_get_info_by_fd(
-            fd.as_raw_fd(),
-            &mut info as *mut _ as *mut std::ffi::c_void,
-            &mut info_len,
-        )
-    };
-    if ret < 0 {
-        bail!("BPF_OBJ_GET_INFO_BY_FD (map ids): {}", libbpf_os_error(ret));
-    }
-    if info.nr_map_ids as usize > map_ids.len() {
-        bail!(
-            "program map id count grew while reading map ids: first pass {}, second pass {}",
-            map_ids.len(),
-            info.nr_map_ids
-        );
-    }
-    map_ids.truncate(info.nr_map_ids as usize);
-    Ok(map_ids)
+    kernel_sys::prog_map_ids(fd, nr_map_ids)
 }
 
 fn get_map_infos(map_ids: &[u32]) -> Result<Vec<MapInfoJson>> {
@@ -453,18 +430,17 @@ fn ensure_original_bytecode(insns: &[kernel_sys::bpf_insn]) -> Result<()> {
 }
 
 fn write_insns(output: Option<&Path>, insns: &[kernel_sys::bpf_insn]) -> Result<()> {
+    let bytes = encode_insns(insns);
     let mut out = open_output(output)?;
-    for insn in insns {
-        out.write_all(&insn_raw_bytes(insn))?;
-    }
+    out.write_all(&bytes)?;
     out.flush()?;
     Ok(())
 }
 
 fn write_json<T: Serialize>(output: Option<&Path>, value: &T) -> Result<()> {
+    let bytes = json_bytes(value)?;
     let mut out = open_output(output)?;
-    serde_json::to_writer_pretty(&mut out, value)?;
-    writeln!(out)?;
+    out.write_all(&bytes)?;
     out.flush()?;
     Ok(())
 }
@@ -478,6 +454,85 @@ fn open_output(output: Option<&Path>) -> Result<Box<dyn Write>> {
         }
         None => Ok(Box::new(io::stdout().lock())),
     }
+}
+
+fn ensure_existing_dir(path: &Path) -> Result<()> {
+    let metadata =
+        fs::metadata(path).with_context(|| format!("failed to stat {}", path.display()))?;
+    if !metadata.is_dir() {
+        bail!("{} is not a directory", path.display());
+    }
+    Ok(())
+}
+
+fn encode_insns(insns: &[kernel_sys::bpf_insn]) -> Vec<u8> {
+    let mut bytes = Vec::with_capacity(std::mem::size_of_val(insns));
+    for insn in insns {
+        bytes.extend_from_slice(&insn_raw_bytes(insn));
+    }
+    bytes
+}
+
+fn json_bytes<T: Serialize>(value: &T) -> Result<Vec<u8>> {
+    let mut bytes = Vec::new();
+    serde_json::to_writer_pretty(&mut bytes, value)?;
+    bytes.push(b'\n');
+    Ok(bytes)
+}
+
+fn write_full_files_atomic(outdir: &Path, entries: &[(&str, &[u8])]) -> Result<()> {
+    let tmp_paths = entries
+        .iter()
+        .map(|(name, _)| full_tmp_path(outdir, name))
+        .collect::<Vec<_>>();
+
+    let result = (|| {
+        for ((name, bytes), tmp_path) in entries.iter().zip(&tmp_paths) {
+            let mut file = OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(tmp_path)
+                .with_context(|| format!("failed to create {}", tmp_path.display()))?;
+            file.write_all(bytes)
+                .with_context(|| format!("failed to write {}", tmp_path.display()))?;
+            file.flush()
+                .with_context(|| format!("failed to flush {}", tmp_path.display()))?;
+            drop(file);
+
+            let final_path = outdir.join(name);
+            if final_path == *tmp_path {
+                bail!(
+                    "temporary path unexpectedly matches final path {}",
+                    final_path.display()
+                );
+            }
+        }
+
+        for ((name, _), tmp_path) in entries.iter().zip(&tmp_paths) {
+            let final_path = outdir.join(name);
+            fs::rename(tmp_path, &final_path).with_context(|| {
+                format!(
+                    "failed to rename {} to {}",
+                    tmp_path.display(),
+                    final_path.display()
+                )
+            })?;
+        }
+        Ok(())
+    })();
+
+    if result.is_err() {
+        for tmp_path in &tmp_paths {
+            let _ = fs::remove_file(tmp_path);
+        }
+    }
+
+    result
+}
+
+fn full_tmp_path(outdir: &Path, name: &str) -> PathBuf {
+    let id = NEXT_TMP_ID.fetch_add(1, Ordering::Relaxed);
+    outdir.join(format!(".{name}.tmp.{}.{id}", std::process::id()))
 }
 
 fn insn_raw_bytes(insn: &kernel_sys::bpf_insn) -> [u8; 8] {
@@ -497,15 +552,6 @@ fn c_name_u8(bytes: &[u8]) -> String {
 fn c_name_i8(bytes: &[std::os::raw::c_char]) -> String {
     let bytes = bytes.iter().map(|&b| b as u8).collect::<Vec<_>>();
     c_name_u8(&bytes)
-}
-
-fn libbpf_os_error(ret: i32) -> std::io::Error {
-    let errno = if ret < 0 {
-        -ret
-    } else {
-        std::io::Error::last_os_error().raw_os_error().unwrap_or(5)
-    };
-    std::io::Error::from_raw_os_error(errno)
 }
 
 fn prog_type_name(value: u32) -> &'static str {

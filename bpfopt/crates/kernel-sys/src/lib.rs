@@ -157,6 +157,20 @@ pub fn prog_load_dryrun(
     insns: &[bpf_insn],
     mut log_buf: Option<&mut [u8]>,
 ) -> Result<()> {
+    prog_load_dryrun_with_fd_array(prog_type, insns, None, log_buf.as_deref_mut())
+}
+
+/// Load raw BPF instructions through libbpf with optional fd_array side input.
+///
+/// This is the fd_array-capable form of [`prog_load_dryrun`]. The `fd_array`
+/// slice is only borrowed for the duration of the load attempt, so callers must
+/// keep the backing fds alive until this function returns.
+pub fn prog_load_dryrun_with_fd_array(
+    prog_type: bpf_prog_type,
+    insns: &[bpf_insn],
+    fd_array: Option<&[i32]>,
+    mut log_buf: Option<&mut [u8]>,
+) -> Result<()> {
     let insn_cnt: size_t = insns
         .len()
         .try_into()
@@ -164,6 +178,14 @@ pub fn prog_load_dryrun(
     let mut opts = bpf_prog_load_opts::default();
     opts.sz = std::mem::size_of::<bpf_prog_load_opts>() as size_t;
     opts.attempts = 1;
+
+    if let Some(fd_array) = fd_array.filter(|fds| !fds.is_empty()) {
+        opts.fd_array_cnt = fd_array
+            .len()
+            .try_into()
+            .map_err(|_| anyhow!("fd_array length does not fit libbpf __u32"))?;
+        opts.fd_array = fd_array.as_ptr();
+    }
 
     if let Some(buf) = log_buf.as_deref_mut() {
         if buf.is_empty() {
@@ -247,6 +269,30 @@ pub fn obj_get_info_by_fd(fd: BorrowedFd<'_>) -> Result<BpfProgInfoFork> {
     let mut info = BpfProgInfoFork::default();
     prog_obj_get_info_by_fd_into(fd, &mut info)?;
     Ok(info)
+}
+
+/// Retrieve map IDs referenced by an open BPF program fd.
+pub fn prog_map_ids(fd: BorrowedFd<'_>, nr_map_ids: u32) -> Result<Vec<u32>> {
+    if nr_map_ids == 0 {
+        return Ok(Vec::new());
+    }
+
+    let mut map_ids = vec![0u32; nr_map_ids as usize];
+    let mut info = BpfProgInfoFork {
+        nr_map_ids,
+        map_ids: map_ids.as_mut_ptr() as u64,
+        ..Default::default()
+    };
+    prog_obj_get_info_by_fd_into(fd, &mut info)?;
+    if info.nr_map_ids as usize > map_ids.len() {
+        bail!(
+            "program map id count grew while reading map ids: first pass {}, second pass {}",
+            map_ids.len(),
+            info.nr_map_ids
+        );
+    }
+    map_ids.truncate(info.nr_map_ids as usize);
+    Ok(map_ids)
 }
 
 /// Return the next live BPF map ID after `start_id`.
