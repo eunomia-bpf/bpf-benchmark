@@ -8,9 +8,9 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use anyhow::{anyhow, Context, Result};
 use serde::Deserialize;
 
-use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
 use crate::elf_parser::{parse_bpf_object, ElfBpfObject, ElfMapMetadata, ElfProgramInfo};
 use crate::insn::{BpfInsn, BPF_PSEUDO_CALL, BPF_PSEUDO_FUNC};
+use crate::mock_maps::{apply_mock_maps, install_mock_map, BpfMapInfo, MockMapState};
 use crate::pass::{BpfProgram, BranchProfile, PassContext, PipelineResult, ProfilingData};
 use crate::passes::build_custom_pipeline;
 
@@ -54,6 +54,7 @@ impl LoadedFixtureProgram {
             map_ids.push(map_id);
         }
         program.set_map_ids(map_ids);
+        apply_mock_maps(&mut program);
         program
     }
 
@@ -89,6 +90,7 @@ impl LoadedFixtureProgram {
             map_ids.push(map_id);
         }
         program.set_map_ids(map_ids);
+        apply_mock_maps(&mut program);
         Ok(program)
     }
 }
@@ -101,8 +103,10 @@ pub fn fixture_path(rel_path: &str) -> PathBuf {
 }
 
 pub fn repo_path(rel_path: &str) -> PathBuf {
+    // CARGO_MANIFEST_DIR = bpfopt/crates/bpfopt-core
+    // repo root = bpfopt/../../  (i.e. bpf-benchmark/)
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("..")
+        .join("../../..")
         .join(rel_path)
 }
 

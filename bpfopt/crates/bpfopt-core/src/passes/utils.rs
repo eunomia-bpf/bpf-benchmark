@@ -8,7 +8,7 @@ use std::collections::HashSet;
 
 use crate::analysis::{CFGAnalysis, CFGResult, LivenessAnalysis};
 use crate::insn::*;
-use crate::pass::{Analysis, BpfProgram};
+use crate::pass::{Analysis, BpfProgram, PassContext};
 
 const BPF_FUNC_TAIL_CALL: i32 = 12;
 const BPF_TAIL_CALL: u8 = 0xf0;
@@ -514,6 +514,24 @@ pub fn ensure_btf_fd_slot(program: &mut BpfProgram, btf_fd: i32) -> i16 {
 
     program.required_btf_fds.push(btf_fd);
     program.required_btf_fds.len() as i16
+}
+
+pub fn resolve_kinsn_call_off_for_pass(
+    program: &mut BpfProgram,
+    ctx: &PassContext,
+    pass_name: &str,
+) -> i16 {
+    ctx.kinsn_call_resolver
+        .call_off_for_pass(program, &ctx.kinsn_registry, pass_name)
+}
+
+pub fn resolve_kinsn_call_off_for_target(
+    program: &mut BpfProgram,
+    ctx: &PassContext,
+    target_name: &str,
+) -> i16 {
+    ctx.kinsn_call_resolver
+        .call_off_for_target_name(program, &ctx.kinsn_registry, target_name)
 }
 // ── Tests ──────────────────────────────────────────────────────────
 

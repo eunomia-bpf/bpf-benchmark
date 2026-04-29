@@ -3,7 +3,6 @@
 
 use std::collections::HashMap;
 
-use crate::bpf;
 use crate::insn::BpfInsn;
 use crate::pass::{Analysis, BpfProgram};
 
@@ -120,11 +119,12 @@ impl Analysis for MapInfoAnalysis {
     }
 
     fn run(&self, program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
+        let provider = program.map_info_provider.clone();
         collect_map_references_with_bindings(
             &program.insns,
             &program.map_ids,
             &program.map_fd_bindings,
-            resolve_live_map_info,
+            move |map_id| provider.map_info(program, map_id),
         )
     }
 }
@@ -212,19 +212,6 @@ where
         references,
         unique_maps,
     })
-}
-
-fn resolve_live_map_info(map_id: u32) -> MapInfoAnalysisResult<Option<MapInfo>> {
-    let (info, frozen) = bpf::bpf_map_get_info_by_id(map_id)
-        .map_err(|err| format!("resolve live map info for map {map_id}: {err:#}"))?;
-    Ok(Some(MapInfo {
-        map_type: info.map_type,
-        key_size: info.key_size,
-        value_size: info.value_size,
-        max_entries: info.max_entries,
-        frozen,
-        map_id: info.id,
-    }))
 }
 
 #[cfg(test)]
@@ -387,8 +374,24 @@ mod tests {
 
     #[test]
     fn map_info_analysis_propagates_live_map_lookup_errors() {
+        #[derive(Debug)]
+        struct ErrorMapInfoProvider;
+
+        impl crate::pass::MapInfoProvider for ErrorMapInfoProvider {
+            fn map_info(
+                &self,
+                _program: &BpfProgram,
+                map_id: u32,
+            ) -> MapInfoAnalysisResult<Option<MapInfo>> {
+                Err(format!(
+                    "resolve live map info for map {map_id}: test error"
+                ))
+            }
+        }
+
         let ld = make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 10);
         let mut program = BpfProgram::new(vec![ld[0], ld[1]]);
+        program.map_info_provider = std::sync::Arc::new(ErrorMapInfoProvider);
         program.set_map_ids(vec![999_999]);
 
         let err = MapInfoAnalysis

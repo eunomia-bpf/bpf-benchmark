@@ -744,8 +744,10 @@ fn test_kinsn_registry_with_available_targets() {
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
             target_btf_fds: HashMap::from([("bpf_rotate64".to_string(), 42)]),
+            target_call_offsets: HashMap::new(),
             target_supported_encodings: HashMap::new(),
         },
+        kinsn_call_resolver: std::sync::Arc::new(FdArrayKinsnCallResolver),
         platform: PlatformCapabilities::default(),
         policy: PolicyConfig::default(),
         prog_type: 0,
@@ -779,6 +781,7 @@ fn test_kinsn_registry_per_target_btf_fd() {
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,
         target_btf_fds: HashMap::new(),
+        target_call_offsets: HashMap::new(),
         target_supported_encodings: HashMap::new(),
     };
     reg.target_btf_fds.insert("bpf_rotate64".to_string(), 100);
@@ -802,6 +805,7 @@ fn test_kinsn_registry_all_btf_fds() {
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,
         target_btf_fds: HashMap::new(),
+        target_call_offsets: HashMap::new(),
         target_supported_encodings: HashMap::new(),
     };
     reg.target_btf_fds.insert("bpf_rotate64".to_string(), 100);
@@ -825,6 +829,7 @@ fn test_required_btf_fds_subset_of_all_btf_fds() {
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,
         target_btf_fds: HashMap::new(),
+        target_call_offsets: HashMap::new(),
         target_supported_encodings: HashMap::new(),
     };
     reg.target_btf_fds.insert("bpf_rotate64".to_string(), 100);

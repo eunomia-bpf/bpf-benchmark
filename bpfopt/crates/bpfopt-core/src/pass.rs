@@ -67,6 +67,179 @@ pub struct BpfProgram {
     pub branch_miss_rate: Option<f64>,
     /// Parsed `log_level=2` verifier state snapshots for the original program.
     pub verifier_states: Arc<[VerifierInsn]>,
+    /// Pre-loaded map value snapshot: (map_id, key_bytes) -> value_bytes.
+    /// Used by offline callers such as the bpfopt CLI.
+    pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
+    /// Pre-loaded map metadata: map_id -> MapMetadata.
+    /// Used by offline callers such as the bpfopt CLI.
+    pub map_metadata: HashMap<u32, MapMetadata>,
+    /// Map metadata resolver. The daemon installs a live raw-syscall provider;
+    /// offline callers use the default snapshot provider.
+    pub map_info_provider: Arc<dyn MapInfoProvider>,
+    /// Map value resolver. The daemon installs a live raw-syscall provider;
+    /// offline callers use the default snapshot provider.
+    pub map_value_provider: Arc<dyn MapValueProvider>,
+}
+
+/// Pre-loaded map metadata used by snapshot/offline map providers.
+#[derive(Clone, Debug)]
+pub struct MapMetadata {
+    pub map_type: u32,
+    pub key_size: u32,
+    pub value_size: u32,
+    pub max_entries: u32,
+    pub frozen: bool,
+    pub map_id: u32,
+}
+
+/// Provider for resolving map metadata from the current execution environment.
+pub trait MapInfoProvider: Send + Sync + std::fmt::Debug {
+    fn map_info(
+        &self,
+        program: &BpfProgram,
+        map_id: u32,
+    ) -> std::result::Result<Option<crate::analysis::MapInfo>, String>;
+}
+
+/// Provider for resolving map values from the current execution environment.
+pub trait MapValueProvider: Send + Sync + std::fmt::Debug {
+    fn lookup_value_size(
+        &self,
+        program: &BpfProgram,
+        info: &crate::analysis::MapInfo,
+    ) -> std::result::Result<usize, String>;
+
+    fn lookup_elem(
+        &self,
+        program: &BpfProgram,
+        map_id: u32,
+        key: &[u8],
+        value_size: usize,
+    ) -> std::result::Result<Vec<u8>, String>;
+}
+
+/// Snapshot-backed map provider used by bpfopt and unit tests.
+#[derive(Clone, Debug, Default)]
+pub struct SnapshotMapProvider;
+
+impl MapInfoProvider for SnapshotMapProvider {
+    fn map_info(
+        &self,
+        program: &BpfProgram,
+        map_id: u32,
+    ) -> std::result::Result<Option<crate::analysis::MapInfo>, String> {
+        let Some(metadata) = program.map_metadata.get(&map_id) else {
+            #[cfg(test)]
+            {
+                return Ok(crate::mock_maps::mock_map_metadata(map_id).map(|metadata| {
+                    crate::analysis::MapInfo {
+                        map_type: metadata.map_type,
+                        key_size: metadata.key_size,
+                        value_size: metadata.value_size,
+                        max_entries: metadata.max_entries,
+                        frozen: metadata.frozen,
+                        map_id: metadata.map_id,
+                    }
+                }));
+            }
+            #[cfg(not(test))]
+            return Ok(None);
+        };
+        Ok(Some(crate::analysis::MapInfo {
+            map_type: metadata.map_type,
+            key_size: metadata.key_size,
+            value_size: metadata.value_size,
+            max_entries: metadata.max_entries,
+            frozen: metadata.frozen,
+            map_id: metadata.map_id,
+        }))
+    }
+}
+
+impl MapValueProvider for SnapshotMapProvider {
+    fn lookup_value_size(
+        &self,
+        program: &BpfProgram,
+        info: &crate::analysis::MapInfo,
+    ) -> std::result::Result<usize, String> {
+        program
+            .map_values
+            .iter()
+            .find_map(|((map_id, _), value)| (*map_id == info.map_id).then_some(value.len()))
+            .or_else(|| {
+                #[cfg(test)]
+                {
+                    crate::mock_maps::mock_lookup_value_size(info.map_id)
+                }
+                #[cfg(not(test))]
+                {
+                    None
+                }
+            })
+            .or(Some(info.value_size as usize))
+            .ok_or_else(|| format!("map {} has no value size", info.map_id))
+    }
+
+    fn lookup_elem(
+        &self,
+        program: &BpfProgram,
+        map_id: u32,
+        key: &[u8],
+        value_size: usize,
+    ) -> std::result::Result<Vec<u8>, String> {
+        if let Some(value) = program.map_values.get(&(map_id, key.to_vec())) {
+            if value.len() != value_size {
+                return Err(format!(
+                    "snapshot map {} returned value size {}, expected {}",
+                    map_id,
+                    value.len(),
+                    value_size
+                ));
+            }
+            return Ok(value.clone());
+        }
+
+        #[cfg(test)]
+        if let Some(result) = crate::mock_maps::mock_lookup_elem(map_id, key, value_size) {
+            return result;
+        }
+
+        let Some(metadata) = program.map_metadata.get(&map_id) else {
+            return Err(format!(
+                "map_values snapshot has no metadata for map {}",
+                map_id
+            ));
+        };
+        zero_filled_snapshot_lookup(metadata, key, value_size)
+            .ok_or_else(|| format!("map_values snapshot missing map {} key {:?}", map_id, key))
+    }
+}
+
+fn zero_filled_snapshot_lookup(
+    metadata: &MapMetadata,
+    key: &[u8],
+    value_size: usize,
+) -> Option<Vec<u8>> {
+    const BPF_MAP_TYPE_ARRAY: u32 = 2;
+    const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = 6;
+
+    if !matches!(
+        metadata.map_type,
+        BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY
+    ) {
+        return None;
+    }
+    if metadata.key_size as usize != key.len() || key.len() > 8 {
+        return None;
+    }
+    if value_size < metadata.value_size as usize {
+        return None;
+    }
+
+    let mut raw = [0u8; 8];
+    raw[..key.len()].copy_from_slice(key);
+    let index = u64::from_le_bytes(raw);
+    (index < metadata.max_entries as u64).then_some(vec![0u8; value_size])
 }
 
 /// Transform log entry — records sites applied by each pass.
@@ -88,7 +261,21 @@ impl BpfProgram {
             map_fd_bindings: HashMap::new(),
             branch_miss_rate: None,
             verifier_states: Arc::from([]),
+            map_values: HashMap::new(),
+            map_metadata: HashMap::new(),
+            map_info_provider: Arc::new(SnapshotMapProvider),
+            map_value_provider: Arc::new(SnapshotMapProvider),
         }
+    }
+
+    /// Install map providers for live runtime or specialized test execution.
+    pub fn set_map_providers(
+        &mut self,
+        map_info_provider: Arc<dyn MapInfoProvider>,
+        map_value_provider: Arc<dyn MapValueProvider>,
+    ) {
+        self.map_info_provider = map_info_provider;
+        self.map_value_provider = map_value_provider;
     }
 
     /// Attach live-kernel map IDs to this program.
@@ -485,6 +672,8 @@ pub trait BpfPass: Send + Sync {
 pub struct PassContext {
     /// Available kinsn targets and their descriptor/BTF transport metadata.
     pub kinsn_registry: KinsnRegistry,
+    /// Resolves the CALL.off transport for kinsn calls introduced by passes.
+    pub kinsn_call_resolver: Arc<dyn KinsnCallResolver>,
     /// CPU capabilities (detected at startup, checked by kinsn passes).
     pub platform: PlatformCapabilities,
     /// Policy configuration (which passes are enabled, parameters, etc.).
@@ -510,6 +699,8 @@ pub struct KinsnRegistry {
     /// Per-target BTF FDs: maps target name (e.g., "bpf_rotate64") to the
     /// owning BTF FD that must be present in the REJIT fd_array.
     pub target_btf_fds: HashMap<String, i32>,
+    /// Per-target static call offsets used by offline callers.
+    pub target_call_offsets: HashMap<String, i16>,
     /// Per-target supported kinsn encodings.
     /// Tests that only seed BTF IDs rely on the packed-only fallback below.
     pub target_supported_encodings: HashMap<String, u32>,
@@ -544,10 +735,24 @@ impl KinsnRegistry {
         self.target_btf_fds.get(target_name).copied()
     }
 
+    pub fn call_off_for_target_name(&self, target_name: &str) -> i16 {
+        self.target_call_offsets
+            .get(target_name)
+            .copied()
+            .unwrap_or(0)
+    }
+
     /// Return the BTF FD required by a given pass's kinsn target.
     pub fn btf_fd_for_pass(&self, pass_name: &str) -> Option<i32> {
         let target_name = Self::target_name_for_pass(pass_name)?;
         self.btf_fd_for_target_name(target_name)
+    }
+
+    /// Return the encoded call offset for a given pass's kinsn target.
+    pub fn call_off_for_pass(&self, pass_name: &str) -> i16 {
+        Self::target_name_for_pass(pass_name)
+            .map(|target_name| self.call_off_for_target_name(target_name))
+            .unwrap_or(0)
     }
 
     pub fn supported_encodings_for_target_name(&self, target_name: &str) -> u32 {
@@ -586,6 +791,70 @@ impl KinsnRegistry {
         fds.dedup();
         fds
     }
+}
+
+/// Adapter for encoding kinsn CALL.off in different execution modes.
+pub trait KinsnCallResolver: Send + Sync + std::fmt::Debug {
+    fn call_off_for_target_name(
+        &self,
+        program: &mut BpfProgram,
+        registry: &KinsnRegistry,
+        target_name: &str,
+    ) -> i16;
+
+    fn call_off_for_pass(
+        &self,
+        program: &mut BpfProgram,
+        registry: &KinsnRegistry,
+        pass_name: &str,
+    ) -> i16 {
+        KinsnRegistry::target_name_for_pass(pass_name)
+            .map(|target_name| self.call_off_for_target_name(program, registry, target_name))
+            .unwrap_or(0)
+    }
+}
+
+/// Live daemon resolver: descriptor BTF FDs are transported through fd_array
+/// slots, and CALL.off stores the 1-based fd_array slot.
+#[derive(Clone, Debug, Default)]
+pub struct FdArrayKinsnCallResolver;
+
+impl KinsnCallResolver for FdArrayKinsnCallResolver {
+    fn call_off_for_target_name(
+        &self,
+        program: &mut BpfProgram,
+        registry: &KinsnRegistry,
+        target_name: &str,
+    ) -> i16 {
+        if let Some(btf_fd) = registry.btf_fd_for_target_name(target_name) {
+            return ensure_required_btf_fd_slot(program, btf_fd);
+        }
+        registry.call_off_for_target_name(target_name)
+    }
+}
+
+/// Offline resolver: CALL.off comes from precomputed target metadata.
+#[derive(Clone, Debug, Default)]
+pub struct StaticKinsnCallResolver;
+
+impl KinsnCallResolver for StaticKinsnCallResolver {
+    fn call_off_for_target_name(
+        &self,
+        _program: &mut BpfProgram,
+        registry: &KinsnRegistry,
+        target_name: &str,
+    ) -> i16 {
+        registry.call_off_for_target_name(target_name)
+    }
+}
+
+fn ensure_required_btf_fd_slot(program: &mut BpfProgram, btf_fd: i32) -> i16 {
+    if let Some(idx) = program.required_btf_fds.iter().position(|&fd| fd == btf_fd) {
+        return idx as i16 + 1;
+    }
+
+    program.required_btf_fds.push(btf_fd);
+    program.required_btf_fds.len() as i16
 }
 
 /// CPU platform capabilities.
@@ -1040,10 +1309,25 @@ fn validate_policy_pass_names(
 
 // ── Helper: default PassContext for testing ──────────────────────────
 
+impl Default for PassContext {
+    fn default() -> Self {
+        Self {
+            kinsn_registry: KinsnRegistry::default(),
+            kinsn_call_resolver: Arc::new(FdArrayKinsnCallResolver),
+            platform: PlatformCapabilities::default(),
+            policy: PolicyConfig {
+                enabled_passes: default_enabled_passes(),
+                ..PolicyConfig::default()
+            },
+            prog_type: 0,
+        }
+    }
+}
+
 impl PassContext {
     /// Create a minimal PassContext suitable for testing.
     /// All kinsn targets unavailable (btf_id = -1), no special CPU features.
-    #[cfg(test)]
+    #[cfg_attr(not(test), allow(dead_code))]
     pub fn test_default() -> Self {
         Self {
             kinsn_registry: KinsnRegistry {
@@ -1056,8 +1340,10 @@ impl PassContext {
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,
                 target_btf_fds: HashMap::new(),
+                target_call_offsets: HashMap::new(),
                 target_supported_encodings: HashMap::new(),
             },
+            kinsn_call_resolver: Arc::new(FdArrayKinsnCallResolver),
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig {
                 enabled_passes: default_enabled_passes(),

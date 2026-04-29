@@ -6,7 +6,6 @@ use std::fmt::Write as _;
 use std::sync::OnceLock;
 
 use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
-use crate::bpf;
 use crate::insn::*;
 use crate::pass::*;
 use crate::verifier_log::VerifierInsn;
@@ -233,14 +232,16 @@ fn try_extract_constant_key_from_map_value(
         .get(&old_fd)
         .copied()
         .ok_or_else(|| format!("no map_id binding for pseudo-map-value old_fd {}", old_fd))?;
-    let (source_info, source_frozen) =
-        bpf::bpf_map_get_info_by_id(source_map_id).map_err(|err| {
+    let source_info = program
+        .map_info_provider
+        .map_info(program, source_map_id)?
+        .ok_or_else(|| {
             format!(
-                "failed to resolve pseudo-map-value source map {}: {err:#}",
+                "failed to resolve pseudo-map-value source map {}",
                 source_map_id
             )
         })?;
-    if !source_frozen {
+    if !source_info.frozen {
         return Err(format!(
             "pseudo-map-value source map {} is mutable",
             source_map_id
@@ -248,21 +249,24 @@ fn try_extract_constant_key_from_map_value(
     }
 
     let source_key = vec![0u8; source_info.key_size as usize];
-    let source_value_size = bpf::bpf_map_lookup_value_size(&source_info).map_err(|err| {
-        format!(
-            "failed to determine pseudo-map-value source map {} lookup size: {err:#}",
-            source_map_id
-        )
-    })?;
-    let source_value =
-        bpf::bpf_map_lookup_elem_by_id(source_map_id, &source_key, source_value_size).map_err(
-            |err| {
-                format!(
-                    "failed to read pseudo-map-value source map {}: {err:#}",
-                    source_map_id
-                )
-            },
-        )?;
+    let source_value_size = program
+        .map_value_provider
+        .lookup_value_size(program, &source_info)
+        .map_err(|err| {
+            format!(
+                "failed to determine pseudo-map-value source map {} lookup size: {err}",
+                source_map_id
+            )
+        })?;
+    let source_value = program
+        .map_value_provider
+        .lookup_elem(program, source_map_id, &source_key, source_value_size)
+        .map_err(|err| {
+            format!(
+                "failed to read pseudo-map-value source map {}: {err}",
+                source_map_id
+            )
+        })?;
     let value_off = value_off as usize;
     let key_end = value_off
         .checked_add(info.key_size as usize)
@@ -654,7 +658,9 @@ fn verifier_guided_stack_store_value(
     let mut key_bytes = [0u8; 8];
     key_bytes[..key_width as usize].copy_from_slice(&full_bytes[subrange_start..subrange_end]);
 
-    let source_imm_pc = constant_stack_store_source_pc(insns, pc, bounds).ok().flatten();
+    let source_imm_pc = constant_stack_store_source_pc(insns, pc, bounds)
+        .ok()
+        .flatten();
 
     Some((state.pc, source_imm_pc, u64::from_le_bytes(key_bytes)))
 }
@@ -1252,12 +1258,20 @@ fn build_site_rewrite(
     let remove_lookup_pattern =
         site_can_attempt_lookup_pattern_removal(program, uses, info, null_check_pc);
     let encoded_key = encode_key_bytes(&key.bytes, info.key_size as usize);
-    let lookup_value_size = bpf::bpf_map_lookup_value_size_by_id(info.map_id)?;
+    let lookup_value_size = program
+        .map_value_provider
+        .lookup_value_size(program, info)
+        .map_err(anyhow::Error::msg)?;
     log_map_inline_debug(&format!(
         "site pc={} reading map_id={} key={:?} lookup_value_size={}",
         site.call_pc, info.map_id, encoded_key, lookup_value_size
     ));
-    let value = match bpf::bpf_map_lookup_elem_by_id(info.map_id, &encoded_key, lookup_value_size) {
+    let value = match program.map_value_provider.lookup_elem(
+        program,
+        info.map_id,
+        &encoded_key,
+        lookup_value_size,
+    ) {
         Ok(value) => {
             log_map_inline_debug(&format!(
                 "site pc={} INLINE value={:?}",
@@ -1267,13 +1281,13 @@ fn build_site_rewrite(
         }
         Err(err) => {
             log_map_inline_debug(&format!(
-                "site at PC={}: bpf_map_lookup_elem_by_id(map_id={}, key={}) failed: {:#}",
+                "site at PC={}: map lookup(map_id={}, key={}) failed: {}",
                 site.call_pc,
                 info.map_id,
                 format_bytes_preview(&encoded_key),
                 err
             ));
-            return Err(err);
+            return Err(anyhow::Error::msg(err));
         }
     };
     let inline_value =
@@ -1482,14 +1496,26 @@ fn resolve_frozen_map_value(
         let Some(&map_id) = program.map_fd_bindings.get(&old_fd) else {
             return Ok(None);
         };
-        let (info, frozen) = bpf::bpf_map_get_info_by_id(map_id)?;
-        if !frozen {
+        let Some(info) = program
+            .map_info_provider
+            .map_info(program, map_id)
+            .map_err(anyhow::Error::msg)?
+        else {
+            return Ok(None);
+        };
+        if !info.frozen {
             return Ok(None);
         }
 
         let key = vec![0u8; info.key_size as usize];
-        let value_size = bpf::bpf_map_lookup_value_size(&info)?;
-        let value = bpf::bpf_map_lookup_elem_by_id(map_id, &key, value_size)?;
+        let value_size = program
+            .map_value_provider
+            .lookup_value_size(program, &info)
+            .map_err(anyhow::Error::msg)?;
+        let value = program
+            .map_value_provider
+            .lookup_elem(program, map_id, &key, value_size)
+            .map_err(anyhow::Error::msg)?;
         Ok(Some(FrozenMapValue { map_id, value }))
     })();
 
@@ -2508,7 +2534,12 @@ fn starts_next_lookup_setup(insn: &BpfInsn) -> bool {
 
 fn alias_copy(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> Option<(u8, i16)> {
     (insn.code == (BPF_ALU64 | BPF_MOV | BPF_X))
-        .then(|| alias_regs.get(&insn.src_reg()).copied().map(|off| (insn.dst_reg(), off)))
+        .then(|| {
+            alias_regs
+                .get(&insn.src_reg())
+                .copied()
+                .map(|off| (insn.dst_reg(), off))
+        })
         .flatten()
 }
 
@@ -2705,7 +2736,10 @@ fn mark_safe_scalar_reg(
 }
 
 fn insn_uses_any_alias(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> bool {
-    alias_regs.keys().copied().any(|reg| insn_uses_reg(insn, reg))
+    alias_regs
+        .keys()
+        .copied()
+        .any(|reg| insn_uses_reg(insn, reg))
 }
 
 fn kill_defined_alias_regs(alias_regs: &mut HashMap<u8, i16>, insn: &BpfInsn) {

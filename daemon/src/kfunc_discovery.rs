@@ -320,6 +320,7 @@ pub fn discover_kinsns() -> DiscoveryResult {
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,
         target_btf_fds: HashMap::new(),
+        target_call_offsets: HashMap::new(),
         target_supported_encodings: HashMap::new(),
     };
     let mut btf_fds: Vec<OwnedFd> = Vec::new();

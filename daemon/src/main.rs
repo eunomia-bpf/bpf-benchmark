@@ -4,21 +4,28 @@
 //! Scans live kernel BPF programs for optimization sites and can apply
 //! bytecode rewrites via BPF_PROG_REJIT.
 
-mod analysis;
 mod bpf;
 mod commands;
-#[cfg(test)]
-mod elf_parser;
-mod insn;
 mod invalidation;
 mod kfunc_discovery;
-mod pass;
-mod passes;
 mod profiler;
 mod server;
-#[cfg(test)]
-mod test_utils;
-mod verifier_log;
+
+mod analysis {
+    pub use bpfopt_core::analysis::*;
+}
+mod insn {
+    pub use bpfopt_core::insn::*;
+}
+mod pass {
+    pub use bpfopt_core::pass::*;
+}
+mod passes {
+    pub use bpfopt_core::passes::*;
+}
+mod verifier_log {
+    pub use bpfopt_core::verifier_log::*;
+}
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -61,6 +68,7 @@ fn main() -> Result<()> {
     );
     let ctx = pass::PassContext {
         kinsn_registry: discovery.registry,
+        kinsn_call_resolver: std::sync::Arc::new(pass::FdArrayKinsnCallResolver),
         platform,
         policy: pass::PolicyConfig {
             enabled_passes: pass::default_enabled_passes(),

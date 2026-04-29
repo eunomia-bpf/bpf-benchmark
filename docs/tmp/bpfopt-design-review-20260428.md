@@ -2,6 +2,8 @@
 
 ## Executive summary
 
+**Superseded correction (2026-04-28 later update):** the cleanup direction described below was reversed. The correct architecture is now `bpfopt-core` as the single shared pass/IR/analysis library, daemon depending on `bpfopt-core`, and daemon retaining only runtime-specific serve/syscall/verify/REJIT/profiler/invalidation code. `08f8a7cf` was reverted in the later refactor that restored `bpfopt/` and migrated daemon's newer pass implementations into `bpfopt-core`.
+
 `daemon/` is the real implementation path and matches the current project design much better than the old `bpfopt/`: `bpfrejit-daemon serve` is the only runtime entry, it discovers live programs, runs the pass pipeline, performs per-pass `BPF_PROG_LOAD` verification, rolls rejected passes back, and finally calls `BPF_PROG_REJIT`.
 
 At the start of this review, `bpfopt/` existed and was not a shared library used by daemon. It was a copied fork of the same pass tree with an offline CLI wrapper. The two copies had already diverged in API and behavior, and `bpfopt-core` tests were broken.

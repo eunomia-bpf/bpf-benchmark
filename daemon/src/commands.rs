@@ -234,6 +234,50 @@ pub(crate) enum OptimizeMode {
 
 pub(crate) type SharedInvalidationTracker = Arc<Mutex<MapInvalidationTracker<BpfMapValueReader>>>;
 
+#[derive(Clone, Debug)]
+struct LiveMapProvider;
+
+impl pass::MapInfoProvider for LiveMapProvider {
+    fn map_info(
+        &self,
+        _program: &pass::BpfProgram,
+        map_id: u32,
+    ) -> std::result::Result<Option<crate::analysis::MapInfo>, String> {
+        let (info, frozen) = bpf::bpf_map_get_info_by_id(map_id)
+            .map_err(|err| format!("resolve live map info for map {map_id}: {err:#}"))?;
+        Ok(Some(crate::analysis::MapInfo {
+            map_type: info.map_type,
+            key_size: info.key_size,
+            value_size: info.value_size,
+            max_entries: info.max_entries,
+            frozen,
+            map_id: info.id,
+        }))
+    }
+}
+
+impl pass::MapValueProvider for LiveMapProvider {
+    fn lookup_value_size(
+        &self,
+        _program: &pass::BpfProgram,
+        info: &crate::analysis::MapInfo,
+    ) -> std::result::Result<usize, String> {
+        bpf::bpf_map_lookup_value_size_by_id(info.map_id)
+            .map_err(|err| format!("determine live map {} lookup size: {err:#}", info.map_id))
+    }
+
+    fn lookup_elem(
+        &self,
+        _program: &pass::BpfProgram,
+        map_id: u32,
+        key: &[u8],
+        value_size: usize,
+    ) -> std::result::Result<Vec<u8>, String> {
+        bpf::bpf_map_lookup_elem_by_id(map_id, key, value_size)
+            .map_err(|err| format!("lookup live map {} key {:?}: {err:#}", map_id, key))
+    }
+}
+
 pub(crate) fn new_invalidation_tracker() -> SharedInvalidationTracker {
     Arc::new(Mutex::new(MapInvalidationTracker::new(BpfMapValueReader)))
 }
@@ -523,6 +567,8 @@ pub(crate) fn try_apply_one(
     };
     let mut total_rejit_ns: u64 = 0;
     let mut program = pass::BpfProgram::new(orig_insns.clone());
+    let live_map_provider = Arc::new(LiveMapProvider);
+    program.set_map_providers(live_map_provider.clone(), live_map_provider);
     program.set_map_ids(map_ids.clone());
     program.verifier_states = original_verifier_states.clone();
 
