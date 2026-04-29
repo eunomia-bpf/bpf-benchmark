@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! Daemon-owned pass execution wrappers.
 //!
-//! bpfopt-core runs pure bytecode transforms. The daemon wraps that runner with
+//! bpfopt runs pure bytecode transforms. The daemon wraps that runner with
 //! live-kernel concerns: kinsn fd_array transport, per-pass verifier dry-runs,
 //! verifier-state refresh, and rollback on rejected transforms.
 

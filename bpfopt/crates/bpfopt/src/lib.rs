@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-//! bpfopt-core — BPF bytecode optimization passes.
+//! bpfopt — BPF bytecode optimizer library.
 //!
-//! This is the core library for BPF program transformations.
+//! This is the library for BPF program transformations.
 //! It is workspace-internal and not published as a public crate.
 //! Zero kernel dependency — pure bytecode in, bytecode out.
 

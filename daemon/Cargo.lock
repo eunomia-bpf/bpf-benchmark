@@ -59,10 +59,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
-name = "bpfopt-core"
+name = "bpfopt"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "clap",
  "goblin",
  "serde",
  "serde_json",
@@ -73,7 +74,7 @@ name = "bpfrejit-daemon"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "bpfopt-core",
+ "bpfopt",
  "clap",
  "goblin",
  "libc",

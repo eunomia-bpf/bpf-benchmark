@@ -10,7 +10,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = "1"
-bpfopt-core = { path = "../bpfopt/crates/bpfopt-core" }
+bpfopt = { path = "../bpfopt/crates/bpfopt" }
 clap = { version = "4", features = ["derive", "env"] }
 goblin = "0.10.5"
 libc = "0.2"

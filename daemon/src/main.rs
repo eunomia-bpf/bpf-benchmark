@@ -13,19 +13,19 @@ mod profiler;
 mod server;
 
 mod analysis {
-    pub use bpfopt_core::analysis::*;
+    pub use bpfopt::analysis::*;
 }
 mod insn {
-    pub use bpfopt_core::insn::*;
+    pub use bpfopt::insn::*;
 }
 mod pass {
-    pub use bpfopt_core::pass::*;
+    pub use bpfopt::pass::*;
 }
 mod passes {
-    pub use bpfopt_core::passes::*;
+    pub use bpfopt::passes::*;
 }
 mod verifier_log {
-    pub use bpfopt_core::verifier_log::*;
+    pub use bpfopt::verifier_log::*;
 }
 
 use anyhow::Result;
