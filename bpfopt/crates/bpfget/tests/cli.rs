@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 
 use std::fs;
-use std::path::PathBuf;
+use std::io::ErrorKind;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
@@ -25,6 +26,24 @@ fn temp_path(name: &str) -> PathBuf {
     std::env::temp_dir().join(format!("bpfget-cli-{}-{id}-{name}", std::process::id()))
 }
 
+fn remove_file_if_exists(path: impl AsRef<Path>) {
+    let path = path.as_ref();
+    match fs::remove_file(path) {
+        Ok(()) => {}
+        Err(err) if err.kind() == ErrorKind::NotFound => {}
+        Err(err) => panic!("remove {}: {err}", path.display()),
+    }
+}
+
+fn remove_dir_if_exists(path: impl AsRef<Path>) {
+    let path = path.as_ref();
+    match fs::remove_dir_all(path) {
+        Ok(()) => {}
+        Err(err) if err.kind() == ErrorKind::NotFound => {}
+        Err(err) => panic!("remove {}: {err}", path.display()),
+    }
+}
+
 fn unsupported_environment(stderr: &[u8]) -> bool {
     let stderr = String::from_utf8_lossy(stderr);
     [
@@ -37,9 +56,11 @@ fn unsupported_environment(stderr: &[u8]) -> bool {
     .any(|needle| stderr.contains(needle))
 }
 
-fn target_btf_permission_blocked(stderr: &str) -> bool {
-    stderr.contains("kinsn BTF probing unavailable")
+fn target_btf_probe_unavailable(stderr: &str) -> bool {
+    stderr.contains("failed to probe target kinsn BTF")
         && (stderr.contains("Operation not permitted") || stderr.contains("Permission denied"))
+        || stderr.contains("target kinsn BTF probing found no kinsn functions")
+        || stderr.contains("no kernel BTF objects are visible")
 }
 
 fn target_stdout_json(output: &std::process::Output) -> serde_json::Value {
@@ -59,6 +80,13 @@ fn expected_kinsn_names() -> Vec<String> {
             .map(|name| (*name).to_string())
             .collect(),
     }
+}
+
+fn u64_to_i64(id: u64) -> Option<i64> {
+    let Ok(id) = i64::try_from(id) else {
+        return None;
+    };
+    Some(id)
 }
 
 #[test]
@@ -131,8 +159,8 @@ fn info_missing_program_exits_failure() {
 #[test]
 fn full_missing_outdir_exits_failure_without_creating_it() {
     let outdir = temp_path("missing-outdir");
-    fs::remove_dir_all(&outdir).ok();
-    fs::remove_file(&outdir).ok();
+    remove_dir_if_exists(&outdir);
+    remove_file_if_exists(&outdir);
     let outdir_arg = outdir.to_string_lossy().to_string();
 
     let output = Command::new(bpfget_bin())
@@ -158,11 +186,13 @@ fn target_stdout_contains_arch_and_features() {
         .output()
         .expect("run bpfget --target");
 
-    assert!(
-        output.status.success(),
-        "stderr={}",
-        String::from_utf8_lossy(&output.stderr)
-    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    if !output.status.success() && target_btf_probe_unavailable(&stderr) {
+        eprintln!("skipping bpfget --target success test: target BTF probing unavailable");
+        return;
+    }
+
+    assert!(output.status.success(), "stderr={stderr}");
     let value: serde_json::Value =
         serde_json::from_slice(&output.stdout).expect("json stdout from bpfget --target");
     assert!(
@@ -186,34 +216,20 @@ fn target_stdout_contains_arch_and_features() {
 }
 
 #[test]
-fn test_target_empty_kinsns_in_unprivileged_env() {
+fn test_target_btf_probe_failure_exits_nonzero() {
     let output = Command::new(bpfget_bin())
         .arg("--target")
         .output()
         .expect("run bpfget --target");
 
-    assert!(
-        output.status.success(),
-        "stderr={}",
-        String::from_utf8_lossy(&output.stderr)
-    );
     let stderr = String::from_utf8_lossy(&output.stderr);
-    if !target_btf_permission_blocked(&stderr) {
-        eprintln!("skipping unprivileged target test: BTF probing is accessible");
+    if output.status.success() {
+        eprintln!("skipping target BTF failure test: BTF probing is accessible");
         return;
     }
 
-    let value = target_stdout_json(&output);
-    assert!(
-        value["kinsns"]
-            .as_object()
-            .is_some_and(serde_json::Map::is_empty),
-        "expected empty kinsns after permission fallback: {value}"
-    );
-    assert!(
-        stderr.contains("no kinsn BTF functions found; target.json uses empty kinsns"),
-        "stderr={stderr}"
-    );
+    assert!(target_btf_probe_unavailable(&stderr), "stderr={stderr}");
+    assert!(output.stdout.is_empty());
 }
 
 #[test]
@@ -246,11 +262,7 @@ fn test_target_finds_kinsn_when_loaded() {
             .unwrap_or_else(|| panic!("target JSON missing loaded kinsn {name}: {value}"));
         let btf_func_id = entry["btf_func_id"]
             .as_i64()
-            .or_else(|| {
-                entry["btf_func_id"]
-                    .as_u64()
-                    .and_then(|id| i64::try_from(id).ok())
-            })
+            .or_else(|| entry["btf_func_id"].as_u64().and_then(u64_to_i64))
             .unwrap_or_else(|| panic!("kinsn {name} missing numeric btf_func_id: {entry}"));
         assert!(btf_func_id >= 0, "kinsn {name} has negative id: {entry}");
     }
@@ -263,7 +275,7 @@ fn test_target_finds_kinsn_when_loaded() {
 #[test]
 fn target_output_writes_json_file() {
     let output_path = temp_path("target.json");
-    fs::remove_file(&output_path).ok();
+    remove_file_if_exists(&output_path);
     let output_arg = output_path.to_string_lossy().to_string();
 
     let output = Command::new(bpfget_bin())
@@ -271,14 +283,17 @@ fn target_output_writes_json_file() {
         .output()
         .expect("run bpfget --target --output");
 
-    assert!(
-        output.status.success(),
-        "stderr={}",
-        String::from_utf8_lossy(&output.stderr)
-    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    if !output.status.success() && target_btf_probe_unavailable(&stderr) {
+        eprintln!("skipping bpfget --target --output success test: target BTF probing unavailable");
+        remove_file_if_exists(&output_path);
+        return;
+    }
+
+    assert!(output.status.success(), "stderr={stderr}");
     assert!(output.stdout.is_empty());
     let bytes = fs::read(&output_path).expect("read target output file");
-    fs::remove_file(output_path).ok();
+    remove_file_if_exists(output_path);
 
     let value: serde_json::Value =
         serde_json::from_slice(&bytes).expect("json file from bpfget --target --output");

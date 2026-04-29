@@ -310,7 +310,8 @@ pub fn parse_bpf_object<P: AsRef<Path>>(path: P) -> Result<ElfBpfObject> {
 
     let maps_section_index = find_section_index(&elf, ".maps");
     let map_symbols = collect_map_symbols(&elf, maps_section_index);
-    let raw_maps = collect_raw_map_metadata(&data, maps_section_index, &map_symbols);
+    let raw_maps = collect_raw_map_metadata(&data, &elf, maps_section_index, &map_symbols)
+        .with_context(|| format!("failed to collect raw map metadata for {}", path.display()))?;
     let btf_maps = collect_btf_map_metadata(&data, &elf)
         .with_context(|| format!("failed to collect BTF map metadata for {}", path.display()))?;
     let mut maps = merge_map_metadata(&map_symbols, &raw_maps, &btf_maps);
@@ -569,39 +570,46 @@ fn is_global_data_section_name(name: &str) -> bool {
 
 fn collect_raw_map_metadata(
     data: &[u8],
+    elf: &Elf<'_>,
     maps_section_index: Option<usize>,
     map_symbols: &[ElfMapSymbol],
-) -> Vec<RawMapMetadata> {
+) -> Result<Vec<RawMapMetadata>> {
     let Some(maps_section_index) = maps_section_index else {
-        return Vec::new();
+        return Ok(Vec::new());
     };
 
     let mut metadata = Vec::with_capacity(map_symbols.len());
-    let Some(section) = Elf::parse(data)
-        .ok()
-        .and_then(|elf| elf.section_headers.get(maps_section_index).cloned())
-    else {
-        return Vec::new();
-    };
-    let Ok(section_bytes) = section_bytes(data, &section) else {
-        return Vec::new();
-    };
+    let section = elf
+        .section_headers
+        .get(maps_section_index)
+        .context(".maps section index is outside section header table")?;
+    let section_bytes = section_bytes(data, section)?;
 
     for symbol in map_symbols {
+        let end = symbol
+            .section_offset
+            .checked_add(symbol.symbol_size)
+            .with_context(|| format!("raw map {} section range overflows", symbol.name))?;
         let raw = section_bytes
-            .get(symbol.section_offset..symbol.section_offset.saturating_add(symbol.symbol_size))
-            .unwrap_or(&[]);
+            .get(symbol.section_offset..end)
+            .with_context(|| {
+                format!(
+                    "raw map {} range {}..{} is outside .maps",
+                    symbol.name, symbol.section_offset, end
+                )
+            })?;
         metadata.push(parse_raw_map_definition(raw));
     }
 
-    metadata
+    Ok(metadata)
 }
 
 fn parse_raw_map_definition(bytes: &[u8]) -> RawMapMetadata {
     let read_u32 = |offset: usize| -> Option<u32> {
         let end = offset.checked_add(4)?;
         let bytes = bytes.get(offset..end)?;
-        Some(u32::from_le_bytes(bytes.try_into().ok()?))
+        let bytes: [u8; 4] = bytes.try_into().expect("slice length checked above");
+        Some(u32::from_le_bytes(bytes))
     };
 
     let map_type = read_u32(0).filter(|value| *value != 0);
@@ -828,16 +836,16 @@ fn parse_btf(bytes: &[u8]) -> Result<ParsedBtf> {
             }
             5 => {
                 for _ in 0..vlen {
-                    let _ = read_u32(type_bytes, &mut offset)?;
-                    let _ = read_u32(type_bytes, &mut offset)?;
-                    let _ = read_u32(type_bytes, &mut offset)?;
+                    let _name_off = read_u32(type_bytes, &mut offset)?;
+                    let _type_id = read_u32(type_bytes, &mut offset)?;
+                    let _bit_offset = read_u32(type_bytes, &mut offset)?;
                 }
                 BtfType::Union { size: size_or_type }
             }
             6 => {
                 for _ in 0..vlen {
-                    let _ = read_u32(type_bytes, &mut offset)?;
-                    let _ = read_u32(type_bytes, &mut offset)?;
+                    let _name_off = read_u32(type_bytes, &mut offset)?;
+                    let _value = read_u32(type_bytes, &mut offset)?;
                 }
                 BtfType::Enum { size: size_or_type }
             }
@@ -857,8 +865,8 @@ fn parse_btf(bytes: &[u8]) -> Result<ParsedBtf> {
             12 => BtfType::Func,
             13 => {
                 for _ in 0..vlen {
-                    let _ = read_u32(type_bytes, &mut offset)?;
-                    let _ = read_u32(type_bytes, &mut offset)?;
+                    let _name_off = read_u32(type_bytes, &mut offset)?;
+                    let _type_id = read_u32(type_bytes, &mut offset)?;
                 }
                 BtfType::FuncProto
             }
@@ -892,9 +900,9 @@ fn parse_btf(bytes: &[u8]) -> Result<ParsedBtf> {
             },
             19 => {
                 for _ in 0..vlen {
-                    let _ = read_u32(type_bytes, &mut offset)?;
-                    let _ = read_u32(type_bytes, &mut offset)?;
-                    let _ = read_u32(type_bytes, &mut offset)?;
+                    let _name_off = read_u32(type_bytes, &mut offset)?;
+                    let _value_lo32 = read_u32(type_bytes, &mut offset)?;
+                    let _value_hi32 = read_u32(type_bytes, &mut offset)?;
                 }
                 BtfType::Enum64 { size: size_or_type }
             }
@@ -916,10 +924,16 @@ fn read_u32(bytes: &[u8], offset: &mut usize) -> Result<u32> {
 }
 
 fn btf_string(strings: &[u8], name_off: u32) -> Option<&str> {
-    let start = usize::try_from(name_off).ok()?;
+    let start = match usize::try_from(name_off) {
+        Ok(start) => start,
+        Err(_) => return None,
+    };
     let tail = strings.get(start..)?;
     let end = tail.iter().position(|byte| *byte == 0)?;
-    std::str::from_utf8(&tail[..end]).ok()
+    let Ok(name) = std::str::from_utf8(&tail[..end]) else {
+        return None;
+    };
+    Some(name)
 }
 
 fn btf_name_or_anonymous(strings: &[u8], name_off: u32) -> String {
@@ -934,7 +948,10 @@ fn find_btf_string_offset(strings: &[u8], needle: &str) -> Option<u32> {
     while offset < strings.len() {
         let end = offset + strings[offset..].iter().position(|byte| *byte == 0)?;
         if strings.get(offset..end)? == needle.as_bytes() {
-            return u32::try_from(offset).ok();
+            let Ok(offset) = u32::try_from(offset) else {
+                return None;
+            };
+            return Some(offset);
         }
         offset = end.saturating_add(1);
     }
@@ -963,12 +980,15 @@ fn merge_map_metadata(
         .enumerate()
         .map(|(index, symbol)| {
             // Some objects provide only BTF-backed map metadata, so a missing raw entry is valid.
-            let raw = raw_maps.get(index).cloned().unwrap_or_default();
+            let raw = raw_maps
+                .get(index)
+                .cloned()
+                .map_or_else(RawMapMetadata::default, std::convert::identity);
             // Likewise, not every symbol has a matching named BTF record.
             let btf = btf_by_name
                 .remove(&symbol.name)
                 .or_else(|| unnamed_btf.pop_front())
-                .unwrap_or_default();
+                .map_or_else(BtfMapMetadata::default, std::convert::identity);
 
             ElfMapMetadata {
                 index,

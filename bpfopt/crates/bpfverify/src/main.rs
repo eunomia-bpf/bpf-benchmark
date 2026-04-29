@@ -393,7 +393,7 @@ fn required_btf_fds(entries: &[FdArrayEntry]) -> Result<Vec<i32>> {
             .name
             .as_deref()
             .map(|name| format!(" ({name})"))
-            .unwrap_or_default();
+            .unwrap_or_else(String::new);
         if entry.btf_id.is_some() || entry.btf_obj_id.is_some() || entry.btf_module.is_some() {
             bail!(
                 "fd_array entry {index}{label} uses btf_id/btf_obj_id/btf_module, but bpfverify only supports inherited btf_fd"

@@ -303,15 +303,19 @@ fn list_programs(json: bool, output: Option<&Path>) -> Result<()> {
 }
 
 fn write_target_json(output: Option<&Path>, kinsn_specs: &[String]) -> Result<()> {
-    let (mut kinsns, warnings) = probe_target_kinsns();
-    for (name, spec) in parse_kinsns(kinsn_specs)? {
-        kinsns.insert(name, spec);
-    }
-    for warning in warnings {
-        eprintln!("warning: {warning}");
-    }
+    let kinsns = if kinsn_specs.is_empty() {
+        let kinsns = probe_target_kinsns().with_context(|| {
+            "failed to probe target kinsn BTF; --target requires readable kernel BTF or explicit --kinsns"
+        })?;
+        if kinsns.is_empty() {
+            bail!("target kinsn BTF probing found no kinsn functions; target.json would be incomplete");
+        }
+        kinsns
+    } else {
+        parse_kinsns(kinsn_specs)?
+    };
     if kinsns.is_empty() {
-        eprintln!("warning: no kinsn BTF functions found; target.json uses empty kinsns");
+        bail!("target.json requires at least one kinsn descriptor");
     }
 
     let target = TargetJson {
@@ -322,30 +326,20 @@ fn write_target_json(output: Option<&Path>, kinsn_specs: &[String]) -> Result<()
     write_json(output, &target)
 }
 
-fn probe_target_kinsns() -> (BTreeMap<String, TargetKinsnJson>, Vec<String>) {
+fn probe_target_kinsns() -> Result<BTreeMap<String, TargetKinsnJson>> {
     let mut found = BTreeMap::new();
-    let mut warnings = Vec::new();
     let mut start_id = 0u32;
     let mut saw_btf = false;
-    let mut loaded_btf = false;
-    let mut first_load_error = None;
-    let vmlinux_btf = match kernel_sys::KernelBtf::load_vmlinux() {
-        Ok(btf) => Some(btf),
-        Err(err) => {
-            warnings.push(format!(
-                "vmlinux BTF unavailable for split module probing: {err:#}"
-            ));
-            None
-        }
-    };
+    let vmlinux_btf =
+        kernel_sys::KernelBtf::load_vmlinux().context("load vmlinux BTF for split BTF probing")?;
 
     loop {
         let btf_id = match kernel_sys::btf_get_next_id(start_id) {
             Ok(Some(id)) => id,
             Ok(None) => break,
             Err(err) => {
-                warnings.push(format!("kinsn BTF probing unavailable: {err:#}"));
-                return (found, warnings);
+                return Err(err)
+                    .with_context(|| format!("enumerate BTF objects after id {start_id}"));
             }
         };
         saw_btf = true;
@@ -353,29 +347,14 @@ fn probe_target_kinsns() -> (BTreeMap<String, TargetKinsnJson>, Vec<String>) {
 
         match kernel_sys::KernelBtf::load_from_kernel_by_id(btf_id) {
             Ok(btf) => {
-                loaded_btf = true;
-                probe_kinsns_in_btf(btf_id, &btf, &mut found, &mut warnings);
+                probe_kinsns_in_btf(btf_id, &btf, &mut found)?;
             }
             Err(err) => {
-                if first_load_error.is_none() {
-                    first_load_error = Some(format!("BTF id {btf_id}: {err:#}"));
-                }
-            }
-        }
-
-        if found.len() != KINSN_PROBE_TARGETS.len() {
-            if let Some(base) = &vmlinux_btf {
-                match kernel_sys::KernelBtf::load_from_kernel_by_id_split(btf_id, base) {
-                    Ok(btf) => {
-                        loaded_btf = true;
-                        probe_kinsns_in_btf(btf_id, &btf, &mut found, &mut warnings);
-                    }
-                    Err(err) => {
-                        if first_load_error.is_none() {
-                            first_load_error = Some(format!("split BTF id {btf_id}: {err:#}"));
-                        }
-                    }
-                }
+                let btf = kernel_sys::KernelBtf::load_from_kernel_by_id_split(btf_id, &vmlinux_btf)
+                    .with_context(|| {
+                        format!("load split BTF id {btf_id}; direct BTF load failed: {err:#}")
+                    })?;
+                probe_kinsns_in_btf(btf_id, &btf, &mut found)?;
             }
         }
 
@@ -385,50 +364,40 @@ fn probe_target_kinsns() -> (BTreeMap<String, TargetKinsnJson>, Vec<String>) {
     }
 
     if !saw_btf {
-        warnings.push("no kernel BTF objects are visible".to_string());
-    } else if !loaded_btf {
-        let detail = first_load_error.unwrap_or_else(|| "unknown error".to_string());
-        warnings.push(format!("unable to load any kernel BTF object: {detail}"));
+        bail!("no kernel BTF objects are visible");
     }
 
-    (found, warnings)
+    Ok(found)
 }
 
 fn probe_kinsns_in_btf(
     btf_id: u32,
     btf: &kernel_sys::KernelBtf,
     found: &mut BTreeMap<String, TargetKinsnJson>,
-    warnings: &mut Vec<String>,
-) {
+) -> Result<()> {
     for target in KINSN_PROBE_TARGETS {
         if found.contains_key(target.json_name) {
             continue;
         }
         for &probe_name in target.probe_names {
-            match btf.find_func_by_name(probe_name) {
-                Ok(Some(btf_func_id)) => {
-                    let Ok(btf_func_id) = i32::try_from(btf_func_id) else {
-                        warnings.push(format!(
-                            "BTF id {btf_id} function {probe_name} type id {btf_func_id} exceeds target.json i32 range"
-                        ));
-                        break;
-                    };
-                    found.insert(
-                        target.json_name.to_string(),
-                        TargetKinsnJson { btf_func_id },
+            if let Some(btf_func_id) = btf
+                .find_func_by_name(probe_name)
+                .with_context(|| format!("inspect BTF id {btf_id} for {probe_name}"))?
+            {
+                let Ok(btf_func_id) = i32::try_from(btf_func_id) else {
+                    bail!(
+                        "BTF id {btf_id} function {probe_name} type id {btf_func_id} exceeds target.json i32 range"
                     );
-                    break;
-                }
-                Ok(None) => {}
-                Err(err) => {
-                    warnings.push(format!(
-                        "failed to inspect BTF id {btf_id} for {probe_name}: {err:#}"
-                    ));
-                    break;
-                }
+                };
+                found.insert(
+                    target.json_name.to_string(),
+                    TargetKinsnJson { btf_func_id },
+                );
+                break;
             }
         }
     }
+    Ok(())
 }
 
 fn parse_kinsns(specs: &[String]) -> Result<BTreeMap<String, TargetKinsnJson>> {
@@ -668,13 +637,27 @@ fn write_full_files_atomic(outdir: &Path, entries: &[(&str, &[u8])]) -> Result<(
         Ok(())
     })();
 
-    if result.is_err() {
+    if let Err(err) = result {
+        let mut cleanup_failures = Vec::new();
         for tmp_path in &tmp_paths {
-            let _ = fs::remove_file(tmp_path);
+            match fs::remove_file(tmp_path) {
+                Ok(()) => {}
+                Err(remove_err) if remove_err.kind() == io::ErrorKind::NotFound => {}
+                Err(remove_err) => {
+                    cleanup_failures.push(format!("{}: {remove_err}", tmp_path.display()));
+                }
+            }
         }
+        if cleanup_failures.is_empty() {
+            return Err(err);
+        }
+        return Err(err.context(format!(
+            "also failed to remove temporary file(s): {}",
+            cleanup_failures.join(", ")
+        )));
     }
 
-    result
+    Ok(())
 }
 
 fn full_tmp_path(outdir: &Path, name: &str) -> PathBuf {

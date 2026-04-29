@@ -2,10 +2,25 @@ use std::process::Command;
 
 fn permission_or_kernel_unavailable(stderr: &[u8]) -> bool {
     let stderr = String::from_utf8_lossy(stderr);
-    if stderr.contains("perf_event_open") || stderr.contains("PMU branch counters") {
-        return false;
-    }
+    stderr.contains("perf_event_open")
+        || stderr.contains("PMU branch counters")
+        || stderr.contains("open branch-instructions PMU counter")
+        || stderr.contains("open branch-misses PMU counter")
+        || stderr.contains("Operation not permitted")
+        || stderr.contains("Permission denied")
+        || stderr.contains("BPF_ENABLE_STATS")
+}
 
+fn pmu_unavailable(stderr: &[u8]) -> bool {
+    let stderr = String::from_utf8_lossy(stderr);
+    stderr.contains("perf_event_open")
+        || stderr.contains("PMU branch counters")
+        || stderr.contains("open branch-instructions PMU counter")
+        || stderr.contains("open branch-misses PMU counter")
+}
+
+fn kernel_access_unavailable(stderr: &[u8]) -> bool {
+    let stderr = String::from_utf8_lossy(stderr);
     stderr.contains("Operation not permitted")
         || stderr.contains("Permission denied")
         || stderr.contains("BPF_ENABLE_STATS")
@@ -42,7 +57,6 @@ fn all_mode_writes_json_array_or_skips_without_kernel_access() {
     let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
     let profiles = json.as_array().expect("json array");
     for profile in profiles {
-        assert!(profile["pmu_available"].is_boolean(), "profile={profile}");
         assert!(profile["branch_miss_rate"].is_null(), "profile={profile}");
         assert!(profile["branch_misses"].is_null(), "profile={profile}");
         assert!(
@@ -50,11 +64,25 @@ fn all_mode_writes_json_array_or_skips_without_kernel_access() {
             "profile={profile}"
         );
     }
-    if String::from_utf8_lossy(&output.stderr).contains("PMU branch counters unavailable") {
-        for profile in profiles {
-            assert_eq!(profile["pmu_available"], false, "profile={profile}");
-        }
+}
+
+#[test]
+fn all_mode_pmu_unavailable_exits_with_error() {
+    let output = Command::new(env!("CARGO_BIN_EXE_bpfprof"))
+        .args(["--all", "--duration", "100ms"])
+        .output()
+        .expect("run bpfprof --all");
+    if output.status.success() {
+        eprintln!("skipping PMU failure test: PMU branch counters are available");
+        return;
     }
+    if kernel_access_unavailable(&output.stderr) && !pmu_unavailable(&output.stderr) {
+        eprintln!("skipping PMU failure test: kernel access unavailable before PMU setup");
+        return;
+    }
+
+    assert!(pmu_unavailable(&output.stderr));
+    assert!(output.stdout.is_empty());
 }
 
 #[test]

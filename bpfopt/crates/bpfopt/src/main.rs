@@ -1074,13 +1074,20 @@ fn verifier_reg_state(state: VerifierRegJson) -> Result<RegState> {
         range: ScalarRange {
             smin: state.min,
             smax: state.max,
-            umin: state.min.and_then(|value| u64::try_from(value).ok()),
-            umax: state.max.and_then(|value| u64::try_from(value).ok()),
+            umin: state.min.and_then(nonnegative_i64_to_u64),
+            umax: state.max.and_then(nonnegative_i64_to_u64),
             ..ScalarRange::default()
         },
         offset: None,
         id: None,
     })
+}
+
+fn nonnegative_i64_to_u64(value: i64) -> Option<u64> {
+    let Ok(value) = u64::try_from(value) else {
+        return None;
+    };
+    Some(value)
 }
 
 fn parse_tnum(input: &str) -> Result<Tnum> {

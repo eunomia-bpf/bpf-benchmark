@@ -6,17 +6,13 @@ use std::collections::HashMap;
 use crate::insn::BpfInsn;
 use crate::pass::{Analysis, BpfProgram};
 
-#[cfg_attr(not(test), allow(dead_code))]
 const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH;
-#[cfg_attr(not(test), allow(dead_code))]
 const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
-#[cfg_attr(not(test), allow(dead_code))]
+#[cfg(test)]
 const BPF_MAP_TYPE_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_HASH;
-#[cfg_attr(not(test), allow(dead_code))]
 const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
-#[cfg_attr(not(test), allow(dead_code))]
 const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH;
-#[cfg_attr(not(test), allow(dead_code))]
+#[cfg(test)]
 const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 
@@ -43,7 +39,6 @@ impl MapInfo {
     /// only the current CPU slot. `PERCPU_ARRAY` is handled as a special case:
     /// map_inline may inline it only after verifying that every per-CPU slot is
     /// byte-identical for the accessed key.
-    #[cfg_attr(not(test), allow(dead_code))]
     pub fn supports_direct_value_access(&self) -> bool {
         matches!(
             self.map_type,
@@ -59,13 +54,11 @@ impl MapInfo {
     /// v1 now performs speculative inlining for mutable maps and relies on the
     /// invalidation tracker to re-specialize when values change. The remaining
     /// hard requirement is that userspace can read the backing value correctly.
-    #[cfg_attr(not(test), allow(dead_code))]
     pub fn is_inlineable_v1(&self) -> bool {
         self.supports_direct_value_access()
     }
 
     /// Returns whether v1 can eliminate the lookup/null-check sequence.
-    #[cfg_attr(not(test), allow(dead_code))]
     pub fn can_remove_lookup_pattern_v1(&self) -> bool {
         matches!(
             self.map_type,
@@ -74,7 +67,6 @@ impl MapInfo {
     }
 
     /// Returns whether this inline is speculative and depends on runtime stability.
-    #[cfg_attr(not(test), allow(dead_code))]
     pub fn is_speculative_v1(&self) -> bool {
         matches!(self.map_type, BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_LRU_HASH)
     }
@@ -100,7 +92,6 @@ pub struct MapInfoResult {
 
 impl MapInfoResult {
     /// Returns the resolved map reference at `pc`, if any.
-    #[cfg_attr(not(test), allow(dead_code))]
     pub fn reference_at_pc(&self, pc: usize) -> Option<&MapReference> {
         self.references.iter().find(|reference| reference.pc == pc)
     }

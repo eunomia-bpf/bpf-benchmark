@@ -9,8 +9,8 @@
 //! This module extracts per-PC register state summaries that can feed later
 //! optimization analyses (constant propagation, range checks, liveness, etc.).
 //!
-//! Used by `bpf_prog_rejit()` to parse verifier diagnostics on REJIT failure,
-//! providing structured error output in the serve optimize flow.
+//! Used by the `bpfverify` CLI to turn raw verifier logs into structured
+//! verifier-state JSON.
 
 use std::collections::HashMap;
 
@@ -127,7 +127,7 @@ pub fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
 ///    reports the state just before the error).
 ///
 /// Returns `None` if no meaningful PC can be extracted.
-#[cfg_attr(not(test), allow(dead_code))]
+#[cfg(test)]
 pub fn extract_failure_pc(verifier_log: &str) -> Option<usize> {
     let lines: Vec<&str> = verifier_log.lines().collect();
     if lines.is_empty() {
@@ -237,14 +237,14 @@ fn parse_from_state_line(
 ) -> Option<(usize, Option<usize>, VerifierInsnKind, bool, &str)> {
     let rest = line.strip_prefix("from ")?;
     let (from_text, rest) = rest.split_once(" to ")?;
-    let from_pc = from_text.trim().parse().ok()?;
+    let from_pc = parse_optional(from_text.trim())?;
 
     let digits_len = rest.chars().take_while(|ch| ch.is_ascii_digit()).count();
     if digits_len == 0 {
         return None;
     }
 
-    let pc = rest[..digits_len].parse().ok()?;
+    let pc = parse_optional(&rest[..digits_len])?;
     let mut tail = &rest[digits_len..];
     let speculative = if let Some(stripped) = tail.strip_prefix(" (speculative execution)") {
         tail = stripped;
@@ -265,7 +265,7 @@ fn parse_from_state_line(
 
 fn parse_pc_state_line(line: &str) -> Option<(usize, Option<usize>, VerifierInsnKind, bool, &str)> {
     let colon = line.find(':')?;
-    let pc = line[..colon].trim().parse().ok()?;
+    let pc = parse_optional(line[..colon].trim())?;
     let tail = line[colon + 1..].trim();
     if tail.is_empty() {
         return None;
@@ -300,7 +300,7 @@ fn strip_frame_prefix(text: &str) -> (usize, &str) {
         return (0, text);
     }
 
-    let frame = rest[..digits_len].parse().ok();
+    let frame = parse_optional(&rest[..digits_len]);
     let tail = rest[digits_len..].trim_start();
     match (frame, tail.strip_prefix(':')) {
         (Some(frame), Some(tail)) => (frame, tail.trim_start()),
@@ -365,12 +365,12 @@ fn parse_reg_name(name: &str) -> Option<(u8, VerifierValueWidth)> {
     } else {
         (name, VerifierValueWidth::Bits64)
     };
-    Some((name.parse().ok()?, value_width))
+    Some((parse_optional(name)?, value_width))
 }
 
 fn parse_stack_name(name: &str) -> Option<i16> {
     let name = name.strip_prefix("fp")?;
-    parse_i32(name)?.try_into().ok()
+    result_to_option(parse_i32(name)?.try_into())
 }
 
 fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> RegState {
@@ -610,19 +610,40 @@ fn find_top_level_char(text: &str, needle: char) -> Option<usize> {
 }
 
 fn parse_i32(text: &str) -> Option<i32> {
-    parse_signed_value(text)?.try_into().ok()
+    result_to_option(parse_signed_value(text)?.try_into())
 }
 
 fn parse_u32(text: &str) -> Option<u32> {
-    parse_unsigned_u64(text)?.try_into().ok()
+    result_to_option(parse_unsigned_u64(text)?.try_into())
 }
 
 fn parse_signed_i32(text: &str) -> Option<i32> {
-    parse_signed_value(text)?.try_into().ok()
+    result_to_option(parse_signed_value(text)?.try_into())
 }
 
 fn parse_unsigned_u32(text: &str) -> Option<u32> {
-    parse_unsigned_u64(text)?.try_into().ok()
+    result_to_option(parse_unsigned_u64(text)?.try_into())
+}
+
+fn parse_optional<T: std::str::FromStr>(text: &str) -> Option<T> {
+    let Ok(value) = text.parse() else {
+        return None;
+    };
+    Some(value)
+}
+
+fn result_to_option<T, E>(result: Result<T, E>) -> Option<T> {
+    let Ok(value) = result else {
+        return None;
+    };
+    Some(value)
+}
+
+fn parse_hex_u64(text: &str) -> Option<u64> {
+    let Ok(value) = u64::from_str_radix(text, 16) else {
+        return None;
+    };
+    Some(value)
 }
 
 fn parse_signed_value(text: &str) -> Option<i64> {
@@ -635,15 +656,15 @@ fn parse_signed_value(text: &str) -> Option<i64> {
         .strip_prefix("-0x")
         .or_else(|| value.strip_prefix("-0X"))
     {
-        let magnitude = u64::from_str_radix(rest, 16).ok()? as i128;
-        return i64::try_from(-magnitude).ok();
+        let magnitude = parse_hex_u64(rest)? as i128;
+        return result_to_option(i64::try_from(-magnitude));
     }
 
     if let Some(rest) = value
         .strip_prefix("+0x")
         .or_else(|| value.strip_prefix("+0X"))
     {
-        let magnitude = u64::from_str_radix(rest, 16).ok()?;
+        let magnitude = parse_hex_u64(rest)?;
         return Some(magnitude as i64);
     }
 
@@ -651,11 +672,11 @@ fn parse_signed_value(text: &str) -> Option<i64> {
         .strip_prefix("0x")
         .or_else(|| value.strip_prefix("0X"))
     {
-        let magnitude = u64::from_str_radix(rest, 16).ok()?;
+        let magnitude = parse_hex_u64(rest)?;
         return Some(magnitude as i64);
     }
 
-    value.parse().ok()
+    parse_optional(value)
 }
 
 fn parse_unsigned_value(text: &str) -> Option<u64> {
@@ -673,10 +694,10 @@ fn parse_unsigned_value(text: &str) -> Option<u64> {
 
 fn parse_unsigned_u64(text: &str) -> Option<u64> {
     if let Some(rest) = text.strip_prefix("0x").or_else(|| text.strip_prefix("0X")) {
-        return u64::from_str_radix(rest, 16).ok();
+        return parse_hex_u64(rest);
     }
 
-    text.parse().ok()
+    parse_optional(text)
 }
 
 fn parse_scalar_exact_value(text: &str) -> Option<u64> {
@@ -689,12 +710,12 @@ fn parse_scalar_exact_value(text: &str) -> Option<u64> {
         .strip_prefix("-0x")
         .or_else(|| value.strip_prefix("-0X"))
     {
-        let magnitude = u64::from_str_radix(rest, 16).ok()?;
+        let magnitude = parse_hex_u64(rest)?;
         return Some(0u64.wrapping_sub(magnitude));
     }
 
     if let Some(rest) = value.strip_prefix('-') {
-        let magnitude: u64 = rest.parse().ok()?;
+        let magnitude = parse_optional(rest)?;
         return Some(0u64.wrapping_sub(magnitude));
     }
 

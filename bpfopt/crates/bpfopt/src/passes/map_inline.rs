@@ -126,7 +126,10 @@ pub fn find_map_lookup_sites(insns: &[BpfInsn]) -> Vec<MapLookupSite> {
 /// Recover a stack-materialized constant key for a lookup helper call.
 #[cfg(test)]
 pub fn extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Option<ConstantKey> {
-    try_extract_constant_key(insns, call_pc).ok()
+    let Ok(key) = try_extract_constant_key(insns, call_pc) else {
+        return None;
+    };
+    Some(key)
 }
 
 #[cfg(test)]
@@ -649,14 +652,16 @@ fn verifier_guided_stack_store_value(
     };
 
     let full_bytes = raw_value.to_le_bytes();
-    let subrange_start = usize::try_from(key_start - store_start).ok()?;
+    let subrange_start = match usize::try_from(key_start - store_start) {
+        Ok(start) => start,
+        Err(_) => return None,
+    };
     let subrange_end = subrange_start + key_width as usize;
     let mut key_bytes = [0u8; 8];
     key_bytes[..key_width as usize].copy_from_slice(&full_bytes[subrange_start..subrange_end]);
 
     let source_imm_pc = constant_stack_store_source_pc(insns, pc, bounds)
-        .ok()
-        .flatten();
+        .map_or_else(|_| None, std::convert::identity);
 
     Some((state.pc, source_imm_pc, u64::from_le_bytes(key_bytes)))
 }
@@ -1444,6 +1449,10 @@ fn build_direct_map_value_load_rewrites(
         let offset = total_off as usize;
         let Some(scalar) = read_scalar_from_value_at(&map_value.value, offset, bpf_size(insn.code))
         else {
+            let size = match size_in_bytes(bpf_size(insn.code)) {
+                Some(size) => size.to_string(),
+                None => "invalid".to_string(),
+            };
             record_diagnostic(
                 &mut diagnostics,
                 format!(
@@ -1451,7 +1460,7 @@ fn build_direct_map_value_load_rewrites(
                     pc,
                     map_value.map_id,
                     offset,
-                    size_in_bytes(bpf_size(insn.code)).unwrap_or_default()
+                    size
                 ),
             );
             pc += insn_width(insn);
@@ -2262,7 +2271,7 @@ fn format_bytes_preview(bytes: &[u8]) -> String {
     let mut out = String::with_capacity(preview_len.saturating_mul(2) + 6);
     out.push_str("0x");
     for byte in &bytes[..preview_len] {
-        let _ = write!(out, "{:02x}", byte);
+        write!(out, "{:02x}", byte).expect("writing to String cannot fail");
     }
     if bytes.len() > preview_len {
         out.push_str("...");
@@ -2434,16 +2443,21 @@ fn resolve_stack_store_slot(
     if !(insn.class() == BPF_ST || insn.class() == BPF_STX) {
         return None;
     }
-    let base_stack_off = resolve_stack_pointer_to_stack_inner(
+    let base_stack_off = match resolve_stack_pointer_to_stack_inner(
         insns,
         pc,
         insn.dst_reg(),
         bounds,
         REG_RESOLUTION_LIMIT,
-    )
-    .ok()?;
+    ) {
+        Ok(base_stack_off) => base_stack_off,
+        Err(_) => return None,
+    };
     let stack_off = i32::from(base_stack_off) + i32::from(insn.off);
-    let stack_off = i16::try_from(stack_off).ok()?;
+    let stack_off = match i16::try_from(stack_off) {
+        Ok(stack_off) => stack_off,
+        Err(_) => return None,
+    };
     Some((stack_off, width))
 }
 
@@ -2456,16 +2470,21 @@ fn resolve_stack_load_slot(
     if insn.class() != BPF_LDX || bpf_mode(insn.code) != BPF_MEM || bpf_size(insn.code) != BPF_DW {
         return None;
     }
-    let base_stack_off = resolve_stack_pointer_to_stack_inner(
+    let base_stack_off = match resolve_stack_pointer_to_stack_inner(
         insns,
         pc,
         insn.src_reg(),
         bounds,
         REG_RESOLUTION_LIMIT,
-    )
-    .ok()?;
+    ) {
+        Ok(base_stack_off) => base_stack_off,
+        Err(_) => return None,
+    };
     let stack_off = i32::from(base_stack_off) + i32::from(insn.off);
-    i16::try_from(stack_off).ok()
+    let Ok(stack_off) = i16::try_from(stack_off) else {
+        return None;
+    };
+    Some(stack_off)
 }
 
 fn kill_overlapping_alias_stack_slots(
@@ -2548,27 +2567,32 @@ fn alias_adjustment(
     let delta = match (bpf_op(insn.code), bpf_src(insn.code)) {
         (BPF_ADD, BPF_K) => insn.imm as i64,
         (BPF_SUB, BPF_K) => -(insn.imm as i64),
-        (BPF_ADD, BPF_X) => resolve_constant_reg_value_inner(
+        (BPF_ADD, BPF_X) => match resolve_constant_reg_value_inner(
             insns,
             pc,
             insn.src_reg(),
             bounds,
             REG_RESOLUTION_LIMIT,
-        )
-        .ok()
-        .map(|value| value.value as i64)?,
-        (BPF_SUB, BPF_X) => -resolve_constant_reg_value_inner(
+        ) {
+            Ok(value) => value.value as i64,
+            Err(_) => return None,
+        },
+        (BPF_SUB, BPF_X) => match resolve_constant_reg_value_inner(
             insns,
             pc,
             insn.src_reg(),
             bounds,
             REG_RESOLUTION_LIMIT,
-        )
-        .ok()
-        .map(|value| value.value as i64)?,
+        ) {
+            Ok(value) => -(value.value as i64),
+            Err(_) => return None,
+        },
         _ => return None,
     };
-    i16::try_from(base_off as i64 + delta).ok()
+    let Ok(adjusted) = i16::try_from(base_off as i64 + delta) else {
+        return None;
+    };
+    Some(adjusted)
 }
 
 fn is_null_check_on_alias(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> bool {

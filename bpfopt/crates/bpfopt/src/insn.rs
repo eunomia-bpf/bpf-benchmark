@@ -358,13 +358,11 @@ impl BpfInsn {
     }
 
     /// `mov64 dst, imm`
-    #[cfg_attr(not(test), allow(dead_code))]
     pub fn mov64_imm(dst: u8, imm: i32) -> Self {
         Self::new(BPF_ALU64 | BPF_MOV | BPF_K, Self::make_regs(dst, 0), 0, imm)
     }
 
     /// `mov32 dst, imm`
-    #[cfg_attr(not(test), allow(dead_code))]
     pub fn mov32_imm(dst: u8, imm: i32) -> Self {
         Self::new(BPF_ALU | BPF_MOV | BPF_K, Self::make_regs(dst, 0), 0, imm)
     }
@@ -429,25 +427,21 @@ impl BpfInsn {
     }
 
     /// `stx_mem size, [dst + off], src`
-    #[allow(dead_code)]
     pub fn stx_mem(size: u8, dst: u8, src: u8, off: i16) -> Self {
         Self::new(BPF_STX | size | BPF_MEM, Self::make_regs(dst, src), off, 0)
     }
 
     /// `alu64 op, dst, imm`  (e.g., LSH64_IMM, OR64_IMM)
-    #[allow(dead_code)]
     pub fn alu64_imm(op: u8, dst: u8, imm: i32) -> Self {
         Self::new(BPF_ALU64 | op | BPF_K, Self::make_regs(dst, 0), 0, imm)
     }
 
     /// `alu64 op, dst, src` (e.g., OR64_REG)
-    #[allow(dead_code)]
     pub fn alu64_reg(op: u8, dst: u8, src: u8) -> Self {
         Self::new(BPF_ALU64 | op | BPF_X, Self::make_regs(dst, src), 0, 0)
     }
 
     /// NOP — encoded as `ja +0`.
-    #[cfg_attr(not(test), allow(dead_code))]
     pub fn nop() -> Self {
         Self::ja(0)
     }
@@ -482,7 +476,7 @@ pub struct BpfBytecodeDump {
     pub raw_hex_blob: Option<String>,
 }
 
-#[cfg_attr(not(test), allow(dead_code))]
+#[cfg(test)]
 fn hex_bytes(bytes: &[u8]) -> String {
     let mut out = String::with_capacity(bytes.len().saturating_mul(3).saturating_sub(1));
     for (idx, byte) in bytes.iter().enumerate() {
@@ -490,12 +484,12 @@ fn hex_bytes(bytes: &[u8]) -> String {
             out.push(' ');
         }
         use std::fmt::Write as _;
-        let _ = write!(out, "{:02x}", byte);
+        write!(out, "{:02x}", byte).expect("writing to String cannot fail");
     }
     out
 }
 
-#[cfg_attr(not(test), allow(dead_code))]
+#[cfg(test)]
 pub fn dump_bytecode(insns: &[BpfInsn]) -> BpfBytecodeDump {
     BpfBytecodeDump {
         insn_count: insns.len(),
@@ -528,7 +522,7 @@ pub fn dump_bytecode_compact(insns: &[BpfInsn]) -> BpfBytecodeDump {
         let raw = insn.raw_bytes();
         for byte in &raw {
             use std::fmt::Write as _;
-            let _ = write!(blob, "{:02x}", byte);
+            write!(blob, "{:02x}", byte).expect("writing to String cannot fail");
         }
     }
     BpfBytecodeDump {
@@ -569,10 +563,11 @@ impl fmt::Display for BpfInsn {
 /// with real compiled BPF programs.
 #[cfg(test)]
 pub fn load_bpf_insns_from_elf(path: &str) -> Option<Vec<BpfInsn>> {
-    crate::elf_parser::parse_bpf_object(path)
-        .ok()?
-        .first_program()
-        .map(|program| program.insns.clone())
+    let object = match crate::elf_parser::parse_bpf_object(path) {
+        Ok(object) => object,
+        Err(_) => return None,
+    };
+    object.first_program().map(|program| program.insns.clone())
 }
 
 /// Return the path to a micro benchmark .bpf.o file relative to the daemon crate.

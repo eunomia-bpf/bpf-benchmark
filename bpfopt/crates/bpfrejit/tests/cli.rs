@@ -2,7 +2,7 @@
 
 use std::fs;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Output, Stdio};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
@@ -22,6 +22,15 @@ fn minimal_program_bytes() -> Vec<u8> {
 fn temp_path(name: &str) -> PathBuf {
     let id = NEXT_TEMP_ID.fetch_add(1, Ordering::Relaxed);
     std::env::temp_dir().join(format!("bpfrejit-cli-{}-{id}-{name}", std::process::id()))
+}
+
+fn remove_file_if_exists(path: impl AsRef<Path>) {
+    let path = path.as_ref();
+    match fs::remove_file(path) {
+        Ok(()) => {}
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
+        Err(err) => panic!("remove {}: {err}", path.display()),
+    }
 }
 
 fn write_temp_file(name: &str, bytes: impl AsRef<[u8]>) -> PathBuf {
@@ -57,7 +66,7 @@ fn rejects_input_length_that_is_not_instruction_aligned() {
         .args(["0", &path_arg])
         .output()
         .expect("run bpfrejit");
-    fs::remove_file(path).ok();
+    remove_file_if_exists(path);
 
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -87,8 +96,8 @@ fn fd_array_malformed_json_exits_with_parse_error() {
         .args(["--fd-array", &fd_array_arg, "0", &bytecode_arg])
         .output()
         .expect("run bpfrejit with malformed fd_array JSON");
-    fs::remove_file(bytecode_path).ok();
-    fs::remove_file(fd_array_path).ok();
+    remove_file_if_exists(bytecode_path);
+    remove_file_if_exists(fd_array_path);
 
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -111,8 +120,8 @@ fn fd_array_missing_btf_fd_exits_with_friendly_error() {
         .args(["--fd-array", &fd_array_arg, "0", &bytecode_arg])
         .output()
         .expect("run bpfrejit with fd_array missing btf_fd");
-    fs::remove_file(bytecode_path).ok();
-    fs::remove_file(fd_array_path).ok();
+    remove_file_if_exists(bytecode_path);
+    remove_file_if_exists(fd_array_path);
 
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -131,7 +140,7 @@ fn dry_run_accepts_fd_array_before_opening_target_program() {
         &["--dry-run", "--fd-array", &fd_array_arg, "0"],
         &minimal_program_bytes(),
     );
-    fs::remove_file(fd_array_path).ok();
+    remove_file_if_exists(fd_array_path);
 
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);

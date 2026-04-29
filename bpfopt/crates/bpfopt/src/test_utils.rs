@@ -72,13 +72,14 @@ impl LoadedFixtureProgram {
         let mut used_capture_indices = HashSet::new();
         for map in &self.used_maps {
             let map_id = NEXT_TEST_MAP_ID.fetch_add(1, Ordering::Relaxed);
-            let values = find_capture_map_index(&capture.maps, map, &used_capture_indices)
-                .map(|capture_index| {
+            let values = match find_capture_map_index(&capture.maps, map, &used_capture_indices) {
+                Some(capture_index) => {
                     used_capture_indices.insert(capture_index);
                     decode_captured_map_values(&capture.maps[capture_index])
-                })
-                .transpose()?
-                .unwrap_or_default();
+                        .with_context(|| format!("decode captured values for map {}", map.name))?
+                }
+                None => HashMap::new(),
+            };
             install_mock_map(
                 map_id,
                 MockMapState {
@@ -343,12 +344,23 @@ pub fn pass_result<'a>(
 fn synthetic_map_info(map: &ElfMapMetadata, map_id: u32) -> BpfMapInfo {
     BpfMapInfo {
         id: map_id,
-        map_type: map.map_type.unwrap_or_default(),
-        key_size: map.key_size.unwrap_or_default(),
-        value_size: map.value_size.unwrap_or_default(),
-        max_entries: map.max_entries.unwrap_or_default(),
-        map_flags: map.map_flags.unwrap_or_default(),
+        map_type: required_map_field(map, "map_type"),
+        key_size: required_map_field(map, "key_size"),
+        value_size: required_map_field(map, "value_size"),
+        max_entries: required_map_field(map, "max_entries"),
+        map_flags: map.map_flags.unwrap_or(0),
     }
+}
+
+fn required_map_field(map: &ElfMapMetadata, field: &str) -> u32 {
+    match field {
+        "map_type" => map.map_type,
+        "key_size" => map.key_size,
+        "value_size" => map.value_size,
+        "max_entries" => map.max_entries,
+        _ => unreachable!("unknown map metadata field {field}"),
+    }
+    .unwrap_or_else(|| panic!("fixture map {} is missing {field}", map.name))
 }
 
 fn synthetic_map_values(map: &ElfMapMetadata) -> HashMap<Vec<u8>, Vec<u8>> {

@@ -423,8 +423,8 @@ impl BpfProgram {
         self.transform_log.push(entry);
     }
 
-    /// Whether any transforms have been applied (used by tests and diagnostic tools).
-    #[allow(dead_code)]
+    /// Whether any transforms have been applied.
+    #[cfg(test)]
     pub fn has_transforms(&self) -> bool {
         self.transform_log.iter().any(|e| e.sites_applied > 0)
     }
@@ -521,13 +521,13 @@ impl AnalysisCache {
     }
 
     /// Invalidate a specific analysis result.
-    #[cfg_attr(not(test), allow(dead_code))]
+    #[cfg(test)]
     pub fn invalidate<R: Any>(&mut self) {
         self.cache.remove(&TypeId::of::<R>());
     }
 
     /// Check whether a specific analysis result is currently cached.
-    #[cfg_attr(not(test), allow(dead_code))]
+    #[cfg(test)]
     pub fn is_cached<R: Any>(&self) -> bool {
         self.cache.contains_key(&TypeId::of::<R>())
     }
@@ -547,7 +547,6 @@ pub struct PassResult {
     /// Sites that were skipped (with reasons).
     pub sites_skipped: Vec<SkipReason>,
     /// Diagnostic messages (read by tests and debug output).
-    #[cfg_attr(not(test), allow(dead_code))]
     pub diagnostics: Vec<String>,
     /// Map-inline dependencies produced by this pass.
     pub map_inline_records: Vec<MapInlineRecord>,
@@ -801,7 +800,6 @@ pub struct PlatformCapabilities {
 
 impl PlatformCapabilities {
     /// Deterministic platform capability set for tests.
-    #[cfg_attr(not(test), allow(dead_code))]
     pub fn test_default() -> Self {
         Self {
             #[cfg(target_arch = "aarch64")]
@@ -818,7 +816,6 @@ impl PlatformCapabilities {
 pub enum Arch {
     #[default]
     X86_64,
-    #[cfg_attr(not(target_arch = "aarch64"), allow(dead_code))]
     Aarch64,
 }
 
@@ -934,7 +931,7 @@ impl PassManager {
     }
 
     /// Add a pass to the end of the pipeline.
-    #[cfg_attr(not(test), allow(dead_code))]
+    #[cfg(test)]
     pub fn add_pass<P: BpfPass + 'static>(&mut self, pass: P) {
         self.passes.push(Box::new(pass));
     }
@@ -944,14 +941,8 @@ impl PassManager {
         self.passes.push(pass);
     }
 
-    /// Return the number of registered passes.
-    #[allow(dead_code)]
-    pub fn pass_count(&self) -> usize {
-        self.passes.len()
-    }
-
     /// Return the names of all registered passes in pipeline order.
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn pass_names(&self) -> Vec<&str> {
         self.passes.iter().map(|p| p.name()).collect()
     }
@@ -1197,7 +1188,6 @@ impl Default for PassContext {
 impl PassContext {
     /// Create a minimal PassContext suitable for testing.
     /// All kinsn targets unavailable (btf_id = -1), no special CPU features.
-    #[cfg_attr(not(test), allow(dead_code))]
     pub fn test_default() -> Self {
         Self {
             kinsn_registry: KinsnRegistry {

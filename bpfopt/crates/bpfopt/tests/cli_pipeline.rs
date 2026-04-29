@@ -2,7 +2,7 @@
 
 use std::fs;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Output, Stdio};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
@@ -22,6 +22,15 @@ fn minimal_program_bytes() -> Vec<u8> {
 fn temp_path(name: &str) -> PathBuf {
     let id = NEXT_TEMP_ID.fetch_add(1, Ordering::Relaxed);
     std::env::temp_dir().join(format!("bpfopt-cli-{}-{id}-{name}", std::process::id()))
+}
+
+fn remove_file_if_exists(path: impl AsRef<Path>) {
+    let path = path.as_ref();
+    match fs::remove_file(path) {
+        Ok(()) => {}
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
+        Err(err) => panic!("remove {}: {err}", path.display()),
+    }
 }
 
 fn write_temp_file(name: &str, contents: &str) -> PathBuf {
@@ -97,7 +106,7 @@ fn wide_mem_report_is_valid_pass_report_json() {
     );
     let report_text = fs::read_to_string(&report_path).expect("read report");
     let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
-    fs::remove_file(report_path).ok();
+    remove_file_if_exists(report_path);
 
     assert_eq!(report["pass"], "wide_mem");
     assert_eq!(report["changed"], false);
@@ -121,7 +130,7 @@ fn optimize_default_pipeline_writes_json_report_array() {
     assert_eq!(output.stdout, input);
     let report_text = fs::read_to_string(&report_path).expect("read report");
     let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
-    fs::remove_file(report_path).ok();
+    remove_file_if_exists(report_path);
 
     let passes = report["passes"].as_array().expect("passes array");
     let pass_names = passes
@@ -187,7 +196,7 @@ fn optimize_without_target_skips_kinsn_passes_with_warning() {
 
     let report_text = fs::read_to_string(&report_path).expect("read report");
     let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
-    fs::remove_file(report_path).ok();
+    remove_file_if_exists(report_path);
     let passes = report["passes"].as_array().expect("passes array");
     assert_eq!(passes.len(), 2);
     assert_eq!(passes[0]["pass"], "rotate");
@@ -243,10 +252,10 @@ fn optimize_default_pipeline_with_all_side_inputs_reports_12_entries() {
         ],
         &minimal_program_bytes(),
     );
-    fs::remove_file(target_path).ok();
-    fs::remove_file(verifier_path).ok();
-    fs::remove_file(profile_path).ok();
-    fs::remove_file(map_values_path).ok();
+    remove_file_if_exists(target_path);
+    remove_file_if_exists(verifier_path);
+    remove_file_if_exists(profile_path);
+    remove_file_if_exists(map_values_path);
 
     assert!(
         output.status.success(),
@@ -255,7 +264,7 @@ fn optimize_default_pipeline_with_all_side_inputs_reports_12_entries() {
     );
     let report_text = fs::read_to_string(&report_path).expect("read report");
     let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
-    fs::remove_file(report_path).ok();
+    remove_file_if_exists(report_path);
 
     let passes = report["passes"].as_array().expect("passes array");
     assert_eq!(passes.len(), 12);
@@ -295,7 +304,7 @@ fn rotate_with_empty_target_kinsns_exits_with_error() {
         &["rotate", "--target", &target_arg],
         &minimal_program_bytes(),
     );
-    fs::remove_file(target_path).ok();
+    remove_file_if_exists(target_path);
 
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -317,7 +326,7 @@ fn cond_select_with_empty_target_kinsns_exits_with_error() {
         &["cond-select", "--target", &target_arg],
         &minimal_program_bytes(),
     );
-    fs::remove_file(target_path).ok();
+    remove_file_if_exists(target_path);
 
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -355,7 +364,7 @@ fn optimize_explicit_const_prop_skips_when_verifier_states_missing() {
     );
     let report_text = fs::read_to_string(&report_path).expect("read report");
     let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
-    fs::remove_file(report_path).ok();
+    remove_file_if_exists(report_path);
     assert_eq!(report["passes"][0]["pass"], "const_prop");
     assert_eq!(report["passes"][0]["skipped"], true);
 }
@@ -387,7 +396,7 @@ fn optimize_explicit_map_inline_skips_when_map_side_inputs_missing() {
     );
     let report_text = fs::read_to_string(&report_path).expect("read report");
     let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
-    fs::remove_file(report_path).ok();
+    remove_file_if_exists(report_path);
     assert_eq!(report["passes"][0]["pass"], "map_inline");
     assert_eq!(report["passes"][0]["skipped"], true);
 }
@@ -413,7 +422,7 @@ fn optimize_explicit_kinsn_pass_skips_when_target_lacks_kinsn() {
         ],
         &minimal_program_bytes(),
     );
-    fs::remove_file(target_path).ok();
+    remove_file_if_exists(target_path);
 
     assert!(
         output.status.success(),
@@ -427,7 +436,7 @@ fn optimize_explicit_kinsn_pass_skips_when_target_lacks_kinsn() {
     );
     let report_text = fs::read_to_string(&report_path).expect("read report");
     let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
-    fs::remove_file(report_path).ok();
+    remove_file_if_exists(report_path);
     assert_eq!(report["passes"][0]["pass"], "wide_mem");
     assert_eq!(report["passes"][0]["skipped"], false);
     assert_eq!(report["passes"][1]["pass"], "rotate");
@@ -459,7 +468,7 @@ fn optimize_bulk_memory_missing_kinsns_reports_v3_names() {
         ],
         &minimal_program_bytes(),
     );
-    fs::remove_file(target_path).ok();
+    remove_file_if_exists(target_path);
 
     assert!(
         output.status.success(),
@@ -478,7 +487,7 @@ fn optimize_bulk_memory_missing_kinsns_reports_v3_names() {
 
     let report_text = fs::read_to_string(&report_path).expect("read report");
     let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
-    fs::remove_file(report_path).ok();
+    remove_file_if_exists(report_path);
     assert_eq!(report["passes"][0]["pass"], "bulk_memory");
     assert_eq!(report["passes"][0]["skipped"], true);
     assert_eq!(

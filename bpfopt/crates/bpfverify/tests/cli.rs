@@ -1,5 +1,6 @@
 use std::fs;
 use std::io::Write;
+use std::path::Path;
 use std::process::{Command, Stdio};
 
 fn run_bpfverify(args: &[&str], stdin_bytes: &[u8]) -> std::process::Output {
@@ -44,6 +45,15 @@ fn temp_path(name: &str) -> std::path::PathBuf {
             .as_nanos()
     );
     std::env::temp_dir().join(unique)
+}
+
+fn remove_file_if_exists(path: impl AsRef<Path>) {
+    let path = path.as_ref();
+    match fs::remove_file(path) {
+        Ok(()) => {}
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
+        Err(err) => panic!("remove {}: {err}", path.display()),
+    }
 }
 
 fn permission_denied(stderr: &[u8]) -> bool {
@@ -102,12 +112,14 @@ fn report_mode_writes_json_for_bad_program() {
 
     let json: serde_json::Value =
         serde_json::from_slice(&fs::read(&report).expect("read report")).unwrap();
-    fs::remove_file(report).ok();
+    remove_file_if_exists(report);
     assert_eq!(json["log_level"], 2);
     assert!(json["verifier_states"]["insns"].is_array(), "json={json}");
-    if json["verifier_log"].as_str().unwrap_or_default().is_empty()
-        && matches!(json["errno"].as_i64(), Some(1 | 13))
-    {
+    let verifier_log_empty = match json["verifier_log"].as_str() {
+        Some(log) => log.is_empty(),
+        None => true,
+    };
+    if verifier_log_empty && matches!(json["errno"].as_i64(), Some(1 | 13)) {
         eprintln!("skipping kernel-dependent bpfverify report assertions: permission denied");
         return;
     }
@@ -127,7 +139,7 @@ fn verifier_states_out_writes_v3_schema() {
     );
     if !output.status.success() && permission_denied(&output.stderr) {
         eprintln!("skipping kernel-dependent verifier-states test: permission denied");
-        fs::remove_file(states).ok();
+        remove_file_if_exists(states);
         return;
     }
 
@@ -138,7 +150,7 @@ fn verifier_states_out_writes_v3_schema() {
     );
     let json: serde_json::Value =
         serde_json::from_slice(&fs::read(&states).expect("read states")).unwrap();
-    fs::remove_file(states).ok();
+    remove_file_if_exists(states);
     assert!(json["insns"].is_array(), "json={json}");
 }
 

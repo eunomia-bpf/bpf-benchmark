@@ -337,7 +337,11 @@ fn apply_alu64_imm(value: RegValue, op: u8, imm: i32) -> Option<RegValue> {
                 BPF_SUB => (current as i64).checked_sub(imm as i64)?,
                 _ => return None,
             };
-            Some(RegValue::FpPlusConst(i32::try_from(next).ok()?))
+            let next = match i32::try_from(next) {
+                Ok(next) => next,
+                Err(_) => return None,
+            };
+            Some(RegValue::FpPlusConst(next))
         }
         _ => None,
     }

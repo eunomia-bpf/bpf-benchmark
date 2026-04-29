@@ -175,24 +175,13 @@ unsafe fn sys_bpf<T>(cmd: u32, attr: *mut T, size: usize) -> libc::c_long {
     }
 }
 
-/// Load raw BPF instructions through libbpf and immediately close the returned fd.
+/// Load raw BPF instructions through libbpf with optional fd_array side input.
 ///
 /// This is useful as a verifier dry-run. If `log_buf` is provided, verifier
 /// logging is enabled with `log_level=2`; on failure the log text is included
-/// in the returned error.
-pub fn prog_load_dryrun(
-    prog_type: bpf_prog_type,
-    insns: &[bpf_insn],
-    log_buf: Option<&mut [u8]>,
-) -> Result<()> {
-    prog_load_dryrun_with_fd_array(prog_type, insns, None, log_buf)
-}
-
-/// Load raw BPF instructions through libbpf with optional fd_array side input.
-///
-/// This is the fd_array-capable form of [`prog_load_dryrun`]. The `fd_array`
-/// slice is only borrowed for the duration of the load attempt, so callers must
-/// keep the backing fds alive until this function returns.
+/// in the returned error. The `fd_array` slice is only borrowed for the
+/// duration of the load attempt, so callers must keep the backing fds alive
+/// until this function returns.
 pub fn prog_load_dryrun_with_fd_array(
     prog_type: bpf_prog_type,
     insns: &[bpf_insn],
@@ -276,11 +265,10 @@ pub fn prog_load_dryrun_report(
         )
     };
 
-    let log = options
-        .log_buf
-        .as_deref()
-        .map(extract_log_string)
-        .unwrap_or_default();
+    let log = match options.log_buf.as_deref() {
+        Some(buf) => extract_log_string(buf),
+        None => String::new(),
+    };
     if fd < 0 {
         return Ok(ProgLoadDryRunReport {
             accepted: false,
@@ -292,9 +280,7 @@ pub fn prog_load_dryrun_report(
     }
 
     let fd = unsafe { OwnedFd::from_raw_fd(fd) };
-    let jited_size = obj_get_info_by_fd(fd.as_fd())
-        .ok()
-        .map(|info| info.jited_prog_len);
+    let jited_size = Some(obj_get_info_by_fd(fd.as_fd())?.jited_prog_len);
     drop(fd);
     Ok(ProgLoadDryRunReport {
         accepted: true,
@@ -455,20 +441,6 @@ pub fn prog_map_ids(fd: BorrowedFd<'_>, nr_map_ids: u32) -> Result<Vec<u32>> {
     Ok(map_ids)
 }
 
-/// Return the next live BPF map ID after `start_id`.
-pub fn map_get_next_id(start_id: u32) -> Result<Option<u32>> {
-    let mut next_id = 0;
-    let ret = unsafe { bpf_map_get_next_id(start_id, &mut next_id) };
-    if ret < 0 {
-        let errno = errno_from_libbpf_ret(ret);
-        if errno == libc::ENOENT {
-            return Ok(None);
-        }
-        return Err(libbpf_error("BPF_MAP_GET_NEXT_ID", ret));
-    }
-    Ok(Some(next_id))
-}
-
 /// Open a live BPF map by ID.
 pub fn map_get_fd_by_id(id: u32) -> Result<OwnedFd> {
     let fd = unsafe { bpf_map_get_fd_by_id(id) };
@@ -525,10 +497,10 @@ pub fn prog_rejit(
 
     let ret = unsafe { sys_bpf(BPF_PROG_REJIT, &mut attr, std::mem::size_of::<AttrRejit>()) };
     if ret < 0 {
-        let log = log_buf
-            .as_deref()
-            .map(extract_log_string)
-            .unwrap_or_default();
+        let log = match log_buf.as_deref() {
+            Some(buf) => extract_log_string(buf),
+            None => String::new(),
+        };
         if !log.is_empty() {
             return Err(anyhow!(
                 "BPF_PROG_REJIT: {}\nverifier log summary:\n{}",
