@@ -47,6 +47,13 @@ Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf
 - The only required custom wrappers are project-fork syscalls not supported upstream: `BPF_PROG_REJIT` and `BPF_PROG_GET_ORIGINAL`.
 - The v3 §11 "direct libbpf linking, future fork+exec" limit was an early conservative constraint and is superseded; implementation code may link `libbpf-rs` directly.
 
+### kernel-sys is the Only Syscall Boundary
+`kernel-sys` is the only bpfopt-suite crate that may directly call BPF syscalls:
+- `bpfopt` (lib and bin) may depend on `kernel-sys` for pure data APIs such as the `bpf_insn` type, opcode constants, and program type enums.
+- `bpfopt` must not call `libc::syscall(SYS_bpf, ...)` or otherwise invoke BPF syscalls directly.
+- Other CLI crates (`bpfverify`, `bpfprof`, `bpfget`, `bpfrejit`, `bpfrejit-daemon`) must also call BPF syscalls only through `kernel-sys`.
+- Inside `kernel-sys`, standard BPF commands should go through `libbpf-rs`/`libbpf-sys`; project-fork commands (`BPF_PROG_REJIT`, `BPF_PROG_GET_ORIGINAL`) are wrapped with `libc::syscall` because upstream libbpf does not support them.
+
 ### Default Config Must Work
 `make vm-corpus`, `make vm-e2e`, `make aws-x86-test`, `make aws-arm64-test` must work with zero manual environment variables. Defaults live in `runner/targets/*.env` files and are overridable via env vars.
 
