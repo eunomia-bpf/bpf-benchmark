@@ -65,12 +65,34 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4512299f36f043ab09a583e57bceb5a5aab7a73db1805848e8fef3c9e8c78b3"
 
 [[package]]
+name = "bpfget"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "kernel-sys",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "bpfopt"
 version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
  "goblin",
+ "kernel-sys",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "bpfrejit"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
  "kernel-sys",
  "serde",
  "serde_json",

@@ -1,6 +1,8 @@
 [workspace]
 members = [
     "crates/bpfopt",
+    "crates/bpfget",
+    "crates/bpfrejit",
     "crates/kernel-sys",
 ]
 resolver = "2"
