@@ -523,29 +523,6 @@ pub fn resolve_kinsn_call_off_for_target(
 mod tests {
     use super::*;
 
-    /// Iterator over BPF instructions that skips LDIMM64 second slots.
-    fn insn_iter_skip_ldimm64(insns: &[BpfInsn]) -> InsnIterSkipLdimm64<'_> {
-        InsnIterSkipLdimm64 { insns, pc: 0 }
-    }
-
-    struct InsnIterSkipLdimm64<'a> {
-        insns: &'a [BpfInsn],
-        pc: usize,
-    }
-
-    impl<'a> Iterator for InsnIterSkipLdimm64<'a> {
-        type Item = (usize, &'a BpfInsn);
-        fn next(&mut self) -> Option<Self::Item> {
-            if self.pc >= self.insns.len() {
-                return None;
-            }
-            let pc = self.pc;
-            let insn = &self.insns[pc];
-            self.pc = if insn.is_ldimm64() { pc + 2 } else { pc + 1 };
-            Some((pc, insn))
-        }
-    }
-
     fn exit_insn() -> BpfInsn {
         BpfInsn {
             code: BPF_JMP | BPF_EXIT,
@@ -760,36 +737,5 @@ mod tests {
         assert_eq!(insns[0].imm, 0xabcde);
         assert!(insns[1].is_call());
         assert_eq!(insns[1].imm, 5555);
-    }
-
-    #[test]
-    fn test_insn_iter_skip_ldimm64() {
-        let ldimm64_lo = BpfInsn {
-            code: BPF_LD | BPF_DW | BPF_IMM,
-            regs: BpfInsn::make_regs(0, 0),
-            off: 0,
-            imm: 42,
-        };
-        let ldimm64_hi = BpfInsn {
-            code: 0,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        };
-        let insns = vec![
-            BpfInsn::mov64_imm(0, 1), // pc=0
-            ldimm64_lo,               // pc=1 (2-slot)
-            ldimm64_hi,               // pc=2 (second slot, skipped)
-            exit_insn(),              // pc=3
-        ];
-        let pcs: Vec<usize> = insn_iter_skip_ldimm64(&insns).map(|(pc, _)| pc).collect();
-        assert_eq!(pcs, vec![0, 1, 3]);
-    }
-
-    #[test]
-    fn test_insn_iter_empty() {
-        let insns: Vec<BpfInsn> = vec![];
-        let pcs: Vec<usize> = insn_iter_skip_ldimm64(&insns).map(|(pc, _)| pc).collect();
-        assert!(pcs.is_empty());
     }
 }

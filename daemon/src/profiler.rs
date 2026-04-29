@@ -848,38 +848,6 @@ pub(crate) mod pmu {
         }
         Some(value)
     }
-
-    #[cfg(test)]
-    mod tests {
-        use super::*;
-
-        #[test]
-        fn pmu_open_returns_some_or_none_gracefully() {
-            let result = PmuCounters::open();
-            if let Some(ref pmu) = result {
-                pmu.reset_and_enable();
-                let mut sum = 0u64;
-                for i in 0..10000 {
-                    sum = sum.wrapping_add(i);
-                }
-                let _ = std::hint::black_box(sum);
-                let rate = pmu.read_branch_miss_rate();
-                pmu.disable();
-                if let Some(rate) = rate {
-                    assert!((0.0..=1.0).contains(&rate));
-                }
-            }
-        }
-
-        #[test]
-        fn perf_event_attr_layout_is_correct() {
-            let attr = PerfEventAttr::new(PERF_TYPE_HARDWARE, PERF_COUNT_HW_BRANCH_MISSES);
-            assert_eq!(attr.type_, 0);
-            assert_eq!(attr.config, 5);
-            assert_eq!(attr.size, std::mem::size_of::<PerfEventAttr>() as u32);
-            assert_eq!(attr.flags, 33);
-        }
-    }
 }
 
 #[cfg(test)]

@@ -581,29 +581,6 @@ mod tests {
                 && module == BULK_MEMORY_MODULE));
     }
 
-    #[test]
-    fn test_discover_kinsns_no_modules_loaded() {
-        // On a host without kinsn modules, discovery should return all -1 IDs.
-        // This test runs on any machine — if modules happen to be loaded, that's OK too.
-        let result = discover_kinsns();
-        // Just check the structure is valid.
-        assert!(result.registry.rotate64_btf_id == -1 || result.registry.rotate64_btf_id > 0);
-        assert!(result.registry.select64_btf_id == -1 || result.registry.select64_btf_id > 0);
-        assert!(result.registry.extract64_btf_id == -1 || result.registry.extract64_btf_id > 0);
-        assert!(result.registry.memcpy_bulk_btf_id == -1 || result.registry.memcpy_bulk_btf_id > 0);
-        assert!(result.registry.memset_bulk_btf_id == -1 || result.registry.memset_bulk_btf_id > 0);
-    }
-
-    #[test]
-    fn test_btf_header_size() {
-        assert_eq!(BTF_HEADER_SIZE, 24);
-    }
-
-    #[test]
-    fn test_btf_type_size() {
-        assert_eq!(BTF_TYPE_SIZE, 12);
-    }
-
     /// HIGH #4: Parse BTF_KIND constants from kernel header and verify.
     ///
     /// This replaces the old hardcoded assertions with values parsed directly

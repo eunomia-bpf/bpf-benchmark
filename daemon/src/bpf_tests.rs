@@ -239,36 +239,6 @@ fn test_bpf_cmd_constants_match_kernel_header() {
 // transport fields.
 
 #[test]
-fn test_attr_struct_sizes_fit_bpf_attr() {
-    // All attr variants must be exactly 128 bytes (the kernel's bpf_attr size).
-    assert_eq!(
-        std::mem::size_of::<AttrGetNextId>(),
-        128,
-        "AttrGetNextId must be 128 bytes"
-    );
-    assert_eq!(
-        std::mem::size_of::<AttrGetFdById>(),
-        128,
-        "AttrGetFdById must be 128 bytes"
-    );
-    assert_eq!(
-        std::mem::size_of::<AttrGetInfoByFd>(),
-        128,
-        "AttrGetInfoByFd must be 128 bytes"
-    );
-    assert_eq!(
-        std::mem::size_of::<AttrRejit>(),
-        128,
-        "AttrRejit must be 128 bytes"
-    );
-    assert_eq!(
-        std::mem::size_of::<AttrProgLoad>(),
-        168,
-        "AttrProgLoad must match the current kernel prog_load attr size"
-    );
-}
-
-#[test]
 fn test_attr_rejit_field_offsets() {
     // Verify AttrRejit field layout matches kernel's union bpf_attr.rejit.
     // Kernel layout (from bpf.h):
@@ -404,19 +374,6 @@ fn test_populate_prog_load_attr_includes_btf_and_debug_info() {
         &attr.prog_name[..7],
         b"tracee\0",
         "prog name should be copied with a trailing NUL"
-    );
-}
-
-#[test]
-fn test_bpf_prog_info_size() {
-    // BpfProgInfo includes BpfReJIT extension fields (orig_prog_len, orig_prog_insns).
-    // Layout: orig_prog_len (u32, offset 228) + 4 bytes padding + orig_prog_insns (u64, offset 232).
-    // Total: 232 + 8 = 240 bytes (with __attribute__((aligned(8)))).
-    let size = std::mem::size_of::<BpfProgInfo>();
-    assert_eq!(
-        size, 240,
-        "BpfProgInfo size mismatch: got {} bytes, expected 240 (from kernel struct bpf_prog_info)",
-        size
     );
 }
 
@@ -750,16 +707,6 @@ fn test_bpf_prog_info_name_str() {
     assert_eq!(info.name_str(), "a".repeat(BPF_OBJ_NAME_LEN));
 }
 
-#[test]
-fn test_btf_info_struct_size() {
-    // BtfInfo must be exactly 128 bytes (padded to match bpf_attr size).
-    assert_eq!(
-        std::mem::size_of::<BtfInfo>(),
-        128,
-        "BtfInfo must be 128 bytes"
-    );
-}
-
 /// HIGH #5: Verify BtfInfo field layout matches kernel `struct bpf_btf_info`.
 ///
 /// From vendor/linux-framework/include/uapi/linux/bpf.h:
@@ -808,69 +755,6 @@ fn test_btf_info_field_offsets() {
     );
 }
 
-/// HIGH #5 continued: Parse kernel header to verify BtfInfo layout.
-#[test]
-fn test_btf_info_layout_matches_kernel_header() {
-    let header_path = concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../vendor/linux-framework/include/uapi/linux/bpf.h"
-    );
-    let content = std::fs::read_to_string(header_path).expect("failed to read kernel bpf.h header");
-
-    // Find struct bpf_btf_info
-    let mut in_struct = false;
-    let mut field_names: Vec<String> = Vec::new();
-    for line in content.lines() {
-        let trimmed = line.trim();
-        if trimmed == "struct bpf_btf_info {" {
-            in_struct = true;
-            continue;
-        }
-        if in_struct && trimmed.starts_with('}') {
-            break;
-        }
-        if !in_struct
-            || trimmed.is_empty()
-            || trimmed.starts_with("/*")
-            || trimmed.starts_with("*")
-            || trimmed.starts_with("//")
-        {
-            continue;
-        }
-        let clean = trimmed.trim_end_matches(';').trim();
-        let parts: Vec<&str> = clean.split_whitespace().collect();
-        if parts.len() >= 2 {
-            field_names.push(parts[1].trim_end_matches(';').to_string());
-        }
-    }
-
-    // Verify the kernel header has the expected fields in order
-    assert!(
-        field_names.contains(&"btf".to_string()),
-        "kernel bpf_btf_info missing 'btf' field"
-    );
-    assert!(
-        field_names.contains(&"btf_size".to_string()),
-        "kernel bpf_btf_info missing 'btf_size' field"
-    );
-    assert!(
-        field_names.contains(&"id".to_string()),
-        "kernel bpf_btf_info missing 'id' field"
-    );
-    assert!(
-        field_names.contains(&"name".to_string()),
-        "kernel bpf_btf_info missing 'name' field"
-    );
-    assert!(
-        field_names.contains(&"name_len".to_string()),
-        "kernel bpf_btf_info missing 'name_len' field"
-    );
-    assert!(
-        field_names.contains(&"kernel_btf".to_string()),
-        "kernel bpf_btf_info missing 'kernel_btf' field"
-    );
-}
-
 #[test]
 fn test_relocate_map_fds_with_non_map_instructions() {
     // Program with no LD_IMM64 instructions at all.
@@ -895,95 +779,4 @@ fn test_relocate_map_fds_empty_program() {
     let result = relocate_map_fds(&mut insns, &[]);
     assert!(result.is_ok());
     assert!(result.unwrap().is_empty());
-}
-
-#[test]
-fn test_mock_array_lookup_returns_zero_for_in_range_missing_key() {
-    let mut info = BpfMapInfo::default();
-    info.id = 9001;
-    info.map_type = BPF_MAP_TYPE_ARRAY;
-    info.key_size = 4;
-    info.value_size = 8;
-    info.max_entries = 4;
-    install_mock_map(
-        info.id,
-        MockMapState {
-            info,
-            frozen: true,
-            values: std::collections::HashMap::new(),
-        },
-    );
-
-    let value = bpf_map_lookup_elem_by_id(9001, &[2, 0, 0, 0], 8).expect("array lookup");
-    assert_eq!(value, vec![0u8; 8]);
-}
-
-#[test]
-fn test_mock_hash_lookup_missing_key_still_errors() {
-    let mut info = BpfMapInfo::default();
-    info.id = 9002;
-    info.map_type = 1;
-    info.key_size = 4;
-    info.value_size = 8;
-    info.max_entries = 4;
-    install_mock_map(
-        info.id,
-        MockMapState {
-            info,
-            frozen: true,
-            values: std::collections::HashMap::new(),
-        },
-    );
-
-    let err = bpf_map_lookup_elem_by_id(9002, &[2, 0, 0, 0], 8).expect_err("hash miss");
-    assert!(err.to_string().contains("missing key"));
-}
-
-#[test]
-fn test_mock_percpu_array_lookup_uses_full_blob_size() {
-    let mut info = BpfMapInfo::default();
-    info.id = 9003;
-    info.map_type = BPF_MAP_TYPE_PERCPU_ARRAY;
-    info.key_size = 4;
-    info.value_size = 4;
-    info.max_entries = 4;
-    let mut value = vec![0u8; round_up_8(4) * 2];
-    value[..4].copy_from_slice(&7u32.to_le_bytes());
-    value[8..12].copy_from_slice(&7u32.to_le_bytes());
-    install_mock_map(
-        info.id,
-        MockMapState {
-            info,
-            frozen: true,
-            values: std::collections::HashMap::from([(1u32.to_le_bytes().to_vec(), value.clone())]),
-        },
-    );
-
-    let lookup_size = bpf_map_lookup_value_size_by_id(9003).expect("lookup size");
-    assert_eq!(lookup_size, value.len());
-    let fetched =
-        bpf_map_lookup_elem_by_id(9003, &1u32.to_le_bytes(), lookup_size).expect("lookup");
-    assert_eq!(fetched, value);
-}
-
-#[test]
-fn test_mock_percpu_array_lookup_returns_zero_for_in_range_missing_key() {
-    let mut info = BpfMapInfo::default();
-    info.id = 9004;
-    info.map_type = BPF_MAP_TYPE_PERCPU_ARRAY;
-    info.key_size = 4;
-    info.value_size = 8;
-    info.max_entries = 4;
-    install_mock_map(
-        info.id,
-        MockMapState {
-            info,
-            frozen: true,
-            values: std::collections::HashMap::new(),
-        },
-    );
-
-    let lookup_size = bpf_map_lookup_value_size_by_id(9004).expect("lookup size");
-    let value = bpf_map_lookup_elem_by_id(9004, &2u32.to_le_bytes(), lookup_size).expect("lookup");
-    assert_eq!(value, vec![0u8; lookup_size]);
 }

@@ -23,7 +23,3 @@ fn prog_get_next_id_enumerates_or_reports_unsupported_environment() {
         }
     }
 }
-
-#[cfg(not(target_os = "linux"))]
-#[test]
-fn prog_get_next_id_skipped_on_non_linux() {}

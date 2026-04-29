@@ -67,10 +67,6 @@ impl<A> MapInvalidationTracker<A> {
         }
     }
 
-    pub fn is_empty(&self) -> bool {
-        self.entries.is_empty()
-    }
-
     pub fn entry_count(&self) -> usize {
         self.entries.len()
     }
@@ -234,14 +230,6 @@ mod tests {
     }
 
     #[test]
-    fn test_tracker_empty() {
-        let tracker = MapInvalidationTracker::new(FakeMapAccessor::default());
-
-        assert!(tracker.is_empty());
-        assert_eq!(tracker.entry_count(), 0);
-    }
-
-    #[test]
     fn test_record_inline_site() {
         let mut tracker = MapInvalidationTracker::new(FakeMapAccessor::default());
 
@@ -257,17 +245,6 @@ mod tests {
                 expected_value: value(11),
             }
         );
-    }
-
-    #[test]
-    fn test_record_multiple_sites() {
-        let mut tracker = MapInvalidationTracker::new(FakeMapAccessor::default());
-
-        tracker.record_inline_site(101, 7, key(1), value(11));
-        tracker.record_inline_site(101, 7, key(2), value(12));
-        tracker.record_inline_site(202, 8, key(1), value(21));
-
-        assert_eq!(tracker.entry_count(), 3);
     }
 
     #[test]

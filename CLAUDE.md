@@ -23,6 +23,13 @@ Corpus performance is measured per-program, not per-app:
 ### No Redundant Informational Fields
 Do not add `workload_miss`, `limitations`, or similar informational-only fields to result payloads. If something fails, it should surface as an error, not as a metadata annotation.
 
+### Unit Test Quality
+Do not add unit tests unless they have a clear bug-detection purpose.
+Good unit tests cover logic branches, state changes, calculations, conversions, boundaries, error paths, external ABI/layout/serialization contracts, or bug regressions.
+ABI/layout tests must verify field offsets or encoded format, not just `size_of`.
+Do not test trivial getters/setters, standard library or upstream library behavior, self-equality tautologies, mocks-only behavior, readability/documentation examples, pure const aliases, or duplicate coverage.
+Before adding a test, be able to answer: what specific bug would this failure identify?
+
 ### bpfopt-suite v3 Architecture
 `docs/tmp/bpfopt_design_v3.md` is the authoritative design document for bpfopt-suite. Keep implementation and documentation aligned with that design:
 - The daemon must not run a pass pipeline, maintain `PassManager`, call `bpfopt`, do profiling, or transform bytecode.

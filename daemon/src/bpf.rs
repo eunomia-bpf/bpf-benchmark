@@ -273,6 +273,7 @@ fn mock_map_state(map_id: u32) -> Option<MockMapState> {
 
 /// Install a mock map for daemon unit tests.
 #[cfg(test)]
+#[allow(dead_code)]
 pub fn install_mock_map(map_id: u32, state: MockMapState) {
     if let Ok(mut maps) = mock_maps().lock() {
         maps.insert(map_id, state);

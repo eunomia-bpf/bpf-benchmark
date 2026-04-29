@@ -51,7 +51,7 @@ impl Analysis for BranchTargetAnalysis {
 mod tests {
     use super::*;
     use crate::insn::*;
-    use crate::pass::{AnalysisCache, BpfProgram};
+    use crate::pass::BpfProgram;
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
         BpfProgram::new(insns)
@@ -106,24 +106,5 @@ mod tests {
         let result = BranchTargetAnalysis.run(&prog);
         assert!(!result.is_target[0]);
         assert!(!result.is_target[1]);
-    }
-
-    #[test]
-    fn cache_branch_target() {
-        let prog = make_program(vec![BpfInsn::ja(1), BpfInsn::nop(), exit_insn()]);
-        let mut cache = AnalysisCache::new();
-        let r1 = cache.get(&BranchTargetAnalysis, &prog);
-        let r2 = cache.get(&BranchTargetAnalysis, &prog);
-        assert_eq!(r1.is_target, r2.is_target);
-    }
-
-    #[test]
-    fn cache_invalidation() {
-        let prog = make_program(vec![BpfInsn::ja(1), BpfInsn::nop(), exit_insn()]);
-        let mut cache = AnalysisCache::new();
-        let _ = cache.get(&BranchTargetAnalysis, &prog);
-        cache.invalidate_all();
-        let r = cache.get(&BranchTargetAnalysis, &prog);
-        assert!(r.is_target[2]);
     }
 }

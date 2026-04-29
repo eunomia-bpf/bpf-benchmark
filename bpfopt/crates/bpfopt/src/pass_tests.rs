@@ -280,14 +280,6 @@ fn exit_insn() -> BpfInsn {
 // ── BpfProgram tests ────────────────────────────────────────────
 
 #[test]
-fn test_bpf_program_new() {
-    let prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-    assert_eq!(prog.insns.len(), 2);
-    assert_eq!(prog.annotations.len(), 2);
-    assert!(!prog.has_transforms());
-}
-
-#[test]
 fn test_bpf_program_sync_annotations_grow() {
     let mut prog = make_program(vec![exit_insn()]);
     assert_eq!(prog.annotations.len(), 1);
@@ -330,19 +322,6 @@ fn test_analysis_cache_basic() {
     let count = cache.get(&analysis, &prog);
     assert_eq!(count, 2);
     assert!(cache.is_cached::<usize>());
-}
-
-#[test]
-fn test_analysis_cache_returns_cached_value() {
-    let mut cache = AnalysisCache::new();
-    let prog = make_program(vec![BpfInsn::nop(), exit_insn()]);
-    let analysis = InsnCountAnalysis;
-
-    let count1 = cache.get(&analysis, &prog);
-    // Even if we could change the program, the cached value should be returned
-    let count2 = cache.get(&analysis, &prog);
-    assert_eq!(count1, count2);
-    assert_eq!(count1, 2);
 }
 
 #[test]
@@ -547,35 +526,6 @@ fn test_pass_manager_retries_const_prop_and_dce_to_fixed_point() {
 }
 
 #[test]
-fn test_pass_result_reporting() {
-    let result = PassResult {
-        pass_name: "test_pass".into(),
-        changed: true,
-        sites_applied: 3,
-        sites_skipped: vec![
-            SkipReason {
-                pc: 5,
-                reason: "interior branch".into(),
-            },
-            SkipReason {
-                pc: 15,
-                reason: "caller-saved conflict".into(),
-            },
-        ],
-        diagnostics: vec!["applied 3 sites".into()],
-        ..Default::default()
-    };
-
-    assert_eq!(result.pass_name, "test_pass");
-    assert!(result.changed);
-    assert_eq!(result.sites_applied, 3);
-    assert_eq!(result.sites_skipped.len(), 2);
-    assert_eq!(result.sites_skipped[0].pc, 5);
-    assert_eq!(result.sites_skipped[1].reason, "caller-saved conflict");
-    assert_eq!(result.diagnostics.len(), 1);
-}
-
-#[test]
 fn test_pass_manager_disabled_pass_policy() {
     let mut pm = PassManager::new();
     pm.add_pass(AppendNopPass);
@@ -613,46 +563,6 @@ fn test_pass_manager_enabled_pass_policy() {
 }
 
 #[test]
-fn test_pass_category() {
-    let noop = NoOpPass;
-    assert_eq!(noop.category(), PassCategory::Optimization);
-
-    let reporter = CountReportingPass;
-    assert_eq!(reporter.category(), PassCategory::Observability);
-}
-
-#[test]
-fn test_pipeline_result_aggregate() {
-    let pr = PipelineResult {
-        pass_results: vec![
-            PassResult {
-                pass_name: "a".into(),
-                changed: true,
-                sites_applied: 2,
-                sites_skipped: vec![],
-                diagnostics: vec![],
-                ..Default::default()
-            },
-            PassResult {
-                pass_name: "b".into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![],
-                diagnostics: vec![],
-                ..Default::default()
-            },
-        ],
-        total_sites_applied: 2,
-        program_changed: true,
-        debug_traces: vec![],
-    };
-
-    assert!(pr.program_changed);
-    assert_eq!(pr.total_sites_applied, 2);
-    assert_eq!(pr.pass_results.len(), 2);
-}
-
-#[test]
 fn test_pass_manager_collects_debug_traces() {
     let mut pm = PassManager::new();
     pm.add_pass(AppendNopPass);
@@ -686,18 +596,6 @@ fn test_pass_manager_collects_debug_traces() {
 }
 
 #[test]
-fn test_pass_context_test_default() {
-    let ctx = PassContext::test_default();
-    assert_eq!(ctx.kinsn_registry.rotate64_btf_id, -1);
-    assert_eq!(ctx.kinsn_registry.select64_btf_id, -1);
-    assert_eq!(ctx.kinsn_registry.memcpy_bulk_btf_id, -1);
-    assert_eq!(ctx.kinsn_registry.memset_bulk_btf_id, -1);
-    assert!(!ctx.platform.has_bmi1);
-    assert_eq!(ctx.policy.enabled_passes, default_enabled_passes());
-    assert!(ctx.policy.disabled_passes.is_empty());
-}
-
-#[test]
 fn test_kinsn_registry_with_available_targets() {
     let ctx = PassContext {
         kinsn_registry: KinsnRegistry {
@@ -720,16 +618,6 @@ fn test_kinsn_registry_with_available_targets() {
     assert!(ctx.kinsn_registry.rotate64_btf_id > 0);
     assert!(ctx.kinsn_registry.select64_btf_id < 0);
     assert_eq!(ctx.kinsn_registry.call_off_for_pass("rotate"), 7);
-}
-
-#[test]
-fn test_pass_manager_pass_count() {
-    let mut pm = PassManager::new();
-    assert_eq!(pm.pass_count(), 0);
-    pm.add_pass(NoOpPass);
-    assert_eq!(pm.pass_count(), 1);
-    pm.add_pass(AppendNopPass);
-    assert_eq!(pm.pass_count(), 2);
 }
 
 // ── Per-target static call offset tests ────────────────────────
@@ -913,20 +801,6 @@ use crate::passes::BranchFlipPass;
 // ── PlatformCapabilities tests ──────────────────────────────
 
 #[test]
-fn test_platform_test_default_returns_valid_result() {
-    let caps = PlatformCapabilities::test_default();
-    #[cfg(target_arch = "x86_64")]
-    {
-        assert_eq!(caps.arch, Arch::X86_64);
-    }
-    #[cfg(target_arch = "aarch64")]
-    {
-        assert_eq!(caps.arch, Arch::Aarch64);
-    }
-    let _ = format!("{:?}", caps);
-}
-
-#[test]
 fn test_pass_skips_without_platform_capability() {
     // A pass that requires CMOV (cond_select on x86) should skip when the
     // platform capability is unavailable.
@@ -965,16 +839,6 @@ fn test_pass_skips_without_platform_capability() {
         .sites_skipped
         .iter()
         .any(|s| s.reason.contains("CMOV")));
-}
-
-#[test]
-fn test_pass_names_method() {
-    let mut pm = PassManager::new();
-    pm.add_pass(NoOpPass);
-    pm.add_pass(AppendNopPass);
-
-    let names = pm.pass_names();
-    assert_eq!(names, vec!["noop", "append_nop"]);
 }
 
 #[test]

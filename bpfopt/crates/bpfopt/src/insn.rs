@@ -563,11 +563,6 @@ mod tests {
     }
 
     #[test]
-    fn test_struct_size() {
-        assert_eq!(std::mem::size_of::<BpfInsn>(), 8);
-    }
-
-    #[test]
     fn test_make_regs_roundtrip() {
         for dst in 0..=15 {
             for src in 0..=15 {

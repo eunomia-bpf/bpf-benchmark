@@ -220,20 +220,6 @@ fn test_default_pipeline_wide_mem() {
 }
 
 #[test]
-fn test_default_pipeline_starts_with_map_inline() {
-    let pm = build_full_pipeline();
-    assert_eq!(pm.pass_names().first().copied(), Some("map_inline"));
-    assert_eq!(pm.pass_names().get(1).copied(), Some("const_prop"));
-    assert_eq!(pm.pass_names().get(2).copied(), Some("dce"));
-}
-
-#[test]
-fn test_default_pipeline_ends_with_branch_flip() {
-    let pm = build_full_pipeline();
-    assert_eq!(pm.pass_names().last().copied(), Some("branch_flip"));
-}
-
-#[test]
 fn test_map_inline_only_pipeline_contains_only_map_inline() {
     let pm =
         build_custom_pipeline(&["map_inline".to_string()]).expect("custom pipeline should build");
@@ -643,41 +629,5 @@ fn test_full_pipeline_real_bytecode_endian_swap_dense() {
         prog.insns.len(),
         endian_result.map_or(0, |r| r.sites_applied),
         endian_result.map_or(0, |r| r.sites_skipped.len()),
-    );
-}
-
-/// Run the full pipeline on cond_select_dense.bpf.o.
-/// Note: clang may emit `Jcc +1; MOV` instead of the 4-insn diamond
-/// (`Jcc +2; MOV; JA +1; MOV`) that the cond_select scanner matches.
-/// This test verifies the pipeline completes without error on real bytecode.
-#[test]
-fn test_full_pipeline_real_bytecode_cmov_select() {
-    let path = crate::insn::micro_program_path("cond_select_dense.bpf.o");
-    let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
-        Some(i) if !i.is_empty() => i,
-        _ => {
-            eprintln!("SKIP: {} not found or empty (run `make micro` first)", path);
-            return;
-        }
-    };
-    let orig_len = insns.len();
-    let mut prog = make_program(insns);
-    let mut ctx = PassContext::test_default();
-    ctx.kinsn_registry.select64_btf_id = 9999;
-    ctx.platform.has_cmov = true;
-    let pm = build_full_pipeline();
-    let result = pm.run(&mut prog, &ctx).unwrap();
-
-    assert!(
-        prog.insns.last().map_or(false, |i| i.is_exit()),
-        "cond_select_dense pipeline output should end with EXIT"
-    );
-    // The program has conditional branches but clang may not emit the exact
-    // 4-insn diamond pattern. Verify the pipeline ran without error.
-    eprintln!(
-        "  cond_select_dense.bpf.o: {} -> {} insns, {} total sites",
-        orig_len,
-        prog.insns.len(),
-        result.total_sites_applied
     );
 }
