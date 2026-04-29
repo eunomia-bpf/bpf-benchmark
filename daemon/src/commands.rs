@@ -2,14 +2,15 @@
 //! Socket command helpers backed by bpfopt-suite CLI subprocesses.
 
 use std::collections::{BTreeMap, HashMap};
-use std::fs;
+use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::os::fd::{AsRawFd, OwnedFd};
+use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
+use std::time::Instant;
 
 use anyhow::{anyhow, bail, Context, Result};
 use serde::ser::{SerializeSeq, Serializer};
@@ -19,9 +20,19 @@ use crate::bpf;
 use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
 
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
-const KEEP_FAILURES_ENV: &str = "BPFREJIT_DAEMON_KEEP_FAILURES";
-const FAILURE_DIR_ENV: &str = "BPFREJIT_DAEMON_FAILURE_DIR";
-const DEFAULT_FAILURE_DIR: &str = "/var/lib/bpfrejit-daemon/failures";
+const FAILURE_ROOT_ENV: &str = "BPFREJIT_DAEMON_FAILURE_ROOT";
+const FAILURE_LAYOUT_ENV: &str = "BPFREJIT_DAEMON_FAILURE_LAYOUT";
+const DEFAULT_FAILURE_ROOT: &str = "/var/lib/bpfrejit-daemon/failures";
+const FAILURE_LAYOUT_DIRECT: &str = "direct";
+const FAILURE_LAYOUT_ACTIVE_RUN_DETAILS: &str = "active-run-details";
+const INSIDE_RUNTIME_CONTAINER_ENV: &str = "BPFREJIT_INSIDE_RUNTIME_CONTAINER";
+const IMAGE_WORKSPACE_ENV: &str = "BPFREJIT_IMAGE_WORKSPACE";
+const RESULT_ROOT_SUFFIXES: &[&str] = &[
+    "micro/results",
+    "corpus/results",
+    "e2e/results",
+    "tests/results",
+];
 
 #[derive(Clone, Debug)]
 pub(crate) struct CliConfig {
@@ -89,56 +100,223 @@ impl Drop for WorkDir {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum FailureExportLayout {
+    Direct,
+    ActiveRunDetails,
+}
+
+impl FailureExportLayout {
+    fn parse(value: &str) -> Result<Self> {
+        match value.trim() {
+            FAILURE_LAYOUT_DIRECT => Ok(Self::Direct),
+            FAILURE_LAYOUT_ACTIVE_RUN_DETAILS => Ok(Self::ActiveRunDetails),
+            _ => bail!(
+                "{FAILURE_LAYOUT_ENV} must be one of {FAILURE_LAYOUT_DIRECT},{FAILURE_LAYOUT_ACTIVE_RUN_DETAILS}"
+            ),
+        }
+    }
+}
+
 #[derive(Debug)]
-struct FailureRetentionConfig {
-    keep: bool,
+struct FailureExportConfig {
     root: PathBuf,
+    layout: FailureExportLayout,
 }
 
-impl FailureRetentionConfig {
+impl FailureExportConfig {
     fn from_env() -> Result<Self> {
-        let keep = match std::env::var(KEEP_FAILURES_ENV) {
-            Ok(value) => parse_bool_env(KEEP_FAILURES_ENV, &value)?,
-            Err(std::env::VarError::NotPresent) => true,
-            Err(err) => return Err(err).with_context(|| format!("read {KEEP_FAILURES_ENV}")),
+        let explicit_root = std::env::var_os(FAILURE_ROOT_ENV);
+        let runtime_root = runtime_container_failure_root()?;
+        let default_layout = if explicit_root.is_none() && runtime_root.is_some() {
+            FailureExportLayout::ActiveRunDetails
+        } else {
+            FailureExportLayout::Direct
         };
-        let root = std::env::var_os(FAILURE_DIR_ENV)
+        let layout = match std::env::var(FAILURE_LAYOUT_ENV) {
+            Ok(value) => FailureExportLayout::parse(&value)?,
+            Err(std::env::VarError::NotPresent) => default_layout,
+            Err(err) => return Err(err).with_context(|| format!("read {FAILURE_LAYOUT_ENV}")),
+        };
+        if matches!(layout, FailureExportLayout::ActiveRunDetails)
+            && explicit_root.is_none()
+            && runtime_root.is_none()
+        {
+            bail!("{FAILURE_LAYOUT_ENV}={FAILURE_LAYOUT_ACTIVE_RUN_DETAILS} requires {FAILURE_ROOT_ENV}");
+        }
+        let root = explicit_root
             .map(PathBuf::from)
-            .unwrap_or_else(|| PathBuf::from(DEFAULT_FAILURE_DIR));
-        Ok(Self { keep, root })
+            .or(runtime_root)
+            .unwrap_or_else(|| PathBuf::from(DEFAULT_FAILURE_ROOT));
+        Ok(Self { root, layout })
+    }
+
+    fn validate_configured_root(&self) -> Result<()> {
+        ensure_writable_dir(&self.root, "failure export root")
+            .with_context(|| format!("{FAILURE_ROOT_ENV}={}", self.root.display()))
+    }
+
+    fn resolve_failure_root(&self) -> Result<PathBuf> {
+        self.validate_configured_root()?;
+        match self.layout {
+            FailureExportLayout::Direct => Ok(self.root.clone()),
+            FailureExportLayout::ActiveRunDetails => active_run_details_failure_root(&self.root),
+        }
     }
 }
 
-fn parse_bool_env(name: &str, value: &str) -> Result<bool> {
-    match value.trim().to_ascii_lowercase().as_str() {
-        "1" | "true" | "yes" | "on" => Ok(true),
-        "0" | "false" | "no" | "off" => Ok(false),
-        _ => bail!("{name} must be one of 1,0,true,false,yes,no,on,off"),
-    }
-}
-
-fn preserve_failure_workdir(workdir: &WorkDir, prog_id: u32) -> Result<Option<PathBuf>> {
-    let config = FailureRetentionConfig::from_env()?;
-    if !config.keep {
+fn runtime_container_failure_root() -> Result<Option<PathBuf>> {
+    let inside = match std::env::var(INSIDE_RUNTIME_CONTAINER_ENV) {
+        Ok(value) => value == "1",
+        Err(std::env::VarError::NotPresent) => false,
+        Err(err) => {
+            return Err(err).with_context(|| format!("read {INSIDE_RUNTIME_CONTAINER_ENV}"));
+        }
+    };
+    if !inside {
         return Ok(None);
     }
-    fs::create_dir_all(&config.root)
-        .with_context(|| format!("create failure directory {}", config.root.display()))?;
-    let timestamp = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .context("system clock is before UNIX_EPOCH")?;
-    let unique = NEXT_WORKDIR_ID.fetch_add(1, Ordering::Relaxed);
-    let failure_dir = config.root.join(format!(
-        "{}_{}_{:09}_{}",
-        prog_id,
-        timestamp.as_secs(),
-        timestamp.subsec_nanos(),
-        unique
+    let workspace = std::env::var_os(IMAGE_WORKSPACE_ENV)
+        .ok_or_else(|| anyhow!("{IMAGE_WORKSPACE_ENV} is required inside the runtime container"))?;
+    Ok(Some(PathBuf::from(workspace)))
+}
+
+pub(crate) fn validate_failure_export_root_from_env() -> Result<()> {
+    FailureExportConfig::from_env()?.validate_configured_root()
+}
+
+fn ensure_writable_dir(path: &Path, description: &str) -> Result<()> {
+    fs::create_dir_all(path).with_context(|| format!("create {description} {}", path.display()))?;
+    let metadata =
+        fs::metadata(path).with_context(|| format!("stat {description} {}", path.display()))?;
+    if !metadata.is_dir() {
+        bail!("{description} {} is not a directory", path.display());
+    }
+    let probe = path.join(format!(
+        ".bpfrejit-write-probe-{}-{}",
+        std::process::id(),
+        NEXT_WORKDIR_ID.fetch_add(1, Ordering::Relaxed)
     ));
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&probe)
+        .with_context(|| format!("create write probe {}", probe.display()))?;
+    file.write_all(b"probe")
+        .with_context(|| format!("write probe {}", probe.display()))?;
+    drop(file);
+    fs::remove_file(&probe).with_context(|| format!("remove write probe {}", probe.display()))?;
+    Ok(())
+}
+
+fn active_run_details_failure_root(results_root: &Path) -> Result<PathBuf> {
+    let parent_pid = unsafe { libc::getppid() as u64 };
+    let mut candidates = Vec::new();
+    for search_root in active_run_search_roots(results_root)? {
+        collect_active_run_candidates(&search_root, parent_pid, &mut candidates)?;
+    }
+    if candidates.len() != 1 {
+        let rendered = candidates
+            .iter()
+            .map(|path| path.display().to_string())
+            .collect::<Vec<_>>()
+            .join(", ");
+        bail!(
+            "{FAILURE_LAYOUT_ENV}={FAILURE_LAYOUT_ACTIVE_RUN_DETAILS} expected exactly one active run under {}, found {}{}",
+            results_root.display(),
+            candidates.len(),
+            if rendered.is_empty() {
+                String::new()
+            } else {
+                format!(": {rendered}")
+            }
+        );
+    }
+    Ok(candidates.remove(0).join("details").join("failures"))
+}
+
+fn active_run_search_roots(root: &Path) -> Result<Vec<PathBuf>> {
+    let mut roots = Vec::new();
+    if root.is_dir() {
+        roots.push(root.to_path_buf());
+    }
+    for suffix in RESULT_ROOT_SUFFIXES {
+        let candidate = root.join(suffix);
+        match fs::metadata(&candidate) {
+            Ok(metadata) if metadata.is_dir() => roots.push(candidate),
+            Ok(_) => bail!(
+                "active-run search root {} is not a directory",
+                candidate.display()
+            ),
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
+            Err(err) => return Err(err).with_context(|| format!("stat {}", candidate.display())),
+        }
+    }
+    if roots.is_empty() {
+        bail!("active-run search root {} does not exist", root.display());
+    }
+    Ok(roots)
+}
+
+fn collect_active_run_candidates(
+    results_root: &Path,
+    parent_pid: u64,
+    candidates: &mut Vec<PathBuf>,
+) -> Result<()> {
+    for entry in fs::read_dir(results_root)
+        .with_context(|| format!("read failure result root {}", results_root.display()))?
+    {
+        let entry = entry?;
+        if !entry.file_type()?.is_dir() {
+            continue;
+        }
+        let run_dir = entry.path();
+        let metadata_path = run_dir.join("metadata.json");
+        let metadata_text = match fs::read_to_string(&metadata_path) {
+            Ok(text) => text,
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => continue,
+            Err(err) => {
+                return Err(err)
+                    .with_context(|| format!("read run metadata {}", metadata_path.display()));
+            }
+        };
+        let metadata: serde_json::Value = serde_json::from_str(&metadata_text)
+            .with_context(|| format!("parse run metadata {}", metadata_path.display()))?;
+        if running_metadata_matches_parent(&metadata, parent_pid) {
+            candidates.push(run_dir);
+        }
+    }
+    Ok(())
+}
+
+fn running_metadata_matches_parent(metadata: &serde_json::Value, parent_pid: u64) -> bool {
+    let status = match metadata.get("status").and_then(serde_json::Value::as_str) {
+        Some(status) => status,
+        None => return false,
+    };
+    if status != "running" {
+        return false;
+    }
+    match metadata
+        .get("launcher_pid")
+        .and_then(serde_json::Value::as_u64)
+    {
+        Some(pid) => pid == parent_pid,
+        None => true,
+    }
+}
+
+fn preserve_failure_workdir(workdir: &WorkDir, prog_id: u32) -> Result<PathBuf> {
+    let config = FailureExportConfig::from_env()?;
+    let failure_root = config.resolve_failure_root()?;
+    ensure_writable_dir(&failure_root, "failure directory")
+        .with_context(|| format!("prepare failure directory {}", failure_root.display()))?;
+    let failure_dir = failure_root.join(prog_id.to_string());
     fs::create_dir(&failure_dir)
         .with_context(|| format!("create failure workdir {}", failure_dir.display()))?;
     copy_dir_contents(workdir.path(), &failure_dir)?;
-    Ok(Some(failure_dir))
+    normalize_failure_artifacts(&failure_dir, prog_id)?;
+    Ok(failure_dir)
 }
 
 fn copy_dir_contents(src: &Path, dst: &Path) -> Result<()> {
@@ -161,6 +339,177 @@ fn copy_dir_contents(src: &Path, dst: &Path) -> Result<()> {
         }
     }
     Ok(())
+}
+
+fn normalize_failure_artifacts(failure_dir: &Path, prog_id: u32) -> Result<()> {
+    copy_alias_if_present(&failure_dir.join("prog.bin"), &failure_dir.join("prog.bpf"))?;
+    copy_alias_if_present(
+        &failure_dir.join("prog_info.json"),
+        &failure_dir.join("info.json"),
+    )?;
+    let rejit_verifier_log = failure_dir.join("bpfrejit_failure_verifier.log");
+    if nonempty_regular_file(&rejit_verifier_log)? {
+        fs::copy(&rejit_verifier_log, failure_dir.join("verifier.log")).with_context(|| {
+            format!(
+                "copy {} to {}",
+                rejit_verifier_log.display(),
+                failure_dir.join("verifier.log").display()
+            )
+        })?;
+    }
+    write_replay_script(failure_dir, prog_id)?;
+    require_regular_file(&failure_dir.join("prog.bpf"), "failure prog.bpf")?;
+    require_regular_file(&failure_dir.join("info.json"), "failure info.json")?;
+    require_regular_file(&failure_dir.join("replay.sh"), "failure replay.sh")?;
+    require_nonempty_file(&failure_dir.join("verifier.log"), "failure verifier.log")?;
+    Ok(())
+}
+
+fn copy_alias_if_present(source: &Path, target: &Path) -> Result<()> {
+    match fs::metadata(source) {
+        Ok(metadata) => {
+            if !metadata.is_file() {
+                bail!(
+                    "failure artifact {} is not a regular file",
+                    source.display()
+                );
+            }
+            fs::copy(source, target)
+                .with_context(|| format!("copy {} to {}", source.display(), target.display()))?;
+            Ok(())
+        }
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(err) => Err(err).with_context(|| format!("stat {}", source.display())),
+    }
+}
+
+fn nonempty_regular_file(path: &Path) -> Result<bool> {
+    match fs::metadata(path) {
+        Ok(metadata) => {
+            if !metadata.is_file() {
+                bail!("failure artifact {} is not a regular file", path.display());
+            }
+            Ok(metadata.len() > 0)
+        }
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(false),
+        Err(err) => Err(err).with_context(|| format!("stat {}", path.display())),
+    }
+}
+
+fn require_regular_file(path: &Path, description: &str) -> Result<()> {
+    match fs::metadata(path) {
+        Ok(metadata) => {
+            if !metadata.is_file() {
+                bail!("{description} {} is not a regular file", path.display());
+            }
+            Ok(())
+        }
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+            bail!("{description} {} is missing", path.display())
+        }
+        Err(err) => Err(err).with_context(|| format!("stat {}", path.display())),
+    }
+}
+
+fn require_nonempty_file(path: &Path, description: &str) -> Result<()> {
+    require_regular_file(path, description)?;
+    let metadata = fs::metadata(path).with_context(|| format!("stat {}", path.display()))?;
+    if metadata.len() == 0 {
+        bail!("{description} {} is empty", path.display());
+    }
+    Ok(())
+}
+
+fn write_replay_script(failure_dir: &Path, prog_id: u32) -> Result<()> {
+    let info_json = failure_dir.join("info.json");
+    require_regular_file(&info_json, "failure info.json")?;
+    let prog_info: ProgInfoJson = read_json_file(&info_json, "failure info.json")?;
+    let load_context_args = replay_load_context_args(&prog_info);
+    let verify_args = render_shell_args(&load_context_args);
+    let script = format!(
+        r#"#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")"
+
+prog_id="${{1:-{prog_id}}}"
+candidate="${{BPFREJIT_REPLAY_CANDIDATE:-verified.bin}}"
+if [ ! -f "$candidate" ]; then
+    candidate=opt.bin
+fi
+if [ ! -f "$candidate" ]; then
+    candidate=prog.bpf
+fi
+
+fd_array_args=()
+if [ -s fd_array.json ]; then
+    fd_array_args=(--fd-array fd_array.json)
+fi
+
+"${{BPFVERIFY:-bpfverify}}" {verify_args} "${{fd_array_args[@]}}" \
+    --input "$candidate" \
+    --output replay.verified.bin \
+    --report replay_bpfverify_report.json
+"${{BPFREJIT:-bpfrejit}}" "$prog_id" replay.verified.bin \
+    --map-fds map_fds.json \
+    --output replay_bpfrejit_summary.json \
+    "${{fd_array_args[@]}}"
+"#,
+    );
+    let script_path = failure_dir.join("replay.sh");
+    fs::write(&script_path, script).with_context(|| format!("write {}", script_path.display()))?;
+    let mut permissions = fs::metadata(&script_path)?.permissions();
+    permissions.set_mode(0o755);
+    fs::set_permissions(&script_path, permissions)
+        .with_context(|| format!("chmod +x {}", script_path.display()))?;
+    Ok(())
+}
+
+fn replay_load_context_args(prog_info: &ProgInfoJson) -> Vec<String> {
+    let mut args = vec![
+        "--prog-type".to_string(),
+        prog_info.prog_type.name.clone(),
+        "--map-fds".to_string(),
+        "map_fds.json".to_string(),
+    ];
+    if let Some(attach_type) = &prog_info.expected_attach_type {
+        args.push("--expected-attach-type".to_string());
+        if attach_type.name.trim().is_empty() {
+            args.push(attach_type.numeric.to_string());
+        } else {
+            args.push(attach_type.name.clone());
+        }
+    }
+    if prog_info.btf_id != 0 {
+        args.push("--prog-btf-id".to_string());
+        args.push(prog_info.btf_id.to_string());
+    }
+    if prog_info.attach_btf_id != 0 {
+        args.push("--attach-btf-id".to_string());
+        args.push(prog_info.attach_btf_id.to_string());
+    }
+    if prog_info.attach_btf_obj_id != 0 {
+        args.push("--attach-btf-obj-id".to_string());
+        args.push(prog_info.attach_btf_obj_id.to_string());
+    }
+    args
+}
+
+fn render_shell_args(args: &[String]) -> String {
+    args.iter()
+        .map(|arg| shell_quote(arg))
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn shell_quote(value: &str) -> String {
+    if !value.is_empty()
+        && value.bytes().all(|byte| {
+            byte.is_ascii_alphanumeric() || matches!(byte, b'_' | b'-' | b'.' | b'/' | b':')
+        })
+    {
+        return value.to_string();
+    }
+    format!("'{}'", value.replace('\'', "'\\''"))
 }
 
 #[derive(Debug)]
@@ -1194,14 +1543,13 @@ where
     match result {
         Ok(result) => Ok(result),
         Err(err) => match preserve_failure_workdir(&workdir, prog_id) {
-            Ok(Some(path)) => {
+            Ok(path) => {
                 eprintln!(
                     "daemon: preserved failure workdir for prog {prog_id} at {}",
                     path.display()
                 );
                 Err(err).with_context(|| format!("preserved failure workdir: {}", path.display()))
             }
-            Ok(None) => Err(err),
             Err(preserve_err) => Err(err).with_context(|| {
                 format!("failed to preserve failure workdir for prog {prog_id}: {preserve_err:#}")
             }),
@@ -1932,33 +2280,34 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"p
         Ok(())
     }
 
-    fn with_failure_retention_env<T>(
-        keep: &str,
-        failure_dir: Option<&Path>,
+    fn with_failure_export_env<T>(
+        failure_root: &Path,
+        layout: Option<&str>,
         f: impl FnOnce() -> T,
     ) -> T {
         let _guard = ENV_LOCK
             .lock()
-            .expect("failure retention env lock should not be poisoned");
-        let old_keep = std::env::var_os(KEEP_FAILURES_ENV);
-        let old_dir = std::env::var_os(FAILURE_DIR_ENV);
-        std::env::set_var(KEEP_FAILURES_ENV, keep);
-        if let Some(dir) = failure_dir {
-            std::env::set_var(FAILURE_DIR_ENV, dir);
+            .expect("failure export env lock should not be poisoned");
+        let old_root = std::env::var_os(FAILURE_ROOT_ENV);
+        let old_layout = std::env::var_os(FAILURE_LAYOUT_ENV);
+        std::env::set_var(FAILURE_ROOT_ENV, failure_root);
+        if let Some(layout) = layout {
+            std::env::set_var(FAILURE_LAYOUT_ENV, layout);
         } else {
-            std::env::remove_var(FAILURE_DIR_ENV);
+            std::env::remove_var(FAILURE_LAYOUT_ENV);
         }
         let result = catch_unwind(AssertUnwindSafe(f));
-        restore_env(KEEP_FAILURES_ENV, old_keep);
-        restore_env(FAILURE_DIR_ENV, old_dir);
+        restore_env(FAILURE_ROOT_ENV, old_root);
+        restore_env(FAILURE_LAYOUT_ENV, old_layout);
         match result {
             Ok(value) => value,
             Err(payload) => resume_unwind(payload),
         }
     }
 
-    fn with_failure_retention_disabled<T>(f: impl FnOnce() -> T) -> T {
-        with_failure_retention_env("0", None, f)
+    fn with_temp_failure_root<T>(f: impl FnOnce(&Path) -> T) -> T {
+        let failure_root = WorkDir::new("bpfrejit-daemon-failure-root").unwrap();
+        with_failure_export_env(failure_root.path(), None, || f(failure_root.path()))
     }
 
     fn restore_env(name: &str, value: Option<OsString>) {
@@ -2015,7 +2364,7 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"p
 
     #[test]
     fn verifier_states_failure_is_error() {
-        with_failure_retention_disabled(|| {
+        with_temp_failure_root(|_| {
             let fake = FakeCliDir::new().unwrap();
             fake.replace_command(
                 "bpfverify",
@@ -2049,7 +2398,7 @@ done
 
     #[test]
     fn final_verify_failure_is_error() {
-        with_failure_retention_disabled(|| {
+        with_temp_failure_root(|_| {
             let fake = FakeCliDir::new().unwrap();
             fake.replace_command(
                 "bpfverify",
@@ -2079,7 +2428,7 @@ exit 9
 
     #[test]
     fn rejit_failure_is_error() {
-        with_failure_retention_disabled(|| {
+        with_temp_failure_root(|_| {
             let fake = FakeCliDir::new().unwrap();
             fake.replace_command(
                 "bpfrejit",
@@ -2109,8 +2458,7 @@ exit 11
 
     #[test]
     fn rejit_failure_preserves_workdir_and_captures_verifier_log() {
-        let failure_root = WorkDir::new("bpfrejit-daemon-failure-root").unwrap();
-        with_failure_retention_env("1", Some(failure_root.path()), || {
+        with_temp_failure_root(|failure_root| {
             let fake = FakeCliDir::new().unwrap();
             fake.replace_command(
                 "bpfrejit",
@@ -2138,17 +2486,16 @@ exit 11
             assert!(message.contains("verifier log summary"));
             assert!(message.contains("synthetic verifier log"));
 
-            let dirs = fs::read_dir(failure_root.path())
-                .unwrap()
-                .map(|entry| entry.unwrap().path())
-                .collect::<Vec<_>>();
-            assert_eq!(dirs.len(), 1);
-            let failure_dir = &dirs[0];
+            let failure_dir = failure_root.join("42");
+            assert!(failure_dir.is_dir());
             for name in [
                 "prog.bin",
+                "prog.bpf",
                 "opt.bin",
                 "verified.bin",
                 "map_fds.json",
+                "info.json",
+                "replay.sh",
                 "bpfopt_report.json",
                 "bpfverify_report.json",
                 "verifier.log",
@@ -2160,7 +2507,60 @@ exit 11
                     "missing preserved artifact {name}"
                 );
             }
+            assert_eq!(
+                fs::read_to_string(failure_dir.join("verifier.log")).unwrap(),
+                "synthetic verifier log"
+            );
         });
+    }
+
+    #[test]
+    fn active_run_details_layout_exports_under_running_artifact_dir() {
+        let results_root = WorkDir::new("bpfrejit-daemon-results-root").unwrap();
+        let run_dir = results_root.path().join("tracee_20260429_120000_000001");
+        fs::create_dir(&run_dir).unwrap();
+        fs::write(
+            run_dir.join("metadata.json"),
+            r#"{"status":"running","run_type":"tracee"}"#,
+        )
+        .unwrap();
+        with_failure_export_env(
+            results_root.path(),
+            Some(FAILURE_LAYOUT_ACTIVE_RUN_DETAILS),
+            || {
+                let fake = FakeCliDir::new().unwrap();
+                fake.replace_command(
+                    "bpfrejit",
+                    r#"#!/usr/bin/env bash
+set -euo pipefail
+printf 'synthetic rejit failure\n' >&2
+exit 11
+"#,
+                )
+                .unwrap();
+
+                let err = try_apply_one(
+                    42,
+                    &fake.config(),
+                    Some(&["wide_mem".to_string()]),
+                    None,
+                    None,
+                    OptimizeMode::Apply,
+                )
+                .unwrap_err();
+
+                let message = format!("{err:#}");
+                let failure_dir = run_dir.join("details").join("failures").join("42");
+                assert!(message.contains(&failure_dir.display().to_string()));
+                assert!(failure_dir.join("prog.bpf").is_file());
+                assert!(failure_dir.join("info.json").is_file());
+                assert!(failure_dir.join("replay.sh").is_file());
+                assert_eq!(
+                    fs::read_to_string(failure_dir.join("verifier.log")).unwrap(),
+                    "synthetic verifier log"
+                );
+            },
+        );
     }
 
     #[test]

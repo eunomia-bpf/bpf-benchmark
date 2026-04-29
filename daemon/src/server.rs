@@ -250,6 +250,7 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
     let mut watcher = ProgramWatcher::from_live();
     let mut profiling_state: Option<ProfilingState> = None;
 
+    commands::validate_failure_export_root_from_env()?;
     remove_socket_file_if_present(socket_path)?;
 
     let listener = UnixListener::bind(socket_path)
