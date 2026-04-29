@@ -23,6 +23,12 @@ Corpus performance is measured per-program, not per-app:
 ### No Redundant Informational Fields
 Do not add `workload_miss`, `limitations`, or similar informational-only fields to result payloads. If something fails, it should surface as an error, not as a metadata annotation.
 
+### Fail-Fast: No Dead Code, Fallback, or Silenced Errors
+Keep the codebase fail-fast so missing v3 capabilities become visible defects instead of hidden behavior.
+- No dead code: every fn, struct, field, and constant must have a real caller; remove `#[allow(dead_code)]` targets, legacy wrappers, compatibility APIs, and public unused APIs.
+- No fallback: unsupported capability or command failure must exit 1 with friendly stderr, never downgrade to other logic, return partial results, or exit 0.
+- No silenced errors: propagate BPF syscall, IO, and parse errors; do not use `.ok()`, `let _ = result`, `unwrap_or_default`, or warning-and-continue for fallible work.
+
 ### Unit Test Quality
 Do not add unit tests unless they have a clear bug-detection purpose.
 Good unit tests cover logic branches, state changes, calculations, conversions, boundaries, error paths, external ABI/layout/serialization contracts, or bug regressions.
