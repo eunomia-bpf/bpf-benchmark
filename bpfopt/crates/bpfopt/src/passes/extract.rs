@@ -236,12 +236,7 @@ mod tests {
     }
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_EXIT,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        }
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
     fn ctx_with_extract_kfunc(btf_id: i32) -> PassContext {
@@ -252,12 +247,12 @@ mod tests {
     }
 
     fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_JEQ | BPF_K,
-            regs: BpfInsn::make_regs(dst, 0),
+        BpfInsn::new(
+            BPF_JMP | BPF_JEQ | BPF_K,
+            BpfInsn::make_regs(dst, 0),
             off,
             imm,
-        }
+        )
     }
 
     // ── contiguous_mask_len tests ──────────────────────────────────

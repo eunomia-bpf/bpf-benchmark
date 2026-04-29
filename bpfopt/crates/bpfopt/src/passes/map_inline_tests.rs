@@ -9,90 +9,70 @@ use crate::verifier_log::parse_verifier_log;
 
 fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
     [
-        BpfInsn {
-            code: BPF_LD | BPF_DW | BPF_IMM,
-            regs: BpfInsn::make_regs(dst, src),
-            off: 0,
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(dst, src),
+            0,
             imm,
-        },
-        BpfInsn {
-            code: 0,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        },
+        ),
+        BpfInsn::new(0, 0, 0, 0),
     ]
 }
 
 fn ld_imm64_parts(dst: u8, src: u8, imm_lo: i32, imm_hi: i32) -> [BpfInsn; 2] {
     [
-        BpfInsn {
-            code: BPF_LD | BPF_DW | BPF_IMM,
-            regs: BpfInsn::make_regs(dst, src),
-            off: 0,
-            imm: imm_lo,
-        },
-        BpfInsn {
-            code: 0,
-            regs: 0,
-            off: 0,
-            imm: imm_hi,
-        },
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(dst, src),
+            0,
+            imm_lo,
+        ),
+        BpfInsn::new(0, 0, 0, imm_hi),
     ]
 }
 
 fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> BpfInsn {
-    BpfInsn {
-        code: BPF_ST | size | BPF_MEM,
-        regs: BpfInsn::make_regs(dst, 0),
+    BpfInsn::new(
+        BPF_ST | size | BPF_MEM,
+        BpfInsn::make_regs(dst, 0),
         off,
         imm,
-    }
+    )
 }
 
 fn add64_imm(dst: u8, imm: i32) -> BpfInsn {
-    BpfInsn {
-        code: BPF_ALU64 | BPF_ADD | BPF_K,
-        regs: BpfInsn::make_regs(dst, 0),
-        off: 0,
+    BpfInsn::new(
+        BPF_ALU64 | BPF_ADD | BPF_K,
+        BpfInsn::make_regs(dst, 0),
+        0,
         imm,
-    }
+    )
 }
 
 fn call_helper(imm: i32) -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_CALL,
-        regs: BpfInsn::make_regs(0, 0),
-        off: 0,
-        imm,
-    }
+    BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, imm)
 }
 
 fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_JEQ | BPF_K,
-        regs: BpfInsn::make_regs(dst, 0),
+    BpfInsn::new(
+        BPF_JMP | BPF_JEQ | BPF_K,
+        BpfInsn::make_regs(dst, 0),
         off,
         imm,
-    }
+    )
 }
 
 fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_JNE | BPF_K,
-        regs: BpfInsn::make_regs(dst, 0),
+    BpfInsn::new(
+        BPF_JMP | BPF_JNE | BPF_K,
+        BpfInsn::make_regs(dst, 0),
         off,
         imm,
-    }
+    )
 }
 
 fn exit_insn() -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_EXIT,
-        regs: 0,
-        off: 0,
-        imm: 0,
-    }
+    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
 }
 
 fn ja(off: i16) -> BpfInsn {
@@ -1661,12 +1641,7 @@ fn classify_r0_uses_tracks_backward_jeq_null_check() {
     let uses = classify_r0_uses(
         &[
             call_helper(HELPER_MAP_LOOKUP_ELEM),
-            BpfInsn {
-                code: BPF_JMP | BPF_JEQ | BPF_K,
-                regs: BpfInsn::make_regs(0, 0),
-                off: -1,
-                imm: 0,
-            },
+            BpfInsn::new(BPF_JMP | BPF_JEQ | BPF_K, BpfInsn::make_regs(0, 0), -1, 0),
             BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
             BpfInsn::mov64_imm(0, 0),
             exit_insn(),
@@ -2080,12 +2055,7 @@ fn map_inline_pass_rewrites_lookup_inside_subprog() {
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
-        BpfInsn {
-            code: BPF_JMP | BPF_CALL,
-            regs: BpfInsn::make_regs(0, 1),
-            off: 0,
-            imm: 2,
-        },
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 1), 0, 2),
         BpfInsn::mov64_imm(0, 0),
         exit_insn(),
         BpfInsn::mov64_imm(9, 0),
@@ -2113,12 +2083,7 @@ fn map_inline_pass_rewrites_lookup_inside_subprog() {
     assert_eq!(
         program.insns,
         vec![
-            BpfInsn {
-                code: BPF_JMP | BPF_CALL,
-                regs: BpfInsn::make_regs(0, 1),
-                off: 0,
-                imm: 2,
-            },
+            BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 1), 0, 2),
             BpfInsn::mov64_imm(0, 0),
             exit_insn(),
             BpfInsn::mov64_imm(9, 0),

@@ -10,12 +10,9 @@ use crate::insn::*;
 use crate::pass::*;
 use crate::verifier_log::VerifierInsn;
 
-const BPF_ADD: u8 = 0x00;
-const BPF_SUB: u8 = 0x10;
-const BPF_MUL: u8 = 0x20;
-const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = 6;
-const BPF_PSEUDO_MAP_FD: u8 = 1;
-const BPF_PSEUDO_MAP_VALUE: u8 = 2;
+const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY as u32;
+const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
+const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
 const HELPER_KTIME_GET_NS: i32 = 5;
 const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
@@ -1621,18 +1618,13 @@ fn emit_constant_load(dst_reg: u8, value: u64, size: u8) -> Vec<BpfInsn> {
 
 fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
     vec![
-        BpfInsn {
-            code: BPF_LD | BPF_DW | BPF_IMM,
-            regs: BpfInsn::make_regs(dst_reg, 0),
-            off: 0,
-            imm: value as u32 as i32,
-        },
-        BpfInsn {
-            code: 0,
-            regs: 0,
-            off: 0,
-            imm: (value >> 32) as u32 as i32,
-        },
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(dst_reg, 0),
+            0,
+            value as u32 as i32,
+        ),
+        BpfInsn::new(0, 0, 0, (value >> 32) as u32 as i32),
     ]
 }
 

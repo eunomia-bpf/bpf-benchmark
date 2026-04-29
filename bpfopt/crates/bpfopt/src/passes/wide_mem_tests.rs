@@ -7,21 +7,16 @@ fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
 }
 
 fn exit_insn() -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_EXIT,
-        regs: 0,
-        off: 0,
-        imm: 0,
-    }
+    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
 }
 
 fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_JEQ | BPF_K,
-        regs: BpfInsn::make_regs(dst, 0),
+    BpfInsn::new(
+        BPF_JMP | BPF_JEQ | BPF_K,
+        BpfInsn::make_regs(dst, 0),
         off,
         imm,
-    }
+    )
 }
 
 /// Build a canonical 4-byte low-byte-first byte-ladder (Variant A).
@@ -102,12 +97,7 @@ fn test_scan_wide_mem_no_match() {
 fn test_scan_wide_mem_embedded_in_program() {
     let mut insns = vec![BpfInsn::mov64_imm(0, 0)];
     insns.extend(build_wide_mem_4(0, 6, 10));
-    insns.push(BpfInsn {
-        code: BPF_JMP | BPF_EXIT,
-        regs: 0,
-        off: 0,
-        imm: 0,
-    });
+    insns.push(BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0));
     let sites = scan_wide_mem(&insns);
     assert_eq!(sites.len(), 1);
     assert_eq!(sites[0].start_pc, 1);
@@ -224,12 +214,7 @@ fn test_scan_high_first_matches_clang_output() {
 fn test_scan_high_first_embedded() {
     let mut insns = vec![BpfInsn::mov64_imm(0, 0)];
     insns.extend(build_wide_mem_high_first_4(2, 3, 1, 8));
-    insns.push(BpfInsn {
-        code: BPF_JMP | BPF_EXIT,
-        regs: 0,
-        off: 0,
-        imm: 0,
-    });
+    insns.push(BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0));
     let sites = scan_wide_mem(&insns);
     assert_eq!(sites.len(), 1);
     assert_eq!(sites[0].start_pc, 1);
@@ -635,12 +620,12 @@ fn test_branch_fixup_backward_across_site() {
 #[test]
 fn test_conditional_branch_fixup() {
     let mut insns = Vec::new();
-    insns.push(BpfInsn {
-        code: BPF_JMP | BPF_JEQ | BPF_K,
-        regs: BpfInsn::make_regs(1, 0),
-        off: 10,
-        imm: 0,
-    });
+    insns.push(BpfInsn::new(
+        BPF_JMP | BPF_JEQ | BPF_K,
+        BpfInsn::make_regs(1, 0),
+        10,
+        0,
+    ));
     insns.extend(wide_mem_4_insns(0, 6, 0));
     insns.push(exit_insn());
 

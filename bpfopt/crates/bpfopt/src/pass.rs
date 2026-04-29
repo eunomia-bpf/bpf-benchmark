@@ -217,8 +217,8 @@ fn zero_filled_snapshot_lookup(
     key: &[u8],
     value_size: usize,
 ) -> Option<Vec<u8>> {
-    const BPF_MAP_TYPE_ARRAY: u32 = 2;
-    const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = 6;
+    const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY as u32;
+    const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY as u32;
 
     if !matches!(
         metadata.map_type,
@@ -355,8 +355,8 @@ impl BpfProgram {
     }
 }
 
-const BPF_PSEUDO_MAP_FD: u8 = 1;
-const BPF_PSEUDO_MAP_VALUE: u8 = 2;
+const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
+const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
 
 pub fn build_map_fd_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> HashMap<i32, u32> {
     let mut old_fd_to_map_id = HashMap::new();

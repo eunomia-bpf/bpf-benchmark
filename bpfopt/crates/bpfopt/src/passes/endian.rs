@@ -9,13 +9,6 @@ use super::utils::{
     emit_packed_kinsn_call_with_off, fixup_all_branches, resolve_kinsn_call_off_for_target,
 };
 
-/// BPF ALU endian operation code.
-const BPF_END: u8 = 0xd0;
-/// BPF_TO_BE source modifier (big-endian byte swap on LE host).
-const BPF_TO_BE: u8 = 0x08;
-/// BPF ALU ADD operation code.
-const BPF_ADD: u8 = 0x00;
-
 /// ENDIAN_FUSION optimization pass: replaces LDX_MEM + ENDIAN_TO_BE patterns
 /// with bpf_endian_loadXX() kfunc calls (lowered to MOVBE on x86 or
 /// LDR+REV on ARM64 by the JIT).
@@ -406,21 +399,16 @@ mod tests {
     }
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_EXIT,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        }
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
     fn endian_to_be(dst: u8, size: i32) -> BpfInsn {
-        BpfInsn {
-            code: BPF_ALU | BPF_END | BPF_TO_BE,
-            regs: BpfInsn::make_regs(dst, 0),
-            off: 0,
-            imm: size,
-        }
+        BpfInsn::new(
+            BPF_ALU | BPF_END | BPF_TO_BE,
+            BpfInsn::make_regs(dst, 0),
+            0,
+            size,
+        )
     }
 
     fn sidecar_payload(insn: &BpfInsn) -> u64 {
@@ -430,12 +418,12 @@ mod tests {
     }
 
     fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_JEQ | BPF_K,
-            regs: BpfInsn::make_regs(dst, 0),
+        BpfInsn::new(
+            BPF_JMP | BPF_JEQ | BPF_K,
+            BpfInsn::make_regs(dst, 0),
             off,
             imm,
-        }
+        )
     }
 
     fn ctx_with_endian_kfuncs(btf_id16: i32, btf_id32: i32, btf_id64: i32) -> PassContext {

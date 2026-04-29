@@ -10,7 +10,7 @@ use crate::analysis::{CFGAnalysis, CFGResult, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::{Analysis, BpfProgram, PassContext};
 
-const BPF_FUNC_TAIL_CALL: i32 = 12;
+const BPF_FUNC_TAIL_CALL: i32 = kernel_sys::BPF_FUNC_tail_call as i32;
 const BPF_TAIL_CALL: u8 = 0xf0;
 
 // ── Branch fixup ───────────────────────────────────────────────────
@@ -524,37 +524,22 @@ mod tests {
     use super::*;
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_EXIT,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        }
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
     fn call_helper(imm: i32) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_CALL,
-            regs: BpfInsn::make_regs(0, 0),
-            off: 0,
-            imm,
-        }
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, imm)
     }
 
     fn pseudo_func_ref(dst: u8, imm: i32) -> [BpfInsn; 2] {
         [
-            BpfInsn {
-                code: BPF_LD | BPF_DW | BPF_IMM,
-                regs: BpfInsn::make_regs(dst, BPF_PSEUDO_FUNC),
-                off: 0,
+            BpfInsn::new(
+                BPF_LD | BPF_DW | BPF_IMM,
+                BpfInsn::make_regs(dst, BPF_PSEUDO_FUNC),
+                0,
                 imm,
-            },
-            BpfInsn {
-                code: 0,
-                regs: 0,
-                off: 0,
-                imm: 0,
-            },
+            ),
+            BpfInsn::new(0, 0, 0, 0),
         ]
     }
 

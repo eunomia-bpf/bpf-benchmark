@@ -71,6 +71,7 @@ dependencies = [
  "anyhow",
  "clap",
  "goblin",
+ "kernel-sys",
  "serde",
  "serde_json",
 ]

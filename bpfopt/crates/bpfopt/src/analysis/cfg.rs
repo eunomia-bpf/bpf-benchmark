@@ -205,12 +205,7 @@ mod tests {
     }
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_EXIT,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        }
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
     #[test]
@@ -229,12 +224,7 @@ mod tests {
     #[test]
     fn cfg_branch_creates_blocks() {
         let insns = vec![
-            BpfInsn {
-                code: BPF_JMP | BPF_JEQ | BPF_K,
-                regs: BpfInsn::make_regs(1, 0),
-                off: 1,
-                imm: 0,
-            },
+            BpfInsn::new(BPF_JMP | BPF_JEQ | BPF_K, BpfInsn::make_regs(1, 0), 1, 0),
             BpfInsn::nop(),
             exit_insn(),
         ];

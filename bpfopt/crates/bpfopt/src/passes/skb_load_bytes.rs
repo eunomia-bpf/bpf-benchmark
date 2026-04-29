@@ -9,13 +9,10 @@ use crate::pass::*;
 
 use super::utils::fixup_all_branches;
 
-const BPF_ADD: u8 = 0x00;
-const BPF_SUB: u8 = 0x10;
+const BPF_FUNC_SKB_LOAD_BYTES: i32 = kernel_sys::BPF_FUNC_skb_load_bytes as i32;
 
-const BPF_FUNC_SKB_LOAD_BYTES: i32 = 26;
-
-const BPF_PROG_TYPE_SCHED_CLS: u32 = 3;
-const BPF_PROG_TYPE_SCHED_ACT: u32 = 4;
+const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS as u32;
+const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT as u32;
 
 const SKB_DATA_OFF: i16 = 76;
 const SKB_DATA_END_OFF: i16 = 80;
@@ -244,12 +241,12 @@ fn emit_replacement(site: RewriteSite, layout: PacketCtxLayout) -> Vec<BpfInsn> 
     insns.push(BpfInsn::ja(3));
     insns.push(BpfInsn::mov64_imm(2, site.offset));
     insns.push(BpfInsn::mov64_imm(4, site.len));
-    insns.push(BpfInsn {
-        code: BPF_JMP | BPF_CALL,
-        regs: BpfInsn::make_regs(0, 0),
-        off: 0,
-        imm: BPF_FUNC_SKB_LOAD_BYTES,
-    });
+    insns.push(BpfInsn::new(
+        BPF_JMP | BPF_CALL,
+        BpfInsn::make_regs(0, 0),
+        0,
+        BPF_FUNC_SKB_LOAD_BYTES,
+    ));
 
     insns
 }
@@ -392,12 +389,12 @@ fn extract_fp_stack_off(value: RegValue) -> Option<i32> {
 }
 
 fn jgt_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_JGT | BPF_X,
-        regs: BpfInsn::make_regs(dst, src),
+    BpfInsn::new(
+        BPF_JMP | BPF_JGT | BPF_X,
+        BpfInsn::make_regs(dst, src),
         off,
-        imm: 0,
-    }
+        0,
+    )
 }
 
 fn insn_width(insn: &BpfInsn) -> usize {
@@ -415,61 +412,49 @@ mod tests {
     use crate::analysis::BranchTargetAnalysis;
     use crate::pass::{BpfProgram, PassContext, PassManager};
 
-    const BPF_ADD: u8 = 0x00;
+    const BPF_FUNC_SKB_LOAD_BYTES: i32 = kernel_sys::BPF_FUNC_skb_load_bytes as i32;
+    const BPF_FUNC_DUMMY_HELPER: i32 = kernel_sys::BPF_FUNC_map_lookup_elem as i32;
 
-    const BPF_FUNC_SKB_LOAD_BYTES: i32 = 26;
-    const BPF_FUNC_DUMMY_HELPER: i32 = 1;
-
-    const BPF_PROG_TYPE_SOCKET_FILTER: u32 = 1;
-    const BPF_PROG_TYPE_SCHED_CLS: u32 = 3;
-    const BPF_PROG_TYPE_SCHED_ACT: u32 = 4;
+    const BPF_PROG_TYPE_SOCKET_FILTER: u32 = kernel_sys::BPF_PROG_TYPE_SOCKET_FILTER as u32;
+    const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS as u32;
+    const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT as u32;
 
     const SKB_DATA_OFF: i16 = 76;
     const SKB_DATA_END_OFF: i16 = 80;
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_EXIT,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        }
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
     fn helper_call(helper_id: i32) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_CALL,
-            regs: BpfInsn::make_regs(0, 0),
-            off: 0,
-            imm: helper_id,
-        }
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, helper_id)
     }
 
     fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_JEQ | BPF_K,
-            regs: BpfInsn::make_regs(dst, 0),
+        BpfInsn::new(
+            BPF_JMP | BPF_JEQ | BPF_K,
+            BpfInsn::make_regs(dst, 0),
             off,
             imm,
-        }
+        )
     }
 
     fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_JNE | BPF_K,
-            regs: BpfInsn::make_regs(dst, 0),
+        BpfInsn::new(
+            BPF_JMP | BPF_JNE | BPF_K,
+            BpfInsn::make_regs(dst, 0),
             off,
             imm,
-        }
+        )
     }
 
     fn jgt_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_JGT | BPF_X,
-            regs: BpfInsn::make_regs(dst, src),
+        BpfInsn::new(
+            BPF_JMP | BPF_JGT | BPF_X,
+            BpfInsn::make_regs(dst, src),
             off,
-            imm: 0,
-        }
+            0,
+        )
     }
 
     fn make_skb_load_bytes_setup(offset: i32, stack_off: i32, len: i32) -> Vec<BpfInsn> {

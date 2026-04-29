@@ -34,8 +34,8 @@ thread_local! {
     static MOCK_MAPS: RefCell<HashMap<u32, MockMapState>> = RefCell::new(HashMap::new());
 }
 
-const BPF_MAP_TYPE_ARRAY: u32 = 2;
-const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = 6;
+const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY as u32;
+const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY as u32;
 
 /// Install a mock map into the thread-local store.
 pub fn install_mock_map(map_id: u32, state: MockMapState) {

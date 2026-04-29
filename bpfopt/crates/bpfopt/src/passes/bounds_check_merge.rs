@@ -11,22 +11,20 @@ use super::utils::{
     compose_addr_maps, eliminate_nops, eliminate_unreachable_blocks, fixup_all_branches,
 };
 
-const BPF_ADD: u8 = 0x00;
-
 /// BPF_PROG_TYPE_SCHED_CLS (TC classifier).
-const BPF_PROG_TYPE_SCHED_CLS: u32 = 3;
+const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS as u32;
 /// BPF_PROG_TYPE_SCHED_ACT (TC action).
-const BPF_PROG_TYPE_SCHED_ACT: u32 = 4;
+const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT as u32;
 /// BPF_PROG_TYPE_XDP.
-const BPF_PROG_TYPE_XDP: u32 = 6;
+const BPF_PROG_TYPE_XDP: u32 = kernel_sys::BPF_PROG_TYPE_XDP as u32;
 /// BPF_PROG_TYPE_SK_SKB.
-const BPF_PROG_TYPE_SK_SKB: u32 = 14;
+const BPF_PROG_TYPE_SK_SKB: u32 = kernel_sys::BPF_PROG_TYPE_SK_SKB as u32;
 /// BPF_PROG_TYPE_LWT_IN.
-const BPF_PROG_TYPE_LWT_IN: u32 = 18;
+const BPF_PROG_TYPE_LWT_IN: u32 = kernel_sys::BPF_PROG_TYPE_LWT_IN as u32;
 /// BPF_PROG_TYPE_LWT_OUT.
-const BPF_PROG_TYPE_LWT_OUT: u32 = 19;
+const BPF_PROG_TYPE_LWT_OUT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_OUT as u32;
 /// BPF_PROG_TYPE_LWT_XMIT.
-const BPF_PROG_TYPE_LWT_XMIT: u32 = 20;
+const BPF_PROG_TYPE_LWT_XMIT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_XMIT as u32;
 
 const XDP_DATA_OFF: i16 = 0;
 const XDP_DATA_END_OFF: i16 = 4;
@@ -609,38 +607,31 @@ mod tests {
     use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
     use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
 
-    const BPF_ADD: u8 = 0x00;
-
-    const BPF_PROG_TYPE_SOCKET_FILTER: u32 = 1;
-    const BPF_PROG_TYPE_SCHED_CLS: u32 = 3;
-    const BPF_PROG_TYPE_SCHED_ACT: u32 = 4;
-    const BPF_PROG_TYPE_XDP: u32 = 6;
+    const BPF_PROG_TYPE_SOCKET_FILTER: u32 = kernel_sys::BPF_PROG_TYPE_SOCKET_FILTER as u32;
+    const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS as u32;
+    const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT as u32;
+    const BPF_PROG_TYPE_XDP: u32 = kernel_sys::BPF_PROG_TYPE_XDP as u32;
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_EXIT,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        }
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
     fn jgt_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_JGT | BPF_X,
-            regs: BpfInsn::make_regs(dst, src),
+        BpfInsn::new(
+            BPF_JMP | BPF_JGT | BPF_X,
+            BpfInsn::make_regs(dst, src),
             off,
-            imm: 0,
-        }
+            0,
+        )
     }
 
     fn jge_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_JGE | BPF_X,
-            regs: BpfInsn::make_regs(dst, src),
+        BpfInsn::new(
+            BPF_JMP | BPF_JGE | BPF_X,
+            BpfInsn::make_regs(dst, src),
             off,
-            imm: 0,
-        }
+            0,
+        )
     }
 
     fn load_packet_root() -> Vec<BpfInsn> {

@@ -2,65 +2,93 @@
 //! BPF instruction encoding, decoding, and constructors.
 
 use std::fmt;
+use std::hash::{Hash, Hasher};
+use std::ops::{Deref, DerefMut};
 
 use serde::Serialize;
 
 // ── Instruction classes ──────────────────────────────────────────────
-pub const BPF_LD: u8 = 0x00;
-pub const BPF_LDX: u8 = 0x01;
-pub const BPF_ST: u8 = 0x02;
-pub const BPF_STX: u8 = 0x03;
-pub const BPF_ALU: u8 = 0x04;
-pub const BPF_JMP: u8 = 0x05;
-pub const BPF_JMP32: u8 = 0x06;
-pub const BPF_ALU64: u8 = 0x07;
+pub const BPF_LD: u8 = kernel_sys::BPF_LD as u8;
+pub const BPF_LDX: u8 = kernel_sys::BPF_LDX as u8;
+pub const BPF_ST: u8 = kernel_sys::BPF_ST as u8;
+pub const BPF_STX: u8 = kernel_sys::BPF_STX as u8;
+pub const BPF_ALU: u8 = kernel_sys::BPF_ALU as u8;
+pub const BPF_JMP: u8 = kernel_sys::BPF_JMP as u8;
+pub const BPF_JMP32: u8 = kernel_sys::BPF_JMP32 as u8;
+pub const BPF_ALU64: u8 = kernel_sys::BPF_ALU64 as u8;
 
 // ── Size modifiers ───────────────────────────────────────────────────
-pub const BPF_W: u8 = 0x00; // 32-bit
-pub const BPF_H: u8 = 0x08; // 16-bit
-pub const BPF_B: u8 = 0x10; //  8-bit
-pub const BPF_DW: u8 = 0x18; // 64-bit
+pub const BPF_W: u8 = kernel_sys::BPF_W as u8; // 32-bit
+pub const BPF_H: u8 = kernel_sys::BPF_H as u8; // 16-bit
+pub const BPF_B: u8 = kernel_sys::BPF_B as u8; //  8-bit
+pub const BPF_DW: u8 = kernel_sys::BPF_DW as u8; // 64-bit
 
 // ── Mode modifiers ───────────────────────────────────────────────────
-pub const BPF_IMM: u8 = 0x00;
-pub const BPF_MEM: u8 = 0x60;
+pub const BPF_IMM: u8 = kernel_sys::BPF_IMM as u8;
+pub const BPF_MEM: u8 = kernel_sys::BPF_MEM as u8;
+pub const BPF_MEMSX: u8 = kernel_sys::BPF_MEMSX as u8;
 
 // ── ALU/JMP operations ──────────────────────────────────────────────
-pub const BPF_AND: u8 = 0x50;
-pub const BPF_OR: u8 = 0x40;
-pub const BPF_LSH: u8 = 0x60;
-pub const BPF_RSH: u8 = 0x70;
-pub const BPF_MOV: u8 = 0xb0;
+pub const BPF_ADD: u8 = kernel_sys::BPF_ADD as u8;
+pub const BPF_SUB: u8 = kernel_sys::BPF_SUB as u8;
+pub const BPF_MUL: u8 = kernel_sys::BPF_MUL as u8;
+pub const BPF_DIV: u8 = kernel_sys::BPF_DIV as u8;
+pub const BPF_OR: u8 = kernel_sys::BPF_OR as u8;
+pub const BPF_AND: u8 = kernel_sys::BPF_AND as u8;
+pub const BPF_LSH: u8 = kernel_sys::BPF_LSH as u8;
+pub const BPF_RSH: u8 = kernel_sys::BPF_RSH as u8;
+pub const BPF_NEG: u8 = kernel_sys::BPF_NEG as u8;
+pub const BPF_MOD: u8 = kernel_sys::BPF_MOD as u8;
+pub const BPF_XOR: u8 = kernel_sys::BPF_XOR as u8;
+pub const BPF_MOV: u8 = kernel_sys::BPF_MOV as u8;
+pub const BPF_ARSH: u8 = kernel_sys::BPF_ARSH as u8;
+pub const BPF_END: u8 = kernel_sys::BPF_END as u8;
+pub const BPF_TO_BE: u8 = kernel_sys::BPF_TO_BE as u8;
 
 // ── Source modifiers ────────────────────────────────────────────────
-pub const BPF_K: u8 = 0x00;
-pub const BPF_X: u8 = 0x08;
+pub const BPF_K: u8 = kernel_sys::BPF_K as u8;
+pub const BPF_X: u8 = kernel_sys::BPF_X as u8;
 
 // ── JMP opcodes ─────────────────────────────────────────────────────
-pub const BPF_JA: u8 = 0x00;
-pub const BPF_JEQ: u8 = 0x10;
-pub const BPF_JGT: u8 = 0x20;
-pub const BPF_JGE: u8 = 0x30;
-pub const BPF_JSET: u8 = 0x40;
-pub const BPF_JNE: u8 = 0x50;
-pub const BPF_JLT: u8 = 0xa0;
-pub const BPF_JLE: u8 = 0xb0;
-pub const BPF_JSGT: u8 = 0x60;
-pub const BPF_JSGE: u8 = 0x70;
-pub const BPF_JSLT: u8 = 0xc0;
-pub const BPF_JSLE: u8 = 0xd0;
+pub const BPF_JA: u8 = kernel_sys::BPF_JA as u8;
+pub const BPF_JEQ: u8 = kernel_sys::BPF_JEQ as u8;
+pub const BPF_JGT: u8 = kernel_sys::BPF_JGT as u8;
+pub const BPF_JGE: u8 = kernel_sys::BPF_JGE as u8;
+pub const BPF_JSET: u8 = kernel_sys::BPF_JSET as u8;
+pub const BPF_JNE: u8 = kernel_sys::BPF_JNE as u8;
+pub const BPF_JLT: u8 = kernel_sys::BPF_JLT as u8;
+pub const BPF_JLE: u8 = kernel_sys::BPF_JLE as u8;
+pub const BPF_JSGT: u8 = kernel_sys::BPF_JSGT as u8;
+pub const BPF_JSGE: u8 = kernel_sys::BPF_JSGE as u8;
+pub const BPF_JSLT: u8 = kernel_sys::BPF_JSLT as u8;
+pub const BPF_JSLE: u8 = kernel_sys::BPF_JSLE as u8;
 
-pub const BPF_CALL: u8 = 0x80;
-pub const BPF_EXIT: u8 = 0x90;
+pub const BPF_CALL: u8 = kernel_sys::BPF_CALL as u8;
+pub const BPF_EXIT: u8 = kernel_sys::BPF_EXIT as u8;
 
 // ── Pseudo source-register tags ────────────────────────────────────
-pub const BPF_PSEUDO_CALL: u8 = 1;
+pub const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
+pub const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
+pub const BPF_PSEUDO_CALL: u8 = kernel_sys::BPF_PSEUDO_CALL as u8;
 #[cfg(test)]
-pub const BPF_PSEUDO_KFUNC_CALL: u8 = 2;
+pub const BPF_PSEUDO_KFUNC_CALL: u8 = kernel_sys::BPF_PSEUDO_KFUNC_CALL as u8;
 pub const BPF_PSEUDO_KINSN_SIDECAR: u8 = 3;
 /// LD_IMM64 local-function reference used for helper callbacks.
-pub const BPF_PSEUDO_FUNC: u8 = 4;
+pub const BPF_PSEUDO_FUNC: u8 = kernel_sys::BPF_PSEUDO_FUNC as u8;
 pub const BPF_PSEUDO_KINSN_CALL: u8 = 4;
+
+// ── Registers ───────────────────────────────────────────────────────
+pub const BPF_REG_0: u8 = kernel_sys::BPF_REG_0 as u8;
+pub const BPF_REG_1: u8 = kernel_sys::BPF_REG_1 as u8;
+pub const BPF_REG_2: u8 = kernel_sys::BPF_REG_2 as u8;
+pub const BPF_REG_3: u8 = kernel_sys::BPF_REG_3 as u8;
+pub const BPF_REG_4: u8 = kernel_sys::BPF_REG_4 as u8;
+pub const BPF_REG_5: u8 = kernel_sys::BPF_REG_5 as u8;
+pub const BPF_REG_6: u8 = kernel_sys::BPF_REG_6 as u8;
+pub const BPF_REG_7: u8 = kernel_sys::BPF_REG_7 as u8;
+pub const BPF_REG_8: u8 = kernel_sys::BPF_REG_8 as u8;
+pub const BPF_REG_9: u8 = kernel_sys::BPF_REG_9 as u8;
+pub const BPF_REG_10: u8 = kernel_sys::BPF_REG_10 as u8;
 
 // ── kinsn encoding constants (synced with include/linux/bpf.h) ────
 pub const BPF_KINSN_ENC_PACKED_CALL: u32 = 1 << 1;
@@ -94,29 +122,147 @@ pub const fn bpf_src(code: u8) -> u8 {
 // ── BpfInsn ─────────────────────────────────────────────────────────
 
 /// A single BPF instruction, ABI-compatible with `struct bpf_insn` in the kernel.
-#[repr(C)]
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct BpfInsn {
-    pub code: u8,
-    pub regs: u8, // dst_reg:4 | src_reg:4
-    pub off: i16,
-    pub imm: i32,
+#[repr(transparent)]
+#[derive(Clone, Copy)]
+pub struct BpfInsn(kernel_sys::bpf_insn);
+
+// Ensure the transparent wrapper keeps the kernel ABI object size.
+const _: () =
+    assert!(std::mem::size_of::<BpfInsn>() == std::mem::size_of::<kernel_sys::bpf_insn>());
+
+impl Deref for BpfInsn {
+    type Target = kernel_sys::bpf_insn;
+
+    #[inline]
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
-// Ensure the struct is 8 bytes, matching kernel ABI.
-const _: () = assert!(std::mem::size_of::<BpfInsn>() == 8);
+impl DerefMut for BpfInsn {
+    #[inline]
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl PartialEq for BpfInsn {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.raw_bytes() == other.raw_bytes()
+    }
+}
+
+impl Eq for BpfInsn {}
+
+impl Hash for BpfInsn {
+    #[inline]
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.raw_bytes().hash(state);
+    }
+}
 
 impl BpfInsn {
     // ── Field accessors ─────────────────────────────────────────────
 
     #[inline]
-    pub const fn dst_reg(&self) -> u8 {
-        self.regs & 0xf
+    pub fn new(code: u8, regs: u8, off: i16, imm: i32) -> Self {
+        Self::new_raw(code, regs, off, imm)
     }
 
     #[inline]
-    pub const fn src_reg(&self) -> u8 {
-        (self.regs >> 4) & 0xf
+    pub fn new_raw(code: u8, regs: u8, off: i16, imm: i32) -> Self {
+        let mut inner = kernel_sys::bpf_insn {
+            code,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off,
+            imm,
+        };
+        inner.set_dst_reg(regs & 0xf);
+        inner.set_src_reg((regs >> 4) & 0xf);
+        Self(inner)
+    }
+
+    #[inline]
+    pub fn from_kernel(insn: kernel_sys::bpf_insn) -> Self {
+        Self(insn)
+    }
+
+    #[inline]
+    pub fn as_kernel(&self) -> &kernel_sys::bpf_insn {
+        &self.0
+    }
+
+    #[inline]
+    pub fn as_kernel_mut(&mut self) -> &mut kernel_sys::bpf_insn {
+        &mut self.0
+    }
+
+    #[inline]
+    pub fn into_kernel(self) -> kernel_sys::bpf_insn {
+        self.0
+    }
+
+    #[inline]
+    pub fn code(&self) -> u8 {
+        self.code
+    }
+
+    #[inline]
+    pub fn set_code(&mut self, code: u8) {
+        self.code = code;
+    }
+
+    #[inline]
+    pub fn regs(&self) -> u8 {
+        Self::make_regs(self.dst_reg(), self.src_reg())
+    }
+
+    #[inline]
+    pub fn set_regs(&mut self, regs: u8) {
+        self.set_dst_reg(regs & 0xf);
+        self.set_src_reg((regs >> 4) & 0xf);
+    }
+
+    #[inline]
+    pub fn dst_reg(&self) -> u8 {
+        kernel_sys::bpf_insn::dst_reg(&self.0)
+    }
+
+    #[inline]
+    pub fn set_dst_reg(&mut self, dst: u8) {
+        self.0.set_dst_reg(dst & 0xf);
+    }
+
+    #[inline]
+    pub fn src_reg(&self) -> u8 {
+        kernel_sys::bpf_insn::src_reg(&self.0)
+    }
+
+    #[inline]
+    pub fn set_src_reg(&mut self, src: u8) {
+        self.0.set_src_reg(src & 0xf);
+    }
+
+    #[inline]
+    pub fn off(&self) -> i16 {
+        self.off
+    }
+
+    #[inline]
+    pub fn set_off(&mut self, off: i16) {
+        self.off = off;
+    }
+
+    #[inline]
+    pub fn imm(&self) -> i32 {
+        self.imm
+    }
+
+    #[inline]
+    pub fn set_imm(&mut self, imm: i32) {
+        self.imm = imm;
     }
 
     #[inline]
@@ -128,16 +274,26 @@ impl BpfInsn {
     pub fn raw_bytes(&self) -> [u8; 8] {
         let mut bytes = [0u8; 8];
         bytes[0] = self.code;
-        bytes[1] = self.regs;
+        bytes[1] = self.regs();
         bytes[2..4].copy_from_slice(&self.off.to_le_bytes());
         bytes[4..8].copy_from_slice(&self.imm.to_le_bytes());
         bytes
     }
 
+    #[inline]
+    pub fn from_raw_bytes(bytes: [u8; 8]) -> Self {
+        Self::new_raw(
+            bytes[0],
+            bytes[1],
+            i16::from_le_bytes([bytes[2], bytes[3]]),
+            i32::from_le_bytes([bytes[4], bytes[5], bytes[6], bytes[7]]),
+        )
+    }
+
     // ── Classification helpers ──────────────────────────────────────
 
     #[inline]
-    pub const fn class(&self) -> u8 {
+    pub fn class(&self) -> u8 {
         bpf_class(self.code)
     }
 
@@ -197,35 +353,20 @@ impl BpfInsn {
     // ── Constructors ────────────────────────────────────────────────
 
     /// `mov64 dst, src` (register)
-    pub const fn mov64_reg(dst: u8, src: u8) -> Self {
-        Self {
-            code: BPF_ALU64 | BPF_MOV | BPF_X,
-            regs: Self::make_regs(dst, src),
-            off: 0,
-            imm: 0,
-        }
+    pub fn mov64_reg(dst: u8, src: u8) -> Self {
+        Self::new(BPF_ALU64 | BPF_MOV | BPF_X, Self::make_regs(dst, src), 0, 0)
     }
 
     /// `mov64 dst, imm`
     #[cfg_attr(not(test), allow(dead_code))]
-    pub const fn mov64_imm(dst: u8, imm: i32) -> Self {
-        Self {
-            code: BPF_ALU64 | BPF_MOV | BPF_K,
-            regs: Self::make_regs(dst, 0),
-            off: 0,
-            imm,
-        }
+    pub fn mov64_imm(dst: u8, imm: i32) -> Self {
+        Self::new(BPF_ALU64 | BPF_MOV | BPF_K, Self::make_regs(dst, 0), 0, imm)
     }
 
     /// `mov32 dst, imm`
     #[cfg_attr(not(test), allow(dead_code))]
-    pub const fn mov32_imm(dst: u8, imm: i32) -> Self {
-        Self {
-            code: BPF_ALU | BPF_MOV | BPF_K,
-            regs: Self::make_regs(dst, 0),
-            off: 0,
-            imm,
-        }
+    pub fn mov32_imm(dst: u8, imm: i32) -> Self {
+        Self::new(BPF_ALU | BPF_MOV | BPF_K, Self::make_regs(dst, 0), 0, imm)
     }
 
     /// `call kfunc` (src_reg = BPF_PSEUDO_KFUNC_CALL = 2)
@@ -233,18 +374,18 @@ impl BpfInsn {
     /// `off = 0` means vmlinux BTF. For module kfuncs, `off` is the 1-based
     /// slot in the load/REJIT `fd_array`.
     #[cfg(test)]
-    pub const fn call_kfunc_with_off(btf_id: i32, off: i16) -> Self {
-        Self {
-            code: BPF_JMP | BPF_CALL,
-            regs: Self::make_regs(0, BPF_PSEUDO_KFUNC_CALL),
+    pub fn call_kfunc_with_off(btf_id: i32, off: i16) -> Self {
+        Self::new(
+            BPF_JMP | BPF_CALL,
+            Self::make_regs(0, BPF_PSEUDO_KFUNC_CALL),
             off,
-            imm: btf_id,
-        }
+            btf_id,
+        )
     }
 
     /// `call kfunc` against vmlinux BTF.
     #[cfg(test)]
-    pub const fn call_kfunc(btf_id: i32) -> Self {
+    pub fn call_kfunc(btf_id: i32) -> Self {
         Self::call_kfunc_with_off(btf_id, 0)
     }
 
@@ -253,33 +394,23 @@ impl BpfInsn {
     /// `imm` is the BTF FUNC id of the exported kinsn stub.
     /// `off` is the 1-based slot in the load/REJIT `fd_array` when module BTF
     /// is used, or 0 for vmlinux.
-    pub const fn call_kinsn_with_off(btf_id: i32, off: i16) -> Self {
-        Self {
-            code: BPF_JMP | BPF_CALL,
-            regs: Self::make_regs(0, BPF_PSEUDO_KINSN_CALL),
+    pub fn call_kinsn_with_off(btf_id: i32, off: i16) -> Self {
+        Self::new(
+            BPF_JMP | BPF_CALL,
+            Self::make_regs(0, BPF_PSEUDO_KINSN_CALL),
             off,
-            imm: btf_id,
-        }
+            btf_id,
+        )
     }
 
     /// `ja +off` (unconditional jump, NOP when off=0)
-    pub const fn ja(off: i16) -> Self {
-        Self {
-            code: BPF_JMP | BPF_JA,
-            regs: 0,
-            off,
-            imm: 0,
-        }
+    pub fn ja(off: i16) -> Self {
+        Self::new(BPF_JMP | BPF_JA, 0, off, 0)
     }
 
     /// `ldx_mem size, dst, [src + off]`
-    pub const fn ldx_mem(size: u8, dst: u8, src: u8, off: i16) -> Self {
-        Self {
-            code: BPF_LDX | size | BPF_MEM,
-            regs: Self::make_regs(dst, src),
-            off,
-            imm: 0,
-        }
+    pub fn ldx_mem(size: u8, dst: u8, src: u8, off: i16) -> Self {
+        Self::new(BPF_LDX | size | BPF_MEM, Self::make_regs(dst, src), off, 0)
     }
 
     /// kinsn sidecar metadata for the immediately following kinsn call.
@@ -288,57 +419,42 @@ impl BpfInsn {
     /// bits [3:0]   = dst_reg field
     /// bits [19:4]  = off field
     /// bits [51:20] = imm field
-    pub const fn kinsn_sidecar(payload: u64) -> Self {
-        Self {
-            code: BPF_ALU64 | BPF_MOV | BPF_K,
-            regs: Self::make_regs((payload & 0xf) as u8, BPF_PSEUDO_KINSN_SIDECAR),
-            off: ((payload >> 4) & 0xffff) as u16 as i16,
-            imm: ((payload >> 20) & 0xffff_ffff) as u32 as i32,
-        }
+    pub fn kinsn_sidecar(payload: u64) -> Self {
+        Self::new(
+            BPF_ALU64 | BPF_MOV | BPF_K,
+            Self::make_regs((payload & 0xf) as u8, BPF_PSEUDO_KINSN_SIDECAR),
+            ((payload >> 4) & 0xffff) as u16 as i16,
+            ((payload >> 20) & 0xffff_ffff) as u32 as i32,
+        )
     }
 
     /// `stx_mem size, [dst + off], src`
     #[allow(dead_code)]
-    pub const fn stx_mem(size: u8, dst: u8, src: u8, off: i16) -> Self {
-        Self {
-            code: BPF_STX | size | BPF_MEM,
-            regs: Self::make_regs(dst, src),
-            off,
-            imm: 0,
-        }
+    pub fn stx_mem(size: u8, dst: u8, src: u8, off: i16) -> Self {
+        Self::new(BPF_STX | size | BPF_MEM, Self::make_regs(dst, src), off, 0)
     }
 
     /// `alu64 op, dst, imm`  (e.g., LSH64_IMM, OR64_IMM)
     #[allow(dead_code)]
-    pub const fn alu64_imm(op: u8, dst: u8, imm: i32) -> Self {
-        Self {
-            code: BPF_ALU64 | op | BPF_K,
-            regs: Self::make_regs(dst, 0),
-            off: 0,
-            imm,
-        }
+    pub fn alu64_imm(op: u8, dst: u8, imm: i32) -> Self {
+        Self::new(BPF_ALU64 | op | BPF_K, Self::make_regs(dst, 0), 0, imm)
     }
 
     /// `alu64 op, dst, src` (e.g., OR64_REG)
     #[allow(dead_code)]
-    pub const fn alu64_reg(op: u8, dst: u8, src: u8) -> Self {
-        Self {
-            code: BPF_ALU64 | op | BPF_X,
-            regs: Self::make_regs(dst, src),
-            off: 0,
-            imm: 0,
-        }
+    pub fn alu64_reg(op: u8, dst: u8, src: u8) -> Self {
+        Self::new(BPF_ALU64 | op | BPF_X, Self::make_regs(dst, src), 0, 0)
     }
 
     /// NOP — encoded as `ja +0`.
     #[cfg_attr(not(test), allow(dead_code))]
-    pub const fn nop() -> Self {
+    pub fn nop() -> Self {
         Self::ja(0)
     }
 
     #[inline]
     #[cfg(test)]
-    pub const fn is_kinsn_sidecar(&self) -> bool {
+    pub fn is_kinsn_sidecar(&self) -> bool {
         self.code == (BPF_ALU64 | BPF_MOV | BPF_K) && self.src_reg() == BPF_PSEUDO_KINSN_SIDECAR
     }
 }
@@ -392,7 +508,7 @@ pub fn dump_bytecode(insns: &[BpfInsn]) -> BpfBytecodeDump {
                     pc,
                     raw_hex: hex_bytes(&raw),
                     code: insn.code,
-                    regs: insn.regs,
+                    regs: insn.regs(),
                     dst_reg: insn.dst_reg(),
                     src_reg: insn.src_reg(),
                     off: insn.off,
@@ -475,6 +591,24 @@ mod tests {
     use super::*;
 
     #[test]
+    fn bpf_insn_abi_offsets_and_raw_bytes_match_uapi() {
+        assert_eq!(std::mem::offset_of!(kernel_sys::bpf_insn, code), 0);
+        assert_eq!(std::mem::offset_of!(kernel_sys::bpf_insn, off), 2);
+        assert_eq!(std::mem::offset_of!(kernel_sys::bpf_insn, imm), 4);
+
+        let insn = BpfInsn::new(0xbf, BpfInsn::make_regs(3, 5), -2, 0x1234_5678);
+        assert_eq!(
+            &insn as *const BpfInsn as usize,
+            insn.as_kernel() as *const kernel_sys::bpf_insn as usize
+        );
+        assert_eq!(
+            insn.raw_bytes(),
+            [0xbf, 0x53, 0xfe, 0xff, 0x78, 0x56, 0x34, 0x12]
+        );
+        assert_eq!(BpfInsn::from_raw_bytes(insn.raw_bytes()), insn);
+    }
+
+    #[test]
     fn test_bpf_insn_encoding() {
         // mov64_reg r1, r2
         let insn = BpfInsn::mov64_reg(1, 2);
@@ -543,22 +677,12 @@ mod tests {
         assert_eq!(insn.src_reg(), 1);
 
         // exit
-        let insn = BpfInsn {
-            code: BPF_JMP | BPF_EXIT,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        };
+        let insn = BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0);
         assert!(insn.is_exit());
         assert!(!insn.is_call());
 
         // is_ldimm64
-        let insn = BpfInsn {
-            code: BPF_LD | BPF_DW | BPF_IMM,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        };
+        let insn = BpfInsn::new(BPF_LD | BPF_DW | BPF_IMM, 0, 0, 0);
         assert!(insn.is_ldimm64());
     }
 
@@ -567,12 +691,7 @@ mod tests {
         for dst in 0..=15 {
             for src in 0..=15 {
                 let regs = BpfInsn::make_regs(dst, src);
-                let insn = BpfInsn {
-                    code: 0,
-                    regs,
-                    off: 0,
-                    imm: 0,
-                };
+                let insn = BpfInsn::new(0, regs, 0, 0);
                 assert_eq!(insn.dst_reg(), dst & 0xf);
                 assert_eq!(insn.src_reg(), src & 0xf);
             }
@@ -582,24 +701,14 @@ mod tests {
     #[test]
     fn test_cond_jmp_classification() {
         // JEQ_IMM
-        let insn = BpfInsn {
-            code: BPF_JMP | BPF_JEQ | BPF_K,
-            regs: BpfInsn::make_regs(1, 0),
-            off: 5,
-            imm: 42,
-        };
+        let insn = BpfInsn::new(BPF_JMP | BPF_JEQ | BPF_K, BpfInsn::make_regs(1, 0), 5, 42);
         assert!(insn.is_cond_jmp());
         assert!(insn.is_jmp_class());
         assert!(!insn.is_ja());
         assert!(!insn.is_call());
 
         // JMP32 JNE_REG
-        let insn = BpfInsn {
-            code: BPF_JMP32 | BPF_JNE | BPF_X,
-            regs: BpfInsn::make_regs(2, 3),
-            off: 3,
-            imm: 0,
-        };
+        let insn = BpfInsn::new(BPF_JMP32 | BPF_JNE | BPF_X, BpfInsn::make_regs(2, 3), 3, 0);
         assert!(insn.is_cond_jmp());
         assert!(insn.is_jmp_class());
     }

@@ -269,12 +269,7 @@ impl BpfPass for TestDceFixedPointPass {
 }
 
 fn exit_insn() -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_EXIT,
-        regs: 0,
-        off: 0,
-        imm: 0,
-    }
+    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
 }
 
 // ── BpfProgram tests ────────────────────────────────────────────
@@ -748,12 +743,7 @@ fn test_run_with_profiling_enables_branch_flip() {
     });
 
     // A simple diamond that would be flipped if PGO says the branch is hot.
-    let jne = BpfInsn {
-        code: BPF_JMP | BPF_JNE | BPF_K,
-        regs: BpfInsn::make_regs(1, 0),
-        off: 2,
-        imm: 0,
-    };
+    let jne = BpfInsn::new(BPF_JMP | BPF_JNE | BPF_K, BpfInsn::make_regs(1, 0), 2, 0);
     let mut prog = make_program(vec![
         jne,                       // pc=0
         BpfInsn::mov64_imm(0, 10), // then
@@ -818,12 +808,12 @@ fn test_pass_skips_without_platform_capability() {
     // has_cmov is false by default in test_default().
 
     let mut prog = make_program(vec![
-        BpfInsn {
-            code: crate::insn::BPF_JMP | crate::insn::BPF_JNE | crate::insn::BPF_K,
-            regs: BpfInsn::make_regs(1, 0),
-            off: 2,
-            imm: 0,
-        },
+        BpfInsn::new(
+            crate::insn::BPF_JMP | crate::insn::BPF_JNE | crate::insn::BPF_K,
+            BpfInsn::make_regs(1, 0),
+            2,
+            0,
+        ),
         BpfInsn::mov64_reg(2, 4),
         BpfInsn::ja(1),
         BpfInsn::mov64_reg(2, 3),

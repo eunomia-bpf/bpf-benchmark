@@ -14,9 +14,9 @@ use crate::mock_maps::{apply_mock_maps, install_mock_map, BpfMapInfo, MockMapSta
 use crate::pass::{BpfProgram, BranchProfile, PassContext, PipelineResult, ProfilingData};
 use crate::passes::build_custom_pipeline;
 
-const BPF_MAP_TYPE_HASH: u32 = 1;
-const BPF_MAP_TYPE_ARRAY: u32 = 2;
-const BPF_MAP_TYPE_LRU_HASH: u32 = 9;
+const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH as u32;
+const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY as u32;
+const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH as u32;
 
 static NEXT_TEST_MAP_ID: AtomicU32 = AtomicU32::new(10_000);
 

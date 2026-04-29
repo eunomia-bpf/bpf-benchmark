@@ -3,18 +3,13 @@ use super::*;
 /// Helper: build a BPF_LD_IMM64 instruction pair with given dst_reg, src_reg, and imm.
 fn make_ld_imm64(dst: u8, src: u8, imm_lo: i32, imm_hi: i32) -> [BpfInsn; 2] {
     [
-        BpfInsn {
-            code: BPF_LD | BPF_IMM | BPF_DW, // 0x18
-            regs: (src << 4) | (dst & 0x0f),
-            off: 0,
-            imm: imm_lo,
-        },
-        BpfInsn {
-            code: 0,
-            regs: 0,
-            off: 0,
-            imm: imm_hi,
-        },
+        BpfInsn::new(
+            BPF_LD | BPF_IMM | BPF_DW,
+            (src << 4) | (dst & 0x0f),
+            0,
+            imm_lo,
+        ),
+        BpfInsn::new(0, 0, 0, imm_hi),
     ]
 }
 
@@ -760,13 +755,8 @@ fn test_relocate_map_fds_with_non_map_instructions() {
     // Program with no LD_IMM64 instructions at all.
     let mut insns = vec![
         BpfInsn::mov64_imm(0, 42),
-        BpfInsn {
-            // exit instruction: BPF_JMP(0x05) | BPF_EXIT(0x90) = 0x95
-            code: 0x95,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        },
+        // exit instruction: BPF_JMP(0x05) | BPF_EXIT(0x90) = 0x95
+        BpfInsn::new(0x95, 0, 0, 0),
     ];
     let result = relocate_map_fds(&mut insns, &[]);
     assert!(result.is_ok());

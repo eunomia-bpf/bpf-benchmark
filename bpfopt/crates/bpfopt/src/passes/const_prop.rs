@@ -8,15 +8,6 @@ use crate::insn::*;
 use crate::pass::*;
 use crate::verifier_log::{VerifierInsn, VerifierInsnKind};
 
-const BPF_ADD: u8 = 0x00;
-const BPF_SUB: u8 = 0x10;
-const BPF_MUL: u8 = 0x20;
-const BPF_DIV: u8 = 0x30;
-const BPF_XOR: u8 = 0xa0;
-const BPF_MOD: u8 = 0x90;
-const BPF_ARSH: u8 = 0xc0;
-const BPF_NEG: u8 = 0x80;
-
 const REG_COUNT: usize = 11;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -692,18 +683,13 @@ fn as_mov64_imm(value: u64) -> Option<i32> {
 
 fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
     vec![
-        BpfInsn {
-            code: BPF_LD | BPF_DW | BPF_IMM,
-            regs: BpfInsn::make_regs(dst_reg, 0),
-            off: 0,
-            imm: value as u32 as i32,
-        },
-        BpfInsn {
-            code: 0,
-            regs: 0,
-            off: 0,
-            imm: (value >> 32) as u32 as i32,
-        },
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(dst_reg, 0),
+            0,
+            value as u32 as i32,
+        ),
+        BpfInsn::new(0, 0, 0, (value >> 32) as u32 as i32),
     ]
 }
 
@@ -798,86 +784,71 @@ mod tests {
     use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
     use crate::passes::{DcePass, MapInlinePass};
 
-    const BPF_PSEUDO_MAP_FD: u8 = 1;
+    const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_EXIT,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        }
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
     fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_JEQ | BPF_K,
-            regs: BpfInsn::make_regs(dst, 0),
+        BpfInsn::new(
+            BPF_JMP | BPF_JEQ | BPF_K,
+            BpfInsn::make_regs(dst, 0),
             off,
             imm,
-        }
+        )
     }
 
     fn jeq32_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP32 | BPF_JEQ | BPF_K,
-            regs: BpfInsn::make_regs(dst, 0),
+        BpfInsn::new(
+            BPF_JMP32 | BPF_JEQ | BPF_K,
+            BpfInsn::make_regs(dst, 0),
             off,
             imm,
-        }
+        )
     }
 
     fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_JNE | BPF_K,
-            regs: BpfInsn::make_regs(dst, 0),
+        BpfInsn::new(
+            BPF_JMP | BPF_JNE | BPF_K,
+            BpfInsn::make_regs(dst, 0),
             off,
             imm,
-        }
+        )
     }
 
     fn ld_imm64(dst: u8, src: u8, imm_lo: i32, imm_hi: i32) -> [BpfInsn; 2] {
         [
-            BpfInsn {
-                code: BPF_LD | BPF_DW | BPF_IMM,
-                regs: BpfInsn::make_regs(dst, src),
-                off: 0,
-                imm: imm_lo,
-            },
-            BpfInsn {
-                code: 0,
-                regs: 0,
-                off: 0,
-                imm: imm_hi,
-            },
+            BpfInsn::new(
+                BPF_LD | BPF_DW | BPF_IMM,
+                BpfInsn::make_regs(dst, src),
+                0,
+                imm_lo,
+            ),
+            BpfInsn::new(0, 0, 0, imm_hi),
         ]
     }
 
     fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> BpfInsn {
-        BpfInsn {
-            code: BPF_ST | size | BPF_MEM,
-            regs: BpfInsn::make_regs(dst, 0),
+        BpfInsn::new(
+            BPF_ST | size | BPF_MEM,
+            BpfInsn::make_regs(dst, 0),
             off,
             imm,
-        }
+        )
     }
 
     fn add64_imm(dst: u8, imm: i32) -> BpfInsn {
-        BpfInsn {
-            code: BPF_ALU64 | BPF_ADD | BPF_K,
-            regs: BpfInsn::make_regs(dst, 0),
-            off: 0,
+        BpfInsn::new(
+            BPF_ALU64 | BPF_ADD | BPF_K,
+            BpfInsn::make_regs(dst, 0),
+            0,
             imm,
-        }
+        )
     }
 
     fn call_helper(imm: i32) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_CALL,
-            regs: BpfInsn::make_regs(0, 0),
-            off: 0,
-            imm,
-        }
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, imm)
     }
 
     fn install_array_map(map_id: u32, value: Vec<u8>) {
@@ -944,12 +915,7 @@ mod tests {
     fn const_prop_folds_alu32_chain_to_mov32_imm() {
         let mut program = BpfProgram::new(vec![
             BpfInsn::mov64_imm(1, -1),
-            BpfInsn {
-                code: BPF_ALU | BPF_ADD | BPF_K,
-                regs: BpfInsn::make_regs(1, 0),
-                off: 0,
-                imm: 1,
-            },
+            BpfInsn::new(BPF_ALU | BPF_ADD | BPF_K, BpfInsn::make_regs(1, 0), 0, 1),
             exit_insn(),
         ]);
 

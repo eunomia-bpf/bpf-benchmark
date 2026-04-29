@@ -387,30 +387,25 @@ mod tests {
     }
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_EXIT,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        }
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
     fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_JNE | BPF_K,
-            regs: BpfInsn::make_regs(dst, 0),
+        BpfInsn::new(
+            BPF_JMP | BPF_JNE | BPF_K,
+            BpfInsn::make_regs(dst, 0),
             off,
             imm,
-        }
+        )
     }
 
     fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_JEQ | BPF_K,
-            regs: BpfInsn::make_regs(dst, 0),
+        BpfInsn::new(
+            BPF_JMP | BPF_JEQ | BPF_K,
+            BpfInsn::make_regs(dst, 0),
             off,
             imm,
-        }
+        )
     }
 
     // ── True diamond: Jcc +N ; [then N-1] ; JA +M ; [else M] ──
@@ -563,12 +558,12 @@ mod tests {
     #[test]
     fn test_branch_flip_skips_jset() {
         let mut prog = make_program(vec![
-            BpfInsn {
-                code: BPF_JMP | BPF_JSET | BPF_K,
-                regs: BpfInsn::make_regs(1, 0),
-                off: 2,
-                imm: 0xff,
-            },
+            BpfInsn::new(
+                BPF_JMP | BPF_JSET | BPF_K,
+                BpfInsn::make_regs(1, 0),
+                2,
+                0xff,
+            ),
             BpfInsn::mov64_imm(0, 10),
             BpfInsn::ja(1),
             BpfInsn::mov64_imm(0, 20),

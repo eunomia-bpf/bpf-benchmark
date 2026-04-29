@@ -7,18 +7,18 @@ use crate::insn::BpfInsn;
 use crate::pass::{Analysis, BpfProgram};
 
 #[cfg_attr(not(test), allow(dead_code))]
-const BPF_MAP_TYPE_HASH: u32 = 1;
+const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH as u32;
 #[cfg_attr(not(test), allow(dead_code))]
-const BPF_MAP_TYPE_ARRAY: u32 = 2;
+const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY as u32;
 #[cfg_attr(not(test), allow(dead_code))]
-const BPF_MAP_TYPE_PERCPU_HASH: u32 = 5;
+const BPF_MAP_TYPE_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_HASH as u32;
 #[cfg_attr(not(test), allow(dead_code))]
-const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = 6;
+const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY as u32;
 #[cfg_attr(not(test), allow(dead_code))]
-const BPF_MAP_TYPE_LRU_HASH: u32 = 9;
+const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH as u32;
 #[cfg_attr(not(test), allow(dead_code))]
-const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = 10;
-const BPF_PSEUDO_MAP_FD: u8 = 1;
+const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH as u32;
+const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 
 /// Runtime metadata for a live kernel map referenced by the program.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -222,18 +222,13 @@ mod tests {
 
     fn make_ld_imm64(dst: u8, src: u8, imm_lo: i32) -> [BpfInsn; 2] {
         [
-            BpfInsn {
-                code: BPF_LD | BPF_DW | BPF_IMM,
-                regs: BpfInsn::make_regs(dst, src),
-                off: 0,
-                imm: imm_lo,
-            },
-            BpfInsn {
-                code: 0,
-                regs: 0,
-                off: 0,
-                imm: 0,
-            },
+            BpfInsn::new(
+                BPF_LD | BPF_DW | BPF_IMM,
+                BpfInsn::make_regs(dst, src),
+                0,
+                imm_lo,
+            ),
+            BpfInsn::new(0, 0, 0, 0),
         ]
     }
 
@@ -425,11 +420,11 @@ mod tests {
 
     #[test]
     fn unsupported_map_types_reject_direct_value_access() {
-        const BPF_MAP_TYPE_PROG_ARRAY: u32 = 3;
-        const BPF_MAP_TYPE_PERF_EVENT_ARRAY: u32 = 4;
-        const BPF_MAP_TYPE_STACK_TRACE: u32 = 7;
-        const BPF_MAP_TYPE_CGROUP_STORAGE: u32 = 19;
-        const BPF_MAP_TYPE_RINGBUF: u32 = 27;
+        const BPF_MAP_TYPE_PROG_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PROG_ARRAY as u32;
+        const BPF_MAP_TYPE_PERF_EVENT_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERF_EVENT_ARRAY as u32;
+        const BPF_MAP_TYPE_STACK_TRACE: u32 = kernel_sys::BPF_MAP_TYPE_STACK_TRACE as u32;
+        const BPF_MAP_TYPE_CGROUP_STORAGE: u32 = kernel_sys::BPF_MAP_TYPE_CGROUP_STORAGE as u32;
+        const BPF_MAP_TYPE_RINGBUF: u32 = kernel_sys::BPF_MAP_TYPE_RINGBUF as u32;
 
         for map_type in [
             BPF_MAP_TYPE_PROG_ARRAY,

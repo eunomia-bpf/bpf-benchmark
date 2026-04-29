@@ -13,31 +13,31 @@ use goblin::elf::Elf;
 
 use crate::insn::{BpfInsn, BPF_DW, BPF_IMM, BPF_LD};
 
-pub const BPF_PSEUDO_MAP_FD: u8 = 1;
-pub const BPF_PSEUDO_MAP_VALUE: u8 = 2;
+pub const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
+pub const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
 
-const BPF_MAP_TYPE_ARRAY: u32 = 2;
+const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY as u32;
 const R_BPF_64_64: u32 = 1;
 const R_BPF_64_NODYLD32: u32 = 4;
 
-const BPF_PROG_TYPE_SOCKET_FILTER: u32 = 1;
-const BPF_PROG_TYPE_KPROBE: u32 = 2;
-const BPF_PROG_TYPE_SCHED_CLS: u32 = 3;
-const BPF_PROG_TYPE_SCHED_ACT: u32 = 4;
-const BPF_PROG_TYPE_TRACEPOINT: u32 = 5;
-const BPF_PROG_TYPE_XDP: u32 = 6;
-const BPF_PROG_TYPE_PERF_EVENT: u32 = 7;
-const BPF_PROG_TYPE_CGROUP_SKB: u32 = 8;
-const BPF_PROG_TYPE_SK_SKB: u32 = 14;
-const BPF_PROG_TYPE_RAW_TRACEPOINT: u32 = 17;
-const BPF_PROG_TYPE_LWT_IN: u32 = 18;
-const BPF_PROG_TYPE_LWT_OUT: u32 = 19;
-const BPF_PROG_TYPE_LWT_XMIT: u32 = 20;
-const BPF_PROG_TYPE_TRACING: u32 = 26;
-const BPF_PROG_TYPE_STRUCT_OPS: u32 = 27;
-const BPF_PROG_TYPE_LSM: u32 = 29;
-const BPF_PROG_TYPE_SYSCALL: u32 = 31;
-const BPF_PROG_TYPE_NETFILTER: u32 = 32;
+const BPF_PROG_TYPE_SOCKET_FILTER: u32 = kernel_sys::BPF_PROG_TYPE_SOCKET_FILTER as u32;
+const BPF_PROG_TYPE_KPROBE: u32 = kernel_sys::BPF_PROG_TYPE_KPROBE as u32;
+const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS as u32;
+const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT as u32;
+const BPF_PROG_TYPE_TRACEPOINT: u32 = kernel_sys::BPF_PROG_TYPE_TRACEPOINT as u32;
+const BPF_PROG_TYPE_XDP: u32 = kernel_sys::BPF_PROG_TYPE_XDP as u32;
+const BPF_PROG_TYPE_PERF_EVENT: u32 = kernel_sys::BPF_PROG_TYPE_PERF_EVENT as u32;
+const BPF_PROG_TYPE_CGROUP_SKB: u32 = kernel_sys::BPF_PROG_TYPE_CGROUP_SKB as u32;
+const BPF_PROG_TYPE_SK_SKB: u32 = kernel_sys::BPF_PROG_TYPE_SK_SKB as u32;
+const BPF_PROG_TYPE_RAW_TRACEPOINT: u32 = kernel_sys::BPF_PROG_TYPE_RAW_TRACEPOINT as u32;
+const BPF_PROG_TYPE_LWT_IN: u32 = kernel_sys::BPF_PROG_TYPE_LWT_IN as u32;
+const BPF_PROG_TYPE_LWT_OUT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_OUT as u32;
+const BPF_PROG_TYPE_LWT_XMIT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_XMIT as u32;
+const BPF_PROG_TYPE_TRACING: u32 = kernel_sys::BPF_PROG_TYPE_TRACING as u32;
+const BPF_PROG_TYPE_STRUCT_OPS: u32 = kernel_sys::BPF_PROG_TYPE_STRUCT_OPS as u32;
+const BPF_PROG_TYPE_LSM: u32 = kernel_sys::BPF_PROG_TYPE_LSM as u32;
+const BPF_PROG_TYPE_SYSCALL: u32 = kernel_sys::BPF_PROG_TYPE_SYSCALL as u32;
+const BPF_PROG_TYPE_NETFILTER: u32 = kernel_sys::BPF_PROG_TYPE_NETFILTER as u32;
 
 #[derive(Clone, Debug)]
 pub struct ElfMapMetadata {
@@ -466,12 +466,7 @@ fn parse_bpf_insns(bytes: &[u8], section_name: &str) -> Result<Vec<BpfInsn>> {
 
     let mut insns = Vec::with_capacity(bytes.len() / std::mem::size_of::<BpfInsn>());
     for chunk in bytes.chunks_exact(8) {
-        insns.push(BpfInsn {
-            code: chunk[0],
-            regs: chunk[1],
-            off: i16::from_le_bytes([chunk[2], chunk[3]]),
-            imm: i32::from_le_bytes([chunk[4], chunk[5], chunk[6], chunk[7]]),
-        });
+        insns.push(BpfInsn::from_raw_bytes(chunk.try_into().unwrap()));
     }
     Ok(insns)
 }
@@ -1022,7 +1017,7 @@ fn apply_map_relocation(
     if insn.code != (BPF_LD | BPF_DW | BPF_IMM) {
         bail!("map relocation at pc {} does not target LD_IMM64", pc);
     }
-    insn.regs = BpfInsn::make_regs(insn.dst_reg(), pseudo_src);
+    insn.set_src_reg(pseudo_src);
     insn.imm = i32::try_from(map_index + 1).context("map index does not fit in i32")?;
     Ok(pc)
 }

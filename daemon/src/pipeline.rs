@@ -406,12 +406,7 @@ mod tests {
     use super::*;
 
     fn exit_insn() -> insn::BpfInsn {
-        insn::BpfInsn {
-            code: insn::BPF_JMP | insn::BPF_EXIT,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        }
+        insn::BpfInsn::new(insn::BPF_JMP | insn::BPF_EXIT, 0, 0, 0)
     }
 
     fn ctx_for_pass_manager(

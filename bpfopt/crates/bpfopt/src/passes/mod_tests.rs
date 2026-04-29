@@ -7,10 +7,9 @@ use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
 use crate::insn::*;
 use crate::pass::{BpfProgram, PassContext, PipelineResult};
 
-const BPF_ADD: u8 = 0x00;
-const BPF_MAP_TYPE_HASH: u32 = 1;
-const BPF_MAP_TYPE_ARRAY: u32 = 2;
-const BPF_PSEUDO_MAP_FD: u8 = 1;
+const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH as u32;
+const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY as u32;
+const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
 
 fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
@@ -19,55 +18,40 @@ fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
 
 fn ld_imm64(dst: u8, src: u8, imm_lo: i32) -> [BpfInsn; 2] {
     [
-        BpfInsn {
-            code: BPF_LD | BPF_DW | BPF_IMM,
-            regs: BpfInsn::make_regs(dst, src),
-            off: 0,
-            imm: imm_lo,
-        },
-        BpfInsn {
-            code: 0,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        },
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(dst, src),
+            0,
+            imm_lo,
+        ),
+        BpfInsn::new(0, 0, 0, 0),
     ]
 }
 
 fn exit_insn() -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_EXIT,
-        regs: 0,
-        off: 0,
-        imm: 0,
-    }
+    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
 }
 
 fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_JEQ | BPF_K,
-        regs: BpfInsn::make_regs(dst, 0),
+    BpfInsn::new(
+        BPF_JMP | BPF_JEQ | BPF_K,
+        BpfInsn::make_regs(dst, 0),
         off,
         imm,
-    }
+    )
 }
 
 fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> BpfInsn {
-    BpfInsn {
-        code: BPF_ST | size | BPF_MEM,
-        regs: BpfInsn::make_regs(dst, 0),
+    BpfInsn::new(
+        BPF_ST | size | BPF_MEM,
+        BpfInsn::make_regs(dst, 0),
         off,
         imm,
-    }
+    )
 }
 
 fn call_helper(imm: i32) -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_CALL,
-        regs: BpfInsn::make_regs(0, 0),
-        off: 0,
-        imm,
-    }
+    BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, imm)
 }
 
 fn install_map(map_id: u32, map_type: u32, value: Vec<u8>) {
@@ -132,12 +116,7 @@ fn test_cfg_analysis_with_subprogs() {
     use crate::pass::Analysis;
 
     let prog = make_program(vec![
-        BpfInsn {
-            code: BPF_JMP | BPF_CALL,
-            regs: BpfInsn::make_regs(0, 1),
-            off: 0,
-            imm: 2,
-        },
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 1), 0, 2),
         BpfInsn::mov64_imm(0, 0),
         exit_insn(),
         BpfInsn::mov64_imm(0, 1),

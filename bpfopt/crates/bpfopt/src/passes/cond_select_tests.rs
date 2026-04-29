@@ -6,39 +6,34 @@ fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
 }
 
 fn exit_insn() -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_EXIT,
-        regs: 0,
-        off: 0,
-        imm: 0,
-    }
+    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
 }
 
 fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_JNE | BPF_K,
-        regs: BpfInsn::make_regs(dst, 0),
+    BpfInsn::new(
+        BPF_JMP | BPF_JNE | BPF_K,
+        BpfInsn::make_regs(dst, 0),
         off,
         imm,
-    }
+    )
 }
 
 fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_JEQ | BPF_K,
-        regs: BpfInsn::make_regs(dst, 0),
+    BpfInsn::new(
+        BPF_JMP | BPF_JEQ | BPF_K,
+        BpfInsn::make_regs(dst, 0),
         off,
         imm,
-    }
+    )
 }
 
 fn jgt_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_JGT | BPF_K,
-        regs: BpfInsn::make_regs(dst, 0),
+    BpfInsn::new(
+        BPF_JMP | BPF_JGT | BPF_K,
+        BpfInsn::make_regs(dst, 0),
         off,
         imm,
-    }
+    )
 }
 
 fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {

@@ -553,12 +553,7 @@ fn parse_bpf_insn_bytes(bytes: &[u8], field_name: &str) -> Result<Vec<BpfInsn>> 
 
     let mut insns = Vec::with_capacity(bytes.len() / std::mem::size_of::<BpfInsn>());
     for chunk in bytes.chunks_exact(8) {
-        insns.push(BpfInsn {
-            code: chunk[0],
-            regs: chunk[1],
-            off: i16::from_le_bytes([chunk[2], chunk[3]]),
-            imm: i32::from_le_bytes([chunk[4], chunk[5], chunk[6], chunk[7]]),
-        });
+        insns.push(BpfInsn::from_raw_bytes(chunk.try_into().unwrap()));
     }
     Ok(insns)
 }
@@ -1326,7 +1321,7 @@ pub fn relocate_map_fds_with_bindings(
         let code = insns[i].code;
         // BPF_LD | BPF_IMM | BPF_DW = 0x18
         if code == (BPF_LD | BPF_IMM | BPF_DW) {
-            let src_reg = (insns[i].regs >> 4) & 0x0f;
+            let src_reg = insns[i].src_reg();
             if src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_VALUE {
                 let old_fd = insns[i].imm;
                 if let std::collections::hash_map::Entry::Vacant(e) = seen.entry(old_fd) {
@@ -1377,7 +1372,7 @@ pub fn relocate_map_fds_with_bindings(
     while i < insns.len() {
         let code = insns[i].code;
         if code == (BPF_LD | BPF_IMM | BPF_DW) {
-            let src_reg = (insns[i].regs >> 4) & 0x0f;
+            let src_reg = insns[i].src_reg();
             if src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_VALUE {
                 let old_fd = insns[i].imm;
                 if let Some(&new_fd) = fd_map.get(&old_fd) {

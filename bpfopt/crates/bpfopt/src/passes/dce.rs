@@ -132,55 +132,40 @@ mod tests {
     use crate::passes::ConstPropPass;
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_EXIT,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        }
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
     fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_JEQ | BPF_K,
-            regs: BpfInsn::make_regs(dst, 0),
+        BpfInsn::new(
+            BPF_JMP | BPF_JEQ | BPF_K,
+            BpfInsn::make_regs(dst, 0),
             off,
             imm,
-        }
+        )
     }
 
     fn pseudo_call(off: i32) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_CALL,
-            regs: BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
-            off: 0,
-            imm: off,
-        }
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
+            0,
+            off,
+        )
     }
 
     fn call_helper(imm: i32) -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_CALL,
-            regs: BpfInsn::make_regs(0, 0),
-            off: 0,
-            imm,
-        }
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, imm)
     }
 
     fn pseudo_func_ref(dst: u8, imm: i32) -> [BpfInsn; 2] {
         [
-            BpfInsn {
-                code: BPF_LD | BPF_DW | BPF_IMM,
-                regs: BpfInsn::make_regs(dst, BPF_PSEUDO_FUNC),
-                off: 0,
+            BpfInsn::new(
+                BPF_LD | BPF_DW | BPF_IMM,
+                BpfInsn::make_regs(dst, BPF_PSEUDO_FUNC),
+                0,
                 imm,
-            },
-            BpfInsn {
-                code: 0,
-                regs: 0,
-                off: 0,
-                imm: 0,
-            },
+            ),
+            BpfInsn::new(0, 0, 0, 0),
         ]
     }
 
@@ -329,12 +314,12 @@ mod tests {
         assert_eq!(
             program.insns,
             vec![
-                BpfInsn {
-                    code: BPF_LD | BPF_DW | BPF_IMM,
-                    regs: BpfInsn::make_regs(2, BPF_PSEUDO_FUNC),
-                    off: 0,
-                    imm: 3,
-                },
+                BpfInsn::new(
+                    BPF_LD | BPF_DW | BPF_IMM,
+                    BpfInsn::make_regs(2, BPF_PSEUDO_FUNC),
+                    0,
+                    3
+                ),
                 callback[1],
                 BpfInsn::mov64_imm(0, 0),
                 exit_insn(),

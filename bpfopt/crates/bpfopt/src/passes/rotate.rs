@@ -359,12 +359,7 @@ mod tests {
     }
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn {
-            code: BPF_JMP | BPF_EXIT,
-            regs: 0,
-            off: 0,
-            imm: 0,
-        }
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
     fn ctx_with_rotate_kfunc(btf_id: i32) -> PassContext {
@@ -658,12 +653,12 @@ mod tests {
             BpfInsn::alu64_imm(BPF_RSH, 2, 56),
             BpfInsn::alu64_imm(BPF_LSH, 3, 8),
             BpfInsn::alu64_reg(BPF_OR, 2, 3),
-            BpfInsn {
-                code: BPF_JMP | BPF_CALL,
-                regs: BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
-                off: 0,
-                imm: 1,
-            },
+            BpfInsn::new(
+                BPF_JMP | BPF_CALL,
+                BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
+                0,
+                1,
+            ),
             BpfInsn::mov64_imm(0, 0),
             exit_insn(),
             BpfInsn::mov64_imm(0, 1),

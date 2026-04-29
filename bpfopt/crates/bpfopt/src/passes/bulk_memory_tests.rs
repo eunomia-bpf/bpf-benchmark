@@ -11,30 +11,25 @@ fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
 }
 
 fn exit_insn() -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_EXIT,
-        regs: 0,
-        off: 0,
-        imm: 0,
-    }
+    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
 }
 
 fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> BpfInsn {
-    BpfInsn {
-        code: BPF_ST | size | BPF_MEM,
-        regs: BpfInsn::make_regs(dst, 0),
+    BpfInsn::new(
+        BPF_ST | size | BPF_MEM,
+        BpfInsn::make_regs(dst, 0),
         off,
         imm,
-    }
+    )
 }
 
 fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn {
-        code: BPF_JMP | BPF_JEQ | BPF_K,
-        regs: BpfInsn::make_regs(dst, 0),
+    BpfInsn::new(
+        BPF_JMP | BPF_JEQ | BPF_K,
+        BpfInsn::make_regs(dst, 0),
         off,
         imm,
-    }
+    )
 }
 
 fn width_bytes(size: u8) -> i16 {

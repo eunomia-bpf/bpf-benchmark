@@ -321,19 +321,19 @@ fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> {
 // ── Packet-pointer safety constants ─────────────────────────────────
 
 /// BPF_PROG_TYPE_SCHED_CLS (TC classifier).
-const BPF_PROG_TYPE_SCHED_CLS: u32 = 3;
+const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS as u32;
 /// BPF_PROG_TYPE_SCHED_ACT (TC action).
-const BPF_PROG_TYPE_SCHED_ACT: u32 = 4;
+const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT as u32;
 /// BPF_PROG_TYPE_XDP.
-const BPF_PROG_TYPE_XDP: u32 = 6;
+const BPF_PROG_TYPE_XDP: u32 = kernel_sys::BPF_PROG_TYPE_XDP as u32;
 /// BPF_PROG_TYPE_LWT_IN.
-const BPF_PROG_TYPE_LWT_IN: u32 = 18;
+const BPF_PROG_TYPE_LWT_IN: u32 = kernel_sys::BPF_PROG_TYPE_LWT_IN as u32;
 /// BPF_PROG_TYPE_LWT_OUT.
-const BPF_PROG_TYPE_LWT_OUT: u32 = 19;
+const BPF_PROG_TYPE_LWT_OUT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_OUT as u32;
 /// BPF_PROG_TYPE_LWT_XMIT.
-const BPF_PROG_TYPE_LWT_XMIT: u32 = 20;
+const BPF_PROG_TYPE_LWT_XMIT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_XMIT as u32;
 /// BPF_PROG_TYPE_SK_SKB.
-const BPF_PROG_TYPE_SK_SKB: u32 = 14;
+const BPF_PROG_TYPE_SK_SKB: u32 = kernel_sys::BPF_PROG_TYPE_SK_SKB as u32;
 
 /// Returns `true` if the given BPF program type may expose packet pointers
 /// whose wide-load safety cannot be statically guaranteed.

@@ -601,12 +601,8 @@ fn test_verifier_rejection_count_counts_rejected_passes() {
 fn test_build_pipeline_default() {
     let ctx = pass::PassContext::test_default();
     let pm = bpfopt::passes::build_full_pipeline();
-    let exit_insn = bpfopt::insn::BpfInsn {
-        code: bpfopt::insn::BPF_JMP | bpfopt::insn::BPF_EXIT,
-        regs: 0,
-        off: 0,
-        imm: 0,
-    };
+    let exit_insn =
+        bpfopt::insn::BpfInsn::new(bpfopt::insn::BPF_JMP | bpfopt::insn::BPF_EXIT, 0, 0, 0);
     let mut prog = pass::BpfProgram::new(vec![exit_insn]);
     let result = pm.run(&mut prog, &ctx).unwrap();
     assert!(!result.program_changed);

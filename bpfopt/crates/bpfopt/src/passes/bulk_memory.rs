@@ -15,9 +15,6 @@ const MEMCPY_TARGET: &str = "bpf_memcpy_bulk";
 const MEMSET_TARGET: &str = "bpf_memset_bulk";
 const MIN_BULK_BYTES: usize = 32;
 const CHUNK_MAX_BYTES: usize = 128;
-const BPF_ADD: u8 = 0x00;
-const BPF_SUB: u8 = 0x10;
-const BPF_XOR: u8 = 0xa0;
 const STACK_PTR_REG: u8 = 10;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
