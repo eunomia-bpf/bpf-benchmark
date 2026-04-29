@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 //! Dynamic map invalidation tracking for specialized map-inline sites.
-#![cfg_attr(not(test), allow(dead_code))]
 
 use anyhow::Result;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
@@ -67,16 +66,16 @@ impl<A> MapInvalidationTracker<A> {
         }
     }
 
+    #[cfg(test)]
     pub fn entry_count(&self) -> usize {
         self.entries.len()
     }
 
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn tracks_prog(&self, prog_id: u32) -> bool {
         self.entries.iter().any(|entry| entry.prog_id == prog_id)
     }
 
-    #[allow(dead_code)]
     pub fn remember_map_fd(&mut self, fd: OwnedFd) -> u32 {
         let raw_fd = fd.as_raw_fd() as u32;
         self.owned_map_fds.insert(raw_fd, fd);

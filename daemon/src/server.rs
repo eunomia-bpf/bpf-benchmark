@@ -429,13 +429,7 @@ fn process_request(
                 mode,
             ) {
                 Ok(result) => serialize_or_error(result),
-                Err(e) => error_json(
-                    format!("{e:#}")
-                        .lines()
-                        .next()
-                        .unwrap_or("<empty error message>")
-                        .to_string(),
-                ),
+                Err(e) => error_json(format!("{e:#}")),
             }
         }
         "optimize-all" => {
@@ -458,8 +452,6 @@ fn process_request(
                 })
                 .collect::<Vec<_>>();
             let mut applied = 0u32;
-            let mut errors = 0u32;
-            let mut program_errors = Vec::new();
             for entry in &program_order {
                 let profile_path = profiling_state
                     .as_ref()
@@ -477,25 +469,18 @@ fn process_request(
                     }
                     Ok(result) if result.status == "ok" => {}
                     Ok(result) => {
-                        errors += 1;
-                        program_errors.push(serde_json::json!({
-                            "prog_id": entry.prog_id,
-                            "prog_name": result.program.prog_name,
-                            "error_message": result.error_message.unwrap_or_else(|| {
-                                format!(
-                                    "optimize prog {} returned status {}",
-                                    entry.prog_id, result.status
-                                )
-                            }),
+                        return error_json(result.error_message.unwrap_or_else(|| {
+                            format!(
+                                "optimize prog {} returned status {}",
+                                entry.prog_id, result.status
+                            )
                         }));
                     }
                     Err(err) => {
-                        errors += 1;
-                        program_errors.push(serde_json::json!({
-                            "prog_id": entry.prog_id,
-                            "prog_name": entry.prog_name,
-                            "error_message": format!("{err:#}"),
-                        }));
+                        return error_json(format!(
+                            "optimize-all failed for prog {} ({}): {err:#}",
+                            entry.prog_id, entry.prog_name
+                        ));
                     }
                 }
             }
@@ -503,11 +488,11 @@ fn process_request(
                 "status": "ok",
                 "total": program_order.len() as u32,
                 "applied": applied,
-                "errors": errors,
+                "errors": 0u32,
                 "profiling_source": profiling_state.as_ref().map_or("none", ProfilingState::label),
                 "hotness_window_ms": serde_json::Value::Null,
                 "program_order": program_order,
-                "program_errors": program_errors,
+                "program_errors": [],
             })
         }
         "profile-start" => {
@@ -618,9 +603,12 @@ mod tests {
 
     use crate::invalidation::{BatchLookupValue, MapInvalidationTracker};
 
+    type MockMapValues = HashMap<u32, HashMap<Vec<u8>, Vec<u8>>>;
+    type SharedMockMapValues = Arc<Mutex<MockMapValues>>;
+
     #[derive(Clone, Debug, Default)]
     struct MockMapValueReader {
-        values: Arc<Mutex<HashMap<u32, HashMap<Vec<u8>, Vec<u8>>>>>,
+        values: SharedMockMapValues,
     }
 
     impl MockMapValueReader {

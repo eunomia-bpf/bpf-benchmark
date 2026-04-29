@@ -201,6 +201,15 @@ struct PassReport {
     insn_count_before: usize,
     insn_count_after: usize,
     insn_delta: isize,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    map_inline_records: Vec<MapInlineRecordReport>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct MapInlineRecordReport {
+    map_id: u32,
+    key_hex: String,
+    value_hex: String,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -1219,6 +1228,11 @@ fn pass_report(result: &PassResult) -> PassReport {
         insn_count_before: result.insns_before,
         insn_count_after: result.insns_after,
         insn_delta: result.insns_after as isize - result.insns_before as isize,
+        map_inline_records: result
+            .map_inline_records
+            .iter()
+            .map(map_inline_record_report)
+            .collect(),
     }
 }
 
@@ -1232,6 +1246,7 @@ fn unchanged_report(pass_name: &str, insn_count: usize) -> PassReport {
         insn_count_before: insn_count,
         insn_count_after: insn_count,
         insn_delta: 0,
+        map_inline_records: Vec::new(),
     }
 }
 
@@ -1245,7 +1260,26 @@ fn skipped_report(pass_name: &str, reason: &str, insn_count: usize) -> PassRepor
         insn_count_before: insn_count,
         insn_count_after: insn_count,
         insn_delta: 0,
+        map_inline_records: Vec::new(),
     }
+}
+
+fn map_inline_record_report(record: &bpfopt::pass::MapInlineRecord) -> MapInlineRecordReport {
+    MapInlineRecordReport {
+        map_id: record.map_id,
+        key_hex: hex_bytes(&record.key),
+        value_hex: hex_bytes(&record.expected_value),
+    }
+}
+
+fn hex_bytes(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut out = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        out.push(HEX[(byte >> 4) as usize] as char);
+        out.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    out
 }
 
 fn optimize_reports(
@@ -1441,6 +1475,29 @@ mod tests {
         assert_eq!(registry.endian_load64_btf_id, 12);
         assert_eq!(registry.call_off_for_target_name("bpf_memcpy_bulk"), 2);
         assert!(registry.packed_supported_for_target_name("bpf_memcpy_bulk"));
+    }
+
+    #[test]
+    fn pass_report_serializes_map_inline_records_as_hex() {
+        let result = PassResult {
+            pass_name: "map_inline".to_string(),
+            changed: true,
+            sites_applied: 1,
+            map_inline_records: vec![bpfopt::pass::MapInlineRecord {
+                map_id: 7,
+                key: vec![1, 0, 0, 0],
+                expected_value: vec![0xab, 0xcd],
+            }],
+            insns_before: 4,
+            insns_after: 2,
+            ..PassResult::default()
+        };
+
+        let report = serde_json::to_value(pass_report(&result)).unwrap();
+
+        assert_eq!(report["map_inline_records"][0]["map_id"], 7);
+        assert_eq!(report["map_inline_records"][0]["key_hex"], "01000000");
+        assert_eq!(report["map_inline_records"][0]["value_hex"], "abcd");
     }
 
     #[test]

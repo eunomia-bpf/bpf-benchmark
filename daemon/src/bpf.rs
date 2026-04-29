@@ -18,6 +18,10 @@ pub fn bpf_map_get_info(fd: RawFd) -> Result<BpfMapInfo> {
         .with_context(|| format!("read info for BPF map fd {fd}"))
 }
 
+pub fn bpf_map_get_fd_by_id(id: u32) -> Result<OwnedFd> {
+    kernel_sys::map_get_fd_by_id(id).with_context(|| format!("open BPF map id {id}"))
+}
+
 pub fn bpf_map_lookup_elem_optional(
     fd: RawFd,
     key: &[u8],
@@ -172,28 +176,6 @@ pub fn iter_prog_ids() -> ProgIdIter {
         next_start_id: 0,
         done: false,
     }
-}
-
-#[allow(dead_code)]
-pub fn bpf_prog_get_fd_by_id(id: u32) -> Result<OwnedFd> {
-    kernel_sys::prog_get_fd_by_id(id).with_context(|| format!("open BPF program id {id}"))
-}
-
-#[allow(dead_code)]
-pub fn bpf_prog_get_info(fd: RawFd) -> Result<kernel_sys::BpfProgInfoFork> {
-    let borrowed = unsafe { BorrowedFd::borrow_raw(fd) };
-    kernel_sys::obj_get_info_by_fd(borrowed)
-        .with_context(|| format!("read info for BPF program fd {fd}"))
-}
-
-#[allow(dead_code)]
-pub fn prog_name(info: &kernel_sys::BpfProgInfoFork) -> String {
-    let end = info
-        .name
-        .iter()
-        .position(|&b| b == 0)
-        .unwrap_or(info.name.len());
-    String::from_utf8_lossy(&info.name[..end]).to_string()
 }
 
 #[cfg(test)]
