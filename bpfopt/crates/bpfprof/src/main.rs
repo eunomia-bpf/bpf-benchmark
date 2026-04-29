@@ -64,9 +64,9 @@ struct ProfileJson {
     duration_ms: u64,
     run_cnt_delta: u64,
     run_time_ns_delta: u64,
-    branch_miss_rate: f64,
-    branch_misses: u64,
-    branch_instructions: u64,
+    branch_miss_rate: Option<f64>,
+    branch_misses: Option<u64>,
+    branch_instructions: Option<u64>,
     per_insn: BTreeMap<String, PerInsnProfile>,
 }
 
@@ -203,29 +203,25 @@ fn build_profiles(
     targets: &[Target],
     before: &BTreeMap<u32, ProgStats>,
     after: &BTreeMap<u32, ProgStats>,
-    branch: BranchCounts,
+    _branch: BranchCounts,
     duration_ms: u64,
 ) -> Vec<ProfileRow> {
-    let branch_miss_rate = if branch.branch_instructions == 0 {
-        0.0
-    } else {
-        branch.branch_misses as f64 / branch.branch_instructions as f64
-    };
-
     let mut rows = targets
         .iter()
         .filter_map(|target| {
             let before = before.get(&target.prog_id)?;
             let after = after.get(&target.prog_id)?;
+            // The current PMU sample covers the whole profiling window, not a
+            // specific BPF program, so per-program branch fields stay null.
             Some(ProfileRow {
                 profile: ProfileJson {
                     prog_id: target.prog_id,
                     duration_ms,
                     run_cnt_delta: after.run_cnt.saturating_sub(before.run_cnt),
                     run_time_ns_delta: after.run_time_ns.saturating_sub(before.run_time_ns),
-                    branch_miss_rate,
-                    branch_misses: branch.branch_misses,
-                    branch_instructions: branch.branch_instructions,
+                    branch_miss_rate: None,
+                    branch_misses: None,
+                    branch_instructions: None,
                     per_insn: BTreeMap::new(),
                 },
                 name: target.name.clone(),
@@ -316,9 +312,14 @@ fn print_table(rows: &[ProfileRow]) -> Result<()> {
         } else {
             row.profile.run_time_ns_delta as f64 / row.profile.run_cnt_delta as f64
         };
+        let branch_miss = row
+            .profile
+            .branch_miss_rate
+            .map(|rate| format!("{:.2}", rate * 100.0))
+            .unwrap_or_else(|| "n/a".to_string());
         writeln!(
             out,
-            "{:<4} {:<8} {:<16} {:<6} {:>12} {:>14} {:>12.1} {:>9.2}",
+            "{:<4} {:<8} {:<16} {:<6} {:>12} {:>14} {:>12.1} {:>9}",
             idx + 1,
             row.profile.prog_id,
             truncate_name(&row.name, 16),
@@ -326,7 +327,7 @@ fn print_table(rows: &[ProfileRow]) -> Result<()> {
             row.profile.run_cnt_delta,
             row.profile.run_time_ns_delta,
             avg_ns,
-            row.profile.branch_miss_rate * 100.0
+            branch_miss
         )?;
     }
     out.flush()?;
@@ -447,15 +448,15 @@ mod tests {
     use super::*;
 
     #[test]
-    fn profile_json_serializes_v3_schema() {
+    fn profile_json_serializes_nullable_branch_metrics() {
         let profile = ProfileJson {
             prog_id: 123,
             duration_ms: 500,
             run_cnt_delta: 10,
             run_time_ns_delta: 2_000,
-            branch_miss_rate: 0.25,
-            branch_misses: 5,
-            branch_instructions: 20,
+            branch_miss_rate: None,
+            branch_misses: None,
+            branch_instructions: None,
             per_insn: BTreeMap::new(),
         };
 
@@ -465,9 +466,9 @@ mod tests {
         assert_eq!(value["duration_ms"], 500);
         assert_eq!(value["run_cnt_delta"], 10);
         assert_eq!(value["run_time_ns_delta"], 2_000);
-        assert_eq!(value["branch_miss_rate"], 0.25);
-        assert_eq!(value["branch_misses"], 5);
-        assert_eq!(value["branch_instructions"], 20);
+        assert!(value["branch_miss_rate"].is_null());
+        assert!(value["branch_misses"].is_null());
+        assert!(value["branch_instructions"].is_null());
         assert!(value["per_insn"].as_object().unwrap().is_empty());
     }
 
@@ -520,7 +521,43 @@ mod tests {
 
         assert_eq!(rows[0].profile.prog_id, 1);
         assert_eq!(rows[0].profile.run_cnt_delta, 20);
-        assert_eq!(rows[0].profile.branch_miss_rate, 0.25);
+    }
+
+    #[test]
+    fn build_profiles_does_not_attribute_shared_pmu_to_program() {
+        let targets = vec![fake_target(7, "target", 6)];
+        let before = BTreeMap::from([(
+            7,
+            ProgStats {
+                run_cnt: 10,
+                run_time_ns: 100,
+            },
+        )]);
+        let after = BTreeMap::from([(
+            7,
+            ProgStats {
+                run_cnt: 14,
+                run_time_ns: 180,
+            },
+        )]);
+
+        let rows = build_profiles(
+            &targets,
+            &before,
+            &after,
+            BranchCounts {
+                branch_misses: 99,
+                branch_instructions: 100,
+            },
+            250,
+        );
+
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].profile.run_cnt_delta, 4);
+        assert_eq!(rows[0].profile.run_time_ns_delta, 80);
+        assert_eq!(rows[0].profile.branch_miss_rate, None);
+        assert_eq!(rows[0].profile.branch_misses, None);
+        assert_eq!(rows[0].profile.branch_instructions, None);
     }
 
     fn fake_target(prog_id: u32, name: &str, prog_type: u32) -> Target {

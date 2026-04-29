@@ -103,6 +103,8 @@ fn report_mode_writes_json_for_bad_program() {
     let json: serde_json::Value =
         serde_json::from_slice(&fs::read(&report).expect("read report")).unwrap();
     fs::remove_file(report).ok();
+    assert_eq!(json["log_level"], 2);
+    assert!(json["verifier_states"]["insns"].is_array(), "json={json}");
     if json["verifier_log"].as_str().unwrap_or_default().is_empty()
         && matches!(json["errno"].as_i64(), Some(1 | 13))
     {

@@ -34,8 +34,8 @@ struct Cli {
     /// kinsn fd_array JSON manifest.
     #[arg(long, value_name = "FILE")]
     fd_array: Option<PathBuf>,
-    /// Verifier log level. Defaults to 1; --verifier-states-out forces 2.
-    #[arg(long, default_value_t = 1, value_name = "N")]
+    /// Verifier log level. Defaults to 0; --report and --verifier-states-out force 2.
+    #[arg(long, default_value_t = 0, value_name = "N")]
     log_level: u32,
     /// Raw struct bpf_insn[] input file. Defaults to stdin.
     #[arg(long, value_name = "FILE")]
@@ -55,6 +55,7 @@ struct Cli {
 struct VerifyReport {
     status: &'static str,
     verifier_log: String,
+    verifier_states: VerifierStatesJson,
     insn_count: usize,
     log_level: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -65,12 +66,12 @@ struct VerifyReport {
     log_true_size: u32,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 struct VerifierStatesJson {
     insns: Vec<VerifierInsnJson>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 struct VerifierInsnJson {
     pc: usize,
     #[serde(skip_serializing_if = "is_zero_usize")]
@@ -78,7 +79,7 @@ struct VerifierInsnJson {
     regs: BTreeMap<String, VerifierRegJson>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 struct VerifierRegJson {
     #[serde(rename = "type")]
     reg_type: String,
@@ -134,11 +135,7 @@ fn run() -> Result<ExitCode> {
     let mut insns = decode_insns(&input_bytes)?;
     let _map_fds = apply_map_fds(cli.map_fds.as_deref(), &mut insns)?;
     let fd_array = read_fd_array(cli.fd_array.as_deref())?;
-    let log_level = if cli.verifier_states_out.is_some() {
-        2
-    } else {
-        cli.log_level
-    };
+    let log_level = effective_log_level(&cli);
 
     let mut log_buf = vec![0u8; DEFAULT_LOG_BUF_SIZE];
     let dryrun = kernel_sys::prog_load_dryrun_report(kernel_sys::ProgLoadDryRunOptions {
@@ -151,9 +148,13 @@ fn run() -> Result<ExitCode> {
     })
     .context("BPF_PROG_LOAD dry-run failed")?;
 
+    let parsed_verifier_states = verifier_log::parse_verifier_log(&dryrun.verifier_log);
+    let verifier_states = convert_verifier_states(&parsed_verifier_states);
+
     let report = VerifyReport {
         status: if dryrun.accepted { "pass" } else { "fail" },
         verifier_log: dryrun.verifier_log.clone(),
+        verifier_states: verifier_states.clone(),
         insn_count: insns.len(),
         log_level,
         errno: dryrun.errno,
@@ -170,8 +171,9 @@ fn run() -> Result<ExitCode> {
             print_verifier_failure(&dryrun);
             return Ok(ExitCode::FAILURE);
         }
-        let states = verifier_states_from_log(&dryrun.verifier_log)?;
-        write_json_file(path, &states).with_context(|| format!("write {}", path.display()))?;
+        ensure_verifier_states_parseable(&dryrun.verifier_log, &parsed_verifier_states)?;
+        write_json_file(path, &verifier_states)
+            .with_context(|| format!("write {}", path.display()))?;
     }
 
     if dryrun.accepted {
@@ -185,6 +187,14 @@ fn run() -> Result<ExitCode> {
 
     print_verifier_failure(&dryrun);
     Ok(ExitCode::FAILURE)
+}
+
+fn effective_log_level(cli: &Cli) -> u32 {
+    if cli.report.is_some() || cli.verifier_states_out.is_some() {
+        2
+    } else {
+        cli.log_level
+    }
 }
 
 fn read_input(path: Option<&Path>) -> Result<Vec<u8>> {
@@ -425,12 +435,14 @@ fn build_rejit_fd_array(required_btf_fds: &[i32]) -> Vec<i32> {
     fd_array
 }
 
-fn verifier_states_from_log(log: &str) -> Result<VerifierStatesJson> {
-    let states = verifier_log::parse_verifier_log(log);
+fn ensure_verifier_states_parseable(
+    log: &str,
+    states: &[verifier_log::VerifierInsn],
+) -> Result<()> {
     if !log.trim().is_empty() && states.is_empty() {
         bail!("verifier log did not contain parseable state snapshots");
     }
-    Ok(convert_verifier_states(&states))
+    Ok(())
 }
 
 fn convert_verifier_states(states: &[verifier_log::VerifierInsn]) -> VerifierStatesJson {
@@ -612,6 +624,29 @@ mod tests {
             kernel_sys::BPF_PROG_TYPE_SOCKET_FILTER
         );
         assert!(parse_prog_type("not-a-type").is_err());
+    }
+
+    #[test]
+    fn log_level_default_is_zero_and_outputs_force_two() {
+        let cli = Cli::try_parse_from(["bpfverify", "--prog-type", "xdp"]).unwrap();
+        assert_eq!(cli.log_level, 0);
+        assert_eq!(effective_log_level(&cli), 0);
+
+        let report_cli =
+            Cli::try_parse_from(["bpfverify", "--prog-type", "xdp", "--report", "r.json"]).unwrap();
+        assert_eq!(effective_log_level(&report_cli), 2);
+
+        let states_cli = Cli::try_parse_from([
+            "bpfverify",
+            "--prog-type",
+            "xdp",
+            "--log-level",
+            "0",
+            "--verifier-states-out",
+            "states.json",
+        ])
+        .unwrap();
+        assert_eq!(effective_log_level(&states_cli), 2);
     }
 
     #[test]
