@@ -16,28 +16,28 @@ use crate::insn::{BpfInsn, BPF_DW, BPF_IMM, BPF_LD};
 pub const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 pub const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
 
-const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY as u32;
+const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
 const R_BPF_64_64: u32 = 1;
 const R_BPF_64_NODYLD32: u32 = 4;
 
-const BPF_PROG_TYPE_SOCKET_FILTER: u32 = kernel_sys::BPF_PROG_TYPE_SOCKET_FILTER as u32;
-const BPF_PROG_TYPE_KPROBE: u32 = kernel_sys::BPF_PROG_TYPE_KPROBE as u32;
-const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS as u32;
-const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT as u32;
-const BPF_PROG_TYPE_TRACEPOINT: u32 = kernel_sys::BPF_PROG_TYPE_TRACEPOINT as u32;
-const BPF_PROG_TYPE_XDP: u32 = kernel_sys::BPF_PROG_TYPE_XDP as u32;
-const BPF_PROG_TYPE_PERF_EVENT: u32 = kernel_sys::BPF_PROG_TYPE_PERF_EVENT as u32;
-const BPF_PROG_TYPE_CGROUP_SKB: u32 = kernel_sys::BPF_PROG_TYPE_CGROUP_SKB as u32;
-const BPF_PROG_TYPE_SK_SKB: u32 = kernel_sys::BPF_PROG_TYPE_SK_SKB as u32;
-const BPF_PROG_TYPE_RAW_TRACEPOINT: u32 = kernel_sys::BPF_PROG_TYPE_RAW_TRACEPOINT as u32;
-const BPF_PROG_TYPE_LWT_IN: u32 = kernel_sys::BPF_PROG_TYPE_LWT_IN as u32;
-const BPF_PROG_TYPE_LWT_OUT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_OUT as u32;
-const BPF_PROG_TYPE_LWT_XMIT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_XMIT as u32;
-const BPF_PROG_TYPE_TRACING: u32 = kernel_sys::BPF_PROG_TYPE_TRACING as u32;
-const BPF_PROG_TYPE_STRUCT_OPS: u32 = kernel_sys::BPF_PROG_TYPE_STRUCT_OPS as u32;
-const BPF_PROG_TYPE_LSM: u32 = kernel_sys::BPF_PROG_TYPE_LSM as u32;
-const BPF_PROG_TYPE_SYSCALL: u32 = kernel_sys::BPF_PROG_TYPE_SYSCALL as u32;
-const BPF_PROG_TYPE_NETFILTER: u32 = kernel_sys::BPF_PROG_TYPE_NETFILTER as u32;
+const BPF_PROG_TYPE_SOCKET_FILTER: u32 = kernel_sys::BPF_PROG_TYPE_SOCKET_FILTER;
+const BPF_PROG_TYPE_KPROBE: u32 = kernel_sys::BPF_PROG_TYPE_KPROBE;
+const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS;
+const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT;
+const BPF_PROG_TYPE_TRACEPOINT: u32 = kernel_sys::BPF_PROG_TYPE_TRACEPOINT;
+const BPF_PROG_TYPE_XDP: u32 = kernel_sys::BPF_PROG_TYPE_XDP;
+const BPF_PROG_TYPE_PERF_EVENT: u32 = kernel_sys::BPF_PROG_TYPE_PERF_EVENT;
+const BPF_PROG_TYPE_CGROUP_SKB: u32 = kernel_sys::BPF_PROG_TYPE_CGROUP_SKB;
+const BPF_PROG_TYPE_SK_SKB: u32 = kernel_sys::BPF_PROG_TYPE_SK_SKB;
+const BPF_PROG_TYPE_RAW_TRACEPOINT: u32 = kernel_sys::BPF_PROG_TYPE_RAW_TRACEPOINT;
+const BPF_PROG_TYPE_LWT_IN: u32 = kernel_sys::BPF_PROG_TYPE_LWT_IN;
+const BPF_PROG_TYPE_LWT_OUT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_OUT;
+const BPF_PROG_TYPE_LWT_XMIT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_XMIT;
+const BPF_PROG_TYPE_TRACING: u32 = kernel_sys::BPF_PROG_TYPE_TRACING;
+const BPF_PROG_TYPE_STRUCT_OPS: u32 = kernel_sys::BPF_PROG_TYPE_STRUCT_OPS;
+const BPF_PROG_TYPE_LSM: u32 = kernel_sys::BPF_PROG_TYPE_LSM;
+const BPF_PROG_TYPE_SYSCALL: u32 = kernel_sys::BPF_PROG_TYPE_SYSCALL;
+const BPF_PROG_TYPE_NETFILTER: u32 = kernel_sys::BPF_PROG_TYPE_NETFILTER;
 
 #[derive(Clone, Debug)]
 pub struct ElfMapMetadata {
@@ -456,7 +456,7 @@ fn section_bytes<'a>(data: &'a [u8], section: &goblin::elf::SectionHeader) -> Re
 }
 
 fn parse_bpf_insns(bytes: &[u8], section_name: &str) -> Result<Vec<BpfInsn>> {
-    if bytes.len() % std::mem::size_of::<BpfInsn>() != 0 {
+    if !bytes.len().is_multiple_of(std::mem::size_of::<BpfInsn>()) {
         bail!(
             "section {} size {} is not aligned to struct bpf_insn",
             section_name,
@@ -481,7 +481,7 @@ fn collect_map_symbols(elf: &Elf<'_>, maps_section_index: Option<usize>) -> Vec<
         .iter()
         .enumerate()
         .filter_map(|(sym_index, symbol)| {
-            if symbol.st_shndx as usize != maps_section_index {
+            if symbol.st_shndx != maps_section_index {
                 return None;
             }
             if symbol.st_type() != sym::STT_OBJECT || symbol.st_size == 0 {
@@ -523,7 +523,7 @@ fn collect_global_data_maps(elf: &Elf<'_>, base_index: usize) -> Result<Vec<Glob
             .iter()
             .enumerate()
             .filter_map(|(sym_index, symbol)| {
-                if symbol.st_shndx as usize != section_index {
+                if symbol.st_shndx != section_index {
                     return None;
                 }
                 if symbol.st_type() != sym::STT_OBJECT || symbol.st_size == 0 {
@@ -963,18 +963,12 @@ fn merge_map_metadata(
         .enumerate()
         .map(|(index, symbol)| {
             // Some objects provide only BTF-backed map metadata, so a missing raw entry is valid.
-            let raw = match raw_maps.get(index).cloned() {
-                Some(raw) => raw,
-                None => RawMapMetadata::default(),
-            };
+            let raw = raw_maps.get(index).cloned().unwrap_or_default();
             // Likewise, not every symbol has a matching named BTF record.
-            let btf = match btf_by_name
+            let btf = btf_by_name
                 .remove(&symbol.name)
                 .or_else(|| unnamed_btf.pop_front())
-            {
-                Some(btf) => btf,
-                None => BtfMapMetadata::default(),
-            };
+                .unwrap_or_default();
 
             ElfMapMetadata {
                 index,
@@ -995,7 +989,7 @@ fn apply_map_relocation(
     map_index: usize,
     force_pseudo_src: Option<u8>,
 ) -> Result<usize> {
-    if byte_offset % std::mem::size_of::<BpfInsn>() != 0 {
+    if !byte_offset.is_multiple_of(std::mem::size_of::<BpfInsn>()) {
         bail!("map relocation offset {} is not insn-aligned", byte_offset);
     }
     let pc = byte_offset / std::mem::size_of::<BpfInsn>();
@@ -1025,7 +1019,7 @@ fn apply_map_relocation(
 fn primary_program_symbol_name(elf: &Elf<'_>, section_index: usize) -> Option<String> {
     let mut primary = None;
     for symbol in elf.syms.iter() {
-        if symbol.st_shndx as usize != section_index {
+        if symbol.st_shndx != section_index {
             continue;
         }
         if symbol.st_type() != sym::STT_FUNC {

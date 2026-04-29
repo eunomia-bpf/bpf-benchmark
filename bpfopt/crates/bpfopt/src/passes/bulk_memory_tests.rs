@@ -69,6 +69,8 @@ fn pack_memcpy_payload(
         | ((temp_reg as u64) << 48)
 }
 
+// Mirrors the kernel sidecar field layout, so each encoded field stays explicit.
+#[allow(clippy::too_many_arguments)]
 fn pack_memset_payload(
     dst_base: u8,
     val_reg: u8,

@@ -329,7 +329,7 @@ mod tests {
         );
         assert!(program.insns[0].is_ldimm64_pseudo_func());
         assert_eq!(program.insns[0].imm, 3);
-        assert_eq!(0usize + 1 + program.insns[0].imm as usize, 4);
+        assert_eq!(1 + program.insns[0].imm as usize, 4);
     }
 
     /// After const_prop folds a conditional branch, the dead block that

@@ -9,7 +9,7 @@ use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY as u32;
+const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
@@ -1286,8 +1286,7 @@ fn build_site_rewrite(
             return Err(anyhow::Error::msg(err));
         }
     };
-    let inline_value =
-        prepare_inline_value(info, &value).map_err(|reason| site_level_inline_veto(reason))?;
+    let inline_value = prepare_inline_value(info, &value).map_err(site_level_inline_veto)?;
 
     let removable_null_check_pc =
         null_check_pc.filter(|&pc| null_check_is_fallthrough_non_null(&program.insns[pc]));
@@ -1556,7 +1555,7 @@ fn collapse_uniform_percpu_array_value(
     }
 
     let stride = round_up_8(value_size);
-    if raw_value.len() < stride || raw_value.len() % stride != 0 {
+    if raw_value.len() < stride || !raw_value.len().is_multiple_of(stride) {
         return Err(format!(
             "PERCPU_ARRAY lookup blob length {} is inconsistent with slot stride {}",
             raw_value.len(),
@@ -2741,8 +2740,7 @@ fn insn_uses_reg(insn: &BpfInsn, reg: u8) -> bool {
     match insn.class() {
         BPF_ALU64 | BPF_ALU => {
             if bpf_op(insn.code) == BPF_MOV {
-                (bpf_src(insn.code) == BPF_X && insn.src_reg() == reg)
-                    || (bpf_src(insn.code) != BPF_X && false)
+                bpf_src(insn.code) == BPF_X && insn.src_reg() == reg
             } else {
                 insn.dst_reg() == reg || (bpf_src(insn.code) == BPF_X && insn.src_reg() == reg)
             }

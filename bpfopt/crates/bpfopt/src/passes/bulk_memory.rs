@@ -764,8 +764,8 @@ fn advance_reg_state(insns: &[BpfInsn], pc: usize, regs: &mut [RegValue; 11]) {
     let insn = &insns[pc];
 
     if insn.is_call() {
-        for reg in 0..=5 {
-            regs[reg] = RegValue::Unknown;
+        for reg in regs.iter_mut().take(6) {
+            *reg = RegValue::Unknown;
         }
         return;
     }

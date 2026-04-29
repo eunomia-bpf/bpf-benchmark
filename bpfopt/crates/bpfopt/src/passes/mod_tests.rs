@@ -7,8 +7,8 @@ use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
 use crate::insn::*;
 use crate::pass::{BpfProgram, PassContext, PipelineResult};
 
-const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH as u32;
-const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY as u32;
+const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH;
+const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
 
@@ -58,12 +58,14 @@ fn install_map(map_id: u32, map_type: u32, value: Vec<u8>) {
     let mut values = HashMap::new();
     values.insert(1u32.to_le_bytes().to_vec(), value.clone());
 
-    let mut info = BpfMapInfo::default();
-    info.map_type = map_type;
-    info.id = map_id;
-    info.key_size = 4;
-    info.value_size = value.len() as u32;
-    info.max_entries = 8;
+    let info = BpfMapInfo {
+        map_type,
+        id: map_id,
+        key_size: 4,
+        value_size: value.len() as u32,
+        max_entries: 8,
+        ..Default::default()
+    };
 
     install_mock_map(
         map_id,
@@ -449,7 +451,7 @@ fn test_full_pipeline_real_bytecode_load_byte_recompose() {
     // Structural validity checks:
     // 1. The program should still end with EXIT
     assert!(
-        prog.insns.last().map_or(false, |i| i.is_exit()),
+        prog.insns.last().is_some_and(|i| i.is_exit()),
         "real bytecode pipeline output should end with EXIT"
     );
     // 2. The program should have been modified (wide_mem patterns exist)
@@ -459,7 +461,7 @@ fn test_full_pipeline_real_bytecode_load_byte_recompose() {
     );
     // 3. Instruction count should be reasonable (not wildly different)
     assert!(
-        prog.insns.len() > 0 && prog.insns.len() <= orig_len + 20,
+        !prog.insns.is_empty() && prog.insns.len() <= orig_len + 20,
         "instruction count changed unreasonably: {} -> {}",
         orig_len,
         prog.insns.len()
@@ -496,7 +498,7 @@ fn test_full_pipeline_real_bytecode_rotate_dense() {
     let result = pm.run(&mut prog, &ctx).unwrap();
 
     assert!(
-        prog.insns.last().map_or(false, |i| i.is_exit()),
+        prog.insns.last().is_some_and(|i| i.is_exit()),
         "rotate_dense pipeline output should end with EXIT"
     );
 
@@ -542,7 +544,7 @@ fn test_full_pipeline_real_bytecode_bitfield_extract() {
     let result = pm.run(&mut prog, &ctx).unwrap();
 
     assert!(
-        prog.insns.last().map_or(false, |i| i.is_exit()),
+        prog.insns.last().is_some_and(|i| i.is_exit()),
         "bitfield_extract pipeline output should end with EXIT"
     );
     let extract_result = result
@@ -588,7 +590,7 @@ fn test_full_pipeline_real_bytecode_endian_swap_dense() {
     let result = pm.run(&mut prog, &ctx).unwrap();
 
     assert!(
-        prog.insns.last().map_or(false, |i| i.is_exit()),
+        prog.insns.last().is_some_and(|i| i.is_exit()),
         "endian_swap_dense pipeline output should end with EXIT"
     );
     let endian_result = result

@@ -454,7 +454,7 @@ fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {
     let dst = reg_const(state, insn.dst_reg(), is_32)?;
 
     if op == BPF_NEG {
-        return Some(eval_unary_alu(op, dst, is_32)?);
+        return eval_unary_alu(op, dst, is_32);
     }
 
     let rhs = if bpf_src(insn.code) == BPF_X {
@@ -888,12 +888,14 @@ mod tests {
         let mut values = HashMap::new();
         values.insert(1u32.to_le_bytes().to_vec(), value.clone());
 
-        let mut info = BpfMapInfo::default();
-        info.map_type = 2;
-        info.id = map_id;
-        info.key_size = 4;
-        info.value_size = value.len() as u32;
-        info.max_entries = 8;
+        let info = BpfMapInfo {
+            map_type: 2,
+            id: map_id,
+            key_size: 4,
+            value_size: value.len() as u32,
+            max_entries: 8,
+            ..Default::default()
+        };
 
         install_mock_map(
             map_id,
@@ -1221,7 +1223,7 @@ mod tests {
         fixup_folded_jumps(&mut new_insns, &old_insns, &addr_map, &replacements);
 
         assert_eq!(new_insns[0], BpfInsn::ja(3));
-        assert_eq!(0usize + 1 + new_insns[0].off as usize, 4);
+        assert_eq!(1 + new_insns[0].off as usize, 4);
     }
 
     #[test]

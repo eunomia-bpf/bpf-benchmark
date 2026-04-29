@@ -437,3 +437,52 @@ fn optimize_explicit_kinsn_pass_skips_when_target_lacks_kinsn() {
         "missing --target kinsns: bpf_rotate64"
     );
 }
+
+#[test]
+fn optimize_bulk_memory_missing_kinsns_reports_v3_names() {
+    let target_path = write_temp_file(
+        "empty-target.json",
+        r#"{"arch":"x86_64","features":["cmov"],"kinsns":{}}"#,
+    );
+    let report_path = temp_path("bulk-memory-target-lacks-kinsn-report.json");
+    let target_arg = target_path.to_string_lossy().to_string();
+    let report_arg = report_path.to_string_lossy().to_string();
+    let output = run_bpfopt(
+        &[
+            "optimize",
+            "--passes",
+            "bulk-memory",
+            "--target",
+            &target_arg,
+            "--report",
+            &report_arg,
+        ],
+        &minimal_program_bytes(),
+    );
+    fs::remove_file(target_path).ok();
+
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains(
+            "warning: skipping bulk-memory: missing --target kinsns: bpf_bulk_memcpy, bpf_bulk_memset"
+        ),
+        "stderr={stderr}"
+    );
+    assert!(!stderr.contains("bpf_memcpy_bulk"), "stderr={stderr}");
+    assert!(!stderr.contains("bpf_memset_bulk"), "stderr={stderr}");
+
+    let report_text = fs::read_to_string(&report_path).expect("read report");
+    let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
+    fs::remove_file(report_path).ok();
+    assert_eq!(report["passes"][0]["pass"], "bulk_memory");
+    assert_eq!(report["passes"][0]["skipped"], true);
+    assert_eq!(
+        report["passes"][0]["reason"],
+        "missing --target kinsns: bpf_bulk_memcpy, bpf_bulk_memset"
+    );
+}

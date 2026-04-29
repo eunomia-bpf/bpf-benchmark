@@ -431,10 +431,12 @@ impl BranchCounters {
 }
 
 fn open_perf_counter(config: u64) -> Result<File> {
-    let mut attrs = perf::perf_event_attr::default();
-    attrs.size = std::mem::size_of::<perf::perf_event_attr>() as u32;
-    attrs.type_ = perf::PERF_TYPE_HARDWARE;
-    attrs.config = config;
+    let mut attrs = perf::perf_event_attr {
+        size: std::mem::size_of::<perf::perf_event_attr>() as u32,
+        type_: perf::PERF_TYPE_HARDWARE,
+        config,
+        ..Default::default()
+    };
     attrs.set_disabled(1);
     attrs.set_exclude_hv(1);
 

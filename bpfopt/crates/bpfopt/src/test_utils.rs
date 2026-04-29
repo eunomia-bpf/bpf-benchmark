@@ -14,9 +14,9 @@ use crate::mock_maps::{apply_mock_maps, install_mock_map, BpfMapInfo, MockMapSta
 use crate::pass::{BpfProgram, BranchProfile, PassContext, PipelineResult, ProfilingData};
 use crate::passes::build_custom_pipeline;
 
-const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH as u32;
-const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY as u32;
-const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH as u32;
+const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH;
+const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
+const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH;
 
 static NEXT_TEST_MAP_ID: AtomicU32 = AtomicU32::new(10_000);
 
@@ -341,14 +341,14 @@ pub fn pass_result<'a>(
 }
 
 fn synthetic_map_info(map: &ElfMapMetadata, map_id: u32) -> BpfMapInfo {
-    let mut info = BpfMapInfo::default();
-    info.id = map_id;
-    info.map_type = map.map_type.unwrap_or_default();
-    info.key_size = map.key_size.unwrap_or_default();
-    info.value_size = map.value_size.unwrap_or_default();
-    info.max_entries = map.max_entries.unwrap_or_default();
-    info.map_flags = map.map_flags.unwrap_or_default();
-    info
+    BpfMapInfo {
+        id: map_id,
+        map_type: map.map_type.unwrap_or_default(),
+        key_size: map.key_size.unwrap_or_default(),
+        value_size: map.value_size.unwrap_or_default(),
+        max_entries: map.max_entries.unwrap_or_default(),
+        map_flags: map.map_flags.unwrap_or_default(),
+    }
 }
 
 fn synthetic_map_values(map: &ElfMapMetadata) -> HashMap<Vec<u8>, Vec<u8>> {
@@ -508,7 +508,7 @@ fn decode_captured_map_values(
 
 fn decode_hex(text: &str) -> Result<Vec<u8>> {
     let text = text.trim();
-    if text.len() % 2 != 0 {
+    if !text.len().is_multiple_of(2) {
         return Err(anyhow!("hex payload must have even length"));
     }
 

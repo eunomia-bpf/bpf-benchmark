@@ -999,7 +999,7 @@ mod tests {
         );
         // Last instruction should still be EXIT.
         assert!(
-            prog.insns.last().map_or(false, |i| i.is_exit()),
+            prog.insns.last().is_some_and(|i| i.is_exit()),
             "output should end with EXIT"
         );
     }

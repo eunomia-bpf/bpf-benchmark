@@ -232,7 +232,7 @@ fn decode_insns(bytes: &[u8]) -> Result<Vec<kernel_sys::bpf_insn>> {
     if bytes.is_empty() {
         bail!("input bytecode is empty");
     }
-    if bytes.len() % size != 0 {
+    if !bytes.len().is_multiple_of(size) {
         bail!("bytecode size not aligned to {size}");
     }
 

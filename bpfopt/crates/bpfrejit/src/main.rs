@@ -139,7 +139,10 @@ fn parse_bytecode(bytes: &[u8]) -> Result<Vec<kernel_sys::bpf_insn>> {
     if bytes.is_empty() {
         bail!("input bytecode is empty");
     }
-    if bytes.len() % std::mem::size_of::<kernel_sys::bpf_insn>() != 0 {
+    if !bytes
+        .len()
+        .is_multiple_of(std::mem::size_of::<kernel_sys::bpf_insn>())
+    {
         bail!(
             "input bytecode length {} is not a multiple of 8",
             bytes.len()

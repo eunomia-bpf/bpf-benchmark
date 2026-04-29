@@ -14,6 +14,9 @@
 
 use std::collections::HashMap;
 
+// Keep the explicit "State" suffixes because these names map directly to
+// verifier log state snapshot forms.
+#[allow(clippy::enum_variant_names)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum VerifierInsnKind {
     EdgeFullState,

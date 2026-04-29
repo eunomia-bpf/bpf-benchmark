@@ -106,15 +106,16 @@ fn test_scan_wide_mem_embedded_in_program() {
 
 #[test]
 fn test_scan_wide_mem_multiple_sites() {
-    let mut insns = Vec::new();
-    insns.push(BpfInsn::ldx_mem(BPF_B, 0, 6, 0));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 1, 6, 1));
-    insns.push(BpfInsn::alu64_imm(BPF_LSH, 1, 8));
-    insns.push(BpfInsn::alu64_reg(BPF_OR, 0, 1));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 3, 7, 4));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 4, 7, 5));
-    insns.push(BpfInsn::alu64_imm(BPF_LSH, 4, 8));
-    insns.push(BpfInsn::alu64_reg(BPF_OR, 3, 4));
+    let insns = vec![
+        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
+        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
+        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+        BpfInsn::alu64_reg(BPF_OR, 0, 1),
+        BpfInsn::ldx_mem(BPF_B, 3, 7, 4),
+        BpfInsn::ldx_mem(BPF_B, 4, 7, 5),
+        BpfInsn::alu64_imm(BPF_LSH, 4, 8),
+        BpfInsn::alu64_reg(BPF_OR, 3, 4),
+    ];
     let sites = scan_wide_mem(&insns);
     assert_eq!(sites.len(), 2);
     assert_eq!(sites[0].start_pc, 0);
@@ -682,27 +683,28 @@ fn test_wide_mem_pass_skips_unsupported_width_3() {
 fn test_wide_mem_pass_applies_width4_skips_width3_mixed() {
     // Program with both a width=4 site (supported) and a width=3 site (unsupported).
     // The pass should apply the width=4 site and skip the width=3 site.
-    let mut insns = Vec::new();
-    // Width=4 low-first: dst=0, base=6, off=0
-    insns.push(BpfInsn::ldx_mem(BPF_B, 0, 6, 0));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 1, 6, 1));
-    insns.push(BpfInsn::alu64_imm(BPF_LSH, 1, 8));
-    insns.push(BpfInsn::alu64_reg(BPF_OR, 0, 1));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 1, 6, 2));
-    insns.push(BpfInsn::alu64_imm(BPF_LSH, 1, 16));
-    insns.push(BpfInsn::alu64_reg(BPF_OR, 0, 1));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 1, 6, 3));
-    insns.push(BpfInsn::alu64_imm(BPF_LSH, 1, 24));
-    insns.push(BpfInsn::alu64_reg(BPF_OR, 0, 1));
-    // Width=3 low-first: dst=2, base=7, off=0
-    insns.push(BpfInsn::ldx_mem(BPF_B, 2, 7, 0));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 3, 7, 1));
-    insns.push(BpfInsn::alu64_imm(BPF_LSH, 3, 8));
-    insns.push(BpfInsn::alu64_reg(BPF_OR, 2, 3));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 3, 7, 2));
-    insns.push(BpfInsn::alu64_imm(BPF_LSH, 3, 16));
-    insns.push(BpfInsn::alu64_reg(BPF_OR, 2, 3));
-    insns.push(exit_insn());
+    let insns = vec![
+        // Width=4 low-first: dst=0, base=6, off=0
+        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
+        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
+        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+        BpfInsn::alu64_reg(BPF_OR, 0, 1),
+        BpfInsn::ldx_mem(BPF_B, 1, 6, 2),
+        BpfInsn::alu64_imm(BPF_LSH, 1, 16),
+        BpfInsn::alu64_reg(BPF_OR, 0, 1),
+        BpfInsn::ldx_mem(BPF_B, 1, 6, 3),
+        BpfInsn::alu64_imm(BPF_LSH, 1, 24),
+        BpfInsn::alu64_reg(BPF_OR, 0, 1),
+        // Width=3 low-first: dst=2, base=7, off=0
+        BpfInsn::ldx_mem(BPF_B, 2, 7, 0),
+        BpfInsn::ldx_mem(BPF_B, 3, 7, 1),
+        BpfInsn::alu64_imm(BPF_LSH, 3, 8),
+        BpfInsn::alu64_reg(BPF_OR, 2, 3),
+        BpfInsn::ldx_mem(BPF_B, 3, 7, 2),
+        BpfInsn::alu64_imm(BPF_LSH, 3, 16),
+        BpfInsn::alu64_reg(BPF_OR, 2, 3),
+        exit_insn(),
+    ];
 
     let mut prog = make_program(insns);
     let mut cache = AnalysisCache::new();
@@ -758,7 +760,7 @@ fn test_scan_wide_mem_real_bytecode() {
         // Width should be available in bindings
         if let Some(width) = site.get_binding("width") {
             assert!(
-                width >= 2 && width <= 8,
+                (2..=8).contains(&width),
                 "wide_mem site width should be 2-8, got {}",
                 width
             );
@@ -952,18 +954,19 @@ fn test_wide_mem_allows_non_stack_with_unknown_prog_type() {
 #[test]
 fn test_wide_mem_mixed_sites_xdp_some_skipped() {
     // Two sites: one from stack (R10, should apply), one from R6 (should skip in XDP).
-    let mut insns = Vec::new();
-    // Site 1: R10-based (stack), 2-byte
-    insns.push(BpfInsn::ldx_mem(BPF_B, 0, 10, -4));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 1, 10, -3));
-    insns.push(BpfInsn::alu64_imm(BPF_LSH, 1, 8));
-    insns.push(BpfInsn::alu64_reg(BPF_OR, 0, 1));
-    // Site 2: R6-based (potential packet ptr), 2-byte
-    insns.push(BpfInsn::ldx_mem(BPF_B, 2, 6, 0));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 3, 6, 1));
-    insns.push(BpfInsn::alu64_imm(BPF_LSH, 3, 8));
-    insns.push(BpfInsn::alu64_reg(BPF_OR, 2, 3));
-    insns.push(exit_insn());
+    let insns = vec![
+        // Site 1: R10-based (stack), 2-byte
+        BpfInsn::ldx_mem(BPF_B, 0, 10, -4),
+        BpfInsn::ldx_mem(BPF_B, 1, 10, -3),
+        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+        BpfInsn::alu64_reg(BPF_OR, 0, 1),
+        // Site 2: R6-based (potential packet ptr), 2-byte
+        BpfInsn::ldx_mem(BPF_B, 2, 6, 0),
+        BpfInsn::ldx_mem(BPF_B, 3, 6, 1),
+        BpfInsn::alu64_imm(BPF_LSH, 3, 8),
+        BpfInsn::alu64_reg(BPF_OR, 2, 3),
+        exit_insn(),
+    ];
 
     let mut prog = make_program(insns);
     let mut cache = AnalysisCache::new();

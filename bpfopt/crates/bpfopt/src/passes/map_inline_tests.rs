@@ -146,12 +146,14 @@ fn install_map_with_key_size(
     frozen: bool,
     values: HashMap<Vec<u8>, Vec<u8>>,
 ) {
-    let mut info = BpfMapInfo::default();
-    info.map_type = map_type;
-    info.id = map_id;
-    info.key_size = key_size;
-    info.value_size = values.values().next().map(|value| value.len()).unwrap_or(0) as u32;
-    info.max_entries = max_entries;
+    let info = BpfMapInfo {
+        map_type,
+        id: map_id,
+        key_size,
+        value_size: values.values().next().map(|value| value.len()).unwrap_or(0) as u32,
+        max_entries,
+        ..Default::default()
+    };
 
     install_mock_map(
         map_id,
@@ -164,12 +166,14 @@ fn install_map_with_key_size(
 }
 
 fn install_empty_map(map_id: u32, map_type: u32, value_size: u32, max_entries: u32, frozen: bool) {
-    let mut info = BpfMapInfo::default();
-    info.map_type = map_type;
-    info.id = map_id;
-    info.key_size = 4;
-    info.value_size = value_size;
-    info.max_entries = max_entries;
+    let info = BpfMapInfo {
+        map_type,
+        id: map_id,
+        key_size: 4,
+        value_size,
+        max_entries,
+        ..Default::default()
+    };
 
     install_mock_map(
         map_id,
@@ -188,12 +192,14 @@ fn install_percpu_array_map(
     frozen: bool,
     values: HashMap<Vec<u8>, Vec<u8>>,
 ) {
-    let mut info = BpfMapInfo::default();
-    info.map_type = BPF_MAP_TYPE_PERCPU_ARRAY;
-    info.id = map_id;
-    info.key_size = 4;
-    info.value_size = value_size;
-    info.max_entries = max_entries;
+    let info = BpfMapInfo {
+        map_type: BPF_MAP_TYPE_PERCPU_ARRAY,
+        id: map_id,
+        key_size: 4,
+        value_size,
+        max_entries,
+        ..Default::default()
+    };
 
     install_mock_map(
         map_id,
@@ -225,12 +231,14 @@ fn install_array_map_entry(map_id: u32, max_entries: u32, key: u32, value: Vec<u
     let mut values = HashMap::new();
     values.insert(key.to_le_bytes().to_vec(), value.clone());
 
-    let mut info = BpfMapInfo::default();
-    info.map_type = 2;
-    info.id = map_id;
-    info.key_size = 4;
-    info.value_size = value.len() as u32;
-    info.max_entries = max_entries;
+    let info = BpfMapInfo {
+        map_type: 2,
+        id: map_id,
+        key_size: 4,
+        value_size: value.len() as u32,
+        max_entries,
+        ..Default::default()
+    };
 
     install_mock_map(
         map_id,
@@ -243,12 +251,14 @@ fn install_array_map_entry(map_id: u32, max_entries: u32, key: u32, value: Vec<u
 }
 
 fn install_empty_array_map(map_id: u32, value_size: u32, max_entries: u32) {
-    let mut info = BpfMapInfo::default();
-    info.map_type = 2;
-    info.id = map_id;
-    info.key_size = 4;
-    info.value_size = value_size;
-    info.max_entries = max_entries;
+    let info = BpfMapInfo {
+        map_type: 2,
+        id: map_id,
+        key_size: 4,
+        value_size,
+        max_entries,
+        ..Default::default()
+    };
 
     install_mock_map(
         map_id,
@@ -1528,27 +1538,18 @@ fn map_inline_pass_removes_hash_lookup_and_null_path_when_entry_present() {
             exit_insn(),
         ]
     );
-    assert_eq!(
-        result.pass_results[0]
-            .diagnostics
-            .iter()
-            .any(|diag| diag.contains("site at PC=5: inlined successfully")),
-        true
-    );
-    assert_eq!(
-        result.pass_results[0]
-            .diagnostics
-            .iter()
-            .any(|diag| diag.contains("site at PC=5: inlined successfully, value=0x7")),
-        true
-    );
-    assert_eq!(
-        result.pass_results[0]
-            .diagnostics
-            .iter()
-            .any(|diag| diag.contains("speculative map-inline sites: 1")),
-        true
-    );
+    assert!(result.pass_results[0]
+        .diagnostics
+        .iter()
+        .any(|diag| diag.contains("site at PC=5: inlined successfully")));
+    assert!(result.pass_results[0]
+        .diagnostics
+        .iter()
+        .any(|diag| diag.contains("site at PC=5: inlined successfully, value=0x7")));
+    assert!(result.pass_results[0]
+        .diagnostics
+        .iter()
+        .any(|diag| diag.contains("speculative map-inline sites: 1")));
 }
 
 #[test]

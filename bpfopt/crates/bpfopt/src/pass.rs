@@ -244,7 +244,7 @@ impl MapValueProvider for SnapshotMapProvider {
             .map_values
             .iter()
             .find_map(|((map_id, _), value)| (*map_id == info.map_id).then_some(value.len()))
-            .or_else(|| {
+            .or({
                 #[cfg(test)]
                 {
                     crate::mock_maps::mock_lookup_value_size(info.map_id)
@@ -298,8 +298,8 @@ fn zero_filled_snapshot_lookup(
     key: &[u8],
     value_size: usize,
 ) -> Option<Vec<u8>> {
-    const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY as u32;
-    const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY as u32;
+    const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
+    const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
 
     if !matches!(
         metadata.map_type,
@@ -487,6 +487,12 @@ pub trait Analysis: Send + Sync {
 /// analysis result triggers recomputation.
 pub struct AnalysisCache {
     cache: HashMap<TypeId, Box<dyn Any + Send + Sync>>,
+}
+
+impl Default for AnalysisCache {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl AnalysisCache {
@@ -856,6 +862,12 @@ pub struct AnalysisRegistry {
     registry: HashMap<String, Box<dyn AnyAnalysis>>,
 }
 
+impl Default for AnalysisRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AnalysisRegistry {
     pub fn new() -> Self {
         Self {
@@ -897,6 +909,12 @@ pub struct PassManager {
 }
 
 pub const CONST_PROP_DCE_FIXED_POINT_MAX_ITERS: usize = 5;
+
+impl Default for PassManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl PassManager {
     pub fn new() -> Self {

@@ -586,11 +586,16 @@ fn missing_kinsn_reason(
     ctx: &PassContext,
     target_names: &[&str],
 ) -> Option<String> {
-    let missing = target_names
-        .iter()
-        .copied()
-        .filter(|target_name| ctx.kinsn_registry.btf_id_for_target_name(target_name) < 0)
-        .collect::<Vec<_>>();
+    let mut missing = Vec::new();
+    for target_name in target_names {
+        if ctx.kinsn_registry.btf_id_for_target_name(target_name) >= 0 {
+            continue;
+        }
+        let public_name = public_kinsn_name(target_name);
+        if !missing.contains(&public_name) {
+            missing.push(public_name);
+        }
+    }
     if missing.is_empty() {
         return None;
     }
@@ -599,6 +604,15 @@ fn missing_kinsn_reason(
         Some("missing --target kinsns".to_string())
     } else {
         Some(format!("missing --target kinsns: {}", missing.join(", ")))
+    }
+}
+
+fn public_kinsn_name(target_name: &str) -> &str {
+    match target_name {
+        "bpf_memcpy_bulk" => "bpf_bulk_memcpy",
+        "bpf_memset_bulk" => "bpf_bulk_memset",
+        "bpf_endian_load16" | "bpf_endian_load32" | "bpf_endian_load64" => "bpf_endian_load64",
+        _ => target_name,
     }
 }
 
@@ -720,7 +734,7 @@ fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()
 
 fn require_kinsn(ctx: &PassContext, target_name: &str) -> Result<()> {
     if ctx.kinsn_registry.btf_id_for_target_name(target_name) < 0 {
-        bail!("kinsn '{target_name}' not in target");
+        bail!("kinsn '{}' not in target", public_kinsn_name(target_name));
     }
     Ok(())
 }
@@ -732,9 +746,16 @@ fn require_any_kinsn(ctx: &PassContext, target_names: &[&str], pass_label: &str)
     {
         return Ok(());
     }
+    let mut public_names = Vec::new();
+    for target_name in target_names {
+        let public_name = public_kinsn_name(target_name);
+        if !public_names.contains(&public_name) {
+            public_names.push(public_name);
+        }
+    }
     bail!(
         "{pass_label} requires at least one target kinsn: {}",
-        target_names.join(", ")
+        public_names.join(", ")
     );
 }
 
@@ -756,7 +777,7 @@ fn read_bytecode(input: Option<&Path>) -> Result<Vec<BpfInsn>> {
 }
 
 fn parse_bytecode(bytes: &[u8]) -> Result<Vec<BpfInsn>> {
-    if bytes.len() % 8 != 0 {
+    if !bytes.len().is_multiple_of(8) {
         bail!(
             "bytecode length {} is not a multiple of 8 bytes",
             bytes.len()
@@ -1131,15 +1152,13 @@ fn parse_map_type(map_type: &MapTypeJson) -> Result<u32> {
                 .replace(['-', ' '], "_")
                 .to_ascii_lowercase();
             match normalized.as_str() {
-                "hash" => Ok(kernel_sys::BPF_MAP_TYPE_HASH as u32),
-                "array" => Ok(kernel_sys::BPF_MAP_TYPE_ARRAY as u32),
-                "percpu_hash" | "per_cpu_hash" => Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_HASH as u32),
-                "percpu_array" | "per_cpu_array" => {
-                    Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY as u32)
-                }
-                "lru_hash" => Ok(kernel_sys::BPF_MAP_TYPE_LRU_HASH as u32),
+                "hash" => Ok(kernel_sys::BPF_MAP_TYPE_HASH),
+                "array" => Ok(kernel_sys::BPF_MAP_TYPE_ARRAY),
+                "percpu_hash" | "per_cpu_hash" => Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_HASH),
+                "percpu_array" | "per_cpu_array" => Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY),
+                "lru_hash" => Ok(kernel_sys::BPF_MAP_TYPE_LRU_HASH),
                 "lru_percpu_hash" | "lru_per_cpu_hash" => {
-                    Ok(kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH as u32)
+                    Ok(kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH)
                 }
                 _ => bail!("unsupported map_type: {name}"),
             }

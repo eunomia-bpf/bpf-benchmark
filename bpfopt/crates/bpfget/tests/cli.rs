@@ -6,6 +6,15 @@ use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 static NEXT_TEMP_ID: AtomicUsize = AtomicUsize::new(0);
+const KINSN_MODULE_TEST_ENV: &str = "BPFGET_TEST_KINSN_MODULE_LOADED";
+const EXPECTED_V3_KINSN_NAMES: &[&str] = &[
+    "bpf_rotate64",
+    "bpf_select64",
+    "bpf_extract64",
+    "bpf_endian_load64",
+    "bpf_bulk_memcpy",
+    "bpf_bulk_memset",
+];
 
 fn bpfget_bin() -> &'static str {
     env!("CARGO_BIN_EXE_bpfget")
@@ -26,6 +35,30 @@ fn unsupported_environment(stderr: &[u8]) -> bool {
     ]
     .iter()
     .any(|needle| stderr.contains(needle))
+}
+
+fn target_btf_permission_blocked(stderr: &str) -> bool {
+    stderr.contains("kinsn BTF probing unavailable")
+        && (stderr.contains("Operation not permitted") || stderr.contains("Permission denied"))
+}
+
+fn target_stdout_json(output: &std::process::Output) -> serde_json::Value {
+    serde_json::from_slice(&output.stdout).expect("json stdout from bpfget --target")
+}
+
+fn expected_kinsn_names() -> Vec<String> {
+    match std::env::var("BPFGET_TEST_EXPECT_KINSNS") {
+        Ok(value) => value
+            .split(',')
+            .map(str::trim)
+            .filter(|name| !name.is_empty())
+            .map(str::to_string)
+            .collect(),
+        Err(_) => EXPECTED_V3_KINSN_NAMES
+            .iter()
+            .map(|name| (*name).to_string())
+            .collect(),
+    }
 }
 
 #[test]
@@ -150,6 +183,81 @@ fn target_stdout_contains_arch_and_features() {
             "kinsn {name} missing numeric btf_func_id: {entry}"
         );
     }
+}
+
+#[test]
+fn test_target_empty_kinsns_in_unprivileged_env() {
+    let output = Command::new(bpfget_bin())
+        .arg("--target")
+        .output()
+        .expect("run bpfget --target");
+
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    if !target_btf_permission_blocked(&stderr) {
+        eprintln!("skipping unprivileged target test: BTF probing is accessible");
+        return;
+    }
+
+    let value = target_stdout_json(&output);
+    assert!(
+        value["kinsns"]
+            .as_object()
+            .is_some_and(serde_json::Map::is_empty),
+        "expected empty kinsns after permission fallback: {value}"
+    );
+    assert!(
+        stderr.contains("no kinsn BTF functions found; target.json uses empty kinsns"),
+        "stderr={stderr}"
+    );
+}
+
+#[test]
+fn test_target_finds_kinsn_when_loaded() {
+    if std::env::var_os(KINSN_MODULE_TEST_ENV).is_none() {
+        eprintln!("skipping loaded-kinsn target test: set {KINSN_MODULE_TEST_ENV}=1 after loading kinsn modules");
+        return;
+    }
+
+    let output = Command::new(bpfget_bin())
+        .arg("--target")
+        .output()
+        .expect("run bpfget --target");
+
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let value = target_stdout_json(&output);
+    let kinsns = value["kinsns"].as_object().expect("kinsns object");
+    let expected_names = expected_kinsn_names();
+    assert!(
+        !expected_names.is_empty(),
+        "BPFGET_TEST_EXPECT_KINSNS must name at least one kinsn"
+    );
+    for name in expected_names {
+        let entry = kinsns
+            .get(&name)
+            .unwrap_or_else(|| panic!("target JSON missing loaded kinsn {name}: {value}"));
+        let btf_func_id = entry["btf_func_id"]
+            .as_i64()
+            .or_else(|| {
+                entry["btf_func_id"]
+                    .as_u64()
+                    .and_then(|id| i64::try_from(id).ok())
+            })
+            .unwrap_or_else(|| panic!("kinsn {name} missing numeric btf_func_id: {entry}"));
+        assert!(btf_func_id >= 0, "kinsn {name} has negative id: {entry}");
+    }
+    assert!(
+        !kinsns.contains_key("bpf_memcpy_bulk") && !kinsns.contains_key("bpf_memset_bulk"),
+        "target JSON must use v3 bulk-memory names: {value}"
+    );
 }
 
 #[test]

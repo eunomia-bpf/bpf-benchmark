@@ -624,7 +624,7 @@ mod tests {
 
         assert!(new_insns[0].is_ldimm64_pseudo_func());
         assert_eq!(new_insns[0].imm, 4);
-        assert_eq!(0usize + 1 + new_insns[0].imm as usize, 5);
+        assert_eq!(1 + new_insns[0].imm as usize, 5);
     }
 
     #[test]

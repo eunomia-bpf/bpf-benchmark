@@ -746,7 +746,7 @@ mod tests {
         // The branch at pc=0 should still reach the EXIT instruction.
         let last_pc = prog.insns.len() - 1;
         assert!(prog.insns[last_pc].is_exit());
-        let branch_target = (0i64 + 1 + prog.insns[0].off as i64) as usize;
+        let branch_target = (1 + prog.insns[0].off as i64) as usize;
         assert_eq!(branch_target, last_pc);
     }
 

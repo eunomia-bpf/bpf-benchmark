@@ -183,9 +183,9 @@ unsafe fn sys_bpf<T>(cmd: u32, attr: *mut T, size: usize) -> libc::c_long {
 pub fn prog_load_dryrun(
     prog_type: bpf_prog_type,
     insns: &[bpf_insn],
-    mut log_buf: Option<&mut [u8]>,
+    log_buf: Option<&mut [u8]>,
 ) -> Result<()> {
-    prog_load_dryrun_with_fd_array(prog_type, insns, None, log_buf.as_deref_mut())
+    prog_load_dryrun_with_fd_array(prog_type, insns, None, log_buf)
 }
 
 /// Load raw BPF instructions through libbpf with optional fd_array side input.
@@ -197,7 +197,7 @@ pub fn prog_load_dryrun_with_fd_array(
     prog_type: bpf_prog_type,
     insns: &[bpf_insn],
     fd_array: Option<&[i32]>,
-    mut log_buf: Option<&mut [u8]>,
+    log_buf: Option<&mut [u8]>,
 ) -> Result<()> {
     let log_level = if log_buf.is_some() { 2 } else { 0 };
     let report = prog_load_dryrun_report(ProgLoadDryRunOptions {
@@ -206,7 +206,7 @@ pub fn prog_load_dryrun_with_fd_array(
         insns,
         fd_array,
         log_level,
-        log_buf: log_buf.as_deref_mut(),
+        log_buf,
     })?;
     if report.accepted {
         return Ok(());
@@ -234,9 +234,11 @@ pub fn prog_load_dryrun_report(
         .len()
         .try_into()
         .map_err(|_| anyhow!("instruction count does not fit libbpf size_t"))?;
-    let mut opts = bpf_prog_load_opts::default();
-    opts.sz = std::mem::size_of::<bpf_prog_load_opts>() as size_t;
-    opts.attempts = 1;
+    let mut opts = bpf_prog_load_opts {
+        sz: std::mem::size_of::<bpf_prog_load_opts>() as size_t,
+        attempts: 1,
+        ..Default::default()
+    };
 
     if let Some(expected_attach_type) = options.expected_attach_type {
         opts.expected_attach_type = expected_attach_type;
@@ -386,9 +388,8 @@ impl KernelBtf {
     pub fn find_func_by_name(&self, name: &str) -> Result<Option<u32>> {
         let c_name =
             CString::new(name).map_err(|_| anyhow!("BTF function name contains NUL: {name:?}"))?;
-        let ret = unsafe {
-            btf__find_by_name_kind(self.ptr.as_ptr(), c_name.as_ptr(), BTF_KIND_FUNC as u32)
-        };
+        let ret =
+            unsafe { btf__find_by_name_kind(self.ptr.as_ptr(), c_name.as_ptr(), BTF_KIND_FUNC) };
         if ret >= 0 {
             return Ok(Some(ret as u32));
         }
@@ -549,7 +550,7 @@ pub fn prog_get_original(prog_fd: BorrowedFd<'_>) -> Result<Vec<bpf_insn>> {
     }
 
     let insn_size = std::mem::size_of::<bpf_insn>();
-    if byte_len % insn_size != 0 {
+    if !byte_len.is_multiple_of(insn_size) {
         bail!(
             "orig_prog_len {} is not a multiple of struct bpf_insn size {}",
             byte_len,
@@ -573,7 +574,7 @@ pub fn prog_get_original(prog_fd: BorrowedFd<'_>) -> Result<Vec<bpf_insn>> {
             returned_len
         );
     }
-    if returned_len % insn_size != 0 {
+    if !returned_len.is_multiple_of(insn_size) {
         bail!(
             "returned orig_prog_len {} is not a multiple of struct bpf_insn size {}",
             returned_len,
