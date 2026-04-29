@@ -65,10 +65,10 @@ pub struct BpfProgram {
     /// Parsed `log_level=2` verifier state snapshots for the original program.
     pub verifier_states: Arc<[VerifierInsn]>,
     /// Pre-loaded map value snapshot: (map_id, key_bytes) -> value_bytes.
-    /// Used by offline callers such as the bpfopt CLI.
+    /// Used by offline snapshot callers and unit tests.
     pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
     /// Pre-loaded map metadata: map_id -> MapMetadata.
-    /// Used by offline callers such as the bpfopt CLI.
+    /// Used by offline snapshot callers and unit tests.
     pub map_metadata: HashMap<u32, MapMetadata>,
     /// Map metadata resolver. The daemon installs a live raw-syscall provider;
     /// offline callers use the default snapshot provider.
@@ -115,7 +115,7 @@ pub trait MapValueProvider: Send + Sync + std::fmt::Debug {
     ) -> std::result::Result<Vec<u8>, String>;
 }
 
-/// Snapshot-backed map provider used by bpfopt and unit tests.
+/// Snapshot-backed map provider used by offline snapshots and unit tests.
 #[derive(Clone, Debug, Default)]
 pub struct SnapshotMapProvider;
 
