@@ -93,6 +93,9 @@ pub struct BpfProgInfoFork {
 pub struct ProgLoadDryRunOptions<'a> {
     pub prog_type: bpf_prog_type,
     pub expected_attach_type: Option<bpf_attach_type>,
+    pub prog_btf_fd: Option<i32>,
+    pub attach_btf_id: Option<u32>,
+    pub attach_btf_obj_fd: Option<i32>,
     pub insns: &'a [bpf_insn],
     pub fd_array: Option<&'a [i32]>,
     pub log_level: u32,
@@ -192,6 +195,9 @@ pub fn prog_load_dryrun_with_fd_array(
     let report = prog_load_dryrun_report(ProgLoadDryRunOptions {
         prog_type,
         expected_attach_type: None,
+        prog_btf_fd: None,
+        attach_btf_id: None,
+        attach_btf_obj_fd: None,
         insns,
         fd_array,
         log_level,
@@ -231,6 +237,21 @@ pub fn prog_load_dryrun_report(
 
     if let Some(expected_attach_type) = options.expected_attach_type {
         opts.expected_attach_type = expected_attach_type;
+    }
+    if let Some(prog_btf_fd) = options.prog_btf_fd {
+        if prog_btf_fd < 0 {
+            bail!("prog_btf_fd must be non-negative");
+        }
+        opts.prog_btf_fd = prog_btf_fd as u32;
+    }
+    if let Some(attach_btf_id) = options.attach_btf_id.filter(|id| *id != 0) {
+        opts.attach_btf_id = attach_btf_id;
+    }
+    if let Some(attach_btf_obj_fd) = options.attach_btf_obj_fd {
+        if attach_btf_obj_fd < 0 {
+            bail!("attach_btf_obj_fd must be non-negative");
+        }
+        opts.attach_btf_obj_fd = attach_btf_obj_fd as u32;
     }
 
     if let Some(fd_array) = options.fd_array.filter(|fds| !fds.is_empty()) {

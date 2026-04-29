@@ -70,6 +70,8 @@ struct ProgInfoJson {
     xlated_prog_len: u32,
     orig_prog_len: u32,
     jited_prog_len: u32,
+    btf_id: u32,
+    attach_btf_obj_id: u32,
     attach_btf_id: u32,
 }
 
@@ -236,6 +238,8 @@ impl ProgInfoJson {
             xlated_prog_len: info.xlated_prog_len,
             orig_prog_len: info.orig_prog_len,
             jited_prog_len: info.jited_prog_len,
+            btf_id: info.btf_id,
+            attach_btf_obj_id: info.attach_btf_obj_id,
             attach_btf_id: info.attach_btf_id,
         }
     }
@@ -753,6 +757,8 @@ mod tests {
             xlated_prog_len: 96,
             orig_prog_len: 96,
             jited_prog_len: 64,
+            btf_id: 0,
+            attach_btf_obj_id: 0,
             attach_btf_id: 0,
         };
 

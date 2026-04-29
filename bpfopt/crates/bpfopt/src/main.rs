@@ -114,6 +114,9 @@ struct CommonArgs {
     /// Target architecture: x86_64 or aarch64.
     #[arg(long, global = true, value_name = "ARCH")]
     platform: Option<String>,
+    /// BPF program type, such as xdp, sched_cls, tracing, or a numeric type.
+    #[arg(long, global = true, value_name = "TYPE")]
+    prog_type: Option<String>,
     /// Available kinsns, comma-separated. Entries may be name or name:btf_id.
     #[arg(long, global = true, value_name = "LIST", value_delimiter = ',')]
     kinsns: Vec<String>,
@@ -1007,6 +1010,9 @@ fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
     if let Some(platform) = common.platform.as_deref() {
         ctx.platform.arch = parse_arch(platform)?;
     }
+    if let Some(prog_type) = common.prog_type.as_deref() {
+        ctx.prog_type = parse_prog_type(prog_type)?;
+    }
 
     if let Some(path) = common.target.as_deref() {
         let target = read_target(path)?;
@@ -1050,6 +1056,53 @@ fn parse_arch(arch: &str) -> Result<bpfopt::pass::Arch> {
         "aarch64" | "arm64" => Ok(bpfopt::pass::Arch::Aarch64),
         _ => bail!("unsupported platform arch: {arch}"),
     }
+}
+
+fn parse_prog_type(input: &str) -> Result<u32> {
+    if let Ok(value) = input.parse::<u32>() {
+        return Ok(value);
+    }
+    let mut normalized = input.trim().to_ascii_lowercase();
+    if let Some(stripped) = normalized.strip_prefix("bpf_prog_type_") {
+        normalized = stripped.to_string();
+    }
+    let normalized = normalized.replace('-', "_");
+    let value = match normalized.as_str() {
+        "socket_filter" => kernel_sys::BPF_PROG_TYPE_SOCKET_FILTER,
+        "kprobe" => kernel_sys::BPF_PROG_TYPE_KPROBE,
+        "sched_cls" => kernel_sys::BPF_PROG_TYPE_SCHED_CLS,
+        "sched_act" => kernel_sys::BPF_PROG_TYPE_SCHED_ACT,
+        "tracepoint" => kernel_sys::BPF_PROG_TYPE_TRACEPOINT,
+        "xdp" => kernel_sys::BPF_PROG_TYPE_XDP,
+        "perf_event" => kernel_sys::BPF_PROG_TYPE_PERF_EVENT,
+        "cgroup_skb" => kernel_sys::BPF_PROG_TYPE_CGROUP_SKB,
+        "cgroup_sock" => kernel_sys::BPF_PROG_TYPE_CGROUP_SOCK,
+        "lwt_in" => kernel_sys::BPF_PROG_TYPE_LWT_IN,
+        "lwt_out" => kernel_sys::BPF_PROG_TYPE_LWT_OUT,
+        "lwt_xmit" => kernel_sys::BPF_PROG_TYPE_LWT_XMIT,
+        "sock_ops" => kernel_sys::BPF_PROG_TYPE_SOCK_OPS,
+        "sk_skb" => kernel_sys::BPF_PROG_TYPE_SK_SKB,
+        "cgroup_device" => kernel_sys::BPF_PROG_TYPE_CGROUP_DEVICE,
+        "sk_msg" => kernel_sys::BPF_PROG_TYPE_SK_MSG,
+        "raw_tracepoint" => kernel_sys::BPF_PROG_TYPE_RAW_TRACEPOINT,
+        "cgroup_sock_addr" => kernel_sys::BPF_PROG_TYPE_CGROUP_SOCK_ADDR,
+        "lwt_seg6local" => kernel_sys::BPF_PROG_TYPE_LWT_SEG6LOCAL,
+        "lirc_mode2" => kernel_sys::BPF_PROG_TYPE_LIRC_MODE2,
+        "sk_reuseport" => kernel_sys::BPF_PROG_TYPE_SK_REUSEPORT,
+        "flow_dissector" => kernel_sys::BPF_PROG_TYPE_FLOW_DISSECTOR,
+        "cgroup_sysctl" => kernel_sys::BPF_PROG_TYPE_CGROUP_SYSCTL,
+        "raw_tracepoint_writable" => kernel_sys::BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE,
+        "cgroup_sockopt" => kernel_sys::BPF_PROG_TYPE_CGROUP_SOCKOPT,
+        "tracing" => kernel_sys::BPF_PROG_TYPE_TRACING,
+        "struct_ops" => kernel_sys::BPF_PROG_TYPE_STRUCT_OPS,
+        "ext" => kernel_sys::BPF_PROG_TYPE_EXT,
+        "lsm" => kernel_sys::BPF_PROG_TYPE_LSM,
+        "sk_lookup" => kernel_sys::BPF_PROG_TYPE_SK_LOOKUP,
+        "syscall" => kernel_sys::BPF_PROG_TYPE_SYSCALL,
+        "netfilter" => kernel_sys::BPF_PROG_TYPE_NETFILTER,
+        _ => bail!("unknown prog type '{input}'"),
+    };
+    Ok(value)
 }
 
 fn apply_features(platform: &mut PlatformCapabilities, features: &[String]) {

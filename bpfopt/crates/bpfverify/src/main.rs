@@ -18,6 +18,8 @@ const DEFAULT_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
 const BPF_LD_IMM64: u8 = (kernel_sys::BPF_LD | kernel_sys::BPF_DW | kernel_sys::BPF_IMM) as u8;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
+const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
+const BPF_PSEUDO_MAP_IDX_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX_VALUE as u8;
 
 #[derive(Parser, Debug)]
 #[command(name = "bpfverify", version, about = "Verify raw BPF bytecode")]
@@ -28,6 +30,21 @@ struct Cli {
     /// Expected attach type for program types that need one.
     #[arg(long, value_name = "TYPE")]
     expected_attach_type: Option<String>,
+    /// BTF object ID associated with program func/line info.
+    #[arg(long, value_name = "ID")]
+    prog_btf_id: Option<u32>,
+    /// Open BTF fd associated with program func/line info.
+    #[arg(long, value_name = "FD")]
+    prog_btf_fd: Option<i32>,
+    /// BTF type ID for tracing/LSM/struct_ops attach context replay.
+    #[arg(long, value_name = "ID")]
+    attach_btf_id: Option<u32>,
+    /// Kernel BTF object ID for the attach target. Zero means vmlinux BTF.
+    #[arg(long, value_name = "ID")]
+    attach_btf_obj_id: Option<u32>,
+    /// Open BTF object fd for the attach target.
+    #[arg(long, value_name = "FD")]
+    attach_btf_obj_fd: Option<i32>,
     /// Map FD manifest from bpfget --full.
     #[arg(long, value_name = "FILE")]
     map_fds: Option<PathBuf>,
@@ -131,6 +148,11 @@ impl FdArray {
     }
 }
 
+struct AttachBtfObjFd {
+    fd: Option<i32>,
+    _owned_fd: Option<OwnedFd>,
+}
+
 fn main() -> ExitCode {
     match run() {
         Ok(code) => code,
@@ -157,12 +179,21 @@ fn run() -> Result<ExitCode> {
     let mut insns = decode_insns(&input_bytes)?;
     let _map_fds = apply_map_fds(cli.map_fds.as_deref(), &mut insns)?;
     let fd_array = read_fd_array(cli.fd_array.as_deref())?;
+    let prog_btf_fd = resolve_optional_btf_fd(cli.prog_btf_fd, cli.prog_btf_id, "prog BTF")?;
+    let attach_btf_obj_fd = resolve_optional_btf_fd(
+        cli.attach_btf_obj_fd,
+        cli.attach_btf_obj_id,
+        "attach BTF object",
+    )?;
     let log_level = effective_log_level(&cli);
 
     let mut log_buf = vec![0u8; DEFAULT_LOG_BUF_SIZE];
     let dryrun = kernel_sys::prog_load_dryrun_report(kernel_sys::ProgLoadDryRunOptions {
         prog_type,
         expected_attach_type,
+        prog_btf_fd: prog_btf_fd.fd,
+        attach_btf_id: cli.attach_btf_id,
+        attach_btf_obj_fd: attach_btf_obj_fd.fd,
         insns: &insns,
         fd_array: (!fd_array.is_empty()).then_some(fd_array.as_slice()),
         log_level,
@@ -306,21 +337,36 @@ fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Res
     }
 
     let mut opened = HashMap::<u32, OwnedFd>::new();
-    for map_id in old_fd_to_map_id.values().copied() {
-        opened.entry(map_id).or_insert(
-            kernel_sys::map_get_fd_by_id(map_id)
-                .with_context(|| format!("open BPF map id {map_id} from {}", path.display()))?,
-        );
-    }
-
     let mut pc = 0usize;
     while pc < insns.len() {
-        if is_pseudo_map_ldimm64(&insns[pc]) {
+        if is_pseudo_map_fd_ldimm64(&insns[pc]) {
             let old_fd = insns[pc].imm;
             let map_id = *old_fd_to_map_id
                 .get(&old_fd)
                 .ok_or_else(|| anyhow!("no map binding for pseudo-map old fd {old_fd}"))?;
-            let new_fd = opened[&map_id].as_raw_fd();
+            let new_fd = open_map_fd(&mut opened, map_id, path)?.as_raw_fd();
+            insns[pc].imm = new_fd;
+            pc += 2;
+        } else if is_pseudo_map_idx_ldimm64(&insns[pc]) {
+            let raw_idx = insns[pc].imm;
+            if raw_idx < 0 {
+                bail!("pseudo-map fd_array index {raw_idx} is negative");
+            }
+            let idx = raw_idx as usize;
+            let Some(&map_id) = positional.get(idx) else {
+                bail!(
+                    "{} does not provide a map_id for pseudo-map fd_array index {}",
+                    path.display(),
+                    idx
+                );
+            };
+            let new_fd = open_map_fd(&mut opened, map_id, path)?.as_raw_fd();
+            let src_reg = if insns[pc].src_reg() == BPF_PSEUDO_MAP_IDX {
+                BPF_PSEUDO_MAP_FD
+            } else {
+                BPF_PSEUDO_MAP_VALUE
+            };
+            insns[pc].set_src_reg(src_reg);
             insns[pc].imm = new_fd;
             pc += 2;
         } else {
@@ -331,11 +377,27 @@ fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Res
     Ok(opened.into_values().collect())
 }
 
+fn open_map_fd<'a>(
+    opened: &'a mut HashMap<u32, OwnedFd>,
+    map_id: u32,
+    path: &Path,
+) -> Result<&'a OwnedFd> {
+    match opened.entry(map_id) {
+        std::collections::hash_map::Entry::Occupied(entry) => Ok(entry.into_mut()),
+        std::collections::hash_map::Entry::Vacant(entry) => {
+            Ok(entry
+                .insert(kernel_sys::map_get_fd_by_id(map_id).with_context(|| {
+                    format!("open BPF map id {map_id} from {}", path.display())
+                })?))
+        }
+    }
+}
+
 fn pseudo_map_old_fds(insns: &[kernel_sys::bpf_insn]) -> Vec<i32> {
     let mut old_fds = Vec::new();
     let mut pc = 0usize;
     while pc < insns.len() {
-        if is_pseudo_map_ldimm64(&insns[pc]) {
+        if is_pseudo_map_fd_ldimm64(&insns[pc]) {
             let old_fd = insns[pc].imm;
             if !old_fds.contains(&old_fd) {
                 old_fds.push(old_fd);
@@ -348,8 +410,16 @@ fn pseudo_map_old_fds(insns: &[kernel_sys::bpf_insn]) -> Vec<i32> {
     old_fds
 }
 
-fn is_pseudo_map_ldimm64(insn: &kernel_sys::bpf_insn) -> bool {
+fn is_pseudo_map_fd_ldimm64(insn: &kernel_sys::bpf_insn) -> bool {
     insn.code == BPF_LD_IMM64 && matches!(insn.src_reg(), BPF_PSEUDO_MAP_FD | BPF_PSEUDO_MAP_VALUE)
+}
+
+fn is_pseudo_map_idx_ldimm64(insn: &kernel_sys::bpf_insn) -> bool {
+    insn.code == BPF_LD_IMM64
+        && matches!(
+            insn.src_reg(),
+            BPF_PSEUDO_MAP_IDX | BPF_PSEUDO_MAP_IDX_VALUE
+        )
 }
 
 fn read_map_bindings(path: &Path) -> Result<Vec<MapBinding>> {
@@ -566,6 +636,40 @@ fn print_verifier_failure(report: &kernel_sys::ProgLoadDryRunReport) {
     }
 }
 
+fn resolve_optional_btf_fd(
+    btf_fd: Option<i32>,
+    btf_id: Option<u32>,
+    label: &str,
+) -> Result<AttachBtfObjFd> {
+    match (btf_fd, btf_id) {
+        (Some(_), Some(_)) => {
+            bail!("{label}: fd and id options are mutually exclusive")
+        }
+        (Some(fd), None) => {
+            if fd < 0 {
+                bail!("{label}: fd must be non-negative");
+            }
+            Ok(AttachBtfObjFd {
+                fd: Some(fd),
+                _owned_fd: None,
+            })
+        }
+        (None, Some(0) | None) => Ok(AttachBtfObjFd {
+            fd: None,
+            _owned_fd: None,
+        }),
+        (None, Some(id)) => {
+            let owned_fd = kernel_sys::btf_get_fd_by_id(id)
+                .with_context(|| format!("open {label} id {id}"))?;
+            let fd = owned_fd.as_raw_fd();
+            Ok(AttachBtfObjFd {
+                fd: Some(fd),
+                _owned_fd: Some(owned_fd),
+            })
+        }
+    }
+}
+
 fn parse_prog_type(input: &str) -> Result<kernel_sys::bpf_prog_type> {
     let normalized = normalize_type_name(input, "bpf_prog_type_");
     let value = match normalized.as_str() {
@@ -607,6 +711,9 @@ fn parse_prog_type(input: &str) -> Result<kernel_sys::bpf_prog_type> {
 }
 
 fn parse_attach_type(input: &str) -> Result<kernel_sys::bpf_attach_type> {
+    if let Ok(value) = input.parse::<kernel_sys::bpf_attach_type>() {
+        return Ok(value);
+    }
     let normalized = normalize_type_name(input, "bpf_");
     let value = match normalized.as_str() {
         "cgroup_inet_ingress" => kernel_sys::BPF_CGROUP_INET_INGRESS,

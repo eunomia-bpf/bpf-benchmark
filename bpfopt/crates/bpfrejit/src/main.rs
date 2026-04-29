@@ -16,6 +16,8 @@ const LOG_BUF_SIZE: usize = 1024 * 1024;
 const BPF_LD_IMM64: u8 = (kernel_sys::BPF_LD | kernel_sys::BPF_DW | kernel_sys::BPF_IMM) as u8;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
+const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
+const BPF_PSEUDO_MAP_IDX_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX_VALUE as u8;
 
 #[derive(Parser, Debug)]
 #[command(name = "bpfrejit", version, about = "Submit replacement BPF bytecode")]
@@ -108,13 +110,38 @@ fn run() -> Result<()> {
 
     let mut log_buf = vec![0u8; LOG_BUF_SIZE];
     if cli.dry_run {
-        kernel_sys::prog_load_dryrun_with_fd_array(
-            info.prog_type,
-            &insns,
-            Some(fd_array.as_slice()),
-            Some(&mut log_buf),
-        )
+        let attach_btf_obj_fd = if info.attach_btf_obj_id == 0 {
+            None
+        } else {
+            Some(
+                kernel_sys::btf_get_fd_by_id(info.attach_btf_obj_id).with_context(|| {
+                    format!("open attach BTF object id {}", info.attach_btf_obj_id)
+                })?,
+            )
+        };
+        let report = kernel_sys::prog_load_dryrun_report(kernel_sys::ProgLoadDryRunOptions {
+            prog_type: info.prog_type,
+            expected_attach_type: None,
+            prog_btf_fd: None,
+            attach_btf_id: (info.attach_btf_id != 0).then_some(info.attach_btf_id),
+            attach_btf_obj_fd: attach_btf_obj_fd.as_ref().map(|fd| fd.as_raw_fd()),
+            insns: &insns,
+            fd_array: Some(fd_array.as_slice()),
+            log_level: 2,
+            log_buf: Some(&mut log_buf),
+        })
         .context("dry-run verifier rejected bytecode")?;
+        if !report.accepted {
+            let reason = report
+                .errno
+                .map(|errno| io::Error::from_raw_os_error(errno).to_string())
+                .unwrap_or_else(|| "unknown verifier error".to_string());
+            bail!(
+                "dry-run verifier rejected bytecode: {}\n{}",
+                reason,
+                report.verifier_log
+            );
+        }
         return write_summary(
             cli.output.as_deref(),
             &Summary {
@@ -234,21 +261,37 @@ fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Res
     }
 
     let mut opened = HashMap::<u32, OwnedFd>::new();
-    for map_id in old_fd_to_map_id.values().copied() {
-        opened.entry(map_id).or_insert(
-            kernel_sys::map_get_fd_by_id(map_id)
-                .with_context(|| format!("open BPF map id {map_id} from {}", path.display()))?,
-        );
-    }
-
     let mut pc = 0usize;
     while pc < insns.len() {
-        if is_pseudo_map_ldimm64(&insns[pc]) {
+        if is_pseudo_map_fd_ldimm64(&insns[pc]) {
             let old_fd = insns[pc].imm;
             let map_id = *old_fd_to_map_id
                 .get(&old_fd)
                 .ok_or_else(|| anyhow!("no map binding for pseudo-map old fd {old_fd}"))?;
-            insns[pc].imm = opened[&map_id].as_raw_fd();
+            let new_fd = open_map_fd(&mut opened, map_id, path)?.as_raw_fd();
+            insns[pc].imm = new_fd;
+            pc += 2;
+        } else if is_pseudo_map_idx_ldimm64(&insns[pc]) {
+            let raw_idx = insns[pc].imm;
+            if raw_idx < 0 {
+                bail!("pseudo-map fd_array index {raw_idx} is negative");
+            }
+            let idx = raw_idx as usize;
+            let Some(&map_id) = positional.get(idx) else {
+                bail!(
+                    "{} does not provide a map_id for pseudo-map fd_array index {}",
+                    path.display(),
+                    idx
+                );
+            };
+            let new_fd = open_map_fd(&mut opened, map_id, path)?.as_raw_fd();
+            let src_reg = if insns[pc].src_reg() == BPF_PSEUDO_MAP_IDX {
+                BPF_PSEUDO_MAP_FD
+            } else {
+                BPF_PSEUDO_MAP_VALUE
+            };
+            insns[pc].set_src_reg(src_reg);
+            insns[pc].imm = new_fd;
             pc += 2;
         } else {
             pc += 1;
@@ -258,11 +301,27 @@ fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Res
     Ok(opened.into_values().collect())
 }
 
+fn open_map_fd<'a>(
+    opened: &'a mut HashMap<u32, OwnedFd>,
+    map_id: u32,
+    path: &Path,
+) -> Result<&'a OwnedFd> {
+    match opened.entry(map_id) {
+        std::collections::hash_map::Entry::Occupied(entry) => Ok(entry.into_mut()),
+        std::collections::hash_map::Entry::Vacant(entry) => {
+            Ok(entry
+                .insert(kernel_sys::map_get_fd_by_id(map_id).with_context(|| {
+                    format!("open BPF map id {map_id} from {}", path.display())
+                })?))
+        }
+    }
+}
+
 fn pseudo_map_old_fds(insns: &[kernel_sys::bpf_insn]) -> Vec<i32> {
     let mut old_fds = Vec::new();
     let mut pc = 0usize;
     while pc < insns.len() {
-        if is_pseudo_map_ldimm64(&insns[pc]) {
+        if is_pseudo_map_fd_ldimm64(&insns[pc]) {
             let old_fd = insns[pc].imm;
             if !old_fds.contains(&old_fd) {
                 old_fds.push(old_fd);
@@ -275,8 +334,16 @@ fn pseudo_map_old_fds(insns: &[kernel_sys::bpf_insn]) -> Vec<i32> {
     old_fds
 }
 
-fn is_pseudo_map_ldimm64(insn: &kernel_sys::bpf_insn) -> bool {
+fn is_pseudo_map_fd_ldimm64(insn: &kernel_sys::bpf_insn) -> bool {
     insn.code == BPF_LD_IMM64 && matches!(insn.src_reg(), BPF_PSEUDO_MAP_FD | BPF_PSEUDO_MAP_VALUE)
+}
+
+fn is_pseudo_map_idx_ldimm64(insn: &kernel_sys::bpf_insn) -> bool {
+    insn.code == BPF_LD_IMM64
+        && matches!(
+            insn.src_reg(),
+            BPF_PSEUDO_MAP_IDX | BPF_PSEUDO_MAP_IDX_VALUE
+        )
 }
 
 fn read_map_bindings(path: &Path) -> Result<Vec<MapBinding>> {
