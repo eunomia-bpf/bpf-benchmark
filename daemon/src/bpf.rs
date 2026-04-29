@@ -11,7 +11,7 @@ use std::sync::OnceLock;
 use anyhow::{bail, Context, Result};
 use serde::Serialize;
 
-use crate::insn::BpfInsn;
+use bpfopt::insn::BpfInsn;
 
 // ── bpf_cmd values (from vendor/linux-framework/include/uapi/linux/bpf.h) ───
 // The enum starts at 0. We only define the commands we actually use.

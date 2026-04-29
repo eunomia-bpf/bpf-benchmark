@@ -10,7 +10,8 @@ pub mod analysis;
 pub mod bpf {
     pub use crate::mock_maps::{install_mock_map, BpfMapInfo, MockMapState};
 }
-pub mod elf_parser;
+#[cfg(test)]
+mod elf_parser;
 pub mod insn;
 #[cfg(test)]
 pub mod mock_maps;

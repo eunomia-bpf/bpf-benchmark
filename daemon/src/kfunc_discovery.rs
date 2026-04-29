@@ -10,9 +10,8 @@ use std::os::unix::io::OwnedFd;
 use std::path::Path;
 
 use anyhow::{bail, Context, Result};
-
-use crate::insn::BPF_KINSN_ENC_PACKED_CALL;
-use crate::pass::KinsnRegistry;
+use bpfopt::insn::BPF_KINSN_ENC_PACKED_CALL;
+use bpfopt::pass::KinsnRegistry;
 
 // ── Known kinsn function → module mapping ────────────────────────────
 

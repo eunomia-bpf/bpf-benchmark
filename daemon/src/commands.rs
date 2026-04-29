@@ -8,11 +8,12 @@ use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 use anyhow::{Context, Result};
+use bpfopt::{analysis, insn, pass, passes, verifier_log};
 use serde::ser::{SerializeSeq, Serializer};
 use serde::Serialize;
 
 use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
-use crate::{bpf, insn, pass, passes, pipeline, verifier_log};
+use crate::{bpf, pipeline};
 
 // ── OptimizeOneResult — structured return from try_apply_one ────────
 
@@ -245,10 +246,10 @@ impl pass::MapInfoProvider for LiveMapProvider {
         &self,
         _program: &pass::BpfProgram,
         map_id: u32,
-    ) -> std::result::Result<Option<crate::analysis::MapInfo>, String> {
+    ) -> std::result::Result<Option<analysis::MapInfo>, String> {
         let (info, frozen) = bpf::bpf_map_get_info_by_id(map_id)
             .map_err(|err| format!("resolve live map info for map {map_id}: {err:#}"))?;
-        Ok(Some(crate::analysis::MapInfo {
+        Ok(Some(analysis::MapInfo {
             map_type: info.map_type,
             key_size: info.key_size,
             value_size: info.value_size,
@@ -263,7 +264,7 @@ impl pass::MapValueProvider for LiveMapProvider {
     fn lookup_value_size(
         &self,
         _program: &pass::BpfProgram,
-        info: &crate::analysis::MapInfo,
+        info: &analysis::MapInfo,
     ) -> std::result::Result<usize, String> {
         bpf::bpf_map_lookup_value_size_by_id(info.map_id)
             .map_err(|err| format!("determine live map {} lookup size: {err:#}", info.map_id))

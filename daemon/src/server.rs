@@ -6,11 +6,12 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
+use bpfopt::{pass, passes};
 use serde::Serialize;
 
 use crate::commands::{self, OptimizeMode};
 use crate::invalidation::{MapInvalidationTracker, MapValueReader};
-use crate::{bpf, pass, pipeline, profiler};
+use crate::{bpf, pipeline, profiler};
 
 const DEFAULT_HOTNESS_WINDOW_MS: u64 = 250;
 
@@ -377,12 +378,12 @@ fn process_request(
     ) -> std::result::Result<pipeline::DaemonContext, String> {
         let mut local_ctx = base_ctx.clone();
         if let Some(enabled_passes) = parse_request_pass_list(req, "enabled_passes")? {
-            crate::passes::validate_pass_names(&enabled_passes)
+            passes::validate_pass_names(&enabled_passes)
                 .map_err(|err| format!("invalid enabled_passes: {err}"))?;
             local_ctx.pass_context.policy.enabled_passes = enabled_passes;
         }
         if let Some(disabled_passes) = parse_request_pass_list(req, "disabled_passes")? {
-            crate::passes::validate_pass_names(&disabled_passes)
+            passes::validate_pass_names(&disabled_passes)
                 .map_err(|err| format!("invalid disabled_passes: {err}"))?;
             local_ctx.pass_context.policy.disabled_passes = disabled_passes;
         }
@@ -798,7 +799,7 @@ fn process_request(
                 "status": "ok",
                 "version": env!("CARGO_PKG_VERSION"),
                 "profiling": profiling,
-                "available_passes_help": crate::passes::available_passes_help(),
+                "available_passes_help": passes::available_passes_help(),
             })
         }
         _ => {

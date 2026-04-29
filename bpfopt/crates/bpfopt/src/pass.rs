@@ -719,53 +719,15 @@ pub struct PlatformCapabilities {
 }
 
 impl PlatformCapabilities {
-    /// Detect CPU capabilities for the current platform.
-    ///
-    /// On x86_64, parses `/proc/cpuinfo` flags to detect BMI1, BMI2, CMOV,
-    /// MOVBE, and BMI2 (for RORX). On aarch64, sets arch and basic capabilities.
-    pub fn detect() -> Self {
-        #[cfg(target_arch = "x86_64")]
-        {
-            Self::detect_x86_64()
-        }
-        #[cfg(target_arch = "aarch64")]
-        {
-            Self {
-                // ARM64 always has conditional select (CSEL).
-                has_cmov: true,
-                arch: Arch::Aarch64,
-                ..Default::default()
-            }
-        }
-        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
-        {
-            Self::default()
-        }
-    }
-
-    /// Detect x86_64 CPU features by parsing /proc/cpuinfo flags.
-    #[cfg(target_arch = "x86_64")]
-    fn detect_x86_64() -> Self {
-        let flags = match std::fs::read_to_string("/proc/cpuinfo") {
-            Ok(content) => {
-                // Find the first "flags" line.
-                content
-                    .lines()
-                    .find(|l| l.starts_with("flags"))
-                    .unwrap_or("")
-                    .to_string()
-            }
-            Err(_) => String::new(),
-        };
-
+    /// Deterministic platform capability set for tests.
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub fn test_default() -> Self {
         Self {
-            has_bmi1: flags.contains(" bmi1"),
-            has_bmi2: flags.contains(" bmi2"),
-            has_cmov: flags.contains(" cmov"),
-            has_movbe: flags.contains(" movbe"),
-            // RORX is part of BMI2 instruction set.
-            has_rorx: flags.contains(" bmi2"),
+            #[cfg(target_arch = "aarch64")]
+            arch: Arch::Aarch64,
+            #[cfg(not(target_arch = "aarch64"))]
             arch: Arch::X86_64,
+            ..Default::default()
         }
     }
 }

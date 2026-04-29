@@ -3,7 +3,7 @@
 
 use anyhow::Result;
 
-pub mod bounds_check_merge;
+mod bounds_check_merge;
 mod branch_flip;
 mod bulk_memory;
 mod cond_select;
@@ -14,7 +14,7 @@ mod extract;
 mod map_inline;
 mod rotate;
 mod skb_load_bytes;
-pub mod utils;
+mod utils;
 mod wide_mem;
 
 pub use bounds_check_merge::BoundsCheckMergePass;

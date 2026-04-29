@@ -913,22 +913,16 @@ use crate::passes::BranchFlipPass;
 // ── PlatformCapabilities tests ──────────────────────────────
 
 #[test]
-fn test_platform_detect_returns_valid_result() {
-    let caps = PlatformCapabilities::detect();
-    // On any Linux machine, detection should complete without panic.
-    // On x86_64, at least some capabilities should be detected.
+fn test_platform_test_default_returns_valid_result() {
+    let caps = PlatformCapabilities::test_default();
     #[cfg(target_arch = "x86_64")]
     {
         assert_eq!(caps.arch, Arch::X86_64);
-        // Most x86_64 CPUs have CMOV (Pentium Pro+).
-        // We don't assert true because of CI variety, but we assert it runs.
     }
     #[cfg(target_arch = "aarch64")]
     {
         assert_eq!(caps.arch, Arch::Aarch64);
-        assert!(caps.has_cmov, "ARM64 always has CSEL");
     }
-    // Just verify the struct is valid regardless of platform.
     let _ = format!("{:?}", caps);
 }
 

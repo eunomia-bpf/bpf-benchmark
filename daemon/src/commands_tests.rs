@@ -600,9 +600,9 @@ fn test_verifier_rejection_count_counts_rejected_passes() {
 #[test]
 fn test_build_pipeline_default() {
     let ctx = pass::PassContext::test_default();
-    let pm = crate::passes::build_full_pipeline();
-    let exit_insn = crate::insn::BpfInsn {
-        code: crate::insn::BPF_JMP | crate::insn::BPF_EXIT,
+    let pm = bpfopt::passes::build_full_pipeline();
+    let exit_insn = bpfopt::insn::BpfInsn {
+        code: bpfopt::insn::BPF_JMP | bpfopt::insn::BPF_EXIT,
         regs: 0,
         off: 0,
         imm: 0,

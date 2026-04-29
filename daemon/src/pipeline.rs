@@ -10,9 +10,8 @@ use std::os::unix::io::RawFd;
 use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
+use bpfopt::{insn, pass, verifier_log};
 use serde::Serialize;
-
-use crate::{insn, pass};
 
 /// Live daemon resolver: descriptor BTF FDs are transported through fd_array
 /// slots, and CALL.off stores the 1-based fd_array slot.
@@ -122,7 +121,7 @@ pub(crate) struct PassVerifyResult {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) error_message: Option<String>,
     #[serde(skip)]
-    pub(crate) verifier_states: Arc<[crate::verifier_log::VerifierInsn]>,
+    pub(crate) verifier_states: Arc<[verifier_log::VerifierInsn]>,
 }
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
@@ -155,9 +154,7 @@ impl PassVerifyResult {
         }
     }
 
-    pub(crate) fn accepted_with_verifier_states(
-        states: Vec<crate::verifier_log::VerifierInsn>,
-    ) -> Self {
+    pub(crate) fn accepted_with_verifier_states(states: Vec<verifier_log::VerifierInsn>) -> Self {
         Self {
             status: PassVerifyStatus::Accepted,
             error_message: None,
@@ -488,7 +485,7 @@ mod tests {
 
         let result = run_with_verifier(&pm, &mut program, &ctx, &resolver, &mut |_, _| {
             Ok(PassVerifyResult::accepted_with_verifier_states(
-                crate::verifier_log::parse_verifier_log(
+                verifier_log::parse_verifier_log(
                     r#"
 0: R0=0 R10=fp0
 1: (95) exit ; R0=1

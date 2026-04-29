@@ -15,10 +15,10 @@ use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result};
+use bpfopt::pass::ProfilingData;
 use serde::{Deserialize, Serialize};
 
 use crate::bpf;
-use crate::pass::ProfilingData;
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ProgStats {

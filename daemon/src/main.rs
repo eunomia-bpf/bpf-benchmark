@@ -9,26 +9,12 @@ mod commands;
 mod invalidation;
 mod kfunc_discovery;
 mod pipeline;
+mod platform_detect;
 mod profiler;
 mod server;
 
-mod analysis {
-    pub use bpfopt::analysis::*;
-}
-mod insn {
-    pub use bpfopt::insn::*;
-}
-mod pass {
-    pub use bpfopt::pass::*;
-}
-mod passes {
-    pub use bpfopt::passes::*;
-}
-mod verifier_log {
-    pub use bpfopt::verifier_log::*;
-}
-
 use anyhow::Result;
+use bpfopt::pass;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -57,7 +43,7 @@ fn main() -> Result<()> {
     for line in &discovery.log {
         eprintln!("{}", line);
     }
-    let platform = pass::PlatformCapabilities::detect();
+    let platform = platform_detect::detect();
     eprintln!(
         "platform: arch={:?} bmi1={} bmi2={} cmov={} movbe={} rorx={}",
         platform.arch,
