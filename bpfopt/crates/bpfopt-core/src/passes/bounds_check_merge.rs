@@ -28,8 +28,19 @@ const BPF_PROG_TYPE_LWT_OUT: u32 = 19;
 /// BPF_PROG_TYPE_LWT_XMIT.
 const BPF_PROG_TYPE_LWT_XMIT: u32 = 20;
 
+const XDP_DATA_OFF: i16 = 0;
+const XDP_DATA_END_OFF: i16 = 4;
+const SKB_DATA_OFF: i16 = 76;
+const SKB_DATA_END_OFF: i16 = 80;
+
 /// Phase-1 heuristic: treat larger jumps as gapped windows and fail closed.
 const MAX_LADDER_WINDOW_GROWTH: i32 = 24;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct PacketCtxLayout {
+    data_off: i16,
+    data_end_off: i16,
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum RegValue {
@@ -91,14 +102,17 @@ impl BpfPass for BoundsCheckMergePass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        if program.insns.is_empty() || !is_packet_prog_type(ctx.prog_type) {
+        let Some(layout) = packet_ctx_layout(ctx.prog_type) else {
+            return Ok(PassResult::unchanged(self.name()));
+        };
+        if program.insns.is_empty() {
             return Ok(PassResult::unchanged(self.name()));
         }
 
         let bt = analyses.get(&BranchTargetAnalysis, program);
         let liveness = analyses.get(&LivenessAnalysis, program);
 
-        let mut scan = scan_guard_sites(&program.insns, &bt, &liveness);
+        let mut scan = scan_guard_sites(&program.insns, &bt, &liveness, layout);
         if scan.guards.is_empty() {
             return Ok(PassResult {
                 sites_skipped: scan.skips,
@@ -234,23 +248,30 @@ impl BpfPass for BoundsCheckMergePass {
     }
 }
 
-fn is_packet_prog_type(prog_type: u32) -> bool {
-    matches!(
-        prog_type,
+fn packet_ctx_layout(prog_type: u32) -> Option<PacketCtxLayout> {
+    match prog_type {
+        BPF_PROG_TYPE_XDP => Some(PacketCtxLayout {
+            data_off: XDP_DATA_OFF,
+            data_end_off: XDP_DATA_END_OFF,
+        }),
         BPF_PROG_TYPE_SCHED_CLS
-            | BPF_PROG_TYPE_SCHED_ACT
-            | BPF_PROG_TYPE_XDP
-            | BPF_PROG_TYPE_SK_SKB
-            | BPF_PROG_TYPE_LWT_IN
-            | BPF_PROG_TYPE_LWT_OUT
-            | BPF_PROG_TYPE_LWT_XMIT
-    )
+        | BPF_PROG_TYPE_SCHED_ACT
+        | BPF_PROG_TYPE_SK_SKB
+        | BPF_PROG_TYPE_LWT_IN
+        | BPF_PROG_TYPE_LWT_OUT
+        | BPF_PROG_TYPE_LWT_XMIT => Some(PacketCtxLayout {
+            data_off: SKB_DATA_OFF,
+            data_end_off: SKB_DATA_END_OFF,
+        }),
+        _ => None,
+    }
 }
 
 fn scan_guard_sites(
     insns: &[BpfInsn],
     bt: &crate::analysis::BranchTargetResult,
     liveness: &crate::analysis::LivenessResult,
+    layout: PacketCtxLayout,
 ) -> ScanResult {
     let mut states = vec![RegValue::Unknown; 11];
     let mut next_root_id = 1u32;
@@ -275,6 +296,7 @@ fn scan_guard_sites(
             &mut states,
             &mut next_root_id,
             &mut last_data_root,
+            layout,
         );
         pc += insn_width(&insns[pc]);
     }
@@ -492,13 +514,14 @@ fn apply_transfer(
     states: &mut [RegValue],
     next_root_id: &mut u32,
     last_data_root: &mut Option<u32>,
+    layout: PacketCtxLayout,
 ) {
     let dst = insn.dst_reg() as usize;
     let src = insn.src_reg() as usize;
 
     match insn.class() {
         BPF_LDX => {
-            if is_ctx_data_load(&insn) {
+            if is_ctx_data_load(&insn, layout) {
                 let root_id = *next_root_id;
                 *next_root_id += 1;
                 states[dst] = RegValue::PacketData {
@@ -506,7 +529,7 @@ fn apply_transfer(
                     const_off: 0,
                 };
                 *last_data_root = Some(root_id);
-            } else if is_ctx_data_end_load(&insn) {
+            } else if is_ctx_data_end_load(&insn, layout) {
                 let root_id = last_data_root.unwrap_or_else(|| {
                     let root_id = *next_root_id;
                     *next_root_id += 1;
@@ -547,12 +570,12 @@ fn apply_transfer(
     }
 }
 
-fn is_ctx_data_load(insn: &BpfInsn) -> bool {
-    insn.is_ldx_mem() && insn.src_reg() == 1 && insn.off == 0
+fn is_ctx_data_load(insn: &BpfInsn, layout: PacketCtxLayout) -> bool {
+    insn.is_ldx_mem() && insn.src_reg() == 1 && insn.off == layout.data_off
 }
 
-fn is_ctx_data_end_load(insn: &BpfInsn) -> bool {
-    insn.is_ldx_mem() && insn.src_reg() == 1 && insn.off == 4
+fn is_ctx_data_end_load(insn: &BpfInsn, layout: PacketCtxLayout) -> bool {
+    insn.is_ldx_mem() && insn.src_reg() == 1 && insn.off == layout.data_end_off
 }
 
 fn reg_state(states: &[RegValue], reg: u8) -> Option<&RegValue> {
@@ -621,9 +644,13 @@ mod tests {
     }
 
     fn load_packet_root() -> Vec<BpfInsn> {
+        load_packet_root_with_offsets(XDP_DATA_OFF, XDP_DATA_END_OFF)
+    }
+
+    fn load_packet_root_with_offsets(data_off: i16, data_end_off: i16) -> Vec<BpfInsn> {
         vec![
-            BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
-            BpfInsn::ldx_mem(BPF_W, 3, 1, 4),
+            BpfInsn::ldx_mem(BPF_W, 2, 1, data_off),
+            BpfInsn::ldx_mem(BPF_W, 3, 1, data_end_off),
         ]
     }
 
@@ -677,6 +704,15 @@ mod tests {
 
     fn make_two_adjacent_checks_program() -> Vec<BpfInsn> {
         let mut insns = load_packet_root();
+        insns.extend(guard(4, 2, 3, 14));
+        insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
+        insns.extend(guard(5, 2, 3, 34));
+        insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
+        shared_error_program(insns)
+    }
+
+    fn make_two_adjacent_tc_checks_program() -> Vec<BpfInsn> {
+        let mut insns = load_packet_root_with_offsets(SKB_DATA_OFF, SKB_DATA_END_OFF);
         insns.extend(guard(4, 2, 3, 14));
         insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
         insns.extend(guard(5, 2, 3, 34));
@@ -930,22 +966,29 @@ mod tests {
     }
 
     #[test]
-    fn test_xdp_program_only() {
+    fn test_packet_program_ctx_layouts() {
         let mut xdp_program = BpfProgram::new(make_two_adjacent_checks_program());
         let xdp_result = run_bounds_check_merge_pass(&mut xdp_program, BPF_PROG_TYPE_XDP);
         assert!(xdp_result.program_changed);
         assert_eq!(xdp_program.insns.len(), 11);
 
-        let mut tc_program = BpfProgram::new(make_two_adjacent_checks_program());
+        let mut tc_program = BpfProgram::new(make_two_adjacent_tc_checks_program());
         let tc_result = run_bounds_check_merge_pass(&mut tc_program, BPF_PROG_TYPE_SCHED_CLS);
         assert!(tc_result.program_changed);
         assert_eq!(tc_program.insns.len(), 11);
 
-        let mut tc_action_program = BpfProgram::new(make_two_adjacent_checks_program());
+        let mut tc_action_program = BpfProgram::new(make_two_adjacent_tc_checks_program());
         let tc_action_result =
             run_bounds_check_merge_pass(&mut tc_action_program, BPF_PROG_TYPE_SCHED_ACT);
         assert!(tc_action_result.program_changed);
         assert_eq!(tc_action_program.insns.len(), 11);
+
+        let xdp_layout_in_tc = make_two_adjacent_checks_program();
+        let mut xdp_layout_tc_program = BpfProgram::new(xdp_layout_in_tc.clone());
+        let xdp_layout_tc_result =
+            run_bounds_check_merge_pass(&mut xdp_layout_tc_program, BPF_PROG_TYPE_SCHED_CLS);
+        assert!(!xdp_layout_tc_result.program_changed);
+        assert_eq!(xdp_layout_tc_program.insns, xdp_layout_in_tc);
 
         let original = make_two_adjacent_checks_program();
         let mut non_packet_program = BpfProgram::new(original.clone());

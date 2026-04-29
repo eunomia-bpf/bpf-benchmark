@@ -216,14 +216,14 @@ def _normalize_apply_passes(
     for index, item in enumerate(raw_passes):
         if not isinstance(item, Mapping):
             raise RuntimeError(f"daemon response field {field_name}[{index}] must be an object")
-        pass_name = str(item.get("pass_name") or "").strip()
+        pass_name = _pass_name_from_item(item)
         if not pass_name:
             raise RuntimeError(
-                f"daemon response field {field_name}[{index}].pass_name must be a non-empty string"
+                f"daemon response field {field_name}[{index}].pass must be a non-empty string"
             )
         if pass_name not in _PASS_TO_SITE_FIELD:
             raise RuntimeError(
-                f"daemon response field {field_name}[{index}].pass_name contains unknown pass "
+                f"daemon response field {field_name}[{index}].pass contains unknown pass "
                 f"{pass_name!r}"
             )
         action = str(item.get("action") or "kept").strip()
@@ -231,17 +231,130 @@ def _normalize_apply_passes(
             raise RuntimeError(
                 f"daemon response field {field_name}[{index}].action must be 'kept' or 'rolled_back'"
             )
-        normalized.append(
-            {
-                "pass_name": pass_name,
-                "action": action,
-                "sites_applied": _strict_non_negative_int(
-                    item.get("sites_applied"),
-                    field_name=f"{field_name}[{index}].sites_applied",
-                ),
-            }
-        )
+        summary = _compact_pass_summary(item, field_name=f"{field_name}[{index}]")
+        summary["action"] = action
+        normalized.append(summary)
     return normalized
+
+
+def _pass_name_from_item(item: Mapping[str, Any]) -> str:
+    return str(item.get("pass_name") or item.get("pass") or "").strip()
+
+
+def _optional_non_negative_int(value: object, *, field_name: str, default: int = 0) -> int:
+    if value is None:
+        return default
+    return _strict_non_negative_int(value, field_name=field_name)
+
+
+def _compact_skip_reasons(raw: object, *, field_name: str) -> dict[str, int]:
+    if raw is None:
+        return {}
+    if not isinstance(raw, Mapping):
+        raise RuntimeError(f"daemon response field {field_name!r} must be an object")
+    compact: dict[str, int] = {}
+    for reason, count in raw.items():
+        reason_text = str(reason).strip()
+        if not reason_text:
+            continue
+        compact[reason_text] = _strict_non_negative_int(
+            count,
+            field_name=f"{field_name}.{reason_text}",
+        )
+    return dict(sorted(compact.items()))
+
+
+def _compact_verify_summary(item: Mapping[str, Any]) -> dict[str, object]:
+    verify = item.get("verify")
+    status = None
+    error = None
+    if isinstance(verify, Mapping):
+        status = verify.get("status")
+        error = verify.get("error_message")
+    if status is None:
+        status = item.get("verify_result")
+    if error is None:
+        error = item.get("verify_error")
+    compact: dict[str, object] = {}
+    status_text = str(status or "").strip()
+    if status_text:
+        compact["status"] = status_text
+    error_text = str(error or "").strip()
+    if error_text:
+        compact["error"] = error_text
+    return compact
+
+
+def _compact_pass_summary(item: Mapping[str, Any], *, field_name: str) -> dict[str, object]:
+    pass_name = _pass_name_from_item(item)
+    if not pass_name:
+        raise RuntimeError(f"daemon response field {field_name}.pass must be a non-empty string")
+    if pass_name not in _PASS_TO_SITE_FIELD:
+        raise RuntimeError(
+            f"daemon response field {field_name}.pass contains unknown pass {pass_name!r}"
+        )
+
+    sites_applied = _optional_non_negative_int(
+        item.get("sites_applied"),
+        field_name=f"{field_name}.sites_applied",
+    )
+    sites_skipped = _optional_non_negative_int(
+        item.get("sites_skipped"),
+        field_name=f"{field_name}.sites_skipped",
+    )
+    sites_matched_value = item.get("sites_matched")
+    if sites_matched_value is None:
+        sites_matched_value = item.get("sites_found")
+    sites_matched = (
+        _strict_non_negative_int(sites_matched_value, field_name=f"{field_name}.sites_matched")
+        if sites_matched_value is not None
+        else sites_applied + sites_skipped
+    )
+    skip_reasons = _compact_skip_reasons(
+        item.get("skip_reasons"),
+        field_name=f"{field_name}.skip_reasons",
+    )
+
+    compact: dict[str, object] = {
+        "pass_name": pass_name,
+        "sites_matched": sites_matched,
+        "sites_applied": sites_applied,
+        "sites_skipped": sites_skipped,
+        "skip_reasons": skip_reasons,
+    }
+    verify_summary = _compact_verify_summary(item)
+    if verify_summary:
+        compact["verify"] = verify_summary
+    return compact
+
+
+def _compact_pass_summaries_from_result(result: Mapping[str, Any]) -> list[dict[str, object]]:
+    raw_passes = None
+    debug_result = result.get("debug_result")
+    if isinstance(debug_result, Mapping):
+        raw_passes = debug_result.get("passes")
+    if raw_passes is None:
+        raw_passes = result.get("passes")
+    if raw_passes is None:
+        return []
+    if not isinstance(raw_passes, list):
+        raise RuntimeError("daemon response field 'passes' must be a list")
+    summaries: list[dict[str, object]] = []
+    for index, item in enumerate(raw_passes):
+        if not isinstance(item, Mapping):
+            raise RuntimeError(f"daemon response field passes[{index}] must be an object")
+        summaries.append(_compact_pass_summary(item, field_name=f"passes[{index}]"))
+    return summaries
+
+
+def _is_successful_noop_result(result: Mapping[str, Any]) -> bool:
+    return (
+        not str(result.get("error") or "").strip()
+        and int(result.get("exit_code", 0) or 0) == 0
+        and not bool(result.get("applied", False))
+        and not bool(result.get("changed", False))
+    )
+
 
 def _policy_pass_list(raw: Any, *, field_name: str) -> list[str] | None:
     if raw is None:
@@ -376,15 +489,15 @@ def _accumulate_pass_site_counts(
     for index, item in enumerate(raw_passes):
         if not isinstance(item, Mapping):
             raise RuntimeError(f"daemon response field {field_name}[{index}] must be an object")
-        pass_name = str(item.get("pass_name") or "").strip()
+        pass_name = _pass_name_from_item(item)
         if not pass_name:
             raise RuntimeError(
-                f"daemon response field {field_name}[{index}].pass_name must be a non-empty string"
+                f"daemon response field {field_name}[{index}].pass must be a non-empty string"
             )
         count_field = _PASS_TO_SITE_FIELD.get(pass_name)
         if count_field is None:
             raise RuntimeError(
-                f"daemon response field {field_name}[{index}].pass_name contains unknown pass "
+                f"daemon response field {field_name}[{index}].pass contains unknown pass "
                 f"{pass_name!r}"
             )
         action = str(item.get("action") or "kept").strip()
@@ -495,25 +608,43 @@ def _compact_single_rejit_result_for_artifact(result: Mapping[str, Any]) -> dict
     raw_per_program = result.get("per_program")
     if isinstance(raw_per_program, Mapping):
         error_programs: list[dict[str, object]] = []
+        noop_programs: list[dict[str, object]] = []
         for prog_id, record in raw_per_program.items():
             if not isinstance(record, Mapping):
                 continue
             error = str(record.get("error") or "")
             exit_code = int(record.get("exit_code", 0) or 0)
             applied = bool(record.get("applied", False))
+            changed = bool(record.get("changed", False))
+            record_prog_id = int(record.get("prog_id", prog_id) or prog_id)
+            if not error and exit_code == 0 and not applied and not changed:
+                noop_programs.append(
+                    {
+                        "prog_id": record_prog_id,
+                        "applied": False,
+                        "changed": False,
+                        "exit_code": 0,
+                        "passes": _compact_pass_summaries_from_result(record),
+                    }
+                )
+                continue
             if not error and exit_code == 0:
                 continue
             error_programs.append(
                 {
-                    "prog_id": int(record.get("prog_id", prog_id) or prog_id),
+                    "prog_id": record_prog_id,
                     "applied": applied,
-                    "changed": bool(record.get("changed", False)),
+                    "changed": changed,
                     "exit_code": exit_code,
                     "error": error,
                 }
             )
         if error_programs:
             compact["error_programs"] = error_programs
+        if noop_programs:
+            compact["noop_programs"] = noop_programs
+    elif _is_successful_noop_result(result):
+        compact["passes"] = _compact_pass_summaries_from_result(result)
 
     return compact
 

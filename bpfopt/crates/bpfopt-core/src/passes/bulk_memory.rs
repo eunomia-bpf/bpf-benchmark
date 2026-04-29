@@ -483,10 +483,6 @@ fn memset_lane_at(insns: &[BpfInsn], pc: usize, regs: &[RegValue; 11]) -> Option
         },
         _ => return None,
     };
-    if fill_byte != 0 {
-        return None;
-    }
-
     Some(MemsetLane {
         width,
         base: insn.dst_reg(),

@@ -111,8 +111,21 @@ fn memcpy_call(
 }
 
 fn memset_zero_call(dst_base: u8, dst_off: i16, len: u8, size: u8) -> Vec<BpfInsn> {
+    memset_call(dst_base, dst_off, len, size, 0)
+}
+
+fn memset_call(dst_base: u8, dst_off: i16, len: u8, size: u8, fill_imm8: u8) -> Vec<BpfInsn> {
     emit_packed_kinsn_call_with_off(
-        pack_memset_payload(dst_base, 0, dst_off, len, size, false, true, 0),
+        pack_memset_payload(
+            dst_base,
+            0,
+            dst_off,
+            len,
+            size,
+            false,
+            fill_imm8 == 0,
+            fill_imm8,
+        ),
         MEMSET_BTF_ID,
         0,
     )
@@ -184,6 +197,42 @@ fn make_memcpy_program_8_pairs() -> Vec<BpfInsn> {
 
 fn make_memset_zero_program() -> Vec<BpfInsn> {
     let mut insns = make_st_mem_zero_run(BPF_DW, 10, -64, 8);
+    insns.push(exit_insn());
+    insns
+}
+
+fn make_memset_nonzero_imm_program() -> Vec<BpfInsn> {
+    let mut insns = Vec::with_capacity(9);
+    for lane in 0..8 {
+        insns.push(st_mem(BPF_W, 10, -32 + 4 * lane as i16, 0x7f7f7f7f));
+    }
+    insns.push(exit_insn());
+    insns
+}
+
+fn make_memset_truncated_byte_imm_program() -> Vec<BpfInsn> {
+    let mut insns = Vec::with_capacity(33);
+    for lane in 0..32 {
+        insns.push(st_mem(BPF_B, 10, -32 + lane as i16, 0x12345680));
+    }
+    insns.push(exit_insn());
+    insns
+}
+
+fn make_memset_negative_dw_imm_program() -> Vec<BpfInsn> {
+    let mut insns = Vec::with_capacity(5);
+    for lane in 0..4 {
+        insns.push(st_mem(BPF_DW, 10, -32 + 8 * lane as i16, -1));
+    }
+    insns.push(exit_insn());
+    insns
+}
+
+fn make_memset_non_repeated_imm_program() -> Vec<BpfInsn> {
+    let mut insns = Vec::with_capacity(9);
+    for lane in 0..8 {
+        insns.push(st_mem(BPF_W, 10, -32 + 4 * lane as i16, 0x11223344));
+    }
     insns.push(exit_insn());
     insns
 }
@@ -346,6 +395,57 @@ fn test_memset_zero_pattern() {
 }
 
 #[test]
+fn test_memset_nonzero_immediate_pattern() {
+    let mut program = make_program(make_memset_nonzero_imm_program());
+    let mut expected = memset_call(10, -32, 32, BPF_W, 0x7f);
+    expected.push(exit_insn());
+
+    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
+
+    assert!(result.program_changed);
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert_eq!(program.insns, expected);
+}
+
+#[test]
+fn test_memset_byte_immediate_truncates_to_imm8() {
+    let mut program = make_program(make_memset_truncated_byte_imm_program());
+    let mut expected = memset_call(10, -32, 32, BPF_B, 0x80);
+    expected.push(exit_insn());
+
+    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
+
+    assert!(result.program_changed);
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert_eq!(program.insns, expected);
+}
+
+#[test]
+fn test_memset_negative_dw_immediate_uses_ff_fill() {
+    let mut program = make_program(make_memset_negative_dw_imm_program());
+    let mut expected = memset_call(10, -32, 32, BPF_DW, 0xff);
+    expected.push(exit_insn());
+
+    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
+
+    assert!(result.program_changed);
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert_eq!(program.insns, expected);
+}
+
+#[test]
+fn test_memset_non_repeated_immediate_unchanged() {
+    let original = make_memset_non_repeated_imm_program();
+    let mut program = make_program(original.clone());
+
+    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
+
+    assert!(!result.program_changed);
+    assert_eq!(program.insns, original);
+    assert_eq!(result.pass_results[0].sites_applied, 0);
+}
+
+#[test]
 fn test_below_threshold_unchanged() {
     let original = make_below_threshold_program();
     let mut program = make_program(original.clone());
@@ -489,16 +589,18 @@ fn test_same_base_chunked_overlap_skipped() {
 }
 
 #[test]
-fn test_memset_nonzero_reg_skipped_by_default() {
-    let original = make_nonzero_memset_reg_program();
-    let mut program = make_program(original.clone());
+fn test_memset_nonzero_reg_pattern() {
+    let mut program = make_program(make_nonzero_memset_reg_program());
+    let mut expected = vec![BpfInsn::mov64_imm(8, 0x5a5a5a5a)];
+    expected.extend(memset_call(10, -32, 32, BPF_W, 0x5a));
+    expected.push(exit_insn());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
 
-    assert!(!result.program_changed);
-    assert_eq!(program.insns, original);
-    assert_eq!(bulk_call_count(&program.insns, MEMSET_BTF_ID), 0);
-    assert_eq!(result.pass_results[0].sites_applied, 0);
+    assert!(result.program_changed);
+    assert_eq!(program.insns, expected);
+    assert_eq!(bulk_call_count(&program.insns, MEMSET_BTF_ID), 1);
+    assert_eq!(result.pass_results[0].sites_applied, 1);
 }
 
 #[test]
