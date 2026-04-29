@@ -255,38 +255,6 @@ pub fn eliminate_dead_register_defs(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, 
     final_addr_map.map(|addr_map| (final_insns, addr_map))
 }
 
-/// Tail-call-aware dead-def elimination.
-///
-/// Dead defs before `protected_prefix_end` are neutralized in place instead of
-/// deleted so later tail-call helper PCs keep the same indices during REJIT.
-pub fn eliminate_dead_register_defs_tail_safe(
-    insns: &[BpfInsn],
-    protected_prefix_end: usize,
-) -> Option<(Vec<BpfInsn>, Vec<usize>, usize, usize)> {
-    if insns.is_empty() {
-        return None;
-    }
-
-    let mut final_insns = insns.to_vec();
-    let mut final_addr_map: Option<Vec<usize>> = None;
-    let mut total_neutralized = 0usize;
-    let mut total_deleted = 0usize;
-
-    while let Some((next_insns, cleanup_map, neutralized, deleted)) =
-        eliminate_dead_register_defs_once_tail_safe(&final_insns, protected_prefix_end)
-    {
-        total_neutralized += neutralized;
-        total_deleted += deleted;
-        final_addr_map = Some(match final_addr_map.take() {
-            Some(existing) => compose_addr_maps(&existing, &cleanup_map),
-            None => cleanup_map,
-        });
-        final_insns = next_insns;
-    }
-
-    final_addr_map.map(|addr_map| (final_insns, addr_map, total_neutralized, total_deleted))
-}
-
 fn eliminate_dead_register_defs_once(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
     let liveness = LivenessAnalysis.run(&BpfProgram::new(insns.to_vec()));
     let mut deleted = vec![false; insns.len()];
@@ -308,57 +276,6 @@ fn eliminate_dead_register_defs_once(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>,
     eliminate_marked_insns(insns, &deleted)
 }
 
-fn eliminate_dead_register_defs_once_tail_safe(
-    insns: &[BpfInsn],
-    protected_prefix_end: usize,
-) -> Option<(Vec<BpfInsn>, Vec<usize>, usize, usize)> {
-    let liveness = LivenessAnalysis.run(&BpfProgram::new(insns.to_vec()));
-    let mut deleted = vec![false; insns.len()];
-    let mut replacements = Vec::new();
-    let mut neutralized = 0usize;
-    let mut deleted_count = 0usize;
-    let mut pc = 0usize;
-
-    while pc < insns.len() {
-        let insn = &insns[pc];
-        let width = insn_width(insn);
-
-        if is_removable_dead_def(insn, liveness.live_out.get(pc)) {
-            if pc < protected_prefix_end {
-                replacements.push((pc, neutralize_dead_def_span(insn)));
-                neutralized += width;
-            } else {
-                for slot in &mut deleted[pc..pc + width] {
-                    *slot = true;
-                }
-                deleted_count += width;
-            }
-        }
-
-        pc += width;
-    }
-
-    if replacements.is_empty() && deleted_count == 0 {
-        return None;
-    }
-
-    let (mut new_insns, addr_map) = if deleted_count > 0 {
-        eliminate_marked_insns(insns, &deleted)
-            .expect("tail-safe dead-def elimination marked instructions for deletion")
-    } else {
-        (insns.to_vec(), identity_addr_map(insns.len()))
-    };
-
-    for (old_pc, replacement) in replacements {
-        let new_pc = addr_map[old_pc];
-        for (idx, new_insn) in replacement.into_iter().enumerate() {
-            new_insns[new_pc + idx] = new_insn;
-        }
-    }
-
-    Some((new_insns, addr_map, neutralized, deleted_count))
-}
-
 fn is_removable_dead_def(insn: &BpfInsn, live_out: Option<&HashSet<u8>>) -> bool {
     let Some(live_out) = live_out else {
         return false;
@@ -378,14 +295,6 @@ fn is_removable_dead_def(insn: &BpfInsn, live_out: Option<&HashSet<u8>>) -> bool
         }
         _ => false,
     }
-}
-
-fn neutralize_dead_def_span(insn: &BpfInsn) -> Vec<BpfInsn> {
-    vec![BpfInsn::mov64_reg(insn.dst_reg(), insn.dst_reg()); insn_width(insn)]
-}
-
-fn identity_addr_map(len: usize) -> Vec<usize> {
-    (0..=len).collect()
 }
 
 fn eliminate_marked_insns(
@@ -651,33 +560,6 @@ mod tests {
         ];
 
         assert_eq!(tail_call_protected_prefix_end(&insns), Some(4));
-    }
-
-    #[test]
-    fn test_eliminate_dead_register_defs_tail_safe_neutralizes_prefix_defs() {
-        let insns = vec![
-            BpfInsn::mov64_imm(8, 1),
-            BpfInsn::mov64_imm(8, 2),
-            call_helper(12),
-            exit_insn(),
-        ];
-
-        let (new_insns, addr_map, neutralized, deleted) =
-            eliminate_dead_register_defs_tail_safe(&insns, 3)
-                .expect("tail-safe DCE should rewrite dead defs");
-
-        assert_eq!(neutralized, 2);
-        assert_eq!(deleted, 0);
-        assert_eq!(addr_map, vec![0, 1, 2, 3, 4]);
-        assert_eq!(
-            new_insns,
-            vec![
-                BpfInsn::mov64_reg(8, 8),
-                BpfInsn::mov64_reg(8, 8),
-                call_helper(12),
-                exit_insn(),
-            ]
-        );
     }
 
     #[test]

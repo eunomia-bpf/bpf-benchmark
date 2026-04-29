@@ -1,0 +1,33 @@
+{
+  "case": "bpftrace",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "tcplife post_rejit failed: prog 3024: bpfverify final verification failed for prog 3024: subprocess \"bpfverify\" \"--prog-type\" \"kprobe\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.0dd57fa1/bpfrejit-daemon-optimize-1798-603/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.0dd57fa1/bpfrejit-daemon-optimize-1798-603/opt.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.0dd57fa1/bpfrejit-daemon-optimize-1798-603/verified.bin\" failed: BPF_PROG_LOAD dry-run failed: Permission denied (os error 13)",
+  "generated_at": "2026-04-29T12:07:14.205764+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-29T12:07:14.205762+00:00",
+  "launcher_boot_id": "207a6365-e746-4590-9125-ae1ce0de1ac2",
+  "launcher_pid": 1784,
+  "launcher_start_ticks": 41141,
+  "policy": {
+    "exclusions": {}
+  },
+  "run_type": "bpftrace",
+  "started_at": "2026-04-29T12:05:41.580200+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

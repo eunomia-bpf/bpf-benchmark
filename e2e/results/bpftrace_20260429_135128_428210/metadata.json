@@ -1,0 +1,33 @@
+{
+  "case": "bpftrace",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "tcplife post_rejit failed: prog 3030: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3030_1777470693_606656065_1134: bpfverify final verification failed for prog 3030: bpfverify final verification rejected bytecode (returncode 0, verifier status fail, errno 13): verifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (b7) r2 = 0\n      1: .12....... (63) *(u32 *)(r10 -112) = r2\n      2: .12....... (7b) *(u64 *)(r10 -120) = r2\n      3: .12....... (63) *(u32 *)(r10 -128) = r2\n      4: .12....... (7b) *(u64 *)(r10 -136) = r2\n      5: .12....... (73) *(u8 *)(r10 -138) = r2\n      6: .12....... (6b) *(u16 *)(r10 -140) = r2\n      7: .12....... (63) *(u32 *)(r10 -144) = r2\n      8: .12....... (7b) *(u64 *)(r10 -152) = r2\n      9: .1........ (79) r6 = *(u64 *)(r1 +112)\n     10: .1....6... (79) r8 = *(u64 *)(r1 +104)\n     11: ......6.8. (b7) r1 = 4\n     12: .1....6.8. (2d) if r1 > r8 goto pc+1\n     13: ......6.8. (05) goto pc+22\n     14: ......6.8. (7b) *(u64 *)(r10 -104) = r6\n     15: ......6.8. (18) r1 = 0xffff8982848b0000\n     17: .1....6.8. (bf) r2 = r10\n     18: .12...6.8. (07) r2 += -104\n     19: .12...6.8. (85) call bpf_map_lookup_elem#1\n     20: 0.....6.8. (55) if r0 != 0x0 goto pc+1\n     21: ......6.8. (05) goto pc+3\n     22: 0.....6.8. (79) r1 = *(u64 *)(r0 +0)\n     23: .1....6.8. (15) if r1 == 0x0 goto pc+1\n     24: ......6.8. (05) goto pc+11\n     25: ......6.8. (85) call bpf_ktime_get_boot_ns#125\n     26: 0.....6.8. (7b) *(u64 *)(r10 -8) = r6\n     27: 0.....6.8. (7b) *(u64 *)(r10 -104) = r0\n     28: ......6.8. (18) r1 = 0xffff8982848b0000\n     30: .1....6.8. (bf) r2 = r10\n     31: .12...6.8. (07) r2 += -8\n     32: .12...6.8. (bf) r3 = r10\n     33: .123..6.8. (07) r3 += -104\n     34: .123..6.8. (b7) r4 = 0\n     35: .1234.6.8. (85) call bpf_map_update_elem#2\n     36: ......6.8. (15) if r8 == 0x2 goto pc+3\n     37: ......6.8. (15) if r8 == 0x7 goto pc+32\n     38: ......6.8. (15) if r8 == 0x9 goto pc+1\n     39: .......... (05) goto pc+328\n     40: ......6.8. (85) call bpf_get_current_pid_tgid#14\n     41: 0.....6.8. (7b) *(u64 *)(r10 -8) = r6\n     42: 0.....6.8. (77) r0 >>= 32\n     43: 0.....6.8. (7b) *(u64 *)(r10 -104) = r0\n     44: ......6.8. (18) r1 = 0xffff898377344400\n     46: .1....6.8. (bf) r2 = r10\n     47: .12...6.8. (07) r2 += -8\n     48: .12...6.8. (bf) r3 = r10\n     49: .123..6.8. (07) r3 += -104\n     50: .123..6.8. (b7) r7 = 0\n     51: .123..678. (b7) r4 = 0\n     52: .1234.678. (85) call bpf_map_update_elem#2\n     53: ......678. (7b) *(u64 *)(r10 -96) = r7\n     54: ......678. (7b) *(u64 *)(r10 -104) = r7\n     55: ......6.8. (bf) r7 = r10\n     56: ......678. (07) r7 += -104\n     57: ......678. (bf) r1 = r7\n     58: .1....678. (b7) r2 = 16\n     59: .12...678. (85) call bpf_get_current_comm#16\n     60: ......678. (7b) *(u64 *)(r10 -8) = r6\n     61: ......678. (18) r1 = 0xffff8982848b2c00\n     63: .1....678. (bf) r2 = r10\n     64: .12...678. (07) r2 += -8\n     65: .12...678. (bf) r3 = r7\n     66: .123..6.8. (b7) r4 = 0\n     67: .1234.6.8. (85) call bpf_map_update_elem#2\n     68: ......6.8. (15) if r8 == 0x7 goto pc+1\n     69: .......... (05) goto pc+298\n     70: ......6... (7b) *(u64 *)(r10 -104) = r6\n     71: ......6... (18) r1 = 0xffff8982848b0000\n     73: .1....6... (bf) r2 = r10\n     74: .12...6... (07) r2 += -104\n     75: .12...6... (85) call bpf_map_lookup_elem#1\n     76: 0.....6... (55) if r0 != 0x0 goto pc+1\n     77: .......... (05) goto pc+290\n     78: 0.....6... (79) r1 = *(u64 *)(r0 +0)\n     79: .1....6... (15) if r1 == 0x0 goto pc+288\n     80: ......6... (85) call bpf_ktime_get_boot_ns#125\n     81: 0.....6... (7b) *(u64 *)(r10 -192) = r0\n     82: ......6... (7b) *(u64 *)(r10 -104) = r6\n     83: ......6... (18) r1 = 0xffff8982848b0000\n     85: .1....6... (bf) r2 = r10\n     86: .12...6... (07) r2 += -104\n     87: .12...6... (85) call bpf_map_lookup_elem#1\n     88: 0.....6... (b7) r9 = 0\n     89: 0.....6..9 (b7) r1 = 0\n     90: 01....6..9 (15) if r0 == 0x0 goto pc+1\n     91: 0.....6..9 (79) r1 = *(u64 *)(r0 +0)\n     92: .1....6..9 (7b) *(u64 *)(r10 -184) = r1\n     93: ......6..9 (bf) r3 = r6\n     94: ...3..6..9 (07) r3 += 14\n     95: ...3..6..9 (bf) r1 = r10\n     96: .1.3..6..9 (07) r1 += -104\n     97: .1.3..6..9 (b7) r2 = 2\n     98: .123..6..9 (85) call bpf_probe_read_kernel#113\n     99: ......6..9 (69) r1 = *(u16 *)(r10 -104)\n    100: .1....6..9 (7b) *(u64 *)(r10 -1\n... verifier log truncated ...",
+  "generated_at": "2026-04-29T13:53:05.351928+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-29T13:53:05.351925+00:00",
+  "launcher_boot_id": "876662d9-8aec-4753-98bf-899a6a2a497d",
+  "launcher_pid": 1783,
+  "launcher_start_ticks": 35288,
+  "policy": {
+    "exclusions": {}
+  },
+  "run_type": "bpftrace",
+  "started_at": "2026-04-29T13:51:28.428210+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

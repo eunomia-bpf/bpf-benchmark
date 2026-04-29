@@ -110,6 +110,15 @@ fn run() -> Result<()> {
 
     let mut log_buf = vec![0u8; LOG_BUF_SIZE];
     if cli.dry_run {
+        let expected_attach_type =
+            kernel_sys::expected_attach_type_for_prog(cli.prog_id, info.prog_type).with_context(
+                || {
+                    format!(
+                        "recover expected attach type for BPF program id {}",
+                        cli.prog_id
+                    )
+                },
+            )?;
         let attach_btf_obj_fd = if info.attach_btf_obj_id == 0 {
             None
         } else {
@@ -121,7 +130,7 @@ fn run() -> Result<()> {
         };
         let report = kernel_sys::prog_load_dryrun_report(kernel_sys::ProgLoadDryRunOptions {
             prog_type: info.prog_type,
-            expected_attach_type: None,
+            expected_attach_type,
             prog_btf_fd: None,
             attach_btf_id: (info.attach_btf_id != 0).then_some(info.attach_btf_id),
             attach_btf_obj_fd: attach_btf_obj_fd.as_ref().map(|fd| fd.as_raw_fd()),
@@ -241,16 +250,20 @@ fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Res
     for binding in bindings.iter().filter(|binding| binding.old_fd.is_some()) {
         old_fd_to_map_id.insert(binding.old_fd.unwrap(), binding.map_id);
     }
-    let positional = bindings
+    let positional_old_fd_map_ids = bindings
         .iter()
         .filter(|binding| binding.old_fd.is_none())
+        .map(|binding| binding.map_id)
+        .collect::<Vec<_>>();
+    let indexed_map_ids = bindings
+        .iter()
         .map(|binding| binding.map_id)
         .collect::<Vec<_>>();
     for (idx, old_fd) in old_fds.iter().copied().enumerate() {
         if old_fd_to_map_id.contains_key(&old_fd) {
             continue;
         }
-        let Some(&map_id) = positional.get(idx) else {
+        let Some(&map_id) = positional_old_fd_map_ids.get(idx) else {
             bail!(
                 "{} does not provide a map_id for pseudo-map old fd {}",
                 path.display(),
@@ -277,7 +290,7 @@ fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Res
                 bail!("pseudo-map fd_array index {raw_idx} is negative");
             }
             let idx = raw_idx as usize;
-            let Some(&map_id) = positional.get(idx) else {
+            let Some(&map_id) = indexed_map_ids.get(idx) else {
                 bail!(
                     "{} does not provide a map_id for pseudo-map fd_array index {}",
                     path.display(),

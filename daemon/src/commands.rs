@@ -1902,6 +1902,7 @@ fn push_missing_target(
 
 fn write_fd_array_from_target(target_path: &Path, passes: &[String], output: &Path) -> Result<()> {
     let target: TargetJson = read_json_file(target_path, "target.json")?;
+    let mut target_value: serde_json::Value = read_json_file(target_path, "target.json")?;
     let mut entries = Vec::new();
     for name in required_kinsn_names(passes) {
         let Some(kinsn) = target.kinsns.get(name) else {
@@ -1918,13 +1919,39 @@ fn write_fd_array_from_target(target_path: &Path, passes: &[String], output: &Pa
         if btf_id == 0 {
             bail!("target kinsn {name} is missing btf_id for fd_array");
         }
+        let slot = entries.len() + 1;
+        let call_offset = i16::try_from(slot)
+            .with_context(|| format!("fd_array slot {slot} for target kinsn {name}"))?;
+        write_kinsn_call_offset(&mut target_value, name, call_offset)?;
         entries.push(FdArrayJsonEntry {
-            slot: entries.len() + 1,
+            slot,
             name: name.to_string(),
             btf_id,
         });
     }
-    write_json_file(output, &entries)
+    write_json_file(output, &entries)?;
+    write_json_file(target_path, &target_value)
+}
+
+fn write_kinsn_call_offset(
+    target: &mut serde_json::Value,
+    name: &str,
+    call_offset: i16,
+) -> Result<()> {
+    let Some(kinsns) = target
+        .get_mut("kinsns")
+        .and_then(|value| value.as_object_mut())
+    else {
+        bail!("target.json is missing object field kinsns");
+    };
+    let Some(kinsn) = kinsns.get_mut(name).and_then(|value| value.as_object_mut()) else {
+        bail!("target.json kinsn {name} is not an object");
+    };
+    kinsn.insert(
+        "call_offset".to_string(),
+        serde_json::Value::from(call_offset),
+    );
+    Ok(())
 }
 
 fn required_kinsn_names(passes: &[String]) -> Vec<&'static str> {
@@ -2343,8 +2370,47 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"p
     }
 
     #[test]
+    fn fd_array_generation_rewrites_target_call_offsets() {
+        let dir = WorkDir::new("bpfrejit-daemon-target-test").unwrap();
+        let target = dir.path().join("target.json");
+        let fd_array = dir.path().join("fd_array.json");
+        fs::write(
+            &target,
+            r#"{
+  "arch": "x86_64",
+  "features": ["cmov"],
+  "kinsns": {
+    "bpf_rotate64": {"btf_func_id": 129879, "btf_id": 42},
+    "bpf_select64": {"btf_func_id": 129880, "btf_id": 43}
+  }
+}
+"#,
+        )
+        .unwrap();
+
+        write_fd_array_from_target(
+            &target,
+            &["rotate".to_string(), "cond_select".to_string()],
+            &fd_array,
+        )
+        .unwrap();
+
+        let fd_entries: serde_json::Value =
+            serde_json::from_slice(&fs::read(&fd_array).unwrap()).unwrap();
+        assert_eq!(fd_entries[0]["slot"], 1);
+        assert_eq!(fd_entries[0]["btf_id"], 42);
+        assert_eq!(fd_entries[1]["slot"], 2);
+        assert_eq!(fd_entries[1]["btf_id"], 43);
+
+        let rewritten: serde_json::Value =
+            serde_json::from_slice(&fs::read(&target).unwrap()).unwrap();
+        assert_eq!(rewritten["kinsns"]["bpf_rotate64"]["call_offset"], 1);
+        assert_eq!(rewritten["kinsns"]["bpf_select64"]["call_offset"], 2);
+    }
+
+    #[test]
     fn missing_target_kinsn_is_error() {
-        with_failure_retention_disabled(|| {
+        with_temp_failure_root(|_| {
             let fake = FakeCliDir::new().unwrap();
             let err = try_apply_one(
                 42,

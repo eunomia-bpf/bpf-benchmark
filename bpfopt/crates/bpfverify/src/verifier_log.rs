@@ -21,6 +21,7 @@ use std::collections::HashMap;
 pub enum VerifierInsnKind {
     EdgeFullState,
     PcFullState,
+    BranchDeltaState,
     InsnDeltaState,
 }
 
@@ -276,18 +277,22 @@ fn parse_pc_state_line(line: &str) -> Option<(usize, Option<usize>, VerifierInsn
     }
 
     let semicolon = find_top_level_char(tail, ';')?;
+    let insn_text = tail[..semicolon].trim();
     let state_text = tail[semicolon + 1..].trim();
-    is_state_text(state_text).then_some((
-        pc,
-        None,
-        VerifierInsnKind::InsnDeltaState,
-        false,
-        state_text,
-    ))
+    let kind = if is_conditional_branch_text(insn_text) {
+        VerifierInsnKind::BranchDeltaState
+    } else {
+        VerifierInsnKind::InsnDeltaState
+    };
+    is_state_text(state_text).then_some((pc, None, kind, false, state_text))
 }
 
 fn is_state_text(text: &str) -> bool {
     text.starts_with('R') || text.starts_with("frame")
+}
+
+fn is_conditional_branch_text(text: &str) -> bool {
+    text.contains(" if ") && text.contains(" goto ")
 }
 
 fn strip_frame_prefix(text: &str) -> (usize, &str) {
@@ -779,6 +784,7 @@ from 4 to 6: R0_w=pkt(off=8,r=8) R1=ctx() R2_w=pkt(r=8) R3_w=pkt_end() R10=fp0
         assert_eq!(r3_after_load.exact_value, None);
 
         assert_eq!(insns[3].pc, 7);
+        assert_eq!(insns[3].kind, VerifierInsnKind::BranchDeltaState);
         let r3_before_branch = insns[3].regs.get(&3).unwrap();
         assert_eq!(r3_before_branch.range.umin, Some(0));
         assert_eq!(r3_before_branch.range.umax, Some(255));
@@ -815,6 +821,7 @@ from 4 to 6: R0_w=pkt(off=8,r=8) R1=ctx() R2_w=pkt(r=8) R3_w=pkt_end() R10=fp0
         assert_eq!(insns[0].regs.get(&10).unwrap().offset, Some(0));
 
         let range = insns[1].regs.get(&0).unwrap();
+        assert_eq!(insns[1].kind, VerifierInsnKind::BranchDeltaState);
         assert_eq!(range.reg_type, "scalar");
         assert_eq!(range.range.smin, Some(0));
         assert_eq!(range.range.umax, Some(1));

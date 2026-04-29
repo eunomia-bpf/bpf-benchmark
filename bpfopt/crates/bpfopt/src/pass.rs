@@ -1117,6 +1117,7 @@ impl PassManager {
                 bytecode_after: Some(dump_bytecode_compact(&program.insns)),
             });
             cache.invalidate_all();
+            program.verifier_states = Arc::from([]);
             program.sync_annotations();
         } else {
             debug_traces.push(PassDebugTrace {

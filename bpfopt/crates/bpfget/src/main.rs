@@ -15,6 +15,10 @@ use serde::{Deserialize, Serialize};
 
 static NEXT_TMP_ID: AtomicU64 = AtomicU64::new(0);
 
+const BPF_LD_IMM64: u8 = (kernel_sys::BPF_LD | kernel_sys::BPF_DW | kernel_sys::BPF_IMM) as u8;
+const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
+const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
+
 #[derive(Parser, Debug)]
 #[command(
     name = "bpfget",
@@ -73,10 +77,14 @@ struct ProgInfoJson {
     btf_id: u32,
     attach_btf_obj_id: u32,
     attach_btf_id: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    expected_attach_type: Option<TypeJson>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 struct MapInfoJson {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    old_fd: Option<i32>,
     map_id: u32,
     map_type: u32,
     key_size: u32,
@@ -162,9 +170,10 @@ fn run() -> Result<()> {
     let prog_id = cli.prog_id.expect("validated PROG_ID");
     if cli.info {
         let (info, map_ids) = get_prog_info_with_map_ids(prog_id)?;
+        let expected_attach_type = expected_attach_type_json(info.id, info.prog_type)?;
         return write_json(
             cli.output.as_deref(),
-            &ProgInfoJson::from_info(info, map_ids),
+            &ProgInfoJson::from_info(info, map_ids, expected_attach_type),
         );
     }
     if cli.full {
@@ -216,7 +225,11 @@ fn validate_cli(cli: &Cli) -> Result<()> {
 }
 
 impl ProgInfoJson {
-    fn from_info(info: kernel_sys::BpfProgInfoFork, map_ids: Vec<u32>) -> Self {
+    fn from_info(
+        info: kernel_sys::BpfProgInfoFork,
+        map_ids: Vec<u32>,
+        expected_attach_type: Option<TypeJson>,
+    ) -> Self {
         let insn_size = std::mem::size_of::<kernel_sys::bpf_insn>() as u32;
         let insn_bytes = if info.orig_prog_len != 0 {
             info.orig_prog_len
@@ -241,8 +254,24 @@ impl ProgInfoJson {
             btf_id: info.btf_id,
             attach_btf_obj_id: info.attach_btf_obj_id,
             attach_btf_id: info.attach_btf_id,
+            expected_attach_type,
         }
     }
+}
+
+fn expected_attach_type_json(
+    prog_id: u32,
+    prog_type: kernel_sys::bpf_prog_type,
+) -> Result<Option<TypeJson>> {
+    let Some(value) = kernel_sys::expected_attach_type_for_prog(prog_id, prog_type)
+        .with_context(|| format!("recover expected attach type for BPF program id {prog_id}"))?
+    else {
+        return Ok(None);
+    };
+    Ok(Some(TypeJson {
+        name: attach_type_name(value).unwrap_or("").to_string(),
+        numeric: value,
+    }))
 }
 
 fn write_full(prog_id: u32, outdir: &Path) -> Result<()> {
@@ -253,10 +282,16 @@ fn write_full(prog_id: u32, outdir: &Path) -> Result<()> {
         .with_context(|| format!("read original bytecode for BPF program id {prog_id}"))?;
     ensure_original_bytecode(&insns)?;
     let (info, map_ids) = get_prog_info_with_map_ids_from_fd(fd.as_fd(), prog_id)?;
-    let map_infos = get_map_infos(&map_ids)?;
+    let expected_attach_type = expected_attach_type_json(info.id, info.prog_type)?;
+    let pseudo_map_old_fds = pseudo_map_old_fds(&insns);
+    let map_infos = get_map_infos(&map_ids, &pseudo_map_old_fds)?;
 
     let prog_bin = encode_insns(&insns);
-    let prog_info_json = json_bytes(&ProgInfoJson::from_info(info, map_ids))?;
+    let prog_info_json = json_bytes(&ProgInfoJson::from_info(
+        info,
+        map_ids,
+        expected_attach_type,
+    ))?;
     let map_fds_json = json_bytes(&map_infos)?;
 
     write_full_files_atomic(
@@ -529,14 +564,23 @@ fn read_prog_map_ids(fd: BorrowedFd<'_>, nr_map_ids: u32) -> Result<Vec<u32>> {
     kernel_sys::prog_map_ids(fd, nr_map_ids)
 }
 
-fn get_map_infos(map_ids: &[u32]) -> Result<Vec<MapInfoJson>> {
+fn get_map_infos(map_ids: &[u32], pseudo_map_old_fds: &[i32]) -> Result<Vec<MapInfoJson>> {
+    if pseudo_map_old_fds.len() > map_ids.len() {
+        bail!(
+            "original bytecode references {} pseudo-map fd values but prog_info exposes only {} map ids",
+            pseudo_map_old_fds.len(),
+            map_ids.len()
+        );
+    }
+
     let mut maps = Vec::with_capacity(map_ids.len());
-    for &map_id in map_ids {
+    for (idx, &map_id) in map_ids.iter().enumerate() {
         let fd = kernel_sys::map_get_fd_by_id(map_id)
             .with_context(|| format!("open BPF map id {map_id}"))?;
         let info = kernel_sys::map_obj_get_info_by_fd(fd.as_fd())
             .with_context(|| format!("read info for BPF map id {map_id}"))?;
         maps.push(MapInfoJson {
+            old_fd: pseudo_map_old_fds.get(idx).copied(),
             map_id,
             map_type: info.type_,
             key_size: info.key_size,
@@ -546,6 +590,27 @@ fn get_map_infos(map_ids: &[u32]) -> Result<Vec<MapInfoJson>> {
         });
     }
     Ok(maps)
+}
+
+fn pseudo_map_old_fds(insns: &[kernel_sys::bpf_insn]) -> Vec<i32> {
+    let mut old_fds = Vec::new();
+    let mut pc = 0usize;
+    while pc < insns.len() {
+        if is_pseudo_map_fd_ldimm64(&insns[pc]) {
+            let old_fd = insns[pc].imm;
+            if !old_fds.contains(&old_fd) {
+                old_fds.push(old_fd);
+            }
+            pc += 2;
+        } else {
+            pc += 1;
+        }
+    }
+    old_fds
+}
+
+fn is_pseudo_map_fd_ldimm64(insn: &kernel_sys::bpf_insn) -> bool {
+    insn.code == BPF_LD_IMM64 && matches!(insn.src_reg(), BPF_PSEUDO_MAP_FD | BPF_PSEUDO_MAP_VALUE)
 }
 
 fn open_prog_fd(prog_id: u32) -> Result<std::os::fd::OwnedFd> {
@@ -737,6 +802,70 @@ fn prog_type_name(value: u32) -> &'static str {
     }
 }
 
+fn attach_type_name(value: u32) -> Option<&'static str> {
+    let name = match value {
+        v if v == kernel_sys::BPF_CGROUP_INET_INGRESS => "cgroup_inet_ingress",
+        v if v == kernel_sys::BPF_CGROUP_INET_EGRESS => "cgroup_inet_egress",
+        v if v == kernel_sys::BPF_CGROUP_INET_SOCK_CREATE => "cgroup_inet_sock_create",
+        v if v == kernel_sys::BPF_CGROUP_SOCK_OPS => "cgroup_sock_ops",
+        v if v == kernel_sys::BPF_SK_SKB_STREAM_PARSER => "sk_skb_stream_parser",
+        v if v == kernel_sys::BPF_SK_SKB_STREAM_VERDICT => "sk_skb_stream_verdict",
+        v if v == kernel_sys::BPF_CGROUP_DEVICE => "cgroup_device",
+        v if v == kernel_sys::BPF_SK_MSG_VERDICT => "sk_msg_verdict",
+        v if v == kernel_sys::BPF_CGROUP_INET4_BIND => "cgroup_inet4_bind",
+        v if v == kernel_sys::BPF_CGROUP_INET6_BIND => "cgroup_inet6_bind",
+        v if v == kernel_sys::BPF_CGROUP_INET4_CONNECT => "cgroup_inet4_connect",
+        v if v == kernel_sys::BPF_CGROUP_INET6_CONNECT => "cgroup_inet6_connect",
+        v if v == kernel_sys::BPF_CGROUP_INET4_POST_BIND => "cgroup_inet4_post_bind",
+        v if v == kernel_sys::BPF_CGROUP_INET6_POST_BIND => "cgroup_inet6_post_bind",
+        v if v == kernel_sys::BPF_CGROUP_UDP4_SENDMSG => "cgroup_udp4_sendmsg",
+        v if v == kernel_sys::BPF_CGROUP_UDP6_SENDMSG => "cgroup_udp6_sendmsg",
+        v if v == kernel_sys::BPF_CGROUP_SYSCTL => "cgroup_sysctl",
+        v if v == kernel_sys::BPF_CGROUP_UDP4_RECVMSG => "cgroup_udp4_recvmsg",
+        v if v == kernel_sys::BPF_CGROUP_UDP6_RECVMSG => "cgroup_udp6_recvmsg",
+        v if v == kernel_sys::BPF_CGROUP_GETSOCKOPT => "cgroup_getsockopt",
+        v if v == kernel_sys::BPF_CGROUP_SETSOCKOPT => "cgroup_setsockopt",
+        v if v == kernel_sys::BPF_TRACE_RAW_TP => "trace_raw_tp",
+        v if v == kernel_sys::BPF_TRACE_FENTRY => "trace_fentry",
+        v if v == kernel_sys::BPF_TRACE_FEXIT => "trace_fexit",
+        v if v == kernel_sys::BPF_MODIFY_RETURN => "modify_return",
+        v if v == kernel_sys::BPF_LSM_MAC => "lsm_mac",
+        v if v == kernel_sys::BPF_TRACE_ITER => "trace_iter",
+        v if v == kernel_sys::BPF_CGROUP_INET4_GETPEERNAME => "cgroup_inet4_getpeername",
+        v if v == kernel_sys::BPF_CGROUP_INET6_GETPEERNAME => "cgroup_inet6_getpeername",
+        v if v == kernel_sys::BPF_CGROUP_INET4_GETSOCKNAME => "cgroup_inet4_getsockname",
+        v if v == kernel_sys::BPF_CGROUP_INET6_GETSOCKNAME => "cgroup_inet6_getsockname",
+        v if v == kernel_sys::BPF_XDP_DEVMAP => "xdp_devmap",
+        v if v == kernel_sys::BPF_CGROUP_INET_SOCK_RELEASE => "cgroup_inet_sock_release",
+        v if v == kernel_sys::BPF_XDP_CPUMAP => "xdp_cpumap",
+        v if v == kernel_sys::BPF_SK_LOOKUP => "sk_lookup",
+        v if v == kernel_sys::BPF_XDP => "xdp",
+        v if v == kernel_sys::BPF_SK_SKB_VERDICT => "sk_skb_verdict",
+        v if v == kernel_sys::BPF_SK_REUSEPORT_SELECT => "sk_reuseport_select",
+        v if v == kernel_sys::BPF_SK_REUSEPORT_SELECT_OR_MIGRATE => {
+            "sk_reuseport_select_or_migrate"
+        }
+        v if v == kernel_sys::BPF_TRACE_KPROBE_MULTI => "trace_kprobe_multi",
+        v if v == kernel_sys::BPF_LSM_CGROUP => "lsm_cgroup",
+        v if v == kernel_sys::BPF_NETFILTER => "netfilter",
+        v if v == kernel_sys::BPF_TCX_INGRESS => "tcx_ingress",
+        v if v == kernel_sys::BPF_TCX_EGRESS => "tcx_egress",
+        v if v == kernel_sys::BPF_TRACE_UPROBE_MULTI => "trace_uprobe_multi",
+        v if v == kernel_sys::BPF_CGROUP_UNIX_CONNECT => "cgroup_unix_connect",
+        v if v == kernel_sys::BPF_CGROUP_UNIX_SENDMSG => "cgroup_unix_sendmsg",
+        v if v == kernel_sys::BPF_CGROUP_UNIX_RECVMSG => "cgroup_unix_recvmsg",
+        v if v == kernel_sys::BPF_CGROUP_UNIX_GETPEERNAME => "cgroup_unix_getpeername",
+        v if v == kernel_sys::BPF_CGROUP_UNIX_GETSOCKNAME => "cgroup_unix_getsockname",
+        v if v == kernel_sys::BPF_NETKIT_PRIMARY => "netkit_primary",
+        v if v == kernel_sys::BPF_NETKIT_PEER => "netkit_peer",
+        v if v == kernel_sys::BPF_TRACE_KPROBE_SESSION => "trace_kprobe_session",
+        v if v == kernel_sys::BPF_TRACE_UPROBE_SESSION => "trace_uprobe_session",
+        v if v == kernel_sys::BPF_TRACE_FSESSION => "trace_fsession",
+        _ => return None,
+    };
+    Some(name)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -760,6 +889,10 @@ mod tests {
             btf_id: 0,
             attach_btf_obj_id: 0,
             attach_btf_id: 0,
+            expected_attach_type: Some(TypeJson {
+                name: "xdp".to_string(),
+                numeric: kernel_sys::BPF_XDP,
+            }),
         };
 
         let text = serde_json::to_string(&info).expect("serialize prog info");
@@ -773,6 +906,63 @@ mod tests {
         assert_eq!(value["type"]["numeric"], kernel_sys::BPF_PROG_TYPE_XDP);
         assert!(value.get("map_ids").is_some());
         assert!(value.get("orig_prog_len").is_some());
+        assert_eq!(value["expected_attach_type"]["name"], "xdp");
+        assert_eq!(
+            value["expected_attach_type"]["numeric"],
+            kernel_sys::BPF_XDP
+        );
+    }
+
+    #[test]
+    fn map_info_json_schema_preserves_old_fd_binding() {
+        let info = MapInfoJson {
+            old_fd: Some(42),
+            map_id: 77,
+            map_type: 1,
+            key_size: 4,
+            value_size: 8,
+            max_entries: 16,
+            name: "events".to_string(),
+        };
+
+        let text = serde_json::to_string(&info).expect("serialize map info");
+        let round_trip: MapInfoJson = serde_json::from_str(&text).expect("deserialize map info");
+
+        assert_eq!(round_trip, info);
+        let value: serde_json::Value = serde_json::from_str(&text).expect("json value");
+        assert_eq!(value["old_fd"], 42);
+        assert_eq!(value["map_id"], 77);
+    }
+
+    #[test]
+    fn pseudo_map_old_fds_preserves_unique_load_order() {
+        let insns = [
+            ldimm64(BPF_PSEUDO_MAP_FD, 11),
+            ldimm64(BPF_PSEUDO_MAP_VALUE, 22),
+            ldimm64(BPF_PSEUDO_MAP_FD, 11),
+        ]
+        .concat();
+
+        assert_eq!(pseudo_map_old_fds(&insns), vec![11, 22]);
+    }
+
+    fn ldimm64(src_reg: u8, imm: i32) -> [kernel_sys::bpf_insn; 2] {
+        let mut first = kernel_sys::bpf_insn {
+            code: BPF_LD_IMM64,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off: 0,
+            imm,
+        };
+        first.set_src_reg(src_reg);
+        let second = kernel_sys::bpf_insn {
+            code: 0,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off: 0,
+            imm: 0,
+        };
+        [first, second]
     }
 
     #[test]

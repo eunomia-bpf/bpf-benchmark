@@ -5,8 +5,8 @@ use crate::analysis::CFGAnalysis;
 use crate::pass::*;
 
 use super::utils::{
-    compose_addr_maps, eliminate_dead_register_defs, eliminate_dead_register_defs_tail_safe,
-    eliminate_nops, eliminate_unreachable_blocks_with_cfg, tail_call_protected_prefix_end,
+    compose_addr_maps, eliminate_dead_register_defs, eliminate_nops,
+    eliminate_unreachable_blocks_with_cfg, tail_call_protected_prefix_end,
 };
 
 /// Dead code elimination pass.
@@ -39,7 +39,6 @@ impl BpfPass for DcePass {
         let mut final_addr_map: Option<Vec<usize>> = None;
         let mut unreachable_removed = 0usize;
         let mut dead_defs_removed = 0usize;
-        let mut dead_defs_neutralized = 0usize;
         let mut nop_removed = 0usize;
 
         if protected_prefix_end.is_none() {
@@ -52,27 +51,15 @@ impl BpfPass for DcePass {
             }
         }
 
-        if let Some(prefix_end) = protected_prefix_end {
-            if let Some((cleaned_insns, cleanup_map, neutralized, deleted)) =
-                eliminate_dead_register_defs_tail_safe(&final_insns, prefix_end)
-            {
-                dead_defs_neutralized = neutralized;
-                dead_defs_removed = deleted;
+        if protected_prefix_end.is_none() {
+            if let Some((cleaned_insns, cleanup_map)) = eliminate_dead_register_defs(&final_insns) {
+                dead_defs_removed = final_insns.len() - cleaned_insns.len();
                 final_addr_map = Some(match final_addr_map.take() {
                     Some(existing) => compose_addr_maps(&existing, &cleanup_map),
                     None => cleanup_map,
                 });
                 final_insns = cleaned_insns;
             }
-        } else if let Some((cleaned_insns, cleanup_map)) =
-            eliminate_dead_register_defs(&final_insns)
-        {
-            dead_defs_removed = final_insns.len() - cleaned_insns.len();
-            final_addr_map = Some(match final_addr_map.take() {
-                Some(existing) => compose_addr_maps(&existing, &cleanup_map),
-                None => cleanup_map,
-            });
-            final_insns = cleaned_insns;
         }
 
         if protected_prefix_end.is_none() {
@@ -90,17 +77,10 @@ impl BpfPass for DcePass {
             return Ok(PassResult::unchanged(self.name()));
         };
 
-        let sites_applied =
-            unreachable_removed + dead_defs_neutralized + dead_defs_removed + nop_removed;
+        let sites_applied = unreachable_removed + dead_defs_removed + nop_removed;
         let mut diagnostics = Vec::new();
         if unreachable_removed > 0 {
             diagnostics.push(format!("removed {} unreachable insns", unreachable_removed));
-        }
-        if dead_defs_neutralized > 0 {
-            diagnostics.push(format!(
-                "neutralized {} dead-def insns to preserve tail-call poke indices",
-                dead_defs_neutralized
-            ));
         }
         if dead_defs_removed > 0 {
             diagnostics.push(format!("removed {} dead-def insns", dead_defs_removed));
@@ -243,7 +223,7 @@ mod tests {
     }
 
     #[test]
-    fn dce_neutralizes_dead_defs_before_tail_call() {
+    fn dce_preserves_dead_defs_before_tail_call() {
         let mut program = BpfProgram::new(vec![
             BpfInsn::mov64_imm(8, 1),
             BpfInsn::mov64_imm(8, 2),
@@ -253,13 +233,13 @@ mod tests {
 
         let result = run_dce_pass(&mut program);
 
-        assert!(result.program_changed);
-        assert_eq!(result.pass_results[0].sites_applied, 2);
+        assert!(!result.program_changed);
+        assert_eq!(result.pass_results[0].sites_applied, 0);
         assert_eq!(
             program.insns,
             vec![
-                BpfInsn::mov64_reg(8, 8),
-                BpfInsn::mov64_reg(8, 8),
+                BpfInsn::mov64_imm(8, 1),
+                BpfInsn::mov64_imm(8, 2),
                 call_helper(12),
                 exit_insn(),
             ]

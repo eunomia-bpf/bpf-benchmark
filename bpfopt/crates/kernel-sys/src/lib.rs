@@ -8,7 +8,7 @@ use std::ffi::{c_char, CString};
 use std::os::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, OwnedFd};
 use std::ptr::NonNull;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 
 pub use libbpf_rs::{
     libbpf_sys, Object, ObjectBuilder, OpenObject, Program, ProgramMut, ProgramType,
@@ -356,6 +356,110 @@ pub fn btf_get_fd_by_id(id: u32) -> Result<OwnedFd> {
         return Err(libbpf_error("BPF_BTF_GET_FD_BY_ID", fd));
     }
     Ok(unsafe { OwnedFd::from_raw_fd(fd) })
+}
+
+fn link_get_next_id(start_id: u32) -> Result<Option<u32>> {
+    let mut next_id = 0;
+    let ret = unsafe { bpf_link_get_next_id(start_id, &mut next_id) };
+    if ret < 0 {
+        let errno = errno_from_libbpf_ret(ret);
+        if errno == libc::ENOENT {
+            return Ok(None);
+        }
+        return Err(libbpf_error("BPF_LINK_GET_NEXT_ID", ret));
+    }
+    Ok(Some(next_id))
+}
+
+fn link_get_fd_by_id(id: u32) -> Result<OwnedFd> {
+    let fd = unsafe { bpf_link_get_fd_by_id(id) };
+    if fd < 0 {
+        return Err(libbpf_error("BPF_LINK_GET_FD_BY_ID", fd));
+    }
+    Ok(unsafe { OwnedFd::from_raw_fd(fd) })
+}
+
+fn link_obj_get_info_by_fd(fd: BorrowedFd<'_>) -> Result<bpf_link_info> {
+    let mut info = bpf_link_info::default();
+    let mut info_len = std::mem::size_of::<bpf_link_info>() as u32;
+    let ret = unsafe { bpf_link_get_info_by_fd(fd.as_raw_fd(), &mut info, &mut info_len) };
+    if ret < 0 {
+        return Err(libbpf_error("BPF_OBJ_GET_INFO_BY_FD (link)", ret));
+    }
+    Ok(info)
+}
+
+/// Recover the load-time expected attach type for a live program from its link.
+///
+/// `struct bpf_prog_info` does not expose `prog->expected_attach_type`, while
+/// `BPF_PROG_LOAD` replay needs it for tracing, LSM, cgroup, and link-backed
+/// attach contexts. Link enumeration is the only stable userspace source for
+/// this metadata without adding another fork-only kernel ABI.
+pub fn expected_attach_type_for_prog(
+    prog_id: u32,
+    prog_type: bpf_prog_type,
+) -> Result<Option<bpf_attach_type>> {
+    let mut start_id = 0;
+    let mut expected = None;
+
+    loop {
+        let Some(link_id) = link_get_next_id(start_id)
+            .with_context(|| format!("enumerate BPF links after id {start_id}"))?
+        else {
+            break;
+        };
+        start_id = link_id;
+
+        let fd =
+            link_get_fd_by_id(link_id).with_context(|| format!("open BPF link id {link_id}"))?;
+        let info = link_obj_get_info_by_fd(fd.as_fd())
+            .with_context(|| format!("read info for BPF link id {link_id}"))?;
+        if info.prog_id != prog_id {
+            continue;
+        }
+
+        let Some(link_attach_type) = expected_attach_type_from_link_info(&info, prog_type) else {
+            continue;
+        };
+        match expected {
+            Some(prev) if prev != link_attach_type => {
+                bail!(
+                    "program id {prog_id} has conflicting link attach types {prev} and {link_attach_type}"
+                );
+            }
+            Some(_) => {}
+            None => expected = Some(link_attach_type),
+        }
+    }
+
+    Ok(expected)
+}
+
+fn expected_attach_type_from_link_info(
+    info: &bpf_link_info,
+    prog_type: bpf_prog_type,
+) -> Option<bpf_attach_type> {
+    match info.type_ {
+        BPF_LINK_TYPE_RAW_TRACEPOINT if prog_type == BPF_PROG_TYPE_TRACING => {
+            Some(BPF_TRACE_RAW_TP)
+        }
+        BPF_LINK_TYPE_TRACING => Some(unsafe { info.__bindgen_anon_1.tracing.attach_type }),
+        BPF_LINK_TYPE_CGROUP => Some(unsafe { info.__bindgen_anon_1.cgroup.attach_type }),
+        BPF_LINK_TYPE_ITER => Some(BPF_TRACE_ITER),
+        BPF_LINK_TYPE_NETNS => Some(unsafe { info.__bindgen_anon_1.netns.attach_type }),
+        BPF_LINK_TYPE_XDP => Some(BPF_XDP),
+        BPF_LINK_TYPE_NETFILTER => Some(BPF_NETFILTER),
+        BPF_LINK_TYPE_KPROBE_MULTI if prog_type == BPF_PROG_TYPE_KPROBE => {
+            Some(BPF_TRACE_KPROBE_MULTI)
+        }
+        BPF_LINK_TYPE_UPROBE_MULTI if prog_type == BPF_PROG_TYPE_KPROBE => {
+            Some(BPF_TRACE_UPROBE_MULTI)
+        }
+        BPF_LINK_TYPE_TCX => Some(unsafe { info.__bindgen_anon_1.tcx.attach_type }),
+        BPF_LINK_TYPE_NETKIT => Some(unsafe { info.__bindgen_anon_1.netkit.attach_type }),
+        BPF_LINK_TYPE_SOCKMAP => Some(unsafe { info.__bindgen_anon_1.sockmap.attach_type }),
+        _ => None,
+    }
 }
 
 /// Parsed kernel BTF object loaded through libbpf.

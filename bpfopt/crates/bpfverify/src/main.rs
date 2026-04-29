@@ -175,6 +175,13 @@ fn run() -> Result<ExitCode> {
         .as_deref()
         .map(parse_attach_type)
         .transpose()?;
+    validate_required_load_metadata(
+        prog_type,
+        expected_attach_type,
+        cli.prog_btf_id,
+        cli.prog_btf_fd,
+        cli.attach_btf_id,
+    )?;
     let input_bytes = read_input(cli.input.as_deref())?;
     let mut insns = decode_insns(&input_bytes)?;
     let _map_fds = apply_map_fds(cli.map_fds.as_deref(), &mut insns)?;
@@ -317,16 +324,20 @@ fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Res
     for binding in bindings.iter().filter(|binding| binding.old_fd.is_some()) {
         old_fd_to_map_id.insert(binding.old_fd.unwrap(), binding.map_id);
     }
-    let positional = bindings
+    let positional_old_fd_map_ids = bindings
         .iter()
         .filter(|binding| binding.old_fd.is_none())
+        .map(|binding| binding.map_id)
+        .collect::<Vec<_>>();
+    let indexed_map_ids = bindings
+        .iter()
         .map(|binding| binding.map_id)
         .collect::<Vec<_>>();
     for (idx, old_fd) in old_fds.iter().copied().enumerate() {
         if old_fd_to_map_id.contains_key(&old_fd) {
             continue;
         }
-        let Some(&map_id) = positional.get(idx) else {
+        let Some(&map_id) = positional_old_fd_map_ids.get(idx) else {
             bail!(
                 "{} does not provide a map_id for pseudo-map old fd {}",
                 path.display(),
@@ -353,7 +364,7 @@ fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Res
                 bail!("pseudo-map fd_array index {raw_idx} is negative");
             }
             let idx = raw_idx as usize;
-            let Some(&map_id) = positional.get(idx) else {
+            let Some(&map_id) = indexed_map_ids.get(idx) else {
                 bail!(
                     "{} does not provide a map_id for pseudo-map fd_array index {}",
                     path.display(),
@@ -567,6 +578,7 @@ fn convert_verifier_states(states: &[verifier_log::VerifierInsn]) -> VerifierSta
         .any(|state| state.kind == verifier_log::VerifierInsnKind::InsnDeltaState);
     let insns = states
         .iter()
+        .filter(|state| state.kind != verifier_log::VerifierInsnKind::BranchDeltaState)
         .filter(|state| !has_delta || state.kind == verifier_log::VerifierInsnKind::InsnDeltaState)
         .filter_map(convert_verifier_state)
         .collect();
@@ -730,6 +742,13 @@ fn parse_attach_type(input: &str) -> Result<kernel_sys::bpf_attach_type> {
         "cgroup_inet6_connect" => kernel_sys::BPF_CGROUP_INET6_CONNECT,
         "cgroup_inet4_post_bind" => kernel_sys::BPF_CGROUP_INET4_POST_BIND,
         "cgroup_inet6_post_bind" => kernel_sys::BPF_CGROUP_INET6_POST_BIND,
+        "cgroup_udp4_sendmsg" => kernel_sys::BPF_CGROUP_UDP4_SENDMSG,
+        "cgroup_udp6_sendmsg" => kernel_sys::BPF_CGROUP_UDP6_SENDMSG,
+        "cgroup_sysctl" => kernel_sys::BPF_CGROUP_SYSCTL,
+        "cgroup_udp4_recvmsg" => kernel_sys::BPF_CGROUP_UDP4_RECVMSG,
+        "cgroup_udp6_recvmsg" => kernel_sys::BPF_CGROUP_UDP6_RECVMSG,
+        "cgroup_getsockopt" => kernel_sys::BPF_CGROUP_GETSOCKOPT,
+        "cgroup_setsockopt" => kernel_sys::BPF_CGROUP_SETSOCKOPT,
         "xdp_devlmap" | "xdp_devmap" => kernel_sys::BPF_XDP_DEVMAP,
         "xdp_cpumap" => kernel_sys::BPF_XDP_CPUMAP,
         "xdp" => kernel_sys::BPF_XDP,
@@ -739,10 +758,95 @@ fn parse_attach_type(input: &str) -> Result<kernel_sys::bpf_attach_type> {
         "modify_return" => kernel_sys::BPF_MODIFY_RETURN,
         "lsm_mac" => kernel_sys::BPF_LSM_MAC,
         "trace_iter" => kernel_sys::BPF_TRACE_ITER,
+        "cgroup_inet4_getpeername" => kernel_sys::BPF_CGROUP_INET4_GETPEERNAME,
+        "cgroup_inet6_getpeername" => kernel_sys::BPF_CGROUP_INET6_GETPEERNAME,
+        "cgroup_inet4_getsockname" => kernel_sys::BPF_CGROUP_INET4_GETSOCKNAME,
+        "cgroup_inet6_getsockname" => kernel_sys::BPF_CGROUP_INET6_GETSOCKNAME,
+        "cgroup_inet_sock_release" => kernel_sys::BPF_CGROUP_INET_SOCK_RELEASE,
         "sk_lookup" => kernel_sys::BPF_SK_LOOKUP,
+        "sk_skb_verdict" => kernel_sys::BPF_SK_SKB_VERDICT,
+        "sk_reuseport_select" => kernel_sys::BPF_SK_REUSEPORT_SELECT,
+        "sk_reuseport_select_or_migrate" => kernel_sys::BPF_SK_REUSEPORT_SELECT_OR_MIGRATE,
+        "trace_kprobe_multi" => kernel_sys::BPF_TRACE_KPROBE_MULTI,
+        "lsm_cgroup" => kernel_sys::BPF_LSM_CGROUP,
+        "netfilter" => kernel_sys::BPF_NETFILTER,
+        "tcx_ingress" => kernel_sys::BPF_TCX_INGRESS,
+        "tcx_egress" => kernel_sys::BPF_TCX_EGRESS,
+        "trace_uprobe_multi" => kernel_sys::BPF_TRACE_UPROBE_MULTI,
+        "cgroup_unix_connect" => kernel_sys::BPF_CGROUP_UNIX_CONNECT,
+        "cgroup_unix_sendmsg" => kernel_sys::BPF_CGROUP_UNIX_SENDMSG,
+        "cgroup_unix_recvmsg" => kernel_sys::BPF_CGROUP_UNIX_RECVMSG,
+        "cgroup_unix_getpeername" => kernel_sys::BPF_CGROUP_UNIX_GETPEERNAME,
+        "cgroup_unix_getsockname" => kernel_sys::BPF_CGROUP_UNIX_GETSOCKNAME,
+        "netkit_primary" => kernel_sys::BPF_NETKIT_PRIMARY,
+        "netkit_peer" => kernel_sys::BPF_NETKIT_PEER,
+        "trace_kprobe_session" => kernel_sys::BPF_TRACE_KPROBE_SESSION,
+        "trace_uprobe_session" => kernel_sys::BPF_TRACE_UPROBE_SESSION,
+        "trace_fsession" => kernel_sys::BPF_TRACE_FSESSION,
         _ => bail!("unknown attach type '{input}'"),
     };
     Ok(value)
+}
+
+fn validate_required_load_metadata(
+    prog_type: kernel_sys::bpf_prog_type,
+    expected_attach_type: Option<kernel_sys::bpf_attach_type>,
+    prog_btf_id: Option<u32>,
+    prog_btf_fd: Option<i32>,
+    attach_btf_id: Option<u32>,
+) -> Result<()> {
+    if prog_type_requires_prog_btf(prog_type)
+        && prog_btf_fd.is_none()
+        && !matches!(prog_btf_id, Some(id) if id != 0)
+    {
+        bail!(
+            "prog type {} requires replaying non-zero prog BTF metadata; pass --prog-btf-id or --prog-btf-fd",
+            prog_type
+        );
+    }
+
+    if prog_type_requires_attach_btf(prog_type) && !matches!(attach_btf_id, Some(id) if id != 0) {
+        bail!(
+            "prog type {} requires replaying non-zero attach_btf_id metadata",
+            prog_type
+        );
+    }
+
+    if prog_type_requires_expected_attach_type(prog_type) && expected_attach_type.is_none() {
+        bail!(
+            "prog type {} requires replaying expected_attach_type metadata",
+            prog_type
+        );
+    }
+
+    Ok(())
+}
+
+fn prog_type_requires_prog_btf(prog_type: kernel_sys::bpf_prog_type) -> bool {
+    matches!(
+        prog_type,
+        kernel_sys::BPF_PROG_TYPE_KPROBE
+            | kernel_sys::BPF_PROG_TYPE_TRACING
+            | kernel_sys::BPF_PROG_TYPE_LSM
+            | kernel_sys::BPF_PROG_TYPE_EXT
+    )
+}
+
+fn prog_type_requires_attach_btf(prog_type: kernel_sys::bpf_prog_type) -> bool {
+    matches!(
+        prog_type,
+        kernel_sys::BPF_PROG_TYPE_TRACING
+            | kernel_sys::BPF_PROG_TYPE_LSM
+            | kernel_sys::BPF_PROG_TYPE_STRUCT_OPS
+            | kernel_sys::BPF_PROG_TYPE_EXT
+    )
+}
+
+fn prog_type_requires_expected_attach_type(prog_type: kernel_sys::bpf_prog_type) -> bool {
+    matches!(
+        prog_type,
+        kernel_sys::BPF_PROG_TYPE_TRACING | kernel_sys::BPF_PROG_TYPE_LSM
+    )
 }
 
 fn normalize_type_name(input: &str, prefix: &str) -> String {
@@ -823,6 +927,30 @@ mod tests {
             converted.insns[1].regs["r2"].tnum.as_deref(),
             Some("0x2a/0x1")
         );
+    }
+
+    #[test]
+    fn verifier_state_conversion_drops_branch_delta_states() {
+        let parsed = verifier_log::parse_verifier_log(
+            r#"
+8: (85) call bpf_map_lookup_elem#1     ; R0=map_value_or_null(id=1)
+9: (55) if r0 != 0x0 goto pc+1        ; R0=0 R2=0
+from 9 to 11: R0=map_ptr(ks=4,vs=64) R10=fp0
+11: (b7) r3 = 8                       ; R3=8
+"#,
+        );
+
+        let converted = convert_verifier_states(&parsed);
+
+        assert_eq!(
+            converted
+                .insns
+                .iter()
+                .map(|insn| insn.pc)
+                .collect::<Vec<_>>(),
+            vec![11]
+        );
+        assert_eq!(converted.insns[0].regs["r3"].const_val, Some(8));
     }
 
     #[test]

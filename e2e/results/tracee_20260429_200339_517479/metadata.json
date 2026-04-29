@@ -1,0 +1,32 @@
+{
+  "case": "tracee",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "generated_at": "2026-04-29T20:03:39.521646+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-29T20:03:39.521639+00:00",
+  "launcher_boot_id": "4b9d60a6-b47a-4ffc-96a3-33ce8f3c0e4b",
+  "launcher_pid": 1783,
+  "launcher_start_ticks": 40503,
+  "policy": {
+    "exclusions": {}
+  },
+  "run_type": "tracee",
+  "started_at": "2026-04-29T20:03:39.517479+00:00",
+  "status": "running",
+  "suite": "e2e"
+}

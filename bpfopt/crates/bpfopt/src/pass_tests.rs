@@ -209,6 +209,28 @@ impl BpfPass for CountReportingPass {
     }
 }
 
+struct VerifierStateCountPass;
+
+impl BpfPass for VerifierStateCountPass {
+    fn name(&self) -> &str {
+        "verifier_state_count"
+    }
+
+    fn run(
+        &self,
+        program: &mut BpfProgram,
+        _analyses: &mut AnalysisCache,
+        _ctx: &PassContext,
+    ) -> anyhow::Result<PassResult> {
+        Ok(PassResult {
+            pass_name: self.name().into(),
+            changed: false,
+            diagnostics: vec![format!("verifier_states={}", program.verifier_states.len())],
+            ..Default::default()
+        })
+    }
+}
+
 struct TestConstPropFixedPointPass;
 
 impl BpfPass for TestConstPropFixedPointPass {
@@ -485,6 +507,34 @@ fn test_pass_manager_analysis_cache_invalidation() {
     assert!(result.pass_results[1].changed);
     // Second count_reporter should see 3 instructions (cache was invalidated).
     assert_eq!(result.pass_results[2].diagnostics, vec!["insn_count=3"]);
+}
+
+#[test]
+fn test_pass_manager_invalidates_verifier_states_after_transform() {
+    let mut pm = PassManager::new();
+    pm.add_pass(AppendNopPass);
+    pm.add_pass(VerifierStateCountPass);
+
+    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+    prog.set_verifier_states(vec![VerifierInsn {
+        pc: 0,
+        frame: 0,
+        from_pc: None,
+        kind: VerifierInsnKind::InsnDeltaState,
+        speculative: false,
+        regs: HashMap::new(),
+        stack: HashMap::new(),
+    }]);
+    let ctx = ctx_for_pass_manager(&pm);
+
+    let result = pm.run(&mut prog, &ctx).unwrap();
+
+    assert_eq!(result.pass_results.len(), 2);
+    assert!(result.pass_results[0].changed);
+    assert_eq!(
+        result.pass_results[1].diagnostics,
+        vec!["verifier_states=0"]
+    );
 }
 
 #[test]
