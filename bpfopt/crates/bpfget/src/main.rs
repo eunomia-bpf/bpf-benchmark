@@ -101,6 +101,7 @@ struct TargetJson {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 struct TargetKinsnJson {
     btf_func_id: i32,
+    btf_id: u32,
 }
 
 struct KinsnProbeTarget {
@@ -391,7 +392,10 @@ fn probe_kinsns_in_btf(
                 };
                 found.insert(
                     target.json_name.to_string(),
-                    TargetKinsnJson { btf_func_id },
+                    TargetKinsnJson {
+                        btf_func_id,
+                        btf_id,
+                    },
                 );
                 break;
             }
@@ -414,7 +418,13 @@ fn parse_kinsns(specs: &[String]) -> Result<BTreeMap<String, TargetKinsnJson>> {
             .parse::<i32>()
             .with_context(|| format!("invalid btf_func_id in --kinsns entry {spec:?}"))?;
         if out
-            .insert(name.to_string(), TargetKinsnJson { btf_func_id })
+            .insert(
+                name.to_string(),
+                TargetKinsnJson {
+                    btf_func_id,
+                    btf_id: 0,
+                },
+            )
             .is_some()
         {
             bail!("duplicate --kinsns entry for {name}");

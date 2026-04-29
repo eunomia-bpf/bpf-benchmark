@@ -344,14 +344,28 @@ RUN set -eux; \
     find ./runner -maxdepth 3 -type f \( -name CMakeCache.txt -o -name cmake_install.cmake -o -name Makefile \) -delete; \
     find ./tests -type f \( \( -name '*.o' ! -name '*.bpf.o' \) -o -name '*.d' -o -name '*.cmd' \) -delete
 
-COPY bpfopt ./bpfopt
+COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
+COPY bpfopt/crates/kernel-sys ./bpfopt/crates/kernel-sys
 COPY daemon ./daemon
 
-# Build bpfopt-suite CLIs in this upper layer; kernel-sys is a library crate only.
+# Build the daemon against kernel-sys without copying the rest of bpfopt.
 RUN set -eux; \
     mkdir -p ./vendor/linux-framework; \
     touch ./vendor/linux-framework/Makefile; \
     make image-daemon-artifact RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    find ./daemon/target -type d \( -name build -o -name deps -o -name incremental -o -name .fingerprint \) -prune -exec rm -rf {} +; \
+    rm -rf \
+        ./daemon/src \
+        ./daemon/tests \
+        ./daemon/Cargo.toml \
+        ./daemon/Cargo.lock \
+        ./daemon/Makefile \
+        ./daemon/README.md
+
+COPY bpfopt ./bpfopt
+
+# Build bpfopt-suite CLIs in this upper layer; kernel-sys is a library crate only.
+RUN set -eux; \
     make image-bpfopt-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     bpfopt_bin_dir="./bpfopt/target/release"; \
     if [ "${RUN_TARGET_ARCH}" = "arm64" ]; then bpfopt_bin_dir="./bpfopt/target/aarch64-unknown-linux-gnu/release"; fi; \
@@ -362,7 +376,6 @@ RUN set -eux; \
         "$bpfopt_bin_dir/bpfverify" \
         "$bpfopt_bin_dir/bpfprof" \
         /usr/local/bin/; \
-    find ./daemon/target -type d \( -name build -o -name deps -o -name incremental -o -name .fingerprint \) -prune -exec rm -rf {} +; \
     find ./bpfopt/target -type d \( -name build -o -name deps -o -name incremental -o -name .fingerprint \) -prune -exec rm -rf {} +; \
     rm -rf \
         /opt/cargo \

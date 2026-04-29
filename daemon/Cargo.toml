@@ -10,9 +10,8 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = "1"
-bpfopt = { path = "../bpfopt/crates/bpfopt" }
 clap = { version = "4", features = ["derive", "env"] }
-goblin = "0.10.5"
+kernel-sys = { path = "../bpfopt/crates/kernel-sys" }
 libc = "0.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

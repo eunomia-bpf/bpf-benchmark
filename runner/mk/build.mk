@@ -70,8 +70,9 @@ ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATR
 
 REQUIRE_IMAGE_BUILD = @if [ "$(BPFREJIT_IMAGE_BUILD)" != "1" ]; then echo "$@ must be run from the runner Dockerfile with BPFREJIT_IMAGE_BUILD=1" >&2; exit 1; fi
 
+KERNEL_SYS_SOURCE_FILES = $(shell find "$(ROOT_DIR)/bpfopt/crates/kernel-sys" -type f \( -name '*.rs' -o -name 'Cargo.toml' \) -print 2>/dev/null) $(ROOT_DIR)/bpfopt/Cargo.toml
 BPFOPT_SOURCE_FILES = $(shell find "$(ROOT_DIR)/bpfopt/crates" -type f \( -name '*.rs' -o -name 'Cargo.toml' \) -print 2>/dev/null) $(ROOT_DIR)/bpfopt/Cargo.toml $(ROOT_DIR)/bpfopt/Cargo.lock
-DAEMON_SOURCE_FILES = $(shell find "$(ROOT_DIR)/daemon/src" -type f 2>/dev/null) $(ROOT_DIR)/daemon/Cargo.toml $(ROOT_DIR)/daemon/Cargo.lock $(ROOT_DIR)/daemon/Makefile
+DAEMON_SOURCE_FILES = $(shell find "$(ROOT_DIR)/daemon/src" -type f 2>/dev/null) $(ROOT_DIR)/daemon/Cargo.toml $(ROOT_DIR)/daemon/Cargo.lock $(ROOT_DIR)/daemon/Makefile $(KERNEL_SYS_SOURCE_FILES)
 RUNNER_CORE_SOURCE_FILES = $(shell find "$(RUNNER_DIR)/src" "$(RUNNER_DIR)/include" -type f ! -name 'llvmbpf_runner.cpp' 2>/dev/null) $(RUNNER_DIR)/CMakeLists.txt
 RUNNER_LLVMBPF_SOURCE_FILES = $(RUNNER_DIR)/src/llvmbpf_runner.cpp $(shell find "$(ROOT_DIR)/vendor/llvmbpf/include" "$(ROOT_DIR)/vendor/llvmbpf/src" -type f 2>/dev/null)
 RUNNER_SOURCE_FILES = $(RUNNER_CORE_SOURCE_FILES) $(RUNNER_LLVMBPF_SOURCE_FILES)

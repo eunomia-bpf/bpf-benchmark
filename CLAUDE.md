@@ -56,7 +56,7 @@ The 6 bpfopt-suite CLI binary crates (`bpfopt`, `bpfverify`, `bpfprof`, `bpfget`
 - Runtime composition happens through stdin/stdout pipelines and bash orchestration.
 - Compile-time dependencies between CLI binary crates are forbidden; do not add path-dependencies from one CLI crate to another.
 - Shared code belongs in library crates, not in the lib portion of one CLI crate for other CLI crates to import.
-- Transition exception: after Phase 1.1, `bpfrejit-daemon` may temporarily depend on `bpfopt`'s lib portion for passes/analysis/insn/verifier_log until Task #45 slims the daemon into an event trigger and removes that dependency.
+- `bpfrejit-daemon` must not depend on `bpfopt`'s lib portion; shared syscall/data access belongs in `kernel-sys`.
 
 ### Use libbpf-rs/libbpf-sys, Don't Re-Wrap
 Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf exposes the needed API or type:

@@ -109,6 +109,28 @@ struct FdArrayEntry {
     btf_module: Option<String>,
 }
 
+struct FdArray {
+    fds: Vec<i32>,
+    _owned_fds: Vec<OwnedFd>,
+}
+
+impl FdArray {
+    fn empty() -> Self {
+        Self {
+            fds: Vec::new(),
+            _owned_fds: Vec::new(),
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.fds.is_empty()
+    }
+
+    fn as_slice(&self) -> &[i32] {
+        &self.fds
+    }
+}
+
 fn main() -> ExitCode {
     match run() {
         Ok(code) => code,
@@ -368,19 +390,22 @@ fn read_map_bindings(path: &Path) -> Result<Vec<MapBinding>> {
         .collect()
 }
 
-fn read_fd_array(path: Option<&Path>) -> Result<Vec<i32>> {
+fn read_fd_array(path: Option<&Path>) -> Result<FdArray> {
     let Some(path) = path else {
-        return Ok(Vec::new());
+        return Ok(FdArray::empty());
     };
     let text =
         fs::read_to_string(path).with_context(|| format!("failed to read {}", path.display()))?;
     let entries: Vec<FdArrayEntry> = serde_json::from_str(&text)
         .with_context(|| format!("failed to parse fd_array JSON {}", path.display()))?;
-    let required = required_btf_fds(&entries)?;
-    Ok(build_rejit_fd_array(&required))
+    let (required, owned_fds) = required_btf_fds(&entries)?;
+    Ok(FdArray {
+        fds: build_rejit_fd_array(&required),
+        _owned_fds: owned_fds,
+    })
 }
 
-fn required_btf_fds(entries: &[FdArrayEntry]) -> Result<Vec<i32>> {
+fn required_btf_fds(entries: &[FdArrayEntry]) -> Result<(Vec<i32>, Vec<OwnedFd>)> {
     let has_slots = entries.iter().any(|entry| entry.slot.is_some());
     let has_missing_slots = entries.iter().any(|entry| entry.slot.is_none());
     if has_slots && has_missing_slots {
@@ -388,23 +413,14 @@ fn required_btf_fds(entries: &[FdArrayEntry]) -> Result<Vec<i32>> {
     }
 
     let mut rows = Vec::with_capacity(entries.len());
+    let mut owned_fds = Vec::new();
     for (index, entry) in entries.iter().enumerate() {
         let label = entry
             .name
             .as_deref()
             .map(|name| format!(" ({name})"))
             .unwrap_or_else(String::new);
-        if entry.btf_id.is_some() || entry.btf_obj_id.is_some() || entry.btf_module.is_some() {
-            bail!(
-                "fd_array entry {index}{label} uses btf_id/btf_obj_id/btf_module, but bpfverify only supports inherited btf_fd"
-            );
-        }
-        let btf_fd = entry
-            .btf_fd
-            .ok_or_else(|| anyhow!("fd_array entry {index}{label} is missing btf_fd"))?;
-        if btf_fd < 0 {
-            bail!("fd_array entry {index}{label} has negative btf_fd {btf_fd}");
-        }
+        let btf_fd = resolve_btf_fd(entry, index, &label, &mut owned_fds)?;
         let slot = entry.slot.unwrap_or(index + 1);
         if slot == 0 {
             bail!("fd_array entry {index}{label} uses invalid slot 0");
@@ -422,7 +438,37 @@ fn required_btf_fds(entries: &[FdArrayEntry]) -> Result<Vec<i32>> {
         }
         out.push(btf_fd);
     }
-    Ok(out)
+    Ok((out, owned_fds))
+}
+
+fn resolve_btf_fd(
+    entry: &FdArrayEntry,
+    index: usize,
+    label: &str,
+    owned_fds: &mut Vec<OwnedFd>,
+) -> Result<i32> {
+    if entry.btf_module.is_some() {
+        bail!("fd_array entry {index}{label} uses unsupported btf_module");
+    }
+    if let Some(btf_fd) = entry.btf_fd {
+        if btf_fd < 0 {
+            bail!("fd_array entry {index}{label} has negative btf_fd {btf_fd}");
+        }
+        return Ok(btf_fd);
+    }
+    let btf_id = entry
+        .btf_id
+        .or(entry.btf_obj_id)
+        .ok_or_else(|| anyhow!("fd_array entry {index}{label} is missing btf_fd or btf_id"))?;
+    if btf_id == 0 {
+        bail!("fd_array entry {index}{label} has invalid btf_id 0");
+    }
+    let fd = kernel_sys::btf_get_fd_by_id(btf_id).with_context(|| {
+        format!("open BTF fd for fd_array entry {index}{label} btf_id {btf_id}")
+    })?;
+    let raw_fd = fd.as_raw_fd();
+    owned_fds.push(fd);
+    Ok(raw_fd)
 }
 
 fn build_rejit_fd_array(required_btf_fds: &[i32]) -> Vec<i32> {

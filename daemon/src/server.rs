@@ -1,21 +1,18 @@
 // SPDX-License-Identifier: MIT
 //! Unix socket server implementation.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
+use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
-use bpfopt::{pass, passes};
 use serde::Serialize;
 
-use crate::commands::{self, OptimizeMode};
+use crate::bpf;
+use crate::commands::{self, CliConfig, OptimizeMode};
 use crate::invalidation::{MapInvalidationTracker, MapValueReader};
-use crate::{bpf, pipeline, profiler};
 
-const DEFAULT_HOTNESS_WINDOW_MS: u64 = 250;
-
-/// Global shutdown flag set by signal handler.
 static SHUTDOWN_FLAG: AtomicBool = AtomicBool::new(false);
 
 extern "C" fn handle_signal(_sig: libc::c_int) {
@@ -76,35 +73,46 @@ where
 }
 
 enum ProfilingState {
-    Active(profiler::ProfilerSession),
-    Frozen(profiler::ProfileSnapshot),
+    Active(commands::ProfileSession),
+    Frozen(commands::FrozenProfile),
 }
 
 impl ProfilingState {
-    fn snapshot(&self) -> Result<profiler::ProfileSnapshot> {
+    fn label(&self) -> &'static str {
         match self {
-            Self::Active(session) => session.snapshot(),
-            Self::Frozen(snapshot) => Ok(snapshot.clone()),
+            Self::Active(_) => "active",
+            Self::Frozen(_) => "loaded",
         }
     }
 
-    fn profiling_data_for(&self, prog_id: u32) -> Result<Option<pass::ProfilingData>> {
-        Ok(self.snapshot()?.profiling_data_for(prog_id))
+    fn profile_path_for(&self, prog_id: u32) -> Option<std::path::PathBuf> {
+        match self {
+            Self::Frozen(profile) => profile.profile_path_for(prog_id),
+            Self::Active(_) => None,
+        }
     }
-}
 
-#[derive(Clone, Debug)]
-struct LiveProgramCandidate {
-    prog_id: u32,
-    prog_name: String,
-    orig_insn_count: usize,
+    fn duration_ms(&self) -> u64 {
+        match self {
+            Self::Active(session) => session.duration_ms(),
+            Self::Frozen(profile) => profile.duration_ms(),
+        }
+    }
+
+    fn programs_profiled(&self) -> usize {
+        match self {
+            Self::Active(_) => 0,
+            Self::Frozen(profile) => profile.programs_profiled(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
 struct OptimizeAllOrderEntry {
     prog_id: u32,
     prog_name: String,
-    orig_insn_count: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    prog_type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     hotness_score: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -115,128 +123,87 @@ struct OptimizeAllOrderEntry {
     avg_ns: Option<f64>,
 }
 
-fn collect_live_program_candidates() -> Result<Vec<LiveProgramCandidate>> {
-    let mut candidates = Vec::new();
-    for prog_id in bpf::iter_prog_ids() {
-        let prog_id = prog_id.context("enumerate program IDs for optimize-all")?;
-        let (info, orig_insns) = bpf::get_orig_insns_by_id(prog_id)
-            .with_context(|| format!("collect optimize-all metadata for prog {}", prog_id))?;
-        if orig_insns.is_empty() {
-            anyhow::bail!(
-                "prog {} ({}) is missing original bytecode from BPF_PROG_GET_ORIGINAL",
-                prog_id,
-                info.name_str()
-            );
-        }
-        candidates.push(LiveProgramCandidate {
-            prog_id,
-            prog_name: info.name_str().to_string(),
-            orig_insn_count: orig_insns.len(),
-        });
-    }
-    Ok(candidates)
+struct ProgramWatcher {
+    seen: HashSet<u32>,
 }
 
-fn default_optimize_all_order(candidates: &[LiveProgramCandidate]) -> Vec<OptimizeAllOrderEntry> {
-    candidates
-        .iter()
-        .map(|candidate| OptimizeAllOrderEntry {
-            prog_id: candidate.prog_id,
-            prog_name: candidate.prog_name.clone(),
-            orig_insn_count: candidate.orig_insn_count,
-            hotness_score: None,
-            run_cnt_delta: None,
-            run_time_ns_delta: None,
-            avg_ns: None,
-        })
-        .collect()
-}
-
-fn optimize_all_order_from_ranking(
-    candidates: &[LiveProgramCandidate],
-    ranking: &profiler::HotnessRanking,
-    observation_window: Duration,
-) -> Vec<OptimizeAllOrderEntry> {
-    let candidates_by_id: HashMap<u32, &LiveProgramCandidate> = candidates
-        .iter()
-        .map(|candidate| (candidate.prog_id, candidate))
-        .collect();
-    let mut ranked_ids = HashSet::new();
-    let mut ordered = Vec::with_capacity(candidates.len());
-
-    for analysis in &ranking.ranked {
-        let Some(candidate) = candidates_by_id.get(&analysis.prog_id) else {
-            continue;
-        };
-        ranked_ids.insert(analysis.prog_id);
-        ordered.push(OptimizeAllOrderEntry {
-            prog_id: candidate.prog_id,
-            prog_name: candidate.prog_name.clone(),
-            orig_insn_count: candidate.orig_insn_count,
-            hotness_score: Some(analysis.hotness_score(observation_window)),
-            run_cnt_delta: Some(analysis.delta_run_cnt),
-            run_time_ns_delta: Some(analysis.delta_run_time_ns),
-            avg_ns: analysis.delta_avg_ns,
-        });
-    }
-
-    for candidate in candidates {
-        if ranked_ids.contains(&candidate.prog_id) {
-            continue;
+impl ProgramWatcher {
+    fn from_live() -> Self {
+        let mut seen = HashSet::new();
+        for prog_id in bpf::iter_prog_ids() {
+            match prog_id {
+                Ok(prog_id) => {
+                    seen.insert(prog_id);
+                }
+                Err(err) => {
+                    eprintln!("serve: failed to initialize BPF program watcher: {err:#}");
+                    break;
+                }
+            }
         }
-        ordered.push(OptimizeAllOrderEntry {
-            prog_id: candidate.prog_id,
-            prog_name: candidate.prog_name.clone(),
-            orig_insn_count: candidate.orig_insn_count,
-            hotness_score: None,
-            run_cnt_delta: None,
-            run_time_ns_delta: None,
-            avg_ns: None,
-        });
+        Self { seen }
     }
 
-    ordered
+    fn tick(&mut self) {
+        for prog_id in bpf::iter_prog_ids() {
+            match prog_id {
+                Ok(prog_id) if self.seen.insert(prog_id) => {
+                    eprintln!("serve: observed new BPF program id {prog_id}");
+                }
+                Ok(_) => {}
+                Err(err) => {
+                    eprintln!("serve: BPF program watch tick failed: {err:#}");
+                    break;
+                }
+            }
+        }
+    }
 }
 
 fn remove_socket_file_if_present(socket_path: &str) -> Result<()> {
     match std::fs::remove_file(socket_path) {
         Ok(()) => Ok(()),
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(()),
-        Err(err) => Err(err).with_context(|| format!("remove stale socket file {}", socket_path)),
+        Err(err) => Err(err).with_context(|| format!("remove stale socket file {socket_path}")),
     }
 }
 
-// ── Serve (Unix socket server) ──────────────────────────────────────
-
-pub(crate) fn cmd_serve(socket_path: &str, ctx: &pipeline::DaemonContext) -> Result<()> {
+pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
     use std::os::unix::net::UnixListener;
 
     register_signal_handlers();
+    let config = CliConfig::from_env();
     let tracker = commands::new_invalidation_tracker();
     let mut last_invalidation_check = Instant::now();
+    let mut last_watch_check = Instant::now();
+    let mut watcher = ProgramWatcher::from_live();
     let mut profiling_state: Option<ProfilingState> = None;
 
-    // Remove stale socket file if it exists.
     remove_socket_file_if_present(socket_path)?;
 
     let listener = UnixListener::bind(socket_path)
-        .with_context(|| format!("bind unix socket at {}", socket_path))?;
+        .with_context(|| format!("bind unix socket at {socket_path}"))?;
     listener.set_nonblocking(true)?;
 
-    println!("serve: listening on {}", socket_path);
+    println!("serve: listening on {socket_path}");
 
     while !SHUTDOWN_FLAG.load(Ordering::Relaxed) {
+        if last_watch_check.elapsed() >= Duration::from_secs(1) {
+            watcher.tick();
+            last_watch_check = Instant::now();
+        }
+
         if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
             let tracker_for_apply = tracker.clone();
             run_invalidation_tick_logged("serve", &tracker, |prog_id| {
-                let profiling = match profiling_state.as_ref() {
-                    Some(state) => state.profiling_data_for(prog_id)?,
-                    None => None,
-                };
+                let profile_path = profiling_state
+                    .as_ref()
+                    .and_then(|state| state.profile_path_for(prog_id));
                 let result = commands::try_apply_one(
                     prog_id,
-                    ctx,
-                    profiling.as_ref(),
+                    &config,
+                    None,
+                    profile_path.as_deref(),
                     Some(&tracker_for_apply),
                     OptimizeMode::Apply,
                 )?;
@@ -258,27 +225,23 @@ pub(crate) fn cmd_serve(socket_path: &str, ctx: &pipeline::DaemonContext) -> Res
 
         match listener.accept() {
             Ok((stream, _addr)) => {
-                if let Err(err) = handle_client(stream, ctx, &mut profiling_state, &tracker) {
-                    eprintln!("serve: client error: {:#}", err);
+                if let Err(err) = handle_client(stream, &config, &mut profiling_state, &tracker) {
+                    eprintln!("serve: client error: {err:#}");
                 }
             }
             Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
                 std::thread::sleep(Duration::from_millis(100));
-                continue;
             }
             Err(e) => {
-                eprintln!("serve: accept error: {}", e);
+                eprintln!("serve: accept error: {e}");
             }
         }
     }
 
     println!("serve: shutting down");
     if let Some(ProfilingState::Active(session)) = profiling_state.take() {
-        if let Err(err) = session.stop() {
-            eprintln!(
-                "serve: failed to stop profiling session during shutdown: {:#}",
-                err
-            );
+        if let Err(err) = commands::stop_profile(session) {
+            eprintln!("serve: failed to stop profiling session during shutdown: {err:#}");
         }
     }
     remove_socket_file_if_present(socket_path)?;
@@ -297,16 +260,16 @@ fn panic_payload_message(payload: &(dyn std::any::Any + Send)) -> String {
 
 fn panic_response(payload: Box<dyn std::any::Any + Send>) -> serde_json::Value {
     let message = panic_payload_message(payload.as_ref());
-    eprintln!("serve: request panicked: {}", message);
+    eprintln!("serve: request panicked: {message}");
     serde_json::json!({
         "status": "error",
-        "error_message": format!("request handler panicked: {}", message),
+        "error_message": format!("request handler panicked: {message}"),
     })
 }
 
 fn handle_client(
     stream: std::os::unix::net::UnixStream,
-    ctx: &pipeline::DaemonContext,
+    config: &CliConfig,
     profiling_state: &mut Option<ProfilingState>,
     tracker: &commands::SharedInvalidationTracker,
 ) -> Result<()> {
@@ -323,13 +286,13 @@ fn handle_client(
 
         let response = match serde_json::from_str::<serde_json::Value>(&line) {
             Ok(req) => match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                process_request(&req, ctx, profiling_state, tracker)
+                process_request(&req, config, profiling_state, tracker)
             })) {
                 Ok(response) => response,
                 Err(payload) => panic_response(payload),
             },
             Err(e) => {
-                serde_json::json!({"status": "error", "error_message": format!("invalid JSON: {}", e)})
+                serde_json::json!({"status": "error", "error_message": format!("invalid JSON: {e}")})
             }
         };
 
@@ -342,321 +305,194 @@ fn handle_client(
     Ok(())
 }
 
+fn parse_request_pass_list(
+    req: &serde_json::Value,
+    key: &str,
+) -> std::result::Result<Option<Vec<String>>, String> {
+    let Some(value) = req.get(key) else {
+        return Ok(None);
+    };
+    let array = value
+        .as_array()
+        .ok_or_else(|| format!("{key} must be a JSON string array"))?;
+    let mut passes = Vec::with_capacity(array.len());
+    for entry in array {
+        let raw_name = entry
+            .as_str()
+            .ok_or_else(|| format!("{key} entries must be strings"))?;
+        let name = raw_name.trim();
+        if name.is_empty() {
+            return Err(format!("{key} entries must not be blank"));
+        }
+        passes.push(name.to_string());
+    }
+    Ok(Some(passes))
+}
+
+fn request_enabled_passes(
+    req: &serde_json::Value,
+) -> std::result::Result<Option<Vec<String>>, String> {
+    let mut enabled = parse_request_pass_list(req, "enabled_passes")?;
+    let disabled = parse_request_pass_list(req, "disabled_passes")?;
+    match (enabled.as_mut(), disabled) {
+        (Some(enabled), Some(disabled)) => {
+            let disabled: HashSet<_> = disabled.into_iter().collect();
+            enabled.retain(|pass| !disabled.contains(pass));
+            Ok(Some(enabled.clone()))
+        }
+        (Some(enabled), None) => Ok(Some(enabled.clone())),
+        (None, Some(_)) => Err("disabled_passes requires enabled_passes with CLI backend".into()),
+        (None, None) => Ok(None),
+    }
+}
+
+fn request_mode(req: &serde_json::Value) -> std::result::Result<OptimizeMode, String> {
+    if let Some(value) = req.get("dry_run") {
+        let dry_run = value
+            .as_bool()
+            .ok_or_else(|| "dry_run must be a JSON boolean".to_string())?;
+        return Ok(if dry_run {
+            OptimizeMode::DryRun
+        } else {
+            OptimizeMode::Apply
+        });
+    }
+
+    Ok(OptimizeMode::Apply)
+}
+
+fn request_interval_ms(req: &serde_json::Value) -> std::result::Result<u64, String> {
+    let value = req
+        .get("interval_ms")
+        .ok_or_else(|| "missing interval_ms".to_string())?;
+    let interval_ms = value
+        .as_u64()
+        .ok_or_else(|| "interval_ms must be a JSON integer".to_string())?;
+    if interval_ms == 0 {
+        return Err("interval_ms must be greater than zero".to_string());
+    }
+    Ok(interval_ms)
+}
+
+fn request_path<'a>(req: &'a serde_json::Value, key: &str) -> std::result::Result<&'a str, String> {
+    let value = req.get(key).ok_or_else(|| format!("missing {key}"))?;
+    value
+        .as_str()
+        .ok_or_else(|| format!("{key} must be a JSON string"))
+}
+
+fn error_json(message: impl Into<String>) -> serde_json::Value {
+    serde_json::json!({
+        "status": "error",
+        "error_message": message.into(),
+    })
+}
+
+fn serialize_or_error<T: Serialize>(value: T) -> serde_json::Value {
+    match serde_json::to_value(value) {
+        Ok(v) => v,
+        Err(e) => error_json(format!("failed to serialize result: {e}")),
+    }
+}
+
 fn process_request(
     req: &serde_json::Value,
-    ctx: &pipeline::DaemonContext,
+    config: &CliConfig,
     profiling_state: &mut Option<ProfilingState>,
     tracker: &commands::SharedInvalidationTracker,
 ) -> serde_json::Value {
-    fn parse_request_pass_list(
-        req: &serde_json::Value,
-        key: &str,
-    ) -> std::result::Result<Option<Vec<String>>, String> {
-        let Some(value) = req.get(key) else {
-            return Ok(None);
-        };
-        let array = value
-            .as_array()
-            .ok_or_else(|| format!("{key} must be a JSON string array"))?;
-        let mut passes = Vec::with_capacity(array.len());
-        for entry in array {
-            let raw_name = entry
-                .as_str()
-                .ok_or_else(|| format!("{key} entries must be strings"))?;
-            let name = raw_name.trim();
-            if name.is_empty() {
-                return Err(format!("{key} entries must not be blank"));
-            }
-            passes.push(name.to_string());
-        }
-        Ok(Some(passes))
-    }
-
-    fn request_context(
-        req: &serde_json::Value,
-        base_ctx: &pipeline::DaemonContext,
-    ) -> std::result::Result<pipeline::DaemonContext, String> {
-        let mut local_ctx = base_ctx.clone();
-        if let Some(enabled_passes) = parse_request_pass_list(req, "enabled_passes")? {
-            passes::validate_pass_names(&enabled_passes)
-                .map_err(|err| format!("invalid enabled_passes: {err}"))?;
-            local_ctx.pass_context.policy.enabled_passes = enabled_passes;
-        }
-        if let Some(disabled_passes) = parse_request_pass_list(req, "disabled_passes")? {
-            passes::validate_pass_names(&disabled_passes)
-                .map_err(|err| format!("invalid disabled_passes: {err}"))?;
-            local_ctx.pass_context.policy.disabled_passes = disabled_passes;
-        }
-        Ok(local_ctx)
-    }
-
-    fn request_mode(req: &serde_json::Value) -> std::result::Result<OptimizeMode, String> {
-        if let Some(value) = req.get("dry_run") {
-            let dry_run = value
-                .as_bool()
-                .ok_or_else(|| "dry_run must be a JSON boolean".to_string())?;
-            return Ok(if dry_run {
-                OptimizeMode::DryRun
-            } else {
-                OptimizeMode::Apply
-            });
-        }
-
-        Ok(OptimizeMode::Apply)
-    }
-
-    fn request_interval(req: &serde_json::Value) -> std::result::Result<Duration, String> {
-        let value = req
-            .get("interval_ms")
-            .ok_or_else(|| "missing interval_ms".to_string())?;
-        let interval_ms = value
-            .as_u64()
-            .ok_or_else(|| "interval_ms must be a JSON integer".to_string())?;
-        if interval_ms == 0 {
-            return Err("interval_ms must be greater than zero".to_string());
-        }
-        Ok(Duration::from_millis(interval_ms))
-    }
-
-    fn request_optional_interval(
-        req: &serde_json::Value,
-        key: &str,
-        default_ms: u64,
-    ) -> std::result::Result<Duration, String> {
-        let Some(value) = req.get(key) else {
-            return Ok(Duration::from_millis(default_ms));
-        };
-        let interval_ms = value
-            .as_u64()
-            .ok_or_else(|| format!("{key} must be a JSON integer"))?;
-        if interval_ms == 0 {
-            return Err(format!("{key} must be greater than zero"));
-        }
-        Ok(Duration::from_millis(interval_ms))
-    }
-
-    fn request_path<'a>(
-        req: &'a serde_json::Value,
-        key: &str,
-    ) -> std::result::Result<&'a str, String> {
-        let value = req.get(key).ok_or_else(|| format!("missing {key}"))?;
-        value
-            .as_str()
-            .ok_or_else(|| format!("{key} must be a JSON string"))
-    }
-
-    fn request_profile_snapshot(
-        profiling_state: &Option<ProfilingState>,
-    ) -> std::result::Result<Option<profiler::ProfileSnapshot>, String> {
-        match profiling_state.as_ref() {
-            Some(state) => state.snapshot().map(Some).map_err(|err| format!("{err:#}")),
-            None => Ok(None),
-        }
-    }
-
     let cmd = req.get("cmd").and_then(|v| v.as_str()).unwrap_or("");
-    let local_ctx = match request_context(req, ctx) {
+    let enabled_passes = match request_enabled_passes(req) {
         Ok(value) => value,
-        Err(message) => return serde_json::json!({"status": "error", "error_message": message}),
+        Err(message) => return error_json(message),
     };
+
     match cmd {
         "optimize" => {
             let prog_id = match req.get("prog_id").and_then(|v| v.as_u64()) {
                 Some(id) => id as u32,
-                None => {
-                    return serde_json::json!({"status": "error", "error_message": "missing prog_id"})
-                }
+                None => return error_json("missing prog_id"),
             };
             let mode = match request_mode(req) {
                 Ok(mode) => mode,
-                Err(message) => {
-                    return serde_json::json!({"status": "error", "error_message": message});
-                }
+                Err(message) => return error_json(message),
             };
-            let profile_snapshot = match request_profile_snapshot(profiling_state) {
-                Ok(snapshot) => snapshot,
-                Err(message) => {
-                    return serde_json::json!({"status": "error", "error_message": message});
-                }
-            };
-            let profiling = profile_snapshot
+            let profile_path = profiling_state
                 .as_ref()
-                .and_then(|snapshot| snapshot.profiling_data_for(prog_id));
+                .and_then(|state| state.profile_path_for(prog_id));
             match commands::try_apply_one(
                 prog_id,
-                &local_ctx,
-                profiling.as_ref(),
+                config,
+                enabled_passes.as_deref(),
+                profile_path.as_deref(),
                 Some(tracker),
                 mode,
             ) {
-                Ok(result) => match serde_json::to_value(result) {
-                    Ok(v) => v,
-                    Err(e) => serde_json::json!({
-                        "status": "error",
-                        "error_message": format!("failed to serialize result: {}", e)
-                    }),
-                },
-                Err(e) => {
-                    let error_message = format!("{e:#}")
+                Ok(result) => serialize_or_error(result),
+                Err(e) => error_json(
+                    format!("{e:#}")
                         .lines()
                         .next()
                         .unwrap_or("<empty error message>")
-                        .to_string();
-                    serde_json::json!({
-                        "status": "error",
-                        "error_message": error_message,
-                    })
-                }
+                        .to_string(),
+                ),
             }
         }
         "optimize-all" => {
-            let hotness_window = match request_optional_interval(
-                req,
-                "hotness_window_ms",
-                DEFAULT_HOTNESS_WINDOW_MS,
-            ) {
-                Ok(interval) => interval,
-                Err(message) => {
-                    return serde_json::json!({"status": "error", "error_message": message});
-                }
-            };
-            let profile_snapshot = match request_profile_snapshot(profiling_state) {
-                Ok(snapshot) => snapshot,
-                Err(message) => {
-                    return serde_json::json!({"status": "error", "error_message": message});
-                }
-            };
-            let candidates = match collect_live_program_candidates() {
-                Ok(candidates) => candidates,
+            let programs = match commands::list_programs(config) {
+                Ok(programs) => programs,
                 Err(err) => {
-                    return serde_json::json!({
-                        "status": "error",
-                        "error_message": format!("failed to collect optimize-all candidates: {err:#}"),
-                    });
+                    return error_json(format!("failed to list live BPF programs: {err:#}"));
                 }
             };
-            let mut program_order = default_optimize_all_order(&candidates);
-            let mut profiling_source = "none";
-            let mut observation_window_ms: Option<u64> = None;
-            let mut on_demand_profiles: HashMap<u32, pass::ProfilingData> = HashMap::new();
-
-            if let Some(snapshot) = profile_snapshot.as_ref() {
-                let observation_window = Duration::from_millis(snapshot.duration_ms.max(1));
-                let ranking = match snapshot.hotness_ranking() {
-                    Ok(ranking) => ranking,
-                    Err(err) => {
-                        return serde_json::json!({
-                            "status": "error",
-                            "error_message": format!(
-                                "failed to rank loaded profile snapshot by hotness: {err:#}"
-                            ),
-                        });
-                    }
-                };
-                program_order =
-                    optimize_all_order_from_ranking(&candidates, &ranking, observation_window);
-                profiling_source = "snapshot";
-                observation_window_ms = Some(observation_window.as_millis() as u64);
-            } else if candidates.len() > 1 {
-                let prog_ids = candidates
-                    .iter()
-                    .map(|candidate| candidate.prog_id)
-                    .collect::<Vec<_>>();
-                match profiler::collect_hotness_ranking(&prog_ids, hotness_window) {
-                    Ok((ranking, observation_window)) => {
-                        program_order = optimize_all_order_from_ranking(
-                            &candidates,
-                            &ranking,
-                            observation_window,
-                        );
-                        profiling_source = "stats_window";
-                        observation_window_ms = Some(observation_window.as_millis() as u64);
-                    }
-                    Err(err) => {
-                        return serde_json::json!({
-                            "status": "error",
-                            "error_message": format!(
-                                "failed to rank optimize-all programs by hotness: {err:#}"
-                            ),
-                        });
-                    }
-                }
-            } else if let Some(candidate) = candidates.first() {
-                match profiler::bpf_stats_enabled() {
-                    Ok(true) => {
-                        match profiler::collect_program_profiling(candidate.prog_id, hotness_window)
-                        {
-                            Ok((profiling, analysis)) => {
-                                on_demand_profiles.insert(candidate.prog_id, profiling);
-                                let ranking = profiler::HotnessRanking::from_analyses(
-                                    vec![analysis],
-                                    hotness_window,
-                                );
-                                program_order = optimize_all_order_from_ranking(
-                                    &candidates,
-                                    &ranking,
-                                    hotness_window,
-                                );
-                                profiling_source = "stats_window_single";
-                                observation_window_ms = Some(hotness_window.as_millis() as u64);
-                            }
-                            Err(err) => {
-                                return serde_json::json!({
-                                    "status": "error",
-                                    "error_message": format!(
-                                        "failed to collect one-shot profiling for prog {}: {err:#}",
-                                        candidate.prog_id
-                                    ),
-                                });
-                            }
-                        }
-                    }
-                    Ok(false) => {}
-                    Err(err) => {
-                        return serde_json::json!({
-                            "status": "error",
-                            "error_message": format!("failed to query bpf stats state: {err:#}"),
-                        });
-                    }
-                }
-            }
+            let program_order = programs
+                .iter()
+                .map(|program| OptimizeAllOrderEntry {
+                    prog_id: program.id,
+                    prog_name: program.name.clone(),
+                    prog_type: Some(program.prog_type_name().to_string()),
+                    hotness_score: None,
+                    run_cnt_delta: None,
+                    run_time_ns_delta: None,
+                    avg_ns: None,
+                })
+                .collect::<Vec<_>>();
             let mut applied = 0u32;
             let mut errors = 0u32;
             let mut program_errors = Vec::new();
-            let total = program_order.len() as u32;
             for entry in &program_order {
-                let prog_id = entry.prog_id;
-                let snapshot_profiling = profile_snapshot
+                let profile_path = profiling_state
                     .as_ref()
-                    .and_then(|snapshot| snapshot.profiling_data_for(prog_id));
-                let profiling = on_demand_profiles
-                    .get(&prog_id)
-                    .or(snapshot_profiling.as_ref());
+                    .and_then(|state| state.profile_path_for(entry.prog_id));
                 match commands::try_apply_one(
-                    prog_id,
-                    &local_ctx,
-                    profiling,
+                    entry.prog_id,
+                    config,
+                    enabled_passes.as_deref(),
+                    profile_path.as_deref(),
                     Some(tracker),
                     OptimizeMode::Apply,
                 ) {
+                    Ok(result) if result.status == "ok" && result.summary.applied => {
+                        applied += 1;
+                    }
+                    Ok(result) if result.status == "ok" => {}
                     Ok(result) => {
-                        if result.status == "ok" && result.summary.applied {
-                            applied += 1;
-                        } else if result.status != "ok" {
-                            errors += 1;
-                            program_errors.push(serde_json::json!({
-                                "prog_id": prog_id,
-                                "prog_name": result.program.prog_name,
-                                "error_message": result.error_message.unwrap_or_else(|| {
-                                    format!("optimize prog {} returned status {}", prog_id, result.status)
-                                }),
-                            }));
-                        }
+                        errors += 1;
+                        program_errors.push(serde_json::json!({
+                            "prog_id": entry.prog_id,
+                            "prog_name": result.program.prog_name,
+                            "error_message": result.error_message.unwrap_or_else(|| {
+                                format!(
+                                    "optimize prog {} returned status {}",
+                                    entry.prog_id, result.status
+                                )
+                            }),
+                        }));
                     }
                     Err(err) => {
                         errors += 1;
                         program_errors.push(serde_json::json!({
-                            "prog_id": prog_id,
+                            "prog_id": entry.prog_id,
                             "prog_name": entry.prog_name,
                             "error_message": format!("{err:#}"),
                         }));
@@ -665,162 +501,122 @@ fn process_request(
             }
             serde_json::json!({
                 "status": "ok",
-                "total": total,
+                "total": program_order.len() as u32,
                 "applied": applied,
                 "errors": errors,
-                "profiling_source": profiling_source,
-                "hotness_window_ms": observation_window_ms,
+                "profiling_source": profiling_state.as_ref().map_or("none", ProfilingState::label),
+                "hotness_window_ms": serde_json::Value::Null,
                 "program_order": program_order,
                 "program_errors": program_errors,
             })
         }
         "profile-start" => {
-            let interval = match request_interval(req) {
-                Ok(interval) => interval,
-                Err(message) => {
-                    return serde_json::json!({"status": "error", "error_message": message});
-                }
+            let interval_ms = match request_interval_ms(req) {
+                Ok(interval_ms) => interval_ms,
+                Err(message) => return error_json(message),
             };
             if matches!(profiling_state.as_ref(), Some(ProfilingState::Active(_))) {
-                return serde_json::json!({
-                    "status": "error",
-                    "error_message": "profiling is already active",
-                });
+                return error_json("profiling is already active");
             }
-            match profiler::ProfilerSession::start(interval) {
+            match commands::start_profile(config, interval_ms) {
                 Ok(session) => {
                     *profiling_state = Some(ProfilingState::Active(session));
                     serde_json::json!({"status": "ok"})
                 }
-                Err(err) => {
-                    serde_json::json!({"status": "error", "error_message": format!("{err:#}")})
-                }
+                Err(err) => error_json(format!("{err:#}")),
             }
         }
         "profile-stop" => {
             let current_state = match profiling_state.take() {
                 Some(state) => state,
-                None => {
-                    return serde_json::json!({
-                        "status": "error",
-                        "error_message": "no profiling session is active",
-                    });
-                }
+                None => return error_json("no profiling session is active"),
             };
-
             match current_state {
-                ProfilingState::Active(session) => match session.stop() {
-                    Ok(snapshot) => {
-                        let summary = snapshot.summary();
-                        *profiling_state = Some(ProfilingState::Frozen(snapshot));
+                ProfilingState::Active(session) => match commands::stop_profile(session) {
+                    Ok(profile) => {
+                        let programs_profiled = profile.programs_profiled();
+                        let duration_ms = profile.duration_ms();
+                        *profiling_state = Some(ProfilingState::Frozen(profile));
                         serde_json::json!({
                             "status": "ok",
-                            "programs_profiled": summary.programs_profiled,
-                            "duration_ms": summary.duration_ms,
+                            "programs_profiled": programs_profiled,
+                            "duration_ms": duration_ms,
                         })
                     }
-                    Err(err) => {
-                        serde_json::json!({"status": "error", "error_message": format!("{err:#}")})
-                    }
+                    Err(err) => error_json(format!("{err:#}")),
                 },
-                ProfilingState::Frozen(snapshot) => {
-                    *profiling_state = Some(ProfilingState::Frozen(snapshot));
-                    serde_json::json!({
-                        "status": "error",
-                        "error_message": "profiling is not active",
-                    })
+                ProfilingState::Frozen(profile) => {
+                    *profiling_state = Some(ProfilingState::Frozen(profile));
+                    error_json("profiling is not active")
                 }
             }
         }
         "profile-save" => {
             let path = match request_path(req, "path") {
                 Ok(path) => path,
-                Err(message) => {
-                    return serde_json::json!({"status": "error", "error_message": message});
-                }
+                Err(message) => return error_json(message),
             };
-            let snapshot = match request_profile_snapshot(profiling_state) {
-                Ok(Some(snapshot)) => snapshot,
-                Ok(None) => {
-                    return serde_json::json!({
-                        "status": "error",
-                        "error_message": "no profile data available",
-                    });
-                }
-                Err(message) => {
-                    return serde_json::json!({"status": "error", "error_message": message});
-                }
+            let Some(ProfilingState::Frozen(profile)) = profiling_state.as_ref() else {
+                return error_json("no profile data available");
             };
-            match snapshot.save_to_path(std::path::Path::new(path)) {
+            match commands::save_profile(profile, Path::new(path)) {
                 Ok(()) => serde_json::json!({
                     "status": "ok",
                     "path": path,
-                    "programs": snapshot.programs_profiled(),
+                    "programs": profile.programs_profiled(),
                 }),
-                Err(err) => {
-                    serde_json::json!({"status": "error", "error_message": format!("{err:#}")})
-                }
+                Err(err) => error_json(format!("{err:#}")),
             }
         }
         "profile-load" => {
             let path = match request_path(req, "path") {
                 Ok(path) => path,
-                Err(message) => {
-                    return serde_json::json!({"status": "error", "error_message": message});
-                }
+                Err(message) => return error_json(message),
             };
             if matches!(profiling_state.as_ref(), Some(ProfilingState::Active(_))) {
-                return serde_json::json!({
-                    "status": "error",
-                    "error_message": "profiling is active; stop it before loading a snapshot",
-                });
+                return error_json("profiling is active; stop it before loading a snapshot");
             }
-            match profiler::ProfileSnapshot::load_from_path(std::path::Path::new(path)) {
-                Ok(snapshot) => {
-                    let programs_loaded = snapshot.programs_profiled();
-                    *profiling_state = Some(ProfilingState::Frozen(snapshot));
+            match commands::load_profile(Path::new(path)) {
+                Ok(profile) => {
+                    let programs_loaded = profile.programs_profiled();
+                    *profiling_state = Some(ProfilingState::Frozen(profile));
                     serde_json::json!({
                         "status": "ok",
                         "programs_loaded": programs_loaded,
                     })
                 }
-                Err(err) => {
-                    serde_json::json!({"status": "error", "error_message": format!("{err:#}")})
-                }
+                Err(err) => error_json(format!("{err:#}")),
             }
         }
         "status" => {
-            let profiling = match profiling_state.as_ref() {
-                Some(ProfilingState::Active(_)) => "active",
-                Some(ProfilingState::Frozen(_)) => "loaded",
-                None => "none",
+            let profiling = profiling_state
+                .as_ref()
+                .map_or("none", ProfilingState::label);
+            let available_passes_help = match commands::available_passes_help(config) {
+                Ok(help) => help,
+                Err(err) => format!("unavailable: {err:#}"),
             };
             serde_json::json!({
                 "status": "ok",
                 "version": env!("CARGO_PKG_VERSION"),
                 "profiling": profiling,
-                "available_passes_help": passes::available_passes_help(),
+                "profile_duration_ms": profiling_state.as_ref().map(ProfilingState::duration_ms),
+                "programs_profiled": profiling_state.as_ref().map(ProfilingState::programs_profiled),
+                "available_passes_help": available_passes_help,
             })
         }
-        _ => {
-            serde_json::json!({"status": "error", "error_message": format!("unknown command: {}", cmd)})
-        }
+        _ => error_json(format!("unknown command: {cmd}")),
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::BTreeMap;
     use std::collections::HashMap;
     use std::sync::{Arc, Mutex};
     use std::time::{SystemTime, UNIX_EPOCH};
 
     use crate::invalidation::{BatchLookupValue, MapInvalidationTracker};
-
-    fn test_daemon_context() -> pipeline::DaemonContext {
-        pipeline::DaemonContext::new(pass::PassContext::test_default(), HashMap::new())
-    }
 
     #[derive(Clone, Debug, Default)]
     struct MockMapValueReader {
@@ -859,6 +655,12 @@ mod tests {
                 })
                 .collect())
         }
+    }
+
+    fn process_test_request(req: &serde_json::Value) -> serde_json::Value {
+        let tracker = commands::new_invalidation_tracker();
+        let mut profiling_state = None;
+        process_request(req, &CliConfig::from_env(), &mut profiling_state, &tracker)
     }
 
     #[test]
@@ -939,65 +741,11 @@ mod tests {
     }
 
     #[test]
-    fn process_request_accepts_valid_disabled_passes() {
-        let req = serde_json::json!({
-            "cmd": "status",
-            "disabled_passes": ["map_inline"],
-        });
-        let tracker = commands::new_invalidation_tracker();
-        let mut profiling_state = None;
-        let response =
-            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
-
-        assert_eq!(response["status"], "ok");
-    }
-
-    #[test]
-    fn process_request_rejects_unknown_enabled_passes() {
-        let req = serde_json::json!({
-            "cmd": "status",
-            "enabled_passes": ["skb_load_bytes"],
-        });
-        let tracker = commands::new_invalidation_tracker();
-        let mut profiling_state = None;
-        let response =
-            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
-
-        assert_eq!(response["status"], "error");
-        assert_eq!(
-            response["error_message"],
-            "invalid enabled_passes: unknown pass name(s): skb_load_bytes"
-        );
-    }
-
-    #[test]
-    fn process_request_rejects_unknown_disabled_passes() {
-        let req = serde_json::json!({
-            "cmd": "status",
-            "disabled_passes": ["bulk_mem"],
-        });
-        let tracker = commands::new_invalidation_tracker();
-        let mut profiling_state = None;
-        let response =
-            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
-
-        assert_eq!(response["status"], "error");
-        assert_eq!(
-            response["error_message"],
-            "invalid disabled_passes: unknown pass name(s): bulk_mem"
-        );
-    }
-
-    #[test]
     fn process_request_rejects_blank_enabled_pass_name() {
-        let req = serde_json::json!({
+        let response = process_test_request(&serde_json::json!({
             "cmd": "status",
             "enabled_passes": ["   "],
-        });
-        let tracker = commands::new_invalidation_tracker();
-        let mut profiling_state = None;
-        let response =
-            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
+        }));
 
         assert_eq!(response["status"], "error");
         assert_eq!(
@@ -1008,14 +756,10 @@ mod tests {
 
     #[test]
     fn process_request_rejects_blank_disabled_pass_name() {
-        let req = serde_json::json!({
+        let response = process_test_request(&serde_json::json!({
             "cmd": "status",
             "disabled_passes": ["   "],
-        });
-        let tracker = commands::new_invalidation_tracker();
-        let mut profiling_state = None;
-        let response =
-            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
+        }));
 
         assert_eq!(response["status"], "error");
         assert_eq!(
@@ -1025,16 +769,26 @@ mod tests {
     }
 
     #[test]
+    fn process_request_rejects_disabled_passes_without_enabled_passes() {
+        let response = process_test_request(&serde_json::json!({
+            "cmd": "status",
+            "disabled_passes": ["map_inline"],
+        }));
+
+        assert_eq!(response["status"], "error");
+        assert_eq!(
+            response["error_message"],
+            "disabled_passes requires enabled_passes with CLI backend"
+        );
+    }
+
+    #[test]
     fn process_request_rejects_non_boolean_dry_run() {
-        let req = serde_json::json!({
+        let response = process_test_request(&serde_json::json!({
             "cmd": "optimize",
             "prog_id": 1,
             "dry_run": "yes",
-        });
-        let tracker = commands::new_invalidation_tracker();
-        let mut profiling_state = None;
-        let response =
-            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
+        }));
 
         assert_eq!(response["status"], "error");
         assert_eq!(response["error_message"], "dry_run must be a JSON boolean");
@@ -1042,14 +796,10 @@ mod tests {
 
     #[test]
     fn process_request_rejects_zero_profile_interval() {
-        let req = serde_json::json!({
+        let response = process_test_request(&serde_json::json!({
             "cmd": "profile-start",
             "interval_ms": 0,
-        });
-        let tracker = commands::new_invalidation_tracker();
-        let mut profiling_state = None;
-        let response =
-            process_request(&req, &test_daemon_context(), &mut profiling_state, &tracker);
+        }));
 
         assert_eq!(response["status"], "error");
         assert_eq!(
@@ -1064,55 +814,45 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .expect("clock should be after epoch")
             .as_nanos();
-        let path = std::env::temp_dir().join(format!("bpfrejit-profile-{timestamp}.json"));
+        let src_path = std::env::temp_dir().join(format!("bpfrejit-profile-src-{timestamp}.json"));
+        let dst_path = std::env::temp_dir().join(format!("bpfrejit-profile-dst-{timestamp}.json"));
+        std::fs::write(
+            &src_path,
+            r#"[{"prog_id":123,"duration_ms":5,"run_cnt_delta":1,"run_time_ns_delta":2}]"#,
+        )
+        .expect("write source profile");
+
         let tracker = commands::new_invalidation_tracker();
-        let snapshot = profiler::ProfileSnapshot {
-            version: profiler::ProfileSnapshot::VERSION,
-            collected_at: "2026-03-28T00:00:00Z".to_string(),
-            duration_ms: 5_000,
-            programs: BTreeMap::from([(
-                "123".to_string(),
-                profiler::ProgramProfile {
-                    run_cnt: 10_000,
-                    run_time_ns: 500_000,
-                    avg_ns: Some(50.0),
-                    branch_miss_rate: Some(0.05),
-                },
-            )]),
-        };
-        let mut profiling_state = Some(ProfilingState::Frozen(snapshot.clone()));
+        let mut profiling_state = None;
+        let load_response = process_request(
+            &serde_json::json!({
+                "cmd": "profile-load",
+                "path": src_path.display().to_string(),
+            }),
+            &CliConfig::from_env(),
+            &mut profiling_state,
+            &tracker,
+        );
+        assert_eq!(load_response["status"], "ok");
+        assert_eq!(load_response["programs_loaded"], 1);
 
         let save_response = process_request(
             &serde_json::json!({
                 "cmd": "profile-save",
-                "path": path.display().to_string(),
+                "path": dst_path.display().to_string(),
             }),
-            &test_daemon_context(),
+            &CliConfig::from_env(),
             &mut profiling_state,
             &tracker,
         );
-
         assert_eq!(save_response["status"], "ok");
         assert_eq!(save_response["programs"], 1);
-
-        let mut loaded_state = None;
-        let load_response = process_request(
-            &serde_json::json!({
-                "cmd": "profile-load",
-                "path": path.display().to_string(),
-            }),
-            &test_daemon_context(),
-            &mut loaded_state,
-            &tracker,
+        assert!(
+            dst_path.exists(),
+            "profile-save should write the destination file"
         );
 
-        assert_eq!(load_response["status"], "ok");
-        assert_eq!(load_response["programs_loaded"], 1);
-        match loaded_state {
-            Some(ProfilingState::Frozen(loaded)) => assert_eq!(loaded, snapshot),
-            _ => panic!("expected frozen profile state after load"),
-        }
-
-        std::fs::remove_file(&path).expect("profile snapshot cleanup should succeed");
+        std::fs::remove_file(&src_path).expect("source profile cleanup should succeed");
+        std::fs::remove_file(&dst_path).expect("destination profile cleanup should succeed");
     }
 }

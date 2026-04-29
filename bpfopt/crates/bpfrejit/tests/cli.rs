@@ -131,6 +131,30 @@ fn fd_array_missing_btf_fd_exits_with_friendly_error() {
 }
 
 #[test]
+fn map_fds_malformed_json_exits_before_opening_target_program() {
+    let bytecode_path = write_temp_file("prog.bin", minimal_program_bytes());
+    let map_fds_path = write_temp_file("malformed-map-fds.json", b"{ not json");
+    let bytecode_arg = bytecode_path.to_string_lossy().to_string();
+    let map_fds_arg = map_fds_path.to_string_lossy().to_string();
+
+    let output = Command::new(bpfrejit_bin())
+        .args(["--map-fds", &map_fds_arg, "0", &bytecode_arg])
+        .output()
+        .expect("run bpfrejit with malformed map_fds JSON");
+    remove_file_if_exists(bytecode_path);
+    remove_file_if_exists(map_fds_path);
+
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("failed to parse map_fds JSON"),
+        "stderr={stderr}"
+    );
+    assert!(!stderr.contains("open BPF program id 0"), "stderr={stderr}");
+    assert!(output.stdout.is_empty());
+}
+
+#[test]
 fn dry_run_accepts_fd_array_before_opening_target_program() {
     let fd_array_path =
         write_temp_file("fd-array.json", br#"[{"name":"bpf_rotate64","btf_fd":0}]"#);

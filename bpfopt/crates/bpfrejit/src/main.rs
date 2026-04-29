@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 //! bpfrejit CLI entry point.
 
+use std::collections::HashMap;
 use std::fs;
 use std::io::{self, Read, Write};
-use std::os::fd::AsFd;
+use std::os::fd::{AsFd, AsRawFd, OwnedFd};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
@@ -12,6 +13,9 @@ use clap::Parser;
 use serde::{Deserialize, Serialize};
 
 const LOG_BUF_SIZE: usize = 1024 * 1024;
+const BPF_LD_IMM64: u8 = (kernel_sys::BPF_LD | kernel_sys::BPF_DW | kernel_sys::BPF_IMM) as u8;
+const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
+const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
 
 #[derive(Parser, Debug)]
 #[command(name = "bpfrejit", version, about = "Submit replacement BPF bytecode")]
@@ -25,6 +29,9 @@ struct Cli {
     /// kinsn fd_array JSON manifest.
     #[arg(long, value_name = "FILE")]
     fd_array: Option<PathBuf>,
+    /// Map FD manifest from bpfget --full.
+    #[arg(long, value_name = "FILE")]
+    map_fds: Option<PathBuf>,
     /// Verify the bytecode with BPF_PROG_LOAD and do not call BPF_PROG_REJIT.
     #[arg(long)]
     dry_run: bool,
@@ -41,6 +48,30 @@ struct FdArrayEntry {
     btf_id: Option<u32>,
     btf_obj_id: Option<u32>,
     btf_module: Option<String>,
+}
+
+#[derive(Debug)]
+struct MapBinding {
+    old_fd: Option<i32>,
+    map_id: u32,
+}
+
+struct FdArray {
+    fds: Vec<i32>,
+    _owned_fds: Vec<OwnedFd>,
+}
+
+impl FdArray {
+    fn empty() -> Self {
+        Self {
+            fds: Vec::new(),
+            _owned_fds: Vec::new(),
+        }
+    }
+
+    fn as_slice(&self) -> &[i32] {
+        &self.fds
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -65,7 +96,8 @@ fn main() -> ExitCode {
 fn run() -> Result<()> {
     let cli = Cli::parse();
 
-    let insns = read_bytecode(cli.file.as_deref())?;
+    let mut insns = read_bytecode(cli.file.as_deref())?;
+    let _map_fds = apply_map_fds(cli.map_fds.as_deref(), &mut insns)?;
     let fd_array = read_fd_array(cli.fd_array.as_deref())?;
 
     let prog_fd = kernel_sys::prog_get_fd_by_id(cli.prog_id)
@@ -79,7 +111,7 @@ fn run() -> Result<()> {
         kernel_sys::prog_load_dryrun_with_fd_array(
             info.prog_type,
             &insns,
-            Some(&fd_array),
+            Some(fd_array.as_slice()),
             Some(&mut log_buf),
         )
         .context("dry-run verifier rejected bytecode")?;
@@ -95,8 +127,13 @@ fn run() -> Result<()> {
         );
     }
 
-    kernel_sys::prog_rejit(prog_fd.as_fd(), &insns, &fd_array, Some(&mut log_buf))
-        .context("kernel rejected BPF_PROG_REJIT")?;
+    kernel_sys::prog_rejit(
+        prog_fd.as_fd(),
+        &insns,
+        fd_array.as_slice(),
+        Some(&mut log_buf),
+    )
+    .context("kernel rejected BPF_PROG_REJIT")?;
     write_summary(
         cli.output.as_deref(),
         &Summary {
@@ -166,21 +203,138 @@ fn parse_bytecode(bytes: &[u8]) -> Result<Vec<kernel_sys::bpf_insn>> {
         .collect())
 }
 
-fn read_fd_array(path: Option<&Path>) -> Result<Vec<i32>> {
+fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Result<Vec<OwnedFd>> {
     let Some(path) = path else {
         return Ok(Vec::new());
+    };
+    let bindings = read_map_bindings(path)?;
+    let old_fds = pseudo_map_old_fds(insns);
+    let mut old_fd_to_map_id = HashMap::new();
+
+    for binding in bindings.iter().filter(|binding| binding.old_fd.is_some()) {
+        old_fd_to_map_id.insert(binding.old_fd.unwrap(), binding.map_id);
+    }
+    let positional = bindings
+        .iter()
+        .filter(|binding| binding.old_fd.is_none())
+        .map(|binding| binding.map_id)
+        .collect::<Vec<_>>();
+    for (idx, old_fd) in old_fds.iter().copied().enumerate() {
+        if old_fd_to_map_id.contains_key(&old_fd) {
+            continue;
+        }
+        let Some(&map_id) = positional.get(idx) else {
+            bail!(
+                "{} does not provide a map_id for pseudo-map old fd {}",
+                path.display(),
+                old_fd
+            );
+        };
+        old_fd_to_map_id.insert(old_fd, map_id);
+    }
+
+    let mut opened = HashMap::<u32, OwnedFd>::new();
+    for map_id in old_fd_to_map_id.values().copied() {
+        opened.entry(map_id).or_insert(
+            kernel_sys::map_get_fd_by_id(map_id)
+                .with_context(|| format!("open BPF map id {map_id} from {}", path.display()))?,
+        );
+    }
+
+    let mut pc = 0usize;
+    while pc < insns.len() {
+        if is_pseudo_map_ldimm64(&insns[pc]) {
+            let old_fd = insns[pc].imm;
+            let map_id = *old_fd_to_map_id
+                .get(&old_fd)
+                .ok_or_else(|| anyhow!("no map binding for pseudo-map old fd {old_fd}"))?;
+            insns[pc].imm = opened[&map_id].as_raw_fd();
+            pc += 2;
+        } else {
+            pc += 1;
+        }
+    }
+
+    Ok(opened.into_values().collect())
+}
+
+fn pseudo_map_old_fds(insns: &[kernel_sys::bpf_insn]) -> Vec<i32> {
+    let mut old_fds = Vec::new();
+    let mut pc = 0usize;
+    while pc < insns.len() {
+        if is_pseudo_map_ldimm64(&insns[pc]) {
+            let old_fd = insns[pc].imm;
+            if !old_fds.contains(&old_fd) {
+                old_fds.push(old_fd);
+            }
+            pc += 2;
+        } else {
+            pc += 1;
+        }
+    }
+    old_fds
+}
+
+fn is_pseudo_map_ldimm64(insn: &kernel_sys::bpf_insn) -> bool {
+    insn.code == BPF_LD_IMM64 && matches!(insn.src_reg(), BPF_PSEUDO_MAP_FD | BPF_PSEUDO_MAP_VALUE)
+}
+
+fn read_map_bindings(path: &Path) -> Result<Vec<MapBinding>> {
+    let text =
+        fs::read_to_string(path).with_context(|| format!("failed to read {}", path.display()))?;
+    let value: serde_json::Value = serde_json::from_str(&text)
+        .with_context(|| format!("failed to parse map_fds JSON {}", path.display()))?;
+    let rows = if let Some(array) = value.as_array() {
+        array.clone()
+    } else if let Some(array) = value.get("maps").and_then(|v| v.as_array()) {
+        array.clone()
+    } else if let Some(array) = value.get("map_ids").and_then(|v| v.as_array()) {
+        array
+            .iter()
+            .map(|map_id| serde_json::json!({ "map_id": map_id }))
+            .collect()
+    } else {
+        bail!(
+            "{} must be an array or contain maps/map_ids",
+            path.display()
+        );
+    };
+
+    rows.into_iter()
+        .enumerate()
+        .map(|(idx, row)| {
+            let map_id = row
+                .get("map_id")
+                .and_then(|v| v.as_u64())
+                .ok_or_else(|| anyhow!("map_fds entry {idx} is missing map_id"))?;
+            let old_fd = row.get("old_fd").and_then(|v| v.as_i64());
+            Ok(MapBinding {
+                old_fd: old_fd.map(|fd| fd as i32),
+                map_id: u32::try_from(map_id)
+                    .with_context(|| format!("map_fds entry {idx} map_id out of range"))?,
+            })
+        })
+        .collect()
+}
+
+fn read_fd_array(path: Option<&Path>) -> Result<FdArray> {
+    let Some(path) = path else {
+        return Ok(FdArray::empty());
     };
     let text =
         fs::read_to_string(path).with_context(|| format!("failed to read {}", path.display()))?;
     let entries: Vec<FdArrayEntry> = serde_json::from_str(&text)
         .with_context(|| format!("failed to parse fd_array JSON {}", path.display()))?;
-    let required = required_btf_fds(&entries)?;
-    Ok(build_rejit_fd_array(&required))
+    let (required, owned_fds) = required_btf_fds(&entries)?;
+    Ok(FdArray {
+        fds: build_rejit_fd_array(&required),
+        _owned_fds: owned_fds,
+    })
 }
 
-fn required_btf_fds(entries: &[FdArrayEntry]) -> Result<Vec<i32>> {
+fn required_btf_fds(entries: &[FdArrayEntry]) -> Result<(Vec<i32>, Vec<OwnedFd>)> {
     if entries.is_empty() {
-        return Ok(Vec::new());
+        return Ok((Vec::new(), Vec::new()));
     }
 
     let has_slots = entries.iter().any(|entry| entry.slot.is_some());
@@ -190,25 +344,14 @@ fn required_btf_fds(entries: &[FdArrayEntry]) -> Result<Vec<i32>> {
     }
 
     let mut rows = Vec::with_capacity(entries.len());
+    let mut owned_fds = Vec::new();
     for (index, entry) in entries.iter().enumerate() {
         let label = entry
             .name
             .as_deref()
             .map(|name| format!(" ({name})"))
             .unwrap_or_else(String::new);
-        if entry.btf_id.is_some() || entry.btf_obj_id.is_some() || entry.btf_module.is_some() {
-            bail!(
-                "fd_array entry {}{} uses btf_id/btf_obj_id/btf_module, but this CLI stage only supports inherited btf_fd",
-                index,
-                label
-            );
-        }
-        let btf_fd = entry
-            .btf_fd
-            .ok_or_else(|| anyhow!("fd_array entry {index}{label} is missing btf_fd"))?;
-        if btf_fd < 0 {
-            bail!("fd_array entry {index}{label} has negative btf_fd {btf_fd}");
-        }
+        let btf_fd = resolve_btf_fd(entry, index, &label, &mut owned_fds)?;
         let slot = entry.slot.unwrap_or(index + 1);
         if slot == 0 {
             bail!("fd_array entry {index}{label} uses invalid slot 0");
@@ -226,7 +369,37 @@ fn required_btf_fds(entries: &[FdArrayEntry]) -> Result<Vec<i32>> {
         }
         out.push(btf_fd);
     }
-    Ok(out)
+    Ok((out, owned_fds))
+}
+
+fn resolve_btf_fd(
+    entry: &FdArrayEntry,
+    index: usize,
+    label: &str,
+    owned_fds: &mut Vec<OwnedFd>,
+) -> Result<i32> {
+    if entry.btf_module.is_some() {
+        bail!("fd_array entry {index}{label} uses unsupported btf_module");
+    }
+    if let Some(btf_fd) = entry.btf_fd {
+        if btf_fd < 0 {
+            bail!("fd_array entry {index}{label} has negative btf_fd {btf_fd}");
+        }
+        return Ok(btf_fd);
+    }
+    let btf_id = entry
+        .btf_id
+        .or(entry.btf_obj_id)
+        .ok_or_else(|| anyhow!("fd_array entry {index}{label} is missing btf_fd or btf_id"))?;
+    if btf_id == 0 {
+        bail!("fd_array entry {index}{label} has invalid btf_id 0");
+    }
+    let fd = kernel_sys::btf_get_fd_by_id(btf_id).with_context(|| {
+        format!("open BTF fd for fd_array entry {index}{label} btf_id {btf_id}")
+    })?;
+    let raw_fd = fd.as_raw_fd();
+    owned_fds.push(fd);
+    Ok(raw_fd)
 }
 
 fn build_rejit_fd_array(required_btf_fds: &[i32]) -> Vec<i32> {
@@ -286,7 +459,8 @@ mod tests {
             },
         ];
 
-        let required = required_btf_fds(&entries).expect("required fds");
+        let (required, owned_fds) = required_btf_fds(&entries).expect("required fds");
+        assert!(owned_fds.is_empty());
         assert_eq!(build_rejit_fd_array(&required), vec![11, 11, 22]);
     }
 
