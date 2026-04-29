@@ -1,28 +1,22 @@
 // SPDX-License-Identifier: MIT
-//! Thread-local mock map facility for tests.
-//!
-//! Provides the same `install_mock_map` / `BpfMapInfo` / `MockMapState` API
-//! that daemon/src/bpf.rs had, but stores data in a thread-local instead of
-//! doing real BPF syscalls. Tests call `apply_mock_maps(&mut program)` to
-//! flush the mock data onto BpfProgram fields before running passes.
+//! Thread-local mock map provider for tests.
 
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::sync::Arc;
 
-use crate::pass::{BpfProgram, MapMetadata};
+use crate::pass::{
+    BpfProgram, MapInfoProvider, MapMetadata, MapValueProvider, SnapshotMapProvider,
+};
 
-/// Mirror of the old `bpf::BpfMapInfo` struct — just enough fields for tests.
 #[derive(Clone, Debug, Default)]
 pub struct BpfMapInfo {
-    pub id: u32,
     pub map_type: u32,
     pub key_size: u32,
     pub value_size: u32,
     pub max_entries: u32,
-    pub map_flags: u32,
 }
 
-/// Mirror of the old `bpf::MockMapState`.
 #[derive(Clone, Debug)]
 pub struct MockMapState {
     pub info: BpfMapInfo,
@@ -36,14 +30,92 @@ thread_local! {
 
 const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
 
-/// Install a mock map into the thread-local store.
 pub fn install_mock_map(map_id: u32, state: MockMapState) {
     MOCK_MAPS.with(|maps| {
         maps.borrow_mut().insert(map_id, state);
     });
 }
 
-pub fn mock_map_metadata(map_id: u32) -> Option<MapMetadata> {
+#[derive(Clone, Debug, Default)]
+pub struct MockMapProvider;
+
+impl MapInfoProvider for MockMapProvider {
+    fn map_info(
+        &self,
+        program: &BpfProgram,
+        map_id: u32,
+    ) -> std::result::Result<Option<crate::analysis::MapInfo>, String> {
+        if let Some(metadata) = program.map_metadata.get(&map_id) {
+            return Ok(Some(map_info_from_metadata(metadata)));
+        }
+
+        Ok(mock_map_metadata(map_id).map(|metadata| map_info_from_metadata(&metadata)))
+    }
+}
+
+impl MapValueProvider for MockMapProvider {
+    fn lookup_value_size(
+        &self,
+        program: &BpfProgram,
+        info: &crate::analysis::MapInfo,
+    ) -> std::result::Result<usize, String> {
+        if let Some(value_size) = program
+            .map_values
+            .iter()
+            .find_map(|((map_id, _), value)| (*map_id == info.map_id).then_some(value.len()))
+        {
+            return Ok(value_size);
+        }
+
+        Ok(mock_lookup_value_size(info.map_id).unwrap_or(info.value_size as usize))
+    }
+
+    fn lookup_elem(
+        &self,
+        program: &BpfProgram,
+        map_id: u32,
+        key: &[u8],
+        value_size: usize,
+    ) -> std::result::Result<Vec<u8>, String> {
+        if let Some(value) = program.map_values.get(&(map_id, key.to_vec())) {
+            if value.len() != value_size {
+                return Err(format!(
+                    "snapshot map {} returned value size {}, expected {}",
+                    map_id,
+                    value.len(),
+                    value_size
+                ));
+            }
+            return Ok(value.clone());
+        }
+        if program.map_value_nulls.contains(&(map_id, key.to_vec())) {
+            return Err(crate::pass::null_map_value_snapshot_message(map_id, key));
+        }
+
+        if let Some(result) = mock_lookup_elem(map_id, key, value_size) {
+            return result;
+        }
+
+        SnapshotMapProvider.lookup_elem(program, map_id, key, value_size)
+    }
+}
+
+pub fn use_mock_maps(program: &mut BpfProgram) {
+    program.set_map_providers(Arc::new(MockMapProvider), Arc::new(MockMapProvider));
+}
+
+fn map_info_from_metadata(metadata: &MapMetadata) -> crate::analysis::MapInfo {
+    crate::analysis::MapInfo {
+        map_type: metadata.map_type,
+        key_size: metadata.key_size,
+        value_size: metadata.value_size,
+        max_entries: metadata.max_entries,
+        frozen: metadata.frozen,
+        map_id: metadata.map_id,
+    }
+}
+
+fn mock_map_metadata(map_id: u32) -> Option<MapMetadata> {
     MOCK_MAPS.with(|maps| {
         maps.borrow().get(&map_id).map(|state| MapMetadata {
             map_type: state.info.map_type,
@@ -56,7 +128,7 @@ pub fn mock_map_metadata(map_id: u32) -> Option<MapMetadata> {
     })
 }
 
-pub fn mock_lookup_value_size(map_id: u32) -> Option<usize> {
+fn mock_lookup_value_size(map_id: u32) -> Option<usize> {
     MOCK_MAPS.with(|maps| {
         let maps = maps.borrow();
         let state = maps.get(&map_id)?;
@@ -70,11 +142,7 @@ pub fn mock_lookup_value_size(map_id: u32) -> Option<usize> {
     })
 }
 
-pub fn mock_lookup_elem(
-    map_id: u32,
-    key: &[u8],
-    value_size: usize,
-) -> Option<Result<Vec<u8>, String>> {
+fn mock_lookup_elem(map_id: u32, key: &[u8], value_size: usize) -> Option<Result<Vec<u8>, String>> {
     MOCK_MAPS.with(|maps| {
         let maps = maps.borrow();
         let state = maps.get(&map_id)?;
@@ -98,28 +166,4 @@ pub fn mock_lookup_elem(
 
 fn round_up_8(value: usize) -> usize {
     (value + 7) & !7
-}
-
-/// Flush all thread-local mock maps onto the given program's `map_metadata`
-/// and `map_values` fields, then clear the thread-local store.
-pub fn apply_mock_maps(program: &mut BpfProgram) {
-    MOCK_MAPS.with(|maps| {
-        let mut maps = maps.borrow_mut();
-        for (map_id, state) in maps.drain() {
-            program.map_metadata.insert(
-                map_id,
-                MapMetadata {
-                    map_type: state.info.map_type,
-                    key_size: state.info.key_size,
-                    value_size: state.info.value_size,
-                    max_entries: state.info.max_entries,
-                    frozen: state.frozen,
-                    map_id,
-                },
-            );
-            for (key, value) in state.values {
-                program.map_values.insert((map_id, key), value);
-            }
-        }
-    });
 }

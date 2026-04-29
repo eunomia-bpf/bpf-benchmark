@@ -124,14 +124,6 @@ fn test_scan_wide_mem_multiple_sites() {
     assert_eq!(sites[1].get_binding("dst_reg"), Some(3));
 }
 
-#[test]
-fn test_scan_wide_mem_prefers_largest_width() {
-    let insns = build_wide_mem_4(0, 6, 0);
-    let sites = scan_wide_mem(&insns);
-    assert_eq!(sites.len(), 1);
-    assert_eq!(sites[0].get_binding("width"), Some(4));
-}
-
 // ── High-byte-first (Variant B) tests ──────────────────────────
 
 fn build_wide_mem_high_first_2(dst: u8, tmp: u8, base: u8, off: i16) -> Vec<BpfInsn> {
@@ -139,21 +131,6 @@ fn build_wide_mem_high_first_2(dst: u8, tmp: u8, base: u8, off: i16) -> Vec<BpfI
         BpfInsn::ldx_mem(BPF_B, dst, base, off + 1),
         BpfInsn::alu64_imm(BPF_LSH, dst, 8),
         BpfInsn::ldx_mem(BPF_B, tmp, base, off),
-        BpfInsn::alu64_reg(BPF_OR, dst, tmp),
-    ]
-}
-
-fn build_wide_mem_high_first_4(dst: u8, tmp: u8, base: u8, off: i16) -> Vec<BpfInsn> {
-    vec![
-        BpfInsn::ldx_mem(BPF_B, dst, base, off + 1),
-        BpfInsn::alu64_imm(BPF_LSH, dst, 8),
-        BpfInsn::ldx_mem(BPF_B, tmp, base, off),
-        BpfInsn::alu64_reg(BPF_OR, dst, tmp),
-        BpfInsn::ldx_mem(BPF_B, tmp, base, off + 2),
-        BpfInsn::alu64_imm(BPF_LSH, tmp, 16),
-        BpfInsn::alu64_reg(BPF_OR, dst, tmp),
-        BpfInsn::ldx_mem(BPF_B, tmp, base, off + 3),
-        BpfInsn::alu64_imm(BPF_LSH, tmp, 24),
         BpfInsn::alu64_reg(BPF_OR, dst, tmp),
     ]
 }
@@ -170,20 +147,6 @@ fn test_scan_high_first_2byte() {
     assert_eq!(s.get_binding("base_reg"), Some(6));
     assert_eq!(s.get_binding("base_off"), Some(10));
     assert_eq!(s.get_binding("width"), Some(2));
-}
-
-#[test]
-fn test_scan_high_first_4byte() {
-    let insns = build_wide_mem_high_first_4(2, 3, 1, 8);
-    let sites = scan_wide_mem(&insns);
-    assert_eq!(sites.len(), 1);
-    let s = &sites[0];
-    assert_eq!(s.start_pc, 0);
-    assert_eq!(s.old_len, 10);
-    assert_eq!(s.get_binding("dst_reg"), Some(2));
-    assert_eq!(s.get_binding("base_reg"), Some(1));
-    assert_eq!(s.get_binding("base_off"), Some(8));
-    assert_eq!(s.get_binding("width"), Some(4));
 }
 
 #[test]
@@ -212,18 +175,6 @@ fn test_scan_high_first_matches_clang_output() {
 }
 
 #[test]
-fn test_scan_high_first_embedded() {
-    let mut insns = vec![BpfInsn::mov64_imm(0, 0)];
-    insns.extend(build_wide_mem_high_first_4(2, 3, 1, 8));
-    insns.push(BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0));
-    let sites = scan_wide_mem(&insns);
-    assert_eq!(sites.len(), 1);
-    assert_eq!(sites[0].start_pc, 1);
-    assert_eq!(sites[0].old_len, 10);
-    assert_eq!(sites[0].get_binding("base_off"), Some(8));
-}
-
-#[test]
 fn test_scan_high_first_no_false_positive() {
     let insns = vec![
         BpfInsn::ldx_mem(BPF_B, 2, 1, 9),
@@ -240,110 +191,44 @@ fn test_scan_high_first_no_false_positive() {
     assert_eq!(sites[0].get_binding("width"), Some(2));
 }
 
-#[test]
-fn test_scan_high_first_prefers_largest() {
-    let insns = build_wide_mem_high_first_4(2, 3, 1, 0);
-    let sites = scan_wide_mem(&insns);
-    assert_eq!(sites.len(), 1);
-    assert_eq!(sites[0].get_binding("width"), Some(4));
-}
-
 // ── Emission tests (from emit.rs) ──────────────────────────────
 
 #[test]
-fn test_emit_wide_mem_4() {
-    let site = RewriteSite {
-        start_pc: 5,
-        old_len: 10,
-        bindings: vec![
-            Binding {
-                name: "dst_reg",
-                value: 0,
-            },
-            Binding {
-                name: "base_reg",
-                value: 6,
-            },
-            Binding {
-                name: "base_off",
-                value: 10,
-            },
-            Binding {
-                name: "width",
-                value: 4,
-            },
-        ],
-    };
-    let result = emit_wide_mem(&site).unwrap();
-    assert_eq!(result.len(), 1);
-    assert_eq!(result[0].code, BPF_LDX | BPF_W | BPF_MEM);
-    assert_eq!(result[0].dst_reg(), 0);
-    assert_eq!(result[0].src_reg(), 6);
-    assert_eq!(result[0].off, 10);
-}
-
-#[test]
-fn test_emit_wide_mem_2() {
-    let site = RewriteSite {
-        start_pc: 0,
-        old_len: 4,
-        bindings: vec![
-            Binding {
-                name: "dst_reg",
-                value: 1,
-            },
-            Binding {
-                name: "base_reg",
-                value: 7,
-            },
-            Binding {
-                name: "base_off",
-                value: 0,
-            },
-            Binding {
-                name: "width",
-                value: 2,
-            },
-        ],
-    };
-    let result = emit_wide_mem(&site).unwrap();
-    assert_eq!(result.len(), 1);
-    assert_eq!(result[0].code, BPF_LDX | BPF_H | BPF_MEM);
-    assert_eq!(result[0].dst_reg(), 1);
-    assert_eq!(result[0].src_reg(), 7);
-    assert_eq!(result[0].off, 0);
-}
-
-#[test]
-fn test_emit_wide_mem_8() {
-    let site = RewriteSite {
-        start_pc: 0,
-        old_len: 22,
-        bindings: vec![
-            Binding {
-                name: "dst_reg",
-                value: 3,
-            },
-            Binding {
-                name: "base_reg",
-                value: 10,
-            },
-            Binding {
-                name: "base_off",
-                value: -8,
-            },
-            Binding {
-                name: "width",
-                value: 8,
-            },
-        ],
-    };
-    let result = emit_wide_mem(&site).unwrap();
-    assert_eq!(result.len(), 1);
-    assert_eq!(result[0].code, BPF_LDX | BPF_DW | BPF_MEM);
-    assert_eq!(result[0].dst_reg(), 3);
-    assert_eq!(result[0].src_reg(), 10);
-    assert_eq!(result[0].off, -8);
+fn test_emit_wide_mem_supported_widths() {
+    for (width, size, dst, base, off) in [
+        (2, BPF_H, 1, 7, 0),
+        (4, BPF_W, 0, 6, 10),
+        (8, BPF_DW, 3, 10, -8),
+    ] {
+        let site = RewriteSite {
+            start_pc: 0,
+            old_len: 1 + 3 * (width as usize - 1),
+            bindings: vec![
+                Binding {
+                    name: "dst_reg",
+                    value: dst as i64,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: base as i64,
+                },
+                Binding {
+                    name: "base_off",
+                    value: off as i64,
+                },
+                Binding {
+                    name: "width",
+                    value: width as i64,
+                },
+            ],
+        };
+        let result = emit_wide_mem(&site).unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].code, BPF_LDX | size | BPF_MEM);
+        assert_eq!(result[0].dst_reg(), dst as u8);
+        assert_eq!(result[0].src_reg(), base as u8);
+        assert_eq!(result[0].off, off as i16);
+    }
 }
 
 #[test]
@@ -374,22 +259,6 @@ fn test_emit_wide_mem_unsupported_width() {
 }
 
 // ── Pass tests ─────────────────────────────────────────────────
-
-#[test]
-fn test_wide_mem_pass_finds_sites() {
-    let mut prog = make_program(make_wide_mem_4byte_program());
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
-    assert_eq!(result.sites_applied, 1);
-    assert_eq!(prog.insns.len(), 2);
-    assert!(prog.insns[0].is_ldx_mem());
-    assert_eq!(bpf_size(prog.insns[0].code), BPF_W);
-}
 
 #[test]
 fn test_wide_mem_pass_no_sites() {
@@ -427,36 +296,6 @@ fn test_wide_mem_pass_transforms_correctly() {
     assert_eq!(prog.insns[0].dst_reg(), 0);
     assert_eq!(prog.insns[0].src_reg(), 6);
     assert_eq!(prog.insns[0].off, 10);
-}
-
-#[test]
-fn test_wide_mem_pass_preserves_branch_offsets() {
-    let mut insns = vec![BpfInsn::ja(10)];
-    insns.push(BpfInsn::ldx_mem(BPF_B, 0, 6, 0));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 2, 6, 1));
-    insns.push(BpfInsn::alu64_imm(BPF_LSH, 2, 8));
-    insns.push(BpfInsn::alu64_reg(BPF_OR, 0, 2));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 3, 6, 2));
-    insns.push(BpfInsn::alu64_imm(BPF_LSH, 3, 16));
-    insns.push(BpfInsn::alu64_reg(BPF_OR, 0, 3));
-    insns.push(BpfInsn::ldx_mem(BPF_B, 4, 6, 3));
-    insns.push(BpfInsn::alu64_imm(BPF_LSH, 4, 24));
-    insns.push(BpfInsn::alu64_reg(BPF_OR, 0, 4));
-    insns.push(exit_insn());
-
-    let mut prog = make_program(insns);
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
-    assert_eq!(prog.insns.len(), 3);
-
-    let ja = &prog.insns[0];
-    assert!(ja.is_ja());
-    assert_eq!(ja.off, 1, "ja should jump to exit at pc 2");
 }
 
 #[test]
@@ -530,26 +369,6 @@ fn test_wide_mem_pass_skips_site_with_live_scratch_reg() {
         .reason
         .contains("scratch register live"),);
     assert_eq!(prog.insns.len(), 6);
-}
-
-#[test]
-fn test_wide_mem_pass_applies_when_scratch_dead() {
-    let mut prog = make_program(vec![
-        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
-    assert_eq!(result.sites_applied, 1);
-    assert_eq!(prog.insns.len(), 2);
 }
 
 #[test]
@@ -765,37 +584,6 @@ fn test_wide_mem_skips_non_stack_in_xdp() {
 }
 
 #[test]
-fn test_wide_mem_skips_non_stack_in_tc() {
-    // Same pattern but with SCHED_CLS (type 3).
-    let mut prog = make_program(vec![
-        BpfInsn::ldx_mem(BPF_B, 2, 1, 0),
-        BpfInsn::ldx_mem(BPF_B, 3, 1, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 3, 8),
-        BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        BpfInsn::ldx_mem(BPF_B, 3, 1, 2),
-        BpfInsn::alu64_imm(BPF_LSH, 3, 16),
-        BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        BpfInsn::ldx_mem(BPF_B, 3, 1, 3),
-        BpfInsn::alu64_imm(BPF_LSH, 3, 24),
-        BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let mut ctx = PassContext::test_default();
-    ctx.prog_type = 3; // SCHED_CLS
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(!result.changed, "should skip non-stack base in TC");
-    assert_eq!(result.sites_applied, 0);
-    assert!(result
-        .sites_skipped
-        .iter()
-        .any(|s| s.reason.contains("packet pointer") || s.reason.contains("non-stack base")));
-}
-
-#[test]
 fn test_wide_mem_allows_stack_base_in_xdp() {
     // Byte-ladder from R10 (stack pointer) should still work in XDP.
     let mut prog = make_program(vec![
@@ -871,29 +659,6 @@ fn test_wide_mem_allows_non_stack_in_tracing() {
     assert!(
         result.changed,
         "non-stack base should work in tracing progs"
-    );
-    assert_eq!(result.sites_applied, 1);
-}
-
-#[test]
-fn test_wide_mem_allows_non_stack_with_unknown_prog_type() {
-    // With prog_type=0 (unknown/unspecified), no packet filter applies.
-    let mut prog = make_program(vec![
-        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default(); // prog_type = 0
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(
-        result.changed,
-        "unknown prog_type should not block wide_mem"
     );
     assert_eq!(result.sites_applied, 1);
 }

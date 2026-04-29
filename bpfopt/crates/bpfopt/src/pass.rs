@@ -198,7 +198,7 @@ pub trait MapValueProvider: Send + Sync + std::fmt::Debug {
     ) -> std::result::Result<Vec<u8>, String>;
 }
 
-/// Snapshot-backed map provider used by offline snapshots and unit tests.
+/// Snapshot-backed map provider used by offline snapshots.
 #[derive(Clone, Debug, Default)]
 pub struct SnapshotMapProvider;
 
@@ -209,20 +209,6 @@ impl MapInfoProvider for SnapshotMapProvider {
         map_id: u32,
     ) -> std::result::Result<Option<crate::analysis::MapInfo>, String> {
         let Some(metadata) = program.map_metadata.get(&map_id) else {
-            #[cfg(test)]
-            {
-                return Ok(crate::mock_maps::mock_map_metadata(map_id).map(|metadata| {
-                    crate::analysis::MapInfo {
-                        map_type: metadata.map_type,
-                        key_size: metadata.key_size,
-                        value_size: metadata.value_size,
-                        max_entries: metadata.max_entries,
-                        frozen: metadata.frozen,
-                        map_id: metadata.map_id,
-                    }
-                }));
-            }
-            #[cfg(not(test))]
             return Err(format!(
                 "map_values snapshot has no metadata for map {}",
                 map_id
@@ -245,22 +231,15 @@ impl MapValueProvider for SnapshotMapProvider {
         program: &BpfProgram,
         info: &crate::analysis::MapInfo,
     ) -> std::result::Result<usize, String> {
-        program
+        if let Some(value_size) = program
             .map_values
             .iter()
             .find_map(|((map_id, _), value)| (*map_id == info.map_id).then_some(value.len()))
-            .or({
-                #[cfg(test)]
-                {
-                    crate::mock_maps::mock_lookup_value_size(info.map_id)
-                }
-                #[cfg(not(test))]
-                {
-                    None
-                }
-            })
-            .or(Some(info.value_size as usize))
-            .ok_or_else(|| format!("map {} has no value size", info.map_id))
+        {
+            return Ok(value_size);
+        }
+
+        Ok(info.value_size as usize)
     }
 
     fn lookup_elem(
@@ -283,11 +262,6 @@ impl MapValueProvider for SnapshotMapProvider {
         }
         if program.map_value_nulls.contains(&(map_id, key.to_vec())) {
             return Err(null_map_value_snapshot_message(map_id, key));
-        }
-
-        #[cfg(test)]
-        if let Some(result) = crate::mock_maps::mock_lookup_elem(map_id, key, value_size) {
-            return result;
         }
 
         if !program.map_metadata.contains_key(&map_id) {

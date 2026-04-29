@@ -1,7 +1,7 @@
 use super::*;
 use std::collections::HashMap;
 
-use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
+use crate::bpf::{install_mock_map, use_mock_maps, BpfMapInfo, MockMapState};
 use crate::insn::*;
 use crate::pass::{BpfProgram, PassContext, PipelineResult};
 
@@ -58,11 +58,9 @@ fn install_map(map_id: u32, map_type: u32, value: Vec<u8>) {
 
     let info = BpfMapInfo {
         map_type,
-        id: map_id,
         key_size: 4,
         value_size: value.len() as u32,
         max_entries: 8,
-        ..Default::default()
     };
 
     install_mock_map(
@@ -84,6 +82,7 @@ fn install_hash_map(map_id: u32, value: Vec<u8>) {
 }
 
 fn run_pipeline_with_passes(program: &mut BpfProgram, pass_names: &[&str]) -> PipelineResult {
+    use_mock_maps(program);
     let pass_names = pass_names
         .iter()
         .map(|name| (*name).to_string())
@@ -362,6 +361,7 @@ fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
     let original_len = program.insns.len();
 
     let pm = build_full_pipeline();
+    use_mock_maps(&mut program);
     let result = pm.run(&mut program, &PassContext::test_default()).unwrap();
 
     assert!(result.program_changed);

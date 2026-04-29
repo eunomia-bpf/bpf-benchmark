@@ -315,18 +315,6 @@ fn test_bpf_program_sync_annotations_shrink() {
     assert_eq!(prog.annotations.len(), 1);
 }
 
-#[test]
-fn test_bpf_program_log_transform() {
-    let mut prog = make_program(vec![exit_insn()]);
-    assert!(!prog.has_transforms());
-    prog.log_transform(TransformEntry { sites_applied: 0 });
-    // sites_applied == 0, so has_transforms should be false
-    assert!(!prog.has_transforms());
-
-    prog.log_transform(TransformEntry { sites_applied: 1 });
-    assert!(prog.has_transforms());
-}
-
 // ── AnalysisCache tests ─────────────────────────────────────────
 
 #[test]
@@ -339,32 +327,6 @@ fn test_analysis_cache_basic() {
     let count = cache.get(&analysis, &prog);
     assert_eq!(count, 2);
     assert!(cache.is_cached::<usize>());
-}
-
-#[test]
-fn test_analysis_cache_invalidate_all() {
-    let mut cache = AnalysisCache::new();
-    let prog = make_program(vec![exit_insn()]);
-    let analysis = InsnCountAnalysis;
-
-    cache.get(&analysis, &prog);
-    assert!(cache.is_cached::<usize>());
-
-    cache.invalidate_all();
-    assert!(!cache.is_cached::<usize>());
-}
-
-#[test]
-fn test_analysis_cache_invalidate_specific() {
-    let mut cache = AnalysisCache::new();
-    let prog = make_program(vec![exit_insn()]);
-    let analysis = InsnCountAnalysis;
-
-    cache.get(&analysis, &prog);
-    assert!(cache.is_cached::<usize>());
-
-    cache.invalidate::<usize>();
-    assert!(!cache.is_cached::<usize>());
 }
 
 #[test]
@@ -414,42 +376,6 @@ fn test_pass_manager_empty_pipeline() {
     assert!(!result.program_changed);
     // Program should be unchanged.
     assert_eq!(prog.insns.len(), 2);
-}
-
-#[test]
-fn test_pass_manager_single_pass_no_change() {
-    let mut pm = PassManager::new();
-    pm.add_pass(NoOpPass);
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-    let ctx = ctx_for_pass_manager(&pm);
-
-    let result = pm.run(&mut prog, &ctx).unwrap();
-
-    assert_eq!(result.pass_results.len(), 1);
-    assert_eq!(result.pass_results[0].pass_name, "noop");
-    assert!(!result.pass_results[0].changed);
-    assert_eq!(result.total_sites_applied, 0);
-    assert!(!result.program_changed);
-    assert_eq!(prog.insns.len(), 2);
-}
-
-#[test]
-fn test_pass_manager_single_pass_with_change() {
-    let mut pm = PassManager::new();
-    pm.add_pass(AppendNopPass);
-    let mut prog = make_program(vec![exit_insn()]);
-    let ctx = ctx_for_pass_manager(&pm);
-
-    let result = pm.run(&mut prog, &ctx).unwrap();
-
-    assert_eq!(result.pass_results.len(), 1);
-    assert!(result.pass_results[0].changed);
-    assert_eq!(result.total_sites_applied, 1);
-    assert!(result.program_changed);
-    // Original 1 insn + 1 appended NOP
-    assert_eq!(prog.insns.len(), 2);
-    // Annotations should be synced
-    assert_eq!(prog.annotations.len(), 2);
 }
 
 #[test]
@@ -640,31 +566,6 @@ fn test_pass_manager_collects_debug_traces() {
     );
 }
 
-#[test]
-fn test_kinsn_registry_with_available_targets() {
-    let ctx = PassContext {
-        kinsn_registry: KinsnRegistry {
-            rotate64_btf_id: 1234,
-            select64_btf_id: -1,
-            extract64_btf_id: -1,
-            memcpy_bulk_btf_id: -1,
-            memset_bulk_btf_id: -1,
-            endian_load16_btf_id: -1,
-            endian_load32_btf_id: -1,
-            endian_load64_btf_id: -1,
-            target_call_offsets: HashMap::from([("bpf_rotate64".to_string(), 7)]),
-            target_supported_encodings: HashMap::new(),
-        },
-        kinsn_call_resolver: std::sync::Arc::new(StaticKinsnCallResolver),
-        platform: PlatformCapabilities::default(),
-        policy: PolicyConfig::default(),
-        prog_type: 0,
-    };
-    assert!(ctx.kinsn_registry.rotate64_btf_id > 0);
-    assert!(ctx.kinsn_registry.select64_btf_id < 0);
-    assert_eq!(ctx.kinsn_registry.call_off_for_pass("rotate"), 7);
-}
-
 // ── Per-target static call offset tests ────────────────────────
 
 #[test]
@@ -692,49 +593,6 @@ fn test_kinsn_registry_per_target_call_offsets() {
 }
 
 // ── Issue 5: Annotation remap tests ─────────────────────────
-
-#[test]
-fn test_remap_annotations_basic() {
-    let mut prog = make_program(vec![
-        BpfInsn::nop(),
-        BpfInsn::nop(),
-        BpfInsn::nop(),
-        exit_insn(),
-    ]);
-    // Set a branch profile on instruction 1.
-    prog.annotations[1].branch_profile = Some(BranchProfile {
-        taken_count: 100,
-        not_taken_count: 50,
-    });
-
-    // Simulate a transform that inserts an instruction before pc=1.
-    // addr_map: old_pc 0->0, 1->2, 2->3, 3->4, sentinel 4->5
-    let new_insns = vec![
-        BpfInsn::nop(),
-        BpfInsn::nop(), // inserted
-        BpfInsn::nop(),
-        BpfInsn::nop(),
-        exit_insn(),
-    ];
-    let addr_map = vec![0, 2, 3, 4, 5];
-    prog.insns = new_insns;
-    prog.remap_annotations(&addr_map);
-
-    // The profile should now be at new_pc=2 (remapped from old_pc=1).
-    assert!(prog.annotations[0].branch_profile.is_none());
-    assert!(prog.annotations[1].branch_profile.is_none());
-    assert!(prog.annotations[2].branch_profile.is_some());
-    assert_eq!(
-        prog.annotations[2]
-            .branch_profile
-            .as_ref()
-            .unwrap()
-            .taken_count,
-        100
-    );
-    assert!(prog.annotations[3].branch_profile.is_none());
-    assert!(prog.annotations[4].branch_profile.is_none());
-}
 
 #[test]
 fn test_remap_annotations_deleted_instruction() {

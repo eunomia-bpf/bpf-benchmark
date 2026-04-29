@@ -8,7 +8,7 @@
 pub mod analysis;
 #[cfg(test)]
 pub mod bpf {
-    pub use crate::mock_maps::{install_mock_map, BpfMapInfo, MockMapState};
+    pub use crate::mock_maps::{install_mock_map, use_mock_maps, BpfMapInfo, MockMapState};
 }
 pub mod insn;
 #[cfg(test)]

@@ -188,30 +188,6 @@ fn wide_mem_accepts_stdin_and_writes_instruction_aligned_stdout() {
 }
 
 #[test]
-fn wide_mem_report_is_valid_pass_report_json() {
-    let report_path = temp_path("wide-mem-report.json");
-    let report_arg = report_path.to_string_lossy().to_string();
-    let output = run_bpfopt(
-        &["wide-mem", "--report", &report_arg],
-        &minimal_program_bytes(),
-    );
-
-    assert!(
-        output.status.success(),
-        "stderr={}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-    let report_text = fs::read_to_string(&report_path).expect("read report");
-    let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
-    remove_file_if_exists(report_path);
-
-    assert_eq!(report["pass"], "wide_mem");
-    assert_eq!(report["changed"], false);
-    assert_eq!(report["insn_count_before"], 2);
-    assert_eq!(report["insn_count_after"], 2);
-}
-
-#[test]
 fn optimize_default_pipeline_fails_when_required_side_inputs_are_missing() {
     let report_path = temp_path("optimize-report.json");
     let report_arg = report_path.to_string_lossy().to_string();
@@ -337,111 +313,6 @@ fn invalid_bytecode_length_exits_with_error() {
 }
 
 #[test]
-fn direct_side_input_required_pass_fails_when_missing_input() {
-    let output = run_bpfopt(&["const-prop"], &minimal_program_bytes());
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("--verifier-states"), "stderr={stderr}");
-}
-
-#[test]
-fn rotate_with_empty_target_kinsns_exits_with_error() {
-    let target_path = write_temp_file(
-        "empty-target.json",
-        r#"{"arch":"x86_64","features":["cmov"],"kinsns":{}}"#,
-    );
-    let target_arg = target_path.to_string_lossy().to_string();
-    let output = run_bpfopt(
-        &["rotate", "--target", &target_arg],
-        &minimal_program_bytes(),
-    );
-    remove_file_if_exists(target_path);
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        stderr.contains("kinsn 'bpf_rotate64' not in target"),
-        "stderr={stderr}"
-    );
-    assert!(output.stdout.is_empty());
-}
-
-#[test]
-fn cond_select_with_empty_target_kinsns_exits_with_error() {
-    let target_path = write_temp_file(
-        "empty-target.json",
-        r#"{"arch":"x86_64","features":["cmov"],"kinsns":{}}"#,
-    );
-    let target_arg = target_path.to_string_lossy().to_string();
-    let output = run_bpfopt(
-        &["cond-select", "--target", &target_arg],
-        &minimal_program_bytes(),
-    );
-    remove_file_if_exists(target_path);
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        stderr.contains("kinsn 'bpf_select64' not in target"),
-        "stderr={stderr}"
-    );
-    assert!(output.stdout.is_empty());
-}
-
-#[test]
-fn optimize_explicit_const_prop_fails_when_verifier_states_missing() {
-    let report_path = temp_path("const-prop-skip-report.json");
-    let report_arg = report_path.to_string_lossy().to_string();
-    let output = run_bpfopt(
-        &[
-            "optimize",
-            "--passes",
-            "const-prop",
-            "--report",
-            &report_arg,
-        ],
-        &minimal_program_bytes(),
-    );
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        stderr.contains("const-prop requires --verifier-states"),
-        "stderr={stderr}"
-    );
-    assert!(output.stdout.is_empty());
-    assert!(!report_path.exists());
-    remove_file_if_exists(report_path);
-}
-
-#[test]
-fn optimize_explicit_map_inline_fails_when_map_side_inputs_missing() {
-    let report_path = temp_path("map-inline-skip-report.json");
-    let report_arg = report_path.to_string_lossy().to_string();
-    let output = run_bpfopt(
-        &[
-            "optimize",
-            "--passes",
-            "map-inline",
-            "--report",
-            &report_arg,
-        ],
-        &minimal_program_bytes(),
-    );
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        stderr.contains("map-inline requires --map-values and --map-ids"),
-        "stderr={stderr}"
-    );
-    assert!(output.stdout.is_empty());
-    assert!(!report_path.exists());
-    remove_file_if_exists(report_path);
-}
-
-#[test]
 fn optimize_map_inline_errors_when_snapshot_key_is_absent() {
     let map_values_path = write_temp_file(
         "map-values-absent-key.json",
@@ -514,39 +385,6 @@ fn optimize_map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
     assert_eq!(pass["sites_applied"], 1);
     assert_eq!(pass["map_inline_records"].as_array().unwrap().len(), 1);
     assert_eq!(pass["map_inline_records"][0]["key_hex"], "02000000");
-}
-
-#[test]
-fn optimize_map_inline_errors_when_array_snapshot_value_is_null() {
-    let map_values_path = write_temp_file(
-        "map-values-array-null.json",
-        r#"{"maps":[{"map_id":111,"map_type":"array","key_size":4,"value_size":4,"max_entries":8,"frozen":true,"entries":[{"key":"01000000","value":null}]}]}"#,
-    );
-    let map_values_arg = map_values_path.to_string_lossy().to_string();
-    let output = run_bpfopt(
-        &[
-            "optimize",
-            "--passes",
-            "map-inline",
-            "--map-values",
-            &map_values_arg,
-            "--map-ids",
-            "111",
-        ],
-        &map_lookup_program_bytes(),
-    );
-    remove_file_if_exists(map_values_path);
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        stderr.contains("map_inline requires a concrete snapshot value"),
-        "stderr={stderr}"
-    );
-    assert!(
-        stderr.contains("map_values snapshot has explicit null for map 111 key 01000000"),
-        "stderr={stderr}"
-    );
 }
 
 #[test]

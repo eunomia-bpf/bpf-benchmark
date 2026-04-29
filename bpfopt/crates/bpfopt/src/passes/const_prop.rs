@@ -780,7 +780,7 @@ mod tests {
     use std::collections::HashMap;
 
     use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
-    use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
+    use crate::bpf::{install_mock_map, use_mock_maps, BpfMapInfo, MockMapState};
     use crate::passes::{DcePass, MapInlinePass};
 
     const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
@@ -890,11 +890,9 @@ mod tests {
 
         let info = BpfMapInfo {
             map_type: 2,
-            id: map_id,
             key_size: 4,
             value_size: value.len() as u32,
             max_entries: 8,
-            ..Default::default()
         };
 
         install_mock_map(
@@ -1085,6 +1083,7 @@ mod tests {
         pm.add_pass(MapInlinePass);
         pm.add_pass(ConstPropPass);
 
+        use_mock_maps(&mut program);
         let result = pm.run(&mut program, &PassContext::test_default()).unwrap();
 
         assert!(result.program_changed);
