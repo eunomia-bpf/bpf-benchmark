@@ -50,9 +50,26 @@ _TOTAL_SITE_FIELDS = (
 
 _BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
 _BENCHMARK_CONFIG_PATH = ROOT_DIR / "corpus" / "config" / "benchmark_config.yaml"
-_DEFAULT_APPLY_TIMEOUT_SECONDS = 120.0
+_APPLY_TIMEOUT_ENV = "BPFREJIT_DAEMON_REQUEST_TIMEOUT_S"
+_FALLBACK_APPLY_TIMEOUT_SECONDS = 600.0
 _DEFAULT_BENCHMARK_REPEAT = 200
 _DEFAULT_PROFILE_INTERVAL_MS = 1000
+
+
+def _default_apply_timeout_seconds() -> float:
+    raw = os.environ.get(_APPLY_TIMEOUT_ENV, "").strip()
+    if not raw:
+        return _FALLBACK_APPLY_TIMEOUT_SECONDS
+    try:
+        value = float(raw)
+    except ValueError as exc:
+        raise RuntimeError(f"{_APPLY_TIMEOUT_ENV} must be a positive number, got {raw!r}") from exc
+    if value <= 0.0:
+        raise RuntimeError(f"{_APPLY_TIMEOUT_ENV} must be positive, got {raw!r}")
+    return value
+
+
+_DEFAULT_APPLY_TIMEOUT_SECONDS = _default_apply_timeout_seconds()
 
 
 def _validate_daemon_runtime_root(candidate: Path, *, source: str) -> Path:

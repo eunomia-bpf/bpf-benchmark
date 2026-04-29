@@ -385,6 +385,8 @@ class BCCRunner(AppRunner):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             bufsize=1,
         )
         if process.stdout is None or process.stderr is None:
@@ -411,7 +413,16 @@ class BCCRunner(AppRunner):
             stdout_thread=stdout_thread,
             stderr_thread=stderr_thread,
         )
-        programs = wait_until_program_set_stable(before_ids=before_ids, timeout_s=self.attach_timeout_s)
+        programs = wait_until_program_set_stable(
+            before_ids=before_ids,
+            timeout_s=self.attach_timeout_s,
+            process=process,
+            collector_snapshot=lambda: {
+                "stdout_tail": [stdout_capture.render()],
+                "stderr_tail": [stderr_capture.render()],
+            },
+            process_name=f"BCC tool {self.tool_name}",
+        )
         if not programs:
             return self._fail_start(
                 f"BCC tool {self.tool_name} did not attach any BPF programs within {self.attach_timeout_s}s"
