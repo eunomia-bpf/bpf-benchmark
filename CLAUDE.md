@@ -23,6 +23,15 @@ Corpus performance is measured per-program, not per-app:
 ### No Redundant Informational Fields
 Do not add `workload_miss`, `limitations`, or similar informational-only fields to result payloads. If something fails, it should surface as an error, not as a metadata annotation.
 
+### bpfopt-suite v3 Architecture
+`docs/tmp/bpfopt_design_v3.md` is the authoritative design document for bpfopt-suite. Keep implementation and documentation aligned with that design:
+- The daemon must not run a pass pipeline, maintain `PassManager`, call `bpfopt`, do profiling, or transform bytecode.
+- The daemon only watches for new BPF programs, detects map invalidation, and triggers external scripts/commands.
+- `bpfopt` is a pure bytecode CLI tool with zero kernel dependency.
+- Per-pass verify loops belong in bash/scripts, not inside the daemon.
+- Benchmark runner code should prefer calling CLI tools directly instead of using the daemon socket.
+- stdin/stdout carry raw binary bytecode (`struct bpf_insn[]`); side-inputs and side-outputs use files.
+
 ### Default Config Must Work
 `make vm-corpus`, `make vm-e2e`, `make aws-x86-test`, `make aws-arm64-test` must work with zero manual environment variables. Defaults live in `runner/targets/*.env` files and are overridable via env vars.
 
