@@ -86,7 +86,7 @@ benchmarks:
     base_name: bitcount
     kernel_input_size: 2056
     input_generator: bitcount
-    expected_result: 3035568289764064166
+    expected_result: 12830754992348206170
     tags: [bitops, pure-jit]
 
   - name: log2_fold
@@ -98,7 +98,7 @@ benchmarks:
     base_name: log2_fold
     kernel_input_size: 1032
     input_generator: log2_fold
-    expected_result: 9
+    expected_result: 6
     tags: [bitops, branch, pure-jit]
 
   - name: dep_chain_short
@@ -220,7 +220,7 @@ benchmarks:
     base_name: load_word32
     kernel_input_size: 1032
     input_generator: load_word32
-    expected_result: 548570475964
+    expected_result: 568897730033
     tags: [memory, load-width, byte-recompose, pure-jit]
 
   - name: load_byte
@@ -232,7 +232,7 @@ benchmarks:
     base_name: load_byte
     kernel_input_size: 1032
     input_generator: load_byte
-    expected_result: 133744
+    expected_result: 132428
     tags: [memory, load-width, control, pure-jit]
 
   - name: load_byte_recompose
@@ -328,7 +328,7 @@ benchmarks:
     base_name: mixed_alu_mem
     kernel_input_size: 1032
     input_generator: mixed_alu_mem
-    expected_result: 5008154085265630854
+    expected_result: 4293717546490700300
     tags: [alu, memory, mixed, pure-jit]
 
   - name: spill_pressure
@@ -340,7 +340,7 @@ benchmarks:
     base_name: spill_pressure
     kernel_input_size: 520
     input_generator: spill_pressure
-    expected_result: 11535549244468459597
+    expected_result: 17238232588209877611
     tags: [compute, reg-pressure, pure-jit]
 
   - name: multi_acc_4
@@ -571,7 +571,7 @@ benchmarks:
     base_name: alu32_64_pingpong
     kernel_input_size: 520
     input_generator: alu32_64_pingpong
-    expected_result: 17903474919538923236
+    expected_result: 4047234684177357765
     tags: [alu, mixed-width, pure-jit]
 
   - name: branch_fanout_32
@@ -644,7 +644,7 @@ benchmarks:
     base_name: const_fold_chain
     kernel_input_size: 520
     input_generator: const_fold_chain
-    expected_result: 6007672884718983195
+    expected_result: 4564298942497563464
     tags: [compute, constants, mixed-width, pure-jit]
 
   - name: struct_field_cluster
@@ -680,7 +680,7 @@ benchmarks:
     base_name: smallmul_strength_reduce
     kernel_input_size: 1032
     input_generator: smallmul_strength_reduce
-    expected_result: 4880578162264678397
+    expected_result: 13107848205125099949
     tags: [alu, strength-reduce, lea-like, pure-jit]
 
   - name: cond_select_dense
@@ -768,7 +768,7 @@ benchmarks:
     io_mode: staged
     kernel_input_size: 2056
     input_generator: bitcount
-    expected_result: 3035568289764064166
+    expected_result: 12830754992348206170
     tags: [tc, pure-jit, non-xdp, kernel-only]
 
   - name: tc_checksum

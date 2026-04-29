@@ -242,13 +242,20 @@ def runner_help_text(runner_binary: Path) -> str:
     return "\n".join([completed.stdout, completed.stderr])
 
 
-def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: str | None) -> None:
+def attach_baseline_adjustments(
+    results: dict[str, object],
+    baseline_benchmark: str | None,
+    *,
+    require_baseline: bool = True,
+) -> None:
     if not baseline_benchmark:
         return
 
     benchmarks = results.get("benchmarks", [])
     baseline_record = next((record for record in benchmarks if record.get("name") == baseline_benchmark), None)
     if baseline_record is None:
+        if not require_baseline:
+            return
         raise RuntimeError(f"baseline benchmark not found in results: {baseline_benchmark}")
 
     baseline_io_mode = baseline_record.get("io_mode")
@@ -479,7 +486,11 @@ def main(argv: list[str] | None = None) -> int:
         updated_at: str,
         error_message: str | None,
     ) -> dict[str, Any]:
-        attach_baseline_adjustments(results, suite.analysis.baseline_benchmark)
+        attach_baseline_adjustments(
+            results,
+            suite.analysis.baseline_benchmark,
+            require_baseline=str(status).startswith("completed"),
+        )
         artifact_metadata = build_run_metadata(
             results,
             run_type=run_type,
