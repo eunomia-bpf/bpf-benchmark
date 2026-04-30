@@ -6,7 +6,8 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, resolve_kinsn_call_off_for_target,
+    emit_packed_kinsn_call_with_off, fixup_all_branches, map_replacement_range,
+    remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
 };
 
 /// ENDIAN_FUSION optimization pass: replaces LDX_MEM + ENDIAN_TO_BE patterns
@@ -156,7 +157,8 @@ fn emit_endian_fusion_call(
     arch: Arch,
     size: u8,
 ) -> Vec<BpfInsn> {
-    let direct_offset = offset_is_directly_encodable(arch, size, offset);
+    let materialize_stack_addr = arch == Arch::X86_64 && src_reg == BPF_REG_10 && offset != 0;
+    let direct_offset = offset_is_directly_encodable(arch, size, offset) && !materialize_stack_addr;
     let mut out = Vec::with_capacity(if direct_offset || offset == 0 {
         2
     } else if src_reg != dst_reg && src_reg != 10 {
@@ -347,11 +349,7 @@ impl BpfPass for EndianFusionPass {
                     site.size,
                 );
                 new_insns.extend_from_slice(&replacement);
-
-                // Map old PCs in the site range.
-                for j in 1..site.old_len {
-                    addr_map[pc + j] = new_pc;
-                }
+                map_replacement_range(&mut addr_map, pc, site.old_len, new_pc, replacement.len());
 
                 pc += site.old_len;
                 site_idx += 1;
@@ -372,6 +370,7 @@ impl BpfPass for EndianFusionPass {
         fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
 
         program.insns = new_insns;
+        remap_kinsn_btf_metadata(program, &ctx.kinsn_registry)?;
         program.remap_annotations(&addr_map);
         program.log_transform(TransformEntry {
             sites_applied: applied,
@@ -649,6 +648,29 @@ mod tests {
         assert_eq!(sidecar_payload(&prog.insns[0]), endian_payload(2, 6, 12));
         assert!(prog.insns[1].is_call());
         assert!(prog.insns[2].is_exit());
+    }
+
+    #[test]
+    fn test_endian_fusion_materializes_stack_base_on_x86() {
+        let mut prog = make_program(vec![
+            BpfInsn::ldx_mem(BPF_DW, 4, BPF_REG_10, -88),
+            endian_to_be(4, 64),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_endian_kfuncs(-1, -1, 3333);
+
+        let pass = EndianFusionPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed);
+        assert_eq!(prog.insns.len(), 5);
+        assert_eq!(prog.insns[0], BpfInsn::mov64_reg(4, BPF_REG_10));
+        assert_eq!(prog.insns[1], BpfInsn::alu64_imm(BPF_ADD, 4, -88));
+        assert!(prog.insns[2].is_kinsn_sidecar());
+        assert_eq!(sidecar_payload(&prog.insns[2]), endian_payload(4, 4, 0));
+        assert!(prog.insns[3].is_call());
+        assert!(prog.insns[4].is_exit());
     }
 
     #[test]

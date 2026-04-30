@@ -8,8 +8,8 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, remap_btf_metadata,
-    resolve_kinsn_call_off_for_target,
+    emit_packed_kinsn_call_with_off, fixup_all_branches, map_replacement_range,
+    remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
 };
 
 const MEMCPY_TARGET: &str = "bpf_memcpy_bulk";
@@ -205,9 +205,7 @@ impl BpfPass for BulkMemoryPass {
                     memset_off,
                 );
                 new_insns.extend_from_slice(&replacement);
-                for j in 1..site.old_len {
-                    addr_map[pc + j] = new_pc;
-                }
+                map_replacement_range(&mut addr_map, pc, site.old_len, new_pc, replacement.len());
                 pc += site.old_len;
                 site_idx += 1;
                 continue;
@@ -228,7 +226,7 @@ impl BpfPass for BulkMemoryPass {
 
         let applied = safe_sites.len();
         program.insns = new_insns;
-        remap_btf_metadata(program, &addr_map)?;
+        remap_kinsn_btf_metadata(program, &ctx.kinsn_registry)?;
         program.remap_annotations(&addr_map);
         program.log_transform(TransformEntry {
             sites_applied: applied,

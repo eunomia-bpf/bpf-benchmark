@@ -6,7 +6,8 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, resolve_kinsn_call_off_for_pass,
+    emit_packed_kinsn_call_with_off, fixup_all_branches, map_replacement_range,
+    remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_pass,
 };
 
 /// ROTATE optimization pass: replaces shift+OR rotate patterns with
@@ -141,11 +142,7 @@ impl BpfPass for RotatePass {
                     | ((site.tmp_reg as u64) << 16);
                 let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
                 new_insns.extend_from_slice(&replacement);
-
-                // Map old PCs in the site range.
-                for j in 1..site.old_len {
-                    addr_map[pc + j] = new_pc;
-                }
+                map_replacement_range(&mut addr_map, pc, site.old_len, new_pc, replacement.len());
 
                 pc += site.old_len;
                 site_idx += 1;
@@ -166,6 +163,7 @@ impl BpfPass for RotatePass {
         fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
 
         program.insns = new_insns;
+        remap_kinsn_btf_metadata(program, &ctx.kinsn_registry)?;
         program.remap_annotations(&addr_map);
         program.log_transform(TransformEntry {
             sites_applied: applied,

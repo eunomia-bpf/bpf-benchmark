@@ -8,7 +8,7 @@ use std::collections::HashSet;
 
 use crate::analysis::{CFGAnalysis, CFGResult, LivenessAnalysis};
 use crate::insn::*;
-use crate::pass::{Analysis, BpfProgram, BtfInfoRecords, PassContext};
+use crate::pass::{Analysis, BpfProgram, BtfInfoRecords, KinsnRegistry, PassContext};
 
 const BPF_FUNC_TAIL_CALL: i32 = kernel_sys::BPF_FUNC_tail_call as i32;
 const BPF_TAIL_CALL: u8 = 0xf0;
@@ -81,17 +81,66 @@ pub fn compose_addr_maps(first: &[usize], second: &[usize]) -> Vec<usize> {
 }
 
 pub fn remap_btf_metadata(program: &mut BpfProgram, addr_map: &[usize]) -> anyhow::Result<()> {
-    let new_len = program.insns.len();
-    remap_btf_records("func_info", program.func_info.as_mut(), addr_map, new_len)?;
-    remap_btf_records("line_info", program.line_info.as_mut(), addr_map, new_len)?;
+    remap_btf_records(
+        "func_info",
+        BtfRecordKind::Func,
+        program.func_info.as_mut(),
+        addr_map,
+        &program.insns,
+    )?;
+    remap_btf_records(
+        "line_info",
+        BtfRecordKind::Line,
+        program.line_info.as_mut(),
+        addr_map,
+        &program.insns,
+    )?;
     Ok(())
+}
+
+pub fn remap_kinsn_btf_metadata(
+    program: &mut BpfProgram,
+    registry: &KinsnRegistry,
+) -> anyhow::Result<()> {
+    let proof_subprog_starts = kinsn_proof_subprog_starts(&program.insns, registry)?;
+    rewrite_func_info_to_subprog_layout(program.func_info.as_mut(), &proof_subprog_starts)?;
+
+    if let Some(records) = program.line_info.as_mut() {
+        records.bytes.clear();
+    }
+    Ok(())
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum BtfRecordKind {
+    Func,
+    Line,
 }
 
 fn remap_btf_records(
     label: &str,
+    kind: BtfRecordKind,
+    records: Option<&mut BtfInfoRecords>,
+    addr_map: &[usize],
+    new_insns: &[BpfInsn],
+) -> anyhow::Result<()> {
+    remap_btf_records_for_len(
+        label,
+        kind,
+        records,
+        addr_map,
+        new_insns.len(),
+        Some(new_insns),
+    )
+}
+
+fn remap_btf_records_for_len(
+    label: &str,
+    kind: BtfRecordKind,
     records: Option<&mut BtfInfoRecords>,
     addr_map: &[usize],
     new_len: usize,
+    new_insns: Option<&[BpfInsn]>,
 ) -> anyhow::Result<()> {
     let Some(records) = records else {
         return Ok(());
@@ -120,11 +169,24 @@ fn remap_btf_records(
     for record in records.bytes.chunks(rec_size) {
         let old_pc =
             u32::from_le_bytes(record[..4].try_into().expect("record has insn_off")) as usize;
-        let Some(new_pc) = remapped_pc(label, old_pc, addr_map, new_len)? else {
+        let Some(new_pc) = remapped_pc(label, kind, old_pc, addr_map, new_len)? else {
+            continue;
+        };
+        if kind == BtfRecordKind::Line
+            && new_insns.is_some_and(|insns| !valid_line_info_pc(insns, new_pc))
+        {
             continue;
         };
         if let Some(previous) = previous_new_pc {
-            if new_pc <= previous {
+            if new_pc < previous {
+                anyhow::bail!(
+                    "{label} remap produced non-increasing insn_off {new_pc} after {previous}"
+                );
+            }
+            if new_pc == previous {
+                if kind == BtfRecordKind::Line {
+                    continue;
+                }
                 anyhow::bail!(
                     "{label} remap produced non-increasing insn_off {new_pc} after {previous}"
                 );
@@ -144,8 +206,407 @@ fn remap_btf_records(
     Ok(())
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct KinsnProofRegion {
+    sidecar_pc: usize,
+    call_pc: usize,
+    proof_len: usize,
+}
+
+fn kinsn_proof_subprog_starts(
+    insns: &[BpfInsn],
+    registry: &KinsnRegistry,
+) -> anyhow::Result<Vec<usize>> {
+    let mut starts = kinsn_candidate_subprog_starts(insns)?;
+    let regions = collect_kinsn_proof_regions(insns, registry)?;
+
+    for region in regions.iter().rev() {
+        if starts.contains(&region.call_pc) {
+            anyhow::bail!(
+                "kinsn call at pc {} starts a subprogram and cannot use pc {} as sidecar",
+                region.call_pc,
+                region.sidecar_pc
+            );
+        }
+        let delta = region.proof_len as isize - 2;
+        if delta == 0 {
+            continue;
+        }
+        for start in &mut starts {
+            if *start <= region.sidecar_pc {
+                continue;
+            }
+            *start = if delta > 0 {
+                start.checked_add(delta as usize).ok_or_else(|| {
+                    anyhow::anyhow!("kinsn proof subprog offset overflow at pc {start}")
+                })?
+            } else {
+                start.checked_sub((-delta) as usize).ok_or_else(|| {
+                    anyhow::anyhow!("kinsn proof subprog offset underflow at pc {start}")
+                })?
+            };
+        }
+    }
+
+    Ok(starts)
+}
+
+fn collect_kinsn_proof_regions(
+    insns: &[BpfInsn],
+    registry: &KinsnRegistry,
+) -> anyhow::Result<Vec<KinsnProofRegion>> {
+    let mut regions = Vec::new();
+    let mut pc = 0usize;
+    while pc < insns.len() {
+        if pc + 1 < insns.len()
+            && is_kinsn_sidecar_insn(&insns[pc])
+            && insns[pc + 1].is_call()
+            && insns[pc + 1].src_reg() == BPF_PSEUDO_KINSN_CALL
+        {
+            let payload = kinsn_sidecar_payload(&insns[pc]);
+            let btf_id = insns[pc + 1].imm;
+            let call_off = insns[pc + 1].off;
+            let proof_len = kinsn_proof_len(registry, btf_id, call_off, payload)?;
+            regions.push(KinsnProofRegion {
+                sidecar_pc: pc,
+                call_pc: pc + 1,
+                proof_len,
+            });
+            pc += 2;
+            continue;
+        }
+
+        if is_kinsn_sidecar_insn(&insns[pc]) {
+            anyhow::bail!("kinsn sidecar at pc {pc} is not followed by a kinsn call");
+        }
+        if insns[pc].is_call() && insns[pc].src_reg() == BPF_PSEUDO_KINSN_CALL {
+            anyhow::bail!("kinsn call at pc {pc} is missing its packed sidecar");
+        }
+
+        pc += 1;
+    }
+
+    Ok(regions)
+}
+
+fn kinsn_proof_len(
+    registry: &KinsnRegistry,
+    btf_id: i32,
+    call_off: i16,
+    payload: u64,
+) -> anyhow::Result<usize> {
+    if kinsn_call_matches(
+        registry,
+        btf_id,
+        call_off,
+        "bpf_rotate64",
+        registry.rotate64_btf_id,
+    ) {
+        return rotate_proof_len(payload);
+    }
+    if kinsn_call_matches(
+        registry,
+        btf_id,
+        call_off,
+        "bpf_select64",
+        registry.select64_btf_id,
+    ) {
+        return select_proof_len(payload);
+    }
+    if kinsn_call_matches(
+        registry,
+        btf_id,
+        call_off,
+        "bpf_extract64",
+        registry.extract64_btf_id,
+    ) {
+        return extract_proof_len(payload);
+    }
+    if kinsn_call_matches(
+        registry,
+        btf_id,
+        call_off,
+        "bpf_memcpy_bulk",
+        registry.memcpy_bulk_btf_id,
+    ) {
+        return memcpy_bulk_proof_len(payload);
+    }
+    if kinsn_call_matches(
+        registry,
+        btf_id,
+        call_off,
+        "bpf_memset_bulk",
+        registry.memset_bulk_btf_id,
+    ) {
+        return memset_bulk_proof_len(payload);
+    }
+    if kinsn_call_matches(
+        registry,
+        btf_id,
+        call_off,
+        "bpf_endian_load16",
+        registry.endian_load16_btf_id,
+    ) || kinsn_call_matches(
+        registry,
+        btf_id,
+        call_off,
+        "bpf_endian_load32",
+        registry.endian_load32_btf_id,
+    ) || kinsn_call_matches(
+        registry,
+        btf_id,
+        call_off,
+        "bpf_endian_load64",
+        registry.endian_load64_btf_id,
+    ) {
+        return endian_proof_len(payload);
+    }
+
+    anyhow::bail!("kinsn call btf_id {btf_id} is not present in the kinsn registry")
+}
+
+fn kinsn_call_matches(
+    registry: &KinsnRegistry,
+    actual_btf_id: i32,
+    actual_call_off: i16,
+    target_name: &str,
+    expected_btf_id: i32,
+) -> bool {
+    if expected_btf_id <= 0 || actual_btf_id != expected_btf_id {
+        return false;
+    }
+    registry
+        .target_call_offsets
+        .get(target_name)
+        .is_none_or(|&expected_off| actual_call_off == expected_off)
+}
+
+fn kinsn_sidecar_payload(insn: &BpfInsn) -> u64 {
+    (u64::from(insn.dst_reg()) & 0xf)
+        | (u64::from(insn.off as u16) << 4)
+        | (u64::from(insn.imm as u32) << 20)
+}
+
+fn payload_reg(payload: u64, shift: u8) -> u8 {
+    ((payload >> shift) & 0xf) as u8
+}
+
+fn payload_u8(payload: u64, shift: u8) -> u8 {
+    ((payload >> shift) & 0xff) as u8
+}
+
+fn payload_s16(payload: u64, shift: u8) -> i16 {
+    ((payload >> shift) & 0xffff) as u16 as i16
+}
+
+fn validate_bpf_reg(label: &str, reg: u8) -> anyhow::Result<()> {
+    if reg > BPF_REG_10 {
+        anyhow::bail!("{label} register {reg} is outside BPF_REG_0..BPF_REG_10");
+    }
+    Ok(())
+}
+
+fn rotate_proof_len(payload: u64) -> anyhow::Result<usize> {
+    let dst_reg = payload_reg(payload, 0);
+    let src_reg = payload_reg(payload, 4);
+    let shift = payload_u8(payload, 8) & 63;
+    let tmp_reg = payload_reg(payload, 16);
+
+    validate_bpf_reg("rotate dst", dst_reg)?;
+    validate_bpf_reg("rotate src", src_reg)?;
+    validate_bpf_reg("rotate tmp", tmp_reg)?;
+    if tmp_reg == dst_reg || tmp_reg == src_reg {
+        anyhow::bail!("rotate tmp register aliases an operand");
+    }
+    if shift == 0 {
+        Ok(1)
+    } else if dst_reg == src_reg {
+        Ok(4)
+    } else {
+        Ok(5)
+    }
+}
+
+fn select_proof_len(payload: u64) -> anyhow::Result<usize> {
+    validate_bpf_reg("select dst", payload_reg(payload, 0))?;
+    validate_bpf_reg("select true", payload_reg(payload, 4))?;
+    validate_bpf_reg("select false", payload_reg(payload, 8))?;
+    validate_bpf_reg("select cond", payload_reg(payload, 12))?;
+    if payload_reg(payload, 16) != 0 {
+        anyhow::bail!("select condition mode is not KINSN_SELECT_COND_NEZ");
+    }
+    Ok(4)
+}
+
+fn extract_proof_len(payload: u64) -> anyhow::Result<usize> {
+    validate_bpf_reg("extract dst", payload_reg(payload, 0))?;
+    let start = payload_u8(payload, 8);
+    let bit_len = payload_u8(payload, 16);
+    if start >= 64 || bit_len == 0 || bit_len > 32 || u16::from(start) + u16::from(bit_len) > 64 {
+        anyhow::bail!("extract payload has invalid range start={start} bit_len={bit_len}");
+    }
+    Ok(usize::from(start != 0) + 1)
+}
+
+fn bulk_offset_range_valid(offset: i16, len: usize) -> bool {
+    let end = i32::from(offset) + len as i32 - 1;
+    end >= i32::from(i16::MIN) && end <= i32::from(i16::MAX)
+}
+
+fn memcpy_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
+    let dst_base = payload_reg(payload, 0);
+    let src_base = payload_reg(payload, 4);
+    let dst_off = payload_s16(payload, 8);
+    let src_off = payload_s16(payload, 24);
+    let len = usize::from(payload_u8(payload, 40)) + 1;
+    let tmp_reg = payload_reg(payload, 48);
+
+    if payload >> 52 != 0 {
+        anyhow::bail!("memcpy bulk payload has non-zero reserved bits");
+    }
+    if len == 0 || len > 128 {
+        anyhow::bail!("memcpy bulk length {len} is outside 1..128");
+    }
+    validate_bpf_reg("memcpy bulk dst", dst_base)?;
+    validate_bpf_reg("memcpy bulk src", src_base)?;
+    validate_bpf_reg("memcpy bulk tmp", tmp_reg)?;
+    if tmp_reg == BPF_REG_10 || tmp_reg == dst_base || tmp_reg == src_base {
+        anyhow::bail!("memcpy bulk tmp register aliases an invalid operand");
+    }
+    if !bulk_offset_range_valid(dst_off, len) || !bulk_offset_range_valid(src_off, len) {
+        anyhow::bail!("memcpy bulk offset range is outside s16");
+    }
+    Ok(len * 2)
+}
+
+fn memset_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
+    let dst_base = payload_reg(payload, 0);
+    let val_reg = payload_reg(payload, 4);
+    let dst_off = payload_s16(payload, 8);
+    let len = usize::from(payload_u8(payload, 24)) + 1;
+    let width_class = (payload >> 32) & 0x3;
+    let value_from_reg = ((payload >> 34) & 0x1) != 0;
+    let zero_fill = ((payload >> 35) & 0x1) != 0;
+    let fill_imm8 = payload_u8(payload, 36);
+    let width_bytes = 1usize << width_class;
+
+    if payload >> 44 != 0 {
+        anyhow::bail!("memset bulk payload has non-zero reserved bits");
+    }
+    if len == 0 || len > 128 {
+        anyhow::bail!("memset bulk length {len} is outside 1..128");
+    }
+    validate_bpf_reg("memset bulk dst", dst_base)?;
+    if value_from_reg {
+        validate_bpf_reg("memset bulk value", val_reg)?;
+    }
+    if len % width_bytes != 0 {
+        anyhow::bail!("memset bulk length {len} is not a multiple of width {width_bytes}");
+    }
+    if !bulk_offset_range_valid(dst_off, len) {
+        anyhow::bail!("memset bulk offset range is outside s16");
+    }
+    if zero_fill && fill_imm8 != 0 {
+        anyhow::bail!("memset bulk zero-fill payload has non-zero fill immediate");
+    }
+    Ok(len)
+}
+
+fn endian_proof_len(payload: u64) -> anyhow::Result<usize> {
+    validate_bpf_reg("endian dst", payload_reg(payload, 0))?;
+    validate_bpf_reg("endian base", payload_reg(payload, 4))?;
+    Ok(2)
+}
+
+fn kinsn_candidate_subprog_starts(insns: &[BpfInsn]) -> anyhow::Result<Vec<usize>> {
+    let cfg = CFGAnalysis.run(&BpfProgram::new(insns.to_vec()));
+    let mut starts = Vec::with_capacity(cfg.subprogs.len());
+
+    for subprog in cfg.subprogs {
+        if subprog.start >= insns.len() {
+            anyhow::bail!(
+                "subprog start {} is outside candidate instruction length {}",
+                subprog.start,
+                insns.len()
+            );
+        }
+        starts.push(subprog.start);
+    }
+
+    if starts.is_empty() {
+        starts.push(0);
+    }
+    if starts[0] != 0 {
+        anyhow::bail!(
+            "first subprog starts at candidate pc {}, expected 0",
+            starts[0]
+        );
+    }
+    for window in starts.windows(2) {
+        if window[0] >= window[1] {
+            anyhow::bail!(
+                "candidate subprog starts are not strictly increasing: {} then {}",
+                window[0],
+                window[1]
+            );
+        }
+    }
+    Ok(starts)
+}
+
+fn is_kinsn_sidecar_insn(insn: &BpfInsn) -> bool {
+    insn.code == (BPF_ALU64 | BPF_MOV | BPF_K) && insn.src_reg() == BPF_PSEUDO_KINSN_SIDECAR
+}
+
+fn rewrite_func_info_to_subprog_layout(
+    records: Option<&mut BtfInfoRecords>,
+    subprog_starts: &[usize],
+) -> anyhow::Result<()> {
+    let Some(records) = records else {
+        return Ok(());
+    };
+    if records.bytes.is_empty() {
+        return Ok(());
+    }
+    if records.rec_size < std::mem::size_of::<u32>() as u32 {
+        anyhow::bail!(
+            "func_info rec_size {} is too small to hold insn_off",
+            records.rec_size
+        );
+    }
+    let rec_size = records.rec_size as usize;
+    if !records.bytes.len().is_multiple_of(rec_size) {
+        anyhow::bail!(
+            "func_info byte length {} is not a multiple of rec_size {}",
+            records.bytes.len(),
+            records.rec_size
+        );
+    }
+    let record_count = records.bytes.len() / rec_size;
+    if record_count != subprog_starts.len() {
+        anyhow::bail!(
+            "func_info record count {} does not match subprog count {}",
+            record_count,
+            subprog_starts.len()
+        );
+    }
+
+    for (record, &pc) in records.bytes.chunks_mut(rec_size).zip(subprog_starts) {
+        let pc: u32 = pc
+            .try_into()
+            .map_err(|_| anyhow::anyhow!("func_info subprog insn_off does not fit u32"))?;
+        record[..4].copy_from_slice(&pc.to_le_bytes());
+    }
+    Ok(())
+}
+
+fn valid_line_info_pc(insns: &[BpfInsn], pc: usize) -> bool {
+    insns.get(pc).is_some_and(|insn| insn.code != 0)
+}
+
 fn remapped_pc(
     label: &str,
+    kind: BtfRecordKind,
     old_pc: usize,
     addr_map: &[usize],
     new_len: usize,
@@ -155,11 +616,17 @@ fn remapped_pc(
         .checked_sub(1)
         .ok_or_else(|| anyhow::anyhow!("{label} remap address map is empty"))?;
     if old_pc >= old_len {
+        if kind == BtfRecordKind::Line {
+            return Ok(None);
+        }
         anyhow::bail!("{label} insn_off {old_pc} is outside old instruction length {old_len}");
     }
     let new_pc = addr_map[old_pc];
     if new_pc >= new_len {
         return Ok(None);
+    }
+    if kind == BtfRecordKind::Func {
+        return Ok(Some(new_pc));
     }
     let next_pc = addr_map[old_pc + 1];
     if next_pc < new_pc {
@@ -168,6 +635,20 @@ fn remapped_pc(
         );
     }
     Ok((next_pc > new_pc).then_some(new_pc))
+}
+
+pub fn map_replacement_range(
+    addr_map: &mut [usize],
+    old_start: usize,
+    old_len: usize,
+    new_start: usize,
+    new_len: usize,
+) {
+    debug_assert!(new_len > 0);
+    for old_offset in 0..old_len {
+        let new_offset = old_offset.min(new_len.saturating_sub(1));
+        addr_map[old_start + old_offset] = new_start + new_offset;
+    }
 }
 
 /// Return the exclusive prefix end before which instruction-count changes must
@@ -703,6 +1184,103 @@ mod tests {
         assert_eq!(
             btf_type_ids(program.line_info.as_ref().unwrap()),
             vec![100, 102, 103]
+        );
+    }
+
+    #[test]
+    fn remap_kinsn_btf_metadata_uses_proof_subprog_layout_for_func_info() {
+        let memcpy_btf_id = 2000;
+        let memcpy_payload = 1 | (2 << 4) | (2 << 40) | (3 << 48);
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::kinsn_sidecar(memcpy_payload),
+            BpfInsn::call_kinsn_with_off(memcpy_btf_id, 1),
+            BpfInsn::new(
+                BPF_JMP | BPF_CALL,
+                BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
+                0,
+                1,
+            ),
+            exit_insn(),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+        program.func_info = Some(BtfInfoRecords {
+            rec_size: 8,
+            bytes: [func_btf_record(0, 10), func_btf_record(999, 11)].concat(),
+        });
+        program.line_info = Some(BtfInfoRecords {
+            rec_size: 16,
+            bytes: [btf_record(0, 100), btf_record(999, 104)].concat(),
+        });
+
+        let registry = KinsnRegistry {
+            memcpy_bulk_btf_id: memcpy_btf_id,
+            ..KinsnRegistry::default()
+        };
+
+        remap_kinsn_btf_metadata(&mut program, &registry).unwrap();
+
+        assert_eq!(btf_offsets(program.func_info.as_ref().unwrap()), vec![0, 8]);
+        assert_eq!(
+            btf_type_ids(program.func_info.as_ref().unwrap()),
+            vec![10, 11]
+        );
+        assert!(program.line_info.as_ref().unwrap().bytes.is_empty());
+    }
+
+    #[test]
+    fn remap_kinsn_btf_metadata_disambiguates_duplicate_btf_ids_by_call_offset() {
+        let shared_btf_id = 2000;
+        let extract_payload = 2 | (16 << 8) | (12 << 16);
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::kinsn_sidecar(extract_payload),
+            BpfInsn::call_kinsn_with_off(shared_btf_id, 5),
+            BpfInsn::new(
+                BPF_JMP | BPF_CALL,
+                BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
+                0,
+                1,
+            ),
+            exit_insn(),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+        program.func_info = Some(BtfInfoRecords {
+            rec_size: 8,
+            bytes: [func_btf_record(0, 10), func_btf_record(999, 11)].concat(),
+        });
+
+        let mut registry = KinsnRegistry {
+            rotate64_btf_id: shared_btf_id,
+            extract64_btf_id: shared_btf_id,
+            ..KinsnRegistry::default()
+        };
+        registry
+            .target_call_offsets
+            .insert("bpf_rotate64".to_string(), 3);
+        registry
+            .target_call_offsets
+            .insert("bpf_extract64".to_string(), 5);
+
+        remap_kinsn_btf_metadata(&mut program, &registry).unwrap();
+
+        assert_eq!(btf_offsets(program.func_info.as_ref().unwrap()), vec![0, 4]);
+    }
+
+    #[test]
+    fn remap_btf_metadata_rejects_out_of_range_func_info() {
+        let mut program = BpfProgram::new(vec![BpfInsn::mov64_imm(0, 0), exit_insn()]);
+        program.func_info = Some(BtfInfoRecords {
+            rec_size: 8,
+            bytes: func_btf_record(2, 10),
+        });
+
+        let err = remap_btf_metadata(&mut program, &[0, 1, 2]).unwrap_err();
+
+        assert!(
+            err.to_string()
+                .contains("func_info insn_off 2 is outside old instruction length 2"),
+            "{err:#}"
         );
     }
 
