@@ -157,8 +157,7 @@ fn emit_endian_fusion_call(
     arch: Arch,
     size: u8,
 ) -> Vec<BpfInsn> {
-    let materialize_stack_addr = arch == Arch::X86_64 && src_reg == BPF_REG_10 && offset != 0;
-    let direct_offset = offset_is_directly_encodable(arch, size, offset) && !materialize_stack_addr;
+    let direct_offset = offset_is_directly_encodable(arch, size, offset);
     let mut out = Vec::with_capacity(if direct_offset || offset == 0 {
         2
     } else if src_reg != dst_reg && src_reg != 10 {
@@ -651,7 +650,7 @@ mod tests {
     }
 
     #[test]
-    fn test_endian_fusion_materializes_stack_base_on_x86() {
+    fn test_endian_fusion_encodes_stack_offset_directly_on_x86() {
         let mut prog = make_program(vec![
             BpfInsn::ldx_mem(BPF_DW, 4, BPF_REG_10, -88),
             endian_to_be(4, 64),
@@ -664,13 +663,14 @@ mod tests {
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
-        assert_eq!(prog.insns.len(), 5);
-        assert_eq!(prog.insns[0], BpfInsn::mov64_reg(4, BPF_REG_10));
-        assert_eq!(prog.insns[1], BpfInsn::alu64_imm(BPF_ADD, 4, -88));
-        assert!(prog.insns[2].is_kinsn_sidecar());
-        assert_eq!(sidecar_payload(&prog.insns[2]), endian_payload(4, 4, 0));
-        assert!(prog.insns[3].is_call());
-        assert!(prog.insns[4].is_exit());
+        assert_eq!(prog.insns.len(), 3);
+        assert!(prog.insns[0].is_kinsn_sidecar());
+        assert_eq!(
+            sidecar_payload(&prog.insns[0]),
+            endian_payload(4, BPF_REG_10, -88)
+        );
+        assert!(prog.insns[1].is_call());
+        assert!(prog.insns[2].is_exit());
     }
 
     #[test]
