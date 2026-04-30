@@ -537,12 +537,6 @@ pub(crate) struct ProfileSession {
     duration_ms: u64,
 }
 
-impl ProfileSession {
-    pub(crate) fn duration_ms(&self) -> u64 {
-        self.duration_ms
-    }
-}
-
 #[derive(Debug)]
 pub(crate) struct FrozenProfile {
     output_dir: WorkDir,
@@ -978,11 +972,6 @@ where
     record_map_inline_records(&mut tracker, prog_id, map_inline_records, open_map_fd)
 }
 
-pub(crate) fn available_passes_help(config: &CliConfig) -> Result<String> {
-    let output = run_output(config.command("bpfopt").arg("list-passes"))?;
-    Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
-}
-
 fn live_bpf_map_lookup(_map: &MapInfoJson, fd: i32, key: &[u8]) -> Result<Option<Vec<u8>>> {
     let info = bpf::bpf_map_get_info(fd)?;
     let value_size = bpf::bpf_map_lookup_value_size(&info)?;
@@ -1036,48 +1025,6 @@ pub(crate) fn stop_profile(session: ProfileSession) -> Result<FrozenProfile> {
         output_dir: session.output_dir,
         duration_ms: session.duration_ms,
         programs_profiled,
-    })
-}
-
-pub(crate) fn save_profile(profile: &FrozenProfile, path: &Path) -> Result<()> {
-    let mut rows = Vec::<serde_json::Value>::new();
-    for entry in fs::read_dir(profile.output_dir.path())
-        .with_context(|| format!("read {}", profile.output_dir.path().display()))?
-    {
-        let entry = entry?;
-        if entry.path().extension().and_then(|value| value.to_str()) != Some("json") {
-            continue;
-        }
-        let data = fs::read(entry.path())?;
-        rows.push(serde_json::from_slice(&data)?);
-    }
-    let mut file = fs::File::create(path).with_context(|| format!("create {}", path.display()))?;
-    serde_json::to_writer_pretty(&mut file, &rows)?;
-    writeln!(file)?;
-    file.flush()?;
-    Ok(())
-}
-
-pub(crate) fn load_profile(path: &Path) -> Result<FrozenProfile> {
-    let data = fs::read(path).with_context(|| format!("read {}", path.display()))?;
-    let rows: Vec<serde_json::Value> = serde_json::from_slice(&data)
-        .with_context(|| format!("parse profile JSON array from {}", path.display()))?;
-    let output_dir = WorkDir::new("bpfrejit-daemon-profile-load")?;
-    for row in &rows {
-        let prog_id = row
-            .get("prog_id")
-            .and_then(|value| value.as_u64())
-            .ok_or_else(|| anyhow!("profile row is missing prog_id"))?;
-        let out_path = output_dir.path().join(format!("{prog_id}.json"));
-        let mut file = fs::File::create(&out_path)
-            .with_context(|| format!("create {}", out_path.display()))?;
-        serde_json::to_writer_pretty(&mut file, row)?;
-        writeln!(file)?;
-    }
-    Ok(FrozenProfile {
-        output_dir,
-        duration_ms: 0,
-        programs_profiled: rows.len(),
     })
 }
 
@@ -2003,10 +1950,6 @@ fn write_json_file<T: Serialize>(path: &Path, value: &T) -> Result<()> {
     Ok(())
 }
 
-fn run_output(command: &mut Command) -> Result<std::process::Output> {
-    run_stage_output("subprocess", command)
-}
-
 fn run_stage_output(stage: &str, command: &mut Command) -> Result<std::process::Output> {
     let program = format!("{command:?}");
     let output = command
@@ -2185,10 +2128,6 @@ JSON
                 &dir.path().join("bpfopt"),
                 r#"#!/usr/bin/env bash
 set -euo pipefail
-if [[ "${1:-}" == "list-passes" ]]; then
-  printf 'wide-mem\ndce\n'
-  exit 0
-fi
 report=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -2619,12 +2558,8 @@ exit 11
         let marker_arg = marker.to_string_lossy().to_string();
         fake.replace_command(
             "bpfopt",
-            r#"#!/usr/bin/env bash
+r#"#!/usr/bin/env bash
 set -euo pipefail
-if [[ "${1:-}" == "list-passes" ]]; then
-  printf 'wide-mem\n'
-  exit 0
-fi
 report=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -2684,12 +2619,8 @@ fi
         let fake = FakeCliDir::new().unwrap();
         fake.replace_command(
             "bpfopt",
-            r#"#!/usr/bin/env bash
+r#"#!/usr/bin/env bash
 set -euo pipefail
-if [[ "${1:-}" == "list-passes" ]]; then
-  printf 'map-inline\n'
-  exit 0
-fi
 if [[ "${1:-}" == "scan-map-keys" ]]; then
   out=""
   while [[ $# -gt 0 ]]; do

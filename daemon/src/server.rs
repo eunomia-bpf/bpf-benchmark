@@ -2,7 +2,6 @@
 //! Unix socket server implementation.
 
 use std::collections::{HashMap, HashSet};
-use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -150,20 +149,6 @@ impl ProfilingState {
         match self {
             Self::Frozen(profile) => profile.profile_path_for(prog_id),
             Self::Active(_) => None,
-        }
-    }
-
-    fn duration_ms(&self) -> u64 {
-        match self {
-            Self::Active(session) => session.duration_ms(),
-            Self::Frozen(profile) => profile.duration_ms(),
-        }
-    }
-
-    fn programs_profiled(&self) -> usize {
-        match self {
-            Self::Active(_) => 0,
-            Self::Frozen(profile) => profile.programs_profiled(),
         }
     }
 }
@@ -426,13 +411,6 @@ fn request_interval_ms(req: &serde_json::Value) -> std::result::Result<u64, Stri
     Ok(interval_ms)
 }
 
-fn request_path<'a>(req: &'a serde_json::Value, key: &str) -> std::result::Result<&'a str, String> {
-    let value = req.get(key).ok_or_else(|| format!("missing {key}"))?;
-    value
-        .as_str()
-        .ok_or_else(|| format!("{key} must be a JSON string"))
-}
-
 fn error_json(message: impl Into<String>) -> serde_json::Value {
     serde_json::json!({
         "status": "error",
@@ -539,58 +517,14 @@ fn process_request(
                 }
             }
         }
-        "profile-save" => {
-            let path = match request_path(req, "path") {
-                Ok(path) => path,
-                Err(message) => return error_json(message),
-            };
-            let Some(ProfilingState::Frozen(profile)) = profiling_state.as_ref() else {
-                return error_json("no profile data available");
-            };
-            match commands::save_profile(profile, Path::new(path)) {
-                Ok(()) => serde_json::json!({
-                    "status": "ok",
-                    "path": path,
-                    "programs": profile.programs_profiled(),
-                }),
-                Err(err) => error_json(format!("{err:#}")),
-            }
-        }
-        "profile-load" => {
-            let path = match request_path(req, "path") {
-                Ok(path) => path,
-                Err(message) => return error_json(message),
-            };
-            if matches!(profiling_state.as_ref(), Some(ProfilingState::Active(_))) {
-                return error_json("profiling is active; stop it before loading a snapshot");
-            }
-            match commands::load_profile(Path::new(path)) {
-                Ok(profile) => {
-                    let programs_loaded = profile.programs_profiled();
-                    *profiling_state = Some(ProfilingState::Frozen(profile));
-                    serde_json::json!({
-                        "status": "ok",
-                        "programs_loaded": programs_loaded,
-                    })
-                }
-                Err(err) => error_json(format!("{err:#}")),
-            }
-        }
         "status" => {
             let profiling = profiling_state
                 .as_ref()
                 .map_or("none", ProfilingState::label);
-            let available_passes_help = match commands::available_passes_help(config) {
-                Ok(help) => help,
-                Err(err) => return error_json(format!("bpfopt list-passes failed: {err:#}")),
-            };
             serde_json::json!({
                 "status": "ok",
                 "version": env!("CARGO_PKG_VERSION"),
                 "profiling": profiling,
-                "profile_duration_ms": profiling_state.as_ref().map(ProfilingState::duration_ms),
-                "programs_profiled": profiling_state.as_ref().map(ProfilingState::programs_profiled),
-                "available_passes_help": available_passes_help,
             })
         }
         _ => error_json(format!("unknown command: {cmd}")),
@@ -602,7 +536,6 @@ mod tests {
     use super::*;
     use std::collections::HashMap;
     use std::sync::{Arc, Mutex};
-    use std::time::{SystemTime, UNIX_EPOCH};
 
     use crate::commands::{
         InlinedMapEntry, OptimizeOneResult, OptimizeSummary, ProgramInfo, TimingsNs,
@@ -669,16 +602,6 @@ mod tests {
             &tracker,
             &reoptimization_state,
         )
-    }
-
-    fn temp_test_dir(prefix: &str) -> std::path::PathBuf {
-        let timestamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("clock should be after epoch")
-            .as_nanos();
-        let path = std::env::temp_dir().join(format!("{prefix}-{timestamp}"));
-        std::fs::create_dir(&path).expect("create temp test dir");
-        path
     }
 
     #[test]
@@ -847,25 +770,6 @@ mod tests {
     }
 
     #[test]
-    fn process_request_status_reports_list_passes_failure_as_error() {
-        let cli_dir = temp_test_dir("bpfrejit-daemon-empty-cli");
-        let config = CliConfig::with_dir(cli_dir.clone());
-        let response = process_test_request_with_config(
-            &serde_json::json!({
-                "cmd": "status",
-            }),
-            &config,
-        );
-
-        std::fs::remove_dir_all(cli_dir).expect("remove temp cli dir");
-        assert_eq!(response["status"], "error");
-        assert!(response["error_message"]
-            .as_str()
-            .expect("error message should be a string")
-            .contains("bpfopt list-passes failed"));
-    }
-
-    #[test]
     fn process_request_rejects_zero_profile_interval() {
         let response = process_test_request(&serde_json::json!({
             "cmd": "profile-start",
@@ -877,56 +781,5 @@ mod tests {
             response["error_message"],
             "interval_ms must be greater than zero"
         );
-    }
-
-    #[test]
-    fn process_request_profile_save_and_load_round_trip() {
-        let timestamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("clock should be after epoch")
-            .as_nanos();
-        let src_path = std::env::temp_dir().join(format!("bpfrejit-profile-src-{timestamp}.json"));
-        let dst_path = std::env::temp_dir().join(format!("bpfrejit-profile-dst-{timestamp}.json"));
-        std::fs::write(
-            &src_path,
-            r#"[{"prog_id":123,"duration_ms":5,"run_cnt_delta":1,"run_time_ns_delta":2}]"#,
-        )
-        .expect("write source profile");
-
-        let tracker = commands::new_invalidation_tracker();
-        let reoptimization_state = new_reoptimization_state();
-        let mut profiling_state = None;
-        let load_response = process_request(
-            &serde_json::json!({
-                "cmd": "profile-load",
-                "path": src_path.display().to_string(),
-            }),
-            &CliConfig::from_env(),
-            &mut profiling_state,
-            &tracker,
-            &reoptimization_state,
-        );
-        assert_eq!(load_response["status"], "ok");
-        assert_eq!(load_response["programs_loaded"], 1);
-
-        let save_response = process_request(
-            &serde_json::json!({
-                "cmd": "profile-save",
-                "path": dst_path.display().to_string(),
-            }),
-            &CliConfig::from_env(),
-            &mut profiling_state,
-            &tracker,
-            &reoptimization_state,
-        );
-        assert_eq!(save_response["status"], "ok");
-        assert_eq!(save_response["programs"], 1);
-        assert!(
-            dst_path.exists(),
-            "profile-save should write the destination file"
-        );
-
-        std::fs::remove_file(&src_path).expect("source profile cleanup should succeed");
-        std::fs::remove_file(&dst_path).expect("destination profile cleanup should succeed");
     }
 }
