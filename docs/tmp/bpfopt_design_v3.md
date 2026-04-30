@@ -27,8 +27,8 @@ bpfget 123 | bpfopt wide-mem | bpfopt rotate | bpfopt const-prop | bpfverify | b
 llvm-objcopy -O binary --only-section=.text new.bpf.o new.bin
 bpfrejit 123 new.bin
 
-# 离线分析
-bpfopt analyze < prog.bin
+# 离线优化报告
+bpfopt optimize --report report.json < prog.bin > opt.bin
 ```
 
 ## 2. 工具详细设计
@@ -65,7 +65,6 @@ bpfopt optimize --passes wide-mem,rotate,const-prop < in.bin > out.bin
 **工具子命令**：
 
 ```bash
-bpfopt analyze < in.bin          # 输出 JSON 分析报告到 stdout
 bpfopt list-passes               # 列出所有可用 pass
 bpfopt list-passes --json        # JSON 格式
 ```
@@ -403,7 +402,7 @@ bpfopt wide-mem --report r1.json < prog.bin | bpfopt rotate --report r2.json > o
 
 ### 4.3 per-pass verify 管道
 
-daemon 或 shell 脚本实现 §4.6 的 per-pass verify loop：
+daemon 或外部 runner orchestration 实现 §4.6 的 per-pass verify loop：
 
 ```bash
 #!/bin/bash
@@ -435,7 +434,7 @@ bpfrejit $PROG_ID $CURRENT
 rm -f $CURRENT $CANDIDATE
 ```
 
-这就是 daemon 过去在 Rust 里实现的 per-pass verify loop，现在变成了一个 30 行的 bash 脚本。
+这就是 daemon 过去在 Rust 里实现的 per-pass verify loop。实现时它必须在 daemon 外部编排；如果没有真实调用方，不保留未使用的 checked-in 脚本。
 
 ### 4.4 verifier-in-the-loop 管道
 
@@ -698,11 +697,11 @@ bpfverify --prog-type xdp --input prog.bin --verifier-states-out states.json
 bpfopt const-prop --verifier-states states.json < prog.bin | bpfopt dce | bpfrejit 123
 ```
 
-### 场景 6：离线 corpus 分析（不需要内核）
+### 场景 6：离线 corpus 优化报告（不需要内核）
 
 ```bash
 for f in corpus/*.bin; do
-  bpfopt analyze < $f >> analysis.jsonl
+  bpfopt optimize --report "$f.report.json" < "$f" > "$f.opt.bin"
 done
 ```
 
@@ -755,7 +754,7 @@ Phase 1 完成后，可以跑：`bpfget 123 | bpfopt wide-mem | bpfrejit 123`
 
 ### Phase 4：增强
 
-12. per-pass verify loop 脚本（参考 §4.3 示例）
+12. per-pass verify loop 外部编排（参考 §4.3 示例；只在存在真实调用方时落地）
 13. target.json 自动生成（`bpfget --target` 探测当前平台 kinsn 能力）
 14. invalidation-hints 支持
 

@@ -10,15 +10,12 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::{anyhow, bail, Context, Result};
 use bpfopt::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis, MapInfoAnalysis};
-use bpfopt::insn::{
-    bpf_op, BpfInsn, BPF_CALL, BPF_DW, BPF_EXIT, BPF_IMM, BPF_JA, BPF_LD, BPF_PSEUDO_KINSN_CALL,
-    BPF_PSEUDO_MAP_FD, BPF_PSEUDO_MAP_VALUE,
-};
+use bpfopt::insn::{BpfInsn, BPF_PSEUDO_MAP_VALUE};
 use bpfopt::pass::{
-    self, Analysis, BpfProgram, BranchProfile, BtfInfoRecords, KinsnRegistry, MapMetadata,
-    MapValueProvider, PassContext, PassManager, PassResult, PlatformCapabilities, ProfilingData,
-    RegState, ScalarRange, SnapshotMapProvider, StackState, StaticKinsnCallResolver, Tnum,
-    VerifierInsn, VerifierInsnKind, VerifierValueWidth,
+    self, BpfProgram, BranchProfile, BtfInfoRecords, KinsnRegistry, MapMetadata, MapValueProvider,
+    PassContext, PassManager, PassResult, PlatformCapabilities, ProfilingData, RegState,
+    ScalarRange, SnapshotMapProvider, StackState, StaticKinsnCallResolver, Tnum, VerifierInsn,
+    VerifierInsnKind, VerifierValueWidth,
 };
 use bpfopt::passes::PASS_REGISTRY;
 use clap::{Args, Parser, Subcommand};
@@ -185,8 +182,6 @@ enum Command {
     SkbLoadBytes,
     /// Run a pass pipeline in-process.
     Optimize(OptimizeArgs),
-    /// Emit a JSON analysis summary.
-    Analyze,
     /// Discover map/key pairs that map-inline would need from --map-values.
     #[command(name = "scan-map-keys")]
     ScanMapKeys,
@@ -241,16 +236,6 @@ struct ListPassEntry {
 }
 
 #[derive(Clone, Debug, Serialize)]
-struct AnalyzeReport {
-    insn_count: usize,
-    subprog_count: usize,
-    map_lookups: Vec<MapLookupReport>,
-    kinsn_calls: Vec<KinsnCallReport>,
-    ld_imm64_count: usize,
-    branch_count: usize,
-}
-
-#[derive(Clone, Debug, Serialize)]
 struct ScanMapKeysReport {
     complete: bool,
     keys: Vec<ScannedMapKeyReport>,
@@ -260,21 +245,6 @@ struct ScanMapKeysReport {
 struct ScannedMapKeyReport {
     map_id: u32,
     key_hex: String,
-}
-
-#[derive(Clone, Debug, Serialize)]
-struct MapLookupReport {
-    pc: usize,
-    map_load_pc: Option<usize>,
-    map_id: Option<u32>,
-    old_fd: Option<i32>,
-}
-
-#[derive(Clone, Debug, Serialize)]
-struct KinsnCallReport {
-    pc: usize,
-    btf_func_id: i32,
-    call_offset: i16,
 }
 
 #[derive(Debug, Deserialize)]
@@ -397,7 +367,6 @@ fn run_main() -> Result<()> {
 
     match cli.command {
         Command::ListPasses(args) => list_passes(&cli.common, args.json),
-        Command::Analyze => run_analyze(&cli.common),
         Command::ScanMapKeys => run_scan_map_keys(&cli.common),
         Command::Optimize(args) => run_optimize(&cli.common, &args),
         command => run_single_pass(&cli.common, command.canonical_pass_name().unwrap()),
@@ -419,10 +388,7 @@ impl Command {
             Command::BulkMemory => Some("bulk_memory"),
             Command::BoundsCheckMerge => Some("bounds_check_merge"),
             Command::SkbLoadBytes => Some("skb_load_bytes_spec"),
-            Command::Optimize(_)
-            | Command::Analyze
-            | Command::ScanMapKeys
-            | Command::ListPasses(_) => None,
+            Command::Optimize(_) | Command::ScanMapKeys | Command::ListPasses(_) => None,
         }
     }
 }
@@ -448,29 +414,6 @@ fn list_passes(common: &CommonArgs, json: bool) -> Result<()> {
         }
         Ok(())
     }
-}
-
-fn run_analyze(common: &CommonArgs) -> Result<()> {
-    let insns = read_bytecode(common.input.as_deref())?;
-    let mut program = BpfProgram::new(insns);
-    attach_program_inputs(&mut program, common)?;
-
-    let cfg = CFGAnalysis.run(&program);
-    let branch_targets = BranchTargetAnalysis.run(&program);
-    let _liveness = LivenessAnalysis.run(&program);
-    let map_info = MapInfoAnalysis
-        .run(&program)
-        .map_err(|err| anyhow!("map_info analysis failed: {err}"))?;
-
-    let report = AnalyzeReport {
-        insn_count: program.insns.len(),
-        subprog_count: cfg.subprogs.len(),
-        map_lookups: collect_map_lookups(&program, &map_info.references),
-        kinsn_calls: collect_kinsn_calls(&program),
-        ld_imm64_count: count_ldimm64(&program),
-        branch_count: count_branches(&program, branch_targets.is_target.len()),
-    };
-    write_json(common.output.as_deref(), &report)
 }
 
 type RecordedMapKeys = Arc<Mutex<Vec<(u32, Vec<u8>)>>>;
@@ -1438,83 +1381,6 @@ fn hex_bytes(bytes: &[u8]) -> String {
 
 fn optimize_reports(pass_results: &[PassResult]) -> Vec<PassReport> {
     pass_results.iter().map(pass_report).collect()
-}
-
-fn collect_map_lookups(
-    program: &BpfProgram,
-    map_refs: &[bpfopt::analysis::MapReference],
-) -> Vec<MapLookupReport> {
-    let refs_by_pc = map_refs
-        .iter()
-        .map(|reference| (reference.pc, reference))
-        .collect::<HashMap<_, _>>();
-    let mut out = Vec::new();
-
-    for (pc, insn) in program.insns.iter().enumerate() {
-        if insn.is_call() && insn.src_reg() == 0 && insn.imm == 1 {
-            let map_load_pc = find_nearest_map_load(&program.insns, pc);
-            let map_ref = map_load_pc.and_then(|load_pc| refs_by_pc.get(&load_pc).copied());
-            out.push(MapLookupReport {
-                pc,
-                map_load_pc,
-                map_id: map_ref.and_then(|reference| reference.map_id),
-                old_fd: map_ref.map(|reference| reference.old_fd),
-            });
-        }
-    }
-
-    out
-}
-
-fn find_nearest_map_load(insns: &[BpfInsn], call_pc: usize) -> Option<usize> {
-    let mut pc = 0usize;
-    let mut last = None;
-    while pc < call_pc && pc < insns.len() {
-        let insn = insns[pc];
-        if insn.is_ldimm64() && insn.dst_reg() == 1 && insn.src_reg() == BPF_PSEUDO_MAP_FD {
-            last = Some(pc);
-        }
-        pc += if insn.is_ldimm64() { 2 } else { 1 };
-    }
-    last
-}
-
-fn collect_kinsn_calls(program: &BpfProgram) -> Vec<KinsnCallReport> {
-    program
-        .insns
-        .iter()
-        .enumerate()
-        .filter_map(|(pc, insn)| {
-            (insn.is_call() && insn.src_reg() == BPF_PSEUDO_KINSN_CALL).then_some(KinsnCallReport {
-                pc,
-                btf_func_id: insn.imm,
-                call_offset: insn.off,
-            })
-        })
-        .collect()
-}
-
-fn count_ldimm64(program: &BpfProgram) -> usize {
-    program
-        .insns
-        .iter()
-        .filter(|insn| insn.code() == (BPF_LD | BPF_DW | BPF_IMM))
-        .count()
-}
-
-fn count_branches(program: &BpfProgram, _branch_target_slots: usize) -> usize {
-    program
-        .insns
-        .iter()
-        .filter(|insn| {
-            insn.is_jmp_class()
-                && !insn.is_call()
-                && !insn.is_exit()
-                && bpf_op(insn.code()) != BPF_CALL
-                && bpf_op(insn.code()) != BPF_EXIT
-                && (bpf_op(insn.code()) == BPF_JA || insn.is_cond_jmp())
-        })
-        .count()
 }
 
 fn default_reg_type() -> String {

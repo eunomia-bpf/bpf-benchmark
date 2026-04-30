@@ -37,17 +37,12 @@ struct Cli {
     /// Output directory for --all; writes one <prog_id>.json per program.
     #[arg(long, value_name = "DIR")]
     output_dir: Option<PathBuf>,
-    /// Print an ASCII hotness table sorted by run_cnt_delta.
-    #[arg(long)]
-    show: bool,
 }
 
 #[derive(Debug)]
 struct Target {
     prog_id: u32,
     fd: std::os::fd::OwnedFd,
-    name: String,
-    prog_type: u32,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -72,13 +67,6 @@ struct ProfileJson {
 struct PerInsnProfile {
     taken: u64,
     not_taken: u64,
-}
-
-#[derive(Clone, Debug)]
-struct ProfileRow {
-    profile: ProfileJson,
-    name: String,
-    prog_type: u32,
 }
 
 struct BranchCounters {
@@ -114,9 +102,6 @@ fn run() -> Result<()> {
     let duration_ms = duration_ms(cli.duration);
     let profiles = build_profiles(&targets, &before, &after, duration_ms);
     write_profiles(&cli, &profiles)?;
-    if cli.show {
-        print_table(&profiles)?;
-    }
     Ok(())
 }
 
@@ -167,14 +152,7 @@ fn collect_targets(cli: &Cli) -> Result<Vec<Target>> {
 fn open_target(prog_id: u32) -> Result<Target> {
     let fd = kernel_sys::prog_get_fd_by_id(prog_id)
         .with_context(|| format!("open BPF program id {prog_id}"))?;
-    let info = kernel_sys::obj_get_info_by_fd(fd.as_fd())
-        .with_context(|| format!("read info for BPF program id {prog_id}"))?;
-    Ok(Target {
-        prog_id,
-        fd,
-        name: c_name(&info.name),
-        prog_type: info.prog_type,
-    })
+    Ok(Target { prog_id, fd })
 }
 
 fn read_snapshots(targets: &[Target]) -> Result<BTreeMap<u32, ProgStats>> {
@@ -198,7 +176,7 @@ fn build_profiles(
     before: &BTreeMap<u32, ProgStats>,
     after: &BTreeMap<u32, ProgStats>,
     duration_ms: u64,
-) -> Vec<ProfileRow> {
+) -> Vec<ProfileJson> {
     let mut rows = targets
         .iter()
         .filter_map(|target| {
@@ -206,68 +184,55 @@ fn build_profiles(
             let after = after.get(&target.prog_id)?;
             // The current PMU sample covers the whole profiling window, not a
             // specific BPF program, so per-program branch fields stay null.
-            Some(ProfileRow {
-                profile: ProfileJson {
-                    prog_id: target.prog_id,
-                    duration_ms,
-                    run_cnt_delta: after.run_cnt.saturating_sub(before.run_cnt),
-                    run_time_ns_delta: after.run_time_ns.saturating_sub(before.run_time_ns),
-                    branch_miss_rate: None,
-                    branch_misses: None,
-                    branch_instructions: None,
-                    per_insn: BTreeMap::new(),
-                },
-                name: target.name.clone(),
-                prog_type: target.prog_type,
+            Some(ProfileJson {
+                prog_id: target.prog_id,
+                duration_ms,
+                run_cnt_delta: after.run_cnt.saturating_sub(before.run_cnt),
+                run_time_ns_delta: after.run_time_ns.saturating_sub(before.run_time_ns),
+                branch_miss_rate: None,
+                branch_misses: None,
+                branch_instructions: None,
+                per_insn: BTreeMap::new(),
             })
         })
         .collect::<Vec<_>>();
     rows.sort_by(|a, b| {
-        b.profile
-            .run_cnt_delta
-            .cmp(&a.profile.run_cnt_delta)
-            .then_with(|| {
-                b.profile
-                    .run_time_ns_delta
-                    .cmp(&a.profile.run_time_ns_delta)
-            })
-            .then_with(|| a.profile.prog_id.cmp(&b.profile.prog_id))
+        b.run_cnt_delta
+            .cmp(&a.run_cnt_delta)
+            .then_with(|| b.run_time_ns_delta.cmp(&a.run_time_ns_delta))
+            .then_with(|| a.prog_id.cmp(&b.prog_id))
     });
     rows
 }
 
-fn write_profiles(cli: &Cli, rows: &[ProfileRow]) -> Result<()> {
+fn write_profiles(cli: &Cli, rows: &[ProfileJson]) -> Result<()> {
     if let Some(dir) = &cli.output_dir {
         fs::create_dir_all(dir).with_context(|| format!("create {}", dir.display()))?;
         for row in rows {
-            let path = dir.join(format!("{}.json", row.profile.prog_id));
-            write_json_file(&path, &row.profile)?;
+            let path = dir.join(format!("{}.json", row.prog_id));
+            write_json_file(&path, row)?;
         }
         return Ok(());
     }
 
     if let Some(path) = &cli.output {
         if cli.all {
-            let profiles = rows.iter().map(|row| &row.profile).collect::<Vec<_>>();
-            return write_json_file(path, &profiles);
+            return write_json_file(path, &rows);
         }
         let profile = rows
             .first()
             .ok_or_else(|| anyhow!("single-program profile unexpectedly empty"))?;
-        return write_json_file(path, &profile.profile);
+        return write_json_file(path, profile);
     }
 
-    if !cli.show {
-        let mut stdout = io::stdout().lock();
-        if cli.all {
-            let profiles = rows.iter().map(|row| &row.profile).collect::<Vec<_>>();
-            write_json(&mut stdout, &profiles)?;
-        } else {
-            let profile = rows
-                .first()
-                .ok_or_else(|| anyhow!("single-program profile unexpectedly empty"))?;
-            write_json(&mut stdout, &profile.profile)?;
-        }
+    let mut stdout = io::stdout().lock();
+    if cli.all {
+        write_json(&mut stdout, &rows)?;
+    } else {
+        let profile = rows
+            .first()
+            .ok_or_else(|| anyhow!("single-program profile unexpectedly empty"))?;
+        write_json(&mut stdout, profile)?;
     }
     Ok(())
 }
@@ -281,49 +246,12 @@ fn write_empty_outputs(cli: &Cli) -> Result<()> {
         } else {
             bail!("no profile target found");
         }
-    } else if cli.show {
-        print_table(&[])?;
     } else if cli.all {
         let mut stdout = io::stdout().lock();
         write_json(&mut stdout, &Vec::<ProfileJson>::new())?;
     } else {
         bail!("no profile target found");
     }
-    Ok(())
-}
-
-fn print_table(rows: &[ProfileRow]) -> Result<()> {
-    let mut out = io::stdout().lock();
-    writeln!(
-        out,
-        "{:<4} {:<8} {:<16} {:<6} {:>12} {:>14} {:>12} {:>9}",
-        "RANK", "PROG_ID", "NAME", "TYPE", "RUNS", "RUN_TIME_NS", "AVG_NS", "BR_MISS%"
-    )?;
-    for (idx, row) in rows.iter().enumerate() {
-        let avg_ns = if row.profile.run_cnt_delta == 0 {
-            0.0
-        } else {
-            row.profile.run_time_ns_delta as f64 / row.profile.run_cnt_delta as f64
-        };
-        let branch_miss = row
-            .profile
-            .branch_miss_rate
-            .map(|rate| format!("{:.2}", rate * 100.0))
-            .unwrap_or_else(|| "n/a".to_string());
-        writeln!(
-            out,
-            "{:<4} {:<8} {:<16} {:<6} {:>12} {:>14} {:>12.1} {:>9}",
-            idx + 1,
-            row.profile.prog_id,
-            truncate_name(&row.name, 16),
-            row.prog_type,
-            row.profile.run_cnt_delta,
-            row.profile.run_time_ns_delta,
-            avg_ns,
-            branch_miss
-        )?;
-    }
-    out.flush()?;
     Ok(())
 }
 
@@ -442,22 +370,6 @@ fn duration_ms(duration: Duration) -> u64 {
     duration.as_millis().try_into().unwrap_or(u64::MAX)
 }
 
-fn c_name(raw: &[u8]) -> String {
-    let bytes = raw
-        .iter()
-        .take_while(|&&ch| ch != 0)
-        .copied()
-        .collect::<Vec<_>>();
-    String::from_utf8_lossy(&bytes).to_string()
-}
-
-fn truncate_name(name: &str, max: usize) -> String {
-    if name.chars().count() <= max {
-        return name.to_string();
-    }
-    name.chars().take(max.saturating_sub(1)).collect::<String>() + "~"
-}
-
 fn error_is_enoent(err: &anyhow::Error) -> bool {
     format!("{err:#}").contains("No such file or directory")
 }
@@ -494,7 +406,7 @@ mod tests {
 
     #[test]
     fn build_profiles_sorts_by_run_count_delta() {
-        let targets = vec![fake_target(2, "cold", 6), fake_target(1, "hot", 6)];
+        let targets = vec![fake_target(2), fake_target(1)];
         let before = BTreeMap::from([
             (
                 1,
@@ -530,13 +442,13 @@ mod tests {
 
         let rows = build_profiles(&targets, &before, &after, 100);
 
-        assert_eq!(rows[0].profile.prog_id, 1);
-        assert_eq!(rows[0].profile.run_cnt_delta, 20);
+        assert_eq!(rows[0].prog_id, 1);
+        assert_eq!(rows[0].run_cnt_delta, 20);
     }
 
     #[test]
     fn build_profiles_does_not_attribute_shared_pmu_to_program() {
-        let targets = vec![fake_target(7, "target", 6)];
+        let targets = vec![fake_target(7)];
         let before = BTreeMap::from([(
             7,
             ProgStats {
@@ -555,11 +467,11 @@ mod tests {
         let rows = build_profiles(&targets, &before, &after, 250);
 
         assert_eq!(rows.len(), 1);
-        assert_eq!(rows[0].profile.run_cnt_delta, 4);
-        assert_eq!(rows[0].profile.run_time_ns_delta, 80);
-        assert_eq!(rows[0].profile.branch_miss_rate, None);
-        assert_eq!(rows[0].profile.branch_misses, None);
-        assert_eq!(rows[0].profile.branch_instructions, None);
+        assert_eq!(rows[0].run_cnt_delta, 4);
+        assert_eq!(rows[0].run_time_ns_delta, 80);
+        assert_eq!(rows[0].branch_miss_rate, None);
+        assert_eq!(rows[0].branch_misses, None);
+        assert_eq!(rows[0].branch_instructions, None);
     }
 
     #[test]
@@ -581,13 +493,8 @@ mod tests {
         assert!(!slept.get());
     }
 
-    fn fake_target(prog_id: u32, name: &str, prog_type: u32) -> Target {
+    fn fake_target(prog_id: u32) -> Target {
         let fd = File::open("/dev/null").unwrap().into();
-        Target {
-            prog_id,
-            fd,
-            name: name.to_string(),
-            prog_type,
-        }
+        Target { prog_id, fd }
     }
 }
