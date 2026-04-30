@@ -428,11 +428,13 @@ for ko_path in /artifacts/kinsn/*.ko; do
 done
 EOF
 
-FROM runner-runtime-artifacts AS runner-runtime-daemon-artifact
+FROM runner-runtime-build-base AS runner-runtime-daemon-artifact
 
 ARG IMAGE_BUILD_JOBS=4
 ARG RUN_TARGET_ARCH=x86_64
 
+COPY Makefile ./Makefile
+COPY runner/mk ./runner/mk
 COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
 COPY bpfopt/crates/kernel-sys ./bpfopt/crates/kernel-sys
 COPY daemon ./daemon
@@ -456,11 +458,13 @@ RUN --mount=type=cache,target=/bpfopt/target,id=bpfopt-cargo-target,sharing=lock
     install -m 0755 "${daemon_bin_dir}/bpfrejit-daemon" /artifacts/rust/usr-local-bin/bpfrejit-daemon; \
     install -m 0755 "${daemon_bin_dir}/bpfrejit-daemon" "${daemon_image_dir}/bpfrejit-daemon"
 
-FROM runner-runtime-artifacts AS runner-runtime-bpfopt-artifacts
+FROM runner-runtime-build-base AS runner-runtime-bpfopt-artifacts
 
 ARG IMAGE_BUILD_JOBS=4
 ARG RUN_TARGET_ARCH=x86_64
 
+COPY Makefile ./Makefile
+COPY runner/mk ./runner/mk
 COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
 COPY bpfopt/crates/bpfget ./bpfopt/crates/bpfget
 COPY bpfopt/crates/bpfopt ./bpfopt/crates/bpfopt
