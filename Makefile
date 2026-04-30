@@ -36,6 +36,8 @@ VM_TEST_TIMEOUT ?= 3600
 VM_MICRO_TIMEOUT ?= 7200
 VM_CORPUS_TIMEOUT ?= 7200
 VM_E2E_TIMEOUT ?= 7200
+KEEP_RESULTS ?= 5
+DOCKER_BUILD_CACHE_KEEP_STORAGE ?= 50GB
 BENCH      ?=
 FUZZ_ROUNDS ?= 1000
 
@@ -61,7 +63,8 @@ VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 	aws-e2e aws-corpus \
 	aws-arm64-test aws-arm64-benchmark aws-arm64-corpus aws-arm64-e2e aws-arm64-terminate \
 	aws-x86-test aws-x86-benchmark aws-x86-corpus aws-x86-e2e aws-x86-terminate \
-	lint help clean
+	lint help clean clean-build clean-results clean-vm-tmp clean-docker-cache \
+	prune-docker-build-cache prune-vm-corpus-results prune-vm-e2e-results
 
 help:
 	@echo "Canonical run targets:"
@@ -76,6 +79,9 @@ help:
 	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=<micro|corpus|e2e>"
 	@echo "        aws-x86-test AWS_X86_REGION=<region> AWS_X86_PROFILE=<profile> AWS_X86_TEST_MODE=<selftest|negative|test>"
 	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=<micro|corpus|e2e>"
+	@echo "Cleanup: clean-build clean-results clean-vm-tmp clean-docker-cache"
+	@echo "Docker GC: make prune-docker-build-cache DOCKER_BUILD_CACHE_KEEP_STORAGE=$(DOCKER_BUILD_CACHE_KEEP_STORAGE)"
+	@echo "Result retention: vm-corpus/vm-e2e KEEP_RESULTS=$(KEEP_RESULTS)"
 
 validate:
 	$(MAKE) vm-test
@@ -102,9 +108,11 @@ vm-micro:
 
 vm-corpus:
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm corpus -- $(VM_CORPUS_SUITE_ARGS)
+	$(MAKE) prune-vm-corpus-results KEEP_RESULTS="$(KEEP_RESULTS)"
 
 vm-e2e:
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm e2e -- $(VM_E2E_SUITE_ARGS)
+	$(MAKE) prune-vm-e2e-results KEEP_RESULTS="$(KEEP_RESULTS)"
 
 vm-all:
 	$(MAKE) vm-test
@@ -156,7 +164,18 @@ aws-corpus:
 		*) echo "unsupported RUN_TARGET_ARCH for aws-corpus: $(RUN_TARGET_ARCH)" >&2; exit 2 ;; \
 	esac
 
-clean:
+prune-vm-corpus-results:
+	"$(PYTHON)" "$(RUNNER_DIR)/scripts/prune-result-dirs" --repo-root "$(ROOT_DIR)" --results-dir "$(ROOT_DIR)/corpus/results" --suite corpus --keep "$(KEEP_RESULTS)"
+
+prune-vm-e2e-results:
+	"$(PYTHON)" "$(RUNNER_DIR)/scripts/prune-result-dirs" --repo-root "$(ROOT_DIR)" --results-dir "$(ROOT_DIR)/e2e/results" --suite e2e --keep "$(KEEP_RESULTS)"
+
+prune-docker-build-cache:
+	docker buildx prune --force --keep-storage "$(DOCKER_BUILD_CACHE_KEEP_STORAGE)"
+
+clean: clean-build
+
+clean-build:
 	rm -rf "$(RUNNER_BUILD_DIR)"
 	rm -rf "$(RUNNER_DIR)/build-x86"
 	rm -rf "$(RUNNER_DIR)/build-arm64"
@@ -174,11 +193,19 @@ clean:
 		"$(ARTIFACT_ROOT)/workload-tools" \
 		"$(ARTIFACT_ROOT)/workload-tools-build" \
 		"$(ARTIFACT_ROOT)/aws-arm64/kernel-build" \
-		"$(ARTIFACT_ROOT)/aws-arm64/results" \
 		"$(ARTIFACT_ROOT)/aws-arm64/run-state" \
 		"$(ARTIFACT_ROOT)/aws-arm64/runs" \
 		"$(ARTIFACT_ROOT)/aws-arm64/state" \
-		"$(ARTIFACT_ROOT)/aws-x86/results" \
 		"$(ARTIFACT_ROOT)/aws-x86/run-state" \
 		"$(ARTIFACT_ROOT)/aws-x86/runs" \
 		"$(ARTIFACT_ROOT)/aws-x86/state"
+
+clean-results:
+	git -C "$(ROOT_DIR)" clean -fdX -- corpus/results e2e/results micro/results tests/results
+	rm -rf "$(ARTIFACT_ROOT)/aws-arm64/results" "$(ARTIFACT_ROOT)/aws-x86/results"
+
+clean-vm-tmp:
+	if [ -d "$(ROOT_DIR)/docs/tmp" ]; then find "$(ROOT_DIR)/docs/tmp" -path '*/vm-tmp/bpf-benchmark-docker.img' -type f -delete; fi
+	if [ -d "$(ROOT_DIR)/docs/tmp/runtime-container-tmp" ]; then find "$(ROOT_DIR)/docs/tmp/runtime-container-tmp" -maxdepth 1 -mindepth 1 -type d -name 'run.*' -exec rm -rf {} +; fi
+
+clean-docker-cache: prune-docker-build-cache
