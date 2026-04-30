@@ -159,7 +159,7 @@ aws-corpus:
 		*) echo "unsupported RUN_TARGET_ARCH for aws-corpus: $(RUN_TARGET_ARCH)" >&2; exit 2 ;; \
 	esac
 
-clean: clean-build
+clean: clean-build clean-vm-tmp
 
 clean-build:
 	rm -rf "$(RUNNER_BUILD_DIR)"
@@ -168,6 +168,7 @@ clean-build:
 	rm -rf "$(RUNNER_DIR)/build-llvmbpf"
 	rm -rf "$(RUNNER_DIR)/build-arm64-llvmbpf"
 	$(MAKE) -C "$(MICRO_DIR)" clean
+	cargo clean --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml"
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	rm -rf "$(X86_BUILD_DIR)" "$(ARM64_BUILD_DIR)" "$(ARTIFACT_ROOT)/runtime-kernel" "$(ROOT_DIR)/.state/runner-contracts"
 	rm -rf \
@@ -191,7 +192,7 @@ clean-results:
 	@echo "Result cleanup is manual; see docs/tmp/p89_disk_audit.md"
 
 clean-vm-tmp:
-	if [ -d "$(ROOT_DIR)/docs/tmp" ]; then find "$(ROOT_DIR)/docs/tmp" -path '*/vm-tmp/bpf-benchmark-docker.img' -type f -delete; fi
+	if [ -d "$(ROOT_DIR)/docs/tmp" ]; then find "$(ROOT_DIR)/docs/tmp" -path '*/vm-tmp/*.img' -type f -delete; fi
 	if [ -d "$(ROOT_DIR)/docs/tmp/runtime-container-tmp" ]; then find "$(ROOT_DIR)/docs/tmp/runtime-container-tmp" -maxdepth 1 -mindepth 1 -type d -name 'run.*' -exec rm -rf {} +; fi
 
 clean-docker-cache:
