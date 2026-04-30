@@ -600,7 +600,6 @@ where
     #[derive(Serialize)]
     struct AttemptRecordForServe<'a> {
         attempt: usize,
-        disabled_passes: &'a [String],
         result: &'a str,
         #[serde(skip_serializing_if = "Option::is_none")]
         failure_pc: Option<usize>,
@@ -612,7 +611,6 @@ where
     for attempt in attempts {
         seq.serialize_element(&AttemptRecordForServe {
             attempt: attempt.attempt,
-            disabled_passes: &attempt.disabled_passes,
             result: &attempt.result,
             failure_pc: attempt.failure_pc,
             attributed_pass: attempt.attributed_pass.as_deref(),
@@ -714,7 +712,6 @@ pub(crate) struct PassDetail {
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct AttemptRecord {
     pub attempt: usize,
-    pub disabled_passes: Vec<String>,
     pub result: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub failure_pc: Option<usize>,
@@ -1409,7 +1406,6 @@ where
         if !should_rejit {
             attempts.push(AttemptRecord {
                 attempt: 0,
-                disabled_passes: Vec::new(),
                 result: "no_change".to_string(),
                 failure_pc: None,
                 attributed_pass: None,
@@ -1498,7 +1494,6 @@ where
                 applied = true;
                 attempts.push(AttemptRecord {
                     attempt: 0,
-                    disabled_passes: Vec::new(),
                     result: if changed {
                         "applied".to_string()
                     } else {
@@ -1511,7 +1506,6 @@ where
             } else {
                 attempts.push(AttemptRecord {
                     attempt: 0,
-                    disabled_passes: Vec::new(),
                     result: "dry_run".to_string(),
                     failure_pc: None,
                     attributed_pass: None,
@@ -3012,7 +3006,6 @@ JSON
             passes: vec![],
             attempts: vec![AttemptRecord {
                 attempt: 0,
-                disabled_passes: vec![],
                 result: "rejit_failed".to_string(),
                 failure_pc: Some(42),
                 attributed_pass: Some("map_inline".to_string()),

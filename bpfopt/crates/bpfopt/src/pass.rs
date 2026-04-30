@@ -845,8 +845,6 @@ pub enum Arch {
 pub struct PolicyConfig {
     /// Enabled pass name list.
     pub enabled_passes: Vec<String>,
-    /// Disabled pass name list.
-    pub disabled_passes: Vec<String>,
 }
 
 pub fn default_enabled_passes() -> Vec<String> {
@@ -976,7 +974,17 @@ impl PassManager {
     /// Return whether a pass is enabled by the current policy.
     pub fn pass_allowed(&self, pass: &dyn BpfPass, ctx: &PassContext) -> anyhow::Result<bool> {
         let available_passes = self.available_pass_names();
-        pass_allowed(pass, ctx, &available_passes)
+        validate_policy_pass_names(
+            "enabled_passes",
+            &ctx.policy.enabled_passes,
+            &available_passes,
+        )?;
+
+        Ok(ctx
+            .policy
+            .enabled_passes
+            .iter()
+            .any(|name| name == pass.name()))
     }
 
     /// Precompute analyses declared by a pass.
@@ -1137,38 +1145,6 @@ impl PassManager {
     }
 }
 
-fn pass_allowed(
-    pass: &dyn BpfPass,
-    ctx: &PassContext,
-    available_passes: &HashSet<&str>,
-) -> anyhow::Result<bool> {
-    validate_policy_pass_names(
-        "enabled_passes",
-        &ctx.policy.enabled_passes,
-        available_passes,
-    )?;
-    validate_policy_pass_names(
-        "disabled_passes",
-        &ctx.policy.disabled_passes,
-        available_passes,
-    )?;
-
-    if !ctx.policy.disabled_passes.is_empty()
-        && ctx
-            .policy
-            .disabled_passes
-            .contains(&pass.name().to_string())
-    {
-        return Ok(false);
-    }
-
-    Ok(ctx
-        .policy
-        .enabled_passes
-        .iter()
-        .any(|name| name == pass.name()))
-}
-
 fn validate_policy_pass_names(
     field: &str,
     configured: &[String],
@@ -1200,7 +1176,6 @@ impl Default for PassContext {
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig {
                 enabled_passes: default_enabled_passes(),
-                ..PolicyConfig::default()
             },
             prog_type: 0,
         }
@@ -1228,7 +1203,6 @@ impl PassContext {
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig {
                 enabled_passes: default_enabled_passes(),
-                ..PolicyConfig::default()
             },
             prog_type: 0,
         }

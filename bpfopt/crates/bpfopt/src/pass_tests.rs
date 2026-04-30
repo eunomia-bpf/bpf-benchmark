@@ -497,23 +497,6 @@ fn test_pass_manager_retries_const_prop_and_dce_to_fixed_point() {
 }
 
 #[test]
-fn test_pass_manager_disabled_pass_policy() {
-    let mut pm = PassManager::new();
-    pm.add_pass(AppendNopPass);
-
-    let mut prog = make_program(vec![exit_insn()]);
-    let mut ctx = ctx_for_pass_manager(&pm);
-    ctx.policy.disabled_passes = vec!["append_nop".into()];
-
-    let result = pm.run(&mut prog, &ctx).unwrap();
-
-    // The pass should be skipped.
-    assert_eq!(result.pass_results.len(), 0);
-    assert!(!result.program_changed);
-    assert_eq!(prog.insns.len(), 1);
-}
-
-#[test]
 fn test_pass_manager_enabled_pass_policy() {
     let mut pm = PassManager::new();
     pm.add_pass(NoOpPass);
@@ -746,13 +729,13 @@ fn test_invalid_policy_pass_name_is_rejected() {
 
     let mut prog = make_program(vec![exit_insn()]);
     let mut ctx = ctx_for_pass_manager(&pm);
-    ctx.policy.disabled_passes = vec!["bulk_mem".into()];
+    ctx.policy.enabled_passes = vec!["bulk_mem".into()];
 
     let err = pm
         .run(&mut prog, &ctx)
         .expect_err("legacy aliases should be rejected");
 
-    assert!(err.to_string().contains("invalid disabled_passes"));
+    assert!(err.to_string().contains("invalid enabled_passes"));
     assert!(err.to_string().contains("unknown pass name(s): bulk_mem"));
 }
 

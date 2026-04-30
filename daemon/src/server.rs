@@ -448,18 +448,7 @@ fn parse_request_pass_list(
 fn request_enabled_passes(
     req: &serde_json::Value,
 ) -> std::result::Result<Option<Vec<String>>, String> {
-    let mut enabled = parse_request_pass_list(req, "enabled_passes")?;
-    let disabled = parse_request_pass_list(req, "disabled_passes")?;
-    match (enabled.as_mut(), disabled) {
-        (Some(enabled), Some(disabled)) => {
-            let disabled: HashSet<_> = disabled.into_iter().collect();
-            enabled.retain(|pass| !disabled.contains(pass));
-            Ok(Some(enabled.clone()))
-        }
-        (Some(enabled), None) => Ok(Some(enabled.clone())),
-        (None, Some(_)) => Err("disabled_passes requires enabled_passes with CLI backend".into()),
-        (None, None) => Ok(None),
-    }
+    parse_request_pass_list(req, "enabled_passes")
 }
 
 fn request_mode(req: &serde_json::Value) -> std::result::Result<OptimizeMode, String> {
@@ -951,34 +940,6 @@ mod tests {
         assert_eq!(
             response["error_message"],
             "enabled_passes entries must not be blank"
-        );
-    }
-
-    #[test]
-    fn process_request_rejects_blank_disabled_pass_name() {
-        let response = process_test_request(&serde_json::json!({
-            "cmd": "status",
-            "disabled_passes": ["   "],
-        }));
-
-        assert_eq!(response["status"], "error");
-        assert_eq!(
-            response["error_message"],
-            "disabled_passes entries must not be blank"
-        );
-    }
-
-    #[test]
-    fn process_request_rejects_disabled_passes_without_enabled_passes() {
-        let response = process_test_request(&serde_json::json!({
-            "cmd": "status",
-            "disabled_passes": ["map_inline"],
-        }));
-
-        assert_eq!(response["status"], "error");
-        assert_eq!(
-            response["error_message"],
-            "disabled_passes requires enabled_passes with CLI backend"
         );
     }
 
