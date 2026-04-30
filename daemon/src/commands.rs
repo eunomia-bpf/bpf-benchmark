@@ -426,6 +426,7 @@ fn write_replay_script(failure_dir: &Path, prog_id: u32) -> Result<()> {
     let prog_info: ProgInfoJson = read_json_file(&info_json, "failure info.json")?;
     let load_context_args = replay_load_context_args(&prog_info);
     let verify_args = render_shell_args(&load_context_args);
+    let btf_info_setup = replay_btf_info_setup(&prog_info);
     let script = format!(
         r#"#!/usr/bin/env bash
 set -euo pipefail
@@ -445,7 +446,10 @@ if [ -s fd_array.json ]; then
     fd_array_args=(--fd-array fd_array.json)
 fi
 
-"${{BPFVERIFY:-bpfverify}}" {verify_args} "${{fd_array_args[@]}}" \
+btf_info_args=()
+{btf_info_setup}
+
+"${{BPFVERIFY:-bpfverify}}" {verify_args} "${{btf_info_args[@]}}" "${{fd_array_args[@]}}" \
     --input "$candidate" \
     --output replay.verified.bin \
     --report replay_bpfverify_report.json
@@ -491,23 +495,28 @@ fn replay_load_context_args(prog_info: &ProgInfoJson) -> Vec<String> {
         args.push("--attach-btf-obj-id".to_string());
         args.push(prog_info.attach_btf_obj_id.to_string());
     }
-    append_btf_info_replay_args(&mut args, prog_info);
     args
 }
 
-fn append_btf_info_replay_args(args: &mut Vec<String>, prog_info: &ProgInfoJson) {
+fn replay_btf_info_setup(prog_info: &ProgInfoJson) -> String {
+    let mut lines = Vec::new();
     if prog_info.nr_func_info != 0 {
-        args.push("--func-info".to_string());
-        args.push(FUNC_INFO_FILE.to_string());
-        args.push("--func-info-rec-size".to_string());
-        args.push(prog_info.func_info_rec_size.to_string());
+        lines.push(format!(
+            "if [ -s {} ]; then\n    btf_info_args+=(--func-info {} --func-info-rec-size {})\nfi",
+            shell_quote(FUNC_INFO_FILE),
+            shell_quote(FUNC_INFO_FILE),
+            shell_quote(&prog_info.func_info_rec_size.to_string())
+        ));
     }
     if prog_info.nr_line_info != 0 {
-        args.push("--line-info".to_string());
-        args.push(LINE_INFO_FILE.to_string());
-        args.push("--line-info-rec-size".to_string());
-        args.push(prog_info.line_info_rec_size.to_string());
+        lines.push(format!(
+            "if [ -s {} ]; then\n    btf_info_args+=(--line-info {} --line-info-rec-size {})\nfi",
+            shell_quote(LINE_INFO_FILE),
+            shell_quote(LINE_INFO_FILE),
+            shell_quote(&prog_info.line_info_rec_size.to_string())
+        ));
     }
+    lines.join("\n")
 }
 
 fn render_shell_args(args: &[String]) -> String {
@@ -1178,6 +1187,7 @@ where
         let mut bpfopt = config.command("bpfopt");
         bpfopt.arg("optimize").arg("--report").arg(&report_json);
         append_bpfopt_context_args(&mut bpfopt, &prog_info);
+        append_btf_info_command_args(&mut bpfopt, &prog_info, workdir.path());
         if !requested_passes.is_empty() {
             bpfopt.arg("--passes").arg(join_pass_csv(requested_passes));
         }
@@ -1229,7 +1239,7 @@ where
                 .arg(&verified_bin)
                 .arg("--report")
                 .arg(&final_verify_report);
-            append_load_context_args(&mut verify, &prog_info, workdir.path());
+            append_candidate_load_context_args(&mut verify, &prog_info, workdir.path())?;
             if use_fd_array {
                 verify.arg("--fd-array").arg(&fd_array_json);
             }
@@ -1336,6 +1346,20 @@ where
 }
 
 fn append_load_context_args(command: &mut Command, prog_info: &ProgInfoJson, workdir: &Path) {
+    append_load_context_base_args(command, prog_info);
+    append_btf_info_command_args(command, prog_info, workdir);
+}
+
+fn append_candidate_load_context_args(
+    command: &mut Command,
+    prog_info: &ProgInfoJson,
+    workdir: &Path,
+) -> Result<()> {
+    append_load_context_base_args(command, prog_info);
+    append_nonempty_btf_info_command_args(command, prog_info, workdir)
+}
+
+fn append_load_context_base_args(command: &mut Command, prog_info: &ProgInfoJson) {
     if let Some(attach_type) = &prog_info.expected_attach_type {
         let value = if attach_type.name.trim().is_empty() {
             attach_type.numeric.to_string()
@@ -1359,7 +1383,6 @@ fn append_load_context_args(command: &mut Command, prog_info: &ProgInfoJson, wor
             .arg("--attach-btf-obj-id")
             .arg(prog_info.attach_btf_obj_id.to_string());
     }
-    append_btf_info_command_args(command, prog_info, workdir);
 }
 
 fn append_bpfopt_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
@@ -1381,6 +1404,50 @@ fn append_btf_info_command_args(command: &mut Command, prog_info: &ProgInfoJson,
             .arg("--line-info-rec-size")
             .arg(prog_info.line_info_rec_size.to_string());
     }
+}
+
+fn append_nonempty_btf_info_command_args(
+    command: &mut Command,
+    prog_info: &ProgInfoJson,
+    workdir: &Path,
+) -> Result<()> {
+    if prog_info.nr_func_info != 0 {
+        append_btf_info_file_if_nonempty(
+            command,
+            &workdir.join(FUNC_INFO_FILE),
+            "--func-info",
+            "--func-info-rec-size",
+            prog_info.func_info_rec_size,
+        )?;
+    }
+    if prog_info.nr_line_info != 0 {
+        append_btf_info_file_if_nonempty(
+            command,
+            &workdir.join(LINE_INFO_FILE),
+            "--line-info",
+            "--line-info-rec-size",
+            prog_info.line_info_rec_size,
+        )?;
+    }
+    Ok(())
+}
+
+fn append_btf_info_file_if_nonempty(
+    command: &mut Command,
+    path: &Path,
+    file_flag: &str,
+    rec_size_flag: &str,
+    rec_size: u32,
+) -> Result<()> {
+    let metadata = fs::metadata(path).with_context(|| format!("stat {}", path.display()))?;
+    if metadata.len() != 0 {
+        command
+            .arg(file_flag)
+            .arg(path)
+            .arg(rec_size_flag)
+            .arg(rec_size.to_string());
+    }
+    Ok(())
 }
 
 fn run_bpfverify_reported(
@@ -1458,7 +1525,7 @@ fn capture_rejit_failure_verifier_log(
         .arg(verified_bin)
         .arg("--report")
         .arg(&report_json);
-    append_load_context_args(&mut verify, prog_info, workdir);
+    append_candidate_load_context_args(&mut verify, prog_info, workdir)?;
     if use_fd_array {
         verify.arg("--fd-array").arg(fd_array_json);
     }
@@ -1905,7 +1972,7 @@ mod tests {
     static ENV_LOCK: TestMutex<()> = TestMutex::new(());
 
     #[test]
-    fn replay_load_context_includes_btf_metadata_files() {
+    fn replay_btf_info_setup_uses_nonempty_metadata_files() {
         let prog_info = ProgInfoJson {
             id: 42,
             name: "conntrack_clean".to_string(),
@@ -1925,20 +1992,48 @@ mod tests {
             expected_attach_type: None,
         };
 
-        let args = replay_load_context_args(&prog_info);
+        let setup = replay_btf_info_setup(&prog_info);
 
-        assert!(args
-            .windows(2)
-            .any(|pair| pair[0] == "--func-info" && pair[1] == FUNC_INFO_FILE));
-        assert!(args
-            .windows(2)
-            .any(|pair| pair[0] == "--func-info-rec-size" && pair[1] == "8"));
-        assert!(args
-            .windows(2)
-            .any(|pair| pair[0] == "--line-info" && pair[1] == LINE_INFO_FILE));
-        assert!(args
-            .windows(2)
-            .any(|pair| pair[0] == "--line-info-rec-size" && pair[1] == "16"));
+        assert!(setup.contains("[ -s func_info.bin ]"));
+        assert!(setup.contains("--func-info func_info.bin --func-info-rec-size 8"));
+        assert!(setup.contains("[ -s line_info.bin ]"));
+        assert!(setup.contains("--line-info line_info.bin --line-info-rec-size 16"));
+    }
+
+    #[test]
+    fn candidate_load_context_skips_empty_btf_metadata_files() {
+        let workdir = WorkDir::new("bpfrejit-daemon-empty-btf").unwrap();
+        fs::write(workdir.path().join(FUNC_INFO_FILE), []).unwrap();
+        fs::write(workdir.path().join(LINE_INFO_FILE), []).unwrap();
+        let prog_info = ProgInfoJson {
+            id: 42,
+            name: "conntrack_clean".to_string(),
+            prog_type: TypeJson {
+                name: "sched_cls".to_string(),
+                numeric: kernel_sys::BPF_PROG_TYPE_SCHED_CLS,
+            },
+            insn_cnt: 12,
+            map_ids: Vec::new(),
+            btf_id: 108,
+            func_info_rec_size: 8,
+            nr_func_info: 2,
+            line_info_rec_size: 16,
+            nr_line_info: 3,
+            attach_btf_obj_id: 0,
+            attach_btf_id: 0,
+            expected_attach_type: None,
+        };
+        let mut command = Command::new("bpfverify");
+
+        append_candidate_load_context_args(&mut command, &prog_info, workdir.path()).unwrap();
+
+        let args = command
+            .get_args()
+            .map(|arg| arg.to_string_lossy().into_owned())
+            .collect::<Vec<_>>();
+        assert!(args.iter().any(|arg| arg == "--prog-btf-id"));
+        assert!(!args.iter().any(|arg| arg == "--func-info"));
+        assert!(!args.iter().any(|arg| arg == "--line-info"));
     }
 
     struct FakeCliDir {
@@ -1979,11 +2074,13 @@ while [[ $# -gt 0 ]]; do
 done
 printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00' > "$outdir/prog.bin"
 cat > "$outdir/prog_info.json" <<JSON
-{"id":$prog_id,"name":"demo","type":{"name":"xdp","numeric":6},"insn_cnt":2,"map_ids":[111]}
+{"id":$prog_id,"name":"demo","type":{"name":"xdp","numeric":6},"insn_cnt":2,"map_ids":[111],"func_info_rec_size":8,"nr_func_info":1,"line_info_rec_size":16,"nr_line_info":1}
 JSON
 cat > "$outdir/map_fds.json" <<JSON
 [{"map_id":111,"map_type":2,"key_size":4,"value_size":4,"max_entries":8,"name":"demo_map"}]
 JSON
+printf '\x00\x00\x00\x00\x01\x00\x00\x00' > "$outdir/func_info.bin"
+printf '\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00' > "$outdir/line_info.bin"
 "#,
             )?;
             write_executable(
@@ -2155,6 +2252,48 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
         assert_eq!(result.summary.total_sites_applied, 2);
         assert_eq!(result.summary.passes_executed, 1);
         assert!(result.passes[0].changed);
+    }
+
+    #[test]
+    fn optimize_passes_btf_metadata_to_bpfopt_for_in_place_remap() {
+        let fake = FakeCliDir::new().unwrap();
+        fake.replace_command(
+            "bpfopt",
+            r#"#!/usr/bin/env bash
+set -euo pipefail
+report=""
+func_info=""
+line_info=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --report) report="$2"; shift 2 ;;
+    --func-info) func_info="$2"; shift 2 ;;
+    --line-info) line_info="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+test -s "$func_info"
+test -s "$line_info"
+cat >/dev/null
+printf '\xb7\x00\x00\x00\x01\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
+cat > "$report" <<JSON
+{"passes":[{"pass":"wide_mem","changed":true,"sites_applied":1,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
+JSON
+"#,
+        )
+        .unwrap();
+
+        let result = try_apply_one(
+            42,
+            &fake.config(),
+            Some(&["wide_mem".to_string()]),
+            None,
+            None,
+        )
+        .unwrap();
+
+        assert_eq!(result.status, "ok");
+        assert_eq!(result.summary.total_sites_applied, 1);
     }
 
     #[test]
