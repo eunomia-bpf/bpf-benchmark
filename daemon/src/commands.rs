@@ -929,6 +929,7 @@ pub(crate) fn start_profile(config: &CliConfig, duration_ms: u64) -> Result<Prof
     let mut child = config
         .command("bpfprof")
         .arg("--all")
+        .arg("--per-site")
         .arg("--duration")
         .arg(format!("{duration_ms}ms"))
         .arg("--output-dir")
@@ -936,7 +937,7 @@ pub(crate) fn start_profile(config: &CliConfig, duration_ms: u64) -> Result<Prof
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
-        .context("spawn bpfprof --all")?;
+        .context("spawn bpfprof --all --per-site")?;
 
     if let Some(status) = child.try_wait().context("poll bpfprof after spawn")? {
         let output = child.wait_with_output().context("collect bpfprof output")?;
@@ -2053,13 +2054,19 @@ fi
                 r#"#!/usr/bin/env bash
 set -euo pipefail
 outdir=""
+per_site=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --per-site) per_site=1; shift ;;
     --output-dir) outdir="$2"; shift 2 ;;
     *) shift ;;
   esac
 done
-printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"branch_miss_rate":null,"branch_misses":null,"branch_instructions":null,"per_insn":{}}\n' > "$outdir/42.json"
+if [[ "$per_site" -ne 1 ]]; then
+  echo "missing --per-site" >&2
+  exit 1
+fi
+printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"branch_miss_rate":0.01,"branch_misses":1,"branch_instructions":100,"per_site":{"0":{"branch_count":100,"branch_misses":1,"miss_rate":0.01,"taken":90,"not_taken":10}}}\n' > "$outdir/42.json"
 "#,
             )?;
             Ok(Self { dir })
@@ -2602,13 +2609,18 @@ JSON
     }
 
     #[test]
-    fn profile_start_stop_uses_bpfprof_output_dir() {
+    fn profile_start_stop_uses_bpfprof_per_site_output_dir() {
         let fake = FakeCliDir::new().unwrap();
         let session = start_profile(&fake.config(), 1).unwrap();
         let frozen = stop_profile(session).unwrap();
 
         assert_eq!(frozen.programs_profiled(), 1);
-        assert!(frozen.profile_path_for(42).is_some());
+        let profile_path = frozen.profile_path_for(42).unwrap();
+        let profile: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(profile_path).unwrap()).unwrap();
+        assert_eq!(profile["branch_miss_rate"], 0.01);
+        assert_eq!(profile["per_site"]["0"]["branch_count"], 100);
+        assert!(profile.get("per_insn").is_none());
     }
 
     #[test]
