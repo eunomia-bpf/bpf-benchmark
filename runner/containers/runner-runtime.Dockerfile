@@ -402,13 +402,13 @@ case "${RUN_TARGET_ARCH}" in
         kernel_arch=x86_64
         module_arch=x86
         cross_compile=
-        expected_modules=5
+        expected_modules=6
         ;;
     arm64)
         kernel_arch=arm64
         module_arch=arm64
         cross_compile=aarch64-linux-gnu-
-        expected_modules=6
+        expected_modules=8
         command -v aarch64-linux-gnu-gcc >/dev/null
         ;;
     *)

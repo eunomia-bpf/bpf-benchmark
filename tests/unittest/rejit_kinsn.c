@@ -45,6 +45,7 @@ enum kinsn_module_id {
 	MOD_ENDIAN,
 	MOD_BULK_MEMORY,
 	MOD_LDP,
+	MOD_PREFETCH,
 	MOD_CNT,
 };
 
@@ -59,6 +60,7 @@ enum kinsn_func_id {
 	FUNC_MEMSET_BULK,
 	FUNC_LDP128,
 	FUNC_STP128,
+	FUNC_PREFETCH,
 	FUNC_CNT,
 };
 
@@ -138,6 +140,11 @@ static struct kinsn_module_ref g_modules[MOD_CNT] = {
 		.btf_fd = -1,
 		.required = ARM64_KINSN_MODULE_REQUIRED,
 	},
+	[MOD_PREFETCH] = {
+		.module_name = "bpf_prefetch",
+		.btf_fd = -1,
+		.required = true,
+	},
 };
 
 static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
@@ -180,6 +187,10 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 	[FUNC_STP128] = {
 		.func_name = "bpf_stp128",
 		.module_id = MOD_LDP,
+	},
+	[FUNC_PREFETCH] = {
+		.func_name = "bpf_prefetch",
+		.module_id = MOD_PREFETCH,
 	},
 };
 
