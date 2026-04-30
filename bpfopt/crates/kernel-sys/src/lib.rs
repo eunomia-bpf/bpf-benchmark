@@ -4,7 +4,7 @@
 //! `libbpf-rs`/`libbpf-sys`. The only direct `bpf(2)` wrappers here are for
 //! fork-only commands that upstream libbpf does not expose.
 
-use std::ffi::{c_char, CStr, CString};
+use std::ffi::{c_char, CString};
 use std::os::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, OwnedFd};
 use std::ptr::NonNull;
 
@@ -118,15 +118,6 @@ pub struct ProgBtfInfo {
     pub func_info: Vec<u8>,
     pub line_info_rec_size: u32,
     pub line_info: Vec<u8>,
-}
-
-/// BTF function type metadata needed to reconstruct func_info replay records.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct BtfFuncType {
-    pub type_id: u32,
-    pub name: String,
-    pub linkage: u32,
-    pub returns_scalar: bool,
 }
 
 /// Result of a verifier dry-run load. Kernel verifier rejection is represented
@@ -544,88 +535,6 @@ impl KernelBtf {
             ret,
         ))
     }
-
-    /// Enumerate BTF_KIND_FUNC types in kernel BTF ID order.
-    pub fn func_types(&self) -> Result<Vec<BtfFuncType>> {
-        let count = unsafe { btf__type_cnt(self.ptr.as_ptr()) };
-        let mut funcs = Vec::new();
-        for type_id in 1..count {
-            let type_ = self.type_by_id(type_id)?;
-            if btf_kind(type_.info) != BTF_KIND_FUNC {
-                continue;
-            }
-            let proto_id = unsafe { type_.__bindgen_anon_1.type_ };
-            funcs.push(BtfFuncType {
-                type_id,
-                name: self.name_by_offset(type_.name_off)?,
-                linkage: btf_vlen(type_.info),
-                returns_scalar: self.func_proto_returns_scalar(proto_id)?,
-            });
-        }
-        Ok(funcs)
-    }
-
-    fn type_by_id(&self, type_id: u32) -> Result<&btf_type> {
-        let type_ = unsafe { btf__type_by_id(self.ptr.as_ptr(), type_id) };
-        if type_.is_null() {
-            bail!("BTF type id {type_id} is not present");
-        }
-        Ok(unsafe { &*type_ })
-    }
-
-    fn name_by_offset(&self, offset: u32) -> Result<String> {
-        let name = unsafe { btf__name_by_offset(self.ptr.as_ptr(), offset) };
-        if name.is_null() {
-            bail!("BTF name offset {offset} returned NULL");
-        }
-        Ok(unsafe { CStr::from_ptr(name) }
-            .to_string_lossy()
-            .into_owned())
-    }
-
-    fn func_proto_returns_scalar(&self, proto_id: u32) -> Result<bool> {
-        let proto = self.type_by_id(proto_id)?;
-        if btf_kind(proto.info) != BTF_KIND_FUNC_PROTO {
-            bail!("BTF type id {proto_id} is not a FUNC_PROTO");
-        }
-        let return_type_id = unsafe { proto.__bindgen_anon_1.type_ };
-        self.type_id_is_scalar(return_type_id)
-    }
-
-    fn type_id_is_scalar(&self, mut type_id: u32) -> Result<bool> {
-        for _ in 0..32 {
-            if type_id == 0 {
-                return Ok(false);
-            }
-            let type_ = self.type_by_id(type_id)?;
-            match btf_kind(type_.info) {
-                kind if kind == BTF_KIND_INT
-                    || kind == BTF_KIND_ENUM
-                    || kind == BTF_KIND_ENUM64 =>
-                {
-                    return Ok(true);
-                }
-                kind if kind == BTF_KIND_TYPEDEF
-                    || kind == BTF_KIND_VOLATILE
-                    || kind == BTF_KIND_CONST
-                    || kind == BTF_KIND_RESTRICT
-                    || kind == BTF_KIND_TYPE_TAG =>
-                {
-                    type_id = unsafe { type_.__bindgen_anon_1.type_ };
-                }
-                _ => return Ok(false),
-            }
-        }
-        bail!("BTF type modifier chain is too deep");
-    }
-}
-
-fn btf_kind(info: u32) -> u32 {
-    (info >> 24) & 0x1f
-}
-
-fn btf_vlen(info: u32) -> u32 {
-    info & 0xffff
 }
 
 impl Drop for KernelBtf {
