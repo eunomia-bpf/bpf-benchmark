@@ -1,0 +1,232 @@
+{
+  "by_app_mode_verdict": {
+    "bcc/bindsnoop": {
+      "default11": {
+        "accepted": 5,
+        "rejected": 10
+      },
+      "kinsn5": {
+        "accepted": 5,
+        "rejected": 10
+      }
+    },
+    "bcc/biosnoop": {
+      "default11": {
+        "accepted": 15
+      },
+      "kinsn5": {
+        "accepted": 15
+      }
+    },
+    "bcc/capable": {
+      "default11": {
+        "rejected": 5
+      },
+      "kinsn5": {
+        "rejected": 5
+      }
+    },
+    "bcc/execsnoop": {
+      "default11": {
+        "accepted": 10
+      },
+      "kinsn5": {
+        "accepted": 10
+      }
+    },
+    "bcc/opensnoop": {
+      "default11": {
+        "unverifiable": 15
+      },
+      "kinsn5": {
+        "rejected": 15
+      }
+    },
+    "bcc/runqlat": {
+      "default11": {
+        "accepted": 15
+      },
+      "kinsn5": {
+        "accepted": 15
+      }
+    },
+    "bcc/syscount": {
+      "default11": {
+        "accepted": 10
+      },
+      "kinsn5": {
+        "accepted": 10
+      }
+    },
+    "bcc/tcpconnect": {
+      "default11": {
+        "accepted": 15
+      },
+      "kinsn5": {
+        "accepted": 15
+      }
+    },
+    "bcc/tcplife": {
+      "default11": {
+        "accepted": 5
+      },
+      "kinsn5": {
+        "accepted": 5
+      }
+    },
+    "bcc/vfsstat": {
+      "default11": {
+        "accepted": 5,
+        "unverifiable": 20
+      },
+      "kinsn5": {
+        "accepted": 5,
+        "rejected": 20
+      }
+    },
+    "bpftrace/biosnoop": {
+      "default11": {
+        "accepted": 5,
+        "error": 5
+      },
+      "kinsn5": {
+        "accepted": 10
+      }
+    },
+    "bpftrace/capable": {
+      "default11": {
+        "accepted": 5
+      },
+      "kinsn5": {
+        "accepted": 5
+      }
+    },
+    "bpftrace/runqlat": {
+      "default11": {
+        "accepted": 15
+      },
+      "kinsn5": {
+        "accepted": 15
+      }
+    },
+    "bpftrace/tcplife": {
+      "default11": {
+        "rejected": 5
+      },
+      "kinsn5": {
+        "accepted": 5
+      }
+    },
+    "bpftrace/tcpretrans": {
+      "default11": {
+        "accepted": 5
+      },
+      "kinsn5": {
+        "accepted": 5
+      }
+    },
+    "bpftrace/vfsstat": {
+      "default11": {
+        "accepted": 10
+      },
+      "kinsn5": {
+        "accepted": 10
+      }
+    },
+    "calico/felix": {
+      "default11": {
+        "accepted": 20,
+        "error": 5,
+        "unverifiable": 5
+      },
+      "kinsn5": {
+        "accepted": 25,
+        "rejected": 5
+      }
+    },
+    "cilium/agent": {
+      "default11": {
+        "accepted": 15,
+        "error": 5,
+        "unverifiable": 60
+      },
+      "kinsn5": {
+        "accepted": 20,
+        "rejected": 35,
+        "unverifiable": 25
+      }
+    },
+    "katran": {
+      "default11": {
+        "accepted": 10,
+        "unverifiable": 5
+      },
+      "kinsn5": {
+        "accepted": 10,
+        "unverifiable": 5
+      }
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "default11": {
+        "error": 30,
+        "unverifiable": 35
+      },
+      "kinsn5": {
+        "accepted": 30,
+        "unverifiable": 35
+      }
+    },
+    "tetragon/observer": {
+      "default11": {
+        "accepted": 175,
+        "error": 455,
+        "unverifiable": 805
+      },
+      "kinsn5": {
+        "accepted": 625,
+        "rejected": 240,
+        "unverifiable": 570
+      }
+    },
+    "tracee/monitor": {
+      "default11": {
+        "accepted": 125,
+        "error": 90,
+        "rejected": 5,
+        "unverifiable": 570
+      },
+      "kinsn5": {
+        "accepted": 205,
+        "rejected": 15,
+        "unverifiable": 570
+      }
+    }
+  },
+  "by_mode_verdict": {
+    "default11": {
+      "accepted": 465,
+      "error": 590,
+      "rejected": 25,
+      "unverifiable": 1515
+    },
+    "kinsn5": {
+      "accepted": 1045,
+      "rejected": 345,
+      "unverifiable": 1205
+    }
+  },
+  "classification_note": "verifier_states-phase host rejects are classified as unverifiable because no transformed default11 dryrun was executed.",
+  "generated_at_unix": 1777579786,
+  "inconsistent": [],
+  "modes": [
+    "kinsn5",
+    "default11"
+  ],
+  "program_count": 519,
+  "result_dir": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260430_193236_794969",
+  "rounds": 5,
+  "tool_head": "cc70923d",
+  "tool_tree": "/tmp/bpf-benchmark-p89h-clean",
+  "transformed_bpfverify_invocations": 3085,
+  "verdict_attempts": 5190
+}
