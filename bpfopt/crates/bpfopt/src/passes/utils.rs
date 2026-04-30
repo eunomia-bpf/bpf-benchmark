@@ -651,6 +651,60 @@ pub fn map_replacement_range(
     }
 }
 
+pub fn kinsn_replacement_subprog_skip_reason(
+    insns: &[BpfInsn],
+    start_pc: usize,
+    old_len: usize,
+    replacement_len: usize,
+) -> anyhow::Result<Option<String>> {
+    if old_len == 0 {
+        anyhow::bail!("kinsn replacement site at pc {start_pc} has zero old length");
+    }
+    if replacement_len == 0 {
+        anyhow::bail!("kinsn replacement site at pc {start_pc} has zero replacement length");
+    }
+    let old_end = start_pc
+        .checked_add(old_len)
+        .ok_or_else(|| anyhow::anyhow!("kinsn replacement site at pc {start_pc} overflows"))?;
+    let replacement_end = start_pc.checked_add(replacement_len).ok_or_else(|| {
+        anyhow::anyhow!("kinsn replacement at pc {start_pc} replacement length overflows")
+    })?;
+    if old_end > insns.len() {
+        anyhow::bail!(
+            "kinsn replacement site {start_pc}..{old_end} exceeds instruction length {}",
+            insns.len()
+        );
+    }
+
+    let starts = kinsn_candidate_subprog_starts(insns)?;
+    let Some(subprog_idx) = starts.iter().rposition(|&start| start <= start_pc) else {
+        anyhow::bail!("no subprogram contains kinsn replacement site at pc {start_pc}");
+    };
+    let subprog_start = starts[subprog_idx];
+    let subprog_end = starts.get(subprog_idx + 1).copied().unwrap_or(insns.len());
+
+    if old_end > subprog_end {
+        return Ok(Some(format!(
+            "kinsn site crosses subprog boundary (site {start_pc}..{old_end}, subprog {subprog_start}..{subprog_end})"
+        )));
+    }
+    if replacement_end > subprog_end {
+        return Ok(Some(format!(
+            "kinsn replacement crosses subprog boundary (replacement {start_pc}..{replacement_end}, subprog {subprog_start}..{subprog_end})"
+        )));
+    }
+    if starts
+        .iter()
+        .any(|&subprog| subprog > start_pc && subprog < old_end)
+    {
+        return Ok(Some(format!(
+            "kinsn site contains subprog entry inside replacement range {start_pc}..{old_end}"
+        )));
+    }
+
+    Ok(None)
+}
+
 /// Return the exclusive prefix end before which instruction-count changes must
 /// be avoided to preserve tail-call poke descriptor indices during REJIT.
 pub fn tail_call_protected_prefix_end(insns: &[BpfInsn]) -> Option<usize> {
@@ -1023,6 +1077,16 @@ mod tests {
         ]
     }
 
+    fn pseudo_call_to(call_pc: usize, target_pc: usize) -> BpfInsn {
+        let imm = target_pc as i64 - (call_pc as i64 + 1);
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
+            0,
+            imm as i32,
+        )
+    }
+
     #[test]
     fn test_fixup_all_branches_forward_jump() {
         // Old: [0] JA +1  [1] nop  [2] exit
@@ -1131,6 +1195,42 @@ mod tests {
         ];
 
         assert_eq!(tail_call_protected_prefix_end(&insns), Some(4));
+    }
+
+    #[test]
+    fn kinsn_replacement_subprog_check_allows_site_inside_one_subprog() {
+        let insns = vec![
+            BpfInsn::alu64_imm(BPF_RSH, 2, 8),
+            BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
+            pseudo_call_to(2, 4),
+            exit_insn(),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ];
+
+        let skip = kinsn_replacement_subprog_skip_reason(&insns, 0, 2, 2).unwrap();
+
+        assert_eq!(skip, None);
+    }
+
+    #[test]
+    fn kinsn_replacement_subprog_check_rejects_pseudo_func_boundary_inside_site() {
+        let func_ref = pseudo_func_ref(2, -4);
+        let insns = vec![
+            BpfInsn::alu64_imm(BPF_RSH, 2, 8),
+            BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
+            exit_insn(),
+            BpfInsn::mov64_imm(0, 0),
+            func_ref[0],
+            func_ref[1],
+            exit_insn(),
+        ];
+
+        let skip = kinsn_replacement_subprog_skip_reason(&insns, 0, 2, 2).unwrap();
+
+        assert!(skip
+            .as_deref()
+            .is_some_and(|reason| reason.contains("subprog boundary")));
     }
 
     #[test]

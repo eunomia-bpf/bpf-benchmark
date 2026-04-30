@@ -8,8 +8,8 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, map_replacement_range,
-    remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
+    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
+    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
 };
 
 const MEMCPY_TARGET: &str = "bpf_memcpy_bulk";
@@ -55,6 +55,14 @@ impl BulkSite {
         match self.kind {
             BulkSiteKind::Memcpy { .. } => MEMCPY_TARGET,
             BulkSiteKind::Memset { .. } => MEMSET_TARGET,
+        }
+    }
+
+    fn replacement_len(&self) -> usize {
+        match &self.kind {
+            BulkSiteKind::Memcpy { chunk_sizes, .. } | BulkSiteKind::Memset { chunk_sizes, .. } => {
+                chunk_sizes.len() * 2
+            }
         }
     }
 }
@@ -160,6 +168,19 @@ impl BpfPass for BulkMemoryPass {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason: format!("{target} packed ABI not available"),
+                });
+                continue;
+            }
+
+            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
+                &program.insns,
+                site.start_pc,
+                site.old_len,
+                site.replacement_len(),
+            )? {
+                skipped.push(SkipReason {
+                    pc: site.start_pc,
+                    reason,
                 });
                 continue;
             }
