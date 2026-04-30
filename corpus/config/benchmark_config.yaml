@@ -1,16 +1,3 @@
-passes:
-  performance:
-    - wide_mem
-    - rotate
-    - cond_select
-    - extract
-    - endian_fusion
-    - map_inline
-    - const_prop
-    - dce
-    - bounds_check_merge
-    - skb_load_bytes_spec
-    - bulk_memory
 policy:
   default:
     passes:
@@ -25,28 +12,3 @@ policy:
       - bounds_check_merge
       - skb_load_bytes_spec
       - bulk_memory
-
-profiles:
-  dev: {}
-  strict: {}
-  experimental_kinsn_full:
-    passes:
-      active_list: [wide_mem, rotate, cond_select, extract, endian_fusion, map_inline, const_prop, dce, bounds_check_merge, skb_load_bytes_spec, bulk_memory]
-  ablation_map_inline_only:
-    passes:
-      active_list: [map_inline]
-  ablation_const_prop_only:
-    passes:
-      active_list: [const_prop]
-  ablation_dce_only:
-    passes:
-      active_list: [dce]
-  ablation_map_inline_const_prop:
-    passes:
-      active_list: [map_inline, const_prop]
-  ablation_map_inline_full:
-    passes:
-      active_list: [map_inline, const_prop, dce]
-  ablation_wide_mem:
-    passes:
-      active_list: [wide_mem]
