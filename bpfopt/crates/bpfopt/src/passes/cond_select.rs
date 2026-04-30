@@ -293,7 +293,6 @@ impl BpfPass for CondSelectPass {
         fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
 
         program.insns = new_insns;
-        program.remap_annotations(&addr_map);
         program.log_transform(TransformEntry {
             sites_applied: applied,
         });

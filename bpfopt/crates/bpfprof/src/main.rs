@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT
 //! bpfprof CLI entry point.
 //!
-//! Branch PMU data requires `perf_event_paranoid <= 2` and container permission
-//! such as `SYS_ADMIN`. PMU counters are required: bpfprof exits with an error
-//! when they cannot be collected.
+//! Profiles are collected from BPF runtime stats (`run_cnt` and `run_time_ns`).
 
 use std::collections::BTreeMap;
-use std::fs::{self, File};
-use std::io::{self, Read, Write};
-use std::os::fd::{AsFd, AsRawFd, FromRawFd};
+use std::fs;
+use std::io::{self, Write};
+use std::os::fd::AsFd;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::thread;
@@ -16,7 +14,6 @@ use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
 use clap::Parser;
-use perf_event_open_sys::{bindings as perf, ioctls};
 use serde::Serialize;
 
 #[derive(Parser, Debug)]
@@ -57,21 +54,6 @@ struct ProfileJson {
     duration_ms: u64,
     run_cnt_delta: u64,
     run_time_ns_delta: u64,
-    branch_miss_rate: Option<f64>,
-    branch_misses: Option<u64>,
-    branch_instructions: Option<u64>,
-    per_insn: BTreeMap<String, PerInsnProfile>,
-}
-
-#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
-struct PerInsnProfile {
-    taken: u64,
-    not_taken: u64,
-}
-
-struct BranchCounters {
-    instructions: File,
-    misses: File,
 }
 
 fn main() -> ExitCode {
@@ -96,7 +78,7 @@ fn run() -> Result<()> {
     let _stats_fd = kernel_sys::enable_stats(kernel_sys::BPF_STATS_RUN_TIME)
         .context("BPF_ENABLE_STATS(BPF_STATS_RUN_TIME)")?;
     let before = read_snapshots(&targets)?;
-    collect_branch_pmu(cli.duration)?;
+    thread::sleep(cli.duration);
     let after = read_snapshots(&targets)?;
 
     let duration_ms = duration_ms(cli.duration);
@@ -182,17 +164,11 @@ fn build_profiles(
         .filter_map(|target| {
             let before = before.get(&target.prog_id)?;
             let after = after.get(&target.prog_id)?;
-            // The current PMU sample covers the whole profiling window, not a
-            // specific BPF program, so per-program branch fields stay null.
             Some(ProfileJson {
                 prog_id: target.prog_id,
                 duration_ms,
                 run_cnt_delta: after.run_cnt.saturating_sub(before.run_cnt),
                 run_time_ns_delta: after.run_time_ns.saturating_sub(before.run_time_ns),
-                branch_miss_rate: None,
-                branch_misses: None,
-                branch_instructions: None,
-                per_insn: BTreeMap::new(),
             })
         })
         .collect::<Vec<_>>();
@@ -255,100 +231,6 @@ fn write_empty_outputs(cli: &Cli) -> Result<()> {
     Ok(())
 }
 
-fn collect_branch_pmu(duration: Duration) -> Result<()> {
-    collect_branch_pmu_with(duration, try_open_pmu, thread::sleep)
-}
-
-fn collect_branch_pmu_with<OpenPmu, SleepFn>(
-    duration: Duration,
-    open_pmu: OpenPmu,
-    sleep: SleepFn,
-) -> Result<()>
-where
-    OpenPmu: FnOnce() -> Result<BranchCounters>,
-    SleepFn: FnOnce(Duration),
-{
-    let pmu = open_pmu()?;
-    pmu.reset_and_enable()?;
-    sleep(duration);
-    pmu.disable()?;
-    pmu.read_counts()?;
-    Ok(())
-}
-
-fn try_open_pmu() -> Result<BranchCounters> {
-    BranchCounters::open().context("open PMU branch counters")
-}
-
-impl BranchCounters {
-    fn open() -> Result<Self> {
-        let instructions = open_perf_counter(perf::PERF_COUNT_HW_BRANCH_INSTRUCTIONS as u64)
-            .context("open branch-instructions PMU counter")?;
-        let misses = open_perf_counter(perf::PERF_COUNT_HW_BRANCH_MISSES as u64)
-            .context("open branch-misses PMU counter")?;
-        Ok(Self {
-            instructions,
-            misses,
-        })
-    }
-
-    fn reset_and_enable(&self) -> Result<()> {
-        self.ioctl_all("reset", |fd| unsafe { ioctls::RESET(fd, 0) })?;
-        self.ioctl_all("enable", |fd| unsafe { ioctls::ENABLE(fd, 0) })
-    }
-
-    fn disable(&self) -> Result<()> {
-        self.ioctl_all("disable", |fd| unsafe { ioctls::DISABLE(fd, 0) })
-    }
-
-    fn read_counts(mut self) -> Result<()> {
-        let _branch_instructions =
-            read_counter(&mut self.instructions).context("read branch-instructions PMU counter")?;
-        let _branch_misses =
-            read_counter(&mut self.misses).context("read branch-misses PMU counter")?;
-        Ok(())
-    }
-
-    fn ioctl_all<F>(&self, action: &str, ioctl: F) -> Result<()>
-    where
-        F: Fn(i32) -> i32,
-    {
-        for file in [&self.instructions, &self.misses] {
-            let ret = ioctl(file.as_raw_fd());
-            if ret < 0 {
-                return Err(anyhow!(
-                    "perf_event_open {action}: {}",
-                    io::Error::last_os_error()
-                ));
-            }
-        }
-        Ok(())
-    }
-}
-
-fn open_perf_counter(config: u64) -> Result<File> {
-    let mut attrs = perf::perf_event_attr {
-        size: std::mem::size_of::<perf::perf_event_attr>() as u32,
-        type_: perf::PERF_TYPE_HARDWARE,
-        config,
-        ..Default::default()
-    };
-    attrs.set_disabled(1);
-    attrs.set_exclude_hv(1);
-
-    let fd = unsafe { perf_event_open_sys::perf_event_open(&mut attrs, 0, -1, -1, 0) };
-    if fd < 0 {
-        return Err(anyhow!("perf_event_open: {}", io::Error::last_os_error()));
-    }
-    Ok(unsafe { File::from_raw_fd(fd) })
-}
-
-fn read_counter(file: &mut File) -> Result<u64> {
-    let mut buf = [0u8; 8];
-    file.read_exact(&mut buf)?;
-    Ok(u64::from_ne_bytes(buf))
-}
-
 fn write_json_file<T: Serialize>(path: &Path, value: &T) -> Result<()> {
     let mut bytes = Vec::new();
     write_json(&mut bytes, value)?;
@@ -377,19 +259,15 @@ fn error_is_enoent(err: &anyhow::Error) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::cell::Cell;
+    use std::fs::File;
 
     #[test]
-    fn profile_json_serializes_nullable_branch_metrics() {
+    fn profile_json_serializes_bpf_stats() {
         let profile = ProfileJson {
             prog_id: 123,
             duration_ms: 500,
             run_cnt_delta: 10,
             run_time_ns_delta: 2_000,
-            branch_miss_rate: None,
-            branch_misses: None,
-            branch_instructions: None,
-            per_insn: BTreeMap::new(),
         };
 
         let value = serde_json::to_value(&profile).unwrap();
@@ -398,10 +276,7 @@ mod tests {
         assert_eq!(value["duration_ms"], 500);
         assert_eq!(value["run_cnt_delta"], 10);
         assert_eq!(value["run_time_ns_delta"], 2_000);
-        assert!(value["branch_miss_rate"].is_null());
-        assert!(value["branch_misses"].is_null());
-        assert!(value["branch_instructions"].is_null());
-        assert!(value["per_insn"].as_object().unwrap().is_empty());
+        assert_eq!(value.as_object().unwrap().len(), 4);
     }
 
     #[test]
@@ -444,53 +319,6 @@ mod tests {
 
         assert_eq!(rows[0].prog_id, 1);
         assert_eq!(rows[0].run_cnt_delta, 20);
-    }
-
-    #[test]
-    fn build_profiles_does_not_attribute_shared_pmu_to_program() {
-        let targets = vec![fake_target(7)];
-        let before = BTreeMap::from([(
-            7,
-            ProgStats {
-                run_cnt: 10,
-                run_time_ns: 100,
-            },
-        )]);
-        let after = BTreeMap::from([(
-            7,
-            ProgStats {
-                run_cnt: 14,
-                run_time_ns: 180,
-            },
-        )]);
-
-        let rows = build_profiles(&targets, &before, &after, 250);
-
-        assert_eq!(rows.len(), 1);
-        assert_eq!(rows[0].run_cnt_delta, 4);
-        assert_eq!(rows[0].run_time_ns_delta, 80);
-        assert_eq!(rows[0].branch_miss_rate, None);
-        assert_eq!(rows[0].branch_misses, None);
-        assert_eq!(rows[0].branch_instructions, None);
-    }
-
-    #[test]
-    fn pmu_open_failure_returns_error_without_sampling_window() {
-        let slept = Cell::new(false);
-        let duration = Duration::from_millis(25);
-
-        let err = collect_branch_pmu_with(
-            duration,
-            || Err(anyhow!("perf_event_open: Operation not permitted")),
-            |slept_duration| {
-                assert_eq!(slept_duration, duration);
-                slept.set(true);
-            },
-        )
-        .expect_err("PMU open failure must fail fast");
-
-        assert!(err.to_string().contains("perf_event_open"));
-        assert!(!slept.get());
     }
 
     fn fake_target(prog_id: u32) -> Target {

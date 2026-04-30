@@ -27,7 +27,7 @@ requests must provide a non-empty `enabled_passes` list.
 {"cmd":"optimize","prog_id":42,"dry_run":true,"enabled_passes":["map_inline","const_prop","dce"]}
 ```
 
-`branch_flip` is opt-in and requires a loaded profile with per-site branch data.
+`bpfprof` profile sessions collect BPF runtime stats (`run_cnt` and `run_time_ns`).
 
 ## Layout
 

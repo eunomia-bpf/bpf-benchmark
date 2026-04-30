@@ -138,7 +138,7 @@ fn run_bpfopt(args: &[&str], stdin_bytes: &[u8]) -> Output {
 }
 
 #[test]
-fn list_passes_outputs_12_v3_cli_names() {
+fn list_passes_outputs_11_v3_cli_names() {
     let output = Command::new(bpfopt_bin())
         .arg("list-passes")
         .output()
@@ -152,9 +152,10 @@ fn list_passes_outputs_12_v3_cli_names() {
     let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
     let passes = stdout.lines().collect::<Vec<_>>();
 
-    assert_eq!(passes.len(), 12);
+    assert_eq!(passes.len(), 11);
     assert!(passes.contains(&"wide-mem"));
     assert!(passes.contains(&"skb-load-bytes"));
+    assert!(!passes.contains(&"branch-flip"));
 }
 
 #[test]
@@ -218,7 +219,7 @@ fn optimize_without_target_fails_before_running_kinsn_passes() {
 }
 
 #[test]
-fn optimize_default_pipeline_with_all_side_inputs_reports_12_entries() {
+fn optimize_default_pipeline_with_all_side_inputs_reports_11_entries() {
     let report_path = temp_path("optimize-full-report.json");
     let target_path = write_temp_file(
         "target.json",
@@ -236,12 +237,10 @@ fn optimize_default_pipeline_with_all_side_inputs_reports_12_entries() {
         }"#,
     );
     let verifier_path = write_temp_file("verifier-states.json", r#"{"insns":[]}"#);
-    let profile_path = write_temp_file("profile.json", r#"{"per_insn":{}}"#);
     let map_values_path = write_temp_file("map-values.json", r#"{"maps":[]}"#);
     let report_arg = report_path.to_string_lossy().to_string();
     let target_arg = target_path.to_string_lossy().to_string();
     let verifier_arg = verifier_path.to_string_lossy().to_string();
-    let profile_arg = profile_path.to_string_lossy().to_string();
     let map_values_arg = map_values_path.to_string_lossy().to_string();
 
     let output = run_bpfopt(
@@ -251,8 +250,6 @@ fn optimize_default_pipeline_with_all_side_inputs_reports_12_entries() {
             &target_arg,
             "--verifier-states",
             &verifier_arg,
-            "--profile",
-            &profile_arg,
             "--map-values",
             &map_values_arg,
             "--map-ids",
@@ -264,7 +261,6 @@ fn optimize_default_pipeline_with_all_side_inputs_reports_12_entries() {
     );
     remove_file_if_exists(target_path);
     remove_file_if_exists(verifier_path);
-    remove_file_if_exists(profile_path);
     remove_file_if_exists(map_values_path);
 
     assert!(
@@ -277,7 +273,7 @@ fn optimize_default_pipeline_with_all_side_inputs_reports_12_entries() {
     remove_file_if_exists(report_path);
 
     let passes = report["passes"].as_array().expect("passes array");
-    assert_eq!(passes.len(), 12);
+    assert_eq!(passes.len(), 11);
     assert!(
         passes
             .iter()

@@ -539,17 +539,11 @@ pub(crate) struct ProfileSession {
 
 #[derive(Debug)]
 pub(crate) struct FrozenProfile {
-    output_dir: WorkDir,
     duration_ms: u64,
     programs_profiled: usize,
 }
 
 impl FrozenProfile {
-    pub(crate) fn profile_path_for(&self, prog_id: u32) -> Option<PathBuf> {
-        let path = self.output_dir.path().join(format!("{prog_id}.json"));
-        path.exists().then_some(path)
-    }
-
     pub(crate) fn duration_ms(&self) -> u64 {
         self.duration_ms
     }
@@ -684,7 +678,6 @@ struct ApplyOneRequest<'a> {
     prog_id: u32,
     config: &'a CliConfig,
     enabled_passes: Option<&'a [String]>,
-    profile_path: Option<&'a Path>,
     invalidation_tracker: Option<&'a SharedInvalidationTracker>,
     mode: OptimizeMode,
     force_rejit: bool,
@@ -1041,7 +1034,6 @@ pub(crate) fn stop_profile(session: ProfileSession) -> Result<FrozenProfile> {
     }
     let programs_profiled = count_json_files(session.output_dir.path())?;
     Ok(FrozenProfile {
-        output_dir: session.output_dir,
         duration_ms: session.duration_ms,
         programs_profiled,
     })
@@ -1051,7 +1043,6 @@ pub(crate) fn try_apply_one(
     prog_id: u32,
     config: &CliConfig,
     enabled_passes: Option<&[String]>,
-    profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
     mode: OptimizeMode,
 ) -> Result<OptimizeOneResult> {
@@ -1060,7 +1051,6 @@ pub(crate) fn try_apply_one(
             prog_id,
             config,
             enabled_passes,
-            profile_path,
             invalidation_tracker,
             mode,
             force_rejit: false,
@@ -1075,7 +1065,6 @@ pub(crate) fn try_reapply_one(
     prog_id: u32,
     config: &CliConfig,
     enabled_passes: Option<&[String]>,
-    profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
     mode: OptimizeMode,
 ) -> Result<OptimizeOneResult> {
@@ -1084,7 +1073,6 @@ pub(crate) fn try_reapply_one(
             prog_id,
             config,
             enabled_passes,
-            profile_path,
             invalidation_tracker,
             mode,
             force_rejit: true,
@@ -1110,7 +1098,6 @@ where
         prog_id,
         config,
         enabled_passes,
-        profile_path,
         invalidation_tracker,
         mode,
         force_rejit,
@@ -1242,15 +1229,6 @@ where
                 join_u32_csv(&prog_info.map_ids)
             };
             side_inputs.push(("--map-ids".to_string(), PathBuf::from(map_ids)));
-        }
-
-        if requested_passes
-            .iter()
-            .any(|pass| canonical_pass(pass) == "branch_flip")
-        {
-            let profile_path = profile_path
-                .ok_or_else(|| anyhow!("branch_flip requested but no profile is loaded"))?;
-            side_inputs.push(("--profile".to_string(), profile_path.to_path_buf()));
         }
 
         let pipeline_start = Instant::now();
@@ -1863,7 +1841,6 @@ fn canonical_pass(pass: &str) -> String {
         "cond-select" | "cond_select" => "cond_select",
         "extract" => "extract",
         "endian" | "endian-fusion" | "endian_fusion" => "endian_fusion",
-        "branch-flip" | "branch_flip" => "branch_flip",
         "dce" => "dce",
         "map-inline" | "map_inline" => "map_inline",
         "bulk-memory" | "bulk_memory" => "bulk_memory",
@@ -2182,7 +2159,7 @@ while [[ $# -gt 0 ]]; do
     *) shift ;;
   esac
 done
-printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"pmu_available":false,"branch_miss_rate":null,"branch_misses":null,"branch_instructions":null,"per_insn":{}}\n' > "$outdir/42.json"
+printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1}\n' > "$outdir/42.json"
 "#,
             )?;
             Ok(Self { dir })
@@ -2259,7 +2236,6 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"p
             &fake.config(),
             Some(&["wide_mem".to_string()]),
             None,
-            None,
             OptimizeMode::Apply,
         )
         .unwrap();
@@ -2323,7 +2299,6 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"p
                 &fake.config(),
                 Some(&["rotate".to_string()]),
                 None,
-                None,
                 OptimizeMode::Apply,
             )
             .unwrap_err();
@@ -2357,7 +2332,6 @@ done
                 &fake.config(),
                 Some(&["const_prop".to_string()]),
                 None,
-                None,
                 OptimizeMode::Apply,
             )
             .unwrap_err();
@@ -2386,7 +2360,6 @@ exit 9
                 42,
                 &fake.config(),
                 Some(&["wide_mem".to_string()]),
-                None,
                 None,
                 OptimizeMode::Apply,
             )
@@ -2417,7 +2390,6 @@ exit 11
                 &fake.config(),
                 Some(&["wide_mem".to_string()]),
                 None,
-                None,
                 OptimizeMode::Apply,
             )
             .unwrap_err();
@@ -2446,7 +2418,6 @@ exit 11
                 42,
                 &fake.config(),
                 Some(&["wide_mem".to_string()]),
-                None,
                 None,
                 OptimizeMode::Apply,
             )
@@ -2515,7 +2486,6 @@ exit 11
                     42,
                     &fake.config(),
                     Some(&["wide_mem".to_string()]),
-                    None,
                     None,
                     OptimizeMode::Apply,
                 )
@@ -2587,7 +2557,6 @@ fi
             &fake.config(),
             Some(&["wide_mem".to_string()]),
             None,
-            None,
             OptimizeMode::Apply,
         )
         .unwrap();
@@ -2632,7 +2601,6 @@ JSON
                 prog_id: 42,
                 config: &config,
                 enabled_passes: Some(&enabled_passes),
-                profile_path: None,
                 invalidation_tracker: Some(&tracker),
                 mode: OptimizeMode::Apply,
                 force_rejit: false,
@@ -2716,7 +2684,6 @@ JSON
                 prog_id: 42,
                 config: &config,
                 enabled_passes: Some(&enabled_passes),
-                profile_path: None,
                 invalidation_tracker: None,
                 mode: OptimizeMode::Apply,
                 force_rejit: true,
@@ -2793,7 +2760,7 @@ JSON
         let frozen = stop_profile(session).unwrap();
 
         assert_eq!(frozen.programs_profiled(), 1);
-        assert!(frozen.profile_path_for(42).is_some());
+        assert_eq!(frozen.duration_ms(), 1);
     }
 
     #[test]

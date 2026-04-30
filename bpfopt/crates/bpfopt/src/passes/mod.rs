@@ -5,7 +5,6 @@
 use anyhow::Result;
 
 mod bounds_check_merge;
-mod branch_flip;
 mod bulk_memory;
 mod cond_select;
 mod const_prop;
@@ -19,7 +18,6 @@ mod utils;
 mod wide_mem;
 
 pub use bounds_check_merge::BoundsCheckMergePass;
-pub use branch_flip::BranchFlipPass;
 pub use bulk_memory::BulkMemoryPass;
 pub use cond_select::CondSelectPass;
 pub use const_prop::ConstPropPass;
@@ -107,16 +105,6 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
         name: "endian_fusion",
         description: "Fuse endian swap patterns into endian load kfunc (MOVBE)",
         make: || Box::new(EndianFusionPass),
-    },
-    PassRegistryEntry {
-        name: "branch_flip",
-        description: "Flip branch polarity using PGO data to improve branch prediction",
-        make: || {
-            Box::new(BranchFlipPass {
-                min_bias: 0.7,
-                max_branch_miss_rate: 0.05,
-            })
-        },
     },
 ];
 

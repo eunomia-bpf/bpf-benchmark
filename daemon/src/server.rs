@@ -144,13 +144,6 @@ impl ProfilingState {
             Self::Frozen(_) => "loaded",
         }
     }
-
-    fn profile_path_for(&self, prog_id: u32) -> Option<std::path::PathBuf> {
-        match self {
-            Self::Frozen(profile) => profile.profile_path_for(prog_id),
-            Self::Active(_) => None,
-        }
-    }
 }
 
 struct ProgramWatcher {
@@ -217,16 +210,12 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
             let tracker_for_apply = tracker.clone();
             let reoptimization_state_for_apply = reoptimization_state.clone();
             run_invalidation_tick_logged("serve", &tracker, |prog_id| {
-                let profile_path = profiling_state
-                    .as_ref()
-                    .and_then(|state| state.profile_path_for(prog_id));
                 let enabled_passes =
                     reoptimization_passes_for(&reoptimization_state_for_apply, prog_id)?;
                 let result = commands::try_reapply_one(
                     prog_id,
                     &config,
                     Some(&enabled_passes),
-                    profile_path.as_deref(),
                     Some(&tracker_for_apply),
                     OptimizeMode::Apply,
                 )?;
@@ -452,14 +441,10 @@ fn process_request(
                 Ok(mode) => mode,
                 Err(message) => return error_json(message),
             };
-            let profile_path = profiling_state
-                .as_ref()
-                .and_then(|state| state.profile_path_for(prog_id));
             match commands::try_apply_one(
                 prog_id,
                 config,
                 Some(requested_passes),
-                profile_path.as_deref(),
                 Some(tracker),
                 mode,
             ) {
