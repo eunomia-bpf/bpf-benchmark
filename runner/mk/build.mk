@@ -54,16 +54,31 @@ X86_KERNEL_FORK_IMAGE := bpf-benchmark/kernel-fork:x86_64-$(KERNEL_FORK_COMMIT_X
 ARM64_KERNEL_FORK_IMAGE := bpf-benchmark/kernel-fork:arm64-$(KERNEL_FORK_COMMIT_ARM64)
 X86_KATRAN_ARTIFACTS_IMAGE := bpf-benchmark/katran-artifacts:x86_64
 ARM64_KATRAN_ARTIFACTS_IMAGE := bpf-benchmark/katran-artifacts:arm64
+GHCR_IMAGE_PREFIX ?= ghcr.io/eunomia-bpf
+GHCR_KERNEL_FORK_IMAGE_REPOSITORY := $(GHCR_IMAGE_PREFIX)/bpf-benchmark-kernel-fork
+GHCR_KATRAN_ARTIFACTS_IMAGE_REPOSITORY := $(GHCR_IMAGE_PREFIX)/bpf-benchmark-katran-artifacts
+X86_KERNEL_FORK_GHCR_IMAGE := $(GHCR_KERNEL_FORK_IMAGE_REPOSITORY):x86_64-$(KERNEL_FORK_COMMIT_X86)
+ARM64_KERNEL_FORK_GHCR_IMAGE := $(GHCR_KERNEL_FORK_IMAGE_REPOSITORY):arm64-$(KERNEL_FORK_COMMIT_ARM64)
+X86_KATRAN_ARTIFACTS_GHCR_IMAGE := $(GHCR_KATRAN_ARTIFACTS_IMAGE_REPOSITORY):x86_64
+ARM64_KATRAN_ARTIFACTS_GHCR_IMAGE := $(GHCR_KATRAN_ARTIFACTS_IMAGE_REPOSITORY):arm64
 X86_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-runner-runtime.image.tar
 ARM64_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-runner-runtime.image.tar
 X86_KERNEL_FORK_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-kernel-fork-$(KERNEL_FORK_COMMIT_X86).image.tar
 ARM64_KERNEL_FORK_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-kernel-fork-$(KERNEL_FORK_COMMIT_ARM64).image.tar
 X86_KATRAN_ARTIFACTS_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-katran-artifacts.image.tar
 ARM64_KATRAN_ARTIFACTS_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-katran-artifacts.image.tar
+ACTIVE_KERNEL_FORK_IMAGE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KERNEL_FORK_IMAGE),$(X86_KERNEL_FORK_IMAGE))
+ACTIVE_KATRAN_ARTIFACTS_IMAGE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KATRAN_ARTIFACTS_IMAGE),$(X86_KATRAN_ARTIFACTS_IMAGE))
+ACTIVE_KERNEL_FORK_GHCR_IMAGE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KERNEL_FORK_GHCR_IMAGE),$(X86_KERNEL_FORK_GHCR_IMAGE))
+ACTIVE_KATRAN_ARTIFACTS_GHCR_IMAGE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KATRAN_ARTIFACTS_GHCR_IMAGE),$(X86_KATRAN_ARTIFACTS_GHCR_IMAGE))
 ACTIVE_RUNNER_RUNTIME_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_RUNNER_RUNTIME_IMAGE_TAR),$(X86_RUNNER_RUNTIME_IMAGE_TAR))
 ACTIVE_KERNEL_FORK_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KERNEL_FORK_IMAGE_TAR),$(X86_KERNEL_FORK_IMAGE_TAR))
 ACTIVE_KATRAN_ARTIFACTS_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR),$(X86_KATRAN_ARTIFACTS_IMAGE_TAR))
 KERNEL_FORK_BUILD_PLATFORM ?= linux/amd64
+X86_KERNEL_FORK_PULL_PLATFORM := $(KERNEL_FORK_BUILD_PLATFORM)
+ARM64_KERNEL_FORK_PULL_PLATFORM := $(KERNEL_FORK_BUILD_PLATFORM)
+X86_KATRAN_ARTIFACTS_PULL_PLATFORM := linux/amd64
+ARM64_KATRAN_ARTIFACTS_PULL_PLATFORM := linux/arm64
 X86_RUNTIME_KERNEL_DIR := $(ARTIFACT_ROOT)/runtime-kernel/x86_64
 X86_RUNTIME_KERNEL_IMAGE := $(X86_RUNTIME_KERNEL_DIR)/bzImage
 ACTIVE_X86_KINSN_SOURCE_DIR := $(ROOT_DIR)/module/x86
@@ -138,52 +153,70 @@ $(BUILD_INPUT_SOURCE_FILES): ;
 .PHONY: FORCE
 FORCE:
 
-# Kernel-fork images are local build artifacts. Do not push them automatically;
-# push the tag manually only when remote cache sharing is desired.
 $(X86_KERNEL_FORK_IMAGE_TAR): $(KERNEL_FORK_IMAGE_SOURCE_FILES)
 	@mkdir -p "$(dir $@)"
-	@if docker image inspect "$(X86_KERNEL_FORK_IMAGE)" >/dev/null 2>&1; then \
-		echo "using existing local kernel-fork image: $(X86_KERNEL_FORK_IMAGE)"; \
+	@if docker pull --platform "$(X86_KERNEL_FORK_PULL_PLATFORM)" "$(X86_KERNEL_FORK_GHCR_IMAGE)"; then \
+		docker tag "$(X86_KERNEL_FORK_GHCR_IMAGE)" "$(X86_KERNEL_FORK_IMAGE)"; \
+		echo "using GHCR kernel-fork image: $(X86_KERNEL_FORK_GHCR_IMAGE)"; \
 	else \
+		echo "GHCR kernel-fork image unavailable, building locally: $(X86_KERNEL_FORK_IMAGE)"; \
 		docker build --platform "$(KERNEL_FORK_BUILD_PLATFORM)" \
 			--target kernel-fork \
 			--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
 			--build-arg RUN_TARGET_ARCH=x86_64 \
 			-t "$(X86_KERNEL_FORK_IMAGE)" -f "$(KERNEL_FORK_CONTAINERFILE)" "$(ROOT_DIR)"; \
+		docker tag "$(X86_KERNEL_FORK_IMAGE)" "$(X86_KERNEL_FORK_GHCR_IMAGE)"; \
 	fi
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_KERNEL_FORK_IMAGE)"; mv -f "$$tmp" "$@"
 
 $(ARM64_KERNEL_FORK_IMAGE_TAR): $(KERNEL_FORK_IMAGE_SOURCE_FILES)
 	@mkdir -p "$(dir $@)"
-	@if docker image inspect "$(ARM64_KERNEL_FORK_IMAGE)" >/dev/null 2>&1; then \
-		echo "using existing local kernel-fork image: $(ARM64_KERNEL_FORK_IMAGE)"; \
+	@if docker pull --platform "$(ARM64_KERNEL_FORK_PULL_PLATFORM)" "$(ARM64_KERNEL_FORK_GHCR_IMAGE)"; then \
+		docker tag "$(ARM64_KERNEL_FORK_GHCR_IMAGE)" "$(ARM64_KERNEL_FORK_IMAGE)"; \
+		echo "using GHCR kernel-fork image: $(ARM64_KERNEL_FORK_GHCR_IMAGE)"; \
 	else \
+		echo "GHCR kernel-fork image unavailable, building locally: $(ARM64_KERNEL_FORK_IMAGE)"; \
 		docker build --platform "$(KERNEL_FORK_BUILD_PLATFORM)" \
 			--target kernel-fork \
 			--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
 			--build-arg RUN_TARGET_ARCH=arm64 \
 			-t "$(ARM64_KERNEL_FORK_IMAGE)" -f "$(KERNEL_FORK_CONTAINERFILE)" "$(ROOT_DIR)"; \
+		docker tag "$(ARM64_KERNEL_FORK_IMAGE)" "$(ARM64_KERNEL_FORK_GHCR_IMAGE)"; \
 	fi
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_KERNEL_FORK_IMAGE)"; mv -f "$$tmp" "$@"
 
 $(X86_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 	@mkdir -p "$(dir $@)"
-	docker build --platform linux/amd64 \
-		--target katran-artifacts \
-		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
-		--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
-		--build-arg RUN_TARGET_ARCH=x86_64 \
-		-t "$(X86_KATRAN_ARTIFACTS_IMAGE)" -f "$(KATRAN_ARTIFACTS_CONTAINERFILE)" "$(ROOT_DIR)"
+	@if docker pull --platform "$(X86_KATRAN_ARTIFACTS_PULL_PLATFORM)" "$(X86_KATRAN_ARTIFACTS_GHCR_IMAGE)"; then \
+		docker tag "$(X86_KATRAN_ARTIFACTS_GHCR_IMAGE)" "$(X86_KATRAN_ARTIFACTS_IMAGE)"; \
+		echo "using GHCR katran-artifacts image: $(X86_KATRAN_ARTIFACTS_GHCR_IMAGE)"; \
+	else \
+		echo "GHCR katran-artifacts image unavailable, building locally: $(X86_KATRAN_ARTIFACTS_IMAGE)"; \
+		docker build --platform linux/amd64 \
+			--target katran-artifacts \
+			--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
+			--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
+			--build-arg RUN_TARGET_ARCH=x86_64 \
+			-t "$(X86_KATRAN_ARTIFACTS_IMAGE)" -f "$(KATRAN_ARTIFACTS_CONTAINERFILE)" "$(ROOT_DIR)"; \
+		docker tag "$(X86_KATRAN_ARTIFACTS_IMAGE)" "$(X86_KATRAN_ARTIFACTS_GHCR_IMAGE)"; \
+	fi
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_KATRAN_ARTIFACTS_IMAGE)"; mv -f "$$tmp" "$@"
 
 $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 	@mkdir -p "$(dir $@)"
-	docker build --platform linux/arm64 \
-		--target katran-artifacts \
-		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
-		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
-		--build-arg RUN_TARGET_ARCH=arm64 \
-		-t "$(ARM64_KATRAN_ARTIFACTS_IMAGE)" -f "$(KATRAN_ARTIFACTS_CONTAINERFILE)" "$(ROOT_DIR)"
+	@if docker pull --platform "$(ARM64_KATRAN_ARTIFACTS_PULL_PLATFORM)" "$(ARM64_KATRAN_ARTIFACTS_GHCR_IMAGE)"; then \
+		docker tag "$(ARM64_KATRAN_ARTIFACTS_GHCR_IMAGE)" "$(ARM64_KATRAN_ARTIFACTS_IMAGE)"; \
+		echo "using GHCR katran-artifacts image: $(ARM64_KATRAN_ARTIFACTS_GHCR_IMAGE)"; \
+	else \
+		echo "GHCR katran-artifacts image unavailable, building locally: $(ARM64_KATRAN_ARTIFACTS_IMAGE)"; \
+		docker build --platform linux/arm64 \
+			--target katran-artifacts \
+			--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
+			--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
+			--build-arg RUN_TARGET_ARCH=arm64 \
+			-t "$(ARM64_KATRAN_ARTIFACTS_IMAGE)" -f "$(KATRAN_ARTIFACTS_CONTAINERFILE)" "$(ROOT_DIR)"; \
+		docker tag "$(ARM64_KATRAN_ARTIFACTS_IMAGE)" "$(ARM64_KATRAN_ARTIFACTS_GHCR_IMAGE)"; \
+	fi
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_KATRAN_ARTIFACTS_IMAGE)"; mv -f "$$tmp" "$@"
 
 $(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRAN_ARTIFACTS_IMAGE_TAR) $(X86_KERNEL_FORK_IMAGE_TAR)
@@ -216,10 +249,33 @@ $(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_K
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
-.PHONY: image-kernel-fork-image-tar image-katran-artifacts-image-tar image-runner-runtime-image-tar
+.PHONY: image-kernel-fork-image-tar image-katran-artifacts-image-tar image-runner-runtime-image-tar \
+	image-push-kernel-fork image-push-katran-artifacts
 image-kernel-fork-image-tar: $(ACTIVE_KERNEL_FORK_IMAGE_TAR)
 image-katran-artifacts-image-tar: $(ACTIVE_KATRAN_ARTIFACTS_IMAGE_TAR)
 image-runner-runtime-image-tar: $(ACTIVE_RUNNER_RUNTIME_IMAGE_TAR)
+
+image-push-kernel-fork:
+	@if docker image inspect "$(ACTIVE_KERNEL_FORK_IMAGE)" >/dev/null 2>&1; then \
+		echo "using local kernel-fork image: $(ACTIVE_KERNEL_FORK_IMAGE)"; \
+	elif [ -f "$(ACTIVE_KERNEL_FORK_IMAGE_TAR)" ]; then \
+		docker load -i "$(ACTIVE_KERNEL_FORK_IMAGE_TAR)"; \
+	else \
+		$(MAKE) image-kernel-fork-image-tar RUN_TARGET_ARCH="$(RUN_TARGET_ARCH)"; \
+	fi
+	docker tag "$(ACTIVE_KERNEL_FORK_IMAGE)" "$(ACTIVE_KERNEL_FORK_GHCR_IMAGE)"
+	docker push "$(ACTIVE_KERNEL_FORK_GHCR_IMAGE)"
+
+image-push-katran-artifacts:
+	@if docker image inspect "$(ACTIVE_KATRAN_ARTIFACTS_IMAGE)" >/dev/null 2>&1; then \
+		echo "using local katran-artifacts image: $(ACTIVE_KATRAN_ARTIFACTS_IMAGE)"; \
+	elif [ -f "$(ACTIVE_KATRAN_ARTIFACTS_IMAGE_TAR)" ]; then \
+		docker load -i "$(ACTIVE_KATRAN_ARTIFACTS_IMAGE_TAR)"; \
+	else \
+		$(MAKE) image-katran-artifacts-image-tar RUN_TARGET_ARCH="$(RUN_TARGET_ARCH)"; \
+	fi
+	docker tag "$(ACTIVE_KATRAN_ARTIFACTS_IMAGE)" "$(ACTIVE_KATRAN_ARTIFACTS_GHCR_IMAGE)"
+	docker push "$(ACTIVE_KATRAN_ARTIFACTS_GHCR_IMAGE)"
 
 $(X86_RUNTIME_KERNEL_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(BPFREJIT_INSTALL_SCRIPT)
 	@mkdir -p "$(X86_RUNTIME_KERNEL_DIR)"
