@@ -461,7 +461,13 @@ FROM runner-runtime-artifacts AS runner-runtime-bpfopt-artifacts
 ARG IMAGE_BUILD_JOBS=4
 ARG RUN_TARGET_ARCH=x86_64
 
-COPY bpfopt ./bpfopt
+COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
+COPY bpfopt/crates/bpfget ./bpfopt/crates/bpfget
+COPY bpfopt/crates/bpfopt ./bpfopt/crates/bpfopt
+COPY bpfopt/crates/bpfprof ./bpfopt/crates/bpfprof
+COPY bpfopt/crates/bpfrejit ./bpfopt/crates/bpfrejit
+COPY bpfopt/crates/bpfverify ./bpfopt/crates/bpfverify
+COPY bpfopt/crates/kernel-sys ./bpfopt/crates/kernel-sys
 
 # Build bpfopt-suite CLIs in this upper layer; kernel-sys is a library crate only.
 RUN --mount=type=cache,target=/bpfopt/target,id=bpfopt-cargo-target,sharing=locked \
