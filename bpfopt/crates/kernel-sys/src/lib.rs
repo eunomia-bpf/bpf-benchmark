@@ -1393,6 +1393,86 @@ pub fn prog_get_original(prog_fd: BorrowedFd<'_>) -> Result<Vec<bpf_insn>> {
     Ok(insns)
 }
 
+/// Retrieve the kernel-translated instruction stream for an open program fd.
+pub fn prog_xlated_insns(prog_fd: BorrowedFd<'_>) -> Result<Vec<bpf_insn>> {
+    let info = obj_get_info_by_fd(prog_fd)?;
+    let byte_len = info.xlated_prog_len as usize;
+    if byte_len == 0 {
+        bail!("target BPF program has no translated bytecode metadata");
+    }
+
+    let insn_size = std::mem::size_of::<bpf_insn>();
+    if !byte_len.is_multiple_of(insn_size) {
+        bail!(
+            "xlated_prog_len {} is not a multiple of struct bpf_insn size {}",
+            byte_len,
+            insn_size
+        );
+    }
+
+    let mut insns = vec![bpf_insn::default(); byte_len / insn_size];
+    let mut info = BpfProgInfoFork {
+        xlated_prog_len: byte_len as u32,
+        xlated_prog_insns: insns.as_mut_ptr() as u64,
+        ..Default::default()
+    };
+    prog_obj_get_info_by_fd_into(prog_fd, &mut info)?;
+
+    let returned_len = info.xlated_prog_len as usize;
+    if returned_len > byte_len {
+        bail!(
+            "xlated_prog_len grew while reading translated bytecode: first pass {} bytes, second pass {} bytes",
+            byte_len,
+            returned_len
+        );
+    }
+    if !returned_len.is_multiple_of(insn_size) {
+        bail!(
+            "returned xlated_prog_len {} is not a multiple of struct bpf_insn size {}",
+            returned_len,
+            insn_size
+        );
+    }
+    if returned_len == 0 || info.xlated_prog_insns == 0 {
+        bail!("BPF_OBJ_GET_INFO_BY_FD did not return translated bytecode");
+    }
+
+    insns.truncate(returned_len / insn_size);
+    Ok(insns)
+}
+
+/// Retrieve native JIT image bytes for an open program fd.
+pub fn prog_jited_insns(prog_fd: BorrowedFd<'_>) -> Result<Vec<u8>> {
+    let info = obj_get_info_by_fd(prog_fd)?;
+    let byte_len = info.jited_prog_len as usize;
+    if byte_len == 0 {
+        bail!("target BPF program has no JIT image metadata");
+    }
+
+    let mut bytes = vec![0u8; byte_len];
+    let mut info = BpfProgInfoFork {
+        jited_prog_len: byte_len as u32,
+        jited_prog_insns: bytes.as_mut_ptr() as u64,
+        ..Default::default()
+    };
+    prog_obj_get_info_by_fd_into(prog_fd, &mut info)?;
+
+    let returned_len = info.jited_prog_len as usize;
+    if returned_len > byte_len {
+        bail!(
+            "jited_prog_len grew while reading JIT image: first pass {} bytes, second pass {} bytes",
+            byte_len,
+            returned_len
+        );
+    }
+    if returned_len == 0 || info.jited_prog_insns == 0 {
+        bail!("BPF_OBJ_GET_INFO_BY_FD did not return JIT image bytes");
+    }
+
+    bytes.truncate(returned_len);
+    Ok(bytes)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
