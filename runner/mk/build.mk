@@ -81,6 +81,10 @@ X86_KATRAN_ARTIFACTS_PULL_PLATFORM := linux/amd64
 ARM64_KATRAN_ARTIFACTS_PULL_PLATFORM := linux/arm64
 X86_RUNTIME_KERNEL_DIR := $(ARTIFACT_ROOT)/runtime-kernel/x86_64
 X86_RUNTIME_KERNEL_IMAGE := $(X86_RUNTIME_KERNEL_DIR)/bzImage
+X86_AWS_KERNEL_IMAGE := $(X86_BUILD_DIR)/arch/x86/boot/bzImage
+X86_AWS_KERNEL_RELEASE_FILE := $(X86_BUILD_DIR)/include/config/kernel.release
+X86_AWS_KERNEL_MODULES_ROOT := $(ARTIFACT_ROOT)/repo-artifacts/x86_64/kernel-modules/lib/modules
+X86_AWS_KERNEL_ARTIFACT_STAMP := $(X86_BUILD_DIR)/.aws-kernel-artifacts.stamp
 ACTIVE_X86_KINSN_SOURCE_DIR := $(ROOT_DIR)/module/x86
 ACTIVE_KINSN_SOURCE_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/module/arm64,$(ACTIVE_X86_KINSN_SOURCE_DIR))
 ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATRAN_ROOT)/bpf/balancer.bpf.o $(REPO_KATRAN_ROOT)/bpf/healthchecking_ipip.bpf.o $(REPO_KATRAN_ROOT)/bpf/xdp_root.bpf.o
@@ -283,6 +287,42 @@ $(X86_RUNTIME_KERNEL_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(BPFREJIT_INSTALL_
 		"$(BPFREJIT_INSTALL_SCRIPT)" --extract-kernel-only "$<"
 	test -s "$@"
 	touch "$@"
+
+$(X86_AWS_KERNEL_ARTIFACT_STAMP): $(X86_RUNNER_RUNTIME_IMAGE_TAR)
+	@mkdir -p "$(dir $(X86_AWS_KERNEL_IMAGE))" "$(dir $(X86_AWS_KERNEL_RELEASE_FILE))" "$(X86_AWS_KERNEL_MODULES_ROOT)"
+	tmpdir="$$(mktemp -d /tmp/bpfrejit-aws-x86-kernel.XXXXXX)"; \
+	cid=""; \
+	cleanup() { \
+		if [ -n "$$cid" ]; then docker rm -f "$$cid" >/dev/null 2>&1 || true; fi; \
+		rm -rf "$$tmpdir"; \
+	}; \
+	trap cleanup EXIT; \
+	docker load -i "$<"; \
+	cid="$$(docker create "$(X86_RUNNER_RUNTIME_IMAGE)" /bin/true)"; \
+	docker cp "$$cid:/artifacts/manifest.json" "$$tmpdir/manifest.json"; \
+	read -r kernel_release target_arch kernel_image < <(python3 -c 'import json, sys; manifest = json.load(open(sys.argv[1], encoding="utf-8")); keys = ("kernel_release", "target_arch", "kernel_image"); values = [str(manifest.get(key) or "").strip() for key in keys]; all(values) or sys.exit("manifest is missing kernel fields"); print(*values)' "$$tmpdir/manifest.json"); \
+	test "$$target_arch" = "x86_64"; \
+	test "$$kernel_image" = "bzImage"; \
+	docker cp "$$cid:/artifacts/kernel/$$kernel_image" "$(X86_AWS_KERNEL_IMAGE)"; \
+	docker cp "$$cid:/artifacts/kernel/System.map" "$(X86_BUILD_DIR)/System.map"; \
+	docker cp "$$cid:/artifacts/kernel/Module.symvers" "$(X86_BUILD_DIR)/Module.symvers"; \
+	docker cp "$$cid:/artifacts/kernel/.config" "$(X86_BUILD_DIR)/.config"; \
+	printf '%s\n' "$$kernel_release" >"$(X86_AWS_KERNEL_RELEASE_FILE)"; \
+	rm -rf "$(X86_AWS_KERNEL_MODULES_ROOT)/$$kernel_release"; \
+	docker cp "$$cid:/artifacts/modules/$$kernel_release" "$(X86_AWS_KERNEL_MODULES_ROOT)/$$kernel_release"; \
+	rm -f "$(X86_AWS_KERNEL_MODULES_ROOT)/$$kernel_release/build" "$(X86_AWS_KERNEL_MODULES_ROOT)/$$kernel_release/source"; \
+	test -s "$(X86_AWS_KERNEL_IMAGE)"; \
+	test -s "$(X86_AWS_KERNEL_RELEASE_FILE)"; \
+	test -d "$(X86_AWS_KERNEL_MODULES_ROOT)/$$kernel_release"; \
+	test -f "$(X86_AWS_KERNEL_MODULES_ROOT)/$$kernel_release/kernel/drivers/block/null_blk/null_blk.ko"; \
+	test -f "$(X86_AWS_KERNEL_MODULES_ROOT)/$$kernel_release/kernel/net/sched/sch_netem.ko"; \
+	touch "$@"
+
+$(X86_AWS_KERNEL_IMAGE) $(X86_AWS_KERNEL_RELEASE_FILE): $(X86_AWS_KERNEL_ARTIFACT_STAMP)
+	@test -s "$@"
+
+$(X86_AWS_KERNEL_MODULES_ROOT): $(X86_AWS_KERNEL_ARTIFACT_STAMP)
+	@test -d "$@"
 
 .PHONY: image-katran-artifacts image-runner-artifacts image-daemon-artifact image-bpfopt-artifacts \
 	image-micro-program-artifacts image-test-artifacts
