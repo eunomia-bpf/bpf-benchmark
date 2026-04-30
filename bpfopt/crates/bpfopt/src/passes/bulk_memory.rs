@@ -8,8 +8,8 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, func_info_record_count,
-    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
+    emit_packed_kinsn_call_with_off, fixup_all_branches, map_replacement_range,
+    remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
 };
 
 const MEMCPY_TARGET: &str = "bpf_memcpy_bulk";
@@ -107,16 +107,6 @@ impl BpfPass for BulkMemoryPass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        if func_info_record_count(program)? > 1 {
-            return Ok(PassResult {
-                sites_skipped: vec![SkipReason {
-                    pc: 0,
-                    reason: "multi-subprog kinsn candidate is not REJIT-safe".into(),
-                }],
-                ..PassResult::unchanged(self.name())
-            });
-        }
-
         if program.insns.is_empty() {
             return Ok(PassResult::unchanged(self.name()));
         }
