@@ -222,36 +222,36 @@ ARG TARGETARCH
 # verified official otelcol-ebpf-profiler release instead.
 ARG OTELCOL_EBPF_PROFILER_VERSION=0.140.0
 
-COPY --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee /artifacts/tracee/bin/tracee
-COPY --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee-ebpf /artifacts/tracee/bin/tracee-ebpf
-COPY --from=runner-runtime-tracee-upstream --chmod=0755 /lib/ld-musl-*.so.1 /lib/
-COPY --from=runner-runtime-tracee-upstream /lib/libc.musl-*.so.1 /lib/
-COPY --from=runner-runtime-tracee-upstream /usr/lib/libelf*.so* /usr/lib/
-COPY --from=runner-runtime-tracee-upstream /usr/lib/libz.so* /usr/lib/
-COPY --from=runner-runtime-tracee-upstream /usr/lib/libzstd.so* /usr/lib/
+COPY --link --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee /artifacts/tracee/bin/tracee
+COPY --link --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee-ebpf /artifacts/tracee/bin/tracee-ebpf
+COPY --link --from=runner-runtime-tracee-upstream --chmod=0755 /lib/ld-musl-*.so.1 /lib/
+COPY --link --from=runner-runtime-tracee-upstream /lib/libc.musl-*.so.1 /lib/
+COPY --link --from=runner-runtime-tracee-upstream /usr/lib/libelf*.so* /usr/lib/
+COPY --link --from=runner-runtime-tracee-upstream /usr/lib/libz.so* /usr/lib/
+COPY --link --from=runner-runtime-tracee-upstream /usr/lib/libzstd.so* /usr/lib/
 
-COPY --from=runner-runtime-tetragon-upstream --chmod=0755 /usr/bin/tetragon /artifacts/tetragon/bin/tetragon
-COPY --from=runner-runtime-tetragon-upstream /var/lib/tetragon/ /artifacts/tetragon/
+COPY --link --from=runner-runtime-tetragon-upstream --chmod=0755 /usr/bin/tetragon /artifacts/tetragon/bin/tetragon
+COPY --link --from=runner-runtime-tetragon-upstream /var/lib/tetragon/ /artifacts/tetragon/
 
-COPY --from=runner-runtime-katran-upstream /artifacts/katran /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran
+COPY --link --from=runner-runtime-katran-upstream /artifacts/katran /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran
 
-COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-agent /usr/local/bin/cilium-agent
-COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-dbg /usr/local/bin/cilium-dbg
-COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-bugtool /usr/local/bin/cilium-bugtool
-COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-health /usr/local/bin/cilium-health
-COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-health-responder /usr/local/bin/cilium-health-responder
-COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-mount /usr/local/bin/cilium-mount
-COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-sysctlfix /usr/local/bin/cilium-sysctlfix
-COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/local/bin/clang /usr/local/bin/clang
-COPY --from=runner-runtime-cilium-upstream --chmod=0755 /usr/local/bin/llc /usr/local/bin/llc
-COPY --from=runner-runtime-cilium-upstream /var/lib/cilium/ /var/lib/cilium/
+COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-agent /usr/local/bin/cilium-agent
+COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-dbg /usr/local/bin/cilium-dbg
+COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-bugtool /usr/local/bin/cilium-bugtool
+COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-health /usr/local/bin/cilium-health
+COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-health-responder /usr/local/bin/cilium-health-responder
+COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-mount /usr/local/bin/cilium-mount
+COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-sysctlfix /usr/local/bin/cilium-sysctlfix
+COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/local/bin/clang /usr/local/bin/clang
+COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/local/bin/llc /usr/local/bin/llc
+COPY --link --from=runner-runtime-cilium-upstream /var/lib/cilium/ /var/lib/cilium/
 
-COPY --from=runner-runtime-calico-upstream --chmod=0755 /usr/bin/calico-node /usr/local/bin/calico-node
-COPY --from=runner-runtime-calico-upstream /etc/calico/ /etc/calico/
-COPY --from=runner-runtime-calico-upstream /usr/lib/calico/bpf/ /usr/lib/calico/bpf/
-COPY --from=runner-runtime-calico-upstream /included-source/ /included-source/
-COPY --from=runner-runtime-calico-upstream /usr/lib64/libpcap.so.1 /usr/local/lib/libpcap.so.1
-COPY --from=runner-runtime-calico-upstream /usr/lib64/libpcap.so.1.9.1 /usr/local/lib/libpcap.so.1.9.1
+COPY --link --from=runner-runtime-calico-upstream --chmod=0755 /usr/bin/calico-node /usr/local/bin/calico-node
+COPY --link --from=runner-runtime-calico-upstream /etc/calico/ /etc/calico/
+COPY --link --from=runner-runtime-calico-upstream /usr/lib/calico/bpf/ /usr/lib/calico/bpf/
+COPY --link --from=runner-runtime-calico-upstream /included-source/ /included-source/
+COPY --link --from=runner-runtime-calico-upstream /usr/lib64/libpcap.so.1 /usr/local/lib/libpcap.so.1
+COPY --link --from=runner-runtime-calico-upstream /usr/lib64/libpcap.so.1.9.1 /usr/local/lib/libpcap.so.1.9.1
 
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
 
@@ -317,10 +317,10 @@ ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 
-COPY --from=runner-runtime-kernel-base /artifacts/kernel /artifacts/kernel
-COPY --from=runner-runtime-kernel-base /artifacts/modules /artifacts/modules
-COPY --from=runner-runtime-kernel-base /artifacts/headers /usr/src/linux-headers-fork
-COPY --from=runner-runtime-kernel-base /artifacts/manifest.json /artifacts/manifest.json
+COPY --link --from=runner-runtime-kernel-base /artifacts/kernel /artifacts/kernel
+COPY --link --from=runner-runtime-kernel-base /artifacts/modules /artifacts/modules
+COPY --link --from=runner-runtime-kernel-base /artifacts/headers /usr/src/linux-headers-fork
+COPY --link --from=runner-runtime-kernel-base /artifacts/manifest.json /artifacts/manifest.json
 
 COPY Makefile ./Makefile
 COPY runner/mk ./runner/mk
