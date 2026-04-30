@@ -201,6 +201,7 @@ def base_runtime_env() -> dict[str, str]:
             "SHELL",
             "BPFREJIT_INSIDE_RUNTIME_CONTAINER",
             "BPFREJIT_IMAGE_WORKSPACE",
+            "BPFREJIT_BENCH_PASSES",
             "RUN_TARGET_ARCH",
         )
         if (value := os.environ.get(name, "").strip())
