@@ -1118,6 +1118,7 @@ fn run_map_inline_round(
     }
 
     program.insns = final_insns;
+    super::utils::remap_btf_metadata(program, &final_addr_map)?;
     program.remap_annotations(&final_addr_map);
 
     if speculative_sites > 0 {

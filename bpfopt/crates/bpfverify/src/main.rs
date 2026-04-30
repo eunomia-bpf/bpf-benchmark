@@ -45,6 +45,18 @@ struct Cli {
     /// Open BTF object fd for the attach target.
     #[arg(long, value_name = "FD")]
     attach_btf_obj_fd: Option<i32>,
+    /// Raw func_info records captured by bpfget --full.
+    #[arg(long, value_name = "FILE")]
+    func_info: Option<PathBuf>,
+    /// Byte size of one func_info record.
+    #[arg(long, value_name = "BYTES")]
+    func_info_rec_size: Option<u32>,
+    /// Raw line_info records captured by bpfget --full.
+    #[arg(long, value_name = "FILE")]
+    line_info: Option<PathBuf>,
+    /// Byte size of one line_info record.
+    #[arg(long, value_name = "BYTES")]
+    line_info_rec_size: Option<u32>,
     /// Map FD manifest from bpfget --full.
     #[arg(long, value_name = "FILE")]
     map_fds: Option<PathBuf>,
@@ -153,6 +165,21 @@ struct AttachBtfObjFd {
     _owned_fd: Option<OwnedFd>,
 }
 
+#[derive(Debug)]
+struct OwnedBtfInfoRecords {
+    rec_size: u32,
+    bytes: Vec<u8>,
+}
+
+impl OwnedBtfInfoRecords {
+    fn as_kernel_records(&self) -> kernel_sys::BtfInfoRecords<'_> {
+        kernel_sys::BtfInfoRecords {
+            rec_size: self.rec_size,
+            bytes: &self.bytes,
+        }
+    }
+}
+
 fn main() -> ExitCode {
     match run() {
         Ok(code) => code,
@@ -186,6 +213,16 @@ fn run() -> Result<ExitCode> {
     let mut insns = decode_insns(&input_bytes)?;
     let _map_fds = apply_map_fds(cli.map_fds.as_deref(), &mut insns)?;
     let fd_array = read_fd_array(cli.fd_array.as_deref())?;
+    let func_info = read_btf_info_records(
+        cli.func_info.as_deref(),
+        cli.func_info_rec_size,
+        "func-info",
+    )?;
+    let line_info = read_btf_info_records(
+        cli.line_info.as_deref(),
+        cli.line_info_rec_size,
+        "line-info",
+    )?;
     let prog_btf_fd = resolve_optional_btf_fd(cli.prog_btf_fd, cli.prog_btf_id, "prog BTF")?;
     let attach_btf_obj_fd = resolve_optional_btf_fd(
         cli.attach_btf_obj_fd,
@@ -201,6 +238,12 @@ fn run() -> Result<ExitCode> {
         prog_btf_fd: prog_btf_fd.fd,
         attach_btf_id: cli.attach_btf_id,
         attach_btf_obj_fd: attach_btf_obj_fd.fd,
+        func_info: func_info
+            .as_ref()
+            .map(OwnedBtfInfoRecords::as_kernel_records),
+        line_info: line_info
+            .as_ref()
+            .map(OwnedBtfInfoRecords::as_kernel_records),
         insns: &insns,
         fd_array: (!fd_array.is_empty()).then_some(fd_array.as_slice()),
         log_level,
@@ -267,6 +310,34 @@ fn read_input(path: Option<&Path>) -> Result<Vec<u8>> {
         }
     }
     Ok(bytes)
+}
+
+fn read_btf_info_records(
+    path: Option<&Path>,
+    rec_size: Option<u32>,
+    label: &str,
+) -> Result<Option<OwnedBtfInfoRecords>> {
+    let (path, rec_size) = match (path, rec_size) {
+        (None, None) => return Ok(None),
+        (Some(path), Some(rec_size)) => (path, rec_size),
+        (Some(_), None) => bail!("--{label} requires --{label}-rec-size"),
+        (None, Some(_)) => bail!("--{label}-rec-size requires --{label}"),
+    };
+    if rec_size == 0 {
+        bail!("--{label}-rec-size must be non-zero");
+    }
+    let bytes = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
+    if bytes.is_empty() {
+        bail!("{label} file {} is empty", path.display());
+    }
+    if bytes.len() % rec_size as usize != 0 {
+        bail!(
+            "{label} file {} length {} is not a multiple of rec_size {rec_size}",
+            path.display(),
+            bytes.len()
+        );
+    }
+    Ok(Some(OwnedBtfInfoRecords { rec_size, bytes }))
 }
 
 fn write_output(path: Option<&Path>, bytes: &[u8]) -> Result<()> {
@@ -953,5 +1024,17 @@ from 9 to 11: R0=map_ptr(ks=4,vs=64) R10=fp0
     fn fd_array_reserves_slot_zero() {
         assert_eq!(build_rejit_fd_array(&[]), Vec::<i32>::new());
         assert_eq!(build_rejit_fd_array(&[11, 22]), vec![11, 11, 22]);
+    }
+
+    #[test]
+    fn btf_info_records_require_matching_rec_size_arg() {
+        let err =
+            read_btf_info_records(Some(Path::new("func_info.bin")), None, "func-info").unwrap_err();
+
+        assert!(
+            err.to_string()
+                .contains("--func-info requires --func-info-rec-size"),
+            "err={err:#}"
+        );
     }
 }

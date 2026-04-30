@@ -118,6 +118,28 @@ pub struct StackState {
     pub value: Option<RegState>,
 }
 
+/// Raw BTF func_info or line_info records whose first u32 is `insn_off`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct BtfInfoRecords {
+    pub rec_size: u32,
+    pub bytes: Vec<u8>,
+}
+
+impl BtfInfoRecords {
+    pub fn new(label: &str, rec_size: u32, bytes: Vec<u8>) -> anyhow::Result<Self> {
+        if rec_size < std::mem::size_of::<u32>() as u32 {
+            anyhow::bail!("{label} rec_size {rec_size} is too small to hold insn_off");
+        }
+        if !bytes.len().is_multiple_of(rec_size as usize) {
+            anyhow::bail!(
+                "{label} byte length {} is not a multiple of rec_size {rec_size}",
+                bytes.len()
+            );
+        }
+        Ok(Self { rec_size, bytes })
+    }
+}
+
 // ── Program IR ──────────────────────────────────────────────────────
 
 /// BPF program IR — linear instruction stream + per-insn annotations + metadata.
@@ -145,6 +167,10 @@ pub struct BpfProgram {
     pub branch_miss_rate: Option<f64>,
     /// Parsed `log_level=2` verifier state snapshots for the original program.
     pub verifier_states: Arc<[VerifierInsn]>,
+    /// Raw func_info records replayed by bpfverify after bytecode transforms.
+    pub func_info: Option<BtfInfoRecords>,
+    /// Raw line_info records replayed by bpfverify after bytecode transforms.
+    pub line_info: Option<BtfInfoRecords>,
     /// Pre-loaded map value snapshot: (map_id, key_bytes) -> value_bytes.
     /// Used by offline snapshot callers and unit tests.
     pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
@@ -326,6 +352,8 @@ impl BpfProgram {
             map_fd_bindings: HashMap::new(),
             branch_miss_rate: None,
             verifier_states: Arc::from([]),
+            func_info: None,
+            line_info: None,
             map_values: HashMap::new(),
             map_value_nulls: HashSet::new(),
             map_metadata: HashMap::new(),

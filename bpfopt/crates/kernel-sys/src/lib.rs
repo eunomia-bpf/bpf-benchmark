@@ -4,7 +4,7 @@
 //! `libbpf-rs`/`libbpf-sys`. The only direct `bpf(2)` wrappers here are for
 //! fork-only commands that upstream libbpf does not expose.
 
-use std::ffi::{c_char, CString};
+use std::ffi::{c_char, CStr, CString};
 use std::os::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, OwnedFd};
 use std::ptr::NonNull;
 
@@ -96,10 +96,37 @@ pub struct ProgLoadDryRunOptions<'a> {
     pub prog_btf_fd: Option<i32>,
     pub attach_btf_id: Option<u32>,
     pub attach_btf_obj_fd: Option<i32>,
+    pub func_info: Option<BtfInfoRecords<'a>>,
+    pub line_info: Option<BtfInfoRecords<'a>>,
     pub insns: &'a [bpf_insn],
     pub fd_array: Option<&'a [i32]>,
     pub log_level: u32,
     pub log_buf: Option<&'a mut [u8]>,
+}
+
+/// Raw BTF func_info or line_info records supplied to `BPF_PROG_LOAD`.
+#[derive(Clone, Copy, Debug)]
+pub struct BtfInfoRecords<'a> {
+    pub rec_size: u32,
+    pub bytes: &'a [u8],
+}
+
+/// Raw BTF metadata captured from an already-loaded program.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct ProgBtfInfo {
+    pub func_info_rec_size: u32,
+    pub func_info: Vec<u8>,
+    pub line_info_rec_size: u32,
+    pub line_info: Vec<u8>,
+}
+
+/// BTF function type metadata needed to reconstruct func_info replay records.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct BtfFuncType {
+    pub type_id: u32,
+    pub name: String,
+    pub linkage: u32,
+    pub returns_scalar: bool,
 }
 
 /// Result of a verifier dry-run load. Kernel verifier rejection is represented
@@ -167,6 +194,28 @@ fn verifier_log_summary(log: &str) -> String {
     }
 }
 
+fn btf_record_count(label: &str, records: BtfInfoRecords<'_>) -> Result<Option<u32>> {
+    if records.bytes.is_empty() {
+        return Ok(None);
+    }
+    if records.rec_size == 0 {
+        bail!("{label} rec_size must be non-zero when records are present");
+    }
+    let rec_size = records.rec_size as usize;
+    if !records.bytes.len().is_multiple_of(rec_size) {
+        bail!(
+            "{label} byte length {} is not a multiple of rec_size {}",
+            records.bytes.len(),
+            records.rec_size
+        );
+    }
+    let count = records.bytes.len() / rec_size;
+    let count = count
+        .try_into()
+        .map_err(|_| anyhow!("{label} record count does not fit libbpf __u32"))?;
+    Ok(Some(count))
+}
+
 unsafe fn sys_bpf<T>(cmd: u32, attr: *mut T, size: usize) -> libc::c_long {
     unsafe {
         libc::syscall(
@@ -211,6 +260,20 @@ pub fn prog_load_dryrun_report(
             bail!("attach_btf_obj_fd must be non-negative");
         }
         opts.attach_btf_obj_fd = attach_btf_obj_fd as u32;
+    }
+    if let Some(func_info) = options.func_info {
+        if let Some(count) = btf_record_count("func_info", func_info)? {
+            opts.func_info = func_info.bytes.as_ptr() as *const libc::c_void;
+            opts.func_info_cnt = count;
+            opts.func_info_rec_size = func_info.rec_size;
+        }
+    }
+    if let Some(line_info) = options.line_info {
+        if let Some(count) = btf_record_count("line_info", line_info)? {
+            opts.line_info = line_info.bytes.as_ptr() as *const libc::c_void;
+            opts.line_info_cnt = count;
+            opts.line_info_rec_size = line_info.rec_size;
+        }
     }
 
     if let Some(fd_array) = options.fd_array.filter(|fds| !fds.is_empty()) {
@@ -481,6 +544,88 @@ impl KernelBtf {
             ret,
         ))
     }
+
+    /// Enumerate BTF_KIND_FUNC types in kernel BTF ID order.
+    pub fn func_types(&self) -> Result<Vec<BtfFuncType>> {
+        let count = unsafe { btf__type_cnt(self.ptr.as_ptr()) };
+        let mut funcs = Vec::new();
+        for type_id in 1..count {
+            let type_ = self.type_by_id(type_id)?;
+            if btf_kind(type_.info) != BTF_KIND_FUNC {
+                continue;
+            }
+            let proto_id = unsafe { type_.__bindgen_anon_1.type_ };
+            funcs.push(BtfFuncType {
+                type_id,
+                name: self.name_by_offset(type_.name_off)?,
+                linkage: btf_vlen(type_.info),
+                returns_scalar: self.func_proto_returns_scalar(proto_id)?,
+            });
+        }
+        Ok(funcs)
+    }
+
+    fn type_by_id(&self, type_id: u32) -> Result<&btf_type> {
+        let type_ = unsafe { btf__type_by_id(self.ptr.as_ptr(), type_id) };
+        if type_.is_null() {
+            bail!("BTF type id {type_id} is not present");
+        }
+        Ok(unsafe { &*type_ })
+    }
+
+    fn name_by_offset(&self, offset: u32) -> Result<String> {
+        let name = unsafe { btf__name_by_offset(self.ptr.as_ptr(), offset) };
+        if name.is_null() {
+            bail!("BTF name offset {offset} returned NULL");
+        }
+        Ok(unsafe { CStr::from_ptr(name) }
+            .to_string_lossy()
+            .into_owned())
+    }
+
+    fn func_proto_returns_scalar(&self, proto_id: u32) -> Result<bool> {
+        let proto = self.type_by_id(proto_id)?;
+        if btf_kind(proto.info) != BTF_KIND_FUNC_PROTO {
+            bail!("BTF type id {proto_id} is not a FUNC_PROTO");
+        }
+        let return_type_id = unsafe { proto.__bindgen_anon_1.type_ };
+        self.type_id_is_scalar(return_type_id)
+    }
+
+    fn type_id_is_scalar(&self, mut type_id: u32) -> Result<bool> {
+        for _ in 0..32 {
+            if type_id == 0 {
+                return Ok(false);
+            }
+            let type_ = self.type_by_id(type_id)?;
+            match btf_kind(type_.info) {
+                kind if kind == BTF_KIND_INT
+                    || kind == BTF_KIND_ENUM
+                    || kind == BTF_KIND_ENUM64 =>
+                {
+                    return Ok(true);
+                }
+                kind if kind == BTF_KIND_TYPEDEF
+                    || kind == BTF_KIND_VOLATILE
+                    || kind == BTF_KIND_CONST
+                    || kind == BTF_KIND_RESTRICT
+                    || kind == BTF_KIND_TYPE_TAG =>
+                {
+                    type_id = unsafe { type_.__bindgen_anon_1.type_ };
+                }
+                _ => return Ok(false),
+            }
+        }
+        bail!("BTF type modifier chain is too deep");
+    }
+}
+
+fn btf_kind(info: u32) -> u32 {
+    (info >> 24) & 0x1f
+}
+
+fn btf_vlen(info: u32) -> u32 {
+    info & 0xffff
 }
 
 impl Drop for KernelBtf {
@@ -533,6 +678,107 @@ pub fn prog_map_ids(fd: BorrowedFd<'_>, nr_map_ids: u32) -> Result<Vec<u32>> {
     }
     map_ids.truncate(info.nr_map_ids as usize);
     Ok(map_ids)
+}
+
+/// Retrieve raw func_info and line_info records referenced by an open BPF program fd.
+pub fn prog_btf_info(fd: BorrowedFd<'_>) -> Result<ProgBtfInfo> {
+    let first = obj_get_info_by_fd(fd)?;
+    let mut func_info =
+        allocate_btf_records("func_info", first.nr_func_info, first.func_info_rec_size)?;
+    let mut line_info =
+        allocate_btf_records("line_info", first.nr_line_info, first.line_info_rec_size)?;
+    if func_info.is_empty() && line_info.is_empty() {
+        return Ok(ProgBtfInfo {
+            func_info_rec_size: first.func_info_rec_size,
+            func_info,
+            line_info_rec_size: first.line_info_rec_size,
+            line_info,
+        });
+    }
+
+    let mut info = BpfProgInfoFork {
+        func_info_rec_size: first.func_info_rec_size,
+        func_info: ptr_u64(func_info.as_mut_ptr()),
+        nr_func_info: first.nr_func_info,
+        nr_line_info: first.nr_line_info,
+        line_info: ptr_u64(line_info.as_mut_ptr()),
+        line_info_rec_size: first.line_info_rec_size,
+        ..Default::default()
+    };
+    prog_obj_get_info_by_fd_into(fd, &mut info)?;
+
+    shrink_btf_records(
+        "func_info",
+        &mut func_info,
+        first.nr_func_info,
+        info.nr_func_info,
+        first.func_info_rec_size,
+        info.func_info_rec_size,
+    )?;
+    shrink_btf_records(
+        "line_info",
+        &mut line_info,
+        first.nr_line_info,
+        info.nr_line_info,
+        first.line_info_rec_size,
+        info.line_info_rec_size,
+    )?;
+
+    Ok(ProgBtfInfo {
+        func_info_rec_size: info.func_info_rec_size,
+        func_info,
+        line_info_rec_size: info.line_info_rec_size,
+        line_info,
+    })
+}
+
+fn allocate_btf_records(label: &str, count: u32, rec_size: u32) -> Result<Vec<u8>> {
+    if count == 0 {
+        return Ok(Vec::new());
+    }
+    if rec_size == 0 {
+        bail!("{label} count is {count} but rec_size is zero");
+    }
+    let len = btf_record_bytes(label, count, rec_size)?;
+    Ok(vec![0; len])
+}
+
+fn shrink_btf_records(
+    label: &str,
+    bytes: &mut Vec<u8>,
+    requested_count: u32,
+    returned_count: u32,
+    requested_rec_size: u32,
+    returned_rec_size: u32,
+) -> Result<()> {
+    if returned_count > requested_count {
+        bail!(
+            "{label} count grew while reading records: first pass {requested_count}, second pass {returned_count}"
+        );
+    }
+    if returned_count != 0 && returned_rec_size != requested_rec_size {
+        bail!(
+            "{label} rec_size changed while reading records: first pass {requested_rec_size}, second pass {returned_rec_size}"
+        );
+    }
+    bytes.truncate(btf_record_bytes(label, returned_count, returned_rec_size)?);
+    Ok(())
+}
+
+fn btf_record_bytes(label: &str, count: u32, rec_size: u32) -> Result<usize> {
+    let count = count as usize;
+    let rec_size = rec_size as usize;
+    count
+        .checked_mul(rec_size)
+        .ok_or_else(|| anyhow!("{label} byte length overflow"))
+}
+
+fn ptr_u64<T>(ptr: *mut T) -> u64 {
+    if ptr.is_null() {
+        0
+    } else {
+        ptr as u64
+    }
 }
 
 /// Open a live BPF map by ID.
@@ -721,5 +967,30 @@ mod tests {
         assert_eq!(offset_of!(BpfProgInfoFork, orig_prog_len), 228);
         assert_eq!(offset_of!(BpfProgInfoFork, orig_prog_insns), 232);
         assert_eq!(size_of::<BpfProgInfoFork>(), 240);
+    }
+
+    #[test]
+    fn btf_record_count_rejects_partial_record() {
+        let records = BtfInfoRecords {
+            rec_size: 8,
+            bytes: &[0; 12],
+        };
+
+        let err = btf_record_count("func_info", records).unwrap_err();
+
+        assert!(
+            err.to_string().contains("not a multiple of rec_size"),
+            "err={err:#}"
+        );
+    }
+
+    #[test]
+    fn btf_record_count_accepts_exact_records() {
+        let records = BtfInfoRecords {
+            rec_size: 8,
+            bytes: &[0; 16],
+        };
+
+        assert_eq!(btf_record_count("func_info", records).unwrap(), Some(2));
     }
 }

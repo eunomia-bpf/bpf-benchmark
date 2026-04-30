@@ -6,7 +6,7 @@ use crate::pass::*;
 
 use super::utils::{
     compose_addr_maps, eliminate_dead_register_defs, eliminate_nops,
-    eliminate_unreachable_blocks_with_cfg, tail_call_protected_prefix_end,
+    eliminate_unreachable_blocks_with_cfg, remap_btf_metadata, tail_call_protected_prefix_end,
 };
 
 /// Dead code elimination pass.
@@ -90,6 +90,7 @@ impl BpfPass for DcePass {
         }
 
         program.insns = final_insns;
+        remap_btf_metadata(program, &final_addr_map)?;
         program.remap_annotations(&final_addr_map);
         program.log_transform(TransformEntry { sites_applied });
 

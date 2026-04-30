@@ -27,6 +27,8 @@ const FAILURE_LAYOUT_DIRECT: &str = "direct";
 const FAILURE_LAYOUT_ACTIVE_RUN_DETAILS: &str = "active-run-details";
 const INSIDE_RUNTIME_CONTAINER_ENV: &str = "BPFREJIT_INSIDE_RUNTIME_CONTAINER";
 const IMAGE_WORKSPACE_ENV: &str = "BPFREJIT_IMAGE_WORKSPACE";
+const FUNC_INFO_FILE: &str = "func_info.bin";
+const LINE_INFO_FILE: &str = "line_info.bin";
 const RESULT_ROOT_SUFFIXES: &[&str] = &[
     "micro/results",
     "corpus/results",
@@ -491,7 +493,23 @@ fn replay_load_context_args(prog_info: &ProgInfoJson) -> Vec<String> {
         args.push("--attach-btf-obj-id".to_string());
         args.push(prog_info.attach_btf_obj_id.to_string());
     }
+    append_btf_info_replay_args(&mut args, prog_info);
     args
+}
+
+fn append_btf_info_replay_args(args: &mut Vec<String>, prog_info: &ProgInfoJson) {
+    if prog_info.nr_func_info != 0 {
+        args.push("--func-info".to_string());
+        args.push(FUNC_INFO_FILE.to_string());
+        args.push("--func-info-rec-size".to_string());
+        args.push(prog_info.func_info_rec_size.to_string());
+    }
+    if prog_info.nr_line_info != 0 {
+        args.push("--line-info".to_string());
+        args.push(LINE_INFO_FILE.to_string());
+        args.push("--line-info-rec-size".to_string());
+        args.push(prog_info.line_info_rec_size.to_string());
+    }
 }
 
 fn render_shell_args(args: &[String]) -> String {
@@ -754,6 +772,14 @@ struct ProgInfoJson {
     map_ids: Vec<u32>,
     #[serde(default)]
     btf_id: u32,
+    #[serde(default)]
+    func_info_rec_size: u32,
+    #[serde(default)]
+    nr_func_info: u32,
+    #[serde(default)]
+    line_info_rec_size: u32,
+    #[serde(default)]
+    nr_line_info: u32,
     #[serde(default)]
     attach_btf_obj_id: u32,
     #[serde(default)]
@@ -1293,7 +1319,7 @@ where
                 .arg(&original_verify_report)
                 .arg("--verifier-states-out")
                 .arg(&verifier_states_json);
-            append_load_context_args(&mut verify, &prog_info);
+            append_load_context_args(&mut verify, &prog_info, workdir.path());
             run_stage_output("bpfverify original verifier-states", &mut verify).with_context(
                 || format!("bpfverify --verifier-states-out failed for prog {prog_id}"),
             )?;
@@ -1405,7 +1431,7 @@ where
                 .arg(&verified_bin)
                 .arg("--report")
                 .arg(&final_verify_report);
-            append_load_context_args(&mut verify, &prog_info);
+            append_load_context_args(&mut verify, &prog_info, workdir.path());
             if use_fd_array {
                 verify.arg("--fd-array").arg(&fd_array_json);
             }
@@ -1557,7 +1583,7 @@ where
     }
 }
 
-fn append_load_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
+fn append_load_context_args(command: &mut Command, prog_info: &ProgInfoJson, workdir: &Path) {
     if let Some(attach_type) = &prog_info.expected_attach_type {
         let value = if attach_type.name.trim().is_empty() {
             attach_type.numeric.to_string()
@@ -1581,10 +1607,28 @@ fn append_load_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
             .arg("--attach-btf-obj-id")
             .arg(prog_info.attach_btf_obj_id.to_string());
     }
+    append_btf_info_command_args(command, prog_info, workdir);
 }
 
 fn append_bpfopt_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
     command.arg("--prog-type").arg(&prog_info.prog_type.name);
+}
+
+fn append_btf_info_command_args(command: &mut Command, prog_info: &ProgInfoJson, workdir: &Path) {
+    if prog_info.nr_func_info != 0 {
+        command
+            .arg("--func-info")
+            .arg(workdir.join(FUNC_INFO_FILE))
+            .arg("--func-info-rec-size")
+            .arg(prog_info.func_info_rec_size.to_string());
+    }
+    if prog_info.nr_line_info != 0 {
+        command
+            .arg("--line-info")
+            .arg(workdir.join(LINE_INFO_FILE))
+            .arg("--line-info-rec-size")
+            .arg(prog_info.line_info_rec_size.to_string());
+    }
 }
 
 fn run_bpfverify_reported(
@@ -1662,7 +1706,7 @@ fn capture_rejit_failure_verifier_log(
         .arg(verified_bin)
         .arg("--report")
         .arg(&report_json);
-    append_load_context_args(&mut verify, prog_info);
+    append_load_context_args(&mut verify, prog_info, workdir);
     if use_fd_array {
         verify.arg("--fd-array").arg(fd_array_json);
     }
@@ -2193,6 +2237,43 @@ mod tests {
     use std::sync::Mutex as TestMutex;
 
     static ENV_LOCK: TestMutex<()> = TestMutex::new(());
+
+    #[test]
+    fn replay_load_context_includes_btf_metadata_files() {
+        let prog_info = ProgInfoJson {
+            id: 42,
+            name: "conntrack_clean".to_string(),
+            prog_type: TypeJson {
+                name: "sched_cls".to_string(),
+                numeric: kernel_sys::BPF_PROG_TYPE_SCHED_CLS,
+            },
+            insn_cnt: 12,
+            map_ids: Vec::new(),
+            btf_id: 108,
+            func_info_rec_size: 8,
+            nr_func_info: 2,
+            line_info_rec_size: 16,
+            nr_line_info: 3,
+            attach_btf_obj_id: 0,
+            attach_btf_id: 0,
+            expected_attach_type: None,
+        };
+
+        let args = replay_load_context_args(&prog_info);
+
+        assert!(args
+            .windows(2)
+            .any(|pair| pair[0] == "--func-info" && pair[1] == FUNC_INFO_FILE));
+        assert!(args
+            .windows(2)
+            .any(|pair| pair[0] == "--func-info-rec-size" && pair[1] == "8"));
+        assert!(args
+            .windows(2)
+            .any(|pair| pair[0] == "--line-info" && pair[1] == LINE_INFO_FILE));
+        assert!(args
+            .windows(2)
+            .any(|pair| pair[0] == "--line-info-rec-size" && pair[1] == "16"));
+    }
 
     struct FakeCliDir {
         dir: WorkDir,

@@ -5,7 +5,7 @@ use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::fixup_all_branches as fixup_branches_inline;
+use super::utils::{fixup_all_branches as fixup_branches_inline, remap_btf_metadata};
 
 /// BRANCH_FLIP: PGO-guided reorder of if/else bodies.
 ///
@@ -281,6 +281,7 @@ impl BpfPass for BranchFlipPass {
         }
 
         program.insns = new_insns;
+        remap_btf_metadata(program, &addr_map)?;
         program.remap_annotations(&addr_map);
         program.log_transform(TransformEntry {
             sites_applied: applied,

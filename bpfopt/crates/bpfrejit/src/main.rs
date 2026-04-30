@@ -136,12 +136,28 @@ fn run() -> Result<()> {
                 })?,
             )
         };
+        let btf_info = kernel_sys::prog_btf_info(prog_fd.as_fd()).with_context(|| {
+            format!(
+                "read BTF record metadata for BPF program id {}",
+                cli.prog_id
+            )
+        })?;
+        let func_info = (!btf_info.func_info.is_empty()).then_some(kernel_sys::BtfInfoRecords {
+            rec_size: btf_info.func_info_rec_size,
+            bytes: &btf_info.func_info,
+        });
+        let line_info = (!btf_info.line_info.is_empty()).then_some(kernel_sys::BtfInfoRecords {
+            rec_size: btf_info.line_info_rec_size,
+            bytes: &btf_info.line_info,
+        });
         let report = kernel_sys::prog_load_dryrun_report(kernel_sys::ProgLoadDryRunOptions {
             prog_type: info.prog_type,
             expected_attach_type,
             prog_btf_fd: prog_btf_fd.as_ref().map(|fd| fd.as_raw_fd()),
             attach_btf_id: (info.attach_btf_id != 0).then_some(info.attach_btf_id),
             attach_btf_obj_fd: attach_btf_obj_fd.as_ref().map(|fd| fd.as_raw_fd()),
+            func_info,
+            line_info,
             insns: &insns,
             fd_array: Some(fd_array.as_slice()),
             log_level: 2,

@@ -15,10 +15,10 @@ use bpfopt::insn::{
     BPF_PSEUDO_MAP_FD, BPF_PSEUDO_MAP_VALUE,
 };
 use bpfopt::pass::{
-    self, Analysis, BpfProgram, BranchProfile, KinsnRegistry, MapMetadata, MapValueProvider,
-    PassContext, PassManager, PassResult, PlatformCapabilities, ProfilingData, RegState,
-    ScalarRange, SnapshotMapProvider, StackState, StaticKinsnCallResolver, Tnum, VerifierInsn,
-    VerifierInsnKind, VerifierValueWidth,
+    self, Analysis, BpfProgram, BranchProfile, BtfInfoRecords, KinsnRegistry, MapMetadata,
+    MapValueProvider, PassContext, PassManager, PassResult, PlatformCapabilities, ProfilingData,
+    RegState, ScalarRange, SnapshotMapProvider, StackState, StaticKinsnCallResolver, Tnum,
+    VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
 use bpfopt::passes::PASS_REGISTRY;
 use clap::{Args, Parser, Subcommand};
@@ -135,6 +135,18 @@ struct CommonArgs {
     /// Map IDs used by the program, comma-separated in kernel used_maps order.
     #[arg(long, global = true, value_name = "LIST", value_delimiter = ',')]
     map_ids: Vec<String>,
+    /// Raw func_info records to remap in place when instruction offsets change.
+    #[arg(long, global = true, value_name = "FILE")]
+    func_info: Option<PathBuf>,
+    /// Byte size of one func_info record.
+    #[arg(long, global = true, value_name = "BYTES")]
+    func_info_rec_size: Option<u32>,
+    /// Raw line_info records to remap in place when instruction offsets change.
+    #[arg(long, global = true, value_name = "FILE")]
+    line_info: Option<PathBuf>,
+    /// Byte size of one line_info record.
+    #[arg(long, global = true, value_name = "BYTES")]
+    line_info_rec_size: Option<u32>,
 }
 
 #[derive(Subcommand)]
@@ -607,6 +619,7 @@ fn run_single_pass(common: &CommonArgs, pass_name: &'static str) -> Result<()> {
     let profiling = read_profile(common.profile.as_deref())?;
     let result = run_pipeline_catching_panics(&pipeline, &mut program, &ctx, profiling.as_ref())?;
     write_bytecode(common.output.as_deref(), &program.insns)?;
+    write_btf_info_outputs(common, &program)?;
 
     if let Some(report_path) = common.report.as_deref() {
         let report = result
@@ -640,6 +653,7 @@ fn run_optimize(common: &CommonArgs, args: &OptimizeArgs) -> Result<()> {
     let profiling = read_profile(common.profile.as_deref())?;
     let result = run_pipeline_catching_panics(&pipeline, &mut program, &ctx, profiling.as_ref())?;
     write_bytecode(common.output.as_deref(), &program.insns)?;
+    write_btf_info_outputs(common, &program)?;
 
     if let Some(report_path) = common.report.as_deref() {
         let report = OptimizeReport {
@@ -895,6 +909,51 @@ fn attach_program_inputs(program: &mut BpfProgram, common: &CommonArgs) -> Resul
         program.map_metadata = snapshot.metadata;
         program.map_values = snapshot.values;
         program.map_value_nulls = snapshot.nulls;
+    }
+    program.func_info = read_btf_info_records(
+        common.func_info.as_deref(),
+        common.func_info_rec_size,
+        "func-info",
+    )?;
+    program.line_info = read_btf_info_records(
+        common.line_info.as_deref(),
+        common.line_info_rec_size,
+        "line-info",
+    )?;
+    Ok(())
+}
+
+fn read_btf_info_records(
+    path: Option<&Path>,
+    rec_size: Option<u32>,
+    label: &str,
+) -> Result<Option<BtfInfoRecords>> {
+    let (path, rec_size) = match (path, rec_size) {
+        (None, None) => return Ok(None),
+        (Some(path), Some(rec_size)) => (path, rec_size),
+        (Some(_), None) => bail!("--{label} requires --{label}-rec-size"),
+        (None, Some(_)) => bail!("--{label}-rec-size requires --{label}"),
+    };
+    let bytes = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
+    Ok(Some(BtfInfoRecords::new(label, rec_size, bytes)?))
+}
+
+fn write_btf_info_outputs(common: &CommonArgs, program: &BpfProgram) -> Result<()> {
+    if let Some(path) = common.func_info.as_deref() {
+        let bytes = program
+            .func_info
+            .as_ref()
+            .map(|records| records.bytes.as_slice())
+            .unwrap_or(&[]);
+        fs::write(path, bytes).with_context(|| format!("failed to write {}", path.display()))?;
+    }
+    if let Some(path) = common.line_info.as_deref() {
+        let bytes = program
+            .line_info
+            .as_ref()
+            .map(|records| records.bytes.as_slice())
+            .unwrap_or(&[]);
+        fs::write(path, bytes).with_context(|| format!("failed to write {}", path.display()))?;
     }
     Ok(())
 }

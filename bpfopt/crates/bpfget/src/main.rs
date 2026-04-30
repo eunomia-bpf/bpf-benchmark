@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! bpfget CLI entry point.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
 use std::os::fd::{AsFd, BorrowedFd};
@@ -16,8 +16,15 @@ use serde::{Deserialize, Serialize};
 static NEXT_TMP_ID: AtomicU64 = AtomicU64::new(0);
 
 const BPF_LD_IMM64: u8 = (kernel_sys::BPF_LD | kernel_sys::BPF_DW | kernel_sys::BPF_IMM) as u8;
+const BPF_CALL_INSN: u8 = (kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) as u8;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
+const BPF_PSEUDO_FUNC: u8 = kernel_sys::BPF_PSEUDO_FUNC as u8;
+const BPF_PSEUDO_CALL: u8 = kernel_sys::BPF_PSEUDO_CALL as u8;
+const FUNC_INFO_REC_SIZE: u32 = 8;
+const LINE_INFO_REC_SIZE: u32 = 16;
+const FUNC_INFO_FILE: &str = "func_info.bin";
+const LINE_INFO_FILE: &str = "line_info.bin";
 
 #[derive(Parser, Debug)]
 #[command(
@@ -75,6 +82,14 @@ struct ProgInfoJson {
     orig_prog_len: u32,
     jited_prog_len: u32,
     btf_id: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    func_info_rec_size: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    nr_func_info: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    line_info_rec_size: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    nr_line_info: u32,
     attach_btf_obj_id: u32,
     attach_btf_id: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -250,6 +265,10 @@ impl ProgInfoJson {
             orig_prog_len: info.orig_prog_len,
             jited_prog_len: info.jited_prog_len,
             btf_id: info.btf_id,
+            func_info_rec_size: info.func_info_rec_size,
+            nr_func_info: info.nr_func_info,
+            line_info_rec_size: info.line_info_rec_size,
+            nr_line_info: info.nr_line_info,
             attach_btf_obj_id: info.attach_btf_obj_id,
             attach_btf_id: info.attach_btf_id,
             expected_attach_type,
@@ -281,7 +300,16 @@ fn validate_required_load_metadata(info: &ProgInfoJson) -> Result<()> {
             info.prog_type.name
         );
     }
+    validate_btf_record_metadata("func_info", info.nr_func_info, info.func_info_rec_size)?;
+    validate_btf_record_metadata("line_info", info.nr_line_info, info.line_info_rec_size)?;
 
+    Ok(())
+}
+
+fn validate_btf_record_metadata(label: &str, count: u32, rec_size: u32) -> Result<()> {
+    if count != 0 && rec_size == 0 {
+        bail!("{label} count is {count} but rec_size is zero");
+    }
     Ok(())
 }
 
@@ -336,22 +364,261 @@ fn write_full(prog_id: u32, outdir: &Path) -> Result<()> {
     ensure_original_bytecode(&insns)?;
     let (info, map_ids) = get_prog_info_with_map_ids_from_fd(fd.as_fd(), prog_id)?;
     let expected_attach_type = expected_attach_type_json(info.id, info.prog_type)?;
+    let mut btf_info = kernel_sys::prog_btf_info(fd.as_fd())
+        .with_context(|| format!("read BTF record metadata for BPF program id {prog_id}"))?;
     let pseudo_map_old_fds = pseudo_map_old_fds(&insns);
     let map_infos = get_map_infos(&map_ids, &pseudo_map_old_fds)?;
 
     let prog_bin = encode_insns(&insns);
-    let prog_info = ProgInfoJson::from_info(info, map_ids, expected_attach_type)?;
+    let mut prog_info = ProgInfoJson::from_info(info, map_ids, expected_attach_type)?;
+    complete_btf_replay_info(&mut prog_info, &mut btf_info, &insns)
+        .with_context(|| format!("complete BTF replay metadata for BPF program id {prog_id}"))?;
     let prog_info_json = json_bytes(&prog_info)?;
     let map_fds_json = json_bytes(&map_infos)?;
 
-    write_full_files_atomic(
-        outdir,
-        &[
-            ("prog.bin", prog_bin.as_slice()),
-            ("prog_info.json", prog_info_json.as_slice()),
-            ("map_fds.json", map_fds_json.as_slice()),
-        ],
-    )
+    validate_btf_record_blob(
+        "func_info",
+        prog_info.nr_func_info,
+        prog_info.func_info_rec_size,
+        &btf_info.func_info,
+    )?;
+    validate_btf_record_blob(
+        "line_info",
+        prog_info.nr_line_info,
+        prog_info.line_info_rec_size,
+        &btf_info.line_info,
+    )?;
+
+    let mut entries = vec![
+        ("prog.bin", prog_bin.as_slice()),
+        ("prog_info.json", prog_info_json.as_slice()),
+        ("map_fds.json", map_fds_json.as_slice()),
+    ];
+    if !btf_info.func_info.is_empty() {
+        entries.push((FUNC_INFO_FILE, btf_info.func_info.as_slice()));
+    }
+    if !btf_info.line_info.is_empty() {
+        entries.push((LINE_INFO_FILE, btf_info.line_info.as_slice()));
+    }
+
+    write_full_files_atomic(outdir, &entries)
+}
+
+fn validate_btf_record_blob(label: &str, count: u32, rec_size: u32, bytes: &[u8]) -> Result<()> {
+    let expected = (count as usize)
+        .checked_mul(rec_size as usize)
+        .ok_or_else(|| anyhow!("{label} byte length overflow"))?;
+    if bytes.len() != expected {
+        bail!(
+            "{label} metadata expected {expected} bytes from {count} records of size {rec_size}, got {}",
+            bytes.len()
+        );
+    }
+    Ok(())
+}
+
+fn complete_btf_replay_info(
+    prog_info: &mut ProgInfoJson,
+    btf_info: &mut kernel_sys::ProgBtfInfo,
+    insns: &[kernel_sys::bpf_insn],
+) -> Result<()> {
+    complete_missing_func_info(prog_info, btf_info, insns)?;
+    omit_incompatible_line_info(prog_info, btf_info, insns)
+}
+
+fn complete_missing_func_info(
+    prog_info: &mut ProgInfoJson,
+    btf_info: &mut kernel_sys::ProgBtfInfo,
+    insns: &[kernel_sys::bpf_insn],
+) -> Result<()> {
+    let subprog_offsets = subprog_offsets(insns)?;
+    if subprog_offsets.len() <= 1 {
+        return Ok(());
+    }
+
+    if prog_info.nr_func_info != 0 {
+        rewrite_func_info_offsets(
+            &mut btf_info.func_info,
+            prog_info.func_info_rec_size,
+            &subprog_offsets,
+        )?;
+        prog_info.nr_func_info = subprog_offsets
+            .len()
+            .try_into()
+            .map_err(|_| anyhow!("func_info record count does not fit u32"))?;
+        btf_info.func_info_rec_size = prog_info.func_info_rec_size;
+        return Ok(());
+    }
+
+    if prog_info.btf_id == 0 {
+        bail!(
+            "program {} has subprogram references but no BTF id for func_info replay",
+            prog_info.id
+        );
+    }
+
+    let btf = kernel_sys::KernelBtf::load_from_kernel_by_id(prog_info.btf_id)
+        .with_context(|| format!("load program BTF id {}", prog_info.btf_id))?;
+    let func_info = synthesize_func_info(&btf, &prog_info.name, &subprog_offsets)?;
+    prog_info.func_info_rec_size = FUNC_INFO_REC_SIZE;
+    prog_info.nr_func_info = subprog_offsets
+        .len()
+        .try_into()
+        .map_err(|_| anyhow!("func_info record count does not fit u32"))?;
+    btf_info.func_info_rec_size = FUNC_INFO_REC_SIZE;
+    btf_info.func_info = func_info;
+    Ok(())
+}
+
+fn omit_incompatible_line_info(
+    prog_info: &mut ProgInfoJson,
+    btf_info: &mut kernel_sys::ProgBtfInfo,
+    insns: &[kernel_sys::bpf_insn],
+) -> Result<()> {
+    if prog_info.nr_line_info == 0 {
+        return Ok(());
+    }
+
+    if line_info_matches_original_bytecode(
+        &btf_info.line_info,
+        prog_info.line_info_rec_size,
+        insns,
+    )? {
+        return Ok(());
+    }
+
+    prog_info.nr_line_info = 0;
+    prog_info.line_info_rec_size = 0;
+    btf_info.line_info.clear();
+    btf_info.line_info_rec_size = 0;
+    Ok(())
+}
+
+fn line_info_matches_original_bytecode(
+    bytes: &[u8],
+    rec_size: u32,
+    insns: &[kernel_sys::bpf_insn],
+) -> Result<bool> {
+    if rec_size < LINE_INFO_REC_SIZE {
+        bail!("line_info rec_size {rec_size} is smaller than {LINE_INFO_REC_SIZE}");
+    }
+    let rec_size = rec_size as usize;
+    if !bytes.len().is_multiple_of(rec_size) {
+        bail!(
+            "line_info byte length {} is not a multiple of rec_size {}",
+            bytes.len(),
+            rec_size
+        );
+    }
+
+    let mut previous_offset = None;
+    for record in bytes.chunks(rec_size) {
+        let offset = u32::from_le_bytes(record[..4].try_into().expect("record has offset"));
+        if let Some(previous) = previous_offset {
+            if offset < previous {
+                return Ok(false);
+            }
+        }
+        previous_offset = Some(offset);
+
+        let Some(insn) = insns.get(offset as usize) else {
+            return Ok(false);
+        };
+        if insn.code == 0 || is_ldimm64_continuation(insns, offset as usize) {
+            return Ok(false);
+        }
+    }
+    Ok(true)
+}
+
+fn is_ldimm64_continuation(insns: &[kernel_sys::bpf_insn], offset: usize) -> bool {
+    offset > 0 && insns[offset - 1].code == BPF_LD_IMM64
+}
+
+fn rewrite_func_info_offsets(bytes: &mut [u8], rec_size: u32, offsets: &[u32]) -> Result<()> {
+    if rec_size < FUNC_INFO_REC_SIZE {
+        bail!("func_info rec_size {rec_size} is smaller than {FUNC_INFO_REC_SIZE}");
+    }
+    let rec_size = rec_size as usize;
+    if !bytes.len().is_multiple_of(rec_size) {
+        bail!(
+            "func_info byte length {} is not a multiple of rec_size {}",
+            bytes.len(),
+            rec_size
+        );
+    }
+    let count = bytes.len() / rec_size;
+    if count != offsets.len() {
+        bail!(
+            "func_info record count {} does not match original subprogram count {}",
+            count,
+            offsets.len()
+        );
+    }
+    for (record, offset) in bytes.chunks_mut(rec_size).zip(offsets.iter()) {
+        record[..4].copy_from_slice(&offset.to_le_bytes());
+    }
+    Ok(())
+}
+
+fn subprog_offsets(insns: &[kernel_sys::bpf_insn]) -> Result<Vec<u32>> {
+    let mut offsets = BTreeSet::new();
+    offsets.insert(0u32);
+    for (pc, insn) in insns.iter().enumerate() {
+        if is_pseudo_call(insn) || is_pseudo_func(insn) {
+            let target = (pc as i64)
+                .checked_add(1)
+                .and_then(|base| base.checked_add(insn.imm as i64))
+                .ok_or_else(|| anyhow!("subprogram target overflow at pc {pc}"))?;
+            if target < 0 || target as usize >= insns.len() {
+                bail!(
+                    "subprogram reference at pc {pc} targets invalid instruction offset {target}"
+                );
+            }
+            offsets.insert(target as u32);
+        }
+    }
+    Ok(offsets.into_iter().collect())
+}
+
+fn is_pseudo_call(insn: &kernel_sys::bpf_insn) -> bool {
+    insn.code == BPF_CALL_INSN && insn.src_reg() == BPF_PSEUDO_CALL
+}
+
+fn is_pseudo_func(insn: &kernel_sys::bpf_insn) -> bool {
+    insn.code == BPF_LD_IMM64 && insn.src_reg() == BPF_PSEUDO_FUNC
+}
+
+fn synthesize_func_info(
+    btf: &kernel_sys::KernelBtf,
+    prog_name: &str,
+    subprog_offsets: &[u32],
+) -> Result<Vec<u8>> {
+    let funcs = btf.func_types()?;
+    let static_scalar_type = funcs
+        .iter()
+        .find(|func| func.linkage == kernel_sys::BTF_FUNC_STATIC && func.returns_scalar)
+        .ok_or_else(|| {
+            anyhow!("program BTF has no static scalar-return function for subprogram replay")
+        })?
+        .type_id;
+    let main_type = funcs
+        .iter()
+        .find(|func| func.name == prog_name)
+        .map(|func| func.type_id)
+        .unwrap_or(static_scalar_type);
+
+    let mut bytes = Vec::with_capacity(subprog_offsets.len() * FUNC_INFO_REC_SIZE as usize);
+    for (idx, offset) in subprog_offsets.iter().enumerate() {
+        let type_id = if idx == 0 {
+            main_type
+        } else {
+            static_scalar_type
+        };
+        bytes.extend_from_slice(&offset.to_le_bytes());
+        bytes.extend_from_slice(&type_id.to_le_bytes());
+    }
+    Ok(bytes)
 }
 
 fn list_programs(json: bool, output: Option<&Path>) -> Result<()> {
@@ -725,6 +992,10 @@ fn json_bytes<T: Serialize>(value: &T) -> Result<Vec<u8>> {
     Ok(bytes)
 }
 
+fn is_zero_u32(value: &u32) -> bool {
+    *value == 0
+}
+
 fn write_full_files_atomic(outdir: &Path, entries: &[(&str, &[u8])]) -> Result<()> {
     let tmp_paths = entries
         .iter()
@@ -937,6 +1208,10 @@ mod tests {
             orig_prog_len: 96,
             jited_prog_len: 64,
             btf_id: 0,
+            func_info_rec_size: 8,
+            nr_func_info: 1,
+            line_info_rec_size: 16,
+            nr_line_info: 2,
             attach_btf_obj_id: 0,
             attach_btf_id: 0,
             expected_attach_type: Some(TypeJson {
@@ -956,6 +1231,10 @@ mod tests {
         assert_eq!(value["type"]["numeric"], kernel_sys::BPF_PROG_TYPE_XDP);
         assert!(value.get("map_ids").is_some());
         assert!(value.get("orig_prog_len").is_some());
+        assert_eq!(value["func_info_rec_size"], 8);
+        assert_eq!(value["nr_func_info"], 1);
+        assert_eq!(value["line_info_rec_size"], 16);
+        assert_eq!(value["nr_line_info"], 2);
         assert_eq!(value["expected_attach_type"]["name"], "xdp");
         assert_eq!(
             value["expected_attach_type"]["numeric"],
@@ -997,6 +1276,103 @@ mod tests {
     }
 
     #[test]
+    fn subprog_offsets_include_pseudo_call_and_func_targets() {
+        let callback = ldimm64(BPF_PSEUDO_FUNC, 3);
+        let insns = [
+            vec![pseudo_call(3)],
+            callback.to_vec(),
+            vec![
+                zero_insn(),
+                zero_insn(),
+                zero_insn(),
+                zero_insn(),
+                zero_insn(),
+                zero_insn(),
+            ],
+        ]
+        .concat();
+
+        assert_eq!(subprog_offsets(&insns).unwrap(), vec![0, 4, 5]);
+    }
+
+    #[test]
+    fn subprog_offsets_reject_invalid_target() {
+        let insns = vec![pseudo_call(99), zero_insn()];
+
+        let err = subprog_offsets(&insns).unwrap_err();
+
+        assert!(
+            err.to_string().contains("invalid instruction offset"),
+            "err={err:#}"
+        );
+    }
+
+    #[test]
+    fn rewrite_func_info_offsets_preserves_type_ids() {
+        let mut records = [
+            11u32.to_le_bytes(),
+            101u32.to_le_bytes(),
+            22u32.to_le_bytes(),
+            202u32.to_le_bytes(),
+        ]
+        .concat();
+
+        rewrite_func_info_offsets(&mut records, FUNC_INFO_REC_SIZE, &[0, 7]).unwrap();
+
+        assert_eq!(
+            records,
+            [
+                0u32.to_le_bytes(),
+                101u32.to_le_bytes(),
+                7u32.to_le_bytes(),
+                202u32.to_le_bytes(),
+            ]
+            .concat()
+        );
+    }
+
+    #[test]
+    fn incompatible_line_info_is_omitted_for_original_replay() {
+        let mut prog_info = prog_info_for_type(kernel_sys::BPF_PROG_TYPE_XDP);
+        prog_info.nr_line_info = 2;
+        prog_info.line_info_rec_size = LINE_INFO_REC_SIZE;
+        let mut btf_info = kernel_sys::ProgBtfInfo {
+            line_info_rec_size: LINE_INFO_REC_SIZE,
+            line_info: [line_info_record(0), line_info_record(1)].concat(),
+            ..Default::default()
+        };
+        let insns = [ldimm64(BPF_PSEUDO_MAP_FD, 1).to_vec(), vec![exit_insn()]].concat();
+
+        omit_incompatible_line_info(&mut prog_info, &mut btf_info, &insns).unwrap();
+
+        assert_eq!(prog_info.nr_line_info, 0);
+        assert_eq!(prog_info.line_info_rec_size, 0);
+        assert!(btf_info.line_info.is_empty());
+        assert_eq!(btf_info.line_info_rec_size, 0);
+    }
+
+    #[test]
+    fn compatible_line_info_is_retained_for_original_replay() {
+        let mut prog_info = prog_info_for_type(kernel_sys::BPF_PROG_TYPE_XDP);
+        prog_info.nr_line_info = 2;
+        prog_info.line_info_rec_size = LINE_INFO_REC_SIZE;
+        let records = [line_info_record(0), line_info_record(1)].concat();
+        let mut btf_info = kernel_sys::ProgBtfInfo {
+            line_info_rec_size: LINE_INFO_REC_SIZE,
+            line_info: records.clone(),
+            ..Default::default()
+        };
+        let insns = vec![mov64_imm(0), exit_insn()];
+
+        omit_incompatible_line_info(&mut prog_info, &mut btf_info, &insns).unwrap();
+
+        assert_eq!(prog_info.nr_line_info, 2);
+        assert_eq!(prog_info.line_info_rec_size, LINE_INFO_REC_SIZE);
+        assert_eq!(btf_info.line_info, records);
+        assert_eq!(btf_info.line_info_rec_size, LINE_INFO_REC_SIZE);
+    }
+
+    #[test]
     fn required_load_metadata_rejects_missing_tracing_attach_context() {
         let mut info = prog_info_for_type(kernel_sys::BPF_PROG_TYPE_TRACING);
         info.btf_id = 10;
@@ -1035,6 +1411,10 @@ mod tests {
             orig_prog_len: 16,
             jited_prog_len: 16,
             btf_id: 0,
+            func_info_rec_size: 0,
+            nr_func_info: 0,
+            line_info_rec_size: 0,
+            nr_line_info: 0,
             attach_btf_obj_id: 0,
             attach_btf_id: 0,
             expected_attach_type: None,
@@ -1058,6 +1438,54 @@ mod tests {
             imm: 0,
         };
         [first, second]
+    }
+
+    fn pseudo_call(imm: i32) -> kernel_sys::bpf_insn {
+        let mut insn = zero_insn();
+        insn.code = BPF_CALL_INSN;
+        insn.imm = imm;
+        insn.set_src_reg(BPF_PSEUDO_CALL);
+        insn
+    }
+
+    fn mov64_imm(imm: i32) -> kernel_sys::bpf_insn {
+        kernel_sys::bpf_insn {
+            code: (kernel_sys::BPF_ALU64 | kernel_sys::BPF_MOV | kernel_sys::BPF_K) as u8,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off: 0,
+            imm,
+        }
+    }
+
+    fn exit_insn() -> kernel_sys::bpf_insn {
+        kernel_sys::bpf_insn {
+            code: (kernel_sys::BPF_JMP | kernel_sys::BPF_EXIT) as u8,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off: 0,
+            imm: 0,
+        }
+    }
+
+    fn zero_insn() -> kernel_sys::bpf_insn {
+        kernel_sys::bpf_insn {
+            code: 0,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off: 0,
+            imm: 0,
+        }
+    }
+
+    fn line_info_record(insn_off: u32) -> Vec<u8> {
+        [
+            insn_off.to_le_bytes(),
+            1u32.to_le_bytes(),
+            2u32.to_le_bytes(),
+            3u32.to_le_bytes(),
+        ]
+        .concat()
     }
 
     #[test]

@@ -557,6 +557,7 @@ impl BpfPass for WideMemPass {
         fixup_all_branches(&mut new_insns, orig_insns, &addr_map);
 
         program.insns = new_insns;
+        super::utils::remap_btf_metadata(program, &addr_map)?;
         program.remap_annotations(&addr_map);
         program.log_transform(TransformEntry {
             sites_applied: applied,

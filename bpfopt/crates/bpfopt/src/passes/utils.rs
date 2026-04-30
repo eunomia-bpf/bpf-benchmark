@@ -8,7 +8,7 @@ use std::collections::HashSet;
 
 use crate::analysis::{CFGAnalysis, CFGResult, LivenessAnalysis};
 use crate::insn::*;
-use crate::pass::{Analysis, BpfProgram, PassContext};
+use crate::pass::{Analysis, BpfProgram, BtfInfoRecords, PassContext};
 
 const BPF_FUNC_TAIL_CALL: i32 = kernel_sys::BPF_FUNC_tail_call as i32;
 const BPF_TAIL_CALL: u8 = 0xf0;
@@ -78,6 +78,96 @@ pub fn fixup_all_branches(new_insns: &mut [BpfInsn], old_insns: &[BpfInsn], addr
 /// Compose two address maps: `old -> mid` and `mid -> new`.
 pub fn compose_addr_maps(first: &[usize], second: &[usize]) -> Vec<usize> {
     first.iter().map(|&pc| second[pc]).collect()
+}
+
+pub fn remap_btf_metadata(program: &mut BpfProgram, addr_map: &[usize]) -> anyhow::Result<()> {
+    let new_len = program.insns.len();
+    remap_btf_records("func_info", program.func_info.as_mut(), addr_map, new_len)?;
+    remap_btf_records("line_info", program.line_info.as_mut(), addr_map, new_len)?;
+    Ok(())
+}
+
+fn remap_btf_records(
+    label: &str,
+    records: Option<&mut BtfInfoRecords>,
+    addr_map: &[usize],
+    new_len: usize,
+) -> anyhow::Result<()> {
+    let Some(records) = records else {
+        return Ok(());
+    };
+    if records.bytes.is_empty() {
+        return Ok(());
+    }
+    if records.rec_size < std::mem::size_of::<u32>() as u32 {
+        anyhow::bail!(
+            "{label} rec_size {} is too small to hold insn_off",
+            records.rec_size
+        );
+    }
+    let rec_size = records.rec_size as usize;
+    if !records.bytes.len().is_multiple_of(rec_size) {
+        anyhow::bail!(
+            "{label} byte length {} is not a multiple of rec_size {}",
+            records.bytes.len(),
+            records.rec_size
+        );
+    }
+
+    let mut remapped = Vec::with_capacity(records.bytes.len());
+    let mut previous_new_pc = None;
+
+    for record in records.bytes.chunks(rec_size) {
+        let old_pc =
+            u32::from_le_bytes(record[..4].try_into().expect("record has insn_off")) as usize;
+        let Some(new_pc) = remapped_pc(label, old_pc, addr_map, new_len)? else {
+            continue;
+        };
+        if let Some(previous) = previous_new_pc {
+            if new_pc <= previous {
+                anyhow::bail!(
+                    "{label} remap produced non-increasing insn_off {new_pc} after {previous}"
+                );
+            }
+        }
+
+        let new_pc: u32 = new_pc
+            .try_into()
+            .map_err(|_| anyhow::anyhow!("{label} remapped insn_off does not fit u32"))?;
+        remapped.extend_from_slice(record);
+        let start = remapped.len() - rec_size;
+        remapped[start..start + 4].copy_from_slice(&new_pc.to_le_bytes());
+        previous_new_pc = Some(new_pc as usize);
+    }
+
+    records.bytes = remapped;
+    Ok(())
+}
+
+fn remapped_pc(
+    label: &str,
+    old_pc: usize,
+    addr_map: &[usize],
+    new_len: usize,
+) -> anyhow::Result<Option<usize>> {
+    let old_len = addr_map
+        .len()
+        .checked_sub(1)
+        .ok_or_else(|| anyhow::anyhow!("{label} remap address map is empty"))?;
+    if old_pc >= old_len {
+        anyhow::bail!("{label} insn_off {old_pc} is outside old instruction length {old_len}");
+    }
+    let new_pc = addr_map[old_pc];
+    if new_pc >= new_len {
+        return Ok(None);
+    }
+    let next_pc = addr_map[old_pc + 1];
+    if next_pc < new_pc {
+        anyhow::bail!(
+            "{label} remap address map is non-monotonic at old pc {old_pc}: {new_pc} -> {next_pc}"
+        );
+    }
+    Ok((next_pc > new_pc).then_some(new_pc))
 }
 
 /// Return the exclusive prefix end before which instruction-count changes must
@@ -575,6 +665,75 @@ mod tests {
             eliminate_dead_register_defs(&insns).expect("dead defs should be removed");
 
         assert_eq!(new_insns, vec![BpfInsn::mov64_imm(0, 7), exit_insn(),]);
+    }
+
+    #[test]
+    fn remap_btf_metadata_drops_deleted_entries_and_shifts_survivors() {
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::mov64_imm(9, 9),
+            BpfInsn::mov64_imm(1, 1),
+            BpfInsn::mov64_imm(2, 2),
+        ]);
+        program.func_info = Some(BtfInfoRecords {
+            rec_size: 8,
+            bytes: func_btf_record(0, 10),
+        });
+        program.line_info = Some(BtfInfoRecords {
+            rec_size: 16,
+            bytes: [
+                btf_record(0, 100),
+                btf_record(1, 101),
+                btf_record(2, 102),
+                btf_record(3, 103),
+            ]
+            .concat(),
+        });
+
+        // Old pc 1 was deleted; a new instruction was inserted before old pc 2.
+        let addr_map = vec![0, 2, 2, 3, 4];
+
+        remap_btf_metadata(&mut program, &addr_map).unwrap();
+
+        assert_eq!(btf_offsets(program.func_info.as_ref().unwrap()), vec![0]);
+        assert_eq!(
+            btf_offsets(program.line_info.as_ref().unwrap()),
+            vec![0, 2, 3]
+        );
+        assert_eq!(
+            btf_type_ids(program.line_info.as_ref().unwrap()),
+            vec![100, 102, 103]
+        );
+    }
+
+    fn btf_record(insn_off: u32, type_id: u32) -> Vec<u8> {
+        [
+            insn_off.to_le_bytes(),
+            type_id.to_le_bytes(),
+            0u32.to_le_bytes(),
+            0u32.to_le_bytes(),
+        ]
+        .concat()
+    }
+
+    fn func_btf_record(insn_off: u32, type_id: u32) -> Vec<u8> {
+        [insn_off.to_le_bytes(), type_id.to_le_bytes()].concat()
+    }
+
+    fn btf_offsets(records: &BtfInfoRecords) -> Vec<u32> {
+        records
+            .bytes
+            .chunks(records.rec_size as usize)
+            .map(|record| u32::from_le_bytes(record[..4].try_into().unwrap()))
+            .collect()
+    }
+
+    fn btf_type_ids(records: &BtfInfoRecords) -> Vec<u32> {
+        records
+            .bytes
+            .chunks(records.rec_size as usize)
+            .map(|record| u32::from_le_bytes(record[4..8].try_into().unwrap()))
+            .collect()
     }
 
     #[test]
