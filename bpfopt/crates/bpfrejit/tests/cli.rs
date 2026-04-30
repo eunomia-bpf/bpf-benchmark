@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 
 use std::fs;
-use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Output, Stdio};
+use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 static NEXT_TEMP_ID: AtomicUsize = AtomicUsize::new(0);
@@ -39,23 +38,6 @@ fn write_temp_file(name: &str, bytes: impl AsRef<[u8]>) -> PathBuf {
     path
 }
 
-fn run_bpfrejit(args: &[&str], stdin_bytes: &[u8]) -> Output {
-    let mut child = Command::new(bpfrejit_bin())
-        .args(args)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("spawn bpfrejit");
-    child
-        .stdin
-        .as_mut()
-        .expect("stdin pipe")
-        .write_all(stdin_bytes)
-        .expect("write stdin");
-    child.wait_with_output().expect("wait bpfrejit")
-}
-
 #[test]
 fn rejects_input_length_that_is_not_instruction_aligned() {
     let path = temp_path("bad.bin");
@@ -71,17 +53,6 @@ fn rejects_input_length_that_is_not_instruction_aligned() {
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("multiple of 8"), "stderr={stderr}");
-    assert!(output.stdout.is_empty());
-}
-
-#[test]
-fn dry_run_reads_valid_stdin_before_opening_target_program() {
-    let output = run_bpfrejit(&["--dry-run", "0"], &minimal_program_bytes());
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("open BPF program id 0"), "stderr={stderr}");
-    assert!(!stderr.contains("multiple of 8"), "stderr={stderr}");
     assert!(output.stdout.is_empty());
 }
 
@@ -151,27 +122,5 @@ fn map_fds_malformed_json_exits_before_opening_target_program() {
         "stderr={stderr}"
     );
     assert!(!stderr.contains("open BPF program id 0"), "stderr={stderr}");
-    assert!(output.stdout.is_empty());
-}
-
-#[test]
-fn dry_run_accepts_fd_array_before_opening_target_program() {
-    let fd_array_path =
-        write_temp_file("fd-array.json", br#"[{"name":"bpf_rotate64","btf_fd":0}]"#);
-    let fd_array_arg = fd_array_path.to_string_lossy().to_string();
-
-    let output = run_bpfrejit(
-        &["--dry-run", "--fd-array", &fd_array_arg, "0"],
-        &minimal_program_bytes(),
-    );
-    remove_file_if_exists(fd_array_path);
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("open BPF program id 0"), "stderr={stderr}");
-    assert!(
-        !stderr.contains("--dry-run with --fd-array is not supported"),
-        "stderr={stderr}"
-    );
     assert!(output.stdout.is_empty());
 }

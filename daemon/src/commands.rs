@@ -2183,7 +2183,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 if [[ -n "$out" ]]; then
-  printf '{"status":"ok","prog_id":%s,"insn_count_before":2,"insn_count_after":2,"dry_run":false}\n' "$prog_id" > "$out"
+  printf '{"status":"ok","prog_id":%s,"insn_count_before":2,"insn_count_after":2}\n' "$prog_id" > "$out"
 fi
 "#,
             )?;
@@ -2591,7 +2591,7 @@ while [[ $# -gt 0 ]]; do
 done
 printf 'called\n' > {marker_arg:?}
 if [[ -n "$out" ]]; then
-  printf '{{"status":"ok","prog_id":%s,"insn_count_before":2,"insn_count_after":2,"dry_run":false}}\n' "$prog_id" > "$out"
+  printf '{{"status":"ok","prog_id":%s,"insn_count_before":2,"insn_count_after":2}}\n' "$prog_id" > "$out"
 fi
 "#
             ),

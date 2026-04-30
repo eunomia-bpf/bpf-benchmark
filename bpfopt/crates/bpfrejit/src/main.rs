@@ -34,9 +34,6 @@ struct Cli {
     /// Map FD manifest from bpfget --full.
     #[arg(long, value_name = "FILE")]
     map_fds: Option<PathBuf>,
-    /// Verify the bytecode with BPF_PROG_LOAD and do not call BPF_PROG_REJIT.
-    #[arg(long)]
-    dry_run: bool,
     /// Optional summary JSON output file.
     #[arg(long, value_name = "FILE")]
     output: Option<PathBuf>,
@@ -82,7 +79,6 @@ struct Summary {
     prog_id: u32,
     insn_count_before: usize,
     insn_count_after: usize,
-    dry_run: bool,
 }
 
 fn main() -> ExitCode {
@@ -109,84 +105,6 @@ fn run() -> Result<()> {
     let insn_count_before = current_insn_count(&info);
 
     let mut log_buf = vec![0u8; LOG_BUF_SIZE];
-    if cli.dry_run {
-        let expected_attach_type =
-            kernel_sys::expected_attach_type_for_prog(cli.prog_id, info.prog_type).with_context(
-                || {
-                    format!(
-                        "recover expected attach type for BPF program id {}",
-                        cli.prog_id
-                    )
-                },
-            )?;
-        let prog_btf_fd = if info.btf_id == 0 {
-            None
-        } else {
-            Some(
-                kernel_sys::btf_get_fd_by_id(info.btf_id)
-                    .with_context(|| format!("open program BTF id {}", info.btf_id))?,
-            )
-        };
-        let attach_btf_obj_fd = if info.attach_btf_obj_id == 0 {
-            None
-        } else {
-            Some(
-                kernel_sys::btf_get_fd_by_id(info.attach_btf_obj_id).with_context(|| {
-                    format!("open attach BTF object id {}", info.attach_btf_obj_id)
-                })?,
-            )
-        };
-        let btf_info = kernel_sys::prog_btf_info(prog_fd.as_fd()).with_context(|| {
-            format!(
-                "read BTF record metadata for BPF program id {}",
-                cli.prog_id
-            )
-        })?;
-        let func_info = (!btf_info.func_info.is_empty()).then_some(kernel_sys::BtfInfoRecords {
-            rec_size: btf_info.func_info_rec_size,
-            bytes: &btf_info.func_info,
-        });
-        let line_info = (!btf_info.line_info.is_empty()).then_some(kernel_sys::BtfInfoRecords {
-            rec_size: btf_info.line_info_rec_size,
-            bytes: &btf_info.line_info,
-        });
-        let report = kernel_sys::prog_load_dryrun_report(kernel_sys::ProgLoadDryRunOptions {
-            prog_type: info.prog_type,
-            expected_attach_type,
-            prog_btf_fd: prog_btf_fd.as_ref().map(|fd| fd.as_raw_fd()),
-            attach_btf_id: (info.attach_btf_id != 0).then_some(info.attach_btf_id),
-            attach_btf_obj_fd: attach_btf_obj_fd.as_ref().map(|fd| fd.as_raw_fd()),
-            func_info,
-            line_info,
-            insns: &insns,
-            fd_array: Some(fd_array.as_slice()),
-            log_level: 2,
-            log_buf: Some(&mut log_buf),
-        })
-        .context("dry-run verifier rejected bytecode")?;
-        if !report.accepted {
-            let reason = report
-                .errno
-                .map(|errno| io::Error::from_raw_os_error(errno).to_string())
-                .unwrap_or_else(|| "unknown verifier error".to_string());
-            bail!(
-                "dry-run verifier rejected bytecode: {}\n{}",
-                reason,
-                report.verifier_log
-            );
-        }
-        return write_summary(
-            cli.output.as_deref(),
-            &Summary {
-                status: "dry-run pass".to_string(),
-                prog_id: cli.prog_id,
-                insn_count_before,
-                insn_count_after: insns.len(),
-                dry_run: true,
-            },
-        );
-    }
-
     kernel_sys::prog_rejit(
         prog_fd.as_fd(),
         &insns,
@@ -201,7 +119,6 @@ fn run() -> Result<()> {
             prog_id: cli.prog_id,
             insn_count_before,
             insn_count_after: insns.len(),
-            dry_run: false,
         },
     )
 }

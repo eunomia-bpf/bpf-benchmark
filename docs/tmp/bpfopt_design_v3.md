@@ -196,9 +196,6 @@ bpfrejit 123 opt.bin
 
 # 从 stdin（管道末端）
 bpfopt wide-mem < prog.bin | bpfrejit 123
-
-# dry-run（只验证不替换）
-bpfrejit 123 opt.bin --dry-run
 ```
 
 #### 行为
@@ -206,6 +203,7 @@ bpfrejit 123 opt.bin --dry-run
 - 调用 `BPF_PROG_REJIT(prog_fd, new_insns, new_insn_cnt)`
 - 成功 → exit 0，输出 summary 到 stderr
 - 内核 verify 失败 → exit 1，输出 verifier log 到 stderr
+- 验证不替换由 `bpfverify` 负责；`bpfrejit` 不提供 dry-run 模式
 - `--fd-array FILE`：kinsn BTF fd_array（如果新字节码包含 kinsn 调用）
 
 ### 2.6 bpfrejit-daemon（可选）
