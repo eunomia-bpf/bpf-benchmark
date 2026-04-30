@@ -957,9 +957,8 @@ rewrite：
 
 1. `program.branch_miss_rate` 必须存在，且不超过阈值。
 2. 若 site 上有 `BranchProfile`，则要求 `taken_count / total >= min_bias`。
-3. 若 site 上没有 `BranchProfile`，但程序级 PMU miss-rate gate 已通过，则允许退化到一个保守的 size-asymmetry fallback：
-   `else_len > 0 && then_len > 2 * else_len`
-4. 若完全没有 PMU 数据，则整个 pass 仍然跳过；也就是说 `branch_flip` 要真正生效，入口仍然是先通过 socket profile 请求为当前 daemon session 注入 profiling 数据。
+3. 若 site 上没有 `BranchProfile`，该 site 直接跳过。
+4. 若完全没有 PMU 数据，则整个 pass 跳过；也就是说 `branch_flip` 要真正生效，入口仍然是先通过 socket profile 请求为当前 daemon session 注入 profiling 数据。
 
 rewrite：
 
@@ -972,7 +971,7 @@ rewrite：
 
 1. 不接受 `JSET`，因为没有简单反操作。
 2. site 内不能有来自外部的 interior target，JCC 自己的 target 除外。
-3. 没有 PMU 数据时完全不做 fallback；只有当前 daemon session 已成功收集到程序级 profile 后，才会考虑 per-site profile 或 size-asymmetry fallback。
+3. 没有 PMU 数据或 per-site profile 时完全不做 fallback。
 
 ### 6.10 `BoundsCheckMergePass`
 

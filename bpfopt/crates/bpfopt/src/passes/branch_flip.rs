@@ -27,10 +27,9 @@ use super::utils::{fixup_all_branches as fixup_branches_inline, remap_btf_metada
 ///   pc+M+1:         JA +(N-1)       // jump over then-body (now second)
 ///   pc+M+2..pc+M+N: [then body: N-1 insns]
 ///
-/// **PGO-guided mode**: branch_flip prefers per-site `BranchProfile` data.
-/// When only program-level PMU data is available, it falls back to a
-/// conservative size-asymmetry heuristic so `serve --pgo` does not degrade into
-/// an unconditional skip for every candidate site.
+/// **PGO-guided mode**: branch_flip requires per-site `BranchProfile` data.
+/// Program-level PMU data is only a safety gate for unpredictable branches;
+/// it is not used to infer individual site direction.
 ///
 /// Safety: skips sites where external branches target interior instructions,
 /// or where JSET is used (no simple inverse). Also adjusts internal branch
@@ -61,10 +60,6 @@ impl BranchFlipSite {
     fn total_len(&self) -> usize {
         1 + self.then_len + 1 + self.else_len
     }
-}
-
-fn heuristic_should_flip(site: &BranchFlipSite) -> bool {
-    site.else_len > 0 && site.then_len > 2 * site.else_len
 }
 
 impl BpfPass for BranchFlipPass {
@@ -122,7 +117,6 @@ impl BpfPass for BranchFlipPass {
         // Phase 2: filter sites and collect safe ones to apply.
         let mut safe_sites: Vec<BranchFlipSite> = Vec::new();
         let mut skipped = Vec::new();
-        let mut heuristic_applied = 0usize;
 
         for site in &sites {
             let jcc = &program.insns[site.pc];
@@ -150,37 +144,22 @@ impl BpfPass for BranchFlipPass {
                 continue;
             }
 
-            let (should_flip, used_heuristic, skip_reason) =
-                if let Some(ref bp) = program.annotations[site.pc].branch_profile {
-                    let total = bp.taken_count + bp.not_taken_count;
-                    (
-                        total > 0 && bp.taken_count as f64 / total as f64 >= self.min_bias,
-                        false,
-                        "branch not biased enough".to_string(),
-                    )
-                } else if heuristic_should_flip(site) {
-                    (
-                        true,
-                        true,
-                        "no branch profile and bodies not asymmetric enough".to_string(),
-                    )
-                } else {
-                    (
-                        false,
-                        false,
-                        "no branch profile and bodies not asymmetric enough".to_string(),
-                    )
-                };
-
-            if !should_flip {
+            let Some(bp) = program.annotations[site.pc].branch_profile.as_ref() else {
                 skipped.push(SkipReason {
                     pc: site.pc,
-                    reason: skip_reason,
+                    reason: "missing per-site branch profile".to_string(),
+                });
+                continue;
+            };
+
+            let total = bp.taken_count + bp.not_taken_count;
+            if total == 0 || bp.taken_count as f64 / (total as f64) < self.min_bias {
+                skipped.push(SkipReason {
+                    pc: site.pc,
+                    reason: "branch not biased enough".to_string(),
                 });
                 continue;
             }
-
-            heuristic_applied += usize::from(used_heuristic);
             safe_sites.push(BranchFlipSite {
                 pc: site.pc,
                 then_len: site.then_len,
@@ -189,17 +168,8 @@ impl BpfPass for BranchFlipPass {
         }
 
         if safe_sites.is_empty() {
-            let diagnostics = if heuristic_applied > 0 {
-                vec![format!(
-                    "used size-asymmetry fallback for {} branch_flip site(s) without per-site branch profiles",
-                    heuristic_applied
-                )]
-            } else {
-                vec![]
-            };
             return Ok(PassResult {
                 sites_skipped: skipped,
-                diagnostics,
                 ..PassResult::unchanged(self.name())
             });
         }
@@ -287,21 +257,11 @@ impl BpfPass for BranchFlipPass {
             sites_applied: applied,
         });
 
-        let diagnostics = if heuristic_applied > 0 {
-            vec![format!(
-                "used size-asymmetry fallback for {} branch_flip site(s) without per-site branch profiles",
-                heuristic_applied
-            )]
-        } else {
-            vec![]
-        };
-
         Ok(PassResult {
             pass_name: self.name().into(),
             changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
-            diagnostics,
             ..Default::default()
         })
     }
@@ -474,7 +434,7 @@ mod tests {
         assert!(result
             .sites_skipped
             .iter()
-            .any(|s| s.reason.contains("not asymmetric enough")));
+            .any(|s| s.reason.contains("missing per-site branch profile")));
     }
 
     #[test]
@@ -667,40 +627,6 @@ mod tests {
     }
 
     #[test]
-    fn test_branch_flip_no_heuristic_fallback() {
-        // With low miss-rate PMU data and a strongly asymmetric diamond,
-        // branch_flip should use the conservative fallback instead of
-        // skipping every site.
-        let mut prog = make_program(vec![
-            jne_imm(1, 0, 6), // Jcc +6 -> else at pc=7
-            BpfInsn::mov64_imm(0, 1),
-            BpfInsn::mov64_imm(1, 2),
-            BpfInsn::mov64_imm(2, 3),
-            BpfInsn::mov64_imm(3, 4),
-            BpfInsn::mov64_imm(4, 5),
-            BpfInsn::ja(1),            // JA +1
-            BpfInsn::mov64_imm(0, 99), // else
-            exit_insn(),
-        ]);
-        // PMU data present but no per-PC PGO data.
-        prog.branch_miss_rate = Some(0.02);
-        let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
-
-        let pass = BranchFlipPass {
-            min_bias: 0.7,
-            max_branch_miss_rate: 0.05,
-        };
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-        assert!(result.changed, "should flip with heuristic fallback");
-        assert_eq!(result.sites_applied, 1);
-        assert!(result
-            .diagnostics
-            .iter()
-            .any(|msg| msg.contains("size-asymmetry fallback")));
-    }
-
-    #[test]
     fn test_branch_flip_skips_high_miss_rate() {
         // With high branch miss rate from PMU, the pass should skip all sites
         // even if per-PC PGO data says to flip.
@@ -800,39 +726,6 @@ mod tests {
             .diagnostics
             .iter()
             .any(|d| d.contains("no PMU data available")));
-    }
-
-    #[test]
-    fn test_branch_flip_low_miss_rate_uses_heuristic_without_branch_profile() {
-        let mut prog = make_program(vec![
-            jne_imm(1, 0, 4),
-            BpfInsn::mov64_imm(0, 1),
-            BpfInsn::mov64_imm(2, 2),
-            BpfInsn::mov64_imm(3, 3),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 99),
-            exit_insn(),
-        ]);
-        prog.branch_miss_rate = Some(0.02);
-
-        let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
-
-        let pass = BranchFlipPass {
-            min_bias: 0.7,
-            max_branch_miss_rate: 0.05,
-        };
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(
-            result.changed,
-            "low miss rate should allow heuristic fallback when bodies are strongly asymmetric"
-        );
-        assert_eq!(result.sites_applied, 1);
-        assert!(result
-            .diagnostics
-            .iter()
-            .any(|d| d.contains("size-asymmetry fallback")));
     }
 
     // ── MEDIUM #4: Profiler -> pass integration test ────────────────

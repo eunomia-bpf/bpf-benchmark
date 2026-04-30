@@ -204,7 +204,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **ROTATE** | 是 | ✅ 已实现 | shift+or → `bpf_rotate64()` kinsn → JIT emit RORX | 701 sites, 15 applied |
 | **COND_SELECT** | 是 | ✅ 已实现 | branch+mov → `bpf_select64()` kinsn → JIT emit CMOV。policy-sensitive | 12 corpus applied |
 | **BITFIELD_EXTRACT** | 是 | ✅ 已实现 | shift+and → `bpf_extract64()` kinsn → JIT emit BEXTR | 524 sites, 4 applied |
-| **BRANCH_FLIP** | 否 | ✅ 已实现 | if/else body 重排。policy-sensitive；默认 benchmark profile 不启用。当前显式启用时仍是 PMU gate + heuristic fallback，而非严格 per-site PGO-only | 非默认 benchmark pass |
+| **BRANCH_FLIP** | 否 | ✅ 已实现 | if/else body 重排。policy-sensitive；默认 benchmark profile 不启用。显式启用时要求 PMU gate + per-site PGO profile；缺 per-site profile 的 site 直接跳过 | 非默认 benchmark pass |
 | **ENDIAN_FUSION** | 可选 | ✅ 已实现 | load+bswap → combined kinsn → JIT emit MOVBE | 256 sites, 17 corpus applied |
 | **Dynamic map inlining** | 否 | ✅ pass 已实现；v3 runtime wiring 待迁移 | JVM deopt 模型：map 稳定 → inline → invalidation → re-REJIT。**论文核心 story** | **11556 个 map_lookup site；Katran 22→2 条（-91%）；Tetragon 447→2（-99.6%）**。v3 目标：`bpfget` 生成 map value side-input，`bpfopt map-inline --map-values ... --report ...` 产出 invalidation hints，薄 `bpfrejit-daemon` 只读取 hints 并触发外部 re-optimize 脚本。设计：`dynamic_map_inlining_design_20260324.md` |
 | **Verifier const prop** | 否 | ✅ 已实现 | `log_level=2` → tnum/range 常量 → `MOV imm` → branch folding。verifier-in-the-loop 已接入（#624） | **23% verifier state 含精确常量；62.5% 分支和立即数比较** |

@@ -85,8 +85,7 @@ explicit pass lists derived from benchmark configuration.
 
 `branch_flip` stays out of the default benchmark profile. If a caller explicitly
 enables it, the current implementation still requires PMU-friendly profiling
-context and may use a conservative size-asymmetry fallback when per-site branch
-profiles are unavailable.
+context and per-site branch profiles.
 
 ## Layout
 
