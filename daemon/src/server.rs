@@ -3,12 +3,11 @@
 
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
-use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
-use rayon::prelude::*;
 use serde::Serialize;
 
 use crate::bpf;
@@ -34,7 +33,7 @@ fn process_invalidation_tick<A, F>(
 ) -> Result<Vec<u32>>
 where
     A: MapValueReader,
-    F: Fn(u32) -> Result<()> + Sync,
+    F: Fn(u32) -> Result<()>,
 {
     let invalidated = {
         let tracker = tracker
@@ -43,44 +42,9 @@ where
         tracker.check_for_invalidations()?
     };
 
-    let failures = Mutex::new(Vec::new());
-    let result = invalidated.par_iter().try_for_each(|prog_id| {
-        reoptimize(*prog_id).map_err(|err| {
-            let message = format!("{err:#}");
-            match failures.lock() {
-                Ok(mut failures) => failures.push((*prog_id, message.clone())),
-                Err(_) => {
-                    return anyhow::anyhow!(
-                        "invalidation reoptimization failure list lock poisoned"
-                    );
-                }
-            }
-            anyhow::anyhow!("prog {}: {}", prog_id, message)
-        })
-    });
-
-    if let Err(err) = result {
-        let mut failures = failures
-            .into_inner()
-            .map_err(|_| anyhow::anyhow!("invalidation failure list lock poisoned"))?;
-        if failures.is_empty() {
-            failures.push((0, format!("{err:#}")));
-        }
-        failures.sort_by_key(|(prog_id, _)| *prog_id);
-        let failures = failures
-            .into_iter()
-            .map(|(prog_id, err)| {
-                if prog_id == 0 {
-                    err
-                } else {
-                    format!("prog {prog_id}: {err}")
-                }
-            })
-            .collect::<Vec<_>>();
-        anyhow::bail!(
-            "invalidation reoptimization failed for {}",
-            failures.join("; ")
-        );
+    for prog_id in &invalidated {
+        reoptimize(*prog_id)
+            .with_context(|| format!("invalidation reoptimization failed for prog {prog_id}"))?;
     }
 
     Ok(invalidated)
@@ -93,7 +57,7 @@ fn run_invalidation_tick_logged<A, F>(
 ) -> Result<()>
 where
     A: MapValueReader,
-    F: Fn(u32) -> Result<()> + Sync,
+    F: Fn(u32) -> Result<()>,
 {
     process_invalidation_tick(tracker, reoptimize)
         .with_context(|| format!("{context}: invalidation tick failed"))?;
@@ -202,22 +166,6 @@ impl ProfilingState {
             Self::Frozen(profile) => profile.programs_profiled(),
         }
     }
-}
-
-#[derive(Clone, Debug, Serialize)]
-struct OptimizeAllOrderEntry {
-    prog_id: u32,
-    prog_name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    prog_type: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    hotness_score: Option<f64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    run_cnt_delta: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    run_time_ns_delta: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    avg_ns: Option<f64>,
 }
 
 struct ProgramWatcher {
@@ -550,116 +498,6 @@ fn process_request(
                 Err(e) => error_json(format!("{e:#}")),
             }
         }
-        "optimize-all" => {
-            let requested_passes = match required_enabled_passes(cmd, &enabled_passes) {
-                Ok(passes) => passes,
-                Err(message) => return error_json(message),
-            };
-            let programs = match commands::list_programs(config) {
-                Ok(programs) => programs,
-                Err(err) => {
-                    return error_json(format!("failed to list live BPF programs: {err:#}"));
-                }
-            };
-            let program_order = programs
-                .iter()
-                .map(|program| OptimizeAllOrderEntry {
-                    prog_id: program.id,
-                    prog_name: program.name.clone(),
-                    prog_type: Some(program.prog_type_name().to_string()),
-                    hotness_score: None,
-                    run_cnt_delta: None,
-                    run_time_ns_delta: None,
-                    avg_ns: None,
-                })
-                .collect::<Vec<_>>();
-            let applied = AtomicU32::new(0);
-            let failures = Mutex::new(Vec::<(u32, String)>::new());
-            let optimize_result = program_order.par_iter().try_for_each(|entry| {
-                let profile_path = profiling_state
-                    .as_ref()
-                    .and_then(|state| state.profile_path_for(entry.prog_id));
-                let result = (|| -> Result<()> {
-                    let result = commands::try_apply_one(
-                        entry.prog_id,
-                        config,
-                        Some(requested_passes),
-                        profile_path.as_deref(),
-                        Some(tracker),
-                        OptimizeMode::Apply,
-                    )
-                    .with_context(|| {
-                        format!(
-                            "optimize-all failed for prog {} ({})",
-                            entry.prog_id, entry.prog_name
-                        )
-                    })?;
-                    if result.status != "ok" {
-                        anyhow::bail!(
-                            "{}",
-                            result.error_message.unwrap_or_else(|| {
-                                format!(
-                                    "optimize prog {} returned status {}",
-                                    entry.prog_id, result.status
-                                )
-                            })
-                        );
-                    }
-                    if result.summary.applied {
-                        applied.fetch_add(1, Ordering::Relaxed);
-                    }
-                    remember_reoptimization_result(
-                        reoptimization_state,
-                        entry.prog_id,
-                        Some(requested_passes),
-                        &result,
-                        OptimizeMode::Apply,
-                    )
-                })();
-                if let Err(err) = result {
-                    let message = format!("{err:#}");
-                    match failures.lock() {
-                        Ok(mut failures) => failures.push((entry.prog_id, message.clone())),
-                        Err(_) => {
-                            return Err(anyhow::anyhow!("optimize-all failure list lock poisoned"))
-                        }
-                    }
-                    return Err(anyhow::anyhow!(message));
-                }
-                Ok(())
-            });
-            if let Err(err) = optimize_result {
-                let mut failures = match failures.into_inner() {
-                    Ok(failures) => failures,
-                    Err(_) => return error_json("optimize-all failure list lock poisoned"),
-                };
-                if failures.is_empty() {
-                    failures.push((0, format!("{err:#}")));
-                }
-                failures.sort_by_key(|(prog_id, _)| *prog_id);
-                let failures = failures
-                    .into_iter()
-                    .map(|(prog_id, err)| {
-                        if prog_id == 0 {
-                            err
-                        } else {
-                            format!("prog {prog_id}: {err}")
-                        }
-                    })
-                    .collect::<Vec<_>>();
-                return error_json(format!("optimize-all failed for {}", failures.join("; ")));
-            }
-            serde_json::json!({
-                "status": "ok",
-                "total": program_order.len() as u32,
-                "applied": applied.load(Ordering::Relaxed),
-                "errors": 0u32,
-                "profiling_source": profiling_state.as_ref().map_or("none", ProfilingState::label),
-                "hotness_window_ms": serde_json::Value::Null,
-                "program_order": program_order,
-                "program_errors": [],
-            })
-        }
         "profile-start" => {
             let interval_ms = match request_interval_ms(req) {
                 Ok(interval_ms) => interval_ms,
@@ -990,19 +828,6 @@ mod tests {
         assert_eq!(
             response["error_message"],
             "optimize requires enabled_passes"
-        );
-    }
-
-    #[test]
-    fn process_request_rejects_optimize_all_without_enabled_passes() {
-        let response = process_test_request(&serde_json::json!({
-            "cmd": "optimize-all",
-        }));
-
-        assert_eq!(response["status"], "error");
-        assert_eq!(
-            response["error_message"],
-            "optimize-all requires enabled_passes"
         );
     }
 

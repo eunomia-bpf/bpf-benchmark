@@ -25,7 +25,6 @@ requests must provide a non-empty `enabled_passes` list.
 {"cmd":"status"}
 {"cmd":"optimize","prog_id":42,"enabled_passes":["map_inline","const_prop","dce"]}
 {"cmd":"optimize","prog_id":42,"dry_run":true,"enabled_passes":["map_inline","const_prop","dce"]}
-{"cmd":"optimize-all","enabled_passes":["map_inline","const_prop","dce"]}
 ```
 
 `branch_flip` is opt-in and requires a loaded profile with per-site branch data.

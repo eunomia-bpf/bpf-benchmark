@@ -731,20 +731,6 @@ struct ProgInfoJson {
     expected_attach_type: Option<TypeJson>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
-pub(crate) struct ListProgJson {
-    pub id: u32,
-    pub name: String,
-    #[serde(rename = "type")]
-    prog_type: TypeJson,
-}
-
-impl ListProgJson {
-    pub(crate) fn prog_type_name(&self) -> &str {
-        &self.prog_type.name
-    }
-}
-
 #[derive(Clone, Debug, Deserialize, Serialize)]
 struct MapInfoJson {
     map_id: u32,
@@ -995,11 +981,6 @@ where
 pub(crate) fn available_passes_help(config: &CliConfig) -> Result<String> {
     let output = run_output(config.command("bpfopt").arg("list-passes"))?;
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
-}
-
-pub(crate) fn list_programs(config: &CliConfig) -> Result<Vec<ListProgJson>> {
-    let output = run_output(config.command("bpfget").arg("--list").arg("--json"))?;
-    serde_json::from_slice(&output.stdout).context("parse bpfget --list --json output")
 }
 
 fn live_bpf_map_lookup(_map: &MapInfoJson, fd: i32, key: &[u8]) -> Result<Option<Vec<u8>>> {
@@ -2924,16 +2905,6 @@ JSON
 
         assert_eq!(frozen.programs_profiled(), 1);
         assert!(frozen.profile_path_for(42).is_some());
-    }
-
-    #[test]
-    fn list_programs_parses_bpfget_json() {
-        let fake = FakeCliDir::new().unwrap();
-        let programs = list_programs(&fake.config()).unwrap();
-
-        assert_eq!(programs.len(), 1);
-        assert_eq!(programs[0].id, 42);
-        assert_eq!(programs[0].name, "demo");
     }
 
     #[test]
