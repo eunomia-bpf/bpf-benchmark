@@ -59,15 +59,15 @@ VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 .PHONY: check validate \
 	vm-selftest vm-negative-test vm-test vm-micro vm-corpus vm-e2e vm-all \
 	aws-e2e aws-corpus \
-	aws-arm64-test aws-arm64-benchmark aws-arm64-terminate \
-	aws-x86-test aws-x86-benchmark aws-x86-terminate \
+	aws-arm64-test aws-arm64-benchmark aws-arm64-corpus aws-arm64-e2e aws-arm64-terminate \
+	aws-x86-test aws-x86-benchmark aws-x86-corpus aws-x86-e2e aws-x86-terminate \
 	lint help clean
 
 help:
 	@echo "Canonical run targets:"
 	@echo "  VM x86:   vm-selftest vm-negative-test vm-test vm-micro vm-corpus vm-e2e vm-all"
-	@echo "  AWS ARM:  aws-arm64-test aws-arm64-benchmark aws-arm64-terminate"
-	@echo "  AWS x86:  aws-x86-test aws-x86-benchmark aws-x86-terminate"
+	@echo "  AWS ARM:  aws-arm64-test aws-arm64-benchmark aws-arm64-corpus aws-arm64-e2e aws-arm64-terminate"
+	@echo "  AWS x86:  aws-x86-test aws-x86-benchmark aws-x86-corpus aws-x86-e2e aws-x86-terminate"
 	@echo "Params: vm-micro overrides use SAMPLES/WARMUPS/INNER_REPEAT/BENCH; defaults come from runner.libs.suite_args"
 	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES)"
 	@echo "        vm-e2e"
@@ -118,6 +118,12 @@ aws-arm64-test:
 aws-arm64-benchmark:
 	$(RUN_TARGET_SUITE_CMD) benchmark aws-arm64 "$(AWS_ARM64_BENCH_MODE)"
 
+aws-arm64-corpus:
+	$(MAKE) aws-arm64-benchmark AWS_ARM64_BENCH_MODE=corpus
+
+aws-arm64-e2e:
+	$(MAKE) aws-arm64-benchmark AWS_ARM64_BENCH_MODE=e2e
+
 aws-arm64-terminate:
 	$(RUN_TARGET_SUITE_CMD) terminate aws-arm64
 
@@ -126,6 +132,12 @@ aws-x86-test:
 
 aws-x86-benchmark:
 	$(RUN_TARGET_SUITE_CMD) benchmark aws-x86 "$(AWS_X86_BENCH_MODE)"
+
+aws-x86-corpus:
+	$(MAKE) aws-x86-benchmark AWS_X86_BENCH_MODE=corpus
+
+aws-x86-e2e:
+	$(MAKE) aws-x86-benchmark AWS_X86_BENCH_MODE=e2e
 
 aws-x86-terminate:
 	$(RUN_TARGET_SUITE_CMD) terminate aws-x86

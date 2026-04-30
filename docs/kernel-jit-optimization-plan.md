@@ -736,6 +736,8 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | `make vm-micro` | canonical 本地 x86 KVM micro benchmark 入口 |
 | `make aws-arm64-test` | canonical AWS ARM64 测试入口 |
 | `make aws-x86-test` | canonical AWS x86 测试入口 |
+| `make aws-arm64-corpus` / `make aws-x86-corpus` | literal AWS corpus aliases，等价于对应架构的 `aws-*-benchmark AWS_*_BENCH_MODE=corpus` |
+| `make aws-arm64-e2e` / `make aws-x86-e2e` | literal AWS E2E aliases，等价于对应架构的 `aws-*-benchmark AWS_*_BENCH_MODE=e2e` |
 | `make __kernel` | 内部 x86 kernel 构建 helper；不属于公开控制面 |
 
 #### 快速验证（无需 VM）
