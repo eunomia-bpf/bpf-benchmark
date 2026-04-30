@@ -63,8 +63,11 @@ fn target_btf_probe_unavailable(stderr: &str) -> bool {
         || stderr.contains("no kernel BTF objects are visible")
 }
 
-fn target_stdout_json(output: &std::process::Output) -> serde_json::Value {
-    serde_json::from_slice(&output.stdout).expect("json stdout from bpfget --target")
+fn read_json_file(path: &Path, context: &str) -> serde_json::Value {
+    let bytes =
+        fs::read(path).unwrap_or_else(|err| panic!("read {context} {}: {err}", path.display()));
+    serde_json::from_slice(&bytes)
+        .unwrap_or_else(|err| panic!("parse {context} {}: {err}", path.display()))
 }
 
 fn expected_kinsn_names() -> Vec<String> {
@@ -104,8 +107,11 @@ fn list_without_json_exits_failure_before_enumerating_programs() {
 
 #[test]
 fn list_json_emits_array_when_supported() {
+    let output_path = temp_path("list.json");
+    remove_file_if_exists(&output_path);
+    let output_arg = output_path.to_string_lossy().to_string();
     let output = Command::new(bpfget_bin())
-        .args(["--list", "--json"])
+        .args(["--list", "--json", "--output", &output_arg])
         .output()
         .expect("run bpfget --list --json");
 
@@ -114,6 +120,7 @@ fn list_json_emits_array_when_supported() {
             "skipping bpfget --list --json test: {}",
             String::from_utf8_lossy(&output.stderr)
         );
+        remove_file_if_exists(output_path);
         return;
     }
 
@@ -122,13 +129,31 @@ fn list_json_emits_array_when_supported() {
         "stderr={}",
         String::from_utf8_lossy(&output.stderr)
     );
-    let value: serde_json::Value =
-        serde_json::from_slice(&output.stdout).expect("json stdout from bpfget --list --json");
+    assert!(output.stdout.is_empty());
+    let value = read_json_file(&output_path, "bpfget --list --json --output");
+    remove_file_if_exists(output_path);
     assert!(value.is_array(), "expected JSON array, got {value}");
 }
 
 #[test]
 fn info_missing_program_exits_failure() {
+    let output_path = temp_path("info.json");
+    remove_file_if_exists(&output_path);
+    let output_arg = output_path.to_string_lossy().to_string();
+    let output = Command::new(bpfget_bin())
+        .args(["--info", "0", "--output", &output_arg])
+        .output()
+        .expect("run bpfget --info 0");
+
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("open BPF program id 0"), "stderr={stderr}");
+    assert!(output.stdout.is_empty());
+    remove_file_if_exists(output_path);
+}
+
+#[test]
+fn info_json_requires_output_file() {
     let output = Command::new(bpfget_bin())
         .args(["--info", "0"])
         .output()
@@ -136,7 +161,10 @@ fn info_missing_program_exits_failure() {
 
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("open BPF program id 0"), "stderr={stderr}");
+    assert!(
+        stderr.contains("--output FILE is required for JSON metadata modes"),
+        "stderr={stderr}"
+    );
     assert!(output.stdout.is_empty());
 }
 
@@ -164,21 +192,26 @@ fn full_missing_outdir_exits_failure_without_creating_it() {
 }
 
 #[test]
-fn target_stdout_contains_arch_and_features() {
+fn target_output_contains_arch_and_features() {
+    let output_path = temp_path("target.json");
+    remove_file_if_exists(&output_path);
+    let output_arg = output_path.to_string_lossy().to_string();
     let output = Command::new(bpfget_bin())
-        .arg("--target")
+        .args(["--target", "--output", &output_arg])
         .output()
         .expect("run bpfget --target");
 
     let stderr = String::from_utf8_lossy(&output.stderr);
     if !output.status.success() && target_btf_probe_unavailable(&stderr) {
         eprintln!("skipping bpfget --target success test: target BTF probing unavailable");
+        remove_file_if_exists(output_path);
         return;
     }
 
     assert!(output.status.success(), "stderr={stderr}");
-    let value: serde_json::Value =
-        serde_json::from_slice(&output.stdout).expect("json stdout from bpfget --target");
+    assert!(output.stdout.is_empty());
+    let value = read_json_file(&output_path, "bpfget --target --output");
+    remove_file_if_exists(output_path);
     assert!(
         value["arch"].as_str().is_some_and(|arch| !arch.is_empty()),
         "target JSON missing arch: {value}"
@@ -201,19 +234,24 @@ fn target_stdout_contains_arch_and_features() {
 
 #[test]
 fn test_target_btf_probe_failure_exits_nonzero() {
+    let output_path = temp_path("target-fail.json");
+    remove_file_if_exists(&output_path);
+    let output_arg = output_path.to_string_lossy().to_string();
     let output = Command::new(bpfget_bin())
-        .arg("--target")
+        .args(["--target", "--output", &output_arg])
         .output()
         .expect("run bpfget --target");
 
     let stderr = String::from_utf8_lossy(&output.stderr);
     if output.status.success() {
         eprintln!("skipping target BTF failure test: BTF probing is accessible");
+        remove_file_if_exists(output_path);
         return;
     }
 
     assert!(target_btf_probe_unavailable(&stderr), "stderr={stderr}");
     assert!(output.stdout.is_empty());
+    remove_file_if_exists(output_path);
 }
 
 #[test]
@@ -223,8 +261,11 @@ fn test_target_finds_kinsn_when_loaded() {
         return;
     }
 
+    let output_path = temp_path("target-loaded.json");
+    remove_file_if_exists(&output_path);
+    let output_arg = output_path.to_string_lossy().to_string();
     let output = Command::new(bpfget_bin())
-        .arg("--target")
+        .args(["--target", "--output", &output_arg])
         .output()
         .expect("run bpfget --target");
 
@@ -233,7 +274,9 @@ fn test_target_finds_kinsn_when_loaded() {
         "stderr={}",
         String::from_utf8_lossy(&output.stderr)
     );
-    let value = target_stdout_json(&output);
+    assert!(output.stdout.is_empty());
+    let value = read_json_file(&output_path, "loaded kinsn target.json");
+    remove_file_if_exists(output_path);
     let kinsns = value["kinsns"].as_object().expect("kinsns object");
     let expected_names = expected_kinsn_names();
     assert!(
@@ -293,8 +336,17 @@ fn target_output_writes_json_file() {
 
 #[test]
 fn target_manual_kinsn_spec_writes_numeric_btf_func_id() {
+    let output_path = temp_path("target-manual.json");
+    remove_file_if_exists(&output_path);
+    let output_arg = output_path.to_string_lossy().to_string();
     let output = Command::new(bpfget_bin())
-        .args(["--target", "--kinsns", "bpf_rotate64:77"])
+        .args([
+            "--target",
+            "--kinsns",
+            "bpf_rotate64:77",
+            "--output",
+            &output_arg,
+        ])
         .output()
         .expect("run bpfget --target --kinsns");
 
@@ -303,7 +355,24 @@ fn target_manual_kinsn_spec_writes_numeric_btf_func_id() {
         "stderr={}",
         String::from_utf8_lossy(&output.stderr)
     );
-    let value: serde_json::Value =
-        serde_json::from_slice(&output.stdout).expect("json stdout from bpfget --target");
+    assert!(output.stdout.is_empty());
+    let value = read_json_file(&output_path, "manual target.json");
+    remove_file_if_exists(output_path);
     assert_eq!(value["kinsns"]["bpf_rotate64"]["btf_func_id"], 77);
+}
+
+#[test]
+fn target_json_requires_output_file() {
+    let output = Command::new(bpfget_bin())
+        .args(["--target", "--kinsns", "bpf_rotate64:77"])
+        .output()
+        .expect("run bpfget --target --kinsns");
+
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("--output FILE is required for JSON metadata modes"),
+        "stderr={stderr}"
+    );
+    assert!(output.stdout.is_empty());
 }

@@ -49,7 +49,7 @@ struct Cli {
     /// Write target.json for the host platform.
     #[arg(long)]
     target: bool,
-    /// Output file. Defaults to stdout.
+    /// Output file. Required for JSON metadata modes; raw bytecode defaults to stdout.
     #[arg(long, value_name = "FILE")]
     output: Option<PathBuf>,
     /// Manual kinsn descriptors for --target, comma-separated name:btf_func_id.
@@ -171,10 +171,13 @@ fn run() -> Result<()> {
     validate_cli(&cli)?;
 
     if cli.list {
-        return list_programs(cli.output.as_deref());
+        return list_programs(cli.output.as_deref().expect("validated --output"));
     }
     if cli.target {
-        return write_target_json(cli.output.as_deref(), &cli.kinsns);
+        return write_target_json(
+            cli.output.as_deref().expect("validated --output"),
+            &cli.kinsns,
+        );
     }
 
     let prog_id = cli.prog_id.expect("validated PROG_ID");
@@ -182,7 +185,10 @@ fn run() -> Result<()> {
         let (info, map_ids) = get_prog_info_with_map_ids(prog_id)?;
         let expected_attach_type = expected_attach_type_json(info.id, info.prog_type)?;
         let prog_info = ProgInfoJson::from_info(info, map_ids, expected_attach_type)?;
-        return write_json(cli.output.as_deref(), &prog_info);
+        return write_json_file(
+            cli.output.as_deref().expect("validated --output"),
+            &prog_info,
+        );
     }
     if cli.full {
         return write_full(prog_id, cli.outdir.as_deref().expect("validated --outdir"));
@@ -217,6 +223,9 @@ fn validate_cli(cli: &Cli) -> Result<()> {
     }
     if cli.list && !cli.json {
         bail!("--list requires --json");
+    }
+    if (cli.info || cli.list || cli.target) && cli.output.is_none() {
+        bail!("--output FILE is required for JSON metadata modes");
     }
     if cli.full {
         if cli.outdir.is_none() {
@@ -413,7 +422,7 @@ fn validate_btf_record_blob(label: &str, count: u32, rec_size: u32, bytes: &[u8]
     Ok(())
 }
 
-fn list_programs(output: Option<&Path>) -> Result<()> {
+fn list_programs(output: &Path) -> Result<()> {
     let mut start_id = 0;
     let mut rows = Vec::new();
 
@@ -439,10 +448,10 @@ fn list_programs(output: Option<&Path>) -> Result<()> {
         }
     }
 
-    write_json(output, &rows)
+    write_json_file(output, &rows)
 }
 
-fn write_target_json(output: Option<&Path>, kinsn_specs: &[String]) -> Result<()> {
+fn write_target_json(output: &Path, kinsn_specs: &[String]) -> Result<()> {
     let kinsns = if kinsn_specs.is_empty() {
         let kinsns = probe_target_kinsns().with_context(|| {
             "failed to probe target kinsn BTF; --target requires readable kernel BTF or explicit --kinsns"
@@ -463,7 +472,7 @@ fn write_target_json(output: Option<&Path>, kinsn_specs: &[String]) -> Result<()
         features: detect_features(),
         kinsns,
     };
-    write_json(output, &target)
+    write_json_file(output, &target)
 }
 
 fn probe_target_kinsns() -> Result<BTreeMap<String, TargetKinsnJson>> {
@@ -732,12 +741,9 @@ fn write_insns(output: Option<&Path>, insns: &[kernel_sys::bpf_insn]) -> Result<
     Ok(())
 }
 
-fn write_json<T: Serialize>(output: Option<&Path>, value: &T) -> Result<()> {
+fn write_json_file<T: Serialize>(output: &Path, value: &T) -> Result<()> {
     let bytes = json_bytes(value)?;
-    let mut out = open_output(output)?;
-    out.write_all(&bytes)?;
-    out.flush()?;
-    Ok(())
+    fs::write(output, bytes).with_context(|| format!("write {}", output.display()))
 }
 
 fn open_output(output: Option<&Path>) -> Result<Box<dyn Write>> {

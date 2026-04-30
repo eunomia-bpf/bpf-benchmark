@@ -5,7 +5,7 @@
 
 use std::collections::BTreeMap;
 use std::fs;
-use std::io::{self, Write};
+use std::io::Write;
 use std::os::fd::AsFd;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -100,6 +100,9 @@ fn validate_cli(cli: &Cli) -> Result<()> {
     if cli.all && cli.output.is_some() && cli.output_dir.is_some() {
         bail!("choose only one of --output or --output-dir with --all");
     }
+    if cli.output.is_none() && cli.output_dir.is_none() {
+        bail!("profile JSON side-output requires --output FILE or --output-dir DIR");
+    }
     Ok(())
 }
 
@@ -191,26 +194,16 @@ fn write_profiles(cli: &Cli, rows: &[ProfileJson]) -> Result<()> {
         return Ok(());
     }
 
-    if let Some(path) = &cli.output {
-        if cli.all {
-            return write_json_file(path, &rows);
-        }
-        let profile = rows
-            .first()
-            .ok_or_else(|| anyhow!("single-program profile unexpectedly empty"))?;
-        return write_json_file(path, profile);
-    }
-
-    let mut stdout = io::stdout().lock();
+    let Some(path) = &cli.output else {
+        bail!("profile JSON side-output requires --output FILE or --output-dir DIR");
+    };
     if cli.all {
-        write_json(&mut stdout, &rows)?;
-    } else {
-        let profile = rows
-            .first()
-            .ok_or_else(|| anyhow!("single-program profile unexpectedly empty"))?;
-        write_json(&mut stdout, profile)?;
+        return write_json_file(path, &rows);
     }
-    Ok(())
+    let profile = rows
+        .first()
+        .ok_or_else(|| anyhow!("single-program profile unexpectedly empty"))?;
+    write_json_file(path, profile)
 }
 
 fn write_empty_outputs(cli: &Cli) -> Result<()> {
@@ -222,9 +215,6 @@ fn write_empty_outputs(cli: &Cli) -> Result<()> {
         } else {
             bail!("no profile target found");
         }
-    } else if cli.all {
-        let mut stdout = io::stdout().lock();
-        write_json(&mut stdout, &Vec::<ProfileJson>::new())?;
     } else {
         bail!("no profile target found");
     }

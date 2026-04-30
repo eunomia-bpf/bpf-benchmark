@@ -163,14 +163,14 @@ bpfprof --all --duration 1s --output-dir profiles/
 bpfget 123 > prog.bin
 
 # 读取程序元数据
-bpfget 123 --info > info.json
+bpfget 123 --info --output info.json
 
 # 读取字节码 + 元数据 + map 绑定（所有 bpfopt/bpfverify 需要的 side-input）
 bpfget 123 --full --outdir /tmp/prog123/
 # 输出: /tmp/prog123/prog.bin, prog_info.json, map_fds.json
 
 # 枚举所有活跃 BPF 程序
-bpfget --list --json
+bpfget --list --json --output programs.json
 ```
 
 #### 关键功能
@@ -698,7 +698,8 @@ bpfrejit-daemon --on-new-prog /opt/bpfrejit/optimize.sh
 
 ```bash
 # 在 VM 内，benchmark 脚本直接调工具
-for PROG_ID in $(bpfget --list --json | jq '.[].id'); do
+bpfget --list --json --output programs.json
+for PROG_ID in $(jq -r '.[].id' programs.json); do
   bpfget $PROG_ID | bpfopt optimize --target target.json --report reports/$PROG_ID.json | bpfrejit $PROG_ID
 done
 ```
@@ -712,7 +713,7 @@ done
 1. **bpfopt-core**：从 daemon 移动 insn.rs, pass.rs, passes/, analysis/, verifier_log.rs。确保现有 ~300 tests 全部通过
 2. **bpfopt CLI**：实现 `optimize` 子命令 + 至少 `wide-mem` 单 pass 子命令。stdin/stdout binary 读写
 3. **bpfrejit CLI**：实现基本的 `bpfrejit PROG_ID FILE` 功能
-4. **bpfget CLI**：实现 `bpfget PROG_ID > prog.bin` 和 `bpfget --list --json`
+4. **bpfget CLI**：实现 `bpfget PROG_ID > prog.bin` 和 `bpfget --list --json --output programs.json`
 
 Phase 1 完成后，可以跑：`bpfget 123 | bpfopt wide-mem | bpfrejit 123`
 
