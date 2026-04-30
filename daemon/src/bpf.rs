@@ -932,6 +932,40 @@ const BPF_IMM: u8 = 0x00;
 const BPF_DW: u8 = 0x18;
 const BPF_PSEUDO_MAP_FD: u8 = 1;
 const BPF_PSEUDO_MAP_VALUE: u8 = 2;
+// libbpf modern progs (tetragon, recent bcc with libbpf-tools) use these
+// pseudo-modes: imm is an index into attr->fd_array rather than a literal
+// fd. Daemon converts them to MAP_FD / MAP_VALUE in-place during relocation
+// because daemon's REJIT submission doesn't reproduce the original
+// fd_array layout.
+const BPF_PSEUDO_MAP_IDX: u8 = 5;
+const BPF_PSEUDO_MAP_IDX_VALUE: u8 = 6;
+
+#[inline]
+fn pseudo_is_map_ref(src_reg: u8) -> bool {
+    matches!(
+        src_reg,
+        BPF_PSEUDO_MAP_FD
+            | BPF_PSEUDO_MAP_VALUE
+            | BPF_PSEUDO_MAP_IDX
+            | BPF_PSEUDO_MAP_IDX_VALUE
+    )
+}
+
+#[inline]
+fn pseudo_is_idx_form(src_reg: u8) -> bool {
+    matches!(src_reg, BPF_PSEUDO_MAP_IDX | BPF_PSEUDO_MAP_IDX_VALUE)
+}
+
+/// Pseudo-mode the IDX form maps to after fd resolution. IDX → FD,
+/// IDX_VALUE → VALUE.
+#[inline]
+fn pseudo_after_idx_lowering(src_reg: u8) -> u8 {
+    match src_reg {
+        BPF_PSEUDO_MAP_IDX => BPF_PSEUDO_MAP_FD,
+        BPF_PSEUDO_MAP_IDX_VALUE => BPF_PSEUDO_MAP_VALUE,
+        other => other,
+    }
+}
 
 /// Relocate map file descriptors in BPF bytecode.
 ///
@@ -960,10 +994,35 @@ pub fn relocate_map_fds_with_bindings(
 ) -> Result<Vec<OwnedFd>> {
     use std::os::unix::io::AsRawFd;
 
-    // Step 1: Scan for BPF_LD_IMM64 with BPF_PSEUDO_MAP_FD or BPF_PSEUDO_MAP_VALUE.
-    // Collect unique old FDs in first-seen order.
-    let mut unique_old_fds: Vec<i32> = Vec::new();
-    let mut seen: HashMap<i32, usize> = HashMap::new();
+    // Step 1: Scan for BPF_LD_IMM64 map references.
+    //
+    // Two distinct namespaces — both legal in the same prog in principle,
+    // but in practice each loader uses one or the other:
+    //   - MAP_FD / MAP_VALUE: imm is the loader-time fd value (libbpf
+    //     legacy, bcc, raw bpf() syscall users)
+    //   - MAP_IDX / MAP_IDX_VALUE: imm is an index into attr->fd_array
+    //     (libbpf modern, tetragon, libbpf-tools)
+    //
+    // The kernel verifier's `add_used_map(env, fd)` is called once per
+    // unique map fd resolved from the imm, in encounter order, so
+    // `prog->aux->used_maps[i]` (== `map_ids[i]` from
+    // `bpf_prog_get_map_ids`) corresponds to the i-th unique map encountered
+    // when walking insns sequentially. We replay that enumeration here:
+    // each unique (src_reg-namespace, imm) tuple gets the next slot in
+    // `map_ids`, opens the fd by id, and the bytecode is rewritten to
+    // MAP_FD / MAP_VALUE form with the new fd in imm.
+    //
+    // For MAP_IDX / MAP_IDX_VALUE this also fixes
+    // `fd_idx without fd_array is invalid` (verifier.c:22293) — the
+    // rewritten insns no longer need fd_array because src_reg switches to
+    // the FD form, so daemon's REJIT submission can leave fd_array empty.
+    #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
+    enum Namespace {
+        Fd,
+        Idx,
+    }
+    let mut unique_keys: Vec<(Namespace, i32)> = Vec::new();
+    let mut seen: HashMap<(Namespace, i32), usize> = HashMap::new();
 
     let mut i = 0;
     while i < insns.len() {
@@ -971,11 +1030,16 @@ pub fn relocate_map_fds_with_bindings(
         // BPF_LD | BPF_IMM | BPF_DW = 0x18
         if code == (BPF_LD | BPF_IMM | BPF_DW) {
             let src_reg = (insns[i].regs >> 4) & 0x0f;
-            if src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_VALUE {
-                let old_fd = insns[i].imm;
-                if let std::collections::hash_map::Entry::Vacant(e) = seen.entry(old_fd) {
-                    let idx = unique_old_fds.len();
-                    unique_old_fds.push(old_fd);
+            if pseudo_is_map_ref(src_reg) {
+                let ns = if pseudo_is_idx_form(src_reg) {
+                    Namespace::Idx
+                } else {
+                    Namespace::Fd
+                };
+                let key = (ns, insns[i].imm);
+                if let std::collections::hash_map::Entry::Vacant(e) = seen.entry(key) {
+                    let idx = unique_keys.len();
+                    unique_keys.push(key);
                     e.insert(idx);
                 }
             }
@@ -985,47 +1049,101 @@ pub fn relocate_map_fds_with_bindings(
         i += 1;
     }
 
-    if unique_old_fds.is_empty() {
+    if unique_keys.is_empty() {
         return Ok(Vec::new());
     }
 
-    let relocation_targets =
-        resolve_map_ids_for_relocation(&unique_old_fds, map_ids, map_fd_bindings);
-
-    if relocation_targets.len() != unique_old_fds.len() {
-        bail!(
-            "relocate_map_fds: found {} unique FDs in bytecode but only resolved {} map IDs",
-            unique_old_fds.len(),
-            relocation_targets.len()
-        );
+    // Step 2: Resolve each unique tuple to a map_id.
+    //   - FD form: try the explicit binding first (supplied by caller via
+    //     `map_fd_bindings` when the original loader's fd values are
+    //     known), else fall back to encounter-order pairing with map_ids
+    //   - IDX form: encounter-order pairing only — there is no explicit
+    //     fd-value-keyed binding for indexes
+    //
+    // Encounter-order pairing means: among unique_keys, keep a counter of
+    // tuples that don't have an explicit binding; the n-th such tuple
+    // takes map_ids[n]. This matches the kernel's add_used_map ordering
+    // because it walks insns in the same sequential order daemon does.
+    let mut tuple_to_map_id: HashMap<(Namespace, i32), u32> = HashMap::new();
+    let mut anon_cursor: usize = 0;
+    for &key in &unique_keys {
+        let (ns, imm) = key;
+        let map_id = match ns {
+            Namespace::Fd => {
+                // FD form: prefer explicit binding
+                if let Some(&id) = map_fd_bindings.get(&imm) {
+                    id
+                } else if anon_cursor < map_ids.len() {
+                    let id = map_ids[anon_cursor];
+                    anon_cursor += 1;
+                    id
+                } else {
+                    bail!(
+                        "relocate_map_fds: ran out of map_ids resolving FD-form pseudo-map (imm={}, {} unique tuples, {} map_ids)",
+                        imm,
+                        unique_keys.len(),
+                        map_ids.len()
+                    );
+                }
+            }
+            Namespace::Idx => {
+                if anon_cursor < map_ids.len() {
+                    let id = map_ids[anon_cursor];
+                    anon_cursor += 1;
+                    id
+                } else {
+                    bail!(
+                        "relocate_map_fds: ran out of map_ids resolving IDX-form pseudo-map (imm={}, {} unique tuples, {} map_ids)",
+                        imm,
+                        unique_keys.len(),
+                        map_ids.len()
+                    );
+                }
+            }
+        };
+        tuple_to_map_id.insert(key, map_id);
     }
 
-    // Step 3: Open new FDs for each map ID and build old_fd -> new_fd mapping.
+    // Step 3: Open new FDs for each map ID and build (namespace, imm) -> new_fd mapping.
     let mut owned_fds: Vec<OwnedFd> = Vec::new();
-    let mut fd_map: HashMap<i32, i32> = HashMap::new();
+    let mut new_fd_map: HashMap<(Namespace, i32), i32> = HashMap::new();
 
-    for (&old_fd, &map_id) in &relocation_targets {
+    for (&key, &map_id) in &tuple_to_map_id {
         let new_fd = bpf_map_get_fd_by_id(map_id).with_context(|| {
             format!(
-                "relocate_map_fds: open map ID {} for old fd {}",
-                map_id, old_fd
+                "relocate_map_fds: open map ID {} for tuple {:?}",
+                map_id, key
             )
         })?;
         let raw = new_fd.as_raw_fd();
-        fd_map.insert(old_fd, raw);
+        new_fd_map.insert(key, raw);
         owned_fds.push(new_fd);
     }
 
-    // Step 4: Patch the bytecode.
+    // Step 4: Patch the bytecode in place.
+    //   - FD form: rewrite imm = new_fd (src_reg unchanged)
+    //   - IDX form: rewrite src_reg → FD form, imm = new_fd, dropping the
+    //     original fd_array index. This lets daemon submit REJIT without
+    //     reproducing the original fd_array layout.
     i = 0;
     while i < insns.len() {
         let code = insns[i].code;
         if code == (BPF_LD | BPF_IMM | BPF_DW) {
             let src_reg = (insns[i].regs >> 4) & 0x0f;
-            if src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_VALUE {
-                let old_fd = insns[i].imm;
-                if let Some(&new_fd) = fd_map.get(&old_fd) {
+            if pseudo_is_map_ref(src_reg) {
+                let ns = if pseudo_is_idx_form(src_reg) {
+                    Namespace::Idx
+                } else {
+                    Namespace::Fd
+                };
+                let key = (ns, insns[i].imm);
+                if let Some(&new_fd) = new_fd_map.get(&key) {
                     insns[i].imm = new_fd;
+                    if pseudo_is_idx_form(src_reg) {
+                        // Lower IDX → FD: src_reg goes from 5/6 to 1/2.
+                        let lowered = pseudo_after_idx_lowering(src_reg);
+                        insns[i].regs = (insns[i].regs & 0x0f) | (lowered << 4);
+                    }
                 }
             }
             i += 2;
