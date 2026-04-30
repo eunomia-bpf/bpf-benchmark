@@ -1,0 +1,1079 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "daemon_socket": "/var/tmp/bpfrejit-daemon/bd-x23x6vq3/daemon.sock",
+  "filters": [
+    "bpftrace/tcpretrans"
+  ],
+  "generated_at": "2026-04-22T06:38:24.893019+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-04-22T06:37:49.366504+00:00",
+    "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+    "daemon_kinsn_discovery": {
+      "captured_at": "2026-04-22T06:37:49.366572+00:00",
+      "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2396331 type_cnt=129853 type_id_bias=129852\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=129874 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=129876 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=129874 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=129879 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=129880 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=129878 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=129879 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=129880 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+      "status": "ok",
+      "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2396331 type_cnt=129853 type_id_bias=129852\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=129874 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=129876 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=129874 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=129879 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=129880 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=129878 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=129879 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=129880 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+      "stderr_path": "/var/tmp/bpfrejit-daemon/bd-x23x6vq3/daemon.stderr.log",
+      "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-x23x6vq3/daemon.sock",
+      "stdout_path": "/var/tmp/bpfrejit-daemon/bd-x23x6vq3/daemon.stdout.log"
+    },
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-04-22T06:37:49.312631+00:00",
+      "loaded_count": 5,
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [],
+      "snapshot_after": {
+        "captured_at": "2026-04-22T06:37:49.312624+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 5
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-04-22T06:37:49.305615+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "missing_expected_modules": [],
+      "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+      "resident_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "source": "lsmod"
+    },
+    "status": "ready"
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "metadata": {
+    "kinsn_modules": {
+      "count": 1,
+      "lifecycle_runs": [
+        {
+          "captured_at": "2026-04-22T06:38:07.882880+00:00",
+          "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+          "daemon_kinsn_discovery": {
+            "captured_at": "2026-04-22T06:37:49.366572+00:00",
+            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2396331 type_cnt=129853 type_id_bias=129852\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=129874 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=129876 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=129874 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=129879 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=129880 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=129878 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=129879 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=129880 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "status": "ok",
+            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2396331 type_cnt=129853 type_id_bias=129852\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=129874 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=129876 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=129874 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=129879 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=129880 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=129878 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=129879 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=129880 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr_path": "/var/tmp/bpfrejit-daemon/bd-x23x6vq3/daemon.stderr.log",
+            "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-x23x6vq3/daemon.sock",
+            "stdout_path": "/var/tmp/bpfrejit-daemon/bd-x23x6vq3/daemon.stdout.log"
+          },
+          "expected_modules": [
+            "bpf_bulk_memory",
+            "bpf_endian",
+            "bpf_extract",
+            "bpf_rotate",
+            "bpf_select"
+          ],
+          "lifecycle_index": 1,
+          "module_load": {
+            "expected_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "failed_modules": [],
+            "invoked_at": "2026-04-22T06:37:49.312631+00:00",
+            "loaded_count": 5,
+            "loaded_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "module_dir": "/artifacts/kinsn",
+            "newly_loaded_modules": [],
+            "snapshot_after": {
+              "captured_at": "2026-04-22T06:37:49.312624+00:00",
+              "expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "loaded_bpf_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "missing_expected_modules": [],
+              "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+              "resident_expected_modules": [
+                "bpf_bulk_memory",
+                "bpf_endian",
+                "bpf_extract",
+                "bpf_rotate",
+                "bpf_select"
+              ],
+              "source": "lsmod"
+            },
+            "status": "ok",
+            "total_count": 5
+          },
+          "module_snapshot_before_daemon": {
+            "captured_at": "2026-04-22T06:37:49.305615+00:00",
+            "expected_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "loaded_bpf_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "missing_expected_modules": [],
+            "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+            "resident_expected_modules": [
+              "bpf_bulk_memory",
+              "bpf_endian",
+              "bpf_extract",
+              "bpf_rotate",
+              "bpf_select"
+            ],
+            "source": "lsmod"
+          },
+          "requested_prog_ids": [
+            9
+          ],
+          "status": "completed"
+        }
+      ]
+    }
+  },
+  "results": [
+    {
+      "app": "bpftrace/tcpretrans",
+      "args": {
+        "script": "tcpretrans"
+      },
+      "baseline": {
+        "exec_ns_mean": 10507.875,
+        "programs": {
+          "9": {
+            "bytes_jited": 968,
+            "bytes_xlated": 1640,
+            "exec_ns": 10507.875,
+            "id": 9,
+            "name": "kprobe_tcp_retransmit_skb",
+            "run_cnt": 16,
+            "run_time_ns": 168126,
+            "type": "kprobe"
+          }
+        }
+      },
+      "baseline_workload": {
+        "duration_s": 8.185985554000013,
+        "ops_per_sec": 0.4886400023080219,
+        "ops_total": 4.0,
+        "stderr": "failed_cycles=3",
+        "stdout": "successful_cycles=1"
+      },
+      "baseline_workloads": [
+        {
+          "duration_s": 8.185985554000013,
+          "ops_per_sec": 0.4886400023080219,
+          "ops_total": 4.0,
+          "stderr": "failed_cycles=3",
+          "stdout": "successful_cycles=1"
+        }
+      ],
+      "command_used": [
+        "/usr/bin/bpftrace",
+        "-q",
+        "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt"
+      ],
+      "configured_workload_seconds": 5.0,
+      "error": "",
+      "had_post_rejit_measurement": true,
+      "measurement_mode": "program",
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "tar: ./include/xen/interface/io/netif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pciif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/protocols.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pvcalls.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/ring.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/sndif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/tpmif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/usbif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/vscsiif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xs_wire.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/memory.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/nmi.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/physdev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/platform.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/sched.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/vcpu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/version.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen-mca.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xenpmu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/mem-reservation.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/page.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/platform_pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/swiotlb-xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-front-pgdir-shbuf.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-ops.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus_dev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input/linux-event-codes.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: .: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: Exiting with failure status due to previous errors",
+        "stdout_tail": "Tracing tcp retransmits. Hit Ctrl-C to end.\nTIME     PID               LADDR:LPORT           RADDR:RPORT  STATE\n06:38:08 0             127.0.0.1:33333       127.0.0.1:55260  ESTABLISHED\n06:38:08 0             127.0.0.1:33333       127.0.0.1:55260  FIN_WAIT1\n06:38:09 0             127.0.0.1:33333       127.0.0.1:55260  FIN_WAIT1\n06:38:10 0             127.0.0.1:41487       127.0.0.1:46366  ESTABLISHED\n06:38:11 0             127.0.0.1:41487       127.0.0.1:46366  FIN_WAIT1\n06:38:11 0             127.0.0.1:33333       127.0.0.1:55260  CLOSING\n06:38:11 0             127.0.0.1:41487       127.0.0.1:46366  FIN_WAIT1\n06:38:13 0             127.0.0.1:33159       127.0.0.1:33202  ESTABLISHED\n06:38:13 0             127.0.0.1:33159       127.0.0.1:33202  FIN_WAIT1\n06:38:13 0             127.0.0.1:41487       127.0.0.1:46366  CLOSING\n06:38:14 0             127.0.0.1:33159       127.0.0.1:33202  FIN_WAIT1\n06:38:14 0             127.0.0.1:33333       127.0.0.1:55260  CLOSING\n06:38:15 0             127.0.0.1:38895       127.0.0.1:48700  ESTABLISHED\n06:38:16 0             127.0.0.1:33159       127.0.0.1:33202  CLOSING\n06:38:16 0             127.0.0.1:38895       127.0.0.1:48700  FIN_WAIT1\n06:38:16 28            127.0.0.1:38895       127.0.0.1:48700  FIN_WAIT1\n06:38:16 0             127.0.0.1:37513       127.0.0.1:43446  ESTABLISHED\n06:38:16 0             127.0.0.1:41487       127.0.0.1:46366  CLOSING\n06:38:16 0             127.0.0.1:37513       127.0.0.1:43446  FIN_WAIT1\n06:38:17 0             127.0.0.1:37513       127.0.0.1:43446  FIN_WAIT1\n06:38:19 0             127.0.0.1:37999       127.0.0.1:44778  ESTABLISHED\n06:38:19 0             127.0.0.1:37513       127.0.0.1:43446  CLOSING\n06:38:19 0             127.0.0.1:37999       127.0.0.1:44778  FIN_WAIT1\n06:38:20 0             127.0.0.1:37999       127.0.0.1:44778  FIN_WAIT1\n06:38:21 0             127.0.0.1:33325       127.0.0.1:35970  ESTABLISHED\n06:38:21 0             127.0.0.1:33333       127.0.0.1:55260  CLOSING\n06:38:21 0             127.0.0.1:33325       127.0.0.1:35970  FIN_WAIT1\n06:38:21 0             127.0.0.1:37999       127.0.0.1:44778  CLOSING\n06:38:22 0             127.0.0.1:37513       127.0.0.1:43446  CLOSING\n06:38:22 0             127.0.0.1:33325       127.0.0.1:35970  FIN_WAIT1\n06:38:23 0             127.0.0.1:41487       127.0.0.1:46366  CLOSING\n06:38:24 0             127.0.0.1:32951       127.0.0.1:32964  ESTABLISHED\n06:38:24 0             127.0.0.1:32951       127.0.0.1:32964  FIN_WAIT1\n06:38:24 0             127.0.0.1:32951       127.0.0.1:32964  FIN_WAIT1"
+      },
+      "prog_ids": [
+        9
+      ],
+      "program_measurements": {
+        "9": {
+          "applied": true,
+          "apply": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 5,
+              "total_sites": 5
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "applied"
+                }
+              ],
+              "changed": true,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [
+                    "site at PC=67: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                    "site at PC=67: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-120 width 8 before pc 67; fallback scan failed: no constant stack store sequence found for fp-96 width 1; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                    "site at PC=135: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                    "site at PC=186: skip reason: lookup result is not consumed by fixed-offset scalar loads"
+                  ],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "map_inline",
+                  "pass_name": "map_inline",
+                  "sites_applied": 0,
+                  "sites_skipped": 3,
+                  "skip_reasons": {
+                    "lookup key is not a constant stack or pseudo-map-value materialization": 1,
+                    "lookup result is not consumed by fixed-offset scalar loads": 2
+                  },
+                  "skipped_sites": [
+                    {
+                      "pc": 67,
+                      "reason": "lookup key is not a constant stack or pseudo-map-value materialization"
+                    },
+                    {
+                      "pc": 135,
+                      "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                    },
+                    {
+                      "pc": 186,
+                      "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                    }
+                  ],
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": true,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "const_prop",
+                  "pass_name": "const_prop",
+                  "sites_applied": 2,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "accepted"
+                  },
+                  "verify_error": null,
+                  "verify_result": "accepted"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "const_prop",
+                  "pass_name": "const_prop",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "skb_load_bytes_spec",
+                  "pass_name": "skb_load_bytes_spec",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "bounds_check_merge",
+                  "pass_name": "bounds_check_merge",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": true,
+                  "diagnostics": [],
+                  "insn_delta": -9,
+                  "insns_after": 182,
+                  "insns_before": 191,
+                  "pass": "wide_mem",
+                  "pass_name": "wide_mem",
+                  "sites_applied": 3,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "accepted"
+                  },
+                  "verify_error": null,
+                  "verify_result": "accepted"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 182,
+                  "insns_before": 182,
+                  "pass": "bulk_memory",
+                  "pass_name": "bulk_memory",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 182,
+                  "insns_before": 182,
+                  "pass": "rotate",
+                  "pass_name": "rotate",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 182,
+                  "insns_before": 182,
+                  "pass": "cond_select",
+                  "pass_name": "cond_select",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 182,
+                  "insns_before": 182,
+                  "pass": "extract",
+                  "pass_name": "extract",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 182,
+                  "insns_before": 182,
+                  "pass": "endian_fusion",
+                  "pass_name": "endian_fusion",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [
+                "const_prop",
+                "wide_mem"
+              ],
+              "prog_id": 9,
+              "program": {
+                "final_insn_count": 182,
+                "insn_delta": -9,
+                "orig_insn_count": 191,
+                "prog_id": 9,
+                "prog_name": "tcp_retransmit_",
+                "prog_type": 2
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 2,
+                "passes_executed": 13,
+                "program_changed": true,
+                "total_sites_applied": 5,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 9724115,
+                "rejit_syscall_ns": 9226990,
+                "total_ns": 12283153
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "tcp_retransmit_",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"applied\"}], \"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [\"site at PC=67: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=67: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-120 width 8 before pc 67; fallback scan failed: no constant stack store sequence found for fp-96 width 1; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"site at PC=135: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"site at PC=186: skip reason: lookup result is not consumed by fixed-offset scalar loads\"], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 0, \"sites_skipped\": 3, \"skip_reasons\": {\"lookup key is not a constant stack or pseudo-map-value materialization\": 1, \"lookup result is not consumed by fixed-offset scalar loads\": 2}, \"skipped_sites\": [{\"pc\": 67, \"reason\": \"lookup key is not a constant stack or pseudo-map-value materialization\"}, {\"pc\": 135, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}, {\"pc\": 186, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}], \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 2, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": -9, \"insns_after\": 182, \"insns_before\": 191, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 3, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"const_prop\", \"wide_mem\"], \"prog_id\": 9, \"program\": {\"final_insn_count\": 182, \"insn_delta\": -9, \"orig_insn_count\": 191, \"prog_id\": 9, \"prog_name\": \"tcp_retransmit_\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 13, \"program_changed\": true, \"total_sites_applied\": 5, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 9724115, \"rejit_syscall_ns\": 9226990, \"total_ns\": 12283153}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 2,
+              "passes_executed": 13,
+              "program_changed": true,
+              "total_sites_applied": 5,
+              "verifier_rejections": 0
+            }
+          },
+          "baseline": {
+            "bytes_jited": 968,
+            "bytes_xlated": 1640,
+            "exec_ns": 10507.875,
+            "id": 9,
+            "name": "kprobe_tcp_retransmit_skb",
+            "run_cnt": 16,
+            "run_time_ns": 168126,
+            "type": "kprobe"
+          },
+          "changed": true,
+          "comparable": true,
+          "comparison_exclusion_reason": "",
+          "id": 9,
+          "label": "bpftrace/tcpretrans:kprobe_tcp_retransmit_skb#9",
+          "name": "kprobe_tcp_retransmit_skb",
+          "rejit": {
+            "bytes_jited": 924,
+            "bytes_xlated": 1568,
+            "exec_ns": 9896.944444444445,
+            "id": 9,
+            "name": "tcp_retransmit_",
+            "run_cnt": 18,
+            "run_time_ns": 178145,
+            "type": "kprobe"
+          },
+          "speedup": 1.0617292093519324,
+          "type": "kprobe"
+        }
+      },
+      "programs": [
+        {
+          "btf_id": 9,
+          "bytes_jited": 968,
+          "bytes_memlock": 4096,
+          "bytes_xlated": 1640,
+          "gpl_compatible": true,
+          "id": 9,
+          "jited": true,
+          "loaded_at": 1776839886,
+          "map_ids": [
+            3,
+            4,
+            5
+          ],
+          "name": "kprobe_tcp_retransmit_skb",
+          "orphaned": false,
+          "owner_fds": [
+            {
+              "fd": 9,
+              "pid": 1736
+            }
+          ],
+          "owner_pids": [
+            1736
+          ],
+          "tag": "6c7dcf4992a62ddf",
+          "type": "kprobe",
+          "uid": 0
+        }
+      ],
+      "rejit": {
+        "exec_ns_mean": 9896.944444444445,
+        "programs": {
+          "9": {
+            "bytes_jited": 924,
+            "bytes_xlated": 1568,
+            "exec_ns": 9896.944444444445,
+            "id": 9,
+            "name": "tcp_retransmit_",
+            "run_cnt": 18,
+            "run_time_ns": 178145,
+            "type": "kprobe"
+          }
+        }
+      },
+      "rejit_apply": {
+        "all_applied": true,
+        "applied": true,
+        "applied_any": true,
+        "counts": {
+          "applied_sites": 5,
+          "total_sites": 5
+        },
+        "error": "",
+        "exit_code": 0,
+        "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"applied\"}], \"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [\"site at PC=67: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=67: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-120 width 8 before pc 67; fallback scan failed: no constant stack store sequence found for fp-96 width 1; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"site at PC=135: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"site at PC=186: skip reason: lookup result is not consumed by fixed-offset scalar loads\"], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 0, \"sites_skipped\": 3, \"skip_reasons\": {\"lookup key is not a constant stack or pseudo-map-value materialization\": 1, \"lookup result is not consumed by fixed-offset scalar loads\": 2}, \"skipped_sites\": [{\"pc\": 67, \"reason\": \"lookup key is not a constant stack or pseudo-map-value materialization\"}, {\"pc\": 135, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}, {\"pc\": 186, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}], \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 2, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": -9, \"insns_after\": 182, \"insns_before\": 191, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 3, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"const_prop\", \"wide_mem\"], \"prog_id\": 9, \"program\": {\"final_insn_count\": 182, \"insn_delta\": -9, \"orig_insn_count\": 191, \"prog_id\": 9, \"prog_name\": \"tcp_retransmit_\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 13, \"program_changed\": true, \"total_sites_applied\": 5, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 9724115, \"rejit_syscall_ns\": 9226990, \"total_ns\": 12283153}}",
+        "per_program": {
+          "9": {
+            "applied": true,
+            "counts": {
+              "applied_sites": 5,
+              "total_sites": 5
+            },
+            "debug_result": {
+              "attempts": [
+                {
+                  "attempt": 0,
+                  "disabled_passes": [],
+                  "result": "applied"
+                }
+              ],
+              "changed": true,
+              "passes": [
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [
+                    "site at PC=67: skip reason: lookup key is not a constant stack or pseudo-map-value materialization",
+                    "site at PC=67: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-120 width 8 before pc 67; fallback scan failed: no constant stack store sequence found for fp-96 width 1; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant",
+                    "site at PC=135: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                    "site at PC=186: skip reason: lookup result is not consumed by fixed-offset scalar loads"
+                  ],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "map_inline",
+                  "pass_name": "map_inline",
+                  "sites_applied": 0,
+                  "sites_skipped": 3,
+                  "skip_reasons": {
+                    "lookup key is not a constant stack or pseudo-map-value materialization": 1,
+                    "lookup result is not consumed by fixed-offset scalar loads": 2
+                  },
+                  "skipped_sites": [
+                    {
+                      "pc": 67,
+                      "reason": "lookup key is not a constant stack or pseudo-map-value materialization"
+                    },
+                    {
+                      "pc": 135,
+                      "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                    },
+                    {
+                      "pc": 186,
+                      "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                    }
+                  ],
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": true,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "const_prop",
+                  "pass_name": "const_prop",
+                  "sites_applied": 2,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "accepted"
+                  },
+                  "verify_error": null,
+                  "verify_result": "accepted"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "const_prop",
+                  "pass_name": "const_prop",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "dce",
+                  "pass_name": "dce",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "skb_load_bytes_spec",
+                  "pass_name": "skb_load_bytes_spec",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 191,
+                  "insns_before": 191,
+                  "pass": "bounds_check_merge",
+                  "pass_name": "bounds_check_merge",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": true,
+                  "diagnostics": [],
+                  "insn_delta": -9,
+                  "insns_after": 182,
+                  "insns_before": 191,
+                  "pass": "wide_mem",
+                  "pass_name": "wide_mem",
+                  "sites_applied": 3,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "accepted"
+                  },
+                  "verify_error": null,
+                  "verify_result": "accepted"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 182,
+                  "insns_before": 182,
+                  "pass": "bulk_memory",
+                  "pass_name": "bulk_memory",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 182,
+                  "insns_before": 182,
+                  "pass": "rotate",
+                  "pass_name": "rotate",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 182,
+                  "insns_before": 182,
+                  "pass": "cond_select",
+                  "pass_name": "cond_select",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 182,
+                  "insns_before": 182,
+                  "pass": "extract",
+                  "pass_name": "extract",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                },
+                {
+                  "action": "kept",
+                  "changed": false,
+                  "diagnostics": [],
+                  "insn_delta": 0,
+                  "insns_after": 182,
+                  "insns_before": 182,
+                  "pass": "endian_fusion",
+                  "pass_name": "endian_fusion",
+                  "sites_applied": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "verify": {
+                    "status": "not_needed"
+                  },
+                  "verify_error": null,
+                  "verify_result": "not_needed"
+                }
+              ],
+              "passes_applied": [
+                "const_prop",
+                "wide_mem"
+              ],
+              "prog_id": 9,
+              "program": {
+                "final_insn_count": 182,
+                "insn_delta": -9,
+                "orig_insn_count": 191,
+                "prog_id": 9,
+                "prog_name": "tcp_retransmit_",
+                "prog_type": 2
+              },
+              "status": "ok",
+              "summary": {
+                "applied": true,
+                "passes_changed": 2,
+                "passes_executed": 13,
+                "program_changed": true,
+                "total_sites_applied": 5,
+                "verifier_rejections": 0
+              },
+              "timings_ns": {
+                "pipeline_run_ns": 9724115,
+                "rejit_syscall_ns": 9226990,
+                "total_ns": 12283153
+              }
+            },
+            "error": "",
+            "exit_code": 0,
+            "inlined_map_entries": [],
+            "kernel_prog_name": "tcp_retransmit_",
+            "output": "{\"attempts\": [{\"attempt\": 0, \"disabled_passes\": [], \"result\": \"applied\"}], \"changed\": true, \"passes\": [{\"action\": \"kept\", \"changed\": false, \"diagnostics\": [\"site at PC=67: skip reason: lookup key is not a constant stack or pseudo-map-value materialization\", \"site at PC=67: verifier-guided key extraction failed: verifier log did not expose a constant stack store covering fp-120 width 8 before pc 67; fallback scan failed: no constant stack store sequence found for fp-96 width 1; pseudo-map-value fallback failed: key pointer does not resolve to a pseudo-map-value constant\", \"site at PC=135: skip reason: lookup result is not consumed by fixed-offset scalar loads\", \"site at PC=186: skip reason: lookup result is not consumed by fixed-offset scalar loads\"], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"map_inline\", \"pass_name\": \"map_inline\", \"sites_applied\": 0, \"sites_skipped\": 3, \"skip_reasons\": {\"lookup key is not a constant stack or pseudo-map-value materialization\": 1, \"lookup result is not consumed by fixed-offset scalar loads\": 2}, \"skipped_sites\": [{\"pc\": 67, \"reason\": \"lookup key is not a constant stack or pseudo-map-value materialization\"}, {\"pc\": 135, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}, {\"pc\": 186, \"reason\": \"lookup result is not consumed by fixed-offset scalar loads\"}], \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 2, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"const_prop\", \"pass_name\": \"const_prop\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"dce\", \"pass_name\": \"dce\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"skb_load_bytes_spec\", \"pass_name\": \"skb_load_bytes_spec\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"bounds_check_merge\", \"pass_name\": \"bounds_check_merge\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": true, \"diagnostics\": [], \"insn_delta\": -9, \"insns_after\": 182, \"insns_before\": 191, \"pass\": \"wide_mem\", \"pass_name\": \"wide_mem\", \"sites_applied\": 3, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"accepted\"}, \"verify_error\": null, \"verify_result\": \"accepted\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"bulk_memory\", \"pass_name\": \"bulk_memory\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"rotate\", \"pass_name\": \"rotate\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"cond_select\", \"pass_name\": \"cond_select\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"extract\", \"pass_name\": \"extract\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}, {\"action\": \"kept\", \"changed\": false, \"diagnostics\": [], \"insn_delta\": 0, \"insns_after\": 182, \"insns_before\": 182, \"pass\": \"endian_fusion\", \"pass_name\": \"endian_fusion\", \"sites_applied\": 0, \"sites_skipped\": 0, \"skip_reasons\": {}, \"verify\": {\"status\": \"not_needed\"}, \"verify_error\": null, \"verify_result\": \"not_needed\"}], \"passes_applied\": [\"const_prop\", \"wide_mem\"], \"prog_id\": 9, \"program\": {\"final_insn_count\": 182, \"insn_delta\": -9, \"orig_insn_count\": 191, \"prog_id\": 9, \"prog_name\": \"tcp_retransmit_\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 13, \"program_changed\": true, \"total_sites_applied\": 5, \"verifier_rejections\": 0}, \"timings_ns\": {\"pipeline_run_ns\": 9724115, \"rejit_syscall_ns\": 9226990, \"total_ns\": 12283153}}",
+            "summary": {
+              "applied": true,
+              "passes_changed": 2,
+              "passes_executed": 13,
+              "program_changed": true,
+              "total_sites_applied": 5,
+              "verifier_rejections": 0
+            }
+          }
+        },
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        },
+        "scan_enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "selection_source": "benchmark_config"
+      },
+      "rejit_workload": {
+        "duration_s": 8.182647453000016,
+        "ops_per_sec": 0.4888393423980981,
+        "ops_total": 4.0,
+        "stderr": "failed_cycles=3",
+        "stdout": "successful_cycles=1"
+      },
+      "rejit_workloads": [
+        {
+          "duration_s": 8.182647453000016,
+          "ops_per_sec": 0.4888393423980981,
+          "ops_total": 4.0,
+          "stderr": "failed_cycles=3",
+          "stdout": "successful_cycles=1"
+        }
+      ],
+      "runner": "bpftrace",
+      "selected_workload": "tcp_retransmit",
+      "status": "ok",
+      "workload": {
+        "corpus": "tcp_retransmit",
+        "e2e": "tcp_retransmit"
+      }
+    }
+  ],
+  "samples": 1,
+  "status": "ok",
+  "suite_name": "macro_apps",
+  "suite_summary": {
+    "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+    "schema_version": 1,
+    "selected_apps": 1,
+    "suite_name": "macro_apps",
+    "total_apps": 20
+  },
+  "summary": {
+    "all_comparable_geomean": 1.0617292093519324,
+    "applied_only_geomean": 1.0617292093519324,
+    "applied_sample_count": 1,
+    "comparison_exclusion_reason_counts": {},
+    "comparison_exclusion_reasons": [],
+    "discovered_programs": 1,
+    "per_app": [
+      {
+        "all_comparable_geomean": 1.0617292093519324,
+        "app": "bpftrace/tcpretrans",
+        "applied_only_geomean": 1.0617292093519324,
+        "applied_program_count": 1,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "bpftrace",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "tcp_retransmit"
+      }
+    ],
+    "sample_count": 1,
+    "selected_apps": 1,
+    "statuses": {
+      "ok": 1
+    }
+  },
+  "workload_seconds": 1.0
+}

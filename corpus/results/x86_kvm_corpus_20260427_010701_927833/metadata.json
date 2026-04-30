@@ -1,0 +1,35 @@
+{
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+  "generated_at": "2026-04-27T01:13:35.166192+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-27T01:13:35.166189+00:00",
+  "launcher_boot_id": "fdebfd2c-733d-4192-abed-9c8369eafae7",
+  "launcher_pid": 1737,
+  "launcher_start_ticks": 38849,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "policy": {
+    "exclusions": {}
+  },
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "started_at": "2026-04-27T01:07:01.927833+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

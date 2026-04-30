@@ -1,0 +1,937 @@
+{
+  "details_dir": "details",
+  "error_message": "corpus suite reported errors",
+  "filters": [],
+  "generated_at": "2026-04-18T09:52:27.584741+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-18T09:52:27.572950+00:00",
+  "launcher_boot_id": "19564785-68c8-42f0-801f-5e49229c1299",
+  "launcher_pid": 1720,
+  "launcher_start_ticks": 35890,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "optimization_summary": {
+    "all_comparable_geomean": 1.113566327819496,
+    "applied_only_geomean": 1.113566327819496,
+    "applied_sample_count": 11,
+    "comparison_exclusion_reason_counts": {
+      "no_programs_changed_in_loader": 33
+    },
+    "comparison_exclusion_reasons": [
+      {
+        "app": "bcc/execsnoop",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/execsnoop:syscall__execve#9",
+        "program": "syscall__execve",
+        "program_id": 9,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/execsnoop",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/execsnoop:do_ret_sys_execve#10",
+        "program": "do_ret_sys_execve",
+        "program_id": 10,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/bindsnoop",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/bindsnoop:bindsnoop_entry#13",
+        "program": "bindsnoop_entry",
+        "program_id": 13,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/bindsnoop",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/bindsnoop:bindsnoop_v6_return#15",
+        "program": "bindsnoop_v6_return",
+        "program_id": 15,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/biosnoop",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/biosnoop:trace_pid_start_tp#18",
+        "program": "trace_pid_start_tp",
+        "program_id": 18,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/biosnoop",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/biosnoop:trace_req_start#19",
+        "program": "trace_req_start",
+        "program_id": 19,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/vfsstat",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/vfsstat:vfs_open#25",
+        "program": "vfs_open",
+        "program_id": 25,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/vfsstat",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/vfsstat:vfs_read#26",
+        "program": "vfs_read",
+        "program_id": 26,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/vfsstat",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/vfsstat:vfs_write#27",
+        "program": "vfs_write",
+        "program_id": 27,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/opensnoop",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/opensnoop:kretfunc__vmlinux____x64_sys_openat#31",
+        "program": "kretfunc__vmlinux____x64_sys_openat",
+        "program_id": 31,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/syscount",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/syscount:tracepoint__raw_syscalls__sys_enter#35",
+        "program": "tracepoint__raw_syscalls__sys_enter",
+        "program_id": 35,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/syscount",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/syscount:tracepoint__raw_syscalls__sys_exit#36",
+        "program": "tracepoint__raw_syscalls__sys_exit",
+        "program_id": 36,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/tcpconnect",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/tcpconnect:trace_connect_entry#39",
+        "program": "trace_connect_entry",
+        "program_id": 39,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/tcpconnect",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/tcpconnect:trace_connect_v4_return#40",
+        "program": "trace_connect_v4_return",
+        "program_id": 40,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/tcpconnect",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/tcpconnect:trace_connect_v6_return#41",
+        "program": "trace_connect_v6_return",
+        "program_id": 41,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/tcplife",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/tcplife:tracepoint__sock__inet_sock_set_state#44",
+        "program": "tracepoint__sock__inet_sock_set_state",
+        "program_id": 44,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/runqlat",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/runqlat:sched_wakeup#48",
+        "program": "sched_wakeup",
+        "program_id": 48,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bcc/runqlat",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bcc/runqlat:raw_tracepoint__sched_wakeup_new#49",
+        "program": "raw_tracepoint__sched_wakeup_new",
+        "program_id": 49,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "scx/rusty:rusty_select_cpu#56",
+        "program": "rusty_select_cpu",
+        "program_id": 56,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "scx/rusty:rusty_enqueue#58",
+        "program": "rusty_enqueue",
+        "program_id": 58,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "scx/rusty:rusty_dispatch#59",
+        "program": "rusty_dispatch",
+        "program_id": 59,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "scx/rusty:rusty_runnable#60",
+        "program": "rusty_runnable",
+        "program_id": 60,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "scx/rusty:rusty_running#61",
+        "program": "rusty_running",
+        "program_id": 61,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "scx/rusty:rusty_stopping#62",
+        "program": "rusty_stopping",
+        "program_id": 62,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "scx/rusty:rusty_quiescent#63",
+        "program": "rusty_quiescent",
+        "program_id": 63,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "scx/rusty:rusty_set_weight#64",
+        "program": "rusty_set_weight",
+        "program_id": 64,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "scx/rusty:rusty_set_cpumask#65",
+        "program": "rusty_set_cpumask",
+        "program_id": 65,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "scx/rusty:rusty_init_task#66",
+        "program": "rusty_init_task",
+        "program_id": 66,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "scx/rusty",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "scx/rusty:rusty_exit_task#67",
+        "program": "rusty_exit_task",
+        "program_id": 67,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "tetragon/default",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "tetragon/default:event_execve#89",
+        "program": "event_execve",
+        "program_id": 89,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "tetragon/default",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "tetragon/default:tg_kp_bprm_committing_creds#90",
+        "program": "tg_kp_bprm_committing_creds",
+        "program_id": 90,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "katran",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "katran:balancer_ingress#123",
+        "program": "balancer_ingress",
+        "program_id": 123,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      },
+      {
+        "app": "bpftrace/biosnoop",
+        "applied": true,
+        "apply_error": "",
+        "changed": false,
+        "label": "bpftrace/biosnoop:block_io_start#139",
+        "program": "block_io_start",
+        "program_id": 139,
+        "reason": "no_programs_changed_in_loader",
+        "unit": "program"
+      }
+    ],
+    "discovered_programs": 44,
+    "per_app": [
+      {
+        "all_comparable_geomean": 0.9414675130797951,
+        "app": "bcc/capable",
+        "applied_only_geomean": 0.9414675130797951,
+        "applied_program_count": 1,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "bcc",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "exec_storm"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "bcc/execsnoop",
+        "applied_only_geomean": null,
+        "applied_program_count": 2,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/execsnoop:syscall__execve#9",
+            "program": "syscall__execve",
+            "program_id": 9,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/execsnoop:do_ret_sys_execve#10",
+            "program": "do_ret_sys_execve",
+            "program_id": 10,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 2,
+        "runner": "bcc",
+        "sample_count": 0,
+        "status": "ok",
+        "workload": "exec_storm"
+      },
+      {
+        "all_comparable_geomean": 0.9896579681885103,
+        "app": "bcc/bindsnoop",
+        "applied_only_geomean": 0.9896579681885103,
+        "applied_program_count": 3,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/bindsnoop:bindsnoop_entry#13",
+            "program": "bindsnoop_entry",
+            "program_id": 13,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/bindsnoop:bindsnoop_v6_return#15",
+            "program": "bindsnoop_v6_return",
+            "program_id": 15,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 3,
+        "runner": "bcc",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "bind_storm"
+      },
+      {
+        "all_comparable_geomean": 1.0096557963940038,
+        "app": "bcc/biosnoop",
+        "applied_only_geomean": 1.0096557963940038,
+        "applied_program_count": 3,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/biosnoop:trace_pid_start_tp#18",
+            "program": "trace_pid_start_tp",
+            "program_id": 18,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/biosnoop:trace_req_start#19",
+            "program": "trace_req_start",
+            "program_id": 19,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 3,
+        "runner": "bcc",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "block_io"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "bcc/vfsstat",
+        "applied_only_geomean": null,
+        "applied_program_count": 3,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/vfsstat:vfs_open#25",
+            "program": "vfs_open",
+            "program_id": 25,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/vfsstat:vfs_read#26",
+            "program": "vfs_read",
+            "program_id": 26,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/vfsstat:vfs_write#27",
+            "program": "vfs_write",
+            "program_id": 27,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 3,
+        "runner": "bcc",
+        "sample_count": 0,
+        "status": "ok",
+        "workload": "vfs_create_write_fsync"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "bcc/opensnoop",
+        "applied_only_geomean": null,
+        "applied_program_count": 1,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/opensnoop:kretfunc__vmlinux____x64_sys_openat#31",
+            "program": "kretfunc__vmlinux____x64_sys_openat",
+            "program_id": 31,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "bcc",
+        "sample_count": 0,
+        "status": "ok",
+        "workload": "file_open_storm"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "bcc/syscount",
+        "applied_only_geomean": null,
+        "applied_program_count": 2,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/syscount:tracepoint__raw_syscalls__sys_enter#35",
+            "program": "tracepoint__raw_syscalls__sys_enter",
+            "program_id": 35,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/syscount:tracepoint__raw_syscalls__sys_exit#36",
+            "program": "tracepoint__raw_syscalls__sys_exit",
+            "program_id": 36,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 2,
+        "runner": "bcc",
+        "sample_count": 0,
+        "status": "ok",
+        "workload": "file_open_storm"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "bcc/tcpconnect",
+        "applied_only_geomean": null,
+        "applied_program_count": 3,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/tcpconnect:trace_connect_entry#39",
+            "program": "trace_connect_entry",
+            "program_id": 39,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/tcpconnect:trace_connect_v4_return#40",
+            "program": "trace_connect_v4_return",
+            "program_id": 40,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/tcpconnect:trace_connect_v6_return#41",
+            "program": "trace_connect_v6_return",
+            "program_id": 41,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 3,
+        "runner": "bcc",
+        "sample_count": 0,
+        "status": "ok",
+        "workload": "network"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "bcc/tcplife",
+        "applied_only_geomean": null,
+        "applied_program_count": 1,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/tcplife:tracepoint__sock__inet_sock_set_state#44",
+            "program": "tracepoint__sock__inet_sock_set_state",
+            "program_id": 44,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "bcc",
+        "sample_count": 0,
+        "status": "ok",
+        "workload": "network"
+      },
+      {
+        "all_comparable_geomean": 1.0424230444994194,
+        "app": "bcc/runqlat",
+        "applied_only_geomean": 1.0424230444994194,
+        "applied_program_count": 3,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [
+          {
+            "label": "bcc/runqlat:sched_wakeup#48",
+            "program": "sched_wakeup",
+            "program_id": 48,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "bcc/runqlat:raw_tracepoint__sched_wakeup_new#49",
+            "program": "raw_tracepoint__sched_wakeup_new",
+            "program_id": 49,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 3,
+        "runner": "bcc",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "hackbench"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "scx/rusty",
+        "applied_only_geomean": null,
+        "applied_program_count": 11,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [
+          {
+            "label": "scx/rusty:rusty_select_cpu#56",
+            "program": "rusty_select_cpu",
+            "program_id": 56,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_enqueue#58",
+            "program": "rusty_enqueue",
+            "program_id": 58,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_dispatch#59",
+            "program": "rusty_dispatch",
+            "program_id": 59,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_runnable#60",
+            "program": "rusty_runnable",
+            "program_id": 60,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_running#61",
+            "program": "rusty_running",
+            "program_id": 61,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_stopping#62",
+            "program": "rusty_stopping",
+            "program_id": 62,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_quiescent#63",
+            "program": "rusty_quiescent",
+            "program_id": 63,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_set_weight#64",
+            "program": "rusty_set_weight",
+            "program_id": 64,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_set_cpumask#65",
+            "program": "rusty_set_cpumask",
+            "program_id": 65,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_init_task#66",
+            "program": "rusty_init_task",
+            "program_id": 66,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "scx/rusty:rusty_exit_task#67",
+            "program": "rusty_exit_task",
+            "program_id": 67,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 11,
+        "runner": "scx",
+        "sample_count": 0,
+        "status": "ok",
+        "workload": "hackbench"
+      },
+      {
+        "all_comparable_geomean": 1.3626177423421653,
+        "app": "tetragon/default",
+        "applied_only_geomean": 1.3626177423421653,
+        "applied_program_count": 6,
+        "comparable_program_count": 4,
+        "comparison_exclusions": [
+          {
+            "label": "tetragon/default:event_execve#89",
+            "program": "event_execve",
+            "program_id": 89,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          },
+          {
+            "label": "tetragon/default:tg_kp_bprm_committing_creds#90",
+            "program": "tg_kp_bprm_committing_creds",
+            "program_id": 90,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 6,
+        "runner": "tetragon",
+        "sample_count": 4,
+        "status": "ok",
+        "workload": "exec_storm"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "katran",
+        "applied_only_geomean": null,
+        "applied_program_count": 1,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [
+          {
+            "label": "katran:balancer_ingress#123",
+            "program": "balancer_ingress",
+            "program_id": 123,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "katran",
+        "sample_count": 0,
+        "status": "ok",
+        "workload": "test_run"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "tracee/default",
+        "applied_only_geomean": null,
+        "applied_program_count": 0,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [],
+        "measurement_mode": "",
+        "program_count": 0,
+        "runner": "tracee",
+        "sample_count": 0,
+        "status": "error",
+        "workload": "tracee_default"
+      },
+      {
+        "all_comparable_geomean": 1.0283523408748312,
+        "app": "bpftrace/capable",
+        "applied_only_geomean": 1.0283523408748312,
+        "applied_program_count": 1,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "bpftrace",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "exec_storm"
+      },
+      {
+        "all_comparable_geomean": 0.9931952260246829,
+        "app": "bpftrace/biosnoop",
+        "applied_only_geomean": 0.9931952260246829,
+        "applied_program_count": 2,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [
+          {
+            "label": "bpftrace/biosnoop:block_io_start#139",
+            "program": "block_io_start",
+            "program_id": 139,
+            "reason": "no_programs_changed_in_loader",
+            "unit": "program"
+          }
+        ],
+        "measurement_mode": "program",
+        "program_count": 2,
+        "runner": "bpftrace",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "block_io"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "bpftrace/vfsstat",
+        "applied_only_geomean": null,
+        "applied_program_count": 0,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [],
+        "measurement_mode": "",
+        "program_count": 0,
+        "runner": "bpftrace",
+        "sample_count": 0,
+        "status": "error",
+        "workload": "vfs_create_write_fsync"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "bpftrace/runqlat",
+        "applied_only_geomean": null,
+        "applied_program_count": 0,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [],
+        "measurement_mode": "",
+        "program_count": 0,
+        "runner": "bpftrace",
+        "sample_count": 0,
+        "status": "error",
+        "workload": "hackbench"
+      },
+      {
+        "all_comparable_geomean": 0.9455760401868847,
+        "app": "bpftrace/tcplife",
+        "applied_only_geomean": 0.9455760401868847,
+        "applied_program_count": 1,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "bpftrace",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "network"
+      },
+      {
+        "all_comparable_geomean": null,
+        "app": "bpftrace/tcpretrans",
+        "applied_only_geomean": null,
+        "applied_program_count": 0,
+        "comparable_program_count": 0,
+        "comparison_exclusions": [],
+        "measurement_mode": "",
+        "program_count": 0,
+        "runner": "bpftrace",
+        "sample_count": 0,
+        "status": "error",
+        "workload": "tcp_retransmit"
+      }
+    ],
+    "sample_count": 11,
+    "selected_apps": 20,
+    "statuses": {
+      "error": 4,
+      "ok": 16
+    }
+  },
+  "run_type": "x86_kvm_corpus",
+  "samples": 30,
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "started_at": "2026-04-18T09:27:04.271457+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

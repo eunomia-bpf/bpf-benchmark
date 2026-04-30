@@ -1,0 +1,35 @@
+{
+  "completed_at": "2026-04-26T04:03:33.255801+00:00",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "generated_at": "2026-04-26T04:03:33.255807+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-26T04:03:33.255801+00:00",
+  "launcher_boot_id": "a7620720-7a78-415a-9b68-f0fde35f103d",
+  "launcher_pid": 1737,
+  "launcher_start_ticks": 34840,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/new-app-integration-review-20260425/tracee-only.yaml",
+  "policy": {
+    "exclusions": {}
+  },
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "started_at": "2026-04-26T04:00:53.741268+00:00",
+  "status": "completed",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

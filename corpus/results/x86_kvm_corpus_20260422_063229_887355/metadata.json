@@ -1,0 +1,72 @@
+{
+  "completed_at": "2026-04-22T06:32:36.699907+00:00",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "filters": [
+    "bcc/capable"
+  ],
+  "generated_at": "2026-04-22T06:32:36.699910+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-22T06:32:36.699907+00:00",
+  "launcher_boot_id": "d401ddb2-fbc5-4014-a113-8e0c4c616f2e",
+  "launcher_pid": 1721,
+  "launcher_start_ticks": 29259,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "optimization_summary": {
+    "all_comparable_geomean": 1.0109546446957347,
+    "applied_only_geomean": 1.0109546446957347,
+    "applied_sample_count": 1,
+    "comparison_exclusion_reason_counts": {},
+    "comparison_exclusion_reasons": [],
+    "discovered_programs": 1,
+    "per_app": [
+      {
+        "all_comparable_geomean": 1.0109546446957347,
+        "app": "bcc/capable",
+        "applied_only_geomean": 1.0109546446957347,
+        "applied_program_count": 1,
+        "comparable_program_count": 1,
+        "comparison_exclusions": [],
+        "measurement_mode": "program",
+        "program_count": 1,
+        "runner": "bcc",
+        "sample_count": 1,
+        "status": "ok",
+        "workload": "exec_storm"
+      }
+    ],
+    "sample_count": 1,
+    "selected_apps": 1,
+    "statuses": {
+      "ok": 1
+    }
+  },
+  "policy": {
+    "exclusions": {
+      "struct_ops": [
+        "map_inline",
+        "dce"
+      ]
+    }
+  },
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "started_at": "2026-04-22T06:32:29.887355+00:00",
+  "status": "completed",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

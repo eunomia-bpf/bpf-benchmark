@@ -1,0 +1,32 @@
+{
+  "case": "tetragon",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "generated_at": "2026-04-30T02:05:55.502576+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-30T02:05:55.502571+00:00",
+  "launcher_boot_id": "8101dc7c-9893-460b-a27d-3516a4cb1834",
+  "launcher_pid": 1901,
+  "launcher_start_ticks": 39391,
+  "policy": {
+    "exclusions": {}
+  },
+  "run_type": "tetragon",
+  "started_at": "2026-04-30T02:05:55.501023+00:00",
+  "status": "running",
+  "suite": "e2e"
+}

@@ -1,0 +1,35 @@
+{
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+  "generated_at": "2026-04-26T06:53:05.798049+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-26T06:53:05.798046+00:00",
+  "launcher_boot_id": "65beef5f-2e3f-408f-ac27-5b19ab1d5eb4",
+  "launcher_pid": 1736,
+  "launcher_start_ticks": 90300,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "policy": {
+    "exclusions": {}
+  },
+  "run_type": "x86_kvm_corpus",
+  "samples": 30,
+  "started_at": "2026-04-26T06:44:50.309533+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

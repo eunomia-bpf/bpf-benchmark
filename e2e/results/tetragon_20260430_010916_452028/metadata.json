@@ -1,0 +1,33 @@
+{
+  "case": "tetragon",
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "Tetragon case could not run: stress_ng_os_io_network workload stressor io timed out",
+  "generated_at": "2026-04-30T01:10:24.692267+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-30T01:10:24.692264+00:00",
+  "launcher_boot_id": "196c4d25-3868-47ca-9e02-ba08094841a8",
+  "launcher_pid": 1898,
+  "launcher_start_ticks": 55985,
+  "policy": {
+    "exclusions": {}
+  },
+  "run_type": "tetragon",
+  "started_at": "2026-04-30T01:09:16.452028+00:00",
+  "status": "error",
+  "suite": "e2e"
+}
