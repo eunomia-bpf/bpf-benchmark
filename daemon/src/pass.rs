@@ -67,6 +67,24 @@ pub struct BpfProgram {
     pub branch_miss_rate: Option<f64>,
     /// Parsed `log_level=2` verifier state snapshots for the original program.
     pub verifier_states: Arc<[VerifierInsn]>,
+    /// Cumulative `original_pc -> current_pc` map.
+    ///
+    /// Length equals the original program's instruction count (set in
+    /// `BpfProgram::new`). After every transform pass, `remap_annotations`
+    /// composes the pass's local `old_pc -> new_pc` map into this cumulative
+    /// one. Submitted as `attr->rejit.addr_map` to the kernel under
+    /// `BPF_F_REJIT_PRESERVE_METADATA`, where it drives `adjust_btf_line`'s
+    /// remap of `prog->aux->linfo[i].insn_off` from original PCs to the
+    /// rewritten layout (so introspection tools keep seeing accurate
+    /// per-line metadata after the rewrite).
+    ///
+    /// Entries equal to `BPF_REJIT_ADDR_MAP_DELETED` (== u32::MAX in u32
+    /// form; here represented as the program length, which the kernel
+    /// treats as out-of-range) mark original PCs whose instruction was
+    /// removed by the rewrite (e.g. dce); the kernel drops the
+    /// corresponding line_info entries rather than mapping them to a
+    /// wrong PC.
+    pub original_addr_map: Vec<usize>,
 }
 
 /// Transform log entry — records sites applied by each pass.
@@ -88,6 +106,8 @@ impl BpfProgram {
             map_fd_bindings: HashMap::new(),
             branch_miss_rate: None,
             verifier_states: Arc::from([]),
+            // Identity: each original PC initially resides at the same PC.
+            original_addr_map: (0..len).collect(),
         }
     }
 
@@ -131,6 +151,56 @@ impl BpfProgram {
         }
 
         self.annotations = new_annotations;
+
+        // Compose this pass's `old_pc -> new_pc` map into the cumulative
+        // `original_pc -> current_pc` map. After this call,
+        // `original_addr_map[orig_pc]` reflects the position of the
+        // original instruction in the latest insn stream. Entries that
+        // map past the new end (the original instruction was deleted by
+        // a pass) get clamped to `new_len`, which serves as the
+        // "deleted" sentinel — when serialized as u32 to the kernel via
+        // `addr_map_for_kernel`, those entries become
+        // `BPF_REJIT_ADDR_MAP_DELETED` so the kernel drops the
+        // corresponding line_info entries.
+        for entry in &mut self.original_addr_map {
+            if *entry < addr_map.len() {
+                let next = addr_map[*entry];
+                *entry = next.min(new_len);
+            } else if *entry < new_len {
+                // Entry already past the local map's range — leave it as
+                // the kernel-visible "deleted" sentinel position by
+                // clamping to new_len. Defensive: shouldn't happen if
+                // each pass's local addr_map covers the full insn stream.
+                *entry = new_len;
+            }
+        }
+    }
+
+    /// Serialize `original_addr_map` into the u32 form expected by the
+    /// kernel's `attr->rejit.addr_map`.
+    ///
+    /// Entries equal to the current insn count (the "deleted" sentinel
+    /// produced by `remap_annotations` when an original PC was clamped
+    /// past the end) are converted to `BPF_REJIT_ADDR_MAP_DELETED`
+    /// (u32::MAX). All other entries are emitted as plain u32.
+    ///
+    /// The kernel's `adjust_btf_line` (under
+    /// `BPF_F_REJIT_PRESERVE_METADATA`) reads this array to remap
+    /// `prog->aux->linfo[i].insn_off` from the original PC to its
+    /// new position, dropping any linfo entry whose original PC maps to
+    /// the deleted sentinel.
+    pub fn addr_map_for_kernel(&self) -> Vec<u32> {
+        let new_len = self.insns.len();
+        self.original_addr_map
+            .iter()
+            .map(|&pc| {
+                if pc >= new_len {
+                    crate::bpf::BPF_REJIT_ADDR_MAP_DELETED
+                } else {
+                    pc as u32
+                }
+            })
+            .collect()
     }
 
     /// Inject profiling data into annotations.

@@ -411,8 +411,16 @@ fn maybe_attach_original_verifier_states(
         let _map_fds_guard =
             bpf::relocate_map_fds_with_bindings(&mut probe_insns, map_ids, &map_fd_bindings)
                 .context("relocate map FDs for verifier-log capture")?;
-        let result = bpf::bpf_prog_rejit_capture_verifier_log(prog_fd, &probe_insns, &[])
-            .context("capture original-program verifier log via BPF_PROG_REJIT(log_level=2)")?;
+        // Identity addr_map: this is a no-op rewrite of the original prog,
+        // so each original PC maps to itself in the new (== old) layout.
+        let identity_addr_map: Vec<u32> = (0..probe_insns.len() as u32).collect();
+        let result = bpf::bpf_prog_rejit_capture_verifier_log(
+            prog_fd,
+            &probe_insns,
+            &[],
+            &identity_addr_map,
+        )
+        .context("capture original-program verifier log via BPF_PROG_REJIT(log_level=2)")?;
         if result.verifier_log.trim().is_empty() {
             anyhow::bail!(
                 "BPF_PROG_REJIT(log_level=2) original-program capture returned an empty verifier log"
@@ -532,26 +540,9 @@ pub(crate) fn try_apply_one(
 
     let pipeline_start = Instant::now();
     let pipeline_result = if matches!(mode, OptimizeMode::Apply) {
-        let prog_load_meta = bpf::bpf_prog_load_meta_from_prog_info(prog_id, fd.as_raw_fd(), &info)
-            .context("prepare live-program metadata for per-pass BPF_PROG_LOAD verify");
         let mut verifier = |pass_name: &str,
                             program: &pass::BpfProgram|
          -> Result<pass::PassVerifyResult> {
-            let prog_load_meta = match prog_load_meta.as_ref() {
-                Ok(meta) => meta,
-                Err(err) => {
-                    let headline = error_headline(err);
-                    eprintln!(
-                        "    WARN: skipping pass '{}' for prog {} ({}): {}",
-                        pass_name,
-                        prog_id,
-                        info.name_str(),
-                        headline,
-                    );
-                    return Ok(pass::PassVerifyResult::rejected(headline));
-                }
-            };
-
             let mut verify_insns = program.insns.clone();
             let _map_fds_guard = bpf::relocate_map_fds_with_bindings(
                 &mut verify_insns,
@@ -571,29 +562,22 @@ pub(crate) fn try_apply_one(
                 &format!("per-pass verify for '{}'", pass_name),
             )?;
             let fd_array = build_rejit_fd_array(&program.required_btf_fds);
+            let addr_map = program.addr_map_for_kernel();
 
             let rejit_start = Instant::now();
-            let verify_result = match bpf::bpf_prog_load_verify(
-                prog_load_meta,
+            let verify_result = match bpf::bpf_prog_rejit_verify_preserve(
+                fd.as_raw_fd(),
                 &verify_insns,
                 &fd_array,
+                &addr_map,
             ) {
                 Ok(result) => {
                     let states = if result.verifier_log.is_empty() {
-                        if result.log_true_size > 0 {
-                            eprintln!(
-                                    "    WARN: accepted pass '{}' for prog {} ({}) exceeded the verifier log buffer (true size {} bytes); verifier-guided states are unavailable for subsequent passes",
-                                    pass_name,
-                                    prog_id,
-                                    info.name_str(),
-                                    result.log_true_size
-                                );
-                        }
                         Vec::new()
                     } else {
                         match parse_verifier_states_from_log(
                             &result.verifier_log,
-                            "BPF_PROG_LOAD(log_level=2) per-pass verify",
+                            "BPF_PROG_REJIT(VERIFY_ONLY|PRESERVE_METADATA) per-pass verify",
                         ) {
                             Ok(states) => states,
                             Err(err) => {
@@ -736,8 +720,14 @@ pub(crate) fn try_apply_one(
 
     validate_required_btf_fds(&program.required_btf_fds, &local_ctx, "final REJIT")?;
     let fd_array = build_rejit_fd_array(&program.required_btf_fds);
+    let final_addr_map = program.addr_map_for_kernel();
     let rejit_start = Instant::now();
-    match bpf::bpf_prog_rejit(fd.as_raw_fd(), &final_rejit_insns, &fd_array) {
+    match bpf::bpf_prog_rejit(
+        fd.as_raw_fd(),
+        &final_rejit_insns,
+        &fd_array,
+        &final_addr_map,
+    ) {
         Ok(rejit_result) => {
             total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
             println!("    REJIT ok");

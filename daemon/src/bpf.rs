@@ -4,7 +4,6 @@
 //! All interaction with the kernel goes through `libc::syscall(SYS_bpf, ...)`.
 
 use std::collections::HashMap;
-use std::ffi::CString;
 use std::os::unix::io::{AsRawFd, FromRawFd, OwnedFd, RawFd};
 use std::sync::OnceLock;
 
@@ -20,7 +19,6 @@ const BPF_MAP_LOOKUP_ELEM: u32 = 1;
 const BPF_MAP_TYPE_ARRAY: u32 = 2;
 const BPF_MAP_TYPE_PERCPU_HASH: u32 = 5;
 const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = 6;
-const BPF_PROG_LOAD: u32 = 5;
 const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = 10;
 const BPF_PROG_GET_NEXT_ID: u32 = 11;
 #[cfg(test)]
@@ -33,18 +31,27 @@ const BPF_BTF_LOAD: u32 = 18;
 const BPF_BTF_GET_FD_BY_ID: u32 = 19;
 // BPF_TASK_FD_QUERY=20, BPF_MAP_LOOKUP_AND_DELETE_ELEM=21, BPF_MAP_FREEZE=22
 const BPF_BTF_GET_NEXT_ID: u32 = 23;
-const BPF_LINK_GET_FD_BY_ID: u32 = 30;
-const BPF_LINK_GET_NEXT_ID: u32 = 31;
 // BPF_PROG_REJIT is the last entry before __MAX_BPF_CMD.
 // BPF_TOKEN_CREATE=36, BPF_PROG_STREAM_READ_BY_FD=37,
 // BPF_PROG_ASSOC_STRUCT_OPS=38, BPF_PROG_REJIT=39
 const BPF_PROG_REJIT: u32 = 39;
 
-const BPF_LINK_TYPE_TRACING: u32 = 2;
-const BPF_LINK_TYPE_CGROUP: u32 = 3;
-const BPF_LINK_TYPE_NETNS: u32 = 5;
-
-const BPF_PROG_TYPE_EXT: u32 = 28;
+// BPF_PROG_REJIT flag bits (uapi). When set, kernel preserves the live
+// program's existing aux->{btf, func_info, line_info} on the tmp prog so
+// the third-party caller (this daemon) doesn't have to re-submit metadata
+// it doesn't own. addr_map (one new-PC per original insn) lets the kernel
+// remap line_info insn_off after the rewrite.
+const BPF_F_REJIT_PRESERVE_METADATA: u32 = 1 << 0;
+// When set, the kernel runs the verifier on the new bytecode but skips
+// JIT and the image swap. Used for per-pass pre-verify probes during
+// daemon scan; the original program is unchanged regardless of outcome.
+const BPF_F_REJIT_VERIFY_ONLY: u32 = 1 << 1;
+/// Sentinel value for addr_map[i] when the original insn was deleted by
+/// the rewrite (e.g. dce). The kernel drops the corresponding line_info
+/// entry rather than mapping it to a wrong PC. Re-exported for use by
+/// `pass::BpfProgram::addr_map_for_kernel` so the daemon-side serialization
+/// stays in sync with the kernel uapi value.
+pub const BPF_REJIT_ADDR_MAP_DELETED: u32 = u32::MAX;
 
 const BPF_OBJ_NAME_LEN: usize = 16;
 
@@ -107,44 +114,18 @@ struct AttrRejit {
     fd_array: u64, // __aligned_u64
     fd_array_cnt: u32,
     flags: u32,
-    _pad: [u8; 128 - 48], // fields above total 48 bytes
+    addr_map: u64, // __aligned_u64; valid only when BPF_F_REJIT_PRESERVE_METADATA
+    addr_map_cnt: u32,
+    _pad: [u8; 128 - 60], // fields above total 60 bytes
 }
 
-/// Attr for BPF_PROG_LOAD — matches `bpf_attr`'s prog_load variant.
-#[repr(C)]
-struct AttrProgLoad {
-    prog_type: u32,
-    insn_cnt: u32,
-    insns: u64,
-    license: u64,
-    log_level: u32,
-    log_size: u32,
-    log_buf: u64,
-    kern_version: u32,
-    prog_flags: u32,
-    prog_name: [u8; BPF_OBJ_NAME_LEN],
-    prog_ifindex: u32,
-    expected_attach_type: u32,
-    prog_btf_fd: u32,
-    func_info_rec_size: u32,
-    func_info: u64,
-    func_info_cnt: u32,
-    line_info_rec_size: u32,
-    line_info: u64,
-    line_info_cnt: u32,
-    attach_btf_id: u32,
-    attach_fd: u32, // union { attach_prog_fd, attach_btf_obj_fd }
-    core_relo_cnt: u32,
-    fd_array: u64,
-    core_relos: u64,
-    core_relo_rec_size: u32,
-    log_true_size: u32,
-    prog_token_fd: i32,
-    fd_array_cnt: u32,
-    signature: u64,
-    signature_size: u32,
-    keyring_id: i32,
-}
+// AttrProgLoad / ProgLoadMeta / bpf_prog_load_* etc. were deleted along
+// with the BPF_PROG_LOAD-based per-pass pre-verify path. Per-pass
+// pre-verify and final REJIT both go through BPF_PROG_REJIT now (see
+// `bpf_prog_rejit_verify_preserve` and `bpf_prog_rejit`); the daemon
+// never has to fetch BTF / func_info / line_info from the live program
+// because the kernel preserves them on tmp under
+// BPF_F_REJIT_PRESERVE_METADATA.
 
 // Safety: all-zeros is a valid representation for these C-compatible structs.
 fn zeroed_attr<T>() -> T {
@@ -303,74 +284,6 @@ pub struct BpfProgImages {
     pub jited_prog_insns: Vec<u8>,
 }
 
-#[derive(Debug)]
-pub struct ProgLoadMeta {
-    pub prog_type: u32,
-    pub prog_ifindex: u32,
-    pub expected_attach_type: u32,
-    pub attach_btf_id: u32,
-    pub prog_name: String,
-    pub gpl_compatible: bool,
-    prog_btf_fd: Option<OwnedFd>,
-    func_info_rec_size: u32,
-    func_info: Vec<u8>,
-    line_info_rec_size: u32,
-    line_info: Vec<u8>,
-    attach_btf_obj_fd: Option<OwnedFd>,
-    attach_prog_fd: Option<OwnedFd>,
-}
-
-#[derive(Debug, Default)]
-struct ProgLoadInfoRecords {
-    func_info_rec_size: u32,
-    func_info: Vec<u8>,
-    line_info_rec_size: u32,
-    line_info: Vec<u8>,
-}
-
-#[derive(Clone, Copy, Debug, Default)]
-struct LinkAttachMetadata {
-    expected_attach_type: u32,
-    attach_prog_id: Option<u32>,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy)]
-struct RawBpfLinkInfo {
-    link_type: u32,
-    id: u32,
-    prog_id: u32,
-    _pad: u32,
-    data: [u8; 64],
-}
-
-impl Default for RawBpfLinkInfo {
-    fn default() -> Self {
-        zeroed_attr()
-    }
-}
-
-impl ProgLoadMeta {
-    fn license(&self) -> &'static str {
-        if self.gpl_compatible {
-            "GPL"
-        } else {
-            "MIT"
-        }
-    }
-
-    fn attach_fd(&self) -> Option<RawFd> {
-        self.attach_prog_fd
-            .as_ref()
-            .map(AsRawFd::as_raw_fd)
-            .or_else(|| self.attach_btf_obj_fd.as_ref().map(AsRawFd::as_raw_fd))
-    }
-
-    fn prog_btf_fd(&self) -> Option<RawFd> {
-        self.prog_btf_fd.as_ref().map(AsRawFd::as_raw_fd)
-    }
-}
-
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct MachineCodeLine {
     pub offset: usize,
@@ -429,63 +342,6 @@ unsafe fn sys_bpf(cmd: u32, attr: *mut u8, size: u32) -> libc::c_long {
 
 fn bpf_err(context: &str) -> anyhow::Error {
     anyhow::anyhow!("{}: {}", context, std::io::Error::last_os_error())
-}
-
-fn read_u32_le(bytes: &[u8], offset: usize) -> u32 {
-    let mut raw = [0u8; 4];
-    raw.copy_from_slice(&bytes[offset..offset + 4]);
-    u32::from_ne_bytes(raw)
-}
-
-fn copy_prog_name(dst: &mut [u8; BPF_OBJ_NAME_LEN], name: &str) {
-    let bytes = name.as_bytes();
-    let copy_len = bytes.len().min(BPF_OBJ_NAME_LEN.saturating_sub(1));
-    dst[..copy_len].copy_from_slice(&bytes[..copy_len]);
-}
-
-fn info_bytes_len(rec_size: u32, cnt: u32, field_name: &str) -> Result<usize> {
-    match (rec_size, cnt) {
-        (_, 0) => Ok(0),
-        (0, _) => bail!("{field_name} count {} has zero record size", cnt),
-        _ => (rec_size as usize)
-            .checked_mul(cnt as usize)
-            .ok_or_else(|| anyhow::anyhow!("{field_name} byte size overflow: {cnt} * {rec_size}")),
-    }
-}
-
-fn info_record_count(bytes: &[u8], rec_size: u32, field_name: &str) -> u32 {
-    debug_assert!(rec_size != 0, "{field_name} record size must be non-zero");
-    debug_assert!(
-        bytes.len().is_multiple_of(rec_size as usize),
-        "{field_name} byte size {} must be a multiple of record size {}",
-        bytes.len(),
-        rec_size
-    );
-    (bytes.len() / rec_size as usize) as u32
-}
-
-fn gpl_compatible(info: &BpfProgInfo) -> bool {
-    info.gpl_compatible_pad & 1 != 0
-}
-
-fn decode_link_attach_metadata(info: &RawBpfLinkInfo, prog_type: u32) -> LinkAttachMetadata {
-    match info.link_type {
-        BPF_LINK_TYPE_TRACING => LinkAttachMetadata {
-            expected_attach_type: read_u32_le(&info.data, 0),
-            attach_prog_id: (prog_type == BPF_PROG_TYPE_EXT)
-                .then(|| read_u32_le(&info.data, 4))
-                .filter(|id| *id != 0),
-        },
-        BPF_LINK_TYPE_CGROUP => LinkAttachMetadata {
-            expected_attach_type: read_u32_le(&info.data, 8),
-            attach_prog_id: None,
-        },
-        BPF_LINK_TYPE_NETNS => LinkAttachMetadata {
-            expected_attach_type: read_u32_le(&info.data, 4),
-            attach_prog_id: None,
-        },
-        _ => LinkAttachMetadata::default(),
-    }
 }
 
 fn bpf_obj_get_info_by_fd(fd: RawFd, info: &mut BpfProgInfo, context: &str) -> Result<()> {
@@ -660,90 +516,6 @@ pub fn bpf_prog_get_fd_by_id(id: u32) -> Result<OwnedFd> {
     }
     // Safety: the kernel returned a valid new fd.
     Ok(unsafe { OwnedFd::from_raw_fd(ret as RawFd) })
-}
-
-fn bpf_link_get_next_id(start_id: u32) -> Result<Option<u32>> {
-    let mut attr: AttrGetNextId = zeroed_attr();
-    attr.start_id = start_id;
-    let ret = unsafe {
-        sys_bpf(
-            BPF_LINK_GET_NEXT_ID,
-            &mut attr as *mut _ as *mut u8,
-            std::mem::size_of::<AttrGetNextId>() as u32,
-        )
-    };
-    if ret < 0 {
-        let err = std::io::Error::last_os_error();
-        if err.raw_os_error() == Some(libc::ENOENT) {
-            return Ok(None);
-        }
-        bail!("BPF_LINK_GET_NEXT_ID: {}", err);
-    }
-    Ok(Some(attr.next_id))
-}
-
-fn bpf_link_get_fd_by_id(id: u32) -> Result<OwnedFd> {
-    let mut attr: AttrGetFdById = zeroed_attr();
-    attr.prog_id = id; // same union position as link_id
-    let ret = unsafe {
-        sys_bpf(
-            BPF_LINK_GET_FD_BY_ID,
-            &mut attr as *mut _ as *mut u8,
-            std::mem::size_of::<AttrGetFdById>() as u32,
-        )
-    };
-    if ret < 0 {
-        bail!(bpf_err(&format!("BPF_LINK_GET_FD_BY_ID({})", id)));
-    }
-    Ok(unsafe { OwnedFd::from_raw_fd(ret as RawFd) })
-}
-
-fn bpf_link_get_info(fd: RawFd) -> Result<RawBpfLinkInfo> {
-    let mut info = RawBpfLinkInfo::default();
-    let mut attr: AttrGetInfoByFd = zeroed_attr();
-    attr.bpf_fd = fd as u32;
-    attr.info_len = std::mem::size_of::<RawBpfLinkInfo>() as u32;
-    attr.info = &mut info as *mut _ as u64;
-
-    let ret = unsafe {
-        sys_bpf(
-            BPF_OBJ_GET_INFO_BY_FD,
-            &mut attr as *mut _ as *mut u8,
-            std::mem::size_of::<AttrGetInfoByFd>() as u32,
-        )
-    };
-    if ret < 0 {
-        bail!(bpf_err("BPF_OBJ_GET_INFO_BY_FD (link)"));
-    }
-    Ok(info)
-}
-
-fn best_effort_prog_link_metadata(prog_id: u32, prog_type: u32) -> Option<LinkAttachMetadata> {
-    let mut next_id = 0u32;
-    loop {
-        let link_id = match bpf_link_get_next_id(next_id) {
-            Ok(Some(id)) => id,
-            Ok(None) | Err(_) => return None,
-        };
-        next_id = link_id;
-
-        let fd = match bpf_link_get_fd_by_id(link_id) {
-            Ok(fd) => fd,
-            Err(_) => continue,
-        };
-        let info = match bpf_link_get_info(fd.as_raw_fd()) {
-            Ok(info) => info,
-            Err(_) => continue,
-        };
-        if info.prog_id != prog_id {
-            continue;
-        }
-
-        let metadata = decode_link_attach_metadata(&info, prog_type);
-        if metadata.expected_attach_type != 0 || metadata.attach_prog_id.is_some() {
-            return Some(metadata);
-        }
-    }
 }
 
 /// Open a file descriptor for the BPF map with the given ID.
@@ -1072,133 +844,6 @@ pub fn bpf_btf_get_fd_by_module_name(module_name: &str) -> Result<OwnedFd> {
     bail!("BTF object for module '{}' not found", module_name)
 }
 
-fn bpf_prog_get_load_info_records(fd: RawFd, info: &BpfProgInfo) -> Result<ProgLoadInfoRecords> {
-    let func_info_len = info_bytes_len(info.func_info_rec_size, info.nr_func_info, "func_info")?;
-    let line_info_len = info_bytes_len(info.line_info_rec_size, info.nr_line_info, "line_info")?;
-
-    if func_info_len == 0 && line_info_len == 0 {
-        return Ok(ProgLoadInfoRecords::default());
-    }
-
-    let mut func_info = vec![0u8; func_info_len];
-    let mut line_info = vec![0u8; line_info_len];
-    let mut info_with_records = BpfProgInfo::default();
-
-    if !func_info.is_empty() {
-        info_with_records.func_info_rec_size = info.func_info_rec_size;
-        info_with_records.nr_func_info = info.nr_func_info;
-        info_with_records.func_info = func_info.as_mut_ptr() as u64;
-    }
-    if !line_info.is_empty() {
-        info_with_records.line_info_rec_size = info.line_info_rec_size;
-        info_with_records.nr_line_info = info.nr_line_info;
-        info_with_records.line_info = line_info.as_mut_ptr() as u64;
-    }
-
-    bpf_obj_get_info_by_fd(
-        fd,
-        &mut info_with_records,
-        "BPF_OBJ_GET_INFO_BY_FD (prog load metadata)",
-    )?;
-
-    let returned_func_info_len = info_bytes_len(
-        info_with_records.func_info_rec_size,
-        info_with_records.nr_func_info,
-        "returned func_info",
-    )?;
-    let returned_line_info_len = info_bytes_len(
-        info_with_records.line_info_rec_size,
-        info_with_records.nr_line_info,
-        "returned line_info",
-    )?;
-
-    if returned_func_info_len > func_info.len() {
-        bail!(
-            "kernel returned {} bytes of func_info, buffer only had {}",
-            returned_func_info_len,
-            func_info.len()
-        );
-    }
-    if returned_line_info_len > line_info.len() {
-        bail!(
-            "kernel returned {} bytes of line_info, buffer only had {}",
-            returned_line_info_len,
-            line_info.len()
-        );
-    }
-
-    func_info.truncate(returned_func_info_len);
-    line_info.truncate(returned_line_info_len);
-
-    Ok(ProgLoadInfoRecords {
-        func_info_rec_size: info_with_records.func_info_rec_size,
-        func_info,
-        line_info_rec_size: info_with_records.line_info_rec_size,
-        line_info,
-    })
-}
-
-pub fn bpf_prog_load_meta_from_prog_info(
-    prog_id: u32,
-    prog_fd: RawFd,
-    info: &BpfProgInfo,
-) -> Result<ProgLoadMeta> {
-    let link_meta = best_effort_prog_link_metadata(prog_id, info.prog_type);
-    let debug_info = bpf_prog_get_load_info_records(prog_fd, info).with_context(|| {
-        format!(
-            "fetch func_info/line_info for BPF_PROG_LOAD verify of prog {}",
-            prog_id
-        )
-    })?;
-    let attach_prog_fd = match link_meta.and_then(|meta| meta.attach_prog_id) {
-        Some(attach_prog_id) => Some(bpf_prog_get_fd_by_id(attach_prog_id).with_context(|| {
-            format!(
-                "open attach target prog {} for BPF_PROG_LOAD verify of prog {}",
-                attach_prog_id, prog_id
-            )
-        })?),
-        None => None,
-    };
-    let attach_btf_obj_fd = if info.attach_btf_obj_id != 0 {
-        Some(
-            bpf_btf_get_fd_by_id(info.attach_btf_obj_id).with_context(|| {
-                format!(
-                    "open attach BTF object {} for BPF_PROG_LOAD verify of prog {}",
-                    info.attach_btf_obj_id, prog_id
-                )
-            })?,
-        )
-    } else {
-        None
-    };
-    let prog_btf_fd = if info.btf_id != 0 {
-        Some(bpf_btf_get_fd_by_id(info.btf_id).with_context(|| {
-            format!(
-                "open prog BTF object {} for BPF_PROG_LOAD verify of prog {}",
-                info.btf_id, prog_id
-            )
-        })?)
-    } else {
-        None
-    };
-
-    Ok(ProgLoadMeta {
-        prog_type: info.prog_type,
-        prog_ifindex: info.ifindex,
-        expected_attach_type: link_meta.map_or(0, |meta| meta.expected_attach_type),
-        attach_btf_id: info.attach_btf_id,
-        prog_name: info.name_str().to_string(),
-        gpl_compatible: gpl_compatible(info),
-        prog_btf_fd,
-        func_info_rec_size: debug_info.func_info_rec_size,
-        func_info: debug_info.func_info,
-        line_info_rec_size: debug_info.line_info_rec_size,
-        line_info: debug_info.line_info,
-        attach_btf_obj_fd,
-        attach_prog_fd,
-    })
-}
-
 /// Retrieve `bpf_prog_info` for an open program fd.
 ///
 /// If `fetch_orig` is true, also allocates a buffer and retrieves the
@@ -1420,189 +1065,12 @@ pub struct RejitResult {
     pub verifier_log: String,
 }
 
-/// Result of a dry-run BPF_PROG_LOAD verification, including any verifier log.
-#[derive(Debug)]
-pub struct ProgLoadVerifyResult {
-    pub verifier_log: String,
-    pub log_true_size: u32,
-}
-
-#[derive(Debug)]
-struct ProgLoadVerifyFailure {
-    os_err: std::io::Error,
-    verifier_log: String,
-    log_true_size: u32,
-}
-
-impl ProgLoadVerifyFailure {
-    fn is_enospc(&self) -> bool {
-        self.os_err.raw_os_error() == Some(libc::ENOSPC)
-    }
-
-    fn into_anyhow(self) -> anyhow::Error {
-        if self.verifier_log.is_empty() {
-            anyhow::anyhow!("BPF_PROG_LOAD: {}", self.os_err)
-        } else {
-            anyhow::anyhow!(
-                "BPF_PROG_LOAD: {}\nverifier log:\n{}",
-                self.os_err,
-                self.verifier_log
-            )
-        }
-    }
-}
-
 fn extract_log_string(log_buf: &[u8]) -> String {
     let nul_pos = log_buf
         .iter()
         .position(|&b| b == 0)
         .unwrap_or(log_buf.len());
     String::from_utf8_lossy(&log_buf[..nul_pos]).into_owned()
-}
-
-fn run_prog_load_once(
-    meta: &ProgLoadMeta,
-    insns: &[BpfInsn],
-    fd_array: &[RawFd],
-    log_level: u32,
-    log_buf: Option<&mut [u8]>,
-) -> std::result::Result<ProgLoadVerifyResult, ProgLoadVerifyFailure> {
-    let mut attr: AttrProgLoad = zeroed_attr();
-    let mut log_buf = log_buf;
-    let license = CString::new(meta.license()).expect("static license strings never contain NUL");
-
-    populate_prog_load_attr(
-        &mut attr,
-        meta,
-        insns,
-        fd_array,
-        log_level,
-        log_buf.as_deref_mut(),
-        &license,
-    );
-
-    let ret = unsafe {
-        sys_bpf(
-            BPF_PROG_LOAD,
-            &mut attr as *mut _ as *mut u8,
-            std::mem::size_of::<AttrProgLoad>() as u32,
-        )
-    };
-
-    let verifier_log = match log_buf.as_ref() {
-        Some(buf) => extract_log_string(buf),
-        None => String::new(),
-    };
-
-    if ret < 0 {
-        return Err(ProgLoadVerifyFailure {
-            os_err: std::io::Error::last_os_error(),
-            verifier_log,
-            log_true_size: attr.log_true_size,
-        });
-    }
-
-    let _loaded_prog = unsafe { OwnedFd::from_raw_fd(ret as RawFd) };
-    Ok(ProgLoadVerifyResult {
-        verifier_log,
-        log_true_size: attr.log_true_size,
-    })
-}
-
-fn populate_prog_load_attr(
-    attr: &mut AttrProgLoad,
-    meta: &ProgLoadMeta,
-    insns: &[BpfInsn],
-    fd_array: &[RawFd],
-    log_level: u32,
-    log_buf: Option<&mut [u8]>,
-    license: &CString,
-) {
-    attr.prog_type = meta.prog_type;
-    attr.insn_cnt = insns.len() as u32;
-    attr.insns = insns.as_ptr() as u64;
-    attr.license = license.as_ptr() as u64;
-    attr.log_level = log_level;
-    if let Some(buf) = log_buf {
-        attr.log_size = buf.len() as u32;
-        attr.log_buf = buf.as_mut_ptr() as u64;
-    }
-    attr.prog_ifindex = meta.prog_ifindex;
-    attr.expected_attach_type = meta.expected_attach_type;
-    if let Some(prog_btf_fd) = meta.prog_btf_fd() {
-        attr.prog_btf_fd = prog_btf_fd as u32;
-    }
-    if !meta.func_info.is_empty() {
-        attr.func_info_rec_size = meta.func_info_rec_size;
-        attr.func_info = meta.func_info.as_ptr() as u64;
-        attr.func_info_cnt =
-            info_record_count(&meta.func_info, meta.func_info_rec_size, "func_info");
-    }
-    if !meta.line_info.is_empty() {
-        attr.line_info_rec_size = meta.line_info_rec_size;
-        attr.line_info = meta.line_info.as_ptr() as u64;
-        attr.line_info_cnt =
-            info_record_count(&meta.line_info, meta.line_info_rec_size, "line_info");
-    }
-    attr.attach_btf_id = meta.attach_btf_id;
-    copy_prog_name(&mut attr.prog_name, &meta.prog_name);
-    if let Some(attach_fd) = meta.attach_fd() {
-        attr.attach_fd = attach_fd as u32;
-    }
-    if !fd_array.is_empty() {
-        attr.fd_array = fd_array.as_ptr() as u64;
-        attr.fd_array_cnt = fd_array.len() as u32;
-    }
-}
-
-pub fn bpf_prog_load_verify(
-    meta: &ProgLoadMeta,
-    insns: &[BpfInsn],
-    fd_array: &[RawFd],
-) -> Result<ProgLoadVerifyResult> {
-    const INITIAL_LOG_BUF_SIZE: usize = 16 * 1024 * 1024; // 16 MB
-    const MAX_LOG_BUF_SIZE: usize = 64 * 1024 * 1024; // 64 MB
-
-    let mut log_buf_size = INITIAL_LOG_BUF_SIZE;
-    loop {
-        let mut log_buf = vec![0u8; log_buf_size];
-        match run_prog_load_once(meta, insns, fd_array, 2, Some(&mut log_buf)) {
-            Ok(result) => return Ok(result),
-            Err(err) => {
-                if err.is_enospc() {
-                    if let Some(next_size) =
-                        next_log_buf_size(log_buf_size, err.log_true_size, MAX_LOG_BUF_SIZE)
-                    {
-                        log_buf_size = next_size;
-                        continue;
-                    }
-
-                    if run_prog_load_once(meta, insns, fd_array, 0, None).is_ok() {
-                        return Ok(ProgLoadVerifyResult {
-                            verifier_log: String::new(),
-                            log_true_size: err.log_true_size,
-                        });
-                    }
-                }
-
-                return Err(err.into_anyhow());
-            }
-        }
-    }
-}
-
-fn next_log_buf_size(current: usize, log_true_size: u32, max: usize) -> Option<usize> {
-    if current >= max {
-        return None;
-    }
-
-    let hinted = usize::try_from(log_true_size)
-        .ok()
-        .and_then(|size| size.checked_add(1))
-        .unwrap_or(current);
-    let doubled = current.saturating_mul(2);
-    let next = hinted.max(doubled).min(max);
-    (next > current).then_some(next)
 }
 
 fn run_rejit_once(
@@ -1612,6 +1080,7 @@ fn run_rejit_once(
     log_level: u32,
     log_buf: Option<&mut [u8]>,
     flags: u32,
+    addr_map: Option<&[u32]>,
 ) -> Result<RejitResult> {
     let mut attr: AttrRejit = zeroed_attr();
     let mut log_buf = log_buf;
@@ -1629,6 +1098,10 @@ fn run_rejit_once(
         attr.fd_array_cnt = fd_array.len() as u32;
     }
     attr.flags = flags;
+    if let Some(am) = addr_map {
+        attr.addr_map = am.as_ptr() as u64;
+        attr.addr_map_cnt = am.len() as u32;
+    }
 
     let ret = unsafe {
         sys_bpf(
@@ -1663,38 +1136,64 @@ fn bpf_prog_rejit_with_flags(
     prog_fd: RawFd,
     insns: &[BpfInsn],
     fd_array: &[RawFd],
+    flags: u32,
+    addr_map: Option<&[u32]>,
 ) -> Result<RejitResult> {
-    const LOG_BUF_SIZE: usize = 16 * 1024 * 1024; // 16 MB
+    const INITIAL_LOG_BUF_SIZE: usize = 64 * 1024 * 1024;
+    const MAX_LOG_BUF_SIZE: usize = 512 * 1024 * 1024;
 
-    match run_rejit_once(prog_fd, insns, fd_array, 0, None, 0) {
+    match run_rejit_once(prog_fd, insns, fd_array, 0, None, flags, addr_map) {
         Ok(_) => Ok(RejitResult {
             verifier_log: String::new(),
         }),
         Err(first_err) => {
-            let mut log_buf = vec![0u8; LOG_BUF_SIZE];
-            match run_rejit_once(prog_fd, insns, fd_array, 2, Some(&mut log_buf), 0) {
-                Ok(result) => Ok(result),
-                Err(second_err) => {
-                    let first_msg = format!("{first_err:#}");
-                    let second_msg = format!("{second_err:#}");
-
-                    if second_msg.contains("No space left on device") {
-                        bail!(
-                            "{second_msg}\ninitial REJIT failure without verifier log:\n{first_msg}"
-                        );
+            // Failure path: retry with verbose log. Double the log buf on
+            // ENOSPC up to MAX. See verifier.c:26650 — the kernel rewrites
+            // ret to -ENOSPC when the user log buffer was too small, so a
+            // successful verify with truncated log still surfaces as
+            // failure to the caller and would mask the real verifier
+            // verdict.
+            let mut log_buf_size = INITIAL_LOG_BUF_SIZE;
+            loop {
+                let mut log_buf = vec![0u8; log_buf_size];
+                match run_rejit_once(
+                    prog_fd,
+                    insns,
+                    fd_array,
+                    2,
+                    Some(&mut log_buf),
+                    flags,
+                    addr_map,
+                ) {
+                    Ok(result) => return Ok(result),
+                    Err(second_err) => {
+                        let second_msg = format!("{second_err:#}");
+                        if second_msg.contains("No space left on device")
+                            && log_buf_size < MAX_LOG_BUF_SIZE
+                        {
+                            log_buf_size = (log_buf_size * 2).min(MAX_LOG_BUF_SIZE);
+                            continue;
+                        }
+                        if second_msg.contains("No space left on device") {
+                            let first_msg = format!("{first_err:#}");
+                            bail!(
+                                "{second_msg}\ninitial REJIT failure without verifier log:\n{first_msg}"
+                            );
+                        }
+                        return Err(second_err);
                     }
-
-                    Err(second_err)
                 }
             }
         }
     }
 }
 
-/// Submit new BPF bytecode to the kernel via BPF_PROG_REJIT.
-///
-/// The kernel will run bpf_check() + JIT on the new instructions and
-/// atomically replace the program image in-place.
+/// Submit new BPF bytecode to the kernel via
+/// `BPF_PROG_REJIT(BPF_F_REJIT_PRESERVE_METADATA)`. The kernel preserves
+/// the program's existing aux->{btf, func_info, line_info} on tmp prog so
+/// the daemon doesn't need to fetch / resubmit metadata it doesn't own;
+/// caller-provided `addr_map` (one new-PC per original insn) lets the
+/// kernel remap line_info insn_off after the rewrite.
 ///
 /// First attempts with `log_level=0` (fast path) and only retries with
 /// `log_level=2` on failure.
@@ -1702,21 +1201,115 @@ pub fn bpf_prog_rejit(
     prog_fd: RawFd,
     insns: &[BpfInsn],
     fd_array: &[RawFd],
+    addr_map: &[u32],
 ) -> Result<RejitResult> {
-    bpf_prog_rejit_with_flags(prog_fd, insns, fd_array)
+    bpf_prog_rejit_with_flags(
+        prog_fd,
+        insns,
+        fd_array,
+        BPF_F_REJIT_PRESERVE_METADATA,
+        Some(addr_map),
+    )
 }
 
-/// Submit BPF bytecode to the kernel via `BPF_PROG_REJIT(log_level=2)` and
-/// return the verifier log even on success.
+/// Per-pass pre-verify probe: ask the kernel to verify the candidate
+/// rewrite without committing it. Uses
+/// `BPF_F_REJIT_VERIFY_ONLY | BPF_F_REJIT_PRESERVE_METADATA` so:
+///   - the original prog image and metadata are unchanged regardless of
+///     verifier outcome (verify-only)
+///   - the daemon does not have to re-submit BTF / func_info / line_info
+///     (preserve-metadata)
+///
+/// Returns the verifier log on success (`log_level=2`) for verifier-state
+/// extraction by subsequent passes, or an error on rejection. Used in
+/// place of the BPF_PROG_LOAD-based pre-verify path which cannot be
+/// reconciled with rewrite-rejit metadata semantics (caller has no clean
+/// source for BTF / func_info bytes that the verifier would accept).
+pub fn bpf_prog_rejit_verify_preserve(
+    prog_fd: RawFd,
+    insns: &[BpfInsn],
+    fd_array: &[RawFd],
+    addr_map: &[u32],
+) -> Result<RejitResult> {
+    // Per-pass pre-verify with verbose log. The kernel's bpf_vlog_finalize
+    // overwrites the verify result with -ENOSPC if log truncated (see
+    // verifier.c:26650), so a successful verify with a too-small buffer
+    // still surfaces as failure to the caller. Doubling-on-ENOSPC handles
+    // outlier large progs without paying the alloc cost up front for the
+    // common case.
+    const INITIAL_LOG_BUF_SIZE: usize = 64 * 1024 * 1024;
+    const MAX_LOG_BUF_SIZE: usize = 512 * 1024 * 1024;
+    let flags = BPF_F_REJIT_VERIFY_ONLY | BPF_F_REJIT_PRESERVE_METADATA;
+
+    let mut log_buf_size = INITIAL_LOG_BUF_SIZE;
+    loop {
+        let mut log_buf = vec![0u8; log_buf_size];
+        match run_rejit_once(
+            prog_fd,
+            insns,
+            fd_array,
+            2,
+            Some(&mut log_buf),
+            flags,
+            Some(addr_map),
+        ) {
+            Ok(result) => return Ok(result),
+            Err(err) => {
+                let msg = format!("{err:#}");
+                if msg.contains("No space left on device") && log_buf_size < MAX_LOG_BUF_SIZE {
+                    log_buf_size = (log_buf_size * 2).min(MAX_LOG_BUF_SIZE);
+                    continue;
+                }
+                return Err(err);
+            }
+        }
+    }
+}
+
+/// Capture the verifier log for an identity rewrite (the new bytecode
+/// equals the original) without committing any image change. Used to
+/// populate verifier-state hints from the original program for subsequent
+/// verifier-guided passes.
+///
+/// Uses `BPF_F_REJIT_VERIFY_ONLY | BPF_F_REJIT_PRESERVE_METADATA`:
+///   - VERIFY_ONLY: the kernel skips JIT + swap; the prog image is
+///     unchanged. We pay verifier cost only (no JIT, no trampoline
+///     refresh).
+///   - PRESERVE_METADATA: the daemon doesn't have to re-fetch BTF /
+///     func_info / line_info from the live prog.
 pub fn bpf_prog_rejit_capture_verifier_log(
     prog_fd: RawFd,
     insns: &[BpfInsn],
     fd_array: &[RawFd],
+    addr_map: &[u32],
 ) -> Result<RejitResult> {
-    const LOG_BUF_SIZE: usize = 16 * 1024 * 1024; // 16 MB
+    const INITIAL_LOG_BUF_SIZE: usize = 64 * 1024 * 1024;
+    const MAX_LOG_BUF_SIZE: usize = 512 * 1024 * 1024;
+    let flags = BPF_F_REJIT_VERIFY_ONLY | BPF_F_REJIT_PRESERVE_METADATA;
 
-    let mut log_buf = vec![0u8; LOG_BUF_SIZE];
-    run_rejit_once(prog_fd, insns, fd_array, 2, Some(&mut log_buf), 0)
+    let mut log_buf_size = INITIAL_LOG_BUF_SIZE;
+    loop {
+        let mut log_buf = vec![0u8; log_buf_size];
+        match run_rejit_once(
+            prog_fd,
+            insns,
+            fd_array,
+            2,
+            Some(&mut log_buf),
+            flags,
+            Some(addr_map),
+        ) {
+            Ok(result) => return Ok(result),
+            Err(err) => {
+                let msg = format!("{err:#}");
+                if msg.contains("No space left on device") && log_buf_size < MAX_LOG_BUF_SIZE {
+                    log_buf_size = (log_buf_size * 2).min(MAX_LOG_BUF_SIZE);
+                    continue;
+                }
+                return Err(err);
+            }
+        }
+    }
 }
 
 pub struct ProgIdIter {

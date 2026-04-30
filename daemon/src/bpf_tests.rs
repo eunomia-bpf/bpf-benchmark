@@ -202,7 +202,6 @@ fn test_bpf_cmd_constants_match_kernel_header() {
 
     // Verify every constant we define in bpf.rs matches the kernel.
     let checks = [
-        ("BPF_PROG_LOAD", BPF_PROG_LOAD),
         ("BPF_PROG_GET_NEXT_ID", BPF_PROG_GET_NEXT_ID),
         ("BPF_MAP_GET_NEXT_ID", BPF_MAP_GET_NEXT_ID),
         ("BPF_PROG_GET_FD_BY_ID", BPF_PROG_GET_FD_BY_ID),
@@ -211,8 +210,6 @@ fn test_bpf_cmd_constants_match_kernel_header() {
         ("BPF_BTF_LOAD", BPF_BTF_LOAD),
         ("BPF_BTF_GET_FD_BY_ID", BPF_BTF_GET_FD_BY_ID),
         ("BPF_BTF_GET_NEXT_ID", BPF_BTF_GET_NEXT_ID),
-        ("BPF_LINK_GET_FD_BY_ID", BPF_LINK_GET_FD_BY_ID),
-        ("BPF_LINK_GET_NEXT_ID", BPF_LINK_GET_NEXT_ID),
         ("BPF_PROG_REJIT", BPF_PROG_REJIT),
     ];
 
@@ -234,13 +231,13 @@ fn test_bpf_cmd_constants_match_kernel_header() {
 
 // ── Struct size and layout tests ─────────────────────────────────
 //
-// Legacy attr variants in this daemon still fit in 128 bytes, but the current
-// kernel `prog_load` variant is larger because it includes fd_array/signature
-// transport fields.
+// Each attr variant we still use must fit in 128 bytes (the kernel's
+// union bpf_attr size). The legacy `AttrProgLoad` was deleted along with
+// the BPF_PROG_LOAD-based per-pass pre-verify path; daemon-side verify
+// goes through `AttrRejit` exclusively now.
 
 #[test]
 fn test_attr_struct_sizes_fit_bpf_attr() {
-    // All attr variants must be exactly 128 bytes (the kernel's bpf_attr size).
     assert_eq!(
         std::mem::size_of::<AttrGetNextId>(),
         128,
@@ -260,11 +257,6 @@ fn test_attr_struct_sizes_fit_bpf_attr() {
         std::mem::size_of::<AttrRejit>(),
         128,
         "AttrRejit must be 128 bytes"
-    );
-    assert_eq!(
-        std::mem::size_of::<AttrProgLoad>(),
-        168,
-        "AttrProgLoad must match the current kernel prog_load attr size"
     );
 }
 
@@ -329,81 +321,6 @@ fn test_attr_rejit_field_offsets() {
         &attr.flags as *const _ as usize - base_addr,
         44,
         "flags at wrong offset"
-    );
-}
-
-#[test]
-fn test_info_bytes_len_rejects_nonzero_count_with_zero_record_size() {
-    let err = info_bytes_len(0, 1, "func_info").expect_err("zero record size must be rejected");
-    assert!(err
-        .to_string()
-        .contains("func_info count 1 has zero record size"));
-}
-
-#[test]
-fn test_populate_prog_load_attr_includes_btf_and_debug_info() {
-    let prog_btf_fd: std::os::fd::OwnedFd = std::fs::File::open("/dev/null")
-        .expect("open /dev/null for prog BTF fd")
-        .into();
-    let attach_btf_obj_fd: std::os::fd::OwnedFd = std::fs::File::open("/dev/null")
-        .expect("open /dev/null for attach BTF fd")
-        .into();
-    let meta = ProgLoadMeta {
-        prog_type: 7,
-        prog_ifindex: 19,
-        expected_attach_type: 23,
-        attach_btf_id: 41,
-        prog_name: "tracee".to_string(),
-        gpl_compatible: true,
-        prog_btf_fd: Some(prog_btf_fd),
-        func_info_rec_size: 8,
-        func_info: vec![0u8; 16],
-        line_info_rec_size: 16,
-        line_info: vec![1u8; 16],
-        attach_btf_obj_fd: Some(attach_btf_obj_fd),
-        attach_prog_fd: None,
-    };
-    let insns = vec![BpfInsn::mov64_imm(0, 1)];
-    let fd_array = vec![101, 202];
-    let mut log_buf = [0u8; 64];
-    let log_buf_ptr = log_buf.as_mut_ptr() as u64;
-    let license = std::ffi::CString::new("GPL").expect("license CString");
-    let mut attr: AttrProgLoad = unsafe { std::mem::zeroed() };
-
-    populate_prog_load_attr(
-        &mut attr,
-        &meta,
-        &insns,
-        &fd_array,
-        2,
-        Some(&mut log_buf),
-        &license,
-    );
-
-    assert_eq!(attr.prog_type, 7);
-    assert_eq!(attr.insn_cnt, 1);
-    assert_eq!(attr.insns, insns.as_ptr() as u64);
-    assert_eq!(attr.license, license.as_ptr() as u64);
-    assert_eq!(attr.log_level, 2);
-    assert_eq!(attr.log_size, log_buf.len() as u32);
-    assert_eq!(attr.log_buf, log_buf_ptr);
-    assert_eq!(attr.prog_ifindex, 19);
-    assert_eq!(attr.expected_attach_type, 23);
-    assert_eq!(attr.prog_btf_fd, meta.prog_btf_fd().unwrap() as u32);
-    assert_eq!(attr.func_info_rec_size, 8);
-    assert_eq!(attr.func_info_cnt, 2);
-    assert_eq!(attr.func_info, meta.func_info.as_ptr() as u64);
-    assert_eq!(attr.line_info_rec_size, 16);
-    assert_eq!(attr.line_info_cnt, 1);
-    assert_eq!(attr.line_info, meta.line_info.as_ptr() as u64);
-    assert_eq!(attr.attach_btf_id, 41);
-    assert_eq!(attr.attach_fd, meta.attach_fd().unwrap() as u32);
-    assert_eq!(attr.fd_array_cnt, fd_array.len() as u32);
-    assert_eq!(attr.fd_array, fd_array.as_ptr() as u64);
-    assert_eq!(
-        &attr.prog_name[..7],
-        b"tracee\0",
-        "prog name should be copied with a trailing NUL"
     );
 }
 
