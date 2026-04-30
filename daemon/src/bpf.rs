@@ -50,6 +50,21 @@ pub(crate) fn bpf_map_lookup_elem_optional(
     Ok(Some(value))
 }
 
+pub(crate) fn bpf_map_get_next_key(
+    fd: RawFd,
+    key: Option<&[u8]>,
+    key_size: usize,
+) -> Result<Option<Vec<u8>>> {
+    if key_size == 0 {
+        bail!("BPF_MAP_GET_NEXT_KEY fd {fd}: map key size is zero");
+    }
+    let mut next_key = vec![0u8; key_size];
+    let borrowed = unsafe { BorrowedFd::borrow_raw(fd) };
+    let found = kernel_sys::map_get_next_key(borrowed, key, &mut next_key)
+        .with_context(|| format!("BPF_MAP_GET_NEXT_KEY fd {fd}"))?;
+    Ok(found.then_some(next_key))
+}
+
 pub(crate) fn bpf_map_lookup_value_size(info: &BpfMapInfo) -> Result<usize> {
     if is_percpu_map_type(info.type_) {
         Ok(round_up_8(info.value_size as usize).saturating_mul(possible_cpu_count()?))

@@ -798,18 +798,6 @@ struct MapValuesEntryJson {
 }
 
 #[derive(Debug, Deserialize)]
-struct ScanMapKeysReport {
-    complete: bool,
-    keys: Vec<ScannedMapKeyJson>,
-}
-
-#[derive(Debug, Deserialize)]
-struct ScannedMapKeyJson {
-    map_id: u32,
-    key_hex: String,
-}
-
-#[derive(Debug, Deserialize)]
 struct TargetJson {
     #[serde(default)]
     kinsns: HashMap<String, TargetKinsnJson>,
@@ -978,6 +966,37 @@ fn live_bpf_map_lookup(_map: &MapInfoJson, fd: i32, key: &[u8]) -> Result<Option
     bpf::bpf_map_lookup_elem_optional(fd, key, value_size)
 }
 
+fn live_bpf_map_keys(map: &MapInfoJson, fd: i32) -> Result<Vec<Vec<u8>>> {
+    if !is_map_inlineable_map_type(map.map_type) {
+        return Ok(Vec::new());
+    }
+    let key_size = map.key_size as usize;
+    if key_size == 0 {
+        bail!("map {} has zero key_size", map.map_id);
+    }
+    if map.max_entries == 0 {
+        bail!("map {} has zero max_entries", map.map_id);
+    }
+
+    let mut keys = Vec::new();
+    let mut previous_key = None;
+    loop {
+        let Some(key) = bpf::bpf_map_get_next_key(fd, previous_key.as_deref(), key_size)? else {
+            break;
+        };
+        previous_key = Some(key.clone());
+        keys.push(key);
+        if keys.len() > map.max_entries as usize {
+            bail!(
+                "BPF_MAP_GET_NEXT_KEY for map {} returned more than max_entries={}",
+                map.map_id,
+                map.max_entries
+            );
+        }
+    }
+    Ok(keys)
+}
+
 pub(crate) fn start_profile(config: &CliConfig, duration_ms: u64) -> Result<ProfileSession> {
     let output_dir = WorkDir::new("bpfrejit-daemon-profile")?;
     let mut child = config
@@ -1048,6 +1067,7 @@ pub(crate) fn try_apply_one(
         },
         bpf::bpf_map_get_fd_by_id,
         live_bpf_map_lookup,
+        live_bpf_map_keys,
     )
 }
 
@@ -1071,17 +1091,20 @@ pub(crate) fn try_reapply_one(
         },
         bpf::bpf_map_get_fd_by_id,
         live_bpf_map_lookup,
+        live_bpf_map_keys,
     )
 }
 
-fn try_apply_one_with_map_access<F, G>(
+fn try_apply_one_with_map_access<F, G, H>(
     request: ApplyOneRequest<'_>,
     mut open_map_fd: F,
     mut lookup_map_value: G,
+    mut scan_map_keys: H,
 ) -> Result<OptimizeOneResult>
 where
     F: FnMut(u32) -> Result<OwnedFd>,
     G: FnMut(&MapInfoJson, i32, &[u8]) -> Result<Option<Vec<u8>>>,
+    H: FnMut(&MapInfoJson, i32) -> Result<Vec<Vec<u8>>>,
 {
     let ApplyOneRequest {
         prog_id,
@@ -1205,13 +1228,11 @@ where
             .any(|pass| canonical_pass(pass) == "map_inline")
         {
             write_live_map_values(
-                config,
-                &prog_bin,
-                &prog_info,
                 &map_fds_json,
                 &map_values_json,
                 &mut open_map_fd,
                 &mut lookup_map_value,
+                &mut scan_map_keys,
             )
             .with_context(|| format!("build map-inline live value snapshot for prog {prog_id}"))?;
             side_inputs.push(("--map-values".to_string(), map_values_json.clone()));
@@ -1595,99 +1616,52 @@ fn pass_detail_from_report(report: &BpfoptPassReport) -> PassDetail {
     }
 }
 
-fn write_live_map_values<F, G>(
-    config: &CliConfig,
-    prog_bin: &Path,
-    prog_info: &ProgInfoJson,
+fn write_live_map_values<F, G, H>(
     map_fds_json: &Path,
     output: &Path,
     open_map_fd: &mut F,
     lookup_map_value: &mut G,
+    scan_map_keys: &mut H,
 ) -> Result<()>
 where
     F: FnMut(u32) -> Result<OwnedFd>,
     G: FnMut(&MapInfoJson, i32, &[u8]) -> Result<Option<Vec<u8>>>,
+    H: FnMut(&MapInfoJson, i32) -> Result<Vec<Vec<u8>>>,
 {
     let maps: Vec<MapInfoJson> = read_json_file(map_fds_json, "map_fds.json")?;
     let mut entries_by_map = BTreeMap::<u32, BTreeMap<Vec<u8>, Option<Vec<u8>>>>::new();
-    write_map_values_snapshot(&maps, &entries_by_map, output)?;
 
-    const MAX_SCAN_ROUNDS: usize = 8;
-    for _ in 0..MAX_SCAN_ROUNDS {
-        let scan = scan_map_inline_keys(config, prog_bin, prog_info, output)?;
-        let mut discovered_new_key = false;
-        for scanned in scan.keys {
-            let key = decode_hex(&scanned.key_hex)
-                .with_context(|| format!("decode scan-map-keys key for map {}", scanned.map_id))?;
-            let map = maps
-                .iter()
-                .find(|map| map.map_id == scanned.map_id)
-                .ok_or_else(|| anyhow!("scan-map-keys returned unknown map {}", scanned.map_id))?;
-            let map_entries = entries_by_map.entry(scanned.map_id).or_default();
-            if map_entries.contains_key(&key) {
-                continue;
-            }
-            let fd = open_map_fd(scanned.map_id).with_context(|| {
-                format!("open BPF map id {} for map-inline value", scanned.map_id)
-            })?;
+    for map in &maps {
+        if !is_map_inlineable_map_type(map.map_type) {
+            continue;
+        }
+        let fd = open_map_fd(map.map_id)
+            .with_context(|| format!("open BPF map id {} for map-inline values", map.map_id))?;
+        for key in scan_map_keys(map, fd.as_raw_fd())
+            .with_context(|| format!("scan live keys for map {}", map.map_id))?
+        {
             let value = lookup_map_value(map, fd.as_raw_fd(), &key).with_context(|| {
                 format!(
                     "lookup live value for map {} key {}",
-                    scanned.map_id,
+                    map.map_id,
                     hex_bytes(&key)
                 )
             })?;
             if value.is_none() && is_array_like_map(map.map_type) {
                 bail!(
                     "array-like map {} has no live value for key {}",
-                    scanned.map_id,
+                    map.map_id,
                     hex_bytes(&key)
                 );
             }
-            map_entries.insert(key, value);
-            discovered_new_key = true;
-        }
-        write_map_values_snapshot(&maps, &entries_by_map, output)?;
-        if scan.complete && !discovered_new_key {
-            return Ok(());
-        }
-        if !scan.complete && !discovered_new_key {
-            bail!("scan-map-keys did not complete and discovered no new map keys");
+            entries_by_map
+                .entry(map.map_id)
+                .or_default()
+                .insert(key, value);
         }
     }
 
-    bail!("scan-map-keys did not converge after {MAX_SCAN_ROUNDS} rounds")
-}
-
-fn scan_map_inline_keys(
-    config: &CliConfig,
-    prog_bin: &Path,
-    prog_info: &ProgInfoJson,
-    map_values_json: &Path,
-) -> Result<ScanMapKeysReport> {
-    let scan_json = map_values_json.with_extension("scan_keys.json");
-    let map_ids = if prog_info.map_ids.is_empty() {
-        "0".to_string()
-    } else {
-        join_u32_csv(&prog_info.map_ids)
-    };
-    let mut scan = config.command("bpfopt");
-    scan.arg("scan-map-keys")
-        .arg("--map-values")
-        .arg(map_values_json)
-        .arg("--map-ids")
-        .arg(map_ids)
-        .arg("--output")
-        .arg(&scan_json);
-    append_bpfopt_context_args(&mut scan, prog_info);
-    run_stage_with_file_io(
-        "bpfopt scan-map-keys",
-        &mut scan,
-        prog_bin,
-        &map_values_json.with_extension("scan_keys.bin"),
-    )
-    .context("bpfopt scan-map-keys failed")?;
-    read_json_file(&scan_json, "bpfopt scan-map-keys report")
+    write_map_values_snapshot(&maps, &entries_by_map, output)
 }
 
 fn write_map_values_snapshot(
@@ -1729,6 +1703,16 @@ fn is_array_like_map(map_type: u32) -> bool {
     matches!(
         map_type,
         kernel_sys::BPF_MAP_TYPE_ARRAY | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
+    )
+}
+
+fn is_map_inlineable_map_type(map_type: u32) -> bool {
+    matches!(
+        map_type,
+        kernel_sys::BPF_MAP_TYPE_HASH
+            | kernel_sys::BPF_MAP_TYPE_ARRAY
+            | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
+            | kernel_sys::BPF_MAP_TYPE_LRU_HASH
     )
 }
 
@@ -2621,20 +2605,6 @@ fi
             "bpfopt",
 r#"#!/usr/bin/env bash
 set -euo pipefail
-if [[ "${1:-}" == "scan-map-keys" ]]; then
-  out=""
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --output) out="$2"; shift 2 ;;
-      *) shift ;;
-    esac
-  done
-  cat >/dev/null
-  cat > "$out" <<JSON
-{"complete":true,"keys":[{"map_id":111,"key_hex":"01000000"}]}
-JSON
-  exit 0
-fi
 report=""
 map_values=""
 while [[ $# -gt 0 ]]; do
@@ -2672,6 +2642,7 @@ JSON
                 assert_eq!(key, 1u32.to_le_bytes().as_slice());
                 Ok(Some(7u32.to_le_bytes().to_vec()))
             },
+            |_map, _fd| Ok(vec![1u32.to_le_bytes().to_vec()]),
         )
         .unwrap();
 
@@ -2717,22 +2688,8 @@ JSON
         .unwrap();
         fake.replace_command(
             "bpfopt",
-            r#"#!/usr/bin/env bash
+r#"#!/usr/bin/env bash
 set -euo pipefail
-if [[ "${1:-}" == "scan-map-keys" ]]; then
-  out=""
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --output) out="$2"; shift 2 ;;
-      *) shift ;;
-    esac
-  done
-  cat >/dev/null
-  cat > "$out" <<JSON
-{"complete":true,"keys":[{"map_id":111,"key_hex":"01000000"}]}
-JSON
-  exit 0
-fi
 report=""
 map_values=""
 while [[ $# -gt 0 ]]; do
@@ -2769,6 +2726,7 @@ JSON
                 assert_eq!(key, 1u32.to_le_bytes().as_slice());
                 Ok(None)
             },
+            |_map, _fd| Ok(vec![1u32.to_le_bytes().to_vec()]),
         )
         .unwrap();
 

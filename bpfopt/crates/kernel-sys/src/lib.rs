@@ -710,6 +710,39 @@ pub fn map_obj_get_info_by_fd(fd: BorrowedFd<'_>) -> Result<bpf_map_info> {
     Ok(info)
 }
 
+/// Read the next key from an open BPF map.
+pub fn map_get_next_key(
+    fd: BorrowedFd<'_>,
+    key: Option<&[u8]>,
+    next_key: &mut [u8],
+) -> Result<bool> {
+    if let Some(key) = key {
+        if key.len() != next_key.len() {
+            bail!(
+                "BPF_MAP_GET_NEXT_KEY key size mismatch: current key has {} bytes, next key buffer has {} bytes",
+                key.len(),
+                next_key.len()
+            );
+        }
+    }
+    let key_ptr = key.map_or(std::ptr::null(), |key| key.as_ptr()) as *const libc::c_void;
+    let ret = unsafe {
+        bpf_map_get_next_key(
+            fd.as_raw_fd(),
+            key_ptr,
+            next_key.as_mut_ptr() as *mut libc::c_void,
+        )
+    };
+    if ret == 0 {
+        return Ok(true);
+    }
+    let errno = errno_from_libbpf_ret(ret);
+    if errno == libc::ENOENT {
+        return Ok(false);
+    }
+    Err(anyhow!("BPF_MAP_GET_NEXT_KEY: {}", os_error(errno)))
+}
+
 /// Enable kernel BPF runtime stats and return the owning fd.
 pub fn enable_stats(stats_type: bpf_stats_type) -> Result<OwnedFd> {
     let fd = unsafe { bpf_enable_stats(stats_type) };
