@@ -707,11 +707,11 @@ pub fn kinsn_replacement_subprog_skip_reason(
 
 fn kinsn_replacement_tail_call_skip_reason(insns: &[BpfInsn], start_pc: usize) -> Option<String> {
     let mut pc = 0usize;
-    while pc < start_pc && pc < insns.len() {
+    while pc < insns.len() {
         let insn = &insns[pc];
         if is_tail_call_insn(insn) {
             return Some(format!(
-                "kinsn site follows tail-call helper (tail call pc {pc}, site pc {start_pc})"
+                "kinsn site in program with tail-call helper (tail call pc {pc}, site pc {start_pc})"
             ));
         }
         pc += insn_width(insn);
@@ -1248,7 +1248,7 @@ mod tests {
     }
 
     #[test]
-    fn kinsn_replacement_subprog_check_allows_site_before_tail_call() {
+    fn kinsn_replacement_subprog_check_rejects_site_before_tail_call() {
         let insns = vec![
             BpfInsn::alu64_imm(BPF_RSH, 2, 8),
             BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
@@ -1258,7 +1258,9 @@ mod tests {
 
         let skip = kinsn_replacement_subprog_skip_reason(&insns, 0, 2, 2).unwrap();
 
-        assert_eq!(skip, None);
+        assert!(skip
+            .as_deref()
+            .is_some_and(|reason| reason.contains("tail-call helper")));
     }
 
     #[test]
