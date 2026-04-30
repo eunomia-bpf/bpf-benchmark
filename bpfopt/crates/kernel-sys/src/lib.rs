@@ -1003,19 +1003,40 @@ pub fn perf_event_ioctl(fd: BorrowedFd<'_>, command: PerfEventCommand) -> Result
 
 /// Create a BPF ring buffer map.
 pub fn create_ringbuf_map(name: &str, max_entries: u32) -> Result<OwnedFd> {
+    create_map(BPF_MAP_TYPE_RINGBUF, name, 0, 0, max_entries, 0, 0, 0)
+}
+
+/// Create a BPF map through libbpf using metadata captured from a fixture.
+pub fn create_map(
+    map_type: bpf_map_type,
+    name: &str,
+    key_size: u32,
+    value_size: u32,
+    max_entries: u32,
+    map_flags: u32,
+    map_extra: u64,
+    map_ifindex: u32,
+) -> Result<OwnedFd> {
     let c_name = CString::new(name).map_err(|_| anyhow!("map name contains NUL: {name:?}"))?;
+    let opts = bpf_map_create_opts {
+        sz: std::mem::size_of::<bpf_map_create_opts>() as size_t,
+        map_flags,
+        map_extra,
+        map_ifindex,
+        ..Default::default()
+    };
     let fd = unsafe {
         bpf_map_create(
-            BPF_MAP_TYPE_RINGBUF,
+            map_type,
             c_name.as_ptr(),
-            0,
-            0,
+            key_size,
+            value_size,
             max_entries,
-            std::ptr::null(),
+            &opts,
         )
     };
     if fd < 0 {
-        return Err(libbpf_error("BPF_MAP_CREATE ringbuf", fd));
+        return Err(libbpf_error("BPF_MAP_CREATE", fd));
     }
     Ok(unsafe { OwnedFd::from_raw_fd(fd) })
 }

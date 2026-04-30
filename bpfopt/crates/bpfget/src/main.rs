@@ -101,6 +101,22 @@ struct MapInfoJson {
     value_size: u32,
     max_entries: u32,
     name: String,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    map_flags: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    ifindex: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    btf_id: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    btf_key_type_id: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    btf_value_type_id: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    btf_vmlinux_value_type_id: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    btf_vmlinux_id: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u64")]
+    map_extra: u64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -137,6 +153,10 @@ const KINSN_PROBE_TARGETS: &[KinsnProbeTarget] = &[
     KinsnProbeTarget {
         json_name: "bpf_select64",
         probe_names: &["bpf_select64"],
+    },
+    KinsnProbeTarget {
+        json_name: "bpf_ccmp64",
+        probe_names: &["bpf_ccmp64"],
     },
     KinsnProbeTarget {
         json_name: "bpf_extract64",
@@ -696,6 +716,14 @@ fn get_map_infos(map_ids: &[u32], pseudo_map_old_fds: &[i32]) -> Result<Vec<MapI
             value_size: info.value_size,
             max_entries: info.max_entries,
             name: c_name_i8(&info.name),
+            map_flags: info.map_flags,
+            ifindex: info.ifindex,
+            btf_id: info.btf_id,
+            btf_key_type_id: info.btf_key_type_id,
+            btf_value_type_id: info.btf_value_type_id,
+            btf_vmlinux_value_type_id: info.btf_vmlinux_value_type_id,
+            btf_vmlinux_id: info.btf_vmlinux_id,
+            map_extra: info.map_extra,
         });
     }
     Ok(maps)
@@ -782,6 +810,10 @@ fn json_bytes<T: Serialize>(value: &T) -> Result<Vec<u8>> {
 }
 
 fn is_zero_u32(value: &u32) -> bool {
+    *value == 0
+}
+
+fn is_zero_u64(value: &u64) -> bool {
     *value == 0
 }
 
@@ -1041,6 +1073,14 @@ mod tests {
             value_size: 8,
             max_entries: 16,
             name: "events".to_string(),
+            map_flags: 8,
+            ifindex: 0,
+            btf_id: 0,
+            btf_key_type_id: 0,
+            btf_value_type_id: 0,
+            btf_vmlinux_value_type_id: 0,
+            btf_vmlinux_id: 0,
+            map_extra: 0,
         };
 
         let text = serde_json::to_string(&info).expect("serialize map info");
@@ -1050,6 +1090,7 @@ mod tests {
         let value: serde_json::Value = serde_json::from_str(&text).expect("json value");
         assert_eq!(value["old_fd"], 42);
         assert_eq!(value["map_id"], 77);
+        assert_eq!(value["map_flags"], 8);
     }
 
     #[test]

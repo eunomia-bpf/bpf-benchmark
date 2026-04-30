@@ -60,6 +60,12 @@ struct Cli {
     /// Map FD manifest from bpfget --full.
     #[arg(long, value_name = "FILE")]
     map_fds: Option<PathBuf>,
+    /// Program metadata fixture from bpfget --full, required with --dummy-map-fds.
+    #[arg(long, value_name = "FILE")]
+    prog_info: Option<PathBuf>,
+    /// Create host-local dummy maps from --map-fds instead of reopening live map IDs.
+    #[arg(long)]
+    dummy_map_fds: bool,
     /// kinsn fd_array JSON manifest.
     #[arg(long, value_name = "FILE")]
     fd_array: Option<PathBuf>,
@@ -126,6 +132,43 @@ struct VerifierRegJson {
 struct MapBinding {
     old_fd: Option<i32>,
     map_id: u32,
+    metadata: Option<MapMetadata>,
+}
+
+#[derive(Debug, Clone)]
+struct MapMetadata {
+    map_type: u32,
+    key_size: u32,
+    value_size: u32,
+    max_entries: u32,
+    name: String,
+    map_flags: u32,
+    ifindex: u32,
+    map_extra: u64,
+}
+
+#[derive(Debug, Deserialize)]
+struct MapBindingJson {
+    old_fd: Option<i64>,
+    map_id: u64,
+    map_type: Option<u32>,
+    key_size: Option<u32>,
+    value_size: Option<u32>,
+    max_entries: Option<u32>,
+    #[serde(default)]
+    name: String,
+    #[serde(default)]
+    map_flags: u32,
+    #[serde(default)]
+    ifindex: u32,
+    #[serde(default)]
+    map_extra: u64,
+}
+
+#[derive(Debug, Deserialize)]
+struct ProgInfoMapIds {
+    #[serde(default)]
+    map_ids: Vec<u32>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -192,6 +235,7 @@ fn main() -> ExitCode {
 
 fn run() -> Result<ExitCode> {
     let cli = Cli::parse();
+    validate_cli(&cli)?;
     if cli.log_level > 2 {
         bail!("--log-level must be 0, 1, or 2");
     }
@@ -211,7 +255,16 @@ fn run() -> Result<ExitCode> {
     )?;
     let input_bytes = read_input(cli.input.as_deref())?;
     let mut insns = decode_insns(&input_bytes)?;
-    let _map_fds = apply_map_fds(cli.map_fds.as_deref(), &mut insns)?;
+    let prog_map_ids = match cli.prog_info.as_deref() {
+        Some(path) => Some(read_prog_info_map_ids(path)?),
+        None => None,
+    };
+    let _map_fds = apply_map_fds(
+        cli.map_fds.as_deref(),
+        cli.dummy_map_fds,
+        prog_map_ids.as_deref(),
+        &mut insns,
+    )?;
     let fd_array = read_fd_array(cli.fd_array.as_deref())?;
     let func_info = read_btf_info_records(
         cli.func_info.as_deref(),
@@ -294,6 +347,20 @@ fn effective_log_level(cli: &Cli) -> u32 {
     } else {
         cli.log_level
     }
+}
+
+fn validate_cli(cli: &Cli) -> Result<()> {
+    if cli.dummy_map_fds {
+        if cli.map_fds.is_none() {
+            bail!("--dummy-map-fds requires --map-fds FILE");
+        }
+        if cli.prog_info.is_none() {
+            bail!("--dummy-map-fds requires --prog-info FILE");
+        }
+    } else if cli.prog_info.is_some() {
+        bail!("--prog-info is only valid with --dummy-map-fds");
+    }
+    Ok(())
 }
 
 fn read_input(path: Option<&Path>) -> Result<Vec<u8>> {
@@ -380,39 +447,33 @@ fn decode_insns(bytes: &[u8]) -> Result<Vec<kernel_sys::bpf_insn>> {
         .collect())
 }
 
-fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Result<Vec<OwnedFd>> {
+fn apply_map_fds(
+    path: Option<&Path>,
+    dummy_map_fds: bool,
+    prog_map_ids: Option<&[u32]>,
+    insns: &mut [kernel_sys::bpf_insn],
+) -> Result<Vec<OwnedFd>> {
     let Some(path) = path else {
         return Ok(Vec::new());
     };
     let bindings = read_map_bindings(path)?;
+    let dummy_prog_map_ids = if dummy_map_fds {
+        let prog_map_ids =
+            prog_map_ids.ok_or_else(|| anyhow!("--dummy-map-fds requires --prog-info FILE"))?;
+        validate_dummy_map_fixtures(path, &bindings, prog_map_ids)?;
+        Some(prog_map_ids)
+    } else {
+        None
+    };
     let old_fds = pseudo_map_old_fds(insns);
-    let mut old_fd_to_map_id = HashMap::new();
-
-    for binding in bindings.iter().filter(|binding| binding.old_fd.is_some()) {
-        old_fd_to_map_id.insert(binding.old_fd.unwrap(), binding.map_id);
-    }
-    let positional_old_fd_map_ids = bindings
-        .iter()
-        .filter(|binding| binding.old_fd.is_none())
-        .map(|binding| binding.map_id)
-        .collect::<Vec<_>>();
-    let indexed_map_ids = bindings
-        .iter()
-        .map(|binding| binding.map_id)
-        .collect::<Vec<_>>();
-    for (idx, old_fd) in old_fds.iter().copied().enumerate() {
-        if old_fd_to_map_id.contains_key(&old_fd) {
-            continue;
-        }
-        let Some(&map_id) = positional_old_fd_map_ids.get(idx) else {
-            bail!(
-                "{} does not provide a map_id for pseudo-map old fd {}",
-                path.display(),
-                old_fd
-            );
-        };
-        old_fd_to_map_id.insert(old_fd, map_id);
-    }
+    let old_fd_to_map_id = if let Some(map_ids) = dummy_prog_map_ids {
+        build_old_fd_map_from_prog_info(map_ids, &old_fds, path)?
+    } else {
+        build_old_fd_map(&bindings, &old_fds, path)?
+    };
+    let indexed_map_ids = prog_map_ids
+        .map(|ids| ids.to_vec())
+        .unwrap_or_else(|| bindings.iter().map(|binding| binding.map_id).collect());
 
     let mut opened = HashMap::<u32, OwnedFd>::new();
     let mut pc = 0usize;
@@ -422,7 +483,8 @@ fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Res
             let map_id = *old_fd_to_map_id
                 .get(&old_fd)
                 .ok_or_else(|| anyhow!("no map binding for pseudo-map old fd {old_fd}"))?;
-            let new_fd = open_map_fd(&mut opened, map_id, path)?.as_raw_fd();
+            let new_fd =
+                open_map_fd(&mut opened, &bindings, map_id, dummy_map_fds, path)?.as_raw_fd();
             insns[pc].imm = new_fd;
             pc += 2;
         } else if is_pseudo_map_idx_ldimm64(&insns[pc]) {
@@ -438,7 +500,8 @@ fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Res
                     idx
                 );
             };
-            let new_fd = open_map_fd(&mut opened, map_id, path)?.as_raw_fd();
+            let new_fd =
+                open_map_fd(&mut opened, &bindings, map_id, dummy_map_fds, path)?.as_raw_fd();
             let src_reg = if insns[pc].src_reg() == BPF_PSEUDO_MAP_IDX {
                 BPF_PSEUDO_MAP_FD
             } else {
@@ -455,20 +518,144 @@ fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Res
     Ok(opened.into_values().collect())
 }
 
-fn open_map_fd<'a>(
-    opened: &'a mut HashMap<u32, OwnedFd>,
-    map_id: u32,
+fn build_old_fd_map(
+    bindings: &[MapBinding],
+    old_fds: &[i32],
     path: &Path,
-) -> Result<&'a OwnedFd> {
-    match opened.entry(map_id) {
-        std::collections::hash_map::Entry::Occupied(entry) => Ok(entry.into_mut()),
-        std::collections::hash_map::Entry::Vacant(entry) => {
-            Ok(entry
-                .insert(kernel_sys::map_get_fd_by_id(map_id).with_context(|| {
-                    format!("open BPF map id {map_id} from {}", path.display())
-                })?))
+) -> Result<HashMap<i32, u32>> {
+    let mut old_fd_to_map_id = HashMap::new();
+
+    for binding in bindings {
+        let Some(old_fd) = binding.old_fd else {
+            continue;
+        };
+        if let Some(previous) = old_fd_to_map_id.insert(old_fd, binding.map_id) {
+            bail!(
+                "{} maps pseudo-map old fd {} to both map {} and {}",
+                path.display(),
+                old_fd,
+                previous,
+                binding.map_id
+            );
         }
     }
+
+    let mut positional_map_ids = bindings
+        .iter()
+        .filter(|binding| binding.old_fd.is_none())
+        .map(|binding| binding.map_id);
+    for old_fd in old_fds.iter().copied() {
+        if old_fd_to_map_id.contains_key(&old_fd) {
+            continue;
+        }
+        let Some(map_id) = positional_map_ids.next() else {
+            bail!(
+                "{} does not provide a map_id for pseudo-map old fd {}",
+                path.display(),
+                old_fd
+            );
+        };
+        old_fd_to_map_id.insert(old_fd, map_id);
+    }
+
+    Ok(old_fd_to_map_id)
+}
+
+fn build_old_fd_map_from_prog_info(
+    prog_map_ids: &[u32],
+    old_fds: &[i32],
+    path: &Path,
+) -> Result<HashMap<i32, u32>> {
+    if old_fds.len() > prog_map_ids.len() {
+        bail!(
+            "{} prog_info exposes {} map ids but bytecode references {} pseudo-map old fds",
+            path.display(),
+            prog_map_ids.len(),
+            old_fds.len()
+        );
+    }
+
+    let mut old_fd_to_map_id = HashMap::new();
+    for (old_fd, map_id) in old_fds.iter().copied().zip(prog_map_ids.iter().copied()) {
+        if let Some(previous) = old_fd_to_map_id.insert(old_fd, map_id) {
+            bail!(
+                "{} maps pseudo-map old fd {} to both map {} and {}",
+                path.display(),
+                old_fd,
+                previous,
+                map_id
+            );
+        }
+    }
+    Ok(old_fd_to_map_id)
+}
+
+fn open_map_fd<'a>(
+    opened: &'a mut HashMap<u32, OwnedFd>,
+    bindings: &[MapBinding],
+    map_id: u32,
+    dummy_map_fds: bool,
+    path: &Path,
+) -> Result<&'a OwnedFd> {
+    if !opened.contains_key(&map_id) {
+        let fd = if dummy_map_fds {
+            create_dummy_map_fd(bindings, map_id, path)?
+        } else {
+            kernel_sys::map_get_fd_by_id(map_id)
+                .with_context(|| format!("open BPF map id {map_id} from {}", path.display()))?
+        };
+        opened.insert(map_id, fd);
+    }
+    opened
+        .get(&map_id)
+        .ok_or_else(|| anyhow!("internal error opening map id {map_id}"))
+}
+
+fn create_dummy_map_fd(bindings: &[MapBinding], map_id: u32, path: &Path) -> Result<OwnedFd> {
+    let binding = bindings
+        .iter()
+        .find(|binding| binding.map_id == map_id)
+        .ok_or_else(|| anyhow!("{} has no fixture for map id {map_id}", path.display()))?;
+    let metadata = binding.metadata.as_ref().ok_or_else(|| {
+        anyhow!(
+            "{} map fixture {} is missing map metadata required by --dummy-map-fds",
+            path.display(),
+            map_id
+        )
+    })?;
+    let name = dummy_map_name(map_id, &metadata.name)?;
+    kernel_sys::create_map(
+        metadata.map_type,
+        &name,
+        metadata.key_size,
+        metadata.value_size,
+        metadata.max_entries,
+        metadata.map_flags,
+        metadata.map_extra,
+        metadata.ifindex,
+    )
+    .with_context(|| {
+        format!(
+            "create dummy BPF map id {map_id} type {} key_size {} value_size {} max_entries {} from {}",
+            metadata.map_type,
+            metadata.key_size,
+            metadata.value_size,
+            metadata.max_entries,
+            path.display()
+        )
+    })
+}
+
+fn dummy_map_name(map_id: u32, fixture_name: &str) -> Result<String> {
+    let name = if fixture_name.trim().is_empty() {
+        format!("m{map_id}")
+    } else {
+        fixture_name.to_string()
+    };
+    if name.as_bytes().len() > 15 {
+        bail!("dummy map name {name:?} exceeds BPF map name limit");
+    }
+    Ok(name)
 }
 
 fn pseudo_map_old_fds(insns: &[kernel_sys::bpf_insn]) -> Vec<i32> {
@@ -523,19 +710,105 @@ fn read_map_bindings(path: &Path) -> Result<Vec<MapBinding>> {
 
     rows.into_iter()
         .enumerate()
-        .map(|(idx, row)| {
-            let map_id = row
-                .get("map_id")
-                .and_then(|v| v.as_u64())
-                .ok_or_else(|| anyhow!("map_fds entry {idx} is missing map_id"))?;
-            let old_fd = row.get("old_fd").and_then(|v| v.as_i64());
-            Ok(MapBinding {
-                old_fd: old_fd.map(|fd| fd as i32),
-                map_id: u32::try_from(map_id)
-                    .with_context(|| format!("map_fds entry {idx} map_id out of range"))?,
-            })
-        })
+        .map(map_binding_from_json)
         .collect()
+}
+
+fn map_binding_from_json((idx, row): (usize, serde_json::Value)) -> Result<MapBinding> {
+    let row: MapBindingJson = serde_json::from_value(row)
+        .with_context(|| format!("failed to parse map_fds entry {idx}"))?;
+    let map_id = u32::try_from(row.map_id)
+        .with_context(|| format!("map_fds entry {idx} map_id out of range"))?;
+    let old_fd = row
+        .old_fd
+        .map(i32::try_from)
+        .transpose()
+        .with_context(|| format!("map_fds entry {idx} old_fd out of range"))?;
+    let metadata = map_metadata_from_json(idx, &row)?;
+    Ok(MapBinding {
+        old_fd,
+        map_id,
+        metadata,
+    })
+}
+
+fn map_metadata_from_json(idx: usize, row: &MapBindingJson) -> Result<Option<MapMetadata>> {
+    let present = [
+        row.map_type.is_some(),
+        row.key_size.is_some(),
+        row.value_size.is_some(),
+        row.max_entries.is_some(),
+    ];
+    if present.iter().all(|value| !value) {
+        return Ok(None);
+    }
+    if !present.iter().all(|value| *value) {
+        bail!("map_fds entry {idx} has partial map metadata");
+    }
+    let map_type = row
+        .map_type
+        .ok_or_else(|| anyhow!("map_fds entry {idx} missing map_type"))?;
+    let key_size = row
+        .key_size
+        .ok_or_else(|| anyhow!("map_fds entry {idx} missing key_size"))?;
+    let value_size = row
+        .value_size
+        .ok_or_else(|| anyhow!("map_fds entry {idx} missing value_size"))?;
+    let max_entries = row
+        .max_entries
+        .ok_or_else(|| anyhow!("map_fds entry {idx} missing max_entries"))?;
+    Ok(Some(MapMetadata {
+        map_type,
+        key_size,
+        value_size,
+        max_entries,
+        name: row.name.clone(),
+        map_flags: row.map_flags,
+        ifindex: row.ifindex,
+        map_extra: row.map_extra,
+    }))
+}
+
+fn read_prog_info_map_ids(path: &Path) -> Result<Vec<u32>> {
+    let text =
+        fs::read_to_string(path).with_context(|| format!("failed to read {}", path.display()))?;
+    let info: ProgInfoMapIds = serde_json::from_str(&text)
+        .with_context(|| format!("failed to parse prog_info JSON {}", path.display()))?;
+    Ok(info.map_ids)
+}
+
+fn validate_dummy_map_fixtures(
+    path: &Path,
+    bindings: &[MapBinding],
+    prog_map_ids: &[u32],
+) -> Result<()> {
+    let mut by_id = HashMap::new();
+    for binding in bindings {
+        if by_id.insert(binding.map_id, binding).is_some() {
+            bail!(
+                "{} contains duplicate fixture for map id {}",
+                path.display(),
+                binding.map_id
+            );
+        }
+        if binding.metadata.is_none() {
+            bail!(
+                "{} map fixture {} is missing map metadata required by --dummy-map-fds",
+                path.display(),
+                binding.map_id
+            );
+        }
+    }
+    for map_id in prog_map_ids {
+        if !by_id.contains_key(map_id) {
+            bail!(
+                "{} is missing map fixture for prog_info map id {}",
+                path.display(),
+                map_id
+            );
+        }
+    }
+    Ok(())
 }
 
 fn read_fd_array(path: Option<&Path>) -> Result<FdArray> {
@@ -971,6 +1244,75 @@ mod tests {
         ])
         .unwrap();
         assert_eq!(effective_log_level(&states_cli), 2);
+    }
+
+    #[test]
+    fn dummy_map_fds_requires_portable_prog_info_fixture() {
+        let cli = Cli::try_parse_from([
+            "bpfverify",
+            "--prog-type",
+            "xdp",
+            "--map-fds",
+            "map_fds.json",
+            "--dummy-map-fds",
+        ])
+        .unwrap();
+
+        let err = validate_cli(&cli).unwrap_err();
+
+        assert!(
+            err.to_string()
+                .contains("--dummy-map-fds requires --prog-info"),
+            "err={err:#}"
+        );
+    }
+
+    #[test]
+    fn old_fd_bindings_use_positional_fixtures_only_for_unbound_fds() {
+        let bindings = vec![
+            MapBinding {
+                old_fd: Some(10),
+                map_id: 100,
+                metadata: None,
+            },
+            MapBinding {
+                old_fd: None,
+                map_id: 200,
+                metadata: None,
+            },
+        ];
+
+        let resolved = build_old_fd_map(&bindings, &[10, 20], Path::new("map_fds.json")).unwrap();
+
+        assert_eq!(resolved[&10], 100);
+        assert_eq!(resolved[&20], 200);
+    }
+
+    #[test]
+    fn dummy_old_fd_bindings_are_derived_from_prog_info_order() {
+        let resolved =
+            build_old_fd_map_from_prog_info(&[700, 800], &[31, 41], Path::new("map_fds.json"))
+                .unwrap();
+
+        assert_eq!(resolved[&31], 700);
+        assert_eq!(resolved[&41], 800);
+    }
+
+    #[test]
+    fn dummy_map_fixtures_require_metadata_for_each_prog_map() {
+        let bindings = vec![MapBinding {
+            old_fd: None,
+            map_id: 7,
+            metadata: None,
+        }];
+
+        let err =
+            validate_dummy_map_fixtures(Path::new("map_fds.json"), &bindings, &[7]).unwrap_err();
+
+        assert!(
+            err.to_string().contains("missing map metadata"),
+            "err={err:#}"
+        );
     }
 
     #[test]
