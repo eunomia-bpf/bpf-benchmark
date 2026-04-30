@@ -140,8 +140,7 @@ _CONFIG_SKELETON: dict[str, Any] = {
         "repeat": _DEFAULT_BENCHMARK_REPEAT,
     },
     "passes": {},
-    "policy": {"rules": []},
-    "profiles": {},
+    "policy": {},
 }
 
 
@@ -158,25 +157,16 @@ def _load_benchmark_root_config() -> dict[str, Any]:
     return _deep_merge(_CONFIG_SKELETON, payload)
 
 
-def load_benchmark_config(profile: str | None = None) -> dict[str, Any]:
+def load_benchmark_config() -> dict[str, Any]:
     rc = _load_benchmark_root_config()
     defaults = _mapping_dict(rc.get("defaults"), field_name="defaults")
     passes = _mapping_dict(rc.get("passes"), field_name="passes")
     policy = _mapping_dict(rc.get("policy"), field_name="policy")
-    profiles = _mapping_dict(rc.get("profiles"), field_name="profiles")
 
-    profile_overrides: dict[str, Any] = {}
-    if profile:
-        if (raw_profile := profiles.get(profile)) is None:
-            available = ", ".join(sorted(profiles))
-            raise SystemExit(f"unknown benchmark profile: {profile}" + (f" (available: {available})" if available else ""))
-        profile_overrides = _mapping_dict(raw_profile, field_name=f"profiles.{profile}")
-
-    effective = _deep_merge({**defaults, "passes": passes, "policy": policy}, profile_overrides)
+    effective = _deep_merge({**defaults, "passes": passes}, {"policy": policy})
     effective["passes"] = _mapping_dict(effective.get("passes"), field_name="passes")
     effective["policy"] = _mapping_dict(effective.get("policy"), field_name="policy")
-    effective.update(profile=profile, config_path=_BENCHMARK_CONFIG_PATH,
-                     config_loaded=True, available_profiles=sorted(profiles))
+    effective.update(config_path=_BENCHMARK_CONFIG_PATH, config_loaded=True)
     return effective
 
 
@@ -359,17 +349,6 @@ def _policy_pass_list(raw: Any, *, field_name: str) -> list[str] | None:
     return [str(value).strip() for value in raw if str(value).strip()]
 
 
-def _policy_match_values(raw: Any, *, field_name: str) -> list[str]:
-    if raw is None:
-        return []
-    if isinstance(raw, list):
-        return [str(value).strip() for value in raw if str(value).strip()]
-    if isinstance(raw, Mapping):
-        raise SystemExit(f"invalid benchmark config field: {field_name} must be a scalar or sequence")
-    text = str(raw).strip()
-    return [text] if text else []
-
-
 def benchmark_config_enabled_passes(benchmark_config: Mapping[str, Any] | None) -> list[str]:
     policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
     policy_default = _mapping_dict(policy_config.get("default"), field_name="policy.default")
@@ -384,62 +363,6 @@ def benchmark_config_enabled_passes(benchmark_config: Mapping[str, Any] | None) 
         "benchmark config must define policy.default.passes or passes.active_list "
         "when no explicit pass override is supplied"
     )
-
-
-def _policy_exclusion_label(match_config: Mapping[str, Any], *, field_name: str) -> str:
-    prog_types = _policy_match_values(
-        match_config.get("prog_type"),
-        field_name=f"{field_name}.prog_type",
-    )
-    other_keys = [key for key in match_config if key != "prog_type"]
-    if len(prog_types) == 1 and not other_keys:
-        return prog_types[0]
-
-    parts: list[str] = []
-    for key, raw_value in match_config.items():
-        current_field = f"{field_name}.{key}"
-        if key == "has_sites":
-            values = _policy_pass_list(raw_value, field_name=current_field) or []
-        else:
-            values = _policy_match_values(raw_value, field_name=current_field)
-        if values:
-            parts.append(f"{key}=" + ",".join(values))
-    return " & ".join(parts) if parts else "default"
-
-
-def benchmark_policy_exclusions(benchmark_config: Mapping[str, Any] | None) -> dict[str, list[str]]:
-    policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
-    exclusions: dict[str, list[str]] = {}
-    for index, raw_rule in enumerate(_policy_rules_list(policy_config), start=1):
-        if not isinstance(raw_rule, Mapping):
-            raise SystemExit(f"invalid benchmark config field: policy.rules[{index}] must be a mapping")
-        disabled = _policy_pass_list(
-            raw_rule.get("disable"),
-            field_name=f"policy.rules[{index}].disable",
-        ) or []
-        if not disabled:
-            continue
-        match_config = _mapping_dict(
-            raw_rule.get("match"),
-            field_name=f"policy.rules[{index}].match",
-        )
-        label = _policy_exclusion_label(
-            match_config,
-            field_name=f"policy.rules[{index}].match",
-        )
-        current = exclusions.setdefault(label, [])
-        for pass_name in disabled:
-            if pass_name not in current:
-                current.append(pass_name)
-    return exclusions
-
-
-def _policy_rules_list(policy_config: Mapping[str, Any]) -> list[Any]:
-    raw_rules = policy_config.get("rules")
-    if raw_rules is None: return []
-    if not isinstance(raw_rules, list):
-        raise SystemExit("invalid benchmark config field: policy.rules must be a sequence")
-    return raw_rules
 
 
 @lru_cache(maxsize=1)
@@ -461,10 +384,8 @@ def benchmark_rejit_enabled_passes() -> list[str]:
 
 
 def benchmark_run_provenance() -> dict[str, object]:
-    benchmark_config = load_benchmark_config()
     return {
         "config": {"enabled_passes": benchmark_rejit_enabled_passes()},
-        "policy": {"exclusions": benchmark_policy_exclusions(benchmark_config)},
     }
 
 

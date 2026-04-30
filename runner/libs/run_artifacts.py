@@ -128,7 +128,6 @@ def summarize_benchmark_results(payload: Mapping[str, Any]) -> dict[str, Any]:
     runtime_names: set[str] = set()
     correctness_mismatches: list[str] = []
     passes_applied = Counter()
-    final_disabled = Counter()
     total_verifier_retries = 0
     total_sites_applied = 0
     daemon_debug_entries = 0
@@ -157,7 +156,6 @@ def summarize_benchmark_results(payload: Mapping[str, Any]) -> dict[str, Any]:
             run_summary["sample_count"] = len(samples) if isinstance(samples, list) else 0
 
             run_passes = Counter()
-            run_disabled = Counter()
             run_verifier_retries = 0
             run_sites_applied = 0
             run_daemon_debug_entries = 0
@@ -177,12 +175,9 @@ def summarize_benchmark_results(payload: Mapping[str, Any]) -> dict[str, Any]:
                         run_daemon_debug_entries += 1
                     for pass_name in rejit.get("passes_applied", []):
                         run_passes[str(pass_name)] += 1
-                    for pass_name in rejit.get("final_disabled_passes", []):
-                        run_disabled[str(pass_name)] += 1
 
             run_summary["optimization_summary"] = {
                 "daemon_debug_entries": run_daemon_debug_entries,
-                "final_disabled_passes": dict(sorted(run_disabled.items())),
                 "passes_applied": dict(sorted(run_passes.items())),
                 "total_sites_applied": run_sites_applied,
                 "verifier_retries": run_verifier_retries,
@@ -190,7 +185,6 @@ def summarize_benchmark_results(payload: Mapping[str, Any]) -> dict[str, Any]:
 
             run_summaries.append(run_summary)
             passes_applied.update(run_passes)
-            final_disabled.update(run_disabled)
             total_verifier_retries += run_verifier_retries
             total_sites_applied += run_sites_applied
             daemon_debug_entries += run_daemon_debug_entries
@@ -204,7 +198,6 @@ def summarize_benchmark_results(payload: Mapping[str, Any]) -> dict[str, Any]:
         "correctness_mismatch_count": len(correctness_mismatches),
         "correctness_mismatches": correctness_mismatches,
         "daemon_debug_entries": daemon_debug_entries,
-        "final_disabled_passes": dict(sorted(final_disabled.items())),
         "passes_applied": dict(sorted(passes_applied.items())),
         "runtime_names": sorted(runtime_names),
         "total_sites_applied": total_sites_applied,
