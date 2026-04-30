@@ -7,47 +7,125 @@ ARG RUN_TARGET_ARCH=x86_64
 ARG VENDOR_LINUX_FRAMEWORK_COMMIT
 ARG KERNEL_FORK_IMAGE_PLATFORM=linux/amd64
 
-FROM docker.io/library/ubuntu:24.04 AS runner-runtime-build-base
+FROM docker.io/library/ubuntu:24.04 AS runner-runtime-runtime-base
 
-ARG GO_VERSION=1.26.0
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        autoconf \
-        automake \
         auditd \
         bash \
-        bc \
-        binutils-dev \
-        bison \
         bpfcc-tools \
         bpftrace \
         bzip2 \
         ca-certificates \
         clang \
-        cmake \
-        cpio \
         curl \
         debianutils \
         diffutils \
-        dwarves \
         elfutils \
         etcd-server \
         file \
         findutils \
         fio \
-        flex \
-        g++ \
-        gcc \
-        git \
         ipset \
         iptables \
         iproute2 \
         jq \
         kmod \
+        libaio1t64 \
+        libboost-atomic1.83.0 \
+        libboost-chrono1.83.0t64 \
+        libboost-container1.83.0 \
+        libboost-context1.83.0 \
+        libboost-coroutine1.83.0 \
+        libboost-date-time1.83.0 \
+        libboost-fiber1.83.0 \
+        libboost-filesystem1.83.0 \
+        libboost-iostreams1.83.0 \
+        libboost-json1.83.0 \
+        libboost-locale1.83.0 \
+        libboost-log1.83.0 \
+        libboost-program-options1.83.0 \
+        libboost-random1.83.0 \
+        libboost-regex1.83.0 \
+        libboost-serialization1.83.0 \
+        libboost-stacktrace1.83.0 \
+        libboost-system1.83.0 \
+        libboost-thread1.83.0 \
+        libboost-timer1.83.0 \
+        libbpf1 \
+        libbpfcc \
+        libbz2-1.0 \
+        libcap2 \
+        libcurl4t64 \
+        libdouble-conversion3 \
+        libdw1t64 \
+        libdwarf1 \
+        libedit2 \
+        libelf1t64 \
+        libevent-2.1-7t64 \
+        libfmt9 \
+        libgflags2.2 \
+        libgoogle-glog0v6t64 \
+        libgrpc++1.51t64 \
+        liblz4-1 \
+        libmnl0 \
+        libpcap0.8t64 \
+        libprotobuf32t64 \
+        libre2-10 \
+        libsodium23 \
+        libsnappy1v5 \
+        libspdlog1.12 \
+        libssl3t64 \
+        libunwind8 \
+        libyaml-cpp0.8 \
+        libzstd1 \
+        llvm \
+        lz4 \
+        nftables \
+        openssl \
+        perl \
+        procps \
+        python3 \
+        python3-bpfcc \
+        python3-yaml \
+        rt-tests \
+        stress-ng \
+        tar \
+        util-linux \
+        wrk \
+        xz-utils \
+        zlib1g \
+        zstd \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p "${IMAGE_WORKSPACE}"
+WORKDIR ${IMAGE_WORKSPACE}
+
+FROM runner-runtime-runtime-base AS runner-runtime-build-base
+
+ARG GO_VERSION=1.26.0
+ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        autoconf \
+        automake \
+        bc \
+        binutils-dev \
+        bison \
+        build-essential \
+        cmake \
+        cpio \
+        dwarves \
+        flex \
+        g++ \
+        gcc \
+        gcc-aarch64-linux-gnu \
+        git \
         libaio-dev \
         libboost-all-dev \
         libbpf-dev \
@@ -85,32 +163,16 @@ RUN apt-get update \
         libunwind-dev \
         libyaml-cpp-dev \
         libzstd-dev \
-        llvm \
         llvm-dev \
-        lz4 \
         make \
-        nftables \
-        openssl \
-        perl \
         pkg-config \
-        procps \
         protobuf-compiler \
         protobuf-compiler-grpc \
-        python3 \
-        python3-bpfcc \
-        python3-yaml \
         rsync \
-        rt-tests \
         scons \
-        stress-ng \
-        tar \
         unzip \
-        util-linux \
-        wrk \
-        xz-utils \
         xxd \
         zlib1g-dev \
-        zstd \
     && rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
@@ -142,9 +204,6 @@ RUN set -eux; \
     chmod -R a+rX /opt/rustup /opt/cargo; \
     rustc --version; \
     cargo --version
-
-RUN mkdir -p "${IMAGE_WORKSPACE}"
-WORKDIR ${IMAGE_WORKSPACE}
 
 FROM ${TRACEE_IMAGE} AS runner-runtime-tracee-upstream
 
@@ -317,64 +376,15 @@ RUN set -eux; \
     find ./runner -maxdepth 3 -type f \( -name CMakeCache.txt -o -name cmake_install.cmake -o -name Makefile \) -delete; \
     find ./tests -type f \( \( -name '*.o' ! -name '*.bpf.o' \) -o -name '*.d' -o -name '*.cmd' \) -delete
 
-RUN set -eux; \
-    apt-get purge -y \
-        autoconf \
-        automake \
-        bc \
-        binutils-dev \
-        bison \
-        clang \
-        cmake \
-        dwarves \
-        flex \
-        g++ \
-        libaio-dev \
-        libboost-all-dev \
-        libbpfcc-dev \
-        libbz2-dev \
-        libcap-dev \
-        libcereal-dev \
-        libclang-dev \
-        libcurl4-openssl-dev \
-        libdouble-conversion-dev \
-        libdwarf-dev \
-        libedit-dev \
-        libevent-dev \
-        libffi-dev \
-        libfl-dev \
-        libfmt-dev \
-        libgflags-dev \
-        libgoogle-glog-dev \
-        libiberty-dev \
-        liblz4-dev \
-        libmnl-dev \
-        libpcap-dev \
-        libre2-dev \
-        libsodium-dev \
-        libsnappy-dev \
-        libspdlog-dev \
-        libtool \
-        libtool-bin \
-        libltdl-dev \
-        libunwind-dev \
-        libyaml-cpp-dev \
-        llvm \
-        llvm-dev \
-        rsync \
-        scons \
-        unzip \
-        xxd; \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/*
-
-FROM runner-runtime-kernel-base AS runner-runtime-kinsn-artifacts
+FROM --platform=${KERNEL_FORK_IMAGE_PLATFORM} runner-runtime-build-base AS runner-runtime-kinsn-artifacts
 
 ARG IMAGE_BUILD_JOBS=4
+ARG KERNEL_FORK_IMAGE_PLATFORM=linux/amd64
 ARG RUN_TARGET_ARCH=x86_64
 
 WORKDIR /src
 
+COPY --link --from=runner-runtime-kernel-base /artifacts /artifacts
 COPY module ./module
 
 RUN --mount=type=cache,target=/tmp/kinsn-build,id=kinsn-build-${RUN_TARGET_ARCH},sharing=locked <<'EOF'
@@ -493,37 +503,44 @@ RUN --mount=type=cache,target=/bpfopt/target,id=bpfopt-cargo-target,sharing=lock
         "$bpfopt_bin_dir/bpfprof" \
         /artifacts/rust/usr-local-bin/
 
-FROM runner-runtime-artifacts AS runner-runtime
+FROM runner-runtime-runtime-base AS runner-runtime
 
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 
-RUN set -eux; \
-    rm -rf \
-        /opt/cargo \
-        /opt/rustup \
-        /usr/src/linux-headers-fork \
-        ./vendor \
-        ./Makefile \
-        ./runner/mk; \
-    apt-get purge -y \
-        gcc \
-        git \
-        libbpf-dev \
-        libdw-dev \
-        libelf-dev \
-        libssl-dev \
-        libzstd-dev \
-        make \
-        pkg-config \
-        zlib1g-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+COPY --link --from=runner-runtime-artifacts /artifacts /artifacts
+COPY --link --from=runner-runtime-artifacts /usr/local/bin/ /usr/local/bin/
+COPY --link --from=runner-runtime-artifacts /usr/local/lib/ /usr/local/lib/
+COPY --link --from=runner-runtime-artifacts /lib/ld-musl-*.so.1 /lib/
+COPY --link --from=runner-runtime-artifacts /lib/libc.musl-*.so.1 /lib/
+COPY --link --from=runner-runtime-artifacts /usr/lib/*-linux-musl/ /usr/lib/
+COPY --link --from=runner-runtime-artifacts /var/lib/cilium /var/lib/cilium
+COPY --link --from=runner-runtime-artifacts /etc/calico /etc/calico
+COPY --link --from=runner-runtime-artifacts /usr/lib/calico /usr/lib/calico
+COPY --link --from=runner-runtime-artifacts /included-source /included-source
+COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WORKSPACE}/runner
+COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
+COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/usr-local-bin/bpfrejit-daemon /usr/local/bin/bpfrejit-daemon
+COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/daemon/target/ ./daemon/target/
+COPY --link --from=runner-runtime-bpfopt-artifacts /artifacts/rust/usr-local-bin/ /usr/local/bin/
+COPY --link --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
 
-COPY --from=runner-runtime-daemon-artifact /artifacts/rust/usr-local-bin/bpfrejit-daemon /usr/local/bin/bpfrejit-daemon
-COPY --from=runner-runtime-daemon-artifact /artifacts/rust/daemon/target/ ./daemon/target/
-COPY --from=runner-runtime-bpfopt-artifacts /artifacts/rust/usr-local-bin/ /usr/local/bin/
-COPY --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
+RUN set -eux; \
+    ldconfig; \
+    test -x /usr/local/bin/bpftool; \
+    test -x /usr/local/bin/bpfrejit-daemon; \
+    test -x /usr/local/bin/bpfopt; \
+    test -x /usr/local/bin/cilium-agent; \
+    test -x /usr/local/bin/calico-node; \
+    test -d /artifacts/kernel; \
+    test -d /artifacts/modules; \
+    test -d /artifacts/kinsn; \
+    test -x "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc"; \
+    case "${RUN_TARGET_ARCH}" in \
+        x86_64) test -x "${IMAGE_WORKSPACE}/runner/build-llvmbpf/micro_exec"; test -d "${IMAGE_WORKSPACE}/tests/unittest/build/progs" ;; \
+        arm64) test -x "${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf/micro_exec"; test -d "${IMAGE_WORKSPACE}/tests/unittest/build-arm64/progs" ;; \
+        *) echo "unsupported RUN_TARGET_ARCH: ${RUN_TARGET_ARCH}" >&2; exit 1 ;; \
+    esac
 
 COPY --link corpus/bcf ./corpus/bcf
 COPY --link e2e/cases ./e2e/cases
