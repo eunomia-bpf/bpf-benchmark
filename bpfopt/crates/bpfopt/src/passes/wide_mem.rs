@@ -314,6 +314,19 @@ fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> {
     Ok(vec![BpfInsn::ldx_mem(size, dst, base, off)])
 }
 
+fn wide_load_alignment_skip_reason(site: &RewriteSite) -> Option<String> {
+    let width = site.get_binding("width").unwrap_or(0);
+    let base_off = site.get_binding("base_off").unwrap_or(0);
+
+    if matches!(width, 2 | 4 | 8) && base_off.rem_euclid(width) != 0 {
+        return Some(format!(
+            "wide load offset {base_off} is not naturally aligned for width {width}"
+        ));
+    }
+
+    None
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // BpfPass implementation
 // ═══════════════════════════════════════════════════════════════════
@@ -463,6 +476,14 @@ impl BpfPass for WideMemPass {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason: format!("unsupported width {} (supports 2, 4, 8)", width),
+                });
+                continue;
+            }
+
+            if let Some(reason) = wide_load_alignment_skip_reason(site) {
+                skipped.push(SkipReason {
+                    pc: site.start_pc,
+                    reason,
                 });
                 continue;
             }

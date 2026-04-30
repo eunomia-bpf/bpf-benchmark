@@ -299,6 +299,30 @@ fn test_wide_mem_pass_transforms_correctly() {
 }
 
 #[test]
+fn test_wide_mem_pass_skips_misaligned_halfword_site() {
+    let mut prog = make_program(vec![
+        BpfInsn::ldx_mem(BPF_B, 1, 10, -94),
+        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+        BpfInsn::ldx_mem(BPF_B, 2, 10, -95),
+        BpfInsn::alu64_reg(BPF_OR, 1, 2),
+        exit_insn(),
+    ]);
+    let mut cache = AnalysisCache::new();
+    let ctx = PassContext::test_default();
+
+    let pass = WideMemPass;
+    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+    assert!(!result.changed);
+    assert_eq!(result.sites_applied, 0);
+    assert!(result
+        .sites_skipped
+        .iter()
+        .any(|s| s.reason.contains("not naturally aligned")));
+    assert_eq!(prog.insns[0].code, BPF_LDX | BPF_B | BPF_MEM);
+}
+
+#[test]
 fn test_wide_mem_pass_skips_site_with_interior_branch_target() {
     let mut prog = make_program(vec![
         jeq_imm(5, 0, 2),
