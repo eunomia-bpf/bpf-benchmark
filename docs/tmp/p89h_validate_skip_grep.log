@@ -1,0 +1,16 @@
+bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:11:    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
+bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:175:            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
+bpfopt/crates/bpfopt/src/passes/cond_select.rs:9:    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
+bpfopt/crates/bpfopt/src/passes/cond_select.rs:229:            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
+bpfopt/crates/bpfopt/src/passes/endian.rs:9:    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
+bpfopt/crates/bpfopt/src/passes/endian.rs:335:            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
+bpfopt/crates/bpfopt/src/passes/extract.rs:9:    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
+bpfopt/crates/bpfopt/src/passes/extract.rs:155:            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
+bpfopt/crates/bpfopt/src/passes/rotate.rs:9:    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
+bpfopt/crates/bpfopt/src/passes/rotate.rs:75:            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
+bpfopt/crates/bpfopt/src/passes/utils.rs:654:pub fn kinsn_replacement_subprog_skip_reason(
+bpfopt/crates/bpfopt/src/passes/utils.rs:1225:        let skip = kinsn_replacement_subprog_skip_reason(&insns, 0, 2, 2).unwrap();
+bpfopt/crates/bpfopt/src/passes/utils.rs:1243:        let skip = kinsn_replacement_subprog_skip_reason(&insns, 0, 2, 2).unwrap();
+bpfopt/crates/bpfopt/src/passes/utils.rs:1259:        let skip = kinsn_replacement_subprog_skip_reason(&insns, 0, 2, 2).unwrap();
+bpfopt/crates/bpfopt/src/passes/utils.rs:1273:        let skip = kinsn_replacement_subprog_skip_reason(&insns, 1, 2, 2).unwrap();
+grep_rc=0

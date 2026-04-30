@@ -1,0 +1,52 @@
+{
+  "arch": "x86_64",
+  "features": [
+    "cmov",
+    "bmi1",
+    "bmi2",
+    "rorx",
+    "movbe"
+  ],
+  "kinsns": {
+    "bpf_bulk_memcpy": {
+      "btf_func_id": 129881,
+      "btf_id": 2,
+      "call_offset": 1
+    },
+    "bpf_bulk_memset": {
+      "btf_func_id": 129882,
+      "btf_id": 2,
+      "call_offset": 2
+    },
+    "bpf_endian_load64": {
+      "btf_func_id": 129882,
+      "btf_id": 3,
+      "call_offset": 6
+    },
+    "bpf_extract64": {
+      "btf_func_id": 129876,
+      "btf_id": 4,
+      "call_offset": 5
+    },
+    "bpf_rotate64": {
+      "btf_func_id": 129876,
+      "btf_id": 5,
+      "call_offset": 3
+    },
+    "bpf_select64": {
+      "btf_func_id": 129878,
+      "btf_id": 6,
+      "call_offset": 4
+    },
+    "bpf_endian_load16": {
+      "btf_func_id": 129880,
+      "btf_id": 3,
+      "call_offset": 6
+    },
+    "bpf_endian_load32": {
+      "btf_func_id": 129881,
+      "btf_id": 3,
+      "call_offset": 6
+    }
+  }
+}

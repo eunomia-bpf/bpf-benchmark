@@ -1,0 +1,882 @@
+=== replay round 1 latest=corpus/results/x86_kvm_p89_kinsn_corpus_20260430_131403_981524 ===
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=1194->1194
+  rotate: changed=false sites=0 insns=1194->1194
+  cond_select: changed=false sites=0 insns=1194->1194
+  extract: changed=false sites=0 insns=1194->1194
+  endian_fusion: changed=false sites=0 insns=1194->1194
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/219
+round=1 mode=kinsn5 prog=219 rc=0 opt=c9ae8b2f60150f2b6be8e9889a9df61494005c641271ccda8111e59da26bbb80 report=40d7a60a41532d49b5a1aca3a6b6a6ac164619435484850171036082bf241359
+round=1 mode=default11 prog=219 rc=0 opt=c9ae8b2f60150f2b6be8e9889a9df61494005c641271ccda8111e59da26bbb80 report=c8a0fc9ee46d40b70ddd8f9991112e63d00e6cf6c0f830d341eb549c2b4b042f
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=1110->1110
+  rotate: changed=false sites=0 insns=1110->1110
+  cond_select: changed=false sites=0 insns=1110->1110
+  extract: changed=false sites=0 insns=1110->1110
+  endian_fusion: changed=false sites=0 insns=1110->1110
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/235
+round=1 mode=kinsn5 prog=235 rc=0 opt=008c2bf227cfd52edba1333b945fd4e8ad7019facd3fc09d4acb8697037ac15a report=3a5b48ff0918b0ce74e3319e22cd4fff1ce173ad1bea83c7d939131d477b5bab
+round=1 mode=default11 prog=235 rc=0 opt=008c2bf227cfd52edba1333b945fd4e8ad7019facd3fc09d4acb8697037ac15a report=cfb4af0a64987eca15f51b9144207100a7c4b91b5f065765e2bc18118bb405d3
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/262
+round=1 mode=kinsn5 prog=262 rc=0 opt=e3db1173b209afb0d8fdb0f00eddec40157da6be7105835d023c79937e826dd9 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=262 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/265
+round=1 mode=kinsn5 prog=265 rc=0 opt=29265376651b69b0261517bb6a1aff200fa3619db9dc235a091af9fecb28c247 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 885 key 0x00000000 at lookup pc 7: map_values snapshot missing map 885 key 00000000
+round=1 mode=default11 prog=265 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/269
+round=1 mode=kinsn5 prog=269 rc=0 opt=833442aa3ff84f9944688afc388b608a43fc9bfa03825657aeed7f1298363fed report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 885 key 0x00000000 at lookup pc 7: map_values snapshot missing map 885 key 00000000
+round=1 mode=default11 prog=269 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/271
+round=1 mode=kinsn5 prog=271 rc=0 opt=988a5f8202e57aba8cf323485cb8fa5e04ba8ede01c7e98dc817a78faf99ccd5 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=271 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/276
+round=1 mode=kinsn5 prog=276 rc=0 opt=d3499ed44bf513d0f283a110e25ed77f2841360195f6a72519ae590c79d8504e report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=276 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/279
+round=1 mode=kinsn5 prog=279 rc=0 opt=2b61f9c1e593d15af6868b59f6e6941147ec3570de7d5a121f559996911b3a78 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 885 key 0x00000000 at lookup pc 7: map_values snapshot missing map 885 key 00000000
+round=1 mode=default11 prog=279 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/285
+round=1 mode=kinsn5 prog=285 rc=0 opt=5f29e8315617152a3861223631e74b0da4c0827a6fea11938fd367a1276f89e7 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1090 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1090 key 00000000
+round=1 mode=default11 prog=285 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/288
+round=1 mode=kinsn5 prog=288 rc=0 opt=217a820369442df3471fca885c7bd7bfeeda1a0ccdd7180a5e051da3af3a3228 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=288 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=true sites=3 insns=3041->3035
+  rotate: changed=false sites=0 insns=3035->3035
+  cond_select: changed=false sites=0 insns=3035->3035
+  extract: changed=true sites=1 insns=3035->3035
+  endian_fusion: changed=false sites=0 insns=3035->3035
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/290
+round=1 mode=kinsn5 prog=290 rc=0 opt=404e5ecedb4a7fab11245bd2e1f7a4778926bf674e0ac79b662c2fb6a45dc506 report=6a056b1a97421a6a9982a4af71bf35363f90306b6b9276016a6ad21d9ca9d00a
+round=1 mode=default11 prog=290 rc=0 opt=514e6257590c15a848dd8a755fdd0fb330f545976749dc73dd6a1fe3cb434fa0 report=07a12a063f62c1000b4f0ae367b2cb74367f25cee3b1f4d0496716370496f40e
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/293
+round=1 mode=kinsn5 prog=293 rc=0 opt=000eb78e4ab8a0ad150548c40addf73ad53b6ec45ce360e6bffe7430024a13af report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1090 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1090 key 00000000
+round=1 mode=default11 prog=293 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/295
+round=1 mode=kinsn5 prog=295 rc=0 opt=fce4dca31cb9167d0c0c0ab285ea5d404e10895a0bfc9db6a15fc40ef95e111b report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=295 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/300
+round=1 mode=kinsn5 prog=300 rc=0 opt=bc95acd10127644a84393fbb289397fd191d25f2af2ca5f89115a3021b8bfe20 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1090 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1090 key 00000000
+round=1 mode=default11 prog=300 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/301
+round=1 mode=kinsn5 prog=301 rc=0 opt=658d2a27a65d115f14e0ef51bea87673b7d77e26e8aef888546e573c5098a984 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=301 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/310
+round=1 mode=kinsn5 prog=310 rc=0 opt=fc91154ee9f4a659a3dc16ec760331bd42fbb9bbb1bd015e380009574b5f6d08 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=310 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/312
+round=1 mode=kinsn5 prog=312 rc=0 opt=d51dfa2bb80eadd9687aa8beca490aea0fe8539dde96cf6fa74feff858cc1cb5 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1366 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1366 key 00000000
+round=1 mode=default11 prog=312 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=true sites=3 insns=3041->3035
+  rotate: changed=false sites=0 insns=3035->3035
+  cond_select: changed=false sites=0 insns=3035->3035
+  extract: changed=true sites=1 insns=3035->3035
+  endian_fusion: changed=false sites=0 insns=3035->3035
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/317
+round=1 mode=kinsn5 prog=317 rc=0 opt=0407085fb7a73c51da3b5db44b44794b65e4a45ebdf967e846a61b5ab6fd5e1e report=6a056b1a97421a6a9982a4af71bf35363f90306b6b9276016a6ad21d9ca9d00a
+round=1 mode=default11 prog=317 rc=0 opt=ac39a52cf64b7d0616a8525d705e86e7c534c0957167a6c9a6c6868507976cee report=07a12a063f62c1000b4f0ae367b2cb74367f25cee3b1f4d0496716370496f40e
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/321
+round=1 mode=kinsn5 prog=321 rc=0 opt=a27bbd34e6e25d9dcb09dc929dde57f3be1ed40af5a9ea0312039be5c0960cfa report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=321 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/324
+round=1 mode=kinsn5 prog=324 rc=0 opt=de9f5ddccab48a24fb92c0e275f85d354cf685009fdc5e4a0d4d051790f74213 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1366 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1366 key 00000000
+round=1 mode=default11 prog=324 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/325
+round=1 mode=kinsn5 prog=325 rc=0 opt=ddf064cc30cf88a51616cfbb02222b22bc074e89d9158ae99b470aa40d4c397f report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=325 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/330
+round=1 mode=kinsn5 prog=330 rc=0 opt=372e46bfd0e8a4190ad37809a19be5fd86aeff6ae113767efd0f2ac0ade80126 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1366 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1366 key 00000000
+round=1 mode=default11 prog=330 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/334
+round=1 mode=kinsn5 prog=334 rc=0 opt=e7a9ad089dfae7c8c9da5620fbffff8eea8d526ddfdc48c3f927d7117351a0cb report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1366 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1366 key 00000000
+round=1 mode=default11 prog=334 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/335
+round=1 mode=kinsn5 prog=335 rc=0 opt=5e6f8a13e319bc8c1fd6c27edb02c69add9f480af139b28789a7bbd266a68b03 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=335 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/342
+round=1 mode=kinsn5 prog=342 rc=0 opt=82e280768cca007b4a39f626f0db0ff9e8e9818d375dc0695db2459ce479ce8f report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1366 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1366 key 00000000
+round=1 mode=default11 prog=342 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/344
+round=1 mode=kinsn5 prog=344 rc=0 opt=96ad3ee367deb8ba605ad5087eb2916a388cdfaa46e6f4a20320b36ddc02358c report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=344 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/346
+round=1 mode=kinsn5 prog=346 rc=0 opt=8b2c17bc142798252016118948299cbee29013269904adcb8804b994f2ed9684 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=346 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/351
+round=1 mode=kinsn5 prog=351 rc=0 opt=da8286891947821a82b3f3c0c69c47391ee0c51243931549f1afcee25cfab79f report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1366 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1366 key 00000000
+round=1 mode=default11 prog=351 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/354
+round=1 mode=kinsn5 prog=354 rc=0 opt=e3e7bdc05df132f416092d3a2721b8c459e8703c83dfcb637adb683ce8fac2b1 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1854 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1854 key 00000000
+round=1 mode=default11 prog=354 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/355
+round=1 mode=kinsn5 prog=355 rc=0 opt=5ff15745c078a7f4a1188095c43e61342da475eb4a2ed95d5c30ec4a39f12a9d report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=355 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/365
+round=1 mode=kinsn5 prog=365 rc=0 opt=db4fdd37229cdbc2cfb088a9ec773e85ce466edbd28ba9b36d819a4decba3381 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=365 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/366
+round=1 mode=kinsn5 prog=366 rc=0 opt=d6c81627ecb99e51a14b9de16a03aeb3729486f25429410c467e4ecf62bc590c report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1927 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1927 key 00000000
+round=1 mode=default11 prog=366 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=true sites=3 insns=3041->3035
+  rotate: changed=false sites=0 insns=3035->3035
+  cond_select: changed=false sites=0 insns=3035->3035
+  extract: changed=true sites=1 insns=3035->3035
+  endian_fusion: changed=false sites=0 insns=3035->3035
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/370
+round=1 mode=kinsn5 prog=370 rc=0 opt=d60ba905777d6a4cba3e5e55f9e3afb0d2976939cfd4f51548551421ca4da6a8 report=6a056b1a97421a6a9982a4af71bf35363f90306b6b9276016a6ad21d9ca9d00a
+round=1 mode=default11 prog=370 rc=0 opt=b8228ea5a74882cab99cbb069ae9fdce1a5c8da9a02c61d73172e7d0bdd26bf0 report=07a12a063f62c1000b4f0ae367b2cb74367f25cee3b1f4d0496716370496f40e
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/371
+round=1 mode=kinsn5 prog=371 rc=0 opt=774ada335487912063f943d415482754da6a174aacf51a1164539955b861c27b report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1927 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1927 key 00000000
+round=1 mode=default11 prog=371 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/372
+round=1 mode=kinsn5 prog=372 rc=0 opt=a39f675c8b7cf64abf132305391613ac292b90c6b9a18b2e7d412947666aceda report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=372 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=true sites=3 insns=3041->3035
+  rotate: changed=false sites=0 insns=3035->3035
+  cond_select: changed=false sites=0 insns=3035->3035
+  extract: changed=true sites=1 insns=3035->3035
+  endian_fusion: changed=false sites=0 insns=3035->3035
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/380
+round=1 mode=kinsn5 prog=380 rc=0 opt=34671034fadc242fbbd63d5d7aee4d9a60186261729719baee9fe4ce6199b8a1 report=6a056b1a97421a6a9982a4af71bf35363f90306b6b9276016a6ad21d9ca9d00a
+round=1 mode=default11 prog=380 rc=0 opt=d636e65cb8bde8f91a0ca18e274c83599559425165ac05a510ee8ec78e854e8f report=07a12a063f62c1000b4f0ae367b2cb74367f25cee3b1f4d0496716370496f40e
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/383
+round=1 mode=kinsn5 prog=383 rc=0 opt=2a145c45086ce73669fc262a2b2d27c2273fd4f3e75ca6488940ae6ae4592dde report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=383 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/384
+round=1 mode=kinsn5 prog=384 rc=0 opt=63440fe7050fc25c046f638cbc5e8c6cab32f1ab4f5fec8e5cc0321d7832c93c report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 1927 key 0x00000000 at lookup pc 7: map_values snapshot missing map 1927 key 00000000
+round=1 mode=default11 prog=384 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=true sites=3 insns=3041->3035
+  rotate: changed=false sites=0 insns=3035->3035
+  cond_select: changed=false sites=0 insns=3035->3035
+  extract: changed=true sites=1 insns=3035->3035
+  endian_fusion: changed=false sites=0 insns=3035->3035
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/392
+round=1 mode=kinsn5 prog=392 rc=0 opt=770e04ef8594ea95829ed1d8d04ffdaba2f3057f4131fab7453369663429fee6 report=6a056b1a97421a6a9982a4af71bf35363f90306b6b9276016a6ad21d9ca9d00a
+round=1 mode=default11 prog=392 rc=0 opt=5f486160cefe0f34c1b1ddb52d224af53656c06e7f430b38000d0c752219e8c5 report=07a12a063f62c1000b4f0ae367b2cb74367f25cee3b1f4d0496716370496f40e
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/393
+round=1 mode=kinsn5 prog=393 rc=0 opt=434f1e1ac5f44238534e3f5ad5c7848f0524439aabfd3fc828b46409e65046a4 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=393 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/399
+round=1 mode=kinsn5 prog=399 rc=0 opt=7551462ed114a368f17d87eafc471fa657308181d0643a1b2af49318551580bb report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 2346 key 0x00000000 at lookup pc 7: map_values snapshot missing map 2346 key 00000000
+round=1 mode=default11 prog=399 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=true sites=3 insns=3041->3035
+  rotate: changed=false sites=0 insns=3035->3035
+  cond_select: changed=false sites=0 insns=3035->3035
+  extract: changed=true sites=1 insns=3035->3035
+  endian_fusion: changed=false sites=0 insns=3035->3035
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/402
+round=1 mode=kinsn5 prog=402 rc=0 opt=b4970b1ea86556e3d3d78e8330fe48b6ddc3f3b645b3b9754e5d6d4e7bd277c3 report=6a056b1a97421a6a9982a4af71bf35363f90306b6b9276016a6ad21d9ca9d00a
+round=1 mode=default11 prog=402 rc=0 opt=b30365092ec77449a49af0cfd817f15f5b9dd569e6f8f17d1a7463ed6b858997 report=07a12a063f62c1000b4f0ae367b2cb74367f25cee3b1f4d0496716370496f40e
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/404
+round=1 mode=kinsn5 prog=404 rc=0 opt=2323457489685079e0891f8d8c31938b7aefa61828c67f4d9b08ed322ba32202 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 2346 key 0x00000000 at lookup pc 7: map_values snapshot missing map 2346 key 00000000
+round=1 mode=default11 prog=404 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/406
+round=1 mode=kinsn5 prog=406 rc=0 opt=e3d84e0c326712d39374efa0b31b6c11efc7eaf067f7a18d739fcd033a56d433 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=406 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=true sites=3 insns=3041->3035
+  rotate: changed=false sites=0 insns=3035->3035
+  cond_select: changed=false sites=0 insns=3035->3035
+  extract: changed=true sites=1 insns=3035->3035
+  endian_fusion: changed=false sites=0 insns=3035->3035
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/412
+round=1 mode=kinsn5 prog=412 rc=0 opt=7cff4a0f230b6c3937a6f4e058ecbe9db703173d368d964936fcdb061a826fba report=6a056b1a97421a6a9982a4af71bf35363f90306b6b9276016a6ad21d9ca9d00a
+round=1 mode=default11 prog=412 rc=0 opt=3eb97c498eebbe05f9e1c368d27abbec9b86e7151aaf4d4c9e32173daf46ffc8 report=07a12a063f62c1000b4f0ae367b2cb74367f25cee3b1f4d0496716370496f40e
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/416
+round=1 mode=kinsn5 prog=416 rc=0 opt=99cb5ceefe1228f4abdefdaf2084142b25b1504af367484bc150d3d525b3c9b5 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 2346 key 0x00000000 at lookup pc 7: map_values snapshot missing map 2346 key 00000000
+round=1 mode=default11 prog=416 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/420
+round=1 mode=kinsn5 prog=420 rc=0 opt=9c9adef95748f39d12f368a6fbfde0eb69396a07766d718da8bc2c3b30b2235c report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=420 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/424
+round=1 mode=kinsn5 prog=424 rc=0 opt=a74bac24d88477ab13f0c1a685a01b5cf2b0d4b3fdb739a98b34e834982e5eb6 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=424 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/425
+round=1 mode=kinsn5 prog=425 rc=0 opt=e0ead3eb762197a8e36a5770732548f6bc62709cdcd26e57511171a4632bb8a0 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 2346 key 0x00000000 at lookup pc 7: map_values snapshot missing map 2346 key 00000000
+round=1 mode=default11 prog=425 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/431
+round=1 mode=kinsn5 prog=431 rc=0 opt=f3816715096b5b2f6a5fa4071a7f8f26978fc74d9580b0f15fe1240974755c65 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 2757 key 0x00000000 at lookup pc 7: map_values snapshot missing map 2757 key 00000000
+round=1 mode=default11 prog=431 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/434
+round=1 mode=kinsn5 prog=434 rc=0 opt=a45c4c8b0a69a4b1265ef7c4a3770b9059e13807aba1b32fd8ae963390b1ae18 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=434 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/437
+round=1 mode=kinsn5 prog=437 rc=0 opt=adc4ca2e738132bfd49f845b26fff8b0eb8df5088405c1a7709c76713ac44fd4 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=437 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3136->3136
+  rotate: changed=false sites=0 insns=3136->3136
+  cond_select: changed=false sites=0 insns=3136->3136
+  extract: changed=false sites=0 insns=3136->3136
+  endian_fusion: changed=false sites=0 insns=3136->3136
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/439
+round=1 mode=kinsn5 prog=439 rc=0 opt=fb8052d9750cef90cb58d46cb76b7b46724b532d7a88c602acf32486b85c4ba2 report=61c6bae3ea82f6b83d3f72d035f55bd950de44d21245840b38c42af63c8801e6
+error: map_inline requires a concrete snapshot value for map 2855 key 0x00000000 at lookup pc 7: map_values snapshot missing map 2855 key 00000000
+round=1 mode=default11 prog=439 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/446
+round=1 mode=kinsn5 prog=446 rc=0 opt=744279319315b246c58275e0cafadc7b1bf0a7befca6f311ed38f5acbd316238 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 2927 key 0x00000000 at lookup pc 7: map_values snapshot missing map 2927 key 00000000
+round=1 mode=default11 prog=446 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/447
+round=1 mode=kinsn5 prog=447 rc=0 opt=cc8283072ff72741d153676f4aa68061138a446c42cc6975e67c66d6bf01aadc report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=447 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/449
+round=1 mode=kinsn5 prog=449 rc=0 opt=0a42f5c2d2defdc11484a48b263a8a10e438d5df3b5422633ddba2c86568093c report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 2977 key 0x00000000 at lookup pc 7: map_values snapshot missing map 2977 key 00000000
+round=1 mode=default11 prog=449 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/451
+round=1 mode=kinsn5 prog=451 rc=0 opt=9fc457d8b9fc2585c565b10befd60f8de93545f1e976b9da639b5b7b03887652 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=451 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/457
+round=1 mode=kinsn5 prog=457 rc=0 opt=a1fada6c866d09997294b14466a260a53886c2da1018a4dbec585c5450fab465 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=457 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/461
+round=1 mode=kinsn5 prog=461 rc=0 opt=fdc1d66a6abc2e3a7730cba7d2a47a0defb9f29835325abd51f292a89f4b8c4e report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 3051 key 0x00000000 at lookup pc 7: map_values snapshot missing map 3051 key 00000000
+round=1 mode=default11 prog=461 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/463
+round=1 mode=kinsn5 prog=463 rc=0 opt=11b8b492166e3fb439793f4cc6aa080e65b4191a224533bbc14de45716affcad report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=463 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/469
+round=1 mode=kinsn5 prog=469 rc=0 opt=4b6b8f0165830338b08c49409bee0c40b5946d19027ce604dfdaa48119069e83 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 3124 key 0x00000000 at lookup pc 7: map_values snapshot missing map 3124 key 00000000
+round=1 mode=default11 prog=469 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/474
+round=1 mode=kinsn5 prog=474 rc=0 opt=739a0e92cbd14e4cfc4cce62b35de6ee3691786585fb400656f12e74c77979a5 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 3197 key 0x00000000 at lookup pc 7: map_values snapshot missing map 3197 key 00000000
+round=1 mode=default11 prog=474 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/476
+round=1 mode=kinsn5 prog=476 rc=0 opt=fc40b412c0c983e1ee651ae589c2bbf9f177a7fbe5bcba722d4ab0c52efa9c24 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=476 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=true sites=3 insns=3041->3035
+  rotate: changed=false sites=0 insns=3035->3035
+  cond_select: changed=false sites=0 insns=3035->3035
+  extract: changed=true sites=1 insns=3035->3035
+  endian_fusion: changed=false sites=0 insns=3035->3035
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/480
+round=1 mode=kinsn5 prog=480 rc=0 opt=02b0b7d0898a4bf8f5bee966983c21798e2efa463aa3e6fab2a7c7e4112d6d72 report=6a056b1a97421a6a9982a4af71bf35363f90306b6b9276016a6ad21d9ca9d00a
+round=1 mode=default11 prog=480 rc=0 opt=82de0548f19f66dedc16ae3440cbb851146483b8f6cb3874ed5aebefcd6f1f84 report=07a12a063f62c1000b4f0ae367b2cb74367f25cee3b1f4d0496716370496f40e
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/481
+round=1 mode=kinsn5 prog=481 rc=0 opt=bc506ba609e25a33c57e47579337cc9faa101c3e0a6e3e8f5a8d5dde48676e08 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 3197 key 0x00000000 at lookup pc 7: map_values snapshot missing map 3197 key 00000000
+round=1 mode=default11 prog=481 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/487
+round=1 mode=kinsn5 prog=487 rc=0 opt=a8364d1f068c57a09d89c70557961e5805655e1f45ce019658dba4268fdfbb1f report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=487 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/489
+round=1 mode=kinsn5 prog=489 rc=0 opt=c9434a14a3a1035660338f3145008b16d9e25121d9f1d8bcb1e9e42a0f27398a report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 3197 key 0x00000000 at lookup pc 7: map_values snapshot missing map 3197 key 00000000
+round=1 mode=default11 prog=489 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/490
+round=1 mode=kinsn5 prog=490 rc=0 opt=274c4dde153948096f392da219256138ba0c00f7eee82934eeed0099aa265630 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=490 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/495
+round=1 mode=kinsn5 prog=495 rc=0 opt=e9b8061df35ed053fd165b684a8663879e219d1b5c2cabc110901e31f1e6a9fe report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 3197 key 0x00000000 at lookup pc 7: map_values snapshot missing map 3197 key 00000000
+round=1 mode=default11 prog=495 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/499
+round=1 mode=kinsn5 prog=499 rc=0 opt=77d3c5f139ba6557c616b44354d9ff0255b5c7d6c30cbdffad34c90ab7b2e362 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=499 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/504
+round=1 mode=kinsn5 prog=504 rc=0 opt=bbcaeb8ec01232daa2f98f50fbd908d99e18942a3424f7b6472b8effcbb5a606 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 3197 key 0x00000000 at lookup pc 7: map_values snapshot missing map 3197 key 00000000
+round=1 mode=default11 prog=504 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/506
+round=1 mode=kinsn5 prog=506 rc=0 opt=399792fd39bc1bc066c2e5a6a5ce0d2c33c7391b99ef2b3794b5821493c7de68 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=506 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=true sites=3 insns=3041->3035
+  rotate: changed=false sites=0 insns=3035->3035
+  cond_select: changed=false sites=0 insns=3035->3035
+  extract: changed=true sites=1 insns=3035->3035
+  endian_fusion: changed=false sites=0 insns=3035->3035
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/512
+round=1 mode=kinsn5 prog=512 rc=0 opt=5619c3797552b2040862d374c3d99a018c09467c180320b444a22a7989f81745 report=6a056b1a97421a6a9982a4af71bf35363f90306b6b9276016a6ad21d9ca9d00a
+round=1 mode=default11 prog=512 rc=0 opt=905991e7dd7957fff342d1f6062730a37ba1ac897a5a135b0ea4d7a2e392025f report=07a12a063f62c1000b4f0ae367b2cb74367f25cee3b1f4d0496716370496f40e
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/513
+round=1 mode=kinsn5 prog=513 rc=0 opt=8168297d4c4e346a19a96e180b06f3e949cd3e896a38e807443c5a3c802fde96 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=513 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/519
+round=1 mode=kinsn5 prog=519 rc=0 opt=f4548e11ba8103ed74c69dbb007f33df4672bbc57578ffdf7459f1ff052d53c4 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 3679 key 0x00000000 at lookup pc 7: map_values snapshot missing map 3679 key 00000000
+round=1 mode=default11 prog=519 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/524
+round=1 mode=kinsn5 prog=524 rc=0 opt=18be66c3d60d8aeef4b0e41aa1a7c182ada4a99952fd57a69eab5f25d5405a71 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=524 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/526
+round=1 mode=kinsn5 prog=526 rc=0 opt=1545972a2477a7cb8457dfd6f6925680312e3ff214a706a4701ea6d670a328b8 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 3679 key 0x00000000 at lookup pc 7: map_values snapshot missing map 3679 key 00000000
+round=1 mode=default11 prog=526 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/528
+round=1 mode=kinsn5 prog=528 rc=0 opt=09a59cdc4ebeed3cd09b8e38e8f4aa97b0eced456e0a4badb6e184b8b7c83484 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 3679 key 0x00000000 at lookup pc 7: map_values snapshot missing map 3679 key 00000000
+round=1 mode=default11 prog=528 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/529
+round=1 mode=kinsn5 prog=529 rc=0 opt=8e5fe86e3d017e4ca9f3aa84fe20f9dd64b26e59206fec35c80f3bd815718246 report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=529 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=2174->2174
+  rotate: changed=false sites=0 insns=2174->2174
+  cond_select: changed=false sites=0 insns=2174->2174
+  extract: changed=false sites=0 insns=2174->2174
+  endian_fusion: changed=false sites=0 insns=2174->2174
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/537
+round=1 mode=kinsn5 prog=537 rc=0 opt=9b84943d91f59c25e45804b2e33c8b00c7c7f81ef3c058fe532124a50b1b5eee report=17c47678aa486d19d01e294e16edb28e1f2058bae705d0a3f9fdf83c713fd1d6
+error: map_inline requires a concrete snapshot value for map 633 key 0x00000000 at lookup pc 902: map_values snapshot missing map 633 key 00000000
+round=1 mode=default11 prog=537 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+bpfopt: ok
+  bulk_memory: changed=false sites=0 insns=3582->3582
+  rotate: changed=false sites=0 insns=3582->3582
+  cond_select: changed=false sites=0 insns=3582->3582
+  extract: changed=false sites=0 insns=3582->3582
+  endian_fusion: changed=false sites=0 insns=3582->3582
+verify: skipped by VERIFY=0
+outdir: /tmp/p89h_validate_replay_work/round_1/kinsn5/540
+round=1 mode=kinsn5 prog=540 rc=0 opt=449ba7ea56d64cf769f15172e6c62858275638ab729ba9b92603f83303fe81d3 report=e9040f68ae51d5962b4fafde1e281dc0c2703f8edcfbd2b72a507901ff64177a
+error: map_inline requires a concrete snapshot value for map 3889 key 0x00000000 at lookup pc 7: map_values snapshot missing map 3889 key 00000000
+round=1 mode=default11 prog=540 rc=1 opt=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 report=missing
+=== replay round 1 done ===

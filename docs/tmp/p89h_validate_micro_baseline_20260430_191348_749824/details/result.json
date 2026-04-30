@@ -1,0 +1,651 @@
+{
+  "benchmarks": [
+    {
+      "category": "baseline",
+      "description": "Return-only baseline",
+      "expected_result": 12345678,
+      "family": "baseline",
+      "hypothesis": "Captures the staged harness floor for baseline subtraction",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/simple.mem",
+      "io_mode": "staged",
+      "level": "tiny",
+      "name": "simple",
+      "runs": [
+        {
+          "baseline_adjustment": {
+            "applied": true,
+            "baseline_benchmark": "simple",
+            "baseline_exec_ns": 35.0,
+            "baseline_io_mode": "staged",
+            "median_minus_baseline_ns": 0.0,
+            "median_over_baseline_ratio": 1.0
+          },
+          "compile_ns": {
+            "count": 5,
+            "max": 4564843,
+            "mean": 4017227,
+            "median": 4233828,
+            "min": 3376067,
+            "p95": 4564843,
+            "stdev": 593312.7425451943
+          },
+          "derived_metrics": {},
+          "exec_ns": {
+            "count": 5,
+            "max": 85,
+            "mean": 48.6,
+            "median": 35,
+            "min": 16,
+            "p95": 85,
+            "stdev": 31.722231951740092
+          },
+          "inner_repeat": 10,
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected_samples": 0,
+            "errors": {},
+            "hardware_counters_observed": false,
+            "include_kernel": null,
+            "requested": false,
+            "scope": "full_repeat_raw",
+            "software_counters_observed": false
+          },
+          "phases_ns": {
+            "input_stage_ns": {
+              "count": 5,
+              "max": 547,
+              "mean": 309.4,
+              "median": 285,
+              "min": 187,
+              "p95": 547,
+              "stdev": 148.07531867262688
+            },
+            "jit_compile_ns": {
+              "count": 5,
+              "max": 4564843,
+              "mean": 4017227,
+              "median": 4233828,
+              "min": 3376067,
+              "p95": 4564843,
+              "stdev": 593312.7425451943
+            },
+            "memory_prepare_ns": {
+              "count": 5,
+              "max": 21077,
+              "mean": 19096,
+              "median": 18506,
+              "min": 16684,
+              "p95": 21077,
+              "stdev": 1882.3659314809115
+            },
+            "program_image_ns": {
+              "count": 5,
+              "max": 99777,
+              "mean": 80324.8,
+              "median": 76278,
+              "min": 72003,
+              "p95": 99777,
+              "stdev": 11242.037591113098
+            },
+            "vm_load_code_ns": {
+              "count": 5,
+              "max": 269,
+              "mean": 169.8,
+              "median": 193,
+              "min": 83,
+              "p95": 269,
+              "stdev": 80.22904710888695
+            }
+          },
+          "result_distribution": {
+            "12345678": 5
+          },
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "inflation_ratio": 0.307292,
+                "native_code_bytes": 59
+              },
+              "compile_ns": 4564843,
+              "exec_cycles": 130,
+              "exec_ns": 35,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 547,
+                "jit_compile_ns": 4564843,
+                "memory_prepare_ns": 21077,
+                "program_image_ns": 99777,
+                "vm_load_code_ns": 193
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686289398,
+              "wall_exec_ns": 1549
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "inflation_ratio": 0.307292,
+                "native_code_bytes": 59
+              },
+              "compile_ns": 4522542,
+              "exec_cycles": 314,
+              "exec_ns": 85,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 285,
+                "jit_compile_ns": 4522542,
+                "memory_prepare_ns": 20941,
+                "program_image_ns": 76278,
+                "vm_load_code_ns": 212
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 1,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686282710,
+              "wall_exec_ns": 4604
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "inflation_ratio": 0.307292,
+                "native_code_bytes": 59
+              },
+              "compile_ns": 3388855,
+              "exec_cycles": 60,
+              "exec_ns": 16,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 188,
+                "jit_compile_ns": 3388855,
+                "memory_prepare_ns": 18272,
+                "program_image_ns": 79649,
+                "vm_load_code_ns": 92
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 2,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686279249,
+              "wall_exec_ns": 1361
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "inflation_ratio": 0.307292,
+                "native_code_bytes": 59
+              },
+              "compile_ns": 4233828,
+              "exec_cycles": 294,
+              "exec_ns": 80,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 340,
+                "jit_compile_ns": 4233828,
+                "memory_prepare_ns": 16684,
+                "program_image_ns": 73917,
+                "vm_load_code_ns": 269
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 3,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686287891,
+              "wall_exec_ns": 4239
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "inflation_ratio": 0.307292,
+                "native_code_bytes": 59
+              },
+              "compile_ns": 3376067,
+              "exec_cycles": 98,
+              "exec_ns": 27,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 187,
+                "jit_compile_ns": 3376067,
+                "memory_prepare_ns": 18506,
+                "program_image_ns": 72003,
+                "vm_load_code_ns": 83
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 4,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686288992,
+              "wall_exec_ns": 1294
+            }
+          ],
+          "timing_source": "rdtsc",
+          "wall_exec_ns": {
+            "count": 5,
+            "max": 4604,
+            "mean": 2609.4,
+            "median": 1549,
+            "min": 1294,
+            "p95": 4604,
+            "stdev": 1661.8704221448795
+          }
+        },
+        {
+          "baseline_adjustment": {
+            "applied": true,
+            "baseline_benchmark": "simple",
+            "baseline_exec_ns": 27.0,
+            "baseline_io_mode": "staged",
+            "median_minus_baseline_ns": 0.0,
+            "median_over_baseline_ratio": 1.0
+          },
+          "compile_ns": {
+            "count": 5,
+            "max": 302769,
+            "mean": 275851.8,
+            "median": 278495,
+            "min": 243277,
+            "p95": 302769,
+            "stdev": 21835.450022841298
+          },
+          "derived_metrics": {},
+          "exec_ns": {
+            "count": 5,
+            "max": 55,
+            "mean": 36.4,
+            "median": 27,
+            "min": 24,
+            "p95": 55,
+            "stdev": 14.449913494550755
+          },
+          "inner_repeat": 10,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected_samples": 0,
+            "errors": {},
+            "hardware_counters_observed": false,
+            "include_kernel": null,
+            "requested": false,
+            "scope": "full_repeat_raw",
+            "software_counters_observed": false
+          },
+          "phases_ns": {
+            "input_stage_ns": {
+              "count": 5,
+              "max": 544,
+              "mean": 412,
+              "median": 401,
+              "min": 336,
+              "p95": 544,
+              "stdev": 81.11411714368838
+            },
+            "memory_prepare_ns": {
+              "count": 5,
+              "max": 19470,
+              "mean": 16190.2,
+              "median": 15595,
+              "min": 14536,
+              "p95": 19470,
+              "stdev": 1896.9997891407368
+            },
+            "object_load_ns": {
+              "count": 5,
+              "max": 241490,
+              "mean": 217911.2,
+              "median": 217595,
+              "min": 189101,
+              "p95": 241490,
+              "stdev": 19568.836391058107
+            },
+            "object_open_ns": {
+              "count": 5,
+              "max": 65881,
+              "mean": 57940.6,
+              "median": 56018,
+              "min": 52349,
+              "p95": 65881,
+              "stdev": 5552.689915707521
+            },
+            "prog_run_wall_ns": {
+              "count": 5,
+              "max": 26994433,
+              "mean": 17997033.4,
+              "median": 15998415,
+              "min": 14998264,
+              "p95": 26994433,
+              "stdev": 5048275.8032288905
+            },
+            "result_extract_ns": {
+              "count": 5,
+              "max": 1745,
+              "mean": 1179,
+              "median": 1065,
+              "min": 882,
+              "p95": 1745,
+              "stdev": 351.84300476206715
+            }
+          },
+          "result_distribution": {
+            "12345678": 5
+          },
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "inflation_ratio": 0.5625,
+                "native_code_bytes": 108
+              },
+              "compile_ns": 302769,
+              "exec_cycles": 9950826,
+              "exec_ns": 24,
+              "jited_prog_len": 108,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 544,
+                "memory_prepare_ns": 15586,
+                "object_load_ns": 241490,
+                "object_open_ns": 61279,
+                "prog_run_wall_ns": 26994433,
+                "result_extract_ns": 1745
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686226559,
+              "wall_exec_ns": 2699461,
+              "xlated_prog_len": 192
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "inflation_ratio": 0.5625,
+                "native_code_bytes": 108
+              },
+              "compile_ns": 278495,
+              "exec_cycles": 5895844,
+              "exec_ns": 49,
+              "jited_prog_len": 108,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 358,
+                "memory_prepare_ns": 19470,
+                "object_load_ns": 212614,
+                "object_open_ns": 65881,
+                "prog_run_wall_ns": 15994367,
+                "result_extract_ns": 1065
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 1,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686289387,
+              "wall_exec_ns": 1599398,
+              "xlated_prog_len": 192
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "inflation_ratio": 0.5625,
+                "native_code_bytes": 108
+              },
+              "compile_ns": 284774,
+              "exec_cycles": 5528735,
+              "exec_ns": 27,
+              "jited_prog_len": 108,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 401,
+                "memory_prepare_ns": 15764,
+                "object_load_ns": 228756,
+                "object_open_ns": 56018,
+                "prog_run_wall_ns": 14998264,
+                "result_extract_ns": 882
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 2,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686251728,
+              "wall_exec_ns": 1499826,
+              "xlated_prog_len": 192
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "inflation_ratio": 0.5625,
+                "native_code_bytes": 108
+              },
+              "compile_ns": 243277,
+              "exec_cycles": 5897276,
+              "exec_ns": 55,
+              "jited_prog_len": 108,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 336,
+                "memory_prepare_ns": 14536,
+                "object_load_ns": 189101,
+                "object_open_ns": 54176,
+                "prog_run_wall_ns": 15998415,
+                "result_extract_ns": 1277
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 3,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686146430,
+              "wall_exec_ns": 1599849,
+              "xlated_prog_len": 192
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "inflation_ratio": 0.5625,
+                "native_code_bytes": 108
+              },
+              "compile_ns": 269944,
+              "exec_cycles": 5897896,
+              "exec_ns": 27,
+              "jited_prog_len": 108,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 421,
+                "memory_prepare_ns": 15595,
+                "object_load_ns": 217595,
+                "object_open_ns": 52349,
+                "prog_run_wall_ns": 15999688,
+                "result_extract_ns": 926
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 4,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686304711,
+              "wall_exec_ns": 1599948,
+              "xlated_prog_len": 192
+            }
+          ],
+          "timing_source": "ktime",
+          "wall_exec_ns": {
+            "count": 5,
+            "max": 2699461,
+            "mean": 1799696.4,
+            "median": 1599849,
+            "min": 1499826,
+            "p95": 2699461,
+            "stdev": 504840.67977957166
+          }
+        }
+      ],
+      "runtime_comparison": {
+        "llvmbpf_over_kernel_adjusted_exec_ratio": null,
+        "llvmbpf_over_kernel_exec_ratio": 1.2962962962962963
+      },
+      "tags": [
+        "baseline",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/.cache/host-runner-build/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 10,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 5,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "generated_at": "2026-04-30T19:13:48.749824+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "powersave",
+    "git_sha": "1cff8f9be2058733ede24fa438e904f39361ea02",
+    "hostname": "lab",
+    "kernel_cmdline": "BOOT_IMAGE=/boot/vmlinuz-6.15.11-061511-generic root=UUID=85355174-a2ad-4e84-bf78-53fac30b89fb ro panic=10 splash quiet iommu=pt vt.handoff=7",
+    "kernel_version": "6.15.11-061511-generic",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "0"
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "bare-metal",
+    "kernel_commit": "a1b8bade169fae6e174ef022fa96fb1c626d96df",
+    "params": {
+      "inner_repeat": 10,
+      "samples": 5,
+      "warmups": 0
+    },
+    "repo_dirty": true,
+    "repo_git_sha": "1cff8f9be2058733ede24fa438e904f39361ea02",
+    "timestamp": "2026-04-30T19:13:48.840594+00:00"
+  },
+  "sample_runtime_orders": {
+    "simple": [
+      [
+        "llvmbpf",
+        "kernel"
+      ],
+      [
+        "kernel",
+        "llvmbpf"
+      ],
+      [
+        "llvmbpf",
+        "kernel"
+      ],
+      [
+        "kernel",
+        "llvmbpf"
+      ],
+      [
+        "llvmbpf",
+        "kernel"
+      ]
+    ]
+  },
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}

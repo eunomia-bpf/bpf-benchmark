@@ -1,0 +1,8 @@
+[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.
+[WARN] Turbo boost is enabled. Consider disabling for stable measurements.
+[WARN] perf_event_paranoid=2. Some perf counters may not be available.
+[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.
+[bench] (1/1) simple
+  llvmbpf    compile median 4.234 ms | exec median 35 ns | result 12345678
+  kernel     compile median 278.495 us | exec median 27 ns | result 12345678
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/p89h_validate_micro_baseline_20260430_191348_749824/metadata.json

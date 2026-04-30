@@ -1,0 +1,505 @@
+=== cargo test round 4 ===
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running unittests src/main.rs (target/debug/deps/bpfget-5aea5a1a68d40a56)
+
+running 6 tests
+test tests::pseudo_map_old_fds_preserves_unique_load_order ... ok
+test tests::map_info_json_schema_preserves_old_fd_binding ... ok
+test tests::prog_info_json_schema_round_trips_requested_fields ... ok
+test tests::required_load_metadata_rejects_missing_kprobe_prog_btf ... ok
+test tests::target_kinsn_specs_reject_missing_btf_func_id ... ok
+test tests::required_load_metadata_rejects_missing_tracing_attach_context ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli.rs (target/debug/deps/cli-a853155ac74c7dfe)
+
+running 11 tests
+test test_target_finds_kinsn_when_loaded ... ok
+test info_json_requires_output_file ... ok
+test full_missing_outdir_exits_failure_without_creating_it ... ok
+test target_json_requires_output_file ... ok
+test list_without_json_exits_failure_before_enumerating_programs ... ok
+test info_missing_program_exits_failure ... ok
+test list_json_emits_array_when_supported ... ok
+test target_manual_kinsn_spec_writes_numeric_btf_func_id ... ok
+test target_output_writes_json_file ... ok
+test target_output_contains_arch_and_features ... ok
+test test_target_btf_probe_failure_exits_nonzero ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/bpfopt-2fcef84ac69f9c55)
+
+running 334 tests
+test analysis::branch_target::tests::branch_target_cond_jmp ... ok
+test analysis::branch_target::tests::branch_target_simple_ja ... ok
+test analysis::branch_target::tests::branch_target_no_branches ... ok
+test analysis::cfg::tests::cfg_branch_creates_blocks ... ok
+test analysis::cfg::tests::cfg_linear_program ... ok
+test analysis::liveness::tests::liveness_branch_merges ... ok
+test analysis::liveness::tests::liveness_register_killed ... ok
+test analysis::liveness::tests::liveness_simple_def_use ... ok
+test analysis::liveness::tests::liveness_call_clobbers_caller_saved ... ok
+test analysis::liveness::tests::use_def_alu_imm ... ok
+test analysis::liveness::tests::use_def_call ... ok
+test analysis::liveness::tests::use_def_exit ... ok
+test analysis::liveness::tests::use_def_ldx ... ok
+test analysis::liveness::tests::use_def_mov_reg ... ok
+test analysis::liveness::tests::use_def_stx ... ok
+test insn::tests::bpf_insn_abi_offsets_and_raw_bytes_match_uapi ... ok
+test insn::tests::test_cond_jmp_classification ... ok
+test pass::tests::test_analysis_cache_basic ... ok
+test pass::tests::test_bpf_program_sync_annotations_grow ... ok
+test pass::tests::test_analysis_cache_targeted_invalidation_for_known_types ... ok
+test pass::tests::test_bpf_program_sync_annotations_shrink ... ok
+test pass::tests::test_kinsn_registry_per_target_call_offsets ... ok
+test pass::tests::test_invalid_policy_pass_name_is_rejected ... ok
+test pass::tests::test_pass_manager_empty_pipeline ... ok
+test pass::tests::test_pass_manager_analysis_cache_invalidation ... ok
+test pass::tests::test_pass_manager_enabled_pass_policy ... ok
+test pass::tests::test_pass_manager_invalidates_verifier_states_after_transform ... ok
+test pass::tests::test_pass_result_insns_before_after_filled_by_pass_manager ... ok
+test pass::tests::test_pass_manager_multiple_passes_sequential ... ok
+test pass::tests::test_pass_result_skip_reason_counts ... ok
+test pass::tests::test_prepend_nop_pass_shifts_annotations_forward ... ok
+test pass::tests::test_profiling_data_injection ... ok
+test pass::tests::test_pass_skips_without_platform_capability ... ok
+test pass::tests::test_remap_annotations_deleted_instruction ... ok
+test pass::tests::test_run_with_profiling_enables_branch_flip ... ok
+test passes::bounds_check_merge::tests::test_empty_program ... ok
+test passes::bounds_check_merge::tests::test_different_base_regs_not_merged ... ok
+test passes::bounds_check_merge::tests::test_no_bounds_checks ... ok
+test passes::bounds_check_merge::tests::test_branch_fixup_after_merge ... ok
+test passes::bounds_check_merge::tests::test_different_error_targets_not_merged ... ok
+test passes::bounds_check_merge::tests::test_mixed_cmp_kinds_not_merged ... ok
+test passes::bounds_check_merge::tests::test_interleaved_instructions_handled ... ok
+test passes::branch_flip::tests::test_branch_flip_asymmetric_with_pgo ... ok
+test passes::branch_flip::tests::test_branch_flip_allows_low_miss_rate ... ok
+test passes::branch_flip::tests::test_branch_flip_missing_per_site_profile_errors ... ok
+test passes::bounds_check_merge::tests::test_single_bounds_check_unchanged ... ok
+test passes::branch_flip::tests::test_branch_flip_insufficient_bias ... ok
+test passes::bounds_check_merge::tests::test_non_adjacent_checks_not_merged ... ok
+test passes::bounds_check_merge::tests::test_merge_preserves_largest_check ... ok
+test passes::branch_flip::tests::test_branch_flip_missing_program_pmu_data_errors ... ok
+test passes::bounds_check_merge::tests::test_variable_offset_skipped ... ok
+test passes::branch_flip::tests::test_branch_flip_multiple_sites_correctness ... ok
+test passes::branch_flip::tests::test_branch_flip_preserves_program_size ... ok
+test passes::bounds_check_merge::tests::test_two_adjacent_checks_merged ... ok
+test passes::branch_flip::tests::test_branch_flip_skips_high_miss_rate ... ok
+test passes::bounds_check_merge::tests::test_three_ladder_checks_merged ... ok
+test passes::branch_flip::tests::test_branch_flip_verifies_output_layout ... ok
+test passes::branch_flip::tests::test_branch_flip_with_biased_pgo ... ok
+test passes::branch_flip::tests::test_invert_jcc_roundtrip ... ok
+test passes::branch_flip::tests::test_branch_flip_skips_high_site_miss_rate ... ok
+test passes::branch_flip::tests::test_branch_flip_skips_jset ... ok
+test passes::branch_flip::tests::test_scan_asymmetric_diamond ... ok
+test passes::branch_flip::tests::test_profiler_to_pass_pipeline_integration ... ok
+test passes::bulk_memory::tests::test_memset_negative_dw_immediate_uses_ff_fill ... ok
+test passes::bulk_memory::tests::test_memset_non_repeated_immediate_unchanged ... ok
+test passes::bulk_memory::tests::test_memset_nonzero_immediate_pattern ... ok
+test passes::bulk_memory::tests::test_memcpy_proof_tmp_live_out_skipped ... ok
+test passes::branch_flip::tests::test_scan_finds_diamond ... ok
+test passes::bounds_check_merge::tests::test_packet_program_ctx_layouts ... ok
+test passes::bulk_memory::tests::test_memset_byte_immediate_truncates_to_imm8 ... ok
+test passes::bulk_memory::tests::test_empty_program ... ok
+test passes::bulk_memory::tests::test_no_consecutive_stores ... ok
+test passes::bulk_memory::tests::test_below_threshold_unchanged ... ok
+test passes::bulk_memory::tests::test_memset_zero_pattern ... ok
+test passes::bulk_memory::tests::test_mixed_widths_handled ... ok
+test passes::bulk_memory::tests::test_memset_nonzero_reg_pattern ... ok
+test passes::bulk_memory::tests::test_interleaved_non_store_splits ... ok
+test passes::bulk_memory::tests::test_non_stack_base_memcpy_skipped_by_alias_gate ... ok
+test passes::bulk_memory::tests::test_branch_fixup_after_replacement ... ok
+test passes::bulk_memory::tests::test_different_base_regs_not_merged ... ok
+test passes::bulk_memory::tests::test_memcpy_pattern_inside_multi_subprog_program ... ok
+test passes::bulk_memory::tests::test_kfunc_not_available_skipped ... ok
+test passes::bulk_memory::tests::test_non_consecutive_offsets_split ... ok
+test passes::cond_select::tests::test_cond_select_alias_cond_reg_is_r2 ... ok
+test passes::bulk_memory::tests::test_memcpy_pattern_8_pairs ... ok
+test passes::cond_select::tests::test_cond_select_alias_cycle_r1_r2 ... ok
+test passes::cond_select::tests::test_cond_select_analyze_multiple_sites ... ok
+test passes::cond_select::tests::test_cond_select_analyze_no_sites_in_linear_program ... ok
+test passes::cond_select::tests::test_cond_select_analyze_4insn_diamond ... ok
+test passes::cond_select::tests::test_cond_select_analyze_reg_values_4insn ... ok
+test passes::cond_select::tests::test_cond_select_analyze_no_match_different_dst ... ok
+test passes::cond_select::tests::test_cond_select_analyze_short_pattern_c ... ok
+test passes::cond_select::tests::test_cond_select_emit_cond_reg_is_r3 ... ok
+test passes::cond_select::tests::test_cond_select_emit_jeq_swaps_args ... ok
+test passes::cond_select::tests::test_cond_select_emit_with_reg_values ... ok
+test passes::bulk_memory::tests::test_memcpy_preserves_surrounding ... ok
+test passes::cond_select::tests::test_cond_select_no_emit_3insn_pattern_b ... ok
+test passes::cond_select::tests::test_cond_select_no_sites_linear ... ok
+test passes::cond_select::tests::test_cond_select_packed_keeps_live_regs ... ok
+test passes::cond_select::tests::test_cond_select_packed_no_callee_saved_dependency ... ok
+test passes::bulk_memory::tests::test_same_base_chunked_overlap_skipped ... ok
+test passes::cond_select::tests::test_cond_select_short_pattern_c_with_reg_values ... ok
+test passes::cond_select::tests::test_cond_select_pattern_b_removed ... ok
+test passes::cond_select::tests::test_cond_select_skip_immediate_values_without_legacy ... ok
+test passes::cond_select::tests::test_cond_select_skip_jgt ... ok
+test passes::cond_select::tests::test_cond_select_skip_non_zero_imm ... ok
+test passes::cond_select::tests::test_cond_select_register_alias_safety ... ok
+test passes::cond_select::tests::test_cond_select_skip_when_kfunc_unavailable ... ok
+test passes::cond_select::tests::test_cond_select_alias_all_overlap_combinations ... ok
+test passes::cond_select::tests::test_cond_select_short_pattern_c_emit_jne ... ok
+test passes::cond_select::tests::test_cond_select_short_pattern_c_no_match_cond_clobbered ... ok
+test passes::const_prop::tests::eval_binary_alu_rejects_zero_divisor_without_panicking ... ok
+test passes::const_prop::tests::const_prop_does_not_fold_typed_ldimm64_map_value ... ok
+test passes::const_prop::tests::fixup_folded_jumps_remaps_backward_jump_after_growth ... ok
+test passes::const_prop::tests::fixup_folded_jumps_remaps_jump_to_end_sentinel ... ok
+test passes::const_prop::tests::const_prop_folds_alu32_chain_to_mov32_imm ... ok
+test passes::const_prop::tests::const_prop_fixups_folded_jump_after_ldimm64_growth ... ok
+test passes::const_prop::tests::const_prop_folds_alu_chain_to_constant_mov ... ok
+test passes::const_prop::tests::const_prop_uses_verifier_exact_constants_after_helper_calls ... ok
+test passes::dce::tests::dce_preserves_dead_defs_before_tail_call ... ok
+test passes::const_prop::tests::const_prop_folds_constant_branches_to_ja_and_nop ... ok
+test passes::dce::tests::dce_preserves_callback_only_subprog_and_rewrites_func_ref ... ok
+test passes::const_prop::tests::const_prop_folds_jmp32_branch_and_fixups_target_after_growth ... ok
+test passes::const_prop::tests::const_prop_removes_dead_target_after_false_branch_fold ... ok
+test passes::dce::tests::dce_preserves_subprog_entries ... ok
+test passes::const_prop::tests::const_prop_folds_branch_after_map_inline ... ok
+test passes::const_prop::tests::const_prop_skips_tail_sensitive_branch_folding_but_keeps_safe_alu_fold ... ok
+test passes::dce::tests::dce_removes_dead_branch_after_const_prop ... ok
+test passes::const_prop::tests::const_prop_then_dce_handles_folded_jump_after_dead_block_growth ... ok
+test passes::dce::tests::dce_preserves_subprog_with_remaining_live_caller ... ok
+test passes::endian::tests::test_endian_fusion_pass_no_sites ... ok
+test passes::const_prop::tests::const_prop_tracks_ldimm64_constants ... ok
+test passes::endian::tests::test_endian_fusion_pass_nonzero_offset ... ok
+test passes::endian::tests::test_endian_fusion_pass_packed_keeps_live_regs ... ok
+test passes::endian::tests::test_endian_fusion_pass_skip_when_kfunc_unavailable ... ok
+test passes::endian::tests::test_endian_fusion_pass_packed_no_callee_saved_dependency ... ok
+test passes::dce::tests::dce_removes_nops_to_fixed_point ... ok
+test passes::endian::tests::test_endian_fusion_encodes_stack_offset_directly_on_x86 ... ok
+test passes::endian::tests::test_endian_fusion_pass_specific_size_unavailable ... ok
+test passes::endian::tests::test_endian_fusion_pass_all_three_sizes ... ok
+test passes::endian::tests::test_endian_fusion_pass_branch_fixup ... ok
+test passes::endian::tests::test_endian_fusion_pass_dst_is_r0 ... ok
+test passes::endian::tests::test_endian_fusion_pass_emit_kfunc_call_32bit ... ok
+test passes::dce::tests::dce_removes_dead_defs_exposed_by_const_prop ... ok
+test passes::dce::tests::dce_removes_orphaned_subprog_after_const_prop ... ok
+test passes::endian::tests::test_endian_fusion_pass_integration_with_pass_manager ... ok
+test passes::endian::tests::test_endian_fusion_pass_interior_branch_target ... ok
+test passes::endian::tests::test_endian_fusion_pass_two_consecutive_sites ... ok
+test passes::endian::tests::test_endian_fusion_pass_uses_static_call_offset ... ok
+test passes::endian::tests::test_endian_fusion_pass_uses_per_size_call_offsets ... ok
+test passes::endian::tests::test_scan_endian_fusion_64bit ... ok
+test passes::endian::tests::test_scan_endian_fusion_16bit ... ok
+test passes::endian::tests::test_endian_fusion_pass_zero_offset ... ok
+test passes::endian::tests::test_scan_endian_fusion_basic_32bit ... ok
+test passes::endian::tests::test_scan_endian_fusion_multiple_sites ... ok
+test passes::endian::tests::test_scan_endian_fusion_no_match_byte_load ... ok
+test passes::endian::tests::test_scan_endian_fusion_no_match_different_regs ... ok
+test passes::endian::tests::test_scan_endian_fusion_no_match_size_mismatch ... ok
+test passes::endian::tests::test_scan_endian_fusion_zero_offset ... ok
+test passes::extract::tests::test_contiguous_mask_len ... ok
+test passes::extract::tests::test_extract_pass_applies_site_inside_multi_subprog_program ... ok
+test passes::extract::tests::test_extract_pass_branch_fixup ... ok
+test passes::extract::tests::test_extract_pass_caller_saved_with_save_restore ... ok
+test passes::extract::tests::test_extract_pass_dst_is_r0 ... ok
+test passes::extract::tests::test_extract_pass_emit_kfunc_call ... ok
+test passes::extract::tests::test_extract_pass_interior_branch_target ... ok
+test passes::extract::tests::test_extract_pass_integration_with_pass_manager ... ok
+test passes::extract::tests::test_extract_pass_no_sites ... ok
+test passes::extract::tests::test_extract_pass_shift_0 ... ok
+test passes::extract::tests::test_extract_pass_packed_no_callee_saved_dependency ... ok
+test passes::extract::tests::test_extract_pass_sign_extended_all_ones_shifted_no_match ... ok
+test passes::extract::tests::test_extract_pass_skip_when_kfunc_unavailable ... ok
+test passes::extract::tests::test_extract_pass_two_consecutive_sites ... ok
+test passes::extract::tests::test_extract_pass_uses_static_call_offset ... ok
+test passes::extract::tests::test_scan_extract_16bit_mask ... ok
+test passes::extract::tests::test_extract_pass_width_1 ... ok
+test passes::extract::tests::test_scan_extract_basic ... ok
+test passes::extract::tests::test_scan_extract_multiple_sites ... ok
+test passes::extract::tests::test_scan_extract_no_match_different_regs ... ok
+test passes::extract::tests::test_scan_extract_no_match_non_contiguous_mask ... ok
+test passes::extract::tests::test_scan_extract_non_power_of_two_minus_one_masks ... ok
+test passes::extract::tests::test_scan_extract_shift_0 ... ok
+test passes::extract::tests::test_scan_extract_sign_extended_all_ones_is_64bit_mask ... ok
+test passes::extract::tests::test_scan_extract_sign_extended_all_ones_shift_too_large ... ok
+test passes::extract::tests::test_scan_extract_sign_extended_all_ones_shifted_is_not_width_32 ... ok
+test passes::extract::tests::test_scan_extract_width_1 ... ok
+test passes::extract::tests::test_scan_extract_zero_mask ... ok
+test passes::map_inline::map_info::tests::collect_map_references_handles_missing_map_ids ... ok
+test passes::map_inline::map_info::tests::collect_map_references_ignores_non_map_ldimm64 ... ok
+test passes::map_inline::map_info::tests::collect_map_references_tracks_unique_fd_order ... ok
+test passes::map_inline::map_info::tests::map_info_analysis_preserves_old_fd_binding_after_leading_map_is_deleted ... ok
+test passes::map_inline::map_info::tests::map_info_analysis_propagates_live_map_lookup_errors ... ok
+test passes::map_inline::map_info::tests::map_info_analysis_runs_without_live_map_metadata ... ok
+test passes::map_inline::map_info::tests::map_info_marks_lru_hash_as_speculative_inlineable ... ok
+test passes::map_inline::map_info::tests::mutable_maps_are_still_inlineable_when_direct_access_is_supported ... ok
+test passes::map_inline::map_info::tests::percpu_array_is_conditionally_inlineable_but_percpu_hashes_still_are_not ... ok
+test passes::map_inline::map_info::tests::unsupported_map_types_reject_direct_value_access ... ok
+test passes::map_inline::tests::classify_r0_uses_allows_helper_argument_loaded_from_lookup_value ... ok
+test passes::map_inline::tests::classify_r0_uses_can_follow_callee_saved_alias_across_helper_when_enabled ... ok
+test passes::map_inline::tests::classify_r0_uses_collects_fixed_loads_until_redefinition ... ok
+test passes::map_inline::tests::classify_r0_uses_marks_pointer_escape_after_null_check_as_other ... ok
+test passes::map_inline::tests::classify_r0_uses_does_not_treat_non_zero_alias_offset_as_null_check ... ok
+test passes::map_inline::tests::classify_r0_uses_marks_store_back_as_other_use ... ok
+test passes::map_inline::tests::classify_r0_uses_tracks_alias_copies_and_guarded_loads ... ok
+test passes::map_inline::tests::classify_r0_uses_tracks_alias_offset_loads ... ok
+test passes::map_inline::tests::classify_r0_uses_tracks_stack_spill_and_reload_across_helper ... ok
+test passes::map_inline::tests::extract_constant_key_from_direct_stack_store ... ok
+test passes::map_inline::tests::extract_constant_key_from_fp_alias_store_base ... ok
+test passes::map_inline::tests::extract_constant_key_from_ldimm64_stack_store ... ok
+test passes::map_inline::tests::extract_constant_key_from_r2_copy_chain ... ok
+test passes::map_inline::tests::find_map_lookup_sites_ignores_calls_without_map_load ... ok
+test passes::map_inline::tests::extract_constant_key_from_stx_stack_store ... ok
+test passes::map_inline::tests::find_map_lookup_sites_matches_helper_one_with_map_arg ... ok
+test passes::map_inline::tests::map_inline_constantizes_frozen_pseudo_map_value_loads ... ok
+test passes::map_inline::tests::map_inline_pass_errors_when_array_snapshot_key_is_absent ... ok
+test passes::map_inline::tests::map_inline_pass_errors_when_percpu_array_default_snapshot_is_absent ... ok
+test passes::map_inline::tests::map_inline_pass_emits_ldimm64_for_wide_constants ... ok
+test passes::map_inline::tests::map_inline_pass_inlines_mutable_array_across_readonly_helper_call ... ok
+test passes::map_inline::tests::map_inline_pass_inlines_uniform_percpu_array_maps ... ok
+test passes::map_inline::tests::map_inline_pass_keeps_hash_lookup_and_rewrites_jne_guarded_load ... ok
+test passes::map_inline::tests::map_inline_pass_keeps_lookup_and_rewrites_load_when_setup_has_branch_target ... ok
+test passes::map_inline::tests::map_inline_pass_records_inlined_sites_for_tracker ... ok
+test passes::map_inline::tests::map_inline_pass_keeps_null_check_when_non_null_window_has_side_effects ... ok
+test passes::map_inline::tests::map_inline_pass_reaches_fixpoint_through_stack_reloaded_key ... ok
+test passes::map_inline::tests::map_inline_pass_removes_hash_lookup_and_null_path_when_entry_present ... ok
+test passes::map_inline::tests::map_inline_pass_removes_hash_lookup_before_helper_using_loaded_scalar ... ok
+test passes::map_inline::tests::map_inline_pass_rewrites_lookup_inside_subprog ... ok
+test passes::map_inline::tests::map_inline_pass_rewrites_lookup_and_scalar_loads ... ok
+test passes::map_inline::tests::map_inline_pass_rewrites_lookup_with_fp_alias_store_key_and_offset_load ... ok
+test passes::map_inline::tests::map_inline_pass_skips_mixed_percpu_array_maps ... ok
+test passes::map_inline::tests::map_inline_pass_removes_null_check_and_dead_cold_block ... ok
+test passes::map_inline::tests::map_inline_pass_rewrites_hash_lookup_with_20_byte_constant_key ... ok
+test passes::map_inline::tests::map_inline_pass_removes_hash_lookup_with_16_byte_split_dw_key ... ok
+test passes::map_inline::tests::map_inline_pass_rewrites_struct_value_multiple_fields ... ok
+test passes::map_inline::tests::map_inline_pass_rewrites_hash_lookup_with_pseudo_map_value_20_byte_key ... ok
+test passes::map_inline::tests::map_inline_pass_skips_non_constant_key ... ok
+test passes::map_inline::tests::map_inline_pass_skips_mutable_array_across_side_effect_helper_call ... ok
+test passes::map_inline::tests::map_inline_pass_skips_percpu_hash_family_maps ... ok
+test passes::map_inline::tests::verifier_guided_key_extracts_store_via_fp_alias_base ... ok
+test passes::map_inline::tests::verifier_guided_key_extracts_wide_zero_store_subrange ... ok
+test passes::map_inline::tests::map_inline_skips_mutable_pseudo_map_value_loads ... ok
+test passes::rotate::tests::test_rotate_pass_no_match_dst_overwritten_after_mov ... ok
+test passes::map_inline::tests::map_inline_pass_uses_verifier_guided_wide_zero_store_key ... ok
+test passes::map_inline::tests::map_inline_pseudo_map_value_feeds_const_prop_and_dce ... ok
+test passes::rotate::tests::test_rotate_pass_emit_kfunc_call ... ok
+test passes::rotate::tests::test_rotate_pass_applies_site_inside_multi_subprog_program ... ok
+test passes::rotate::tests::test_rotate_pass_integration_with_pass_manager ... ok
+test passes::map_inline::tests::map_inline_pass_rewrites_u32_max_with_mov32_imm ... ok
+test passes::map_inline::tests::map_inline_pass_skips_mutable_array_lookup_with_store_back ... ok
+test passes::rotate::tests::test_rotate_pass_no_match_dst_overwritten_by_ldx ... ok
+test passes::rotate::tests::test_rotate_pass_no_match_with_intervening_harmless_insn ... ok
+test passes::rotate::tests::test_rotate_pass_no_match_without_provenance ... ok
+test passes::rotate::tests::test_rotate_pass_no_match_wrong_provenance ... ok
+test passes::rotate::tests::test_rotate_pass_no_match_wrong_sum ... ok
+test passes::rotate::tests::test_rotate_pass_pattern_b_match ... ok
+test passes::rotate::tests::test_rotate_pass_pattern_clang_style ... ok
+test passes::rotate::tests::test_rotate_pass_pattern_match ... ok
+test passes::rotate::tests::test_rotate_pass_pattern_or_reversed ... ok
+test passes::rotate::tests::test_rotate_pass_packed_keeps_live_regs ... ok
+test passes::rotate::tests::test_rotate_pass_requires_adjacent_provenance_mov ... ok
+test passes::rotate::tests::test_rotate_pass_skip_when_kfunc_unavailable ... ok
+test passes::rotate::tests::test_rotate_pass_packed_no_callee_saved_dependency ... ok
+test passes::skb_load_bytes::tests::test_branch_fixup_correct ... ok
+test passes::rotate::tests::test_rotate_pass_tmp_live_out_conflict ... ok
+test passes::skb_load_bytes::tests::test_ctx_arg_must_be_reloaded_after_prior_helper_call ... ok
+test passes::skb_load_bytes::tests::test_constant_offset_and_len_required ... ok
+test passes::skb_load_bytes::tests::test_empty_program ... ok
+test passes::skb_load_bytes::tests::test_ctx_reload_from_callee_saved_reg_is_accepted ... ok
+test passes::skb_load_bytes::tests::test_no_helper_calls ... ok
+test passes::skb_load_bytes::tests::test_error_check_preserved ... ok
+test passes::skb_load_bytes::tests::test_multiple_calls_in_sequence ... ok
+test passes::skb_load_bytes::tests::test_non_skb_helper_unchanged ... ok
+test passes::skb_load_bytes::tests::test_only_small_constant_lengths_are_specialized ... ok
+test passes::skb_load_bytes::tests::test_output_fewer_or_equal_instructions ... ok
+test passes::skb_load_bytes::tests::test_single_skb_load_bytes_replaced ... ok
+test passes::skb_load_bytes::tests::test_only_tc_programs ... ok
+test passes::skb_load_bytes::tests::test_supported_wide_lengths_stay_bytewise ... ok
+test passes::tests::cascade_const_prop_folds_non_zero_map_inline_output ... ok
+test passes::tests::test_branch_targets_backward_jump ... ok
+test passes::tests::test_build_custom_pipeline_rejects_unknown_pass_name ... ok
+test passes::tests::test_build_custom_pipeline_respects_registry_order ... ok
+test passes::tests::test_cfg_analysis_with_callback_subprog_refs ... ok
+test passes::tests::test_cfg_analysis_with_subprogs ... ok
+test passes::tests::cascade_map_inline_emits_non_zero_mov_constant ... ok
+test passes::tests::test_liveness_across_branch ... ok
+test passes::tests::test_map_inline_only_pipeline_contains_only_map_inline ... ok
+test passes::utils::tests::kinsn_replacement_subprog_check_allows_site_before_tail_call ... ok
+test passes::tests::cascade_dce_eliminates_dead_branch_after_const_prop ... ok
+test passes::utils::tests::kinsn_replacement_subprog_check_allows_site_inside_one_subprog ... ok
+test passes::utils::tests::kinsn_replacement_subprog_check_rejects_pseudo_func_boundary_inside_site ... ok
+test passes::tests::cascade_hash_map_removes_lookup_and_null_path_then_folds_non_null_path ... ok
+test passes::utils::tests::kinsn_replacement_subprog_check_rejects_site_after_tail_call ... ok
+test passes::utils::tests::remap_btf_metadata_rejects_out_of_range_func_info ... ok
+test passes::utils::tests::remap_btf_metadata_drops_deleted_entries_and_shifts_survivors ... ok
+test passes::utils::tests::remap_kinsn_btf_metadata_disambiguates_duplicate_btf_ids_by_call_offset ... ok
+test passes::utils::tests::remap_kinsn_btf_metadata_uses_proof_subprog_layout_for_func_info ... ok
+test passes::utils::tests::test_eliminate_nops_preserves_helper_call_reserved_fields ... ok
+test passes::utils::tests::test_emit_packed_kinsn_call_wide_payload ... ok
+test passes::utils::tests::test_eliminate_dead_register_defs_cascades_across_overwrites ... ok
+test passes::utils::tests::test_emit_packed_kinsn_call_with_module_off ... ok
+test passes::utils::tests::test_fixup_all_branches_does_not_write_branch_off_into_helper_call ... ok
+test passes::utils::tests::test_fixup_all_branches_does_not_write_deleted_branch_target_into_surviving_branch ... ok
+test passes::utils::tests::test_fixup_all_branches_forward_jump ... ok
+test passes::tests::cascade_full_pipeline_shortens_program_and_preserves_folded_semantics ... ok
+test passes::utils::tests::test_fixup_all_branches_rewrites_pseudo_func_target_after_growth ... ok
+test passes::utils::tests::test_tail_call_protected_prefix_end_tracks_last_tail_call ... ok
+test passes::wide_mem::tests::test_emit_wide_mem_supported_widths ... ok
+test passes::wide_mem::tests::test_emit_wide_mem_unsupported_width ... ok
+test passes::wide_mem::tests::test_is_packet_unsafe_prog_type ... ok
+test passes::wide_mem::tests::test_scan_high_first_2byte ... ok
+test passes::wide_mem::tests::test_scan_high_first_matches_clang_output ... ok
+test passes::wide_mem::tests::test_scan_high_first_no_false_positive ... ok
+test passes::wide_mem::tests::test_scan_wide_mem_2byte ... ok
+test passes::wide_mem::tests::test_scan_wide_mem_4byte ... ok
+test passes::wide_mem::tests::test_branch_fixup_forward_across_site ... ok
+test passes::wide_mem::tests::test_scan_wide_mem_embedded_in_program ... ok
+test passes::wide_mem::tests::test_conditional_branch_fixup ... ok
+test passes::wide_mem::tests::test_scan_wide_mem_no_match ... ok
+test passes::wide_mem::tests::test_scan_wide_mem_multiple_sites ... ok
+test passes::wide_mem::tests::test_branch_fixup_backward_across_site ... ok
+test passes::wide_mem::tests::test_wide_mem_allows_non_stack_in_tracing ... ok
+test passes::wide_mem::tests::test_wide_mem_allows_map_value_base_in_xdp ... ok
+test passes::tests::test_default_pipeline_wide_mem ... ok
+test passes::wide_mem::tests::test_wide_mem_pass_no_sites ... ok
+test passes::wide_mem::tests::test_wide_mem_allows_stack_base_in_xdp ... ok
+test passes::wide_mem::tests::test_wide_mem_mixed_sites_xdp_some_skipped ... ok
+test passes::wide_mem::tests::test_wide_mem_pass_skips_site_with_live_scratch_reg ... ok
+test passes::wide_mem::tests::test_wide_mem_pass_skips_site_with_interior_branch_target ... ok
+test passes::wide_mem::tests::test_wide_mem_pass_multiple_sites ... ok
+test passes::wide_mem::tests::test_wide_mem_pass_skips_unsupported_width_3 ... ok
+test passes::wide_mem::tests::test_wide_mem_pass_integration_with_pass_manager ... ok
+test passes::wide_mem::tests::test_wide_mem_pass_transforms_correctly ... ok
+test passes::wide_mem::tests::test_wide_mem_pass_applies_width4_skips_width3_mixed ... ok
+test passes::wide_mem::tests::test_wide_mem_skips_non_stack_in_xdp ... ok
+
+test result: ok. 334 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/main.rs (target/debug/deps/bpfopt-e1b6a4e4b504d2d6)
+
+running 6 tests
+test tests::canonical_pass_names_accept_v3_cli_names ... ok
+test tests::parse_bytecode_rejects_non_instruction_multiple ... ok
+test tests::parse_bytecode_round_trips_raw_instruction_bytes ... ok
+test tests::target_json_maps_v3_kinsn_aliases_to_registry_fields ... ok
+test tests::verifier_states_json_builds_const_prop_delta_states ... ok
+test tests::pass_report_serializes_map_inline_records_as_hex ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli_pipeline.rs (target/debug/deps/cli_pipeline-bebcf9aa7739f44d)
+
+running 10 tests
+test invalid_bytecode_length_exits_with_error ... ok
+test list_passes_outputs_12_cli_names_including_branch_flip ... ok
+test optimize_default_pipeline_fails_when_required_side_inputs_are_missing ... ok
+test optimize_without_target_fails_before_running_kinsn_passes ... ok
+test optimize_explicit_kinsn_pass_fails_when_target_lacks_kinsn ... ok
+test optimize_bulk_memory_missing_kinsns_fails_with_v3_names ... ok
+test wide_mem_accepts_stdin_and_writes_instruction_aligned_stdout ... ok
+test optimize_map_inline_errors_when_snapshot_key_is_absent ... ok
+test optimize_map_inline_skips_hash_lookup_when_snapshot_value_is_null ... ok
+test optimize_default_pipeline_with_all_side_inputs_reports_11_entries ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/bpfprof-c70e2dd4ed4ed52f)
+
+running 7 tests
+test tests::build_profiles_requires_real_per_site_data ... ok
+test tests::build_profiles_sorts_by_run_count_delta ... ok
+test tests::lbr_sample_reports_helper_failure ... ok
+test tests::stats_delta_rejects_counter_regression ... ok
+test tests::profile_json_serializes_required_branch_metrics ... ok
+test tests::lbr_sample_attributes_misses_and_direction_to_bpf_pc ... ok
+test tests::jit_span_maps_native_branch_to_unique_bpf_branch_pc ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli.rs (target/debug/deps/cli-5298f719b37f2446)
+
+running 4 tests
+test per_site_mode_is_required ... ok
+test all_mode_pmu_unavailable_exits_with_error ... ok
+test profile_json_requires_side_output_file ... ok
+test nonexistent_prog_id_exits_with_error ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/bpfrejit-cc48e82b9bb6e6d5)
+
+running 3 tests
+test tests::fd_array_rejects_holes ... ok
+test tests::fd_array_reserves_slot_zero_with_duplicate_valid_fd ... ok
+test tests::parse_bytecode_rejects_non_instruction_multiple ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli.rs (target/debug/deps/cli-77e7cff6acd9c979)
+
+running 4 tests
+test rejects_input_length_that_is_not_instruction_aligned ... ok
+test map_fds_malformed_json_exits_before_opening_target_program ... ok
+test fd_array_malformed_json_exits_with_parse_error ... ok
+test fd_array_missing_btf_fd_exits_with_friendly_error ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/bpfverify-dcf19c39cb05365f)
+
+running 19 tests
+test tests::btf_info_records_require_matching_rec_size_arg ... ok
+test tests::fd_array_reserves_slot_zero ... ok
+test tests::prog_type_parser_accepts_common_names ... ok
+test verifier_log::tests::extract_failure_pc_empty_log ... ok
+test verifier_log::tests::distinguishes_exact_64bit_and_32bit_scalars ... ok
+test tests::verifier_state_conversion_drops_branch_delta_states ... ok
+test tests::verifier_state_conversion_prefers_delta_states ... ok
+test verifier_log::tests::extract_failure_pc_from_invalid_insn ... ok
+test verifier_log::tests::extract_failure_pc_from_type_mismatch ... ok
+test verifier_log::tests::extract_failure_pc_jump_out_of_range ... ok
+test verifier_log::tests::extract_failure_pc_last_state_fallback ... ok
+test verifier_log::tests::ignores_non_state_lines ... ok
+test verifier_log::tests::parse_verifier_rejection_from_rejit_error ... ok
+test verifier_log::tests::parses_constants_and_repeated_bounds_from_real_messages ... ok
+test verifier_log::tests::parses_frame_and_stack_tokens ... ok
+test verifier_log::tests::parses_speculative_full_state_and_stack_spill ... ok
+test verifier_log::tests::truncated_log_tail_does_not_drop_complete_states ... ok
+test verifier_log::tests::parses_real_style_branch_and_insn_states ... ok
+test tests::log_level_default_is_zero_and_outputs_force_two ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli.rs (target/debug/deps/cli-7a7020bd01bd57ed)
+
+running 5 tests
+test pipe_mode_rejects_bad_program_with_verifier_log ... ok
+test pipe_mode_passes_good_program_through ... ok
+test missing_prog_type_exits_with_friendly_error ... ok
+test report_mode_writes_json_for_bad_program ... ok
+test verifier_states_out_writes_v3_schema ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/kernel_sys-a40bda4008871efa)
+
+running 7 tests
+test tests::attr_rejit_field_offsets_match_fork_uapi ... ok
+test tests::bpf_prog_info_fork_field_offsets_match_fork_uapi ... ok
+test tests::btf_record_count_accepts_exact_records ... ok
+test tests::branch_snapshot_sidecar_bytecode_calls_required_helpers ... ok
+test tests::btf_record_count_rejects_partial_record ... ok
+test tests::verifier_log_reaches_safe_exit_requires_safe_processed_tail ... ok
+test tests::branch_snapshot_event_layout_matches_perf_branch_entry_abi ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/prog_get_original.rs (target/debug/deps/prog_get_original-4443ba932ccea503)
+
+running 1 test
+test prog_get_original_matches_fork_reported_orig_prog_len ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/prog_ids.rs (target/debug/deps/prog_ids-d950bf036ae10216)
+
+running 1 test
+test prog_get_next_id_enumerates_or_reports_unsupported_environment ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+=== round 4 rc=0 ===
