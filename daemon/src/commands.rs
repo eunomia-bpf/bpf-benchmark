@@ -1222,6 +1222,11 @@ where
         mode,
         force_rejit,
     } = request;
+    let requested_passes =
+        enabled_passes.ok_or_else(|| anyhow!("enabled_passes is required for bpfopt optimize"))?;
+    if requested_passes.is_empty() {
+        bail!("enabled_passes must include at least one pass for bpfopt optimize");
+    }
     let total_start = Instant::now();
     let workdir = WorkDir::new("bpfrejit-daemon-optimize")?;
     let prog_bin = workdir.path().join("prog.bin");
@@ -1265,7 +1270,6 @@ where
                 orig_insn_count
             );
         }
-        let requested_passes = enabled_passes.unwrap_or(&[]);
         let mut side_inputs = Vec::<(String, PathBuf)>::new();
 
         let mut has_fd_array = false;

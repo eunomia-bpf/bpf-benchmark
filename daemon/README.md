@@ -41,25 +41,19 @@ Health check:
 Optimize one live program:
 
 ```json
-{"cmd":"optimize","prog_id":42}
+{"cmd":"optimize","prog_id":42,"enabled_passes":["map_inline","const_prop","dce"]}
 ```
 
 Dry-run optimize one live program:
 
 ```json
-{"cmd":"optimize","prog_id":42,"dry_run":true}
+{"cmd":"optimize","prog_id":42,"dry_run":true,"enabled_passes":["map_inline","const_prop","dce"]}
 ```
 
 Optimize all live programs:
 
 ```json
-{"cmd":"optimize-all"}
-```
-
-Override pass selection for a request:
-
-```json
-{"cmd":"optimize","prog_id":42,"enabled_passes":["map_inline","const_prop","dce"]}
+{"cmd":"optimize-all","enabled_passes":["map_inline","const_prop","dce"]}
 ```
 
 Successful `optimize` responses embed the full structured result from
@@ -86,10 +80,8 @@ Successful `optimize` responses embed the full structured result from
 The daemon builds a pass pipeline in `daemon/src/passes/` and executes it
 through `PassManager` in `daemon/src/pass.rs`.
 
-Two defaults matter here:
-
-- Daemon request default: if a client omits `enabled_passes`, the daemon falls back to its internal registry order.
-- Benchmark/e2e default: repo runners send explicit pass lists derived from [corpus/config/benchmark_config.yaml](/home/yunwei37/workspace/bpf-benchmark/corpus/config/benchmark_config.yaml). The current default benchmark profile is `map_inline`, `const_prop`, `dce`.
+Requests must provide a non-empty `enabled_passes` list. Repo runners send
+explicit pass lists derived from benchmark configuration.
 
 `branch_flip` stays out of the default benchmark profile. If a caller explicitly
 enables it, the current implementation still requires PMU-friendly profiling

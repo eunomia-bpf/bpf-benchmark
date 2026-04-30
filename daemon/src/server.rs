@@ -225,35 +225,23 @@ struct ProgramWatcher {
 }
 
 impl ProgramWatcher {
-    fn from_live() -> Self {
+    fn from_live() -> Result<Self> {
         let mut seen = HashSet::new();
         for prog_id in bpf::iter_prog_ids() {
-            match prog_id {
-                Ok(prog_id) => {
-                    seen.insert(prog_id);
-                }
-                Err(err) => {
-                    eprintln!("serve: failed to initialize BPF program watcher: {err:#}");
-                    break;
-                }
-            }
+            let prog_id = prog_id.context("initialize BPF program watcher")?;
+            seen.insert(prog_id);
         }
-        Self { seen }
+        Ok(Self { seen })
     }
 
-    fn tick(&mut self) {
+    fn tick(&mut self) -> Result<()> {
         for prog_id in bpf::iter_prog_ids() {
-            match prog_id {
-                Ok(prog_id) if self.seen.insert(prog_id) => {
-                    eprintln!("serve: observed new BPF program id {prog_id}");
-                }
-                Ok(_) => {}
-                Err(err) => {
-                    eprintln!("serve: BPF program watch tick failed: {err:#}");
-                    break;
-                }
+            let prog_id = prog_id.context("watch live BPF programs")?;
+            if self.seen.insert(prog_id) {
+                eprintln!("serve: observed new BPF program id {prog_id}");
             }
         }
+        Ok(())
     }
 }
 
@@ -274,7 +262,7 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
     let reoptimization_state = new_reoptimization_state();
     let mut last_invalidation_check = Instant::now();
     let mut last_watch_check = Instant::now();
-    let mut watcher = ProgramWatcher::from_live();
+    let mut watcher = ProgramWatcher::from_live()?;
     let mut profiling_state: Option<ProfilingState> = None;
 
     commands::validate_failure_export_root_from_env()?;
@@ -288,7 +276,7 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
 
     while !SHUTDOWN_FLAG.load(Ordering::Relaxed) {
         if last_watch_check.elapsed() >= Duration::from_secs(1) {
-            watcher.tick();
+            watcher.tick()?;
             last_watch_check = Instant::now();
         }
 
@@ -451,6 +439,17 @@ fn request_enabled_passes(
     parse_request_pass_list(req, "enabled_passes")
 }
 
+fn required_enabled_passes<'a>(
+    cmd: &str,
+    enabled_passes: &'a Option<Vec<String>>,
+) -> std::result::Result<&'a [String], String> {
+    match enabled_passes.as_deref() {
+        Some([]) => Err(format!("{cmd} requires at least one enabled_passes entry")),
+        Some(passes) => Ok(passes),
+        None => Err(format!("{cmd} requires enabled_passes")),
+    }
+}
+
 fn request_mode(req: &serde_json::Value) -> std::result::Result<OptimizeMode, String> {
     if let Some(value) = req.get("dry_run") {
         let dry_run = value
@@ -515,6 +514,10 @@ fn process_request(
 
     match cmd {
         "optimize" => {
+            let requested_passes = match required_enabled_passes(cmd, &enabled_passes) {
+                Ok(passes) => passes,
+                Err(message) => return error_json(message),
+            };
             let prog_id = match req.get("prog_id").and_then(|v| v.as_u64()) {
                 Some(id) => id as u32,
                 None => return error_json("missing prog_id"),
@@ -529,7 +532,7 @@ fn process_request(
             match commands::try_apply_one(
                 prog_id,
                 config,
-                enabled_passes.as_deref(),
+                Some(requested_passes),
                 profile_path.as_deref(),
                 Some(tracker),
                 mode,
@@ -537,7 +540,7 @@ fn process_request(
                 Ok(result) => match remember_reoptimization_result(
                     reoptimization_state,
                     prog_id,
-                    enabled_passes.as_deref(),
+                    Some(requested_passes),
                     &result,
                     mode,
                 ) {
@@ -548,6 +551,10 @@ fn process_request(
             }
         }
         "optimize-all" => {
+            let requested_passes = match required_enabled_passes(cmd, &enabled_passes) {
+                Ok(passes) => passes,
+                Err(message) => return error_json(message),
+            };
             let programs = match commands::list_programs(config) {
                 Ok(programs) => programs,
                 Err(err) => {
@@ -576,7 +583,7 @@ fn process_request(
                     let result = commands::try_apply_one(
                         entry.prog_id,
                         config,
-                        enabled_passes.as_deref(),
+                        Some(requested_passes),
                         profile_path.as_deref(),
                         Some(tracker),
                         OptimizeMode::Apply,
@@ -604,7 +611,7 @@ fn process_request(
                     remember_reoptimization_result(
                         reoptimization_state,
                         entry.prog_id,
-                        enabled_passes.as_deref(),
+                        Some(requested_passes),
                         &result,
                         OptimizeMode::Apply,
                     )
@@ -737,7 +744,7 @@ fn process_request(
                 .map_or("none", ProfilingState::label);
             let available_passes_help = match commands::available_passes_help(config) {
                 Ok(help) => help,
-                Err(err) => format!("unavailable: {err:#}"),
+                Err(err) => return error_json(format!("bpfopt list-passes failed: {err:#}")),
             };
             serde_json::json!({
                 "status": "ok",
@@ -807,16 +814,33 @@ mod tests {
     }
 
     fn process_test_request(req: &serde_json::Value) -> serde_json::Value {
+        process_test_request_with_config(req, &CliConfig::from_env())
+    }
+
+    fn process_test_request_with_config(
+        req: &serde_json::Value,
+        config: &CliConfig,
+    ) -> serde_json::Value {
         let tracker = commands::new_invalidation_tracker();
         let reoptimization_state = new_reoptimization_state();
         let mut profiling_state = None;
         process_request(
             req,
-            &CliConfig::from_env(),
+            config,
             &mut profiling_state,
             &tracker,
             &reoptimization_state,
         )
+    }
+
+    fn temp_test_dir(prefix: &str) -> std::path::PathBuf {
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("clock should be after epoch")
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!("{prefix}-{timestamp}"));
+        std::fs::create_dir(&path).expect("create temp test dir");
+        path
     }
 
     #[test]
@@ -948,11 +972,73 @@ mod tests {
         let response = process_test_request(&serde_json::json!({
             "cmd": "optimize",
             "prog_id": 1,
+            "enabled_passes": ["wide_mem"],
             "dry_run": "yes",
         }));
 
         assert_eq!(response["status"], "error");
         assert_eq!(response["error_message"], "dry_run must be a JSON boolean");
+    }
+
+    #[test]
+    fn process_request_rejects_optimize_without_enabled_passes() {
+        let response = process_test_request(&serde_json::json!({
+            "cmd": "optimize",
+            "prog_id": 1,
+        }));
+
+        assert_eq!(response["status"], "error");
+        assert_eq!(
+            response["error_message"],
+            "optimize requires enabled_passes"
+        );
+    }
+
+    #[test]
+    fn process_request_rejects_optimize_all_without_enabled_passes() {
+        let response = process_test_request(&serde_json::json!({
+            "cmd": "optimize-all",
+        }));
+
+        assert_eq!(response["status"], "error");
+        assert_eq!(
+            response["error_message"],
+            "optimize-all requires enabled_passes"
+        );
+    }
+
+    #[test]
+    fn process_request_rejects_empty_enabled_passes_for_optimize() {
+        let response = process_test_request(&serde_json::json!({
+            "cmd": "optimize",
+            "prog_id": 1,
+            "enabled_passes": [],
+        }));
+
+        assert_eq!(response["status"], "error");
+        assert_eq!(
+            response["error_message"],
+            "optimize requires at least one enabled_passes entry"
+        );
+    }
+
+    #[test]
+    fn process_request_status_reports_list_passes_failure_as_error() {
+        let cli_dir = temp_test_dir("bpfrejit-daemon-empty-cli");
+        let config = CliConfig::with_dir(cli_dir.clone());
+        let response = process_test_request_with_config(
+            &serde_json::json!({
+                "cmd": "status",
+            }),
+            &config,
+        );
+
+        std::fs::remove_dir_all(cli_dir).expect("remove temp cli dir");
+        assert_eq!(response["status"], "error");
+        assert!(response["error_message"]
+            .as_str()
+            .expect("error message should be a string")
+            .contains("bpfopt list-passes failed"));
     }
 
     #[test]
