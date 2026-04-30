@@ -62,8 +62,7 @@ VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 	aws-e2e aws-corpus \
 	aws-arm64-test aws-arm64-benchmark aws-arm64-corpus aws-arm64-e2e aws-arm64-terminate \
 	aws-x86-test aws-x86-benchmark aws-x86-corpus aws-x86-e2e aws-x86-terminate \
-	lint help clean clean-build clean-results clean-vm-tmp clean-docker-cache \
-	prune-docker-build-cache
+	lint help clean clean-build clean-results clean-vm-tmp clean-docker-cache
 
 help:
 	@echo "Canonical run targets:"
@@ -79,7 +78,7 @@ help:
 	@echo "        aws-x86-test AWS_X86_REGION=<region> AWS_X86_PROFILE=<profile> AWS_X86_TEST_MODE=<selftest|negative|test>"
 	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=<micro|corpus|e2e>"
 	@echo "Cleanup: clean-build clean-results clean-vm-tmp clean-docker-cache"
-	@echo "Docker GC: make prune-docker-build-cache DOCKER_BUILD_CACHE_KEEP_STORAGE=$(DOCKER_BUILD_CACHE_KEEP_STORAGE)"
+	@echo "Docker GC: make clean-docker-cache DOCKER_BUILD_CACHE_KEEP_STORAGE=$(DOCKER_BUILD_CACHE_KEEP_STORAGE)"
 
 validate:
 	$(MAKE) vm-test
@@ -160,9 +159,6 @@ aws-corpus:
 		*) echo "unsupported RUN_TARGET_ARCH for aws-corpus: $(RUN_TARGET_ARCH)" >&2; exit 2 ;; \
 	esac
 
-prune-docker-build-cache:
-	docker buildx prune --force --keep-storage "$(DOCKER_BUILD_CACHE_KEEP_STORAGE)"
-
 clean: clean-build
 
 clean-build:
@@ -198,4 +194,8 @@ clean-vm-tmp:
 	if [ -d "$(ROOT_DIR)/docs/tmp" ]; then find "$(ROOT_DIR)/docs/tmp" -path '*/vm-tmp/bpf-benchmark-docker.img' -type f -delete; fi
 	if [ -d "$(ROOT_DIR)/docs/tmp/runtime-container-tmp" ]; then find "$(ROOT_DIR)/docs/tmp/runtime-container-tmp" -maxdepth 1 -mindepth 1 -type d -name 'run.*' -exec rm -rf {} +; fi
 
-clean-docker-cache: prune-docker-build-cache
+clean-docker-cache:
+	@echo "Docker build cache is not pruned automatically."
+	@echo "After confirming no image build is active, run:"
+	@echo "  docker buildx prune --keep-storage $(DOCKER_BUILD_CACHE_KEEP_STORAGE)"
+	@echo "See docs/docker-build-cache-gc.md"
