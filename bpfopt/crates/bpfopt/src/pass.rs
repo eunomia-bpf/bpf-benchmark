@@ -684,6 +684,7 @@ pub struct PassContext {
 pub struct KinsnRegistry {
     pub rotate64_btf_id: i32,
     pub select64_btf_id: i32,
+    pub ccmp64_btf_id: i32,
     pub extract64_btf_id: i32,
     pub memcpy_bulk_btf_id: i32,
     pub memset_bulk_btf_id: i32,
@@ -702,6 +703,7 @@ impl KinsnRegistry {
         match pass_name {
             "rotate" => Some("bpf_rotate64"),
             "cond_select" => Some("bpf_select64"),
+            "ccmp" => Some("bpf_ccmp64"),
             "extract" => Some("bpf_extract64"),
             "endian_fusion" => Some("bpf_endian_load32"),
             _ => None,
@@ -712,6 +714,7 @@ impl KinsnRegistry {
         match target_name {
             "bpf_rotate64" => self.rotate64_btf_id,
             "bpf_select64" => self.select64_btf_id,
+            "bpf_ccmp64" => self.ccmp64_btf_id,
             "bpf_extract64" => self.extract64_btf_id,
             "bpf_memcpy_bulk" => self.memcpy_bulk_btf_id,
             "bpf_memset_bulk" => self.memset_bulk_btf_id,
@@ -1090,6 +1093,7 @@ impl PassContext {
             kinsn_registry: KinsnRegistry {
                 rotate64_btf_id: -1,
                 select64_btf_id: -1,
+                ccmp64_btf_id: -1,
                 extract64_btf_id: -1,
                 memcpy_bulk_btf_id: -1,
                 memset_bulk_btf_id: -1,

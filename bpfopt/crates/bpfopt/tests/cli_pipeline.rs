@@ -138,7 +138,7 @@ fn run_bpfopt(args: &[&str], stdin_bytes: &[u8]) -> Output {
 }
 
 #[test]
-fn list_passes_outputs_12_cli_names_including_branch_flip() {
+fn list_passes_outputs_13_cli_names_including_ccmp_and_branch_flip() {
     let output = Command::new(bpfopt_bin())
         .arg("list-passes")
         .output()
@@ -152,9 +152,10 @@ fn list_passes_outputs_12_cli_names_including_branch_flip() {
     let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
     let passes = stdout.lines().collect::<Vec<_>>();
 
-    assert_eq!(passes.len(), 12);
+    assert_eq!(passes.len(), 13);
     assert!(passes.contains(&"wide-mem"));
     assert!(passes.contains(&"skb-load-bytes"));
+    assert!(passes.contains(&"ccmp"));
     assert!(passes.contains(&"branch-flip"));
 }
 

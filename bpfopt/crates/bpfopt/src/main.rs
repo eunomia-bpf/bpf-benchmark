@@ -12,7 +12,7 @@ use anyhow::{anyhow, bail, Context, Result};
 use bpfopt::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
 use bpfopt::insn::BpfInsn;
 use bpfopt::pass::{
-    BpfProgram, BranchProfile, BtfInfoRecords, KinsnRegistry, MapMetadata, PassContext,
+    Arch, BpfProgram, BranchProfile, BtfInfoRecords, KinsnRegistry, MapMetadata, PassContext,
     PassManager, PassResult, PlatformCapabilities, ProfilingData, RegState, ScalarRange,
     StackState, StaticKinsnCallResolver, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
@@ -30,6 +30,7 @@ const ALL_PASS_ORDER: &[&str] = &[
     "bulk_memory",
     "rotate",
     "cond_select",
+    "ccmp",
     "extract",
     "endian_fusion",
     "branch_flip",
@@ -49,6 +50,21 @@ const DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
     "endian_fusion",
 ];
 
+const ARM64_DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
+    "map_inline",
+    "const_prop",
+    "dce",
+    "skb_load_bytes_spec",
+    "bounds_check_merge",
+    "wide_mem",
+    "bulk_memory",
+    "rotate",
+    "cond_select",
+    "ccmp",
+    "extract",
+    "endian_fusion",
+];
+
 const PASS_ALIASES: &[(&str, &str)] = &[
     ("wide-mem", "wide_mem"),
     ("wide_mem", "wide_mem"),
@@ -57,6 +73,7 @@ const PASS_ALIASES: &[(&str, &str)] = &[
     ("const_prop", "const_prop"),
     ("cond-select", "cond_select"),
     ("cond_select", "cond_select"),
+    ("ccmp", "ccmp"),
     ("extract", "extract"),
     ("endian", "endian_fusion"),
     ("endian-fusion", "endian_fusion"),
@@ -81,6 +98,8 @@ const KINSN_ALIASES: &[(&str, &str)] = &[
     ("rotate64", "bpf_rotate64"),
     ("bpf_select64", "bpf_select64"),
     ("select64", "bpf_select64"),
+    ("bpf_ccmp64", "bpf_ccmp64"),
+    ("ccmp64", "bpf_ccmp64"),
     ("bpf_extract64", "bpf_extract64"),
     ("extract64", "bpf_extract64"),
     ("bpf_memcpy_bulk", "bpf_memcpy_bulk"),
@@ -170,6 +189,8 @@ enum Command {
     /// Replace branch-over-mov with conditional select kinsn calls.
     #[command(name = "cond-select")]
     CondSelect,
+    /// Fold ARM64 zero-test compare chains with CCMP.
+    Ccmp,
     /// Replace shift+mask with bit-field extract kinsn calls.
     Extract,
     /// Fuse endian load+swap sequences.
@@ -376,6 +397,7 @@ impl Command {
             Command::Rotate => Some("rotate"),
             Command::ConstProp => Some("const_prop"),
             Command::CondSelect => Some("cond_select"),
+            Command::Ccmp => Some("ccmp"),
             Command::Extract => Some("extract"),
             Command::Endian => Some("endian_fusion"),
             Command::BranchFlip => Some("branch_flip"),
@@ -439,8 +461,9 @@ fn run_single_pass(common: &CommonArgs, pass_name: &'static str) -> Result<()> {
 }
 
 fn run_optimize(common: &CommonArgs, args: &OptimizeArgs) -> Result<()> {
+    let mut ctx = build_pass_context(common)?;
     let pass_names = if args.passes.is_empty() {
-        DEFAULT_OPTIMIZE_PASS_ORDER.to_vec()
+        default_optimize_pass_order(ctx.platform.arch).to_vec()
     } else {
         args.passes
             .iter()
@@ -451,7 +474,6 @@ fn run_optimize(common: &CommonArgs, args: &OptimizeArgs) -> Result<()> {
     validate_required_side_inputs(common, &pass_names)?;
     let mut program = BpfProgram::new(read_bytecode(common.input.as_deref())?);
     attach_program_inputs(&mut program, common)?;
-    let mut ctx = build_pass_context(common)?;
     validate_required_kinsns(&ctx, &pass_names)?;
     ctx.policy.enabled_passes = pass_names.iter().map(|name| (*name).to_string()).collect();
     let pipeline = build_pipeline(&pass_names)?;
@@ -468,6 +490,13 @@ fn run_optimize(common: &CommonArgs, args: &OptimizeArgs) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn default_optimize_pass_order(arch: Arch) -> &'static [&'static str] {
+    match arch {
+        Arch::Aarch64 => ARM64_DEFAULT_OPTIMIZE_PASS_ORDER,
+        Arch::X86_64 => DEFAULT_OPTIMIZE_PASS_ORDER,
+    }
 }
 
 fn public_kinsn_name(target_name: &str) -> &str {
@@ -526,6 +555,7 @@ fn cli_name_for_pass(canonical: &str) -> &'static str {
         "rotate" => "rotate",
         "const_prop" => "const-prop",
         "cond_select" => "cond-select",
+        "ccmp" => "ccmp",
         "extract" => "extract",
         "endian_fusion" => "endian",
         "branch_flip" => "branch-flip",
@@ -575,6 +605,7 @@ fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()
         match pass_name {
             "rotate" => require_kinsn(ctx, "bpf_rotate64")?,
             "cond_select" => require_kinsn(ctx, "bpf_select64")?,
+            "ccmp" if ctx.platform.arch == Arch::Aarch64 => require_kinsn(ctx, "bpf_ccmp64")?,
             "extract" => require_kinsn(ctx, "bpf_extract64")?,
             "endian_fusion" => require_any_kinsn(
                 ctx,
@@ -912,6 +943,7 @@ fn unavailable_kinsn_registry() -> KinsnRegistry {
     KinsnRegistry {
         rotate64_btf_id: -1,
         select64_btf_id: -1,
+        ccmp64_btf_id: -1,
         extract64_btf_id: -1,
         memcpy_bulk_btf_id: -1,
         memset_bulk_btf_id: -1,
@@ -968,6 +1000,7 @@ fn set_kinsn_btf_id(registry: &mut KinsnRegistry, name: &str, btf_id: i32) {
     match name {
         "bpf_rotate64" => registry.rotate64_btf_id = btf_id,
         "bpf_select64" => registry.select64_btf_id = btf_id,
+        "bpf_ccmp64" => registry.ccmp64_btf_id = btf_id,
         "bpf_extract64" => registry.extract64_btf_id = btf_id,
         "bpf_memcpy_bulk" => registry.memcpy_bulk_btf_id = btf_id,
         "bpf_memset_bulk" => registry.memset_bulk_btf_id = btf_id,
@@ -1319,11 +1352,18 @@ mod tests {
     #[test]
     fn canonical_pass_names_accept_v3_cli_names() {
         assert_eq!(canonicalize_pass_name("wide-mem").unwrap(), "wide_mem");
+        assert_eq!(canonicalize_pass_name("ccmp").unwrap(), "ccmp");
         assert_eq!(
             canonicalize_pass_name("skb-load-bytes").unwrap(),
             "skb_load_bytes_spec"
         );
         assert!(canonicalize_pass_name("wide_mem2").is_err());
+    }
+
+    #[test]
+    fn default_optimize_order_includes_ccmp_only_on_arm64() {
+        assert!(default_optimize_pass_order(Arch::Aarch64).contains(&"ccmp"));
+        assert!(!default_optimize_pass_order(Arch::X86_64).contains(&"ccmp"));
     }
 
     #[test]
@@ -1348,12 +1388,21 @@ mod tests {
                         supported_encodings: None,
                     },
                 ),
+                (
+                    "bpf_ccmp64".to_string(),
+                    KinsnJson {
+                        btf_func_id: 13,
+                        call_offset: None,
+                        supported_encodings: None,
+                    },
+                ),
             ]),
         };
 
         let registry = kinsn_registry_from_target(&target).unwrap();
         assert_eq!(registry.memcpy_bulk_btf_id, 11);
         assert_eq!(registry.endian_load64_btf_id, 12);
+        assert_eq!(registry.ccmp64_btf_id, 13);
         assert_eq!(registry.call_off_for_target_name("bpf_memcpy_bulk"), 2);
     }
 

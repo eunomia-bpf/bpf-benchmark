@@ -317,6 +317,15 @@ fn kinsn_proof_len(
         registry,
         btf_id,
         call_off,
+        "bpf_ccmp64",
+        registry.ccmp64_btf_id,
+    ) {
+        return ccmp_proof_len(payload);
+    }
+    if kinsn_call_matches(
+        registry,
+        btf_id,
+        call_off,
         "bpf_extract64",
         registry.extract64_btf_id,
     ) {
@@ -436,6 +445,42 @@ fn select_proof_len(payload: u64) -> anyhow::Result<usize> {
         anyhow::bail!("select condition mode is not KINSN_SELECT_COND_NEZ");
     }
     Ok(4)
+}
+
+fn ccmp_proof_len(payload: u64) -> anyhow::Result<usize> {
+    let dst_reg = payload_reg(payload, 0);
+    let count_bits = ((payload >> 4) & 0x3) as u8;
+    let count = usize::from(count_bits) + 2;
+    let mode = (payload >> 6) & 0x1;
+
+    if payload >> 24 != 0 {
+        anyhow::bail!("ccmp payload has non-zero reserved bits");
+    }
+    if count_bits > 2 {
+        anyhow::bail!("ccmp count {} exceeds maximum 4", count);
+    }
+    if dst_reg > BPF_REG_9 {
+        anyhow::bail!("ccmp dst register {dst_reg} is outside BPF_REG_0..BPF_REG_9");
+    }
+    if mode > 1 {
+        anyhow::bail!("ccmp mode {mode} is invalid");
+    }
+
+    for idx in 0..4 {
+        let reg = payload_reg(payload, (8 + idx * 4) as u8);
+        if idx >= count {
+            if reg != 0 {
+                anyhow::bail!("ccmp unused register slot {idx} is non-zero");
+            }
+            continue;
+        }
+        validate_bpf_reg("ccmp compare", reg)?;
+        if reg == dst_reg {
+            anyhow::bail!("ccmp dst register aliases compare operand r{reg}");
+        }
+    }
+
+    Ok(count + 2)
 }
 
 fn extract_proof_len(payload: u64) -> anyhow::Result<usize> {

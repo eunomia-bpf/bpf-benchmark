@@ -7,6 +7,7 @@ use anyhow::Result;
 mod bounds_check_merge;
 mod branch_flip;
 mod bulk_memory;
+mod ccmp;
 mod cond_select;
 mod const_prop;
 mod dce;
@@ -21,6 +22,7 @@ mod wide_mem;
 pub use bounds_check_merge::BoundsCheckMergePass;
 pub use branch_flip::BranchFlipPass;
 pub use bulk_memory::BulkMemoryPass;
+pub use ccmp::CcmpPass;
 pub use cond_select::CondSelectPass;
 pub use const_prop::ConstPropPass;
 pub use dce::DcePass;
@@ -97,6 +99,11 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
         name: "cond_select",
         description: "Replace branch-over-mov with conditional select kfunc (CMOV/CSEL)",
         make: || Box::new(CondSelectPass),
+    },
+    PassRegistryEntry {
+        name: "ccmp",
+        description: "Fold ARM64 zero-test compare chains into CCMP kfunc calls",
+        make: || Box::new(CcmpPass),
     },
     PassRegistryEntry {
         name: "extract",

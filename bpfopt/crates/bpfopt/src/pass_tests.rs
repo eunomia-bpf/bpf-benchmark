@@ -441,6 +441,7 @@ fn test_kinsn_registry_per_target_call_offsets() {
     let reg = KinsnRegistry {
         rotate64_btf_id: 10,
         select64_btf_id: 20,
+        ccmp64_btf_id: -1,
         extract64_btf_id: 30,
         memcpy_bulk_btf_id: -1,
         memset_bulk_btf_id: -1,
