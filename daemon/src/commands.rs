@@ -29,6 +29,8 @@ const INSIDE_RUNTIME_CONTAINER_ENV: &str = "BPFREJIT_INSIDE_RUNTIME_CONTAINER";
 const IMAGE_WORKSPACE_ENV: &str = "BPFREJIT_IMAGE_WORKSPACE";
 const FUNC_INFO_FILE: &str = "func_info.bin";
 const LINE_INFO_FILE: &str = "line_info.bin";
+const MAP_VALUES_FILE: &str = "map-values.json";
+const VERIFIER_STATES_FILE: &str = "verifier-states.json";
 const RESULT_ROOT_SUFFIXES: &[&str] = &[
     "micro/results",
     "corpus/results",
@@ -1099,8 +1101,8 @@ where
     let map_fds_json = workdir.path().join("map_fds.json");
     let target_json = workdir.path().join("target.json");
     let fd_array_json = workdir.path().join("fd_array.json");
-    let verifier_states_json = workdir.path().join("verifier_states.json");
-    let map_values_json = workdir.path().join("map_values.json");
+    let verifier_states_json = workdir.path().join(VERIFIER_STATES_FILE);
+    let map_values_json = workdir.path().join(MAP_VALUES_FILE);
     let opt_bin = workdir.path().join("opt.bin");
     let verified_bin = workdir.path().join("verified.bin");
     let report_json = workdir.path().join("bpfopt_report.json");
@@ -1137,6 +1139,25 @@ where
         }
         let mut side_inputs = Vec::<(String, PathBuf)>::new();
 
+        write_original_verifier_states(
+            config,
+            &prog_info,
+            workdir.path(),
+            &prog_bin,
+            &map_fds_json,
+            &verifier_states_json,
+        )
+        .with_context(|| format!("capture verifier states for prog {prog_id}"))?;
+
+        write_live_map_values(
+            &map_fds_json,
+            &map_values_json,
+            &mut open_map_fd,
+            &mut lookup_map_value,
+            &mut scan_map_keys,
+        )
+        .with_context(|| format!("build live map value snapshot for prog {prog_id}"))?;
+
         let mut has_fd_array = false;
         if needs_target(requested_passes) {
             run_stage_output(
@@ -1170,25 +1191,6 @@ where
             .iter()
             .any(|pass| canonical_pass(pass) == "const_prop")
         {
-            let original_verify_report = workdir.path().join("original_bpfverify_report.json");
-            let mut verify = config.command("bpfverify");
-            verify
-                .arg("--prog-type")
-                .arg(&prog_info.prog_type.name)
-                .arg("--map-fds")
-                .arg(&map_fds_json)
-                .arg("--input")
-                .arg(&prog_bin)
-                .arg("--output")
-                .arg(workdir.path().join("verified_original.bin"))
-                .arg("--report")
-                .arg(&original_verify_report)
-                .arg("--verifier-states-out")
-                .arg(&verifier_states_json);
-            append_load_context_args(&mut verify, &prog_info, workdir.path());
-            run_stage_output("bpfverify original verifier-states", &mut verify).with_context(
-                || format!("bpfverify --verifier-states-out failed for prog {prog_id}"),
-            )?;
             side_inputs.push((
                 "--verifier-states".to_string(),
                 verifier_states_json.clone(),
@@ -1199,14 +1201,6 @@ where
             .iter()
             .any(|pass| canonical_pass(pass) == "map_inline")
         {
-            write_live_map_values(
-                &map_fds_json,
-                &map_values_json,
-                &mut open_map_fd,
-                &mut lookup_map_value,
-                &mut scan_map_keys,
-            )
-            .with_context(|| format!("build map-inline live value snapshot for prog {prog_id}"))?;
             side_inputs.push(("--map-values".to_string(), map_values_json.clone()));
             let map_ids = if prog_info.map_ids.is_empty() {
                 "0".to_string()
@@ -1599,6 +1593,35 @@ fn capture_rejit_failure_verifier_log(
     Ok(verifier_log_summary(&report.verifier_log))
 }
 
+fn write_original_verifier_states(
+    config: &CliConfig,
+    prog_info: &ProgInfoJson,
+    workdir: &Path,
+    prog_bin: &Path,
+    map_fds_json: &Path,
+    verifier_states_json: &Path,
+) -> Result<()> {
+    let original_verify_report = workdir.join("original_bpfverify_report.json");
+    let mut verify = config.command("bpfverify");
+    verify
+        .arg("--prog-type")
+        .arg(&prog_info.prog_type.name)
+        .arg("--map-fds")
+        .arg(map_fds_json)
+        .arg("--input")
+        .arg(prog_bin)
+        .arg("--output")
+        .arg(workdir.join("verified_original.bin"))
+        .arg("--report")
+        .arg(&original_verify_report)
+        .arg("--verifier-states-out")
+        .arg(verifier_states_json);
+    append_load_context_args(&mut verify, prog_info, workdir);
+    run_stage_output("bpfverify original verifier-states", &mut verify)
+        .context("bpfverify --verifier-states-out failed")?;
+    Ok(())
+}
+
 fn pass_detail_from_report(report: &BpfoptPassReport) -> PassDetail {
     PassDetail {
         pass_name: report.pass.clone(),
@@ -1714,7 +1737,7 @@ fn needs_target(passes: &[String]) -> bool {
     passes.iter().any(|pass| {
         matches!(
             canonical_pass(pass).as_str(),
-            "rotate" | "cond_select" | "extract" | "endian_fusion" | "bulk_memory"
+            "rotate" | "cond_select" | "ccmp" | "extract" | "endian_fusion" | "bulk_memory"
         )
     })
 }
@@ -1726,6 +1749,7 @@ fn missing_target_kinsns(path: &Path, passes: &[String]) -> Result<Vec<&'static 
         match canonical_pass(pass).as_str() {
             "rotate" => push_missing_target(&mut missing, &target, &["bpf_rotate64"]),
             "cond_select" => push_missing_target(&mut missing, &target, &["bpf_select64"]),
+            "ccmp" => push_missing_target(&mut missing, &target, &["bpf_ccmp64"]),
             "extract" => push_missing_target(&mut missing, &target, &["bpf_extract64"]),
             "endian_fusion" => push_missing_target(
                 &mut missing,
@@ -1831,6 +1855,7 @@ fn required_kinsn_names(passes: &[String]) -> Vec<&'static str> {
         match canonical_pass(pass).as_str() {
             "rotate" => push_unique(&mut names, "bpf_rotate64"),
             "cond_select" => push_unique(&mut names, "bpf_select64"),
+            "ccmp" => push_unique(&mut names, "bpf_ccmp64"),
             "extract" => push_unique(&mut names, "bpf_extract64"),
             "endian_fusion" => push_unique(&mut names, "bpf_endian_load64"),
             "bulk_memory" => {
@@ -2085,6 +2110,49 @@ mod tests {
         assert!(!args.iter().any(|arg| arg == "--line-info"));
     }
 
+    #[test]
+    fn live_map_values_snapshot_writes_values_and_lookup_misses() {
+        let workdir = WorkDir::new("bpfrejit-daemon-map-values").unwrap();
+        let map_fds = workdir.path().join("map_fds.json");
+        let output = workdir.path().join(MAP_VALUES_FILE);
+        fs::write(
+            &map_fds,
+            r#"[
+  {"map_id":111,"map_type":2,"key_size":4,"value_size":4,"max_entries":8,"name":"array_map"},
+  {"map_id":222,"map_type":1,"key_size":4,"value_size":4,"max_entries":8,"name":"hash_map"}
+]
+"#,
+        )
+        .unwrap();
+
+        write_live_map_values(
+            &map_fds,
+            &output,
+            &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
+            &mut |map, _fd, key| {
+                if map.map_id == 111 && key == 1u32.to_le_bytes().as_slice() {
+                    Ok(Some(7u32.to_le_bytes().to_vec()))
+                } else {
+                    Ok(None)
+                }
+            },
+            &mut |map, _fd| {
+                if map.map_id == 111 {
+                    Ok(vec![1u32.to_le_bytes().to_vec()])
+                } else {
+                    Ok(vec![2u32.to_le_bytes().to_vec()])
+                }
+            },
+        )
+        .unwrap();
+
+        let json: serde_json::Value = serde_json::from_slice(&fs::read(output).unwrap()).unwrap();
+        assert_eq!(json["maps"][0]["entries"][0]["key"], "01000000");
+        assert_eq!(json["maps"][0]["entries"][0]["value"], "07000000");
+        assert_eq!(json["maps"][1]["entries"][0]["key"], "02000000");
+        assert!(json["maps"][1]["entries"][0]["value"].is_null());
+    }
+
     struct FakeCliDir {
         dir: WorkDir,
     }
@@ -2123,10 +2191,10 @@ while [[ $# -gt 0 ]]; do
 done
 printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00' > "$outdir/prog.bin"
 cat > "$outdir/prog_info.json" <<JSON
-{"id":$prog_id,"name":"demo","type":{"name":"xdp","numeric":6},"insn_cnt":2,"map_ids":[111],"func_info_rec_size":8,"nr_func_info":1,"line_info_rec_size":16,"nr_line_info":1}
+{"id":$prog_id,"name":"demo","type":{"name":"xdp","numeric":6},"insn_cnt":2,"map_ids":[],"func_info_rec_size":8,"nr_func_info":1,"line_info_rec_size":16,"nr_line_info":1}
 JSON
 cat > "$outdir/map_fds.json" <<JSON
-[{"map_id":111,"map_type":2,"key_size":4,"value_size":4,"max_entries":8,"name":"demo_map"}]
+[]
 JSON
 printf '\x00\x00\x00\x00\x01\x00\x00\x00' > "$outdir/func_info.bin"
 printf '\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00' > "$outdir/line_info.bin"
@@ -2289,6 +2357,26 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
         with_failure_export_env(failure_root.path(), None, || f(failure_root.path()))
     }
 
+    fn with_clean_daemon_export_env<T>(f: impl FnOnce() -> T) -> T {
+        let _guard = ENV_LOCK
+            .lock()
+            .expect("failure export env lock should not be poisoned");
+        let old_root = std::env::var_os(FAILURE_ROOT_ENV);
+        let old_layout = std::env::var_os(FAILURE_LAYOUT_ENV);
+        let old_keep_all_workdirs = std::env::var_os(KEEP_ALL_WORKDIRS_ENV);
+        std::env::remove_var(FAILURE_ROOT_ENV);
+        std::env::remove_var(FAILURE_LAYOUT_ENV);
+        std::env::remove_var(KEEP_ALL_WORKDIRS_ENV);
+        let result = catch_unwind(AssertUnwindSafe(f));
+        restore_env(FAILURE_ROOT_ENV, old_root);
+        restore_env(FAILURE_LAYOUT_ENV, old_layout);
+        restore_env(KEEP_ALL_WORKDIRS_ENV, old_keep_all_workdirs);
+        match result {
+            Ok(value) => value,
+            Err(payload) => resume_unwind(payload),
+        }
+    }
+
     fn restore_env(name: &str, value: Option<OsString>) {
         if let Some(value) = value {
             std::env::set_var(name, value);
@@ -2299,24 +2387,26 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
 
     #[test]
     fn optimize_uses_cli_subprocesses_and_preserves_response_shape() {
-        let fake = FakeCliDir::new().unwrap();
-        let result = try_apply_one(
-            42,
-            &fake.config(),
-            Some(&["wide_mem".to_string()]),
-            None,
-            None,
-        )
-        .unwrap();
+        with_clean_daemon_export_env(|| {
+            let fake = FakeCliDir::new().unwrap();
+            let result = try_apply_one(
+                42,
+                &fake.config(),
+                Some(&["wide_mem".to_string()]),
+                None,
+                None,
+            )
+            .unwrap();
 
-        assert_eq!(result.status, "ok");
-        assert_eq!(result.prog_id, 42);
-        assert!(result.changed);
-        assert_eq!(result.passes_applied, vec!["wide_mem"]);
-        assert!(result.summary.applied);
-        assert_eq!(result.summary.total_sites_applied, 2);
-        assert_eq!(result.summary.passes_executed, 1);
-        assert!(result.passes[0].changed);
+            assert_eq!(result.status, "ok");
+            assert_eq!(result.prog_id, 42);
+            assert!(result.changed);
+            assert_eq!(result.passes_applied, vec!["wide_mem"]);
+            assert!(result.summary.applied);
+            assert_eq!(result.summary.total_sites_applied, 2);
+            assert_eq!(result.summary.passes_executed, 1);
+            assert!(result.passes[0].changed);
+        });
     }
 
     #[test]
@@ -2351,6 +2441,8 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
                 assert!(debug_dir.join("prog.bin").is_file());
                 assert!(debug_dir.join("prog_info.json").is_file());
                 assert!(debug_dir.join("map_fds.json").is_file());
+                assert!(debug_dir.join(MAP_VALUES_FILE).is_file());
+                assert!(debug_dir.join(VERIFIER_STATES_FILE).is_file());
                 assert!(debug_dir.join("bpfopt_report.json").is_file());
             },
         );
@@ -2377,10 +2469,11 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
 
     #[test]
     fn optimize_passes_btf_metadata_to_bpfopt_for_in_place_remap() {
-        let fake = FakeCliDir::new().unwrap();
-        fake.replace_command(
-            "bpfopt",
-            r#"#!/usr/bin/env bash
+        with_clean_daemon_export_env(|| {
+            let fake = FakeCliDir::new().unwrap();
+            fake.replace_command(
+                "bpfopt",
+                r#"#!/usr/bin/env bash
 set -euo pipefail
 report=""
 func_info=""
@@ -2401,20 +2494,21 @@ cat > "$report" <<JSON
 {"passes":[{"pass":"wide_mem","changed":true,"sites_applied":1,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
 JSON
 "#,
-        )
-        .unwrap();
+            )
+            .unwrap();
 
-        let result = try_apply_one(
-            42,
-            &fake.config(),
-            Some(&["wide_mem".to_string()]),
-            None,
-            None,
-        )
-        .unwrap();
+            let result = try_apply_one(
+                42,
+                &fake.config(),
+                Some(&["wide_mem".to_string()]),
+                None,
+                None,
+            )
+            .unwrap();
 
-        assert_eq!(result.status, "ok");
-        assert_eq!(result.summary.total_sites_applied, 1);
+            assert_eq!(result.status, "ok");
+            assert_eq!(result.summary.total_sites_applied, 1);
+        });
     }
 
     #[test]
@@ -2516,6 +2610,29 @@ done
                 "bpfverify",
                 r#"#!/usr/bin/env bash
 set -euo pipefail
+input=""
+output=""
+states=""
+report=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --input) input="$2"; shift 2 ;;
+    --output) output="$2"; shift 2 ;;
+    --report) report="$2"; shift 2 ;;
+    --verifier-states-out) states="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+if [[ -n "$states" ]]; then
+  if [[ -n "$input" && -n "$output" ]]; then cp "$input" "$output"; fi
+  if [[ -n "$report" ]]; then
+    cat > "$report" <<JSON
+{"status":"pass","verifier_log":"synthetic verifier log","verifier_states":{"insns":[]},"insn_count":2,"log_level":2,"errno":null,"jited_size":64,"log_true_size":0}
+JSON
+  fi
+  printf '{"insns":[]}\n' > "$states"
+  exit 0
+fi
 printf 'synthetic final verifier failure\n' >&2
 exit 9
 "#,
@@ -2603,6 +2720,8 @@ exit 11
                 "opt.bin",
                 "verified.bin",
                 "map_fds.json",
+                MAP_VALUES_FILE,
+                VERIFIER_STATES_FILE,
                 "info.json",
                 "replay.sh",
                 "bpfopt_report.json",
@@ -2673,11 +2792,12 @@ exit 11
 
     #[test]
     fn reapply_force_rejit_reinstalls_candidate_even_when_unchanged() {
-        let fake = FakeCliDir::new().unwrap();
-        let marker = fake.dir.path().join("rejit-called");
-        let marker_arg = marker.to_string_lossy().to_string();
-        fake.replace_command(
-            "bpfopt",
+        with_clean_daemon_export_env(|| {
+            let fake = FakeCliDir::new().unwrap();
+            let marker = fake.dir.path().join("rejit-called");
+            let marker_arg = marker.to_string_lossy().to_string();
+            fake.replace_command(
+                "bpfopt",
 r#"#!/usr/bin/env bash
 set -euo pipefail
 report=""
@@ -2693,12 +2813,12 @@ cat > "$report" <<JSON
 {"passes":[{"pass":"wide_mem","changed":false,"sites_applied":0,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
 JSON
 "#,
-        )
-        .unwrap();
-        fake.replace_command(
-            "bpfrejit",
-            &format!(
-                r#"#!/usr/bin/env bash
+            )
+            .unwrap();
+            fake.replace_command(
+                "bpfrejit",
+                &format!(
+                    r#"#!/usr/bin/env bash
 set -euo pipefail
 prog_id="$1"
 shift
@@ -2714,29 +2834,55 @@ if [[ -n "$out" ]]; then
   printf '{{"status":"ok","prog_id":%s,"insn_count_before":2,"insn_count_after":2}}\n' "$prog_id" > "$out"
 fi
 "#
-            ),
-        )
-        .unwrap();
+                ),
+            )
+            .unwrap();
 
-        let result = try_reapply_one(
-            42,
-            &fake.config(),
-            Some(&["wide_mem".to_string()]),
-            None,
-            None,
-        )
-        .unwrap();
+            let result = try_reapply_one(
+                42,
+                &fake.config(),
+                Some(&["wide_mem".to_string()]),
+                None,
+                None,
+            )
+            .unwrap();
 
-        assert!(!result.changed);
-        assert!(result.summary.applied);
-        assert!(marker.exists());
+            assert!(!result.changed);
+            assert!(result.summary.applied);
+            assert!(marker.exists());
+        });
     }
 
     #[test]
     fn map_inline_report_records_refresh_invalidation_tracker_after_rejit() {
-        let fake = FakeCliDir::new().unwrap();
-        fake.replace_command(
-            "bpfopt",
+        with_clean_daemon_export_env(|| {
+            let fake = FakeCliDir::new().unwrap();
+            fake.replace_command(
+                "bpfget",
+                r#"#!/usr/bin/env bash
+set -euo pipefail
+prog_id="$1"
+shift
+outdir=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --full) shift ;;
+    --outdir) outdir="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00' > "$outdir/prog.bin"
+cat > "$outdir/prog_info.json" <<JSON
+{"id":$prog_id,"name":"demo","type":{"name":"xdp","numeric":6},"insn_cnt":2,"map_ids":[111]}
+JSON
+cat > "$outdir/map_fds.json" <<JSON
+[{"map_id":111,"map_type":2,"key_size":4,"value_size":4,"max_entries":8,"name":"demo_map"}]
+JSON
+"#,
+            )
+            .unwrap();
+            fake.replace_command(
+                "bpfopt",
 r#"#!/usr/bin/env bash
 set -euo pipefail
 report=""
@@ -2755,49 +2901,51 @@ cat > "$report" <<JSON
 {"passes":[{"pass":"map_inline","changed":true,"sites_applied":1,"insn_count_before":2,"insn_count_after":2,"insn_delta":0,"map_inline_records":[{"map_id":111,"key_hex":"01000000","value_hex":"07000000"}]}]}
 JSON
 "#,
-        )
-        .unwrap();
-        let tracker = new_invalidation_tracker();
-        let config = fake.config();
-        let enabled_passes = ["map_inline".to_string()];
+            )
+            .unwrap();
+            let tracker = new_invalidation_tracker();
+            let config = fake.config();
+            let enabled_passes = ["map_inline".to_string()];
 
-        let result = try_apply_one_with_map_access(
-            ApplyOneRequest {
-                prog_id: 42,
-                config: &config,
-                enabled_passes: Some(&enabled_passes),
-                profile_path: None,
-                invalidation_tracker: Some(&tracker),
-                force_rejit: false,
-            },
-            |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
-            |_map, _fd, key| {
-                assert_eq!(key, 1u32.to_le_bytes().as_slice());
-                Ok(Some(7u32.to_le_bytes().to_vec()))
-            },
-            |_map, _fd| Ok(vec![1u32.to_le_bytes().to_vec()]),
-        )
-        .unwrap();
+            let result = try_apply_one_with_map_access(
+                ApplyOneRequest {
+                    prog_id: 42,
+                    config: &config,
+                    enabled_passes: Some(&enabled_passes),
+                    profile_path: None,
+                    invalidation_tracker: Some(&tracker),
+                    force_rejit: false,
+                },
+                |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
+                |_map, _fd, key| {
+                    assert_eq!(key, 1u32.to_le_bytes().as_slice());
+                    Ok(Some(7u32.to_le_bytes().to_vec()))
+                },
+                |_map, _fd| Ok(vec![1u32.to_le_bytes().to_vec()]),
+            )
+            .unwrap();
 
-        assert_eq!(
-            result.inlined_map_entries,
-            vec![InlinedMapEntry {
-                map_id: 111,
-                key_hex: "01000000".to_string(),
-                value_hex: "07000000".to_string(),
-            }]
-        );
-        let tracker = tracker.lock().expect("tracker lock should not be poisoned");
-        assert!(tracker.tracks_prog(42));
-        assert_eq!(tracker.entry_count(), 1);
+            assert_eq!(
+                result.inlined_map_entries,
+                vec![InlinedMapEntry {
+                    map_id: 111,
+                    key_hex: "01000000".to_string(),
+                    value_hex: "07000000".to_string(),
+                }]
+            );
+            let tracker = tracker.lock().expect("tracker lock should not be poisoned");
+            assert!(tracker.tracks_prog(42));
+            assert_eq!(tracker.entry_count(), 1);
+        });
     }
 
     #[test]
     fn reapply_map_inline_hash_lookup_miss_completes_rejit() {
-        let fake = FakeCliDir::new().unwrap();
-        fake.replace_command(
-            "bpfget",
-            r#"#!/usr/bin/env bash
+        with_clean_daemon_export_env(|| {
+            let fake = FakeCliDir::new().unwrap();
+            fake.replace_command(
+                "bpfget",
+                r#"#!/usr/bin/env bash
 set -euo pipefail
 prog_id="$1"
 shift
@@ -2817,10 +2965,10 @@ cat > "$outdir/map_fds.json" <<JSON
 [{"map_id":111,"map_type":1,"key_size":4,"value_size":4,"max_entries":8,"name":"hash_map"}]
 JSON
 "#,
-        )
-        .unwrap();
-        fake.replace_command(
-            "bpfopt",
+            )
+            .unwrap();
+            fake.replace_command(
+                "bpfopt",
 r#"#!/usr/bin/env bash
 set -euo pipefail
 report=""
@@ -2839,33 +2987,34 @@ cat > "$report" <<JSON
 {"passes":[{"pass":"map_inline","changed":false,"sites_applied":0,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
 JSON
 "#,
-        )
-        .unwrap();
-        let config = fake.config();
-        let enabled_passes = ["map_inline".to_string()];
+            )
+            .unwrap();
+            let config = fake.config();
+            let enabled_passes = ["map_inline".to_string()];
 
-        let result = try_apply_one_with_map_access(
-            ApplyOneRequest {
-                prog_id: 42,
-                config: &config,
-                enabled_passes: Some(&enabled_passes),
-                profile_path: None,
-                invalidation_tracker: None,
-                force_rejit: true,
-            },
-            |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
-            |_map, _fd, key| {
-                assert_eq!(key, 1u32.to_le_bytes().as_slice());
-                Ok(None)
-            },
-            |_map, _fd| Ok(vec![1u32.to_le_bytes().to_vec()]),
-        )
-        .unwrap();
+            let result = try_apply_one_with_map_access(
+                ApplyOneRequest {
+                    prog_id: 42,
+                    config: &config,
+                    enabled_passes: Some(&enabled_passes),
+                    profile_path: None,
+                    invalidation_tracker: None,
+                    force_rejit: true,
+                },
+                |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
+                |_map, _fd, key| {
+                    assert_eq!(key, 1u32.to_le_bytes().as_slice());
+                    Ok(None)
+                },
+                |_map, _fd| Ok(vec![1u32.to_le_bytes().to_vec()]),
+            )
+            .unwrap();
 
-        assert!(!result.changed);
-        assert!(result.summary.applied);
-        assert_eq!(result.summary.total_sites_applied, 0);
-        assert!(result.inlined_map_entries.is_empty());
+            assert!(!result.changed);
+            assert!(result.summary.applied);
+            assert_eq!(result.summary.total_sites_applied, 0);
+            assert!(result.inlined_map_entries.is_empty());
+        });
     }
 
     #[test]
