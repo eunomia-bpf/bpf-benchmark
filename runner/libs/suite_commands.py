@@ -1,6 +1,7 @@
 """Shared suite and runtime image command-line builders."""
 from __future__ import annotations
 
+import os
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,9 @@ _CONTAINER_RESULT_DIR_BY_SUITE = {
     "test": "tests/results",
 }
 _CONTAINER_RUNTIME_TMP_DIR = "docs/tmp/runtime-container-tmp"
+_RUNTIME_CONTAINER_ENV_PASSTHROUGH = (
+    "BPFREJIT_BENCH_PASSES",
+)
 
 
 def _required(value: str, name: str, die: Any) -> str:
@@ -135,6 +139,10 @@ def build_runtime_container_command(
         "-w",
         str(image_workspace),
     ]
+    for name in _RUNTIME_CONTAINER_ENV_PASSTHROUGH:
+        value = os.environ.get(name, "").strip()
+        if value:
+            command.extend(["-e", f"{name}={value}"])
     for result_dir in runtime_container_result_dirs(host_workspace, suite_name, die=die):
         command.extend(["-v", f"{result_dir}:{image_workspace / result_dir.relative_to(host_workspace)}"])
     if mount_runtime_tmp:
