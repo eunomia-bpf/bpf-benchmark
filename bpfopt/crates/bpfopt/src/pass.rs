@@ -19,6 +19,9 @@ pub struct InsnAnnotation {
     /// PGO: branch taken/not-taken counts at this instruction.
     /// Used by BranchFlipPass to decide whether to flip.
     pub branch_profile: Option<BranchProfile>,
+    /// PGO: real per-site PMU data for prefetch admission.
+    /// Used by PrefetchPass to avoid static blanket insertion.
+    pub prefetch_profile: Option<PrefetchProfile>,
 }
 
 /// Real per-site PMU branch statistics.
@@ -31,10 +34,21 @@ pub struct BranchProfile {
     pub not_taken_count: u64,
 }
 
+/// Real per-site PMU memory statistics for prefetch admission.
+#[derive(Clone, Debug)]
+pub struct PrefetchProfile {
+    pub execution_count: u64,
+    pub cache_references: u64,
+    pub cache_misses: u64,
+    pub miss_rate: f64,
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct ProfilingData {
     pub branch_profiles: HashMap<usize, BranchProfile>,
     pub branch_miss_rate: Option<f64>,
+    pub prefetch_profiles: HashMap<usize, PrefetchProfile>,
+    pub cache_miss_rate: Option<f64>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -166,6 +180,10 @@ pub struct BpfProgram {
     /// Set by `inject_profiling` when PMU data is available.
     /// Consumed by BranchFlipPass to gate optimization.
     pub branch_miss_rate: Option<f64>,
+    /// Program-level cache miss rate from PMU hardware counters.
+    /// Set by `inject_profiling` when PMU data is available.
+    /// Consumed by PrefetchPass diagnostics and admission.
+    pub cache_miss_rate: Option<f64>,
     /// Parsed `log_level=2` verifier state snapshots for the original program.
     pub verifier_states: Arc<[VerifierInsn]>,
     /// Raw func_info records replayed by bpfverify after bytecode transforms.
@@ -344,6 +362,7 @@ impl BpfProgram {
             map_ids: Vec::new(),
             map_fd_bindings: HashMap::new(),
             branch_miss_rate: None,
+            cache_miss_rate: None,
             verifier_states: Arc::from([]),
             func_info: None,
             line_info: None,
@@ -391,7 +410,7 @@ impl BpfProgram {
 
         for (old_pc, ann) in old_annotations.into_iter().enumerate() {
             // Skip default annotations (nothing to remap).
-            if ann.branch_profile.is_none() {
+            if ann.branch_profile.is_none() && ann.prefetch_profile.is_none() {
                 continue;
             }
             if old_pc < addr_map.len() {
@@ -415,9 +434,17 @@ impl BpfProgram {
                 self.annotations[pc].branch_profile = Some(profile.clone());
             }
         }
+        for (&pc, profile) in &data.prefetch_profiles {
+            if pc < self.annotations.len() {
+                self.annotations[pc].prefetch_profile = Some(profile.clone());
+            }
+        }
         // Propagate program-level PMU branch miss rate.
         if data.branch_miss_rate.is_some() {
             self.branch_miss_rate = data.branch_miss_rate;
+        }
+        if data.cache_miss_rate.is_some() {
+            self.cache_miss_rate = data.cache_miss_rate;
         }
     }
 
@@ -691,6 +718,7 @@ pub struct KinsnRegistry {
     pub endian_load16_btf_id: i32,
     pub endian_load32_btf_id: i32,
     pub endian_load64_btf_id: i32,
+    pub prefetch_btf_id: i32,
     /// Per-target static call offsets used by offline callers.
     pub target_call_offsets: HashMap<String, i16>,
     /// Per-target supported kinsn encodings.
@@ -706,6 +734,7 @@ impl KinsnRegistry {
             "ccmp" => Some("bpf_ccmp64"),
             "extract" => Some("bpf_extract64"),
             "endian_fusion" => Some("bpf_endian_load32"),
+            "prefetch" => Some("bpf_prefetch"),
             _ => None,
         }
     }
@@ -721,6 +750,7 @@ impl KinsnRegistry {
             "bpf_endian_load16" => self.endian_load16_btf_id,
             "bpf_endian_load32" => self.endian_load32_btf_id,
             "bpf_endian_load64" => self.endian_load64_btf_id,
+            "bpf_prefetch" => self.prefetch_btf_id,
             _ => -1,
         }
     }
@@ -1100,6 +1130,7 @@ impl PassContext {
                 endian_load16_btf_id: -1,
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,
+                prefetch_btf_id: -1,
                 target_call_offsets: HashMap::new(),
                 target_supported_encodings: HashMap::new(),
             },

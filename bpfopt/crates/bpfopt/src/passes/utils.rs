@@ -370,6 +370,15 @@ fn kinsn_proof_len(
     ) {
         return endian_proof_len(payload);
     }
+    if kinsn_call_matches(
+        registry,
+        btf_id,
+        call_off,
+        "bpf_prefetch",
+        registry.prefetch_btf_id,
+    ) {
+        return prefetch_proof_len(payload);
+    }
 
     anyhow::bail!("kinsn call btf_id {btf_id} is not present in the kinsn registry")
 }
@@ -561,6 +570,17 @@ fn endian_proof_len(payload: u64) -> anyhow::Result<usize> {
     validate_bpf_reg("endian dst", payload_reg(payload, 0))?;
     validate_bpf_reg("endian base", payload_reg(payload, 4))?;
     Ok(2)
+}
+
+fn prefetch_proof_len(payload: u64) -> anyhow::Result<usize> {
+    validate_bpf_reg("prefetch ptr", payload_reg(payload, 0))?;
+    if ((payload >> 4) & 0xf) != 0 {
+        anyhow::bail!("prefetch payload has unsupported hint kind");
+    }
+    if payload >> 8 != 0 {
+        anyhow::bail!("prefetch payload has non-zero reserved bits");
+    }
+    Ok(1)
 }
 
 fn kinsn_candidate_subprog_starts(insns: &[BpfInsn]) -> anyhow::Result<Vec<usize>> {

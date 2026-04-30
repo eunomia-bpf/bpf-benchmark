@@ -96,7 +96,7 @@ fn run_pipeline_with_passes(program: &mut BpfProgram, pass_names: &[&str]) -> Pi
 fn default_test_pipeline() -> PassManager {
     let pass_names = PASS_REGISTRY
         .iter()
-        .filter(|entry| entry.name != "branch_flip")
+        .filter(|entry| entry.name != "branch_flip" && entry.name != "prefetch")
         .map(|entry| entry.name.to_string())
         .collect::<Vec<_>>();
     build_custom_pipeline(&pass_names).unwrap()

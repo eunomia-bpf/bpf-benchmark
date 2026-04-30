@@ -448,6 +448,7 @@ fn test_kinsn_registry_per_target_call_offsets() {
         endian_load16_btf_id: -1,
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,
+        prefetch_btf_id: -1,
         target_call_offsets: HashMap::from([
             ("bpf_rotate64".to_string(), 100),
             ("bpf_select64".to_string(), 200),

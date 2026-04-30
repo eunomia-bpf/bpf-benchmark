@@ -34,6 +34,7 @@ const ALL_PASS_ORDER: &[&str] = &[
     "extract",
     "endian_fusion",
     "branch_flip",
+    "prefetch",
 ];
 
 const DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
@@ -80,6 +81,7 @@ const PASS_ALIASES: &[(&str, &str)] = &[
     ("endian_fusion", "endian_fusion"),
     ("branch-flip", "branch_flip"),
     ("branch_flip", "branch_flip"),
+    ("prefetch", "prefetch"),
     ("dce", "dce"),
     ("map-inline", "map_inline"),
     ("map_inline", "map_inline"),
@@ -116,6 +118,8 @@ const KINSN_ALIASES: &[(&str, &str)] = &[
     ("endian_load32", "bpf_endian_load32"),
     ("bpf_endian_load64", "bpf_endian_load64"),
     ("endian_load64", "bpf_endian_load64"),
+    ("bpf_prefetch", "bpf_prefetch"),
+    ("prefetch", "bpf_prefetch"),
 ];
 
 #[derive(Parser)]
@@ -198,6 +202,8 @@ enum Command {
     /// Reorder if/else bodies using PGO profile data.
     #[command(name = "branch-flip")]
     BranchFlip,
+    /// Insert PGO-gated map-lookup key prefetch kinsn calls.
+    Prefetch,
     /// Remove unreachable blocks, NOPs, and dead register definitions.
     Dce,
     /// Inline stable map lookup values.
@@ -291,8 +297,14 @@ enum SupportedEncodingsJson {
 
 #[derive(Debug, Deserialize)]
 struct ProfileJson {
-    branch_miss_rate: f64,
+    #[serde(default)]
+    branch_miss_rate: Option<f64>,
+    #[serde(default)]
+    cache_miss_rate: Option<f64>,
+    #[serde(default)]
     per_site: HashMap<String, ProfileSiteJson>,
+    #[serde(default)]
+    prefetch_sites: HashMap<String, PrefetchSiteJson>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -302,6 +314,14 @@ struct ProfileSiteJson {
     miss_rate: f64,
     taken: u64,
     not_taken: u64,
+}
+
+#[derive(Debug, Deserialize)]
+struct PrefetchSiteJson {
+    execution_count: u64,
+    cache_references: u64,
+    cache_misses: u64,
+    miss_rate: f64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -401,6 +421,7 @@ impl Command {
             Command::Extract => Some("extract"),
             Command::Endian => Some("endian_fusion"),
             Command::BranchFlip => Some("branch_flip"),
+            Command::Prefetch => Some("prefetch"),
             Command::Dce => Some("dce"),
             Command::MapInline => Some("map_inline"),
             Command::BulkMemory => Some("bulk_memory"),
@@ -559,6 +580,7 @@ fn cli_name_for_pass(canonical: &str) -> &'static str {
         "extract" => "extract",
         "endian_fusion" => "endian",
         "branch_flip" => "branch-flip",
+        "prefetch" => "prefetch",
         "dce" => "dce",
         "map_inline" => "map-inline",
         "bulk_memory" => "bulk-memory",
@@ -571,7 +593,7 @@ fn cli_name_for_pass(canonical: &str) -> &'static str {
 fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Result<()> {
     for &pass_name in pass_names {
         match pass_name {
-            "rotate" | "cond_select" | "extract" | "endian_fusion" | "bulk_memory" => {
+            "rotate" | "cond_select" | "extract" | "endian_fusion" | "bulk_memory" | "prefetch" => {
                 if common.target.is_none() && common.kinsns.is_empty() {
                     bail!(
                         "{} requires --target or --kinsns",
@@ -619,6 +641,7 @@ fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()
             "bulk_memory" => {
                 require_all_kinsns(ctx, &["bpf_memcpy_bulk", "bpf_memset_bulk"], "bulk-memory")?
             }
+            "prefetch" => require_kinsn(ctx, "bpf_prefetch")?,
             _ => {}
         }
     }
@@ -950,6 +973,7 @@ fn unavailable_kinsn_registry() -> KinsnRegistry {
         endian_load16_btf_id: -1,
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,
+        prefetch_btf_id: -1,
         target_call_offsets: HashMap::new(),
         target_supported_encodings: HashMap::new(),
     }
@@ -1007,6 +1031,7 @@ fn set_kinsn_btf_id(registry: &mut KinsnRegistry, name: &str, btf_id: i32) {
         "bpf_endian_load16" => registry.endian_load16_btf_id = btf_id,
         "bpf_endian_load32" => registry.endian_load32_btf_id = btf_id,
         "bpf_endian_load64" => registry.endian_load64_btf_id = btf_id,
+        "bpf_prefetch" => registry.prefetch_btf_id = btf_id,
         _ => {}
     }
 }
@@ -1016,16 +1041,25 @@ fn read_profile(path: Option<&Path>) -> Result<Option<ProfilingData>> {
         return Ok(None);
     };
     let profile: ProfileJson = read_json_file(path, "profile.json")?;
-    if !profile.branch_miss_rate.is_finite() || !(0.0..=1.0).contains(&profile.branch_miss_rate) {
-        bail!(
-            "profile branch_miss_rate must be finite and within [0, 1], got {}",
-            profile.branch_miss_rate
-        );
+    let mut data = ProfilingData::default();
+    if let Some(branch_miss_rate) = profile.branch_miss_rate {
+        if !branch_miss_rate.is_finite() || !(0.0..=1.0).contains(&branch_miss_rate) {
+            bail!(
+                "profile branch_miss_rate must be finite and within [0, 1], got {}",
+                branch_miss_rate
+            );
+        }
+        data.branch_miss_rate = Some(branch_miss_rate);
     }
-    let mut data = ProfilingData {
-        branch_miss_rate: Some(profile.branch_miss_rate),
-        ..ProfilingData::default()
-    };
+    if let Some(cache_miss_rate) = profile.cache_miss_rate {
+        if !cache_miss_rate.is_finite() || !(0.0..=1.0).contains(&cache_miss_rate) {
+            bail!(
+                "profile cache_miss_rate must be finite and within [0, 1], got {}",
+                cache_miss_rate
+            );
+        }
+        data.cache_miss_rate = Some(cache_miss_rate);
+    }
     for (pc, counts) in profile.per_site {
         let pc = pc
             .parse::<usize>()
@@ -1064,6 +1098,33 @@ fn read_profile(path: Option<&Path>) -> Result<Option<ProfilingData>> {
                 miss_rate: counts.miss_rate,
                 taken_count: counts.taken,
                 not_taken_count: counts.not_taken,
+            },
+        );
+    }
+    for (pc, counts) in profile.prefetch_sites {
+        let pc = pc
+            .parse::<usize>()
+            .with_context(|| format!("invalid prefetch_sites pc key: {pc}"))?;
+        if counts.cache_misses > counts.cache_references {
+            bail!(
+                "profile prefetch_sites[{pc}] cache_misses {} exceeds cache_references {}",
+                counts.cache_misses,
+                counts.cache_references
+            );
+        }
+        if !counts.miss_rate.is_finite() || !(0.0..=1.0).contains(&counts.miss_rate) {
+            bail!(
+                "profile prefetch_sites[{pc}] miss_rate must be finite and within [0, 1], got {}",
+                counts.miss_rate
+            );
+        }
+        data.prefetch_profiles.insert(
+            pc,
+            bpfopt::pass::PrefetchProfile {
+                execution_count: counts.execution_count,
+                cache_references: counts.cache_references,
+                cache_misses: counts.cache_misses,
+                miss_rate: counts.miss_rate,
             },
         );
     }
@@ -1357,6 +1418,7 @@ mod tests {
             canonicalize_pass_name("skb-load-bytes").unwrap(),
             "skb_load_bytes_spec"
         );
+        assert_eq!(canonicalize_pass_name("prefetch").unwrap(), "prefetch");
         assert!(canonicalize_pass_name("wide_mem2").is_err());
     }
 
@@ -1364,6 +1426,8 @@ mod tests {
     fn default_optimize_order_includes_ccmp_only_on_arm64() {
         assert!(default_optimize_pass_order(Arch::Aarch64).contains(&"ccmp"));
         assert!(!default_optimize_pass_order(Arch::X86_64).contains(&"ccmp"));
+        assert!(!default_optimize_pass_order(Arch::Aarch64).contains(&"prefetch"));
+        assert!(!default_optimize_pass_order(Arch::X86_64).contains(&"prefetch"));
     }
 
     #[test]
@@ -1396,6 +1460,14 @@ mod tests {
                         supported_encodings: None,
                     },
                 ),
+                (
+                    "bpf_prefetch".to_string(),
+                    KinsnJson {
+                        btf_func_id: 14,
+                        call_offset: Some(7),
+                        supported_encodings: None,
+                    },
+                ),
             ]),
         };
 
@@ -1403,7 +1475,9 @@ mod tests {
         assert_eq!(registry.memcpy_bulk_btf_id, 11);
         assert_eq!(registry.endian_load64_btf_id, 12);
         assert_eq!(registry.ccmp64_btf_id, 13);
+        assert_eq!(registry.prefetch_btf_id, 14);
         assert_eq!(registry.call_off_for_target_name("bpf_memcpy_bulk"), 2);
+        assert_eq!(registry.call_off_for_target_name("bpf_prefetch"), 7);
     }
 
     #[test]

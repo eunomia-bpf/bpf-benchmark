@@ -801,6 +801,7 @@ mod tests {
         let profiling = crate::pass::ProfilingData {
             branch_profiles,
             branch_miss_rate: Some(0.10), // 10% miss rate => high, should trigger
+            ..Default::default()
         };
 
         // Run via PassManager with profiling
@@ -832,6 +833,7 @@ mod tests {
                 m
             },
             branch_miss_rate: Some(0.01), // 1% miss rate => low, should trigger
+            ..Default::default()
         };
 
         let mut prog2 = BpfProgram::new(vec![

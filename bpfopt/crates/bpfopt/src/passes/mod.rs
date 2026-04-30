@@ -14,6 +14,7 @@ mod dce;
 mod endian;
 mod extract;
 mod map_inline;
+mod prefetch;
 mod rotate;
 mod skb_load_bytes;
 mod utils;
@@ -29,6 +30,7 @@ pub use dce::DcePass;
 pub use endian::EndianFusionPass;
 pub use extract::ExtractPass;
 pub use map_inline::{MapInfo, MapInfoAnalysis, MapInfoResult, MapInlinePass, MapReference};
+pub use prefetch::PrefetchPass;
 pub use rotate::RotatePass;
 pub use skb_load_bytes::SkbLoadBytesSpecPass;
 pub use wide_mem::WideMemPass;
@@ -124,6 +126,11 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
                 max_branch_miss_rate: 0.05,
             })
         },
+    },
+    PassRegistryEntry {
+        name: "prefetch",
+        description: "Experimental PGO-gated map-lookup key prefetch kinsn insertion",
+        make: || Box::new(PrefetchPass),
     },
 ];
 
