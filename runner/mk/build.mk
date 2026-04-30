@@ -351,8 +351,16 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES)
 	bpf_root="$$artifact_root/bpf"; \
 	system_libdir="$$(pkg-config --variable=libdir libelf)"; \
 	mkdir -p "$$install_root/bin" "$$install_root/lib" "$$install_root/lib64" "$$bpf_root" "$$build_root/deps"; \
-	command -v grpc_cpp_plugin >/dev/null; \
-	touch "$$build_root/deps/grpc_installed"; \
+	grpc_plugin="$$(command -v grpc_cpp_plugin)"; \
+	clang_bin="$$(command -v clang)"; \
+	llc_bin="$$(command -v llc)"; \
+	clang_root="$$build_root/deps/clang/clang+llvm-12.0.0-x86_64-linux-gnu-ubuntu-20.04"; \
+	mkdir -p "$$install_root/grpc/_build"; \
+	ln -sf "$$grpc_plugin" "$$install_root/grpc/_build/grpc_cpp_plugin"; \
+	mkdir -p "$$clang_root/bin" "$$clang_root/lib"; \
+	ln -sf "$$clang_bin" "$$clang_root/bin/clang"; \
+	ln -sf "$$llc_bin" "$$clang_root/bin/llc"; \
+	touch "$$build_root/deps/grpc_installed" "$$build_root/deps/clang_installed"; \
 	printf '%s\n' 'set(CMAKE_CXX_COMPILE_OBJECT "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -std=gnu++20 -o <OBJECT> -c <SOURCE>")' > "$$override_file"; \
 	cd "$$repo_root" && env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR \
 		CC=clang CXX=clang++ AR=ar RANLIB=ranlib \
@@ -389,10 +397,12 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES)
 			-DCMAKE_USER_MAKE_RULES_OVERRIDE_CXX="$$override_file" \
 			-DBUILD_TESTS=OFF; \
 	cmake --build "$$build_root/build" --target install -j"$(JOBS)"; \
-	cd "$$repo_root" && ./build_bpf_modules_opensource.sh -s "$$repo_root" -b "$$build_root" -o "$$bpf_root"; \
+	install -m 0755 "$$install_root/example/katran_server_grpc" "$$install_root/bin/katran_server_grpc"; \
+	cd "$$repo_root" && ./build_bpf_modules_opensource.sh -s "$$repo_root" -b "$$build_root"; \
+	install -m 0644 "$$build_root/deps/bpfprog/bpf/balancer.bpf.o" "$$bpf_root/balancer.bpf.o"; \
+	install -m 0644 "$$build_root/deps/bpfprog/bpf/healthchecking_ipip.o" "$$bpf_root/healthchecking_ipip.bpf.o"; \
+	install -m 0644 "$$build_root/deps/bpfprog/bpf/xdp_root.o" "$$bpf_root/xdp_root.bpf.o"; \
 	test -x "$$install_root/bin/katran_server_grpc" || { echo "missing Katran install output: $$install_root/bin/katran_server_grpc" >&2; exit 1; }; \
-	[ -f "$$bpf_root/healthchecking_ipip.o" ] && mv -f "$$bpf_root/healthchecking_ipip.o" "$$bpf_root/healthchecking_ipip.bpf.o" || true; \
-	[ -f "$$bpf_root/xdp_root.o" ] && mv -f "$$bpf_root/xdp_root.o" "$$bpf_root/xdp_root.bpf.o" || true; \
 	for path in $(ACTIVE_KATRAN_REQUIRED); do test -e "$$path"; done; \
 	touch $(ACTIVE_KATRAN_REQUIRED)
 

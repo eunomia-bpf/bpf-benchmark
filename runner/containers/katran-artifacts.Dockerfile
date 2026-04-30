@@ -11,6 +11,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         autoconf \
+        autoconf-archive \
         automake \
         bash \
         bc \
@@ -24,6 +25,7 @@ RUN apt-get update \
         cmake \
         cpio \
         curl \
+        build-essential \
         debianutils \
         diffutils \
         dwarves \
@@ -37,6 +39,7 @@ RUN apt-get update \
         iproute2 \
         kmod \
         libboost-all-dev \
+        libbison-dev \
         libbpf-dev \
         libbpfcc-dev \
         libbz2-dev \
@@ -56,6 +59,7 @@ RUN apt-get update \
         libgoogle-glog-dev \
         libgrpc++-dev \
         libiberty-dev \
+        libjemalloc-dev \
         liblz4-dev \
         liblzma-dev \
         libmnl-dev \
@@ -67,6 +71,7 @@ RUN apt-get update \
         libtool \
         libtool-bin \
         libltdl-dev \
+        libunwind8-dev \
         libunwind-dev \
         libzstd-dev \
         llvm \
@@ -82,6 +87,7 @@ RUN apt-get update \
         python3-bpfcc \
         rsync \
         scons \
+        sudo \
         tar \
         unzip \
         xz-utils \
@@ -126,7 +132,7 @@ RUN set -eux; \
         (cd "${repo_dest}" && git sparse-checkout set --no-cone "$@"); \
     }; \
     has_repo_content katran || clone_sparse_repo katran https://github.com/facebookincubator/katran.git main \
-        /CMakeLists.txt build /build_bpf_modules_opensource.sh /build_katran.sh cmake example_grpc katran/decap katran/lib; \
+        /CMakeLists.txt build /build_bpf_modules_opensource.sh /build_katran.sh cmake example_grpc katran/CMakeLists.txt katran/decap katran/lib; \
     make -C vendor/linux-framework/tools/bpf/bpftool \
         VMLINUX_BTF= \
         feature-llvm=0 \
