@@ -12,9 +12,9 @@ use anyhow::{anyhow, bail, Context, Result};
 use bpfopt::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
 use bpfopt::insn::BpfInsn;
 use bpfopt::pass::{
-    BpfProgram, BtfInfoRecords, KinsnRegistry, MapMetadata, PassContext, PassManager, PassResult,
-    PlatformCapabilities, RegState, ScalarRange, StackState, StaticKinsnCallResolver, Tnum,
-    VerifierInsn, VerifierInsnKind, VerifierValueWidth,
+    BpfProgram, BranchProfile, BtfInfoRecords, KinsnRegistry, MapMetadata, PassContext,
+    PassManager, PassResult, PlatformCapabilities, ProfilingData, RegState, ScalarRange,
+    StackState, StaticKinsnCallResolver, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
 use bpfopt::passes::{MapInfoAnalysis, PASS_REGISTRY};
 use clap::{Args, Parser, Subcommand};
@@ -32,9 +32,22 @@ const ALL_PASS_ORDER: &[&str] = &[
     "cond_select",
     "extract",
     "endian_fusion",
+    "branch_flip",
 ];
 
-const DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = ALL_PASS_ORDER;
+const DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
+    "map_inline",
+    "const_prop",
+    "dce",
+    "skb_load_bytes_spec",
+    "bounds_check_merge",
+    "wide_mem",
+    "bulk_memory",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+];
 
 const PASS_ALIASES: &[(&str, &str)] = &[
     ("wide-mem", "wide_mem"),
@@ -48,6 +61,8 @@ const PASS_ALIASES: &[(&str, &str)] = &[
     ("endian", "endian_fusion"),
     ("endian-fusion", "endian_fusion"),
     ("endian_fusion", "endian_fusion"),
+    ("branch-flip", "branch_flip"),
+    ("branch_flip", "branch_flip"),
     ("dce", "dce"),
     ("map-inline", "map_inline"),
     ("map_inline", "map_inline"),
@@ -116,6 +131,9 @@ struct CommonArgs {
     /// Target platform JSON file.
     #[arg(long, global = true, value_name = "FILE")]
     target: Option<PathBuf>,
+    /// PGO profile JSON file.
+    #[arg(long, global = true, value_name = "FILE")]
+    profile: Option<PathBuf>,
     /// Verifier states JSON file.
     #[arg(long, global = true, value_name = "FILE")]
     verifier_states: Option<PathBuf>,
@@ -156,6 +174,9 @@ enum Command {
     Extract,
     /// Fuse endian load+swap sequences.
     Endian,
+    /// Reorder if/else bodies using PGO profile data.
+    #[command(name = "branch-flip")]
+    BranchFlip,
     /// Remove unreachable blocks, NOPs, and dead register definitions.
     Dce,
     /// Inline stable map lookup values.
@@ -245,6 +266,20 @@ struct KinsnJson {
 enum SupportedEncodingsJson {
     Bits(u32),
     Names(Vec<String>),
+}
+
+#[derive(Debug, Deserialize)]
+struct ProfileJson {
+    #[serde(default)]
+    branch_miss_rate: Option<f64>,
+    #[serde(default)]
+    per_insn: HashMap<String, ProfileInsnJson>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ProfileInsnJson {
+    taken: u64,
+    not_taken: u64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -342,6 +377,7 @@ impl Command {
             Command::CondSelect => Some("cond_select"),
             Command::Extract => Some("extract"),
             Command::Endian => Some("endian_fusion"),
+            Command::BranchFlip => Some("branch_flip"),
             Command::Dce => Some("dce"),
             Command::MapInline => Some("map_inline"),
             Command::BulkMemory => Some("bulk_memory"),
@@ -384,7 +420,8 @@ fn run_single_pass(common: &CommonArgs, pass_name: &'static str) -> Result<()> {
     validate_required_kinsns(&ctx, &[pass_name])?;
     ctx.policy.enabled_passes = vec![pass_name.to_string()];
     let pipeline = build_pipeline(&[pass_name])?;
-    let result = run_pipeline_catching_panics(&pipeline, &mut program, &ctx)?;
+    let profiling = read_profile(common.profile.as_deref())?;
+    let result = run_pipeline_catching_panics(&pipeline, &mut program, &ctx, profiling.as_ref())?;
     write_bytecode(common.output.as_deref(), &program.insns)?;
     write_btf_info_outputs(common, &program)?;
 
@@ -417,7 +454,8 @@ fn run_optimize(common: &CommonArgs, args: &OptimizeArgs) -> Result<()> {
     validate_required_kinsns(&ctx, &pass_names)?;
     ctx.policy.enabled_passes = pass_names.iter().map(|name| (*name).to_string()).collect();
     let pipeline = build_pipeline(&pass_names)?;
-    let result = run_pipeline_catching_panics(&pipeline, &mut program, &ctx)?;
+    let profiling = read_profile(common.profile.as_deref())?;
+    let result = run_pipeline_catching_panics(&pipeline, &mut program, &ctx, profiling.as_ref())?;
     write_bytecode(common.output.as_deref(), &program.insns)?;
     write_btf_info_outputs(common, &program)?;
 
@@ -444,9 +482,12 @@ fn run_pipeline_catching_panics(
     pipeline: &PassManager,
     program: &mut BpfProgram,
     ctx: &PassContext,
+    profiling: Option<&ProfilingData>,
 ) -> Result<bpfopt::pass::PipelineResult> {
-    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| pipeline.run(program, ctx)))
-        .map_err(|_| anyhow!("internal pass panic"))?
+    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        pipeline.run_with_profiling(program, ctx, profiling)
+    }))
+    .map_err(|_| anyhow!("internal pass panic"))?
 }
 
 fn build_pipeline(pass_names: &[&str]) -> Result<PassManager> {
@@ -486,6 +527,7 @@ fn cli_name_for_pass(canonical: &str) -> &'static str {
         "cond_select" => "cond-select",
         "extract" => "extract",
         "endian_fusion" => "endian",
+        "branch_flip" => "branch-flip",
         "dce" => "dce",
         "map_inline" => "map-inline",
         "bulk_memory" => "bulk-memory",
@@ -504,6 +546,11 @@ fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Re
                         "{} requires --target or --kinsns",
                         cli_name_for_pass(pass_name)
                     );
+                }
+            }
+            "branch_flip" => {
+                if common.profile.is_none() {
+                    bail!("branch-flip requires --profile");
                 }
             }
             "const_prop" => {
@@ -928,6 +975,30 @@ fn set_kinsn_btf_id(registry: &mut KinsnRegistry, name: &str, btf_id: i32) {
         "bpf_endian_load64" => registry.endian_load64_btf_id = btf_id,
         _ => {}
     }
+}
+
+fn read_profile(path: Option<&Path>) -> Result<Option<ProfilingData>> {
+    let Some(path) = path else {
+        return Ok(None);
+    };
+    let profile: ProfileJson = read_json_file(path, "profile.json")?;
+    let mut data = ProfilingData {
+        branch_miss_rate: profile.branch_miss_rate,
+        ..ProfilingData::default()
+    };
+    for (pc, counts) in profile.per_insn {
+        let pc = pc
+            .parse::<usize>()
+            .with_context(|| format!("invalid per_insn pc key: {pc}"))?;
+        data.branch_profiles.insert(
+            pc,
+            BranchProfile {
+                taken_count: counts.taken,
+                not_taken_count: counts.not_taken,
+            },
+        );
+    }
+    Ok(Some(data))
 }
 
 fn read_verifier_states(path: &Path) -> Result<Vec<VerifierInsn>> {

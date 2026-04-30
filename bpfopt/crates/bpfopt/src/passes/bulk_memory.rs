@@ -229,6 +229,7 @@ impl BpfPass for BulkMemoryPass {
         let applied = safe_sites.len();
         program.insns = new_insns;
         remap_btf_metadata(program, &addr_map)?;
+        program.remap_annotations(&addr_map);
         program.log_transform(TransformEntry {
             sites_applied: applied,
         });

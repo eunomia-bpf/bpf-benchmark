@@ -91,6 +91,7 @@ impl BpfPass for DcePass {
 
         program.insns = final_insns;
         remap_btf_metadata(program, &final_addr_map)?;
+        program.remap_annotations(&final_addr_map);
         program.log_transform(TransformEntry { sites_applied });
 
         Ok(PassResult {

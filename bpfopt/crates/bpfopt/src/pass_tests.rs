@@ -69,6 +69,37 @@ impl BpfPass for AppendNopPass {
     }
 }
 
+/// A pass that inserts a NOP at the beginning of the program.
+struct PrependNopPass;
+
+impl BpfPass for PrependNopPass {
+    fn name(&self) -> &str {
+        "prepend_nop"
+    }
+    fn category(&self) -> PassCategory {
+        PassCategory::Optimization
+    }
+    fn run(
+        &self,
+        program: &mut BpfProgram,
+        _analyses: &mut AnalysisCache,
+        _ctx: &PassContext,
+    ) -> anyhow::Result<PassResult> {
+        let old_len = program.insns.len();
+        program.insns.insert(0, BpfInsn::nop());
+        let addr_map = (0..=old_len).map(|pc| pc + 1).collect::<Vec<_>>();
+        program.remap_annotations(&addr_map);
+        Ok(PassResult {
+            pass_name: self.name().into(),
+            changed: true,
+            sites_applied: 1,
+            sites_skipped: vec![],
+            diagnostics: vec![],
+            ..Default::default()
+        })
+    }
+}
+
 /// A pass that replaces all MOV64_IMM with a different immediate value.
 struct RewriteMovImmPass {
     new_imm: i32,
@@ -103,6 +134,34 @@ impl BpfPass for RewriteMovImmPass {
             ..Default::default()
         })
     }
+}
+
+#[test]
+fn test_prepend_nop_pass_shifts_annotations_forward() {
+    let mut pm = PassManager::new();
+    pm.add_pass(PrependNopPass);
+
+    let mut program = make_program(vec![BpfInsn::mov64_imm(0, 1), exit_insn()]);
+    program.annotations[1].branch_profile = Some(BranchProfile {
+        taken_count: 7,
+        not_taken_count: 3,
+    });
+
+    let ctx = ctx_for_pass_manager(&pm);
+    let result = pm.run(&mut program, &ctx).unwrap();
+
+    assert!(result.program_changed);
+    assert_eq!(program.insns.len(), 3);
+    assert!(program.annotations[0].branch_profile.is_none());
+    assert!(program.annotations[1].branch_profile.is_none());
+    assert_eq!(
+        program.annotations[2]
+            .branch_profile
+            .as_ref()
+            .expect("prepended program should remap existing annotation")
+            .taken_count,
+        7
+    );
 }
 
 /// A trivial analysis that counts the number of instructions.
@@ -174,6 +233,27 @@ impl BpfPass for VerifierStateCountPass {
 
 fn exit_insn() -> BpfInsn {
     BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
+}
+
+// ── BpfProgram tests ────────────────────────────────────────────
+
+#[test]
+fn test_bpf_program_sync_annotations_grow() {
+    let mut prog = make_program(vec![exit_insn()]);
+    assert_eq!(prog.annotations.len(), 1);
+    prog.insns.push(BpfInsn::nop());
+    prog.insns.push(BpfInsn::nop());
+    prog.sync_annotations();
+    assert_eq!(prog.annotations.len(), 3);
+}
+
+#[test]
+fn test_bpf_program_sync_annotations_shrink() {
+    let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::nop(), exit_insn()]);
+    assert_eq!(prog.annotations.len(), 3);
+    prog.insns.truncate(1);
+    prog.sync_annotations();
+    assert_eq!(prog.annotations.len(), 1);
 }
 
 // ── AnalysisCache tests ─────────────────────────────────────────
@@ -369,6 +449,110 @@ fn test_kinsn_registry_per_target_call_offsets() {
     assert_eq!(reg.call_off_for_target_name("bpf_select64"), 200);
     assert_eq!(reg.call_off_for_target_name("bpf_extract64"), 300);
 }
+
+// ── Issue 5: Annotation remap tests ─────────────────────────
+
+#[test]
+fn test_remap_annotations_deleted_instruction() {
+    let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::nop(), exit_insn()]);
+    prog.annotations[0].branch_profile = Some(BranchProfile {
+        taken_count: 10,
+        not_taken_count: 5,
+    });
+
+    // Simulate a transform that removes instruction 0.
+    // addr_map: old_pc 0->0 (maps to first new insn), 1->0, 2->1, sentinel 3->2
+    // After rewrite, the program has 2 instructions.
+    prog.insns = vec![BpfInsn::nop(), exit_insn()];
+    // Both old pcs 0 and 1 map to new pc 0 — the annotation from old pc 0
+    // ends up at new pc 0.
+    let addr_map = vec![0, 0, 1, 2];
+    prog.remap_annotations(&addr_map);
+
+    assert!(prog.annotations[0].branch_profile.is_some());
+    assert_eq!(prog.annotations.len(), 2);
+}
+
+// ── Issue 6: PGO closedloop tests ───────────────────────────
+
+#[test]
+fn test_profiling_data_injection() {
+    let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::nop(), exit_insn()]);
+    assert!(prog.annotations[1].branch_profile.is_none());
+
+    let mut pdata = ProfilingData::default();
+    pdata.branch_profiles.insert(
+        1,
+        BranchProfile {
+            taken_count: 80,
+            not_taken_count: 20,
+        },
+    );
+    prog.inject_profiling(&pdata);
+
+    assert!(prog.annotations[0].branch_profile.is_none());
+    assert!(prog.annotations[1].branch_profile.is_some());
+    let bp = prog.annotations[1].branch_profile.as_ref().unwrap();
+    assert_eq!(bp.taken_count, 80);
+    assert_eq!(bp.not_taken_count, 20);
+}
+
+#[test]
+fn test_run_with_profiling_enables_branch_flip() {
+    use crate::analysis::BranchTargetAnalysis;
+
+    let mut pm = PassManager::new();
+    pm.register_analysis(BranchTargetAnalysis);
+    pm.add_pass(BranchFlipPass {
+        min_bias: 0.7,
+        max_branch_miss_rate: 0.05,
+    });
+
+    // A simple diamond that would be flipped if PGO says the branch is hot.
+    let jne = BpfInsn::new(BPF_JMP | BPF_JNE | BPF_K, BpfInsn::make_regs(1, 0), 2, 0);
+    let mut prog = make_program(vec![
+        jne,                       // pc=0
+        BpfInsn::mov64_imm(0, 10), // then
+        BpfInsn::ja(1),            // skip else
+        BpfInsn::mov64_imm(0, 20), // else
+        exit_insn(),
+    ]);
+    let ctx = PassContext::test_default();
+
+    // Without profiling: no flip.
+    let result = pm.run_with_profiling(&mut prog, &ctx, None).unwrap();
+    assert!(!result.program_changed, "should not flip without PGO data");
+
+    // Reset the program.
+    let mut prog = make_program(vec![
+        jne,
+        BpfInsn::mov64_imm(0, 10),
+        BpfInsn::ja(1),
+        BpfInsn::mov64_imm(0, 20),
+        exit_insn(),
+    ]);
+
+    // With profiling data showing hot branch + PMU data: should flip.
+    let mut pdata = ProfilingData::default();
+    pdata.branch_profiles.insert(
+        0,
+        BranchProfile {
+            taken_count: 90,
+            not_taken_count: 10,
+        },
+    );
+    pdata.branch_miss_rate = Some(0.02);
+    let result = pm
+        .run_with_profiling(&mut prog, &ctx, Some(&pdata))
+        .unwrap();
+    assert!(
+        result.program_changed,
+        "should flip with PGO data showing hot branch"
+    );
+}
+
+// ── BranchFlipPass import for testing ───────────────────────
+use crate::passes::BranchFlipPass;
 
 // ── PlatformCapabilities tests ──────────────────────────────
 

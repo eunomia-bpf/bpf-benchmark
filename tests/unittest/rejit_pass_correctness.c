@@ -275,6 +275,12 @@ static const struct test_prog_desc test_progs[] = {
 		.cat = CAT_XDP,
 	},
 	{
+		.test_name = "T08_branch_flip",
+		.obj_file = "test_branch_flip.bpf.o",
+		.prog_name = "test_branch_flip",
+		.cat = CAT_XDP,
+	},
+	{
 		.test_name = "T09_bitfield_extract",
 		.obj_file = "test_bitfield_extract.bpf.o",
 		.prog_name = "test_bitfield_extract",

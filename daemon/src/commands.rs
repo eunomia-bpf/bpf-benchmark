@@ -528,6 +528,35 @@ fn shell_quote(value: &str) -> String {
     format!("'{}'", value.replace('\'', "'\\''"))
 }
 
+#[derive(Debug)]
+pub(crate) struct ProfileSession {
+    child: std::process::Child,
+    output_dir: WorkDir,
+    duration_ms: u64,
+}
+
+#[derive(Debug)]
+pub(crate) struct FrozenProfile {
+    output_dir: WorkDir,
+    duration_ms: u64,
+    programs_profiled: usize,
+}
+
+impl FrozenProfile {
+    pub(crate) fn profile_path_for(&self, prog_id: u32) -> Option<PathBuf> {
+        let path = self.output_dir.path().join(format!("{prog_id}.json"));
+        path.exists().then_some(path)
+    }
+
+    pub(crate) fn duration_ms(&self) -> u64 {
+        self.duration_ms
+    }
+
+    pub(crate) fn programs_profiled(&self) -> usize {
+        self.programs_profiled
+    }
+}
+
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct OptimizeOneResult {
     pub status: String,
@@ -583,6 +612,7 @@ struct ApplyOneRequest<'a> {
     prog_id: u32,
     config: &'a CliConfig,
     enabled_passes: Option<&'a [String]>,
+    profile_path: Option<&'a Path>,
     invalidation_tracker: Option<&'a SharedInvalidationTracker>,
     force_rejit: bool,
 }
@@ -894,10 +924,61 @@ fn live_bpf_map_keys(map: &MapInfoJson, fd: i32) -> Result<Vec<Vec<u8>>> {
     Ok(keys)
 }
 
+pub(crate) fn start_profile(config: &CliConfig, duration_ms: u64) -> Result<ProfileSession> {
+    let output_dir = WorkDir::new("bpfrejit-daemon-profile")?;
+    let mut child = config
+        .command("bpfprof")
+        .arg("--all")
+        .arg("--duration")
+        .arg(format!("{duration_ms}ms"))
+        .arg("--output-dir")
+        .arg(output_dir.path())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .context("spawn bpfprof --all")?;
+
+    if let Some(status) = child.try_wait().context("poll bpfprof after spawn")? {
+        let output = child.wait_with_output().context("collect bpfprof output")?;
+        bail!(
+            "bpfprof exited during profile-start with status {}: {}",
+            status,
+            stderr_summary(&output)
+        );
+    }
+
+    Ok(ProfileSession {
+        child,
+        output_dir,
+        duration_ms,
+    })
+}
+
+pub(crate) fn stop_profile(session: ProfileSession) -> Result<FrozenProfile> {
+    let output = session
+        .child
+        .wait_with_output()
+        .context("wait for bpfprof profile session")?;
+    if !output.status.success() {
+        bail!(
+            "bpfprof profile session failed with status {}: {}",
+            output.status,
+            stderr_summary(&output)
+        );
+    }
+    let programs_profiled = count_json_files(session.output_dir.path())?;
+    Ok(FrozenProfile {
+        output_dir: session.output_dir,
+        duration_ms: session.duration_ms,
+        programs_profiled,
+    })
+}
+
 pub(crate) fn try_apply_one(
     prog_id: u32,
     config: &CliConfig,
     enabled_passes: Option<&[String]>,
+    profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
 ) -> Result<OptimizeOneResult> {
     try_apply_one_with_map_access(
@@ -905,6 +986,7 @@ pub(crate) fn try_apply_one(
             prog_id,
             config,
             enabled_passes,
+            profile_path,
             invalidation_tracker,
             force_rejit: false,
         },
@@ -918,6 +1000,7 @@ pub(crate) fn try_reapply_one(
     prog_id: u32,
     config: &CliConfig,
     enabled_passes: Option<&[String]>,
+    profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
 ) -> Result<OptimizeOneResult> {
     try_apply_one_with_map_access(
@@ -925,6 +1008,7 @@ pub(crate) fn try_reapply_one(
             prog_id,
             config,
             enabled_passes,
+            profile_path,
             invalidation_tracker,
             force_rejit: true,
         },
@@ -949,6 +1033,7 @@ where
         prog_id,
         config,
         enabled_passes,
+        profile_path,
         invalidation_tracker,
         force_rejit,
     } = request;
@@ -1078,6 +1163,15 @@ where
                 join_u32_csv(&prog_info.map_ids)
             };
             side_inputs.push(("--map-ids".to_string(), PathBuf::from(map_ids)));
+        }
+
+        if requested_passes
+            .iter()
+            .any(|pass| canonical_pass(pass) == "branch_flip")
+        {
+            let profile_path = profile_path
+                .ok_or_else(|| anyhow!("branch_flip requested but no profile is loaded"))?;
+            side_inputs.push(("--profile".to_string(), profile_path.to_path_buf()));
         }
 
         let mut bpfopt = config.command("bpfopt");
@@ -1646,6 +1740,7 @@ fn canonical_pass(pass: &str) -> String {
         "cond-select" | "cond_select" => "cond_select",
         "extract" => "extract",
         "endian" | "endian-fusion" | "endian_fusion" => "endian_fusion",
+        "branch-flip" | "branch_flip" => "branch_flip",
         "dce" => "dce",
         "map-inline" | "map_inline" => "map_inline",
         "bulk-memory" | "bulk_memory" => "bulk_memory",
@@ -1785,6 +1880,17 @@ fn verifier_log_summary(log: &str) -> String {
     } else {
         summary
     }
+}
+
+fn count_json_files(path: &Path) -> Result<usize> {
+    let mut count = 0usize;
+    for entry in fs::read_dir(path).with_context(|| format!("read {}", path.display()))? {
+        let entry = entry?;
+        if entry.path().extension().and_then(|value| value.to_str()) == Some("json") {
+            count += 1;
+        }
+    }
+    Ok(count)
 }
 
 #[cfg(test)]
@@ -1942,6 +2048,20 @@ if [[ -n "$out" ]]; then
 fi
 "#,
             )?;
+            write_executable(
+                &dir.path().join("bpfprof"),
+                r#"#!/usr/bin/env bash
+set -euo pipefail
+outdir=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --output-dir) outdir="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"branch_miss_rate":null,"branch_misses":null,"branch_instructions":null,"per_insn":{}}\n' > "$outdir/42.json"
+"#,
+            )?;
             Ok(Self { dir })
         }
 
@@ -2011,8 +2131,14 @@ fi
     #[test]
     fn optimize_uses_cli_subprocesses_and_preserves_response_shape() {
         let fake = FakeCliDir::new().unwrap();
-        let result =
-            try_apply_one(42, &fake.config(), Some(&["wide_mem".to_string()]), None).unwrap();
+        let result = try_apply_one(
+            42,
+            &fake.config(),
+            Some(&["wide_mem".to_string()]),
+            None,
+            None,
+        )
+        .unwrap();
 
         assert_eq!(result.status, "ok");
         assert_eq!(result.prog_id, 42);
@@ -2067,8 +2193,14 @@ fi
     fn missing_target_kinsn_is_error() {
         with_temp_failure_root(|_| {
             let fake = FakeCliDir::new().unwrap();
-            let err =
-                try_apply_one(42, &fake.config(), Some(&["rotate".to_string()]), None).unwrap_err();
+            let err = try_apply_one(
+                42,
+                &fake.config(),
+                Some(&["rotate".to_string()]),
+                None,
+                None,
+            )
+            .unwrap_err();
 
             let message = format!("{err:#}");
             assert!(message.contains("bpfget --target did not expose kinsns"));
@@ -2094,8 +2226,14 @@ done
             )
             .unwrap();
 
-            let err = try_apply_one(42, &fake.config(), Some(&["const_prop".to_string()]), None)
-                .unwrap_err();
+            let err = try_apply_one(
+                42,
+                &fake.config(),
+                Some(&["const_prop".to_string()]),
+                None,
+                None,
+            )
+            .unwrap_err();
 
             let message = format!("{err:#}");
             assert!(message.contains("bpfverify --verifier-states-out failed"));
@@ -2117,8 +2255,14 @@ exit 9
             )
             .unwrap();
 
-            let err = try_apply_one(42, &fake.config(), Some(&["wide_mem".to_string()]), None)
-                .unwrap_err();
+            let err = try_apply_one(
+                42,
+                &fake.config(),
+                Some(&["wide_mem".to_string()]),
+                None,
+                None,
+            )
+            .unwrap_err();
 
             let message = format!("{err:#}");
             assert!(message.contains("bpfverify final verification failed"));
@@ -2140,8 +2284,14 @@ exit 11
             )
             .unwrap();
 
-            let err = try_apply_one(42, &fake.config(), Some(&["wide_mem".to_string()]), None)
-                .unwrap_err();
+            let err = try_apply_one(
+                42,
+                &fake.config(),
+                Some(&["wide_mem".to_string()]),
+                None,
+                None,
+            )
+            .unwrap_err();
 
             let message = format!("{err:#}");
             assert!(message.contains("bpfrejit failed for prog 42"));
@@ -2163,8 +2313,14 @@ exit 11
             )
             .unwrap();
 
-            let err = try_apply_one(42, &fake.config(), Some(&["wide_mem".to_string()]), None)
-                .unwrap_err();
+            let err = try_apply_one(
+                42,
+                &fake.config(),
+                Some(&["wide_mem".to_string()]),
+                None,
+                None,
+            )
+            .unwrap_err();
 
             let message = format!("{err:#}");
             assert!(message.contains("preserved failure workdir"));
@@ -2225,8 +2381,14 @@ exit 11
                 )
                 .unwrap();
 
-                let err = try_apply_one(42, &fake.config(), Some(&["wide_mem".to_string()]), None)
-                    .unwrap_err();
+                let err = try_apply_one(
+                    42,
+                    &fake.config(),
+                    Some(&["wide_mem".to_string()]),
+                    None,
+                    None,
+                )
+                .unwrap_err();
 
                 let message = format!("{err:#}");
                 let failure_dir = run_dir.join("details").join("failures").join("42");
@@ -2289,8 +2451,14 @@ fi
         )
         .unwrap();
 
-        let result =
-            try_reapply_one(42, &fake.config(), Some(&["wide_mem".to_string()]), None).unwrap();
+        let result = try_reapply_one(
+            42,
+            &fake.config(),
+            Some(&["wide_mem".to_string()]),
+            None,
+            None,
+        )
+        .unwrap();
 
         assert!(!result.changed);
         assert!(result.summary.applied);
@@ -2331,6 +2499,7 @@ JSON
                 prog_id: 42,
                 config: &config,
                 enabled_passes: Some(&enabled_passes),
+                profile_path: None,
                 invalidation_tracker: Some(&tracker),
                 force_rejit: false,
             },
@@ -2413,6 +2582,7 @@ JSON
                 prog_id: 42,
                 config: &config,
                 enabled_passes: Some(&enabled_passes),
+                profile_path: None,
                 invalidation_tracker: None,
                 force_rejit: true,
             },
@@ -2429,6 +2599,16 @@ JSON
         assert!(result.summary.applied);
         assert_eq!(result.summary.total_sites_applied, 0);
         assert!(result.inlined_map_entries.is_empty());
+    }
+
+    #[test]
+    fn profile_start_stop_uses_bpfprof_output_dir() {
+        let fake = FakeCliDir::new().unwrap();
+        let session = start_profile(&fake.config(), 1).unwrap();
+        let frozen = stop_profile(session).unwrap();
+
+        assert_eq!(frozen.programs_profiled(), 1);
+        assert!(frozen.profile_path_for(42).is_some());
     }
 
     #[test]

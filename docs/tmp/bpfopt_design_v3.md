@@ -48,6 +48,7 @@ bpfopt const-prop  [FLAGS] < in.bin > out.bin
 bpfopt cond-select [FLAGS] < in.bin > out.bin
 bpfopt extract     [FLAGS] < in.bin > out.bin
 bpfopt endian      [FLAGS] < in.bin > out.bin
+bpfopt branch-flip [FLAGS] < in.bin > out.bin   # experimental Paper B
 bpfopt dce         [FLAGS] < in.bin > out.bin
 bpfopt map-inline  [FLAGS] < in.bin > out.bin
 bpfopt bulk-memory [FLAGS] < in.bin > out.bin
@@ -93,7 +94,7 @@ bpfopt list-passes --json        # JSON 格式
 #### 错误处理
 
 - pass 无可优化 site：正常退出（exit 0），原样透传字节码，report 中 `changed=false`
-- 缺少必需 side-input（如 map-inline 需要 --map-values）：exit 1，stderr 报错
+- 缺少必需 side-input（如 branch-flip 需要 --profile）：exit 1，stderr 报错
 - 字节码格式错误：exit 1，stderr 报错
 - 不得静默失败
 
@@ -148,6 +149,7 @@ bpfprof --all --duration 1s --output-dir profiles/
 #### 采集内容
 
 - `bpf_enable_stats` → per-program run_cnt, run_time_ns
+- `perf_event_open` → branch_misses, branch_instructions
 - 计算 delta（窗口前后差值）
 
 #### 输出
@@ -303,18 +305,27 @@ Map 值快照。bpfopt map-inline 的输入。
 
 ### 3.4 profile.json
 
-BPF runtime stats profile 数据。bpfprof 输出。
+PGO profile 数据。bpfprof 输出，bpfopt branch-flip 等 pass 消费。
 
 ```json
 {
   "prog_id": 123,
   "duration_ms": 500,
   "run_cnt_delta": 15000,
-  "run_time_ns_delta": 4500000
+  "run_time_ns_delta": 4500000,
+  "branch_miss_rate": 0.032,
+  "branch_misses": 480,
+  "branch_instructions": 15000,
+  "per_insn": {
+    "42": { "taken": 12000, "not_taken": 3000 },
+    "67": { "taken": 200, "not_taken": 14800 }
+  }
 }
 ```
 
-- `run_cnt_delta` / `run_time_ns_delta` 来自 BPF_STATS。
+- `per_insn` 的 key 是指令 PC（十进制字符串）
+- 没有 per_insn 数据时可以省略该字段
+- `branch_miss_rate` 是程序级的 PMU 数据
 
 ### 3.5 verifier-states.json
 
@@ -444,12 +455,15 @@ bpfopt dce --verifier-states states2.json < step1.bin > step2.bin
 | `cond-select` | CondSelectPass | branch+mov → bpf_select64 kinsn | 是 | --target |
 | `extract` | ExtractPass | shift+and → bpf_extract64 kinsn | 是 | --target |
 | `endian` | EndianFusionPass | load+bswap → endian kinsn (MOVBE) | 可选 | --target |
+| `branch-flip` | BranchFlipPass | if/else body 重排（experimental Paper B / PGO-gated） | 否 | --profile |
 | `const-prop` | ConstPropPass | verifier 常量折叠 | 否 | --verifier-states |
 | `dce` | DcePass | 死代码消除 | 否 | 无 |
 | `map-inline` | MapInlinePass | map lookup → 常量内联 | 否 | --map-values, --map-ids |
 | `bulk-memory` | BulkMemoryPass | 大块 memcpy/memset → kinsn | 是 | --target |
 | `bounds-check-merge` | BoundsCheckMergePass | 合并 bounds check guard | 否 | 无 |
 | `skb-load-bytes` | SkbLoadBytesSpecPass | skb_load_bytes → direct packet access | 否 | 无 |
+
+`branch-flip` 是 Paper B experimental scaffolding：它服务于基于 profile/info 的 speculative runtime optimization，不属于当前默认优化策略。当前实现保留 Rust pass、profile JSON side-input、daemon profile socket commands 和 bpfprof PMU 字段，但 Paper B 实验前必须补真实 per-site PGO；placeholder 行为不能作为论文实验结论。
 
 **默认 pass 顺序**（`bpfopt optimize` 不指定 `--passes` 时）：
 map-inline → const-prop → dce → skb-load-bytes → bounds-check-merge → wide-mem → bulk-memory → rotate → cond-select → extract → endian
@@ -481,6 +495,7 @@ bpfopt-suite/
 │   │       │   ├── cond_select.rs
 │   │       │   ├── extract.rs
 │   │       │   ├── endian.rs
+│   │       │   ├── branch_flip.rs
 │   │       │   ├── const_prop.rs
 │   │       │   ├── dce.rs
 │   │       │   ├── map_inline.rs
@@ -553,7 +568,7 @@ kernel-sys（raw BPF syscall）
 | daemon 文件 | 去向 | 改动 |
 |-------------|------|------|
 | `daemon/src/insn.rs` | `bpfopt-core/src/insn.rs` | 直接移动，无改动 |
-| `daemon/src/pass.rs` | `bpfopt-core/src/pass.rs` | 移动；删除 `required_btf_fds`（kinsn FD 不再在 pass 层面管理）；P84 删除无真实 PGO 闭环的 ProfilingData/BranchProfile |
+| `daemon/src/pass.rs` | `bpfopt-core/src/pass.rs` | 移动；删除 `required_btf_fds`（kinsn FD 不再在 pass 层面管理）；ProfilingData/BranchProfile 保留 |
 | `daemon/src/passes/*.rs` | `bpfopt-core/src/passes/*.rs` | 移动；MapInlinePass 改为从 JSON 读 map values（不再调 bpf syscall） |
 | `daemon/src/analysis/*.rs` | `bpfopt-core/src/analysis/*.rs` | 直接移动 |
 | `daemon/src/verifier_log.rs` | `bpfopt-core/src/verifier_log.rs` | 直接移动 |
@@ -651,10 +666,14 @@ bpfget 123 | bpfopt wide-mem | bpfrejit 123
 bpfget 123 | bpfopt wide-mem | bpfopt rotate --target target.json | bpfverify --prog-type xdp | bpfrejit 123
 ```
 
-### 场景 3：采集 BPF runtime stats profile
+### 场景 3：带 PGO profile
 
 ```bash
+# 先采集 profile
 bpfprof --prog-id 123 --duration 1s --output profile.json
+
+# 用 profile 优化
+bpfget 123 | bpfopt branch-flip --profile profile.json | bpfrejit 123
 ```
 
 ### 场景 4：预编译替换（绕过 bpfopt）
@@ -719,7 +738,7 @@ Phase 1 完成后，可以跑：`bpfget 123 | bpfopt wide-mem | bpfrejit 123`
 
 ### Phase 2：完整工具链
 
-5. **bpfopt 所有 pass 子命令**：11 个 pass 全部可独立调用
+5. **bpfopt 所有 pass 子命令**：12 个 pass 全部可独立调用
 6. **bpfverify CLI**：dry-run + verifier states 输出
 7. **bpfprof CLI**：profile 采集
 8. **bpfget --full**：一次性输出所有 side-input

@@ -27,6 +27,9 @@ requests must provide a non-empty `enabled_passes` list.
 {"cmd":"optimize","prog_id":42,"dry_run":true,"enabled_passes":["map_inline","const_prop","dce"]}
 ```
 
+`branch_flip` is experimental Paper B scaffolding. It is opt-in and uses loaded
+profile data when requested; it is not part of the default optimizer pass list.
+
 ## Layout
 
 ```text

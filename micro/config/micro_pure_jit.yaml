@@ -743,6 +743,18 @@ benchmarks:
     expected_result: 4354686090269194327
     tags: [memory, endian, canonical, pure-jit]
 
+  - name: branch_flip_dense
+    description: Pure dense if/else diamonds over aligned staged u64 input
+    category: control-flow
+    family: branch-flip
+    level: canonical-dense
+    hypothesis: Isolates BRANCH_FLIP lowering with eight simple ALU-only diamonds repeated across 32 groups
+    base_name: branch_flip_dense
+    kernel_input_size: 2048
+    input_generator: branch_flip_dense
+    expected_result: 255429993929868791
+    tags: [branch, branch-flip, canonical, pure-jit]
+
   # Kernel-only non-XDP breadth checks. These use skb program types with packet-fed
   # staged input and skb-context result extraction.
   - name: tc_bitcount

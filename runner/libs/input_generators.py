@@ -261,6 +261,7 @@ _KIND_BUILDERS = {
     "addr_calc_stride":    _build_addr_calc_stride,
     "endian_swap_dense":   _build_endian_swap_dense,
     "groups_lanes_u64":    _build_groups_lanes_u64,
+    "branch_flip_dense":   _build_groups_lanes_u64,    # alias
     "extract_dense":       lambda output, spec: _build_groups_lanes_u64(output, {**spec, "index_offset_salt2": spec.get("index_offset_salt2", 3)}),
     "plain_bytes":         _build_plain_bytes,
     "plain_u64_pair":      _build_plain_u64_pair,

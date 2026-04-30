@@ -230,6 +230,7 @@ impl BpfPass for BoundsCheckMergePass {
         }
 
         program.insns = final_insns;
+        program.remap_annotations(&final_addr_map);
         program.log_transform(TransformEntry {
             sites_applied: rewrites.len(),
         });

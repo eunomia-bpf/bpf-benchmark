@@ -21,6 +21,7 @@ _PASS_TO_SITE_FIELD = {
     "map_inline": "map_inline_sites",
     "const_prop": "const_prop_sites",
     "dce": "dce_sites",
+    "branch_flip": "branch_flip_sites",
     "bounds_check_merge": "bounds_check_merge_sites",
     "bulk_memory": "bulk_memory_sites",
     "cond_select": "cmov_sites",
@@ -43,6 +44,7 @@ _TOTAL_SITE_FIELDS = (
     "extract_sites",
     "endian_sites",
     "skb_load_bytes_spec_sites",
+    "branch_flip_sites",
     "other_sites",
 )
 
@@ -51,6 +53,7 @@ _BENCHMARK_CONFIG_PATH = ROOT_DIR / "corpus" / "config" / "benchmark_config.yaml
 _APPLY_TIMEOUT_ENV = "BPFREJIT_DAEMON_REQUEST_TIMEOUT_S"
 _FALLBACK_APPLY_TIMEOUT_SECONDS = 600.0
 _DEFAULT_BENCHMARK_REPEAT = 200
+_DEFAULT_PROFILE_INTERVAL_MS = 1000
 
 
 def _default_apply_timeout_seconds() -> float:
@@ -758,6 +761,33 @@ def _optimize_request(
                            daemon_proc=daemon_proc, stdout_path=stdout_path, stderr_path=stderr_path)
 
 
+def _prepare_branch_flip_profile(
+    socket_path: Path,
+    *,
+    daemon_proc: subprocess.Popen[str] | None = None,
+    stdout_path: Path | None = None,
+    stderr_path: Path | None = None,
+    interval_ms: int = _DEFAULT_PROFILE_INTERVAL_MS,
+    timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
+) -> dict[str, object] | None:
+    kw: dict[str, Any] = {"timeout_seconds": timeout_seconds, "daemon_proc": daemon_proc,
+                          "stdout_path": stdout_path, "stderr_path": stderr_path}
+
+    def _profile_cmd(payload: dict[str, object], default_msg: str) -> dict[str, object] | None:
+        resp = _daemon_request(socket_path, payload, **kw)
+        if str(resp.get("status") or "") != "ok":
+            msg = str(resp.get("error_message") or default_msg)
+            return {"exit_code": 124 if "timed out" in msg.lower() else 1,
+                    "output": json.dumps(resp, sort_keys=True), "error": msg}
+        return None
+
+    err = _profile_cmd({"cmd": "profile-start", "interval_ms": int(interval_ms)}, "profile-start failed")
+    if err is not None:
+        return err
+    time.sleep(interval_ms / 1000.0)
+    return _profile_cmd({"cmd": "profile-stop"}, "profile-stop failed")
+
+
 def apply_daemon_rejit(
     prog_ids: list[int] | None = None,
     *,
@@ -783,6 +813,25 @@ def apply_daemon_rejit(
     applied = False
     changed = False
     errors: list[str] = []
+    if normalized_enabled_passes and "branch_flip" in normalized_enabled_passes:
+        profile_error = _prepare_branch_flip_profile(daemon_socket_path, daemon_proc=daemon_proc,
+                                                      stdout_path=daemon_stdout_path, stderr_path=daemon_stderr_path)
+        if profile_error is not None:
+            ec = int(profile_error.get("exit_code", 1) or 1)
+            out = str(profile_error.get("output") or "")
+            msg = str(profile_error.get("error") or "profile collection failed")
+            return {
+                "applied": False,
+                "changed": False,
+                "output": out, "exit_code": ec, "error": msg,
+                "enabled_passes": normalized_enabled_passes,
+                "passes": [],
+                "per_program": {int(pid): {"prog_id": int(pid), "applied": False, "changed": False,
+                                           "output": out, "exit_code": ec, "error": msg,
+                                           "enabled_passes": normalized_enabled_passes, "passes": []}
+                                for pid in prog_ids},
+                "program_counts": {"requested": len(prog_ids), "applied": 0, "not_applied": len(prog_ids)},
+            }
     for prog_id in prog_ids:
         _resp = _optimize_request(daemon_socket_path, prog_id, enabled_passes=normalized_enabled_passes,
                                    daemon_proc=daemon_proc, stdout_path=daemon_stdout_path, stderr_path=daemon_stderr_path)

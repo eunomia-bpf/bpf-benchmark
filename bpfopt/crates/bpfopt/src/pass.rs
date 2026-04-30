@@ -2,7 +2,7 @@
 //! Pass framework — LLVM-style PassManager for BPF program transformations.
 //!
 //! Core abstractions:
-//! - `BpfProgram`: linear instruction stream + metadata
+//! - `BpfProgram`: linear instruction stream + per-insn annotations + metadata
 //! - `Analysis`: read-only analysis producing typed, cached results
 //! - `BpfPass`: transformation pass that may modify the program
 //! - `PassManager`: orchestrates pass execution and analysis cache invalidation
@@ -12,6 +12,27 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use crate::insn::{BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
+
+// ── Per-instruction annotation — populated by analysis passes, read by transform passes.
+#[derive(Clone, Debug, Default)]
+pub struct InsnAnnotation {
+    /// PGO: branch taken/not-taken counts at this instruction.
+    /// Used by BranchFlipPass to decide whether to flip.
+    pub branch_profile: Option<BranchProfile>,
+}
+
+/// PGO branch statistics.
+#[derive(Clone, Debug)]
+pub struct BranchProfile {
+    pub taken_count: u64,
+    pub not_taken_count: u64,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct ProfilingData {
+    pub branch_profiles: HashMap<usize, BranchProfile>,
+    pub branch_miss_rate: Option<f64>,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum VerifierInsnKind {
@@ -119,14 +140,16 @@ impl BtfInfoRecords {
 
 // ── Program IR ──────────────────────────────────────────────────────
 
-/// BPF program IR — linear instruction stream + metadata.
+/// BPF program IR — linear instruction stream + per-insn annotations + metadata.
 ///
 /// This is the core data structure operated on by all passes. Transform passes
-/// modify `insns`; analysis passes populate the analysis cache.
+/// modify `insns`; analysis passes populate `annotations` and the analysis cache.
 #[derive(Clone)]
 pub struct BpfProgram {
     /// Instruction stream (mutable — transform passes modify this).
     pub insns: Vec<BpfInsn>,
+    /// Per-insn annotations (length synchronized with insns).
+    pub annotations: Vec<InsnAnnotation>,
     /// Transform log: records what each pass did.
     pub transform_log: Vec<TransformEntry>,
     /// Map IDs referenced by this program, in the kernel's `used_maps` order.
@@ -136,6 +159,10 @@ pub struct BpfProgram {
     /// Stable `old_fd -> map_id` bindings captured from the original program
     /// before any transform removes or reorders pseudo-map loads.
     pub map_fd_bindings: HashMap<i32, u32>,
+    /// Program-level branch miss rate from PMU hardware counters.
+    /// Set by `inject_profiling` when PMU data is available.
+    /// Consumed by BranchFlipPass to gate optimization.
+    pub branch_miss_rate: Option<f64>,
     /// Parsed `log_level=2` verifier state snapshots for the original program.
     pub verifier_states: Arc<[VerifierInsn]>,
     /// Raw func_info records replayed by bpfverify after bytecode transforms.
@@ -304,13 +331,16 @@ pub struct TransformEntry {
 }
 
 impl BpfProgram {
-    /// Create from raw instructions.
+    /// Create from raw instructions. Annotations are default-initialized.
     pub fn new(insns: Vec<BpfInsn>) -> Self {
+        let len = insns.len();
         Self {
             insns,
+            annotations: vec![InsnAnnotation::default(); len],
             transform_log: Vec::new(),
             map_ids: Vec::new(),
             map_fd_bindings: HashMap::new(),
+            branch_miss_rate: None,
             verifier_states: Arc::from([]),
             func_info: None,
             line_info: None,
@@ -334,6 +364,58 @@ impl BpfProgram {
     pub fn set_map_ids(&mut self, map_ids: Vec<u32>) {
         self.map_fd_bindings = build_map_fd_bindings(&self.insns, &map_ids);
         self.map_ids = map_ids;
+    }
+
+    /// Resynchronize annotations length after instruction stream changes.
+    /// Transform passes must call this after modifying insns.
+    pub fn sync_annotations(&mut self) {
+        self.annotations
+            .resize_with(self.insns.len(), InsnAnnotation::default);
+    }
+
+    /// Remap annotations using an address map (old_pc -> new_pc).
+    ///
+    /// After a transform pass changes instruction count, annotations from the
+    /// old program need to be remapped to their new positions. The addr_map
+    /// must have length >= old_annotations_len, where addr_map[old_pc] gives
+    /// the new_pc for that instruction. Annotations for old PCs that map to
+    /// valid new PCs are placed at the new location; all other positions get
+    /// default annotations.
+    pub fn remap_annotations(&mut self, addr_map: &[usize]) {
+        let new_len = self.insns.len();
+        let old_annotations = std::mem::take(&mut self.annotations);
+        let mut new_annotations = vec![InsnAnnotation::default(); new_len];
+
+        for (old_pc, ann) in old_annotations.into_iter().enumerate() {
+            // Skip default annotations (nothing to remap).
+            if ann.branch_profile.is_none() {
+                continue;
+            }
+            if old_pc < addr_map.len() {
+                let new_pc = addr_map[old_pc];
+                if new_pc < new_len {
+                    new_annotations[new_pc] = ann;
+                }
+            }
+        }
+
+        self.annotations = new_annotations;
+    }
+
+    /// Inject profiling data into annotations.
+    ///
+    /// For each PC in the profiling data that is within bounds, sets the
+    /// corresponding annotation's branch_profile.
+    pub fn inject_profiling(&mut self, data: &ProfilingData) {
+        for (&pc, profile) in &data.branch_profiles {
+            if pc < self.annotations.len() {
+                self.annotations[pc].branch_profile = Some(profile.clone());
+            }
+        }
+        // Propagate program-level PMU branch miss rate.
+        if data.branch_miss_rate.is_some() {
+            self.branch_miss_rate = data.branch_miss_rate;
+        }
     }
 
     /// Attach parsed verifier states to this program.
@@ -920,6 +1002,23 @@ impl PassManager {
         })
     }
 
+    /// Execute the pipeline with optional profiling data.
+    ///
+    /// If `profiling` is provided, injects branch profiles into the program's
+    /// annotations before running the pipeline. This enables PGO-guided passes
+    /// like BranchFlipPass to make data-driven decisions.
+    pub fn run_with_profiling(
+        &self,
+        program: &mut BpfProgram,
+        ctx: &PassContext,
+        profiling: Option<&ProfilingData>,
+    ) -> anyhow::Result<PipelineResult> {
+        if let Some(data) = profiling {
+            program.inject_profiling(data);
+        }
+        self.run(program, ctx)
+    }
+
     fn run_single_pass(
         &self,
         pass: &dyn BpfPass,
@@ -936,6 +1035,7 @@ impl PassManager {
         if result.changed {
             cache.invalidate_all();
             program.verifier_states = Arc::from([]);
+            program.sync_annotations();
         }
 
         Ok(result)
