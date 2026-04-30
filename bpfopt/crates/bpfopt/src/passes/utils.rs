@@ -111,6 +111,27 @@ pub fn remap_kinsn_btf_metadata(
     Ok(())
 }
 
+pub fn func_info_record_count(program: &BpfProgram) -> anyhow::Result<usize> {
+    let Some(records) = program.func_info.as_ref() else {
+        return Ok(0);
+    };
+    if records.bytes.is_empty() {
+        return Ok(0);
+    }
+    let rec_size = records.rec_size as usize;
+    if rec_size == 0 {
+        anyhow::bail!("func_info rec_size must be non-zero");
+    }
+    if !records.bytes.len().is_multiple_of(rec_size) {
+        anyhow::bail!(
+            "func_info byte length {} is not a multiple of rec_size {}",
+            records.bytes.len(),
+            records.rec_size
+        );
+    }
+    Ok(records.bytes.len() / rec_size)
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum BtfRecordKind {
     Func,

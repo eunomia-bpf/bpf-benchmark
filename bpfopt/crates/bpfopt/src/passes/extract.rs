@@ -6,8 +6,8 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, map_replacement_range,
-    remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_pass,
+    emit_packed_kinsn_call_with_off, fixup_all_branches, func_info_record_count,
+    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_pass,
 };
 
 /// EXTRACT optimization pass: replaces RSH+AND bitfield extraction patterns
@@ -111,6 +111,16 @@ impl BpfPass for ExtractPass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
+        if func_info_record_count(program)? > 1 {
+            return Ok(PassResult {
+                sites_skipped: vec![SkipReason {
+                    pc: 0,
+                    reason: "multi-subprog kinsn candidate is not REJIT-safe".into(),
+                }],
+                ..PassResult::unchanged(self.name())
+            });
+        }
+
         // Check if bpf_extract64 kfunc is available.
         if ctx.kinsn_registry.extract64_btf_id < 0 {
             return Ok(PassResult::skipped(
@@ -227,7 +237,7 @@ impl BpfPass for ExtractPass {
 mod tests {
     use super::*;
     use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
-    use crate::pass::{AnalysisCache, PassContext, PassManager};
+    use crate::pass::{AnalysisCache, BtfInfoRecords, PassContext, PassManager};
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
         BpfProgram::new(insns)
@@ -242,6 +252,10 @@ mod tests {
         ctx.kinsn_registry.extract64_btf_id = btf_id;
         ctx.platform.has_bmi1 = true;
         ctx
+    }
+
+    fn func_info_record(insn_off: u32, type_id: u32) -> Vec<u8> {
+        [insn_off.to_le_bytes(), type_id.to_le_bytes()].concat()
     }
 
     fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
@@ -396,6 +410,35 @@ mod tests {
         assert!(result.sites_skipped[0]
             .reason
             .contains("kfunc not available"));
+    }
+
+    #[test]
+    fn test_extract_pass_skips_multi_subprog_candidates() {
+        let mut prog = make_program(vec![
+            BpfInsn::alu64_imm(BPF_RSH, 2, 8),
+            BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
+            exit_insn(),
+        ]);
+        prog.func_info = Some(BtfInfoRecords {
+            rec_size: 8,
+            bytes: [func_info_record(0, 1), func_info_record(2, 2)].concat(),
+        });
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_extract_kfunc(7777);
+
+        let pass = ExtractPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed);
+        assert_eq!(result.sites_applied, 0);
+        assert!(result
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.reason.contains("multi-subprog")));
+        assert!(!prog
+            .insns
+            .iter()
+            .any(|insn| insn.is_call() && insn.src_reg() == BPF_PSEUDO_KINSN_CALL));
     }
 
     #[test]
