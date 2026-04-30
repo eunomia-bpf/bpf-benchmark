@@ -344,39 +344,6 @@ fn test_pass_manager_enabled_pass_policy() {
     assert_eq!(prog.insns.len(), 2);
 }
 
-#[test]
-fn test_pass_manager_collects_debug_traces() {
-    let mut pm = PassManager::new();
-    pm.add_pass(AppendNopPass);
-
-    let ctx = ctx_for_pass_manager(&pm);
-
-    let mut prog = make_program(vec![exit_insn()]);
-    let result = pm
-        .run(&mut prog, &ctx)
-        .expect("pass manager should succeed");
-
-    assert_eq!(result.debug_traces.len(), 1);
-    assert_eq!(result.debug_traces[0].pass_name, "append_nop");
-    assert!(result.debug_traces[0].changed);
-    assert_eq!(
-        result.debug_traces[0]
-            .bytecode_before
-            .as_ref()
-            .unwrap()
-            .insn_count,
-        1
-    );
-    assert_eq!(
-        result.debug_traces[0]
-            .bytecode_after
-            .as_ref()
-            .unwrap()
-            .insn_count,
-        2
-    );
-}
-
 // ── Per-target static call offset tests ────────────────────────
 
 #[test]

@@ -10,7 +10,7 @@ use anyhow::{Context, Result};
 use serde::Serialize;
 
 use crate::bpf;
-use crate::commands::{self, CliConfig, OptimizeMode};
+use crate::commands::{self, CliConfig};
 use crate::invalidation::{MapInvalidationTracker, MapValueReader};
 
 static SHUTDOWN_FLAG: AtomicBool = AtomicBool::new(false);
@@ -79,12 +79,8 @@ impl ReoptimizationState {
         prog_id: u32,
         requested_passes: Option<&[String]>,
         result: &commands::OptimizeOneResult,
-        mode: OptimizeMode,
     ) {
-        if !matches!(mode, OptimizeMode::Apply)
-            || result.status != "ok"
-            || result.inlined_map_entries.is_empty()
-        {
+        if result.status != "ok" || result.inlined_map_entries.is_empty() {
             self.enabled_passes_by_prog.remove(&prog_id);
             return;
         }
@@ -117,12 +113,11 @@ fn remember_reoptimization_result(
     prog_id: u32,
     enabled_passes: Option<&[String]>,
     result: &commands::OptimizeOneResult,
-    mode: OptimizeMode,
 ) -> Result<()> {
     state
         .lock()
         .map_err(|_| anyhow::anyhow!("reoptimization state lock poisoned"))?
-        .remember_result(prog_id, enabled_passes, result, mode);
+        .remember_result(prog_id, enabled_passes, result);
     Ok(())
 }
 
@@ -217,7 +212,6 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
                     &config,
                     Some(&enabled_passes),
                     Some(&tracker_for_apply),
-                    OptimizeMode::Apply,
                 )?;
                 if result.status != "ok" {
                     anyhow::bail!(
@@ -235,7 +229,6 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
                     prog_id,
                     Some(&enabled_passes),
                     &result,
-                    OptimizeMode::Apply,
                 )?;
                 Ok(())
             })?;
@@ -372,21 +365,6 @@ fn required_enabled_passes<'a>(
     }
 }
 
-fn request_mode(req: &serde_json::Value) -> std::result::Result<OptimizeMode, String> {
-    if let Some(value) = req.get("dry_run") {
-        let dry_run = value
-            .as_bool()
-            .ok_or_else(|| "dry_run must be a JSON boolean".to_string())?;
-        return Ok(if dry_run {
-            OptimizeMode::DryRun
-        } else {
-            OptimizeMode::Apply
-        });
-    }
-
-    Ok(OptimizeMode::Apply)
-}
-
 fn request_interval_ms(req: &serde_json::Value) -> std::result::Result<u64, String> {
     let value = req
         .get("interval_ms")
@@ -437,23 +415,12 @@ fn process_request(
                 Some(id) => id as u32,
                 None => return error_json("missing prog_id"),
             };
-            let mode = match request_mode(req) {
-                Ok(mode) => mode,
-                Err(message) => return error_json(message),
-            };
-            match commands::try_apply_one(
-                prog_id,
-                config,
-                Some(requested_passes),
-                Some(tracker),
-                mode,
-            ) {
+            match commands::try_apply_one(prog_id, config, Some(requested_passes), Some(tracker)) {
                 Ok(result) => match remember_reoptimization_result(
                     reoptimization_state,
                     prog_id,
                     Some(requested_passes),
                     &result,
-                    mode,
                 ) {
                     Ok(()) => serialize_or_error(result),
                     Err(err) => error_json(format!("{err:#}")),
@@ -522,9 +489,7 @@ mod tests {
     use std::collections::HashMap;
     use std::sync::{Arc, Mutex};
 
-    use crate::commands::{
-        InlinedMapEntry, OptimizeOneResult, OptimizeSummary, ProgramInfo, TimingsNs,
-    };
+    use crate::commands::{InlinedMapEntry, OptimizeOneResult, OptimizeSummary, ProgramInfo};
     use crate::invalidation::{BatchLookupValue, MapInvalidationTracker};
 
     type MockMapValues = HashMap<u32, HashMap<Vec<u8>, Vec<u8>>>;
@@ -668,12 +633,6 @@ mod tests {
                 passes_changed: 1,
             },
             passes: Vec::new(),
-            attempts: Vec::new(),
-            timings_ns: TimingsNs {
-                pipeline_run_ns: 1,
-                rejit_syscall_ns: 1,
-                total_ns: 2,
-            },
             inlined_map_entries: vec![InlinedMapEntry {
                 map_id: 7,
                 key_hex: "01000000".to_string(),
@@ -683,17 +642,12 @@ mod tests {
         };
         let requested = vec!["const_prop".to_string(), "map_inline".to_string()];
 
-        state.remember_result(101, Some(&requested), &result, OptimizeMode::Apply);
+        state.remember_result(101, Some(&requested), &result);
 
         assert_eq!(state.enabled_passes_for(101), Some(requested));
 
         result.inlined_map_entries.clear();
-        state.remember_result(
-            101,
-            Some(&["map_inline".to_string()]),
-            &result,
-            OptimizeMode::Apply,
-        );
+        state.remember_result(101, Some(&["map_inline".to_string()]), &result);
 
         assert!(state.enabled_passes_for(101).is_none());
     }
@@ -710,19 +664,6 @@ mod tests {
             response["error_message"],
             "enabled_passes entries must not be blank"
         );
-    }
-
-    #[test]
-    fn process_request_rejects_non_boolean_dry_run() {
-        let response = process_test_request(&serde_json::json!({
-            "cmd": "optimize",
-            "prog_id": 1,
-            "enabled_passes": ["wide_mem"],
-            "dry_run": "yes",
-        }));
-
-        assert_eq!(response["status"], "error");
-        assert_eq!(response["error_message"], "dry_run must be a JSON boolean");
     }
 
     #[test]

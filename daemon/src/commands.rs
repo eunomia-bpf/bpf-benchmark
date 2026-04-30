@@ -10,10 +10,8 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
-use std::time::Instant;
 
 use anyhow::{anyhow, bail, Context, Result};
-use serde::ser::{SerializeSeq, Serializer};
 use serde::{Deserialize, Serialize};
 
 use crate::bpf;
@@ -562,49 +560,10 @@ pub(crate) struct OptimizeOneResult {
     pub program: ProgramInfo,
     pub summary: OptimizeSummary,
     pub passes: Vec<PassDetail>,
-    #[serde(
-        skip_serializing_if = "Vec::is_empty",
-        default,
-        serialize_with = "serialize_attempts_without_debug"
-    )]
-    pub attempts: Vec<AttemptRecord>,
-    pub timings_ns: TimingsNs,
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub inlined_map_entries: Vec<InlinedMapEntry>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
-}
-
-#[cfg(test)]
-pub(crate) type ServeOptimizeResponse = OptimizeOneResult;
-
-fn serialize_attempts_without_debug<S>(
-    attempts: &[AttemptRecord],
-    serializer: S,
-) -> std::result::Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    #[derive(Serialize)]
-    struct AttemptRecordForServe<'a> {
-        attempt: usize,
-        result: &'a str,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        failure_pc: Option<usize>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        attributed_pass: Option<&'a str>,
-    }
-
-    let mut seq = serializer.serialize_seq(Some(attempts.len()))?;
-    for attempt in attempts {
-        seq.serialize_element(&AttemptRecordForServe {
-            attempt: attempt.attempt,
-            result: &attempt.result,
-            failure_pc: attempt.failure_pc,
-            attributed_pass: attempt.attributed_pass.as_deref(),
-        })?;
-    }
-    seq.end()
 }
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
@@ -643,43 +602,11 @@ pub(crate) struct PassDetail {
     pub insn_delta: i64,
 }
 
-#[derive(Clone, Debug, Serialize)]
-pub(crate) struct AttemptRecord {
-    pub attempt: usize,
-    pub result: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub failure_pc: Option<usize>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub attributed_pass: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub debug: Option<AttemptDebug>,
-}
-
-#[derive(Clone, Debug, Serialize)]
-pub(crate) struct AttemptDebug {
-    #[serde(skip_serializing_if = "Vec::is_empty", default)]
-    pub warnings: Vec<String>,
-}
-
-#[derive(Clone, Debug, Serialize)]
-pub(crate) struct TimingsNs {
-    pub pipeline_run_ns: u64,
-    pub rejit_syscall_ns: u64,
-    pub total_ns: u64,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum OptimizeMode {
-    Apply,
-    DryRun,
-}
-
 struct ApplyOneRequest<'a> {
     prog_id: u32,
     config: &'a CliConfig,
     enabled_passes: Option<&'a [String]>,
     invalidation_tracker: Option<&'a SharedInvalidationTracker>,
-    mode: OptimizeMode,
     force_rejit: bool,
 }
 
@@ -1044,7 +971,6 @@ pub(crate) fn try_apply_one(
     config: &CliConfig,
     enabled_passes: Option<&[String]>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
-    mode: OptimizeMode,
 ) -> Result<OptimizeOneResult> {
     try_apply_one_with_map_access(
         ApplyOneRequest {
@@ -1052,7 +978,6 @@ pub(crate) fn try_apply_one(
             config,
             enabled_passes,
             invalidation_tracker,
-            mode,
             force_rejit: false,
         },
         bpf::bpf_map_get_fd_by_id,
@@ -1066,7 +991,6 @@ pub(crate) fn try_reapply_one(
     config: &CliConfig,
     enabled_passes: Option<&[String]>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
-    mode: OptimizeMode,
 ) -> Result<OptimizeOneResult> {
     try_apply_one_with_map_access(
         ApplyOneRequest {
@@ -1074,7 +998,6 @@ pub(crate) fn try_reapply_one(
             config,
             enabled_passes,
             invalidation_tracker,
-            mode,
             force_rejit: true,
         },
         bpf::bpf_map_get_fd_by_id,
@@ -1099,7 +1022,6 @@ where
         config,
         enabled_passes,
         invalidation_tracker,
-        mode,
         force_rejit,
     } = request;
     let requested_passes =
@@ -1107,7 +1029,6 @@ where
     if requested_passes.is_empty() {
         bail!("enabled_passes must include at least one pass for bpfopt optimize");
     }
-    let total_start = Instant::now();
     let workdir = WorkDir::new("bpfrejit-daemon-optimize")?;
     let prog_bin = workdir.path().join("prog.bin");
     let prog_info_json = workdir.path().join("prog_info.json");
@@ -1231,7 +1152,6 @@ where
             side_inputs.push(("--map-ids".to_string(), PathBuf::from(map_ids)));
         }
 
-        let pipeline_start = Instant::now();
         let mut bpfopt = config.command("bpfopt");
         bpfopt.arg("optimize").arg("--report").arg(&report_json);
         append_bpfopt_context_args(&mut bpfopt, &prog_info);
@@ -1248,7 +1168,6 @@ where
         }
         run_stage_with_file_io("bpfopt optimize", &mut bpfopt, &prog_bin, &opt_bin)
             .context("bpfopt optimize failed")?;
-        let pipeline_ns = pipeline_start.elapsed().as_nanos() as u64;
 
         let report: BpfoptOptimizeReport = read_json_file(&report_json, "bpfopt optimize report")?;
         let passes = report
@@ -1268,23 +1187,11 @@ where
         }
         let use_fd_array = candidate_has_kinsn_call;
 
-        let mut total_rejit_ns = 0u64;
-        let mut attempts = Vec::new();
         let status = "ok".to_string();
         let mut applied = false;
         let error_message = None;
 
-        let should_rejit = changed || (force_rejit && matches!(mode, OptimizeMode::Apply));
-        if !should_rejit {
-            attempts.push(AttemptRecord {
-                attempt: 0,
-                result: "no_change".to_string(),
-                failure_pc: None,
-                attributed_pass: None,
-                debug: None,
-            });
-        } else {
-            let verify_start = Instant::now();
+        if changed || force_rejit {
             let final_verify_report = workdir.path().join("bpfverify_report.json");
             let final_verify_log = workdir.path().join("verifier.log");
             let mut verify = config.command("bpfverify");
@@ -1309,75 +1216,51 @@ where
                 &final_verify_report,
                 &final_verify_log,
             );
-            total_rejit_ns += verify_start.elapsed().as_nanos() as u64;
             verify_result.with_context(|| {
                 format!("bpfverify final verification failed for prog {prog_id}")
             })?;
 
-            if matches!(mode, OptimizeMode::Apply) {
-                let rejit_start = Instant::now();
-                let mut rejit = config.command("bpfrejit");
-                rejit
-                    .arg(prog_id.to_string())
-                    .arg(&verified_bin)
-                    .arg("--map-fds")
-                    .arg(&map_fds_json)
-                    .arg("--output")
-                    .arg(&rejit_summary_json);
-                if use_fd_array {
-                    rejit.arg("--fd-array").arg(&fd_array_json);
-                }
-                let rejit_result = run_stage_output("bpfrejit", &mut rejit);
-                total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
-                if let Err(rejit_err) = rejit_result {
-                    let verifier_context = match capture_rejit_failure_verifier_log(
-                        config,
-                        &prog_info,
-                        &map_fds_json,
-                        &fd_array_json,
-                        use_fd_array,
-                        &verified_bin,
-                        workdir.path(),
-                    ) {
-                        Ok(summary) => format!("\nverifier log summary:\n{summary}"),
-                        Err(report_err) => {
-                            format!("\npost-failure bpfverify --report failed: {report_err:#}")
-                        }
-                    };
-                    return Err(rejit_err).with_context(|| {
-                        format!("bpfrejit failed for prog {prog_id}{verifier_context}")
-                    });
-                }
-                refresh_invalidation_tracking(
-                    invalidation_tracker,
-                    prog_id,
-                    &map_inline_records,
-                    &mut open_map_fd,
-                )
-                .with_context(|| {
-                    format!("refresh map-inline invalidation tracking for prog {prog_id}")
-                })?;
-                applied = true;
-                attempts.push(AttemptRecord {
-                    attempt: 0,
-                    result: if changed {
-                        "applied".to_string()
-                    } else {
-                        "reapplied".to_string()
-                    },
-                    failure_pc: None,
-                    attributed_pass: None,
-                    debug: None,
-                });
-            } else {
-                attempts.push(AttemptRecord {
-                    attempt: 0,
-                    result: "dry_run".to_string(),
-                    failure_pc: None,
-                    attributed_pass: None,
-                    debug: None,
+            let mut rejit = config.command("bpfrejit");
+            rejit
+                .arg(prog_id.to_string())
+                .arg(&verified_bin)
+                .arg("--map-fds")
+                .arg(&map_fds_json)
+                .arg("--output")
+                .arg(&rejit_summary_json);
+            if use_fd_array {
+                rejit.arg("--fd-array").arg(&fd_array_json);
+            }
+            let rejit_result = run_stage_output("bpfrejit", &mut rejit);
+            if let Err(rejit_err) = rejit_result {
+                let verifier_context = match capture_rejit_failure_verifier_log(
+                    config,
+                    &prog_info,
+                    &map_fds_json,
+                    &fd_array_json,
+                    use_fd_array,
+                    &verified_bin,
+                    workdir.path(),
+                ) {
+                    Ok(summary) => format!("\nverifier log summary:\n{summary}"),
+                    Err(report_err) => {
+                        format!("\npost-failure bpfverify --report failed: {report_err:#}")
+                    }
+                };
+                return Err(rejit_err).with_context(|| {
+                    format!("bpfrejit failed for prog {prog_id}{verifier_context}")
                 });
             }
+            refresh_invalidation_tracking(
+                invalidation_tracker,
+                prog_id,
+                &map_inline_records,
+                &mut open_map_fd,
+            )
+            .with_context(|| {
+                format!("refresh map-inline invalidation tracking for prog {prog_id}")
+            })?;
+            applied = true;
         }
 
         let passes_applied = passes
@@ -1407,12 +1290,6 @@ where
                 passes_changed,
             },
             passes,
-            attempts,
-            timings_ns: TimingsNs {
-                pipeline_run_ns: pipeline_ns,
-                rejit_syscall_ns: total_rejit_ns,
-                total_ns: total_start.elapsed().as_nanos() as u64,
-            },
             inlined_map_entries,
             error_message,
         })
@@ -2231,14 +2108,8 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1}\n
     #[test]
     fn optimize_uses_cli_subprocesses_and_preserves_response_shape() {
         let fake = FakeCliDir::new().unwrap();
-        let result = try_apply_one(
-            42,
-            &fake.config(),
-            Some(&["wide_mem".to_string()]),
-            None,
-            OptimizeMode::Apply,
-        )
-        .unwrap();
+        let result =
+            try_apply_one(42, &fake.config(), Some(&["wide_mem".to_string()]), None).unwrap();
 
         assert_eq!(result.status, "ok");
         assert_eq!(result.prog_id, 42);
@@ -2248,7 +2119,6 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1}\n
         assert_eq!(result.summary.total_sites_applied, 2);
         assert_eq!(result.summary.passes_executed, 1);
         assert!(result.passes[0].changed);
-        assert_eq!(result.attempts[0].result, "applied");
     }
 
     #[test]
@@ -2294,14 +2164,8 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1}\n
     fn missing_target_kinsn_is_error() {
         with_temp_failure_root(|_| {
             let fake = FakeCliDir::new().unwrap();
-            let err = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["rotate".to_string()]),
-                None,
-                OptimizeMode::Apply,
-            )
-            .unwrap_err();
+            let err =
+                try_apply_one(42, &fake.config(), Some(&["rotate".to_string()]), None).unwrap_err();
 
             let message = format!("{err:#}");
             assert!(message.contains("bpfget --target did not expose kinsns"));
@@ -2327,14 +2191,8 @@ done
             )
             .unwrap();
 
-            let err = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["const_prop".to_string()]),
-                None,
-                OptimizeMode::Apply,
-            )
-            .unwrap_err();
+            let err = try_apply_one(42, &fake.config(), Some(&["const_prop".to_string()]), None)
+                .unwrap_err();
 
             let message = format!("{err:#}");
             assert!(message.contains("bpfverify --verifier-states-out failed"));
@@ -2356,14 +2214,8 @@ exit 9
             )
             .unwrap();
 
-            let err = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["wide_mem".to_string()]),
-                None,
-                OptimizeMode::Apply,
-            )
-            .unwrap_err();
+            let err = try_apply_one(42, &fake.config(), Some(&["wide_mem".to_string()]), None)
+                .unwrap_err();
 
             let message = format!("{err:#}");
             assert!(message.contains("bpfverify final verification failed"));
@@ -2385,14 +2237,8 @@ exit 11
             )
             .unwrap();
 
-            let err = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["wide_mem".to_string()]),
-                None,
-                OptimizeMode::Apply,
-            )
-            .unwrap_err();
+            let err = try_apply_one(42, &fake.config(), Some(&["wide_mem".to_string()]), None)
+                .unwrap_err();
 
             let message = format!("{err:#}");
             assert!(message.contains("bpfrejit failed for prog 42"));
@@ -2414,14 +2260,8 @@ exit 11
             )
             .unwrap();
 
-            let err = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["wide_mem".to_string()]),
-                None,
-                OptimizeMode::Apply,
-            )
-            .unwrap_err();
+            let err = try_apply_one(42, &fake.config(), Some(&["wide_mem".to_string()]), None)
+                .unwrap_err();
 
             let message = format!("{err:#}");
             assert!(message.contains("preserved failure workdir"));
@@ -2482,14 +2322,8 @@ exit 11
                 )
                 .unwrap();
 
-                let err = try_apply_one(
-                    42,
-                    &fake.config(),
-                    Some(&["wide_mem".to_string()]),
-                    None,
-                    OptimizeMode::Apply,
-                )
-                .unwrap_err();
+                let err = try_apply_one(42, &fake.config(), Some(&["wide_mem".to_string()]), None)
+                    .unwrap_err();
 
                 let message = format!("{err:#}");
                 let failure_dir = run_dir.join("details").join("failures").join("42");
@@ -2552,18 +2386,11 @@ fi
         )
         .unwrap();
 
-        let result = try_reapply_one(
-            42,
-            &fake.config(),
-            Some(&["wide_mem".to_string()]),
-            None,
-            OptimizeMode::Apply,
-        )
-        .unwrap();
+        let result =
+            try_reapply_one(42, &fake.config(), Some(&["wide_mem".to_string()]), None).unwrap();
 
         assert!(!result.changed);
         assert!(result.summary.applied);
-        assert_eq!(result.attempts[0].result, "reapplied");
         assert!(marker.exists());
     }
 
@@ -2602,7 +2429,6 @@ JSON
                 config: &config,
                 enabled_passes: Some(&enabled_passes),
                 invalidation_tracker: Some(&tracker),
-                mode: OptimizeMode::Apply,
                 force_rejit: false,
             },
             |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
@@ -2685,7 +2511,6 @@ JSON
                 config: &config,
                 enabled_passes: Some(&enabled_passes),
                 invalidation_tracker: None,
-                mode: OptimizeMode::Apply,
                 force_rejit: true,
             },
             |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
@@ -2700,57 +2525,7 @@ JSON
         assert!(!result.changed);
         assert!(result.summary.applied);
         assert_eq!(result.summary.total_sites_applied, 0);
-        assert_eq!(result.attempts[0].result, "reapplied");
         assert!(result.inlined_map_entries.is_empty());
-    }
-
-    #[test]
-    fn serve_optimize_response_omits_attempt_debug_payloads() {
-        let result = OptimizeOneResult {
-            status: "error".to_string(),
-            prog_id: 7,
-            changed: false,
-            passes_applied: vec![],
-            program: ProgramInfo {
-                prog_id: 7,
-                prog_name: "demo_prog".to_string(),
-                prog_type: 6,
-                orig_insn_count: 10,
-                final_insn_count: 10,
-                insn_delta: 0,
-            },
-            summary: OptimizeSummary {
-                applied: false,
-                total_sites_applied: 0,
-                passes_executed: 1,
-                passes_changed: 0,
-            },
-            passes: vec![],
-            attempts: vec![AttemptRecord {
-                attempt: 0,
-                result: "rejit_failed".to_string(),
-                failure_pc: Some(42),
-                attributed_pass: Some("map_inline".to_string()),
-                debug: Some(AttemptDebug {
-                    warnings: vec!["large debug payload".to_string()],
-                }),
-            }],
-            timings_ns: TimingsNs {
-                pipeline_run_ns: 10,
-                rejit_syscall_ns: 20,
-                total_ns: 30,
-            },
-            inlined_map_entries: vec![],
-            error_message: Some("kernel rejected BPF_PROG_REJIT".to_string()),
-        };
-
-        let json = serde_json::to_string(&ServeOptimizeResponse::from(result)).unwrap();
-        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-
-        assert_eq!(parsed["status"], "error");
-        assert_eq!(parsed["attempts"][0]["failure_pc"], 42);
-        assert_eq!(parsed["attempts"][0]["attributed_pass"], "map_inline");
-        assert!(parsed["attempts"][0].get("debug").is_none());
     }
 
     #[test]

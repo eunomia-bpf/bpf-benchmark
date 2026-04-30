@@ -11,9 +11,7 @@ use std::any::{Any, TypeId};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
-use serde::Serialize;
-
-use crate::insn::{dump_bytecode_compact, BpfBytecodeDump, BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
+use crate::insn::{BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum VerifierInsnKind {
@@ -805,25 +803,12 @@ impl AnalysisRegistry {
 
 // ── PassManager ─────────────────────────────────────────────────────
 
-#[derive(Clone, Debug, Serialize)]
-pub struct PassDebugTrace {
-    pub pass_name: String,
-    pub changed: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub bytecode_before: Option<BpfBytecodeDump>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub bytecode_after: Option<BpfBytecodeDump>,
-}
-
 /// Pipeline execution result.
 #[derive(Clone, Debug)]
 pub struct PipelineResult {
     pub pass_results: Vec<PassResult>,
     pub total_sites_applied: usize,
     pub program_changed: bool,
-    /// Full bytecode dumps around each executed pass, only populated when
-    /// debug logging is enabled.
-    pub debug_traces: Vec<PassDebugTrace>,
 }
 
 /// PassManager — manages and executes the pass pipeline.
@@ -928,14 +913,13 @@ impl PassManager {
         let mut pass_results = Vec::new();
         let mut total_sites = 0usize;
         let mut any_changed = false;
-        let mut debug_traces = Vec::new();
         for pass in &self.passes {
             let pass = pass.as_ref();
             if !self.pass_allowed(pass, ctx)? {
                 continue;
             }
 
-            let result = self.run_single_pass(pass, program, &mut cache, ctx, &mut debug_traces)?;
+            let result = self.run_single_pass(pass, program, &mut cache, ctx)?;
             if result.changed {
                 total_sites += result.sites_applied;
             }
@@ -947,7 +931,6 @@ impl PassManager {
             pass_results,
             total_sites_applied: total_sites,
             program_changed: any_changed,
-            debug_traces,
         })
     }
 
@@ -957,31 +940,16 @@ impl PassManager {
         program: &mut BpfProgram,
         cache: &mut AnalysisCache,
         ctx: &PassContext,
-        debug_traces: &mut Vec<PassDebugTrace>,
     ) -> anyhow::Result<PassResult> {
         self.run_required_analyses(pass, program, cache);
-        let before_insns = program.insns.clone();
-        let insns_before = before_insns.len();
+        let insns_before = program.insns.len();
         let mut result = pass.run(program, cache, ctx)?;
         result.insns_before = insns_before;
         result.insns_after = program.insns.len();
 
         if result.changed {
-            debug_traces.push(PassDebugTrace {
-                pass_name: result.pass_name.clone(),
-                changed: true,
-                bytecode_before: Some(dump_bytecode_compact(&before_insns)),
-                bytecode_after: Some(dump_bytecode_compact(&program.insns)),
-            });
             cache.invalidate_all();
             program.verifier_states = Arc::from([]);
-        } else {
-            debug_traces.push(PassDebugTrace {
-                pass_name: result.pass_name.clone(),
-                changed: false,
-                bytecode_before: None,
-                bytecode_after: None,
-            });
         }
 
         Ok(result)

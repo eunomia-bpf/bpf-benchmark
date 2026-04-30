@@ -329,12 +329,7 @@ def _compact_pass_summary(item: Mapping[str, Any], *, field_name: str) -> dict[s
 
 
 def _compact_pass_summaries_from_result(result: Mapping[str, Any]) -> list[dict[str, object]]:
-    raw_passes = None
-    debug_result = result.get("debug_result")
-    if isinstance(debug_result, Mapping):
-        raw_passes = debug_result.get("passes")
-    if raw_passes is None:
-        raw_passes = result.get("passes")
+    raw_passes = result.get("passes")
     if raw_passes is None:
         return []
     if not isinstance(raw_passes, list):
@@ -546,11 +541,7 @@ def applied_site_totals_from_rejit_result(result: Mapping[str, Any] | None) -> d
                 counts[f] += int(pc.get(f, 0) or 0)
         return counts
 
-    dbg_val = result.get("debug_result")
-    debug_result: Mapping[str, Any] = dbg_val if isinstance(dbg_val, Mapping) else {}
-    raw_passes = debug_result.get("passes")
-    if raw_passes is None:
-        raw_passes = result.get("passes")
+    raw_passes = result.get("passes")
     if raw_passes is not None:
         counts = _applied_site_totals_from_passes(raw_passes)
     elif isinstance(summary := result.get("summary"), Mapping):
@@ -571,7 +562,6 @@ _ARTIFACT_REJIT_RESULT_KEYS = frozenset(
     {
         "applied",
         "changed",
-        "debug_result",
         "enabled_passes",
         "error",
         "exit_code",
@@ -745,7 +735,6 @@ def _apply_result_from_response(
         "exit_code": exit_code,
         "enabled_passes": normalized_enabled_passes,
         "passes": passes,
-        "debug_result": dict(response),
         "inlined_map_entries": [dict(e) for e in (response.get("inlined_map_entries") or []) if isinstance(e, Mapping)],
         "summary": dict(summary),
         "error": error,
@@ -840,13 +829,11 @@ def _daemon_request(
 
 
 def _optimize_request(
-    socket_path: Path, prog_id: int, *, enabled_passes: Sequence[str] | None, dry_run: bool,
+    socket_path: Path, prog_id: int, *, enabled_passes: Sequence[str] | None,
     daemon_proc: subprocess.Popen[str] | None = None, stdout_path: Path | None = None,
     stderr_path: Path | None = None, timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
     payload: dict[str, object] = {"cmd": "optimize", "prog_id": int(prog_id)}
-    if dry_run:
-        payload["dry_run"] = True
     if enabled_passes is not None:
         payload["enabled_passes"] = [str(n).strip() for n in enabled_passes if str(n).strip()]
     return _daemon_request(socket_path, payload, timeout_seconds=timeout_seconds,
@@ -925,7 +912,7 @@ def apply_daemon_rejit(
                 "program_counts": {"requested": len(prog_ids), "applied": 0, "not_applied": len(prog_ids)},
             }
     for prog_id in prog_ids:
-        _resp = _optimize_request(daemon_socket_path, prog_id, enabled_passes=normalized_enabled_passes, dry_run=False,
+        _resp = _optimize_request(daemon_socket_path, prog_id, enabled_passes=normalized_enabled_passes,
                                    daemon_proc=daemon_proc, stdout_path=daemon_stdout_path, stderr_path=daemon_stderr_path)
         result = _apply_result_from_response(_resp, output=json.dumps(_resp, sort_keys=True),
                                               exit_code=0 if str(_resp.get("status") or "") == "ok" else 1,
