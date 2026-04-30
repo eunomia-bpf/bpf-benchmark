@@ -2,7 +2,7 @@ use super::*;
 
 use std::collections::HashMap;
 
-use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
+use crate::pass::{BpfProgram, BtfInfoRecords, PassContext, PassManager, PipelineResult};
 const MEMCPY_BTF_ID: i32 = 4101;
 const MEMSET_BTF_ID: i32 = 4102;
 
@@ -325,6 +325,10 @@ fn ctx_with_bulk_kfuncs() -> PassContext {
     ctx
 }
 
+fn func_info_record(insn_off: u32, type_id: u32) -> Vec<u8> {
+    [insn_off.to_le_bytes(), type_id.to_le_bytes()].concat()
+}
+
 fn run_bulk_memory_pass(program: &mut BpfProgram, ctx: &PassContext) -> PipelineResult {
     let mut pm = PassManager::new();
     pm.register_analysis(BranchTargetAnalysis);
@@ -340,6 +344,25 @@ fn bulk_call_count(insns: &[BpfInsn], btf_id: i32) -> usize {
             insn.is_call() && insn.src_reg() == BPF_PSEUDO_KINSN_CALL && insn.imm == btf_id
         })
         .count()
+}
+
+#[test]
+fn test_bulk_memory_skips_multi_subprog_candidates() {
+    let mut program = make_program(make_memset_zero_program());
+    program.func_info = Some(BtfInfoRecords {
+        rec_size: 8,
+        bytes: [func_info_record(0, 1), func_info_record(8, 2)].concat(),
+    });
+
+    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
+
+    assert!(!result.program_changed);
+    assert_eq!(result.pass_results[0].sites_applied, 0);
+    assert!(result.pass_results[0]
+        .sites_skipped
+        .iter()
+        .any(|skip| skip.reason.contains("multi-subprog")));
+    assert_eq!(bulk_call_count(&program.insns, MEMSET_BTF_ID), 0);
 }
 
 #[test]
