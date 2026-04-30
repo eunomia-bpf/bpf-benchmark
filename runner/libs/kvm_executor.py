@@ -134,17 +134,21 @@ def run_vm_suite(workspace_root: Path, config: RunConfig, suite_args: list[str] 
         [suite_command(workspace_root, config, effective_suite_args)],
         initial_cwd=ROOT_DIR,
     )
-    completed = run_in_vm(
-        config.kvm.kernel_image,
-        guest_script,
-        _optional_int(config.kvm.cpus),
-        config.kvm.mem or None,
-        int(config.kvm.timeout_seconds),
-        cwd=ROOT_DIR,
-        rwdirs=(ROOT_DIR,),
-        vm_executable=config.kvm.executable,
-        machine_backend=config.kvm.backend,
-    )
+    host_docker_disk = guest_script.parent.parent / "vm-tmp" / "bpf-benchmark-docker.img"
+    try:
+        completed = run_in_vm(
+            config.kvm.kernel_image,
+            guest_script,
+            _optional_int(config.kvm.cpus),
+            config.kvm.mem or None,
+            int(config.kvm.timeout_seconds),
+            cwd=ROOT_DIR,
+            rwdirs=(ROOT_DIR,),
+            vm_executable=config.kvm.executable,
+            machine_backend=config.kvm.backend,
+        )
+    finally:
+        host_docker_disk.unlink(missing_ok=True)
     if completed.stdout:
         sys.stdout.write(completed.stdout)
     if completed.stderr:
