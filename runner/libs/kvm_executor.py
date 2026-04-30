@@ -87,9 +87,19 @@ fi
 """
 
 
+def _host_docker_disk_path(workspace_root: Path, run_token: str) -> Path:
+    token = str(run_token).strip()
+    if not token:
+        _die("run config RUN_TOKEN is empty")
+    if Path(token).name != token or token in {".", ".."}:
+        _die(f"run config RUN_TOKEN must be a single path segment: {token!r}")
+    return workspace_root / "docs" / "tmp" / token / "vm-tmp" / "bpf-benchmark-docker.img"
+
+
 def suite_command(workspace_root: Path, config: RunConfig, suite_args: list[str]) -> str:
     if not config.remote.runtime_container_image.strip():
         _die("run config RUN_RUNTIME_CONTAINER_IMAGE is empty")
+    host_docker_disk = _host_docker_disk_path(workspace_root, config.identity.token)
     image_tar = runtime_container_image_tar_path(workspace_root, config.identity.target_arch)
     result_dirs = [
         str(path)
@@ -116,7 +126,8 @@ def suite_command(workspace_root: Path, config: RunConfig, suite_args: list[str]
         str(image_tar),
     ])
     docker_prelude = _docker_prelude_shell()
-    return f"{mkdir_cmd} && (\n{docker_prelude}\n{install_cmd} && {container_cmd}\n)"
+    docker_disk_export = f"export BPFREJIT_VM_DOCKER_DISK={shlex.quote(str(host_docker_disk))}"
+    return f"{mkdir_cmd} && (\n{docker_disk_export}\n{docker_prelude}\n{install_cmd} && {container_cmd}\n)"
 
 
 def _optional_int(value: str) -> int | None:
@@ -134,7 +145,7 @@ def run_vm_suite(workspace_root: Path, config: RunConfig, suite_args: list[str] 
         [suite_command(workspace_root, config, effective_suite_args)],
         initial_cwd=ROOT_DIR,
     )
-    host_docker_disk = guest_script.parent.parent / "vm-tmp" / "bpf-benchmark-docker.img"
+    host_docker_disk = _host_docker_disk_path(workspace_root, config.identity.token)
     try:
         completed = run_in_vm(
             config.kvm.kernel_image,
