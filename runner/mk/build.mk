@@ -7,8 +7,6 @@ DOCKERIGNORE_FILE := $(ROOT_DIR)/.dockerignore
 X86_BUILD_DISTRO_VARIANT := ubuntu24.04
 BUILD_ARCH_VARIANT := $(if $(filter x86_64,$(RUN_TARGET_ARCH)),-$(X86_BUILD_DISTRO_VARIANT),)
 IMAGE_ARTIFACT_ROOT ?= /artifacts/user
-KERNEL_ARTIFACT_ROOT ?= /artifacts
-KERNEL_MODULES_ARTIFACT_ROOT ?= $(KERNEL_ARTIFACT_ROOT)/modules
 IMAGE_BUILD_ROOT ?= /tmp/bpf-benchmark-build/$(RUN_TARGET_ARCH)$(BUILD_ARCH_VARIANT)
 ACTIVE_ARTIFACT_ROOT := $(if $(filter 1,$(BPFREJIT_IMAGE_BUILD)),$(IMAGE_ARTIFACT_ROOT),$(ARTIFACT_ROOT))
 ACTIVE_BUILD_ARTIFACT_ROOT := $(if $(filter 1,$(BPFREJIT_IMAGE_BUILD)),$(IMAGE_BUILD_ROOT),$(ARTIFACT_ROOT))
@@ -43,29 +41,31 @@ ACTIVE_TEST_NEGATIVE_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT
 ACTIVE_TEST_UNITTEST_PRIMARY := $(ACTIVE_TEST_UNITTEST_BUILD_DIR)/rejit_regression
 ACTIVE_TEST_NEGATIVE_PRIMARY := $(ACTIVE_TEST_NEGATIVE_BUILD_DIR)/adversarial_rejit
 RUNNER_RUNTIME_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/runner-runtime.Dockerfile
+KERNEL_FORK_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/kernel-fork.Dockerfile
 KATRAN_ARTIFACTS_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/katran-artifacts.Dockerfile
 BPFREJIT_INSTALL_SCRIPT := $(RUNNER_DIR)/scripts/bpfrejit-install
+KERNEL_FORK_COMMIT_X86 := $(shell cd "$(KERNEL_DIR)" && git rev-parse --short HEAD)
+KERNEL_FORK_COMMIT_ARM64 := $(shell cd "$(KERNEL_DIR)" && git rev-parse --short HEAD)
 X86_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:x86_64
 ARM64_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:arm64
+X86_KERNEL_FORK_IMAGE := bpf-benchmark/kernel-fork:x86_64-$(KERNEL_FORK_COMMIT_X86)
+ARM64_KERNEL_FORK_IMAGE := bpf-benchmark/kernel-fork:arm64-$(KERNEL_FORK_COMMIT_ARM64)
 X86_KATRAN_ARTIFACTS_IMAGE := bpf-benchmark/katran-artifacts:x86_64
 ARM64_KATRAN_ARTIFACTS_IMAGE := bpf-benchmark/katran-artifacts:arm64
 X86_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-runner-runtime.image.tar
 ARM64_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-runner-runtime.image.tar
+X86_KERNEL_FORK_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-kernel-fork-$(KERNEL_FORK_COMMIT_X86).image.tar
+ARM64_KERNEL_FORK_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-kernel-fork-$(KERNEL_FORK_COMMIT_ARM64).image.tar
 X86_KATRAN_ARTIFACTS_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-katran-artifacts.image.tar
 ARM64_KATRAN_ARTIFACTS_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-katran-artifacts.image.tar
 ACTIVE_RUNNER_RUNTIME_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_RUNNER_RUNTIME_IMAGE_TAR),$(X86_RUNNER_RUNTIME_IMAGE_TAR))
+ACTIVE_KERNEL_FORK_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KERNEL_FORK_IMAGE_TAR),$(X86_KERNEL_FORK_IMAGE_TAR))
 ACTIVE_KATRAN_ARTIFACTS_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR),$(X86_KATRAN_ARTIFACTS_IMAGE_TAR))
+KERNEL_FORK_BUILD_PLATFORM ?= linux/amd64
 X86_RUNTIME_KERNEL_DIR := $(ARTIFACT_ROOT)/runtime-kernel/x86_64
 X86_RUNTIME_KERNEL_IMAGE := $(X86_RUNTIME_KERNEL_DIR)/bzImage
 ACTIVE_X86_KINSN_SOURCE_DIR := $(ROOT_DIR)/module/x86
 ACTIVE_KINSN_SOURCE_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/module/arm64,$(ACTIVE_X86_KINSN_SOURCE_DIR))
-ACTIVE_KINSN_MODULE_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/module/arm64,$(ACTIVE_X86_KINSN_SOURCE_DIR))
-ACTIVE_KERNEL_BUILD_DIR := $(IMAGE_BUILD_ROOT)/kernel-build
-ACTIVE_KERNEL_ARCH_ARG := $(if $(filter arm64,$(RUN_TARGET_ARCH)),ARCH=arm64,)
-ACTIVE_KERNEL_DEFCONFIG := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_DEFCONFIG_SRC),$(DEFCONFIG_SRC))
-ACTIVE_KERNEL_IMAGE_PATH := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ACTIVE_KERNEL_BUILD_DIR)/arch/arm64/boot/vmlinuz.efi,$(ACTIVE_KERNEL_BUILD_DIR)/arch/x86/boot/bzImage)
-ACTIVE_KERNEL_IMAGE_NAME := $(if $(filter arm64,$(RUN_TARGET_ARCH)),vmlinuz.efi,bzImage)
-ACTIVE_KERNEL_BUILD_TARGETS := $(if $(filter arm64,$(RUN_TARGET_ARCH)),Image vmlinuz.efi modules,bzImage modules)
 ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATRAN_ROOT)/bpf/balancer.bpf.o $(REPO_KATRAN_ROOT)/bpf/healthchecking_ipip.bpf.o $(REPO_KATRAN_ROOT)/bpf/xdp_root.bpf.o
 
 REQUIRE_IMAGE_BUILD = @if [ "$(BPFREJIT_IMAGE_BUILD)" != "1" ]; then echo "$@ must be run from the runner Dockerfile with BPFREJIT_IMAGE_BUILD=1" >&2; exit 1; fi
@@ -112,13 +112,14 @@ CORPUS_RUNTIME_SOURCE_FILES = $(shell find "$(ROOT_DIR)/corpus" \( -path '*/__py
 E2E_RUNTIME_SOURCE_FILES = $(shell find "$(ROOT_DIR)/e2e" \( -path '*/__pycache__' -o -path '*/results' \) -prune -o -type f -print 2>/dev/null)
 KERNEL_BUILD_META_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -path '*/build*' -o -path '*/.cache' \) -prune -o -type f \( -name 'Makefile' -o -name 'Kconfig*' -o -name '*.mk' -o -path '*/scripts/config' \) -print 2>/dev/null)
 KERNEL_SOURCE_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -path '*/build*' -o -path '*/.cache' \) -prune -o -type f \( -name '*.c' -o -name '*.h' -o -name '*.S' -o -name '*.lds' -o -name '*.dts' -o -name '*.dtsi' -o -name '*.sh' \) -print 2>/dev/null)
+KERNEL_FORK_IMAGE_SOURCE_FILES = $(KERNEL_FORK_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
+	$(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) $(DEFCONFIG_SRC) $(ARM64_DEFCONFIG_SRC)
 KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES = $(BUILD_RULE_FILES) $(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
 	$(KATRAN_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_SOURCE_FILES = $(BUILD_RULE_FILES) $(RUNNER_RUNTIME_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
 	$(DAEMON_SOURCE_FILES) $(BPFOPT_SOURCE_FILES) $(RUNNER_SOURCE_FILES) $(TEST_UNITTEST_SOURCE_FILES) $(TEST_NEGATIVE_SOURCE_FILES) \
 	$(MICRO_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) \
-	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES) \
-	$(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) $(DEFCONFIG_SRC) $(ARM64_DEFCONFIG_SRC)
+	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_LAYER_FILES = $(RUNNER_RUNTIME_SOURCE_FILES) $(MICRO_RUNTIME_SOURCE_FILES) \
 	$(CORPUS_RUNTIME_SOURCE_FILES) $(E2E_RUNTIME_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_INPUT_FILES = $(RUNNER_RUNTIME_IMAGE_SOURCE_FILES) $(RUNNER_RUNTIME_IMAGE_LAYER_FILES)
@@ -128,12 +129,40 @@ BUILD_INPUT_SOURCE_FILES = $(sort \
 	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) \
 	$(RUNNER_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES) $(MICRO_RUNTIME_SOURCE_FILES) $(CORPUS_RUNTIME_SOURCE_FILES) \
 	$(E2E_RUNTIME_SOURCE_FILES) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) \
-	$(RUNNER_RUNTIME_CONTAINERFILE) $(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE))
+	$(KERNEL_FORK_CONTAINERFILE) $(RUNNER_RUNTIME_CONTAINERFILE) $(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE))
 
 $(BUILD_INPUT_SOURCE_FILES): ;
 
 .PHONY: FORCE
 FORCE:
+
+# Kernel-fork images are local build artifacts. Do not push them automatically;
+# push the tag manually only when remote cache sharing is desired.
+$(X86_KERNEL_FORK_IMAGE_TAR): $(KERNEL_FORK_IMAGE_SOURCE_FILES)
+	@mkdir -p "$(dir $@)"
+	@if docker image inspect "$(X86_KERNEL_FORK_IMAGE)" >/dev/null 2>&1; then \
+		echo "using existing local kernel-fork image: $(X86_KERNEL_FORK_IMAGE)"; \
+	else \
+		docker build --platform "$(KERNEL_FORK_BUILD_PLATFORM)" \
+			--target kernel-fork \
+			--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
+			--build-arg RUN_TARGET_ARCH=x86_64 \
+			-t "$(X86_KERNEL_FORK_IMAGE)" -f "$(KERNEL_FORK_CONTAINERFILE)" "$(ROOT_DIR)"; \
+	fi
+	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_KERNEL_FORK_IMAGE)"; mv -f "$$tmp" "$@"
+
+$(ARM64_KERNEL_FORK_IMAGE_TAR): $(KERNEL_FORK_IMAGE_SOURCE_FILES)
+	@mkdir -p "$(dir $@)"
+	@if docker image inspect "$(ARM64_KERNEL_FORK_IMAGE)" >/dev/null 2>&1; then \
+		echo "using existing local kernel-fork image: $(ARM64_KERNEL_FORK_IMAGE)"; \
+	else \
+		docker build --platform "$(KERNEL_FORK_BUILD_PLATFORM)" \
+			--target kernel-fork \
+			--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
+			--build-arg RUN_TARGET_ARCH=arm64 \
+			-t "$(ARM64_KERNEL_FORK_IMAGE)" -f "$(KERNEL_FORK_CONTAINERFILE)" "$(ROOT_DIR)"; \
+	fi
+	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_KERNEL_FORK_IMAGE)"; mv -f "$$tmp" "$@"
 
 $(X86_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 	@mkdir -p "$(dir $@)"
@@ -143,7 +172,7 @@ $(X86_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 		--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=x86_64 \
 		-t "$(X86_KATRAN_ARTIFACTS_IMAGE)" -f "$(KATRAN_ARTIFACTS_CONTAINERFILE)" "$(ROOT_DIR)"
-	docker save -o "$@" "$(X86_KATRAN_ARTIFACTS_IMAGE)"
+	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_KATRAN_ARTIFACTS_IMAGE)"; mv -f "$$tmp" "$@"
 
 $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 	@mkdir -p "$(dir $@)"
@@ -153,33 +182,40 @@ $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=arm64 \
 		-t "$(ARM64_KATRAN_ARTIFACTS_IMAGE)" -f "$(KATRAN_ARTIFACTS_CONTAINERFILE)" "$(ROOT_DIR)"
-	docker save -o "$@" "$(ARM64_KATRAN_ARTIFACTS_IMAGE)"
+	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_KATRAN_ARTIFACTS_IMAGE)"; mv -f "$$tmp" "$@"
 
-$(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRAN_ARTIFACTS_IMAGE_TAR)
+$(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRAN_ARTIFACTS_IMAGE_TAR) $(X86_KERNEL_FORK_IMAGE_TAR)
 	@mkdir -p "$(dir $@)"
 	docker load -i "$(X86_KATRAN_ARTIFACTS_IMAGE_TAR)"
+	docker load -i "$(X86_KERNEL_FORK_IMAGE_TAR)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
 		--build-context runner-runtime-katran-upstream=docker-image://$(X86_KATRAN_ARTIFACTS_IMAGE) \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=x86_64 \
+		--build-arg VENDOR_LINUX_FRAMEWORK_COMMIT="$(KERNEL_FORK_COMMIT_X86)" \
+		--build-arg KERNEL_FORK_IMAGE_PLATFORM="$(KERNEL_FORK_BUILD_PLATFORM)" \
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
-	docker save -o "$@" "$(X86_RUNNER_RUNTIME_IMAGE)"
+	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
-$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)
+$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(ARM64_KERNEL_FORK_IMAGE_TAR)
 	@mkdir -p "$(dir $@)"
 	docker load -i "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)"
+	docker load -i "$(ARM64_KERNEL_FORK_IMAGE_TAR)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
 		--build-context runner-runtime-katran-upstream=docker-image://$(ARM64_KATRAN_ARTIFACTS_IMAGE) \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=arm64 \
+		--build-arg VENDOR_LINUX_FRAMEWORK_COMMIT="$(KERNEL_FORK_COMMIT_ARM64)" \
+		--build-arg KERNEL_FORK_IMAGE_PLATFORM="$(KERNEL_FORK_BUILD_PLATFORM)" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
-	docker save -o "$@" "$(ARM64_RUNNER_RUNTIME_IMAGE)"
+	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
-.PHONY: image-katran-artifacts-image-tar image-runner-runtime-image-tar
+.PHONY: image-kernel-fork-image-tar image-katran-artifacts-image-tar image-runner-runtime-image-tar
+image-kernel-fork-image-tar: $(ACTIVE_KERNEL_FORK_IMAGE_TAR)
 image-katran-artifacts-image-tar: $(ACTIVE_KATRAN_ARTIFACTS_IMAGE_TAR)
 image-runner-runtime-image-tar: $(ACTIVE_RUNNER_RUNTIME_IMAGE_TAR)
 
@@ -189,67 +225,6 @@ $(X86_RUNTIME_KERNEL_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(BPFREJIT_INSTALL_
 		"$(BPFREJIT_INSTALL_SCRIPT)" --extract-kernel-only "$<"
 	test -s "$@"
 	touch "$@"
-
-.PHONY: image-kernel-artifacts image-kernel-build image-kernel-modules-artifacts image-kinsn-artifacts
-
-image-kernel-artifacts:
-	$(REQUIRE_IMAGE_BUILD)
-	rm -rf "$(KERNEL_ARTIFACT_ROOT)/kernel" "$(KERNEL_ARTIFACT_ROOT)/modules" "$(KERNEL_ARTIFACT_ROOT)/kinsn" "$(KERNEL_ARTIFACT_ROOT)/manifest.json"
-	mkdir -p "$(KERNEL_ARTIFACT_ROOT)/kernel" "$(KERNEL_ARTIFACT_ROOT)/modules" "$(KERNEL_ARTIFACT_ROOT)/kinsn"
-	$(MAKE) image-kernel-build RUN_TARGET_ARCH="$(RUN_TARGET_ARCH)" ACTIVE_KERNEL_BUILD_DIR="$(ACTIVE_KERNEL_BUILD_DIR)"
-	$(MAKE) image-kernel-modules-artifacts RUN_TARGET_ARCH="$(RUN_TARGET_ARCH)" ACTIVE_KERNEL_BUILD_DIR="$(ACTIVE_KERNEL_BUILD_DIR)" KERNEL_MODULES_ARTIFACT_ROOT="$(KERNEL_ARTIFACT_ROOT)/modules"
-	$(MAKE) image-kinsn-artifacts RUN_TARGET_ARCH="$(RUN_TARGET_ARCH)" ACTIVE_KERNEL_BUILD_DIR="$(ACTIVE_KERNEL_BUILD_DIR)" ACTIVE_KINSN_MODULE_DIR="$(KERNEL_ARTIFACT_ROOT)/kinsn"
-	cp -a "$(ACTIVE_KERNEL_IMAGE_PATH)" "$(KERNEL_ARTIFACT_ROOT)/kernel/$(ACTIVE_KERNEL_IMAGE_NAME)"
-	kernel_release="$$(tr -d '\n' < "$(ACTIVE_KERNEL_BUILD_DIR)/include/config/kernel.release")"; \
-	printf '{\n  "kernel_release": "%s",\n  "target_arch": "%s",\n  "kernel_image": "%s"\n}\n' \
-		"$$kernel_release" "$(RUN_TARGET_ARCH)" "$(ACTIVE_KERNEL_IMAGE_NAME)" >"$(KERNEL_ARTIFACT_ROOT)/manifest.json"; \
-	test -s "$(KERNEL_ARTIFACT_ROOT)/kernel/$(ACTIVE_KERNEL_IMAGE_NAME)"; \
-	test -d "$(KERNEL_ARTIFACT_ROOT)/modules/$$kernel_release"; \
-	find "$(KERNEL_ARTIFACT_ROOT)/kinsn" -type f -name '*.ko' | grep -q .
-
-image-kernel-build:
-	$(REQUIRE_IMAGE_BUILD)
-	mkdir -p "$(ACTIVE_KERNEL_BUILD_DIR)"
-	cp "$(ACTIVE_KERNEL_DEFCONFIG)" "$(ACTIVE_KERNEL_BUILD_DIR)/.config"
-	"$(KERNEL_DIR)/scripts/config" --file "$(ACTIVE_KERNEL_BUILD_DIR)/.config" --enable BLK_DEV_LOOP
-	"$(KERNEL_DIR)/scripts/config" --file "$(ACTIVE_KERNEL_BUILD_DIR)/.config" --enable VIRTIO_CONSOLE
-	"$(KERNEL_DIR)/scripts/config" --file "$(ACTIVE_KERNEL_BUILD_DIR)/.config" --enable EXT4_FS
-	"$(KERNEL_DIR)/scripts/config" --file "$(ACTIVE_KERNEL_BUILD_DIR)/.config" --enable JBD2
-	"$(KERNEL_DIR)/scripts/config" --file "$(ACTIVE_KERNEL_BUILD_DIR)/.config" --enable FS_MBCACHE
-	if [ "$(RUN_TARGET_ARCH)" = "arm64" ]; then \
-		make -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE= olddefconfig; \
-		find "$(ACTIVE_KERNEL_BUILD_DIR)" -type f -name '*.o' -size 0 -delete; \
-		rm -f "$(ACTIVE_KERNEL_BUILD_DIR)/vmlinux.a" "$(ACTIVE_KERNEL_BUILD_DIR)/vmlinux.o" "$(ACTIVE_KERNEL_BUILD_DIR)/drivers/of/built-in.a"; \
-		make -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" ARCH=arm64 CROSS_COMPILE= $(ACTIVE_KERNEL_BUILD_TARGETS) -j"$(JOBS)"; \
-	else \
-		make -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" olddefconfig; \
-		make -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" $(ACTIVE_KERNEL_BUILD_TARGETS) -j"$(JOBS)"; \
-	fi
-	test -f "$(ACTIVE_KERNEL_BUILD_DIR)/include/config/kernel.release"
-	test -s "$(ACTIVE_KERNEL_IMAGE_PATH)"
-
-image-kernel-modules-artifacts:
-	$(REQUIRE_IMAGE_BUILD)
-	stage_root="$(KERNEL_MODULES_ARTIFACT_ROOT)"; \
-	kernel_release_file="$(ACTIVE_KERNEL_BUILD_DIR)/include/config/kernel.release"; \
-	test -f "$$kernel_release_file" || { echo "missing kernel release file: $$kernel_release_file" >&2; exit 1; }; \
-	kernel_release="$$(tr -d '\n' < "$$kernel_release_file")"; \
-	install_root="$(IMAGE_BUILD_ROOT)/modules-install"; \
-	release_root="$$stage_root/$$kernel_release"; \
-	mkdir -p "$$stage_root"; \
-	rm -rf "$$install_root" "$$release_root"; \
-	make $(ACTIVE_KERNEL_ARCH_ARG) --no-print-directory -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" INSTALL_MOD_PATH="$$install_root" DEPMOD=true modules_install >/dev/null; \
-	depmod -b "$$install_root" "$$kernel_release" >/dev/null; \
-	cp -a "$$install_root/lib/modules/$$kernel_release" "$$release_root"; \
-	rm -f "$$release_root/build" "$$release_root/source"; \
-	test -f "$$release_root/kernel/drivers/block/null_blk/null_blk.ko"; \
-	test -f "$$release_root/kernel/net/sched/sch_netem.ko"; \
-	touch "$$stage_root"
-
-image-kinsn-artifacts:
-	$(REQUIRE_IMAGE_BUILD)
-	mkdir -p "$(ACTIVE_KINSN_MODULE_DIR)"
-	make $(ACTIVE_KERNEL_ARCH_ARG) -C "$(KERNEL_DIR)" O="$(ACTIVE_KERNEL_BUILD_DIR)" M="$(ACTIVE_KINSN_SOURCE_DIR)" MO="$(ACTIVE_KINSN_MODULE_DIR)" modules
 
 .PHONY: image-katran-artifacts image-runner-artifacts image-daemon-artifact image-bpfopt-artifacts \
 	image-micro-program-artifacts image-test-artifacts

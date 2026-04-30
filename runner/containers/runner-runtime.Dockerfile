@@ -3,6 +3,9 @@ ARG TRACEE_IMAGE=docker.io/aquasec/tracee:0.24.1@sha256:cfbbfee972e64a644f6b1bac
 ARG TETRAGON_IMAGE=quay.io/cilium/tetragon:v1.6.1@sha256:ff96ace3e6a0166ba04ff3eecfaeee19b7e6deee2b7cdbe3245feda57df5015f
 ARG CILIUM_IMAGE=quay.io/cilium/cilium:v1.19.3@sha256:2e61680593cddca8b6c055f6d4c849d87a26a1c91c7e3b8b56c7fb76ab7b7b10
 ARG CALICO_NODE_IMAGE=quay.io/calico/node:v3.31.3@sha256:f2339c4ff3a57228cbc39a1f67ab81abded1997d843e0e0b1e86664c7c4eb6c0
+ARG RUN_TARGET_ARCH=x86_64
+ARG VENDOR_LINUX_FRAMEWORK_COMMIT
+ARG KERNEL_FORK_IMAGE_PLATFORM=linux/amd64
 
 FROM docker.io/library/ubuntu:24.04 AS runner-runtime-build-base
 
@@ -247,37 +250,7 @@ RUN set -eux; \
     ln -sfn /usr/local/bin/cilium-dbg "${repo_artifact_root}/cilium/bin/cilium-dbg"; \
     ln -sfn /usr/local/bin/otelcol-ebpf-profiler "${repo_artifact_root}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
-FROM runner-runtime-build-base AS runner-runtime-kernel-artifacts
-
-ARG IMAGE_BUILD_JOBS=4
-ARG RUN_TARGET_ARCH=x86_64
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends bsdextrautils \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY Makefile ./Makefile
-COPY runner/mk ./runner/mk
-COPY vendor/bpfrejit_x86_defconfig vendor/bpfrejit_arm64_defconfig ./vendor/
-COPY vendor/linux-framework ./vendor/linux-framework
-COPY module ./module
-
-RUN set -eux; \
-    mkdir -p /artifacts; \
-    find ./module -type f \( \
-        -name '*.ko' -o -name '*.o' -o -name '*.mod' -o -name '*.mod.c' \
-        -o -name '*.cmd' -o -name 'Module.symvers' -o -name 'modules.order' \
-    \) -delete; \
-    make image-kernel-artifacts \
-        RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" \
-        BPFREJIT_IMAGE_BUILD=1 \
-        JOBS="${IMAGE_BUILD_JOBS}"; \
-    rm -rf \
-        /tmp/bpf-benchmark-build \
-        ./Makefile \
-        ./runner/mk \
-        ./vendor \
-        ./module
+FROM --platform=${KERNEL_FORK_IMAGE_PLATFORM} bpf-benchmark/kernel-fork:${RUN_TARGET_ARCH}-${VENDOR_LINUX_FRAMEWORK_COMMIT} AS runner-runtime-kernel-base
 
 FROM runner-runtime-app-artifacts AS runner-runtime-artifacts
 
@@ -285,10 +258,10 @@ ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 
-COPY --from=runner-runtime-kernel-artifacts /artifacts/kernel /artifacts/kernel
-COPY --from=runner-runtime-kernel-artifacts /artifacts/modules /artifacts/modules
-COPY --from=runner-runtime-kernel-artifacts /artifacts/kinsn /artifacts/kinsn
-COPY --from=runner-runtime-kernel-artifacts /artifacts/manifest.json /artifacts/manifest.json
+COPY --from=runner-runtime-kernel-base /artifacts/kernel /artifacts/kernel
+COPY --from=runner-runtime-kernel-base /artifacts/modules /artifacts/modules
+COPY --from=runner-runtime-kernel-base /artifacts/headers /usr/src/linux-headers-fork
+COPY --from=runner-runtime-kernel-base /artifacts/manifest.json /artifacts/manifest.json
 
 COPY Makefile ./Makefile
 COPY runner/mk ./runner/mk
@@ -395,6 +368,63 @@ RUN set -eux; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
+FROM runner-runtime-kernel-base AS runner-runtime-kinsn-artifacts
+
+ARG IMAGE_BUILD_JOBS=4
+ARG RUN_TARGET_ARCH=x86_64
+
+WORKDIR /src
+
+COPY module ./module
+
+RUN --mount=type=cache,target=/tmp/kinsn-build,id=kinsn-build-${RUN_TARGET_ARCH},sharing=locked <<'EOF'
+set -eux
+
+case "${IMAGE_BUILD_JOBS}" in
+    ''|*[!0-9]*|0)
+        echo "IMAGE_BUILD_JOBS must be a positive integer: ${IMAGE_BUILD_JOBS}" >&2
+        exit 1
+        ;;
+esac
+
+case "${RUN_TARGET_ARCH}" in
+    x86_64)
+        kernel_arch=x86_64
+        module_arch=x86
+        cross_compile=
+        expected_modules=5
+        ;;
+    arm64)
+        kernel_arch=arm64
+        module_arch=arm64
+        cross_compile=aarch64-linux-gnu-
+        expected_modules=6
+        command -v aarch64-linux-gnu-gcc >/dev/null
+        ;;
+    *)
+        echo "unsupported RUN_TARGET_ARCH: ${RUN_TARGET_ARCH}" >&2
+        exit 1
+        ;;
+esac
+
+mkdir -p /tmp/kinsn-build /artifacts/kinsn
+find /tmp/kinsn-build -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+find ./module -type f \( \
+    -name '*.ko' -o -name '*.o' -o -name '*.mod' -o -name '*.mod.c' \
+    -o -name '*.cmd' -o -name 'Module.symvers' -o -name 'modules.order' \
+\) -delete
+
+make_args="ARCH=${kernel_arch}"
+if [ -n "${cross_compile}" ]; then
+    make_args="${make_args} CROSS_COMPILE=${cross_compile}"
+fi
+
+make -C /artifacts/headers ${make_args} M="${PWD}/module/${module_arch}" MO=/tmp/kinsn-build modules -j"${IMAGE_BUILD_JOBS}"
+install -m 0644 /tmp/kinsn-build/*.ko /artifacts/kinsn/
+module_count="$(find /artifacts/kinsn -maxdepth 1 -type f -name '*.ko' | wc -l)"
+test "${module_count}" -eq "${expected_modules}"
+EOF
+
 FROM runner-runtime-artifacts AS runner-runtime-daemon-artifact
 
 ARG IMAGE_BUILD_JOBS=4
@@ -435,6 +465,8 @@ RUN --mount=type=cache,target=/bpfopt/target,id=bpfopt-cargo-target,sharing=lock
     --mount=type=cache,target=/opt/cargo/registry,id=opt-cargo-registry,sharing=locked \
     --mount=type=cache,target=/opt/cargo/git,id=opt-cargo-git,sharing=locked \
     set -eux; \
+    mkdir -p ./vendor/linux-framework; \
+    touch ./vendor/linux-framework/Makefile; \
     ln -sfn /bpfopt/target ./bpfopt/target; \
     make image-bpfopt-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     bpfopt_bin_dir="./bpfopt/target/release"; \
@@ -457,6 +489,7 @@ RUN set -eux; \
     rm -rf \
         /opt/cargo \
         /opt/rustup \
+        /usr/src/linux-headers-fork \
         ./vendor \
         ./Makefile \
         ./runner/mk; \
@@ -477,6 +510,7 @@ RUN set -eux; \
 COPY --from=runner-runtime-daemon-artifact /artifacts/rust/usr-local-bin/bpfrejit-daemon /usr/local/bin/bpfrejit-daemon
 COPY --from=runner-runtime-daemon-artifact /artifacts/rust/daemon/target/ ./daemon/target/
 COPY --from=runner-runtime-bpfopt-artifacts /artifacts/rust/usr-local-bin/ /usr/local/bin/
+COPY --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
 
 COPY runner/__init__.py runner/repos.yaml ./runner/
 COPY runner/libs ./runner/libs
